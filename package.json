@@ -1,0 +1,27 @@
+{
+  "name": "actifit-landingpage",
+  "version": "1.0.0",
+  "description": "Landingpage for the Actifit project",
+  "author": "mktcode",
+  "private": true,
+  "scripts": {
+    "dev": "nuxt",
+    "build": "nuxt build",
+    "start": "nuxt start",
+    "generate": "nuxt generate",
+    "lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
+    "precommit": "npm run lint"
+  },
+  "dependencies": {
+    "nuxt": "^1.0.0"
+  },
+  "devDependencies": {
+    "babel-eslint": "^8.2.1",
+    "cross-env": "^5.0.1",
+    "eslint": "^5.0.1",
+    "eslint-loader": "^2.0.0",
+    "eslint-plugin-vue": "^4.0.0",
+    "node-sass": "^4.9.2",
+    "sass-loader": "^7.0.3"
+  }
+}
