@@ -75,7 +75,7 @@
       <div class="container py-5">
         <div class="row">
           <div class="col">
-            <small class="text-muted">&copy; Copyright LebHR Jobs {{ currentYear }}</small>
+            <small class="text-muted">&copy; Copyright Actifit {{ currentYear }}</small>
           </div>
           <div class="col text-right">
             <small class="links">
