@@ -46,11 +46,12 @@
         <div class="col text-center">
           <a href="https://play.google.com/store/apps/details?id=io.actifit.fitnesstracker.actifitfitnesstracker" target="_blank">
             <img src="/img/google-play.png" />
-          </a><br>
-          <br>
-          <a href="#" target="_blank">
-            <img src="/img/app-store.png" />
           </a>
+          <!--<br>-->
+          <!--<br>-->
+          <!--<a href="#" target="_blank">-->
+            <!--<img src="/img/app-store.png" />-->
+          <!--</a>-->
         </div>
       </div>
       <div class="row mt-5 pt-5">
