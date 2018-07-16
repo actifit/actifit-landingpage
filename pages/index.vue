@@ -44,7 +44,7 @@
           <p class="lead">Download the app from playstore. Go for a walk, run, do your favorite workout with a min target of 5,000 steps/moves. Post to steemit and get rewarded!</p>
         </div>
         <div class="col text-center">
-          <a href="#" target="_blank">
+          <a href="https://play.google.com/store/apps/details?id=io.actifit.fitnesstracker.actifitfitnesstracker" target="_blank">
             <img src="/img/google-play.png" />
           </a><br>
           <br>
@@ -71,6 +71,21 @@
         </div>
       </div>
     </div>
+    <div class="footer bg-light">
+      <div class="container py-5">
+        <div class="row">
+          <div class="col">
+            <small class="text-muted">&copy; Copyright LebHR Jobs {{ currentYear }}</small>
+          </div>
+          <div class="col text-right">
+            <small class="links">
+              <a href="#" class="px-1">Imprint</a>
+              <a href="#" class="px-1">Privacy Policy</a>
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -86,6 +101,11 @@
       return {
         username: '',
         tokenInfo: null
+      }
+    },
+    computed: {
+      currentYear () {
+        return (new Date()).getFullYear()
       }
     },
     methods: {
