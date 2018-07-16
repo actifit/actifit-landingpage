@@ -8,6 +8,16 @@
       </div>
       <a href="#" :class="'btn btn-danger' + (username.length < 3 ? ' disabled' : '')" @click="goToWallet()">Show Wallet</a>
     </div>
+    <div class="row mt-5" v-if="tokenInfo">
+      <div class="col text-center">
+        <h4>Tokens distributed</h4>
+        <h2 class="text-brand">{{ tokenInfo.tokens_distributed }}</h2>
+      </div>
+      <div class="col text-center">
+        <h4>Users</h4>
+        <h2 class="text-brand">{{ tokenInfo.user_count }}</h2>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -20,7 +30,8 @@
     },
     data () {
       return {
-        username: ''
+        username: '',
+        tokenInfo: null
       }
     },
     methods: {
@@ -29,6 +40,11 @@
           this.$router.push({path: '/wallet/' + this.username})
         }
       }
+    },
+    mounted () {
+      fetch('http://actifitbot.herokuapp.com/user-tokens-info').then(res => {
+        res.json().then(json => this.tokenInfo = json[0]).catch(e => console.log(e.message))
+      })
     }
   }
 </script>
