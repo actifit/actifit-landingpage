@@ -43,9 +43,7 @@
         res.json().then(json => this.tokens = json.tokens).catch(e => console.log(e.message))
       })
       fetch('https://actifitbot.herokuapp.com/transactions/' + this.username).then(res => {
-        res.json().then(json => {
-          this.transactions = json ? json : this.transactions
-        }).catch(e => console.log(e.message))
+        res.json().then(json => this.transactions = json ? json : this.transactions).catch(e => console.log(e.message))
       })
     }
   }
