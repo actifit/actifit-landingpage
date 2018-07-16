@@ -22,7 +22,7 @@
       </div>
     </div>
     <div class="container py-5 mt-5" id="content">
-      <h1 class="mb-4"><span class="text-brand">Actifit</span> is an innovative dapp that rewards fitness activity!</h1>
+      <h1 class="mb-4 text-capitalize"><span class="text-brand">Actifit</span> is an innovative dapp that rewards fitness activity!</h1>
       <p class="lead mb-5 pb-5">
         Built as one of the first Smart Media Tokens on top of the Steem blockchain, with a beta Android app that is released since day 1, Actifit tracks and rewards your activity, and rewards you with Actifit tokens, but also STEEM rewards via upvotes on your steemit posts.
       </p>
@@ -40,7 +40,7 @@
       </div>
       <div class="row mt-5 pt-5">
         <div class="col">
-          <h2>Earn tokens as simple as one two three</h2>
+          <h2 class="text-capitalize">Earn tokens as simple as one two three</h2>
           <p class="lead">Download the app from playstore. Go for a walk, run, do your favorite workout with a min target of 5,000 steps/moves. Post to steemit and get rewarded!</p>
         </div>
         <div class="col text-center">
@@ -56,7 +56,7 @@
       </div>
       <div class="row mt-5 pt-5">
         <div class="col">
-          <h2>Actifit tokens use cases</h2>
+          <h2 class="text-capitalize">Actifit tokens use cases</h2>
           <p class="lead">
             Actifit tokens will be available for purchasing fitness related equipment, tools, gadgets, sports wear, gym memberships... and any transactions between providers and actifiters.<br>
             As a Steem Smart Media Token, Actifit tokens will have their own valuation per STEEM as well as FIAT currencies, and hence can be cashed out for actual FIAT currency.
@@ -65,7 +65,7 @@
       </div>
       <div class="row mt-5 pt-5">
         <div class="col">
-          <h2>Delegate to earn more rewards</h2>
+          <h2 class="text-capitalize">Delegate to earn more rewards</h2>
           <p class="lead">
             You can earn more Actifit tokens if you are a STEEM token holder. Delegate to Actifit and earn 1:1 Actifit per Steem Power delegation, as well as a share of the 5% beneficiary reward of actifit posts.
           </p>
