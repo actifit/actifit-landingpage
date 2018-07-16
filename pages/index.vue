@@ -1,59 +1,39 @@
 <template>
-  <section class="container">
-    <div>
-      <logo/>
-      <h1 class="title">
-        actifit-landingpage
-      </h1>
-      <h2 class="subtitle">
-        Landingpage for the Actifit project
-      </h2>
-      <div class="links">
-        <a href="https://nuxtjs.org/" target="_blank" class="button--green">Documentation</a>
-        <a href="https://github.com/nuxt/nuxt.js" target="_blank" class="button--grey">GitHub</a>
+  <div class="container py-5">
+    <Header />
+    <div class="card form mx-auto mt-4 p-3 text-center">
+      <div class="form-group">
+        <p class="lead">Enter your Actifit username to see your current funds and transaction history.</p>
+        <input type="text" class="form-control" id="username" placeholder="Enter username" v-model="username" @keyup.enter="goToWallet()">
       </div>
+      <a href="#" :class="'btn btn-danger' + (username.length < 3 ? ' disabled' : '')" @click="goToWallet()">Show Wallet</a>
     </div>
-  </section>
+  </div>
 </template>
 
 <script>
-import Logo from '~/components/Logo.vue'
+  import Header from '~/components/Header'
 
-export default {
-  components: {
-    Logo
+  export default {
+    components: {
+      Header
+    },
+    data () {
+      return {
+        username: ''
+      }
+    },
+    methods: {
+      goToWallet () {
+        if (this.username.length > 2) {
+          this.$router.push({path: '/wallet/' + this.username})
+        }
+      }
+    }
   }
-}
 </script>
 
-<style>
-.container
-{
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-.title
-{
-  font-family: "Quicksand", "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; /* 1 */
-  display: block;
-  font-weight: 300;
-  font-size: 100px;
-  color: #35495e;
-  letter-spacing: 1px;
-}
-.subtitle
-{
-  font-weight: 300;
-  font-size: 42px;
-  color: #526488;
-  word-spacing: 5px;
-  padding-bottom: 15px;
-}
-.links
-{
-  padding-top: 15px;
-}
+<style lang="sass">
+  .form
+    max-width: 500px
 </style>
