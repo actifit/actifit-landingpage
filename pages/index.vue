@@ -28,7 +28,7 @@
     <!-- intro -->
     <section class="intro bg-light" id="content">
       <div class="container py-5">
-        <h1 class="pt-5 mb-3 text-capitalize text-center"><span class="text-brand">Actifit</span> is an innovative dapp that rewards fitness activity!</h1>
+        <h1 class="pt-5 mb-3 text-capitalize text-center"><span class="text-brand">Actifit:</span> An innovative dapp that rewards fitness activity!</h1>
         <p class="lead mb-4 pb-5 text-center">
           Built as one of the first Smart Media Tokens on top of the Steem blockchain, with a beta Android app that is released since day 1, Actifit tracks and rewards your activity, and rewards you with Actifit tokens, but also STEEM rewards via upvotes on your steemit posts.
         </p>
