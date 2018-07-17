@@ -1,9 +1,9 @@
 <template>
   <div>
     <!-- header with fullscreen background -->
-    <div class="header pt-3 pt-md-5 position-relative">
+    <div class="header pt-md-5 position-relative">
       <div class="container py-5">
-        <div class="pb-4 text-center">
+        <div class="pb-md-4 text-center">
           <img src="/img/icon.png" alt="Actifit" />
           <h1 class="mt-3 text-brand title">Actifit Fitness Tracker</h1>
           <h3 class="font-italic text-brand slogan">Rewarding Fitness Activity</h3>
@@ -11,7 +11,7 @@
         <!-- username form -->
         <div class="card form mx-auto p-3 mt-3 mt-md-5 text-center border-0">
           <div class="form-group">
-            <p class="lead py-3 form-info">Enter your Actifit/Steemit username to see your current funds and transaction history.</p>
+            <p class="lead py-md-3 form-info">Enter your Actifit/Steemit username to see your current funds and transaction history.</p>
             <input type="text" class="form-control form-control-lg" id="username" placeholder="Enter username" v-model="username" @keyup.enter="goToWallet()">
           </div>
           <a href="#" :class="'btn btn-lg btn-danger' + (username.length < 3 ? ' disabled' : '')" @click="goToWallet()">Show Wallet</a>
