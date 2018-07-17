@@ -54,11 +54,11 @@
     },
     mounted () {
       // fetch account balance
-      fetch('https://actifitbot.herokuapp.com/user/' + this.username).then(res => {
+      fetch('https://actifitbot.herokuapp.com/user/' + this.username.toLowerCase()).then(res => {
         res.json().then(json => this.tokens = json.tokens).catch(e => console.log(e.message))
       })
       // fetch transaction history
-      fetch('https://actifitbot.herokuapp.com/transactions/' + this.username).then(res => {
+      fetch('https://actifitbot.herokuapp.com/transactions/' + this.username.toLowerCase()).then(res => {
         res.json().then(json => this.transactions = json ? json : this.transactions).catch(e => console.log(e.message))
       })
     }
