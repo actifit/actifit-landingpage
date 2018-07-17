@@ -38,7 +38,7 @@
           <div class="col text-center">
             <h1><i class="fas fa-coins"></i></h1>
             <h4>Tokens Distributed</h4>
-            <h2 class="text-brand">{{ numberFormat(tokenInfo.tokens_distributed) }} AT</h2>
+            <h2 class="text-brand">{{ numberFormat(tokenInfo.tokens_distributed) }} AFIT</h2>
           </div>
           <div class="col text-center">
             <h1><i class="fas fa-users"></i></h1>
