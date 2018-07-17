@@ -1,7 +1,7 @@
 <template>
   <div class="card p-3 my-2 d-flex flex-row justify-content-between">
     <div>
-      <h4 class="mb-0">{{ transaction.token_count }} <small>AT</small></h4>
+      <h4 class="mb-0">{{ transaction.token_count }} <small>AFIT</small></h4>
       <small class="text-muted">@{{ transaction.user }}</small>
     </div>
     <div>
