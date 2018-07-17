@@ -30,12 +30,12 @@
         <div class="col text-center">
           <h1><i class="fas fa-coins"></i></h1>
           <h4>Tokens distributed</h4>
-          <h2 class="text-brand">{{ tokenInfo.tokens_distributed }} AT</h2>
+          <h2 class="text-brand">{{ numberFormat(tokenInfo.tokens_distributed) }} AT</h2>
         </div>
         <div class="col text-center">
           <h1><i class="fas fa-users"></i></h1>
           <h4>Users</h4>
-          <h2 class="text-brand">{{ tokenInfo.user_count }}</h2>
+          <h2 class="text-brand">{{ numberFormat(tokenInfo.user_count) }}</h2>
         </div>
       </div>
       <div class="row mt-5 pt-5">
@@ -117,6 +117,9 @@
       },
       scrollDown () {
         VueScrollTo.scrollTo('#content', 1000, {easing: 'ease-in-out'})
+      },
+      numberFormat (number) {
+        return new Intl.NumberFormat('en-EN').format(number)
       }
     },
     mounted () {
