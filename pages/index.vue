@@ -29,12 +29,12 @@
       <div class="row" v-if="tokenInfo">
         <div class="col text-center">
           <h1><i class="fas fa-coins"></i></h1>
-          <h4>Tokens distributed</h4>
+          <h4>Tokens Distributed</h4>
           <h2 class="text-brand">{{ numberFormat(tokenInfo.tokens_distributed) }} AT</h2>
         </div>
         <div class="col text-center">
           <h1><i class="fas fa-users"></i></h1>
-          <h4>Users</h4>
+          <h4>Token Holders</h4>
           <h2 class="text-brand">{{ numberFormat(tokenInfo.user_count) }}</h2>
         </div>
       </div>
