@@ -157,7 +157,7 @@
       }
     },
     mounted () {
-      fetch('http://actifitbot.herokuapp.com/user-tokens-info').then(res => {
+      fetch('https://actifitbot.herokuapp.com/user-tokens-info').then(res => {
         res.json().then(json => this.tokenInfo = json[0]).catch(e => console.log(e.message))
       })
     }
