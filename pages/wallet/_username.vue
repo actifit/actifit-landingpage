@@ -1,7 +1,13 @@
 <template>
   <div class="container  pt-3 pb-5">
     <nuxt-link to="/"><i class="fas fa-arrow-left fa-2x text-brand"></i></nuxt-link>
-    <Header />
+    <div class="container py-5">
+      <div class="text-center">
+        <img src="/img/icon.png" alt="Actifit" />
+        <h1 class="mt-3 text-brand">Actifit Fitness Tracker</h1>
+        <h3 class="font-italic text-brand">Rewarding Fitness Activity</h3>
+      </div>
+    </div>
     <div class="text-center">
       <h3 class="mb-4">Hey {{ username }}!</h3>
       <h4>Your Account Balance:</h4>
