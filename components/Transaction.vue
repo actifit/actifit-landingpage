@@ -21,7 +21,7 @@
       date () {
         let date = new Date(this.transaction.date)
         let minutes = date.getMinutes()
-        return date.getDate() + '/' + date.getMonth()+1 + '/' + date.getFullYear() + ' - ' + date.getHours() + ':' + (minutes < 10 ? '0' + minutes : minutes)
+        return date.getDate() + '/' + (date.getMonth()+1) + '/' + date.getFullYear() + ' - ' + date.getHours() + ':' + (minutes < 10 ? '0' + minutes : minutes)
       }
     }
   }
