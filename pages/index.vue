@@ -1,17 +1,17 @@
 <template>
   <div>
     <!-- header with fullscreen background -->
-    <div class="header pt-5 position-relative">
+    <div class="header pt-3 pt-md-5 position-relative">
       <div class="container py-5">
         <div class="pb-4 text-center">
           <img src="/img/icon.png" alt="Actifit" />
-          <h1 class="mt-3 text-brand">Actifit Fitness Tracker</h1>
-          <h3 class="font-italic text-brand">Rewarding Fitness Activity</h3>
+          <h1 class="mt-3 text-brand title">Actifit Fitness Tracker</h1>
+          <h3 class="font-italic text-brand slogan">Rewarding Fitness Activity</h3>
         </div>
         <!-- username form -->
-        <div class="card form mx-auto p-3 mt-5 text-center border-0">
+        <div class="card form mx-auto p-3 mt-3 mt-md-5 text-center border-0">
           <div class="form-group">
-            <p class="lead py-3">Enter your Actifit/Steemit username to see your current funds and transaction history.</p>
+            <p class="lead py-3 form-info">Enter your Actifit/Steemit username to see your current funds and transaction history.</p>
             <input type="text" class="form-control form-control-lg" id="username" placeholder="Enter username" v-model="username" @keyup.enter="goToWallet()">
           </div>
           <a href="#" :class="'btn btn-lg btn-danger' + (username.length < 3 ? ' disabled' : '')" @click="goToWallet()">Show Wallet</a>
@@ -28,7 +28,7 @@
     <!-- intro -->
     <section class="intro bg-light" id="content">
       <div class="container py-5">
-        <h1 class="pt-5 mb-3 text-capitalize text-center"><span class="text-brand">Actifit:</span> An innovative dapp that rewards fitness activity!</h1>
+        <h1 class="pt-5 mb-3 text-capitalize text-center headline"><span class="text-brand">Actifit:</span> An innovative dapp that rewards fitness activity!</h1>
         <p class="lead mb-4 pb-5 text-center">
           Built as one of the first Smart Media Tokens on top of the Steem blockchain, with a beta Android app that is released since day 1, Actifit tracks and rewards your activity, and rewards you with Actifit tokens, but also STEEM rewards via upvotes on your steemit posts.
         </p>
@@ -168,4 +168,23 @@
   @media (min-width: 768px)
     .showcase .showcase-text
       padding: 7rem
+
+  @media (max-width: 767px)
+    .header
+      .title
+        font-size: 1.7rem
+      .slogan
+        font-size: 1.3rem
+      .form-info
+        font-size: 1rem
+    .intro
+      .headline
+        font-size: 1.7rem
+    .showcase
+      .showcase-text
+        padding: 2rem
+        h2
+          font-size: 1.5rem
+        .lead
+          font-size: 1.2rem
 </style>
