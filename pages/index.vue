@@ -49,10 +49,12 @@
       </div>
     </section>
 
+    <!-- texts with images -->
     <section class="showcase">
       <div class="container-fluid p-0">
-        <div class="row no-gutters">
 
+        <!-- app -->
+        <div class="row no-gutters">
           <div class="col-lg-6 order-lg-2 text-white showcase-img" style="background-image: url('/img/showcase-1.jpg');"></div>
           <div class="col-lg-6 order-lg-1 my-auto showcase-text">
             <h2 class="text-capitalize">Earn tokens as simple as one two three</h2>
@@ -69,6 +71,8 @@
             </div>
           </div>
         </div>
+
+        <!-- use case -->
         <div class="row no-gutters">
           <div class="col-lg-6 text-white showcase-img" style="background-image: url('/img/showcase-2.jpg');"></div>
           <div class="col-lg-6 my-auto showcase-text">
@@ -80,6 +84,8 @@
             </p>
           </div>
         </div>
+
+        <!-- delegation -->
         <div class="row no-gutters">
           <div class="col-lg-6 order-lg-2 text-white showcase-img" style="background-image: url('/img/showcase-3.jpg');"></div>
           <div class="col-lg-6 order-lg-1 my-auto showcase-text">
@@ -110,16 +116,12 @@
 
 <script>
   import VueScrollTo from 'vue-scrollto'
-  import Header from '~/components/Header'
 
   export default {
-    components: {
-      Header
-    },
     data () {
       return {
-        username: '',
-        tokenInfo: null
+        username: '', // username whose funds to show
+        tokenInfo: null // stats from the api (user count and distributed token)
       }
     },
     computed: {
@@ -128,14 +130,28 @@
       }
     },
     methods: {
+      /**
+       * Forwards to wallet page if username is provided.
+       */
       goToWallet () {
         if (this.username.length > 2) {
           this.$router.push({path: '/wallet/' + this.username})
         }
       },
+
+      /**
+       * Scrolls down to content area.
+       */
       scrollDown () {
         VueScrollTo.scrollTo('#content', 1000, {easing: 'ease-in-out'})
       },
+
+      /**
+       * Formats numbers with commas and dots.
+       *
+       * @param number
+       * @returns {string}
+       */
       numberFormat (number) {
         return new Intl.NumberFormat('en-EN').format(number)
       }
