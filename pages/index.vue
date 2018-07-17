@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- header with fullscreen background -->
     <div class="header pt-5 position-relative">
       <div class="container py-5">
         <div class="pb-4 text-center">
@@ -7,6 +8,7 @@
           <h1 class="mt-3 text-brand">Actifit Fitness Tracker</h1>
           <h3 class="font-italic text-brand">Rewarding Fitness Activity</h3>
         </div>
+        <!-- username form -->
         <div class="card form mx-auto p-3 mt-5 text-center border-0">
           <div class="form-group">
             <p class="lead py-3">Enter your Actifit/Steemit username to see your current funds and transaction history.</p>
@@ -15,63 +17,79 @@
           <a href="#" :class="'btn btn-lg btn-danger' + (username.length < 3 ? ' disabled' : '')" @click="goToWallet()">Show Wallet</a>
         </div>
       </div>
+      <!-- scroll indicator -->
       <div class="text-center scroll-down position-absolute w-100">
         <a href="#" @click="scrollDown()">
           <i class="fas fa-2x text-light fa-chevron-down"></i>
         </a>
       </div>
     </div>
-    <div class="container py-5 mt-5" id="content">
-      <h1 class="mb-4 text-capitalize"><span class="text-brand">Actifit</span> is an innovative dapp that rewards fitness activity!</h1>
-      <p class="lead mb-5 pb-5">
-        Built as one of the first Smart Media Tokens on top of the Steem blockchain, with a beta Android app that is released since day 1, Actifit tracks and rewards your activity, and rewards you with Actifit tokens, but also STEEM rewards via upvotes on your steemit posts.
-      </p>
-      <div class="row" v-if="tokenInfo">
-        <div class="col text-center">
-          <h1><i class="fas fa-coins"></i></h1>
-          <h4>Tokens Distributed</h4>
-          <h2 class="text-brand">{{ numberFormat(tokenInfo.tokens_distributed) }} AT</h2>
-        </div>
-        <div class="col text-center">
-          <h1><i class="fas fa-users"></i></h1>
-          <h4>Token Holders</h4>
-          <h2 class="text-brand">{{ numberFormat(tokenInfo.user_count) }}</h2>
-        </div>
-      </div>
-      <div class="row mt-5 pt-5">
-        <div class="col">
-          <h2 class="text-capitalize">Earn tokens as simple as one two three</h2>
-          <p class="lead">Download the app from playstore. Go for a walk, run, do your favorite workout with a min target of 5,000 steps/moves. Post to steemit and get rewarded!</p>
-        </div>
-        <div class="col text-center">
-          <a href="https://play.google.com/store/apps/details?id=io.actifit.fitnesstracker.actifitfitnesstracker" target="_blank">
-            <img src="/img/google-play.png" />
-          </a>
-          <!--<br>-->
-          <!--<br>-->
-          <!--<a href="#" target="_blank">-->
-            <!--<img src="/img/app-store.png" />-->
-          <!--</a>-->
+
+    <!-- intro -->
+    <section class="intro bg-light" id="content">
+      <div class="container py-5">
+        <h1 class="pt-5 mb-3 text-capitalize text-center"><span class="text-brand">Actifit</span> is an innovative dapp that rewards fitness activity!</h1>
+        <p class="lead mb-4 pb-5 text-center">
+          Built as one of the first Smart Media Tokens on top of the Steem blockchain, with a beta Android app that is released since day 1, Actifit tracks and rewards your activity, and rewards you with Actifit tokens, but also STEEM rewards via upvotes on your steemit posts.
+        </p>
+
+        <!-- stats -->
+        <div class="row pb-5" v-if="tokenInfo">
+          <div class="col text-center">
+            <h1><i class="fas fa-coins"></i></h1>
+            <h4>Tokens Distributed</h4>
+            <h2 class="text-brand">{{ numberFormat(tokenInfo.tokens_distributed) }} AT</h2>
+          </div>
+          <div class="col text-center">
+            <h1><i class="fas fa-users"></i></h1>
+            <h4>Token Holders</h4>
+            <h2 class="text-brand">{{ numberFormat(tokenInfo.user_count) }}</h2>
+          </div>
         </div>
       </div>
-      <div class="row mt-5 pt-5">
-        <div class="col">
-          <h2 class="text-capitalize">Actifit tokens use cases</h2>
-          <p class="lead">
-            Actifit tokens will be available for purchasing fitness related equipment, tools, gadgets, sports wear, gym memberships... and any transactions between providers and actifiters.<br>
-            As a Steem Smart Media Token, Actifit tokens will have their own valuation per STEEM as well as FIAT currencies, and hence can be cashed out for actual FIAT currency.
-          </p>
+    </section>
+
+    <section class="showcase">
+      <div class="container-fluid p-0">
+        <div class="row no-gutters">
+
+          <div class="col-lg-6 order-lg-2 text-white showcase-img" style="background-image: url('/img/showcase-1.jpg');"></div>
+          <div class="col-lg-6 order-lg-1 my-auto showcase-text">
+            <h2 class="text-capitalize">Earn tokens as simple as one two three</h2>
+            <p class="lead mb-0">Download the app from playstore. Go for a walk, run, do your favorite workout with a min target of 5,000 steps/moves. Post to steemit and get rewarded!</p>
+            <div class="text-center mt-5">
+              <a href="https://play.google.com/store/apps/details?id=io.actifit.fitnesstracker.actifitfitnesstracker" target="_blank">
+                <img src="/img/google-play.png" />
+              </a>
+              <!--<br>-->
+              <!--<br>-->
+              <!--<a href="#" target="_blank">-->
+              <!--<img src="/img/app-store.png" />-->
+              <!--</a>-->
+            </div>
+          </div>
+        </div>
+        <div class="row no-gutters">
+          <div class="col-lg-6 text-white showcase-img" style="background-image: url('/img/showcase-2.jpg');"></div>
+          <div class="col-lg-6 my-auto showcase-text">
+            <h2 class="text-capitalize">Actifit tokens use cases</h2>
+            <p class="lead mb-0">
+              Actifit tokens will be available for purchasing fitness related equipment, tools, gadgets, sports wear, gym memberships... and any transactions between providers and actifiters.<br>
+              <br>
+              As a Steem Smart Media Token, Actifit tokens will have their own valuation per STEEM as well as FIAT currencies, and hence can be cashed out for actual FIAT currency.
+            </p>
+          </div>
+        </div>
+        <div class="row no-gutters">
+          <div class="col-lg-6 order-lg-2 text-white showcase-img" style="background-image: url('/img/showcase-3.jpg');"></div>
+          <div class="col-lg-6 order-lg-1 my-auto showcase-text">
+            <h2 class="text-capitalize">Delegate to earn more rewards</h2>
+            <p class="lead mb-0">You can earn more Actifit tokens if you are a STEEM token holder. Delegate to Actifit and earn 1:1 Actifit per Steem Power delegation, as well as a share of the 5% beneficiary reward of actifit posts.</p>
+          </div>
         </div>
       </div>
-      <div class="row mt-5 pt-5">
-        <div class="col">
-          <h2 class="text-capitalize">Delegate to earn more rewards</h2>
-          <p class="lead">
-            You can earn more Actifit tokens if you are a STEEM token holder. Delegate to Actifit and earn 1:1 Actifit per Steem Power delegation, as well as a share of the 5% beneficiary reward of actifit posts.
-          </p>
-        </div>
-      </div>
-    </div>
+    </section>
+
     <div class="footer bg-light">
       <div class="container py-5">
         <div class="row">
@@ -140,4 +158,14 @@
       box-shadow: 0 0 50px rgba(0, 0, 0, 0.2)
   .scroll-down
     bottom: 20px
+  .showcase .showcase-text
+    padding: 3rem
+  .showcase .showcase-img
+    min-height: 30rem
+    background-size: cover
+    background-position: center
+
+  @media (min-width: 768px)
+    .showcase .showcase-text
+      padding: 7rem
 </style>
