@@ -79,10 +79,10 @@
             <small class="text-muted">&copy; Copyright Actifit {{ currentYear }}</small>
           </div>
           <div class="col text-right">
-            <small class="links">
-              <a href="#" class="px-1">Imprint</a>
-              <a href="#" class="px-1">Privacy Policy</a>
-            </small>
+            <!--<small class="links">-->
+              <!--<a href="#" class="px-1">Imprint</a>-->
+              <!--<a href="#" class="px-1">Privacy Policy</a>-->
+            <!--</small>-->
           </div>
         </div>
       </div>
