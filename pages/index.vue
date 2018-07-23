@@ -247,28 +247,18 @@
       </div>
     </section>
 
-    <div class="footer bg-light">
-      <div class="container py-5">
-        <div class="row">
-          <div class="col text-center">
-            <small class="text-muted">&copy; Copyright Actifit {{ currentYear }}</small>
-          </div>
-          <!--<div class="col text-right">-->
-            <!--<small class="links">-->
-              <!--<a href="#" class="px-1">Imprint</a>-->
-              <!--<a href="#" class="px-1">Privacy Policy</a>-->
-            <!--</small>-->
-          <!--</div>-->
-        </div>
-      </div>
-    </div>
+    <Footer />
   </div>
 </template>
 
 <script>
   import VueScrollTo from 'vue-scrollto'
+  import Footer from '~/components/Footer'
 
   export default {
+    components: {
+      Footer
+    },
     data () {
       return {
         username: '', // username whose funds to show
