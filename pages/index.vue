@@ -1,7 +1,28 @@
 <template>
   <div>
+    <!-- top anchor -->
+    <a id="top"></a>
+
+    <!-- navbar links with smooth scrolling to sections -->
+    <nav class="navbar fixed-top navbar-expand-lg navbar-light">
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mx-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="#" @click="scrollTo('#top')">Wallet</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" @click="scrollTo('#content')">What is Actifit</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
     <!-- header with fullscreen background -->
-    <div class="header pt-md-5 position-relative">
+    <div class="header pt-4 pt-md-5 position-relative">
       <div class="container py-5">
         <div class="pb-md-4 text-center">
           <img src="/img/icon.png" alt="Actifit" />
@@ -19,7 +40,7 @@
       </div>
       <!-- scroll indicator -->
       <div class="text-center scroll-down position-absolute w-100">
-        <a href="#" @click="scrollDown()">
+        <a href="#" @click="scrollTo('#content')">
           <i class="fas fa-2x text-light fa-chevron-down"></i>
         </a>
       </div>
@@ -173,8 +194,8 @@
       /**
        * Scrolls down to content area.
        */
-      scrollDown () {
-        VueScrollTo.scrollTo('#content', 1000, {easing: 'ease-in-out'})
+      scrollTo (target) {
+        VueScrollTo.scrollTo(target, 1000, {easing: 'ease-in-out'})
       },
 
       /**
@@ -205,6 +226,19 @@
 </script>
 
 <style lang="sass">
+  .navbar
+    background: rgba(255, 255, 255, 0.5)
+    transition: background-color .3s ease
+    &:hover
+      background: #fff
+    .navbar-toggler
+      border: none
+      outline: none
+    .navbar-nav
+      .nav-link
+        &:hover,
+        &:focus
+          color: #ff112d
   .header
     height: 100%
     background: url('/img/header.jpg') center
@@ -213,7 +247,7 @@
       max-width: 500px
       box-shadow: 0 0 50px rgba(0, 0, 0, 0.2)
   .scroll-down
-    bottom: 20px
+    bottom: 10px
   .showcase .showcase-text
     padding: 3rem
   .showcase .showcase-img
