@@ -38,12 +38,12 @@
           <div class="col text-center">
             <h1><i class="fas fa-coins"></i></h1>
             <h4>Tokens Distributed</h4>
-            <h2 class="text-brand">{{ numberFormat(tokenInfo.tokens_distributed) }} AFIT</h2>
+            <h2 class="text-brand">{{ numberFormat(animatedTokensDistributed) }} AFIT</h2>
           </div>
           <div class="col text-center">
             <h1><i class="fas fa-users"></i></h1>
             <h4>Token Holders</h4>
-            <h2 class="text-brand">{{ numberFormat(tokenInfo.user_count) }}</h2>
+            <h2 class="text-brand">{{ numberFormat(animatedUserCount) }}</h2>
           </div>
         </div>
       </div>
@@ -121,12 +121,30 @@
     data () {
       return {
         username: '', // username whose funds to show
-        tokenInfo: null // stats from the api (user count and distributed token)
+        tokenInfo: null, // stats from the api (user count and distributed token)
+        userCount: 0,
+        tweenedUserCount: 0,
+        tokensDistributed: 0,
+        tweenedTokensDistributed: 0
       }
     },
     computed: {
       currentYear () {
         return (new Date()).getFullYear()
+      },
+      animatedUserCount: function() {
+        return this.tweenedUserCount.toFixed(0);
+      },
+      animatedTokensDistributed: function() {
+        return this.tweenedTokensDistributed.toFixed(0);
+      }
+    },
+    watch: {
+      userCount: function(newValue) {
+        TweenLite.to(this.$data, 8, { tweenedUserCount: newValue });
+      },
+      tokensDistributed: function(newValue) {
+        TweenLite.to(this.$data, 8, { tweenedTokensDistributed: newValue });
       }
     },
     methods: {
@@ -158,7 +176,11 @@
     },
     mounted () {
       fetch('https://actifitbot.herokuapp.com/user-tokens-info').then(res => {
-        res.json().then(json => this.tokenInfo = json[0]).catch(e => console.log(e.message))
+        res.json().then(json => {
+          this.tokenInfo = json[0]
+          this.userCount = this.tokenInfo.user_count
+          this.tokensDistributed = this.tokenInfo.tokens_distributed
+        }).catch(e => console.log(e.message))
       })
     }
   }
