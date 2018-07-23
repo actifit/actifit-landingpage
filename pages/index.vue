@@ -17,6 +17,18 @@
           <li class="nav-item">
             <a class="nav-link" href="#" @click="scrollTo('#content')">What is Actifit</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" @click="scrollTo('#leaderboard')">Leaderboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" @click="scrollTo('#team')">Team</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" @click="scrollTo('#ambassadors')">Ambassadors</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" @click="scrollTo('#athletes')">Sponsored Athletes</a>
+          </li>
         </ul>
       </div>
     </nav>
@@ -117,6 +129,122 @@
           <div class="col-lg-6 order-lg-1 my-auto showcase-text">
             <h2 class="text-capitalize">Delegate to earn more rewards</h2>
             <p class="lead mb-0">You can earn more Actifit tokens if you are a STEEM token holder. Delegate to Actifit and earn 1:1 Actifit per Steem Power delegation, as well as a share of the 5% beneficiary reward of actifit posts.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="leaderboard" class="py-5 bg-brand text-light">
+      <div class="container">
+        <h1 class="text-center pb-5">
+          <i class="fas fa-medal"></i><br>
+          Daily Leaderboard
+        </h1>
+        <div class="row">
+          <div class="col-sm-4 text-center mb-4 mb-sm-0 d-flex align-items-center justify-content-center">
+            <div>
+              <h2>2.</h2>
+              <a href="https://steemit.com/@entrepreneur916" target="_blank">
+                <div class="avatar mx-auto mb-3" style="background-image: url('https://ipfs.busy.org/ipfs/QmPyExYzRA6Zp14c2UL3dZSTwZtToABHwFAyFjR1pZMVk6');"></div>
+              </a>
+              <a href="https://steemit.com/@entrepreneur916" target="_blank">@entrepreneur916</a>
+            </div>
+          </div>
+          <div class="col-sm-4 text-center mb-4 mb-sm-0 d-flex align-items-center justify-content-center">
+            <div>
+              <h2>1.</h2>
+              <a href="https://steemit.com/@bunnymoney" target="_blank">
+                <div class="avatar mx-auto mb-3" style="width: 200px; height: 200px; background-image: url('https://ipfs.busy.org/ipfs/QmQnNadhAJPJL5Sa8FYL5Pxhgw22zWjw4S8Kmji6k21p2w');"></div>
+              </a>
+              <a href="https://steemit.com/@bunnymoney" target="_blank">@bunnymoney</a>
+            </div>
+          </div>
+          <div class="col-sm-4 text-center mb-4 mb-sm-0 d-flex align-items-center justify-content-center">
+            <div>
+              <h2>3.</h2>
+              <a href="https://steemit.com/@fedesox" target="_blank">
+                <div class="avatar mx-auto mb-3" style="width: 100px; height: 100px; background-image: url('https://ipfs.busy.org/ipfs/QmZrT7r9SjKUcx81L8p9G9z6uhndupDpfsrtYjwqgF3zC2');"></div>
+              </a>
+              <a href="https://steemit.com/@fedesox" target="_blank">@fedesox</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="team" class="py-5">
+      <div class="container">
+        <h1 class="text-center pb-5">Team</h1>
+        <div class="row">
+          <div class="col-sm-4 text-center mb-4 mb-sm-0">
+            <a href="https://steemit.com/@entrepreneur916" target="_blank">
+              <div class="avatar mx-auto mb-3" style="background-image: url('https://ipfs.busy.org/ipfs/QmPyExYzRA6Zp14c2UL3dZSTwZtToABHwFAyFjR1pZMVk6');"></div>
+            </a>
+            <a href="https://steemit.com/@entrepreneur916" target="_blank">@entrepreneur916</a>
+          </div>
+          <div class="col-sm-4 text-center mb-4 mb-sm-0">
+            <a href="https://steemit.com/@bunnymoney" target="_blank">
+              <div class="avatar mx-auto mb-3" style="background-image: url('https://ipfs.busy.org/ipfs/QmQnNadhAJPJL5Sa8FYL5Pxhgw22zWjw4S8Kmji6k21p2w');"></div>
+            </a>
+            <a href="https://steemit.com/@bunnymoney" target="_blank">@bunnymoney</a>
+          </div>
+          <div class="col-sm-4 text-center mb-4 mb-sm-0">
+            <a href="https://steemit.com/@fedesox" target="_blank">
+              <div class="avatar mx-auto mb-3" style="background-image: url('https://ipfs.busy.org/ipfs/QmZrT7r9SjKUcx81L8p9G9z6uhndupDpfsrtYjwqgF3zC2');"></div>
+            </a>
+            <a href="https://steemit.com/@fedesox" target="_blank">@fedesox</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="ambassadors" class="py-5 bg-light">
+      <div class="container">
+        <h1 class="text-center pb-5">Ambassadors</h1>
+        <div class="row">
+          <div class="col-sm-4 text-center mb-4 mb-sm-0">
+            <a href="https://steemit.com/@entrepreneur916" target="_blank">
+              <div class="avatar mx-auto mb-3" style="background-image: url('https://ipfs.busy.org/ipfs/QmPyExYzRA6Zp14c2UL3dZSTwZtToABHwFAyFjR1pZMVk6');"></div>
+            </a>
+            <a href="https://steemit.com/@entrepreneur916" target="_blank">@entrepreneur916</a>
+          </div>
+          <div class="col-sm-4 text-center mb-4 mb-sm-0">
+            <a href="https://steemit.com/@bunnymoney" target="_blank">
+              <div class="avatar mx-auto mb-3" style="background-image: url('https://ipfs.busy.org/ipfs/QmQnNadhAJPJL5Sa8FYL5Pxhgw22zWjw4S8Kmji6k21p2w');"></div>
+            </a>
+            <a href="https://steemit.com/@bunnymoney" target="_blank">@bunnymoney</a>
+          </div>
+          <div class="col-sm-4 text-center mb-4 mb-sm-0">
+            <a href="https://steemit.com/@fedesox" target="_blank">
+              <div class="avatar mx-auto mb-3" style="background-image: url('https://ipfs.busy.org/ipfs/QmZrT7r9SjKUcx81L8p9G9z6uhndupDpfsrtYjwqgF3zC2');"></div>
+            </a>
+            <a href="https://steemit.com/@fedesox" target="_blank">@fedesox</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="athletes" class="py-5">
+      <div class="container">
+        <h1 class="text-center pb-5">Sponsored Athletes</h1>
+        <div class="row">
+          <div class="col-sm-4 text-center mb-4 mb-sm-0">
+            <a href="https://steemit.com/@entrepreneur916" target="_blank">
+              <div class="avatar mx-auto mb-3" style="background-image: url('https://ipfs.busy.org/ipfs/QmPyExYzRA6Zp14c2UL3dZSTwZtToABHwFAyFjR1pZMVk6');"></div>
+            </a>
+            <a href="https://steemit.com/@entrepreneur916" target="_blank">@entrepreneur916</a>
+          </div>
+          <div class="col-sm-4 text-center mb-4 mb-sm-0">
+            <a href="https://steemit.com/@bunnymoney" target="_blank">
+              <div class="avatar mx-auto mb-3" style="background-image: url('https://ipfs.busy.org/ipfs/QmQnNadhAJPJL5Sa8FYL5Pxhgw22zWjw4S8Kmji6k21p2w');"></div>
+            </a>
+            <a href="https://steemit.com/@bunnymoney" target="_blank">@bunnymoney</a>
+          </div>
+          <div class="col-sm-4 text-center mb-4 mb-sm-0">
+            <a href="https://steemit.com/@fedesox" target="_blank">
+              <div class="avatar mx-auto mb-3" style="background-image: url('https://ipfs.busy.org/ipfs/QmZrT7r9SjKUcx81L8p9G9z6uhndupDpfsrtYjwqgF3zC2');"></div>
+            </a>
+            <a href="https://steemit.com/@fedesox" target="_blank">@fedesox</a>
           </div>
         </div>
       </div>
