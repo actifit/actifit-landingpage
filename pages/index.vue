@@ -45,6 +45,11 @@
             <h4>Token Holders</h4>
             <h2 class="text-brand">{{ numberFormat(animatedUserCount) }}</h2>
           </div>
+          <div class="col text-center">
+            <h1><i class="fas fa-dumbbell"></i></h1>
+            <h4>Reward Activities</h4>
+            <h2 class="text-brand">{{ numberFormat(animatedRewardedActivityCount) }}</h2>
+          </div>
         </div>
       </div>
     </section>
@@ -125,7 +130,9 @@
         userCount: 0,
         tweenedUserCount: 0,
         tokensDistributed: 0,
-        tweenedTokensDistributed: 0
+        tweenedTokensDistributed: 0,
+        rewardedActivityCount: 0,
+        tweenedRewardedActivityCount: 0
       }
     },
     computed: {
@@ -137,6 +144,9 @@
       },
       animatedTokensDistributed: function() {
         return this.tweenedTokensDistributed.toFixed(0);
+      },
+      animatedRewardedActivityCount: function() {
+        return this.tweenedRewardedActivityCount.toFixed(0);
       }
     },
     watch: {
@@ -145,6 +155,9 @@
       },
       tokensDistributed: function(newValue) {
         TweenLite.to(this.$data, 8, { tweenedTokensDistributed: newValue });
+      },
+      rewardedActivityCount: function(newValue) {
+        TweenLite.to(this.$data, 8, { tweenedRewardedActivityCount: newValue });
       }
     },
     methods: {
@@ -180,6 +193,11 @@
           this.tokenInfo = json[0]
           this.userCount = this.tokenInfo.user_count
           this.tokensDistributed = this.tokenInfo.tokens_distributed
+        }).catch(e => console.log(e.message))
+      })
+      fetch('http://actifitbot.herokuapp.com/rewarded-activity-count').then(res => {
+        res.json().then(json => {
+          this.rewardedActivityCount = json
         }).catch(e => console.log(e.message))
       })
     }
