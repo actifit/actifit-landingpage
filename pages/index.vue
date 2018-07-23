@@ -179,9 +179,9 @@
           Team
         </h1>
         <div class="row">
-          <div class="col-sm-3 text-center mb-4" v-for="(moderator, index) in moderators" :key="index" :moderator="moderator">
+          <div class="col-6 col-sm-4 col-md-3 text-center mb-4" v-for="(moderator, index) in moderators" :key="index" :moderator="moderator">
             <a :href="'https://steemit.com/@' + moderator" target="_blank">
-              <div class="avatar mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + moderator + '/avatar);'"></div>
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + moderator + '/avatar);'"></div>
             </a>
             <a :href="'https://steemit.com/@' + moderator" target="_blank">@{{ moderator }}</a>
           </div>
@@ -395,4 +395,6 @@
           font-size: 1.5rem
         .lead
           font-size: 1.2rem
+      .showcase-img
+        min-height: 15rem
 </style>
