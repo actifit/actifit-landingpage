@@ -174,25 +174,16 @@
 
     <section id="team" class="py-5">
       <div class="container">
-        <h1 class="text-center pb-5">Team</h1>
+        <h1 class="text-center pb-5">
+          <i class="fas fa-users"></i><br>
+          Team
+        </h1>
         <div class="row">
-          <div class="col-sm-4 text-center mb-4 mb-sm-0">
-            <a href="https://steemit.com/@entrepreneur916" target="_blank">
-              <div class="avatar mx-auto mb-3" style="background-image: url('https://ipfs.busy.org/ipfs/QmPyExYzRA6Zp14c2UL3dZSTwZtToABHwFAyFjR1pZMVk6');"></div>
+          <div class="col-sm-3 text-center mb-4" v-for="(moderator, index) in moderators" :key="index" :moderator="moderator">
+            <a :href="'https://steemit.com/@' + moderator" target="_blank">
+              <div class="avatar mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + moderator + '/avatar);'"></div>
             </a>
-            <a href="https://steemit.com/@entrepreneur916" target="_blank">@entrepreneur916</a>
-          </div>
-          <div class="col-sm-4 text-center mb-4 mb-sm-0">
-            <a href="https://steemit.com/@bunnymoney" target="_blank">
-              <div class="avatar mx-auto mb-3" style="background-image: url('https://ipfs.busy.org/ipfs/QmQnNadhAJPJL5Sa8FYL5Pxhgw22zWjw4S8Kmji6k21p2w');"></div>
-            </a>
-            <a href="https://steemit.com/@bunnymoney" target="_blank">@bunnymoney</a>
-          </div>
-          <div class="col-sm-4 text-center mb-4 mb-sm-0">
-            <a href="https://steemit.com/@fedesox" target="_blank">
-              <div class="avatar mx-auto mb-3" style="background-image: url('https://ipfs.busy.org/ipfs/QmZrT7r9SjKUcx81L8p9G9z6uhndupDpfsrtYjwqgF3zC2');"></div>
-            </a>
-            <a href="https://steemit.com/@fedesox" target="_blank">@fedesox</a>
+            <a :href="'https://steemit.com/@' + moderator" target="_blank">@{{ moderator }}</a>
           </div>
         </div>
       </div>
@@ -200,7 +191,10 @@
 
     <section id="ambassadors" class="py-5 bg-light">
       <div class="container">
-        <h1 class="text-center pb-5">Ambassadors</h1>
+        <h1 class="text-center pb-5">
+          <i class="fas fa-bullhorn tilt"></i><br>
+          Ambassadors
+        </h1>
         <div class="row">
           <div class="col-sm-4 text-center mb-4 mb-sm-0">
             <a href="https://steemit.com/@entrepreneur916" target="_blank">
@@ -226,9 +220,12 @@
 
     <section id="athletes" class="py-5">
       <div class="container">
-        <h1 class="text-center pb-5">Sponsored Athletes</h1>
+        <h1 class="text-center pb-5">
+          <i class="fas fa-dumbbell"></i><br>
+          Sponsored Athletes
+        </h1>
         <div class="row">
-          <div class="col-sm-4 text-center mb-4 mb-sm-0">
+          <div class="col-sm-4 text-center mb-4">
             <a href="https://steemit.com/@entrepreneur916" target="_blank">
               <div class="avatar mx-auto mb-3" style="background-image: url('https://ipfs.busy.org/ipfs/QmPyExYzRA6Zp14c2UL3dZSTwZtToABHwFAyFjR1pZMVk6');"></div>
             </a>
@@ -281,7 +278,8 @@
         tokensDistributed: 0,
         tweenedTokensDistributed: 0,
         rewardedActivityCount: 0,
-        tweenedRewardedActivityCount: 0
+        tweenedRewardedActivityCount: 0,
+        moderators: ['alfamano', 'ionutciobanu', 'curtwriter', 'zoneboy', 'rabihfarhat', 'gerginho', 'd-gold', 'ciuoto', 'vishalsingh4997', 'kpreddy']
       }
     },
     computed: {
@@ -382,6 +380,8 @@
     min-height: 30rem
     background-size: cover
     background-position: center
+  .tilt
+    transform: rotate(-15deg)
 
   @media (min-width: 768px)
     .showcase .showcase-text
