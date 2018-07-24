@@ -196,23 +196,11 @@
           Ambassadors
         </h1>
         <div class="row">
-          <div class="col-sm-4 text-center mb-4 mb-sm-0">
-            <a href="https://steemit.com/@entrepreneur916" target="_blank">
-              <div class="avatar mx-auto mb-3" style="background-image: url('https://ipfs.busy.org/ipfs/QmPyExYzRA6Zp14c2UL3dZSTwZtToABHwFAyFjR1pZMVk6');"></div>
+          <div class="col-6 col-sm-4 text-center mb-4" v-for="(ambassador, index) in ambassadors" :key="index" :moderator="ambassador">
+            <a :href="'https://steemit.com/@' + ambassador" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + ambassador + '/avatar);'"></div>
             </a>
-            <a href="https://steemit.com/@entrepreneur916" target="_blank">@entrepreneur916</a>
-          </div>
-          <div class="col-sm-4 text-center mb-4 mb-sm-0">
-            <a href="https://steemit.com/@bunnymoney" target="_blank">
-              <div class="avatar mx-auto mb-3" style="background-image: url('https://ipfs.busy.org/ipfs/QmQnNadhAJPJL5Sa8FYL5Pxhgw22zWjw4S8Kmji6k21p2w');"></div>
-            </a>
-            <a href="https://steemit.com/@bunnymoney" target="_blank">@bunnymoney</a>
-          </div>
-          <div class="col-sm-4 text-center mb-4 mb-sm-0">
-            <a href="https://steemit.com/@fedesox" target="_blank">
-              <div class="avatar mx-auto mb-3" style="background-image: url('https://ipfs.busy.org/ipfs/QmZrT7r9SjKUcx81L8p9G9z6uhndupDpfsrtYjwqgF3zC2');"></div>
-            </a>
-            <a href="https://steemit.com/@fedesox" target="_blank">@fedesox</a>
+            <a :href="'https://steemit.com/@' + ambassador" target="_blank">@{{ ambassador }}</a>
           </div>
         </div>
       </div>
@@ -269,7 +257,8 @@
         tweenedTokensDistributed: 0,
         rewardedActivityCount: 0,
         tweenedRewardedActivityCount: 0,
-        moderators: ['alfamano', 'ionutciobanu', 'curtwriter', 'zoneboy', 'rabihfarhat', 'gerginho', 'd-gold', 'ciuoto', 'vishalsingh4997', 'kpreddy']
+        moderators: ['alfamano', 'ionutciobanu', 'curtwriter', 'zoneboy', 'rabihfarhat', 'gerginho', 'd-gold', 'ciuoto', 'vishalsingh4997', 'kpreddy'],
+        ambassadors: ['taskmaster4450', 'flauwy', 'rosatravels']
       }
     },
     computed: {
