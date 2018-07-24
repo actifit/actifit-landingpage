@@ -80,7 +80,7 @@
           </div>
           <div class="col text-center">
             <h1><i class="fas fa-dumbbell"></i></h1>
-            <h4>Reward Activities</h4>
+            <h4>Rewarded Activities</h4>
             <h2 class="text-brand">{{ numberFormat(animatedRewardedActivityCount) }}</h2>
           </div>
         </div>
@@ -140,32 +140,32 @@
           <i class="fas fa-medal"></i><br>
           Daily Leaderboard
         </h1>
-        <div class="row">
+        <div class="row" v-if="leaderboard.length">
           <div class="col-sm-4 text-center mb-4 mb-sm-0 d-flex align-items-center justify-content-center">
             <div>
               <h2>2.</h2>
-              <a href="https://steemit.com/@entrepreneur916" target="_blank">
-                <div class="avatar mx-auto mb-3" style="background-image: url('https://ipfs.busy.org/ipfs/QmPyExYzRA6Zp14c2UL3dZSTwZtToABHwFAyFjR1pZMVk6');"></div>
+              <a :href="'https://steemit.com/@' + leaderboard[1].username" target="_blank">
+                <div class="avatar mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + leaderboard[0].username + '/avatar);'"></div>
               </a>
-              <a href="https://steemit.com/@entrepreneur916" target="_blank">@entrepreneur916</a>
+              <a :href="'https://steemit.com/@' + leaderboard[1].username" target="_blank">{{ leaderboard[1].username }}</a>
             </div>
           </div>
           <div class="col-sm-4 text-center mb-4 mb-sm-0 d-flex align-items-center justify-content-center">
             <div>
               <h2>1.</h2>
-              <a href="https://steemit.com/@bunnymoney" target="_blank">
-                <div class="avatar mx-auto mb-3" style="width: 200px; height: 200px; background-image: url('https://ipfs.busy.org/ipfs/QmQnNadhAJPJL5Sa8FYL5Pxhgw22zWjw4S8Kmji6k21p2w');"></div>
+              <a :href="'https://steemit.com/@' + leaderboard[0].username" target="_blank">
+                <div class="avatar mx-auto mb-3" :style="'width: 200px; height: 200px; background-image: url(https://steemitimages.com/u/' + leaderboard[1].username + '/avatar);'"></div>
               </a>
-              <a href="https://steemit.com/@bunnymoney" target="_blank">@bunnymoney</a>
+              <a :href="'https://steemit.com/@' + leaderboard[0].username" target="_blank">{{ leaderboard[0].username }}</a>
             </div>
           </div>
           <div class="col-sm-4 text-center mb-4 mb-sm-0 d-flex align-items-center justify-content-center">
             <div>
               <h2>3.</h2>
-              <a href="https://steemit.com/@fedesox" target="_blank">
-                <div class="avatar mx-auto mb-3" style="width: 100px; height: 100px; background-image: url('https://ipfs.busy.org/ipfs/QmZrT7r9SjKUcx81L8p9G9z6uhndupDpfsrtYjwqgF3zC2');"></div>
+              <a :href="'https://steemit.com/@' + leaderboard[2].username" target="_blank">
+                <div class="avatar mx-auto mb-3" :style="'width: 100px; height: 100px; background-image: url(https://steemitimages.com/u/' + leaderboard[2].username + '/avatar);'"></div>
               </a>
-              <a href="https://steemit.com/@fedesox" target="_blank">@fedesox</a>
+              <a :href="'https://steemit.com/@' + leaderboard[2].username" target="_blank">{{ leaderboard[2].username }}</a>
             </div>
           </div>
         </div>
@@ -257,6 +257,7 @@
         tweenedTokensDistributed: 0,
         rewardedActivityCount: 0,
         tweenedRewardedActivityCount: 0,
+        leaderboard: [],
         moderators: ['alfamano', 'ionutciobanu', 'curtwriter', 'zoneboy', 'rabihfarhat', 'gerginho', 'd-gold', 'ciuoto', 'vishalsingh4997', 'kpreddy'],
         ambassadors: ['taskmaster4450', 'flauwy', 'rosatravels']
       }
@@ -320,7 +321,18 @@
       })
       fetch('http://actifitbot.herokuapp.com/rewarded-activity-count').then(res => {
         res.json().then(json => {
-          this.rewardedActivityCount = json
+          this.rewardedActivityCount = json[0].reward_count
+        }).catch(e => console.log(e.message))
+      })
+      fetch('https://actifit-pst-cr3at0r.herokuapp.com/api/top5p0sts', {method: 'POST'}).then(res => {
+        res.text().then(text => {
+          console.log(text);
+          text.split(';').forEach(item => {
+            let data = item.split(' ')
+            if (data) {
+              this.leaderboard.push({username: data[1].replace('@', ''), rewards: data[2]})
+            }
+          })
         }).catch(e => console.log(e.message))
       })
     }
