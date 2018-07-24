@@ -1,0 +1,33 @@
+<template>
+  <div class="footer bg-light">
+    <div class="container py-5">
+      <div class="text-center social-links mb-4">
+        <a href="https://discord.gg/aHtcA6r" target="_blank" class="d-inline-block mx-3"><i class="fab fa-2x fa-discord"></i></a>
+        <a href="https://www.facebook.com/Actifit.fitness/" target="_blank" class="d-inline-block mx-3"><i class="fab fa-2x fa-facebook"></i></a>
+        <a href="https://www.twitter.com/Actifit_fitness" target="_blank" class="d-inline-block mx-3"><i class="fab fa-2x fa-twitter"></i></a>
+        <a href="https://www.instagram.com/actifit.fitness/" target="_blank" class="d-inline-block mx-3"><i class="fab fa-2x fa-instagram"></i></a>
+      </div>
+      <div class="row">
+        <div class="col text-center">
+          <small class="text-muted">&copy; Copyright Actifit {{ currentYear }}</small>
+        </div>
+        <!--<div class="col text-right">-->
+        <!--<small class="links">-->
+        <!--<a href="#" class="px-1">Imprint</a>-->
+        <!--<a href="#" class="px-1">Privacy Policy</a>-->
+        <!--</small>-->
+        <!--</div>-->
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+  export default {
+    computed: {
+      currentYear () {
+        return (new Date()).getFullYear()
+      }
+    }
+  }
+</script>
