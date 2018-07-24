@@ -273,9 +273,6 @@
       }
     },
     computed: {
-      currentYear () {
-        return (new Date()).getFullYear()
-      },
       animatedUserCount: function() {
         return this.tweenedUserCount.toFixed(0);
       },
