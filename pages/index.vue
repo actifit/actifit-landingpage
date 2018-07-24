@@ -80,7 +80,7 @@
           </div>
           <div class="col text-center">
             <h1><i class="fas fa-dumbbell"></i></h1>
-            <h4>Reward Activities</h4>
+            <h4>Rewarded Activities</h4>
             <h2 class="text-brand">{{ numberFormat(animatedRewardedActivityCount) }}</h2>
           </div>
         </div>
