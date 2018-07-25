@@ -258,7 +258,7 @@
         rewardedActivityCount: 0,
         tweenedRewardedActivityCount: 0,
         leaderboard: [],
-        moderators: ['alfamano', 'ionutciobanu', 'curtwriter', 'zoneboy', 'rabihfarhat', 'gerginho', 'd-gold', 'ciuoto', 'vishalsingh4997', 'kpreddy'],
+        moderators: ['alfamano', 'ionutciobanu', 'curtwriter', 'zoneboy', 'rabihfarhat', 'gerginho', 'd-gold', 'ciuoto', 'vishalsingh4997', 'kpreddy', 'katerinaramm', 'mcfarhat'],
         ambassadors: ['taskmaster4450', 'flauwy', 'rosatravels']
       }
     },
@@ -319,7 +319,7 @@
           this.tokensDistributed = this.tokenInfo.tokens_distributed
         }).catch(e => console.log(e.message))
       })
-      fetch('http://actifitbot.herokuapp.com/rewarded-activity-count').then(res => {
+      fetch('https://actifitbot.herokuapp.com/rewarded-activity-count').then(res => {
         res.json().then(json => {
           this.rewardedActivityCount = json[0].reward_count
         }).catch(e => console.log(e.message))
