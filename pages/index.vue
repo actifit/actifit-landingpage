@@ -145,7 +145,7 @@
             <div>
               <h2>2.</h2>
               <a :href="'https://steemit.com/@' + leaderboard[1].username" target="_blank">
-                <div class="avatar mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + leaderboard[0].username + '/avatar);'"></div>
+                <div class="avatar mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + leaderboard[1].username + '/avatar);'"></div>
               </a>
               <a :href="'https://steemit.com/@' + leaderboard[1].username" target="_blank">{{ leaderboard[1].username }}</a>
             </div>
@@ -154,7 +154,7 @@
             <div>
               <h2>1.</h2>
               <a :href="'https://steemit.com/@' + leaderboard[0].username" target="_blank">
-                <div class="avatar mx-auto mb-3" :style="'width: 200px; height: 200px; background-image: url(https://steemitimages.com/u/' + leaderboard[1].username + '/avatar);'"></div>
+                <div class="avatar mx-auto mb-3" :style="'width: 200px; height: 200px; background-image: url(https://steemitimages.com/u/' + leaderboard[0].username + '/avatar);'"></div>
               </a>
               <a :href="'https://steemit.com/@' + leaderboard[0].username" target="_blank">{{ leaderboard[0].username }}</a>
             </div>
