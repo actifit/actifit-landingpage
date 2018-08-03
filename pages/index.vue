@@ -259,7 +259,7 @@
         tweenedRewardedActivityCount: 0,
         leaderboard: [],
         moderators: ['alfamano', 'ionutciobanu', 'curtwriter', 'zoneboy', 'rabihfarhat', 'gerginho', 'd-gold', 'ciuoto', 'vishalsingh4997', 'kpreddy', 'katerinaramm', 'mcfarhat'],
-        ambassadors: ['taskmaster4450', 'flauwy', 'rosatravels']
+        ambassadors: ['taskmaster4450', 'flauwy', 'rosatravels', 'toocurious']
       }
     },
     computed: {
