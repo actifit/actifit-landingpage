@@ -10,9 +10,12 @@
       </button>
 
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mx-auto">
+        <ul class="navbar-nav mr-auto">
           <li class="nav-item">
-            <a class="nav-link" href="#" @click="scrollTo('#top')">Wallet</a>
+            <a class="nav-link" href="#" @click="scrollTo('#top')">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" @click="$router.push('/activity')">Activity</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#" @click="scrollTo('#content')">What is Actifit</a>
@@ -28,6 +31,12 @@
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#" @click="scrollTo('#athletes')">Sponsored Athletes</a>
+          </li>
+        </ul>
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="#" @click.prevent="$store.dispatch('logout')" v-if="user">Logout</a>
+            <a class="nav-link" :href="$steemconnect.getLoginURL()" v-else>Login</a>
           </li>
         </ul>
       </div>
@@ -242,6 +251,7 @@
 <script>
   import VueScrollTo from 'vue-scrollto'
   import Footer from '~/components/Footer'
+  import { mapGetters } from 'vuex'
 
   export default {
     components: {
@@ -263,6 +273,7 @@
       }
     },
     computed: {
+      ...mapGetters(['user']),
       animatedUserCount: function() {
         return this.tweenedUserCount.toFixed(0);
       },
@@ -312,6 +323,9 @@
       }
     },
     mounted () {
+      // login
+      this.$store.dispatch('login')
+
       fetch('https://actifitbot.herokuapp.com/user-tokens-info').then(res => {
         res.json().then(json => {
           this.tokenInfo = json[0]
