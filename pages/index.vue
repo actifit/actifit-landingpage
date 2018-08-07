@@ -337,19 +337,6 @@
 </script>
 
 <style lang="sass">
-  .navbar
-    background: rgba(255, 255, 255, 0.5)
-    transition: background-color .3s ease
-    &:hover
-      background: #fff
-    .navbar-toggler
-      border: none
-      outline: none
-    .navbar-nav
-      .nav-link
-        &:hover,
-        &:focus
-          color: #ff112d
   .header
     height: 100%
     background: url('/img/header.jpg') center
