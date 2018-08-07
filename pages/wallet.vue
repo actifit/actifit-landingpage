@@ -1,8 +1,17 @@
 <template>
   <div>
+    <nav class="navbar fixed-top navbar-expand-lg navbar-light">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="#" @click.prevent="$router.push('/')">
+            <i class="fas fa-arrow-left text-brand navbar-back"></i>
+          </a>
+        </li>
+      </ul>
+      <UserMenu />
+    </nav>
+
     <div class="container  pt-3 pb-5">
-      <!-- back to homepage -->
-      <nuxt-link to="/"><i class="fas fa-arrow-left fa-2x text-brand"></i></nuxt-link>
 
       <!-- header -->
       <div class="container py-5">
@@ -15,10 +24,10 @@
 
       <!-- account balance -->
       <div class="text-center">
-        <h3 class="mb-4">Hey {{ username }}!</h3>
+        <h3 class="mb-4" v-if="user">Hey {{ user.account.name }}!</h3>
         <h4>Your Account Balance:</h4>
-        <h1 class="mb-0 font-weight-bold">{{ tokens }}</h1>
-        <h5>Actifit Tokens</h5>
+        <h1 class="mb-0 font-weight-bold">{{ formattedUserTokens }}</h1>
+        <h5>AFIT</h5>
       </div>
 
       <!-- transaction history -->
@@ -35,37 +44,26 @@
 <script>
   import 'whatwg-fetch' // fetch polyfill
 
+  import UserMenu from '~/components/UserMenu'
   import Transaction from '~/components/Transaction'
   import Footer from '~/components/Footer'
 
+  import { mapGetters } from 'vuex'
+
   export default {
     components: {
+      UserMenu,
       Transaction, // single transaction block
       Footer
     },
-    data () {
-      return {
-        tokens: 0, // account balance
-        transactions: [] // transaction history
-      }
-    },
     computed: {
-      /**
-       * Returns username from route.
-       */
-      username () {
-        return this.$route.params.username
-      }
+      ...mapGetters(['user', 'userTokens', 'transactions']),
+      formattedUserTokens () {
+        return parseFloat(this.userTokens).toFixed(2)
+      },
     },
     mounted () {
-      // fetch account balance
-      fetch('https://actifitbot.herokuapp.com/user/' + this.username.toLowerCase()).then(res => {
-        res.json().then(json => this.tokens = json.tokens).catch(e => console.log(e.message))
-      })
-      // fetch transaction history
-      fetch('https://actifitbot.herokuapp.com/transactions/' + this.username.toLowerCase()).then(res => {
-        res.json().then(json => this.transactions = json ? json : this.transactions).catch(e => console.log(e.message))
-      })
+      this.$store.dispatch('login')
     }
   }
 </script>
