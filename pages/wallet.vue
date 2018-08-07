@@ -42,8 +42,6 @@
 </template>
 
 <script>
-  import 'whatwg-fetch' // fetch polyfill
-
   import UserMenu from '~/components/UserMenu'
   import Transaction from '~/components/Transaction'
   import Footer from '~/components/Footer'
