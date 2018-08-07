@@ -43,7 +43,7 @@
               <div class="col-sm-6">
                 <p class="lead text-muted">Balance:</p>
                 <h3><b>{{ formattedUserTokens }}</b><br><small>AFIT</small></h3>
-                <a href="#" class="btn btn-lg btn-brand w-100">My Wallet</a>
+                <a href="#" @click.prevent="$router.push('wallet')" class="btn btn-lg btn-brand w-100">My Wallet</a>
               </div>
               <div class="col-sm-6 mt-4 mt-sm-0">
                 <p class="lead text-muted">Activity:</p>

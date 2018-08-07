@@ -12,7 +12,7 @@
           <div class="user-avatar" :style="'background-image: url(https://steemitimages.com/u/' + user.account.name + '/avatar)'"></div>
         </a>
         <div class="dropdown-menu dropdown-menu-right">
-          <a class="dropdown-item" href="#">Wallet</a>
+          <a class="dropdown-item" href="#" @click.prevent="$router.push('wallet')">Wallet</a>
           <a class="dropdown-item" href="#">Activity</a>
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="#" @click.prevent="$store.dispatch('logout')">Logout</a>
