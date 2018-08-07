@@ -8,7 +8,7 @@ Vue.use(VueSteemConnect, {
 })
 
 export default {
-  login ({ commit, state }) {
+  login ({ commit, dispatch, state }) {
     // return promise to be able to wait for the user object to be set
     return new Promise((resolve, reject) => {
       // user will be set, when coming from auth page
@@ -24,6 +24,7 @@ export default {
             else {
               // save user object in store
               commit('login', user)
+              dispatch('fetchUserTokens')
               resolve()
             }
           })
@@ -35,5 +36,12 @@ export default {
     // remove access token and unset user in store
     localStorage.removeItem('access_token')
     commit('logout')
+  },
+  fetchUserTokens ({ state, commit }) {
+    return new Promise((resolve, reject) => {
+      fetch('https://actifitbot.herokuapp.com/user/' + state.user.account.name.toLowerCase()).then(res => {
+        res.json().then(json => commit('setUserTokens', json.tokens)).catch(e => reject(e))
+      }).catch(e => reject(e))
+    })
   }
 }

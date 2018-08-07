@@ -7,7 +7,8 @@ import actions from './actions'
 const createStore = () => {
   return new Vuex.Store({
     state: {
-      user: null // logged in user, via steemconnect
+      user: null, // logged in user, via steemconnect
+      userTokens: 0 // logged-in user's token count
     },
     getters,
     mutations,

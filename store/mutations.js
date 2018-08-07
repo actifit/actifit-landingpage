@@ -4,5 +4,8 @@ export default {
   },
   logout (state) {
     state.user = null
+  },
+  setUserTokens (state, userTokens) {
+    state.userTokens = userTokens
   }
 }
