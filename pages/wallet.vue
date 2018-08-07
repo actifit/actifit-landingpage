@@ -15,10 +15,10 @@
 
       <!-- account balance -->
       <div class="text-center">
-        <h3 class="mb-4">Hey {{ username }}!</h3>
+        <h3 class="mb-4" v-if="user">Hey {{ user.account.name }}!</h3>
         <h4>Your Account Balance:</h4>
-        <h1 class="mb-0 font-weight-bold">{{ userTokens }}</h1>
-        <h5>Actifit Tokens</h5>
+        <h1 class="mb-0 font-weight-bold">{{ formattedUserTokens }}</h1>
+        <h5>AFIT</h5>
       </div>
 
       <!-- transaction history -->
@@ -35,6 +35,7 @@
 <script>
   import 'whatwg-fetch' // fetch polyfill
 
+  import UserMenu from '~/components/UserMenu'
   import Transaction from '~/components/Transaction'
   import Footer from '~/components/Footer'
 
@@ -42,17 +43,15 @@
 
   export default {
     components: {
+      UserMenu,
       Transaction, // single transaction block
       Footer
     },
     computed: {
-      ...mapGetters(['userTokens', 'transactions']),
-      /**
-       * Returns username from route.
-       */
-      username () {
-        return this.$route.params.username
-      }
+      ...mapGetters(['user', 'userTokens', 'transactions']),
+      formattedUserTokens () {
+        return parseFloat(this.userTokens).toFixed(2)
+      },
     },
     mounted () {
       this.$store.dispatch('login')
