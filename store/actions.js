@@ -25,6 +25,7 @@ export default {
               // save user object in store
               commit('login', user)
               dispatch('fetchUserTokens')
+              dispatch('fetchTransactions')
               resolve()
             }
           })
@@ -41,6 +42,13 @@ export default {
     return new Promise((resolve, reject) => {
       fetch('https://actifitbot.herokuapp.com/user/' + state.user.account.name.toLowerCase()).then(res => {
         res.json().then(json => commit('setUserTokens', json.tokens)).catch(e => reject(e))
+      }).catch(e => reject(e))
+    })
+  },
+  fetchTransactions ({ state, commit }) {
+    return new Promise((resolve, reject) => {
+      fetch('https://actifitbot.herokuapp.com/transactions/' + state.user.account.name.toLowerCase()).then(res => {
+        res.json().then(json => commit('setTransactions', json || [])).catch(e => reject(e))
       }).catch(e => reject(e))
     })
   },

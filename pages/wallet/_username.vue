@@ -17,7 +17,7 @@
       <div class="text-center">
         <h3 class="mb-4">Hey {{ username }}!</h3>
         <h4>Your Account Balance:</h4>
-        <h1 class="mb-0 font-weight-bold">{{ tokens }}</h1>
+        <h1 class="mb-0 font-weight-bold">{{ userTokens }}</h1>
         <h5>Actifit Tokens</h5>
       </div>
 
@@ -38,18 +38,15 @@
   import Transaction from '~/components/Transaction'
   import Footer from '~/components/Footer'
 
+  import { mapGetters } from 'vuex'
+
   export default {
     components: {
       Transaction, // single transaction block
       Footer
     },
-    data () {
-      return {
-        tokens: 0, // account balance
-        transactions: [] // transaction history
-      }
-    },
     computed: {
+      ...mapGetters(['userTokens', 'transactions']),
       /**
        * Returns username from route.
        */
@@ -58,14 +55,7 @@
       }
     },
     mounted () {
-      // fetch account balance
-      fetch('https://actifitbot.herokuapp.com/user/' + this.username.toLowerCase()).then(res => {
-        res.json().then(json => this.tokens = json.tokens).catch(e => console.log(e.message))
-      })
-      // fetch transaction history
-      fetch('https://actifitbot.herokuapp.com/transactions/' + this.username.toLowerCase()).then(res => {
-        res.json().then(json => this.transactions = json ? json : this.transactions).catch(e => console.log(e.message))
-      })
+      this.$store.dispatch('login')
     }
   }
 </script>

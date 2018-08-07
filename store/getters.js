@@ -5,6 +5,9 @@ export default {
   userTokens (state) {
     return state.userTokens
   },
+  transactions (state) {
+    return state.transactions
+  },
   userCount (state) {
     return state.userCount
   },

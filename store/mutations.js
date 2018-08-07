@@ -8,6 +8,9 @@ export default {
   setUserTokens (state, userTokens) {
     state.userTokens = userTokens
   },
+  setTransactions (state, transactions) {
+    state.transactions = transactions
+  },
   setUserCount (state, userCount) {
     state.userCount = userCount
   },

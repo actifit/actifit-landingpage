@@ -39,7 +39,18 @@
         <!-- wallet preview -->
         <div class="card form mx-auto p-3 mt-3 mt-md-5 text-center border-0">
           <div v-if="user">
-            <a href="#" class="btn btn-lg btn-brand">My Wallet</a>
+            <div class="row">
+              <div class="col-sm-6">
+                <p class="lead text-muted">Balance:</p>
+                <h3><b>{{ formattedUserTokens }}</b><br><small>AFIT</small></h3>
+                <a href="#" class="btn btn-lg btn-brand w-100">My Wallet</a>
+              </div>
+              <div class="col-sm-6 mt-4 mt-sm-0">
+                <p class="lead text-muted">Activity:</p>
+                <h3><b>{{ userReportsCount }}</b><br><small>Reports</small></h3>
+                <a href="#" class="btn btn-lg btn-brand w-100">My Activity</a>
+              </div>
+            </div>
           </div>
           <div v-else>
             <p class="lead py-md-3 form-info">Log in to see your current token balance or sign up for an account to start getting rewarded for your activity.</p>
@@ -265,7 +276,15 @@
       }
     },
     computed: {
-      ...mapGetters(['user', 'userCount', 'tokensDistributed', 'rewardedActivityCount', 'leaderboard']),
+      ...mapGetters(['user', 'userTokens', 'transactions', 'userCount', 'tokensDistributed', 'rewardedActivityCount', 'leaderboard']),
+      formattedUserTokens () {
+        return parseFloat(this.userTokens).toFixed(2)
+      },
+      userReportsCount () {
+        return this.transactions.filter((transaction) => {
+          return transaction.reward_activity === 'Post'
+        }).length
+      },
       animatedUserCount: function() {
         return this.tweenedUserCount.toFixed(0);
       },
