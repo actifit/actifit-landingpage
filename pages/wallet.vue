@@ -1,8 +1,17 @@
 <template>
   <div>
+    <nav class="navbar fixed-top navbar-expand-lg navbar-light">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="#" @click.prevent="$router.push('/')">
+            <i class="fas fa-arrow-left text-brand navbar-back"></i>
+          </a>
+        </li>
+      </ul>
+      <UserMenu />
+    </nav>
+
     <div class="container  pt-3 pb-5">
-      <!-- back to homepage -->
-      <nuxt-link to="/"><i class="fas fa-arrow-left fa-2x text-brand"></i></nuxt-link>
 
       <!-- header -->
       <div class="container py-5">
