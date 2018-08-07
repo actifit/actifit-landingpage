@@ -1,3 +1,5 @@
+$brand-color: #ff112d
+
 body,
 html,
 #__nuxt,
@@ -10,10 +12,10 @@ body *
   font-family: 'Roboto', sans-serif
 
 .text-brand
-  color: #ff112d
+  color: $brand-color
 
 .bg-brand
-  background-color: #ff112d
+  background-color: $brand-color
 
 .btn,
 .card,
@@ -22,12 +24,21 @@ body *
 
 a,
 .btn-link
-  color: #ff112d
+  color: $brand-color
   &:hover
-    color: #c3112b
+    color: darken($brand-color, 10)
 .bg-brand
   a
     color: #f8f9fa
+
+.btn-brand
+  background: $brand-color
+  color: #fff
+  &:hover,
+  &:focus
+    background: darken($brand-color, 10)
+    color: #fff
+    box-shadow: none
 
 .avatar
   width: 150px
@@ -39,3 +50,7 @@ a,
   &.small
     width: 120px
     height: 120px
+
+.dropdown-item.active,
+.dropdown-item:active
+  background: $brand-color

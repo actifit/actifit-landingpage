@@ -12,13 +12,7 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item">
-            <a class="nav-link" href="#" @click="scrollTo('#top')">Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#" @click="$router.push('/activity')">Activity</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#" @click="scrollTo('#content')">What is Actifit</a>
+            <a class="nav-link" href="#" @click="scrollTo('#content')">What is Actifit?</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#" @click="scrollTo('#leaderboard')">Leaderboard</a>
@@ -27,18 +21,10 @@
             <a class="nav-link" href="#" @click="scrollTo('#team')">Team</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#" @click="scrollTo('#ambassadors')">Ambassadors</a>
-          </li>
-          <li class="nav-item">
             <a class="nav-link" href="#" @click="scrollTo('#athletes')">Sponsored Athletes</a>
           </li>
         </ul>
-        <ul class="navbar-nav ml-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="#" @click.prevent="$store.dispatch('logout')" v-if="user">Logout</a>
-            <a class="nav-link" :href="$steemconnect.getLoginURL()" v-else>Login</a>
-          </li>
-        </ul>
+        <UserMenu />
       </div>
     </nav>
 
@@ -50,13 +36,22 @@
           <h1 class="mt-3 text-brand title">Actifit Fitness Tracker</h1>
           <h3 class="font-italic text-brand slogan">Rewarding Fitness Activity</h3>
         </div>
-        <!-- username form -->
+        <!-- wallet preview -->
         <div class="card form mx-auto p-3 mt-3 mt-md-5 text-center border-0">
-          <div class="form-group">
-            <p class="lead py-md-3 form-info">Enter your Actifit/Steemit username to see your current funds and transaction history.</p>
-            <input type="text" class="form-control form-control-lg" id="username" placeholder="Enter username" v-model="username" @keyup.enter="goToWallet()">
+          <div v-if="user">
+            <a href="#" class="btn btn-lg btn-brand">My Wallet</a>
           </div>
-          <a href="#" :class="'btn btn-lg btn-danger' + (username.length < 3 ? ' disabled' : '')" @click="goToWallet()">Show Wallet</a>
+          <div v-else>
+            <p class="lead py-md-3 form-info">Log in to see your current token balance or sign up for an account to start getting rewarded for your activity.</p>
+            <div class="row">
+              <div class="col-6">
+                <a :href="$steemconnect.getLoginURL()" class="btn btn-brand btn-lg w-100">Login</a>
+              </div>
+              <div class="col-6">
+                <a href="https://steemit.com/signup" class="btn btn-brand btn-lg w-100">Sign Up</a>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <!-- scroll indicator -->
@@ -250,11 +245,13 @@
 
 <script>
   import VueScrollTo from 'vue-scrollto'
+  import UserMenu from '~/components/UserMenu'
   import Footer from '~/components/Footer'
   import { mapGetters } from 'vuex'
 
   export default {
     components: {
+      UserMenu,
       Footer
     },
     data () {
@@ -296,15 +293,6 @@
       }
     },
     methods: {
-      /**
-       * Forwards to wallet page if username is provided.
-       */
-      goToWallet () {
-        if (this.username.length > 2) {
-          this.$router.push({path: '/wallet/' + this.username})
-        }
-      },
-
       /**
        * Scrolls down to content area.
        */
