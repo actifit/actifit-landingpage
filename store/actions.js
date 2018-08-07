@@ -53,6 +53,8 @@ export default {
     })
   },
   fetchTokenInfo ({ commit }) {
+    commit('setUserCount', 0) // reset to trigger animation again
+    commit('setTokensDistributed', 0) // reset to trigger animation again
     return new Promise((resolve, reject) => {
       fetch('https://actifitbot.herokuapp.com/user-tokens-info').then(res => {
         res.json().then(json => {
@@ -63,6 +65,7 @@ export default {
     })
   },
   fetchRewardedActivityCount ({ commit }) {
+    commit('setRewardedActivityCount', 0) // reset to trigger animation again
     return new Promise((resolve, reject) => {
       fetch('https://actifitbot.herokuapp.com/rewarded-activity-count').then(res => {
         res.json().then(json => {
