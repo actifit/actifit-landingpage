@@ -4,5 +4,17 @@ export default {
   },
   userTokens (state) {
     return state.userTokens
+  },
+  userCount (state) {
+    return state.userCount
+  },
+  tokensDistributed (state) {
+    return state.tokensDistributed
+  },
+  rewardedActivityCount (state) {
+    return state.rewardedActivityCount
+  },
+  leaderboard (state) {
+    return state.leaderboard
   }
 }

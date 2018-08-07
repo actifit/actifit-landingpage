@@ -43,5 +43,41 @@ export default {
         res.json().then(json => commit('setUserTokens', json.tokens)).catch(e => reject(e))
       }).catch(e => reject(e))
     })
+  },
+  fetchTokenInfo ({ commit }) {
+    return new Promise((resolve, reject) => {
+      fetch('https://actifitbot.herokuapp.com/user-tokens-info').then(res => {
+        res.json().then(json => {
+          commit('setUserCount', json[0].user_count)
+          commit('setTokensDistributed', json[0].tokens_distributed)
+        }).catch(e => reject(e))
+      }).catch(e => reject(e))
+    })
+  },
+  fetchRewardedActivityCount ({ commit }) {
+    return new Promise((resolve, reject) => {
+      fetch('https://actifitbot.herokuapp.com/rewarded-activity-count').then(res => {
+        res.json().then(json => {
+          commit('setRewardedActivityCount', json[0].reward_count)
+        }).catch(e => reject(e))
+      }).catch(e => reject(e))
+    })
+  },
+  fetchLeaderboard ({ commit }) {
+    return new Promise((resolve, reject) => {
+      fetch('https://actifit-pst-cr3at0r.herokuapp.com/api/top5p0sts', {method: 'POST'}).then(res => {
+        res.text().then(text => {
+          let leaderboard = []
+          let items = text.split(';').filter(Boolean)
+          items.forEach(item => {
+            let data = item.split(' ')
+            if (data) {
+              leaderboard.push({username: data[1].replace('@', ''), rewards: data[2]})
+            }
+          })
+          commit('setLeaderboard', leaderboard)
+        }).catch(e => reject(e))
+      }).catch(e => reject(e))
+    })
   }
 }

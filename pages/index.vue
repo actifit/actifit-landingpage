@@ -71,7 +71,7 @@
         </p>
 
         <!-- stats -->
-        <div class="row pb-5" v-if="tokenInfo">
+        <div class="row pb-5">
           <div class="col text-center">
             <h1><i class="fas fa-coins"></i></h1>
             <h4>Tokens Distributed</h4>
@@ -257,20 +257,15 @@
     data () {
       return {
         username: '', // username whose funds to show
-        tokenInfo: null, // stats from the api (user count and distributed token)
-        userCount: 0,
         tweenedUserCount: 0,
-        tokensDistributed: 0,
         tweenedTokensDistributed: 0,
-        rewardedActivityCount: 0,
         tweenedRewardedActivityCount: 0,
-        leaderboard: [],
         moderators: ['alfamano', 'ionutciobanu', 'curtwriter', 'zoneboy', 'rabihfarhat', 'gerginho', 'd-gold', 'ciuoto', 'vishalsingh4997', 'kpreddy', 'katerinaramm', 'mcfarhat'],
         ambassadors: ['taskmaster4450', 'flauwy', 'rosatravels']
       }
     },
     computed: {
-      ...mapGetters(['user']),
+      ...mapGetters(['user', 'userCount', 'tokensDistributed', 'rewardedActivityCount', 'leaderboard']),
       animatedUserCount: function() {
         return this.tweenedUserCount.toFixed(0);
       },
@@ -314,29 +309,10 @@
       // login
       this.$store.dispatch('login')
 
-      fetch('https://actifitbot.herokuapp.com/user-tokens-info').then(res => {
-        res.json().then(json => {
-          this.tokenInfo = json[0]
-          this.userCount = this.tokenInfo.user_count
-          this.tokensDistributed = this.tokenInfo.tokens_distributed
-        }).catch(e => console.log(e.message))
-      })
-      fetch('https://actifitbot.herokuapp.com/rewarded-activity-count').then(res => {
-        res.json().then(json => {
-          this.rewardedActivityCount = json[0].reward_count
-        }).catch(e => console.log(e.message))
-      })
-      fetch('https://actifit-pst-cr3at0r.herokuapp.com/api/top5p0sts', {method: 'POST'}).then(res => {
-        res.text().then(text => {
-          console.log(text);
-          text.split(';').forEach(item => {
-            let data = item.split(' ')
-            if (data) {
-              this.leaderboard.push({username: data[1].replace('@', ''), rewards: data[2]})
-            }
-          })
-        }).catch(e => console.log(e.message))
-      })
+      // fetch data
+      this.$store.dispatch('fetchTokenInfo')
+      this.$store.dispatch('fetchRewardedActivityCount')
+      this.$store.dispatch('fetchLeaderboard')
     }
   }
 </script>

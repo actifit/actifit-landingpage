@@ -7,5 +7,17 @@ export default {
   },
   setUserTokens (state, userTokens) {
     state.userTokens = userTokens
+  },
+  setUserCount (state, userCount) {
+    state.userCount = userCount
+  },
+  setTokensDistributed (state, tokensDistributed) {
+    state.tokensDistributed = tokensDistributed
+  },
+  setRewardedActivityCount (state, rewardedActivityCount) {
+    state.rewardedActivityCount = rewardedActivityCount
+  },
+  setLeaderboard (state, leaderboard) {
+    state.leaderboard = leaderboard
   }
 }
