@@ -92,18 +92,42 @@ export default {
       }).catch(e => reject(e))
     })
   },
-  fetchReports ({ commit }) {
+  fetchReports ({ state, commit, dispatch }) {
     return new Promise((resolve, reject) => {
-      steem.api.getDiscussionsByCreated({tag: 'actifit', limit: 100}, (err, posts) => {
+      let lastReport = state.reports.length ? state.reports[state.reports.length - 1] : null
+      let start_author = lastReport ? lastReport.author : null
+      let start_permlink = lastReport ? lastReport.permlink : null
+      steem.api.getDiscussionsByCreated({tag: 'actifit', limit: 100, start_author, start_permlink}, (err, posts) => {
         if (err) reject(err)
         else {
-          commit('setReports', posts.filter(post => {
-            let meta = JSON.parse(post.json_metadata)
-            return meta.hasOwnProperty('step_count')
-          }))
+          posts.shift()
+          posts = posts.filter(postsFilter)
+          commit('setReports', [...state.reports, ...posts])
+          dispatch('checkIfMorePostsAvailable')
+          resolve()
+        }
+      })
+    })
+  },
+  checkIfMorePostsAvailable ({ state, commit }) {
+    return new Promise((resolve, reject) => {
+      let lastReport = state.reports.length ? state.reports[state.reports.length - 1] : null
+      let start_author = lastReport ? lastReport.author : null
+      let start_permlink = lastReport ? lastReport.permlink : null
+      steem.api.getDiscussionsByCreated({tag: 'actifit', limit: 100, start_author, start_permlink}, (err, posts) => {
+        if (err) reject(err)
+        else {
+          posts.shift()
+          posts = posts.filter(postsFilter)
+          commit('setMoreReportsAvailable', !!posts.length)
           resolve()
         }
       })
     })
   }
+}
+
+let postsFilter = (post) => {
+  let meta = JSON.parse(post.json_metadata)
+  return meta.hasOwnProperty('step_count') && meta.hasOwnProperty('activity_type')
 }

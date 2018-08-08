@@ -17,6 +17,12 @@
       <div class="row">
         <Report v-for="(report, index) in reports" :report="report" :key="index" />
       </div>
+      <div class="text-center" v-if="moreReportsAvailable">
+        <a href="#" class="btn btn-brand" @click.prevent="loadMore()">
+          load more
+          <i class="fas fa-spinner fa-spin" v-if="loadingMore"></i>
+        </a>
+      </div>
     </div>
 
     <Footer />
@@ -38,15 +44,29 @@
       Report,
       Footer
     },
+    data () {
+      return {
+        loadingMore: false
+      }
+    },
     computed: {
-      ...mapGetters(['reports'])
+      ...mapGetters(['reports', 'moreReportsAvailable'])
+    },
+    methods: {
+      async loadMore () {
+        this.loadingMore = true
+        await this.$store.dispatch('fetchReports')
+        this.loadingMore = false
+      }
     },
     mounted () {
       // login
       this.$store.dispatch('login')
 
       // fetch reports
-      this.$store.dispatch('fetchReports')
+      if (!this.reports.length) {
+        this.$store.dispatch('fetchReports')
+      }
     }
   }
 </script>

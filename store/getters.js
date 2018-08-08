@@ -23,7 +23,7 @@ export default {
   reports (state) {
     return state.reports
   },
-  userReports (state) {
-    return state.userReports
+  moreReportsAvailable (state) {
+    return state.moreReportsAvailable
   }
 }

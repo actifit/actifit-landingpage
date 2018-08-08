@@ -15,7 +15,7 @@ const createStore = () => {
       rewardedActivityCount: 0, // total amount of activity posts
       leaderboard: [], // top users
       reports: [], // all activity reports/posts
-      userReports: [] // logged-in user's activity reports/posts
+      moreReportsAvailable: true, // indicator if there are more reports to load
     },
     getters,
     mutations,

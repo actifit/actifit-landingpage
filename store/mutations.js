@@ -26,7 +26,7 @@ export default {
   setReports (state, reports) {
     state.reports = reports
   },
-  setUserReports (state, userReports) {
-    state.userReports = userReports
+  setMoreReportsAvailable (state, moreReportsAvailable) {
+    state.moreReportsAvailable = moreReportsAvailable
   }
 }
