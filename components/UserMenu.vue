@@ -4,7 +4,7 @@
       <li class="nav-item" v-if="!user">
         <a class="nav-link" :href="$steemconnect.getLoginURL()">Login</a>
       </li>
-      <li class="nav-item" v-if="user">
+      <li class="nav-item d-none d-sm-block" v-if="user">
         <span class="navbar-text py-0">Balance:<br><b>{{ formattedUserTokens }}</b></span>
       </li>
       <li class="nav-item dropdown" v-if="user">
@@ -12,8 +12,8 @@
           <div class="user-avatar" :style="'background-image: url(https://steemitimages.com/u/' + user.account.name + '/avatar)'"></div>
         </a>
         <div class="dropdown-menu dropdown-menu-right">
-          <a class="dropdown-item" href="#" @click.prevent="$router.push('wallet')">Wallet</a>
-          <a class="dropdown-item" href="#">Activity</a>
+          <a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet')">Wallet</a>
+          <a class="dropdown-item" href="#" @click.prevent="$router.push('/activity/' + user.account.name)">Activity</a>
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="#" @click.prevent="$store.dispatch('logout')">Logout</a>
         </div>
@@ -43,6 +43,7 @@
       background-position: center center
       background-size: cover
       border-radius: 50%
+      border: solid 1px #ddd
     .dropdown-toggle::after
       display: none
     .navbar-text

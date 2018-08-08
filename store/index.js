@@ -13,7 +13,11 @@ const createStore = () => {
       userCount: 0, // users using actifit
       tokensDistributed: 0, // total amount of distributed tokens
       rewardedActivityCount: 0, // total amount of activity posts
-      leaderboard: [] // top users
+      leaderboard: [], // top users
+      reports: [], // all activity reports/posts
+      moreReportsAvailable: false, // indicator if there are more reports to load
+      userReports: [], // logged-in user's activity reports/posts
+      moreUserReportsAvailable: false, // indicator if there are more user reports to load
     },
     getters,
     mutations,

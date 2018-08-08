@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import VueSteemConnect from 'vue-steemconnect'
+import steem from 'steem'
 
 // make steemconnect available
 Vue.use(VueSteemConnect, {
@@ -53,6 +54,8 @@ export default {
     })
   },
   fetchTokenInfo ({ commit }) {
+    commit('setUserCount', 0) // reset to trigger animation again
+    commit('setTokensDistributed', 0) // reset to trigger animation again
     return new Promise((resolve, reject) => {
       fetch('https://actifitbot.herokuapp.com/user-tokens-info').then(res => {
         res.json().then(json => {
@@ -63,6 +66,7 @@ export default {
     })
   },
   fetchRewardedActivityCount ({ commit }) {
+    commit('setRewardedActivityCount', 0) // reset to trigger animation again
     return new Promise((resolve, reject) => {
       fetch('https://actifitbot.herokuapp.com/rewarded-activity-count').then(res => {
         res.json().then(json => {
@@ -87,5 +91,81 @@ export default {
         }).catch(e => reject(e))
       }).catch(e => reject(e))
     })
+  },
+  fetchReports ({ state, commit, dispatch }) {
+    return new Promise((resolve, reject) => {
+      let lastReport = state.reports.length ? state.reports[state.reports.length - 1] : null
+      let start_author = lastReport ? lastReport.author : null
+      let start_permlink = lastReport ? lastReport.permlink : null
+      steem.api.getDiscussionsByCreated({tag: 'actifit', limit: 100, start_author, start_permlink}, (err, posts) => {
+        if (err) reject(err)
+        else {
+          posts.shift()
+          posts = posts.filter(postsFilter)
+          commit('setReports', [...state.reports, ...posts])
+          dispatch('checkIfMoreReportsAvailable')
+          resolve()
+        }
+      })
+    })
+  },
+  checkIfMoreReportsAvailable ({ state, commit }) {
+    return new Promise((resolve, reject) => {
+      let lastReport = state.reports.length ? state.reports[state.reports.length - 1] : null
+      let start_author = lastReport ? lastReport.author : null
+      let start_permlink = lastReport ? lastReport.permlink : null
+      steem.api.getDiscussionsByCreated({tag: 'actifit', limit: 100, start_author, start_permlink}, (err, posts) => {
+        if (err) reject(err)
+        else {
+          posts.shift()
+          posts = posts.filter(postsFilter)
+          commit('setMoreReportsAvailable', !!posts.length)
+          resolve()
+        }
+      })
+    })
+  },
+  fetchUserReports ({ state, commit, dispatch }, username) {
+    return new Promise((resolve, reject) => {
+      let lastReport = state.userReports.length ? state.userReports[state.userReports.length - 1] : null
+      let start_author = lastReport ? lastReport.author : null
+      let start_permlink = lastReport ? lastReport.permlink : null
+      steem.api.getDiscussionsByBlog({tag: username, limit: 100, start_author, start_permlink}, (err, posts) => {
+        if (err) reject(err)
+        else {
+          posts.shift()
+          posts = posts.filter(userPostsFilter)
+          commit('setUserReports', [...state.userReports, ...posts])
+          dispatch('checkIfMoreUserReportsAvailable', username)
+          resolve()
+        }
+      })
+    })
+  },
+  checkIfMoreUserReportsAvailable ({ state, commit }, username) {
+    return new Promise((resolve, reject) => {
+      let lastReport = state.userReports.length ? state.userReports[state.userReports.length - 1] : null
+      let start_author = lastReport ? lastReport.author : null
+      let start_permlink = lastReport ? lastReport.permlink : null
+      steem.api.getDiscussionsByBlog({tag: username, limit: 100, start_author, start_permlink}, (err, posts) => {
+        if (err) reject(err)
+        else {
+          posts.shift()
+          posts = posts.filter(userPostsFilter)
+          commit('setMoreUserReportsAvailable', !!posts.length)
+          resolve()
+        }
+      })
+    })
   }
+}
+
+const postsFilter = (post) => {
+  let meta = JSON.parse(post.json_metadata)
+  return meta.hasOwnProperty('step_count') && meta.hasOwnProperty('activity_type')
+}
+
+const userPostsFilter = (post) => {
+  let meta = JSON.parse(post.json_metadata)
+  return meta.hasOwnProperty('step_count') && meta.hasOwnProperty('activity_type') && meta.tags.indexOf('actifit') !== -1
 }
