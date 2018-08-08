@@ -43,6 +43,7 @@
       background-position: center center
       background-size: cover
       border-radius: 50%
+      border: solid 1px #ddd
     .dropdown-toggle::after
       display: none
     .navbar-text
