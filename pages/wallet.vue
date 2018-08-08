@@ -1,6 +1,6 @@
 <template>
   <div>
-    <nav class="navbar fixed-top navbar-expand-lg navbar-light">
+    <nav class="navbar fixed-top navbar-expand navbar-light">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item">
           <a class="nav-link" href="#" @click.prevent="$router.push('/')">
@@ -8,19 +8,11 @@
           </a>
         </li>
       </ul>
+      <NavbarBrand />
       <UserMenu />
     </nav>
 
-    <div class="container  pt-3 pb-5">
-
-      <!-- header -->
-      <div class="container py-5">
-        <div class="text-center">
-          <img src="/img/icon.png" alt="Actifit" />
-          <h1 class="mt-3 text-brand">Actifit Fitness Tracker</h1>
-          <h3 class="font-italic text-brand">Rewarding Fitness Activity</h3>
-        </div>
-      </div>
+    <div class="container pt-5 mt-5 pb-5">
 
       <!-- account balance -->
       <div class="text-center">
@@ -42,6 +34,7 @@
 </template>
 
 <script>
+  import NavbarBrand from '~/components/NavbarBrand'
   import UserMenu from '~/components/UserMenu'
   import Transaction from '~/components/Transaction'
   import Footer from '~/components/Footer'
@@ -50,6 +43,7 @@
 
   export default {
     components: {
+      NavbarBrand,
       UserMenu,
       Transaction, // single transaction block
       Footer
