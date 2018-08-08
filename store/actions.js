@@ -5,7 +5,7 @@ import steem from 'steem'
 // init steemconnect (with default vote and comment permissions)
 Vue.use(VueSteemConnect, {
   app: 'actifit.app',
-  callbackURL: process.env.scRedirectUrl || 'http://localhost:3000/auth'
+  callbackURL: process.env.scRedirectUrl || 'https://actifit.io/auth'
 })
 
 // returning promises to be able to wait for data
