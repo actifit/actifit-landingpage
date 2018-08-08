@@ -68,10 +68,10 @@
       this.$store.dispatch('login')
 
       // fetch reports
-      if (!this.reports.length) {
-        await this.$store.dispatch('fetchReports')
-        this.loading = false
-      }
+      this.$store.commit('setReports', [])
+      this.$store.commit('setMoreReportsAvailable', false)
+      await this.$store.dispatch('fetchReports')
+      this.loading = false
     }
   }
 </script>
