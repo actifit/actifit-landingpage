@@ -12,16 +12,19 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item">
-            <a class="nav-link" href="#" @click="scrollTo('#content')">What is Actifit?</a>
+            <a class="nav-link" href="#" @click.prevent="scrollTo('#content')">What is Actifit?</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#" @click="scrollTo('#leaderboard')">Leaderboard</a>
+            <a class="nav-link" href="#" @click.prevent="$router.push('/activity')">Activity</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#" @click="scrollTo('#team')">Team</a>
+            <a class="nav-link" href="#" @click.prevent="scrollTo('#leaderboard')">Leaderboard</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#" @click="scrollTo('#athletes')">Sponsored Athletes</a>
+            <a class="nav-link" href="#" @click.prevent="scrollTo('#team')">Team</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" @click.prevent="scrollTo('#athletes')">Sponsored Athletes</a>
           </li>
         </ul>
         <UserMenu />
@@ -43,12 +46,12 @@
               <div class="col-sm-6">
                 <p class="lead text-muted">Balance:</p>
                 <h3><b>{{ formattedUserTokens }}</b><br><small>AFIT</small></h3>
-                <a href="#" @click.prevent="$router.push('wallet')" class="btn btn-lg btn-brand w-100">My Wallet</a>
+                <a href="#" @click.prevent="$router.push('/wallet')" class="btn btn-lg btn-brand w-100">My Wallet</a>
               </div>
               <div class="col-sm-6 mt-4 mt-sm-0">
                 <p class="lead text-muted">Activity:</p>
                 <h3><b>{{ userReportsCount }}</b><br><small>Reports</small></h3>
-                <a href="#" class="btn btn-lg btn-brand w-100">My Activity</a>
+                <a href="#" class="btn btn-lg btn-brand w-100" @click.prevent="$router.push('/activity/' + user.account.name)">My Activity</a>
               </div>
             </div>
           </div>

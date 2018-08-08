@@ -22,5 +22,11 @@ export default {
   },
   setLeaderboard (state, leaderboard) {
     state.leaderboard = leaderboard
+  },
+  setReports (state, reports) {
+    state.reports = reports
+  },
+  setUserReports (state, userReports) {
+    state.userReports = userReports
   }
 }

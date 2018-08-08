@@ -13,7 +13,9 @@ const createStore = () => {
       userCount: 0, // users using actifit
       tokensDistributed: 0, // total amount of distributed tokens
       rewardedActivityCount: 0, // total amount of activity posts
-      leaderboard: [] // top users
+      leaderboard: [], // top users
+      reports: [], // all activity reports/posts
+      userReports: [] // logged-in user's activity reports/posts
     },
     getters,
     mutations,

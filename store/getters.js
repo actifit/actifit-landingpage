@@ -19,5 +19,11 @@ export default {
   },
   leaderboard (state) {
     return state.leaderboard
+  },
+  reports (state) {
+    return state.reports
+  },
+  userReports (state) {
+    return state.userReports
   }
 }

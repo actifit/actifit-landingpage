@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import VueSteemConnect from 'vue-steemconnect'
+import steem from 'steem'
 
 // make steemconnect available
 Vue.use(VueSteemConnect, {
@@ -89,6 +90,20 @@ export default {
           commit('setLeaderboard', leaderboard)
         }).catch(e => reject(e))
       }).catch(e => reject(e))
+    })
+  },
+  fetchReports ({ commit }) {
+    return new Promise((resolve, reject) => {
+      steem.api.getDiscussionsByCreated({tag: 'actifit', limit: 100}, (err, posts) => {
+        if (err) reject(err)
+        else {
+          commit('setReports', posts.filter(post => {
+            let meta = JSON.parse(post.json_metadata)
+            return meta.hasOwnProperty('step_count')
+          }))
+          resolve()
+        }
+      })
     })
   }
 }
