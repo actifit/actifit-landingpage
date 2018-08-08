@@ -1,8 +1,10 @@
 <template>
   <div>
+    <!-- navbar -->
     <nav class="navbar fixed-top navbar-expand navbar-light">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item">
+          <!-- home link -->
           <a class="nav-link" href="#" @click.prevent="$router.push('/')">
             <i class="fas fa-arrow-left text-brand navbar-back"></i>
           </a>
@@ -55,6 +57,7 @@
       },
     },
     mounted () {
+      // login
       this.$store.dispatch('login')
     }
   }
