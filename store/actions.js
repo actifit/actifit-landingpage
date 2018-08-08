@@ -127,7 +127,7 @@ export default {
   },
   fetchUserReports ({ state, commit, dispatch }, username) {
     return new Promise((resolve, reject) => {
-      let lastReport = state.reports.length ? state.reports[state.reports.length - 1] : null
+      let lastReport = state.userReports.length ? state.userReports[state.userReports.length - 1] : null
       let start_author = lastReport ? lastReport.author : null
       let start_permlink = lastReport ? lastReport.permlink : null
       steem.api.getDiscussionsByBlog({tag: username, limit: 100, start_author, start_permlink}, (err, posts) => {
@@ -135,7 +135,7 @@ export default {
         else {
           posts.shift()
           posts = posts.filter(userPostsFilter)
-          commit('setUserReports', [...state.reports, ...posts])
+          commit('setUserReports', [...state.userReports, ...posts])
           dispatch('checkIfMoreUserReportsAvailable', username)
           resolve()
         }
