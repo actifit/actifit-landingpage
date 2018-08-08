@@ -14,11 +14,6 @@
 
 <script>
   export default {
-    data() {
-      return {
-        loading: true
-      }
-    },
     async mounted () {
       let accessToken = this.$route.query['access_token']
       if (accessToken) {
