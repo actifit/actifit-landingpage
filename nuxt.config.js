@@ -2,6 +2,9 @@ const pkg = require('./package')
 
 module.exports = {
   mode: 'universal',
+  env: {
+    scRedirectUrl: process.env.SC_REDIRECT_URL || 'http://localhost:3000/auth',
+  },
 
   /*
   ** Headers of the page
