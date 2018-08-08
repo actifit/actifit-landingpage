@@ -39,7 +39,8 @@
           <h1 class="mt-3 text-brand title">Actifit Fitness Tracker</h1>
           <h3 class="font-italic text-brand slogan">Rewarding Fitness Activity</h3>
         </div>
-        <!-- wallet preview -->
+
+        <!-- wallet/activities preview -->
         <div class="card form mx-auto p-3 mt-3 mt-md-5 text-center border-0">
           <div v-if="user">
             <div class="row">
@@ -55,6 +56,8 @@
               </div>
             </div>
           </div>
+
+          <!-- login/register buttons -->
           <div v-else>
             <p class="lead py-md-3 form-info">Log in to see your current token balance or sign up for an account to start getting rewarded for your activity.</p>
             <div class="row">
@@ -68,6 +71,7 @@
           </div>
         </div>
       </div>
+
       <!-- scroll indicator -->
       <div class="text-center scroll-down position-absolute w-100">
         <a href="#" @click="scrollTo('#content')">
@@ -152,6 +156,7 @@
       </div>
     </section>
 
+    <!-- leaderboard -->
     <section id="leaderboard" class="py-5 bg-brand text-light">
       <div class="container">
         <h1 class="text-center pb-5">
@@ -190,6 +195,7 @@
       </div>
     </section>
 
+    <!-- team -->
     <section id="team" class="py-5">
       <div class="container">
         <h1 class="text-center pb-5">
@@ -207,6 +213,7 @@
       </div>
     </section>
 
+    <!-- ambassadors -->
     <section id="ambassadors" class="py-5 bg-light">
       <div class="container">
         <h1 class="text-center pb-5">
@@ -224,6 +231,7 @@
       </div>
     </section>
 
+    <!-- sponsored athletes -->
     <section id="athletes" class="py-5">
       <div class="container">
         <h1 class="text-center pb-5">
@@ -258,7 +266,7 @@
 </template>
 
 <script>
-  import VueScrollTo from 'vue-scrollto'
+  import VueScrollTo from 'vue-scrollto' // for smooth scrolling
   import UserMenu from '~/components/UserMenu'
   import Footer from '~/components/Footer'
   import { mapGetters } from 'vuex'
@@ -271,9 +279,13 @@
     data () {
       return {
         username: '', // username whose funds to show
+
+        // animated numbers
         tweenedUserCount: 0,
         tweenedTokensDistributed: 0,
         tweenedRewardedActivityCount: 0,
+
+        // static mods/ambassadors lists
         moderators: ['alfamano', 'ionutciobanu', 'curtwriter', 'zoneboy', 'rabihfarhat', 'gerginho', 'd-gold', 'ciuoto', 'vishalsingh4997', 'kpreddy', 'katerinaramm', 'mcfarhat'],
         ambassadors: ['taskmaster4450', 'flauwy', 'rosatravels']
       }
@@ -283,11 +295,14 @@
       formattedUserTokens () {
         return parseFloat(this.userTokens).toFixed(2)
       },
+
       userReportsCount () {
         return this.transactions.filter((transaction) => {
-          return transaction.reward_activity === 'Post'
+          return transaction.reward_activity === 'Post' // count only posts
         }).length
       },
+
+      // animated numbers
       animatedUserCount: function() {
         return this.tweenedUserCount.toFixed(0);
       },
@@ -298,6 +313,7 @@
         return this.tweenedRewardedActivityCount.toFixed(0);
       }
     },
+    // watchers to update animated numbers
     watch: {
       userCount: function(newValue) {
         TweenLite.to(this.$data, 8, { tweenedUserCount: newValue });

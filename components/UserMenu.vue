@@ -1,4 +1,5 @@
 <template>
+  <!-- login link or user dropdown menu when logged in, for navbar-->
   <div class="ml-auto">
     <ul class="navbar-nav ml-auto user-menu">
       <li class="nav-item" v-if="!user">
