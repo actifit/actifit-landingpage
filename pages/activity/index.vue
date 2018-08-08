@@ -14,6 +14,9 @@
 
     <div class="container pt-5 mt-5 pb-5">
       <h2 class="text-center mb-5">Activity Reports</h2>
+      <div class="text-center" v-if="loading">
+        <i class="fas fa-spinner fa-spin text-brand"></i>
+      </div>
       <div class="row">
         <Report v-for="(report, index) in reports" :report="report" :key="index" />
       </div>
@@ -46,6 +49,7 @@
     },
     data () {
       return {
+        loading: true,
         loadingMore: false
       }
     },
@@ -59,13 +63,14 @@
         this.loadingMore = false
       }
     },
-    mounted () {
+    async mounted () {
       // login
       this.$store.dispatch('login')
 
       // fetch reports
       if (!this.reports.length) {
-        this.$store.dispatch('fetchReports')
+        await this.$store.dispatch('fetchReports')
+        this.loading = false
       }
     }
   }

@@ -14,10 +14,13 @@
 
     <div class="container pt-5 mt-5 pb-5">
       <h2 class="text-center mb-5">Activity Reports by {{ username }}</h2>
+      <div class="text-center" v-if="loading">
+        <i class="fas fa-spinner fa-spin text-brand"></i>
+      </div>
       <div class="row" v-if="userReports.length">
         <Report v-for="(report, index) in userReports" :report="report" :key="index" />
       </div>
-      <div class="text-center text-muted" v-else>
+      <div class="text-center text-muted" v-if="!userReports.length && !loading">
         {{ username }} has not tracked any activity yet.
       </div>
       <div class="text-center" v-if="moreUserReportsAvailable">
@@ -49,6 +52,7 @@
     },
     data () {
       return {
+        loading: true,
         loadingMore: false
       }
     },
@@ -71,7 +75,8 @@
 
       // fetch reports
       this.$store.commit('setUserReports', [])
-      this.$store.dispatch('fetchUserReports', this.username)
+      await this.$store.dispatch('fetchUserReports', this.username)
+      this.loading = false
     }
   }
 </script>
