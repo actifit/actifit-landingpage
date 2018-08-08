@@ -1,4 +1,5 @@
 <template>
+  <!-- Footer used on all pages -->
   <div class="footer bg-light">
     <div class="container py-5">
       <div class="text-center social-links mb-4">
@@ -11,12 +12,6 @@
         <div class="col text-center">
           <small class="text-muted">&copy; Copyright Actifit {{ currentYear }}</small>
         </div>
-        <!--<div class="col text-right">-->
-        <!--<small class="links">-->
-        <!--<a href="#" class="px-1">Imprint</a>-->
-        <!--<a href="#" class="px-1">Privacy Policy</a>-->
-        <!--</small>-->
-        <!--</div>-->
       </div>
     </div>
   </div>

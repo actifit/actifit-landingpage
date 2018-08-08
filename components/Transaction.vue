@@ -1,4 +1,5 @@
 <template>
+  <!-- single transaction item for wallet page -->
   <div class="card p-3 my-2">
     <div class="d-flex flex-row justify-content-between">
       <div>

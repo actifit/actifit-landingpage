@@ -1,4 +1,5 @@
 <template>
+  <!-- Brand for navbar on subpages -->
   <div class="mx-auto navbar-brand py-0">
     <img src="/img/icon.png" alt="Actifit" class="float-left mr-2" />
     <div class="float-left d-none d-sm-block">
