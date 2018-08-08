@@ -103,13 +103,13 @@ export default {
           posts.shift()
           posts = posts.filter(postsFilter)
           commit('setReports', [...state.reports, ...posts])
-          dispatch('checkIfMorePostsAvailable')
+          dispatch('checkIfMoreReportsAvailable')
           resolve()
         }
       })
     })
   },
-  checkIfMorePostsAvailable ({ state, commit }) {
+  checkIfMoreReportsAvailable ({ state, commit }) {
     return new Promise((resolve, reject) => {
       let lastReport = state.reports.length ? state.reports[state.reports.length - 1] : null
       let start_author = lastReport ? lastReport.author : null
@@ -124,10 +124,48 @@ export default {
         }
       })
     })
+  },
+  fetchUserReports ({ state, commit, dispatch }, username) {
+    return new Promise((resolve, reject) => {
+      let lastReport = state.reports.length ? state.reports[state.reports.length - 1] : null
+      let start_author = lastReport ? lastReport.author : null
+      let start_permlink = lastReport ? lastReport.permlink : null
+      steem.api.getDiscussionsByBlog({tag: username, limit: 100, start_author, start_permlink}, (err, posts) => {
+        if (err) reject(err)
+        else {
+          posts.shift()
+          posts = posts.filter(userPostsFilter)
+          commit('setUserReports', [...state.reports, ...posts])
+          dispatch('checkIfMoreUserReportsAvailable', username)
+          resolve()
+        }
+      })
+    })
+  },
+  checkIfMoreUserReportsAvailable ({ state, commit }, username) {
+    return new Promise((resolve, reject) => {
+      let lastReport = state.userReports.length ? state.userReports[state.userReports.length - 1] : null
+      let start_author = lastReport ? lastReport.author : null
+      let start_permlink = lastReport ? lastReport.permlink : null
+      steem.api.getDiscussionsByBlog({tag: username, limit: 100, start_author, start_permlink}, (err, posts) => {
+        if (err) reject(err)
+        else {
+          posts.shift()
+          posts = posts.filter(userPostsFilter)
+          commit('setMoreUserReportsAvailable', !!posts.length)
+          resolve()
+        }
+      })
+    })
   }
 }
 
-let postsFilter = (post) => {
+const postsFilter = (post) => {
   let meta = JSON.parse(post.json_metadata)
   return meta.hasOwnProperty('step_count') && meta.hasOwnProperty('activity_type')
+}
+
+const userPostsFilter = (post) => {
+  let meta = JSON.parse(post.json_metadata)
+  return meta.hasOwnProperty('step_count') && meta.hasOwnProperty('activity_type') && meta.tags.indexOf('actifit') !== -1
 }

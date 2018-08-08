@@ -25,5 +25,11 @@ export default {
   },
   moreReportsAvailable (state) {
     return state.moreReportsAvailable
+  },
+  userReports (state) {
+    return state.userReports
+  },
+  moreUserReportsAvailable (state) {
+    return state.moreUserReportsAvailable
   }
 }
