@@ -1,11 +1,14 @@
 <template>
-  <div class="py-5">
+  <div class="py-5 px-2">
     <div class="pb-md-4 text-center">
       <img src="/img/icon.png" alt="Actifit" />
-      <h1 class="mt-3 text-brand title">Actifit Fitness Tracker</h1>
-      <h3 class="font-italic text-brand slogan">Rewarding Fitness Activity</h3>
+      <h3 class="mt-3 text-brand title">Actifit Fitness Tracker</h3>
+      <h5 class="font-italic text-brand slogan">Rewarding Fitness Activity</h5>
     </div>
-    <h3 class="pt-4 text-center">You will be redirected in a moment...</h3>
+    <h5 class="pt-4 text-center">You will be redirected in a moment...</h5>
+    <div class="text-center mt-4">
+      <i class="fas fa-spinner fa-spin fa-2x"></i>
+    </div>
   </div>
 </template>
 
