@@ -70,9 +70,8 @@
       this.$store.dispatch('login')
 
       // fetch reports
-      if (!this.userReports.length) {
-        await this.$store.dispatch('fetchUserReports', this.username)
-      }
+      this.$store.commit('setUserReports', [])
+      this.$store.dispatch('fetchUserReports', this.username)
     }
   }
 </script>
