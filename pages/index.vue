@@ -163,7 +163,7 @@
           <i class="fas fa-medal"></i><br>
           Daily Leaderboard
         </h1>
-        <div class="row" v-if="leaderboard.length">
+        <div class="row" v-if="leaderboard.length >= 3">
           <div class="col-sm-4 text-center mb-4 mb-sm-0 d-flex align-items-center justify-content-center">
             <div>
               <h2>2.</h2>
