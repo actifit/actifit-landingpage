@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import Vuex from 'vuex'
 
 import getters from './getters'
@@ -5,9 +6,8 @@ import mutations from './mutations'
 import actions from './actions'
 
 const createStore = () => {
-  return new Vuex.Store({
+  const store = new Vuex.Store({
     state: {
-      user: null, // logged in user, via steemconnect
       userTokens: 0, // logged-in user's token count
       transactions: [], // logged-in user's transactions
       userCount: 0, // users using actifit
@@ -21,8 +21,20 @@ const createStore = () => {
     },
     getters,
     mutations,
-    actions
+    actions,
+    modules: {
+      steemconnect: Vue.SteemConnectStore
+    }
   })
+
+  store.subscribe((mutation) => {
+    if (mutation.type === 'login') {
+      store.dispatch('fetchUserTokens')
+      store.dispatch('fetchTransactions')
+    }
+  })
+
+  return store
 }
 
 export default createStore

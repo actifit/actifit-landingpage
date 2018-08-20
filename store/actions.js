@@ -1,55 +1,18 @@
-import Vue from 'vue'
-import VueSteemConnect from 'vue-steemconnect'
 import steem from 'steem'
-
-// init steemconnect (with default vote and comment permissions)
-Vue.use(VueSteemConnect, {
-  app: 'actifit.app',
-  callbackURL: process.env.scRedirectUrl || 'http://localhost:3000/auth'
-})
 
 // returning promises to be able to wait for data
 
 export default {
-  login ({ commit, dispatch, state }) {
-    return new Promise((resolve, reject) => {
-      // user will be set, when coming from auth page
-      // but not if accessed this page directly
-      if (!state.user) {
-        // in that case we look for an access token in localStorage
-        const accessToken = localStorage.getItem('access_token')
-        if (accessToken) {
-          // set access token and try to fetch user object
-          Vue.SteemConnect().setAccessToken(accessToken)
-          Vue.SteemConnect().me((err, user) => {
-            if (err) reject(err)
-            else {
-              // save user object in store
-              commit('login', user)
-              dispatch('fetchUserTokens')
-              dispatch('fetchTransactions')
-              resolve()
-            }
-          })
-        }
-      }
-    })
-  },
-  logout ({ commit }) {
-    // remove access token and unset user in store
-    localStorage.removeItem('access_token')
-    commit('logout')
-  },
   fetchUserTokens ({ state, commit }) {
     return new Promise((resolve, reject) => {
-      fetch('https://actifitbot.herokuapp.com/user/' + state.user.account.name.toLowerCase()).then(res => {
+      fetch('https://actifitbot.herokuapp.com/user/' + state.steemconnect.user.account.name.toLowerCase()).then(res => {
         res.json().then(json => commit('setUserTokens', json.tokens)).catch(e => reject(e))
       }).catch(e => reject(e))
     })
   },
   fetchTransactions ({ state, commit }) {
     return new Promise((resolve, reject) => {
-      fetch('https://actifitbot.herokuapp.com/transactions/' + state.user.account.name.toLowerCase()).then(res => {
+      fetch('https://actifitbot.herokuapp.com/transactions/' + state.steemconnect.user.account.name.toLowerCase()).then(res => {
         res.json().then(json => commit('setTransactions', json || [])).catch(e => reject(e))
       }).catch(e => reject(e))
     })
