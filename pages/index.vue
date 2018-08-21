@@ -280,21 +280,7 @@
     </section>
 
     <Footer />
-
-    <!-- news modal -->
-    <div class="modal fade" id="newsModal" tabindex="-1">
-      <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content" v-if="activeNews">
-          <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">{{ activeNews.title }}</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body" v-html="activeNewsBody"></div>
-        </div>
-      </div>
-    </div>
+    <NewsModal :news="activeNews" />
   </div>
 </template>
 
@@ -303,14 +289,15 @@
   import UserMenu from '~/components/UserMenu'
   import Footer from '~/components/Footer'
   import News from '~/components/News'
+  import NewsModal from '~/components/NewsModal'
   import { mapGetters } from 'vuex'
-  import marked from 'marked'
 
   export default {
     components: {
       UserMenu,
       Footer,
-      News
+      News,
+      NewsModal
     },
     data () {
       return {
@@ -347,9 +334,6 @@
       },
       animatedRewardedActivityCount: function() {
         return this.tweenedRewardedActivityCount.toFixed(0);
-      },
-      activeNewsBody () {
-        return marked(this.activeNews.body)
       }
     },
     // watchers to update animated numbers
