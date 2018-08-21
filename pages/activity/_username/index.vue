@@ -44,6 +44,7 @@
     </div>
 
     <Footer />
+    <ReportModal :report="activeReport" />
   </div>
 </template>
 
@@ -52,6 +53,7 @@
   import NavbarBrand from '~/components/NavbarBrand'
   import Report from '~/components/Report'
   import Footer from '~/components/Footer'
+  import ReportModal from '~/components/ReportModal'
 
   import { mapGetters } from 'vuex'
 
@@ -60,7 +62,8 @@
       UserMenu,
       NavbarBrand,
       Report,
-      Footer
+      Footer,
+      ReportModal
     },
     data () {
       return {
@@ -69,7 +72,7 @@
       }
     },
     computed: {
-      ...mapGetters(['userReports', 'moreUserReportsAvailable']),
+      ...mapGetters(['userReports', 'moreUserReportsAvailable', 'activeReport']),
 
       // get username from url
       username () {

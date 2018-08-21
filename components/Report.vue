@@ -44,8 +44,8 @@
           </div>
           <div class="col-6 text-right">
             <small>
-              <a :href="'https://steemit.com' + report.url" class="text-brand" target="_blank">
-                read more <i class="fas fa-external-link-alt"></i>
+              <a href="#" class="text-brand" @click="$store.commit('setActiveReport', report)" data-toggle="modal" data-target="#reportModal">
+                read more
               </a>
             </small>
           </div>

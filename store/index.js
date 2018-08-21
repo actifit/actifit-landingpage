@@ -15,6 +15,7 @@ const createStore = () => {
       rewardedActivityCount: 0, // total amount of activity posts
       leaderboard: [], // top users
       reports: [], // all activity reports/posts
+      activeReport: null, // report shown in the modal
       moreReportsAvailable: false, // indicator if there are more reports to load
       userReports: [], // logged-in user's activity reports/posts
       moreUserReportsAvailable: false, // indicator if there are more user reports to load

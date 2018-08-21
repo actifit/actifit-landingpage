@@ -20,6 +20,9 @@ export default {
   reports (state) {
     return state.reports
   },
+  activeReport (state) {
+    return state.activeReport
+  },
   moreReportsAvailable (state) {
     return state.moreReportsAvailable
   },
