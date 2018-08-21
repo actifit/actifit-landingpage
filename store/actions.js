@@ -133,6 +133,19 @@ export default {
         }
       })
     })
+  },
+  fetchNews ({ state, commit }) {
+    return new Promise((resolve, reject) => {
+      steem.api.getDiscussionsByBlog({tag: 'actifit', limit: 100}, (err, posts) => {
+        if (err) reject(err)
+        else {
+          posts = posts.filter(newsFilter) // get only actual news updates
+          commit('setNews', posts)
+          commit('setActiveNews', posts[0]) // set first one as default news for modal
+          resolve()
+        }
+      })
+    })
   }
 }
 
@@ -147,4 +160,8 @@ const userPostsFilter = (post) => {
   // actual activity posts must have those two properties in metadata
   // since, in this case, posts are fetched by users blog, we also need to check for the actifit tag
   return meta.hasOwnProperty('step_count') && meta.hasOwnProperty('activity_type') && meta.tags.indexOf('actifit') !== -1
+}
+
+const newsFilter = (post) => {
+  return post.author === 'actifit'
 }

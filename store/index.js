@@ -18,6 +18,8 @@ const createStore = () => {
       moreReportsAvailable: false, // indicator if there are more reports to load
       userReports: [], // logged-in user's activity reports/posts
       moreUserReportsAvailable: false, // indicator if there are more user reports to load
+      news: [],
+      activeNews: null
     },
     getters,
     mutations,

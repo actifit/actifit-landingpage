@@ -28,5 +28,11 @@ export default {
   },
   moreUserReportsAvailable (state) {
     return state.moreUserReportsAvailable
+  },
+  news (state) {
+    return state.news
+  },
+  activeNews (state) {
+    return state.activeNews
   }
 }

@@ -28,5 +28,11 @@ export default {
   },
   setMoreUserReportsAvailable (state, moreUserReportsAvailable) {
     state.moreUserReportsAvailable = moreUserReportsAvailable
+  },
+  setNews (state, news) {
+    state.news = news
+  },
+  setActiveNews (state, activeNews) {
+    state.activeNews = activeNews
   }
 }
