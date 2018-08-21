@@ -26,6 +26,9 @@
           <li class="nav-item">
             <a class="nav-link" href="#" @click.prevent="scrollTo('#athletes')">Sponsored Athletes</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" @click.prevent="scrollTo('#news')">News</a>
+          </li>
         </ul>
         <UserMenu />
       </div>
