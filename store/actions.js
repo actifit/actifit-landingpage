@@ -141,7 +141,6 @@ export default {
         else {
           posts = posts.filter(newsFilter) // get only actual news updates
           commit('setNews', posts)
-          commit('setActiveNews', posts[0]) // set first one as default news for modal
           resolve()
         }
       })
