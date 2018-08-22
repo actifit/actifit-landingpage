@@ -37,5 +37,11 @@ export default {
   },
   setActiveNews (state, activeNews) {
     state.activeNews = activeNews
+  },
+  setVoteWeight (state, weight) {
+    state.voteWeight = weight
+  },
+  setPostToVote (state, post) {
+    state.postToVote = post
   }
 }

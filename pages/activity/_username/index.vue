@@ -45,6 +45,13 @@
 
     <Footer />
     <ReportModal :report="activeReport" />
+    <VoteModal />
+    <no-ssr>
+      <div>
+        <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
+        <notifications :group="'error'" :position="'top center'" :classes="'vue-notification error'" />
+      </div>
+    </no-ssr>
   </div>
 </template>
 
@@ -54,6 +61,7 @@
   import Report from '~/components/Report'
   import Footer from '~/components/Footer'
   import ReportModal from '~/components/ReportModal'
+  import VoteModal from '~/components/VoteModal'
 
   import { mapGetters } from 'vuex'
 
@@ -63,7 +71,8 @@
       NavbarBrand,
       Report,
       Footer,
-      ReportModal
+      ReportModal,
+      VoteModal
     },
     data () {
       return {

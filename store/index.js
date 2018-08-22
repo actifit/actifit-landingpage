@@ -20,7 +20,9 @@ const createStore = () => {
       userReports: [], // logged-in user's activity reports/posts
       moreUserReportsAvailable: false, // indicator if there are more user reports to load
       news: [], // all news update posts from actifit account
-      activeNews: null // news shown in the modal
+      activeNews: null, // news shown in the modal
+      voteWeight: 100, // vote weight for voting on posts
+      postToVote: null // active post that will be voted on
     },
     getters,
     mutations,

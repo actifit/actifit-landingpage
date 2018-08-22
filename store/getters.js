@@ -37,5 +37,11 @@ export default {
   },
   activeNews (state) {
     return state.activeNews
+  },
+  voteWeight (state) {
+    return state.voteWeight
+  },
+  postToVote (state) {
+    return state.postToVote
   }
 }
