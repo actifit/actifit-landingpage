@@ -28,10 +28,11 @@ const createStore = () => {
     mutations,
     actions,
     modules: {
-      steemconnect: Vue.SteemConnectStore
+      steemconnect: Vue.SteemConnectStore // login/logout actions, user mutation/getters
     }
   })
 
+  // fetch user related data after login
   store.subscribe((mutation) => {
     if (mutation.type === 'login') {
       store.dispatch('fetchUserTokens')
