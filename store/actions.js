@@ -1,55 +1,18 @@
-import Vue from 'vue'
-import VueSteemConnect from 'vue-steemconnect'
 import steem from 'steem'
-
-// init steemconnect (with default vote and comment permissions)
-Vue.use(VueSteemConnect, {
-  app: 'actifit.app',
-  callbackURL: process.env.scRedirectUrl || 'http://localhost:3000/auth'
-})
 
 // returning promises to be able to wait for data
 
 export default {
-  login ({ commit, dispatch, state }) {
-    return new Promise((resolve, reject) => {
-      // user will be set, when coming from auth page
-      // but not if accessed this page directly
-      if (!state.user) {
-        // in that case we look for an access token in localStorage
-        const accessToken = localStorage.getItem('access_token')
-        if (accessToken) {
-          // set access token and try to fetch user object
-          Vue.SteemConnect().setAccessToken(accessToken)
-          Vue.SteemConnect().me((err, user) => {
-            if (err) reject(err)
-            else {
-              // save user object in store
-              commit('login', user)
-              dispatch('fetchUserTokens')
-              dispatch('fetchTransactions')
-              resolve()
-            }
-          })
-        }
-      }
-    })
-  },
-  logout ({ commit }) {
-    // remove access token and unset user in store
-    localStorage.removeItem('access_token')
-    commit('logout')
-  },
   fetchUserTokens ({ state, commit }) {
     return new Promise((resolve, reject) => {
-      fetch('https://actifitbot.herokuapp.com/user/' + state.user.account.name.toLowerCase()).then(res => {
+      fetch('https://actifitbot.herokuapp.com/user/' + state.steemconnect.user.account.name.toLowerCase()).then(res => {
         res.json().then(json => commit('setUserTokens', json.tokens)).catch(e => reject(e))
       }).catch(e => reject(e))
     })
   },
   fetchTransactions ({ state, commit }) {
     return new Promise((resolve, reject) => {
-      fetch('https://actifitbot.herokuapp.com/transactions/' + state.user.account.name.toLowerCase()).then(res => {
+      fetch('https://actifitbot.herokuapp.com/transactions/' + state.steemconnect.user.account.name.toLowerCase()).then(res => {
         res.json().then(json => commit('setTransactions', json || [])).catch(e => reject(e))
       }).catch(e => reject(e))
     })
@@ -170,6 +133,18 @@ export default {
         }
       })
     })
+  },
+  fetchNews ({ state, commit }) {
+    return new Promise((resolve, reject) => {
+      steem.api.getDiscussionsByBlog({tag: 'actifit', limit: 100}, (err, posts) => {
+        if (err) reject(err)
+        else {
+          posts = posts.filter(newsFilter) // get only actual news updates
+          commit('setNews', posts)
+          resolve()
+        }
+      })
+    })
   }
 }
 
@@ -184,4 +159,8 @@ const userPostsFilter = (post) => {
   // actual activity posts must have those two properties in metadata
   // since, in this case, posts are fetched by users blog, we also need to check for the actifit tag
   return meta.hasOwnProperty('step_count') && meta.hasOwnProperty('activity_type') && meta.tags.indexOf('actifit') !== -1
+}
+
+const newsFilter = (post) => {
+  return post.author === 'actifit'
 }

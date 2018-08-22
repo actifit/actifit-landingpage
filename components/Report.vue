@@ -38,14 +38,16 @@
         <div class="row details mt-3">
           <div class="col-6">
             <small>
-              <i class="far fa-thumbs-up"></i> {{ report.net_votes }}
+              <a href="#" class="text-brand" @click.prevent="$store.commit('setPostToVote', report)" data-toggle="modal" data-target="#voteModal">
+                <i class="far fa-thumbs-up"></i> {{ report.net_votes }}
+              </a>
               <i class="far fa-comments ml-2"></i> {{ report.children }}
             </small>
           </div>
           <div class="col-6 text-right">
             <small>
-              <a :href="'https://steemit.com' + report.url" class="text-brand" target="_blank">
-                read more <i class="fas fa-external-link-alt"></i>
+              <a href="#" class="text-brand" @click="$store.commit('setActiveReport', report)" data-toggle="modal" data-target="#reportModal">
+                read more
               </a>
             </small>
           </div>

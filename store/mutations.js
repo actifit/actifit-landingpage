@@ -1,10 +1,4 @@
 export default {
-  login (state, user) {
-    state.user = user
-  },
-  logout (state) {
-    state.user = null
-  },
   setUserTokens (state, userTokens) {
     state.userTokens = userTokens
   },
@@ -26,6 +20,9 @@ export default {
   setReports (state, reports) {
     state.reports = reports
   },
+  setActiveReport (state, report) {
+    state.activeReport = report
+  },
   setMoreReportsAvailable (state, moreReportsAvailable) {
     state.moreReportsAvailable = moreReportsAvailable
   },
@@ -34,5 +31,17 @@ export default {
   },
   setMoreUserReportsAvailable (state, moreUserReportsAvailable) {
     state.moreUserReportsAvailable = moreUserReportsAvailable
+  },
+  setNews (state, news) {
+    state.news = news
+  },
+  setActiveNews (state, activeNews) {
+    state.activeNews = activeNews
+  },
+  setVoteWeight (state, weight) {
+    state.voteWeight = weight
+  },
+  setPostToVote (state, post) {
+    state.postToVote = post
   }
 }

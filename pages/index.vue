@@ -26,6 +26,9 @@
           <li class="nav-item">
             <a class="nav-link" href="#" @click.prevent="scrollTo('#athletes')">Sponsored Athletes</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" @click.prevent="scrollTo('#news')">News</a>
+          </li>
         </ul>
         <UserMenu />
       </div>
@@ -261,7 +264,23 @@
       </div>
     </section>
 
+    <!-- news -->
+    <section id="news" class="py-5 bg-brand text-light">
+      <h1 class="text-center pb-3">
+        <i class="far fa-newspaper"></i><br>
+        News
+      </h1>
+      <no-ssr>
+        <carousel :perPageCustom="[[0, 1], [768, 2], [1024, 3], [1280, 4]]" :paginationColor="'rgba(255, 255, 255, 0.5)'" :paginationActiveColor="'#fff'">
+          <slide v-for="(post, index) in news" :post="post" :key="index">
+            <News :post="post" />
+          </slide>
+        </carousel>
+      </no-ssr>
+    </section>
+
     <Footer />
+    <NewsModal :news="activeNews" />
   </div>
 </template>
 
@@ -269,12 +288,16 @@
   import VueScrollTo from 'vue-scrollto' // for smooth scrolling
   import UserMenu from '~/components/UserMenu'
   import Footer from '~/components/Footer'
+  import News from '~/components/News'
+  import NewsModal from '~/components/NewsModal'
   import { mapGetters } from 'vuex'
 
   export default {
     components: {
       UserMenu,
-      Footer
+      Footer,
+      News,
+      NewsModal
     },
     data () {
       return {
@@ -291,7 +314,7 @@
       }
     },
     computed: {
-      ...mapGetters(['user', 'userTokens', 'transactions', 'userCount', 'tokensDistributed', 'rewardedActivityCount', 'leaderboard']),
+      ...mapGetters(['user', 'userTokens', 'transactions', 'userCount', 'tokensDistributed', 'rewardedActivityCount', 'leaderboard', 'news', 'activeNews']),
       formattedUserTokens () {
         return parseFloat(this.userTokens).toFixed(2)
       },
@@ -351,6 +374,7 @@
       this.$store.dispatch('fetchTokenInfo')
       this.$store.dispatch('fetchRewardedActivityCount')
       this.$store.dispatch('fetchLeaderboard')
+      this.$store.dispatch('fetchNews')
     }
   }
 </script>
@@ -373,6 +397,12 @@
     background-position: center
   .tilt
     transform: rotate(-15deg)
+
+  .VueCarousel-dot-container
+    padding: 15px !important
+    .VueCarousel-dot
+      padding: 1px 5px !important
+      margin-top: 0 !important
 
   @media (min-width: 768px)
     .showcase .showcase-text

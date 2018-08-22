@@ -1,7 +1,4 @@
 export default {
-  user (state) {
-    return state.user
-  },
   userTokens (state) {
     return state.userTokens
   },
@@ -23,6 +20,9 @@ export default {
   reports (state) {
     return state.reports
   },
+  activeReport (state) {
+    return state.activeReport
+  },
   moreReportsAvailable (state) {
     return state.moreReportsAvailable
   },
@@ -31,5 +31,17 @@ export default {
   },
   moreUserReportsAvailable (state) {
     return state.moreUserReportsAvailable
+  },
+  news (state) {
+    return state.news
+  },
+  activeNews (state) {
+    return state.activeNews
+  },
+  voteWeight (state) {
+    return state.voteWeight
+  },
+  postToVote (state) {
+    return state.postToVote
   }
 }

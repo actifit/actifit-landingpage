@@ -40,6 +40,15 @@ a,
     color: #fff
     box-shadow: none
 
+.btn-white
+  background: #fff
+  color: $brand-color !important
+  &:hover,
+  &:focus
+    background: #f8f8f8
+    color: $brand-color
+    box-shadow: none
+
 .avatar
   width: 150px
   height: 150px
@@ -70,3 +79,14 @@ a,
         color: #ff112d
   .navbar-back
     font-size: 1.3rem
+
+.modal-content
+  border-radius: 0
+  border: none
+  .modal-body
+    img
+      max-width: 100%
+
+.page-item
+  &.disabled
+    opacity: .5

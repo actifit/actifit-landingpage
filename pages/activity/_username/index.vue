@@ -44,6 +44,14 @@
     </div>
 
     <Footer />
+    <ReportModal :report="activeReport" />
+    <VoteModal />
+    <no-ssr>
+      <div>
+        <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
+        <notifications :group="'error'" :position="'top center'" :classes="'vue-notification error'" />
+      </div>
+    </no-ssr>
   </div>
 </template>
 
@@ -52,6 +60,8 @@
   import NavbarBrand from '~/components/NavbarBrand'
   import Report from '~/components/Report'
   import Footer from '~/components/Footer'
+  import ReportModal from '~/components/ReportModal'
+  import VoteModal from '~/components/VoteModal'
 
   import { mapGetters } from 'vuex'
 
@@ -60,7 +70,9 @@
       UserMenu,
       NavbarBrand,
       Report,
-      Footer
+      Footer,
+      ReportModal,
+      VoteModal
     },
     data () {
       return {
@@ -69,7 +81,7 @@
       }
     },
     computed: {
-      ...mapGetters(['userReports', 'moreUserReportsAvailable']),
+      ...mapGetters(['userReports', 'moreUserReportsAvailable', 'activeReport']),
 
       // get username from url
       username () {
