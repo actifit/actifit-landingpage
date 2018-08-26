@@ -65,7 +65,7 @@
             <p class="lead py-md-3 form-info">Log in to see your current token balance or sign up for an account to start getting rewarded for your activity.</p>
             <div class="row">
               <div class="col-6">
-                <a :href="$steemconnect.getLoginURL()" class="btn btn-brand btn-lg w-100">Login</a>
+                <a :href="$steemconnect.getLoginURL().replace('v2.','')" class="btn btn-brand btn-lg w-100">Login</a>
               </div>
               <div class="col-6">
                 <a href="https://signup.steemit.com/?ref=actifit" class="btn btn-brand btn-lg w-100">Sign Up</a>
