@@ -14,10 +14,15 @@ module.exports = {
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { hid: 'description', name: 'description', content: pkg.description }
+      { hid: 'description', name: 'description', content: pkg.description },
+	  { hid: 'og:title', name:'og:title', content: 'Actifit - Rewarding Fitness Activity'},
+	  { hid: 'og:description', name:'og:description', content: 'Actifit is an innovative dapp that aims to incentivize fitness and healthy lifestyle via rewarding daily activity.'},
+      { hid: 'og:url', name:'og:url', content: 'https://actifit.io'},
+	  { hid: 'og:type', name:'og:type', content: 'website'},
+	  { hid: 'og:image', name:'og:image', content: 'https://actifit.io/img/actifit_logo.png'},
     ],
     link: [
-      { rel: 'icon', type: 'image/x-icon', href: '/img/icon.png' },
+      { rel: 'icon', type: 'image/x-icon', href: '/img/actifit_logo.png' },
       { rel: 'stylesheet', href: 'https://use.fontawesome.com/releases/v5.1.0/css/all.css' },
       { rel: 'stylesheet', href: 'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css' },
       { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css?family=Roboto' }
