@@ -38,7 +38,10 @@
         <div class="row details mt-3">
           <div class="col-6">
             <small>
-              <a href="#" class="text-brand" @click.prevent="$store.commit('setPostToVote', report)" data-toggle="modal" data-target="#voteModal">
+			  <a href="#" class="text-brand" v-if="!user">
+                <i class="far fa-thumbs-up"></i> {{ report.net_votes }}
+              </a>
+              <a href="#" class="text-brand" @click.prevent="$store.commit('setPostToVote', report)" data-toggle="modal" data-target="#voteModal" v-if="user">
                 <i class="far fa-thumbs-up"></i> {{ report.net_votes }}
               </a>
               <i class="far fa-comments ml-2"></i> {{ report.children }}
@@ -58,9 +61,11 @@
 </template>
 
 <script>
+  import { mapGetters } from 'vuex'
   export default {
     props: ['report'],
     computed: {
+	  ...mapGetters(['user', 'postToVote']),
       date () {
         let date = new Date(this.report.created)
         let minutes = date.getMinutes();
