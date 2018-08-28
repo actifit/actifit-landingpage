@@ -309,7 +309,7 @@
         tweenedRewardedActivityCount: 0,
 
         // static mods/ambassadors lists
-        moderators: ['alfamano', 'ionutciobanu', 'curtwriter', 'zoneboy', 'rabihfarhat', 'gerginho', 'd-gold', 'ciuoto', 'vishalsingh4997', 'kpreddy', 'katerinaramm', 'mcfarhat'],
+        moderators: ['alfamano', 'curtwriter', 'rabihfarhat', 'd-gold', 'ciuoto', 'vishalsingh4997', 'kpreddy', 'katerinaramm', 'thereikiforest', 'ruah', 'mcfarhat'],
         ambassadors: ['taskmaster4450', 'flauwy', 'rosatravels', 'toocurious']
       }
     },
