@@ -18,7 +18,7 @@
           </div>
           <div class="form-group">
             <label for="report-tags">Tags</label>
-            <input class="form-control" id="report-tags" v-model="tags" />
+            <input-tag id="report-tags" :tags.sync="tags" :addTagOnBlur="true"></input-tag>
             <small class="form-text text-muted">You don't need to add the #actifit tag. It will be added automatically.</small>
           </div>
           <div class="preview" v-html="preview"></div>
@@ -37,14 +37,18 @@
 
 <script>
   import marked from 'marked'
+  import InputTag from 'vue-input-tag'
   import { mapGetters } from 'vuex'
 
   export default {
+    components: {
+      InputTag
+    },
     data () {
       return {
         title: '', // post title
         body: '', // post body
-        tags: '', // post tags
+        tags: [], // post tags
         loading: false // loading animation in submit button
       }
     },
@@ -62,7 +66,7 @@
         this.body = this.editReport.body
 
         const meta = JSON.parse(this.editReport.json_metadata)
-        this.tags = meta.hasOwnProperty('tags') ? meta.tags.join(',') : 'actifit' // actifit as default tag, if no tags are present (for some reason)
+        this.tags = meta.hasOwnProperty('tags') ? meta.tags : ['actifit'] // actifit as default tag, if no tags are present (for some reason)
       }
     },
     methods: {
@@ -73,7 +77,7 @@
         const meta = JSON.parse(this.editReport.json_metadata)
         meta.tags = [
           'actifit',
-          ...this.tags.split(',')
+          ...this.tags
             .filter(tag => tag !== 'actifit') // remove actifit tag, its the first tag automatically
             .filter(String) // remove empty values
             .map(tag => tag.trim()) // trim leading and trailing whitespaces from tags

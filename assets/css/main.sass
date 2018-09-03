@@ -107,3 +107,13 @@ a,
 	
 .news h5
 	height: 100px
+
+body // to have stronger specificy
+  .vue-input-tag-wrapper
+    .input-tag
+      background-color: lighten($brand-color, 40)
+      border-color: lighten($brand-color, 30)
+      color: $brand-color
+      padding: 4px 10px
+      .remove
+        color: $brand-color
