@@ -109,7 +109,7 @@ export default {
       steem.api.getDiscussionsByBlog({tag: username, limit: 100, start_author, start_permlink}, (err, posts) => {
         if (err) reject(err)
         else {
-          posts.shift() // remove the first posts because its the last post from before
+          if (start_author && start_permlink) posts.shift() // remove the first posts because its the last post from before
           posts = posts.filter(userPostsFilter) // get only actual activity reports
           commit('setUserReports', [...state.userReports, ...posts])
           dispatch('checkIfMoreUserReportsAvailable', username)
@@ -158,7 +158,7 @@ const userPostsFilter = (post) => {
   let meta = JSON.parse(post.json_metadata)
   // actual activity posts must have those two properties in metadata
   // since, in this case, posts are fetched by users blog, we also need to check for the actifit tag
-  return meta.hasOwnProperty('step_count') && meta.hasOwnProperty('activity_type') && meta.tags.indexOf('actifit') !== -1
+  return meta.hasOwnProperty('step_count') && meta.hasOwnProperty('activity_type') && meta.hasOwnProperty('tags') && meta.tags.indexOf('actifit') !== -1
 }
 
 const newsFilter = (post) => {
