@@ -51,6 +51,12 @@
           </div>
           <div class="col-6 text-right">
             <small>
+              <a href="#" class="text-brand" @click="$store.commit('setEditReport', report)" data-toggle="modal"
+                 data-target="#editReportModal" v-if="user && report.author === user.account.name">
+                <i class="far fa-edit"></i>
+                edit
+              </a>
+              <span v-if="user && report.author === user.account.name"> - </span>
               <a href="#" class="text-brand" @click="$store.commit('setActiveReport', report)" data-toggle="modal"
                  data-target="#reportModal">
                 read more

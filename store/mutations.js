@@ -23,6 +23,9 @@ export default {
   setActiveReport (state, report) {
     state.activeReport = report
   },
+  setEditReport (state, report) {
+    state.editReport = report
+  },
   setMoreReportsAvailable (state, moreReportsAvailable) {
     state.moreReportsAvailable = moreReportsAvailable
   },

@@ -23,6 +23,9 @@ export default {
   activeReport (state) {
     return state.activeReport
   },
+  editReport (state) {
+    return state.editReport
+  },
   moreReportsAvailable (state) {
     return state.moreReportsAvailable
   },
