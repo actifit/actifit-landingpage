@@ -21,7 +21,9 @@
     props: ['news'],
     computed: {
       body () {
-        return marked(this.news.body)
+		/* regex to match @ words and convert them to steemit user links */
+		var re = /@([\w-]+)(?![\w-])/g;
+        return marked(this.news.body.replace(re,'[$&](https://steemit.com/$&)'))
       }
     }
   }

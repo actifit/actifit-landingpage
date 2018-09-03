@@ -10,7 +10,8 @@
       </div>
       <div class="row">
         <div class="col text-center">
-          <small class="text-muted">&copy; Copyright Actifit {{ currentYear }}</small>
+          <small class="text-muted">&copy; Copyright Actifit {{ currentYear }}</small>|
+		  <small class="text-muted"><a href="privacy-policy">Privacy Policy</a></small>
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 {
   "name": "actifit-landingpage",
   "version": "1.0.0",
-  "description": "Landingpage for the Actifit project",
+  "description": "Actifit is an innovative dapp that aims to incentivize fitness and healthy lifestyle via rewarding daily activity.",
   "author": "mktcode",
   "private": true,
   "scripts": {
