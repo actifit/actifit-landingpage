@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import steem from 'steem'
 
 // returning promises to be able to wait for data
@@ -116,6 +117,18 @@ export default {
           resolve()
         }
       })
+    })
+  },
+  updateUserReport ({ state, commit }, options) {
+    steem.api.getContent(options.author, options.permlink, (err, updatedReport) => {
+      if (err) console.log(err)
+      else {
+        const index = state.userReports.findIndex(report => report.author === updatedReport.author && report.permlink === updatedReport.permlink)
+        if (index !== -1) {
+          // use Vue.set because of: https://vuejs.org/v2/guide/list.html#Caveats
+          Vue.set(state.userReports, index, updatedReport)
+        }
+      }
     })
   },
   checkIfMoreUserReportsAvailable ({ state, commit }, username) {

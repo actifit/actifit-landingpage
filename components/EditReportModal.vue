@@ -109,6 +109,12 @@
               text: err ? 'Unknown error: Your changes could not be saved.' : 'Changes successfully saved!',
               position: 'top center'
             })
+
+            // update report in store
+            this.$store.dispatch('updateUserReport', {
+              author: this.editReport.author,
+              permlink: this.editReport.permlink
+            })
           }
         )
       }
