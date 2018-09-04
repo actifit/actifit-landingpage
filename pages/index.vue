@@ -121,16 +121,16 @@
           <div class="col-lg-6 order-lg-2 text-white showcase-img" style="background-image: url('/img/showcase-1.jpg');"></div>
           <div class="col-lg-6 order-lg-1 my-auto showcase-text">
             <h2 class="text-capitalize">Earn tokens as simple as one two three</h2>
-            <p class="lead mb-0">Download the app from playstore. Go for a walk, run, do your favorite workout with a min target of 5,000 steps/moves. Post to steemit and get rewarded!</p>
+            <p class="lead mb-0">Download the Actifit mobile app. Go for a run, walk your dog, go through your favorite workout with a min target of 5,000 activity count. Post to steemit and get rewarded!</p>
             <div class="text-center mt-5">
-              <a href="https://play.google.com/store/apps/details?id=io.actifit.fitnesstracker.actifitfitnesstracker" target="_blank">
+              <a href="https://bit.ly/actifit-app" target="_blank">
                 <img src="/img/google-play.png" />
               </a>
-              <!--<br>-->
-              <!--<br>-->
-              <!--<a href="#" target="_blank">-->
-              <!--<img src="/img/app-store.png" />-->
-              <!--</a>-->
+              <br>
+              <br>
+              <a href="https://bit.ly/actifit-ios" target="_blank">
+              <img src="/img/app-store.png" />
+              </a>
             </div>
           </div>
         </div>
@@ -153,7 +153,24 @@
           <div class="col-lg-6 order-lg-2 text-white showcase-img" style="background-image: url('/img/showcase-3.jpg');"></div>
           <div class="col-lg-6 order-lg-1 my-auto showcase-text">
             <h2 class="text-capitalize">Delegate to earn more rewards</h2>
-            <p class="lead mb-0">You can earn more Actifit tokens if you are a STEEM token holder. Delegate to Actifit and earn 1:1 Actifit per Steem Power delegation, as well as a share of the 5% beneficiary reward of actifit posts.</p>
+            <p class="lead mb-0">You can earn more Actifit tokens if you are a STEEM token holder. Delegate Steem Power to Actifit and earn your share of 100K AFIT tokens distributed per day to our delegators, as well as a weekly share of the 5% beneficiary reward of actifit posts.</p>
+			<div style="text-align:center; padding-top: 10px">
+			<br/>
+			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=10%20SP">10 SP</a>| 
+			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=20%20SP">20 SP</a>|
+			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=50%20SP">50 SP</a>|
+			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=100%20SP">100 SP</a>|
+			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=250%20SP">250 SP</a>|
+			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=500%20SP">500 SP</a><br/>
+			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=1000%20SP">1K SP</a>|
+			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=2000%20SP">2K SP</a>|
+			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=5000%20SP">5K SP</a>|
+			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=10000%20SP">10K SP</a>| 
+			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=20000%20SP">20K SP</a>|
+			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=50000%20SP">50K SP</a>
+			<br/>
+			<a href="https://steembottracker.com/delegation.html?delegatee=actifit">Custom Amount</a>
+			</div>
           </div>
         </div>
       </div>
@@ -309,7 +326,7 @@
         tweenedRewardedActivityCount: 0,
 
         // static mods/ambassadors lists
-        moderators: ['alfamano', 'ionutciobanu', 'curtwriter', 'zoneboy', 'rabihfarhat', 'gerginho', 'd-gold', 'ciuoto', 'vishalsingh4997', 'kpreddy', 'katerinaramm', 'mcfarhat'],
+        moderators: ['alfamano', 'curtwriter', 'rabihfarhat', 'd-gold', 'ciuoto', 'vishalsingh4997', 'kpreddy', 'katerinaramm', 'thereikiforest', 'ruah', 'mcfarhat'],
         ambassadors: ['taskmaster4450', 'flauwy', 'rosatravels', 'toocurious']
       }
     },
