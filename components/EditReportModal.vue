@@ -70,7 +70,7 @@
         this.body = this.editReport.body
 
         const meta = JSON.parse(this.editReport.json_metadata)
-        this.tags = meta.hasOwnProperty('tags') ? meta.tags : ['actifit'] // actifit as default tag, if no tags are present (for some reason)
+        this.tags = meta.hasOwnProperty('tags') ? meta.tags.filter(tag => tag !== 'actifit') : [] // actifit as default tag, if no tags are present (for some reason)
 
         // refresh editor
         setTimeout(() => {
