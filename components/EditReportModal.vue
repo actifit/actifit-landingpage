@@ -23,7 +23,7 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-success" @click.prevent="save()">
+          <button type="button" class="btn btn-brand" @click.prevent="save()">
             <i class="fas fa-spin fa-spinner" v-if="loading"></i>
             <i class="fas fa-paper-plane" v-else></i>
             Save
