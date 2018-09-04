@@ -14,14 +14,13 @@
             <input class="form-control form-control-lg" id="report-title" v-model="title" />
           </div>
           <div class="form-group">
-            <textarea class="form-control" v-model="body"></textarea>
+            <markdown-editor v-model="body" :configs="editorConfig" ref="editor"></markdown-editor>
           </div>
           <div class="form-group">
             <label for="report-tags">Tags</label>
             <input-tag id="report-tags" :tags.sync="tags" :addTagOnBlur="true"></input-tag>
             <small class="form-text text-muted">You don't need to add the #actifit tag. It will be added automatically.</small>
           </div>
-          <div class="preview" v-html="preview"></div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-success" @click.prevent="save()">
@@ -49,15 +48,20 @@
         title: '', // post title
         body: '', // post body
         tags: [], // post tags
-        loading: false // loading animation in submit button
+        loading: false, // loading animation in submit button
+        editorConfig: { // markdown editor for post body
+          autofocus: true,
+          spellChecker: false,
+          previewRender: (body) => {
+            return marked(body.replace(/@([\w-]+)(?![\w-])/g,'[$&](https://steemit.com/$&)'))
+          },
+          forceSync: true,
+          status: ['lines', 'words']
+        }
       }
     },
     computed: {
-      ...mapGetters(['editReport']),
-      preview () {
-        // parse markdown, match @ words and convert them to steemit user links
-        return marked(this.body.replace(/@([\w-]+)(?![\w-])/g,'[$&](https://steemit.com/$&)'))
-      }
+      ...mapGetters(['editReport'])
     },
     watch: {
       editReport () {
@@ -67,6 +71,11 @@
 
         const meta = JSON.parse(this.editReport.json_metadata)
         this.tags = meta.hasOwnProperty('tags') ? meta.tags : ['actifit'] // actifit as default tag, if no tags are present (for some reason)
+
+        // refresh editor
+        setTimeout(() => {
+          this.$refs.editor.simplemde.codemirror.refresh()
+        }, 250)
       }
     },
     methods: {
