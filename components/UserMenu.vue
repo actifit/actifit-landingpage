@@ -13,6 +13,8 @@
           <div class="user-avatar" :style="'background-image: url(https://steemitimages.com/u/' + user.account.name + '/avatar)'"></div>
         </a>
         <div class="dropdown-menu dropdown-menu-right">
+          <h6 class="dropdown-header text-center">@{{ user.account.name }}</h6>
+          <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet')">Wallet</a>
           <a class="dropdown-item" href="#" @click.prevent="$router.push('/activity/' + user.account.name)">Activity</a>
           <div class="dropdown-divider"></div>
