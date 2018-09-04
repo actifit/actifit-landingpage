@@ -56,7 +56,8 @@
             return marked(body.replace(/@([\w-]+)(?![\w-])/g,'[$&](https://steemit.com/$&)'))
           },
           forceSync: true,
-          status: ['lines', 'words']
+          status: ['lines', 'words'],
+          promptURLs: true
         }
       }
     },
