@@ -45,6 +45,7 @@
 
     <Footer />
     <ReportModal :report="activeReport" />
+    <EditReportModal />
     <VoteModal />
     <no-ssr>
       <div>
@@ -61,6 +62,7 @@
   import Report from '~/components/Report'
   import Footer from '~/components/Footer'
   import ReportModal from '~/components/ReportModal'
+  import EditReportModal from '~/components/EditReportModal'
   import VoteModal from '~/components/VoteModal'
 
   import { mapGetters } from 'vuex'
@@ -72,6 +74,7 @@
       Report,
       Footer,
       ReportModal,
+      EditReportModal,
       VoteModal
     },
     data () {

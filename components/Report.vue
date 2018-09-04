@@ -11,7 +11,8 @@
         <div class="row">
           <div class="col-7">
             <a :href="'https://steemit.com/@' + report.author" target="_blank">
-              <div class="user-avatar mr-1" :style="'background-image: url(https://steemitimages.com/u/' + report.author + '/avatar)'"></div>
+              <div class="user-avatar mr-1"
+                   :style="'background-image: url(https://steemitimages.com/u/' + report.author + '/avatar)'"></div>
               <small class="d-inline-block align-top">@{{ report.author }}</small>
             </a>
           </div>
@@ -38,10 +39,11 @@
         <div class="row details mt-3">
           <div class="col-6">
             <small>
-			  <a href="#" class="text-brand" v-if="!user">
+              <a href="#" class="text-brand" v-if="!user">
                 <i class="far fa-thumbs-up"></i> {{ report.net_votes }}
               </a>
-              <a href="#" class="text-brand" @click.prevent="$store.commit('setPostToVote', report)" data-toggle="modal" data-target="#voteModal" v-if="user">
+              <a href="#" class="text-brand" @click.prevent="$store.commit('setPostToVote', report)" data-toggle="modal"
+                 data-target="#voteModal" v-if="user">
                 <i class="far fa-thumbs-up"></i> {{ report.net_votes }}
               </a>
               <i class="far fa-comments ml-2"></i> {{ report.children }}
@@ -49,7 +51,14 @@
           </div>
           <div class="col-6 text-right">
             <small>
-              <a href="#" class="text-brand" @click="$store.commit('setActiveReport', report)" data-toggle="modal" data-target="#reportModal">
+              <a href="#" class="text-brand" @click="$store.commit('setEditReport', report)" data-toggle="modal"
+                 data-target="#editReportModal" v-if="user && report.author === user.account.name">
+                <i class="far fa-edit"></i>
+                edit
+              </a>
+              <span v-if="user && report.author === user.account.name"> - </span>
+              <a href="#" class="text-brand" @click="$store.commit('setActiveReport', report)" data-toggle="modal"
+                 data-target="#reportModal">
                 read more
               </a>
             </small>
@@ -61,23 +70,24 @@
 </template>
 
 <script>
-  import { mapGetters } from 'vuex'
+  import {mapGetters} from 'vuex'
+
   export default {
     props: ['report'],
     computed: {
-	  ...mapGetters(['user', 'postToVote']),
-      date () {
+      ...mapGetters(['user', 'postToVote']),
+      date() {
         let date = new Date(this.report.created)
-        let minutes = date.getMinutes();
+        let minutes = date.getMinutes()
         return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() + ' ' + date.getHours() + ':' + (minutes < 10 ? '0' + minutes : minutes)
       },
-      steps () {
+      steps() {
         return this.meta.step_count[0]
       },
-      type () {
+      type() {
         return this.meta.activity_type.join(', ')
       },
-      meta () {
+      meta() {
         return JSON.parse(this.report.json_metadata)
       }
     }

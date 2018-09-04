@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import steem from 'steem'
 
 // returning promises to be able to wait for data
@@ -109,13 +110,25 @@ export default {
       steem.api.getDiscussionsByBlog({tag: username, limit: 100, start_author, start_permlink}, (err, posts) => {
         if (err) reject(err)
         else {
-          posts.shift() // remove the first posts because its the last post from before
+          if (start_author && start_permlink) posts.shift() // remove the first posts because its the last post from before
           posts = posts.filter(userPostsFilter) // get only actual activity reports
           commit('setUserReports', [...state.userReports, ...posts])
           dispatch('checkIfMoreUserReportsAvailable', username)
           resolve()
         }
       })
+    })
+  },
+  updateUserReport ({ state, commit }, options) {
+    steem.api.getContent(options.author, options.permlink, (err, updatedReport) => {
+      if (err) console.log(err)
+      else {
+        const index = state.userReports.findIndex(report => report.author === updatedReport.author && report.permlink === updatedReport.permlink)
+        if (index !== -1) {
+          // use Vue.set because of: https://vuejs.org/v2/guide/list.html#Caveats
+          Vue.set(state.userReports, index, updatedReport)
+        }
+      }
     })
   },
   checkIfMoreUserReportsAvailable ({ state, commit }, username) {
@@ -158,7 +171,7 @@ const userPostsFilter = (post) => {
   let meta = JSON.parse(post.json_metadata)
   // actual activity posts must have those two properties in metadata
   // since, in this case, posts are fetched by users blog, we also need to check for the actifit tag
-  return meta.hasOwnProperty('step_count') && meta.hasOwnProperty('activity_type') && meta.tags.indexOf('actifit') !== -1
+  return meta.hasOwnProperty('step_count') && meta.hasOwnProperty('activity_type') && meta.hasOwnProperty('tags') && meta.tags.indexOf('actifit') !== -1
 }
 
 const newsFilter = (post) => {

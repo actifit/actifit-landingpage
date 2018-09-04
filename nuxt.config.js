@@ -55,6 +55,7 @@ module.exports = {
 	  { src: '~plugins/ga.js', ssr: false },
     { src: '~plugins/vue-carousel', ssr: false },
     { src: '~plugins/vue-notification', ssr: false },
+    { src: '~plugins/vue-simplemde', ssr: false },
   ],
 
   /*
