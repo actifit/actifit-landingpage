@@ -119,11 +119,19 @@ export default {
       })
     })
   },
-  updateUserReport ({ state, commit }, options) {
+  updateReport ({ state, commit }, options) {
     steem.api.getContent(options.author, options.permlink, (err, updatedReport) => {
       if (err) console.log(err)
       else {
-        const index = state.userReports.findIndex(report => report.author === updatedReport.author && report.permlink === updatedReport.permlink)
+        // update reports
+        let index = state.reports.findIndex(report => report.author === updatedReport.author && report.permlink === updatedReport.permlink)
+        if (index !== -1) {
+          // use Vue.set because of: https://vuejs.org/v2/guide/list.html#Caveats
+          Vue.set(state.reports, index, updatedReport)
+        }
+
+        // update user reports
+        index = state.userReports.findIndex(report => report.author === updatedReport.author && report.permlink === updatedReport.permlink)
         if (index !== -1) {
           // use Vue.set because of: https://vuejs.org/v2/guide/list.html#Caveats
           Vue.set(state.userReports, index, updatedReport)

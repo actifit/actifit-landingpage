@@ -23,7 +23,7 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-success" @click.prevent="save()">
+          <button type="button" class="btn btn-brand" @click.prevent="save()">
             <i class="fas fa-spin fa-spinner" v-if="loading"></i>
             <i class="fas fa-paper-plane" v-else></i>
             Save
@@ -103,7 +103,7 @@
           this.body,
           meta,
           (err) => {
-            // stop loading animation and show notifitcation
+            // stop loading animation and show notification
             this.loading = false
             this.$notify({
               group: err ? 'error' : 'success',
@@ -112,7 +112,7 @@
             })
 
             // update report in store
-            this.$store.dispatch('updateUserReport', {
+            this.$store.dispatch('updateReport', {
               author: this.editReport.author,
               permlink: this.editReport.permlink
             })
