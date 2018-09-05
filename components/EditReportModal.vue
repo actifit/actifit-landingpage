@@ -112,7 +112,7 @@
             })
 
             // update report in store
-            this.$store.dispatch('updateUserReport', {
+            this.$store.dispatch('updateReport', {
               author: this.editReport.author,
               permlink: this.editReport.permlink
             })
