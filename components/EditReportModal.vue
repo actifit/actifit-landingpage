@@ -103,7 +103,7 @@
           this.body,
           meta,
           (err) => {
-            // stop loading animation and show notifitcation
+            // stop loading animation and show notification
             this.loading = false
             this.$notify({
               group: err ? 'error' : 'success',
