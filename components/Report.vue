@@ -3,14 +3,14 @@
   <div class="col-md-6 col-lg-4 mb-4">
     <div class="card report">
       <h6 class="mb-0 text-center">
-        <a :href="'https://steemit.com' + report.url" target="_blank">
+        <a :href="'https://busy.org' + report.url" target="_blank">
           {{ report.title }}
         </a>
       </h6>
       <div class="report-body">
         <div class="row">
           <div class="col-7">
-            <a :href="'https://steemit.com/@' + report.author" target="_blank">
+            <a :href="'https://busy.org/@' + report.author" target="_blank">
               <div class="user-avatar mr-1"
                    :style="'background-image: url(https://steemitimages.com/u/' + report.author + '/avatar)'"></div>
               <small class="d-inline-block align-top">@{{ report.author }}</small>

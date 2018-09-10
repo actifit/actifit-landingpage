@@ -121,7 +121,7 @@
           <div class="col-lg-6 order-lg-2 text-white showcase-img" style="background-image: url('/img/showcase-1.jpg');"></div>
           <div class="col-lg-6 order-lg-1 my-auto showcase-text">
             <h2 class="text-capitalize">Earn tokens as simple as one two three</h2>
-            <p class="lead mb-0">Download the Actifit mobile app. Go for a run, walk your dog, go through your favorite workout with a min target of 5,000 activity count. Post to steemit and get rewarded!</p>
+            <p class="lead mb-0">Download the Actifit mobile app. Go for a run, walk your dog, go through your favorite workout with a min target of 5,000 activity count. Post to the Steem blockchain and get rewarded!</p>
             <div class="text-center mt-5">
               <a href="https://bit.ly/actifit-app" target="_blank">
                 <img src="/img/google-play.png" />
@@ -187,28 +187,28 @@
           <div class="col-sm-4 text-center mb-4 mb-sm-0 d-flex align-items-center justify-content-center">
             <div>
               <h2>2.</h2>
-              <a :href="'https://steemit.com/@' + leaderboard[1].username" target="_blank">
+              <a :href="'https://busy.org/@' + leaderboard[1].username" target="_blank">
                 <div class="avatar mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + leaderboard[1].username + '/avatar);'"></div>
               </a>
-              <a :href="'https://steemit.com/@' + leaderboard[1].username" target="_blank">{{ leaderboard[1].username }}</a>
+              <a :href="'https://busy.org/@' + leaderboard[1].username" target="_blank">{{ leaderboard[1].username }}</a>
             </div>
           </div>
           <div class="col-sm-4 text-center mb-4 mb-sm-0 d-flex align-items-center justify-content-center">
             <div>
               <h2>1.</h2>
-              <a :href="'https://steemit.com/@' + leaderboard[0].username" target="_blank">
+              <a :href="'https://busy.org/@' + leaderboard[0].username" target="_blank">
                 <div class="avatar mx-auto mb-3" :style="'width: 200px; height: 200px; background-image: url(https://steemitimages.com/u/' + leaderboard[0].username + '/avatar);'"></div>
               </a>
-              <a :href="'https://steemit.com/@' + leaderboard[0].username" target="_blank">{{ leaderboard[0].username }}</a>
+              <a :href="'https://busy.org/@' + leaderboard[0].username" target="_blank">{{ leaderboard[0].username }}</a>
             </div>
           </div>
           <div class="col-sm-4 text-center mb-4 mb-sm-0 d-flex align-items-center justify-content-center">
             <div>
               <h2>3.</h2>
-              <a :href="'https://steemit.com/@' + leaderboard[2].username" target="_blank">
+              <a :href="'https://busy.org/@' + leaderboard[2].username" target="_blank">
                 <div class="avatar mx-auto mb-3" :style="'width: 100px; height: 100px; background-image: url(https://steemitimages.com/u/' + leaderboard[2].username + '/avatar);'"></div>
               </a>
-              <a :href="'https://steemit.com/@' + leaderboard[2].username" target="_blank">{{ leaderboard[2].username }}</a>
+              <a :href="'https://busy.org/@' + leaderboard[2].username" target="_blank">{{ leaderboard[2].username }}</a>
             </div>
           </div>
         </div>
@@ -224,10 +224,10 @@
         </h1>
         <div class="row">
           <div class="col-6 col-sm-4 col-md-3 text-center mb-4" v-for="(moderator, index) in moderators" :key="index" :moderator="moderator">
-            <a :href="'https://steemit.com/@' + moderator" target="_blank">
+            <a :href="'https://busy.org/@' + moderator" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + moderator + '/avatar);'"></div>
             </a>
-            <a :href="'https://steemit.com/@' + moderator" target="_blank">@{{ moderator }}</a>
+            <a :href="'https://busy.org/@' + moderator" target="_blank">@{{ moderator }}</a>
           </div>
         </div>
       </div>
@@ -242,10 +242,10 @@
         </h1>
         <div class="row">
           <div class="col-6 col-sm-4 text-center mb-4" v-for="(ambassador, index) in ambassadors" :key="index" :moderator="ambassador">
-            <a :href="'https://steemit.com/@' + ambassador" target="_blank">
+            <a :href="'https://busy.org/@' + ambassador" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + ambassador + '/avatar);'"></div>
             </a>
-            <a :href="'https://steemit.com/@' + ambassador" target="_blank">@{{ ambassador }}</a>
+            <a :href="'https://busy.org/@' + ambassador" target="_blank">@{{ ambassador }}</a>
           </div>
         </div>
       </div>
@@ -260,22 +260,22 @@
         </h1>
         <div class="row">
           <div class="col-sm-4 text-center mb-4">
-            <a href="https://steemit.com/@entrepreneur916" target="_blank">
+            <a href="https://busy.org/@entrepreneur916" target="_blank">
               <div class="avatar mx-auto mb-3" style="background-image: url('https://ipfs.busy.org/ipfs/QmPyExYzRA6Zp14c2UL3dZSTwZtToABHwFAyFjR1pZMVk6');"></div>
             </a>
-            <a href="https://steemit.com/@entrepreneur916" target="_blank">@entrepreneur916</a>
+            <a href="https://busy.org/@entrepreneur916" target="_blank">@entrepreneur916</a>
           </div>
           <div class="col-sm-4 text-center mb-4 mb-sm-0">
-            <a href="https://steemit.com/@bunnymoney" target="_blank">
+            <a href="https://busy.org/@bunnymoney" target="_blank">
               <div class="avatar mx-auto mb-3" style="background-image: url('https://ipfs.busy.org/ipfs/QmQnNadhAJPJL5Sa8FYL5Pxhgw22zWjw4S8Kmji6k21p2w');"></div>
             </a>
-            <a href="https://steemit.com/@bunnymoney" target="_blank">@bunnymoney</a>
+            <a href="https://busy.org/@bunnymoney" target="_blank">@bunnymoney</a>
           </div>
           <div class="col-sm-4 text-center mb-4 mb-sm-0">
-            <a href="https://steemit.com/@fedesox" target="_blank">
+            <a href="https://busy.org/@fedesox" target="_blank">
               <div class="avatar mx-auto mb-3" style="background-image: url('https://ipfs.busy.org/ipfs/QmZrT7r9SjKUcx81L8p9G9z6uhndupDpfsrtYjwqgF3zC2');"></div>
             </a>
-            <a href="https://steemit.com/@fedesox" target="_blank">@fedesox</a>
+            <a href="https://busy.org/@fedesox" target="_blank">@fedesox</a>
           </div>
         </div>
       </div>
