@@ -60,24 +60,47 @@ export default {
   },
   fetchReports ({ state, commit, dispatch }) {
     // fetches initial posts or more posts if invoked again
-    return new Promise((resolve, reject) => {
-      // if there are posts already, take the last one as starting point
-      let lastReport = state.reports.length ? state.reports[state.reports.length - 1] : null
-      let start_author = lastReport ? lastReport.author : null
-      let start_permlink = lastReport ? lastReport.permlink : null
+	
+	//grab list of banned users first
+	let bannedUsers = [];
+	fetch('https://actifitbot.herokuapp.com/banned_users').then(res => {
+		res.json().then(json => {
+			bannedUsers = json;
+			
+			//proceed with grabbing posts
+			return new Promise((resolve, reject) => {
+				console.log('let\'s get discussions');
+			  // if there are posts already, take the last one as starting point
+			  let lastReport = state.reports.length ? state.reports[state.reports.length - 1] : null
+			  let start_author = lastReport ? lastReport.author : null
+			  let start_permlink = lastReport ? lastReport.permlink : null
 
-      // get (next) 100 posts with actifit tag
-      steem.api.getDiscussionsByCreated({tag: 'actifit', limit: 100, start_author, start_permlink}, (err, posts) => {
-        if (err) reject(err)
-        else {
-          posts.shift() // remove the first posts because its the last post from before
-          posts = posts.filter(postsFilter) // get only actual activity reports
-          commit('setReports', [...state.reports, ...posts]) // append them to current reports
-          dispatch('checkIfMoreReportsAvailable') // check if there's more to load (to show load more button or not)
-          resolve()
-        }
-      })
-    })
+			  // get (next) 100 posts with actifit tag
+			  steem.api.getDiscussionsByCreated({tag: 'actifit', limit: 100, start_author, start_permlink}, (err, posts) => {
+				if (err) reject(err)
+				else {
+				  posts.shift() // remove the first posts because its the last post from before
+				  posts = posts.filter(postsFilter) // get only actual activity reports
+				  //posts = posts.filter(bannedUsersFilter([{user:'inlakech'},{user:'tecire'},{user:'sssssss'}])) //get rid of banned users posts
+				  //new function to filter out banned users and their posts
+				  posts = posts.filter(function (post) {
+					   let user_banned = false;
+						for (let n = 0; n < bannedUsers.length; n++) {
+							if (post.author == bannedUsers[n].user){
+								user_banned = true;
+								break;
+							}
+						}   
+						return !user_banned
+					});
+				  commit('setReports', [...state.reports, ...posts]) // append them to current reports
+				  dispatch('checkIfMoreReportsAvailable') // check if there's more to load (to show load more button or not)
+				  resolve()
+				}
+			  })
+			})
+		}).catch(e => reject(e))
+	}).catch(e => reject(e))
   },
   checkIfMoreReportsAvailable ({ state, commit }) {
     return new Promise((resolve, reject) => {
