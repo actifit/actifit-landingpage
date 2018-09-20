@@ -20,6 +20,9 @@ export default {
   setReports (state, reports) {
     state.reports = reports
   },
+  setTopDelegators (state, topDelegators) {
+    state.topDelegators = topDelegators
+  },
   setActiveReport (state, report) {
     state.activeReport = report
   },

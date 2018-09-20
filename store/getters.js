@@ -20,6 +20,9 @@ export default {
   reports (state) {
     return state.reports
   },
+  topDelegators (state) {
+    return state.topDelegators
+  },
   activeReport (state) {
     return state.activeReport
   },

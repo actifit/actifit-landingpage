@@ -96,17 +96,17 @@
           <div class="col text-center">
             <h1><i class="fas fa-coins"></i></h1>
             <h4>Tokens Distributed</h4>
-            <h2 class="text-brand">{{ numberFormat(animatedTokensDistributed) }} AFIT</h2>
+            <h2 class="text-brand">{{ numberFormat(animatedTokensDistributed, 0) }} AFIT</h2>
           </div>
           <div class="col text-center">
             <h1><i class="fas fa-users"></i></h1>
             <h4>Token Holders</h4>
-            <h2 class="text-brand">{{ numberFormat(animatedUserCount) }}</h2>
+            <h2 class="text-brand">{{ numberFormat(animatedUserCount, 0) }}</h2>
           </div>
           <div class="col text-center">
             <h1><i class="fas fa-dumbbell"></i></h1>
             <h4>Rewarded Activities</h4>
-            <h2 class="text-brand">{{ numberFormat(animatedRewardedActivityCount) }}</h2>
+            <h2 class="text-brand">{{ numberFormat(animatedRewardedActivityCount, 0) }}</h2>
           </div>
         </div>
       </div>
@@ -155,22 +155,42 @@
             <h2 class="text-capitalize">Delegate to earn more rewards</h2>
             <p class="lead mb-0">You can earn more Actifit tokens if you are a STEEM token holder. Delegate Steem Power to Actifit and earn your share of 100K AFIT tokens distributed per day to our delegators, as well as a weekly share of the 5% beneficiary reward of actifit posts.</p>
 			<div style="text-align:center; padding-top: 10px">
-			<br/>
-			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=10%20SP">10 SP</a>| 
-			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=20%20SP">20 SP</a>|
-			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=50%20SP">50 SP</a>|
-			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=100%20SP">100 SP</a>|
-			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=250%20SP">250 SP</a>|
-			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=500%20SP">500 SP</a><br/>
-			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=1000%20SP">1K SP</a>|
-			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=2000%20SP">2K SP</a>|
-			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=5000%20SP">5K SP</a>|
-			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=10000%20SP">10K SP</a>| 
-			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=20000%20SP">20K SP</a>|
-			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=50000%20SP">50K SP</a>
-			<br/>
-			<a href="https://steembottracker.com/delegation.html?delegatee=actifit">Custom Amount</a>
+				<br/>
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=10%20SP">10 SP</a>| 
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=20%20SP">20 SP</a>|
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=50%20SP">50 SP</a>|
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=100%20SP">100 SP</a>|
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=250%20SP">250 SP</a>|
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=500%20SP">500 SP</a><br/>
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=1000%20SP">1K SP</a>|
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=2000%20SP">2K SP</a>|
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=5000%20SP">5K SP</a>|
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=10000%20SP">10K SP</a>| 
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=20000%20SP">20K SP</a>|
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=50000%20SP">50K SP</a>
+				<br/>
+				<a href="https://steembottracker.com/delegation.html?delegatee=actifit">Custom Amount</a>
 			</div>
+          </div>
+        </div>
+      </div>
+    </section>
+	
+	
+	<!-- top Delegators -->
+    <section id="delegators" class="py-5 bg-light">
+      <div class="container">
+        <h1 class="text-center pb-5">
+          <i class="fas fa-heart"></i><br>
+          Top Delegators
+        </h1>
+        <div class="row">
+          <div class="col-6 col-sm-4 col-md-3 text-center mb-4" v-for="(delegator, index) in topDelegators" :key="index" :delegator="delegator">
+            <a :href="'https://busy.org/@' + delegator" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + delegator._id + '/avatar);'"></div>
+            </a>
+            <a :href="'https://busy.org/@' + delegator" target="_blank">@{{ delegator._id }}</a><br/>
+			<a :href="'https://busy.org/@' + delegator" target="_blank">{{ numberFormat(delegator.steem_power, 0) }} Steem Power</a>
           </div>
         </div>
       </div>
@@ -191,6 +211,7 @@
                 <div class="avatar mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + leaderboard[1].username + '/avatar);'"></div>
               </a>
               <a :href="'https://busy.org/@' + leaderboard[1].username" target="_blank">{{ leaderboard[1].username }}</a>
+			  <a :href="'https://busy.org/@' + leaderboard[1].username" target="_blank">{{ leaderboard[1].username }}</a>
             </div>
           </div>
           <div class="col-sm-4 text-center mb-4 mb-sm-0 d-flex align-items-center justify-content-center">
@@ -324,6 +345,9 @@
         tweenedUserCount: 0,
         tweenedTokensDistributed: 0,
         tweenedRewardedActivityCount: 0,
+		
+		//initializing array
+		//topDelegators: [],
 
         // static mods/ambassadors lists
         moderators: ['alfamano', 'curtwriter', 'rabihfarhat', 'd-gold', 'ciuoto', 'vishalsingh4997', 'kpreddy', 'katerinaramm', 'thereikiforest', 'ruah', 'lordneroo', 'mcfarhat'],
@@ -331,7 +355,7 @@
       }
     },
     computed: {
-      ...mapGetters(['user', 'userTokens', 'transactions', 'userCount', 'tokensDistributed', 'rewardedActivityCount', 'leaderboard', 'news', 'activeNews']),
+      ...mapGetters(['user', 'userTokens', 'transactions', 'userCount', 'topDelegators', 'tokensDistributed', 'rewardedActivityCount', 'leaderboard', 'news', 'activeNews']),
       formattedUserTokens () {
         return parseFloat(this.userTokens).toFixed(2)
       },
@@ -377,10 +401,11 @@
        * Formats numbers with commas and dots.
        *
        * @param number
+	   * @param precision
        * @returns {string}
        */
-      numberFormat (number) {
-        return new Intl.NumberFormat('en-EN').format(number)
+      numberFormat (number, precision) {
+        return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       }
     },
     mounted () {
@@ -391,7 +416,9 @@
       this.$store.dispatch('fetchTokenInfo')
       this.$store.dispatch('fetchRewardedActivityCount')
       this.$store.dispatch('fetchLeaderboard')
+	  this.$store.dispatch('fetchTopDelegators')
       this.$store.dispatch('fetchNews')
+	  
     }
   }
 </script>

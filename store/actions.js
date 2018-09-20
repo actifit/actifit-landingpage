@@ -18,6 +18,13 @@ export default {
       }).catch(e => reject(e))
     })
   },
+  fetchTopDelegators ({ state, commit }){
+	return new Promise((resolve, reject) => {
+      fetch('https://actifitbot.herokuapp.com/topDelegators?count=12').then(res => {
+        res.json().then(json => commit('setTopDelegators', json || [])).catch(e => reject(e))
+      }).catch(e => reject(e))
+    })
+  },
   fetchTokenInfo ({ commit }) {
     commit('setUserCount', 0) // reset to trigger animation again
     commit('setTokensDistributed', 0) // reset to trigger animation again
