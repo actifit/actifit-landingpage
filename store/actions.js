@@ -24,23 +24,21 @@ export default {
 		if (Number.isInteger(maxCount)){
 			targetUrl += '?count='+maxCount;
 		}
-      fetch(targetUrl).then(res => {
-        res.json().then(json => commit('setTopDelegators', json || [])).catch(e => reject(e))
-      }).catch(e => reject(e))
+		fetch(targetUrl).then(res => {
+			res.json().then(json => commit('setTopDelegators', json || [])).catch(e => reject(e))
+		}).catch(e => reject(e))
     })
   },
   fetchModerators ({ commit }){
 	return new Promise((resolve, reject) => {
-		var targetUrl = 'https://actifitbot.herokuapp.com/moderators';
-		fetch(targetUrl).then(res => {
+		fetch('https://actifitbot.herokuapp.com/moderators').then(res => {
 			res.json().then(json => commit('setModerators', json || [])).catch(e => reject(e))
 		}).catch(e => reject(e))
     })
   },
   fetchAmbassadors ({ commit }){
 	return new Promise((resolve, reject) => {
-		var targetUrl = 'https://actifitbot.herokuapp.com/ambassadors';
-		fetch(targetUrl).then(res => {
+		fetch('https://actifitbot.herokuapp.com/ambassadors').then(res => {
 			res.json().then(json => commit('setAmbassadors', json || [])).catch(e => reject(e))
 		}).catch(e => reject(e))
     })
