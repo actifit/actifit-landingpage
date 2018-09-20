@@ -18,6 +18,9 @@
             <a class="nav-link" href="#" @click.prevent="$router.push('/activity')">Activity</a>
           </li>
           <li class="nav-item">
+            <a class="nav-link" href="#" @click.prevent="scrollTo('#delegators')">Delegators</a>
+          </li>
+		  <li class="nav-item">
             <a class="nav-link" href="#" @click.prevent="scrollTo('#leaderboard')">Leaderboard</a>
           </li>
           <li class="nav-item">
@@ -192,6 +195,9 @@
             <a :href="'https://busy.org/@' + delegator" target="_blank">@{{ delegator._id }}</a><br/>
 			<a :href="'https://busy.org/@' + delegator" target="_blank">{{ numberFormat(delegator.steem_power, 0) }} Steem Power</a>
           </div>
+		  <div class="full-div">
+			<nuxt-link to="/delegators" class="text-center btn delegator-btn" data-target="#">View All Delegators</nuxt-link>
+		  </div>
         </div>
       </div>
     </section>
