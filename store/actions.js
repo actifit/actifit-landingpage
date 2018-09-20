@@ -18,9 +18,13 @@ export default {
       }).catch(e => reject(e))
     })
   },
-  fetchTopDelegators ({ state, commit }){
+  fetchTopDelegators ({ state, commit }, maxCount){
 	return new Promise((resolve, reject) => {
-      fetch('https://actifitbot.herokuapp.com/topDelegators?count=12').then(res => {
+		var targetUrl = 'https://actifitbot.herokuapp.com/topDelegators';
+		if (Number.isInteger(maxCount)){
+			targetUrl += '?count='+maxCount;
+		}
+      fetch(targetUrl).then(res => {
         res.json().then(json => commit('setTopDelegators', json || [])).catch(e => reject(e))
       }).catch(e => reject(e))
     })

@@ -424,7 +424,9 @@
       this.$store.dispatch('fetchTokenInfo')
       this.$store.dispatch('fetchRewardedActivityCount')
       this.$store.dispatch('fetchLeaderboard')
-	  this.$store.dispatch('fetchTopDelegators')
+	  
+	  //grab top 12 delegators
+	  this.$store.dispatch('fetchTopDelegators', 12)
       this.$store.dispatch('fetchNews')
 	  
     }
