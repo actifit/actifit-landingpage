@@ -23,11 +23,11 @@
       <!-- show listing when loaded -->
       <div class="row" v-if="topDelegators.length">
           <div class="col-6 col-sm-4 col-md-3 text-center mb-4" v-for="(delegator, index) in topDelegators" :key="index" :delegator="delegator">
-            <a :href="'https://busy.org/@' + delegator" target="_blank">
+            <a :href="'https://busy.org/@' + delegator._id" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + delegator._id + '/avatar);'"></div>
             </a>
-            <a :href="'https://busy.org/@' + delegator" target="_blank">@{{ delegator._id }}</a><br/>
-			<a :href="'https://busy.org/@' + delegator" target="_blank">{{ numberFormat(delegator.steem_power, 0) }} Steem Power</a>
+            <a :href="'https://busy.org/@' + delegator._id" target="_blank">@{{ delegator._id }}</a><br/>
+			<a :href="'https://busy.org/@' + delegator._id" target="_blank">{{ numberFormat(delegator.steem_power, 0) }} Steem Power</a>
           </div>
       </div>
     </div>

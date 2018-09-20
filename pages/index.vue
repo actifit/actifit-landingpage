@@ -189,11 +189,11 @@
         </h1>
         <div class="row">
           <div class="col-6 col-sm-4 col-md-3 text-center mb-4" v-for="(delegator, index) in topDelegators" :key="index" :delegator="delegator">
-            <a :href="'https://busy.org/@' + delegator" target="_blank">
+            <a :href="'https://busy.org/@' + delegator._id" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + delegator._id + '/avatar);'"></div>
             </a>
-            <a :href="'https://busy.org/@' + delegator" target="_blank">@{{ delegator._id }}</a><br/>
-			<a :href="'https://busy.org/@' + delegator" target="_blank">{{ numberFormat(delegator.steem_power, 0) }} Steem Power</a>
+            <a :href="'https://busy.org/@' + delegator._id" target="_blank">@{{ delegator._id }}</a><br/>
+			<a :href="'https://busy.org/@' + delegator._id" target="_blank">{{ numberFormat(delegator.steem_power, 0) }} Steem Power</a>
           </div>
 		  <div class="full-div">
 			<nuxt-link to="/delegators" class="text-center btn delegator-btn" data-target="#">View All Delegators</nuxt-link>
@@ -253,10 +253,10 @@
         </h1>
         <div class="row">
           <div class="col-6 col-sm-4 col-md-3 text-center mb-4" v-for="(moderator, index) in moderators" :key="index" :moderator="moderator">
-            <a :href="'https://busy.org/@' + moderator" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + moderator + '/avatar);'"></div>
+            <a :href="'https://busy.org/@' + moderator.name" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + moderator.name + '/avatar);'"></div>
             </a>
-            <a :href="'https://busy.org/@' + moderator" target="_blank">@{{ moderator }}</a>
+            <a :href="'https://busy.org/@' + moderator.name" target="_blank">@{{ moderator.name }}</a>
           </div>
         </div>
       </div>
@@ -270,11 +270,11 @@
           Ambassadors
         </h1>
         <div class="row">
-          <div class="col-6 col-sm-4 text-center mb-4" v-for="(ambassador, index) in ambassadors" :key="index" :moderator="ambassador">
-            <a :href="'https://busy.org/@' + ambassador" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + ambassador + '/avatar);'"></div>
+          <div class="col-6 col-sm-4 text-center mb-4" v-for="(ambassador, index) in ambassadors" :key="index" :moderator="ambassador.name">
+            <a :href="'https://busy.org/@' + ambassador.name" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + ambassador.name + '/avatar);'"></div>
             </a>
-            <a :href="'https://busy.org/@' + ambassador" target="_blank">@{{ ambassador }}</a>
+            <a :href="'https://busy.org/@' + ambassador.name" target="_blank">@{{ ambassador.name }}</a>
           </div>
         </div>
       </div>
@@ -354,16 +354,10 @@
         tweenedTokensDistributed: 0,
         tweenedRewardedActivityCount: 0,
 		
-		//initializing array
-		//topDelegators: [],
-
-        // static mods/ambassadors lists
-        moderators: ['alfamano', 'curtwriter', 'rabihfarhat', 'd-gold', 'ciuoto', 'vishalsingh4997', 'kpreddy', 'katerinaramm', 'thereikiforest', 'ruah', 'lordneroo', 'mcfarhat'],
-        ambassadors: ['taskmaster4450', 'flauwy', 'rosatravels', 'toocurious']
       }
     },
     computed: {
-      ...mapGetters(['user', 'userTokens', 'transactions', 'userCount', 'topDelegators', 'tokensDistributed', 'rewardedActivityCount', 'leaderboard', 'news', 'activeNews']),
+      ...mapGetters(['user', 'userTokens', 'transactions', 'userCount', 'topDelegators', 'moderators', 'ambassadors', 'tokensDistributed', 'rewardedActivityCount', 'leaderboard', 'news', 'activeNews']),
       formattedUserTokens () {
         return parseFloat(this.userTokens).toFixed(2)
       },
@@ -427,6 +421,11 @@
 	  
 	  //grab top 12 delegators
 	  this.$store.dispatch('fetchTopDelegators', 12)
+	  
+	  //grab team listing
+	  this.$store.dispatch('fetchModerators')
+	  this.$store.dispatch('fetchAmbassadors')
+	  
       this.$store.dispatch('fetchNews')
 	  
     }

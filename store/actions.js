@@ -29,6 +29,22 @@ export default {
       }).catch(e => reject(e))
     })
   },
+  fetchModerators ({ commit }){
+	return new Promise((resolve, reject) => {
+		var targetUrl = 'https://actifitbot.herokuapp.com/moderators';
+		fetch(targetUrl).then(res => {
+			res.json().then(json => commit('setModerators', json || [])).catch(e => reject(e))
+		}).catch(e => reject(e))
+    })
+  },
+  fetchAmbassadors ({ commit }){
+	return new Promise((resolve, reject) => {
+		var targetUrl = 'https://actifitbot.herokuapp.com/ambassadors';
+		fetch(targetUrl).then(res => {
+			res.json().then(json => commit('setAmbassadors', json || [])).catch(e => reject(e))
+		}).catch(e => reject(e))
+    })
+  },
   fetchTokenInfo ({ commit }) {
     commit('setUserCount', 0) // reset to trigger animation again
     commit('setTokensDistributed', 0) // reset to trigger animation again

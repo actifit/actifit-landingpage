@@ -23,6 +23,12 @@ export default {
   setTopDelegators (state, topDelegators) {
     state.topDelegators = topDelegators
   },
+  setModerators (state, moderators) {
+    state.moderators = moderators
+  },
+  setAmbassadors (state, ambassadors) {
+    state.ambassadors = ambassadors
+  },
   setActiveReport (state, report) {
     state.activeReport = report
   },
