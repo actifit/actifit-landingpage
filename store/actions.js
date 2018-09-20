@@ -57,7 +57,7 @@ export default {
           items.forEach(item => {
             let data = item.split(' ')
             if (data) {
-              leaderboard.push({username: data[1].replace('@', ''), rewards: data[2]})
+              leaderboard.push({username: data[1], activity_count: data[2]})
             }
           })
           commit('setLeaderboard', leaderboard)

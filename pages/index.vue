@@ -207,29 +207,31 @@
           <div class="col-sm-4 text-center mb-4 mb-sm-0 d-flex align-items-center justify-content-center">
             <div>
               <h2>2.</h2>
-              <a :href="'https://busy.org/@' + leaderboard[1].username" target="_blank">
-                <div class="avatar mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + leaderboard[1].username + '/avatar);'"></div>
+              <a :href="'https://busy.org/' + leaderboard[1].username" target="_blank">
+                <div class="avatar mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + leaderboard[1].username.replace('@','') + '/avatar);'"></div>
               </a>
-              <a :href="'https://busy.org/@' + leaderboard[1].username" target="_blank">{{ leaderboard[1].username }}</a>
-			  <a :href="'https://busy.org/@' + leaderboard[1].username" target="_blank">{{ leaderboard[1].username }}</a>
+              <a :href="'https://busy.org/' + leaderboard[1].username" target="_blank">{{ leaderboard[1].username }}</a><br/>
+			  <a :href="'https://busy.org/' + leaderboard[1].username" target="_blank">{{ leaderboard[1].activity_count }} Recorded Activity</a>
             </div>
           </div>
           <div class="col-sm-4 text-center mb-4 mb-sm-0 d-flex align-items-center justify-content-center">
             <div>
               <h2>1.</h2>
-              <a :href="'https://busy.org/@' + leaderboard[0].username" target="_blank">
-                <div class="avatar mx-auto mb-3" :style="'width: 200px; height: 200px; background-image: url(https://steemitimages.com/u/' + leaderboard[0].username + '/avatar);'"></div>
+              <a :href="'https://busy.org/' + leaderboard[0].username" target="_blank">
+                <div class="avatar mx-auto mb-3" :style="'width: 200px; height: 200px; background-image: url(https://steemitimages.com/u/' + leaderboard[0].username.replace('@','') + '/avatar);'"></div>
               </a>
-              <a :href="'https://busy.org/@' + leaderboard[0].username" target="_blank">{{ leaderboard[0].username }}</a>
+              <a :href="'https://busy.org/' + leaderboard[0].username" target="_blank">{{ leaderboard[0].username }}</a><br/>
+			  <a :href="'https://busy.org/' + leaderboard[0].username" target="_blank">{{ leaderboard[0].activity_count }} Recorded Activity</a>
             </div>
           </div>
           <div class="col-sm-4 text-center mb-4 mb-sm-0 d-flex align-items-center justify-content-center">
             <div>
               <h2>3.</h2>
-              <a :href="'https://busy.org/@' + leaderboard[2].username" target="_blank">
-                <div class="avatar mx-auto mb-3" :style="'width: 100px; height: 100px; background-image: url(https://steemitimages.com/u/' + leaderboard[2].username + '/avatar);'"></div>
+              <a :href="'https://busy.org/' + leaderboard[2].username" target="_blank">
+                <div class="avatar mx-auto mb-3" :style="'width: 100px; height: 100px; background-image: url(https://steemitimages.com/u/' + leaderboard[2].username.replace('@','') + '/avatar);'"></div>
               </a>
-              <a :href="'https://busy.org/@' + leaderboard[2].username" target="_blank">{{ leaderboard[2].username }}</a>
+              <a :href="'https://busy.org/' + leaderboard[2].username" target="_blank">{{ leaderboard[2].username }}</a><br/>
+			  <a :href="'https://busy.org/' + leaderboard[2].username" target="_blank">{{ leaderboard[2].activity_count }} Recorded Activity</a>
             </div>
           </div>
         </div>
