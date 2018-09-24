@@ -18,7 +18,7 @@
           <a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet')">Wallet</a>
           <a class="dropdown-item" href="#" @click.prevent="$router.push('/activity/' + user.account.name)">Activity</a>
           <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="#" @click.prevent="$store.dispatch('logout')">Logout</a>
+          <a class="dropdown-item" href="#" @click.prevent="$store.dispatch('steemconnect/logout')">Logout</a>
         </div>
       </li>
     </ul>
