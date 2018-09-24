@@ -412,9 +412,7 @@
       }
     },
     async mounted () {
-      // login
-      await this.$store.dispatch('steemconnect/login')
-
+      
       // fetch data
       this.$store.dispatch('fetchUserTokens')
       this.$store.dispatch('fetchTokenInfo')
@@ -429,6 +427,10 @@
 	  this.$store.dispatch('fetchAmbassadors')
 
       this.$store.dispatch('fetchNews')
+	  
+	  // login
+      await this.$store.dispatch('steemconnect/login')
+
 
     }
   }
