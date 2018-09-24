@@ -159,7 +159,7 @@
             <p class="lead mb-0">You can earn more Actifit tokens if you are a STEEM token holder. Delegate Steem Power to Actifit and earn your share of 100,000 AFIT tokens distributed per day to our delegators, as well as a weekly share of the 5% beneficiary reward of actifit posts.</p>
 			<div style="text-align:center; padding-top: 10px">
 				<br/>
-				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=10%20SP">10 SP</a>| 
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=10%20SP">10 SP</a>|
 				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=20%20SP">20 SP</a>|
 				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=50%20SP">50 SP</a>|
 				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=100%20SP">100 SP</a>|
@@ -168,7 +168,7 @@
 				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=1000%20SP">1K SP</a>|
 				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=2000%20SP">2K SP</a>|
 				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=5000%20SP">5K SP</a>|
-				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=10000%20SP">10K SP</a>| 
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=10000%20SP">10K SP</a>|
 				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=20000%20SP">20K SP</a>|
 				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=50000%20SP">50K SP</a>
 				<br/>
@@ -178,8 +178,8 @@
         </div>
       </div>
     </section>
-	
-	
+
+
 	<!-- top Delegators -->
     <section id="delegators" class="py-5 bg-light">
       <div class="container">
@@ -353,10 +353,11 @@
         tweenedUserCount: 0,
         tweenedTokensDistributed: 0,
         tweenedRewardedActivityCount: 0,
-		
+
       }
     },
     computed: {
+      ...mapGetters('steemconnect', ['user']),
       ...mapGetters(['user', 'userTokens', 'transactions', 'userCount', 'topDelegators', 'moderators', 'ambassadors', 'tokensDistributed', 'rewardedActivityCount', 'leaderboard', 'news', 'activeNews']),
       formattedUserTokens () {
         return parseFloat(this.userTokens).toFixed(2)
@@ -410,24 +411,25 @@
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       }
     },
-    mounted () {
+    async mounted () {
       // login
-      this.$store.dispatch('login')
+      await this.$store.dispatch('steemconnect/login')
 
       // fetch data
+      this.$store.dispatch('fetchUserTokens')
       this.$store.dispatch('fetchTokenInfo')
       this.$store.dispatch('fetchRewardedActivityCount')
       this.$store.dispatch('fetchLeaderboard')
-	  
+
 	  //grab top 12 delegators
 	  this.$store.dispatch('fetchTopDelegators', 12)
-	  
+
 	  //grab team listing
 	  this.$store.dispatch('fetchModerators')
 	  this.$store.dispatch('fetchAmbassadors')
-	  
+
       this.$store.dispatch('fetchNews')
-	  
+
     }
   }
 </script>

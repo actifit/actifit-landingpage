@@ -90,7 +90,7 @@
     },
     async mounted () {
       // login
-      this.$store.dispatch('login')
+      this.$store.dispatch('steemconnect/login')
 
       // reset previously fetched posts to get latest
       this.$store.commit('setReports', [])

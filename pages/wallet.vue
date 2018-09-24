@@ -51,14 +51,17 @@
       Footer
     },
     computed: {
-      ...mapGetters(['user', 'userTokens', 'transactions']),
+      ...mapGetters('steemconnect', ['user']),
+      ...mapGetters(['userTokens', 'transactions']),
       formattedUserTokens () {
         return parseFloat(this.userTokens).toFixed(2)
       },
     },
-    mounted () {
+    async mounted () {
       // login
-      this.$store.dispatch('login')
+      await this.$store.dispatch('steemconnect/login')
+      this.$store.dispatch('fetchUserTokens')
+      this.$store.dispatch('fetchTransactions')
     }
   }
 </script>
