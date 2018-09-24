@@ -18,6 +18,9 @@
             <a class="nav-link" href="#" @click.prevent="$router.push('/activity')">Activity</a>
           </li>
           <li class="nav-item">
+            <a class="nav-link" href="#" @click.prevent="scrollTo('#delegators')">Delegators</a>
+          </li>
+		  <li class="nav-item">
             <a class="nav-link" href="#" @click.prevent="scrollTo('#leaderboard')">Leaderboard</a>
           </li>
           <li class="nav-item">
@@ -62,7 +65,7 @@
 
           <!-- login/register buttons -->
           <div v-else>
-            <p class="lead py-md-3 form-info">Log in to see your current token balance or sign up for an account to start getting rewarded for your activity.</p>
+            <p class="lead py-md-3 form-info">Log in to see your current token balance, or sign up for a Steem account to start getting rewarded for your activity.</p>
             <div class="row">
               <div class="col-6">
                 <a :href="$steemconnect.getLoginURL().replace('v2.','')" class="btn btn-brand btn-lg w-100">Login</a>
@@ -88,7 +91,7 @@
       <div class="container py-5">
         <h1 class="pt-5 mb-3 text-capitalize text-center headline"><span class="text-brand">Actifit:</span> An innovative dapp that rewards fitness activity!</h1>
         <p class="lead mb-4 pb-5 text-center">
-          Built as one of the first Smart Media Tokens on top of the Steem blockchain, with a beta Android app that is released since day 1, Actifit tracks and rewards your activity, and rewards you with Actifit tokens, but also STEEM rewards via upvotes on your steemit posts.
+          Built as one of the first Smart Media Tokens on top of the Steem blockchain, with beta Android and iOS mobile apps already available on playstore and app store, Actifit tracks and rewards your activity via Actifit(AFIT) tokens, but also STEEM rewards via upvotes on your Steem posts.
         </p>
 
         <!-- stats -->
@@ -96,17 +99,17 @@
           <div class="col text-center">
             <h1><i class="fas fa-coins"></i></h1>
             <h4>Tokens Distributed</h4>
-            <h2 class="text-brand">{{ numberFormat(animatedTokensDistributed) }} AFIT</h2>
+            <h2 class="text-brand">{{ numberFormat(animatedTokensDistributed, 0) }} AFIT</h2>
           </div>
           <div class="col text-center">
             <h1><i class="fas fa-users"></i></h1>
             <h4>Token Holders</h4>
-            <h2 class="text-brand">{{ numberFormat(animatedUserCount) }}</h2>
+            <h2 class="text-brand">{{ numberFormat(animatedUserCount, 0) }}</h2>
           </div>
           <div class="col text-center">
             <h1><i class="fas fa-dumbbell"></i></h1>
             <h4>Rewarded Activities</h4>
-            <h2 class="text-brand">{{ numberFormat(animatedRewardedActivityCount) }}</h2>
+            <h2 class="text-brand">{{ numberFormat(animatedRewardedActivityCount, 0) }}</h2>
           </div>
         </div>
       </div>
@@ -121,7 +124,7 @@
           <div class="col-lg-6 order-lg-2 text-white showcase-img" style="background-image: url('/img/showcase-1.jpg');"></div>
           <div class="col-lg-6 order-lg-1 my-auto showcase-text">
             <h2 class="text-capitalize">Earn tokens as simple as one two three</h2>
-            <p class="lead mb-0">Download the Actifit mobile app. Go for a run, walk your dog, go through your favorite workout with a min target of 5,000 activity count. Post to steemit and get rewarded!</p>
+            <p class="lead mb-0">Download the Actifit mobile app. Go for a run, walk your dog, go through your favorite workout with a min target of 5,000 activity count. Post to the Steem blockchain and get rewarded!</p>
             <div class="text-center mt-5">
               <a href="https://bit.ly/actifit-app" target="_blank">
                 <img src="/img/google-play.png" />
@@ -143,7 +146,7 @@
             <p class="lead mb-0">
               Actifit tokens will be available for purchasing fitness related equipment, tools, gadgets, sports wear, gym memberships... and any transactions between providers and actifiters.<br>
               <br>
-              As a Steem Smart Media Token, Actifit tokens will have their own valuation per STEEM as well as FIAT currencies, and hence can be cashed out for actual FIAT currency.
+              As a Steem Smart Media Token, Actifit tokens are planned to have their own valuation per STEEM as well as FIAT currencies, and hence to be cashed out for actual FIAT currency.
             </p>
           </div>
         </div>
@@ -153,25 +156,48 @@
           <div class="col-lg-6 order-lg-2 text-white showcase-img" style="background-image: url('/img/showcase-3.jpg');"></div>
           <div class="col-lg-6 order-lg-1 my-auto showcase-text">
             <h2 class="text-capitalize">Delegate to earn more rewards</h2>
-            <p class="lead mb-0">You can earn more Actifit tokens if you are a STEEM token holder. Delegate Steem Power to Actifit and earn your share of 100K AFIT tokens distributed per day to our delegators, as well as a weekly share of the 5% beneficiary reward of actifit posts.</p>
+            <p class="lead mb-0">You can earn more Actifit tokens if you are a STEEM token holder. Delegate Steem Power to Actifit and earn your share of 100,000 AFIT tokens distributed per day to our delegators, as well as a weekly share of the 5% beneficiary reward of actifit posts.</p>
 			<div style="text-align:center; padding-top: 10px">
-			<br/>
-			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=10%20SP">10 SP</a>| 
-			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=20%20SP">20 SP</a>|
-			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=50%20SP">50 SP</a>|
-			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=100%20SP">100 SP</a>|
-			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=250%20SP">250 SP</a>|
-			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=500%20SP">500 SP</a><br/>
-			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=1000%20SP">1K SP</a>|
-			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=2000%20SP">2K SP</a>|
-			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=5000%20SP">5K SP</a>|
-			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=10000%20SP">10K SP</a>| 
-			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=20000%20SP">20K SP</a>|
-			<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=50000%20SP">50K SP</a>
-			<br/>
-			<a href="https://steembottracker.com/delegation.html?delegatee=actifit">Custom Amount</a>
+				<br/>
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=10%20SP">10 SP</a>|
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=20%20SP">20 SP</a>|
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=50%20SP">50 SP</a>|
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=100%20SP">100 SP</a>|
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=250%20SP">250 SP</a>|
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=500%20SP">500 SP</a><br/>
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=1000%20SP">1K SP</a>|
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=2000%20SP">2K SP</a>|
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=5000%20SP">5K SP</a>|
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=10000%20SP">10K SP</a>|
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=20000%20SP">20K SP</a>|
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=50000%20SP">50K SP</a>
+				<br/>
+				<a href="https://steembottracker.com/delegation.html?delegatee=actifit">Custom Amount</a>
 			</div>
           </div>
+        </div>
+      </div>
+    </section>
+
+
+	<!-- top Delegators -->
+    <section id="delegators" class="py-5 bg-light">
+      <div class="container">
+        <h1 class="text-center pb-5">
+          <i class="fas fa-heart"></i><br>
+          Top Delegators
+        </h1>
+        <div class="row">
+          <div class="col-6 col-sm-4 col-md-3 text-center mb-4" v-for="(delegator, index) in topDelegators" :key="index" :delegator="delegator">
+            <a :href="'https://busy.org/@' + delegator._id" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + delegator._id + '/avatar);'"></div>
+            </a>
+            <a :href="'https://busy.org/@' + delegator._id" target="_blank">@{{ delegator._id }}</a><br/>
+			<a :href="'https://busy.org/@' + delegator._id" target="_blank">{{ numberFormat(delegator.steem_power, 0) }} Steem Power</a>
+          </div>
+		  <div class="full-div">
+			<nuxt-link to="/delegators" class="text-center btn delegator-btn" data-target="#">View All Delegators</nuxt-link>
+		  </div>
         </div>
       </div>
     </section>
@@ -187,28 +213,31 @@
           <div class="col-sm-4 text-center mb-4 mb-sm-0 d-flex align-items-center justify-content-center">
             <div>
               <h2>2.</h2>
-              <a :href="'https://steemit.com/@' + leaderboard[1].username" target="_blank">
-                <div class="avatar mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + leaderboard[1].username + '/avatar);'"></div>
+              <a :href="'https://busy.org/' + leaderboard[1].username" target="_blank">
+                <div class="avatar mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + leaderboard[1].username.replace('@','') + '/avatar);'"></div>
               </a>
-              <a :href="'https://steemit.com/@' + leaderboard[1].username" target="_blank">{{ leaderboard[1].username }}</a>
+              <a :href="'https://busy.org/' + leaderboard[1].username" target="_blank">{{ leaderboard[1].username }}</a><br/>
+			  <a :href="'https://busy.org/' + leaderboard[1].username" target="_blank">{{ leaderboard[1].activity_count }} Recorded Activity</a>
             </div>
           </div>
           <div class="col-sm-4 text-center mb-4 mb-sm-0 d-flex align-items-center justify-content-center">
             <div>
               <h2>1.</h2>
-              <a :href="'https://steemit.com/@' + leaderboard[0].username" target="_blank">
-                <div class="avatar mx-auto mb-3" :style="'width: 200px; height: 200px; background-image: url(https://steemitimages.com/u/' + leaderboard[0].username + '/avatar);'"></div>
+              <a :href="'https://busy.org/' + leaderboard[0].username" target="_blank">
+                <div class="avatar mx-auto mb-3" :style="'width: 200px; height: 200px; background-image: url(https://steemitimages.com/u/' + leaderboard[0].username.replace('@','') + '/avatar);'"></div>
               </a>
-              <a :href="'https://steemit.com/@' + leaderboard[0].username" target="_blank">{{ leaderboard[0].username }}</a>
+              <a :href="'https://busy.org/' + leaderboard[0].username" target="_blank">{{ leaderboard[0].username }}</a><br/>
+			  <a :href="'https://busy.org/' + leaderboard[0].username" target="_blank">{{ leaderboard[0].activity_count }} Recorded Activity</a>
             </div>
           </div>
           <div class="col-sm-4 text-center mb-4 mb-sm-0 d-flex align-items-center justify-content-center">
             <div>
               <h2>3.</h2>
-              <a :href="'https://steemit.com/@' + leaderboard[2].username" target="_blank">
-                <div class="avatar mx-auto mb-3" :style="'width: 100px; height: 100px; background-image: url(https://steemitimages.com/u/' + leaderboard[2].username + '/avatar);'"></div>
+              <a :href="'https://busy.org/' + leaderboard[2].username" target="_blank">
+                <div class="avatar mx-auto mb-3" :style="'width: 100px; height: 100px; background-image: url(https://steemitimages.com/u/' + leaderboard[2].username.replace('@','') + '/avatar);'"></div>
               </a>
-              <a :href="'https://steemit.com/@' + leaderboard[2].username" target="_blank">{{ leaderboard[2].username }}</a>
+              <a :href="'https://busy.org/' + leaderboard[2].username" target="_blank">{{ leaderboard[2].username }}</a><br/>
+			  <a :href="'https://busy.org/' + leaderboard[2].username" target="_blank">{{ leaderboard[2].activity_count }} Recorded Activity</a>
             </div>
           </div>
         </div>
@@ -224,10 +253,10 @@
         </h1>
         <div class="row">
           <div class="col-6 col-sm-4 col-md-3 text-center mb-4" v-for="(moderator, index) in moderators" :key="index" :moderator="moderator">
-            <a :href="'https://steemit.com/@' + moderator" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + moderator + '/avatar);'"></div>
+            <a :href="'https://busy.org/@' + moderator.name" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + moderator.name + '/avatar);'"></div>
             </a>
-            <a :href="'https://steemit.com/@' + moderator" target="_blank">@{{ moderator }}</a>
+            <a :href="'https://busy.org/@' + moderator.name" target="_blank">@{{ moderator.name }}</a>
           </div>
         </div>
       </div>
@@ -241,11 +270,11 @@
           Ambassadors
         </h1>
         <div class="row">
-          <div class="col-6 col-sm-4 text-center mb-4" v-for="(ambassador, index) in ambassadors" :key="index" :moderator="ambassador">
-            <a :href="'https://steemit.com/@' + ambassador" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + ambassador + '/avatar);'"></div>
+          <div class="col-6 col-sm-4 text-center mb-4" v-for="(ambassador, index) in ambassadors" :key="index" :moderator="ambassador.name">
+            <a :href="'https://busy.org/@' + ambassador.name" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + ambassador.name + '/avatar);'"></div>
             </a>
-            <a :href="'https://steemit.com/@' + ambassador" target="_blank">@{{ ambassador }}</a>
+            <a :href="'https://busy.org/@' + ambassador.name" target="_blank">@{{ ambassador.name }}</a>
           </div>
         </div>
       </div>
@@ -260,22 +289,22 @@
         </h1>
         <div class="row">
           <div class="col-sm-4 text-center mb-4">
-            <a href="https://steemit.com/@entrepreneur916" target="_blank">
+            <a href="https://busy.org/@entrepreneur916" target="_blank">
               <div class="avatar mx-auto mb-3" style="background-image: url('https://ipfs.busy.org/ipfs/QmPyExYzRA6Zp14c2UL3dZSTwZtToABHwFAyFjR1pZMVk6');"></div>
             </a>
-            <a href="https://steemit.com/@entrepreneur916" target="_blank">@entrepreneur916</a>
+            <a href="https://busy.org/@entrepreneur916" target="_blank">@entrepreneur916</a>
           </div>
           <div class="col-sm-4 text-center mb-4 mb-sm-0">
-            <a href="https://steemit.com/@bunnymoney" target="_blank">
+            <a href="https://busy.org/@bunnymoney" target="_blank">
               <div class="avatar mx-auto mb-3" style="background-image: url('https://ipfs.busy.org/ipfs/QmQnNadhAJPJL5Sa8FYL5Pxhgw22zWjw4S8Kmji6k21p2w');"></div>
             </a>
-            <a href="https://steemit.com/@bunnymoney" target="_blank">@bunnymoney</a>
+            <a href="https://busy.org/@bunnymoney" target="_blank">@bunnymoney</a>
           </div>
           <div class="col-sm-4 text-center mb-4 mb-sm-0">
-            <a href="https://steemit.com/@fedesox" target="_blank">
+            <a href="https://busy.org/@fedesox" target="_blank">
               <div class="avatar mx-auto mb-3" style="background-image: url('https://ipfs.busy.org/ipfs/QmZrT7r9SjKUcx81L8p9G9z6uhndupDpfsrtYjwqgF3zC2');"></div>
             </a>
-            <a href="https://steemit.com/@fedesox" target="_blank">@fedesox</a>
+            <a href="https://busy.org/@fedesox" target="_blank">@fedesox</a>
           </div>
         </div>
       </div>
@@ -325,14 +354,11 @@
         tweenedTokensDistributed: 0,
         tweenedRewardedActivityCount: 0,
 
-        // static mods/ambassadors lists
-        moderators: ['alfamano', 'curtwriter', 'rabihfarhat', 'd-gold', 'ciuoto', 'vishalsingh4997', 'kpreddy', 'katerinaramm', 'thereikiforest', 'ruah', 'mcfarhat'],
-        ambassadors: ['taskmaster4450', 'flauwy', 'rosatravels', 'toocurious']
       }
     },
     computed: {
       ...mapGetters('steemconnect', ['user']),
-      ...mapGetters(['userTokens', 'transactions', 'userCount', 'tokensDistributed', 'rewardedActivityCount', 'leaderboard', 'news', 'activeNews']),
+      ...mapGetters(['user', 'userTokens', 'transactions', 'userCount', 'topDelegators', 'moderators', 'ambassadors', 'tokensDistributed', 'rewardedActivityCount', 'leaderboard', 'news', 'activeNews']),
       formattedUserTokens () {
         return parseFloat(this.userTokens).toFixed(2)
       },
@@ -378,10 +404,11 @@
        * Formats numbers with commas and dots.
        *
        * @param number
+	   * @param precision
        * @returns {string}
        */
-      numberFormat (number) {
-        return new Intl.NumberFormat('en-EN').format(number)
+      numberFormat (number, precision) {
+        return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       }
     },
     async mounted () {
@@ -393,7 +420,16 @@
       this.$store.dispatch('fetchTokenInfo')
       this.$store.dispatch('fetchRewardedActivityCount')
       this.$store.dispatch('fetchLeaderboard')
+
+	  //grab top 12 delegators
+	  this.$store.dispatch('fetchTopDelegators', 12)
+
+	  //grab team listing
+	  this.$store.dispatch('fetchModerators')
+	  this.$store.dispatch('fetchAmbassadors')
+
       this.$store.dispatch('fetchNews')
+
     }
   }
 </script>

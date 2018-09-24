@@ -20,6 +20,15 @@ export default {
   reports (state) {
     return state.reports
   },
+  topDelegators (state) {
+    return state.topDelegators
+  },
+  moderators (state) {
+    return state.moderators
+  },
+  ambassadors (state) {
+    return state.ambassadors
+  },
   activeReport (state) {
     return state.activeReport
   },

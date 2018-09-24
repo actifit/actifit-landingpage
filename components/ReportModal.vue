@@ -23,7 +23,7 @@
       body () {
 		/* regex to match @ words and convert them to steemit user links */
 		var re = /@([\w-]+)(?![\w-])/g;
-        return marked(this.report.body.replace(re,'[$&](https://steemit.com/$&)'))
+        return marked(this.report.body.replace(re,'[$&](https://busy.org/$&)'))
       }
     }
   }
