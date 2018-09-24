@@ -57,9 +57,11 @@
         return parseFloat(this.userTokens).toFixed(2)
       },
     },
-    mounted () {
+    async mounted () {
       // login
-      this.$store.dispatch('steemconnect/login')
+      await this.$store.dispatch('steemconnect/login')
+      this.$store.dispatch('fetchUserTokens')
+      this.$store.dispatch('fetchTransactions')
     }
   }
 </script>

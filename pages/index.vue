@@ -384,11 +384,12 @@
         return new Intl.NumberFormat('en-EN').format(number)
       }
     },
-    mounted () {
+    async mounted () {
       // login
-      this.$store.dispatch('steemconnect/login')
+      await this.$store.dispatch('steemconnect/login')
 
       // fetch data
+      this.$store.dispatch('fetchUserTokens')
       this.$store.dispatch('fetchTokenInfo')
       this.$store.dispatch('fetchRewardedActivityCount')
       this.$store.dispatch('fetchLeaderboard')
