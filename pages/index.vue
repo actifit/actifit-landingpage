@@ -331,7 +331,8 @@
       }
     },
     computed: {
-      ...mapGetters(['user', 'userTokens', 'transactions', 'userCount', 'tokensDistributed', 'rewardedActivityCount', 'leaderboard', 'news', 'activeNews']),
+      ...mapGetters('steemconnect', ['user']),
+      ...mapGetters(['userTokens', 'transactions', 'userCount', 'tokensDistributed', 'rewardedActivityCount', 'leaderboard', 'news', 'activeNews']),
       formattedUserTokens () {
         return parseFloat(this.userTokens).toFixed(2)
       },
@@ -385,7 +386,7 @@
     },
     mounted () {
       // login
-      this.$store.dispatch('login')
+      this.$store.dispatch('steemconnect/login')
 
       // fetch data
       this.$store.dispatch('fetchTokenInfo')

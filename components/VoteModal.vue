@@ -45,7 +45,8 @@
       }
     },
     computed: {
-      ...mapGetters(['user', 'postToVote']),
+      ...mapGetters('steemconnect', ['user']),
+      ...mapGetters(['postToVote']),
       voteWeight: {
         get () {
           return this.$store.getters.voteWeight

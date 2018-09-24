@@ -30,7 +30,8 @@
 
   export default {
     computed: {
-      ...mapGetters(['user', 'userTokens']),
+      ...mapGetters('steemconnect', ['user']),
+      ...mapGetters(['userTokens']),
       formattedUserTokens () {
         return parseFloat(this.userTokens).toFixed(2) + ' AFIT'
       }

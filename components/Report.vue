@@ -75,7 +75,8 @@
   export default {
     props: ['report'],
     computed: {
-      ...mapGetters(['user', 'postToVote']),
+      ...mapGetters('steemconnect', ['user']),
+      ...mapGetters(['postToVote']),
       date() {
         let date = new Date(this.report.created)
         let minutes = date.getMinutes()
