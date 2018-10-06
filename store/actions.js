@@ -18,6 +18,13 @@ export default {
       }).catch(e => reject(e))
     })
   },
+  fetchUserRank ({ state, commit }) {
+    return new Promise((resolve, reject) => {
+      fetch('https://actifitbot.herokuapp.com/getRank/' + state.steemconnect.user.account.name.toLowerCase()).then(res => {
+        res.json().then(json => commit('setUserRank', json.user_rank)).catch(e => reject(e))
+      }).catch(e => reject(e))
+    })
+  },  
   fetchTopDelegators ({ state, commit }, maxCount){
 	return new Promise((resolve, reject) => {
 		var targetUrl = 'https://actifitbot.herokuapp.com/topDelegators';

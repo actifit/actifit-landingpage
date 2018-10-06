@@ -5,8 +5,11 @@
       <li class="nav-item" v-if="!user">
         <a class="nav-link" :href="$steemconnect.getLoginURL().replace('v2.','')">Login</a>
       </li>
+	  <li class="nav-item d-none d-sm-block" v-if="user" >
+        <span class="navbar-text py-0" style="color:#ff112d">Rank&nbsp;<br><b>{{ displayUserRank }}</b></span>
+      </li>
       <li class="nav-item d-none d-sm-block" v-if="user">
-        <span class="navbar-text py-0">Balance:<br><b>{{ formattedUserTokens }}</b></span>
+        <span class="navbar-text py-0">Balance<br><b>{{ formattedUserTokens }}</b></span>
       </li>
       <li class="nav-item dropdown" v-if="user">
         <a class="nav-link dropdown-toggle py-0" href="#" data-toggle="dropdown">
@@ -31,10 +34,13 @@
   export default {
     computed: {
       ...mapGetters('steemconnect', ['user']),
-      ...mapGetters(['userTokens']),
+      ...mapGetters(['userTokens', 'userRank']),
       formattedUserTokens () {
         return parseFloat(this.userTokens).toFixed(2) + ' AFIT'
-      }
+      },
+	  displayUserRank () {
+		return this.userRank
+	  },
     }
   }
 </script>

@@ -52,16 +52,20 @@
     },
     computed: {
       ...mapGetters('steemconnect', ['user']),
-      ...mapGetters(['userTokens', 'transactions']),
+      ...mapGetters(['userTokens', 'transactions', 'userRank']),
       formattedUserTokens () {
         return parseFloat(this.userTokens).toFixed(2)
       },
+	  displayUserRank () {
+		return this.userRank
+	  },
     },
     async mounted () {
       // login
       await this.$store.dispatch('steemconnect/login')
       this.$store.dispatch('fetchUserTokens')
       this.$store.dispatch('fetchTransactions')
+	  this.$store.dispatch('fetchUserRank')
     }
   }
 </script>

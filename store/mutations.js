@@ -5,6 +5,9 @@ export default {
   setTransactions (state, transactions) {
     state.transactions = transactions
   },
+  setUserRank (state, userRank) {
+    state.userRank = userRank
+  },
   setUserCount (state, userCount) {
     state.userCount = userCount
   },

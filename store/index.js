@@ -10,6 +10,7 @@ const createStore = () => {
     state: {
       userTokens: 0, // logged-in user's token count
       transactions: [], // logged-in user's transactions
+	  userRank: 0, // logged-in user's rank
       userCount: 0, // users using actifit
       tokensDistributed: 0, // total amount of distributed tokens
       rewardedActivityCount: 0, // total amount of activity posts
@@ -41,6 +42,7 @@ const createStore = () => {
     if (mutation.type === 'login') {
       store.dispatch('fetchUserTokens')
       store.dispatch('fetchTransactions')
+	  store.dispatch('fetchUserRank')
     }
   })
 
