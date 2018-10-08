@@ -418,9 +418,6 @@
     async mounted () {
       
       // fetch data
-      this.$store.dispatch('fetchUserTokens')
-	  this.$store.dispatch('fetchUserRank')
-      this.$store.dispatch('fetchTokenInfo')
       this.$store.dispatch('fetchRewardedActivityCount')
       this.$store.dispatch('fetchLeaderboard')
 
@@ -434,8 +431,11 @@
       this.$store.dispatch('fetchNews')
 	  
 	  // login
-      await this.$store.dispatch('steemconnect/login')
-
+      this.$store.dispatch('steemconnect/login')
+      
+	  this.$store.dispatch('fetchUserTokens')
+	  this.$store.dispatch('fetchUserRank')
+      this.$store.dispatch('fetchTokenInfo')
 
     }
   }

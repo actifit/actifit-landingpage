@@ -62,7 +62,7 @@
     },
     async mounted () {
       // login
-      await this.$store.dispatch('steemconnect/login')
+      this.$store.dispatch('steemconnect/login')
       this.$store.dispatch('fetchUserTokens')
       this.$store.dispatch('fetchTransactions')
 	  this.$store.dispatch('fetchUserRank')
