@@ -47,6 +47,8 @@
   
   const actifit_host = 'https://usermedia.actifit.io/'
   const bucketName = 'actifit';
+  
+  AWS.config.update({ "accessKeyId": process.env.AWS_ACCESS_KEY_ID, "secretAccessKey": process.env.AWS_SECRET_ACCESS_KEY});
 
   export default {
     components: {
@@ -119,7 +121,8 @@
 		  //Execute the upload process
 		  s3.putObject(params, function (err, data) {
 			if (err){ 
-			  alert(err) // displaying error message
+			  //alert(err) // displaying error message
+			  console.log(err);
 			  main_container.imgUploading = false;
 			} else {
 			  console.log("image successfully uploaded");
@@ -135,7 +138,7 @@
 			}
 			main_container.$notify({
               group: err ? 'error' : 'success',
-              text: err ? 'Unknown error: Your image could not be added.' : 'Image successfully added!',
+              text: err ? 'Your image could not be added.' : 'Image successfully added!',
               position: 'top center'
             })
 		  })
