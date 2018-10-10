@@ -57,7 +57,7 @@
               </div>
               <div class="col-sm-6 mt-4 mt-sm-0">
                 <p class="lead text-muted">Activity</p>
-                <h3><b>{{ userReportsCount }}</b><br><small>Reports</small></h3>
+                <h3><b>{{ grabUserReportCount }}</b><br><small>Reports</small></h3>
                 <a href="#" class="btn btn-lg btn-brand w-100" @click.prevent="$router.push('/activity/' + user.account.name)">My Activity</a>
               </div>
             </div>
@@ -358,15 +358,13 @@
     },
     computed: {
       ...mapGetters('steemconnect', ['user']),
-      ...mapGetters(['userTokens', 'transactions', 'userRank', 'userCount', 'topDelegators', 'moderators', 'ambassadors', 'tokensDistributed', 'rewardedActivityCount', 'leaderboard', 'news', 'activeNews']),
+      ...mapGetters(['userTokens', 'userReportCount', 'transactions', 'userRank', 'userCount', 'topDelegators', 'moderators', 'ambassadors', 'tokensDistributed', 'rewardedActivityCount', 'leaderboard', 'news', 'activeNews']),
       formattedUserTokens () {
         return parseFloat(this.userTokens).toFixed(2)
       },
 	  
-      userReportsCount () {
-        return this.transactions.filter((transaction) => {
-          return transaction.reward_activity === 'Post' // count only posts
-        }).length
+      grabUserReportCount () {
+        return this.userReportCount
       },
 	  
 	  displayUserRank () {
@@ -435,6 +433,7 @@
       
 	  this.$store.dispatch('fetchUserTokens')
 	  this.$store.dispatch('fetchUserRank')
+	  this.$store.dispatch('fetchUserReportCount')
       this.$store.dispatch('fetchTokenInfo')
 
     }

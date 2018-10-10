@@ -9,6 +9,7 @@ const createStore = () => {
   const store = new Vuex.Store({
     state: {
       userTokens: 0, // logged-in user's token count
+	  userReportCount: 0, // logged-in user's report count
       transactions: [], // logged-in user's transactions
 	  userRank: 0, // logged-in user's rank
       userCount: 0, // users using actifit
@@ -41,7 +42,7 @@ const createStore = () => {
   store.subscribe((mutation) => {
     if (mutation.type === 'login') {
       store.dispatch('fetchUserTokens')
-      store.dispatch('fetchTransactions')
+      store.dispatch('fetchUserReportCount')
 	  store.dispatch('fetchUserRank')
     }
   })

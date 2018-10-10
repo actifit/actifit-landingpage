@@ -11,6 +11,13 @@ export default {
       }).catch(e => reject(e))
     })
   },
+  fetchUserReportCount ({ state, commit }) {
+    return new Promise((resolve, reject) => {
+      fetch('https://actifitbot.herokuapp.com/userRewardedPostCount/' + state.steemconnect.user.account.name.toLowerCase()).then(res => {
+        res.json().then(json => commit('setUserReportCount', json.rewarded_post_count)).catch(e => reject(e))
+      }).catch(e => reject(e))
+    })
+  },
   fetchTransactions ({ state, commit }) {
     return new Promise((resolve, reject) => {
       fetch('https://actifitbot.herokuapp.com/transactions/' + state.steemconnect.user.account.name.toLowerCase()).then(res => {
