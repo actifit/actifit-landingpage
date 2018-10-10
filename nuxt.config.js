@@ -74,6 +74,7 @@ module.exports = {
     extend(config, ctx) {
       // Run ESLint on save
       if (ctx.isDev && ctx.isClient) {
+		
         config.module.rules.push({
           enforce: 'pre',
           test: /\.(js|vue)$/,
@@ -81,6 +82,11 @@ module.exports = {
           exclude: /(node_modules)/
         })
       }
+	  
+		config.node = {
+            fs: 'empty'
+        }
     }
+	
   }
 }

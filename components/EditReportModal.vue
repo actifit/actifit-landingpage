@@ -16,6 +16,11 @@
           <div class="form-group">
             <markdown-editor v-model="body" :configs="editorConfig" ref="editor"></markdown-editor>
           </div>
+		  <div class="form-group">
+			<label for="image-upload">Upload Images</label><br/>
+			<input id="image-upload" type="file" v-on:change="fileChange($event.target.files)" /> 
+			<i class="fas fa-spin fa-spinner" v-if="imgUploading"></i>
+		  </div>
           <div class="form-group">
             <label for="report-tags">Tags</label>
             <input-tag id="report-tags" :tags.sync="tags" :addTagOnBlur="true"></input-tag>
@@ -38,6 +43,10 @@
   import marked from 'marked'
   import InputTag from 'vue-input-tag'
   import { mapGetters } from 'vuex'
+  import AWS from 'aws-sdk'
+  
+  const actifit_host = 'https://usermedia.actifit.io/'
+  const bucketName = 'actifit';
 
   export default {
     components: {
@@ -48,7 +57,9 @@
         title: '', // post title
         body: '', // post body
         tags: [], // post tags
+		file: '', //image
         loading: false, // loading animation in submit button
+		imgUploading: false, // loading animation while image upload in progress
         editorConfig: { // markdown editor for post body
           autofocus: true,
           spellChecker: false,
@@ -80,6 +91,55 @@
       }
     },
     methods: {
+		fileChange (file) {
+		  //display image upload animation
+		  this.imgUploading = true;
+		  
+		  //generate new key/name for the image to store
+		  var key = (Date.now().toString(36) + Math.random().toString(36).substr(2, 11) + Math.random().toString(36).substr(2, 11)).toUpperCase();
+		  
+		  //initialize S3 instance to process the upload
+		  const s3 = new AWS.S3()
+		  var params = {
+			Bucket: bucketName,
+			Key: key, // this will be your share url name
+			ContentType: 'image/jpeg',
+			Body: file[0], 
+			ACL: 'public-read' 
+		  }
+		  
+		  let img_orig_name = file[0].name
+		  let img_url = actifit_host + key
+		  
+		  let txt_editor = this.$refs.editor.simplemde;
+		  
+		  //reference to this to be used inside the s3 response method
+		  let main_container = this;
+		  
+		  //Execute the upload process
+		  s3.putObject(params, function (err, data) {
+			if (err){ 
+			  alert(err) // displaying error message
+			  main_container.imgUploading = false;
+			} else {
+			  console.log("image successfully uploaded");
+			  console.log(data);
+			  console.log('File uploaded to ' + img_url);
+			  
+			  //insert the image markdown within the editor as cursor position
+			  
+			  let pos = txt_editor.codemirror.getCursor();
+			  txt_editor.codemirror.setSelection(pos, pos);
+			  txt_editor.codemirror.replaceSelection('!['+img_orig_name+']('+img_url+')');
+			  main_container.imgUploading = false;
+			}
+			main_container.$notify({
+              group: err ? 'error' : 'success',
+              text: err ? 'Unknown error: Your image could not be added.' : 'Image successfully added!',
+              position: 'top center'
+            })
+		  })
+		},
       save () {
         this.loading = true // start loading animation
 
