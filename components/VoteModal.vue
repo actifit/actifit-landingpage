@@ -15,7 +15,7 @@
             <li :class="{'page-item': true, disabled: voteWeight === -100}"><a class="page-link vote-controls text-danger" href="#" @click.prevent="changeVoteWeight(-10)">-10</a></li>
             <li :class="{'page-item': true, disabled: voteWeight === -100}"><a class="page-link vote-controls text-danger" href="#" @click.prevent="changeVoteWeight(-1)">-1</a></li>
             <li class="page-item vote-weight">
-              <input type="number" value="100" class="form-control" v-model="voteWeight" />
+              <input id="votableWeight" type="number" value="100" class="form-control" v-model="voteWeight" @change="customVoteWeight" />
             </li>
             <li :class="{'page-item': true, disabled: voteWeight === 100}"><a class="page-link vote-controls text-success" href="#" @click.prevent="changeVoteWeight(1)">+1</a></li>
             <li :class="{'page-item': true, disabled: voteWeight === 100}"><a class="page-link vote-controls text-success" href="#" @click.prevent="changeVoteWeight(10)">+10</a></li>
@@ -57,13 +57,22 @@
       }
     },
     methods: {
+	  //handles updating custom values
+	  customVoteWeight () {
+		var newVal = document.getElementById('votableWeight').value;
+		if (newVal == this.voteWeight){
+			//do nothing
+		}else{
+			this.setVoteWeight(newVal);
+		}
+	  },
       changeVoteWeight (value) {
-        this.setVoteWeight(this.voteWeight += value)
+        this.setVoteWeight(this.voteWeight += parseInt(value))
       },
       setVoteWeight (weight) {
         weight = weight > 100 ? 100 : weight
         weight = weight < -100 ? -100 : weight
-        this.$store.commit('setVoteWeight', weight)
+        this.$store.commit('setVoteWeight', parseInt(weight))
       },
       vote () {
         this.loading = true
