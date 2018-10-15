@@ -18,7 +18,8 @@
         <div class="dropdown-menu dropdown-menu-right">
           <h6 class="dropdown-header text-center">@{{ user.account.name }}</h6>
           <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet')">Wallet</a>
+          <a class="dropdown-item" href="#" @click.prevent="">Rank <br/> {{ displayUserRank }}</a>
+		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet')">Wallet <br/> {{ formattedUserTokens }}</a>
           <a class="dropdown-item" href="#" @click.prevent="$router.push('/activity/' + user.account.name)">Activity</a>
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="#" @click.prevent="$store.dispatch('steemconnect/logout')">Logout</a>
