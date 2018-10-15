@@ -10,10 +10,12 @@
       <div class="report-body">
         <div class="row">
           <div class="col-7">
-            <a :href="'https://busy.org/@' + report.author" target="_blank">
+            <a :href="'https://busy.org/@' + report.author" target="_blank">			
+			
               <div class="user-avatar mr-1"
                    :style="'background-image: url(https://steemitimages.com/u/' + report.author + '/avatar)'"></div>
               <small class="d-inline-block align-top">@{{ report.author }}</small>
+			  <small class="text-brand numberCircle">{{ getUserRank }}</small>
             </a>
           </div>
           <div class="col-5 text-right">
@@ -116,19 +118,31 @@
 		}else{
 			return this.report.pending_payout_value.replace('SBD','').replace('STEEM','')+' STEEM/SBD'
 		}
-
+	  },
+	  getUserRank() {
+		//proper formatting issue to display circle for smaller numbers
+		if (this.userRank<10){
+			return ' '+parseFloat(this.userRank).toFixed(1);
+		}else{
+			return parseFloat(this.userRank).toFixed(1);
+		}
 	  }
 	  	  
     }, 
 	data: function(){
 		return {
-			afitReward: ''
+			afitReward: '',
+			userRank: '',
 		}
 	},
 	async mounted () {
 		//grab the post's reward to display it properly
 		fetch('https://actifitbot.herokuapp.com/getPostReward?user=' + this.report.author+'&url='+this.report.url).then(res => {
 			res.json().then(json => this.afitReward = json.token_count)}).catch(e => reject(e))
+			
+		//grab the author's rank
+		fetch('https://actifitbot.herokuapp.com/getRank/' + this.report.author).then(res => {
+			res.json().then(json => this.userRank = json.user_rank)}).catch(e => reject(e))
 	}
   }
 </script>
@@ -157,4 +171,17 @@
       border-radius: 50%
       float: left
       border: solid 1px #ddd
+</style>
+<style>
+	.numberCircle {
+	  border-radius: 50%;
+	  width: 10px;
+	  line-height: 10px;
+	  padding: 4px 2px 4px 2px;
+	  margin-left: 4px;
+	  background: #fff;
+	  border: 2px solid;
+	  text-align: center;
+	  vertical-align:middle;
+	}
 </style>
