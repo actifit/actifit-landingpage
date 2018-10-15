@@ -31,7 +31,7 @@ export default {
         res.json().then(json => commit('setUserRank', json.user_rank)).catch(e => reject(e))
       }).catch(e => reject(e))
     })
-  },  
+  }, 
   fetchTopDelegators ({ state, commit }, maxCount){
 	return new Promise((resolve, reject) => {
 		var targetUrl = 'https://actifitbot.herokuapp.com/topDelegators';

@@ -23,7 +23,7 @@
         <div class="row details mt-3">
           <div class="col-7">
             <small class="d-block">
-              <b>Activity:</b>
+              <b>Activity Type:</b>
             </small>
             <small class="d-block text-truncate" :title="type">
               {{ type }}
@@ -31,7 +31,7 @@
           </div>
           <div class="col-5 text-right">
             <small>
-              <b>Steps/Moves:</b><br>
+              <b>Activity Count:</b><br>
               {{ steps }}
             </small>
           </div>
@@ -64,6 +64,18 @@
             </small>
           </div>
         </div>
+		<div class="row details mt-3">
+			<div class="col-6">
+				<small>
+					{{ postPayout }}
+				</small>
+			</div>
+			<div class="col-6 text-right">
+				<small>
+					{{ afitReward }} AFIT
+				</small>
+			</div>
+		</div>
       </div>
     </div>
   </div>
@@ -90,8 +102,34 @@
       },
       meta() {
         return JSON.parse(this.report.json_metadata)
-      }
-    }
+      },
+	  postPayout() {
+		//check if post paid to grab proper STEEM/SBD payout value
+		//compare today v/s payout date calculated based on 7 days payout time
+		let reportDate = new Date() 
+		let payoutDays = 7;
+		let reportPayout = new Date(this.report.created);
+		reportPayout.setDate(reportPayout.getDate() + payoutDays);
+		let today = new Date();
+		if (today.getTime() > reportPayout.getTime()){
+			return this.report.total_payout_value.replace('SBD','').replace('STEEM','')+' STEEM/SBD'
+		}else{
+			return this.report.pending_payout_value.replace('SBD','').replace('STEEM','')+' STEEM/SBD'
+		}
+
+	  }
+	  	  
+    }, 
+	data: function(){
+		return {
+			afitReward: ''
+		}
+	},
+	async mounted () {
+		//grab the post's reward to display it properly
+		fetch('https://actifitbot.herokuapp.com/getPostReward?user=' + this.report.author+'&url='+this.report.url).then(res => {
+			res.json().then(json => this.afitReward = json.token_count)}).catch(e => reject(e))
+	}
   }
 </script>
 
