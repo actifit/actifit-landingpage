@@ -40,7 +40,7 @@
         return parseFloat(this.userTokens).toFixed(2) + ' AFIT'
       },
 	  displayUserRank () {
-		return this.userRank
+		return parseFloat(this.userRank).toFixed(1)
 	  },
     }
   }
