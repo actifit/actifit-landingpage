@@ -79,11 +79,13 @@
 			</div>
 		</div>
 		<!-- adding section to display additional FULL Payout option -->
-		<div class="row details mt-2 text-brand" v-if="this.meta.full_afit_pay=='on'">
+		<div class="row details mt-2 text-brand full-afit-txt" v-if="this.meta.full_afit_pay=='on'">
 			<div class="col-8">
+				<i class="fas fa-star"></i>
 				<small>
-					Full AFIT Payout Mode On
+					Full AFIT Payout Mode
 				</small>
+				<i class="fas fa-star"></i>
 			</div>
 			<div class="col-4 text-right" v-if="!postPaid()">
 				<small>
@@ -214,5 +216,8 @@
 	  border: 2px solid;
 	  text-align: center;
 	  vertical-align:middle;
+	}
+	.full-afit-txt{
+	  font-style: italic;
 	}
 </style>
