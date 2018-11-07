@@ -22,7 +22,7 @@
             <small class="text-muted">{{ date }}</small>
           </div>
         </div>
-        <div class="row details mt-3">
+        <div class="row details mt-2">
           <div class="col-7">
             <small class="d-block">
               <b>Activity Type:</b>
@@ -38,7 +38,7 @@
             </small>
           </div>
         </div>
-        <div class="row details mt-3">
+        <div class="row details mt-2">
           <div class="col-6">
             <small>
               <a href="#" class="text-brand" v-if="!user">
@@ -66,7 +66,7 @@
             </small>
           </div>
         </div>
-		<div class="row details mt-3">
+		<div class="row details mt-2">
 			<div class="col-6">
 				<small>
 					{{ postPayout }}
@@ -75,6 +75,24 @@
 			<div class="col-6 text-right">
 				<small>
 					{{ afitReward }} AFIT
+				</small>
+			</div>
+		</div>
+		<!-- adding section to display additional FULL Payout option -->
+		<div class="row details mt-2 text-brand" v-if="this.meta.full_afit_pay=='on'">
+			<div class="col-8">
+				<small>
+					Full AFIT Payout Mode On
+				</small>
+			</div>
+			<div class="col-4 text-right" v-if="!postPaid()">
+				<small>
+					Pending Pay
+				</small>
+			</div>
+			<div class="col-4 text-right" v-else>
+				<small>
+					{{ fullAFITReward }} AFIT
 				</small>
 			</div>
 		</div>
@@ -106,14 +124,7 @@
         return JSON.parse(this.report.json_metadata)
       },
 	  postPayout() {
-		//check if post paid to grab proper STEEM/SBD payout value
-		//compare today v/s payout date calculated based on 7 days payout time
-		let reportDate = new Date() 
-		let payoutDays = 7;
-		let reportPayout = new Date(this.report.created);
-		reportPayout.setDate(reportPayout.getDate() + payoutDays);
-		let today = new Date();
-		if (today.getTime() > reportPayout.getTime()){
+		if (this.postPaid()){
 			return this.report.total_payout_value.replace('SBD','').replace('STEEM','')+' STEEM/SBD'
 		}else{
 			return this.report.pending_payout_value.replace('SBD','').replace('STEEM','')+' STEEM/SBD'
@@ -133,17 +144,37 @@
 		return {
 			afitReward: '',
 			userRank: '',
+			fullAFITReward: '',
 		}
 	},
+	methods: {
+	  postPaid() {
+		//compare today v/s payout date calculated based on 7 days payout time
+		let reportDate = new Date() 
+		let payoutDays = 7;
+		let reportPayout = new Date(this.report.created);
+		reportPayout.setDate(reportPayout.getDate() + payoutDays);
+		let today = new Date();
+		if (today.getTime() > reportPayout.getTime()){
+			return true;
+		}
+		return false;
+	  },
+	},
 	async mounted () {
-		//grab the post's reward to display it properly
 		fetch('https://actifitbot.herokuapp.com/getPostReward?user=' + this.report.author+'&url='+this.report.url).then(res => {
+		//grab the post's reward to display it properly
 			res.json().then(json => this.afitReward = json.token_count)}).catch(e => reject(e))
 			
 		//grab the author's rank
 		fetch('https://actifitbot.herokuapp.com/getRank/' + this.report.author).then(res => {
 			res.json().then(json => this.userRank = json.user_rank)}).catch(e => reject(e))
-	}
+			
+		//grab post full pay if full pay enabled
+		fetch('https://actifitbot.herokuapp.com/getPostFullAFITPayReward?user=' + this.report.author+'&url='+this.report.url).then(res => {
+			res.json().then(json => this.fullAFITReward = json.token_count)}).catch(e => reject(e))
+	},
+	
   }
 </script>
 
