@@ -41,11 +41,15 @@
         <div class="row details mt-2">
           <div class="col-6">
             <small>
-              <a href="#" class="text-brand" v-if="!user">
+              <a href="#" v-if="!user">
                 <i class="far fa-thumbs-up"></i> {{ report.net_votes }}
               </a>
-              <a href="#" class="text-brand" @click.prevent="$store.commit('setPostToVote', report)" data-toggle="modal"
-                 data-target="#voteModal" v-if="user">
+              <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 
+                 data-target="#voteModal" v-if="user && userVotedThisPost()==true">
+                <i class="far fa-thumbs-up"></i> {{ report.net_votes }}
+              </a>
+			  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal"
+                 data-target="#voteModal" v-else-if="user">
                 <i class="far fa-thumbs-up"></i> {{ report.net_votes }}
               </a>
               <i class="far fa-comments ml-2"></i> {{ report.children }}
@@ -139,6 +143,9 @@
 		}else{
 			return parseFloat(this.userRank).toFixed(1);
 		}
+	  },
+	  votedByUser() {
+		return this.postUpvoted;
 	  }
 	  	  
     }, 
@@ -147,9 +154,11 @@
 			afitReward: '',
 			userRank: '',
 			fullAFITReward: '',
+			postUpvoted: false,
 		}
 	},
 	methods: {
+	  /* function checks to see if post reached its payout period */
 	  postPaid() {
 		//compare today v/s payout date calculated based on 7 days payout time
 		let reportDate = new Date() 
@@ -162,6 +171,27 @@
 		}
 		return false;
 	  },
+	  /* function checks if logged in user has upvoted current report */
+	  userVotedThisPost() {
+		let curUser = this.user.account.name;
+		this.postUpvoted = this.report.active_votes.filter(voter => (voter.voter === curUser)).length > 0;
+		return this.postUpvoted;
+	  },
+	  /* function handles confirming if the user had voted already to prevent issues */
+	  votePrompt(e) {
+		//if this post is already voted by the user, we need to show a confirmation
+		if (this.userVotedThisPost()){
+		  var confirmPopup = confirm("You already had voted before on this post. Are you sure you want to change your vote?");
+		  if (confirmPopup){
+			this.$store.commit('setPostToVote', this.report)
+		  }else{
+			e.stopPropagation();
+		  }
+		}else{
+		  //proceed normally showing vote popup
+		  this.$store.commit('setPostToVote', this.report)
+		}
+	  }
 	},
 	async mounted () {
 		fetch('https://actifitbot.herokuapp.com/getPostReward?user=' + this.report.author+'&url='+this.report.url).then(res => {
@@ -172,9 +202,10 @@
 		fetch('https://actifitbot.herokuapp.com/getRank/' + this.report.author).then(res => {
 			res.json().then(json => this.userRank = json.user_rank)}).catch(e => reject(e))
 			
-		//grab post full pay if full pay enabled
+		//grab post full pay if full pay mode enabled
 		fetch('https://actifitbot.herokuapp.com/getPostFullAFITPayReward?user=' + this.report.author+'&url='+this.report.url).then(res => {
 			res.json().then(json => this.fullAFITReward = json.token_count)}).catch(e => reject(e))
+			
 	},
 	
   }
