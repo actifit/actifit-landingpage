@@ -8,7 +8,8 @@
       </div>
       <div>
         <small class="text-muted">{{ date }}</small><br>
-        <a :href="'https://busy.org' + transaction.url" target="_blank" v-if="transaction.url">Activity Details</a>
+		<a :href="'https://busy.org' + '/@' + transaction.user + '/' + transaction.url" target="_blank" v-if="transaction.reward_activity == 'Full AFIT Payout'">Activity Details</a>
+        <a :href="'https://busy.org' + transaction.url" target="_blank" v-else-if="transaction.url">Activity Details</a>
       </div>
     </div>
     <p class="font-italic mb-0 mt-2 text-center" v-if="transaction.note">{{ transaction.note }}</p>
