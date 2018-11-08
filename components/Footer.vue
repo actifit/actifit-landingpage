@@ -11,7 +11,8 @@
       <div class="row">
         <div class="col text-center">
           <small class="text-muted">&copy; Copyright Actifit {{ currentYear }}</small> |
-		      <small class="text-muted"><nuxt-link to="/privacy-policy">Privacy Policy</nuxt-link></small>
+		  <small class="text-muted"><nuxt-link to="/privacy-policy">Privacy Policy</nuxt-link></small> |
+		  <small class="text-muted"><nuxt-link to="/terms-conditions">Terms & Conditions</nuxt-link></small>
         </div>
       </div>
     </div>
