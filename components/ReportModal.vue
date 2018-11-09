@@ -33,6 +33,6 @@
 
 <style>
 	.modal-author{
-		margin-left: 10px;
+		margin-left: 10px !important;
 	}
 </style>
