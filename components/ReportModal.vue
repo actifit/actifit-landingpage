@@ -3,7 +3,9 @@
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content" v-if="report">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">{{ report.title }}</h5>
+          <h5 class="modal-title" id="exampleModalLabel">{{ report.title }}</h5><br/>
+		  <a :href="'https://busy.org/@' + report.author" target="_blank">
+		  <h5 class="modal-author modal-title text-brand" >@{{ report.author}}</h5></a>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -28,3 +30,9 @@
     }
   }
 </script>
+
+<style>
+	.modal-author{
+		margin-left: 10px;
+	}
+</style>
