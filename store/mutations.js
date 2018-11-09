@@ -61,5 +61,8 @@ export default {
   },
   setPostToVote (state, post) {
     state.postToVote = post
-  }
+  },
+  setNewlyVotedPosts (state, newlyVotedPosts) {
+    state.newlyVotedPosts = newlyVotedPosts
+  },
 }

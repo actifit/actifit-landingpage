@@ -28,7 +28,8 @@ const createStore = () => {
       news: [], // all news update posts from actifit account
       activeNews: null, // news shown in the modal
       voteWeight: 100, // vote weight for voting on posts
-      postToVote: null // active post that will be voted on
+      postToVote: null, // active post that will be voted on
+	  newlyVotedPosts: [], //contains a reference to all newly voted posts on this session
     },
     getters,
     mutations,

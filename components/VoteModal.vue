@@ -21,7 +21,6 @@
             <li :class="{'page-item': true, disabled: voteWeight === 100}"><a class="page-link vote-controls text-success" href="#" @click.prevent="changeVoteWeight(10)">+10</a></li>
             <li :class="{'page-item': true, disabled: voteWeight === 100}"><a class="page-link vote-controls" href="#" @click.prevent="setVoteWeight(100)"><i class="far fa-thumbs-up text-success"></i></a></li>
           </ul>
-
           <button type="submit" class="btn btn-brand" @click="vote()" v-if="voteWeight">
             <i class="fas fa-thumbs-up" v-if="voteWeight > 0"></i>
             <i class="fas fa-thumbs-down" v-if="voteWeight < 0"></i>
@@ -47,6 +46,7 @@
     computed: {
       ...mapGetters('steemconnect', ['user']),
       ...mapGetters(['postToVote']),
+	  ...mapGetters(['newlyVotedPosts']),
       voteWeight: {
         get () {
           return this.$store.getters.voteWeight
@@ -76,7 +76,7 @@
       },
       vote () {
         this.loading = true
-        this.$steemconnect.vote(this.user.account.name, this.postToVote.author, this.postToVote.permlink, this.voteWeight * 100, (err) => {
+		this.$steemconnect.vote(this.user.account.name, this.postToVote.author, this.postToVote.permlink, this.voteWeight * 100, (err) => {
           this.loading = false
           if (err) {
             this.$notify({
@@ -85,7 +85,12 @@
               position: 'top center'
             });
           }
-          else {
+          else {			
+			//append this entry into the list of voted posts
+			if (this.newlyVotedPosts.indexOf(this.postToVote.id) === -1){
+				this.newlyVotedPosts.push(this.postToVote.id);
+			}
+			this.$store.commit('setNewlyVotedPosts', this.newlyVotedPosts);
             $(this.$refs.voteModal).modal('hide')
             this.$notify({
               group: 'success',

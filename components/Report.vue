@@ -115,6 +115,7 @@
     computed: {
       ...mapGetters('steemconnect', ['user']),
       ...mapGetters(['postToVote']),
+	  ...mapGetters(['newlyVotedPosts']),
       date() {
         let date = new Date(this.report.created)
         let minutes = date.getMinutes()
@@ -146,7 +147,7 @@
 	  },
 	  votedByUser() {
 		return this.postUpvoted;
-	  }
+	  },
 	  	  
     }, 
 	data: function(){
@@ -174,7 +175,8 @@
 	  /* function checks if logged in user has upvoted current report */
 	  userVotedThisPost() {
 		let curUser = this.user.account.name;
-		this.postUpvoted = this.report.active_votes.filter(voter => (voter.voter === curUser)).length > 0;
+		//check if the post contains in its original voters current user, or if it has been upvoted in current session
+		this.postUpvoted = this.report.active_votes.filter(voter => (voter.voter === curUser)).length > 0 || this.newlyVotedPosts.indexOf(this.report.id)!==-1;
 		return this.postUpvoted;
 	  },
 	  /* function handles confirming if the user had voted already to prevent issues */
@@ -191,6 +193,10 @@
 		  //proceed normally showing vote popup
 		  this.$store.commit('setPostToVote', this.report)
 		}
+	  },
+	  newlyVotedPostsQuery() {
+		//handles returning a list of recently manually upvoted on this current session
+		return this.newlyVotedPosts.length;
 	  }
 	},
 	async mounted () {
