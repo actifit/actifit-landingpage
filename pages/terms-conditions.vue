@@ -121,7 +121,7 @@ You agree that your comments will not violate any right of any third-party, incl
 
 <h4>SECTION 10 - PERSONAL INFORMATION</h4>
 
-Your submission of personal information through our Service is governed by our Privacy Policy. To view our Privacy Policy.
+Your submission of personal information through our Service is governed by our <nuxt-link to="/privacy-policy">Privacy Policy</nuxt-link>.
 
 
 <h4>SECTION 11 - ERRORS, INACCURACIES AND OMISSIONS</h4>
@@ -205,7 +205,7 @@ We reserve the right, at our sole discretion, to update, change or replace any p
 
 <h4>SECTION 20 - CONTACT INFORMATION</h4>
 
-Questions about the Terms of Service should be sent to us at actifit.io@gmail.com.
+Questions about the Terms of Service should be sent to us at <a href="mailto:actifit.io@gmail.com">actifit.io@gmail.com</a>.
 
 </div>
 

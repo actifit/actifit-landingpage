@@ -18,7 +18,7 @@
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-5">
       <h2 class="text-center mb-5">Privacy Policy</h2>
-		<p>Effective date: August 23, 2018</p>
+		<p>Effective date: November 26, 2018</p>
 
 
 		<p>Actifit.io ("us", "we", or "our") operates the https://actifit.io website and the Actifit Fitness Tracker mobile application (the "Service").</p>
@@ -41,6 +41,10 @@
 		<ul>
 		<li>Cookies and Usage Data</li>
 		</ul>
+		<p>While using Actifit mobile apps, we collect your phone's sensor readings in terms of your movements, as Actifit aims to reward users' activity, as well as other information such as your Steem account username, password/keys, activity types, measurements and other relevant information. Though this information is not stored except on your own device, until you decide to submit this information and post it, whereby it will be posted on the Steem blockchain. Passwords/keys will not be stored anywhere aside from your own device, and will be used to authenticate your user account.</p> 
+		<p>Similarly, if you decide to use one of the integrations Actifit provides to sync data from wearabale devices (such as Fitbit), then this data (including but not limited to step count, weight/height) will also be stored on your device, and only submitted to the Steem blockchain once you decide to, and will be integrated as part of your post.</p>
+		<p>Due to the immutable nature of the blockchain, the data and posts/reports submitted can no longer be deleted.</p>
+		<p>Uploading pictures/attachments via Actifit.io website or app, you give Actifit team the permission to reuse this content under any means deemed useful, including but not limited to social media promotions and other marketing purposes</p>
 
 		<h4>Usage Data</h4>
 
@@ -128,7 +132,7 @@
 		<p>If you have any questions about this Privacy Policy, please contact us:</p>
 		<ul>
 			<li>By email: <a href="mailto:actifit.io@gmail.com">actifit.io@gmail.com</a></li>
-            <li>By visiting our group on discord: https://discord.gg/aHtcA6r</li>
+            <li>By visiting our group on discord: <a href="https://discord.gg/aHtcA6r">https://discord.gg/aHtcA6r</a></li>
       
         </ul>
       
