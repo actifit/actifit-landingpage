@@ -19,6 +19,8 @@
     "nuxt": "^1.4.2",
     "steem": "^0.7.1",
     "vue-carousel": "^0.11.0",
+    "vue-cookie-accept-decline": "^5.0.1",
+    "vue-cookie-law": "^1.8.0",
     "vue-input-tag": "^1.0.4",
     "vue-notification": "^1.3.13",
     "vue-scrollto": "^2.11.0",

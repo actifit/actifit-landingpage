@@ -16,15 +16,50 @@
         </div>
       </div>
     </div>
+	<vue-cookie-accept-decline
+    :ref="'myPanel1'"
+    :elementId="'myPanel1'"
+    :debug="false"
+    :position="'bottom'"
+    :type="'bar'"
+    :disableDecline="true"
+    :transitionName="'slideFromBottom'"
+    :showPostponeButton="false"
+    >
+
+    
+    <!-- Optional -->
+    <div slot="message">
+        We use cookies to ensure you get the best experience on our website. <router-link to="privacy-policy">More Info</router-link>
+    </div>
+
+    <!-- Optional -->
+    <div slot="acceptContent">
+        GOT IT!
+    </div>
+  </vue-cookie-accept-decline>
   </div>
 </template>
 
 <script>
+  import VueCookieAcceptDecline from 'vue-cookie-accept-decline'
+  import "vue-cookie-accept-decline/dist/vue-cookie-accept-decline.css";
   export default {
     computed: {
       currentYear () {
         return (new Date()).getFullYear()
       }
-    }
+    },
+	components: {
+		VueCookieAcceptDecline
+	}
   }
 </script>
+<style>
+	.cookie__bar__content{
+		overflow: visible!important;
+	}
+	button.cookie__bar__buttons__button--accept{
+		background: #ff112d!important;
+	}
+</style>

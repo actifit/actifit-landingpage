@@ -343,7 +343,7 @@
       UserMenu,
       Footer,
       News,
-      NewsModal
+      NewsModal 
     },
     data () {
       return {
