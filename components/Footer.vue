@@ -30,7 +30,9 @@
     
     <!-- Optional -->
     <div slot="message">
-        We use cookies to ensure you get the best experience on our website. <router-link to="privacy-policy">More Info</router-link>
+        We use cookies to ensure you get the best experience on our website. 
+		Continuing to use the site represents your consent to this.
+		<router-link to="privacy-policy">More Info</router-link>
     </div>
 
     <!-- Optional -->
