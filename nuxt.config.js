@@ -14,7 +14,7 @@ module.exports = {
   head: {
     title: 'Actifit Fitness Tracker - Rewarding Fitness Activity',
     meta: [
-      { charset: 'utf-8' },
+	  { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
       { hid: 'description', name: 'description', content: pkg.description },
 	  { hid: 'og:title', name:'og:title', content: 'Actifit - Rewarding Fitness Activity'},
@@ -22,6 +22,7 @@ module.exports = {
       { hid: 'og:url', name:'og:url', content: 'https://actifit.io'},
 	  { hid: 'og:type', name:'og:type', content: 'website'},
 	  { hid: 'og:image', name:'og:image', content: 'https://actifit.io/img/actifit_logo.png'},
+	  { name: 'google-site-verification', content:'Dv3mVaav2x5_2FauDB6MRjixVtVVWPfjUekWwKY-Tnc' },
     ],
     link: [
       { rel: 'icon', type: 'image/x-icon', href: '/img/actifit_logo.png' },
