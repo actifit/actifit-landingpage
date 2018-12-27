@@ -71,10 +71,10 @@
     },
     async mounted () {
       // login
-      this.$store.dispatch('login')
+      this.$store.dispatch('steemconnect/login')
 
       // fetch full delegators list
-      await this.$store.dispatch('fetchTopDelegators')
+      this.$store.dispatch('fetchTopDelegators')
 
       // remove loading state
       this.loading = false

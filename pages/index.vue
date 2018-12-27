@@ -392,7 +392,8 @@
       },
       rewardedActivityCount: function(newValue) {
         TweenLite.to(this.$data, 8, { tweenedRewardedActivityCount: newValue });
-      }
+      },
+	  user: 'fetchUserData',
     },
     methods: {
       /**
@@ -411,10 +412,21 @@
        */
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
-      }
+      },
+	  
+	  fetchUserData () {
+	    console.log('fetchUserData');
+		if (typeof this.user != 'undefined' && this.user != null){
+		  this.$store.dispatch('fetchUserTokens')
+		  this.$store.dispatch('fetchUserRank')
+		  this.$store.dispatch('fetchUserReportCount')
+		  this.$store.dispatch('fetchTokenInfo')
+		  this.$store.dispatch('fetchReferrals')
+		}
+	  },
     },
     async mounted () {
-      
+      console.log('mounted');
       // fetch data
       this.$store.dispatch('fetchRewardedActivityCount')
       this.$store.dispatch('fetchLeaderboard')
@@ -430,12 +442,7 @@
 	  
 	  // login
       this.$store.dispatch('steemconnect/login')
-      
-	  this.$store.dispatch('fetchUserTokens')
-	  this.$store.dispatch('fetchUserRank')
-	  this.$store.dispatch('fetchUserReportCount')
-      this.$store.dispatch('fetchTokenInfo')
-
+	  this.fetchUserData();
     }
   }
 </script>

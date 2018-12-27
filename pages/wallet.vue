@@ -60,12 +60,21 @@
 		return this.userRank
 	  },
     },
+	methods: {
+	  fetchUserData () {
+	    console.log('fetchUserData');
+		if (typeof this.user != 'undefined' && this.user != null){	  
+		  this.$store.dispatch('fetchUserTokens')
+		  this.$store.dispatch('fetchTransactions')
+		  this.$store.dispatch('fetchUserRank')
+		  this.$store.dispatch('fetchReferrals')
+		}
+	  }
+	},
     async mounted () {
       // login
       this.$store.dispatch('steemconnect/login')
-      this.$store.dispatch('fetchUserTokens')
-      this.$store.dispatch('fetchTransactions')
-	  this.$store.dispatch('fetchUserRank')
+	  this.fetchUserData();
     }
   }
 </script>

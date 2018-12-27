@@ -8,6 +8,9 @@ export default {
   transactions (state) {
     return state.transactions
   },
+  referrals (state) {
+    return state.referrals
+  },
   userRank (state) {
 	return state.userRank
   },

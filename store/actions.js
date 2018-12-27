@@ -25,6 +25,13 @@ export default {
       }).catch(e => reject(e))
     })
   },
+  fetchReferrals ({ state, commit }) {
+    return new Promise((resolve, reject) => {
+      fetch('https://actifitbot.herokuapp.com/signups/' + state.steemconnect.user.account.name.toLowerCase()).then(res => {
+        res.json().then(json => commit('setReferrals', json || [])).catch(e => reject(e))
+      }).catch(e => reject(e))
+    })
+  }, 
   fetchUserRank ({ state, commit }) {
     return new Promise((resolve, reject) => {
       fetch('https://actifitbot.herokuapp.com/getRank/' + state.steemconnect.user.account.name.toLowerCase()).then(res => {

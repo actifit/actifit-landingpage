@@ -11,6 +11,7 @@ const createStore = () => {
       userTokens: 0, // logged-in user's token count
 	  userReportCount: 0, // logged-in user's report count
       transactions: [], // logged-in user's transactions
+	  referrals: [], //logged-in user's referrals
 	  userRank: 0, // logged-in user's rank
       userCount: 0, // users using actifit
       tokensDistributed: 0, // total amount of distributed tokens

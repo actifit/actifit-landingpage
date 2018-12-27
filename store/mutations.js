@@ -8,6 +8,9 @@ export default {
   setTransactions (state, transactions) {
     state.transactions = transactions
   },
+  setReferrals (state, referrals) {
+    state.referrals = referrals
+  },
   setUserRank (state, userRank) {
     state.userRank = userRank
   },

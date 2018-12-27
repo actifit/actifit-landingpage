@@ -5,7 +5,12 @@ module.exports = {
   env: {
     scRedirectUrl: process.env.SC_REDIRECT_URL || 'http://localhost:3000/auth',
 	AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
-	AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY
+	AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
+	CREATE_ACCOUNT_API_KEY: process.env.CREATE_ACCOUNT_API_KEY,
+	REWARD_REFERRAL_API_KEY: process.env.REWARD_REFERRAL_API_KEY,
+	DELEGATE_ACCOUNT_API_KEY: process.env.DELEGATE_ACCOUNT_API_KEY,
+	confirmPaymentToken: process.env.CONFIRM_PAYMENT_API_KEY,
+	actiAppUrl: process.env.ACTI_API_URL || 'http://localhost:3120/',
   },
 
   /*
