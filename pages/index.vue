@@ -420,7 +420,6 @@
 		  this.$store.dispatch('fetchUserTokens')
 		  this.$store.dispatch('fetchUserRank')
 		  this.$store.dispatch('fetchUserReportCount')
-		  this.$store.dispatch('fetchTokenInfo')
 		  this.$store.dispatch('fetchReferrals')
 		}
 	  },
@@ -430,6 +429,8 @@
       // fetch data
       this.$store.dispatch('fetchRewardedActivityCount')
       this.$store.dispatch('fetchLeaderboard')
+	  
+	  this.$store.dispatch('fetchTokenInfo')
 
 	  //grab top 12 delegators
 	  this.$store.dispatch('fetchTopDelegators', 12)
