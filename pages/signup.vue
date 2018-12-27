@@ -149,7 +149,7 @@
 		captchaValid: false,
 		captcha_invalid: '',
 		targetAccount: 'actifit.signup',
-		delegatedSteem: 4,
+		delegatedSteem: 10,
 		privatePostKey: '',
 		error_proceeding: '',
 		error_msg: '',
