@@ -19,7 +19,7 @@
       <!-- account balance -->
       <div class="text-center">
         <h3 class="mb-4" v-if="user">Hey {{ user.account.name }}!</h3>
-		<p class="lead">For every referral, earn an amount equal to 10% of the AFIT rewards your referred user is earning upon successful signup!</p>
+		<p class="lead">For every referral, earn an amount equal to 20% of the AFIT rewards your referred user is earning upon successful signup!</p>
         <h5>Your Referral Link:</h5>
 		<input type="text" class="w-50 p-3" ref="refLink" id="referral-link" readonly/>
 		<button v-on:click="copyContent" data-targetEl="refLink" class="btn btn-brand p-3">Copy Link</button>	
