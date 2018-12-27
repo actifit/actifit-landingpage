@@ -185,6 +185,7 @@
       this.$store.dispatch('fetchTransactions')
 	  this.$store.dispatch('fetchUserRank')
 	  this.$store.dispatch('fetchReferrals')
+	  
 	  //console.log(this.$route.query.referrer);
 	  //this.initiateProcess ('jhdkhfkjf');
     },
@@ -287,13 +288,14 @@
 			this.error_msg = 'The email format used is incorrect.';
 			return;
 		}
-		//to prevent tempering with STEEM and AFIT values
+		//to prevent tampering with STEEM and AFIT values
 		const steem_invest = this.getMatchingSTEEM ();
 		const afit_reward = this.getMatchingAFIT ();
 		this.checkingFunds = true;
 		this.processStarted = true;
-		console.log('checking funds:'+this.targetMemo +">min:"+this.minSteemAmount());
+		console.log('checking funds');
 		let url = new URL(process.env.actiAppUrl + 'confirmPayment');
+		//compile all needed data and send it along the request for processing
 		let params = {
 			confirm_payment_token: process.env.confirmPaymentToken, 
 			new_account: this.$refs["account-username"].value,
@@ -306,11 +308,13 @@
 			email: this.$refs["account-email"].value,
 		}
 		Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
-		//the referrer, if exists
-		console.log(url)
 		try{
 			let res = await fetch(url);
-			let outcome = await res.json();
+			//let outcome = await res.json();
+			//as we are sending keep alives, we need to ensure we remove those from the final response, and then use it as json format
+			let outcome = await res.text();
+			outcome = outcome.replace(/ka/g,'');
+			outcome = JSON.parse(outcome);
 			console.log(outcome);
 			this.checkingFunds = false;
 			this.accountCreated = outcome.accountCreated;
@@ -319,6 +323,7 @@
 			this.privatePostKey = privateKeys.posting;
 		}catch(err){
 			console.error(err);
+			this.checkingFunds = false;
 		}
 	  },
 	  isEmailValid: function() {
