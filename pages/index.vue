@@ -71,7 +71,7 @@
                 <a :href="$steemconnect.getLoginURL().replace('v2.','')" class="btn btn-brand btn-lg w-100">Login</a>
               </div>
               <div class="col-6">
-                <a href="https://signup.steemit.com/?ref=actifit" class="btn btn-brand btn-lg w-100">Sign Up</a>
+                <a href="https://actifit.io/signup" class="btn btn-brand btn-lg w-100">Sign Up</a>
               </div>
             </div>
           </div>
