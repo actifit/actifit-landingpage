@@ -310,11 +310,7 @@
 		Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
 		try{
 			let res = await fetch(url);
-			//let outcome = await res.json();
-			//as we are sending keep alives, we need to ensure we remove those from the final response, and then use it as json format
-			let outcome = await res.text();
-			outcome = outcome.replace(/ka/g,'');
-			outcome = JSON.parse(outcome);
+			let outcome = await res.json();
 			console.log(outcome);
 			this.checkingFunds = false;
 			this.accountCreated = outcome.accountCreated;
