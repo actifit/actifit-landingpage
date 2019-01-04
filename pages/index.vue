@@ -40,14 +40,17 @@
     <!-- header with fullscreen background -->
     <div class="header pt-4 pt-md-5 position-relative">
       <div class="container py-5">
-        <div class="pb-md-4 text-center">
-          <img src="/img/icon.png" alt="Actifit" />
-          <h1 class="mt-3 text-brand title">Actifit Fitness Tracker</h1>
-          <h3 class="font-italic text-brand slogan">Rewarding Fitness Activity</h3>
-        </div>
+        
 
         <!-- wallet/activities preview -->
-        <div class="card form mx-auto p-3 mt-3 mt-md-5 text-center border-0">
+        <div class="card form mx-auto p-3 mt-3 mt-md-5 text-center border-0 home-card">
+		  <div class="pb-md-4 text-center">
+			  <img src="/img/actifit_logo.png" alt="Actifit" />
+			  <h1 class="mt-3 text-brand title">Actifit</h1>
+			  <h3 class="font-italic text-brand slogan">Rewarding Your Everyday Activity</h3>
+			</div>
+		
+		
           <div v-if="user">
             <div class="row">
               <div class="col-sm-6">
@@ -65,10 +68,10 @@
 
           <!-- login/register buttons -->
           <div v-else>
-            <p class="lead py-md-3 form-info">Log in to see your current token balance, or sign up for a Steem account to start getting rewarded for your activity.</p>
+            <!--<p class="lead py-md-3 form-info">Log in to see your current token balance, or sign up for a Steem account to start getting rewarded for your activity.</p>-->
             <div class="row">
               <div class="col-6">
-                <a :href="$steemconnect.getLoginURL().replace('v2.','')" class="btn btn-brand btn-lg w-100">Login</a>
+                <a :href="$steemconnect.getLoginURL()" class="btn btn-brand btn-lg w-100">Login</a>
               </div>
               <div class="col-6">
                 <a href="https://actifit.io/signup" class="btn btn-brand btn-lg w-100">Sign Up</a>
@@ -89,9 +92,9 @@
     <!-- intro -->
     <section class="intro bg-light" id="content">
       <div class="container py-5">
-        <h1 class="pt-5 mb-3 text-capitalize text-center headline"><span class="text-brand">Actifit:</span> An innovative dapp that rewards fitness activity!</h1>
+        <h1 class="pt-5 mb-3 text-capitalize text-center headline"><span class="text-brand">Actifit:</span> An innovative dapp that rewards your everyday activity!</h1>
         <p class="lead mb-4 pb-5 text-center">
-          Built as one of the first Smart Media Tokens on top of the Steem blockchain, with beta Android and iOS mobile apps already available on playstore and app store, Actifit tracks and rewards your activity via Actifit(AFIT) tokens, but also STEEM rewards via upvotes on your Steem posts.
+          Built as one of the first Smart Media Tokens on top of the Steem blockchain, with beta Android and iOS mobile apps already available on playstore and app store, Actifit tracks and rewards your activity with Actifit (AFIT) tokens, but also STEEM rewards via upvotes on your Steem posts.
         </p>
 
         <!-- stats -->
@@ -124,7 +127,7 @@
           <div class="col-lg-6 order-lg-2 text-white showcase-img" style="background-image: url('/img/showcase-1.jpg');"></div>
           <div class="col-lg-6 order-lg-1 my-auto showcase-text">
             <h2 class="text-capitalize">Earn tokens as simple as one two three</h2>
-            <p class="lead mb-0">Download the Actifit mobile app. Go for a run, walk your dog, go through your favorite workout with a min target of 5,000 activity count. Post to the Steem blockchain and get rewarded!</p>
+            <p class="lead mb-0">1. Download the Actifit mobile app.<br/>2. Go for a jog, walk your dog, maw your lawn, go to the gym, move around your office,... with an aim to reach a minimum of 5,000 activity count.<br/>3. Post via app to the Steem blockchain, and get rewarded!</p>
             <div class="text-center mt-5">
               <a href="https://bit.ly/actifit-app" target="_blank">
                 <img src="/img/google-play.png" />
@@ -140,13 +143,13 @@
 
         <!-- use case -->
         <div class="row no-gutters">
-          <div class="col-lg-6 text-white showcase-img" style="background-image: url('/img/showcase-2.jpg');"></div>
+          <div class="col-lg-6 text-white showcase-img" style="background-image: url('/img/showcase-4.jpg');"></div>
           <div class="col-lg-6 my-auto showcase-text">
-            <h2 class="text-capitalize">Actifit tokens use cases</h2>
+            <h2 class="text-capitalize">Actifit (AFIT) tokens use cases</h2>
             <p class="lead mb-0">
-              Actifit tokens will be available for purchasing fitness related equipment, tools, gadgets, sports wear, gym memberships... and any transactions between providers and actifiters.<br>
+              AFIT tokens will be available for purchasing fitness related equipment, tools, gadgets, sports wear, gym memberships... and any transactions between providers and actifiters.<br>
               <br>
-              As a Steem Smart Media Token, Actifit tokens are planned to have their own valuation per STEEM as well as FIAT currencies, and hence to be cashed out for actual FIAT currency.
+              As a Steem Smart Media Token, AFIT tokens are planned to have their own valuation per STEEM as well as FIAT currencies, and hence to be cashed out for actual FIAT currency.
             </p>
           </div>
         </div>
@@ -156,7 +159,7 @@
           <div class="col-lg-6 order-lg-2 text-white showcase-img" style="background-image: url('/img/showcase-3.jpg');"></div>
           <div class="col-lg-6 order-lg-1 my-auto showcase-text">
             <h2 class="text-capitalize">Delegate to earn more rewards</h2>
-            <p class="lead mb-0">You can earn more Actifit tokens if you are a STEEM token holder. Delegate Steem Power to Actifit and earn your share of 100,000 AFIT tokens distributed per day to our delegators, as well as a weekly share of the 5% beneficiary reward of actifit posts.</p>
+            <p class="lead mb-0">You can earn more AFIT tokens if you are a STEEM token holder. Delegate Steem Power to Actifit and earn your share of 100,000 AFIT tokens distributed per day to our delegators, as well as a weekly share of the 5% beneficiary reward of actifit posts.</p>
 			<div style="text-align:center; padding-top: 10px">
 				<br/>
 				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=10%20SP">10 SP</a>|
@@ -448,10 +451,10 @@
   }
 </script>
 
-<style lang="sass">
+<style lang="sass">	
   .header
     height: 100%
-    background: url('/img/header.jpg') center
+    background: url('/img/header-2.jpg') center
     background-size: cover
     .form
       max-width: 500px
@@ -497,4 +500,10 @@
           font-size: 1.2rem
       .showcase-img
         min-height: 15rem
+</style>
+<style>
+	.home-card{
+		opacity: 0.9;
+	}
+
 </style>
