@@ -3,7 +3,7 @@
   <div class="ml-auto">
     <ul class="navbar-nav ml-auto user-menu">
       <li class="nav-item" v-if="!user">
-        <a class="nav-link" :href="$steemconnect.getLoginURL().replace('v2.','')">Login</a>
+        <a class="nav-link" :href="$steemconnect.getLoginURL()">Login</a>
       </li>
 	  <li class="nav-item d-none d-sm-block" v-if="user" >
         <span class="navbar-text py-0" style="color:#ff112d">Rank&nbsp;<br><b>{{ displayUserRank }}</b></span>
