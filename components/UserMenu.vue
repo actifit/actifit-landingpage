@@ -2,7 +2,10 @@
   <!-- login link or user dropdown menu when logged in, for navbar-->
   <div class="ml-auto">
     <ul class="navbar-nav ml-auto user-menu">
-      <li class="nav-item" v-if="!user">
+      <li class="nav-item">
+        <a class="nav-link" :href="'/signup'">Signup</a>
+      </li>
+	  <li class="nav-item" v-if="!user">
         <a class="nav-link" :href="$steemconnect.getLoginURL()">Login</a>
       </li>
 	  <li class="nav-item d-none d-sm-block" v-if="user" >
