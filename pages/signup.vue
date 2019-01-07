@@ -168,7 +168,7 @@
 		
 	  //grab AFIT price
 	  
-	  fetch('https://actifitbot.herokuapp.com/curAFITPrice').then(
+	  fetch(process.env.actiAppUrl+'curAFITPrice').then(
 		res => {res.json().then(json => this.setAFITPrice (json.unit_price_usd)).catch(e => reject(e))
 	  }).catch(e => reject(e))
 	

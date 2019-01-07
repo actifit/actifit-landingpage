@@ -102,6 +102,21 @@
 				</small>
 			</div>
 		</div>
+		<!-- adding section to display charity info if available -->
+		<div class="row details mt-2 text-brand full-afit-txt" v-if="this.meta.charity">
+			<div class="col-8">
+				<i class="fas fa-dove"></i>
+				<small>
+					Charity Post
+				</small>
+				<i class="fas fa-dove"></i>
+			</div>
+			<div class="col-4 text-right">
+				<small>
+					<a :href="'https://busy.org/@' + this.meta.charity[0]" target="_blank">@{{this.meta.charity[0]}}</a>
+				</small>
+			</div>
+		</div>
       </div>
     </div>
   </div>
@@ -200,16 +215,16 @@
 	  }
 	},
 	async mounted () {
-		fetch('https://actifitbot.herokuapp.com/getPostReward?user=' + this.report.author+'&url='+this.report.url).then(res => {
+		fetch(process.env.actiAppUrl+'getPostReward?user=' + this.report.author+'&url='+this.report.url).then(res => {
 		//grab the post's reward to display it properly
 			res.json().then(json => this.afitReward = json.token_count)}).catch(e => reject(e))
 			
 		//grab the author's rank
-		fetch('https://actifitbot.herokuapp.com/getRank/' + this.report.author).then(res => {
+		fetch(process.env.actiAppUrl+'getRank/' + this.report.author).then(res => {
 			res.json().then(json => this.userRank = json.user_rank)}).catch(e => reject(e))
 			
 		//grab post full pay if full pay mode enabled
-		fetch('https://actifitbot.herokuapp.com/getPostFullAFITPayReward?user=' + this.report.author+'&url='+this.report.url).then(res => {
+		fetch(process.env.actiAppUrl+'getPostFullAFITPayReward?user=' + this.report.author+'&url='+this.report.url).then(res => {
 			res.json().then(json => this.fullAFITReward = json.token_count)}).catch(e => reject(e))
 			
 	},

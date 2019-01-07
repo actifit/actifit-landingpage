@@ -6,42 +6,42 @@ import steem from 'steem'
 export default {
   fetchUserTokens ({ state, commit }) {
     return new Promise((resolve, reject) => {
-      fetch('https://actifitbot.herokuapp.com/user/' + state.steemconnect.user.account.name.toLowerCase()).then(res => {
+      fetch(process.env.actiAppUrl+'user/' + state.steemconnect.user.account.name.toLowerCase()).then(res => {
         res.json().then(json => commit('setUserTokens', json.tokens)).catch(e => reject(e))
       }).catch(e => reject(e))
     })
   },
   fetchUserReportCount ({ state, commit }) {
     return new Promise((resolve, reject) => {
-      fetch('https://actifitbot.herokuapp.com/userRewardedPostCount/' + state.steemconnect.user.account.name.toLowerCase()).then(res => {
+      fetch(process.env.actiAppUrl+'userRewardedPostCount/' + state.steemconnect.user.account.name.toLowerCase()).then(res => {
         res.json().then(json => commit('setUserReportCount', json.rewarded_post_count)).catch(e => reject(e))
       }).catch(e => reject(e))
     })
   },
   fetchTransactions ({ state, commit }) {
     return new Promise((resolve, reject) => {
-      fetch('https://actifitbot.herokuapp.com/transactions/' + state.steemconnect.user.account.name.toLowerCase()).then(res => {
+      fetch(process.env.actiAppUrl+'transactions/' + state.steemconnect.user.account.name.toLowerCase()).then(res => {
         res.json().then(json => commit('setTransactions', json || [])).catch(e => reject(e))
       }).catch(e => reject(e))
     })
   },
   fetchReferrals ({ state, commit }) {
     return new Promise((resolve, reject) => {
-      fetch('https://actifitbot.herokuapp.com/signups/' + state.steemconnect.user.account.name.toLowerCase()).then(res => {
+      fetch(process.env.actiAppUrl+'signups/' + state.steemconnect.user.account.name.toLowerCase()).then(res => {
         res.json().then(json => commit('setReferrals', json || [])).catch(e => reject(e))
       }).catch(e => reject(e))
     })
   }, 
   fetchUserRank ({ state, commit }) {
     return new Promise((resolve, reject) => {
-      fetch('https://actifitbot.herokuapp.com/getRank/' + state.steemconnect.user.account.name.toLowerCase()).then(res => {
+      fetch(process.env.actiAppUrl+'getRank/' + state.steemconnect.user.account.name.toLowerCase()).then(res => {
         res.json().then(json => commit('setUserRank', json.user_rank)).catch(e => reject(e))
       }).catch(e => reject(e))
     })
   }, 
   fetchTopDelegators ({ state, commit }, maxCount){
 	return new Promise((resolve, reject) => {
-		var targetUrl = 'https://actifitbot.herokuapp.com/topDelegators';
+		var targetUrl = process.env.actiAppUrl+'topDelegators';
 		if (Number.isInteger(maxCount)){
 			targetUrl += '?count='+maxCount;
 		}
@@ -52,14 +52,14 @@ export default {
   },
   fetchModerators ({ commit }){
 	return new Promise((resolve, reject) => {
-		fetch('https://actifitbot.herokuapp.com/moderators').then(res => {
+		fetch(process.env.actiAppUrl+'moderators').then(res => {
 			res.json().then(json => commit('setModerators', json || [])).catch(e => reject(e))
 		}).catch(e => reject(e))
     })
   },
   fetchAmbassadors ({ commit }){
 	return new Promise((resolve, reject) => {
-		fetch('https://actifitbot.herokuapp.com/ambassadors').then(res => {
+		fetch(process.env.actiAppUrl+'ambassadors').then(res => {
 			res.json().then(json => commit('setAmbassadors', json || [])).catch(e => reject(e))
 		}).catch(e => reject(e))
     })
@@ -68,7 +68,7 @@ export default {
     commit('setUserCount', 0) // reset to trigger animation again
     commit('setTokensDistributed', 0) // reset to trigger animation again
     return new Promise((resolve, reject) => {
-      fetch('https://actifitbot.herokuapp.com/user-tokens-info').then(res => {
+      fetch(process.env.actiAppUrl+'user-tokens-info').then(res => {
         res.json().then(json => {
           commit('setUserCount', json[0].user_count)
           commit('setTokensDistributed', json[0].tokens_distributed)
@@ -79,7 +79,7 @@ export default {
   fetchRewardedActivityCount ({ commit }) {
     commit('setRewardedActivityCount', 0) // reset to trigger animation again
     return new Promise((resolve, reject) => {
-      fetch('https://actifitbot.herokuapp.com/rewarded-activity-count').then(res => {
+      fetch(process.env.actiAppUrl+'rewarded-activity-count').then(res => {
         res.json().then(json => {
           commit('setRewardedActivityCount', json[0].reward_count)
         }).catch(e => reject(e))
@@ -109,7 +109,7 @@ export default {
 	
 	//grab list of banned users first
 	let bannedUsers = [];
-	fetch('https://actifitbot.herokuapp.com/banned_users').then(res => {
+	fetch(process.env.actiAppUrl+'banned_users').then(res => {
 		res.json().then(json => {
 			bannedUsers = json;
 			
