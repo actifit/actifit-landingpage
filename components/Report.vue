@@ -104,14 +104,14 @@
 		</div>
 		<!-- adding section to display charity info if available -->
 		<div class="row details mt-2 text-brand full-afit-txt" v-if="this.meta.charity">
-			<div class="col-8">
+			<div class="col-6">
 				<i class="fas fa-dove"></i>
 				<small>
 					Charity Post
 				</small>
 				<i class="fas fa-dove"></i>
 			</div>
-			<div class="col-4 text-right">
+			<div class="col-6 text-right">
 				<small>
 					<a :href="'https://busy.org/@' + this.meta.charity[0]" target="_blank">@{{this.meta.charity[0]}}</a>
 				</small>
