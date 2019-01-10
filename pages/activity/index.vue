@@ -79,28 +79,40 @@
       }
     },
     computed: {
+	  ...mapGetters('steemconnect', ['user']),
       ...mapGetters(['reports', 'moreReportsAvailable', 'activeReport'])
     },
+	watch: {
+	  user: 'fetchUserData',
+	},
     methods: {
       async loadMore () {
         this.loadingMore = true
         await this.$store.dispatch('fetchReports')
         this.loadingMore = false
-      }
+      },
+	  fetchUserData () {
+	    console.log('fetchUserData');
+		if (typeof this.user != 'undefined' && this.user != null){
+		  this.$store.dispatch('fetchUserTokens')
+		  this.$store.dispatch('fetchUserRank')
+		  this.$store.dispatch('fetchReferrals')
+		}
+	  },
     },
     async mounted () {
-      // login
-      this.$store.dispatch('steemconnect/login')
-
       // reset previously fetched posts to get latest
       this.$store.commit('setReports', [])
 
       // disable load more button and only show if there actually are more posts to load
       this.$store.commit('setMoreReportsAvailable', false)
-
+	  
+	  this.$store.dispatch('steemconnect/login')
+	  this.fetchUserData();
+	  
       // fetch reports
       await this.$store.dispatch('fetchReports')
-
+	  
       // remove loading indicator
       this.loading = false
     }

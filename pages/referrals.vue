@@ -59,20 +59,10 @@
 	  },
     },
     async mounted () {
-	  //this.$refs.refLink.value = window.location.origin + '/signup?referrer=' + this.displayUserRef() ;
-      // login
-	  /*console.log('mounted');
-      await this.$store.dispatch('steemconnect/login')
-	  if (typeof this.user != 'undefined' && this.user != null){
-		  
-		  this.$refs.refLink.value = window.location.origin + '/signup?referrer=' + this.user.account.name ;
-	  }
-	  console.log('mounted done');*/
 	  this.fetchUserInfo();
     },
 	created () {
 	  this.$store.dispatch('steemconnect/login')
-	  //this.$refs.refLink.value = window.location.origin + '/signup?referrer=' + this.user.account.name ;
 	},
 	watch: {
 	  user : 'fetchUserInfo'
