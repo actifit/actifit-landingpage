@@ -141,6 +141,9 @@
 	    this.steemPower = this.numberFormat(totalSteem * (vests / totalVests), 3)+" STEEM POWER";
 	  },
 	  claimableSTEEMRewards () {
+		//refresh user data first
+		this.fetchUserData();
+		
 		//function handles preparing claimable STEEM rewards
 		if (typeof this.user != 'undefined' && this.user != null){
 		  this.claimSTEEM = this.user.account.reward_steem_balance;
