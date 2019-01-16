@@ -27,34 +27,39 @@
 			<span class="p-2">{{ formattedSTEEMBalance() }}</span>
 			<span class="p-2">{{ formattedSTEEMBalance('1') }}</span>
 			<div class="p-2"><button v-on:click="transferFunds" class="btn btn-brand btn-lg w-20">{{ this.transferAction }}</button></div>
-			<div v-if="transferMode" class="text-center grid">
+			<transition name="fade">
+			  <div v-if="transferMode" class="text-center grid">
 				<div class="row">
-				<label for="transfer-recipient" class="w-25">To*</label>
-				<input type="text" id="transfer-recipient" name="transfer-recipient" ref="transfer-recipient" class="form-control-lg w-50 p-2">
+				  <label for="transfer-recipient" class="w-25">To *</label>
+				  <input type="text" id="transfer-recipient" name="transfer-recipient" ref="transfer-recipient" class="form-control-lg w-50 p-2">
 				</div>
 				<div class="row">
-				<label for="transfer-type" class="w-25">Type*</label>
+				<label for="transfer-type" class="w-25">Type *</label>
 				<select @change="transferTypeChange" id="transfer-type" name="transfer-type" ref="transfer-type" text="Choose Type" class="form-control-lg w-50 p-2">
 				  <option value="STEEM">STEEM</option>
 				  <option value="SBD">SBD</option>
 				</select>
 				</div>
 				<div class="row">
-				<label for="transfer-amount" class="w-25">Amount*</label>
-				<input type="number" id="transfer-amount" name="transfer-amount" ref="transfer-amount" class="form-control-lg w-50 p-2">
+				  <label for="transfer-amount" class="w-25">Amount *</label>
+				  <input type="number" id="transfer-amount" name="transfer-amount" ref="transfer-amount" class="form-control-lg w-50 p-2">
 				</div>
 				<div class="row">
-				<label for="transfer-memo" class="w-25">Memo</label>
-				<input type="text" id="transfer-memo" name="transfer-memo" ref="transfer-memo" class="form-control-lg w-50 p-2">				
+				  <label for="transfer-memo" class="w-25">Memo</label>
+				  <input type="text" id="transfer-memo" name="transfer-memo" ref="transfer-memo" class="form-control-lg w-50 p-2">				
+				</div>
+				<div class="text-center small p-2">
+				  <i>{{ this.memo_notice}}</i>
 				</div>
 				<div class="text-brand text-center" v-if="error_proceeding">
 				  {{ this.error_msg}}
 				</div>
 				<div class="row">
-					<div class="w-25"></div>
-					<button v-on:click="proceedTransfer" class="btn btn-brand btn-lg w-50">Send</button>
+				  <div class="w-25"></div>
+				  <button v-on:click="proceedTransfer" class="btn btn-brand btn-lg w-50">Send</button>
 				</div>
-			</div>
+			  </div>
+			</transition>
 		</h5>
 		<div v-if="isClaimableDataAvailable">
 			<h5>Claimable STEEM Rewards</h5>
@@ -101,6 +106,7 @@
 		error_proceeding: '',
 		error_msg: '',
 		transferAction: 'Transfer Funds',
+		memo_notice: 'If sending funds to an exchange, make sure to use the memo field.',
 	  }
 	},
     components: {
