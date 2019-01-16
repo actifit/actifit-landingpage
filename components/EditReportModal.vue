@@ -155,7 +155,12 @@
             .filter(String) // remove empty values
             .map(tag => tag.trim()) // trim leading and trailing whitespaces from tags
         ]
-
+		
+		//ensure that the app info is actifit specific, for example edited by a different editor
+		if (!meta.app.includes('actifit')){
+			meta.app = 'actifit/0.4.1.io';
+		}
+		
         // save changes
         this.$steemconnect.comment(
           this.editReport.parent_author,
