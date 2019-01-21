@@ -26,9 +26,13 @@
 			<span class="p-2">{{ this.steemPower }}</span>
 			<span class="p-2">{{ formattedSTEEMBalance() }}</span>
 			<span class="p-2">{{ formattedSTEEMBalance('1') }}</span>
-			<div class="p-2"><button v-on:click="transferFunds" class="btn btn-brand btn-lg w-20">{{ this.transferAction }}</button></div>
+			<div class="p-2">
+				<button v-on:click="transferFunds" class="btn btn-brand btn-lg w-20 border">{{ transferActionButton }}</button>
+				<button v-on:click="powerUpFunds" class="btn btn-brand btn-lg w-20 border">{{ powerUpActionButton }}</button>
+				<button v-on:click="powerDownFunds" class="btn btn-brand btn-lg w-20 border">{{ powerDownActionButton }}</button>
+			</div>
 			<transition name="fade">
-			  <div v-if="transferMode" class="text-center grid">
+			  <div v-if="fundActivityMode == 1" class="text-center grid">
 				<div class="row">
 				  <label for="transfer-recipient" class="w-25">To *</label>
 				  <input type="text" id="transfer-recipient" name="transfer-recipient" ref="transfer-recipient" class="form-control-lg w-50 p-2">
@@ -57,6 +61,40 @@
 				<div class="row">
 				  <div class="w-25"></div>
 				  <button v-on:click="proceedTransfer" class="btn btn-brand btn-lg w-50">Send</button>
+				</div>
+			  </div>
+			</transition>
+			<transition name="fade">
+			  <div v-if="fundActivityMode == 2" class="text-center grid">
+				<div class="row">
+				  <label for="powerup-recipient" class="w-25">To *</label>
+				  <input type="text" id="powerup-recipient" name="powerup-recipient" ref="powerup-recipient" class="form-control-lg w-50 p-2" :value="user.account.name">
+				</div>
+				<div class="row">
+				  <label for="powerup-amount" class="w-25">Amount *</label>
+				  <input type="number" id="powerup-amount" name="powerup-amount" ref="powerup-amount" class="form-control-lg w-50 p-2">
+				</div>
+				<div class="text-brand text-center" v-if="error_proceeding">
+				  {{ this.error_msg}}
+				</div>
+				<div class="row">
+				  <div class="w-25"></div>
+				  <button v-on:click="proceedPowerUp" class="btn btn-brand btn-lg w-50">Power Up</button>
+				</div>
+			  </div>
+			</transition>
+			<transition name="fade">
+			  <div v-if="fundActivityMode == 3" class="text-center grid">
+				<div class="row">
+				  <label for="powerdown-amount" class="w-25">Amount *</label>
+				  <input type="number" id="powerdown-amount" name="powerdown-amount" ref="powerdown-amount" class="form-control-lg w-50 p-2">
+				</div>
+				<div class="text-brand text-center" v-if="error_proceeding">
+				  {{ this.error_msg}}
+				</div>
+				<div class="row">
+				  <div class="w-25"></div>
+				  <button v-on:click="proceedPowerDown" class="btn btn-brand btn-lg w-50">Power Down</button>
 				</div>
 			  </div>
 			</transition>
@@ -95,18 +133,28 @@
   export default {
 	data () {
 	  return {
+	    CLOSED_MODE: 0,
+		TRANSFER_FUNDS: 1,
+		POWERUP_FUNDS: 2,
+		POWERDOWN_FUNDS: 3,
+		TRANSFER_FUNDS_ACTION_TEXT: 'Transfer Funds',
+		HIDE_TRANSFER_FUNDS_ACTION_TEXT: 'Hide Transfer',		
+		POWERUP_ACTION_TEXT: 'Power Up STEEM',
+		HIDE_POWERUP_ACTION_TEXT: 'Hide Power Up',
+		POWERDOWN_ACTION_TEXT: 'Power Down STEEM',
+		HIDE_POWERDOWN_ACTION_TEXT: 'Hide Power Down',		
 		steemPower: '',
 		claimSP: '',
 		claimSTEEM: '',
 		claimVests: '',
 		claimSBD: '',
 		claimWindow: '',
-		transferMode: 0,
+		fundActivityMode: this.CLOSED_MODE,
 		transferType: 'STEEM',
 		error_proceeding: '',
 		error_msg: '',
-		transferAction: 'Transfer Funds',
 		memo_notice: 'If sending funds to an exchange, make sure to use the memo field.',
+		properties: '', //handles the Steem BC properties
 	  }
 	},
     components: {
@@ -131,6 +179,27 @@
 			parseFloat(this.claimSP) ||
 			parseFloat(this.claimVests) ||
 			parseFloat(this.claimSBD) );
+	  },
+	  transferActionButton () {
+	    //handle proper button display
+		/*if (this.fundActivityMode == this.TRANSFER_FUNDS){
+		  return this.HIDE_TRANSFER_FUNDS_ACTION_TEXT;
+		}*/
+		return this.TRANSFER_FUNDS_ACTION_TEXT;
+	  },
+	  powerUpActionButton () {
+	    //handle proper button display
+		/*if (this.fundActivityMode == this.POWERUP_FUNDS){
+		  return this.HIDE_POWERUP_ACTION_TEXT;
+		}*/
+		return this.POWERUP_ACTION_TEXT;
+	  },
+	  powerDownActionButton () {
+	    //handle proper button display
+		/*if (this.fundActivityMode == this.POWERDOWN_FUNDS){
+		  return this.HIDE_POWERDOWN_ACTION_TEXT;
+		}*/
+		return this.POWERDOWN_ACTION_TEXT;
 	  }
     },
 	methods: {
@@ -173,12 +242,26 @@
 		return displaySteemBalance;
 	  },
 	  async vestsToSteemPower (vests) {
-	    //handle fetching user's SP
-	    let properties = await steem.api.getDynamicGlobalPropertiesAsync();
-		let totalSteem = Number(properties.total_vesting_fund_steem.split(' ')[0]);
-		let totalVests = Number(properties.total_vesting_shares.split(' ')[0]);
+		//function handles converting Vests to SP
+		if (this.properties == ''){
+		  //not loaded yet
+		  this.properties = await steem.api.getDynamicGlobalPropertiesAsync();
+		}
+		let totalSteem = Number(this.properties.total_vesting_fund_steem.split(' ')[0]);
+		let totalVests = Number(this.properties.total_vesting_shares.split(' ')[0]);
 	    vests = Number(vests.split(' ')[0]);
 	    this.steemPower = this.numberFormat(totalSteem * (vests / totalVests), 3)+" STEEM POWER";
+	  },
+	  async steemPowerToVests (steemPower) {
+	    //function handles conversting SP to Vests
+		if (this.properties == ''){
+		  //not loaded yet
+		  this.properties = await steem.api.getDynamicGlobalPropertiesAsync();
+		}
+		let totalSteem = Number(this.properties.total_vesting_fund_steem.split(' ')[0]);
+		let totalVests = Number(this.properties.total_vesting_shares.split(' ')[0]);
+		
+		return parseFloat(steemPower * totalVests / totalSteem).toFixed(6);
 	  },
 	  claimableSTEEMRewards () {
 		
@@ -217,12 +300,36 @@
 	  },
 	  transferFunds () {
 		//function handles opening/closing transfer section
-		this.transferMode = !this.transferMode;
-		if (this.transferAction == 'Transfer Funds'){
-		  this.transferAction = 'Hide Transfer';
+		
+		//set proper Fund Activity Mode controlling the display
+		if (this.fundActivityMode == this.TRANSFER_FUNDS ){
+		  this.fundActivityMode = 0;
 		}else{
-		  this.transferAction = 'Transfer Funds';
+		  this.fundActivityMode = this.TRANSFER_FUNDS;
 		}
+
+	  },
+	  powerUpFunds () {
+		//function handles opening/closing of power up section
+		
+		//set proper Fund Activity Mode controlling the display
+		if (this.fundActivityMode == this.POWERUP_FUNDS ){
+		  this.fundActivityMode = 0;
+		}else{
+		  this.fundActivityMode = this.POWERUP_FUNDS;
+		}
+		
+	  },
+	  powerDownFunds () {
+		//function handles opening/closing of power up section
+		
+		//set proper Fund Activity Mode controlling the display
+		if (this.fundActivityMode == this.POWERDOWN_FUNDS ){
+		  this.fundActivityMode = 0;
+		}else{
+		  this.fundActivityMode = this.POWERDOWN_FUNDS;
+		}
+		
 	  },
 	  proceedTransfer () {
 		//function handles the actual processing of the transfer
@@ -248,7 +355,7 @@
 		  amount: this.$refs["transfer-amount"].value + ' ' + this.transferType,
 		  memo: this.$refs["transfer-memo"].value,
 		}, window.location.origin + '/wallet');
-		//console.log(link);
+		//launch the SC window
 		window.open(link);
 	  },
 	  transferTypeChange (e) {
@@ -256,13 +363,68 @@
 		if(e.target.options.selectedIndex > -1) {
 		  this.transferType = e.target.options[e.target.options.selectedIndex].value;
 		}
-	  }
+	  },
+	  proceedPowerUp () {
+		//function handles the actual processing of the power up
+		this.error_proceeding = false;
+		this.error_msg = '';
+		//ensure we have proper values
+		if (this.$refs["powerup-recipient"].value.trim() == '' ||
+			this.$refs["powerup-amount"].value.trim() == ''){
+		  this.error_proceeding = true;
+		  this.error_msg = 'Please ensure to fill all required power up fields properly.';
+		  return;
+		}
+		if (isNaN(this.$refs["powerup-amount"].value.trim()) || this.$refs["powerup-amount"].value == 0){
+		  this.error_proceeding = true;
+		  this.error_msg = 'The amount needs to be a positive numeric value.';
+		  return;
+		}
+		
+		//https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
+		var link = this.$steemconnect.sign('transfer-to-vesting', {
+		  from: this.user.account.name,
+		  to: this.$refs["powerup-recipient"].value,
+		  amount: parseFloat(this.$refs["powerup-amount"].value).toFixed(3) + ' ' + 'STEEM',
+		}, window.location.origin + '/wallet');
+		//launch the SC window
+		window.open(link);
+	  },
+	  async proceedPowerDown () {
+		//function handles the actual processing of the power down
+		this.error_proceeding = false;
+		this.error_msg = '';
+		//ensure we have proper values
+		if (this.$refs["powerdown-amount"].value.trim() == ''){
+		  this.error_proceeding = true;
+		  this.error_msg = 'Please ensure to fill the amount properly.';
+		  return;
+		}
+		if (isNaN(this.$refs["powerdown-amount"].value.trim()) || this.$refs["powerdown-amount"].value == 0){
+		  this.error_proceeding = true;
+		  this.error_msg = 'The amount needs to be a positive numeric value.';
+		  return;
+		}
+		let vestsValue = await this.steemPowerToVests(this.$refs["powerdown-amount"].value);
+		console.log(vestsValue);
+		//https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
+		var link = this.$steemconnect.sign('withdraw-vesting', {
+		  account: this.user.account.name,
+		  vesting_shares: vestsValue + ' ' + 'VESTS',
+		}, window.location.origin + '/wallet');
+		//launch the SC window
+		window.open(link);
+	  },
 	},
     async mounted () {
       // login
       this.$store.dispatch('steemconnect/login')
 	  this.fetchUserData();
 	  let ref_id = this;
+	  
+	  //let's load the properties to properly convert SP to Vests and vice-versa
+	  this.properties = await steem.api.getDynamicGlobalPropertiesAsync();
+	  
 	  window.addEventListener("focus", function(event) 
 	  { 
 		console.log('focus');
