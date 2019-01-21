@@ -108,8 +108,9 @@
 				  {{ this.error_msg}}
 				</div>
 				<div class="row">
-				  <div class="w-25"></div>
-				  <button v-on:click="proceedPowerDown" class="btn btn-brand btn-lg w-50">Power Down</button>
+				  <div class="text-center small p-2 w-25"></div>
+				  <button v-on:click="proceedPowerDown" class="btn btn-brand btn-lg w-25 border">Power Down</button>
+				  <button v-on:click="cancelPowerDown" class="btn btn-brand btn-lg w-25 border">Cancel Power Down</button>
 				</div>
 			  </div>
 			</transition>
@@ -430,6 +431,15 @@
 		//launch the SC window
 		window.open(link);
 	  },
+	  cancelPowerDown () {
+		//function handles cancelling the power down
+		var link = this.$steemconnect.sign('withdraw-vesting', {
+		  account: this.user.account.name,
+		  vesting_shares: '0.000000 VESTS',
+		}, window.location.origin + '/wallet');
+		//launch the SC window
+		window.open(link);
+	  }
 	},
     async mounted () {
       // login
