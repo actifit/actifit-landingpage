@@ -74,6 +74,13 @@
 				  <label for="powerup-amount" class="w-25">Amount *</label>
 				  <input type="number" id="powerup-amount" name="powerup-amount" ref="powerup-amount" class="form-control-lg w-50 p-2">
 				</div>
+				<div class="row">
+				  <div class="text-center small p-2 w-25"></div>
+				  <div class="text-center small p-2 w-50"><i>
+				    Powering up STEEM converts your STEEM into <b>STEEM POWER (SP)</b>, providing you more stake on the Steem blockchain, and hence increasing the influence of your vote to posts.<br/>
+				    SP can only be withdrawn using the Power Down option, which allows the conversion back to STEEM over the period of 13 weeks, with one portion out of 13 converted every week.</i>
+				  </div>
+				</div>
 				<div class="text-brand text-center" v-if="error_proceeding">
 				  {{ this.error_msg}}
 				</div>
@@ -88,6 +95,14 @@
 				<div class="row">
 				  <label for="powerdown-amount" class="w-25">Amount *</label>
 				  <input type="number" id="powerdown-amount" name="powerdown-amount" ref="powerdown-amount" class="form-control-lg w-50 p-2">
+				</div>
+				<div class="row">
+				  <div class="text-center small p-2 w-25"></div>
+				  <div class="text-center small p-2 w-50"><i>
+				    Powering down allows you to convert your STEEM POWER back to withdrawable <b>liquid STEEM</b>. <br/>
+				    This process occurs over 13 weeks, yielding one portion out of 13 of the powered down amount to be converted every week.
+				  </i>
+				  </div>
 				</div>
 				<div class="text-brand text-center" v-if="error_proceeding">
 				  {{ this.error_msg}}
@@ -400,7 +415,7 @@
 		  this.error_msg = 'Please ensure to fill the amount properly.';
 		  return;
 		}
-		if (isNaN(this.$refs["powerdown-amount"].value.trim()) || this.$refs["powerdown-amount"].value == 0){
+		if (isNaN(this.$refs["powerdown-amount"].value.trim())){
 		  this.error_proceeding = true;
 		  this.error_msg = 'The amount needs to be a positive numeric value.';
 		  return;
