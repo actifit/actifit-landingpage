@@ -218,6 +218,9 @@
 		return this.POWERDOWN_ACTION_TEXT;
 	  }
     },
+	watch: {
+	  user: 'fetchUserData',
+	},
 	methods: {
 	  /**
        * Formats numbers with commas and dots.
@@ -231,6 +234,7 @@
       },
 	  fetchUserData () {
 	    //console.log('fetchUserData');
+		console.log(this.user);
 		if (typeof this.user != 'undefined' && this.user != null){	  
 		  this.$store.dispatch('fetchUserTokens')
 		  this.$store.dispatch('fetchTransactions')
@@ -449,7 +453,7 @@
 	  
 	  //let's load the properties to properly convert SP to Vests and vice-versa
 	  this.properties = await steem.api.getDynamicGlobalPropertiesAsync();
-	  
+	  console.log(this.user);
 	  window.addEventListener("focus", function(event) 
 	  { 
 		console.log('focus');
