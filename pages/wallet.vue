@@ -298,7 +298,7 @@
 		let totalVests = Number(this.properties.total_vesting_shares.split(' ')[0]);
 	    vests = Number(vests.split(' ')[0]);
 		if (typeof returnVal != undefined && returnVal != 'undefined'){
-		  return this.numberFormat(totalSteem * (vests / totalVests), 3)+" STEEM POWER";
+		  return this.numberFormat(totalSteem * (vests / totalVests), 3)+" STEEM";
 		}
 	    this.steemPower = this.numberFormat(totalSteem * (vests / totalVests), 3)+" STEEM POWER";
 	  },
