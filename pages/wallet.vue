@@ -96,6 +96,10 @@
 				  <label for="powerdown-amount" class="w-25">Amount *</label>
 				  <input type="number" id="powerdown-amount" name="powerdown-amount" ref="powerdown-amount" class="form-control-lg w-50 p-2">
 				</div>
+				<div class="row" v-if="isPoweringDown">
+				  <div class="text-center small p-2 w-25"></div>
+				  <div class="text-center text-brand small p-2 w-50">You are currently powering down at rate of {{powerDownRateVal}}</div>
+				</div>
 				<div class="row">
 				  <div class="text-center small p-2 w-25"></div>
 				  <div class="text-center small p-2 w-50"><i>
@@ -107,10 +111,14 @@
 				<div class="text-brand text-center" v-if="error_proceeding">
 				  {{ this.error_msg}}
 				</div>
-				<div class="row">
+				<div class="row" v-if="isPoweringDown">
 				  <div class="text-center small p-2 w-25"></div>
 				  <button v-on:click="proceedPowerDown" class="btn btn-brand btn-lg w-25 border">Power Down</button>
 				  <button v-on:click="cancelPowerDown" class="btn btn-brand btn-lg w-25 border">Cancel Power Down</button>
+				</div>
+				<div class="row" v-else>
+				  <div class="text-center small p-2 w-25"></div>
+				  <button v-on:click="proceedPowerDown" class="btn btn-brand btn-lg w-50 border">Power Down</button>
 				</div>
 			  </div>
 			</transition>
@@ -153,6 +161,7 @@
 		TRANSFER_FUNDS: 1,
 		POWERUP_FUNDS: 2,
 		POWERDOWN_FUNDS: 3,
+		powerDownRateVal: '',
 		TRANSFER_FUNDS_ACTION_TEXT: 'Transfer Funds',
 		HIDE_TRANSFER_FUNDS_ACTION_TEXT: 'Hide Transfer',		
 		POWERUP_ACTION_TEXT: 'Power Up STEEM',
@@ -196,6 +205,15 @@
 			parseFloat(this.claimVests) ||
 			parseFloat(this.claimSBD) );
 	  },
+	  isPoweringDown () {
+		//returns whether user is powering down
+		if (typeof this.user != 'undefined' && this.user != null){
+		  if (this.user.account.vesting_withdraw_rate.split(' ')[0] > 0){
+			return true;
+		  }
+		}
+		return false;
+	  },
 	  transferActionButton () {
 	    //handle proper button display
 		/*if (this.fundActivityMode == this.TRANSFER_FUNDS){
@@ -232,14 +250,13 @@
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
-	  fetchUserData () {
-	    //console.log('fetchUserData');
-		console.log(this.user);
+	  async fetchUserData () {
 		if (typeof this.user != 'undefined' && this.user != null){	  
 		  this.$store.dispatch('fetchUserTokens')
 		  this.$store.dispatch('fetchTransactions')
 		  this.$store.dispatch('fetchUserRank')
 		  this.$store.dispatch('fetchReferrals')
+		  this.powerDownRateVal = await this.vestsToSteemPower(this.user.account.vesting_withdraw_rate.split(' ')[0], true);
 		}
 	  },
 	  formattedSTEEMBalance (dataType) {
@@ -261,7 +278,7 @@
 		}
 		return displaySteemBalance;
 	  },
-	  async vestsToSteemPower (vests) {
+	  async vestsToSteemPower (vests, returnVal) {
 		//function handles converting Vests to SP
 		if (this.properties == ''){
 		  //not loaded yet
@@ -270,6 +287,9 @@
 		let totalSteem = Number(this.properties.total_vesting_fund_steem.split(' ')[0]);
 		let totalVests = Number(this.properties.total_vesting_shares.split(' ')[0]);
 	    vests = Number(vests.split(' ')[0]);
+		if (typeof returnVal != undefined && returnVal != 'undefined'){
+		  return this.numberFormat(totalSteem * (vests / totalVests), 3)+" STEEM POWER";
+		}
 	    this.steemPower = this.numberFormat(totalSteem * (vests / totalVests), 3)+" STEEM POWER";
 	  },
 	  async steemPowerToVests (steemPower) {
@@ -453,7 +473,6 @@
 	  
 	  //let's load the properties to properly convert SP to Vests and vice-versa
 	  this.properties = await steem.api.getDynamicGlobalPropertiesAsync();
-	  console.log(this.user);
 	  window.addEventListener("focus", function(event) 
 	  { 
 		console.log('focus');
