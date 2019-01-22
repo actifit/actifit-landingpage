@@ -27,29 +27,29 @@
 			<span class="p-2">{{ formattedSTEEMBalance() }}</span>
 			<span class="p-2">{{ formattedSTEEMBalance('1') }}</span>
 			<div class="p-2">
-				<button v-on:click="transferFunds" class="btn btn-brand btn-lg w-20 border">{{ transferActionButton }}</button>
-				<button v-on:click="powerUpFunds" class="btn btn-brand btn-lg w-20 border">{{ powerUpActionButton }}</button>
-				<button v-on:click="powerDownFunds" class="btn btn-brand btn-lg w-20 border">{{ powerDownActionButton }}</button>
+				<button v-on:click="transferFunds" :class="fundBtnClasses">{{ transferActionButton }}</button>
+				<button v-on:click="powerUpFunds" :class="fundBtnClasses">{{ powerUpActionButton }}</button>
+				<button v-on:click="powerDownFunds" :class="fundBtnClasses">{{ powerDownActionButton }}</button>
 			</div>
 			<transition name="fade">
 			  <div v-if="fundActivityMode == 1" class="text-center grid">
 				<div class="row">
-				  <label for="transfer-recipient" class="w-25">To *</label>
+				  <label for="transfer-recipient" class="w-25 p-2">To *</label>
 				  <input type="text" id="transfer-recipient" name="transfer-recipient" ref="transfer-recipient" class="form-control-lg w-50 p-2">
 				</div>
 				<div class="row">
-				<label for="transfer-type" class="w-25">Type *</label>
+				<label for="transfer-type" class="w-25 p-2">Type *</label>
 				<select @change="transferTypeChange" id="transfer-type" name="transfer-type" ref="transfer-type" text="Choose Type" class="form-control-lg w-50 p-2">
 				  <option value="STEEM">STEEM</option>
 				  <option value="SBD">SBD</option>
 				</select>
 				</div>
 				<div class="row">
-				  <label for="transfer-amount" class="w-25">Amount *</label>
+				  <label for="transfer-amount" class="w-25 p-2">Amount *</label>
 				  <input type="number" id="transfer-amount" name="transfer-amount" ref="transfer-amount" class="form-control-lg w-50 p-2">
 				</div>
 				<div class="row">
-				  <label for="transfer-memo" class="w-25">Memo</label>
+				  <label for="transfer-memo" class="w-25 p-2">Memo</label>
 				  <input type="text" id="transfer-memo" name="transfer-memo" ref="transfer-memo" class="form-control-lg w-50 p-2">				
 				</div>
 				<div class="text-center small p-2">
@@ -67,17 +67,17 @@
 			<transition name="fade">
 			  <div v-if="fundActivityMode == 2" class="text-center grid">
 				<div class="row">
-				  <label for="powerup-recipient" class="w-25">To *</label>
+				  <label for="powerup-recipient" class="w-25 p-2">To *</label>
 				  <input type="text" id="powerup-recipient" name="powerup-recipient" ref="powerup-recipient" class="form-control-lg w-50 p-2" :value="user.account.name">
 				</div>
 				<div class="row">
-				  <label for="powerup-amount" class="w-25">Amount *</label>
+				  <label for="powerup-amount" class="w-25 p-2">Amount *</label>
 				  <input type="number" id="powerup-amount" name="powerup-amount" ref="powerup-amount" class="form-control-lg w-50 p-2">
 				</div>
 				<div class="row">
 				  <div class="text-center small p-2 w-25"></div>
 				  <div class="text-center small p-2 w-50"><i>
-				    Powering up STEEM converts your STEEM into <b>STEEM POWER (SP)</b>, providing you more stake on the Steem blockchain, and hence increasing the influence of your vote to posts.<br/>
+				    Powering up STEEM converts your STEEM into <b>STEEM POWER (SP)</b>, providing you more stake on the Steem blockchain, and hence increasing your vote value on posts.<br/>
 				    SP can only be withdrawn using the Power Down option, which allows the conversion back to STEEM over the period of 13 weeks, with one portion out of 13 converted every week.</i>
 				  </div>
 				</div>
@@ -93,7 +93,7 @@
 			<transition name="fade">
 			  <div v-if="fundActivityMode == 3" class="text-center grid">
 				<div class="row">
-				  <label for="powerdown-amount" class="w-25">Amount *</label>
+				  <label for="powerdown-amount" class="w-25 p-2">Amount *</label>
 				  <input type="number" id="powerdown-amount" name="powerdown-amount" ref="powerdown-amount" class="form-control-lg w-50 p-2">
 				</div>
 				<div class="row" v-if="isPoweringDown">
@@ -234,6 +234,14 @@
 		  return this.HIDE_POWERDOWN_ACTION_TEXT;
 		}*/
 		return this.POWERDOWN_ACTION_TEXT;
+	  },
+	  fundBtnClasses () {
+		//use proper classes for neat display
+		console.log(screen.width);
+		if (screen.width < 768){
+		  return "btn btn-brand btn-lg border w-100";
+		}
+		return "btn btn-brand btn-lg border";
 	  }
     },
 	watch: {
