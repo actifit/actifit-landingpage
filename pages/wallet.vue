@@ -98,7 +98,7 @@
 				</div>
 				<div class="row" v-if="isPoweringDown">
 				  <div class="text-center small p-2 w-25"></div>
-				  <div class="text-center text-brand small p-2 w-50">You are currently powering down at rate of {{powerDownRateVal}}</div>
+				  <div class="text-center text-brand small p-2 w-50"><b>You are currently powering down at a weekly rate of {{powerDownRateVal}}</b></div>
 				</div>
 				<div class="row">
 				  <div class="text-center small p-2 w-25"></div>
