@@ -17,8 +17,8 @@
     <div class="container pt-5 mt-5 pb-5">
 
       <!-- account balance -->
-      <div class="text-center">
-        <h3 class="mb-4" v-if="user">Hey {{ user.account.name }}!</h3>
+      <div class="text-center" v-if="user">
+        <h3 class="mb-4">Hey {{ user.account.name }}!</h3>
         <h4>Your AFIT Balance</h4>
         <h4 class="mb-4 font-weight-bold">{{ formattedUserTokens }}</h4>
 		<h4>Your STEEM Balance</h4>
@@ -27,9 +27,9 @@
 			<span class="p-2">{{ formattedSTEEMBalance() }}</span>
 			<span class="p-2">{{ formattedSTEEMBalance('1') }}</span>
 			<div class="p-2">
-				<button v-on:click="transferFunds" :class="fundBtnClasses">{{ transferActionButton }}</button>
-				<button v-on:click="powerUpFunds" :class="fundBtnClasses">{{ powerUpActionButton }}</button>
-				<button v-on:click="powerDownFunds" :class="fundBtnClasses">{{ powerDownActionButton }}</button>
+				<button v-on:click="transferFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ transferActionButton }}</button>
+				<button v-on:click="powerUpFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ powerUpActionButton }}</button>
+				<button v-on:click="powerDownFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ powerDownActionButton }}</button>
 			</div>
 			<transition name="fade">
 			  <div v-if="fundActivityMode == 1" class="text-center grid">
@@ -76,7 +76,7 @@
 				</div>
 				<div class="row">
 				  <div class="text-center small p-2 w-25"></div>
-				  <div class="text-center small p-2 w-50"><i>
+				  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50"><i>
 				    Powering up STEEM converts your STEEM into <b>STEEM POWER (SP)</b>, providing you more stake on the Steem blockchain, and hence increasing your vote value on posts.<br/>
 				    SP can only be withdrawn using the Power Down option, which allows the conversion back to STEEM over the period of 13 weeks, with one portion out of 13 converted every week.</i>
 				  </div>
@@ -102,7 +102,7 @@
 				</div>
 				<div class="row">
 				  <div class="text-center small p-2 w-25"></div>
-				  <div class="text-center small p-2 w-50"><i>
+				  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50"><i>
 				    Powering down allows you to convert your STEEM POWER back to withdrawable <b>liquid STEEM</b>. <br/>
 				    This process occurs over 13 weeks, yielding one portion out of 13 of the powered down amount to be converted every week.
 				  </i>
@@ -180,6 +180,7 @@
 		error_msg: '',
 		memo_notice: 'If sending funds to an exchange, make sure to use the memo field.',
 		properties: '', //handles the Steem BC properties
+		screenWidth: 1200,
 	  }
 	},
     components: {
@@ -235,13 +236,14 @@
 		}*/
 		return this.POWERDOWN_ACTION_TEXT;
 	  },
-	  fundBtnClasses () {
+	  smallScreenBtnClasses () {
 		//use proper classes for neat display
-		console.log(screen.width);
-		if (screen.width < 768){
-		  return "btn btn-brand btn-lg border w-100";
+		console.log(this.screenWidth);
+		console.log('fundBtnClasses');
+		if (this.screenWidth < 768){
+		  return "w-100";
 		}
-		return "btn btn-brand btn-lg border";
+		return "";
 	  }
     },
 	watch: {
@@ -481,6 +483,9 @@
 	  
 	  //let's load the properties to properly convert SP to Vests and vice-versa
 	  this.properties = await steem.api.getDynamicGlobalPropertiesAsync();
+	  
+	  this.screenWidth = screen.width;
+	  console.log(this.screenWidth)
 	  window.addEventListener("focus", function(event) 
 	  { 
 		console.log('focus');
