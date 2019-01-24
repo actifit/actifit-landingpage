@@ -238,8 +238,6 @@
 	  },
 	  smallScreenBtnClasses () {
 		//use proper classes for neat display
-		console.log(this.screenWidth);
-		console.log('fundBtnClasses');
 		if (this.screenWidth < 768){
 		  return "w-100";
 		}
@@ -297,7 +295,7 @@
 		let totalSteem = Number(this.properties.total_vesting_fund_steem.split(' ')[0]);
 		let totalVests = Number(this.properties.total_vesting_shares.split(' ')[0]);
 	    vests = Number(vests.split(' ')[0]);
-		if (typeof returnVal != undefined && returnVal != 'undefined'){
+		if (typeof returnVal != 'undefined'){
 		  return this.numberFormat(totalSteem * (vests / totalVests), 3)+" STEEM";
 		}
 	    this.steemPower = this.numberFormat(totalSteem * (vests / totalVests), 3)+" STEEM POWER";
