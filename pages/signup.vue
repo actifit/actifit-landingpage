@@ -56,6 +56,10 @@
 			  <input class="form-control form-control-lg" id="account-password" ref="account-password"/>
 			  <p class="text-brand"><i>Make sure to store your password somewhere safe. Losing your password could lead to permanent loss of your funds!!</i></p>
 			  <button v-on:click="copyContent" data-targetEl="account-password" class="btn btn-brand btn-lg w-20">Copy Password</button><br/><br/>
+			  
+			  <label for="account-password-confirm">Confirm Your Password (to ensure you copied it)</label><br/>
+			  <input class="form-control form-control-lg" id="account-password-confirm" ref="account-password-confirm"/>
+			  
 			  <label for="account-email">Your Email (Optional - helps with recovery if needed)</label><br/>
 			  <input class="form-control form-control-lg mb-2" id="account-email" ref="account-email" v-model="email"/>
 			  <label for="invested-usd">USD Amount To Invest</label><br/>
@@ -288,6 +292,12 @@
 			this.error_proceeding = true;
 			this.error_msg = 'The email format used is incorrect.';
 			return;
+		}
+		//make sure user copied and pasted password
+		if (this.$refs["account-password-confirm"].value != this.$refs["account-password"].value){
+		  this.error_proceeding = true;
+		  this.error_msg = 'Please copy the password into a safe location, and confirm doing that by pasting it to the "Confirm Your Password" field above.';
+		  return;
 		}
 		//to prevent tampering with STEEM and AFIT values
 		const steem_invest = this.getMatchingSTEEM ();
