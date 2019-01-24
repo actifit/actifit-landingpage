@@ -3,8 +3,8 @@
     <!-- header -->
     <div class="pb-md-4 text-center">
       <img src="/img/icon.png" alt="Actifit" />
-      <h3 class="mt-3 text-brand title">Actifit Fitness Tracker</h3>
-      <h5 class="font-italic text-brand slogan">Rewarding Fitness Activity</h5>
+      <h3 class="mt-3 text-brand title">Actifit</h3>
+      <h5 class="font-italic text-brand slogan">Rewarding Your Everyday Activity</h5>
     </div>
 
     <h5 class="pt-4 text-center">You will be redirected in a moment...</h5>
