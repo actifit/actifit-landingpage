@@ -14,10 +14,10 @@
       <UserMenu />
     </nav>
 
-    <div class="container pt-5 mt-5 pb-5">
+    <div class="container pt-5 mt-5 pb-5" v-if="user">
 
       <!-- account balance -->
-      <div class="text-center" v-if="user">
+      <div class="text-center">
         <h3 class="mb-4">Hey {{ user.account.name }}!</h3>
         <h4>Your AFIT Balance</h4>
         <h4 class="mb-4 font-weight-bold">{{ formattedUserTokens }}</h4>
@@ -141,6 +141,25 @@
         <div class="text-center"><small class="text-muted" v-if="transactions.length === 0">No transactions yet.</small></div>
       </div>
     </div>
+	
+	<div class="container mt-5 pb-5 pt-5 w-50" v-else>
+      <!-- account balance -->
+      <div class="text-center p-5">
+		<div class="row pb-3">
+		  <div class="text-center text-brand w-100 lead">
+		    You need to login first to check your balance.
+		  </div>
+		</div>
+		<div class="row pb-3">
+		  <div class="w-50">
+			<a :href="$steemconnect.getLoginURL()" class="btn btn-brand btn-lg w-75">Login</a>
+		  </div>
+		  <div class="w-50">
+			<a href="https://actifit.io/signup" class="btn btn-brand btn-lg w-75">Sign Up</a>
+		  </div>
+		</div>
+	  </div>
+	</div>
     <Footer />
   </div>
 </template>
