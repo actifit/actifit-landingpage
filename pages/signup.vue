@@ -21,8 +21,9 @@
 
 	  
 			<h1 class="pt-5 mb-3 text-capitalize text-center headline"><span class="text-brand">Create your Actifit / Steem account</span></h1>
-			<p class="lead mb-2 ">
+			<div class="lead mb-2 ">
 			  In order to use Actifit, you need an account on the Steem blockchain. If you do not have an account, you can sign up for one right now!<br/>
+			  <p class="lead mb-2 p-2 text-center bg-danger text-white"><i>Don't know what Actifit is? Head over to <a href="https://actifit.io" class="acti-hover">home page</a> to learn more</i></p>
 			  While you can create a Steem account from <a href="https://signup.steemit.com/?ref=actifit">Steemit.com</a> for free, it could take up to two weeks, or more to get approved.<br/>
 			  Other services allow the creation of Steem accounts at a cost, yet here at Actifit, <span class="afit-tokens-earned text-brand">for as low as {{ this.minUSD }}$</span>, you get the following awesome treats:
 			  <ul>
@@ -32,7 +33,7 @@
 				<li>Via posting your daily activity, you can earn STEEM upvotes and AFIT tokens, a free source of earning crypto while getting healthy and fit!</li>
 				<li>Owning AFIT tokens allows you to earn more rewards for your daily activity, as it <span class="afit-tokens-earned text-brand">increases your User Rank</span>. At the minimum 10$ investment, your User Rank will stand at 3%. For instance, <span class="afit-tokens-earned text-brand">investing 100$ will earn you {{ afitTokensToEarn('100') }} AFIT tokens</span>, and will increase your User Rank to 6%, reflecting in an <span class="afit-tokens-earned text-brand">increase in your daily STEEM and AFIT rewards.</span></li>
 			   </ul>
-			</p>
+			</div>
 			
 			<div class="row lead mb-4 p-3 w-100">
 				<div class="w-100 p-2">You can buy & send STEEM using any of the following exchanges</div>
@@ -332,5 +333,8 @@
 <style>
 .afit-tokens-earned, label{
 	font-weight: bold;
+}
+.acti-hover:hover{
+	color: white;
 }
 </style>
