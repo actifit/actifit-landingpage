@@ -155,7 +155,7 @@
 			<a :href="$steemconnect.getLoginURL()" class="btn btn-brand btn-lg w-75">Login</a>
 		  </div>
 		  <div class="w-50">
-			<a href="https://actifit.io/signup" class="btn btn-brand btn-lg w-75">Sign Up</a>
+			<a href="/signup" class="btn btn-brand btn-lg w-75">Sign Up</a>
 		  </div>
 		</div>
 	  </div>

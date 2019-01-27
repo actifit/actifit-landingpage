@@ -19,7 +19,7 @@
       <!-- account balance -->
       <div class="text-center">
         <h3 class="mb-4" v-if="user">Hey {{ user.account.name }}!</h3>
-		<p class="lead">For every referral, earn an amount equal to 20% of the AFIT rewards your referral is earning upon successful signup!</p>
+		<p class="lead">{{this.referralNotice}}</p>
         <h5>Your Referral Link:</h5>
 		<input type="text" class="w-50 p-3" name="refLink" ref="refLink" id="referral-link" :value="refUrl" readonly/>
 		<button v-on:click="copyContent" data-targetEl="refLink" class="btn btn-brand p-3">Copy Link</button>	
@@ -86,6 +86,7 @@
 	<div class="container mt-5 pb-5 pt-5 w-50" v-else>
       <!-- account balance -->
       <div class="text-center p-5">
+	    <p class="lead">{{this.referralNotice}}</p>
 		<div class="row pb-3">
 		  <div class="text-center text-brand w-100 lead">
 		    You need to login first to access your referral link and referral data.
@@ -96,7 +97,7 @@
 			<a :href="$steemconnect.getLoginURL()" class="btn btn-brand btn-lg w-75">Login</a>
 		  </div>
 		  <div class="w-50">
-			<a href="https://actifit.io/signup" class="btn btn-brand btn-lg w-75">Sign Up</a>
+			<a href="/signup" class="btn btn-brand btn-lg w-75">Sign Up</a>
 		  </div>
 		</div>
 	  </div>
@@ -127,6 +128,7 @@
 	data (){
 	  return {
 	    refUrl: '',
+		referralNotice: 'For every referral, earn an amount equal to 20% of the AFIT rewards your referral earns upon successful signup!',
 	  }
 	},
     computed: {
