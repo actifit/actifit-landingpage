@@ -158,8 +158,9 @@
 		
 		//ensure that the app info is actifit specific, for example edited by a different editor
 		if (!meta.app.includes('actifit')){
-			meta.app = 'actifit/0.4.1.io';
+			meta.app = 'actifit/0.4.1';
 		}
+		meta.suppEdit = 'actifit.io';
 		
         // save changes
         this.$steemconnect.comment(
