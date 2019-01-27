@@ -17,12 +17,12 @@ module.exports = {
   ** Headers of the page
   */
   head: {
-    title: 'Actifit Fitness Tracker - Rewarding Fitness Activity',
+    title: 'Actifit - Rewarding Your Everyday Activity',
     meta: [
 	  { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
       { hid: 'description', name: 'description', content: pkg.description },
-	  { hid: 'og:title', name:'og:title', content: 'Actifit - Rewarding Fitness Activity'},
+	  { hid: 'og:title', name:'og:title', content: 'Actifit - Rewarding Your Everyday Activity'},
 	  { hid: 'og:description', name:'og:description', content: pkg.description},
       { hid: 'og:url', name:'og:url', content: 'https://actifit.io'},
 	  { hid: 'og:type', name:'og:type', content: 'website'},
