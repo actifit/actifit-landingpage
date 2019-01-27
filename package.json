@@ -28,13 +28,15 @@
     "vue-recaptcha": "^1.1.1",
     "vue-scrollto": "^2.13.0",
     "vue-simplemde": "^0.5.1",
+    "vue-social-sharing": "^2.3.3",
     "vue-steemconnect": "^0.3.1",
+    "vuejs-countdown": "^0.2.1",
     "whatwg-fetch": "^2.0.4"
   },
   "devDependencies": {
     "babel-eslint": "^8.2.1",
     "cross-env": "^5.0.1",
-    "eslint": "^5.4.0",
+    "eslint": "^5.12.1",
     "eslint-loader": "^2.1.0",
     "eslint-plugin-vue": "^4.7.1",
     "node-sass": "^4.11.0",
