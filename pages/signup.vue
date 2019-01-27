@@ -23,7 +23,7 @@
 			<h1 class="pt-5 mb-3 text-capitalize text-center headline"><span class="text-brand">Create your Actifit / Steem account</span></h1>
 			<div class="lead mb-2 ">
 			  In order to use Actifit, you need an account on the Steem blockchain. If you do not have an account, you can sign up for one right now!<br/>
-			  <p class="lead mb-2 p-2 text-center bg-danger text-white"><i>Don't know what Actifit is? Head over to <a href="https://actifit.io" class="acti-hover">home page</a> to learn more</i></p>
+			  <p class="lead mb-2 p-2 text-center bg-danger text-white"><i>Don't know what Actifit is? Head over to <a href="https://actifit.io" class="acti-hover"><u>home page</u></a> to learn more</i></p>
 			  While you can create a Steem account from <a href="https://signup.steemit.com/?ref=actifit">Steemit.com</a> for free, it could take up to two weeks, or more to get approved.<br/>
 			  Other services allow the creation of Steem accounts at a cost, yet here at Actifit, <span class="afit-tokens-earned text-brand">for as low as {{ this.minUSD }}$</span>, you get the following awesome treats:
 			  <ul>
@@ -344,7 +344,7 @@
 .afit-tokens-earned, label{
 	font-weight: bold;
 }
-.acti-hover:hover{
+.acti-hover, .acti-hover:hover{
 	color: white;
 }
 </style>
