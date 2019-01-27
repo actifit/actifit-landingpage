@@ -28,6 +28,7 @@ module.exports = {
 	  { hid: 'og:type', name:'og:type', content: 'website'},
 	  { hid: 'og:image', name:'og:image', content: 'https://actifit.io/img/actifit_logo.png'},
 	  { name: 'google-site-verification', content:'Dv3mVaav2x5_2FauDB6MRjixVtVVWPfjUekWwKY-Tnc' },
+	  { hid: 'fb:app_id', name: 'fb:app_id', content: '651065985331472'},
     ],
     link: [
       { rel: 'icon', type: 'image/x-icon', href: '/img/actifit_logo.png' },
