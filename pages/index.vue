@@ -32,17 +32,32 @@
           <li class="nav-item">
             <a class="nav-link" href="#" @click.prevent="scrollTo('#news')">News</a>
           </li>
+		  <li class="nav-item">
+            <a class="nav-link" href="#" @click.prevent="$router.push('/referrals')">Refer A Friend</a>
+          </li>
         </ul>
         <UserMenu />
       </div>
     </nav>
+	
+	<div class="position-fixed text-brand mx-auto w-100 acti-notify-comp">
+		<div class="text-center w-50 mx-auto acti-notify-comp-inner border-2 rounded">
+		  <div>Competition Alert: Refer New Actifitters!</div>
+		  <div>Earn 5 STEEM + 13 AFIT Per Referral</div>
+		  <div>Additional Top Referrer Reward Up To 200 STEEM!</div>
+		  <span><a href="/referrals"><u>Refer a Friend</u></a></span> | 
+		  <span><a href="/signup"><u>Signup a Friend</u></a></span> |
+		  <span><a href=""><u>Read More</u></a></span>
+		  <div><span class="end-string">Ends in </span><Countdown v-if="countDownReady" deadline="February 12, 2019"></Countdown></div>
+		</div>
+	</div>
 
     <!-- header with fullscreen background -->
-    <div class="header pt-4 pt-md-5 position-relative">
-      <div class="container py-5">
+	<div class="header pt-4 pt-md-5 position-relative">
+	  <div class="container py-5">
         
-
         <!-- wallet/activities preview -->
+		
         <div class="card form mx-auto p-3 mt-3 mt-md-5 text-center border-0 home-card">
 		  <div class="pb-md-4 text-center">
 			  <img src="/img/actifit_logo.png" alt="Actifit" />
@@ -74,7 +89,7 @@
                 <a :href="$steemconnect.getLoginURL()" class="btn btn-brand btn-lg w-100">Login</a>
               </div>
               <div class="col-6">
-                <a href="https://actifit.io/signup" class="btn btn-brand btn-lg w-100">Sign Up</a>
+                <a href="/signup" class="btn btn-brand btn-lg w-100">Sign Up</a>
               </div>
             </div>
           </div>
@@ -88,7 +103,7 @@
         </a>
       </div>
     </div>
-
+	
     <!-- intro -->
     <section class="intro bg-light" id="content">
       <div class="container py-5">
@@ -329,6 +344,7 @@
     </section>
 
     <Footer />
+	
     <NewsModal :news="activeNews" />
   </div>
 </template>
@@ -340,13 +356,16 @@
   import News from '~/components/News'
   import NewsModal from '~/components/NewsModal'
   import { mapGetters } from 'vuex'
+  
+  import Countdown from 'vuejs-countdown'
 
   export default {
     components: {
       UserMenu,
       Footer,
       News,
-      NewsModal 
+      NewsModal,
+	  Countdown 
     },
     data () {
       return {
@@ -356,6 +375,7 @@
         tweenedUserCount: 0,
         tweenedTokensDistributed: 0,
         tweenedRewardedActivityCount: 0,
+		countDownReady: false,
 
       }
     },
@@ -447,7 +467,8 @@
 	  // login
       this.$store.dispatch('steemconnect/login')
 	  this.fetchUserData();
-    }
+	  this.countDownReady = true;
+    },
   }
 </script>
 
@@ -503,7 +524,27 @@
 </style>
 <style>
 	.home-card{
-		opacity: 0.9;
+	  opacity: 0.9;
 	}
-
+	.acti-notify-comp{
+	  top:56px; 
+	  z-index:100000; 
+	  font-size: 20px;
+	  vertical-align: top;
+	}
+	.acti-notify-comp-inner{
+	  background: white; 
+	}
+	.vuejs-countdown .digit{
+	  font-size: 20px !important;
+	}
+	.vuejs-countdown{
+	  display: inline;
+	}
+	.end-string{
+	  vertical-align: top;
+	}
+	.border-2{
+	  border: 2px solid #ff112d;
+	}
 </style>
