@@ -47,7 +47,7 @@
 		  <div>Additional Top Referrer Reward Up To 200 STEEM!</div>
 		  <span><a href="/referrals"><u>Refer a Friend</u></a></span> | 
 		  <span><a href="/signup"><u>Signup a Friend</u></a></span> |
-		  <span><a href=""><u>Read More</u></a></span>
+		  <span><a href="https://busy.org/@actifit/actifit-two-week-signup-competition-200-steem-top-referrer-reward-earn-for-each-signup"><u>Read More</u></a></span>
 		  <div><span class="end-string">Ends in </span><Countdown v-if="countDownReady" deadline="February 12, 2019"></Countdown></div>
 		</div>
 	</div>
