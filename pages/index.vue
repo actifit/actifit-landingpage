@@ -475,7 +475,7 @@
 <style lang="sass">	
   .header
     height: 100%
-    background: url('/img/header-2.jpg') center
+    background: url('/img/header-3.jpg') center
     background-size: cover
     .form
       max-width: 500px
