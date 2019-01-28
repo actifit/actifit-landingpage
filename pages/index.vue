@@ -40,17 +40,7 @@
       </div>
     </nav>
 	
-	<div class="position-fixed text-brand mx-auto w-100 acti-notify-comp">
-		<div class="text-center w-50 mx-auto acti-notify-comp-inner border-2 rounded">
-		  <div>Competition Alert: Refer New Actifitters!</div>
-		  <div>Earn 5 STEEM + 13 AFIT Per Referral</div>
-		  <div>Additional Top Referrer Reward Up To 200 STEEM!</div>
-		  <span><a href="/referrals"><u>Refer a Friend</u></a></span> | 
-		  <span><a href="/signup"><u>Signup a Friend</u></a></span> |
-		  <span><a href="https://busy.org/@actifit/actifit-two-week-signup-competition-200-steem-top-referrer-reward-earn-for-each-signup"><u>Read More</u></a></span>
-		  <div><span class="end-string">Ends in </span><Countdown v-if="countDownReady" deadline="February 12, 2019"></Countdown></div>
-		</div>
-	</div>
+	<CompetitionAnnounce />
 
     <!-- header with fullscreen background -->
 	<div class="header pt-4 pt-md-5 position-relative">
@@ -357,7 +347,7 @@
   import NewsModal from '~/components/NewsModal'
   import { mapGetters } from 'vuex'
   
-  import Countdown from 'vuejs-countdown'
+  import CompetitionAnnounce from '~/components/CompetitionAnnounce'
 
   export default {
     components: {
@@ -365,7 +355,7 @@
       Footer,
       News,
       NewsModal,
-	  Countdown 
+	  CompetitionAnnounce
     },
     data () {
       return {
@@ -375,8 +365,6 @@
         tweenedUserCount: 0,
         tweenedTokensDistributed: 0,
         tweenedRewardedActivityCount: 0,
-		countDownReady: false,
-
       }
     },
     computed: {
@@ -467,7 +455,6 @@
 	  // login
       this.$store.dispatch('steemconnect/login')
 	  this.fetchUserData();
-	  this.countDownReady = true;
     },
   }
 </script>
@@ -525,26 +512,5 @@
 <style>
 	.home-card{
 	  opacity: 0.9;
-	}
-	.acti-notify-comp{
-	  top:56px; 
-	  z-index:100000; 
-	  font-size: 20px;
-	  vertical-align: top;
-	}
-	.acti-notify-comp-inner{
-	  background: white; 
-	}
-	.vuejs-countdown .digit{
-	  font-size: 20px !important;
-	}
-	.vuejs-countdown{
-	  display: inline;
-	}
-	.end-string{
-	  vertical-align: top;
-	}
-	.border-2{
-	  border: 2px solid #ff112d;
 	}
 </style>

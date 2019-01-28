@@ -16,6 +16,8 @@
       <UserMenu />
     </nav>
 	
+	<CompetitionAnnounce />
+	
 	<section class="intro bg-light" id="content">
 		<div class="container pt-5 mt-5 pb-5">
 
@@ -128,6 +130,8 @@
   import VueRecaptcha from 'vue-recaptcha';
 
   import { mapGetters } from 'vuex'
+  
+  import CompetitionAnnounce from '~/components/CompetitionAnnounce'
 
   export default {
     components: {
@@ -136,6 +140,7 @@
       Transaction, // single transaction block
       Footer,
 	  VueRecaptcha,
+	  CompetitionAnnounce
     },
 	data () {
       return {
