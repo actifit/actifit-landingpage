@@ -27,7 +27,7 @@
 	},
     computed: {
       body () {
-		let report_content = this.news.body;
+		let report_content = this.report.body;
 		/* let's find images sent as pure URLs, and display them as actual images */
 		let img_links_reg = /(https?:\/\/.*\.(?:png|jpg|jpeg|gif))/igm;
 		report_content = report_content.replace(img_links_reg,'<img src="$&">');
