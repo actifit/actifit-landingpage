@@ -132,7 +132,7 @@
           <div class="col-lg-6 order-lg-2 text-white showcase-img" style="background-image: url('/img/showcase-1.jpg');"></div>
           <div class="col-lg-6 order-lg-1 my-auto showcase-text">
             <h2 class="text-capitalize">Earn tokens as simple as one two three</h2>
-            <p class="lead mb-0">1. Download the Actifit mobile app.<br/>2. Go for a jog, walk your dog, maw your lawn, go to the gym, move around your office,... with an aim to reach a minimum of 5,000 activity count.<br/>3. Post via app to the Steem blockchain, and get rewarded!</p>
+            <p class="lead mb-0">1. Download the Actifit mobile app.<br/>2. Go for a jog, walk your dog, mow your lawn, go to the gym, move around your office,... with an aim to reach a minimum of 5,000 activity count.<br/>3. Post via app to the Steem blockchain, and get rewarded!</p>
             <div class="text-center mt-5">
               <a href="https://bit.ly/actifit-app" target="_blank">
                 <img src="/img/google-play.png" />
