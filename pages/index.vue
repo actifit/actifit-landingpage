@@ -296,19 +296,31 @@
           Sponsored Athletes
         </h1>
         <div class="row">
-          <div class="col-sm-4 text-center mb-4">
+		  <div class="col-6 col-sm-4 text-center mb-4">
+            <a href="https://busy.org/@lasitha" target="_blank">
+              <div class="avatar mx-auto mb-3" style="background-image: url('https://steemitimages.com/p/4HFqJv9qRjVeVQzX3gvDHytNF793bg88B7fESPieLQ8dxHkpPXaNe2rRpUWHJ9oYqAqg35RCq5cGDGqMBomDWQ4pj7ZxwQiW2QmTqkZ5gU3Snkvwtmqe8AkkSWsiLeULjsjFWn1JUPg6vAr1HaniGbakPsmAMyHgdfc?width=512&height=512');"></div>
+            </a>
+            <a href="https://busy.org/@lasitha" target="_blank">@lasitha</a>
+          </div>
+		  <div class="col-6 col-sm-4 text-center mb-4">
+            <a href="https://busy.org/@christinelook" target="_blank">
+              <div class="avatar mx-auto mb-3" style="background-image: url('https://steemitimages.com/p/4i88GgaV8qiFU89taP2MgKXzwntUGAvkoQiKU7VxyD37q96HFWBrAPu8BtekbVWEabLnj8XnMov6ZWym79sztA9VTWxjqavxREuQUJqYnh6of1wNVcBc8jpbRQ?width=512&height=512');"></div>
+            </a>
+            <a href="https://busy.org/@christinelook" target="_blank">@christinelook</a>
+          </div>
+          <div class="col-6 col-sm-4 text-center mb-4">
             <a href="https://busy.org/@entrepreneur916" target="_blank">
               <div class="avatar mx-auto mb-3" style="background-image: url('https://ipfs.busy.org/ipfs/QmPyExYzRA6Zp14c2UL3dZSTwZtToABHwFAyFjR1pZMVk6');"></div>
             </a>
             <a href="https://busy.org/@entrepreneur916" target="_blank">@entrepreneur916</a>
           </div>
-          <div class="col-sm-4 text-center mb-4 mb-sm-0">
+          <div class="col-6 col-sm-6 text-center mb-4 mb-sm-0">
             <a href="https://busy.org/@bunnymoney" target="_blank">
               <div class="avatar mx-auto mb-3" style="background-image: url('https://ipfs.busy.org/ipfs/QmQnNadhAJPJL5Sa8FYL5Pxhgw22zWjw4S8Kmji6k21p2w');"></div>
             </a>
             <a href="https://busy.org/@bunnymoney" target="_blank">@bunnymoney</a>
           </div>
-          <div class="col-sm-4 text-center mb-4 mb-sm-0">
+          <div class="col-6 col-sm-6 text-center mb-4 mb-sm-0">
             <a href="https://busy.org/@fedesox" target="_blank">
               <div class="avatar mx-auto mb-3" style="background-image: url('https://ipfs.busy.org/ipfs/QmZrT7r9SjKUcx81L8p9G9z6uhndupDpfsrtYjwqgF3zC2');"></div>
             </a>

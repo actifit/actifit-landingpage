@@ -1,6 +1,6 @@
 <template>
-  <div class="position-fixed text-brand mx-auto w-100 acti-notify-comp">
-	<div class="text-center w-50 mx-auto acti-notify-comp-inner border-2 rounded">
+  <div :class="outserSmallScreenClasses" class="position-fixed text-brand mx-auto w-100 acti-notify-comp" >
+	<div :class="smallScreenClasses" class="text-center mx-auto acti-notify-comp-inner border-2 rounded">
 	  <div>Competition Alert: Refer New Actifitters!
 		<a href="" @click.prevent="adjustVisibility" class="expand-comp-notice">
 			<span v-if="showCompDetails">&#9651;</span>
@@ -32,10 +32,25 @@
       return {
 		countDownReady: false,
 		showCompDetails: true,
+		screenWidth: 1200,
 	  }
 	},
     computed: {
 	  ...mapGetters(['competitionNoticeOpen']),
+	  smallScreenClasses () {
+		//use proper classes for neat display
+		if (this.screenWidth < 768){
+		  return "w-100";
+		}
+		return "w-50";
+	  },
+	  outserSmallScreenClasses () {
+		//use proper classes for neat display
+		if (this.screenWidth < 768){
+		  return "px-2";
+		}
+		return "";
+	  }
     },
 	methods: {
 	  adjustVisibility () {
@@ -49,6 +64,7 @@
 	},
 	async mounted () {
 	  this.countDownReady = true;
+	  this.screenWidth = screen.width;
 	  if (localStorage.getItem('ActifitNotificationHidden')){ 
 	    this.showCompDetails = !localStorage.getItem('ActifitNotificationHidden')
 	  }
