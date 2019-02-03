@@ -144,7 +144,7 @@
       </div>
     </div>
 	
-	<div class="container mt-5 pb-5 pt-5 w-50" v-else>
+	<div :class="smallScreenClasses" class="container mt-5 pb-5 pt-5" v-else>
       <!-- account balance -->
       <div class="text-center p-5">
 		<div class="row pb-3">
@@ -265,7 +265,14 @@
 		  return "w-100";
 		}
 		return "";
-	  }
+	  },
+	  smallScreenClasses () {
+		//use proper classes for neat display
+		if (this.screenWidth < 768){
+		  return "w-100";
+		}
+		return "w-50";
+	  },
     },
 	watch: {
 	  user: 'fetchUserData',
