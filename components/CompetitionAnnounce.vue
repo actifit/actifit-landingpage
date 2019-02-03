@@ -8,7 +8,7 @@
 		</a></div>
 	  <transition name="fade">
 		<div class="extra-info" v-if="showCompDetails">
-		  <div>Earn 5 STEEM + 13 AFIT Per Referral</div>
+		  <div>Earn 5 STEEM + 11 AFIT Per Referral</div>
 		  <div>Additional Top Referrer Reward Up To 200 STEEM!</div>
 		  <span><a href="/referrals"><u>Refer a Friend</u></a></span> | 
 		  <span><a href="/signup"><u>Signup a Friend</u></a></span> |
