@@ -23,7 +23,7 @@
         <h3 class="mb-4" v-if="user">Hey {{ user.account.name }}!</h3>
 		<p class="lead">{{this.referralNotice}}</p>
         <h5>Your Referral Link:</h5>
-		<input type="text" class="w-50 p-3" name="refLink" ref="refLink" id="referral-link" :value="refUrl" readonly/>
+		<input type="text" :class="smallScreenClasses" class="p-3" name="refLink" ref="refLink" id="referral-link" :value="refUrl" readonly/>
 		<button v-on:click="copyContent" data-targetEl="refLink" class="btn btn-brand p-3">Copy Link</button>	
 		<div class="text-brand"> 
 			<span class="share-txt">Share: </span>
@@ -85,7 +85,7 @@
       </div>
     </div>
 	
-	<div class="container mt-5 pb-5 pt-5 w-50" v-else>
+	<div :class="smallScreenClasses" class="container mt-5 pb-5 pt-5" v-else>
       <!-- account balance -->
       <div class="text-center p-5">
 	    <p class="lead">{{this.referralNotice}}</p>
@@ -134,6 +134,7 @@
 	  return {
 	    refUrl: '',
 		referralNotice: 'For every referral, earn an amount equal to 20% of the AFIT rewards your referral earns upon successful signup!',
+		screenWidth: 1200,
 	  }
 	},
     computed: {
@@ -142,8 +143,16 @@
 	  displayUserRank () {
 		return this.userRank
 	  },
+	  smallScreenClasses () {
+		//use proper classes for neat display
+		if (this.screenWidth < 768){
+		  return "w-100";
+		}
+		return "w-50";
+	  },
     },
     async mounted () {
+	  this.screenWidth = screen.width;
 	  this.fetchUserInfo();
     },
 	created () {
