@@ -10,6 +10,7 @@ module.exports = {
 	REWARD_REFERRAL_API_KEY: process.env.REWARD_REFERRAL_API_KEY,
 	DELEGATE_ACCOUNT_API_KEY: process.env.DELEGATE_ACCOUNT_API_KEY,
 	confirmPaymentToken: process.env.CONFIRM_PAYMENT_API_KEY,
+	webEditToken: process.env.WEB_EDIT_REWARD_KEY,
 	actiAppUrl: process.env.ACTI_API_URL || 'http://localhost:3120/',
   },
 

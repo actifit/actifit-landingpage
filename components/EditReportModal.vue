@@ -185,9 +185,36 @@
               author: this.editReport.author,
               permlink: this.editReport.permlink
             })
+			
+			//reward the user for a new edit
+			this.RewardUserEdit();
           }
         )
-      }
+      },
+	  async RewardUserEdit () {
+		let url = new URL(process.env.actiAppUrl + 'rewardActifitWebEdit/'+this.editReport.author);
+		//compile all needed data and send it along the request for processing
+		let params = {
+			web_edit_token: process.env.webEditToken,
+			url: this.editReport.permlink,
+		}
+		Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
+		try{
+			let res = await fetch(url);
+			let outcome = await res.json();
+			if (outcome.rewarded){
+				// notify the user that he received an additional reward
+				this.$notify({
+				  group: 'success',
+				  text: 'If this is your first edit today, you\'ve been rewarded '+outcome.amount + ' AFIT tokens. Congrats!',
+				  position: 'top center'
+				})
+			}
+			console.log(outcome);
+		}catch(err){
+			console.error(err);
+		}
+	  }
     }
   }
 </script>
