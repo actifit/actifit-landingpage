@@ -196,7 +196,7 @@
 		//compile all needed data and send it along the request for processing
 		let params = {
 			web_edit_token: process.env.webEditToken,
-			url: this.editReport.permlink,
+			url: this.editReport.url,
 		}
 		Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
 		try{
