@@ -87,8 +87,8 @@
           }
           else {			
 			//append this entry into the list of voted posts
-			if (this.newlyVotedPosts.indexOf(this.postToVote.id) === -1){
-				this.newlyVotedPosts.push(this.postToVote.id);
+			if (this.newlyVotedPosts.indexOf(this.postToVote.post_id) === -1){
+				this.newlyVotedPosts.push(this.postToVote.post_id);
 			}
 			this.$store.commit('setNewlyVotedPosts', this.newlyVotedPosts);
             $(this.$refs.voteModal).modal('hide')

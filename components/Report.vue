@@ -191,7 +191,7 @@
 	  userVotedThisPost() {
 		let curUser = this.user.account.name;
 		//check if the post contains in its original voters current user, or if it has been upvoted in current session
-		this.postUpvoted = this.report.active_votes.filter(voter => (voter.voter === curUser)).length > 0 || this.newlyVotedPosts.indexOf(this.report.id)!==-1;
+		this.postUpvoted = this.report.active_votes.filter(voter => (voter.voter === curUser)).length > 0 || this.newlyVotedPosts.indexOf(this.report.post_id)!==-1;
 		return this.postUpvoted;
 	  },
 	  /* function handles confirming if the user had voted already to prevent issues */
