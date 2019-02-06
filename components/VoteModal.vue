@@ -123,7 +123,7 @@
 				// notify the user that he received an additional reward
 				this.$notify({
 				  group: 'success',
-				  text: 'You\'ve been rewarded '+outcome.amount + ' AFIT tokens for upvoting a min of 3 Actifit reports at 20%. Congrats!',
+				  text: 'You\'ve been rewarded '+outcome.amount + ' AFIT tokens for upvoting 3 Actifit reports at 20% voting power or more. Congrats!',
 				  position: 'top center'
 				})
 			}

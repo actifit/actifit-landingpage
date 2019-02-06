@@ -11,6 +11,8 @@
           </button>
         </div>
         <vue-markdown class="modal-body" v-html="body"></vue-markdown>
+		<div class="report-comments">
+		</div>
       </div>
     </div>
   </div>
@@ -18,8 +20,12 @@
 
 <script>
   import VueMarkdown from 'vue-markdown'
-
+  import steem from 'steem'
+  
   export default {
+	watch: {
+	  report : 'fetchComments'
+	},
     props: ['report'],
 	components: {
 	  VueMarkdown,
@@ -43,7 +49,27 @@
 		let user_name = /(@([\a-zA-Z0-9-.]+)(?![\a-zA-Z0-9-.]))([,.|() ])/g;
         return report_content.replace(user_name,'[$1](https://busy.org/$1)$3')
       }
-    }
+    },
+	methods: {
+	  fetchComments () {
+	    //handles grabbing related comments to current post
+	    if (typeof this.report != undefined && this.report != 'undefined' && this.report != null){
+			console.log(this.report);
+		  //getState allows fetching all related comments to the post at hand. Yet we need to build the proper param to it under the format '/tag/username/permlink'
+		  let report_param = this.report.category + '/@' + this.report.author + '/' + this.report.permlink;
+		  let cur_ref = this;
+	      steem.api.getState (report_param, function (err, result){
+			//sort results by depth so as we display entries properly
+			let comments_found = Object.values(result.content).sort( function (comment_a, comment_b){
+			  return comment_a.depth < comment_b.depth? -1:1; 
+			});
+			//go through sorted items, skip depth 0 as that's the current post
+	        console.log(err, comments_found);
+			const comments = [];
+	      });
+	    }
+	  },
+	}
   }
 </script>
 
