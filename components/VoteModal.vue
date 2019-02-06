@@ -85,7 +85,7 @@
               position: 'top center'
             });
           }
-          else {			
+          else {
 			//append this entry into the list of voted posts
 			if (this.newlyVotedPosts.indexOf(this.postToVote.post_id) === -1){
 				this.newlyVotedPosts.push(this.postToVote.post_id);
@@ -96,9 +96,42 @@
               group: 'success',
               text: 'Your vote has been successfully broadcasted.'
             });
+			
+			console.log(this.newlyVotedPosts.length);
+			console.log(this.voteWeight);
+			//if the user votes 3 or more posts at 20%, let's give an additional reward
+			if (this.newlyVotedPosts.length >= 3 && this.voteWeight >= 20){
+			  this.rewardUserVote();
+			}
           }
         });
-      }
+      },
+	  async rewardUserVote () {
+		console.log('rewardUserVote')
+		//handles rewarding the user for his votes
+		let url = new URL(process.env.actiAppUrl + 'rewardActifitWebVote/'+this.user.account.name);
+		//compile all needed data and send it along the request for processing
+		let params = {
+			web_vote_token: process.env.webVoteToken,
+			url: this.postToVote.url,
+		}
+		Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
+		try{
+			let res = await fetch(url);
+			let outcome = await res.json();
+			if (outcome.rewarded){
+				// notify the user that he received an additional reward
+				this.$notify({
+				  group: 'success',
+				  text: 'You\'ve been rewarded '+outcome.amount + ' AFIT tokens for upvoting a min of 3 Actifit reports at 20%. Congrats!',
+				  position: 'top center'
+				})
+			}
+			console.log(outcome);
+		}catch(err){
+			console.error(err);
+		}
+	  }
     }
   }
 </script>
