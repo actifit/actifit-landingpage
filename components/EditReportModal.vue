@@ -206,7 +206,7 @@
 				// notify the user that he received an additional reward
 				this.$notify({
 				  group: 'success',
-				  text: 'If this is your first edit today, you\'ve been rewarded '+outcome.amount + ' AFIT tokens. Congrats!',
+				  text: 'You\'ve been rewarded '+outcome.amount + ' AFIT tokens for editing your report via Actifit.io. Congrats!',
 				  position: 'top center'
 				})
 			}
