@@ -97,8 +97,6 @@
               text: 'Your vote has been successfully broadcasted.'
             });
 			
-			console.log(this.newlyVotedPosts.length);
-			console.log(this.voteWeight);
 			//if the user votes 3 or more posts at 20%, let's give an additional reward
 			if (this.newlyVotedPosts.length >= 3 && this.voteWeight >= 20){
 			  this.rewardUserVote();
@@ -107,7 +105,6 @@
         });
       },
 	  async rewardUserVote () {
-		console.log('rewardUserVote')
 		//handles rewarding the user for his votes
 		let url = new URL(process.env.actiAppUrl + 'rewardActifitWebVote/'+this.user.account.name);
 		//compile all needed data and send it along the request for processing
@@ -127,7 +124,6 @@
 				  position: 'top center'
 				})
 			}
-			console.log(outcome);
 		}catch(err){
 			console.error(err);
 		}

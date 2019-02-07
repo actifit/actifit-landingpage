@@ -43,11 +43,11 @@
             <small>
               <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 
                  data-target="#voteModal" v-if="user && userVotedThisPost()==true">
-                <i class="far fa-thumbs-up"></i> {{ report.net_votes }}
+                <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
               </a>
 			  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal"
                  data-target="#voteModal" v-else>
-                <i class="far fa-thumbs-up"></i> {{ report.net_votes }}
+                <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
               </a>
               <i class="far fa-comments ml-2"></i> {{ report.children }}
             </small>
@@ -160,6 +160,9 @@
 	  votedByUser() {
 		return this.postUpvoted;
 	  },
+	  getVoteCount(){
+		return Array.isArray(this.report.active_votes)?this.report.active_votes.length:0;
+	  }
 	  	  
     }, 
 	data: function(){
