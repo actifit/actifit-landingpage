@@ -41,15 +41,12 @@
         <div class="row details mt-2">
           <div class="col-6">
             <small>
-              <a href="#" v-if="!user">
-                <i class="far fa-thumbs-up"></i> {{ report.net_votes }}
-              </a>
               <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 
                  data-target="#voteModal" v-if="user && userVotedThisPost()==true">
                 <i class="far fa-thumbs-up"></i> {{ report.net_votes }}
               </a>
 			  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal"
-                 data-target="#voteModal" v-else-if="user">
+                 data-target="#voteModal" v-else>
                 <i class="far fa-thumbs-up"></i> {{ report.net_votes }}
               </a>
               <i class="far fa-comments ml-2"></i> {{ report.children }}
@@ -196,8 +193,13 @@
 	  },
 	  /* function handles confirming if the user had voted already to prevent issues */
 	  votePrompt(e) {
+		//if no user is logged in, prompt to login
+		if (!this.user){
+		  alert('You need to login or signup first');
+		  e.stopPropagation();
+		}
 		//if this post is already voted by the user, we need to show a confirmation
-		if (this.userVotedThisPost()){
+		else if (this.userVotedThisPost()){
 		  var confirmPopup = confirm("You already had voted before on this post. Are you sure you want to change your vote?");
 		  if (confirmPopup){
 			this.$store.commit('setPostToVote', this.report)
