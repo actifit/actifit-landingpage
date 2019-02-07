@@ -25,7 +25,7 @@
 				  <i class="far fa-comments ml-2"></i> {{ report.children }}
 				</small>
 			</div>
-			<div class="modal-body">
+			<div>
 				<small>
 					{{ postPayout }}
 				</small>
