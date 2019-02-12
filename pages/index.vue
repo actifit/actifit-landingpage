@@ -39,8 +39,6 @@
         <UserMenu />
       </div>
     </nav>
-	
-	<CompetitionAnnounce />
 
     <!-- header with fullscreen background -->
 	<div class="header pt-4 pt-md-5 position-relative">
@@ -358,8 +356,6 @@
   import News from '~/components/News'
   import NewsModal from '~/components/NewsModal'
   import { mapGetters } from 'vuex'
-  
-  import CompetitionAnnounce from '~/components/CompetitionAnnounce'
 
   export default {
     components: {
@@ -367,7 +363,6 @@
       Footer,
       News,
       NewsModal,
-	  CompetitionAnnounce
     },
     data () {
       return {

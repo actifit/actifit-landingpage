@@ -13,8 +13,6 @@
       <NavbarBrand />
       <UserMenu />
     </nav>
-	
-	<CompetitionAnnounce />
 
     <div class="container pt-5 mt-5 pb-5" v-if="user">
 
@@ -174,7 +172,6 @@
   import steem from 'steem'
 
   import { mapGetters } from 'vuex'
-  import CompetitionAnnounce from '~/components/CompetitionAnnounce'
 
   export default {
 	data () {
@@ -210,7 +207,6 @@
       UserMenu,
       Transaction, // single transaction block
       Footer,
-	  CompetitionAnnounce
     },
     computed: {
       ...mapGetters('steemconnect', ['user']),

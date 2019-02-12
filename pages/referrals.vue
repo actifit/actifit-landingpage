@@ -13,8 +13,6 @@
       <NavbarBrand />
       <UserMenu />
     </nav>
-	
-	<CompetitionAnnounce />
 
     <div class="container pt-5 mt-5 pb-5" v-if="user">
 
@@ -118,8 +116,6 @@
   import SocialSharing from 'vue-social-sharing'
 
   import { mapGetters } from 'vuex'
-  
-  import CompetitionAnnounce from '~/components/CompetitionAnnounce'
 
   export default {
     components: {
@@ -128,7 +124,6 @@
       Referral, // single referral block
       Footer,
 	  SocialSharing,
-	  CompetitionAnnounce
     },
 	data (){
 	  return {
