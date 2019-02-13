@@ -14,7 +14,7 @@
             <input class="form-control form-control-lg" id="report-title" v-model="title" />
           </div>
           <div class="form-group">
-            <markdown-editor v-model="body" :configs="editorConfig" ref="editor"></markdown-editor>
+			<steem-editor v-model="body" language="en" />
           </div>
 		  <div class="form-group">
 			<label for="image-upload">Upload Images</label><br/>
@@ -40,11 +40,15 @@
 </template>
 
 <script>
-  import marked from 'marked'
   import InputTag from 'vue-input-tag'
   import { mapGetters } from 'vuex'
   import AWS from 'aws-sdk'
   
+  import Vue from 'vue'
+  import steemEditor from 'steem-editor';
+  import 'steem-editor/dist/css/index.css';
+  Vue.use( steemEditor );
+
   const actifit_host = 'https://usermedia.actifit.io/'
   const bucketName = 'actifit';
   
@@ -52,7 +56,7 @@
 
   export default {
     components: {
-      InputTag
+      InputTag,
     },
     data () {
       return {
@@ -62,16 +66,6 @@
 		file: '', //image
         loading: false, // loading animation in submit button
 		imgUploading: false, // loading animation while image upload in progress
-        editorConfig: { // markdown editor for post body
-          autofocus: true,
-          spellChecker: false,
-          previewRender: (body) => {
-            return marked(body.replace(/@([\w-]+)(?![\w-])/g,'[$&](https://busy.org/$&)'))
-          },
-          forceSync: true,
-          status: ['lines', 'words'],
-          promptURLs: true
-        }
       }
     },
     computed: {

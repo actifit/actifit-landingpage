@@ -12,7 +12,7 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <vue-markdown class="modal-body" v-html="body"></vue-markdown>
+		<article class="modal-body" v-html="$renderMD(body)"></article>
 		<div class="modal-footer">
 			<div><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen">Reply</a></div>
 			<div>
@@ -70,7 +70,7 @@
 		</div>
 		<transition name="fade">
 		  <div class="report-reply modal-body" v-if="commentBoxOpen">
-		    <markdown-editor v-model="replyBody" :configs="editorConfig" ref="editor"></markdown-editor>
+			<steem-editor v-model="replyBody" language="en" ref="editor"/>
 			<a href="#" @click.prevent="postResponse($event)" class="btn btn-brand border reply-btn w-25">Post<i class="fas fa-spin fa-spinner" v-if="loading"></i></a>
 			<a href="#" @click.prevent="resetOpenComment()"  class="btn btn-brand border reply-btn w-25">Cancel</a>
 		  </div>
@@ -83,7 +83,7 @@
 				<div class="modal-author modal-title text-brand" >@{{ $store.state.steemconnect.user.name }}<small class="date-head text-muted">Now</small></div>
 			  </div>
 			</a>
-			<vue-markdown class="modal-body" v-html="responseBody"></vue-markdown>
+			<article class="modal-body" v-html="$renderMD(responseBody)"></article>
 		</div>
 		<div class="report-comments modal-body" v-if="commentsAvailable">
 			<Comments 
@@ -101,10 +101,16 @@
 </template>
 
 <script>
-  import VueMarkdown from 'vue-markdown'
   import steem from 'steem'
   import {mapGetters} from 'vuex'
   import Comments from '~/components/Comments'
+  
+  import Vue from 'vue'
+  
+  import steemEditor from 'steem-editor';
+  import 'steem-editor/dist/css/index.css';
+
+  Vue.use( steemEditor );
   
   
   export default {
@@ -119,16 +125,6 @@
 			loading: false,
 			responsePosted: false,
 			responseBody: '',
-			editorConfig: { // markdown editor for post body
-			  autofocus: true,
-			  spellChecker: false,
-			  /*previewRender: (body) => {
-				return marked(body.replace(/@([\w-]+)(?![\w-])/g,'[$&](https://busy.org/$&)'))
-			  },*/
-			  forceSync: true,
-			  //status: false,//['lines', 'words'],
-			  promptURLs: true
-			}
 		}
 	},
 	watch: {
@@ -136,7 +132,6 @@
 	},
     props: ['report'],
 	components: {
-	  VueMarkdown,
 	  Comments,
 	},
     computed: {
@@ -150,10 +145,6 @@
       },
       body () {
 		let report_content = this.report.body;
-		
-		/* let's find images sent as pure URLs, and display them as actual images, while avoiding well established images */
-		let img_links_reg = /^(?:(?!=").)*((https?:\/\/.*\.(?:png|jpg|jpeg|gif))|(https?:\/\/usermedia\.actifit\.io[^\)]*))(?:\)*)/igm;
-		report_content = report_content.replace(img_links_reg,'<img src="$1">');
 		
 		/* let's match youtube vidoes and display them in a player */
 		//let vid_reg = /^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+/gm;
