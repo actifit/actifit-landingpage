@@ -188,6 +188,40 @@ export default {
       })
     })
   },
+  fetchReportComments ({ state, commit, dispatch }, report) {
+	// handles grabbing comments for currently opened post
+	return new Promise((resolve, reject) => {
+	  let report_param = report.category + '/@' + report.author + '/' + report.permlink;
+	  let cur_ref = this;
+	  //using getState to fetch all level comments
+	  steem.api.getState (report_param, function (err, result){
+		//sort results by depth so as we display entries properly
+		let comments_found = Object.values(result.content).sort( function (comment_a, comment_b){
+		  return comment_a.depth < comment_b.depth? -1:1; 
+		});
+		//go through sorted items, set them up in a suitable tree chart for proper display
+
+		//loop through all entries starting at the very bottom
+		for (let i = comments_found.length - 1 ; i > 0 ;--i){
+			//try to match the parent of each entry to build a proper tree
+			for (let j = i - 1; j >= 0 ; --j){
+				if (comments_found[i].parent_author == comments_found[j].author
+					&& comments_found[i].parent_permlink == comments_found[j].permlink){
+					if (comments_found[j].reply_entries == null){
+						comments_found[j].reply_entries = [];
+					}
+					comments_found[j].reply_entries.push(comments_found[i]);
+				}
+			}
+		}
+		//the proper tree now lies in entry 0 with all subsequent comments, let's set it to our comment rendering var
+
+		commit('setCommentEntries', comments_found.slice(0, 1)[0]) // if posts were found, show load more button
+		resolve()
+
+	  });
+	})
+  },
   updateReport ({ state, commit }, options) {
     steem.api.getContent(options.author, options.permlink, (err, updatedReport) => {
       if (err) console.log(err)

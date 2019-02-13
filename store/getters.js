@@ -65,7 +65,10 @@ export default {
   postToVote (state) {
     return state.postToVote
   },
-  newlyVotedPosts (state){
+  newlyVotedPosts (state) {
 	return state.newlyVotedPosts
+  },
+  commentEntries (state) {
+	return state.commentEntries
   }
 }

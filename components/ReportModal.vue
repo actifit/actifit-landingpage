@@ -5,13 +5,16 @@
         <div class="modal-header">
           <h5 class="modal-title" id="exampleModalLabel">{{ report.title }}</h5><br/>
 		  <a :href="'https://busy.org/@' + report.author" target="_blank">
-		  <h5 class="modal-author modal-title text-brand" >@{{ report.author}} <small class="text-brand numberCircle">{{ getUserRank }}</small></h5></a>
+			<h5 class="modal-author modal-title text-brand" >@{{ report.author}} <small class="text-brand numberCircle">{{ getUserRank }}</small></h5>
+		  </a>
+		  <span class="date-head text-muted">{{ date }}</span>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <vue-markdown class="modal-body" v-html="body"></vue-markdown>
-		<div class="modal-body">
+		<div class="modal-footer">
+			<div><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen">Reply</a></div>
 			<div>
 				<small>
 				  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 
@@ -35,27 +38,27 @@
 			</div>
 		</div>
 		<!-- adding section to display additional FULL Payout option -->
-		<div class="modal-body" v-if="this.meta.full_afit_pay=='on'">
-			<div class="col-8">
+		<div class="modal-footer" v-if="this.meta.full_afit_pay=='on'">
+			<div class="text-brand">
 				<i class="fas fa-star"></i>
 				<small>
 					Full AFIT Payout Mode
 				</small>
 				<i class="fas fa-star"></i>
 			</div>
-			<div class="col-4 text-right" v-if="!postPaid()">
+			<div class="text-brand" v-if="!postPaid()">
 				<small>
 					Pending Pay
 				</small>
 			</div>
-			<div class="col-4 text-right" v-else>
+			<div class="text-brand" v-else>
 				<small>
 					{{ fullAFITReward }} AFIT
 				</small>
 			</div>
 		</div>
 		<!-- adding section to display charity info if available -->
-		<div class="modal-body" v-if="this.meta.charity">
+		<div class="modal-footer" v-if="this.meta.charity">
 			<i class="fas fa-dove"></i>
 			<small>
 				Charity Post
@@ -65,7 +68,32 @@
 				<a :href="'https://busy.org/@' + this.meta.charity[0]" target="_blank">@{{this.meta.charity[0]}}</a>
 			</small>
 		</div>
-		<div class="report-comments">
+		<transition name="fade">
+		  <div class="report-reply modal-body" v-if="commentBoxOpen">
+		    <markdown-editor v-model="replyBody" :configs="editorConfig" ref="editor"></markdown-editor>
+			<a href="#" @click.prevent="postResponse($event)" class="btn btn-brand border reply-btn w-25">Post<i class="fas fa-spin fa-spinner" v-if="loading"></i></a>
+			<a href="#" @click.prevent="resetOpenComment()"  class="btn btn-brand border reply-btn w-25">Cancel</a>
+		  </div>
+		</transition>
+		<div class="report-reply modal-body" v-if="responsePosted">
+			<a :href="'https://busy.org/@' + this.$store.state.steemconnect.user.name" target="_blank">
+			  <div class="comment-user-section">	
+				<div class="user-avatar mr-1"
+					   :style="'background-image: url(https://steemitimages.com/u/' + this.$store.state.steemconnect.user.name + '/avatar)'"></div>
+				<div class="modal-author modal-title text-brand" >@{{ $store.state.steemconnect.user.name }}<small class="date-head text-muted">Now</small></div>
+			  </div>
+			</a>
+			<vue-markdown class="modal-body" v-html="responseBody"></vue-markdown>
+		</div>
+		<div class="report-comments modal-body" v-if="commentsAvailable">
+			<Comments 
+				:author="commentEntries.author" 
+				:body="commentEntries.body" 
+				:reply_entries.sync="commentEntries.reply_entries" 
+				:main_post_author="report.author"
+				:main_post_permlink="report.permlink"
+				:main_post_cat="report.category"
+				:depth="0" />
 		</div>
       </div>
     </div>
@@ -76,25 +104,50 @@
   import VueMarkdown from 'vue-markdown'
   import steem from 'steem'
   import {mapGetters} from 'vuex'
+  import Comments from '~/components/Comments'
+  
   
   export default {
-	data: function(){
+	data () {
 		return {
-			afitReward: '',
+			afitReward: 0,
 			userRank: '',
 			fullAFITReward: '',
 			postUpvoted: false,
+			replyBody: '',
+			commentBoxOpen: false,
+			loading: false,
+			responsePosted: false,
+			responseBody: '',
+			editorConfig: { // markdown editor for post body
+			  autofocus: true,
+			  spellChecker: false,
+			  /*previewRender: (body) => {
+				return marked(body.replace(/@([\w-]+)(?![\w-])/g,'[$&](https://busy.org/$&)'))
+			  },*/
+			  forceSync: true,
+			  //status: false,//['lines', 'words'],
+			  promptURLs: true
+			}
 		}
 	},
 	watch: {
-	  report : 'fetchReportData'
+	  report : 'fetchReportData',
 	},
     props: ['report'],
 	components: {
 	  VueMarkdown,
+	  Comments,
 	},
     computed: {
+	  ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters(['newlyVotedPosts']),
+	  ...mapGetters(['commentEntries']),
+	  date() {
+        let date = new Date(this.report.created)
+        let minutes = date.getMinutes()
+        return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() + ' ' + date.getHours() + ':' + (minutes < 10 ? '0' + minutes : minutes)
+      },
       body () {
 		let report_content = this.report.body;
 		
@@ -114,7 +167,7 @@
         return report_content.replace(user_name,'[$1](https://busy.org/$1)$3')
       },
 	  getVoteCount(){
-		return Array.isArray(this.report.active_votes)?this.report.active_votes.length:0;
+		return Array.isArray(this.report.active_votes) ? this.report.active_votes.length : 0;
 	  },
 	  meta() {
         return JSON.parse(this.report.json_metadata)
@@ -134,6 +187,10 @@
 			return parseFloat(this.userRank).toFixed(1);
 		}
 	  },
+	  commentsAvailable() {
+
+		return this.commentEntries != null;
+	  }
     },
 	methods: {
 	  /* function checks to see if post reached its payout period */
@@ -149,12 +206,65 @@
 		}
 		return false;
 	  },
+	  /* function handles closing open comment box and resetting data */
+	  resetOpenComment () {
+		this.replyBody='';
+		this.commentBoxOpen=false;
+	  },
+	  /* function handles sending out the comment to the blockchain */
+	  postResponse(event) {
+		// proceed with saving the comment
+		
+		this.loading = true
+		
+		//build the permlink
+		let comment_perm = this.user.account.name.replace('.','-') + '-re-' + this.report.author.replace('.','-') + '-' + this.report.permlink + new Date().toISOString().replace(/[^a-zA-Z0-9]+/g, '').toLowerCase();
+		
+		//prepare meta data
+		let meta = new Object();
+		meta.tags = '[actifit]';
+		meta.app = 'actifit/0.4.1';
+		meta.suppEdit = 'actifit.io.comment';
+		
+        this.$steemconnect.comment(
+          this.report.author,
+          this.report.permlink,
+          this.user.account.name,
+          comment_perm,
+          '',
+          this.replyBody,
+          meta,
+          (err) => {
+            // stop loading animation and show notification
+            this.loading = false
+            this.$notify({
+              group: err ? 'error' : 'success',
+              text: err ? 'Unknown error: Your comment could not be sent.' : 'Comment successfully posted!',
+              position: 'top center'
+            })
+			
+			//display comment placeholder till blockchain data comes through
+			this.responsePosted = true;
+			this.responseBody = this.replyBody;
+			
+			//refetch report data anew, but only after 10 seconds to ensure data has been made available
+			setTimeout( this.fetchReportCommentData, 10000);
+			
+			//reset open comment
+			this.resetOpenComment();
+			
+			//reward the user for a new edit
+			//this.RewardUserEdit();
+          }
+        )
+		
+	  },
 	  /* function checks if logged in user has upvoted current report */
 	  userVotedThisPost() {
-		let curUser = this.$parent.user.account.name;
+		let curUser = this.user.account.name;
 		//check if the post contains in its original voters current user, or if it has been upvoted in current session
 		this.postUpvoted = this.report.active_votes.filter(voter => (voter.voter === curUser)).length > 0 || this.newlyVotedPosts.indexOf(this.report.post_id)!==-1;
-		console.log(this.postUpvoted);
+		
 		return this.postUpvoted;
 	  },
 	  /* function handles confirming if the user had voted already to prevent issues */
@@ -183,22 +293,12 @@
 		this.fetchReportCommentData()
 	  },
 	  fetchReportCommentData () {
-	    //handles grabbing related comments to current post
-	    if (typeof this.report != undefined && this.report != 'undefined' && this.report != null){
-			console.log(this.report);
-		  //getState allows fetching all related comments to the post at hand. Yet we need to build the proper param to it under the format '/tag/username/permlink'
-		  let report_param = this.report.category + '/@' + this.report.author + '/' + this.report.permlink;
-		  let cur_ref = this;
-	      steem.api.getState (report_param, function (err, result){
-			//sort results by depth so as we display entries properly
-			let comments_found = Object.values(result.content).sort( function (comment_a, comment_b){
-			  return comment_a.depth < comment_b.depth? -1:1; 
-			});
-			//go through sorted items, skip depth 0 as that's the current post
-	        console.log(err, comments_found);
-			const comments = [];
-	      });
-	    }
+		//regrab report data to fix comments
+		this.$store.dispatch('fetchReportComments', this.report)
+		
+		//clear the placeholder comment displayed
+		this.responsePosted = false;
+		this.responseBody = '';
 	  },
 	  fetchReportKeyData () {
 		fetch(process.env.actiAppUrl+'getPostReward?user=' + this.report.author+'&url='+this.report.url).then(res => {
@@ -229,7 +329,10 @@
 	.actifit-link-plain{
 	  color: black;
 	}
-	.modal-author:hover, .text-brand:hover, .actifit-link-plain:hover{
+	.modal-body{
+	  word-break: break-word;
+	}
+	.modal-body a:hover, .modal-header a:hover, .text-brand:hover, .actifit-link-plain:hover{
 	  text-decoration: none;
 	}
 	.numberCircle {
@@ -242,5 +345,14 @@
 	  border: 2px solid;
 	  text-align: center;
 	  vertical-align:middle;
+	}
+	.markdown-editor .CodeMirror, .markdown-editor .CodeMirror-scroll {
+	  min-height: 100px;
+	}
+	.reply-btn{
+	  float: right;
+	}
+	.date-head{
+	  padding-left: 2px;
 	}
 </style>

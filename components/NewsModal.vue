@@ -45,3 +45,8 @@
     }
   }
 </script>
+<style>
+  .modal-body{
+    word-break: break-word;
+  }
+</style>

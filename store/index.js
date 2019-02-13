@@ -31,6 +31,7 @@ const createStore = () => {
       voteWeight: 100, // vote weight for voting on posts
       postToVote: null, // active post that will be voted on
 	  newlyVotedPosts: [], //contains a reference to all newly voted posts on this session
+	  commentEntries: [], //contains a reference to the current comments on open modal post
     },
     getters,
     mutations,

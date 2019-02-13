@@ -68,4 +68,7 @@ export default {
   setNewlyVotedPosts (state, newlyVotedPosts) {
     state.newlyVotedPosts = newlyVotedPosts
   },
+  setCommentEntries (state, commentEntries) {
+    state.commentEntries = commentEntries
+  },
 }
