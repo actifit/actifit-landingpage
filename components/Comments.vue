@@ -209,7 +209,7 @@
 	  userVotedThisPost() {
 		let curUser = this.$store.state.steemconnect.user;
 		//check if the post contains in its original voters current user, or if it has been upvoted in current session
-		this.postUpvoted = this.full_data.active_votes.filter(voter => (voter.voter === curUser)).length > 0 || this.$parent.newlyVotedPosts.indexOf(this.full_data.post_id)!==-1;
+		this.postUpvoted = this.full_data.active_votes.filter(voter => (voter.voter === curUser)).length > 0;
 		
 		return this.postUpvoted;
 	  },
@@ -235,7 +235,18 @@
 		fetch(process.env.actiAppUrl+'getRank/' + this.author).then(res => {
 				res.json().then(json => this.userRank = json.user_rank)}).catch(e => reject(e))
 				
-	  }
+	  },
+	  /* function handles confirming if the user had voted already to prevent issues */
+	  votePrompt(e) {
+		//if no user is logged in, prompt to login
+		if (!this.$store.state.steemconnect.user.name){
+		  alert('You need to login or signup first');
+		  e.stopPropagation();
+		}else{
+		  //proceed normally showing vote popup
+		  this.$store.commit('setPostToVote', this.full_data)
+		}
+	  },
     },
 	async mounted () {
 	  if (this.full_data != null){
