@@ -197,7 +197,6 @@
 
 			//refetch report data anew, but only after 10 seconds to ensure data has been made available
 			setTimeout( this.fetchReportCommentData, 10000);
-			//this.$emit('requestUpdateComments');
 			
 			//reset open comment
 			this.resetOpenComment();

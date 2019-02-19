@@ -32,6 +32,7 @@ const createStore = () => {
       postToVote: null, // active post that will be voted on
 	  newlyVotedPosts: [], //contains a reference to all newly voted posts on this session
 	  commentEntries: [], //contains a reference to the current comments on open modal post
+	  commentCountToday: 0, //contains the count of comments done by a user on a single day
     },
     getters,
     mutations,

@@ -70,5 +70,8 @@ export default {
   },
   commentEntries (state) {
 	return state.commentEntries
+  },
+  commentCountToday (state) {
+	return state.commentCountToday
   }
 }

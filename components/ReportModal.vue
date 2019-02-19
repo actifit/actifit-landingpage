@@ -12,7 +12,7 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <vue-markdown class="modal-body" v-html="body"></vue-markdown>
+		<vue-markdown class="modal-body" v-html="body"></vue-markdown>
 		<div class="modal-footer">
 			<div><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen">Reply</a></div>
 			<div>
@@ -70,7 +70,7 @@
 		</div>
 		<transition name="fade">
 		  <div class="report-reply modal-body" v-if="commentBoxOpen">
-		    <markdown-editor v-model="replyBody" :configs="editorConfig" ref="editor"></markdown-editor>
+			<markdown-editor v-model="replyBody" :configs="editorConfig" ref="editor"></markdown-editor>
 			<a href="#" @click.prevent="postResponse($event)" class="btn btn-brand border reply-btn w-25">Post<i class="fas fa-spin fa-spinner" v-if="loading"></i></a>
 			<a href="#" @click.prevent="resetOpenComment()"  class="btn btn-brand border reply-btn w-25">Cancel</a>
 		  </div>
@@ -104,8 +104,7 @@
   import VueMarkdown from 'vue-markdown'
   import steem from 'steem'
   import {mapGetters} from 'vuex'
-  import Comments from '~/components/Comments'
-  
+  import Comments from '~/components/Comments'  
   
   export default {
 	data () {
@@ -142,7 +141,7 @@
     computed: {
 	  ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters(['newlyVotedPosts']),
-	  ...mapGetters(['commentEntries']),
+	  ...mapGetters(['commentEntries'], 'commentCountToday'),
 	  date() {
         let date = new Date(this.report.created)
         let minutes = date.getMinutes()
@@ -250,14 +249,52 @@
 			//refetch report data anew, but only after 10 seconds to ensure data has been made available
 			setTimeout( this.fetchReportCommentData, 10000);
 			
+			//check if comment is lengthy enough, increase tracked count by 1
+			if (this.responseBody.length >= 50){
+				if (isNaN(this.commentCountToday)){
+					this.commentCountToday = 0;
+				}
+				this.commentCountToday += 1;
+			}
+			
+			this.$store.commit('setCommentCountToday', this.commentCountToday);
+			
+			//reward the user for interacting with 3 different posts via comments
+			if (this.commentCountToday >= 3){
+				this.rewardUserComment();
+			}
+			
 			//reset open comment
 			this.resetOpenComment();
-			
-			//reward the user for a new edit
-			//this.RewardUserEdit();
           }
         )
 		
+	  },
+	  /* function handles rewarding user for comments */
+	  async rewardUserComment () {
+		console.log('rewarding comments');
+		let url = new URL(process.env.actiAppUrl + 'rewardActifitWebComment/'+this.user.account.name);
+		//compile all needed data and send it along the request for processing
+		let params = {
+			web_comment_token: process.env.webCommentToken,
+			url: this.report.url,
+		}
+		Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
+		try{
+			let res = await fetch(url);
+			let outcome = await res.json();
+			if (outcome.rewarded){
+				// notify the user that he received an additional reward
+				this.$notify({
+				  group: 'success',
+				  text: 'You\'ve been rewarded '+outcome.amount + ' AFIT tokens for commenting on 3 activity reports today. Congrats!',
+				  position: 'top center'
+				})
+			}
+			console.log(outcome);
+		}catch(err){
+			console.error(err);
+		}
 	  },
 	  /* function checks if logged in user has upvoted current report */
 	  userVotedThisPost() {

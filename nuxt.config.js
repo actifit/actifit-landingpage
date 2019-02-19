@@ -12,6 +12,7 @@ module.exports = {
 	confirmPaymentToken: process.env.CONFIRM_PAYMENT_API_KEY,
 	webEditToken: process.env.WEB_EDIT_REWARD_KEY,
 	webVoteToken: process.env.WEB_VOTE_REWARD_KEY,
+	webCommentToken: process.env.WEB_COMMENT_REWARD_KEY,
 	actiAppUrl: process.env.ACTI_API_URL || 'http://localhost:3120/',
   },
 

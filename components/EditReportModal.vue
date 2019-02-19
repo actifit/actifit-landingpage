@@ -14,7 +14,7 @@
             <input class="form-control form-control-lg" id="report-title" v-model="title" />
           </div>
           <div class="form-group">
-            <markdown-editor v-model="body" :configs="editorConfig" ref="editor"></markdown-editor>
+			<markdown-editor v-model="body" :configs="editorConfig" ref="editor"></markdown-editor>
           </div>
 		  <div class="form-group">
 			<label for="image-upload">Upload Images</label><br/>
@@ -52,7 +52,7 @@
 
   export default {
     components: {
-      InputTag
+      InputTag,
     },
     data () {
       return {
@@ -62,7 +62,7 @@
 		file: '', //image
         loading: false, // loading animation in submit button
 		imgUploading: false, // loading animation while image upload in progress
-        editorConfig: { // markdown editor for post body
+		editorConfig: { // markdown editor for post body
           autofocus: true,
           spellChecker: false,
           previewRender: (body) => {

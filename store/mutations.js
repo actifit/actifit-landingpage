@@ -71,4 +71,7 @@ export default {
   setCommentEntries (state, commentEntries) {
     state.commentEntries = commentEntries
   },
+  setCommentCountToday (state, commentCountToday) {
+    state.commentCountToday = commentCountToday
+  },
 }
