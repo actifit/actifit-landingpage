@@ -392,4 +392,7 @@
 	.date-head{
 	  padding-left: 2px;
 	}
+	.report-reply{
+	  padding-left: 40px;
+	}
 </style>
