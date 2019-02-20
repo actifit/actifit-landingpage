@@ -269,7 +269,7 @@ export default {
         }
       })
     })
-  }
+  },
 }
 
 const postsFilter = (post) => {
