@@ -1,7 +1,7 @@
 <template>
   <div class="modal fade" id="voteModal" tabindex="-1" ref="voteModal">
     <div class="modal-dialog" role="document">
-      <div class="modal-content" v-if="postToVote">
+      <div class="modal-content border border-danger" v-if="postToVote">
         <div class="modal-header">
           <h5 class="modal-title">Vote on {{ postToVote.title }}</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
