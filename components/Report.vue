@@ -144,9 +144,9 @@
       },
 	  postPayout() {
 		if (this.postPaid()){
-			return this.report.total_payout_value.replace('SBD','').replace('STEEM','')+' STEEM/SBD'
+			return this.report.total_payout_value.replace('SBD','').replace('STEEM','')+' $'
 		}else{
-			return this.report.pending_payout_value.replace('SBD','').replace('STEEM','')+' STEEM/SBD'
+			return this.report.pending_payout_value.replace('SBD','').replace('STEEM','')+' $'
 		}
 	  },
 	  getUserRank() {
