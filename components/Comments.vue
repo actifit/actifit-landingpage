@@ -8,7 +8,7 @@
 			<div class="modal-author modal-title text-brand" >@{{ author }}<small class="text-brand numberCircle">{{ getUserRank }}</small><small class="date-head text-muted">{{ date }}</small></div>
 		  </div>
 		</a>
-		<vue-markdown class="modal-body" v-html="commentBody()" :style="{ paddingLeft: depth * indentFactor + 'px' }" ></vue-markdown>
+		<article class="modal-body" v-html="$renderMD(commentBody())" :style="{ paddingLeft: depth * indentFactor + 'px' }"></article>
 		<div class="modal-footer">
 			<div><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen">Reply</a></div>
 			<div>
@@ -45,7 +45,7 @@
 				<div class="modal-author modal-title text-brand" >@{{ $store.state.steemconnect.user.name }}<small class="date-head text-muted">Now</small></div>
 			  </div>
 			</a>
-			<vue-markdown class="modal-body" v-html="responseBody" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }" ></vue-markdown>
+			<article class="modal-body" v-html="$renderMD(responseBody)" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }" ></article>
 		</div>
 	</div>
     <Comments 
@@ -66,6 +66,11 @@
 
   import VueMarkdown from 'vue-markdown'
   import steem from 'steem'
+  
+  import Vue from 'vue'
+  
+  import steemEditor from 'steem-editor';
+  import 'steem-editor/dist/css/index.css';
   
   export default { 
     props: [ 'author', 'reply_entries', 'depth', 'body', 'full_data', 'main_post_author', 'main_post_permlink', 'main_post_cat' ],
@@ -126,10 +131,6 @@
     methods: {
       commentBody () {
 		let report_content = this.full_data.body;
-		
-		/* let's find images sent as pure URLs, and display them as actual images, while avoiding well established images */
-		let img_links_reg = /^(?:(?!=").)*((https?:\/\/.*\.(?:png|jpg|jpeg|gif))|(https?:\/\/usermedia\.actifit\.io[^\)]*))(?:\)*)/igm;
-		report_content = report_content.replace(img_links_reg,'<img src="$1">');
 		
 		/* let's match youtube vidoes and display them in a player */
 		//let vid_reg = /^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+/gm;

@@ -12,7 +12,7 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-		<vue-markdown class="modal-body" v-html="body"></vue-markdown>
+		<article class="modal-body" v-html="$renderMD(body)"></article>
 		<div class="modal-footer">
 			<div><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen">Reply</a></div>
 			<div>
@@ -83,7 +83,7 @@
 				<div class="modal-author modal-title text-brand" >@{{ $store.state.steemconnect.user.name }}<small class="date-head text-muted">Now</small></div>
 			  </div>
 			</a>
-			<vue-markdown class="modal-body" v-html="responseBody"></vue-markdown>
+			<article class="modal-body" v-html="$renderMD(responseBody)"></article>
 		</div>
 		<div class="report-comments modal-body" v-if="commentsAvailable">
 			<Comments 
@@ -105,6 +105,13 @@
   import steem from 'steem'
   import {mapGetters} from 'vuex'
   import Comments from '~/components/Comments'  
+  
+  import Vue from 'vue'
+  
+  import steemEditor from 'steem-editor';
+  import 'steem-editor/dist/css/index.css';
+
+  Vue.use( steemEditor );
   
   export default {
 	data () {
@@ -149,10 +156,6 @@
       },
       body () {
 		let report_content = this.report.body;
-		
-		/* let's find images sent as pure URLs, and display them as actual images, while avoiding well established images */
-		let img_links_reg = /^(?:(?!=").)*((https?:\/\/.*\.(?:png|jpg|jpeg|gif))|(https?:\/\/usermedia\.actifit\.io[^\)]*))(?:\)*)/igm;
-		report_content = report_content.replace(img_links_reg,'<img src="$1">');
 		
 		/* let's match youtube vidoes and display them in a player */
 		//let vid_reg = /^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+/gm;
