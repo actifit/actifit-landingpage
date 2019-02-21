@@ -84,7 +84,7 @@
 			loading: false,
 			responsePosted: false,
 			responseBody: '',
-			indentFactor: 20,
+			indentFactor: 30,
 			editorConfig: { // markdown editor for post body
 			  autofocus: true,
 			  spellChecker: false,
@@ -258,6 +258,8 @@
 <style>
 .comment-info{
   overflow: auto;
+  padding-top: 0px;
+  padding-bottom: 0px;  
 }
 .user-avatar{
   width: 20px;
