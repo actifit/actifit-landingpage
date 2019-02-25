@@ -352,12 +352,22 @@
 		//grab post full pay if full pay mode enabled
 		fetch(process.env.actiAppUrl+'getPostFullAFITPayReward?user=' + this.report.author+'&url='+this.report.url).then(res => {
 				res.json().then(json => this.fullAFITReward = json.token_count)}).catch(e => reject(e))
+	  },
+	  fixSubModal () {
+		//handles fixing parent class to properly interpret existing report modal
+		//need to make sure this is subentry of a report modal, meaning report modal is showing
+		if ($('#reportModal').hasClass('show')){
+		  $('body').addClass('modal-open');
+		}
 	  }
 	},
 	async mounted () {
 	  if (this.report != null){
 		this.fetchReportKeyData();
 	  }
+	
+	  //fix modal overlay
+	  $('#voteModal').on("hidden.bs.modal", this.fixSubModal)
 	}
   }
 </script>
