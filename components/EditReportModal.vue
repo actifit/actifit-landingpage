@@ -156,6 +156,15 @@
             .map(tag => tag.trim()) // trim leading and trailing whitespaces from tags
         ]
 		
+		//cleanup images to remove any ones which could have been removed
+		for (let i = 0;i < meta.image.length;i++){
+			if (!this.body.includes(meta.image[i])){
+				//remove this element
+				meta.image.splice(i, 1);
+				i--;
+			}
+		}
+		
 		//fetch any new images to add them as proper thumbnails
 		
 		//matching our image markdown pattern 
@@ -164,12 +173,14 @@
 		let markdown_imgs = this.body.match(regex);
 		
 		if (markdown_imgs != null){
-			for (var mimgct = markdown_imgs.length - 1;mimgct >= 0;mimgct--){
+			for (let mimgct = markdown_imgs.length - 1;mimgct >= 0;mimgct--){
 				//grab url only
-				var img_src_url = markdown_imgs[mimgct].substring(markdown_imgs[mimgct].indexOf('(')+1,markdown_imgs[mimgct].indexOf(')'));
+				let img_src_url = markdown_imgs[mimgct].substring(markdown_imgs[mimgct].indexOf('(')+1,markdown_imgs[mimgct].indexOf(')'));
 				
-				//append at the start
-				meta.image.unshift(img_src_url);
+				//append at the start if not already part of meta
+				if (!meta.image.includes(img_src_url)){
+					meta.image.unshift(img_src_url);
+				}
 			}
 		}
 		
