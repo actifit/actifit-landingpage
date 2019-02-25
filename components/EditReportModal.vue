@@ -156,6 +156,23 @@
             .map(tag => tag.trim()) // trim leading and trailing whitespaces from tags
         ]
 		
+		//fetch any new images to add them as proper thumbnails
+		
+		//matching our image markdown pattern 
+		const regex = /!\[(.*?)\]\((.*?)\)/g;
+		
+		let markdown_imgs = this.body.match(regex);
+		
+		if (markdown_imgs != null){
+			for (var mimgct = markdown_imgs.length - 1;mimgct >= 0;mimgct--){
+				//grab url only
+				var img_src_url = markdown_imgs[mimgct].substring(markdown_imgs[mimgct].indexOf('(')+1,markdown_imgs[mimgct].indexOf(')'));
+				
+				//append at the start
+				meta.image.unshift(img_src_url);
+			}
+		}
+		
 		//ensure that the app info is actifit specific, for example edited by a different editor
 		if (!meta.app.includes('actifit')){
 			meta.app = 'actifit/0.4.1';
