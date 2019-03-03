@@ -34,6 +34,10 @@
 					  <button v-on:click="setPasswordVal" class="btn btn-brand">Generate Password</button>
 					</div>
 					<div class="row">
+					  <label for="confirm-funds-pass" class="w-25 p-2">Confirm Password</label>
+					  <input type="text" id="confirm-funds-pass" name="confirm-funds-pass" ref="confirm-funds-pass" class="form-control-lg w-50 p-2">
+					</div>
+					<div class="row">
 					  <div class="w-25"></div>
 					  <button v-on:click="setFundsPass" class="btn btn-brand btn-lg w-50">Set Password</button>
 					</div>
@@ -41,14 +45,16 @@
 					  <div class="w-25"></div>
 					  <i class="fas fa-spin fa-spinner" ></i>
 					</div>
-					<div v-if="errorSettingPass" class="row">
+					<div v-if="errorSettingPass" class="row text-brand">
 					  <div class="w-25"></div>
 					  <span>{{errorSettingPass}}</span>
 					</div>
 				</div>
 				<div v-else-if="!userFundsPassVerified" class="text-center grid">
 					<div>Step 2 / 3: Your funds password needs to be verified</div>
-					<div>Please send any amount of STEEM to @actifit.exchange to verify your pass. You can use below form</div>
+					<div>Please send any amount of STEEM to @actifit.exchange to verify your pass. You can use below form
+					<br/><span class="font-weight-bold">Please DO NOT CLOSE this window till verification is complete.</span>
+					</div>
 					<div class="row">
 					  <label for="pass-transfer-type" class="w-25 p-2">Type *</label>
 					  <select @change="passTransferTypeChange" id="pass-transfer-type" name="pass-transfer-type" ref="pass-transfer-type" text="Choose Type" class="form-control-lg w-50 p-2">
@@ -74,7 +80,7 @@
 					  </div>
 					</div>
 				</div>
-				<div v-else class="text-center grid">
+				<div v-else-if="pendingTokenSwap == ''" class="text-center grid">
 					<div>Step 3 / 3: You are ready to exchange AFIT for STEEM Upvotes!</div>
 					<div>Choose an option</div>
 					  <span class="afit-ex-option border border-danger p-2 m-2 btn-brand">
@@ -122,6 +128,10 @@
 						{{swapResult}}
 					  </i></div>
 					</div>
+				</div>
+				<div v-else class="text-center grid font-weight-bold">
+					<div>You have a scheduled {{pendingTokenSwap.paid_afit}} AFIT to STEEM Upvotes exchange in progress.
+					<br/>The upvote should take place on upcoming reward cycle.</div>
 				</div>
 			  </div>
 			</transition>
@@ -323,6 +333,7 @@
 		screenWidth: 1200,
 		afit_val_exchange: 5,
 		afitPrice: 0.036,
+		pendingTokenSwap: '',
 	  }
 	},
     components: {
@@ -410,6 +421,11 @@
 		  //let's check if user already has a funds pass set
 		  fetch(process.env.actiAppUrl+'userHasFundsPassSet/'+this.user.account.name).then(
 			res => {res.json().then(json => this.setUserPassStatus (json)).catch(e => reject(e))
+		  }).catch(e => reject(e))
+		  
+		  //let's check if user has a pending AFIT tokens exchange
+		  fetch(process.env.actiAppUrl+'userHasPendingTokenSwap/'+this.user.account.name).then(
+			res => {res.json().then(json => this.pendingTokenSwap = json ).catch(e => reject(e))
 		  }).catch(e => reject(e))
 			
 		}
@@ -652,6 +668,18 @@
 		//stores the password set by the user
 		this.settingPass = true;
 		this.errorSettingPass = '';
+		//ensure we have proper values
+		if (this.$refs["funds-pass"].value == ''){
+		  this.errorSettingPass = 'Please enter a funds password or generate one';
+		  this.settingPass = false;
+		  return;
+		}
+		//ensure user confirmed password
+		if (this.$refs["confirm-funds-pass"].value !== this.$refs["funds-pass"].value){
+		  this.errorSettingPass = 'Your confirmation password needs to match your funds password';
+		  this.settingPass = false;
+		  return;
+		}
 		let url = new URL(process.env.actiAppUrl + 'setUserFundsPass/'+this.user.account.name+'/'+this.$refs['funds-pass'].value);
 		let res = await fetch(url);
 		let outcome = await res.json();
