@@ -21,6 +21,111 @@
         <h3 class="mb-4">Hey {{ user.account.name }}!</h3>
         <h4>Your AFIT Balance</h4>
         <h4 class="mb-4 font-weight-bold">{{ formattedUserTokens }}</h4>
+		<div class="p-2">
+			<button v-on:click="exchangeAFITforSTEEM" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ exchangeAFITActionButton }}</button>
+			<transition name="fade">
+			  <div v-if="exchangeAFITMode == 1">
+				<div v-if="!userHasFundsPass" class="text-center grid p-2">
+					<span>Step 1 / 3: You need to set up your funds password</span>
+					<h5>Set Your Funds Pass</h5>
+					<div class="row">
+					  <label for="funds-pass" class="w-25 p-2">Funds Password</label>
+					  <input type="text" id="funds-pass" name="funds-pass" ref="funds-pass" class="form-control-lg w-50 p-2">
+					  <button v-on:click="setPasswordVal" class="btn btn-brand">Generate Password</button>
+					</div>
+					<div class="row">
+					  <div class="w-25"></div>
+					  <button v-on:click="setFundsPass" class="btn btn-brand btn-lg w-50">Set Password</button>
+					</div>
+					<div v-if="settingPass" class="row">
+					  <div class="w-25"></div>
+					  <i class="fas fa-spin fa-spinner" ></i>
+					</div>
+					<div v-if="errorSettingPass" class="row">
+					  <div class="w-25"></div>
+					  <span>{{errorSettingPass}}</span>
+					</div>
+				</div>
+				<div v-else-if="!userFundsPassVerified" class="text-center grid">
+					<div>Step 2 / 3: Your funds password needs to be verified</div>
+					<div>Please send any amount of STEEM to @actifit.exchange to verify your pass. You can use below form</div>
+					<div class="row">
+					  <label for="pass-transfer-type" class="w-25 p-2">Type *</label>
+					  <select @change="passTransferTypeChange" id="pass-transfer-type" name="pass-transfer-type" ref="pass-transfer-type" text="Choose Type" class="form-control-lg w-50 p-2">
+					    <option value="STEEM">STEEM</option>
+					    <option value="SBD">SBD</option>
+					  </select>
+					</div>
+					<div class="row">
+					  <label for="pass-transfer-amount" class="w-25 p-2">Amount *</label>
+					  <input type="number" id="pass-transfer-amount" name="pass-transfer-amount" ref="pass-transfer-amount" class="form-control-lg w-50 p-2">
+					</div>
+					<div class="text-brand text-center" v-if="pass_error_proceeding">
+					  {{ this.pass_error_msg}}
+					</div>
+					<div class="row">
+					  <div class="w-25"></div>
+					  <button v-on:click="proceedVerifyPass" class="btn btn-brand btn-lg w-50">Send & Verify</button>
+					</div>
+					<div class="row">
+					  <div class="w-25"></div>
+					  <div v-if="checkingFunds" id="checking_funds">
+						<i class="fas fa-spin fa-spinner"></i>Checking Your STEEM Transfer
+					  </div>
+					</div>
+				</div>
+				<div v-else class="text-center grid">
+					<div>Step 3 / 3: You are ready to exchange AFIT for STEEM Upvotes!</div>
+					<div>Choose an option</div>
+					  <span class="afit-ex-option border border-danger p-2 m-2 btn-brand">
+						<input type="radio" id="afit_exchange_5" value="5" v-model="afit_val_exchange">
+						<label for="afit_exchange_5">5 AFIT Tokens</label>
+					  </span>
+					  <span class="afit-ex-option border border-danger p-2 m-2 btn-brand">
+						<input type="radio" id="afit_exchange_10" value="10" v-model="afit_val_exchange">
+						<label for="afit_exchange_10">10 AFIT Tokens</label>
+					  </span>
+					  <br>
+					  <span class="afit-ex-option border border-danger p-2 m-2 btn-brand">
+						<input type="radio" id="afit_exchange_15" value="15" v-model="afit_val_exchange">
+						<label for="afit_exchange_15">15 AFIT Tokens</label>
+					  </span>
+					  <span class="afit-ex-option border border-danger p-2 m-2 btn-brand">
+						<input type="radio" id="afit_exchange_20" value="20" v-model="afit_val_exchange">
+						<label for="afit_exchange_20">20 AFIT Tokens</label>
+					  </span>
+					<br>
+					<span><i>You are exchanging {{ afit_val_exchange }} AFIT tokens for approx. ${{ (afit_val_exchange * 0.036 / 0.65).toFixed(2) }} in STEEM upvote
+						<br/> (net profit approx. ${{ (afit_val_exchange * 0.036).toFixed(2) }})
+						<br/>Please enter your funds password to proceed</i></span>
+					<div class="row" >
+					  <div class="w-25 p-2 text-right">Funds Password</div>
+					  <input type="password" id="funds-pass-entry" name="funds-pass-entry" ref="funds-pass-entry" class="form-control-lg w-50 p-2">
+					</div>
+					<div class="row" v-if="error_swap != ''" >
+					  <div class="w-25"></div>
+					  <div class="text-brand w-50">{{error_swap}}</div>
+					</div>
+					<div class="row">
+					  <div class="w-25"></div>
+					  <button v-on:click="exchangeTokensUpvote" class="btn btn-brand btn-lg w-50">Exchange</button>
+					</div>
+					<div class="row" v-if="performingSwap" >
+					  <div class="w-25"></div>
+					  <div id="performing_swap">
+						<i class="fas fa-spin fa-spinner"></i>
+					  </div>
+					</div>
+					<div class="row" v-if="swapResult != ''" >
+					  <div class="w-25"></div>
+					  <div id="swap_result" class="text-brand"><i>
+						{{swapResult}}
+					  </i></div>
+					</div>
+				</div>
+			  </div>
+			</transition>
+		</div>
 		<h4>Your STEEM Balance</h4>
 		<h5 class="mb-4 font-weight-bold">
 			<span class="p-2">{{ this.steemPower }}</span>
@@ -180,7 +285,9 @@
 		TRANSFER_FUNDS: 1,
 		POWERUP_FUNDS: 2,
 		POWERDOWN_FUNDS: 3,
+		EXCHANGE_AFIT_STEEM: 1,
 		powerDownRateVal: '',
+		EXCHANGE_AFIT_FOR_STEEM: 'Exchange AFIT for STEEM',
 		TRANSFER_FUNDS_ACTION_TEXT: 'Transfer Funds',
 		HIDE_TRANSFER_FUNDS_ACTION_TEXT: 'Hide Transfer',		
 		POWERUP_ACTION_TEXT: 'Power Up STEEM',
@@ -195,11 +302,27 @@
 		claimWindow: '',
 		fundActivityMode: this.CLOSED_MODE,
 		transferType: 'STEEM',
+		transferTypePass: 'STEEM',
 		error_proceeding: '',
 		error_msg: '',
+		pass_error_proceeding: '',
+		pass_error_msg: '',
+		performingSwap: false,
+		error_swap: '',
+		swapResult: '',
+		checkingFunds: false,
+		target_exchange_account: 'actifit.exchange',
 		memo_notice: 'If sending funds to an exchange, make sure to use the memo field.',
 		properties: '', //handles the Steem BC properties
+		userHasFundsPass: false, //holds value if user has proper funds pass or not yet
+		userFundsPassVerified: false, //holds value if user has verified funds pass or not yet
+		settingPass: false,
+		verifyingPass: false,
+		exchangeAFITMode: this.CLOSED_MODE,
+		errorSettingPass: '',
 		screenWidth: 1200,
+		afit_val_exchange: 5,
+		afitPrice: 0.036,
 	  }
 	},
     components: {
@@ -234,25 +357,16 @@
 		}
 		return false;
 	  },
+	  exchangeAFITActionButton () {
+		return this.EXCHANGE_AFIT_FOR_STEEM;
+	  },
 	  transferActionButton () {
-	    //handle proper button display
-		/*if (this.fundActivityMode == this.TRANSFER_FUNDS){
-		  return this.HIDE_TRANSFER_FUNDS_ACTION_TEXT;
-		}*/
 		return this.TRANSFER_FUNDS_ACTION_TEXT;
 	  },
 	  powerUpActionButton () {
-	    //handle proper button display
-		/*if (this.fundActivityMode == this.POWERUP_FUNDS){
-		  return this.HIDE_POWERUP_ACTION_TEXT;
-		}*/
 		return this.POWERUP_ACTION_TEXT;
 	  },
 	  powerDownActionButton () {
-	    //handle proper button display
-		/*if (this.fundActivityMode == this.POWERDOWN_FUNDS){
-		  return this.HIDE_POWERDOWN_ACTION_TEXT;
-		}*/
 		return this.POWERDOWN_ACTION_TEXT;
 	  },
 	  smallScreenBtnClasses () {
@@ -291,7 +405,26 @@
 		  this.$store.dispatch('fetchUserRank')
 		  this.$store.dispatch('fetchReferrals')
 		  this.powerDownRateVal = await this.vestsToSteemPower(this.user.account.vesting_withdraw_rate.split(' ')[0], true);
+		  
+		  
+		  //let's check if user already has a funds pass set
+		  fetch(process.env.actiAppUrl+'userHasFundsPassSet/'+this.user.account.name).then(
+			res => {res.json().then(json => this.setUserPassStatus (json)).catch(e => reject(e))
+		  }).catch(e => reject(e))
+			
 		}
+	  },
+	  setAFITPrice (_afitPrice){
+		this.afitPrice = parseFloat(_afitPrice).toFixed(3);
+	  },
+	  setUserPassStatus (result) {
+		//handles setting funds password status
+		console.log(result);
+		//set proper value for funds pass confirmation
+		this.userHasFundsPass = result.hasFundsPass;
+		
+		//set proper value for verified funds pass status
+		this.userFundsPassVerified = result.passVerified;
 	  },
 	  formattedSTEEMBalance (dataType) {
 	    //handle display of STEEM/SBD balance
@@ -338,7 +471,6 @@
 		return parseFloat(steemPower * totalVests / totalSteem).toFixed(6);
 	  },
 	  claimableSTEEMRewards () {
-		
 		//function handles preparing claimable STEEM rewards
 		if (typeof this.user != 'undefined' && this.user != null){
 		  this.claimSTEEM = this.user.account.reward_steem_balance;
@@ -360,8 +492,6 @@
 		  reward_vests: this.claimVests,
 		}, window.location.origin + '/wallet');
 
-		//console.log(link);
-		
 		window.open(link);
 		
 		//Below would have been preferred approach, but claimRewardBalance keeps failing. Keeping here for future further exploration
@@ -403,7 +533,6 @@
 		}else{
 		  this.fundActivityMode = this.POWERDOWN_FUNDS;
 		}
-		
 	  },
 	  proceedTransfer () {
 		//function handles the actual processing of the transfer
@@ -497,7 +626,126 @@
 		}, window.location.origin + '/wallet');
 		//launch the SC window
 		window.open(link);
-	  }
+	  },
+	  exchangeAFITforSTEEM () {
+		//function handles exchanging AFIT tokens for STEEM upvotes
+		this.exchangeAFITMode = !this.exchangeAFITMode
+	  },
+	  passTransferTypeChange (e) {
+	    //handles the drop down select option to ensure we have proper value
+		if(e.target.options.selectedIndex > -1) {
+		  this.transferTypePass = e.target.options[e.target.options.selectedIndex].value;
+		}
+	  },
+	  setPasswordVal(){
+		this.$refs["funds-pass"].value = this.generatePassword(2);
+	  },
+	  generatePassword (multip) {
+		//generate random 11 characters password
+		let passString = '';
+		for (let i=0;i<multip;i++){
+			passString += Math.random().toString(36).substr(2, 13);
+		}
+		return passString;
+	  },
+	  async setFundsPass () {
+		//stores the password set by the user
+		this.settingPass = true;
+		this.errorSettingPass = '';
+		let url = new URL(process.env.actiAppUrl + 'setUserFundsPass/'+this.user.account.name+'/'+this.$refs['funds-pass'].value);
+		let res = await fetch(url);
+		let outcome = await res.json();
+		this.settingPass = false;
+		console.log(outcome);
+		if (!outcome.error){
+			//success
+			this.userHasFundsPass = true;
+		}else{
+			//display error
+			this.errorSettingPass = outcome.error;
+		}
+	  },
+	  async proceedVerifyPass() {
+		//handles checking for proper confirmation of account via STEEM transfer
+		this.checkingFunds = true
+		//function handles the actual processing of the transfer
+		this.pass_error_proceeding = false;
+		this.pass_error_msg = '';
+		//ensure we have proper values
+		if (isNaN(this.$refs["pass-transfer-amount"].value.trim()) || this.$refs["pass-transfer-amount"].value == 0){
+		  this.error_proceeding = true;
+		  this.error_msg = 'The amount needs to be a positive numeric value, with a min of 0.001';
+		  return;
+		}
+		//https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
+		var link = this.$steemconnect.sign('transfer', {
+		  from: this.user.account.name,
+		  to: this.target_exchange_account,
+		  amount: this.$refs["pass-transfer-amount"].value + ' ' + this.transferTypePass,
+		  memo: '',//no memo needed
+		});
+		
+		//launch the SC window
+		window.open(link);
+		
+		//also start verification process
+		let url = new URL(process.env.actiAppUrl + 'confirmPaymentPasswordVerify');
+		//compile all needed data and send it along the request for processing
+		let params = {
+			from: this.user.account.name,
+		}
+		Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
+		try{
+			let res = await fetch(url);
+			let outcome = await res.json();
+			console.log(outcome);
+		}catch(err){
+			console.error(err);
+		}
+		this.checkingFunds = false;
+	  },
+	  async exchangeTokensUpvote () {
+		//function handles actual exchange of AFIT tokens to STEEM upvote via recording this
+		this.performingSwap = true
+		this.error_swap = '';
+		this.swapResult = '';
+		//ensure we have proper values
+		if (this.$refs["funds-pass-entry"].value == ''){
+		  this.error_proceeding = true;
+		  this.error_swap = 'Please provide your funds password';
+		  this.performingSwap = false;
+		  return;
+		}
+		if (this.userTokens < 100 ){
+		  this.error_swap = 'you need at least 100 AFIT tokens to swap for upvotes';
+		  this.performingSwap = false;
+		  return;
+		}
+		//proceed with storing the swap and decreasing user AFIT tokens count
+		let url = new URL(process.env.actiAppUrl + 'performAfitSteemExchange');
+		//compile all needed data and send it along the request for processing
+		let params = {
+			user: this.user.account.name,
+			pass: this.$refs['funds-pass-entry'].value,
+			tokens: this.afit_val_exchange,
+		}
+		Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
+		try{
+			let res = await fetch(url);
+			let outcome = await res.json();
+			console.log(outcome);
+			if (outcome.status == 'Success'){
+				this.swapResult = 'AFIT Tokens Successfully swapped for additional STEEM upvote! Upvote will occurr on next reward cycle.';
+				//update user data
+				this.fetchUserData();
+			}else{
+				this.error_swap = outcome.error;
+			}
+		}catch(err){
+			console.error(err);
+		}
+		this.performingSwap = false;
+	  },
 	},
     async mounted () {
       // login
@@ -508,6 +756,11 @@
 	  //let's load the properties to properly convert SP to Vests and vice-versa
 	  this.properties = await steem.api.getDynamicGlobalPropertiesAsync();
 	  
+	  //grab AFIT price
+	  fetch(process.env.actiAppUrl+'curAFITPrice').then(
+		res => {res.json().then(json => this.setAFITPrice (json.unit_price_usd)).catch(e => reject(e))
+	  }).catch(e => reject(e))
+	  
 	  this.screenWidth = screen.width;
 	  console.log(this.screenWidth)
 	  window.addEventListener("focus", function(event) 
@@ -516,7 +769,7 @@
 		//refresh user data first
 		ref_id.fetchUserData();
 	  }, false);
-		
+	  
     }
   }
 </script>
@@ -524,4 +777,14 @@
 <style lang="sass">
   .history
     max-width: 500px
+</style>
+<style>
+  .afit-ex-option{
+	border-style: solid;
+	display: inline-block;
+  }
+  .afit-ex-option label{
+	height: 60px;
+	width: 100px;
+  }
 </style>
