@@ -23,11 +23,12 @@
         <h4 class="mb-4 font-weight-bold">{{ formattedUserTokens }}</h4>
 		<div class="p-2">
 			<button v-on:click="exchangeAFITforSTEEM" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ exchangeAFITActionButton }}</button>
-			<transition name="fade">
+			
 			  <div v-if="exchangeAFITMode == 1">
-				<div v-if="!userHasFundsPass" class="text-center grid p-2">
-					<span>Step 1 / 3: You need to set up your funds password</span>
-					<h5>Set Your Funds Pass</h5>
+			  <transition name="fade" v-if="!userHasFundsPass" >
+				<div class="text-center grid p-2">
+					<div class="text-brand font-weight-bold">Let's get you started on exchanging your AFIT for STEEM upvotes!</div>
+					<h5>Step 1 / 3: You need to set up your funds password</h5>
 					<div class="row">
 					  <label for="funds-pass" class="w-25 p-2">Funds Password</label>
 					  <input type="text" id="funds-pass" name="funds-pass" ref="funds-pass" class="form-control-lg w-50 p-2">
@@ -50,10 +51,13 @@
 					  <span>{{errorSettingPass}}</span>
 					</div>
 				</div>
-				<div v-else-if="!userFundsPassVerified" class="text-center grid">
-					<div>Step 2 / 3: Your funds password needs to be verified</div>
-					<div>Please send any amount of STEEM to @actifit.exchange to verify your pass. You can use below form
-					<br/><span class="font-weight-bold">Please DO NOT CLOSE this window till verification is complete.</span>
+			  </transition>
+			  <transition name="fade" v-else-if="!userFundsPassVerified" >
+				<div class="text-center grid">
+					<h5>Step 2 / 3: Your funds password needs to be verified</h5>
+					<div>Please send at least 1 STEEM/SBD to @actifit.exchange (one time fee) <br/>
+					to verify your funds password & activate your exchange service using form below.
+					<br/><span>DO NOT CLOSE this window till verification is complete.</span>
 					</div>
 					<div class="row">
 					  <label for="pass-transfer-type" class="w-25 p-2">Type *</label>
@@ -64,7 +68,7 @@
 					</div>
 					<div class="row">
 					  <label for="pass-transfer-amount" class="w-25 p-2">Amount *</label>
-					  <input type="number" id="pass-transfer-amount" name="pass-transfer-amount" ref="pass-transfer-amount" class="form-control-lg w-50 p-2">
+					  <input type="number" id="pass-transfer-amount" name="pass-transfer-amount" ref="pass-transfer-amount" class="form-control-lg w-50 p-2"  v-model="transfer_amount">
 					</div>
 					<div class="text-brand text-center" v-if="pass_error_proceeding">
 					  {{ this.pass_error_msg}}
@@ -80,8 +84,11 @@
 					  </div>
 					</div>
 				</div>
-				<div v-else-if="pendingTokenSwap == ''" class="text-center grid">
+			  </transition>
+			  <transition name="fade" v-else-if="pendingTokenSwap == ''" >
+				<div class="text-center grid p-2">
 					<div>Step 3 / 3: You are ready to exchange AFIT for STEEM Upvotes!</div>
+					<div>Upvotes take place on your next actifit post/report with proof of activity.</div>
 					<div>Choose an option</div>
 					  <span class="afit-ex-option border border-danger p-2 m-2 btn-brand">
 						<input type="radio" id="afit_exchange_5" value="5" v-model="afit_val_exchange">
@@ -129,12 +136,21 @@
 					  </i></div>
 					</div>
 				</div>
-				<div v-else class="text-center grid font-weight-bold">
-					<div>You have a scheduled {{pendingTokenSwap.paid_afit}} AFIT to STEEM Upvotes exchange in progress.
-					<br/>The upvote should take place on upcoming reward cycle.</div>
+			  </transition>
+			  <!--<transition name="fade" v-else-if="pendingTokenSwapTransCount > 30" >
+				<div class="text-center grid font-weight-bold p-2">
+					There are no more spots during this round for exchanging AFIT tokens to STEEM Upvotes.
+					Please try again on the following voting cycle.
 				</div>
+			  </transition>-->
+			  <transition name="fade" v-else >
+				<div class="text-center grid font-weight-bold p-2">
+					<div>You have a scheduled {{pendingTokenSwap.paid_afit}} AFIT to STEEM Upvotes exchange in progress.
+					<br/>The upvote should take place on upcoming reward cycle(s) to your next successful Actifit Post.</div>
+				</div>
+			  </transition>
 			  </div>
-			</transition>
+			
 		</div>
 		<h4>Your STEEM Balance</h4>
 		<h5 class="mb-4 font-weight-bold">
@@ -334,6 +350,9 @@
 		afit_val_exchange: 5,
 		afitPrice: 0.036,
 		pendingTokenSwap: '',
+		transfer_amount: 1,
+		min_tokens_required: 100,
+		pendingTokenSwapTransCount: 0,
 	  }
 	},
     components: {
@@ -425,8 +444,13 @@
 		  
 		  //let's check if user has a pending AFIT tokens exchange
 		  fetch(process.env.actiAppUrl+'userHasPendingTokenSwap/'+this.user.account.name).then(
-			res => {res.json().then(json => this.pendingTokenSwap = json ).catch(e => reject(e))
+			res => {res.json().then(json => this.setUserTokenSwapStatus (json) ).catch(e => reject(e))
 		  }).catch(e => reject(e))
+		  
+		  //let's grab the number of pending token swap transactions to see if we can add more
+		  /*fetch(process.env.actiAppUrl+'getPendingTokenSwapTransCount').then(
+			res => {res.json().then(json => this.pendingTokenSwapTransCount = json ).catch(e => reject(e))
+		  }).catch(e => reject(e))*/
 			
 		}
 	  },
@@ -441,6 +465,16 @@
 		
 		//set proper value for verified funds pass status
 		this.userFundsPassVerified = result.passVerified;
+	  },
+	  setUserTokenSwapStatus (result){
+	    //handles setting user token swap status
+		console.log(result);
+		if (result.user_pending_swap){
+			this.pendingTokenSwap = result.user_pending_swap
+		}else{
+			this.pendingTokenSwap = '';
+		}
+		//
 	  },
 	  formattedSTEEMBalance (dataType) {
 	    //handle display of STEEM/SBD balance
@@ -700,9 +734,10 @@
 		this.pass_error_proceeding = false;
 		this.pass_error_msg = '';
 		//ensure we have proper values
-		if (isNaN(this.$refs["pass-transfer-amount"].value.trim()) || this.$refs["pass-transfer-amount"].value == 0){
+		if (isNaN(this.$refs["pass-transfer-amount"].value.trim()) || this.$refs["pass-transfer-amount"].value < 1){
 		  this.error_proceeding = true;
-		  this.error_msg = 'The amount needs to be a positive numeric value, with a min of 0.001';
+		  this.error_msg = 'The amount needs to be a minimum of 1 STEEM/SBD';
+		  this.checkingFunds = false;
 		  return;
 		}
 		//https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
@@ -727,6 +762,8 @@
 			let res = await fetch(url);
 			let outcome = await res.json();
 			console.log(outcome);
+			//update user data according to result
+			this.fetchUserData();
 		}catch(err){
 			console.error(err);
 		}
@@ -744,8 +781,8 @@
 		  this.performingSwap = false;
 		  return;
 		}
-		if (this.userTokens < 100 ){
-		  this.error_swap = 'you need at least 100 AFIT tokens to swap for upvotes';
+		if (this.userTokens <  this.min_tokens_required){
+		  this.error_swap = 'You need at least '+this.min_tokens_required+' AFIT tokens to swap for upvotes';
 		  this.performingSwap = false;
 		  return;
 		}
