@@ -782,7 +782,7 @@
 		  return;
 		}
 		if (this.userTokens <  this.min_tokens_required){
-		  this.error_swap = 'You need at least '+this.min_tokens_required+' AFIT tokens to swap for upvotes';
+		  this.error_swap = 'You need at least '+this.min_tokens_required+' AFIT tokens to exchange for upvotes';
 		  this.performingSwap = false;
 		  return;
 		}
