@@ -154,9 +154,12 @@
 		</div>
 		<h4>Your STEEM Balance</h4>
 		<h5 class="mb-4 font-weight-bold">
-			<span class="p-2">{{ this.steemPower }}</span>
-			<span class="p-2">{{ formattedSTEEMBalance() }}</span>
-			<span class="p-2">{{ formattedSTEEMBalance('1') }}</span>
+			<span class="p-2">{{ this.renderSteemPower(2) }} STEEM POWER</span>
+			<span class="p-2">{{ this.renderSteemBalance() }}</span>
+			<span class="p-2">{{ this.renderSBDBalance() }}</span>
+			<div class="p-2">
+				<small><i>(STEEM POWER BREAKDOWN: {{this.renderSteemPower(1)}} + {{this.renderSteemPower(3)}} - {{this.renderSteemPower(4)}} - {{this.renderSteemPower(5)}})</i></small>
+			</div>
 			<div class="p-2">
 				<button v-on:click="transferFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ transferActionButton }}</button>
 				<button v-on:click="powerUpFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ powerUpActionButton }}</button>
@@ -229,7 +232,7 @@
 				</div>
 				<div class="row" v-if="isPoweringDown">
 				  <div class="text-center small p-2 w-25"></div>
-				  <div class="text-center text-brand small p-2 w-50"><b>You are currently powering down at a weekly rate of {{powerDownRateVal}}</b></div>
+				  <div class="text-center text-brand small p-2 w-50"><b>You are currently powering down at a weekly rate of {{this.renderSteemPower(5)}} STEEM</b></div>
 				</div>
 				<div class="row">
 				  <div class="text-center small p-2 w-25"></div>
@@ -320,7 +323,10 @@
 		HIDE_POWERUP_ACTION_TEXT: 'Hide Power Up',
 		POWERDOWN_ACTION_TEXT: 'Power Down STEEM',
 		HIDE_POWERDOWN_ACTION_TEXT: 'Hide Power Down',		
-		steemPower: '',
+		steemPower: 0,
+		effectiveSteemPower: 0,
+		delegatedSteemPower: 0,
+		receivedSteemPower: 0,
 		claimSP: '',
 		claimSTEEM: '',
 		claimVests: '',
@@ -428,14 +434,33 @@
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
+	  renderSteemPower (type) {
+		switch(type){
+			case 1: return this.numberFormat(this.steemPower, 3);
+					
+			case 2: return this.numberFormat(this.effectiveSteemPower, 3);
+					
+			case 3: return this.numberFormat(this.receivedSteemPower, 3);
+					
+			case 4: return this.numberFormat(this.delegatedSteemPower, 3);
+					
+			case 5: return this.numberFormat(this.powerDownRateVal, 3);
+		}
+	  },
+	  renderSteemBalance () {
+		console.log(this.user.account.balance);
+		return this.user.account.balance;
+	  },
+	  renderSBDBalance () {
+		console.log(this.user.account.sbd_balance);
+		return this.user.account.sbd_balance;
+	  },
 	  async fetchUserData () {
 		if (typeof this.user != 'undefined' && this.user != null){	  
 		  this.$store.dispatch('fetchUserTokens')
 		  this.$store.dispatch('fetchTransactions')
 		  this.$store.dispatch('fetchUserRank')
 		  this.$store.dispatch('fetchReferrals')
-		  this.powerDownRateVal = await this.vestsToSteemPower(this.user.account.vesting_withdraw_rate.split(' ')[0], true);
-		  
 		  
 		  //let's check if user already has a funds pass set
 		  fetch(process.env.actiAppUrl+'userHasFundsPassSet/'+this.user.account.name).then(
@@ -451,6 +476,26 @@
 		  /*fetch(process.env.actiAppUrl+'getPendingTokenSwapTransCount').then(
 			res => {res.json().then(json => this.pendingTokenSwapTransCount = json ).catch(e => reject(e))
 		  }).catch(e => reject(e))*/
+		  		  
+		  //grab SP
+		  this.steemPower = await this.vestsToSteemPower(this.user.account.vesting_shares);
+		
+		  //grab Delegated SP
+		  this.delegatedSteemPower = await this.vestsToSteemPower(this.user.account.delegated_vesting_shares);
+		
+		  //grab received SP
+		  this.receivedSteemPower = await this.vestsToSteemPower(this.user.account.received_vesting_shares);
+		  
+		  //grab powerdown SP
+		  this.powerDownRateVal = await this.vestsToSteemPower(this.user.account.vesting_withdraw_rate.split(' ')[0]);
+		
+		  //effective SP
+		  this.effectiveSteemPower = this.steemPower + this.receivedSteemPower - this.delegatedSteemPower - this.powerDownRateVal;
+		
+		  //also update claimable amounts
+		  this.claimableSTEEMRewards();
+		  
+		  console.log(this.user);
 			
 		}
 	  },
@@ -476,26 +521,7 @@
 		}
 		//
 	  },
-	  formattedSTEEMBalance (dataType) {
-	    //handle display of STEEM/SBD balance
-	    //console.log(this.user)
-		let displaySteemBalance = '';
-	    if (typeof this.user != 'undefined' && this.user != null){
-		  if (dataType == '1'){
-		    //SBD balance
-			displaySteemBalance = this.user.account.sbd_balance;
-		  }else{
-		    //STEEM balance
-		    displaySteemBalance = this.user.account.balance;
-			//also prompt SP display
-			this.vestsToSteemPower(this.user.account.vesting_shares);
-			//also update claimable amounts
-			this.claimableSTEEMRewards();
-		  }
-		}
-		return displaySteemBalance;
-	  },
-	  async vestsToSteemPower (vests, returnVal) {
+	  async vestsToSteemPower (vests) {
 		//function handles converting Vests to SP
 		if (this.properties == ''){
 		  //not loaded yet
@@ -504,10 +530,7 @@
 		let totalSteem = Number(this.properties.total_vesting_fund_steem.split(' ')[0]);
 		let totalVests = Number(this.properties.total_vesting_shares.split(' ')[0]);
 	    vests = Number(vests.split(' ')[0]);
-		if (typeof returnVal != 'undefined'){
-		  return this.numberFormat(totalSteem * (vests / totalVests), 3)+" STEEM";
-		}
-	    this.steemPower = this.numberFormat(totalSteem * (vests / totalVests), 3)+" STEEM POWER";
+	    return (totalSteem * (vests / totalVests));
 	  },
 	  async steemPowerToVests (steemPower) {
 	    //function handles conversting SP to Vests
