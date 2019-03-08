@@ -35,6 +35,10 @@
 					  <button v-on:click="setPasswordVal" class="btn btn-brand">Generate Password</button>
 					</div>
 					<div class="row">
+						<div class="w-25"></div>
+						<div class="w-50 text-brand"><i>Please avoid using special characters(#,$,%...)</i></div>
+					</div>
+					<div class="row">
 					  <label for="confirm-funds-pass" class="w-25 p-2">Confirm Password</label>
 					  <input type="text" id="confirm-funds-pass" name="confirm-funds-pass" ref="confirm-funds-pass" class="form-control-lg w-50 p-2">
 					</div>
