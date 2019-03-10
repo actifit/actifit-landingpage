@@ -12,7 +12,7 @@
 			<table class="table table-hover">
 			  <thead class="text-brand">
 				<tr>
-				  <th scope="col">User</th>
+				  <th scope="col" class="d-none d-md-table-cell">User</th>
 				  <th scope="col">Date</th>
 				  <th scope="col">AFIT Exchanged</th>
 				  <th scope="col">Status</th>
@@ -20,7 +20,7 @@
 			  </thead>
 			  <tbody>
 				<tr v-for="histTrans in transList" :key="histTrans._id" :class="{'bg-danger': !histTrans.upvote_processed, 'text-white': !histTrans.upvote_processed}">
-				  <td><a :href="'https://busy.org/@' + histTrans.user " target="_blank">@{{ histTrans.user }}</a></td>
+				  <td class="d-none d-md-table-cell"><a :href="'https://busy.org/@' + histTrans.user " target="_blank">@{{ histTrans.user }}</a></td>
 				  <td>{{date(histTrans.date)}}</td>
 				  <td>{{ histTrans.paid_afit }}</td>
 				  <td v-if="histTrans.upvote_processed">Complete</td>

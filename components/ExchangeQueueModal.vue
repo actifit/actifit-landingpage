@@ -14,8 +14,8 @@
 				<tr>
 				  <th scope="col">#Order</th>
 				  <th scope="col">User</th>
-				  <th scope="col">Date</th>
-				  <th scope="col">AFIT Exchanged</th>
+				  <th scope="col" class="d-none d-lg-table-cell">Date</th>
+				  <th scope="col" class="d-none d-sm-table-cell">AFIT Exchanged</th>
 				  <th scope="col">Est. Voting/Exchange Time</th>
 				</tr>
 			  </thead>
@@ -23,9 +23,9 @@
 				<tr v-for="pendingTrans in transList" :key="pendingTrans._id" :class="{'bg-danger': user === pendingTrans.user, 'text-white': user === pendingTrans.user}">
 				  <th scope="row">{{ pendingTrans.order }}</th>
 				  <td><a :href="'https://busy.org/@' + pendingTrans.user " target="_blank">@{{ pendingTrans.user }}</a></td>
-				  <td>{{ date(pendingTrans.date) }}</td>
-				  <td>{{ pendingTrans.paid_afit }}</td>
-				  <td>Within {{ pendingTrans.reward_round * 24 }} Hrs</td>
+				  <td class="d-none d-lg-table-cell">{{ date(pendingTrans.date) }}</td>
+				  <td class="d-none d-sm-table-cell">{{ pendingTrans.paid_afit }}</td>
+				  <td>Within ~ {{ pendingTrans.reward_round * 24 }} Hrs</td>
 				</tr>
 			  </tbody>
 			</table>
