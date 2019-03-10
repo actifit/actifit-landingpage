@@ -91,6 +91,14 @@
 			  </transition>
 			  <transition name="fade" v-else-if="pendingTokenSwap == ''" >
 				<div class="text-center grid p-2">
+				  <div class="p-3">
+					<a href="#" data-toggle="modal" class="text-brand p-3" data-target="#exchangeQueueModal" >
+					  <i class="fas fa-list-ol"></i> Exchange Queue
+					</a>
+					<a href="#" data-toggle="modal" class="text-brand p-3" data-target="#exchangeHistoryModal" >
+					  <i class="fas fa-history"></i> My History
+					</a>
+				  </div>
 					<div>Step 3 / 3: You are ready to exchange AFIT for STEEM Upvotes!</div>
 					<div>Upvotes take place on your next actifit post/report with proof of activity.</div>
 					<div>Choose an option</div>
@@ -148,18 +156,18 @@
 				</div>
 			  </transition>-->
 			  <transition name="fade" v-else >
+				<div class="p-3">
+				  <a href="#" data-toggle="modal" class="text-brand p-3" data-target="#exchangeQueueModal" >
+					<i class="fas fa-list-ol"></i> Exchange Queue
+				  </a>
+				  <a href="#" data-toggle="modal" class="text-brand p-3" data-target="#exchangeHistoryModal" >
+					<i class="fas fa-history"></i> My History
+				  </a>
+				</div>
 				<div class="text-center grid font-weight-bold p-2">
 					<i><div>You have a scheduled {{pendingTokenSwap.paid_afit}} AFIT to STEEM Upvotes exchange in progress.</div>
 					<div class="text-brand">Your current number in queue is {{userTokenSwapPending.order}}. Your exchange/upvote should take place within {{userTokenSwapPending.reward_round * 24}} hrs</div>
 					<div>The upvote will take place on your most recent Actifit Report card that is NOT yet rewarded.</div></i>
-					<div class="p-3">
-					  <a href="#" data-toggle="modal" class="text-brand p-3" data-target="#exchangeQueueModal" >
-						<i class="fas fa-list-ol"></i> Queue
-					  </a>
-					  <a href="#" data-toggle="modal" class="text-brand p-3" data-target="#exchangeHistoryModal" >
-						<i class="fas fa-history"></i> History
-					  </a>
-					</div>
 				</div>
 			  </transition>
 			  <ExchangeQueue :transList="tokenSwapQueue.pendingTransactions" :user="user.account.name"/>
