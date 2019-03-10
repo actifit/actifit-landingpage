@@ -1,0 +1,57 @@
+<template>
+  <div class="modal fade" id="exchangeQueueModal" ref="exchangeQueueModal" tabindex="-1">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Exchange Transactions Queue</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+		<div class="modal-body">
+			<table class="table table-hover">
+			  <thead class="text-brand">
+				<tr>
+				  <th scope="col">#Order</th>
+				  <th scope="col">User</th>
+				  <th scope="col">Date</th>
+				  <th scope="col">AFIT Exchanged</th>
+				  <th scope="col">Est. Voting/Exchange Time</th>
+				</tr>
+			  </thead>
+			  <tbody>
+				<tr v-for="pendingTrans in transList" :key="pendingTrans._id" :class="{'bg-danger': user === pendingTrans.user, 'text-white': user === pendingTrans.user}">
+				  <th scope="row">{{ pendingTrans.order }}</th>
+				  <td><a :href="'https://busy.org/@' + pendingTrans.user " target="_blank">@{{ pendingTrans.user }}</a></td>
+				  <td>{{ date(pendingTrans.date) }}</td>
+				  <td>{{ pendingTrans.paid_afit }}</td>
+				  <td>Within {{ pendingTrans.reward_round * 24 }} Hrs</td>
+				</tr>
+			  </tbody>
+			</table>
+		</div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+ 
+  export default {
+    props: [ 'transList', 'user' ],
+	methods: {
+	  date(val) {
+        let date = new Date(val)
+        let minutes = date.getMinutes()
+        return date.getDate() + '/' 
+			+ (date.getMonth() + 1) + '/' 
+			+ date.getFullYear() + ' ' 
+			+ date.getHours() + ':' 
+			+ (minutes < 10 ? '0' + minutes : minutes)
+      },
+	}
+  }
+</script>
+<style>
+
+</style>

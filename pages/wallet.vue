@@ -149,10 +149,21 @@
 			  </transition>-->
 			  <transition name="fade" v-else >
 				<div class="text-center grid font-weight-bold p-2">
-					<div>You have a scheduled {{pendingTokenSwap.paid_afit}} AFIT to STEEM Upvotes exchange in progress.
-					<br/>The upvote should take place on upcoming reward cycle(s) to your next successful Actifit Post.</div>
+					<i><div>You have a scheduled {{pendingTokenSwap.paid_afit}} AFIT to STEEM Upvotes exchange in progress.</div>
+					<div class="text-brand">Your current number in queue is {{userTokenSwapPending.order}}. Your exchange/upvote should take place within {{userTokenSwapPending.reward_round * 24}} hrs</div>
+					<div>The upvote will take place on your most recent Actifit Report card that is NOT yet rewarded.</div></i>
+					<div class="p-3">
+					  <a href="#" data-toggle="modal" class="text-brand p-3" data-target="#exchangeQueueModal" >
+						<i class="fas fa-list-ol"></i> Queue
+					  </a>
+					  <a href="#" data-toggle="modal" class="text-brand p-3" data-target="#exchangeHistoryModal" >
+						<i class="fas fa-history"></i> History
+					  </a>
+					</div>
 				</div>
 			  </transition>
+			  <ExchangeQueue :transList="tokenSwapQueue.pendingTransactions" :user="user.account.name"/>
+			  <ExchangeHistory :transList="userTokenSwapHistory.userTokenSwapHist"/>
 			  </div>
 			
 		</div>
@@ -308,7 +319,9 @@
   import Transaction from '~/components/Transaction'
   import Footer from '~/components/Footer'
   import steem from 'steem'
-
+  import ExchangeQueue from '~/components/ExchangeQueueModal'
+  import ExchangeHistory from '~/components/ExchangeHistoryModal'
+  
   import { mapGetters } from 'vuex'
 
   export default {
@@ -363,6 +376,9 @@
 		transfer_amount: 1,
 		min_tokens_required: 100,
 		pendingTokenSwapTransCount: 0,
+		tokenSwapQueue: '',
+		userTokenSwapHistory: '',
+		userTokenSwapPending: '',
 	  }
 	},
     components: {
@@ -370,6 +386,8 @@
       UserMenu,
       Transaction, // single transaction block
       Footer,
+	  ExchangeQueue,
+	  ExchangeHistory,
     },
     computed: {
       ...mapGetters('steemconnect', ['user']),
@@ -476,6 +494,17 @@
 			res => {res.json().then(json => this.setUserTokenSwapStatus (json) ).catch(e => reject(e))
 		  }).catch(e => reject(e))
 		  
+		  //let's grab the full queue of pending AFIT tokens exchange
+		  fetch(process.env.actiAppUrl+'getPendingTokenSwapTrans/').then(
+			res => {res.json().then(json => this.setTokenSwapQueue (json) ).catch(e => reject(e))
+		  }).catch(e => reject(e))
+		  
+		  //let's grab the user's history AFIT tokens exchange
+		  fetch(process.env.actiAppUrl+'getUserTokenSwapHistory/'+this.user.account.name).then(
+			res => {res.json().then(json => this.setUserTokenSwapHistory (json) ).catch(e => reject(e))
+		  }).catch(e => reject(e))
+		  
+		  
 		  //let's grab the number of pending token swap transactions to see if we can add more
 		  /*fetch(process.env.actiAppUrl+'getPendingTokenSwapTransCount').then(
 			res => {res.json().then(json => this.pendingTokenSwapTransCount = json ).catch(e => reject(e))
@@ -525,6 +554,26 @@
 		}
 		//
 	  },
+	  setTokenSwapQueue (result){
+		//handles setting the current tokenSwapQueue
+		this.tokenSwapQueue = result
+		this.getUserQueueDetails();
+	  },
+	  getUserQueueDetails (){
+		let entryList = this.tokenSwapQueue.pendingTransactions
+		//sets proper full entry for user's token queue exchange details
+		for (let i=0, max = entryList.length; i<max;i++){
+			if (entryList[i].user === this.user.account.name){
+				//found our user
+				this.userTokenSwapPending = entryList[i];
+				break;
+			}
+		}
+	  },
+	  setUserTokenSwapHistory (result){
+		//handles setting the user's token swap history
+		this.userTokenSwapHistory = result;
+	  },	  
 	  async vestsToSteemPower (vests) {
 		//function handles converting Vests to SP
 		if (this.properties == ''){
