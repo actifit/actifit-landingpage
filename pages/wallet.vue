@@ -391,6 +391,7 @@
 		tokenSwapQueue: '',
 		userTokenSwapHistory: '',
 		userTokenSwapPending: '',
+		runningInterval: '',
 	  }
 	},
     components: {
@@ -482,11 +483,11 @@
 		}
 	  },
 	  renderSteemBalance () {
-		console.log(this.user.account.balance);
+		//console.log(this.user.account.balance);
 		return this.user.account.balance;
 	  },
 	  renderSBDBalance () {
-		console.log(this.user.account.sbd_balance);
+		//console.log(this.user.account.sbd_balance);
 		return this.user.account.sbd_balance;
 	  },
 	  async fetchUserData () {
@@ -540,7 +541,7 @@
 		  //also update claimable amounts
 		  this.claimableSTEEMRewards();
 		  
-		  console.log(this.user);
+		  //console.log(this.user);
 			
 		}
 	  },
@@ -549,7 +550,7 @@
 	  },
 	  setUserPassStatus (result) {
 		//handles setting funds password status
-		console.log(result);
+		//console.log(result);
 		//set proper value for funds pass confirmation
 		this.userHasFundsPass = result.hasFundsPass;
 		
@@ -558,7 +559,7 @@
 	  },
 	  setUserTokenSwapStatus (result){
 	    //handles setting user token swap status
-		console.log(result);
+		//console.log(result);
 		if (result.user_pending_swap){
 			this.pendingTokenSwap = result.user_pending_swap
 		}else{
@@ -747,7 +748,7 @@
 		  return;
 		}
 		let vestsValue = await this.steemPowerToVests(this.$refs["powerdown-amount"].value);
-		console.log(vestsValue);
+		//console.log(vestsValue);
 		//https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
 		var link = this.$steemconnect.sign('withdraw-vesting', {
 		  account: this.user.account.name,
@@ -806,7 +807,7 @@
 		let res = await fetch(url);
 		let outcome = await res.json();
 		this.settingPass = false;
-		console.log(outcome);
+		//console.log(outcome);
 		if (!outcome.error){
 			//success
 			this.userHasFundsPass = true;
@@ -849,7 +850,7 @@
 		try{
 			let res = await fetch(url);
 			let outcome = await res.json();
-			console.log(outcome);
+			//console.log(outcome);
 			//update user data according to result
 			this.fetchUserData();
 		}catch(err){
@@ -886,7 +887,7 @@
 		try{
 			let res = await fetch(url);
 			let outcome = await res.json();
-			console.log(outcome);
+			//console.log(outcome);
 			if (outcome.status == 'Success'){
 				this.swapResult = 'AFIT Tokens Successfully swapped for additional STEEM upvote! Upvote will occurr on next reward cycle.';
 				//update user data
@@ -899,6 +900,12 @@
 		}
 		this.performingSwap = false;
 	  },
+	},
+	created () {
+	  this.runningInterval = setInterval(this.fetchUserData, 60*1000);
+	},
+	destroyed () {
+	  clearInterval(this.runningInterval);
 	},
     async mounted () {
       // login
@@ -915,14 +922,7 @@
 	  }).catch(e => reject(e))
 	  
 	  this.screenWidth = screen.width;
-	  console.log(this.screenWidth)
-	  window.addEventListener("focus", function(event) 
-	  { 
-		console.log('focus');
-		//refresh user data first
-		ref_id.fetchUserData();
-	  }, false);
-	  
+	  	  
     }
   }
 </script>
