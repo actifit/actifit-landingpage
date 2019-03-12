@@ -492,6 +492,11 @@
 	  },
 	  async fetchUserData () {
 		if (typeof this.user != 'undefined' && this.user != null){	  
+		  
+		  //update user info from blockchain
+		  let user_data = await this.$steemconnect.me();
+		  this.user.account = user_data.account;
+		  
 		  this.$store.dispatch('fetchUserTokens')
 		  this.$store.dispatch('fetchTransactions')
 		  this.$store.dispatch('fetchUserRank')
