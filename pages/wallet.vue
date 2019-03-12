@@ -259,7 +259,9 @@
 				</div>
 				<div class="row" v-if="isPoweringDown">
 				  <div class="text-center small p-2 w-25"></div>
-				  <div class="text-center text-brand small p-2 w-50"><b>You are currently powering down at a weekly rate of {{this.renderSteemPower(5)}} STEEM</b></div>
+				  <div class="text-center text-brand small p-2 w-50"><b>You are currently powering down at a weekly rate of {{this.renderSteemPower(5)}} STEEM<br/>
+					Your next withdrawal occurs on {{this.powerDownWithdrawDate}}</b>
+				  </div>
 				</div>
 				<div class="row">
 				  <div class="text-center small p-2 w-25"></div>
@@ -345,6 +347,7 @@
 		POWERDOWN_FUNDS: 3,
 		EXCHANGE_AFIT_STEEM: 1,
 		powerDownRateVal: '',
+		powerDownWithdrawDate: '',
 		EXCHANGE_AFIT_FOR_STEEM: 'Exchange AFIT for STEEM',
 		TRANSFER_FUNDS_ACTION_TEXT: 'Transfer Funds',
 		HIDE_TRANSFER_FUNDS_ACTION_TEXT: 'Hide Transfer',		
@@ -469,6 +472,15 @@
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
+	  date(val) {
+        let date = new Date(val)
+        let minutes = date.getMinutes()
+        return date.getDate() + '/' 
+			+ (date.getMonth() + 1) + '/' 
+			+ date.getFullYear() + ' ' 
+			+ date.getHours() + ':' 
+			+ (minutes < 10 ? '0' + minutes : minutes)
+      },
 	  renderSteemPower (type) {
 		switch(type){
 			case 1: return this.numberFormat(this.steemPower, 3);
@@ -539,6 +551,9 @@
 		  
 		  //grab powerdown SP
 		  this.powerDownRateVal = await this.vestsToSteemPower(this.user.account.vesting_withdraw_rate.split(' ')[0]);
+		  
+		  //grab next power down withdrawal date
+		  this.powerDownWithdrawDate = this.date(this.user.account.next_vesting_withdrawal);
 		
 		  //effective SP
 		  this.effectiveSteemPower = this.steemPower + this.receivedSteemPower - this.delegatedSteemPower - this.powerDownRateVal;
