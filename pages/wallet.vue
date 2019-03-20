@@ -323,6 +323,12 @@
 		</div>
 	  </div>
 	</div>
+	<no-ssr>
+      <div>
+        <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
+        <notifications :group="'error'" :position="'top center'" :classes="'vue-notification error'" />
+      </div>
+    </no-ssr>
     <Footer />
   </div>
 </template>
@@ -650,7 +656,7 @@
 		  reward_sbd: this.claimSBD,
 		  reward_vests: this.claimVests,
 		  auto_return: true,
-		}, window.location.origin + '/wallet');
+		}, window.location.origin + '/wallet?op=claim rewards&status=success');
 
 		window.open(link);
 		
@@ -718,7 +724,7 @@
 		  amount: this.$refs["transfer-amount"].value + ' ' + this.transferType,
 		  memo: this.$refs["transfer-memo"].value,
 		  auto_return: true,
-		}, window.location.origin + '/wallet');
+		}, window.location.origin + '/wallet?op=transfer&status=success');
 		//launch the SC window
 		window.open(link);
 	  },
@@ -751,7 +757,7 @@
 		  to: this.$refs["powerup-recipient"].value,
 		  amount: parseFloat(this.$refs["powerup-amount"].value).toFixed(3) + ' ' + 'STEEM',
 		  auto_return: true,
-		}, window.location.origin + '/wallet');
+		}, window.location.origin + '/wallet?op=power up&status=success');
 		//launch the SC window
 		window.open(link);
 	  },
@@ -777,7 +783,7 @@
 		  account: this.user.account.name,
 		  vesting_shares: vestsValue + ' ' + 'VESTS',
 		  auto_return: true,
-		}, window.location.origin + '/wallet');
+		}, window.location.origin + '/wallet?op=power down&status=success');
 		//launch the SC window
 		window.open(link);
 	  },
@@ -787,7 +793,7 @@
 		  account: this.user.account.name,
 		  vesting_shares: '0.000000 VESTS',
 		  auto_return: true,
-		}, window.location.origin + '/wallet');
+		}, window.location.origin + '/wallet?op=cancel power down&status=success');
 		//launch the SC window
 		window.open(link);
 	  },
@@ -948,6 +954,22 @@
 	  }).catch(e => reject(e))
 	  
 	  this.screenWidth = screen.width;
+	  console.log(!this.$route.query.op);
+	  //check if this is the result of an operation
+	  if (this.$route.query.op && this.$route.query.status){
+		// notify the user that operation was successful
+		this.$notify({
+		  group: 'success',
+		  text: 'Your "'+this.$route.query.op + '" operation completed with '+ this.$route.query.status + '!',
+		  position: 'top center'
+		})
+		//reset success state
+		if (history && history.pushState) {
+			let historyState = {};
+			//Only do this if history.pushState is supported by the browser
+			history.pushState('wallet', document.title, window.location.href.split('?')[0]);
+		}
+	  }
 	  	  
     }
   }
