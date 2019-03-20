@@ -649,6 +649,7 @@
 		  reward_steem: this.claimSTEEM,
 		  reward_sbd: this.claimSBD,
 		  reward_vests: this.claimVests,
+		  auto_return: true,
 		}, window.location.origin + '/wallet');
 
 		window.open(link);
@@ -716,6 +717,7 @@
 		  to: this.$refs["transfer-recipient"].value,
 		  amount: this.$refs["transfer-amount"].value + ' ' + this.transferType,
 		  memo: this.$refs["transfer-memo"].value,
+		  auto_return: true,
 		}, window.location.origin + '/wallet');
 		//launch the SC window
 		window.open(link);
@@ -748,6 +750,7 @@
 		  from: this.user.account.name,
 		  to: this.$refs["powerup-recipient"].value,
 		  amount: parseFloat(this.$refs["powerup-amount"].value).toFixed(3) + ' ' + 'STEEM',
+		  auto_return: true,
 		}, window.location.origin + '/wallet');
 		//launch the SC window
 		window.open(link);
@@ -773,6 +776,7 @@
 		var link = this.$steemconnect.sign('withdraw-vesting', {
 		  account: this.user.account.name,
 		  vesting_shares: vestsValue + ' ' + 'VESTS',
+		  auto_return: true,
 		}, window.location.origin + '/wallet');
 		//launch the SC window
 		window.open(link);
@@ -782,6 +786,7 @@
 		var link = this.$steemconnect.sign('withdraw-vesting', {
 		  account: this.user.account.name,
 		  vesting_shares: '0.000000 VESTS',
+		  auto_return: true,
 		}, window.location.origin + '/wallet');
 		//launch the SC window
 		window.open(link);
@@ -855,6 +860,7 @@
 		  to: this.target_exchange_account,
 		  amount: this.$refs["pass-transfer-amount"].value + ' ' + this.transferTypePass,
 		  memo: '',//no memo needed
+		  auto_return: true,
 		});
 		
 		//launch the SC window
