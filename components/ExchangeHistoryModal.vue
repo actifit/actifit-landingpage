@@ -23,7 +23,8 @@
 				  <td class="d-none d-md-table-cell"><a :href="'https://busy.org/@' + histTrans.user " target="_blank">@{{ histTrans.user }}</a></td>
 				  <td>{{date(histTrans.date)}}</td>
 				  <td>{{ histTrans.paid_afit }}</td>
-				  <td v-if="histTrans.upvote_processed">Complete</td>
+				  <td v-if="histTrans.upvote_processed && !histTrans.refunded">Complete</td>
+				  <td v-else-if="histTrans.refunded">Refunded</td>
 				  <td v-else>In Progress</td>
 				</tr>
 			  </tbody>
