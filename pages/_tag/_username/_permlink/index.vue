@@ -42,9 +42,7 @@ export default {
 	  Footer
   },
   created () {
-	console.log('mounted');
 	if ((typeof this.$route.params !== 'undefined') && (typeof this.$route.params.tag !== 'undefined') &&(typeof this.$route.params.username !== 'undefined') && (typeof this.$route.params.permlink !== 'undefined') ) {
-	  console.log('reroute');
 	  this.$router.push({ path: "/"+this.$route.params.username+"/"+this.$route.params.permlink })
 	}else{
 		this.errorDisplay = 'Error: Post could not be found!';
