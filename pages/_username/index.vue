@@ -20,7 +20,7 @@
 			<div class="user-avatar large-avatar mr-1 mb-5"
 					   :style="'background-image: url(https://steemitimages.com/u/' + this.displayUser + '/avatar)'"></div>
 			<a :href="report.author" target="_blank">@{{ displayUser }} <small class="text-brand numberCircle">{{ getUserRank }}</small></a></h5>
-		  <div class="text-brand">{{ rewardedPostCount }} Actvity Reports Rewarded</div>
+		  <div class="text-brand"><a class="nav-link" :href="'/activity/'+displayUser" >{{ rewardedPostCount }} Activity Reports Rewarded</a></div>
         </div>
 	</div>
 	<div v-else-if="errorDisplay" class="container pt-5 mt-5 pb-5" >
