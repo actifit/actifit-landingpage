@@ -3,7 +3,7 @@
   <div class="col-md-6 col-lg-4 mb-4">
     <div class="card report">
       <h6 class="mb-0 text-center">
-        <a :href="'https://busy.org' + report.url" target="_blank">
+        <a :href="report.url" target="_blank">
           {{ report.title }}
         </a>
       </h6>
