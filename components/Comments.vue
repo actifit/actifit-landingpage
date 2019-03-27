@@ -69,6 +69,8 @@
   
   import Vue from 'vue'
   
+  import { mapGetters } from 'vuex'
+  
   import steemEditor from 'steem-editor';
   import 'steem-editor/dist/css/index.css';
   
@@ -81,6 +83,7 @@
 			userRank: 0,
 			commentBoxOpen: false,
 			replyBody: '',
+			moderatorSignature: '',
 			loading: false,
 			responsePosted: false,
 			responseBody: '',
@@ -95,12 +98,14 @@
 		}
 	},
 	watch: {
-	  full_data : 'fetchReportData'
+	  full_data : 'fetchReportData',
+	  moderators: 'insertModSignature',
 	},
 	components: {
 	  VueMarkdown,
 	},
     computed: {
+	  ...mapGetters(['moderators']),
 	  getVoteCount(){
 		return Array.isArray(this.full_data.active_votes) ? this.full_data.active_votes.length : 0;
 	  },
@@ -152,11 +157,11 @@
 		
 		//clear the placeholder comment displayed
 		this.responsePosted = false;
-		this.responseBody = '';
+		this.responseBody = this.moderatorSignature;
 	  },
 	  /* function handles closing open comment box and resetting data */
 	  resetOpenComment () {
-		this.replyBody='';
+		this.replyBody = this.moderatorSignature;
 		this.commentBoxOpen=false;
 	  },
 	  /* function handles sending out the comment to the blockchain */
@@ -234,7 +239,17 @@
 		//grab the author's rank
 		fetch(process.env.actiAppUrl+'getRank/' + this.author).then(res => {
 				res.json().then(json => this.userRank = json.user_rank)}).catch(e => reject(e))
+		
+		//grab moderators' list
+		this.$store.dispatch('fetchModerators')
 				
+	  },
+	  /* function handles appending moderators signature */
+	  insertModSignature () {
+		if (this.$store.state.steemconnect.user && this.moderators.find( mod => mod.name == this.$store.state.steemconnect.user.name && mod.title == 'moderator')) {
+		  this.moderatorSignature = process.env.standardModeratorSignature;
+		  this.replyBody = this.moderatorSignature;
+		}
 	  },
 	  /* function handles confirming if the user had voted already to prevent issues */
 	  votePrompt(e) {
@@ -249,6 +264,7 @@
 	  },
     },
 	async mounted () {
+	  console.log('comments mounted');
 	  if (this.full_data != null){
 		this.fetchReportData();
 	  }

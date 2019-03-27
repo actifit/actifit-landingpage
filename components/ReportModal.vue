@@ -121,6 +121,7 @@
 			fullAFITReward: '',
 			postUpvoted: false,
 			replyBody: '',
+			moderatorSignature: '',
 			commentBoxOpen: false,
 			loading: false,
 			responsePosted: false,
@@ -139,6 +140,7 @@
 	},
 	watch: {
 	  report : 'fetchReportData',
+	  moderators: 'insertModSignature',
 	},
     props: ['report'],
 	components: {
@@ -149,6 +151,7 @@
 	  ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters(['newlyVotedPosts']),
 	  ...mapGetters(['commentEntries'], 'commentCountToday'),
+	  ...mapGetters(['moderators']),
 	  date() {
         let date = new Date(this.report.created)
         let minutes = date.getMinutes()
@@ -210,7 +213,7 @@
 	  },
 	  /* function handles closing open comment box and resetting data */
 	  resetOpenComment () {
-		this.replyBody='';
+		this.replyBody = this.moderatorSignature;
 		this.commentBoxOpen=false;
 	  },
 	  /* function handles sending out the comment to the blockchain */
@@ -307,6 +310,13 @@
 		
 		return this.postUpvoted;
 	  },
+	  /* function handles appending moderators signature */
+	  insertModSignature () {
+		if (this.$store.state.steemconnect.user && this.moderators.find( mod => mod.name == this.$store.state.steemconnect.user.name && mod.title == 'moderator')) {
+		  this.moderatorSignature = process.env.standardModeratorSignature;
+		  this.replyBody = this.moderatorSignature;
+		}
+	  },
 	  /* function handles confirming if the user had voted already to prevent issues */
 	  votePrompt(e) {
 		//if no user is logged in, prompt to login
@@ -338,7 +348,7 @@
 		
 		//clear the placeholder comment displayed
 		this.responsePosted = false;
-		this.responseBody = '';
+		this.responseBody = this.moderatorSignature;
 	  },
 	  fetchReportKeyData () {
 		fetch(process.env.actiAppUrl+'getPostReward?user=' + this.report.author+'&url='+this.report.url).then(res => {
@@ -352,6 +362,9 @@
 		//grab post full pay if full pay mode enabled
 		fetch(process.env.actiAppUrl+'getPostFullAFITPayReward?user=' + this.report.author+'&url='+this.report.url).then(res => {
 				res.json().then(json => this.fullAFITReward = json.token_count)}).catch(e => reject(e))
+				
+		//grab moderators' list
+		this.$store.dispatch('fetchModerators')
 	  },
 	  fixSubModal () {
 		//handles fixing parent class to properly interpret existing report modal

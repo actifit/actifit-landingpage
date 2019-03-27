@@ -80,13 +80,13 @@
 			</small>
 		</div>
 		<transition name="fade">
-		  <div class="report-reply modal-body col-md-9" v-if="commentBoxOpen">
+		  <div class="report-reply col-md-9" v-if="commentBoxOpen">
 			<markdown-editor v-model="replyBody" :configs="editorConfig" ref="editor"></markdown-editor>
 			<a href="#" @click.prevent="postResponse($event)" class="btn btn-brand border reply-btn w-25">Post<i class="fas fa-spin fa-spinner" v-if="loading"></i></a>
 			<a href="#" @click.prevent="resetOpenComment()"  class="btn btn-brand border reply-btn w-25">Cancel</a>
 		  </div>
 		</transition>
-		<div class="report-reply modal-body col-md-9" v-if="responsePosted">
+		<div class="report-reply col-md-9" v-if="responsePosted">
 			<a :href="'https://busy.org/@' + this.$store.state.steemconnect.user.name" target="_blank">
 			  <div class="comment-user-section">	
 				<div class="user-avatar mr-1"
@@ -94,9 +94,9 @@
 				<div class="modal-author modal-title text-brand" >@{{ $store.state.steemconnect.user.name }}<small class="date-head text-muted">Now</small></div>
 			  </div>
 			</a>
-			<article class="modal-body" v-html="$renderMD(responseBody)"></article>
+			<article v-html="$renderMD(responseBody)"></article>
 		</div>
-		<div class="report-comments modal-body col-md-9" v-if="commentsAvailable">
+		<div class="report-comments col-md-9" v-if="commentsAvailable">
 			<Comments 
 				:author="commentEntries.author" 
 				:body="commentEntries.body" 
@@ -144,6 +144,7 @@
 			fullAFITReward: '',
 			postUpvoted: false,
 			replyBody: '',
+			moderatorSignature: '',
 			commentBoxOpen: false,
 			loading: false,
 			responsePosted: false,
@@ -162,6 +163,7 @@
 	},
 	watch: {
 	  report : 'fetchReportData',
+	  moderators: 'insertModSignature',
 	},
 	components: {
 	  NavbarBrand,
@@ -174,6 +176,7 @@
 	  ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters(['newlyVotedPosts']),
 	  ...mapGetters(['commentEntries'], 'commentCountToday'),
+	  ...mapGetters(['moderators']),
 	  date() {
         let date = new Date(this.report.created)
         let minutes = date.getMinutes()
@@ -245,7 +248,7 @@
 	  },
 	  /* function handles closing open comment box and resetting data */
 	  resetOpenComment () {
-		this.replyBody='';
+		this.replyBody = this.moderatorSignature;
 		this.commentBoxOpen=false;
 	  },
 	  /* function handles sending out the comment to the blockchain */
@@ -342,6 +345,13 @@
 		
 		return this.postUpvoted;
 	  },
+	  /* function handles appending moderators signature */
+	  insertModSignature () {
+		if (this.$store.state.steemconnect.user && this.moderators.find( mod => mod.name == this.$store.state.steemconnect.user.name && mod.title == 'moderator')) {
+		  this.moderatorSignature = process.env.standardModeratorSignature;
+		  this.replyBody = this.moderatorSignature;
+		}
+	  },
 	  /* function handles confirming if the user had voted already to prevent issues */
 	  votePrompt(e) {
 		//if no user is logged in, prompt to login
@@ -375,7 +385,7 @@
 		
 		//clear the placeholder comment displayed
 		this.responsePosted = false;
-		this.responseBody = '';
+		this.responseBody = this.moderatorSignature;
 	  },
 	  fetchReportKeyData () {
 		fetch(process.env.actiAppUrl+'getPostReward?user=' + this.report.author+'&url='+this.report.url).then(res => {
@@ -389,6 +399,9 @@
 		//grab post full pay if full pay mode enabled
 		fetch(process.env.actiAppUrl+'getPostFullAFITPayReward?user=' + this.report.author+'&url='+this.report.url).then(res => {
 				res.json().then(json => this.fullAFITReward = json.token_count)}).catch(e => reject(e))
+				
+		//grab moderators' list
+		this.$store.dispatch('fetchModerators')
 	  },
 	  fixSubModal () {
 		//handles fixing parent class to properly interpret existing report modal
@@ -396,9 +409,23 @@
 		if ($('#reportModal').hasClass('show')){
 		  $('body').addClass('modal-open');
 		}
-	  }
+	  },
+	  fetchUserData () {
+	    console.log('fetchUserData');
+		if (typeof this.user != 'undefined' && this.user != null){
+		  this.$store.dispatch('fetchUserTokens')
+		  this.$store.dispatch('fetchUserRank')
+		  this.$store.dispatch('fetchUserReportCount')
+		  this.$store.dispatch('fetchReferrals')
+		}
+	  },
 	},
 	async mounted () {
+	
+		this.$store.dispatch('steemconnect/login');
+		
+		this.fetchUserData();
+		
 		// try to fetch report data
 	    if ((typeof this.$route.params !== 'undefined') && (typeof this.$route.params.username !== 'undefined') && (typeof this.$route.params.permlink !== 'undefined') ) {
 		  this.postAuthor = this.$route.params.username
@@ -473,5 +500,6 @@
 	}
 	.report-reply{
 	  padding-left: 40px;
+	  padding-bottom: 40px;
 	}
 </style>
