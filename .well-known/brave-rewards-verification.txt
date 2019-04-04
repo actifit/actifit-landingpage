@@ -1,0 +1,4 @@
+This is a Brave Rewards publisher verification file.
+
+Domain: actifit.io
+Token: 681977df41f48030c7293ce30e9b221585bcb23b81c59075fab487925d5df90e
