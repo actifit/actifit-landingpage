@@ -7,6 +7,7 @@
         <a href="https://www.facebook.com/Actifit.fitness/" target="_blank" class="d-inline-block mx-3"><i class="fab fa-2x fa-facebook"></i></a>
         <a href="https://www.twitter.com/Actifit_fitness" target="_blank" class="d-inline-block mx-3"><i class="fab fa-2x fa-twitter"></i></a>
         <a href="https://www.instagram.com/actifit.fitness/" target="_blank" class="d-inline-block mx-3"><i class="fab fa-2x fa-instagram"></i></a>
+		<a href="https://t.me/joinchat/HiszbEZ3lH139lXz_JNjQA" target="_blank" class="d-inline-block mx-3"><i class="fab fa-2x fa-telegram"></i></a>
       </div>
       <div class="row">
         <div class="col text-center">
