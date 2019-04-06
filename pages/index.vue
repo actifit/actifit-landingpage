@@ -14,6 +14,9 @@
           <li class="nav-item">
             <a class="nav-link" href="#" @click.prevent="scrollTo('#content')">What is Actifit?</a>
           </li>
+		  <li class="nav-item">
+            <a class="nav-link" href="/whitepaper/Actifit_White_Paper.pdf">Whitepaper</a>
+          </li>
           <li class="nav-item">
             <a class="nav-link" href="#" @click.prevent="$router.push('/activity')">Activity</a>
           </li>
