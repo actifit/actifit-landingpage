@@ -330,6 +330,7 @@
       </div>
     </no-ssr>
     <Footer />
+	<CompetitionAnnounce />
   </div>
 </template>
 
@@ -341,6 +342,7 @@
   import steem from 'steem'
   import ExchangeQueue from '~/components/ExchangeQueueModal'
   import ExchangeHistory from '~/components/ExchangeHistoryModal'
+  import CompetitionAnnounce from '~/components/CompetitionAnnounce'
   
   import { mapGetters } from 'vuex'
 
@@ -410,6 +412,7 @@
       Footer,
 	  ExchangeQueue,
 	  ExchangeHistory,
+	  CompetitionAnnounce
     },
     computed: {
       ...mapGetters('steemconnect', ['user']),

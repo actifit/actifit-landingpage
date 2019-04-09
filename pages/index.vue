@@ -349,6 +349,7 @@
     <Footer />
 	
     <NewsModal :news="activeNews" />
+	<CompetitionAnnounce />
   </div>
 </template>
 
@@ -358,6 +359,7 @@
   import Footer from '~/components/Footer'
   import News from '~/components/News'
   import NewsModal from '~/components/NewsModal'
+  import CompetitionAnnounce from '~/components/CompetitionAnnounce'
   import { mapGetters } from 'vuex'
 
   export default {
@@ -366,6 +368,7 @@
       Footer,
       News,
       NewsModal,
+	  CompetitionAnnounce
     },
     data () {
       return {

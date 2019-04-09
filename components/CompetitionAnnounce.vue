@@ -1,19 +1,19 @@
 <template>
   <div :class="outserSmallScreenClasses" class="position-fixed text-brand mx-auto w-100 acti-notify-comp" >
 	<div :class="smallScreenClasses" class="text-center mx-auto acti-notify-comp-inner border-2 rounded">
-	  <div>Competition Alert: Refer New Actifitters!
+	  <div>Actifit Initial Steem Offering!<br/>Starts Friday 1 PM GMT/UTC
 		<a href="" @click.prevent="adjustVisibility" class="expand-comp-notice">
 			<span v-if="showCompDetails">&#9651;</span>
 			<span v-else>&#9661;</span>
 		</a></div>
 	  <transition name="fade">
 		<div class="extra-info" v-if="showCompDetails">
-		  <div>Earn 5 STEEM + 11 AFIT Per Referral</div>
-		  <div>Additional Top Referrer Reward Up To 200 STEEM!</div>
-		  <span><a href="/referrals"><u>Refer a Friend</u></a></span> | 
-		  <span><a href="/signup"><u>Signup a Friend</u></a></span> |
-		  <span><a href="https://busy.org/@actifit/actifit-two-week-signup-competition-200-steem-top-referrer-reward-earn-for-each-signup"><u>Read More</u></a></span>
-		  <div><span class="end-string">Ends in </span><Countdown v-if="countDownReady" deadline="February 12, 2019"></Countdown></div>
+		  <div class="img-container">
+			<img class="announce-img" src="/img/ISO_announce.png">
+		  </div>
+		  <div><a href="https://actifit.io/@actifit/actifit-iso-first-ever-initial-steem-offering-this-friday-not-to-miss-event-discounted-afit-price-afit-eng-tokens-bonuses"><u>Check ISO Announcement</u></a></div>
+		  <div><a href="https://steem-engine.com/?p=market&t=AFIT"><u>Participate in ISO</u></a></div>
+		  <div><span class="end-string">ISO Starts in </span><Countdown v-if="countDownReady" deadline="April 12, 2019 13:00"></Countdown></div>
 		</div>
 	  </transition>
 	</div>
@@ -42,7 +42,7 @@
 		if (this.screenWidth < 768){
 		  return "w-100";
 		}
-		return "w-50";
+		return "w-75";
 	  },
 	  outserSmallScreenClasses () {
 		//use proper classes for neat display
@@ -77,7 +77,7 @@
 	  z-index:100000; 
 	  font-size: 20px;
 	  vertical-align: top;
-	  opacity: 0.9;
+	  opacity: 1;
 	}
 	.acti-notify-comp-inner{
 	  background: white; 
@@ -98,5 +98,13 @@
 	  float:right; 
 	  cursor: hand; 
 	  padding-right: 5px;
+	}
+	.announce-img{
+	  max-height: 70vh;
+	  margin: auto;
+	  max-width: 100%;
+	}
+	.img-container{
+	  
 	}
 </style>
