@@ -76,7 +76,7 @@
 	  top:56px; 
 	}
 	.acti-notify-comp{
-	  top:56px; 
+	  top:0px; 
 	  z-index:100000; 
 	  font-size: 20px;
 	  vertical-align: top;
