@@ -72,12 +72,9 @@
   }
 </script>
 <style>
-	.home .acti-notify-comp{
-	  top:56px; 
-	}
 	.acti-notify-comp{
-	  top:0px; 
-	  z-index:100000; 
+	  top:56px; 
+	  z-index:1; 
 	  font-size: 20px;
 	  vertical-align: top;
 	  opacity: 1;
