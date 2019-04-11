@@ -108,9 +108,25 @@ Third-party links on this site may direct you to third-party websites that are n
 We are not liable for any harm or damages of any sort made in connection with any third-party content or interacting with third-party websites. Please review carefully the third-party's policies and practices and make sure you understand them before you engage in any transaction. Complaints, claims, concerns, or questions regarding third-party products should be directed to the third-party.
 
 
+<h4>SECTION 9 - AFIT TOKENS. PARTICIPATING IN ACTIFIT ICO, IEO, ISO, OR ANY OTHER TOKEN SALE FORM</h4>
 
+Your participation in purchasing AFIT tokens via any means, including a token sale, an ICO (Initial Coin Offering), IEO (Initial Exchange Offering), ISO (Initial Steem Offering), to name a few, or any other means of purchasing and/or exchanging them from/to other forms of FIAT and/or crypto is done at your sole responsibility. 
+Actifit does not hold any responsibility for any potential loss of value, funds or investment via purchasing, exchanging, and/or holding AFIT tokens under any form.
+Token purchase transactions are non-reversible and non-refundable.
 
-<h4>SECTION 9 - USER COMMENTS, FEEDBACK AND OTHER SUBMISSIONS</h4>
+AFIT token value is subject to change over time, and no guarantees are offered by Actifit team to maintain a certain price. Any Actifit marketing, promotion, or any similar initiative does not represent a financial advise. 
+
+AFIT tokens are utility tokens, and do not represent a security nor intended to be used as such.
+
+Actifit business model may change or need to be modified due to any regulatory and compliance requirements from any applicable laws in any jurisdictions. Purchasers and holders of AFIT tokens acknowledge and understand that neither Actifit nor any of its affiliates shall be held liable for any direct or indirect loss or damages caused by such changes.
+
+Actifit warns its buyers that token purchase represents a very high risk, and such activity should only be conducted after careful consideration do not invest what you cannot afford to lose.
+
+Actifit relies in its operation on third party technologies, including but not limited to Steem blockchain, Ethereum blockchain, and other tools and software. Actifit aims to undertake reasonable security measures to hold its tokens and users safe from any security concern, yet does not present any guarantees under this aspect.
+
+Lack of funding, token & other crypto valuation could have large impact on the growth, progress, and continuity of Actifit project among other reasons, hence Actifit does not provide any guarantee to the continuity of the project.
+
+<h4>SECTION 10 - USER COMMENTS, FEEDBACK AND OTHER SUBMISSIONS</h4>
 
 If, at our request, you send certain specific submissions (for example contest entries) or without a request from us you send creative ideas, suggestions, proposals, plans, or other materials, whether online, by email, by postal mail, or otherwise (collectively, 'comments'), you agree that we may, at any time, without restriction, edit, copy, publish, distribute, translate and otherwise use in any medium any comments that you forward to us. We are and shall be under no obligation (1) to maintain any comments in confidence; (2) to pay compensation for any comments; or (3) to respond to any comments.
 
@@ -119,12 +135,12 @@ We may, but have no obligation to, monitor, edit or remove content that we deter
 You agree that your comments will not violate any right of any third-party, including copyright, trademark, privacy, personality or other personal or proprietary right. You further agree that your comments will not contain libelous or otherwise unlawful, abusive or obscene material, or contain any computer virus or other malware that could in any way affect the operation of the Service or any related website. You may not use a false e-mail address, pretend to be someone other than yourself, or otherwise mislead us or third-parties as to the origin of any comments. You are solely responsible for any comments you make and their accuracy. We take no responsibility and assume no liability for any comments posted by you or any third-party.
 
 
-<h4>SECTION 10 - PERSONAL INFORMATION</h4>
+<h4>SECTION 11 - PERSONAL INFORMATION</h4>
 
 Your submission of personal information through our Service is governed by our <nuxt-link to="/privacy-policy">Privacy Policy</nuxt-link>.
 
 
-<h4>SECTION 11 - ERRORS, INACCURACIES AND OMISSIONS</h4>
+<h4>SECTION 12 - ERRORS, INACCURACIES AND OMISSIONS</h4>
 
 Occasionally there may be information on our site or in the Service that contains typographical errors, inaccuracies or omissions that may relate to product descriptions, pricing, promotions, offers, product shipping charges, transit times and availability. We reserve the right to correct any errors, inaccuracies or omissions, and to change or update information or cancel orders if any information in the Service or on any related website is inaccurate at any time without prior notice (including after you have submitted your order).
 
@@ -132,12 +148,12 @@ We undertake no obligation to update, amend or clarify information in the Servic
 
 
 
-<h4>SECTION 12 - PROHIBITED USES</h4>
+<h4>SECTION 13 - PROHIBITED USES</h4>
 
 In addition to other prohibitions as set forth in the Terms of Service, you are prohibited from using the site or its content: (a) for any unlawful purpose; (b) to solicit others to perform or participate in any unlawful acts; (c) to violate any international, federal, provincial or state regulations, rules, laws, or local ordinances; (d) to infringe upon or violate our intellectual property rights or the intellectual property rights of others; (e) to harass, abuse, insult, harm, defame, slander, disparage, intimidate, or discriminate based on gender, sexual orientation, religion, ethnicity, race, age, national origin, or disability; (f) to submit false or misleading information; (g) to upload or transmit viruses or any other type of malicious code that will or may be used in any way that will affect the functionality or operation of the Service or of any related website, other websites, or the Internet; (h) to collect or track the personal information of others; (i) to spam, phish, pharm, pretext, spider, crawl, or scrape; (j) for any obscene or immoral purpose; or (k) to interfere with or circumvent the security features of the Service or any related website, other websites, or the Internet. We reserve the right to terminate your use of the Service or any related website for violating any of the prohibited uses.
 
 
-<h4>SECTION 13 - DISCLAIMER OF WARRANTIES; ASSUMPTION OF RISK, LIMITATION OF LIABILITY</h4>
+<h4>SECTION 14 - DISCLAIMER OF WARRANTIES; ASSUMPTION OF RISK, LIMITATION OF LIABILITY</h4>
 
 We do not guarantee, represent or warrant that your use of our service will be uninterrupted, timely, secure or error-free.
 
@@ -163,17 +179,17 @@ In no case shall Actifit.io, our directors, officers, employees, affiliates, age
 
 
 
-<h4>SECTION 14 - INDEMNIFICATION</h4>
+<h4>SECTION 15 - INDEMNIFICATION</h4>
 
 You agree to indemnify, defend and hold harmless Actifit.io and our parent, subsidiaries, affiliates, partners, officers, directors, agents, contractors, licensors, service providers, subcontractors, suppliers, interns and employees, harmless from any claim or demand, including reasonable attorneys' fees, made by any third-party due to or arising out of your breach of these Terms of Service or the documents they incorporate by reference, or your violation of any law or the rights of a third-party.
 
 
-<h4>SECTION 15 - SEVERABILITY</h4>
+<h4>SECTION 16 - SEVERABILITY</h4>
 
 In the event that any provision of these Terms of Service is determined to be unlawful, void or unenforceable, such provision shall nonetheless be enforceable to the fullest extent permitted by applicable law, and the unenforceable portion shall be deemed to be severed from these Terms of Service, such determination shall not affect the validity and enforceability of any other remaining provisions.
 
 
-<h4>SECTION 16 - TERMINATION</h4>
+<h4>SECTION 17 - TERMINATION</h4>
 
 The obligations and liabilities of the parties incurred prior to the termination date shall survive the termination of this agreement for all purposes.
 
@@ -182,7 +198,7 @@ These Terms of Service are effective unless and until terminated by either you o
 If in our sole judgment you fail, or we suspect that you have failed, to comply with any term or provision of these Terms of Service, we also may terminate this agreement at any time without notice and you will remain liable for all amounts due up to and including the date of termination; and/or accordingly may deny you access to our Services (or any part thereof).
 
 
-<h4>SECTION 17 - ENTIRE AGREEMENT</h4>
+<h4>SECTION 18 - ENTIRE AGREEMENT</h4>
 
 The failure of us to exercise or enforce any right or provision of these Terms of Service shall not constitute a waiver of such right or provision.
 
@@ -191,21 +207,21 @@ These Terms of Service and any policies or operating rules posted by us on this 
 Any ambiguities in the interpretation of these Terms of Service shall not be construed against the drafting party.
 
 
-<h4>SECTION 18 - GOVERNING LAW</h4>
+<h4>SECTION 19 - GOVERNING LAW</h4>
 
 These Terms of Service and any separate agreements whereby we provide you Services shall be governed by and construed in accordance with the laws of Lebanon.
 
 
-<h4>SECTION 19 - CHANGES TO TERMS OF SERVICE</h4>
+<h4>SECTION 20 - CHANGES TO TERMS OF SERVICE</h4>
 
 You can review the most current version of the Terms of Service at any time at this page.
 
 We reserve the right, at our sole discretion, to update, change or replace any part of these Terms of Service by posting updates and changes to our website. It is your responsibility to check our website periodically for changes. Your continued use of or access to our website or the Service following the posting of any changes to these Terms of Service constitutes acceptance of those changes.
 
 
-<h4>SECTION 20 - CONTACT INFORMATION</h4>
+<h4>SECTION 21 - CONTACT INFORMATION</h4>
 
-Questions about the Terms of Service should be sent to us at <a href="mailto:actifit.io@gmail.com">actifit.io@gmail.com</a>.
+Questions about the Terms of Service should be sent to us at <a href="mailto:info@actifit.io">info@actifit.io</a>.
 
 </div>
 
