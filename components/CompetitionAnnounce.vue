@@ -1,7 +1,7 @@
 <template>
   <div :class="outserSmallScreenClasses" class="position-fixed text-brand mx-auto w-100 acti-notify-comp" >
 	<div :class="smallScreenClasses" class="text-center mx-auto acti-notify-comp-inner border-2 rounded">
-	  <div>Actifit Initial Steem Offering! Starts Friday April 12 @ 1 PM GMT/UTC
+	  <div>Actifit Initial Steem Offering! 110,000 AFIT tokens sold 1st second. Event ends Sunday 1PM GMT!
 		<a href="" @click.prevent="adjustVisibility" class="expand-comp-notice">
 			<span v-if="showCompDetails">&#9651;</span>
 			<span v-else>&#9661;</span>
@@ -13,7 +13,7 @@
 		  </div>
 		  <div><a href="https://actifit.io/@actifit/actifit-iso-first-ever-initial-steem-offering-this-friday-not-to-miss-event-discounted-afit-price-afit-eng-tokens-bonuses"><u>Check ISO Announcement</u></a></div>
 		  <div><a href="https://steem-engine.com/?p=market&t=AFIT"><u>Participate in ISO</u></a></div>
-		  <div><span class="end-string">ISO Starts in </span><Countdown v-if="countDownReady" deadline="April 12, 2019 13:00 GMT"></Countdown></div>
+		  <div><span class="end-string">ISO End in </span><Countdown v-if="countDownReady" deadline="April 14, 2019 13:00 GMT"></Countdown></div>
 		</div>
 	  </transition>
 	</div>
