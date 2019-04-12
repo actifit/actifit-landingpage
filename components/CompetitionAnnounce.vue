@@ -13,7 +13,7 @@
 		  </div>
 		  <div><a href="https://actifit.io/@actifit/actifit-iso-first-ever-initial-steem-offering-this-friday-not-to-miss-event-discounted-afit-price-afit-eng-tokens-bonuses"><u>Check ISO Announcement</u></a></div>
 		  <div><a href="https://steem-engine.com/?p=market&t=AFIT"><u>Participate in ISO</u></a></div>
-		  <div><span class="end-string">ISO Starts in </span><Countdown v-if="countDownReady" deadline="April 12, 2019 13:00"></Countdown></div>
+		  <div><span class="end-string">ISO Starts in </span><Countdown v-if="countDownReady" deadline="April 12, 2019 13:00 GMT"></Countdown></div>
 		</div>
 	  </transition>
 	</div>
