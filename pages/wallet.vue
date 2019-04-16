@@ -330,7 +330,6 @@
       </div>
     </no-ssr>
     <Footer />
-	<CompetitionAnnounce />
   </div>
 </template>
 
@@ -342,7 +341,6 @@
   import steem from 'steem'
   import ExchangeQueue from '~/components/ExchangeQueueModal'
   import ExchangeHistory from '~/components/ExchangeHistoryModal'
-  import CompetitionAnnounce from '~/components/CompetitionAnnounce'
   
   import { mapGetters } from 'vuex'
 
@@ -411,8 +409,7 @@
       Transaction, // single transaction block
       Footer,
 	  ExchangeQueue,
-	  ExchangeHistory,
-	  CompetitionAnnounce
+	  ExchangeHistory
     },
     computed: {
       ...mapGetters('steemconnect', ['user']),

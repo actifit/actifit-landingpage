@@ -42,7 +42,6 @@
     <ReportModal :report="activeReport" />
     <EditReportModal />
     <VoteModal />
-	<CompetitionAnnounce />
     <no-ssr>
       <div>
         <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
@@ -60,7 +59,6 @@
   import ReportModal from '~/components/ReportModal'
   import EditReportModal from '~/components/EditReportModal'
   import VoteModal from '~/components/VoteModal'
-  import CompetitionAnnounce from '~/components/CompetitionAnnounce'
 
   import { mapGetters } from 'vuex'
 
@@ -72,8 +70,7 @@
       Footer,
       ReportModal,
       EditReportModal,
-      VoteModal,
-	  CompetitionAnnounce
+      VoteModal
     },
     data () {
       return {
