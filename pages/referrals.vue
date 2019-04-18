@@ -19,7 +19,7 @@
       <!-- account balance -->
       <div class="text-center">
         <h3 class="mb-4" v-if="user">{{ $t('Hey') }} {{ user.account.name }}!</h3>
-		<p class="lead">{{this.referralNotice}}</p>
+		<p class="lead">{{ $t('referral_notice') }}</p>
         <h5>{{ $t('Your_Referral_Link') }}</h5>
 		<input type="text" :class="smallScreenClasses" class="p-3" name="refLink" ref="refLink" id="referral-link" :value="refUrl" readonly/>
 		<button v-on:click="copyContent" data-targetEl="refLink" class="btn btn-brand p-3">{{ $t('Copy_Link') }}</button>	
