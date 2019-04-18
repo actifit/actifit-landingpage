@@ -14,7 +14,7 @@
         </div>
 		<article class="modal-body" v-html="$renderMD(body)"></article>
 		<div class="modal-footer">
-			<div><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen">Reply</a></div>
+			<div><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen">{{ $t('Reply') }}</a></div>
 			<div>
 				<small>
 				  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 
@@ -33,7 +33,7 @@
 					{{ postPayout }}
 				</small>
 				<small>
-					{{ afitReward }} AFIT
+					{{ afitReward }} {{ $t('AFIT_Token') }}
 				</small>
 			</div>
 		</div>
@@ -42,18 +42,18 @@
 			<div class="text-brand">
 				<i class="fas fa-star"></i>
 				<small>
-					Full AFIT Payout Mode
+					{{ $t('Full_AFIT_Payout_Mode') }}
 				</small>
 				<i class="fas fa-star"></i>
 			</div>
 			<div class="text-brand" v-if="!postPaid()">
 				<small>
-					Pending Pay
+					{{ $t('Pending_Pay') }}
 				</small>
 			</div>
 			<div class="text-brand" v-else>
 				<small>
-					{{ fullAFITReward }} AFIT
+					{{ fullAFITReward }} {{ $t('AFIT_Token') }}
 				</small>
 			</div>
 		</div>
@@ -61,7 +61,7 @@
 		<div class="modal-footer" v-if="this.meta.charity">
 			<i class="fas fa-dove"></i>
 			<small>
-				Charity Post
+				{{ $t('Charity_Post') }}
 			</small>
 			<i class="fas fa-dove"></i>
 			<small>
@@ -71,8 +71,8 @@
 		<transition name="fade">
 		  <div class="report-reply modal-body" v-if="commentBoxOpen">
 			<markdown-editor v-model="replyBody" :configs="editorConfig" ref="editor"></markdown-editor>
-			<a href="#" @click.prevent="postResponse($event)" class="btn btn-brand border reply-btn w-25">Post<i class="fas fa-spin fa-spinner" v-if="loading"></i></a>
-			<a href="#" @click.prevent="resetOpenComment()"  class="btn btn-brand border reply-btn w-25">Cancel</a>
+			<a href="#" @click.prevent="postResponse($event)" class="btn btn-brand border reply-btn w-25">{{ $t('Post') }}<i class="fas fa-spin fa-spinner" v-if="loading"></i></a>
+			<a href="#" @click.prevent="resetOpenComment()"  class="btn btn-brand border reply-btn w-25">{{ $t('Cancel') }}</a>
 		  </div>
 		</transition>
 		<div class="report-reply modal-body" v-if="responsePosted">
@@ -80,7 +80,7 @@
 			  <div class="comment-user-section">	
 				<div class="user-avatar mr-1"
 					   :style="'background-image: url(https://steemitimages.com/u/' + this.$store.state.steemconnect.user.name + '/avatar)'"></div>
-				<div class="modal-author modal-title text-brand" >@{{ $store.state.steemconnect.user.name }}<small class="date-head text-muted">Now</small></div>
+				<div class="modal-author modal-title text-brand" >@{{ $store.state.steemconnect.user.name }}<small class="date-head text-muted">{{ $t('Now') }}</small></div>
 			  </div>
 			</a>
 			<article class="modal-body" v-html="$renderMD(responseBody)"></article>
@@ -248,7 +248,7 @@
             this.loading = false
             this.$notify({
               group: err ? 'error' : 'success',
-              text: err ? 'Unknown error: Your comment could not be sent.' : 'Comment successfully posted!',
+              text: err ? this.$t('Comment_Error') : this.$t('Comment_Success'),
               position: 'top center'
             })
 			
@@ -297,7 +297,7 @@
 				// notify the user that he received an additional reward
 				this.$notify({
 				  group: 'success',
-				  text: 'You\'ve been rewarded '+outcome.amount + ' AFIT tokens for commenting on 3 activity reports today. Congrats!',
+				  text: this.$t('youve_been_rewarded') + outcome.amount + this.$t('reward_for_comment'),
 				  position: 'top center'
 				})
 			}
@@ -325,12 +325,12 @@
 	  votePrompt(e) {
 		//if no user is logged in, prompt to login
 		if (!this.$parent.user){
-		  alert('You need to login or signup first');
+		  alert(this.$t('need_login_signup_notice_vote'));
 		  e.stopPropagation();
 		}
 		//if this post is already voted by the user, we need to show a confirmation
 		else if (this.userVotedThisPost()){
-		  var confirmPopup = confirm("You already had voted before on this post. Are you sure you want to change your vote?");
+		  var confirmPopup = confirm(this.$t('confirm_vote_change'));
 		  if (confirmPopup){
 			this.$store.commit('setPostToVote', this.report)
 		  }else{

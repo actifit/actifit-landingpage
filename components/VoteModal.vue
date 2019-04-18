@@ -3,17 +3,17 @@
     <div class="modal-dialog" role="document">
       <div class="modal-content border border-danger" v-if="postToVote">
         <div class="modal-header">
-          <h5 class="modal-title">Vote on {{ postToVote.title }}</h5>
+          <h5 class="modal-title">{{ $t('Vote_on') }} {{ postToVote.title }}</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
 		<div class="text-center pt-2" v-if="getVotingPower">
-			<span>Your Voting Power: </span><span :style="displayProperColor">{{getVotingPower}}</span>
-			<div class="text-brand"><small>Full In {{timeToFullVP}}</small></div>
+			<span>{{ $t('Your_Voting_Power') }} </span><span :style="displayProperColor">{{getVotingPower}}</span>
+			<div class="text-brand"><small>{{ $t('Full_In') }} {{timeToFullVP}}</small></div>
 		</div>
         <div class="modal-body text-center">
-          <small class="text-muted">Adjust the weight of your vote.</small>
+          <small class="text-muted">{{ $t('Adjust_Vote_Weight') }}</small>
           <ul class="pagination justify-content-center mt-2">
             <li :class="{'page-item': true, disabled: voteWeight === -100}"><a class="page-link vote-controls" href="#" @click.prevent="setVoteWeight(-100)"><i class="far fa-flag text-danger"></i></a></li>
             <li :class="{'page-item': true, disabled: voteWeight === -100}"><a class="page-link vote-controls text-danger" href="#" @click.prevent="changeVoteWeight(-10)">-10</a></li>
@@ -25,12 +25,12 @@
             <li :class="{'page-item': true, disabled: voteWeight === 100}"><a class="page-link vote-controls text-success" href="#" @click.prevent="changeVoteWeight(10)">+10</a></li>
             <li :class="{'page-item': true, disabled: voteWeight === 100}"><a class="page-link vote-controls" href="#" @click.prevent="setVoteWeight(100)"><i class="far fa-thumbs-up text-success"></i></a></li>
           </ul>
-		  <div class="text-center"><span>Your Vote Value:</span><span>{{vote_value_usd}}</span></div>
+		  <div class="text-center"><span>{{ $t('Your_Vote_Value:') }}</span><span>{{vote_value_usd}}</span></div>
           <button type="submit" class="btn btn-brand" @click="vote()" v-if="voteWeight">
             <i class="fas fa-thumbs-up" v-if="voteWeight > 0"></i>
             <i class="fas fa-thumbs-down" v-if="voteWeight < 0"></i>
-            <span v-if="voteWeight > 0"> Upvote</span>
-            <span v-if="voteWeight < 0"> Downvote</span>
+            <span v-if="voteWeight > 0"> {{ $t('Upvote') }}</span>
+            <span v-if="voteWeight < 0"> {{ $t('Downvote') }}</span>
             <i class="fas fa-spinner fa-spin ml-2" v-if="loading"></i>
           </button>
         </div>
@@ -245,7 +245,7 @@
           if (err) {
             this.$notify({
               group: 'error',
-              text: 'Unknown error: Your vote could not be broadcasted.',
+              text: this.$t('Vote_Error'),
               position: 'top center'
             });
           }
@@ -258,7 +258,7 @@
             $(this.$refs.voteModal).modal('hide')
             this.$notify({
               group: 'success',
-              text: 'Your vote has been successfully broadcasted.'
+              text: this.$t('Vote_Success')
             });
 			
 			//if the user votes 3 or more posts at 20%, let's give an additional reward
@@ -291,7 +291,7 @@
 				// notify the user that he received an additional reward
 				this.$notify({
 				  group: 'success',
-				  text: 'You\'ve been rewarded '+outcome.amount + ' AFIT tokens for upvoting 3 Actifit reports at 20% voting power or more. Congrats!',
+				  text: this.$t('youve_been_rewarded')+outcome.amount + this.$t('reward_for_upvote'),
 				  position: 'top center'
 				})
 			}

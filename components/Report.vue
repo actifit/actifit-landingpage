@@ -25,7 +25,7 @@
         <div class="row details mt-2">
           <div class="col-7">
             <small class="d-block">
-              <b>Activity Type:</b>
+              <b>{{ $t('Activity_Type') }}:</b>
             </small>
             <small class="d-block text-truncate" :title="type">
               {{ type }}
@@ -33,7 +33,7 @@
           </div>
           <div class="col-5 text-right">
             <small>
-              <b>Activity Count:</b><br>
+              <b>{{ $t('Activity_Count') }}:</b><br>
               {{ steps }}
             </small>
           </div>
@@ -57,12 +57,12 @@
               <a href="#" class="text-brand" @click="$store.commit('setEditReport', report)" data-toggle="modal"
                  data-target="#editReportModal" v-if="user && report.author === user.account.name">
                 <i class="far fa-edit"></i>
-                edit
+                {{ $t('edit_small') }}
               </a>
               <span v-if="user && report.author === user.account.name"> - </span>
               <a href="#" class="text-brand" @click="$store.commit('setActiveReport', report)" data-toggle="modal"
                  data-target="#reportModal">
-                read more
+                {{ $t('read_more_small') }}
               </a>
             </small>
           </div>
@@ -75,7 +75,7 @@
 			</div>
 			<div class="col-6 text-right">
 				<small>
-					{{ afitReward }} AFIT
+					{{ afitReward }} {{ $t('AFIT_Token') }}
 				</small>
 			</div>
 		</div>
@@ -84,18 +84,18 @@
 			<div class="col-8">
 				<i class="fas fa-star"></i>
 				<small>
-					Full AFIT Payout Mode
+					{{ $t('Full_AFIT_Payout_Mode') }}
 				</small>
 				<i class="fas fa-star"></i>
 			</div>
 			<div class="col-4 text-right" v-if="!postPaid()">
 				<small>
-					Pending Pay
+					{{ $t('Pending_Pay') }}
 				</small>
 			</div>
 			<div class="col-4 text-right" v-else>
 				<small>
-					{{ fullAFITReward }} AFIT
+					{{ fullAFITReward }} {{ $t('AFIT_Token') }}
 				</small>
 			</div>
 		</div>
@@ -104,7 +104,7 @@
 			<div class="col-6">
 				<i class="fas fa-dove"></i>
 				<small>
-					Charity Post
+					{{ $t('Charity_Post') }}
 				</small>
 				<i class="fas fa-dove"></i>
 			</div>
@@ -198,12 +198,12 @@
 	  votePrompt(e) {
 		//if no user is logged in, prompt to login
 		if (!this.user){
-		  alert('You need to login or signup first');
+		  alert(this.$t('need_login_signup_notice_vote'));
 		  e.stopPropagation();
 		}
 		//if this post is already voted by the user, we need to show a confirmation
 		else if (this.userVotedThisPost()){
-		  var confirmPopup = confirm("You already had voted before on this post. Are you sure you want to change your vote?");
+		  var confirmPopup = confirm(this.$t('confirm_vote_change'));
 		  if (confirmPopup){
 			this.$store.commit('setPostToVote', this.report)
 		  }else{

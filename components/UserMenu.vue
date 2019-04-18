@@ -3,16 +3,16 @@
   <div class="ml-auto">
     <ul class="navbar-nav ml-auto user-menu">
       <li class="nav-item">
-        <a class="nav-link" :href="'/signup'">Signup</a>
+        <a class="nav-link" :href="'/signup'">{{ $t('Signup_Link') }}</a>
       </li>
 	  <li class="nav-item" v-if="!user">
-        <a class="nav-link" :href="$steemconnect.getLoginURL()">Login</a>
+        <a class="nav-link" :href="$steemconnect.getLoginURL()">{{ $t('Login') }}</a>
       </li>
 	  <li class="nav-item d-none d-sm-block" v-if="user" >
-        <span class="navbar-text py-0" style="color:#ff112d">Rank&nbsp;<br><b>{{ displayUserRank }}</b></span>
+        <span class="navbar-text py-0" style="color:#ff112d">{{ $t('Rank') }}&nbsp;<br><b>{{ displayUserRank }}</b></span>
       </li>
       <li class="nav-item d-none d-sm-block" v-if="user">
-        <span class="navbar-text py-0">Balance<br><b>{{ formattedUserTokens }}</b></span>
+        <span class="navbar-text py-0">{{ $t('Balance') }}<br><b>{{ formattedUserTokens }}</b></span>
       </li>
       <li class="nav-item dropdown" v-if="user">
         <a class="nav-link dropdown-toggle py-0" href="#" data-toggle="dropdown">
@@ -21,12 +21,12 @@
         <div class="dropdown-menu dropdown-menu-right">
           <h6 class="dropdown-header text-center">@{{ user.account.name }}</h6>
           <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="#" @click.prevent="">My Rank <br/><span class="text-brand"> {{ displayUserRank }} </span></a>
-		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet')">My Wallet <br/><span class="text-brand">  {{ formattedUserTokens }}</span></a>
-		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/referrals')">My Referrals <br/><span class="text-brand"> {{ referralCount }} </span></a>
-          <a class="dropdown-item" href="#" @click.prevent="$router.push('/activity/' + user.account.name)">My Activity</a>
+          <a class="dropdown-item" href="#" @click.prevent="">{{ $t('My_Rank') }} <br/><span class="text-brand"> {{ displayUserRank }} </span></a>
+		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet')">{{ $t('My_Wallet') }} <br/><span class="text-brand">  {{ formattedUserTokens }}</span></a>
+		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/referrals')">{{ $t('My_Referrals') }} <br/><span class="text-brand"> {{ referralCount }} </span></a>
+          <a class="dropdown-item" href="#" @click.prevent="$router.push('/activity/' + user.account.name)">{{ $t('My_Activity') }}</a>
           <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="#" @click.prevent="$store.dispatch('steemconnect/logout')">Logout</a>
+          <a class="dropdown-item" href="#" @click.prevent="$store.dispatch('steemconnect/logout')">{{ $t('Logout') }}</a>
         </div>
       </li>
     </ul>
