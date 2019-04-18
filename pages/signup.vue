@@ -20,31 +20,15 @@
 		<div class="container pt-5 mt-5 pb-5">
 
 	  
-			<h1 class="pt-5 mb-3 text-capitalize text-center headline"><span class="text-brand">Create your Actifit / Steem account</span></h1>
-			<div class="lead mb-2 ">
-			  In order to use Actifit, you need an account on the Steem blockchain. If you do not have an account, you can sign up for one right now!<br/>
-			  <p class="lead mb-2 p-2 text-center bg-danger text-white"><i>Don't know what Actifit is? Head over to <a href="https://actifit.io" class="acti-hover"><u>home page</u></a> to learn more</i></p>
-			  While you can create a Steem account from <a href="https://signup.steemit.com/?ref=actifit">Steemit.com</a> for free, it could take up to two weeks, or more to get approved.<br/>
-			  Other services allow the creation of Steem accounts at a cost, yet here at Actifit, <span class="afit-tokens-earned text-brand">for as low as {{ this.minUSD }}$</span>, you get the following awesome treats:
-			  <ul>
-				<li>Your <span class="afit-tokens-earned text-brand">free Steem / Actifit account</span>, usable across the Steem blockchain and all cool relevant dapps such as Dtube, Steem monsters, Steem hunt, dlike, tasteem, and many more...</li>
-				<li><span class="afit-tokens-earned text-brand"> {{ afitTokensToEarn() }} </span> AFIT tokens matching your current investment. The higher you invest, the higher the amount earned.</li>
-				<li>The Steem blockchain requires a min amount of Steem Power (which decides how often you can do transactions on it). To help with that, <span class="afit-tokens-earned text-brand">we will delegate to your new account {{ this.delegatedSteem }} Steem Power for 3 months to help you post easily once per day!</span></li>
-				<li>Via posting your daily activity, you can earn STEEM upvotes and AFIT tokens, a free source of earning crypto while getting healthy and fit!</li>
-				<li>Owning AFIT tokens allows you to earn more rewards for your daily activity, as it <span class="afit-tokens-earned text-brand">increases your User Rank</span>. At the minimum {{ this.minUSD }}$ investment, your User Rank will stand at 3%. For instance, <span class="afit-tokens-earned text-brand">investing 100$ will earn you {{ afitTokensToEarn('100') }} AFIT tokens</span>, and will increase your User Rank to 6%, reflecting in an <span class="afit-tokens-earned text-brand">increase in your daily STEEM and AFIT rewards.</span></li>
-			   </ul>
+			<h1 class="pt-5 mb-3 text-capitalize text-center headline"><span class="text-brand">{{ $t('signup.headline') }}</span></h1>
+			<div class="lead mb-2 " v-html="signupProcessDetails()">
 			</div>
 			
-			<div class="row lead mb-4 p-3 w-100">
-				<div class="w-100 p-2">You can buy & send STEEM using any of the following exchanges</div>
-				<div class="w-30 p-3"><a href="https://bittrex.com/" >Bittrex</a></div>
-				<div class="w-70 p-3"><a href="https://www.binance.com/" >Binance</a></div>
-				<div class="w-30 p-3"><a href="https://poloniex.com/" >Poloniex</a></div>
-				<div class="w-70 p-3"><a href="https://www.huobi.com/" >Huobi</a></div>
-				<div class="w-100 p-2">Or check out any of the other exchanges listed on <a href="https://coinmarketcap.com/currencies/steem/#markets">Coinmarketcap</a></div>
+			<div class="row lead mb-4 p-3 w-100" v-html="$t('signup.buy_text')">
+				
 			</div>
 			<div class="form-group">
-			  <label for="account-username">Your Username</label>
+			  <label for="account-username">{{ $t('Your_Username') }}</label>
 			  <input class="form-control form-control-lg mb-2" ref="account-username" id="account-username" @input="handleUsername($event.target.value)"/>
 			  <p class="text-brand" v-if="username_invalid">
 				<b>{{ username_invalid }}</b>
@@ -52,58 +36,57 @@
 			  <p class="text-brand" v-if="username_exists">
 				<b>{{ username_exists }}</b>
 			  </p>
-			  <label for="account-password">Your Password</label><br/>
+			  <label for="account-password">{{ $t('Your_Password') }}</label><br/>
 			  <input class="form-control form-control-lg" id="account-password" ref="account-password"/>
-			  <p class="text-brand"><i>Make sure to store your password somewhere safe. Losing your password could lead to permanent loss of your funds!!</i></p>
-			  <button v-on:click="copyContent" data-targetEl="account-password" class="btn btn-brand btn-lg w-20">Copy Password</button><br/><br/>
+			  <p class="text-brand"><i>{{ $t('lost_password_precaution') }}</i></p>
+			  <button v-on:click="copyContent" data-targetEl="account-password" class="btn btn-brand btn-lg w-20">{{ $t('Copy_Password') }}</button><br/><br/>
 			  
-			  <label for="account-password-confirm">Confirm Your Password (to ensure you copied it)</label><br/>
+			  <label for="account-password-confirm">{{ $t('confirm_password_copy') }}</label><br/>
 			  <input class="form-control form-control-lg" id="account-password-confirm" ref="account-password-confirm"/>
 			  
-			  <label for="account-email">Your Email (Optional - helps with recovery if needed)</label><br/>
+			  <label for="account-email">{{ $t('email_optional') }}</label><br/>
 			  <input class="form-control form-control-lg mb-2" id="account-email" ref="account-email" v-model="email"/>
-			  <label for="invested-usd">USD Amount To Invest</label><br/>
+			  <label for="invested-usd">{{ $t('usd_amount_invest') }}</label><br/>
 			  <input type="number" class="form-control form-control-lg mb-2" id="invested-usd" ref="invested-usd" v-model="userInputUSDAmount"/>
-			  <label for="invested-amount">STEEM Amount To Send</label><br/>
+			  <label for="invested-amount">{{ $t('steem_amount_send') }}</label><br/>
 			  <input type="number" class="form-control form-control-lg" id="invested-amount" ref="invested-amount" readonly :value="getMatchingSTEEM()" />
-			  <button v-on:click="copyContent" data-targetEl="invested-amount" class="btn btn-brand btn-lg w-20">Copy STEEM Amount</button><br/><br/>
-			  <label for="matching-afit">Matching Rewarded AFIT(s)</label><br/>
+			  <button v-on:click="copyContent" data-targetEl="invested-amount" class="btn btn-brand btn-lg w-20">{{ $t('copy_steem_amount') }}</button><br/><br/>
+			  <label for="matching-afit">{{ $t('matching_rew_afit') }}</label><br/>
 			  <input type="number" class="form-control form-control-lg mb-2" id="matching-afit" ref="matching-afit" readonly :value="getMatchingAFIT()"/>
 			  <p class="lead mb-4">
-			  You will need to send the matching STEEM amount to the below address. When sending the funds, make sure to use both the "address" and the "memo" fields.
+			  {{ $t('notice_send_amount') }}
 			  </p>
 			  
-			  <label for="actifit-address">Address</label><br/>
+			  <label for="actifit-address">{{ $t('Address') }}</label><br/>
 			  <input class="form-control form-control-lg w-80" id="actifit-address" ref="actifit-address" readonly :value="getTargetAccount()"/>
-				<button v-on:click="copyContent" data-targetEl="actifit-address" class="btn btn-brand btn-lg w-20">Copy Address</button><br/><br/>
-				<label for="actifit-memo">Memo</label><br/>
+				<button v-on:click="copyContent" data-targetEl="actifit-address" class="btn btn-brand btn-lg w-20">{{ $t('Copy_Address') }}</button><br/><br/>
+				<label for="actifit-memo">{{ $t('Memo') }}</label><br/>
 				<input class="form-control form-control-lg w-80" id="actifit-memo" ref="actifit-memo" readonly />	
-				<button v-on:click="copyContent" data-targetEl="actifit-memo" class="btn btn-brand btn-lg w-20 mb-2">Copy Memo</button>	
+				<button v-on:click="copyContent" data-targetEl="actifit-memo" class="btn btn-brand btn-lg w-20 mb-2">{{ $t('Copy_Memo') }}</button>	
 				
 				<vue-recaptcha ref="recaptcha" @verify="onVerifyCaptcha" @expired="onExpiredCaptcha" sitekey="6LdpcoMUAAAAAPGTqlvhKEK6Ayw5NqLDZz5Sjudq">
 				</vue-recaptcha>
 				<p class="text-brand" v-if="captcha_invalid">
 				  <b>{{ captcha_invalid }}</b>
 				</p>
-				<p class="lead mb-4 pb-1">
-					Once you send out the funds, please click the button below for confirmation and to process your account creation.
-					<br/>Please keep the page open till we verify your payment and create your account.
+				<p class="lead mb-4 pb-1" v-html="$t('send_process_verf')">
+					
 				</p>
 				<div class="text-brand text-center" v-if="error_proceeding">
 				  {{ this.error_msg}}
 				</div>
-				<div class="text-center pb-2"><button v-on:click="checkFunds" class="btn btn-brand btn-lg w-20">I have sent STEEM!</button></div>
+				<div class="text-center pb-2"><button v-on:click="checkFunds" class="btn btn-brand btn-lg w-20">{{ $t('Steem_sent') }}</button></div>
 				<div v-if="processStarted" class="text-center text-brand">
 					<div id="checking_funds">
-						<i class="fas fa-spin fa-spinner" v-if="checkingFunds"></i><i class="fas fa-check" v-else></i> Checking Your STEEM Transfer
+						<i class="fas fa-spin fa-spinner" v-if="checkingFunds"></i><i class="fas fa-check" v-else></i> {{ $t('Check_Steem_Transfer') }}
 					</div>
 					<div id="account_creation" v-if="resultReturned">
 						<div v-if="accountCreated">
-							<i class="fas fa-check"></i><span> Account Successfully Created! <br/><br/> You may now login using your username and password. Make sure you do NOT lose your password and store it safely!</span>
-							<div>For the Actifit Mobile App, you need your private posting key to send out your reports, which is the following:<br/> <b>{{this.privatePostKey}}</b><br/>Please copy this also to a safe place.</div>
+							<i class="fas fa-check"></i><span> {{ $t('account_created_success') }} <br/><br/> {{ $t('post_account_creation_notice') }}</span>
+							<div>{{ $t('posting_key_notice') }}<br/> <b>{{this.privatePostKey}}</b><br/>{{ $t('copy_safe_location') }}</div>
 						</div>
-						<div v-else>
-							There was a problem creating your account. Please contact support at <a href="https://discord.gg/aHtcA6r">discord</a> or via email <a href="mailto:info@actifit.io">info@actifit.io</a>
+						<div v-else v-html="$t('error_account_creation')">
+							
 						</div>
 					</div>
 					
@@ -195,6 +178,14 @@
 	  //this.initiateProcess ('jhdkhfkjf');
     },
 	methods: {
+	  signupProcessDetails(){
+		return this.$t('signup.desc_part1') + this.minUSD 
+			+ this.$t('signup.desc_part2') + this.afitTokensToEarn() 
+			+ this.$t('signup.desc_part3') + this.delegatedSteem
+			+ this.$t('signup.desc_part4') + this.minUSD
+			+ this.$t('signup.desc_part5') + this.afitTokensToEarn('100')
+			+ this.$t('signup.desc_part6');
+	  },
 	  handleUsername (val) {
 		let vue_ctnr = this;
 		this.username_invalid = '';
@@ -274,29 +265,29 @@
 		this.error_proceeding = false;
 		this.error_msg = '';
 		if (!this.captchaValid){
-			this.captcha_invalid = 'Please solve captcha first.';
+			this.captcha_invalid = this.$t('solve_captcha');
 			return;
 		}
 		if (this.username_exists || this.username_invalid || this.$refs["account-username"].value==''){
 			this.error_proceeding = true;
-			this.error_msg = 'Please choose a proper username for your new account.';
+			this.error_msg = this.$t('choose_proper_username');
 			return;
 		}
 		if (parseFloat(this.$refs["invested-usd"].value)<parseFloat(this.minUSD)){
 			this.error_proceeding = true;
-			this.error_msg = 'The USD amount chosen is too low. You need to use a min of USD '+this.minUSD;
+			this.error_msg = this.$t('amount_too_low')+this.minUSD;
 			return;
 		}
 		console.log(this.isEmailValid());
 		if (this.isEmailValid()!=''){
 			this.error_proceeding = true;
-			this.error_msg = 'The email format used is incorrect.';
+			this.error_msg = this.$t('invalid_email_format');
 			return;
 		}
 		//make sure user copied and pasted password
 		if (this.$refs["account-password-confirm"].value != this.$refs["account-password"].value){
 		  this.error_proceeding = true;
-		  this.error_msg = 'Please copy the password into a safe location, and confirm doing that by pasting it to the "Confirm Your Password" field above.';
+		  this.error_msg = this.$t('copy_password_confirm');
 		  return;
 		}
 		//to prevent tampering with STEEM and AFIT values
