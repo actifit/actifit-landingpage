@@ -18,13 +18,13 @@
 
       <!-- account balance -->
       <div class="text-center">
-        <h3 class="mb-4" v-if="user">Hey {{ user.account.name }}!</h3>
+        <h3 class="mb-4" v-if="user">{{ $t('Hey') }} {{ user.account.name }}!</h3>
 		<p class="lead">{{this.referralNotice}}</p>
-        <h5>Your Referral Link:</h5>
+        <h5>{{ $t('Your_Referral_Link') }}</h5>
 		<input type="text" :class="smallScreenClasses" class="p-3" name="refLink" ref="refLink" id="referral-link" :value="refUrl" readonly/>
-		<button v-on:click="copyContent" data-targetEl="refLink" class="btn btn-brand p-3">Copy Link</button>	
+		<button v-on:click="copyContent" data-targetEl="refLink" class="btn btn-brand p-3">{{ $t('Copy_Link') }}</button>	
 		<div class="text-brand"> 
-			<span class="share-txt">Share: </span>
+			<span class="share-txt">{{ $t('Share') }} </span>
 			<social-sharing :url="refUrl"
 						  title="Actifit - Rewarding Your Everyday Activity"
 						  description="Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity "
@@ -77,27 +77,27 @@
 
       <!-- Referrals -->
       <div class="history mx-auto">
-        <h3 class="text-center mt-5">My Referrals</h3>
+        <h3 class="text-center mt-5">{{ $t('My_Referrals') }}</h3>
         <Referral v-for="(referral, index) in referrals" :key="index" :referral="referral" />
-        <div class="text-center"><small class="text-muted" v-if="referrals.length === 0">No referrals yet.</small></div>
+        <div class="text-center"><small class="text-muted" v-if="referrals.length === 0">{{ $t('No_referrals_notice') }}</small></div>
       </div>
     </div>
 	
 	<div :class="smallScreenClasses" class="container mt-5 pb-5 pt-5" v-else>
       <!-- account balance -->
       <div class="text-center p-5">
-	    <p class="lead">{{this.referralNotice}}</p>
+	    <p class="lead">{{ $t('referral_notice') }}</p>
 		<div class="row pb-3">
 		  <div class="text-center text-brand w-100 lead">
-		    You need to login first to access your referral link and referral data.
+		    {{ $t('login_required_referrals') }}
 		  </div>
 		</div>
 		<div class="row pb-3">
 		  <div class="w-50">
-			<a :href="$steemconnect.getLoginURL()" class="btn btn-brand btn-lg w-75">Login</a>
+			<a :href="$steemconnect.getLoginURL()" class="btn btn-brand btn-lg w-75">{{ $t('Login') }}</a>
 		  </div>
 		  <div class="w-50">
-			<a href="/signup" class="btn btn-brand btn-lg w-75">Sign Up</a>
+			<a href="/signup" class="btn btn-brand btn-lg w-75">{{ $t('Sign_Up') }}</a>
 		  </div>
 		</div>
 	  </div>
@@ -128,7 +128,6 @@
 	data (){
 	  return {
 	    refUrl: '',
-		referralNotice: 'For every referral, earn an amount equal to 20% of the AFIT rewards your referral earns upon successful signup!',
 		screenWidth: 1200,
 	  }
 	},

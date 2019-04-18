@@ -135,6 +135,7 @@ module.exports = {
   Address: 'Address',
   Copy_Address: 'Copy Address',
   Copy_Memo: 'Copy Memo',
+  Copy_Link: 'Copy Link',
   send_process_verf: 'Once you send out the funds, please click the button below for confirmation and to process your account creation.<br/>Please keep the page open till we verify your payment and create your account.',
   Steem_sent: 'I have sent STEEM!',
   Check_Steem_Transfer: 'Checking Your STEEM Transfer',
@@ -148,4 +149,10 @@ module.exports = {
   amount_too_low: 'The USD amount chosen is too low. You need to use a min of USD ',
   choose_proper_username: 'Please choose a proper username for your new account.',
   solve_captcha: 'Please solve captcha first.',
+  Your_Referral_Link: 'Your Referral Link:',
+  Share: 'Share',
+  My_Referrals: 'My Referrals',
+  No_referrals_notice: 'No referrals yet.',
+  login_required_referrals: 'You need to login first to access your referral link and referral data.',
+  referral_notice: 'For every referral, earn an amount equal to 20% of the AFIT rewards your referral earns upon successful signup!',
 }
