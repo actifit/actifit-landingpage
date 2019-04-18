@@ -17,7 +17,7 @@
 
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-5">
-      <h2 class="text-center mb-5">Activity Reports by {{ username }}</h2>
+      <h2 class="text-center mb-5">{{ $t('Activity_Reports_by') }} {{ username }}</h2>
 
       <!-- show spinner while loading -->
       <div class="text-center" v-if="loading">
@@ -31,13 +31,13 @@
 
       <!-- or no content message when no reports found -->
       <div class="text-center text-muted" v-if="!userReports.length && !loading">
-        {{ username }} has not tracked any activity yet.
+        {{ username }} {{ $t('error_no_tracked_activity') }}
       </div>
 
       <!-- show load more button if there are more posts available -->
       <div class="text-center" v-if="moreUserReportsAvailable">
         <a href="#" class="btn btn-brand" @click.prevent="loadMore()">
-          load more
+          {{ $t('load_more') }}
           <i class="fas fa-spinner fa-spin" v-if="loadingMore"></i>
         </a>
       </div>

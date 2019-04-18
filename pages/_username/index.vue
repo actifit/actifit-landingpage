@@ -20,7 +20,7 @@
 			<div class="user-avatar large-avatar mr-1 mb-5"
 					   :style="'background-image: url(https://steemitimages.com/u/' + this.displayUser + '/avatar)'"></div>
 			<a :href="report.author" target="_blank">@{{ displayUser }} <small class="text-brand numberCircle">{{ getUserRank }}</small></a></h5>
-		  <div class="text-brand"><a class="nav-link" :href="'/activity/'+displayUser" >{{ rewardedPostCount }} Activity Reports Rewarded</a></div>
+		  <div class="text-brand"><a class="nav-link" :href="'/activity/'+displayUser" >{{ rewardedPostCount }} {{ $t('Activity_Reports_Rewarded') }}</a></div>
         </div>
 	</div>
 	<div v-else-if="errorDisplay" class="container pt-5 mt-5 pb-5" >
@@ -145,12 +145,12 @@
 	  votePrompt(e) {
 		//if no user is logged in, prompt to login
 		if (!this.$parent.user){
-		  alert('You need to login or signup first');
+		  alert(this.$t('need_login_signup_notice_vote'));
 		  e.stopPropagation();
 		}
 		//if this post is already voted by the user, we need to show a confirmation
 		else if (this.userVotedThisPost()){
-		  var confirmPopup = confirm("You already had voted before on this post. Are you sure you want to change your vote?");
+		  var confirmPopup = confirm(this.$t('confirm_vote_change'));
 		  if (confirmPopup){
 			this.$store.commit('setPostToVote', this.report)
 		  }else{
@@ -178,7 +178,7 @@
 		  fetch(process.env.actiAppUrl+'userRewardedPostCount/' + this.displayUser).then(res => {
 			res.json().then(json => this.rewardedPostCount = json.rewarded_post_count)}).catch(e => reject(e))
 		}else{
-		  this.errorDisplay = 'Error: User Not Found';
+		  this.errorDisplay = this.$t('user_not_found_error');
 		}
 		  	
 	}

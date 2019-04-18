@@ -17,7 +17,7 @@
 
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-5">
-      <h2 class="text-center mb-5">Actifit Delegators</h2>
+      <h2 class="text-center mb-5">{{ $t('Actifit_Delegators') }}</h2>
 
 
       <!-- show listing when loaded -->
@@ -27,7 +27,7 @@
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + delegator._id + '/avatar);'"></div>
             </a>
             <a :href="'https://busy.org/@' + delegator._id" target="_blank">@{{ delegator._id }}</a><br/>
-			<a :href="'https://busy.org/@' + delegator._id" target="_blank">{{ numberFormat(delegator.steem_power, 0) }} Steem Power</a>
+			<a :href="'https://busy.org/@' + delegator._id" target="_blank">{{ numberFormat(delegator.steem_power, 0) }} {{ $t('Steem_Power') }}</a>
           </div>
       </div>
     </div>
