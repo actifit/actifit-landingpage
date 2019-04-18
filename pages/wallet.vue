@@ -18,33 +18,33 @@
 
       <!-- account balance -->
       <div class="text-center">
-        <h3 class="mb-4">Hey {{ user.account.name }}!</h3>
-        <h4>Your AFIT Balance</h4>
+        <h3 class="mb-4">{{ $t('Hey') }} {{ user.account.name }}!</h3>
+        <h4>{{ $t('Your_Afit_Balance') }}</h4>
         <h4 class="mb-4 font-weight-bold">{{ formattedUserTokens }}</h4>
 		<div class="p-2">
-			<button v-on:click="exchangeAFITforSTEEM" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ exchangeAFITActionButton }}</button>
+			<button v-on:click="exchangeAFITforSTEEM" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('EXCHANGE_AFIT_FOR_STEEM') }}</button>
 			
 			  <div v-if="exchangeAFITMode == 1">
 			  <transition name="fade" v-if="!userHasFundsPass" >
 				<div class="text-center grid p-2">
-					<div class="text-brand font-weight-bold">Let's get you started on exchanging your AFIT for STEEM upvotes!</div>
-					<h5>Step 1 / 3: You need to set up your funds password</h5>
+					<div class="text-brand font-weight-bold">{{ $t('wallet.title_process') }}</div>
+					<h5>{{ $t('wallet.step1_title') }}</h5>
 					<div class="row">
-					  <label for="funds-pass" class="w-25 p-2">Funds Password</label>
+					  <label for="funds-pass" class="w-25 p-2">{{ $t('Funds_Password') }}</label>
 					  <input type="text" id="funds-pass" name="funds-pass" ref="funds-pass" class="form-control-lg w-50 p-2">
-					  <button v-on:click="setPasswordVal" class="btn btn-brand">Generate Password</button>
+					  <button v-on:click="setPasswordVal" class="btn btn-brand">{{ $t('Generate_Password') }}</button>
 					</div>
 					<div class="row">
 						<div class="w-25"></div>
-						<div class="w-50 text-brand"><i>Please avoid using special characters(#,$,%...)</i></div>
+						<div class="w-50 text-brand"><i>{{ $t('avoid_special_chars') }}</i></div>
 					</div>
 					<div class="row">
-					  <label for="confirm-funds-pass" class="w-25 p-2">Confirm Password</label>
+					  <label for="confirm-funds-pass" class="w-25 p-2">{{ $t('Confirm_Password') }}</label>
 					  <input type="text" id="confirm-funds-pass" name="confirm-funds-pass" ref="confirm-funds-pass" class="form-control-lg w-50 p-2">
 					</div>
 					<div class="row">
 					  <div class="w-25"></div>
-					  <button v-on:click="setFundsPass" class="btn btn-brand btn-lg w-50">Set Password</button>
+					  <button v-on:click="setFundsPass" class="btn btn-brand btn-lg w-50">{{ $t('Set_Password') }}</button>
 					</div>
 					<div v-if="settingPass" class="row">
 					  <div class="w-25"></div>
@@ -58,20 +58,18 @@
 			  </transition>
 			  <transition name="fade" v-else-if="!userFundsPassVerified" >
 				<div class="text-center grid">
-					<h5>Step 2 / 3: Your funds password needs to be verified</h5>
-					<div>Please send at least 1 STEEM/SBD to @actifit.exchange (one time fee) <br/>
-					to verify your funds password & activate your exchange service using form below.
-					<br/><span>DO NOT CLOSE this window till verification is complete.</span>
+					<h5>{{ $t('wallet.step2_title') }}</h5>
+					<div v-html="$t('wallet.step2_desc')">
 					</div>
 					<div class="row">
-					  <label for="pass-transfer-type" class="w-25 p-2">Type *</label>
+					  <label for="pass-transfer-type" class="w-25 p-2">{{ $t('Type') }} *</label>
 					  <select @change="passTransferTypeChange" id="pass-transfer-type" name="pass-transfer-type" ref="pass-transfer-type" text="Choose Type" class="form-control-lg w-50 p-2">
-					    <option value="STEEM">STEEM</option>
-					    <option value="SBD">SBD</option>
+					    <option value="STEEM">{{ $t('STEEM') }}</option>
+					    <option value="SBD">{{ $t('SBD') }}</option>
 					  </select>
 					</div>
 					<div class="row">
-					  <label for="pass-transfer-amount" class="w-25 p-2">Amount *</label>
+					  <label for="pass-transfer-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
 					  <input type="number" id="pass-transfer-amount" name="pass-transfer-amount" ref="pass-transfer-amount" class="form-control-lg w-50 p-2"  v-model="transfer_amount">
 					</div>
 					<div class="text-brand text-center" v-if="pass_error_proceeding">
@@ -79,12 +77,12 @@
 					</div>
 					<div class="row">
 					  <div class="w-25"></div>
-					  <button v-on:click="proceedVerifyPass" class="btn btn-brand btn-lg w-50">Send & Verify</button>
+					  <button v-on:click="proceedVerifyPass" class="btn btn-brand btn-lg w-50">{{ $t('Send_Verify') }}</button>
 					</div>
 					<div class="row">
 					  <div class="w-25"></div>
 					  <div v-if="checkingFunds" id="checking_funds">
-						<i class="fas fa-spin fa-spinner"></i>Checking Your STEEM Transfer
+						<i class="fas fa-spin fa-spinner"></i>{{ $t('Checking_Steem_Transfer') }}
 					  </div>
 					</div>
 				</div>
@@ -94,41 +92,41 @@
 				  <div class="p-3">
 					<div class="col-md-6 d-inline-block pt-3 text-md-right">
 					  <a href="#" data-toggle="modal" class="text-brand p-3" data-target="#exchangeQueueModal" >
-					    <i class="fas fa-list-ol"></i> Exchange Queue
+					    <i class="fas fa-list-ol"></i> {{ $t('Exchange_Queue') }}
 					  </a>
 					</div>
 					<div class="col-md-6 d-inline-block pt-3 text-md-left">
 					  <a href="#" data-toggle="modal" class="text-brand p-3" data-target="#exchangeHistoryModal" >
-					    <i class="fas fa-history"></i> My History
+					    <i class="fas fa-history"></i> {{ $t('My_History') }}
 					  </a>
 					</div>
 				  </div>
-					<div>Step 3 / 3: You are ready to exchange AFIT for STEEM Upvotes!</div>
-					<div>Upvotes take place on your next actifit post/report with proof of activity.</div>
-					<div>Choose an option</div>
+					<div>{{ $t('wallet.step3_title') }}</div>
+					<div>{{ $t('wallet.step3_desc1') }}</div>
+					<div>{{ $t('wallet.step3_desc2') }}</div>
 					  <span class="afit-ex-option border border-danger p-2 m-2 btn-brand">
 						<input type="radio" id="afit_exchange_5" value="5" v-model="afit_val_exchange">
-						<label for="afit_exchange_5">5 AFIT Tokens</label>
+						<label for="afit_exchange_5">5 {{ $t('AFIT_Token') }} {{ $t('Tokens') }}</label>
 					  </span>
 					  <span class="afit-ex-option border border-danger p-2 m-2 btn-brand">
 						<input type="radio" id="afit_exchange_10" value="10" v-model="afit_val_exchange">
-						<label for="afit_exchange_10">10 AFIT Tokens</label>
+						<label for="afit_exchange_10">10 {{ $t('AFIT_Token') }} {{ $t('Tokens') }}</label>
 					  </span>
 					  <br>
 					  <span class="afit-ex-option border border-danger p-2 m-2 btn-brand">
 						<input type="radio" id="afit_exchange_15" value="15" v-model="afit_val_exchange">
-						<label for="afit_exchange_15">15 AFIT Tokens</label>
+						<label for="afit_exchange_15">15 {{ $t('AFIT_Token') }} {{ $t('Tokens') }}</label>
 					  </span>
 					  <span class="afit-ex-option border border-danger p-2 m-2 btn-brand">
 						<input type="radio" id="afit_exchange_20" value="20" v-model="afit_val_exchange">
-						<label for="afit_exchange_20">20 AFIT Tokens</label>
+						<label for="afit_exchange_20">20 {{ $t('AFIT_Token') }} {{ $t('Tokens') }}</label>
 					  </span>
 					<br>
-					<span><i>You are exchanging {{ afit_val_exchange }} AFIT tokens for approx. ${{ (afit_val_exchange * 0.036 / 0.65).toFixed(2) }} in STEEM upvote
-						<br/> (net profit approx. ${{ (afit_val_exchange * 0.036).toFixed(2) }})
-						<br/>Please enter your funds password to proceed</i></span>
+					<span><i>{{ $t('You_are_exchanging') }} {{ afit_val_exchange }} {{ $t('AFIT_Token') }} {{ $t('Tokens') }} {{ $t('for_approx') }} ${{ (afit_val_exchange * 0.036 / 0.65).toFixed(2) }} {{ $t('in_steem_upvote') }}
+						<br/> ({{ $t('net_profit_approx') }} ${{ (afit_val_exchange * 0.036).toFixed(2) }})
+						<br/>{{ $t('enter_funds_pass_proceed') }}</i></span>
 					<div class="row" >
-					  <div class="w-25 p-2 text-right">Funds Password</div>
+					  <div class="w-25 p-2 text-right">{{ $t('Funds_Password') }}</div>
 					  <input type="password" id="funds-pass-entry" name="funds-pass-entry" ref="funds-pass-entry" class="form-control-lg w-50 p-2">
 					</div>
 					<div class="row" v-if="error_swap != ''" >
@@ -163,15 +161,15 @@
 				<div class="text-center grid font-weight-bold p-2">
 					<div class="p-3">
 					  <a href="#" data-toggle="modal" class="text-brand p-3" data-target="#exchangeQueueModal" >
-						<i class="fas fa-list-ol"></i> Exchange Queue
+						<i class="fas fa-list-ol"></i> {{ $t('Exchange_Queue') }}
 					  </a>
 					  <a href="#" data-toggle="modal" class="text-brand p-3" data-target="#exchangeHistoryModal" >
-						<i class="fas fa-history"></i> My History
+						<i class="fas fa-history"></i> {{ $t('My_History') }}
 					  </a>
 					</div>
-					<i><div>You have a scheduled {{pendingTokenSwap.paid_afit}} AFIT to STEEM Upvotes exchange in progress.</div>
-					<div class="text-brand">Your current number in queue is {{userTokenSwapPending.order}}. Your exchange/upvote should take place within ~ {{userTokenSwapPending.reward_round * 24}} hrs</div>
-					<div>The upvote will take place on your most recent Actifit Report card that is NOT yet rewarded.</div></i>
+					<i><div>{{ $t('You_have_scheduled') }} {{pendingTokenSwap.paid_afit}} {{ $t('afit_steem_exchange_in_progress') }}</div>
+					<div class="text-brand">{{ $t('current_no_queue') }} {{userTokenSwapPending.order}}. {{ $t('exchange_projected_time') }} {{userTokenSwapPending.reward_round * 24}} {{ $t('hrs') }}</div>
+					<div>{{ $t('wallet.upvote_notice') }}</div></i>
 				</div>
 			  </transition>
 			  <ExchangeQueue :transList="tokenSwapQueue.pendingTransactions" :user="user.account.name"/>
@@ -179,67 +177,65 @@
 			  </div>
 			
 		</div>
-		<h4>Your STEEM Balance</h4>
+		<h4>{{ $t('Your_Steem_Balance') }}</h4>
 		<h5 class="mb-4 font-weight-bold">
-			<span class="p-2">{{ this.renderSteemPower(2) }} STEEM POWER</span>
+			<span class="p-2">{{ this.renderSteemPower(2) }} {{ $t('STEEM_POWER_CAPS') }}</span>
 			<span class="p-2">{{ this.renderSteemBalance() }}</span>
 			<span class="p-2">{{ this.renderSBDBalance() }}</span>
 			<div class="p-2">
-				<small><i>(STEEM POWER BREAKDOWN: {{this.renderSteemPower(1)}} + {{this.renderSteemPower(3)}} - {{this.renderSteemPower(4)}} - {{this.renderSteemPower(5)}})</i></small>
+				<small><i>({{ $t('STEEM_POWER_BREAKDOWN') }}: {{this.renderSteemPower(1)}} + {{this.renderSteemPower(3)}} - {{this.renderSteemPower(4)}} - {{this.renderSteemPower(5)}})</i></small>
 			</div>
 			<div class="p-2">
-				<button v-on:click="transferFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ transferActionButton }}</button>
-				<button v-on:click="powerUpFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ powerUpActionButton }}</button>
-				<button v-on:click="powerDownFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ powerDownActionButton }}</button>
+				<button v-on:click="transferFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('TRANSFER_FUNDS_ACTION_TEXT') }}</button>
+				<button v-on:click="powerUpFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{  $t('POWERUP_ACTION_TEXT') }}</button>
+				<button v-on:click="powerDownFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('POWERDOWN_ACTION_TEXT') }}</button>
 			</div>
 			<transition name="fade">
 			  <div v-if="fundActivityMode == 1" class="text-center grid">
 				<div class="row">
-				  <label for="transfer-recipient" class="w-25 p-2">To *</label>
+				  <label for="transfer-recipient" class="w-25 p-2">{{ $t('To') }} *</label>
 				  <input type="text" id="transfer-recipient" name="transfer-recipient" ref="transfer-recipient" class="form-control-lg w-50 p-2">
 				</div>
 				<div class="row">
-				<label for="transfer-type" class="w-25 p-2">Type *</label>
+				<label for="transfer-type" class="w-25 p-2">{{ $t('Type') }} *</label>
 				<select @change="transferTypeChange" id="transfer-type" name="transfer-type" ref="transfer-type" text="Choose Type" class="form-control-lg w-50 p-2">
 				  <option value="STEEM">STEEM</option>
 				  <option value="SBD">SBD</option>
 				</select>
 				</div>
 				<div class="row">
-				  <label for="transfer-amount" class="w-25 p-2">Amount *</label>
+				  <label for="transfer-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
 				  <input type="number" id="transfer-amount" name="transfer-amount" ref="transfer-amount" class="form-control-lg w-50 p-2">
 				</div>
 				<div class="row">
-				  <label for="transfer-memo" class="w-25 p-2">Memo</label>
+				  <label for="transfer-memo" class="w-25 p-2">{{ $t('Memo') }}</label>
 				  <input type="text" id="transfer-memo" name="transfer-memo" ref="transfer-memo" class="form-control-lg w-50 p-2">				
 				</div>
 				<div class="text-center small p-2">
-				  <i>{{ this.memo_notice}}</i>
+				  <i>{{ $t('wallet_memo_notice') }}</i>
 				</div>
 				<div class="text-brand text-center" v-if="error_proceeding">
 				  {{ this.error_msg}}
 				</div>
 				<div class="row">
 				  <div class="w-25"></div>
-				  <button v-on:click="proceedTransfer" class="btn btn-brand btn-lg w-50">Send</button>
+				  <button v-on:click="proceedTransfer" class="btn btn-brand btn-lg w-50">{{ $t('Send') }}</button>
 				</div>
 			  </div>
 			</transition>
 			<transition name="fade">
 			  <div v-if="fundActivityMode == 2" class="text-center grid">
 				<div class="row">
-				  <label for="powerup-recipient" class="w-25 p-2">To *</label>
+				  <label for="powerup-recipient" class="w-25 p-2">{{ $t('To') }} *</label>
 				  <input type="text" id="powerup-recipient" name="powerup-recipient" ref="powerup-recipient" class="form-control-lg w-50 p-2" :value="user.account.name">
 				</div>
 				<div class="row">
-				  <label for="powerup-amount" class="w-25 p-2">Amount *</label>
+				  <label for="powerup-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
 				  <input type="number" id="powerup-amount" name="powerup-amount" ref="powerup-amount" class="form-control-lg w-50 p-2">
 				</div>
 				<div class="row">
 				  <div class="text-center small p-2 w-25"></div>
-				  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50"><i>
-				    Powering up STEEM converts your STEEM into <b>STEEM POWER (SP)</b>, providing you more stake on the Steem blockchain, and hence increasing your vote value on posts.<br/>
-				    SP can only be withdrawn using the Power Down option, which allows the conversion back to STEEM over the period of 13 weeks, with one portion out of 13 converted every week.</i>
+				  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50" v-html="$t('power_up_notice')">
 				  </div>
 				</div>
 				<div class="text-brand text-center" v-if="error_proceeding">
@@ -247,28 +243,25 @@
 				</div>
 				<div class="row">
 				  <div class="w-25"></div>
-				  <button v-on:click="proceedPowerUp" class="btn btn-brand btn-lg w-50">Power Up</button>
+				  <button v-on:click="proceedPowerUp" class="btn btn-brand btn-lg w-50">{{ $t('Power_Up') }}</button>
 				</div>
 			  </div>
 			</transition>
 			<transition name="fade">
 			  <div v-if="fundActivityMode == 3" class="text-center grid">
 				<div class="row">
-				  <label for="powerdown-amount" class="w-25 p-2">Amount *</label>
+				  <label for="powerdown-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
 				  <input type="number" id="powerdown-amount" name="powerdown-amount" ref="powerdown-amount" class="form-control-lg w-50 p-2">
 				</div>
 				<div class="row" v-if="isPoweringDown">
 				  <div class="text-center small p-2 w-25"></div>
-				  <div class="text-center text-brand small p-2 w-50"><b>You are currently powering down at a weekly rate of {{this.renderSteemPower(5)}} STEEM<br/>
-					Your next withdrawal occurs on {{this.powerDownWithdrawDate}}</b>
+				  <div class="text-center text-brand small p-2 w-50"><b>{{ $t('currently_powering_down') }} {{this.renderSteemPower(5)}} STEEM<br/>
+					{{ $t('next_withdraw_on') }} {{this.powerDownWithdrawDate}}</b>
 				  </div>
 				</div>
 				<div class="row">
 				  <div class="text-center small p-2 w-25"></div>
-				  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50"><i>
-				    Powering down allows you to convert your STEEM POWER back to withdrawable <b>liquid STEEM</b>. <br/>
-				    This process occurs over 13 weeks, yielding one portion out of 13 of the powered down amount to be converted every week.
-				  </i>
+				  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50" v-html="$t('power_down_notice')">
 				  </div>
 				</div>
 				<div class="text-brand text-center" v-if="error_proceeding">
@@ -276,32 +269,32 @@
 				</div>
 				<div class="row" v-if="isPoweringDown">
 				  <div class="text-center small p-2 w-25"></div>
-				  <button v-on:click="proceedPowerDown" class="btn btn-brand btn-lg w-25 border">Power Down</button>
-				  <button v-on:click="cancelPowerDown" class="btn btn-brand btn-lg w-25 border">Cancel Power Down</button>
+				  <button v-on:click="proceedPowerDown" class="btn btn-brand btn-lg w-25 border">{{ $t('Power_Down') }}</button>
+				  <button v-on:click="cancelPowerDown" class="btn btn-brand btn-lg w-25 border">{{ $t('Cancel_Power_Down') }}</button>
 				</div>
 				<div class="row" v-else>
 				  <div class="text-center small p-2 w-25"></div>
-				  <button v-on:click="proceedPowerDown" class="btn btn-brand btn-lg w-50 border">Power Down</button>
+				  <button v-on:click="proceedPowerDown" class="btn btn-brand btn-lg w-50 border">{{ $t('Power_Down') }}</button>
 				</div>
 			  </div>
 			</transition>
 		</h5>
 		<div v-if="isClaimableDataAvailable">
-			<h5>Claimable STEEM Rewards</h5>
+			<h5>{{ $t('Claimable_Steem_Rewards') }}</h5>
 			<h6 class="mb-4 font-weight-bold">
 				<span class="p-2">{{ this.claimSP }}</span>
 				<span class="p-2">{{ this.claimSTEEM }}</span>
 				<span class="p-2">{{ this.claimSBD }}</span>
-				<div class="p-2"><button v-on:click="claimRewards" class="btn btn-brand btn-lg w-20">Claim Rewards</button></div>
+				<div class="p-2"><button v-on:click="claimRewards" class="btn btn-brand btn-lg w-20">{{ $t('Claim_Rewards') }}</button></div>
 			</h6>
 		</div>
       </div>
 	  
       <!-- transaction history -->
       <div class="history mx-auto">
-        <h3 class="text-center mt-5">AFIT Transaction History</h3>
+        <h3 class="text-center mt-5">{{ $t('AFIT_Transaction_History') }}</h3>
         <Transaction v-for="(transaction, index) in transactions" :key="index" :transaction="transaction" />
-        <div class="text-center"><small class="text-muted" v-if="transactions.length === 0">No transactions yet.</small></div>
+        <div class="text-center"><small class="text-muted" v-if="transactions.length === 0">{{ $t('No_transactions_notice') }}</small></div>
       </div>
     </div>
 	
@@ -310,15 +303,15 @@
       <div class="text-center p-5">
 		<div class="row pb-3">
 		  <div class="text-center text-brand w-100 lead">
-		    You need to login first to check your balance.
+		    {{ $t('login_required_wallet') }}
 		  </div>
 		</div>
 		<div class="row pb-3">
 		  <div class="w-50">
-			<a :href="$steemconnect.getLoginURL()" class="btn btn-brand btn-lg w-75">Login</a>
+			<a :href="$steemconnect.getLoginURL()" class="btn btn-brand btn-lg w-75">{{ $t('Login') }}</a>
 		  </div>
 		  <div class="w-50">
-			<a href="/signup" class="btn btn-brand btn-lg w-75">Sign Up</a>
+			<a href="/signup" class="btn btn-brand btn-lg w-75">{{ $t('Sign_Up') }}</a>
 		  </div>
 		</div>
 	  </div>
@@ -353,14 +346,7 @@
 		POWERDOWN_FUNDS: 3,
 		EXCHANGE_AFIT_STEEM: 1,
 		powerDownRateVal: '',
-		powerDownWithdrawDate: '',
-		EXCHANGE_AFIT_FOR_STEEM: 'Exchange AFIT for STEEM',
-		TRANSFER_FUNDS_ACTION_TEXT: 'Transfer Funds',
-		HIDE_TRANSFER_FUNDS_ACTION_TEXT: 'Hide Transfer',		
-		POWERUP_ACTION_TEXT: 'Power Up STEEM',
-		HIDE_POWERUP_ACTION_TEXT: 'Hide Power Up',
-		POWERDOWN_ACTION_TEXT: 'Power Down STEEM',
-		HIDE_POWERDOWN_ACTION_TEXT: 'Hide Power Down',		
+		powerDownWithdrawDate: '',	
 		steemPower: 0,
 		effectiveSteemPower: 0,
 		delegatedSteemPower: 0,
@@ -382,7 +368,6 @@
 		swapResult: '',
 		checkingFunds: false,
 		target_exchange_account: 'actifit.exchange',
-		memo_notice: 'If sending funds to an exchange, make sure to use the memo field.',
 		properties: '', //handles the Steem BC properties
 		userHasFundsPass: false, //holds value if user has proper funds pass or not yet
 		userFundsPassVerified: false, //holds value if user has verified funds pass or not yet
@@ -436,18 +421,6 @@
 		  }
 		}
 		return false;
-	  },
-	  exchangeAFITActionButton () {
-		return this.EXCHANGE_AFIT_FOR_STEEM;
-	  },
-	  transferActionButton () {
-		return this.TRANSFER_FUNDS_ACTION_TEXT;
-	  },
-	  powerUpActionButton () {
-		return this.POWERUP_ACTION_TEXT;
-	  },
-	  powerDownActionButton () {
-		return this.POWERDOWN_ACTION_TEXT;
 	  },
 	  smallScreenBtnClasses () {
 		//use proper classes for neat display
@@ -708,12 +681,12 @@
 		if (this.$refs["transfer-recipient"].value.trim() == '' ||
 			this.$refs["transfer-amount"].value.trim() == ''){
 		  this.error_proceeding = true;
-		  this.error_msg = 'Please ensure to fill all required transfer fields properly.';
+		  this.error_msg = this.$t('all_fields_required');
 		  return;
 		}
 		if (isNaN(this.$refs["transfer-amount"].value.trim()) || this.$refs["transfer-amount"].value == 0){
 		  this.error_proceeding = true;
-		  this.error_msg = 'The amount needs to be a positive numeric value.';
+		  this.error_msg = this.$t('amount_positive_int');
 		  return;
 		}
 		
@@ -742,12 +715,12 @@
 		if (this.$refs["powerup-recipient"].value.trim() == '' ||
 			this.$refs["powerup-amount"].value.trim() == ''){
 		  this.error_proceeding = true;
-		  this.error_msg = 'Please ensure to fill all required power up fields properly.';
+		  this.error_msg = this.$t('all_fields_required');
 		  return;
 		}
 		if (isNaN(this.$refs["powerup-amount"].value.trim()) || this.$refs["powerup-amount"].value == 0){
 		  this.error_proceeding = true;
-		  this.error_msg = 'The amount needs to be a positive numeric value.';
+		  this.error_msg = this.$t('amount_positive_int');
 		  return;
 		}
 		
@@ -768,12 +741,12 @@
 		//ensure we have proper values
 		if (this.$refs["powerdown-amount"].value.trim() == ''){
 		  this.error_proceeding = true;
-		  this.error_msg = 'Please ensure to fill the amount properly.';
+		  this.error_msg = this.$t('all_fields_required');
 		  return;
 		}
 		if (isNaN(this.$refs["powerdown-amount"].value.trim())){
 		  this.error_proceeding = true;
-		  this.error_msg = 'The amount needs to be a positive numeric value.';
+		  this.error_msg = this.$t('amount_positive_int');
 		  return;
 		}
 		let vestsValue = await this.steemPowerToVests(this.$refs["powerdown-amount"].value);
@@ -824,13 +797,13 @@
 		this.errorSettingPass = '';
 		//ensure we have proper values
 		if (this.$refs["funds-pass"].value == ''){
-		  this.errorSettingPass = 'Please enter a funds password or generate one';
+		  this.errorSettingPass = this.$t('error_missing_funds_pass');
 		  this.settingPass = false;
 		  return;
 		}
 		//ensure user confirmed password
 		if (this.$refs["confirm-funds-pass"].value !== this.$refs["funds-pass"].value){
-		  this.errorSettingPass = 'Your confirmation password needs to match your funds password';
+		  this.errorSettingPass = this.$t('error_passwords_mismatch');
 		  this.settingPass = false;
 		  return;
 		}
@@ -856,7 +829,7 @@
 		//ensure we have proper values
 		if (isNaN(this.$refs["pass-transfer-amount"].value.trim()) || this.$refs["pass-transfer-amount"].value < 1){
 		  this.error_proceeding = true;
-		  this.error_msg = 'The amount needs to be a minimum of 1 STEEM/SBD';
+		  this.error_msg = this.$t('min_amount_1_STEEM_SBD');
 		  this.checkingFunds = false;
 		  return;
 		}
@@ -898,12 +871,12 @@
 		//ensure we have proper values
 		if (this.$refs["funds-pass-entry"].value == ''){
 		  this.error_proceeding = true;
-		  this.error_swap = 'Please provide your funds password';
+		  this.error_swap = this.$t('provide_funds_pass');
 		  this.performingSwap = false;
 		  return;
 		}
 		if (this.userTokens <  this.min_tokens_required){
-		  this.error_swap = 'You need at least '+this.min_tokens_required+' AFIT tokens to exchange for upvotes';
+		  this.error_swap = this.$t('need_at_least') + this.min_tokens_required + this.$t('afit_tokens_to_exchange');
 		  this.performingSwap = false;
 		  return;
 		}
@@ -921,7 +894,7 @@
 			let outcome = await res.json();
 			//console.log(outcome);
 			if (outcome.status == 'Success'){
-				this.swapResult = 'AFIT Tokens Successfully swapped for additional STEEM upvote! Upvote will occurr on next reward cycle.';
+				this.swapResult = this.$t('afit_steem_swap_success');
 				//update user data
 				this.fetchUserData();
 			}else{
@@ -960,7 +933,7 @@
 		// notify the user that operation was successful
 		this.$notify({
 		  group: 'success',
-		  text: 'Your "'+this.$route.query.op + '" operation completed with '+ this.$route.query.status + '!',
+		  text: this.$t('Your') + ' "' + this.$route.query.op + '" ' + this.$t('completed_success'),
 		  position: 'top center'
 		})
 		//reset success state

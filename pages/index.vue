@@ -12,31 +12,31 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item">
-            <a class="nav-link" href="#" @click.prevent="scrollTo('#content')">What is Actifit?</a>
+            <a class="nav-link" href="#" @click.prevent="scrollTo('#content')">{{ $t('What_is_actifit') }}</a>
           </li>
 		  <li class="nav-item">
-            <a class="nav-link" href="/whitepaper/Actifit_White_Paper.pdf">Whitepaper</a>
+            <a class="nav-link" href="/whitepaper/Actifit_White_Paper.pdf">{{ $t('Whitepaper') }}</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#" @click.prevent="$router.push('/activity')">Activity</a>
+            <a class="nav-link" href="#" @click.prevent="$router.push('/activity')">{{ $t('Activity') }}</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#" @click.prevent="scrollTo('#delegators')">Delegators</a>
+            <a class="nav-link" href="#" @click.prevent="scrollTo('#delegators')">{{ $t('Delegators') }}</a>
           </li>
 		  <li class="nav-item">
-            <a class="nav-link" href="#" @click.prevent="scrollTo('#leaderboard')">Leaderboard</a>
+            <a class="nav-link" href="#" @click.prevent="scrollTo('#leaderboard')">{{ $t('Leaderboard') }}</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#" @click.prevent="scrollTo('#team')">Team</a>
+            <a class="nav-link" href="#" @click.prevent="scrollTo('#team')">{{ $t('Team') }}</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#" @click.prevent="scrollTo('#athletes')">Sponsored Athletes</a>
+            <a class="nav-link" href="#" @click.prevent="scrollTo('#athletes')">{{ $t('Sponsored_Athletes') }}</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#" @click.prevent="scrollTo('#news')">News</a>
+            <a class="nav-link" href="#" @click.prevent="scrollTo('#news')">{{ $t('News') }}</a>
           </li>
 		  <li class="nav-item">
-            <a class="nav-link" href="#" @click.prevent="$router.push('/referrals')">Refer A Friend</a>
+            <a class="nav-link" href="#" @click.prevent="$router.push('/referrals')">{{ $t('Refer_A_Friend') }}</a>
           </li>
         </ul>
         <UserMenu />
@@ -52,22 +52,22 @@
         <div class="card form mx-auto p-3 mt-3 mt-md-5 text-center border-0 home-card">
 		  <div class="pb-md-4 text-center">
 			  <img src="/img/actifit_logo.png" alt="Actifit" />
-			  <h1 class="mt-3 text-brand title">Actifit</h1>
-			  <h3 class="font-italic text-brand slogan">Rewarding Your Everyday Activity</h3>
+			  <h1 class="mt-3 text-brand title">{{ $t('Actifit') }}</h1>
+			  <h3 class="font-italic text-brand slogan">{{ $t('Slogan') }}</h3>
 			</div>
 		
 		
           <div v-if="user">
             <div class="row">
               <div class="col-sm-6">
-                <p class="lead text-muted">Balance</p>
-                <h3><b>{{ formattedUserTokens }}</b><br><small>AFIT</small></h3>
-                <a href="#" @click.prevent="$router.push('/wallet')" class="btn btn-lg btn-brand w-100">My Wallet</a>
+                <p class="lead text-muted">{{ $t('Balance') }}</p>
+                <h3><b>{{ formattedUserTokens }}</b><br><small>{{ $t('AFIT_Token') }}</small></h3>
+                <a href="#" @click.prevent="$router.push('/wallet')" class="btn btn-lg btn-brand w-100">{{ $t('My_Wallet') }}</a>
               </div>
               <div class="col-sm-6 mt-4 mt-sm-0">
-                <p class="lead text-muted">Activity</p>
-                <h3><b>{{ grabUserReportCount }}</b><br><small>Reports</small></h3>
-                <a href="#" class="btn btn-lg btn-brand w-100" @click.prevent="$router.push('/activity/' + user.account.name)">My Activity</a>
+                <p class="lead text-muted">{{ $t('Activity') }}</p>
+                <h3><b>{{ grabUserReportCount }}</b><br><small>{{ $t('Reports') }}</small></h3>
+                <a href="#" class="btn btn-lg btn-brand w-100" @click.prevent="$router.push('/activity/' + user.account.name)">{{ $t('My_Activity') }}</a>
               </div>
             </div>
           </div>
@@ -77,10 +77,10 @@
             <!--<p class="lead py-md-3 form-info">Log in to see your current token balance, or sign up for a Steem account to start getting rewarded for your activity.</p>-->
             <div class="row">
               <div class="col-6">
-                <a :href="$steemconnect.getLoginURL()" class="btn btn-brand btn-lg w-100">Login</a>
+                <a :href="$steemconnect.getLoginURL()" class="btn btn-brand btn-lg w-100">{{ $t('Login') }}</a>
               </div>
               <div class="col-6">
-                <a href="/signup" class="btn btn-brand btn-lg w-100">Sign Up</a>
+                <a href="/signup" class="btn btn-brand btn-lg w-100">{{ $t('Sign_Up') }}</a>
               </div>
             </div>
           </div>
@@ -98,26 +98,26 @@
     <!-- intro -->
     <section class="intro bg-light" id="content">
       <div class="container py-5">
-        <h1 class="pt-5 mb-3 text-capitalize text-center headline"><span class="text-brand">Actifit:</span> An innovative dapp that rewards your everyday activity!</h1>
+        <h1 class="pt-5 mb-3 text-capitalize text-center headline" v-html="$t('homepage.section1_title')"></h1>
         <p class="lead mb-4 pb-5 text-center">
-          Built as one of the first Smart Media Tokens on top of the Steem blockchain, with beta Android and iOS mobile apps already available on playstore and app store, Actifit tracks and rewards your activity with Actifit (AFIT) tokens, but also STEEM rewards via upvotes on your Steem posts.
+          {{ $t('homepage.section1_desc') }}
         </p>
 
         <!-- stats -->
         <div class="row pb-5">
           <div class="col text-center">
             <h1><i class="fas fa-coins"></i></h1>
-            <h4>Tokens Distributed</h4>
-            <h2 class="text-brand">{{ numberFormat(animatedTokensDistributed, 0) }} AFIT</h2>
+            <h4>{{ $t('Tokens_Distributed') }}</h4>
+            <h2 class="text-brand">{{ numberFormat(animatedTokensDistributed, 0) }} {{ $t('AFIT_Token') }}</h2>
           </div>
           <div class="col text-center">
             <h1><i class="fas fa-users"></i></h1>
-            <h4>Token Holders</h4>
+            <h4>{{ $t('Token_Holders') }}</h4>
             <h2 class="text-brand">{{ numberFormat(animatedUserCount, 0) }}</h2>
           </div>
           <div class="col text-center">
             <h1><i class="fas fa-dumbbell"></i></h1>
-            <h4>Rewarded Activities</h4>
+            <h4>{{ $t('Rewarded_Activities') }}</h4>
             <h2 class="text-brand">{{ numberFormat(animatedRewardedActivityCount, 0) }}</h2>
           </div>
         </div>
@@ -132,8 +132,8 @@
         <div class="row no-gutters">
           <div class="col-lg-6 order-lg-2 text-white showcase-img" style="background-image: url('/img/showcase-1.jpg');"></div>
           <div class="col-lg-6 order-lg-1 my-auto showcase-text">
-            <h2 class="text-capitalize">Earn tokens as simple as one two three</h2>
-            <p class="lead mb-0">1. Download the Actifit mobile app.<br/>2. Go for a jog, walk your dog, mow your lawn, go to the gym, move around your office,... with an aim to reach a minimum of 5,000 activity count.<br/>3. Post via app to the Steem blockchain, and get rewarded!</p>
+            <h2 class="text-capitalize">{{ $t('homepage.section2_title') }}</h2>
+            <p class="lead mb-0" v-html="$t('homepage.section2_desc')"></p>
             <div class="text-center mt-5">
               <a href="https://bit.ly/actifit-app" target="_blank">
                 <img src="/img/google-play.png" />
@@ -151,11 +151,8 @@
         <div class="row no-gutters">
           <div class="col-lg-6 text-white showcase-img" style="background-image: url('/img/showcase-4.jpg');"></div>
           <div class="col-lg-6 my-auto showcase-text">
-            <h2 class="text-capitalize">Actifit (AFIT) tokens use cases</h2>
-            <p class="lead mb-0">
-              AFIT tokens will be available for purchasing fitness related equipment, tools, gadgets, sports wear, gym memberships... and any transactions between providers and actifiters.<br>
-              <br>
-              As a Steem Smart Media Token, AFIT tokens are planned to have their own valuation per STEEM as well as FIAT currencies, and hence to be cashed out for actual FIAT currency.
+            <h2 class="text-capitalize">{{ $t('homepage.section3_title') }}</h2>
+            <p class="lead mb-0" v-html="$t('homepage.section3_desc')">
             </p>
           </div>
         </div>
@@ -164,24 +161,24 @@
         <div class="row no-gutters">
           <div class="col-lg-6 order-lg-2 text-white showcase-img" style="background-image: url('/img/showcase-3.jpg');"></div>
           <div class="col-lg-6 order-lg-1 my-auto showcase-text">
-            <h2 class="text-capitalize">Delegate to earn more rewards</h2>
-            <p class="lead mb-0">You can earn more AFIT tokens if you are a STEEM token holder. Delegate Steem Power to Actifit and earn your share of 100,000 AFIT tokens distributed per day to our delegators, as well as a weekly share of the 5% beneficiary reward of actifit posts.</p>
+            <h2 class="text-capitalize">{{ $t('homepage.section4_title') }}</h2>
+            <p class="lead mb-0">{{ $t('homepage.section4_desc') }}</p>
 			<div style="text-align:center; padding-top: 10px">
 				<br/>
-				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=10%20SP">10 SP</a>|
-				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=20%20SP">20 SP</a>|
-				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=50%20SP">50 SP</a>|
-				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=100%20SP">100 SP</a>|
-				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=250%20SP">250 SP</a>|
-				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=500%20SP">500 SP</a><br/>
-				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=1000%20SP">1K SP</a>|
-				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=2000%20SP">2K SP</a>|
-				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=5000%20SP">5K SP</a>|
-				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=10000%20SP">10K SP</a>|
-				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=20000%20SP">20K SP</a>|
-				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=50000%20SP">50K SP</a>
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=10%20SP">10 {{ $t('SP') }}</a>|
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=20%20SP">20 {{ $t('SP') }}</a>|
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=50%20SP">50 {{ $t('SP') }}</a>|
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=100%20SP">100 {{ $t('SP') }}</a>|
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=250%20SP">250 {{ $t('SP') }}</a>|
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=500%20SP">500 {{ $t('SP') }}</a><br/>
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=1000%20SP">1,000 {{ $t('SP') }}</a>|
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=2000%20SP">2,000 {{ $t('SP') }}</a>|
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=5000%20SP">5,000 {{ $t('SP') }}</a>|
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=10000%20SP">10,000 {{ $t('SP') }}</a>|
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=20000%20SP">20,000 {{ $t('SP') }}</a>|
+				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=50000%20SP">50,000 {{ $t('SP') }}</a>
 				<br/>
-				<a href="https://steembottracker.com/delegation.html?delegatee=actifit">Custom Amount</a>
+				<a href="https://steembottracker.com/delegation.html?delegatee=actifit">{{ $t('Custom_Amount') }}</a>
 			</div>
           </div>
         </div>
@@ -194,7 +191,7 @@
       <div class="container">
         <h1 class="text-center pb-5">
           <i class="fas fa-heart"></i><br>
-          Top Delegators
+          {{ $t('Top_Delegators') }}
         </h1>
         <div class="row">
           <div class="col-6 col-sm-4 col-md-3 text-center mb-4" v-for="(delegator, index) in topDelegators" :key="index" :delegator="delegator">
@@ -202,10 +199,10 @@
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + delegator._id + '/avatar);'"></div>
             </a>
             <a :href="'https://busy.org/@' + delegator._id" target="_blank">@{{ delegator._id }}</a><br/>
-			<a :href="'https://busy.org/@' + delegator._id" target="_blank">{{ numberFormat(delegator.steem_power, 0) }} Steem Power</a>
+			<a :href="'https://busy.org/@' + delegator._id" target="_blank">{{ numberFormat(delegator.steem_power, 0) }} {{ $t('Steem_Power') }}</a>
           </div>
 		  <div class="full-div">
-			<nuxt-link to="/delegators" class="text-center btn delegator-btn" data-target="#">View All Delegators</nuxt-link>
+			<nuxt-link to="/delegators" class="text-center btn delegator-btn" data-target="#">{{ $t('View_All_Delegators') }}</nuxt-link>
 		  </div>
         </div>
       </div>
@@ -216,7 +213,7 @@
       <div class="container">
         <h1 class="text-center pb-5">
           <i class="fas fa-medal"></i><br>
-          Daily Leaderboard
+          {{ $t('Daily_Leaderboard') }}
         </h1>
         <div class="row" v-if="leaderboard.length >= 3">
           <div class="col-sm-4 text-center mb-4 mb-sm-0 d-flex align-items-center justify-content-center">
@@ -226,7 +223,7 @@
                 <div class="avatar mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + leaderboard[1].username.replace('@','') + '/avatar);'"></div>
               </a>
               <a :href="'https://busy.org/' + leaderboard[1].username" target="_blank">{{ leaderboard[1].username }}</a><br/>
-			  <a :href="'https://busy.org/' + leaderboard[1].username" target="_blank">{{ leaderboard[1].activity_count }} Recorded Activity</a>
+			  <a :href="'https://busy.org/' + leaderboard[1].username" target="_blank">{{ leaderboard[1].activity_count }} {{ $t('Recorded_Activity') }}</a>
             </div>
           </div>
           <div class="col-sm-4 text-center mb-4 mb-sm-0 d-flex align-items-center justify-content-center">
@@ -236,7 +233,7 @@
                 <div class="avatar mx-auto mb-3" :style="'width: 200px; height: 200px; background-image: url(https://steemitimages.com/u/' + leaderboard[0].username.replace('@','') + '/avatar);'"></div>
               </a>
               <a :href="'https://busy.org/' + leaderboard[0].username" target="_blank">{{ leaderboard[0].username }}</a><br/>
-			  <a :href="'https://busy.org/' + leaderboard[0].username" target="_blank">{{ leaderboard[0].activity_count }} Recorded Activity</a>
+			  <a :href="'https://busy.org/' + leaderboard[0].username" target="_blank">{{ leaderboard[0].activity_count }} {{ $t('Recorded_Activity') }}</a>
             </div>
           </div>
           <div class="col-sm-4 text-center mb-4 mb-sm-0 d-flex align-items-center justify-content-center">
@@ -246,7 +243,7 @@
                 <div class="avatar mx-auto mb-3" :style="'width: 100px; height: 100px; background-image: url(https://steemitimages.com/u/' + leaderboard[2].username.replace('@','') + '/avatar);'"></div>
               </a>
               <a :href="'https://busy.org/' + leaderboard[2].username" target="_blank">{{ leaderboard[2].username }}</a><br/>
-			  <a :href="'https://busy.org/' + leaderboard[2].username" target="_blank">{{ leaderboard[2].activity_count }} Recorded Activity</a>
+			  <a :href="'https://busy.org/' + leaderboard[2].username" target="_blank">{{ leaderboard[2].activity_count }} {{ $t('Recorded_Activity') }}</a>
             </div>
           </div>
         </div>
@@ -258,7 +255,7 @@
       <div class="container">
         <h1 class="text-center pb-5">
           <i class="fas fa-users"></i><br>
-          Team
+          {{ $t('Team') }}
         </h1>
         <div class="row">
           <div class="col-6 col-sm-4 col-md-3 text-center mb-4" v-for="(moderator, index) in moderators" :key="index" :moderator="moderator">
@@ -276,7 +273,7 @@
       <div class="container">
         <h1 class="text-center pb-5">
           <i class="fas fa-bullhorn tilt"></i><br>
-          Ambassadors
+          {{ $t('Ambassadors') }}
         </h1>
         <div class="row">
           <div class="col-6 col-sm-4 text-center mb-4" v-for="(ambassador, index) in ambassadors" :key="index" :moderator="ambassador.name">
@@ -294,7 +291,7 @@
       <div class="container">
         <h1 class="text-center pb-5">
           <i class="fas fa-dumbbell"></i><br>
-          Sponsored Athletes
+          {{ $t('Sponsored_Athletes') }}
         </h1>
         <div class="row">
 		  <div class="col-6 col-sm-4 text-center mb-4">
@@ -335,7 +332,7 @@
     <section id="news" class="py-5 bg-brand text-light">
       <h1 class="text-center pb-3">
         <i class="far fa-newspaper"></i><br>
-        News
+        {{ $t('News') }}
       </h1>
       <no-ssr>
         <carousel :perPageCustom="[[0, 1], [768, 2], [1024, 3], [1280, 4]]" :paginationColor="'rgba(255, 255, 255, 0.5)'" :paginationActiveColor="'#fff'">

@@ -1,5 +1,7 @@
 const pkg = require('./package')
 
+const { I18N } = require('./config')
+
 module.exports = {
   mode: 'universal',
   env: {
@@ -76,6 +78,7 @@ module.exports = {
   ** Nuxt.js modules
   */
   modules: [
+    ['nuxt-i18n', I18N],
   ],
 
   /*
