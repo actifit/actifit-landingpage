@@ -11,9 +11,9 @@
       </div>
       <div class="row">
         <div class="col text-center">
-          <small class="text-muted">&copy; Copyright Actifit {{ currentYear }}</small> |
-		  <small class="text-muted"><nuxt-link to="/privacy-policy">Privacy Policy</nuxt-link></small> |
-		  <small class="text-muted"><nuxt-link to="/terms-conditions">Terms & Conditions</nuxt-link></small>
+          <small class="text-muted">&copy; {{ $t('Copyright_Actifit') }} {{ currentYear }}</small> |
+		  <small class="text-muted"><nuxt-link to="/privacy-policy">{{ $t('Privacy_Policy') }}</nuxt-link></small> |
+		  <small class="text-muted"><nuxt-link to="/terms-conditions">{{ $t('Terms_Conditions') }}</nuxt-link></small>
         </div>
       </div>
     </div>
@@ -31,14 +31,13 @@
     
     <!-- Optional -->
     <div slot="message">
-        We use cookies to ensure you get the best experience on our website. 
-		Continuing to use the site represents your consent to this.
-		<router-link to="privacy-policy">More Info</router-link>
+        {{ $t('cookies_notice') }}
+		<router-link to="privacy-policy">{{ $t('More_Info') }}</router-link>
     </div>
 
     <!-- Optional -->
     <div slot="acceptContent">
-        GOT IT!
+        {{ $t('Accept_Cookie') }}
     </div>
   </vue-cookie-accept-decline>
   </div>

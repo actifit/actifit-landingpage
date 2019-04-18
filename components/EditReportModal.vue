@@ -3,35 +3,35 @@
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content" v-if="editReport">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Edit: {{ title }}</h5>
+          <h5 class="modal-title" id="exampleModalLabel">{{ $t('Edit') }} {{ title }}</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
           <div class="form-group">
-            <label for="report-title">Title</label>
+            <label for="report-title">{{ $t('Title') }}</label>
             <input class="form-control form-control-lg" id="report-title" v-model="title" />
           </div>
           <div class="form-group">
 			<markdown-editor v-model="body" :configs="editorConfig" ref="editor"></markdown-editor>
           </div>
 		  <div class="form-group">
-			<label for="image-upload">Upload Images</label><br/>
+			<label for="image-upload">{{ $t('Upload_Images') }}</label><br/>
 			<input id="image-upload" type="file" v-on:change="fileChange($event.target.files)" /> 
 			<i class="fas fa-spin fa-spinner" v-if="imgUploading"></i>
 		  </div>
           <div class="form-group">
-            <label for="report-tags">Tags</label>
+            <label for="report-tags">{{ $t('Tags') }}</label>
             <input-tag id="report-tags" :tags.sync="tags" :addTagOnBlur="true"></input-tag>
-            <small class="form-text text-muted">You don't need to add the #actifit tag. It will be added automatically.</small>
+            <small class="form-text text-muted">{{ $t('Tag_Edit_Note') }}</small>
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-brand" @click.prevent="save()">
             <i class="fas fa-spin fa-spinner" v-if="loading"></i>
             <i class="fas fa-paper-plane" v-else></i>
-            Save
+            {{ $t('Save') }}
           </button>
         </div>
       </div>
@@ -138,7 +138,7 @@
 			}
 			main_container.$notify({
               group: err ? 'error' : 'success',
-              text: err ? 'Your image could not be added.' : 'Image successfully added!',
+              text: err ? this.$t('Img_Upload_Fail') : this.$t('Img_Upload_Success'),
               position: 'top center'
             })
 		  })
@@ -204,7 +204,7 @@
             this.loading = false
             this.$notify({
               group: err ? 'error' : 'success',
-              text: err ? 'Unknown error: Your changes could not be saved.' : 'Changes successfully saved!',
+              text: err ? this.$t('Save_Error') : this.$t('Save_Success'),
               position: 'top center'
             })
 
@@ -234,7 +234,7 @@
 				// notify the user that he received an additional reward
 				this.$notify({
 				  group: 'success',
-				  text: 'You\'ve been rewarded '+outcome.amount + ' AFIT tokens for editing your report via Actifit.io. Congrats!',
+				  text: this.$t('youve_been_rewarded') +outcome.amount + this.$t('reward_for_edit'),
 				  position: 'top center'
 				})
 			}

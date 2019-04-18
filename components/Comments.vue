@@ -10,7 +10,7 @@
 		</a>
 		<article class="modal-body" v-html="$renderMD(commentBody())" :style="{ paddingLeft: depth * indentFactor + 'px' }"></article>
 		<div class="modal-footer">
-			<div><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen">Reply</a></div>
+			<div><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen">{{ $t('Reply') }}</a></div>
 			<div>
 				<small>
 				  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 
@@ -33,8 +33,8 @@
 		<transition name="fade">
 		  <div class="comment-reply" v-if="commentBoxOpen">
 			<markdown-editor v-model="replyBody" :configs="editorConfig" ref="editor"></markdown-editor>
-			<a href="#" @click.prevent="postResponse($event)" class="btn btn-brand border reply-btn w-25">Post<i class="fas fa-spin fa-spinner" v-if="loading"></i></a>
-			<a href="#" @click.prevent="resetOpenComment()"  class="btn btn-brand border reply-btn w-25">Cancel</a>
+			<a href="#" @click.prevent="postResponse($event)" class="btn btn-brand border reply-btn w-25">{{ $t('Post') }}<i class="fas fa-spin fa-spinner" v-if="loading"></i></a>
+			<a href="#" @click.prevent="resetOpenComment()"  class="btn btn-brand border reply-btn w-25">{{ $t('Cancel') }}</a>
 		  </div>
 		</transition>
 		<div class="comment-reply" v-if="responsePosted">
@@ -42,7 +42,7 @@
 			  <div class="comment-user-section" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }">	
 				<div class="user-avatar mr-1"
 					   :style="'background-image: url(https://steemitimages.com/u/' + this.$store.state.steemconnect.user.name + '/avatar)'"></div>
-				<div class="modal-author modal-title text-brand" >@{{ $store.state.steemconnect.user.name }}<small class="date-head text-muted">Now</small></div>
+				<div class="modal-author modal-title text-brand" >@{{ $store.state.steemconnect.user.name }}<small class="date-head text-muted">{{ $t('Now') }}</small></div>
 			  </div>
 			</a>
 			<article class="modal-body" v-html="$renderMD(responseBody)" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }" ></article>
@@ -193,7 +193,7 @@
             this.loading = false
             this.$notify({
               group: err ? 'error' : 'success',
-              text: err ? 'Unknown error: Your comment could not be sent.' : 'Comment successfully posted!',
+              text: err ? this.$t('Comment_Error') : this.$t('Comment_Success'),
               position: 'top center'
             })
 			
@@ -255,7 +255,7 @@
 	  votePrompt(e) {
 		//if no user is logged in, prompt to login
 		if (!this.$store.state.steemconnect.user.name){
-		  alert('You need to login or signup first');
+		  alert(this.$t('need_login_signup_notice_vote'));
 		  e.stopPropagation();
 		}else{
 		  //proceed normally showing vote popup

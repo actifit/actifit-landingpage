@@ -3,7 +3,7 @@
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">My Exchange Transactions History</h5>
+          <h5 class="modal-title" id="exampleModalLabel">{{ $t('Ex_Trans_History') }}</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -12,10 +12,10 @@
 			<table class="table table-hover">
 			  <thead class="text-brand">
 				<tr>
-				  <th scope="col" class="d-none d-md-table-cell">User</th>
-				  <th scope="col">Date</th>
-				  <th scope="col">AFIT Exchanged</th>
-				  <th scope="col">Status</th>
+				  <th scope="col" class="d-none d-md-table-cell">{{ $t('User') }}</th>
+				  <th scope="col">{{ $t('Date') }}</th>
+				  <th scope="col">{{ $t('AFIT_Exchanged') }}</th>
+				  <th scope="col">{{ $t('Status') }}</th>
 				</tr>
 			  </thead>
 			  <tbody>
@@ -23,9 +23,9 @@
 				  <td class="d-none d-md-table-cell"><a :href="'https://busy.org/@' + histTrans.user " target="_blank">@{{ histTrans.user }}</a></td>
 				  <td>{{date(histTrans.date)}}</td>
 				  <td>{{ histTrans.paid_afit }}</td>
-				  <td v-if="histTrans.upvote_processed && !histTrans.refunded">Complete</td>
-				  <td v-else-if="histTrans.refunded">Refunded</td>
-				  <td v-else>In Progress</td>
+				  <td v-if="histTrans.upvote_processed && !histTrans.refunded">{{ $t('Complete') }}</td>
+				  <td v-else-if="histTrans.refunded">{{ $t('Refunded') }}</td>
+				  <td v-else>{{ $t('In_Progress') }}</td>
 				</tr>
 			  </tbody>
 			</table>

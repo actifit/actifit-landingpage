@@ -3,7 +3,7 @@
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Exchange Transactions Queue</h5>
+          <h5 class="modal-title" id="exampleModalLabel">{{ $t('Exchange_Transactions_Queue') }}</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -12,11 +12,11 @@
 			<table class="table table-hover">
 			  <thead class="text-brand">
 				<tr>
-				  <th scope="col">#Order</th>
-				  <th scope="col">User</th>
-				  <th scope="col" class="d-none d-lg-table-cell">Date</th>
-				  <th scope="col" class="d-none d-sm-table-cell">AFIT Exchanged</th>
-				  <th scope="col">Est. Voting/Exchange Time</th>
+				  <th scope="col">{{ $t('Order_No') }}</th>
+				  <th scope="col">{{ $t('User') }}</th>
+				  <th scope="col" class="d-none d-lg-table-cell">{{ $t('Date') }}</th>
+				  <th scope="col" class="d-none d-sm-table-cell">{{ $t('AFIT_Exchanged') }}</th>
+				  <th scope="col">{{ $t('Exchange_Time') }}</th>
 				</tr>
 			  </thead>
 			  <tbody>
@@ -25,7 +25,7 @@
 				  <td><a :href="'https://busy.org/@' + pendingTrans.user " target="_blank">@{{ pendingTrans.user }}</a></td>
 				  <td class="d-none d-lg-table-cell">{{ date(pendingTrans.date) }}</td>
 				  <td class="d-none d-sm-table-cell">{{ pendingTrans.paid_afit }}</td>
-				  <td>Within ~ {{ pendingTrans.reward_round * 24 }} Hrs</td>
+				  <td>{{ $t('Within') }} {{ pendingTrans.reward_round * 24 }} {{ $t('hrs') }}</td>
 				</tr>
 			  </tbody>
 			</table>
