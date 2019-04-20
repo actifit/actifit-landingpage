@@ -21,7 +21,7 @@ module.exports = {
   Sign_Up: 'Sign Up',
   SP: 'SP',
   homepage: {
-    section1_title: '<span class="text-brand">Actifit:</span> An innovative dapps that rewards your everyday activity!',
+    section1_title: '<span class="text-brand">Actifit:</span> An innovative dapp that rewards your everyday activity!',
 	section1_desc: 'Built as one of the first Smart Media Tokens on top of the Steem blockchain, with beta Android and iOS mobile apps already available on playstore and app store, Actifit tracks and rewards your activity with Actifit (AFIT) tokens, but also STEEM rewards via upvotes on your Steem posts.',
 	section2_title: 'Earn tokens as simple as one two three',
 	section2_desc: '1. Download the Actifit mobile app.<br/>2. Go for a jog, walk your dog, mow your lawn, go to the gym, move around your office,... with an aim to reach a minimum of 5,000 activity count.<br/>3. Post via app to the Steem blockchain, and get rewarded!',
