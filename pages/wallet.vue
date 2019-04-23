@@ -376,7 +376,7 @@
 		exchangeAFITMode: this.CLOSED_MODE,
 		errorSettingPass: '',
 		screenWidth: 1200,
-		afit_val_exchange: 5,
+		afit_val_exchange: '5',
 		afitPrice: 0.036,
 		pendingTokenSwap: '',
 		transfer_amount: 1,
@@ -880,6 +880,7 @@
 		  this.performingSwap = false;
 		  return;
 		}
+		
 		//proceed with storing the swap and decreasing user AFIT tokens count
 		let url = new URL(process.env.actiAppUrl + 'performAfitSteemExchange');
 		//compile all needed data and send it along the request for processing
@@ -894,6 +895,35 @@
 			let outcome = await res.json();
 			//console.log(outcome);
 			if (outcome.status == 'Success'){
+				//map exchange amount to exchange category
+				let exchange_cat = 1;
+				console.log(this.afit_val_exchange);
+				switch(this.afit_val_exchange){
+					case '5': exchange_cat = 1; break;
+					case '10': exchange_cat = 2; break;
+					case '15': exchange_cat = 3; break;
+					case '20': exchange_cat = 4; break;
+					default: exchange_cat = -1;
+				}
+				console.log('exchange_cat:'+exchange_cat);
+				
+				//store the transaction to Steem BC
+				let cstm_params = {
+					required_auths: [],
+					required_posting_auths: [this.user.account.name],
+					id: 'actifit',
+					json: "{ \"afit_upvote_exchange_type\": \""+exchange_cat+"\"}"
+				  };
+		  
+				let res = await this.$steemconnect.broadcast([['custom_json', cstm_params]], (err) => {
+				  console.log(err);
+				  if (err) {
+					console.log(err);
+				  }else{
+					console.log('success');
+				  }
+				});
+				
 				this.swapResult = this.$t('afit_steem_swap_success');
 				//update user data
 				this.fetchUserData();
