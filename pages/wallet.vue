@@ -169,7 +169,7 @@
 					</div>
 					<i><div>{{ $t('You_have_scheduled') }} {{pendingTokenSwap.paid_afit}} {{ $t('afit_steem_exchange_in_progress') }}</div>
 					<div class="text-brand">{{ $t('current_no_queue') }} {{userTokenSwapPending.order}}. {{ $t('exchange_projected_time') }} {{userTokenSwapPending.reward_round * 24}} {{ $t('hrs') }}</div>
-					<div>{{ $t('wallet.upvote_notice') }}</div></i>
+					<div>{{ $t('upvote_notice') }}</div></i>
 				</div>
 			  </transition>
 			  <ExchangeQueue :transList="tokenSwapQueue.pendingTransactions" :user="user.account.name"/>
@@ -897,7 +897,7 @@
 			if (outcome.status == 'Success'){
 				//map exchange amount to exchange category
 				let exchange_cat = 1;
-				console.log(this.afit_val_exchange);
+				//console.log(this.afit_val_exchange);
 				switch(this.afit_val_exchange){
 					case '5': exchange_cat = 1; break;
 					case '10': exchange_cat = 2; break;
@@ -905,7 +905,7 @@
 					case '20': exchange_cat = 4; break;
 					default: exchange_cat = -1;
 				}
-				console.log('exchange_cat:'+exchange_cat);
+				//console.log('exchange_cat:'+exchange_cat);
 				
 				//store the transaction to Steem BC
 				let cstm_params = {
