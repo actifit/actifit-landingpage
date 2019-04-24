@@ -25,7 +25,7 @@
             <li :class="{'page-item': true, disabled: voteWeight === 100}"><a class="page-link vote-controls text-success" href="#" @click.prevent="changeVoteWeight(10)">+10</a></li>
             <li :class="{'page-item': true, disabled: voteWeight === 100}"><a class="page-link vote-controls" href="#" @click.prevent="setVoteWeight(100)"><i class="far fa-thumbs-up text-success"></i></a></li>
           </ul>
-		  <div class="text-center"><span>{{ $t('Your_Vote_Value:') }}</span><span>{{vote_value_usd}}</span></div>
+		  <div class="text-center"><span>{{ $t('Your_Vote_Value') }}:</span><span>{{vote_value_usd}}</span></div>
           <button type="submit" class="btn btn-brand" @click="vote()" v-if="voteWeight">
             <i class="fas fa-thumbs-up" v-if="voteWeight > 0"></i>
             <i class="fas fa-thumbs-down" v-if="voteWeight < 0"></i>
