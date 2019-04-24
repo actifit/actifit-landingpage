@@ -258,11 +258,110 @@
           {{ $t('Team') }}
         </h1>
         <div class="row">
-          <div class="col-6 col-sm-4 col-md-3 text-center mb-4" v-for="(moderator, index) in moderators" :key="index" :moderator="moderator">
-            <a :href="'https://busy.org/@' + moderator.name" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + moderator.name + '/avatar);'"></div>
+		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
+            <a href="https://busy.org/@mcfarhat" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://www.dropbox.com/s/dlo8nengvv5ebpb/Mo%20-%20pro%20-%202018.jpg?dl=1);'"></div>
             </a>
-            <a :href="'https://busy.org/@' + moderator.name" target="_blank">@{{ moderator.name }}</a>
+            <a href="https://busy.org/@mcfarhat" target="_blank">Mohammad Farhat</a>
+			<div><i>CEO & Founder</i></div>
+			<a href="https://www.linkedin.com/in/mohammadfarhat/" target="_blank"><i class="fab fa-linkedin"></i></a>
+          </div>
+		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
+            <a href="https://busy.org/@alfamano" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.licdn.com/dms/image/C4D03AQHaFIYov4RQRA/profile-displayphoto-shrink_800_800/0?e=1561593600&v=beta&t=P4mXVYWQLZ95_9ulQG8HGBGmDFDN4ct6AItzcsG71Ng);'"></div>
+            </a>
+            <a href="https://busy.org/@alfamano" target="_blank">Alaa Farhat</a>
+			<div><i>Operations Manager</i></div>
+			<a href="https://www.linkedin.com/in/alaa-farhat-b8b59317/" target="_blank"><i class="fab fa-linkedin"></i></a>
+          </div>
+		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
+            <a href="https://busy.org/@katerinaramm" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/katerinaramm/avatar);'"></div>
+            </a>
+            <a href="https://busy.org/@katerinaramm" target="_blank">Katerina Ramoutsaki</a>
+			<div><i>Social Media Manager</i></div>
+			<a href="https://www.linkedin.com/in/katerina-ramoutsaki-25055697/" target="_blank"><i class="fab fa-linkedin"></i></a>
+          </div>
+		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
+            <a href="https://busy.org/@rabihfarhat" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.licdn.com/dms/image/C5603AQHo9hI0JjU5sg/profile-displayphoto-shrink_800_800/0?e=1561593600&v=beta&t=NWsO9U_HJaaZ_s5xJAiIJcRIN2lQZfJkYXcyYzi2Cg8);'"></div>
+            </a>
+            <a href="https://busy.org/@rabihfarhat" target="_blank">Rabih Farhat</a>
+			<div><i>Finance Manager</i></div>
+			<a href="https://www.linkedin.com/in/rabih-farhat-42a1604b/" target="_blank"><i class="fab fa-linkedin"></i></a>
+          </div>
+		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
+            <a href="https://busy.org/@stats-generator" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.licdn.com/dms/image/C4E03AQHa0iykUKqUmA/profile-displayphoto-shrink_800_800/0?e=1561593600&v=beta&t=xl5sQ80B1Cj5Oio-ph54RFqEY2ezrjYuGE_sJsxfDeQ);'"></div>
+            </a>
+            <a href="https://busy.org/@stats-generator" target="_blank">Paul Jansen</a>
+			<div><i>Quality Assurance Manager</i></div>
+			<a href="https://www.linkedin.com/in/profilepauljansen" target="_blank"><i class="fab fa-linkedin"></i></a>
+          </div>
+		</div>
+		<div class="row">
+		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
+            <a href="https://busy.org/@definethedollar" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.licdn.com/dms/image/C4D03AQFX6nc2g7kxPw/profile-displayphoto-shrink_800_800/0?e=1561593600&v=beta&t=ANzZzMRaKW9dYgL6V1ZhRbBVgELUPmtwCQ1Oc13SFpo);'"></div>
+            </a>
+            <a href="https://busy.org/@definethedollar" target="_blank">Jason Rees</a>
+			<div><i>Moderator</i></div>
+			<a href="https://www.linkedin.com/in/jason-bryan-rees-68b917184/" target="_blank"><i class="fab fa-linkedin"></i></a>
+          </div>
+		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
+            <a href="https://busy.org/@ciuoto" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/ciuoto/avatar);'"></div>
+            </a>
+            <a href="https://busy.org/@ciuoto" target="_blank">Eugenio Pirillo</a>
+			<div><i>Moderator</i></div>
+			<a href="https://www.linkedin.com/in/epirillo/" target="_blank"><i class="fab fa-linkedin"></i></a>
+          </div>
+		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
+            <a href="https://busy.org/@thereikiforest" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.discordapp.net/attachments/491018053685870622/570037859231465472/ADdPNihJzmPcLkHtjKRVWu2N2uvBRfNLKJYb8XFwoWdz4j9e3DS1QLdFzcrCu82tWCUcPMWmdAARuC1dyPZmPVkDo.png?width=586&height=492);'"></div>
+            </a>
+            <a href="https://busy.org/@thereikiforest" target="_blank">April Newhall</a>
+			<div><i>Moderator</i></div>
+          </div>
+		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
+            <a href="https://busy.org/@ashikstd" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.licdn.com/dms/image/C5603AQHyM8GBU9DWzA/profile-displayphoto-shrink_800_800/0?e=1561593600&v=beta&t=E55Jf7Qf0KcMv6mhgXa45mjbdWsEn6tlHUbWj3IY0Ls);'"></div>
+            </a>
+            <a href="https://busy.org/@ashikstd" target="_blank">Md Al Amin</a>
+			<div><i>Moderator</i></div>
+			<a href="https://www.linkedin.com/in/ashikstd/" target="_blank"><i class="fab fa-linkedin"></i></a>
+          </div>
+		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
+            <a href="https://busy.org/@alokkumar" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.licdn.com/dms/image/C4D03AQEG2ZehG2gP4w/profile-displayphoto-shrink_800_800/0?e=1561593600&v=beta&t=toFJjbpoI8gse5M64RZFgJLSoHweFSBLhdgcdPw02FY);'"></div>
+            </a>
+            <a href="https://busy.org/@alokkumar" target="_blank">Alok Kumar</a>
+			<div><i>Moderator</i></div>
+			<a href="https://www.linkedin.com/in/alok-kumar-18373228" target="_blank"><i class="fab fa-linkedin"></i></a>
+          </div>
+		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
+            <a href="https://busy.org/@ckole" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.licdn.com/dms/image/C4D03AQEK2wNJByOaZA/profile-displayphoto-shrink_800_800/0?e=1561593600&v=beta&t=HbGxfQXZBI6sIa6qPEIUx7OgWRxWY1wFsfEpo1GqSKI);'"></div>
+            </a>
+            <a href="https://busy.org/@ckole" target="_blank">S. K Olatayo</a>
+			<div><i>Moderator</i></div>
+			<a href="https://www.linkedin.com/in/s-k-olatayo-5b6323178/" target="_blank"><i class="fab fa-linkedin"></i></a>
+          </div>
+		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
+            <a href="https://busy.org/@priyanarc" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/p/32FTXiZsHoAW6noHJDhrg3W8ZKHVFSsLYM859aTDCF8iErL1Z6bfFgZVxWVcQeXwjds5wDJfwPn8wUxqL4mUQj1gXrsTDqxwvNCNV36ZfkfWKCPGW5Ur4uBRzpVbDETYkJJVrCp2SaDZJkii?width=128&height=128);'"></div>
+            </a>
+            <a href="https://busy.org/@priyanarc" target="_blank">Priyan Fareen</a>
+			<div><i>Moderator</i></div>
+			<a href="https://www.linkedin.com/in/priyan-fareen-33722398/" target="_blank"><i class="fab fa-linkedin"></i></a>
+          </div>
+		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
+            <a href="https://busy.org/@sumit71428" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.licdn.com/dms/image/C5103AQHisdsxVqaShQ/profile-displayphoto-shrink_800_800/0?e=1561593600&v=beta&t=rtjC0n9_tvOFFPaO5nDr0hG9i5WpMZsAQeNPTxhCZsw);'"></div>
+            </a>
+            <a href="https://busy.org/@sumit71428" target="_blank">Sumit Singh</a>
+			<div><i>Moderator</i></div>
+			<a href="https://www.linkedin.com/in/sumit-singh-91b616185/" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
         </div>
       </div>
@@ -454,7 +553,7 @@
 	  this.$store.dispatch('fetchTopDelegators', 12)
 
 	  //grab team listing
-	  this.$store.dispatch('fetchModerators')
+	  //this.$store.dispatch('fetchModerators')
 	  this.$store.dispatch('fetchAmbassadors')
 
       this.$store.dispatch('fetchNews')
