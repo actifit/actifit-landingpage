@@ -19,6 +19,7 @@
     "marked": "^0.6.2",
     "nuxt": "^1.4.2",
     "nuxt-i18n": "^5.8.5",
+    "sscjs": "0.0.7",
     "steem": "^0.7.4",
     "steem-editor": "^1.0.8",
     "steemconnect": "^2.0.1",

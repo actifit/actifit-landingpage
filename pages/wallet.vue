@@ -23,7 +23,33 @@
         <h4 class="mb-4 font-weight-bold">{{ formattedUserTokens }}</h4>
 		<div class="p-2">
 			<button v-on:click="exchangeAFITforSTEEM" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('EXCHANGE_AFIT_FOR_STEEM') }}</button>
-			
+			<button v-on:click="moveAFITSEtoAFITPOWER" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('MOVE_AFIT_SE_AFIT_POWER') }}</button>
+			  
+			  <div v-if="moveAFITSEPower == 1">
+				<transition name="fade" >
+				  <div class="text-center grid p-2">
+					<div class="text-brand font-weight-bold">{{ $t('wallet.afit_se_to_power') }}</div>
+					<div class="row" >
+					  <div class="w-25 p-2 text-right">{{ $t('Amount_To_Move') }}</div>
+					  <input type="number" id="afit-se-move-power" name="afit-se-move-power" ref="afit-se-move-power" class="form-control-lg w-50 p-2">
+					</div>
+					<div class="text-brand text-center" v-if="afit_se_move_error_proceeding">
+					  {{ this.afit_se_move_err_msg}}
+					</div>
+					<div class="row">
+					  <div class="w-25"></div>
+					  <button v-on:click="proceedMoveSEPower" class="btn btn-brand btn-lg w-50">{{ $t('Proceed') }}</button>
+					</div>
+					<div class="row">
+					  <div class="w-25"></div>
+					  <div v-if="movingFunds" id="checking_funds">
+						<i class="fas fa-spin fa-spinner"></i>{{ $t('moving_afit_se_power') }}
+					  </div>
+					</div>
+				  </div>
+				</transition>
+			  </div>
+			  
 			  <div v-if="exchangeAFITMode == 1">
 			  <transition name="fade" v-if="!userHasFundsPass" >
 				<div class="text-center grid p-2">
@@ -135,7 +161,7 @@
 					</div>
 					<div class="row">
 					  <div class="w-25"></div>
-					  <button v-on:click="exchangeTokensUpvote" class="btn btn-brand btn-lg w-50">Exchange</button>
+					  <button v-on:click="exchangeTokensUpvote" class="btn btn-brand btn-lg w-50">{{ $t('Exchange') }}</button>
 					</div>
 					<div class="row" v-if="performingSwap" >
 					  <div class="w-25"></div>
@@ -179,9 +205,7 @@
 		</div>
 		<h4>{{ $t('Your_Steem_Balance') }}</h4>
 		<h5 class="mb-4 font-weight-bold">
-			<span class="p-2">{{ this.renderSteemPower(2) }} {{ $t('STEEM_POWER_CAPS') }}</span>
-			<span class="p-2">{{ this.renderSteemBalance() }}</span>
-			<span class="p-2">{{ this.renderSBDBalance() }}</span>
+			<span class="p-2">{{ this.renderSteemPower(2) }} {{ $t('STEEM_POWER_CAPS') }} | {{ this.renderSteemBalance() }} | {{ this.renderSBDBalance() }}</span>
 			<div class="p-2">
 				<small><i>({{ $t('STEEM_POWER_BREAKDOWN') }}: {{this.renderSteemPower(1)}} + {{this.renderSteemPower(3)}} - {{this.renderSteemPower(4)}} - {{this.renderSteemPower(5)}})</i></small>
 			</div>
@@ -282,9 +306,7 @@
 		<div v-if="isClaimableDataAvailable">
 			<h5>{{ $t('Claimable_Steem_Rewards') }}</h5>
 			<h6 class="mb-4 font-weight-bold">
-				<span class="p-2">{{ this.claimSP }}</span>
-				<span class="p-2">{{ this.claimSTEEM }}</span>
-				<span class="p-2">{{ this.claimSBD }}</span>
+				<span class="p-2">{{ this.claimSP }} | {{ this.claimSTEEM }} | {{ this.claimSBD }}</span>
 				<div class="p-2"><button v-on:click="claimRewards" class="btn btn-brand btn-lg w-20">{{ $t('Claim_Rewards') }}</button></div>
 			</h6>
 		</div>
@@ -334,6 +356,9 @@
   import steem from 'steem'
   import ExchangeQueue from '~/components/ExchangeQueueModal'
   import ExchangeHistory from '~/components/ExchangeHistoryModal'
+  import SSC from 'sscjs'
+  
+  const ssc = new SSC('https://api.steem-engine.com/rpc');
   
   import { mapGetters } from 'vuex'
 
@@ -363,10 +388,12 @@
 		error_msg: '',
 		pass_error_proceeding: '',
 		pass_error_msg: '',
+		afit_se_move_error_proceeding: '',
 		performingSwap: false,
 		error_swap: '',
 		swapResult: '',
 		checkingFunds: false,
+		movingFunds: false,
 		target_exchange_account: 'actifit.exchange',
 		properties: '', //handles the Steem BC properties
 		userHasFundsPass: false, //holds value if user has proper funds pass or not yet
@@ -374,6 +401,7 @@
 		settingPass: false,
 		verifyingPass: false,
 		exchangeAFITMode: this.CLOSED_MODE,
+		moveAFITSEPower: this.CLOSED_MODE,
 		errorSettingPass: '',
 		screenWidth: 1200,
 		afit_val_exchange: '5',
@@ -386,6 +414,8 @@
 		userTokenSwapHistory: '',
 		userTokenSwapPending: '',
 		runningInterval: '',
+		afit_se_balance: 0,
+		userAddedTokens: 0,
 	  }
 	},
     components: {
@@ -400,7 +430,7 @@
       ...mapGetters('steemconnect', ['user']),
       ...mapGetters(['userTokens', 'transactions', 'userRank']),
       formattedUserTokens () {
-        return parseFloat(this.userTokens).toFixed(2) + " AFIT";
+		return (parseFloat(this.userTokens) + parseFloat(this.userAddedTokens)).toFixed(2) + " AFIT" + " | " + parseFloat(this.afit_se_balance) + " AFIT S-E (Steem-Engine)";
       },
 	  displayUserRank () {
 		return this.userRank
@@ -540,6 +570,32 @@
 		  //also update claimable amounts
 		  this.claimableSTEEMRewards();
 		  
+		  //if this operation relates to powering up AFIT from S-E, need to also initiate call to adjust AFIT token count
+		  if (this.$route.query.confirm_trans == 1){
+			
+			//console.log('confirming funds delivery');
+			let url = new URL(process.env.actiAppUrl + 'confirmAFITSEReceipt/?user='+this.$store.state.steemconnect.user.name);
+			//connect with our service to confirm AFIT received to proper wallet
+			try{
+				let res = await fetch(url);
+				let outcome = await res.json();
+				//console.log(outcome);
+				if (outcome.error){
+					console.error(err);
+				}else{
+					//update user token count
+					if (outcome.afit_se_power){
+						this.userAddedTokens = outcome.afit_amount;
+					}
+				}
+				//this.checkingFunds = false;
+				//this.resultReturned = true;
+			
+			}catch(err){
+				console.error(err);
+				//this.checkingFunds = false;
+			}
+		  }
 		  //console.log(this.user);
 			
 		}
@@ -774,6 +830,9 @@
 		//function handles exchanging AFIT tokens for STEEM upvotes
 		this.exchangeAFITMode = !this.exchangeAFITMode
 	  },
+	  moveAFITSEtoAFITPOWER () {
+		this.moveAFITSEPower = !this.moveAFITSEPower
+	  },
 	  passTransferTypeChange (e) {
 	    //handles the drop down select option to ensure we have proper value
 		if(e.target.options.selectedIndex > -1) {
@@ -819,6 +878,42 @@
 			//display error
 			this.errorSettingPass = outcome.error;
 		}
+	  },
+	  async proceedMoveSEPower() {
+		//handles checking for proper confirmation of account via STEEM transfer
+		//this.movingFunds = true
+		//function handles the actual processing of the transfer
+		this.afit_se_move_error_proceeding = false;
+		this.afit_se_move_err_msg = '';
+		
+		let amount_to_power = this.$refs["afit-se-move-power"].value.trim();
+		//ensure we have proper values
+		if (isNaN(amount_to_power) || parseFloat(amount_to_power) < 0.01){
+		  this.afit_se_move_error_proceeding = true;
+		  this.afit_se_move_err_msg = this.$t('min_amount_AFIT_power');
+		  //this.movingFunds = false;
+		  return;
+		}
+		//ensure user is powering up value he has
+		if (parseFloat(amount_to_power) > parseFloat(this.afit_se_balance)){
+		  this.afit_se_move_error_proceeding = true;
+		  this.afit_se_move_err_msg = this.$t('max_amount_AFIT_power');
+		  //this.movingFunds = false;
+		  return;
+		}
+		
+		//store the transaction to Steem BC according to S-E protocol for transfer
+		let link = this.$steemconnect.sign('custom_json', {
+		  required_auths: "[\"" + this.user.account.name + "\"]",
+		  required_posting_auths: "[]",
+		  id: 'ssc-mainnet1',
+		  json: "{\"contractName\":\"tokens\",\"contractAction\":\"transfer\",\"contractPayload\":{\"symbol\":\"AFIT\",\"to\":\"actifit.s-e\",\"quantity\":\"" + amount_to_power + "\",\"memo\":\"\"}}",
+		  auto_return: true,
+		}, window.location.origin + '/wallet?op='+this.$t('Move_AFIT_to_Wallet')+'&status=success&confirm_trans=1');
+		
+		//redirect to proper action
+		window.location = link;
+	
 	  },
 	  async proceedVerifyPass() {
 		//handles checking for proper confirmation of account via STEEM transfer
@@ -957,7 +1052,7 @@
 	  }).catch(e => reject(e))
 	  
 	  this.screenWidth = screen.width;
-	  console.log(!this.$route.query.op);
+	  //console.log(!this.$route.query.op);
 	  //check if this is the result of an operation
 	  if (this.$route.query.op && this.$route.query.status){
 		// notify the user that operation was successful
@@ -973,6 +1068,11 @@
 			history.pushState('wallet', document.title, window.location.href.split('?')[0]);
 		}
 	  }
+	  
+	  //fetch user's S-E balance
+	  let bal = await ssc.findOne('tokens', 'balances', { account: 'mcfarhat', symbol: 'AFIT' });
+	  //console.log(bal);
+	  this.afit_se_balance = bal.balance;
 	  	  
     }
   }
