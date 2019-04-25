@@ -570,6 +570,12 @@
 		  //also update claimable amounts
 		  this.claimableSTEEMRewards();
 		  
+		   
+		  //fetch user's S-E balance
+		  let bal = await ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFIT' });
+		  //console.log(bal);
+		  this.afit_se_balance = bal.balance;
+		  
 		  //if this operation relates to powering up AFIT from S-E, need to also initiate call to adjust AFIT token count
 		  if (this.$route.query.confirm_trans == 1){
 			
@@ -1068,11 +1074,6 @@
 			history.pushState('wallet', document.title, window.location.href.split('?')[0]);
 		}
 	  }
-	  
-	  //fetch user's S-E balance
-	  let bal = await ssc.findOne('tokens', 'balances', { account: 'mcfarhat', symbol: 'AFIT' });
-	  //console.log(bal);
-	  this.afit_se_balance = bal.balance;
 	  	  
     }
   }
