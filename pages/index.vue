@@ -5,10 +5,10 @@
 
     <!-- navbar links with smooth scrolling to sections -->
     <nav class="navbar fixed-top navbar-expand-lg navbar-light">
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <button class="navbar-toggler" id="navbar_menu" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-
+	  <UserMenu/>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item">
@@ -39,7 +39,6 @@
             <a class="nav-link" href="#" @click.prevent="$router.push('/referrals')">{{ $t('Refer_A_Friend') }}</a>
           </li>
         </ul>
-        <UserMenu />
       </div>
     </nav>
 
@@ -618,5 +617,24 @@
 <style>
 	.home-card{
 	  opacity: 0.9;
+	}
+	#navbar_menu{
+	  position: absolute;
+	  top: 10px;
+	}
+	.user-menu .user-avatar{
+	  float: right;
+	}
+	
+	@media screen and (min-width: 600px) {
+	  #navbarSupportedContent{
+		position: absolute;
+	  }
+	}
+	@media screen and (max-width: 599px) {
+		#navbarSupportedContent{
+		  position: relative;
+		  background: white;
+		}
 	}
 </style>

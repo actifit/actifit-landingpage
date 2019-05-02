@@ -1,10 +1,7 @@
 <template>
   <!-- login link or user dropdown menu when logged in, for navbar-->
   <div class="ml-auto">
-    <ul class="navbar-nav ml-auto user-menu">
-      <li class="nav-item">
-        <a class="nav-link" :href="'/signup'">{{ $t('Signup_Link') }}</a>
-      </li>
+    <ul class="navbar-nav mr-auto user-menu">
 	  <li class="nav-item" v-if="!user">
         <a class="nav-link" :href="$steemconnect.getLoginURL()">{{ $t('Login') }}</a>
       </li>
@@ -15,7 +12,7 @@
         <span class="navbar-text py-0">{{ $t('Balance') }}<br><b>{{ formattedUserTokens }}</b></span>
       </li>
       <li class="nav-item dropdown" v-if="user">
-        <a class="nav-link dropdown-toggle py-0" href="#" data-toggle="dropdown">
+        <a class="nav-link dropdown-toggle py-0" id="user_menu_navlink" href="#" data-toggle="dropdown">
           <div class="user-avatar" :style="'background-image: url(https://steemitimages.com/u/' + user.account.name + '/avatar)'"></div>
         </a>
         <div class="dropdown-menu dropdown-menu-right">
@@ -66,4 +63,9 @@
       display: none
     .navbar-text
       font-size: .8rem
+</style>
+<style>
+	#user_menu_navlink{
+		height: 40px;
+	}
 </style>
