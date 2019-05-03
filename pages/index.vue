@@ -620,7 +620,7 @@
 	}
 	#navbar_menu{
 	  position: absolute;
-	  top: 10px;
+	  top: 0px;
 	}
 	.user-menu .user-avatar{
 	  float: right;
