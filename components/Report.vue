@@ -114,6 +114,21 @@
 				</small>
 			</div>
 		</div>
+		<div class="row details mt-2 text-brand full-afit-txt" v-if="isUserModerator">
+		  <div class="col-6 text-brand">
+			<div v-if="appType == 'iOS'"><i class="fab fa-apple" ></i> iOS</div>
+			<div v-else-if="appType == 'Android'"><i class="fab fa-android" ></i> Android</div>
+			<div class="mt-2">App: {{ appVersion }}</div>
+		  </div>
+		  <div class="col-6" style="text-align: right">
+			<span v-if="trackingDevice == 'Fitbit Tracking'">
+			  <img src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Fitbit_logo.svg" width="60px" >
+			  <div class="mt-2">{{ trackingDevice }}</div>
+			</span>
+			<div v-else>{{ trackingDevice }}</div>
+		  </div>		 
+		  <div class="col-12 text-brand mt-2">UserID: {{ actUserID }}</div>		  
+		</div>
       </div>
     </div>
   </div>
@@ -128,6 +143,7 @@
       ...mapGetters('steemconnect', ['user']),
       ...mapGetters(['postToVote']),
 	  ...mapGetters(['newlyVotedPosts']),
+	  ...mapGetters(['moderators']),
       date() {
         let date = new Date(this.report.created)
         let minutes = date.getMinutes()
@@ -138,6 +154,24 @@
       },
       type() {
         return this.meta.activity_type.join(', ')
+      },
+	  appType() {
+        return this.meta.appType
+      },
+	  appVersion() {
+        return this.meta.app
+      },
+	  actUserID() {
+		if (Array.isArray(this.meta.actifitUserID) && this.meta.actifitUserID.length>0){
+		  return this.meta.actifitUserID[0]
+		}
+		return this.meta.actifitUserID
+	  },
+	  trackingDevice() {
+	    if (Array.isArray(this.meta.dataTrackingSource) && this.meta.dataTrackingSource.length>0){
+		  return this.meta.dataTrackingSource[0]
+		}
+        return this.meta.dataTrackingSource
       },
       meta() {
         return JSON.parse(this.report.json_metadata)
@@ -162,6 +196,12 @@
 	  },
 	  getVoteCount(){
 		return Array.isArray(this.report.active_votes)?this.report.active_votes.length:0;
+	  },
+	  isUserModerator() {
+		if (this.$store.state.steemconnect.user && this.moderators.find( mod => mod.name == this.$store.state.steemconnect.user.name && mod.title == 'moderator')) {
+		  return true;
+		}
+		return false;
 	  }
 	  	  
     }, 
@@ -231,7 +271,9 @@
 		//grab post full pay if full pay mode enabled
 		fetch(process.env.actiAppUrl+'getPostFullAFITPayReward?user=' + this.report.author+'&url='+this.report.url).then(res => {
 			res.json().then(json => this.fullAFITReward = json.token_count)}).catch(e => reject(e))
-			
+		
+		//grab moderators' list
+		this.$store.dispatch('fetchModerators')
 	},
 	
   }
