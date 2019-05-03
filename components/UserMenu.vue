@@ -2,8 +2,8 @@
   <!-- login link or user dropdown menu when logged in, for navbar-->
   <div class="ml-auto">
     <ul class="navbar-nav mr-auto user-menu">
-	  <li class="nav-item" >
-		<a :href="'/signup'" v-if="!user">{{ $t('Signup_Link') }}</a> | <a :href="$steemconnect.getLoginURL()" v-if="!user">{{ $t('Login') }}</a>
+	  <li class="nav-item" v-if="!user">
+		<a :href="'/signup'" >{{ $t('Signup_Link') }}</a> | <a :href="$steemconnect.getLoginURL()" >{{ $t('Login') }}</a>
 	  </li>
 	  <li class="nav-item d-none d-sm-block" v-if="user" >
         <span class="navbar-text py-0" style="color:#ff112d">{{ $t('Rank') }}&nbsp;<br><b>{{ displayUserRank }}</b></span>
