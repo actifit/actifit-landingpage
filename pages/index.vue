@@ -355,12 +355,28 @@
 			<a href="https://www.linkedin.com/in/priyan-fareen-33722398/" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
+            <a href="https://busy.org/@kpreddy" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.licdn.com/dms/image/C5103AQFJSd4EV5aT7A/profile-displayphoto-shrink_800_800/0?e=1562198400&v=beta&t=7BT88sxg8ixtf5pIFmbR6FMa-95H0TXjikXo48egGr0);'"></div>
+            </a>
+            <a href="https://busy.org/@kpreddy" target="_blank">Praveen Reddy Kanthala</a>
+			<div><i>Moderator</i></div>
+			<a href="https://www.linkedin.com/in/praveen-reddy-kanthala-a0532011a/" target="_blank"><i class="fab fa-linkedin"></i></a>
+          </div>		  
+		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="https://busy.org/@sumit71428" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.licdn.com/dms/image/C5103AQHisdsxVqaShQ/profile-displayphoto-shrink_800_800/0?e=1561593600&v=beta&t=rtjC0n9_tvOFFPaO5nDr0hG9i5WpMZsAQeNPTxhCZsw);'"></div>
             </a>
             <a href="https://busy.org/@sumit71428" target="_blank">Sumit Singh</a>
 			<div><i>Moderator</i></div>
 			<a href="https://www.linkedin.com/in/sumit-singh-91b616185/" target="_blank"><i class="fab fa-linkedin"></i></a>
+          </div>
+		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
+            <a href="https://busy.org/@vishalsingh4997" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/vishalsingh4997/avatar/);'"></div>
+            </a>
+            <a href="https://busy.org/@vishalsingh4997" target="_blank">Vishal Singh</a>
+			<div><i>Moderator</i></div>
+			<a href="https://www.linkedin.com/in/enomz/" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
         </div>
       </div>
