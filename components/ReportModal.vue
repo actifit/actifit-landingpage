@@ -14,8 +14,9 @@
         </div>
 		<article class="modal-body" v-html="$renderMD(body)"></article>
 		<div class="modal-footer">
-			<div><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen">{{ $t('Reply') }}</a></div>
-			<div>
+		  <div class="report-modal-prelim-info col-md-6">
+			<span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen">{{ $t('Reply') }}</a></span>
+			<span>
 				<small>
 				  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 
 					 data-target="#voteModal" v-if="this.$parent.user && userVotedThisPost()==true">
@@ -27,15 +28,64 @@
 				  </a>
 				  <i class="far fa-comments ml-2"></i> {{ report.children }}
 				</small>
-			</div>
-			<div>
+			</span>
+			<span>
 				<small>
 					{{ postPayout }}
 				</small>
 				<small>
 					{{ afitReward }} {{ $t('AFIT_Token') }}
 				</small>
-			</div>
+			</span>
+		  </div>
+		  <div class="text-brand col-md-6"> 
+			<social-sharing :url="formattedReportUrl"
+						  title="Actifit - Rewarding Your Everyday Activity"
+						  description="Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity "
+						  quote="Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity"
+						  hashtags="actifit,steem,health,mobile"
+						  twitter-user="actifit_fitness"
+						  inline-template>
+				 <div class="share-links-actifit">
+				  <network network="facebook">
+					<i class="fab fa-facebook" title="facebook"></i>
+				  </network>
+				  <network network="twitter">
+					<i class="fab fa-twitter" title="twitter"></i>
+				  </network>
+				  <network network="telegram">
+					<i class="fab fa-telegram" title="telegram"></i>
+				  </network>
+				  <network network="whatsapp">
+					<i class="fab fa-whatsapp" title="whatsapp"></i>
+				  </network>
+				  <network network="weibo">
+					<i class="fab fa-weibo" title="weibo"></i>
+				  </network> 
+				  <network network="googleplus">
+					<i class="fab fa-google-plus" title="google+"></i>
+				  </network>
+				  <network network="line">
+					<i class="fab fa-line" title="line"></i>
+				  </network>
+				  <network network="linkedin">
+					<i class="fab fa-linkedin" title="linkedin"></i>
+				  </network>
+				  <network network="reddit">
+					<i class="fab fa-reddit" title="reddit"></i>
+				  </network>
+				  <network network="skype">
+					<i class="fab fa-skype" title="skype"></i>
+				  </network>
+				  <network network="sms">
+					<i class="fas fa-comment" title="SMS"></i>
+				  </network>
+				  <network network="email">
+					  <i class="fa fa-envelope" title="email"></i>
+				  </network>
+			  </div>
+			</social-sharing>
+		  </div>
 		</div>
 		<!-- adding section to display additional FULL Payout option -->
 		<div class="modal-footer" v-if="this.meta.full_afit_pay=='on'">
@@ -110,6 +160,8 @@
   
   import steemEditor from 'steem-editor';
   import 'steem-editor/dist/css/index.css';
+  
+  import SocialSharing from 'vue-social-sharing'
 
   Vue.use( steemEditor );
   
@@ -146,6 +198,7 @@
 	components: {
 	  VueMarkdown,
 	  Comments,
+	  SocialSharing,
 	},
     computed: {
 	  ...mapGetters('steemconnect', ['user']),
@@ -175,6 +228,9 @@
 		let user_name = /(@([\a-zA-Z0-9-.]+)(?![\a-zA-Z0-9-.]))([,.|() ])/g;
         return report_content.replace(user_name,'[$1](https://busy.org/$1)$3')
       },
+	  formattedReportUrl () {
+		return "https://actifit.io" + this.report.url;
+	  },
 	  getVoteCount(){
 		return Array.isArray(this.report.active_votes) ? this.report.active_votes.length : 0;
 	  },
@@ -424,5 +480,15 @@
 	}
 	.report-reply{
 	  padding-left: 40px;
+	}
+	.share-links-actifit{
+	  text-align: right;
+	}
+	.share-links-actifit span{
+	  padding: 5px;
+	  cursor: pointer;
+	}
+	.report-modal-prelim-info span{
+	  padding: 5px;
 	}
 </style>
