@@ -587,7 +587,7 @@
 				let outcome = await res.json();
 				//console.log(outcome);
 				if (outcome.error){
-					console.error(err);
+					console.error(outcome);
 				}else{
 					//update user token count
 					if (outcome.afit_se_power){
