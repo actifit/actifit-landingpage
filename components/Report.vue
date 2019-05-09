@@ -10,7 +10,7 @@
       <div class="report-body">
         <div class="row">
           <div class="col-7">
-            <a :href="'https://busy.org/@' + report.author" target="_blank">			
+            <a :href="report.author" target="_blank">			
 			
               <div class="user-avatar mr-1"
                    :style="'background-image: url(https://steemitimages.com/u/' + report.author + '/avatar)'"></div>
@@ -110,7 +110,7 @@
 			</div>
 			<div class="col-6 text-right">
 				<small>
-					<a :href="'https://busy.org/@' + this.meta.charity[0]" target="_blank">@{{this.meta.charity[0]}}</a>
+					<a :href="this.meta.charity[0]" target="_blank">@{{this.meta.charity[0]}}</a>
 				</small>
 			</div>
 		</div>

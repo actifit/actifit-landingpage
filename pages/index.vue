@@ -194,11 +194,11 @@
         </h1>
         <div class="row">
           <div class="col-6 col-sm-4 col-md-3 text-center mb-4" v-for="(delegator, index) in topDelegators" :key="index" :delegator="delegator">
-            <a :href="'https://busy.org/@' + delegator._id" target="_blank">
+            <a :href="delegator._id" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + delegator._id + '/avatar);'"></div>
             </a>
-            <a :href="'https://busy.org/@' + delegator._id" target="_blank">@{{ delegator._id }}</a><br/>
-			<a :href="'https://busy.org/@' + delegator._id" target="_blank">{{ numberFormat(delegator.steem_power, 0) }} {{ $t('Steem_Power') }}</a>
+            <a :href="delegator._id" target="_blank">@{{ delegator._id }}</a><br/>
+			<a :href="delegator._id" target="_blank">{{ numberFormat(delegator.steem_power, 0) }} {{ $t('Steem_Power') }}</a>
           </div>
 		  <div class="full-div">
 			<nuxt-link to="/delegators" class="text-center btn delegator-btn" data-target="#">{{ $t('View_All_Delegators') }}</nuxt-link>
@@ -218,31 +218,31 @@
           <div class="col-sm-4 text-center mb-4 mb-sm-0 d-flex align-items-center justify-content-center">
             <div>
               <h2>2.</h2>
-              <a :href="'https://busy.org/' + leaderboard[1].username" target="_blank">
+              <a :href="leaderboard[1].username" target="_blank">
                 <div class="avatar mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + leaderboard[1].username.replace('@','') + '/avatar);'"></div>
               </a>
-              <a :href="'https://busy.org/' + leaderboard[1].username" target="_blank">{{ leaderboard[1].username }}</a><br/>
-			  <a :href="'https://busy.org/' + leaderboard[1].username" target="_blank">{{ leaderboard[1].activity_count }} {{ $t('Recorded_Activity') }}</a>
+              <a :href="leaderboard[1].username" target="_blank">{{ leaderboard[1].username }}</a><br/>
+			  <a :href="leaderboard[1].username" target="_blank">{{ leaderboard[1].activity_count }} {{ $t('Recorded_Activity') }}</a>
             </div>
           </div>
           <div class="col-sm-4 text-center mb-4 mb-sm-0 d-flex align-items-center justify-content-center">
             <div>
               <h2>1.</h2>
-              <a :href="'https://busy.org/' + leaderboard[0].username" target="_blank">
+              <a :href="leaderboard[0].username" target="_blank">
                 <div class="avatar mx-auto mb-3" :style="'width: 200px; height: 200px; background-image: url(https://steemitimages.com/u/' + leaderboard[0].username.replace('@','') + '/avatar);'"></div>
               </a>
-              <a :href="'https://busy.org/' + leaderboard[0].username" target="_blank">{{ leaderboard[0].username }}</a><br/>
-			  <a :href="'https://busy.org/' + leaderboard[0].username" target="_blank">{{ leaderboard[0].activity_count }} {{ $t('Recorded_Activity') }}</a>
+              <a :href="leaderboard[0].username" target="_blank">{{ leaderboard[0].username }}</a><br/>
+			  <a :href="leaderboard[0].username" target="_blank">{{ leaderboard[0].activity_count }} {{ $t('Recorded_Activity') }}</a>
             </div>
           </div>
           <div class="col-sm-4 text-center mb-4 mb-sm-0 d-flex align-items-center justify-content-center">
             <div>
               <h2>3.</h2>
-              <a :href="'https://busy.org/' + leaderboard[2].username" target="_blank">
+              <a :href="leaderboard[2].username" target="_blank">
                 <div class="avatar mx-auto mb-3" :style="'width: 100px; height: 100px; background-image: url(https://steemitimages.com/u/' + leaderboard[2].username.replace('@','') + '/avatar);'"></div>
               </a>
-              <a :href="'https://busy.org/' + leaderboard[2].username" target="_blank">{{ leaderboard[2].username }}</a><br/>
-			  <a :href="'https://busy.org/' + leaderboard[2].username" target="_blank">{{ leaderboard[2].activity_count }} {{ $t('Recorded_Activity') }}</a>
+              <a :href="leaderboard[2].username" target="_blank">{{ leaderboard[2].username }}</a><br/>
+			  <a :href="leaderboard[2].username" target="_blank">{{ leaderboard[2].activity_count }} {{ $t('Recorded_Activity') }}</a>
             </div>
           </div>
         </div>
@@ -258,123 +258,123 @@
         </h1>
         <div class="row">
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
-            <a href="https://busy.org/@mcfarhat" target="_blank">
+            <a href="@mcfarhat" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://www.dropbox.com/s/dlo8nengvv5ebpb/Mo%20-%20pro%20-%202018.jpg?dl=1);'"></div>
             </a>
-            <a href="https://busy.org/@mcfarhat" target="_blank">Mohammad Farhat</a>
+            <a href="@mcfarhat" target="_blank">Mohammad Farhat</a>
 			<div><i>CEO & Founder</i></div>
 			<a href="https://www.linkedin.com/in/mohammadfarhat/" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
-            <a href="https://busy.org/@alfamano" target="_blank">
+            <a href="@alfamano" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.licdn.com/dms/image/C4D03AQHaFIYov4RQRA/profile-displayphoto-shrink_800_800/0?e=1561593600&v=beta&t=P4mXVYWQLZ95_9ulQG8HGBGmDFDN4ct6AItzcsG71Ng);'"></div>
             </a>
-            <a href="https://busy.org/@alfamano" target="_blank">Alaa Farhat</a>
+            <a href="@alfamano" target="_blank">Alaa Farhat</a>
 			<div><i>Operations Manager</i></div>
 			<a href="https://www.linkedin.com/in/alaa-farhat-b8b59317/" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
-            <a href="https://busy.org/@katerinaramm" target="_blank">
+            <a href="@katerinaramm" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/katerinaramm/avatar);'"></div>
             </a>
-            <a href="https://busy.org/@katerinaramm" target="_blank">Katerina Ramoutsaki</a>
+            <a href="@katerinaramm" target="_blank">Katerina Ramoutsaki</a>
 			<div><i>Social Media Manager</i></div>
 			<a href="https://www.linkedin.com/in/katerina-ramoutsaki-25055697/" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
-            <a href="https://busy.org/@rabihfarhat" target="_blank">
+            <a href="@rabihfarhat" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.licdn.com/dms/image/C5603AQHo9hI0JjU5sg/profile-displayphoto-shrink_800_800/0?e=1561593600&v=beta&t=NWsO9U_HJaaZ_s5xJAiIJcRIN2lQZfJkYXcyYzi2Cg8);'"></div>
             </a>
-            <a href="https://busy.org/@rabihfarhat" target="_blank">Rabih Farhat</a>
+            <a href="@rabihfarhat" target="_blank">Rabih Farhat</a>
 			<div><i>Finance Manager</i></div>
 			<a href="https://www.linkedin.com/in/rabih-farhat-42a1604b/" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
-            <a href="https://busy.org/@stats-generator" target="_blank">
+            <a href="@stats-generator" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.licdn.com/dms/image/C4E03AQHa0iykUKqUmA/profile-displayphoto-shrink_800_800/0?e=1561593600&v=beta&t=xl5sQ80B1Cj5Oio-ph54RFqEY2ezrjYuGE_sJsxfDeQ);'"></div>
             </a>
-            <a href="https://busy.org/@stats-generator" target="_blank">Paul Jansen</a>
+            <a href="@stats-generator" target="_blank">Paul Jansen</a>
 			<div><i>Quality Assurance Manager</i></div>
 			<a href="https://www.linkedin.com/in/profilepauljansen" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
 		</div>
 		<div class="row">
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
-            <a href="https://busy.org/@definethedollar" target="_blank">
+            <a href="@definethedollar" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.licdn.com/dms/image/C4D03AQFX6nc2g7kxPw/profile-displayphoto-shrink_800_800/0?e=1561593600&v=beta&t=ANzZzMRaKW9dYgL6V1ZhRbBVgELUPmtwCQ1Oc13SFpo);'"></div>
             </a>
-            <a href="https://busy.org/@definethedollar" target="_blank">Jason Rees</a>
+            <a href="@definethedollar" target="_blank">Jason Rees</a>
 			<div><i>Moderator</i></div>
 			<a href="https://www.linkedin.com/in/jason-bryan-rees-68b917184/" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
-            <a href="https://busy.org/@ciuoto" target="_blank">
+            <a href="@ciuoto" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/ciuoto/avatar);'"></div>
             </a>
-            <a href="https://busy.org/@ciuoto" target="_blank">Eugenio Pirillo</a>
+            <a href="@ciuoto" target="_blank">Eugenio Pirillo</a>
 			<div><i>Moderator</i></div>
 			<a href="https://www.linkedin.com/in/epirillo/" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
-            <a href="https://busy.org/@thereikiforest" target="_blank">
+            <a href="@thereikiforest" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.discordapp.net/attachments/491018053685870622/570037859231465472/ADdPNihJzmPcLkHtjKRVWu2N2uvBRfNLKJYb8XFwoWdz4j9e3DS1QLdFzcrCu82tWCUcPMWmdAARuC1dyPZmPVkDo.png?width=586&height=492);'"></div>
             </a>
-            <a href="https://busy.org/@thereikiforest" target="_blank">April Newhall</a>
+            <a href="@thereikiforest" target="_blank">April Newhall</a>
 			<div><i>Moderator</i></div>
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
-            <a href="https://busy.org/@ashikstd" target="_blank">
+            <a href="@ashikstd" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.licdn.com/dms/image/C5603AQHyM8GBU9DWzA/profile-displayphoto-shrink_800_800/0?e=1561593600&v=beta&t=E55Jf7Qf0KcMv6mhgXa45mjbdWsEn6tlHUbWj3IY0Ls);'"></div>
             </a>
-            <a href="https://busy.org/@ashikstd" target="_blank">Md Al Amin</a>
+            <a href="@ashikstd" target="_blank">Md Al Amin</a>
 			<div><i>Moderator</i></div>
 			<a href="https://www.linkedin.com/in/ashikstd/" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
-            <a href="https://busy.org/@alokkumar" target="_blank">
+            <a href="@alokkumar" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.licdn.com/dms/image/C4D03AQEG2ZehG2gP4w/profile-displayphoto-shrink_800_800/0?e=1561593600&v=beta&t=toFJjbpoI8gse5M64RZFgJLSoHweFSBLhdgcdPw02FY);'"></div>
             </a>
-            <a href="https://busy.org/@alokkumar" target="_blank">Alok Kumar</a>
+            <a href="@alokkumar" target="_blank">Alok Kumar</a>
 			<div><i>Moderator</i></div>
 			<a href="https://www.linkedin.com/in/alok-kumar-18373228" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
-            <a href="https://busy.org/@ckole" target="_blank">
+            <a href="@ckole" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.licdn.com/dms/image/C4D03AQEK2wNJByOaZA/profile-displayphoto-shrink_800_800/0?e=1561593600&v=beta&t=HbGxfQXZBI6sIa6qPEIUx7OgWRxWY1wFsfEpo1GqSKI);'"></div>
             </a>
-            <a href="https://busy.org/@ckole" target="_blank">S. K Olatayo</a>
+            <a href="@ckole" target="_blank">S. K Olatayo</a>
 			<div><i>Moderator</i></div>
 			<a href="https://www.linkedin.com/in/s-k-olatayo-5b6323178/" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
-            <a href="https://busy.org/@priyanarc" target="_blank">
+            <a href="@priyanarc" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/p/32FTXiZsHoAW6noHJDhrg3W8ZKHVFSsLYM859aTDCF8iErL1Z6bfFgZVxWVcQeXwjds5wDJfwPn8wUxqL4mUQj1gXrsTDqxwvNCNV36ZfkfWKCPGW5Ur4uBRzpVbDETYkJJVrCp2SaDZJkii?width=128&height=128);'"></div>
             </a>
-            <a href="https://busy.org/@priyanarc" target="_blank">Priyan Fareen</a>
+            <a href="@priyanarc" target="_blank">Priyan Fareen</a>
 			<div><i>Moderator</i></div>
 			<a href="https://www.linkedin.com/in/priyan-fareen-33722398/" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
-            <a href="https://busy.org/@kpreddy" target="_blank">
+            <a href="@kpreddy" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.licdn.com/dms/image/C5103AQFJSd4EV5aT7A/profile-displayphoto-shrink_800_800/0?e=1562198400&v=beta&t=7BT88sxg8ixtf5pIFmbR6FMa-95H0TXjikXo48egGr0);'"></div>
             </a>
-            <a href="https://busy.org/@kpreddy" target="_blank">Praveen Reddy Kanthala</a>
+            <a href="@kpreddy" target="_blank">Praveen Reddy Kanthala</a>
 			<div><i>Moderator</i></div>
 			<a href="https://www.linkedin.com/in/praveen-reddy-kanthala-a0532011a/" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>		  
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
-            <a href="https://busy.org/@sumit71428" target="_blank">
+            <a href="@sumit71428" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.licdn.com/dms/image/C5103AQHisdsxVqaShQ/profile-displayphoto-shrink_800_800/0?e=1561593600&v=beta&t=rtjC0n9_tvOFFPaO5nDr0hG9i5WpMZsAQeNPTxhCZsw);'"></div>
             </a>
-            <a href="https://busy.org/@sumit71428" target="_blank">Sumit Singh</a>
+            <a href="@sumit71428" target="_blank">Sumit Singh</a>
 			<div><i>Moderator</i></div>
 			<a href="https://www.linkedin.com/in/sumit-singh-91b616185/" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
-            <a href="https://busy.org/@vishalsingh4997" target="_blank">
+            <a href="@vishalsingh4997" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/vishalsingh4997/avatar/);'"></div>
             </a>
-            <a href="https://busy.org/@vishalsingh4997" target="_blank">Vishal Singh</a>
+            <a href="@vishalsingh4997" target="_blank">Vishal Singh</a>
 			<div><i>Moderator</i></div>
 			<a href="https://www.linkedin.com/in/enomz/" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
@@ -391,10 +391,10 @@
         </h1>
         <div class="row">
           <div class="col-6 col-sm-4 text-center mb-4" v-for="(ambassador, index) in ambassadors" :key="index" :moderator="ambassador.name">
-            <a :href="'https://busy.org/@' + ambassador.name" target="_blank">
+            <a :href="ambassador.name" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + ambassador.name + '/avatar);'"></div>
             </a>
-            <a :href="'https://busy.org/@' + ambassador.name" target="_blank">@{{ ambassador.name }}</a>
+            <a :href="ambassador.name" target="_blank">@{{ ambassador.name }}</a>
           </div>
         </div>
       </div>
@@ -409,34 +409,34 @@
         </h1>
         <div class="row">
 		  <div class="col-6 col-sm-4 text-center mb-4">
-            <a href="https://busy.org/@lasitha" target="_blank">
+            <a href="@lasitha" target="_blank">
               <div class="avatar mx-auto mb-3" style="background-image: url('https://steemitimages.com/p/4HFqJv9qRjVeVQzX3gvDHytNF793bg88B7fESPieLQ8dxHkpPXaNe2rRpUWHJ9oYqAqg35RCq5cGDGqMBomDWQ4pj7ZxwQiW2QmTqkZ5gU3Snkvwtmqe8AkkSWsiLeULjsjFWn1JUPg6vAr1HaniGbakPsmAMyHgdfc?width=512&height=512');"></div>
             </a>
-            <a href="https://busy.org/@lasitha" target="_blank">@lasitha</a>
+            <a href="@lasitha" target="_blank">@lasitha</a>
           </div>
 		  <div class="col-6 col-sm-4 text-center mb-4">
-            <a href="https://busy.org/@christinelook" target="_blank">
+            <a href="@christinelook" target="_blank">
               <div class="avatar mx-auto mb-3" style="background-image: url('https://steemitimages.com/p/4i88GgaV8qiFU89taP2MgKXzwntUGAvkoQiKU7VxyD37q96HFWBrAPu8BtekbVWEabLnj8XnMov6ZWym79sztA9VTWxjqavxREuQUJqYnh6of1wNVcBc8jpbRQ?width=512&height=512');"></div>
             </a>
-            <a href="https://busy.org/@christinelook" target="_blank">@christinelook</a>
+            <a href="@christinelook" target="_blank">@christinelook</a>
           </div>
           <div class="col-6 col-sm-4 text-center mb-4">
-            <a href="https://busy.org/@entrepreneur916" target="_blank">
+            <a href="@entrepreneur916" target="_blank">
               <div class="avatar mx-auto mb-3" style="background-image: url('https://ipfs.busy.org/ipfs/QmPyExYzRA6Zp14c2UL3dZSTwZtToABHwFAyFjR1pZMVk6');"></div>
             </a>
-            <a href="https://busy.org/@entrepreneur916" target="_blank">@entrepreneur916</a>
+            <a href="@entrepreneur916" target="_blank">@entrepreneur916</a>
           </div>
           <div class="col-6 col-sm-6 text-center mb-4 mb-sm-0">
-            <a href="https://busy.org/@bunnymoney" target="_blank">
+            <a href="@bunnymoney" target="_blank">
               <div class="avatar mx-auto mb-3" style="background-image: url('https://ipfs.busy.org/ipfs/QmQnNadhAJPJL5Sa8FYL5Pxhgw22zWjw4S8Kmji6k21p2w');"></div>
             </a>
-            <a href="https://busy.org/@bunnymoney" target="_blank">@bunnymoney</a>
+            <a href="@bunnymoney" target="_blank">@bunnymoney</a>
           </div>
           <div class="col-6 col-sm-6 text-center mb-4 mb-sm-0">
-            <a href="https://busy.org/@fedesox" target="_blank">
+            <a href="@fedesox" target="_blank">
               <div class="avatar mx-auto mb-3" style="background-image: url('https://ipfs.busy.org/ipfs/QmZrT7r9SjKUcx81L8p9G9z6uhndupDpfsrtYjwqgF3zC2');"></div>
             </a>
-            <a href="https://busy.org/@fedesox" target="_blank">@fedesox</a>
+            <a href="@fedesox" target="_blank">@fedesox</a>
           </div>
         </div>
       </div>

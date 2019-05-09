@@ -4,7 +4,7 @@
       <div class="modal-content" v-if="report">
         <div class="modal-header">
           <h5 class="modal-title" id="exampleModalLabel">{{ report.title }}</h5><br/>
-		  <a :href="'https://busy.org/@' + report.author" target="_blank">
+		  <a :href="report.author" target="_blank">
 			<h5 class="modal-author modal-title text-brand" >@{{ report.author}} <small class="text-brand numberCircle">{{ getUserRank }}</small></h5>
 		  </a>
 		  <span class="date-head text-muted">{{ date }}</span>
@@ -115,7 +115,7 @@
 			</small>
 			<i class="fas fa-dove"></i>
 			<small>
-				<a :href="'https://busy.org/@' + this.meta.charity[0]" target="_blank">@{{this.meta.charity[0]}}</a>
+				<a :href="this.meta.charity[0]" target="_blank">@{{this.meta.charity[0]}}</a>
 			</small>
 		</div>
 		<transition name="fade">
@@ -126,7 +126,7 @@
 		  </div>
 		</transition>
 		<div class="report-reply modal-body" v-if="responsePosted">
-			<a :href="'https://busy.org/@' + this.$store.state.steemconnect.user.name" target="_blank">
+			<a :href="this.$store.state.steemconnect.user.name" target="_blank">
 			  <div class="comment-user-section">	
 				<div class="user-avatar mr-1"
 					   :style="'background-image: url(https://steemitimages.com/u/' + this.$store.state.steemconnect.user.name + '/avatar)'"></div>
@@ -182,7 +182,7 @@
 			  autofocus: true,
 			  spellChecker: false,
 			  /*previewRender: (body) => {
-				return marked(body.replace(/@([\w-]+)(?![\w-])/g,'[$&](https://busy.org/$&)'))
+				return marked(body.replace(/@([\w-]+)(?![\w-])/g,'[$&](https://actifit.io/$&)'))
 			  },*/
 			  forceSync: true,
 			  //status: false,//['lines', 'words'],
@@ -226,7 +226,7 @@
 		
 		/* regex to match @ words and convert them to steem user links */
 		let user_name = /(@([\a-zA-Z0-9-.]+)(?![\a-zA-Z0-9-.]))([,.|() ])/g;
-        return report_content.replace(user_name,'[$1](https://busy.org/$1)$3')
+        return report_content.replace(user_name,'[$1](https://actifit.io/$1)$3')
       },
 	  formattedReportUrl () {
 		return "https://actifit.io" + this.report.url;

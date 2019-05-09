@@ -20,7 +20,7 @@
 			  </thead>
 			  <tbody>
 				<tr v-for="histTrans in transList" :key="histTrans._id" :class="{'bg-danger': !histTrans.upvote_processed, 'text-white': !histTrans.upvote_processed}">
-				  <td class="d-none d-md-table-cell"><a :href="'https://busy.org/@' + histTrans.user " target="_blank">@{{ histTrans.user }}</a></td>
+				  <td class="d-none d-md-table-cell"><a :href="histTrans.user " target="_blank">@{{ histTrans.user }}</a></td>
 				  <td>{{date(histTrans.date)}}</td>
 				  <td>{{ histTrans.paid_afit }}</td>
 				  <td v-if="histTrans.upvote_processed && !histTrans.refunded">{{ $t('Complete') }}</td>

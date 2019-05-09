@@ -19,7 +19,7 @@
 		  <h5 class="text-brand" >
 			<div class="user-avatar mid-avatar mr-1 mb-5"
 					   :style="'background-image: url(https://steemitimages.com/u/' + this.report.author + '/avatar)'"></div>
-			<a :href="'https://busy.org/@' + report.author" target="_blank">@{{ report.author}} <small class="text-brand numberCircle">{{ getUserRank }}</small></a></h5>
+			<a :href="report.author" target="_blank">@{{ report.author}} <small class="text-brand numberCircle">{{ getUserRank }}</small></a></h5>
 		  <span class="date-head text-muted">{{ date }}</span>
 		  <div class="report-tags">{{ displayReportTags }}</div>
         </div>
@@ -126,7 +126,7 @@
 			</small>
 			<i class="fas fa-dove"></i>
 			<small>
-				<a :href="'https://busy.org/@' + this.meta.charity[0]" target="_blank">@{{this.meta.charity[0]}}</a>
+				<a :href="this.meta.charity[0]" target="_blank">@{{this.meta.charity[0]}}</a>
 			</small>
 		</div>
 		<transition name="fade">
@@ -137,7 +137,7 @@
 		  </div>
 		</transition>
 		<div class="report-reply col-md-9" v-if="responsePosted">
-			<a :href="'https://busy.org/@' + this.$store.state.steemconnect.user.name" target="_blank">
+			<a :href="this.$store.state.steemconnect.user.name" target="_blank">
 			  <div class="comment-user-section">	
 				<div class="user-avatar mr-1"
 					   :style="'background-image: url(https://steemitimages.com/u/' + this.$store.state.steemconnect.user.name + '/avatar)'"></div>
@@ -205,7 +205,7 @@
 			  autofocus: true,
 			  spellChecker: false,
 			  /*previewRender: (body) => {
-				return marked(body.replace(/@([\w-]+)(?![\w-])/g,'[$&](https://busy.org/$&)'))
+				return marked(body.replace(/@([\w-]+)(?![\w-])/g,'[$&](https://actifit.io/$&)'))
 			  },*/
 			  forceSync: true,
 			  //status: false,//['lines', 'words'],
@@ -261,7 +261,7 @@
 		
 		/* regex to match @ words and convert them to steem user links */
 		let user_name = /(@([\a-zA-Z0-9-.]+)(?![\a-zA-Z0-9-.]))([,.|() ])/g;
-        return report_content.replace(user_name,'[$1](https://busy.org/$1)$3')
+        return report_content.replace(user_name,'[$1](https://actifit.io/$1)$3')
       },
 	  getVoteCount(){
 		return Array.isArray(this.report.active_votes) ? this.report.active_votes.length : 0;

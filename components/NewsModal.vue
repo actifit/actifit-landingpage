@@ -44,7 +44,7 @@
 		
 		/* regex to match @ words and convert them to steem user links */
 		let user_name = /(@([\a-zA-Z0-9-.]+)(?![\a-zA-Z0-9-.]))([,.|() ])/g;
-        return report_content.replace(user_name,'[$1](https://busy.org/$1)$3')
+        return report_content.replace(user_name,'[$1](https://actifit.io/$1)$3')
       }
     }
   }

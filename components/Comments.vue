@@ -1,7 +1,7 @@
 <template>
   <div class="comments">
     <div class="modal-body comment-info" v-if="depth > 0">
-		<a :href="'https://busy.org/@' + author" target="_blank">
+		<a :href="author" target="_blank">
 		  <div class="comment-user-section" :style="{ paddingLeft: depth * indentFactor + 'px' }">	
 			<div class="user-avatar mr-1"
                    :style="'background-image: url(https://steemitimages.com/u/' + author + '/avatar)'"></div>
@@ -38,7 +38,7 @@
 		  </div>
 		</transition>
 		<div class="comment-reply" v-if="responsePosted">
-			<a :href="'https://busy.org/@' + this.$store.state.steemconnect.user.name" target="_blank">
+			<a :href="this.$store.state.steemconnect.user.name" target="_blank">
 			  <div class="comment-user-section" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }">	
 				<div class="user-avatar mr-1"
 					   :style="'background-image: url(https://steemitimages.com/u/' + this.$store.state.steemconnect.user.name + '/avatar)'"></div>
@@ -146,7 +146,7 @@
 		
 		/* regex to match @ words and convert them to steem user links */
 		let user_name = /(@([\a-zA-Z0-9-.]+)(?![\a-zA-Z0-9-.]))([,.|() ])/g;
-        return report_content.replace(user_name,'[$1](https://busy.org/$1)$3')
+        return report_content.replace(user_name,'[$1](https://actifit.io/$1)$3')
       },
 	  meta() {
         return JSON.parse(this.full_data.json_metadata)

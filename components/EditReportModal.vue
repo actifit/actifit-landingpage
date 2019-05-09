@@ -66,7 +66,7 @@
           autofocus: true,
           spellChecker: false,
           previewRender: (body) => {
-            return marked(body.replace(/@([\w-]+)(?![\w-])/g,'[$&](https://busy.org/$&)'))
+            return marked(body.replace(/@([\w-]+)(?![\w-])/g,'[$&](https://actifit.io/$&)'))
           },
           forceSync: true,
           status: ['lines', 'words'],
