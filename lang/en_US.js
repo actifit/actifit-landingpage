@@ -220,6 +220,7 @@ module.exports = {
   Logout: 'Logout',
   Signup_Link: 'Signup',
   Rank: 'Rank',
+  My_Profile: 'My Profile',
   My_Rank: 'My Rank',
   Vote_on: 'Vote on',
   Your_Voting_Power: 'Your Voting Power:',
