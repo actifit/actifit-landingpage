@@ -21,10 +21,10 @@
 					   :style="'background-image: url(https://steemitimages.com/u/' + this.displayUser + '/avatar)'"></div>
 		  <div v-if="userinfo" class="user-details">
 			<div><i class="fas fa-user"></i> {{ userinfo.name }}</div>
-			<div class="location-text"><i class="fas fa-street-view"></i> {{ userMeta.profile.location }}</div>
-			<div><i class="fas fa-address-card"></i> {{ userMeta.profile.about }}</div>
+			<div class="location-text" v-if="userMeta"><i class="fas fa-street-view"></i> {{ userMeta.profile.location }}</div>
+			<div v-if="userMeta"><i class="fas fa-address-card"></i> {{ userMeta.profile.about }}</div>
 			<div><i class="fas fa-calendar-alt"></i> {{ $t('Created_On') }} {{ pureDate(userinfo.created) }}</div>
-			<div v-if="userMeta.profile.website"><i class="fas fa-link"></i>&nbsp;<a href="userMeta.profile.website">{{ userMeta.profile.website }}</a></div>
+			<div v-if="userMeta && userMeta.profile.website"><i class="fas fa-link"></i>&nbsp;<a href="userMeta.profile.website">{{ userMeta.profile.website }}</a></div>
 			<div><i class="fas fa-pen"></i> {{ numberFormat(userinfo.post_count, 0) }} {{ $t('Steem_posts_comments') }}</div>
 			<div>{{ $t('Followers') }}: {{ numberFormat(userinfo.follower_count,0) }}</div>
 			<div>{{ $t('Following') }}: {{ numberFormat(userinfo.following_count,0) }}</div>
@@ -116,7 +116,11 @@
 		}
 	  },
 	  userMeta() {
-		return JSON.parse(this.userinfo.json_metadata);
+	    try{
+		  return JSON.parse(this.userinfo.json_metadata);
+		}catch(err){
+		  return null;
+		}
 	  },
     },
 	methods: {
@@ -257,7 +261,7 @@
 		
 		  //let's grab the user's AFIT tokens balance
 		  fetch(process.env.actiAppUrl+'user/'+this.displayUser).then(
-			res => {res.json().then(json => this.userTokenCount = json.tokens)}).catch(e => reject(e))
+			res => {res.json().then(json => this.userTokenCount = json.tokens).catch(console.log('error fetching user balance'))}).catch(console.log('error fetching user balance'))
 		
 		  //let's grab user's current badges
 		  fetch(process.env.actiAppUrl+'userBadges/'+this.displayUser).then(
