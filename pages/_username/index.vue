@@ -21,7 +21,7 @@
 					   :style="'background-image: url(https://steemitimages.com/u/' + this.displayUser + '/avatar)'"></div>
 		  <div v-if="userinfo" class="user-details">
 			<div><i class="fas fa-user"></i> {{ userinfo.name }}</div>
-			<div><i class="fas fa-street-view"></i> {{ userMeta.profile.location }}</div>
+			<div class="location-text"><i class="fas fa-street-view"></i> {{ userMeta.profile.location }}</div>
 			<div><i class="fas fa-address-card"></i> {{ userMeta.profile.about }}</div>
 			<div><i class="fas fa-calendar-alt"></i> {{ $t('Created_On') }} {{ pureDate(userinfo.created) }}</div>
 			<div v-if="userMeta.profile.website"><i class="fas fa-link"></i>&nbsp;<a href="userMeta.profile.website">{{ userMeta.profile.website }}</a></div>
@@ -37,9 +37,10 @@
 		    <div class="text-brand badges-title"><i class="fas fa-trophy"></i> {{ $t('Badges') }}</div>
 		    <div class="iso-badge">
 			  <div>
-				<div id="iso-badge" class="col-md-4" v-if="userHasBadge(iso_badge)"><div><img class="badge-img" src="https://actifit.io/img/badges/actifit_iso_badge.png"></div><div class="text-brand claimed-check"><i class="fas fa-check"></i></div></div>
-				<div id="iso-badge" class="col-md-4"  v-else><img class="badge-img badge-unclaimed" src="https://actifit.io/img/badges/actifit_iso_badge.png"></div>
+				<div id="iso-badge" class="claimed-check" v-if="userHasBadge(iso_badge)"><div><img class="badge-img" src="https://actifit.io/img/badges/actifit_iso_badge.png"></div><div class="text-brand claimed-check"><i class="fas fa-check"></i></div></div>
+				<div id="iso-badge" class="claimed-check"  v-else><img class="badge-img badge-unclaimed" src="https://actifit.io/img/badges/actifit_iso_badge.png"></div>
 				<button v-if="badgeClaimable(iso_badge)" v-on:click="claimBadge('iso')" class="btn btn-brand btn-lg border">{{ $t('Claim_badge') }}</button>
+				<div v-else class="col-md-4 text-brand claimed-check">{{ $t('missed_event_notice') }}</div>
 				<div v-if="claimingBadge" id="claiming_badge">
 					<i class="fas fa-spin fa-spinner"></i>{{ $t('claiming_badge_notice') }}
 				</div>
@@ -334,5 +335,8 @@
 	.user-badges{
 	  border: 2px #ff112d solid;
 	  margin: 10px;
+	}
+	.location-text{
+	  word-break: break-all;
 	}
 </style>

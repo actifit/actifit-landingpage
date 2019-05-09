@@ -245,4 +245,5 @@ module.exports = {
   Claim_badge: 'Claim Badge',
   claiming_badge_notice: 'Claiming Badge',
   badge_reqts_not_met: 'You do not meet the requirements for this badge',
+  missed_event_notice: 'Missed Event',
 }
