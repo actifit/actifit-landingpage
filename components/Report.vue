@@ -6,6 +6,7 @@
         <a :href="report.url" target="_blank">
           {{ report.title }}
         </a>
+		<span v-if="this.afitReward" :title="$t('Rewarded_report')" class="check-tooltip"><i class="fas fa-check"></i></span>
       </h6>
       <div class="report-body">
         <div class="row">
@@ -318,5 +319,8 @@
 	}
 	.full-afit-txt{
 	  font-style: italic;
+	}
+	.check-tooltip{
+	  color: white;
 	}
 </style>
