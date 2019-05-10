@@ -19,7 +19,7 @@
 		  <h5 class="text-brand" >
 			<div class="user-avatar mid-avatar mr-1 mb-5"
 					   :style="'background-image: url(https://steemitimages.com/u/' + this.report.author + '/avatar)'"></div>
-			<a :href="report.author" target="_blank">@{{ report.author}} <small class="text-brand numberCircle">{{ getUserRank }}</small></a></h5>
+			<a :href="'/'+report.author" target="_blank">@{{ report.author}} <small class="text-brand numberCircle">{{ getUserRank }}</small></a></h5>
 		  <span class="date-head text-muted">{{ date }}</span>
 		  <div class="report-tags">{{ displayReportTags }}</div>
         </div>

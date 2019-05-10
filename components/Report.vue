@@ -10,7 +10,7 @@
       <div class="report-body">
         <div class="row">
           <div class="col-7">
-            <a :href="report.author" target="_blank">			
+            <a :href="'/'+report.author" target="_blank">
 			
               <div class="user-avatar mr-1"
                    :style="'background-image: url(https://steemitimages.com/u/' + report.author + '/avatar)'"></div>
