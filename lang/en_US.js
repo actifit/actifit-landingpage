@@ -239,6 +239,7 @@ module.exports = {
   Proceed: 'Proceed',
   Move_AFIT_to_Wallet: 'Move AFIT to Wallet',
   Created_On: 'Created on',
+  Joined_On: 'Joined on',
   Followers: 'Followers',
   Following: 'Following',
   Steem_posts_comments: 'Steem posts / comments',
@@ -250,4 +251,6 @@ module.exports = {
   Rewarded_report: 'Rewarded Report',
   Votes_Actifit_Witness: 'Votes for Actifit Witness',
   Vote_Now_Actifit_Witness: 'Vote For Actifit Witness',
+  Delegates_to_Actifit: 'Delegates to Actifit',
+  Delegate_Now_Actifit: 'Delegate to Actifit',
 }

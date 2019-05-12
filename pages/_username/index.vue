@@ -23,11 +23,13 @@
 			<div><i class="fas fa-user"></i> {{ userinfo.name }}</div>
 			<div class="location-text" v-if="userMeta"><i class="fas fa-street-view"></i> {{ userMeta.profile.location }}</div>
 			<div v-if="userMeta"><i class="fas fa-address-card"></i> {{ userMeta.profile.about }}</div>
-			<div><i class="fas fa-calendar-alt"></i> {{ $t('Created_On') }} {{ pureDate(userinfo.created) }}</div>
+			<div><i class="fas fa-calendar-alt"></i> {{ $t('Joined_On') }} {{ pureDate(userinfo.created) }}</div>
 			<div v-if="userMeta && userMeta.profile.website"><i class="fas fa-link"></i>&nbsp;<a href="userMeta.profile.website">{{ userMeta.profile.website }}</a></div>
 			<div><i class="fas fa-pen"></i> {{ numberFormat(userinfo.post_count, 0) }} {{ $t('Steem_posts_comments') }}</div>
-			<div v-if="userinfo.witness_votes.includes('actifit')"><i class="fas fa-cubes"></i>&nbsp;{{ $t('Votes_Actifit_Witness') }}</div>
-			<div v-else><i class="fas fa-cubes"></i>&nbsp;<a class="btn btn-brand" href="https://steemconnect.com/sign/account-witness-vote?witness=actifit&approve=1" target="_blank">{{ $t('Vote_Now_Actifit_Witness') }}</a></div>
+			<div v-if="userinfo.witness_votes.includes('actifit')"><i class="fas fa-cubes text-brand"></i>&nbsp;{{ $t('Votes_Actifit_Witness') }}</div>
+			<div v-else><i class="fas fa-cubes  text-brand"></i>&nbsp;<a class="btn btn-brand" href="https://steemconnect.com/sign/account-witness-vote?witness=actifit&approve=1" target="_blank">{{ $t('Vote_Now_Actifit_Witness') }}</a></div>
+			<div v-if="actifitDelegator"><i class="fas fa-file-invoice-dollar  text-brand"></i>&nbsp;{{ $t('Delegates_to_Actifit') }} {{ actifitDelegator.steem_power }} {{ $t('Steem_Power') }}</div>
+			<div v-else><i class="fas fa-file-invoice-dollar  text-brand"></i>&nbsp;<a class="btn btn-brand" href="https://steembottracker.com/delegation.html?delegatee=actifit" target="_blank">{{ $t('Delegate_Now_Actifit') }}</a></div>
 			<div>{{ $t('Followers') }}: {{ numberFormat(userinfo.follower_count,0) }}</div>
 			<div>{{ $t('Following') }}: {{ numberFormat(userinfo.following_count,0) }}</div>
 			<div class="text-brand">
@@ -91,6 +93,7 @@
 			claimErrorDesc: '',
 			iso_badge: 'iso',
 			claimingBadge: false,
+			actifitDelegator: '',
 		}
 	},
 	watch: {
@@ -271,6 +274,10 @@
 		  //let's check if user participated in ISO event
 		  fetch(process.env.actiAppUrl+'isoParticipant/'+this.displayUser).then(
 			res => {res.json().then(json => this.isoParticipant = json)}).catch(e => reject(e))
+			
+		  //let's check if this user delegates to Actifit
+		  fetch(process.env.actiAppUrl+'delegation/'+this.displayUser).then(
+			res => {res.json().then(json => this.actifitDelegator = json)}).catch(e => reject(e))
 		
 		  this.getAccountData();
 		}else{
