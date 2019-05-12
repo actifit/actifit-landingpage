@@ -248,4 +248,6 @@ module.exports = {
   badge_reqts_not_met: 'You do not meet the requirements for this badge',
   missed_event_notice: 'Missed Event',
   Rewarded_report: 'Rewarded Report',
+  Votes_Actifit_Witness: 'Votes for Actifit Witness',
+  Vote_Now_Actifit_Witness: 'Vote For Actifit Witness',
 }

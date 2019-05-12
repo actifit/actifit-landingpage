@@ -26,6 +26,8 @@
 			<div><i class="fas fa-calendar-alt"></i> {{ $t('Created_On') }} {{ pureDate(userinfo.created) }}</div>
 			<div v-if="userMeta && userMeta.profile.website"><i class="fas fa-link"></i>&nbsp;<a href="userMeta.profile.website">{{ userMeta.profile.website }}</a></div>
 			<div><i class="fas fa-pen"></i> {{ numberFormat(userinfo.post_count, 0) }} {{ $t('Steem_posts_comments') }}</div>
+			<div v-if="userinfo.witness_votes.includes('actifit')"><i class="fas fa-cubes"></i>&nbsp;{{ $t('Votes_Actifit_Witness') }}</div>
+			<div v-else><i class="fas fa-cubes"></i>&nbsp;<a class="btn btn-brand" href="https://steemconnect.com/sign/account-witness-vote?witness=actifit&approve=1" target="_blank">{{ $t('Vote_Now_Actifit_Witness') }}</a></div>
 			<div>{{ $t('Followers') }}: {{ numberFormat(userinfo.follower_count,0) }}</div>
 			<div>{{ $t('Following') }}: {{ numberFormat(userinfo.following_count,0) }}</div>
 			<div class="text-brand">
