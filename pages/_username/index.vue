@@ -351,4 +351,7 @@
 	.location-text{
 	  word-break: break-all;
 	}
+	a.btn{
+	  border: 1px solid white
+	}
 </style>
