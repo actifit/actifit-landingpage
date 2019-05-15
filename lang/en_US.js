@@ -253,4 +253,5 @@ module.exports = {
   Vote_Now_Actifit_Witness: 'Vote For Actifit Witness',
   Delegates_to_Actifit: 'Delegates to Actifit',
   Delegate_Now_Actifit: 'Delegate to Actifit',
+  promo_code: 'Promo Code',
 }

@@ -45,25 +45,35 @@
 			  <input class="form-control form-control-lg" id="account-password-confirm" ref="account-password-confirm"/>
 			  
 			  <label for="account-email">{{ $t('email_optional') }}</label><br/>
-			  <input class="form-control form-control-lg mb-2" id="account-email" ref="account-email" v-model="email"/>
-			  <label for="invested-usd">{{ $t('usd_amount_invest') }}</label><br/>
-			  <input type="number" class="form-control form-control-lg mb-2" id="invested-usd" ref="invested-usd" v-model="userInputUSDAmount"/>
-			  <label for="invested-amount">{{ $t('steem_amount_send') }}</label><br/>
-			  <input type="number" class="form-control form-control-lg" id="invested-amount" ref="invested-amount" readonly :value="getMatchingSTEEM()" />
-			  <button v-on:click="copyContent" data-targetEl="invested-amount" class="btn btn-brand btn-lg w-20">{{ $t('copy_steem_amount') }}</button><br/><br/>
-			  <label for="matching-afit">{{ $t('matching_rew_afit') }}</label><br/>
-			  <input type="number" class="form-control form-control-lg mb-2" id="matching-afit" ref="matching-afit" readonly :value="getMatchingAFIT()"/>
-			  <p class="lead mb-4">
-			  {{ $t('notice_send_amount') }}
-			  </p>
+			  <input class="form-control form-control-lg mb-2" id="account-email" ref="account-email" v-model="email"/>	
 			  
-			  <label for="actifit-address">{{ $t('Address') }}</label><br/>
-			  <input class="form-control form-control-lg w-80" id="actifit-address" ref="actifit-address" readonly :value="getTargetAccount()"/>
+			  <div class="mb-2">
+			    <input type="checkbox" id="promo-code-chkbx" v-model="promo_code_chkbx" >
+			    <label for="checkbox" class="p-2">{{ $t('promo_code') }}</label>
+			  </div>
+			  <div v-if="promo_code_chkbx">
+			    <label for="promo-code-val">{{ $t('promo_code') }}</label>
+			    <input type="text" class="form-control form-control-lg mb-2" id="promo-code-val" ref="promo-code-val"/>
+			  </div>
+			  <div v-else>
+			    <label for="invested-usd">{{ $t('usd_amount_invest') }}</label><br/>
+			    <input type="number" class="form-control form-control-lg mb-2" id="invested-usd" ref="invested-usd" v-model="userInputUSDAmount"/>
+			    <label for="invested-amount">{{ $t('steem_amount_send') }}</label><br/>
+			    <input type="number" class="form-control form-control-lg" id="invested-amount" ref="invested-amount" readonly :value="getMatchingSTEEM()" />
+			    <button v-on:click="copyContent" data-targetEl="invested-amount" class="btn btn-brand btn-lg w-20">{{ $t('copy_steem_amount') }}</button><br/><br/>
+			    <label for="matching-afit">{{ $t('matching_rew_afit') }}</label><br/>
+			    <input type="number" class="form-control form-control-lg mb-2" id="matching-afit" ref="matching-afit" readonly :value="getMatchingAFIT()"/>
+			    <p class="lead mb-4">
+			    {{ $t('notice_send_amount') }}
+			    </p>
+			  
+			    <label for="actifit-address">{{ $t('Address') }}</label><br/>
+			    <input class="form-control form-control-lg w-80" id="actifit-address" ref="actifit-address" readonly :value="getTargetAccount()"/>
 				<button v-on:click="copyContent" data-targetEl="actifit-address" class="btn btn-brand btn-lg w-20">{{ $t('Copy_Address') }}</button><br/><br/>
 				<label for="actifit-memo">{{ $t('Memo') }}</label><br/>
 				<input class="form-control form-control-lg w-80" id="actifit-memo" ref="actifit-memo" readonly />	
 				<button v-on:click="copyContent" data-targetEl="actifit-memo" class="btn btn-brand btn-lg w-20 mb-2">{{ $t('Copy_Memo') }}</button>	
-				
+			  </div>	
 				<vue-recaptcha ref="recaptcha" @verify="onVerifyCaptcha" @expired="onExpiredCaptcha" sitekey="6LdpcoMUAAAAAPGTqlvhKEK6Ayw5NqLDZz5Sjudq">
 				</vue-recaptcha>
 				<p class="text-brand" v-if="captcha_invalid">
@@ -142,6 +152,7 @@
 		error_proceeding: '',
 		error_msg: '',
 		email: '',
+		promo_code_chkbx: false,
 		reg: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/
 	  }
 	},
@@ -264,6 +275,11 @@
 		this.captcha_invalid = '';
 		this.error_proceeding = false;
 		this.error_msg = '';
+		
+		let invested_usd = 0;
+		if (!this.promo_code_chkbx){
+		  invested_usd = this.$refs["invested-usd"].value;
+		}
 		if (!this.captchaValid){
 			this.captcha_invalid = this.$t('solve_captcha');
 			return;
@@ -273,7 +289,7 @@
 			this.error_msg = this.$t('choose_proper_username');
 			return;
 		}
-		if (parseFloat(this.$refs["invested-usd"].value)<parseFloat(this.minUSD)){
+		if (!this.promo_code_chkbx && parseFloat(this.$refs["invested-usd"].value)<parseFloat(this.minUSD)){
 			this.error_proceeding = true;
 			this.error_msg = this.$t('amount_too_low')+this.minUSD;
 			return;
@@ -302,12 +318,13 @@
 			confirm_payment_token: process.env.confirmPaymentToken, 
 			new_account: this.$refs["account-username"].value,
 			new_pass: this.$refs["account-password"].value,
-			usd_invest: this.$refs["invested-usd"].value,
+			usd_invest: invested_usd,
 			steem_invest: steem_invest,
 			afit_reward: afit_reward,
 			memo: this.targetMemo,
 			referrer: this.$route.query.referrer,
 			email: this.$refs["account-email"].value,
+			promo_code: this.$refs["promo-code-val"].value,
 		}
 		Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
 		try{
