@@ -88,6 +88,9 @@
 
       // get username from url
       username () {
+	    if (this.$route.params.username.startsWith('@')){
+		  return this.$route.params.username.substring(1, this.$route.params.username.length);
+		}
         return this.$route.params.username
       }
     },
