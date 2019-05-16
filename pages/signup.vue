@@ -277,8 +277,11 @@
 		this.error_msg = '';
 		
 		let invested_usd = 0;
+		let promo_code_val = '';
 		if (!this.promo_code_chkbx){
 		  invested_usd = this.$refs["invested-usd"].value;
+		}else{
+		  promo_code_val = this.$refs["promo-code-val"].value
 		}
 		if (!this.captchaValid){
 			this.captcha_invalid = this.$t('solve_captcha');
@@ -324,7 +327,7 @@
 			memo: this.targetMemo,
 			referrer: this.$route.query.referrer,
 			email: this.$refs["account-email"].value,
-			promo_code: this.$refs["promo-code-val"].value,
+			promo_code: promo_code_val,
 		}
 		Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
 		try{
