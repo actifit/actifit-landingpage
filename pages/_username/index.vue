@@ -39,19 +39,39 @@
 				<a :href="'/activity/'+displayUser" >{{ numberFormat(rewardedPostCount, 0) }} {{ $t('Activity_Reports_Rewarded') }}</a>
 			</div>
 		  </div>
+		  <!-- badges section -->
 		  <div v-if="userinfo" class="user-badges">
 		    <div class="text-brand badges-title"><i class="fas fa-trophy"></i> {{ $t('Badges') }}</div>
-		    <div class="iso-badge">
-			  <div>
+		    <div class="badge-entry iso-badge">
+			  <div :title="$t('iso_badge_title')">
+				<div class="badge-title text-brand">{{ $t('iso_badge_title') }}</div>
 				<div id="iso-badge" class="claimed-check" v-if="userHasBadge(iso_badge)"><div><img class="badge-img" src="https://actifit.io/img/badges/actifit_iso_badge.png"></div><div class="text-brand claimed-check"><i class="fas fa-check"></i></div></div>
 				<div id="iso-badge" class="claimed-check"  v-else><img class="badge-img badge-unclaimed" src="https://actifit.io/img/badges/actifit_iso_badge.png"></div>
-				<button v-if="badgeClaimable(iso_badge)" v-on:click="claimBadge('iso')" class="btn btn-brand btn-lg border">{{ $t('Claim_badge') }}</button>
+				<button v-if="badgeClaimable(iso_badge)" v-on:click="claimBadge(iso_badge)" class="btn btn-brand btn-lg border">{{ $t('Claim_badge') }}</button>
 				<div v-else-if="this.isoParticipant.length == 0" class="col-md-4 text-brand claimed-check">{{ $t('missed_event_notice') }}</div>
-				<div v-if="claimingBadge" id="claiming_badge">
+				<div v-if="claimingBadge == iso_badge" id="claiming_badge">
 					<i class="fas fa-spin fa-spinner"></i>{{ $t('claiming_badge_notice') }}
 				</div>
 			  </div>
 			  
+			</div>
+			<div class="badge-entry rew-activity-badge">
+			  <div class="badge-title text-brand">{{ $t('rew_activity_badge_title') }}</div>
+			  <div v-for="level in rewarded_posts_rules" :key="level[1]" 
+				class="single-rew-activity-badge" :style="{left: (level[1]-1) * activ_badge_indent + 'px'}"
+				:title="$t('rew_activity_badge_level_title') + ' ' + level[1]">
+				<div v-if="level[1] > 0 && level[1] <= maxClaimedActivityBadgeLevel()">
+					<div :id="rew_activity_badge+level[1]" class="claimed-check" v-if="userHasBadge(rew_activity_badge+level[1])"><div><img class="badge-img" :src="'/img/badges/actifit_rew_act_lev_'+level[1]+'_badge.png'"></div><div class="text-brand claimed-check"><i class="fas fa-check"></i></div></div>
+					<div :id="rew_activity_badge+level[1]" class="claimed-check unclaimed-badge" v-else :style="{left: (level[1]-1) * activ_badge_indent + claimable_badge_indent + 'px'}"><img class="badge-img badge-unclaimed" :src="'/img/badges/actifit_rew_act_lev_'+level[1]+'_badge.png'"></div>
+					<button v-if="badgeClaimable(rew_activity_badge+level[1])" v-on:click="claimBadge(rew_activity_badge+level[1])" class="btn btn-brand btn-lg border unclaimed-badge unclaimed-badge-btn" :style="{left: (level[1]-1) * activ_badge_indent + claimable_badge_indent + 'px'}">{{ $t('Claim_badge') }}</button>
+					<div v-if="!badgeClaimable(rew_activity_badge+level[1]) && !userHasBadge(rew_activity_badge+level[1])" class="unclaimed-badge unclaimed-badge-btn unclaimed-badge-note text-brand" :style="{left: (level[1]-1) * activ_badge_indent + claimable_badge_indent + 'px'}">
+					  {{ $t('next_target') }}
+					</div>
+					<div v-if="claimingBadge == rew_activity_badge+level[1]" id="claiming_badge" class="unclaimed-badge unclaimed-badge-spin" :style="{left: (level[1]-1) * activ_badge_indent + claimable_badge_indent + 'px'}">
+						<i class="fas fa-spin fa-spinner"></i>{{ $t('claiming_badge_notice') }}
+					</div>
+				</div>
+			  </div>
 			</div>
 			<div v-if="claimError">{{ claimErrorDesc }}</div>
 		  </div>
@@ -94,8 +114,24 @@
 			claimError: '',
 			claimErrorDesc: '',
 			iso_badge: 'iso',
+			rew_activity_badge: 'rewarded_activity_lev_',
 			claimingBadge: false,
 			actifitDelegator: '',
+			activ_badge_indent: 10,
+			claimable_badge_indent: 120,
+			rewarded_posts_rules: [
+									[9,0],
+									[29,1],
+									[59,2],
+									[89,3],
+									[119,4],
+									[179,5],
+									[359,6],
+									[539,7],
+									[719,8],
+									[1079,9],
+									[1080,10]
+								]
 		}
 	},
 	watch: {
@@ -127,7 +163,7 @@
 		}catch(err){
 		  return null;
 		}
-	  },
+	  }
     },
 	methods: {
 	  /**
@@ -140,6 +176,48 @@
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
+	  maxClaimedActivityBadgeLevel() {
+		let maxActivityBadge = 0;
+		let par_ref = this;
+		this.userBadges.forEach(function (badgeEntry){
+			if (badgeEntry.badge.includes(par_ref.rew_activity_badge)){
+				let badgeLevel = badgeEntry.badge.replace(par_ref.rew_activity_badge,'');
+				if (parseInt(maxActivityBadge) < parseInt(badgeLevel)){
+				  //found higher level, store
+				  maxActivityBadge = badgeLevel;
+				}
+			}
+		})
+		if (maxActivityBadge == 0) this.claimable_badge_indent = 0;
+		else this.claimable_badge_indent = 120;
+		return parseInt(maxActivityBadge)+1;
+	  },
+	  /**
+	  * function handles mapping and calculating relevant score
+	  * params: 
+	  * * 2D array providing couplets of rules
+	  * * factor multipier for data
+	  * * current value to compare
+	  */
+	  calcScore(rules_array, value){
+		var result;
+		//console.log("rules_array.length:"+rules_array.length);
+		for (var i=0; i<rules_array.length; i++){
+			var rule = rules_array[i];
+			
+			//default until we find a larger range that fits better
+			result = rule[1];
+			
+			if (parseInt(value) <= parseInt(rule[0])){
+				break;
+			}
+		}
+		//console.log('result:'+result);
+		return result;
+	  },
+	  getUserActivityLevel() {
+		return this.calcScore(this.rewarded_posts_rules, this.rewardedPostCount) 
+	  },
 	  /* handles checking if the user had claimed this badge already */
 	  userHasBadge(badgeType) {
 		if (this.userBadges.length>0){
@@ -153,6 +231,10 @@
 	  },
 	  /* handles checking if the badge is available for claim by this user */
 	  badgeClaimable(badgeType) {
+	    /*console.log('badgeClaimable:'+badgeType);
+		console.log(this.rew_activity_badge);
+		console.log(badgeType.includes(this.rew_activity_badge));
+		console.log('----');*/
 		//make sure this is the logged in user taking action
 		if (!this.user || (this.displayUser !== this.user.account.name)){
 			return false;
@@ -161,6 +243,16 @@
 		  return false;
 		}else if (badgeType == this.iso_badge && this.isoParticipant.length > 0){
 		  return true;
+		}else if (badgeType.includes(this.rew_activity_badge)){
+		  //if this is a rewarded activity level badge
+		  
+		  let badgeLevel = badgeType.replace(this.rew_activity_badge,'');
+		  /*console.log('badgeLevel:'+badgeLevel);
+		  console.log('this.getUserActivityLevel():'+this.getUserActivityLevel());*/
+		  //check if user level passed the min level for this badge
+		  if (this.getUserActivityLevel() >= badgeLevel){
+			return true;
+		  }
 		}
 		return false;
 	  },
@@ -208,7 +300,7 @@
 	  async claimBadge(badgeType) {
 		console.log(badgeType);
 		if (this.badgeClaimable(badgeType)){
-			this.claimingBadge = true;
+			this.claimingBadge = badgeType;
 			//enable this badge for this user
 			try{
 				let res = await fetch(process.env.actiAppUrl+'claimBadge/?user='+this.displayUser+'&badge='+badgeType);
@@ -238,7 +330,7 @@
 			}catch(err){
 				console.error(err);
 			}
-			this.claimingBadge = false;
+			this.claimingBadge = '';
 		}else{
 		  this.claimError = true;
 		  this.claimErrorDesc = this.$t('badge_reqts_not_met');
@@ -340,6 +432,9 @@
 	.badges-title{
 	  text-align: center;
 	}
+	.badge-title{
+	  padding-left: 20px;
+	}
 	.badge-unclaimed{
 	  opacity: 0.2
 	}
@@ -355,5 +450,28 @@
 	}
 	a.btn{
 	  border: 1px solid white
+	}
+	.rew-activity-badge{
+	  position: relative;
+	  height: 270px;
+	}
+	.single-rew-activity-badge{
+	  position: absolute;
+	  top: 20px;
+	}
+	.unclaimed-badge{
+	  position: absolute;
+	}
+	.unclaimed-badge-spin{
+	  top: 220px;
+	  width: 200px;
+	}
+	.unclaimed-badge-btn{
+	  top: 170px;
+	  width: 200px;
+	  padding-left: 20px;
+	}
+	.unclaimed-badge-note{
+	  font-style: italic;
 	}
 </style>

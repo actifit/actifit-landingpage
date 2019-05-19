@@ -254,4 +254,8 @@ module.exports = {
   Delegates_to_Actifit: 'Delegates to Actifit',
   Delegate_Now_Actifit: 'Delegate to Actifit',
   promo_code: 'Promo Code',
+  iso_badge_title: 'ISO Badge',
+  next_target: 'Next Target',
+  rew_activity_badge_title: 'Rewarded Activity Badges',
+  rew_activity_badge_level_title: 'Rewarded Activity Badge Level',
 }
