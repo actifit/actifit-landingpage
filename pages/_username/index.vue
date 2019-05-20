@@ -62,12 +62,12 @@
 				:title="$t('rew_activity_badge_level_title') + ' ' + level[1]">
 				<div v-if="level[1] > 0 && level[1] <= maxClaimedActivityBadgeLevel()">
 					<div :id="rew_activity_badge+level[1]" class="claimed-check" v-if="userHasBadge(rew_activity_badge+level[1])"><div><img class="badge-img" :src="'/img/badges/actifit_rew_act_lev_'+level[1]+'_badge.png'"></div><div class="text-brand claimed-check"><i class="fas fa-check"></i></div></div>
-					<div :id="rew_activity_badge+level[1]" class="claimed-check unclaimed-badge" v-else :style="{left: (level[1]-1) * activ_badge_indent + claimable_badge_indent + 'px'}"><img class="badge-img badge-unclaimed" :src="'/img/badges/actifit_rew_act_lev_'+level[1]+'_badge.png'"></div>
-					<button v-if="badgeClaimable(rew_activity_badge+level[1])" v-on:click="claimBadge(rew_activity_badge+level[1])" class="btn btn-brand btn-lg border unclaimed-badge unclaimed-badge-btn" :style="{left: (level[1]-1) * activ_badge_indent + claimable_badge_indent + 'px'}">{{ $t('Claim_badge') }}</button>
-					<div v-if="!badgeClaimable(rew_activity_badge+level[1]) && !userHasBadge(rew_activity_badge+level[1])" class="unclaimed-badge unclaimed-badge-btn unclaimed-badge-note text-brand" :style="{left: (level[1]-1) * activ_badge_indent + claimable_badge_indent + 'px'}">
+					<div :id="rew_activity_badge+level[1]" class="claimed-check unclaimed-badge" v-else :style="{left:  claimable_badge_indent + 'px'}"><img class="badge-img badge-unclaimed" :src="'/img/badges/actifit_rew_act_lev_'+level[1]+'_badge.png'"></div>
+					<button v-if="badgeClaimable(rew_activity_badge+level[1])" v-on:click="claimBadge(rew_activity_badge+level[1])" class="btn btn-brand btn-lg border unclaimed-badge unclaimed-badge-btn" :style="{left: claimable_badge_indent + 'px'}">{{ $t('Claim_badge') }}</button>
+					<div v-if="!badgeClaimable(rew_activity_badge+level[1]) && !userHasBadge(rew_activity_badge+level[1])" class="unclaimed-badge unclaimed-badge-btn unclaimed-badge-note text-brand" :style="{left:  claimable_badge_indent + 'px'}">
 					  {{ $t('next_target') }}
 					</div>
-					<div v-if="claimingBadge == rew_activity_badge+level[1]" id="claiming_badge" class="unclaimed-badge unclaimed-badge-spin" :style="{left: (level[1]-1) * activ_badge_indent + claimable_badge_indent + 'px'}">
+					<div v-if="claimingBadge == rew_activity_badge+level[1]" id="claiming_badge" class="unclaimed-badge unclaimed-badge-spin" :style="{left: claimable_badge_indent + 'px'}">
 						<i class="fas fa-spin fa-spinner"></i>{{ $t('claiming_badge_notice') }}
 					</div>
 				</div>
@@ -118,7 +118,7 @@
 			claimingBadge: false,
 			actifitDelegator: '',
 			activ_badge_indent: 10,
-			claimable_badge_indent: 120,
+			claimable_badge_indent: 125,
 			rewarded_posts_rules: [
 									[9,0],
 									[29,1],
@@ -189,7 +189,7 @@
 			}
 		})
 		if (maxActivityBadge == 0) this.claimable_badge_indent = 0;
-		else this.claimable_badge_indent = 120;
+		else this.claimable_badge_indent = 125;
 		return parseInt(maxActivityBadge)+1;
 	  },
 	  /**

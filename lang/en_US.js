@@ -257,7 +257,7 @@ module.exports = {
   promo_code: 'Promo Code',
   iso_badge_title: 'ISO Badge',
   next_target: 'Next Target',
-  rew_activity_badge_title: 'Rewarded Activity Badges',
-  rew_activity_badge_level_title: 'Rewarded Activity Badge Level',
+  rew_activity_badge_title: 'Rewarded Activity Reports Badges',
+  rew_activity_badge_level_title: 'Rewarded Activity Reports Badge - Level',
   create_account: 'Create Account',
 }
