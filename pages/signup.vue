@@ -53,7 +53,7 @@
 			  </div>
 			  <div v-if="promo_code_chkbx">
 			    <label for="promo-code-val">{{ $t('promo_code') }}</label>
-			    <input type="text" class="form-control form-control-lg mb-2" id="promo-code-val" ref="promo-code-val"/>
+			    <input type="text" class="form-control form-control-lg mb-2" id="promo-code-val" ref="promo-code-val" v-model="promo_code_val"/>
 			  </div>
 			  <div v-else>
 			    <label for="invested-usd">{{ $t('usd_amount_invest') }}</label><br/>
@@ -79,16 +79,18 @@
 				<p class="text-brand" v-if="captcha_invalid">
 				  <b>{{ captcha_invalid }}</b>
 				</p>
-				<p class="lead mb-4 pb-1" v-html="$t('send_process_verf')">
-					
-				</p>
+				<p class="lead mb-4 pb-1" v-html="$t('send_process_verf')" v-if="!promo_code_chkbx"></p>
+				<p class="lead mb-4 pb-1" v-html="$t('send_process_promo_verf')" v-else></p>
 				<div class="text-brand text-center" v-if="error_proceeding">
 				  {{ this.error_msg}}
 				</div>
-				<div class="text-center pb-2"><button v-on:click="checkFunds" class="btn btn-brand btn-lg w-20">{{ $t('Steem_sent') }}</button></div>
+				<div class="text-center pb-2">
+					<button v-on:click="checkFunds" class="btn btn-brand btn-lg w-20" v-if="!promo_code_chkbx">{{ $t('Steem_sent') }}</button>
+					<button v-on:click="checkFunds" class="btn btn-brand btn-lg w-20" v-else>{{ $t('create_account') }}</button>
+				</div>
 				<div v-if="processStarted" class="text-center text-brand">
 					<div id="checking_funds">
-						<i class="fas fa-spin fa-spinner" v-if="checkingFunds"></i><i class="fas fa-check" v-else></i> {{ $t('Check_Steem_Transfer') }}
+						<i class="fas fa-spin fa-spinner" v-if="checkingFunds"></i><i class="fas fa-check" v-if="!promo_code_chkbx && !checkingFunds"></i><span v-if="!promo_code_chkbx"> {{ $t('Check_Steem_Transfer') }}</span>
 					</div>
 					<div id="account_creation" v-if="resultReturned">
 						<div v-if="accountCreated">
@@ -153,6 +155,7 @@
 		error_msg: '',
 		email: '',
 		promo_code_chkbx: false,
+		promo_code_val: '',
 		reg: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/
 	  }
 	},
@@ -185,12 +188,16 @@
 	  this.$store.dispatch('fetchUserRank')
 	  this.$store.dispatch('fetchReferrals')
 	  
-	  //console.log(this.$route.query.referrer);
-	  //this.initiateProcess ('jhdkhfkjf');
+	  //if a promo code is available, let's set it accordingly
+	  if (this.$route.query.promo){
+		this.promo_code_chkbx = true;
+		this.promo_code_val = this.$route.query.promo;
+	  }
+	  
     },
 	methods: {
 	  signupProcessDetails(){
-		return this.$t('signup.desc_part1') + this.minUSD 
+		return this.$t('signup.desc_part1') + ' ' + this.minUSD 
 			+ this.$t('signup.desc_part2') + this.afitTokensToEarn() 
 			+ this.$t('signup.desc_part3') + this.delegatedSteem
 			+ this.$t('signup.desc_part4') + this.minUSD
@@ -277,11 +284,8 @@
 		this.error_msg = '';
 		
 		let invested_usd = 0;
-		let promo_code_val = '';
 		if (!this.promo_code_chkbx){
 		  invested_usd = this.$refs["invested-usd"].value;
-		}else{
-		  promo_code_val = this.$refs["promo-code-val"].value
 		}
 		if (!this.captchaValid){
 			this.captcha_invalid = this.$t('solve_captcha');
@@ -327,7 +331,7 @@
 			memo: this.targetMemo,
 			referrer: this.$route.query.referrer,
 			email: this.$refs["account-email"].value,
-			promo_code: promo_code_val,
+			promo_code: this.promo_code_val,
 		}
 		Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
 		try{

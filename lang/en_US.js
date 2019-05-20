@@ -139,6 +139,7 @@ module.exports = {
   Copy_Memo: 'Copy Memo',
   Copy_Link: 'Copy Link',
   send_process_verf: 'Once you send out the funds, please click the button below for confirmation and to process your account creation.<br/>Please keep the page open till we verify your payment and create your account.',
+  send_process_promo_verf: 'Please keep the page open till we confirm your account creation.',
   Steem_sent: 'I have sent STEEM!',
   Check_Steem_Transfer: 'Checking Your STEEM Transfer',
   error_account_creation: 'There was a problem creating your account. Please contact support at <a href="https://discord.gg/aHtcA6r">discord</a> or via email <a href="mailto:info@actifit.io">info@actifit.io</a>',
@@ -258,4 +259,5 @@ module.exports = {
   next_target: 'Next Target',
   rew_activity_badge_title: 'Rewarded Activity Badges',
   rew_activity_badge_level_title: 'Rewarded Activity Badge Level',
+  create_account: 'Create Account',
 }
