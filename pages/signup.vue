@@ -162,7 +162,15 @@
     computed: {
     },
     async mounted () {
-		  
+	  
+
+	  //if a promo code is available, let's set it accordingly
+	  if (this.$route.query.promo){
+		this.promo_code_chkbx = true;
+		this.promo_code_val = this.$route.query.promo;
+	  }
+
+	  
 	  //grab STEEM price
 	  fetch('https://api.coinmarketcap.com/v1/ticker/steem/').then(
 		res => {res.json().then(json => this.setSteemPrice (json[0].price_usd)).catch(e => reject(e))
@@ -187,12 +195,6 @@
       this.$store.dispatch('fetchTransactions')
 	  this.$store.dispatch('fetchUserRank')
 	  this.$store.dispatch('fetchReferrals')
-	  
-	  //if a promo code is available, let's set it accordingly
-	  if (this.$route.query.promo){
-		this.promo_code_chkbx = true;
-		this.promo_code_val = this.$route.query.promo;
-	  }
 	  
     },
 	methods: {
