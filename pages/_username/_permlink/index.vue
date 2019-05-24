@@ -30,7 +30,7 @@
 			<span>
 				<small>
 				  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 
-					 data-target="#voteModal" v-if="this.$parent.user && userVotedThisPost()==true">
+					 data-target="#voteModal" v-if="this.$store.state.steemconnect.user && userVotedThisPost()==true">
 					<i class="far fa-thumbs-up"></i> {{getVoteCount }}
 				  </a>
 				  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal"
@@ -39,6 +39,7 @@
 				  </a>
 				  <i class="far fa-comments ml-2"></i> {{ report.children }}
 				</small>
+				
 			</span>
 			<span>
 				<small>
@@ -162,6 +163,13 @@
           <h4>{{ errorDisplay }}</h4>
 		</div>
 	</div>
+	<VoteModal />
+	<no-ssr>
+      <div>
+        <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
+        <notifications :group="'error'" :position="'top center'" :classes="'vue-notification error'" />
+      </div>
+    </no-ssr>
 	<Footer />
   </div>
 </template>
@@ -182,6 +190,8 @@
   import 'steem-editor/dist/css/index.css';
   
   import SocialSharing from 'vue-social-sharing'
+  
+  import VoteModal from '~/components/VoteModal'
 
   Vue.use( steemEditor );
   
@@ -214,8 +224,9 @@
 		}
 	},
 	watch: {
-	  report : 'fetchReportData',
+	  report: 'fetchReportData',
 	  moderators: 'insertModSignature',
+	  postUpvoted: 'updatePostData',
 	},
 	components: {
 	  NavbarBrand,
@@ -224,6 +235,7 @@
 	  VueMarkdown,
 	  Comments,
 	  SocialSharing,
+	  VoteModal
 	},
     computed: {
 	  ...mapGetters('steemconnect', ['user']),
@@ -415,7 +427,7 @@
 	  /* function handles confirming if the user had voted already to prevent issues */
 	  votePrompt(e) {
 		//if no user is logged in, prompt to login
-		if (!this.$parent.user){
+		if (!this.$store.state.steemconnect.user){
 		  alert(this.$t('need_login_signup_notice_vote'));
 		  e.stopPropagation();
 		}
@@ -479,6 +491,20 @@
 		  this.$store.dispatch('fetchReferrals')
 		}
 	  },
+	  async updatePostData () {
+		// try to fetch matching report
+		  steem.api.getContent(this.postAuthor, this.postPermLink, (err, result) => {
+			console.log(err, result);
+			this.report = result;
+			console.log(this.report);
+			if (this.report && this.report.author){
+				this.fetchReportKeyData();
+			}else{
+				this.errorDisplay = this.$t('error_post_not_found');
+			}
+
+		  })
+	  }
 	},
 	async mounted () {
 	
@@ -494,18 +520,7 @@
 			this.postAuthor = this.$route.params.username.substring(1, this.$route.params.username.length);
 		  }
 		  console.log(this.postAuthor);
-		  // try to fetch matching report
-		  steem.api.getContent(this.postAuthor, this.postPermLink, (err, result) => {
-		    console.log(err, result);
-			this.report = result;
-			console.log(this.report);
-			if (this.report && this.report.author){
-				this.fetchReportKeyData();
-			}else{
-				this.errorDisplay = this.$t('error_post_not_found');
-			}
-
-		  })
+		  this.updatePostData();
 		}
 		  	
 	}
