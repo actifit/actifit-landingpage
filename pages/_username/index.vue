@@ -252,9 +252,9 @@
 		console.log(badgeType.includes(this.rew_activity_badge));
 		console.log('----');*/
 		//make sure this is the logged in user taking action
-		/*if (!this.user || (this.displayUser !== this.user.account.name)){
+		if (!this.user || (this.displayUser !== this.user.account.name)){
 			return false;
-		}*/
+		}
 		if (this.userHasBadge(badgeType)){
 		  return false;
 		}else if (badgeType == this.iso_badge && this.isoParticipant.length > 0){
