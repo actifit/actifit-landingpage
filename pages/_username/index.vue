@@ -45,16 +45,16 @@
 		    <div class="badge-entry iso-badge">
 			  <div :title="$t('iso_badge_title')">
 				<div class="badge-title text-brand">{{ $t('iso_badge_title') }}</div>
-				<div id="iso-badge" class="claimed-check" v-if="userHasBadge(iso_badge)"><div><img class="badge-img" src="https://actifit.io/img/badges/actifit_iso_badge.png"></div><div class="text-brand claimed-check"><i class="fas fa-check"></i></div></div>
-				<div id="iso-badge" class="claimed-check"  v-else><img class="badge-img badge-unclaimed" src="https://actifit.io/img/badges/actifit_iso_badge.png"></div>
+				<div id="iso-badge" class="claimed-check" v-if="userHasBadge(iso_badge)"><div><img class="badge-img" src="/img/badges/actifit_iso_badge.png"></div><div class="text-brand claimed-check"><i class="fas fa-check"></i></div></div>
+				<div id="iso-badge" class="claimed-check"  v-else><img class="badge-img badge-unclaimed" src="/img/badges/actifit_iso_badge.png"></div>
 				<button v-if="badgeClaimable(iso_badge)" v-on:click="claimBadge(iso_badge)" class="btn btn-brand btn-lg border">{{ $t('Claim_badge') }}</button>
 				<div v-else-if="this.isoParticipant.length == 0" class="col-md-4 text-brand claimed-check">{{ $t('missed_event_notice') }}</div>
 				<div v-if="claimingBadge == iso_badge" id="claiming_badge">
 					<i class="fas fa-spin fa-spinner"></i>{{ $t('claiming_badge_notice') }}
 				</div>
 			  </div>
-			  
 			</div>
+			
 			<div class="badge-entry rew-activity-badge">
 			  <div class="badge-title text-brand">{{ $t('rew_activity_badge_title') }}</div>
 			  <div v-for="level in rewarded_posts_rules" :key="level[1]" 
@@ -73,6 +73,20 @@
 				</div>
 			  </div>
 			</div>
+			
+			<div class="badge-entry doubledup-activity-badge">
+				<div class="badge-title text-brand">{{ $t('doubledup_badge_title') }}</div>
+				<div :title="$t('doubledup_badge_title')">
+					<div id="doubledup-badge" class="claimed-check" v-if="userHasBadge(doubledup_badge)"><div><img class="badge-img" src="/img/badges/actifit_doubled_up_badge.png"></div><div class="text-brand claimed-check"><i class="fas fa-check"></i></div></div>
+					<div id="doubledup-badge" class="claimed-check"  v-else><img class="badge-img badge-unclaimed" src="/img/badges/actifit_doubled_up_badge.png"></div>
+					<button v-if="badgeClaimable(doubledup_badge)" v-on:click="claimBadge(doubledup_badge)" class="btn btn-brand btn-lg border">{{ $t('Claim_badge') }}</button>
+					<div v-else-if="this.doubledupWinner.length == 0" class="col-md-4 text-brand claimed-check">{{ $t('not_lucky_yet') }}</div>
+					<div v-if="claimingBadge == doubledup_badge" id="claiming_badge">
+						<i class="fas fa-spin fa-spinner"></i>{{ $t('claiming_badge_notice') }}
+					</div>
+				</div>
+			</div>
+			
 			<div v-if="claimError">{{ claimErrorDesc }}</div>
 		  </div>
         </div>
@@ -110,11 +124,13 @@
 			noUserFound: false,
 			userTokenCount: '',
 			isoParticipant: [],
+			doubledupWinner: [],
 			userBadges: [],
 			claimError: '',
 			claimErrorDesc: '',
 			iso_badge: 'iso',
 			rew_activity_badge: 'rewarded_activity_lev_',
+			doubledup_badge: 'doubledup_badge',
 			claimingBadge: false,
 			actifitDelegator: '',
 			activ_badge_indent: 10,
@@ -236,23 +252,22 @@
 		console.log(badgeType.includes(this.rew_activity_badge));
 		console.log('----');*/
 		//make sure this is the logged in user taking action
-		if (!this.user || (this.displayUser !== this.user.account.name)){
+		/*if (!this.user || (this.displayUser !== this.user.account.name)){
 			return false;
-		}
+		}*/
 		if (this.userHasBadge(badgeType)){
 		  return false;
 		}else if (badgeType == this.iso_badge && this.isoParticipant.length > 0){
 		  return true;
 		}else if (badgeType.includes(this.rew_activity_badge)){
 		  //if this is a rewarded activity level badge
-		  
 		  let badgeLevel = badgeType.replace(this.rew_activity_badge,'');
-		  /*console.log('badgeLevel:'+badgeLevel);
-		  console.log('this.getUserActivityLevel():'+this.getUserActivityLevel());*/
 		  //check if user level passed the min level for this badge
 		  if (this.getUserActivityLevel() >= badgeLevel){
 			return true;
 		  }
+		}else if (badgeType == this.doubledup_badge && this.doubledupWinner.length > 0){
+		  return true;
 		}
 		return false;
 	  },
@@ -372,6 +387,11 @@
 		  //let's check if this user delegates to Actifit
 		  fetch(process.env.actiAppUrl+'delegation/'+this.displayUser).then(
 			res => {res.json().then(json => this.actifitDelegator = json)}).catch(e => reject(e))
+			
+		
+		  //let's check if this user had won lucky doubled up before
+		  fetch(process.env.actiAppUrl+'luckyWinner/'+this.displayUser).then(
+			res => {res.json().then(json => this.doubledupWinner = json)}).catch(e => reject(e))
 		
 		  this.getAccountData();
 		}else{
