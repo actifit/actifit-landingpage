@@ -79,8 +79,8 @@
 				<div :title="$t('doubledup_badge_title')">
 					<div id="doubledup-badge" class="claimed-check" v-if="userHasBadge(doubledup_badge)"><div><img class="badge-img" src="/img/badges/actifit_doubled_up_badge.png"></div><div class="text-brand claimed-check"><i class="fas fa-check"></i></div></div>
 					<div id="doubledup-badge" class="claimed-check"  v-else><img class="badge-img badge-unclaimed" src="/img/badges/actifit_doubled_up_badge.png"></div>
-					<button v-if="badgeClaimable(doubledup_badge)" v-on:click="claimBadge(doubledup_badge)" class="btn btn-brand btn-lg border">{{ $t('Claim_badge') }}</button>
-					<div v-else-if="this.doubledupWinner.length == 0" class="col-md-4 text-brand claimed-check">{{ $t('not_lucky_yet') }}</div>
+					<button v-if="badgeClaimable(doubledup_badge)" v-on:click="claimBadge(doubledup_badge)" class="btn btn-brand btn-lg border unclaimed-badge-btn">{{ $t('Claim_badge') }}</button>
+					<div v-else-if="this.doubledupWinner.length == 0" class="badge-doubledup-desc text-brand claimed-check">{{ $t('not_lucky_yet') }}</div>
 					<div v-if="claimingBadge == doubledup_badge" id="claiming_badge">
 						<i class="fas fa-spin fa-spinner"></i>{{ $t('claiming_badge_notice') }}
 					</div>
@@ -493,5 +493,9 @@
 	}
 	.unclaimed-badge-note{
 	  font-style: italic;
+	}
+	.badge-doubledup-desc{
+	  padding-left: 20px;
+	  width: 200px;
 	}
 </style>

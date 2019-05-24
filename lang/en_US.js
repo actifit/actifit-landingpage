@@ -261,5 +261,5 @@ module.exports = {
   rew_activity_badge_level_title: 'Rewarded Activity Reports Badge - Level',
   create_account: 'Create Account',
   doubledup_badge_title: 'Lucky Doubled UP Badge',
-  not_lucky_yet: 'Luck Hasn\'t Hit Yet',
+  not_lucky_yet: 'Luck Hasn\'t Hit Yet!',
 }
