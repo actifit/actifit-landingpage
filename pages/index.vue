@@ -331,10 +331,10 @@
 			<a href="https://www.linkedin.com/in/ashikstd/" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
-            <a href="@alokkumar" target="_blank">
+            <a href="@alokkumar121" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.licdn.com/dms/image/C4D03AQEG2ZehG2gP4w/profile-displayphoto-shrink_800_800/0?e=1561593600&v=beta&t=toFJjbpoI8gse5M64RZFgJLSoHweFSBLhdgcdPw02FY);'"></div>
             </a>
-            <a href="@alokkumar" target="_blank">Alok Kumar</a>
+            <a href="@alokkumar121" target="_blank">Alok Kumar</a>
 			<div><i>Moderator</i></div>
 			<a href="https://www.linkedin.com/in/alok-kumar-18373228" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
