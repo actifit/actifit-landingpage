@@ -87,6 +87,19 @@
 				</div>
 			</div>
 			
+			<div class="badge-entry charity-activity-badge">
+				<div class="badge-title text-brand">{{ $t('charity_badge_title') }}</div>
+				<div :title="$t('charity_badge_title')">
+					<div id="charity-badge" class="claimed-check" v-if="userHasBadge(charity_badge)"><div><img class="badge-img" src="/img/badges/actifit_charity_badge.png"></div><div class="text-brand claimed-check"><i class="fas fa-check"></i></div></div>
+					<div id="charity-badge" class="claimed-check"  v-else><img class="badge-img badge-unclaimed" src="/img/badges/actifit_charity_badge.png"></div>
+					<button v-if="badgeClaimable(charity_badge)" v-on:click="claimBadge(charity_badge)" class="btn btn-brand btn-lg border unclaimed-badge-btn">{{ $t('Claim_badge') }}</button>
+					<!--<div v-else-if="this.charityDonor.length == 0" class="badge-charity-desc text-brand claimed-check">{{ $t('not_lucky_yet') }}</div>-->
+					<div v-if="claimingBadge == charity_badge" id="claiming_badge">
+						<i class="fas fa-spin fa-spinner"></i>{{ $t('claiming_badge_notice') }}
+					</div>
+				</div>
+			</div>
+			
 			<div v-if="claimError">{{ claimErrorDesc }}</div>
 		  </div>
         </div>
@@ -125,12 +138,14 @@
 			userTokenCount: '',
 			isoParticipant: [],
 			doubledupWinner: [],
+			charityDonor: [],
 			userBadges: [],
 			claimError: '',
 			claimErrorDesc: '',
 			iso_badge: 'iso',
 			rew_activity_badge: 'rewarded_activity_lev_',
 			doubledup_badge: 'doubledup_badge',
+			charity_badge: 'charity_badge',
 			claimingBadge: false,
 			actifitDelegator: '',
 			activ_badge_indent: 10,
@@ -236,6 +251,8 @@
 	  },
 	  /* handles checking if the user had claimed this badge already */
 	  userHasBadge(badgeType) {
+		console.log('user badges');
+		console.log(this.userBadges);
 		if (this.userBadges.length>0){
 		  let matchingBadge = this.userBadges.find( badge_entry => (badge_entry.user === this.displayUser && badge_entry.badge === badgeType));
 		  console.log(matchingBadge);
@@ -267,6 +284,8 @@
 			return true;
 		  }
 		}else if (badgeType == this.doubledup_badge && this.doubledupWinner.length > 0){
+		  return true;
+		}else if (badgeType == this.charity_badge && this.charityDonor.length > 0){
 		  return true;
 		}
 		return false;
@@ -392,6 +411,11 @@
 		  //let's check if this user had won lucky doubled up before
 		  fetch(process.env.actiAppUrl+'luckyWinner/'+this.displayUser).then(
 			res => {res.json().then(json => this.doubledupWinner = json)}).catch(e => reject(e))
+			
+		  //let's check if this user had any charity contributions before
+		  fetch(process.env.actiAppUrl+'charityDonor/'+this.displayUser).then(
+			res => {res.json().then(json => this.charityDonor = json)}).catch(e => reject(e))	
+			
 		
 		  this.getAccountData();
 		}else{
@@ -454,6 +478,7 @@
 	}
 	.badge-title{
 	  padding-left: 20px;
+	  font-weight: bold;
 	}
 	.badge-unclaimed{
 	  opacity: 0.2
@@ -497,5 +522,6 @@
 	.badge-doubledup-desc{
 	  padding-left: 20px;
 	  width: 200px;
+	  text-align: left;
 	}
 </style>
