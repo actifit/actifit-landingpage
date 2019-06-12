@@ -4,7 +4,7 @@
     <a id="top"></a>
 
     <!-- navbar links with smooth scrolling to sections -->
-    <nav class="navbar fixed-top navbar-expand-lg navbar-light">
+    <nav class="navbar fixed-top navbar-expand-lg navbar-light px-1">
       <button class="navbar-toggler" id="navbar_menu" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>

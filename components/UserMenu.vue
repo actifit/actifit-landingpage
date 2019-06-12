@@ -12,7 +12,7 @@
         <span class="navbar-text py-0">{{ $t('Balance') }}<br><b>{{ formattedUserTokens }}</b></span>
       </li>
       <li class="nav-item dropdown" v-if="user">
-        <a class="nav-link dropdown-toggle py-0" id="user_menu_navlink" href="#" data-toggle="dropdown">
+        <a class="nav-link dropdown-toggle p-0" id="user_menu_navlink" href="#" data-toggle="dropdown">
           <div class="user-avatar" :style="'background-image: url(https://steemitimages.com/u/' + user.account.name + '/avatar)'"></div>
         </a>
         <div class="dropdown-menu dropdown-menu-right">
