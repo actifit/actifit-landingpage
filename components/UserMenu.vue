@@ -1,14 +1,14 @@
 <template>
   <!-- login link or user dropdown menu when logged in, for navbar-->
   <div class="ml-auto">
-    <ul class="navbar-nav mr-auto user-menu">
+    <ul class="navbar-nav mr-auto user-menu flex-row">
 	  <li class="nav-item" v-if="!user">
 		<a :href="'/signup'" >{{ $t('Signup_Link') }}</a> | <a :href="$steemconnect.getLoginURL()" >{{ $t('Login') }}</a>
 	  </li>
-	  <li class="nav-item d-none d-sm-block" v-if="user" >
+	  <li class="nav-item mr-2" v-if="user" >
         <span class="navbar-text py-0" style="color:#ff112d">{{ $t('Rank') }}&nbsp;<br><b>{{ displayUserRank }}</b></span>
       </li>
-      <li class="nav-item d-none d-sm-block" v-if="user">
+      <li class="nav-item mr-2" v-if="user">
         <span class="navbar-text py-0">{{ $t('Balance') }}<br><b>{{ formattedUserTokens }}</b></span>
       </li>
       <li class="nav-item dropdown" v-if="user">
