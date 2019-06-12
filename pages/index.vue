@@ -49,9 +49,9 @@
         <!-- wallet/activities preview -->
 		
         <div class="card form mx-auto p-3 mt-3 mt-md-5 text-center border-0 home-card">
-		  <div class="pb-md-4 text-center">
-			  <img src="/img/actifit_logo.png" alt="Actifit" />
-			  <h1 class="mt-3 text-brand title">{{ $t('Actifit') }}</h1>
+		  <div class="pb-md-2 text-center">
+			  <img src="/img/actifit_logo.png" alt="Actifit" class="logo" />
+			  <h1 class="mt-3 mt-sm-2 text-brand title">{{ $t('Actifit') }}</h1>
 			  <h3 class="font-italic text-brand slogan">{{ $t('Slogan') }}</h3>
 			</div>
 		
@@ -59,12 +59,12 @@
           <div v-if="user">
             <div class="row">
               <div class="col-sm-6">
-                <p class="lead text-muted">{{ $t('Balance') }}</p>
+                <p class="lead text-muted mb-0">{{ $t('Balance') }}</p>
                 <h3><b>{{ formattedUserTokens }}</b><br><small>{{ $t('AFIT_Token') }}</small></h3>
                 <a href="#" @click.prevent="$router.push('/wallet')" class="btn btn-lg btn-brand w-100">{{ $t('My_Wallet') }}</a>
               </div>
               <div class="col-sm-6 mt-4 mt-sm-0">
-                <p class="lead text-muted">{{ $t('Activity') }}</p>
+                <p class="lead text-muted mb-0">{{ $t('Activity') }}</p>
                 <h3><b>{{ grabUserReportCount }}</b><br><small>{{ $t('Reports') }}</small></h3>
                 <a href="#" class="btn btn-lg btn-brand w-100" @click.prevent="$router.push('/activity/' + user.account.name)">{{ $t('My_Activity') }}</a>
               </div>
@@ -582,7 +582,7 @@
 
 <style lang="sass">	
   .header
-    height: 100%
+    min-height: 100%
     background: url('/img/header-3.jpg') center
     background-size: cover
     .form
@@ -614,6 +614,12 @@
   @media (min-width: 768px)
     .showcase .showcase-text
       padding: 7rem
+
+  @media (max-width: 1200px)
+    .header
+      .form
+        .logo
+          max-width: 100px
 
   @media (max-width: 767px)
     .header
