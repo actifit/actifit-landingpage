@@ -1,6 +1,6 @@
 <template>
   <!-- login link or user dropdown menu when logged in, for navbar-->
-  <div class="ml-auto">
+  <div class="user-menu-container ml-auto position-absolute d-flex align-items-center">
     <ul class="navbar-nav mr-auto user-menu flex-row">
 	  <li class="nav-item" v-if="!user">
 		<a :href="'/signup'" >{{ $t('Signup_Link') }}</a> | <a :href="$steemconnect.getLoginURL()" >{{ $t('Login') }}</a>
@@ -52,6 +52,10 @@
 </script>
 
 <style lang="sass">
+.user-menu-container
+  height: 54px
+  top: 0
+  right: 6px
   .user-menu
     .user-avatar
       width: 40px
@@ -64,6 +68,10 @@
       display: none
     .navbar-text
       font-size: .8rem
+    .dropdown-menu
+      position: absolute
+      right: 0
+      left: auto
 </style>
 <style>
 	#user_menu_navlink{

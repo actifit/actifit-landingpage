@@ -1,6 +1,6 @@
 <template>
   <!-- Brand for navbar on subpages -->
-  <div class="mx-auto navbar-brand py-0">
+  <div class="navbar-brand py-0 pl-2">
     <img src="/img/actifit_logo.png" alt="Actifit" class="float-left mr-2" />
     <div class="float-left d-none d-sm-block">
       <h1 class="m-0 text-brand text-center">{{ $t('Actifit') }}</h1>
