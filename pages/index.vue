@@ -605,6 +605,12 @@
       padding: 1px 5px !important
       margin-top: 0 !important
 
+  @media (min-width: 992px)
+    .navbar
+      .navbar-nav
+        .nav-link
+          padding-right: .4rem
+          padding-left: .4rem
   @media (min-width: 768px)
     .showcase .showcase-text
       padding: 7rem
