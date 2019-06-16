@@ -547,7 +547,6 @@
       },
 	  
 	  fetchUserData () {
-	    console.log('fetchUserData');
 		if (typeof this.user != 'undefined' && this.user != null){
 		  this.$store.dispatch('fetchUserTokens')
 		  this.$store.dispatch('fetchUserRank')
@@ -557,7 +556,6 @@
 	  },
     },
     async mounted () {
-      console.log('mounted');
       // fetch data
       this.$store.dispatch('fetchRewardedActivityCount')
       this.$store.dispatch('fetchLeaderboard')

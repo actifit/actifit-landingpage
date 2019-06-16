@@ -385,7 +385,6 @@
 	  },
 	  /* function handles rewarding user for comments */
 	  async rewardUserComment () {
-		console.log('rewarding comments');
 		let url = new URL(process.env.actiAppUrl + 'rewardActifitWebComment/'+this.user.account.name);
 		//compile all needed data and send it along the request for processing
 		let params = {
@@ -404,7 +403,6 @@
 				  position: 'top center'
 				})
 			}
-			console.log(outcome);
 		}catch(err){
 			console.error(err);
 		}
@@ -483,7 +481,6 @@
 		}
 	  },
 	  fetchUserData () {
-	    console.log('fetchUserData');
 		if (typeof this.user != 'undefined' && this.user != null){
 		  this.$store.dispatch('fetchUserTokens')
 		  this.$store.dispatch('fetchUserRank')
@@ -494,9 +491,7 @@
 	  async updatePostData () {
 		// try to fetch matching report
 		  steem.api.getContent(this.postAuthor, this.postPermLink, (err, result) => {
-			console.log(err, result);
 			this.report = result;
-			console.log(this.report);
 			if (this.report && this.report.author){
 				this.fetchReportKeyData();
 			}else{
@@ -519,7 +514,6 @@
 		  if (this.$route.params.username.startsWith('@')){
 			this.postAuthor = this.$route.params.username.substring(1, this.$route.params.username.length);
 		  }
-		  console.log(this.postAuthor);
 		  this.updatePostData();
 		}
 		  	

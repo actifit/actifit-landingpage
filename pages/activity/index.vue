@@ -92,7 +92,6 @@
         this.loadingMore = false
       },
 	  fetchUserData () {
-	    console.log('fetchUserData');
 		if (typeof this.user != 'undefined' && this.user != null){
 		  this.$store.dispatch('fetchUserTokens')
 		  this.$store.dispatch('fetchUserRank')

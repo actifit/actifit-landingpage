@@ -166,7 +166,6 @@
 		  return;
 	  },
 	  fetchUserInfo () {
-		console.log('fetchUserInfo');
 		if (typeof this.user != 'undefined' && this.user != null){
 		  this.$store.dispatch('fetchUserTokens')
 		  this.$store.dispatch('fetchReferrals')
