@@ -4,11 +4,10 @@
     <a id="top"></a>
 
     <!-- navbar links with smooth scrolling to sections -->
-    <nav class="navbar fixed-top navbar-expand-lg navbar-light">
-      <button class="navbar-toggler" id="navbar_menu" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <nav class="navbar fixed-top navbar-expand-lg navbar-light px-1">
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-	  <UserMenu/>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item">
@@ -40,6 +39,7 @@
           </li>
         </ul>
       </div>
+      <UserMenu/>
     </nav>
 
     <!-- header with fullscreen background -->
@@ -49,9 +49,9 @@
         <!-- wallet/activities preview -->
 		
         <div class="card form mx-auto p-3 mt-3 mt-md-5 text-center border-0 home-card">
-		  <div class="pb-md-4 text-center">
-			  <img src="/img/actifit_logo.png" alt="Actifit" />
-			  <h1 class="mt-3 text-brand title">{{ $t('Actifit') }}</h1>
+		  <div class="pb-md-2 text-center">
+			  <img src="/img/actifit_logo.png" alt="Actifit" class="logo" />
+			  <h1 class="mt-3 mt-sm-2 text-brand title">{{ $t('Actifit') }}</h1>
 			  <h3 class="font-italic text-brand slogan">{{ $t('Slogan') }}</h3>
 			</div>
 		
@@ -59,12 +59,12 @@
           <div v-if="user">
             <div class="row">
               <div class="col-sm-6">
-                <p class="lead text-muted">{{ $t('Balance') }}</p>
+                <p class="lead text-muted mb-0">{{ $t('Balance') }}</p>
                 <h3><b>{{ formattedUserTokens }}</b><br><small>{{ $t('AFIT_Token') }}</small></h3>
                 <a href="#" @click.prevent="$router.push('/wallet')" class="btn btn-lg btn-brand w-100">{{ $t('My_Wallet') }}</a>
               </div>
               <div class="col-sm-6 mt-4 mt-sm-0">
-                <p class="lead text-muted">{{ $t('Activity') }}</p>
+                <p class="lead text-muted mb-0">{{ $t('Activity') }}</p>
                 <h3><b>{{ grabUserReportCount }}</b><br><small>{{ $t('Reports') }}</small></h3>
                 <a href="#" class="btn btn-lg btn-brand w-100" @click.prevent="$router.push('/activity/' + user.account.name)">{{ $t('My_Activity') }}</a>
               </div>
@@ -547,7 +547,6 @@
       },
 	  
 	  fetchUserData () {
-	    console.log('fetchUserData');
 		if (typeof this.user != 'undefined' && this.user != null){
 		  this.$store.dispatch('fetchUserTokens')
 		  this.$store.dispatch('fetchUserRank')
@@ -557,7 +556,6 @@
 	  },
     },
     async mounted () {
-      console.log('mounted');
       // fetch data
       this.$store.dispatch('fetchRewardedActivityCount')
       this.$store.dispatch('fetchLeaderboard')
@@ -582,7 +580,7 @@
 
 <style lang="sass">	
   .header
-    height: 100%
+    min-height: 100%
     background: url('/img/header-3.jpg') center
     background-size: cover
     .form
@@ -605,9 +603,21 @@
       padding: 1px 5px !important
       margin-top: 0 !important
 
+  .navbar
+    .navbar-nav
+      .nav-link
+        padding-right: .4rem
+        padding-left: .4rem
+
   @media (min-width: 768px)
     .showcase .showcase-text
       padding: 7rem
+
+  @media (max-width: 1200px)
+    .header
+      .form
+        .logo
+          max-width: 100px
 
   @media (max-width: 767px)
     .header
@@ -634,23 +644,7 @@
 	.home-card{
 	  opacity: 0.9;
 	}
-	#navbar_menu{
-	  position: absolute;
-	  top: 0px;
-	}
 	.user-menu .user-avatar{
 	  float: right;
-	}
-	
-	@media screen and (min-width: 600px) {
-	  #navbarSupportedContent{
-		position: absolute;
-	  }
-	}
-	@media screen and (max-width: 599px) {
-		#navbarSupportedContent{
-		  position: relative;
-		  background: white;
-		}
 	}
 </style>

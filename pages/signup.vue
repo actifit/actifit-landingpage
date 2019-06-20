@@ -217,7 +217,6 @@
 			//ensure no existing account matches same name
 			steem.api.getAccounts([val], function(err, result) {
 			  if (result.length>0){
-				console.log('existing account found');
 				vue_ctnr.username_exists = 'Please choose a different username';
 			  }
 			});
@@ -303,7 +302,6 @@
 			this.error_msg = this.$t('amount_too_low')+this.minUSD;
 			return;
 		}
-		console.log(this.isEmailValid());
 		if (this.isEmailValid()!=''){
 			this.error_proceeding = true;
 			this.error_msg = this.$t('invalid_email_format');
@@ -320,7 +318,6 @@
 		const afit_reward = this.getMatchingAFIT ();
 		this.checkingFunds = true;
 		this.processStarted = true;
-		console.log('checking funds');
 		let url = new URL(process.env.actiAppUrl + 'confirmPayment');
 		//compile all needed data and send it along the request for processing
 		let params = {
@@ -339,7 +336,6 @@
 		try{
 			let res = await fetch(url);
 			let outcome = await res.json();
-			console.log(outcome);
 			this.checkingFunds = false;
 			this.accountCreated = outcome.accountCreated;
 			this.resultReturned = true;

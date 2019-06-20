@@ -2,7 +2,7 @@
   <div>
     <!-- navbar -->
     <nav class="navbar fixed-top navbar-expand navbar-light">
-      <ul class="navbar-nav mr-auto">
+      <ul class="navbar-nav">
         <li class="nav-item">
           <!-- home link -->
           <a class="nav-link" href="#" @click.prevent="$router.push('/')">
@@ -166,7 +166,6 @@
 		  return;
 	  },
 	  fetchUserInfo () {
-		console.log('fetchUserInfo');
 		if (typeof this.user != 'undefined' && this.user != null){
 		  this.$store.dispatch('fetchUserTokens')
 		  this.$store.dispatch('fetchReferrals')

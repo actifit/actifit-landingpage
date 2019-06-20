@@ -22,7 +22,11 @@
 			  <tbody>
 				<tr v-for="pendingTrans in transList" :key="pendingTrans._id" :class="{'bg-danger': user === pendingTrans.user, 'text-white': user === pendingTrans.user}">
 				  <th scope="row">{{ pendingTrans.order }}</th>
-				  <td><a :href="pendingTrans.user" target="_blank">@{{ pendingTrans.user }}</a></td>
+				  <td>
+					<a :href="pendingTrans.user" target="_blank" :class="{'text-white': user === pendingTrans.user}">
+						@{{ pendingTrans.user }}
+					</a>
+				  </td>
 				  <td class="d-none d-lg-table-cell">{{ date(pendingTrans.date) }}</td>
 				  <td class="d-none d-sm-table-cell">{{ pendingTrans.paid_afit }}</td>
 				  <td>{{ $t('Within') }} {{ pendingTrans.reward_round * 24 }} {{ $t('hrs') }}</td>

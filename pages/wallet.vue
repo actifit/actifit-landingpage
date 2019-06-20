@@ -2,7 +2,7 @@
   <div>
     <!-- navbar -->
     <nav class="navbar fixed-top navbar-expand navbar-light">
-      <ul class="navbar-nav mr-auto">
+      <ul class="navbar-nav">
         <li class="nav-item">
           <!-- home link -->
           <a class="nav-link" href="#" @click.prevent="$router.push('/')">
@@ -437,7 +437,6 @@
 	  },
 	  isClaimableDataAvailable () {
 	  //confirms whether we have useful claimable data to control display of the relevant section
-		//console.log('isClaimableDataAvailable');
 		return (parseFloat(this.claimSTEEM)>0 ||
 			parseFloat(this.claimSP) ||
 			parseFloat(this.claimVests) ||
@@ -504,11 +503,9 @@
 		}
 	  },
 	  renderSteemBalance () {
-		//console.log(this.user.account.balance);
 		return this.user.account.balance;
 	  },
 	  renderSBDBalance () {
-		//console.log(this.user.account.sbd_balance);
 		return this.user.account.sbd_balance;
 	  },
 	  async fetchUserData () {
@@ -573,19 +570,16 @@
 		   
 		  //fetch user's S-E balance
 		  let bal = await ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFIT' });
-		  //console.log(bal);
 		  this.afit_se_balance = bal.balance;
 		  
 		  //if this operation relates to powering up AFIT from S-E, need to also initiate call to adjust AFIT token count
 		  if (this.$route.query.confirm_trans == 1){
 			
-			//console.log('confirming funds delivery');
 			let url = new URL(process.env.actiAppUrl + 'confirmAFITSEReceipt/?user='+this.$store.state.steemconnect.user.name);
 			//connect with our service to confirm AFIT received to proper wallet
 			try{
 				let res = await fetch(url);
 				let outcome = await res.json();
-				//console.log(outcome);
 				if (outcome.error){
 					console.error(outcome);
 				}else{
@@ -602,7 +596,6 @@
 				//this.checkingFunds = false;
 			}
 		  }
-		  //console.log(this.user);
 			
 		}
 	  },
@@ -611,7 +604,6 @@
 	  },
 	  setUserPassStatus (result) {
 		//handles setting funds password status
-		//console.log(result);
 		//set proper value for funds pass confirmation
 		this.userHasFundsPass = result.hasFundsPass;
 		
@@ -620,7 +612,6 @@
 	  },
 	  setUserTokenSwapStatus (result){
 	    //handles setting user token swap status
-		//console.log(result);
 		if (result.user_pending_swap){
 			this.pendingTokenSwap = result.user_pending_swap
 		}else{
@@ -812,7 +803,6 @@
 		  return;
 		}
 		let vestsValue = await this.steemPowerToVests(this.$refs["powerdown-amount"].value);
-		//console.log(vestsValue);
 		//https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
 		var link = this.$steemconnect.sign('withdraw-vesting', {
 		  account: this.user.account.name,
@@ -876,7 +866,6 @@
 		let res = await fetch(url);
 		let outcome = await res.json();
 		this.settingPass = false;
-		//console.log(outcome);
 		if (!outcome.error){
 			//success
 			this.userHasFundsPass = true;
@@ -956,7 +945,6 @@
 		try{
 			let res = await fetch(url);
 			let outcome = await res.json();
-			//console.log(outcome);
 			//update user data according to result
 			this.fetchUserData();
 		}catch(err){
@@ -994,11 +982,9 @@
 		try{
 			let res = await fetch(url);
 			let outcome = await res.json();
-			//console.log(outcome);
 			if (outcome.status == 'Success'){
 				//map exchange amount to exchange category
 				let exchange_cat = 1;
-				//console.log(this.afit_val_exchange);
 				switch(this.afit_val_exchange){
 					case '5': exchange_cat = 1; break;
 					case '10': exchange_cat = 2; break;
@@ -1006,7 +992,6 @@
 					case '20': exchange_cat = 4; break;
 					default: exchange_cat = -1;
 				}
-				//console.log('exchange_cat:'+exchange_cat);
 				
 				//store the transaction to Steem BC
 				let cstm_params = {
@@ -1017,11 +1002,8 @@
 				  };
 		  
 				let res = await this.$steemconnect.broadcast([['custom_json', cstm_params]], (err) => {
-				  console.log(err);
 				  if (err) {
 					console.log(err);
-				  }else{
-					console.log('success');
 				  }
 				});
 				
@@ -1058,7 +1040,6 @@
 	  }).catch(e => reject(e))
 	  
 	  this.screenWidth = screen.width;
-	  //console.log(!this.$route.query.op);
 	  //check if this is the result of an operation
 	  if (this.$route.query.op && this.$route.query.status){
 		// notify the user that operation was successful

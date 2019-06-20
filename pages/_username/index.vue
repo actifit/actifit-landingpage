@@ -2,7 +2,7 @@
   <div>
 	<!-- navbar -->
     <nav class="navbar fixed-top navbar-expand navbar-light">
-      <ul class="navbar-nav mr-auto">
+      <ul class="navbar-nav">
         <li class="nav-item">
           <!-- home link -->
           <a class="nav-link" href="#" @click.prevent="$router.push('/')">
@@ -232,7 +232,6 @@
 	  */
 	  calcScore(rules_array, value){
 		var result;
-		//console.log("rules_array.length:"+rules_array.length);
 		for (var i=0; i<rules_array.length; i++){
 			var rule = rules_array[i];
 			
@@ -243,7 +242,6 @@
 				break;
 			}
 		}
-		//console.log('result:'+result);
 		return result;
 	  },
 	  getUserActivityLevel() {
@@ -251,11 +249,8 @@
 	  },
 	  /* handles checking if the user had claimed this badge already */
 	  userHasBadge(badgeType) {
-		console.log('user badges');
-		console.log(this.userBadges);
 		if (this.userBadges.length>0){
 		  let matchingBadge = this.userBadges.find( badge_entry => (badge_entry.user === this.displayUser && badge_entry.badge === badgeType));
-		  console.log(matchingBadge);
 		  if (matchingBadge){
 			return true;
 		  }
@@ -312,13 +307,11 @@
  
 		steem.api.getAccounts([this.displayUser], function(err, result) {
 			//result now contains the account details
-			console.log(err, result);
 			if (result.length == 0){
 			  parentRef.noUserFound = true;
 			  parentRef.errorDisplay = parentRef.$t('user_not_found_error');
 			}else{
 			  parentRef.userinfo = result[0];
-			  console.log(result[0]);
 			  //grab and display follower and following count
 				steem.api.getFollowCount(parentRef.displayUser, function(err, result) {
 					//console.log(err, result);
@@ -332,14 +325,12 @@
 	  },
 	  /* handles the actual claim of a badge */
 	  async claimBadge(badgeType) {
-		console.log(badgeType);
 		if (this.badgeClaimable(badgeType)){
 			this.claimingBadge = badgeType;
 			//enable this badge for this user
 			try{
 				let res = await fetch(process.env.actiAppUrl+'claimBadge/?user='+this.displayUser+'&badge='+badgeType);
 				let outcome = await res.json();
-				//console.log(outcome);
 				if (outcome.status=='success'){
 					//store the transaction to Steem BC
 					let cstm_params = {
@@ -357,7 +348,6 @@
 					  }
 					});
 					this.userBadges.push(outcome);
-					console.log('outcome:'+outcome);
 				}else{
 					console.error(outcome);
 				}
@@ -382,7 +372,6 @@
 		  if (this.$route.params.username.startsWith('@')){
 			this.displayUser = this.$route.params.username.substring(1, this.$route.params.username.length);
 		  }
-		  console.log(this.displayUser);
 		  
 		  //grab the author's rank
 		  fetch(process.env.actiAppUrl+'getRank/' + this.displayUser).then(res => {
@@ -393,7 +382,7 @@
 		
 		  //let's grab the user's AFIT tokens balance
 		  fetch(process.env.actiAppUrl+'user/'+this.displayUser).then(
-			res => {res.json().then(json => this.userTokenCount = json.tokens).catch(console.log('error fetching user balance'))}).catch(console.log('error fetching user balance'))
+			res => {res.json().then(json => this.userTokenCount = json.tokens)}).catch(e => console.log(e))
 		
 		  //let's grab user's current badges
 		  fetch(process.env.actiAppUrl+'userBadges/'+this.displayUser).then(
