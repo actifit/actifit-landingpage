@@ -382,7 +382,7 @@
 		
 		  //let's grab the user's AFIT tokens balance
 		  fetch(process.env.actiAppUrl+'user/'+this.displayUser).then(
-			res => {res.json().then(json => this.userTokenCount = json.tokens).catch(e => console.log(e))
+			res => {res.json().then(json => this.userTokenCount = json.tokens)}).catch(e => console.log(e))
 		
 		  //let's grab user's current badges
 		  fetch(process.env.actiAppUrl+'userBadges/'+this.displayUser).then(
