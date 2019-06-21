@@ -39,7 +39,7 @@
           </li>
         </ul>
       </div>
-      <UserMenu/>
+	  <UserMenu/>
     </nav>
 
     <!-- header with fullscreen background -->
@@ -290,10 +290,10 @@
 			<a href="https://www.linkedin.com/in/rabih-farhat-42a1604b/" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
-            <a href="@stats-generator" target="_blank">
+            <a href="@pjansen" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.licdn.com/dms/image/C4E03AQHa0iykUKqUmA/profile-displayphoto-shrink_800_800/0?e=1561593600&v=beta&t=xl5sQ80B1Cj5Oio-ph54RFqEY2ezrjYuGE_sJsxfDeQ);'"></div>
             </a>
-            <a href="@stats-generator" target="_blank">Paul Jansen</a>
+            <a href="@pjansen" target="_blank">Paul Jansen</a>
 			<div><i>Quality Assurance Manager</i></div>
 			<a href="https://www.linkedin.com/in/profilepauljansen" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
@@ -644,6 +644,7 @@
 	.home-card{
 	  opacity: 0.9;
 	}
+	
 	.user-menu .user-avatar{
 	  float: right;
 	}
