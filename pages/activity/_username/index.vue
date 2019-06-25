@@ -83,7 +83,11 @@
         loadingMore: false // loading state for loading more reports
       }
     },
+	watch: {
+	  user: 'fetchUserData',
+	},
     computed: {
+	  ...mapGetters('steemconnect', ['user']),
       ...mapGetters(['userReports', 'moreUserReportsAvailable', 'activeReport']),
 
       // get username from url
@@ -99,12 +103,24 @@
         this.loadingMore = true
         await this.$store.dispatch('fetchUserReports', this.username)
         this.loadingMore = false
-      }
+      },
+	  async fetchUserData () {
+		if (typeof this.user != 'undefined' && this.user != null){	  
+		  
+		  //update user info from blockchain
+		  let user_data = await this.$steemconnect.me();
+		  this.user.account = user_data.account;
+		  //ensure we fetch proper logged in user data
+		  this.$store.dispatch('fetchUserTokens')
+		  this.$store.dispatch('fetchUserRank')
+		}
+	  },
     },
     async mounted () {
       // login
       this.$store.dispatch('steemconnect/login')
-
+	  this.fetchUserData();
+	  
       // reset previously fetched posts to get latest
       this.$store.commit('setUserReports', [])
 

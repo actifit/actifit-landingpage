@@ -298,6 +298,9 @@
 		  //update user info from blockchain
 		  let user_data = await this.$steemconnect.me();
 		  this.user.account = user_data.account;
+		  //ensure we fetch proper logged in user data
+		  this.$store.dispatch('fetchUserTokens')
+		  this.$store.dispatch('fetchUserRank')
 		}
 	  },
 	  /* handles fetching of user related info */
