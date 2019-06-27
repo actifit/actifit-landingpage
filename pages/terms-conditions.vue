@@ -72,11 +72,11 @@ We reserve the right at any time to modify or discontinue the Service (or any pa
 We shall not be liable to you or to any third-party for any modification, price change, suspension or discontinuance of the Service.
 
 
-<h4>SECTION 5 - PRODUCTS OR SERVICES (if applicable)</h4>
+<h4>SECTION 5 - PRODUCTS OR SERVICES</h4>
 
-Certain products or services may be available exclusively online through the website. These products or services may have limited quantities and are subject to return or exchange only according to our Return Policy.
+Certain products or services may be available exclusively online through the website, whether provided directly via us, or via third parties, or online sellers allowed to utilize our website. These products or services may have limited quantities and are subject to return or exchange only according to our Return Policy.
 
-We reserve the right, but are not obligated, to limit the sales of our products or Services to any person, geographic region or jurisdiction. We may exercise this right on a case-by-case basis. We reserve the right to limit the quantities of any products or services that we offer. All descriptions of products or product pricing are subject to change at anytime without notice, at the sole discretion of us. We reserve the right to discontinue any product at any time. Any offer for any product or service made on this site is void where prohibited.
+We reserve the right, but are not obligated, to limit the sales of those products or Services to any person, geographic region or jurisdiction. We may exercise this right on a case-by-case basis. We reserve the right to limit the quantities of any products or services that we offer. All descriptions of products or product pricing are subject to change at anytime without notice, at the sole discretion of us. We reserve the right to discontinue any product at any time. Any offer for any product or service made on this site is void where prohibited.
 
 We do not warrant that the quality of any products, services, information, or other material purchased or obtained by you will meet your expectations, or that any errors in the Service will be corrected.
 
@@ -110,7 +110,7 @@ We are not liable for any harm or damages of any sort made in connection with an
 
 <h4>SECTION 9 - AFIT TOKENS. PARTICIPATING IN ACTIFIT ICO, IEO, ISO, OR ANY OTHER TOKEN SALE FORM</h4>
 
-Your participation in purchasing AFIT tokens via any means, including a token sale, an ICO (Initial Coin Offering), IEO (Initial Exchange Offering), ISO (Initial Steem Offering), to name a few, or any other means of purchasing and/or exchanging them from/to other forms of FIAT and/or crypto is done at your sole responsibility. 
+Your participation in purchasing AFIT tokens via any means, including a token sale, an ICO (Initial Coin Offering), IEO (Initial Exchange Offering), ISO (Initial Steem Offering), our website, to name a few, or any other means of purchasing and/or exchanging them from/to other forms of FIAT and/or crypto is done at your sole responsibility. 
 Actifit does not hold any responsibility for any potential loss of value, funds or investment via purchasing, exchanging, and/or holding AFIT tokens under any form.
 Token purchase transactions are non-reversible and non-refundable.
 
