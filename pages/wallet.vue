@@ -21,12 +21,12 @@
         <h3 class="mb-4">{{ $t('Hey') }} {{ user.account.name }}!</h3>
         <h4>{{ $t('Your_Afit_Balance') }}</h4>
         <h4 class="mb-4 font-weight-bold">{{ formattedUserTokens }}</h4>
-		<div class="p-2">
-			<button v-on:click="exchangeAFITforSTEEM" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('EXCHANGE_AFIT_FOR_STEEM') }}</button>
+		<div class="p-2 font-weight-bold">
+			<button v-on:click="buyAFITwithSTEEM" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('BUY_AFIT_WITH_STEEM') }}</button>
+			<button v-on:click="exchangeAFITforSTEEM" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('EXCHANGE_AFIT_FOR_STEEM') }}</button>
 			<button v-on:click="moveAFITSEtoAFITPOWER" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('MOVE_AFIT_SE_AFIT_POWER') }}</button>
-			  
-			  <div v-if="moveAFITSEPower == 1">
-				<transition name="fade" >
+			  <transition name="fade">
+			  <div v-if="afitActivityMode == MOVE_AFIT_SE">
 				  <div class="text-center grid p-2">
 					<div class="text-brand font-weight-bold">{{ $t('wallet.afit_se_to_power') }}</div>
 					<div class="row" >
@@ -47,10 +47,42 @@
 					  </div>
 					</div>
 				  </div>
-				</transition>
 			  </div>
 			  
-			  <div v-if="exchangeAFITMode == 1">
+			  <div v-else-if="afitActivityMode == BUY_AFIT_STEEM">
+				  <div class="text-center grid p-2">
+					<div class="row" >
+					  <span class="text-brand text-center w-100" v-html="$t('notice_buy_afit')">
+					  </span>
+					</div>
+					<div class="row" >
+					  <div class="w-25 p-2 text-right" :value="this.defaultAfit">{{ $t('AFIT_Amount_To_Buy') }}</div>
+					  <input type="number" id="afit-amount-buy" name="afit-amount-buy" ref="afit-amount-buy" class="form-control-lg w-50 p-2" v-model="afitBuyAmount">
+					</div>
+					<div class="row" >
+					  <div class="w-25 p-2 text-right">{{ $t('STEEM_Amount_To_Pay') }}</div>
+					  <input type="number" id="steem-amount-pay" name="steem-amount-pay" ref="steem-amount-pay" class="form-control-lg w-50 p-2" readonly="readonly" :value="this.getMatchingSTEEM()">
+					</div>
+					<div class="text-brand text-center" v-if="afit_buy_error_proceeding">
+					  {{ this.afit_buy_err_msg}}
+					</div>
+					<div class="row">
+					  <div class="w-25"></div>
+					  <button v-on:click="proceedBuyAFIT" class="btn btn-brand btn-lg w-50">{{ $t('Proceed') }}</button>
+					</div>
+					<div class="row">
+					  <div class="w-25"></div>
+					  <div v-if="checkingBought" id="checking_buy" class="w-50 text-brand">
+						<i class="fas fa-spin fa-spinner"></i>{{ $t('confirming_buy_transaction') }}
+					  </div>
+					  <div v-else-if="transConfirmed" class="w-50 text-brand">
+					    {{ $t('trans_confirmed') }}
+					  </div>
+					</div>
+				  </div>
+			  </div>
+			  
+			  <div v-else-if="afitActivityMode == EXCHANGE_AFIT_STEEM">
 			  <transition name="fade" v-if="!userHasFundsPass" >
 				<div class="text-center grid p-2">
 					<div class="text-brand font-weight-bold">{{ $t('wallet.title_process') }}</div>
@@ -202,6 +234,7 @@
 			  <ExchangeHistory :transList="userTokenSwapHistory.userTokenSwapHist"/>
 			  </div>
 			
+			</transition>
 		</div>
 		<h4>{{ $t('Your_Steem_Balance') }}</h4>
 		<h5 class="mb-4 font-weight-bold">
@@ -210,9 +243,9 @@
 				<small><i>({{ $t('STEEM_POWER_BREAKDOWN') }}: {{this.renderSteemPower(1)}} + {{this.renderSteemPower(3)}} - {{this.renderSteemPower(4)}} - {{this.renderSteemPower(5)}})</i></small>
 			</div>
 			<div class="p-2">
-				<button v-on:click="transferFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('TRANSFER_FUNDS_ACTION_TEXT') }}</button>
-				<button v-on:click="powerUpFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{  $t('POWERUP_ACTION_TEXT') }}</button>
-				<button v-on:click="powerDownFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('POWERDOWN_ACTION_TEXT') }}</button>
+				<button v-on:click="transferFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('TRANSFER_FUNDS_ACTION_TEXT') }}</button>
+				<button v-on:click="powerUpFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{  $t('POWERUP_ACTION_TEXT') }}</button>
+				<button v-on:click="powerDownFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('POWERDOWN_ACTION_TEXT') }}</button>
 			</div>
 			<transition name="fade">
 			  <div v-if="fundActivityMode == 1" class="text-center grid">
@@ -370,6 +403,8 @@
 		POWERUP_FUNDS: 2,
 		POWERDOWN_FUNDS: 3,
 		EXCHANGE_AFIT_STEEM: 1,
+		MOVE_AFIT_SE: 2,
+		BUY_AFIT_STEEM: 3,
 		powerDownRateVal: '',
 		powerDownWithdrawDate: '',	
 		steemPower: 0,
@@ -382,6 +417,7 @@
 		claimSBD: '',
 		claimWindow: '',
 		fundActivityMode: this.CLOSED_MODE,
+		afitActivityMode: this.CLOSED_MODE,
 		transferType: 'STEEM',
 		transferTypePass: 'STEEM',
 		error_proceeding: '',
@@ -394,14 +430,15 @@
 		swapResult: '',
 		checkingFunds: false,
 		movingFunds: false,
+		checkingBought: false,
+		transConfirmed: false,
 		target_exchange_account: 'actifit.exchange',
+		target_buy_account: 'actifit.buy',
 		properties: '', //handles the Steem BC properties
 		userHasFundsPass: false, //holds value if user has proper funds pass or not yet
 		userFundsPassVerified: false, //holds value if user has verified funds pass or not yet
 		settingPass: false,
 		verifyingPass: false,
-		exchangeAFITMode: this.CLOSED_MODE,
-		moveAFITSEPower: this.CLOSED_MODE,
 		errorSettingPass: '',
 		screenWidth: 1200,
 		afit_val_exchange: '5',
@@ -416,6 +453,11 @@
 		runningInterval: '',
 		afit_se_balance: 0,
 		userAddedTokens: 0,
+		steemPrice: 0.1,
+		defaultAfit: 100,
+		afit_buy_error_proceeding: false,
+		afit_buy_err_msg: '',
+		afitBuyAmount: this.defaultAfit
 	  }
 	},
     components: {
@@ -703,7 +745,8 @@
 		}else{
 		  this.fundActivityMode = this.TRANSFER_FUNDS;
 		}
-
+		//hide upper activity section
+		this.afitActivityMode = 0;
 	  },
 	  powerUpFunds () {
 		//function handles opening/closing of power up section
@@ -714,7 +757,8 @@
 		}else{
 		  this.fundActivityMode = this.POWERUP_FUNDS;
 		}
-		
+		//hide upper activity section
+		this.afitActivityMode = 0;
 	  },
 	  powerDownFunds () {
 		//function handles opening/closing of power up section
@@ -725,6 +769,8 @@
 		}else{
 		  this.fundActivityMode = this.POWERDOWN_FUNDS;
 		}
+		//hide upper activity section
+		this.afitActivityMode = 0;
 	  },
 	  proceedTransfer () {
 		//function handles the actual processing of the transfer
@@ -823,11 +869,40 @@
 		window.open(link);
 	  },
 	  exchangeAFITforSTEEM () {
-		//function handles exchanging AFIT tokens for STEEM upvotes
-		this.exchangeAFITMode = !this.exchangeAFITMode
+		//function handles opening/closing exchanging AFIT tokens for STEEM upvotes  section
+		
+		//set proper AFIT Activity Mode controlling the display
+		if (this.afitActivityMode == this.EXCHANGE_AFIT_STEEM ){
+		  this.afitActivityMode = 0;
+		}else{
+		  this.afitActivityMode = this.EXCHANGE_AFIT_STEEM;
+		}
+		//hide lower section for STEEM actions
+		this.fundActivityMode = 0;
+	  },
+	  buyAFITwithSTEEM () {
+		//function handles opening/closing exchanging AFIT tokens for STEEM upvotes  section
+		
+		//set proper AFIT Activity Mode controlling the display
+		if (this.afitActivityMode == this.BUY_AFIT_STEEM ){
+		  this.afitActivityMode = 0;
+		}else{
+		  this.afitActivityMode = this.BUY_AFIT_STEEM;
+		}
+		//hide lower section for STEEM actions
+		this.fundActivityMode = 0;
 	  },
 	  moveAFITSEtoAFITPOWER () {
-		this.moveAFITSEPower = !this.moveAFITSEPower
+		//function handles opening/closing exchanging AFIT tokens for STEEM upvotes  section
+		
+		//set proper AFIT Activity Mode controlling the display
+		if (this.afitActivityMode == this.MOVE_AFIT_SE ){
+		  this.afitActivityMode = 0;
+		}else{
+		  this.afitActivityMode = this.MOVE_AFIT_SE;
+		}
+		//hide lower section for STEEM actions
+		this.fundActivityMode = 0;
 	  },
 	  passTransferTypeChange (e) {
 	    //handles the drop down select option to ensure we have proper value
@@ -952,6 +1027,58 @@
 		}
 		this.checkingFunds = false;
 	  },
+	  async proceedBuyAFIT () {
+		//function handles the actual processing of the buy event
+		this.checkingBought = true;
+		this.afit_buy_error_proceeding = false;
+		this.afit_buy_err_msg = '';
+		this.transConfirmed = false;
+		
+		let afit_amount_to_buy = this.$refs["afit-amount-buy"].value.trim();
+		console.log(afit_amount_to_buy);
+		//ensure we have proper values
+		if (isNaN(afit_amount_to_buy) || parseFloat(afit_amount_to_buy) < 1){
+		  this.afit_buy_error_proceeding = true;
+		  this.afit_buy_err_msg = this.$t('min_amount_AFIT_buy');
+		  this.checkingBought = false;
+		  return;
+		}
+		
+		var link = this.$steemconnect.sign('transfer', {
+		  from: this.user.account.name,
+		  to: this.target_buy_account,
+		  amount: this.getMatchingSTEEM() + ' ' + 'STEEM',
+		  memo: '',//no memo needed
+		  auto_return: true,
+		});
+		
+		//launch the SC window
+		window.open(link);
+		
+		//also start verification process
+		let url = new URL(process.env.actiAppUrl + 'confirmBuyAction');
+		//compile all needed data and send it along the request for processing
+		let params = {
+			from: this.user.account.name,
+			afit_amount: afit_amount_to_buy,
+			steem_amount: this.getMatchingSTEEM(),
+		}
+		Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
+		try{
+			let res = await fetch(url);
+			let outcome = await res.json();
+			console.log(outcome);
+			
+			//notify user
+			this.transConfirmed = true;
+			//update user data according to result
+			this.fetchUserData();
+		}catch(err){
+			console.error(err);
+		}
+		
+		this.checkingBought = false;
+	  },
 	  async exchangeTokensUpvote () {
 		//function handles actual exchange of AFIT tokens to STEEM upvote via recording this
 		this.performingSwap = true
@@ -1018,6 +1145,12 @@
 		}
 		this.performingSwap = false;
 	  },
+	  getMatchingSTEEM () {
+		return parseFloat(this.afitBuyAmount * this.afitPrice / this.steemPrice).toFixed(3);
+	  },
+	  setSteemPrice (_steemPrice){
+		this.steemPrice = parseFloat(_steemPrice).toFixed(3);
+	  },
 	},
 	created () {
 	  this.runningInterval = setInterval(this.fetchUserData, 60*1000);
@@ -1055,6 +1188,16 @@
 			history.pushState('wallet', document.title, window.location.href.split('?')[0]);
 		}
 	  }
+	  
+	  //check if we need to open the buy token screen
+	  if (this.$route.query.action === 'buy_afit'){
+		this.afitActivityMode = this.BUY_AFIT_STEEM;
+	  }
+	  
+	  //grab STEEM price
+	  fetch('https://api.coinmarketcap.com/v1/ticker/steem/').then(
+		res => {res.json().then(json => this.setSteemPrice (json[0].price_usd)).catch(e => reject(e))
+	  }).catch(e => reject(e))
 	  	  
     }
   }

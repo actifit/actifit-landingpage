@@ -263,4 +263,11 @@ module.exports = {
   doubledup_badge_title: 'Lucky Doubled UP Badge',
   charity_badge_title: 'Charity Donor',
   not_lucky_yet: 'Luck Hasn\'t Hit Yet!',
+  BUY_AFIT_WITH_STEEM: 'Buy AFIT',
+  AFIT_Amount_To_Buy: 'AFIT Amount to Buy',
+  STEEM_Amount_To_Pay: 'STEEM Amount to Pay',
+  min_amount_AFIT_buy: 'The amount needs to be a minimum of 1 AFIT',
+  notice_buy_afit: 'DO NOT CLOSE this window till transaction is verified.',
+  confirming_buy_transaction: 'Confirming AFIT Buy Transaction',
+  trans_confirmed: 'Transaction Successfully Confirmed!',
 }
