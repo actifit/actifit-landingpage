@@ -1069,8 +1069,10 @@
 			let outcome = await res.json();
 			console.log(outcome);
 			
-			//notify user
-			this.transConfirmed = true;
+			if (outcome.paymentReceivedTx != ''){
+				//notify user
+				this.transConfirmed = true;
+			}
 			//update user data according to result
 			this.fetchUserData();
 		}catch(err){

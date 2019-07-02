@@ -270,4 +270,5 @@ module.exports = {
   notice_buy_afit: 'DO NOT CLOSE this window till transaction is verified.',
   confirming_buy_transaction: 'Confirming AFIT Buy Transaction',
   trans_confirmed: 'Transaction Successfully Confirmed!',
+  buy_afit_menu: 'Buy AFIT',
 }

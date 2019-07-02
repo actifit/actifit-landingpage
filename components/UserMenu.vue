@@ -18,6 +18,7 @@
         <div class="dropdown-menu dropdown-menu-right">
           <h6 class="dropdown-header text-center">@{{ user.account.name }}</h6>
           <div class="dropdown-divider"></div>
+		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet?action=buy_afit')">{{ $t('buy_afit_menu') }}<br/></a>
           <a class="dropdown-item" href="#" @click.prevent="$router.push('/' + user.account.name)">{{ $t('My_Profile') }}<br/></a>
 		  <a class="dropdown-item" href="#" @click.prevent="">{{ $t('My_Rank') }} <br/><span class="text-brand"> {{ displayUserRank }} </span></a>
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet')">{{ $t('My_Wallet') }} <br/><span class="text-brand">  {{ formattedUserTokens }}</span></a>
