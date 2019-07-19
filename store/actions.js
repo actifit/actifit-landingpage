@@ -64,6 +64,20 @@ export default {
 		}).catch(e => reject(e))
     })
   },
+  fetchPros ({ commit }){
+	return new Promise((resolve, reject) => {
+		fetch(process.env.actiAppUrl+'professionals').then(res => {
+			res.json().then(json => commit('setProfessionals', json || [])).catch(e => reject(e))
+		}).catch(e => reject(e))
+    })
+  },
+  fetchProducts ({ commit }){
+	return new Promise((resolve, reject) => {
+		fetch(process.env.actiAppUrl+'products').then(res => {
+			res.json().then(json => commit('setProducts', json || [])).catch(e => reject(e))
+		}).catch(e => reject(e))
+    })
+  },
   fetchTokenInfo ({ commit }) {
     commit('setUserCount', 0) // reset to trigger animation again
     commit('setTokensDistributed', 0) // reset to trigger animation again

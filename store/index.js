@@ -21,6 +21,8 @@ const createStore = () => {
 	  topDelegators: [], //list of top delegators
 	  moderators: [], //list of current moderators
 	  ambassadors: [], //list of current ambassadors
+	  professionals: [], //list of professional approved trainers/nutritionists/...
+	  products: [], //list of products
       activeReport: null, // report shown in the modal
       editReport: null, // report shown in the edit modal
       moreReportsAvailable: false, // indicator if there are more reports to load

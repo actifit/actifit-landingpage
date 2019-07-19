@@ -80,6 +80,8 @@ We reserve the right, but are not obligated, to limit the sales of those product
 
 We do not warrant that the quality of any products, services, information, or other material purchased or obtained by you will meet your expectations, or that any errors in the Service will be corrected.
 
+The purchase of a ebook sold or made available via Actifit enables you to use this ebook solely for your personal use following the purchase, and in no way gives you the right to redistribute this ebook publicly or sell it to other parties.
+Unless explicitly stated, you are allowed to acquire 1 copy of the ebook.
 
 <h4>SECTION 6 - ACCURACY OF ACCOUNT INFORMATION</h4>
 

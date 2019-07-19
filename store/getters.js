@@ -38,6 +38,12 @@ export default {
   ambassadors (state) {
     return state.ambassadors
   },
+  professionals (state) {
+	return state.professionals  
+  },
+  products (state) {
+	return state.products  
+  },
   activeReport (state) {
     return state.activeReport
   },

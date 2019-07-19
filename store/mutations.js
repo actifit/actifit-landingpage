@@ -38,6 +38,12 @@ export default {
   setAmbassadors (state, ambassadors) {
     state.ambassadors = ambassadors
   },
+  setProfessionals (state, professionals) {
+	state.professionals = professionals
+  },
+  setProducts (state, products) {
+	state.products = products
+  },
   setActiveReport (state, report) {
     state.activeReport = report
   },

@@ -1194,6 +1194,8 @@
 	  //check if we need to open the buy token screen
 	  if (this.$route.query.action === 'buy_afit'){
 		this.afitActivityMode = this.BUY_AFIT_STEEM;
+	  }else if (this.$route.query.action === 'set_funds_pass'){
+	    this.afitActivityMode = this.EXCHANGE_AFIT_STEEM;
 	  }
 	  
 	  //grab STEEM price

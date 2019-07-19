@@ -23,6 +23,9 @@
             <a class="nav-link" href="#" @click.prevent="scrollTo('#delegators')">{{ $t('Delegators') }}</a>
           </li>
 		  <li class="nav-item">
+            <a class="nav-link" href="#" @click.prevent="scrollTo('#professionals')">{{ $t('Professionals') }}</a>
+          </li>
+		  <li class="nav-item">
             <a class="nav-link" href="#" @click.prevent="scrollTo('#leaderboard')">{{ $t('Leaderboard') }}</a>
           </li>
           <li class="nav-item">
@@ -36,6 +39,9 @@
           </li>
 		  <li class="nav-item">
             <a class="nav-link" href="#" @click.prevent="$router.push('/referrals')">{{ $t('Refer_A_Friend') }}</a>
+          </li>
+		  <li class="nav-item">
+            <a class="nav-link" href="#" @click.prevent="$router.push('/market')">{{ $t('Market') }}</a>
           </li>
         </ul>
       </div>
