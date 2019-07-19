@@ -40,9 +40,9 @@
 		  <li class="nav-item">
             <a class="nav-link" href="#" @click.prevent="$router.push('/referrals')">{{ $t('Refer_A_Friend') }}</a>
           </li>
-		  <li class="nav-item">
+		  <!--<li class="nav-item">
             <a class="nav-link" href="#" @click.prevent="$router.push('/market')">{{ $t('Market') }}</a>
-          </li>
+          </li>-->
         </ul>
       </div>
 	  <UserMenu/>
