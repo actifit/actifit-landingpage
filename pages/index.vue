@@ -273,7 +273,7 @@
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@alfamano" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.licdn.com/dms/image/C4D03AQHaFIYov4RQRA/profile-displayphoto-shrink_800_800/0?e=1561593600&v=beta&t=P4mXVYWQLZ95_9ulQG8HGBGmDFDN4ct6AItzcsG71Ng);'"></div>
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/alaafarhat.jpg);'"></div>
             </a>
             <a href="@alfamano" target="_blank">Alaa Farhat</a>
 			<div><i>Operations Manager</i></div>
@@ -289,7 +289,7 @@
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@rabihfarhat" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.licdn.com/dms/image/C5603AQHo9hI0JjU5sg/profile-displayphoto-shrink_800_800/0?e=1561593600&v=beta&t=NWsO9U_HJaaZ_s5xJAiIJcRIN2lQZfJkYXcyYzi2Cg8);'"></div>
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/rabihfarhat.jpg);'"></div>
             </a>
             <a href="@rabihfarhat" target="_blank">Rabih Farhat</a>
 			<div><i>Finance Manager</i></div>
@@ -297,7 +297,7 @@
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@pjansen" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.licdn.com/dms/image/C4E03AQHa0iykUKqUmA/profile-displayphoto-shrink_800_800/0?e=1561593600&v=beta&t=xl5sQ80B1Cj5Oio-ph54RFqEY2ezrjYuGE_sJsxfDeQ);'"></div>
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/pauljansen.jpg);'"></div>
             </a>
             <a href="@pjansen" target="_blank">Paul Jansen</a>
 			<div><i>Quality Assurance Manager</i></div>
@@ -307,7 +307,7 @@
 		<div class="row">
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@definethedollar" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.licdn.com/dms/image/C4D03AQFX6nc2g7kxPw/profile-displayphoto-shrink_800_800/0?e=1561593600&v=beta&t=ANzZzMRaKW9dYgL6V1ZhRbBVgELUPmtwCQ1Oc13SFpo);'"></div>
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/jasonrees.jpg);'"></div>
             </a>
             <a href="@definethedollar" target="_blank">Jason Rees</a>
 			<div><i>Moderator</i></div>
@@ -330,7 +330,7 @@
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@ashikstd" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.licdn.com/dms/image/C5603AQHyM8GBU9DWzA/profile-displayphoto-shrink_800_800/0?e=1561593600&v=beta&t=E55Jf7Qf0KcMv6mhgXa45mjbdWsEn6tlHUbWj3IY0Ls);'"></div>
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/mdalamin.jpg);'"></div>
             </a>
             <a href="@ashikstd" target="_blank">Md Al Amin</a>
 			<div><i>Moderator</i></div>
@@ -338,7 +338,7 @@
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@alokkumar121" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.licdn.com/dms/image/C4D03AQEG2ZehG2gP4w/profile-displayphoto-shrink_800_800/0?e=1561593600&v=beta&t=toFJjbpoI8gse5M64RZFgJLSoHweFSBLhdgcdPw02FY);'"></div>
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/alokkumar.jpg);'"></div>
             </a>
             <a href="@alokkumar121" target="_blank">Alok Kumar</a>
 			<div><i>Moderator</i></div>
@@ -346,7 +346,7 @@
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@ckole" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.licdn.com/dms/image/C4D03AQEK2wNJByOaZA/profile-displayphoto-shrink_800_800/0?e=1561593600&v=beta&t=HbGxfQXZBI6sIa6qPEIUx7OgWRxWY1wFsfEpo1GqSKI);'"></div>
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/skolatayo.jpg);'"></div>
             </a>
             <a href="@ckole" target="_blank">S. K Olatayo</a>
 			<div><i>Moderator</i></div>
@@ -362,7 +362,7 @@
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@kpreddy" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.licdn.com/dms/image/C5103AQFJSd4EV5aT7A/profile-displayphoto-shrink_800_800/0?e=1562198400&v=beta&t=7BT88sxg8ixtf5pIFmbR6FMa-95H0TXjikXo48egGr0);'"></div>
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/praveenreddy.jpg);'"></div>
             </a>
             <a href="@kpreddy" target="_blank">Praveen Reddy Kanthala</a>
 			<div><i>Moderator</i></div>
@@ -370,7 +370,7 @@
           </div>		  
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@sumit71428" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.licdn.com/dms/image/C5103AQHisdsxVqaShQ/profile-displayphoto-shrink_800_800/0?e=1561593600&v=beta&t=rtjC0n9_tvOFFPaO5nDr0hG9i5WpMZsAQeNPTxhCZsw);'"></div>
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/sumitsingh.jpg);'"></div>
             </a>
             <a href="@sumit71428" target="_blank">Sumit Singh</a>
 			<div><i>Moderator</i></div>
