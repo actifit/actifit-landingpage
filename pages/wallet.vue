@@ -336,12 +336,26 @@
 			  </div>
 			</transition>
 		</h5>
-		<div v-if="isClaimableDataAvailable">
-			<h5>{{ $t('Claimable_Steem_Rewards') }}</h5>
-			<h6 class="mb-4 font-weight-bold">
-				<span class="p-2">{{ this.claimSP }} | {{ this.claimSTEEM }} | {{ this.claimSBD }}</span>
-				<div class="p-2"><button v-on:click="claimRewards" class="btn btn-brand btn-lg w-20">{{ $t('Claim_Rewards') }}</button></div>
-			</h6>
+		<div class="row">
+			<div v-if="isClaimableDataAvailable" class="col-md-6">
+				<h5>{{ $t('Claimable_Steem_Rewards') }}</h5>
+				<h6 class="mb-4 font-weight-bold">
+					<span class="p-2">{{ this.claimSP }} | {{ this.claimSTEEM }} | {{ this.claimSBD }}</span>
+					<div class="p-2"><button v-on:click="claimRewards" class="btn btn-brand btn-lg w-20">{{ $t('Claim_Rewards') }}</button></div>
+				</h6>
+			</div>
+			<div v-if="claimableSETokens.length > 0" class="col-md-6">
+				<h5>{{ $t('Claimable_Token_Rewards') }}</h5>
+				<h6 class="mb-4 font-weight-bold">
+					<span class="p-2" v-for="(entry, index) in claimableSETokens" :key="index" :entry="entry">{{ renderTokenVal(entry.amount, entry.symbol) }} {{ entry.symbol }}</span>
+					<div class="p-2">
+						<button v-on:click="claimTokenRewards" class="btn btn-brand btn-lg w-20">{{ $t('Claim_Token_Rewards') }}</button>
+						<div v-if="claimingTokens">
+							<i class="fas fa-spin fa-spinner"></i>
+						</div>
+					</div>
+				</h6>
+			</div>
 		</div>
       </div>
 	  
@@ -392,6 +406,9 @@
   import SSC from 'sscjs'
   
   const ssc = new SSC('https://api.steem-engine.com/rpc');
+  const scot_steemengine_api = 'https://scot-api.steem-engine.com/';
+  
+  const tokensOfInterest = ['ZZAN', 'SPORTS'];
   
   import { mapGetters } from 'vuex'
 
@@ -457,7 +474,10 @@
 		defaultAfit: 100,
 		afit_buy_error_proceeding: false,
 		afit_buy_err_msg: '',
-		afitBuyAmount: this.defaultAfit
+		afitBuyAmount: this.defaultAfit,
+		claimableSETokens: [],
+		tokenOfInterestPrecision: [],
+		claimingTokens: false,
 	  }
 	},
     components: {
@@ -472,7 +492,7 @@
       ...mapGetters('steemconnect', ['user']),
       ...mapGetters(['userTokens', 'transactions', 'userRank']),
       formattedUserTokens () {
-		return this.numberFormat((parseFloat(this.userTokens) + parseFloat(this.userAddedTokens)).toFixed(3), 3) + " AFIT" + " | " + this.numberFormat(parseFloat(this.afit_se_balance), 3) + " AFIT S-E (Steem-Engine)";
+		return this.numberFormat((parseFloat(this.userTokens) + parseFloat(this.userAddedTokens)).toFixed(3), 3) + " AFIT" + " | " + this.numberFormat(parseFloat(this.afit_se_balance), 3) + " AFIT (Steem-Engine)";
       },
 	  displayUserRank () {
 		return this.userRank
@@ -581,6 +601,17 @@
 		  fetch(process.env.actiAppUrl+'getUserTokenSwapHistory/'+this.user.account.name).then(
 			res => {res.json().then(json => this.setUserTokenSwapHistory (json) ).catch(e => reject(e))
 		  }).catch(e => reject(e))
+
+
+		  //let's grab the precision for our tokens of interest for proper value display
+		  fetch(scot_steemengine_api+'info').then(
+			res => {res.json().then(json => this.setSETokensPrecision (json) ).catch(e => reject(e))
+		  }).catch(e => reject(e))
+		  
+		  //let's grab the user's steem-engine tokens too
+		  fetch(scot_steemengine_api+'@'+this.user.account.name).then(
+			res => {res.json().then(json => this.setUserClaimableSETokens (json) ).catch(e => reject(e))
+		  }).catch(e => reject(e))
 		  
 		  
 		  //let's grab the number of pending token swap transactions to see if we can add more
@@ -612,31 +643,34 @@
 		   
 		  //fetch user's S-E balance
 		  let bal = await ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFIT' });
-		  this.afit_se_balance = bal.balance;
-		  
-		  //if this operation relates to powering up AFIT from S-E, need to also initiate call to adjust AFIT token count
-		  if (this.$route.query.confirm_trans == 1){
-			
-			let url = new URL(process.env.actiAppUrl + 'confirmAFITSEReceipt/?user='+this.$store.state.steemconnect.user.name);
-			//connect with our service to confirm AFIT received to proper wallet
-			try{
-				let res = await fetch(url);
-				let outcome = await res.json();
-				if (outcome.error){
-					console.error(outcome);
-				}else{
-					//update user token count
-					if (outcome.afit_se_power){
-						this.userAddedTokens = outcome.afit_amount;
+		  if (bal){
+			  this.afit_se_balance = bal.balance;
+			  
+			  //if this operation relates to powering up AFIT from S-E, need to also initiate call to adjust AFIT token count
+			  if (this.$route.query.confirm_trans == 1){
+				
+				let url = new URL(process.env.actiAppUrl + 'confirmAFITSEReceipt/?user='+this.$store.state.steemconnect.user.name);
+				//connect with our service to confirm AFIT received to proper wallet
+				try{
+					let res = await fetch(url);
+					let outcome = await res.json();
+					if (outcome.error){
+						console.error(outcome);
+					}else{
+						//update user token count
+						if (outcome.afit_se_power){
+							this.userAddedTokens = outcome.afit_amount;
+						}
 					}
+					//this.checkingFunds = false;
+					//this.resultReturned = true;
+				
+				}catch(err){
+					console.error(err);
+					//this.checkingFunds = false;
 				}
-				//this.checkingFunds = false;
-				//this.resultReturned = true;
-			
-			}catch(err){
-				console.error(err);
-				//this.checkingFunds = false;
-			}
+			  }
+		  
 		  }
 			
 		}
@@ -680,7 +714,43 @@
 	  setUserTokenSwapHistory (result){
 		//handles setting the user's token swap history
 		this.userTokenSwapHistory = result;
-	  },	  
+	  },
+	  renderTokenVal (amount, symbol) {
+		if (this.tokenOfInterestPrecision[symbol]){
+			let prec = this.tokenOfInterestPrecision[symbol];
+			return this.numberFormat(amount / Math.pow(10, prec), prec)
+		}
+	  },
+	  setSETokensPrecision (result) {
+		let par = this;
+		this.tokenOfInterestPrecision = [];
+		//loop through our tokens of interest to fetch them and allow users to claim their rewards
+		tokensOfInterest.forEach( function(item, index){
+		  try{
+			  let tokenDetails = result[item];
+			  par.tokenOfInterestPrecision[item] = tokenDetails.precision;
+		  }catch(e){
+			console.error(e);
+		  }
+		});
+	  },
+	  setUserClaimableSETokens (result) {
+		let par = this;
+		this.claimableSETokens = [];
+		//loop through our tokens of interest to fetch them and allow users to claim their rewards
+		tokensOfInterest.forEach( function(item, index){
+		  try{
+			  let tokenDetails = result[item];
+			  //if we have pending rewards
+			  if (tokenDetails.pending_token > 0){
+				par.claimableSETokens.push({symbol: tokenDetails.symbol, amount: tokenDetails.pending_token });
+			  }
+		  }catch(e){
+			console.error(e);
+		  }
+		});
+		
+	  },
 	  async vestsToSteemPower (vests) {
 		//function handles converting Vests to SP
 		if (this.properties == ''){
@@ -714,6 +784,37 @@
 		}
 		return '';
 	  },
+	  async claimTokenRewards () {
+		//function handles claiming token rewards
+		this.claimingTokens = true;
+		//build list of claimable tokens
+		let claimableTokens = [];
+		this.claimableSETokens.forEach( function(item, index){
+			claimableTokens.push({symbol: item.symbol});
+		});
+		//broadcast the transaction to Steem BC
+		let cstm_params = {
+			required_auths: [],
+			required_posting_auths: [this.user.account.name],
+			id: 'scot_claim_token',
+			json: JSON.stringify(claimableTokens)
+		  };
+  
+		let res = await this.$steemconnect.broadcast([['custom_json', cstm_params]], (err) => {
+		  if (err) {
+			console.log(err);
+		  }else{
+			this.$notify({
+			  group: 'success',
+			  text: this.$t('tokens_claimed_successfully'),
+			  position: 'top center'
+			})
+			//reset claimable tokens
+			this.claimableSETokens = [];
+		  }
+		});
+		this.claimingTokens = false;
+	  },
 	  async claimRewards () {
 		//function handles claiming STEEM rewards
 		
@@ -728,7 +829,7 @@
 
 		window.open(link);
 		
-		//Below would have been preferred approach, but claimRewardBalance keeps failing. Keeping here for future further exploration
+		//Below would have been preferred approach, but claimRewardBalance keeps failing as it requires more authority. Keeping here for future further exploration
 		/*
 		console.log(this.claimSTEEM.split(' ')[0]);
 		console.log(this.claimSBD.split(' ')[0]);
