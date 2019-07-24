@@ -236,13 +236,27 @@
 			
 			</transition>
 		</div>
-		<h4>{{ $t('Your_Steem_Balance') }}</h4>
-		<h5 class="mb-4 font-weight-bold">
-			<span class="p-2">{{ this.renderSteemPower(2) }} {{ $t('STEEM_POWER_CAPS') }} | {{ this.renderSteemBalance() }} | {{ this.renderSBDBalance() }}</span>
-			<div class="p-2" id="ttip-area">
-				<small><i>{{ $t('STEEM_POWER_BREAKDOWN') }}: {{this.renderSteemPower(1)}} ({{ $t('Owned_SP') }}) + {{this.renderSteemPower(3)}} ({{ $t('Received_SP') }}) - {{this.renderSteemPower(4)}} ({{ $t('Delegated_SP') }}) - {{this.renderSteemPower(5)}} ({{ $t('Powering_Down_Amount') }})</i></small>
+		<div class="row text-center">
+			<div class="col-md-6">
+				<h4>{{ $t('Your_Steem_Balance') }}</h4>
+				<div class="mb-4 font-weight-bold">
+					<div class="p-2">{{ this.renderSteemPower(2) }} {{ $t('STEEM_POWER_CAPS') }} | {{ this.renderSteemBalance() }} | {{ this.renderSBDBalance() }}</div>
+					<div class="row">
+						<div class="p-2 col-md-6" id="ttip-area">
+							<small><i>{{ $t('STEEM_POWER_BREAKDOWN') }}: {{this.renderSteemPower(1)}} ({{ $t('Owned_SP') }}) + {{this.renderSteemPower(3)}} ({{ $t('Received_SP') }}) - {{this.renderSteemPower(4)}} ({{ $t('Delegated_SP') }}) - {{this.renderSteemPower(5)}} ({{ $t('Powering_Down_Amount') }})</i></small>
+						</div>
+					</div>
+				</div>
 			</div>
-			<div class="p-2">
+			<div v-if="tokensOfInterestBal.length > 0" class="col-md-6">
+				<h5>{{ $t('Your_Token_Balance') }}</h5>
+				<div class="mb-4 font-weight-bold">
+					<div class="p-2" v-for="(token, index) in tokensOfInterestBal" :key="index" :token="token">{{ renderBal(token) }} {{ token.symbol }} <span v-if="parseFloat(renderStake(token)) > 0">+ {{ renderStake(token)}} {{ token.symbol }} {{ $t('Staked') }}</span></div>
+				</div>
+			</div>
+		</div>
+		<div class="row text-center">
+			<div class="p-2 col-md-12">
 				<button v-on:click="transferFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('TRANSFER_FUNDS_ACTION_TEXT') }}</button>
 				<button v-on:click="powerUpFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{  $t('POWERUP_ACTION_TEXT') }}</button>
 				<button v-on:click="powerDownFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('POWERDOWN_ACTION_TEXT') }}</button>
@@ -335,18 +349,18 @@
 				</div>
 			  </div>
 			</transition>
-		</h5>
+		</div>
 		<div class="row">
 			<div v-if="isClaimableDataAvailable" class="col-md-6">
 				<h5>{{ $t('Claimable_Steem_Rewards') }}</h5>
-				<h6 class="mb-4 font-weight-bold">
+				<div class="mb-4 font-weight-bold">
 					<span class="p-2">{{ this.claimSP }} | {{ this.claimSTEEM }} | {{ this.claimSBD }}</span>
 					<div class="p-2"><button v-on:click="claimRewards" class="btn btn-brand btn-lg w-20">{{ $t('Claim_Rewards') }}</button></div>
-				</h6>
+				</div>
 			</div>
 			<div v-if="claimableSETokens.length > 0" class="col-md-6">
 				<h5>{{ $t('Claimable_Token_Rewards') }}</h5>
-				<h6 class="mb-4 font-weight-bold">
+				<div class="mb-4 font-weight-bold">
 					<span class="p-2" v-for="(entry, index) in claimableSETokens" :key="index" :entry="entry">{{ renderTokenVal(entry.amount, entry.symbol) }} {{ entry.symbol }}</span>
 					<div class="p-2">
 						<button v-on:click="claimTokenRewards" class="btn btn-brand btn-lg w-20">{{ $t('Claim_Token_Rewards') }}</button>
@@ -354,7 +368,7 @@
 							<i class="fas fa-spin fa-spinner"></i>
 						</div>
 					</div>
-				</h6>
+				</div>
 			</div>
 		</div>
       </div>
@@ -478,6 +492,7 @@
 		claimableSETokens: [],
 		tokenOfInterestPrecision: [],
 		claimingTokens: false,
+		tokensOfInterestBal: [],
 	  }
 	},
     components: {
@@ -602,11 +617,8 @@
 			res => {res.json().then(json => this.setUserTokenSwapHistory (json) ).catch(e => reject(e))
 		  }).catch(e => reject(e))
 
-
-		  //let's grab the precision for our tokens of interest for proper value display
-		  fetch(scot_steemengine_api+'info').then(
-			res => {res.json().then(json => this.setSETokensPrecision (json) ).catch(e => reject(e))
-		  }).catch(e => reject(e))
+		  //let's grab the user's steem-engine tokens too
+		  this.fetchTokenBalance();
 		  
 		  //let's grab the user's steem-engine tokens too
 		  fetch(scot_steemengine_api+'@'+this.user.account.name).then(
@@ -641,7 +653,7 @@
 		  this.claimableSTEEMRewards();
 		  
 		   
-		  //fetch user's S-E balance
+		  //fetch user's AFIT S-E balance
 		  let bal = await ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFIT' });
 		  if (bal){
 			  this.afit_se_balance = bal.balance;
@@ -672,7 +684,12 @@
 			  }
 		  
 		  }
-			
+		  
+		  //fetch user's tokensOfInterest S-E balance
+		  let tokenData = await ssc.find('tokens', 'balances', { account: this.user.account.name, symbol : { '$in' : tokensOfInterest } });
+		  if (tokenData){
+			this.tokensOfInterestBal = tokenData;
+		  }
 		}
 	  },
 	  setAFITPrice (_afitPrice){
@@ -715,6 +732,16 @@
 		//handles setting the user's token swap history
 		this.userTokenSwapHistory = result;
 	  },
+	  renderBal (token) {
+		let prec = this.tokenOfInterestPrecision[token.symbol];
+		return this.numberFormat(token.balance, prec);
+	  },
+	  renderStake (token) {
+		let totalStaked = 0;
+		totalStaked += parseFloat(token.delegationsIn) - parseFloat(token.delegationsOut) + parseFloat(token.stake);
+		let prec = this.tokenOfInterestPrecision[token.symbol];
+		return this.numberFormat(totalStaked, prec);
+	  },
 	  renderTokenVal (amount, symbol) {
 		if (this.tokenOfInterestPrecision[symbol]){
 			let prec = this.tokenOfInterestPrecision[symbol];
@@ -748,8 +775,7 @@
 		  }catch(e){
 			console.error(e);
 		  }
-		});
-		
+		});		
 	  },
 	  async vestsToSteemPower (vests) {
 		//function handles converting Vests to SP
@@ -811,9 +837,18 @@
 			})
 			//reset claimable tokens
 			this.claimableSETokens = [];
+			
+			//also run after 30 seconds a refresh on token count
+			setTimeout(this.fetchTokenBalance , 20);
 		  }
 		});
 		this.claimingTokens = false;
+	  },
+	  async fetchTokenBalance () {
+		//let's grab the precision for our tokens of interest for proper value display
+		  fetch(scot_steemengine_api+'info').then(
+			res => {res.json().then(json => this.setSETokensPrecision (json) ).catch(e => reject(e))
+		  }).catch(e => reject(e))
 	  },
 	  async claimRewards () {
 		//function handles claiming STEEM rewards
@@ -1136,7 +1171,6 @@
 		this.transConfirmed = false;
 		
 		let afit_amount_to_buy = this.$refs["afit-amount-buy"].value.trim();
-		console.log(afit_amount_to_buy);
 		//ensure we have proper values
 		if (isNaN(afit_amount_to_buy) || parseFloat(afit_amount_to_buy) < 1){
 		  this.afit_buy_error_proceeding = true;
@@ -1168,7 +1202,6 @@
 		try{
 			let res = await fetch(url);
 			let outcome = await res.json();
-			console.log(outcome);
 			
 			if (outcome.paymentReceivedTx != ''){
 				//notify user
@@ -1320,5 +1353,9 @@
   .afit-ex-option label{
 	height: 60px;
 	width: 100px;
+  }
+  #ttip-area{
+	display: table;
+    margin: 0 auto;
   }
 </style>

@@ -93,6 +93,7 @@ module.exports = {
   Claim_Rewards: 'Claim STEEM Rewards',
   Claimable_Token_Rewards: 'Claimable Token Rewards',
   Claim_Token_Rewards: 'Claim Token Rewards',
+  Your_Token_Balance: 'Your Token Balance',
   AFIT_Transaction_History: 'AFIT Transaction History',
   No_transactions_notice: 'No transactions yet.',
   login_required_wallet: 'You need to login first to check your balance.',
@@ -308,4 +309,5 @@ module.exports = {
   Delegated_SP: 'Delegated SP',
   Powering_Down_Amount: 'Powering Down Amount',
   tokens_claimed_successfully: 'Tokens Claimed Successfully',
+  Staked: 'Staked',
 }
