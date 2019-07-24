@@ -265,7 +265,7 @@
         <div class="row">
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@mcfarhat" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://www.dropbox.com/s/dlo8nengvv5ebpb/Mo%20-%20pro%20-%202018.jpg?dl=1);'"></div>
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/mohammadfarhat.jpg);'"></div>
             </a>
             <a href="@mcfarhat" target="_blank">Mohammad Farhat</a>
 			<div><i>CEO & Founder</i></div>
@@ -281,7 +281,7 @@
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@katerinaramm" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/katerinaramm/avatar);'"></div>
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/katerinaramm.jpg);'"></div>
             </a>
             <a href="@katerinaramm" target="_blank">Katerina Ramoutsaki</a>
 			<div><i>Social Media Manager</i></div>
@@ -315,7 +315,7 @@
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@ciuoto" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/ciuoto/avatar);'"></div>
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/eugeniopirillo.jpg);'"></div>
             </a>
             <a href="@ciuoto" target="_blank">Eugenio Pirillo</a>
 			<div><i>Moderator</i></div>
@@ -323,7 +323,7 @@
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@thereikiforest" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://media.discordapp.net/attachments/491018053685870622/570037859231465472/ADdPNihJzmPcLkHtjKRVWu2N2uvBRfNLKJYb8XFwoWdz4j9e3DS1QLdFzcrCu82tWCUcPMWmdAARuC1dyPZmPVkDo.png?width=586&height=492);'"></div>
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/aprilnewhall.jpg);'"></div>
             </a>
             <a href="@thereikiforest" target="_blank">April Newhall</a>
 			<div><i>Moderator</i></div>
@@ -354,7 +354,7 @@
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@priyanarc" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/p/32FTXiZsHoAW6noHJDhrg3W8ZKHVFSsLYM859aTDCF8iErL1Z6bfFgZVxWVcQeXwjds5wDJfwPn8wUxqL4mUQj1gXrsTDqxwvNCNV36ZfkfWKCPGW5Ur4uBRzpVbDETYkJJVrCp2SaDZJkii?width=128&height=128);'"></div>
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/priyanfareen.jpg);'"></div>
             </a>
             <a href="@priyanarc" target="_blank">Priyan Fareen</a>
 			<div><i>Moderator</i></div>
@@ -378,7 +378,7 @@
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@vishalsingh4997" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/vishalsingh4997/avatar/);'"></div>
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/vishalsingh.jpg);'"></div>
             </a>
             <a href="@vishalsingh4997" target="_blank">Vishal Singh</a>
 			<div><i>Moderator</i></div>
