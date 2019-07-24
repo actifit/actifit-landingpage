@@ -472,7 +472,7 @@
       ...mapGetters('steemconnect', ['user']),
       ...mapGetters(['userTokens', 'transactions', 'userRank']),
       formattedUserTokens () {
-		return (parseFloat(this.userTokens) + parseFloat(this.userAddedTokens)).toFixed(2) + " AFIT" + " | " + parseFloat(this.afit_se_balance) + " AFIT S-E (Steem-Engine)";
+		return this.numberFormat((parseFloat(this.userTokens) + parseFloat(this.userAddedTokens)).toFixed(3), 3) + " AFIT" + " | " + this.numberFormat(parseFloat(this.afit_se_balance), 3) + " AFIT S-E (Steem-Engine)";
       },
 	  displayUserRank () {
 		return this.userRank
@@ -545,10 +545,10 @@
 		}
 	  },
 	  renderSteemBalance () {
-		return this.user.account.balance;
+		return this.numberFormat(parseFloat(this.user.account.balance), 3) + ' ' + this.$t('STEEM');
 	  },
 	  renderSBDBalance () {
-		return this.user.account.sbd_balance;
+		return this.numberFormat(parseFloat(this.user.account.sbd_balance), 3) + ' ' + this.$t('SBD');
 	  },
 	  async fetchUserData () {
 		if (typeof this.user != 'undefined' && this.user != null){	  

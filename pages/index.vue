@@ -66,7 +66,7 @@
             <div class="row">
               <div class="col-sm-6">
                 <p class="lead text-muted mb-0">{{ $t('Balance') }}</p>
-                <h3><b>{{ formattedUserTokens }}</b><br><small>{{ $t('AFIT_Token') }}</small></h3>
+                <h3><b>{{ numberFormat(formattedUserTokens, 3) }}</b><br><small>{{ $t('AFIT_Token') }}</small></h3>
                 <a href="#" @click.prevent="$router.push('/wallet')" class="btn btn-lg btn-brand w-100">{{ $t('My_Wallet') }}</a>
               </div>
               <div class="col-sm-6 mt-4 mt-sm-0">
@@ -498,7 +498,7 @@
       ...mapGetters('steemconnect', ['user']),
       ...mapGetters(['userTokens', 'userReportCount', 'transactions', 'userRank', 'userCount', 'topDelegators', 'moderators', 'ambassadors', 'tokensDistributed', 'rewardedActivityCount', 'leaderboard', 'news', 'activeNews']),
       formattedUserTokens () {
-        return parseFloat(this.userTokens).toFixed(2)
+        return parseFloat(this.userTokens).toFixed(3)
       },
 	  
       grabUserReportCount () {

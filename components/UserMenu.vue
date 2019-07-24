@@ -40,8 +40,8 @@
     computed: {
       ...mapGetters('steemconnect', ['user']),
       ...mapGetters(['userTokens', 'userRank', 'referrals']),
-      formattedUserTokens () {
-        return parseFloat(this.userTokens).toFixed(2) + ' AFIT'
+	  formattedUserTokens () {
+        return this.numberFormat(parseFloat(this.userTokens).toFixed(3), 3) + ' AFIT'
       },
 	  displayUserRank () {
 		return parseFloat(this.userRank).toFixed(1)
@@ -49,7 +49,19 @@
 	  referralCount () {
 	    return this.referrals.length;
 	  }
-    }
+    },
+	methods: {
+	  /**
+       * Formats numbers with commas and dots.
+       *
+       * @param number
+	   * @param precision
+       * @returns {string}
+       */
+      numberFormat (number, precision) {
+        return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
+      },
+	}
   }
 </script>
 
