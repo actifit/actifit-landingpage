@@ -239,8 +239,8 @@
 		<h4>{{ $t('Your_Steem_Balance') }}</h4>
 		<h5 class="mb-4 font-weight-bold">
 			<span class="p-2">{{ this.renderSteemPower(2) }} {{ $t('STEEM_POWER_CAPS') }} | {{ this.renderSteemBalance() }} | {{ this.renderSBDBalance() }}</span>
-			<div class="p-2">
-				<small><i>({{ $t('STEEM_POWER_BREAKDOWN') }}: {{this.renderSteemPower(1)}} + {{this.renderSteemPower(3)}} - {{this.renderSteemPower(4)}} - {{this.renderSteemPower(5)}})</i></small>
+			<div class="p-2" id="ttip-area">
+				<small><i>{{ $t('STEEM_POWER_BREAKDOWN') }}: {{this.renderSteemPower(1)}} ({{ $t('Owned_SP') }}) + {{this.renderSteemPower(3)}} ({{ $t('Received_SP') }}) - {{this.renderSteemPower(4)}} ({{ $t('Delegated_SP') }}) - {{this.renderSteemPower(5)}} ({{ $t('Powering_Down_Amount') }})</i></small>
 			</div>
 			<div class="p-2">
 				<button v-on:click="transferFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('TRANSFER_FUNDS_ACTION_TEXT') }}</button>

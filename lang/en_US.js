@@ -301,4 +301,8 @@ module.exports = {
   Download_ready: 'Download Ready',
   download_ready_again_text: 'Your download link is ready. Click to initiate download.',
   Market: 'Market',
+  Owned_SP: 'Owned SP',
+  Received_SP: 'Received SP', 
+  Delegated_SP: 'Delegated SP',
+  Powering_Down_Amount: 'Powering Down Amount',
 }
