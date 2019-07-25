@@ -507,7 +507,7 @@
       ...mapGetters('steemconnect', ['user']),
       ...mapGetters(['userTokens', 'transactions', 'userRank']),
       formattedUserTokens () {
-		return this.numberFormat((parseFloat(this.userTokens) + parseFloat(this.userAddedTokens)).toFixed(3), 3) + " AFIT" + " | " + this.numberFormat(parseFloat(this.afit_se_balance), 3) + " AFIT (Steem-Engine)";
+		return this.numberFormat((parseFloat(this.userTokens) + parseFloat(this.userAddedTokens)).toFixed(3), 3) + " AFIT" + " | " + this.numberFormat(parseFloat(this.afit_se_balance), 3) + " AFIT S-E";
       },
 	  displayUserRank () {
 		return this.userRank

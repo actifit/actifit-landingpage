@@ -91,7 +91,7 @@ module.exports = {
   Cancel_Power_Down: 'Cancel Power Down',
   Claimable_Steem_Rewards: 'Claimable STEEM Rewards',
   Claim_Rewards: 'Claim STEEM Rewards',
-  Claimable_Token_Rewards: 'Claimable Token Rewards',
+  Claimable_Token_Rewards: 'Claimable S-E Token Rewards',
   Claim_Token_Rewards: 'Claim Token Rewards',
   Your_Token_Balance: 'Your Token Balance',
   AFIT_Transaction_History: 'AFIT Transaction History',
@@ -308,6 +308,6 @@ module.exports = {
   Received_SP: 'Received SP', 
   Delegated_SP: 'Delegated SP',
   Powering_Down_Amount: 'Powering Down Amount',
-  tokens_claimed_successfully: 'Tokens Claimed Successfully',
+  tokens_claimed_successfully: 'Tokens Claimed Successfully!',
   Staked: 'Staked',
 }
