@@ -422,7 +422,7 @@
   const ssc = new SSC('https://api.steem-engine.com/rpc');
   const scot_steemengine_api = 'https://scot-api.steem-engine.com/';
   
-  const tokensOfInterest = ['ZZAN', 'SPORTS'];
+  const tokensOfInterest = ['ZZAN', 'SPORTS', 'PAL'];
   
   import { mapGetters } from 'vuex'
 
