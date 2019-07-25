@@ -35,7 +35,29 @@
 			<div>{{ $t('Followers') }}: {{ numberFormat(userinfo.follower_count,0) }}</div>
 			<div>{{ $t('Following') }}: {{ numberFormat(userinfo.following_count,0) }}</div>
 			<div class="text-brand">
-				<div><a href="/wallet" >{{ numberFormat(userTokenCount, 3) }} AFIT Tokens</a></div>
+				<div>
+					<a href="/wallet" >{{ numberFormat(userTokenCount, 3) }} AFIT Tokens</a>&nbsp;
+					<button v-if="!account_banned" class="btn btn-brand border" v-on:click="tipUser" >Tip AFIT</button>
+				</div>
+				<div v-if="proceedTip">
+					<div class="tip-details">
+						<div class="row">
+							<label for="tip-amount" class="w-25 p-2">{{ $t('Tip_Amount') }}</label>
+							<input type="number" id="tip-amount" name="tip-amount" ref="tip-amount" class="form-control-lg w-50 p-2">
+						</div>
+						<div class="row">
+							<label for="funds-pass" class="w-25 p-2">{{ $t('Funds_Password') }}</label>
+							<input type="password" id="funds-pass" name="funds-pass" ref="funds-pass" class="form-control-lg w-50 p-2">
+							<a href="/wallet?action=set_funds_pass" class="btn btn-brand border m-1">{{ $t('create_pass_short') }}</a>
+						</div>
+						<div class="row">
+							<div v-if="tipError" v-html="tipError" class="m-3"></div>
+						</div>
+						<button v-on:click="proceedTipActivity" class="btn btn-brand w-50 border m-3">{{ $t('Proceed') }}</button>
+						<i class="fas fa-spin fa-spinner" v-if="tipInProgress"></i>
+					</div>
+				</div>
+				
 				<a :href="'/activity/'+displayUser" >{{ numberFormat(rewardedPostCount, 0) }} {{ $t('Activity_Reports_Rewarded') }}</a>
 			</div>
 		  </div>
@@ -111,6 +133,12 @@
 		</div>
 	</div>
 	<Footer />
+	<no-ssr>
+      <div>
+        <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
+        <notifications :group="'error'" :position="'top center'" :classes="'vue-notification error'" />
+      </div>
+    </no-ssr>
   </div>
 </template>
 
@@ -155,6 +183,9 @@
 			activ_badge_indent: 10,
 			claimable_badge_indent: 125,
 			account_banned: false,
+			tipError: '',
+			tipInProgress: false,
+			proceedTip: false,
 			rewarded_posts_rules: [
 									[9,0],
 									[29,1],
@@ -181,7 +212,7 @@
     computed: {
 	  ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters(['newlyVotedPosts']),
-	  ...mapGetters(['commentEntries'], 'commentCountToday'),
+	  ...mapGetters(['userTokens'],['commentEntries'], 'commentCountToday'),
 	  formattedProfileUrl () {
 		return "https://actifit.io/" + this.displayUser;
 	  },
@@ -249,7 +280,79 @@
 		}
 		return result;
 	  },
-	  
+	  //handles displaying/closing tip section
+	  tipUser() {
+		this.proceedTip = !this.proceedTip;
+	  },
+	  //handles actual tipping action
+	  async proceedTipActivity() {
+		this.tipError = '';
+		if (!this.user){
+			this.tipError = this.$t('Need_login_tip');
+			return false;
+		}
+		if (this.displayUser == this.user.account.name){
+			this.tipError = this.$t('Cannot_tip_self');
+			return false;
+		}
+		if (this.$refs["funds-pass"].value == ''){
+		  this.tipError = this.$t('error_missing_funds_pass') + ' <u><a href="/wallet?action=set_funds_pass">' + this.$t('create_funds_pass') + '</a></u>';
+		  return;
+		}
+		if (this.$refs["tip-amount"].value == ''){
+		  this.tipError = this.$t('amount_positive_int');
+		  return;
+		}
+		//check if user has enough funds
+		if (parseFloat(this.$refs["tip-amount"].value) > parseFloat(this.userTokens)){
+		  this.tipError = this.$t('amount_above_balance');
+		  return;
+		}
+		this.tipInProgress = true;
+		//proceed with tipping
+		let res = await fetch(process.env.actiAppUrl+'tipAccount/'
+			+ '?user=' + this.user.account.name
+			+ '&targetUser=' + this.displayUser
+			+ '&amount=' + this.$refs["tip-amount"].value
+			+ '&fundsPass=' + this.$refs["funds-pass"].value);
+		let outcome = await res.json();
+		if (outcome.status=='Success'){
+			let tipTransaction = { action: 'Tip', amount: outcome.tipAmount, recipient: this.displayUser};
+			//store the transaction to Steem BC
+			let cstm_params = {
+				required_auths: [],
+				required_posting_auths: [this.user.account.name],
+				id: 'actifit',
+				json: JSON.stringify(tipTransaction)
+			};
+			let res = await this.$steemconnect.broadcast([['custom_json', cstm_params]], (err) => {
+			  console.log(err);
+			  if (err) {
+				console.log(err);
+			  }else{
+				console.log('success');
+			  }
+			});
+			
+			//notify of success
+			this.$notify({
+			  group: 'success',
+			  text: this.$t('tip_successfully_sent'),
+			  position: 'top center'
+			})
+			//update sender token count
+			//ensure we fetch proper logged in user data
+			this.$store.dispatch('fetchUserTokens')
+			
+			//update recipient token count
+			this.userTokenCount = outcome.recipientTokenCount;
+			
+			this.proceedTip = false;
+		}else{
+			this.tipError = outcome.error;
+		}
+		this.tipInProgress = false;
+	  },
 	  getUserActivityLevel() {
 		return this.calcScore(this.rewarded_posts_rules, this.rewardedPostCount) 
 	  },
@@ -491,6 +594,11 @@
 	.user-badges{
 	  border: 2px #ff112d solid;
 	  margin: 10px;
+	}
+	.tip-details{
+	  border: 2px #ff112d solid;
+	  margin: 10px;
+	  padding: 10px;
 	}
 	.location-text{
 	  word-break: break-all;

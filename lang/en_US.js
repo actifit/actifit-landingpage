@@ -108,7 +108,7 @@ module.exports = {
   wallet_memo_notice: 'If sending funds to an exchange, make sure to use the memo field.',
   amount_positive_int: 'The amount needs to be a positive numeric value.',
   all_fields_required: 'Please ensure to fill all required fields properly.',
-  error_missing_funds_pass: 'Please enter a funds password or generate one',
+  error_missing_funds_pass: 'Please enter a funds password or generate one.',
   error_passwords_mismatch: 'Your confirmation password needs to match your funds password',
   min_amount_1_STEEM_SBD: 'The amount needs to be a minimum of 1 STEEM/SBD',
   provide_funds_pass: 'Please provide your funds password',
@@ -313,5 +313,11 @@ module.exports = {
   Need_login_tip: 'Please login first to tip this user',
   Cannot_tip_self: 'Come ooon you cannot tip yourself',
   Account_banned: 'Banned Account',
-  Account_banned_tip: 'Account is banned. If you believe this to be in error, please contact us.'
+  Account_banned_tip: 'Account is banned. If you believe this to be in error, please contact us.',
+  Tip_Amount: 'Tip Amount',
+  amount_above_balance: 'Amount is beyond than your current balance',
+  amount_above_daily_limit: 'Amount is beyond your daily tipping limit',
+  tip_successfully_sent: 'Tip Sent Successfully!',
+  create_funds_pass: 'You can create your funds password here.',
+  create_pass_short: 'Create Password',
 }
