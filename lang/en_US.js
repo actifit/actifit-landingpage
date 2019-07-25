@@ -93,7 +93,7 @@ module.exports = {
   Claim_Rewards: 'Claim STEEM Rewards',
   Claimable_Token_Rewards: 'Claimable S-E Token Rewards',
   Claim_Token_Rewards: 'Claim Token Rewards',
-  Your_Token_Balance: 'Your Token Balance',
+  Your_Token_Balance: 'Your S-E Token Balance',
   AFIT_Transaction_History: 'AFIT Transaction History',
   No_transactions_notice: 'No transactions yet.',
   login_required_wallet: 'You need to login first to check your balance.',
