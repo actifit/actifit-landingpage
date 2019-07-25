@@ -20,7 +20,7 @@
 		  <div class="user-avatar large-avatar mr-1 mb-5"
 					   :style="'background-image: url(https://steemitimages.com/u/' + this.displayUser + '/avatar)'"></div>
 		  <div v-if="userinfo" class="user-details">
-			<div><i class="fas fa-user"></i> {{ userinfo.name }}</div>
+			<div><i class="fas fa-user"></i> {{ userinfo.name }} <b-badge v-if="account_banned" variant="danger" :title="$t('Account_banned_tip')" >{{ $t('Account_banned') }}</b-badge></div>
 			<div v-if="userMeta && userMeta.profile">
 				<div class="location-text" ><i class="fas fa-street-view"></i> {{ userMeta.profile.location }}</div>
 				<div><i class="fas fa-address-card"></i> {{ userMeta.profile.about }}</div>
@@ -124,6 +124,10 @@
   
   import Vue from 'vue'
   
+  /* import badges component */
+  import { BadgePlugin } from 'bootstrap-vue'
+  Vue.use(BadgePlugin)
+
   export default {
 	data () {
 		return {
@@ -150,6 +154,7 @@
 			actifitDelegator: '',
 			activ_badge_indent: 10,
 			claimable_badge_indent: 125,
+			account_banned: false,
 			rewarded_posts_rules: [
 									[9,0],
 									[29,1],
@@ -244,6 +249,7 @@
 		}
 		return result;
 	  },
+	  
 	  getUserActivityLevel() {
 		return this.calcScore(this.rewarded_posts_rules, this.rewardedPostCount) 
 	  },
@@ -408,6 +414,10 @@
 		  fetch(process.env.actiAppUrl+'charityDonor/'+this.displayUser).then(
 			res => {res.json().then(json => this.charityDonor = json)}).catch(e => reject(e))	
 			
+			
+		  //let's check if this user is banned
+		  fetch(process.env.actiAppUrl+'is_banned/'+this.displayUser).then(
+			res => {res.json().then(json => this.account_banned = json)}).catch(e => reject(e))
 		
 		  this.getAccountData();
 		}else{

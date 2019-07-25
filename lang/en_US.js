@@ -310,4 +310,8 @@ module.exports = {
   Powering_Down_Amount: 'Powering Down Amount',
   tokens_claimed_successfully: 'Tokens Claimed Successfully!',
   Staked: 'Staked',
+  Need_login_tip: 'Please login first to tip this user',
+  Cannot_tip_self: 'Come ooon you cannot tip yourself',
+  Account_banned: 'Banned Account',
+  Account_banned_tip: 'Account is banned. If you believe this to be in error, please contact us.'
 }

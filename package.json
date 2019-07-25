@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "aws-sdk": "^2.388.0",
+    "bootstrap-vue": "^2.0.0-rc.27",
     "marked": "^0.6.2",
     "nuxt": "^1.4.2",
     "nuxt-i18n": "^5.8.5",
