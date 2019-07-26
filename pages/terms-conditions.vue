@@ -27,7 +27,7 @@
 
 This website is operated by Actifit.io. Throughout the site, the terms "we", "us" and "our" refer to Actifit.io. Actifit.io offers this website and related mobile apps, including all information, tools and services available from this site to you, the user, conditioned upon your acceptance of all terms, conditions, policies and notices stated here.
 
-By visiting our site and/ or using our apps, you engage in our "Service" and agree to be bound by the following terms and conditions ("Terms of Service", "Terms"), including those additional terms and conditions and policies referenced herein and/or available by hyperlink. These Terms of Service apply  to all users of the site, including without limitation users who are browsers, vendors, customers, merchants, and/ or contributors of content.
+By visiting our site and/ or using our apps, you engage in our "Service" and agree to be bound by the following terms and conditions ("Terms of Service", "Terms"), including those additional terms and conditions and policies referenced herein and/or available by hyperlink. These Terms of Service apply to all users of the site or our Service, including without limitation users who are browsers, vendors, customers, merchants, and/ or contributors of content.
 
 Please read these Terms of Service carefully before accessing or using our Service. By accessing or using any part of the site, you agree to be bound by these Terms of Service. If you do not agree to all the terms and conditions of this agreement, then you may not access the website or use any services. If these Terms of Service are considered an offer, acceptance is expressly limited to these Terms of Service.
 
@@ -41,6 +41,9 @@ By agreeing to these Terms of Service, you represent that you are at least the a
 You may not use our products for any illegal or unauthorized purpose nor may you, in the use of the Service, violate any laws in your jurisdiction (including but not limited to copyright laws).
 
 You must not transmit any worms or viruses or any code of a destructive nature.
+
+You may use only one single unique account in using our Actifit Service. The use and/or engagement via multiple accounts by the same real user is considered abusive behaviour and subjects the user to potential ban from access to our Service.
+Actifit reserves the right to ban any user to its own discretion based on any suspicion, doubt, or proof of potential abuse, or for any reason as decided by the Actifit team.
 
 A breach or violation of any of the Terms will result in an immediate termination of your Services.
 
@@ -152,7 +155,7 @@ We undertake no obligation to update, amend or clarify information in the Servic
 
 <h4>SECTION 13 - PROHIBITED USES</h4>
 
-In addition to other prohibitions as set forth in the Terms of Service, you are prohibited from using the site or its content: (a) for any unlawful purpose; (b) to solicit others to perform or participate in any unlawful acts; (c) to violate any international, federal, provincial or state regulations, rules, laws, or local ordinances; (d) to infringe upon or violate our intellectual property rights or the intellectual property rights of others; (e) to harass, abuse, insult, harm, defame, slander, disparage, intimidate, or discriminate based on gender, sexual orientation, religion, ethnicity, race, age, national origin, or disability; (f) to submit false or misleading information; (g) to upload or transmit viruses or any other type of malicious code that will or may be used in any way that will affect the functionality or operation of the Service or of any related website, other websites, or the Internet; (h) to collect or track the personal information of others; (i) to spam, phish, pharm, pretext, spider, crawl, or scrape; (j) for any obscene or immoral purpose; or (k) to interfere with or circumvent the security features of the Service or any related website, other websites, or the Internet. We reserve the right to terminate your use of the Service or any related website for violating any of the prohibited uses.
+In addition to other prohibitions as set forth in the Terms of Service, you are prohibited from using the site, its content, or our Service: (a) for any unlawful purpose; (b) to solicit others to perform or participate in any unlawful acts; (c) to violate any international, federal, provincial or state regulations, rules, laws, or local ordinances; (d) to infringe upon or violate our intellectual property rights or the intellectual property rights of others; (e) to harass, abuse, insult, harm, defame, slander, disparage, intimidate, or discriminate based on gender, sexual orientation, religion, ethnicity, race, age, national origin, or disability; (f) to submit false or misleading information; (g) to upload or transmit viruses or any other type of malicious code that will or may be used in any way that will affect the functionality or operation of the Service or of any related website, other websites, or the Internet; (h) to collect or track the personal information of others; (i) to spam, phish, pharm, pretext, spider, crawl, or scrape; (j) for any obscene or immoral purpose; or (k) to interfere with or circumvent the security features of the Service or any related website, other websites, or the Internet. We reserve the right to terminate your use of the Service or any related website for violating any of the prohibited uses.
 
 
 <h4>SECTION 14 - DISCLAIMER OF WARRANTIES; ASSUMPTION OF RISK, LIMITATION OF LIABILITY</h4>
