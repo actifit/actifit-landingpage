@@ -1,7 +1,7 @@
 <template>
   <div class="comments">
     <div class="modal-body comment-info" v-if="depth > 0">
-		<a :href="author" target="_blank">
+		<a :href="'/' + author" target="_blank">
 		  <div class="comment-user-section" :style="{ paddingLeft: depth * indentFactor + 'px' }">	
 			<div class="user-avatar mr-1"
                    :style="'background-image: url(https://steemitimages.com/u/' + author + '/avatar)'"></div>
