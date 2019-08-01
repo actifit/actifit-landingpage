@@ -19,12 +19,22 @@
       <!-- account balance -->
       <div class="text-center">
         <h3 class="mb-4">{{ $t('Hey') }} {{ user.account.name }}!</h3>
-        <h4>{{ $t('Your_Afit_Balance') }}</h4>
-        <h4 class="mb-4 font-weight-bold">{{ formattedUserTokens }}</h4>
+        <div class="row row-sep">
+			<div class="col-md-6 row-sep-in">
+				<h4><img src="/img/actifit_logo.png" class="mr-2 token-logo">{{ $t('Your_Afit_Balance') }}</h4>
+				<h5 class="mb-4 font-weight-bold">{{ formattedUserTokens }}</h5>
+			</div>
+			<div class="col-md-6 row-sep-in">
+				<h4><img src="/img/AFITX.png" class="mr-2 token-logo">{{ $t('Your_Afitx_Balance') }}<i class="fas fa-info-circle" v-on:click="showAfitxInfo=!showAfitxInfo"></i></h4>
+				<div v-if="showAfitxInfo" v-html="$t('afitx_info')"></div>
+				<h5 class="mb-4 font-weight-bold">{{ formattedUserAFITX }}</h5>
+			</div>
+		</div>
 		<div class="p-2 font-weight-bold">
 			<button v-on:click="buyAFITwithSTEEM" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('BUY_AFIT_WITH_STEEM') }}</button>
 			<button v-on:click="exchangeAFITforSTEEM" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('EXCHANGE_AFIT_FOR_STEEM') }}</button>
 			<button v-on:click="moveAFITSEtoAFITPOWER" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('MOVE_AFIT_SE_AFIT_POWER') }}</button>
+			<button v-on:click="initiateAFITtoSE" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('INITIATE_AFIT_TO_SE') }}</button>
 			  <transition name="fade">
 			  <div v-if="afitActivityMode == MOVE_AFIT_SE">
 				  <div class="text-center grid p-2">
@@ -38,7 +48,7 @@
 					</div>
 					<div class="row">
 					  <div class="w-25"></div>
-					  <button v-on:click="proceedMoveSEPower" class="btn btn-brand btn-lg w-50">{{ $t('Proceed') }}</button>
+					  <button v-on:click="proceedMoveSEPower" class="btn btn-brand btn-lg w-50 border">{{ $t('Proceed') }}</button>
 					</div>
 					<div class="row">
 					  <div class="w-25"></div>
@@ -46,6 +56,47 @@
 						<i class="fas fa-spin fa-spinner"></i>{{ $t('moving_afit_se_power') }}
 					  </div>
 					</div>
+				  </div>
+			  </div>
+			  
+			  <div v-else-if="afitActivityMode == INIT_AFIT_TO_SE">
+				  <div class="text-center grid p-2">
+					<h5 class="text-brand font-weight-bold">{{ $t('wallet.initiate_afit_to_se') }}</h5>
+					<div v-if="userPDAfit.user">
+						<span class="end-string">{{ afitPowerDownText }}</span><Countdown v-if="countDownReady" :deadline="nextAfitPDTarget"></Countdown>
+					</div>
+					<div>{{ $t('move_afit_se_notice') }}</div>
+					<div>{{ $t('move_afit_se_notice2') }}</div>
+					<div>{{ $t('move_afit_se_notice3') }}</div>
+					<div>
+						<div class="row" >
+						  <div class="w-25 p-2 text-right">{{ $t('Amount_To_Move_Daily') }}</div>
+						  <input type="number" id="afit-move-to-se" name="afit-move-to-se" ref="afit-move-to-se" class="form-control-lg w-50 p-2">
+						</div>
+						<div class="row">
+							<label for="move-funds-pass" class="w-25 p-2 text-right">{{ $t('Funds_Password') }}</label>
+							<input type="password" id="move-funds-pass" name="move-funds-pass" ref="move-funds-pass" class="form-control-lg w-50 p-2">
+							<a @click.prevent="afitActivityMode = EXCHANGE_AFIT_STEEM" href="#" class="btn btn-brand border m-1">{{ $t('create_pass_short') }}</a>
+						</div>
+						<div class="text-brand text-center" v-if="afit_se_move_error_proceeding" v-html="afit_se_move_err_msg">
+						</div>
+						<div class="row" v-if="userPDAfit.user">
+						  <div class="w-25"></div>
+						  <button v-on:click="proceedMoveToSE" class="btn btn-brand border btn-lg w-25">{{ $t('adjust_amount') }}</button>
+						  <button v-on:click="cancelMoveToSE" class="btn btn-brand border btn-lg w-25">{{ $t('Cancel_Transfer') }}</button>
+						</div>
+						<div class="row" v-else>
+						  <div class="w-25"></div>
+						  <button v-on:click="proceedMoveToSE" class="btn btn-brand border btn-lg w-50">{{ $t('Proceed') }}</button>
+						</div>
+						<div class="row">
+						  <div class="w-25"></div>
+						  <div v-if="initiateInProgress">
+							<i class="fas fa-spin fa-spinner"></i>{{ $t('processing') }}
+						  </div>
+						</div>
+					</div>
+					
 				  </div>
 			  </div>
 			  
@@ -68,7 +119,7 @@
 					</div>
 					<div class="row">
 					  <div class="w-25"></div>
-					  <button v-on:click="proceedBuyAFIT" class="btn btn-brand btn-lg w-50">{{ $t('Proceed') }}</button>
+					  <button v-on:click="proceedBuyAFIT" class="btn btn-brand btn-lg w-50 border">{{ $t('Proceed') }}</button>
 					</div>
 					<div class="row">
 					  <div class="w-25"></div>
@@ -102,7 +153,7 @@
 					</div>
 					<div class="row">
 					  <div class="w-25"></div>
-					  <button v-on:click="setFundsPass" class="btn btn-brand btn-lg w-50">{{ $t('Set_Password') }}</button>
+					  <button v-on:click="setFundsPass" class="btn btn-brand btn-lg w-50 border">{{ $t('Set_Password') }}</button>
 					</div>
 					<div v-if="settingPass" class="row">
 					  <div class="w-25"></div>
@@ -115,7 +166,7 @@
 				</div>
 			  </transition>
 			  <transition name="fade" v-else-if="!userFundsPassVerified" >
-				<div class="text-center grid">
+				<div class="text-center grid p-2">
 					<h5>{{ $t('wallet.step2_title') }}</h5>
 					<div v-html="$t('wallet.step2_desc')">
 					</div>
@@ -135,7 +186,7 @@
 					</div>
 					<div class="row">
 					  <div class="w-25"></div>
-					  <button v-on:click="proceedVerifyPass" class="btn btn-brand btn-lg w-50">{{ $t('Send_Verify') }}</button>
+					  <button v-on:click="proceedVerifyPass" class="btn btn-brand btn-lg w-50 border">{{ $t('Send_Verify') }}</button>
 					</div>
 					<div class="row">
 					  <div class="w-25"></div>
@@ -193,7 +244,7 @@
 					</div>
 					<div class="row">
 					  <div class="w-25"></div>
-					  <button v-on:click="exchangeTokensUpvote" class="btn btn-brand btn-lg w-50">{{ $t('Exchange') }}</button>
+					  <button v-on:click="exchangeTokensUpvote" class="btn btn-brand btn-lg w-50 border">{{ $t('Exchange') }}</button>
 					</div>
 					<div class="row" v-if="performingSwap" >
 					  <div class="w-25"></div>
@@ -236,9 +287,9 @@
 			
 			</transition>
 		</div>
-		<div class="row text-center">
-			<div class="col-md-6">
-				<h4>{{ $t('Your_Steem_Balance') }}</h4>
+		<div class="row text-center row-sep">
+			<div class="col-md-6 row-sep-in">
+				<h4><img src="/img/STEEM.png" class="mr-2 token-logo">{{ $t('Your_Steem_Balance') }}</h4>
 				<div class="mb-4 font-weight-bold">
 					<div class="p-2">{{ this.renderSteemPower(2) }} {{ $t('STEEM_POWER_CAPS') }} | {{ this.renderSteemBalance() }} | {{ this.renderSBDBalance() }}</div>
 					<div class="row">
@@ -248,8 +299,8 @@
 					</div>
 				</div>
 			</div>
-			<div v-if="tokensOfInterestBal.length > 0" class="col-md-6">
-				<h5>{{ $t('Your_Token_Balance') }}</h5>
+			<div v-if="tokensOfInterestBal.length > 0" class="col-md-6 row-sep-in">
+				<h4>{{ $t('Your_Token_Balance') }}</h4>
 				<div class="mb-4 font-weight-bold">
 					<div class="p-2" v-for="(token, index) in tokensOfInterestBal" :key="index" :token="token">{{ renderBal(token) }} {{ token.symbol }} <span v-if="parseFloat(renderStake(token)) > 0">+ {{ renderStake(token)}} {{ token.symbol }} {{ $t('Staked') }}</span></div>
 				</div>
@@ -262,7 +313,7 @@
 				<button v-on:click="powerDownFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('POWERDOWN_ACTION_TEXT') }}</button>
 			</div>
 			<transition name="fade">
-			  <div v-if="fundActivityMode == 1" class="text-center grid">
+			  <div v-if="fundActivityMode == 1" class="text-center grid p-2 col-md-12">
 				<div class="row">
 				  <label for="transfer-recipient" class="w-25 p-2">{{ $t('To') }} *</label>
 				  <input type="text" id="transfer-recipient" name="transfer-recipient" ref="transfer-recipient" class="form-control-lg w-50 p-2">
@@ -290,12 +341,12 @@
 				</div>
 				<div class="row">
 				  <div class="w-25"></div>
-				  <button v-on:click="proceedTransfer" class="btn btn-brand btn-lg w-50">{{ $t('Send') }}</button>
+				  <button v-on:click="proceedTransfer" class="btn btn-brand btn-lg w-50 border">{{ $t('Send') }}</button>
 				</div>
 			  </div>
 			</transition>
 			<transition name="fade">
-			  <div v-if="fundActivityMode == 2" class="text-center grid">
+			  <div v-if="fundActivityMode == 2" class="text-center grid p-2">
 				<div class="row">
 				  <label for="powerup-recipient" class="w-25 p-2">{{ $t('To') }} *</label>
 				  <input type="text" id="powerup-recipient" name="powerup-recipient" ref="powerup-recipient" class="form-control-lg w-50 p-2" :value="user.account.name">
@@ -314,12 +365,12 @@
 				</div>
 				<div class="row">
 				  <div class="w-25"></div>
-				  <button v-on:click="proceedPowerUp" class="btn btn-brand btn-lg w-50">{{ $t('Power_Up') }}</button>
+				  <button v-on:click="proceedPowerUp" class="btn btn-brand btn-lg w-50 border">{{ $t('Power_Up') }}</button>
 				</div>
 			  </div>
 			</transition>
 			<transition name="fade">
-			  <div v-if="fundActivityMode == 3" class="text-center grid">
+			  <div v-if="fundActivityMode == 3" class="text-center grid p-2 col-md-12">
 				<div class="row">
 				  <label for="powerdown-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
 				  <input type="number" id="powerdown-amount" name="powerdown-amount" ref="powerdown-amount" class="form-control-lg w-50 p-2">
@@ -350,16 +401,16 @@
 			  </div>
 			</transition>
 		</div>
-		<div class="row">
-			<div v-if="isClaimableDataAvailable" class="col-md-6">
-				<h5>{{ $t('Claimable_Steem_Rewards') }}</h5>
+		<div class="row row-sep">
+			<div v-if="isClaimableDataAvailable" class="col-md-6 row-sep-in">
+				<h5 class="token-title"><img src="/img/STEEM.png" class="mr-2 token-logo">{{ $t('Claimable_Steem_Rewards') }}</h5>
 				<div class="mb-4 font-weight-bold">
 					<span class="p-2">{{ this.claimSP }} | {{ this.claimSTEEM }} | {{ this.claimSBD }}</span>
 					<div class="p-2"><button v-on:click="claimRewards" class="btn btn-brand btn-lg w-20">{{ $t('Claim_Rewards') }}</button></div>
 				</div>
 			</div>
-			<div v-if="claimableSETokens.length > 0" class="col-md-6">
-				<h5>{{ $t('Claimable_Token_Rewards') }}</h5>
+			<div v-if="claimableSETokens.length > 0" class="col-md-6 row-sep-in">
+				<h5 class="token-title">{{ $t('Claimable_Token_Rewards') }}</h5>
 				<div class="mb-4 font-weight-bold">
 					<span class="p-2" v-for="(entry, index) in claimableSETokens" :key="index" :entry="entry">{{ renderTokenVal(entry.amount, entry.symbol) }} {{ entry.symbol }}</span>
 					<div class="p-2">
@@ -419,6 +470,8 @@
   import ExchangeHistory from '~/components/ExchangeHistoryModal'
   import SSC from 'sscjs'
   
+  import Countdown from 'vuejs-countdown'
+  
   const ssc = new SSC('https://api.steem-engine.com/rpc');
   const scot_steemengine_api = 'https://scot-api.steem-engine.com/';
   
@@ -436,6 +489,7 @@
 		EXCHANGE_AFIT_STEEM: 1,
 		MOVE_AFIT_SE: 2,
 		BUY_AFIT_STEEM: 3,
+		INIT_AFIT_TO_SE: 4,
 		powerDownRateVal: '',
 		powerDownWithdrawDate: '',	
 		steemPower: 0,
@@ -483,6 +537,7 @@
 		userTokenSwapPending: '',
 		runningInterval: '',
 		afit_se_balance: 0,
+		afitx_se_balance: 0,
 		userAddedTokens: 0,
 		steemPrice: 0.1,
 		defaultAfit: 100,
@@ -493,6 +548,12 @@
 		tokenOfInterestPrecision: [],
 		claimingTokens: false,
 		tokensOfInterestBal: [],
+		initiateInProgress: false,
+		userPDAfit: '',
+		countDownReady: false,
+		nextAfitPDTarget: '',
+		afitPowerDownText: '',
+		showAfitxInfo: false,
 	  }
 	},
     components: {
@@ -501,7 +562,8 @@
       Transaction, // single transaction block
       Footer,
 	  ExchangeQueue,
-	  ExchangeHistory
+	  ExchangeHistory,
+	  Countdown
     },
     computed: {
       ...mapGetters('steemconnect', ['user']),
@@ -509,6 +571,9 @@
       formattedUserTokens () {
 		return this.numberFormat((parseFloat(this.userTokens) + parseFloat(this.userAddedTokens)).toFixed(3), 3) + " AFIT" + " | " + this.numberFormat(parseFloat(this.afit_se_balance), 3) + " AFIT S-E";
       },
+	  formattedUserAFITX () {
+		return this.numberFormat(this.afitx_se_balance,3) + ' AFITX';
+	  },
 	  displayUserRank () {
 		return this.userRank
 	  },
@@ -584,6 +649,32 @@
 	  },
 	  renderSBDBalance () {
 		return this.numberFormat(parseFloat(this.user.account.sbd_balance), 3) + ' ' + this.$t('SBD');
+	  },
+	  setUserPDAfitStatus (result) {
+		this.userPDAfit = result;
+		//next power down takes place every day same time 10:00 AM UTC
+		//console.log(result);
+		//console.log(result.user);
+		//only display if user is powering down AFIT
+		if (result.user && result.daily_afit_transfer){
+			//check current time
+			let curDate = new Date();
+			let voteDate = new Date();
+			let timeString = (curDate.getUTCHours()<10?'0'+curDate.getUTCHours():curDate.getUTCHours()) + '' + (curDate.getUTCMinutes()<10?'0'+curDate.getUTCMinutes():curDate.getUTCMinutes());
+
+			//time passed, jump till tomorrow
+			if (parseInt(timeString) > 1000){//10:00 AM
+				//add one day till next vote
+				voteDate.setDate(voteDate.getDate() + 1);
+			}
+			voteDate.setUTCHours(10);
+			voteDate.setUTCMinutes(0);
+			voteDate.setUTCSeconds(0);
+			
+			this.nextAfitPDTarget = ""+voteDate;//"August 14, 2019 13:00 GMT";//
+			this.afitPowerDownText = this.$t('next_afit_powerdown').replace('AFIT_AMOUNT', this.userPDAfit.daily_afit_transfer+ ' AFIT');
+			this.countDownReady = true;
+		}
 	  },
 	  async fetchUserData () {
 		if (typeof this.user != 'undefined' && this.user != null){	  
@@ -682,7 +773,12 @@
 					//this.checkingFunds = false;
 				}
 			  }
+		  }
 		  
+		  //fetch user's AFITX S-E balance
+		  bal = await ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' });
+		  if (bal){
+			  this.afitx_se_balance = bal.balance;
 		  }
 		  
 		  //fetch user's tokensOfInterest S-E balance
@@ -690,6 +786,11 @@
 		  if (tokenData){
 			this.tokensOfInterestBal = tokenData;
 		  }
+		  
+		  //check if user is powering down AFIT to SE
+		  fetch(process.env.actiAppUrl+'isPoweringDown/'+this.user.account.name).then(
+			res => {res.json().then(json => this.setUserPDAfitStatus (json) ).catch(e => reject(e))
+		  }).catch(e => reject(e))
 		}
 	  },
 	  setAFITPrice (_afitPrice){
@@ -751,6 +852,7 @@
 	  setSETokensPrecision (result) {
 		let par = this;
 		this.tokenOfInterestPrecision = [];
+		//console.log(result);
 		//loop through our tokens of interest to fetch them and allow users to claim their rewards
 		tokensOfInterest.forEach( function(item, index){
 		  try{
@@ -1040,6 +1142,18 @@
 		//hide lower section for STEEM actions
 		this.fundActivityMode = 0;
 	  },
+	  initiateAFITtoSE () {
+		//function handles opening/closing moving AFIT to SE
+		
+		//set proper AFIT Activity Mode controlling the display
+		if (this.afitActivityMode == this.INIT_AFIT_TO_SE ){
+		  this.afitActivityMode = 0;
+		}else{
+		  this.afitActivityMode = this.INIT_AFIT_TO_SE;
+		}
+		//hide lower section for STEEM actions
+		this.fundActivityMode = 0;
+	  },
 	  passTransferTypeChange (e) {
 	    //handles the drop down select option to ensure we have proper value
 		if(e.target.options.selectedIndex > -1) {
@@ -1084,6 +1198,177 @@
 			//display error
 			this.errorSettingPass = outcome.error;
 		}
+	  },
+	  async cancelMoveToSE(){
+		this.afit_se_move_err_msg = '';
+		let userConf = confirm(this.$t('Cancel_Transfer_Confirm'));
+		if (!userConf) {
+		  return;
+		}
+		
+		
+		//make sure password is provided
+		//ensure user provided funds-pass
+		if (this.$refs["move-funds-pass"].value == ''){
+		  this.afit_se_move_error_proceeding = true;
+		  this.afit_se_move_err_msg = this.$t('error_missing_funds_pass') + ' <u><a href="/wallet?action=set_funds_pass">' + this.$t('create_funds_pass') + '</a></u>';
+		  return;
+		}
+		
+		this.initiateInProgress = true;
+		
+		//proceed with tipping
+		let res = await fetch(process.env.actiAppUrl+'cancelAFITMoveSE/'
+			+ '?user=' + this.user.account.name
+			+ '&fundsPass=' + this.$refs["move-funds-pass"].value
+			);
+		let outcome = await res.json();
+		if (outcome.status=='Success'){
+			let afitCancPDTransaction = { action: 'Cancel AFIT To S-E Power Down'};
+			//store the transaction to Steem BC
+			let cstm_params = {
+				required_auths: [],
+				required_posting_auths: [this.user.account.name],
+				id: 'actifit',
+				json: JSON.stringify(afitCancPDTransaction)
+			};
+			let res = await this.$steemconnect.broadcast([['custom_json', cstm_params]], (err) => {
+			  if (err) {
+				console.log(err);
+			  }else{
+				console.log('success');
+			  }
+			});
+			
+			//notify of success
+			this.$notify({
+			  group: 'success',
+			  text: this.$t('afit_power_down_canceled'),
+			  position: 'top center'
+			})
+			
+			//unset the value of existing transfer
+			this.userPDAfit = false
+			
+		}else{
+			this.afit_se_move_error_proceeding = true;
+			this.afit_se_move_err_msg = outcome.error;
+		}
+		this.initiateInProgress = false;
+	  },
+	  async proceedMoveToSE() {
+		
+		this.afit_se_move_error_proceeding = false;
+		this.afit_se_move_err_msg = '';
+		
+		let amount_to_powerdown = this.$refs["afit-move-to-se"].value.trim();
+		
+		//ensure user provided funds-pass
+		if (this.$refs["move-funds-pass"].value == ''){
+		  this.afit_se_move_error_proceeding = true;
+		  this.afit_se_move_err_msg = this.$t('error_missing_funds_pass') + ' <u><a href="/wallet?action=set_funds_pass">' + this.$t('create_funds_pass') + '</a></u>';
+		  return;
+		}
+		//ensure we have proper values
+		if (isNaN(amount_to_powerdown) || parseFloat(amount_to_powerdown) < 0.1){
+		  this.afit_se_move_error_proceeding = true;
+		  this.afit_se_move_err_msg = this.$t('min_amount_AFIT_power');
+		  //this.movingFunds = false;
+		  return;
+		}
+		amount_to_powerdown = parseFloat(amount_to_powerdown);
+		//console.log(amount_to_powerdown);
+		
+		//ensure user is powering down value he has
+		if (amount_to_powerdown > parseFloat(this.userTokens)){
+		  this.afit_se_move_error_proceeding = true;
+		  this.afit_se_move_err_msg = this.$t('max_amount_AFIT_power_SE');
+		  //this.movingFunds = false;
+		  return;
+		}
+		this.initiateInProgress = true;
+		
+		try{
+			//check if the user has enough AFITX S-E amount allowing him the transfers daily
+			let bal = await ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' });
+			if (bal){
+			  this.afitx_se_balance = parseFloat(bal.balance);
+			  //console.log('AFITX balance: '+this.afitx_se_balance);
+			  
+			  //make sure user has at least 0.1 AFITX to move tokens
+			  if (this.afitx_se_balance < 0.1){
+				this.afit_se_move_error_proceeding = true;
+				this.afit_se_move_err_msg = this.$t('no_proper_afitx_funds');
+				this.initiateInProgress = false;
+				return;
+			  }
+			  //console.log(amount_to_powerdown);
+			  //console.log(this.afitx_se_balance);
+			  //calculate amount that can be transferred daily
+			  if (amount_to_powerdown / 100 > this.afitx_se_balance){
+				this.afit_se_move_error_proceeding = true;
+				this.afit_se_move_err_msg = this.$t('cannot_move_amount_afitx_needed');
+				this.initiateInProgress = false;
+				return;
+			  }
+			}else{
+				this.afit_se_move_error_proceeding = true;
+				this.afit_se_move_err_msg = this.$t('no_proper_afitx_funds');
+				this.initiateInProgress = false;
+				return;
+			}
+		}catch(err){
+			this.afit_se_move_error_proceeding = true;
+			this.afit_se_move_err_msg = this.$t('unable_fetch_bal_try_again');
+			this.initiateInProgress = false;
+			return;
+		}
+		//otherwise we're good, let's register the move
+		
+		
+		//proceed with tipping
+		let res = await fetch(process.env.actiAppUrl+'initiateAFITMoveSE/'
+			+ '?user=' + this.user.account.name
+			+ '&amount=' + amount_to_powerdown
+			+ '&fundsPass=' + this.$refs["move-funds-pass"].value);
+		let outcome = await res.json();
+		if (outcome.status=='Success'){
+			let afitPDTransaction = { action: 'AFIT To S-E Power Down', amount: amount_to_powerdown};
+			//store the transaction to Steem BC
+			let cstm_params = {
+				required_auths: [],
+				required_posting_auths: [this.user.account.name],
+				id: 'actifit',
+				json: JSON.stringify(afitPDTransaction)
+			};
+			let res = await this.$steemconnect.broadcast([['custom_json', cstm_params]], (err) => {
+			  if (err) {
+				console.log(err);
+			  }else{
+				console.log('success');
+			  }
+			});
+			
+			//notify of success
+			this.$notify({
+			  group: 'success',
+			  text: this.$t('power_down_successfully_initiated'),
+			  position: 'top center'
+			})
+			
+			this.setUserPDAfitStatus(outcome.trx);
+			
+			//check if user is powering down AFIT to SE
+			  /*fetch(process.env.actiAppUrl+'isPoweringDown/'+this.user.account.name).then(
+				res => {res.json().then(json => this.setUserPDAfitStatus (json) ).catch(e => reject(e))
+			  }).catch(e => reject(e))*/
+			
+		}else{
+			this.afit_se_move_error_proceeding = true;
+			this.afit_se_move_err_msg = outcome.error;
+		}
+		this.initiateInProgress = false;
+		
 	  },
 	  async proceedMoveSEPower() {
 		//handles checking for proper confirmation of account via STEEM transfer
@@ -1357,5 +1642,27 @@
   #ttip-area{
 	display: table;
     margin: 0 auto;
+  }
+  .row-sep{
+    border: 2px solid red;
+	border-radius: 5px;
+  }
+  .row-sep-in{
+    border: 2px solid red;
+  }
+  .row-sep-in h4, .row-sep-in .token-title{
+	border-bottom: 1px dashed red;
+	height: 40px;
+  }
+  .token-logo{
+	width: 40px;
+	height: 40px;
+  }
+  .fa-info-circle{
+	cursor: pointer;
+  }
+  .text-center.grid.p-2{
+	border: 2px solid red;
+	border-radius: 5px;
   }
 </style>
