@@ -7,4 +7,6 @@
 	<string name="step3_title">Step 3 / 3: You are ready to exchange AFIT for STEEM Upvotes!</string>
 	<string name="step3_desc1">Upvotes take place on your next actifit post/report with proof of activity.</string>
 	<string name="step3_desc2">Choose an option</string>
+	<string name="afit_se_to_power">Move AFIT (Steem-Engine) To Actifit Wallet</string>
+	<string name="initiate_afit_to_se">Move AFIT to S-E</string>
 </resources>

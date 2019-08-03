@@ -302,7 +302,9 @@
 			<div v-if="tokensOfInterestBal.length > 0" class="col-md-6 row-sep-in">
 				<h4>{{ $t('Your_Token_Balance') }}</h4>
 				<div class="mb-4 font-weight-bold">
-					<div class="p-2" v-for="(token, index) in tokensOfInterestBal" :key="index" :token="token">{{ renderBal(token) }} {{ token.symbol }} <span v-if="parseFloat(renderStake(token)) > 0">+ {{ renderStake(token)}} {{ token.symbol }} {{ $t('Staked') }}</span></div>
+					<div class="p-2" v-for="(token, index) in tokensOfInterestBal" :key="index" :token="token">{{ renderBal(token) }} {{ token.symbol }} <span v-if="parseFloat(renderStake(token)) > 0">+ {{ renderStake(token)}} {{ token.symbol }} {{ $t('Staked') }} </span>
+					<span v-if="parseFloat(delegStake(token)) > 0">( + {{ delegStake(token)}} {{ token.symbol }} {{ $t('Delegated') }})</span>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -839,9 +841,13 @@
 	  },
 	  renderStake (token) {
 		let totalStaked = 0;
-		totalStaked += parseFloat(token.delegationsIn) - parseFloat(token.delegationsOut) + parseFloat(token.stake);
+		totalStaked += parseFloat(token.delegationsIn) + parseFloat(token.stake);
 		let prec = this.tokenOfInterestPrecision[token.symbol];
 		return this.numberFormat(totalStaked, prec);
+	  },
+	  delegStake (token) {
+		let prec = this.tokenOfInterestPrecision[token.symbol];
+		return this.numberFormat(parseFloat(token.delegationsOut), prec);
 	  },
 	  renderTokenVal (amount, symbol) {
 		if (this.tokenOfInterestPrecision[symbol]){
