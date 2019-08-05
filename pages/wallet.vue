@@ -1405,6 +1405,7 @@
 		  required_posting_auths: "[]",
 		  id: 'ssc-mainnet1',
 		  json: "{\"contractName\":\"tokens\",\"contractAction\":\"transfer\",\"contractPayload\":{\"symbol\":\"AFIT\",\"to\":\"actifit.s-e\",\"quantity\":\"" + amount_to_power + "\",\"memo\":\"\"}}",
+		  authority: 'active',
 		  auto_return: true,
 		}, window.location.origin + '/wallet?op='+this.$t('Move_AFIT_to_Wallet')+'&status=success&confirm_trans=1');
 		
