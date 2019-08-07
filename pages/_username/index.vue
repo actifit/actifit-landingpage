@@ -14,10 +14,10 @@
       <UserMenu />
     </nav>
 	<div v-if="errorDisplay==''" class="container pt-5 mt-5 pb-5 col-md-9" >
-	  <h5 class="text-brand" v-if="displayUser">
+	  <h5 class="text-brand user-name" v-if="displayUser">
 			<a :href="formattedProfileUrl" target="_blank">@{{ displayUser }} <small class="text-brand numberCircle">{{ getUserRank }}</small></a></h5>
         <div class="mb-3 col-md-9">
-		  <div class="user-avatar large-avatar mr-1 mb-5"
+		  <div class="user-avatar large-avatar mr-1 mb-3"
 					   :style="'background-image: url(https://steemitimages.com/u/' + this.displayUser + '/avatar)'"></div>
 		  <div v-if="userinfo" class="user-details">
 			<div><i class="fas fa-user mr-2"></i> {{ userinfo.name }} <b-badge v-if="account_banned" variant="danger" :title="$t('Account_banned_tip')" >{{ $t('Account_banned') }}</b-badge></div>
@@ -31,9 +31,9 @@
 			<div v-if="userinfo.witness_votes.includes('actifit')"><i class="fas fa-cubes text-brand mr-2"></i>&nbsp;{{ $t('Votes_Actifit_Witness') }}</div>
 			<div v-else><i class="fas fa-cubes text-brand mr-2"></i>&nbsp;<a class="btn btn-brand" href="https://steemconnect.com/sign/account-witness-vote?witness=actifit&approve=1" target="_blank">{{ $t('Vote_Now_Actifit_Witness') }}</a></div>
 			<div v-if="actifitDelegator"><i class="fas fa-file-invoice-dollar text-brand mr-2"></i>&nbsp;{{ $t('Delegates_to_Actifit') }} {{ actifitDelegator.steem_power }} {{ $t('Steem_Power') }}</div>
-			<div v-else><i class="fas fa-file-invoice-dollar  text-brand"></i>&nbsp;<a class="btn btn-brand" href="https://steembottracker.com/delegation.html?delegatee=actifit" target="_blank">{{ $t('Delegate_Now_Actifit') }}</a></div>
-			<div><span class="mr-4"></span>{{ $t('Followers') }}: {{ numberFormat(userinfo.follower_count,0) }}</div>
-			<div><span class="mr-4"></span>{{ $t('Following') }}: {{ numberFormat(userinfo.following_count,0) }}</div>
+			<div v-else><i class="fas fa-file-invoice-dollar text-brand"></i>&nbsp;<a class="btn btn-brand" href="https://steembottracker.com/delegation.html?delegatee=actifit" target="_blank">{{ $t('Delegate_Now_Actifit') }}</a></div>
+			<div><i class="fas fa-angle-double-left text-brand mr-2"></i>{{ $t('Followers') }}: {{ numberFormat(userinfo.follower_count,0) }}</div>
+			<div><i class="fas fa-angle-double-right text-brand mr-2"></i>{{ $t('Following') }}: {{ numberFormat(userinfo.following_count,0) }}</div>
 			<div class="text-brand">
 				<div>
 					<img src="/img/actifit_logo.png" class="mr-2 token-logo">
@@ -63,7 +63,7 @@
 					</div>
 				</div>
 				
-				<span class="mr-4"></span><a :href="'/activity/'+displayUser" >{{ numberFormat(rewardedPostCount, 0) }} {{ $t('Activity_Reports_Rewarded') }}</a>
+				<i class="fab fa-angellist mr-2"></i><a :href="'/activity/'+displayUser" >{{ numberFormat(rewardedPostCount, 0) }} {{ $t('Activity_Reports_Rewarded') }}</a>
 			</div>
 		  </div>
 		  <!-- badges section -->
@@ -566,6 +566,10 @@
 </script>
 
 <style>
+	.user-name{
+		margin-left: 10px;
+		padding: 10px;
+	}
 	.large-avatar{
 		width: 128px;
 		height: 128px;
@@ -605,8 +609,22 @@
 	.date-head{
 	  padding-left: 2px;
 	}
+	@media only screen and (min-width: 600px) {
+		.user-avatar{
+		  float: left;
+		}
+		.user-details{
+		  padding-left: 128px;
+		  margin-left: 20px;
+		}
+	}
+	@media only screen and (max-width: 600px) {
+		.user-details{
+		  padding-left: 10px;
+		}
+	}
 	.user-avatar{
-	  float: left;
+		margin-left: 10px;
 	}
 	.badge-img, .claimed-check{
 	  width: 150px;
@@ -621,9 +639,6 @@
 	}
 	.badge-unclaimed{
 	  opacity: 0.2
-	}
-	.user-details{
-	  padding-left: 128px;
 	}
 	.user-badges{
 	  border: 2px #ff112d solid;
