@@ -657,7 +657,7 @@
 			
 			//get AFIT standard val
 			let afitCoreVal = this.userTokens * this.afitPrice;
-			console.log(afitCoreVal);
+			//console.log(afitCoreVal);
 			totalAccountValue += afitCoreVal;
 			
 			let par = this;
@@ -665,22 +665,23 @@
 			//grab tokens of interest vals as well
 			this.tokensOfInterestBal.forEach(function(token, index){
 				let tokenData = par.tokenMetrics.find(v => v.symbol == token.symbol);
-				console.log(tokenData);
+				//console.log(tokenData);
 				let tokenVal = token.balance * parseFloat(tokenData.lastPrice)
 				tokenVal += token.stake * parseFloat(tokenData.lastPrice)
 				totalAccountValue += tokenVal
-				console.log('value for '+token.symbol+ ' $ ' + tokenVal);
+				//console.log('value for '+token.symbol+ ' $ ' + tokenVal);
 			});
 			
 			//grab claimable tokens of interest vals as well
 			this.claimableSETokens.forEach(function(token, index){
 				let tokenData = par.tokenMetrics.find(v => v.symbol == token.symbol);
-				console.log(token);
-				console.log(tokenData);
+				//console.log(token);
+				//console.log(tokenData);
 				let prec = par.tokenOfInterestPrecision[token.symbol];
-				let tokenVal = par.numberFormat(token.amount, prec) * parseFloat(tokenData.lastPrice)
+				//console.log(prec);
+				let tokenVal = parseFloat(par.numberFormat(token.amount, prec)) * parseFloat(tokenData.lastPrice);
 				totalAccountValue += tokenVal
-				console.log('value for '+token.symbol+ ' $ ' + tokenVal);
+				//console.log('claimable value for '+token.symbol+ ' $ ' + tokenVal);
 			});
 			
 			//append STEEM amount
@@ -692,11 +693,11 @@
 			//append SBD amount after conversion to STEEM
 			totalAccountValue += (parseFloat(this.user.account.sbd_balance) * this.sbdPrice / this.steemPrice);
 			
-			console.log(parseFloat(this.claimSP));
+			//console.log(parseFloat(this.claimSP));
 			totalAccountValue += parseFloat(this.claimSP);
-			console.log(parseFloat(this.claimSTEEM));
+			//console.log(parseFloat(this.claimSTEEM));
 			totalAccountValue += parseFloat(this.claimSTEEM); 
-			console.log(parseFloat(this.claimSBD) * this.sbdPrice / this.steemPrice);
+			//console.log(parseFloat(this.claimSBD) * this.sbdPrice / this.steemPrice);
 			totalAccountValue += (parseFloat(this.claimSBD) * this.sbdPrice / this.steemPrice);
 			
 			this.totalAccountValueSteem = totalAccountValue;
