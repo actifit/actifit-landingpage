@@ -281,7 +281,8 @@
 .comment-info{
   overflow: auto;
   padding-top: 10px;
-  padding-bottom: 0px;  
+  padding-bottom: 0px; 
+  border: 1px solid #e9ecef;
 }
 .user-avatar{
   width: 20px;
