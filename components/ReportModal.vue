@@ -5,7 +5,7 @@
         <div class="modal-header">
           <h5 class="modal-title" id="exampleModalLabel">{{ report.title }}</h5><br/>
 		  <a :href="report.author" target="_blank">
-			<h5 class="modal-author modal-title text-brand" >@{{ report.author}} <small class="text-brand numberCircle">{{ getUserRank }}</small></h5>
+			<h5 class="modal-author modal-title text-brand" >@{{ report.author}} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></h5>
 		  </a>
 		  <span class="date-head text-muted">{{ date }}</span>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -252,13 +252,19 @@
 			return this.report.pending_payout_value.replace('SBD','').replace('STEEM','')+' $'
 		}
 	  },
-	  getUserRank() {
+	  /*getUserRank() {
 		//proper formatting issue to display circle for smaller numbers
 		if (this.userRank<10){
 			return ' '+parseFloat(this.userRank).toFixed(1);
 		}else{
 			return parseFloat(this.userRank).toFixed(1);
 		}
+	  },*/
+	  displayCoreUserRank () {
+		return (this.userRank?parseFloat(this.userRank.rank_no_afitx).toFixed(2):'');
+	  },
+	  displayIncreasedUserRank () {
+		return '(+' + parseFloat(this.userRank.afitx_rank).toFixed(2) + ')';
 	  },
 	  commentsAvailable() {
 
@@ -425,7 +431,7 @@
 				
 		//grab the author's rank
 		fetch(process.env.actiAppUrl+'getRank/' + this.report.author).then(res => {
-				res.json().then(json => this.userRank = json.user_rank)}).catch(e => reject(e))
+				res.json().then(json => this.userRank = json)}).catch(e => reject(e))
 				
 		//grab post full pay if full pay mode enabled
 		fetch(process.env.actiAppUrl+'getPostFullAFITPayReward?user=' + this.report.author+'&url='+this.report.url).then(res => {
@@ -467,7 +473,7 @@
 	  text-decoration: none;
 	}
 	.numberCircle {
-	  border-radius: 50%;
+	  border-radius: 25%;
 	  width: 10px;
 	  line-height: 10px;
 	  padding: 4px 2px 4px 2px;
@@ -498,5 +504,8 @@
 	}
 	.report-modal-prelim-info span{
 	  padding: 5px;
+	}
+	.increased-rank{
+		color: #76BB0E;
 	}
 </style>

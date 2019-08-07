@@ -5,7 +5,7 @@
 		  <div class="comment-user-section" :style="{ paddingLeft: depth * indentFactor + 'px' }">	
 			<div class="user-avatar mr-1"
                    :style="'background-image: url(https://steemitimages.com/u/' + author + '/avatar)'"></div>
-			<div class="modal-author modal-title text-brand" >@{{ author }}<small class="text-brand numberCircle">{{ getUserRank }}</small><small class="date-head text-muted">{{ date }}</small></div>
+			<div class="modal-author modal-title text-brand" >@{{ author }}<small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small><small class="date-head text-muted">{{ date }}</small></div>
 		  </div>
 		</a>
 		<article class="modal-body" v-html="$renderMD(commentBody())" :style="{ paddingLeft: depth * indentFactor + 'px' }"></article>
@@ -121,13 +121,19 @@
         let minutes = date.getMinutes()
         return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() + ' ' + date.getHours() + ':' + (minutes < 10 ? '0' + minutes : minutes)
       },
-	  getUserRank() {
+	  /*getUserRank() {
 		//proper formatting issue to display circle for smaller numbers
 		if (this.userRank<10){
 			return ' '+parseFloat(this.userRank).toFixed(1);
 		}else{
 			return parseFloat(this.userRank).toFixed(1);
 		}
+	  },*/
+	  displayCoreUserRank () {
+		return (this.userRank?parseFloat(this.userRank.rank_no_afitx).toFixed(2):'');
+	  },
+	  displayIncreasedUserRank () {
+		return '(+' + parseFloat(this.userRank.afitx_rank).toFixed(2) + ')';
 	  },
     },
 	components: {
@@ -238,7 +244,7 @@
 		
 		//grab the author's rank
 		fetch(process.env.actiAppUrl+'getRank/' + this.author).then(res => {
-				res.json().then(json => this.userRank = json.user_rank)}).catch(e => reject(e))
+				res.json().then(json => this.userRank = json)}).catch(e => reject(e))
 		
 		//grab moderators' list
 		this.$store.dispatch('fetchModerators')
@@ -274,7 +280,7 @@
 <style>
 .comment-info{
   overflow: auto;
-  padding-top: 0px;
+  padding-top: 10px;
   padding-bottom: 0px;  
 }
 .user-avatar{

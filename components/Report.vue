@@ -10,21 +10,21 @@
       </h6>
       <div class="report-body">
         <div class="row">
-          <div class="col-7">
+          <div class="col-8">
             <a :href="'/'+report.author" target="_blank">
 			
               <div class="user-avatar mr-1"
                    :style="'background-image: url(https://steemitimages.com/u/' + report.author + '/avatar)'"></div>
               <small class="d-inline-block align-top">@{{ report.author }}</small>
-			  <small class="text-brand numberCircle">{{ getUserRank }}</small>
+			  <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small>
             </a>
           </div>
-          <div class="col-5 text-right">
+          <div class="col-4 text-right">
             <small class="text-muted">{{ date }}</small>
           </div>
         </div>
         <div class="row details mt-2">
-          <div class="col-7">
+          <div class="col-8">
             <small class="d-block">
               <b>{{ $t('Activity_Type') }}:</b>
             </small>
@@ -32,7 +32,7 @@
               {{ type }}
             </small>
           </div>
-          <div class="col-5 text-right">
+          <div class="col-4 text-right">
             <small>
               <b>{{ $t('Activity_Count') }}:</b><br>
               {{ steps }}
@@ -186,13 +186,19 @@
 			return this.report.pending_payout_value.replace('SBD','').replace('STEEM','')+' $'
 		}
 	  },
-	  getUserRank() {
+	  /*getUserRank() {
 		//proper formatting issue to display circle for smaller numbers
 		if (this.userRank<10){
 			return ' '+parseFloat(this.userRank).toFixed(1);
 		}else{
 			return parseFloat(this.userRank).toFixed(1);
 		}
+	  },*/
+	  displayCoreUserRank () {
+		return (this.userRank?parseFloat(this.userRank.rank_no_afitx).toFixed(2):'');
+	  },
+	  displayIncreasedUserRank () {
+		return '(+' + parseFloat(this.userRank.afitx_rank).toFixed(2) + ')';
 	  },
 	  votedByUser() {
 		return this.postUpvoted;
@@ -280,7 +286,7 @@
 			
 		//grab the author's rank
 		fetch(process.env.actiAppUrl+'getRank/' + this.report.author).then(res => {
-			res.json().then(json => this.userRank = json.user_rank)}).catch(e => reject(e))
+			res.json().then(json => this.userRank = json)}).catch(e => reject(e))
 			
 		//grab post full pay if full pay mode enabled
 		fetch(process.env.actiAppUrl+'getPostFullAFITPayReward?user=' + this.report.author+'&url='+this.report.url).then(res => {
@@ -320,7 +326,7 @@
 </style>
 <style>
 	.numberCircle {
-	  border-radius: 50%;
+	  border-radius: 25%;
 	  width: 10px;
 	  line-height: 10px;
 	  padding: 4px 2px 4px 2px;
@@ -335,5 +341,8 @@
 	}
 	.check-tooltip{
 	  color: white;
+	}
+	.increased-rank{
+		color: #76BB0E;
 	}
 </style>

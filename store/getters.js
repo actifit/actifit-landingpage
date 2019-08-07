@@ -14,6 +14,9 @@ export default {
   userRank (state) {
 	return state.userRank
   },
+  userRankObj (state) {
+	return state.userRankObj
+  },
   userCount (state) {
     return state.userCount
   },

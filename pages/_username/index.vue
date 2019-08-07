@@ -15,7 +15,7 @@
     </nav>
 	<div v-if="errorDisplay==''" class="container pt-5 mt-5 pb-5 col-md-9" >
 	  <h5 class="text-brand user-name" v-if="displayUser">
-			<a :href="formattedProfileUrl" target="_blank">@{{ displayUser }} <small class="text-brand numberCircle">{{ getUserRank }}</small></a></h5>
+			<a :href="formattedProfileUrl" target="_blank">@{{ displayUser }} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></a></h5>
         <div class="mb-3 col-md-9">
 		  <div v-if="displayUser" class="user-avatar large-avatar mr-1 mb-3"
 					   :style="'background-image: url(https://steemitimages.com/u/' + this.displayUser + '/avatar)'"></div>
@@ -238,13 +238,19 @@
 	  formattedProfileUrl () {
 		return "https://actifit.io/" + this.displayUser;
 	  },
-	  getUserRank() {
+	  /*getUserRank() {
 		//proper formatting issue to display circle for smaller numbers
 		if (this.userRank<10){
 			return ' '+parseFloat(this.userRank).toFixed(1);
 		}else{
 			return parseFloat(this.userRank).toFixed(1);
 		}
+	  },*/
+	  displayCoreUserRank () {
+		return (this.userRank?parseFloat(this.userRank.rank_no_afitx).toFixed(2):'');
+	  },
+	  displayIncreasedUserRank () {
+		return '(+' + parseFloat(this.userRank.afitx_rank).toFixed(2) + ')';
 	  },
 	  userMeta() {
 	    try{
@@ -509,7 +515,7 @@
 		  
 		  //grab the author's rank
 		  fetch(process.env.actiAppUrl+'getRank/' + this.displayUser).then(res => {
-			res.json().then(json => this.userRank = json.user_rank)}).catch(e => reject(e))
+			res.json().then(json => this.userRank = json)}).catch(e => reject(e))
 		  
 		  fetch(process.env.actiAppUrl+'userRewardedPostCount/' + this.displayUser).then(res => {
 			res.json().then(json => this.rewardedPostCount = json.rewarded_post_count)}).catch(e => reject(e))
@@ -596,7 +602,7 @@
 	  text-decoration: none;
 	}
 	.numberCircle {
-	  border-radius: 50%;
+	  border-radius: 25%;
 	  width: 10px;
 	  line-height: 10px;
 	  padding: 4px 2px 4px 2px;
@@ -687,4 +693,7 @@
 	  width: 20px;
 	  height: 20px;
     }
+	.increased-rank{
+		color: #76BB0E;
+	}
 </style>

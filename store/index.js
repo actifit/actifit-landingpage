@@ -13,6 +13,7 @@ const createStore = () => {
       transactions: [], // logged-in user's transactions
 	  referrals: [], //logged-in user's referrals
 	  userRank: 0, // logged-in user's rank
+	  userRankObj: '', // full details about user's rank
       userCount: 0, // users using actifit
       tokensDistributed: 0, // total amount of distributed tokens
       rewardedActivityCount: 0, // total amount of activity posts

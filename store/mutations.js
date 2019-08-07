@@ -12,7 +12,8 @@ export default {
     state.referrals = referrals
   },
   setUserRank (state, userRank) {
-    state.userRank = userRank
+    state.userRankObj = userRank
+	state.userRank = userRank.user_rank
   },
   setUserCount (state, userCount) {
     state.userCount = userCount

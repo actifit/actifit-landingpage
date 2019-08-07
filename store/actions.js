@@ -35,7 +35,7 @@ export default {
   fetchUserRank ({ state, commit }) {
     return new Promise((resolve, reject) => {
       fetch(process.env.actiAppUrl+'getRank/' + state.steemconnect.user.account.name.toLowerCase()).then(res => {
-        res.json().then(json => commit('setUserRank', json.user_rank)).catch(e => reject(e))
+        res.json().then(json => commit('setUserRank', json)).catch(e => reject(e))
       }).catch(e => reject(e))
     })
   }, 

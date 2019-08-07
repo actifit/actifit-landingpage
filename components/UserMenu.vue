@@ -6,7 +6,7 @@
 		<a :href="'/signup'" >{{ $t('Signup_Link') }}</a> | <a :href="$steemconnect.getLoginURL()" >{{ $t('Login') }}</a>
 	  </li>
 	  <li class="nav-item mr-2" v-if="user" >
-        <span class="navbar-text py-0" style="color:#ff112d">{{ $t('Rank') }}&nbsp;<br><b>{{ displayUserRank }}</b></span>
+        <span class="navbar-text py-0 text-brand" >{{ $t('Rank') }}&nbsp;<br><b>{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRankObj && this.userRankObj.afitx_rank">{{  displayIncreasedUserRank }}</span></b></span>
       </li>
       <li class="nav-item mr-2" v-if="user">
         <span class="navbar-text py-0">{{ $t('Balance') }}<br><b>{{ formattedUserTokens }}</b></span>
@@ -21,7 +21,7 @@
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet?action=buy_afit')">{{ $t('buy_afit_menu') }}<br/></a>
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/market')">{{ $t('spend_afit_menu') }}<br/></a>
           <a class="dropdown-item" href="#" @click.prevent="$router.push('/' + user.account.name)">{{ $t('My_Profile') }}<br/></a>
-		  <a class="dropdown-item" href="#" @click.prevent="">{{ $t('My_Rank') }} <br/><span class="text-brand"> {{ displayUserRank }} </span></a>
+		  <a class="dropdown-item" href="#" @click.prevent="">{{ $t('My_Rank') }} <br/><span class="text-brand"> {{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRankObj && this.userRankObj.afitx_rank">{{  displayIncreasedUserRank }}</span> </span></a>
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet')">{{ $t('My_Wallet') }} <br/><span class="text-brand">  {{ formattedUserTokens }}</span></a>
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/referrals')">{{ $t('My_Referrals') }} <br/><span class="text-brand"> {{ referralCount }} </span></a>
           <a class="dropdown-item" href="#" @click.prevent="$router.push('/activity/' + user.account.name)">{{ $t('My_Activity') }}</a>
@@ -39,12 +39,18 @@
   export default {
     computed: {
       ...mapGetters('steemconnect', ['user']),
-      ...mapGetters(['userTokens', 'userRank', 'referrals']),
+      ...mapGetters(['userTokens', 'userRank', 'userRankObj', 'referrals']),
 	  formattedUserTokens () {
         return this.numberFormat(parseFloat(this.userTokens).toFixed(3), 3) + ' AFIT'
       },
 	  displayUserRank () {
 		return parseFloat(this.userRank).toFixed(1)
+	  },
+	  displayCoreUserRank () {
+		return (this.userRankObj?parseFloat(this.userRankObj.rank_no_afitx).toFixed(2):'');
+	  },
+	  displayIncreasedUserRank () {
+		return '(+' + parseFloat(this.userRankObj.afitx_rank).toFixed(2) + ')';
 	  },
 	  referralCount () {
 	    return this.referrals.length;
@@ -90,5 +96,8 @@
 <style>
 	#user_menu_navlink{
 		height: 40px;
+	}
+	.increased-rank{
+		color: #76BB0E;
 	}
 </style>
