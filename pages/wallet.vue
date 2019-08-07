@@ -19,7 +19,11 @@
       <!-- account balance -->
       <div class="text-center">
         <h3 class="mb-4">{{ $t('Hey') }} {{ user.account.name }}!</h3>
-		<h5>{{ $t('account_est_val') }} $<span v-if="formattedTotAccountVal"> {{ formattedTotAccountVal}}</span><span v-else> ---</span></h5>
+		<h5>{{ $t('account_est_val') }}</h5>
+		<h5 v-if="this.tokenMetrics.length > 0">
+			<div class="pb-2">{{ $t('in_usd') }}: ${{ this.formattedTotAccountVal()}}</div>
+			<div class="pb-2">{{ $t('in_steem') }}: <img src="/img/STEEM.png" class="token-logo-sm">{{ formattedSteemTotVal }}</div>
+		</h5>
         <div class="row row-sep">
 			<div class="col-md-6 row-sep-in">
 				<h4><img src="/img/actifit_logo.png" class="mr-2 token-logo">{{ $t('Your_Afit_Balance') }}</h4>
@@ -559,7 +563,7 @@
 		nextAfitPDTarget: '',
 		afitPowerDownText: '',
 		showAfitxInfo: false,
-		totalAccountValue: 0,
+		totalAccountValueSteem: 0,
 	  }
 	},
     components: {
@@ -574,69 +578,12 @@
     computed: {
       ...mapGetters('steemconnect', ['user']),
       ...mapGetters(['userTokens', 'transactions', 'userRank']),
-      formattedUserTokens () {
+      formattedSteemTotVal () {
+		return this.numberFormat(this.totalAccountValueSteem, 3) + ' ' + this.$t('STEEM');
+	  },
+	  formattedUserTokens () {
 		return this.numberFormat((parseFloat(this.userTokens) + parseFloat(this.userAddedTokens)).toFixed(3), 3) + " AFIT" + " | " + this.numberFormat(parseFloat(this.afit_se_balance), 3) + " AFIT S-E";
       },
-	  formattedTotAccountVal () {
-		let totalAccountValue = 0;
-		if (this.tokenMetrics.length > 0){
-			//get AFITX val
-			let afitxData = this.tokenMetrics.find(v => v.symbol == 'AFITX');
-			totalAccountValue += this.afitx_se_balance * parseFloat(afitxData.lastPrice)
-			
-			//get AFIT SE val
-			let afitData = this.tokenMetrics.find(v => v.symbol == 'AFIT');
-			totalAccountValue += this.afit_se_balance * parseFloat(afitData.lastPrice)
-			
-			//get AFIT standard val
-			let afitCoreVal = this.userTokens * this.afitPrice;
-			console.log(afitCoreVal);
-			totalAccountValue += afitCoreVal;
-			
-			let par = this;
-			
-			//grab tokens of interest vals as well
-			this.tokensOfInterestBal.forEach(function(token, index){
-				let tokenData = par.tokenMetrics.find(v => v.symbol == token.symbol);
-				console.log(tokenData);
-				let tokenVal = token.balance * parseFloat(tokenData.lastPrice)
-				tokenVal += token.stake * parseFloat(tokenData.lastPrice)
-				totalAccountValue += tokenVal
-				console.log('value for '+token.symbol+ ' $ ' + tokenVal);
-			});
-			
-			//grab claimable tokens of interest vals as well
-			this.claimableSETokens.forEach(function(token, index){
-				let tokenData = par.tokenMetrics.find(v => v.symbol == token.symbol);
-				console.log(token);
-				console.log(tokenData);
-				let prec = par.tokenOfInterestPrecision[token.symbol];
-				let tokenVal = par.numberFormat(token.amount, prec) * parseFloat(tokenData.lastPrice)
-				totalAccountValue += tokenVal
-				console.log('value for '+token.symbol+ ' $ ' + tokenVal);
-			});
-			
-			//append STEEM amount
-			totalAccountValue += parseFloat(this.user.account.balance);
-			
-			//append SP amount
-			totalAccountValue += parseFloat(this.steemPower);
-			
-			//append SBD amount after conversion to STEEM
-			totalAccountValue += (parseFloat(this.user.account.sbd_balance) * this.sbdPrice / this.steemPrice);
-			
-			console.log(parseFloat(this.claimSP));
-			totalAccountValue += parseFloat(this.claimSP);
-			console.log(parseFloat(this.claimSTEEM));
-			totalAccountValue += parseFloat(this.claimSTEEM); 
-			console.log(parseFloat(this.claimSBD) * this.sbdPrice / this.steemPrice);
-			totalAccountValue += (parseFloat(this.claimSBD) * this.sbdPrice / this.steemPrice);
-			
-			//convert amount to STEEM price
-			totalAccountValue *= this.steemPrice;
-		}
-		return this.numberFormat(totalAccountValue, 2);
-	  },
 	  formattedUserAFITX () {
 		return this.numberFormat(this.afitx_se_balance,3) + ' AFITX';
 	  },
@@ -697,6 +644,68 @@
 			+ date.getHours() + ':' 
 			+ (minutes < 10 ? '0' + minutes : minutes)
       },
+	  formattedTotAccountVal () {
+		let totalAccountValue = 0;
+		if (this.tokenMetrics.length > 0){
+			//get AFITX val
+			let afitxData = this.tokenMetrics.find(v => v.symbol == 'AFITX');
+			totalAccountValue += this.afitx_se_balance * parseFloat(afitxData.lastPrice)
+			
+			//get AFIT SE val
+			let afitData = this.tokenMetrics.find(v => v.symbol == 'AFIT');
+			totalAccountValue += this.afit_se_balance * parseFloat(afitData.lastPrice)
+			
+			//get AFIT standard val
+			let afitCoreVal = this.userTokens * this.afitPrice;
+			console.log(afitCoreVal);
+			totalAccountValue += afitCoreVal;
+			
+			let par = this;
+			
+			//grab tokens of interest vals as well
+			this.tokensOfInterestBal.forEach(function(token, index){
+				let tokenData = par.tokenMetrics.find(v => v.symbol == token.symbol);
+				console.log(tokenData);
+				let tokenVal = token.balance * parseFloat(tokenData.lastPrice)
+				tokenVal += token.stake * parseFloat(tokenData.lastPrice)
+				totalAccountValue += tokenVal
+				console.log('value for '+token.symbol+ ' $ ' + tokenVal);
+			});
+			
+			//grab claimable tokens of interest vals as well
+			this.claimableSETokens.forEach(function(token, index){
+				let tokenData = par.tokenMetrics.find(v => v.symbol == token.symbol);
+				console.log(token);
+				console.log(tokenData);
+				let prec = par.tokenOfInterestPrecision[token.symbol];
+				let tokenVal = par.numberFormat(token.amount, prec) * parseFloat(tokenData.lastPrice)
+				totalAccountValue += tokenVal
+				console.log('value for '+token.symbol+ ' $ ' + tokenVal);
+			});
+			
+			//append STEEM amount
+			totalAccountValue += parseFloat(this.user.account.balance);
+			
+			//append SP amount
+			totalAccountValue += parseFloat(this.steemPower);
+			
+			//append SBD amount after conversion to STEEM
+			totalAccountValue += (parseFloat(this.user.account.sbd_balance) * this.sbdPrice / this.steemPrice);
+			
+			console.log(parseFloat(this.claimSP));
+			totalAccountValue += parseFloat(this.claimSP);
+			console.log(parseFloat(this.claimSTEEM));
+			totalAccountValue += parseFloat(this.claimSTEEM); 
+			console.log(parseFloat(this.claimSBD) * this.sbdPrice / this.steemPrice);
+			totalAccountValue += (parseFloat(this.claimSBD) * this.sbdPrice / this.steemPrice);
+			
+			this.totalAccountValueSteem = totalAccountValue;
+			
+			//convert amount to STEEM price
+			totalAccountValue *= this.steemPrice;
+		}
+		return this.numberFormat(totalAccountValue, 2);
+	  },
 	  renderSteemPower (type) {
 		switch(type){
 			case 1: return this.numberFormat(this.steemPower, 3);
@@ -1739,6 +1748,10 @@
   .token-logo{
 	width: 40px;
 	height: 40px;
+  }
+  .token-logo-sm{
+	width: 20px;
+	height: 20px;
   }
   .fa-info-circle{
 	cursor: pointer;
