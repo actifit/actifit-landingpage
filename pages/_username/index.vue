@@ -17,14 +17,14 @@
 	  <h5 class="text-brand user-name" v-if="displayUser">
 			<a :href="formattedProfileUrl" target="_blank">@{{ displayUser }} <small class="text-brand numberCircle">{{ getUserRank }}</small></a></h5>
         <div class="mb-3 col-md-9">
-		  <div class="user-avatar large-avatar mr-1 mb-3"
+		  <div v-if="displayUser" class="user-avatar large-avatar mr-1 mb-3"
 					   :style="'background-image: url(https://steemitimages.com/u/' + this.displayUser + '/avatar)'"></div>
 		  <div v-if="userinfo" class="user-details">
 			<div><i class="fas fa-user mr-2"></i> {{ userinfo.name }} <b-badge v-if="account_banned" variant="danger" :title="$t('Account_banned_tip')" >{{ $t('Account_banned') }}</b-badge></div>
 			<div v-if="userMeta && userMeta.profile">
 				<div class="location-text" ><i class="fas fa-street-view mr-2"></i> {{ userMeta.profile.location }}</div>
 				<div><i class="fas fa-address-card mr-2"></i> {{ userMeta.profile.about }}</div>
-				<div><i class="fas fa-link mr-2"></i>&nbsp;<a href="userMeta.profile.website">{{ userMeta.profile.website }}</a></div>
+				<div><i class="fas fa-link mr-2"></i>&nbsp;<a :href="userMeta.profile.website">{{ userMeta.profile.website }}</a></div>
 			</div>
 			<div><i class="fas fa-calendar-alt mr-2"></i> {{ $t('Joined_On') }} {{ pureDate(userinfo.created) }}</div>
 			<div><i class="fas fa-pen mr-2"></i> {{ numberFormat(userinfo.post_count, 0) }} {{ $t('Steem_posts_comments') }}</div>
