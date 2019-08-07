@@ -341,4 +341,5 @@ module.exports = {
   move_afit_se_notice3: 'Please note that moving AFIT from your wallet could decrease your user rank.',
   afitx_info: 'AFITX is a new special benefits token for Actifit users & AFIT token holders. Holding this token enables users to: <ul><li>Daily Move AFIT tokens to S-E</li><li>Increases user rank</li><li>Increases post rewards via our different rewarded tokens</li><li>Receive priority when exchanging AFIT for STEEM upvotes</li><li>Participate in contests</li><li>AFITX will constitute the basis for our future Exchange framework</li></ul>',
   Delegated: 'Delegated',
+  account_est_val: 'Estimated Account Value',
 }

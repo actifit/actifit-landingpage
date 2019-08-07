@@ -19,6 +19,7 @@
       <!-- account balance -->
       <div class="text-center">
         <h3 class="mb-4">{{ $t('Hey') }} {{ user.account.name }}!</h3>
+		<h5>{{ $t('account_est_val') }} $<span v-if="formattedTotAccountVal"> {{ formattedTotAccountVal}}</span><span v-else> ---</span></h5>
         <div class="row row-sep">
 			<div class="col-md-6 row-sep-in">
 				<h4><img src="/img/actifit_logo.png" class="mr-2 token-logo">{{ $t('Your_Afit_Balance') }}</h4>
@@ -542,6 +543,7 @@
 		afitx_se_balance: 0,
 		userAddedTokens: 0,
 		steemPrice: 0.1,
+		sbdPrice: 0.1,
 		defaultAfit: 100,
 		afit_buy_error_proceeding: false,
 		afit_buy_err_msg: '',
@@ -550,12 +552,14 @@
 		tokenOfInterestPrecision: [],
 		claimingTokens: false,
 		tokensOfInterestBal: [],
+		tokenMetrics: [],
 		initiateInProgress: false,
 		userPDAfit: '',
 		countDownReady: false,
 		nextAfitPDTarget: '',
 		afitPowerDownText: '',
 		showAfitxInfo: false,
+		totalAccountValue: 0,
 	  }
 	},
     components: {
@@ -573,6 +577,66 @@
       formattedUserTokens () {
 		return this.numberFormat((parseFloat(this.userTokens) + parseFloat(this.userAddedTokens)).toFixed(3), 3) + " AFIT" + " | " + this.numberFormat(parseFloat(this.afit_se_balance), 3) + " AFIT S-E";
       },
+	  formattedTotAccountVal () {
+		let totalAccountValue = 0;
+		if (this.tokenMetrics.length > 0){
+			//get AFITX val
+			let afitxData = this.tokenMetrics.find(v => v.symbol == 'AFITX');
+			totalAccountValue += this.afitx_se_balance * parseFloat(afitxData.lastPrice)
+			
+			//get AFIT SE val
+			let afitData = this.tokenMetrics.find(v => v.symbol == 'AFIT');
+			totalAccountValue += this.afit_se_balance * parseFloat(afitData.lastPrice)
+			
+			//get AFIT standard val
+			let afitCoreVal = this.userTokens * this.afitPrice;
+			console.log(afitCoreVal);
+			totalAccountValue += afitCoreVal;
+			
+			let par = this;
+			
+			//grab tokens of interest vals as well
+			this.tokensOfInterestBal.forEach(function(token, index){
+				let tokenData = par.tokenMetrics.find(v => v.symbol == token.symbol);
+				console.log(tokenData);
+				let tokenVal = token.balance * parseFloat(tokenData.lastPrice)
+				tokenVal += token.stake * parseFloat(tokenData.lastPrice)
+				totalAccountValue += tokenVal
+				console.log('value for '+token.symbol+ ' $ ' + tokenVal);
+			});
+			
+			//grab claimable tokens of interest vals as well
+			this.claimableSETokens.forEach(function(token, index){
+				let tokenData = par.tokenMetrics.find(v => v.symbol == token.symbol);
+				console.log(token);
+				console.log(tokenData);
+				let prec = par.tokenOfInterestPrecision[token.symbol];
+				let tokenVal = par.numberFormat(token.amount, prec) * parseFloat(tokenData.lastPrice)
+				totalAccountValue += tokenVal
+				console.log('value for '+token.symbol+ ' $ ' + tokenVal);
+			});
+			
+			//append STEEM amount
+			totalAccountValue += parseFloat(this.user.account.balance);
+			
+			//append SP amount
+			totalAccountValue += parseFloat(this.steemPower);
+			
+			//append SBD amount after conversion to STEEM
+			totalAccountValue += (parseFloat(this.user.account.sbd_balance) * this.sbdPrice / this.steemPrice);
+			
+			console.log(parseFloat(this.claimSP));
+			totalAccountValue += parseFloat(this.claimSP);
+			console.log(parseFloat(this.claimSTEEM));
+			totalAccountValue += parseFloat(this.claimSTEEM); 
+			console.log(parseFloat(this.claimSBD) * this.sbdPrice / this.steemPrice);
+			totalAccountValue += (parseFloat(this.claimSBD) * this.sbdPrice / this.steemPrice);
+			
+			//convert amount to STEEM price
+			totalAccountValue *= this.steemPrice;
+		}
+		return this.numberFormat(totalAccountValue, 2);
+	  },
 	  formattedUserAFITX () {
 		return this.numberFormat(this.afitx_se_balance,3) + ' AFITX';
 	  },
@@ -788,6 +852,9 @@
 		  if (tokenData){
 			this.tokensOfInterestBal = tokenData;
 		  }
+		  
+		  //fetch tokens' data (price et al)
+		  this.tokenMetrics = await ssc.find('market', 'metrics', {symbol : { '$in' : tokensOfInterest.concat(['AFIT','AFITX']) }}, 1000, 0, '', false);	  
 		  
 		  //check if user is powering down AFIT to SE
 		  fetch(process.env.actiAppUrl+'isPoweringDown/'+this.user.account.name).then(
@@ -1579,6 +1646,9 @@
 	  setSteemPrice (_steemPrice){
 		this.steemPrice = parseFloat(_steemPrice).toFixed(3);
 	  },
+	  setSBDPrice (_sbdPrice){
+		this.sbdPrice = parseFloat(_sbdPrice).toFixed(3);
+	  }
 	},
 	created () {
 	  this.runningInterval = setInterval(this.fetchUserData, 60*1000);
@@ -1627,6 +1697,11 @@
 	  //grab STEEM price
 	  fetch('https://api.coinmarketcap.com/v1/ticker/steem/').then(
 		res => {res.json().then(json => this.setSteemPrice (json[0].price_usd)).catch(e => reject(e))
+	  }).catch(e => reject(e))
+	  
+	  //grab SBD price
+	  fetch('https://api.coinmarketcap.com/v1/ticker/steem-dollars/').then(
+		res => {res.json().then(json => this.setSBDPrice (json[0].price_usd)).catch(e => reject(e))
 	  }).catch(e => reject(e))
 	  	  
     }
