@@ -475,9 +475,9 @@
   
   import Countdown from 'vuejs-countdown'
   
-  const ssc = new SSC('https://api.steem-engine.com/rpc');
-  const scot_steemengine_api = 'https://scot-api.steem-engine.com/';
-  
+  const ssc = new SSC(process.env.steemEngineRpc);
+  const scot_steemengine_api = process.env.steemEngineScot;
+
   const tokensOfInterest = ['ZZAN', 'SPORTS', 'PAL'];
   
   import { mapGetters } from 'vuex'

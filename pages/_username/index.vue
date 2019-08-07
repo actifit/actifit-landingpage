@@ -20,24 +20,29 @@
 		  <div class="user-avatar large-avatar mr-1 mb-5"
 					   :style="'background-image: url(https://steemitimages.com/u/' + this.displayUser + '/avatar)'"></div>
 		  <div v-if="userinfo" class="user-details">
-			<div><i class="fas fa-user"></i> {{ userinfo.name }} <b-badge v-if="account_banned" variant="danger" :title="$t('Account_banned_tip')" >{{ $t('Account_banned') }}</b-badge></div>
+			<div><i class="fas fa-user mr-2"></i> {{ userinfo.name }} <b-badge v-if="account_banned" variant="danger" :title="$t('Account_banned_tip')" >{{ $t('Account_banned') }}</b-badge></div>
 			<div v-if="userMeta && userMeta.profile">
-				<div class="location-text" ><i class="fas fa-street-view"></i> {{ userMeta.profile.location }}</div>
-				<div><i class="fas fa-address-card"></i> {{ userMeta.profile.about }}</div>
-				<div><i class="fas fa-link"></i>&nbsp;<a href="userMeta.profile.website">{{ userMeta.profile.website }}</a></div>
+				<div class="location-text" ><i class="fas fa-street-view mr-2"></i> {{ userMeta.profile.location }}</div>
+				<div><i class="fas fa-address-card mr-2"></i> {{ userMeta.profile.about }}</div>
+				<div><i class="fas fa-link mr-2"></i>&nbsp;<a href="userMeta.profile.website">{{ userMeta.profile.website }}</a></div>
 			</div>
-			<div><i class="fas fa-calendar-alt"></i> {{ $t('Joined_On') }} {{ pureDate(userinfo.created) }}</div>
-			<div><i class="fas fa-pen"></i> {{ numberFormat(userinfo.post_count, 0) }} {{ $t('Steem_posts_comments') }}</div>
-			<div v-if="userinfo.witness_votes.includes('actifit')"><i class="fas fa-cubes text-brand"></i>&nbsp;{{ $t('Votes_Actifit_Witness') }}</div>
-			<div v-else><i class="fas fa-cubes  text-brand"></i>&nbsp;<a class="btn btn-brand" href="https://steemconnect.com/sign/account-witness-vote?witness=actifit&approve=1" target="_blank">{{ $t('Vote_Now_Actifit_Witness') }}</a></div>
-			<div v-if="actifitDelegator"><i class="fas fa-file-invoice-dollar  text-brand"></i>&nbsp;{{ $t('Delegates_to_Actifit') }} {{ actifitDelegator.steem_power }} {{ $t('Steem_Power') }}</div>
+			<div><i class="fas fa-calendar-alt mr-2"></i> {{ $t('Joined_On') }} {{ pureDate(userinfo.created) }}</div>
+			<div><i class="fas fa-pen mr-2"></i> {{ numberFormat(userinfo.post_count, 0) }} {{ $t('Steem_posts_comments') }}</div>
+			<div v-if="userinfo.witness_votes.includes('actifit')"><i class="fas fa-cubes text-brand mr-2"></i>&nbsp;{{ $t('Votes_Actifit_Witness') }}</div>
+			<div v-else><i class="fas fa-cubes text-brand mr-2"></i>&nbsp;<a class="btn btn-brand" href="https://steemconnect.com/sign/account-witness-vote?witness=actifit&approve=1" target="_blank">{{ $t('Vote_Now_Actifit_Witness') }}</a></div>
+			<div v-if="actifitDelegator"><i class="fas fa-file-invoice-dollar text-brand mr-2"></i>&nbsp;{{ $t('Delegates_to_Actifit') }} {{ actifitDelegator.steem_power }} {{ $t('Steem_Power') }}</div>
 			<div v-else><i class="fas fa-file-invoice-dollar  text-brand"></i>&nbsp;<a class="btn btn-brand" href="https://steembottracker.com/delegation.html?delegatee=actifit" target="_blank">{{ $t('Delegate_Now_Actifit') }}</a></div>
-			<div>{{ $t('Followers') }}: {{ numberFormat(userinfo.follower_count,0) }}</div>
-			<div>{{ $t('Following') }}: {{ numberFormat(userinfo.following_count,0) }}</div>
+			<div><span class="mr-4"></span>{{ $t('Followers') }}: {{ numberFormat(userinfo.follower_count,0) }}</div>
+			<div><span class="mr-4"></span>{{ $t('Following') }}: {{ numberFormat(userinfo.following_count,0) }}</div>
 			<div class="text-brand">
 				<div>
-					<a href="/wallet" >{{ numberFormat(userTokenCount, 3) }} AFIT Tokens</a>&nbsp;
+					<img src="/img/actifit_logo.png" class="mr-2 token-logo">
+					<a href="/wallet" >{{ numberFormat(userTokenCount, 3) }} AFIT Tokens + {{ displayAFITSEBal }} AFIT S-E Tokens</a>&nbsp;
 					<button v-if="!account_banned" class="btn btn-brand border" v-on:click="tipUser" >Tip AFIT</button>
+				</div>
+				<div>
+					<img src="/img/AFITX.png" class="mr-2 token-logo">
+					<a href="/wallet" >{{ displayAFITXBal }} AFITX Tokens</a>&nbsp;
 				</div>
 				<div v-if="proceedTip">
 					<div class="tip-details">
@@ -58,7 +63,7 @@
 					</div>
 				</div>
 				
-				<a :href="'/activity/'+displayUser" >{{ numberFormat(rewardedPostCount, 0) }} {{ $t('Activity_Reports_Rewarded') }}</a>
+				<span class="mr-4"></span><a :href="'/activity/'+displayUser" >{{ numberFormat(rewardedPostCount, 0) }} {{ $t('Activity_Reports_Rewarded') }}</a>
 			</div>
 		  </div>
 		  <!-- badges section -->
@@ -155,6 +160,9 @@
   /* import badges component */
   import { BadgePlugin } from 'bootstrap-vue'
   Vue.use(BadgePlugin)
+  
+  import SSC from 'sscjs'
+  const ssc = new SSC(process.env.steemEngineRpc);
 
   export default {
 	data () {
@@ -168,6 +176,8 @@
 			userinfo: '',
 			noUserFound: false,
 			userTokenCount: '',
+			userAFITSETokenCount: '',
+			userAFITXSETokenCount: '',
 			isoParticipant: [],
 			doubledupWinner: [],
 			charityDonor: [],
@@ -213,6 +223,18 @@
 	  ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters(['newlyVotedPosts']),
 	  ...mapGetters(['userTokens'],['commentEntries'], 'commentCountToday'),
+	  displayAFITXBal () {
+		if (!isNaN(this.userAFITXSETokenCount)){
+			return this.numberFormat(this.userAFITXSETokenCount, 3);
+		}
+		return 0;
+	  },
+	  displayAFITSEBal () {
+		if (!isNaN(this.userAFITSETokenCount)){
+			return this.numberFormat(this.userAFITSETokenCount, 3);
+		}
+		return 0;
+	  },
 	  formattedProfileUrl () {
 		return "https://actifit.io/" + this.displayUser;
 	  },
@@ -521,6 +543,18 @@
 		  //let's check if this user is banned
 		  fetch(process.env.actiAppUrl+'is_banned/'+this.displayUser).then(
 			res => {res.json().then(json => this.account_banned = json)}).catch(e => reject(e))
+			
+		  //fetch user's AFIT S-E balance
+		  let bal = await ssc.findOne('tokens', 'balances', { account: this.displayUser, symbol: 'AFIT' });
+		  if (bal){
+			  this.userAFITSETokenCount = bal.balance;
+		  }
+		  
+		  //fetch user's AFITX S-E balance
+		  bal = await ssc.findOne('tokens', 'balances', { account: this.displayUser, symbol: 'AFITX' });
+		  if (bal){
+			  this.userAFITXSETokenCount = bal.balance;
+		  }
 		
 		  this.getAccountData();
 		}else{
@@ -634,4 +668,8 @@
 	  width: 200px;
 	  text-align: left;
 	}
+	.token-logo{
+	  width: 20px;
+	  height: 20px;
+    }
 </style>
