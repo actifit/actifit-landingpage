@@ -656,7 +656,7 @@
 			totalAccountValue += this.afit_se_balance * parseFloat(afitData.lastPrice)
 			
 			//get AFIT standard val
-			let afitCoreVal = this.userTokens * this.afitPrice;
+			let afitCoreVal = this.userTokens * this.afitPrice / this.steemPrice;
 			//console.log(afitCoreVal);
 			totalAccountValue += afitCoreVal;
 			
