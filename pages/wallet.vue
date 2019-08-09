@@ -637,6 +637,7 @@
 	watch: {
 	  user: 'fetchUserData',
 	  tokenMetrics: 'formattedTotAccountVal',
+	  steemPrice: 'formattedTotAccountVal',
 	},
 	methods: {
 	  /**
