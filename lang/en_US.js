@@ -344,4 +344,5 @@ module.exports = {
   account_est_val: 'Estimated Total Account Value',
   in_usd: 'In USD',
   in_steem: 'In STEEM',
+  detailed_calc_title: 'Calculation Details:',
 }
