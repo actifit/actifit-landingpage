@@ -550,6 +550,8 @@
 		  fetch(process.env.actiAppUrl+'is_banned/'+this.displayUser).then(
 			res => {res.json().then(json => this.account_banned = json)}).catch(e => reject(e))
 			
+		  
+		  try{
 		  //fetch user's AFIT S-E balance
 		  let bal = await ssc.findOne('tokens', 'balances', { account: this.displayUser, symbol: 'AFIT' });
 		  if (bal){
@@ -560,6 +562,11 @@
 		  bal = await ssc.findOne('tokens', 'balances', { account: this.displayUser, symbol: 'AFITX' });
 		  if (bal){
 			  this.userAFITXSETokenCount = bal.balance;
+		  }
+		  
+		  }catch(err){
+			//avoid time outs causing page not to load
+			console.log(err);
 		  }
 		
 		  this.getAccountData();
