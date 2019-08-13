@@ -9,6 +9,34 @@
           </button>
         </div>
 		<div class="modal-body">
+			<h5 class="modal-title" id="exampleModalLabel">{{ $t('top_afitx_holders') }}</h5>
+			<table class="table table-hover">
+			  <thead class="text-brand">
+				<tr>
+				  <th scope="col">{{ $t('Rank') }}</th>
+				  <th scope="col">{{ $t('User') }}</th>
+				  <th scope="col">{{ $t('Afitx_Bal') }}</th>
+				  <!--<th scope="col" class="d-none d-lg-table-cell">{{ $t('Date') }}</th>-->
+				  <th scope="col" class="d-none d-sm-table-cell">{{ $t('AFIT_Exchanged') }}</th>
+				  <th scope="col">{{ $t('Exchange_Time') }}</th>
+				</tr>
+			  </thead>
+			  <tbody>
+				<tr v-for="(topHolder, key) in topAFITXList" :key="key" :class="{'bg-danger': user === topHolder.account, 'text-white': user === topHolder.account}" v-if="exchangeRequestSet(topHolder.account)">
+				  <td>{{ key + 1 }}</td>
+				  <td>
+					<a :href="topHolder.account" target="_blank" :class="{'text-white': user === topHolder.account}">
+						@{{ topHolder.account }}
+					</a>
+				  </td>
+				  <td class="d-none d-lg-table-cell">{{ topHolder.balance }} {{ $t('AFITX') }}</td>
+				  <!--<td class="d-none d-lg-table-cell">{{ date(topHolder.date) }}</td>-->
+				  <td class="d-none d-sm-table-cell">{{ amountExchanged(topHolder.account) }}</td>
+				  <td>{{ $t('Within') }} {{ 24 }} {{ $t('hrs') }}</td>
+				</tr>
+			  </tbody>
+			</table>
+			
 			<table class="table table-hover">
 			  <thead class="text-brand">
 				<tr>
@@ -20,8 +48,8 @@
 				</tr>
 			  </thead>
 			  <tbody>
-				<tr v-for="pendingTrans in transList" :key="pendingTrans._id" :class="{'bg-danger': user === pendingTrans.user, 'text-white': user === pendingTrans.user}">
-				  <th scope="row">{{ pendingTrans.order }}</th>
+				<tr v-for="(pendingTrans, key) in transList" :key="pendingTrans._id" :class="{'bg-danger': user === pendingTrans.user, 'text-white': user === pendingTrans.user}" v-if="!topHolder(pendingTrans.user)">
+				  <th scope="row">{{ key + 1 }}</th>
 				  <td>
 					<a :href="pendingTrans.user" target="_blank" :class="{'text-white': user === pendingTrans.user}">
 						@{{ pendingTrans.user }}
@@ -42,7 +70,7 @@
 <script>
  
   export default {
-    props: [ 'transList', 'user' ],
+    props: [ 'transList', 'user', 'topAFITXList' ],
 	methods: {
 	  date(val) {
         let date = new Date(val)
@@ -53,6 +81,20 @@
 			+ date.getHours() + ':' 
 			+ (minutes < 10 ? '0' + minutes : minutes)
       },
+	  exchangeRequestSet(user){
+		return this.transList.find(v => v.user == user)
+	  },
+	  amountExchanged(user){
+		let entry = [];
+		entry = this.transList.find(v => v.user == user)
+		if (entry){
+			return entry.paid_afit
+		}
+		return '';
+	  },
+	  topHolder(user){
+		return this.topAFITXList.find(v => v.account == user)
+	  }
 	}
   }
 </script>

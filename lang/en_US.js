@@ -345,4 +345,7 @@ module.exports = {
   in_usd: 'In USD',
   in_steem: 'In STEEM',
   detailed_calc_title: 'Calculation Details:',
+  top_afitx_holders: 'Top 25 AFITX Requests',
+  Afitx_Bal: 'AFITX Held',
+  AFITX: 'AFITX',
 }

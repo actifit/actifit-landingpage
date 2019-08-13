@@ -296,7 +296,7 @@
 					<div>{{ $t('upvote_notice') }}</div></i>
 				</div>
 			  </transition>
-			  <ExchangeQueue :transList="tokenSwapQueue.pendingTransactions" :user="user.account.name"/>
+			  <ExchangeQueue :transList="tokenSwapQueue.pendingTransactions" :user="user.account.name" :topAFITXList="topAFITXHolders"/>
 			  <ExchangeHistory :transList="userTokenSwapHistory.userTokenSwapHist"/>
 			  </div>
 			
@@ -551,6 +551,7 @@
 		pendingTokenSwapTransCount: 0,
 		tokenSwapQueue: '',
 		userTokenSwapHistory: '',
+		topAFITXHolders: '',
 		userTokenSwapPending: '',
 		runningInterval: '',
 		afit_se_balance: 0,
@@ -911,6 +912,12 @@
 		  fetch(process.env.actiAppUrl+'isPoweringDown/'+this.user.account.name).then(
 			res => {res.json().then(json => this.setUserPDAfitStatus (json) ).catch(e => reject(e))
 		  }).catch(e => reject(e))
+		  
+		  //grab list of top AFITX token holders
+		  fetch(process.env.actiAppUrl+'topAFITXHolders/?count=25').then(
+			res => {res.json().then(json => this.topAFITXHolders = json ).catch(e => reject(e))
+		  }).catch(e => reject(e))
+		  
 		}
 	  },
 	  setAFITPrice (_afitPrice){
