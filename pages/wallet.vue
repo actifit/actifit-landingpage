@@ -36,11 +36,24 @@
 		</div>
         <div class="row row-sep">
 			<div class="col-md-6 row-sep-in">
-				<h4><img src="/img/actifit_logo.png" class="mr-2 token-logo">{{ $t('Your_Afit_Balance') }}</h4>
+				<h4>
+					<img src="/img/actifit_logo.png" class="mr-2 token-logo">{{ $t('Your_Afit_Balance') }}
+					<small class="text-right">
+						<a href="#" data-toggle="modal" class="text-brand p-3" data-target="#topHoldersModal" >
+							<i class="fas fa-list-ol"></i> {{ $t('top_100_afit_holders') }}
+						</a>
+					</small>
+				</h4>
 				<h5 class="mb-4 font-weight-bold">{{ formattedUserTokens }}</h5>
 			</div>
 			<div class="col-md-6 row-sep-in">
-				<h4><img src="/img/AFITX.png" class="mr-2 token-logo">{{ $t('Your_Afitx_Balance') }}<i class="fas fa-info-circle" v-on:click="showAfitxInfo=!showAfitxInfo"></i></h4>
+				<h4><img src="/img/AFITX.png" class="mr-2 token-logo">{{ $t('Your_Afitx_Balance') }}<i class="fas fa-info-circle" v-on:click="showAfitxInfo=!showAfitxInfo"></i>
+					<small class="text-right">
+						<a href="#" data-toggle="modal" class="text-brand p-3" data-target="#topHoldersXModal" >
+							<i class="fas fa-list-ol"></i> {{ $t('top_100_afitx_holders') }}
+						</a>
+					</small>
+				</h4>
 				<div v-if="showAfitxInfo" v-html="$t('afitx_info')"></div>
 				<h5 class="mb-4 font-weight-bold">{{ formattedUserAFITX }}</h5>
 			</div>
@@ -291,9 +304,16 @@
 						<i class="fas fa-history"></i> {{ $t('My_History') }}
 					  </a>
 					</div>
-					<i><div>{{ $t('You_have_scheduled') }} {{pendingTokenSwap.paid_afit}} {{ $t('afit_steem_exchange_in_progress') }}</div>
-					<div class="text-brand">{{ $t('current_no_queue') }} {{userTokenSwapPending.order}}. {{ $t('exchange_projected_time') }} {{userTokenSwapPending.reward_round * 24}} {{ $t('hrs') }}</div>
-					<div>{{ $t('upvote_notice') }}</div></i>
+					<div>{{ $t('You_have_scheduled') }} {{pendingTokenSwap.paid_afit}} {{ $t('afit_steem_exchange_in_progress') }}</div>
+					<div class="text-brand" v-if="topHolder(user.account.name)">{{ $t('top_afitx_holder_pending_ex') }}</div>
+					<div class="text-brand" v-else>
+					<div v-if="userAFITXRank<100">
+					{{ $t('afitx_bal_rank') }} {{ userAFITXRank }}. {{ $t('you_need') }} {{ minJoinTopHolders() }} {{ $t('min_missing_afitx_prio') }}
+					</div>
+					<div>{{ $t('current_no_queue') }} {{userTokenSwapPending.order}}. {{ $t('exchange_projected_time').replace('ROUND_COUNT', userTokenSwapPending.reward_round) }}</div>
+					</div>
+					<div>{{ $t('upvote_notice') }}</div>
+					<small>{{ $t('afitx_data_update_notice') }}</small>
 				</div>
 			  </transition>
 			  <ExchangeQueue :transList="tokenSwapQueue.pendingTransactions" :user="user.account.name" :topAFITXList="topAFITXHolders"/>
@@ -467,6 +487,8 @@
 		</div>
 	  </div>
 	</div>
+	<TopHolders :user="user.account.name" :holdersList="afitHoldersList"/>
+	<TopHoldersX :user="user.account.name" :holdersList="afitxHoldersList"/>
 	<no-ssr>
       <div>
         <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
@@ -488,6 +510,9 @@
   import SSC from 'sscjs'
   
   import Countdown from 'vuejs-countdown'
+  
+  import TopHolders from '~/components/TopHoldersModal'
+  import TopHoldersX from '~/components/TopHoldersXModal'
   
   const ssc = new SSC(process.env.steemEngineRpc);
   const scot_steemengine_api = process.env.steemEngineScot;
@@ -578,6 +603,9 @@
 		totalAccountValueSteem: 0,
 		detailCalculation: '',
 		showDetailedCalc: false,
+		userAFITXRank: -1,
+		afitHoldersList: [],
+		afitxHoldersList: [],
 	  }
 	},
     components: {
@@ -587,7 +615,9 @@
       Footer,
 	  ExchangeQueue,
 	  ExchangeHistory,
-	  Countdown
+	  Countdown,
+	  TopHolders,
+	  TopHoldersX
     },
     computed: {
       ...mapGetters('steemconnect', ['user']),
@@ -651,6 +681,25 @@
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
+	  topHolder(user){
+		if (this.topAFITXHolders.length){
+			return this.topAFITXHolders.find(v => v.account == user)
+		}
+		return '';
+	  },
+	  topHolderBalance(rank){
+		if (this.topAFITXHolders.length > rank){
+			return this.topAFITXHolders[rank];
+		}
+		return {};
+	  },
+	  minJoinTopHolders () {
+		let lastTopHold = this.topHolderBalance(this.topAFITXHolders.length - 1);
+		if (lastTopHold){
+			let missingAmount = lastTopHold.balance - this.afitx_se_balance;
+			return missingAmount;
+		}
+	  },
 	  date(val) {
         let date = new Date(val)
         let minutes = date.getMinutes()
@@ -899,6 +948,12 @@
 			  this.afitx_se_balance = bal.balance;
 		  }
 		  
+		  //fetch user's AFITX Rank
+		   fetch(process.env.actiAppUrl+'afitxData/'+this.user.account.name).then(
+			res => {res.json().then(json => this.userAFITXRank = json.ind ).catch(e => reject(e))
+		  }).catch(e => reject(e))
+		  
+		  
 		  //fetch user's tokensOfInterest S-E balance
 		  let tokenData = await ssc.find('tokens', 'balances', { account: this.user.account.name, symbol : { '$in' : tokensOfInterest } });
 		  if (tokenData){
@@ -913,9 +968,19 @@
 			res => {res.json().then(json => this.setUserPDAfitStatus (json) ).catch(e => reject(e))
 		  }).catch(e => reject(e))
 		  
-		  //grab list of top AFITX token holders
+		  //grab list of top 25 AFITX token holders
 		  fetch(process.env.actiAppUrl+'topAFITXHolders/?count=25').then(
 			res => {res.json().then(json => this.topAFITXHolders = json ).catch(e => reject(e))
+		  }).catch(e => reject(e))
+		  
+		  //grab list of top 100 AFITX token holders
+		  fetch(process.env.actiAppUrl+'topAFITXHolders/?count=100').then(
+			res => {res.json().then(json => this.afitxHoldersList = json ).catch(e => reject(e))
+		  }).catch(e => reject(e))
+		  
+		  //grab list of top 100 AFIT token holders
+		  fetch(process.env.actiAppUrl+'topAFITHolders/?count=100').then(
+			res => {res.json().then(json => this.afitHoldersList = json ).catch(e => reject(e))
 		  }).catch(e => reject(e))
 		  
 		}

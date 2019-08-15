@@ -32,7 +32,7 @@
 				  <td class="d-none d-lg-table-cell">{{ topHolder.balance }} {{ $t('AFITX') }}</td>
 				  <!--<td class="d-none d-lg-table-cell">{{ date(topHolder.date) }}</td>-->
 				  <td class="d-none d-sm-table-cell">{{ amountExchanged(topHolder.account) }}</td>
-				  <td>{{ $t('Within') }} {{ 24 }} {{ $t('hrs') }}</td>
+				  <td>{{ $t('within_round').replace('ROUND_COUNT', '') }} </td>
 				</tr>
 			  </tbody>
 			</table>
@@ -57,7 +57,8 @@
 				  </td>
 				  <td class="d-none d-lg-table-cell">{{ date(pendingTrans.date) }}</td>
 				  <td class="d-none d-sm-table-cell">{{ pendingTrans.paid_afit }}</td>
-				  <td>{{ $t('Within') }} {{ pendingTrans.reward_round * 24 }} {{ $t('hrs') }}</td>
+				  <td v-if="pendingTrans.reward_round < 2">{{ $t('within_round').replace('ROUND_COUNT', '') }}</td>
+				  <td v-else>{{ $t('within_rounds').replace('ROUND_COUNT', pendingTrans.reward_round) }}</td>
 				</tr>
 			  </tbody>
 			</table>
