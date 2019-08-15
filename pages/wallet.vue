@@ -467,6 +467,8 @@
         <Transaction v-for="(transaction, index) in transactions" :key="index" :transaction="transaction" />
         <div class="text-center"><small class="text-muted" v-if="transactions.length === 0">{{ $t('No_transactions_notice') }}</small></div>
       </div>
+	  	<TopHolders :user="user.account.name" :holdersList="afitHoldersList"/>
+		<TopHoldersX :user="user.account.name" :holdersList="afitxHoldersList"/>
     </div>
 	
 	<div :class="smallScreenClasses" class="container mt-5 pb-5 pt-5" v-else>
@@ -487,8 +489,6 @@
 		</div>
 	  </div>
 	</div>
-	<TopHolders :user="user.account.name" :holdersList="afitHoldersList"/>
-	<TopHoldersX :user="user.account.name" :holdersList="afitxHoldersList"/>
 	<no-ssr>
       <div>
         <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
