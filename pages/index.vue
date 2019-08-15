@@ -276,16 +276,16 @@
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/alaafarhat.jpg);'"></div>
             </a>
             <a href="@alfamano" target="_blank">Alaa Farhat</a>
-			<div><i>Operations Manager</i></div>
+			<div><i>Bus Dev Manager</i></div>
 			<a href="https://www.linkedin.com/in/alaa-farhat-b8b59317/" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
-            <a href="@katerinaramm" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/katerinaramm.jpg);'"></div>
+            <a href="@pjansen" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/pauljansen.jpg);'"></div>
             </a>
-            <a href="@katerinaramm" target="_blank">Katerina Ramoutsaki</a>
-			<div><i>Social Media Manager</i></div>
-			<a href="https://www.linkedin.com/in/katerina-ramoutsaki-25055697/" target="_blank"><i class="fab fa-linkedin"></i></a>
+            <a href="@pjansen" target="_blank">Paul Jansen</a>
+			<div><i>Operations Manager</i></div>
+			<a href="https://www.linkedin.com/in/profilepauljansen" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@rabihfarhat" target="_blank">
@@ -296,12 +296,12 @@
 			<a href="https://www.linkedin.com/in/rabih-farhat-42a1604b/" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
-            <a href="@pjansen" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/pauljansen.jpg);'"></div>
+            <a href="@katerinaramm" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/katerinaramm.jpg);'"></div>
             </a>
-            <a href="@pjansen" target="_blank">Paul Jansen</a>
-			<div><i>Quality Assurance Manager</i></div>
-			<a href="https://www.linkedin.com/in/profilepauljansen" target="_blank"><i class="fab fa-linkedin"></i></a>
+            <a href="@katerinaramm" target="_blank">Katerina Ramoutsaki</a>
+			<div><i>Social Media Manager</i></div>
+			<a href="https://www.linkedin.com/in/katerina-ramoutsaki-25055697/" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
 		</div>
 		<div class="row">
