@@ -276,7 +276,7 @@
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/alaafarhat.jpg);'"></div>
             </a>
             <a href="@alfamano" target="_blank">Alaa Farhat</a>
-			<div><i>Bus Dev Manager</i></div>
+			<div><i>Business Development Manager</i></div>
 			<a href="https://www.linkedin.com/in/alaa-farhat-b8b59317/" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
