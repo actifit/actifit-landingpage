@@ -35,25 +35,29 @@
 			</div>
 		</div>
         <div class="row row-sep">
-			<div class="col-md-6 row-sep-in">
-				<h4>
-					<img src="/img/actifit_logo.png" class="mr-2 token-logo">{{ $t('Your_Afit_Balance') }}
+			<div class="col-md-6 row-sep-in small-pad-row">
+				<h5 class="token-title">
+					<img src="/img/actifit_logo.png" class="mr-1 token-logo">{{ $t('Your_Afit_Balance') }}
 					<small class="text-right">
-						<a href="#" data-toggle="modal" class="text-brand p-3" data-target="#topHoldersModal" >
-							<i class="fas fa-list-ol"></i> {{ $t('top_100_afit_holders') }}
+						<a href="#" data-toggle="modal" class="text-brand" data-target="#topHoldersModal" >
+							<i class="fas fa-list-ol"></i>
+							<span v-if="screenWidth > 500"> {{ $t('top_100_afit_holders') }}</span>
+							<span v-else> {{ $t('top_100') }}</span>
 						</a>
 					</small>
-				</h4>
+				</h5>
 				<h5 class="mb-4 font-weight-bold">{{ formattedUserTokens }}</h5>
 			</div>
-			<div class="col-md-6 row-sep-in">
-				<h4><img src="/img/AFITX.png" class="mr-2 token-logo">{{ $t('Your_Afitx_Balance') }}<i class="fas fa-info-circle" v-on:click="showAfitxInfo=!showAfitxInfo"></i>
+			<div class="col-md-6 row-sep-in small-pad-row">
+				<h5 class="token-title"><img src="/img/AFITX.png" class="mr-1 token-logo">{{ $t('Your_Afitx_Balance') }}<i class="fas fa-info-circle" v-on:click="showAfitxInfo=!showAfitxInfo"></i>&nbsp;
 					<small class="text-right">
-						<a href="#" data-toggle="modal" class="text-brand p-3" data-target="#topHoldersXModal" >
-							<i class="fas fa-list-ol"></i> {{ $t('top_100_afitx_holders') }}
+						<a href="#" data-toggle="modal" class="text-brand" data-target="#topHoldersXModal" >
+							<i class="fas fa-list-ol"></i>
+							<span v-if="screenWidth > 500"> {{ $t('top_100_afitx_holders') }}</span>
+							<span v-else> {{ $t('top_100') }}</span>
 						</a>
 					</small>
-				</h4>
+				</h5>
 				<div v-if="showAfitxInfo" v-html="$t('afitx_info')"></div>
 				<h5 class="mb-4 font-weight-bold">{{ formattedUserAFITX }}</h5>
 			</div>
@@ -324,7 +328,7 @@
 		</div>
 		<div class="row text-center row-sep">
 			<div class="col-md-6 row-sep-in">
-				<h4><img src="/img/STEEM.png" class="mr-2 token-logo">{{ $t('Your_Steem_Balance') }}</h4>
+				<h5 class="token-title"><img src="/img/STEEM.png" class="mr-2 token-logo">{{ $t('Your_Steem_Balance') }}</h5>
 				<div class="mb-4 font-weight-bold">
 					<div class="p-2">{{ this.renderSteemPower(2) }} {{ $t('STEEM_POWER_CAPS') }} | {{ this.renderSteemBalance() }} | {{ this.renderSBDBalance() }}</div>
 					<div class="row">
@@ -335,7 +339,7 @@
 				</div>
 			</div>
 			<div v-if="tokensOfInterestBal.length > 0" class="col-md-6 row-sep-in">
-				<h4>{{ $t('Your_Token_Balance') }}</h4>
+				<h5 class="token-title">{{ $t('Your_Token_Balance') }}</h5>
 				<div class="mb-4 font-weight-bold">
 					<div class="p-2" v-for="(token, index) in tokensOfInterestBal" :key="index" :token="token">{{ renderBal(token) }} {{ token.symbol }} <span v-if="parseFloat(renderStake(token)) > 0">+ {{ renderStake(token)}} {{ token.symbol }} {{ $t('Staked') }} </span>
 					<span v-if="parseFloat(delegStake(token)) > 0">( + {{ delegStake(token)}} {{ token.symbol }} {{ $t('Delegated') }})</span>
@@ -1873,5 +1877,9 @@
   .text-center.grid.p-2, .calc-data{
 	border: 2px solid red;
 	border-radius: 5px;
+  }
+  .small-pad-row{
+	padding-left: 5px;
+	padding-right: 5px;
   }
 </style>

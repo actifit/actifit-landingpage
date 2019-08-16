@@ -360,5 +360,6 @@ module.exports = {
   top_100_afit_holders: 'Top 100 Holders',
   top_afit_holders_title: 'Top 100 AFIT Holders',
   top_afitx_holders_title: 'Top 100 AFITX Holders',
-  AFIT: 'AFIT'
+  AFIT: 'AFIT',
+  top_100: 'Top 100',
 }
