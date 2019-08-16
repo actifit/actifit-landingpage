@@ -701,7 +701,7 @@
 		let lastTopHold = this.topHolderBalance(this.topAFITXHolders.length - 1);
 		if (lastTopHold){
 			let missingAmount = lastTopHold.balance - this.afitx_se_balance;
-			return missingAmount;
+			return this.numberFormat(missingAmount, 5);
 		}
 	  },
 	  date(val) {
