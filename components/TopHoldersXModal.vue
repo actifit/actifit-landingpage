@@ -25,7 +25,7 @@
 						@{{ topHolder.account }}
 					</a>
 				  </td>
-				  <td class="d-none d-lg-table-cell">{{ numberFormat(topHolder.balance, 5) }} {{ $t('AFITX') }}</td>
+				  <td>{{ numberFormat(topHolder.balance, 5) }} {{ $t('AFITX') }}</td>
 				</tr>
 			  </tbody>
 			</table>
@@ -66,5 +66,10 @@
 	.token-logo{
 		width: 40px;
 		height: 40px;
+	}
+	@media screen and (max-width: 600px){
+		.table td, .table th{
+			padding: .3rem;
+		}
 	}
 </style>
