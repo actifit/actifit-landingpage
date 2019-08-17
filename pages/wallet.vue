@@ -63,7 +63,8 @@
 			</div>
 		</div>
 		<div class="p-2 font-weight-bold">
-			<button v-on:click="buyAFITwithSTEEM" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('BUY_AFIT_WITH_STEEM') }}</button>
+			<!--<button v-on:click="buyAFITwithSTEEM" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('BUY_AFIT_WITH_STEEM') }}</button>-->
+			<a href="https://steem-engine.com/?p=market&t=AFIT" class="btn btn-brand btn-lg border w-25">{{ $t('buy_afit_se') }}</a>
 			<button v-on:click="exchangeAFITforSTEEM" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('EXCHANGE_AFIT_FOR_STEEM') }}</button>
 			<button v-on:click="moveAFITSEtoAFITPOWER" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('MOVE_AFIT_SE_AFIT_POWER') }}</button>
 			<button v-on:click="initiateAFITtoSE" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('INITIATE_AFIT_TO_SE') }}</button>
@@ -272,7 +273,15 @@
 					</div>
 					<div class="row" v-if="error_swap != ''" >
 					  <div class="w-25"></div>
-					  <div class="text-brand w-50">{{error_swap}}</div>
+					  <span class="text-brand">{{error_swap}}</span>
+					</div>
+					<div class="row" v-if="buyMore">
+						<div class="w-25"></div>
+						<div class="w-50">
+							<a href="#" class="btn btn-brand border p-2" v-on:click="moveAFITSEtoAFITPOWER">{{ $t('transfer_afit_from_se') }}</a>
+							<span class="text-brand">OR</span>
+							<a href="https://steem-engine.com/?p=market&t=AFIT" class="btn btn-brand border p-2">{{ $t('buy_afit_se') }}</a>
+						</div>
 					</div>
 					<div class="row">
 					  <div class="w-25"></div>
@@ -576,7 +585,7 @@
 		afitPrice: 0.036,
 		pendingTokenSwap: '',
 		transfer_amount: 1,
-		min_tokens_required: 100,
+		min_tokens_required: 10000,
 		pendingTokenSwapTransCount: 0,
 		tokenSwapQueue: '',
 		userTokenSwapHistory: '',
@@ -610,6 +619,7 @@
 		userAFITXRank: -1,
 		afitHoldersList: [],
 		afitxHoldersList: [],
+		buyMore: false,
 	  }
 	},
     components: {
@@ -1706,6 +1716,7 @@
 		this.performingSwap = true
 		this.error_swap = '';
 		this.swapResult = '';
+		this.buyMore = false;
 		//ensure we have proper values
 		if (this.$refs["funds-pass-entry"].value == ''){
 		  this.error_proceeding = true;
@@ -1714,8 +1725,9 @@
 		  return;
 		}
 		if (this.userTokens <  this.min_tokens_required){
-		  this.error_swap = this.$t('need_at_least') + this.min_tokens_required + this.$t('afit_tokens_to_exchange');
+		  this.error_swap = this.$t('need_at_least') + this.numberFormat(this.min_tokens_required, 2) + this.$t('afit_tokens_to_exchange');
 		  this.performingSwap = false;
+		  this.buyMore = true;
 		  return;
 		}
 		

@@ -115,7 +115,7 @@ module.exports = {
   min_amount_1_STEEM_SBD: 'The amount needs to be a minimum of 1 STEEM/SBD',
   provide_funds_pass: 'Please provide your funds password',
   need_at_least: 'You need at least ',
-  afit_tokens_to_exchange: ' AFIT tokens to exchange for upvotes',
+  afit_tokens_to_exchange: ' AFIT tokens in your wallet to exchange for upvotes',
   afit_steem_swap_success: 'AFIT Tokens Successfully swapped for additional STEEM upvote! Upvote will occurr on next reward cycle.',
   completed_success: 'operation completed successfully !',
   Your: 'Your',
@@ -362,4 +362,7 @@ module.exports = {
   top_afitx_holders_title: 'Top 100 AFITX Holders',
   AFIT: 'AFIT',
   top_100: 'Top 100',
+  OR: 'OR',
+  transfer_afit_from_se: 'Transfer AFIT From S-E',
+  buy_afit_se: 'Buy AFIT On S-E',
 }
