@@ -48,7 +48,7 @@
 				</tr>
 			  </thead>
 			  <tbody>
-				<tr v-for="(pendingTrans, key) in transList" :key="pendingTrans._id" :class="{'bg-danger': user === pendingTrans.user, 'text-white': user === pendingTrans.user}" v-if="!topHolder(pendingTrans.user)">
+				<tr v-for="(pendingTrans, key) in transList" :key="pendingTrans._id" :class="{'bg-danger': user === pendingTrans.user, 'text-white': user === pendingTrans.user}" v-if="!isTopHolder(pendingTrans.user)">
 				  <th scope="row">{{ key + 1 }}</th>
 				  <td>
 					<a :href="pendingTrans.user" target="_blank" :class="{'text-white': user === pendingTrans.user}">
@@ -83,18 +83,23 @@
 			+ (minutes < 10 ? '0' + minutes : minutes)
       },
 	  exchangeRequestSet(user){
-		return this.transList.find(v => v.user == user)
+		if (this.transList.length){
+			return this.transList.find(v => v.user == user)
+		}
+		return false;
 	  },
 	  amountExchanged(user){
-		let entry = [];
-		entry = this.transList.find(v => v.user == user)
-		if (entry){
-			return entry.paid_afit
+		if (this.transList.length){
+			let entry = [];
+			entry = this.transList.find(v => v.user == user)
+			if (entry){
+				return entry.paid_afit
+			}
 		}
 		return '';
 	  },
-	  topHolder(user){
-		return this.topAFITXList.find(v => v.account == user)
+	  isTopHolder(user){
+		return (this.topAFITXList.length?this.topAFITXList.find(v => v.account == user):false);
 	  }
 	}
   }
