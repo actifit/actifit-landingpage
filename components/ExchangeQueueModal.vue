@@ -15,7 +15,7 @@
 				<tr>
 				  <th scope="col">{{ $t('Rank') }}</th>
 				  <th scope="col">{{ $t('User') }}</th>
-				  <th scope="col">{{ $t('Afitx_Bal') }}</th>
+				  <th scope="col" class="d-none d-sm-table-cell">{{ $t('Afitx_Bal') }}</th>
 				  <!--<th scope="col" class="d-none d-lg-table-cell">{{ $t('Date') }}</th>-->
 				  <th scope="col" class="d-none d-sm-table-cell">{{ $t('AFIT_Exchanged') }}</th>
 				  <th scope="col">{{ $t('Exchange_Time') }}</th>

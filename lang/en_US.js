@@ -209,7 +209,7 @@ module.exports = {
   In_Progress: 'In Progress',
   Exchange_Transactions_Queue: 'Exchange Transactions Queue',
   Order_No: '#Order',
-  Exchange_Time: 'Est. Voting/Exchange Round',
+  Exchange_Time: 'Est. Voting / Exchange Round',
   Within: 'Within ~',
   Copyright_Actifit: 'Copyright Actifit',
   Privacy_Policy: 'Privacy Policy',
