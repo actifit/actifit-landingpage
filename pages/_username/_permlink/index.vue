@@ -280,10 +280,15 @@
 		//swap into a player format, and introduce embed format for proper playing of videos
 		report_content = report_content.replace(vid_reg,'<iframe width="640" height="360" src="https://www.youtube.com/embed/$1"></iframe>');
 		
+		/* let's find links sent as [](), and display them properly */
+		//let href_lnks = /\[([\d\w-\.\@]*)\]\(([\d\w-\.\@\/\:]*)\)/igm;
+		//report_content = report_content.replace(href_lnks,'<a href="$2">$1</a>');
 		
-		/* regex to match @ words and convert them to steem user links */
-		let user_name = /(@([\a-zA-Z0-9-.]+)(?![\a-zA-Z0-9-.]))([,.|() ])/g;
-        return report_content.replace(user_name,'[$1](https://actifit.io/$1)$3')
+		/* regex to match @ words and convert them to steem user links. Need to skip special occurrences such as name within a link (preceded by /) */
+		let user_name = /([^\/])(@([\d\w-.]+))/igm;
+        
+		report_content = report_content.replace(user_name,'$1<a href="https://actifit.io/$2">$2</a>')
+		return report_content;
       },
 	  getVoteCount(){
 		return Array.isArray(this.report.active_votes) ? this.report.active_votes.length : 0;

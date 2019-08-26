@@ -50,8 +50,9 @@
 		//swap into a player format, and introduce embed format for proper playing of videos
 		report_content = report_content.replace(vid_reg,'<iframe width="640" height="360" src="https://www.youtube.com/embed/$1"></iframe>');
 		
-		/* regex to match @ words and convert them to steem user links */
-		let user_name = /(@([\a-zA-Z0-9-.]+)(?![\a-zA-Z0-9-.]))([,.|() ])/g;
+		/* regex to match @ words and convert them to steem user links. Need to skip special occurrences such as name within a link (preceded by /) */
+		let user_name = /([^\/])(@([\d\w-.]+))/igm;
+
         return report_content.replace(user_name,'[$1](https://actifit.io/$1)$3')
       }
     }
