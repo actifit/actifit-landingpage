@@ -234,8 +234,9 @@
 		
 		/* regex to match @ words and convert them to steem user links. Need to skip special occurrences such as name within a link (preceded by /) */
 		let user_name = /([^\/])(@([\d\w-.]+))/igm;
-
-        return report_content.replace(user_name,'[$1](https://actifit.io/$1)$3')
+        
+		report_content = report_content.replace(user_name,'$1<a href="https://actifit.io/$2">$2</a>')
+		return report_content;
       },
 	  formattedReportUrl () {
 		return "https://actifit.io" + this.report.url;
