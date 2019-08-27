@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import steem from 'steem'
 
+steem.api.setOptions({ url: 'https://anyx.io' });
+
 // returning promises to be able to wait for data
 
 export default {
