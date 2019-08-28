@@ -9,6 +9,9 @@
         <a href="https://www.instagram.com/actifit.fitness/" target="_blank" class="d-inline-block mx-3"><i class="fab fa-2x fa-instagram"></i></a>
 		<a href="https://t.me/actifit" target="_blank" class="d-inline-block mx-3"><i class="fab fa-2x fa-telegram"></i></a>
       </div>
+	  <div class="row">
+		<div class="col text-center"><small>Price Data provided By <a href="https://coingecko.com">CoinGecko</a></small></div>
+	  </div>
       <div class="row">
         <div class="col text-center">
           <small class="text-muted">&copy; {{ $t('Copyright_Actifit') }} {{ currentYear }}</small> |
