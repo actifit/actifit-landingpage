@@ -34,11 +34,11 @@
 			<div v-else><i class="fas fa-file-invoice-dollar text-brand"></i>&nbsp;<a class="btn btn-brand" href="https://steembottracker.com/delegation.html?delegatee=actifit" target="_blank">{{ $t('Delegate_Now_Actifit') }}</a></div>
 			<div><i class="fas fa-angle-double-left text-brand mr-2"></i>{{ $t('Followers') }}: {{ numberFormat(userinfo.follower_count,0) }}</div>
 			<div><i class="fas fa-angle-double-right text-brand mr-2"></i>{{ $t('Following') }}: {{ numberFormat(userinfo.following_count,0) }}</div>
-			<div class="text-brand">
+			<div class="text-brand" v-if="!account_banned" >
 				<div>
 					<img src="/img/actifit_logo.png" class="mr-2 token-logo">
 					<a href="/wallet" >{{ numberFormat(userTokenCount, 3) }} AFIT Tokens + {{ displayAFITSEBal }} AFIT S-E Tokens</a>&nbsp;
-					<button v-if="!account_banned" class="btn btn-brand border" v-on:click="tipUser" >Tip AFIT</button>
+					<button class="btn btn-brand border" v-on:click="tipUser" >Tip AFIT</button>
 				</div>
 				<div>
 					<img src="/img/AFITX.png" class="mr-2 token-logo">
@@ -67,7 +67,7 @@
 			</div>
 		  </div>
 		  <!-- badges section -->
-		  <div v-if="userinfo" class="user-badges">
+		  <div v-if="userinfo && !account_banned" class="user-badges">
 		    <div class="text-brand badges-title"><i class="fas fa-trophy"></i> {{ $t('Badges') }}</div>
 		    <div class="badge-entry iso-badge">
 			  <div :title="$t('iso_badge_title')">
