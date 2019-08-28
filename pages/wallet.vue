@@ -109,7 +109,7 @@
 						<div class="row">
 							<label for="move-funds-pass" class="w-25 p-2 text-right">{{ $t('Funds_Password') }}</label>
 							<input type="password" id="move-funds-pass" name="move-funds-pass" ref="move-funds-pass" class="form-control-lg w-50 p-2">
-							<a @click.prevent="afitActivityMode = EXCHANGE_AFIT_STEEM" href="#" class="btn btn-brand border m-1">{{ $t('create_pass_short') }}</a>
+							<a href="/wallet?action=set_funds_pass" target="_blank" class="btn btn-brand border m-1">{{ $t('create_pass_short') }}</a>
 						</div>
 						<div class="text-brand text-center" v-if="afit_se_move_error_proceeding" v-html="afit_se_move_err_msg">
 						</div>

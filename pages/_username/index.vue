@@ -53,7 +53,7 @@
 						<div class="row">
 							<label for="funds-pass" class="w-25 p-2">{{ $t('Funds_Password') }}</label>
 							<input type="password" id="funds-pass" name="funds-pass" ref="funds-pass" class="form-control-lg w-50 p-2">
-							<a href="/wallet?action=set_funds_pass" class="btn btn-brand border m-1">{{ $t('create_pass_short') }}</a>
+							<a href="/wallet?action=set_funds_pass" target="_blank" class="btn btn-brand border m-1">{{ $t('create_pass_short') }}</a>
 						</div>
 						<div class="row">
 							<div v-if="tipError" v-html="tipError" class="m-3"></div>
