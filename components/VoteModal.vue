@@ -301,14 +301,14 @@
 	  }
     },
 	async mounted () {
-	  //grab SBD price, needed for vote value calculation
-	  fetch('https://api.coinmarketcap.com/v1/ticker/steem-dollars/').then(
-		res => {res.json().then(json => this.setSBDPrice (json[0].price_usd)).catch(e => reject(e))
+	  //grab STEEM price, needed for vote value calculation
+	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem&vs_currencies=usd').then(
+		res => {res.json().then(json => this.setSteemPrice (json.steem.usd)).catch(e => reject(e))
 	  }).catch(e => reject(e))
 	  
 	  //grab SBD price, needed for vote value calculation
-	  fetch('https://api.coinmarketcap.com/v1/ticker/steem/').then(
-		res => {res.json().then(json => this.setSteemPrice (json[0].price_usd)).catch(e => reject(e))
+	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem-dollars&vs_currencies=usd').then(
+		res => {res.json().then(json => this.setSBDPrice (json.steem-dollars.usd)).catch(e => reject(e))
 	  }).catch(e => reject(e))
 	
 	  //in addition to the default updating of VP upon each render, we need to take into consideration leaving window open. 

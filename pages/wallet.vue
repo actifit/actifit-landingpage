@@ -1783,6 +1783,7 @@
 		return parseFloat(this.afitBuyAmount * this.afitPrice / this.steemPrice).toFixed(3);
 	  },
 	  setSteemPrice (_steemPrice){
+		console.log(_steemPrice);
 		this.steemPrice = parseFloat(_steemPrice).toFixed(3);
 	  },
 	  setSBDPrice (_sbdPrice){
@@ -1834,13 +1835,13 @@
 	  }
 	  
 	  //grab STEEM price
-	  fetch('https://api.coinmarketcap.com/v1/ticker/steem/').then(
-		res => {res.json().then(json => this.setSteemPrice (json[0].price_usd)).catch(e => reject(e))
+	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem&vs_currencies=usd').then(
+		res => {res.json().then(json => this.setSteemPrice (json.steem.usd)).catch(e => reject(e))
 	  }).catch(e => reject(e))
 	  
 	  //grab SBD price
-	  fetch('https://api.coinmarketcap.com/v1/ticker/steem-dollars/').then(
-		res => {res.json().then(json => this.setSBDPrice (json[0].price_usd)).catch(e => reject(e))
+	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem-dollars&vs_currencies=usd').then(
+		res => {res.json().then(json => this.setSBDPrice (json.steem-dollars.usd)).catch(e => reject(e))
 	  }).catch(e => reject(e))
 	  	  
     }
