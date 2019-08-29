@@ -28,10 +28,12 @@
 			</div>
 			<div><i class="fas fa-calendar-alt mr-2"></i> {{ $t('Joined_On') }} {{ pureDate(userinfo.created) }}</div>
 			<div><i class="fas fa-pen mr-2"></i> {{ numberFormat(userinfo.post_count, 0) }} {{ $t('Steem_posts_comments') }}</div>
-			<div v-if="userinfo.witness_votes.includes('actifit')"><i class="fas fa-cubes text-brand mr-2"></i>&nbsp;{{ $t('Votes_Actifit_Witness') }}</div>
-			<div v-else><i class="fas fa-cubes text-brand mr-2"></i>&nbsp;<a class="btn btn-brand" href="https://steemconnect.com/sign/account-witness-vote?witness=actifit&approve=1" target="_blank">{{ $t('Vote_Now_Actifit_Witness') }}</a></div>
-			<div v-if="actifitDelegator"><i class="fas fa-file-invoice-dollar text-brand mr-2"></i>&nbsp;{{ $t('Delegates_to_Actifit') }} {{ actifitDelegator.steem_power }} {{ $t('Steem_Power') }}</div>
-			<div v-else><i class="fas fa-file-invoice-dollar text-brand"></i>&nbsp;<a class="btn btn-brand" href="https://steembottracker.com/delegation.html?delegatee=actifit" target="_blank">{{ $t('Delegate_Now_Actifit') }}</a></div>
+			<div v-if="!account_banned">
+				<div v-if="userinfo.witness_votes.includes('actifit')"><i class="fas fa-cubes text-brand mr-2"></i>&nbsp;{{ $t('Votes_Actifit_Witness') }}</div>
+				<div v-else><i class="fas fa-cubes text-brand mr-2"></i>&nbsp;<a class="btn btn-brand" href="https://steemconnect.com/sign/account-witness-vote?witness=actifit&approve=1" target="_blank">{{ $t('Vote_Now_Actifit_Witness') }}</a></div>
+				<div v-if="actifitDelegator"><i class="fas fa-file-invoice-dollar text-brand mr-2"></i>&nbsp;{{ $t('Delegates_to_Actifit') }} {{ actifitDelegator.steem_power }} {{ $t('Steem_Power') }}</div>
+				<div v-else><i class="fas fa-file-invoice-dollar text-brand"></i>&nbsp;<a class="btn btn-brand" href="https://steembottracker.com/delegation.html?delegatee=actifit" target="_blank">{{ $t('Delegate_Now_Actifit') }}</a></div>
+			</div>
 			<div><i class="fas fa-angle-double-left text-brand mr-2"></i>{{ $t('Followers') }}: {{ numberFormat(userinfo.follower_count,0) }}</div>
 			<div><i class="fas fa-angle-double-right text-brand mr-2"></i>{{ $t('Following') }}: {{ numberFormat(userinfo.following_count,0) }}</div>
 			<div class="text-brand" v-if="!account_banned" >
