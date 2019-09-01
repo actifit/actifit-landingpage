@@ -306,14 +306,6 @@
 		</div>
 		<div class="row">
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
-            <a href="@definethedollar" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/jasonrees.jpg);'"></div>
-            </a>
-            <a href="@definethedollar" target="_blank">Jason Rees</a>
-			<div><i>Moderator</i></div>
-			<a href="https://www.linkedin.com/in/jason-bryan-rees-68b917184/" target="_blank"><i class="fab fa-linkedin"></i></a>
-          </div>
-		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@ciuoto" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/eugeniopirillo.jpg);'"></div>
             </a>
