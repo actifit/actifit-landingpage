@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import steem from 'steem'
 
-//steem.api.setOptions({ url: 'https://anyx.io' });
+steem.api.setOptions({ url: 'https://steemd.minnowsupportproject.org/' });
 
 // returning promises to be able to wait for data
 
