@@ -83,13 +83,13 @@
 			+ (minutes < 10 ? '0' + minutes : minutes)
       },
 	  exchangeRequestSet(user){
-		if (this.transList.length){
+		if (this.transList && this.transList.length){
 			return this.transList.find(v => v.user == user)
 		}
 		return false;
 	  },
 	  amountExchanged(user){
-		if (this.transList.length){
+		if (this.transList && this.transList.length){
 			let entry = [];
 			entry = this.transList.find(v => v.user == user)
 			if (entry){
@@ -99,7 +99,7 @@
 		return '';
 	  },
 	  isTopHolder(user){
-		return (this.topAFITXList.length?this.topAFITXList.find(v => v.account == user):false);
+		return ((this.topAFITXList && this.topAFITXList.length)?this.topAFITXList.find(v => v.account == user):false);
 	  }
 	}
   }

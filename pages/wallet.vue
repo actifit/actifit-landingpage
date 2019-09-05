@@ -265,7 +265,7 @@
 					  </span>
 					<br>
 					<span><i>{{ $t('You_are_exchanging') }} {{ afit_val_exchange }} {{ $t('AFIT_Token') }} {{ $t('Tokens') }} {{ $t('for_approx') }} ${{ (afit_val_exchange * 0.036 / 0.65).toFixed(2) }} {{ $t('in_steem_upvote') }}
-						<br/> ({{ $t('net_profit_approx') }} ${{ (afit_val_exchange * 0.036).toFixed(2) }})
+						<!--<br/> ({{ $t('net_profit_approx') }} ${{ (afit_val_exchange * 0.036).toFixed(2) }})-->
 						<br/>{{ $t('enter_funds_pass_proceed') }}</i></span>
 					<div class="row" >
 					  <div class="w-25 p-2 text-right">{{ $t('Funds_Password') }}</div>
