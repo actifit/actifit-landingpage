@@ -77,7 +77,7 @@
 					  <input type="number" id="afit-se-move-power" name="afit-se-move-power" ref="afit-se-move-power" class="form-control-lg w-50 p-2">
 					</div>
 					<div class="text-brand text-center" v-if="afit_se_move_error_proceeding">
-					  {{ this.afit_se_move_err_msg}}
+					  {{ this.afit_se_move_err_msg }}
 					</div>
 					<div class="row">
 					  <div class="w-25"></div>
@@ -350,8 +350,30 @@
 			<div v-if="tokensOfInterestBal.length > 0" class="col-md-6 row-sep-in">
 				<h5 class="token-title">{{ $t('Your_Token_Balance') }}</h5>
 				<div class="mb-4 font-weight-bold">
-					<div class="p-2" v-for="(token, index) in tokensOfInterestBal" :key="index" :token="token">{{ renderBal(token) }} {{ token.symbol }} <span v-if="parseFloat(renderStake(token)) > 0">+ {{ renderStake(token)}} {{ token.symbol }} {{ $t('Staked') }} </span>
-					<span v-if="parseFloat(delegStake(token)) > 0">( + {{ delegStake(token)}} {{ token.symbol }} {{ $t('Delegated') }})</span>
+					<div class="p-2" v-for="(token, index) in tokensOfInterestBal" :key="index" :token="token">
+						{{ renderBal(token) }} {{ token.symbol }} <span v-if="parseFloat(renderStake(token)) > 0">+ {{ renderStake(token)}} {{ token.symbol }} {{ $t('Staked') }} </span>
+						<span v-if="parseFloat(delegStake(token)) > 0">( + {{ delegStake(token)}} {{ token.symbol }} {{ $t('Delegated') }}) </span>
+						<span><i class="fas fa-arrow-circle-up text-brand p-1" :title="$t('stake_tokens')" v-on:click="initiateStaking(token)"></i></span>
+						<span><i class="fas fa-arrow-circle-down text-brand p-1" :title="$t('unstake_tokens')" v-on:click="initiateUnStaking(token)"></i></span>
+						<span><i class="fas fa-share-square text-brand p-1" :title="$t('transfer_tokens')" v-on:click="initiateTransfer(token)"></i></span>
+					</div>
+					<div class="row" v-if="tokenActions">
+					  <label for="token-powerup-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
+					  <input type="number" id="token-powerup-amount" name="token-powerup-amount" ref="token-powerup-amount" class="form-control-lg w-50 p-2"><span class="p-2">{{ selTokenUp.symbol }}</span>
+					</div>
+					<div class="row" v-if="tokenActions && curTokenAction == TRANSFER_FUNDS">
+					  <label for="token-target-account" class="w-25 p-2">{{ $t('Account') }} *</label>
+					  <span class="p-1">@</span><input type="text" id="token-target-account" name="token-target-account" ref="token-target-account" class="form-control-lg p-2">
+					</div>
+					<div class="row" v-if="tokenActions">
+					  <div class="w-25"></div>
+					  <button v-if="curTokenAction == POWERUP_FUNDS" v-on:click="proceedPowerUpToken" class="btn btn-brand btn-lg w-50 border">{{ $t('Power_Up') }}</button>
+					  <button v-else-if="curTokenAction == POWERDOWN_FUNDS" v-on:click="proceedPowerDownToken" class="btn btn-brand btn-lg w-50 border">{{ $t('Power_Down') }}</button>
+					  <button v-else-if="curTokenAction == TRANSFER_FUNDS" v-on:click="proceedTransferToken" class="btn btn-brand btn-lg w-50 border">{{ $t('Send') }}</button>
+					</div>
+					<div class="row" v-if="afit_se_power_error_proceeding">
+					  <div class="w-25"></div>
+					  <div v-html="this.afit_se_power_err_msg"></div>
 					</div>
 				</div>
 			</div>
@@ -620,6 +642,11 @@
 		afitHoldersList: [],
 		afitxHoldersList: [],
 		buyMore: false,
+		tokenActions: false,
+		curTokenAction: '',
+		selTokenUp: '',
+		afit_se_power_error_proceeding: false,
+		afit_se_power_err_msg: '',
 	  }
 	},
     components: {
@@ -695,6 +722,37 @@
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
+	  //handles setting proper token to be staked
+	  initiateStaking(token){
+		//only adjust open/close is same button is clicked, otherwise adjust token being staked
+		if (this.selTokenUp == token && this.curTokenAction == this.POWERUP_FUNDS){
+			this.tokenActions = !this.tokenActions;
+		}else{
+			this.tokenActions = true;
+		}
+		this.curTokenAction = this.POWERUP_FUNDS;
+		this.selTokenUp = token;
+	  },
+	  initiateUnStaking(token){
+		//only adjust open/close is same button is clicked, otherwise adjust token being unstaked
+		if (this.selTokenUp == token && this.curTokenAction == this.POWERDOWN_FUNDS){
+			this.tokenActions = !this.tokenActions;
+		}else{
+			this.tokenActions = true;
+		}
+		this.curTokenAction = this.POWERDOWN_FUNDS;
+		this.selTokenUp = token;
+	  },
+	  initiateTransfer(token){
+		//only adjust open/close is same button is clicked, otherwise adjust token being unstaked
+		if (this.selTokenUp == token && this.curTokenAction == this.TRANSFER_FUNDS){
+			this.tokenActions = !this.tokenActions;
+		}else{
+			this.tokenActions = true;
+		}
+		this.curTokenAction = this.TRANSFER_FUNDS;
+		this.selTokenUp = token;
+	  },
 	  topHolder(user){
 		if (this.topAFITXHolders.length){
 			return this.topAFITXHolders.find(v => v.account == user)
@@ -1617,6 +1675,123 @@
 		window.location = link;
 	
 	  },
+	  async proceedPowerUpToken() {
+		//handles performing a token power up/staking
+		this.afit_se_power_error_proceeding = false;
+		this.afit_se_power_err_msg = '';
+		console.log('proceedPowerUpToken');
+		console.log(this.selTokenUp);
+		
+		let tokenMaxVal = this.selTokenUp.balance;
+		console.log(parseFloat(tokenMaxVal));
+		let amount_to_power = this.$refs["token-powerup-amount"].value.trim();
+		//ensure we have proper values
+		if (isNaN(amount_to_power) || parseFloat(amount_to_power) < 0.01){
+		  this.afit_se_power_error_proceeding = true;
+		  this.afit_se_power_err_msg = this.$t('min_amount_token_power');
+		  //this.movingFunds = false;
+		  return;
+		}
+		//ensure user is powering up value he has
+		if (parseFloat(amount_to_power) > parseFloat(tokenMaxVal)){
+		  this.afit_se_power_error_proceeding = true;
+		  this.afit_se_power_err_msg = this.$t('max_amount_token_power');
+		  //this.movingFunds = false;
+		  return;
+		}
+		
+		//store the transaction to Steem BC according to S-E protocol for power up
+		let link = this.$steemconnect.sign('custom_json', {
+		  required_auths: "[\"" + this.user.account.name + "\"]",
+		  required_posting_auths: "[]",
+		  id: 'ssc-mainnet1',
+		  json: "{\"contractName\":\"tokens\",\"contractAction\":\"stake\",\"contractPayload\":{\"symbol\":\"" + this.selTokenUp.symbol + "\",\"to\":\"" + this.user.account.name + "\",\"quantity\":\"" + amount_to_power + "\",\"memo\":\"\"}}",
+		  authority: 'active',
+		  auto_return: true,
+		}, window.location.origin + '/wallet?op='+this.$t('Power_up_token')+'&status=success&confirm_trans=1');
+		
+		//redirect to proper action
+		window.location = link;
+	
+	  },
+	  proceedPowerDownToken() {
+		//handles performing a token power down/unstaking
+		this.afit_se_power_error_proceeding = false;
+		this.afit_se_power_err_msg = '';
+		
+		console.log(this.selTokenUp);
+		
+		let tokenMaxVal = this.selTokenUp.stake;
+		let amount_to_powerdown = this.$refs["token-powerup-amount"].value.trim();
+		//ensure we have proper values
+		if (isNaN(amount_to_powerdown) || parseFloat(amount_to_powerdown) < 0.01){
+		  this.afit_se_power_error_proceeding = true;
+		  this.afit_se_power_err_msg = this.$t('min_amount_token_power');
+		  return;
+		}
+		//ensure user is powering down amount he has staked
+		if (parseFloat(amount_to_powerdown) > parseFloat(tokenMaxVal)){
+		  this.afit_se_power_error_proceeding = true;
+		  this.afit_se_power_err_msg = this.$t('max_amount_token_powerdown');
+		  return;
+		}
+		
+		//store the transaction to Steem BC according to S-E protocol for power down
+		let link = this.$steemconnect.sign('custom_json', {
+		  required_auths: "[\"" + this.user.account.name + "\"]",
+		  required_posting_auths: "[]",
+		  id: 'ssc-mainnet1',
+		  json: "{\"contractName\":\"tokens\",\"contractAction\":\"unstake\",\"contractPayload\":{\"symbol\":\"" + this.selTokenUp.symbol + "\",\"quantity\":\"" + amount_to_powerdown + "\",\"memo\":\"\"}}",
+		  authority: 'active',
+		  auto_return: true,
+		}, window.location.origin + '/wallet?op='+this.$t('Power_down_token')+'&status=success&confirm_trans=1');
+		
+		//redirect to proper action
+		window.location = link;
+	  },
+	  proceedTransferToken() {
+		//handles performing a token power down/unstaking
+		this.afit_se_power_error_proceeding = false;
+		this.afit_se_power_err_msg = '';
+		
+		console.log(this.selTokenUp);
+		
+		let tokenMaxVal = this.selTokenUp.balance;
+		let amount_to_send = this.$refs["token-powerup-amount"].value.trim();
+		let target_account = this.$refs["token-target-account"].value.trim();
+		//ensure we have proper values
+		//confirm target account set
+		if (!target_account){
+		  this.afit_se_power_error_proceeding = true;
+		  this.afit_se_power_err_msg = this.$t('missing_target_account');
+		  return;
+		}
+		
+		if (isNaN(amount_to_send) || parseFloat(amount_to_send) < 0.01){
+		  this.afit_se_power_error_proceeding = true;
+		  this.afit_se_power_err_msg = this.$t('min_amount_token_power');
+		  return;
+		}
+		//ensure user is powering down amount he has staked
+		if (parseFloat(amount_to_send) > parseFloat(tokenMaxVal)){
+		  this.afit_se_power_error_proceeding = true;
+		  this.afit_se_power_err_msg = this.$t('max_amount_token_power');
+		  return;
+		}
+		
+		//store the transaction to Steem BC according to S-E protocol for transfer
+		let link = this.$steemconnect.sign('custom_json', {
+		  required_auths: "[\"" + this.user.account.name + "\"]",
+		  required_posting_auths: "[]",
+		  id: 'ssc-mainnet1',
+		  json: "{\"contractName\":\"tokens\",\"contractAction\":\"transfer\",\"contractPayload\":{\"symbol\":\"" + this.selTokenUp.symbol + "\",\"to\":\"" + target_account + "\",\"quantity\":\"" + amount_to_send + "\",\"memo\":\"\"}}",
+		  authority: 'active',
+		  auto_return: true,
+		}, window.location.origin + '/wallet?op='+this.$t('Transfer_token')+'&status=success&confirm_trans=1');
+		
+		//redirect to proper action
+		window.location = link;
+	  },
 	  async proceedVerifyPass() {
 		//handles checking for proper confirmation of account via STEEM transfer
 		this.checkingFunds = true
@@ -1884,9 +2059,6 @@
 	width: 20px;
 	height: 20px;
   }
-  .fa-info-circle{
-	cursor: pointer;
-  }
   .text-center.grid.p-2, .calc-data{
 	border: 2px solid red;
 	border-radius: 5px;
@@ -1894,5 +2066,8 @@
   .small-pad-row{
 	padding-left: 5px;
 	padding-right: 5px;
+  }
+  .fas{
+	cursor: pointer;
   }
 </style>
