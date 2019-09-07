@@ -12,6 +12,9 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
+		<div class="modal-header">
+			<div class="report-tags p-1" v-html="displayReportTags"></div>
+		</div>
 		<article class="modal-body" v-html="$renderMD(body)"></article>
 		<div class="modal-footer">
 		  <div class="report-modal-prelim-info col-md-6">
@@ -210,6 +213,16 @@
         let minutes = date.getMinutes()
         return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() + ' ' + date.getHours() + ':' + (minutes < 10 ? '0' + minutes : minutes)
       },
+	  displayReportTags(){
+		let tagDisplay = "";
+		if (this.report && this.report.json_metadata){
+			let meta_data = JSON.parse(this.report.json_metadata);
+			for (let i in meta_data.tags){
+				tagDisplay += '<span class="single-tag p-1">' + meta_data.tags[i] + '</span> ';
+			};
+		}
+		return tagDisplay;
+	  },
       body () {
 		let report_content = this.report.body;
 		
@@ -509,5 +522,9 @@
 	}
 	.increased-rank{
 		color: #76BB0E;
+	}
+	.single-tag{
+		background-color: red;
+		color: white;
 	}
 </style>

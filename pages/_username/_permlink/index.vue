@@ -21,7 +21,7 @@
 					   :style="'background-image: url(https://steemitimages.com/u/' + this.report.author + '/avatar)'"></div>
 			<a :href="'/'+report.author" target="_blank">@{{ report.author}} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></a></h5>
 		  <span class="date-head text-muted">{{ date }}</span>
-		  <div class="report-tags">{{ displayReportTags }}</div>
+		  <div class="report-tags p-1" v-html="displayReportTags"></div>
         </div>
 		<article v-html="$renderMD(body)" class="col-md-9"></article>
 		<div class="modal-footer col-md-9">
@@ -253,7 +253,7 @@
 		if (this.report && this.report.json_metadata){
 			let meta_data = JSON.parse(this.report.json_metadata);
 			for (let i in meta_data.tags){
-				tagDisplay += meta_data.tags[i] + ' ';
+				tagDisplay += '<span class="single-tag p-1">' + meta_data.tags[i] + '</span> ';
 			};
 		}
 		return tagDisplay;
@@ -604,5 +604,9 @@
 	}
 	.increased-rank{
 		color: #76BB0E;
+	}
+	.single-tag{
+		background-color: red;
+		color: white;
 	}
 </style>
