@@ -508,6 +508,12 @@
 		<TopHoldersX :user="user.account.name" :holdersList="afitxHoldersList"/>
     </div>
 	
+	<!-- show spinner while loading -->
+	<div :class="smallScreenClasses" class="container mt-5 pb-5 pt-5" v-else-if="loading">
+	  <div class="text-center">
+		<i class="fas fa-spinner fa-spin text-brand"></i>
+	  </div>
+	</div>
 	<div :class="smallScreenClasses" class="container mt-5 pb-5 pt-5" v-else>
       <!-- account balance -->
       <div class="text-center p-5">
@@ -526,6 +532,7 @@
 		</div>
 	  </div>
 	</div>
+	
 	<no-ssr>
       <div>
         <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
@@ -650,6 +657,7 @@
 		selTokenUp: '',
 		afit_se_power_error_proceeding: false,
 		afit_se_power_err_msg: '',
+		loading: true,
 	  }
 	},
     components: {
@@ -2074,7 +2082,7 @@
 	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem-dollars&vs_currencies=usd').then(
 		res => {res.json().then(json => this.setSBDPrice (json.steem-dollars.usd)).catch(e => reject(e))
 	  }).catch(e => reject(e))
-	  	  
+	  this.loading = false;
     }
   }
 </script>
