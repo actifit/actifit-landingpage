@@ -2080,7 +2080,7 @@
 	  
 	  //grab SBD price
 	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem-dollars&vs_currencies=usd').then(
-		res => {res.json().then(json => this.setSBDPrice (json.steem-dollars.usd)).catch(e => reject(e))
+		res => {res.json().then(json => this.setSBDPrice (json['steem-dollars'].usd)).catch(e => reject(e))
 	  }).catch(e => reject(e))
 	  this.loading = false;
     }
