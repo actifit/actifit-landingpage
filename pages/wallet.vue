@@ -353,8 +353,9 @@
 					<div class="p-2" v-for="(token, index) in tokensOfInterestBal" :key="index" :token="token">
 						{{ renderBal(token) }} {{ token.symbol }} <span v-if="parseFloat(renderStake(token)) > 0">+ {{ renderStake(token)}} {{ token.symbol }} {{ $t('Staked') }} </span>
 						<span v-if="parseFloat(delegStake(token)) > 0">( + {{ delegStake(token)}} {{ token.symbol }} {{ $t('Delegated') }}) </span>
-						<span><i class="fas fa-arrow-circle-up text-brand p-1" :title="$t('stake_tokens')" v-on:click="initiateStaking(token)"></i></span>
-						<span><i class="fas fa-arrow-circle-down text-brand p-1" :title="$t('unstake_tokens')" v-on:click="initiateUnStaking(token)"></i></span>
+						<span v-if="token.symbol != 'STEEMP'"><i class="fas fa-arrow-circle-up text-brand p-1" :title="$t('stake_tokens')" v-on:click="initiateStaking(token)"></i></span>
+						<span v-if="token.symbol != 'STEEMP'"><i class="fas fa-arrow-circle-down text-brand p-1" :title="$t('unstake_tokens')" v-on:click="initiateUnStaking(token)"></i></span>
+						<span v-else><i class="fas fa-upload text-brand p-1" :title="$t('withdraw_tokens')" v-on:click="initiateWithdraw(token)"></i></span>
 						<span><i class="fas fa-share-square text-brand p-1" :title="$t('transfer_tokens')" v-on:click="initiateTransfer(token)"></i></span>
 					</div>
 					<div class="row" v-if="tokenActions">
@@ -370,6 +371,7 @@
 					  <button v-if="curTokenAction == POWERUP_FUNDS" v-on:click="proceedPowerUpToken" class="btn btn-brand btn-lg w-50 border">{{ $t('Power_Up') }}</button>
 					  <button v-else-if="curTokenAction == POWERDOWN_FUNDS" v-on:click="proceedPowerDownToken" class="btn btn-brand btn-lg w-50 border">{{ $t('Power_Down') }}</button>
 					  <button v-else-if="curTokenAction == TRANSFER_FUNDS" v-on:click="proceedTransferToken" class="btn btn-brand btn-lg w-50 border">{{ $t('Send') }}</button>
+					  <button v-else-if="curTokenAction == WITHDRAW_FUNDS" v-on:click="proceedWithdrawToken" class="btn btn-brand btn-lg w-50 border">{{ $t('Withdraw') }}</button>
 					</div>
 					<div class="row" v-if="afit_se_power_error_proceeding">
 					  <div class="w-25"></div>
@@ -552,7 +554,7 @@
   const ssc = new SSC(process.env.steemEngineRpc);
   const scot_steemengine_api = process.env.steemEngineScot;
 
-  const tokensOfInterest = ['ZZAN', 'SPORTS', 'PAL'];
+  const tokensOfInterest = ['ZZAN', 'SPORTS', 'PAL', 'STEEMP'];
   
   import { mapGetters } from 'vuex'
 
@@ -563,6 +565,7 @@
 		TRANSFER_FUNDS: 1,
 		POWERUP_FUNDS: 2,
 		POWERDOWN_FUNDS: 3,
+		WITHDRAW_FUNDS: 4,
 		EXCHANGE_AFIT_STEEM: 1,
 		MOVE_AFIT_SE: 2,
 		BUY_AFIT_STEEM: 3,
@@ -753,6 +756,16 @@
 		this.curTokenAction = this.TRANSFER_FUNDS;
 		this.selTokenUp = token;
 	  },
+	  initiateWithdraw(token){
+		//only adjust open/close is same button is clicked, otherwise adjust token being unstaked
+		if (this.selTokenUp == token && this.curTokenAction == this.WITHDRAW_FUNDS){
+			this.tokenActions = !this.tokenActions;
+		}else{
+			this.tokenActions = true;
+		}
+		this.curTokenAction = this.WITHDRAW_FUNDS;
+		this.selTokenUp = token;
+	  },
 	  topHolder(user){
 		if (this.topAFITXHolders.length){
 			return this.topAFITXHolders.find(v => v.account == user)
@@ -810,6 +823,11 @@
 			this.tokensOfInterestBal.forEach(function(token, index){
 				let tokenData = par.tokenMetrics.find(v => v.symbol == token.symbol);
 				//console.log(tokenData);
+				if (token.symbol == 'STEEMP'){
+					tokenData = new Object();
+					tokenData.lastPrice = 1;
+					token.stake = 0;
+				}
 				let tokenVal = token.balance * parseFloat(tokenData.lastPrice)
 				tokenVal += token.stake * parseFloat(tokenData.lastPrice)
 				par.totalAccountValue += tokenVal
@@ -1125,7 +1143,9 @@
 		tokensOfInterest.forEach( function(item, index){
 		  try{
 			  let tokenDetails = result[item];
-			  par.tokenOfInterestPrecision[item] = tokenDetails.precision;
+			  if (tokenDetails){
+				par.tokenOfInterestPrecision[item] = tokenDetails.precision;
+			  }
 		  }catch(e){
 			console.error(e);
 		  }
@@ -1139,7 +1159,7 @@
 		  try{
 			  let tokenDetails = result[item];
 			  //if we have pending rewards
-			  if (tokenDetails.pending_token > 0){
+			  if (tokenDetails && tokenDetails.pending_token > 0){
 				par.claimableSETokens.push({symbol: tokenDetails.symbol, amount: tokenDetails.pending_token });
 			  }
 		  }catch(e){
@@ -1788,6 +1808,42 @@
 		  authority: 'active',
 		  auto_return: true,
 		}, window.location.origin + '/wallet?op='+this.$t('Transfer_token')+'&status=success&confirm_trans=1');
+		
+		//redirect to proper action
+		window.location = link;
+	  },
+	  proceedWithdrawToken() {
+		//handles performing a token power down/unstaking
+		this.afit_se_power_error_proceeding = false;
+		this.afit_se_power_err_msg = '';
+		
+		console.log(this.selTokenUp);
+		
+		let tokenMaxVal = this.selTokenUp.balance;
+		let amount_to_withdraw = this.$refs["token-powerup-amount"].value.trim();
+		//ensure we have proper values
+		
+		if (isNaN(amount_to_withdraw) || parseFloat(amount_to_withdraw) < 0.01){
+		  this.afit_se_power_error_proceeding = true;
+		  this.afit_se_power_err_msg = this.$t('min_amount_token_power');
+		  return;
+		}
+		//ensure user is powering down amount he has staked
+		if (parseFloat(amount_to_withdraw) > parseFloat(tokenMaxVal)){
+		  this.afit_se_power_error_proceeding = true;
+		  this.afit_se_power_err_msg = this.$t('max_amount_token_power');
+		  return;
+		}
+		
+		//store the transaction to Steem BC according to S-E protocol for withdraw
+		let link = this.$steemconnect.sign('custom_json', {
+		  required_auths: "[\"" + this.user.account.name + "\"]",
+		  required_posting_auths: "[]",
+		  id: 'ssc-mainnet1',
+		  json: "{\"contractName\":\"steempegged\",\"contractAction\":\"withdraw\",\"contractPayload\":{\"quantity\":\"" + amount_to_withdraw + "\"}}",
+		  authority: 'active',
+		  auto_return: true,
+		}, window.location.origin + '/wallet?op='+this.$t('Withdraw_token')+'&status=success&confirm_trans=1');
 		
 		//redirect to proper action
 		window.location = link;

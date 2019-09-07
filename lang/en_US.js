@@ -374,6 +374,8 @@ module.exports = {
   buy_afit_se: 'Buy AFIT On S-E',
   stake_tokens: 'Power Up Tokens',
   unstake_tokens: 'Power Down Tokens',
+  withdraw_tokens: 'Withdraw Tokens',
+  Withdraw: 'Withdraw',
   transfer_tokens: 'Transfer Tokens',
   Account: 'Account',
   missing_target_account: 'Please provide valid recipient account',
