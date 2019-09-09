@@ -353,9 +353,9 @@
 					<div class="p-2" v-for="(token, index) in tokensOfInterestBal" :key="index" :token="token">
 						{{ renderBal(token) }} {{ token.symbol }} <span v-if="parseFloat(renderStake(token)) > 0">+ {{ renderStake(token)}} {{ token.symbol }} {{ $t('Staked') }} </span>
 						<span v-if="parseFloat(delegStake(token)) > 0">( + {{ delegStake(token)}} {{ token.symbol }} {{ $t('Delegated') }}) </span>
-						<span v-if="token.symbol != 'STEEMP'"><i class="fas fa-arrow-circle-up text-brand p-1" :title="$t('stake_tokens')" v-on:click="initiateStaking(token)"></i></span>
-						<span v-if="token.symbol != 'STEEMP'"><i class="fas fa-arrow-circle-down text-brand p-1" :title="$t('unstake_tokens')" v-on:click="initiateUnStaking(token)"></i></span>
-						<span v-else><i class="fas fa-upload text-brand p-1" :title="$t('withdraw_tokens')" v-on:click="initiateWithdraw(token)"></i></span>
+						<span v-if="token.stakable"><i class="fas fa-arrow-circle-up text-brand p-1" :title="$t('stake_tokens')" v-on:click="initiateStaking(token)"></i></span>
+						<span v-if="token.stakable"><i class="fas fa-arrow-circle-down text-brand p-1" :title="$t('unstake_tokens')" v-on:click="initiateUnStaking(token)"></i></span>
+						<span v-if="token.symbol == 'STEEMP'"><i class="fas fa-upload text-brand p-1" :title="$t('withdraw_tokens')" v-on:click="initiateWithdraw(token)"></i></span>
 						<span><i class="fas fa-share-square text-brand p-1" :title="$t('transfer_tokens')" v-on:click="initiateTransfer(token)"></i></span>
 					</div>
 					<div class="row" v-if="tokenActions">
@@ -561,7 +561,7 @@
   const ssc = new SSC(process.env.steemEngineRpc);
   const scot_steemengine_api = process.env.steemEngineScot;
 
-  const tokensOfInterest = ['ZZAN', 'SPORTS', 'PAL', 'STEEMP'];
+  const tokensOfInterest = ['AFIT', 'AFITX', 'ZZAN', 'SPORTS', 'PAL', 'STEEMP'];
   
   import { mapGetters } from 'vuex'
 
@@ -808,7 +808,7 @@
 		
 			this.detailCalculation = '';
 			//get AFITX val
-			let afitxData = this.tokenMetrics.find(v => v.symbol == 'AFITX');
+			/*let afitxData = this.tokenMetrics.find(v => v.symbol == 'AFITX');
 			let afitxVal = this.afitx_se_balance * parseFloat(afitxData.lastPrice)
 			this.totalAccountValue += afitxVal
 			this.detailCalculation += this.afitx_se_balance + ' AFITX x '+ afitxData.lastPrice + ' AFITX/STEEM = ' + this.numberFormat(afitxVal, 4) + ' STEEM<br/>';
@@ -817,7 +817,7 @@
 			let afitData = this.tokenMetrics.find(v => v.symbol == 'AFIT');
 			let afitseVal = this.afit_se_balance * parseFloat(afitData.lastPrice);
 			this.totalAccountValue += afitseVal
-			this.detailCalculation += this.afit_se_balance + ' AFIT S-E x '+ afitData.lastPrice + ' AFIT S-E/STEEM = ' + this.numberFormat(afitseVal, 4) + ' STEEM<br/>';
+			this.detailCalculation += this.afit_se_balance + ' AFIT S-E x '+ afitData.lastPrice + ' AFIT S-E/STEEM = ' + this.numberFormat(afitseVal, 4) + ' STEEM<br/>';*/
 			
 			//get AFIT standard val
 			let afitCoreVal = this.userTokens * this.afitPrice / this.steemPrice;
@@ -826,15 +826,20 @@
 			this.detailCalculation += this.userTokens + ' AFIT x '+ this.numberFormat((this.afitPrice / this.steemPrice), 4) + ' AFIT/STEEM = ' + this.numberFormat(afitCoreVal, 4) + ' STEEM<br/>';
 			
 			let par = this;
-			
 			//grab tokens of interest vals as well
 			this.tokensOfInterestBal.forEach(function(token, index){
 				let tokenData = par.tokenMetrics.find(v => v.symbol == token.symbol);
-				//console.log(tokenData);
-				if (token.symbol == 'STEEMP'){
+				console.log(tokenData);
+				if( !tokenData || (typeof tokenData.lastPrice === 'undefined' || tokenData.lastPrice === null )){
 					tokenData = new Object();
 					tokenData.lastPrice = 1;
+				}
+				if( typeof token.stake === 'undefined' || token.stake === null || token.symbol === 'AFITX'){
+					console.log(token.symbol);
 					token.stake = 0;
+					token.stakable = false;
+				}else{
+					token.stakable = true;
 				}
 				let tokenVal = token.balance * parseFloat(tokenData.lastPrice)
 				tokenVal += token.stake * parseFloat(tokenData.lastPrice)
@@ -1055,7 +1060,11 @@
 		  //fetch user's tokensOfInterest S-E balance
 		  let tokenData = await ssc.find('tokens', 'balances', { account: this.user.account.name, symbol : { '$in' : tokensOfInterest } });
 		  if (tokenData){
-			this.tokensOfInterestBal = tokenData;
+			this.tokensOfInterestBal = tokenData.sort(function tokenEntry(a, b) {
+				return b.symbol < a.symbol ?  1
+						: b.symbol > a.symbol ? -1
+						: 0;
+			});
 		  }
 		  
 		  //fetch tokens' data (price et al)
