@@ -561,7 +561,8 @@
   const ssc = new SSC(process.env.steemEngineRpc);
   const scot_steemengine_api = process.env.steemEngineScot;
 
-  const tokensOfInterest = ['AFIT', 'AFITX', 'ZZAN', 'SPORTS', 'PAL', 'STEEMP'];
+  const tokensNonStakable = ['AFITX', 'AFIT', 'STEEMP'];
+  const tokensOfInterest = ['ZZAN', 'SPORTS', 'PAL'].concat(tokensNonStakable);
   
   import { mapGetters } from 'vuex'
 
@@ -829,13 +830,11 @@
 			//grab tokens of interest vals as well
 			this.tokensOfInterestBal.forEach(function(token, index){
 				let tokenData = par.tokenMetrics.find(v => v.symbol == token.symbol);
-				console.log(tokenData);
 				if( !tokenData || (typeof tokenData.lastPrice === 'undefined' || tokenData.lastPrice === null )){
 					tokenData = new Object();
 					tokenData.lastPrice = 1;
 				}
-				if( typeof token.stake === 'undefined' || token.stake === null || token.symbol === 'AFITX'){
-					console.log(token.symbol);
+				if( typeof token.stake === 'undefined' || token.stake === null || tokensNonStakable.includes(token.symbol)){
 					token.stake = 0;
 					token.stakable = false;
 				}else{
