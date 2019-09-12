@@ -232,6 +232,9 @@ module.exports = {
   My_Rank: 'My Rank',
   Vote_on: 'Vote on',
   Your_Voting_Power: 'Your Voting Power:',
+  Your_RC: 'Your RC:',
+  My_Voting_Power: 'My VP',
+  My_RC: 'My RC',
   Full_In: 'Full In',
   Adjust_Vote_Weight: 'Adjust the weight of your vote.',
   Your_Vote_Value: 'Your Vote Value',
@@ -379,4 +382,6 @@ module.exports = {
   transfer_tokens: 'Transfer Tokens',
   Account: 'Account',
   missing_target_account: 'Please provide valid recipient account',
+  VP_desc: 'Your VP (Voting Power) allows you to vote others and increase your & their rewards. Leaving your VP at 100% wastes rewards for both you and other users. Maintaining your VP at a min of 80% daily is recommended. VP replenishes at a rate of 20% per day',
+  RC_desc: 'Your RC (Resource Credits) are what enables you to take actions on the Steem blockchain. Actions include posting, voting,... amongst others. RCs replenish at a rate of 20% per day',
 }

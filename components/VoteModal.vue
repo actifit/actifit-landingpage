@@ -8,10 +8,7 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-		<div class="text-center pt-2" v-if="getVotingPower">
-			<span>{{ $t('Your_Voting_Power') }} </span><span :style="displayProperColor">{{getVotingPower}}</span>
-			<div class="text-brand"><small>{{ $t('Full_In') }} {{timeToFullVP}}</small></div>
-		</div>
+		<SteemStats :user="user"/>
         <div class="modal-body text-center">
           <small class="text-muted">{{ $t('Adjust_Vote_Weight') }}</small>
           <ul class="pagination justify-content-center mt-2">
@@ -42,13 +39,18 @@
 <script>
   import { mapGetters } from 'vuex'
   import steem from 'steem'
+  
+  //import dsteem from 'dsteem'
+  import SteemStats from '~/components/SteemStats'
+  
+  var dsteem = require('dsteem')
+  
+  var client;
 
   export default {
     data () {
       return {
         loading: false,
-		currentVotingPower: 0,
-		timeToFullVP: '',
 		properties: '', //handles the Steem BC properties
 		sbd_print_percentage: 1,
 		rewardBalance: 1,
@@ -61,6 +63,9 @@
 		STEEMIT_VOTE_REGENERATION_SECONDS: (5 * 60 * 60 * 24),
       }
     },
+	components: {
+	  SteemStats,
+	},
     computed: {
       ...mapGetters('steemconnect', ['user']),
       ...mapGetters(['postToVote']),
@@ -121,11 +126,12 @@
 		this.steem_price = parseFloat(_steemPrice).toFixed(3);
 	  },
 	  //handles grabbing current user's VP
-	  fetchVotingPower() {
+	  async fetchVotingPower() {
 		let account = this.user.account;
 		if (typeof account == 'undefined' || account == null){
 		  return '';
 		}
+		console.log(account);
 		const totalShares = parseFloat(account.vesting_shares) + parseFloat(account.received_vesting_shares) - parseFloat(account.delegated_vesting_shares) - parseFloat(account.vesting_withdraw_rate);
 
 		const elapsed = Math.floor(Date.now() / 1000) - account.voting_manabar.last_update_time;
@@ -141,17 +147,24 @@
 			
 		this.currentVotingPower = currentManaPerc.toFixed(3);
 		//also fetch time till full power replenishes
-		this.timeToFullPower();
+		this.timeToFull(this.currentVotingPower);
 		
 		//and calculate voting power initially
 		this.calculateVoteValue();
 		
+		//this.currentRC = currentManaPerc;
+		let rcComponent = await client.rc.getRCMana(this.user.account.name);
+		console.log(rcComponent);
+		this.currentRC = rcComponent.percentage/100;
+		this.currentRCPercent = this.currentRC + '%';
+		//console.log(this.currentRC);
+		
+		
 		return currentManaPerc;
 	  },
 	  //calculates time till full power replenishes
-	  timeToFullPower(){
-		let timeToFull = this.toTimer((this.STEEMIT_100_PERCENT - this.currentVotingPower * 100) * this.STEEMIT_VOTE_REGENERATION_SECONDS / this.STEEMIT_100_PERCENT);
-		this.timeToFullVP = timeToFull;
+	  timeToFull(param){
+		let timeToFull = this.toTimer((this.STEEMIT_100_PERCENT - param * 100) * this.STEEMIT_VOTE_REGENERATION_SECONDS / this.STEEMIT_100_PERCENT);
 		
 		return timeToFull;
 	  },
@@ -308,7 +321,7 @@
 	  
 	  //grab SBD price, needed for vote value calculation
 	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem-dollars&vs_currencies=usd').then(
-		res => {res.json().then(json => this.setSBDPrice (json.steem-dollars.usd)).catch(e => reject(e))
+		res => {res.json().then(json => this.setSBDPrice (json['steem-dollars'].usd)).catch(e => reject(e))
 	  }).catch(e => reject(e))
 	
 	  //in addition to the default updating of VP upon each render, we need to take into consideration leaving window open. 
@@ -317,6 +330,15 @@
 	  if (this.report != null){
 		this.fetchReportKeyData();
 	  }
+	  
+	  
+	  client = new dsteem.Client('https://api.steemit.com')
+	  /*
+	    let properties = await client.database.getDynamicGlobalProperties()
+		console.log(properties)
+	  */
+	  //let acct = await client.rc.findRCAccounts('mcfarhat');
+	  
 	}
   }
 </script>

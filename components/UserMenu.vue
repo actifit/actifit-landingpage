@@ -21,6 +21,7 @@
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet?action=buy_afit')">{{ $t('buy_afit_menu') }}<br/></a>
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/market')">{{ $t('spend_afit_menu') }}<br/></a>
           <a class="dropdown-item" href="#" @click.prevent="$router.push('/' + user.account.name)">{{ $t('My_Profile') }}<br/></a>
+		  <SteemStats :user="user" minView="true" class="dropdown-item"/>
 		  <a class="dropdown-item" href="#" @click.prevent="">{{ $t('My_Rank') }} <br/><span class="text-brand"> {{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRankObj && this.userRankObj.afitx_rank">{{  displayIncreasedUserRank }}</span> </span></a>
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet')">{{ $t('My_Wallet') }} <br/><span class="text-brand">  {{ formattedUserTokens }}</span></a>
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/referrals')">{{ $t('My_Referrals') }} <br/><span class="text-brand"> {{ referralCount }} </span></a>
@@ -35,8 +36,12 @@
 
 <script>
   import { mapGetters } from 'vuex'
+  import SteemStats from '~/components/SteemStats'
 
   export default {
+	components: {
+	  SteemStats
+    },
     computed: {
       ...mapGetters('steemconnect', ['user']),
       ...mapGetters(['userTokens', 'userRank', 'userRankObj', 'referrals']),

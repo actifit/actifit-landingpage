@@ -54,16 +54,15 @@
         
         <!-- wallet/activities preview -->
 		
-        <div class="card form mx-auto p-3 mt-3 mt-md-5 text-center border-0 home-card">
+        <div class="card form mx-auto p-3 mt-3 mt-md-2 text-center border-0 home-card">
 		  <div class="pb-md-2 text-center">
 			  <img src="/img/actifit_logo.png" alt="Actifit" class="logo" />
 			  <h1 class="mt-3 mt-sm-2 text-brand title">{{ $t('Actifit') }}</h1>
 			  <h3 class="font-italic text-brand slogan">{{ $t('Slogan') }}</h3>
 			</div>
 		
-		
           <div v-if="user">
-            <div class="row">
+            <div class="pb-md-2 row">
               <div class="col-sm-6">
                 <p class="lead text-muted mb-0">{{ $t('Balance') }}</p>
                 <h3><b>{{ numberFormat(formattedUserTokens, 3) }}</b><br><small>{{ $t('AFIT_Token') }}</small></h3>
@@ -75,7 +74,14 @@
                 <a href="#" class="btn btn-lg btn-brand w-100" @click.prevent="$router.push('/activity/' + user.account.name)">{{ $t('My_Activity') }}</a>
               </div>
             </div>
-          </div>
+			<div class="pb-md-2 row text-center">
+			  <SteemStats :user="user" class="col-md-12"/>
+			</div>
+			<div class="pb-md-2 row text-center">
+			  <span class="w-25"/>
+			  <a href="#" class="btn btn-lg btn-brand w-50" @click.prevent="$router.push('/activity/')">What's Up?</a>
+			</div>
+		  </div>
 
           <!-- login/register buttons -->
           <div v-else>
@@ -468,13 +474,15 @@
   import News from '~/components/News'
   import NewsModal from '~/components/NewsModal'
   import { mapGetters } from 'vuex'
+  import SteemStats from '~/components/SteemStats'
 
   export default {
     components: {
       UserMenu,
       Footer,
       News,
-      NewsModal
+      NewsModal,
+	  SteemStats
     },
     data () {
       return {

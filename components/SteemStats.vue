@@ -1,0 +1,188 @@
+<template>
+	<div class="steem-stats pt-2" v-if="getVotingPower">
+		<span v-if="!minView"><span>{{ $t('Your_Voting_Power') }} </span><span :style="displayProperColor">{{getVotingPower}}</span><span ><small>({{ $t('Full_In') }} {{timeToFull(this.currentVotingPower)}})</small> <i class="fas fa-info-circle" v-on:click="showVPInfo=!showVPInfo"></i></span></span>
+		<span v-else><span>{{ $t('My_Voting_Power') }} </span><span :style="displayProperColor">{{getVotingPower}}</span></span>
+		<div v-if="showVPInfo">{{ $t('VP_desc') }}</div>
+		<div class="progress">
+		  <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" :aria-valuenow="currentVotingPower" aria-valuemin="0" aria-valuemax="100" :style="{ width: currentVotingPower + '%' }"></div>
+		</div>
+		<span v-if="!minView"><span>{{ $t('Your_RC') }} </span><span :style="displayProperColor">{{this.currentRCPercent}}</span><span><small>({{ $t('Full_In') }} {{timeToFull(this.currentRC)}})</small> <i class="fas fa-info-circle" v-on:click="showRCInfo=!showRCInfo"></i></span></span>
+		<span v-else><span>{{ $t('My_RC') }} </span><span :style="displayProperColor">{{this.currentRCPercent}}</span></span>
+		<div v-if="showRCInfo">{{ $t('RC_desc') }}</div>
+		<div class="progress">
+			<div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" :aria-valuenow="currentRCPercent" aria-valuemin="0" aria-valuemax="100" :style="{ width: currentRCPercent}"></div>
+		</div>
+		
+	</div>
+</template>
+
+<script>
+  import { mapGetters } from 'vuex'
+  import steem from 'steem'
+  
+  //import dsteem from 'dsteem'
+  
+  var dsteem = require('dsteem')
+  
+  var client;
+  
+  export default {
+    data () {
+      return {
+		currentVotingPower: 0,
+		currentRC: 0,
+		currentRCPercent: '0%',
+		timeToFullVP: '',
+		properties: '', //handles the Steem BC properties
+		sbd_print_percentage: 1,
+		votePowerReserveRate: 1,
+		sbd_price: 1,
+		steem_price: 1,
+		STEEMIT_100_PERCENT: 10000,
+		STEEMIT_VOTE_REGENERATION_SECONDS: (5 * 60 * 60 * 24),
+		showRCInfo: false,
+		showVPInfo: false,
+	  }
+	},
+	props: ['user', 'minView'],
+	computed: {
+	  getVotingPower () {
+		return this.currentVotingPower + '%';
+	  },
+	  displayProperColor () {
+		//display proper coloring reflecting VP state
+		if (this.currentVotingPower > 80){
+		  return "color: #28a745";
+		}else if (this.currentVotingPower > 60){
+		  return "color: #fd7e14";
+		}
+		return "color: #dc3545";
+	  }
+	},
+	methods: {
+	  //handles calculating and displaying proper voting value
+	  async calculateVoteValue () {
+		
+		if (this.properties == ''){
+		  //not loaded yet
+		  this.properties = await steem.api.getDynamicGlobalPropertiesAsync();
+		  //grab reward fund data
+		  let rewardFund = await steem.api.getRewardFundAsync("post");
+		  this.rewardBalance = parseFloat(rewardFund.reward_balance.replace(" STEEM", ""));
+		  this.recentClaims = rewardFund.recent_claims;
+		}
+		
+		let totalSteem = Number(this.properties.total_vesting_fund_steem.split(' ')[0]);
+		let totalVests = Number(this.properties.total_vesting_shares.split(' ')[0]);
+		
+		this.votePowerReserveRate = this.properties.vote_power_reserve_rate;
+		this.sbd_print_percentage = this.properties.sbd_print_rate / 10000;
+		//this.getVoteValueUSD();
+	  },
+	  //store SBD price
+	  setSBDPrice (_sbdPrice){
+		this.sbd_price = parseFloat(_sbdPrice).toFixed(3);
+	  },
+	  //store Steem price
+	  setSteemPrice (_steemPrice){
+		this.steem_price = parseFloat(_steemPrice).toFixed(3);
+	  },
+	  //handles grabbing current user's VP
+	  async fetchVotingPower() {
+		console.log('fetchVP');
+		console.log(this.user);
+		if (!this.user){
+		  return 0;
+		}
+		let account = this.user.account;
+		if (typeof account == 'undefined' || account == null){
+		  return '';
+		}
+		console.log(account);
+		const totalShares = parseFloat(account.vesting_shares) + parseFloat(account.received_vesting_shares) - parseFloat(account.delegated_vesting_shares) - parseFloat(account.vesting_withdraw_rate);
+
+		const elapsed = Math.floor(Date.now() / 1000) - account.voting_manabar.last_update_time;
+		const maxMana = totalShares * 1000000;
+		// 432000 sec = 5 days
+		let currentMana = parseFloat(account.voting_manabar.current_mana) + elapsed * maxMana / 432000;
+
+		if (currentMana > maxMana) {
+			currentMana = maxMana;
+		}
+
+		const currentManaPerc = currentMana * 100 / maxMana;
+			
+		this.currentVotingPower = currentManaPerc.toFixed(3);
+		//also fetch time till full power replenishes
+		this.timeToFull(this.currentVotingPower);
+		
+		//and calculate voting power initially
+		this.calculateVoteValue();
+		
+		//this.currentRC = currentManaPerc;
+		let rcComponent = await client.rc.getRCMana(this.user.account.name);
+		console.log(rcComponent);
+		this.currentRC = rcComponent.percentage/100;
+		this.currentRCPercent = this.currentRC + '%';
+		//console.log(this.currentRC);
+		
+		
+		return currentManaPerc;
+	  },
+	  //calculates time till full power replenishes
+	  timeToFull(param){
+		let timeToFull = this.toTimer((this.STEEMIT_100_PERCENT - param * 100) * this.STEEMIT_VOTE_REGENERATION_SECONDS / this.STEEMIT_100_PERCENT);
+		
+		return timeToFull;
+	  },
+	  //convert to proper timing render
+	  toTimer(ts) {
+	    const HOURS = 60 * 60;
+	    let h = Math.floor(ts / HOURS);
+	    let m = Math.floor((ts % HOURS) / 60);
+	    //let s = Math.floor((ts % 60));
+	    return this.padLeft(h, 2) + 'h:' + this.padLeft(m, 2) + 'm';//':' + this.padLeft(s, 2);
+	  },
+	  //proper padding to display double digits
+	  padLeft(v, d) {
+	    let l = (v + '').length;
+	    if (l >= d) return v + '';
+	    for (let i = l; i < d; i++) {
+		  v = '0' + v;
+		}
+	    return v;
+	  },
+	},
+	async mounted () {
+	  //initialize dsteem
+	  client = new dsteem.Client('https://api.steemit.com')
+	  
+	  //grab STEEM price, needed for vote value calculation
+	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem&vs_currencies=usd').then(
+		res => {res.json().then(json => this.setSteemPrice (json.steem.usd)).catch(e => reject(e))
+	  }).catch(e => reject(e))
+	  
+	  //grab SBD price, needed for vote value calculation
+	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem-dollars&vs_currencies=usd').then(
+		res => {res.json().then(json => this.setSBDPrice (json['steem-dollars'].usd)).catch(e => reject(e))
+	  }).catch(e => reject(e))
+	
+	  //in addition to the default updating of VP upon each render, we need to take into consideration leaving window open. 
+	  //for this purpose, let's update every 30 seconds
+	  this.fetchVotingPower();
+	  setInterval(this.fetchVotingPower, 30 * 1000);
+	  if (this.report != null){
+		this.fetchReportKeyData();
+	  }
+	    /*let properties = await client.database.getDynamicGlobalProperties()
+		console.log(properties)*/
+	  //let acct = await client.rc.findRCAccounts('mcfarhat');
+	  
+	}
+  }
+</script>
+<style>
+	.fas, .steem-stats{
+	  cursor: pointer;
+    }
+</style>
