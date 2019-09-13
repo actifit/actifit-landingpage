@@ -1,14 +1,17 @@
 <template>
-	<div>
-		<div v-if="isVoting">
-			<span>{{ $t('reward_running_note') }}</span>
-		</div>
-		<div v-else>
-			<span>{{ $t('next_reward_note') }} {{ rewardStartTimer }}</span>
-		</div>
-		<div>{{ $t('actifit_vp') }}: {{ vpPercent }}</div>
-		<div class="progress">
-		  <div class="progress-bar progress-bar-striped progress-bar-animated bg-actifit" role="progressbar" :aria-valuenow="vp" aria-valuemin="0" aria-valuemax="100" :style="{ width: vp + '%' }"></div>
+	<div class="row text-center pb-3">
+		<div class="w-25" />
+		<div class="w-50 voting-notice p-2">
+			<div v-if="isVoting">
+				<span>{{ $t('reward_running_note') }}</span>
+			</div>
+			<div v-else>
+				<span>{{ $t('next_reward_note') }} {{ rewardStartTimer }}</span>
+			</div>
+			<div>{{ $t('actifit_vp') }}: {{ vpPercent }}</div>
+			<div class="progress">
+			  <div class="progress-bar progress-bar-striped progress-bar-animated bg-actifit" role="progressbar" :aria-valuenow="vp" aria-valuemin="0" aria-valuemax="100" :style="{ width: vp + '%' }"></div>
+			</div>
 		</div>
 	</div>
 </template>
@@ -78,7 +81,15 @@
   }
 </script>
 <style>
-	.fas, .steem-stats{
-	  cursor: pointer;
-    }
+.voting-notice{
+	background: red;
+    border: 1px red solid;
+    border-radius: 10px;
+    color: white;
+	font-weight: bold;
+}
+.bg-actifit{
+	background-color: #FF122E;
+	opacity: 0.5;
+}
 </style>

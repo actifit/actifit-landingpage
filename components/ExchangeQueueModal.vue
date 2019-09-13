@@ -9,6 +9,7 @@
           </button>
         </div>
 		<div class="modal-body">
+			<VotingStatus />
 			<h5 class="modal-title" id="exampleModalLabel">{{ $t('top_afitx_holders') }}</h5>
 			<table class="table table-hover">
 			  <thead class="text-brand">
@@ -70,8 +71,13 @@
 
 <script>
  
+  import VotingStatus from '~/components/VotingStatus'
+
   export default {
     props: [ 'transList', 'user', 'topAFITXList' ],
+	components: {
+		VotingStatus,
+	},
 	methods: {
 	  date(val) {
         let date = new Date(val)

@@ -77,9 +77,9 @@
 			<div class="pb-md-2 row text-center">
 			  <SteemStats :user="user" class="col-md-12"/>
 			</div>
-			<div class="pb-md-2 row text-center">
+			<div class="pb-md-2 pt-2 row text-center">
 			  <span class="w-25"/>
-			  <a href="#" class="btn btn-lg btn-brand w-50" @click.prevent="$router.push('/activity/')">What's Up?</a>
+			  <a href="#" class="btn btn-lg btn-brand w-50" @click.prevent="$router.push('/activity/')">{{ $t('activity_feed') }}</a>
 			</div>
 		  </div>
 

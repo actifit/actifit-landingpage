@@ -388,4 +388,5 @@ module.exports = {
   next_reward_note: 'Next Rewards Round Starts In',
   reward_running_note: 'Rewards Round Running...',
   actifit_vp: 'Actifit VP',
+  activity_feed: 'Activity Feed',
 }

@@ -25,12 +25,7 @@
       </div>
 	  
 	  <!-- show voting counter -->
-	  <div class="row text-center pb-3" v-else>
-		<div class="w-25" />
-		<div class="w-50 voting-notice p-2 text-bold">
-			<VotingStatus />
-		</div>
-	  </div>
+	  <VotingStatus v-else />
 
       <!-- show listing when loaded -->
       <div class="row" v-if="reports.length">
@@ -129,15 +124,5 @@
   }
 </script>
 <style>
-.voting-notice{
-	background: red;
-    border: 1px red solid;
-    border-radius: 10px;
-    color: white;
-	font-weight: bold;
-}
-.bg-actifit{
-	background-color: #FF122E;
-	opacity: 0.5;
-}
+
 </style>
