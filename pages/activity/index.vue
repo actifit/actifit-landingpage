@@ -28,16 +28,7 @@
 	  <div class="row text-center pb-3" v-else>
 		<div class="w-25" />
 		<div class="w-50 voting-notice p-2 text-bold">
-			<div v-if="isVoting">
-				<span>Rewards Round Running</span>
-			</div>
-			<div v-else>
-				<span>Next Rewards Round Starts In {{ rewardStartTimer }}</span>
-			</div>
-			<div>Actifit VP: {{ vpPercent }}</div>
-			<div class="progress">
-			  <div class="progress-bar progress-bar-striped progress-bar-animated bg-actifit" role="progressbar" :aria-valuenow="vp" aria-valuemin="0" aria-valuemax="100" :style="{ width: vp + '%' }"></div>
-			</div>
+			<VotingStatus />
 		</div>
 	  </div>
 
@@ -76,6 +67,8 @@
   import ReportModal from '~/components/ReportModal'
   import EditReportModal from '~/components/EditReportModal'
   import VoteModal from '~/components/VoteModal'
+  import VotingStatus from '~/components/VotingStatus'
+  
 
   import { mapGetters } from 'vuex'
 
@@ -87,17 +80,13 @@
       Footer,
       ReportModal,
       EditReportModal,
-      VoteModal
+      VoteModal,
+	  VotingStatus
     },
     data () {
       return {
         loading: true, // initial loading state
         loadingMore: false, // loading state for loading more reports
-		isVoting: false,
-		vp: 0,
-		vpPercent: 0,
-		currentVotingTimer: '00:00:00',
-		rewardStartTimer: this.currentVotingTimer,
       }
     },
     computed: {
@@ -120,24 +109,6 @@
 		  this.$store.dispatch('fetchReferrals')
 		}
 	  },
-	  setVotingStatus(json) {
-		if (json && json.status){
-			this.isVoting = json.status.is_voting;
-			this.vp = json.vp
-			this.vpPercent = parseFloat(json.vp).toFixed(3) + '%';
-			if (this.isVoting){
-				this.rewardStartTimer = this.currentVotingTimer;
-			}else{
-				this.rewardStartTimer = json.reward_start;
-			}
-		}
-	  },
-	  loadVotingStatus() {
-		//fetch voting status
-	  fetch(process.env.actiAppUrl+'votingStatus/').then(
-		res => {res.json().then(json => this.setVotingStatus (json) ).catch(e => reject(e))
-	  }).catch(e => reject(e))
-	  }
     },
     async mounted () {
       // reset previously fetched posts to get latest
@@ -151,11 +122,6 @@
 	  
       // fetch reports
       await this.$store.dispatch('fetchReports')
-	  
-	  this.loadVotingStatus();
-	  
-	  setInterval(this.loadVotingStatus, 30 * 1000);
-	  
 	  
       // remove loading indicator
       this.loading = false

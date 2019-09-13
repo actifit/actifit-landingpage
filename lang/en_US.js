@@ -385,4 +385,7 @@ module.exports = {
   VP_desc: 'Your VP (Voting Power) allows you to vote others and increase your & their rewards. Leaving your VP at 100% wastes rewards for both you and other users. Maintaining your VP at a min of 80% daily is recommended. VP replenishes at a rate of 20% per day.',
   RC_desc: 'Your RC (Resource Credits) are what enables you to take actions on the Steem blockchain. Actions include posting, voting,... amongst others. RCs replenish at a rate of 20% per day.',
   Actifit_Info: 'Actifit Info',
+  next_reward_note: 'Next Rewards Round Starts In',
+  reward_running_note: 'Rewards Round Running...',
+  actifit_vp: 'Actifit VP',
 }
