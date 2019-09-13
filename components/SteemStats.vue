@@ -89,8 +89,6 @@
 	  },
 	  //handles grabbing current user's VP
 	  async fetchVotingPower() {
-		console.log('fetchVP');
-		console.log(this.user);
 		if (!this.user){
 		  return 0;
 		}
@@ -98,7 +96,6 @@
 		if (typeof account == 'undefined' || account == null){
 		  return '';
 		}
-		console.log(account);
 		const totalShares = parseFloat(account.vesting_shares) + parseFloat(account.received_vesting_shares) - parseFloat(account.delegated_vesting_shares) - parseFloat(account.vesting_withdraw_rate);
 
 		const elapsed = Math.floor(Date.now() / 1000) - account.voting_manabar.last_update_time;
@@ -121,10 +118,8 @@
 		
 		//this.currentRC = currentManaPerc;
 		let rcComponent = await client.rc.getRCMana(this.user.account.name);
-		console.log(rcComponent);
 		this.currentRC = rcComponent.percentage/100;
 		this.currentRCPercent = this.currentRC + '%';
-		//console.log(this.currentRC);
 		
 		
 		return currentManaPerc;
