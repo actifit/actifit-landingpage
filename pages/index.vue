@@ -464,6 +464,9 @@
     <Footer />
 	
     <NewsModal :news="activeNews" />
+	<NotifyModal :modalTitle="$t('Actifit_Info')" :modalText="$t('VP_desc')"/>
+	<NotifyModal id="notifyModalRC" ref="notifyModalRC" :modalTitle="$t('Actifit_Info')" :modalText="$t('RC_desc')"/>
+	 
   </div>
 </template>
 
@@ -475,6 +478,7 @@
   import NewsModal from '~/components/NewsModal'
   import { mapGetters } from 'vuex'
   import SteemStats from '~/components/SteemStats'
+  import NotifyModal from '~/components/NotifyModal'
 
   export default {
     components: {
@@ -482,7 +486,8 @@
       Footer,
       News,
       NewsModal,
-	  SteemStats
+	  SteemStats,
+	  NotifyModal
     },
     data () {
       return {

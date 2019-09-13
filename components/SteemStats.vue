@@ -1,18 +1,17 @@
 <template>
 	<div class="steem-stats pt-2" v-if="getVotingPower">
-		<span v-if="!minView"><span>{{ $t('Your_Voting_Power') }} </span><span :style="displayProperColor">{{getVotingPower}}</span><span ><small>({{ $t('Full_In') }} {{timeToFull(this.currentVotingPower)}})</small> <i class="fas fa-info-circle" v-on:click="showVPInfo=!showVPInfo"></i></span></span>
+		<span v-if="!minView"><span>{{ $t('Your_Voting_Power') }} </span><span :style="displayProperColor">{{getVotingPower}}</span><span><small>({{ $t('Full_In') }} {{timeToFull(this.currentVotingPower)}})</small> <a href="#" data-toggle="modal" data-target="#notifyModal"><i class="fas fa-info-circle"></i></a></span></span>
 		<span v-else><span>{{ $t('My_Voting_Power') }} </span><span :style="displayProperColor">{{getVotingPower}}</span></span>
 		<div v-if="showVPInfo">{{ $t('VP_desc') }}</div>
 		<div class="progress">
 		  <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" :aria-valuenow="currentVotingPower" aria-valuemin="0" aria-valuemax="100" :style="{ width: currentVotingPower + '%' }"></div>
 		</div>
-		<span v-if="!minView"><span>{{ $t('Your_RC') }} </span><span :style="displayProperColor">{{this.currentRCPercent}}</span><span><small>({{ $t('Full_In') }} {{timeToFull(this.currentRC)}})</small> <i class="fas fa-info-circle" v-on:click="showRCInfo=!showRCInfo"></i></span></span>
+		<span v-if="!minView"><span>{{ $t('Your_RC') }} </span><span :style="displayProperColor">{{this.currentRCPercent}}</span><span><small>({{ $t('Full_In') }} {{timeToFull(this.currentRC)}})</small> <a href="#" data-toggle="modal" data-target="#notifyModalRC"><i class="fas fa-info-circle"></i></a></span></span>
 		<span v-else><span>{{ $t('My_RC') }} </span><span :style="displayProperColor">{{this.currentRCPercent}}</span></span>
 		<div v-if="showRCInfo">{{ $t('RC_desc') }}</div>
 		<div class="progress">
 			<div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" :aria-valuenow="currentRCPercent" aria-valuemin="0" aria-valuemax="100" :style="{ width: currentRCPercent}"></div>
 		</div>
-		
 	</div>
 </template>
 
@@ -45,6 +44,8 @@
 	  }
 	},
 	props: ['user', 'minView'],
+	components: {
+	},
 	computed: {
 	  getVotingPower () {
 		return this.currentVotingPower + '%';
