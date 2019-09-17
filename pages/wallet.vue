@@ -1014,7 +1014,10 @@
 		  
 		   
 		  //fetch user's AFIT S-E balance
+		  
 		  let bal = await ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFIT' });
+		  
+		  
 		  if (bal){
 			  this.afit_se_balance = bal.balance;
 			  
@@ -1024,6 +1027,7 @@
 				let url = new URL(process.env.actiAppUrl + 'confirmAFITSEReceipt/?user='+this.$store.state.steemconnect.user.name);
 				//connect with our service to confirm AFIT received to proper wallet
 				try{
+					
 					let res = await fetch(url);
 					let outcome = await res.json();
 					if (outcome.error){
@@ -1045,10 +1049,23 @@
 		  }
 		  
 		  //fetch user's AFITX S-E balance
+		  /*console.log('fetch AFITX SE balance');
 		  bal = await ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' });
+		  console.log('>>result of AFITX SE balance');
+		  console.log(bal);
 		  if (bal){
 			  this.afitx_se_balance = bal.balance;
-		  }
+		  }*/
+		  let parnt = this
+		  ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' }).then(
+				function(bal) {
+					
+					
+					if (bal){
+						  parnt.afitx_se_balance = bal.balance;
+					  }
+				}
+			)
 		  
 		  //fetch user's AFITX Rank
 		   fetch(process.env.actiAppUrl+'afitxData/'+this.user.account.name).then(
@@ -1058,6 +1075,8 @@
 		  
 		  //fetch user's tokensOfInterest S-E balance
 		  let tokenData = await ssc.find('tokens', 'balances', { account: this.user.account.name, symbol : { '$in' : tokensOfInterest } });
+		  
+		  
 		  if (tokenData){
 			this.tokensOfInterestBal = tokenData.sort(function tokenEntry(a, b) {
 				return b.symbol < a.symbol ?  1
@@ -1715,11 +1734,9 @@
 		//handles performing a token power up/staking
 		this.afit_se_power_error_proceeding = false;
 		this.afit_se_power_err_msg = '';
-		console.log('proceedPowerUpToken');
-		console.log(this.selTokenUp);
 		
 		let tokenMaxVal = this.selTokenUp.balance;
-		console.log(parseFloat(tokenMaxVal));
+		
 		let amount_to_power = this.$refs["token-powerup-amount"].value.trim();
 		//ensure we have proper values
 		if (isNaN(amount_to_power) || parseFloat(amount_to_power) < 0.01){
@@ -1744,7 +1761,7 @@
 		  json: "{\"contractName\":\"tokens\",\"contractAction\":\"stake\",\"contractPayload\":{\"symbol\":\"" + this.selTokenUp.symbol + "\",\"to\":\"" + this.user.account.name + "\",\"quantity\":\"" + amount_to_power + "\",\"memo\":\"\"}}",
 		  authority: 'active',
 		  auto_return: true,
-		}, window.location.origin + '/wallet?op='+this.$t('Power_up_token')+'&status=success&confirm_trans=1');
+		}, window.location.origin + '/wallet?op='+this.$t('Power_up_token')+'&status=success');
 		
 		//redirect to proper action
 		window.location = link;
@@ -1755,7 +1772,7 @@
 		this.afit_se_power_error_proceeding = false;
 		this.afit_se_power_err_msg = '';
 		
-		console.log(this.selTokenUp);
+		
 		
 		let tokenMaxVal = this.selTokenUp.stake;
 		let amount_to_powerdown = this.$refs["token-powerup-amount"].value.trim();
@@ -1780,7 +1797,7 @@
 		  json: "{\"contractName\":\"tokens\",\"contractAction\":\"unstake\",\"contractPayload\":{\"symbol\":\"" + this.selTokenUp.symbol + "\",\"quantity\":\"" + amount_to_powerdown + "\",\"memo\":\"\"}}",
 		  authority: 'active',
 		  auto_return: true,
-		}, window.location.origin + '/wallet?op='+this.$t('Power_down_token')+'&status=success&confirm_trans=1');
+		}, window.location.origin + '/wallet?op='+this.$t('Power_down_token')+'&status=success');
 		
 		//redirect to proper action
 		window.location = link;
@@ -1790,7 +1807,7 @@
 		this.afit_se_power_error_proceeding = false;
 		this.afit_se_power_err_msg = '';
 		
-		console.log(this.selTokenUp);
+		
 		
 		let tokenMaxVal = this.selTokenUp.balance;
 		let amount_to_send = this.$refs["token-powerup-amount"].value.trim();
@@ -1823,7 +1840,7 @@
 		  json: "{\"contractName\":\"tokens\",\"contractAction\":\"transfer\",\"contractPayload\":{\"symbol\":\"" + this.selTokenUp.symbol + "\",\"to\":\"" + target_account + "\",\"quantity\":\"" + amount_to_send + "\",\"memo\":\"\"}}",
 		  authority: 'active',
 		  auto_return: true,
-		}, window.location.origin + '/wallet?op='+this.$t('Transfer_token')+'&status=success&confirm_trans=1');
+		}, window.location.origin + '/wallet?op='+this.$t('Transfer_token')+'&status=success');
 		
 		//redirect to proper action
 		window.location = link;
@@ -1833,7 +1850,7 @@
 		this.afit_se_power_error_proceeding = false;
 		this.afit_se_power_err_msg = '';
 		
-		console.log(this.selTokenUp);
+		
 		
 		let tokenMaxVal = this.selTokenUp.balance;
 		let amount_to_withdraw = this.$refs["token-powerup-amount"].value.trim();
@@ -1859,7 +1876,7 @@
 		  json: "{\"contractName\":\"steempegged\",\"contractAction\":\"withdraw\",\"contractPayload\":{\"quantity\":\"" + amount_to_withdraw + "\"}}",
 		  authority: 'active',
 		  auto_return: true,
-		}, window.location.origin + '/wallet?op='+this.$t('Withdraw_token')+'&status=success&confirm_trans=1');
+		}, window.location.origin + '/wallet?op='+this.$t('Withdraw_token')+'&status=success');
 		
 		//redirect to proper action
 		window.location = link;
@@ -2030,7 +2047,7 @@
 		return parseFloat(this.afitBuyAmount * this.afitPrice / this.steemPrice).toFixed(3);
 	  },
 	  setSteemPrice (_steemPrice){
-		console.log(_steemPrice);
+		
 		this.steemPrice = parseFloat(_steemPrice).toFixed(3);
 	  },
 	  setSBDPrice (_sbdPrice){
