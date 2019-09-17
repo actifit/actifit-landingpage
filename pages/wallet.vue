@@ -1028,18 +1028,10 @@
 				//connect with our service to confirm AFIT received to proper wallet
 				try{
 					
-					let res = await fetch(url);
-					let outcome = await res.json();
-					if (outcome.error){
-						console.error(outcome);
-					}else{
-						//update user token count
-						if (outcome.afit_se_power){
-							this.userAddedTokens = outcome.afit_amount;
-						}
-					}
-					//this.checkingFunds = false;
-					//this.resultReturned = true;
+					fetch(url).then(
+					  res => {res.json().then(json => this.userAddedTokens = json.afit_amount ).catch(e => reject(e))
+					}).catch(e => reject(e))
+					
 				
 				}catch(err){
 					console.error(err);
