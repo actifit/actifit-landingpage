@@ -945,6 +945,16 @@
 			this.countDownReady = true;
 		}
 	  },
+	  setUserAddedTokens(outcome){
+		if (outcome.error){
+			console.error(outcome);
+		}else{
+			//update user token count
+			if (outcome.afit_se_power){
+				this.userAddedTokens = outcome.afit_amount;
+			}
+		}
+	  },
 	  async fetchUserData () {
 		if (typeof this.user != 'undefined' && this.user != null){	  
 		  
@@ -1029,7 +1039,7 @@
 				try{
 					
 					fetch(url).then(
-					  res => {res.json().then(json => this.userAddedTokens = json.afit_amount ).catch(e => reject(e))
+					  res => {res.json().then(json => this.setUserAddedTokens(json)).catch(e => reject(e))
 					}).catch(e => reject(e))
 					
 				
