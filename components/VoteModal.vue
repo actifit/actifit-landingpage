@@ -8,7 +8,7 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-		<SteemStats :user="user"/>
+		<SteemStats class="modal-body" :user="user"/>
         <div class="modal-body text-center">
           <small class="text-muted">{{ $t('Adjust_Vote_Weight') }}</small>
           <ul class="pagination justify-content-center mt-2">
