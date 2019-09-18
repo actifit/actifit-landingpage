@@ -389,4 +389,9 @@ module.exports = {
   reward_running_note: 'Rewards Round Running...',
   actifit_vp: 'Actifit VP',
   activity_feed: 'Activity Feed',
+  Voters_List: 'Voters List',
+  Voter: 'Voter',
+  Voting_Percent: 'Percent',
+  Voting_Amount: 'Amount',
+  Voting_Date: 'Date/Time',
 }

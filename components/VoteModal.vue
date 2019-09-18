@@ -23,16 +23,22 @@
             <li :class="{'page-item': true, disabled: voteWeight === 100}"><a class="page-link vote-controls" href="#" @click.prevent="setVoteWeight(100)"><i class="far fa-thumbs-up text-success"></i></a></li>
           </ul>
 		  <div class="text-center"><span>{{ $t('Your_Vote_Value') }}:</span><span>{{vote_value_usd}}</span></div>
-          <button type="submit" class="btn btn-brand" @click="vote()" v-if="voteWeight">
+		  <button type="submit" class="btn btn-brand" @click="vote()" v-if="voteWeight">
             <i class="fas fa-thumbs-up" v-if="voteWeight > 0"></i>
             <i class="fas fa-thumbs-down" v-if="voteWeight < 0"></i>
             <span v-if="voteWeight > 0"> {{ $t('Upvote') }}</span>
             <span v-if="voteWeight < 0"> {{ $t('Downvote') }}</span>
             <i class="fas fa-spinner fa-spin ml-2" v-if="loading"></i>
           </button>
+		  
+		  <a href="#" data-toggle="modal" class="btn btn-brand" data-target="#votersListModal" >
+			<i class="fas fa-list-ol"></i> {{ $t('Voters_List') }}
+		  </a>
+		  
         </div>
       </div>
     </div>
+	<VotersListModal :modalTitle="$t('Voters_List')" :votersList="votersList"/>
   </div>
 </template>
 
@@ -42,6 +48,7 @@
   
   //import dsteem from 'dsteem'
   import SteemStats from '~/components/SteemStats'
+  import VotersListModal from '~/components/VotersListModal'
   
   var dsteem = require('dsteem')
   
@@ -61,10 +68,15 @@
 		vote_value_usd: '',
 		STEEMIT_100_PERCENT: 10000,
 		STEEMIT_VOTE_REGENERATION_SECONDS: (5 * 60 * 60 * 24),
+		votersList: [],
       }
     },
+	watch: {
+	  postToVote: 'fetchVoterData',
+	},
 	components: {
 	  SteemStats,
+	  VotersListModal
 	},
     computed: {
       ...mapGetters('steemconnect', ['user']),
@@ -311,6 +323,14 @@
 		}catch(err){
 			console.error(err);
 		}
+	  },
+	  async fetchVoterData(){
+		console.log('voter data');
+		  if (!this.postToVote){
+			return;
+		  }
+		  this.votersList = this.postToVote.active_votes;
+		  console.log(this.votersList);
 	  }
     },
 	async mounted () {
@@ -327,10 +347,8 @@
 	  //in addition to the default updating of VP upon each render, we need to take into consideration leaving window open. 
 	  //for this purpose, let's update every 30 seconds
 	  setInterval(this.fetchVotingPower, 30 * 1000);
-	  if (this.report != null){
-		this.fetchReportKeyData();
-	  }
 	  
+	  this.fetchVoterData();
 	  
 	  client = new dsteem.Client('https://api.steemit.com')
 	  /*
