@@ -13,8 +13,9 @@
 			  <thead class="text-brand">
 				<tr>
 				  <th scope="col">{{ $t('Voter') }}</th>
+				  <th scope="col">{{ $t('Voting_Action') }}</th>
 				  <th scope="col">{{ $t('Voting_Percent') }}</th>
-				  <!--<th scope="col">{{ $t('Voting_Amount') }}</th>
+				  <!--<th scope="col">{{ $t('Voting_Value') }}</th>
 				  <th scope="col">{{ $t('Voting_Date') }}</th>-->
 				</tr>
 			  </thead>
@@ -25,6 +26,10 @@
 					<a :href="voteEntry.voter" target="_blank" :class="{'text-white': user && user.name === voteEntry.voter}">
 						@{{ voteEntry.voter }}
 					</a>
+				  </td>
+				  <td>
+					<i v-if="voteEntry.percent >= 0" class="fas fa-thumbs-up text-green"></i>
+					<i v-else class="fas fa-thumbs-down text-brand"></i>
 				  </td>
 				  <td>{{ voteEntry.percent / 100 }} %</td>
 				</tr>
@@ -58,5 +63,7 @@
   }
 </script>
 <style>
-
+.text-green{
+	color: #76BB0E
+}
 </style>

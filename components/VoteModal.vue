@@ -32,7 +32,7 @@
           </button>
 		  
 		  <a href="#" data-toggle="modal" class="btn btn-brand border" data-target="#votersListModal" >
-			<i class="fas fa-list-ol"></i> {{ $t('Voters_List') }}
+			<i class="fas fa-list-ul"></i> {{ $t('Voters') }}
 		  </a>
 		  
         </div>
@@ -127,7 +127,7 @@
 		
 		this.votePowerReserveRate = this.properties.vote_power_reserve_rate;
 		this.sbd_print_percentage = this.properties.sbd_print_rate / 10000;
-		this.getVoteValueUSD();
+		this.getVoteValueUSD(this.voteWeight, this.user.account, this.currentVotingPower);
 	  },
 	  //store SBD price
 	  setSBDPrice (_sbdPrice){
@@ -143,7 +143,6 @@
 		if (typeof account == 'undefined' || account == null){
 		  return '';
 		}
-		console.log(account);
 		const totalShares = parseFloat(account.vesting_shares) + parseFloat(account.received_vesting_shares) - parseFloat(account.delegated_vesting_shares) - parseFloat(account.vesting_withdraw_rate);
 
 		const elapsed = Math.floor(Date.now() / 1000) - account.voting_manabar.last_update_time;
@@ -166,7 +165,6 @@
 		
 		//this.currentRC = currentManaPerc;
 		let rcComponent = await client.rc.getRCMana(this.user.account.name);
-		console.log(rcComponent);
 		this.currentRC = rcComponent.percentage/100;
 		this.currentRCPercent = this.currentRC + '%';
 		//console.log(this.currentRC);
@@ -198,9 +196,9 @@
 	    return v;
 	  },
 	  //handles grabbing the vote value /STEEM
-	  getVoteValue() {
+	  getVoteValue(weight, account, vp) {
 		if (this.rewardBalance && this.recentClaims && this.steem_price && this.votePowerReserveRate) {
-		  let voteValue = this.getVoteRShares(this.voteWeight, this.user.account, this.currentVotingPower * 100)
+		  let voteValue = this.getVoteRShares(weight, account, vp * 100)
 			* this.rewardBalance / this.recentClaims
 			* this.steem_price;
 		  
@@ -234,8 +232,8 @@
 		return effective_vesting_shares;
 	  },
 	  //handles display vote value in USD
-	  getVoteValueUSD() {
-		let vote_value = this.getVoteValue();
+	  getVoteValueUSD(weight, account, vp) {
+		let vote_value = this.getVoteValue(weight, account, vp);
 		
 		const steempower_value = vote_value * 0.5
 		const sbd_print_percentage_half = (0.5 * this.sbd_print_percentage)
@@ -340,12 +338,10 @@
 		}
 	  },
 	  async fetchVoterData(){
-		console.log('voter data');
 		  if (!this.postToVote){
 			return;
 		  }
 		  this.votersList = this.postToVote.active_votes;
-		  console.log(this.votersList);
 	  }
     },
 	async mounted () {

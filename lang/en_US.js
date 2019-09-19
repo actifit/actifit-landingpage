@@ -391,7 +391,9 @@ module.exports = {
   activity_feed: 'Activity Feed',
   Voters_List: 'Voters List',
   Voter: 'Voter',
+  Voters: 'Voters',
   Voting_Percent: 'Percent',
-  Voting_Amount: 'Amount',
+  Voting_Value: 'Value',
   Voting_Date: 'Date/Time',
+  Voting_Action: 'Action',
 }

@@ -164,6 +164,8 @@
 		</div>
 	</div>
 	<VoteModal />
+	<NotifyModal :modalTitle="$t('Actifit_Info')" :modalText="$t('VP_desc')"/>
+	<NotifyModal id="notifyModalRC" ref="notifyModalRC" :modalTitle="$t('Actifit_Info')" :modalText="$t('RC_desc')"/>
 	<no-ssr>
       <div>
         <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
@@ -182,7 +184,8 @@
   import VueMarkdown from 'vue-markdown'
   import steem from 'steem'
   import {mapGetters} from 'vuex'
-  import Comments from '~/components/Comments'  
+  import Comments from '~/components/Comments'
+  import NotifyModal from '~/components/NotifyModal'
   
   import Vue from 'vue'
   
@@ -236,7 +239,8 @@
 	  VueMarkdown,
 	  Comments,
 	  SocialSharing,
-	  VoteModal
+	  VoteModal,
+	  NotifyModal
 	},
     computed: {
 	  ...mapGetters('steemconnect', ['user']),

@@ -45,6 +45,8 @@
     <ReportModal :report="activeReport" />
     <EditReportModal />
     <VoteModal :report="activeReport"/>
+	<NotifyModal :modalTitle="$t('Actifit_Info')" :modalText="$t('VP_desc')"/>
+	<NotifyModal id="notifyModalRC" ref="notifyModalRC" :modalTitle="$t('Actifit_Info')" :modalText="$t('RC_desc')"/>
     <no-ssr>
       <div>
         <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
@@ -63,6 +65,7 @@
   import EditReportModal from '~/components/EditReportModal'
   import VoteModal from '~/components/VoteModal'
   import VotingStatus from '~/components/VotingStatus'
+  import NotifyModal from '~/components/NotifyModal'
 
   import { mapGetters } from 'vuex'
 
@@ -75,7 +78,8 @@
       ReportModal,
       EditReportModal,
       VoteModal,
-	  VotingStatus
+	  VotingStatus,
+	  NotifyModal
     },
     data () {
       return {
