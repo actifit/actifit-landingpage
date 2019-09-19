@@ -23,7 +23,7 @@
             <li :class="{'page-item': true, disabled: voteWeight === 100}"><a class="page-link vote-controls" href="#" @click.prevent="setVoteWeight(100)"><i class="far fa-thumbs-up text-success"></i></a></li>
           </ul>
 		  <div class="text-center"><span>{{ $t('Your_Vote_Value') }}:</span><span>{{vote_value_usd}}</span></div>
-		  <button type="submit" class="btn btn-brand" @click="vote()" v-if="voteWeight">
+		  <button type="submit" class="btn btn-brand border" @click="vote()" v-if="voteWeight">
             <i class="fas fa-thumbs-up" v-if="voteWeight > 0"></i>
             <i class="fas fa-thumbs-down" v-if="voteWeight < 0"></i>
             <span v-if="voteWeight > 0"> {{ $t('Upvote') }}</span>
@@ -31,7 +31,7 @@
             <i class="fas fa-spinner fa-spin ml-2" v-if="loading"></i>
           </button>
 		  
-		  <a href="#" data-toggle="modal" class="btn btn-brand" data-target="#votersListModal" >
+		  <a href="#" data-toggle="modal" class="btn btn-brand border" data-target="#votersListModal" >
 			<i class="fas fa-list-ol"></i> {{ $t('Voters_List') }}
 		  </a>
 		  
@@ -263,8 +263,23 @@
 		//while setting, ensure we display proper voting value in USD as well
 		this.calculateVoteValue();
       },
-      vote () {
-        this.loading = true
+      /* function checks if logged in user has upvoted current report */
+	  userVotedThisPost() {
+		let curUser = this.user.account.name;
+		//check if the post contains in its original voters current user, or if it has been upvoted in current session
+		return this.postToVote.active_votes.filter(voter => (voter.voter === curUser)).length > 0 || this.newlyVotedPosts.indexOf(this.postToVote.post_id)!==-1;
+	  },
+	  vote () {
+        //if the user already voted, confirm vote change
+		//if this post is already voted by the user, we need to show a confirmation
+		if (this.userVotedThisPost()){
+		  var confirmPopup = confirm(this.$t('confirm_vote_change'));
+		  if (!confirmPopup){
+			return;
+		  }
+		}
+		
+		this.loading = true
 		this.$steemconnect.vote(this.user.account.name, this.postToVote.author, this.postToVote.permlink, this.voteWeight * 100, (err) => {
           this.loading = false
           if (err) {

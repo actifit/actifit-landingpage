@@ -449,15 +449,6 @@
 		if (!this.$store.state.steemconnect.user){
 		  alert(this.$t('need_login_signup_notice_vote'));
 		  e.stopPropagation();
-		}
-		//if this post is already voted by the user, we need to show a confirmation
-		else if (this.userVotedThisPost()){
-		  var confirmPopup = confirm(this.$t('confirm_vote_change'));
-		  if (confirmPopup){
-			this.$store.commit('setPostToVote', this.report)
-		  }else{
-			e.stopPropagation();
-		  }
 		}else{
 		  //proceed normally showing vote popup
 		  this.$store.commit('setPostToVote', this.report)
