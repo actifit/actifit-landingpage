@@ -13,8 +13,8 @@
       <NavbarBrand />
       <UserMenu />
     </nav>
-	<div v-if="report && report.author" class="container pt-5 mt-5 pb-5 col-md-9" >
-        <div class="report-head mb-3 col-md-9">
+	<div v-if="report && report.author" class="container pt-5 mt-5 pb-5 col-md-6" >
+        <div class="report-head mb-3 col-md-12">
           <h4 id="exampleModalLabel">{{ report.title }}</h4>
 		  <h5 class="text-brand" >
 			<div class="user-avatar mid-avatar mr-1 mb-5"
@@ -23,8 +23,8 @@
 		  <span class="date-head text-muted">{{ date }}</span>
 		  <div class="report-tags p-1" v-html="displayReportTags"></div>
         </div>
-		<article v-html="$renderMD(body)" class="col-md-9"></article>
-		<div class="modal-footer col-md-9">
+		<article v-html="$renderMD(body)" class="col-md-12"></article>
+		<div class="modal-footer col-md-12">
 		  <div class="report-modal-prelim-info col-md-6">
 			<span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen">{{ $t('Reply') }}</a></span>
 			<span>
@@ -100,7 +100,7 @@
 		  </div>
 		</div>
 		<!-- adding section to display additional FULL Payout option -->
-		<div class="modal-footer col-md-9" v-if="this.meta.full_afit_pay=='on'">
+		<div class="modal-footer col-md-12" v-if="this.meta.full_afit_pay=='on'">
 			<div class="text-brand">
 				<i class="fas fa-star"></i>
 				<small>
@@ -120,7 +120,7 @@
 			</div>
 		</div>
 		<!-- adding section to display charity info if available -->
-		<div class="modal-footer col-md-9" v-if="this.meta.charity">
+		<div class="modal-footer col-md-12" v-if="this.meta.charity">
 			<i class="fas fa-dove"></i>
 			<small>
 				{{ $t('Charity_Post') }}
@@ -131,13 +131,13 @@
 			</small>
 		</div>
 		<transition name="fade">
-		  <div class="report-reply col-md-9" v-if="commentBoxOpen">
+		  <div class="report-reply col-md-12" v-if="commentBoxOpen">
 			<markdown-editor v-model="replyBody" :configs="editorConfig" ref="editor"></markdown-editor>
 			<a href="#" @click.prevent="postResponse($event)" class="btn btn-brand border reply-btn w-25">{{ $t('Post') }}<i class="fas fa-spin fa-spinner" v-if="loading"></i></a>
 			<a href="#" @click.prevent="resetOpenComment()"  class="btn btn-brand border reply-btn w-25">{{ $t('Cancel') }}</a>
 		  </div>
 		</transition>
-		<div class="report-reply col-md-9" v-if="responsePosted">
+		<div class="report-reply col-md-12" v-if="responsePosted">
 			<a :href="this.$store.state.steemconnect.user.name" target="_blank">
 			  <div class="comment-user-section">	
 				<div class="user-avatar mr-1"
@@ -147,7 +147,7 @@
 			</a>
 			<article v-html="$renderMD(responseBody)"></article>
 		</div>
-		<div class="report-comments col-md-9" v-if="commentsAvailable">
+		<div class="report-comments col-md-12" v-if="commentsAvailable">
 			<Comments 
 				:author="commentEntries.author" 
 				:body="commentEntries.body" 
