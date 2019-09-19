@@ -38,7 +38,7 @@
         </div>
       </div>
     </div>
-	<VotersListModal :modalTitle="$t('Voters_List')" :votersList="votersList"/>
+	<VotersListModal :modalTitle="$t('Voters_List')" :votersList="votersList" :postData="postToVote"/>
   </div>
 </template>
 
