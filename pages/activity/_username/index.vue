@@ -68,7 +68,16 @@
   import { mapGetters } from 'vuex'
 
   export default {
-    components: {
+    head () {
+		return {
+		  title: `Actifit activity reports by ${this.username} - Actifit.io`,
+		  meta: [
+			{ hid: 'description', name: 'description', content: `Listing of activity reports by ${this.username}` },
+			{ hid: 'ogdescription', name: 'og:description', content: `Listing of activity reports by ${this.username}` }
+		  ]
+		}
+	},
+	components: {
       UserMenu,
       NavbarBrand,
       Report,

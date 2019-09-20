@@ -44,7 +44,16 @@
   import { mapGetters } from 'vuex'
 
   export default {
-    components: {
+    head () {
+		return {
+		  title: `Actifit Delegators - Actifit.io`,
+		  meta: [
+			{ hid: 'description', name: 'description', content: `Listing of Actifit delegators / supporters` },
+			{ hid: 'ogdescription', name: 'og:description', content: `Listing of Actifit delegators / supporters` }
+		  ]
+		}
+	},
+	components: {
       UserMenu,
       NavbarBrand,
       Footer

@@ -567,6 +567,15 @@
   import { mapGetters } from 'vuex'
 
   export default {
+	head () {
+		return {
+		  title: `Actifit user wallet - Actifit.io`,
+		  meta: [
+			{ hid: 'description', name: 'description', content: `Wallet details for actifit user` },
+			{ hid: 'ogdescription', name: 'og:description', content: `Wallet details for actifit user` }
+		  ]
+		}
+	},
 	data () {
 	  return {
 	    CLOSED_MODE: 0,

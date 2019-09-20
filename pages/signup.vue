@@ -125,6 +125,15 @@
   import { mapGetters } from 'vuex'
 
   export default {
+	head () {
+		return {
+		  title: `Signup Page - Actifit.io`,
+		  meta: [
+			{ hid: 'description', name: 'description', content: `Signup for an account at actifit.io` },
+			{ hid: 'ogdescription', name: 'og:description', content: `Signup for an account at actifit.io` }
+		  ]
+		}
+	},
     components: {
       NavbarBrand,
       UserMenu,

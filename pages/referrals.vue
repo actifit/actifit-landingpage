@@ -118,6 +118,15 @@
   import { mapGetters } from 'vuex'
 
   export default {
+	head () {
+		return {
+		  title: `Actifit Referrals - Actifit.io`,
+		  meta: [
+			{ hid: 'description', name: 'description', content: `Referrals page for actifit users` },
+			{ hid: 'ogdescription', name: 'og:description', content: `Referrals page for actifit users` }
+		  ]
+		}
+	},
     components: {
       NavbarBrand,
       UserMenu,

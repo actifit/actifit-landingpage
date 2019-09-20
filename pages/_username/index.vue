@@ -167,6 +167,15 @@
   const ssc = new SSC(process.env.steemEngineRpc);
 
   export default {
+	head () {
+		return {
+		  title: `Actifit user profile ${this.username} - Actifit.io`,
+		  meta: [
+			{ hid: 'description', name: 'description', content: `Actifit profile view for ${this.username}` },
+			{ hid: 'ogdescription', name: 'og:description', content: `Actifit profile view for ${this.username}` }
+		  ]
+		}
+	},
 	data () {
 		return {
 			report: '',
@@ -260,7 +269,14 @@
 		}catch(err){
 		  return null;
 		}
-	  }
+	  },
+	  // get username from url
+      username () {
+	    if (this.$route.params.username.startsWith('@')){
+		  return this.$route.params.username.substring(1, this.$route.params.username.length);
+		}
+        return this.$route.params.username
+      }
     },
 	methods: {
 	  /**
@@ -501,7 +517,7 @@
 		  this.claimError = true;
 		  this.claimErrorDesc = this.$t('badge_reqts_not_met');
 	    }
-	  }
+	  },
 	},
 	async mounted () {
 		// login

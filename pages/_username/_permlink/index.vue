@@ -199,6 +199,15 @@
   Vue.use( steemEditor );
   
   export default {
+	head () {
+		return {
+		  title: `Post by ${this.username} - Actifit.io`,
+		  meta: [
+			{ hid: 'description', name: 'description', content: `Post by ${this.username}` },
+			{ hid: 'ogdescription', name: 'og:description', content: `Post by ${this.username}` }
+		  ]
+		}
+	},
 	data () {
 		return {
 			report: '',
@@ -247,6 +256,13 @@
 	  ...mapGetters(['newlyVotedPosts']),
 	  ...mapGetters(['commentEntries'], 'commentCountToday'),
 	  ...mapGetters(['moderators']),
+	  // get username from url
+      username () {
+	    if (this.$route.params.username.startsWith('@')){
+		  return this.$route.params.username.substring(1, this.$route.params.username.length);
+		}
+        return this.$route.params.username
+      },
 	  date() {
         let date = new Date(this.report.created)
         let minutes = date.getMinutes()

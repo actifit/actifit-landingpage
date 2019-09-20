@@ -45,7 +45,16 @@
   import { mapGetters } from 'vuex'
 
   export default {
-    components: {
+    head () {
+		return {
+		  title: `Actifit Market - Actifit.io`,
+		  meta: [
+			{ hid: 'description', name: 'description', content: `Actifit market where you can buy goods with AFIT tokens. Spend your AFIT tokens on health, fitness, and related products & services!` },
+			{ hid: 'ogdescription', name: 'og:description', content: `Actifit market where you can buy goods with AFIT tokens. Spend your AFIT tokens on health, fitness, and related products & services!` }
+		  ]
+		}
+	},
+	components: {
       UserMenu,
       NavbarBrand,
       Product,

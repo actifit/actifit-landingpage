@@ -44,7 +44,16 @@
   import { mapGetters } from 'vuex'
 
   export default {
-    components: {
+    head () {
+		return {
+		  title: `Actifit Consultants - Actifit.io`,
+		  meta: [
+			{ hid: 'description', name: 'description', content: `Actifit verified consultants are fitness and nutrition professionals who provide services via Actifit market` },
+			{ hid: 'ogdescription', name: 'og:description', content: `Actifit verified consultants are fitness and nutrition professionals who provide services via Actifit market` }
+		  ]
+		}
+	},
+	components: {
       UserMenu,
       NavbarBrand,
       Professional,
