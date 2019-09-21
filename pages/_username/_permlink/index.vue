@@ -207,8 +207,8 @@
 		  meta: [
 				{ hid: 'title', name: 'og:title', 'property':'og:title', content: `${this.postTitle} by ${this.username} - Actifit`},
 				{ hid: 'description', name: 'description', content: `Post by ${this.username}` },
-				{ hid: 'ogdescription', 'property':'og:description', name: 'og:description', content: `Post by ${this.username}` },
-				{ hid: 'image', 'property':'og:image', name: 'og:image', content: `${this.postImg}`},
+				{ hid: 'ogdescription', name: 'og:description', 'property':'og:description', content: `Post by ${this.username}` },
+				{ hid: 'image', name: 'og:image', 'property':'og:image', content: `${this.postImg}`},
 			  ],
 		}
 	},
