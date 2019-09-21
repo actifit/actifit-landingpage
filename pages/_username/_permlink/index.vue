@@ -197,6 +197,8 @@
   import SocialSharing from 'vue-social-sharing'
   
   import VoteModal from '~/components/VoteModal'
+  
+  import sanitize from 'sanitize-html'
 
   Vue.use( steemEditor );  
   
@@ -206,8 +208,8 @@
 		  title: `${this.postTitle} by ${this.username} - Actifit`,
 		  meta: [
 				{ hid: 'title', name: 'og:title', 'property':'og:title', content: `${this.postTitle} by ${this.username} - Actifit`},
-				{ hid: 'description', name: 'description', content: `Post by ${this.username}` },
-				{ hid: 'ogdescription', name: 'og:description', 'property':'og:description', content: `Post by ${this.username}` },
+				{ hid: 'description', name: 'description', content: `${this.desc} by ${this.username}` },
+				{ hid: 'ogdescription', name: 'og:description', 'property':'og:description', content: `${this.desc} by ${this.username}` },
 				{ hid: 'image', name: 'og:image', 'property':'og:image', content: `${this.postImg}`},
 			  ],
 		}
@@ -231,8 +233,32 @@
 		//grab text without HTML, and remove extra spacing
 		var pure_text = $('.actifit_container').text().replace(/\s+/g,' ');
 		console.log(pure_text);*/
+		console.log(result.body);
+		//remove all tags from text
+		let desc = sanitize(result.body, { allowedTags: [] });
 		
+		//remove all links/image links
+		let img_links_reg = /[!]?\[[\d\w\s-\.\(\)]*\]\(((((https?:\/\/usermedia\.actifit\.io\/))|((https:\/\/ipfs\.busy\.org\/ipfs\/))|((https:\/\/steemitimages\.com\/)))[\d\w-[\:\/\.\%]+|(https?:\/\/[.\d\w-\/\:\%\(\)]*\.(?:png|jpg|jpeg|gif)))[)]/igm;
+		desc = desc.replace(img_links_reg,'');
 		
+		/* let's find images sent as pure URLs */
+		img_links_reg = /(((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|((https:\/\/ipfs\.busy\.org\/ipfs\/)[\d\w-]+)|((https:\/\/steemitimages\.com\/)[\d\w-[\:\/\.]+)|(https?:\/\/[.\/\d\w-]*\.(?:png|jpg|jpeg|gif)))[\s]/igm;
+		desc = desc.replace(img_links_reg,'');
+		
+		/* replace spaces with single separating space */
+		desc = desc.replace(/\s+/g,' ');
+		
+		/* cleanup some markdown known syntax */
+		desc = desc.replace(/\#/g,'')
+					.replace(/\*/g,'')
+					.replace(/\_/g,'');
+		
+		//make sure we don't over consume desc size
+		if (desc.length > 140){
+			desc = desc.substr(0, 140) + '...';
+		}
+		console.log(desc);
+		meta_spec.desc = desc;
 		return meta_spec;
 	},
 	data () {
@@ -320,7 +346,7 @@
 		img_links_reg = /(((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|((https:\/\/ipfs\.busy\.org\/ipfs\/)[\d\w-]+)|((https:\/\/steemitimages\.com\/)[\d\w-[\:\/\.]+)|(https?:\/\/[.\/\d\w-]*\.(?:png|jpg|jpeg|gif)))[\s]/igm;
 		report_content = report_content.replace(img_links_reg,'<img src="$1">');
 		
-		/* let's match youtube vidoes and display them in a player */
+		/* let's match youtube videos and display them in a player */
 		//let vid_reg = /^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+/gm;
 		let vid_reg = /https?:\/\/(?:[0-9A-Z-]+\.)?(?:youtu\.be\/|youtube\.com\S*[^\w\-\s])([\w\-]{11})(?=[^\w\-]|$)(?![?=&amp;+%\w]*(?:['"][^&lt;&gt;]*&gt;|&lt;\/a&gt;))[?=&amp;+%\w-]*/ig;
 		

@@ -23,6 +23,7 @@
     "nuxt": "^1.4.2",
     "nuxt-i18n": "^5.8.5",
     "remarkable": "^2.0.0",
+    "sanitize-html": "^1.20.1",
     "sscjs": "0.0.7",
     "steem": "^0.7.4",
     "steem-editor": "^1.0.8",
