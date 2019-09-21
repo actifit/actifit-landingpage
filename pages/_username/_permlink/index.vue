@@ -187,6 +187,8 @@
   import Comments from '~/components/Comments'
   import NotifyModal from '~/components/NotifyModal'
   
+  //import Remarkable from 'remarkable';
+    
   import Vue from 'vue'
   
   import steemEditor from 'steem-editor';
@@ -196,17 +198,41 @@
   
   import VoteModal from '~/components/VoteModal'
 
-  Vue.use( steemEditor );
+  Vue.use( steemEditor );  
   
   export default {
 	head () {
 		return {
-		  title: `Post by ${this.username} - Actifit.io`,
+		  title: `${this.postTitle} by ${this.username} - Actifit`,
 		  meta: [
-			{ hid: 'description', name: 'description', content: `Post by ${this.username}` },
-			{ hid: 'ogdescription', name: 'og:description', content: `Post by ${this.username}` }
-		  ]
+				{ hid: 'description', name: 'description', content: `Post by ${this.username}` },
+				{ hid: 'ogdescription', name: 'og:description', content: `Post by ${this.username}` },
+				{ hid: 'image', name: 'og:image', 'property':'og:image', content: `${this.postImg}`},
+			  ],
 		}
+	},
+	/* pre-prepare post data for SEO/SMM friendliness */
+	async asyncData ({params}) {
+		let result = await steem.api.getContentAsync(params.username.replace('@',''), params.permlink);
+		let imgs = JSON.parse(result.json_metadata).image;
+		let meta_spec = {
+			postTitle: result.title,
+		}
+		if (Array.isArray(imgs) && imgs.length > 0 ){
+			meta_spec.postImg = imgs[0];
+		}
+		//console.log(result);
+		//console.log(result.body);
+		
+		
+		/*const $ = cheerio.load('<div class="actifit_container">'+result.body+'</div>');
+				
+		//grab text without HTML, and remove extra spacing
+		var pure_text = $('.actifit_container').text().replace(/\s+/g,' ');
+		console.log(pure_text);*/
+		
+		
+		return meta_spec;
 	},
 	data () {
 		return {
