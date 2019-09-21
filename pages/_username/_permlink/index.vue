@@ -205,6 +205,7 @@
 		return {
 		  title: `${this.postTitle} by ${this.username} - Actifit`,
 		  meta: [
+				{ hid: 'title', name: 'og:title', 'property':'og:title', content: `${this.postTitle} by ${this.username} - Actifit`},
 				{ hid: 'description', name: 'description', content: `Post by ${this.username}` },
 				{ hid: 'ogdescription', name: 'og:description', content: `Post by ${this.username}` },
 				{ hid: 'image', name: 'og:image', 'property':'og:image', content: `${this.postImg}`},
