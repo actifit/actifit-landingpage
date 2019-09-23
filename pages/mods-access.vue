@@ -1,0 +1,244 @@
+<template>
+  <div>
+    <!-- navbar -->
+    <nav class="navbar fixed-top navbar-expand navbar-light">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <!-- home link -->
+          <a class="nav-link" href="#" @click.prevent="$router.push('/')">
+            <i class="fas fa-arrow-left text-brand navbar-back"></i>
+          </a>
+        </li>
+      </ul>
+      <NavbarBrand />
+      <UserMenu />
+    </nav>
+
+    <div class="container pt-5 mt-5 pb-5" v-if="isUserModerator">
+		<div class="text-center">
+			<h2>Moderator Interface</h2>
+		</div>
+		
+		<div class="col-md-12 row-sep m-2">
+			<div class="text-bold">{{ $t('Hey') }} {{ user.account.name }}!</div>
+			INPUT YOUR FUNDS PASSWORD<input type="password" name="fundsPass" ref="fundsPass">
+		</div>
+		<div class="col-md-12 row-sep m-2">
+			<div class="row text-center action-title">BAN USER</div>
+			<div :action='this.actiapimod' method="get" class="p-2">
+			  User: <input type="text" id="banuser" name="banuser" ref="banuser" value=""><br>
+			  Ban Length: <input type="text" name="ban_length" ref="ban_length" value="10000" ><br>
+			  Ban Reason: <input type="text" name="ban_reason" ref="ban_reason" value="" ><br>
+			  <input type="button"  value="Ban Hammer" v-on:click="processAction('ban')">
+			  <div ref="banresult" name="banresult" class="text-brand" />
+			</div>
+		</div>
+		
+		<div class="col-md-12 row-sep m-2">
+			<div class="text-center row action-title">UNBAN USER</div>
+			<div :action='this.actiapimod' method="get" class="p-2">
+			  User: <input type="text" id="unbanuser" ref="unbanuser" name="unbanuser" value=""><br>
+			  <input type="button" value="UNBAN" v-on:click="processAction('unban')">
+			  <div ref="unbanresult" name="unbanresult" class="text-brand" />
+			</div>
+		</div>
+		
+		<div class="col-md-12 row-sep m-2">
+			<div class="text-center row action-title">ACTIFIT REWARD CONTEST</div>
+			<div :action='this.actiapimod' method="get" class="p-2">
+				POST URL:
+				<input type="text" id="fullurl" name="fullurl" ref="fullurl" size="100">
+				VP:
+				<input type="number" id="power" name="power" ref="power" min="0" max="100" value="100" style="width: 60px;" >
+				<br />
+				<input type="button" value="VOTE AWAY!" v-on:click="processAction('reward')">
+				<div name="rewardresult" ref="rewardresult" class="text-brand" />
+			</div>
+		</div>
+		
+		<div class="col-md-12 row-sep m-2">
+			<div class="text-center row action-title">RESET FUNDS PASSWORD</div>
+			<div :action='this.actiapimod' method="get" class="p-2">
+			  User: <input type="text" id="resetuser" name="resetuser" ref="resetuser" value=""><br>
+			  <input type="button" value="RESET PASSWORD" v-on:click="processAction('resetpass')">
+			  <div name="resetpassresult" ref="resetpassresult" class="text-brand" />
+			</div>
+		</div>
+		
+		<!--<div class="col-md-12 row-sep m-2">
+			<div class="text-center row action-title">VERIFY FUNDS PASSWORD</div>
+			<div :action='this.actiapimod' method="get" class="p-2">
+			  User: <input type="text" id="from" name="from" ref="from" value=""><br>
+			  <input type="button" value="VERIFY PASSWORD" v-on:click="processAction('verifypass')">
+			  <div name="verifypassresult" ref="verifypassresult" class="text-brand" />
+			</div>
+		</div>-->
+    </div>
+	
+	<div :class="smallScreenClasses" class="container mt-5 pb-5 pt-5" v-else>
+      <!-- account balance -->
+      <div class="text-center p-5">
+		<div class="row pb-3">
+		  <div class="text-center text-brand w-100 lead">
+		    {{ $t('need_login_signup_notice_vote') }}
+		  </div>
+		</div>
+		<div class="row pb-3">
+		  <div class="w-50">
+			<a :href="$steemconnect.getLoginURL()" class="btn btn-brand btn-lg w-75">{{ $t('Login') }}</a>
+		  </div>
+		  <div class="w-50">
+			<a href="/signup" class="btn btn-brand btn-lg w-75">{{ $t('Sign_Up') }}</a>
+		  </div>
+		</div>
+	  </div>
+	</div>
+	
+    <Footer />
+  </div>
+</template>
+
+<script>
+  import NavbarBrand from '~/components/NavbarBrand'
+  import UserMenu from '~/components/UserMenu'
+  import Referral from '~/components/Referral'
+  import Footer from '~/components/Footer'
+
+  import { mapGetters } from 'vuex'
+
+  export default {
+	head () {
+		return {
+		  title: `Actifit Moderator Access - Actifit`,
+		}
+	},
+    components: {
+      NavbarBrand,
+      UserMenu,
+      Referral, // single referral block
+      Footer,
+    },
+	data (){
+	  return {
+		screenWidth: 1200,
+		actiapimod: process.env.actiAppUrl + 'modAction',
+	  }
+	},
+    computed: {
+      ...mapGetters('steemconnect', ['user']),
+	  ...mapGetters(['moderators']),
+	  displayUserRank () {
+		return this.userRank
+	  },
+	  smallScreenClasses () {
+		//use proper classes for neat display
+		if (this.screenWidth < 768){
+		  return "w-100";
+		}
+		return "w-50";
+	  },
+	  isUserModerator() {
+		if (this.$store.state.steemconnect.user && this.moderators.find( mod => mod.name == this.$store.state.steemconnect.user.name && mod.title == 'moderator')) {
+		  return true;
+		}
+		return false;
+	  }
+    },
+    async mounted () {
+	  this.screenWidth = screen.width;
+	  this.fetchUserInfo();
+	  
+	  //grab moderators' list
+		this.$store.dispatch('fetchModerators')
+    },
+	created () {
+	  this.$store.dispatch('steemconnect/login')
+	},
+	watch: {
+	  user : 'fetchUserInfo'
+	},
+	methods: {
+	  fetchUserInfo () {
+		if (typeof this.user != 'undefined' && this.user != null){
+		  this.$store.dispatch('fetchUserTokens')
+		  this.$store.dispatch('fetchReferrals')
+		  this.$store.dispatch('fetchUserRank')
+		  let baseUrl = window.location.origin;
+		}
+	  },
+	  async processAction (targetAction){
+		
+		let url = new URL(this.actiapimod);
+		//compile all needed data and send it along the request for processing
+		let params = {
+			moderator: this.user.account.name,
+			targetAction: targetAction,
+			fundsPass: this.$refs['fundsPass'].value.trim(),
+		};
+		switch(targetAction){
+		
+			case 'ban': 
+						params.banuser = this.$refs['banuser'].value.trim();
+						params.ban_length = this.$refs['ban_length'].value.trim();
+						params.ban_reason = this.$refs['ban_reason'].value.trim();
+						break;
+			case 'unban': 
+						params.unbanuser = this.$refs['unbanuser'].value.trim();
+						break;
+			case 'reward': 
+						params.fullurl = this.$refs['fullurl'].value.trim();
+						params.power = this.$refs['power'].value.trim();
+						break;
+			case 'resetpass':
+						params.resetuser = this.$refs['resetuser'].value.trim();
+						break;
+		
+			case 'verifypass':
+						params.from = this.$refs['from'].value.trim();
+						break;
+		}
+		
+		Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
+		try{
+			let res = await fetch(url);
+			let outcome = await res.json();
+			console.log(outcome);
+			let display = outcome;
+			if (outcome.error){
+				display = outcome.error;
+			}else if (outcome.status){
+				display = outcome.status;
+			}else if (outcome.ok){
+				display = 'success';
+			}
+			this.$refs[targetAction+'result'].innerHTML = display;
+			//update user data according to result
+
+		}catch(err){
+			console.error(err);
+		}
+	  }
+	},
+  }
+</script>
+<style>
+	#referral-link{
+	  border-color: #ff112d;
+	}
+	.share-links-actifit span{
+	  cursor: pointer;
+	  font-size: 22px;
+	  padding: 5px;
+	}
+	.share-txt {
+	  font-size: 20px;
+	}
+	.row-sep{
+		border: 2px solid red;
+		border-radius: 5px;
+	}
+	.action-title{
+		font-weight: bold;
+		border-bottom: 2px solid red;
+	}
+</style>

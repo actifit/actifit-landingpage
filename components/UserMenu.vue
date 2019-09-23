@@ -18,6 +18,8 @@
         <div class="dropdown-menu dropdown-menu-right">
           <h6 class="dropdown-header text-center">@{{ user.account.name }}</h6>
           <div class="dropdown-divider"></div>
+		  <a class="dropdown-item text-brand" href="#" @click.prevent="$router.push('/mods-access/')" v-if="isUserModerator">Moderation</a>
+		  <div class="dropdown-divider"></div>
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet?action=buy_afit')">{{ $t('buy_afit_menu') }}<br/></a>
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/market')">{{ $t('spend_afit_menu') }}<br/></a>
           <a class="dropdown-item" href="#" @click.prevent="$router.push('/' + user.account.name)">{{ $t('My_Profile') }}<br/></a>
@@ -45,6 +47,7 @@
     computed: {
       ...mapGetters('steemconnect', ['user']),
       ...mapGetters(['userTokens', 'userRank', 'userRankObj', 'referrals']),
+	  ...mapGetters(['moderators']),
 	  formattedUserTokens () {
         return this.numberFormat(parseFloat(this.userTokens).toFixed(3), 3) + ' AFIT'
       },
@@ -59,6 +62,12 @@
 	  },
 	  referralCount () {
 	    return this.referrals.length;
+	  },
+	  isUserModerator() {
+		if (this.$store.state.steemconnect.user && this.moderators.find( mod => mod.name == this.$store.state.steemconnect.user.name && mod.title == 'moderator')) {
+		  return true;
+		}
+		return false;
 	  }
     },
 	methods: {
@@ -72,7 +81,12 @@
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
-	}
+	},
+    async mounted () {
+	  
+	  //grab moderators' list
+		this.$store.dispatch('fetchModerators')
+    },
   }
 </script>
 
