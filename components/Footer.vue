@@ -11,6 +11,7 @@
       </div>
 	  <div class="row">
 		<div class="col text-center"><small>Price Data provided By <a href="https://coingecko.com">CoinGecko</a></small></div>
+		<div v-if="!isHomePage"><adsbygoogle /></div>
 	  </div>
       <div class="row">
         <div class="col text-center">
@@ -50,10 +51,11 @@
   import VueCookieAcceptDecline from 'vue-cookie-accept-decline'
   import "vue-cookie-accept-decline/dist/vue-cookie-accept-decline.css";
   export default {
+	props: ['isHomePage'],
     computed: {
       currentYear () {
         return (new Date()).getFullYear()
-      }
+      },
     },
 	components: {
 		VueCookieAcceptDecline

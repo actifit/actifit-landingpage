@@ -1,5 +1,5 @@
 <template>
-  <div class="home">
+  <div class="home" ref="homePage">
     <!-- top anchor -->
     <a id="top"></a>
 
@@ -461,7 +461,7 @@
       </no-ssr>
     </section>
 
-    <Footer />
+    <Footer isHomePage='true'/>
 	
     <NewsModal :news="activeNews" />
 	<NotifyModal :modalTitle="$t('Actifit_Info')" :modalText="$t('VP_desc')"/>
@@ -492,7 +492,6 @@
     data () {
       return {
         username: '', // username whose funds to show
-
         // animated numbers
         tweenedUserCount: 0,
         tweenedTokensDistributed: 0,
