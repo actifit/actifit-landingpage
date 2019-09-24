@@ -11,7 +11,7 @@
       </div>
 	  <div class="row">
 		<div class="col text-center"><small>Price Data provided By <a href="https://coingecko.com">CoinGecko</a></small></div>
-		<div v-if="!isHomePage"><adsbygoogle /></div>
+		<div v-if="!isHomePage" class="goog-ad-disp"><adsbygoogle /></div>
 	  </div>
       <div class="row">
         <div class="col text-center">
@@ -68,5 +68,11 @@
 	}
 	button.cookie__bar__buttons__button--accept{
 		background: #ff112d!important;
+	}
+	.goog-ad-disp{
+		min-width: 120px;
+		max-width: 900px;
+		min-height: 120px;
+		max-height: 500px;
 	}
 </style>
