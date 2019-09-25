@@ -1,6 +1,6 @@
 <template>
   <!-- single report item for activity pages -->
-  <div class="col-md-6 col-lg-4 mb-4">
+  <div >
     <div class="card report">
       <h6 class="mb-0 text-center">
         <a :href="report.url" target="_blank">
@@ -264,7 +264,6 @@
 	  async updatePostData () {
 		// try to fetch matching report
 		  steem.api.getContent(this.report.author, this.report.permlink, (err, result) => {
-			console.log(err, result);
 			this.report.total_payout_value = result.total_payout_value;
 			this.report.pending_payout_value = result.pending_payout_value;
 		  })

@@ -76,5 +76,6 @@
 	}
 	.goog-ad-horiz-90{
 		height: 90px!important;
+		max-height: 90px!important;
 	}
 </style>
