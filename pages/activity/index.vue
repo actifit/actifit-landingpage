@@ -41,11 +41,11 @@
 	  
 	  <!-- enable display of up to 2 ads among content -->
 	 <div class="row" v-if="reports.length">
-		<div class="row"  v-for="iterx in parseInt(reports.length / 3)" :key="iterx">
-			<div v-for="itery in 3" :key="itery" class="col-md-6 col-lg-4 mb-4">
-				<Report v-if="iterx * 3 + itery < reports.length" :report="reports[iterx * 3 + itery]" />
+		<div class="row"  v-for="iterx in parseInt(reports.length / splitFactor)" :key="iterx">
+			<div v-for="itery in splitFactor" :key="itery" class="col-md-6 col-lg-4 mb-4">
+				<Report v-if="iterx * splitFactor + itery < reports.length" :report="reports[iterx * splitFactor + itery]" />
 			</div>
-			<div class="col-md-6 col-lg-4 mb-4" v-if="iterx < 3">
+			<div class="col-md-6 col-lg-4 mb-4" v-if="iterx < inlineAds + 1">
 				<adsbygoogle ad-slot="7038919015" ad-format="fluid" ad-layout-key="-fb+5w+4e-db+86"/>
 			</div>
 		</div>
@@ -113,6 +113,8 @@
       return {
         loading: true, // initial loading state
         loadingMore: false, // loading state for loading more reports
+		splitFactor: 9,
+		inlineAds: 2,
       }
     },
     computed: {
