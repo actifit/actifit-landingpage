@@ -46,7 +46,7 @@
 				<Report v-if="iterx * 3 + itery < reports.length" :report="reports[iterx * 3 + itery]" />
 			</div>
 			<div class="col-md-6 col-lg-4 mb-4" v-if="iterx < 3">
-					<adsbygoogle ad-slot="7038919015" ad-format="fluid" ad-layout-key="-fb+5w+4e-db+86"/>
+				<adsbygoogle ad-slot="7038919015" ad-format="fluid" ad-layout-key="-fb+5w+4e-db+86"/>
 			</div>
 		</div>
       </div>
