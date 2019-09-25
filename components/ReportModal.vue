@@ -16,6 +16,7 @@
 			<div class="report-tags p-1" v-html="displayReportTags"></div>
 		</div>
 		<article class="modal-body" v-html="$renderMD(body)"></article>
+		<div class="modal-body"><adsbygoogle ad-slot="6804482273" /></div>
 		<div class="modal-footer">
 		  <div class="report-modal-prelim-info col-md-6">
 			<span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen">{{ $t('Reply') }}</a></span>
