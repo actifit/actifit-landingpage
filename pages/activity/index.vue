@@ -27,7 +27,7 @@
 	  <!-- show voting counter -->
 	  <VotingStatus v-else />
 	  
-	  <div class="col-md-12"><adsbygoogle ad-slot="6804482273" /></div>
+	  <div class="col-md-12"><adsbygoogle ad-slot="6804482273" class="goog-ad-horiz-90"/></div>
 
       <!-- show listing when loaded -->
       <div class="row" v-if="reports.length">

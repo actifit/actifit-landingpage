@@ -74,4 +74,7 @@
 		min-height: 120px;
 		max-height: 500px;
 	}
+	.goog-ad-horiz-90{
+		max-height: 90px;
+	}
 </style>
