@@ -139,6 +139,9 @@
 	  },
 	  //handles grabbing current user's VP
 	  async fetchVotingPower() {
+		if (!this.user){
+		  return '';
+		}
 		let account = this.user.account;
 		if (typeof account == 'undefined' || account == null){
 		  return '';
