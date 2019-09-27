@@ -335,6 +335,11 @@
 			
 			</transition>
 		</div>
+		
+		<div class="row">
+			<adsbygoogle ad-slot="3184833281" :ad-style="acti_goog_ad_horiz_slim"/>
+		</div>
+		
 		<div class="row text-center row-sep">
 			<div class="col-md-6 row-sep-in">
 				<h5 class="token-title"><img src="/img/STEEM.png" class="mr-2 token-logo">{{ $t('Your_Steem_Balance') }}</h5>
@@ -497,6 +502,10 @@
 			</div>
 		</div>
       </div>
+	  
+		<div class="row">
+			<adsbygoogle ad-slot="3184833281" :ad-style="acti_goog_ad_horiz_slim"/>
+		</div>
 	  
       <!-- transaction history -->
       <div class="history mx-auto">
@@ -668,6 +677,7 @@
 		afit_se_power_error_proceeding: false,
 		afit_se_power_err_msg: '',
 		loading: true,
+		acti_goog_ad_horiz_slim:{display:'inline-block',width:'728px',height:'90px'},
 	  }
 	},
     components: {

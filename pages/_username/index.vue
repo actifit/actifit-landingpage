@@ -68,6 +68,9 @@
 				<i class="fab fa-angellist mr-2"></i><a :href="'/activity/'+displayUser" >{{ numberFormat(rewardedPostCount, 0) }} {{ $t('Activity_Reports_Rewarded') }}</a>
 			</div>
 		  </div>
+		  
+			<adsbygoogle ad-slot="3184833281" :ad-style="acti_goog_ad_horiz_slim"/>
+			
 		  <!-- badges section -->
 		  <div v-if="userinfo && !account_banned" class="user-badges">
 		    <div class="text-brand badges-title"><i class="fas fa-trophy"></i> {{ $t('Badges') }}</div>
@@ -207,6 +210,7 @@
 			tipError: '',
 			tipInProgress: false,
 			proceedTip: false,
+			acti_goog_ad_horiz_slim:{display:'inline-block',width:'728px',height:'90px'},
 			rewarded_posts_rules: [
 									[9,0],
 									[29,1],
