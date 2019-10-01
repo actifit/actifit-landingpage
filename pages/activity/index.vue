@@ -41,7 +41,7 @@
 	  
 	  <!-- enable display of up to 2 ads among content -->
 	 <div class="row" v-if="reports.length">
-		<div class="row"  v-for="iterx in parseInt(reports.length / splitFactor)" :key="iterx">
+		<div class="row"  v-for="iterx in Math.ceil(reports.length / splitFactor)" :key="iterx">
 			<div v-for="itery in splitFactor" :key="itery" class="col-md-6 col-lg-4 mb-4">
 				<Report v-if="(iterx - 1) * splitFactor + (itery - 1) < reports.length" :report="reports[(iterx - 1) * splitFactor + (itery - 1)]" />
 			</div>
