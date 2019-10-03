@@ -1,5 +1,5 @@
 <template>
-  <div class="comments">
+  <div class="comments" v-if="!commentDeleted">
     <div class="modal-body comment-info" v-if="depth > 0">
 		<a :href="'/' + author" target="_blank">
 		  <div class="comment-user-section" :style="{ paddingLeft: depth * indentFactor + 'px' }">	
@@ -8,8 +8,17 @@
 			<div class="modal-author modal-title text-brand" >@{{ author }}<small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small><small class="date-head text-muted">{{ date }}</small></div>
 		  </div>
 		</a>
-		<article class="modal-body" v-html="$renderMD(commentBody())" :style="{ paddingLeft: depth * indentFactor + 'px' }"></article>
+		<article class="modal-body" v-if="!editBoxOpen" v-html="$renderMD(commentBody())" :style="{ paddingLeft: depth * indentFactor + 'px' }"></article>
+		<transition name="fade">
+		  <div class="comment-reply" v-if="editBoxOpen">
+			<markdown-editor v-model="full_data.body" :configs="editorConfig" ref="editor"></markdown-editor>
+			<a href="#" @click.prevent="editResponse($event)" class="btn btn-brand border reply-btn w-25">{{ $t('Post') }}<i class="fas fa-spin fa-spinner" v-if="loading"></i></a>
+			<a href="#" @click.prevent="editBoxOpen = !editBoxOpen" class="btn btn-brand border reply-btn w-25">{{ $t('Cancel') }}</a>
+		  </div>
+		</transition>
 		<div class="modal-footer">
+			<div v-if="this.$store.state.steemconnect.user && this.$store.state.steemconnect.user.name == this.full_data.author"><a href="#" @click.prevent="editBoxOpen = !editBoxOpen">{{ $t('Edit_note') }}</a></div>
+			<div v-if="this.$store.state.steemconnect.user && this.$store.state.steemconnect.user.name == this.full_data.author"><a href="#" @click.prevent="deleteComment">{{ $t('Delete_note') }}<i class="fas fa-spin fa-spinner" v-if="deleting"></i></a></div>
 			<div><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen">{{ $t('Reply') }}</a></div>
 			<div>
 				<small>
@@ -80,11 +89,14 @@
 	data () {
 		return {
 			postUpvoted: false,
+			commentDeleted: false,
 			userRank: 0,
 			commentBoxOpen: false,
+			editBoxOpen: false,
 			replyBody: '',
 			moderatorSignature: '',
 			loading: false,
+			deleting: false,
 			responsePosted: false,
 			responseBody: '',
 			indentFactor: 30,
@@ -170,6 +182,38 @@
 		this.replyBody = this.moderatorSignature;
 		this.commentBoxOpen=false;
 	  },
+	  /* function handles deleting comment */
+	  deleteComment () {
+		  var confirmPopup = confirm(this.$t('confirm_delete_comment'));
+		  if (!confirmPopup){
+			return;
+		  }
+		  //proceed with deletion
+		  this.deleting = true
+		  
+		  this.$steemconnect.deleteComment(
+          this.full_data.author,
+          this.full_data.permlink,(err) => {
+            // stop deleting animation and show notification
+            this.deleting = false
+            this.$notify({
+              group: err ? 'error' : 'success',
+              text: err ? this.$t('Delete_Error') : this.$t('Delete_Success'),
+              position: 'top center'
+            })
+			
+			//display comment placeholder till blockchain data comes through
+			if (!err){	
+				this.commentDeleted = true;
+			}	
+
+			//refetch report data anew, but only after 10 seconds to ensure data has been made available
+			setTimeout( this.fetchReportCommentData, 10000);
+
+          }
+        )
+		  
+	  },
 	  /* function handles sending out the comment to the blockchain */
 	  postResponse(event) {
 		// proceed with saving the comment
@@ -212,6 +256,45 @@
 			
 			//reset open comment
 			this.resetOpenComment();
+          }
+        )
+		
+	  },
+	  /* function handles editing out the comment to the blockchain */
+	  editResponse(event) {
+		// proceed with saving the comment
+		
+		this.loading = true		
+		
+		//append meta data
+		let meta = JSON.parse(this.full_data.json_metadata);
+		meta.tags = '[actifit]';
+		meta.app = 'actifit/0.4.1';
+		meta.suppEdit = 'actifit.io.comment';
+		
+        this.$steemconnect.comment(
+          this.full_data.parent_author,
+          this.full_data.parent_permlink,
+          this.full_data.author,
+          this.full_data.permlink,
+          this.full_data.title,
+          this.full_data.body,
+          meta,
+          (err) => {
+            // stop loading animation and show notification
+            this.loading = false
+            this.$notify({
+              group: err ? 'error' : 'success',
+              text: err ? this.$t('Edit_Error') : this.$t('Edit_Success'),
+              position: 'top center'
+            })
+			
+			//display comment placeholder till blockchain data comes through
+			this.editBoxOpen = false;
+
+			//refetch report data anew, but only after 10 seconds to ensure data has been made available
+			setTimeout( this.fetchReportCommentData, 10000);
+
           }
         )
 		
@@ -267,7 +350,6 @@
 	  },
     },
 	async mounted () {
-	  console.log('comments mounted');
 	  if (this.full_data != null){
 		this.fetchReportData();
 	  }
