@@ -190,9 +190,10 @@ export default {
       let lastReport = state.userReports.length ? state.userReports[state.userReports.length - 1] : null
       let start_author = lastReport ? lastReport.author : null
       let start_permlink = lastReport ? lastReport.permlink : null
-
+	  console.log(lastReport);
+	  
       // get (next) 100 posts from the user
-      steem.api.getDiscussionsByBlog({tag: username, limit: 100, start_author, start_permlink}, (err, posts) => {
+      steem.api.getDiscussionsByBlog({tag: username, limit: 100, start_author: start_author, start_permlink: start_permlink}, (err, posts) => {
         if (err) reject(err)
         else {
           if (start_author && start_permlink) posts.shift() // remove the first posts because its the last post from before
@@ -263,7 +264,7 @@ export default {
       let lastReport = state.userReports.length ? state.userReports[state.userReports.length - 1] : null
       let start_author = lastReport ? lastReport.author : null
       let start_permlink = lastReport ? lastReport.permlink : null
-      steem.api.getDiscussionsByBlog({tag: username, limit: 100, start_author, start_permlink}, (err, posts) => {
+      steem.api.getDiscussionsByBlog({tag: username, limit: 100, start_author: start_author, start_permlink: start_permlink}, (err, posts) => {
         if (err) reject(err)
         else {
           posts.shift() // remove the first posts because its the last post from before
@@ -299,7 +300,7 @@ const userPostsFilter = username => (post) => {
   // actual activity posts must have those two properties in metadata
   // since, in this case, posts are fetched by users blog, we also need to check for the actifit tag
   // add to that, we need to skip resteems, so we need to ensure this is the same author
-  return meta.hasOwnProperty('step_count') && meta.hasOwnProperty('activity_type') && meta.hasOwnProperty('tags') && meta.tags.indexOf('actifit') !== -1 && post.author === username
+  return meta.hasOwnProperty('step_count') && meta.hasOwnProperty('activity_type') && post.author === username && ( ( meta.hasOwnProperty('tags') && meta.tags.indexOf('actifit') !== -1) || post.category == 'actifit' || ( meta.hasOwnProperty('community') && meta.community.indexOf('actifit') !== -1) ) 
 }
 
 const newsFilter = (post) => {
