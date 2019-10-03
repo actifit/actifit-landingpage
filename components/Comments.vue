@@ -226,13 +226,10 @@
 	  },
 	  /* function checks to see if post reached its payout period */
 	  postPaid() {
-		//compare today v/s payout date calculated based on 7 days payout time
-		let reportDate = new Date() 
-		let payoutDays = 7;
-		let reportPayout = new Date(this.full_data.created);
-		reportPayout.setDate(reportPayout.getDate() + payoutDays);
-		let today = new Date();
-		if (today.getTime() > reportPayout.getTime()){
+		//check if last_payout is after cashout_time which means post got paid
+		let last_payout = new Date(this.full_data.last_payout);
+		let cashout_time = new Date(this.full_data.cashout_time);
+		if (last_payout.getTime() > cashout_time.getTime()){
 			return true;
 		}
 		return false;
