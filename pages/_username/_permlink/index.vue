@@ -333,6 +333,7 @@
 		return tagDisplay;
 	  },
       body () {
+		//console.log(this.report);
 		let report_content = this.report.body;
 		
 		/* let's find images sent as ![](), and display them properly */
@@ -402,8 +403,16 @@
 	methods: {
 	  /* function checks to see if post reached its payout period */
 	  postPaid() {
+		//check if last_payout is after cashout_time which means post got paid
+		let last_payout = new Date(this.report.last_payout);
+		let cashout_time = new Date(this.report.cashout_time);
+		if (last_payout.getTime() > cashout_time.getTime()){
+			return true;
+		}
+		return false;
+		
 		//compare today v/s payout date calculated based on 7 days payout time
-		let reportDate = new Date() 
+		/*let reportDate = new Date() 
 		let payoutDays = 7;
 		let reportPayout = new Date(this.report.created);
 		reportPayout.setDate(reportPayout.getDate() + payoutDays);
@@ -411,7 +420,7 @@
 		if (today.getTime() > reportPayout.getTime()){
 			return true;
 		}
-		return false;
+		return false;*/
 	  },
 	  /* function handles closing open comment box and resetting data */
 	  resetOpenComment () {
