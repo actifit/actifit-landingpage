@@ -18,7 +18,7 @@
 		</transition>
 		<div class="modal-footer">
 			<div v-if="this.$store.state.steemconnect.user && this.$store.state.steemconnect.user.name == this.full_data.author"><a href="#" @click.prevent="editBoxOpen = !editBoxOpen">{{ $t('Edit_note') }}</a></div>
-			<div v-if="this.$store.state.steemconnect.user && this.$store.state.steemconnect.user.name == this.full_data.author"><a href="#" @click.prevent="deleteComment">{{ $t('Delete_note') }}<i class="fas fa-spin fa-spinner" v-if="deleting"></i></a></div>
+			<div v-if="commentDeletable()"><a href="#" @click.prevent="deleteComment">{{ $t('Delete_note') }}<i class="fas fa-spin fa-spinner" v-if="deleting"></i></a></div>
 			<div><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen">{{ $t('Reply') }}</a></div>
 			<div>
 				<small>
@@ -307,6 +307,14 @@
 		
 		return this.postUpvoted;
 	  },
+	  /* function checks if the comment can be deleted */
+	  commentDeletable () {
+		return (parseInt(this.full_data.children) == 0 
+				&& this.$store.state.steemconnect.user && this.$store.state.steemconnect.user.name == this.full_data.author
+				&& parseInt(this.full_data.pending_payout_value.replace('SBD','').replace('STEEM','')) == 0
+				&& parseInt(this.full_data.total_payout_value.replace('SBD','').replace('STEEM','')) == 0
+				&& parseInt(this.full_data.curator_payout_value.replace('SBD','').replace('STEEM','')) == 0)
+	  },
 	  /* function checks to see if post reached its payout period */
 	  postPaid() {
 		//check if last_payout is after cashout_time which means post got paid
@@ -321,6 +329,8 @@
 		/*fetch(process.env.actiAppUrl+'getPostReward?user=' + this.author+'&url='+this.full_data.url).then(res => {
 		//grab the post's reward to display it properly
 				res.json().then(json => this.afitReward = json.token_count)}).catch(e => reject(e))*/
+		
+		//console.log(this.full_data);
 		
 		//grab the author's rank
 		fetch(process.env.actiAppUrl+'getRank/' + this.author).then(res => {
