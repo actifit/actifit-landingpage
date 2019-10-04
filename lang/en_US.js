@@ -403,4 +403,6 @@ module.exports = {
   Voting_Value: 'Value',
   Voting_Date: 'Date/Time',
   Voting_Action: 'Action',
+  Short_Signature: 'Short Signature',
+  Full_Signature: 'Full Signature',
 }

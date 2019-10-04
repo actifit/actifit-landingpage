@@ -14,6 +14,8 @@
 			<markdown-editor v-model="full_data.body" :configs="editorConfig" ref="editor"></markdown-editor>
 			<a href="#" @click.prevent="editResponse($event)" class="btn btn-brand border reply-btn w-25">{{ $t('Post') }}<i class="fas fa-spin fa-spinner" v-if="loading"></i></a>
 			<a href="#" @click.prevent="editBoxOpen = !editBoxOpen" class="btn btn-brand border reply-btn w-25">{{ $t('Cancel') }}</a>
+			<a href="#" @click.prevent="insertModSignature" class="btn btn-brand border reply-btn w-25">{{ $t('Short_Signature') }}</a>
+			<a href="#" @click.prevent="insertFullModSignature" class="btn btn-brand border reply-btn w-25">{{ $t('Full_Signature') }}</a>
 		  </div>
 		</transition>
 		<div class="modal-footer">
@@ -44,6 +46,8 @@
 			<markdown-editor v-model="replyBody" :configs="editorConfig" ref="editor"></markdown-editor>
 			<a href="#" @click.prevent="postResponse($event)" class="btn btn-brand border reply-btn w-25">{{ $t('Post') }}<i class="fas fa-spin fa-spinner" v-if="loading"></i></a>
 			<a href="#" @click.prevent="resetOpenComment()"  class="btn btn-brand border reply-btn w-25">{{ $t('Cancel') }}</a>
+			<a href="#" @click.prevent="insertModSignature" class="btn btn-brand border reply-btn w-25">{{ $t('Short_Signature') }}</a>
+			<a href="#" @click.prevent="insertFullModSignature" class="btn btn-brand border reply-btn w-25">{{ $t('Full_Signature') }}</a>
 		  </div>
 		</transition>
 		<div class="comment-reply" v-if="responsePosted">
@@ -111,7 +115,6 @@
 	},
 	watch: {
 	  full_data : 'fetchReportData',
-	  moderators: 'insertModSignature',
 	},
 	components: {
 	  VueMarkdown,
@@ -343,8 +346,15 @@
 	  /* function handles appending moderators signature */
 	  insertModSignature () {
 		if (this.$store.state.steemconnect.user && this.moderators.find( mod => mod.name == this.$store.state.steemconnect.user.name && mod.title == 'moderator')) {
+		  this.moderatorSignature = process.env.shortModeratorSignature;
+		  this.replyBody += this.moderatorSignature;
+		}
+	  },
+	  /* function handles appending full moderator signature */
+	  insertFullModSignature () {
+		if (this.$store.state.steemconnect.user && this.moderators.find( mod => mod.name == this.$store.state.steemconnect.user.name && mod.title == 'moderator')) {
 		  this.moderatorSignature = process.env.standardModeratorSignature;
-		  this.replyBody = this.moderatorSignature;
+		  this.replyBody += this.moderatorSignature;
 		}
 	  },
 	  /* function handles confirming if the user had voted already to prevent issues */
