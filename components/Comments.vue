@@ -17,9 +17,9 @@
 		  </div>
 		</transition>
 		<div class="modal-footer">
-			<div v-if="this.$store.state.steemconnect.user && this.$store.state.steemconnect.user.name == this.full_data.author"><a href="#" @click.prevent="editBoxOpen = !editBoxOpen">{{ $t('Edit_note') }}</a></div>
-			<div v-if="commentDeletable()"><a href="#" @click.prevent="deleteComment">{{ $t('Delete_note') }}<i class="fas fa-spin fa-spinner" v-if="deleting"></i></a></div>
-			<div><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen">{{ $t('Reply') }}</a></div>
+			<div v-if="this.$store.state.steemconnect.user && this.$store.state.steemconnect.user.name == this.full_data.author"><a href="#" @click.prevent="editBoxOpen = !editBoxOpen" :title="$t('Edit_note')"><i class="fas fa-edit"></i></a></div>
+			<div v-if="commentDeletable()"><a href="#" @click.prevent="deleteComment" :title="$t('Delete_note')"><i class="fas fa-trash-alt"></i><i class="fas fa-spin fa-spinner" v-if="deleting"></i></a></div>
+			<div><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i class="fas fa-reply"></i></a></div>
 			<div>
 				<small>
 				  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 

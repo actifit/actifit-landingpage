@@ -27,7 +27,8 @@
 		<div class="modal-body goog-ad-horiz-90"><adsbygoogle ad-slot="4921049809" /></div>
 		<div class="modal-footer col-md-12">
 		  <div class="report-modal-prelim-info col-md-6">
-			<span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen">{{ $t('Reply') }}</a></span>
+			<span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i class="fas fa-reply"></i></a></span>
+			
 			<span>
 				<small>
 				  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 
@@ -121,7 +122,7 @@
 			</div>
 		</div>
 		<!-- adding section to display charity info if available -->
-		<div class="modal-footer col-md-12" v-if="this.meta.charity">
+		<div class="modal-footer col-md-12 text-brand" v-if="this.meta.charity">
 			<i class="fas fa-dove"></i>
 			<small>
 				{{ $t('Charity_Post') }}

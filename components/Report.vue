@@ -5,8 +5,9 @@
       <h6 class="mb-0 text-center">
         <a :href="report.url" target="_blank">
           {{ report.title }}
+		  <i class="fas fa-external-link-alt"></i>
         </a>
-		<span v-if="this.afitReward" :title="$t('Rewarded_report')" class="check-tooltip"><i class="fas fa-check"></i></span>
+		<span v-if="this.afitReward" :title="$t('Rewarded_report')" class="check-tooltip"><i class="fas fa-check p-2"></i></span>
       </h6>
       <div class="report-body">
         <div class="row">
@@ -56,14 +57,12 @@
           <div class="col-6 text-right">
             <small>
               <a href="#" class="text-brand" @click="$store.commit('setEditReport', report)" data-toggle="modal"
-                 data-target="#editReportModal" v-if="user && report.author === user.account.name">
-                <i class="far fa-edit"></i>
-                {{ $t('edit_small') }}
+                 data-target="#editReportModal" v-if="user && report.author === user.account.name" :title="$t('Edit_note')">
+                <i class="fas fa-edit p-2"></i>
               </a>
-              <span v-if="user && report.author === user.account.name"> - </span>
               <a href="#" class="text-brand" @click="$store.commit('setActiveReport', report)" data-toggle="modal"
-                 data-target="#reportModal">
-                {{ $t('read_more_small') }}
+                 data-target="#reportModal" :title="$t('read_more_small')">
+                <i class="fas fa-book-open"></i>
               </a>
             </small>
           </div>

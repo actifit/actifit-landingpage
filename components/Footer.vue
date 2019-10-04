@@ -78,4 +78,7 @@
 		height: 90px!important;
 		max-height: 90px!important;
 	}
+	.fa-reply:before {
+		content: "\f3e5" !important;
+	}
 </style>

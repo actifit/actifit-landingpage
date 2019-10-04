@@ -28,16 +28,6 @@
 	  <VotingStatus v-else />
 	  
 	  <div class="col-md-12 goog-ad-horiz-90"><adsbygoogle ad-slot="6804482273"/></div>
-
-      <!-- show listing when loaded -->
-       <!-- <div class="row" v-if="reports.length">
-		<div v-for="(report, index) in reports" :key="index" class="row">
-			<Report :report="report" class="col-md-6 col-lg-4 mb-4"/>
-			<div v-if="index % 4 == 0 && index < 8" class="col-md-6 col-lg-4 mb-4">
-				<adsbygoogle ad-slot="7038919015" ad-format="fluid" ad-layout-key="-fb+5w+4e-db+86"/>
-			</div>
-		</div>
-      </div> -->
 	  
 	  <!-- enable display of up to 2 ads among content -->
 	 <div class="row" v-if="reports.length">
