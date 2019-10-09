@@ -5,7 +5,13 @@
 		  <div class="comment-user-section" :style="{ paddingLeft: depth * indentFactor + 'px' }">	
 			<div class="user-avatar mr-1"
                    :style="'background-image: url(https://steemitimages.com/u/' + author + '/avatar)'"></div>
-			<div class="modal-author modal-title text-brand" >@{{ author }}<small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small><small class="date-head text-muted">{{ date }}</small></div>
+			<div class="modal-author modal-title text-brand" >@{{ author }}<small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small>
+			</div>
+		  </div>
+		</a>
+		<a :href="'/@' + author + '/' + full_data.permlink" target="_blank">
+		  <div class="comment-user-section" :style="{ paddingLeft: depth * indentFactor + 'px' }">	
+			<small class="date-head text-muted">{{ date }}</small>
 		  </div>
 		</a>
 		<article class="modal-body" v-if="!editBoxOpen" v-html="$renderMD(commentBody())" :style="{ paddingLeft: depth * indentFactor + 'px' }"></article>
