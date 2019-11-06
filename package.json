@@ -4,6 +4,9 @@
   "description": "Actifit is an innovative dapp that aims to incentivize fitness and healthy lifestyle via rewarding daily activity.",
   "author": "mktcode",
   "private": true,
+  "engines": {
+	"node": "10.6.0"
+  },
   "scripts": {
     "dev": "nuxt",
     "build": "nuxt build",
