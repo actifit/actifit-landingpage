@@ -18,14 +18,9 @@
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-5">
       <h2 class="text-center mb-5">{{ $t('Activity_Reports') }}</h2>
-
-      <!-- show spinner while loading -->
-      <div class="text-center" v-if="loading">
-        <i class="fas fa-spinner fa-spin text-brand"></i>
-      </div>
 	  
 	  <!-- show voting counter -->
-	  <VotingStatus v-else />
+	  <VotingStatus v-if="reports.length" />
 	  
 	  <div class="col-md-12 goog-ad-horiz-90"><adsbygoogle ad-slot="6804482273"/></div>
 	  
@@ -40,6 +35,10 @@
 			</div>
 		</div>
       </div>
+	  
+	  <div class="col-md-12 text-center" v-else>
+		<i class="fas fa-spinner fa-spin text-brand"></i>
+	  </div>
 
       <!-- show load more button if there are more posts available -->
       <div class="text-center" v-if="moreReportsAvailable">
