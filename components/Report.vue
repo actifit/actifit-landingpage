@@ -311,17 +311,6 @@
       border: solid 1px #ddd
 </style>
 <style>
-	.numberCircle {
-	  border-radius: 25%;
-	  width: 10px;
-	  line-height: 10px;
-	  padding: 4px 2px 4px 2px;
-	  margin-left: 4px;
-	  background: #fff;
-	  border: 2px solid;
-	  text-align: center;
-	  vertical-align:middle;
-	}
 	.full-afit-txt{
 	  font-style: italic;
 	}

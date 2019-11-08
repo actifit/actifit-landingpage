@@ -23,7 +23,6 @@
     "bootstrap-vue": "^2.0.0-rc.27",
     "cheerio": "^1.0.0-rc.3",
     "dsteem": "^0.11.3",
-    "lodash": "^4.17.15",
     "marked": "^0.6.2",
     "nuxt": "^1.4.2",
     "nuxt-i18n": "^5.8.5",

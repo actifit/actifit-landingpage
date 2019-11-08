@@ -2,7 +2,7 @@
   <div>
 	<!-- navbar -->
     <nav class="navbar fixed-top navbar-expand navbar-light">
-      <ul class="navbar-nav">
+      <ul class="navbar-nav d-none d-sm-block">
         <li class="nav-item">
           <!-- home link -->
           <a class="nav-link" href="#" @click.prevent="$router.push('/')">
@@ -14,8 +14,30 @@
       <UserMenu />
     </nav>
 	<div v-if="errorDisplay==''" class="container pt-5 mt-5 pb-5 col-md-9" >
-	  <h5 class="text-brand user-name" v-if="displayUser">
-			<a :href="formattedProfileUrl" target="_blank">@{{ displayUser }} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></a></h5>
+		<h5 class="text-brand user-name" v-if="displayUser">
+			<a :href="formattedProfileUrl" target="_blank">@{{ displayUser }} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></a>
+			<span v-if="!account_banned && !isOwnAccount()" class="text-brand">
+				<span :title="$t('you_are_friends_username').replace('_USERNAME_', displayUser)" v-if="isFriend()" >
+					<i class="fas fa-user-friends  p-2" ></i>
+					<span :title="$t('cancel_friendship')" v-on:click="dropFriend"><i class="fas fa-user-times"></i></span>
+					<div v-if="addFriendError" v-html="addFriendError"></div>
+				</span>
+				<span :title="$t('friendship_pending_approval')" v-else-if="isPendingFriend()">
+					<i class="fas fa-user-clock  p-2"></i>
+					<span :title="$t('cancel_friend_request')" v-on:click="cancelFriendRequest" v-if="isPendingFriend().direction == 0"><i class="fas fa-user-times"></i></span>
+					<span :title="$t('accept_friend_request')" v-on:click="acceptFriend" v-else-if="isPendingFriend().direction == 1"><i class="fas fa-user-check"></i></span>
+					<div v-if="addFriendError" v-html="addFriendError"></div>
+				</span>
+				<span :title="$t('add_username_friend').replace('_USERNAME_', displayUser)" v-else
+					v-on:click="addFriend">
+					<i class="fas fa-user-plus  p-2"></i>
+					<div v-if="addFriendError" v-html="addFriendError"></div>
+				</span>
+				<i class="fas fa-spin fa-spinner" v-if="friendshipLoader"></i>
+			</span>
+		</h5>
+		
+		
         <div class="mb-3 col-md-9">
 		  <div v-if="displayUser" class="user-avatar large-avatar mr-1 mb-3"
 					   :style="'background-image: url(https://steemitimages.com/u/' + this.displayUser + '/avatar)'"></div>
@@ -29,8 +51,9 @@
 			<div><i class="fas fa-calendar-alt mr-2"></i> {{ $t('Joined_On') }} {{ pureDate(userinfo.created) }}</div>
 			<div><i class="fas fa-pen mr-2"></i> {{ numberFormat(userinfo.post_count, 0) }} {{ $t('Steem_posts_comments') }}</div>
 			<div v-if="!account_banned">
+				<div class="friends-count mb-2 mt-2"><i class="fas fa-user-friends text-brand mr-2" ></i>{{ this.userFriends.length }} {{ $t('friends') }} <span v-html="showFriendsSnippet()"></span></div>
 				<div v-if="userinfo.witness_votes.includes('actifit')"><i class="fas fa-cubes text-brand mr-2"></i>&nbsp;{{ $t('Votes_Actifit_Witness') }}</div>
-				<div v-else><i class="fas fa-cubes text-brand mr-2"></i>&nbsp;<a class="btn btn-brand" href="https://steemconnect.com/sign/account-witness-vote?witness=actifit&approve=1" target="_blank">{{ $t('Vote_Now_Actifit_Witness') }}</a></div>
+				<div v-else><i class="fas fa-cubes text-brand mr-2"></i>&nbsp;<a class="btn btn-brand" href="https://steemconnect.com/sign/account-witness-vote?witness=actifit&approve=true" target="_blank">{{ $t('Vote_Now_Actifit_Witness') }}</a></div>
 				<div v-if="actifitDelegator"><i class="fas fa-file-invoice-dollar text-brand mr-2"></i>&nbsp;{{ $t('Delegates_to_Actifit') }} {{ actifitDelegator.steem_power }} {{ $t('Steem_Power') }}</div>
 				<div v-else><i class="fas fa-file-invoice-dollar text-brand"></i>&nbsp;<a class="btn btn-brand" href="https://steembottracker.com/delegation.html?delegatee=actifit" target="_blank">{{ $t('Delegate_Now_Actifit') }}</a></div>
 			</div>
@@ -69,7 +92,7 @@
 			</div>
 		  </div>
 		  
-			<adsbygoogle ad-slot="3184833281" :ad-style="acti_goog_ad_horiz_slim"/>
+			<adsbygoogle ad-slot="8625360638" :ad-style="acti_goog_ad_square"/>
 			
 		  <!-- badges section -->
 		  <div v-if="userinfo && !account_banned" class="user-badges">
@@ -190,6 +213,10 @@
 			userinfo: '',
 			noUserFound: false,
 			userTokenCount: '',
+			userFriends: [],
+			friendRequests: [],
+			friendshipLoader: false,
+			maxFriendDisplay: 5,
 			userAFITSETokenCount: '',
 			userAFITXSETokenCount: '',
 			isoParticipant: [],
@@ -210,7 +237,8 @@
 			tipError: '',
 			tipInProgress: false,
 			proceedTip: false,
-			acti_goog_ad_horiz_slim:{display:'inline-block',width:'728px',height:'90px'},
+			addFriendError: '',
+			acti_goog_ad_square:{display:'inline-block', maxWidth:'300px', maxHeight: '350px'},
 			rewarded_posts_rules: [
 									[9,0],
 									[29,1],
@@ -330,6 +358,269 @@
 		}
 		return result;
 	  },
+	  //handles sending add friend request
+	  async addFriend() {
+		this.addFriendError = '';
+		if (!this.user){
+			this.addFriendError = this.$t('Need_login');
+			return false;
+		}
+		if (this.displayUser == this.user.account.name){
+			this.addFriendError = this.$t('Cannot_friend_self');
+			return false;
+		}
+		if (this.isFriend()){
+			this.addFriendError = this.$t('Already_friends');
+			return false;
+		}
+		let userConf = confirm(this.$t('confirm_add_friend').replace('_USERNAME_', this.displayUser));
+		if (!userConf) {
+		  return;
+		}		
+		this.friendshipLoader = true;
+		//send request to BC
+		//broadcast the transaction to Steem BC
+		let cstm_params = {
+			required_auths: [],
+			required_posting_auths: [this.user.account.name],
+			id: 'actifit',
+			json: JSON.stringify({'transaction': 'add-friend-request', 'target': this.displayUser})
+		  };
+		let res = await this.$steemconnect.broadcast([['custom_json', cstm_params]], (err, res) => {
+		  if (err) {
+			console.log(err);
+			this.friendshipLoader = false;
+		  }else{  
+			console.log(res.result);
+			//success, store request to DB
+			this.propagateFriendReq(res.result);
+		  }
+		});	
+	  },
+	  async propagateFriendReq(res) {
+		let req_res = await fetch(process.env.actiAppUrl+'addFriend/'
+			+ this.user.account.name + '/'
+			+ this.displayUser + '/'
+			+ res.block_num + '/'
+			+ res.id);
+		let outcome = await req_res.json();
+		if (outcome.status=='success'){
+			console.log('friend request sent');
+			this.friendshipLoader = false;
+			//notify of success
+			this.$notify({
+			  group: 'success',
+			  text: this.$t('friend_request_sent'),
+			  position: 'top center'
+			})
+		}else{
+			console.log('error sending friend request');
+			this.addFriendError = this.$t('unknown_error');
+			this.friendshipLoader = false;
+			return false;
+		}
+		this.refreshFriendStatus();
+	  },
+	  async cancelFriendRequest() {
+		this.addFriendError = '';
+		if (!this.user){
+			this.addFriendError = this.$t('Need_login');
+			return false;
+		}
+		if (this.displayUser == this.user.account.name){
+			this.addFriendError = this.$t('Cannot_unfriend_self');
+			return false;
+		}
+		if (this.isFriend()){
+			this.addFriendError = this.$t('Already_friends');
+			return false;
+		}
+		let userConf = confirm(this.$t('confirm_cancel_friend_request').replace('_USERNAME_', this.displayUser));
+		if (!userConf) {
+		  return;
+		}
+		this.friendshipLoader = true;
+		//send request to BC
+		//broadcast the transaction to Steem BC
+		let cstm_params = {
+			required_auths: [],
+			required_posting_auths: [this.user.account.name],
+			id: 'actifit',
+			json: JSON.stringify({'transaction': 'cancel-friend-request', 'target': this.displayUser})
+		  };
+		let res = await this.$steemconnect.broadcast([['custom_json', cstm_params]], (err, res) => {
+		  if (err) {
+			console.log(err);
+			this.friendshipLoader = false;
+		  }else{  
+			console.log(res.result);
+			//success, store request to DB
+			this.cancelFriendReq(res.result);
+		  }
+		});	
+	  },
+	  async cancelFriendReq(res) {
+		let req_res = await fetch(process.env.actiAppUrl+'cancelFriendRequest/'
+			+ this.user.account.name + '/'
+			+ this.displayUser + '/'
+			+ res.block_num + '/'
+			+ res.id);
+		let outcome = await req_res.json();
+		if (outcome.status=='success'){
+			console.log('friend request cancelled');
+			this.friendshipLoader = false;
+			//notify of success
+			this.$notify({
+			  group: 'success',
+			  text: this.$t('friend_request_cancelled'),
+			  position: 'top center'
+			})
+		}else{
+			console.log('error cancelling friend request');
+			this.addFriendError = this.$t('unknown_error');
+			this.friendshipLoader = false;
+			return false;
+		}
+		this.refreshFriendStatus();
+	  },
+	  async dropFriend() {
+		this.addFriendError = '';
+		if (!this.user){
+			this.addFriendError = this.$t('Need_login');
+			return false;
+		}
+		if (this.displayUser == this.user.account.name){
+			this.addFriendError = this.$t('Cannot_unfriend_self');
+			return false;
+		}
+		if (!this.isFriend()){
+			this.addFriendError = this.$t('Not_friends');
+			return false;
+		}
+		let userConf = confirm(this.$t('confirm_drop_friend').replace('_USERNAME_', this.displayUser));
+		if (!userConf) {
+		  return;
+		}
+		this.friendshipLoader = true;
+		//send request to BC
+		//broadcast the transaction to Steem BC
+		let cstm_params = {
+			required_auths: [],
+			required_posting_auths: [this.user.account.name],
+			id: 'actifit',
+			json: JSON.stringify({'transaction': 'cancel-friendship', 'target': this.displayUser})
+		  };
+		let res = await this.$steemconnect.broadcast([['custom_json', cstm_params]], (err, res) => {
+		  if (err) {
+			console.log(err);
+			this.friendshipLoader = false;
+		  }else{  
+			console.log(res.result);
+			//success, store request to DB
+			this.dropFriendship(res.result);
+		  }
+		});	
+	  },
+	  async dropFriendship(res) {
+		let req_res = await fetch(process.env.actiAppUrl+'dropFriendship/'
+			+ this.user.account.name + '/'
+			+ this.displayUser + '/'
+			+ res.block_num + '/'
+			+ res.id);
+		let outcome = await req_res.json();
+		if (outcome.status=='success'){
+			console.log('friendship dropped');
+			this.friendshipLoader = false;
+			//notify of success
+			this.$notify({
+			  group: 'success',
+			  text: this.$t('friendship_dropped'),
+			  position: 'top center'
+			})
+		}else{
+			console.log('error dropping friendship');
+			this.addFriendError = this.$t('unknown_error');
+			this.friendshipLoader = false;
+			return false;
+		}
+		this.refreshFriendStatus();
+	  },
+	  async acceptFriend() {
+		this.addFriendError = '';
+		if (!this.user){
+			this.addFriendError = this.$t('Need_login');
+			return false;
+		}
+		if (this.displayUser == this.user.account.name){
+			this.addFriendError = this.$t('Cannot_unfriend_self');
+			return false;
+		}
+		if (this.isFriend()){
+			this.addFriendError = this.$t('Already_friends');
+			return false;
+		}
+		let userConf = confirm(this.$t('confirm_accept_friend').replace('_USERNAME_', this.displayUser));
+		if (!userConf) {
+		  return;
+		}
+		this.friendshipLoader = true;
+		//send request to BC
+		//broadcast the transaction to Steem BC
+		let cstm_params = {
+			required_auths: [],
+			required_posting_auths: [this.user.account.name],
+			id: 'actifit',
+			json: JSON.stringify({'transaction': 'accept-friendship', 'target': this.displayUser})
+		  };
+		let res = await this.$steemconnect.broadcast([['custom_json', cstm_params]], (err, res) => {
+		  if (err) {
+			console.log(err);
+			this.friendshipLoader = false;
+		  }else{  
+			console.log(res.result);
+			//success, store request to DB
+			this.acceptFriendPropagate(res.result);
+		  }
+		});	
+	  },
+	  async acceptFriendPropagate(res) {
+		let req_res = await fetch(process.env.actiAppUrl+'acceptFriend/'
+			+ this.user.account.name + '/'
+			+ this.displayUser + '/'
+			+ res.block_num + '/'
+			+ res.id);
+		let outcome = await req_res.json();
+		if (outcome.status=='success'){
+			console.log('friendship accepted');
+			this.friendshipLoader = false;
+			//notify of success
+			this.$notify({
+			  group: 'success',
+			  text: this.$t('friendship_accepted'),
+			  position: 'top center'
+			})
+		}else{
+			console.log('error accepting friendship');
+			this.addFriendError = this.$t('unknown_error');
+			this.friendshipLoader = false;
+			return false;
+		}
+		this.refreshFriendStatus();
+	  },
+	  async refreshFriendStatus() {
+		//grab user friends list
+		let res = await fetch(process.env.actiAppUrl+'userFriends/'+this.displayUser);
+		let outcome = await res.json();
+		this.userFriends = outcome;
+		//console.log(outcome);
+		//console.log(this.userFriends);
+		
+		//grab pending user friend requests (sent and received)
+		let quer = await fetch(process.env.actiAppUrl+'userFriendRequests/'+this.displayUser);
+		this.friendRequests = await quer.json();
+		//console.log('friendRequests');
+		//console.log(this.friendRequests);
+	  },
 	  //handles displaying/closing tip section
 	  tipUser() {
 		this.proceedTip = !this.proceedTip;
@@ -375,7 +666,7 @@
 				id: 'actifit',
 				json: JSON.stringify(tipTransaction)
 			};
-			let res = await this.$steemconnect.broadcast([['custom_json', cstm_params]], (err) => {
+			let res = await this.$steemconnect.broadcast([['custom_json', cstm_params]], (err, res) => {
 			  console.log(err);
 			  if (err) {
 				console.log(err);
@@ -460,10 +751,11 @@
 		  //ensure we fetch proper logged in user data
 		  this.$store.dispatch('fetchUserTokens')
 		  this.$store.dispatch('fetchUserRank')
+		  
 		}
 	  },
 	  /* handles fetching of user related info */
-	  getAccountData () {
+	  async getAccountData () {
 		
 		let parentRef = this;
  
@@ -484,6 +776,52 @@
 				});
 			}
 		});
+		 
+		this.refreshFriendStatus();
+	  },
+	  isFriend(){
+		if (this.user){
+			console.log(this.userFriends)
+			if (this.userFriends && this.userFriends.find( friend => (friend.friend == this.user.account.name))){
+				console.log('friend true');
+				return true;
+			}
+			return false;
+		}
+		return false;
+	  },
+	  isOwnAccount(){
+		if (this.user){
+			return (this.displayUser == this.user.account.name)
+		}
+		return false;
+	  },
+	  isPendingFriend(){
+		if (this.user && this.friendRequests){
+			console.log(this.friendRequests)
+			if (this.friendRequests.sent_pending && this.friendRequests.sent_pending.find( friend => (friend.target == this.user.account.name))){
+				console.log('friend true');
+				return {status: true, direction: 1};
+			}
+			if (this.friendRequests.received_pending && this.friendRequests.received_pending.find( friend => (friend.initiator == this.user.account.name))){
+				console.log('friend true');
+				return {status: true, direction: 0};
+			}
+			return false;
+		}
+		return false;
+	  },
+	  //handles displaying some of the logos of friends
+	  showFriendsSnippet(){
+		let snipp = '<span>';
+		for (let i=0; i < Math.min(this.userFriends.length, this.maxFriendDisplay); i++){
+			snipp += '<div class="user-avatar-small mr-1" title="' + this.userFriends[i].friend + '" style="background-image: url(\'https://steemitimages.com/u/' + this.userFriends[i].friend + '/avatar\')"></div>';
+		}
+		if (this.userFriends.length > this.maxFriendDisplay){
+			snipp += '+ ' + (this.userFriends.length - this.maxFriendDisplay) + this.$t('other') + ' ' + this.$t('friends');
+		}
+		snipp += '</span>';
+		return snipp;
 	  },
 	  /* handles the actual claim of a badge */
 	  async claimBadge(badgeType) {
@@ -501,7 +839,7 @@
 						id: 'actifit',
 						json: "{ \"claimed_badge\": \""+badgeType+"\"}"
 					};
-					let res = await this.$steemconnect.broadcast([['custom_json', cstm_params]], (err) => {
+					let res = await this.$steemconnect.broadcast([['custom_json', cstm_params]], (err, res) => {
 					  console.log(err);
 					  if (err) {
 						console.log(err);
@@ -630,17 +968,6 @@
 	a:hover, a:hover, .text-brand:hover, .actifit-link-plain:hover{
 	  text-decoration: none;
 	}
-	.numberCircle {
-	  border-radius: 25%;
-	  width: 10px;
-	  line-height: 10px;
-	  padding: 4px 2px 4px 2px;
-	  margin-left: 4px;
-	  background: #fff;
-	  border: 2px solid;
-	  text-align: center;
-	  vertical-align:middle;
-	}
 	.date-head{
 	  padding-left: 2px;
 	}
@@ -724,5 +1051,8 @@
     }
 	.increased-rank{
 		color: #76BB0E;
+	}
+	.fas{
+	  cursor: pointer;
 	}
 </style>

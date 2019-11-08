@@ -11,17 +11,52 @@
       <li class="nav-item mr-2" v-if="user">
         <span class="navbar-text py-0">{{ $t('Balance') }}<br><b>{{ formattedUserTokens }}</b></span>
       </li>
+	  <li class="nav-item mr-2" v-if="user">
+		<span class="user-avatar-small group-class notification-class text-brand" v-if="activeNotificationsLen > 0">{{ this.activeNotificationsLen }}</span>
+        <span class="user-avatar group-class" v-if="activeNotificationsLen > 0">
+			<a class="nav-link dropdown-toggle p-0" id="user_menu_navlink" href="#" data-toggle="dropdown" :title="$t('Notifications_popup').replace('_count_', activeNotificationsLen)">
+				<i class="fas fa-bell p-2 text-brand"></i>
+			</a>
+			<div class="dropdown-menu dropdown-menu-right notif-container">
+			  <div class="row p-2" v-for="(notif, index) in activeNotifications" :key="index" :notif="notif">
+				<span class="col-md-10">
+					<a :href="notif.url" v-on:click="markRead(notif)">
+						<i class="fas fa-user-plus p-1" v-if="notif.type == 'friendship' || notif.type == 'friendship_request'"></i>
+						<i class="fas fa-user-friends p-1" v-else-if="notif.type == 'friendship_acceptance'"></i>
+						<span>{{ notif.details }}</span>
+						<span v-if="notif.action_taker" class="user-avatar user-avatar-medium mr-1 mb-3"
+					   :style="'background-image: url(https://steemitimages.com/u/' + notif.action_taker + '/avatar)'"></span>
+					</a>
+				</span>
+				<span>
+				  <a href="#" v-on:click="markRead(notif)" class="col-md-2" :title="$t('mark_as_read')"><i class="fas fa-check-square"></i></a>
+				</span>
+			  </div>
+			</div>
+		</span>
+		<span class="user-avatar group-class" v-else>
+			<a class="nav-link dropdown-toggle p-0" id="user_menu_navlink" href="#" data-toggle="dropdown">
+				<i class="fas fa-bell p-2"></i>
+			</a>
+			<div class="dropdown-menu dropdown-menu-right">
+				<div class="p-2">{{ $t('no_notifications') }}</div>
+			</div>
+		</span>
+      </li>
+	  <li class="nav-item mr-2" v-if="user">
+		<a href="#" @click.prevent="$router.push('/friends')" :title="$t('friends')"><span class="user-avatar group-class text-brand"><i class="fas fa-user-friends p-2" ></i></span></a>
+	  </li>
       <li class="nav-item dropdown" v-if="user">
         <a class="nav-link dropdown-toggle p-0" id="user_menu_navlink" href="#" data-toggle="dropdown">
-          <div class="user-avatar" :style="'background-image: url(https://steemitimages.com/u/' + user.account.name + '/avatar)'"></div>
+          <div class="user-avatar group-class" :style="'background-image: url(https://steemitimages.com/u/' + user.account.name + '/avatar)'"></div>
         </a>
         <div class="dropdown-menu dropdown-menu-right">
           <h6 class="dropdown-header text-center">@{{ user.account.name }}</h6>
           <div class="dropdown-divider"></div>
 		  <a class="dropdown-item text-brand" href="#" @click.prevent="$router.push('/mods-access/')" v-if="isUserModerator">Moderation</a>
-		  <div class="dropdown-divider"></div>
+		  <div class="dropdown-divider" v-if="isUserModerator"></div>
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet?action=buy_afit')">{{ $t('buy_afit_menu') }}<br/></a>
-		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/market')">{{ $t('spend_afit_menu') }}<br/></a>
+		  <a class="dropdown-item item-highlight" href="#" @click.prevent="$router.push('/market')">{{ $t('spend_afit_menu') }}<br/></a>
           <a class="dropdown-item" href="#" @click.prevent="$router.push('/' + user.account.name)">{{ $t('My_Profile') }}<br/></a>
 		  <SteemStats :user="user" minView="true" class="dropdown-item"/>
 		  <a class="dropdown-item" href="#" @click.prevent="">{{ $t('My_Rank') }} <br/><span class="text-brand"> {{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRankObj && this.userRankObj.afitx_rank">{{  displayIncreasedUserRank }}</span> </span></a>
@@ -44,6 +79,15 @@
 	components: {
 	  SteemStats
     },
+	data () {
+		return {
+			activeNotifications: [],
+			activeNotificationsLen: 1,
+		}
+	},
+	watch: {
+	  user: 'updateUserData',
+	},
     computed: {
       ...mapGetters('steemconnect', ['user']),
       ...mapGetters(['userTokens', 'userRank', 'userRankObj', 'referrals']),
@@ -81,11 +125,39 @@
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
+	  async updateUserData () {
+		//grab user's notifications
+		if (this.user){
+			let res = await fetch(process.env.actiAppUrl + 'activeNotifications/' + this.user.account.name);
+			let outcome = await res.json();
+			/*console.log('notifications>>>>>>');
+			console.log(outcome);
+			console.log(outcome.status);*/
+			try{
+				this.activeNotificationsLen = outcome.length;
+				this.activeNotifications = outcome;
+			}catch(err){
+				console.log('error fetching notifications');
+			}
+		}
+	  },
+	  async markRead(notif){
+		let res = await fetch(process.env.actiAppUrl + 'markRead/' + notif._id);
+		let outcome = await res.json();
+		console.log(outcome);
+		console.log(outcome.status);
+		this.updateUserData()
+	  }
 	},
     async mounted () {
 	  
-	  //grab moderators' list
+		//grab moderators' list
 		this.$store.dispatch('fetchModerators')
+		
+		this.updateUserData()
+		
+		//fetch new notifications every minute
+		setInterval(this.updateUserData, 60000);
     },
   }
 </script>
@@ -118,5 +190,36 @@
 	}
 	.increased-rank{
 		color: #76BB0E;
+	}
+	.group-class{
+		margin-left: 0px !important;
+		display: inline-block;
+	}
+	.notification-class{
+		background-color: red;
+		color: white !important;
+		display: inline-block;
+		text-align: center;
+		font-size: 12px;
+		width: auto;
+		min-width: 20px;
+	}
+	.group-class.user-avatar-small{
+		float: left;
+	}
+	.user-avatar{
+		text-align: center;
+	}
+	.user-avatar-medium{
+		width: 30px !important;
+		height: 30px !important;
+		text-align: center;
+		position: absolute;
+		float: right;
+	}
+	.notif-container{
+		max-height: 300px;
+		overflow-y: auto;
+		overflow-x: hidden;
 	}
 </style>

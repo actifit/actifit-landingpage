@@ -1,7 +1,7 @@
 <template>
   <!-- Brand for navbar on subpages -->
   <div class="navbar-brand py-0 pl-2">
-    <img src="/img/actifit_logo.png" alt="Actifit" class="float-left mr-2" />
+    <img src="/img/actifit_logo.png" alt="Actifit" class="float-left mr-2 d-none d-sm-block" />
     <div class="float-left d-none d-sm-block">
       <h1 class="m-0 text-brand text-center">{{ $t('Actifit') }}</h1>
       <h3 class="m-0 font-italic text-brand">{{ $t('Slogan') }}</h3>

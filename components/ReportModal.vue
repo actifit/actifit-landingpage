@@ -489,17 +489,6 @@
 	.modal-body a:hover, .modal-header a:hover, .text-brand:hover, .actifit-link-plain:hover{
 	  text-decoration: none;
 	}
-	.numberCircle {
-	  border-radius: 25%;
-	  width: 10px;
-	  line-height: 10px;
-	  padding: 4px 2px 4px 2px;
-	  margin-left: 4px;
-	  background: #fff;
-	  border: 2px solid;
-	  text-align: center;
-	  vertical-align:middle;
-	}
 	.markdown-editor .CodeMirror, .markdown-editor .CodeMirror-scroll {
 	  min-height: 100px;
 	}

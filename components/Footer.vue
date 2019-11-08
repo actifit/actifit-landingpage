@@ -62,6 +62,17 @@
   }
 </script>
 <style>
+	.numberCircle {
+	  width: 10px;
+	  line-height: 10px;
+	  padding: 4px 2px 4px 2px;
+	  margin-left: 4px;
+	  background: #fff;
+	  border: 1px solid;
+	  text-align: center;
+	  vertical-align:middle;
+	  outline-style: inset;
+	}
 	.cookie__bar__content{
 		overflow: visible!important;
 	}
@@ -80,5 +91,19 @@
 	}
 	.fa-reply:before {
 		content: "\f3e5" !important;
+	}
+	.user-avatar-small{
+		width: 20px;
+		height: 20px;
+		background-position: center center;
+		background-size: cover;
+		border-radius: 50%;
+		border: solid 1px #ddd;
+		display: inline-block;
+		cursor: pointer;
+	}
+	.item-highlight{
+		border: 3px red inset;
+		margin: -3px;
 	}
 </style>

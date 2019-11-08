@@ -40,7 +40,7 @@
 		  <li class="nav-item">
             <a class="nav-link" href="#" @click.prevent="$router.push('/referrals')">{{ $t('Refer_A_Friend') }}</a>
           </li>
-		  <li class="nav-item">
+		  <li class="nav-item item-highlight">
             <a class="nav-link" href="#" @click.prevent="$router.push('/market')">{{ $t('Market') }}</a>
           </li>
         </ul>
@@ -463,6 +463,8 @@
 
     <Footer isHomePage='true'/>
 	
+	<FriendshipModal v-if="user"/>
+	
     <NewsModal :news="activeNews" />
 	<NotifyModal :modalTitle="$t('Actifit_Info')" :modalText="$t('VP_desc')"/>
 	<NotifyModal id="notifyModalRC" ref="notifyModalRC" :modalTitle="$t('Actifit_Info')" :modalText="$t('RC_desc')"/>
@@ -479,6 +481,7 @@
   import { mapGetters } from 'vuex'
   import SteemStats from '~/components/SteemStats'
   import NotifyModal from '~/components/NotifyModal'
+  import FriendshipModal from '~/components/FriendshipModal'
 
   export default {
     components: {
@@ -487,7 +490,8 @@
       News,
       NewsModal,
 	  SteemStats,
-	  NotifyModal
+	  NotifyModal,
+	  FriendshipModal
     },
     data () {
       return {
