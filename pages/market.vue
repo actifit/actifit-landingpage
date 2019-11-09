@@ -49,7 +49,7 @@
       <!-- show listing of products -->
       <div class="row" v-if="prodList.length">
         <Product v-for="product in prodList" 
-			:product="product" :key="product._id" :pros="professionals" 
+			:product="product" :key="product._id" :pros="professionals" :userrank="userRank"
 			v-if="!currentFilter || product.type == currentFilter"
 			@update-prod="updateProd"/>
       </div>
@@ -105,7 +105,7 @@
     },
     computed: {
 	  ...mapGetters('steemconnect', ['user']),
-      ...mapGetters(['userTokens', 'products', 'professionals']),
+      ...mapGetters(['userTokens', 'products', 'professionals', 'userRank']),
     },
 	watch: {
 	  user: 'fetchUserData',

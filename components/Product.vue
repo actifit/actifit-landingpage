@@ -170,10 +170,10 @@
   import steem from 'steem'
 
   export default {
-    props: ['product', 'pros'],
+    props: ['product', 'pros', 'userrank'],
     computed: {
       ...mapGetters('steemconnect', ['user']),
-	  ...mapGetters(['userTokens', 'userRank']),
+	  ...mapGetters(['userTokens']),
       date() {
         let date = new Date(this.product.approval_date)
         let minutes = date.getMinutes()
@@ -249,7 +249,7 @@
 		//console.log('>reqtMet');
 		if (reqt.item.toLowerCase() == 'User Rank'.toLowerCase()){
 			//user rank case
-			if (parseFloat(this.userRank) >= parseFloat(reqt.level)){
+			if (parseFloat(this.userrank) >= parseFloat(reqt.level)){
 				return true;
 			}
 		}else{
