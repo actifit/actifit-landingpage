@@ -1,7 +1,7 @@
 <template>
   <div :class="outserSmallScreenClasses" class="position-fixed text-brand mx-auto w-100 acti-notify-comp" v-if="innerShowModal || showCompDetails" id="friendshipModal" tabindex="-1">
 	<div :class="smallScreenClasses" class="text-center mx-auto acti-notify-comp-inner border-2 rounded" role="document">
-	  <div :class="titleClass" class="max-acti-width lead text-white">
+	  <div :class="titleClass" class="row max-acti-width text-white mx-auto px-2">
 		<div :class="mainTitleClass"><span>{{ $t('friendship_hook_title') }}</span>
 		<span class="d-none d-md-inline-block font-italic"><br/>{{ $t('friendship_subtitle') }}</span></div>
 		<div :class="closeBtnClass">
@@ -12,7 +12,7 @@
 	  </div>
 	  
 	<div class="row max-acti-width">
-	  <div class="col-md-8">
+	  <div class="col-md-8 pr-0">
 		<div class="friends-title">
 		</div>
 		<img class="friends-img" :src="'/img/fitness-friends-' + this.randImg+ '.jpg'">
@@ -118,7 +118,7 @@
 	  scrollClasses () {
 		let defClasses = "col-md-4 "
 		if (this.screenWidth < 768){
-		  defClasses += "sugg-container-horiz scrollbar-horiz scrollbar-danger-horiz";
+		  defClasses += "sugg-container-horiz scrollbar-horiz scrollbar-danger-horiz ml-3";
 		}else{
 		  defClasses += "sugg-container scrollbar scrollbar-danger";
 		}
@@ -128,7 +128,7 @@
 		if (this.screenWidth < 768){
 			return "title-flex";
 		}
-		return "row";
+		return "";
 	  },
 	  mainTitleClass (){
 		if (this.screenWidth < 768){
@@ -138,7 +138,7 @@
 	  },
 	  closeBtnClass () {
 		if (this.screenWidth < 768){
-			return "";
+			return "mr-2";
 		}
 		return "col-md-1";
 	  },
@@ -465,7 +465,7 @@
 	.sugg-container-horiz{
 		display: flex;
         flex-wrap: nowrap;
-        height: 500px;
+        max-height: 275px;
         overflow-x: auto;
         width: auto;
 		overflow-y: hidden;
