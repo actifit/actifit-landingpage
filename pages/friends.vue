@@ -578,9 +578,9 @@
 		  padding-left: 10px;
 		}
 	}
-	.user-avatar{
+	/*.user-avatar{
 		margin-left: 10px;
-	}
+	}*/
 	.badge-img, .claimed-check{
 	  width: 150px;
 	  text-align: center;
