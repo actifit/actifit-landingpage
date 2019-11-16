@@ -72,6 +72,7 @@
 	  text-align: center;
 	  vertical-align:middle;
 	  outline-style: inset;
+	  border-radius: 0%;
 	}
 	.cookie__bar__content{
 		overflow: visible!important;
