@@ -264,7 +264,7 @@
 						<label for="afit_exchange_20">20 {{ $t('AFIT_Token') }} {{ $t('Tokens') }}</label>
 					  </span>
 					<br>
-					<span><i>{{ $t('You_are_exchanging') }} {{ afit_val_exchange }} {{ $t('AFIT_Token') }} {{ $t('Tokens') }} {{ $t('for_approx') }} ${{ (afit_val_exchange * 0.036 / 0.65).toFixed(2) }} {{ $t('in_steem_upvote') }}
+					<span><i>{{ $t('You_are_exchanging') }} {{ afit_val_exchange }} {{ $t('AFIT_Token') }} {{ $t('Tokens') }} {{ $t('for_approx') }} ${{ (afit_val_exchange * afitPrice / 0.65).toFixed(2) }} {{ $t('in_steem_upvote') }}
 						<!--<br/> ({{ $t('net_profit_approx') }} ${{ (afit_val_exchange * 0.036).toFixed(2) }})-->
 						<br/>{{ $t('enter_funds_pass_proceed') }}</i></span>
 					<div class="row" >
