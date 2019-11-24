@@ -107,4 +107,7 @@
 		border: 3px red inset;
 		margin: -3px;
 	}
+	.no-actifit{
+		display: none !important;
+	}
 </style>
