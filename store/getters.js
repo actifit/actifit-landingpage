@@ -47,6 +47,9 @@ export default {
   products (state) {
 	return state.products  
   },
+  gadgetStats (state) {
+	return state.gadgetStats
+  },
   activeReport (state) {
     return state.activeReport
   },

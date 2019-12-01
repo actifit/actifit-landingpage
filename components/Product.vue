@@ -36,7 +36,6 @@
 		  </div>
 		  
 		  <div class="card-section" v-if="this.product.type == 'ingame'">
-		  
 			  <div class="row text-info pt-1">
 				<div class="pb-md-2 pt-md-2 text-center col-md-6 info-box info-box-orangered">
 				  <b>{{ $t('Available')}}</b><br/>{{this.product.count}} {{$t('units')}}
@@ -137,6 +136,12 @@
 				<input type="text" name="friend" id="friend" ref="friend" class="form-control p-2" v-else :value="grabConsumableItem().benefic">
 			</div>
 			<b>{{$t('Remaining_boost')}}:</b> {{grabConsumableItem().span - grabConsumableItem().consumed}} {{$t('Activity_Reports')}}
+			<div>
+				<b>{{$t('bought_count')}}:</b> {{ this.boughtCount }}
+			</div>
+			<div>
+				<b>{{$t('consumed_count')}}:</b> {{ this.consumedCount }}
+			</div>
 		  </div>
 		  <div class="pb-md-2 text-center" v-if="buyAttempt">			  
               <div v-if="buyInProgress && errorProceed==''">
@@ -170,7 +175,7 @@
   import steem from 'steem'
 
   export default {
-    props: ['product', 'pros', 'userrank'],
+    props: ['product', 'pros', 'userrank', 'gadgetStats'],
     computed: {
       ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters(['userTokens']),
@@ -179,7 +184,30 @@
         let minutes = date.getMinutes()
         return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() + ' ' + date.getHours() + ':' + (minutes < 10 ? '0' + minutes : minutes)
       },
-	  
+	  boughtCount () {
+		if (this.user && this.product.type == 'ingame' && Array.isArray(this.gadgetStats) && this.gadgetStats.length > 0){
+			return this.consumedCount + this.activeCount;
+		}
+		return 0;
+	  },
+	  consumedCount () {
+		if (this.user && this.product.type == 'ingame' && Array.isArray(this.gadgetStats) && this.gadgetStats.length > 0){
+			let entry = this.gadgetStats.find( entry => (entry._id.gadget === this.product._id && entry._id.status == 'consumed' ));
+			if (entry){
+				return entry.count;
+			}
+		}
+		return 0;
+	  },
+	  activeCount () {
+		if (this.user && this.product.type == 'ingame' && Array.isArray(this.gadgetStats) && this.gadgetStats.length > 0){
+			let entry = this.gadgetStats.find( entry => (entry._id.gadget === this.product._id && entry._id.status == 'active' ));
+			if (entry){
+				return entry.count;
+			}
+		}
+		return 0;
+	  }
     }, 
 	data: function(){
 		return {

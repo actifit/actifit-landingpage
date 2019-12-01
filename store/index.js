@@ -24,6 +24,7 @@ const createStore = () => {
 	  ambassadors: [], //list of current ambassadors
 	  professionals: [], //list of professional approved trainers/nutritionists/...
 	  products: [], //list of products
+	  gadgetStats: [], //aggregate stats of user's bought gadgets
       activeReport: null, // report shown in the modal
       editReport: null, // report shown in the edit modal
       moreReportsAvailable: false, // indicator if there are more reports to load

@@ -80,6 +80,13 @@ export default {
 		}).catch(e => reject(e))
     })
   },
+  fetchUserGadgetStats ({ state, commit }){
+	return new Promise((resolve, reject) => {
+		fetch(process.env.actiAppUrl+'boughtGadgetCountByUser/' + state.steemconnect.user.account.name.toLowerCase()).then(res => {
+			res.json().then(json => commit('setGadgetStats', json || [])).catch(e => reject(e))
+		}).catch(e => reject(e))
+    })
+  },
   fetchTokenInfo ({ commit }) {
     commit('setUserCount', 0) // reset to trigger animation again
     commit('setTokensDistributed', 0) // reset to trigger animation again

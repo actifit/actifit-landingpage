@@ -45,6 +45,9 @@ export default {
   setProducts (state, products) {
 	state.products = products
   },
+  setGadgetStats (state, gadgetStats) {
+	state.gadgetStats = gadgetStats
+  },
   setActiveReport (state, report) {
     state.activeReport = report
   },
