@@ -486,4 +486,5 @@ module.exports = {
   no_pending_friends: 'You currently do not have any pending friendship requests',
   bought_count: 'Total Bought',
   consumed_count: 'Total Consumed',
+  Benef_friend: 'Beneficiary Friend',
 }

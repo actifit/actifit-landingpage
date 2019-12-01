@@ -136,6 +136,8 @@
 				<input type="text" name="friend" id="friend" ref="friend" class="form-control p-2" v-else :value="grabConsumableItem().benefic">
 			</div>
 			<b>{{$t('Remaining_boost')}}:</b> {{grabConsumableItem().span - grabConsumableItem().consumed}} {{$t('Activity_Reports')}}
+		  </div>
+		  <div v-if="product.type == 'ingame' && this.boughtCount > 0">
 			<div>
 				<b>{{$t('bought_count')}}:</b> {{ this.boughtCount }}
 			</div>
