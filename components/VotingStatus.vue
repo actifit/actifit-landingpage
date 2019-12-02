@@ -6,9 +6,15 @@
 				<span>{{ $t('reward_running_note') }}</span>
 			</div>
 			<div v-else>
-				<span>{{ $t('next_reward_note') }} {{ rewardStartTimer }}</span>
+				<span>{{ $t('next_reward_note') }} 
+					<span v-if="!isLoading">{{ rewardStartTimer }}</span>
+					<span v-else><i class="fas fa-spinner fa-spin"></i></span>
+				</span>
 			</div>
-			<div>{{ $t('actifit_vp') }}: {{ vpPercent }}</div>
+			<div>{{ $t('actifit_vp') }}: 
+				<span v-if="!isLoading">{{ vpPercent }}</span>
+				<span v-else><i class="fas fa-spinner fa-spin"></i></span>
+			</div>
 			<div class="progress">
 			  <div class="progress-bar progress-bar-striped progress-bar-animated bg-actifit" role="progressbar" :aria-valuenow="vp" aria-valuemin="0" aria-valuemax="100" :style="{ width: vp + '%' }"></div>
 			</div>
@@ -34,6 +40,7 @@
 		vpPercent: 0,
 		currentVotingTimer: '00:00:00',
 		rewardStartTimer: this.currentVotingTimer,
+		isLoading: true,
 	  }
 	},
 	props: ['user', 'minView'],
@@ -64,6 +71,7 @@
 			}else{
 				this.rewardStartTimer = json.reward_start;
 			}
+			this.isLoading = false;
 		}
 	  },
 	  loadVotingStatus() {
