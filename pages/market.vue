@@ -11,7 +11,7 @@
         </li>
       </ul>
       <NavbarBrand />
-      <UserMenu v-if="this.user"/>
+      <UserMenu />
     </nav>
 
     <!-- listing -->
