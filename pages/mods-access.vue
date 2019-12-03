@@ -20,8 +20,31 @@
 		</div>
 		
 		<div class="col-md-12 row-sep m-2">
-			<div class="text-bold">{{ $t('Hey') }} {{ user.account.name }}!</div>
-			INPUT YOUR FUNDS PASSWORD<input type="password" name="fundsPass" ref="fundsPass">
+			<h3>Moderator Current Week Stats</h3>
+		</div>
+		
+		<div class="col-md-12 row-sep m-2">
+			<table class="table table-hover">
+				<thead class="text-brand">
+				<tr>
+				  <th scope="col">Moderator</th>
+				  <th scope="col">Comment Count</th>
+				  <th scope="col">Vote Count</th>
+				</tr>
+			  </thead>
+			  <tbody>
+				<tr v-for="(stat, index) in moderatorStats" v-bind:key="index" v-if="Array.isArray(stat.items) && stat.items.length>0" :class="checkTopRank(stat.items)">
+					<td :class="{'bg-success': stat.items[0].user === topVoter || stat.items[0].user === topCommentor, 'text-white': stat.items[0].user === topVoter || stat.items[0].user === topCommentor}">@{{stat.items[0].user}}</td>
+					<td :class="{'bg-success': stat.items[0].user === topVoter || stat.items[0].user === topCommentor, 'text-white': stat.items[0].user === topVoter || stat.items[0].user === topCommentor}">{{stat.items.filter(entry => entry.reward_activity === "Moderator Comment").length}}</td>
+					<td :class="{'bg-success': stat.items[0].user === topVoter || stat.items[0].user === topCommentor, 'text-white': stat.items[0].user === topVoter || stat.items[0].user === topCommentor}">{{stat.items.filter(entry => entry.reward_activity === "Post Vote").length}}</td>
+				</tr>
+				</tbody>
+			</table>
+		</div>
+		
+		<div class="col-md-12 row-sep m-2">
+			<h3>{{ $t('Hey') }} {{ user.account.name }}!</h3>
+			<b>INPUT YOUR FUNDS PASSWORD</b><input type="password" name="fundsPass" ref="fundsPass">
 		</div>
 		<div class="col-md-12 row-sep m-2">
 			<div class="row text-center action-title">BAN USER</div>
@@ -122,6 +145,11 @@
 	  return {
 		screenWidth: 1200,
 		actiapimod: process.env.actiAppUrl + 'modAction',
+		moderatorStats: [],
+		topVotes: -1,
+		topVoter: '',
+		topComments: -1,
+		topCommentor: '',
 	  }
 	},
     computed: {
@@ -150,6 +178,19 @@
 	  
 	  //grab moderators' list
 		this.$store.dispatch('fetchModerators')
+		
+		//grab moderators weekly stats
+		let res = await fetch(process.env.actiAppUrl + 'moderatorWeeklyStats');
+		let outcome = await res.json();
+		console.log(outcome);
+		this.moderatorStats = outcome;
+		/*for (let i=0;i<outcome.length;i++){
+			if (Array.isArray(outcome[i]) && outcome[i].length>0){
+				let entry = new Object();
+				entry.user=
+				this.moderatorStats.push(entry);
+			}
+		}*/
     },
 	created () {
 	  this.$store.dispatch('steemconnect/login')
@@ -158,6 +199,32 @@
 	  user : 'fetchUserInfo'
 	},
 	methods: {
+	  checkTopRank (item){
+		let topRanker = false;
+		console.log(item);
+		if (Array.isArray(item)){
+			let votes = item.filter(entry => entry.reward_activity === "Post Vote").length;
+			console.log('votes:'+votes);
+			if (votes > this.topVotes){
+				this.topVotes = votes;
+				this.topVoter = item[0].user;
+				topRanker = true;
+			}
+			
+			let comments = item.filter(entry => entry.reward_activity === "Moderator Comment").length;
+			console.log('comments:'+comments);
+			if (comments > this.topComments){
+				this.topComments = comments;
+				this.topCommentor = item[0].user;
+				topRanker = true;
+			}
+		}
+		console.log(topRanker);
+		if (topRanker){
+			return "topRank";
+		}
+		return "jingo";
+	  },
 	  fetchUserInfo () {
 		if (typeof this.user != 'undefined' && this.user != null){
 		  this.$store.dispatch('fetchUserTokens')
@@ -240,5 +307,8 @@
 	.action-title{
 		font-weight: bold;
 		border-bottom: 2px solid red;
+	}
+	.topRank{
+		background: red;
 	}
 </style>
