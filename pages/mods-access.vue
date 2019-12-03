@@ -20,7 +20,10 @@
 		</div>
 		
 		<div class="col-md-12 row-sep m-2">
-			<h3>Moderator Current Week Stats</h3>
+			<h3 v-if="week==1">Moderator Current Week Stats</h3>
+			<h3 v-else>Moderator Prior Week Stats</h3>
+			<input type="button" value="Prior Week" v-on:click="moderatorStats = priorWeekStats; week=-1">
+			<input type="button" value="Current Week" v-on:click="moderatorStats = currentWeekStats; week=1">
 		</div>
 		
 		<div class="col-md-12 row-sep m-2">
@@ -146,10 +149,13 @@
 		screenWidth: 1200,
 		actiapimod: process.env.actiAppUrl + 'modAction',
 		moderatorStats: [],
+		currentWeekStats: [],
+		priorWeekStats: [],
 		topVotes: -1,
 		topVoter: '',
 		topComments: -1,
 		topCommentor: '',
+		week: 1,
 	  }
 	},
     computed: {
@@ -184,6 +190,12 @@
 		let outcome = await res.json();
 		console.log(outcome);
 		this.moderatorStats = outcome;
+		this.currentWeekStats = outcome;
+		
+		let res_two = await fetch(process.env.actiAppUrl + 'moderatorWeeklyStats?priorWeek=true');
+		let outcome_two = await res_two.json();
+		console.log(outcome_two);
+		this.priorWeekStats = outcome_two;
 		/*for (let i=0;i<outcome.length;i++){
 			if (Array.isArray(outcome[i]) && outcome[i].length>0){
 				let entry = new Object();
