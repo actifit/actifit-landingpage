@@ -437,6 +437,7 @@ module.exports = {
   friendship_hook_title: 'Because fitness with friends is more fun, challenging & rewarding !! ',
   friendship_subtitle: 'Make friends now on actifit.',
   suggested_friends: 'Suggested Friends',
+  Suggested_friends: 'Suggested Friends',
   Notifications_popup: 'You have _count_ notifications',
   rewards: 'rewards',
   level_short: ' - L',
