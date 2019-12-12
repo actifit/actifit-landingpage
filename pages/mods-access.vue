@@ -22,8 +22,8 @@
 		<div class="col-md-12 row-sep m-2">
 			<h3 v-if="week==1">Moderator Current Week Stats</h3>
 			<h3 v-else>Moderator Prior Week Stats</h3>
-			<input type="button" value="Prior Week" v-on:click="moderatorStats = priorWeekStats; week=-1">
-			<input type="button" value="Current Week" v-on:click="moderatorStats = currentWeekStats; week=1">
+			<input type="button" value="Prior Week" v-on:click="moderatorStats = priorWeekStats; week=-1;topVotes=-1;topComments=-1;topVoter='';topCommentor=''">
+			<input type="button" value="Current Week" v-on:click="moderatorStats = currentWeekStats; week=1;topVotes=-1;topComments=-1;topVoter='';topCommentor=''">
 		</div>
 		
 		<div class="col-md-12 row-sep m-2">
