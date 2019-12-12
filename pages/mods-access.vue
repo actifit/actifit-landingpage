@@ -26,7 +26,9 @@
 			<input type="button" value="Current Week" v-on:click="moderatorStats = currentWeekStats; week=1;topVotes=-1;topComments=-1;topVoter='';topCommentor=''">
 		</div>
 		
-		<div class="col-md-12 row-sep m-2">
+		<div class="col-md-12 text-center" v-if="!Array.isArray(moderatorStats) || moderatorStats.length < 1"><i class="fas fa-spin fa-spinner text-brand"></i></div>
+		
+		<div v-else class="col-md-12 row-sep m-2">
 			<table class="table table-hover">
 				<thead class="text-brand">
 				<tr>
