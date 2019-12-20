@@ -17,7 +17,7 @@
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-5">
       <h2 class="text-center">{{ $t('market_title') }}</h2>
-	  <h5 class="text-center mb-5 market-sub">{{ $t('market_subtitle') }}</h5>
+	  <h3 class="text-center m-4 text-brand market-sub">{{ $t('market_subtitle') }}</h3>
 	  
 	  <!-- allow sorting & filtering products -->
 	  <div class="row col-md-12" v-if="prodList.length">
