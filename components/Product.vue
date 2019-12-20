@@ -3,10 +3,10 @@
         <div class="card form mx-auto p-3 mt-3 mt-md-5 text-center card-border pro-card col-sm-3">
 		  <div class="text-center card-section">
 		    <div class="row basic-info">
-			  <h3 class="pro-name col-md-12">{{ this.product.name}}<span v-if="this.product.level">{{$t('level_short')}}{{this.product.level}}</span>
+			  <h3 class="pro-name col-md-12">{{ this.product.name}}<span v-if="!product.specialevent && this.product.level">{{$t('level_short')}}{{this.product.level}}</span>
 			  </h3>
 			  
-			  <div v-if="this.product.type == 'ingame'" class="col-md-4" :title="this.product.name + ' - Level ' + this.product.level">
+			  <div v-if="this.product.type == 'ingame'" class="col-md-4" :title="!product.specialevent?this.product.name + ' - Level ' + this.product.level:this.product.name">
 				<div :class="'avatar-'+this.product.level" class="avatar pro-card-av mx-auto" :style="'background-image: url(img/gadgets/' + this.product.image + ');'"></div>
 				<span v-for="iterl in this.product.level" :key="iterl">
 					<i class="fas fa-star text-brand"></i>
@@ -54,13 +54,23 @@
 						<div>
 							<span v-if="boost.boost_beneficiary == 'friend'" :title="$t('Boost') + ' ' + $t('to_a_friend')"><i class="fas fa-user-friends pl-2"></i></span>
 							<span v-else :title="$t('Boost') + ' ' + $t('to_you')"><i class="fas fa-user pl-2"></i></span>
-							<span v-for="iterx in Math.ceil(boost.boost_amount / 5)" :key="iterx">
-								<span class="color-box-afit" v-if="boost.boost_unit == 'AFIT'"></span>
-								<span class="color-box-sports" v-else-if="boost.boost_unit == 'SPORTS'"></span>
-								<span class="color-box-steem" v-else-if="boost.boost_unit == 'SP'"></span>
-								<span class="color-box-rank" v-else-if="boost.boost_unit == 'User Rank'"></span>
+							<span v-if="boost.boost_amount">
+								<span v-for="iterx in Math.ceil(boost.boost_amount / 5)" :key="iterx">
+									<span class="color-box-afit" v-if="boost.boost_unit == 'AFIT'"></span>
+									<span class="color-box-sports" v-else-if="boost.boost_unit == 'SPORTS'"></span>
+									<span class="color-box-steem" v-else-if="boost.boost_unit == 'SP'"></span>
+									<span class="color-box-rank" v-else-if="boost.boost_unit == 'User Rank'"></span>
+								</span>
+								<br v-if="product.specialevent"/><br v-if="product.specialevent"/>
+								<span>&nbsp;+{{boost.boost_amount}}</span><span>{{boost.boost_type.replace('percent_reward','%').replace('percent','%').replace('unit',' ')}}</span>&nbsp;<span>{{boost.boost_unit}} {{$t('rewards')}} {{$t('per_report')}}</span>&nbsp;
 							</span>
-							<span>&nbsp;+{{boost.boost_amount}}</span><span>{{boost.boost_type.replace('percent_reward','%').replace('percent','%').replace('unit',' ')}}</span>&nbsp;<span>{{boost.boost_unit}} {{$t('rewards')}} {{$t('per_report')}}</span>&nbsp;
+							<span v-else-if="boost.boost_min_amount">
+								<span v-for="iterx in Math.ceil(boost.boost_max_amount / 5)" :key="iterx">
+									<span class="color-box-afit" v-if="boost.boost_unit == 'AFIT'"></span>
+								</span>
+								<br v-if="product.specialevent"/><br v-if="product.specialevent"/>
+								<span>+&nbsp;</span><span>{{boost.boost_type.replace('percent_reward','%').replace('percent','%').replace('unit',' ')}}</span>&nbsp;{{boost.boost_min_amount}}&nbsp;-&nbsp;{{boost.boost_max_amount}}<span>&nbsp;{{boost.boost_unit}} {{$t('rewards')}} {{$t('per_report')}}</span>&nbsp;
+							</span>
 							<span v-if="boost.boost_beneficiary == 'friend'">{{$t('to_a_friend')}}</span>
 							<span v-else>{{$t('to_you')}}</span>
 						</div>

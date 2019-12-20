@@ -488,4 +488,5 @@ module.exports = {
   bought_count: 'Total Bought',
   consumed_count: 'Total Consumed',
   Benef_friend: 'Beneficiary Friend',
+  special_christmas_event: 'Actifit Special Christmas Event!',
 }

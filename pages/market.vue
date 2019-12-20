@@ -18,6 +18,7 @@
     <div class="container pt-5 mt-5 pb-5">
       <h2 class="text-center">{{ $t('market_title') }}</h2>
 	  <h5 class="text-center mb-5 market-sub">{{ $t('market_subtitle') }}</h5>
+	  
 	  <!-- allow sorting & filtering products -->
 	  <div class="row col-md-12" v-if="prodList.length">
 		<span class="col-md-5"></span>
@@ -46,11 +47,23 @@
 			<option value="ebook">{{$t('Ebook')}}</option>
         </select>
 	  </div>
+	  	  
+	  
+	  <h5 class="text-center mb-5 market-sub">{{ $t('special_christmas_event') }}</h5>
+	  <!-- show listing of special event products -->
+	  <div class="row" v-if="prodList.length">
+        <Product v-for="product in prodList" 
+			:product="product" :key="product._id" :pros="professionals" :userrank="userRank" :gadgetStats="gadgetStats"
+			v-if="product.specialevent"
+			@update-prod="updateProd"/>
+      </div>
+	  <br/>
+	  
       <!-- show listing of products -->
       <div class="row" v-if="prodList.length">
         <Product v-for="product in prodList" 
 			:product="product" :key="product._id" :pros="professionals" :userrank="userRank" :gadgetStats="gadgetStats"
-			v-if="!currentFilter || product.type == currentFilter"
+			v-if="!product.specialevent && (!currentFilter || product.type == currentFilter)"
 			@update-prod="updateProd"/>
       </div>
 	  <div class="text-center text-brand" v-else><i class="fas fa-spin fa-spinner"></i></div>

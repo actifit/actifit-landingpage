@@ -1,7 +1,7 @@
 <template>
   <div :class="outserSmallScreenClasses" class="position-fixed text-brand mx-auto w-100 acti-notify-comp" >
 	<div :class="smallScreenClasses" class="text-center mx-auto acti-notify-comp-inner border-2 rounded">
-	  <div>Actifit Initial Steem Offering! 110,000 AFIT tokens sold 1st second. Event ends Sunday 1PM GMT!
+	  <div>Actifit Special Christmas Market Event!
 		<a href="" @click.prevent="adjustVisibility" class="expand-comp-notice">
 			<span v-if="showCompDetails">&#9651;</span>
 			<span v-else>&#9661;</span>
@@ -9,11 +9,10 @@
 	  <transition name="fade">
 		<div class="extra-info" v-if="showCompDetails">
 		  <div class="img-container">
-			<img class="announce-img" src="/img/ISO_announce.png">
+			<img class="announce-img" src="/img/actifit-christmas-event.jpg">
 		  </div>
-		  <div><a href="https://actifit.io/@actifit/actifit-iso-first-ever-initial-steem-offering-this-friday-not-to-miss-event-discounted-afit-price-afit-eng-tokens-bonuses"><u>Check ISO Announcement</u></a></div>
-		  <div><a href="https://steem-engine.com/?p=market&t=AFIT"><u>Participate in ISO</u></a></div>
-		  <div><span class="end-string">ISO End in </span><Countdown v-if="countDownReady" deadline="April 14, 2019 13:00 GMT"></Countdown></div>
+		  <div><a href="https://actifit.io/market"><u>Buy Christmas Gadgets</u></a></div>
+		  <div><span class="end-string">Event ends in </span><Countdown v-if="countDownReady" deadline="December 31, 2019 23:59 GMT"></Countdown><i v-else class="fas fa-spin fa-spinner text-brand"></i></div>
 		</div>
 	  </transition>
 	</div>
