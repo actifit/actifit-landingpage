@@ -48,9 +48,10 @@
         </select>
 	  </div>
 	  	  
-	  
-	  <h5 class="text-center mb-5 market-sub">{{ $t('special_christmas_event') }}</h5>
 	  <!-- show listing of special event products -->
+	  <!--
+	  <h5 class="text-center mb-5 market-sub">{{ $t('special_christmas_event') }}</h5>
+	  
 	  <div class="row" v-if="prodList.length">
         <Product v-for="product in prodList" 
 			:product="product" :key="product._id" :pros="professionals" :userrank="userRank" :gadgetStats="gadgetStats"
@@ -58,6 +59,7 @@
 			@update-prod="updateProd"/>
       </div>
 	  <br/>
+	  -->
 	  
       <!-- show listing of products -->
       <div class="row" v-if="prodList.length">
