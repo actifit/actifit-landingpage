@@ -93,7 +93,8 @@
 					</div>
 				</div>
 				<div class="info-box-orange mb-2 col-md-12 cntnr">
-					<i class="fab fa-angellist mr-2"></i><a :href="'/activity/'+displayUser" >{{ numberFormat(rewardedPostCount, 0) }} {{ $t('Activity_Reports_Rewarded') }}</a>
+					<i class="fab fa-angellist mr-2"></i><a :href="'/activity/'+displayUser" >{{ numberFormat(rewardedPostCount, 0) }} {{ $t('Activity_Reports_Rewarded') }}</a>&nbsp;
+					<a :href="'/activity/'+displayUser" class="btn btn-brand border">{{ $t('View_reports') }}</a>
 				</div>
 			</div>
 		  </div>
