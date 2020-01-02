@@ -42,14 +42,16 @@
 		  <div v-if="displayUser" class="user-avatar large-avatar mr-1 mb-3"
 					   :style="'background-image: url(https://steemitimages.com/u/' + this.displayUser + '/avatar)'"></div>
 		  <div v-if="userinfo" class="user-details">
-			<div><i class="fas fa-user mr-2"></i> {{ userinfo.name }} <b-badge v-if="account_banned" variant="danger" :title="$t('Account_banned_tip')" >{{ $t('Account_banned') }}</b-badge></div>
-			<div v-if="userMeta && userMeta.profile">
-				<div class="location-text" ><i class="fas fa-street-view mr-2"></i> {{ userMeta.profile.location }}</div>
-				<div><i class="fas fa-address-card mr-2"></i> {{ userMeta.profile.about }}</div>
-				<div><i class="fas fa-link mr-2"></i>&nbsp;<a :href="userMeta.profile.website">{{ userMeta.profile.website }}</a></div>
+			<div class="info-box p-2"><i class="fas fa-user mr-2"></i> {{ userinfo.name }} <b-badge v-if="account_banned" variant="danger" :title="$t('Account_banned_tip')" >{{ $t('Account_banned') }}</b-badge></div>
+			<div v-if="userMeta && userMeta.profile" class="row m-0 cntnr">
+				<div class="location-text info-box col-md-4" ><i class="fas fa-street-view mr-2"></i> {{ userMeta.profile.location }}</div>
+				<div class="info-box col-md-4"><i class="fas fa-address-card mr-2"></i> {{ userMeta.profile.about }}</div>
+				<div class="info-box col-md-4"><i class="fas fa-link mr-2"></i>&nbsp;<a :href="userMeta.profile.website" class="force-white-url">{{ userMeta.profile.website }}</a></div>
 			</div>
-			<div><i class="fas fa-calendar-alt mr-2"></i> {{ $t('Joined_On') }} {{ pureDate(userinfo.created) }}</div>
-			<div><i class="fas fa-pen mr-2"></i> {{ numberFormat(userinfo.post_count, 0) }} {{ $t('Steem_posts_comments') }}</div>
+			<div class="row m-0 cntnr">
+				<div class="info-box col-md-6"><i class="fas fa-calendar-alt mr-2"></i> {{ $t('Joined_On') }} {{ pureDate(userinfo.created) }}</div>
+				<div class="info-box col-md-6"><i class="fas fa-pen mr-2"></i> {{ numberFormat(userinfo.post_count, 0) }} {{ $t('Steem_posts_comments') }}</div>
+			</div>
 			<div v-if="!account_banned">
 				<div class="friends-count mb-2 mt-2"><i class="fas fa-user-friends text-brand mr-2" ></i>{{ this.userFriends.length }} {{ $t('friends') }} <span v-html="showFriendsSnippet()"></span></div>
 				<div v-if="userinfo.witness_votes.includes('actifit')"><i class="fas fa-cubes text-brand mr-2"></i>&nbsp;{{ $t('Votes_Actifit_Witness') }}</div>
@@ -1054,5 +1056,17 @@
 	}
 	.fas{
 	  cursor: pointer;
+	}
+	.info-box {
+		border: 1px solid #fff;
+		color: #fff;
+		background: #ff4500;
+	}
+	.force-white-url{
+		color: white !important;
+		text-decoration: underline;
+	}
+	.cntnr{
+		min-height: 100px;
 	}
 </style>
