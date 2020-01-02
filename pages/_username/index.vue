@@ -820,7 +820,7 @@
 			snipp += '<div class="user-avatar-small mr-1" title="' + this.userFriends[i].friend + '" style="background-image: url(\'https://steemitimages.com/u/' + this.userFriends[i].friend + '/avatar\')"></div>';
 		}
 		if (this.userFriends.length > this.maxFriendDisplay){
-			snipp += '+ ' + (this.userFriends.length - this.maxFriendDisplay) + this.$t('other') + ' ' + this.$t('friends');
+			snipp += '+ ' + (this.userFriends.length - this.maxFriendDisplay) + ' ' + this.$t('other') + ' ' + this.$t('friends');
 		}
 		snipp += '</span>';
 		return snipp;
