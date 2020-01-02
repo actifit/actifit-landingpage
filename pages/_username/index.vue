@@ -53,7 +53,7 @@
 				<div class="info-box col-md-6"><i class="fas fa-pen mr-2"></i> {{ numberFormat(userinfo.post_count, 0) }} {{ $t('Steem_posts_comments') }}</div>
 			</div>
 			<div v-if="!account_banned">
-				<div class="friends-count mb-2 mt-2"><i class="fas fa-user-friends text-brand mr-2" ></i>{{ this.userFriends.length }} {{ $t('friends') }} <span v-html="showFriendsSnippet()"></span></div>
+				<div class="friends-count mb-2 mt-2"><i class="fas fa-user-friends text-brand mr-2" ></i><a href="./friends">{{ this.userFriends.length }} {{ $t('friends') }} <span v-html="showFriendsSnippet()"></span></a></div>
 				<div v-if="userinfo.witness_votes.includes('actifit')"><i class="fas fa-cubes text-brand mr-2"></i>&nbsp;{{ $t('Votes_Actifit_Witness') }}</div>
 				<div v-else><i class="fas fa-cubes text-brand mr-2"></i>&nbsp;<a class="btn btn-brand" href="https://steemconnect.com/sign/account-witness-vote?witness=actifit&approve=true" target="_blank">{{ $t('Vote_Now_Actifit_Witness') }}</a></div>
 				<div v-if="actifitDelegator"><i class="fas fa-file-invoice-dollar text-brand mr-2"></i>&nbsp;{{ $t('Delegates_to_Actifit') }} {{ actifitDelegator.steem_power }} {{ $t('Steem_Power') }}</div>
@@ -820,7 +820,7 @@
 			snipp += '<div class="user-avatar-small mr-1" title="' + this.userFriends[i].friend + '" style="background-image: url(\'https://steemitimages.com/u/' + this.userFriends[i].friend + '/avatar\')"></div>';
 		}
 		if (this.userFriends.length > this.maxFriendDisplay){
-			snipp += '+ ' + (this.userFriends.length - this.maxFriendDisplay) + ' ' + this.$t('other') + ' ' + this.$t('friends');
+			snipp += '+ ' + (this.userFriends.length - this.maxFriendDisplay) + ' ' + this.$t('other') + ' ' + this.$t('friends')+'';
 		}
 		snipp += '</span>';
 		return snipp;
