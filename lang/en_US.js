@@ -494,4 +494,5 @@ module.exports = {
   AFITX_Tokens: 'AFITX Tokens',
   AFIT_SE_Tokens: 'AFIT S-E Tokens',
   View_reports: 'View Reports',
+  View_friends: 'View Friends',
 }

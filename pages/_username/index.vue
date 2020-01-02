@@ -53,7 +53,10 @@
 				<div class="info-box col-md-6 cntnr"><i class="fas fa-pen mr-2"></i> {{ numberFormat(userinfo.post_count, 0) }} {{ $t('Steem_posts_comments') }}</div>
 			</div>
 			<div v-if="!account_banned" class="row m-0">
-				<div class="friends-count mb-2 mt-2 info-box info-box-orange col-md-12 force-white-url cntnr"><i class="fas fa-user-friends text-brand mr-2" ></i><a href="./friends">{{ this.userFriends.length }} {{ $t('friends') }} <span v-html="showFriendsSnippet()"></span></a></div>
+				<div class="friends-count mb-2 mt-2 info-box info-box-orange col-md-12 cntnr">
+					<i class="fas fa-user-friends text-brand mr-2" ></i><a href="./friends" >{{ this.userFriends.length }} {{ $t('friends') }} <span v-html="showFriendsSnippet()"></span></a>
+					<a class="btn btn-brand m-2" href="./friends">{{ $t('View_friends') }}</a>
+				</div>
 				<div class="info-box-orange mb-2 col-md-6 cntnr"><i class="fas fa-angle-double-left text-brand mr-2"></i>{{ $t('Followers') }}: {{ numberFormat(userinfo.follower_count,0) }}</div>
 				<div class="info-box-orange mb-2 col-md-6 cntnr"><i class="fas fa-angle-double-right text-brand mr-2"></i>{{ $t('Following') }}: {{ numberFormat(userinfo.following_count,0) }}</div>
 				<div class="info-box-orange mb-2 col-md-6 cntnr" v-if="userinfo.witness_votes.includes('actifit')"><i class="fas fa-cubes text-brand mr-2"></i>&nbsp;{{ $t('Votes_Actifit_Witness') }}&nbsp;<i class="fas fa-check text-success"></i></div>
@@ -94,7 +97,7 @@
 				</div>
 				<div class="info-box-orange mb-2 col-md-12 cntnr">
 					<i class="fab fa-angellist mr-2"></i><a :href="'/activity/'+displayUser" >{{ numberFormat(rewardedPostCount, 0) }} {{ $t('Activity_Reports_Rewarded') }}</a>&nbsp;
-					<a :href="'/activity/'+displayUser" class="btn btn-brand border">{{ $t('View_reports') }}</a>
+					<a :href="'/activity/'+displayUser" class="btn btn-brand border m-2">{{ $t('View_reports') }}</a>
 				</div>
 			</div>
 		  </div>
@@ -103,10 +106,10 @@
 			
 		  <!-- badges section -->
 		  <div v-if="userinfo && !account_banned" class="user-badges">
-		    <div class="text-brand badges-title"><i class="fas fa-trophy"></i> {{ $t('Badges') }}</div>
+		    <h3 class="text-brand badges-title"><i class="fas fa-trophy"></i> {{ $t('Badges') }}</h3>
 		    <div class="badge-entry iso-badge">
 			  <div :title="$t('iso_badge_title')">
-				<div class="badge-title text-brand">{{ $t('iso_badge_title') }}</div>
+				<div class="badge-title">{{ $t('iso_badge_title') }}</div>
 				<div id="iso-badge" class="claimed-check" v-if="userHasBadge(iso_badge)"><div><img class="badge-img" src="/img/badges/actifit_iso_badge.png"></div><div class="text-brand claimed-check"><i class="fas fa-check"></i></div></div>
 				<div id="iso-badge" class="claimed-check"  v-else><img class="badge-img badge-unclaimed" src="/img/badges/actifit_iso_badge.png"></div>
 				<button v-if="badgeClaimable(iso_badge)" v-on:click="claimBadge(iso_badge)" class="btn btn-brand btn-lg border">{{ $t('Claim_badge') }}</button>
@@ -118,31 +121,38 @@
 			</div>
 			
 			<div class="badge-entry rew-activity-badge">
-			  <div class="badge-title text-brand">{{ $t('rew_activity_badge_title') }}</div>
+			  <div class="badge-title">{{ $t('rew_activity_badge_title') }}</div>
 			  <div v-for="level in rewarded_posts_rules" :key="level[1]" 
 				class="single-rew-activity-badge" :style="{left: (level[1]-1) * activ_badge_indent + 'px'}"
 				:title="$t('rew_activity_badge_level_title') + ' ' + level[1]">
 				<div v-if="level[1] > 0 && level[1] <= maxClaimedActivityBadgeLevel()">
-					<div :id="rew_activity_badge+level[1]" class="claimed-check" v-if="userHasBadge(rew_activity_badge+level[1])"><div><img class="badge-img" :src="'/img/badges/actifit_rew_act_lev_'+level[1]+'_badge.png'"></div><div class="text-brand claimed-check"><i class="fas fa-check"></i></div></div>
-					<div :id="rew_activity_badge+level[1]" class="claimed-check unclaimed-badge" v-else :style="{left:  claimable_badge_indent + 'px'}"><img class="badge-img badge-unclaimed" :src="'/img/badges/actifit_rew_act_lev_'+level[1]+'_badge.png'"></div>
-					<button v-if="badgeClaimable(rew_activity_badge+level[1])" v-on:click="claimBadge(rew_activity_badge+level[1])" class="btn btn-brand btn-lg border unclaimed-badge unclaimed-badge-btn" :style="{left: claimable_badge_indent + 'px'}">{{ $t('Claim_badge') }}</button>
-					<div v-if="!badgeClaimable(rew_activity_badge+level[1]) && !userHasBadge(rew_activity_badge+level[1])" class="unclaimed-badge unclaimed-badge-btn unclaimed-badge-note text-brand" :style="{left:  claimable_badge_indent + 'px'}">
-					  {{ $t('next_target') }}
+					<div :id="rew_activity_badge+level[1]" class="claimed-check" v-if="userHasBadge(rew_activity_badge+level[1])">
+						<div><img class="badge-img" :src="'/img/badges/actifit_rew_act_lev_'+level[1]+'_badge.png'"></div>
+						<div class="text-brand claimed-check"><i class="fas fa-check"></i></div>
 					</div>
-					<div v-if="claimingBadge == rew_activity_badge+level[1]" id="claiming_badge" class="unclaimed-badge unclaimed-badge-spin" :style="{left: claimable_badge_indent + 'px'}">
-						<i class="fas fa-spin fa-spinner"></i>{{ $t('claiming_badge_notice') }}
+					<div :id="rew_activity_badge+level[1]" class="claimed-check unclaimed-badge" v-else :style="{left:  claimable_badge_indent + 'px'}">
+						<img class="badge-img badge-unclaimed" :src="'/img/badges/actifit_rew_act_lev_'+level[1]+'_badge.png'">
+					</div>
+					<div>
+						<button v-if="badgeClaimable(rew_activity_badge+level[1])" v-on:click="claimBadge(rew_activity_badge+level[1])" class="btn btn-brand btn-lg border unclaimed-badge unclaimed-badge-btn" :style="{left: claimable_badge_indent + 'px'}">{{ $t('Claim_badge') }}</button>
+						<div v-if="!badgeClaimable(rew_activity_badge+level[1]) && !userHasBadge(rew_activity_badge+level[1])" class="unclaimed-badge text-brand unclaimed-badge-btn unclaimed-badge-note " :style="{left:  claimable_badge_indent + 'px'}" :title="$t('next_target')">
+						  <i class="fas fa-crosshairs"></i>
+						</div>
+						<div v-if="claimingBadge == rew_activity_badge+level[1]" id="claiming_badge" class="unclaimed-badge unclaimed-badge-spin" :style="{left: claimable_badge_indent + 'px'}">
+							<i class="fas fa-spin fa-spinner"></i>{{ $t('claiming_badge_notice') }}
+						</div>
 					</div>
 				</div>
 			  </div>
 			</div>
 			
 			<div class="badge-entry doubledup-activity-badge">
-				<div class="badge-title text-brand">{{ $t('doubledup_badge_title') }}</div>
+				<div class="badge-title">{{ $t('doubledup_badge_title') }}</div>
 				<div :title="$t('doubledup_badge_title')">
 					<div id="doubledup-badge" class="claimed-check" v-if="userHasBadge(doubledup_badge)"><div><img class="badge-img" src="/img/badges/actifit_doubled_up_badge.png"></div><div class="text-brand claimed-check"><i class="fas fa-check"></i></div></div>
 					<div id="doubledup-badge" class="claimed-check"  v-else><img class="badge-img badge-unclaimed" src="/img/badges/actifit_doubled_up_badge.png"></div>
 					<button v-if="badgeClaimable(doubledup_badge)" v-on:click="claimBadge(doubledup_badge)" class="btn btn-brand btn-lg border unclaimed-badge-btn">{{ $t('Claim_badge') }}</button>
-					<div v-else-if="this.doubledupWinner.length == 0" class="badge-doubledup-desc text-brand claimed-check">{{ $t('not_lucky_yet') }}</div>
+					<div v-else-if="this.doubledupWinner.length == 0" class="badge-doubledup-desc claimed-check">{{ $t('not_lucky_yet') }}</div>
 					<div v-if="claimingBadge == doubledup_badge" id="claiming_badge">
 						<i class="fas fa-spin fa-spinner"></i>{{ $t('claiming_badge_notice') }}
 					</div>
@@ -150,7 +160,7 @@
 			</div>
 			
 			<div class="badge-entry charity-activity-badge">
-				<div class="badge-title text-brand">{{ $t('charity_badge_title') }}</div>
+				<div class="badge-title">{{ $t('charity_badge_title') }}</div>
 				<div :title="$t('charity_badge_title')">
 					<div id="charity-badge" class="claimed-check" v-if="userHasBadge(charity_badge)"><div><img class="badge-img" src="/img/badges/actifit_charity_badge.png"></div><div class="text-brand claimed-check"><i class="fas fa-check"></i></div></div>
 					<div id="charity-badge" class="claimed-check"  v-else><img class="badge-img badge-unclaimed" src="/img/badges/actifit_charity_badge.png"></div>
@@ -978,7 +988,7 @@
 	.date-head{
 	  padding-left: 2px;
 	}
-	@media only screen and (min-width: 600px) {
+	@media only screen and (min-width: 601px) {
 		.user-avatar{
 		  float: left;
 		}
@@ -986,18 +996,30 @@
 		  padding-left: 128px;
 		  margin-left: 20px;
 		}
+		.badge-img, .claimed-check{
+		  width: 150px;
+		  text-align: center;
+		}
+		.rew-activity-badge{
+		  position: relative;
+		  height: 270px;
+		}
 	}
 	@media only screen and (max-width: 600px) {
 		.user-details{
 		  padding-left: 10px;
 		}
+		.badge-img, .claimed-check{
+			width: 100px;
+			text-align: center;
+		}
+		.rew-activity-badge{
+		  position: relative;
+		  height: 190px;
+		}
 	}
 	.user-avatar{
 		margin-left: 10px;
-	}
-	.badge-img, .claimed-check{
-	  width: 150px;
-	  text-align: center;
 	}
 	.badges-title{
 	  text-align: center;
@@ -1010,7 +1032,7 @@
 	  opacity: 0.2
 	}
 	.user-badges{
-	  border: 2px #ff112d solid;
+	  /*border: 2px #ff112d solid;*/
 	  margin: 10px;
 	}
 	.tip-details{
@@ -1024,23 +1046,19 @@
 	a.btn{
 	  border: 1px solid white
 	}
-	.rew-activity-badge{
-	  position: relative;
-	  height: 270px;
-	}
 	.single-rew-activity-badge{
 	  position: absolute;
 	  top: 20px;
 	}
 	.unclaimed-badge{
-	  position: absolute;
+	  position: relative;
 	}
 	.unclaimed-badge-spin{
-	  top: 220px;
+	  /*top: 220px;*/
 	  width: 200px;
 	}
 	.unclaimed-badge-btn{
-	  top: 170px;
+	  /*top: 170px;*/
 	  width: 200px;
 	  padding-left: 20px;
 	}
@@ -1051,6 +1069,7 @@
 	  padding-left: 20px;
 	  width: 200px;
 	  text-align: left;
+	  font-style: italic;
 	}
 	.token-logo{
 	  width: 20px;
@@ -1070,6 +1089,11 @@
 	.info-box-orange{
 		color: #ff4500;
 		background: linear-gradient(30deg, orange, transparent);
+	}
+	.badge-entry{
+		color: #fff !important;
+		background: linear-gradient(45deg, green, orange);
+		border: 1px solid #fff;
 	}
 	.force-white-url{
 		color: white !important;
