@@ -338,6 +338,7 @@ module.exports = {
   Cannot_tip_self: 'Come ooon you cannot tip yourself',
   Account_banned: 'Banned Account',
   Account_banned_tip: 'Account is banned. If you believe this to be in error, please contact us.',
+  Send_tip: 'Tip AFIT',
   Tip_Amount: 'Tip Amount',
   amount_above_balance: 'Amount is beyond than your current balance',
   amount_above_daily_limit: 'Amount is beyond your daily tipping limit',
@@ -489,4 +490,7 @@ module.exports = {
   consumed_count: 'Total Consumed',
   Benef_friend: 'Beneficiary Friend',
   special_christmas_event: 'Actifit Special Christmas Event!',
+  AFIT_Tokens: 'AFIT Tokens',
+  AFITX_Tokens: 'AFITX Tokens',
+  AFIT_SE_Tokens: 'AFIT S-E Tokens',
 }

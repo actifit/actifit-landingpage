@@ -66,12 +66,12 @@
 				<div class="row m-0">
 					<div class="info-box-orange mb-2 col-md-6 cntnr">
 						<img src="/img/actifit_logo.png" class="mr-2 token-logo">
-						<a href="/wallet" >{{ numberFormat(userTokenCount, 3) }} AFIT Tokens + {{ displayAFITSEBal }} AFIT S-E Tokens</a>&nbsp;
-						<button class="btn btn-brand border" v-on:click="tipUser" >Tip AFIT</button>
+						<a href="/wallet" >{{ numberFormat(userTokenCount, 3) }} {{ $t('AFIT_Tokens') }} + {{ displayAFITSEBal }} {{ $t('AFIT_SE_Tokens') }}</a>&nbsp;
+						<button class="btn btn-brand border" v-on:click="tipUser" >{{ $t('Send_tip') }}</button>
 					</div>
 					<div class="info-box-orange mb-2 col-md-6 cntnr">
 						<img src="/img/AFITX.png" class="mr-2 token-logo">
-						<a href="/wallet" >{{ displayAFITXBal }} AFITX Tokens</a>&nbsp;
+						<a href="/wallet" >{{ displayAFITXBal }} {{ $t('AFITX_Tokens') }}</a>&nbsp;
 					</div>
 				</div>
 				<div v-if="proceedTip">
