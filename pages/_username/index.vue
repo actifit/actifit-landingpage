@@ -43,33 +43,36 @@
 					   :style="'background-image: url(https://steemitimages.com/u/' + this.displayUser + '/avatar)'"></div>
 		  <div v-if="userinfo" class="user-details">
 			<div class="info-box p-2"><i class="fas fa-user mr-2"></i> {{ userinfo.name }} <b-badge v-if="account_banned" variant="danger" :title="$t('Account_banned_tip')" >{{ $t('Account_banned') }}</b-badge></div>
-			<div v-if="userMeta && userMeta.profile" class="row m-0 cntnr">
-				<div class="location-text info-box col-md-4" ><i class="fas fa-street-view mr-2"></i> {{ userMeta.profile.location }}</div>
-				<div class="info-box col-md-4"><i class="fas fa-address-card mr-2"></i> {{ userMeta.profile.about }}</div>
-				<div class="info-box col-md-4"><i class="fas fa-link mr-2"></i>&nbsp;<a :href="userMeta.profile.website" class="force-white-url">{{ userMeta.profile.website }}</a></div>
+			<div v-if="userMeta && userMeta.profile" class="row m-0">
+				<div class="location-text info-box col-md-4 cntnr" ><i class="fas fa-street-view mr-2"></i> {{ userMeta.profile.location }}</div>
+				<div class="info-box col-md-4 cntnr"><i class="fas fa-address-card mr-2"></i> {{ userMeta.profile.about }}</div>
+				<div class="info-box col-md-4 cntnr"><i class="fas fa-link mr-2"></i>&nbsp;<a :href="userMeta.profile.website" class="force-white-url">{{ userMeta.profile.website }}</a></div>
 			</div>
-			<div class="row m-0 cntnr">
-				<div class="info-box col-md-6"><i class="fas fa-calendar-alt mr-2"></i> {{ $t('Joined_On') }} {{ pureDate(userinfo.created) }}</div>
-				<div class="info-box col-md-6"><i class="fas fa-pen mr-2"></i> {{ numberFormat(userinfo.post_count, 0) }} {{ $t('Steem_posts_comments') }}</div>
+			<div class="row m-0">
+				<div class="info-box col-md-6 cntnr"><i class="fas fa-calendar-alt mr-2"></i> {{ $t('Joined_On') }} {{ pureDate(userinfo.created) }}</div>
+				<div class="info-box col-md-6 cntnr"><i class="fas fa-pen mr-2"></i> {{ numberFormat(userinfo.post_count, 0) }} {{ $t('Steem_posts_comments') }}</div>
 			</div>
-			<div v-if="!account_banned">
-				<div class="friends-count mb-2 mt-2"><i class="fas fa-user-friends text-brand mr-2" ></i><a href="./friends">{{ this.userFriends.length }} {{ $t('friends') }} <span v-html="showFriendsSnippet()"></span></a></div>
-				<div v-if="userinfo.witness_votes.includes('actifit')"><i class="fas fa-cubes text-brand mr-2"></i>&nbsp;{{ $t('Votes_Actifit_Witness') }}</div>
-				<div v-else><i class="fas fa-cubes text-brand mr-2"></i>&nbsp;<a class="btn btn-brand" href="https://steemconnect.com/sign/account-witness-vote?witness=actifit&approve=true" target="_blank">{{ $t('Vote_Now_Actifit_Witness') }}</a></div>
-				<div v-if="actifitDelegator"><i class="fas fa-file-invoice-dollar text-brand mr-2"></i>&nbsp;{{ $t('Delegates_to_Actifit') }} {{ actifitDelegator.steem_power }} {{ $t('Steem_Power') }}</div>
-				<div v-else><i class="fas fa-file-invoice-dollar text-brand"></i>&nbsp;<a class="btn btn-brand" href="https://steembottracker.com/delegation.html?delegatee=actifit" target="_blank">{{ $t('Delegate_Now_Actifit') }}</a></div>
+			<div v-if="!account_banned" class="row m-0">
+				<div class="friends-count mb-2 mt-2 info-box info-box-orange col-md-12 force-white-url cntnr"><i class="fas fa-user-friends text-brand mr-2" ></i><a href="./friends">{{ this.userFriends.length }} {{ $t('friends') }} <span v-html="showFriendsSnippet()"></span></a></div>
+				<div class="info-box-orange mb-2 col-md-6 cntnr"><i class="fas fa-angle-double-left text-brand mr-2"></i>{{ $t('Followers') }}: {{ numberFormat(userinfo.follower_count,0) }}</div>
+				<div class="info-box-orange mb-2 col-md-6 cntnr"><i class="fas fa-angle-double-right text-brand mr-2"></i>{{ $t('Following') }}: {{ numberFormat(userinfo.following_count,0) }}</div>
+				<div class="info-box-orange mb-2 col-md-6 cntnr" v-if="userinfo.witness_votes.includes('actifit')"><i class="fas fa-cubes text-brand mr-2"></i>&nbsp;{{ $t('Votes_Actifit_Witness') }}</div>
+				<div class="info-box-orange mb-2 col-md-6 cntnr" v-else><i class="fas fa-cubes text-brand mr-2"></i>&nbsp;<a class="btn btn-brand" href="https://steemconnect.com/sign/account-witness-vote?witness=actifit&approve=true" target="_blank">{{ $t('Vote_Now_Actifit_Witness') }}</a></div>
+				<div class="info-box-orange mb-2 col-md-6 cntnr" v-if="actifitDelegator"><i class="fas fa-file-invoice-dollar text-brand mr-2"></i>&nbsp;{{ $t('Delegates_to_Actifit') }} {{ actifitDelegator.steem_power }} {{ $t('Steem_Power') }}</div>
+				<div class="info-box-orange mb-2 col-md-6 cntnr" v-else><i class="fas fa-file-invoice-dollar text-brand"></i>&nbsp;<a class="btn btn-brand" href="https://steembottracker.com/delegation.html?delegatee=actifit" target="_blank">{{ $t('Delegate_Now_Actifit') }}</a></div>
 			</div>
-			<div><i class="fas fa-angle-double-left text-brand mr-2"></i>{{ $t('Followers') }}: {{ numberFormat(userinfo.follower_count,0) }}</div>
-			<div><i class="fas fa-angle-double-right text-brand mr-2"></i>{{ $t('Following') }}: {{ numberFormat(userinfo.following_count,0) }}</div>
+			
 			<div class="text-brand" v-if="!account_banned" >
-				<div>
-					<img src="/img/actifit_logo.png" class="mr-2 token-logo">
-					<a href="/wallet" >{{ numberFormat(userTokenCount, 3) }} AFIT Tokens + {{ displayAFITSEBal }} AFIT S-E Tokens</a>&nbsp;
-					<button class="btn btn-brand border" v-on:click="tipUser" >Tip AFIT</button>
-				</div>
-				<div>
-					<img src="/img/AFITX.png" class="mr-2 token-logo">
-					<a href="/wallet" >{{ displayAFITXBal }} AFITX Tokens</a>&nbsp;
+				<div class="row m-0">
+					<div class="info-box-orange mb-2 col-md-6 cntnr">
+						<img src="/img/actifit_logo.png" class="mr-2 token-logo">
+						<a href="/wallet" >{{ numberFormat(userTokenCount, 3) }} AFIT Tokens + {{ displayAFITSEBal }} AFIT S-E Tokens</a>&nbsp;
+						<button class="btn btn-brand border" v-on:click="tipUser" >Tip AFIT</button>
+					</div>
+					<div class="info-box-orange mb-2 col-md-6 cntnr">
+						<img src="/img/AFITX.png" class="mr-2 token-logo">
+						<a href="/wallet" >{{ displayAFITXBal }} AFITX Tokens</a>&nbsp;
+					</div>
 				</div>
 				<div v-if="proceedTip">
 					<div class="tip-details">
@@ -89,8 +92,9 @@
 						<i class="fas fa-spin fa-spinner" v-if="tipInProgress"></i>
 					</div>
 				</div>
-				
-				<i class="fab fa-angellist mr-2"></i><a :href="'/activity/'+displayUser" >{{ numberFormat(rewardedPostCount, 0) }} {{ $t('Activity_Reports_Rewarded') }}</a>
+				<div class="info-box-orange mb-2 col-md-12 cntnr">
+					<i class="fab fa-angellist mr-2"></i><a :href="'/activity/'+displayUser" >{{ numberFormat(rewardedPostCount, 0) }} {{ $t('Activity_Reports_Rewarded') }}</a>
+				</div>
 			</div>
 		  </div>
 		  
@@ -1060,13 +1064,17 @@
 	.info-box {
 		border: 1px solid #fff;
 		color: #fff;
-		background: #ff4500;
+		background: linear-gradient(30deg, red, transparent);
+	}
+	.info-box-orange{
+		color: #ff4500;
+		background: linear-gradient(30deg, orange, transparent);
 	}
 	.force-white-url{
 		color: white !important;
 		text-decoration: underline;
 	}
 	.cntnr{
-		min-height: 100px;
+		min-height: 80px;
 	}
 </style>
