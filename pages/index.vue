@@ -457,7 +457,7 @@
 
     <Footer isHomePage='true'/>
 	
-	<!--<FriendshipModal v-if="user"/>-->
+	<FriendshipModal v-if="user"/>
 	
     <NewsModal :news="activeNews" />
 	<NotifyModal :modalTitle="$t('Actifit_Info')" :modalText="$t('VP_desc')"/>
