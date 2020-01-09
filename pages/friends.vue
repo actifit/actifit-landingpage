@@ -70,7 +70,7 @@
 		</span>-->
 		
 		
-		<adsbygoogle ad-slot="8625360638" :ad-style="acti_goog_ad_square"/>
+		<!-- <adsbygoogle ad-slot="8625360638" :ad-style="acti_goog_ad_square"/> -->
 		
       
 		

@@ -16,7 +16,7 @@
 			<div class="report-tags p-1" v-html="displayReportTags"></div>
 		</div>
 		<article class="modal-body" v-html="$renderMD(body)"></article>
-		<div class="modal-body goog-ad-horiz-90"><adsbygoogle ad-slot="5716623705" /></div>
+		<!-- <div class="modal-body goog-ad-horiz-90"><adsbygoogle ad-slot="5716623705" /></div> -->
 		<div class="modal-footer">
 		  <div class="report-modal-prelim-info col-md-6">
 			<span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i class="fas fa-reply"></i></a></span>

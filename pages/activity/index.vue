@@ -22,7 +22,7 @@
 	  <!-- show voting counter -->
 	  <VotingStatus v-if="reports.length" />
 	  
-	  <div class="col-md-12 goog-ad-horiz-90"><adsbygoogle ad-slot="6804482273"/></div>
+	  <!-- <div class="col-md-12 goog-ad-horiz-90"><adsbygoogle ad-slot="6804482273"/></div> -->
 	  
 	  <!-- enable display of up to 2 ads among content -->
 	 <div class="row" v-if="reports.length">
@@ -30,9 +30,9 @@
 			<div v-for="itery in splitFactor" :key="itery" class="col-md-6 col-lg-4 mb-4">
 				<Report v-if="(iterx - 1) * splitFactor + (itery - 1) < reports.length" :report="reports[(iterx - 1) * splitFactor + (itery - 1)]" />
 			</div>
-			<div class="col-md-6 col-lg-4 mb-4" v-if="(iterx - 1) < inlineAds">
+			<!-- <div class="col-md-6 col-lg-4 mb-4" v-if="(iterx - 1) < inlineAds">
 				<adsbygoogle ad-slot="7038919015" ad-format="fluid" ad-layout-key="-fb+5w+4e-db+86"/>
-			</div>
+			</div> -->
 		</div>
       </div>
 	  

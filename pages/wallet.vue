@@ -336,9 +336,9 @@
 			</transition>
 		</div>
 		
-		<div class="row">
+		<!-- <div class="row">
 			<adsbygoogle ad-slot="3184833281" :ad-style="acti_goog_ad_horiz_slim"/>
-		</div>
+		</div> -->
 		
 		<div class="row text-center row-sep">
 			<div class="col-md-6 row-sep-in">
@@ -503,9 +503,9 @@
 		</div>
       </div>
 	  
-		<div class="row">
+		<!-- <div class="row">
 			<adsbygoogle ad-slot="3184833281" :ad-style="acti_goog_ad_horiz_slim"/>
-		</div>
+		</div> -->
 	  
       <!-- transaction history -->
       <div class="history mx-auto">
