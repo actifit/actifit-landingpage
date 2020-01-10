@@ -31,7 +31,7 @@
 			<div>
 				<small>
 				  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 
-					 data-target="#voteModal" v-if="this.$parent.user && userVotedThisPost()==true">
+					 data-target="#voteModal" v-if="userVotedThisPost()==true">
 					<i class="far fa-thumbs-up"></i> {{getVoteCount }}
 				  </a>
 				  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal"
@@ -334,8 +334,12 @@
 	  },
 	  /* function checks if logged in user has upvoted current report */
 	  userVotedThisPost() {
-		let curUser = this.$store.state.steemconnect.user;
+		let curUser = this.$store.state.steemconnect.user.name;
 		//check if the post contains in its original voters current user, or if it has been upvoted in current session
+		if (!curUser){
+			this.postUpvoted = false;
+			return this.postUpvoted;
+		}
 		this.postUpvoted = this.full_data.active_votes.filter(voter => (voter.voter === curUser)).length > 0;
 		
 		return this.postUpvoted;
