@@ -357,15 +357,7 @@
             <a href="@priyanarc" target="_blank">Priyan Fareen</a>
 			<div><i>Moderator</i></div>
 			<a href="https://www.linkedin.com/in/priyan-fareen-33722398/" target="_blank"><i class="fab fa-linkedin"></i></a>
-          </div>
-		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
-            <a href="@kpreddy" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/praveenreddy.jpg);'"></div>
-            </a>
-            <a href="@kpreddy" target="_blank">Praveen Reddy Kanthala</a>
-			<div><i>Moderator</i></div>
-			<a href="https://www.linkedin.com/in/praveen-reddy-kanthala-a0532011a/" target="_blank"><i class="fab fa-linkedin"></i></a>
-          </div>		  
+          </div>	  
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@sumit71428" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/sumitsingh.jpg);'"></div>
@@ -375,12 +367,20 @@
 			<a href="https://www.linkedin.com/in/sumit-singh-91b616185/" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
-            <a href="@vishalsingh4997" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/vishalsingh.jpg);'"></div>
+            <a href="@silvertop" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/silvertop.jpg);'"></div>
             </a>
-            <a href="@vishalsingh4997" target="_blank">Vishal Singh</a>
+            <a href="@silvertop" target="_blank">Mike Gutman</a>
 			<div><i>Moderator</i></div>
-			<a href="https://www.linkedin.com/in/enomz/" target="_blank"><i class="fab fa-linkedin"></i></a>
+			<a href="" target="_blank"><i class="fab fa-linkedin"></i></a>
+          </div>
+		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
+            <a href="@elizabethbit" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/elizabethbit.jpg);'"></div>
+            </a>
+            <a href="@elizabethbit" target="_blank">Elizabeth Gutman</a>
+			<div><i>Moderator</i></div>
+			<a href="https://www.linkedin.com/in/elizabeth-gutman-33456536/" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
         </div>
       </div>
