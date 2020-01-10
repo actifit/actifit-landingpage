@@ -162,18 +162,42 @@
 	},
     methods: {
       commentBody () {
-		let report_content = this.full_data.body;
+		//console.log(this.report);
+		let report_content = this.report.body;
 		
-		/* let's match youtube vidoes and display them in a player */
+		//console.log(report_content);
+		
+		/* let's find images sent as ![](), and display them properly */
+		//let img_links_reg = /^(?:(?!=").)*((https?:\/\/[./\d\w-]*\.(?:png|jpg|jpeg|gif))|((https?:\/\/usermedia\.actifit\.io\/[./\d\w-]+)))/igm;
+		let img_links_reg = /[!]\[[\d\w\s-\.\(\)]*\]\((((https?:\/\/actifit\.s3\.amazonaws\.com\/)|((https?:\/\/usermedia\.actifit\.io\/))|((https:\/\/ipfs\.busy\.org\/ipfs\/))|((https:\/\/steemitimages\.com\/)))[\d\w-=&[\:\/\.\%\?]+|(https?:\/\/[.\d\w-\/\:\%]*(\.(?:png|jpg|jpeg|gif)(\??[\d\w-=&[\:\/\.\%\?]+)?)?))[)]/igm;
+		report_content = report_content.replace(img_links_reg,'<img src="$1">');
+		
+		/* let's find images sent as pure URLs, and display them as actual images, while avoiding well established images */
+		/* negative lookbehinds are not supported ?<! we need to switch to another approach */
+		//img_links_reg = /(?<!=")(?<!]\()(((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|(https?:\/\/[./\d\w-]*\.(?:png|jpg|jpeg|gif)))/igm;
+		//img_links_reg = /(((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|(https?:\/\/[./\d\w-]*\.(?:png|jpg|jpeg|gif)))(?!")/igm;
+		img_links_reg = /(((https?:\/\/actifit\.s3\.amazonaws\.com\/)[\d\w-]+)|((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|((https:\/\/ipfs\.busy\.org\/ipfs\/)[\d\w-]+)|((https:\/\/steemitimages\.com\/)[\d\w-[\:\/\.]+)|(https?:\/\/[.\/\d\w-]*\.(?:png|jpg|jpeg|gif)))[\s]/igm;
+		report_content = report_content.replace(img_links_reg,'<img src="$1">');
+		
+		/* let's match youtube videos and display them in a player */
 		//let vid_reg = /^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+/gm;
 		let vid_reg = /https?:\/\/(?:[0-9A-Z-]+\.)?(?:youtu\.be\/|youtube\.com\S*[^\w\-\s])([\w\-]{11})(?=[^\w\-]|$)(?![?=&amp;+%\w]*(?:['"][^&lt;&gt;]*&gt;|&lt;\/a&gt;))[?=&amp;+%\w-]*/ig;
 		
 		//swap into a player format, and introduce embed format for proper playing of videos
 		report_content = report_content.replace(vid_reg,'<iframe width="640" height="360" src="https://www.youtube.com/embed/$1"></iframe>');
 		
-		/* regex to match @ words and convert them to steem user links */
-		let user_name = /(@([\a-zA-Z0-9-.]+)(?![\a-zA-Z0-9-.]))([,.|() ])/g;
-        return report_content.replace(user_name,'[$1](https://actifit.io/$1)$3')
+		/* let's find links sent as [](), and display them properly */
+		let href_lnks = /\[([\d\w\s-\.\(\)=[\:\/\.%\?&"<>]*)\]\(([\d\w-=[\:\/\.%\?&]+|(https?:\/\/[.\d\w-\/\:\%\(\)]*\.))[)]/igm;
+		report_content = report_content.replace(href_lnks,'<a href="$2">$1</a>');
+		
+		//let href_lnks = /\[([\d\w-\.\@]*)\]\(([\d\w-\.\@\/\:]*)\)/igm;
+		//report_content = report_content.replace(href_lnks,'<a href="$2">$1</a>');
+		
+		/* regex to match @ words and convert them to steem user links. Need to skip special occurrences such as name within a link (preceded by /) */
+		let user_name = /([^\/])(@([\d\w-.]+))/igm;
+        
+		report_content = report_content.replace(user_name,'$1<a href="https://actifit.io/$2">$2</a>')
+		return report_content;
       },
 	  meta() {
         return JSON.parse(this.full_data.json_metadata)
