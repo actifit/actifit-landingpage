@@ -163,7 +163,7 @@
     methods: {
       commentBody () {
 		//console.log(this.report);
-		let report_content = this.report.body;
+		let report_content = this.full_data.body;
 		
 		//console.log(report_content);
 		
