@@ -31,7 +31,7 @@
 			<div>
 				<small>
 				  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 
-					 data-target="#voteModal" v-if="userVotedThisPost()==true">
+					 data-target="#voteModal" v-if="this.$store.state.steemconnect.user && userVotedThisPost()==true">
 					<i class="far fa-thumbs-up"></i> {{getVoteCount }}
 				  </a>
 				  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal"
