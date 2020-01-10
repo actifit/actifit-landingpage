@@ -372,7 +372,6 @@
             </a>
             <a href="@silvertop" target="_blank">Mike Gutman</a>
 			<div><i>Moderator</i></div>
-			<a href="" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@elizabethbit" target="_blank">
