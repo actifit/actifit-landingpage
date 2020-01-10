@@ -54,6 +54,7 @@
 			<a href="#" @click.prevent="resetOpenComment()"  class="btn btn-brand border reply-btn w-25">{{ $t('Cancel') }}</a>
 			<a href="#" @click.prevent="insertModSignature" class="btn btn-brand border reply-btn w-25">{{ $t('Short_Signature') }}</a>
 			<a href="#" @click.prevent="insertFullModSignature" class="btn btn-brand border reply-btn w-25">{{ $t('Full_Signature') }}</a>
+			<div class="text-brand" v-html="errPosting"></div>
 		  </div>
 		</transition>
 		<div class="comment-reply" v-if="responsePosted">
@@ -108,6 +109,7 @@
 			loading: false,
 			deleting: false,
 			responsePosted: false,
+			errPosting: '',
 			responseBody: '',
 			indentFactor: 30,
 			editorConfig: { // markdown editor for post body
@@ -255,6 +257,11 @@
 	  /* function handles sending out the comment to the blockchain */
 	  postResponse(event) {
 		// proceed with saving the comment
+		
+		if (!this.$store.state.steemconnect.user){
+			this.errPosting = this.$t('Need_login');
+			return;
+		}
 		
 		this.loading = true
 		
