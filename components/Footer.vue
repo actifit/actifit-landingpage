@@ -10,7 +10,7 @@
 		<a href="https://t.me/actifit" target="_blank" class="d-inline-block mx-3" :title="$t('Telegram')"><i class="fab fa-2x fa-telegram"></i></a>
       </div>
 	  <div class="row">
-		<div class="col text-center"><small>Price Data provided By <a href="https://coingecko.com">CoinGecko</a></small></div>
+		<div class="col text-center"><small>{{ $t('price_data_sentence') }}<a href="https://coingecko.com">{{ $t('CoinGecko') }}</a></small></div>
 	  </div>
       <div class="row">
         <div class="col text-center">
