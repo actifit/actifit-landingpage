@@ -27,6 +27,9 @@ export default {
   setLeaderboard (state, leaderboard) {
     state.leaderboard = leaderboard
   },
+  setExtendedLeaderboard (state, leaderboard) {
+    state.extLeaderboard = leaderboard
+  },
   setReports (state, reports) {
     state.reports = reports
   },

@@ -127,6 +127,15 @@ export default {
       }).catch(e => reject(e))
     })
   },
+  fetchExtendedLeaderboard ({ commit }) {
+    return new Promise((resolve, reject) => {
+      fetch('https://actifit-pst-cr3at0r.herokuapp.com/api/topP0stsV2', {method: 'POST'}).then(res => {
+        res.json().then(json => {
+          commit('setExtendedLeaderboard', json)
+        }).catch(e => reject(e))
+      }).catch(e => reject(e))
+    })
+  },
   fetchReports ({ state, commit, dispatch }) {
     // fetches initial posts or more posts if invoked again
 	

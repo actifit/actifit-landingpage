@@ -29,6 +29,9 @@ export default {
   leaderboard (state) {
     return state.leaderboard
   },
+  extLeaderboard (state) {
+    return state.extLeaderboard
+  },
   reports (state) {
     return state.reports
   },

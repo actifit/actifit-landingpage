@@ -18,6 +18,7 @@ const createStore = () => {
       tokensDistributed: 0, // total amount of distributed tokens
       rewardedActivityCount: 0, // total amount of activity posts
       leaderboard: [], // top users
+	  extLeaderboard: [], //top users extended
       reports: [], // all activity reports/posts
 	  topDelegators: [], //list of top delegators
 	  moderators: [], //list of current moderators
