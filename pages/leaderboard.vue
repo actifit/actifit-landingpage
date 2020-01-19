@@ -19,26 +19,18 @@
           <i class="fas fa-medal"></i><br>
           {{ $t('Daily_Leaderboard') }}
         </h1>
-        
-		<div class="row" v-if="1==2">
-			<div v-if="extLeaderboard.length == 0" class="col-md-12 text-center"><i class="fas fa-spin fa-spinner text-brand"></i></div>
-			<div class="row col-md-12 m-3 mb-sm-0" v-else>
-				<span class="">Rank</span>
-				<span class="">User</span>
-				<span class="col-md-3">Activity Count</span>
-				<span class="col-md-3">Post Details</span>
-			</div>
-		</div>
+       
 		<div class="row border-actifit" v-if="extLeaderboard.length >= 3" v-for="(curEntry, index) in extLeaderboard" :key="index">
           <div class="row col-md-12 m-3 mb-sm-0">
-              <span class="">{{index+1}}.</span>
+              <span class="avatar pro-card-av rank-class" style="background-image: url(img/gadgets/friend-ranker.png);" >
+				<div class="p-3">{{index+1}}</div>
+			  </span>
               <a :href="curEntry.author" target="_blank">
                 <div class="avatar mb-3 " :style="'background-image: url(https://steemitimages.com/u/' + curEntry.author.replace('@','') + '/avatar);'"></div>
               </a>
               <a :href="curEntry.author" target="_blank" class="col-md-3">@{{ curEntry.author }}</a><br/>
 			  <a :href="curEntry.author" target="_blank" class="col-md-3">{{ numberFormat(curEntry.activityCount[0], 0) }}</a>
-			  <a :href="curEntry.url" target="_blank" class="col-md-3">Post Details</a>
-			  <span v-if="1==2">{{curEntry}}</span>
+			  <a :href="curEntry.url" target="_blank" :class="smallScreenBtnClasses" class="btn btn-lg btn-brand border">{{ $t('View_post_details') }}</a>
           </div>
         </div>
 	
@@ -64,6 +56,13 @@
 	computed: {
       ...mapGetters('steemconnect', ['user']),
       ...mapGetters(['userTokens', 'userReportCount', 'userRank', 'extLeaderboard']),
+	  smallScreenBtnClasses () {
+		//use proper classes for neat display
+		if (screen.width < 768){
+		  return "h-25";
+		}
+		return "h-50";
+	  },
     },
 	watch: {
 		user: 'fetchUserData',
@@ -106,5 +105,13 @@
 }
 .border-actifit{
 	border: 2px red solid;
+}
+.border-actifit:first{
+	border-bottom: none;
+}
+.rank-class{
+	color: white;
+    text-align: center;
+	border: none!important;
 }
 </style>
