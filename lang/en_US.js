@@ -495,4 +495,14 @@ module.exports = {
   AFIT_SE_Tokens: 'AFIT S-E Tokens',
   View_reports: 'View Reports',
   View_friends: 'View Friends',
+  Discord: 'Discord',
+  Facebook: 'Facebook',
+  Twitter: 'Twitter',
+  Instagram: 'Instagram',
+  Telegram: 'Telegram',
+  price_data_sentence: 'Price Data provided By ',
+  CoinGecko: 'CoinGecko',
+  View_post_details: 'Post Details',
+  Find_me: 'Find Me',
+  View_leaderboard: 'View Current Leaderboard'
 }
