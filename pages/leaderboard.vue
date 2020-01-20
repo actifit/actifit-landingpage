@@ -20,7 +20,9 @@
           {{ $t('Daily_Leaderboard') }}
         </h1>
 		<div v-if="!Array.isArray(extLeaderboard) || extLeaderboard.length < 3" class="md-col-12 text-center"><i class="fas fa-spin fa-spinner text-brand"></i></div>
-		<div v-if="user" class="text-right"><button target="_blank" :class="smallScreenBtnClasses" class="btn btn-lg btn-brand border" v-on:click="findUser">{{ $t('Find_me') }}</button></div>
+		<div v-else>
+			<div v-if="user" class="text-right"><button target="_blank" :class="smallScreenBtnClasses" class="btn btn-lg btn-brand border" v-on:click="findUser">{{ $t('Find_me') }}</button></div>
+		</div>
 		<div class="row border-actifit" v-if="extLeaderboard.length >= 3" v-for="(curEntry, index) in extLeaderboard" :key="index" :class="entryRelClass(curEntry.author, curEntry.activityCount[0])" :ref="curEntry.author">
           <div class="row col-md-12 m-3 mb-sm-0">
               <span class="avatar pro-card-av rank-class" style="background-image: url(img/gadgets/friend-ranker.png);" >
