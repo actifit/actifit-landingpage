@@ -19,8 +19,8 @@
           <i class="fas fa-medal"></i><br>
           {{ $t('Daily_Leaderboard') }}
         </h1>
-       
-		<div class="row border-actifit" v-if="extLeaderboard.length >= 3" v-for="(curEntry, index) in extLeaderboard" :key="index">
+		<div v-if="!Array.isArray(extLeaderboard) || extLeaderboard.length < 3" class="md-col-12 text-center"><i class="fas fa-spin fa-spinner text-brand"></i></div>
+		<div class="row border-actifit" v-if="extLeaderboard.length >= 3" v-for="(curEntry, index) in extLeaderboard" :key="index" :class="entryRelClass(curEntry.activityCount[0])" >
           <div class="row col-md-12 m-3 mb-sm-0">
               <span class="avatar pro-card-av rank-class" style="background-image: url(img/gadgets/friend-ranker.png);" >
 				<div class="p-3">{{index+1}}</div>
@@ -28,8 +28,8 @@
               <a :href="curEntry.author" target="_blank">
                 <div class="avatar mb-3 " :style="'background-image: url(https://steemitimages.com/u/' + curEntry.author.replace('@','') + '/avatar);'"></div>
               </a>
-              <a :href="curEntry.author" target="_blank" class="col-md-3">@{{ curEntry.author }}</a><br/>
-			  <a :href="curEntry.author" target="_blank" class="col-md-3">{{ numberFormat(curEntry.activityCount[0], 0) }}</a>
+              <a :href="curEntry.author" target="_blank" class="col-md-3 mt-3"><span>@{{ curEntry.author }}</span></a><br/>
+			  <a :href="curEntry.author" target="_blank" class="col-md-3 mt-3"><span>{{ numberFormat(curEntry.activityCount[0], 0) }} {{$t('recorded_activity')}}</span></a>
 			  <a :href="curEntry.url" target="_blank" :class="smallScreenBtnClasses" class="btn btn-lg btn-brand border">{{ $t('View_post_details') }}</a>
           </div>
         </div>
@@ -86,6 +86,20 @@
 		  this.$store.dispatch('fetchReferrals')
 		}
 	  },
+	  entryRelClass (activCount){
+		try{
+			activCount = parseInt(activCount);
+			if (activCount >= 10000 ){
+				return "green-rank";
+			}
+			if (activCount >= 5000){
+				return "red-rank";
+			}
+			return "grey-rank";
+		}catch(err){
+			return "";
+		}
+	  }
 	},
 	async mounted () {
       // fetch data
@@ -113,5 +127,14 @@
 	color: white;
     text-align: center;
 	border: none!important;
+}
+.green-rank{
+	background: linear-gradient(-30deg, lightgreen, transparent);
+}
+.red-rank{
+	background: linear-gradient(-30deg, bisque, transparent);
+}
+.grey-rank{
+	background: linear-gradient(-30deg, lightgrey, transparent);
 }
 </style>
