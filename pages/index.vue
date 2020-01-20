@@ -213,7 +213,7 @@
 			<a :href="delegator._id" target="_blank">{{ numberFormat(delegator.steem_power, 0) }} {{ $t('Steem_Power') }}</a>
           </div>
 		  <div class="full-div">
-			<nuxt-link to="/delegators" class="text-center btn delegator-btn" data-target="#">{{ $t('View_All_Delegators') }}</nuxt-link>
+			<nuxt-link to="/delegators" class="text-center btn btn-brand" data-target="#">{{ $t('View_All_Delegators') }}</nuxt-link>
 		  </div>
         </div>
       </div>
@@ -258,6 +258,9 @@
             </div>
           </div>
         </div>
+		<div class="full-div">
+			<nuxt-link to="/leaderboard" class="text-center btn delegator-btn text-brand mt-2 leader-cls-btn" data-target="#">{{ $t('View_leaderboard') }}</nuxt-link>
+		</div>
       </div>
     </section>
 
@@ -659,5 +662,9 @@
 	
 	.user-menu .user-avatar{
 	  float: right;
+	}
+	.leader-cls-btn:hover{
+	  background-color: darkred;
+	  color: white;
 	}
 </style>
