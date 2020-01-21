@@ -110,4 +110,7 @@
 	.no-actifit{
 		display: none !important;
 	}
+	.currency-logo-small{
+		height: 15px;
+	}
 </style>

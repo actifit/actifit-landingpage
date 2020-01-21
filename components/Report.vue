@@ -70,12 +70,12 @@
 		<div class="row details mt-2">
 			<div class="col-6">
 				<small>
-					{{ postPayout }}
+					<img src="/img/STEEM.png" class="mr-1 currency-logo-small">{{ postPayout }}
 				</small>
 			</div>
 			<div class="col-6 text-right">
 				<small>
-					{{ afitReward }} {{ $t('AFIT_Token') }}
+					<img src="/img/actifit_logo.png" class="mr-1 currency-logo-small">{{ afitReward }} {{ $t('AFIT_Token') }}
 				</small>
 			</div>
 		</div>

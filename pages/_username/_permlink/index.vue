@@ -45,7 +45,7 @@
 			</span>
 			<span>
 				<small :title="afitReward +' ' + $t('AFIT_Token')">
-					<img src="/img/actifit_logo.png" class="mr-2 currency-logo-small">{{ afitReward }} {{ $t('AFIT_Token') }}
+					<img src="/img/actifit_logo.png" class="mr-1 currency-logo-small">{{ afitReward }} {{ $t('AFIT_Token') }}
 				</small>
 				<small :title="postPayout">
 					<img src="/img/STEEM.png" class="mr-1 currency-logo-small">{{ postPayout }}
@@ -739,9 +739,6 @@
 	.single-tag{
 		background-color: red;
 		color: white;
-	}
-	.currency-logo-small{
-		height: 15px;
 	}
 	.pointer-cur-cls{
 		cursor: pointer;
