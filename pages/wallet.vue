@@ -571,7 +571,7 @@
   const scot_steemengine_api = process.env.steemEngineScot;
 
   const tokensNonStakable = ['AFITX', 'AFIT', 'STEEMP'];
-  const tokensOfInterest = ['SPORTS', 'PAL'].concat(tokensNonStakable);
+  const tokensOfInterest = ['SPORTS', 'PAL', 'APX'].concat(tokensNonStakable);
   
   import { mapGetters } from 'vuex'
 
