@@ -50,7 +50,7 @@
 				<small :title="postPayout">
 					<img src="/img/STEEM.png" class="mr-1 currency-logo-small">{{ postPayout }}
 				</small>
-				<span @click.prevent="displayMorePayoutData = !displayMorePayoutData" class="text-brand" :title="$t('more_token_rewards')">
+				<span @click.prevent="displayMorePayoutData = !displayMorePayoutData" class="text-brand pointer-cur-cls" :title="$t('more_token_rewards')">
 					<i class="fas fa-chevron-circle-down" v-if="!displayMorePayoutData"></i>
 					<i class="fas fa-chevron-circle-up" v-else></i>
 				</span>
@@ -244,14 +244,7 @@
 		}
 		//console.log(result);
 		//console.log(result.body);
-		
-		
-		/*const $ = cheerio.load('<div class="actifit_container">'+result.body+'</div>');
-				
-		//grab text without HTML, and remove extra spacing
-		var pure_text = $('.actifit_container').text().replace(/\s+/g,' ');
-		console.log(pure_text);*/
-		//console.log(result.body);
+
 		//remove all tags from text
 		let desc = sanitize(result.body, { allowedTags: [] });
 		
@@ -594,11 +587,6 @@
 		//grab post full pay if full pay mode enabled
 		fetch(process.env.actiAppUrl+'getPostFullAFITPayReward?user=' + this.report.author+'&url='+this.report.url).then(res => {
 				res.json().then(json => this.fullAFITReward = json.token_count)}).catch(e => reject(e))
-				
-		//grab moderators' list
-		fetch(this.$store.dispatch('fetchModerators')).then(res => {
-		
-		}).catch(e => reject(e))
 		
 		//grab post S-E token pay
 		fetch(scot_steemengine_api+'@'+this.report.author+'/'+this.report.permlink ).then(
@@ -754,5 +742,8 @@
 	}
 	.currency-logo-small{
 		height: 15px;
+	}
+	.pointer-cur-cls{
+		cursor: pointer;
 	}
 </style>

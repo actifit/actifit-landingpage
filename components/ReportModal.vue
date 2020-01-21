@@ -34,12 +34,23 @@
 				</small>
 			</span>
 			<span>
-				<small>
-					{{ postPayout }}
+				<small :title="afitReward +' ' + $t('AFIT_Token')">
+					<img src="/img/actifit_logo.png" class="mr-2 currency-logo-small">{{ afitReward }} {{ $t('AFIT_Token') }}
 				</small>
-				<small>
-					{{ afitReward }} {{ $t('AFIT_Token') }}
+				<small :title="postPayout">
+					<img src="/img/STEEM.png" class="mr-1 currency-logo-small">{{ postPayout }}
 				</small>
+				<span @click.prevent="displayMorePayoutData = !displayMorePayoutData" class="text-brand pointer-cur-cls" :title="$t('more_token_rewards')">
+					<i class="fas fa-chevron-circle-down" v-if="!displayMorePayoutData"></i>
+					<i class="fas fa-chevron-circle-up" v-else></i>
+				</span>
+				<transition name="fade" v-if="displayMorePayoutData">
+					<div class="m-2">
+						<small v-for="(token, index) in tokenRewards" :key="index" :title="displayTokenValue(token)">
+							{{displayTokenValue(token)}} | 
+						</small>
+					</div>
+				</transition>
 			</span>
 		  </div>
 		  <div class="text-brand col-md-6"> 
@@ -172,10 +183,14 @@
 
   Vue.use( steemEditor );
   
+  const scot_steemengine_api = process.env.steemEngineScot;
+  const tokensOfInterest = ['SPORTS', 'PAL', 'APX'];
+  
   export default {
 	data () {
 		return {
 			afitReward: 0,
+			tokenRewards: [],
 			userRank: '',
 			fullAFITReward: '',
 			postUpvoted: false,
@@ -195,7 +210,8 @@
 			  forceSync: true,
 			  //status: false,//['lines', 'words'],
 			  promptURLs: true
-			}
+			},
+			displayMorePayoutData: false,
 		}
 	},
 	watch: {
@@ -463,6 +479,28 @@
 				
 		//grab moderators' list
 		this.$store.dispatch('fetchModerators')
+		
+		//grab post S-E token pay
+		fetch(scot_steemengine_api+'@'+this.report.author+'/'+this.report.permlink ).then(
+			res => {res.json().then(json => this.setReportTokenRewards (json) ).catch(e => reject(e))
+		}).catch(e => reject(e))
+	  },
+	  /* function handles proper display for post token rewards */
+	  displayTokenValue (token) {
+		let val;
+		//if already paid
+		if (parseFloat(token.total_payout_value)>0){
+			val = parseFloat(token.total_payout_value) / Math.pow(10, token.precision);
+			return this.numberFormat(val, token.precision) + ' ' + token.token;
+		}
+		if (isNaN(token.pending_token)){
+			return "";
+		}
+		if (parseFloat(token.pending_token) == 0){
+			return this.numberFormat(val, token.precision) + ' ' + token.token;
+		}
+		val = parseFloat(token.pending_token) / Math.pow(10, token.precision);
+		return this.numberFormat(val, token.precision) + ' ' + token.token;
 	  },
 	  fixSubModal () {
 		//handles fixing parent class to properly interpret existing report modal
@@ -470,7 +508,21 @@
 		if ($('#reportModal').hasClass('show')){
 		  $('body').addClass('modal-open');
 		}
-	  }
+	  },
+	   async setReportTokenRewards (result) {
+		this.tokenRewards = result;
+		console.log(result);
+	  },
+	  /**
+       * Formats numbers with commas and dots.
+       *
+       * @param number
+	   * @param precision
+       * @returns {string}
+       */
+      numberFormat (number, precision) {
+        return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
+      }
 	},
 	async mounted () {
 	  if (this.report != null){
@@ -524,5 +576,11 @@
 	.single-tag{
 		background-color: red;
 		color: white;
+	}
+	.currency-logo-small{
+		height: 15px;
+	}
+	.pointer-cur-cls{
+		cursor: pointer;
 	}
 </style>
