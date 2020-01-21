@@ -504,5 +504,7 @@ module.exports = {
   CoinGecko: 'CoinGecko',
   View_post_details: 'Post Details',
   Find_me: 'Find Me',
-  View_leaderboard: 'View Current Leaderboard'
+  View_leaderboard: 'View Current Leaderboard',
+  payout_value: 'Payout Value',
+  more_token_rewards: 'More Token Rewards',
 }
