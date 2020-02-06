@@ -89,8 +89,9 @@
 	  initializePostCalc(){
 		
 		this.tokenRewards = this.$parent.$parent.tokenRewards;
-		//console.log();
-		
+		if (!this.tokenRewards){
+			this.tokenRewards = this.postData.specTokenRewards;
+		}		
 		
 		//calculate various needed data for vote value
 		if (this.currentToken != 'STEEM'){
