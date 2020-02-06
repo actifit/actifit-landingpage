@@ -9,6 +9,13 @@
           </button>
         </div>
 		<div class="modal-body">
+			<div>
+				<select v-model="currentToken" class="form-control col-3 sel-adj float-right border-red" >
+					<!-- default option is STEEM -->
+					<option value="STEEM">STEEM</option>
+					<option v-for="(tokenType, key) in tokenRewards" :key="key" :value="tokenType.token">{{tokenType.token}}</option>
+				</select>
+			</div>
 			<table class="table table-hover">
 			  <thead class="text-brand">
 				<tr>
@@ -21,7 +28,7 @@
 			  </thead>
 			  <tbody>
 				<!-- voter, percent, reputation, rshares -->
-				<tr v-for="(voteEntry, key) in votersList" :key="key" :class="{'bg-danger': user && user.name === voteEntry.voter, 'text-white': user && user.name === voteEntry.voter}">
+				<tr v-for="(voteEntry, key) in activeVotersList" :key="key" :class="{'bg-danger': user && user.name === voteEntry.voter, 'text-white': user && user.name === voteEntry.voter}">
 				  <td>
 					<a :href="voteEntry.voter" target="_blank" :class="{'text-white': user && user.name === voteEntry.voter}">
 						@{{ voteEntry.voter }}
@@ -50,6 +57,13 @@
   let ratio;
   
   export default {
+	data () {
+      return {
+		currentToken: 'STEEM',
+		tokenRewards: [],
+		activeVotersList : [],
+	  }
+	},
     props: [ 'modalTitle', 'votersList', 'postData' ],
 	components: {
 	  
@@ -60,36 +74,61 @@
     },
 	watch: {
 		postData: 'initializePostCalc',
+		currentToken: 'initializePostCalc',
 	},
 	methods: {
 	  /* calculate vote value */
 	  voteValue(voteEntry){
 		if (voteEntry){
-			return '$ ' + parseFloat((voteEntry.rshares * ratio)).toFixed(4);
+			return this.currentToken + ' ' + parseFloat((voteEntry.rshares * ratio)).toFixed(4);
 		}else{
-			return '$ ' + 0;
+			return this.currentToken + ' ' + 0;
 		}
 	  },
 	  /* initialize post specific data and calculations */
 	  initializePostCalc(){
-		//sort data according to abs value of rshares
-		this.votersList = this.votersList.sort(function sortVoters(a, b) {
-				return Math.abs(b.rshares) - Math.abs(a.rshares);
-		});
+		
+		this.tokenRewards = this.$parent.$parent.tokenRewards;
+		//console.log();
+		
 		
 		//calculate various needed data for vote value
-		totalPayout =
-		  parseFloat(this.postData.pending_payout_value) +
-		  parseFloat(this.postData.total_payout_value) +
-		  parseFloat(this.postData.curator_payout_value);
-		  
-		voteRshares = this.postData.active_votes.reduce((a, b) => a + parseFloat(b.rshares), 0);
+		if (this.currentToken != 'STEEM'){
+			this.activeVotersList = this.tokenRewards[this.currentToken].active_votes;
+			totalPayout =
+			  parseFloat(this.tokenRewards[this.currentToken].pending_token) +
+			  parseFloat(this.tokenRewards[this.currentToken].total_payout_value) +
+			  parseFloat(this.tokenRewards[this.currentToken].curator_payout_value);
+			
+			totalPayout /= Math.pow(10, this.tokenRewards[this.currentToken].precision);
+			
+			voteRshares = this.tokenRewards[this.currentToken].active_votes.reduce((a, b) => a + parseFloat(b.rshares), 0);
+			//voteRshares = this.tokenRewards[this.currentToken].voteRshares;
+		
+		}else{
+			this.activeVotersList = this.votersList;
+			//calculate various needed data for vote value
+			totalPayout =
+			  parseFloat(this.postData.pending_payout_value) +
+			  parseFloat(this.postData.total_payout_value) +
+			  parseFloat(this.postData.curator_payout_value);
+			  
+			voteRshares = this.postData.active_votes.reduce((a, b) => a + parseFloat(b.rshares), 0);
+		}
+		
+		//sort data according to abs value of rshares
+		this.activeVotersList = this.activeVotersList.sort(function sortVoters(a, b) {
+				return Math.abs(b.rshares) - Math.abs(a.rshares);
+		});
 		
 		ratio = (voteRshares === 0) ? 0 : totalPayout / voteRshares;
 	  }
 	},
 	async mounted () {
+		console.log('mounted');
 		if (this.postData){
+			console.log('postData');
+			console.log(this.postData);
 			this.initializePostCalc();
 		}
 	}
@@ -98,5 +137,9 @@
 <style>
 .text-green{
 	color: #76BB0E
+}
+.border-red{
+	border: 2px red solid;
+	border-radius: 5px;
 }
 </style>
