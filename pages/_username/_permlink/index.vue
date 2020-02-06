@@ -640,7 +640,8 @@
 	  },
 	  async setReportTokenRewards (result) {
 		this.tokenRewards = result;
-		console.log(result);
+		this.report.specTokenRewards = this.tokenRewards;
+		//console.log(result);
 	  },
 	  /**
        * Formats numbers with commas and dots.
