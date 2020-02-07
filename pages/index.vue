@@ -88,7 +88,8 @@
             <!--<p class="lead py-md-3 form-info">Log in to see your current token balance, or sign up for a Steem account to start getting rewarded for your activity.</p>-->
             <div class="row">
               <div class="col-6">
-                <a :href="$steemconnect.getLoginURL()" class="btn btn-brand btn-lg w-100">{{ $t('Login') }}</a>
+                <!--<a href="/login" class="btn btn-brand btn-lg w-100">{{ $t('Login') }}</a>-->
+				<a :href="$steemconnect.getLoginURL()" class="btn btn-brand btn-lg w-100">{{ $t('Login') }}</a>
               </div>
               <div class="col-6">
                 <a href="/signup" class="btn btn-brand btn-lg w-100">{{ $t('Sign_Up') }}</a>
@@ -465,7 +466,7 @@
 	<NotifyModal :modalTitle="$t('Actifit_Info')" :modalText="$t('VP_desc')"/>
 	<NotifyModal id="notifyModalRC" ref="notifyModalRC" :modalTitle="$t('Actifit_Info')" :modalText="$t('RC_desc')"/>
 	
-	<!--<CompetitionAnnounce />-->
+	<CompetitionAnnounce />
 	 
   </div>
 </template>
@@ -481,7 +482,7 @@
   import NotifyModal from '~/components/NotifyModal'
   import FriendshipModal from '~/components/FriendshipModal'
   
-  //import CompetitionAnnounce from '~/components/CompetitionAnnounce'
+  import CompetitionAnnounce from '~/components/CompetitionAnnounce'
 
   export default {
     components: {
@@ -492,7 +493,7 @@
 	  SteemStats,
 	  NotifyModal,
 	  FriendshipModal,
-	  //CompetitionAnnounce
+	  CompetitionAnnounce
     },
     data () {
       return {
