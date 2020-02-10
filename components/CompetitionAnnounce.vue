@@ -10,7 +10,7 @@
 		<div class="extra-info" v-if="showCompDetails">
 		  <div class="img-container row">
 			<iframe v-if="screenWidth < 768" src="http://www.youtube.com/embed/kS6AXH1kY74" width="320" height="180" frameborder="0" class="mx-auto" allowfullscreen></iframe>
-			<iframe v-else src="http://www.youtube.com/embed/kS6AXH1kY74" width="640" height="360" frameborder="0" class="mx-auto" allowfullscreen></iframe>
+			<iframe v-else src="https://www.youtube.com/embed/kS6AXH1kY74" width="640" height="360" frameborder="0" class="mx-auto" allowfullscreen></iframe>
 			<!--<iframe width="640" height="360" src="https://www.youtube.com/embed/kS6AXH1kY74"></iframe>-->
 			<!--<img class="announce-img" src="/img/actifit-christmas-event.jpg">-->
 		  </div>
