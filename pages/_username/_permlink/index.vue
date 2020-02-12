@@ -551,14 +551,10 @@
 	  },
 	  /* function handles confirming if the user had voted already to prevent issues */
 	  votePrompt(e) {
-		//if no user is logged in, prompt to login
-		if (!this.$store.state.steemconnect.user){
-		  alert(this.$t('need_login_signup_notice_vote'));
-		  e.stopPropagation();
-		}else{
+		
 		  //proceed normally showing vote popup
 		  this.$store.commit('setPostToVote', this.report)
-		}
+		//}
 	  },
 	  fetchReportData () {
 		//function handling propagating calls to grab key report data and comment info
