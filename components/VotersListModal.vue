@@ -30,7 +30,7 @@
 				<!-- voter, percent, reputation, rshares -->
 				<tr v-for="(voteEntry, key) in activeVotersList" :key="key" :class="{'bg-danger': user && user.name === voteEntry.voter, 'text-white': user && user.name === voteEntry.voter}">
 				  <td>
-					<a :href="voteEntry.voter" target="_blank" :class="{'text-white': user && user.name === voteEntry.voter}">
+					<a :href="'/'+voteEntry.voter" target="_blank" :class="{'text-white': user && user.name === voteEntry.voter}">
 						@{{ voteEntry.voter }}
 					</a>
 				  </td>
