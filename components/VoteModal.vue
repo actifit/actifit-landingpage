@@ -271,7 +271,15 @@
 		return this.postToVote.active_votes.filter(voter => (voter.voter === curUser)).length > 0 || this.newlyVotedPosts.indexOf(this.postToVote.post_id)!==-1;
 	  },
 	  vote () {
-        //if the user already voted, confirm vote change
+        //if no user is logged in, prompt to login
+		if (!this.user || !this.user.account){
+		//if (!this.$store.state.steemconnect.user){
+		  alert(this.$t('need_login_signup_notice_vote'));
+		  e.stopPropagation();
+		  return;
+		}
+		
+		//if the user already voted, confirm vote change
 		//if this post is already voted by the user, we need to show a confirmation
 		if (this.userVotedThisPost()){
 		  var confirmPopup = confirm(this.$t('confirm_vote_change'));
