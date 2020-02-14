@@ -246,6 +246,7 @@
 	  product: 'getPrice',
 	  pros: 'updateProPic',
 	  user: 'allReqtsMet',
+	  userrank: 'allReqtsMet',
 	},
 	methods: {
 	  /**
@@ -286,8 +287,10 @@
 	  },
 	  //checks whether the requirement for this product is met
 	  async reqtMet (reqt){
-		//console.log('>reqtMet');
 		if (reqt.item.toLowerCase() == 'User Rank'.toLowerCase()){
+			console.log('>User Rank');
+			console.log(this.userrank);
+			console.log(reqt.level);
 			//user rank case
 			if (parseFloat(this.userrank) >= parseFloat(reqt.level)){
 				return true;
@@ -297,7 +300,7 @@
 			//check if user meets current reqt conditions
 			let query = await fetch(process.env.actiAppUrl
 				+ 'gadgetBoughtName/'
-				+ '?user=' + this.$store.state.steemconnect.user.name 
+				+ '?user=' + this.user.account.name
 				+ '&gadget_name=' + reqt.item
 				+ '&gadget_level=' + parseInt(reqt.level));
 			let res = await query.json();
@@ -389,14 +392,14 @@
 		  if (this.product.type == 'ingame'){
 			fetch(process.env.actiAppUrl
 				+ 'gadgetBought/'
-				+ '?user=' + this.$store.state.steemconnect.user.name 
+				+ '?user=' + this.user.account.name
 				+ '&gadget_id=' + this.product._id).then(
 				res => {res.json().then(json => this.setProductBought (json)).catch(e => this.reject(e))
 			  }).catch(e => this.reject(e))
 		  }else{
 			  fetch(process.env.actiAppUrl
 				+ 'productBought/'
-				+ '?user=' + this.$store.state.steemconnect.user.name 
+				+ '?user=' + this.user.account.name
 				+ '&product_id=' + this.product._id).then(
 				res => {res.json().then(json => this.setProductBought (json)).catch(e => this.reject(e))
 			  }).catch(e => this.reject(e))
@@ -421,7 +424,7 @@
 			this.downloadAgainReady = true;
 			this.downloadHref = process.env.actiAppUrl 
 								+ 'downEbook/'
-								+ '?user=' + this.$store.state.steemconnect.user.name 
+								+ '?user=' + this.user.account.name
 								+ '&product_id=' + this.product._id
 								+ '&access_token=' + outcome.access_token
 		}else{
@@ -501,11 +504,11 @@
 		});
 		
 		
-		let url = new URL(process.env.actiAppUrl + 'processBuyOrder/?user='+this.$store.state.steemconnect.user.name+'&product_id='+this.product._id);
+		let url = new URL(process.env.actiAppUrl + 'processBuyOrder/?user='+this.user.account.name+'&product_id='+this.product._id);
 		
 		if (this.product.type == 'ingame'){
 			url = new URL( process.env.actiAppUrl + 'buyGadget/'
-							+ this.$store.state.steemconnect.user.name + '/'
+							+ this.user.account.name + '/'
 							+ this.product._id + '/'
 							+ bcastRes.block_num + '/'
 							+ bcastRes.id);
@@ -538,7 +541,7 @@
 										+ this.$t('By') + ' ' + this.product.provider_name + '.<br/>';
 					this.firstDownloadHref = process.env.actiAppUrl 
 										+ 'downEbook/'
-										+ '?user=' + this.$store.state.steemconnect.user.name 
+										+ '?user=' + this.user.account.name
 										+ '&product_id=' + this.product._id
 										+ '&access_token=' + outcome.access_token;
 				}else if (this.product.type == 'ingame'){
@@ -607,7 +610,7 @@
 		  }
 		});
 		let url_string = process.env.actiAppUrl + 'activateGadget/'
-							+ this.$store.state.steemconnect.user.name + '/'
+							+ this.user.account.name + '/'
 							+ this.product._id + '/'
 							+ bcastRes.block_num + '/'
 							+ bcastRes.id;
@@ -671,7 +674,7 @@
 		});
 		
 		let	url = new URL( process.env.actiAppUrl + 'deactivateGadget/'
-							+ this.$store.state.steemconnect.user.name + '/'
+							+ this.user.account.name + '/'
 							+ this.product._id + '/'
 							+ bcastRes.block_num + '/'
 							+ bcastRes.id);
