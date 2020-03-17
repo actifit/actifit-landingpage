@@ -460,13 +460,13 @@
 
     <Footer isHomePage='true'/>
 	
-	<!-- <FriendshipModal v-if="user"/> -->
+	<FriendshipModal v-if="user"/>
 	
     <NewsModal :news="activeNews" />
 	<NotifyModal :modalTitle="$t('Actifit_Info')" :modalText="$t('VP_desc')"/>
 	<NotifyModal id="notifyModalRC" ref="notifyModalRC" :modalTitle="$t('Actifit_Info')" :modalText="$t('RC_desc')"/>
 	
-	<CompetitionAnnounce />
+	<!-- <CompetitionAnnounce /> -->
 	 
   </div>
 </template>
@@ -482,7 +482,7 @@
   import NotifyModal from '~/components/NotifyModal'
   import FriendshipModal from '~/components/FriendshipModal'
   
-  import CompetitionAnnounce from '~/components/CompetitionAnnounce'
+  //import CompetitionAnnounce from '~/components/CompetitionAnnounce'
 
   export default {
     components: {
@@ -492,8 +492,8 @@
       NewsModal,
 	  SteemStats,
 	  NotifyModal,
-	  FriendshipModal,
-	  CompetitionAnnounce
+	  FriendshipModal
+	  //,CompetitionAnnounce
     },
     data () {
       return {
