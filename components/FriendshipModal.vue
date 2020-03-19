@@ -213,6 +213,62 @@
 		}
 		return false;
 	  },
+	  async processTrxFunc(op_name, cstm_params){
+		if (!this.stdLogin){
+			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
+			//console.log(res);
+			if (res.result.block_num) {
+				console.log('success');
+				return {success: true, trx: res.result};
+			}else{
+				//console.log(err);
+				return {success: false, trx: null};
+			}
+		}else{
+			let operation = [ 
+			   [op_name, cstm_params]
+			];
+			console.log('broadcasting');
+			console.log(operation);
+			
+			//console.log(this.$steemconnect.accessToken);
+			//console.log(this.$store.state.accessToken);
+			//grab token
+			let accToken = localStorage.getItem('access_token')
+			
+			let op_json = JSON.stringify(operation)
+			
+			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+op_json);
+			
+			let reqHeads = new Headers({
+			  'Content-Type': 'application/json',
+			  'x-acti-token': 'Bearer ' + accToken,
+			});
+			let res = await fetch(url, {
+				headers: reqHeads
+			});
+			let outcome = await res.json();
+			console.log(outcome);
+			if (outcome.error){
+				console.log(outcome.error);
+				//clear entry
+				localStorage.removeItem('access_token');
+				//this.$store.commit('setStdLoginUser', false);
+				this.error_msg = this.$t('session_expired_login_again');
+				this.$store.dispatch('steemconnect/logout');
+				
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('session_expired_login_again'),
+				  position: 'top center'
+				})
+				return {success: false, trx: null};
+				//this.$router.push('/login');
+			}else{
+				return {success: true, trx: outcome.trx};
+			}
+		}
+	  },
 	  //handles sending add friend request
 	  async addFriend(targetFriend) {
 		this.addFriendError = '';
@@ -241,16 +297,17 @@
 			id: 'actifit',
 			json: JSON.stringify({'transaction': 'add-friend-request', 'target': targetFriend})
 		  };
-		let res = await this.$steemconnect.broadcast([['custom_json', cstm_params]], (err, res) => {
-		  if (err) {
+		
+		let res = await this.processTrxFunc('custom_json', cstm_params);
+		//console.log(res);
+		if (res.success){
+			//success, store request to DB
+			this.propagateFriendReq(res.trx.tx, targetFriend);
+		}else{
 			console.log(err);
 			this.friendshipLoader = false;
-		  }else{  
-			console.log(res.result);
-			//success, store request to DB
-			this.propagateFriendReq(res.result, targetFriend);
-		  }
-		});	
+		}
+
 	  },
 	  async propagateFriendReq(res, targetFriend) {
 		let req_res = await fetch(process.env.actiAppUrl+'addFriend/'

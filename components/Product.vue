@@ -168,7 +168,7 @@
 			  <div v-if="!user">
 			    <div class="row pb-3">
 				  <div class="w-50">
-					<a :href="$steemconnect.getLoginURL()" class="btn btn-brand btn-lg w-75">{{ $t('Login') }}</a>
+					<a href="/login" class="btn btn-brand btn-lg w-75">{{ $t('Login') }}</a>
 				  </div>
 				  <div class="w-50">
 					<a href="/signup" class="btn btn-brand btn-lg w-75">{{ $t('Sign_Up') }}</a>
@@ -433,6 +433,62 @@
 		}
 		this.downloadAgainRunning = false;
 	  },
+	  async processTrxFunc(op_name, cstm_params){
+		if (!this.stdLogin){
+			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
+			//console.log(res);
+			if (res.result.block_num) {
+				console.log('success');
+				return {success: true, trx: res.result};
+			}else{
+				//console.log(err);
+				return {success: false, trx: null};
+			}
+		}else{
+			let operation = [ 
+			   [op_name, cstm_params]
+			];
+			console.log('broadcasting');
+			console.log(operation);
+			
+			//console.log(this.$steemconnect.accessToken);
+			//console.log(this.$store.state.accessToken);
+			//grab token
+			let accToken = localStorage.getItem('access_token')
+			
+			let op_json = JSON.stringify(operation)
+			
+			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+op_json);
+			
+			let reqHeads = new Headers({
+			  'Content-Type': 'application/json',
+			  'x-acti-token': 'Bearer ' + accToken,
+			});
+			let res = await fetch(url, {
+				headers: reqHeads
+			});
+			let outcome = await res.json();
+			console.log(outcome);
+			if (outcome.error){
+				console.log(outcome.error);
+				//clear entry
+				localStorage.removeItem('access_token');
+				//this.$store.commit('setStdLoginUser', false);
+				this.error_msg = this.$t('session_expired_login_again');
+				this.$store.dispatch('steemconnect/logout');
+				
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('session_expired_login_again'),
+				  position: 'top center'
+				})
+				return {success: false, trx: null};
+				//this.$router.push('/login');
+			}else{
+				return {success: true, trx: outcome.trx};
+			}
+		}
+	  },
 	  async buyNow() {
 		this.buyAttempt = true;
 		this.buyInProgress = true;
@@ -495,14 +551,14 @@
 			  };
 		}
 		let bcastRes;
-		let qRes = await this.$steemconnect.broadcast([['custom_json', cstm_params]], (err, res) => {
-		  if (err) {
-			console.log(err);
-		  }else{
-			bcastRes = res.result;
-		  }
-		});
 		
+		let res = await this.processTrxFunc('custom_json', cstm_params);
+		//console.log(res);
+		if (res.success){
+			bcastRes = res.trx.tx;
+		}else{
+			console.log(err);
+		}
 		
 		let url = new URL(process.env.actiAppUrl + 'processBuyOrder/?user='+this.user.account.name+'&product_id='+this.product._id);
 		
@@ -602,13 +658,15 @@
 			cstm_params['json'] = "{\"transaction\": \"activate-gadget\" , \"gadget\": \""+this.product._id+"\", \"benefic\": \""+appendFriend+"\"}";
 		}
 		let bcastRes;
-		let qRes = await this.$steemconnect.broadcast([['custom_json', cstm_params]], (err, res) => {
-		  if (err) {
+		
+		let res = await this.processTrxFunc('custom_json', cstm_params);
+		//console.log(res);
+		if (res.success){
+			bcastRes = res.trx.tx;
+		}else{
 			console.log(err);
-		  }else{
-			bcastRes = res.result;
-		  }
-		});
+		}
+		
 		let url_string = process.env.actiAppUrl + 'activateGadget/'
 							+ this.user.account.name + '/'
 							+ this.product._id + '/'
@@ -665,13 +723,14 @@
 			json: "{\"transaction\": \"deactivate-gadget\" , \"gadget\": \""+this.product._id+"\"}"
 		};
 		let bcastRes;
-		let qRes = await this.$steemconnect.broadcast([['custom_json', cstm_params]], (err, res) => {
-		  if (err) {
+		
+		let res = await this.processTrxFunc('custom_json', cstm_params);
+		//console.log(res);
+		if (res.success){
+			bcastRes = res.trx.tx;
+		}else{
 			console.log(err);
-		  }else{
-			bcastRes = res.result;
-		  }
-		});
+		}
 		
 		let	url = new URL( process.env.actiAppUrl + 'deactivateGadget/'
 							+ this.user.account.name + '/'

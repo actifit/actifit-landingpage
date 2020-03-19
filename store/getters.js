@@ -88,5 +88,8 @@ export default {
   },
   commentCountToday (state) {
 	return state.commentCountToday
+  },
+  stdLoginUser (state) {
+	return state.stdLoginUser
   }
 }

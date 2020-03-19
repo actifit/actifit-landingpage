@@ -87,4 +87,7 @@ export default {
   setCommentCountToday (state, commentCountToday) {
     state.commentCountToday = commentCountToday
   },
+  setStdLoginUser (state, stdLoginUser){
+	state.stdLoginUser = stdLoginUser;
+  }
 }

@@ -75,7 +75,9 @@
       }
     },
     computed: {
-      ...mapGetters(['editReport'])
+      ...mapGetters(['editReport']),
+	  ...mapGetters('steemconnect', ['user']),
+	  ...mapGetters('steemconnect', ['stdLogin'])
     },
     watch: {
       editReport () {
@@ -143,7 +145,81 @@
             })
 		  })
 		},
-      save () {
+	  async processTrxFunc(op_name, cstm_params){
+		if (!this.stdLogin){
+			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
+			//console.log(res);
+			if (res.result.block_num) {
+				console.log('success');
+				return {success: true, trx: res.result};
+			}else{
+				//console.log(err);
+				return {success: false, trx: null};
+			}
+		}else{
+			let operation = [ 
+			   [op_name, cstm_params]
+			];
+			console.log('broadcasting');
+			console.log(operation);
+			
+			//console.log(this.$steemconnect.accessToken);
+			//console.log(this.$store.state.accessToken);
+			//grab token
+			let accToken = localStorage.getItem('access_token')
+			
+			let op_json = JSON.stringify(operation)
+			
+			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+op_json);
+			
+			let reqHeads = new Headers({
+			  'Content-Type': 'application/json',
+			  'x-acti-token': 'Bearer ' + accToken,
+			});
+			let res = await fetch(url, {
+				headers: reqHeads
+			});
+			let outcome = await res.json();
+			console.log(outcome);
+			if (outcome.error){
+				console.log(outcome.error);
+				//clear entry
+				localStorage.removeItem('access_token');
+				//this.$store.commit('setStdLoginUser', false);
+				this.error_msg = this.$t('session_expired_login_again');
+				this.$store.dispatch('steemconnect/logout');
+				
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('session_expired_login_again'),
+				  position: 'top center'
+				})
+				return {success: false, trx: null};
+				//this.$router.push('/login');
+			}else{
+				return {success: true, trx: outcome.trx};
+			}
+		}
+	  },
+	  commentSuccess (err) {
+		// stop loading animation and show notification
+		this.loading = false
+		this.$notify({
+		  group: err ? 'error' : 'success',
+		  text: err ? this.$t('Save_Error') : this.$t('Save_Success'),
+		  position: 'top center'
+		})
+
+		// update report in store
+		this.$store.dispatch('updateReport', {
+		  author: this.editReport.author,
+		  permlink: this.editReport.permlink
+		})
+		
+		//reward the user for a new edit
+		this.RewardUserEdit();
+	  },
+      async save () {
         this.loading = true // start loading animation
 
         // prepare tags
@@ -189,35 +265,39 @@
 			meta.app = 'actifit/0.4.1';
 		}
 		meta.suppEdit = 'actifit.io';
-		
+		console.log(this.stdLogin);
         // save changes
-        this.$steemconnect.comment(
-          this.editReport.parent_author,
-          this.editReport.parent_permlink,
-          this.editReport.author,
-          this.editReport.permlink,
-          this.title,
-          this.body,
-          meta,
-          (err) => {
-            // stop loading animation and show notification
-            this.loading = false
-            this.$notify({
-              group: err ? 'error' : 'success',
-              text: err ? this.$t('Save_Error') : this.$t('Save_Success'),
-              position: 'top center'
-            })
-
-            // update report in store
-            this.$store.dispatch('updateReport', {
-              author: this.editReport.author,
-              permlink: this.editReport.permlink
-            })
+		if (!this.stdLogin){
+		
+			this.$steemconnect.comment(
+			  this.editReport.parent_author,
+			  this.editReport.parent_permlink,
+			  this.editReport.author,
+			  this.editReport.permlink,
+			  this.title,
+			  this.body,
+			  meta,
+			  (err) => {
+				this.commentSuccess();
+			  }
+			)
+		}else{
+			let cstm_params = {
+			  "author": this.editReport.author,
+			  "title": this.title,
+			  "body": this.body.replace(/%/g,'percent '),
+			  "parent_author": this.editReport.parent_author,
+			  "parent_permlink": this.editReport.parent_permlink,
+			  "permlink": this.editReport.permlink,
+			  "json_metadata": JSON.stringify(meta)
+			};
 			
-			//reward the user for a new edit
-			this.RewardUserEdit();
-          }
-        )
+			let res = await this.processTrxFunc('comment', cstm_params);
+			
+			if (res.success){
+				this.commentSuccess();
+			}
+		}
       },
 	  async RewardUserEdit () {
 		let url = new URL(process.env.actiAppUrl + 'rewardActifitWebEdit/'+this.editReport.author);

@@ -113,7 +113,7 @@
 		</div>
 		<div class="row pb-3">
 		  <div class="w-50">
-			<a :href="$steemconnect.getLoginURL()" class="btn btn-brand btn-lg w-75">{{ $t('Login') }}</a>
+			<a href="/login" class="btn btn-brand btn-lg w-75">{{ $t('Login') }}</a>
 		  </div>
 		  <div class="w-50">
 			<a href="/signup" class="btn btn-brand btn-lg w-75">{{ $t('Sign_Up') }}</a>
@@ -174,7 +174,7 @@
 		return "w-50";
 	  },
 	  isUserModerator() {
-		if (this.$store.state.steemconnect.user && this.moderators.find( mod => mod.name == this.$store.state.steemconnect.user.name && mod.title == 'moderator')) {
+		if (this.user && this.moderators.find( mod => mod.name == this.user.name && mod.title == 'moderator')) {
 		  return true;
 		}
 		return false;

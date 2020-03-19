@@ -206,7 +206,7 @@
 		return Array.isArray(this.report.active_votes)?this.report.active_votes.length:0;
 	  },
 	  isUserModerator() {
-		if (this.$store.state.steemconnect.user && this.moderators.find( mod => mod.name == this.$store.state.steemconnect.user.name && mod.title == 'moderator')) {
+		if (this.user && this.moderators.find( mod => mod.name == this.user.name && mod.title == 'moderator')) {
 		  return true;
 		}
 		return false;

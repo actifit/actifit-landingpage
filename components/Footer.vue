@@ -113,4 +113,8 @@
 	.currency-logo-small{
 		height: 15px;
 	}
+	.token-logo-sm{
+		width: 20px;
+		height: 20px;
+	}
 </style>

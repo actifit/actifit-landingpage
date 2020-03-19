@@ -32,7 +32,7 @@
 			<span>
 				<small>
 				  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 
-					 data-target="#voteModal" v-if="this.$store.state.steemconnect.user && userVotedThisPost()==true">
+					 data-target="#voteModal" v-if="this.user && userVotedThisPost()==true">
 					<i class="far fa-thumbs-up"></i> {{getVoteCount }}
 				  </a>
 				  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal"
@@ -153,11 +153,11 @@
 		  </div>
 		</transition>
 		<div class="report-reply col-md-12" v-if="responsePosted">
-			<a :href="this.$store.state.steemconnect.user.name" target="_blank">
+			<a :href="'/'+this.user.account.name" target="_blank">
 			  <div class="comment-user-section">	
 				<div class="user-avatar mr-1"
-					   :style="'background-image: url(https://steemitimages.com/u/' + this.$store.state.steemconnect.user.name + '/avatar)'"></div>
-				<div class="modal-author modal-title text-brand" >@{{ $store.state.steemconnect.user.name }}<small class="date-head text-muted">{{ $t('Now') }}</small></div>
+					   :style="'background-image: url(https://steemitimages.com/u/' + this.user.account.name + '/avatar)'"></div>
+				<div class="modal-author modal-title text-brand" >@{{ user.account.name }}<small class="date-head text-muted">{{ $t('Now') }}</small></div>
 			  </div>
 			</a>
 			<article v-html="$renderMD(responseBody)"></article>
@@ -228,7 +228,7 @@
 				{ hid: 'title', name: 'og:title', 'property':'og:title', content: `${this.postTitle} by ${this.username} - Actifit`},
 				{ hid: 'description', name: 'description', content: `${this.desc} by ${this.username}` },
 				{ hid: 'ogdescription', name: 'og:description', 'property':'og:description', content: `${this.desc} by ${this.username}` },
-				{ hid: 'image', name: 'og:image', 'property':'og:image', content: `${this.postImg}`},
+				{ hid: 'image', name: 'og:image', 'property':'og:image', content: `${this.postImg}`}
 			  ],
 		}
 	},
@@ -318,6 +318,7 @@
 	},
     computed: {
 	  ...mapGetters('steemconnect', ['user']),
+	  ...mapGetters('steemconnect', ['stdLogin']),
 	  ...mapGetters(['newlyVotedPosts']),
 	  ...mapGetters(['commentEntries'], 'commentCountToday'),
 	  ...mapGetters(['moderators']),
@@ -443,8 +444,99 @@
 		this.replyBody = this.moderatorSignature;
 		this.commentBoxOpen=false;
 	  },
+	  
+	  async processTrxFunc(op_name, cstm_params){
+		if (!this.stdLogin){
+			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
+			//console.log(res);
+			if (res.result.block_num) {
+				console.log('success');
+				return {success: true, trx: res.result};
+			}else{
+				//console.log(err);
+				return {success: false, trx: null};
+			}
+		}else{
+			let operation = [ 
+			   [op_name, cstm_params]
+			];
+			console.log('broadcasting');
+			console.log(operation);
+			
+			//console.log(this.$steemconnect.accessToken);
+			//console.log(this.$store.state.accessToken);
+			//grab token
+			let accToken = localStorage.getItem('access_token')
+			
+			let op_json = JSON.stringify(operation)
+			
+			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+op_json);
+			
+			let reqHeads = new Headers({
+			  'Content-Type': 'application/json',
+			  'x-acti-token': 'Bearer ' + accToken,
+			});
+			let res = await fetch(url, {
+				headers: reqHeads
+			});
+			let outcome = await res.json();
+			console.log(outcome);
+			if (outcome.error){
+				console.log(outcome.error);
+				//clear entry
+				localStorage.removeItem('access_token');
+				//this.$store.commit('setStdLoginUser', false);
+				this.error_msg = this.$t('session_expired_login_again');
+				this.$store.dispatch('steemconnect/logout');
+				
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('session_expired_login_again'),
+				  position: 'top center'
+				})
+				return {success: false, trx: null};
+				//this.$router.push('/login');
+			}else{
+				return {success: true, trx: outcome.trx};
+			}
+		}
+	  },
+	  commentSuccess (err){
+		// stop loading animation and show notification
+		this.loading = false
+		this.$notify({
+		  group: err ? 'error' : 'success',
+		  text: err ? this.$t('Comment_Error') : this.$t('Comment_Success'),
+		  position: 'top center'
+		})
+		
+		//display comment placeholder till blockchain data comes through
+		this.responsePosted = true;
+		this.responseBody = this.replyBody;
+		
+		//refetch report data anew, but only after 10 seconds to ensure data has been made available
+		setTimeout( this.fetchReportCommentData, 10000);
+		
+		//check if comment is lengthy enough, increase tracked count by 1
+		if (this.responseBody.length >= 50){
+			if (isNaN(this.commentCountToday)){
+				this.commentCountToday = 0;
+			}
+			this.commentCountToday += 1;
+		}
+		
+		this.$store.commit('setCommentCountToday', this.commentCountToday);
+		
+		//reward the user for interacting with 3 different posts via comments
+		if (this.commentCountToday >= 3){
+			this.rewardUserComment();
+		}
+		
+		//reset open comment
+		this.resetOpenComment();
+	  },
 	  /* function handles sending out the comment to the blockchain */
-	  postResponse(event) {
+	  async postResponse(event) {
 		// proceed with saving the comment
 		
 		this.loading = true
@@ -458,50 +550,36 @@
 		meta.app = 'actifit/0.4.1';
 		meta.suppEdit = 'actifit.io.comment';
 		
-        this.$steemconnect.comment(
-          this.report.author,
-          this.report.permlink,
-          this.user.account.name,
-          comment_perm,
-          '',
-          this.replyBody,
-          meta,
-          (err) => {
-            // stop loading animation and show notification
-            this.loading = false
-            this.$notify({
-              group: err ? 'error' : 'success',
-              text: err ? this.$t('Comment_Error') : this.$t('Comment_Success'),
-              position: 'top center'
-            })
+		if (!this.stdLogin){
+			this.$steemconnect.comment(
+			  this.report.author,
+			  this.report.permlink,
+			  this.user.account.name,
+			  comment_perm,
+			  '',
+			  this.replyBody,
+			  meta,
+			  (err) => {
+				this.commentSuccess(err);
+			  }
+			)
+		}else{
+			let cstm_params = {
+			  "author": this.user.account.name,
+			  "title": "",
+			  "body": this.replyBody,
+			  "parent_author": this.report.author,
+			  "parent_permlink": this.report.permlink,
+			  "permlink": comment_perm,
+			  "json_metadata": JSON.stringify(meta)
+			};
 			
-			//display comment placeholder till blockchain data comes through
-			this.responsePosted = true;
-			this.responseBody = this.replyBody;
+			let res = await this.processTrxFunc('comment', cstm_params);
 			
-			//refetch report data anew, but only after 10 seconds to ensure data has been made available
-			setTimeout( this.fetchReportCommentData, 10000);
-			
-			//check if comment is lengthy enough, increase tracked count by 1
-			if (this.responseBody.length >= 50){
-				if (isNaN(this.commentCountToday)){
-					this.commentCountToday = 0;
-				}
-				this.commentCountToday += 1;
+			if (res.success){
+				this.commentSuccess();
 			}
-			
-			this.$store.commit('setCommentCountToday', this.commentCountToday);
-			
-			//reward the user for interacting with 3 different posts via comments
-			if (this.commentCountToday >= 3){
-				this.rewardUserComment();
-			}
-			
-			//reset open comment
-			this.resetOpenComment();
-          }
-        )
-		
+		}
 	  },
 	  /* function handles rewarding user for comments */
 	  async rewardUserComment () {
@@ -537,14 +615,14 @@
 	  },
 	  /* function handles appending moderators signature */
 	  insertModSignature () {
-		if (this.$store.state.steemconnect.user && this.moderators.find( mod => mod.name == this.$store.state.steemconnect.user.name && mod.title == 'moderator')) {
+		if (this.user && this.moderators.find( mod => mod.name == this.user.name && mod.title == 'moderator')) {
 		  this.moderatorSignature = process.env.shortModeratorSignature;
 		  this.replyBody += this.moderatorSignature;
 		}
 	  },
 	  /* function handles appending full moderator signature */
 	  insertFullModSignature () {
-		if (this.$store.state.steemconnect.user && this.moderators.find( mod => mod.name == this.$store.state.steemconnect.user.name && mod.title == 'moderator')) {
+		if (this.user && this.moderators.find( mod => mod.name == this.user.name && mod.title == 'moderator')) {
 		  this.moderatorSignature = process.env.standardModeratorSignature;
 		  this.replyBody += this.moderatorSignature;
 		}

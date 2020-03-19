@@ -533,7 +533,7 @@
 		</div>
 		<div class="row pb-3">
 		  <div class="w-50">
-			<a :href="$steemconnect.getLoginURL()" class="btn btn-brand btn-lg w-75">{{ $t('Login') }}</a>
+			<a href="/login" class="btn btn-brand btn-lg w-75">{{ $t('Login') }}</a>
 		  </div>
 		  <div class="w-50">
 			<a href="/signup" class="btn btn-brand btn-lg w-75">{{ $t('Sign_Up') }}</a>
@@ -693,6 +693,7 @@
     },
     computed: {
       ...mapGetters('steemconnect', ['user']),
+	  ...mapGetters('steemconnect', ['stdLogin']),
       ...mapGetters(['userTokens', 'transactions', 'userRank']),
       formattedSteemTotVal () {
 		return this.numberFormat(this.totalAccountValueSteem, 3) + ' ' + this.$t('STEEM');
@@ -976,11 +977,19 @@
 	  },
 	  async fetchUserData () {
 		if (typeof this.user != 'undefined' && this.user != null){	  
+		  console.log('stdLoginUser');
+		  console.log(this.stdLogin);
+		  console.log(this.user);
 		  
 		  //update user info from blockchain
-		  let user_data = await this.$steemconnect.me();
-		  this.user.account = user_data.account;
-		  
+		  if (!this.stdLogin){
+			try{
+				let user_data = await this.$steemconnect.me();
+				this.user.account = user_data.account;
+			}catch(excp){
+				console.log(excp);
+			}
+		  }
 		  this.$store.dispatch('fetchUserTokens')
 		  this.$store.dispatch('fetchTransactions')
 		  this.$store.dispatch('fetchUserRank')
@@ -1053,7 +1062,7 @@
 			  //if this operation relates to powering up AFIT from S-E, need to also initiate call to adjust AFIT token count
 			  if (this.$route.query.confirm_trans == 1){
 				
-				let url = new URL(process.env.actiAppUrl + 'confirmAFITSEReceipt/?user='+this.$store.state.steemconnect.user.name);
+				let url = new URL(process.env.actiAppUrl + 'confirmAFITSEReceipt/?user='+this.user.name);
 				//connect with our service to confirm AFIT received to proper wallet
 				try{
 					
@@ -1271,11 +1280,12 @@
 			id: 'scot_claim_token',
 			json: JSON.stringify(claimableTokens)
 		  };
-  
-		let res = await this.$steemconnect.broadcast([['custom_json', cstm_params]], (err) => {
-		  if (err) {
-			console.log(err);
-		  }else{
+		console.log(this.stdLogin);
+		
+		let res = await this.processTrxFunc('custom_json', cstm_params);
+		
+		console.log('trx status:'+res.success);
+		if (res.success){
 			this.$notify({
 			  group: 'success',
 			  text: this.$t('tokens_claimed_successfully'),
@@ -1286,8 +1296,7 @@
 			
 			//also run after 30 seconds a refresh on token count
 			setTimeout(this.fetchTokenBalance , 20);
-		  }
-		});
+		}
 		this.claimingTokens = false;
 	  },
 	  async fetchTokenBalance () {
@@ -1543,6 +1552,62 @@
 			this.errorSettingPass = outcome.error;
 		}
 	  },
+	  async processTrxFunc(op_name, cstm_params){
+		if (!this.stdLogin){
+			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
+			//console.log(res);
+			if (res.result.block_num) {
+				console.log('success');
+				return {success: true, trx: res.result};
+			}else{
+				//console.log(err);
+				return {success: false, trx: null};
+			}
+		}else{
+			let operation = [ 
+			   [op_name, cstm_params]
+			];
+			console.log('broadcasting');
+			console.log(operation);
+			
+			//console.log(this.$steemconnect.accessToken);
+			//console.log(this.$store.state.accessToken);
+			//grab token
+			let accToken = localStorage.getItem('access_token')
+			
+			let op_json = JSON.stringify(operation)
+			
+			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+op_json);
+			
+			let reqHeads = new Headers({
+			  'Content-Type': 'application/json',
+			  'x-acti-token': 'Bearer ' + accToken,
+			});
+			let res = await fetch(url, {
+				headers: reqHeads
+			});
+			let outcome = await res.json();
+			console.log(outcome);
+			if (outcome.error){
+				console.log(outcome.error);
+				//clear entry
+				localStorage.removeItem('access_token');
+				//this.$store.commit('setStdLoginUser', false);
+				this.error_msg = this.$t('session_expired_login_again');
+				this.$store.dispatch('steemconnect/logout');
+				
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('session_expired_login_again'),
+				  position: 'top center'
+				})
+				return {success: false, trx: null};
+				//this.$router.push('/login');
+			}else{
+				return {success: true, trx: outcome.trx};
+			}
+		}
+	  },
 	  async cancelMoveToSE(){
 		this.afit_se_move_err_msg = '';
 		let userConf = confirm(this.$t('Cancel_Transfer_Confirm'));
@@ -1576,23 +1641,21 @@
 				id: 'actifit',
 				json: JSON.stringify(afitCancPDTransaction)
 			};
-			let res = await this.$steemconnect.broadcast([['custom_json', cstm_params]], (err) => {
-			  if (err) {
-				console.log(err);
-			  }else{
-				console.log('success');
-			  }
-			});
 			
-			//notify of success
-			this.$notify({
-			  group: 'success',
-			  text: this.$t('afit_power_down_canceled'),
-			  position: 'top center'
-			})
+			let res = await this.processTrxFunc('custom_json', cstm_params);
 			
-			//unset the value of existing transfer
-			this.userPDAfit = false
+			if (res.success){
+				//notify of success
+				this.$notify({
+				  group: 'success',
+				  text: this.$t('afit_power_down_canceled'),
+				  position: 'top center'
+				})
+				
+				//unset the value of existing transfer
+				this.userPDAfit = false
+			}
+			
 			
 		}else{
 			this.afit_se_move_error_proceeding = true;
@@ -1685,23 +1748,18 @@
 				id: 'actifit',
 				json: JSON.stringify(afitPDTransaction)
 			};
-			let res = await this.$steemconnect.broadcast([['custom_json', cstm_params]], (err) => {
-			  if (err) {
-				console.log(err);
-			  }else{
-				console.log('success');
-			  }
-			});
+			let res = await this.processTrxFunc('custom_json', cstm_params);
 			
-			//notify of success
-			this.$notify({
-			  group: 'success',
-			  text: this.$t('power_down_successfully_initiated'),
-			  position: 'top center'
-			})
-			
-			this.setUserPDAfitStatus(outcome.trx);
-			
+			if (res.success){
+				//notify of success
+				this.$notify({
+				  group: 'success',
+				  text: this.$t('power_down_successfully_initiated'),
+				  position: 'top center'
+				})
+				
+				this.setUserPDAfitStatus(outcome.trx);
+			}
 			//check if user is powering down AFIT to SE
 			  /*fetch(process.env.actiAppUrl+'isPoweringDown/'+this.user.account.name).then(
 				res => {res.json().then(json => this.setUserPDAfitStatus (json) ).catch(e => reject(e))
@@ -2047,11 +2105,13 @@
 					json: "{ \"afit_upvote_exchange_type\": \""+exchange_cat+"\"}"
 				  };
 		  
-				let res = await this.$steemconnect.broadcast([['custom_json', cstm_params]], (err) => {
-				  if (err) {
-					console.log(err);
-				  }
-				});
+				
+				let res = await this.processTrxFunc('custom_json', cstm_params);
+		
+				console.log('trx status:'+res.success);
+				/*if (res.success){
+					
+				}*/
 				
 				this.swapResult = this.$t('afit_steem_swap_success');
 				//update user data
@@ -2164,10 +2224,6 @@
   .token-logo{
 	width: 40px;
 	height: 40px;
-  }
-  .token-logo-sm{
-	width: 20px;
-	height: 20px;
   }
   .text-center.grid.p-2, .calc-data{
 	border: 2px solid red;

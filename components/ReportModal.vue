@@ -144,11 +144,11 @@
 		  </div>
 		</transition>
 		<div class="report-reply modal-body" v-if="responsePosted">
-			<a :href="this.$store.state.steemconnect.user.name" target="_blank">
+			<a :href="this.user.name" target="_blank">
 			  <div class="comment-user-section">	
 				<div class="user-avatar mr-1"
-					   :style="'background-image: url(https://steemitimages.com/u/' + this.$store.state.steemconnect.user.name + '/avatar)'"></div>
-				<div class="modal-author modal-title text-brand" >@{{ $store.state.steemconnect.user.name }}<small class="date-head text-muted">{{ $t('Now') }}</small></div>
+					   :style="'background-image: url(https://steemitimages.com/u/' + this.user.name + '/avatar)'"></div>
+				<div class="modal-author modal-title text-brand" >@{{ user.name }}<small class="date-head text-muted">{{ $t('Now') }}</small></div>
 			  </div>
 			</a>
 			<article class="modal-body" v-html="$renderMD(responseBody)"></article>
@@ -225,6 +225,7 @@
 	},
     computed: {
 	  ...mapGetters('steemconnect', ['user']),
+	  ...mapGetters('steemconnect', ['stdLogin']),
 	  ...mapGetters(['newlyVotedPosts']),
 	  ...mapGetters(['commentEntries'], 'commentCountToday'),
 	  ...mapGetters(['moderators']),
@@ -326,11 +327,31 @@
 		this.replyBody = this.moderatorSignature;
 		this.commentBoxOpen=false;
 	  },
+	  
+	  commentSuccess (err) {
+		// stop loading animation and show notification
+		this.loading = false
+		this.$notify({
+		  group: err ? 'error' : 'success',
+		  text: err ? this.$t('Save_Error') : this.$t('Save_Success'),
+		  position: 'top center'
+		})
+
+		// update report in store
+		this.$store.dispatch('updateReport', {
+		  author: this.editReport.author,
+		  permlink: this.editReport.permlink
+		})
+		
+		//reward the user for a new edit
+		this.RewardUserEdit();
+	  },
+	  
 	  /* function handles sending out the comment to the blockchain */
-	  postResponse(event) {
+	  async postResponse(event) {
 		// proceed with saving the comment
 		
-		if (!this.$store.state.steemconnect.user){
+		if (!this.user){
 			this.errPosting = this.$t('Need_login');
 			return;
 		}
@@ -345,50 +366,38 @@
 		meta.tags = '[actifit]';
 		meta.app = 'actifit/0.4.1';
 		meta.suppEdit = 'actifit.io.comment';
+		console.log(this.stdLogin);
+		if (!this.stdLogin){
+			this.$steemconnect.comment(
+			  this.report.author,
+			  this.report.permlink,
+			  this.user.account.name,
+			  comment_perm,
+			  '',
+			  this.replyBody,
+			  meta,
+			  (err) => {
+				this.commentSuccess(err);
+			  }
+			)
 		
-        this.$steemconnect.comment(
-          this.report.author,
-          this.report.permlink,
-          this.user.account.name,
-          comment_perm,
-          '',
-          this.replyBody,
-          meta,
-          (err) => {
-            // stop loading animation and show notification
-            this.loading = false
-            this.$notify({
-              group: err ? 'error' : 'success',
-              text: err ? this.$t('Comment_Error') : this.$t('Comment_Success'),
-              position: 'top center'
-            })
+		}else{
+			let cstm_params = {
+			  "author": this.user.account.name,
+			  "title": '',
+			  "body": this.replyBody,
+			  "parent_author": this.report.author,
+			  "parent_permlink": this.report.permlink,
+			  "permlink": comment_perm,
+			  "json_metadata": JSON.stringify(meta)
+			};
 			
-			//display comment placeholder till blockchain data comes through
-			this.responsePosted = true;
-			this.responseBody = this.replyBody;
+			let res = await this.processTrxFunc('comment', cstm_params);
 			
-			//refetch report data anew, but only after 10 seconds to ensure data has been made available
-			setTimeout( this.fetchReportCommentData, 10000);
-			
-			//check if comment is lengthy enough, increase tracked count by 1
-			if (this.responseBody.length >= 50){
-				if (isNaN(this.commentCountToday)){
-					this.commentCountToday = 0;
-				}
-				this.commentCountToday += 1;
+			if (res.success){
+				this.commentSuccess();
 			}
-			
-			this.$store.commit('setCommentCountToday', this.commentCountToday);
-			
-			//reward the user for interacting with 3 different posts via comments
-			if (this.commentCountToday >= 3){
-				this.rewardUserComment();
-			}
-			
-			//reset open comment
-			this.resetOpenComment();
-          }
-        )
+		}
 		
 	  },
 	  /* function handles rewarding user for comments */
@@ -427,14 +436,14 @@
 	  },
 	  /* function handles appending moderators signature */
 	  insertModSignature () {
-		if (this.$store.state.steemconnect.user && this.moderators.find( mod => mod.name == this.$store.state.steemconnect.user.name && mod.title == 'moderator')) {
+		if (this.user && this.moderators.find( mod => mod.name == this.user.name && mod.title == 'moderator')) {
 		  this.moderatorSignature = process.env.shortModeratorSignature;
 		  this.replyBody += this.moderatorSignature;
 		}
 	  },
 	  /* function handles appending full moderator signature */
 	  insertFullModSignature () {
-		if (this.$store.state.steemconnect.user && this.moderators.find( mod => mod.name == this.$store.state.steemconnect.user.name && mod.title == 'moderator')) {
+		if (this.user && this.moderators.find( mod => mod.name == this.user.name && mod.title == 'moderator')) {
 		  this.moderatorSignature = process.env.standardModeratorSignature;
 		  this.replyBody += this.moderatorSignature;
 		}

@@ -25,13 +25,13 @@
 		  </div>
 		</transition>
 		<div class="modal-footer">
-			<div v-if="this.$store.state.steemconnect.user && this.$store.state.steemconnect.user.name == this.full_data.author"><a href="#" @click.prevent="editBoxOpen = !editBoxOpen" :title="$t('Edit_note')"><i class="fas fa-edit"></i></a></div>
+			<div v-if="this.user && this.user.account.name == this.full_data.author"><a href="#" @click.prevent="editBoxOpen = !editBoxOpen" :title="$t('Edit_note')"><i class="fas fa-edit"></i></a></div>
 			<div v-if="commentDeletable()"><a href="#" @click.prevent="deleteComment" :title="$t('Delete_note')"><i class="fas fa-trash-alt"></i><i class="fas fa-spin fa-spinner" v-if="deleting"></i></a></div>
 			<div><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i class="fas fa-reply"></i></a></div>
 			<div>
 				<small>
 				  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 
-					 data-target="#voteModal" v-if="this.$store.state.steemconnect.user && userVotedThisPost()==true">
+					 data-target="#voteModal" v-if="this.user && userVotedThisPost()==true">
 					<i class="far fa-thumbs-up"></i> {{getVoteCount }}
 				  </a>
 				  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal"
@@ -58,11 +58,11 @@
 		  </div>
 		</transition>
 		<div class="comment-reply" v-if="responsePosted">
-			<a :href="this.$store.state.steemconnect.user.name" target="_blank">
+			<a :href="this.user.account.name" target="_blank">
 			  <div class="comment-user-section" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }">	
 				<div class="user-avatar mr-1"
-					   :style="'background-image: url(https://steemitimages.com/u/' + this.$store.state.steemconnect.user.name + '/avatar)'"></div>
-				<div class="modal-author modal-title text-brand" >@{{ $store.state.steemconnect.user.name }}<small class="date-head text-muted">{{ $t('Now') }}</small></div>
+					   :style="'background-image: url(https://steemitimages.com/u/' + this.user.account.name + '/avatar)'"></div>
+				<div class="modal-author modal-title text-brand" >@{{ user.name }}<small class="date-head text-muted">{{ $t('Now') }}</small></div>
 			  </div>
 			</a>
 			<article class="modal-body" v-html="$renderMD(responseBody)" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }" ></article>
@@ -128,6 +128,8 @@
 	  VueMarkdown,
 	},
     computed: {
+	  ...mapGetters('steemconnect', ['user']),
+	  ...mapGetters('steemconnect', ['stdLogin']),
 	  ...mapGetters(['moderators']),
 	  ...mapGetters(['newlyVotedPosts']),
 	  getVoteCount(){
@@ -222,43 +224,135 @@
 		this.replyBody = this.moderatorSignature;
 		this.commentBoxOpen=false;
 	  },
+	  
+	  async processTrxFunc(op_name, cstm_params){
+		if (!this.stdLogin){
+			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
+			//console.log(res);
+			if (res.result.block_num) {
+				console.log('success');
+				return {success: true, trx: res.result};
+			}else{
+				//console.log(err);
+				return {success: false, trx: null};
+			}
+		}else{
+			let operation = [ 
+			   [op_name, cstm_params]
+			];
+			console.log('broadcasting');
+			console.log(operation);
+			
+			//console.log(this.$steemconnect.accessToken);
+			//console.log(this.$store.state.accessToken);
+			//grab token
+			let accToken = localStorage.getItem('access_token')
+			
+			let op_json = JSON.stringify(operation)
+			
+			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+op_json);
+			
+			let reqHeads = new Headers({
+			  'Content-Type': 'application/json',
+			  'x-acti-token': 'Bearer ' + accToken,
+			});
+			let res = await fetch(url, {
+				headers: reqHeads
+			});
+			let outcome = await res.json();
+			console.log(outcome);
+			if (outcome.error){
+				console.log(outcome.error);
+				//clear entry
+				localStorage.removeItem('access_token');
+				//this.$store.commit('setStdLoginUser', false);
+				this.error_msg = this.$t('session_expired_login_again');
+				this.$store.dispatch('steemconnect/logout');
+				
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('session_expired_login_again'),
+				  position: 'top center'
+				})
+				return {success: false, trx: null};
+				//this.$router.push('/login');
+			}else{
+				return {success: true, trx: outcome.trx};
+			}
+		}
+	  },
+	  
+	  deleteSuccess (err) {
+		// stop deleting animation and show notification
+		this.deleting = false
+		this.$notify({
+		  group: err ? 'error' : 'success',
+		  text: err ? this.$t('Delete_Error') : this.$t('Delete_Success'),
+		  position: 'top center'
+		})
+		
+		//display comment placeholder till blockchain data comes through
+		if (!err){	
+			this.commentDeleted = true;
+		}	
+
+		//refetch report data anew, but only after 10 seconds to ensure data has been made available
+		setTimeout( this.fetchReportCommentData, 10000);
+	  },
 	  /* function handles deleting comment */
-	  deleteComment () {
+	  async deleteComment () {
 		  var confirmPopup = confirm(this.$t('confirm_delete_comment'));
 		  if (!confirmPopup){
 			return;
 		  }
 		  //proceed with deletion
 		  this.deleting = true
-		  
-		  this.$steemconnect.deleteComment(
-          this.full_data.author,
-          this.full_data.permlink,(err) => {
-            // stop deleting animation and show notification
-            this.deleting = false
-            this.$notify({
-              group: err ? 'error' : 'success',
-              text: err ? this.$t('Delete_Error') : this.$t('Delete_Success'),
-              position: 'top center'
-            })
+		  console.log(this.stdLogin);
+		  if (!this.stdLogin){
+			this.$steemconnect.deleteComment(
+			  this.full_data.author,
+			  this.full_data.permlink,(err) => {
+				this.deleteSuccess (err);
+
+			  }
+			)
+		  }else{
+			let cstm_params = {
+			  "author": this.full_data.author,
+			  "permlink": this.full_data.permlink
+			};
 			
-			//display comment placeholder till blockchain data comes through
-			if (!err){	
-				this.commentDeleted = true;
-			}	
+			let res = await this.processTrxFunc('delete_comment', cstm_params);
+			
+			if (res.success){
+				this.deleteSuccess();
+			}
+		  }
+	  },
+	  commentSuccess (err){
+		// stop loading animation and show notification
+		this.loading = false
+		this.$notify({
+		  group: err ? 'error' : 'success',
+		  text: err ? this.$t('Comment_Error') : this.$t('Comment_Success'),
+		  position: 'top center'
+		})
+		
+		//display comment placeholder till blockchain data comes through
+		this.responsePosted = true;
+		this.responseBody = this.replyBody;
 
-			//refetch report data anew, but only after 10 seconds to ensure data has been made available
-			setTimeout( this.fetchReportCommentData, 10000);
-
-          }
-        )
-		  
+		//refetch report data anew, but only after 10 seconds to ensure data has been made available
+		setTimeout( this.fetchReportCommentData, 10000);
+		
+		//reset open comment
+		this.resetOpenComment();
 	  },
 	  /* function handles sending out the comment to the blockchain */
-	  postResponse(event) {
+	  async postResponse(event) {
 		// proceed with saving the comment
 		
-		if (!this.$store.state.steemconnect.user){
+		if (!this.user){
 			this.errPosting = this.$t('Need_login');
 			return;
 		}
@@ -267,7 +361,7 @@
 		
 		//build the permlink
 		
-		let comment_perm = this.$store.state.steemconnect.user.name.replace('.','-') + '-re-' + this.full_data.author.replace('.','-') + '-' + this.full_data.permlink + new Date().toISOString().replace(/[^a-zA-Z0-9]+/g, '').toLowerCase();
+		let comment_perm = this.user.account.name.replace('.','-') + '-re-' + this.full_data.author.replace('.','-') + '-' + this.full_data.permlink + new Date().toISOString().replace(/[^a-zA-Z0-9]+/g, '').toLowerCase();
 		
 		//prepare meta data
 		let meta = [];
@@ -275,35 +369,38 @@
 		meta.app = 'actifit/0.4.1';
 		meta.suppEdit = 'actifit.io.comment';
 		
-        this.$steemconnect.comment(
-          this.full_data.author,
-          this.full_data.permlink,
-          this.$store.state.steemconnect.user.name,
-          comment_perm,
-          '',
-          this.replyBody,
-          meta,
-          (err) => {
-            // stop loading animation and show notification
-            this.loading = false
-            this.$notify({
-              group: err ? 'error' : 'success',
-              text: err ? this.$t('Comment_Error') : this.$t('Comment_Success'),
-              position: 'top center'
-            })
-			
-			//display comment placeholder till blockchain data comes through
-			this.responsePosted = true;
-			this.responseBody = this.replyBody;
-
-			//refetch report data anew, but only after 10 seconds to ensure data has been made available
-			setTimeout( this.fetchReportCommentData, 10000);
-			
-			//reset open comment
-			this.resetOpenComment();
-          }
-        )
 		
+		if (!this.stdLogin){
+		
+			this.$steemconnect.comment(
+			  this.full_data.author,
+			  this.full_data.permlink,
+			  this.user.account.name,
+			  comment_perm,
+			  '',
+			  this.replyBody,
+			  meta,
+			  (err) => {
+				this.commentSuccess();
+			  }
+			)
+		}else{
+			let cstm_params = {
+			  "author": this.user.account.name,
+			  "title": "",
+			  "body": this.replyBody,
+			  "parent_author": this.full_data.author,
+			  "parent_permlink": this.full_data.permlink,
+			  "permlink": comment_perm,
+			  "json_metadata": JSON.stringify(meta)
+			};
+			
+			let res = await this.processTrxFunc('comment', cstm_params);
+			
+			if (res.success){
+				this.commentSuccess();
+			}
+		}
 	  },
 	  /* function handles editing out the comment to the blockchain */
 	  editResponse(event) {
@@ -346,7 +443,7 @@
 	  },
 	  /* function checks if logged in user has upvoted current report */
 	  userVotedThisPost() {
-		let curUser = this.$store.state.steemconnect.user.name;
+		let curUser = this.user.account.name;
 		//check if the post contains in its original voters current user, or if it has been upvoted in current session
 		if (!curUser){
 			this.postUpvoted = false;
@@ -359,7 +456,7 @@
 	  /* function checks if the comment can be deleted */
 	  commentDeletable () {
 		return (parseInt(this.full_data.children) == 0 
-				&& this.$store.state.steemconnect.user && this.$store.state.steemconnect.user.name == this.full_data.author
+				&& this.user && this.user.account.name == this.full_data.author
 				&& parseInt(this.full_data.pending_payout_value.replace('SBD','').replace('STEEM','')) == 0
 				&& parseInt(this.full_data.total_payout_value.replace('SBD','').replace('STEEM','')) == 0
 				&& parseInt(this.full_data.curator_payout_value.replace('SBD','').replace('STEEM','')) == 0)
@@ -391,14 +488,14 @@
 	  },
 	  /* function handles appending moderators signature */
 	  insertModSignature () {
-		if (this.$store.state.steemconnect.user && this.moderators.find( mod => mod.name == this.$store.state.steemconnect.user.name && mod.title == 'moderator')) {
+		if (this.user && this.moderators.find( mod => mod.name == this.user.account.name && mod.title == 'moderator')) {
 		  this.moderatorSignature = process.env.shortModeratorSignature;
 		  this.replyBody += this.moderatorSignature;
 		}
 	  },
 	  /* function handles appending full moderator signature */
 	  insertFullModSignature () {
-		if (this.$store.state.steemconnect.user && this.moderators.find( mod => mod.name == this.$store.state.steemconnect.user.name && mod.title == 'moderator')) {
+		if (this.user && this.moderators.find( mod => mod.name == this.user.account.name && mod.title == 'moderator')) {
 		  this.moderatorSignature = process.env.standardModeratorSignature;
 		  this.replyBody += this.moderatorSignature;
 		}
@@ -406,7 +503,7 @@
 	  /* function handles confirming if the user had voted already to prevent issues */
 	  votePrompt(e) {
 		//if no user is logged in, prompt to login
-		if (!this.$store.state.steemconnect.user.name){
+		if (!this.user.account.name){
 		  alert(this.$t('need_login_signup_notice_vote'));
 		  e.stopPropagation();
 		}else{

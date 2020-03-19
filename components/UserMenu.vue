@@ -3,7 +3,7 @@
   <div class="user-menu-container ml-auto position-absolute d-flex align-items-center">
     <ul class="navbar-nav mr-auto user-menu flex-row">
 	  <li class="nav-item" v-if="!user">
-		<a :href="'/signup'" >{{ $t('Signup_Link') }}</a> | <a :href="$steemconnect.getLoginURL()" >{{ $t('Login') }}</a>
+		<a :href="'/signup'" >{{ $t('Signup_Link') }}</a> | <a :href="'/login'" >{{ $t('Login') }}</a>
 	  </li>
 	  <li class="nav-item mr-2" v-if="user" >
         <span class="navbar-text py-0 text-brand" >{{ $t('Rank') }}&nbsp;<br><b>{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRankObj && this.userRankObj.afitx_rank">{{  displayIncreasedUserRank }}</span></b></span>
@@ -108,7 +108,7 @@
 	    return this.referrals.length;
 	  },
 	  isUserModerator() {
-		if (this.$store.state.steemconnect.user && this.moderators.find( mod => mod.name == this.$store.state.steemconnect.user.name && mod.title == 'moderator')) {
+		if (this.user && this.moderators.find( mod => mod.name == this.user.name && mod.title == 'moderator')) {
 		  return true;
 		}
 		return false;

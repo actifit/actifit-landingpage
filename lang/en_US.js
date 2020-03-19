@@ -507,4 +507,11 @@ module.exports = {
   View_leaderboard: 'View Current Leaderboard',
   payout_value: 'Payout Value',
   more_token_rewards: 'More Token Rewards',
+  Username: 'Username',
+  Ppkey: 'Private Posting Key',
+  Login_sc: 'Login Via SteemConnect',
+  Login_via: 'Login Via',
+  Login_actifit: 'Login to Actifit',
+  login_error: 'Your account and/or private posting key is incorrect.',
+  session_expired_login_again: 'Your session has expired. Please login again.',
 }

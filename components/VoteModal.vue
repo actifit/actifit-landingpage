@@ -80,6 +80,7 @@
 	},
     computed: {
       ...mapGetters('steemconnect', ['user']),
+	  ...mapGetters('steemconnect', ['stdLogin']),
       ...mapGetters(['postToVote']),
 	  ...mapGetters(['newlyVotedPosts']),
       voteWeight: {
@@ -270,7 +271,92 @@
 		//check if the post contains in its original voters current user, or if it has been upvoted in current session
 		return this.postToVote.active_votes.filter(voter => (voter.voter === curUser)).length > 0 || this.newlyVotedPosts.indexOf(this.postToVote.post_id)!==-1;
 	  },
-	  vote () {
+	  async processTrxFunc(op_name, cstm_params){
+		if (!this.stdLogin){
+			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
+			//console.log(res);
+			if (res.result.block_num) {
+				console.log('success');
+				return {success: true, trx: res.result};
+			}else{
+				//console.log(err);
+				return {success: false, trx: null};
+			}
+		}else{
+			let operation = [ 
+			   [op_name, cstm_params]
+			];
+			console.log('broadcasting');
+			console.log(operation);
+			
+			//console.log(this.$steemconnect.accessToken);
+			//console.log(this.$store.state.accessToken);
+			//grab token
+			let accToken = localStorage.getItem('access_token')
+			
+			let op_json = JSON.stringify(operation)
+			
+			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+op_json);
+			
+			let reqHeads = new Headers({
+			  'Content-Type': 'application/json',
+			  'x-acti-token': 'Bearer ' + accToken,
+			});
+			let res = await fetch(url, {
+				headers: reqHeads
+			});
+			let outcome = await res.json();
+			console.log(outcome);
+			if (outcome.error){
+				console.log(outcome.error);
+				//clear entry
+				localStorage.removeItem('access_token');
+				//this.$store.commit('setStdLoginUser', false);
+				this.error_msg = this.$t('session_expired_login_again');
+				this.$store.dispatch('steemconnect/logout');
+				
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('session_expired_login_again'),
+				  position: 'top center'
+				})
+				return {success: false, trx: null};
+				//this.$router.push('/login');
+			}else{
+				return {success: true, trx: outcome.trx};
+			}
+		}
+	  },
+	  voteSuccess (err) {
+		  this.loading = false
+		  if (err) {
+			this.$notify({
+			  group: 'error',
+			  text: this.$t('Vote_Error'),
+			  position: 'top center'
+			});
+		  }
+		  else {
+			//append this entry into the list of voted posts
+			if (this.newlyVotedPosts.indexOf(this.postToVote.post_id) === -1){
+				this.newlyVotedPosts.push(this.postToVote.post_id);
+			}
+			this.$store.commit('setNewlyVotedPosts', this.newlyVotedPosts);
+			$(this.$refs.voteModal).modal('hide')
+			this.$notify({
+			  group: 'success',
+			  text: this.$t('Vote_Success')
+			});
+			
+			//if the user votes 3 or more posts at 20%, let's give an additional reward
+			if (this.newlyVotedPosts.length >= 3 && this.voteWeight >= 20){
+			  this.rewardUserVote();
+			}
+			
+			this.refreshAccountData();
+		  }
+	  },
+	  async vote () {
         //if no user is logged in, prompt to login
 		if (!this.user || !this.user.account){
 		//if (!this.$store.state.steemconnect.user){
@@ -289,40 +375,31 @@
 		}
 		
 		this.loading = true
-		this.$steemconnect.vote(this.user.account.name, this.postToVote.author, this.postToVote.permlink, this.voteWeight * 100, (err) => {
-          this.loading = false
-          if (err) {
-            this.$notify({
-              group: 'error',
-              text: this.$t('Vote_Error'),
-              position: 'top center'
-            });
-          }
-          else {
-			//append this entry into the list of voted posts
-			if (this.newlyVotedPosts.indexOf(this.postToVote.post_id) === -1){
-				this.newlyVotedPosts.push(this.postToVote.post_id);
-			}
-			this.$store.commit('setNewlyVotedPosts', this.newlyVotedPosts);
-            $(this.$refs.voteModal).modal('hide')
-            this.$notify({
-              group: 'success',
-              text: this.$t('Vote_Success')
-            });
+		if (!this.stdLogin){
+			this.$steemconnect.vote(this.user.account.name, this.postToVote.author, this.postToVote.permlink, this.voteWeight * 100, (err) => {
+			  this.voteSuccess(err);
+			});
+		}else{
+			let cstm_params = {
+			  "voter": this.user.account.name,
+			  "author": this.postToVote.author,
+			  "permlink": this.postToVote.permlink,
+			  "weight": this.voteWeight * 100
+			};
 			
-			//if the user votes 3 or more posts at 20%, let's give an additional reward
-			if (this.newlyVotedPosts.length >= 3 && this.voteWeight >= 20){
-			  this.rewardUserVote();
-			}
+			let res = await this.processTrxFunc('vote', cstm_params);
 			
-			this.refreshAccountData();
-          }
-        });
+			if (res.success){
+				this.voteSuccess();
+			}
+		}
       },
 	  //handles refreshing account data following vote
 	  async refreshAccountData () {
-		let user_data = await this.$steemconnect.me();
-		this.user.account = user_data.account;
+		if (!this.stdLogin){
+			let user_data = await this.$steemconnect.me();
+			this.user.account = user_data.account;
+		}
 	  },
 	  async rewardUserVote () {
 		//handles rewarding the user for his votes

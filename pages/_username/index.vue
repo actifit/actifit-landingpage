@@ -281,6 +281,7 @@
 	},
     computed: {
 	  ...mapGetters('steemconnect', ['user']),
+	  ...mapGetters('steemconnect', ['stdLogin']),
 	  ...mapGetters(['newlyVotedPosts']),
 	  ...mapGetters(['userTokens'],['commentEntries'], 'commentCountToday'),
 	  displayAFITXBal () {
@@ -375,6 +376,62 @@
 		}
 		return result;
 	  },
+	  async processTrxFunc(op_name, cstm_params){
+		if (!this.stdLogin){
+			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
+			//console.log(res);
+			if (res.result.block_num) {
+				console.log('success');
+				return {success: true, trx: res.result};
+			}else{
+				//console.log(err);
+				return {success: false, trx: null};
+			}
+		}else{
+			let operation = [ 
+			   [op_name, cstm_params]
+			];
+			console.log('broadcasting');
+			console.log(operation);
+			
+			//console.log(this.$steemconnect.accessToken);
+			//console.log(this.$store.state.accessToken);
+			//grab token
+			let accToken = localStorage.getItem('access_token')
+			
+			let op_json = JSON.stringify(operation)
+			
+			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+op_json);
+			
+			let reqHeads = new Headers({
+			  'Content-Type': 'application/json',
+			  'x-acti-token': 'Bearer ' + accToken,
+			});
+			let res = await fetch(url, {
+				headers: reqHeads
+			});
+			let outcome = await res.json();
+			console.log(outcome);
+			if (outcome.error){
+				console.log(outcome.error);
+				//clear entry
+				localStorage.removeItem('access_token');
+				//this.$store.commit('setStdLoginUser', false);
+				this.error_msg = this.$t('session_expired_login_again');
+				this.$store.dispatch('steemconnect/logout');
+				
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('session_expired_login_again'),
+				  position: 'top center'
+				})
+				return {success: false, trx: null};
+				//this.$router.push('/login');
+			}else{
+				return {success: true, trx: outcome.trx};
+			}
+		}
+	  },
 	  //handles sending add friend request
 	  async addFriend() {
 		this.addFriendError = '';
@@ -403,16 +460,14 @@
 			id: 'actifit',
 			json: JSON.stringify({'transaction': 'add-friend-request', 'target': this.displayUser})
 		  };
-		let res = await this.$steemconnect.broadcast([['custom_json', cstm_params]], (err, res) => {
-		  if (err) {
-			console.log(err);
-			this.friendshipLoader = false;
-		  }else{  
-			console.log(res.result);
+		let res = await this.processTrxFunc('custom_json', cstm_params);
+		console.log(res.success);
+		if (res.success){
 			//success, store request to DB
-			this.propagateFriendReq(res.result);
-		  }
-		});	
+			this.propagateFriendReq(res.trx.tx);
+		}else{  			
+			this.friendshipLoader = false;
+		}
 	  },
 	  async propagateFriendReq(res) {
 		let req_res = await fetch(process.env.actiAppUrl+'addFriend/'
@@ -465,16 +520,14 @@
 			id: 'actifit',
 			json: JSON.stringify({'transaction': 'cancel-friend-request', 'target': this.displayUser})
 		  };
-		let res = await this.$steemconnect.broadcast([['custom_json', cstm_params]], (err, res) => {
-		  if (err) {
-			console.log(err);
-			this.friendshipLoader = false;
-		  }else{  
-			console.log(res.result);
+		let res = await this.processTrxFunc('custom_json', cstm_params);
+		//console.log(res);
+		if (res.success){
 			//success, store request to DB
-			this.cancelFriendReq(res.result);
-		  }
-		});	
+			this.cancelFriendReq(res.trx.tx);
+		}else{
+			this.friendshipLoader = false;
+		}
 	  },
 	  async cancelFriendReq(res) {
 		let req_res = await fetch(process.env.actiAppUrl+'cancelFriendRequest/'
@@ -527,16 +580,14 @@
 			id: 'actifit',
 			json: JSON.stringify({'transaction': 'cancel-friendship', 'target': this.displayUser})
 		  };
-		let res = await this.$steemconnect.broadcast([['custom_json', cstm_params]], (err, res) => {
-		  if (err) {
-			console.log(err);
-			this.friendshipLoader = false;
-		  }else{  
-			console.log(res.result);
+		let res = await this.processTrxFunc('custom_json', cstm_params);
+		console.log(res);
+		if (res.success){
 			//success, store request to DB
-			this.dropFriendship(res.result);
-		  }
-		});	
+			this.dropFriendship(res.trx.tx);
+		}else{
+			this.friendshipLoader = false;
+		}
 	  },
 	  async dropFriendship(res) {
 		let req_res = await fetch(process.env.actiAppUrl+'dropFriendship/'
@@ -589,16 +640,14 @@
 			id: 'actifit',
 			json: JSON.stringify({'transaction': 'accept-friendship', 'target': this.displayUser})
 		  };
-		let res = await this.$steemconnect.broadcast([['custom_json', cstm_params]], (err, res) => {
-		  if (err) {
-			console.log(err);
-			this.friendshipLoader = false;
-		  }else{  
-			console.log(res.result);
+		let res = await this.processTrxFunc('custom_json', cstm_params);
+		console.log(res);
+		if (res.success){
 			//success, store request to DB
-			this.acceptFriendPropagate(res.result);
-		  }
-		});	
+			this.acceptFriendPropagate(res.trx.tx);
+		}else{
+			this.friendshipLoader = false;
+		}
 	  },
 	  async acceptFriendPropagate(res) {
 		let req_res = await fetch(process.env.actiAppUrl+'acceptFriend/'
@@ -683,27 +732,24 @@
 				id: 'actifit',
 				json: JSON.stringify(tipTransaction)
 			};
-			let res = await this.$steemconnect.broadcast([['custom_json', cstm_params]], (err, res) => {
-			  console.log(err);
-			  if (err) {
-				console.log(err);
-			  }else{
-				console.log('success');
-			  }
-			});
-			
-			//notify of success
-			this.$notify({
-			  group: 'success',
-			  text: this.$t('tip_successfully_sent'),
-			  position: 'top center'
-			})
-			//update sender token count
-			//ensure we fetch proper logged in user data
-			this.$store.dispatch('fetchUserTokens')
-			
-			//update recipient token count
-			this.userTokenCount = outcome.recipientTokenCount;
+			let res = await this.processTrxFunc('custom_json', cstm_params);
+			//console.log(res);
+			if (res.success){
+				//notify of success
+				this.$notify({
+				  group: 'success',
+				  text: this.$t('tip_successfully_sent'),
+				  position: 'top center'
+				})
+				//update sender token count
+				//ensure we fetch proper logged in user data
+				this.$store.dispatch('fetchUserTokens')
+				
+				//update recipient token count
+				this.userTokenCount = outcome.recipientTokenCount;
+			}else{
+				this.friendshipLoader = false;
+			}
 			
 			this.proceedTip = false;
 		}else{
@@ -763,8 +809,15 @@
 		if (typeof this.user != 'undefined' && this.user != null){	  
 		  
 		  //update user info from blockchain
-		  let user_data = await this.$steemconnect.me();
-		  this.user.account = user_data.account;
+		  console.log(this.stdLogin);
+		  if (!this.stdLogin){
+			try{
+				let user_data = await this.$steemconnect.me();
+				this.user.account = user_data.account;
+			}catch(excp){
+				console.log(excp);
+			}
+		  }
 		  //ensure we fetch proper logged in user data
 		  this.$store.dispatch('fetchUserTokens')
 		  this.$store.dispatch('fetchUserRank')
@@ -856,14 +909,14 @@
 						id: 'actifit',
 						json: "{ \"claimed_badge\": \""+badgeType+"\"}"
 					};
-					let res = await this.$steemconnect.broadcast([['custom_json', cstm_params]], (err, res) => {
-					  console.log(err);
-					  if (err) {
-						console.log(err);
-					  }else{
+					let res = await this.processTrxFunc('custom_json', cstm_params);
+					//console.log(res);
+					if (res.success){
 						console.log('success');
-					  }
-					});
+					}else{
+						console.log('error');
+					}
+					
 					this.userBadges.push(outcome);
 				}else{
 					console.error(outcome);
