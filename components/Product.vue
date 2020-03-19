@@ -190,6 +190,7 @@
     props: ['product', 'pros', 'userrank', 'gadgetStats'],
     computed: {
       ...mapGetters('steemconnect', ['user']),
+	  ...mapGetters('steemconnect', ['stdLogin']),
 	  ...mapGetters(['userTokens']),
       date() {
         let date = new Date(this.product.approval_date)
@@ -458,7 +459,9 @@
 			
 			let op_json = JSON.stringify(operation)
 			
-			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+op_json);
+			let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
+			
+			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+op_json+'&bchain='+cur_bchain);
 			
 			let reqHeads = new Headers({
 			  'Content-Type': 'application/json',
@@ -553,9 +556,8 @@
 		let bcastRes;
 		
 		let res = await this.processTrxFunc('custom_json', cstm_params);
-		//console.log(res);
 		if (res.success){
-			bcastRes = res.trx.tx;
+			bcastRes = res.trx;
 		}else{
 			console.log(err);
 		}
@@ -662,7 +664,7 @@
 		let res = await this.processTrxFunc('custom_json', cstm_params);
 		//console.log(res);
 		if (res.success){
-			bcastRes = res.trx.tx;
+			bcastRes = res.trx;
 		}else{
 			console.log(err);
 		}
@@ -727,7 +729,7 @@
 		let res = await this.processTrxFunc('custom_json', cstm_params);
 		//console.log(res);
 		if (res.success){
-			bcastRes = res.trx.tx;
+			bcastRes = res.trx;
 		}else{
 			console.log(err);
 		}

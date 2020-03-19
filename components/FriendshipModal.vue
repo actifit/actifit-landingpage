@@ -238,8 +238,10 @@
 			
 			let op_json = JSON.stringify(operation)
 			
-			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+op_json);
+			let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
 			
+			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+op_json+'&bchain='+cur_bchain);
+
 			let reqHeads = new Headers({
 			  'Content-Type': 'application/json',
 			  'x-acti-token': 'Bearer ' + accToken,
