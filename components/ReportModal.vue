@@ -333,18 +333,33 @@
 		this.loading = false
 		this.$notify({
 		  group: err ? 'error' : 'success',
-		  text: err ? this.$t('Save_Error') : this.$t('Save_Success'),
+		  text: err ? this.$t('Comment_Error') : this.$t('Comment_Success'),
 		  position: 'top center'
 		})
-
-		// update report in store
-		this.$store.dispatch('updateReport', {
-		  author: this.editReport.author,
-		  permlink: this.editReport.permlink
-		})
 		
-		//reward the user for a new edit
-		this.RewardUserEdit();
+		//display comment placeholder till blockchain data comes through
+		this.responsePosted = true;
+		this.responseBody = this.replyBody;
+		
+		//refetch report data anew, but only after 10 seconds to ensure data has been made available
+		setTimeout( this.fetchReportCommentData, 10000);
+		
+		//check if comment is lengthy enough, increase tracked count by 1
+		if (this.responseBody.length >= 50){
+			if (isNaN(this.commentCountToday)){
+				this.commentCountToday = 0;
+			}
+			this.commentCountToday += 1;
+		}
+		this.$store.commit('setCommentCountToday', this.commentCountToday);
+		
+		//reward the user for interacting with 3 different posts via comments
+		if (this.commentCountToday >= 3){
+			this.rewardUserComment();
+		}
+		
+		//reset open comment
+		this.resetOpenComment();
 	  },
 	  
 	  /* function handles sending out the comment to the blockchain */
