@@ -15,7 +15,7 @@
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
     "precommit": "npm run lint",
     "heroku-postbuild": "npm run build",
-    "prepare": "patch-package"
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@nuxtjs/google-adsense": "^1.1.3",
