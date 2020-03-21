@@ -272,7 +272,8 @@
 		return this.postToVote.active_votes.filter(voter => (voter.voter === curUser)).length > 0 || this.newlyVotedPosts.indexOf(this.postToVote.post_id)!==-1;
 	  },
 	  async processTrxFunc(op_name, cstm_params){
-		if (!this.stdLogin){
+		if (!localStorage.getItem('std_login')){
+		//if (!this.stdLogin){
 			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
 			//console.log(res);
 			if (res.result.block_num) {
@@ -378,7 +379,8 @@
 		}
 		
 		this.loading = true
-		if (!this.stdLogin){
+		if (!localStorage.getItem('std_login')){
+		//if (!this.stdLogin){
 			this.$steemconnect.vote(this.user.account.name, this.postToVote.author, this.postToVote.permlink, this.voteWeight * 100, (err) => {
 			  this.voteSuccess(err);
 			});
@@ -399,7 +401,8 @@
       },
 	  //handles refreshing account data following vote
 	  async refreshAccountData () {
-		if (!this.stdLogin){
+		if (!localStorage.getItem('std_login')){
+		//if (!this.stdLogin){
 			let user_data = await this.$steemconnect.me();
 			this.user.account = user_data.account;
 		}

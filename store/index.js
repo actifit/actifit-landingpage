@@ -39,6 +39,7 @@ const createStore = () => {
 	  commentEntries: [], //contains a reference to the current comments on open modal post
 	  commentCountToday: 0, //contains the count of comments done by a user on a single day
 	  stdLoginUser: null,
+	  bchain: '',//current active blockchain
     },
     getters,
     mutations,

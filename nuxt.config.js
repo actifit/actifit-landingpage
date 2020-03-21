@@ -15,6 +15,8 @@ module.exports = {
 	webEditToken: process.env.WEB_EDIT_REWARD_KEY,
 	webVoteToken: process.env.WEB_VOTE_REWARD_KEY,
 	webCommentToken: process.env.WEB_COMMENT_REWARD_KEY,
+	steemApiNode: 'https://api.steemit.com/',
+	hiveApiNode: 'https://api.hive.blog/',
 	actiAppUrl: process.env.ACTI_API_URL || 'http://localhost:3120/',
 	steemEngineRpc: 'https://api.steem-engine.com/rpc',
 	steemEngineScot: 'https://scot-api.steem-engine.com/',

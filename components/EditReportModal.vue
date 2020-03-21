@@ -146,7 +146,8 @@
 		  })
 		},
 	  async processTrxFunc(op_name, cstm_params){
-		if (!this.stdLogin){
+		if (!localStorage.getItem('std_login')){
+		//if (!this.stdLogin){
 			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
 			//console.log(res);
 			if (res.result.block_num) {
@@ -211,7 +212,10 @@
 		  text: err ? this.$t('Save_Error') : this.$t('Save_Success'),
 		  position: 'top center'
 		})
-
+		
+		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
+		this.$store.commit('setBchain', cur_bchain);
+		
 		// update report in store
 		this.$store.dispatch('updateReport', {
 		  author: this.editReport.author,
@@ -269,7 +273,8 @@
 		meta.suppEdit = 'actifit.io';
 		console.log(this.stdLogin);
         // save changes
-		if (!this.stdLogin){
+		if (!localStorage.getItem('std_login')){
+		//if (!this.stdLogin){
 		
 			this.$steemconnect.comment(
 			  this.editReport.parent_author,

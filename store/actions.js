@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import steem from 'steem'
 
-steem.api.setOptions({ url: 'https://api.steemit.com/' });
+steem.api.setOptions({ url: process.env.steemApiNode });
 
 // returning promises to be able to wait for data
 
@@ -153,6 +153,13 @@ export default {
 			  let start_author = lastReport ? lastReport.author : null
 			  let start_permlink = lastReport ? lastReport.permlink : null
 
+			  //set proper blockchain selection
+			  if (state.bchain == 'STEEM'){
+				steem.api.setOptions({ url: process.env.steemApiNode });
+			  }else{
+				steem.api.setOptions({ url: process.env.hiveApiNode });
+			  }
+
 			  // get (next) 100 posts with actifit tag
 			  steem.api.getDiscussionsByCreated({tag: 'actifit', limit: 100, start_author, start_permlink}, (err, posts) => {
 				if (err) reject(err)
@@ -186,7 +193,14 @@ export default {
       let lastReport = state.reports.length ? state.reports[state.reports.length - 1] : null
       let start_author = lastReport ? lastReport.author : null
       let start_permlink = lastReport ? lastReport.permlink : null
-
+	  
+	  //set proper blockchain selection
+	  if (state.bchain == 'STEEM'){
+		steem.api.setOptions({ url: process.env.steemApiNode });
+	  }else{
+		steem.api.setOptions({ url: process.env.hiveApiNode });
+	  }
+	  
       // get (next) 100 posts with actifit tag
       steem.api.getDiscussionsByCreated({tag: 'actifit', limit: 100, start_author, start_permlink}, (err, posts) => {
         if (err) reject(err)
@@ -208,6 +222,13 @@ export default {
       let start_permlink = lastReport ? lastReport.permlink : null
 	  console.log(lastReport);
 	  
+	  //set proper blockchain selection
+	  if (state.bchain == 'STEEM'){
+		steem.api.setOptions({ url: process.env.steemApiNode });
+	  }else{
+		steem.api.setOptions({ url: process.env.hiveApiNode });
+	  }
+	  
       // get (next) 100 posts from the user
       steem.api.getDiscussionsByBlog({tag: username, limit: 100, start_author: start_author, start_permlink: start_permlink}, (err, posts) => {
         if (err) reject(err)
@@ -226,6 +247,14 @@ export default {
 	return new Promise((resolve, reject) => {
 	  let report_param = report.category + '/@' + report.author + '/' + report.permlink;
 	  let cur_ref = this;
+	  
+	  //set proper blockchain selection
+	  if (state.bchain == 'STEEM'){
+		steem.api.setOptions({ url: process.env.steemApiNode });
+	  }else{
+		steem.api.setOptions({ url: process.env.hiveApiNode });
+	  }	  
+	  
 	  //using getState to fetch all level comments
 	  steem.api.getState (report_param, function (err, result){
 		//sort results by depth so as we display entries properly
@@ -256,6 +285,15 @@ export default {
 	})
   },
   updateReport ({ state, commit }, options) {
+	  
+	//set proper blockchain selection
+	if (state.bchain == 'STEEM'){
+		steem.api.setOptions({ url: process.env.steemApiNode });
+	}else{
+		steem.api.setOptions({ url: process.env.hiveApiNode });
+	}  
+	  
+	  
     steem.api.getContent(options.author, options.permlink, (err, updatedReport) => {
       if (err) console.log(err)
       else {
@@ -280,6 +318,14 @@ export default {
       let lastReport = state.userReports.length ? state.userReports[state.userReports.length - 1] : null
       let start_author = lastReport ? lastReport.author : null
       let start_permlink = lastReport ? lastReport.permlink : null
+	  
+	  //set proper blockchain selection
+	  if (state.bchain == 'STEEM'){
+		steem.api.setOptions({ url: process.env.steemApiNode });
+	  }else{
+		steem.api.setOptions({ url: process.env.hiveApiNode });
+	  }	  
+	  
       steem.api.getDiscussionsByBlog({tag: username, limit: 100, start_author: start_author, start_permlink: start_permlink}, (err, posts) => {
         if (err) reject(err)
         else {
@@ -293,6 +339,14 @@ export default {
   },
   fetchNews ({ state, commit }) {
     return new Promise((resolve, reject) => {
+		
+	  //set proper blockchain selection
+	  if (state.bchain == 'STEEM'){
+		steem.api.setOptions({ url: process.env.steemApiNode });
+	  }else{
+		steem.api.setOptions({ url: process.env.hiveApiNode });
+	  }		
+		
       steem.api.getDiscussionsByBlog({tag: 'actifit', limit: 100}, (err, posts) => {
         if (err) reject(err)
         else {

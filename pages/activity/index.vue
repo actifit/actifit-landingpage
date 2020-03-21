@@ -116,6 +116,8 @@
     methods: {
       async loadMore () {
         this.loadingMore = true
+		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
+		this.$store.commit('setBchain', cur_bchain);
         await this.$store.dispatch('fetchReports')
         this.loadingMore = false
       },
@@ -138,6 +140,9 @@
 	  this.fetchUserData();
 	  
       // fetch reports
+	  let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
+	  this.$store.commit('setBchain', cur_bchain);
+	  
       await this.$store.dispatch('fetchReports')
 	  
       // remove loading indicator

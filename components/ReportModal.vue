@@ -381,8 +381,9 @@
 		meta.tags = '[actifit]';
 		meta.app = 'actifit/0.4.1';
 		meta.suppEdit = 'actifit.io.comment';
-		console.log(this.stdLogin);
-		if (!this.stdLogin){
+		//console.log(this.stdLogin);
+		if (!localStorage.getItem('std_login')){
+		//if (!this.stdLogin){
 			this.$steemconnect.comment(
 			  this.report.author,
 			  this.report.permlink,
@@ -476,6 +477,10 @@
 		this.fetchReportCommentData()
 	  },
 	  fetchReportCommentData () {
+	  
+		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
+		this.$store.commit('setBchain', cur_bchain);
+		
 		//regrab report data to fix comments
 		this.$store.dispatch('fetchReportComments', this.report)
 		

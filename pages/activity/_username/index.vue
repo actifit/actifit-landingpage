@@ -106,6 +106,7 @@
 	},
     computed: {
 	  ...mapGetters('steemconnect', ['user']),
+	  ...mapGetters('steemconnect', ['stdLogin']),
       ...mapGetters(['userReports', 'moreUserReportsAvailable', 'activeReport']),
 
       // get username from url
@@ -119,13 +120,18 @@
     methods: {
       async loadMore () {
         this.loadingMore = true
+		
+		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
+		this.$store.commit('setBchain', cur_bchain);
+	  
         await this.$store.dispatch('fetchUserReports', this.username)
         this.loadingMore = false
       },
 	  async fetchUserData () {
 		if (typeof this.user != 'undefined' && this.user != null){	  
 		  
-		  if (!this.stdLogin){
+		  if (!localStorage.getItem('std_login')){
+		  //if (!this.stdLogin){
 			  //update user info from blockchain
 			  let user_data = await this.$steemconnect.me();
 			  this.user.account = user_data.account;
@@ -148,6 +154,10 @@
       this.$store.commit('setMoreUserReportsAvailable', false)
 
       // fetch reports
+	  
+	  let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
+	  this.$store.commit('setBchain', cur_bchain);
+	  
       await this.$store.dispatch('fetchUserReports', this.username)
 
       // remove loading indicator

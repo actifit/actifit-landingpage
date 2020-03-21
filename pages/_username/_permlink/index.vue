@@ -446,7 +446,8 @@
 	  },
 	  
 	  async processTrxFunc(op_name, cstm_params){
-		if (!this.stdLogin){
+		if (!localStorage.getItem('std_login')){
+		//if (!this.stdLogin){
 			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
 			//console.log(res);
 			if (res.result.block_num) {
@@ -552,7 +553,8 @@
 		meta.app = 'actifit/0.4.1';
 		meta.suppEdit = 'actifit.io.comment';
 		
-		if (!this.stdLogin){
+		//if (!this.stdLogin){
+		if (!localStorage.getItem('std_login')){
 			this.$steemconnect.comment(
 			  this.report.author,
 			  this.report.permlink,

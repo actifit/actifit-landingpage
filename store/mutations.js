@@ -89,5 +89,8 @@ export default {
   },
   setStdLoginUser (state, stdLoginUser){
 	state.stdLoginUser = stdLoginUser;
+  },
+  setBchain (state, bchain) {
+	state.bchain = bchain;
   }
 }

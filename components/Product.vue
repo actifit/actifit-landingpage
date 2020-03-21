@@ -435,7 +435,7 @@
 		this.downloadAgainRunning = false;
 	  },
 	  async processTrxFunc(op_name, cstm_params){
-		if (!this.stdLogin){
+		if (!localStorage.getItem('std_login')){
 			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
 			//console.log(res);
 			if (res.result.block_num) {
@@ -459,7 +459,48 @@
 			
 			let op_json = JSON.stringify(operation)
 			
-			let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
+			//TODO: move support to hive as well - now it's failing with dsteem
+			
+			/*
+			{ id: '8dbd67505244c12626ba6b16db8e7d9ea7517ba5',
+			  block_num: 41846303,
+			  trx_num: 1,
+			  expired: false,
+			  ref_block_num: 34317,
+			  ref_block_prefix: 2366159845,
+			  expiration: '2020-03-21T13:31:57',
+			  operations: [ [ 'custom_json', [Object] ] ],
+			  extensions: [],
+			  signatures:
+			   [ '1f2397bfc5100f56ad673bd47b53b5b6f9322c36b5abb26d87d4da2e0d1ec2901352fbe8832fddada800c66bd785014ce87949c1
+			31f3a394d57ae6925fe16d6780' ] }
+			{ tx:
+			   { id: '8dbd67505244c12626ba6b16db8e7d9ea7517ba5',
+				 block_num: 41846303,
+				 trx_num: 1,
+				 expired: false,
+				 ref_block_num: 34317,
+				 ref_block_prefix: 2366159845,
+				 expiration: '2020-03-21T13:31:57',
+				 operations: [ [Array] ],
+				 extensions: [],
+				 signatures:
+				  [ '1f2397bfc5100f56ad673bd47b53b5b6f9322c36b5abb26d87d4da2e0d1ec2901352fbe8832fddada800c66bd785014ce8794
+			9c131f3a394d57ae6925fe16d6780' ] } }
+			(node:38336) UnhandledPromiseRejectionWarning: TypeError: Cannot read property 'transaction_ids' of null
+				at DatabaseAPI.<anonymous> (C:\Mohammad\my own\steemit\actifit\actifit_newpost\actifitbot\actifitbot\node_
+			modules\dsteem\lib\helpers\database.js:147:31)
+				at Generator.next (<anonymous>)
+				at fulfilled (C:\Mohammad\my own\steemit\actifit\actifit_newpost\actifitbot\actifitbot\node_modules\dsteem
+			\lib\helpers\database.js:38:58)
+				at process._tickCallback (internal/process/next_tick.js:68:7)
+			(node:38336) UnhandledPromiseRejectionWarning: Unhandled promise rejection. This error originated either by th
+			rowing inside of an async function without a catch block, or by rejecting a promise which was not handled with
+			 .catch(). (rejection id: 7)
+			*/
+			
+			//let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
+			let cur_bchain = 'STEEM';
 			
 			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+op_json+'&bchain='+cur_bchain);
 			
@@ -488,7 +529,7 @@
 				return {success: false, trx: null};
 				//this.$router.push('/login');
 			}else{
-				return {success: true, trx: outcome.trx};
+				return {success: true, trx: outcome.trx.tx};
 			}
 		}
 	  },
@@ -556,6 +597,7 @@
 		let bcastRes;
 		
 		let res = await this.processTrxFunc('custom_json', cstm_params);
+		console.log(res);
 		if (res.success){
 			bcastRes = res.trx;
 		}else{

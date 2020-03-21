@@ -24,6 +24,19 @@
 				<div class="form-group">
 					<input type="text" id="username" name="username" :placeholder="$t('Username')" ref="username" class="form-control form-control-lg mb-2">
 					<input type="password" id="ppkey" name="ppkey" ref="ppkey" :placeholder="$t('Ppkey')"  class="form-control form-control-lg mb-2">
+					
+					<span class="row mb-2 form-control-lg ">
+					<span class="bchain-option p-2 m-2 btn col-4 m-auto">
+						<input type="radio" id="hive_bchain" value="HIVE" v-model="bchain_val">
+						<img src="/img/HIVE.png" class="col-6" v-on:click="bchain_val = 'HIVE'" :class="adjustHiveClass">
+						<label for="hive_bchain">HIVE</label>
+					  </span>
+					  <span class="bchain-option p-2 m-2 btn col-4 m-auto">
+						<input type="radio" id="steem_bchain" value="STEEM" v-model="bchain_val">
+						<img src="/img/STEEM.png" class="col-6" v-on:click="bchain_val = 'STEEM'" :class="adjustSteemClass">
+						<label for="steem_bchain">STEEM</label>
+					  </span>
+					</span>
 					<i class="fas fa-spin fa-spinner text-brand" v-if="!captchaReady"></i>
 					<vue-recaptcha ref="recaptcha" @verify="onVerifyCaptcha" @expired="onExpiredCaptcha" @render="captchaReady=true" sitekey="6LdpcoMUAAAAAPGTqlvhKEK6Ayw5NqLDZz5Sjudq">
 					</vue-recaptcha>
@@ -96,9 +109,22 @@
 		user: '',
 		captchaReady: false,
 		login_in_progress: false,
+		bchain_val: 'HIVE',
 	  }
 	},
     computed: {
+		adjustHiveClass () {
+			if (this.bchain_val != 'HIVE'){
+				return 'option-opaque';
+			}
+			return '';
+		},
+		adjustSteemClass () {
+			if (this.bchain_val != 'STEEM'){
+				return 'option-opaque';
+			}
+			return '';
+		}
     },
     async mounted () {
 	
@@ -171,13 +197,20 @@
 			this.error_msg = this.$t('login_error');
 			return;
 		}
+		
+		//set proper blockchain selected
+		this.$store.commit('setBchain', this.bchain_val);
+		
+		localStorage.setItem('cur_bchain', this.bchain_val)
+		
 		this.login_in_progress = true;
 		let account_name = this.$refs["username"].value;
 		let priv_pkey = this.$refs["ppkey"].value;
 		let vue_ctnr = this;
 		let user_info = {
 						'username': account_name,
-						'ppkey': priv_pkey
+						'ppkey': priv_pkey,
+						'bchain': this.bchain_val
 					}
 		fetch(process.env.actiAppUrl+'loginAuth',{
 				method: 'POST',
@@ -210,5 +243,8 @@
 }
 .std-login{
 	border-right: 2px solid red;
+}
+.option-opaque{
+	opacity: 0.5;
 }
 </style>

@@ -64,7 +64,7 @@
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/referrals')">{{ $t('My_Referrals') }} <br/><span class="text-brand"> {{ referralCount }} </span></a>
           <a class="dropdown-item" href="#" @click.prevent="$router.push('/activity/' + user.account.name)">{{ $t('My_Activity') }}</a>
           <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="#" @click.prevent="$store.dispatch('steemconnect/logout')">{{ $t('Logout') }}</a>
+          <a class="dropdown-item" href="#" @click.prevent="proceedLogout()">{{ $t('Logout') }}</a>
         </div>
       </li>
     </ul>
@@ -125,6 +125,12 @@
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
+	  proceedLogout () {
+		this.$store.commit('setStdLoginUser', false);
+		localStorage.removeItem('std_login')
+		localStorage.removeItem('std_login_name');
+		this.$store.dispatch('steemconnect/logout')
+	  },
 	  async updateUserData () {
 		//grab user's notifications
 		if (this.user){

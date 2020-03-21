@@ -214,7 +214,8 @@
 		return false;
 	  },
 	  async processTrxFunc(op_name, cstm_params){
-		if (!this.stdLogin){
+		if (!localStorage.getItem('std_login')){
+		//if (!this.stdLogin){
 			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
 			//console.log(res);
 			if (res.result.block_num) {

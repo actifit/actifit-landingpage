@@ -91,5 +91,8 @@ export default {
   },
   stdLoginUser (state) {
 	return state.stdLoginUser
+  },
+  bchain (state){
+	return state.bchain
   }
 }

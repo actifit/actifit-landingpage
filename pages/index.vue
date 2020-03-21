@@ -506,6 +506,7 @@
     },
     computed: {
       ...mapGetters('steemconnect', ['user']),
+	  ...mapGetters('steemconnect', ['stdLogin']),
       ...mapGetters(['userTokens', 'userReportCount', 'transactions', 'userRank', 'userCount', 'topDelegators', 'moderators', 'ambassadors', 'tokensDistributed', 'rewardedActivityCount', 'leaderboard', 'news', 'activeNews']),
       formattedUserTokens () {
         return parseFloat(this.userTokens).toFixed(3)

@@ -212,6 +212,10 @@
         return JSON.parse(this.full_data.json_metadata)
       },
 	  fetchReportCommentData () {
+	  
+		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
+		this.$store.commit('setBchain', cur_bchain);
+		
 		//regrab report data to fix comments
 		this.$store.dispatch('fetchReportComments', {author: this.main_post_author, category: this.main_post_cat, permlink: this.main_post_permlink})
 		
@@ -226,7 +230,8 @@
 	  },
 	  
 	  async processTrxFunc(op_name, cstm_params){
-		if (!this.stdLogin){
+		if (!localStorage.getItem('std_login')){
+		//if (!this.stdLogin){
 			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
 			//console.log(res);
 			if (res.result.block_num) {
@@ -310,7 +315,8 @@
 		  //proceed with deletion
 		  this.deleting = true
 		  console.log(this.stdLogin);
-		  if (!this.stdLogin){
+		  if (!localStorage.getItem('std_login')){
+		  //if (!this.stdLogin){
 			this.$steemconnect.deleteComment(
 			  this.full_data.author,
 			  this.full_data.permlink,(err) => {
@@ -372,7 +378,8 @@
 		meta.suppEdit = 'actifit.io.comment';
 		
 		
-		if (!this.stdLogin){
+		if (!localStorage.getItem('std_login')){
+		//if (!this.stdLogin){
 		
 			this.$steemconnect.comment(
 			  this.full_data.author,
