@@ -89,7 +89,7 @@ patch-package
 +					});
 +				}else{
 +					let username = localStorage.getItem('std_login_name');
-+					let url = new URL(process.env.actiAppUrl + 'fetchUserData/?user='+username);
++					let url = new URL(process.env.actiAppUrl + 'fetchUserData/?user='+username+'&bchain='+(localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):''));
 +			
 +					let reqHeads = new Headers({
 +					  'Content-Type': 'application/json',
