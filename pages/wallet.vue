@@ -452,18 +452,15 @@
 			  <div v-if="fundActivityMode == 3" class="text-center grid p-2 col-md-12">
 				<div >
 				  <div class="row">
-				  <label for="powerdown-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
-				  <input type="number" id="powerdown-amount" name="powerdown-amount" ref="powerdown-amount" class="form-control-lg w-50 p-2">
+					  <label for="powerdown-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
+					  <input type="number" id="powerdown-amount" name="powerdown-amount" ref="powerdown-amount" class="form-control-lg w-50 p-2">
 				  </div>
 				  <div class="row">
-				  <label for="powerdown-amount" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
-				  <input type="password"  id="p-ac-key" name="p-ac-key" ref="p-ac-key" class="form-control-lg w-50 p-2">
+					  <label for="powerdown-amount" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
+					  <input type="password"  id="p-ac-key" name="p-ac-key" ref="p-ac-key" class="form-control-lg w-50 p-2">
 				  </div>
 				  <div class="row">
-				  <div>This operation requires your <b>PRIVATE ACTIVE</b> key.*</div>
-				  <div v-if="powerDownProcess" id="power_down_spinner">
-					<i class="fas fa-spin fa-spinner"></i>
-				  </div>
+					<div class="p-2 col-md-6">This operation requires your <b>PRIVATE ACTIVE</b> key.*</div>
 				  </div>
 				</div>
 				<div class="row" v-if="isPoweringDown">
@@ -484,10 +481,16 @@
 				  <div class="text-center small p-2 w-25"></div>
 				  <button v-on:click="proceedPowerDown" class="btn btn-brand btn-lg w-25 border">{{ $t('Power_Down') }}</button>
 				  <button v-on:click="cancelPowerDown" class="btn btn-brand btn-lg w-25 border">{{ $t('Cancel_Power_Down') }}</button>
+				  <div v-if="powerDownProcess">
+				  <i class="fas fa-spin fa-spinner" ></i>
+				  </div>
 				</div>
 				<div class="row" v-else>
 				  <div class="text-center small p-2 w-25"></div>
 				  <button v-on:click="proceedPowerDown" class="btn btn-brand btn-lg w-50 border">{{ $t('Power_Down') }}</button>
+				  <div v-if="powerDownProcess">
+				  <i class="fas fa-spin fa-spinner" ></i>
+				  </div>
 				</div>
 			  </div>
 			</transition>
@@ -1248,6 +1251,7 @@
 	  },
 	  async vestsToSteemPower (vests) {
 		//function handles converting Vests to SP
+		await this.setProperNode();
 		if (this.properties == ''){
 		  //not loaded yet
 		  this.properties = await steem.api.getDynamicGlobalPropertiesAsync();
@@ -1259,6 +1263,7 @@
 	  },
 	  async steemPowerToVests (steemPower) {
 	    //function handles conversting SP to Vests
+		await this.setProperNode();
 		if (this.properties == ''){
 		  //not loaded yet
 		  this.properties = await steem.api.getDynamicGlobalPropertiesAsync();
@@ -1473,41 +1478,66 @@
 			window.open(link);
 		}else{
 			this.powerDownProcess = true;
-			//steem.api.setOptions({ url: "https://api.steemit.com" });
-			steem.api.setOptions({ url: "https://api.hive.blog/" });
-			const ops = [
-			  "withdraw_vesting",
-			  {
-				"account": this.user.account.name,
-				"vesting_shares": vestsValue,
-				/*"vesting_shares": {
-				  "amount": vestsValue+' VESTS',
-				  "precision": 6,
-				  "nai": "@@000000037"
-				}*/
-			  }
-			];
-			await steem.broadcast.withdrawVestingAsync(this.$refs["p-ac-key"].value, this.user.account.name, vestsValue + ' VESTS' ).then(
-				res => console.log (res), this.powerDownProcess = false)
-			  /* { operations: ops, extensions: [] },
-			   { active:  }
-			).catch(err => {
-				console.log(err.message);
-				return {error: err.message};
-			});*/
-		
-			//console.log(tx);
+			await this.setProperNode ();
+			let res = await steem.broadcast.withdrawVestingAsync(this.$refs["p-ac-key"].value, this.user.account.name, vestsValue + ' VESTS' ).then(
+				res => this.confirmPowerdown(this.$refs["powerdown-amount"].value, res)).catch(err=>console.log(err));
 		}
 	  },
-	  cancelPowerDown () {
+	  confirmPowerdown (amount, res){
+		if (res.block_num){
+			console.log (res);
+			let note = 'power down cancelled successfully!';
+			if (amount > 0){
+				note = 'power down of '+amount +' started successfully!';
+			}
+			this.$notify({
+			  group: 'success',
+			  text: note,
+			  position: 'top center'
+			})
+			this.$store.dispatch('steemconnect/refreshUser');
+		}else{
+			this.$notify({
+			  group: 'error',
+			  text: this.$t('error starting powerdown '),
+			  position: 'top center'
+			})
+		}
+		this.powerDownProcess = false;
+	  },
+	  async cancelPowerDown () {
 		//function handles cancelling the power down
-		var link = this.$steemconnect.sign('withdraw-vesting', {
-		  account: this.user.account.name,
-		  vesting_shares: '0.000000 VESTS',
-		  auto_return: true,
-		}, window.location.origin + '/wallet?op=cancel power down&status=success');
-		//launch the SC window
-		window.open(link);
+		if (localStorage.getItem('std_login')){
+			if (this.$refs["p-ac-key"].value == ''){
+			  this.error_proceeding = true;
+			  this.error_msg = this.$t('all_fields_required');
+			  return;
+			}
+		}
+		if (!localStorage.getItem('std_login')){
+			var link = this.$steemconnect.sign('withdraw-vesting', {
+			  account: this.user.account.name,
+			  vesting_shares: '0.000000 VESTS',
+			  auto_return: true,
+			}, window.location.origin + '/wallet?op=cancel power down&status=success');
+			//launch the SC window
+			window.open(link);
+		}else{
+			this.powerDownProcess = true;
+			//steem.api.setOptions({ url: "https://api.steemit.com" });
+			await this.setProperNode ();
+			let res = await steem.broadcast.withdrawVestingAsync(this.$refs["p-ac-key"].value, this.user.account.name, '0.000000 VESTS' ).then(
+				res => this.confirmPowerdown(0, res)).catch(err=>console.log(err));
+		}
+	  },
+	  setProperNode (){
+		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
+		let properNode = process.env.hiveApiNode;
+		if (cur_bchain == 'STEEM'){
+			let properNode = process.env.steemApiNode;
+		}
+		console.log(cur_bchain);
+		steem.api.setOptions({ url: properNode });
 	  },
 	  exchangeAFITforSTEEM () {
 		//function handles opening/closing exchanging AFIT tokens for STEEM upvotes  section
@@ -2199,7 +2229,7 @@
       this.$store.dispatch('steemconnect/login')
 	  this.fetchUserData();
 	  let ref_id = this;
-	  
+	  await this.setProperNode();
 	  //let's load the properties to properly convert SP to Vests and vice-versa
 	  this.properties = await steem.api.getDynamicGlobalPropertiesAsync();
 	  
