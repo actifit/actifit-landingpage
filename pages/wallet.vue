@@ -2039,7 +2039,7 @@
 		window.open(link);
 		
 		//also start verification process
-		let url = new URL(process.env.actiAppUrl + 'confirmPaymentPasswordVerify');
+		let url = new URL(process.env.actiAppUrl + 'confirmPaymentPasswordVerify/'+'?bchain=' + 'STEEM');//only STEEM for now. TODO add support for HIVE pay
 		//compile all needed data and send it along the request for processing
 		let params = {
 			from: this.user.account.name,
