@@ -174,7 +174,7 @@
 		return "w-50";
 	  },
 	  isUserModerator() {
-		if (this.user && this.moderators.find( mod => mod.name == this.user.name && mod.title == 'moderator')) {
+		if (this.user && this.moderators.find( mod => mod.name == this.user.account.name && mod.title == 'moderator')) {
 		  return true;
 		}
 		return false;
