@@ -63,7 +63,7 @@ patch-package
              // don't do anything if user data is already set
              if (!state.user) {
                // in that case we look for an access token in localStorage
-@@ -68,16 +81,50 @@ var VueSteemConnect = {
+@@ -68,24 +81,91 @@ var VueSteemConnect = {
                if (accessToken) {
                  // set access token and try to fetch user object
                  Vue.SteemConnect().setAccessToken(accessToken);
@@ -117,13 +117,43 @@ patch-package
                }
 -            }
 +            }else{
-+				commit('setStdLogin', true);
++				commit('setStdLogin', std_login);
 +				resolve();
 +			}
            });
          },
++		refreshUser: async function refreshUser(_ref3){
++			let commit = _ref3.commit;
++			let std_login = localStorage.getItem('std_login')
++			let accessToken = localStorage.getItem('access_token');
++			if (std_login && accessToken){
++				let username = localStorage.getItem('std_login_name');
++				let url = new URL(process.env.actiAppUrl + 'fetchUserData/?user='+username+'&bchain='+(localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):''));
++		
++				let reqHeads = new Headers({
++				  'Content-Type': 'application/json',
++				  'x-acti-token': 'Bearer ' + accessToken,
++				});
++				let res = await fetch(url, {
++					headers: reqHeads
++				});
++				let outcome = await res.json();
++				//console.log(outcome);
++				if (outcome.error || !outcome.success){
++					reject(outcome.error)
++				}else{
++					//attempt to auth and grab user data
++					let userSC = new Object();
++					userSC.account = outcome.userdata;
++					console.log('success stdLogin');
++					// save user object in store
++					commit('setStdLogin', true);
++					commit('login', userSC)
++				}
++			}
++		},
          logout: function logout(_ref2) {
-@@ -85,7 +132,10 @@ var VueSteemConnect = {
+           var commit = _ref2.commit;
  
            // remove access token and unset user in store
            localStorage.removeItem('access_token');
@@ -136,7 +166,7 @@ patch-package
        }
 --- a/node_modules/vue-steemconnect/src/index.js
 +++ b/node_modules/vue-steemconnect/src/index.js
-@@ -1,83 +1,143 @@
+@@ -1,83 +1,146 @@
 -const sc2 = require('sc2-sdk');
 -import { Initialize } from 'sc2-sdk';
 +'use strict';
@@ -237,7 +267,7 @@ patch-package
 +			
 +			let std_login = localStorage.getItem('std_login')
 +			console.log('found std_login LS:'+std_login);
-+			commit('setStdLogin', true);
++			
 +			
              // don't do anything if user data is already set
              if (!state.user) {
@@ -271,7 +301,7 @@ patch-package
 +					});
 +				}else{
 +					let username = localStorage.getItem('std_login_name');
-+					let url = new URL(process.env.actiAppUrl + 'fetchUserData/?user='+username);
++					let url = new URL(process.env.actiAppUrl + 'fetchUserData/?user='+username+'&bchain='+(localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):''));
 +			
 +					let reqHeads = new Headers({
 +					  'Content-Type': 'application/json',
@@ -297,8 +327,12 @@ patch-package
 +					}
 +				}
                }
-             }
+-            }
 -          })
++            }else{
++				commit('setStdLogin', std_login);
++				resolve();
++			}
 +          });
          },
 -        logout ({ commit }) {
