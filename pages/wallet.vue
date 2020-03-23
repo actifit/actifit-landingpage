@@ -64,8 +64,8 @@
 		</div>
 		<div class="p-2 font-weight-bold">
 			<!--<button v-on:click="buyAFITwithSTEEM" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('BUY_AFIT_WITH_STEEM') }}</button>-->
-			<a href="https://steem-engine.com/?p=market&t=AFIT" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('buy_afit_se') }}</a>
-			<button v-on:click="exchangeAFITforSTEEM" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('EXCHANGE_AFIT_FOR_STEEM') }}</button>
+			<a href="https://steem-engine.com/?p=market&t=AFIT" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border ">{{ $t('buy_afit_se') }}</a>
+			<button v-on:click="exchangeAFITforSTEEM" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('EXCHANGE_AFIT_FOR_STEEM') }}</button>
 			<button v-on:click="moveAFITSEtoAFITPOWER" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('MOVE_AFIT_SE_AFIT_POWER') }}</button>
 			<button v-on:click="initiateAFITtoSE" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('INITIATE_AFIT_TO_SE') }}</button>
 			  <transition name="fade">
@@ -341,10 +341,10 @@
 		</div>
 		
 		<div class="row text-center row-sep">
-			<div class="col-md-6 row-sep-in">
+			<div class="col-md-6 row-sep-in" v-if="cur_bchain=='STEEM'">
 				<h5 class="token-title"><img src="/img/STEEM.png" class="mr-2 token-logo">{{ $t('Your_Steem_Balance') }}</h5>
 				<div class="mb-4 font-weight-bold">
-					<div class="p-2">{{ this.renderSteemPower(2) }} {{ $t('STEEM_POWER_CAPS') }} | {{ this.renderSteemBalance() }} | {{ this.renderSBDBalance() }}</div>
+					<div class="p-2">{{ this.renderSteemPower(2) }} {{ $t('STEEM_POWER_CAPS') }} | {{ this.renderBalance(this.cur_bchain) }} | {{ this.renderSBDBalance(this.cur_bchain) }}</div>
 					<div class="row">
 						<div class="p-2 col-md-6" id="ttip-area">
 							<small><i>{{ $t('STEEM_POWER_BREAKDOWN') }}: {{this.renderSteemPower(1)}} ({{ $t('Owned_SP') }}) + {{this.renderSteemPower(3)}} ({{ $t('Received_SP') }}) - {{this.renderSteemPower(4)}} ({{ $t('Delegated_SP') }}) - {{this.renderSteemPower(5)}} ({{ $t('Powering_Down_Amount') }})</i></small>
@@ -352,6 +352,18 @@
 					</div>
 				</div>
 			</div>
+			<div class="col-md-6 row-sep-in" v-else-if="cur_bchain=='HIVE'">
+				<h5 class="token-title"><img src="/img/HIVE.png" class="mr-2 token-logo">{{ $t('Your_Hive_Balance') }}</h5>
+				<div class="mb-4 font-weight-bold">
+					<div class="p-2">{{ this.renderSteemPower(2) }} {{ $t('HIVE_POWER_CAPS') }} | {{ this.renderBalance(this.cur_bchain) }} | {{ this.renderSBDBalance(this.cur_bchain) }}</div>
+					<div class="row">
+						<div class="p-2 col-md-6" id="ttip-area">
+							<small><i>{{ $t('HIVE_POWER_BREAKDOWN') }}: {{this.renderSteemPower(1)}} ({{ $t('Owned_HP') }}) + {{this.renderSteemPower(3)}} ({{ $t('Received_HP') }}) - {{this.renderSteemPower(4)}} ({{ $t('Delegated_HP') }}) - {{this.renderSteemPower(5)}} ({{ $t('Powering_Down_Amount') }})</i></small>
+						</div>
+					</div>
+				</div>
+			</div>
+			
 			<div v-if="tokensOfInterestBal.length > 0" class="col-md-6 row-sep-in">
 				<h5 class="token-title">{{ $t('Your_Token_Balance') }}</h5>
 				<div class="mb-4 font-weight-bold">
@@ -388,8 +400,8 @@
 		<div class="row text-center">
 			<div class="p-2 col-md-12">
 				<button v-on:click="transferFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('TRANSFER_FUNDS_ACTION_TEXT') }}</button>
-				<button v-on:click="powerUpFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{  $t('POWERUP_ACTION_TEXT') }}</button>
-				<button v-on:click="powerDownFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('POWERDOWN_ACTION_TEXT') }}</button>
+				<button v-on:click="powerUpFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{  $t('POWERUP_ACTION_TEXT') }} {{this.cur_bchain}}</button>
+				<button v-on:click="powerDownFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('POWERDOWN_ACTION_TEXT') }}{{this.cur_bchain}}</button>
 			</div>
 			<transition name="fade">
 			  <div v-if="fundActivityMode == 1" class="text-center grid p-2 col-md-12">
@@ -496,11 +508,18 @@
 			</transition>
 		</div>
 		<div class="row row-sep">
-			<div v-if="isClaimableDataAvailable" class="col-md-6 row-sep-in">
+			<div v-if="isClaimableDataAvailable && cur_bchain=='STEEM'" class="col-md-6 row-sep-in">
 				<h5 class="token-title"><img src="/img/STEEM.png" class="mr-2 token-logo">{{ $t('Claimable_Steem_Rewards') }}</h5>
 				<div class="mb-4 font-weight-bold">
 					<span class="p-2">{{ this.claimSP }} | {{ this.claimSTEEM }} | {{ this.claimSBD }}</span>
-					<div class="p-2"><button v-on:click="claimRewards" class="btn btn-brand btn-lg w-20">{{ $t('Claim_Rewards') }}</button></div>
+					<div class="p-2"><button v-on:click="claimRewards" class="btn btn-brand btn-lg w-20">{{ $t('Claim_Steem_Rewards') }}</button></div>
+				</div>
+			</div>
+			<div v-else-if="isClaimableDataAvailable && cur_bchain=='HIVE'" class="col-md-6 row-sep-in">
+				<h5 class="token-title"><img src="/img/HIVE.png" class="mr-2 token-logo">{{ $t('Claimable_Hive_Rewards') }}</h5>
+				<div class="mb-4 font-weight-bold">
+					<span class="p-2">{{ this.claimSP }} | {{ this.claimSTEEM }} | {{ this.claimSBD }}</span>
+					<div class="p-2"><button v-on:click="claimRewards" class="btn btn-brand btn-lg w-20">{{ $t('Claim_Hive_Rewards') }}</button></div>
 				</div>
 			</div>
 			<div v-if="claimableSETokens.length > 0" class="col-md-6 row-sep-in">
@@ -663,6 +682,7 @@
 		userAddedTokens: 0,
 		steemPrice: 0.1,
 		sbdPrice: 0.1,
+		hivePrice: 0.1,
 		defaultAfit: 100,
 		afit_buy_error_proceeding: false,
 		afit_buy_err_msg: '',
@@ -694,6 +714,7 @@
 		loading: true,
 		acti_goog_ad_horiz_slim:{display:'inline-block',width:'728px',height:'90px'},
 		powerDownProcess: false,
+		cur_bchain: 'HIVE',
 	  }
 	},
     components: {
@@ -744,7 +765,7 @@
 		if (this.screenWidth < 768){
 		  return "w-100";
 		}
-		return "";
+		return "w-50";
 	  },
 	  smallScreenClasses () {
 		//use proper classes for neat display
@@ -949,11 +970,11 @@
 			case 5: return this.numberFormat(this.powerDownRateVal, 3);
 		}
 	  },
-	  renderSteemBalance () {
-		return this.numberFormat(parseFloat(this.user.account.balance), 3) + ' ' + this.$t('STEEM');
+	  renderBalance (type) {
+		return this.numberFormat(parseFloat(this.user.account.balance), 3) + ' ' + type;
 	  },
-	  renderSBDBalance () {
-		return this.numberFormat(parseFloat(this.user.account.sbd_balance), 3) + ' ' + this.$t('SBD');
+	  renderSBDBalance (type) {
+		return this.numberFormat(parseFloat(this.user.account.sbd_balance), 3) + ' ' + ((type == 'STEEM')?this.$t('SBD'):this.$t('HBD'));
 	  },
 	  setUserPDAfitStatus (result) {
 		this.userPDAfit = result;
@@ -2216,6 +2237,9 @@
 	  },
 	  setSBDPrice (_sbdPrice){
 		this.sbdPrice = parseFloat(_sbdPrice).toFixed(3);
+	  },
+	  setHivePrice (_hivePrice){
+		this.hivePrice = parseFloat(_hivePrice).toFixed(3);
 	  }
 	},
 	created () {
@@ -2225,6 +2249,10 @@
 	  clearInterval(this.runningInterval);
 	},
     async mounted () {
+	  //check which chain is active
+	  if (localStorage.getItem('cur_bchain')){
+		this.cur_bchain = localStorage.getItem('cur_bchain')
+	  }
       // login
       this.$store.dispatch('steemconnect/login')
 	  this.fetchUserData();
@@ -2265,6 +2293,11 @@
 	  //grab STEEM price
 	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem&vs_currencies=usd').then(
 		res => {res.json().then(json => this.setSteemPrice (json.steem.usd)).catch(e => reject(e))
+	  }).catch(e => reject(e))
+	  
+	  //grab HIVE price
+	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=hive&vs_currencies=usd').then(
+		res => {res.json().then(json => this.setHivePrice (json.hive.usd)).catch(e => reject(e))
 	  }).catch(e => reject(e))
 	  
 	  //grab SBD price
