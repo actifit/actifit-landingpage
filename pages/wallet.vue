@@ -528,6 +528,9 @@
 				<div class="mb-4 font-weight-bold">
 					<span class="p-2">{{ this.claimSP }} | {{ this.claimSTEEM }} | {{ this.claimSBD }}</span>
 					<div class="p-2"><button v-on:click="claimRewards" class="btn btn-brand btn-lg w-20">{{ $t('Claim_Steem_Rewards') }}</button></div>
+					<div v-if="claimRewardsProcess">
+					  <i class="fas fa-spin fa-spinner" ></i>
+					</div>
 				</div>
 			</div>
 			<div v-else-if="isClaimableDataAvailable && cur_bchain=='HIVE'" class="col-md-6 row-sep-in">
@@ -535,6 +538,9 @@
 				<div class="mb-4 font-weight-bold">
 					<span class="p-2">{{ this.claimSP }} | {{ this.claimSTEEM }} | {{ this.claimSBD }}</span>
 					<div class="p-2"><button v-on:click="claimRewards" class="btn btn-brand btn-lg w-20">{{ $t('Claim_Hive_Rewards') }}</button></div>
+					<div v-if="claimRewardsProcess">
+					  <i class="fas fa-spin fa-spinner" ></i>
+					</div>
 				</div>
 			</div>
 			<div v-if="claimableSETokens.length > 0" class="col-md-6 row-sep-in">
@@ -731,6 +737,7 @@
 		acti_goog_ad_horiz_slim:{display:'inline-block',width:'728px',height:'90px'},
 		powerDownProcess: false,
 		powerUpProcess: false,
+		claimRewardsProcess: false,
 		cur_bchain: 'HIVE',
 	  }
 	},
@@ -1375,24 +1382,47 @@
 	  async claimRewards () {
 		//function handles claiming STEEM rewards
 		
-		//sample link: https://steemconnect.com/sign/claim-reward-balance?account=sdsf&reward_steem=33&reward_sbd=2342&reward_vests=23432
-		var link = this.$steemconnect.sign('claim-reward-balance', {
-		  account: this.user.account.name,
-		  reward_steem: this.claimSTEEM,
-		  reward_sbd: this.claimSBD,
-		  reward_vests: this.claimVests,
-		  auto_return: true,
-		}, window.location.origin + '/wallet?op=claim rewards&status=success');
-
-		window.open(link);
 		
-		//Below would have been preferred approach, but claimRewardBalance keeps failing as it requires more authority. Keeping here for future further exploration
-		/*
-		console.log(this.claimSTEEM.split(' ')[0]);
-		console.log(this.claimSBD.split(' ')[0]);
-		console.log(this.claimVests.split(' ')[0]);
-		await this.$steemconnect.claimRewardBalance(this.user.account.name, this.claimSTEEM, this.claimSBD, this.claimSP);
-		console.log('done');*/
+		
+		if (!localStorage.getItem('std_login')){
+			//sample link: https://steemconnect.com/sign/claim-reward-balance?account=sdsf&reward_steem=33&reward_sbd=2342&reward_vests=23432
+			var link = this.$steemconnect.sign('claim-reward-balance', {
+			  account: this.user.account.name,
+			  reward_steem: this.claimSTEEM,
+			  reward_sbd: this.claimSBD,
+			  reward_vests: this.claimVests,
+			  auto_return: true,
+			}, window.location.origin + '/wallet?op=claim rewards&status=success');
+
+			window.open(link);
+			
+			//Below would have been preferred approach, but claimRewardBalance keeps failing as it requires more authority. Keeping here for future further exploration
+			/*
+			console.log(this.claimSTEEM.split(' ')[0]);
+			console.log(this.claimSBD.split(' ')[0]);
+			console.log(this.claimVests.split(' ')[0]);
+			await this.$steemconnect.claimRewardBalance(this.user.account.name, this.claimSTEEM, this.claimSBD, this.claimSP);
+			console.log('done');*/
+		}else{
+			this.claimRewardsProcess = true;
+			await this.setProperNode ();
+			console.log('claiming rewards');
+			//TODO: below replace functions are needed for compatibility now with steem-js still using STEEM & SBD terminology for HIVE
+			let cstm_params = {
+				"account": this.user.account.name,
+				"reward_steem": this.claimSTEEM.replace('HIVE','STEEM'),
+				"reward_sbd": this.claimSBD.replace('HBD','SBD'),
+				"reward_vests": this.claimVests
+			};
+			
+			let res = await this.processTrxFunc('claim_reward_balance', cstm_params);
+			
+			if (res.success){
+				this.confirmCompletion('claimrewards', 0, res.trx.tx);
+			}
+			/*steem.broadcast.claimRewardBalanceAsync(this.user.account.name,this.claimSTEEM, this.claimSBD, this.claimSP).then(
+				res => ).catch(err=>console.log(err));*/
+		}
 	  },
 	  transferFunds () {
 		//function handles opening/closing transfer section
@@ -1565,11 +1595,14 @@
 			if (this.cur_bchain=='HIVE'){
 				power_type = 'HP';
 			}
-			if (amount > 0){
+			if (type=='powerdown' && amount > 0){
 				note = 'Power down of '+amount + ' ' + power_type + ' started successfully!';
 			}
 			if (type=='powerup'){
 				note = 'Power up of '+amount+ ' ' + power_type + ' completed successfully!';
+			}
+			if (type=='claimrewards'){
+				note = 'Rewards claimed successfully!';
 			}
 			this.$notify({
 			  group: 'success',
@@ -1580,14 +1613,16 @@
 		}else{
 			this.$notify({
 			  group: 'error',
-			  text: this.$t('error starting powerdown '),
+			  text: this.$t('error performing action! '),
 			  position: 'top center'
 			})
 		}
 		if (type=='powerup'){
 			this.powerUpProcess = false;
-		}else{
+		}else if (type=='powerup'){
 			this.powerDownProcess = false;
+		}else if (type=='claimrewards'){
+			this.claimRewardsProcess = false;
 		}
 	  },
 	  async cancelPowerDown () {
