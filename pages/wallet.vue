@@ -22,7 +22,8 @@
 		<h5>{{ $t('account_est_val') }}<i class="fas fa-info-circle" v-on:click="showDetailedCalc=!showDetailedCalc"></i></h5>
 		<h5 v-if="this.tokenMetrics.length > 0">
 			<div class="pb-2">{{ $t('in_usd') }}: ${{ totalAccountValue}}</div>
-			<div class="pb-2">{{ $t('in_steem') }}: <img src="/img/STEEM.png" class="token-logo-sm">{{ formattedSteemTotVal }}</div>
+			<div class="pb-2" v-if="this.cur_bchain=='STEEM'">{{ $t('in_steem') }}: <img src="/img/STEEM.png" class="token-logo-sm">{{ formattedSteemTotVal }}</div>
+			<div class="pb-2" v-else-if="this.cur_bchain=='HIVE'">{{ $t('in_hive') }}: <img src="/img/HIVE.png" class="token-logo-sm">{{ formattedSteemTotVal }}</div>
 		</h5>
 		<div v-if="this.showDetailedCalc" class="text-center">
 			<div class="row">
@@ -446,9 +447,19 @@
 				  <label for="powerup-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
 				  <input type="number" id="powerup-amount" name="powerup-amount" ref="powerup-amount" class="form-control-lg w-50 p-2">
 				</div>
+				<div class="row" v-if="isStdLogin">
+					  <label for="powerup-amount" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
+					  <input type="password" id="p-ac-key-up" name="p-ac-key-up" ref="p-ac-key-up" class="form-control-lg w-50 p-2">
+				</div>
+				<div class="row" v-if="isStdLogin">
+					<div class="text-center small p-2 w-25"></div>
+					<div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your <b>PRIVATE ACTIVE</b> key.*</div>
+				</div>
 				<div class="row">
 				  <div class="text-center small p-2 w-25"></div>
-				  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50" v-html="$t('power_up_notice')">
+				  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50" v-html="$t('power_up_notice')" v-if="cur_bchain=='STEEM'">
+				  </div>
+				  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50" v-html="$t('power_up_hive_notice')" v-else-if="cur_bchain=='HIVE'">
 				  </div>
 				</div>
 				<div class="text-brand text-center" v-if="error_proceeding">
@@ -457,6 +468,9 @@
 				<div class="row">
 				  <div class="w-25"></div>
 				  <button v-on:click="proceedPowerUp" class="btn btn-brand btn-lg w-50 border">{{ $t('Power_Up') }}</button>
+				</div>
+				<div v-if="powerUpProcess">
+				  <i class="fas fa-spin fa-spinner" ></i>
 				</div>
 			  </div>
 			</transition>
@@ -467,12 +481,13 @@
 					  <label for="powerdown-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
 					  <input type="number" id="powerdown-amount" name="powerdown-amount" ref="powerdown-amount" class="form-control-lg w-50 p-2">
 				  </div>
-				  <div class="row">
+				  <div class="row" v-if="isStdLogin">
 					  <label for="powerdown-amount" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 					  <input type="password"  id="p-ac-key" name="p-ac-key" ref="p-ac-key" class="form-control-lg w-50 p-2">
 				  </div>
-				  <div class="row">
-					<div class="p-2 col-md-6">This operation requires your <b>PRIVATE ACTIVE</b> key.*</div>
+				  <div class="row" v-if="isStdLogin">
+					<div class="text-center small p-2 w-25"></div>
+					<div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your <b>PRIVATE ACTIVE</b> key.*</div>
 				  </div>
 				</div>
 				<div class="row" v-if="isPoweringDown">
@@ -683,6 +698,7 @@
 		steemPrice: 0.1,
 		sbdPrice: 0.1,
 		hivePrice: 0.1,
+		hbdPrice: 0.1,
 		defaultAfit: 100,
 		afit_buy_error_proceeding: false,
 		afit_buy_err_msg: '',
@@ -714,6 +730,7 @@
 		loading: true,
 		acti_goog_ad_horiz_slim:{display:'inline-block',width:'728px',height:'90px'},
 		powerDownProcess: false,
+		powerUpProcess: false,
 		cur_bchain: 'HIVE',
 	  }
 	},
@@ -732,8 +749,11 @@
       ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters('steemconnect', ['stdLogin']),
       ...mapGetters(['userTokens', 'transactions', 'userRank']),
-      formattedSteemTotVal () {
-		return this.numberFormat(this.totalAccountValueSteem, 3) + ' ' + this.$t('STEEM');
+      isStdLogin () {
+		return localStorage.getItem('std_login')
+	  },
+	  formattedSteemTotVal () {
+		return this.numberFormat(this.totalAccountValueSteem, 3) + ' ' + this.cur_bchain;
 	  },
 	  formattedUserTokens () {
 		return this.numberFormat((parseFloat(this.userTokens) + parseFloat(this.userAddedTokens)).toFixed(3), 3) + " AFIT" + " | " + this.numberFormat(parseFloat(this.afit_se_balance), 3) + " AFIT S-E";
@@ -877,11 +897,18 @@
 			this.totalAccountValue += afitseVal
 			this.detailCalculation += this.afit_se_balance + ' AFIT S-E x '+ afitData.lastPrice + ' AFIT S-E/STEEM = ' + this.numberFormat(afitseVal, 4) + ' STEEM<br/>';*/
 			
+			//base currency (STEEM v/s HIVE)
+			let baseCurrency = this.steemPrice
+			let peggedCurrencyUnit = 'SBD';
+			if (this.cur_bchain == 'HIVE' ){
+				baseCurrency = this.hivePrice
+				peggedCurrencyUnit = 'HBD';
+			}
 			//get AFIT standard val
-			let afitCoreVal = this.userTokens * this.afitPrice / this.steemPrice;
+			let afitCoreVal = this.userTokens * this.afitPrice / baseCurrency;
 			//console.log(afitCoreVal);
 			this.totalAccountValue += afitCoreVal;
-			this.detailCalculation += this.userTokens + ' AFIT x '+ this.numberFormat((this.afitPrice / this.steemPrice), 4) + ' AFIT/STEEM = ' + this.numberFormat(afitCoreVal, 4) + ' STEEM<br/>';
+			this.detailCalculation += this.userTokens + ' AFIT x '+ this.numberFormat((this.afitPrice / baseCurrency), 4) + ' AFIT/'+this.cur_bchain+' = ' + this.numberFormat(afitCoreVal, 4) + ' '+this.cur_bchain+'<br/>';
 			
 			let par = this;
 			//grab tokens of interest vals as well
@@ -900,7 +927,7 @@
 				let tokenVal = token.balance * parseFloat(tokenData.lastPrice)
 				tokenVal += token.stake * parseFloat(tokenData.lastPrice)
 				par.totalAccountValue += tokenVal
-				par.detailCalculation += '(' + token.balance + ' + ' + token.stake + ') ' + token.symbol + ' x '+ tokenData.lastPrice + ' ' + token.symbol + '/STEEM = ' + par.numberFormat(tokenVal, 4) + ' STEEM<br/>';
+				par.detailCalculation += '(' + token.balance + ' + ' + token.stake + ') ' + token.symbol + ' x '+ tokenData.lastPrice + ' ' + token.symbol + '/'+par.cur_bchain+' = ' + par.numberFormat(tokenVal, 4) + ' '+par.cur_bchain+'<br/>';
 				//console.log('value for '+token.symbol+ ' $ ' + tokenVal);
 			});
 			
@@ -913,7 +940,7 @@
 				//console.log(prec);
 				let tokenVal = parseFloat(par.numberFormat(token.amount, prec)) * parseFloat(tokenData.lastPrice);
 				par.totalAccountValue += tokenVal
-				par.detailCalculation += par.numberFormat(token.amount, prec) + ' ' + token.symbol + ' x '+ tokenData.lastPrice + ' ' + token.symbol + '/STEEM = ' + par.numberFormat(tokenVal, 4) + ' STEEM<br/>';
+				par.detailCalculation += par.numberFormat(token.amount, prec) + ' ' + token.symbol + ' x '+ tokenData.lastPrice + ' ' + token.symbol + '/'+par.cur_bchain+' = ' + par.numberFormat(tokenVal, 4) + ' '+par.cur_bchain+'<br/>';
 				//console.log('claimable value for '+token.symbol+ ' $ ' + tokenVal);
 			});
 			
@@ -922,24 +949,24 @@
 			let totSteem = parseFloat(this.user.account.balance) + parseFloat(this.steemPower);
 			this.totalAccountValue += totSteem;
 			
-			this.detailCalculation += '(' + parseFloat(this.user.account.balance) + ' + ' + this.steemPower + ') STEEM x 1 = ' + this.numberFormat(totSteem, 4) + ' STEEM<br/>';
+			this.detailCalculation += '(' + parseFloat(this.user.account.balance) + ' + ' + this.steemPower + ') '+this.cur_bchain+' x 1 = ' + this.numberFormat(totSteem, 4) + ' '+this.cur_bchain+'<br/>';
 			
 			//append SBD amount after conversion to STEEM
-			let sbd_val = (parseFloat(this.user.account.sbd_balance) * this.sbdPrice / this.steemPrice);;
+			let sbd_val = (parseFloat(this.user.account.sbd_balance) * this.sbdPrice / baseCurrency);;
 			this.totalAccountValue += sbd_val;
-			this.detailCalculation += parseFloat(this.user.account.sbd_balance) + ' SBD x '+ this.numberFormat((this.sbdPrice / this.steemPrice), 4) + ' SBD/STEEM = ' + this.numberFormat(sbd_val, 4) + ' STEEM<br/>';
+			this.detailCalculation += parseFloat(this.user.account.sbd_balance) + ' '+peggedCurrencyUnit+' x '+ this.numberFormat((this.sbdPrice / baseCurrency), 4) + ' '+peggedCurrencyUnit+'/'+this.cur_bchain+' = ' + this.numberFormat(sbd_val, 4) + ' '+this.cur_bchain+'<br/>';
 						
 
 			//append claimable STEEM + SP
 			let totClaimSteem = parseFloat(this.claimSP) + parseFloat(this.claimSTEEM); 
 			this.totalAccountValue += totClaimSteem;
 			
-			this.detailCalculation += '(' + parseFloat(this.claimSTEEM) + ' + ' + parseFloat(this.claimSP) + ') STEEM x 1 = ' + this.numberFormat(totClaimSteem, 4) + ' STEEM<br/>';
+			this.detailCalculation += '(' + parseFloat(this.claimSTEEM) + ' + ' + parseFloat(this.claimSP) + ') '+this.cur_bchain+' x 1 = ' + this.numberFormat(totClaimSteem, 4) + ' '+this.cur_bchain+'<br/>';
 			
 			//console.log(parseFloat(this.claimSBD) * this.sbdPrice / this.steemPrice);
-			let claim_sbd = (parseFloat(this.claimSBD) * this.sbdPrice / this.steemPrice);
+			let claim_sbd = (parseFloat(this.claimSBD) * this.sbdPrice / baseCurrency);
 			this.totalAccountValue += claim_sbd;
-			this.detailCalculation += parseFloat(this.claimSBD) + ' SBD x '+ this.numberFormat((this.sbdPrice / this.steemPrice), 4) + ' SBD/STEEM = ' + this.numberFormat(claim_sbd, 4) + ' STEEM<br/>';
+			this.detailCalculation += parseFloat(this.claimSBD) + ' '+peggedCurrencyUnit+' x '+ this.numberFormat((this.sbdPrice / baseCurrency), 4) + ' '+peggedCurrencyUnit+'/'+this.cur_bchain+' = ' + this.numberFormat(claim_sbd, 4) + ' '+this.cur_bchain+'<br/>';
 			
 			this.detailCalculation += '-----<br/>';
 			
@@ -947,11 +974,11 @@
 			
 			//convert amount to STEEM price
 			//console.log(this.totalAccountValue);
-			this.totalAccountValue *= this.steemPrice;
+			this.totalAccountValue *= baseCurrency;
 			
-			this.detailCalculation += this.numberFormat(this.totalAccountValueSteem, 4) + ' STEEM x '+ this.steemPrice + ' STEEM/USD = $ ' + this.numberFormat(this.totalAccountValue, 4) + ' USD<br/>';
+			this.detailCalculation += this.numberFormat(this.totalAccountValueSteem, 4) + ' '+this.cur_bchain+' x '+ baseCurrency + ' '+this.cur_bchain+'/USD = $ ' + this.numberFormat(this.totalAccountValue, 4) + ' USD<br/>';
 			
-			//console.log(this.steemPrice);
+			//console.log(baseCurrency);
 			//console.log(this.totalAccountValue);
 			this.totalAccountValue = this.numberFormat(this.totalAccountValue, 2);
 			
@@ -1419,7 +1446,6 @@
 		  this.error_msg = this.$t('amount_positive_int');
 		  return;
 		}
-		
 		//https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
 		var link = this.$steemconnect.sign('transfer', {
 		  from: this.user.account.name,
@@ -1437,8 +1463,12 @@
 		  this.transferType = e.target.options[e.target.options.selectedIndex].value;
 		}
 	  },
-	  proceedPowerUp () {
+	  async proceedPowerUp () {
 		//function handles the actual processing of the power up
+		let confirmPopup = confirm(this.$t('confirm_power_up'));
+		if (!confirmPopup){
+			return;
+		}
 		this.error_proceeding = false;
 		this.error_msg = '';
 		//ensure we have proper values
@@ -1454,18 +1484,41 @@
 		  return;
 		}
 		
-		//https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
-		var link = this.$steemconnect.sign('transfer-to-vesting', {
-		  from: this.user.account.name,
-		  to: this.$refs["powerup-recipient"].value,
-		  amount: parseFloat(this.$refs["powerup-amount"].value).toFixed(3) + ' ' + 'STEEM',
-		  auto_return: true,
-		}, window.location.origin + '/wallet?op=power up&status=success');
-		//launch the SC window
-		window.open(link);
+		if (localStorage.getItem('std_login')){
+			if (this.$refs["p-ac-key-up"].value == ''){
+			  this.error_proceeding = true;
+			  this.error_msg = this.$t('all_fields_required');
+			  return;
+			}
+		}
+		
+		if (!localStorage.getItem('std_login')){
+			
+			//https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
+			var link = this.$steemconnect.sign('transfer-to-vesting', {
+			  from: this.user.account.name,
+			  to: this.$refs["powerup-recipient"].value,
+			  amount: parseFloat(this.$refs["powerup-amount"].value).toFixed(3) + ' ' + 'STEEM',
+			  auto_return: true,
+			}, window.location.origin + '/wallet?op=power up&status=success');
+			//launch the SC window
+			window.open(link);
+		}else{
+			this.powerUpProcess = true;
+			await this.setProperNode ();
+			//transferToVesting(wif, from, to, amount)
+			let res = await steem.broadcast.transferToVestingAsync(this.$refs["p-ac-key-up"].value, this.user.account.name, this.user.account.name, parseFloat(this.$refs["powerup-amount"].value).toFixed(3) + ' ' + 'STEEM' ).then(
+				res => this.confirmCompletion('powerup', this.$refs["powerup-amount"].value, res)).catch(err=>console.log(err));
+		}
 	  },
 	  async proceedPowerDown () {
 		//function handles the actual processing of the power down
+		
+		let confirmPopup = confirm(this.$t('confirm_power_down'));
+		if (!confirmPopup){
+			return;
+		}
+		
 		this.error_proceeding = false;
 		this.error_msg = '';
 		//ensure we have proper values
@@ -1501,15 +1554,22 @@
 			this.powerDownProcess = true;
 			await this.setProperNode ();
 			let res = await steem.broadcast.withdrawVestingAsync(this.$refs["p-ac-key"].value, this.user.account.name, vestsValue + ' VESTS' ).then(
-				res => this.confirmPowerdown(this.$refs["powerdown-amount"].value, res)).catch(err=>console.log(err));
+				res => this.confirmCompletion('powerdown', this.$refs["powerdown-amount"].value, res)).catch(err=>console.log(err));
 		}
 	  },
-	  confirmPowerdown (amount, res){
+	  confirmCompletion (type, amount, res){
 		if (res.block_num){
 			console.log (res);
-			let note = 'power down cancelled successfully!';
+			let note = 'Power down cancelled successfully!';
+			let power_type = 'SP';
+			if (this.cur_bchain=='HIVE'){
+				power_type = 'HP';
+			}
 			if (amount > 0){
-				note = 'power down of '+amount +' started successfully!';
+				note = 'Power down of '+amount + ' ' + power_type + ' started successfully!';
+			}
+			if (type=='powerup'){
+				note = 'Power up of '+amount+ ' ' + power_type + ' completed successfully!';
 			}
 			this.$notify({
 			  group: 'success',
@@ -1524,10 +1584,20 @@
 			  position: 'top center'
 			})
 		}
-		this.powerDownProcess = false;
+		if (type=='powerup'){
+			this.powerUpProcess = false;
+		}else{
+			this.powerDownProcess = false;
+		}
 	  },
 	  async cancelPowerDown () {
 		//function handles cancelling the power down
+		
+		let confirmPopup = confirm(this.$t('confirm_cancel_power_down'));
+		if (!confirmPopup){
+			return;
+		}
+		
 		if (localStorage.getItem('std_login')){
 			if (this.$refs["p-ac-key"].value == ''){
 			  this.error_proceeding = true;
@@ -1548,14 +1618,14 @@
 			//steem.api.setOptions({ url: "https://api.steemit.com" });
 			await this.setProperNode ();
 			let res = await steem.broadcast.withdrawVestingAsync(this.$refs["p-ac-key"].value, this.user.account.name, '0.000000 VESTS' ).then(
-				res => this.confirmPowerdown(0, res)).catch(err=>console.log(err));
+				res => this.confirmCompletion('powerdown', 0, res)).catch(err=>console.log(err));
 		}
 	  },
 	  setProperNode (){
 		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
 		let properNode = process.env.hiveApiNode;
 		if (cur_bchain == 'STEEM'){
-			let properNode = process.env.steemApiNode;
+			properNode = process.env.steemApiNode;
 		}
 		console.log(cur_bchain);
 		steem.api.setOptions({ url: properNode });
@@ -2240,6 +2310,9 @@
 	  },
 	  setHivePrice (_hivePrice){
 		this.hivePrice = parseFloat(_hivePrice).toFixed(3);
+	  },
+	  setHBDPrice (_hbdPrice){
+		this.hbdPrice = parseFloat(_hbdPrice).toFixed(3);
 	  }
 	},
 	created () {
@@ -2303,6 +2376,12 @@
 	  //grab SBD price
 	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem-dollars&vs_currencies=usd').then(
 		res => {res.json().then(json => this.setSBDPrice (json['steem-dollars'].usd)).catch(e => reject(e))
+	  }).catch(e => reject(e))
+	  this.loading = false;
+	  
+	  //grab HBD price
+	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=hive_dollar&vs_currencies=usd').then(
+		res => {res.json().then(json => this.setHBDPrice (json['hive_dollar'].usd)).catch(e => reject(e))
 	  }).catch(e => reject(e))
 	  this.loading = false;
     }

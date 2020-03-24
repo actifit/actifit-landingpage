@@ -88,6 +88,7 @@ module.exports = {
   To: 'To',
   Memo: 'Memo',
   power_up_notice: '<i>Powering up STEEM converts your STEEM into <b>STEEM POWER (SP)</b>, providing you more stake on the Steem blockchain, and hence increasing your vote value on posts.<br/>SP can only be withdrawn using the Power Down option, which allows the conversion back to STEEM over the period of 13 weeks, with one portion out of 13 converted every week.</i>',
+  power_up_hive_notice: '<i>Powering up HIVE converts your HIVE into <b>HIVE POWER (HP)</b>, providing you more stake on the Hive blockchain, and hence increasing your vote value on posts.<br/>HP can only be withdrawn using the Power Down option, which allows the conversion back to HIVE over the period of 13 weeks, with one portion out of 13 converted every week.</i>',
   Power_Up: 'Power Up',
   Power_Down: 'Power Down',
   power_down_notice: '<i>Powering down allows you to convert your STEEM POWER back to withdrawable <b>liquid STEEM</b>. <br/>This process occurs over 13 weeks, yielding one portion out of 13 of the powered down amount to be converted every week.</i>',
@@ -374,6 +375,7 @@ module.exports = {
   account_est_val: 'Estimated Total Account Value',
   in_usd: 'In USD',
   in_steem: 'In STEEM',
+  in_hive: 'In HIVE',
   detailed_calc_title: 'Calculation Details:',
   top_afitx_holders: 'Top 25 AFITX Requests',
   Afitx_Bal: 'AFITX Held',
@@ -522,4 +524,8 @@ module.exports = {
   Login_actifit: 'Login to Actifit',
   login_error: 'Your account and/or private posting key is incorrect.',
   session_expired_login_again: 'Your session has expired. Please login again.',
+  confirm_power_down: 'Are you sure you want to start a power down?',
+  confirm_power_up: 'Are you sure you want to power up?',
+  confirm_cancel_power_down: 'Are you sure you want to cancel your power down?',
+  Active_Key: 'Active Key'
 }
