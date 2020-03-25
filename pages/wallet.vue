@@ -2361,11 +2361,12 @@
 	  if (localStorage.getItem('cur_bchain')){
 		this.cur_bchain = localStorage.getItem('cur_bchain')
 	  }
+	  await this.setProperNode();
       // login
       this.$store.dispatch('steemconnect/login')
 	  this.fetchUserData();
 	  let ref_id = this;
-	  await this.setProperNode();
+	  
 	  //let's load the properties to properly convert SP to Vests and vice-versa
 	  this.properties = await steem.api.getDynamicGlobalPropertiesAsync();
 	  
