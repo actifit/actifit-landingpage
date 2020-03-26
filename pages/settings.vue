@@ -138,8 +138,8 @@
 				//this.user_settings.user = this.user.account.name;
 			}
 			this.user_settings.post_target_bchain = this.target_bchain;
-			
-			let url = new URL(process.env.actiAppUrl + 'updateSettings/?user=' + this.user.account.name+'&settings='+JSON.stringify(this.user_settings));
+			console.log(this.user_settings);
+			let url = new URL(process.env.actiAppUrl + 'updateSettings/?user=' + this.user.account.name+'&settings='+JSON.stringify({post_target_bchain: this.target_bchain}));
 			
 			let accToken = localStorage.getItem('access_token')
 			
