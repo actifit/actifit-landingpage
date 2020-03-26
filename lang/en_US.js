@@ -527,5 +527,10 @@ module.exports = {
   confirm_power_down: 'Are you sure you want to start a power down?',
   confirm_power_up: 'Are you sure you want to power up?',
   confirm_cancel_power_down: 'Are you sure you want to cancel your power down?',
-  Active_Key: 'Active Key'
+  Active_Key: 'Active Key',
+  Settings: 'Settings',
+  Posting_settings: 'Posting Settings',
+  Actifit_post_target: 'Actifit App Posts Go To:',
+  successfully_updated_settings: 'Settings Successfully Saved!',
+  error: 'Generic Error',
 }

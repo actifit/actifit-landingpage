@@ -26,7 +26,7 @@
 					<input type="password" id="ppkey" name="ppkey" ref="ppkey" :placeholder="$t('Ppkey')"  class="form-control form-control-lg mb-2">
 					
 					<span class="row mb-2 form-control-lg ">
-					<span class="bchain-option p-2 m-2 btn col-4 m-auto">
+					  <span class="bchain-option p-2 m-2 btn col-4 m-auto">
 						<input type="radio" id="hive_bchain" value="HIVE" v-model="bchain_val">
 						<img src="/img/HIVE.png" class="col-6" v-on:click="bchain_val = 'HIVE'" :class="adjustHiveClass">
 						<label for="hive_bchain">HIVE</label>
