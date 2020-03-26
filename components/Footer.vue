@@ -117,4 +117,7 @@
 		width: 20px;
 		height: 20px;
 	}
+	.dropdown-menu > .dropdown-item{
+		padding: .1rem 1.1rem !important;
+	}
 </style>
