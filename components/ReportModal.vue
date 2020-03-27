@@ -480,7 +480,7 @@
 	  fetchReportCommentData () {
 	  
 		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
-		this.$store.commit('setBchain', cur_bchain);
+		this.$store.commit('setBchain', this.cur_bchain);
 		
 		//regrab report data to fix comments
 		this.$store.dispatch('fetchReportComments', this.report)

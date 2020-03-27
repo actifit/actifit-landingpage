@@ -231,7 +231,7 @@
 				{ hid: 'description', name: 'description', content: `${this.desc} by ${this.username}` },
 				{ hid: 'ogdescription', name: 'og:description', 'property':'og:description', content: `${this.desc} by ${this.username}` },
 				{ hid: 'image', name: 'og:image', 'property':'og:image', content: `${this.postImg}`}
-			  ],
+			  ]
 		}
 	},
 	/* pre-prepare post data for SEO/SMM friendliness */
