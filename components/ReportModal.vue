@@ -212,6 +212,7 @@
 			  promptURLs: true
 			},
 			displayMorePayoutData: false,
+			cur_bchain: 'HIVE',
 		}
 	},
 	watch: {
@@ -478,7 +479,7 @@
 	  },
 	  fetchReportCommentData () {
 	  
-		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
+		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
 		this.$store.commit('setBchain', cur_bchain);
 		
 		//regrab report data to fix comments
@@ -555,6 +556,8 @@
 	
 	  //fix modal overlay
 	  $('#voteModal').on("hidden.bs.modal", this.fixSubModal)
+	  
+	  this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 	}
   }
 </script>

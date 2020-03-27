@@ -70,7 +70,9 @@
 		<div class="row details mt-2">
 			<div class="col-6">
 				<small>
-					<img src="/img/STEEM.png" class="mr-1 currency-logo-small">{{ postPayout }}
+					<img src="/img/STEEM.png" class="mr-1 currency-logo-small" v-if="cur_bchain=='STEEM'">
+					<img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain=='HIVE'">
+					{{ postPayout }}
 				</small>
 			</div>
 			<div class="col-6 text-right">
@@ -219,6 +221,7 @@
 			userRank: '',
 			fullAFITReward: '',
 			postUpvoted: false,
+			cur_bchain: 'HIVE',
 		}
 	},
 	watch: {
@@ -280,6 +283,8 @@
 		
 		//grab moderators' list
 		this.$store.dispatch('fetchModerators')
+		
+		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 	},
 	
   }

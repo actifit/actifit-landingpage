@@ -48,7 +48,9 @@
 					<img src="/img/actifit_logo.png" class="mr-1 currency-logo-small">{{ afitReward }} {{ $t('AFIT_Token') }}
 				</small>
 				<small :title="postPayout">
-					<img src="/img/STEEM.png" class="mr-1 currency-logo-small">{{ postPayout }}
+					<img src="/img/STEEM.png" class="mr-1 currency-logo-small" v-if="cur_bchain=='STEEM'">
+					<img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain=='HIVE'">
+					{{ postPayout }}
 				</small>
 				<span @click.prevent="displayMorePayoutData = !displayMorePayoutData" class="text-brand pointer-cur-cls" :title="$t('more_token_rewards')">
 					<i class="fas fa-chevron-circle-down" v-if="!displayMorePayoutData"></i>
@@ -299,6 +301,7 @@
 			  promptURLs: true
 			},
 			displayMorePayoutData: false,
+			cur_bchain: 'HIVE',
 		}
 	},
 	watch: {
@@ -471,9 +474,7 @@
 			
 			let op_json = JSON.stringify(operation)
 			
-			let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
-			
-			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+op_json+'&bchain='+cur_bchain);
+			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+op_json+'&bchain='+this.cur_bchain);
 			
 			let reqHeads = new Headers({
 			  'Content-Type': 'application/json',
@@ -747,6 +748,8 @@
 		  }
 		  this.updatePostData();
 		}
+		
+		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		  	
 	}
   }
