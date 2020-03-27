@@ -403,6 +403,7 @@
 				<button v-on:click="transferFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('TRANSFER_FUNDS_ACTION_TEXT') }}</button>
 				<button v-on:click="powerUpFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{  $t('POWERUP_ACTION_TEXT') }} {{this.cur_bchain}}</button>
 				<button v-on:click="powerDownFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('POWERDOWN_ACTION_TEXT') }}{{this.cur_bchain}}</button>
+				<button v-on:click="delegateFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('DELEGATE_ACTION_TEXT') }}{{this.cur_bchain}}</button>
 			</div>
 			<transition name="fade">
 			  <div v-if="fundActivityMode == 1" class="text-center grid p-2 col-md-12">
@@ -518,6 +519,44 @@
 				  <div v-if="powerDownProcess">
 				  <i class="fas fa-spin fa-spinner" ></i>
 				  </div>
+				</div>
+			  </div>
+			</transition>
+			<transition name="fade">
+			  <div v-if="fundActivityMode == 5" class="text-center grid p-2 col-12">
+				<div class="row">
+				  <label for="delegate-recipient" class="w-25 p-2">{{ $t('To') }} *</label>
+				  <input type="text" id="delegate-recipient" name="delegate-recipient" ref="delegate-recipient" class="form-control-lg w-50 p-2" :value="user.account.name">
+				</div>
+				<div class="row">
+				  <label for="delegate-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
+				  <input type="number" id="delegate-amount" name="delegate-amount" ref="delegate-amount" class="form-control-lg w-50 p-2">
+				</div>
+				<div class="row" v-if="isStdLogin">
+					  <label for="delegate-amount" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
+					  <input type="password" id="p-ac-key-delg" name="p-ac-key-delg" ref="p-ac-key-delg" class="form-control-lg w-50 p-2">
+				</div>
+				<div class="row" v-if="isStdLogin">
+					<div class="text-center small p-2 w-25"></div>
+					<div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your <b>PRIVATE ACTIVE</b> key.*</div>
+				</div>
+				<div class="row">
+				  <div class="text-center small p-2 w-25"></div>
+				  <div class="p-2 w-50"></div>
+				  <!--<div :class="smallScreenBtnClasses" class="text-center small p-2 w-50" v-html="$t('power_up_notice')" v-if="cur_bchain=='STEEM'">
+				  </div>
+				  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50" v-html="$t('power_up_hive_notice')" v-else-if="cur_bchain=='HIVE'">
+				  </div>-->
+				</div>
+				<div class="text-brand text-center" v-if="error_proceeding">
+				  {{ this.error_msg}}
+				</div>
+				<div class="row">
+				  <div class="w-25"></div>
+				  <button v-on:click="proceedDelegation" class="btn btn-brand btn-lg w-50 border">{{ $t('Delegate') }}</button>
+				</div>
+				<div v-if="delegateProcess">
+				  <i class="fas fa-spin fa-spinner" ></i>
 				</div>
 			  </div>
 			</transition>
@@ -647,6 +686,7 @@
 		POWERUP_FUNDS: 2,
 		POWERDOWN_FUNDS: 3,
 		WITHDRAW_FUNDS: 4,
+		DELEGATE_FUNDS: 5,
 		EXCHANGE_AFIT_STEEM: 1,
 		MOVE_AFIT_SE: 2,
 		BUY_AFIT_STEEM: 3,
@@ -739,6 +779,7 @@
 		powerUpProcess: false,
 		claimRewardsProcess: false,
 		cur_bchain: 'HIVE',
+		delegateProcess: false,
 	  }
 	},
     components: {
@@ -1460,6 +1501,18 @@
 		//hide upper activity section
 		this.afitActivityMode = 0;
 	  },
+	  delegateFunds () {
+		//function handles opening/closing of delegation section
+		
+		//set proper Fund Activity Mode controlling the display
+		if (this.fundActivityMode == this.DELEGATE_FUNDS ){
+		  this.fundActivityMode = 0;
+		}else{
+		  this.fundActivityMode = this.DELEGATE_FUNDS;
+		}
+		//hide upper activity section
+		this.afitActivityMode = 0;
+	  },
 	  proceedTransfer () {
 		//function handles the actual processing of the transfer
 		this.error_proceeding = false;
@@ -1541,6 +1594,57 @@
 				res => this.confirmCompletion('powerup', this.$refs["powerup-amount"].value, res)).catch(err=>console.log(err));
 		}
 	  },
+	  
+	  async proceedDelegation () {
+		//function handles the actual processing of delegation
+		let confirmPopup = confirm(this.$t('confirm_delegation'));
+		if (!confirmPopup){
+			return;
+		}
+		this.error_proceeding = false;
+		this.error_msg = '';
+		//ensure we have proper values
+		if (this.$refs["delegate-recipient"].value.trim() == '' ||
+			this.$refs["delegate-amount"].value.trim() == ''){
+		  this.error_proceeding = true;
+		  this.error_msg = this.$t('all_fields_required');
+		  return;
+		}
+		if (isNaN(this.$refs["delegate-amount"].value.trim()) || this.$refs["delegate-amount"].value == 0){
+		  this.error_proceeding = true;
+		  this.error_msg = this.$t('amount_positive_int');
+		  return;
+		}
+		
+		if (localStorage.getItem('std_login')){
+			if (this.$refs["p-ac-key-delg"].value == ''){
+			  this.error_proceeding = true;
+			  this.error_msg = this.$t('all_fields_required');
+			  return;
+			}
+		}
+		
+		if (!localStorage.getItem('std_login')){
+			
+			//https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
+			/*var link = this.$steemconnect.sign('transfer-to-vesting', {
+			  from: this.user.account.name,
+			  to: this.$refs["delegate-recipient"].value,
+			  amount: parseFloat(this.$refs["delegate-amount"].value).toFixed(3) + ' ' + 'STEEM',
+			  auto_return: true,
+			}, window.location.origin + '/wallet?op=delegate&status=success');
+			//launch the SC window
+			window.open(link);*/
+		}else{
+			this.delegateProcess = true;
+			await this.setProperNode ();
+			//transferToVesting(wif, from, to, amount)
+			let vestsValue = await this.steemPowerToVests(this.$refs["delegate-amount"].value);
+			let res = await steem.broadcast.delegateVestingSharesAsync(this.$refs["p-ac-key-delg"].value, this.user.account.name, this.$refs["delegate-recipient"].value.trim(), vestsValue + ' ' + 'VESTS' ).then(
+				res => this.confirmCompletion('delegate', this.$refs["delegate-amount"].value, res)).catch(err=>console.log(err));
+		}
+	  },
+	  
 	  async proceedPowerDown () {
 		//function handles the actual processing of the power down
 		
@@ -1604,6 +1708,9 @@
 			if (type=='claimrewards'){
 				note = 'Rewards claimed successfully!';
 			}
+			if (type=='delegate'){
+				note = 'Delegation completed successfully!';
+			}
 			this.$notify({
 			  group: 'success',
 			  text: note,
@@ -1623,6 +1730,8 @@
 			this.powerDownProcess = false;
 		}else if (type=='claimrewards'){
 			this.claimRewardsProcess = false;
+		}else if (type='delegate'){
+			this.delegateProcess = false;
 		}
 	  },
 	  async cancelPowerDown () {

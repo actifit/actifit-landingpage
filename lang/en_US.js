@@ -533,4 +533,6 @@ module.exports = {
   Actifit_post_target: 'Actifit App Posts Go To:',
   successfully_updated_settings: 'Settings Successfully Saved!',
   error: 'Generic Error',
+  confirm_delegation: 'Are you sure you want to proceed with the delegation?',
+  DELEGATE_ACTION_TEXT: 'Delegate '
 }
