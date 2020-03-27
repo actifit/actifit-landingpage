@@ -526,7 +526,7 @@
 			  <div v-if="fundActivityMode == 5" class="text-center grid p-2 col-12">
 				<div class="row">
 				  <label for="delegate-recipient" class="w-25 p-2">{{ $t('To') }} *</label>
-				  <input type="text" id="delegate-recipient" name="delegate-recipient" ref="delegate-recipient" class="form-control-lg w-50 p-2" :value="user.account.name">
+				  <input type="text" id="delegate-recipient" name="delegate-recipient" ref="delegate-recipient" class="form-control-lg w-50 p-2" value="actifit">
 				</div>
 				<div class="row">
 				  <label for="delegate-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
