@@ -27,11 +27,31 @@
             <small class="form-text text-muted">{{ $t('Tag_Edit_Note') }}</small>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-brand" @click.prevent="save()">
+		<div class="modal-footer m-2">
+			<div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-if="cur_bchain=='HIVE'">
+				<input type="radio" id="hive" value="HIVE" v-model="target_bchain">
+				<img src="/img/HIVE.png" style="max-height: 50px" v-on:click="target_bchain = 'HIVE'" :class="adjustHiveClass">
+				<label for="hive">HIVE ONLY</label>
+			</div>
+			<div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-else-if="cur_bchain=='STEEM'">
+				<input type="radio" id="steem" value="STEEM" v-model="target_bchain">
+				<img src="/img/STEEM.png" style="max-height: 50px" v-on:click="target_bchain = 'STEEM'" :class="adjustSteemClass">
+				<label for="steem">STEEM ONLY</label>
+			</div>
+			<div class="bchain-option btn col-6 p-2 row text-left  mx-auto">
+				<input type="radio" id="hive_steem" value="BOTH" v-model="target_bchain">
+				<img src="/img/HIVE.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px" :class="adjustBothClass">
+				<img src="/img/STEEM.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px" :class="adjustBothClass">
+				<label for="hive_steem">HIVE + STEEM</label>
+			</div>
+		</div>
+		<div class="modal-footer">
+          <button type="button" class="btn btn-white border border-danger text-red" @click.prevent="save()">
             <i class="fas fa-spin fa-spinner" v-if="loading"></i>
             <i class="fas fa-paper-plane" v-else></i>
             {{ $t('Save') }}
+			<img src="/img/HIVE.png" style="max-height: 50px" v-if="target_bchain=='HIVE' || target_bchain=='BOTH'">
+			<img src="/img/STEEM.png" style="max-height: 50px" v-if="target_bchain=='STEEM' || target_bchain=='BOTH'">
           </button>
         </div>
       </div>
@@ -62,6 +82,8 @@
 		file: '', //image
         loading: false, // loading animation in submit button
 		imgUploading: false, // loading animation while image upload in progress
+		cur_bchain: 'HIVE', //bchain used to edit/save
+		target_bchain: 'HIVE', //bchain to which edits will go
 		editorConfig: { // markdown editor for post body
           autofocus: true,
           spellChecker: false,
@@ -77,7 +99,26 @@
     computed: {
       ...mapGetters(['editReport']),
 	  ...mapGetters('steemconnect', ['user']),
-	  ...mapGetters('steemconnect', ['stdLogin'])
+	  ...mapGetters('steemconnect', ['stdLogin']),
+	  adjustHiveClass () {
+		if (this.target_bchain != 'HIVE'){
+			return 'option-opaque';
+		}
+		return '';
+	  },
+	  adjustSteemClass () {
+		if (this.target_bchain != 'STEEM'){
+			return 'option-opaque';
+		}
+		return '';
+	  },
+	  adjustBothClass () {
+		if (this.target_bchain != 'BOTH'){
+			return 'option-opaque';
+		}
+		return '';
+	  },
+	  
     },
     watch: {
       editReport () {
@@ -145,7 +186,7 @@
             })
 		  })
 		},
-	  async processTrxFunc(op_name, cstm_params){
+	  async processTrxFunc(op_name, cstm_params, bchain_option){
 		if (!localStorage.getItem('std_login')){
 		//if (!this.stdLogin){
 			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
@@ -171,7 +212,11 @@
 			
 			let op_json = JSON.stringify(operation)
 			
-			let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
+			let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+			
+			if (bchain_option){
+				cur_bchain = bchain_option;
+			}
 			
 			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+op_json+'&bchain='+cur_bchain);
 			
@@ -204,16 +249,16 @@
 			}
 		}
 	  },
-	  commentSuccess (err) {
+	  commentSuccess (err, reward, bchain) {
 		// stop loading animation and show notification
 		this.loading = false
 		this.$notify({
 		  group: err ? 'error' : 'success',
-		  text: err ? this.$t('Save_Error') : this.$t('Save_Success'),
+		  text: err ? this.$t('Save_Error') : this.$t('Save_Success_Chain').replace('_CHAIN_', bchain),
 		  position: 'top center'
 		})
 		
-		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
+		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		this.$store.commit('setBchain', cur_bchain);
 		
 		// update report in store
@@ -223,7 +268,9 @@
 		})
 		
 		//reward the user for a new edit
-		this.RewardUserEdit();
+		if (reward){
+			this.RewardUserEdit();
+		}
 	  },
       async save () {
         this.loading = true // start loading animation
@@ -285,7 +332,7 @@
 			  this.body,
 			  meta,
 			  (err) => {
-				this.commentSuccess();
+				this.commentSuccess(err, true, 'STEEM');
 			  }
 			)
 		}else{
@@ -299,10 +346,25 @@
 			  "json_metadata": JSON.stringify(meta)
 			};
 			
-			let res = await this.processTrxFunc('comment', cstm_params);
+			let res = await this.processTrxFunc('comment', cstm_params, this.cur_bchain);
 			
 			if (res.success){
-				this.commentSuccess();
+				this.commentSuccess(null, true, this.cur_bchain);
+			}else{
+				this.commentSuccess('error saving', true, this.cur_bchain);
+			}
+			
+			//also send the same post again to the other chain
+			let other_chain = this.cur_bchain=='HIVE'?'STEEM':'HIVE';
+			if (this.target_bchain == 'BOTH'){
+				this.loading = true;
+				let res = await this.processTrxFunc('comment', cstm_params, other_chain);
+			
+				if (res.success){
+					this.commentSuccess(null, false, other_chain);
+				}else{
+					this.commentSuccess('error saving', true, other_chain);
+				}
 			}
 		}
       },
@@ -330,6 +392,10 @@
 			console.error(err);
 		}
 	  }
-    }
+    },
+	async mounted () {
+		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+		this.$store.commit('setBchain', this.cur_bchain);
+	}
   }
 </script>
