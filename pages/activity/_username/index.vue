@@ -121,7 +121,7 @@
       async loadMore () {
         this.loadingMore = true
 		
-		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
+		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		this.$store.commit('setBchain', cur_bchain);
 	  
         await this.$store.dispatch('fetchUserReports', this.username)
@@ -155,7 +155,7 @@
 
       // fetch reports
 	  
-	  let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
+	  let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 	  this.$store.commit('setBchain', cur_bchain);
 	  
       await this.$store.dispatch('fetchUserReports', this.username)

@@ -150,8 +150,8 @@
 			<markdown-editor v-model="replyBody" :configs="editorConfig" ref="editor"></markdown-editor>
 			<a href="#" @click.prevent="postResponse($event)" class="btn btn-brand border reply-btn w-25">{{ $t('Post') }}<i class="fas fa-spin fa-spinner" v-if="loading"></i></a>
 			<a href="#" @click.prevent="resetOpenComment()"  class="btn btn-brand border reply-btn w-25">{{ $t('Cancel') }}</a>
-			<a href="#" @click.prevent="insertModSignature" class="btn btn-brand border reply-btn w-25">{{ $t('Short_Signature') }}</a>
-			<a href="#" @click.prevent="insertFullModSignature" class="btn btn-brand border reply-btn w-25">{{ $t('Full_Signature') }}</a>			
+			<a href="#" @click.prevent="insertModSignature" class="btn btn-brand border reply-btn w-25" v-if="(this.user && this.moderators.find( mod => mod.name == this.user.name && mod.title == 'moderator'))">{{ $t('Short_Signature') }}</a>
+			<a href="#" @click.prevent="insertFullModSignature" class="btn btn-brand border reply-btn w-25" v-if="(this.user && this.moderators.find( mod => mod.name == this.user.name && mod.title == 'moderator'))">{{ $t('Full_Signature') }}</a>			
 		  </div>
 		</transition>
 		<div class="report-reply col-md-12" v-if="responsePosted">
@@ -736,6 +736,10 @@
 	
 		this.$store.dispatch('steemconnect/login');
 		
+		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+		
+		this.$store.commit('setBchain', this.cur_bchain);
+		
 		this.fetchUserData();
 		
 		// try to fetch report data
@@ -748,7 +752,7 @@
 		  this.updatePostData();
 		}
 		
-		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+
 		  	
 	}
   }
