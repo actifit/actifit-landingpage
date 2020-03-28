@@ -28,12 +28,12 @@
 					<span class="row mb-2 form-control-lg ">
 					  <span class="bchain-option p-2 m-2 btn col-4 m-auto">
 						<input type="radio" id="hive_bchain" value="HIVE" v-model="bchain_val">
-						<img src="/img/HIVE.png" class="col-6" v-on:click="bchain_val = 'HIVE'" :class="adjustHiveClass">
+						<img src="/img/HIVE.png" style="max-height: 50px;" v-on:click="bchain_val = 'HIVE'" :class="adjustHiveClass">
 						<label for="hive_bchain">HIVE</label>
 					  </span>
 					  <span class="bchain-option p-2 m-2 btn col-4 m-auto">
 						<input type="radio" id="steem_bchain" value="STEEM" v-model="bchain_val">
-						<img src="/img/STEEM.png" class="col-6" v-on:click="bchain_val = 'STEEM'" :class="adjustSteemClass">
+						<img src="/img/STEEM.png" style="max-height: 50px;" v-on:click="bchain_val = 'STEEM'" :class="adjustSteemClass">
 						<label for="steem_bchain">STEEM</label>
 					  </span>
 					</span>

@@ -24,13 +24,13 @@
 			  
 			  <div class="bchain-option btn col-12 m-2 p-2 row text-left">
 				<input type="radio" id="hive_steem" value="BOTH" v-model="target_bchain">
-				<img src="/img/HIVE.png" v-on:click="target_bchain = 'BOTH'" class="col-2" :class="adjustBothClass">
-				<img src="/img/STEEM.png" v-on:click="target_bchain = 'BOTH'" class="col-2" :class="adjustBothClass">
+				<img src="/img/HIVE.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px;"  :class="adjustBothClass">
+				<img src="/img/STEEM.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px;"  :class="adjustBothClass">
 				<label for="hive_steem">HIVE + STEEM</label>
 			  </div>
 			  <div class="bchain-option btn col-12 m-2 p-2 row text-left">
 				<input type="radio" id="hive" value="HIVE" v-model="target_bchain">
-				<img src="/img/HIVE.png" class="col-2" v-on:click="target_bchain = 'HIVE'" :class="adjustHiveClass">
+				<img src="/img/HIVE.png" style="max-height: 50px;"  v-on:click="target_bchain = 'HIVE'" :class="adjustHiveClass">
 				<label for="hive">HIVE ONLY</label>
 			  </div>
 			
