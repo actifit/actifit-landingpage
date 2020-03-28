@@ -234,7 +234,6 @@
 			  ]
 		}
 	},
-	/* pre-prepare post data for SEO/SMM friendliness */
 	async asyncData ({params}) {
 		let result = await steem.api.getContentAsync(params.username.replace('@',''), params.permlink);
 		let imgs = JSON.parse(result.json_metadata).image;
