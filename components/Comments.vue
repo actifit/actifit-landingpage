@@ -18,6 +18,26 @@
 		<transition name="fade">
 		  <div class="comment-reply" v-if="editBoxOpen">
 			<markdown-editor v-model="full_data.body" :configs="editorConfig" ref="editor"></markdown-editor>
+			
+			<div class="modal-footer m-2">
+				<div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-if="cur_bchain=='HIVE'">
+					<input type="radio" id="hive" value="HIVE" v-model="target_bchain">
+					<img src="/img/HIVE.png" style="max-height: 50px" v-on:click="target_bchain = 'HIVE'" :class="adjustHiveClass">
+					<label for="hive">HIVE ONLY</label>
+				</div>
+				<div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-else-if="cur_bchain=='STEEM'">
+					<input type="radio" id="steem" value="STEEM" v-model="target_bchain">
+					<img src="/img/STEEM.png" style="max-height: 50px" v-on:click="target_bchain = 'STEEM'" :class="adjustSteemClass">
+					<label for="steem">STEEM ONLY</label>
+				</div>
+				<div class="bchain-option btn col-6 p-2 row text-left  mx-auto">
+					<input type="radio" id="hive_steem" value="BOTH" v-model="target_bchain">
+					<img src="/img/HIVE.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px" :class="adjustBothClass">
+					<img src="/img/STEEM.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px" :class="adjustBothClass">
+					<label for="hive_steem">HIVE + STEEM</label>
+				</div>
+			</div>
+			
 			<a href="#" @click.prevent="editResponse($event)" class="btn btn-brand border reply-btn w-25">{{ $t('Post') }}<i class="fas fa-spin fa-spinner" v-if="loading"></i></a>
 			<a href="#" @click.prevent="editBoxOpen = !editBoxOpen" class="btn btn-brand border reply-btn w-25">{{ $t('Cancel') }}</a>
 			<a href="#" @click.prevent="insertModSignature" class="btn btn-brand border reply-btn w-25" v-if="(this.user && this.moderators.find( mod => mod.name == this.user.account.name && mod.title == 'moderator'))">{{ $t('Short_Signature') }}</a>
@@ -50,7 +70,30 @@
 		<transition name="fade">
 		  <div class="comment-reply" v-if="commentBoxOpen">
 			<markdown-editor v-model="replyBody" :configs="editorConfig" ref="editor"></markdown-editor>
-			<a href="#" @click.prevent="postResponse($event)" class="btn btn-brand border reply-btn w-25">{{ $t('Post') }}<i class="fas fa-spin fa-spinner" v-if="loading"></i></a>
+			<div class="modal-footer m-2">
+				<div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-if="cur_bchain=='HIVE'">
+					<input type="radio" id="hive" value="HIVE" v-model="target_bchain">
+					<img src="/img/HIVE.png" style="max-height: 50px" v-on:click="target_bchain = 'HIVE'" :class="adjustHiveClass">
+					<label for="hive">HIVE ONLY</label>
+				</div>
+				<div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-else-if="cur_bchain=='STEEM'">
+					<input type="radio" id="steem" value="STEEM" v-model="target_bchain">
+					<img src="/img/STEEM.png" style="max-height: 50px" v-on:click="target_bchain = 'STEEM'" :class="adjustSteemClass">
+					<label for="steem">STEEM ONLY</label>
+				</div>
+				<div class="bchain-option btn col-6 p-2 row text-left  mx-auto">
+					<input type="radio" id="hive_steem" value="BOTH" v-model="target_bchain">
+					<img src="/img/HIVE.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px" :class="adjustBothClass">
+					<img src="/img/STEEM.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px" :class="adjustBothClass">
+					<label for="hive_steem">HIVE + STEEM</label>
+				</div>
+			</div>
+			<a href="#" @click.prevent="postResponse($event)" class="btn btn-brand border reply-btn w-25">
+				{{ $t('Post') }}
+				<img src="/img/HIVE.png" style="max-height: 25px" v-if="target_bchain=='HIVE' || target_bchain=='BOTH'">
+				<img src="/img/STEEM.png" style="max-height: 25px" v-if="target_bchain=='STEEM' || target_bchain=='BOTH'">
+				<i class="fas fa-spin fa-spinner" v-if="loading"></i>
+			</a>
 			<a href="#" @click.prevent="resetOpenComment()"  class="btn btn-brand border reply-btn w-25">{{ $t('Cancel') }}</a>
 			<a href="#" @click.prevent="insertModSignature" class="btn btn-brand border reply-btn w-25" v-if="(this.user && this.moderators.find( mod => mod.name == this.user.account.name && mod.title == 'moderator'))">{{ $t('Short_Signature') }}</a>
 			<a href="#" @click.prevent="insertFullModSignature" class="btn btn-brand border reply-btn w-25" v-if="(this.user && this.moderators.find( mod => mod.name == this.user.account.name && mod.title == 'moderator'))">{{ $t('Full_Signature') }}</a>
@@ -112,6 +155,8 @@
 			errPosting: '',
 			responseBody: '',
 			indentFactor: 30,
+			cur_bchain: 'HIVE',
+			target_bchain: 'HIVE',
 			editorConfig: { // markdown editor for post body
 			  autofocus: true,
 			  spellChecker: false,
@@ -132,6 +177,24 @@
 	  ...mapGetters('steemconnect', ['stdLogin']),
 	  ...mapGetters(['moderators']),
 	  ...mapGetters(['newlyVotedPosts']),
+	  adjustHiveClass () {
+		if (this.target_bchain != 'HIVE'){
+			return 'option-opaque';
+		}
+		return '';
+	  },
+	  adjustSteemClass () {
+		if (this.target_bchain != 'STEEM'){
+			return 'option-opaque';
+		}
+		return '';
+	  },
+	  adjustBothClass () {
+		if (this.target_bchain != 'BOTH'){
+			return 'option-opaque';
+		}
+		return '';
+	  },
 	  getVoteCount(){
 		let totcnt = Array.isArray(this.full_data.active_votes) ? this.full_data.active_votes.length : 0;
 		if (this.newlyVotedPosts.indexOf(this.full_data.post_id) != -1){
@@ -213,8 +276,8 @@
       },
 	  fetchReportCommentData () {
 	  
-		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
-		this.$store.commit('setBchain', cur_bchain);
+		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+		this.$store.commit('setBchain', this.cur_bchain);
 		
 		//regrab report data to fix comments
 		this.$store.dispatch('fetchReportComments', {author: this.main_post_author, category: this.main_post_cat, permlink: this.main_post_permlink})
@@ -229,7 +292,7 @@
 		this.commentBoxOpen=false;
 	  },
 	  
-	  async processTrxFunc(op_name, cstm_params){
+	  async processTrxFunc(op_name, cstm_params, bchain_option){
 		if (!localStorage.getItem('std_login')){
 		//if (!this.stdLogin){
 			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
@@ -255,7 +318,11 @@
 			
 			let op_json = JSON.stringify(operation)
 			
-			let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
+			let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+			
+			if (bchain_option){
+				cur_bchain = bchain_option;
+			}
 			
 			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+op_json+'&bchain='+cur_bchain);
 			
@@ -337,24 +404,29 @@
 			}
 		  }
 	  },
-	  commentSuccess (err){
+	  commentSuccess (err, finalize, bchain) {
 		// stop loading animation and show notification
-		this.loading = false
+		
 		this.$notify({
 		  group: err ? 'error' : 'success',
-		  text: err ? this.$t('Comment_Error') : this.$t('Comment_Success'),
+		  text: err ? this.$t('Comment_Error') : this.$t('Comment_Success_Chain').replace('_CHAIN_', bchain),
 		  position: 'top center'
 		})
 		
-		//display comment placeholder till blockchain data comes through
-		this.responsePosted = true;
-		this.responseBody = this.replyBody;
+		if (finalize){
+			this.loading = false
+			this.editBoxOpen = false;
+			
+			//display comment placeholder till blockchain data comes through
+			this.responsePosted = true;
+			this.responseBody = this.replyBody;
 
-		//refetch report data anew, but only after 10 seconds to ensure data has been made available
-		setTimeout( this.fetchReportCommentData, 10000);
-		
-		//reset open comment
-		this.resetOpenComment();
+			//refetch report data anew, but only after 10 seconds to ensure data has been made available
+			setTimeout( this.fetchReportCommentData, 10000);
+			
+			//reset open comment
+			this.resetOpenComment();
+		}
 	  },
 	  /* function handles sending out the comment to the blockchain */
 	  async postResponse(event) {
@@ -390,7 +462,7 @@
 			  this.replyBody,
 			  meta,
 			  (err) => {
-				this.commentSuccess();
+				this.commentSuccess(err, true, 'STEEM');
 			  }
 			)
 		}else{
@@ -404,15 +476,30 @@
 			  "json_metadata": JSON.stringify(meta)
 			};
 			
-			let res = await this.processTrxFunc('comment', cstm_params);
+			let res = await this.processTrxFunc('comment', cstm_params, this.cur_bchain);
 			
 			if (res.success){
-				this.commentSuccess();
+				this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain);
+			}else{
+				this.commentSuccess('error saving', false, this.cur_bchain);
+			}
+			
+			//also send the same post again to the other chain
+			let other_chain = this.cur_bchain=='HIVE'?'STEEM':'HIVE';
+			if (this.target_bchain == 'BOTH'){
+				//this.loading = true;
+				let res = await this.processTrxFunc('comment', cstm_params, other_chain);
+			
+				if (res.success){
+					this.commentSuccess(null, true, other_chain);
+				}else{
+					this.commentSuccess('error saving', false, other_chain);
+				}
 			}
 		}
 	  },
 	  /* function handles editing out the comment to the blockchain */
-	  editResponse(event) {
+	  async editResponse(event) {
 		// proceed with saving the comment
 		
 		this.loading = true		
@@ -423,31 +510,64 @@
 		meta.app = 'actifit/0.4.1';
 		meta.suppEdit = 'actifit.io.comment';
 		
-        this.$steemconnect.comment(
-          this.full_data.parent_author,
-          this.full_data.parent_permlink,
-          this.full_data.author,
-          this.full_data.permlink,
-          this.full_data.title,
-          this.full_data.body,
-          meta,
-          (err) => {
-            // stop loading animation and show notification
-            this.loading = false
-            this.$notify({
-              group: err ? 'error' : 'success',
-              text: err ? this.$t('Edit_Error') : this.$t('Edit_Success'),
-              position: 'top center'
-            })
+		if (!localStorage.getItem('std_login')){
+			this.$steemconnect.comment(
+			  this.full_data.parent_author,
+			  this.full_data.parent_permlink,
+			  this.full_data.author,
+			  this.full_data.permlink,
+			  this.full_data.title,
+			  this.full_data.body,
+			  meta,
+			  (err) => {
+				// stop loading animation and show notification
+				this.loading = false
+				this.$notify({
+				  group: err ? 'error' : 'success',
+				  text: err ? this.$t('Edit_Error') : this.$t('Edit_Success'),
+				  position: 'top center'
+				})
+				
+				//display comment placeholder till blockchain data comes through
+				this.editBoxOpen = false;
+
+				//refetch report data anew, but only after 10 seconds to ensure data has been made available
+				setTimeout( this.fetchReportCommentData, 10000);
+
+			  }
+			)
+		}else{
+			let cstm_params = {
+			  "author": this.full_data.author,
+			  "title": this.full_data.title,
+			  "body": this.full_data.body,
+			  "parent_author": this.full_data.parent_author,
+			  "parent_permlink": this.full_data.parent_permlink,
+			  "permlink": this.full_data.permlink,
+			  "json_metadata": JSON.stringify(meta)
+			};
 			
-			//display comment placeholder till blockchain data comes through
-			this.editBoxOpen = false;
-
-			//refetch report data anew, but only after 10 seconds to ensure data has been made available
-			setTimeout( this.fetchReportCommentData, 10000);
-
-          }
-        )
+			let res = await this.processTrxFunc('comment', cstm_params, this.cur_bchain);
+			
+			if (res.success){
+				this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain);
+			}else{
+				this.commentSuccess('error saving', false, this.cur_bchain);
+			}
+			
+			//also send the same post again to the other chain
+			let other_chain = this.cur_bchain=='HIVE'?'STEEM':'HIVE';
+			if (this.target_bchain == 'BOTH'){
+				//this.loading = true;
+				let res = await this.processTrxFunc('comment', cstm_params, other_chain);
+			
+				if (res.success){
+					this.commentSuccess(null, true, other_chain);
+				}else{
+					this.commentSuccess('error saving', false, other_chain);
+				}
+			}
+		}
 		
 	  },
 	  /* function checks if logged in user has upvoted current report */

@@ -148,7 +148,32 @@
 		<transition name="fade">
 		  <div class="report-reply col-md-12" v-if="commentBoxOpen">
 			<markdown-editor v-model="replyBody" :configs="editorConfig" ref="editor"></markdown-editor>
-			<a href="#" @click.prevent="postResponse($event)" class="btn btn-brand border reply-btn w-25">{{ $t('Post') }}<i class="fas fa-spin fa-spinner" v-if="loading"></i></a>
+			
+			<div class="modal-footer m-2">
+				<div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-if="cur_bchain=='HIVE'">
+					<input type="radio" id="hive" value="HIVE" v-model="target_bchain">
+					<img src="/img/HIVE.png" style="max-height: 50px" v-on:click="target_bchain = 'HIVE'" :class="adjustHiveClass">
+					<label for="hive">HIVE ONLY</label>
+				</div>
+				<div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-else-if="cur_bchain=='STEEM'">
+					<input type="radio" id="steem" value="STEEM" v-model="target_bchain">
+					<img src="/img/STEEM.png" style="max-height: 50px" v-on:click="target_bchain = 'STEEM'" :class="adjustSteemClass">
+					<label for="steem">STEEM ONLY</label>
+				</div>
+				<div class="bchain-option btn col-6 p-2 row text-left  mx-auto">
+					<input type="radio" id="hive_steem" value="BOTH" v-model="target_bchain">
+					<img src="/img/HIVE.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px" :class="adjustBothClass">
+					<img src="/img/STEEM.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px" :class="adjustBothClass">
+					<label for="hive_steem">HIVE + STEEM</label>
+				</div>
+			</div>
+			
+			<a href="#" @click.prevent="postResponse($event)" class="btn btn-brand border reply-btn w-25">
+				{{ $t('Post') }}
+				<img src="/img/HIVE.png" style="max-height: 25px" v-if="target_bchain=='HIVE' || target_bchain=='BOTH'">
+				<img src="/img/STEEM.png" style="max-height: 25px" v-if="target_bchain=='STEEM' || target_bchain=='BOTH'">
+				<i class="fas fa-spin fa-spinner" v-if="loading"></i>
+			</a>
 			<a href="#" @click.prevent="resetOpenComment()"  class="btn btn-brand border reply-btn w-25">{{ $t('Cancel') }}</a>
 			<a href="#" @click.prevent="insertModSignature" class="btn btn-brand border reply-btn w-25" v-if="(this.user && this.moderators.find( mod => mod.name == this.user.name && mod.title == 'moderator'))">{{ $t('Short_Signature') }}</a>
 			<a href="#" @click.prevent="insertFullModSignature" class="btn btn-brand border reply-btn w-25" v-if="(this.user && this.moderators.find( mod => mod.name == this.user.name && mod.title == 'moderator'))">{{ $t('Full_Signature') }}</a>			
@@ -301,6 +326,7 @@
 			},
 			displayMorePayoutData: false,
 			cur_bchain: 'HIVE',
+			target_bchain: 'HIVE',
 		}
 	},
 	watch: {
@@ -324,6 +350,24 @@
 	  ...mapGetters(['newlyVotedPosts']),
 	  ...mapGetters(['commentEntries'], 'commentCountToday'),
 	  ...mapGetters(['moderators']),
+	  adjustHiveClass () {
+		if (this.target_bchain != 'HIVE'){
+			return 'option-opaque';
+		}
+		return '';
+	  },
+	  adjustSteemClass () {
+		if (this.target_bchain != 'STEEM'){
+			return 'option-opaque';
+		}
+		return '';
+	  },
+	  adjustBothClass () {
+		if (this.target_bchain != 'BOTH'){
+			return 'option-opaque';
+		}
+		return '';
+	  },
 	  // get username from url
       username () {
 	    if (this.$route.params.username.startsWith('@')){
@@ -504,39 +548,42 @@
 			}
 		}
 	  },
-	  commentSuccess (err){
-		// stop loading animation and show notification
-		this.loading = false
+	  commentSuccess (err, finalize, bchain) {
+		
 		this.$notify({
 		  group: err ? 'error' : 'success',
 		  text: err ? this.$t('Comment_Error') : this.$t('Comment_Success'),
 		  position: 'top center'
 		})
 		
-		//display comment placeholder till blockchain data comes through
-		this.responsePosted = true;
-		this.responseBody = this.replyBody;
-		
-		//refetch report data anew, but only after 10 seconds to ensure data has been made available
-		setTimeout( this.fetchReportCommentData, 10000);
-		
-		//check if comment is lengthy enough, increase tracked count by 1
-		if (this.responseBody.length >= 50){
-			if (isNaN(this.commentCountToday)){
-				this.commentCountToday = 0;
+		if (finalize){
+			// stop loading animation and show notification
+			this.loading = false
+			//display comment placeholder till blockchain data comes through
+			this.responsePosted = true;
+			this.responseBody = this.replyBody;
+			
+			//refetch report data anew, but only after 10 seconds to ensure data has been made available
+			setTimeout( this.fetchReportCommentData, 10000);
+			
+			//check if comment is lengthy enough, increase tracked count by 1
+			if (this.responseBody.length >= 50){
+				if (isNaN(this.commentCountToday)){
+					this.commentCountToday = 0;
+				}
+				this.commentCountToday += 1;
 			}
-			this.commentCountToday += 1;
+			
+			this.$store.commit('setCommentCountToday', this.commentCountToday);
+			
+			//reward the user for interacting with 3 different posts via comments
+			if (this.commentCountToday >= 3){
+				this.rewardUserComment();
+			}
+			
+			//reset open comment
+			this.resetOpenComment();
 		}
-		
-		this.$store.commit('setCommentCountToday', this.commentCountToday);
-		
-		//reward the user for interacting with 3 different posts via comments
-		if (this.commentCountToday >= 3){
-			this.rewardUserComment();
-		}
-		
-		//reset open comment
-		this.resetOpenComment();
 	  },
 	  /* function handles sending out the comment to the blockchain */
 	  async postResponse(event) {
@@ -564,7 +611,7 @@
 			  this.replyBody,
 			  meta,
 			  (err) => {
-				this.commentSuccess(err);
+				this.commentSuccess(err, true, 'STEEM');
 			  }
 			)
 		}else{
@@ -578,10 +625,25 @@
 			  "json_metadata": JSON.stringify(meta)
 			};
 			
-			let res = await this.processTrxFunc('comment', cstm_params);
+			let res = await this.processTrxFunc('comment', cstm_params, this.cur_bchain);
 			
 			if (res.success){
-				this.commentSuccess();
+				this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain);
+			}else{
+				this.commentSuccess('error saving', false, this.cur_bchain);
+			}
+			
+			//also send the same post again to the other chain
+			let other_chain = this.cur_bchain=='HIVE'?'STEEM':'HIVE';
+			if (this.target_bchain == 'BOTH'){
+				//this.loading = true;
+				let res = await this.processTrxFunc('comment', cstm_params, other_chain);
+			
+				if (res.success){
+					this.commentSuccess(null, true, other_chain);
+				}else{
+					this.commentSuccess('error saving', false, other_chain);
+				}
 			}
 		}
 	  },
@@ -646,6 +708,10 @@
 		}
 	  },
 	  fetchReportCommentData () {
+		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+		
+		this.$store.commit('setBchain', this.cur_bchain);
+	  
 		//regrab report data to fix comments
 		this.$store.dispatch('fetchReportComments', this.report)
 		
@@ -705,7 +771,14 @@
 		}
 	  },
 	  async updatePostData () {
-		// try to fetch matching report
+		  // try to fetch matching report
+		  //set proper chain
+		  if (this.cur_bchain == 'HIVE'){
+			steem.api.setOptions({ url: process.env.hiveApiNode });
+		  }else{
+			steem.api.setOptions({ url: process.env.steemApiNode });
+		  }	  
+		 
 		  steem.api.getContent(this.postAuthor, this.postPermLink, (err, result) => {
 			this.report = result;
 			if (this.report && this.report.author){

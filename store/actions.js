@@ -184,7 +184,7 @@ export default {
 				}
 			  })
 			})
-		}).catch(e => reject(e))
+		}).catch(e => (console.log(e),reject(e)))
 	}).catch(e => reject(e))
   },
   checkIfMoreReportsAvailable ({ state, commit }) {
@@ -249,10 +249,11 @@ export default {
 	  let cur_ref = this;
 	  
 	  //set proper blockchain selection
+	  //particularly for the getstate, we need a node supporting getstate, so we will use specifically 
 	  if (state.bchain == 'STEEM'){
 		steem.api.setOptions({ url: process.env.steemApiNode });
 	  }else{
-		steem.api.setOptions({ url: process.env.hiveApiNode });
+		steem.api.setOptions({ url: process.env.hiveStateApiNode });
 	  }	  
 	  
 	  //using getState to fetch all level comments

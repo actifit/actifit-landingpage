@@ -50,8 +50,8 @@
             <i class="fas fa-spin fa-spinner" v-if="loading"></i>
             <i class="fas fa-paper-plane" v-else></i>
             {{ $t('Save') }}
-			<img src="/img/HIVE.png" style="max-height: 50px" v-if="target_bchain=='HIVE' || target_bchain=='BOTH'">
-			<img src="/img/STEEM.png" style="max-height: 50px" v-if="target_bchain=='STEEM' || target_bchain=='BOTH'">
+			<img src="/img/HIVE.png" style="max-height: 25px" v-if="target_bchain=='HIVE' || target_bchain=='BOTH'">
+			<img src="/img/STEEM.png" style="max-height: 25px" v-if="target_bchain=='STEEM' || target_bchain=='BOTH'">
           </button>
         </div>
       </div>
@@ -249,27 +249,29 @@
 			}
 		}
 	  },
-	  commentSuccess (err, reward, bchain) {
-		// stop loading animation and show notification
-		this.loading = false
+	  commentSuccess (err, finalize, bchain) {
+		
 		this.$notify({
 		  group: err ? 'error' : 'success',
 		  text: err ? this.$t('Save_Error') : this.$t('Save_Success_Chain').replace('_CHAIN_', bchain),
 		  position: 'top center'
 		})
 		
-		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
-		this.$store.commit('setBchain', cur_bchain);
+		//let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+		//this.$store.commit('setBchain', cur_bchain);
 		
-		// update report in store
-		this.$store.dispatch('updateReport', {
-		  author: this.editReport.author,
-		  permlink: this.editReport.permlink
-		})
 		
 		//reward the user for a new edit
-		if (reward){
+		if (finalize){
+			// stop loading animation and show notification
+			this.loading = false
 			this.RewardUserEdit();
+			// update report in store
+			this.$store.dispatch('updateReport', {
+			  author: this.editReport.author,
+			  permlink: this.editReport.permlink
+			})
+			
 		}
 	  },
       async save () {
@@ -349,9 +351,9 @@
 			let res = await this.processTrxFunc('comment', cstm_params, this.cur_bchain);
 			
 			if (res.success){
-				this.commentSuccess(null, true, this.cur_bchain);
+				this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain);
 			}else{
-				this.commentSuccess('error saving', true, this.cur_bchain);
+				this.commentSuccess('error saving', false, this.cur_bchain);
 			}
 			
 			//also send the same post again to the other chain
@@ -361,9 +363,9 @@
 				let res = await this.processTrxFunc('comment', cstm_params, other_chain);
 			
 				if (res.success){
-					this.commentSuccess(null, false, other_chain);
+					this.commentSuccess(null, true, other_chain);
 				}else{
-					this.commentSuccess('error saving', true, other_chain);
+					this.commentSuccess('error saving', false, other_chain);
 				}
 			}
 		}

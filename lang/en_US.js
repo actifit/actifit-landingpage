@@ -189,6 +189,7 @@ module.exports = {
   Post: 'Post',
   Now: 'Now',
   Comment_Success: 'Comment successfully posted!',
+  Comment_Success_Chain: 'Comment successfully posted to _CHAIN_ !',
   Comment_Error: 'Unknown error: Your comment could not be sent.',
   error_post_not_found: 'Error: Post could not be found!',
   youve_been_rewarded: 'You\'ve been rewarded ',
