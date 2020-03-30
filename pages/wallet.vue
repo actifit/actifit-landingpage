@@ -414,8 +414,14 @@
 				<div class="row">
 				<label for="transfer-type" class="w-25 p-2">{{ $t('Type') }} *</label>
 				<select @change="transferTypeChange" id="transfer-type" name="transfer-type" ref="transfer-type" text="Choose Type" class="form-control-lg w-50 p-2">
-				  <option value="STEEM">STEEM</option>
-				  <option value="SBD">SBD</option>
+				  <option value="STEEM">
+					<span v-if="cur_bchain=='STEEM'">{{ $t('STEEM') }}</span>
+					<span v-if="cur_bchain=='HIVE'">{{ $t('HIVE') }}</span>
+				  </option>
+				  <option value="SBD">
+					<span v-if="cur_bchain=='STEEM'">{{ $t('SBD') }}</span>
+					<span v-if="cur_bchain=='HIVE'">{{ $t('HBD') }}</span>
+				  </option>
 				</select>
 				</div>
 				<div class="row">
@@ -426,6 +432,14 @@
 				  <label for="transfer-memo" class="w-25 p-2">{{ $t('Memo') }}</label>
 				  <input type="text" id="transfer-memo" name="transfer-memo" ref="transfer-memo" class="form-control-lg w-50 p-2">				
 				</div>
+				<div class="row" v-if="isStdLogin">
+					  <label for="p-ac-key-trans" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
+					  <input type="password" id="p-ac-key-trans" name="p-ac-key-trans" ref="p-ac-key-trans" class="form-control-lg w-50 p-2">
+				</div>
+				<div class="row" v-if="isStdLogin">
+					<div class="text-center small p-2 w-25"></div>
+					<div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your <b>PRIVATE ACTIVE</b> key.*</div>
+				</div>
 				<div class="text-center small p-2">
 				  <i>{{ $t('wallet_memo_notice') }}</i>
 				</div>
@@ -435,6 +449,9 @@
 				<div class="row">
 				  <div class="w-25"></div>
 				  <button v-on:click="proceedTransfer" class="btn btn-brand btn-lg w-50 border">{{ $t('Send') }}</button>
+				</div>
+				<div v-if="transferProcess">
+				  <i class="fas fa-spin fa-spinner" ></i>
 				</div>
 			  </div>
 			</transition>
@@ -778,6 +795,7 @@
 		powerDownProcess: false,
 		powerUpProcess: false,
 		claimRewardsProcess: false,
+		transferProcess: false,
 		cur_bchain: 'HIVE',
 		delegateProcess: false,
 	  }
@@ -1513,8 +1531,14 @@
 		//hide upper activity section
 		this.afitActivityMode = 0;
 	  },
-	  proceedTransfer () {
+	  async proceedTransfer () {
 		//function handles the actual processing of the transfer
+		
+		let confirmPopup = confirm(this.$t('confirm_transfer'));
+		if (!confirmPopup){
+			return;
+		}
+		
 		this.error_proceeding = false;
 		this.error_msg = '';
 		//ensure we have proper values
@@ -1529,16 +1553,34 @@
 		  this.error_msg = this.$t('amount_positive_int');
 		  return;
 		}
-		//https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
-		var link = this.$steemconnect.sign('transfer', {
-		  from: this.user.account.name,
-		  to: this.$refs["transfer-recipient"].value,
-		  amount: this.$refs["transfer-amount"].value + ' ' + this.transferType,
-		  memo: this.$refs["transfer-memo"].value,
-		  auto_return: true,
-		}, window.location.origin + '/wallet?op=transfer&status=success');
-		//launch the SC window
-		window.open(link);
+		
+		if (localStorage.getItem('std_login')){
+			if (this.$refs["p-ac-key-trans"].value == ''){
+			  this.error_proceeding = true;
+			  this.error_msg = this.$t('all_fields_required');
+			  return;
+			}
+		}
+		
+		if (!localStorage.getItem('std_login')){
+			
+			//https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
+			var link = this.$steemconnect.sign('transfer', {
+			  from: this.user.account.name,
+			  to: this.$refs["transfer-recipient"].value,
+			  amount: this.$refs["transfer-amount"].value + ' ' + this.transferType,
+			  memo: this.$refs["transfer-memo"].value,
+			  auto_return: true,
+			}, window.location.origin + '/wallet?op=transfer&status=success');
+			//launch the SC window
+			window.open(link);
+		}else{
+			this.transferProcess = true;
+			await this.setProperNode ();
+			//transferToVesting(wif, from, to, amount)
+			let res = await steem.broadcast.transferAsync(this.$refs["p-ac-key-trans"].value, this.user.account.name, this.$refs["transfer-recipient"].value, parseFloat(this.$refs["transfer-amount"].value).toFixed(3) + ' ' + this.transferType, this.$refs["transfer-memo"].value).then(
+				res => this.confirmCompletion('transfer', this.$refs["transfer-amount"].value, res)).catch(err=>console.log(err));
+		}
 	  },
 	  transferTypeChange (e) {
 	    //handles the drop down select option to ensure we have proper value
@@ -1711,6 +1753,9 @@
 			if (type=='delegate'){
 				note = 'Delegation completed successfully!';
 			}
+			if (type=='transfer'){
+				note = 'Transfer completed successfully!';
+			}
 			this.$notify({
 			  group: 'success',
 			  text: note,
@@ -1730,8 +1775,10 @@
 			this.powerDownProcess = false;
 		}else if (type=='claimrewards'){
 			this.claimRewardsProcess = false;
-		}else if (type='delegate'){
+		}else if (type=='delegate'){
 			this.delegateProcess = false;
+		}else if (type=='transfer'){
+			this.transferProcess = false;
 		}
 	  },
 	  async cancelPowerDown () {

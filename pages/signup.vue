@@ -340,6 +340,7 @@
 			referrer: this.$route.query.referrer,
 			email: this.$refs["account-email"].value,
 			promo_code: this.promo_code_val,
+			//cur_bchain: 'HIVE',
 		}
 		Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
 		try{

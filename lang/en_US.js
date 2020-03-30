@@ -64,6 +64,8 @@ module.exports = {
   Checking_Steem_Transfer: 'Checking Your STEEM Transfer',
   STEEM: 'STEEM',
   SBD: 'SBD',
+  HIVE: 'HIVE',
+  HBD: 'HBD',
   Exchange_Queue: 'Exchange Queue',
   My_History: 'My History',
   Tokens: 'Tokens',
@@ -536,5 +538,6 @@ module.exports = {
   successfully_updated_settings: 'Settings Successfully Saved!',
   error: 'Generic Error',
   confirm_delegation: 'Are you sure you want to proceed with the delegation?',
-  DELEGATE_ACTION_TEXT: 'Delegate '
+  DELEGATE_ACTION_TEXT: 'Delegate ',
+  confirm_transfer: 'Are you sure you want to transfer your funds over?'
 }
