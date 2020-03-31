@@ -58,7 +58,9 @@
 			  <div v-else>
 			    <label for="invested-usd" v-html="dispAmountInvest()"></label><br/>
 			    <input type="number" class="form-control form-control-lg mb-2" id="invested-usd" ref="invested-usd" v-model="userInputUSDAmount"/>
-			    <label for="invested-amount">{{ $t('choose_cryto') }}</label><br/>
+			    <label for="matching-afit">{{ $t('matching_rew_afit') }}</label><br/>
+			    <input type="number" class="form-control form-control-lg mb-2" id="matching-afit" ref="matching-afit" readonly :value="getMatchingAFIT()"/>
+				<label for="invested-amount">{{ $t('choose_cryto') }}</label><br/>
 				<span class="row m-0">
 					<input type="number" class="form-control form-control-lg w-50" id="invested-amount" ref="invested-amount" readonly :value="getMatchingAmount()" />
 					<select @change="adjustCurrency" id="invested-crypto" name="invested-crypto" ref="invested-crypto" text="$t('choose_cryto')" class="form-control form-control-lg w-50">
@@ -69,10 +71,8 @@
 					</select>
 				</span>
 			    <button v-on:click="copyContent" data-targetEl="invested-amount" class="btn btn-brand btn-lg w-20">{{ $t('copy_amount') }}</button><br/><br/>
-			    <label for="matching-afit">{{ $t('matching_rew_afit') }}</label><br/>
-			    <input type="number" class="form-control form-control-lg mb-2" id="matching-afit" ref="matching-afit" readonly :value="getMatchingAFIT()"/>
 			    <p class="lead mb-4">
-			    {{ $t('notice_send_amount') }}
+			    {{ $t('notice_send_amount').replace('_CUR_', this.transferType) }}
 			    </p>
 			  
 			    <label for="actifit-address">{{ $t('Address') }}</label><br/>
@@ -93,7 +93,7 @@
 				  {{ this.error_msg}}
 				</div>
 				<div class="text-center pb-2">
-					<button v-on:click="checkFunds" class="btn btn-brand btn-lg w-20" v-if="!promo_code_chkbx">{{ $t('Steem_sent') }}</button>
+					<button v-on:click="checkFunds" class="btn btn-brand btn-lg w-20" v-if="!promo_code_chkbx">{{ $t('Steem_sent').replace('_CUR_', this.transferType) }}</button>
 					<button v-on:click="checkFunds" class="btn btn-brand btn-lg w-20" v-else>{{ $t('create_account') }}</button>
 				</div>
 				<div v-if="processStarted" class="text-center text-brand">
@@ -103,7 +103,7 @@
 					<div id="account_creation" v-if="resultReturned">
 						<div v-if="accountCreated">
 							<i class="fas fa-check"></i><span> {{ $t('account_created_success') }} <br/><br/> {{ $t('post_account_creation_notice') }}</span>
-							<div>{{ $t('posting_key_notice') }}<br/> <b>{{this.privatePostKey}}</b><br/>{{ $t('copy_safe_location') }}</div>
+							<div>{{ $t('posting_key_notice') }}<br/> <b>{{this.privatePostKey}}</b><br/>{{ $t('copy_safe_location') }} <br/><br/>{{ $t('delegation_received') }}</div>
 						</div>
 						<div v-else v-html="$t('error_account_creation')">
 							
@@ -161,7 +161,7 @@
 		hivePrice: 0.1,
 		hbdPrice: 0.1,
 		transferType: 'STEEM',//default option
-		minUSD: 5,
+		minUSD: process.env.minSignupUSDCost,
 		afitPrice: 0.5,
 		userInputSTEEMAmount: 0,
 		userInputUSDAmount: this.minUSD,
