@@ -317,7 +317,7 @@
 			+ this.user.account.name + '/'
 			+ targetFriend + '/'
 			+ res.block_num + '/'
-			+ res.id);
+			+ res.id + '/' + this.cur_bchain);
 		let outcome = await req_res.json();
 		if (outcome.status=='success'){
 			console.log('friend request sent');

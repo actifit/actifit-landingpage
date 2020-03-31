@@ -148,6 +148,8 @@
 			addFriendError: '',
 			acti_goog_ad_square:{display:'inline-block', maxWidth:'300px', maxHeight: '350px'},
 			showModal: false,
+			
+			cur_bchain: 'HIVE',
 		}
 	},
 	watch: {
@@ -222,9 +224,7 @@
 			
 			let op_json = JSON.stringify(operation)
 			
-			let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
-			
-			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+op_json+'&bchain='+cur_bchain);
+			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+op_json+'&bchain='+this.cur_bchain);
 
 			let reqHeads = new Headers({
 			  'Content-Type': 'application/json',
@@ -299,7 +299,7 @@
 			+ this.user.account.name + '/'
 			+ targetUser + '/'
 			+ res.block_num + '/'
-			+ res.id);
+			+ res.id + '/' + this.cur_bchain);
 		let outcome = await req_res.json();
 		if (outcome.status=='success'){
 			console.log('friend request sent');
@@ -359,7 +359,7 @@
 			+ this.user.account.name + '/'
 			+ targetUser + '/'
 			+ res.block_num + '/'
-			+ res.id);
+			+ res.id + '/' + this.cur_bchain);
 		let outcome = await req_res.json();
 		if (outcome.status=='success'){
 			console.log('friend request cancelled');
@@ -586,6 +586,7 @@
 	  
 	},
 	async mounted () {
+		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		// login
 		this.$store.dispatch('steemconnect/login')
 		this.fetchUserData();
