@@ -166,7 +166,7 @@ module.exports = {
   posting_key_notice: 'For the Actifit Mobile App, you need your private posting key to send out your reports, which is the following:',
   copy_safe_location: 'Please copy this also to a safe place.',
   copy_password_confirm: 'Please copy the password into a safe location, and confirm doing that by pasting it to the "Confirm Your Password" field above.',
-  delegation_received: 'You also received 10 HP (HIVE Power) & 10 SP (STEEM Power) delegation for 3 months to help sustain your account.'
+  delegation_received: 'You also received 10 HP (HIVE Power) & 10 SP (STEEM Power) delegation for 3 months to help sustain your account.',
   invalid_email_format: 'The email format used is incorrect.',
   amount_too_low: 'The USD amount chosen is too low. You need to use a min of USD ',
   choose_proper_username: 'Please choose a proper username for your new account.',
