@@ -175,8 +175,8 @@
 				<i class="fas fa-spin fa-spinner" v-if="loading"></i>
 			</a>
 			<a href="#" @click.prevent="resetOpenComment()"  class="btn btn-brand border reply-btn w-25">{{ $t('Cancel') }}</a>
-			<a href="#" @click.prevent="insertModSignature" class="btn btn-brand border reply-btn w-25" v-if="(this.user && this.moderators.find( mod => mod.name == this.user.name && mod.title == 'moderator'))">{{ $t('Short_Signature') }}</a>
-			<a href="#" @click.prevent="insertFullModSignature" class="btn btn-brand border reply-btn w-25" v-if="(this.user && this.moderators.find( mod => mod.name == this.user.name && mod.title == 'moderator'))">{{ $t('Full_Signature') }}</a>			
+			<a href="#" @click.prevent="insertModSignature" class="btn btn-brand border reply-btn w-25" v-if="(this.user && this.moderators.find( mod => mod.name == this.user.account.name && mod.title == 'moderator'))">{{ $t('Short_Signature') }}</a>
+			<a href="#" @click.prevent="insertFullModSignature" class="btn btn-brand border reply-btn w-25" v-if="(this.user && this.moderators.find( mod => mod.name == this.user.account.name && mod.title == 'moderator'))">{{ $t('Full_Signature') }}</a>			
 		  </div>
 		</transition>
 		<div class="report-reply col-md-12" v-if="responsePosted">
@@ -681,14 +681,14 @@
 	  },
 	  /* function handles appending moderators signature */
 	  insertModSignature () {
-		if (this.user && this.moderators.find( mod => mod.name == this.user.name && mod.title == 'moderator')) {
+		if (this.user && this.moderators.find( mod => mod.name == this.user.account.name && mod.title == 'moderator')) {
 		  this.moderatorSignature = process.env.shortModeratorSignature;
 		  this.replyBody += this.moderatorSignature;
 		}
 	  },
 	  /* function handles appending full moderator signature */
 	  insertFullModSignature () {
-		if (this.user && this.moderators.find( mod => mod.name == this.user.name && mod.title == 'moderator')) {
+		if (this.user && this.moderators.find( mod => mod.name == this.user.account.name && mod.title == 'moderator')) {
 		  this.moderatorSignature = process.env.standardModeratorSignature;
 		  this.replyBody += this.moderatorSignature;
 		}
