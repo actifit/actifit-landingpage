@@ -24,11 +24,11 @@
 			<div class="lead mb-2 " v-html="signupProcessDetails()">
 			</div>
 			
-			<div class="row lead mb-4 p-3 w-100" v-html="$t('signup.buy_text')">
+			<div class="row lead mb-4 p-3 w-100" v-html="''"><!-- signup.buy_text -->
 				
 			</div>
 			<div class="form-group">
-			  <label for="account-username">{{ $t('Your_Username') }}</label>
+			  <label for="account-username">{{ $t('Pick_Username') }}</label>
 			  <input class="form-control form-control-lg mb-2" ref="account-username" id="account-username" @input="handleUsername($event.target.value)"/>
 			  <p class="text-brand" v-if="username_invalid">
 				<b>{{ username_invalid }}</b>
@@ -56,11 +56,19 @@
 			    <input type="text" class="form-control form-control-lg mb-2" id="promo-code-val" ref="promo-code-val" v-model="promo_code_val"/>
 			  </div>
 			  <div v-else>
-			    <label for="invested-usd">{{ $t('usd_amount_invest') }}</label><br/>
+			    <label for="invested-usd" v-html="dispAmountInvest()"></label><br/>
 			    <input type="number" class="form-control form-control-lg mb-2" id="invested-usd" ref="invested-usd" v-model="userInputUSDAmount"/>
-			    <label for="invested-amount">{{ $t('steem_amount_send') }}</label><br/>
-			    <input type="number" class="form-control form-control-lg" id="invested-amount" ref="invested-amount" readonly :value="getMatchingSTEEM()" />
-			    <button v-on:click="copyContent" data-targetEl="invested-amount" class="btn btn-brand btn-lg w-20">{{ $t('copy_steem_amount') }}</button><br/><br/>
+			    <label for="invested-amount">{{ $t('choose_cryto') }}</label><br/>
+				<span class="row m-0">
+					<input type="number" class="form-control form-control-lg w-50" id="invested-amount" ref="invested-amount" readonly :value="getMatchingAmount()" />
+					<select @change="adjustCurrency" id="invested-crypto" name="invested-crypto" ref="invested-crypto" text="$t('choose_cryto')" class="form-control form-control-lg w-50">
+						<option value="STEEM">{{ $t('STEEM') }}</option>
+						<!--<option value="SBD">{{ $t('SBD') }}</option>-->
+						<option value="HIVE">{{ $t('HIVE') }}</option>
+						<!--<option value="STEEM">{{ $t('HBD') }}</option>-->
+					</select>
+				</span>
+			    <button v-on:click="copyContent" data-targetEl="invested-amount" class="btn btn-brand btn-lg w-20">{{ $t('copy_amount') }}</button><br/><br/>
 			    <label for="matching-afit">{{ $t('matching_rew_afit') }}</label><br/>
 			    <input type="number" class="form-control form-control-lg mb-2" id="matching-afit" ref="matching-afit" readonly :value="getMatchingAFIT()"/>
 			    <p class="lead mb-4">
@@ -149,6 +157,10 @@
 		resultReturned: false,
 		accountCreated: false,
 		steemPrice: 0.1,
+		sbdPrice: 0.1,
+		hivePrice: 0.1,
+		hbdPrice: 0.1,
+		transferType: 'STEEM',//default option
 		minUSD: 5,
 		afitPrice: 0.5,
 		userInputSTEEMAmount: 0,
@@ -184,6 +196,21 @@
 	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem&vs_currencies=usd').then(
 		res => {res.json().then(json => this.setSteemPrice (json.steem.usd)).catch(e => reject(e))
 	  }).catch(e => reject(e))
+	  
+	  //grab SBD price
+	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem-dollar&vs_currencies=usd').then(
+		res => {res.json().then(json => this.setSBDPrice (json['steem-dollar'].usd)).catch(e => reject(e))
+	  }).catch(e => reject(e))
+	  
+	  //grab HIVE price
+	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=hive&vs_currencies=usd').then(
+		res => {res.json().then(json => this.setHivePrice (json.hive.usd)).catch(e => reject(e))
+	  }).catch(e => reject(e))
+	  
+	  //grab HBD price
+	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=hive_dollar&vs_currencies=usd').then(
+		res => {res.json().then(json => this.setHBDPrice (json.hive_dollar.usd)).catch(e => reject(e))
+	  }).catch(e => reject(e))
 		
 	  //grab AFIT price
 	  
@@ -207,13 +234,24 @@
 	  
     },
 	methods: {
+	  adjustCurrency(e){
+		if(e.target.options.selectedIndex > -1) {
+		  this.transferType = e.target.options[e.target.options.selectedIndex].value;
+		  //also adjust payment amount
+		  
+		}
+	  },
+	  dispAmountInvest(){
+		return this.$t('usd_amount_invest') + ' ' + this.$t('min_amount').replace('_AMNT_', this.minUSD)
+	  },
 	  signupProcessDetails(){
-		return this.$t('signup.desc_part1') + ' ' + this.minUSD 
+		return '';/*this.$t('signup.desc_part1')
 			+ this.$t('signup.desc_part2') + this.afitTokensToEarn() 
 			+ this.$t('signup.desc_part3') + this.delegatedSteem
+			+ this.$t('signup.desc_part3_5') + this.delegatedSteem
 			+ this.$t('signup.desc_part4') + this.minUSD
 			+ this.$t('signup.desc_part5') + this.afitTokensToEarn('100')
-			+ this.$t('signup.desc_part6');
+			+ this.$t('signup.desc_part6');*/
 	  },
 	  handleUsername (val) {
 		let vue_ctnr = this;
@@ -235,6 +273,15 @@
 	  },
 	  setSteemPrice (_steemPrice){
 		this.steemPrice = parseFloat(_steemPrice).toFixed(3);
+	  },
+	  setSBDPrice (_sbdPrice){
+		this.sbdPrice = parseFloat(_sbdPrice).toFixed(3);
+	  },
+	  setHivePrice (_hivePrice){
+		this.hivePrice = parseFloat(_hivePrice).toFixed(3);
+	  },
+	  setHBDPrice (_hbdPrice){
+		this.hbdPrice = parseFloat(_hbdPrice).toFixed(3);
 	  },
 	  minSteemAmount () {
 		//take into consideration potential charges, and remove 0.1 STEEM for potential transfer loss
@@ -266,8 +313,13 @@
 	  getMatchingAFIT () {		
 		return parseFloat(this.userInputUSDAmount / this.afitPrice).toFixed(3);
 	  },
-	  getMatchingSTEEM () {
-		return parseFloat(this.userInputUSDAmount / this.steemPrice).toFixed(3);
+	  getMatchingAmount () {
+		console.log(this.transferType);
+		if (this.transferType == 'STEEM'){
+			return parseFloat(this.userInputUSDAmount / this.steemPrice).toFixed(3);
+		}else if (this.transferType == 'HIVE'){
+			return parseFloat(this.userInputUSDAmount / this.hivePrice).toFixed(3);
+		}
 	  },
 	  setMemoValue () {
 		this.$refs["actifit-memo"].value = this.generateMemo();
@@ -323,7 +375,7 @@
 		  return;
 		}
 		//to prevent tampering with STEEM and AFIT values
-		const steem_invest = this.getMatchingSTEEM ();
+		const steem_invest = this.getMatchingAmount ();
 		const afit_reward = this.getMatchingAFIT ();
 		this.checkingFunds = true;
 		this.processStarted = true;
@@ -335,6 +387,7 @@
 			new_pass: this.$refs["account-password"].value,
 			usd_invest: invested_usd,
 			steem_invest: steem_invest,
+			sent_cur: this.transferType,
 			afit_reward: afit_reward,
 			memo: this.targetMemo,
 			referrer: this.$route.query.referrer,
