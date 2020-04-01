@@ -263,7 +263,7 @@ module.exports = {
   Downvote: 'Downvote',
   Exchange: 'Exchange',
   Vote_Error: 'Unknown error: Your vote could not be broadcasted.',
-  Vote_Success: 'Your vote has been successfully broadcasted.',
+  Vote_Success: 'Your vote has been successfully broadcasted on _BCHAIN_',
   Amount_To_Move: 'Amount to Move',
   afit_se_move_err_msg: 'Please provide a proper numeric amount',
   min_amount_AFIT_power: 'The amount needs to be a minimum of 0.01 AFIT',

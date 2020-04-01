@@ -10,6 +10,24 @@
         </div>
 		<SteemStats class="modal-body" :user="user"/>
         <div class="modal-body text-center">
+		  <div class="modal-footer m-2">
+			<div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-if="cur_bchain=='HIVE'">
+				<input type="radio" id="hive" value="HIVE" v-model="target_bchain">
+				<img src="/img/HIVE.png" style="max-height: 50px" v-on:click="target_bchain = 'HIVE'" :class="adjustHiveClass">
+				<label for="hive">HIVE ONLY</label>
+			</div>
+			<div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-else-if="cur_bchain=='STEEM'">
+				<input type="radio" id="steem" value="STEEM" v-model="target_bchain">
+				<img src="/img/STEEM.png" style="max-height: 50px" v-on:click="target_bchain = 'STEEM'" :class="adjustSteemClass">
+				<label for="steem">STEEM ONLY</label>
+			</div>
+			<div class="bchain-option btn col-6 p-2 row text-left  mx-auto">
+				<input type="radio" id="hive_steem" value="BOTH" v-model="target_bchain">
+				<img src="/img/HIVE.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px" :class="adjustBothClass">
+				<img src="/img/STEEM.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px" :class="adjustBothClass">
+				<label for="hive_steem">HIVE + STEEM</label>
+			</div>
+		  </div>
           <small class="text-muted">{{ $t('Adjust_Vote_Weight') }}</small>
           <ul class="pagination justify-content-center mt-2">
             <li :class="{'page-item': true, disabled: voteWeight === -100}"><a class="page-link vote-controls" href="#" @click.prevent="setVoteWeight(-100)"><i class="far fa-flag text-danger"></i></a></li>
@@ -28,6 +46,8 @@
             <i class="fas fa-thumbs-down" v-if="voteWeight < 0"></i>
             <span v-if="voteWeight > 0"> {{ $t('Upvote') }}</span>
             <span v-if="voteWeight < 0"> {{ $t('Downvote') }}</span>
+			<img src="/img/HIVE.png" style="max-height: 25px" v-if="target_bchain=='HIVE' || target_bchain=='BOTH'">
+			<img src="/img/STEEM.png" style="max-height: 25px" v-if="target_bchain=='STEEM' || target_bchain=='BOTH'">
             <i class="fas fa-spinner fa-spin ml-2" v-if="loading"></i>
           </button>
 		  
@@ -69,6 +89,8 @@
 		STEEMIT_100_PERCENT: 10000,
 		STEEMIT_VOTE_REGENERATION_SECONDS: (5 * 60 * 60 * 24),
 		votersList: [],
+		cur_bchain: 'HIVE',
+		target_bchain: 'HIVE',
       }
     },
 	watch: {
@@ -83,6 +105,24 @@
 	  ...mapGetters('steemconnect', ['stdLogin']),
       ...mapGetters(['postToVote']),
 	  ...mapGetters(['newlyVotedPosts']),
+	  adjustHiveClass () {
+		if (this.target_bchain != 'HIVE'){
+			return 'option-opaque';
+		}
+		return '';
+	  },
+	  adjustSteemClass () {
+		if (this.target_bchain != 'STEEM'){
+			return 'option-opaque';
+		}
+		return '';
+	  },
+	  adjustBothClass () {
+		if (this.target_bchain != 'BOTH'){
+			return 'option-opaque';
+		}
+		return '';
+	  },
       voteWeight: {
         get () {
           return this.$store.getters.voteWeight
@@ -271,7 +311,7 @@
 		//check if the post contains in its original voters current user, or if it has been upvoted in current session
 		return this.postToVote.active_votes.filter(voter => (voter.voter === curUser)).length > 0 || this.newlyVotedPosts.indexOf(this.postToVote.post_id)!==-1;
 	  },
-	  async processTrxFunc(op_name, cstm_params){
+	  async processTrxFunc(op_name, cstm_params, bchain_option){
 		if (!localStorage.getItem('std_login')){
 		//if (!this.stdLogin){
 			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
@@ -296,10 +336,14 @@
 			let accToken = localStorage.getItem('access_token')
 			
 			let op_json = JSON.stringify(operation)
-
-			let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
 			
-			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+op_json+'&bchain='+cur_bchain);
+			let bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+			
+			if (bchain_option){
+				bchain = bchain_option;
+			}
+			
+			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+op_json+'&bchain='+bchain);
 
 			
 			let reqHeads = new Headers({
@@ -331,8 +375,7 @@
 			}
 		}
 	  },
-	  voteSuccess (err) {
-		  this.loading = false
+	  voteSuccess (err, finalize, bchain) {
 		  if (err) {
 			this.$notify({
 			  group: 'error',
@@ -341,23 +384,26 @@
 			});
 		  }
 		  else {
-			//append this entry into the list of voted posts
-			if (this.newlyVotedPosts.indexOf(this.postToVote.post_id) === -1){
-				this.newlyVotedPosts.push(this.postToVote.post_id);
+			if (finalize){
+				this.loading = false
+				//append this entry into the list of voted posts
+				if (this.newlyVotedPosts.indexOf(this.postToVote.post_id) === -1){
+					this.newlyVotedPosts.push(this.postToVote.post_id);
+				}
+				this.$store.commit('setNewlyVotedPosts', this.newlyVotedPosts);
+				$(this.$refs.voteModal).modal('hide')
+				this.$notify({
+				  group: 'success',
+				  text: this.$t('Vote_Success').replace('_BCHAIN_',bchain)
+				});
+				
+				//if the user votes 3 or more posts at 20%, let's give an additional reward
+				if (this.newlyVotedPosts.length >= 3 && this.voteWeight >= 20){
+				  this.rewardUserVote();
+				}
+				
+				this.refreshAccountData();
 			}
-			this.$store.commit('setNewlyVotedPosts', this.newlyVotedPosts);
-			$(this.$refs.voteModal).modal('hide')
-			this.$notify({
-			  group: 'success',
-			  text: this.$t('Vote_Success')
-			});
-			
-			//if the user votes 3 or more posts at 20%, let's give an additional reward
-			if (this.newlyVotedPosts.length >= 3 && this.voteWeight >= 20){
-			  this.rewardUserVote();
-			}
-			
-			this.refreshAccountData();
 		  }
 	  },
 	  async vote () {
@@ -382,7 +428,7 @@
 		if (!localStorage.getItem('std_login')){
 		//if (!this.stdLogin){
 			this.$steemconnect.vote(this.user.account.name, this.postToVote.author, this.postToVote.permlink, this.voteWeight * 100, (err) => {
-			  this.voteSuccess(err);
+			  this.voteSuccess(err, true, 'STEEM');
 			});
 		}else{
 			let cstm_params = {
@@ -392,11 +438,27 @@
 			  "weight": this.voteWeight * 100
 			};
 			
-			let res = await this.processTrxFunc('vote', cstm_params);
+			let res = await this.processTrxFunc('vote', cstm_params, this.cur_bchain);
 			
 			if (res.success){
-				this.voteSuccess();
+				this.voteSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain);
+			}else{
+				this.voteSuccess('error voting', false, this.cur_bchain);
 			}
+			
+			//also send the same post again to the other chain
+			let other_chain = this.cur_bchain=='HIVE'?'STEEM':'HIVE';
+			if (this.target_bchain == 'BOTH'){
+				//this.loading = true;
+				let res = await this.processTrxFunc('vote', cstm_params, other_chain);
+			
+				if (res.success){
+					this.voteSuccess(null, true, other_chain);
+				}else{
+					this.voteSuccess('error voting', false, other_chain);
+				}
+			}
+			
 		}
       },
 	  //handles refreshing account data following vote
@@ -405,6 +467,8 @@
 		//if (!this.stdLogin){
 			let user_data = await this.$steemconnect.me();
 			this.user.account = user_data.account;
+		}else{
+			this.$store.dispatch('steemconnect/refreshUser');
 		}
 	  },
 	  async rewardUserVote () {
@@ -439,6 +503,7 @@
 	  }
     },
 	async mounted () {
+	  this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
 	  //grab STEEM price, needed for vote value calculation
 	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem&vs_currencies=usd').then(
 		res => {res.json().then(json => this.setSteemPrice (json.steem.usd)).catch(e => reject(e))
