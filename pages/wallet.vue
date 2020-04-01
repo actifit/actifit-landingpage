@@ -1733,7 +1733,7 @@
 				res => this.confirmCompletion('powerdown', this.$refs["powerdown-amount"].value, res)).catch(err=>console.log(err));
 		}
 	  },
-	  confirmCompletion (type, amount, res){
+	  async confirmCompletion (type, amount, res){
 		if (res.block_num){
 			console.log (res);
 			let note = 'Power down cancelled successfully!';
