@@ -351,6 +351,9 @@
 							<small><i>{{ $t('STEEM_POWER_BREAKDOWN') }}: {{this.renderSteemPower(1)}} ({{ $t('Owned_SP') }}) + {{this.renderSteemPower(3)}} ({{ $t('Received_SP') }}) - {{this.renderSteemPower(4)}} ({{ $t('Delegated_SP') }}) - {{this.renderSteemPower(5)}} ({{ $t('Powering_Down_Amount') }})</i></small>
 						</div>
 					</div>
+					<div>
+						<button v-on:click="fetchDelegations(false)" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('FETCH_MY_DELEGATIONS') }}</button>
+					</div>
 				</div>
 			</div>
 			<div class="col-md-6 row-sep-in" v-else-if="cur_bchain=='HIVE'">
@@ -361,6 +364,9 @@
 						<div class="p-2 col-md-6" id="ttip-area">
 							<small><i>{{ $t('HIVE_POWER_BREAKDOWN') }}: {{this.renderSteemPower(1)}} ({{ $t('Owned_HP') }}) + {{this.renderSteemPower(3)}} ({{ $t('Received_HP') }}) - {{this.renderSteemPower(4)}} ({{ $t('Delegated_HP') }}) - {{this.renderSteemPower(5)}} ({{ $t('Powering_Down_Amount') }})</i></small>
 						</div>
+					</div>
+					<div>
+						<button v-on:click="fetchDelegations(false)" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('FETCH_MY_DELEGATIONS') }}</button>
 					</div>
 				</div>
 			</div>
@@ -573,6 +579,39 @@
 				  <button v-on:click="proceedDelegation" class="btn btn-brand btn-lg w-50 border">{{ $t('Delegate') }}</button>
 				</div>
 				<div v-if="delegateProcess">
+				  <i class="fas fa-spin fa-spinner" ></i>
+				</div>
+				
+				
+				
+				<div>
+					<h5>{{ $t('active_delegations') }}</h5>
+					<table class="table table-hover">
+					  <thead class="text-brand">
+						<tr>
+						  <th scope="col">{{ $t('Delegatee') }}</th>
+						  <th scope="col" v-if="cur_bchain == 'STEEM' ">{{ $t('Steem_Power') }}</th>
+						  <th scope="col" v-else-if="cur_bchain == 'HIVE' ">{{ $t('Hive_Power') }}</th>
+						  <th scope="col">{{ $t('Date') }}</th>
+						  <th scope="col">{{ $t('Action') }}</th>
+						</tr>
+					  </thead>
+					  <tbody>
+						<tr v-for="(delegation, index) in activeDelegations" :key="index" :delegation="delegation">
+							<td><a :href="'./@'+delegation.delegatee" >@{{ delegation.delegatee }}</a></td> 
+							<td>
+								{{ numberFormat(delegation.power, 3) }} 
+								<span v-if="cur_bchain == 'STEEM'">{{ $t('SP_Symbol') }}</span>
+								<span v-else-if="cur_bchain == 'HIVE'">{{ $t('HP_Symbol') }}</span></td> 
+							<td>{{ date(delegation.min_delegation_time) }}</td>
+							<td><span ><a href="#" @click.prevent="editDelegation(delegation)" :title="$t('Edit_Delegation')"><i class="fas fa-edit"></i></a></span>&nbsp;
+							<span ><a href="#" @click.prevent="cancelDelegation(delegation)" :title="$t('Cancel_Delegation')"><i class="fas fa-trash-alt"></i><i class="fas fa-spin fa-spinner" v-if="cancellingDelegation"></i></a></span></td>
+						</tr>
+					  </tbody>
+					</table>
+				</div>
+				<button v-on:click="fetchDelegations(true)" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('FETCH_MY_DELEGATIONS') }}</button>
+				<div v-if="loadingDeleg">
 				  <i class="fas fa-spin fa-spinner" ></i>
 				</div>
 			  </div>
@@ -798,6 +837,9 @@
 		transferProcess: false,
 		cur_bchain: 'HIVE',
 		delegateProcess: false,
+		loadingDeleg: false,
+		activeDelegations: [],
+		cancellingDelegation: false,
 	  }
 	},
     components: {
@@ -877,6 +919,33 @@
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
+	  editDelegation(delegation){
+		this.$refs['delegate-recipient'].value = delegation.delegatee;
+		this.$refs['delegate-amount'].value = (delegation.power).toFixed(3);
+	  },
+	  cancelDelegation(delegation){
+		this.$refs['delegate-recipient'].value = delegation.delegatee;
+		this.$refs['delegate-amount'].value = 0;
+	  },
+	  //grab account delegations
+	  async fetchDelegations(forceOpen){
+		if (!forceOpen){
+			this.delegateFunds();
+		}
+		await this.setProperNode();
+		this.loadingDeleg = true;
+		let max_limit = 1000;
+		let max_date = new Date(2016, 1, 1, 0, 0, 0, 0);
+		let delg = await steem.api.getVestingDelegationsAsync(this.user.account.name, max_date, max_limit);
+		console.log(delg);
+		if (Array.isArray(delg) && delg.length > 0){
+			for (let i=0; i < delg.length; i++){
+				delg[i].power = await this.vestsToSteemPower(delg[i].vesting_shares);
+			}
+		}
+		this.activeDelegations = delg;
+		this.loadingDeleg = false;
+	  },
 	  //handles setting proper token to be staked
 	  initiateStaking(token){
 		//only adjust open/close is same button is clicked, otherwise adjust token being staked
@@ -1652,11 +1721,11 @@
 		  this.error_msg = this.$t('all_fields_required');
 		  return;
 		}
-		if (isNaN(this.$refs["delegate-amount"].value.trim()) || this.$refs["delegate-amount"].value == 0){
+		/*if (isNaN(this.$refs["delegate-amount"].value.trim()) || this.$refs["delegate-amount"].value == 0){
 		  this.error_proceeding = true;
 		  this.error_msg = this.$t('amount_positive_int');
 		  return;
-		}
+		}*/
 		
 		if (localStorage.getItem('std_login')){
 			if (this.$refs["p-ac-key-delg"].value == ''){
@@ -1682,8 +1751,13 @@
 			await this.setProperNode ();
 			//transferToVesting(wif, from, to, amount)
 			let vestsValue = await this.steemPowerToVests(this.$refs["delegate-amount"].value);
+			let parnt = this;
 			let res = await steem.broadcast.delegateVestingSharesAsync(this.$refs["p-ac-key-delg"].value, this.user.account.name, this.$refs["delegate-recipient"].value.trim(), vestsValue + ' ' + 'VESTS' ).then(
-				res => this.confirmCompletion('delegate', this.$refs["delegate-amount"].value, res)).catch(err=>console.log(err));
+				res => this.confirmCompletion('delegate', this.$refs["delegate-amount"].value, res)).catch((err)=>{
+					console.log(err);
+					parnt.error_msg = 'Error Processing. Make sure you are using proper private active key';
+					this.delegateProcess = false
+				});
 		}
 	  },
 	  
@@ -1777,6 +1851,7 @@
 			this.claimRewardsProcess = false;
 		}else if (type=='delegate'){
 			this.delegateProcess = false;
+			this.fetchDelegations(true);
 		}else if (type=='transfer'){
 			this.transferProcess = false;
 		}

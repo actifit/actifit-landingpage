@@ -38,6 +38,7 @@ module.exports = {
   Custom_Amount: 'Custom Amount',
   Top_Delegators: 'Top Delegators',
   Steem_Power: 'Steem Power',
+  Hive_Power: 'Hive Power',
   View_All_Delegators: 'View All Delegators',
   Daily_Leaderboard: 'Daily Leaderboard',
   Recorded_Activity: 'Recorded Activity',
@@ -544,5 +545,10 @@ module.exports = {
   confirm_delegation: 'Are you sure you want to proceed with the delegation?',
   DELEGATE_ACTION_TEXT: 'Delegate ',
   confirm_transfer: 'Are you sure you want to transfer your funds over?',
-  Pick_Username: 'Choose a Username'
+  Pick_Username: 'Choose a Username',
+  FETCH_MY_DELEGATIONS: 'Fetch My Delegations',
+  Cancel_Delegation: 'Cancel Delegation',
+  Edit_Delegation: 'Adjust Delegation',
+  SP_Symbol: 'SP',
+  HP_Symbol: 'HP',
 }
