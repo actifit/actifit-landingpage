@@ -1751,11 +1751,11 @@
 			await this.setProperNode ();
 			//transferToVesting(wif, from, to, amount)
 			let vestsValue = await this.steemPowerToVests(this.$refs["delegate-amount"].value);
-			let parnt = this;
 			let res = await steem.broadcast.delegateVestingSharesAsync(this.$refs["p-ac-key-delg"].value, this.user.account.name, this.$refs["delegate-recipient"].value.trim(), vestsValue + ' ' + 'VESTS' ).then(
 				res => this.confirmCompletion('delegate', this.$refs["delegate-amount"].value, res)).catch((err)=>{
 					console.log(err);
-					parnt.error_msg = 'Error Processing. Make sure you are using proper private active key';
+					this.error_proceeding = true;
+					this.error_msg = 'Error Processing. Make sure you are using your private active key';
 					this.delegateProcess = false
 				});
 		}
