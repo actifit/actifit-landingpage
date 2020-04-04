@@ -1845,7 +1845,7 @@
 		}
 		if (type=='powerup'){
 			this.powerUpProcess = false;
-		}else if (type=='powerup'){
+		}else if (type=='powerdown'){
 			this.powerDownProcess = false;
 		}else if (type=='claimrewards'){
 			this.claimRewardsProcess = false;
