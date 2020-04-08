@@ -56,32 +56,43 @@
 			
 			
 			<div>{{ $t('Change_password_desc') }}</div>
-			<div>{{ $t('Apply_pass_change_to') }}</div>
-			<div class="bchain-option btn m-2 p-2 row text-left">
-				<input type="radio" id="hive_steem" value="BOTH" v-model="target_bchain">
-				<img src="/img/HIVE.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px;" :class="adjustBothClass">
-				<img src="/img/STEEM.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px;" :class="adjustBothClass">
-				<label for="hive_steem">HIVE + STEEM</label>
+			<div class="row">
+				<div class="font-weight-bold pb-3 col-3">{{ $t('Apply_pass_change_to') }}</div>
+				<div class="bchain-option btn ml-2 p-2 row text-left">
+					<input type="radio" id="hive_steem" value="BOTH" v-model="target_bchain">
+					<img src="/img/HIVE.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px;" :class="adjustBothClass">
+					<img src="/img/STEEM.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px;" :class="adjustBothClass">
+					<label for="hive_steem">HIVE + STEEM</label>
+				</div>
+				<div class="bchain-option btn ml-2 p-2 row text-left" v-if="cur_bchain=='HIVE'">
+					<input type="radio" id="hive" value="HIVE" v-model="target_bchain">
+					<img src="/img/HIVE.png" style="max-height: 50px;"  v-on:click="target_bchain = 'HIVE'" :class="adjustHiveClass">
+					<label for="hive">HIVE ONLY</label>
+				</div>
+				<div class="bchain-option btn ml-2 p-2 row text-left" v-else-if="cur_bchain=='STEEM'">
+					<input type="radio" id="steem" value="STEEM" v-model="target_bchain">
+					<img src="/img/STEEM.png" style="max-height: 50px;"  v-on:click="target_bchain = 'STEEM'" :class="adjustSteemClass">
+					<label for="steem">STEEM ONLY</label>
+				</div>
 			</div>
-			<div class="bchain-option btn m-2 p-2 row text-left" v-if="cur_bchain=='HIVE'">
-				<input type="radio" id="hive" value="HIVE" v-model="target_bchain">
-				<img src="/img/HIVE.png" style="max-height: 50px;"  v-on:click="target_bchain = 'HIVE'" :class="adjustHiveClass">
-				<label for="hive">HIVE ONLY</label>
-			</div>
-			<div class="bchain-option btn m-2 p-2 row text-left" v-else-if="cur_bchain=='STEEM'">
-				<input type="radio" id="steem" value="STEEM" v-model="target_bchain">
-				<img src="/img/STEEM.png" style="max-height: 50px;"  v-on:click="target_bchain = 'STEEM'" :class="adjustSteemClass">
-				<label for="steem">STEEM ONLY</label>
-			</div>
-			
 			<div class="row">
 				<label for="passchangedata" class="font-weight-bold col-3">{{ $t('Your_current_pass') }} {{ cur_bchain}} <img :src="'/img/'+cur_bchain+'.png'" style="max-height: 50px;"></label>
-				<input class="form-control form-control-lg mb-2 col-7" ref="passchangedata" id="passchangedata" :value="$refs['passfetchdata']?$refs['passfetchdata'].value:''"/>
+				<input class="form-control form-control-lg mb-2 col-7" ref="passchangedata" id="passchangedata" />
+				<button v-on:click="verifyPassByChain($refs['passchangedata'].value, cur_bchain, 1)" data-targetEl="newAcctPwdField" class="btn btn-brand btn-lg w-20 mb-2 ml-1">{{ $t('Verify') }}</button>
+				<div><i class="fas fa-spin fa-spinner text-brand m-lg-3" v-if="validatingA"></i>
+				<i class="fas fa-check text-success m-lg-3" v-if="passAValid"></i>
+				<i class="fas fa-times text-danger m-lg-3" v-else></i>
+				</div>
 			</div>
 			
 			<div class="row" v-if="target_bchain == 'BOTH'">
 				<label for="passchangedataother" class="font-weight-bold col-3">{{ $t('Your_current_pass') }} {{ (cur_bchain=='HIVE'?'STEEM':'HIVE')}} <img :src="'/img/'+(cur_bchain=='HIVE'?'STEEM':'HIVE')+'.png'" style="max-height: 50px;"></label>
 				<input class="form-control form-control-lg mb-2 col-7" ref="passchangedataother" id="passchangedataother" />
+				<button v-on:click="verifyPassByChain($refs['passchangedataother'].value, (cur_bchain=='HIVE'?'STEEM':'HIVE'), 2)" data-targetEl="newAcctPwdField" class="btn btn-brand btn-lg w-20 mb-2 ml-1">{{ $t('Verify') }}</button>
+				<div><i class="fas fa-spin fa-spinner text-brand m-lg-3" v-if="validatingB"></i>
+				<i class="fas fa-check text-success m-lg-3" v-if="passBValid"></i>
+				<i class="fas fa-times text-danger m-lg-3" v-else></i>
+				</div>
 			</div>
 			
 			<button v-on:click="setPasswordVal" class="btn btn-brand btn-lg w-20">{{ $t('Generate_New_Password') }}</button>
@@ -102,9 +113,9 @@
 			</div>
 		</div>
 	</div>
-	<div class="container pt-5 mt-5 pb-5" v-if="update_result">
+	<div class="container pt-5 mt-5 pb-5" v-if="user || update_result">
 		<div class="row">
-			<div class="col-3"></div>
+			<label for="newAcctInfo" class="col-3">$t('Pass_update_progress')</label>
 			<textarea rows="8" cols="80" class="text-brand" v-html="update_result" ref="newAcctInfo" id="newAcctInfo" readonly>
 			</textarea >
 			<button v-on:click="copyContent" data-targetEl="newAcctInfo" class="btn btn-brand btn-lg w-20 mb-2 ml-1" style="max-height: 50px;">{{ $t('Copy') }}</button>
@@ -172,6 +183,10 @@
 			updatingPass: false,
 			update_result: '',
 			reloginNeeded: false,
+			passAValid: false,
+			passBValid: false,
+			validatingA: false,
+			validatingB: false,
 		}
 	},
 	watch: {
@@ -225,12 +240,44 @@
 		console.log(cur_bchain);
 		steem.api.setOptions({ url: properNode });
 	  },
-	  verifyPass (cur_pass) {
-		let auths = {
-			posting: this.user.account.posting.key_auths,
-			active: this.user.account.active.key_auths,
-			owner: this.user.account.owner.key_auths,
-		};
+	  async verifyPassByChain (pass, chain, target){
+		if (target == 1){
+			this.validatingA = true;
+		}else if (target == 2){
+			this.validatingB = true;
+		}
+		this.setProperNode(chain);
+		let res = await steem.api.getAccountsAsync([this.user.account.name]);
+		if (res && res.length > 0){
+			let auths = {
+				posting: res[0].posting.key_auths,
+				active: res[0].active.key_auths,
+				owner: res[0].owner.key_auths,
+			};
+			console.log(res);
+			console.log(pass);
+			console.log(auths);
+			let passVerified = await this.verifyPass(pass, auths);
+			
+			if (target == 1){
+				this.passAValid = passVerified;
+				this.validatingA = false;
+			}else if (target == 2){
+				this.passBValid = passVerified;
+				this.validatingB = false;
+			}
+		}else{
+			if (target == 1){
+				this.passAValid = false;
+				this.validatingA = false;
+			}else if (target == 2){
+				this.passBValid = false;
+				this.validatingB = false;
+			}
+		}
+	  },
+	  verifyPass (cur_pass, auths) {
+		
 		let res = steem.auth.verify(this.user.account.name, cur_pass, auths);
 		console.log(res);
 		return res;
@@ -240,7 +287,12 @@
 		this.fetchingPass = true;
 		this.errorFetch = '';
 		await this.setProperNode();
-		if (this.$refs["passfetchdata"].value == '' || ! await this.verifyPass(this.$refs["passfetchdata"].value)){
+		let auths = {
+			posting: this.user.account.posting.key_auths,
+			active: this.user.account.active.key_auths,
+			owner: this.user.account.owner.key_auths,
+		};
+		if (this.$refs["passfetchdata"].value == '' || ! await this.verifyPass(this.$refs["passfetchdata"].value, auths)){
 		  this.errorFetch = this.$t('Error_provide_password');
 		  this.fetchingPass = false;
 		  this.resetKeys();

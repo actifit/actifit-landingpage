@@ -575,4 +575,5 @@ module.exports = {
   Password_management: 'Password & Keys Management',
   Apply_pass_change_to: 'Apply Password Change To:',
   re_login_required: 'You need to login again following your password & keys change',
+  Pass_update_progress: 'Password Update Progress'
 }
