@@ -63,6 +63,7 @@
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet')">{{ $t('My_Wallet') }} <br/><span class="text-brand">  {{ formattedUserTokens }}</span></a>
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/referrals')">{{ $t('My_Referrals') }} <br/><span class="text-brand"> {{ referralCount }} </span></a>
           <a class="dropdown-item" href="#" @click.prevent="$router.push('/activity/' + user.account.name)">{{ $t('My_Activity') }}</a>
+		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/password')">{{ $t('My_Password') }}</a>
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/settings')">{{ $t('Settings') }}</a>
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="#" @click.prevent="proceedLogout()">{{ $t('Logout') }}</a>
