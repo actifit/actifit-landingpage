@@ -95,7 +95,7 @@
 				</div>
 			</div>
 			
-			<button v-on:click="setPasswordVal" class="btn btn-brand btn-lg w-20">{{ $t('Generate_New_Password') }}</button>
+			<button v-on:click="setPasswordVal" class="btn btn-brand btn-lg w-20 mb-2">{{ $t('Generate_New_Password') }}</button>
 			
 			<div class="row">
 				<label for="newAcctPwdField" class="font-weight-bold col-3">{{ $t('Your_new_pass') }}</label>
@@ -113,9 +113,9 @@
 			</div>
 		</div>
 	</div>
-	<div class="container pt-5 mt-5 pb-5" v-if="user || update_result">
+	<div :class="resDisplayContainer" v-if="user || update_result">
 		<div class="row">
-			<label for="newAcctInfo" class="col-3">$t('Pass_update_progress')</label>
+			<label for="newAcctInfo" class="col-3">{{ $t('Pass_update_progress') }}</label>
 			<textarea rows="8" cols="80" class="text-brand" v-html="update_result" ref="newAcctInfo" id="newAcctInfo" readonly>
 			</textarea >
 			<button v-on:click="copyContent" data-targetEl="newAcctInfo" class="btn btn-brand btn-lg w-20 mb-2 ml-1" style="max-height: 50px;">{{ $t('Copy') }}</button>
@@ -219,6 +219,13 @@
 		  return "w-100";
 		}
 		return "w-50";
+	  },
+	  resDisplayContainer () {
+		let def = "container pb-5"
+		if (!this.user){
+			def += " pt-5 mt-5"
+		}
+		return def;
 	  },
 	},
 	methods: {
