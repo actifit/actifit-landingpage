@@ -828,11 +828,22 @@
 		  
 		}
 	  },
+	  setProperNode (){
+		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+		let properNode = process.env.hiveApiNode;
+		if (cur_bchain == 'STEEM'){
+			properNode = process.env.steemApiNode;
+		}
+		console.log(cur_bchain);
+		steem.api.setOptions({ url: properNode });
+	  },
 	  /* handles fetching of user related info */
 	  async getAccountData () {
 		
 		let parentRef = this;
- 
+		
+		await this.setProperNode();
+		
 		steem.api.getAccounts([this.displayUser], function(err, result) {
 			//result now contains the account details
 			if (result.length == 0){

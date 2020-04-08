@@ -1883,7 +1883,7 @@
 		}
 	  },
 	  setProperNode (){
-		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
+		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		let properNode = process.env.hiveApiNode;
 		if (cur_bchain == 'STEEM'){
 			properNode = process.env.steemApiNode;
