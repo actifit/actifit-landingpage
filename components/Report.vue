@@ -260,8 +260,16 @@
 		//handles returning a list of recently manually upvoted on this current session
 		return this.newlyVotedPosts.length;
 	  },
+	  setProperNode (){
+		let properNode = process.env.hiveApiNode;
+		if (this.cur_bchain == 'STEEM'){
+			properNode = process.env.steemApiNode;
+		}
+		steem.api.setOptions({ url: properNode });
+	  },
 	  async updatePostData () {
 		// try to fetch matching report
+		  await setProperNode ();
 		  steem.api.getContent(this.report.author, this.report.permlink, (err, result) => {
 			this.report.total_payout_value = result.total_payout_value;
 			this.report.pending_payout_value = result.pending_payout_value;
