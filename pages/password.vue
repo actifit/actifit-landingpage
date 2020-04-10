@@ -261,9 +261,9 @@
 				active: res[0].active.key_auths,
 				owner: res[0].owner.key_auths,
 			};
-			console.log(res);
-			console.log(pass);
-			console.log(auths);
+			//console.log(res);
+			//console.log(pass);
+			//console.log(auths);
 			let passVerified = await this.verifyPass(pass, auths);
 			
 			if (target == 1){
@@ -286,7 +286,7 @@
 	  verifyPass (cur_pass, auths) {
 		
 		let res = steem.auth.verify(this.user.account.name, cur_pass, auths);
-		console.log(res);
+		//console.log(res);
 		return res;
 	  },
 	  async fetchKeys () {
@@ -307,7 +307,7 @@
 		}
 		
 		let privateKeys = await steem.auth.getPrivateKeys(this.user.account.name, this.$refs["passfetchdata"].value);
-		console.log(privateKeys);
+		//console.log(privateKeys);
 		this.privatePostKey = privateKeys.posting;
 		this.privateActKey = privateKeys.active;
 		this.privateOwnKey = privateKeys.owner;
@@ -357,7 +357,7 @@
 				headers: reqHeads
 			});
 			let outcome = await res.json();
-			console.log(outcome);
+			//console.log(outcome);
 			if (outcome.error){
 				//unable to reset
 				console.log('unable to reset');
@@ -369,7 +369,7 @@
 		}
 	  },
 	  async updatePass(chain_choice, finalize){
-		console.log('updatePass '+chain_choice);
+		//console.log('updatePass '+chain_choice);
 		this.updatingPass = true;
 		this.errorUpdate = '';
 		
@@ -380,7 +380,7 @@
 			passField = "passchangedataother";
 		}
 		
-		console.log(this.$refs[passField].value);
+		//console.log(this.$refs[passField].value);
 		
 		if (this.$refs[passField].value == ''){// || ! await this.verifyPass(this.$refs[passField].value)){
 		  this.errorUpdate = this.$t('Error_provide_password');
@@ -394,7 +394,7 @@
 		  return;
 		}
 		
-		console.log(this.newAcctPwd);
+		//console.log(this.newAcctPwd);
 		//console.log(this.acctPassConfirm);
 		//make sure user copied and pasted password
 		if (this.newAcctPwd !== this.$refs['acctPassConfirmField'].value){
@@ -417,10 +417,10 @@
 		let curOwnerKey = curPrivateKey.owner;
 
 		// SAVE THIS OUTPUT INFORMATION AND DO NOT LOSE IT
-		console.log(`
+		/*console.log(`
 		Current owner key : ${curOwnerKey}
 		New password      : ${this.newAcctPwd}
-		New keys          : ${JSON.stringify(newKeys, null, 1)}`);
+		New keys          : ${JSON.stringify(newKeys, null, 1)}`);*/
 
 		// this is not needed anymore because we already got the pubkeys from steem.auth.getPrivateKeys()
 		// var publicKeys = steem.auth.generateKeys(account, this.newAcctPwd, ['owner', 'active', 'posting', 'memo']);
@@ -456,7 +456,7 @@
 				  position: 'top center'
 				})
 		});
-		console.log(res);
+		//console.log(res);
 		if (res && res.block_num){
 			let sel_chain = this.cur_bchain;
 			if (chain_choice){
