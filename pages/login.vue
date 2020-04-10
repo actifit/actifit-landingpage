@@ -130,24 +130,6 @@
 	
 	},
 	methods: {
-	  handleUsername (val) {
-		let vue_ctnr = this;
-		this.username_invalid = '';
-		this.username_exists = '';
-		//validate format first
-		let usernameValid = steem.utils.validateAccountName(val);
-		//check for error msg
-		if (usernameValid == null){
-			//ensure no existing account matches same name
-			steem.api.getAccounts([val], function(err, result) {
-			  if (result.length>0){
-				vue_ctnr.username_exists = 'Please choose a different username';
-			  }
-			});
-		}else{
-			this.username_invalid = usernameValid;
-		}
-	  },
 	  onVerifyCaptcha (response) {
 		this.captchaValid = true;
 	  },
