@@ -41,6 +41,7 @@
 		STEEMIT_VOTE_REGENERATION_SECONDS: (5 * 60 * 60 * 24),
 		showRCInfo: false,
 		showVPInfo: false,
+		cur_bchain: 'HIVE',
 	  }
 	},
 	props: ['user', 'minView'],
@@ -148,10 +149,25 @@
 		}
 	    return v;
 	  },
+	  setProperNode (){
+		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+		let properNode = process.env.hiveApiNode;
+		if (this.cur_bchain == 'STEEM'){
+			properNode = process.env.steemApiNode;
+		}
+		console.log(this.cur_bchain);
+		steem.api.setOptions({ url: properNode });
+		//initialize dsteem
+	    client = new dsteem.Client(properNode)
+	  },
 	},
 	async mounted () {
-	  //initialize dsteem
-	  client = new dsteem.Client('https://api.steemit.com')
+	  //check which chain is active
+	  if (localStorage.getItem('cur_bchain')){
+		this.cur_bchain = localStorage.getItem('cur_bchain')
+	  }
+	  await this.setProperNode();
+	  
 	  
 	  //grab STEEM price, needed for vote value calculation
 	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem&vs_currencies=usd').then(
