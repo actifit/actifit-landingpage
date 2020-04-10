@@ -269,7 +269,7 @@
 	  },
 	  async updatePostData () {
 		// try to fetch matching report
-		  await setProperNode ();
+		  await this.setProperNode ();
 		  steem.api.getContent(this.report.author, this.report.permlink, (err, result) => {
 			this.report.total_payout_value = result.total_payout_value;
 			this.report.pending_payout_value = result.pending_payout_value;
