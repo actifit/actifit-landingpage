@@ -260,6 +260,12 @@
 		}
 	},
 	async asyncData ({params}) {
+		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE')
+		if (cur_bchain == 'HIVE'){
+			await steem.api.setOptions({ url: process.env.hiveApiNode });
+		}else{
+			await steem.api.setOptions({ url: process.env.steemApiNode });
+		}	  
 		let result = await steem.api.getContentAsync(params.username.replace('@',''), params.permlink);
 		let imgs = JSON.parse(result.json_metadata).image;
 		let meta_spec = {
