@@ -11,8 +11,8 @@
 		<div class="modal-body">
 			<div>
 				<select v-model="currentToken" class="form-control col-3 sel-adj float-right border-red" >
-					<!-- default option is STEEM -->
-					<option value="STEEM">STEEM</option>
+					<!-- default option is cur_bchain value (HIVE/STEEM) -->
+					<option :value="cur_bchain">{{cur_bchain}}</option>
 					<option v-for="(tokenType, key) in tokenRewards" :key="key" :value="tokenType.token">{{tokenType.token}}</option>
 				</select>
 			</div>
@@ -59,9 +59,10 @@
   export default {
 	data () {
       return {
-		currentToken: 'STEEM',
+		currentToken: 'HIVE',
 		tokenRewards: [],
 		activeVotersList : [],
+		cur_bchain: 'HIVE',
 	  }
 	},
     props: [ 'modalTitle', 'votersList', 'postData' ],
@@ -87,45 +88,51 @@
 	  },
 	  /* initialize post specific data and calculations */
 	  initializePostCalc(){
-		
-		this.tokenRewards = this.$parent.$parent.tokenRewards;
-		if (!this.tokenRewards){
-			this.tokenRewards = this.postData.specTokenRewards;
-		}		
-		
-		//calculate various needed data for vote value
-		if (this.currentToken != 'STEEM'){
-			this.activeVotersList = this.tokenRewards[this.currentToken].active_votes;
-			totalPayout =
-			  parseFloat(this.tokenRewards[this.currentToken].pending_token) +
-			  parseFloat(this.tokenRewards[this.currentToken].total_payout_value) +
-			  parseFloat(this.tokenRewards[this.currentToken].curator_payout_value);
+		if (this.postData){
+			this.tokenRewards = this.$parent.$parent.tokenRewards;
+			if (!this.tokenRewards){
+				this.tokenRewards = this.postData.specTokenRewards;
+			}		
 			
-			totalPayout /= Math.pow(10, this.tokenRewards[this.currentToken].precision);
-			
-			voteRshares = this.tokenRewards[this.currentToken].active_votes.reduce((a, b) => a + parseFloat(b.rshares), 0);
-			//voteRshares = this.tokenRewards[this.currentToken].voteRshares;
-		
-		}else{
-			this.activeVotersList = this.votersList;
 			//calculate various needed data for vote value
-			totalPayout =
-			  parseFloat(this.postData.pending_payout_value) +
-			  parseFloat(this.postData.total_payout_value) +
-			  parseFloat(this.postData.curator_payout_value);
-			  
-			voteRshares = this.postData.active_votes.reduce((a, b) => a + parseFloat(b.rshares), 0);
+			if (this.currentToken != this.cur_bchain){
+				this.activeVotersList = this.tokenRewards[this.currentToken].active_votes;
+				totalPayout =
+				  parseFloat(this.tokenRewards[this.currentToken].pending_token) +
+				  parseFloat(this.tokenRewards[this.currentToken].total_payout_value) +
+				  parseFloat(this.tokenRewards[this.currentToken].curator_payout_value);
+				
+				totalPayout /= Math.pow(10, this.tokenRewards[this.currentToken].precision);
+				
+				voteRshares = this.tokenRewards[this.currentToken].active_votes.reduce((a, b) => a + parseFloat(b.rshares), 0);
+				//voteRshares = this.tokenRewards[this.currentToken].voteRshares;
+			
+			}else{
+				this.activeVotersList = this.votersList;
+				//calculate various needed data for vote value
+				totalPayout =
+				  parseFloat(this.postData.pending_payout_value) +
+				  parseFloat(this.postData.total_payout_value) +
+				  parseFloat(this.postData.curator_payout_value);
+				  
+				voteRshares = this.postData.active_votes.reduce((a, b) => a + parseFloat(b.rshares), 0);
+			}
+			
+			//sort data according to abs value of rshares
+			this.activeVotersList = this.activeVotersList.sort(function sortVoters(a, b) {
+					return Math.abs(b.rshares) - Math.abs(a.rshares);
+			});
+			
+			ratio = (voteRshares === 0) ? 0 : totalPayout / voteRshares;
 		}
-		
-		//sort data according to abs value of rshares
-		this.activeVotersList = this.activeVotersList.sort(function sortVoters(a, b) {
-				return Math.abs(b.rshares) - Math.abs(a.rshares);
-		});
-		
-		ratio = (voteRshares === 0) ? 0 : totalPayout / voteRshares;
 	  }
 	},
 	async mounted () {
+		//grab current chain
+		if (localStorage.getItem('cur_bchain')){
+			this.cur_bchain = localStorage.getItem('cur_bchain')
+			this.currentToken = this.cur_bchain;
+		}
 		console.log('mounted');
 		if (this.postData){
 			console.log('postData');
