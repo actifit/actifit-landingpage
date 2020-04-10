@@ -85,6 +85,8 @@
 		votePowerReserveRate: 1,
 		sbd_price: 1,
 		steem_price: 1,
+		hbd_price: 1,
+		hive_price: 1,
 		vote_value_usd: '',
 		STEEMIT_100_PERCENT: 10000,
 		STEEMIT_VOTE_REGENERATION_SECONDS: (5 * 60 * 60 * 24),
@@ -157,7 +159,7 @@
 		  this.properties = await steem.api.getDynamicGlobalPropertiesAsync();
 		  //grab reward fund data
 		  let rewardFund = await steem.api.getRewardFundAsync("post");
-		  this.rewardBalance = parseFloat(rewardFund.reward_balance.replace(" STEEM", ""));
+		  this.rewardBalance = parseFloat(rewardFund.reward_balance.replace(" STEEM", "").replace(" HIVE", ""));
 		  this.recentClaims = rewardFund.recent_claims;
 		}
 		
@@ -178,6 +180,16 @@
 	  setSteemPrice (_steemPrice){
 		this.steem_price = parseFloat(_steemPrice).toFixed(3);
 	  },
+	  
+	  //store HBD price
+	  setHBDPrice (_hbdPrice){
+		this.hbd_price = parseFloat(_hbdPrice).toFixed(3);
+	  },
+	  //store Hive price
+	  setHivePrice (_hivePrice){
+		this.hive_price = parseFloat(_hivePrice).toFixed(3);
+	  },
+	  
 	  //handles grabbing current user's VP
 	  async fetchVotingPower() {
 		if (!this.user){
@@ -241,10 +253,14 @@
 	  },
 	  //handles grabbing the vote value /STEEM
 	  getVoteValue(weight, account, vp) {
-		if (this.rewardBalance && this.recentClaims && this.steem_price && this.votePowerReserveRate) {
+		let priceUsed = this.hive_price;
+		if (this.cur_bchain == 'STEEM'){
+			priceUsed = this.steem_price;
+		}
+		if (this.rewardBalance && this.recentClaims && priceUsed && this.votePowerReserveRate) {
 		  let voteValue = this.getVoteRShares(weight, account, vp * 100)
 			* this.rewardBalance / this.recentClaims
-			* this.steem_price;
+			* priceUsed;
 		  
 		  return voteValue;
 		}
@@ -500,10 +516,23 @@
 			return;
 		  }
 		  this.votersList = this.postToVote.active_votes;
-	  }
+	  },
+	  setProperNode (){
+		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+		let properNode = process.env.hiveApiNode;
+		if (this.cur_bchain == 'STEEM'){
+			properNode = process.env.steemApiNode;
+		}
+		console.log(this.cur_bchain);
+		steem.api.setOptions({ url: properNode });
+		//initialize dsteem
+	    client = new dsteem.Client(properNode)
+	  },
     },
 	async mounted () {
-	  this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
+	
+	  await this.setProperNode();
+	  
 	  //grab STEEM price, needed for vote value calculation
 	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem&vs_currencies=usd').then(
 		res => {res.json().then(json => this.setSteemPrice (json.steem.usd)).catch(e => reject(e))
@@ -513,6 +542,16 @@
 	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem-dollars&vs_currencies=usd').then(
 		res => {res.json().then(json => this.setSBDPrice (json['steem-dollars'].usd)).catch(e => reject(e))
 	  }).catch(e => reject(e))
+	  
+	  //grab HIVE price, needed for vote value calculation
+	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=hive&vs_currencies=usd').then(
+		res => {res.json().then(json => this.setHivePrice (json.hive.usd)).catch(e => reject(e))
+	  }).catch(e => reject(e))
+	  
+	  //grab HBD price, needed for vote value calculation
+	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=hive_dollar&vs_currencies=usd').then(
+		res => {res.json().then(json => this.setHBDPrice (json['hive_dollar'].usd)).catch(e => reject(e))
+	  }).catch(e => reject(e))
 	
 	  //in addition to the default updating of VP upon each render, we need to take into consideration leaving window open. 
 	  //for this purpose, let's update every 30 seconds
@@ -520,7 +559,7 @@
 	  
 	  this.fetchVoterData();
 	  
-	  client = new dsteem.Client('https://api.steemit.com')
+	  //client = new dsteem.Client('https://api.steemit.com')
 	  /*
 	    let properties = await client.database.getDynamicGlobalProperties()
 		console.log(properties)
