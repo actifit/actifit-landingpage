@@ -260,13 +260,19 @@
 		}
 	},
 	async asyncData ({params}) {
-		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE')
-		if (cur_bchain == 'HIVE'){
-			await steem.api.setOptions({ url: process.env.hiveApiNode });
-		}else{
+		//let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE')
+		//if (cur_bchain == 'HIVE'){
+		//set HIVE as default chain, since we cannot use localstorage in here
+		await steem.api.setOptions({ url: process.env.hiveApiNode });
+		/*}else{
 			await steem.api.setOptions({ url: process.env.steemApiNode });
-		}	  
+		}	  */
 		let result = await steem.api.getContentAsync(params.username.replace('@',''), params.permlink);
+		if (!result || !result.author){
+			//switch to other chain
+			await steem.api.setOptions({ url: process.env.steemApiNode });
+			result = await steem.api.getContentAsync(params.username.replace('@',''), params.permlink);
+		}
 		let imgs = JSON.parse(result.json_metadata).image;
 		let meta_spec = {
 			postTitle: result.title,
