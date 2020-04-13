@@ -218,14 +218,16 @@
 				cur_bchain = bchain_option;
 			}
 			
-			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+encodeURIComponent(op_json)+'&bchain='+cur_bchain);
+			let url = new URL(process.env.actiAppUrl + 'performTrxPost/?user='+this.user.account.name+'&bchain='+cur_bchain);
 			
 			let reqHeads = new Headers({
 			  'Content-Type': 'application/json',
 			  'x-acti-token': 'Bearer ' + accToken,
 			});
 			let res = await fetch(url, {
-				headers: reqHeads
+				method: 'POST',
+				headers: reqHeads,
+				body: JSON.stringify({'operation': JSON.stringify(operation)})
 			});
 			let outcome = await res.json();
 			console.log(outcome);
