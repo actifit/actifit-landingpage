@@ -28,7 +28,7 @@
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + delegator._id + '/avatar);'"></div>
             </a>
             <a :href="delegator._id" target="_blank">@{{ delegator._id }}</a><br/>
-			<a :href="delegator._id" target="_blank">{{ numberFormat(delegator.steem_power, 0) }} {{ $t('Hive_Power') }}</a>
+			<img src="/img/HIVE.png" style="max-height: 20px;"><a :href="delegator._id" target="_blank">{{ numberFormat(delegator.steem_power, 0) }} {{ $t('Hive_Power') }}</a>
           </div>
       </div>
 	  <h3 class="text-center text-primary mb-5"><img src="/img/STEEM.png" style="max-height: 50px;">{{ $t('Steem_Power_Delegators') }}</h3>
@@ -38,7 +38,7 @@
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + delegator._id + '/avatar);'"></div>
             </a>
             <a :href="delegator._id" target="_blank">@{{ delegator._id }}</a><br/>
-			<a :href="delegator._id" target="_blank">{{ numberFormat(delegator.steem_power, 0) }} {{ $t('Steem_Power') }}</a>
+			<img src="/img/STEEM.png" style="max-height: 20px;"><a :href="delegator._id" target="_blank">{{ numberFormat(delegator.steem_power, 0) }} {{ $t('Steem_Power') }}</a>
           </div>
       </div>
     </div>
