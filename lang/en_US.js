@@ -181,6 +181,8 @@ module.exports = {
   login_required_referrals: 'You need to login first to access your referral link and referral data.',
   referral_notice: 'For every referral, earn an amount equal to 20% of the AFIT rewards your referral earns upon successful signup!',
   Actifit_Delegators: 'Actifit Delegators',
+  Hive_Power_Delegators: 'Hive Power Delegators',
+  Steem_Power_Delegators: 'Steem Power Delegators',
   Activity_Reports_by: 'Activity Reports by',
   error_no_tracked_activity: 'has not tracked any activity yet.',
   load_more: 'load more',

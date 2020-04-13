@@ -21,8 +21,19 @@
 
 
       <!-- show listing when loaded -->
-      <div class="row" v-if="topDelegators.length">
-          <div class="col-6 col-sm-4 col-md-3 text-center mb-4" v-for="(delegator, index) in topDelegators" :key="index" :delegator="delegator">
+	  <h3 class="text-center text-brand mb-5"><img src="/img/HIVE.png" style="max-height: 50px;">{{ $t('Hive_Power_Delegators') }}</h3>
+      <div class="row" v-if="topDelegators.hive && topDelegators.hive.length">
+          <div class="col-6 col-sm-4 col-md-3 text-center mb-4" v-for="(delegator, index) in topDelegators.hive" :key="index" :delegator="delegator">
+            <a :href="delegator._id" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + delegator._id + '/avatar);'"></div>
+            </a>
+            <a :href="delegator._id" target="_blank">@{{ delegator._id }}</a><br/>
+			<a :href="delegator._id" target="_blank">{{ numberFormat(delegator.steem_power, 0) }} {{ $t('Hive_Power') }}</a>
+          </div>
+      </div>
+	  <h3 class="text-center text-primary mb-5"><img src="/img/STEEM.png" style="max-height: 50px;">{{ $t('Steem_Power_Delegators') }}</h3>
+	  <div class="row" v-if="topDelegators.steem && topDelegators.steem.length">
+          <div class="col-6 col-sm-4 col-md-3 text-center mb-4" v-for="(delegator, index) in topDelegators.steem" :key="index" :delegator="delegator">
             <a :href="delegator._id" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + delegator._id + '/avatar);'"></div>
             </a>
