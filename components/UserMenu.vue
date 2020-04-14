@@ -58,11 +58,15 @@
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet?action=buy_afit')">{{ $t('buy_afit_menu') }}<br/></a>
 		  <a class="dropdown-item item-highlight" href="#" @click.prevent="$router.push('/market')">{{ $t('spend_afit_menu') }}<br/></a>
           <a class="dropdown-item" href="#" @click.prevent="$router.push('/' + user.account.name)">{{ $t('My_Profile') }}<br/></a>
-		  <SteemStats :user="user" minView="true" class="dropdown-item"/>
+		  <SteemStats :user="user" minView="true" class="dropdown-item" :key="reload"/>
 		  <a class="dropdown-item" href="#" @click.prevent="">{{ $t('My_Rank') }} <br/><span class="text-brand"> {{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRankObj && this.userRankObj.afitx_rank">{{  displayIncreasedUserRank }}</span> </span></a>
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet')">{{ $t('My_Wallet') }} <br/><span class="text-brand">  {{ formattedUserTokens }}</span></a>
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/referrals')">{{ $t('My_Referrals') }} <br/><span class="text-brand"> {{ referralCount }} </span></a>
           <a class="dropdown-item" href="#" @click.prevent="$router.push('/activity/' + user.account.name)">{{ $t('My_Activity') }}</a>
+		  <a class="dropdown-item" href="#">{{ $t('Active_chain') }} <br />
+			<img src="/img/HIVE.png" style="max-height: 20px;" v-on:click="setActiveChain('HIVE')" :class="adjustHiveClass">
+			<img src="/img/STEEM.png" style="max-height: 20px;" v-on:click="setActiveChain('STEEM')" :class="adjustSteemClass">
+		  </a>
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/password')">{{ $t('My_Password') }}</a>
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/settings')">{{ $t('Settings') }}</a>
           <div class="dropdown-divider"></div>
@@ -85,14 +89,22 @@
 		return {
 			activeNotifications: [],
 			activeNotificationsLen: 1,
+			cur_bchain: 'HIVE',
+			reload: 0,
 		}
 	},
 	watch: {
 	  user: 'updateUserData',
+	  bchain: function(newBchain) {
+		console.log('change in chain');
+		this.cur_bchain = newBchain;
+		this.$store.dispatch('steemconnect/refreshUser');
+		this.reload += 1;
+	  }
 	},
     computed: {
       ...mapGetters('steemconnect', ['user']),
-      ...mapGetters(['userTokens', 'userRank', 'userRankObj', 'referrals']),
+      ...mapGetters(['userTokens', 'userRank', 'userRankObj', 'referrals', 'bchain']),
 	  ...mapGetters(['moderators']),
 	  formattedUserTokens () {
         return this.numberFormat(parseFloat(this.userTokens).toFixed(3), 3) + ' AFIT'
@@ -114,6 +126,18 @@
 		  return true;
 		}
 		return false;
+	  },
+	  adjustHiveClass () {
+		if (this.cur_bchain != 'HIVE'){
+			return 'option-opaque';
+		}
+		return 'active-spin';
+	  },
+	  adjustSteemClass () {
+		if (this.cur_bchain != 'STEEM'){
+			return 'option-opaque';
+		}
+		return 'active-spin';
 	  }
     },
 	methods: {
@@ -127,6 +151,20 @@
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
+	  setActiveChain(chain){
+		if (this.cur_bchain == chain){
+			//take no action if no change in chain
+			return;
+		}
+		let userConf = confirm(this.$t('confirm_chain_switch').replace('_CHAIN_', chain));
+		if (!userConf) {
+		  return;
+		}
+		this.cur_bchain = chain;
+		this.$store.commit('setBchain', this.cur_bchain);
+		
+		localStorage.setItem('cur_bchain', this.cur_bchain);
+	  },
 	  proceedLogout () {
 		this.$store.commit('setStdLoginUser', false);
 		localStorage.removeItem('std_login')
@@ -134,6 +172,7 @@
 		this.$store.dispatch('steemconnect/logout')
 	  },
 	  async updateUserData () {
+		console.log('updateUserData '+this.cur_bchain)
 		//grab user's notifications
 		if (this.user){
 			let res = await fetch(process.env.actiAppUrl + 'activeNotifications/' + this.user.account.name);
@@ -148,6 +187,7 @@
 				console.log('error fetching notifications');
 			}
 		}
+		this.$forceUpdate()
 	  },
 	  async markRead(notif){
 		let res = await fetch(process.env.actiAppUrl + 'markRead/' + notif._id);
@@ -158,7 +198,12 @@
 	  }
 	},
     async mounted () {
-	  
+		
+		//grab current active chain
+		if (localStorage.getItem('cur_bchain')){
+			this.cur_bchain = localStorage.getItem('cur_bchain')
+		}
+		
 		//grab moderators' list
 		this.$store.dispatch('fetchModerators')
 		
@@ -229,5 +274,19 @@
 		max-height: 300px;
 		overflow-y: auto;
 		overflow-x: hidden;
+	}
+	.option-opaque{
+		opacity: 0.3;
+	}
+	@keyframes spin {
+		0% {
+			transform: rotateZ(0);
+		}
+		100% {
+			transform: rotateZ(360deg);
+		}
+	}
+	.active-spin{
+		animation: spin 5s ease-in-out infinite alternate;
 	}
 </style>

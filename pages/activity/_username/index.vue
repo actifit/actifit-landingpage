@@ -103,11 +103,24 @@
     },
 	watch: {
 	  user: 'fetchUserData',
+	  bchain: async function(newBchain) {
+		console.log('user activity change in chain '+newBchain);
+		this.cur_bchain = newBchain;
+		await this.$store.dispatch('steemconnect/refreshUser');
+		
+		// reset previously fetched posts to get latest
+		this.$store.commit('setUserReports', [])
+
+		// disable load more button and only show if there actually are more posts to load
+		this.$store.commit('setMoreUserReportsAvailable', false)
+		this.$store.dispatch('fetchUserReports', this.username)
+		//this.reload += 1;
+	  }
 	},
     computed: {
 	  ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters('steemconnect', ['stdLogin']),
-      ...mapGetters(['userReports', 'moreUserReportsAvailable', 'activeReport']),
+      ...mapGetters(['userReports', 'moreUserReportsAvailable', 'activeReport', 'bchain']),
 
       // get username from url
       username () {

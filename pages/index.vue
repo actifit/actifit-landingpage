@@ -75,7 +75,7 @@
               </div>
             </div>
 			<div class="pb-md-2 row text-center">
-			  <SteemStats :user="user" class="col-md-12"/>
+			  <SteemStats :user="user" class="col-md-12" :key="reload"/>
 			</div>
 			<div class="pb-md-2 pt-2 row text-center">
 			  <span class="w-25"/>
@@ -509,12 +509,13 @@
         tweenedUserCount: 0,
         tweenedTokensDistributed: 0,
         tweenedRewardedActivityCount: 0,
+		reload: 0,
       }
     },
     computed: {
       ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters('steemconnect', ['stdLogin']),
-      ...mapGetters(['userTokens', 'userReportCount', 'transactions', 'userRank', 'userCount', 'topDelegators', 'moderators', 'ambassadors', 'tokensDistributed', 'rewardedActivityCount', 'leaderboard', 'news', 'activeNews']),
+      ...mapGetters(['userTokens', 'userReportCount', 'transactions', 'userRank', 'userCount', 'topDelegators', 'moderators', 'ambassadors', 'tokensDistributed', 'rewardedActivityCount', 'leaderboard', 'news', 'activeNews', 'bchain']),
       formattedUserTokens () {
         return parseFloat(this.userTokens).toFixed(3)
       },
@@ -550,6 +551,13 @@
         TweenLite.to(this.$data, 8, { tweenedRewardedActivityCount: newValue });
       },
 	  user: 'fetchUserData',
+	  bchain: async function(newBchain) {
+		console.log('user activity change in chain '+newBchain);
+		this.cur_bchain = newBchain;
+		await this.$store.dispatch('steemconnect/refreshUser');
+		this.fetchUserData();
+		this.reload += 1;
+	  }
     },
     methods: {
       /**

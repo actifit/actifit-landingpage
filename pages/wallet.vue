@@ -851,7 +851,7 @@
     computed: {
       ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters('steemconnect', ['stdLogin']),
-      ...mapGetters(['userTokens', 'transactions', 'userRank']),
+      ...mapGetters(['userTokens', 'transactions', 'userRank', 'bchain']),
       isStdLogin () {
 		return localStorage.getItem('std_login')
 	  },
@@ -902,6 +902,12 @@
 	  user: 'fetchUserData',
 	  tokenMetrics: 'formattedTotAccountVal',
 	  steemPrice: 'formattedTotAccountVal',
+	  bchain: function(newBchain) {
+		console.log('change in chain');
+		this.cur_bchain = newBchain;
+		this.$store.dispatch('steemconnect/refreshUser');
+		//this.reload += 1;
+	  }
 	},
 	methods: {
 	  /**

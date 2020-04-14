@@ -197,7 +197,8 @@
 				:main_post_author="report.author"
 				:main_post_permlink="report.permlink"
 				:main_post_cat="report.category"
-				:depth="0" />
+				:depth="0" 
+				:key="reload"/>
 		</div>
 	</div>
 	<div v-else-if="errorDisplay" class="container pt-5 mt-5 pb-5" >
@@ -339,12 +340,20 @@
 			displayMorePayoutData: false,
 			cur_bchain: 'HIVE',
 			target_bchain: 'HIVE',
+			reload: 0,
 		}
 	},
 	watch: {
 	  report: 'fetchReportData',
 	  postUpvoted: 'updatePostData',
 	  user: 'fetchUserData',
+	  bchain: async function(newBchain) {
+		console.log('post content change in chain '+newBchain);
+		this.cur_bchain = newBchain;
+		await this.$store.dispatch('steemconnect/refreshUser');
+		await this.updatePostData();
+		this.reload += 1;
+	  }
 	},
 	components: {
 	  NavbarBrand,
@@ -361,7 +370,7 @@
 	  ...mapGetters('steemconnect', ['stdLogin']),
 	  ...mapGetters(['newlyVotedPosts']),
 	  ...mapGetters(['commentEntries'], 'commentCountToday'),
-	  ...mapGetters(['moderators']),
+	  ...mapGetters(['moderators', 'bchain']),
 	  adjustHiveClass () {
 		if (this.target_bchain != 'HIVE'){
 			return 'option-opaque';

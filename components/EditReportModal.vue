@@ -97,7 +97,7 @@
       }
     },
     computed: {
-      ...mapGetters(['editReport']),
+      ...mapGetters(['editReport', 'bchain']),
 	  ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters('steemconnect', ['stdLogin']),
 	  adjustHiveClass () {
@@ -121,6 +121,12 @@
 	  
     },
     watch: {
+	  bchain: async function(newBchain) {
+		console.log('profile change in chain '+newBchain);
+		this.cur_bchain = newBchain;
+		await this.$store.dispatch('steemconnect/refreshUser');
+		//this.reload += 1;
+	  },
       editReport () {
         // set initial values after edit button was clicked
         this.title = this.editReport.title

@@ -274,6 +274,13 @@
 	},
 	watch: {
 	  user: 'fetchUserData',
+	  bchain: async function(newBchain) {
+		console.log('profile change in chain '+newBchain);
+		this.cur_bchain = newBchain;
+		await this.$store.dispatch('steemconnect/refreshUser');
+		this.fetchUserData();
+		//this.reload += 1;
+	  }
 	},
 	components: {
 	  NavbarBrand,
@@ -283,7 +290,7 @@
     computed: {
 	  ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters('steemconnect', ['stdLogin']),
-	  ...mapGetters(['newlyVotedPosts']),
+	  ...mapGetters(['newlyVotedPosts', 'bchain']),
 	  ...mapGetters(['userTokens'],['commentEntries'], 'commentCountToday'),
 	  displayAFITXBal () {
 		if (!isNaN(this.userAFITXSETokenCount)){
@@ -825,7 +832,7 @@
 		  //ensure we fetch proper logged in user data
 		  this.$store.dispatch('fetchUserTokens')
 		  this.$store.dispatch('fetchUserRank')
-		  
+		  this.$forceUpdate()
 		}
 	  },
 	  setProperNode (){
