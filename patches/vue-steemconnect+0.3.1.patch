@@ -139,7 +139,7 @@ patch-package
 +					headers: reqHeads
 +				});
 +				let outcome = await res.json();
-+				console.log(outcome);
++				//console.log(outcome);
 +				if (outcome.error || !outcome.success){
 +					// remove access token and unset user in store
 +					  localStorage.removeItem('access_token');
