@@ -580,4 +580,7 @@ module.exports = {
   Pass_update_progress: 'Password Update Progress',
   Active_chain: 'Active Chain',
   confirm_chain_switch: 'Are you sure you want to switch to _CHAIN_ ?',
+  running_on_chain: 'Running on _CHAIN_',
+  switch_chain: 'Switch Chain',
+  switch_to_chain: 'Switch to _CHAIN_',
 }

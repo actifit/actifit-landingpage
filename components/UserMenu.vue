@@ -64,8 +64,12 @@
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/referrals')">{{ $t('My_Referrals') }} <br/><span class="text-brand"> {{ referralCount }} </span></a>
           <a class="dropdown-item" href="#" @click.prevent="$router.push('/activity/' + user.account.name)">{{ $t('My_Activity') }}</a>
 		  <a class="dropdown-item" href="#">{{ $t('Active_chain') }} <br />
-			<img src="/img/HIVE.png" style="max-height: 20px;" v-on:click="setActiveChain('HIVE')" :class="adjustHiveClass">
-			<img src="/img/STEEM.png" style="max-height: 20px;" v-on:click="setActiveChain('STEEM')" :class="adjustSteemClass">
+			<img src="/img/HIVE.png" style="max-height: 20px;" v-on:click="setActiveChain('HIVE')" :class="adjustHiveClass" :title="(cur_bchain == 'HIVE'?$t('running_on_chain').replace('_CHAIN_', 'HIVE'):$t('switch_to_chain').replace('_CHAIN_', 'HIVE'))">
+			<span class="span-toggle-chain pl-2 pr-2 text-brand" :title="$t('switch_chain')">
+				<i class="fas fa-toggle-on" v-if="cur_bchain == 'STEEM'" v-on:click="setActiveChain('HIVE')"></i>
+				<i class="fas fa-toggle-off" v-else-if="cur_bchain == 'HIVE'" v-on:click="setActiveChain('STEEM')"></i>
+			</span>
+			<img src="/img/STEEM.png" style="max-height: 20px;" v-on:click="setActiveChain('STEEM')" :class="adjustSteemClass" :title="(cur_bchain == 'STEEM'?$t('running_on_chain').replace('_CHAIN_', 'STEEM'):$t('switch_to_chain').replace('_CHAIN_', 'STEEM'))">
 		  </a>
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/password')">{{ $t('My_Password') }}</a>
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/settings')">{{ $t('Settings') }}</a>
@@ -288,5 +292,8 @@
 	}
 	.active-spin{
 		animation: spin 5s ease-in-out infinite alternate;
+	}
+	.span-toggle-chain{
+		font-size: 1.2rem;
 	}
 </style>
