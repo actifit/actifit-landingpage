@@ -101,16 +101,17 @@
 		const totalShares = parseFloat(account.vesting_shares) + parseFloat(account.received_vesting_shares) - parseFloat(account.delegated_vesting_shares) - parseFloat(account.vesting_withdraw_rate);
 
 		const elapsed = Math.floor(Date.now() / 1000) - account.voting_manabar.last_update_time;
-		const maxMana = totalShares * 1000000;
+		let maxMana = totalShares * 1000000;
 		// 432000 sec = 5 days
 		let currentMana = parseFloat(account.voting_manabar.current_mana) + elapsed * maxMana / 432000;
-
 		if (currentMana > maxMana) {
 			currentMana = maxMana;
 		}
-
-		const currentManaPerc = currentMana * 100 / maxMana;
-			
+		//if user has no VP, set mana as 1 to avoid division by 0
+		if (maxMana == 0){
+			maxMana = 1;
+		}
+		let currentManaPerc = currentMana * 100 / maxMana;
 		this.currentVotingPower = currentManaPerc.toFixed(3);
 		//also fetch time till full power replenishes
 		this.timeToFull(this.currentVotingPower);
