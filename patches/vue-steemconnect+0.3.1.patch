@@ -63,7 +63,7 @@ patch-package
              // don't do anything if user data is already set
              if (!state.user) {
                // in that case we look for an access token in localStorage
-@@ -68,24 +81,98 @@ var VueSteemConnect = {
+@@ -68,24 +81,99 @@ var VueSteemConnect = {
                if (accessToken) {
                  // set access token and try to fetch user object
                  Vue.SteemConnect().setAccessToken(accessToken);
@@ -123,6 +123,7 @@ patch-package
            });
          },
 +		refreshUser: async function refreshUser(_ref3){
++			console.log('SC plugin refreshUser');
 +			let commit = _ref3.commit;
 +			let std_login = localStorage.getItem('std_login')
 +			let accessToken = localStorage.getItem('access_token');
@@ -138,7 +139,7 @@ patch-package
 +					headers: reqHeads
 +				});
 +				let outcome = await res.json();
-+				//console.log(outcome);
++				console.log(outcome);
 +				if (outcome.error || !outcome.success){
 +					// remove access token and unset user in store
 +					  localStorage.removeItem('access_token');
