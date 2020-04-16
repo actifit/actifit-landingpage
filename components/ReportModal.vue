@@ -606,7 +606,8 @@
 	  },
 	  fetchReportCommentData () {
 	  
-		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
+		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+		this.target_bchain = this.cur_bchain;
 		this.$store.commit('setBchain', this.cur_bchain);
 		
 		//regrab report data to fix comments
