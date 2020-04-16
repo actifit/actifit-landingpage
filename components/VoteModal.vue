@@ -97,6 +97,13 @@
     },
 	watch: {
 	  postToVote: 'fetchVoterData',
+	  bchain: function(newBchain) {
+		console.log('change in chain - voter modal');
+		this.cur_bchain = newBchain;
+		this.target_bchain = newBchain;
+		this.$store.dispatch('steemconnect/refreshUser');
+		//this.reload += 1;
+	  }
 	},
 	components: {
 	  SteemStats,
@@ -106,7 +113,7 @@
       ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters('steemconnect', ['stdLogin']),
       ...mapGetters(['postToVote']),
-	  ...mapGetters(['newlyVotedPosts']),
+	  ...mapGetters(['newlyVotedPosts', 'bchain']),
 	  adjustHiveClass () {
 		if (this.target_bchain != 'HIVE'){
 			return 'option-opaque';

@@ -71,11 +71,17 @@
 	},
 	computed: {
       ...mapGetters('steemconnect', ['user']),
-      
+      ...mapGetters(['bchain']),
     },
 	watch: {
 		postData: 'initializePostCalc',
 		currentToken: 'initializePostCalc',
+		bchain: async function(newBchain) {
+		  console.log('change in chain - voter list');
+		  this.cur_bchain = newBchain;
+		  this.currentToken = newBchain;
+		//this.reload += 1;
+	    }
 	},
 	methods: {
 	  /* calculate vote value */
