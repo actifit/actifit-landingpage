@@ -243,6 +243,10 @@
 	},
 	watch: {
 	  report : 'fetchReportData',
+	  bchain: function(newBchain) {
+		this.cur_bchain = newBchain;
+		this.target_bchain = newBchain;
+	  }
 	},
     props: ['report'],
 	components: {
@@ -255,7 +259,7 @@
 	  ...mapGetters('steemconnect', ['stdLogin']),
 	  ...mapGetters(['newlyVotedPosts']),
 	  ...mapGetters(['commentEntries'], 'commentCountToday'),
-	  ...mapGetters(['moderators']),
+	  ...mapGetters(['moderators', 'bchain']),
 	  adjustHiveClass () {
 		if (this.target_bchain != 'HIVE'){
 			return 'option-opaque';

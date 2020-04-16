@@ -168,6 +168,10 @@
 	},
 	watch: {
 	  full_data : 'fetchReportData',
+	  bchain: function(newBchain) {
+		this.cur_bchain = newBchain;
+		this.target_bchain = newBchain;
+	  }
 	},
 	components: {
 	  VueMarkdown,
@@ -176,7 +180,7 @@
 	  ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters('steemconnect', ['stdLogin']),
 	  ...mapGetters(['moderators']),
-	  ...mapGetters(['newlyVotedPosts']),
+	  ...mapGetters(['newlyVotedPosts', 'bchain']),
 	  adjustHiveClass () {
 		if (this.target_bchain != 'HIVE'){
 			return 'option-opaque';
