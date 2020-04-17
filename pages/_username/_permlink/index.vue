@@ -257,7 +257,10 @@
 				{ hid: 'description', name: 'description', content: `${this.desc} by ${this.username}` },
 				{ hid: 'ogdescription', name: 'og:description', 'property':'og:description', content: `${this.desc} by ${this.username}` },
 				{ hid: 'image', name: 'og:image', 'property':'og:image', content: `${this.postImg}`}
-			  ]
+			  ],
+		  link: [
+				{ rel: 'canonical', href: `${this.canonUrl}`}
+		  ]
 		}
 	},
 	async asyncData ({params}) {
@@ -268,19 +271,57 @@
 		/*}else{
 			await steem.api.setOptions({ url: process.env.steemApiNode });
 		}	  */
-		let result = await steem.api.getContentAsync(params.username.replace('@',''), params.permlink);
+		console.log('connect node');
+		let user_name = params.username.replace('@','');
+		let result = await steem.api.getContentAsync(user_name, params.permlink);
+		let is_steem = false;
 		if (!result || !result.author){
 			//switch to other chain
 			await steem.api.setOptions({ url: process.env.steemApiNode });
-			result = await steem.api.getContentAsync(params.username.replace('@',''), params.permlink);
+			result = await steem.api.getContentAsync(user_name, params.permlink);
+			is_steem = true;
 		}
-		let imgs = JSON.parse(result.json_metadata).image;
+		let post_meta = JSON.parse(result.json_metadata)
+		let imgs = post_meta.image;
 		let meta_spec = {
 			postTitle: result.title,
 		}
 		if (Array.isArray(imgs) && imgs.length > 0 ){
 			meta_spec.postImg = imgs[0];
 		}
+		
+		//let's set proper canonical url based of app
+		let canonUrl = '';
+
+		if (post_meta.app){
+			let src_app = post_meta.app.split('/')[0];
+			//fetch post original category
+			let post_cat = result.category;
+			
+			//fallback
+			if (!post_cat){
+				post_cat = post_meta.community;
+			}
+			
+			//list of current apps applying proper formal scripting. Default as hive
+			let appsPatterns = process.env.hiveAppsScript;
+			
+			//fallback to steem 
+			if (is_steem){
+				appsPatterns = process.env.steemAppsScript;
+			}
+			
+			for (let appPat in appsPatterns) {
+				if (src_app.toLowerCase() == appPat.toLowerCase()){
+					//found, grab pattern
+					canonUrl = appsPatterns[appPat].url_scheme.replace('{username}', user_name)
+														.replace('{permlink}', params.permlink)
+														.replace('{category}', post_cat);
+					break;
+				}
+			}
+		}
+		meta_spec.canonUrl = canonUrl;
 		//console.log(result);
 		//console.log(result.body);
 

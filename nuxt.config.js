@@ -25,6 +25,186 @@ module.exports = {
 	minSignupUSDCost: 2,
 	shortModeratorSignature: '<br/>![rulersig2.jpg](https://cdn.steemitimages.com/DQmXrZz658YfMQBXNTA12rmbzqWXASfaGcNSqatJJ2ba7NR/rulersig2.jpg)<sub>@Actifit Moderator</sub>',
 	standardModeratorSignature: '<br/>![rulersig2.jpg](https://cdn.steemitimages.com/DQmXrZz658YfMQBXNTA12rmbzqWXASfaGcNSqatJJ2ba7NR/rulersig2.jpg)<sub>@Actifit Moderator <br/>Vote for [Actifit as a Witness](https://steemconnect.com/sign/account-witness-vote?witness=actifit&approve=1) <br/>Delegate to Actifit [10SP](https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=10%20SP)| [20SP](https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=20%20SP)| [50SP](https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=50%20SP)| [100SP](https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=100%20SP)| [250SP](https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=250%20SP)| [500SP](https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=500%20SP)| [1000SP](https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=1000%20SP)| [5000SP](https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=5000%20SP)| [10000SP](https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=10000%20SP)| [20000SP](https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=20000%20SP)| [Custom Amount](https://steembottracker.com/delegation.html?delegatee=actifit) <br/>Chat with us on [discord](https://discord.gg/aHtcA6r) | Visit our [website](https://actifit.io/) <br/>[Download on playstore](https://bit.ly/actifit-app) | [Download on app store](https://bit.ly/actifit-ios)[FAQs](https://steemit.com/actifit/@katerinaramm/actifit-app-or-rewarding-fitness-activity-with-tokens-and-steemit-upvotes-faqs) | [Text Tutorial](https://steemit.com/utopian-io/@katerinaramm/tutorial-for-actifit-app-update-november-2018-version-v0-5-0) | [Video Tutorial](https://youtu.be/tqkaDoonyvI)</sub>',
+	hiveAppsScript: {
+	  "hiveblog": {
+		"name": "Hive blog",
+		"homepage": "https://hive.blog",
+		"url_scheme": "https://hive.blog/{category}/@{username}/{permlink}"
+	  },
+	  "esteem": {
+		"name": "Esteem",
+		"homepage": "https://esteem.app",
+		"url_scheme": "https://esteem.app/{category}/@{username}/{permlink}"
+	  },
+	  "peakd": {
+		"name": "PeakD",
+		"homepage": "https://peakd.com",
+		"url_scheme": "https://peakd.com/{category}/@{username}/{permlink}"
+	  },
+	  "steempress": {
+		"name": "SteemPress",
+		"homepage": "https://wordpress.org/plugins/steempress/"
+	  },
+	  "actifit": {
+		"name": "Actifit",
+		"homepage": "https://actifit.io",
+		"url_scheme": "https://actifit.io/@{username}/{permlink}"
+	  },
+	  "travelfeed": {
+		"name": "TravelFeed",
+		"homepage": "https://travelfeed.io",
+		"url_scheme": "https://travelfeed.io/@{username}/{permlink}"
+	  },
+	  "3speak": {
+		"name": "3Speak",
+		"homepage": "https://3speak.online",
+		"url_scheme": "https://3speak.online/watch?v={username}/{permlink}"
+	  }
+	},
+	steemAppsScript: {
+	  "steemit": {
+		"name": "Steemit",
+		"homepage": "https://steemit.com",
+		"url_scheme": "https://steemit.com/{category}/@{username}/{permlink}"
+	  },
+	  "appics": {
+		"name": "APPICS",
+		"homepage": "https://appics.com"
+	  },
+	  "busy": {
+		"name": "Busy",
+		"homepage": "https://busy.org",
+		"url_scheme": "https://busy.org/@{username}/{permlink}"
+	  },
+	  "bsteem": {
+		"name": "bSteem",
+		"homepage": "http://bsteem.com"
+	  },
+	  "esteem": {
+		"name": "eSteem",
+		"homepage": "https://esteem.app",
+		"url_scheme": "https://esteem.app/@{username}/{permlink}"
+	  },
+	  "fundition": {
+		"name": "Fundition",
+		"homepage": "https://fundition.io",
+		"url_scheme": "https://fundition.io/#!/@{username}/{permlink}"
+	  },
+	  "chainbb": {
+		"name": "chainBB",
+		"homepage": "https://chainbb.com",
+		"url_scheme": "https://chainbb.com/{category}/@{username}/{permlink}"
+	  },
+	  "utopian": {
+		"name": "Utopian",
+		"homepage": "https://utopian.io",
+		"url_scheme": "https://utopian.io/{category}/@{username}/{permlink}"
+	  },
+	  "dtube": {
+		"name": "DTube",
+		"homepage": "https://d.tube",
+		"url_scheme": "https://d.tube/#!/v/{username}/{permlink}"
+	  },
+	  "dlive": {
+		"name": "DLive",
+		"homepage": "https://www.dlive.io",
+		"url_scheme": "https://www.dlive.io/#/livestream/{username}/{permlink}"
+	  },
+	  "dmania": {
+		"name": "dMania",
+		"homepage": "https://dmania.lol",
+		"url_scheme": "https://dmania.lol/post/{username}/{permlink}"
+	  },
+	  "dsound": {
+		"name": "DSound",
+		"homepage": "https://dsound.audio",
+		"url_scheme": "https://dsound.audio/#/@{username}/{permlink}"
+	  },
+	  "steepshot": {
+		"name": "Steepshot",
+		"homepage": "https://steepshot.io",
+		"url_scheme":
+		  "https://alpha.steepshot.io/post/{category}/@{username}/{permlink}"
+	  },
+	  "zappl": {
+		"name": "Zappl",
+		"homepage": "https://zappl.com",
+		"url_scheme": "https://zappl.com/{category}/{username}/{permlink}"
+	  },
+	  "partiko": {
+		"name": "Partiko",
+		"homepage": "https://partiko.app"
+	  },
+	  "steemkr": {
+		"name": "Steemkr",
+		"homepage": "https://steemkr.com",
+		"url_scheme": "https://steemkr.com/{category}/@{username}/{permlink}"
+	  },
+	  "steemjs": {
+		"name": "Steem.js",
+		"homepage": "https://github.com/steemit/steem-js"
+	  },
+	  "steempeak": {
+		"name": "SteemPeak",
+		"homepage": "https://steempeak.com",
+		"url_scheme": "https://steempeak.com/{category}/@{username}/{permlink}"
+	  },
+	  "steempress": {
+		"name": "SteemPress",
+		"homepage": "https://wordpress.org/plugins/steempress/"
+	  },
+	  "strimi": {
+		"name": "Strimi",
+		"homepage": "https://strimi.pl",
+		"url_scheme": "https://strimi.pl/{category}/@{username}/{permlink}"
+	  },
+	  "steemhunt": {
+		"name": "Steemhunt",
+		"homepage": "https://steemhunt.com",
+		"url_scheme": "https://steemhunt.com/@{username}/{permlink}"
+	  },
+	  "memeit.lol": {
+		"name": "Memeit.LOL",
+		"homepage": "https://memeit.lol",
+		"url_scheme": "https://memeit.lol/@{username}/{permlink}"
+	  },
+	  "steemia": {
+		"name": "Steemia",
+		"homepage": "https://steemia.io"
+	  },
+	  "tasteem": {
+		"name": "Tasteem",
+		"homepage": "https://tasteem.io"
+	  },
+	  "travelfeed": {
+		"name": "TravelFeed",
+		"homepage": "https://travelfeed.io",
+		"url_scheme": "https://travelfeed.io/@{username}/{permlink}"
+	  },
+	  "hede": {
+		"name": "Hede.io",
+		"homepage": "https://hede.io",
+		"url_scheme": "https://hede.io/hede-io/@{username}/{permlink}"
+	  },
+	  "actifit": {
+		"name": "Actifit",
+		"homepage": "https://actifit.io",
+		"url_scheme": "https://actifit.io/@{username}/{permlink}"
+	  },
+	  "ulogs": {
+		"name": "Ulogs",
+		"homepage": "https://ulogs.org",
+		"url_scheme": "https://ulogs.org/@{username}/{permlink}"
+	  },
+	  "musing": {
+		"name": "Musing",
+		"homepage": "https://musing.io",
+		"url_scheme": "https://musing.io/q/{username}/{permlink}"
+	  },
+	  "guc-desktop": {
+		"name": "GUC"
+	  }
+	}
   },
 
   /*
