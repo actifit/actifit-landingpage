@@ -314,9 +314,12 @@
 			for (let appPat in appsPatterns) {
 				if (src_app.toLowerCase() == appPat.toLowerCase()){
 					//found, grab pattern
-					canonUrl = appsPatterns[appPat].url_scheme.replace('{username}', user_name)
+					if (appsPatterns[appPat].url_scheme){
+						//some might not have a pattern, skip them
+						canonUrl = appsPatterns[appPat].url_scheme.replace('{username}', user_name)
 														.replace('{permlink}', params.permlink)
 														.replace('{category}', post_cat);
+					}
 					break;
 				}
 			}
