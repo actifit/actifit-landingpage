@@ -41,6 +41,38 @@
         <div class="mb-3 col-md-9">
 		  <div v-if="displayUser" class="user-avatar large-avatar mr-1 mb-3"
 					   :style="'background-image: url(https://steemitimages.com/u/' + this.displayUser + '/avatar)'"></div>
+		  <div>
+			<table>
+				<tr>
+					<!--<img src="https://cdn.steemitimages.com/DQmdnh1nApZieHZ3s1fEhCALDjnzytFwo78zbAY5CLUMpoG/TRACKM.png">-->
+					<td><div class="text-center"><div class="phishy"><h6>Height</h6></div>
+						<h6>{{ lastHeight + ' '+heightUnit }}</h6></div></td>
+					<td><img src="https://cdn.steemitimages.com/DQmfSsFiXem7AxWG1NCiYYPAjtT4Y7LR8FsXpfsZQe7XqPC/h1.png"></td>
+					<td><div class="text-center"><div class="phishy"><h6>Weight</h6></div>
+						<h6>{{ lastWeight+' '+weightUnit}}</h6></div></td>
+					<td><img src="https://cdn.steemitimages.com/DQmVqJVEWUwicFRtkEz2WYq2mDH61mQLDsrzN1yBrKLrpyZ/w1a.png"></td>
+				</tr>
+				
+				<tr>
+					<td><div class="text-center"><div class="phishy"><h6>Body Fat</h6></div>
+						<h6>{{ lastBodyfat+' % '}}</h6></div></td>
+					<td><img src="https://cdn.steemitimages.com/DQmPJ2Vvi3mBQXKHoy5CTG7fyLFWMG8JaAZ8y1XZFeDkRUC/bd1.png"></td>
+					<td><div class="text-center"><div class="phishy"><h6>Chest</h6></div></div>
+						<div class="text-center"><h6>{{ lastChest+' '+chestUnit }}</h6></div></td>
+					<td><img src="https://cdn.steemitimages.com/DQmbaoNBT5Unnjqh8JgP6TPj4mFKFnyKkLgP6eDYnnkiLkB/c1.png"></td>
+				</tr>
+
+				<tr>
+					<td><div class="text-center"><div class="phishy"><h6>Waist</h6></div></div>
+						<div class="text-center"><h6>{{ lastWaist+' '+waistUnit }}</h6></div></td>
+					<td><img src="https://cdn.steemitimages.com/DQmZ2Lfwg77FLaf3YpU1VPLsJvnBt1F8DG8y6t6xUAKnsYq/w1.png"></td>
+					<td><div class="text-center"><div class="phishy"><h6>Thighs</h6></div></div>
+						<div class="text-center"><h6>{{ lastThighs+' '+thighsUnit }}</h6></div></td>
+					<td><img src="https://cdn.steemitimages.com/DQmbbAAFy6hwwBWqtSmcSwosTyNZi9rcd6GNeugQRY9MF1h/t1.png"></td>
+					
+				</tr>
+			</table>
+		  </div>
 		  <div v-if="userinfo" class="user-details">
 			<div class="info-box p-2"><i class="fas fa-user mr-2"></i> {{ userinfo.name }} <b-badge v-if="account_banned" variant="danger" :title="$t('Account_banned_tip')" >{{ $t('Account_banned') }}</b-badge></div>
 			<div v-if="userMeta && userMeta.profile" class="row m-0">
@@ -269,7 +301,18 @@
 									[719,8],
 									[1079,9],
 									[1080,10]
-								]		
+								],
+			lastHeight: '-',
+			heightUnit: '',
+			lastWeight: '-',
+			weightUnit: '',
+			lastChest: '-',
+			chestUnit: '',
+			lastWaist: '-',
+			waistUnit: '',
+			lastThighs: '-',
+			thighsUnit: '',
+			lastBodyfat: '-',			
 		}
 	},
 	watch: {
@@ -957,6 +1000,25 @@
 		  this.claimError = true;
 		  this.claimErrorDesc = this.$t('badge_reqts_not_met');
 	    }
+	  },
+	  async setUserMeasurements(json){
+		//first row contains latest measurements, if any
+		console.log('setUserMeasurements');
+		console.log(json);
+		if (Array.isArray(json) && json.length > 0){
+			console.log(json[0].json_metadata.height);
+			this.lastHeight = json[0].json_metadata.height;
+			this.heightUnit = json[0].json_metadata.heightUnit;
+			this.lastWeight = json[0].json_metadata.weight;
+			this.weightUnit = json[0].json_metadata.weightUnit;
+			this.lastChest = json[0].json_metadata.chest;
+			this.chestUnit = json[0].json_metadata.chestUnit;
+			this.lastWaist = json[0].json_metadata.waist;
+			this.waistUnit = json[0].json_metadata.waistUnit;			
+			this.lastThighs = json[0].json_metadata.thighs;
+			this.thighsUnit = json[0].json_metadata.thighsUnit;				
+			this.lastBodyfat = json[0].json_metadata.bodyfat;
+		}
 	  }
 	},
 	async mounted () {
@@ -974,6 +1036,9 @@
 			this.displayUser = this.$route.params.username.substring(1, this.$route.params.username.length);
 		  }
 		  
+		  //grab the user's latest stats if available
+		  fetch(process.env.actiAppUrl+'trackedMeasurements/' + this.displayUser).then(res => {
+			res.json().then(json => this.setUserMeasurements(json))}).catch(e => console.log(e))
 		  
 		  //grab the author's rank
 		  fetch(process.env.actiAppUrl+'getRank/' + this.displayUser).then(res => {
