@@ -254,15 +254,21 @@
 			console.log(outcome);
 			if (outcome.error){
 				console.log(outcome.error);
-				//clear entry
-				localStorage.removeItem('access_token');
-				//this.$store.commit('setStdLoginUser', false);
-				this.error_msg = this.$t('session_expired_login_again');
-				this.$store.dispatch('steemconnect/logout');
+				
+				//if this is authority error, means needs to be logged out
+				//example "missing required posting authority:Missing Posting Authority"
+				let err_msg = outcome.trx.tx.error;
+				if (err_msg.includes('missing') && err_msg.includes('authority')){
+					//clear entry
+					localStorage.removeItem('access_token');
+					//this.$store.commit('setStdLoginUser', false);
+					this.error_msg = this.$t('session_expired_login_again');
+					this.$store.dispatch('steemconnect/logout');
+				}
 				
 				this.$notify({
 				  group: 'error',
-				  text: this.$t('session_expired_login_again'),
+				  text: err_msg,
 				  position: 'top center'
 				})
 				return {success: false, trx: null};

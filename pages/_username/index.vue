@@ -269,7 +269,7 @@
 									[719,8],
 									[1079,9],
 									[1080,10]
-								]
+								]		
 		}
 	},
 	watch: {
@@ -424,15 +424,21 @@
 			console.log(outcome);
 			if (outcome.error){
 				console.log(outcome.error);
-				//clear entry
-				localStorage.removeItem('access_token');
-				//this.$store.commit('setStdLoginUser', false);
-				this.error_msg = this.$t('session_expired_login_again');
-				this.$store.dispatch('steemconnect/logout');
+				
+				//if this is authority error, means needs to be logged out
+				//example "missing required posting authority:Missing Posting Authority"
+				let err_msg = outcome.trx.tx.error;
+				if (err_msg.includes('missing') && err_msg.includes('authority')){
+					//clear entry
+					localStorage.removeItem('access_token');
+					//this.$store.commit('setStdLoginUser', false);
+					this.error_msg = this.$t('session_expired_login_again');
+					this.$store.dispatch('steemconnect/logout');
+				}
 				
 				this.$notify({
 				  group: 'error',
-				  text: this.$t('session_expired_login_again'),
+				  text: err_msg,
 				  position: 'top center'
 				})
 				return {success: false, trx: null};
@@ -951,7 +957,7 @@
 		  this.claimError = true;
 		  this.claimErrorDesc = this.$t('badge_reqts_not_met');
 	    }
-	  },
+	  }
 	},
 	async mounted () {
 	
@@ -967,6 +973,7 @@
 		  if (this.$route.params.username.startsWith('@')){
 			this.displayUser = this.$route.params.username.substring(1, this.$route.params.username.length);
 		  }
+		  
 		  
 		  //grab the author's rank
 		  fetch(process.env.actiAppUrl+'getRank/' + this.displayUser).then(res => {
