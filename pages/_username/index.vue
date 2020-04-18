@@ -14,7 +14,7 @@
       <UserMenu />
     </nav>
 	<div v-if="errorDisplay==''" class="container pt-5 mt-5 pb-5 col-md-9" >
-		<h5 class="text-brand user-name" v-if="displayUser">
+		<h5 class="d-flex flex-row text-brand user-name" v-if="displayUser">
 			<a :href="formattedProfileUrl" target="_blank">@{{ displayUser }} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></a>
 			<span v-if="!account_banned && !isOwnAccount()" class="text-brand">
 				<span :title="$t('you_are_friends_username').replace('_USERNAME_', displayUser)" v-if="isFriend()" >
@@ -37,12 +37,17 @@
 			</span>
 		</h5>
 		
-		
-        <div class="mb-3 col-md-9">
+		<div class="d-flex flex-row">
+        <div class="d-flex flex-column mb-3">
 		  <div v-if="displayUser" class="user-avatar large-avatar mr-1 mb-3"
 					   :style="'background-image: url(https://steemitimages.com/u/' + this.displayUser + '/avatar)'"></div>
-		  <div>
+		  <div class="acti-widget">
 			<table>
+				<tr>,
+					<td colspan="4"><h6>Last Updated On </h6>
+						{{ pureDate(lastUpdated) }}
+					</td>
+				</tr>
 				<tr>
 					<!--<img src="https://cdn.steemitimages.com/DQmdnh1nApZieHZ3s1fEhCALDjnzytFwo78zbAY5CLUMpoG/TRACKM.png">-->
 					<td><div class="text-center"><div class="phishy"><h6>Height</h6></div>
@@ -73,6 +78,8 @@
 				</tr>
 			</table>
 		  </div>
+		</div>
+		  <div class="d-flex flex-column">
 		  <div v-if="userinfo" class="user-details">
 			<div class="info-box p-2"><i class="fas fa-user mr-2"></i> {{ userinfo.name }} <b-badge v-if="account_banned" variant="danger" :title="$t('Account_banned_tip')" >{{ $t('Account_banned') }}</b-badge></div>
 			<div v-if="userMeta && userMeta.profile" class="row m-0">
@@ -206,8 +213,9 @@
 			
 			<div v-if="claimError">{{ claimErrorDesc }}</div>
 		  </div>
-        </div>
-		
+		  </div>
+        
+		</div>
 	</div>
 	<div v-else class="container pt-5 mt-5 pb-5" >
 		<div class="mb-3 text-center">
@@ -312,7 +320,8 @@
 			waistUnit: '',
 			lastThighs: '-',
 			thighsUnit: '',
-			lastBodyfat: '-',			
+			lastBodyfat: '-',
+			lastUpdated: '-',
 		}
 	},
 	watch: {
@@ -1018,6 +1027,7 @@
 			this.lastThighs = json[0].json_metadata.thighs;
 			this.thighsUnit = json[0].json_metadata.thighsUnit;				
 			this.lastBodyfat = json[0].json_metadata.bodyfat;
+			this.lastUpdated = json[0].date;
 		}
 	  }
 	},
@@ -1142,10 +1152,7 @@
 		.user-avatar{
 		  float: left;
 		}
-		.user-details{
-		  padding-left: 128px;
-		  margin-left: 20px;
-		}
+		
 		.badge-img, .claimed-check{
 		  width: 150px;
 		  text-align: center;
@@ -1251,5 +1258,8 @@
 	}
 	.cntnr{
 		min-height: 80px;
+	}
+	.acti-widget{
+		border: 2px #ff112d solid;
 	}
 </style>
