@@ -583,4 +583,6 @@ module.exports = {
   running_on_chain: 'Running on _CHAIN_',
   switch_chain: 'Switch Chain',
   switch_to_chain: 'Switch to _CHAIN_',
+  Measurements_chart: 'Measurements Chart',
+  View_chart: 'View Chart',
 }

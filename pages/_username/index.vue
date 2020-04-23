@@ -77,6 +77,11 @@
 					
 				</tr>
 			</table>
+			
+			<a href="#" data-toggle="modal" class="btn btn-brand" 
+					 data-target="#measureChartModal" >
+				{{ $t('View_chart') }}
+			</a>
 		  </div>
 		</div>
 		  <div class="d-flex flex-column">
@@ -222,6 +227,7 @@
           <h4>{{ errorDisplay }}</h4>
 		</div>
 	</div>
+	<MeasureChartModal :userMeasurements="userMeasurements"	/>
 	<Footer />
 	<no-ssr>
       <div>
@@ -241,6 +247,8 @@
   import {mapGetters} from 'vuex'
   
   import Vue from 'vue'
+  
+  import MeasureChartModal from '~/components/MeasureChartModal'
   
   /* import badges component */
   import { BadgePlugin } from 'bootstrap-vue'
@@ -322,6 +330,7 @@
 			thighsUnit: '',
 			lastBodyfat: '-',
 			lastUpdated: '-',
+			userMeasurements: [],
 		}
 	},
 	watch: {
@@ -338,6 +347,7 @@
 	  NavbarBrand,
 	  UserMenu,
 	  Footer,
+	  MeasureChartModal
 	},
     computed: {
 	  ...mapGetters('steemconnect', ['user']),
@@ -1014,6 +1024,7 @@
 		//first row contains latest measurements, if any
 		console.log('setUserMeasurements');
 		console.log(json);
+		this.userMeasurements = json;
 		if (Array.isArray(json) && json.length > 0){
 			console.log(json[0].json_metadata.height);
 			this.lastHeight = json[0].json_metadata.height;
