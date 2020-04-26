@@ -42,8 +42,8 @@
 		  <div v-if="displayUser" class="user-avatar large-avatar mr-1 mb-3"
 					   :style="'background-image: url(https://steemitimages.com/u/' + this.displayUser + '/avatar)'"></div>
 		  <div class="acti-widget">
-			<table>
-				<tr>,
+			<table v-if="1==2">
+				<tr>
 					<td colspan="4"><h6>Last Updated On </h6>
 						{{ pureDate(lastUpdated) }}
 					</td>
@@ -79,7 +79,7 @@
 			</table>
 			
 			<a href="#" data-toggle="modal" class="btn btn-brand" 
-					 data-target="#measureChartModal" >
+					 data-target="#measureChartModal" v-if="1==2">
 				{{ $t('View_chart') }}
 			</a>
 		  </div>

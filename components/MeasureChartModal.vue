@@ -63,10 +63,10 @@
 							  }
 						},
 						display: true,
-						scaleLabel: {
+						/*scaleLabel: {
 							display:     true,
 							labelString: 'Date'
-						},
+						},*/
 						distribution: 'linear'
 					}]
 				}
