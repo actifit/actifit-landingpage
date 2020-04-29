@@ -41,7 +41,7 @@
             <li :class="{'page-item': true, disabled: voteWeight === 100}"><a class="page-link vote-controls" href="#" @click.prevent="setVoteWeight(100)"><i class="far fa-thumbs-up text-success"></i></a></li>
           </ul>
 		  <div class="text-center"><span>{{ $t('Your_Vote_Value') }}:</span><span>{{vote_value_usd}}</span></div>
-		  <button type="submit" class="btn btn-brand border" @click="vote()" v-if="voteWeight">
+		  <button type="submit" class="btn btn-brand border" @click="vote($event)" v-if="voteWeight">
             <i class="fas fa-thumbs-up" v-if="voteWeight > 0"></i>
             <i class="fas fa-thumbs-down" v-if="voteWeight < 0"></i>
             <span v-if="voteWeight > 0"> {{ $t('Upvote') }}</span>
@@ -435,7 +435,7 @@
 			}
 		  }
 	  },
-	  async vote () {
+	  async vote (e) {
         //if no user is logged in, prompt to login
 		if (!this.user || !this.user.account){
 		//if (!this.$store.state.steemconnect.user){

@@ -643,13 +643,13 @@
 	  /* function handles confirming if the user had voted already to prevent issues */
 	  votePrompt(e) {
 		//if no user is logged in, prompt to login
-		if (!this.user.account.name){
+		/*if (!this.user.account.name){
 		  alert(this.$t('need_login_signup_notice_vote'));
 		  e.stopPropagation();
-		}else{
+		}else{*/
 		  //proceed normally showing vote popup
 		  this.$store.commit('setPostToVote', this.full_data)
-		}
+		///}
 	  },
     },
 	async mounted () {
