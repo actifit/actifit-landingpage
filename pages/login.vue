@@ -37,6 +37,10 @@
 						<label for="steem_bchain">STEEM</label>
 					  </span>
 					</span>
+					<span class="row mb-2 form-control-lg ">
+						<input type="checkbox" id="keeploggedin" v-model="keep_loggedin_val" >
+						<label for="keeploggedin" class="ml-3">Keep me logged in</label>
+					</span>
 					<i class="fas fa-spin fa-spinner text-brand" v-if="!captchaReady"></i>
 					<vue-recaptcha ref="recaptcha" @verify="onVerifyCaptcha" @expired="onExpiredCaptcha" @render="captchaReady=true" sitekey="6LdpcoMUAAAAAPGTqlvhKEK6Ayw5NqLDZz5Sjudq">
 					</vue-recaptcha>
@@ -110,6 +114,7 @@
 		captchaReady: false,
 		login_in_progress: false,
 		bchain_val: 'HIVE',
+		keep_loggedin_val: false,
 	  }
 	},
     computed: {
@@ -192,7 +197,8 @@
 		let user_info = {
 						'username': account_name,
 						'ppkey': priv_pkey,
-						'bchain': this.bchain_val
+						'bchain': this.bchain_val,
+						'keeploggedin': this.keep_loggedin_val
 					}
 		fetch(process.env.actiAppUrl+'loginAuth',{
 				method: 'POST',
