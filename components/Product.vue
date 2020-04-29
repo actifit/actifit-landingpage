@@ -499,8 +499,8 @@
 			 .catch(). (rejection id: 7)
 			*/
 			
-			//let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
-			let cur_bchain = 'STEEM';
+			let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+			//let cur_bchain = 'STEEM';
 			
 			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+op_json+'&bchain='+cur_bchain);
 			
@@ -610,6 +610,7 @@
 			console.log(err);
 		}
 		
+		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		let url = new URL(process.env.actiAppUrl + 'processBuyOrder/?user='+this.user.account.name+'&product_id='+this.product._id);
 		
 		if (this.product.type == 'ingame'){
@@ -617,7 +618,8 @@
 							+ this.user.account.name + '/'
 							+ this.product._id + '/'
 							+ bcastRes.block_num + '/'
-							+ bcastRes.id);
+							+ bcastRes.id + '/'
+							+ cur_bchain);
 		}
 		console.log(url);
 		//connect with our service to process buy order
@@ -716,12 +718,13 @@
 		}else{
 			console.log(err);
 		}
-		
+		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		let url_string = process.env.actiAppUrl + 'activateGadget/'
 							+ this.user.account.name + '/'
 							+ this.product._id + '/'
 							+ bcastRes.block_num + '/'
-							+ bcastRes.id;
+							+ bcastRes.id + '/'
+							+ cur_bchain;
 		console.log('prodHasFriendBenefic');
 		if (appendFriend){
 			console.log(this.$refs["friend"].value);
@@ -781,12 +784,14 @@
 		}else{
 			console.log(err);
 		}
-		
+		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		let	url = new URL( process.env.actiAppUrl + 'deactivateGadget/'
 							+ this.user.account.name + '/'
 							+ this.product._id + '/'
 							+ bcastRes.block_num + '/'
-							+ bcastRes.id);
+							+ bcastRes.id + '/'
+							+ cur_bchain
+							);
 		
 		console.log(url);
 		//connect with our service to process buy order
