@@ -8,7 +8,7 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-		<SteemStats class="modal-body" :user="user"/>
+		<SteemStats class="modal-body" :user="user" v-if="user"/>
         <div class="modal-body text-center">
 		  <div class="modal-footer m-2">
 			<div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-if="cur_bchain=='HIVE'">
