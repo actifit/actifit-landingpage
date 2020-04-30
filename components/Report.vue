@@ -127,6 +127,10 @@
 			  <img src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Fitbit_logo.svg" width="60px" >
 			  <div class="mt-2">{{ trackingDevice }}</div>
 			</span>
+			<span v-else-if="trackingDevice == 'healthapp'">
+			  <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Health_icon_iOS_12.png" width="60px" >
+			  <div class="mt-2">{{ $t('healthapp') }}</div>
+			</span>
 			<div v-else>{{ trackingDevice }}</div>
 		  </div>		 
 		  <div class="col-12 text-brand mt-2">UserID: {{ actUserID }}</div>		  
