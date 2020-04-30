@@ -207,13 +207,19 @@
 					<div class="row">
 					  <label for="pass-transfer-type" class="w-25 p-2">{{ $t('Type') }} *</label>
 					  <select @change="passTransferTypeChange" id="pass-transfer-type" name="pass-transfer-type" ref="pass-transfer-type" text="Choose Type" class="form-control-lg w-50 p-2">
-					    <option value="STEEM">{{ $t('STEEM') }}</option>
-					    <option value="SBD">{{ $t('SBD') }}</option>
+					    <option v-if="cur_bchain=='STEEM'" value="STEEM">{{ $t('STEEM') }}</option>
+					    <option v-if="cur_bchain=='STEEM'" value="SBD">{{ $t('SBD') }}</option>
+						<option v-if="cur_bchain=='HIVE'" value="HIVE">{{ $t('HIVE') }}</option>
+					    <option v-if="cur_bchain=='HIVE'" value="HBD">{{ $t('HBD') }}</option>
 					  </select>
 					</div>
 					<div class="row">
 					  <label for="pass-transfer-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
 					  <input type="number" id="pass-transfer-amount" name="pass-transfer-amount" ref="pass-transfer-amount" class="form-control-lg w-50 p-2"  v-model="transfer_amount">
+					</div>
+					<div class="row" v-if="isStdLogin">
+					  <label for="p-ac-key-funds-ver" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
+					  <input type="password" id="p-ac-key-funds-ver" name="p-ac-key-funds-ver" ref="p-ac-key-funds-ver" class="form-control-lg w-50 p-2">
 					</div>
 					<div class="text-brand text-center" v-if="pass_error_proceeding">
 					  {{ this.pass_error_msg}}
@@ -1831,6 +1837,9 @@
 			if (type=='transfer'){
 				note = 'Transfer completed successfully!';
 			}
+			if (type=='transfer-verify'){
+				note = 'Transfer completed. Verifying transaction.'
+			}
 			this.$notify({
 			  group: 'success',
 			  text: note,
@@ -1855,6 +1864,23 @@
 			this.fetchDelegations(true);
 		}else if (type=='transfer'){
 			this.transferProcess = false;
+		}else if (type=='transfer-verify'){
+			//also start verification process
+			let url = new URL(process.env.actiAppUrl + 'confirmPaymentPasswordVerify/'+'?bchain=' + this.cur_bchain);
+			//compile all needed data and send it along the request for processing
+			let params = {
+				from: this.user.account.name,
+			}
+			Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
+			try{
+				let res = await fetch(url);
+				let outcome = await res.json();
+				//update user data according to result
+				this.fetchUserData();
+			}catch(err){
+				console.error(err);
+			}
+			this.checkingFunds = false;
 		}
 	  },
 	  async cancelPowerDown () {
@@ -2420,34 +2446,63 @@
 		  this.checkingFunds = false;
 		  return;
 		}
-		//https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
-		var link = this.$steemconnect.sign('transfer', {
-		  from: this.user.account.name,
-		  to: this.target_exchange_account,
-		  amount: this.$refs["pass-transfer-amount"].value + ' ' + this.transferTypePass,
-		  memo: '',//no memo needed
-		  auto_return: true,
-		});
 		
-		//launch the SC window
-		window.open(link);
+		if (!localStorage.getItem('std_login')){
+			//https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
+			var link = this.$steemconnect.sign('transfer', {
+			  from: this.user.account.name,
+			  to: this.target_exchange_account,
+			  amount: this.$refs["pass-transfer-amount"].value + ' ' + this.transferTypePass,
+			  memo: '',//no memo needed
+			  auto_return: true,
+			});
 		
-		//also start verification process
-		let url = new URL(process.env.actiAppUrl + 'confirmPaymentPasswordVerify/'+'?bchain=' + 'STEEM');//only STEEM for now. TODO add support for HIVE pay
-		//compile all needed data and send it along the request for processing
-		let params = {
-			from: this.user.account.name,
+			//launch the SC window
+			window.open(link);
+			
+			//also start verification process
+			let url = new URL(process.env.actiAppUrl + 'confirmPaymentPasswordVerify/'+'?bchain=' + this.cur_bchain);
+			//compile all needed data and send it along the request for processing
+			let params = {
+				from: this.user.account.name,
+			}
+			Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
+			try{
+				let res = await fetch(url);
+				let outcome = await res.json();
+				//update user data according to result
+				this.fetchUserData();
+			}catch(err){
+				console.error(err);
+			}
+			this.checkingFunds = false;
+			
+		}else{
+			
+			if (this.$refs["p-ac-key-funds-ver"].value == ''){
+			  this.error_proceeding = true;
+			  this.error_msg = this.$t('all_fields_required');
+			  return;
+			}
+		
+			
+			let confirmPopup = confirm(this.$t('Confirm_verf_transfer').replace('_AMOUNT_',this.$refs["pass-transfer-amount"].value).replace('_CURR_',this.transferTypePass));
+			if (!confirmPopup){
+				return;
+			}
+		
+			await this.setProperNode ();
+			console.log('perform transfer');
+			console.log(this.$refs["p-ac-key-funds-ver"].value);
+			//transferToVesting(wif, from, to, amount)
+			let res = await steem.broadcast.transferAsync(this.$refs["p-ac-key-funds-ver"].value, this.user.account.name, this.target_exchange_account, parseFloat(this.$refs["pass-transfer-amount"].value).toFixed(3) + ' ' + this.transferTypePass, '').then(
+				res => this.confirmCompletion('transfer-verify', this.$refs["pass-transfer-amount"].value, res)).catch(err=>console.log(err));
+				
+			/*steem.broadcast.claimRewardBalanceAsync(this.user.account.name,this.claimSTEEM, this.claimSBD, this.claimSP).then(
+				res => ).catch(err=>console.log(err));*/
 		}
-		Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
-		try{
-			let res = await fetch(url);
-			let outcome = await res.json();
-			//update user data according to result
-			this.fetchUserData();
-		}catch(err){
-			console.error(err);
-		}
-		this.checkingFunds = false;
+		
+		
 	  },
 	  async proceedBuyAFIT () {
 		//function handles the actual processing of the buy event
