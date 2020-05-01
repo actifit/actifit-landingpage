@@ -258,6 +258,12 @@
 		this.username_invalid = '';
 		this.username_exists = '';
 		//validate format first
+		
+		//rely on HIVE node
+		let properNode = process.env.hiveApiNode;
+		
+		steem.api.setOptions({ url: properNode });
+		
 		let usernameValid = steem.utils.validateAccountName(val);
 		//check for error msg
 		if (usernameValid == null){
@@ -393,7 +399,7 @@
 			referrer: this.$route.query.referrer,
 			email: this.$refs["account-email"].value,
 			promo_code: this.promo_code_val,
-			//cur_bchain: 'STEEM',
+			//cur_bchain: 'HIVE',
 		}
 		Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
 		try{
@@ -402,6 +408,12 @@
 			this.checkingFunds = false;
 			this.accountCreated = outcome.accountCreated;
 			this.resultReturned = true;
+			
+			//rely on HIVE node
+			let properNode = process.env.hiveApiNode;
+			
+			steem.api.setOptions({ url: properNode });
+			
 			let privateKeys = await steem.auth.getPrivateKeys(this.$refs["account-username"].value, this.$refs["account-password"].value, ['posting']);
 			this.privatePostKey = privateKeys.posting;
 		}catch(err){
