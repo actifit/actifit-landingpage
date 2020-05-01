@@ -162,7 +162,7 @@ module.exports = {
   send_process_verf: 'Once you send out the funds, please click the button below for confirmation and to process your account creation.<br/>Please keep the page open till we verify your payment and create your account.',
   send_process_promo_verf: 'Please keep the page open till we confirm your account creation.',
   Steem_sent: 'I have sent _CUR_!',
-  Check_Steem_Transfer: 'Checking Your STEEM Transfer',
+  Check_Steem_Transfer: 'Checking Your Transfer',
   error_account_creation: 'There was a problem creating your account. Please contact support at <a href="https://discord.gg/aHtcA6r">discord</a> or via email <a href="mailto:info@actifit.io">info@actifit.io</a>',
   account_created_success: 'Account Successfully Created! ',
   post_account_creation_notice: 'You may now login using your username and password. Make sure you do NOT lose your password and store it safely!',
