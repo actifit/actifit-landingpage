@@ -12,12 +12,12 @@
 			<div>
 				<MeasureLineChart :data="weightVals" :options="chartOptions"/>
 			</div>
-			<div>
+			<!--<div>
 				<MeasureLineChart :data="chestVals" :options="chartOptions"/>
 			</div>
 			<div>
 				<MeasureLineChart :data="bodyfatVals" :options="chartOptions"/>
-			</div>
+			</div>-->
 		</div>
       </div>
     </div>
@@ -96,36 +96,48 @@
 			
 			
 			for (let i=0;i<this.userMeasurements.length;i++){
-				if (this.userMeasurements[i].json_metadata.height){
-					weightData.push({
-						x: new Date(this.userMeasurements[i].date),
-						y: this.userMeasurements[i].json_metadata.weight
-					})
+				if (this.userMeasurements[i].date){
+					if (this.userMeasurements[i].json_metadata.weight){
+						weightData.push({
+							x: new Date(this.userMeasurements[i].date),
+							y: this.userMeasurements[i].json_metadata.weight
+						})
+					}
 					
-					heightData.push({
-						x: new Date(this.userMeasurements[i].date),
-						y: this.userMeasurements[i].json_metadata.height
-					})
+					if (this.userMeasurements[i].json_metadata.height){
+						heightData.push({
+							x: new Date(this.userMeasurements[i].date),
+							y: this.userMeasurements[i].json_metadata.height
+						})
+					}
 					
-					chestData.push({
-						x: new Date(this.userMeasurements[i].date),
-						y: this.userMeasurements[i].json_metadata.chest
-					})
+					if (this.userMeasurements[i].json_metadata.chest){					
+						chestData.push({
+							x: new Date(this.userMeasurements[i].date),
+							y: this.userMeasurements[i].json_metadata.chest
+						})
+					}
 					
-					thighsData.push({
-						x: new Date(this.userMeasurements[i].date),
-						y: this.userMeasurements[i].json_metadata.thighs
-					})
+					if (this.userMeasurements[i].json_metadata.thighs){					
+						thighsData.push({
+							x: new Date(this.userMeasurements[i].date),
+							y: this.userMeasurements[i].json_metadata.thighs
+						})
+					}
 					
-					waistData.push({
-						x: new Date(this.userMeasurements[i].date),
-						y: this.userMeasurements[i].json_metadata.waist
-					})
+					if (this.userMeasurements[i].json_metadata.waist){					
+						waistData.push({
+							x: new Date(this.userMeasurements[i].date),
+							y: this.userMeasurements[i].json_metadata.waist
+						})
+					}
 					
-					bodyfatData.push({
-						x: new Date(this.userMeasurements[i].date),
-						y: this.userMeasurements[i].json_metadata.bodyfat
-					})
+					if (this.userMeasurements[i].json_metadata.bodyfat){					
+						bodyfatData.push({
+							x: new Date(this.userMeasurements[i].date),
+							y: this.userMeasurements[i].json_metadata.bodyfat
+						})
+					}
 				}
 			}
 			//console.log(weightData);
@@ -134,12 +146,58 @@
 			this.weightVals = {
 				datasets: [
 				{
-				  label: 'Weight Progress',
-				  backgroundColor: '#f87979',
+				  label: 'Weight',
+				  backgroundColor: '#a85832',
+				  borderColor: '#a85832',
 				  showLine: true,
-				  //spanGaps: true,
+				  spanGaps: true,
 				  fill: false,
 				  data: weightData,
+				},
+				{
+				  label: 'Height',
+				  backgroundColor: '#a88732',
+				  borderColor: '#a88732',
+				  showLine: true,
+				  spanGaps: true,
+				  fill: false,
+				  data: heightData,
+				},
+				{
+				  label: 'Bodyfat Progress',
+				  backgroundColor: '#32a883',
+				  borderColor: '#32a883',
+				  showLine: true,
+				  spanGaps: true,
+				  fill: false,
+				  data: bodyfatData,
+				},
+				{
+				  label: 'Chest Progress',
+				  backgroundColor: '#a74dd1',
+				  borderColor: '#a74dd1',
+				  showLine: true,
+				  spanGaps: true,
+				  fill: false,
+				  data: chestData,
+				},
+				{
+				  label: 'Waist Progress',
+				  backgroundColor: '#d14dd1',
+				  borderColor: '#d14dd1',
+				  showLine: true,
+				  spanGaps: true,
+				  fill: false,
+				  data: waistData,
+				},
+				{
+				  label: 'Thighs Progress',
+				  backgroundColor: '#f76ad6',
+				  borderColor: '#f76ad6',
+				  showLine: true,
+				  spanGaps: true,
+				  fill: false,
+				  data: thighsData,
 				}
 			  ]
 			};
@@ -166,6 +224,22 @@
 				  //spanGaps: true,
 				  fill: false,
 				  data: chestData,
+				},
+				{
+				  label: 'Waist Progress',
+				  backgroundColor: '#f87979',
+				  showLine: true,
+				  //spanGaps: true,
+				  fill: false,
+				  data: waistData,
+				},
+				{
+				  label: 'Thighs Progress',
+				  backgroundColor: '#f87979',
+				  showLine: true,
+				  //spanGaps: true,
+				  fill: false,
+				  data: thighsData,
 				}
 			  ]
 			};

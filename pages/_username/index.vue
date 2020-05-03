@@ -88,7 +88,7 @@
 			</table>
 			
 			<a href="#" data-toggle="modal" class="btn btn-brand" 
-					 data-target="#measureChartModal" v-if="isFriend() || isOwnAccount()">
+					 data-target="#measureChartModal" v-if="isFriend() || isOwnAccount() || 1==1">
 				{{ $t('View_chart') }}
 			</a>
 		  </div>
@@ -1036,17 +1036,17 @@
 		this.userMeasurements = json;
 		if (Array.isArray(json) && json.length > 0){
 			console.log(json[0].json_metadata.height);
-			this.lastHeight = json[0].json_metadata.height;
-			this.heightUnit = json[0].json_metadata.heightUnit;
-			this.lastWeight = json[0].json_metadata.weight;
-			this.weightUnit = json[0].json_metadata.weightUnit;
-			this.lastChest = json[0].json_metadata.chest;
-			this.chestUnit = json[0].json_metadata.chestUnit;
-			this.lastWaist = json[0].json_metadata.waist;
-			this.waistUnit = json[0].json_metadata.waistUnit;			
-			this.lastThighs = json[0].json_metadata.thighs;
-			this.thighsUnit = json[0].json_metadata.thighsUnit;				
-			this.lastBodyfat = json[0].json_metadata.bodyfat;
+			json[0].json_metadata.height?this.lastHeight = json[0].json_metadata.height:'';
+			json[0].json_metadata.heightUnit?this.heightUnit = json[0].json_metadata.heightUnit:'';
+			json[0].json_metadata.weight?this.lastWeight = json[0].json_metadata.weight:'';
+			json[0].json_metadata.weightUnit?this.weightUnit = json[0].json_metadata.weightUnit:'';
+			json[0].json_metadata.chest?this.lastChest = json[0].json_metadata.chest:'';
+			json[0].json_metadata.chestUnit?this.chestUnit = json[0].json_metadata.chestUnit:'';
+			json[0].json_metadata.waist?this.lastWaist = json[0].json_metadata.waist:'';
+			json[0].json_metadata.waistUnit?this.waistUnit = json[0].json_metadata.waistUnit:'';
+			json[0].json_metadata.thighs?this.lastThighs = json[0].json_metadata.thighs:'';
+			json[0].json_metadata.thighsUnit?this.thighsUnit = json[0].json_metadata.thighsUnit:'';
+			json[0].json_metadata.bodyfat?this.lastBodyfat = json[0].json_metadata.bodyfat:'';
 			this.lastUpdated = json[0].date;
 		}
 	  }
