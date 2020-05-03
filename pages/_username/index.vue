@@ -47,6 +47,11 @@
 		  <div class="acti-widget" v-if="displayUser">
 			<table>
 				<tr>
+					<td colspan="4" class="font-italic">
+						<h6>Recent User Tracked Stats</h6>
+					</td>
+				</tr>
+				<tr>
 					<!--<img src="https://cdn.steemitimages.com/DQmdnh1nApZieHZ3s1fEhCALDjnzytFwo78zbAY5CLUMpoG/TRACKM.png">-->
 					<td><div class="text-center"><div class="phishy"><h6>Height</h6></div>
 						<h6>{{ lastHeight + ' '+heightUnit }}</h6></div></td>
@@ -83,7 +88,7 @@
 			</table>
 			
 			<a href="#" data-toggle="modal" class="btn btn-brand" 
-					 data-target="#measureChartModal" v-if="1==2">
+					 data-target="#measureChartModal" v-if="isFriend() || isOwnAccount()">
 				{{ $t('View_chart') }}
 			</a>
 		  </div>
@@ -1276,5 +1281,10 @@
 	}
 	.acti-widget{
 		border: 2px #ff112d solid;
+	}
+	
+	.acti-widget img{
+		width: 50px;
+		max-width: unset;
 	}
 </style>
