@@ -206,6 +206,11 @@
           <h4>{{ errorDisplay }}</h4>
 		</div>
 	</div>
+	<div v-else class="container pt-5 mt-5 pb-5">
+		<div class="mb-3 text-center">
+			<i class="fas fa-spin fa-spinner text-brand"></i>
+		</div>
+	</div>
 	<VoteModal />
 	<NotifyModal :modalTitle="$t('Actifit_Info')" :modalText="$t('VP_desc')"/>
 	<NotifyModal id="notifyModalRC" ref="notifyModalRC" :modalTitle="$t('Actifit_Info')" :modalText="$t('RC_desc')"/>
