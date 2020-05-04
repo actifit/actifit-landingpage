@@ -88,7 +88,7 @@
 			</table>
 			
 			<a href="#" data-toggle="modal" class="btn btn-brand" 
-					 data-target="#measureChartModal" v-if="isFriend() || isOwnAccount()">
+					 data-target="#measureChartModal" v-if="isFriend() || isOwnAccount() || 1==1">
 				{{ $t('View_chart') }}
 			</a>
 		  </div>
