@@ -81,7 +81,7 @@
 				</tr>
 				
 				<tr>
-					<td colspan="4" class="font-italic">
+					<td colspan="4" class="font-italic" v-if="lastUpdated!='' && lastUpdated!='-'">
 						<small>Last Updated On {{ pureDate(lastUpdated) }}</small>
 					</td>
 				</tr>
@@ -887,6 +887,10 @@
 	  },
 	  /* handles returning the date portion without time */
 	  pureDate(val) {
+		console.log(val);
+		if (!val || val=='-'){
+			return '';
+		}
         let date = new Date(val)
         return date.getDate() + '/' 
 			+ (date.getMonth() + 1) + '/' 
@@ -1047,7 +1051,7 @@
 			json[0].json_metadata.thighs?this.lastThighs = json[0].json_metadata.thighs:'';
 			json[0].json_metadata.thighsUnit?this.thighsUnit = json[0].json_metadata.thighsUnit:'';
 			json[0].json_metadata.bodyfat?this.lastBodyfat = json[0].json_metadata.bodyfat:'';
-			this.lastUpdated = json[0].date;
+			json[0].date?this.lastUpdated = json[0].date:'';
 		}
 	  }
 	},
