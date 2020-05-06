@@ -245,6 +245,7 @@ module.exports = {
   More_Info: 'More Info',
   Accept_Cookie: 'GOT IT!',
   Read_more: 'Read more',
+  Full_view: 'Full view',
   read_more_small: 'read more',
   Referred_Account: 'Referred Account:',
   Referral_Reward: 'Referral Reward:',

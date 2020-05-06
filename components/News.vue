@@ -3,6 +3,7 @@
     <small>{{ date }}</small>
     <h5>{{ post.title }}</h5>
     <a href="#" class="btn btn-white" @click="$store.commit('setActiveNews', post)" data-toggle="modal" data-target="#newsModal">{{ $t('Read_more') }}</a>
+	<a :href="'/@'+post.author+'/'+post.permlink" target="_blank" class="btn btn-white ml-3">{{ $t('Full_view') }}</a>
   </div>
 </template>
 
