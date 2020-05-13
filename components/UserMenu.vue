@@ -44,6 +44,10 @@
 				<i class="fas fa-bell p-2"></i>
 			</a>
 			<div class="dropdown-menu dropdown-menu-right">
+				<div class="text-right m-2">
+					<a href='./notifications' class="btn btn-brand border" >{{ $t('View_all') }}</a>
+					<a href='#' class="btn btn-brand border" v-on:click="markAllRead()" >{{ $t('Clear_all') }}</a>
+				</div>
 				<div class="p-2">{{ $t('no_notifications') }}</div>
 			</div>
 		</span>
@@ -199,14 +203,43 @@
 		this.$forceUpdate()
 	  },
 	  async markRead(notif){
-		let res = await fetch(process.env.actiAppUrl + 'markRead/' + notif._id);
+		let accToken = localStorage.getItem('access_token')
+		
+		let url = new URL(process.env.actiAppUrl + 'markRead/' + notif._id + '?user=' + this.user.account.name);
+			
+		let reqHeads = new Headers({
+		  'Content-Type': 'application/json',
+		  'x-acti-token': 'Bearer ' + accToken,
+		});
+		let res = await fetch(url, {
+			method: 'GET',
+			headers: reqHeads,
+		});
+		
 		let outcome = await res.json();
 		console.log(outcome);
 		console.log(outcome.status);
 		this.updateUserData()
 	  },
 	  async markAllRead(){
-		let res = await fetch(process.env.actiAppUrl + 'markAllRead/?user=' + this.user.account.name);
+		let userConf = confirm(this.$t('Mark_all_read_confirm'));
+		if (!userConf) {
+		  return;
+		}
+		
+		let accToken = localStorage.getItem('access_token')
+		
+		let url = new URL(process.env.actiAppUrl + 'markAllRead/?user=' + this.user.account.name);
+		
+		let reqHeads = new Headers({
+		  'Content-Type': 'application/json',
+		  'x-acti-token': 'Bearer ' + accToken,
+		});
+		let res = await fetch(url, {
+			method: 'GET',
+			headers: reqHeads,
+		});
+		
 		let outcome = await res.json();
 		console.log(outcome);
 		console.log(outcome.status);

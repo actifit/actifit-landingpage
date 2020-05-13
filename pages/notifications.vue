@@ -16,18 +16,27 @@
 	
 	<div class="container pt-5 mt-5 pb-5" v-if="user">
 	
-		<h4 class="text-brand user-name">@{{ user.account.name }} {{ $t('Notifications') }}</h4>
+		<h4 class="user-name">@{{ user.account.name }} {{ $t('Notifications') }}</h4>
 		
-		<div class="row p-2" v-for="(notif, index) in notifications" :key="index" :notif="notif">
+		<div class="row text-right">
+			<select v-model="currentFilter" class="form-control col-md-3 sel-adj float-right">
+				<option value="all">{{ $t('all') }}</option>
+				<option value="read">{{ $t('read') }}</option>
+				<option value="unread">{{ $t('unread') }}</option>
+			</select>
+			<a href='#' class="btn btn-brand border float-right" v-on:click="markAllRead()" :title="$t('Mark_all_read')"><i class="fas fa-tasks"></i></a>
+		</div>
+		
+		<div class="row p-2 border" v-for="(notif, index) in notifications" :key="index" :notif="notif" v-if="renderNotif(notif)">
 			<span>
 			  <a :href="notif.url" v-on:click="markRead(notif)" class="col-md-2">{{ notif.date }}</a>
 			</span>
-			<span class="col-md-6">
+			<span class="col-md-8">
 				<a :href="notif.url" v-on:click="markRead(notif)">
 					<i class="fas fa-user-plus p-1" v-if="notif.type == 'friendship' || notif.type == 'friendship_request'"></i>
 					<i class="fas fa-user-friends p-1" v-else-if="notif.type == 'friendship_acceptance'"></i>
 					<span>{{ notif.details }}</span>
-					<span v-if="notif.action_taker" class="user-avatar user-avatar-medium mr-1 mb-3"
+					<span v-if="notif.action_taker" class="user-avatar notifications-avatar mr-1 mb-3"
 				   :style="'background-image: url(https://steemitimages.com/u/' + notif.action_taker + '/avatar)'"></span>
 				</a>
 			</span>
@@ -35,7 +44,8 @@
 			  <a href="#" v-on:click="markRead(notif)" class="col-md-2">{{ notif.status }}</a>
 			</span>
 			<span>
-			  <a href="#" v-on:click="markRead(notif)" class="col-md-2" :title="$t('mark_as_read')"><i class="fas fa-check-square"></i></a>
+			  <a href="#" v-on:click="markRead(notif)" class="col-md-2" :title="$t('mark_as_read')"  v-if="notif.status == 'unread'"><i class="fas fa-check-square"></i></a>
+			  <a href="#" v-on:click="markUnread(notif)" class="col-md-2" :title="$t('mark_as_unread')"  v-else><i class="far fa-square"></i></a>
 			</span>
 		  </div>
 		
@@ -100,7 +110,7 @@
 			cur_bchain: 'HIVE',
 			loading: false,
 			acti_goog_ad_square:{display:'inline-block', maxWidth:'300px', maxHeight: '350px'},
-			
+			currentFilter: 'all',
 		}
 	},
 	watch: {
@@ -144,7 +154,15 @@
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
-	  
+	  renderNotif(notif){
+		if (this.currentFilter == 'all'){
+			return true;
+		}
+		if (notif.status == this.currentFilter){
+			return true;
+		}
+		return false;
+	  },
 	  async processTrxFunc(op_name, cstm_params){
 		if (!localStorage.getItem('std_login')){
 		//if (!this.stdLogin){
@@ -223,14 +241,62 @@
 		this.$forceUpdate()
 	  },
 	  async markRead(notif){
-		let res = await fetch(process.env.actiAppUrl + 'markRead/' + notif._id);
+		let accToken = localStorage.getItem('access_token')
+		
+		let url = new URL(process.env.actiAppUrl + 'markRead/' + notif._id + '?user=' + this.user.account.name);
+			
+		let reqHeads = new Headers({
+		  'Content-Type': 'application/json',
+		  'x-acti-token': 'Bearer ' + accToken,
+		});
+		let res = await fetch(url, {
+			method: 'GET',
+			headers: reqHeads,
+		});
+		
+		let outcome = await res.json();
+		console.log(outcome);
+		console.log(outcome.status);
+		this.updateUserData()
+	  },
+	  async markUnread(notif){
+		let accToken = localStorage.getItem('access_token')
+		
+		let url = new URL(process.env.actiAppUrl + 'markUnread/' + notif._id + '?user=' + this.user.account.name);
+			
+		let reqHeads = new Headers({
+		  'Content-Type': 'application/json',
+		  'x-acti-token': 'Bearer ' + accToken,
+		});
+		let res = await fetch(url, {
+			method: 'GET',
+			headers: reqHeads,
+		});
+		
 		let outcome = await res.json();
 		console.log(outcome);
 		console.log(outcome.status);
 		this.updateUserData()
 	  },
 	  async markAllRead(){
-		let res = await fetch(process.env.actiAppUrl + 'markAllRead/?user=' + this.user.account.name);
+		let userConf = confirm(this.$t('Mark_all_read_confirm'));
+		if (!userConf) {
+		  return;
+		}
+		
+		let accToken = localStorage.getItem('access_token')
+		
+		let url = new URL(process.env.actiAppUrl + 'markAllRead/?user=' + this.user.account.name);
+		
+		let reqHeads = new Headers({
+		  'Content-Type': 'application/json',
+		  'x-acti-token': 'Bearer ' + accToken,
+		});
+		let res = await fetch(url, {
+			method: 'GET',
+			headers: reqHeads,
+		});
+		
 		let outcome = await res.json();
 		console.log(outcome);
 		console.log(outcome.status);
@@ -374,5 +440,14 @@
 	}
 	.friend-mod{
 	  z-index: 99999;
+	}
+	.notifications-avatar{
+		width: 40px;
+		height: 40px;
+		background-position: center center;
+		background-size: cover;
+		border-radius: 50%;
+		border: solid 1px #ddd;
+		float: right;
 	}
 </style>
