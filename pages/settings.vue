@@ -116,6 +116,8 @@
 	methods: {
 	  async fetchSettings () {
 		if (this.user){
+			this.$store.dispatch('fetchUserTokens')
+			this.$store.dispatch('fetchUserRank')
 			try{
 				let res = await fetch(process.env.actiAppUrl + 'userSettings/' + this.user.account.name);
 				let set_res = await res.json();
