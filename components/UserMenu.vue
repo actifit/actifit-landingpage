@@ -22,7 +22,7 @@
 				<a href='./notifications' class="btn btn-brand border" >{{ $t('View_all') }}</a>
 				<a href='#' class="btn btn-brand border" v-on:click="markAllRead()" >{{ $t('Clear_all') }}</a>
 			  </div>
-			  <div class="row p-2" v-for="(notif, index) in activeNotifications" :key="index" :notif="notif">
+			  <div class="row p-2 border-top" v-for="(notif, index) in activeNotifications" :key="index" :notif="notif">
 				<span class="col-md-10">
 					<a :href="notif.url" v-on:click="markRead(notif)">
 						<i class="fas fa-user-plus p-1" v-if="notif.type == 'friendship' || notif.type == 'friendship_request'"></i>

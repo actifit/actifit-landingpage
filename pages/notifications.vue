@@ -19,7 +19,7 @@
 		<h4 class="user-name">@{{ user.account.name }} {{ $t('Notifications') }}</h4>
 		
 		<div class="row text-right">
-			<select v-model="currentFilter" class="form-control col-md-3 sel-adj float-right">
+			<select v-model="currentFilter" class="form-control col-md-2 sel-adj float-right">
 				<option value="all">{{ $t('all') }}</option>
 				<option value="read">{{ $t('read') }}</option>
 				<option value="unread">{{ $t('unread') }}</option>
@@ -27,7 +27,7 @@
 			<a href='#' class="btn btn-brand border float-right" v-on:click="markAllRead()" :title="$t('Mark_all_read')"><i class="fas fa-tasks"></i></a>
 		</div>
 		
-		<div class="row p-2 border" v-for="(notif, index) in notifications" :key="index" :notif="notif" v-if="renderNotif(notif)">
+		<div class="row p-2 border border-bottom-0" v-for="(notif, index) in notifications" :key="index" :notif="notif" v-if="renderNotif(notif)">
 			<span class="col-md-2">
 			  <a :href="notif.url" v-on:click="markRead(notif)" >{{ date(notif.date) }}</a>
 			</span>
