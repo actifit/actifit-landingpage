@@ -158,6 +158,19 @@
 		return false;
 	  },
 	  async updateUserData () {
+		if (!localStorage.getItem('std_login')){
+		  //if (!this.stdLogin){
+			try{
+				let user_data = await this.$steemconnect.me();
+				this.user.account = user_data.account;
+			}catch(excp){
+				console.log(excp);
+			}
+		  }
+		  
+		this.$store.dispatch('fetchUserTokens')
+		this.$store.dispatch('fetchUserRank')
+		  
 		//grab user's notifications
 		if (this.user){
 			let res = await fetch(process.env.actiAppUrl + 'allNotifications/' + this.user.account.name);
