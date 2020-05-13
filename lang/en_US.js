@@ -588,4 +588,6 @@ module.exports = {
   View_chart: 'View Chart',
   Confirm_verf_transfer: 'Proceed with payment of _AMOUNT_ _CURR_ to verify your funds password?',
   healthapp: 'Health App',
+  View_all: 'View All',
+  Clear_all: 'Clear All',
 }

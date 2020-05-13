@@ -18,6 +18,10 @@
 				<i class="fas fa-bell p-2 text-brand"></i>
 			</a>
 			<div class="dropdown-menu dropdown-menu-right notif-container">
+			  <div class="text-right m-2">
+				<a href='./notifications' class="btn btn-brand border" >{{ $t('View_all') }}</a>
+				<a href='#' class="btn btn-brand border" v-on:click="markAllRead()" >{{ $t('Clear_all') }}</a>
+			  </div>
 			  <div class="row p-2" v-for="(notif, index) in activeNotifications" :key="index" :notif="notif">
 				<span class="col-md-10">
 					<a :href="notif.url" v-on:click="markRead(notif)">
@@ -33,6 +37,7 @@
 				</span>
 			  </div>
 			</div>
+			
 		</span>
 		<span class="user-avatar group-class" v-else>
 			<a class="nav-link dropdown-toggle p-0" id="user_menu_navlink" href="#" data-toggle="dropdown">
@@ -195,6 +200,13 @@
 	  },
 	  async markRead(notif){
 		let res = await fetch(process.env.actiAppUrl + 'markRead/' + notif._id);
+		let outcome = await res.json();
+		console.log(outcome);
+		console.log(outcome.status);
+		this.updateUserData()
+	  },
+	  async markAllRead(){
+		let res = await fetch(process.env.actiAppUrl + 'markAllRead/?user=' + this.user.account.name);
 		let outcome = await res.json();
 		console.log(outcome);
 		console.log(outcome.status);
