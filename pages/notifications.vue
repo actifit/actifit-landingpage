@@ -28,8 +28,8 @@
 		</div>
 		
 		<div class="row p-2 border" v-for="(notif, index) in notifications" :key="index" :notif="notif" v-if="renderNotif(notif)">
-			<span>
-			  <a :href="notif.url" v-on:click="markRead(notif)" class="col-md-2">{{ notif.date }}</a>
+			<span class="col-md-2">
+			  <a :href="notif.url" v-on:click="markRead(notif)" >{{ date(notif.date) }}</a>
 			</span>
 			<span class="col-md-8">
 				<a :href="notif.url" v-on:click="markRead(notif)">
@@ -40,12 +40,12 @@
 				   :style="'background-image: url(https://steemitimages.com/u/' + notif.action_taker + '/avatar)'"></span>
 				</a>
 			</span>
-			<span>
-			  <a href="#" v-on:click="markRead(notif)" class="col-md-2">{{ notif.status }}</a>
+			<span class="col-md-1">
+			  <a href="#" v-on:click="markRead(notif)" >{{ notif.status }}</a>
 			</span>
-			<span>
-			  <a href="#" v-on:click="markRead(notif)" class="col-md-2" :title="$t('mark_as_read')"  v-if="notif.status == 'unread'"><i class="fas fa-check-square"></i></a>
-			  <a href="#" v-on:click="markUnread(notif)" class="col-md-2" :title="$t('mark_as_unread')"  v-else><i class="far fa-square"></i></a>
+			<span class="col-md-1">
+			  <a href="#" v-on:click="markRead(notif)" :title="$t('mark_as_read')"  v-if="notif.status == 'unread'"><i class="fas fa-check-square"></i></a>
+			  <a href="#" v-on:click="markUnread(notif)" :title="$t('mark_as_unread')"  v-else><i class="far fa-square"></i></a>
 			</span>
 		  </div>
 		
@@ -107,7 +107,6 @@
 	data () {
 		return {
 			notifications: [],
-			cur_bchain: 'HIVE',
 			loading: false,
 			acti_goog_ad_square:{display:'inline-block', maxWidth:'300px', maxHeight: '350px'},
 			currentFilter: 'all',
@@ -124,23 +123,9 @@
     computed: {
 	  ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters('steemconnect', ['stdLogin']),
-	  ...mapGetters(['userTokens']),
+	  ...mapGetters(['userTokens', 'userRank']),
 	  formattedProfileUrl () {
 		return "https://actifit.io/" + this.displayUser;
-	  },
-	  /*getUserRank() {
-		//proper formatting issue to display circle for smaller numbers
-		if (this.userRank<10){
-			return ' '+parseFloat(this.userRank).toFixed(1);
-		}else{
-			return parseFloat(this.userRank).toFixed(1);
-		}
-	  },*/
-	  displayCoreUserRank () {
-		return (this.userRank?parseFloat(this.userRank.rank_no_afitx).toFixed(2):'');
-	  },
-	  displayIncreasedUserRank () {
-		return '(+' + parseFloat(this.userRank.afitx_rank).toFixed(2) + ')';
 	  },
     },
 	methods: {
@@ -154,6 +139,15 @@
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
+	  date(val) {
+        let date = new Date(val)
+        let minutes = date.getMinutes()
+        return date.getDate() + '/' 
+			+ (date.getMonth() + 1) + '/' 
+			+ date.getFullYear() + ' ' 
+			+ date.getHours() + ':' 
+			+ (minutes < 10 ? '0' + minutes : minutes)
+      },
 	  renderNotif(notif){
 		if (this.currentFilter == 'all'){
 			return true;
@@ -163,71 +157,7 @@
 		}
 		return false;
 	  },
-	  async processTrxFunc(op_name, cstm_params){
-		if (!localStorage.getItem('std_login')){
-		//if (!this.stdLogin){
-			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
-			//console.log(res);
-			if (res.result.block_num) {
-				console.log('success');
-				return {success: true, trx: res.result};
-			}else{
-				//console.log(err);
-				return {success: false, trx: null};
-			}
-		}else{
-			let operation = [ 
-			   [op_name, cstm_params]
-			];
-			console.log('broadcasting');
-			console.log(operation);
-			
-			//console.log(this.$steemconnect.accessToken);
-			//console.log(this.$store.state.accessToken);
-			//grab token
-			let accToken = localStorage.getItem('access_token')
-			
-			let op_json = JSON.stringify(operation)
-			
-			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+op_json+'&bchain='+this.cur_bchain);
-
-			let reqHeads = new Headers({
-			  'Content-Type': 'application/json',
-			  'x-acti-token': 'Bearer ' + accToken,
-			});
-			let res = await fetch(url, {
-				headers: reqHeads
-			});
-			let outcome = await res.json();
-			console.log(outcome);
-			if (outcome.error){
-				console.log(outcome.error);
-				
-				//if this is authority error, means needs to be logged out
-				//example "missing required posting authority:Missing Posting Authority"
-				let err_msg = outcome.trx.tx.error;
-				if (err_msg.includes('missing') && err_msg.includes('authority')){
-					//clear entry
-					localStorage.removeItem('access_token');
-					//this.$store.commit('setStdLoginUser', false);
-					this.error_msg = this.$t('session_expired_login_again');
-					this.$store.dispatch('steemconnect/logout');
-				}
-				
-				this.$notify({
-				  group: 'error',
-				  text: err_msg,
-				  position: 'top center'
-				})
-				return false;
-				//this.$router.push('/login');
-			}else{
-				return true;
-			}
-		}
-	  },
 	  async updateUserData () {
-		console.log('updateUserData '+this.cur_bchain)
 		//grab user's notifications
 		if (this.user){
 			let res = await fetch(process.env.actiAppUrl + 'allNotifications/' + this.user.account.name);
@@ -304,7 +234,6 @@
 	  }
 	},
 	async mounted () {
-		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		// login
 		this.$store.dispatch('steemconnect/login')
 		
