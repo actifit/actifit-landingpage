@@ -65,10 +65,19 @@
 		</div>
 		<div class="p-2 font-weight-bold">
 			<!--<button v-on:click="buyAFITwithSTEEM" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('BUY_AFIT_WITH_STEEM') }}</button>-->
-			<a href="https://steem-engine.com/?p=market&t=AFIT" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border ">{{ $t('buy_afit_se') }}</a>
+			<a v-if="cur_bchain=='STEEM'" href="https://steem-engine.com/?p=market&t=AFIT" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border " target="_blank" rel="noopener noreferrer">{{ $t('buy_afit_se') }}</a>
+			<a v-else href="https://hive-engine.com/?p=market&t=AFIT" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border " target="_blank" rel="noopener noreferrer">{{ $t('buy_afit_he') }}</a>
+			
+			<a v-if="cur_bchain=='STEEM'" href="https://steem-engine.com/?p=market&t=AFITX" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border " target="_blank" rel="noopener noreferrer">{{ $t('buy_afitx_se') }}</a>
+			<a v-else href="https://hive-engine.com/?p=market&t=AFITX" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border " target="_blank" rel="noopener noreferrer">{{ $t('buy_afitx_he') }}</a>
+			
 			<button v-on:click="exchangeAFITforSTEEM" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('EXCHANGE_AFIT_FOR_STEEM') }}</button>
-			<button v-on:click="moveAFITSEtoAFITPOWER" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('MOVE_AFIT_SE_AFIT_POWER') }}</button>
-			<button v-on:click="initiateAFITtoSE" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('INITIATE_AFIT_TO_SE') }}</button>
+			
+			<button v-if="cur_bchain=='STEEM'" v-on:click="moveAFITSEtoAFITPOWER" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('MOVE_AFIT_SE_AFIT_POWER') }}</button>
+			<button v-else v-on:click="moveAFITSEtoAFITPOWER" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('MOVE_AFIT_HE_AFIT_POWER') }}</button>
+			
+			<button v-if="cur_bchain=='STEEM'" v-on:click="initiateAFITtoSE" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('INITIATE_AFIT_TO_SE') }}</button>
+			<button v-else v-on:click="initiateAFITtoSE" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('INITIATE_AFIT_TO_HE') }}</button>
 			  <transition name="fade">
 			  <div v-if="afitActivityMode == MOVE_AFIT_SE">
 				  <div class="text-center grid p-2">
@@ -99,7 +108,9 @@
 					<div v-if="userPDAfit.user">
 						<span class="end-string">{{ afitPowerDownText }}</span><Countdown v-if="countDownReady" :deadline="nextAfitPDTarget"></Countdown>
 					</div>
-					<div>{{ $t('move_afit_se_notice') }}</div>
+					<div v-if="cur_bchain=='STEEM'">{{ $t('move_afit_se_notice') }}</div>
+					<div v-else>{{ $t('move_afit_he_notice') }}</div>
+					
 					<div>{{ $t('move_afit_se_notice2') }}</div>
 					<div>{{ $t('move_afit_se_notice3') }}</div>
 					<div>
@@ -1532,6 +1543,11 @@
 		  this.claimSP = this.user.account.reward_vesting_steem + " POWER";
 		  this.claimVests = this.user.account.reward_vesting_balance;
 		  this.claimSBD = this.user.account.reward_sbd_balance;
+		  if (this.cur_bchain=='HIVE'){
+			this.claimSP = this.claimSP.replace('STEEM','HIVE');
+			this.claimSTEEM = this.claimSTEEM.replace('STEEM','HIVE');
+			this.claimSBD = this.claimSBD.replace('SBD','HBD');
+		  }
 		  return this.claimSP + this.claimSTEEM + this.claimSBD;
 		}
 		return '';
