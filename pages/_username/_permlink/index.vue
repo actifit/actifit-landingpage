@@ -251,6 +251,7 @@
   Vue.use( steemEditor );  
   
   const scot_steemengine_api = process.env.steemEngineScot;
+  const scot_hive_api_param = process.env.hiveEngineScotParam;
   const tokensOfInterest = ['SPORTS', 'PAL', 'APX'];
   
   export default {
@@ -808,10 +809,19 @@
 		fetch(process.env.actiAppUrl+'getPostFullAFITPayReward?user=' + this.report.author+'&url='+this.report.url).then(res => {
 				res.json().then(json => this.fullAFITReward = json.token_count)}).catch(e => reject(e))
 		
-		//grab post S-E token pay
-		fetch(scot_steemengine_api+'@'+this.report.author+'/'+this.report.permlink ).then(
-			res => {res.json().then(json => this.setReportTokenRewards (json) ).catch(e => reject(e))
-		}).catch(e => reject(e))
+		if (this.cur_bchain == 'STEEM'){
+			console.log('grab SE token payout');
+			//grab post S-E token pay
+			fetch(scot_steemengine_api+'@'+this.report.author+'/'+this.report.permlink ).then(
+				res => {res.json().then(json => this.setReportTokenRewards (json) ).catch(e => reject(e))
+			}).catch(e => reject(e))
+		}else{
+			console.log('grab HE token payout');
+			//grab post H-E token pay
+			fetch(scot_steemengine_api+'@'+this.report.author+'/'+this.report.permlink +scot_hive_api_param).then(
+				res => {res.json().then(json => this.setReportTokenRewards (json) ).catch(e => reject(e))
+			}).catch(e => reject(e))
+		}
 		
 	  },
 	  /* function handles proper display for post token rewards */

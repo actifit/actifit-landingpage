@@ -209,6 +209,7 @@
   Vue.use( steemEditor );
   
   const scot_steemengine_api = process.env.steemEngineScot;
+  const scot_hive_api_param = process.env.hiveEngineScotParam;
   const tokensOfInterest = ['SPORTS', 'PAL', 'APX'];
   
   export default {
@@ -641,10 +642,17 @@
 		//grab moderators' list
 		this.$store.dispatch('fetchModerators')
 		
-		//grab post S-E token pay
-		fetch(scot_steemengine_api+'@'+this.report.author+'/'+this.report.permlink ).then(
-			res => {res.json().then(json => this.setReportTokenRewards (json) ).catch(e => reject(e))
-		}).catch(e => reject(e))
+		if (this.cur_bchain == 'STEEM'){
+			//grab post S-E token pay
+			fetch(scot_steemengine_api+'@'+this.report.author+'/'+this.report.permlink ).then(
+				res => {res.json().then(json => this.setReportTokenRewards (json) ).catch(e => reject(e))
+			}).catch(e => reject(e))
+		}else{
+			//grab post H-E token pay
+			fetch(scot_steemengine_api+'@'+this.report.author+'/'+this.report.permlink +scot_hive_api_param).then(
+				res => {res.json().then(json => this.setReportTokenRewards (json) ).catch(e => reject(e))
+			}).catch(e => reject(e))
+		}
 	  },
 	  /* function handles proper display for post token rewards */
 	  displayTokenValue (token) {

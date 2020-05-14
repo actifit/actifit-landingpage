@@ -1243,7 +1243,7 @@
 			  }).catch(e => reject(e))
 		  
 		  }else{
-			  fetch(scot_steemengine_api+'@'+this.user.account.name+'?'+scot_hive_api_param).then(
+			  fetch(scot_steemengine_api+'@'+this.user.account.name+scot_hive_api_param).then(
 				res => {res.json().then(json => this.setUserClaimableSETokens (json) ).catch(e => reject(e))
 			  }).catch(e => reject(e))
 
@@ -1577,7 +1577,7 @@
 			res => {res.json().then(json => this.setSETokensPrecision (json) ).catch(e => reject(e))
 		  }).catch(e => reject(e))
 		}else{
-		  fetch(scot_steemengine_api+'info'+'?'+scot_hive_api_param).then(
+		  fetch(scot_steemengine_api+'info'+scot_hive_api_param).then(
 			res => {res.json().then(json => this.setSETokensPrecision (json) ).catch(e => reject(e))
 		  }).catch(e => reject(e))
 		}
