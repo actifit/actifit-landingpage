@@ -375,7 +375,8 @@
 			</div>
 			
 			<div v-if="tokensOfInterestBal.length > 0" class="col-md-6 row-sep-in">
-				<h5 class="token-title">{{ $t('Your_Token_Balance') }}</h5>
+				<h5 class="token-title" v-if="cur_bchain == 'STEEM'">{{ $t('Your_Token_Balance') }}</h5>
+				<h5 class="token-title" v-else>{{ $t('Your_HE_Token_Balance') }}</h5>
 				<div class="mb-4 font-weight-bold">
 					<div class="p-2" v-for="(token, index) in tokensOfInterestBal" :key="index" :token="token">
 						{{ renderBal(token) }} {{ token.symbol }} <span v-if="parseFloat(renderStake(token)) > 0">+ {{ renderStake(token)}} {{ token.symbol }} {{ $t('Staked') }} </span>
@@ -642,7 +643,8 @@
 				</div>
 			</div>
 			<div v-if="claimableSETokens.length > 0" class="col-md-6 row-sep-in">
-				<h5 class="token-title">{{ $t('Claimable_Token_Rewards') }}</h5>
+				<h5 class="token-title" v-if="cur_bchain == 'STEEM'">{{ $t('Claimable_Token_Rewards') }}</h5>
+				<h5 class="token-title" v-else>{{ $t('Claimable_HE_Token_Rewards') }}</h5>
 				<div class="mb-4 font-weight-bold">
 					<span class="p-2" v-for="(entry, index) in claimableSETokens" :key="index" :entry="entry">{{ renderTokenVal(entry.amount, entry.symbol) }} {{ entry.symbol }}</span>
 					<div class="p-2">
@@ -720,6 +722,9 @@
   
   const ssc = new SSC(process.env.steemEngineRpc);
   const scot_steemengine_api = process.env.steemEngineScot;
+  
+  const hsc = new SSC(process.env.hiveEngineRpc);
+  const scot_hive_api_param = process.env.hiveEngineScotParam;
 
   const tokensNonStakable = ['AFITX', 'AFIT', 'STEEMP'];
   const tokensOfInterest = ['SPORTS', 'PAL', 'APX'].concat(tokensNonStakable);
@@ -797,6 +802,10 @@
 		runningInterval: '',
 		afit_se_balance: 0,
 		afitx_se_balance: 0,
+		
+		afit_he_balance: 0,
+		afitx_he_balance: 0,
+		
 		userAddedTokens: 0,
 		steemPrice: 0.1,
 		sbdPrice: 0.1,
@@ -865,7 +874,7 @@
 		return this.numberFormat(this.totalAccountValueSteem, 3) + ' ' + this.cur_bchain;
 	  },
 	  formattedUserTokens () {
-		return this.numberFormat((parseFloat(this.userTokens) + parseFloat(this.userAddedTokens)).toFixed(3), 3) + " AFIT" + " | " + this.numberFormat(parseFloat(this.afit_se_balance), 3) + " AFIT S-E";
+		return this.numberFormat((parseFloat(this.userTokens) + parseFloat(this.userAddedTokens)).toFixed(3), 3) + " AFIT" + " | " + this.numberFormat(parseFloat(this.afit_se_balance), 3) + " AFIT S-E" + " | " + this.numberFormat(parseFloat(this.afit_he_balance), 3) + " AFIT H-E";
       },
 	  formattedUserAFITX () {
 		return this.numberFormat(this.afitx_se_balance,3) + ' AFITX';
@@ -1078,11 +1087,13 @@
 				let tokenData = par.tokenMetrics.find(v => v.symbol == token.symbol);
 				//console.log(token);
 				//console.log(tokenData);
-				let prec = par.tokenOfInterestPrecision[token.symbol];
-				//console.log(prec);
-				let tokenVal = parseFloat(par.numberFormat(token.amount, prec)) * parseFloat(tokenData.lastPrice);
-				par.totalAccountValue += tokenVal
-				par.detailCalculation += par.numberFormat(token.amount, prec) + ' ' + token.symbol + ' x '+ tokenData.lastPrice + ' ' + token.symbol + '/'+par.cur_bchain+' = ' + par.numberFormat(tokenVal, 4) + ' '+par.cur_bchain+'<br/>';
+				if (tokenData && tokenData.lastPrice){
+					let prec = par.tokenOfInterestPrecision[token.symbol];
+					//console.log(prec);
+					let tokenVal = parseFloat(par.numberFormat(token.amount, prec)) * parseFloat(tokenData.lastPrice);
+					par.totalAccountValue += tokenVal
+					par.detailCalculation += par.numberFormat(token.amount, prec) + ' ' + token.symbol + ' x '+ tokenData.lastPrice + ' ' + token.symbol + '/'+par.cur_bchain+' = ' + par.numberFormat(tokenVal, 4) + ' '+par.cur_bchain+'<br/>';
+				}
 				//console.log('claimable value for '+token.symbol+ ' $ ' + tokenVal);
 			});
 			
@@ -1226,10 +1237,17 @@
 		  this.fetchTokenBalance();
 		  
 		  //let's grab the user's steem-engine tokens too
-		  fetch(scot_steemengine_api+'@'+this.user.account.name).then(
-			res => {res.json().then(json => this.setUserClaimableSETokens (json) ).catch(e => reject(e))
-		  }).catch(e => reject(e))
+		  if (this.cur_bchain == 'STEEM'){
+			  fetch(scot_steemengine_api+'@'+this.user.account.name).then(
+				res => {res.json().then(json => this.setUserClaimableSETokens (json) ).catch(e => reject(e))
+			  }).catch(e => reject(e))
 		  
+		  }else{
+			  fetch(scot_steemengine_api+'@'+this.user.account.name+'?'+scot_hive_api_param).then(
+				res => {res.json().then(json => this.setUserClaimableSETokens (json) ).catch(e => reject(e))
+			  }).catch(e => reject(e))
+
+		  }
 		  
 		  //let's grab the number of pending token swap transactions to see if we can add more
 		  /*fetch(process.env.actiAppUrl+'getPendingTokenSwapTransCount').then(
@@ -1285,6 +1303,33 @@
 			  }
 		  }
 		  
+		  //fetch user's AFIT H-E balance
+		  
+		  bal = await hsc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFIT' });
+		  
+		  
+		  if (bal){
+			  this.afit_he_balance = bal.balance;
+			  
+			  //if this operation relates to powering up AFIT from S-E, need to also initiate call to adjust AFIT token count
+			  if (this.$route.query.confirm_trans == 1){
+				
+				let url = new URL(process.env.actiAppUrl + 'confirmAFITSEReceipt/?user='+this.user.name);
+				//connect with our service to confirm AFIT received to proper wallet
+				try{
+					
+					fetch(url).then(
+					  res => {res.json().then(json => this.setUserAddedTokens(json)).catch(e => reject(e))
+					}).catch(e => reject(e))
+					
+				
+				}catch(err){
+					console.error(err);
+					//this.checkingFunds = false;
+				}
+			  }
+		  }
+		  
 		  //fetch user's AFITX S-E balance
 		  /*console.log('fetch AFITX SE balance');
 		  bal = await ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' });
@@ -1303,6 +1348,16 @@
 					  }
 				}
 			)
+			
+		  hsc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' }).then(
+				function(bal) {
+					
+					
+					if (bal){
+						  parnt.afitx_he_balance = bal.balance;
+					  }
+				}
+			)
 		  
 		  //fetch user's AFITX Rank
 		   fetch(process.env.actiAppUrl+'afitxData/'+this.user.account.name).then(
@@ -1311,8 +1366,12 @@
 		  
 		  
 		  //fetch user's tokensOfInterest S-E balance
-		  let tokenData = await ssc.find('tokens', 'balances', { account: this.user.account.name, symbol : { '$in' : tokensOfInterest } });
-		  
+		  let tokenData
+		  if (this.cur_bchain == 'STEEM'){
+			tokenData = await ssc.find('tokens', 'balances', { account: this.user.account.name, symbol : { '$in' : tokensOfInterest } });
+		  }else{
+			tokenData = await hsc.find('tokens', 'balances', { account: this.user.account.name, symbol : { '$in' : tokensOfInterest } });
+		  }
 		  
 		  if (tokenData){
 			this.tokensOfInterestBal = tokenData.sort(function tokenEntry(a, b) {
@@ -1323,8 +1382,11 @@
 		  }
 		  
 		  //fetch tokens' data (price et al)
-		  this.tokenMetrics = await ssc.find('market', 'metrics', {symbol : { '$in' : tokensOfInterest.concat(['AFIT','AFITX']) }}, 1000, 0, '', false);	  
-		  
+		  if (this.cur_bchain == 'STEEM'){
+			this.tokenMetrics = await ssc.find('market', 'metrics', {symbol : { '$in' : tokensOfInterest.concat(['AFIT','AFITX']) }}, 1000, 0, '', false);	  
+		  }else{
+			this.tokenMetrics = await hsc.find('market', 'metrics', {symbol : { '$in' : tokensOfInterest.concat(['AFIT','AFITX']) }}, 1000, 0, '', false);	
+		  }
 		  //check if user is powering down AFIT to SE
 		  fetch(process.env.actiAppUrl+'isPoweringDown/'+this.user.account.name).then(
 			res => {res.json().then(json => this.setUserPDAfitStatus (json) ).catch(e => reject(e))
@@ -1510,9 +1572,15 @@
 	  },
 	  async fetchTokenBalance () {
 		//let's grab the precision for our tokens of interest for proper value display
+		if (this.cur_bchain == 'STEEM'){  
 		  fetch(scot_steemengine_api+'info').then(
 			res => {res.json().then(json => this.setSETokensPrecision (json) ).catch(e => reject(e))
 		  }).catch(e => reject(e))
+		}else{
+		  fetch(scot_steemengine_api+'info'+'?'+scot_hive_api_param).then(
+			res => {res.json().then(json => this.setSETokensPrecision (json) ).catch(e => reject(e))
+		  }).catch(e => reject(e))
+		}
 	  },
 	  async claimRewards () {
 		//function handles claiming STEEM rewards
@@ -2169,6 +2237,7 @@
 		this.initiateInProgress = true;
 		
 		try{
+			//TODO: add support on hive for moving tokens over to H-E
 			//check if the user has enough AFITX S-E amount allowing him the transfers daily
 			let bal = await ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' });
 			if (bal){
