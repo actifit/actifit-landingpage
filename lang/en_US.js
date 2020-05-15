@@ -285,6 +285,7 @@ module.exports = {
   max_amount_AFIT_power_SE: 'The amount needs to be within your Max AFIT balance',
   Proceed: 'Proceed',
   Move_AFIT_to_Wallet: 'Move AFIT to Wallet',
+  Scheduled_successfully: ' scheduled successfully',
   Power_up_token: 'Power Up Token',
   Power_down_token: 'Power Down Token',
   Transfer_token: 'Transfer Token',
@@ -606,4 +607,5 @@ module.exports = {
   all: 'all',
   read: 'read',
   unread:' unread',
+  error_performing_operation: 'There was an error performing the operation',
 }

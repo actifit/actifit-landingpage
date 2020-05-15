@@ -86,6 +86,10 @@
 					  <div class="w-25 p-2 text-right">{{ $t('Amount_To_Move') }}</div>
 					  <input type="number" id="afit-se-move-power" name="afit-se-move-power" ref="afit-se-move-power" class="form-control-lg w-50 p-2">
 					</div>
+					<div class="row" v-if="isStdLogin">
+					  <label for="p-ac-key-power" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
+					  <input type="password" id="p-ac-key-power" name="p-ac-key-power" ref="p-ac-key-power" class="form-control-lg w-50 p-2">
+					</div>
 					<div class="text-brand text-center" v-if="afit_se_move_error_proceeding">
 					  {{ this.afit_se_move_err_msg }}
 					</div>
@@ -1298,7 +1302,7 @@
 			  //if this operation relates to powering up AFIT from S-E, need to also initiate call to adjust AFIT token count
 			  if (this.$route.query.confirm_trans == 1){
 				
-				let url = new URL(process.env.actiAppUrl + 'confirmAFITSEReceipt/?user='+this.user.name);
+				let url = new URL(process.env.actiAppUrl + 'confirmAFITSEReceipt/?user='+this.user.name+'&bchain='+this.cur_bchain);
 				//connect with our service to confirm AFIT received to proper wallet
 				try{
 					
@@ -1321,24 +1325,6 @@
 		  
 		  if (bal){
 			  this.afit_he_balance = bal.balance;
-			  
-			  //if this operation relates to powering up AFIT from S-E, need to also initiate call to adjust AFIT token count
-			  if (this.$route.query.confirm_trans == 1){
-				
-				let url = new URL(process.env.actiAppUrl + 'confirmAFITSEReceipt/?user='+this.user.name);
-				//connect with our service to confirm AFIT received to proper wallet
-				try{
-					
-					fetch(url).then(
-					  res => {res.json().then(json => this.setUserAddedTokens(json)).catch(e => reject(e))
-					}).catch(e => reject(e))
-					
-				
-				}catch(err){
-					console.error(err);
-					//this.checkingFunds = false;
-				}
-			  }
 		  }
 		  
 		  //fetch user's AFITX S-E balance
@@ -2353,18 +2339,125 @@
 		  return;
 		}
 		
-		//store the transaction to Steem BC according to S-E protocol for transfer
-		let link = this.$steemconnect.sign('custom_json', {
-		  required_auths: "[\"" + this.user.account.name + "\"]",
-		  required_posting_auths: "[]",
-		  id: 'ssc-mainnet1',
-		  json: "{\"contractName\":\"tokens\",\"contractAction\":\"transfer\",\"contractPayload\":{\"symbol\":\"AFIT\",\"to\":\"actifit.s-e\",\"quantity\":\"" + amount_to_power + "\",\"memo\":\"\"}}",
-		  authority: 'active',
-		  auto_return: true,
-		}, window.location.origin + '/wallet?op='+this.$t('Move_AFIT_to_Wallet')+'&status=success&confirm_trans=1');
+		if (this.$refs["p-ac-key-power"].value == ''){
+		  this.afit_se_move_error_proceeding = true;
+		  this.afit_se_move_err_msg = this.$t('all_fields_required');
+		  return;
+		}
 		
-		//redirect to proper action
-		window.location = link;
+		//store the transaction to Steem BC according to S-E protocol for transfer
+		
+		if (!localStorage.getItem('std_login')){
+			let link = this.$steemconnect.sign('custom_json', {
+			  required_auths: "[\"" + this.user.account.name + "\"]",
+			  required_posting_auths: "[]",
+			  id: 'ssc-mainnet1',
+			  json: "{\"contractName\":\"tokens\",\"contractAction\":\"transfer\",\"contractPayload\":{\"symbol\":\"AFIT\",\"to\":\"actifit.s-e\",\"quantity\":\"" + amount_to_power + "\",\"memo\":\"\"}}",
+			  authority: 'active',
+			  auto_return: true,
+			}, window.location.origin + '/wallet?op='+this.$t('Move_AFIT_to_Wallet')+'&status=success&confirm_trans=1');
+			
+			//redirect to proper action
+			window.location = link;
+		
+		}else{
+		
+			/*
+			let json_data = {
+				contractName: 'tokens',
+				contractAction: 'transfer',
+				contractPayload: {
+					symbol: 'AFITX',
+					to: entry.user,
+					quantity: '' + rewardAFITX,//needs to be string
+					memo: ''
+				}
+			}
+			console.log(json_data);
+			totalAFITXSpent += parseFloat(rewardAFITX);
+			totalUsersRewarded += 1;
+			client.broadcast.json({
+				//required_auths: [config.token_dist_account],
+				required_auths: [config.account],
+				required_posting_auths: [],
+				id: 'ssc-mainnet1',
+				json: JSON.stringify(json_data),
+			}, privateKey).then(
+				result => { console.log(result) },
+				error => { console.error(error) }
+			)
+			
+			*/
+			this.movingFunds = true;
+			
+			let targetAcct = 'actifit.h-e';
+			let transId = 'ssc-mainnet-hive';
+			if (this.cur_bchain == 'STEEM'){
+				targetAcct = 'actifit.s-e';
+				transId = 'ssc-mainnet1';
+			}
+			
+			let json_data = {
+				contractName: 'tokens',
+				contractAction: 'transfer',
+				contractPayload: {
+					symbol: 'AFIT',
+					to: targetAcct,
+					quantity: '' + amount_to_power,//needs to be string
+					memo: ''
+				}
+			}
+			
+			let userKey = this.$refs["p-ac-key-power"].value;
+			
+			//send out transaction to blockchain
+			await this.setProperNode();
+			let tx = await steem.broadcast.customJsonAsync(
+					userKey, 
+					[ this.user.account.name ] , 
+					[], 
+					transId, 
+					JSON.stringify(json_data)
+				).catch(err => {
+					console.log(err.message);
+			});
+			
+			console.log(tx.block_num);
+			console.log(tx);
+			
+			if (tx.block_num){
+				//notify of success
+				this.$notify({
+				  group: 'success',
+				  text: this.$t('Move_AFIT_to_Wallet')+ ' ' +this.$t('Scheduled_successfully'),
+				  position: 'top center'
+				})
+				
+				//initiate call to adjust AFIT token count
+				
+				let url = new URL(process.env.actiAppUrl + 'confirmAFITSEReceipt/?user='+this.user.account.name+'&bchain='+this.cur_bchain);
+				//connect with our service to confirm AFIT received to proper wallet
+				try{
+					
+					fetch(url).then(
+					  res => {res.json().then(json => {this.setUserAddedTokens(json);this.movingFunds = false;}).catch(e => {reject(e);this.movingFunds = false;})
+					}).catch(e => reject(e))
+					
+				
+				}catch(err){
+					console.error(err);
+					//this.checkingFunds = false;
+				}				
+			}else{
+				//notify of success
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('error_performing_operation'),
+				  position: 'top center'
+				})
+				this.movingFunds = false;
+			}
+		}
 	
 	  },
 	  async proceedPowerUpToken() {
