@@ -409,12 +409,21 @@
 					  <label for="token-target-account" class="w-25 p-2">{{ $t('Account') }} *</label>
 					  <span class="p-1">@</span><input type="text" id="token-target-account" name="token-target-account" ref="token-target-account" class="form-control-lg p-2">
 					</div>
+					
+					<div class="row" v-if="isStdLogin && tokenActions && curTokenAction == TRANSFER_FUNDS">
+					  <label for="p-ac-key-trans-token" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
+					  <input type="password" id="p-ac-key-trans-token" name="p-ac-key-trans-token" ref="p-ac-key-trans-token" class="form-control-lg w-50 p-2">
+					</div>
+					
 					<div class="row" v-if="tokenActions">
 					  <div class="w-25"></div>
 					  <button v-if="curTokenAction == POWERUP_FUNDS" v-on:click="proceedPowerUpToken" class="btn btn-brand btn-lg w-50 border">{{ $t('Power_Up') }}</button>
 					  <button v-else-if="curTokenAction == POWERDOWN_FUNDS" v-on:click="proceedPowerDownToken" class="btn btn-brand btn-lg w-50 border">{{ $t('Power_Down') }}</button>
 					  <button v-else-if="curTokenAction == TRANSFER_FUNDS" v-on:click="proceedTransferToken" class="btn btn-brand btn-lg w-50 border">{{ $t('Send') }}</button>
 					  <button v-else-if="curTokenAction == WITHDRAW_FUNDS" v-on:click="proceedWithdrawToken" class="btn btn-brand btn-lg w-50 border">{{ $t('Withdraw') }}</button>
+					</div>
+					<div v-if="movingFunds" id="checking_funds">
+						<i class="fas fa-spin fa-spinner"></i>
 					</div>
 					<div class="row" v-if="afit_se_power_error_proceeding">
 					  <div class="w-25"></div>
@@ -2425,7 +2434,7 @@
 			console.log(tx.block_num);
 			console.log(tx);
 			
-			if (tx.block_num){
+			if (tx && tx.block_num){
 				//notify of success
 				this.$notify({
 				  group: 'success',
@@ -2532,7 +2541,7 @@
 		//redirect to proper action
 		window.location = link;
 	  },
-	  proceedTransferToken() {
+	  async proceedTransferToken() {
 		//handles performing a token power down/unstaking
 		this.afit_se_power_error_proceeding = false;
 		this.afit_se_power_err_msg = '';
@@ -2561,19 +2570,102 @@
 		  this.afit_se_power_err_msg = this.$t('max_amount_token_power');
 		  return;
 		}
+
 		
-		//store the transaction to Steem BC according to S-E protocol for transfer
-		let link = this.$steemconnect.sign('custom_json', {
-		  required_auths: "[\"" + this.user.account.name + "\"]",
-		  required_posting_auths: "[]",
-		  id: 'ssc-mainnet1',
-		  json: "{\"contractName\":\"tokens\",\"contractAction\":\"transfer\",\"contractPayload\":{\"symbol\":\"" + this.selTokenUp.symbol + "\",\"to\":\"" + target_account + "\",\"quantity\":\"" + amount_to_send + "\",\"memo\":\"\"}}",
-		  authority: 'active',
-		  auto_return: true,
-		}, window.location.origin + '/wallet?op='+this.$t('Transfer_token')+'&status=success');
-		
-		//redirect to proper action
-		window.location = link;
+		if (!localStorage.getItem('std_login')){
+			//store the transaction to Steem BC according to S-E protocol for transfer
+			let link = this.$steemconnect.sign('custom_json', {
+			  required_auths: "[\"" + this.user.account.name + "\"]",
+			  required_posting_auths: "[]",
+			  id: 'ssc-mainnet1',
+			  json: "{\"contractName\":\"tokens\",\"contractAction\":\"transfer\",\"contractPayload\":{\"symbol\":\"" + this.selTokenUp.symbol + "\",\"to\":\"" + target_account + "\",\"quantity\":\"" + amount_to_send + "\",\"memo\":\"\"}}",
+			  authority: 'active',
+			  auto_return: true,
+			}, window.location.origin + '/wallet?op='+this.$t('Transfer_token')+'&status=success');
+			
+			//redirect to proper action
+			window.location = link;
+		}else{
+			if (this.$refs["p-ac-key-trans-token"].value == ''){
+			  this.afit_se_power_error_proceeding = true;
+			  this.afit_se_power_err_msg = this.$t('all_fields_required');
+			  return;
+			}
+			
+			
+			this.movingFunds = true;
+			
+			let targetAcct = 'actifit.h-e';
+			let transId = 'ssc-mainnet-hive';
+			if (this.cur_bchain == 'STEEM'){
+				targetAcct = 'actifit.s-e';
+				transId = 'ssc-mainnet1';
+			}
+			
+			let json_data = {
+				contractName: 'tokens',
+				contractAction: 'transfer',
+				contractPayload: {
+					symbol: this.selTokenUp.symbol,
+					to: target_account,
+					quantity: '' + amount_to_send,//needs to be string
+					memo: ''
+				}
+			}
+			
+			let userKey = this.$refs["p-ac-key-trans-token"].value;
+			
+			//send out transaction to blockchain
+			await this.setProperNode();
+			let tx = await steem.broadcast.customJsonAsync(
+					userKey, 
+					[ this.user.account.name ] , 
+					[], 
+					transId, 
+					JSON.stringify(json_data)
+				).catch(err => {
+					console.log(err.message);
+			});
+			
+			console.log(tx.block_num);
+			console.log(tx);
+			
+			if (tx && tx.block_num){
+				//notify of success
+				this.$notify({
+				  group: 'success',
+				  text: this.$t('Transfer_token')+ ' ' +this.$t('completed_success'),
+				  position: 'top center'
+				})
+				
+				//initiate call to adjust AFIT token count
+				
+				/*let url = new URL(process.env.actiAppUrl + 'confirmAFITSEReceipt/?user='+this.user.account.name+'&bchain='+this.cur_bchain);
+				//connect with our service to confirm AFIT received to proper wallet
+				try{
+					
+					fetch(url).then(
+					  res => {res.json().then(json => {this.setUserAddedTokens(json);this.movingFunds = false;}).catch(e => {reject(e);this.movingFunds = false;})
+					}).catch(e => reject(e))
+					
+				
+				}catch(err){
+					console.error(err);
+					//this.checkingFunds = false;
+				}		*/		
+			}else{
+				//notify of success
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('error_performing_operation'),
+				  position: 'top center'
+				})
+				
+			}
+			
+			this.movingFunds = false;
+			
+		}
 	  },
 	  proceedWithdrawToken() {
 		//handles performing a token power down/unstaking
