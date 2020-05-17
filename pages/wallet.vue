@@ -398,7 +398,7 @@
 						<span v-if="parseFloat(delegStake(token)) > 0">( + {{ delegStake(token)}} {{ token.symbol }} {{ $t('Delegated') }}) </span>
 						<span v-if="token.stakable"><i class="fas fa-arrow-circle-up text-brand p-1" :title="$t('stake_tokens')" v-on:click="initiateStaking(token)"></i></span>
 						<span v-if="token.stakable"><i class="fas fa-arrow-circle-down text-brand p-1" :title="$t('unstake_tokens')" v-on:click="initiateUnStaking(token)"></i></span>
-						<span v-if="token.symbol == 'STEEMP'"><i class="fas fa-upload text-brand p-1" :title="$t('withdraw_tokens')" v-on:click="initiateWithdraw(token)"></i></span>
+						<span v-if="token.symbol == 'STEEMP' || token.symbol == 'SWAP.HIVE'"><i class="fas fa-upload text-brand p-1" :title="$t('withdraw_tokens')" v-on:click="initiateWithdraw(token)"></i></span>
 						<span><i class="fas fa-share-square text-brand p-1" :title="$t('transfer_tokens')" v-on:click="initiateTransfer(token)"></i></span>
 					</div>
 					<div class="row" v-if="tokenActions">
@@ -410,7 +410,7 @@
 					  <span class="p-1">@</span><input type="text" id="token-target-account" name="token-target-account" ref="token-target-account" class="form-control-lg p-2">
 					</div>
 					
-					<div class="row" v-if="isStdLogin && tokenActions && curTokenAction == TRANSFER_FUNDS">
+					<div class="row" v-if="isStdLogin && tokenActions">
 					  <label for="p-ac-key-trans-token" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 					  <input type="password" id="p-ac-key-trans-token" name="p-ac-key-trans-token" ref="p-ac-key-trans-token" class="form-control-lg w-50 p-2">
 					</div>
@@ -750,7 +750,7 @@
   const hsc = new SSC(process.env.hiveEngineRpc);
   const scot_hive_api_param = process.env.hiveEngineScotParam;
 
-  const tokensNonStakable = ['AFITX', 'AFIT', 'STEEMP'];
+  const tokensNonStakable = ['AFITX', 'AFIT', 'STEEMP', 'SWAP.HIVE'];
   const tokensOfInterest = ['SPORTS', 'PAL', 'APX'].concat(tokensNonStakable);
   
   import { mapGetters } from 'vuex'
@@ -2492,21 +2492,80 @@
 		  return;
 		}
 		
-		//store the transaction to Steem BC according to S-E protocol for power up
-		let link = this.$steemconnect.sign('custom_json', {
-		  required_auths: "[\"" + this.user.account.name + "\"]",
-		  required_posting_auths: "[]",
-		  id: 'ssc-mainnet1',
-		  json: "{\"contractName\":\"tokens\",\"contractAction\":\"stake\",\"contractPayload\":{\"symbol\":\"" + this.selTokenUp.symbol + "\",\"to\":\"" + this.user.account.name + "\",\"quantity\":\"" + amount_to_power + "\",\"memo\":\"\"}}",
-		  authority: 'active',
-		  auto_return: true,
-		}, window.location.origin + '/wallet?op='+this.$t('Power_up_token')+'&status=success');
-		
-		//redirect to proper action
-		window.location = link;
+		if (!localStorage.getItem('std_login')){
+			//store the transaction to Steem BC according to S-E protocol for power up
+			let link = this.$steemconnect.sign('custom_json', {
+			  required_auths: "[\"" + this.user.account.name + "\"]",
+			  required_posting_auths: "[]",
+			  id: 'ssc-mainnet1',
+			  json: "{\"contractName\":\"tokens\",\"contractAction\":\"stake\",\"contractPayload\":{\"symbol\":\"" + this.selTokenUp.symbol + "\",\"to\":\"" + this.user.account.name + "\",\"quantity\":\"" + amount_to_power + "\",\"memo\":\"\"}}",
+			  authority: 'active',
+			  auto_return: true,
+			}, window.location.origin + '/wallet?op='+this.$t('Power_up_token')+'&status=success');
+			
+			//redirect to proper action
+			window.location = link;
+		}else{
+			this.movingFunds = true;
+			
+			let targetAcct = 'actifit.h-e';
+			let transId = 'ssc-mainnet-hive';
+			if (this.cur_bchain == 'STEEM'){
+				targetAcct = 'actifit.s-e';
+				transId = 'ssc-mainnet1';
+			}
+			
+			let json_data = {
+				contractName: 'tokens',
+				contractAction: 'stake',
+				contractPayload: {
+					symbol: this.selTokenUp.symbol,
+					to: this.user.account.name,
+					quantity: '' + amount_to_power,//needs to be string
+					memo: ''
+				}
+			}
+			
+			let userKey = this.$refs["p-ac-key-trans-token"].value;
+			
+			//send out transaction to blockchain
+			await this.setProperNode();
+			let tx = await steem.broadcast.customJsonAsync(
+					userKey, 
+					[ this.user.account.name ] , 
+					[], 
+					transId, 
+					JSON.stringify(json_data)
+				).catch(err => {
+					console.log(err.message);
+			});
+			
+			console.log(tx.block_num);
+			console.log(tx);
+			
+			if (tx && tx.block_num){
+				//notify of success
+				this.$notify({
+				  group: 'success',
+				  text: this.$t('Power_up_token')+ ' ' +this.$t('completed_success'),
+				  position: 'top center'
+				})
+				
+			}else{
+				//notify of success
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('error_performing_operation'),
+				  position: 'top center'
+				})
+				
+			}
+			
+			this.movingFunds = false;
+		}
 	
 	  },
-	  proceedPowerDownToken() {
+	  async proceedPowerDownToken() {
 		//handles performing a token power down/unstaking
 		this.afit_se_power_error_proceeding = false;
 		this.afit_se_power_err_msg = '';
@@ -2528,18 +2587,78 @@
 		  return;
 		}
 		
-		//store the transaction to Steem BC according to S-E protocol for power down
-		let link = this.$steemconnect.sign('custom_json', {
-		  required_auths: "[\"" + this.user.account.name + "\"]",
-		  required_posting_auths: "[]",
-		  id: 'ssc-mainnet1',
-		  json: "{\"contractName\":\"tokens\",\"contractAction\":\"unstake\",\"contractPayload\":{\"symbol\":\"" + this.selTokenUp.symbol + "\",\"quantity\":\"" + amount_to_powerdown + "\",\"memo\":\"\"}}",
-		  authority: 'active',
-		  auto_return: true,
-		}, window.location.origin + '/wallet?op='+this.$t('Power_down_token')+'&status=success');
 		
-		//redirect to proper action
-		window.location = link;
+		if (!localStorage.getItem('std_login')){
+			//store the transaction to Steem BC according to S-E protocol for power down
+			let link = this.$steemconnect.sign('custom_json', {
+			  required_auths: "[\"" + this.user.account.name + "\"]",
+			  required_posting_auths: "[]",
+			  id: 'ssc-mainnet1',
+			  json: "{\"contractName\":\"tokens\",\"contractAction\":\"unstake\",\"contractPayload\":{\"symbol\":\"" + this.selTokenUp.symbol + "\",\"quantity\":\"" + amount_to_powerdown + "\",\"memo\":\"\"}}",
+			  authority: 'active',
+			  auto_return: true,
+			}, window.location.origin + '/wallet?op='+this.$t('Power_down_token')+'&status=success');
+			
+			//redirect to proper action
+			window.location = link;
+		
+		}else{
+			this.movingFunds = true;
+			
+			let targetAcct = 'actifit.h-e';
+			let transId = 'ssc-mainnet-hive';
+			if (this.cur_bchain == 'STEEM'){
+				targetAcct = 'actifit.s-e';
+				transId = 'ssc-mainnet1';
+			}
+			
+			let json_data = {
+				contractName: 'tokens',
+				contractAction: 'unstake',
+				contractPayload: {
+					symbol: this.selTokenUp.symbol,
+					quantity: '' + amount_to_powerdown,//needs to be string
+					memo: ''
+				}
+			}
+			
+			let userKey = this.$refs["p-ac-key-trans-token"].value;
+			
+			//send out transaction to blockchain
+			await this.setProperNode();
+			let tx = await steem.broadcast.customJsonAsync(
+					userKey, 
+					[ this.user.account.name ] , 
+					[], 
+					transId, 
+					JSON.stringify(json_data)
+				).catch(err => {
+					console.log(err.message);
+			});
+			
+			console.log(tx.block_num);
+			console.log(tx);
+			
+			if (tx && tx.block_num){
+				//notify of success
+				this.$notify({
+				  group: 'success',
+				  text: this.$t('Power_down_token')+ ' ' +this.$t('completed_success'),
+				  position: 'top center'
+				})
+				
+			}else{
+				//notify of success
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('error_performing_operation'),
+				  position: 'top center'
+				})
+				
+			}
+			
+			this.movingFunds = false;
+		}
 	  },
 	  async proceedTransferToken() {
 		//handles performing a token power down/unstaking
@@ -2667,7 +2786,7 @@
 			
 		}
 	  },
-	  proceedWithdrawToken() {
+	  async proceedWithdrawToken() {
 		//handles performing a token power down/unstaking
 		this.afit_se_power_error_proceeding = false;
 		this.afit_se_power_err_msg = '';
@@ -2690,18 +2809,101 @@
 		  return;
 		}
 		
-		//store the transaction to Steem BC according to S-E protocol for withdraw
-		let link = this.$steemconnect.sign('custom_json', {
-		  required_auths: "[\"" + this.user.account.name + "\"]",
-		  required_posting_auths: "[]",
-		  id: 'ssc-mainnet1',
-		  json: "{\"contractName\":\"steempegged\",\"contractAction\":\"withdraw\",\"contractPayload\":{\"quantity\":\"" + amount_to_withdraw + "\"}}",
-		  authority: 'active',
-		  auto_return: true,
-		}, window.location.origin + '/wallet?op='+this.$t('Withdraw_token')+'&status=success');
+		if (!localStorage.getItem('std_login')){
 		
-		//redirect to proper action
-		window.location = link;
+			//store the transaction to Steem BC according to S-E protocol for withdraw
+			let link = this.$steemconnect.sign('custom_json', {
+			  required_auths: "[\"" + this.user.account.name + "\"]",
+			  required_posting_auths: "[]",
+			  id: 'ssc-mainnet1',
+			  json: "{\"contractName\":\"steempegged\",\"contractAction\":\"withdraw\",\"contractPayload\":{\"quantity\":\"" + amount_to_withdraw + "\"}}",
+			  authority: 'active',
+			  auto_return: true,
+			}, window.location.origin + '/wallet?op='+this.$t('Withdraw_token')+'&status=success');
+			
+			//redirect to proper action
+			window.location = link;
+		}else{
+			if (this.$refs["p-ac-key-trans-token"].value == ''){
+			  this.afit_se_power_error_proceeding = true;
+			  this.afit_se_power_err_msg = this.$t('all_fields_required');
+			  return;
+			}
+			
+			
+			this.movingFunds = true;
+			
+			let targetAcct = 'actifit.h-e';
+			let transId = 'ssc-mainnet-hive';
+			let curr = 'hivepegged';
+			if (this.cur_bchain == 'STEEM'){
+				targetAcct = 'actifit.s-e';
+				transId = 'ssc-mainnet1';
+				curr = 'steempegged';
+			}
+			
+			
+			
+			let json_data = {
+				contractName: curr,
+				contractAction: 'withdraw',
+				contractPayload: {
+					quantity: '' + amount_to_withdraw,//needs to be string
+				}
+			}
+			
+			let userKey = this.$refs["p-ac-key-trans-token"].value;
+			
+			//send out transaction to blockchain
+			await this.setProperNode();
+			let tx = await steem.broadcast.customJsonAsync(
+					userKey, 
+					[ this.user.account.name ] , 
+					[], 
+					transId, 
+					JSON.stringify(json_data)
+				).catch(err => {
+					console.log(err.message);
+			});
+			
+			console.log(tx.block_num);
+			console.log(tx);
+			
+			if (tx && tx.block_num){
+				//notify of success
+				this.$notify({
+				  group: 'success',
+				  text: this.$t('Withdraw_token')+ ' ' +this.$t('completed_success'),
+				  position: 'top center'
+				})
+				
+				//initiate call to adjust AFIT token count
+				
+				/*let url = new URL(process.env.actiAppUrl + 'confirmAFITSEReceipt/?user='+this.user.account.name+'&bchain='+this.cur_bchain);
+				//connect with our service to confirm AFIT received to proper wallet
+				try{
+					
+					fetch(url).then(
+					  res => {res.json().then(json => {this.setUserAddedTokens(json);this.movingFunds = false;}).catch(e => {reject(e);this.movingFunds = false;})
+					}).catch(e => reject(e))
+					
+				
+				}catch(err){
+					console.error(err);
+					//this.checkingFunds = false;
+				}		*/		
+			}else{
+				//notify of success
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('error_performing_operation'),
+				  position: 'top center'
+				})
+				
+			}
+			
+			this.movingFunds = false;
+		}
 	  },
 	  async proceedVerifyPass() {
 		//handles checking for proper confirmation of account via STEEM transfer
