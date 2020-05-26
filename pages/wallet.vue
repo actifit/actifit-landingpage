@@ -60,7 +60,10 @@
 					</small>
 				</h5>
 				<div v-if="showAfitxInfo" v-html="$t('afitx_info')"></div>
-				<h5 class="mb-4 font-weight-bold">{{ formattedUserAFITX }}</h5>
+				<h5 class="mb-4 font-weight-bold row">
+					<span class="col-md-6">{{ formattedUserAFITXSE }}<i class="fas fa-angle-double-right"></i></span>
+					<span class="col-md-6">{{ formattedUserAFITXHE }}<i class="fas fa-angle-double-left"></i></span>
+				</h5>
 			</div>
 		</div>
 		<div class="p-2 font-weight-bold">
@@ -70,6 +73,12 @@
 			
 			<a v-if="cur_bchain=='STEEM'" href="https://steem-engine.com/?p=market&t=AFITX" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border " target="_blank" rel="noopener noreferrer">{{ $t('buy_afitx_se') }}</a>
 			<a v-else href="https://hive-engine.com/?p=market&t=AFITX" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border " target="_blank" rel="noopener noreferrer">{{ $t('buy_afitx_he') }}</a>
+			
+			
+			
+			<button v-if="cur_bchain=='STEEM'" v-on:click="moveAFITXseHE" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('move_afitx_se_he') }}</button>
+			
+			<button v-else v-on:click="moveAFITXseHE" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('move_afitx_he_se') }}</button>
 			
 			<button v-on:click="exchangeAFITforSTEEM" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('EXCHANGE_AFIT_FOR_STEEM') }}</button>
 			
@@ -83,7 +92,7 @@
 				  <div class="text-center grid p-2">
 					<div class="text-brand font-weight-bold">{{ $t('wallet.afit_se_to_power') }}</div>
 					<div class="row" >
-					  <div class="w-25 p-2 text-right">{{ $t('Amount_To_Move') }}</div>
+					  <div class="w-25 p-2">{{ $t('Amount_To_Move') }}</div>
 					  <input type="number" id="afit-se-move-power" name="afit-se-move-power" ref="afit-se-move-power" class="form-control-lg w-50 p-2">
 					</div>
 					<div class="row" v-if="isStdLogin">
@@ -96,6 +105,38 @@
 					<div class="row">
 					  <div class="w-25"></div>
 					  <button v-on:click="proceedMoveSEPower" class="btn btn-brand btn-lg w-50 border">{{ $t('Proceed') }}</button>
+					</div>
+					<div class="row">
+					  <div class="w-25"></div>
+					  <div v-if="movingFunds" id="checking_funds">
+						<i class="fas fa-spin fa-spinner"></i>{{ $t('moving_afit_se_power') }}
+					  </div>
+					</div>
+				  </div>
+			  </div>
+			  
+			  <div v-else-if="afitActivityMode == MOVE_AFITX_SE_HE">
+				  <div class="text-center grid p-2">
+					<div v-if="cur_bchain=='STEEM'" class="text-brand font-weight-bold">{{ $t('move_afitx_se_he') }}</div>
+					<div v-else class="text-brand font-weight-bold">{{ $t('move_afitx_he_se') }}</div>
+					<div class="row" >
+					  <div class="w-25 p-2">{{ $t('Amount_To_Move') }}</div>
+					  <input type="number" id="afitx-se-he" name="afitx-se-he" ref="afitx-se-he" class="form-control-lg w-50 p-2">
+					</div>
+					<div class="row" v-if="isStdLogin">
+					  <label for="p-ac-key-afitx" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
+					  <input type="password" id="p-ac-key-afitx" name="p-ac-key-afitx" ref="p-ac-key-afitx" class="form-control-lg w-50 p-2">
+					</div>
+					<div class="row">
+						<div class="w-25"></div>
+						<div>{{ $t('percent_burn_afitx') }}</div>
+					</div>
+					<div class="text-brand text-center" v-if="afit_se_move_error_proceeding">
+					  {{ this.afit_se_move_err_msg }}
+					</div>
+					<div class="row">
+					  <div class="w-25"></div>
+					  <button v-on:click="proceedMoveAFITX(1)" class="btn btn-brand btn-lg w-50 border">{{ $t('Proceed') }}</button>
 					</div>
 					<div class="row">
 					  <div class="w-25"></div>
@@ -550,7 +591,9 @@
 				</div>
 				<div class="row">
 				  <div class="text-center small p-2 w-25"></div>
-				  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50" v-html="$t('power_down_notice')">
+				  <div v-if="cur_bchain=='STEEM'" :class="smallScreenBtnClasses" class="text-center small p-2 w-50" v-html="$t('power_down_notice').replace('_CUR_','STEEM').replace('_TIME_', '4')">
+				  </div>
+				  <div v-else-if="cur_bchain=='HIVE'" :class="smallScreenBtnClasses" class="text-center small p-2 w-50" v-html="$t('power_down_notice').replace('_CUR_','HIVE').replace('_TIME_', '13')">
 				  </div>
 				</div>
 				<div class="text-brand text-center" v-if="error_proceeding">
@@ -774,6 +817,7 @@
 		WITHDRAW_FUNDS: 4,
 		DELEGATE_FUNDS: 5,
 		EXCHANGE_AFIT_STEEM: 1,
+		MOVE_AFITX_SE_HE: 6,
 		MOVE_AFIT_SE: 2,
 		BUY_AFIT_STEEM: 3,
 		INIT_AFIT_TO_SE: 4,
@@ -900,8 +944,11 @@
 	  formattedUserTokens () {
 		return this.numberFormat((parseFloat(this.userTokens) + parseFloat(this.userAddedTokens)).toFixed(3), 3) + " AFIT" + " | " + this.numberFormat(parseFloat(this.afit_se_balance), 3) + " AFIT S-E" + " | " + this.numberFormat(parseFloat(this.afit_he_balance), 3) + " AFIT H-E";
       },
-	  formattedUserAFITX () {
-		return this.numberFormat(this.afitx_se_balance,3) + ' AFITX';
+	  formattedUserAFITXSE () {
+		return this.numberFormat(this.afitx_se_balance,3) + ' AFITX S-E';
+	  },
+	  formattedUserAFITXHE () {
+		return this.numberFormat(this.afitx_he_balance, 3) + ' AFITX H-E';
 	  },
 	  displayUserRank () {
 		return this.userRank
@@ -1993,8 +2040,11 @@
 				res => this.confirmCompletion('powerdown', 0, res)).catch(err=>console.log(err));
 		}
 	  },
-	  setProperNode (){
+	  setProperNode (selectChain){
 		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+		if (selectChain){
+			cur_bchain = selectChain;
+		}
 		let properNode = process.env.hiveApiNode;
 		if (cur_bchain == 'STEEM'){
 			properNode = process.env.steemApiNode;
@@ -2010,6 +2060,16 @@
 		  this.afitActivityMode = 0;
 		}else{
 		  this.afitActivityMode = this.EXCHANGE_AFIT_STEEM;
+		}
+		//hide lower section for STEEM actions
+		this.fundActivityMode = 0;
+	  },
+	  moveAFITXseHE () {
+		//set proper AFIT Activity Mode controlling the display
+		if (this.afitActivityMode == this.MOVE_AFITX_SE_HE ){
+		  this.afitActivityMode = 0;
+		}else{
+		  this.afitActivityMode = this.MOVE_AFITX_SE_HE;
 		}
 		//hide lower section for STEEM actions
 		this.fundActivityMode = 0;
@@ -2468,6 +2528,126 @@
 			}
 		}
 	
+	  },
+	  async proceedMoveAFITX(direction) {
+		//direction = 1: SE to HE
+		//direction = 2: HE to SE
+		
+		//handles checking for proper confirmation of account via STEEM transfer
+		//this.movingFunds = true
+		//function handles the actual processing of the transfer
+		this.afit_se_move_error_proceeding = false;
+		this.afit_se_move_err_msg = '';
+		
+		let amount_to_move = this.$refs["afitx-se-he"].value.trim();
+		//ensure we have proper values
+		if (isNaN(amount_to_move) || parseFloat(amount_to_move) < 0.01){
+		  this.afit_se_move_error_proceeding = true;
+		  this.afit_se_move_err_msg = this.$t('min_amount_AFITX');
+		  //this.movingFunds = false;
+		  return;
+		}
+		//ensure user is moving value he has
+		let afitx_bal = this.afitx_he_balance;
+		if (direction == 1){
+		//if (this.cur_bchain == 'STEEM'){
+			afitx_bal = this.afitx_se_balance;
+		}
+		if (parseFloat(amount_to_move) > parseFloat(afitx_bal)){
+		  this.afit_se_move_error_proceeding = true;
+		  this.afit_se_move_err_msg = this.$t('max_amount_AFITX');
+		  //this.movingFunds = false;
+		  return;
+		}
+		
+		if (this.$refs["p-ac-key-afitx"].value == ''){
+		  this.afit_se_move_error_proceeding = true;
+		  this.afit_se_move_err_msg = this.$t('all_fields_required');
+		  return;
+		}
+	  
+		this.movingFunds = true;
+		//standard is moving tokens from S-E to H-E, which requires sending bcast to Steem.
+		
+		let targetAcct = 'afitx.h-e';
+		let transId = 'ssc-mainnet-hive';
+		//let targetBchain = 'STEEM';
+		//other option is moving tokens from H-E to S-E
+		if (direction == 1){
+		//if (this.cur_bchain == 'STEEM'){
+			targetAcct = 'afitx.s-e';
+			transId = 'ssc-mainnet1';
+			//targetBchain = 'HIVE';
+		}
+		
+		let json_data = {
+			contractName: 'tokens',
+			contractAction: 'transfer',
+			contractPayload: {
+				symbol: 'AFITX',
+				to: targetAcct,
+				quantity: '' + amount_to_move,//needs to be string
+				memo: ''
+			}
+		}
+		
+		let userKey = this.$refs["p-ac-key-afitx"].value;
+		
+		//send out transaction to blockchain
+		await this.setProperNode((direction==1?'STEEM':'HIVE'));
+		let tx = await steem.broadcast.customJsonAsync(
+				userKey, 
+				[ this.user.account.name ] , 
+				[], 
+				transId, 
+				JSON.stringify(json_data)
+			).catch(err => {
+				console.log(err.message);
+		});
+		
+		console.log(tx.block_num);
+		console.log(tx);
+		
+		if (tx && tx.block_num){
+		
+			//proceed with moving tokens over to recipient
+			
+			//let's check if user already has a funds pass set
+			fetch(process.env.actiAppUrl+'proceedAfitxTransition/?user='+this.user.account.name+'&amount='+amount_to_move+'&bchain='+(direction==1?'STEEM':'HIVE')).then(
+				res => {res.json().then(json => 
+					{
+						//notify of success
+						this.$notify({
+						  group: 'success',
+						  text: this.$t('afitx_transfer_complete'),
+						  position: 'top center'
+						});
+						this.movingFunds = false;
+						
+					}).catch(e => {console.log(e);
+							this.$notify({
+						  group: 'error',
+						  text: this.$t('afitx_transfer_error'),
+						  position: 'top center'
+						});
+						this.movingFunds = false;})
+			}).catch(e => {console.log(e);
+							this.$notify({
+							  group: 'error',
+							  text: this.$t('afitx_transfer_error'),
+							  position: 'top center'
+							});
+							this.movingFunds = false;})
+			
+			
+		}else{
+			this.$notify({
+			  group: 'error',
+			  text: this.$t('afitx_transfer_error'),
+			  position: 'top center'
+			})
+			this.movingFunds = false;
+		}
 	  },
 	  async proceedPowerUpToken() {
 		//handles performing a token power up/staking
