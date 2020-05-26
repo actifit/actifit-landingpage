@@ -61,9 +61,49 @@
 				</h5>
 				<div v-if="showAfitxInfo" v-html="$t('afitx_info')"></div>
 				<h5 class="mb-4 font-weight-bold row">
-					<span class="col-md-6">{{ formattedUserAFITXSE }}<i class="fas fa-angle-double-right"></i></span>
-					<span class="col-md-6">{{ formattedUserAFITXHE }}<i class="fas fa-angle-double-left"></i></span>
+					<span class="col-md-6">
+						{{ formattedUserAFITXSE }}
+						<br/>
+						<i class="text-brand fas fa-angle-double-right" v-on:click="moveAFITXseHE" :title="$t('move_afitx_se_he_title')"></i>
+					</span>
+					<span class="col-md-6">
+						{{ formattedUserAFITXHE }}
+						<br/>
+						<i class="text-brand fas fa-angle-double-left" v-on:click="moveAFITXheSE" :title="$t('move_afitx_he_se_title')"></i>
+					</span>
 				</h5>
+				<div v-if="afitActivityMode == MOVE_AFITX_SE_HE || afitActivityMode == MOVE_AFITX_HE_SE">
+					  <div class="text-center p-2">
+						<div v-if="afitActivityMode == MOVE_AFITX_SE_HE" class="text-brand font-weight-bold">{{ $t('move_afitx_se_he') }}</div>
+						<div v-else class="text-brand font-weight-bold">{{ $t('move_afitx_he_se') }}</div>
+						<div class="row" >
+						  <div class="w-25 p-2">{{ $t('Amount_To_Move') }}</div>
+						  <input type="number" id="afitx-se-he" name="afitx-se-he" ref="afitx-se-he" class="form-control-lg w-50 p-2">
+						</div>
+						<div class="row" v-if="isStdLogin">
+						  <label for="p-ac-key-afitx" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
+						  <input type="password" id="p-ac-key-afitx" name="p-ac-key-afitx" ref="p-ac-key-afitx" class="form-control-lg w-50 p-2">
+						</div>
+						<div class="row">
+							<div class="w-25"></div>
+							<div>{{ $t('percent_burn_afitx') }}</div>
+						</div>
+						<div class="text-brand text-center" v-if="afit_se_move_error_proceeding">
+						  {{ this.afit_se_move_err_msg }}
+						</div>
+						<div class="row">
+						  <div class="w-25"></div>
+						  <button v-if="afitActivityMode == MOVE_AFITX_SE_HE" v-on:click="proceedMoveAFITX(1)" class="btn btn-brand btn-lg w-50 border">{{ $t('Proceed') }}</button>
+						  <button v-else v-on:click="proceedMoveAFITX(2)" class="btn btn-brand btn-lg w-50 border">{{ $t('Proceed') }}</button>
+						</div>
+						<div class="row">
+						  <div class="w-25"></div>
+						  <div v-if="movingAFITX" id="checking_funds">
+							<i class="fas fa-spin fa-spinner"></i>
+						  </div>
+						</div>
+					  </div>
+				</div>
 			</div>
 		</div>
 		<div class="p-2 font-weight-bold">
@@ -73,12 +113,6 @@
 			
 			<a v-if="cur_bchain=='STEEM'" href="https://steem-engine.com/?p=market&t=AFITX" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border " target="_blank" rel="noopener noreferrer">{{ $t('buy_afitx_se') }}</a>
 			<a v-else href="https://hive-engine.com/?p=market&t=AFITX" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border " target="_blank" rel="noopener noreferrer">{{ $t('buy_afitx_he') }}</a>
-			
-			
-			
-			<button v-if="cur_bchain=='STEEM'" v-on:click="moveAFITXseHE" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('move_afitx_se_he') }}</button>
-			
-			<button v-else v-on:click="moveAFITXseHE" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('move_afitx_he_se') }}</button>
 			
 			<button v-on:click="exchangeAFITforSTEEM" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('EXCHANGE_AFIT_FOR_STEEM') }}</button>
 			
@@ -105,38 +139,6 @@
 					<div class="row">
 					  <div class="w-25"></div>
 					  <button v-on:click="proceedMoveSEPower" class="btn btn-brand btn-lg w-50 border">{{ $t('Proceed') }}</button>
-					</div>
-					<div class="row">
-					  <div class="w-25"></div>
-					  <div v-if="movingFunds" id="checking_funds">
-						<i class="fas fa-spin fa-spinner"></i>{{ $t('moving_afit_se_power') }}
-					  </div>
-					</div>
-				  </div>
-			  </div>
-			  
-			  <div v-else-if="afitActivityMode == MOVE_AFITX_SE_HE">
-				  <div class="text-center grid p-2">
-					<div v-if="cur_bchain=='STEEM'" class="text-brand font-weight-bold">{{ $t('move_afitx_se_he') }}</div>
-					<div v-else class="text-brand font-weight-bold">{{ $t('move_afitx_he_se') }}</div>
-					<div class="row" >
-					  <div class="w-25 p-2">{{ $t('Amount_To_Move') }}</div>
-					  <input type="number" id="afitx-se-he" name="afitx-se-he" ref="afitx-se-he" class="form-control-lg w-50 p-2">
-					</div>
-					<div class="row" v-if="isStdLogin">
-					  <label for="p-ac-key-afitx" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
-					  <input type="password" id="p-ac-key-afitx" name="p-ac-key-afitx" ref="p-ac-key-afitx" class="form-control-lg w-50 p-2">
-					</div>
-					<div class="row">
-						<div class="w-25"></div>
-						<div>{{ $t('percent_burn_afitx') }}</div>
-					</div>
-					<div class="text-brand text-center" v-if="afit_se_move_error_proceeding">
-					  {{ this.afit_se_move_err_msg }}
-					</div>
-					<div class="row">
-					  <div class="w-25"></div>
-					  <button v-on:click="proceedMoveAFITX(1)" class="btn btn-brand btn-lg w-50 border">{{ $t('Proceed') }}</button>
 					</div>
 					<div class="row">
 					  <div class="w-25"></div>
@@ -818,6 +820,7 @@
 		DELEGATE_FUNDS: 5,
 		EXCHANGE_AFIT_STEEM: 1,
 		MOVE_AFITX_SE_HE: 6,
+		MOVE_AFITX_HE_SE: 7,
 		MOVE_AFIT_SE: 2,
 		BUY_AFIT_STEEM: 3,
 		INIT_AFIT_TO_SE: 4,
@@ -846,6 +849,7 @@
 		swapResult: '',
 		checkingFunds: false,
 		movingFunds: false,
+		movingAFITX: false,
 		checkingBought: false,
 		transConfirmed: false,
 		target_exchange_account: 'actifit.exchange',
@@ -1384,33 +1388,10 @@
 		  }
 		  
 		  //fetch user's AFITX S-E balance
-		  /*console.log('fetch AFITX SE balance');
-		  bal = await ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' });
-		  console.log('>>result of AFITX SE balance');
-		  console.log(bal);
-		  if (bal){
-			  this.afitx_se_balance = bal.balance;
-		  }*/
-		  let parnt = this
-		  ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' }).then(
-				function(bal) {
-					
-					
-					if (bal){
-						  parnt.afitx_se_balance = bal.balance;
-					  }
-				}
-			)
-			
-		  hsc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' }).then(
-				function(bal) {
-					
-					
-					if (bal){
-						  parnt.afitx_he_balance = bal.balance;
-					  }
-				}
-			)
+		  this.fetchAFITXSE();
+		  
+		  //fetch user's AFITX H-E balance
+		  this.fetchAFITXHE();
 		  
 		  //fetch user's AFITX Rank
 		   fetch(process.env.actiAppUrl+'afitxData/'+this.user.account.name).then(
@@ -1462,6 +1443,31 @@
 		  
 		}
 	  },
+	  fetchAFITXSE() {
+		  let parnt = this
+		  ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' }).then(
+				function(bal) {
+					
+					
+					if (bal){
+						  parnt.afitx_se_balance = bal.balance;
+					  }
+				}
+			)
+	  },
+	  fetchAFITXHE() {
+		  let parnt = this
+		  hsc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' }).then(
+				function(bal) {
+					
+					
+					if (bal){
+						  parnt.afitx_he_balance = bal.balance;
+					  }
+				}
+			)
+	  },
+	  
 	  setAFITPrice (_afitPrice){
 		this.afitPrice = parseFloat(_afitPrice).toFixed(3);
 	  },
@@ -2074,6 +2080,16 @@
 		//hide lower section for STEEM actions
 		this.fundActivityMode = 0;
 	  },
+	  moveAFITXheSE () {
+		//set proper AFIT Activity Mode controlling the display
+		if (this.afitActivityMode == this.MOVE_AFITX_HE_SE ){
+		  this.afitActivityMode = 0;
+		}else{
+		  this.afitActivityMode = this.MOVE_AFITX_HE_SE;
+		}
+		//hide lower section for STEEM actions
+		this.fundActivityMode = 0;
+	  },
 	  buyAFITwithSTEEM () {
 		//function handles opening/closing exchanging AFIT tokens for STEEM upvotes  section
 		
@@ -2566,7 +2582,7 @@
 		  return;
 		}
 	  
-		this.movingFunds = true;
+		this.movingAFITX = true;
 		//standard is moving tokens from S-E to H-E, which requires sending bcast to Steem.
 		
 		let targetAcct = 'afitx.h-e';
@@ -2622,7 +2638,10 @@
 						  text: this.$t('afitx_transfer_complete'),
 						  position: 'top center'
 						});
-						this.movingFunds = false;
+						this.movingAFITX = false;
+						//update balances
+						this.fetchAFITXSE();
+						this.fetchAFITXHE();
 						
 					}).catch(e => {console.log(e);
 							this.$notify({
@@ -2630,14 +2649,15 @@
 						  text: this.$t('afitx_transfer_error'),
 						  position: 'top center'
 						});
-						this.movingFunds = false;})
-			}).catch(e => {console.log(e);
+						this.movingAFITX = false;
+						})
+					}).catch(e => {console.log(e);
 							this.$notify({
 							  group: 'error',
 							  text: this.$t('afitx_transfer_error'),
 							  position: 'top center'
 							});
-							this.movingFunds = false;})
+							this.movingAFITX = false;})
 			
 			
 		}else{
@@ -2646,7 +2666,7 @@
 			  text: this.$t('afitx_transfer_error'),
 			  position: 'top center'
 			})
-			this.movingFunds = false;
+			this.movingAFITX = false;
 		}
 	  },
 	  async proceedPowerUpToken() {
