@@ -617,4 +617,5 @@ module.exports = {
   percent_burn_afitx: 'Please note that 0.5% of total amount will be burnt as part of the exchange transfer.',
   afitx_transfer_complete: 'AFITX transfer complete',
   afitx_transfer_error: 'AFITX transfer error!',
+  confirm_transfer_afit_exchange: 'Are you sure you wish the transfer _CUR_ from _EXCH1_ to _EXCH2_ ?'
 }

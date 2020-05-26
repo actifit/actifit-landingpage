@@ -47,7 +47,53 @@
 						</a>
 					</small>
 				</h5>
-				<h5 class="mb-4 font-weight-bold">{{ formattedUserTokens }}</h5>
+				<h5 class="mb-4 font-weight-bold row">
+					<span class="col-md-12">{{ formattedUserAfit }}</span>
+				</h5>
+				<h5 class="mb-4 font-weight-bold row">
+					<span class="col-md-6">
+						{{ formattedUserAfitSE }}
+						<br/>
+						<i class="text-brand fas fa-angle-double-right" v-on:click="moveAFITseHE" :title="$t('move_afit_se_he_title')"></i>
+					</span>
+					<span class="col-md-6">
+						{{ formattedUserAfitHE }}
+						<br/>
+						<i class="text-brand fas fa-angle-double-left" v-on:click="moveAFITheSE" :title="$t('move_afit_he_se_title')"></i>
+					</span>
+				</h5>
+				<div v-if="afitActivityMode == MOVE_AFIT_SE_HE || afitActivityMode == MOVE_AFIT_HE_SE">
+					  <div class="text-center p-2">
+						<div v-if="afitActivityMode == MOVE_AFIT_SE_HE" class="text-brand font-weight-bold">{{ $t('move_afit_se_he') }}</div>
+						<div v-else class="text-brand font-weight-bold">{{ $t('move_afit_he_se') }}</div>
+						<div class="row" >
+						  <div class="w-25 p-2">{{ $t('Amount_To_Move') }}</div>
+						  <input type="number" id="afit-se-he" name="afit-se-he" ref="afit-se-he" class="form-control-lg w-50 p-2">
+						</div>
+						<div class="row" v-if="isStdLogin">
+						  <label for="p-ac-key-afit" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
+						  <input type="password" id="p-ac-key-afit" name="p-ac-key-afit" ref="p-ac-key-afit" class="form-control-lg w-50 p-2">
+						</div>
+						<div class="row">
+							<div class="w-25"></div>
+							<div>{{ $t('percent_burn_afit') }}</div>
+						</div>
+						<div class="text-brand text-center" v-if="afit_se_move_error_proceeding">
+						  {{ this.afit_se_move_err_msg }}
+						</div>
+						<div class="row">
+						  <div class="w-25"></div>
+						  <button v-if="afitActivityMode == MOVE_AFIT_SE_HE" v-on:click="proceedMoveAFIT(1)" class="btn btn-brand btn-lg w-50 border">{{ $t('Proceed') }}</button>
+						  <button v-else v-on:click="proceedMoveAFIT(2)" class="btn btn-brand btn-lg w-50 border">{{ $t('Proceed') }}</button>
+						</div>
+						<div class="row">
+						  <div class="w-25"></div>
+						  <div v-if="movingAFIT" >
+							<i class="fas fa-spin fa-spinner"></i>
+						  </div>
+						</div>
+					  </div>
+				</div>
 			</div>
 			<div class="col-md-6 row-sep-in small-pad-row">
 				<h5 class="token-title"><img src="/img/AFITX.png" class="mr-1 token-logo">{{ $t('Your_Afitx_Balance') }}<i class="fas fa-info-circle" v-on:click="showAfitxInfo=!showAfitxInfo"></i>&nbsp;
@@ -98,7 +144,7 @@
 						</div>
 						<div class="row">
 						  <div class="w-25"></div>
-						  <div v-if="movingAFITX" id="checking_funds">
+						  <div v-if="movingAFITX" >
 							<i class="fas fa-spin fa-spinner"></i>
 						  </div>
 						</div>
@@ -821,6 +867,8 @@
 		EXCHANGE_AFIT_STEEM: 1,
 		MOVE_AFITX_SE_HE: 6,
 		MOVE_AFITX_HE_SE: 7,
+		MOVE_AFIT_SE_HE: 8,
+		MOVE_AFIT_HE_SE: 9,
 		MOVE_AFIT_SE: 2,
 		BUY_AFIT_STEEM: 3,
 		INIT_AFIT_TO_SE: 4,
@@ -849,6 +897,7 @@
 		swapResult: '',
 		checkingFunds: false,
 		movingFunds: false,
+		movingAFIT: false,
 		movingAFITX: false,
 		checkingBought: false,
 		transConfirmed: false,
@@ -945,8 +994,14 @@
 	  formattedSteemTotVal () {
 		return this.numberFormat(this.totalAccountValueSteem, 3) + ' ' + this.cur_bchain;
 	  },
-	  formattedUserTokens () {
-		return this.numberFormat((parseFloat(this.userTokens) + parseFloat(this.userAddedTokens)).toFixed(3), 3) + " AFIT" + " | " + this.numberFormat(parseFloat(this.afit_se_balance), 3) + " AFIT S-E" + " | " + this.numberFormat(parseFloat(this.afit_he_balance), 3) + " AFIT H-E";
+	  formattedUserAfit () {
+		return this.numberFormat((parseFloat(this.userTokens) + parseFloat(this.userAddedTokens)).toFixed(3), 3) + " AFIT";
+      },
+	  formattedUserAfitSE () {
+		return this.numberFormat(parseFloat(this.afit_se_balance), 3) + " AFIT S-E" ;
+      },
+	  formattedUserAfitHE () {
+		return this.numberFormat(parseFloat(this.afit_he_balance), 3) + " AFIT H-E";
       },
 	  formattedUserAFITXSE () {
 		return this.numberFormat(this.afitx_se_balance,3) + ' AFITX S-E';
@@ -1353,39 +1408,12 @@
 		   
 		  //fetch user's AFIT S-E balance
 		  
-		  let bal = await ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFIT' });
-		  
-		  
-		  if (bal){
-			  this.afit_se_balance = bal.balance;
-			  
-			  //if this operation relates to powering up AFIT from S-E, need to also initiate call to adjust AFIT token count
-			  if (this.$route.query.confirm_trans == 1){
-				
-				let url = new URL(process.env.actiAppUrl + 'confirmAFITSEReceipt/?user='+this.user.name+'&bchain='+this.cur_bchain);
-				//connect with our service to confirm AFIT received to proper wallet
-				try{
-					
-					fetch(url).then(
-					  res => {res.json().then(json => this.setUserAddedTokens(json)).catch(e => reject(e))
-					}).catch(e => reject(e))
-					
-				
-				}catch(err){
-					console.error(err);
-					//this.checkingFunds = false;
-				}
-			  }
-		  }
+		  this.fetchAFITSE();
 		  
 		  //fetch user's AFIT H-E balance
 		  
-		  bal = await hsc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFIT' });
+		  this.fetchAFITHE();
 		  
-		  
-		  if (bal){
-			  this.afit_he_balance = bal.balance;
-		  }
 		  
 		  //fetch user's AFITX S-E balance
 		  this.fetchAFITXSE();
@@ -1442,6 +1470,37 @@
 		  }).catch(e => reject(e))
 		  
 		}
+	  },
+	  async fetchAFITSE() {
+		let bal = await ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFIT' });
+		  
+		  if (bal){
+			  this.afit_se_balance = bal.balance;
+			  
+			  //if this operation relates to powering up AFIT from S-E, need to also initiate call to adjust AFIT token count
+			  if (this.$route.query.confirm_trans == 1){
+				
+				let url = new URL(process.env.actiAppUrl + 'confirmAFITSEReceipt/?user='+this.user.name+'&bchain='+this.cur_bchain);
+				//connect with our service to confirm AFIT received to proper wallet
+				try{
+					
+					fetch(url).then(
+					  res => {res.json().then(json => this.setUserAddedTokens(json)).catch(e => reject(e))
+					}).catch(e => reject(e))
+					
+				
+				}catch(err){
+					console.error(err);
+					//this.checkingFunds = false;
+				}
+			  }
+		  }
+	  },
+	  async fetchAFITHE() {
+		  let bal = await hsc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFIT' });
+		  if (bal){
+			  this.afit_he_balance = bal.balance;
+		  }
 	  },
 	  fetchAFITXSE() {
 		  let parnt = this
@@ -2090,6 +2149,26 @@
 		//hide lower section for STEEM actions
 		this.fundActivityMode = 0;
 	  },
+	  moveAFITseHE () {
+		//set proper AFIT Activity Mode controlling the display
+		if (this.afitActivityMode == this.MOVE_AFIT_SE_HE ){
+		  this.afitActivityMode = 0;
+		}else{
+		  this.afitActivityMode = this.MOVE_AFIT_SE_HE;
+		}
+		//hide lower section for STEEM actions
+		this.fundActivityMode = 0;
+	  },
+	  moveAFITheSE () {
+		//set proper AFIT Activity Mode controlling the display
+		if (this.afitActivityMode == this.MOVE_AFIT_HE_SE ){
+		  this.afitActivityMode = 0;
+		}else{
+		  this.afitActivityMode = this.MOVE_AFIT_HE_SE;
+		}
+		//hide lower section for STEEM actions
+		this.fundActivityMode = 0;
+	  },
 	  buyAFITwithSTEEM () {
 		//function handles opening/closing exchanging AFIT tokens for STEEM upvotes  section
 		
@@ -2545,6 +2624,139 @@
 		}
 	
 	  },
+	  async proceedMoveAFIT(direction) {
+		//direction = 1: SE to HE
+		//direction = 2: HE to SE
+		
+		//handles checking for proper confirmation of account via STEEM transfer
+		//this.movingFunds = true
+		//function handles the actual processing of the transfer
+		this.afit_se_move_error_proceeding = false;
+		this.afit_se_move_err_msg = '';
+		
+		
+		let amount_to_move = this.$refs["afit-se-he"].value.trim();
+		
+		
+		let confirmPopup = confirm(this.$t('confirm_transfer_afit_exchange').replace('_CUR_',amount_to_move+' AFIT').replace('_EXCH1_',(direction == 1?'SE':'HE')).replace('_EXCH2_',(direction == 1?'HE':'SE')));
+		if (!confirmPopup){
+			return;
+		}
+		
+		
+		//ensure we have proper values
+		if (isNaN(amount_to_move) || parseFloat(amount_to_move) < 0.01){
+		  this.afit_se_move_error_proceeding = true;
+		  this.afit_se_move_err_msg = this.$t('min_amount_AFIT');
+		  //this.movingFunds = false;
+		  return;
+		}
+		//ensure user is moving value he has
+		let afit_bal = this.afit_he_balance;
+		if (direction == 1){
+		//if (this.cur_bchain == 'STEEM'){
+			afit_bal = this.afit_se_balance;
+		}
+		if (parseFloat(amount_to_move) > parseFloat(afit_bal)){
+		  this.afit_se_move_error_proceeding = true;
+		  this.afit_se_move_err_msg = this.$t('max_amount_AFIT');
+		  //this.movingFunds = false;
+		  return;
+		}
+		
+		if (this.$refs["p-ac-key-afit"].value == ''){
+		  this.afit_se_move_error_proceeding = true;
+		  this.afit_se_move_err_msg = this.$t('all_fields_required');
+		  return;
+		}
+	  
+		this.movingAFIT = true;
+		//standard is moving tokens from S-E to H-E, which requires sending bcast to Steem.
+		
+		let targetAcct = 'afit.h-e';
+		let transId = 'ssc-mainnet-hive';
+		//let targetBchain = 'STEEM';
+		//other option is moving tokens from H-E to S-E
+		if (direction == 1){
+		//if (this.cur_bchain == 'STEEM'){
+			targetAcct = 'afit.s-e';
+			transId = 'ssc-mainnet1';
+			//targetBchain = 'HIVE';
+		}
+		
+		let json_data = {
+			contractName: 'tokens',
+			contractAction: 'transfer',
+			contractPayload: {
+				symbol: 'AFIT',
+				to: targetAcct,
+				quantity: '' + amount_to_move,//needs to be string
+				memo: ''
+			}
+		}
+		
+		let userKey = this.$refs["p-ac-key-afit"].value;
+		
+		//send out transaction to blockchain
+		await this.setProperNode((direction==1?'STEEM':'HIVE'));
+		let tx = await steem.broadcast.customJsonAsync(
+				userKey, 
+				[ this.user.account.name ] , 
+				[], 
+				transId, 
+				JSON.stringify(json_data)
+			).catch(err => {
+				console.log(err.message);
+		});
+		
+		console.log(tx.block_num);
+		console.log(tx);
+		
+		if (tx && tx.block_num){
+		
+			//proceed with moving tokens over to recipient
+			
+			//let's check if user already has a funds pass set
+			fetch(process.env.actiAppUrl+'proceedAfitTransition/?user='+this.user.account.name+'&amount='+amount_to_move+'&bchain='+(direction==1?'STEEM':'HIVE')).then(
+				res => {res.json().then(json => 
+					{
+						//notify of success
+						this.$notify({
+						  group: 'success',
+						  text: this.$t('afit_transfer_complete'),
+						  position: 'top center'
+						});
+						this.movingAFIT = false;
+						//update balances
+						this.fetchAFITSE();
+						this.fetchAFITHE();
+						
+					}).catch(e => {console.log(e);
+							this.$notify({
+						  group: 'error',
+						  text: this.$t('afit_transfer_error'),
+						  position: 'top center'
+						});
+						this.movingAFIT = false;
+						})
+					}).catch(e => {console.log(e);
+							this.$notify({
+							  group: 'error',
+							  text: this.$t('afit_transfer_error'),
+							  position: 'top center'
+							});
+							this.movingAFIT = false;})
+			
+			
+		}else{
+			this.$notify({
+			  group: 'error',
+			  text: this.$t('afit_transfer_error'),
+			  position: 'top center'
+			})
+			this.movingAFIT = false;
+		}
+	  },
 	  async proceedMoveAFITX(direction) {
 		//direction = 1: SE to HE
 		//direction = 2: HE to SE
@@ -2556,6 +2768,12 @@
 		this.afit_se_move_err_msg = '';
 		
 		let amount_to_move = this.$refs["afitx-se-he"].value.trim();
+		
+		let confirmPopup = confirm(this.$t('confirm_transfer_afit_exchange').replace('_CUR_',amount_to_move+' AFIT').replace('_EXCH1_',(direction == 1?'SE':'HE')).replace('_EXCH2_',(direction == 1?'HE':'SE')));
+		if (!confirmPopup){
+			return;
+		}
+		
 		//ensure we have proper values
 		if (isNaN(amount_to_move) || parseFloat(amount_to_move) < 0.01){
 		  this.afit_se_move_error_proceeding = true;
