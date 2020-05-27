@@ -612,6 +612,8 @@ module.exports = {
   error_performing_operation: 'There was an error performing the operation',
   move_afitx_se_he: 'Move AFITX S-E to H-E',
   move_afitx_he_se: 'Move AFITX H-E to S-E',
+  move_afit_se_he: 'Move AFIT S-E to H-E',
+  move_afit_he_se: 'Move AFIT H-E to S-E',
   move_afitx_se_he_title: 'Move AFITX from Steem-Engine to Hive-Engine',
   move_afitx_he_se_title: 'Move AFITX from Hive-Engine to Steem-Engine',
   percent_burn_afitx: 'Please note that 0.5% of total amount will be burnt as part of the exchange transfer.',
