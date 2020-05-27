@@ -197,7 +197,7 @@
 			  
 			  <div v-else-if="afitActivityMode == INIT_AFIT_TO_SE">
 				  <div class="text-center grid p-2">
-					<h5 class="text-brand font-weight-bold">{{ $t('wallet.initiate_afit_to_se') }}</h5>
+					<h5 class="text-brand font-weight-bold">{{ $t('wallet.initiate_afit_to_he') }}</h5>
 					<div v-if="userPDAfit.user">
 						<span class="end-string">{{ afitPowerDownText }}</span><Countdown v-if="countDownReady" :deadline="nextAfitPDTarget"></Countdown>
 					</div>
