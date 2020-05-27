@@ -391,7 +391,7 @@ module.exports = {
   adjust_amount: 'Adjust Amount',
   unable_fetch_bal_try_again: 'Unable to fetch current balance. Try again please',
   move_afit_se_notice: 'Moving AFIT to S-E enables you to trade them. ',
-  move_afit_he_notice: 'Moving AFIT to S-E enables you to trade them. ',
+  move_afit_he_notice: 'Moving AFIT to H-E enables you to trade them. ',
   move_afit_se_notice2: 'For every 1 AFITX owned, you can move daily up to 100 AFIT.',
   move_afit_se_notice3: 'Please note that moving AFIT from your wallet could decrease your user rank.',
   afitx_info: 'AFITX is a new special benefits token for Actifit users & AFIT token holders. Holding this token enables users to: <ul><li>Daily Move AFIT tokens to S-E</li><li>Increases user rank</li><li>Increases post rewards via our different rewarded tokens</li><li>Receive priority when exchanging AFIT for upvotes</li><li>Participate in contests</li><li>AFITX will constitute the basis for our future Exchange framework</li></ul>',
@@ -617,5 +617,6 @@ module.exports = {
   percent_burn_afitx: 'Please note that 0.5% of total amount will be burnt as part of the exchange transfer.',
   afitx_transfer_complete: 'AFITX transfer complete',
   afitx_transfer_error: 'AFITX transfer error!',
-  confirm_transfer_afit_exchange: 'Are you sure you wish the transfer _CUR_ from _EXCH1_ to _EXCH2_ ?'
+  confirm_transfer_afit_exchange: 'Are you sure you wish the transfer _CUR_ from _EXCH1_ to _EXCH2_ ?',
+  Amount_to_receive: 'Amount to Receive'
 }

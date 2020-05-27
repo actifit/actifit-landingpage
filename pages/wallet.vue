@@ -165,8 +165,8 @@
 			<button v-if="cur_bchain=='STEEM'" v-on:click="moveAFITSEtoAFITPOWER" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('MOVE_AFIT_SE_AFIT_POWER') }}</button>
 			<button v-else v-on:click="moveAFITSEtoAFITPOWER" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('MOVE_AFIT_HE_AFIT_POWER') }}</button>
 			
-			<button v-if="cur_bchain=='STEEM'" v-on:click="initiateAFITtoSE" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('INITIATE_AFIT_TO_SE') }}</button>
-			<button v-else v-on:click="initiateAFITtoSE" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('INITIATE_AFIT_TO_HE') }}</button>
+			<!--<button v-if="cur_bchain=='STEEM'" v-on:click="initiateAFITtoSE" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('INITIATE_AFIT_TO_SE') }}</button>-->
+			<button v-on:click="initiateAFITtoSE" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('INITIATE_AFIT_TO_HE') }}</button>
 			  <transition name="fade">
 			  <div v-if="afitActivityMode == MOVE_AFIT_SE">
 				  <div class="text-center grid p-2">
@@ -201,8 +201,8 @@
 					<div v-if="userPDAfit.user">
 						<span class="end-string">{{ afitPowerDownText }}</span><Countdown v-if="countDownReady" :deadline="nextAfitPDTarget"></Countdown>
 					</div>
-					<div v-if="cur_bchain=='STEEM'">{{ $t('move_afit_se_notice') }}</div>
-					<div v-else>{{ $t('move_afit_he_notice') }}</div>
+					<!--<div v-if="cur_bchain=='STEEM'">{{ $t('move_afit_se_notice') }}</div>-->
+					<div>{{ $t('move_afit_he_notice') }}</div>
 					
 					<div>{{ $t('move_afit_se_notice2') }}</div>
 					<div>{{ $t('move_afit_se_notice3') }}</div>
@@ -2556,10 +2556,10 @@
 			
 			let targetAcct = 'actifit.h-e';
 			let transId = 'ssc-mainnet-hive';
-			if (this.cur_bchain == 'STEEM'){
+			/*if (this.cur_bchain == 'STEEM'){
 				targetAcct = 'actifit.s-e';
 				transId = 'ssc-mainnet1';
-			}
+			}*/
 			
 			let json_data = {
 				contractName: 'tokens',
@@ -2575,7 +2575,7 @@
 			let userKey = this.$refs["p-ac-key-power"].value;
 			
 			//send out transaction to blockchain
-			await this.setProperNode();
+			await this.setProperNode('HIVE');
 			let tx = await steem.broadcast.customJsonAsync(
 					userKey, 
 					[ this.user.account.name ] , 
@@ -2717,19 +2717,29 @@
 			//proceed with moving tokens over to recipient
 			
 			//let's check if user already has a funds pass set
-			fetch(process.env.actiAppUrl+'proceedAfitTransition/?user='+this.user.account.name+'&amount='+amount_to_move+'&bchain='+(direction==1?'STEEM':'HIVE')).then(
+			fetch(process.env.actiAppUrl+'proceedAfitTransition/?user='+this.user.account.name+'&txid='+tx.id+'&amount='+amount_to_move+'&bchain='+(direction==1?'STEEM':'HIVE')).then(
 				res => {res.json().then(json => 
 					{
-						//notify of success
-						this.$notify({
-						  group: 'success',
-						  text: this.$t('afit_transfer_complete'),
-						  position: 'top center'
-						});
+						
+						if (parseFloat(json.afit_amount) > 0){
+							//notify of success
+							this.$notify({
+							  group: 'success',
+							  text: this.$t('afit_transfer_complete'),
+							  position: 'top center'
+							});
+							
+							//update balances
+							setTimeout(this.fetchAFITSE, 3000);
+							setTimeout(this.fetchAFITHE, 3000);
+						}else{
+							this.$notify({
+							  group: 'error',
+							  text: this.$t('afit_transfer_error'),
+							  position: 'top center'
+							});
+						}
 						this.movingAFIT = false;
-						//update balances
-						this.fetchAFITSE();
-						this.fetchAFITHE();
 						
 					}).catch(e => {console.log(e);
 							this.$notify({
@@ -2847,19 +2857,27 @@
 			//proceed with moving tokens over to recipient
 			
 			//let's check if user already has a funds pass set
-			fetch(process.env.actiAppUrl+'proceedAfitxTransition/?user='+this.user.account.name+'&amount='+amount_to_move+'&bchain='+(direction==1?'STEEM':'HIVE')).then(
+			fetch(process.env.actiAppUrl+'proceedAfitxTransition/?user='+this.user.account.name+'&txid='+tx.id+'&amount='+amount_to_move+'&bchain='+(direction==1?'STEEM':'HIVE')).then(
 				res => {res.json().then(json => 
 					{
-						//notify of success
-						this.$notify({
-						  group: 'success',
-						  text: this.$t('afitx_transfer_complete'),
-						  position: 'top center'
-						});
+						if (parseFloat(json.afitx_amount) > 0){
+							//notify of success
+							this.$notify({
+							  group: 'success',
+							  text: this.$t('afitx_transfer_complete'),
+							  position: 'top center'
+							});
+							//update balances
+							setTimeout(this.fetchAFITXSE, 3000);
+							setTimeout(this.fetchAFITXHE, 3000);
+						}else{
+							this.$notify({
+							  group: 'error',
+							  text: this.$t('afitx_transfer_error'),
+							  position: 'top center'
+							});
+						}
 						this.movingAFITX = false;
-						//update balances
-						this.fetchAFITXSE();
-						this.fetchAFITXHE();
 						
 					}).catch(e => {console.log(e);
 							this.$notify({
