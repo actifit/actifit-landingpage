@@ -16,55 +16,42 @@
     </nav>
 
     <div class="container pt-5 mt-5 pb-5">
-		<div class="border-0 card form home-card mt-3 mt-md-2 mx-auto p-3 text-center">
+		<div class="border-0 card form home-card mt-3 mt-md-2 mx-auto p-3 text-center col-md-6">
 			<h3 class="p-3">{{ $t('Login_actifit') }}</h3>
-		<div class="row">
-			<div class="std-login col-md-6">
-				<!--<h5 class="col-md-6"><img src="/img/STEEM.png" class="token-logo-sm">Standard Login</h5>-->
-				<div class="form-group">
-					<input type="text" id="username" name="username" :placeholder="$t('Username')" ref="username" class="form-control form-control-lg mb-2">
-					<input type="password" id="ppkey" name="ppkey" ref="ppkey" :placeholder="$t('Ppkey')"  class="form-control form-control-lg mb-2">
-					
-					<span class="row mb-2 form-control-lg ">
-					  <span class="bchain-option p-2 m-2 btn col-4 m-auto">
-						<input type="radio" id="hive_bchain" value="HIVE" v-model="bchain_val">
-						<img src="/img/HIVE.png" style="max-height: 50px;" v-on:click="bchain_val = 'HIVE'" :class="adjustHiveClass">
-						<label for="hive_bchain">HIVE</label>
-					  </span>
-					  <span class="bchain-option p-2 m-2 btn col-4 m-auto">
-						<input type="radio" id="steem_bchain" value="STEEM" v-model="bchain_val">
-						<img src="/img/STEEM.png" style="max-height: 50px;" v-on:click="bchain_val = 'STEEM'" :class="adjustSteemClass">
-						<label for="steem_bchain">STEEM</label>
-					  </span>
-					</span>
-					<span class="row mb-2 form-control-lg ">
-						<input type="checkbox" id="keeploggedin" v-model="keep_loggedin_val" >
-						<label for="keeploggedin" class="ml-3">Keep me logged in</label>
-					</span>
-					<i class="fas fa-spin fa-spinner text-brand" v-if="!captchaReady"></i>
-					<vue-recaptcha ref="recaptcha" @verify="onVerifyCaptcha" @expired="onExpiredCaptcha" @render="captchaReady=true" sitekey="6LdpcoMUAAAAAPGTqlvhKEK6Ayw5NqLDZz5Sjudq">
-					</vue-recaptcha>
-					<p class="text-brand" v-if="captcha_invalid">
-					  <b>{{ captcha_invalid }}</b>
-					</p>
-					<div class="text-brand text-center" v-if="error_proceeding">
-					  {{ this.error_msg}}
-					</div>
-					<div class="text-center p-2">
-						<button v-on:click="proceedLogin" class="btn btn-brand btn-lg w-75">{{ $t('Login') }}<i class="fas fa-spin fa-spinner text-white" v-if="login_in_progress"></i></button>
-					</div>
+			<!--<h5 class="col-md-6"><img src="/img/STEEM.png" class="token-logo-sm">Standard Login</h5>-->
+			<div class="form-group">
+				<input type="text" id="username" name="username" :placeholder="$t('Username')" ref="username" class="form-control form-control-lg mb-2">
+				<input type="password" id="ppkey" name="ppkey" ref="ppkey" :placeholder="$t('Ppkey')"  class="form-control form-control-lg mb-2">
+				
+				<span class="row mb-2 form-control-lg ">
+				  <span class="bchain-option p-2 m-2 btn col-4 m-auto">
+					<input type="radio" id="hive_bchain" value="HIVE" v-model="bchain_val">
+					<img src="/img/HIVE.png" style="max-height: 50px;" v-on:click="bchain_val = 'HIVE'" :class="adjustHiveClass">
+					<label for="hive_bchain">HIVE</label>
+				  </span>
+				  <span class="bchain-option p-2 m-2 btn col-4 m-auto">
+					<input type="radio" id="steem_bchain" value="STEEM" v-model="bchain_val">
+					<img src="/img/STEEM.png" style="max-height: 50px;" v-on:click="bchain_val = 'STEEM'" :class="adjustSteemClass">
+					<label for="steem_bchain">STEEM</label>
+				  </span>
+				</span>
+				<span class="row mb-2 form-control-lg ">
+					<input type="checkbox" id="keeploggedin" v-model="keep_loggedin_val" >
+					<label for="keeploggedin" class="ml-3">Keep me logged in</label>
+				</span>
+				<i class="fas fa-spin fa-spinner text-brand" v-if="!captchaReady"></i>
+				<vue-recaptcha ref="recaptcha" @verify="onVerifyCaptcha" @expired="onExpiredCaptcha" @render="captchaReady=true" sitekey="6LdpcoMUAAAAAPGTqlvhKEK6Ayw5NqLDZz5Sjudq">
+				</vue-recaptcha>
+				<p class="text-brand" v-if="captcha_invalid">
+				  <b>{{ captcha_invalid }}</b>
+				</p>
+				<div class="text-brand text-center" v-if="error_proceeding">
+				  {{ this.error_msg}}
+				</div>
+				<div class="text-center p-2">
+					<button v-on:click="proceedLogin" class="btn btn-brand btn-lg w-75">{{ $t('Login') }}<i class="fas fa-spin fa-spinner text-white" v-if="login_in_progress"></i></button>
 				</div>
 			</div>
-			<div id="sc_connect" class="col-md-6">
-				<div class="">
-					<h5 class="text-bold">{{ $t('Login_via') }}</h5>
-					<img src="img/sc-logo.png" class="mx-auto">
-				</div>
-				<div>
-				  <a :href="$steemconnect.getLoginURL()" class="btn btn-brand btn-lg w-75">{{ $t('Login_sc') }}</a>
-				</div>
-			</div>
-		</div>
 		</div>
 	</div>
 	<Footer />
