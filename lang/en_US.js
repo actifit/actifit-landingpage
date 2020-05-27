@@ -615,6 +615,7 @@ module.exports = {
   move_afitx_se_he_title: 'Move AFITX from Steem-Engine to Hive-Engine',
   move_afitx_he_se_title: 'Move AFITX from Hive-Engine to Steem-Engine',
   percent_burn_afitx: 'Please note that 0.5% of total amount will be burnt as part of the exchange transfer.',
+  percent_burn_afit: 'Please note that 0.5% of total amount will be burnt as part of the exchange transfer.',
   afitx_transfer_complete: 'AFITX transfer complete',
   afitx_transfer_error: 'AFITX transfer error!',
   confirm_transfer_afit_exchange: 'Are you sure you wish the transfer _CUR_ from _EXCH1_ to _EXCH2_ ?',
