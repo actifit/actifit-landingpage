@@ -170,7 +170,8 @@
 			  <transition name="fade">
 			  <div v-if="afitActivityMode == MOVE_AFIT_SE">
 				  <div class="text-center grid p-2">
-					<div class="text-brand font-weight-bold">{{ $t('wallet.afit_se_to_power') }}</div>
+					<div v-if="cur_bchain=='STEEM'" class="text-brand font-weight-bold">{{ $t('wallet.afit_se_to_power') }}</div>
+					<div v-else class="text-brand font-weight-bold">{{ $t('wallet.afit_he_to_power') }}</div>
 					<div class="row" >
 					  <div class="w-25 p-2">{{ $t('Amount_To_Move') }}</div>
 					  <input type="number" id="afit-se-move-power" name="afit-se-move-power" ref="afit-se-move-power" class="form-control-lg w-50 p-2">
@@ -2556,10 +2557,10 @@
 			
 			let targetAcct = 'actifit.h-e';
 			let transId = 'ssc-mainnet-hive';
-			/*if (this.cur_bchain == 'STEEM'){
+			if (this.cur_bchain == 'STEEM'){
 				targetAcct = 'actifit.s-e';
 				transId = 'ssc-mainnet1';
-			}*/
+			}
 			
 			let json_data = {
 				contractName: 'tokens',
@@ -2575,7 +2576,7 @@
 			let userKey = this.$refs["p-ac-key-power"].value;
 			
 			//send out transaction to blockchain
-			await this.setProperNode('HIVE');
+			await this.setProperNode();
 			let tx = await steem.broadcast.customJsonAsync(
 					userKey, 
 					[ this.user.account.name ] , 
