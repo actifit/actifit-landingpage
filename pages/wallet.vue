@@ -2404,15 +2404,26 @@
 		this.initiateInProgress = true;
 		
 		try{
-			//TODO: add support on hive for moving tokens over to H-E
 			//check if the user has enough AFITX S-E amount allowing him the transfers daily
 			let bal = await ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' });
+			
+			let bal_he = await hsc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' });
+			
+			this.afitx_se_balance = 0;
+			this.afitx_he_balance = 0;
 			if (bal){
-			  this.afitx_se_balance = parseFloat(bal.balance);
+				this.afitx_se_balance = parseFloat(bal.balance);
+			}
+			if (bal_he){
+				this.afitx_he_balance = parseFloat(bal_he.balance);
+			}
+			if (bal || bal_he){
+			  
+			  let tot_afitx_bal = this.afitx_se_balance + this.afitx_he_balance;
 			  //console.log('AFITX balance: '+this.afitx_se_balance);
 			  
 			  //make sure user has at least 0.1 AFITX to move tokens
-			  if (this.afitx_se_balance < 0.1){
+			  if (tot_afitx_bal < 0.1){
 				this.afit_se_move_error_proceeding = true;
 				this.afit_se_move_err_msg = this.$t('no_proper_afitx_funds');
 				this.initiateInProgress = false;
@@ -2421,7 +2432,7 @@
 			  //console.log(amount_to_powerdown);
 			  //console.log(this.afitx_se_balance);
 			  //calculate amount that can be transferred daily
-			  if (amount_to_powerdown / 100 > this.afitx_se_balance){
+			  if (amount_to_powerdown / 100 > tot_afitx_bal){
 				this.afit_se_move_error_proceeding = true;
 				this.afit_se_move_err_msg = this.$t('cannot_move_amount_afitx_needed');
 				this.initiateInProgress = false;
