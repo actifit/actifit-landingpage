@@ -2434,7 +2434,7 @@
 			  //calculate amount that can be transferred daily
 			  if (amount_to_powerdown / 100 > tot_afitx_bal){
 				this.afit_se_move_error_proceeding = true;
-				this.afit_se_move_err_msg = this.$t('cannot_move_amount_afitx_needed');
+				this.afit_se_move_err_msg = this.$t('cannot_move_amount_afitx_needed').replace('AFIT_AMNT',amount_to_powerdown);
 				this.initiateInProgress = false;
 				return;
 			  }
