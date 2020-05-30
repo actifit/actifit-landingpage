@@ -122,12 +122,12 @@
 				<div class="row m-0">
 					<div class="info-box-orange mb-2 col-md-6 cntnr">
 						<img src="/img/actifit_logo.png" class="mr-2 token-logo">
-						<a href="/wallet" >{{ numberFormat(userTokenCount, 3) }} {{ $t('AFIT_Tokens') }} + {{ displayAFITSEBal }} {{ $t('AFIT_SE_Tokens') }}</a>&nbsp;
+						<a href="/wallet" >{{ numberFormat(userTokenCount, 3) }} {{ $t('AFIT_Tokens') }} + {{ displayAFITSEBal }} {{ $t('AFIT_SE_Tokens') }} + {{ displayAFITHEBal }} {{ $t('AFIT_HE_Tokens') }}</a>&nbsp;
 						<button class="btn btn-brand border" v-on:click="tipUser" >{{ $t('Send_tip') }}</button>
 					</div>
 					<div class="info-box-orange mb-2 col-md-6 cntnr">
 						<img src="/img/AFITX.png" class="mr-2 token-logo">
-						<a href="/wallet" >{{ displayAFITXBal }} {{ $t('AFITX_Tokens') }}</a>&nbsp;
+						<a href="/wallet" >{{ displayAFITXBal }} {{ $t('AFITX_Tokens') }} + {{ displayAFITXHEBal }} {{ $t('AFITX_HE_Tokens') }}</a>&nbsp;
 					</div>
 				</div>
 				<div v-if="proceedTip">
@@ -265,6 +265,8 @@
   
   import SSC from 'sscjs'
   const ssc = new SSC(process.env.steemEngineRpc);
+  
+  const hsc = new SSC(process.env.hiveEngineRpc);
 
   export default {
 	head () {
@@ -293,6 +295,8 @@
 			maxFriendDisplay: 5,
 			userAFITSETokenCount: '',
 			userAFITXSETokenCount: '',
+			userAFITHETokenCount: '',
+			userAFITXHETokenCount: '',			
 			isoParticipant: [],
 			doubledupWinner: [],
 			charityDonor: [],
@@ -372,6 +376,18 @@
 	  displayAFITSEBal () {
 		if (!isNaN(this.userAFITSETokenCount)){
 			return this.numberFormat(this.userAFITSETokenCount, 3);
+		}
+		return 0;
+	  },
+	  displayAFITXHEBal () {
+		if (!isNaN(this.userAFITXHETokenCount)){
+			return this.numberFormat(this.userAFITXHETokenCount, 3);
+		}
+		return 0;
+	  },
+	  displayAFITHEBal () {
+		if (!isNaN(this.userAFITHETokenCount)){
+			return this.numberFormat(this.userAFITHETokenCount, 3);
 		}
 		return 0;
 	  },
@@ -1123,6 +1139,18 @@
 		  bal = await ssc.findOne('tokens', 'balances', { account: this.displayUser, symbol: 'AFITX' });
 		  if (bal){
 			  this.userAFITXSETokenCount = bal.balance;
+		  }
+		  
+		  //fetch user's AFIT H-E balance
+		  bal = await hsc.findOne('tokens', 'balances', { account: this.displayUser, symbol: 'AFIT' });
+		  if (bal){
+			  this.userAFITHETokenCount = bal.balance;
+		  }
+		  
+		  //fetch user's AFITX H-E balance
+		  bal = await hsc.findOne('tokens', 'balances', { account: this.displayUser, symbol: 'AFITX' });
+		  if (bal){
+			  this.userAFITXHETokenCount = bal.balance;
 		  }
 		  
 		  }catch(err){
