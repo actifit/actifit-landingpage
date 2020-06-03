@@ -105,15 +105,15 @@
 		   
 		  <div class="card-footer pb-md-2 text-center">
               <div v-if="product.type == 'ingame'">
-				<a class="btn btn-danger btn-lg w-100 book-button" @click.prevent="activateGadget()" :class="allReqtsFilled ? '':'bg-secondary'" v-if="grabConsumableItem() && grabConsumableItem().status == 'bought'" >
+				<a class="btn btn-danger btn-lg w-100 book-button" @click.prevent="activateGadget()" :class="productBuyColor" v-if="grabConsumableItem() && grabConsumableItem().status == 'bought'" >
 					<span>{{ $t('activate_gadget') }}</span>&nbsp;
 					<i class="fas fa-check text-success"></i>
 				</a>
-				<a class="btn btn-success btn-lg w-100 book-button" @click.prevent="deactivateGadget()" :class="allReqtsFilled ? '':'bg-secondary'" v-else-if="grabConsumableItem() && grabConsumableItem().status == 'active'">
+				<a class="btn btn-success btn-lg w-100 book-button" @click.prevent="deactivateGadget()" :class="productBuyColor" v-else-if="grabConsumableItem() && grabConsumableItem().status == 'active'">
 					<span>{{ $t('deactivate_gadget') }}</span>&nbsp;
 					<i class="fas fa-times text-brand"></i>
 				</a>
-				<a class="btn btn-success btn-lg w-100 book-button" @click.prevent="buyNow()" :class="allReqtsFilled ? '':'bg-secondary'" v-else>{{ $t('Buy_now') }} {{numberFormat(this.item_price, 2)}} {{this.item_currency}}<img class="token-logo " src="/img/actifit_logo.png"></a>
+				<a class="btn btn-success btn-lg w-100 book-button" @click.prevent="buyNow()" :class="productBuyColor" v-else>{{ $t('Buy_now') }} {{numberFormat(this.item_price, 2)}} {{this.item_currency}}<img class="token-logo " src="/img/actifit_logo.png"></a>
 			  </div>
 			  <div v-else-if="!productBought">
                 <a class="btn btn-brand btn-lg w-100 book-button" @click.prevent="buyNow()" v-if="!this.errorProceed" >{{ $t('Buy_now') }} {{numberFormat(this.item_price, 2)}} {{this.item_currency}}<img class="token-logo " src="/img/actifit_logo.png"></a>
@@ -197,6 +197,16 @@
       ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters('steemconnect', ['stdLogin']),
 	  ...mapGetters(['userTokens']),
+	  productBuyColor () {
+		if (!this.allReqtsFilled){ 
+			return 'bg-secondary';
+		}
+		if (this.product.type == 'ingame' && this.product.count < 1){
+			return 'bg-warning';
+		}
+		return '';
+		
+	  },
       date() {
         let date = new Date(this.product.approval_date)
         let minutes = date.getMinutes()
