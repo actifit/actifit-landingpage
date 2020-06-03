@@ -544,6 +544,12 @@
 		this.buyInProgress = true;
 		this.errorProceed = '';
 		
+		//making sure user is logged in 
+		if (!this.user){
+		  this.errorProceed = this.$t('need_login_signup_notice_vote');
+		  return;
+		}
+		
 		//check if this is a game gadget and if reqts have been met
 		if (this.product.type == 'ingame'){
 			if (!this.allReqtsFilled){
@@ -557,10 +563,6 @@
 			}
 		}
 		//first check if user has enough AFIT
-		if (!this.user){
-		  this.errorProceed = this.$t('need_login_signup_notice_vote');
-		  return;
-		}
 		if (this.user){
 		  if (this.userTokens < this.item_price){
 			this.errorProceed = this.$t('Not_enough_balance_to_buy') + this.$t('Buy_afit_here') ;
