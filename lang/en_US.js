@@ -485,7 +485,7 @@ module.exports = {
   consumed: 'consumed',
   per_report:'per report',
   none: 'none',
-  cannot_buy_reqts_not_filled: 'You cannot buy this product as its requirements are unfilled',
+  cannot_buy_reqts_not_filled: 'You cannot buy this product as its requirements are unfulfilled',
   cannot_buy_none_available: 'You cannot buy this product as no units are available. Try again later',
   reqt_not_met: 'Requirement Not Met',
   reqt_met: 'Requirement Met',

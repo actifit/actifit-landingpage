@@ -6,18 +6,18 @@
 			  <h3 class="pro-name col-md-12">{{ this.product.name}}<span v-if="!product.specialevent && this.product.level">{{$t('level_short')}}{{this.product.level}}</span>
 			  </h3>
 			  
-			  <div v-if="this.product.type == 'ingame'" class="col-md-4" :title="!product.specialevent?this.product.name + ' - Level ' + this.product.level:this.product.name">
+			  <div v-if="this.product.type == 'ingame'" class="col-md-6" :title="!product.specialevent?this.product.name + ' - Level ' + this.product.level:this.product.name">
 				<div :class="'avatar-'+this.product.level" class="avatar pro-card-av mx-auto" :style="'background-image: url(img/gadgets/' + this.product.image + ');'"></div>
 				<span v-for="iterl in this.product.level" :key="iterl">
 					<i class="fas fa-star text-brand"></i>
 				</span>
 			  </div>
-			  <div v-else class="col-md-4">	
+			  <div v-else class="col-md-6">	
 				<a :href="'/' + this.product.provider">
 				<div class="avatar pro-card-av mx-auto mb-3" :style="'background-image: url(' + product_prov_pic + ');'"></div>
 				</a>
 			  </div>
-			  <div class="col-md-8">
+			  <div class="col-md-6">
 				  <div v-if="this.product.type == 'ingame'" class="avatar gaming-label mx-auto" :style="'background-image: url(img/gadgets/gaming.png);'"></div>
 				  <h4 v-else-if="this.product.type == 'ebook'"><i class="fas fa-book"></i></h4>
 				  <h4 v-else-if="this.product.type == 'service'"><i class='fas fa-phone-volume'></i></h4>
