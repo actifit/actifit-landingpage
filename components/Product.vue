@@ -31,9 +31,6 @@
 			  </div>
 			</div>  
 		  </div>
-		  <div class="pb-md-2 text-left card-section" v-if="this.product.type != 'ingame'">
-			<b>{{ $t('price')}}: </b>{{numberFormat(this.item_price, 2)}} {{this.item_currency}}
-		  </div>
 		  
 		  <div class="card-body" v-if="this.product.type == 'ingame'">
 			  <div class="row text-info pt-1">
@@ -93,11 +90,19 @@
 					</div>
 				  </div>
 			   </div>
+			   
+			   <div class="row">
+			     <div class="col-md-12 pb-md-2 pt-md-2 text-left">
+					<b>{{ $t('details')}}: </b>{{this.product.description}}
+				 </div>
+			   </div>
 		   
 		   </div>
-		   <div class="card-footer pb-md-2 text-left">
-			<b>{{ $t('details')}}: </b>{{this.product.description}}
-		  </div>
+		   
+		   <div v-else class="card-body pb-md-2 text-left">
+				<b>{{ $t('details')}}: </b>{{this.product.description}}
+		   </div>
+		   
 		  <div class="card-footer pb-md-2 text-center">
               <div v-if="product.type == 'ingame'">
 				<a class="btn btn-danger btn-lg w-100 book-button" @click.prevent="activateGadget()" :class="allReqtsFilled ? '':'bg-secondary'" v-if="grabConsumableItem() && grabConsumableItem().status == 'bought'" >
@@ -134,7 +139,7 @@
 				</div>
               </div>
 		  </div>
-		  <div v-if="grabConsumableItem()" class="card-section pb-md-2 text-left">
+		  <div v-if="grabConsumableItem()" class="card-footer pb-md-2 text-left">
 			<div>
 				<b>{{$t('Status')}}:</b>
 				<span v-if="grabConsumableItem().status == 'active'" class="col-md-12 text-success" @click.prevent="deactivateGadget()"><i class="fas fa-toggle-on"></i>&nbsp;{{$t('Active')}}</span>
@@ -147,7 +152,7 @@
 			</div>
 			<b>{{$t('Remaining_boost')}}:</b> {{grabConsumableItem().span - grabConsumableItem().consumed}} {{$t('Activity_Reports')}}
 		  </div>
-		  <div v-if="product.type == 'ingame' && this.boughtCount > 0">
+		  <div v-if="product.type == 'ingame' && this.boughtCount > 0" class="card-footer">
 			<div>
 				<b>{{$t('bought_count')}}:</b> {{ this.boughtCount }}
 			</div>
