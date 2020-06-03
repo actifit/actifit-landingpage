@@ -1,7 +1,7 @@
 <template>
   <!-- single card item for approved product -->	
-        <div class="card form mx-auto p-3 mt-3 mt-md-5 text-center card-border pro-card col-sm-3">
-		  <div class="text-center card-section">
+        <div class="card form mx-auto p-3 mt-3 mt-md-5 text-center card-border pro-card col-sm-4">
+		  <div class="text-center card-header">
 		    <div class="row basic-info">
 			  <h3 class="pro-name col-md-12">{{ this.product.name}}<span v-if="!product.specialevent && this.product.level">{{$t('level_short')}}{{this.product.level}}</span>
 			  </h3>
@@ -35,7 +35,7 @@
 			<b>{{ $t('price')}}: </b>{{numberFormat(this.item_price, 2)}} {{this.item_currency}}
 		  </div>
 		  
-		  <div class="card-section" v-if="this.product.type == 'ingame'">
+		  <div class="card-body" v-if="this.product.type == 'ingame'">
 			  <div class="row text-info pt-1">
 				<div class="pb-md-2 pt-md-2 text-center col-md-6 info-box info-box-orangered">
 				  <b>{{ $t('Available')}}</b><br/>{{this.product.count}} {{$t('units')}}
@@ -95,10 +95,10 @@
 			   </div>
 		   
 		   </div>
-		   <div class="card-section pb-md-2 text-left">
+		   <div class="card-footer pb-md-2 text-left">
 			<b>{{ $t('details')}}: </b>{{this.product.description}}
 		  </div>
-		  <div class="card-section pb-md-2 text-center">
+		  <div class="card-footer pb-md-2 text-center">
               <div v-if="product.type == 'ingame'">
 				<a class="btn btn-danger btn-lg w-100 book-button" @click.prevent="activateGadget()" :class="allReqtsFilled ? '':'bg-secondary'" v-if="grabConsumableItem() && grabConsumableItem().status == 'bought'" >
 					<span>{{ $t('activate_gadget') }}</span>&nbsp;
