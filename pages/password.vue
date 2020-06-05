@@ -68,13 +68,11 @@
 				<label for="ownKey" class="font-weight-bold col-3">{{ $t('Private_owner_key') }}</label>
 				<input class="form-control form-control-lg mb-2 col-7" ref="ownKey" id="ownKey"/>
 			</div>
-			<div class="row">
-				<button v-on:click="changeRecoveryAccount" class="btn btn-brand btn-lg">
-					{{ $t('Change_recovery_account') }}
-					<i class="fas fa-spin fa-spinner text-white" v-if="updatingRecovery"></i>
-				</button><br/>
-				<div class="text-brand" v-if="errorUpdateRecovery">{{ errorUpdateRecovery }}</div>
-			</div>
+			<button v-on:click="changeRecoveryAccount" class="btn btn-brand btn-lg">
+				{{ $t('Change_recovery_account') }}
+				<i class="fas fa-spin fa-spinner text-white" v-if="updatingRecovery"></i>
+			</button><br/>
+			<div class="text-brand" v-if="errorUpdateRecovery">{{ errorUpdateRecovery }}</div>
 			
 			<h5>{{ $t('Change_password') }}</h5>
 			
