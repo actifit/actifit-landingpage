@@ -78,8 +78,12 @@
 			  <SteemStats :user="user" class="col-md-12" :key="reload"/>
 			</div>
 			<div class="pb-md-2 pt-2 row text-center">
-			  <span class="w-25"/>
-			  <a href="#" class="btn btn-lg btn-brand w-50" @click.prevent="$router.push('/activity/')">{{ $t('activity_feed') }}</a>
+			  <div class="col-sm-6">
+				<a href="#" class="btn btn-lg btn-brand w-100" @click.prevent="$router.push('/activity/')">{{ $t('activity_feed') }}</a>
+			  </div>
+			  <div class="col-sm-6">
+				<a href="#" class="btn btn-lg btn-brand w-100" @click.prevent="$router.push('/market/')">{{ $t('Market') }}</a>
+			  </div>
 			</div>
 		  </div>
 
@@ -94,6 +98,14 @@
               <div class="col-6">
                 <a href="/signup" class="btn btn-brand btn-lg w-100">{{ $t('Sign_Up') }}</a>
               </div>
+            </div>
+			<div class="row pb-md-2 pt-2 ">
+              <div class="col-sm-6">
+				<a href="#" class="btn btn-lg btn-brand w-100" @click.prevent="$router.push('/activity/')">{{ $t('activity_feed') }}</a>
+			  </div>
+			  <div class="col-sm-6">
+				<a href="#" class="btn btn-lg btn-brand w-100" @click.prevent="$router.push('/market/')">{{ $t('Market') }}</a>
+			  </div>
             </div>
           </div>
         </div>
