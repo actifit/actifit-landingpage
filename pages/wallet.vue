@@ -551,6 +551,7 @@
 				<div class="row">
 				  <label for="transfer-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
 				  <input type="number" id="transfer-amount" name="transfer-amount" ref="transfer-amount" class="form-control-lg w-50 p-2">
+			      <span class="w-25 p-1 text-left text-brand" v-on:click="fillTransAmount()" :title="$t('select_full_balance')"><u>{{ this.renderTransAmount() }}</u></span>
 				</div>
 				<div class="row">
 				  <label for="transfer-memo" class="w-25 p-2">{{ $t('Memo') }}</label>
@@ -1048,6 +1049,7 @@
 	  user: 'fetchUserData',
 	  tokenMetrics: 'formattedTotAccountVal',
 	  steemPrice: 'formattedTotAccountVal',
+	  transferType: 'resetTransAmount',
 	  bchain: function(newBchain) {
 		console.log('change in chain');
 		this.cur_bchain = newBchain;
@@ -1066,6 +1068,19 @@
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
+	  renderTransAmount () {
+		if (this.transferType == 'SBD' || this.transferType == 'HBD'){
+			return this.renderSBDBalance(this.cur_bchain)
+		}else{
+			return this.renderBalance(this.cur_bchain) 
+		}
+	  },
+	  fillTransAmount (){
+		this.$refs['transfer-amount'].value = this.renderTransAmount().split(' ')[0];
+	  },
+	  resetTransAmount () {
+		this.$refs['transfer-amount'].value = '';
+	  },
 	  editDelegation(delegation){
 		this.$refs['delegate-recipient'].value = delegation.delegatee;
 		this.$refs['delegate-amount'].value = (delegation.power).toFixed(3);
