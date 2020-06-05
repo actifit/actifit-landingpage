@@ -52,6 +52,30 @@
 			  </div>
 			</div>
 			
+			<h5>{{ $t('Change_recovery_account') }}</h5>
+			
+			<div>{{ $t('Change_recovery_account_desc') }}</div>
+			
+			<div class="row">
+				<label for="curRecoveryAccount" class="font-weight-bold col-3">{{ $t('Current_recovery_account') }}</label>
+				<input class="form-control form-control-lg mb-2 col-7" ref="curRecoveryAccount" id="curRecoveryAccount" :value="user.account.recovery_account" readonly/>
+			</div>
+			<div class="row">
+				<label for="newRecoveryAccount" class="font-weight-bold col-3">{{ $t('New_recovery_account') }}</label>
+				<input class="form-control form-control-lg mb-2 col-7" ref="newRecoveryAccount" id="newRecoveryAccount" />
+			</div>
+			<div class="row">
+				<label for="ownKey" class="font-weight-bold col-3">{{ $t('Private_owner_key') }}</label>
+				<input class="form-control form-control-lg mb-2 col-7" ref="ownKey" id="ownKey"/>
+			</div>
+			<div class="row">
+				<button v-on:click="changeRecoveryAccount" class="btn btn-brand btn-lg">
+					{{ $t('Change_recovery_account') }}
+					<i class="fas fa-spin fa-spinner text-white" v-if="updatingRecovery"></i>
+				</button><br/>
+				<div class="text-brand" v-if="errorUpdateRecovery">{{ errorUpdateRecovery }}</div>
+			</div>
+			
 			<h5>{{ $t('Change_password') }}</h5>
 			
 			
@@ -179,8 +203,10 @@
 			cur_bchain: 'HIVE',//default val
 			errorFetch: '',
 			errorUpdate: '',
+			errorUpdateRecovery: '',
 			fetchingPass: false,
 			updatingPass: false,
+			updatingRecovery: false,
 			update_result: '',
 			reloginNeeded: false,
 			passAValid: false,
@@ -190,7 +216,6 @@
 		}
 	},
 	watch: {
-	  //user: 'fetchSettings'
 	},
     computed: {
 	  ...mapGetters('steemconnect', ['user']),
@@ -234,6 +259,41 @@
 		this.privateActKey = '';
 		this.privateOwnKey = '';
 		this.privateMemoKey = '';
+	  },
+	  async changeRecoveryAccount () {
+		this.errorUpdateRecovery = '';
+		this.updatingRecovery = true;
+		if (this.$refs['newRecoveryAccount'].value == ''){//
+		  this.errorUpdateRecovery = this.$t('Error_provide_recovery_account');
+		  this.updatingRecovery = false;
+		  return;
+		}
+		
+		if (this.$refs['ownKey'].value == ''){
+		  this.errorUpdateRecovery = this.$t('Error_provide_owner_key');
+		  this.updatingRecovery = false;
+		  return;
+		}
+		
+		this.setProperNode();
+		steem.broadcast.changeRecoveryAccountAsync(this.$refs['ownKey'].value, this.user.account.name, this.$refs['newRecoveryAccount'].value, [])
+        .then(results => {
+            console.log(JSON.stringify(results));
+			this.updatingRecovery = false;
+			this.$notify({
+			  group: 'success',
+			  text: this.$t('Success_update_recovery_account'),
+			  position: 'top center'
+			})
+        }).catch(err => {
+			console.log(err);
+			this.updatingRecovery = false;
+			this.$notify({
+			  group: 'error',
+			  text: this.$t('error'),
+			  position: 'top center'
+			})
+		});
 	  },
 	  setProperNode (overrideNode){
 		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');

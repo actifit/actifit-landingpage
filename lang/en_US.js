@@ -591,6 +591,10 @@ module.exports = {
   Update_pass: 'Update Password',
   Change_password: 'Change Your Password',
   Change_password_desc: 'You can change your current password here by setting a new password. Please note that all your existing keys will be invalidated and new ones will be generated. MAKE SURE TO MAKE A COPY OF YOUR PASSWORD & KEYS AS LOSING THEM COULD MEAN LOSING ACCESS TO YOUR ACCOUNT',
+  Change_recovery_account: 'Change Recovery Account',
+  Current_recovery_account: 'Current Recovery Account',
+  New_recovery_account: 'New Recovery Account',
+  Change_recovery_account_desc: 'You can change your recovery account, but be aware that the actual change will take place 30 days post your request.',
   Password_management: 'Password & Keys Management',
   Apply_pass_change_to: 'Apply Password Change To:',
   re_login_required: 'You need to login again following your password & keys change',
@@ -623,5 +627,10 @@ module.exports = {
   afitx_transfer_complete: 'AFITX transfer complete',
   afitx_transfer_error: 'AFITX transfer error!',
   confirm_transfer_afit_exchange: 'Are you sure you wish the transfer _CUR_ from _EXCH1_ to _EXCH2_ ?',
-  Amount_to_receive: 'Amount to Receive'
+  Amount_to_receive: 'Amount to Receive',
+  select_full_balance: 'Select Full Balance', 
+  Change: 'Change',
+  Error_provide_recovery_account:'Missing Recovery Account',
+  Error_provide_owner_key:'Missing Private Owner Key',
+  Success_update_recovery_account: 'You have successfully requested a change to your recovery account. Please be aware the actual change will occur 30 days post your request.',
 }
