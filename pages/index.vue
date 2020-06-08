@@ -82,7 +82,7 @@
 				<a href="#" class="btn btn-lg btn-brand w-100" @click.prevent="$router.push('/activity/')">{{ $t('activity_feed') }}</a>
 			  </div>
 			  <div class="col-sm-6">
-				<a href="#" class="btn btn-lg btn-brand w-100" @click.prevent="$router.push('/market/')">{{ $t('Market') }}</a>
+				<a href="#" class="btn btn-lg btn-brand w-100" @click.prevent="$router.push('/market')">{{ $t('Market') }}</a>
 			  </div>
 			</div>
 		  </div>
