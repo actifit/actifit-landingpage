@@ -7,7 +7,7 @@
 			  </h3>
 			  
 			  <div v-if="this.product.type == 'ingame'" class="col-md-6" :title="!product.specialevent?this.product.name + ' - Level ' + this.product.level:this.product.name">
-				<div :class="'avatar-'+this.product.level" class="avatar pro-card-av mx-auto" :style="'background-image: url(./img/gadgets/' + this.product.image + ');'"></div>
+				<div :class="'avatar-'+this.product.level" class="avatar pro-card-av mx-auto" :style="'background-image: url(img/gadgets/' + this.product.image + ');'"></div>
 				<span v-for="iterl in this.product.level" :key="iterl">
 					<i class="fas fa-star text-brand"></i>
 				</span>
@@ -18,7 +18,7 @@
 				</a>
 			  </div>
 			  <div class="col-md-6">
-				  <div v-if="this.product.type == 'ingame'" class="avatar gaming-label mx-auto" :style="'background-image: url(./img/gadgets/gaming.png);'"></div>
+				  <div v-if="this.product.type == 'ingame'" class="avatar gaming-label mx-auto" :style="'background-image: url(img/gadgets/gaming.png);'"></div>
 				  <h4 v-else-if="this.product.type == 'ebook'"><i class="fas fa-book"></i></h4>
 				  <h4 v-else-if="this.product.type == 'service'"><i class='fas fa-phone-volume'></i></h4>
 				  <h3 class="product-type">{{ this.product.type}} <span v-if="this.product.type != 'ingame'">{{ $t('By') }}</span> <br/> 
