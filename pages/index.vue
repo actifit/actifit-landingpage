@@ -78,10 +78,10 @@
 			  <SteemStats :user="user" class="col-md-12" :key="reload"/>
 			</div>
 			<div class="pb-md-2 pt-2 row text-center">
-			  <div class="col-sm-6">
+			  <div class="col-sm-6 mb-3">
 				<a href="#" class="btn btn-lg btn-brand w-100" @click.prevent="$router.push('/activity/')">{{ $t('activity_feed') }}</a>
 			  </div>
-			  <div class="col-sm-6 mt-4">
+			  <div class="col-sm-6">
 				<a href="#" class="btn btn-lg btn-brand w-100" @click.prevent="$router.push('/market/')">{{ $t('Market') }}</a>
 			  </div>
 			</div>
