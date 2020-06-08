@@ -2613,7 +2613,7 @@
 					console.log(err.message);
 			});
 			
-			console.log(tx.block_num);
+			//console.log(tx.block_num);
 			console.log(tx);
 			
 			if (tx && tx.block_num){
@@ -2736,7 +2736,7 @@
 				console.log(err.message);
 		});
 		
-		console.log(tx.block_num);
+		//console.log(tx.block_num);
 		console.log(tx);
 		
 		if (tx && tx.block_num){
@@ -2876,7 +2876,7 @@
 				console.log(err.message);
 		});
 		
-		console.log(tx.block_num);
+		//console.log(tx.block_num);
 		console.log(tx);
 		
 		if (tx && tx.block_num){
@@ -3003,7 +3003,7 @@
 					console.log(err.message);
 			});
 			
-			console.log(tx.block_num);
+			//console.log(tx.block_num);
 			console.log(tx);
 			
 			if (tx && tx.block_num){
@@ -3099,7 +3099,7 @@
 					console.log(err.message);
 			});
 			
-			console.log(tx.block_num);
+			//console.log(tx.block_num);
 			console.log(tx);
 			
 			if (tx && tx.block_num){
@@ -3209,7 +3209,7 @@
 					console.log(err.message);
 			});
 			
-			console.log(tx.block_num);
+			//console.log(tx.block_num);
 			console.log(tx);
 			
 			if (tx && tx.block_num){
@@ -3329,7 +3329,7 @@
 					console.log(err.message);
 			});
 			
-			console.log(tx.block_num);
+			//console.log(tx.block_num);
 			console.log(tx);
 			
 			if (tx && tx.block_num){
