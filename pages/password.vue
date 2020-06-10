@@ -179,6 +179,8 @@
   import Footer from '~/components/Footer'
   import steem from 'steem'
   
+  import hive from '@hiveio/hive-js'
+  
   export default {
 	components: {
 	  NavbarBrand,
@@ -273,8 +275,8 @@
 		  return;
 		}
 		
-		this.setProperNode();
-		steem.broadcast.changeRecoveryAccountAsync(this.$refs['ownKey'].value, this.user.account.name, this.$refs['newRecoveryAccount'].value, [])
+		let chainLnk = this.setProperNode();
+		chainLnk.broadcast.changeRecoveryAccountAsync(this.$refs['ownKey'].value, this.user.account.name, this.$refs['newRecoveryAccount'].value, [])
         .then(results => {
             console.log(JSON.stringify(results));
 			this.updatingRecovery = false;
@@ -298,12 +300,12 @@
 		if (overrideNode){
 			cur_bchain = overrideNode
 		}
-		let properNode = process.env.hiveApiNode;
+		let properNode = hive;
 		if (cur_bchain == 'STEEM'){
-			properNode = process.env.steemApiNode;
+			properNode = steem;
 		}
 		console.log(cur_bchain);
-		steem.api.setOptions({ url: properNode });
+		return properNode;
 	  },
 	  async verifyPassByChain (pass, chain, target){
 		if (target == 1){
@@ -311,8 +313,8 @@
 		}else if (target == 2){
 			this.validatingB = true;
 		}
-		this.setProperNode(chain);
-		let res = await steem.api.getAccountsAsync([this.user.account.name]);
+		let chainLnk = this.setProperNode(chain);
+		let res = await chainLnk.api.getAccountsAsync([this.user.account.name]);
 		if (res && res.length > 0){
 			let auths = {
 				posting: res[0].posting.key_auths,
@@ -343,7 +345,7 @@
 	  },
 	  verifyPass (cur_pass, auths) {
 		
-		let res = steem.auth.verify(this.user.account.name, cur_pass, auths);
+		let res = hive.auth.verify(this.user.account.name, cur_pass, auths);
 		//console.log(res);
 		return res;
 	  },
@@ -351,7 +353,7 @@
 		//ensure we have proper password to fetch keys
 		this.fetchingPass = true;
 		this.errorFetch = '';
-		await this.setProperNode();
+		let chainLnk = await this.setProperNode();
 		let auths = {
 			posting: this.user.account.posting.key_auths,
 			active: this.user.account.active.key_auths,
@@ -364,7 +366,7 @@
 		  return;
 		}
 		
-		let privateKeys = await steem.auth.getPrivateKeys(this.user.account.name, this.$refs["passfetchdata"].value);
+		let privateKeys = await chainLnk.auth.getPrivateKeys(this.user.account.name, this.$refs["passfetchdata"].value);
 		//console.log(privateKeys);
 		this.privatePostKey = privateKeys.posting;
 		this.privateActKey = privateKeys.active;
@@ -431,7 +433,7 @@
 		this.updatingPass = true;
 		this.errorUpdate = '';
 		
-		await this.setProperNode(chain_choice);
+		let chainLnk = await this.setProperNode(chain_choice);
 		console.log('chain_choice ' + chain_choice);
 		let passField = "passchangedata";//default one for main chain
 		if (chain_choice != this.cur_bchain){
@@ -464,14 +466,14 @@
 		
 		
 		//generate pass wif
-		//let newWif = 'P' + steem.auth.toWif(this.newAcctPwd);
+		//let newWif = 'P' + chainLnk.auth.toWif(this.newAcctPwd);
 		//console.log('new wif');
 		//console.log(newWif);
 		//generate new keys based on new wif
-		let newKeys = steem.auth.getPrivateKeys(this.user.account.name, this.newAcctPwd, ['owner', 'active', 'posting', 'memo']); 
+		let newKeys = chainLnk.auth.getPrivateKeys(this.user.account.name, this.newAcctPwd, ['owner', 'active', 'posting', 'memo']); 
 		
 		//ensure we have user owner key to generate new keys
-		let curPrivateKey = steem.auth.getPrivateKeys(this.user.account.name, this.$refs[passField].value, ['owner']);
+		let curPrivateKey = chainLnk.auth.getPrivateKeys(this.user.account.name, this.$refs[passField].value, ['owner']);
 		let curOwnerKey = curPrivateKey.owner;
 
 		// SAVE THIS OUTPUT INFORMATION AND DO NOT LOSE IT
@@ -490,7 +492,7 @@
 		let jsonMetadata = {};
 
 		// broadcast
-		let res = await steem.broadcast.accountUpdateAsync(
+		let res = await chainLnk.broadcast.accountUpdateAsync(
 		  curOwnerKey,
 		  this.user.account.name,
 		  ownerKey,
@@ -550,6 +552,8 @@
 		if (localStorage.getItem('cur_bchain')){
 			this.cur_bchain = localStorage.getItem('cur_bchain')
 		}
+		steem.api.setOptions({ url: process.env.steemApiNode });
+		hive.api.setOptions({ url: process.env.hiveApiNode });
 		await this.setProperNode();
 		this.$store.dispatch('steemconnect/login')
 	}

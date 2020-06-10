@@ -144,6 +144,8 @@
   import {mapGetters} from 'vuex'
   
   import steem from 'steem'
+  
+  import hive from '@hiveio/hive-js'
 
   export default {
     props: ['report'],
@@ -265,22 +267,24 @@
 		return this.newlyVotedPosts.length;
 	  },
 	  setProperNode (){
-		let properNode = process.env.hiveApiNode;
+		let properNode = hive;
 		if (this.cur_bchain == 'STEEM'){
-			properNode = process.env.steemApiNode;
+			properNode = steem;
 		}
-		steem.api.setOptions({ url: properNode });
+		return properNode;
 	  },
 	  async updatePostData () {
 		// try to fetch matching report
-		  await this.setProperNode ();
-		  steem.api.getContent(this.report.author, this.report.permlink, (err, result) => {
+		  let chainLnk = await this.setProperNode ();
+		  chainLnk.api.getContent(this.report.author, this.report.permlink, (err, result) => {
 			this.report.total_payout_value = result.total_payout_value;
 			this.report.pending_payout_value = result.pending_payout_value;
 		  })
 	  }
 	},
 	async mounted () {
+		steem.api.setOptions({ url: process.env.steemApiNode });
+		hive.api.setOptions({ url: process.env.hiveApiNode });
 		fetch(process.env.actiAppUrl+'getPostReward?user=' + this.report.author+'&url='+this.report.url).then(res => {
 		//grab the post's reward to display it properly
 			res.json().then(json => this.afitReward = json.token_count)}).catch(e => reject(e))

@@ -18,7 +18,7 @@ module.exports = {
 	steemApiNode: 'https://api.steemit.com/',
 	hiveApiNode: 'https://api.hive.blog/',
 	hiveStateApiNode: 'https://anyx.io',
-	altHiveNodes: ["https://api.openhive.network", "https://anyx.io", "https://api.hivekings.com", "https://api.hive.blog/", "https://hived.privex.io"],
+	altHiveNodes: ["https://api.hive.blog/", "https://anyx.io", "https://api.openhive.network", "https://api.hivekings.com", "https://hived.privex.io"],
 	actiAppUrl: process.env.ACTI_API_URL || 'http://localhost:3120/',
 	steemEngineRpc: 'https://api.steem-engine.com/rpc',
 	hiveEngineRpc: 'https://api.hive-engine.com/rpc',

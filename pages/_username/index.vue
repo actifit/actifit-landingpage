@@ -253,6 +253,9 @@
   import Footer from '~/components/Footer'
 
   import steem from 'steem'
+  
+  import hive from '@hiveio/hive-js'
+  
   import {mapGetters} from 'vuex'
   
   import Vue from 'vue'
@@ -934,21 +937,21 @@
 	  },
 	  setProperNode (){
 		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
-		let properNode = process.env.hiveApiNode;
+		let properNode = hive;
 		if (cur_bchain == 'STEEM'){
-			properNode = process.env.steemApiNode;
+			properNode = steem;
 		}
 		console.log(cur_bchain);
-		steem.api.setOptions({ url: properNode });
+		return properNode;
 	  },
 	  /* handles fetching of user related info */
 	  async getAccountData () {
 		
 		let parentRef = this;
 		
-		await this.setProperNode();
+		let chainLnk = await this.setProperNode();
 		
-		steem.api.getAccounts([this.displayUser], function(err, result) {
+		chainLnk.api.getAccounts([this.displayUser], function(err, result) {
 			//result now contains the account details
 			if (result.length == 0){
 			  parentRef.noUserFound = true;
@@ -956,7 +959,7 @@
 			}else{
 			  parentRef.userinfo = result[0];
 			  //grab and display follower and following count
-				steem.api.getFollowCount(parentRef.displayUser, function(err, result) {
+				chainLnk.api.getFollowCount(parentRef.displayUser, function(err, result) {
 					//console.log(err, result);
 					if (!err) {
 					  parentRef.userinfo.follower_count = result.follower_count;
@@ -1074,7 +1077,8 @@
 	async mounted () {
 	
 		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
-		
+		steem.api.setOptions({ url: process.env.steemApiNode });
+		hive.api.setOptions({ url: process.env.hiveApiNode });
 		// login
 		this.$store.dispatch('steemconnect/login')
 		this.fetchUserData();

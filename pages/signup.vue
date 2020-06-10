@@ -128,6 +128,9 @@
   import Transaction from '~/components/Transaction'
   import Footer from '~/components/Footer'
   import steem from 'steem'
+  
+  import hive from '@hiveio/hive-js'
+  
   import VueRecaptcha from 'vue-recaptcha';
 
   import { mapGetters } from 'vuex'
@@ -184,6 +187,11 @@
     },
     async mounted () {
 	  
+	  
+	  //rely on HIVE node
+	  let properNode = process.env.hiveApiNode;
+	
+	  hive.api.setOptions({ url: properNode });
 
 	  //if a promo code is available, let's set it accordingly
 	  if (this.$route.query.promo){
@@ -258,17 +266,12 @@
 		this.username_invalid = '';
 		this.username_exists = '';
 		//validate format first
-		
-		//rely on HIVE node
-		let properNode = process.env.hiveApiNode;
-		
-		steem.api.setOptions({ url: properNode });
-		
-		let usernameValid = steem.utils.validateAccountName(val);
+				
+		let usernameValid = hive.utils.validateAccountName(val);
 		//check for error msg
 		if (usernameValid == null){
 			//ensure no existing account matches same name
-			steem.api.getAccounts([val], function(err, result) {
+			hive.api.getAccounts([val], function(err, result) {
 			  if (result.length>0){
 				vue_ctnr.username_exists = 'Please choose a different username';
 			  }
@@ -409,12 +412,7 @@
 			this.accountCreated = outcome.accountCreated;
 			this.resultReturned = true;
 			
-			//rely on HIVE node
-			let properNode = process.env.hiveApiNode;
-			
-			steem.api.setOptions({ url: properNode });
-			
-			let privateKeys = await steem.auth.getPrivateKeys(this.$refs["account-username"].value, this.$refs["account-password"].value, ['posting']);
+			let privateKeys = await hive.auth.getPrivateKeys(this.$refs["account-username"].value, this.$refs["account-password"].value, ['posting']);
 			this.privatePostKey = privateKeys.posting;
 		}catch(err){
 			console.error(err);

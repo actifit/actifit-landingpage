@@ -66,13 +66,19 @@
   import { mapGetters } from 'vuex'
   import steem from 'steem'
   
+  import hive from '@hiveio/hive-js'
+  
   //import dsteem from 'dsteem'
   import SteemStats from '~/components/SteemStats'
   import VotersListModal from '~/components/VotersListModal'
   
   var dsteem = require('dsteem')
   
+  var dhive = require('@hiveio/dhive')
+  
   var client;
+  
+  var hiveclient;
 
   export default {
     data () {
@@ -163,9 +169,10 @@
 		
 		if (this.properties == ''){
 		  //not loaded yet
-		  this.properties = await steem.api.getDynamicGlobalPropertiesAsync();
+		  let chainLnk = await this.setProperNode();
+		  this.properties = await chainLnk.api.getDynamicGlobalPropertiesAsync();
 		  //grab reward fund data
-		  let rewardFund = await steem.api.getRewardFundAsync("post");
+		  let rewardFund = await chainLnk.api.getRewardFundAsync("post");
 		  this.rewardBalance = parseFloat(rewardFund.reward_balance.replace(" STEEM", "").replace(" HIVE", ""));
 		  this.recentClaims = rewardFund.recent_claims;
 		}
@@ -227,7 +234,13 @@
 		this.calculateVoteValue();
 		
 		//this.currentRC = currentManaPerc;
-		let rcComponent = await client.rc.getRCMana(this.user.account.name);
+		
+		let chainLnk = hiveclient;
+		if (this.cur_bchain == 'STEEM'){
+			chainLnk = client;
+		}
+		
+		let rcComponent = await chainLnk.rc.getRCMana(this.user.account.name);
 		this.currentRC = rcComponent.percentage/100;
 		this.currentRCPercent = this.currentRC + '%';
 		//console.log(this.currentRC);
@@ -532,19 +545,20 @@
 	  },
 	  setProperNode (){
 		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
-		let properNode = process.env.hiveApiNode;
+		let properNode = hive;
 		if (this.cur_bchain == 'STEEM'){
-			properNode = process.env.steemApiNode;
+			properNode = steem;
 		}
 		console.log(this.cur_bchain);
-		steem.api.setOptions({ url: properNode });
-		//initialize dsteem
-	    client = new dsteem.Client(properNode)
+		return properNode;
 	  },
     },
 	async mounted () {
 	
-	  await this.setProperNode();
+	  client = new dsteem.Client(process.env.steemApiNode)
+	  hiveclient = new dhive.Client(process.env.altHiveNodes)
+	  steem.api.setOptions({ url: process.env.steemApiNode });
+	  hive.api.setOptions({ url: process.env.hiveApiNode });
 	  
 	  //grab STEEM price, needed for vote value calculation
 	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem&vs_currencies=usd').then(
