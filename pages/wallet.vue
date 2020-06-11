@@ -1070,15 +1070,15 @@
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
-	  renderTransAmount () {
+	  renderTransAmount (nofrmt) {
 		if (this.transferType == 'SBD' || this.transferType == 'HBD'){
-			return this.renderSBDBalance(this.cur_bchain)
+			return this.renderSBDBalance(this.cur_bchain, nofrmt)
 		}else{
-			return this.renderBalance(this.cur_bchain) 
+			return this.renderBalance(this.cur_bchain, nofrmt) 
 		}
 	  },
 	  fillTransAmount (){
-		this.$refs['transfer-amount'].value = this.renderTransAmount().split(' ')[0];
+		this.$refs['transfer-amount'].value = this.renderTransAmount('1').split(' ')[0];
 	  },
 	  resetTransAmount () {
 		this.$refs['transfer-amount'].value = '';
@@ -1298,10 +1298,16 @@
 			case 5: return this.numberFormat(this.powerDownRateVal, 3);
 		}
 	  },
-	  renderBalance (type) {
+	  renderBalance (type, nofrmt) {
+		if (nofrmt){
+			return this.user.account.balance;
+		}
 		return this.numberFormat(parseFloat(this.user.account.balance), 3) + ' ' + type;
 	  },
-	  renderSBDBalance (type) {
+	  renderSBDBalance (type, nofrmt) {
+		if (nofrmt){
+			return this.user.account.sbd_balance;
+		}
 		return this.numberFormat(parseFloat(this.user.account.sbd_balance), 3) + ' ' + ((type == 'STEEM')?this.$t('SBD'):this.$t('HBD'));
 	  },
 	  setUserPDAfitStatus (result) {
