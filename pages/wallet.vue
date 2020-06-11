@@ -828,6 +828,8 @@
   import Transaction from '~/components/Transaction'
   import Footer from '~/components/Footer'
   import steem from 'steem'
+  
+  import hive from '@hiveio/hive-js'
   import ExchangeQueue from '~/components/ExchangeQueueModal'
   import ExchangeHistory from '~/components/ExchangeHistoryModal'
   import SSC from 'sscjs'
