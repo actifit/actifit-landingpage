@@ -236,6 +236,7 @@ export default {
         else {
           if (start_author && start_permlink) posts.shift() // remove the first posts because its the last post from before
           posts = posts.filter(userPostsFilter(username)) // get only actual activity reports
+		  console.log(posts);
           commit('setUserReports', [...state.userReports, ...posts])
           dispatch('checkIfMoreUserReportsAvailable', username)
           resolve()
