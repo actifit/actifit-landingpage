@@ -67,6 +67,8 @@
   import VueRecaptcha from 'vue-recaptcha';
 
   import { mapGetters } from 'vuex'
+  
+  import hive from '@hiveio/hive-js'
 
   export default {
 	head () {

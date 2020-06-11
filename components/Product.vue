@@ -190,6 +190,8 @@
   import {mapGetters} from 'vuex'
   
   import steem from 'steem'
+  
+  import hive from '@hiveio/hive-js'
 
   export default {
     props: ['product', 'pros', 'userrank', 'gadgetStats'],
