@@ -350,14 +350,6 @@
 			<div><i>Moderator</i></div>
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
-            <a href="@ashikstd" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/mdalamin.jpg);'"></div>
-            </a>
-            <a href="@ashikstd" target="_blank">Md Al Amin</a>
-			<div><i>Moderator</i></div>
-			<a href="https://www.linkedin.com/in/ashikstd/" target="_blank"><i class="fab fa-linkedin"></i></a>
-          </div>
-		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@alokkumar121" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/alokkumar.jpg);'"></div>
             </a>
@@ -383,11 +375,11 @@
           </div>	  
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@sumit71428" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/sumitsingh.jpg);'"></div>
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/praveen.jpg);'"></div>
             </a>
-            <a href="@sumit71428" target="_blank">Sumit Singh</a>
+            <a href="@sumit71428" target="_blank">Praveen Reddy</a>
 			<div><i>Moderator</i></div>
-			<a href="https://www.linkedin.com/in/sumit-singh-91b616185/" target="_blank"><i class="fab fa-linkedin"></i></a>
+			<a href="https://www.linkedin.com/in/praveen-reddy-kanthala-a0532011a/" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@silvertop" target="_blank">
