@@ -2531,7 +2531,7 @@
 		  return;
 		}
 		//ensure user is powering up value he has
-		if (parseFloat(amount_to_power) > parseFloat(this.afit_se_balance)){
+		if (parseFloat(amount_to_power) > parseFloat(this.afit_he_balance)){
 		  this.afit_se_move_error_proceeding = true;
 		  this.afit_se_move_err_msg = this.$t('max_amount_AFIT_power');
 		  //this.movingFunds = false;
