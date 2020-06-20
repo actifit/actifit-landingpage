@@ -2733,7 +2733,7 @@
 		let userKey = this.$refs["p-ac-key-afit"].value;
 		
 		//send out transaction to blockchain
-		await this.setProperNode((direction==1?'STEEM':'HIVE'));
+		let chainLnk = await this.setProperNode((direction==1?'STEEM':'HIVE'));
 		let tx = await chainLnk.broadcast.customJsonAsync(
 				userKey, 
 				[ this.user.account.name ] , 
@@ -2873,7 +2873,7 @@
 		let userKey = this.$refs["p-ac-key-afitx"].value;
 		
 		//send out transaction to blockchain
-		await this.setProperNode((direction==1?'STEEM':'HIVE'));
+		let chainLnk = await this.setProperNode((direction==1?'STEEM':'HIVE'));
 		let tx = await chainLnk.broadcast.customJsonAsync(
 				userKey, 
 				[ this.user.account.name ] , 
