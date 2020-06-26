@@ -17,9 +17,9 @@
     <div class="container pt-5 mt-5 pb-5" v-if="user">
 
       <!-- account balance -->
-      <div class="text-center">
+      <div class="text-left">
         <h3 class="mb-4" v-if="user">{{ $t('Hey') }} {{ user.account.name }}!</h3>
-		<p class="lead">{{ $t('referral_notice') }}</p>
+		<div class="" v-html="$t('referral_notice')"></div>
         <h5>{{ $t('Your_Referral_Link') }}</h5>
 		<input type="text" :class="smallScreenClasses" class="p-3" name="refLink" ref="refLink" id="referral-link" :value="refUrl" readonly/>
 		<button v-on:click="copyContent" data-targetEl="refLink" class="btn btn-brand p-3">{{ $t('Copy_Link') }}</button>	
@@ -75,18 +75,58 @@
 		</div>
       </div>
 
+	  <!-- Referral Reward Calculation -->
+	  <div class="">
+        <h3 class="text-left mt-5">{{ $t('Referral_Reward_Breakdown') }}</h3>
+        <div class="text-left">
+			<b><i class="fas fa-check text-success m-lg-3"></i>
+			{{ $t('referral_default_reward') }}</b>
+		</div>
+		<div class="text-left">
+			<b><i class="fas fa-check text-success m-lg-3"></i>
+			{{ totalPercentBonus }} {{ $t('referral_monthly_reward') }}:</b>
+		</div>
+		<div class="text-left pl-4">
+			<i class="fas fa-check text-success m-lg-3"></i>
+			{{ $t('referral_rec_default_reward') }}
+		</div>
+		<div class="text-left pl-4">
+			<i class="fas fa-check text-success m-lg-3" v-if="this.userRank>=this.userRankMin"></i>
+			<i class="fas fa-times text-danger m-lg-3" v-else></i>
+			{{ $t('referral_user_rank_reqt') }}
+			<div v-if="this.userRank<this.userRankMin" class="text-brand">
+				{{ $t('missing_reqt_value').replace('_AMNT_', this.userRankMin-this.userRank).replace('_UNIT_', 'points') }}
+			</div>
+		</div>
+		<div class="text-left pl-4">
+			<i class="fas fa-check text-success m-lg-3" v-if="this.userTokens>=this.userTokensMin"></i>
+			<i class="fas fa-times text-danger m-lg-3" v-else></i>
+			{{ $t('referral_afit_bal') }}
+			<div v-if="this.userTokens<this.userTokensMin" class="text-brand">
+				{{ $t('missing_reqt_value').replace('_AMNT_', this.userTokensMin-this.userTokens).replace('_UNIT_', 'AFIT') }}
+			</div>
+		</div>
+		<div class="text-left pl-4">
+			<i class="fas fa-check text-success m-lg-3" v-if="this.afitx_balance>=this.afitxMin"></i>
+			<i class="fas fa-times text-danger m-lg-3" v-else></i>
+			{{ $t('referral_afitx_bal') }} 
+			<div v-if="this.afitx_balance<this.afitxMin" class="text-brand">
+				{{ $t('missing_reqt_value').replace('_AMNT_', this.afitxMin-this.afitx_balance).replace('_UNIT_', 'AFITX') }}
+			</div>
+		</div>
+      </div>
+	  
       <!-- Referrals -->
-      <div class="history mx-auto">
-        <h3 class="text-center mt-5">{{ $t('My_Referrals') }}</h3>
+      <div class="">
+        <h3 class="text-left mt-5">{{ $t('My_Referrals') }}</h3>
         <Referral v-for="(referral, index) in referrals" :key="index" :referral="referral" />
-        <div class="text-center"><small class="text-muted" v-if="referrals.length === 0">{{ $t('No_referrals_notice') }}</small></div>
+        <div class="text-left"><small class="text-muted" v-if="referrals.length === 0">{{ $t('No_referrals_notice') }}</small></div>
       </div>
     </div>
 	
 	<div :class="smallScreenClasses" class="container mt-5 pb-5 pt-5" v-else>
       <!-- account balance -->
       <div class="text-center p-5">
-	    <p class="lead">{{ $t('referral_notice') }}</p>
 		<div class="row pb-3">
 		  <div class="text-center text-brand w-100 lead">
 		    {{ $t('login_required_referrals') }}
@@ -116,7 +156,13 @@
   import SocialSharing from 'vue-social-sharing'
 
   import { mapGetters } from 'vuex'
-
+  
+  import SSC from 'sscjs'
+  
+  const ssc = new SSC(process.env.steemEngineRpc);
+  
+  const hsc = new SSC(process.env.hiveEngineRpc);
+  
   export default {
 	head () {
 		return {
@@ -138,6 +184,12 @@
 	  return {
 	    refUrl: '',
 		screenWidth: 1200,
+		afitx_he_balance: 0,
+		afitx_se_balance: 0,
+		afitx_balance: 0,
+		userTokensMin: 50000,
+		userRankMin: 30,
+		afitxMin: 50,
 	  }
 	},
     computed: {
@@ -153,6 +205,9 @@
 		}
 		return "w-50";
 	  },
+	  totalPercentBonus () {
+		return 20 + (this.userRank>=this.userRankMin?5:0) + (this.userTokens>=this.userTokensMin?5:0) + (this.afitx_balance>=this.afitxMin?5:0) + '%';
+	  }
     },
     async mounted () {
 	  this.screenWidth = screen.width;
@@ -181,8 +236,36 @@
 		  this.$store.dispatch('fetchUserRank')
 		  let baseUrl = window.location.origin;
 		  this.refUrl = baseUrl + '/signup?referrer=' + this.user.account.name;
+		  this.fetchAFITXSE();
+		  this.fetchAFITXHE();
 		}
-	  }
+	  },
+	  fetchAFITXSE() {
+		  let parnt = this
+		  ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' }).then(
+				function(bal) {
+					
+					
+					if (bal){
+						  parnt.afitx_se_balance = bal.balance;
+						  parnt.afitx_balance = parseFloat(parnt.afitx_he_balance)+parseFloat(parnt.afitx_se_balance)
+					  }
+				}
+			)
+	  },
+	  fetchAFITXHE() {
+		  let parnt = this
+		  hsc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' }).then(
+				function(bal) {
+					
+					
+					if (bal){
+						  parnt.afitx_he_balance = bal.balance;
+						  parnt.afitx_balance = parseFloat(parnt.afitx_he_balance)+parseFloat(parnt.afitx_se_balance)
+					  }
+				}
+			)
+	  },
 	},
   }
 </script>
