@@ -114,6 +114,7 @@
 				{{ $t('missing_reqt_value').replace('_AMNT_', this.afitxMin-this.afitx_balance).replace('_UNIT_', 'AFITX') }}
 			</div>
 		</div>
+		<a href="/wallet" class="btn btn-brand btn-lg border w-25">{{ $t('Wallet') }}</a><a href="/userrank" class="btn btn-brand btn-lg border w-25">{{ $t('User_rank_details') }}</a>
       </div>
 	  
       <!-- Referrals -->
