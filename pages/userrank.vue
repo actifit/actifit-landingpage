@@ -24,32 +24,32 @@
 		<div v-html="$t('Rank_delegation_score')"></div>
 		<div class="pl-3">
 		<span v-for="iterx in delegation_rules.length" :key="iterx">
-			<span class="color-box-afit" :title="matchVal(delegation_rules, iterx)+' HP'" v-if="iterx<=revRankFactor(delegation_rules, userRankObj.delegation_score, delegation_factor)"></span>
-			<span class="color-box-afit opaque-box" :title="matchVal(delegation_rules, iterx)+' HP'" v-else></span>
+			<span class="color-box-afit" :title="'('+matchVal(delegation_rules, iterx)+' - '+ matchVal(delegation_rules, iterx+1, true) + ') HP'" v-if="iterx<=revRankFactor(delegation_rules, userRankObj.delegation_score, delegation_factor)"></span>
+			<span class="color-box-afit opaque-box" :title="'('+matchVal(delegation_rules, iterx)+' - '+ matchVal(delegation_rules, iterx+1, true) + ') HP'" v-else></span>
 		</span>
 		<span class="pl-2">+ {{userRankObj.delegation_score}}</span>
 		</div>
 		<div v-html="$t('Rank_afit')"></div>
 		<div class="pl-3">
 		<span v-for="iterx in afit_token_rules.length" :key="iterx">
-			<span class="color-box-afit" :title="matchVal(afit_token_rules, iterx)+' AFIT'" v-if="iterx<=revRankFactor(afit_token_rules, userRankObj.afit_tokens_score, afit_token_factor)"></span>
-			<span class="color-box-afit opaque-box" :title="matchVal(afit_token_rules, iterx)+' AFIT'" v-else></span>
+			<span class="color-box-afit" :title="'('+matchVal(afit_token_rules, iterx)+' - '+ matchVal(afit_token_rules, iterx+1, true) + ' AFIT'" v-if="iterx<=revRankFactor(afit_token_rules, userRankObj.afit_tokens_score, afit_token_factor)"></span>
+			<span class="color-box-afit opaque-box" :title="'('+matchVal(afit_token_rules, iterx)+' - '+ matchVal(afit_token_rules, iterx+1, true) + ' AFIT'" v-else></span>
 		</span>
 		<span class="pl-2">+ {{userRankObj.afit_tokens_score}}</span>
 		</div>
 		<div v-html="$t('Rank_total_posts')"></div>
 		<div class="pl-3">
 		<span v-for="iterx in rewarded_posts_rules.length" :key="iterx">
-			<span class="color-box-afit" :title="matchVal(rewarded_posts_rules, iterx)+' Posts'" v-if="iterx<=revRankFactor(rewarded_posts_rules, userRankObj.tot_posts_score, rewarded_posts_factor)"></span>
-			<span class="color-box-afit opaque-box" :title="matchVal(rewarded_posts_rules, iterx)+' Posts'" v-else></span>
+			<span class="color-box-afit" :title="'('+matchVal(rewarded_posts_rules, iterx)+' - '+ matchVal(rewarded_posts_rules, iterx+1, true) + ' Posts'" v-if="iterx<=revRankFactor(rewarded_posts_rules, userRankObj.tot_posts_score, rewarded_posts_factor)"></span>
+			<span class="color-box-afit opaque-box" :title="'('+matchVal(rewarded_posts_rules, iterx)+' - '+ matchVal(rewarded_posts_rules, iterx+1, true) + ' Posts'" v-else></span>
 		</span>
 		<span class="pl-2">+ {{userRankObj.tot_posts_score}}</span>
 		</div>
 		<div v-html="$t('Rank_recent_posts')"></div>
 		<div class="pl-3">
 		<span v-for="iterx in recent_reward_posts_rules.length" :key="iterx">
-			<span class="color-box-afit" :title="matchVal(recent_reward_posts_rules, iterx)+' Posts'" v-if="iterx<=revRankFactor(recent_reward_posts_rules, userRankObj.recent_posts_score, recent_posts_factor)"></span>
-			<span class="color-box-afit opaque-box" :title="matchVal(recent_reward_posts_rules, iterx)+' Posts'" v-else></span>
+			<span class="color-box-afit" :title="'('+matchVal(recent_reward_posts_rules, iterx)+' - '+ matchVal(recent_reward_posts_rules, iterx+1, true) + ' Posts'" v-if="iterx<=revRankFactor(recent_reward_posts_rules, userRankObj.recent_posts_score, recent_posts_factor)"></span>
+			<span class="color-box-afit opaque-box" :title="'('+matchVal(recent_reward_posts_rules, iterx)+' - '+ matchVal(recent_reward_posts_rules, iterx+1, true) + ' Posts'" v-else></span>
 		</span>
 		<span class="pl-2">+ {{userRankObj.recent_posts_score}}</span>
 		</div>
@@ -131,7 +131,7 @@
 			[99999,0.65],
 			[499999,0.75],
 			[999999,0.90],
-			[1000000,1]
+			//[1000000,1]
 		],
 		
 		//AFIT token calculation matrix
@@ -146,7 +146,7 @@
 			[499999,0.70],
 			[999999,0.80],
 			[4999999,0.90],
-			[5000000,1]
+			//[5000000,1]
 		],
 		
 		//Rewarded Posts calculation matrix
@@ -161,7 +161,7 @@
 			[539,0.70],
 			[719,0.80],
 			[1079,0.90],
-			[1080,1]
+			//[1080,1]
 		],
 		
 		//Rewarded Posts calculation matrix
@@ -171,7 +171,7 @@
 			[4,0.40],
 			[6,0.60],
 			[8,0.80],
-			[9,1]
+			//[9,1]
 		],
 		delegation_factor: 30,
 		afit_token_factor: 30,
@@ -224,8 +224,14 @@
 		  
 		}
 	  },
-	  matchVal(arr, iterx){
+	  matchVal(arr, iterx, decrease){
+		if (iterx>arr.length){
+			return '';
+		}
 		let x = arr[iterx-1];
+		if (decrease){
+			return this.numberFormat(x[0], 0);
+		}
 		return this.numberFormat(x[0]+1, 0);
 	  },
 	  revRankFactor(arr, value, factor){
