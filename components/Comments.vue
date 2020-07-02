@@ -208,9 +208,9 @@
 	  },
 	  postPayout() {
 		if (this.postPaid()){
-			return this.full_data.total_payout_value.replace('SBD','').replace('STEEM','')+' STEEM/SBD'
+			return this.full_data.total_payout_value.replace('SBD','').replace('STEEM','').replace('HBD','').replace('HIVE','')+' $'
 		}else{
-			return this.full_data.pending_payout_value.replace('SBD','').replace('STEEM','')+' STEEM/SBD'
+			return this.full_data.pending_payout_value.replace('SBD','').replace('STEEM','').replace('HBD','').replace('HIVE','')+' $'
 		}
 	  },
 	  date() {
