@@ -91,6 +91,10 @@
 					 data-target="#measureChartModal" v-if="isFriend() || isOwnAccount() || 1==1">
 				{{ $t('View_chart') }}
 			</a>
+			<a href="#" data-toggle="modal" class="btn btn-brand" 
+					 data-target="#activityChartModal" v-if="isFriend() || isOwnAccount() || 1==1">
+				{{ $t('View_activity_chart') }}
+			</a>
 		  </div>
 		</div>
 		  <div class="d-flex flex-column">
@@ -237,6 +241,9 @@
 		</div>
 	</div>
 	<MeasureChartModal :userMeasurements="userMeasurements"	/>
+	
+	<ActivityChartModal :userActivity="userActivity"	/>
+	
 	<Footer />
 	<no-ssr>
       <div>
@@ -261,6 +268,8 @@
   import Vue from 'vue'
   
   import MeasureChartModal from '~/components/MeasureChartModal'
+  
+  import ActivityChartModal from '~/components/ActivityChartModal'
   
   /* import badges component */
   import { BadgePlugin } from 'bootstrap-vue'
@@ -347,6 +356,7 @@
 			lastBodyfat: '-',
 			lastUpdated: '-',
 			userMeasurements: [],
+			userActivity: [],
 		}
 	},
 	watch: {
@@ -363,7 +373,8 @@
 	  NavbarBrand,
 	  UserMenu,
 	  Footer,
-	  MeasureChartModal
+	  MeasureChartModal,
+	  ActivityChartModal
 	},
     computed: {
 	  ...mapGetters('steemconnect', ['user']),
@@ -1072,7 +1083,13 @@
 			json[0].json_metadata.bodyfat?this.lastBodyfat = json[0].json_metadata.bodyfat:'';
 			json[0].date?this.lastUpdated = json[0].date:'';
 		}
-	  }
+	  },
+	  async setUserActivity(json){
+		//first row contains latest activity, if any
+		console.log('setUserActivity');
+		console.log(json);
+		this.userActivity = json;
+	  },
 	},
 	async mounted () {
 	
@@ -1093,6 +1110,10 @@
 		  //grab the user's latest stats if available
 		  fetch(process.env.actiAppUrl+'trackedMeasurements/' + this.displayUser).then(res => {
 			res.json().then(json => this.setUserMeasurements(json))}).catch(e => console.log(e))
+		  
+		  //grab the user's latest posts data
+		  fetch(process.env.actiAppUrl+'trackedActivity/' + this.displayUser).then(res => {
+			res.json().then(json => this.setUserActivity(json))}).catch(e => console.log(e))
 		  
 		  //grab the author's rank
 		  fetch(process.env.actiAppUrl+'getRank/' + this.displayUser).then(res => {

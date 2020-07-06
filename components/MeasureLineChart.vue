@@ -1,7 +1,11 @@
 <script>
 import { Scatter } from 'vue-chartjs'
 import moment from 'moment'
- 
+import chartPluginAnnotation from 'chartjs-plugin-annotation';
+
+let namedChartAnnotation = chartPluginAnnotation;
+namedChartAnnotation["id"]="annotation";
+
 export default {
   extends: Scatter,
   props: ['data', 'options'],
@@ -10,11 +14,13 @@ export default {
   },
   methods: {
 	updateChart () {
+		this.addPlugin(namedChartAnnotation),
 		this.renderChart(this.data, this.options)
 	}
   },
   mounted () {
-    this.renderChart(this.data, this.options)
+		this.addPlugin(namedChartAnnotation),
+		this.renderChart(this.data, this.options)
   }
 }
 </script>

@@ -16,7 +16,7 @@ module.exports = {
 	webVoteToken: process.env.WEB_VOTE_REWARD_KEY,
 	webCommentToken: process.env.WEB_COMMENT_REWARD_KEY,
 	steemApiNode: 'https://api.steemit.com/',
-	hiveApiNode: 'https://api.hive.blog',
+	hiveApiNode: 'https://anyx.io',
 	hiveStateApiNode: 'https://anyx.io',
 	altHiveNodes: ["https://api.hive.blog/", "https://anyx.io", "https://api.openhive.network", "https://api.hivekings.com", "https://hived.privex.io"],
 	actiAppUrl: process.env.ACTI_API_URL || 'http://localhost:3120/',
