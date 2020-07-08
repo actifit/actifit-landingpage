@@ -51,21 +51,34 @@
 						<span>{{ lastActivityCount }} <img src="/img/actifit_logo.png" class="activity-small-logo"></span></div></td>
 					<td colspan="2"><div class="text-center"><div class="phishy"><h6>Activity Date</h6></div>
 						<div><h6>{{ lastActivityDate }}</h6></div></div></td>
-					<!--<td><img src="/img/actifit_logo.png" class="mr-1 token-logo"></td>-->
 				</tr>
 				<tr>
 					<td colspan="4">
 						<a href="#" data-toggle="modal" class="btn btn-brand btn-block" 
-								 data-target="#activityChartModal" v-if="isFriend() || isOwnAccount() || 1==1">
+								 data-target="#activityChartModal" v-if="isFriend() || isOwnAccount()">
 							{{ $t('View_activity_chart') }}
 						</a>
+						<a href="#" class="btn btn-brand btn-block" v-on:click="displayAddFriendActivity=!displayAddFriendActivity" v-else-if="user" >
+							{{ $t('View_activity_chart') }}
+						</a>
+						<a href="#" class="btn btn-brand btn-block" v-on:click="displayLoginActivity=!displayLoginActivity" v-else >
+							{{ $t('View_activity_chart') }}
+						</a>
+						<div v-if="displayAddFriendActivity">
+							{{ $t('View_chart_notice').replace('_USER', this.username) }}
+							<span :title="$t('add_username_friend').replace('_USERNAME_', displayUser)" v-on:click="addFriend">
+								<i class="fas fa-user-plus p-2"></i>
+								<div v-if="addFriendError" v-html="addFriendError"></div>
+							</span>
+						</div>
+						<div v-if="displayLoginActivity">
+							  <div class="">
+								<a href="/login" class="btn btn-brand w-50">{{ $t('Login') }}</a>
+								<a href="/signup" class="btn btn-brand w-50">{{ $t('Sign_Up') }}</a>
+							  </div>
+						</div>
 					</td>
 				</tr>
-				<!--<tr>
-					<td colspan="4" class="font-italic">
-						<h6>Recent User Tracked Stats</h6>
-					</td>
-				</tr>-->
 				<tr>
 					<!--<img src="https://cdn.steemitimages.com/DQmdnh1nApZieHZ3s1fEhCALDjnzytFwo78zbAY5CLUMpoG/TRACKM.png">-->
 					<td><div class="text-center"><div class="phishy"><h6>Height</h6></div>
@@ -103,9 +116,28 @@
 			</table>
 			
 			<a href="#" data-toggle="modal" class="btn btn-brand btn-block" 
-					 data-target="#measureChartModal" v-if="isFriend() || isOwnAccount() || 1==1">
+					 data-target="#measureChartModal" v-if="isFriend() || isOwnAccount()">
 				{{ $t('Stats_chart') }}
 			</a>
+			<a href="#" class="btn btn-brand btn-block" v-on:click="displayAddFriendStats=!displayAddFriendStats" v-else-if="user" >
+				{{ $t('Stats_chart') }}
+			</a>
+			<a href="#" class="btn btn-brand btn-block" v-on:click="displayLoginStats=!displayLoginStats" v-else >
+				{{ $t('Stats_chart') }}
+			</a>
+			<div v-if="displayAddFriendStats">
+				{{ $t('View_chart_notice').replace('_USER', this.username) }}
+				<span :title="$t('add_username_friend').replace('_USERNAME_', displayUser)" v-on:click="addFriend">
+					<i class="fas fa-user-plus p-2"></i>
+					<div v-if="addFriendError" v-html="addFriendError"></div>
+				</span>
+			</div>
+			<div v-if="displayLoginStats">
+				  <div class="">
+					<a href="/login" class="btn btn-brand w-50">{{ $t('Login') }}</a>
+					<a href="/signup" class="btn btn-brand w-50">{{ $t('Sign_Up') }}</a>
+				  </div>
+			</div>
 			
 		  </div>
 		</div>
@@ -371,6 +403,10 @@
 			userActivity: [],
 			lastActivityCount: '-',
 			lastActivityDate: '-',
+			displayAddFriendStats: false,
+			displayAddFriendActivity: false,
+			displayLoginStats: false,
+			displayLoginActivity: false,
 		}
 	},
 	watch: {

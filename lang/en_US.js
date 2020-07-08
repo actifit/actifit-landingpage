@@ -627,6 +627,7 @@ module.exports = {
   Stats_chart: 'Stats Chart',
   Activity_chart: 'Activity Chart',
   View_activity_chart: 'Activity Chart',
+  View_chart_notice: 'To view _USER_ \'s charts, you need to be friends',
   Confirm_verf_transfer: 'Proceed with payment of _AMOUNT_ _CURR_ to verify your funds password?',
   healthapp: 'Health App',
   View_all: 'View All',
