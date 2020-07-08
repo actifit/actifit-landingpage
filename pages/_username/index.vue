@@ -69,7 +69,7 @@
 						<a href="#" class="btn btn-brand btn-block" v-on:click="displayLoginActivity=!displayLoginActivity" v-else >
 							{{ $t('View_activity_chart') }}
 						</a>
-						<div v-if="displayAddFriendActivity">
+						<div v-if="displayAddFriendActivity" class="border text-brand">
 							{{ $t('View_chart_notice').replace('_USER', this.username) }}
 							<span :title="$t('add_username_friend').replace('_USERNAME_', displayUser)" v-on:click="addFriend">
 								<i class="fas fa-user-plus p-2"></i>
@@ -130,7 +130,7 @@
 			<a href="#" class="btn btn-brand btn-block" v-on:click="displayLoginStats=!displayLoginStats" v-else >
 				{{ $t('Stats_chart') }}
 			</a>
-			<div v-if="displayAddFriendStats">
+			<div v-if="displayAddFriendStats" class="border text-brand">
 				{{ $t('View_chart_notice').replace('_USER', this.username) }}
 				<span :title="$t('add_username_friend').replace('_USERNAME_', displayUser)" v-on:click="addFriend">
 					<i class="fas fa-user-plus p-2"></i>

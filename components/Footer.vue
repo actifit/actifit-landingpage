@@ -94,8 +94,8 @@
 		content: "\f3e5" !important;
 	}
 	.user-avatar-small{
-		width: 20px;
-		height: 20px;
+		width: 30px;
+		height: 30px;
 		background-position: center center;
 		background-size: cover;
 		border-radius: 50%;
