@@ -13,7 +13,12 @@
       <NavbarBrand />
       <UserMenu />
     </nav>
-	<div v-if="errorDisplay==''" class="container pt-5 mt-5 pb-5 col-md-9" >
+	<div v-if="loadingData" class="container pt-5 mt-5 pb-5" >
+		<div class="mb-3 text-center">
+		  <i class="fas fa-spin fa-spinner text-brand" ></i>
+		</div>
+	</div>
+	<div v-else-if="errorDisplay==''" class="container pt-5 mt-5 pb-5 col-md-9" >
 		<h5 class="d-flex flex-row text-brand user-name" v-if="displayUser">
 			<a :href="formattedProfileUrl" target="_blank">@{{ displayUser }} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></a>
 			<span v-if="!account_banned && !isOwnAccount()" class="text-brand">
@@ -407,6 +412,7 @@
 			displayAddFriendActivity: false,
 			displayLoginStats: false,
 			displayLoginActivity: false,
+			loadingData: true,
 		}
 	},
 	watch: {
@@ -1013,12 +1019,14 @@
 		let chainLnk = await this.setProperNode();
 		
 		chainLnk.api.getAccounts([this.displayUser], function(err, result) {
+			parentRef.loadingData = false;
 			//result now contains the account details
 			if (result.length == 0){
 			  parentRef.noUserFound = true;
 			  parentRef.errorDisplay = parentRef.$t('user_not_found_error');
 			}else{
 			  parentRef.userinfo = result[0];
+			  
 			  //grab and display follower and following count
 				chainLnk.api.getFollowCount(parentRef.displayUser, function(err, result) {
 					//console.log(err, result);
