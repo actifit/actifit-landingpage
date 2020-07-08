@@ -12,7 +12,7 @@
         <span class="navbar-text py-0">{{ $t('Balance') }}<br><b>{{ formattedUserTokens }}</b></span>
       </li>
 	  <li class="nav-item mr-2" v-if="user">
-		<span class="user-avatar-small group-class notification-class text-brand" v-if="activeNotificationsLen > 0">{{ this.activeNotificationsLen }}</span>
+		<span class="user-avatar-notif-menu group-class notification-class text-brand" v-if="activeNotificationsLen > 0">{{ this.activeNotificationsLen }}</span>
         <span class="user-avatar group-class" v-if="activeNotificationsLen > 0">
 			<a class="nav-link dropdown-toggle p-0" id="user_menu_navlink" href="#" data-toggle="dropdown" :title="$t('Notifications_popup').replace('_count_', activeNotificationsLen)">
 				<i class="fas fa-bell p-2 text-brand"></i>
@@ -306,7 +306,7 @@
 		width: auto;
 		min-width: 20px;
 	}
-	.group-class.user-avatar-small{
+	.group-class.user-avatar-notif-menu{
 		float: left;
 	}
 	.user-avatar{
