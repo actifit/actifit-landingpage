@@ -624,6 +624,7 @@ module.exports = {
   switch_to_chain: 'Switch to _CHAIN_',
   Measurements_chart: 'Measurements Chart',
   View_chart: 'View Chart',
+  Stats_chart: 'Stats Chart',
   Activity_chart: 'Activity Chart',
   View_activity_chart: 'Activity Chart',
   Confirm_verf_transfer: 'Proceed with payment of _AMOUNT_ _CURR_ to verify your funds password?',

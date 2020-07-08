@@ -147,7 +147,7 @@
 			
 			
 			for (let i=0;i<this.userActivity.length;i++){
-				console.log(this.userActivity[i]);
+				//console.log(this.userActivity[i]);
 				if (this.userActivity[i].date){
 					if (this.userActivity[i].json_metadata.step_count){
 						trackedData.push({
@@ -157,7 +157,7 @@
 					}
 				}
 			}
-			console.log(trackedData);
+			//console.log(trackedData);
 
 			
 			this.weightVals = {

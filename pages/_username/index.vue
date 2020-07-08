@@ -47,10 +47,25 @@
 		  <div class="acti-widget" v-if="displayUser">
 			<table>
 				<tr>
+					<td colspan="2"><div class="text-center"><div class="phishy"><h6>Activity Count</h6></div>
+						<span>{{ lastActivityCount }} <img src="/img/actifit_logo.png" class="activity-small-logo"></span></div></td>
+					<td colspan="2"><div class="text-center"><div class="phishy"><h6>Activity Date</h6></div>
+						<div><h6>{{ lastActivityDate }}</h6></div></div></td>
+					<!--<td><img src="/img/actifit_logo.png" class="mr-1 token-logo"></td>-->
+				</tr>
+				<tr>
+					<td colspan="4">
+						<a href="#" data-toggle="modal" class="btn btn-brand btn-block" 
+								 data-target="#activityChartModal" v-if="isFriend() || isOwnAccount() || 1==1">
+							{{ $t('View_activity_chart') }}
+						</a>
+					</td>
+				</tr>
+				<!--<tr>
 					<td colspan="4" class="font-italic">
 						<h6>Recent User Tracked Stats</h6>
 					</td>
-				</tr>
+				</tr>-->
 				<tr>
 					<!--<img src="https://cdn.steemitimages.com/DQmdnh1nApZieHZ3s1fEhCALDjnzytFwo78zbAY5CLUMpoG/TRACKM.png">-->
 					<td><div class="text-center"><div class="phishy"><h6>Height</h6></div>
@@ -87,14 +102,11 @@
 				</tr>
 			</table>
 			
-			<a href="#" data-toggle="modal" class="btn btn-brand" 
+			<a href="#" data-toggle="modal" class="btn btn-brand btn-block" 
 					 data-target="#measureChartModal" v-if="isFriend() || isOwnAccount() || 1==1">
-				{{ $t('View_chart') }}
+				{{ $t('Stats_chart') }}
 			</a>
-			<a href="#" data-toggle="modal" class="btn btn-brand" 
-					 data-target="#activityChartModal" v-if="isFriend() || isOwnAccount() || 1==1">
-				{{ $t('View_activity_chart') }}
-			</a>
+			
 		  </div>
 		</div>
 		  <div class="d-flex flex-column">
@@ -357,6 +369,8 @@
 			lastUpdated: '-',
 			userMeasurements: [],
 			userActivity: [],
+			lastActivityCount: '-',
+			lastActivityDate: '-',
 		}
 	},
 	watch: {
@@ -1089,6 +1103,11 @@
 		console.log('setUserActivity');
 		console.log(json);
 		this.userActivity = json;
+		if (Array.isArray(json) && json.length > 0){
+			console.log(json[0].json_metadata);
+			this.lastActivityCount = this.numberFormat(json[0].json_metadata.step_count[0]);
+			this.lastActivityDate = this.pureDate(json[0].date);
+		}
 	  },
 	},
 	async mounted () {
@@ -1343,5 +1362,11 @@
 	.acti-widget img{
 		width: 50px;
 		max-width: unset;
+	}
+	.activity-small-logo{
+		width: 25px!important;
+	}
+	.phishy h6{
+		font-weight: bold;
 	}
 </style>
