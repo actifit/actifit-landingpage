@@ -655,4 +655,5 @@ module.exports = {
   Error_provide_recovery_account:'Missing Recovery Account',
   Error_provide_owner_key:'Missing Private Owner Key',
   Success_update_recovery_account: 'You have successfully requested a change to your recovery account. Please be aware the actual change will occur 30 days post your request.',
+  Activity_chart: 'Activity Chart',
 }

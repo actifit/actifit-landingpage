@@ -56,7 +56,11 @@
           </div>
           <div class="col-6 text-right">
             <small>
-              <a href="#" class="text-brand" @click="$store.commit('setEditReport', report)" data-toggle="modal"
+              <a href="#" class="text-brand pr-2" @click="$store.commit('setActiveReport', report)" data-toggle="modal"
+                 data-target="#dailyActivityChartModal" :title="$t('Activity_chart')">
+                <i class="fas fa-chart-line"></i>
+              </a>
+			  <a href="#" class="text-brand" @click="$store.commit('setEditReport', report)" data-toggle="modal"
                  data-target="#editReportModal" v-if="user && report.author === user.account.name" :title="$t('Edit_note')">
                 <i class="fas fa-edit p-2"></i>
               </a>

@@ -51,6 +51,7 @@
 
     <Footer />
     <ReportModal :report="activeReport" />
+	<DailyActivityChartModal :report="activeReport" />
     <EditReportModal />
     <VoteModal :report="activeReport"/>
 	<NotifyModal :modalTitle="$t('Actifit_Info')" :modalText="$t('VP_desc')"/>
@@ -74,7 +75,8 @@
   import VoteModal from '~/components/VoteModal'
   import VotingStatus from '~/components/VotingStatus'
   import NotifyModal from '~/components/NotifyModal'
-
+  import DailyActivityChartModal from '~/components/DailyActivityChartModal'
+	
   import { mapGetters } from 'vuex'
 
   export default {
@@ -96,7 +98,8 @@
       EditReportModal,
       VoteModal,
 	  VotingStatus,
-	  NotifyModal
+	  NotifyModal,
+	  DailyActivityChartModal
     },
     data () {
       return {
