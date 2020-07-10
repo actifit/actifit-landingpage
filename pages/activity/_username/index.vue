@@ -52,6 +52,7 @@
 
     <Footer />
     <ReportModal :report="activeReport" />
+	<DailyActivityChartModal :report="activeReport" />
     <EditReportModal />
     <VoteModal />
     <no-ssr>
@@ -71,6 +72,7 @@
   import ReportModal from '~/components/ReportModal'
   import EditReportModal from '~/components/EditReportModal'
   import VoteModal from '~/components/VoteModal'
+  import DailyActivityChartModal from '~/components/DailyActivityChartModal'
 
   import { mapGetters } from 'vuex'
 
@@ -91,7 +93,8 @@
       Footer,
       ReportModal,
       EditReportModal,
-      VoteModal
+      VoteModal,
+	  DailyActivityChartModal
     },
     data () {
       return {

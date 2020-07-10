@@ -138,17 +138,13 @@
 	methods: {
 		async setupChartData(){
 			//extract proper needed data for chart
-			console.log('setupChartData');
-			console.log(this.report);
 			let trackedData = [];
 			if (this.report && JSON.parse(this.report.json_metadata)){
 				let activityDataJsn = JSON.parse(this.report.json_metadata);
-				console.log(activityDataJsn);
 				if (Array.isArray(activityDataJsn.detailedActivity)&& activityDataJsn.detailedActivity.length>0){
 					let activityData = activityDataJsn.detailedActivity[0].split('|');
 					let activityDate = new Date(activityDataJsn.activityDate[0].substr(0,4),activityDataJsn.activityDate[0].substr(4,2)-1, activityDataJsn.activityDate[0].substr(6,2));
 					for (let i=0;i<activityData.length;i++){
-						console.log(activityData[i]);
 						/*if (this.report[i].date){
 							if (this.report[i].json_metadata.step_count){*/
 								trackedData.push({
@@ -161,8 +157,6 @@
 				}
 			
 			}
-			console.log(trackedData);
-
 			
 			this.weightVals = {
 				datasets: [
