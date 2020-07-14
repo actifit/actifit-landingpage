@@ -15,7 +15,7 @@
             <a :href="'/'+report.author" target="_blank">
 			
               <div class="user-avatar mr-1"
-                   :style="'background-image: url(https://steemitimages.com/u/' + report.author + '/avatar)'"></div>
+                   :style="'background-image: url('+profImgUrl+'/u/' + report.author + '/avatar)'"></div>
               <small class="d-inline-block align-top">@{{ report.author }}</small>
 			  <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small>
             </a>
@@ -232,6 +232,7 @@
 			fullAFITReward: '',
 			postUpvoted: false,
 			cur_bchain: 'HIVE',
+			profImgUrl: process.env.hiveImgUrl,
 		}
 	},
 	watch: {
@@ -305,6 +306,11 @@
 		this.$store.dispatch('fetchModerators')
 		
 		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+		
+		this.profImgUrl = process.env.hiveImgUrl;
+		if (this.cur_bchain == 'STEEM'){
+			this.profImgUrl = process.env.steemImgUrl;
+		}
 	},
 	
   }

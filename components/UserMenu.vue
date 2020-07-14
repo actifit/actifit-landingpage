@@ -29,7 +29,7 @@
 						<i class="fas fa-user-friends p-1" v-else-if="notif.type == 'friendship_acceptance'"></i>
 						<span>{{ notif.details }}</span>
 						<span v-if="notif.action_taker" class="user-avatar user-avatar-medium mr-1 mb-3"
-					   :style="'background-image: url(https://steemitimages.com/u/' + notif.action_taker + '/avatar)'"></span>
+					   :style="'background-image: url('+profImgUrl+'/u/' + notif.action_taker + '/avatar)'"></span>
 					</a>
 				</span>
 				<span>
@@ -57,7 +57,7 @@
 	  </li>
       <li class="nav-item dropdown" v-if="user">
         <a class="nav-link dropdown-toggle p-0" id="user_menu_navlink" href="#" data-toggle="dropdown">
-          <div class="user-avatar group-class" :style="'background-image: url(https://steemitimages.com/u/' + user.account.name + '/avatar)'"></div>
+          <div class="user-avatar group-class" :style="'background-image: url('+profImgUrl+'/u/' + user.account.name + '/avatar)'"></div>
         </a>
         <div class="dropdown-menu dropdown-menu-right">
           <h6 class="dropdown-header text-center">@{{ user.account.name }}</h6>
@@ -104,6 +104,7 @@
 			activeNotificationsLen: 1,
 			cur_bchain: 'HIVE',
 			reload: 0,
+			profImgUrl: process.env.steemImgUrl,
 		}
 	},
 	watch: {
@@ -177,6 +178,11 @@
 		this.$store.commit('setBchain', this.cur_bchain);
 		
 		localStorage.setItem('cur_bchain', this.cur_bchain);
+		
+		this.profImgUrl = process.env.hiveImgUrl;
+		if (this.cur_bchain == 'STEEM'){
+			this.profImgUrl = process.env.steemImgUrl;
+		}
 	  },
 	  proceedLogout () {
 		this.$store.commit('setStdLoginUser', false);
@@ -251,6 +257,12 @@
 		//grab current active chain
 		if (localStorage.getItem('cur_bchain')){
 			this.cur_bchain = localStorage.getItem('cur_bchain')
+		}
+		
+		
+		this.profImgUrl = process.env.hiveImgUrl;
+		if (this.cur_bchain == 'STEEM'){
+			this.profImgUrl = process.env.steemImgUrl;
 		}
 		
 		//grab moderators' list

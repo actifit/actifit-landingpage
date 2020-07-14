@@ -20,7 +20,7 @@
 		<h5>{{ $t('Active_Friendships') }}</h5>
 		<div class="row pb-3">
 			<div v-if="userFriends && Array.isArray(userFriends) && userFriends.length>0" v-for="(curFriend, index) in userFriends" :key="index" class="col-md-3">
-				<a :href="'/'+curFriend.friend"><div class="avatar mr-1" :style="'background-image: url(\'https://steemitimages.com/u/' + curFriend.friend + '/avatar\')'"></div>
+				<a :href="'/'+curFriend.friend"><div class="avatar mr-1" :style="'background-image: url(\''+profImgUrl+'/u/' + curFriend.friend + '/avatar\')'"></div>
 				<div class="friend-name text-center">@{{curFriend.friend}}</div></a>
 			</div>
 			<div v-else class="text-center text-brand">
@@ -31,13 +31,13 @@
 		<h5>{{ $t('Pending_Friendships') }}</h5>
 		<div class="row pb-3">
 			<div v-if="friendRequests && Array.isArray(friendRequests.sent_pending) && friendRequests.sent_pending.length>0" v-for="pendFriend in friendRequests.sent_pending" :key="pendFriend.target" class="col-md-3  text-brand">
-				<a :href="'/'+pendFriend.target"><div class="avatar mr-1" :style="'background-image: url(\'https://steemitimages.com/u/' + pendFriend.target + '/avatar\')'"></div>
+				<a :href="'/'+pendFriend.target"><div class="avatar mr-1" :style="'background-image: url(\''+profImgUrl+'/u/' + pendFriend.target + '/avatar\')'"></div>
 				<span class="friend-name text-center">@{{pendFriend.target}}</span></a>
 				<!--<span :title="$t('cancel_friend_request')" v-on:click="cancelFriendRequest" v-if="isPendingFriend(pendFriend.target).direction == 1"><i class="fas fa-user-times"></i></span>
 				<span :title="$t('accept_friend_request')" v-on:click="acceptFriend" v-else-if="isPendingFriend(pendFriend.target).direction == 0"><i class="fas fa-user-check"></i></span>-->
 			</div>
 			<div v-if="friendRequests && Array.isArray(friendRequests.received_pending) && friendRequests.received_pending.length>0" v-for="pendFriend in friendRequests.received_pending" :key="pendFriend.initiator" class="col-md-3 text-brand">
-				<a :href="'/'+pendFriend.initiator"><div class="avatar mr-1" :style="'background-image: url(\'https://steemitimages.com/u/' + pendFriend.initiator + '/avatar\')'"></div>
+				<a :href="'/'+pendFriend.initiator"><div class="avatar mr-1" :style="'background-image: url(\''+profImgUrl+'/u/' + pendFriend.initiator + '/avatar\')'"></div>
 				<span class="friend-name text-center">@{{pendFriend.initiator}}</span></a>
 				<!--<span :title="$t('cancel_friend_request')" v-on:click="cancelFriendRequest" v-if="isPendingFriend(pendFriend.initiator).direction == 1"><i class="fas fa-user-times"></i></span>
 				<span :title="$t('accept_friend_request')" v-on:click="acceptFriend" v-else-if="isPendingFriend(pendFriend.initiator).direction == 0"><i class="fas fa-user-check"></i></span>-->
@@ -148,7 +148,7 @@
 			addFriendError: '',
 			acti_goog_ad_square:{display:'inline-block', maxWidth:'300px', maxHeight: '350px'},
 			showModal: false,
-			
+			profImgUrl: process.env.hiveImgUrl,
 			cur_bchain: 'HIVE',
 		}
 	},
@@ -581,7 +581,7 @@
 	  showFriendsSnippet(){
 		let snipp = '<span>';
 		for (let i=0; i < Math.min(this.userFriends.length, this.maxFriendDisplay); i++){
-			snipp += '<div class="user-avatar-small mr-1" title="' + this.userFriends[i].friend + '" style="background-image: url(\'https://steemitimages.com/u/' + this.userFriends[i].friend + '/avatar\')"></div>';
+			snipp += '<div class="user-avatar-small mr-1" title="' + this.userFriends[i].friend + '" style="background-image: url(\''+this.profImgUrl+'/u/' + this.userFriends[i].friend + '/avatar\')"></div>';
 		}
 		if (this.userFriends.length > this.maxFriendDisplay){
 			snipp += '+ ' + (this.userFriends.length - this.maxFriendDisplay) + this.$t('other') + ' ' + this.$t('friends');
@@ -593,6 +593,10 @@
 	},
 	async mounted () {
 		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+		this.profImgUrl = process.env.hiveImgUrl;
+		if (this.cur_bchain == 'STEEM'){
+			this.profImgUrl = process.env.steemImgUrl;
+		}
 		// login
 		this.$store.dispatch('steemconnect/login')
 		this.fetchUserData();

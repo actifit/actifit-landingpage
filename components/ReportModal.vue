@@ -172,7 +172,7 @@
 			<a :href="this.user.name" target="_blank">
 			  <div class="comment-user-section">	
 				<div class="user-avatar mr-1"
-					   :style="'background-image: url(https://steemitimages.com/u/' + this.user.name + '/avatar)'"></div>
+					   :style="'background-image: url('+profImgUrl+'/u/' + this.user.name + '/avatar)'"></div>
 				<div class="modal-author modal-title text-brand" >@{{ user.name }}<small class="date-head text-muted">{{ $t('Now') }}</small></div>
 			  </div>
 			</a>
@@ -240,6 +240,7 @@
 			},
 			displayMorePayoutData: false,
 			cur_bchain: 'HIVE',
+			profImgUrl: process.env.steemImgUrl,
 		}
 	},
 	watch: {
@@ -642,7 +643,12 @@
 		//grab moderators' list
 		this.$store.dispatch('fetchModerators')
 		
+		this.profImgUrl = process.env.hiveImgUrl;
+		
 		if (this.cur_bchain == 'STEEM'){
+		
+			this.profImgUrl = process.env.steemImgUrl;
+			
 			//grab post S-E token pay
 			fetch(scot_steemengine_api+'@'+this.report.author+'/'+this.report.permlink ).then(
 				res => {res.json().then(json => this.setReportTokenRewards (json) ).catch(e => reject(e))

@@ -25,7 +25,7 @@
 			<div class="col-md-4">
 				<a :href="formattedProfileUrl(suggestion.author)" target="_blank">
 					<div class="user-avatar large-avatar mr-1"
-					   :style="'background-image: url(https://steemitimages.com/u/' + suggestion.author + '/avatar)'"></div>
+					   :style="'background-image: url('+profImgUrl+'/u/' + suggestion.author + '/avatar)'"></div>
 				</a>
 			</div>
 			<div class="col-md-7 mini-user-card text-left">
@@ -90,6 +90,7 @@
 		friendshipLoader: false,
 		userTokens: '',
 		innerShowModal: false,
+		profImgUrl: process.env.hiveImgUrl,
 	  }
 	},
     computed: {
@@ -363,7 +364,13 @@
 		user: 'populateFriends',
 	},
 	async mounted () {	
-	
+	  
+	  this.profImgUrl = process.env.hiveImgUrl;
+	  this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+	  if (this.cur_bchain == 'STEEM'){
+		this.profImgUrl = process.env.steemImgUrl;
+	  }
+	  
 	  //we have 3 images to choose from
 	  this.randImg = Math.ceil(Math.random() * (3 - 1) + 1);
 	  this.screenWidth = screen.width;

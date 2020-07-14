@@ -15,6 +15,8 @@ module.exports = {
 	webEditToken: process.env.WEB_EDIT_REWARD_KEY,
 	webVoteToken: process.env.WEB_VOTE_REWARD_KEY,
 	webCommentToken: process.env.WEB_COMMENT_REWARD_KEY,
+	steemImgUrl: 'https://steemitimages.com',
+	hiveImgUrl: 'https://images.hive.blog',
 	steemApiNode: 'https://api.steemit.com/',
 	hiveApiNode: 'https://anyx.io',
 	hiveStateApiNode: 'https://anyx.io',

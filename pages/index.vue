@@ -220,14 +220,14 @@
         <div class="row">
           <div  v-if="topDelegators.hive" class="col-6 col-sm-4 col-md-3 text-center mb-4" v-for="(delegator, index) in topDelegators.hive" :key="'hive'+index" :delegator="delegator">
             <a :href="delegator._id" target="_blank">
-              <div class="avatar avatar-hive small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + delegator._id + '/avatar);'"></div>
+              <div class="avatar avatar-hive small mx-auto mb-3" :style="'background-image: url('+profImgUrl+'/u/' + delegator._id + '/avatar);'"></div>
             </a>
             <a :href="delegator._id" target="_blank">@{{ delegator._id }}</a><br/>
 			<img src="/img/HIVE.png" style="max-height: 20px;"><a :href="delegator._id" target="_blank">{{ numberFormat(delegator.steem_power, 0) }} {{ $t('Hive_Power') }}</a>
           </div>
 		  <div  v-if="topDelegators.steem" class="col-6 col-sm-4 col-md-3 text-center mb-4" v-for="(delegator, index) in topDelegators.steem" :key="'steem'+index" :delegator="delegator">
             <a :href="delegator._id" target="_blank">
-              <div class="avatar avatar-steem small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + delegator._id + '/avatar);'"></div>
+              <div class="avatar avatar-steem small mx-auto mb-3" :style="'background-image: url('+profImgUrl+'/u/' + delegator._id + '/avatar);'"></div>
             </a>
             <a :href="delegator._id" target="_blank">@{{ delegator._id }}</a><br/>
 			<img src="/img/STEEM.png" style="max-height: 20px;"><a :href="delegator._id" target="_blank">{{ numberFormat(delegator.steem_power, 0) }} {{ $t('Steem_Power') }}</a>
@@ -251,7 +251,7 @@
             <div>
               <h2>2.</h2>
               <a :href="leaderboard[1].username" target="_blank">
-                <div class="avatar mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + leaderboard[1].username.replace('@','') + '/avatar);'"></div>
+                <div class="avatar mx-auto mb-3" :style="'background-image: url('+profImgUrl+'/u/' + leaderboard[1].username.replace('@','') + '/avatar);'"></div>
               </a>
               <a :href="leaderboard[1].username" target="_blank">{{ leaderboard[1].username }}</a><br/>
 			  <a :href="leaderboard[1].username" target="_blank">{{ leaderboard[1].activity_count }} {{ $t('Recorded_Activity') }}</a>
@@ -261,7 +261,7 @@
             <div>
               <h2>1.</h2>
               <a :href="leaderboard[0].username" target="_blank">
-                <div class="avatar mx-auto mb-3" :style="'width: 200px; height: 200px; background-image: url(https://steemitimages.com/u/' + leaderboard[0].username.replace('@','') + '/avatar);'"></div>
+                <div class="avatar mx-auto mb-3" :style="'width: 200px; height: 200px; background-image: url('+profImgUrl+'/u/' + leaderboard[0].username.replace('@','') + '/avatar);'"></div>
               </a>
               <a :href="leaderboard[0].username" target="_blank">{{ leaderboard[0].username }}</a><br/>
 			  <a :href="leaderboard[0].username" target="_blank">{{ leaderboard[0].activity_count }} {{ $t('Recorded_Activity') }}</a>
@@ -271,7 +271,7 @@
             <div>
               <h2>3.</h2>
               <a :href="leaderboard[2].username" target="_blank">
-                <div class="avatar mx-auto mb-3" :style="'width: 100px; height: 100px; background-image: url(https://steemitimages.com/u/' + leaderboard[2].username.replace('@','') + '/avatar);'"></div>
+                <div class="avatar mx-auto mb-3" :style="'width: 100px; height: 100px; background-image: url('+profImgUrl+'/u/' + leaderboard[2].username.replace('@','') + '/avatar);'"></div>
               </a>
               <a :href="leaderboard[2].username" target="_blank">{{ leaderboard[2].username }}</a><br/>
 			  <a :href="leaderboard[2].username" target="_blank">{{ leaderboard[2].activity_count }} {{ $t('Recorded_Activity') }}</a>
@@ -410,7 +410,7 @@
         <div class="row">
           <div class="col-6 col-sm-4 text-center mb-4" v-for="(ambassador, index) in ambassadors" :key="index" :moderator="ambassador.name">
             <a :href="ambassador.name" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://steemitimages.com/u/' + ambassador.name + '/avatar);'"></div>
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url('+profImgUrl+'/u/' + ambassador.name + '/avatar);'"></div>
             </a>
             <a :href="ambassador.name" target="_blank">@{{ ambassador.name }}</a>
           </div>
@@ -514,6 +514,7 @@
         tweenedTokensDistributed: 0,
         tweenedRewardedActivityCount: 0,
 		reload: 0,
+		profImgUrl: process.env.hiveImgUrl,
       }
     },
     computed: {
@@ -558,6 +559,10 @@
 	  bchain: async function(newBchain) {
 		console.log('user activity change in chain '+newBchain);
 		this.cur_bchain = newBchain;
+		this.profImgUrl = process.env.hiveImgUrl;
+		if (this.cur_bchain == 'STEEM'){
+			this.profImgUrl = process.env.steemImgUrl;
+		}
 		await this.$store.dispatch('steemconnect/refreshUser');
 		this.fetchUserData();
 		this.reload += 1;

@@ -258,6 +258,7 @@
 			downloadHref: '',
 			firstDownloadHref: '',
 			boughtItems: [],
+			profImgUrl: process.env.steemImgUrl,
 		}
 	},
 	watch: {
@@ -852,7 +853,12 @@
 		}
 		if (this.product_prov_pic == ''){
 			//still no pic, grab steemit default one
-			this.product_prov_pic = 'https://steemitimages.com/u/' + this.product.provider + '/avatar';
+			this.profImgUrl = process.env.hiveImgUrl;
+			let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+			if (cur_bchain == 'STEEM'){
+				this.profImgUrl = process.env.steemImgUrl;
+			}
+			this.product_prov_pic = this.profImgUrl+'/u/' + this.product.provider + '/avatar';
 		}
 	  },
 	},

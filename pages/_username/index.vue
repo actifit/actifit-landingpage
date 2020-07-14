@@ -48,7 +48,7 @@
 		<div class="d-flex flex-row">
         <div class="d-flex flex-column mb-3">
 		  <div v-if="displayUser" class="user-avatar large-avatar mr-1 mb-3"
-					   :style="'background-image: url(https://steemitimages.com/u/' + this.displayUser + '/avatar)'"></div>
+					   :style="'background-image: url('+this.profImgUrl+'/u/' + this.displayUser + '/avatar)'"></div>
 		  <div class="acti-widget" v-if="displayUser">
 			<table>
 				<tr>
@@ -413,6 +413,7 @@
 			displayLoginStats: false,
 			displayLoginActivity: false,
 			loadingData: true,
+			profImgUrl: process.env.hiveImgUrl,
 		}
 	},
 	watch: {
@@ -1003,12 +1004,12 @@
 		}
 	  },
 	  setProperNode (){
-		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		let properNode = hive;
-		if (cur_bchain == 'STEEM'){
+		if (this.cur_bchain == 'STEEM'){
 			properNode = steem;
 		}
-		console.log(cur_bchain);
+		console.log(this.cur_bchain);
 		return properNode;
 	  },
 	  /* handles fetching of user related info */
@@ -1017,6 +1018,11 @@
 		let parentRef = this;
 		
 		let chainLnk = await this.setProperNode();
+		
+		this.profImgUrl = process.env.hiveImgUrl;
+		if (this.cur_bchain == 'STEEM'){
+			this.profImgUrl = process.env.steemImgUrl;
+		}
 		
 		chainLnk.api.getAccounts([this.displayUser], function(err, result) {
 			parentRef.loadingData = false;
@@ -1076,7 +1082,7 @@
 	  showFriendsSnippet(){
 		let snipp = '<span>';
 		for (let i=0; i < Math.min(this.userFriends.length, this.maxFriendDisplay); i++){
-			snipp += '<div class="user-avatar-small mr-1" title="' + this.userFriends[i].friend + '" style="background-image: url(\'https://steemitimages.com/u/' + this.userFriends[i].friend + '/avatar\')"></div>';
+			snipp += '<div class="user-avatar-small mr-1" title="' + this.userFriends[i].friend + '" style="background-image: url(\''+this.profImgUrl+'/u/' + this.userFriends[i].friend + '/avatar\')"></div>';
 		}
 		if (this.userFriends.length > this.maxFriendDisplay){
 			snipp += '+ ' + (this.userFriends.length - this.maxFriendDisplay) + ' ' + this.$t('other') + ' ' + this.$t('friends')+'';

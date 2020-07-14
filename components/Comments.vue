@@ -4,7 +4,7 @@
 		<a :href="'/' + author" target="_blank">
 		  <div class="comment-user-section" :style="{ paddingLeft: depth * indentFactor + 'px' }">	
 			<div class="user-avatar mr-1"
-                   :style="'background-image: url(https://steemitimages.com/u/' + author + '/avatar)'"></div>
+                   :style="'background-image: url('+this.profImgUrl+'/u/' + author + '/avatar)'"></div>
 			<div class="modal-author modal-title text-brand" >@{{ author }}<small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small>
 			</div>
 		  </div>
@@ -104,7 +104,7 @@
 			<a :href="this.user.account.name" target="_blank">
 			  <div class="comment-user-section" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }">	
 				<div class="user-avatar mr-1"
-					   :style="'background-image: url(https://steemitimages.com/u/' + this.user.account.name + '/avatar)'"></div>
+					   :style="'background-image: url('+this.profImgUrl+'/u/' + this.user.account.name + '/avatar)'"></div>
 				<div class="modal-author modal-title text-brand" >@{{ user.name }}<small class="date-head text-muted">{{ $t('Now') }}</small></div>
 			  </div>
 			</a>
@@ -157,6 +157,7 @@
 			indentFactor: 30,
 			cur_bchain: 'HIVE',
 			target_bchain: 'HIVE',
+			profImgUrl: process.env.hiveImgUrl,
 			editorConfig: { // markdown editor for post body
 			  autofocus: true,
 			  spellChecker: false,
@@ -653,6 +654,11 @@
 	  },
     },
 	async mounted () {
+	  this.profImgUrl = process.env.hiveImgUrl;
+	  this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+	  if (this.cur_bchain == 'STEEM'){
+		this.profImgUrl = process.env.steemImgUrl;
+	  }
 	  if (this.full_data != null){
 		this.fetchReportData();
 	  }

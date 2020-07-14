@@ -18,7 +18,7 @@
           <h4 id="exampleModalLabel">{{ report.title }}</h4>
 		  <h5 class="text-brand" >
 			<div class="user-avatar mid-avatar mr-1 mb-5"
-					   :style="'background-image: url(https://steemitimages.com/u/' + this.report.author + '/avatar)'"></div>
+					   :style="'background-image: url('+profImgUrl+'/u/' + this.report.author + '/avatar)'"></div>
 			<a :href="'/'+report.author" target="_blank">@{{ report.author}} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></a></h5>
 		  <span class="date-head text-muted">{{ date }}</span>
 		  <div class="report-tags p-1" v-html="displayReportTags"></div>
@@ -183,7 +183,7 @@
 			<a :href="'/'+this.user.account.name" target="_blank">
 			  <div class="comment-user-section">	
 				<div class="user-avatar mr-1"
-					   :style="'background-image: url(https://steemitimages.com/u/' + this.user.account.name + '/avatar)'"></div>
+					   :style="'background-image: url('+profImgUrl+'/u/' + this.user.account.name + '/avatar)'"></div>
 				<div class="modal-author modal-title text-brand" >@{{ user.account.name }}<small class="date-head text-muted">{{ $t('Now') }}</small></div>
 			  </div>
 			</a>
@@ -391,6 +391,7 @@
 			cur_bchain: 'HIVE',
 			target_bchain: 'HIVE',
 			reload: 0,
+			profImgUrl: process.env.hiveImgUrl,
 		}
 	},
 	watch: {
@@ -402,6 +403,10 @@
 		this.cur_bchain = newBchain;
 		await this.$store.dispatch('steemconnect/refreshUser');
 		await this.updatePostData();
+		this.profImgUrl = process.env.hiveImgUrl;
+		if (this.cur_bchain == 'STEEM'){
+			this.profImgUrl = process.env.steemImgUrl;
+		}
 		this.reload += 1;
 	  }
 	},
@@ -911,7 +916,10 @@
 		  this.updatePostData();
 		}
 		
-
+		this.profImgUrl = process.env.hiveImgUrl;
+		if (this.cur_bchain == 'STEEM'){
+			this.profImgUrl = process.env.steemImgUrl;
+		}
 		  	
 	}
   }

@@ -37,7 +37,7 @@
 					<i class="fas fa-user-friends p-1" v-else-if="notif.type == 'friendship_acceptance'"></i>
 					<span>{{ notif.details }}</span>
 					<span v-if="notif.action_taker" class="user-avatar notifications-avatar mr-1 mb-3"
-				   :style="'background-image: url(https://steemitimages.com/u/' + notif.action_taker + '/avatar)'"></span>
+				   :style="'background-image: url('+this.profImgUrl+'/u/' + notif.action_taker + '/avatar)'"></span>
 				</a>
 			</span>
 			<span class="col-md-1">
@@ -110,6 +110,7 @@
 			loading: false,
 			acti_goog_ad_square:{display:'inline-block', maxWidth:'300px', maxHeight: '350px'},
 			currentFilter: 'all',
+			profImgUrl: process.env.hiveImgUrl,
 		}
 	},
 	watch: {
@@ -251,6 +252,12 @@
 		this.$store.dispatch('steemconnect/login')
 		
 		this.updateUserData()
+		
+		this.profImgUrl = process.env.hiveImgUrl;
+		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+		if (cur_bchain == 'STEEM'){
+			this.profImgUrl = process.env.steemImgUrl;
+		}
 		
 		//fetch new notifications every minute
 		setInterval(this.updateUserData, 60000);

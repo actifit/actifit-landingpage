@@ -29,7 +29,7 @@
 				<div class="p-3">{{index+1}}</div>
 			  </span>
               <a :href="curEntry.author" target="_blank">
-                <div class="avatar mb-3 " :style="'background-image: url(https://steemitimages.com/u/' + curEntry.author.replace('@','') + '/avatar);'"></div>
+                <div class="avatar mb-3 " :style="'background-image: url('+profImgUrl+'/u/' + curEntry.author.replace('@','') + '/avatar);'"></div>
               </a>
               <a :href="curEntry.author" target="_blank" class="col-md-3 mt-3"><span>@{{ curEntry.author }}</span></a><br/>
 			  <a :href="curEntry.author" target="_blank" class="col-md-3 mt-3"><span>{{ numberFormat(curEntry.activityCount[0], 0) }} {{$t('Recorded_Activity')}}</span></a>
@@ -67,6 +67,11 @@
 		return "h-50";
 	  },
     },
+	data () {
+		return {
+			profImgUrl: process.env.hiveImgUrl,
+		}
+	},
 	watch: {
 		user: 'fetchUserData',
 	},
@@ -118,6 +123,12 @@
       this.$store.dispatch('fetchExtendedLeaderboard')
 	  this.$store.dispatch('steemconnect/login')
 	  this.fetchUserData();
+	  
+	  let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+		this.profImgUrl = process.env.hiveImgUrl;
+		if (cur_bchain == 'STEEM'){
+			this.profImgUrl = process.env.steemImgUrl;
+		}
 	}
   }
 </script>
