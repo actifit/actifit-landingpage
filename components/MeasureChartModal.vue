@@ -153,6 +153,7 @@
 				  spanGaps: true,
 				  fill: false,
 				  data: weightData,
+				  borderWidth: 1
 				},
 				{
 				  label: 'Height',
@@ -162,6 +163,7 @@
 				  spanGaps: true,
 				  fill: false,
 				  data: heightData,
+				  borderWidth: 1
 				},
 				{
 				  label: 'Bodyfat Progress',
@@ -171,6 +173,7 @@
 				  spanGaps: true,
 				  fill: false,
 				  data: bodyfatData,
+				  borderWidth: 1
 				},
 				{
 				  label: 'Chest Progress',
@@ -180,6 +183,7 @@
 				  spanGaps: true,
 				  fill: false,
 				  data: chestData,
+				  borderWidth: 1
 				},
 				{
 				  label: 'Waist Progress',
@@ -189,6 +193,7 @@
 				  spanGaps: true,
 				  fill: false,
 				  data: waistData,
+				  borderWidth: 1
 				},
 				{
 				  label: 'Thighs Progress',
@@ -198,6 +203,7 @@
 				  spanGaps: true,
 				  fill: false,
 				  data: thighsData,
+				  borderWidth: 1
 				}
 			  ]
 			};

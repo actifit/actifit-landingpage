@@ -170,6 +170,7 @@
 				  spanGaps: true,
 				  fill: false,
 				  data: trackedData,
+				  borderWidth: 1
 				},
 			  ]
 			};
