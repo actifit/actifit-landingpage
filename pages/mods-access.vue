@@ -51,6 +51,17 @@
 			<h3>{{ $t('Hey') }} {{ user.account.name }}!</h3>
 			<b>INPUT YOUR FUNDS PASSWORD</b><input type="password" name="fundsPass" ref="fundsPass">
 		</div>
+		
+		<div class="col-md-12 row-sep m-2">
+			<div class="row text-center action-title">VERIFY NEWBIE</div>
+			<div :action='this.actiapimod' method="get" class="p-2">
+			  User: <input type="text" id="newbieaccount" name="newbieaccount" ref="newbieaccount" value=""><br>
+			  Social Media Verify Link: <input type="text" name="verif_link" ref="verif_link" value="http://" ><br>
+			  <input type="button"  value="Verify Newbie" v-on:click="processAction('verifynewbie')">
+			  <div ref="verifynewbieresult" name="verifynewbieresult" class="text-brand" />
+			</div>
+		</div>
+		
 		<div class="col-md-12 row-sep m-2">
 			<div class="row text-center action-title">BAN USER</div>
 			<div :action='this.actiapimod' method="get" class="p-2">
@@ -276,6 +287,10 @@
 		
 			case 'verifypass':
 						params.from = this.$refs['from'].value.trim();
+						break;
+			case 'verifynewbie':
+						params.account = this.$refs['newbieaccount'].value.trim();
+						params.verif_link = this.$refs['verif_link'].value.trim();
 						break;
 		}
 		
