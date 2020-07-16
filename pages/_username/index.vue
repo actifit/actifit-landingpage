@@ -163,24 +163,29 @@
 					<i class="fas fa-user-friends text-brand mr-2" ></i><a href="./friends" >{{ this.userFriends.length }} {{ $t('friends') }} <span v-html="showFriendsSnippet()"></span></a>
 					<a class="btn btn-brand m-2" href="./friends">{{ $t('View_friends') }}</a>
 				</div>
-				<div class="info-box-orange mb-2 col-md-6 cntnr"><i class="fas fa-angle-double-left text-brand mr-2"></i>{{ $t('Followers') }}: {{ numberFormat(userinfo.follower_count,0) }}</div>
-				<div class="info-box-orange mb-2 col-md-6 cntnr"><i class="fas fa-angle-double-right text-brand mr-2"></i>{{ $t('Following') }}: {{ numberFormat(userinfo.following_count,0) }}</div>
+				<div class="info-box-orange mb-2 col-md-6 cntnr"><i class="fas fa-angle-double-left text-brand mr-2"></i>{{ $t('Followers') }}: {{ getFollowerCount }}</div>
+				<div class="info-box-orange mb-2 col-md-6 cntnr"><i class="fas fa-angle-double-right text-brand mr-2"></i>{{ $t('Following') }}: {{ getFollowingCount }}</div>
 				<div class="info-box-orange mb-2 col-md-6 cntnr" v-if="userinfo.witness_votes.includes('actifit')"><i class="fas fa-cubes text-brand mr-2"></i>&nbsp;{{ $t('Votes_Actifit_Witness') }}&nbsp;<i class="fas fa-check text-success"></i></div>
 				<div class="info-box-orange mb-2 col-md-6 cntnr" v-else><i class="fas fa-cubes text-brand mr-2"></i>&nbsp;<a class="btn btn-brand" href="https://steemconnect.com/sign/account-witness-vote?witness=actifit&approve=true" target="_blank">{{ $t('Vote_Now_Actifit_Witness') }}</a></div>
 				<div class="info-box-orange mb-2 col-md-6 cntnr" v-if="actifitDelegator"><i class="fas fa-file-invoice-dollar text-brand mr-2"></i>&nbsp;{{ $t('Delegates_to_Actifit') }} {{ actifitDelegator.steem_power }} {{ $t('Steem_Power') }}</div>
-				<div class="info-box-orange mb-2 col-md-6 cntnr" v-else><i class="fas fa-file-invoice-dollar text-brand"></i>&nbsp;<a class="btn btn-brand" href="https://steembottracker.com/delegation.html?delegatee=actifit" target="_blank">{{ $t('Delegate_Now_Actifit') }}</a></div>
+				<div class="info-box-orange mb-2 col-md-6 cntnr" v-else><i class="fas fa-file-invoice-dollar text-brand"></i>&nbsp;<a class="btn btn-brand" href="/wallet" target="_blank">{{ $t('Delegate_Now_Actifit') }}</a></div>
 			</div>
 			
 			<div class="text-brand" v-if="!account_banned" >
 				<div class="row m-0">
 					<div class="info-box-orange mb-2 col-md-6 cntnr">
-						<img src="/img/actifit_logo.png" class="mr-2 token-logo">
-						<a href="/wallet" >{{ numberFormat(userTokenCount, 3) }} {{ $t('AFIT_Tokens') }} + {{ displayAFITSEBal }} {{ $t('AFIT_SE_Tokens') }} + {{ displayAFITHEBal }} {{ $t('AFIT_HE_Tokens') }}</a>&nbsp;
+						<a href="/wallet" >
+						<img src="/img/actifit_logo.png" class="mr-2 token-logo">{{ numberFormat(userTokenCount, 3) }} {{ $t('AFIT_Tokens') }}<br/>
+						<img src="/img/actifit_logo.png" class="mr-2 token-logo">{{ displayAFITSEBal }} {{ $t('AFIT_SE_Tokens') }}<br/> 
+						<img src="/img/actifit_logo.png" class="mr-2 token-logo">{{ displayAFITHEBal }} {{ $t('AFIT_HE_Tokens') }}</a><br/>
 						<button class="btn btn-brand border" v-on:click="tipUser" >{{ $t('Send_tip') }}</button>
 					</div>
 					<div class="info-box-orange mb-2 col-md-6 cntnr">
-						<img src="/img/AFITX.png" class="mr-2 token-logo">
-						<a href="/wallet" >{{ displayAFITXBal }} {{ $t('AFITX_Tokens') }} + {{ displayAFITXHEBal }} {{ $t('AFITX_HE_Tokens') }}</a>&nbsp;
+						
+						<a href="/wallet" >
+						<img src="/img/AFITX.png" class="mr-2 token-logo">{{ displayAFITXBal }} {{ $t('AFITX_Tokens') }} <br/>
+						<img src="/img/AFITX.png" class="mr-2 token-logo">{{ displayAFITXHEBal }} {{ $t('AFITX_HE_Tokens') }}
+						</a>
 					</div>
 				</div>
 				<div v-if="proceedTip">
@@ -348,6 +353,8 @@
 			rewardedPostCount: '',
 			loading: false,
 			userinfo: '',
+			follower_count: 0,
+			following_count: 0,
 			noUserFound: false,
 			userTokenCount: '',
 			userFriends: [],
@@ -461,6 +468,21 @@
 			return this.numberFormat(this.userAFITHETokenCount, 3);
 		}
 		return 0;
+	  },
+	  getFollowerCount() {
+		console.log('followercount:'+this.follower_count);
+		/*if (!isNaN(this.follower_count)){
+			return '';
+		}*/
+		
+		return this.numberFormat(this.follower_count,0);
+	  },
+	  getFollowingCount() {
+		/*if (!isNaN(this.following_count)){
+			return '';
+		}*/
+		
+		return this.numberFormat(this.following_count,0);
 	  },
 	  formattedProfileUrl () {
 		return "https://actifit.io/" + this.displayUser;
@@ -1037,8 +1059,9 @@
 				chainLnk.api.getFollowCount(parentRef.displayUser, function(err, result) {
 					//console.log(err, result);
 					if (!err) {
-					  parentRef.userinfo.follower_count = result.follower_count;
-					  parentRef.userinfo.following_count = result.following_count;
+					  parentRef.follower_count = result.follower_count;
+					  parentRef.following_count = result.following_count;
+					  parentRef.$forceUpdate()
 					}
 				});
 			}
