@@ -313,7 +313,7 @@ module.exports = {
   Joined_On: 'Joined on',
   Followers: 'Followers',
   Following: 'Following',
-  Steem_posts_comments: 'Steem posts / comments',
+  Steem_posts_comments: ' posts / comments',
   Badges: 'Badges',
   Claim_badge: 'Claim Badge',
   claiming_badge_notice: 'Claiming Badge',
