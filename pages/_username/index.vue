@@ -165,8 +165,31 @@
 				</div>
 				<div class="info-box-orange mb-2 col-md-6 cntnr"><i class="fas fa-angle-double-left text-brand mr-2"></i>{{ $t('Followers') }}: {{ getFollowerCount }}</div>
 				<div class="info-box-orange mb-2 col-md-6 cntnr"><i class="fas fa-angle-double-right text-brand mr-2"></i>{{ $t('Following') }}: {{ getFollowingCount }}</div>
-				<div class="info-box-orange mb-2 col-md-6 cntnr" v-if="userinfo.witness_votes.includes('actifit')"><i class="fas fa-cubes text-brand mr-2"></i>&nbsp;{{ $t('Votes_Actifit_Witness') }}&nbsp;<i class="fas fa-check text-success"></i></div>
-				<div class="info-box-orange mb-2 col-md-6 cntnr" v-else><i class="fas fa-cubes text-brand mr-2"></i>&nbsp;<a class="btn btn-brand" href="https://steemconnect.com/sign/account-witness-vote?witness=actifit&approve=true" target="_blank">{{ $t('Vote_Now_Actifit_Witness') }}</a></div>
+				<div class="info-box-orange mb-2 col-md-6 cntnr">
+					<div v-if="userinfo.witness_votes.includes('actifit') || userinfo.proxy == 'actifit'">
+						<i class="fas fa-cubes text-brand mr-2"></i>&nbsp;{{ $t('Votes_Actifit_Witness') }}&nbsp;<span v-if="userinfo.proxy == 'actifit'">{{ $t('proxy') }}</span><i class="fas fa-check text-success"></i>
+						<button class="btn btn-brand border" v-on:click="voteWitness" >{{ $t('Vote_Now_Actifit_Witness') }}</button>
+					</div>
+					<div v-else>
+						<i class="fas fa-cubes text-brand mr-2"></i>&nbsp;<button class="btn btn-brand border" v-on:click="voteWitness" >{{ $t('Vote_Now_Actifit_Witness') }}</button>
+					</div>
+				
+					<div v-if="voteWitnessDisplay">  
+						<div>
+							<label for="p-ac-key" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
+							<input type="password" id="p-ac-key" name="p-ac-key" ref="p-ac-key" class="form-control-lg w-50 p-2">
+						</div>
+						<div class="text-center">
+							<button class="btn btn-brand border m-2" v-on:click="proceedWitnessVote()" >{{ $t('Vote') }}</button>
+							<button class="btn btn-brand border m-2" v-on:click="proceedWitnessVote(1)" >{{ $t('Set_proxy') }}</button>
+							<button class="btn btn-brand border m-2" v-on:click="voteWitness" >{{ $t('Cancel') }}</button>
+						</div>
+						<div class="text-center"><i v-if="votingProgress" class="fas fa-spin fa-spinner"></i></div>
+						<div class="text-brand text-center" v-if="error_proceeding">
+						  {{ this.error_msg }}
+						</div>
+					</div>
+				</div>				
 				<div class="info-box-orange mb-2 col-md-6 cntnr" v-if="actifitDelegator"><i class="fas fa-file-invoice-dollar text-brand mr-2"></i>&nbsp;{{ $t('Delegates_to_Actifit') }} {{ actifitDelegator.steem_power }} {{ $t('Steem_Power') }}</div>
 				<div class="info-box-orange mb-2 col-md-6 cntnr" v-else><i class="fas fa-file-invoice-dollar text-brand"></i>&nbsp;<a class="btn btn-brand" href="/wallet" target="_blank">{{ $t('Delegate_Now_Actifit') }}</a></div>
 			</div>
@@ -421,6 +444,10 @@
 			displayLoginActivity: false,
 			loadingData: true,
 			profImgUrl: process.env.hiveImgUrl,
+			voteWitnessDisplay: false,
+			error_proceeding: false,
+			error_msg: '',
+			votingProgress: false,
 		}
 	},
 	watch: {
@@ -887,6 +914,60 @@
 	  tipUser() {
 		this.proceedTip = !this.proceedTip;
 	  },
+	  //handles displaying/closing witness vote section
+	  voteWitness() {
+		this.voteWitnessDisplay = !this.voteWitnessDisplay;
+	  },
+	  proceedWitnessVote(isProxy) {
+		this.error_proceeding = false;
+		if (this.$refs["p-ac-key"].value == ''){
+		  this.error_proceeding = true;
+		  this.error_msg = this.$t('all_fields_required');
+		  return;
+		}
+		this.votingProgress = true;
+		let parentRef = this;
+		if (isProxy){
+			hive.broadcast.accountWitnessProxy(this.$refs["p-ac-key"].value, this.displayUser, 'actifit', function(err, result) {
+			  console.log(err, result);
+			  if (err){
+				parentRef.error_proceeding = true;
+				parentRef.error_msg = parentRef.$t('Error_sending_vote');
+				parentRef.votingProgress = false;
+			  }else{
+				parentRef.votingProgress = false;
+				parentRef.voteWitnessDisplay = false;
+				//notify of success
+				parentRef.$notify({
+				  group: 'success',
+				  text: parentRef.$t('Witness_proxy_set_successfully'),
+				  position: 'top center'
+				})
+				parentRef.getAccountData();
+			  }
+			});
+		}else{
+			hive.broadcast.accountWitnessVote(this.$refs["p-ac-key"].value, this.displayUser, 'actifit', 1, function(err, result) {
+			  console.log(err, result);
+			  if (err){
+				parentRef.error_proceeding = true;
+				parentRef.error_msg = parentRef.$t('Error_sending_vote_proxy');;
+				parentRef.votingProgress = false;
+			  }else{
+				parentRef.votingProgress = false;
+				parentRef.voteWitnessDisplay = false;
+				//notify of success
+				parentRef.$notify({
+				  group: 'success',
+				  text: parentRef.$t('Witness_voted_successfully'),
+				  position: 'top center'
+				})
+				parentRef.getAccountData();
+			  }
+			});
+		}
+	
+	  },
 	  //handles actual tipping action
 	  async proceedTipActivity() {
 		this.tipError = '';
@@ -1054,6 +1135,7 @@
 			  parentRef.errorDisplay = parentRef.$t('user_not_found_error');
 			}else{
 			  parentRef.userinfo = result[0];
+			  console.log(parentRef.userinfo);
 			  
 			  //grab and display follower and following count
 				chainLnk.api.getFollowCount(parentRef.displayUser, function(err, result) {
