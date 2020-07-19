@@ -188,21 +188,7 @@
             <h2 class="text-capitalize">{{ $t('homepage.section4_title') }}</h2>
             <p class="lead mb-0">{{ $t('homepage.section4_desc') }}</p>
 			<div style="text-align:center; padding-top: 10px">
-				<br/>
-				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=10%20SP">10 {{ $t('SP') }}</a>|
-				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=20%20SP">20 {{ $t('SP') }}</a>|
-				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=50%20SP">50 {{ $t('SP') }}</a>|
-				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=100%20SP">100 {{ $t('SP') }}</a>|
-				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=250%20SP">250 {{ $t('SP') }}</a>|
-				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=500%20SP">500 {{ $t('SP') }}</a><br/>
-				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=1000%20SP">1,000 {{ $t('SP') }}</a>|
-				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=2000%20SP">2,000 {{ $t('SP') }}</a>|
-				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=5000%20SP">5,000 {{ $t('SP') }}</a>|
-				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=10000%20SP">10,000 {{ $t('SP') }}</a>|
-				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=20000%20SP">20,000 {{ $t('SP') }}</a>|
-				<a href="https://steemconnect.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=50000%20SP">50,000 {{ $t('SP') }}</a>
-				<br/>
-				<a href="https://steembottracker.com/delegation.html?delegatee=actifit">{{ $t('Custom_Amount') }}</a>
+				<a href="/wallet?action=delegate" class="btn btn-brand btn-lg">{{ $t('Delegate') }}</a>
 			</div>
           </div>
         </div>

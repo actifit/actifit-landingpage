@@ -3635,6 +3635,9 @@
 		this.afitActivityMode = this.BUY_AFIT_STEEM;
 	  }else if (this.$route.query.action === 'set_funds_pass'){
 	    this.afitActivityMode = this.EXCHANGE_AFIT_STEEM;
+	  }else if (this.$route.query.action === 'delegate'){
+		this.afitActivityMode = 0;
+		this.fundActivityMode = this.DELEGATE_FUNDS;
 	  }
 	  
 	  //grab STEEM price
