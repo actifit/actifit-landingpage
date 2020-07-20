@@ -269,7 +269,7 @@ module.exports = {
   ** Nuxt.js modules
   */
   modules: [
-	//'nuxt-helmet',
+	'nuxt-helmet',
     ['nuxt-i18n', I18N],
 	['@nuxtjs/google-adsense', {
       id: 'ca-pub-2770948859841315',
