@@ -15,8 +15,7 @@
 		<div class="modal-header">
 			<div class="report-tags p-1" v-html="displayReportTags"></div>
 		</div>
-		<vue-remarkable class="modal-body" v-html="body" ></vue-remarkable>
-		<!--<article class="modal-body" v-html="$renderMD(body)"></article>-->
+		<vue-remarkable class="modal-body" :source="body" :options="{'html': true}"></vue-remarkable>
 		<div class="modal-body goog-ad-horiz-90"><adsbygoogle ad-slot="5716623705" /></div>
 		<div class="modal-footer">
 		  <div class="report-modal-prelim-info col-md-6">
@@ -177,8 +176,7 @@
 				<div class="modal-author modal-title text-brand" >@{{ user.name }}<small class="date-head text-muted">{{ $t('Now') }}</small></div>
 			  </div>
 			</a>
-			<vue-remarkable class="modal-body" v-html="body" ></vue-remarkable>
-			<!--<article class="modal-body" v-html="$renderMD(responseBody)"></article>-->
+			<vue-remarkable class="modal-body" :source="body" :options="{'html': true}"></vue-remarkable>
 		</div>
 		<div class="report-comments modal-body" v-if="commentsAvailable">
 			<Comments 
@@ -202,12 +200,8 @@
   
   import Vue from 'vue'
   import vueRemarkable from 'vue-remarkable';
-  //import steemEditor from 'steem-editor';
-  //import 'steem-editor/dist/css/index.css';
   
-  import SocialSharing from 'vue-social-sharing'
-
-  //Vue.use( steemEditor );
+  import SocialSharing from 'vue-social-sharing';
   
   const scot_steemengine_api = process.env.steemEngineScot;
   const scot_hive_api_param = process.env.hiveEngineScotParam;

@@ -263,7 +263,6 @@ module.exports = {
     { src: '~plugins/vue-carousel', ssr: false },
     { src: '~plugins/vue-notification', ssr: false },
     { src: '~plugins/vue-simplemde', ssr: false },
-    //{ src: '~plugins/steem-editor', ssr: false },
   ],
 
   /*
