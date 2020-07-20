@@ -23,7 +23,7 @@
 		  </div>
           <div class="form-group">
             <label for="report-tags">{{ $t('Tags') }}</label>
-            <input-tag id="report-tags" :tags.sync="tags" :addTagOnBlur="true"></input-tag>
+            <input id="report-tags" v-model="tags" :addTagOnBlur="true" />
             <small class="form-text text-muted">{{ $t('Tag_Edit_Note') }}</small>
           </div>
         </div>
@@ -61,7 +61,7 @@
 
 <script>
   import marked from 'marked'
-  import InputTag from 'vue-input-tag'
+  //import InputTag from 'vue-input-tag'
   import { mapGetters } from 'vuex'
   import AWS from 'aws-sdk'
   
@@ -72,7 +72,7 @@
 
   export default {
     components: {
-      InputTag,
+      //InputTag,
     },
     data () {
       return {
@@ -290,7 +290,13 @@
 	  },
       async save () {
         this.loading = true // start loading animation
-
+		if (this.tags.indexOf(',')!==-1){
+			//contains commas, treat accordingly
+			this.tags = this.tags.split(',');
+		}else{
+			//rely on spaces instead
+			this.tags = this.tags.split(' ');
+		}
         // prepare tags
         const meta = JSON.parse(this.editReport.json_metadata)
         meta.tags = [
