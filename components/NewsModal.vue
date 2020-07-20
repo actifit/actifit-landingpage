@@ -8,7 +8,7 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-		<article class="modal-body" v-html="$renderMD(body)"></article>
+		<vue-remarkable class="modal-body" :source="body" :options="{'html': true}"></vue-remarkable>
       </div>
     </div>
   </div>
@@ -16,16 +16,12 @@
 
 <script>
   import Vue from 'vue'
-  
-  import steemEditor from 'steem-editor';
-  import 'steem-editor/dist/css/index.css';
-
-  Vue.use( steemEditor );  
+  import vueRemarkable from 'vue-remarkable';
 
   export default {
     props: ['news'],
 	components: {
-	  
+	  vueRemarkable
 	},
     computed: {
       body () {

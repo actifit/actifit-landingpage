@@ -259,24 +259,49 @@ module.exports = {
   */
   plugins: [
     '~/plugins/vue-steemconnect',
-	  { src: '~plugins/ga.js', ssr: false },
+	{ src: '~plugins/ga.js', ssr: false },
     { src: '~plugins/vue-carousel', ssr: false },
     { src: '~plugins/vue-notification', ssr: false },
     { src: '~plugins/vue-simplemde', ssr: false },
-    { src: '~plugins/steem-editor', ssr: false },
+    //{ src: '~plugins/steem-editor', ssr: false },
   ],
 
   /*
   ** Nuxt.js modules
   */
   modules: [
+	//'nuxt-helmet',
     ['nuxt-i18n', I18N],
 	['@nuxtjs/google-adsense', {
       id: 'ca-pub-2770948859841315',
 	  pageLevelAds: true
-    }]
+    }],
   ],
-
+  
+  "browserslist": [
+    "defaults",
+    "not dead"
+  ],
+  /*"browserslist": {
+    "defaults"
+  },*/
+  
+  /*helmet: {
+   
+    dnsPrefetchControl: false,
+    expectCt: false,
+    featurePolicy: false,
+    frameguard: false,
+    hidePoweredBy: false,
+    hsts: false,
+    ieNoOpen: false,
+    noCache: false,
+    noSniff: false,
+    permittedCrossDomainPolicies: false,
+    referrerPolicy: false,
+    xssFilter: false,
+   
+ },*/
   /*
   ** Build configuration
   */

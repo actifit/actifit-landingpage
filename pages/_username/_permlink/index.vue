@@ -23,7 +23,7 @@
 		  <span class="date-head text-muted">{{ date }}</span>
 		  <div class="report-tags p-1" v-html="displayReportTags"></div>
         </div>
-		<article v-html="$renderMD(body)" class="col-md-12"></article>
+		<vue-remarkable class="col-md-12" :source="body" :options="{'html': true}" ></vue-remarkable>
 		<div class="modal-body goog-ad-horiz-90"><adsbygoogle ad-slot="4921049809" /></div>
 		<div class="modal-footer col-md-12">
 		  <div class="report-modal-prelim-info col-md-6">
@@ -187,7 +187,7 @@
 				<div class="modal-author modal-title text-brand" >@{{ user.account.name }}<small class="date-head text-muted">{{ $t('Now') }}</small></div>
 			  </div>
 			</a>
-			<article v-html="$renderMD(responseBody)"></article>
+			<vue-remarkable :source="responseBody" :options="{'html': true}" ></vue-remarkable>
 		</div>
 		<div class="report-comments col-md-12" v-if="commentsAvailable">
 			<Comments 
@@ -229,18 +229,14 @@
   import UserMenu from '~/components/UserMenu'
   import Footer from '~/components/Footer'
 
-  import VueMarkdown from 'vue-markdown'
   import steem from 'steem'
   import {mapGetters} from 'vuex'
   import Comments from '~/components/Comments'
   import NotifyModal from '~/components/NotifyModal'
   
-  //import Remarkable from 'remarkable';
+  import vueRemarkable from 'vue-remarkable';
     
   import Vue from 'vue'
-  
-  import steemEditor from 'steem-editor';
-  import 'steem-editor/dist/css/index.css';
   
   import SocialSharing from 'vue-social-sharing'
   
@@ -248,7 +244,7 @@
   
   import sanitize from 'sanitize-html'
 
-  Vue.use( steemEditor );  
+  //Vue.use( steemEditor );  
   
   const scot_steemengine_api = process.env.steemEngineScot;
   const scot_hive_api_param = process.env.hiveEngineScotParam;
@@ -414,7 +410,7 @@
 	  NavbarBrand,
 	  UserMenu,
 	  Footer,
-	  VueMarkdown,
+	  vueRemarkable,
 	  Comments,
 	  SocialSharing,
 	  VoteModal,

@@ -14,7 +14,7 @@
 			<small class="date-head text-muted">{{ date }}</small>
 		  </div>
 		</a>
-		<article class="modal-body" v-if="!editBoxOpen" v-html="$renderMD(commentBody())" :style="{ paddingLeft: depth * indentFactor + 'px' }"></article>
+		<vue-remarkable class="modal-body" v-if="!editBoxOpen" v-html="commentBody()" :source="commentBody()" :style="{ paddingLeft: depth * indentFactor + 'px' }" :options="{'html': true}"></vue-remarkable>
 		<transition name="fade">
 		  <div class="comment-reply" v-if="editBoxOpen">
 			<markdown-editor v-model="full_data.body" :configs="editorConfig" ref="editor"></markdown-editor>
@@ -108,7 +108,9 @@
 				<div class="modal-author modal-title text-brand" >@{{ user.name }}<small class="date-head text-muted">{{ $t('Now') }}</small></div>
 			  </div>
 			</a>
-			<article class="modal-body" v-html="$renderMD(responseBody)" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }" ></article>
+			<vue-remarkable class="modal-body" v-html="getContent()" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }" ></vue-remarkable>
+			<!--<vue-markdown class="modal-body" v-html="responseBody" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }" ></vue-markdown>-->
+			<!--<article class="modal-body" v-html="$renderMD(responseBody)" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }" ></article>-->
 		</div>
 	</div>
     <Comments 
@@ -127,15 +129,16 @@
 </template>
 <script>
 
-  import VueMarkdown from 'vue-markdown'
+  import vueRemarkable from 'vue-remarkable';
+
   import steem from 'steem'
   
   import Vue from 'vue'
   
   import { mapGetters } from 'vuex'
   
-  import steemEditor from 'steem-editor';
-  import 'steem-editor/dist/css/index.css';
+  //import steemEditor from 'steem-editor';
+  //import 'steem-editor/dist/css/index.css';
   
   export default { 
     props: [ 'author', 'reply_entries', 'depth', 'body', 'full_data', 'main_post_author', 'main_post_permlink', 'main_post_cat' ],
@@ -175,13 +178,16 @@
 	  }
 	},
 	components: {
-	  VueMarkdown,
+	  vueRemarkable
 	},
     computed: {
 	  ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters('steemconnect', ['stdLogin']),
 	  ...mapGetters(['moderators']),
 	  ...mapGetters(['newlyVotedPosts', 'bchain']),
+	  getContent () {
+		return this.responseBody;
+	  },
 	  adjustHiveClass () {
 		if (this.target_bchain != 'HIVE'){
 			return 'option-opaque';
@@ -234,9 +240,6 @@
 		return '(+' + parseFloat(this.userRank.afitx_rank).toFixed(2) + ')';
 	  },
     },
-	components: {
-	  VueMarkdown,
-	},
     methods: {
       commentBody () {
 		//console.log(this.report);
