@@ -1,6 +1,6 @@
 <template>
   <div>
-	<script src="https://www.google.com/recaptcha/api.js?onload=vueRecaptchaApiLoaded&render=explicit" async defer></script> 
+	<!--<script src="https://www.google.com/recaptcha/api.js?onload=vueRecaptchaApiLoaded&render=explicit" async defer></script> -->
     <!-- navbar -->
     <nav class="navbar fixed-top navbar-expand navbar-light">
       <ul class="navbar-nav">
@@ -40,7 +40,7 @@
 					<label for="keeploggedin" class="ml-3">Keep me logged in</label>
 				</span>
 				<i class="fas fa-spin fa-spinner text-brand" v-if="!captchaReady"></i>
-				<vue-recaptcha ref="recaptcha" @verify="onVerifyCaptcha" @expired="onExpiredCaptcha" @render="captchaReady=true" sitekey="6LdpcoMUAAAAAPGTqlvhKEK6Ayw5NqLDZz5Sjudq">
+				<vue-recaptcha ref="recaptcha" @verify="onVerifyCaptcha" @render="captchaReady=true" @expired="onExpiredCaptcha" :loadRecaptchaScript="true" sitekey="6LdpcoMUAAAAAPGTqlvhKEK6Ayw5NqLDZz5Sjudq">
 				</vue-recaptcha>
 				<p class="text-brand" v-if="captcha_invalid">
 				  <b>{{ captcha_invalid }}</b>
