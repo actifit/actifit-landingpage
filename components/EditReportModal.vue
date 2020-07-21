@@ -290,12 +290,15 @@
 	  },
       async save () {
         this.loading = true // start loading animation
-		if (this.tags.indexOf(',')!==-1){
-			//contains commas, treat accordingly
-			this.tags = this.tags.split(',');
-		}else{
-			//rely on spaces instead
-			this.tags = this.tags.split(' ');
+		//only convert to array if not already array
+		if (!Array.isArray(this.tags)){
+			if (this.tags.indexOf(',')!==-1){
+				//contains commas, treat accordingly
+				this.tags = this.tags.split(',');
+			}else{
+				//rely on spaces instead
+				this.tags = this.tags.split(' ');
+			}
 		}
         // prepare tags
         const meta = JSON.parse(this.editReport.json_metadata)
