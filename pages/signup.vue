@@ -1,6 +1,6 @@
 <template>
   <div>
-	<script src="https://www.google.com/recaptcha/api.js?onload=vueRecaptchaApiLoaded&render=explicit" async defer>
+	<!--<script src="https://www.google.com/recaptcha/api.js?onload=vueRecaptchaApiLoaded&render=explicit" async defer>-->
 </script> 
     <!-- navbar -->
     <nav class="navbar fixed-top navbar-expand navbar-light">
@@ -82,7 +82,7 @@
 				<input class="form-control form-control-lg w-80" id="actifit-memo" ref="actifit-memo" readonly />	
 				<button v-on:click="copyContent" data-targetEl="actifit-memo" class="btn btn-brand btn-lg w-20 mb-2">{{ $t('Copy_Memo') }}</button>	
 			  </div>	
-				<vue-recaptcha ref="recaptcha" @verify="onVerifyCaptcha" @expired="onExpiredCaptcha" sitekey="6LdpcoMUAAAAAPGTqlvhKEK6Ayw5NqLDZz5Sjudq">
+				<vue-recaptcha ref="recaptcha" @verify="onVerifyCaptcha" @expired="onExpiredCaptcha" :loadRecaptchaScript="true" sitekey="6LdpcoMUAAAAAPGTqlvhKEK6Ayw5NqLDZz5Sjudq">
 				</vue-recaptcha>
 				<p class="text-brand" v-if="captcha_invalid">
 				  <b>{{ captcha_invalid }}</b>
