@@ -92,6 +92,10 @@
 				<div class="text-brand text-center" v-if="error_proceeding">
 				  {{ this.error_msg}}
 				</div>
+				<div class="mb-2">
+					<input type="checkbox" id="hive-only" v-model="hive_only" >
+					<label for="checkbox" class="p-2">{{ $t('hive_only_account') }}</label>
+				</div>
 				<div class="text-center pb-2">
 					<button v-on:click="checkFunds" class="btn btn-brand btn-lg w-20" v-if="!promo_code_chkbx">{{ $t('Steem_sent').replace('_CUR_', this.transferType) }}</button>
 					<button v-on:click="checkFunds" class="btn btn-brand btn-lg w-20" v-else>{{ $t('create_account') }}</button>
@@ -180,6 +184,7 @@
 		email: '',
 		promo_code_chkbx: false,
 		promo_code_val: '',
+		hive_only: false,
 		reg: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/
 	  }
 	},
@@ -403,6 +408,9 @@
 			email: this.$refs["account-email"].value,
 			promo_code: this.promo_code_val,
 			//cur_bchain: 'HIVE',
+		}
+		if (this.hive_only){
+			params['cur_bchain'] = 'HIVE';
 		}
 		Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
 		try{

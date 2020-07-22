@@ -664,4 +664,5 @@ module.exports = {
   Error_sending_vote: 'There was an error sending vote. Make sure you are using correct active key, and you do not already have actifit voted as a witness or proxy',
   Error_sending_vote_proxy: 'There was an error setting proxy. Make sure you are using correct active key, and you do not already have actifit set as proxy',
   Delegate: 'Delegate',
+  hive_only_account: 'Create Only On Hive',
 }
