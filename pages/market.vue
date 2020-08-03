@@ -66,7 +66,7 @@
         <Product v-for="product in prodList" 
 			:product="product" :key="product._id" :pros="professionals" :userrank="userRank" :gadgetStats="gadgetStats"
 			v-if="!product.specialevent && (!currentFilter || product.type == currentFilter)"
-			@update-prod="updateProd"/>
+			@update-prod="updateProd" :afitPrice="afitPrice"/>
       </div>
 	  <div class="text-center text-brand" v-else><i class="fas fa-spin fa-spinner"></i></div>
 
@@ -116,6 +116,7 @@
 		currentFilter: '',
 		currentSort: JSON.stringify({value: 'price', direction: 'asc'}),
 		prodList: [],
+		afitPrice: 0,
       }
     },
     computed: {
@@ -165,10 +166,26 @@
 		console.log('updateProd');
 		console.log(this.prodList[ind]);
 	  },
+	  setAFITPrice (_afitPrice){
+		this.afitPrice = _afitPrice;
+		console.log(this.afitPrice);
+	  },
+	  async fetchAfitPrice () {
+	    //fetch AFIT price
+	    fetch(process.env.actiAppUrl+'exchangeAFITPrice').then(
+		  res => {res.json().then(json => this.setAFITPrice (json)).catch(e => reject(e))
+	    }).catch(e => reject(e))
+	  },
     },
+	
     async mounted () {
 	  this.$store.dispatch('steemconnect/login')
 	  this.fetchUserData();
+	  
+	  this.fetchAfitPrice();
+	  //refetch price every 2 mins
+	  setInterval(this.fetchAfitPrice, 2 * 60 * 1000);
+	 
 	  
       // fetch products
       this.$store.dispatch('fetchProducts')

@@ -113,10 +113,20 @@
 					<span>{{ $t('deactivate_gadget') }}</span>&nbsp;
 					<i class="fas fa-times text-brand"></i>
 				</a>
-				<a class="btn btn-success btn-lg w-100 book-button" @click.prevent="buyNow()" :class="productBuyColor" v-else>{{ $t('Buy_now') }} {{numberFormat(this.item_price, 2)}} {{this.item_currency}}<img class="token-logo " src="/img/actifit_logo.png"></a>
+				<div v-else>
+					<a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNow()" :class="productBuyColor" style="float:left; border: 1px white solid;">{{ $t('Buy_now') }} <br/> {{numberFormat(this.item_price, 2)}} {{this.item_currency}}<img class="token-logo " src="/img/actifit_logo.png"></a>
+					<a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNowHive()" :class="productBuyColor" style="border: 1px white solid;">{{ $t('Buy_now') }} <br/> {{numberFormat(this.item_price * this.afitPrice.afitHiveLastPrice, 3)}} {{this.hive_currency}}<img class="token-logo " src="/img/HIVE.png"></a>
+					<div class="row" v-if="buyHiveExpand">
+					  <label for="active-key" class="p-2">{{ $t('Active_Key') }} *</label>
+					  <input type="password" id="active-key" name="active-key" ref="active-key" class="form-control-lg w-50 p-2">
+					</div>
+					<div class="text-center" v-if="buyHiveExpand">
+					  <button v-on:click="proceedBuyNowHive()" class="btn btn-brand btn-lg border">{{ $t('Proceed') }}</button>
+					</div>
+				</div>
 			  </div>
-			  <div v-else-if="!productBought">
-                <a class="btn btn-brand btn-lg w-100 book-button" @click.prevent="buyNow()" v-if="!this.errorProceed" >{{ $t('Buy_now') }} {{numberFormat(this.item_price, 2)}} {{this.item_currency}}<img class="token-logo " src="/img/actifit_logo.png"></a>
+			  <div v-else-if="!productBought && !this.errorProceed">
+                <a class="btn btn-brand btn-lg w-50 book-button" @click.prevent="buyNow()" style="float:left; border: 1px white solid;">{{ $t('Buy_now') }} <br/> {{numberFormat(this.item_price, 2)}} {{this.item_currency}}<img class="token-logo " src="/img/actifit_logo.png"></a>
               </div>
 			  <div v-else>
 			    <div v-if="!this.downloadAgainReady">
@@ -194,7 +204,7 @@
   import hive from '@hiveio/hive-js'
 
   export default {
-    props: ['product', 'pros', 'userrank', 'gadgetStats'],
+    props: ['product', 'pros', 'userrank', 'gadgetStats', 'afitPrice'],
     computed: {
       ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters('steemconnect', ['stdLogin']),
@@ -246,8 +256,10 @@
 			consumed_count: 0,
 			allReqtsFilled: false,
 			item_currency: 'AFIT',
+			hive_currency: 'HIVE',
 			product_prov_pic: '',
 			buyAttempt: false,
+			buyHiveExpand: false,
 			errorProceed: '',
 			buyInProgress: false,
 			productBought: false,
@@ -556,6 +568,154 @@
 				return {success: true, trx: outcome.trx.tx};
 			}
 		}
+	  },
+	  async buyNowHive () {
+		this.buyHiveExpand = !this.buyHiveExpand;
+	  },
+	  async proceedBuyNowHive (){
+		this.buyAttempt = true;
+		this.buyInProgress = true;
+		this.errorProceed = '';
+		
+		//making sure user is logged in 
+		if (!this.user){
+		  this.errorProceed = this.$t('need_login_signup_notice_vote');
+		  return;
+		}
+		
+		//check if this is a game gadget and if reqts have been met
+		if (this.product.type == 'ingame'){
+			if (!this.allReqtsFilled){
+			  this.errorProceed = this.$t('cannot_buy_reqts_not_filled');
+			  return;
+			}
+			
+			if (this.product.count < 1){
+			  this.errorProceed = this.$t('cannot_buy_none_available');
+			  return;
+			}
+		}
+		//check if active key was provided 
+		
+		if (this.$refs["active-key"].value == ''){
+		  this.errorProceed = this.$t('all_fields_required');
+		  return;
+		}
+		
+		//proceed with payment
+		//let chainLnk = await this.setProperNode ();
+		//transferToVesting(wif, from, to, amount)
+		let payAmount = parseFloat(this.item_price * this.afitPrice.afitHiveLastPrice).toFixed(3);
+		let memo = 'buy-gadget:'+this.product._id;
+		let res = await hive.broadcast.transferAsync(this.$refs["active-key"].value, this.user.account.name, 'actifit.funds', payAmount + ' ' + 'HIVE', memo).then(
+			res => this.confirmCompletion('transfer', payAmount, res)).catch(err=> this.errorCompletion(err));
+			
+		//chainLnk
+	  },
+	  async errorCompletion(res){
+		console.log(res);
+		let err_details = res;//JSON.parse();
+		this.errorProceed = err_details.cause.message;
+		//this.buyAttempt = false;
+		this.buyInProgress = false;
+	  },
+	  async confirmCompletion (type, amount, res){
+		if (res.block_num){
+			console.log (res);
+			
+			
+			//only support HIVE
+			let cur_bchain = 'HIVE';//(localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+			let url = '';//new URL(process.env.actiAppUrl + 'processBuyOrderHive/?user='+this.user.account.name+'&product_id='+this.product._id);
+			
+			//if (this.product.type == 'ingame'){
+				url = new URL( process.env.actiAppUrl + 'buyGadgetHive/'
+								+ this.user.account.name + '/'
+								+ this.product._id + '/'
+								+ res.block_num + '/'
+								+ res.id + '/'
+								+ cur_bchain);
+			//}
+			console.log(url);
+			//connect with our service to process buy order
+			try{
+				let res = await fetch(url);
+				let outcome = await res.json();
+				if (outcome.error){
+					this.errorProceed = outcome;
+					console.error(outcome);
+				}else{
+					//update user token count
+					
+					//update product status
+					this.checkProductBought();
+					
+					this.$store.dispatch('fetchProducts')
+					
+					if (this.product.type == 'service'){
+						//display proper success message
+						this.errorProceed = this.$t('purchase_success_service_part1') + this.product.name + ' ' 
+											+ this.$t('With') + ' ' + this.product.provider_name + '.\n'
+											+ this.$t('purchase_success_service_part2') + '.\n'
+					}else if (this.product.type == 'ebook'){
+						//display proper success message
+						this.errorProceed = this.$t('purchase_success_ebook_part1') + ' ' + this.product.name + ' '
+											+ this.$t('By') + ' ' + this.product.provider_name + '.<br/>';
+						this.firstDownloadHref = process.env.actiAppUrl 
+											+ 'downEbook/'
+											+ '?user=' + this.user.account.name
+											+ '&product_id=' + this.product._id
+											+ '&access_token=' + outcome.access_token;
+					}else if (this.product.type == 'ingame'){
+						//display proper success message
+						this.errorProceed = this.$t('purchase_success_ingame_part1') + ' ' + this.product.name + ' '
+											+ this.$t('Level') + ' ' + this.product.level + '. ' + this.$t('purchase_success_ingame_part2') + '.<br/>';
+					}
+				}
+				//this.checkingFunds = false;
+				//this.resultReturned = true;
+			
+			}catch(err){
+				console.error(err);
+				//this.checkingFunds = false;
+			}
+			
+			
+			
+			//also start validation and gadget lock process
+			/*let url = new URL(process.env.actiAppUrl + 'confirmPaymentGadget/'+'?bchain=' + this.cur_bchain);
+			//compile all needed data and send it along the request for processing
+			let params = {
+				from: this.user.account.name,
+				
+			}
+			Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
+			try{
+				let res = await fetch(url);
+				let outcome = await res.json();
+				//update user data according to result
+				this.fetchUserData();
+			}catch(err){
+				console.error(err);
+			}*/
+			
+		}else{
+			this.errorProceed = res.error.message;
+		}
+		this.buyAttempt = false;
+		this.buyInProgress = false;
+	  },
+	  setProperNode (selectChain){
+		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+		if (selectChain){
+			cur_bchain = selectChain;
+		}
+		let properNode = hive;
+		if (cur_bchain == 'STEEM'){
+			properNode = steem;
+		}
+		console.log(cur_bchain);
+		return properNode;
 	  },
 	  async buyNow() {
 		this.buyAttempt = true;
