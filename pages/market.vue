@@ -19,6 +19,19 @@
       <h2 class="text-center">{{ $t('market_title') }}</h2>
 	  <h3 class="text-center m-4 text-brand market-sub">{{ $t('market_subtitle') }}</h3>
 	  
+	  
+	  <!-- ticket prize section / gadgets purchase -->
+	  
+	  <div class="col-md-12 text-center text-primary mb-5 notice-text">
+		  <h4>{{$t('prize_tickets_buy_gadgets')}}<a href="#" data-toggle="modal" data-target="#notifyModal"><i class="fas fa-info-circle" :title="$t('view_details')"></i></a></h4> 
+		  <i class="fas fa-ticket-alt text-brand"></i>&nbsp;{{ ticketCount }} {{$t('tickets_collected')}}
+		  <i class="fas fa-donate text-brand"></i>&nbsp;{{$t('prize_pool')}} {{ prizePoolValue }} {{$t('HIVE')}}<img src="/img/HIVE.png" class="token-logo-sm">
+		  <div class="col-md-12">
+			<div class="mt-2">{{ $t('next_draw') }}&nbsp;</div><Countdown v-if="countDownReady" deadline="August 17, 2020 00:00 GMT"></Countdown><div v-else ><i class="fas fa-spin fa-spinner text-brand"></i></div>
+		  </div>
+	  </div>
+	  
+	  
 	  <!-- allow sorting & filtering products -->
 	  <div class="row col-md-12" v-if="prodList.length">
 		<span class="col-md-5"></span>
@@ -66,11 +79,13 @@
         <Product v-for="product in prodList" 
 			:product="product" :key="product._id" :pros="professionals" :userrank="userRank" :gadgetStats="gadgetStats"
 			v-if="!product.specialevent && (!currentFilter || product.type == currentFilter)"
-			@update-prod="updateProd" :afitPrice="afitPrice"/>
+			@update-prod="updateProd" :afitPrice="afitPrice" @refresh-tickets="refreshTickets"/>
       </div>
 	  <div class="text-center text-brand" v-else><i class="fas fa-spin fa-spinner"></i></div>
 
     </div>
+	
+	<NotifyModal :modalTitle="$t('Actifit_Info')" :modalText="$t('weekly_pay_prize_desc')"/>
 
     <Footer />
     <no-ssr>
@@ -92,6 +107,12 @@
   import Lodash from 'lodash'
 
   import { mapGetters } from 'vuex'
+  
+  import hive from '@hiveio/hive-js'
+  
+  import Countdown from 'vuejs-countdown'
+  
+  import NotifyModal from '~/components/NotifyModal'
 
   export default {
     head () {
@@ -109,7 +130,9 @@
       Product,
 	  Professional,
       Footer,
-	  Lodash
+	  Lodash,
+	  Countdown,
+	  NotifyModal
     },
     data () {
       return {
@@ -117,6 +140,10 @@
 		currentSort: JSON.stringify({value: 'price', direction: 'asc'}),
 		prodList: [],
 		afitPrice: 0,
+		ticketCount: 0,
+		prizePool: 0,
+		prizePoolValue: '',
+		countDownReady: false,
       }
     },
     computed: {
@@ -129,12 +156,18 @@
 	  products: 'setProducts',
 	},
     methods: {
+	  refreshTickets () {
+		//console.log('>>>>refreshing');
+		this.fetchUserBuyTicketEntries();
+		this.fetchPrizePool();
+	  },
 	  fetchUserData () {
 		if (typeof this.user != 'undefined' && this.user != null){
 		  this.$store.dispatch('fetchUserTokens')
 		  this.$store.dispatch('fetchUserRank')
 		  this.$store.dispatch('fetchReferrals')
 		  this.$store.dispatch('fetchUserGadgetStats')
+		  this.fetchUserBuyTicketEntries();
 		}
 	  },
 	  reorderProducts () {
@@ -163,8 +196,8 @@
 		let ind = this.prodList.findIndex( product => (product._id === prod._id ));
 		this.prodList[ind] = prod;
 		this.$forceUpdate();
-		console.log('updateProd');
-		console.log(this.prodList[ind]);
+		//console.log('updateProd');
+		//console.log(this.prodList[ind]);
 	  },
 	  setAFITPrice (_afitPrice){
 		this.afitPrice = _afitPrice;
@@ -176,15 +209,55 @@
 		  res => {res.json().then(json => this.setAFITPrice (json)).catch(e => reject(e))
 	    }).catch(e => reject(e))
 	  },
+	  setTicketCount(result){
+		if (Array.isArray(result) && result.length > 0){
+			this.ticketCount = result[0].tickets_collected;
+		}else{
+			this.ticketCount = 0;
+		}
+	  },
+	  async fetchUserBuyTicketEntries () {
+	    //fetch user ticket entries
+		if (this.user && this.user.account){
+			fetch(process.env.actiAppUrl+'userActiveGadgetBuyTickets/'+this.user.account.name).then(
+			  res => {res.json().then(json => this.setTicketCount (json)).catch(e => reject(e))
+			}).catch(e => reject(e))
+		}
+	  },
+	  async fetchPrizePool () {
+		let _parent = this;
+		hive.api.getAccounts([process.env.actifitMarketBuy], function(err, response){
+			//console.log(err, response);
+			if (!err){
+				_parent.prizePool = response[0].balance;
+				_parent.prizePoolValue = parseFloat(_parent.prizePool.split(' ')[0])/2;
+			}
+		});
+	  },
+	  async prepareData () {
+		this.fetchAfitPrice();
+		
+		this.fetchUserBuyTicketEntries();
+	  
+		this.fetchPrizePool();
+	  },
+	  
     },
 	
     async mounted () {
+	  this.countDownReady = true;
+	  
 	  this.$store.dispatch('steemconnect/login')
 	  this.fetchUserData();
 	  
-	  this.fetchAfitPrice();
+	  
+	  this.prepareData();
+	  
+	  
+	  hive.api.setOptions({ url: process.env.hiveApiNode });
+	  
 	  //refetch price every 2 mins
-	  setInterval(this.fetchAfitPrice, 2 * 60 * 1000);
+	  setInterval(this.prepareData, 2 * 60 * 1000);
 	 
 	  
       // fetch products
@@ -212,5 +285,14 @@
   }
   .sel-adj{
 	margin-bottom: 3px;
+  }
+  .notice-text{
+    font-size: x-large;
+  }
+  .no-bullets{
+    list-style: none;
+  }
+  .text-success{
+    padding-right: 2px;
   }
 </style>

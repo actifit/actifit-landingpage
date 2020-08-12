@@ -110,7 +110,7 @@
 	watch: {
 	  user: 'updateUserData',
 	  bchain: function(newBchain) {
-		console.log('change in chain');
+		//console.log('change in chain');
 		this.cur_bchain = newBchain;
 		this.$store.dispatch('steemconnect/refreshUser');
 		this.reload += 1;
@@ -191,7 +191,7 @@
 		this.$store.dispatch('steemconnect/logout')
 	  },
 	  async updateUserData () {
-		console.log('updateUserData '+this.cur_bchain)
+		//console.log('updateUserData '+this.cur_bchain)
 		//grab user's notifications
 		if (this.user){
 			let res = await fetch(process.env.actiAppUrl + 'activeNotifications/' + this.user.account.name);
@@ -223,8 +223,8 @@
 		});
 		
 		let outcome = await res.json();
-		console.log(outcome);
-		console.log(outcome.status);
+		//console.log(outcome);
+		//console.log(outcome.status);
 		this.updateUserData()
 	  },
 	  async markAllRead(){
@@ -247,8 +247,8 @@
 		});
 		
 		let outcome = await res.json();
-		console.log(outcome);
-		console.log(outcome.status);
+		//console.log(outcome);
+		//console.log(outcome.status);
 		this.updateUserData()
 	  }
 	},

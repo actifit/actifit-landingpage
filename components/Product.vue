@@ -118,10 +118,11 @@
 					<a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNowHive()" :class="productBuyColor" style="border: 1px white solid;">{{ $t('Buy_now') }} <br/> {{numberFormat(this.item_price * this.afitPrice.afitHiveLastPrice, 3)}} {{this.hive_currency}}<img class="token-logo " src="/img/HIVE.png"></a>
 					<div class="row" v-if="buyHiveExpand">
 					  <label for="active-key" class="p-2">{{ $t('Active_Key') }} *</label>
-					  <input type="password" id="active-key" name="active-key" ref="active-key" class="form-control-lg w-50 p-2">
+					  <input type="password" id="active-key" name="active-key" ref="active-key" class="form-control-lg w-50 p-2" v-model="userActvKey">
 					</div>
 					<div class="text-center" v-if="buyHiveExpand">
-					  <button v-on:click="proceedBuyNowHive()" class="btn btn-brand btn-lg border">{{ $t('Proceed') }}</button>
+					  <button v-on:click="proceedBuyNowHive()" v-if="this.userTokens >= this.minAfitBuyTicket" class="btn btn-brand btn-lg border">{{ $t('Proceed') }}</button>
+					  <button data-toggle="modal" v-else :data-target="'#buyOptionsModal'+_uid" class="btn btn-brand btn-lg border">{{ $t('Proceed') }}</button>
 					</div>
 				</div>
 			  </div>
@@ -191,6 +192,8 @@
 				</div>
 			  </div>
 		  </div>
+		  
+		  <BuyOptionsModal :id="'buyOptionsModal'+_uid" :ref="'buyOptionsModal'+_uid" :modalTitle="$t('Buy_product')" :modalText="$t('buy_now_modal_desc').replace('_AMNT_', minAfitBuyTicket)" @proceed-purchase="proceedBuyNowHive"/>
           
         </div>
 		
@@ -202,9 +205,14 @@
   import steem from 'steem'
   
   import hive from '@hiveio/hive-js'
+  
+  import BuyOptionsModal from '~/components/BuyOptionsModal'
 
   export default {
     props: ['product', 'pros', 'userrank', 'gadgetStats', 'afitPrice'],
+	components: {
+		BuyOptionsModal
+	},
     computed: {
       ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters('steemconnect', ['stdLogin']),
@@ -271,6 +279,9 @@
 			firstDownloadHref: '',
 			boughtItems: [],
 			profImgUrl: process.env.steemImgUrl,
+			minAfitBuyTicket: process.env.minAfitBuyEarnTicket,
+			userActvKey: '',
+			prodRef: this,
 		}
 	},
 	watch: {
@@ -292,7 +303,7 @@
       },
 	  //handles checking all requirements for the product
 	  async allReqtsMet (){
-		console.log('>>>>>>>allReqtsMet');
+		//console.log('>>>>>>>allReqtsMet');
 		if (Array.isArray(this.product.requirements) && this.product.requirements.length > 0){
 			for (let i=0; i<this.product.requirements.length;i++){
 				if (this.product.requirements[i].item){
@@ -319,9 +330,9 @@
 	  //checks whether the requirement for this product is met
 	  async reqtMet (reqt){
 		if (reqt.item.toLowerCase() == 'User Rank'.toLowerCase()){
-			console.log('>User Rank');
-			console.log(this.userrank);
-			console.log(reqt.level);
+			//console.log('>User Rank');
+			//console.log(this.userrank);
+			//console.log(reqt.level);
 			//user rank case
 			if (parseFloat(this.userrank) >= parseFloat(reqt.level)){
 				return true;
@@ -338,7 +349,7 @@
 			//console.log(res);
 			let consumed_cnt = 0;
 			for (let i=0;i<res.length;i++){
-				console.log(res[i].status);
+				//console.log(res[i].status);
 				if (res[i].status == 'consumed'){
 					consumed_cnt += 1;
 				}
@@ -386,7 +397,7 @@
 	  },
 	  grabConsumableItem() {
 		if (Array.isArray(this.boughtItems) && this.boughtItems.length > 0){
-			console.log(this.boughtItems);
+			//console.log(this.boughtItems);
 			let i = 0;
 			let count = this.boughtItems.length;
 			for (let i = 0 ; i < count; i++){
@@ -449,7 +460,7 @@
 		let res = await fetch(url);
 		let outcome = await res.json();
 		this.settingPass = false;
-		console.log(outcome);
+		//console.log(outcome);
 		if (!outcome.error){
 			//success
 			this.downloadAgainReady = true;
@@ -469,7 +480,7 @@
 			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
 			//console.log(res);
 			if (res.result.block_num) {
-				console.log('success');
+				//console.log('success');
 				return {success: true, trx: res.result};
 			}else{
 				//console.log(err);
@@ -479,7 +490,7 @@
 			let operation = [ 
 			   [op_name, cstm_params]
 			];
-			console.log('broadcasting');
+			//console.log('broadcasting');
 			console.log(operation);
 			
 			//console.log(this.$steemconnect.accessToken);
@@ -542,7 +553,7 @@
 				headers: reqHeads
 			});
 			let outcome = await res.json();
-			console.log(outcome);
+			//console.log(outcome);
 			if (outcome.error){
 				console.log(outcome.error);
 				
@@ -570,20 +581,11 @@
 		}
 	  },
 	  async buyNowHive () {
-		this.buyHiveExpand = !this.buyHiveExpand;
-	  },
-	  async proceedBuyNowHive (){
+		//check if this is a game gadget and if reqts have been met
 		this.buyAttempt = true;
-		this.buyInProgress = true;
+		//this.buyInProgress = true;
 		this.errorProceed = '';
 		
-		//making sure user is logged in 
-		if (!this.user){
-		  this.errorProceed = this.$t('need_login_signup_notice_vote');
-		  return;
-		}
-		
-		//check if this is a game gadget and if reqts have been met
 		if (this.product.type == 'ingame'){
 			if (!this.allReqtsFilled){
 			  this.errorProceed = this.$t('cannot_buy_reqts_not_filled');
@@ -595,25 +597,54 @@
 			  return;
 			}
 		}
-		//check if active key was provided 
-		
-		if (this.$refs["active-key"].value == ''){
-		  this.errorProceed = this.$t('all_fields_required');
-		  return;
-		}
-		
-		//proceed with payment
-		//let chainLnk = await this.setProperNode ();
-		//transferToVesting(wif, from, to, amount)
-		let payAmount = parseFloat(this.item_price * this.afitPrice.afitHiveLastPrice).toFixed(3);
-		let memo = 'buy-gadget:'+this.product._id;
-		let res = await hive.broadcast.transferAsync(this.$refs["active-key"].value, this.user.account.name, 'actifit.funds', payAmount + ' ' + 'HIVE', memo).then(
-			res => this.confirmCompletion('transfer', payAmount, res)).catch(err=> this.errorCompletion(err));
+		this.buyHiveExpand = !this.buyHiveExpand;
+	  },
+	  async proceedBuyNowHive (){
+		try{
+			console.log(this.product.name);
+			this.buyAttempt = true;
+			this.buyInProgress = true;
+			this.errorProceed = '';
+			console.log('proceedBuyNowHive');
+			//making sure user is logged in 
+			if (!this.user){
+			  this.errorProceed = this.$t('need_login_signup_notice_vote');
+			  return;
+			}
 			
-		//chainLnk
+			//check if this is a game gadget and if reqts have been met
+			if (this.product.type == 'ingame'){
+				if (!this.allReqtsFilled){
+				  this.errorProceed = this.$t('cannot_buy_reqts_not_filled');
+				  return;
+				}
+				
+				if (this.product.count < 1){
+				  this.errorProceed = this.$t('cannot_buy_none_available');
+				  return;
+				}
+			}
+			//check if active key was provided 
+			//console.log(this.$refs);
+			if (this.userActvKey == ''){
+			  this.errorProceed = this.$t('all_fields_required');
+			  return;
+			}
+			
+			//proceed with payment
+			//let chainLnk = await this.setProperNode ();
+			//transferToVesting(wif, from, to, amount)
+			let payAmount = parseFloat(this.item_price * this.afitPrice.afitHiveLastPrice).toFixed(3);
+			let memo = 'buy-gadget:'+this.product._id;
+			let res = await hive.broadcast.transferAsync(this.userActvKey, this.user.account.name, process.env.actifitMarketBuy, payAmount + ' ' + 'HIVE', memo).then(
+				res => this.confirmCompletion('transfer', payAmount, res)).catch(err=> this.errorCompletion(err));
+				
+		}catch(excp){
+			console.log(excp);
+		}
 	  },
 	  async errorCompletion(res){
-		console.log(res);
+		//console.log(res);
 		let err_details = res;//JSON.parse();
 		this.errorProceed = err_details.cause.message;
 		//this.buyAttempt = false;
@@ -621,7 +652,7 @@
 	  },
 	  async confirmCompletion (type, amount, res){
 		if (res.block_num){
-			console.log (res);
+			//console.log (res);
 			
 			
 			//only support HIVE
@@ -636,7 +667,7 @@
 								+ res.id + '/'
 								+ cur_bchain);
 			//}
-			console.log(url);
+			//console.log(url);
 			//connect with our service to process buy order
 			try{
 				let res = await fetch(url);
@@ -670,6 +701,8 @@
 						//display proper success message
 						this.errorProceed = this.$t('purchase_success_ingame_part1') + ' ' + this.product.name + ' '
 											+ this.$t('Level') + ' ' + this.product.level + '. ' + this.$t('purchase_success_ingame_part2') + '.<br/>';
+											
+						this.$emit('refresh-tickets');
 					}
 				}
 				//this.checkingFunds = false;
@@ -744,7 +777,7 @@
 		if (this.user){
 		  if (this.userTokens < this.item_price){
 			this.errorProceed = this.$t('Not_enough_balance_to_buy') + this.$t('Buy_afit_here') ;
-			console.log(this.errorProceed );
+			//console.log(this.errorProceed );
 			return;
 		  }
 		}
@@ -783,7 +816,7 @@
 		let bcastRes;
 		
 		let res = await this.processTrxFunc('custom_json', cstm_params);
-		console.log(res);
+		//console.log(res);
 		if (res.success){
 			bcastRes = res.trx;
 		}else{
@@ -801,7 +834,7 @@
 							+ bcastRes.id + '/'
 							+ cur_bchain);
 		}
-		console.log(url);
+		//console.log(url);
 		//connect with our service to process buy order
 		try{
 			let res = await fetch(url);
@@ -847,8 +880,8 @@
 		}
 	  },
 	  prodHasFriendBenefic() {
-		console.log('prodHasFriendBenefic');
-		console.log(this.product.benefits.boosts);
+		//console.log('prodHasFriendBenefic');
+		//console.log(this.product.benefits.boosts);
 		if (Array.isArray(this.product.benefits.boosts) && this.product.benefits.boosts.length>0){
 			let maxCount = this.product.benefits.boosts.length;
 			for (let i=0;i<maxCount;i++){
@@ -905,14 +938,14 @@
 							+ bcastRes.block_num + '/'
 							+ bcastRes.id + '/'
 							+ cur_bchain;
-		console.log('prodHasFriendBenefic');
+		//console.log('prodHasFriendBenefic');
 		if (appendFriend){
-			console.log(this.$refs["friend"].value);
+			//console.log(this.$refs["friend"].value);
 			url_string += '/' + appendFriend;
 		}
 		let	url = new URL( url_string );
 		
-		console.log(url);
+		//console.log(url);
 		//connect with our service to process buy order
 		try{
 			let res = await fetch(url);
@@ -973,7 +1006,7 @@
 							+ cur_bchain
 							);
 		
-		console.log(url);
+		//console.log(url);
 		//connect with our service to process buy order
 		try{
 			let res = await fetch(url);

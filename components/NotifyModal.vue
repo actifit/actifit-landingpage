@@ -8,7 +8,7 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-		<div class="modal-body">{{ modalText }}</div>
+		<div class="modal-body" v-html="modalText"></div>
       </div>
     </div>
   </div>
