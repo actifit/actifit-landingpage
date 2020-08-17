@@ -27,7 +27,7 @@
 		  <i class="fas fa-ticket-alt text-brand"></i>&nbsp;{{ ticketCount }} {{$t('tickets_collected')}}
 		  <i class="fas fa-donate text-brand"></i>&nbsp;{{$t('prize_pool')}} {{ prizePoolValue }} {{$t('HIVE')}}<img src="/img/HIVE.png" class="token-logo-sm">
 		  <div class="col-md-12">
-			<div class="mt-2">{{ $t('next_draw') }}&nbsp;</div><Countdown v-if="countDownReady" deadline="August 17, 2020 00:00 GMT"></Countdown><div v-else ><i class="fas fa-spin fa-spinner text-brand"></i></div>
+			<div class="mt-2">{{ $t('next_draw') }}&nbsp;</div><Countdown v-if="countDownReady && nextGadgetBuyRewardDate" :deadline="nextGadgetBuyRewardDate"></Countdown><div v-else ><i class="fas fa-spin fa-spinner text-brand"></i></div>
 		  </div>
 	  </div>
 	  
@@ -144,6 +144,7 @@
 		prizePool: 0,
 		prizePoolValue: '',
 		countDownReady: false,
+		nextGadgetBuyRewardDate: '',//'2020-10-15',//"August 18, 2020 00:00 GMT",
       }
     },
     computed: {
@@ -242,6 +243,26 @@
 		this.fetchPrizePool();
 	  },
 	  
+	  setNextPrizeDate (json){
+		console.log('setNextPrizeDate');
+		console.log(json);
+		let targetDate = new Date(json.nextDrawDate);
+		let mnth = targetDate.getMonth()+1;
+		if (mnth<10){
+			mnth = '0'+mnth;
+		}
+		this.nextGadgetBuyRewardDate = targetDate.getFullYear() + '-' + mnth  + '-' + targetDate.getDate() + ' 00:00 GMT' ;
+		console.log('nextGadgetBuyRewardDate');
+		console.log(this.nextGadgetBuyRewardDate);
+	  },
+	  
+	  async fetchGadgetPrizeCycle() {
+		fetch(process.env.actiAppUrl+'recentGadgetBuyPrizeCycle/').then(
+		  res => {res.json().then(json => this.setNextPrizeDate (json)).catch(e => reject(e))
+		}).catch(e => reject(e))
+		
+	  }
+	  
     },
 	
     async mounted () {
@@ -250,6 +271,7 @@
 	  this.$store.dispatch('steemconnect/login')
 	  this.fetchUserData();
 	  
+	  this.fetchGadgetPrizeCycle();
 	  
 	  this.prepareData();
 	  
