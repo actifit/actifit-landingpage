@@ -1,0 +1,557 @@
+<template>
+  <div class="modal fade" id="cartModal" tabindex="-1" ref="cartModal">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content border border-danger" >
+        <div class="modal-header">
+          <h5 class="modal-title">{{ $t('Checkout_title') }}</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body text-center m-3" v-if="cartEntries.length > 0">
+		  <div v-for="(product, index) in cartEntries" :key="index" style="text-align: left;">
+			<div class="row m-0 pb-1">
+				<div :class="'avatar-'+product.level" class="avatar pro-card-small avatar-small " :style="'background-image: url(img/gadgets/' + product.image + ');'"></div>
+				<h5 class="col ml-3">{{product.name}} - Level {{product.level}}</h5>
+				<div class="ml-2"><button type="button" class="close text-brand" aria-label="Remove" @click.prevent="removeProduct(product)">
+					<i class="fas fa-minus-square"></i>
+				</button></div>
+			</div>
+		  </div>
+		  
+		  <a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNow()" style="float:left; border: 1px white solid;">{{ $t('Buy_now') }} <br/> {{numberFormat(this.product_price_afit, 2)}} {{this.item_currency}}<img class="token-logo " src="/img/actifit_logo.png"></a>
+		  <a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNowHive()" style="border: 1px white solid;">{{ $t('Buy_now') }} <br/> {{numberFormat(this.product_price_afit * this.afitPrice.afitHiveLastPrice, 3)}} {{this.hive_currency}}<img class="token-logo " src="/img/HIVE.png"></a>
+		  
+			<div class="row m-0" v-if="buyHiveExpand">
+			  <label for="active-key" class="p-2 col-sm-3">{{ $t('Active_Key') }} *</label>
+			  <input type="password" id="active-key" name="active-key" ref="active-key" class="form-control-lg col-sm-8 p-2" v-model="userActvKey">
+			</div>
+			<div class="text-center" v-if="buyHiveExpand">
+			  <button v-on:click="proceedBuyNowHive()" v-if="this.userTokens >= this.minAfitBuyTicket" class="btn btn-brand btn-lg border">{{ $t('Proceed') }}</button>
+			  <button data-toggle="modal" v-else :data-target="'#buyOptionsModal'+_uid" class="btn btn-brand btn-lg border">{{ $t('Proceed') }}</button>
+			</div>
+			
+			<div class="pb-md-2 text-center" v-if="buyAttempt">			  
+              <div v-if="buyInProgress && errorProceed==''">
+				<i class="fas fa-spin fa-spinner"></i>
+			  </div>
+			  <div v-if="errorProceed!=''">
+                <span class="text-brand" v-html="this.errorProceed"></span>
+              </div>
+			  <div v-if="!user">
+			    <div class="row pb-3">
+				  <div class="w-50">
+					<a href="/login" class="btn btn-brand btn-lg w-75">{{ $t('Login') }}</a>
+				  </div>
+				  <div class="w-50">
+					<a href="/signup" class="btn btn-brand btn-lg w-75">{{ $t('Sign_Up') }}</a>
+				  </div>
+				</div>
+			  </div>
+			</div>
+
+        </div>
+		<div class="modal-body text-center m-3" v-else>
+			{{ $t('Cart_empty') }}
+		</div>
+      </div>
+    </div>
+	
+	<no-ssr>
+      <div>
+        <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
+        <notifications :group="'error'" :position="'top center'" :classes="'vue-notification error'" />
+      </div>
+    </no-ssr>
+  </div>
+</template>
+
+<script>
+  import { mapGetters } from 'vuex'
+  import steem from 'steem'
+  
+  import hive from '@hiveio/hive-js'
+
+  
+  var dsteem = require('dsteem')
+  
+  var dhive = require('@hiveio/dhive')
+  
+  var client;
+  
+  var hiveclient;
+
+  export default {
+     props: ['afitPrice'],
+	data () {
+      return {
+        loading: false,
+		sbd_price: 1,
+		steem_price: 1,
+		hbd_price: 1,
+		hive_price: 1,
+		cur_bchain: 'HIVE',
+		target_bchain: 'HIVE',
+		product_price_afit: 0,
+		item_currency: 'AFIT',
+		hive_currency: 'HIVE',
+		buyHiveExpand: false,
+		errorProceed: '',
+		buyInProgress: false,
+		buyAttempt: false,
+		userActvKey: '',
+		minAfitBuyTicket: process.env.minAfitBuyEarnTicket,
+      }
+    },
+	watch: {
+	  bchain: function(newBchain) {
+		console.log('change in chain - voter modal');
+		this.cur_bchain = newBchain;
+		this.target_bchain = newBchain;
+		this.$store.dispatch('steemconnect/refreshUser');
+		//this.reload += 1;
+	  },
+	  cartEntries: function(){
+		this.product_price_afit = 0;
+		for (let i=0;i<this.cartEntries.length;i++){
+			this.product_price_afit += this.getProductPrice(this.cartEntries[i]);
+		}
+	  }
+	},
+	components: {
+	},
+    computed: {
+      ...mapGetters('steemconnect', ['user']),
+	  ...mapGetters('steemconnect', ['stdLogin']),
+      ...mapGetters(['cartEntries']),
+	  ...mapGetters(['userTokens']),
+	  ...mapGetters(['bchain']),
+	  adjustHiveClass () {
+		if (this.target_bchain != 'HIVE'){
+			return 'option-opaque';
+		}
+		return '';
+	  },
+	  adjustSteemClass () {
+		if (this.target_bchain != 'STEEM'){
+			return 'option-opaque';
+		}
+		return '';
+	  },
+	  adjustBothClass () {
+		if (this.target_bchain != 'BOTH'){
+			return 'option-opaque';
+		}
+		return '';
+	  },
+    },
+	beforeUpdate() {
+	  //VP data needing constant refresh upon open/close of new upvote modal
+	  
+	},
+    methods: {
+	  	  /**
+       * Formats numbers with commas and dots.
+       *
+       * @param number
+	   * @param precision
+       * @returns {string}
+       */
+      numberFormat (number, precision) {
+        return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
+      },
+	  getProductPrice (product){
+		let price_options = product.price;
+		let price_options_count = price_options.length;
+		let item_price = 0;
+		for (let i=0; i < price_options_count; i++){
+			let entry = price_options[i];
+			item_price = entry.price;
+			//item_currency = entry.currency;
+		}
+		return item_price;
+	  },
+	  removeProduct (product){
+		this.$store.commit('removeCartEntry', product)
+	  },
+	  //store SBD price
+	  setSBDPrice (_sbdPrice){
+		this.sbd_price = parseFloat(_sbdPrice).toFixed(3);
+	  },
+	  //store Steem price
+	  setSteemPrice (_steemPrice){
+		this.steem_price = parseFloat(_steemPrice).toFixed(3);
+	  },
+	  
+	  //store HBD price
+	  setHBDPrice (_hbdPrice){
+		this.hbd_price = parseFloat(_hbdPrice).toFixed(3);
+	  },
+	  //store Hive price
+	  setHivePrice (_hivePrice){
+		this.hive_price = parseFloat(_hivePrice).toFixed(3);
+	  },
+	  
+	  async processTrxFunc(op_name, cstm_params){
+		if (!localStorage.getItem('std_login')){
+			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
+			//console.log(res);
+			if (res.result.block_num) {
+				//console.log('success');
+				return {success: true, trx: res.result};
+			}else{
+				//console.log(err);
+				return {success: false, trx: null};
+			}
+		}else{
+			let operation = [ 
+			   [op_name, cstm_params]
+			];
+			console.log(operation);
+
+			//grab token
+			let accToken = localStorage.getItem('access_token')
+			
+			let op_json = JSON.stringify(operation)
+			
+			
+			let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+			//let cur_bchain = 'STEEM';
+			
+			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+op_json+'&bchain='+cur_bchain);
+			
+			let reqHeads = new Headers({
+			  'Content-Type': 'application/json',
+			  'x-acti-token': 'Bearer ' + accToken,
+			});
+			let res = await fetch(url, {
+				headers: reqHeads
+			});
+			let outcome = await res.json();
+			//console.log(outcome);
+			if (outcome.error){
+				console.log(outcome.error);
+				
+				//if this is authority error, means needs to be logged out
+				//example "missing required posting authority:Missing Posting Authority"
+				let err_msg = outcome.trx.tx.error;
+				if (err_msg.includes('missing') && err_msg.includes('authority')){
+					//clear entry
+					localStorage.removeItem('access_token');
+					//this.$store.commit('setStdLoginUser', false);
+					this.error_msg = this.$t('session_expired_login_again');
+					this.$store.dispatch('steemconnect/logout');
+				}
+				
+				this.$notify({
+				  group: 'error',
+				  text: err_msg,//this.$t('session_expired_login_again'),
+				  position: 'top center'
+				})
+				return {success: false, trx: null};
+				//this.$router.push('/login');
+			}else{
+				return {success: true, trx: outcome.trx.tx};
+			}
+		}
+	  },
+	  
+	  async buyNow() {
+		this.buyAttempt = true;
+		this.buyInProgress = true;
+		this.errorProceed = '';
+		
+		//making sure user is logged in 
+		if (!this.user){
+		  this.errorProceed = this.$t('need_login_signup_notice_vote');
+		  return;
+		}
+		
+		//check if this is a game gadget and if reqts have been met
+		/*if (this.product.type == 'ingame'){
+			if (!this.allReqtsFilled){
+			  this.errorProceed = this.$t('cannot_buy_reqts_not_filled');
+			  return;
+			}
+			
+			if (this.product.count < 1){
+			  this.errorProceed = this.$t('cannot_buy_none_available');
+			  return;
+			}
+		}*/
+		//first check if user has enough AFIT
+		if (this.user){
+		  if (this.userTokens < this.product_price_afit){
+			this.errorProceed = this.$t('Not_enough_balance_to_buy') + this.$t('Buy_afit_here') ;
+			//console.log(this.errorProceed );
+			return;
+		  }
+		}
+		//show user confirm for purchasing product/service
+		
+		/*let user_prmpt =  this.$t('purchase_confirm_part1') + this.product.name + ' ' + this.product.type + '.\n' 
+					+ this.$t('purchase_confirm_part2') + this.numberFormat(this.item_price, 2) + ' ' + this.item_currency + '.\n' 
+					+ this.$t('Proceed') + '?';
+		if (this.product.type == 'ingame'){
+			user_prmpt =  this.$t('purchase_confirm_part1') + this.product.name + ' Level ' + this.product.level + ' ' + this.product.type + ' virtual gadget' + '.\n' 
+					+ this.$t('purchase_confirm_part2') + this.numberFormat(this.item_price, 2) + ' ' + this.item_currency + '.\n' 
+					+ this.$t('Proceed') + '?';
+		}
+		let decis = confirm(user_prmpt);
+		if (!decis){
+			this.buyInProgress = false;
+			return;
+		}*/
+		
+		//construct product list param
+		let prod_list_str = '';
+		for (let i=0;i<this.cartEntries.length;i++){
+			prod_list_str+=this.cartEntries[i]._id;
+			if (i<this.cartEntries.length-1){
+				prod_list_str+='-';
+			}
+		}
+		
+		//broadcast trx to blockchain
+		/*let cstm_params = {
+			required_auths: [],
+			required_posting_auths: [this.user.account.name],
+			id: 'actifit',
+			json: "{ \"buy_product\": \""+prod_list_str+"\"}"
+		  };*/
+		
+		//if (this.product.type == 'ingame'){
+			//different tx
+		let cstm_params = {
+				required_auths: [],
+				required_posting_auths: [this.user.account.name],
+				id: 'actifit',
+				json: "{\"transaction\": \"buy-gadget\" , \"gadget\": \""+prod_list_str+"\"}"
+			  };
+		//}
+		let bcastRes;
+		
+		let res = await this.processTrxFunc('custom_json', cstm_params);
+		//console.log(res);
+		if (res.success){
+			bcastRes = res.trx;
+		}else{
+			console.log(err);
+		}
+		
+		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+		
+		
+		let url = new URL( process.env.actiAppUrl + 'buyMultiGadget/'
+						+ this.user.account.name + '/'
+						+ prod_list_str + '/'
+						+ bcastRes.block_num + '/'
+						+ bcastRes.id + '/'
+						+ cur_bchain);
+	
+		//console.log(url);
+		//connect with our service to process buy order
+		try{
+			let res = await fetch(url);
+			let outcome = await res.json();
+			if (outcome.error){
+				this.errorProceed = outcome;
+				console.error(outcome);
+			}else{
+				//update user token count
+				this.$store.dispatch('fetchUserTokens')
+				
+				//display proper success message
+				this.errorProceed = this.$t('purchase_success_ingame_multi');
+				
+				this.$emit('refresh-tickets-multi');
+					
+				this.$notify({
+				  group: 'success',
+				  text: this.$t('purchase_success_ingame_multi'),
+				  position: 'top center'
+				})
+				//}
+			}
+			//this.checkingFunds = false;
+			//this.resultReturned = true;
+		
+		}catch(err){
+			console.error(err);
+			//this.checkingFunds = false;
+		}
+		this.buyInProgress = false;
+	  },
+	  async buyNowHive () {
+		//check if this is a game gadget and if reqts have been met
+		this.buyAttempt = true;
+		//this.buyInProgress = true;
+		this.errorProceed = '';
+		
+		/*if (this.product.type == 'ingame'){
+			if (!this.allReqtsFilled){
+			  this.errorProceed = this.$t('cannot_buy_reqts_not_filled');
+			  return;
+			}
+			
+			if (this.product.count < 1){
+			  this.errorProceed = this.$t('cannot_buy_none_available');
+			  return;
+			}
+		}*/
+		this.buyHiveExpand = !this.buyHiveExpand;
+	  },
+	  async proceedBuyNowHive (){
+		try{
+			this.buyAttempt = true;
+			this.buyInProgress = true;
+			this.errorProceed = '';
+			console.log('proceedBuyNowHive');
+			//making sure user is logged in 
+			if (!this.user){
+			  this.errorProceed = this.$t('need_login_signup_notice_vote');
+			  return;
+			}
+			
+			//check if this is a game gadget and if reqts have been met
+			/*if (this.product.type == 'ingame'){
+				if (!this.allReqtsFilled){
+				  this.errorProceed = this.$t('cannot_buy_reqts_not_filled');
+				  return;
+				}
+				
+				if (this.product.count < 1){
+				  this.errorProceed = this.$t('cannot_buy_none_available');
+				  return;
+				}
+			}*/
+			//check if active key was provided 
+			//console.log(this.$refs);
+			if (this.userActvKey == ''){
+			  this.errorProceed = this.$t('all_fields_required');
+			  return;
+			}
+			
+			//proceed with payment
+			//let chainLnk = await this.setProperNode ();
+			//transferToVesting(wif, from, to, amount)
+			let payAmount = parseFloat(this.product_price_afit * this.afitPrice.afitHiveLastPrice).toFixed(3);
+			let memo = 'buy-gadget:';
+			//loop through gadgets and construct proper memo
+			for (let i=0;i<this.cartEntries.length;i++){
+				memo+=this.cartEntries[i]._id;
+				if (i<this.cartEntries.length-1){
+					memo+='-';
+				}
+			}
+			console.log(memo);
+			let res = await hive.broadcast.transferAsync(this.userActvKey, this.user.account.name, process.env.actifitMarketBuy, payAmount + ' ' + 'HIVE', memo).then(
+				res => this.confirmCompletion('transfer', payAmount, res)).catch(err=> this.errorCompletion(err));
+				
+		}catch(excp){
+			console.log(excp);
+		}
+	  },
+	  async errorCompletion(res){
+		//console.log(res);
+		let err_details = res;//JSON.parse();
+		this.errorProceed = err_details.cause.message;
+		//this.buyAttempt = false;
+		this.buyInProgress = false;
+	  },
+	  async confirmCompletion (type, amount, res){
+		if (res.block_num){
+			//console.log (res);
+			
+			
+			//only support HIVE
+			let cur_bchain = 'HIVE';//(localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+			let url = '';//new URL(process.env.actiAppUrl + 'processBuyOrderHive/?user='+this.user.account.name+'&product_id='+this.product._id);
+			let memo = '';
+			for (let i=0;i<this.cartEntries.length;i++){
+				memo+=this.cartEntries[i]._id;
+				if (i<this.cartEntries.length-1){
+					memo+='-';
+				}
+			}
+			
+			//if (this.product.type == 'ingame'){
+				url = new URL( process.env.actiAppUrl + 'buyMultiGadgetHive/'
+								+ this.user.account.name + '/'
+								+ memo + '/'
+								+ res.block_num + '/'
+								+ res.id + '/'
+								+ cur_bchain);
+			//}
+			//console.log(url);
+			//connect with our service to process buy order
+			try{
+				let res = await fetch(url);
+				let outcome = await res.json();
+				if (outcome.error){
+					this.errorProceed = outcome;
+					console.error(outcome);
+				}else{
+										
+					//display proper success message
+					this.errorProceed = this.$t('purchase_success_ingame_multi');
+										
+					this.$emit('refresh-tickets-multi');
+					
+					this.$notify({
+					  group: 'success',
+					  text: this.$t('purchase_success_ingame_multi'),
+					  position: 'top center'
+					})
+				
+				}
+				//this.checkingFunds = false;
+				//this.resultReturned = true;
+			
+			}catch(err){
+				console.error(err);
+				//this.checkingFunds = false;
+			}
+			
+			
+			
+			//also start validation and gadget lock process
+			/*let url = new URL(process.env.actiAppUrl + 'confirmPaymentGadget/'+'?bchain=' + this.cur_bchain);
+			//compile all needed data and send it along the request for processing
+			let params = {
+				from: this.user.account.name,
+				
+			}
+			Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
+			try{
+				let res = await fetch(url);
+				let outcome = await res.json();
+				//update user data according to result
+				this.fetchUserData();
+			}catch(err){
+				console.error(err);
+			}*/
+			
+		}else{
+			this.errorProceed = res.error.message;
+		}
+		this.buyAttempt = false;
+		this.buyInProgress = false;
+	  },
+	  
+	  
+    },
+	async mounted () {	  
+	  
+	}
+  }
+</script>
+<style>
+.avatar-small{
+	border-width: 3px!important;
+}
+.pro-card-small{
+	width: 45px;
+    height: 45px;
+}
+</style>

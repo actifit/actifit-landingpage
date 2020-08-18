@@ -40,6 +40,7 @@ const createStore = () => {
 	  commentCountToday: 0, //contains the count of comments done by a user on a single day
 	  stdLoginUser: null,
 	  bchain: '',//current active blockchain
+	  cartEntries: [], //contains current items being bought via market
     },
     getters,
     mutations,

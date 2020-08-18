@@ -94,5 +94,8 @@ export default {
   },
   bchain (state){
 	return state.bchain
+  },
+  cartEntries (state){
+	return state.cartEntries
   }
 }

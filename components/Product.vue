@@ -124,6 +124,11 @@
 					  <button v-on:click="proceedBuyNowHive()" v-if="this.userTokens >= this.minAfitBuyTicket" class="btn btn-brand btn-lg border">{{ $t('Proceed') }}</button>
 					  <button data-toggle="modal" v-else :data-target="'#buyOptionsModal'+_uid" class="btn btn-brand btn-lg border">{{ $t('Proceed') }}</button>
 					</div>
+					<div v-if="user && this.allReqtsFilled">
+						<a class="btn btn-success btn-lg w-50 book-button" @click.prevent="addCart()" style="float:left; border: 1px white solid;" v-if="this.cartEntries.filter(obj => obj._id === this.product._id).length < 1"><span v-html="$t('Add_Cart')"></span></a>
+						<a class="btn btn-success btn-lg w-50 book-button" @click.prevent="removeCart()" style="float:left; border: 1px white solid;" v-else ><span v-html="$t('Remove_Cart')"></span></a>
+						<a class="btn btn-success btn-lg w-50 book-button" data-toggle="modal" data-target="#cartModal" style="float:left; border: 1px white solid;"><span v-html="$t('Checkout')"></span> </a>
+					</div>
 				</div>
 			  </div>
 			  <div v-else-if="!productBought && !this.errorProceed">
@@ -194,7 +199,17 @@
 		  </div>
 		  
 		  <BuyOptionsModal :id="'buyOptionsModal'+_uid" :ref="'buyOptionsModal'+_uid" :modalTitle="$t('Buy_product')" :modalText="$t('buy_now_modal_desc').replace('_AMNT_', minAfitBuyTicket)" @proceed-purchase="proceedBuyNowHive"/>
+		  
+		  <CartModal id="cartModal" ref="cartModal" :afitPrice="afitPrice" @refresh-tickets-multi="refreshTicketsMulti"/>
           
+		<no-ssr>
+		  <div>
+			<notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
+			<notifications :group="'error'" :position="'top center'" :classes="'vue-notification error'" />
+		  </div>
+		</no-ssr>
+		  
+		  
         </div>
 		
 </template>
@@ -207,16 +222,20 @@
   import hive from '@hiveio/hive-js'
   
   import BuyOptionsModal from '~/components/BuyOptionsModal'
+  import CartModal from '~/components/CartModal'
+  
 
   export default {
     props: ['product', 'pros', 'userrank', 'gadgetStats', 'afitPrice'],
 	components: {
-		BuyOptionsModal
+		BuyOptionsModal,
+		CartModal
 	},
     computed: {
       ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters('steemconnect', ['stdLogin']),
 	  ...mapGetters(['userTokens']),
+	  ...mapGetters(['cartEntries']),
 	  productBuyColor () {
 		if (!this.allReqtsFilled){ 
 			return 'bg-secondary';
@@ -301,6 +320,20 @@
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
+	  
+	  async addCart(){
+		let res = await this.$store.commit('addCartEntry', this.product)
+		if (res){
+			this.$notify({
+			  group: 'success',
+			  text: this.$t('success_add_cart').replace('_PROD_',this.product.name+'-L'+this.product.level),//this.$t('session_expired_login_again'),
+			  position: 'top center'
+			})
+		}
+	  },
+	  async removeCart(){
+		let res = await this.$store.commit('removeCartEntry', this.product)
+	  },
 	  //handles checking all requirements for the product
 	  async allReqtsMet (){
 		//console.log('>>>>>>>allReqtsMet');
@@ -737,6 +770,16 @@
 		}
 		this.buyAttempt = false;
 		this.buyInProgress = false;
+	  },
+	  refreshTicketsMulti (){
+		//update product status
+		this.checkProductBought();
+		
+		this.$store.dispatch('fetchUserTokens')
+		
+		this.$store.dispatch('fetchProducts')
+		
+		this.$emit('refresh-tickets');
 	  },
 	  setProperNode (selectChain){
 		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');

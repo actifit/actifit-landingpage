@@ -92,5 +92,15 @@ export default {
   },
   setBchain (state, bchain) {
 	state.bchain = bchain;
+  },
+  setCartEntries (state, entries) {
+	state.cartEntries = entries;
+  },
+  addCartEntry (state, entry){
+	state.cartEntries.push(entry);
+	return true;
+  },
+  removeCartEntry (state, entry){
+	state.cartEntries = state.cartEntries.filter( obj => obj._id !== entry._id);
   }
 }
