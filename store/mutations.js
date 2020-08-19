@@ -102,5 +102,8 @@ export default {
   },
   removeCartEntry (state, entry){
 	state.cartEntries = state.cartEntries.filter( obj => obj._id !== entry._id);
+  },
+  clearCart (state){
+	state.cartEntries = [];
   }
 }

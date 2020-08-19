@@ -4,7 +4,7 @@
       <div class="modal-content border border-danger" >
         <div class="modal-header">
           <h5 class="modal-title">{{ $t('Checkout_title') }}</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <button type="button" class="close" id="closeCartMod" ref="closeCartMod" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
@@ -18,17 +18,29 @@
 				</button></div>
 			</div>
 		  </div>
-		  
-		  <a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNow()" style="float:left; border: 1px white solid;">{{ $t('Buy_now') }} <br/> {{numberFormat(this.product_price_afit, 2)}} {{this.item_currency}}<img class="token-logo " src="/img/actifit_logo.png"></a>
-		  <a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNowHive()" style="border: 1px white solid;">{{ $t('Buy_now') }} <br/> {{numberFormat(this.product_price_afit * this.afitPrice.afitHiveLastPrice, 3)}} {{this.hive_currency}}<img class="token-logo " src="/img/HIVE.png"></a>
-		  
-			<div class="row m-0" v-if="buyHiveExpand">
-			  <label for="active-key" class="p-2 col-sm-3">{{ $t('Active_Key') }} *</label>
-			  <input type="password" id="active-key" name="active-key" ref="active-key" class="form-control-lg col-sm-8 p-2" v-model="userActvKey">
+			
+			<div v-if="!purchaseSuccess">
+				<a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNow()" style="float:left; border: 1px white solid;">{{ $t('Buy_now') }} <br/> {{numberFormat(this.product_price_afit, 2)}} {{this.item_currency}}<img class="token-logo " src="/img/actifit_logo.png"></a>
+				<a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNowHive()" style="border: 1px white solid;">{{ $t('Buy_now') }} <br/> {{numberFormat(this.product_price_afit * this.afitPrice.afitHiveLastPrice, 3)}} {{this.hive_currency}}<img class="token-logo " src="/img/HIVE.png"></a>
+			  
+				<div class="row m-0" v-if="buyHiveExpand">
+				  <label for="active-key" class="p-2 col-sm-3">{{ $t('Active_Key') }} *</label>
+				  <input type="password" id="active-key" name="active-key" ref="active-key" class="form-control-lg col-sm-8 p-2" v-model="userActvKey">
+				</div>
+				<div class="text-center" v-if="buyHiveExpand">
+				  <button v-on:click="proceedBuyNowHive()" v-if="this.userTokens >= this.minAfitBuyTicket" class="btn btn-brand btn-lg border">{{ $t('Proceed') }}</button>
+				  <button data-toggle="modal" v-else :data-target="'#buyOptionsModal'+_uid" class="btn btn-brand btn-lg border">{{ $t('Proceed') }}</button>
+				</div>
 			</div>
-			<div class="text-center" v-if="buyHiveExpand">
-			  <button v-on:click="proceedBuyNowHive()" v-if="this.userTokens >= this.minAfitBuyTicket" class="btn btn-brand btn-lg border">{{ $t('Proceed') }}</button>
-			  <button data-toggle="modal" v-else :data-target="'#buyOptionsModal'+_uid" class="btn btn-brand btn-lg border">{{ $t('Proceed') }}</button>
+			<div v-else>
+				<div v-if="prodHasFriendBenefic()" class="row m-0 p-1">
+					<span class="m-2"><b>{{$t('Benef_friend')}}: </b></span>
+					<input type="text" name="friend" id="friend" ref="friend" class="form-control p-2 w-50" >
+				</div>
+				<a class="btn btn-danger btn-lg book-button p-1" @click.prevent="activateGadget()">
+					<span>{{ $t('activate_all_gadgets') }}</span>&nbsp;
+					<i class="fas fa-check text-success"></i>
+				</a>
 			</div>
 			
 			<div class="pb-md-2 text-center" v-if="buyAttempt">			  
@@ -51,6 +63,7 @@
 			</div>
 
         </div>
+
 		<div class="modal-body text-center m-3" v-else>
 			{{ $t('Cart_empty') }}
 		</div>
@@ -101,6 +114,7 @@
 		buyAttempt: false,
 		userActvKey: '',
 		minAfitBuyTicket: process.env.minAfitBuyEarnTicket,
+		purchaseSuccess: false,
       }
     },
 	watch: {
@@ -255,6 +269,128 @@
 			}
 		}
 	  },
+	  prodHasFriendBenefic(){
+		for (let i=0;i<this.cartEntries.length;i++){
+			let product = this.cartEntries[i];
+			//if at least one product supports beneficiary, return true
+			if (Array.isArray(product.benefits.boosts) && product.benefits.boosts.length>0){
+				let maxCount = product.benefits.boosts.length;
+				for (let i=0;i<maxCount;i++){
+					if (product.benefits.boosts[i].boost_beneficiary == 'friend'){
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	  },
+	  async activateGadget() {
+		
+		//clear error
+		this.errorProceed = '';
+		
+		this.buyAttempt = true;
+		this.buyInProgress = true;
+		let appendFriend = null;
+		//need to make sure we have a target friend set in special boost types
+		if (this.prodHasFriendBenefic()){
+			if (this.$refs["friend"].value == ''){
+			  this.errorProceed = this.$t('Provide_friend_name_receive_boost');
+			  return;
+			}
+			if (this.$refs["friend"].value.replace('@','') == this.user.account.name){
+			  this.errorProceed = this.$t('Cannot_use_same_account');
+			  return;
+			}
+			appendFriend = this.$refs["friend"].value;
+		}
+		
+		//construct product list param
+		let prod_list_str = '';
+		for (let i=0;i<this.cartEntries.length;i++){
+			prod_list_str+=this.cartEntries[i]._id;
+			if (i<this.cartEntries.length-1){
+				prod_list_str+='-';
+			}
+		}
+		
+		let cstm_params = {
+			required_auths: [],
+			required_posting_auths: [this.user.account.name],
+			id: 'actifit',
+			json: "{\"transaction\": \"activate-gadget\" , \"gadget\": \""+prod_list_str+"\"}"
+		};
+		if (appendFriend){
+			cstm_params['json'] = "{\"transaction\": \"activate-gadget\" , \"gadget\": \""+prod_list_str+"\", \"benefic\": \""+appendFriend+"\"}";
+		}
+		let bcastRes;
+		
+		let res = await this.processTrxFunc('custom_json', cstm_params);
+		//console.log(res);
+		if (res.success){
+			bcastRes = res.trx;
+		}else{
+			console.log(err);
+		}
+		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+		let url_string = process.env.actiAppUrl + 'activateMultiGadget/'
+							+ this.user.account.name + '/'
+							+ prod_list_str + '/'
+							+ bcastRes.block_num + '/'
+							+ bcastRes.id + '/'
+							+ cur_bchain;
+		//console.log('prodHasFriendBenefic');
+		if (appendFriend){
+			//console.log(this.$refs["friend"].value);
+			url_string += '/' + appendFriend;
+		}
+		let	url = new URL( url_string );
+		
+		//console.log(url);
+		//connect with our service to process buy order
+		try{
+			let res = await fetch(url);
+			let outcome = await res.json();
+			if (outcome.error){
+				this.errorProceed = outcome;
+				console.error(outcome);
+			}else{
+				//update product status
+				//this.checkProductBought();
+				//notify parent to refresh products
+
+				//this.$store.dispatch('fetchProducts')
+
+				this.$emit('refresh-tickets-multi');
+				
+				//display proper success message
+				this.errorProceed = this.$t('all_gadgets_activated');
+				
+				this.$notify({
+				  group: 'success',
+				  text: this.$t('all_gadgets_activated'),
+				  position: 'top center'
+				})
+				
+				//clear cart
+				this.$store.commit('clearCart');
+				
+				//reset purchase status
+				this.purchaseSuccess = false;
+				
+				//close modal
+				this.$refs['closeCartMod'].click();
+			}
+			//this.checkingFunds = false;
+			//this.resultReturned = true;
+		
+		}catch(err){
+			console.error(err);
+			//this.checkingFunds = false;
+		}
+		this.buyAttempt = false;
+		this.buyInProgress = false;
+	  },
 	  
 	  async buyNow() {
 		this.buyAttempt = true;
@@ -371,6 +507,9 @@
 				  text: this.$t('purchase_success_ingame_multi'),
 				  position: 'top center'
 				})
+				console.log('purchaseSuccess');
+				this.purchaseSuccess = true;
+				console.log(this.purchaseSuccess);
 				//}
 			}
 			//this.checkingFunds = false;
@@ -503,6 +642,10 @@
 					  text: this.$t('purchase_success_ingame_multi'),
 					  position: 'top center'
 					})
+					
+					console.log('purchaseSuccess');
+					this.purchaseSuccess = true;
+					console.log(this.purchaseSuccess);
 				
 				}
 				//this.checkingFunds = false;
