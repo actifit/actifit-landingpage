@@ -114,8 +114,8 @@
 					<i class="fas fa-times text-brand"></i>
 				</a>
 				<div v-else>
-					<a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNow()" :class="productBuyColor" style="float:left; border: 1px white solid;">{{ $t('Buy_now') }} <br/> {{numberFormat(this.item_price, 2)}} {{this.item_currency}}<img class="token-logo " src="/img/actifit_logo.png"></a>
-					<a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNowHive()" :class="productBuyColor" style="border: 1px white solid;">{{ $t('Buy_now') }} <br/> {{numberFormat(this.item_price * this.afitPrice.afitHiveLastPrice, 3)}} {{this.hive_currency}}<img class="token-logo " src="/img/HIVE.png"></a>
+					<a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNow()" :class="productBuyColor" style="float:left; border: 1px white solid;">{{ $t('Buy_now') }} <br/> {{numberFormat(this.item_price, 2)}} {{this.item_currency}}<img class="token-logo-sm " src="/img/actifit_logo.png"></a>
+					<a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNowHive()" :class="productBuyColor" style="border: 1px white solid;">{{ $t('Buy_now') }} <br/> {{numberFormat(this.item_price * this.afitPrice.afitHiveLastPrice, 3)}} {{this.hive_currency}}<img class="token-logo-sm " src="/img/HIVE.png"></a>
 					<div class="row" v-if="buyHiveExpand">
 					  <label for="active-key" class="p-2">{{ $t('Active_Key') }} *</label>
 					  <input type="password" id="active-key" name="active-key" ref="active-key" class="form-control-lg w-50 p-2" v-model="userActvKey">
@@ -132,7 +132,7 @@
 				</div>
 			  </div>
 			  <div v-else-if="!productBought && !this.errorProceed">
-                <a class="btn btn-brand btn-lg w-50 book-button" @click.prevent="buyNow()" style="float:left; border: 1px white solid;">{{ $t('Buy_now') }} <br/> {{numberFormat(this.item_price, 2)}} {{this.item_currency}}<img class="token-logo " src="/img/actifit_logo.png"></a>
+                <a class="btn btn-brand btn-lg w-50 book-button" @click.prevent="buyNow()" style="float:left; border: 1px white solid;">{{ $t('Buy_now') }} <br/> {{numberFormat(this.item_price, 2)}} {{this.item_currency}}<img class="token-logo-sm " src="/img/actifit_logo.png"></a>
               </div>
 			  <div v-else>
 			    <div v-if="!this.downloadAgainReady">
@@ -1136,7 +1136,7 @@
 	  height: 45px;
 	  border: none;
 	}
-	.token-logo{
+	.token-logo-sm{
 	  width: 20px;
 	  height: 20px;
 	}
