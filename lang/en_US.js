@@ -671,7 +671,7 @@ module.exports = {
   active_delegations: 'Active Delegations', 
   prize_tickets_buy_gadgets: 'Actifit Gadget Prize Draw',
   tickets_collected: 'tickets collected',
-  my_tickets_collected: 'My tickets',
+  my_tickets_collected: 'My Tickets',
   prize_pool: 'Prize Pool',
   Ready: 'Ready',
   next_draw: 'Next Draw In ',

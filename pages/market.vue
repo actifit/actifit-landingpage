@@ -27,9 +27,8 @@
 		  <div class="row row-sep">
 			<div class="col-md-4 row-sep-in small-pad-row">
 			  <h5 class="token-title pt-2 notice-text">{{$t('my_tickets_collected')}}</h5>
-			  <div v-if="ticketCount!=''"><i class="fas fa-ticket-alt text-brand" ></i>&nbsp;{{ ticketCount }} {{$t('tickets_collected')}}</div>
-			  <div v-else-if="!user" >-</div>
-			  <div v-else ><i class="fas fa-spin fa-spinner text-brand"></i></div>
+			  <div v-if="user"><i class="fas fa-ticket-alt text-brand" ></i>&nbsp;{{ ticketCount }} {{$t('tickets_collected')}}</div>
+			  <div v-else >-</div>
 			</div>
 			<div class="col-md-4 row-sep-in small-pad-row">
 			  <h5 class="token-title pt-2 notice-text">{{$t('prize_pool')}}</h5>
@@ -153,7 +152,7 @@
 		currentSort: JSON.stringify({value: 'price', direction: 'asc'}),
 		prodList: [],
 		afitPrice: 0,
-		ticketCount: '',
+		ticketCount: 0,
 		prizePool: 0,
 		prizePoolValue: '',
 		countDownReady: false,
