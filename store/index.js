@@ -41,6 +41,7 @@ const createStore = () => {
 	  stdLoginUser: null,
 	  bchain: '',//current active blockchain
 	  cartEntries: [], //contains current items being bought via market
+	  purchaseSuccess: false, //references latest purchase transaction using cart
     },
     getters,
     mutations,

@@ -121,7 +121,7 @@
 		buyAttempt: false,
 		userActvKey: '',
 		minAfitBuyTicket: process.env.minAfitBuyEarnTicket,
-		purchaseSuccess: false,
+		//purchaseSuccess: false,
       }
     },
 	watch: {
@@ -133,6 +133,10 @@
 		//this.reload += 1;
 	  },
 	  cartEntries: function(){
+		//reset any errors due to adding new entries
+		this.errorProceed = '';
+		
+		//update total cart price
 		this.product_price_afit = 0;
 		for (let i=0;i<this.cartEntries.length;i++){
 			this.product_price_afit += this.getProductPrice(this.cartEntries[i]);
@@ -148,6 +152,7 @@
       ...mapGetters(['cartEntries']),
 	  ...mapGetters(['userTokens']),
 	  ...mapGetters(['bchain']),
+	  ...mapGetters(['purchaseSuccess']),
 	  adjustHiveClass () {
 		if (this.target_bchain != 'HIVE'){
 			return 'option-opaque';
@@ -384,7 +389,9 @@
 				this.$store.commit('clearCart');
 				
 				//reset purchase status
-				this.purchaseSuccess = false;
+				//this.purchaseSuccess = false;
+				
+				this.$store.commit('setPurchaseSuccess', false);
 				
 				//close modal
 				this.$refs['closeCartMod'].click();
@@ -516,8 +523,9 @@
 				  position: 'top center'
 				})
 				console.log('purchaseSuccess');
-				this.purchaseSuccess = true;
-				console.log(this.purchaseSuccess);
+				//this.purchaseSuccess = true;
+				this.$store.commit('setPurchaseSuccess', true);
+				//console.log(this.purchaseSuccess);
 				//}
 			}
 			//this.checkingFunds = false;
@@ -652,8 +660,9 @@
 					})
 					
 					console.log('purchaseSuccess');
-					this.purchaseSuccess = true;
-					console.log(this.purchaseSuccess);
+					//this.purchaseSuccess = true;
+					this.$store.commit('setPurchaseSuccess', true);
+					//console.log(this.purchaseSuccess);
 				
 				}
 				//this.checkingFunds = false;

@@ -97,6 +97,11 @@ export default {
 	state.cartEntries = entries;
   },
   addCartEntry (state, entry){
+	//if this new addition is following a prior purchase, need to reset the cart
+	if (state.purchaseSuccess){
+		state.purchaseSuccess = false;
+		state.cartEntries = [];
+	}
 	state.cartEntries.push(entry);
 	return true;
   },
@@ -105,5 +110,8 @@ export default {
   },
   clearCart (state){
 	state.cartEntries = [];
+  },
+  setPurchaseSuccess (state, _purchaseSuccess) {
+	state.purchaseSuccess = _purchaseSuccess;
   }
 }

@@ -97,5 +97,8 @@ export default {
   },
   cartEntries (state){
 	return state.cartEntries
+  },
+  purchaseSuccess (state) {
+	return state.purchaseSuccess;
   }
 }
