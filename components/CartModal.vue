@@ -20,8 +20,8 @@
 		  </div>
 			
 			<div v-if="!purchaseSuccess">
-				<a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNow()" style="float:left; border: 1px white solid;">{{ $t('Buy_now') }} <br/> {{numberFormat(this.product_price_afit, 2)}} {{this.item_currency}}<img class="token-logo " src="/img/actifit_logo.png"></a>
-				<a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNowHive()" style="border: 1px white solid;">{{ $t('Buy_now') }} <br/> {{numberFormat(this.product_price_afit * this.afitPrice.afitHiveLastPrice, 3)}} {{this.hive_currency}}<img class="token-logo " src="/img/HIVE.png"></a>
+				<a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNow()" style="float:left; border: 1px white solid;">{{ $t('Buy_now') }} <br/> {{numberFormat(this.product_price_afit, 2)}} {{this.item_currency}}<img class="token-logo-sm " src="/img/actifit_logo.png"></a>
+				<a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNowHive()" style="border: 1px white solid;">{{ $t('Buy_now') }} <br/> {{numberFormat(this.product_price_afit * this.afitPrice.afitHiveLastPrice, 3)}} {{this.hive_currency}}<img class="token-logo-sm " src="/img/HIVE.png"></a>
 			  
 				<div class="row m-0" v-if="buyHiveExpand">
 				  <label for="active-key" class="p-2 col-sm-3">{{ $t('Active_Key') }} *</label>
@@ -29,7 +29,7 @@
 				</div>
 				<div class="text-center" v-if="buyHiveExpand">
 				  <button v-on:click="proceedBuyNowHive()" v-if="this.userTokens >= this.minAfitBuyTicket" class="btn btn-brand btn-lg border">{{ $t('Proceed') }}</button>
-				  <button data-toggle="modal" v-else :data-target="'#buyOptionsModal'+_uid" class="btn btn-brand btn-lg border">{{ $t('Proceed') }}</button>
+				  <button data-toggle="modal" v-else :data-target="'#buyOptionsModalCart'" class="btn btn-brand btn-lg border">{{ $t('Proceed') }}</button>
 				</div>
 			</div>
 			<div v-else>
@@ -68,7 +68,12 @@
 			{{ $t('Cart_empty') }}
 		</div>
       </div>
+	  
+	  
     </div>
+	
+	
+	  <BuyOptionsModal id="buyOptionsModalCart" ref="buyOptionsModalCart" containerID="#buyOptionsModalCart" :modalTitle="$t('Buy_product')" :modalText="$t('buy_now_modal_desc').replace('_AMNT_', minAfitBuyTicket)" @proceed-purchase="proceedBuyNowHive"/>
 	
 	<no-ssr>
       <div>
@@ -84,6 +89,8 @@
   import steem from 'steem'
   
   import hive from '@hiveio/hive-js'
+  
+  import BuyOptionsModal from '~/components/BuyOptionsModal'
 
   
   var dsteem = require('dsteem')
@@ -133,6 +140,7 @@
 	  }
 	},
 	components: {
+		BuyOptionsModal
 	},
     computed: {
       ...mapGetters('steemconnect', ['user']),

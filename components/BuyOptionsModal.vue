@@ -1,29 +1,29 @@
 <template>
-  <div class="modal fade" id="buyOptionsModal" ref="buyOptionsModal" tabindex="-1">
-    <div class="modal-dialog modal-lg" role="document">
+  <div :class="classContxt" id="buyOptionsModal" ref="buyOptionsModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div v-if="modalTitle" class="modal-header">
           <h5 class="modal-title" id="exampleModalLabel">{{ modalTitle }}</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <button type="button" class="close" data-toggle="modal" data-target="containerID" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
 		<div class="modal-body" v-html="modalText"></div>
 		<div class="modal-body">
-			<div class="row">
-				<div class="w-50">
-					<div class="row pl-5">
-					<a href="https://steem-engine.com/?p=market&t=AFIT" class="btn btn-brand btn-lg border w-75" target="_blank" rel="noopener noreferrer">{{ $t('buy_afit_se') }}</a>
+			<div class="row col-12">
+				<div class="col-sm-12 col-md-6">
+					<div class="row">
+					<a href="https://steem-engine.com/?p=market&t=AFIT" class="btn btn-brand btn-lg border" target="_blank" rel="noopener noreferrer">{{ $t('buy_afit_se') }}</a>
 					</div>
-					<div class="row pl-5">
-					<a href="https://hive-engine.com/?p=market&t=AFIT" class="btn btn-brand btn-lg border w-75" target="_blank" rel="noopener noreferrer">{{ $t('buy_afit_he') }}</a>
+					<div class="row">
+					<a href="https://hive-engine.com/?p=market&t=AFIT" class="btn btn-brand btn-lg border" target="_blank" rel="noopener noreferrer">{{ $t('buy_afit_he') }}</a>
 					</div>
-					<div class="row pl-5">
-					<a href="/wallet" class="btn btn-brand btn-lg border w-75" target="_blank" >{{ $t('Move_AFIT_to_Wallet') }}</a>
+					<div class="row">
+					<a href="/wallet" class="btn btn-brand btn-lg border" target="_blank" >{{ $t('Move_AFIT_to_Wallet') }}</a>
 					</div>
 				</div>
-				<div class="w-50 pr-5">
-					<a href="#" @click.prevent="proceedBuy" class="btn btn-success btn-lg border w-75" data-dismiss="modal" >{{ $t('continue_gadget_purchase') }}</a>
+				<div class="col-sm-12 col-md-6">
+					<a href="#" @click.prevent="proceedBuy" class="btn btn-success btn-lg border" data-toggle="modal" :data-target="containerID">{{ $t('continue_gadget_purchase') }}</a>
 				</div>
 			</div>
 		</div>
@@ -36,7 +36,12 @@
 <script>
  
   export default {
-    props: [ 'modalTitle', 'modalText', 'initiator'],
+    props: [ 'modalTitle', 'modalText', 'initiator', 'containerID'],
+	data () {
+		return {
+			classContxt: "modal modal-opts fade nooverflow"
+		}
+	},
 	components: {
 	  
 	},
@@ -47,7 +52,6 @@
 	  async proceedBuy(){
 		console.log('proceedBuy Options');
 		this.$emit('proceed-purchase');
-		//console.log(this.initiator.$parent.$children.find(_uid));
 	  }
 	},
 	async mounted () {
@@ -56,5 +60,7 @@
   }
 </script>
 <style>
-
+.nooverflow{
+	overflow: hidden;
+}
 </style>

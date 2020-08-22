@@ -98,6 +98,8 @@
     </div>
 	
 	<NotifyModal :modalTitle="$t('Actifit_Info')" :modalText="$t('weekly_pay_prize_desc')"/>
+	
+	
 
     <Footer />
     <no-ssr>
