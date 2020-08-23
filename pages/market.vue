@@ -41,6 +41,14 @@
 			  <div v-else ><i class="fas fa-spin fa-spinner text-brand"></i></div>
 			</div>
 		  </div>
+		  <div class="row row-sep">
+			<div class="col-md-4"></div>
+			<div class="col-md-4 row-sep-in">
+				<h5 class="token-title pt-2 notice-text"><i class="fas text-brand fa-trophy"></i> {{ $t('Recent_draw_winner') }}</h5>
+				<div><a :href="'/'+lastDrawWinner">@{{ lastDrawWinner }}</a> {{ wonAmount }} {{ $t('HIVE') }}<img src="/img/HIVE.png" class="token-logo-sm"></div>
+			</div>
+		  </div>
+		
 	  </div>
 	  
 	  
@@ -159,6 +167,8 @@
 		prizePoolValue: '',
 		countDownReady: false,
 		nextGadgetBuyRewardDate: '',//'2020-10-15',//"August 18, 2020 00:00 GMT",
+		lastDrawWinner: '',
+		wonAmount: 0,
       }
     },
     computed: {
@@ -268,6 +278,10 @@
 		this.nextGadgetBuyRewardDate = targetDate.getFullYear() + '-' + mnth  + '-' + targetDate.getDate() + ' 00:00 GMT' ;
 		console.log('nextGadgetBuyRewardDate');
 		console.log(this.nextGadgetBuyRewardDate);
+		
+		//also set last draw winner display
+		this.lastDrawWinner = json.winner[0].name;
+		this.wonAmount = json.winner[0].reward;
 	  },
 	  
 	  async fetchGadgetPrizeCycle() {

@@ -688,4 +688,6 @@ module.exports = {
   Checkout: 'Checkout <br /> <i class="fas fa-shopping-cart"></i>',
   success_add_cart: '_PROD_ successfully added to cart!',
   Cart_empty: 'Your cart is empty',
+  Recent_draw_winner: 'Last Draw Winner',
+  win_amount: ' won ',
 }
