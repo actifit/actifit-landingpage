@@ -346,7 +346,8 @@
     padding-right: 2px;
   }
   .row-sep-in{
-    border: 3px solid red;
+    border: 3px solid orange;
+	background: linear-gradient(20deg,orange,transparent);
   }
   .row-sep-in h5, .row-sep-in .token-title{
 	border-bottom: 1px dashed red;
