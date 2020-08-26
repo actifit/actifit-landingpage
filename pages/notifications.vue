@@ -37,7 +37,7 @@
 					<i class="fas fa-user-friends p-1" v-else-if="notif.type == 'friendship_acceptance'"></i>
 					<span>{{ notif.details }}</span>
 					<span v-if="notif.action_taker" class="user-avatar notifications-avatar mr-1 mb-3"
-				   :style="'background-image: url('+this.profImgUrl+'/u/' + notif.action_taker + '/avatar)'"></span>
+				   :style="'background-image: url('+profImgUrl+'/u/' + notif.action_taker + '/avatar)'"></span>
 				</a>
 			</span>
 			<span class="col-md-1">
