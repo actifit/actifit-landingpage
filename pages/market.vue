@@ -181,6 +181,16 @@
 	  products: 'setProducts',
 	},
     methods: {
+	  /**
+       * Formats numbers with commas and dots.
+       *
+       * @param number
+	   * @param precision
+       * @returns {string}
+       */
+      numberFormat (number, precision) {
+        return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
+      },
 	  refreshTickets () {
 		//console.log('>>>>refreshing');
 		this.fetchUserBuyTicketEntries();
@@ -255,7 +265,7 @@
 			//console.log(err, response);
 			if (!err){
 				_parent.prizePool = response[0].balance;
-				_parent.prizePoolValue = parseFloat(_parent.prizePool.split(' ')[0])/2;
+				_parent.prizePoolValue = _parent.numberFormat(parseFloat(_parent.prizePool.split(' ')[0])/2, 3);
 			}
 		});
 	  },
@@ -281,7 +291,7 @@
 		
 		//also set last draw winner display
 		this.lastDrawWinner = json.winner[0].name;
-		this.wonAmount = json.winner[0].reward;
+		this.wonAmount = this.numberFormat(json.winner[0].reward, 3);
 	  },
 	  
 	  async fetchGadgetPrizeCycle() {
