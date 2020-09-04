@@ -10,38 +10,41 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
-          <li class="nav-item">
+          <!--<li class="nav-item">
             <a class="nav-link" href="#" @click.prevent="scrollTo('#content')">{{ $t('What_is_actifit') }}</a>
+          </li>-->
+          <li class="nav-item m-1 p-1 nav-item-border">
+            <a class="nav-link text-white" href="#" @click.prevent="$router.push('/activity')">{{ $t('Activity') }}</a>
           </li>
-		  <li class="nav-item">
-            <a class="nav-link" href="/whitepaper/Actifit_White_Paper.pdf">{{ $t('Whitepaper') }}</a>
+		  <li class="nav-item m-1 p-1 nav-item-border"><!-- item-highlight-->
+            <div style="display:inline-flex"><i class="fas fa-shopping-cart text-white"></i><a class="nav-link text-white" href="#" @click.prevent="$router.push('/market')">{{ $t('Market') }}</a></div>
           </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#" @click.prevent="$router.push('/activity')">{{ $t('Activity') }}</a>
+		  <li class="nav-item m-1 p-1 nav-item-border">
+            <div style="display:inline-flex"><i class="fas fa-seedling text-white"></i><a class="nav-link text-white" href="#" @click.prevent="$router.push('/yieldfarming')">{{ $t('yield_farming') }}</a></div>
           </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#" @click.prevent="scrollTo('#delegators')">{{ $t('Delegators') }}</a>
+          <li class="nav-item m-1 p-1 nav-item-border">
+            <a class="nav-link text-white" href="#" @click.prevent="scrollTo('#delegators')">{{ $t('Delegators') }}</a>
           </li>
-		  <li class="nav-item">
+		  <!--<li class="nav-item">
             <a class="nav-link" href="#" @click.prevent="scrollTo('#professionals')">{{ $t('Professionals') }}</a>
+          </li>-->
+		  <li class="nav-item m-1 p-1 nav-item-border">
+            <a class="nav-link text-white" href="#" @click.prevent="scrollTo('#leaderboard')">{{ $t('Leaderboard') }}</a>
           </li>
-		  <li class="nav-item">
-            <a class="nav-link" href="#" @click.prevent="scrollTo('#leaderboard')">{{ $t('Leaderboard') }}</a>
+          <li class="nav-item m-1 p-1 nav-item-border">
+            <a class="nav-link text-white" href="#" @click.prevent="scrollTo('#team')">{{ $t('Team') }}</a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#" @click.prevent="scrollTo('#team')">{{ $t('Team') }}</a>
-          </li>
-          <li class="nav-item">
+          <!--<li class="nav-item">
             <a class="nav-link" href="#" @click.prevent="scrollTo('#athletes')">{{ $t('Sponsored_Athletes') }}</a>
+          </li>-->
+          <li class="nav-item m-1 p-1 nav-item-border">
+            <a class="nav-link text-white" href="#" @click.prevent="scrollTo('#news')">{{ $t('News') }}</a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#" @click.prevent="scrollTo('#news')">{{ $t('News') }}</a>
+		  <li class="nav-item m-1 p-1 nav-item-border">
+            <a class="nav-link text-white" href="#" @click.prevent="$router.push('/referrals')">{{ $t('Refer_A_Friend') }}</a>
           </li>
-		  <li class="nav-item">
-            <a class="nav-link" href="#" @click.prevent="$router.push('/referrals')">{{ $t('Refer_A_Friend') }}</a>
-          </li>
-		  <li class="nav-item item-highlight">
-            <a class="nav-link" href="#" @click.prevent="$router.push('/market')">{{ $t('Market') }}</a>
+		  <li class="nav-item m-1 p-1 nav-item-border">
+            <a class="nav-link text-white" href="/whitepaper/Actifit_White_Paper.pdf">{{ $t('Whitepaper') }}</a>
           </li>
         </ul>
       </div>
@@ -100,10 +103,10 @@
               </div>
             </div>
 			<div class="row pb-md-2 pt-2 ">
-              <div class="col-sm-6">
+              <div class="col-6">
 				<a href="#" class="btn btn-lg btn-brand w-100" @click.prevent="$router.push('/activity/')">{{ $t('activity_feed') }}</a>
 			  </div>
-			  <div class="col-sm-6">
+			  <div class="col-6">
 				<a href="#" class="btn btn-lg btn-brand w-100" @click.prevent="$router.push('/market/')">{{ $t('Market') }}</a>
 			  </div>
             </div>
@@ -187,8 +190,9 @@
           <div class="col-lg-6 order-lg-1 my-auto showcase-text">
             <h2 class="text-capitalize">{{ $t('homepage.section4_title') }}</h2>
             <p class="lead mb-0">{{ $t('homepage.section4_desc') }}</p>
-			<div style="text-align:center; padding-top: 10px">
-				<a href="/wallet?action=delegate" class="btn btn-brand btn-lg">{{ $t('Delegate') }}</a>
+			<div class="text-center row pt-2">
+				<a href="/yieldfarming" class="btn btn-brand btn-lg w-50 border-light">{{ $t('yield_farming') }}</a>
+				<a href="/wallet?action=delegate" class="btn btn-brand btn-lg w-50 border-light">{{ $t('Delegate') }}</a>
 			</div>
           </div>
         </div>
@@ -329,27 +333,12 @@
 			<a href="https://www.linkedin.com/in/epirillo/" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
-            <a href="@thereikiforest" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/aprilnewhall.jpg);'"></div>
-            </a>
-            <a href="@thereikiforest" target="_blank">April Newhall</a>
-			<div><i>Moderator</i></div>
-          </div>
-		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@alokkumar121" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/alokkumar.jpg);'"></div>
             </a>
             <a href="@alokkumar121" target="_blank">Alok Kumar</a>
 			<div><i>Moderator</i></div>
 			<a href="https://www.linkedin.com/in/alok-kumar-18373228" target="_blank"><i class="fab fa-linkedin"></i></a>
-          </div>
-		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
-            <a href="@ckole" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/skolatayo.jpg);'"></div>
-            </a>
-            <a href="@ckole" target="_blank">S. K Olatayo</a>
-			<div><i>Moderator</i></div>
-			<a href="https://www.linkedin.com/in/s-k-olatayo-5b6323178/" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@priyanarc" target="_blank">
@@ -360,12 +349,20 @@
 			<a href="https://www.linkedin.com/in/priyan-fareen-33722398/" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>	  
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
-            <a href="@sumit71428" target="_blank">
+            <a href="@kpreddy" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/praveen.jpg);'"></div>
             </a>
-            <a href="@sumit71428" target="_blank">Praveen Reddy</a>
+            <a href="@kpreddy" target="_blank">Praveen Reddy</a>
 			<div><i>Moderator</i></div>
 			<a href="https://www.linkedin.com/in/praveen-reddy-kanthala-a0532011a/" target="_blank"><i class="fab fa-linkedin"></i></a>
+          </div>
+		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
+            <a href="@sumit71428" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/sumitsingh.jpg);'"></div>
+            </a>
+            <a href="@sumit71428" target="_blank">Sumit Singh</a>
+			<div><i>Moderator</i></div>
+			<a href="https://www.linkedin.com/in/sumit-singh-91b616185/" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@silvertop" target="_blank">
@@ -387,7 +384,7 @@
     </section>
 
     <!-- ambassadors -->
-    <section id="ambassadors" class="py-5 bg-light">
+    <!--<section id="ambassadors" class="py-5 bg-light">
       <div class="container">
         <h1 class="text-center pb-5">
           <i class="fas fa-bullhorn tilt"></i><br>
@@ -402,10 +399,10 @@
           </div>
         </div>
       </div>
-    </section>
+    </section>-->
 
     <!-- sponsored athletes -->
-    <section id="athletes" class="py-5">
+    <!--<section id="athletes" class="py-5">
       <div class="container">
         <h1 class="text-center pb-5">
           <i class="fas fa-dumbbell"></i><br>
@@ -438,7 +435,7 @@
           </div>
         </div>
       </div>
-    </section>
+    </section>-->
 
     <!-- news -->
     <section id="news" class="py-5 bg-brand text-light">
@@ -687,5 +684,11 @@
 	.leader-cls-btn:hover{
 	  background-color: darkred;
 	  color: white;
+	}
+	.nav-item-border{
+		opacity: 0.7;
+		background-color: #ff112d;
+		border: 1px solid #ff112d;
+		border-radius: 3px;
 	}
 </style>
