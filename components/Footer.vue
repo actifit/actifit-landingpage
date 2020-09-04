@@ -120,4 +120,7 @@
 	.dropdown-menu > .dropdown-item{
 		padding: .1rem 1.1rem !important;
 	}
+	.btn{
+		border-radius: 3px;
+	}
 </style>
