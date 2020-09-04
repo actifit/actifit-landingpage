@@ -13,37 +13,37 @@
           <!--<li class="nav-item">
             <a class="nav-link" href="#" @click.prevent="scrollTo('#content')">{{ $t('What_is_actifit') }}</a>
           </li>-->
-          <li class="nav-item m-1 p-1 nav-item-border">
+          <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
             <a class="nav-link text-white" href="#" @click.prevent="$router.push('/activity')">{{ $t('Activity') }}</a>
           </li>
-		  <li class="nav-item m-1 p-1 nav-item-border"><!-- item-highlight-->
+		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border"><!-- item-highlight-->
             <div style="display:inline-flex"><i class="fas fa-shopping-cart text-white"></i><a class="nav-link text-white" href="#" @click.prevent="$router.push('/market')">{{ $t('Market') }}</a></div>
           </li>
-		  <li class="nav-item m-1 p-1 nav-item-border">
+		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
             <div style="display:inline-flex"><i class="fas fa-seedling text-white"></i><a class="nav-link text-white" href="#" @click.prevent="$router.push('/yieldfarming')">{{ $t('yield_farming') }}</a></div>
           </li>
-          <li class="nav-item m-1 p-1 nav-item-border">
+          <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
             <a class="nav-link text-white" href="#" @click.prevent="scrollTo('#delegators')">{{ $t('Delegators') }}</a>
           </li>
 		  <!--<li class="nav-item">
             <a class="nav-link" href="#" @click.prevent="scrollTo('#professionals')">{{ $t('Professionals') }}</a>
           </li>-->
-		  <li class="nav-item m-1 p-1 nav-item-border">
+		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
             <a class="nav-link text-white" href="#" @click.prevent="scrollTo('#leaderboard')">{{ $t('Leaderboard') }}</a>
           </li>
-          <li class="nav-item m-1 p-1 nav-item-border">
+          <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
             <a class="nav-link text-white" href="#" @click.prevent="scrollTo('#team')">{{ $t('Team') }}</a>
           </li>
           <!--<li class="nav-item">
             <a class="nav-link" href="#" @click.prevent="scrollTo('#athletes')">{{ $t('Sponsored_Athletes') }}</a>
           </li>-->
-          <li class="nav-item m-1 p-1 nav-item-border">
+          <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
             <a class="nav-link text-white" href="#" @click.prevent="scrollTo('#news')">{{ $t('News') }}</a>
           </li>
-		  <li class="nav-item m-1 p-1 nav-item-border">
+		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
             <a class="nav-link text-white" href="#" @click.prevent="$router.push('/referrals')">{{ $t('Refer_A_Friend') }}</a>
           </li>
-		  <li class="nav-item m-1 p-1 nav-item-border">
+		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
             <a class="nav-link text-white" href="/whitepaper/Actifit_White_Paper.pdf">{{ $t('Whitepaper') }}</a>
           </li>
         </ul>
