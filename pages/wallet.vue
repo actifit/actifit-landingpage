@@ -3638,6 +3638,9 @@
 	  }else if (this.$route.query.action === 'delegate'){
 		this.afitActivityMode = 0;
 		this.fundActivityMode = this.DELEGATE_FUNDS;
+	  }else if (this.$route.query.action === 'power_up'){
+		this.afitActivityMode = 0;
+		this.fundActivityMode = this.POWERUP_FUNDS;
 	  }
 	  
 	  //grab STEEM price
