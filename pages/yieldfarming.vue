@@ -20,7 +20,7 @@
 	  
 	  <div class="col-md-12 text-center text-primary mb-5 notice-text">
 		  <h2 class="text-center mb-5">{{ $t('Daily_yield') }}<a href="#" data-toggle="modal" data-target="#notifyModal"><i class="fas fa-info-circle" :title="$t('view_details')"></i></a></h2>
-		  <div class="text-center p-2">
+		  <div class="text-center row p-2">
 			<span v-if="afitPrice">
 				<img class="token-logo-sm " src="/img/actifit_logo.png">{{ $t('Current') }} {{ $t('AFIT_Token')}} {{ $t('price')}}: $ {{ numberFormat(afitPrice.afitHiveLastUsdPrice, 5) }} | 
 			</span>
@@ -43,6 +43,11 @@
 					
 					<h5>{{$t('total_delegations')}}: {{numberFormat(topDelegators.hive.length,0)}}</h5>
 					<h5>{{$t('total_amount_locked')}}: {{numberFormat(delegatedHiveAmount,0)}} {{$t('HIVE')}} ( $ {{numberFormat(delegatedHiveAmount * hivePrice,2)}} )</h5>
+					<h5 v-if="afitPrice && hivePrice">{{$t('yearly_apy')}}: {{calculateYearlyAPY('hive')}}</h5>
+					<div style="text-align:center; padding-top: 10px">
+						<a href="/wallet?action=power_up" class="btn btn-brand w-25">{{ $t('stake') }}</a>
+						<a href="/wallet?action=delegate" class="btn btn-brand w-25">{{ $t('DELEGATE_ACTION_TEXT') }}</a>
+					</div>
 				</span>
 				<span v-else>
 					<i class="fas fa-spin fa-spinner text-brand"></i>
@@ -58,32 +63,15 @@
 					</h5>
 					<h5>{{$t('total_delegations')}}: {{numberFormat(topDelegators.steem.length,0)}}</h5>
 					<h5>{{$t('total_amount_locked')}}: {{numberFormat(delegatedSteemAmount,0)}} {{$t('STEEM')}} ( $ {{numberFormat(delegatedSteemAmount * steemPrice,2)}} )</h5>
+					<h5 v-if="afitPrice && steemPrice">{{$t('yearly_apy')}}: {{calculateYearlyAPY('steem')}}</h5>
+					<div style="text-align:center; padding-top: 10px">
+						<a href="/wallet?action=power_up" class="btn btn-brand w-25">{{ $t('stake') }}</a>
+						<a href="/wallet?action=delegate" class="btn btn-brand w-25">{{ $t('DELEGATE_ACTION_TEXT') }}</a>
+					</div>
 				</span>
 				<span v-else>
 					<i class="fas fa-spin fa-spinner text-brand"></i>
 				</span>
-			</div>
-		  </div>
-		  <div class="row row-sep">
-			<div class="col-md-6 row-sep-in p-2" v-if="afitPrice && hivePrice">
-				<div class="" >
-					<h4>{{ $t('yearly_apy') }}</h4>
-					<h4 class="text-brand">{{calculateYearlyAPY('hive')}}</h4>
-				</div>
-				<div style="text-align:center; padding-top: 10px">
-					<a href="/wallet?action=power_up" class="btn btn-brand w-25">{{ $t('stake').replace('_TOKEN_', 'Hive') }}</a>
-					<a href="/wallet?action=delegate" class="btn btn-brand w-25">{{ $t('DELEGATE_ACTION_TEXT') }}</a>
-				</div>
-			</div>
-			<div class="col-md-6 row-sep-in p-2" v-if="afitPrice && steemPrice">
-				<div class="" >
-					<h4>{{ $t('yearly_apy') }}</h4>
-					<h4 class="text-brand">{{calculateYearlyAPY('steem')}}</h4>
-				</div>
-				<div style="text-align:center; padding-top: 10px">
-					<a href="/wallet?action=power_up" class="btn btn-brand w-25">{{ $t('stake').replace('_TOKEN_', 'Steem') }}</a>
-					<a href="/wallet?action=delegate" class="btn btn-brand w-25">{{ $t('DELEGATE_ACTION_TEXT') }}</a>
-				</div>
 			</div>
 		  </div>
 		
