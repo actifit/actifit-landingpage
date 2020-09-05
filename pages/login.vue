@@ -1,19 +1,7 @@
 <template>
   <div>
 	<!--<script src="https://www.google.com/recaptcha/api.js?onload=vueRecaptchaApiLoaded&render=explicit" async defer></script> -->
-    <!-- navbar -->
-    <nav class="navbar fixed-top navbar-expand navbar-light">
-      <ul class="navbar-nav">
-        <li class="nav-item">
-          <!-- home link -->
-          <a class="nav-link" href="#" @click.prevent="$router.push('/')">
-            <i class="fas fa-arrow-left text-brand navbar-back"></i>
-          </a>
-        </li>
-      </ul>
-      <NavbarBrand />
-      <UserMenu />
-    </nav>
+    <NavbarBrand />
 
     <div class="container pt-5 mt-5 pb-5">
 		<div class="border-0 card form home-card mt-3 mt-md-2 mx-auto p-3 text-center col-md-6">
@@ -60,7 +48,6 @@
 
 <script>
   import NavbarBrand from '~/components/NavbarBrand'
-  import UserMenu from '~/components/UserMenu'
   import Transaction from '~/components/Transaction'
   import Footer from '~/components/Footer'
   import steem from 'steem'
@@ -82,7 +69,6 @@
 	},
     components: {
       NavbarBrand,
-      UserMenu,
       Transaction, // single transaction block
       Footer,
 	  VueRecaptcha,

@@ -706,4 +706,5 @@ module.exports = {
   daily_amount: 'Daily Rewards Amount',
   yield_farm_note: '<ul class="no-bullets"><li><i class="fas fa-check text-success"></i>There are ZERO, ZILCH, ZIP, NADA, 0 gas fees to be paid when transacting, compared to Ethereum massive fees!</li><li><i class="fas fa-check text-success"></i>You yield farm by purchasing HIVE or STEEM tokens, staking them as HIVE POWER / STEEM POWER, and delegating them to @actifit account</li><li><i class="fas fa-check text-success"></i>Your daily earnings are based on daily available AFIT amount in pool and others\'s contributions to the pool</li><li><i class="fas fa-check text-success"></i>Delegated Amount Remains Locked IN YOUR WALLET</li><li><i class="fas fa-check text-success"></i>Your daily yield goes into your actifit.io/wallet on the next day of your delegation</li></ul>',
   stake: 'Stake',
+  Home: 'Home',
 }

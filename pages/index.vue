@@ -3,53 +3,7 @@
     <!-- top anchor -->
     <a id="top"></a>
 
-    <!-- navbar links with smooth scrolling to sections -->
-    <nav class="navbar fixed-top navbar-expand-lg navbar-light px-1">
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
-          <!--<li class="nav-item">
-            <a class="nav-link" href="#" @click.prevent="scrollTo('#content')">{{ $t('What_is_actifit') }}</a>
-          </li>-->
-          <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
-            <a class="nav-link text-white" href="#" @click.prevent="$router.push('/activity')">{{ $t('Activity') }}</a>
-          </li>
-		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border"><!-- item-highlight-->
-            <div style="display:inline-flex"><i class="fas fa-shopping-cart text-white"></i><a class="nav-link text-white" href="#" @click.prevent="$router.push('/market')">{{ $t('Market') }}</a></div>
-          </li>
-		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
-            <div style="display:inline-flex"><i class="fas fa-seedling text-white"></i><a class="nav-link text-white" href="#" @click.prevent="$router.push('/yieldfarming')">{{ $t('yield_farming') }}</a></div>
-          </li>
-          <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
-            <a class="nav-link text-white" href="#" @click.prevent="scrollTo('#delegators')">{{ $t('Delegators') }}</a>
-          </li>
-		  <!--<li class="nav-item">
-            <a class="nav-link" href="#" @click.prevent="scrollTo('#professionals')">{{ $t('Professionals') }}</a>
-          </li>-->
-		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
-            <a class="nav-link text-white" href="#" @click.prevent="scrollTo('#leaderboard')">{{ $t('Leaderboard') }}</a>
-          </li>
-          <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
-            <a class="nav-link text-white" href="#" @click.prevent="scrollTo('#team')">{{ $t('Team') }}</a>
-          </li>
-          <!--<li class="nav-item">
-            <a class="nav-link" href="#" @click.prevent="scrollTo('#athletes')">{{ $t('Sponsored_Athletes') }}</a>
-          </li>-->
-          <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
-            <a class="nav-link text-white" href="#" @click.prevent="scrollTo('#news')">{{ $t('News') }}</a>
-          </li>
-		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
-            <a class="nav-link text-white" href="#" @click.prevent="$router.push('/referrals')">{{ $t('Refer_A_Friend') }}</a>
-          </li>
-		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
-            <a class="nav-link text-white" href="/whitepaper/Actifit_White_Paper.pdf">{{ $t('Whitepaper') }}</a>
-          </li>
-        </ul>
-      </div>
-	  <UserMenu/>
-    </nav>
+    <NavbarBrand :home="true" @scrollTo="scrollTo"/>
 
     <!-- header with fullscreen background -->
 	<div class="header pt-4 pt-md-5 position-relative">
@@ -466,8 +420,8 @@
 </template>
 
 <script>
+  import NavbarBrand from '~/components/NavbarBrand'
   import VueScrollTo from 'vue-scrollto' // for smooth scrolling
-  import UserMenu from '~/components/UserMenu'
   import Footer from '~/components/Footer'
   import News from '~/components/News'
   import NewsModal from '~/components/NewsModal'
@@ -480,7 +434,7 @@
 
   export default {
     components: {
-      UserMenu,
+	  NavbarBrand,
       Footer,
       News,
       NewsModal,
@@ -684,11 +638,5 @@
 	.leader-cls-btn:hover{
 	  background-color: darkred;
 	  color: white;
-	}
-	.nav-item-border{
-		opacity: 0.7;
-		background-color: #ff112d;
-		border: 1px solid #ff112d;
-		border-radius: 3px;
 	}
 </style>

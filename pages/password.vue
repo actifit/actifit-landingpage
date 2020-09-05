@@ -1,18 +1,6 @@
 <template>
   <div>
-	<!-- navbar -->
-    <nav class="navbar fixed-top navbar-expand navbar-light">
-      <ul class="navbar-nav d-none d-sm-block">
-        <li class="nav-item">
-          <!-- home link -->
-          <a class="nav-link" href="#" @click.prevent="$router.push('/')">
-            <i class="fas fa-arrow-left text-brand navbar-back"></i>
-          </a>
-        </li>
-      </ul>
-      <NavbarBrand />
-      <UserMenu />
-    </nav>
+	<NavbarBrand />
 	
 	<div class="container pt-5 mt-5 pb-5" v-if="user">
 	
@@ -174,7 +162,6 @@
 </template>
 <script>
   import { mapGetters } from 'vuex'
-  import UserMenu from '~/components/UserMenu'
   import NavbarBrand from '~/components/NavbarBrand'
   import Footer from '~/components/Footer'
   import steem from 'steem'
@@ -184,7 +171,6 @@
   export default {
 	components: {
 	  NavbarBrand,
-	  UserMenu,
 	  Footer
     },
 	data () {

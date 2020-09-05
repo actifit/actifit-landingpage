@@ -1,19 +1,7 @@
 <template>
   <!-- activity report listing -->
   <div>
-    <!-- navbar -->
-    <nav class="navbar fixed-top navbar-expand navbar-light">
-      <ul class="navbar-nav">
-        <li class="nav-item">
-          <!-- home link -->
-          <a class="nav-link" href="#" @click.prevent="$router.push('/')">
-            <i class="fas fa-arrow-left text-brand navbar-back"></i>
-          </a>
-        </li>
-      </ul>
-      <NavbarBrand />
-      <UserMenu />
-    </nav>
+    <NavbarBrand />
 
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-5">
