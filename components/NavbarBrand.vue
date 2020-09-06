@@ -10,11 +10,11 @@
             <a class="nav-link" href="#" @click.prevent="scrollTo('#content')">{{ $t('What_is_actifit') }}</a>
           </li>-->
           <li class="nav-item btn btn-brand m-1 p-1 nav-item-border" v-if="!home">
-            <a class="nav-link text-white" href="#" @click.prevent="$router.push('/')">{{ $t('Home') }}</a>
+            <div style="display:inline-flex"><i class="fas fa-home text-white"></i><a class="nav-link text-white" href="#" @click.prevent="$router.push('/')">{{ $t('Home') }}</a></div>
           </li>
 		  
 		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
-            <a class="nav-link text-white" href="#" @click.prevent="$router.push('/activity')">{{ $t('Activity') }}</a>
+            <div style="display:inline-flex"><i class="fas fa-running text-white"></i><a class="nav-link text-white" href="#" @click.prevent="$router.push('/activity')">{{ $t('Activity') }}</a></div>
           </li>
 		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border"><!-- item-highlight-->
             <div style="display:inline-flex"><i class="fas fa-shopping-cart text-white"></i><a class="nav-link text-white" href="#" @click.prevent="$router.push('/market')">{{ $t('Market') }}</a></div>
@@ -24,30 +24,30 @@
           </li>
 		  
           <li class="nav-item btn btn-brand m-1 p-1 nav-item-border" v-if="home">
-            <a class="nav-link text-white" href="#" @click.prevent="$emit('scrollTo', '#delegators')">{{ $t('Delegators') }}</a>
+            <div style="display:inline-flex"><i class="fas fa-heart text-white"></i><a class="nav-link text-white" href="#" @click.prevent="$emit('scrollTo', '#delegators')">{{ $t('Delegators') }}</a></div>
           </li>
 		  <!--<li class="nav-item">
             <a class="nav-link" href="#" @click.prevent="scrollTo('#professionals')">{{ $t('Professionals') }}</a>
           </li>-->
 		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border" v-if="home">
-            <a class="nav-link text-white" href="#" @click.prevent="$emit('scrollTo', '#leaderboard')">{{ $t('Leaderboard') }}</a>
+            <div style="display:inline-flex"><i class="fas fa-medal text-white"></i><a class="nav-link text-white" href="#" @click.prevent="$emit('scrollTo', '#leaderboard')">{{ $t('Leaderboard') }}</a></div>
           </li>
           <li class="nav-item btn btn-brand m-1 p-1 nav-item-border" v-if="home">
-            <a class="nav-link text-white" href="#" @click.prevent="$emit('scrollTo', '#team')">{{ $t('Team') }}</a>
+            <div style="display:inline-flex"><i class="fas fa-users text-white"></i><a class="nav-link text-white" href="#" @click.prevent="$emit('scrollTo', '#team')">{{ $t('Team') }}</a></div>
           </li>
 		  
           <!--<li class="nav-item">
             <a class="nav-link" href="#" @click.prevent="scrollTo('#athletes')">{{ $t('Sponsored_Athletes') }}</a>
           </li>-->
           <li class="nav-item btn btn-brand m-1 p-1 nav-item-border" v-if="home">
-            <a class="nav-link text-white" href="#" @click.prevent="$emit('scrollTo', '#news')">{{ $t('News') }}</a>
+            <div style="display:inline-flex"><i class="far fa-newspaper text-white"></i><a class="nav-link text-white" href="#" @click.prevent="$emit('scrollTo', '#news')">{{ $t('News') }}</a></div>
           </li>
 
 		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
-            <a class="nav-link text-white" href="#" @click.prevent="$router.push('/referrals')">{{ $t('Refer_A_Friend') }}</a>
+            <div style="display:inline-flex"><i class="fas fa-user-friends text-white"></i><a class="nav-link text-white" href="#" @click.prevent="$router.push('/referrals')">{{ $t('Refer_A_Friend') }}</a></div>
           </li>
 		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
-            <a class="nav-link text-white" href="/whitepaper/Actifit_White_Paper.pdf">{{ $t('Whitepaper') }}</a>
+            <div style="display:inline-flex"><i class="fas fa-print text-white"></i><a class="nav-link text-white" href="/whitepaper/Actifit_White_Paper.pdf">{{ $t('Whitepaper') }}</a></div>
           </li>
         </ul>
       </div>
