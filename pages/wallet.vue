@@ -42,12 +42,12 @@
 					<span class="col-md-6">
 						{{ formattedUserAfitSE }}
 						<br/>
-						<i class="text-brand fas fa-angle-double-right" v-on:click="moveAFITseHE" :title="$t('move_afit_se_he_title')"></i>
+						<span class="btn btn-brand" :title="$t('move_afit_se_he_title')"><i class="fas fa-angle-double-right" v-on:click="moveAFITseHE"></i></span>
 					</span>
 					<span class="col-md-6">
 						{{ formattedUserAfitHE }}
 						<br/>
-						<i class="text-brand fas fa-angle-double-left" v-on:click="moveAFITheSE" :title="$t('move_afit_he_se_title')"></i>
+						<span class="btn btn-brand" :title="$t('move_afit_he_se_title')"><i class="fas fa-angle-double-left" v-on:click="moveAFITheSE"></i></span>
 					</span>
 				</h5>
 				<div v-if="afitActivityMode == MOVE_AFIT_SE_HE || afitActivityMode == MOVE_AFIT_HE_SE">
@@ -98,12 +98,12 @@
 					<span class="col-md-6">
 						{{ formattedUserAFITXSE }}
 						<br/>
-						<i class="text-brand fas fa-angle-double-right" v-on:click="moveAFITXseHE" :title="$t('move_afitx_se_he_title')"></i>
+						<span class="btn btn-brand" :title="$t('move_afitx_se_he_title')"><i class="fas fa-angle-double-right" v-on:click="moveAFITXseHE"></i></span>
 					</span>
 					<span class="col-md-6">
 						{{ formattedUserAFITXHE }}
 						<br/>
-						<i class="text-brand fas fa-angle-double-left" v-on:click="moveAFITXheSE" :title="$t('move_afitx_he_se_title')"></i>
+						<span class="btn btn-brand" :title="$t('move_afitx_he_se_title')"><i class="fas fa-angle-double-left" v-on:click="moveAFITXheSE"></i></span>
 					</span>
 				</h5>
 				<div v-if="afitActivityMode == MOVE_AFITX_SE_HE || afitActivityMode == MOVE_AFITX_HE_SE">
@@ -479,15 +479,14 @@
 						<span v-if="token.symbol == 'STEEMP' || token.symbol == 'SWAP.HIVE'"><i class="fas fa-upload text-brand p-1" :title="$t('withdraw_tokens')" v-on:click="initiateWithdraw(token)"></i></span>
 						<span><i class="fas fa-share-square text-brand p-1" :title="$t('transfer_tokens')" v-on:click="initiateTransfer(token)"></i></span>
 					</div>
-					<div class="row" v-if="tokenActions">
-					  <label for="token-powerup-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
-					  <input type="number" id="token-powerup-amount" name="token-powerup-amount" ref="token-powerup-amount" class="form-control-lg w-50 p-2"><span class="p-2">{{ selTokenUp.symbol }}</span>
-					</div>
 					<div class="row" v-if="tokenActions && curTokenAction == TRANSFER_FUNDS">
 					  <label for="token-target-account" class="w-25 p-2">{{ $t('Account') }} *</label>
 					  <span class="p-1">@</span><input type="text" id="token-target-account" name="token-target-account" ref="token-target-account" class="form-control-lg p-2">
 					</div>
-					
+					<div class="row" v-if="tokenActions">
+					  <label for="token-powerup-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
+					  <input type="number" id="token-powerup-amount" name="token-powerup-amount" ref="token-powerup-amount" class="form-control-lg w-50 p-2"><span class="p-2">{{ selTokenUp.symbol }}</span>
+					</div>
 					<div class="row" v-if="isStdLogin && tokenActions">
 					  <label for="p-ac-key-trans-token" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 					  <input type="password" id="p-ac-key-trans-token" name="p-ac-key-trans-token" ref="p-ac-key-trans-token" class="form-control-lg w-50 p-2">
