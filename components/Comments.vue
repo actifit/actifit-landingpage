@@ -14,7 +14,7 @@
 			<small class="date-head text-muted">{{ date }}</small>
 		  </div>
 		</a>
-		<vue-remarkable class="modal-body" v-if="!editBoxOpen" v-html="commentBody()" :source="commentBody()" :style="{ paddingLeft: depth * indentFactor + 'px' }" :options="{'html': true}"></vue-remarkable>
+		<vue-remarkable class="modal-body" v-if="!editBoxOpen" :source="commentBody()" :style="{ paddingLeft: depth * indentFactor + 'px' }" :options="{'html': true}"></vue-remarkable>
 		<transition name="fade">
 		  <div class="comment-reply" v-if="editBoxOpen">
 			<markdown-editor v-model="full_data.body" :configs="editorConfig" ref="editor"></markdown-editor>
@@ -102,13 +102,13 @@
 		</transition>
 		<div class="comment-reply" v-if="responsePosted">
 			<a :href="this.user.account.name" target="_blank">
-			  <div class="comment-user-section" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }">	
+			  <div class="comment-user-section" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }">
 				<div class="user-avatar mr-1"
 					   :style="'background-image: url('+this.profImgUrl+'/u/' + this.user.account.name + '/avatar)'"></div>
 				<div class="modal-author modal-title text-brand" >@{{ user.name }}<small class="date-head text-muted">{{ $t('Now') }}</small></div>
 			  </div>
 			</a>
-			<vue-remarkable class="modal-body" v-html="getContent()" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }" ></vue-remarkable>
+			<vue-remarkable class="modal-body" :source="getContent()" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }" ></vue-remarkable>
 			<!--<vue-markdown class="modal-body" v-html="responseBody" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }" ></vue-markdown>-->
 			<!--<article class="modal-body" v-html="$renderMD(responseBody)" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }" ></article>-->
 		</div>

@@ -156,6 +156,8 @@
 		transferType: 'STEEM',//default option
 		minUSD: process.env.minSignupUSDCost,
 		afitPrice: 0.5,
+		maxAfitRewardPerLot: 1000,
+		lotSizeUsd: 5,
 		userInputSTEEMAmount: 0,
 		userInputUSDAmount: this.minUSD,
 		username_exists: '',
@@ -288,13 +290,13 @@
 		return parseFloat(this.minUSD / this.steemPrice - 0.1).toFixed(3);
 	  },
 	  setAFITPrice (_afitPrice){
-		this.afitPrice = parseFloat(_afitPrice).toFixed(3);
+		this.afitPrice = parseFloat(_afitPrice).toFixed(6);
 	  },
 	  afitTokensToEarn (usdInvest) {
 		if (typeof usdInvest == 'undefined' || usdInvest== null || usdInvest=='' || usdInvest==0){
 			usdInvest = this.minUSD
 		}
-		return parseFloat(usdInvest / this.afitPrice).toFixed(3);
+		return parseFloat(usdInvest / this.afitPrice).toFixed(6);
 	  },
 	  setPasswordVal(){
 		this.$refs["account-password"].value = this.generatePassword(4);
@@ -311,7 +313,18 @@
 		return this.targetAccount;
 	  },
 	  getMatchingAFIT () {		
-		return parseFloat(this.userInputUSDAmount / this.afitPrice).toFixed(3);
+		let matchingAfitAmnt = parseFloat(this.userInputUSDAmount / this.afitPrice);
+		//make sure we only reward max amount per lot
+		let lotCount = Math.floor(this.userInputUSDAmount / this.lotSizeUsd);
+		if (lotCount < 1){
+			lotCount += 1;
+		}
+		//max amount per lot
+		let maxAfitPerTotLots = this.maxAfitRewardPerLot * lotCount
+		if (matchingAfitAmnt > maxAfitPerTotLots){
+			matchingAfitAmnt = maxAfitPerTotLots;
+		}
+		return Math.floor(matchingAfitAmnt);
 	  },
 	  getMatchingAmount () {
 		console.log(this.transferType);
