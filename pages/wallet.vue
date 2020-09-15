@@ -331,7 +331,7 @@
 			  </transition>
 			  <transition name="fade" v-else-if="pendingTokenSwap == ''" >
 				<div class="text-center grid p-2">
-				  <div class="p-3">
+				  <div class="p-3 row">
 					<div class="col-md-6 d-inline-block pt-3 text-md-right">
 					  <a href="#" data-toggle="modal" class="text-brand p-3" data-target="#exchangeQueueModal" >
 					    <i class="fas fa-list-ol"></i> {{ $t('Exchange_Queue') }}
@@ -347,24 +347,24 @@
 					<div>{{ $t('wallet.step3_desc1') }}</div>
 					<div>{{ $t('wallet.step3_desc2') }}</div>
 					  <span class="afit-ex-option border border-danger p-2 m-2 btn-brand">
-						<input type="radio" id="afit_exchange_5" value="5" v-model="afit_val_exchange">
-						<label for="afit_exchange_5">5 {{ $t('AFIT_Token') }} {{ $t('Tokens') }}</label>
+						<input type="radio" id="afit_exchange_5" value="500" v-model="afit_val_exchange">
+						<label for="afit_exchange_5">500 {{ $t('AFIT_Token') }} {{ $t('Tokens') }}</label>
 					  </span>
 					  <span class="afit-ex-option border border-danger p-2 m-2 btn-brand">
-						<input type="radio" id="afit_exchange_10" value="10" v-model="afit_val_exchange">
-						<label for="afit_exchange_10">10 {{ $t('AFIT_Token') }} {{ $t('Tokens') }}</label>
+						<input type="radio" id="afit_exchange_10" value="1000" v-model="afit_val_exchange">
+						<label for="afit_exchange_10">1,000 {{ $t('AFIT_Token') }} {{ $t('Tokens') }}</label>
 					  </span>
 					  <br>
 					  <span class="afit-ex-option border border-danger p-2 m-2 btn-brand">
-						<input type="radio" id="afit_exchange_15" value="15" v-model="afit_val_exchange">
-						<label for="afit_exchange_15">15 {{ $t('AFIT_Token') }} {{ $t('Tokens') }}</label>
+						<input type="radio" id="afit_exchange_15" value="1500" v-model="afit_val_exchange">
+						<label for="afit_exchange_15">1,500 {{ $t('AFIT_Token') }} {{ $t('Tokens') }}</label>
 					  </span>
 					  <span class="afit-ex-option border border-danger p-2 m-2 btn-brand">
-						<input type="radio" id="afit_exchange_20" value="20" v-model="afit_val_exchange">
-						<label for="afit_exchange_20">20 {{ $t('AFIT_Token') }} {{ $t('Tokens') }}</label>
+						<input type="radio" id="afit_exchange_20" value="2000" v-model="afit_val_exchange">
+						<label for="afit_exchange_20">2,000 {{ $t('AFIT_Token') }} {{ $t('Tokens') }}</label>
 					  </span>
 					<br>
-					<span><i>{{ $t('You_are_exchanging') }} {{ afit_val_exchange }} {{ $t('AFIT_Token') }} {{ $t('Tokens') }} {{ $t('for_approx') }} ${{ (afit_val_exchange * afitPrice / 0.65).toFixed(2) }} {{ $t('in_steem_upvote') }}
+					<span><i>{{ $t('You_are_exchanging') }} {{ afit_val_exchange }} {{ $t('AFIT_Token') }} {{ $t('Tokens') }} {{ $t('for') }} {{ afit_exch_matching_perc}} % {{ $t('extra_upvote')}}
 						<!--<br/> ({{ $t('net_profit_approx') }} ${{ (afit_val_exchange * 0.036).toFixed(2) }})-->
 						<br/>{{ $t('enter_funds_pass_proceed') }}</i></span>
 					<div class="row" >
@@ -901,7 +901,8 @@
 		verifyingPass: false,
 		errorSettingPass: '',
 		screenWidth: 1200,
-		afit_val_exchange: '5',
+		afit_val_exchange: 500,
+		afit_exch_matching_perc: 10,
 		afitPrice: 0.036,
 		pendingTokenSwap: '',
 		transfer_amount: 1,
@@ -962,6 +963,13 @@
 		loadingDeleg: false,
 		activeDelegations: [],
 		cancellingDelegation: false,
+		
+		extra_reward_arr: [
+							{afit: 500, upvote: 10},
+							{afit: 1000, upvote: 15},
+							{afit: 1500, upvote: 20},
+							{afit: 2000, upvote: 25},
+						],
 	  }
 	},
     components: {
@@ -1039,6 +1047,10 @@
 	  tokenMetrics: 'formattedTotAccountVal',
 	  steemPrice: 'formattedTotAccountVal',
 	  transferType: 'resetTransAmount',
+	  afit_val_exchange: function(newVal){
+		let new_val = this.extra_reward_arr.find(match => match.afit == this.afit_val_exchange)
+		this.afit_exch_matching_perc = new_val.upvote;
+	  },
 	  bchain: function(newBchain) {
 		console.log('change in chain');
 		this.cur_bchain = newBchain;
@@ -1539,7 +1551,7 @@
 	  },
 	  
 	  setAFITPrice (_afitPrice){
-		this.afitPrice = parseFloat(_afitPrice).toFixed(3);
+		this.afitPrice = parseFloat(_afitPrice).toFixed(6);
 	  },
 	  setUserPassStatus (result) {
 		//handles setting funds password status
@@ -2427,32 +2439,36 @@
 			if (bal_he){
 				this.afitx_he_balance = parseFloat(bal_he.balance);
 			}
-			if (bal || bal_he){
-			  
-			  let tot_afitx_bal = this.afitx_se_balance + this.afitx_he_balance;
-			  //console.log('AFITX balance: '+this.afitx_se_balance);
-			  
-			  //make sure user has at least 0.1 AFITX to move tokens
-			  if (tot_afitx_bal < 0.1){
-				this.afit_se_move_error_proceeding = true;
-				this.afit_se_move_err_msg = this.$t('no_proper_afitx_funds');
-				this.initiateInProgress = false;
-				return;
-			  }
-			  //console.log(amount_to_powerdown);
-			  //console.log(this.afitx_se_balance);
-			  //calculate amount that can be transferred daily
-			  if (amount_to_powerdown / 100 > tot_afitx_bal){
-				this.afit_se_move_error_proceeding = true;
-				this.afit_se_move_err_msg = this.$t('cannot_move_amount_afitx_needed').replace('AFIT_AMNT',amount_to_powerdown);
-				this.initiateInProgress = false;
-				return;
-			  }
-			}else{
-				this.afit_se_move_error_proceeding = true;
-				this.afit_se_move_err_msg = this.$t('no_proper_afitx_funds');
-				this.initiateInProgress = false;
-				return;
+			let free_movable_afit_day = 500;
+			let afitx_afit_move_ratio = 100;
+			if (amount_to_powerdown > free_movable_afit_day){
+				if (bal || bal_he){
+				  
+				  let tot_afitx_bal = this.afitx_se_balance + this.afitx_he_balance;
+				  //console.log('AFITX balance: '+this.afitx_se_balance);
+				  
+				  //make sure user has at least 0.1 AFITX to move tokens
+				  /*if (tot_afitx_bal < 0.1){
+					this.afit_se_move_error_proceeding = true;
+					this.afit_se_move_err_msg = this.$t('no_proper_afitx_funds');
+					this.initiateInProgress = false;
+					return;
+				  }*/
+				  //console.log(amount_to_powerdown);
+				  //console.log(this.afitx_se_balance);
+				  //calculate amount that can be transferred daily
+				  if ((amount_to_powerdown - free_movable_afit_day) / afitx_afit_move_ratio > tot_afitx_bal){
+					this.afit_se_move_error_proceeding = true;
+					this.afit_se_move_err_msg = this.$t('cannot_move_amount_afitx_needed').replace('AFIT_AMNT',amount_to_powerdown);
+					this.initiateInProgress = false;
+					return;
+				  }
+				}else{
+					this.afit_se_move_error_proceeding = true;
+					this.afit_se_move_err_msg = this.$t('no_proper_afitx_funds');
+					this.initiateInProgress = false;
+					return;
+				}
 			}
 		}catch(err){
 			this.afit_se_move_error_proceeding = true;
@@ -3522,10 +3538,10 @@
 				//map exchange amount to exchange category
 				let exchange_cat = 1;
 				switch(this.afit_val_exchange){
-					case '5': exchange_cat = 1; break;
-					case '10': exchange_cat = 2; break;
-					case '15': exchange_cat = 3; break;
-					case '20': exchange_cat = 4; break;
+					case '500': exchange_cat = 1; break;
+					case '1000': exchange_cat = 2; break;
+					case '1500': exchange_cat = 3; break;
+					case '2000': exchange_cat = 4; break;
 					default: exchange_cat = -1;
 				}
 				
