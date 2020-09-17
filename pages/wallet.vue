@@ -347,21 +347,21 @@
 					<div>{{ $t('wallet.step3_desc1') }}</div>
 					<div>{{ $t('wallet.step3_desc2') }}</div>
 					  <span class="afit-ex-option border border-danger p-2 m-2 btn-brand">
-						<input type="radio" id="afit_exchange_5" value="500" v-model="afit_val_exchange">
-						<label for="afit_exchange_5">500 {{ $t('AFIT_Token') }} {{ $t('Tokens') }}</label>
+						<input type="radio" id="afit_exchange_5" value="50" v-model="afit_val_exchange">
+						<label for="afit_exchange_5">50 {{ $t('AFIT_Token') }} {{ $t('Tokens') }}</label>
 					  </span>
 					  <span class="afit-ex-option border border-danger p-2 m-2 btn-brand">
-						<input type="radio" id="afit_exchange_10" value="1000" v-model="afit_val_exchange">
-						<label for="afit_exchange_10">1,000 {{ $t('AFIT_Token') }} {{ $t('Tokens') }}</label>
+						<input type="radio" id="afit_exchange_10" value="100" v-model="afit_val_exchange">
+						<label for="afit_exchange_10">100 {{ $t('AFIT_Token') }} {{ $t('Tokens') }}</label>
 					  </span>
 					  <br>
 					  <span class="afit-ex-option border border-danger p-2 m-2 btn-brand">
-						<input type="radio" id="afit_exchange_15" value="1500" v-model="afit_val_exchange">
-						<label for="afit_exchange_15">1,500 {{ $t('AFIT_Token') }} {{ $t('Tokens') }}</label>
+						<input type="radio" id="afit_exchange_15" value="150" v-model="afit_val_exchange">
+						<label for="afit_exchange_15">150 {{ $t('AFIT_Token') }} {{ $t('Tokens') }}</label>
 					  </span>
 					  <span class="afit-ex-option border border-danger p-2 m-2 btn-brand">
-						<input type="radio" id="afit_exchange_20" value="2000" v-model="afit_val_exchange">
-						<label for="afit_exchange_20">2,000 {{ $t('AFIT_Token') }} {{ $t('Tokens') }}</label>
+						<input type="radio" id="afit_exchange_20" value="200" v-model="afit_val_exchange">
+						<label for="afit_exchange_20">200 {{ $t('AFIT_Token') }} {{ $t('Tokens') }}</label>
 					  </span>
 					<br>
 					<span><i>{{ $t('You_are_exchanging') }} {{ afit_val_exchange }} {{ $t('AFIT_Token') }} {{ $t('Tokens') }} {{ $t('for') }} {{ afit_exch_matching_perc}} % {{ $t('extra_upvote')}}
@@ -965,10 +965,10 @@
 		cancellingDelegation: false,
 		
 		extra_reward_arr: [
-							{afit: 500, upvote: 10},
-							{afit: 1000, upvote: 15},
-							{afit: 1500, upvote: 20},
-							{afit: 2000, upvote: 25},
+							{afit: 50, upvote: 10},
+							{afit: 100, upvote: 15},
+							{afit: 150, upvote: 20},
+							{afit: 200, upvote: 25},
 						],
 	  }
 	},
@@ -3538,10 +3538,10 @@
 				//map exchange amount to exchange category
 				let exchange_cat = 1;
 				switch(this.afit_val_exchange){
-					case '500': exchange_cat = 1; break;
-					case '1000': exchange_cat = 2; break;
-					case '1500': exchange_cat = 3; break;
-					case '2000': exchange_cat = 4; break;
+					case '50': exchange_cat = 1; break;
+					case '100': exchange_cat = 2; break;
+					case '150': exchange_cat = 3; break;
+					case '200': exchange_cat = 4; break;
 					default: exchange_cat = -1;
 				}
 				
