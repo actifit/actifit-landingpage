@@ -600,8 +600,9 @@
 				}
 			}
 			console.log(memo);
+			let attempt = 1;
 			let res = await hive.broadcast.transferAsync(this.userActvKey, this.user.account.name, process.env.actifitMarketBuy, payAmount + ' ' + 'HIVE', memo).then(
-				res => this.confirmCompletion('transfer', payAmount, res)).catch(err=> this.errorCompletion(err));
+				res => this.confirmCompletion('transfer', payAmount, res, attempt)).catch(err=> this.errorCompletion(err));
 				
 		}catch(excp){
 			console.log(excp);
@@ -614,7 +615,7 @@
 		//this.buyAttempt = false;
 		this.buyInProgress = false;
 	  },
-	  async confirmCompletion (type, amount, res){
+	  async confirmCompletion (type, amount, res, attempt){
 		if (res.block_num){
 			//console.log (res);
 			
@@ -630,22 +631,34 @@
 				}
 			}
 			
+			let tgtNode = process.env.actiAppUrl;
 			//if (this.product.type == 'ingame'){
-				url = new URL( process.env.actiAppUrl + 'buyMultiGadgetHive/'
-								+ this.user.account.name + '/'
-								+ memo + '/'
-								+ res.block_num + '/'
-								+ res.id + '/'
-								+ cur_bchain);
+			if (attempt != 1){
+				tgtNode = process.env.actiAppBackUrl;
+			}
+			
+			url = new URL( tgtNode + 'buyMultiGadgetHive/'
+							+ this.user.account.name + '/'
+							+ memo + '/'
+							+ res.block_num + '/'
+							+ res.id + '/'
+							+ cur_bchain);
+
 			//}
 			//console.log(url);
 			//connect with our service to process buy order
 			try{
-				let res = await fetch(url);
-				let outcome = await res.json();
+				let reslt = await fetch(url);
+				let outcome = await reslt.json();
 				if (outcome.error){
-					this.errorProceed = outcome;
-					console.error(outcome);
+					if (attempt == 1){
+						//try again with another API node
+						console.log('>>>>try again');
+						this.confirmCompletion(type, amount, res, attempt + 1);
+					}else{
+						this.errorProceed = outcome;
+						console.error(outcome);
+					}
 				}else{
 										
 					//display proper success message
@@ -670,6 +683,14 @@
 			
 			}catch(err){
 				console.error(err);
+				if (attempt == 1){
+					//try again with another API node
+					console.log('>>>>try again');
+					this.confirmCompletion(type, amount, res, attempt + 1);
+				}else{
+					this.errorProceed = outcome;
+					console.error(outcome);
+				}
 				//this.checkingFunds = false;
 			}
 			

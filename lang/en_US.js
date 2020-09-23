@@ -414,7 +414,7 @@ module.exports = {
   unable_fetch_bal_try_again: 'Unable to fetch current balance. Try again please',
   move_afit_se_notice: 'Moving AFIT to S-E enables you to trade them. ',
   move_afit_he_notice: 'Moving AFIT to H-E enables you to trade them. ',
-  move_afit_se_notice2: 'You can move up to 300 AFIT daily without any constraints. For every extra 100 AFIT you want to move daily, you need to have 1 additional AFITX.',
+  move_afit_se_notice2: 'You can move up to 500 AFIT daily without any constraints. For every extra 100 AFIT you want to move daily, you need to have 1 additional AFITX.',
   move_afit_se_notice3: 'Please note that moving AFIT from your wallet could decrease your user rank.',
   afitx_info: 'AFITX is a new special benefits token for Actifit users & AFIT token holders. Holding this token enables users to: <ul><li>Daily Move AFIT tokens to S-E</li><li>Increases user rank</li><li>Increases post rewards via our different rewarded tokens</li><li>Receive priority when exchanging AFIT for upvotes</li><li>Participate in contests</li><li>AFITX will constitute the basis for our future Exchange framework</li></ul>',
   Delegated: 'Delegated',
