@@ -178,10 +178,6 @@
 		}
 		
 		
-		
-		let totalSteem = Number(this.properties.total_vesting_fund_steem.split(' ')[0]);
-		let totalVests = Number(this.properties.total_vesting_shares.split(' ')[0]);
-		
 		this.votePowerReserveRate = this.properties.vote_power_reserve_rate;
 		this.sbd_print_percentage = this.properties.sbd_print_rate / 10000;
 		this.getVoteValueUSD(this.voteWeight, this.user.account, this.currentVotingPower);
@@ -557,7 +553,14 @@
 	
 	  client = new dsteem.Client(process.env.steemApiNode)
 	  hiveclient = new dhive.Client(process.env.altHiveNodes)
+	  
+	  hiveclient.updateOperations(true);
+	  
 	  steem.api.setOptions({ url: process.env.steemApiNode });
+	  
+	  hive.config.set('rebranded_api', true)
+	  hive.broadcast.updateOperations()
+	  
 	  hive.api.setOptions({ url: process.env.hiveApiNode });
 	  
 	  //grab STEEM price, needed for vote value calculation

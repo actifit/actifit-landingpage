@@ -92,15 +92,6 @@
   
   import BuyOptionsModal from '~/components/BuyOptionsModal'
 
-  
-  var dsteem = require('dsteem')
-  
-  var dhive = require('@hiveio/dhive')
-  
-  var client;
-  
-  var hiveclient;
-
   export default {
      props: ['afitPrice'],
 	data () {
@@ -723,7 +714,11 @@
 	  
     },
 	async mounted () {	  
+		  
+	  hive.config.set('rebranded_api', true)
+	  hive.broadcast.updateOperations()
 	  
+	  hive.api.setOptions({ url: process.env.hiveApiNode });
 	}
   }
 </script>

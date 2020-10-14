@@ -1759,10 +1759,19 @@
 			//TODO: below replace functions are needed for compatibility now with steem-js still using STEEM & SBD terminology for HIVE
 			let cstm_params = {
 				"account": this.user.account.name,
-				"reward_steem": this.claimSTEEM.replace('HIVE','STEEM'),
-				"reward_sbd": this.claimSBD.replace('HBD','SBD'),
+				"reward_steem": this.claimSTEEM,
+				"reward_sbd": this.claimSBD,
 				"reward_vests": this.claimVests
 			};
+			
+			if (this.cur_bchain == 'HIVE') {
+				cstm_params = {
+					"account": this.user.account.name,
+					"reward_hive": this.claimSTEEM,
+					"reward_hbd": this.claimSBD,
+					"reward_vests": this.claimVests
+				};
+			}
 			
 			let res = await this.processTrxFunc('claim_reward_balance', cstm_params);
 			
@@ -3601,6 +3610,11 @@
 		this.cur_bchain = localStorage.getItem('cur_bchain')
 	  }
 	  steem.api.setOptions({ url: process.env.steemApiNode });
+	  
+		  
+	  hive.config.set('rebranded_api', true)
+	  hive.broadcast.updateOperations()
+	  
 	  hive.api.setOptions({ url: process.env.hiveApiNode });
 	  let chainLnk = await this.setProperNode();
       // login

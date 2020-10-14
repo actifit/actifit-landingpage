@@ -119,6 +119,8 @@
   
   import hive from '@hiveio/hive-js'
   
+  
+  
   import Countdown from 'vuejs-countdown'
   
   import NotifyModal from '~/components/NotifyModal'
@@ -299,6 +301,9 @@
 	  
 	  this.prepareData();
 	  
+			  
+	  hive.config.set('rebranded_api', true)
+	  hive.broadcast.updateOperations()
 	  
 	  hive.api.setOptions({ url: process.env.hiveApiNode });
 	  

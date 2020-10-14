@@ -3,6 +3,9 @@ import steem from 'steem'
 
 import hive from '@hiveio/hive-js'
 
+hive.config.set('rebranded_api', true)
+hive.broadcast.updateOperations()
+
 steem.api.setOptions({ url: process.env.steemApiNode });
 
 hive.api.setOptions({ url: process.env.hiveApiNode });

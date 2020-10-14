@@ -1122,6 +1122,11 @@
 	async mounted () {
 		this.getPrice();
 		this.updateProPic();
+		
+		hive.config.set('rebranded_api', true)
+		hive.broadcast.updateOperations()
+	  
+		hive.api.setOptions({ url: process.env.hiveApiNode });
 	},
 	
   }

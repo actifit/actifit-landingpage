@@ -183,7 +183,11 @@
 	  
 	  //rely on HIVE node
 	  let properNode = process.env.hiveApiNode;
-	
+	  
+			  
+	  hive.config.set('rebranded_api', true)
+	  hive.broadcast.updateOperations()
+	  
 	  hive.api.setOptions({ url: properNode });
 
 	  //if a promo code is available, let's set it accordingly

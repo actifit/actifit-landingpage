@@ -1255,6 +1255,11 @@
 	
 		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		steem.api.setOptions({ url: process.env.steemApiNode });
+				
+				
+		hive.config.set('rebranded_api', true)
+		hive.broadcast.updateOperations()
+		
 		hive.api.setOptions({ url: process.env.hiveApiNode });
 		// login
 		this.$store.dispatch('steemconnect/login')
