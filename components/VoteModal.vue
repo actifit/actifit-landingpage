@@ -85,7 +85,7 @@
       return {
         loading: false,
 		properties: '', //handles the Steem BC properties
-		sbd_print_percentage: 1,
+		bd_print_percentage: 1,
 		rewardBalance: 1,
 		recentClaims: 1,
 		votePowerReserveRate: 1,
@@ -179,7 +179,12 @@
 		
 		
 		this.votePowerReserveRate = this.properties.vote_power_reserve_rate;
-		this.sbd_print_percentage = this.properties.sbd_print_rate / 10000;
+		if (this.cur_bchain == 'STEEM' && this.properties.sbd_print_rate){
+			this.bd_print_percentage = this.properties.sbd_print_rate / 10000;
+		}else{
+			this.bd_print_percentage = this.properties.hbd_print_rate / 10000;
+		}
+		
 		this.getVoteValueUSD(this.voteWeight, this.user.account, this.currentVotingPower);
 	  },
 	  //store SBD price
@@ -304,18 +309,24 @@
 	  getVestingShares(account) {
 		var effective_vesting_shares = parseFloat(account.vesting_shares.replace(" VESTS", ""))
 			+ parseFloat(account.received_vesting_shares.replace(" VESTS", ""))
-		   - parseFloat(account.delegated_vesting_shares.replace(" VESTS", ""));
+		   - parseFloat(account.delegated_vesting_shares.replace(" VESTS", ""))
+		   - parseFloat(account.vesting_withdraw_rate.replace(" VESTS", ""));
 		return effective_vesting_shares;
 	  },
 	  //handles display vote value in USD
 	  getVoteValueUSD(weight, account, vp) {
 		let vote_value = this.getVoteValue(weight, account, vp);
 		
-		const steempower_value = vote_value * 0.5
-		const sbd_print_percentage_half = (0.5 * this.sbd_print_percentage)
-		const sbd_value = vote_value * sbd_print_percentage_half
-		const steem_value = vote_value * (0.5 - sbd_print_percentage_half)
-		this.vote_value_usd = ((sbd_value * this.sbd_price) + steem_value + steempower_value).toFixed(3) +  '$';
+		const tokenpower_value = vote_value * 0.5
+		const bd_print_percentage_half = (0.5 * this.bd_print_percentage)
+		const bd_value = vote_value * bd_print_percentage_half
+		const token_value = vote_value * (0.5 - bd_print_percentage_half)
+		if (this.cur_bchain == 'STEEM'){
+			this.vote_value_usd = ((bd_value * this.sbd_price) + token_value + tokenpower_value).toFixed(3) +  '$';
+		}else{
+			this.vote_value_usd = ((bd_value * this.hbd_price) + token_value + tokenpower_value).toFixed(3) +  '$';
+		}
+		
 		return this.vote_value_usd
 	  },
 	  //handles updating custom values
