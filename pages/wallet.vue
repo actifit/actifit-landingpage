@@ -1252,9 +1252,15 @@
 			this.detailCalculation += '(' + parseFloat(this.user.account.balance) + ' + ' + this.steemPower + ') '+this.cur_bchain+' x 1 = ' + this.numberFormat(totSteem, 4) + ' '+this.cur_bchain+'<br/>';
 			
 			//append SBD amount after conversion to STEEM
-			let sbd_val = (parseFloat(this.user.account.sbd_balance) * this.sbdPrice / baseCurrency);;
-			this.totalAccountValue += sbd_val;
-			this.detailCalculation += parseFloat(this.user.account.sbd_balance) + ' '+peggedCurrencyUnit+' x '+ this.numberFormat((this.sbdPrice / baseCurrency), 4) + ' '+peggedCurrencyUnit+'/'+this.cur_bchain+' = ' + this.numberFormat(sbd_val, 4) + ' '+this.cur_bchain+'<br/>';
+			if (this.cur_bchain == 'STEEM'){
+				let sbd_val = (parseFloat(this.user.account.sbd_balance) * this.sbdPrice / baseCurrency);;
+				this.totalAccountValue += sbd_val;
+				this.detailCalculation += parseFloat(this.user.account.sbd_balance) + ' '+peggedCurrencyUnit+' x '+ this.numberFormat((this.sbdPrice / baseCurrency), 4) + ' '+peggedCurrencyUnit+'/'+this.cur_bchain+' = ' + this.numberFormat(sbd_val, 4) + ' '+this.cur_bchain+'<br/>';
+			}else{
+				let sbd_val = (parseFloat(this.user.account.hbd_balance) * this.hbdPrice / baseCurrency);;
+				this.totalAccountValue += sbd_val;
+				this.detailCalculation += parseFloat(this.user.account.hbd_balance) + ' '+peggedCurrencyUnit+' x '+ this.numberFormat((this.hbdPrice / baseCurrency), 4) + ' '+peggedCurrencyUnit+'/'+this.cur_bchain+' = ' + this.numberFormat(sbd_val, 4) + ' '+this.cur_bchain+'<br/>';
+			}
 						
 
 			//append claimable STEEM + SP
@@ -1264,10 +1270,15 @@
 			this.detailCalculation += '(' + parseFloat(this.claimSTEEM) + ' + ' + parseFloat(this.claimSP) + ') '+this.cur_bchain+' x 1 = ' + this.numberFormat(totClaimSteem, 4) + ' '+this.cur_bchain+'<br/>';
 			
 			//console.log(parseFloat(this.claimSBD) * this.sbdPrice / this.steemPrice);
-			let claim_sbd = (parseFloat(this.claimSBD) * this.sbdPrice / baseCurrency);
-			this.totalAccountValue += claim_sbd;
-			this.detailCalculation += parseFloat(this.claimSBD) + ' '+peggedCurrencyUnit+' x '+ this.numberFormat((this.sbdPrice / baseCurrency), 4) + ' '+peggedCurrencyUnit+'/'+this.cur_bchain+' = ' + this.numberFormat(claim_sbd, 4) + ' '+this.cur_bchain+'<br/>';
-			
+			if (this.cur_bchain == 'STEEM'){
+				let claim_sbd = (parseFloat(this.claimSBD) * this.sbdPrice / baseCurrency);
+				this.totalAccountValue += claim_sbd;
+				this.detailCalculation += parseFloat(this.claimSBD) + ' '+peggedCurrencyUnit+' x '+ this.numberFormat((this.sbdPrice / baseCurrency), 4) + ' '+peggedCurrencyUnit+'/'+this.cur_bchain+' = ' + this.numberFormat(claim_sbd, 4) + ' '+this.cur_bchain+'<br/>';
+			}else{
+				let claim_sbd = (parseFloat(this.claimSBD) * this.hbdPrice / baseCurrency);
+				this.totalAccountValue += claim_sbd;
+				this.detailCalculation += parseFloat(this.claimSBD) + ' '+peggedCurrencyUnit+' x '+ this.numberFormat((this.hbdPrice / baseCurrency), 4) + ' '+peggedCurrencyUnit+'/'+this.cur_bchain+' = ' + this.numberFormat(claim_sbd, 4) + ' '+this.cur_bchain+'<br/>';
+			}
 			this.detailCalculation += '-----<br/>';
 			
 			this.totalAccountValueSteem = this.totalAccountValue;
@@ -1305,9 +1316,17 @@
 	  },
 	  renderSBDBalance (type, nofrmt) {
 		if (nofrmt){
-			return this.user.account.sbd_balance;
+			if (this.cur_bchain == 'STEEM'){
+				return this.user.account.sbd_balance;
+			}else{
+				return this.user.account.hbd_balance;
+			}
 		}
-		return this.numberFormat(parseFloat(this.user.account.sbd_balance), 3) + ' ' + ((type == 'STEEM')?this.$t('SBD'):this.$t('HBD'));
+		if (this.cur_bchain == 'STEEM'){
+			return this.numberFormat(parseFloat(this.user.account.sbd_balance), 3) + ' ' + ((type == 'STEEM')?this.$t('SBD'):this.$t('HBD'));
+		}else{
+			return this.numberFormat(parseFloat(this.user.account.hbd_balance), 3) + ' ' + ((type == 'STEEM')?this.$t('SBD'):this.$t('HBD'));
+		}
 	  },
 	  setUserPDAfitStatus (result) {
 		this.userPDAfit = result;
@@ -1649,10 +1668,18 @@
 		  //not loaded yet
 		  this.properties = await chainLnk.api.getDynamicGlobalPropertiesAsync();
 		}
-		let totalSteem = Number(this.properties.total_vesting_fund_steem.split(' ')[0]);
-		let totalVests = Number(this.properties.total_vesting_shares.split(' ')[0]);
-	    vests = Number(vests.split(' ')[0]);
-	    return (totalSteem * (vests / totalVests));
+		if (this.cur_bchain == 'STEEM'){
+			let totalSteem = Number(this.properties.total_vesting_fund_steem.split(' ')[0]);
+			let totalVests = Number(this.properties.total_vesting_shares.split(' ')[0]);
+			vests = Number(vests.split(' ')[0]);
+			return (totalSteem * (vests / totalVests));
+		}else{
+			let totalSteem = Number(this.properties.total_vesting_fund_hive.split(' ')[0]);
+			let totalVests = Number(this.properties.total_vesting_shares.split(' ')[0]);
+			vests = Number(vests.split(' ')[0]);
+			return (totalSteem * (vests / totalVests));
+		}
+		
 	  },
 	  async steemPowerToVests (steemPower) {
 	    //function handles conversting SP to Vests
@@ -1661,10 +1688,15 @@
 		  //not loaded yet
 		  this.properties = await chainLnk.api.getDynamicGlobalPropertiesAsync();
 		}
-		let totalSteem = Number(this.properties.total_vesting_fund_steem.split(' ')[0]);
-		let totalVests = Number(this.properties.total_vesting_shares.split(' ')[0]);
-		
-		return parseFloat(steemPower * totalVests / totalSteem).toFixed(6);
+		if (this.cur_bchain == 'STEEM'){
+			let totalSteem = Number(this.properties.total_vesting_fund_steem.split(' ')[0]);
+			let totalVests = Number(this.properties.total_vesting_shares.split(' ')[0]);
+			return parseFloat(steemPower * totalVests / totalSteem).toFixed(6);
+		}else{
+			let totalSteem = Number(this.properties.total_vesting_fund_hive.split(' ')[0]);
+			let totalVests = Number(this.properties.total_vesting_shares.split(' ')[0]);
+			return parseFloat(steemPower * totalVests / totalSteem).toFixed(6);
+		}
 	  },
 	  claimableSTEEMRewards () {
 		//function handles preparing claimable STEEM rewards
@@ -1674,9 +1706,10 @@
 		  this.claimVests = this.user.account.reward_vesting_balance;
 		  this.claimSBD = this.user.account.reward_sbd_balance;
 		  if (this.cur_bchain=='HIVE'){
-			this.claimSP = this.claimSP.replace('STEEM','HIVE');
+			this.claimSTEEM = this.user.account.reward_hive_balance;
+			this.claimSP = this.user.account.reward_vesting_hive + " POWER";
 			this.claimSTEEM = this.claimSTEEM.replace('STEEM','HIVE');
-			this.claimSBD = this.claimSBD.replace('SBD','HBD');
+			this.claimSBD = this.user.account.reward_hbd_balance;
 		  }
 		  return this.claimSP + this.claimSTEEM + this.claimSBD;
 		}
