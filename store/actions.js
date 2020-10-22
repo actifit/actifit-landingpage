@@ -225,7 +225,6 @@ export default {
       let lastReport = state.userReports.length ? state.userReports[state.userReports.length - 1] : null
       let start_author = lastReport ? lastReport.author : null
       let start_permlink = lastReport ? lastReport.permlink : null
-	  console.log(lastReport);
 	  
 	   //set proper blockchain selection
 	  let chainLnk = hive;
@@ -238,8 +237,7 @@ export default {
         if (err) reject(err)
         else {
           if (start_author && start_permlink) posts.shift() // remove the first posts because its the last post from before
-          posts = posts.filter(userPostsFilter(username)) // get only actual activity reports
-		  console.log(posts);
+		  posts = posts.filter(userPostsFilter(username)) // get only actual activity reports
           commit('setUserReports', [...state.userReports, ...posts])
           dispatch('checkIfMoreUserReportsAvailable', username)
           resolve()
@@ -365,17 +363,25 @@ export default {
 }
 
 const postsFilter = (post) => {
-  let meta = JSON.parse(post.json_metadata)
-  // actual activity posts must have those two properties in metadata
-  return meta.hasOwnProperty('step_count') && meta.hasOwnProperty('activity_type')
+  try{
+	  let meta = JSON.parse(post.json_metadata)
+	  // actual activity posts must have those two properties in metadata
+	  return meta.hasOwnProperty('step_count') && meta.hasOwnProperty('activity_type')
+  }catch(exc){
+	  return false;
+  }
 }
 
 const userPostsFilter = username => (post) => {
-  let meta = JSON.parse(post.json_metadata)
-  // actual activity posts must have those two properties in metadata
-  // since, in this case, posts are fetched by users blog, we also need to check for the actifit tag
-  // add to that, we need to skip resteems, so we need to ensure this is the same author
-  return meta.hasOwnProperty('step_count') && meta.hasOwnProperty('activity_type') && post.author === username && ( ( meta.hasOwnProperty('tags') && meta.tags.indexOf('actifit') !== -1) || post.category == 'actifit' || ( meta.hasOwnProperty('community') && meta.community.indexOf('actifit') !== -1) ) 
+  try{
+	  let meta = JSON.parse(post.json_metadata)
+	  // actual activity posts must have those two properties in metadata
+	  // since, in this case, posts are fetched by users blog, we also need to check for the actifit tag
+	  // add to that, we need to skip resteems, so we need to ensure this is the same author
+	  return meta.hasOwnProperty('step_count') && meta.hasOwnProperty('activity_type') && post.author === username && ( ( meta.hasOwnProperty('tags') && meta.tags.indexOf('actifit') !== -1) || post.category == 'actifit' || ( meta.hasOwnProperty('community') && meta.community.indexOf('actifit') !== -1) ) 
+  }catch(exc){
+	  return false;
+  }
 }
 
 const newsFilter = (post) => {
