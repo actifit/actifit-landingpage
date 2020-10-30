@@ -1123,9 +1123,9 @@
 		this.getPrice();
 		this.updateProPic();
 		
-		hive.config.set('rebranded_api', true)
-		hive.broadcast.updateOperations()
-	  
+		//hive.config.set('rebranded_api', true)
+		//hive.broadcast.updateOperations()
+		hive.config.set('alternative_api_endpoints', process.env.altHiveNodes);
 		hive.api.setOptions({ url: process.env.hiveApiNode });
 	},
 	
