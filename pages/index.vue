@@ -310,14 +310,14 @@
 			<div><i>Moderator</i></div>
 			<a href="https://www.linkedin.com/in/praveen-reddy-kanthala-a0532011a/" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
-		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
+		  <!--<div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@sumit71428" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/sumitsingh.jpg);'"></div>
             </a>
             <a href="@sumit71428" target="_blank">Sumit Singh</a>
 			<div><i>Moderator</i></div>
 			<a href="https://www.linkedin.com/in/sumit-singh-91b616185/" target="_blank"><i class="fab fa-linkedin"></i></a>
-          </div>
+          </div>-->
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@silvertop" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/silvertop.jpg);'"></div>
@@ -391,6 +391,47 @@
       </div>
     </section>-->
 
+	<!-- partners -->
+	<section id="partners" class="py-5 bg-light">
+      <div class="container">
+        <h1 class="text-center pb-5">
+          <i class="far fa-handshake"></i><br>
+			{{ $t('Partners') }}
+        </h1>
+        <div class="row">
+		  <!--<div class="col-6 col-sm-4 col-md-3 text-center mb-4">
+            <a rel="nofollow noopener" href="https://sportstalsocial.com/" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url();'"></div>
+            </a>
+            <a rel="nofollow noopener" href="https://sportstalksocial.com/" target="_blank">Sports Talk</a>
+          </div>-->
+		  
+		  <div class="col-4 col-sm-4 col-md-4 text-center mb-4">
+            <a rel="nofollow noopener" href="https://actifit.io/@beachready" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(./img/partners/BEACH_READY_LOGO.png);'"></div>
+            </a>
+            <a rel="nofollow noopener" href="https://actifit.io/@beachready" target="_blank">Beach Ready</a>
+          </div>
+		  
+		  <div class="col-4 col-sm-4 col-md-4 text-center mb-4">
+            <a rel="nofollow noopener" href="https://coinpedia.org/" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(./img/partners/coinpedia_logo_2.png);'"></div>
+            </a>
+            <a rel="nofollow noopener" href="https://coinpedia.org/" target="_blank">CoinPedia</a>
+          </div>
+		  
+		  <div class="col-4 col-sm-4 col-md-4 text-center mb-4">
+            <a rel="nofollow noopener" href="https://actifit.io/@adventureready" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(./img/partners/ADVENTURE_READY_LOGO.png);'"></div>
+            </a>
+            <a rel="nofollow noopener" href="https://actifit.io/@adventureready" target="_blank">Adventure Ready</a>
+          </div>
+		  
+		</div>
+	  </div>
+      
+    </section>
+
     <!-- news -->
     <section id="news" class="py-5 bg-brand text-light">
       <h1 class="text-center pb-3">
@@ -405,6 +446,7 @@
         </carousel>
       </no-ssr>
     </section>
+	
 
     <Footer isHomePage='true'/>
 	

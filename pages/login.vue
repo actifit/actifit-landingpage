@@ -52,6 +52,8 @@
   import Footer from '~/components/Footer'
   import steem from 'steem'
   import VueRecaptcha from 'vue-recaptcha';
+  
+  //import { VueReCaptchaV3 } from 'vue-recaptcha-v3';
 
   import { mapGetters } from 'vuex'
   
@@ -71,6 +73,7 @@
       NavbarBrand,
       Transaction, // single transaction block
       Footer,
+	  //VueReCaptchaV3
 	  VueRecaptcha,
     },
 	data () {
@@ -107,7 +110,11 @@
 		}
     },
     async mounted () {
-	
+		/*try {
+		  await this.$recaptcha.init()
+		} catch (e) {
+		  console.log(e);
+		}*/
 	},
 	methods: {
 	  onVerifyCaptcha (response) {
@@ -150,10 +157,20 @@
 		this.error_proceeding = false;
 		this.error_msg = '';
 		
+		/*try {
+			const token = await this.$recaptcha.execute('login')
+			console.log('ReCaptcha token:', token)
+		} catch (error) {
+			console.log('Login error:', error)
+			this.captcha_invalid = this.$t('solve_captcha');
+			return;
+		}*/
+		
 		if (!this.captchaValid){
 			this.captcha_invalid = this.$t('solve_captcha');
 			return;
 		}
+		
 		if (this.$refs["username"].value == '' || this.$refs["ppkey"].value == ''){
 			this.error_proceeding = true;
 			this.error_msg = this.$t('login_error');

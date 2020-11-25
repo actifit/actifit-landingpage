@@ -39,6 +39,11 @@
           <!--<li class="nav-item">
             <a class="nav-link" href="#" @click.prevent="scrollTo('#athletes')">{{ $t('Sponsored_Athletes') }}</a>
           </li>-->
+		  
+		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border" v-if="home">
+            <div style="display:inline-flex"><i class="far fa-handshake text-white"></i><a class="nav-link text-white" href="#" @click.prevent="$emit('scrollTo', '#partners')">{{ $t('Partners') }}</a></div>
+          </li>
+		  
           <li class="nav-item btn btn-brand m-1 p-1 nav-item-border" v-if="home">
             <div style="display:inline-flex"><i class="far fa-newspaper text-white"></i><a class="nav-link text-white" href="#" @click.prevent="$emit('scrollTo', '#news')">{{ $t('News') }}</a></div>
           </li>

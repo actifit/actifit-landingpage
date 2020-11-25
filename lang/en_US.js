@@ -9,6 +9,7 @@ module.exports = {
   Team: 'Team',
   Ambassadors: 'Ambassadors',
   News: 'News',
+  Partners: 'Partners',
   Sponsored_Athletes: 'Sponsored Athletes',
   Professionals: 'Professionals',
   Refer_A_Friend: 'Refer A Friend',
