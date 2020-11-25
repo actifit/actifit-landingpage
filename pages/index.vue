@@ -399,28 +399,28 @@
 			{{ $t('Partners') }}
         </h1>
         <div class="row">
-		  <!--<div class="col-6 col-sm-4 col-md-3 text-center mb-4">
-            <a rel="nofollow noopener" href="https://sportstalsocial.com/" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url();'"></div>
+		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
+            <a rel="nofollow noopener" href="https://sportstalksocial.com/" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(./img/partners/sports_talk_social_logo.png);'"></div>
             </a>
-            <a rel="nofollow noopener" href="https://sportstalksocial.com/" target="_blank">Sports Talk</a>
-          </div>-->
+            <a rel="nofollow noopener" href="https://sportstalksocial.com/" target="_blank">Sports Talk Social</a>
+          </div>
 		  
-		  <div class="col-4 col-sm-4 col-md-4 text-center mb-4">
+		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a rel="nofollow noopener" href="https://actifit.io/@beachready" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(./img/partners/BEACH_READY_LOGO.png);'"></div>
             </a>
             <a rel="nofollow noopener" href="https://actifit.io/@beachready" target="_blank">Beach Ready</a>
           </div>
 		  
-		  <div class="col-4 col-sm-4 col-md-4 text-center mb-4">
+		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a rel="nofollow noopener" href="https://coinpedia.org/" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(./img/partners/coinpedia_logo_2.png);'"></div>
             </a>
             <a rel="nofollow noopener" href="https://coinpedia.org/" target="_blank">CoinPedia</a>
           </div>
 		  
-		  <div class="col-4 col-sm-4 col-md-4 text-center mb-4">
+		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a rel="nofollow noopener" href="https://actifit.io/@adventureready" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(./img/partners/ADVENTURE_READY_LOGO.png);'"></div>
             </a>
