@@ -229,7 +229,7 @@
     </section>
 
     <!-- team -->
-    <section id="team" class="py-5">
+    <section id="team" class="py-5 bg-light">
       <div class="container">
         <h1 class="text-center pb-5">
           <i class="fas fa-users"></i><br>
@@ -392,7 +392,7 @@
     </section>-->
 
 	<!-- partners -->
-	<section id="partners" class="py-5 bg-light">
+	<section id="partners" class="py-5 bold-content">
       <div class="container">
         <h1 class="text-center pb-5">
           <i class="far fa-handshake"></i><br>
@@ -680,5 +680,8 @@
 	.leader-cls-btn:hover{
 	  background-color: darkred;
 	  color: white;
+	}
+	.bold-content{
+		font-weight: bold;
 	}
 </style>
