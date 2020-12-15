@@ -21,9 +21,15 @@
 				  <div v-if="this.product.type == 'ingame'" class="avatar gaming-label mx-auto" :style="'background-image: url(img/gadgets/gaming.png);'"></div>
 				  <h4 v-else-if="this.product.type == 'ebook'"><i class="fas fa-book"></i></h4>
 				  <h4 v-else-if="this.product.type == 'service'"><i class='fas fa-phone-volume'></i></h4>
-				  <h3 class="product-type">{{ this.product.type}} <span v-if="this.product.type != 'ingame'">{{ $t('By') }}</span> <br/> 
+				  <h3 class="product-type">{{ this.product.type}} <span v-if="this.product.type != 'ingame' && this.product.type != 'real'">{{ $t('By') }}</span> <br/> 
 					<a v-if="this.product.type == 'service'" :href="'/consultants/?prof=' + this.product.provider_name" >{{ this.product.provider_name}}</a>
 					<a v-else :href="'/' + this.product.provider" >{{ this.product.provider_name}}</a>
+					<span v-if="this.product.type=='real'">
+						<span v-if="this.item_price_extra>0"><img class="token-logo-md " src="/img/hive.png">+</span>
+						<span><img class="token-logo-md " src="/img/actifit_logo.png"></span>
+					</span>
+				  </h3>
+				  <h3 v-else-if="">
 				  </h3>
 				  <!--<div class="pb-md-2 text-left" >
 					<b>{{ $t('price')}}: </b>{{numberFormat(this.item_price, 2)}} {{this.item_currency}}<img class="token-logo" src="/img/actifit_logo.png">
@@ -31,6 +37,32 @@
 			  </div>
 			</div>  
 		  </div>
+		  
+		  <div class="card-body" v-if="this.product.type == 'real'">
+			  <div class="row text-info pt-1">
+				<div class="pb-md-2 pt-md-2 col-12 text-center info-box info-box-orangered">
+				  <b>{{ $t('Available')}}</b><br/>{{this.product.count}} {{$t('units')}}
+				</div>
+			  </div>
+			  <div class="row">
+				<div class="col-md-12 pb-md-2 pt-md-2 info-box info-box-orangered">
+					<b>{{ $t('Requirements') }}</b>
+					<div v-if="product.requirements == null || product.requirements.length == 0 || product.requirements.length == 1 && product.requirements[0].item == null"><span>{{ $t('none') }}</span></div>
+					<div v-else v-for="(reqt, index) in product.requirements" :key="index" class="text-left">
+						<span v-if="user" class="pr-1">
+							<i class="fas fa-check text-success" :title="$t('reqt_met')" v-if="reqt.met" ></i>
+							<i class="fas fa-times-circle text-dark" :title="$t('reqt_not_met')" v-else></i>
+							<!--<i class="fas fa-times text-brand" :title="$t('reqt_not_met')" v-else></i>-->
+						</span>
+						<span class="" v-if="reqt.item && reqt.item.toLowerCase() == 'User Rank'.toLowerCase()" :title="$t('user_rank_reqt').replace('_VAL_', reqt.level)">{{reqt.item}} &gt; {{reqt.level}}</span>
+						<span class="" v-else-if="reqt.item && reqt.item.toLowerCase() == 'AFIT'.toLowerCase()" :title="$t('afit_reqt').replace('_VAL_', reqt.level)">{{$t('user_afit_balace')}} &gt;= {{reqt.count}} {{reqt.item}} </span>
+						<span v-else :title="$t('consumed_reqt').replace('_AMOUNT_', reqt.count).replace('_ITEM_', reqt.item).replace('_LEVEL_', reqt.level)">{{$t('At_Least')}} {{reqt.count}} '{{reqt.item}} {{$t('level_short')}} {{reqt.level}}' {{$t('consumed')}}</span>
+					</div>
+				  </div>
+			   </div>
+			</div>  
+		  
+		  
 		  
 		  <div class="card-body" v-if="this.product.type == 'ingame'">
 			  <div class="row text-info pt-1">
@@ -103,8 +135,43 @@
 				<b>{{ $t('details')}}: </b>{{this.product.description}}
 		   </div>
 		   
+		   <div v-if="product.type == 'real'" class="card-body pb-md-2 text-left">
+				<!--<b>{{ $t('Delivery')}}: </b>{{this.product.delivery}}-->
+				
+				<!--<LightBox :media="media" ></LightBox>-->
+				<div class="lbox-container mb-2">
+					<div >
+						<b>{{ $t('product_images') }}</b>
+						<br />
+					</div>
+					<div class="col-6">
+						<lightbox css="h-200 h-lg-250 w-200" :cells="2" :items="product.prodImages"></lightbox>
+					</div>
+				</div>
+		   </div>
+		   
+			<div v-if="product.type == 'real' && !checkout_product && realProdBuyStatus" class="card-body pb-md-2 text-left">
+				<b>{{ $t('order_quantity')}} </b>
+				<select v-model="order_quantity" class="col-6 form-control sel-adj">
+					<option value="1" selected>1</option>
+					<option v-if="product.allowedQuantity && quant < product.allowedQuantity" v-for="quant in product.allowedQuantity" :value="quant+1">{{quant+1}}</option>
+				</select>
+			</div>
+		   
 		  <div class="card-footer pb-md-2 text-center">
-              <div v-if="product.type == 'ingame'">
+              <div v-if="product.type == 'real'">
+				<a v-if="!checkout_product && realProdBuyStatus" class="btn btn-success btn-lg book-button" @click.prevent="prepareCheckout()" :class="productBuyColor" style="float:left; border: 1px white solid;">{{ $t('Buy_now') }} <br/>
+				<span v-if="this.item_price_extra > 0">{{numberFormat(this.item_price_extra, 2)}} {{this.item_extra_currency}}<img class="token-logo-sm " src="/img/hive.png">+</span>
+				{{numberFormat(this.item_price, 2)}} {{this.item_currency}}<img class="token-logo-sm " src="/img/actifit_logo.png">
+				</a>
+				<span v-else-if="!checkout_product" >
+				<span >{{$t('pending_real_order_notification') }}</span>
+				<div v-for="(entry, index) in pendingOrders" :key="index" :entry="entry">
+					<span class="text-brand">{{$t('item_bought')}} {{showDate(entry.date_bought)}} {{$t('with_status')}} {{ entry.status}}</span>
+				</div>
+				</span>
+			  </div>
+			  <div v-else-if="product.type == 'ingame'">
 				<a class="btn btn-danger btn-lg w-100 book-button" @click.prevent="activateGadget()" :class="productBuyColor" v-if="grabConsumableItem() && grabConsumableItem().status == 'bought'" >
 					<span>{{ $t('activate_gadget') }}</span>&nbsp;
 					<i class="fas fa-check text-success"></i>
@@ -197,6 +264,32 @@
 				</div>
 			  </div>
 		  </div>
+		  <div v-if="checkout_product">
+			<div v-if="item_price_extra > 0">
+				<label for="active-key" class="p-2">{{ $t('Active_Key') }} *</label>
+				<input type="password" id="rl-active-key" name="rl-active-key" ref="rl-active-key" class="form-control-lg w-50 p-2" v-model="userRlActvKey">
+			</div>
+			<div class="col-12">{{ $t('shipping_details') }}</div>
+			<input type="text" name="buyer_name" id="buyer_name" ref="buyer_name" :placeholder="$t('buyer_name')" class="form-control p-2" >
+			<input type="text" name="buyer_phone" id="buyer_phone" ref="buyer_phone" :placeholder="$t('buyer_phone')" class="form-control p-2" >
+			<input type="text" name="buyer_address" id="buyer_address" ref="buyer_address" :placeholder="$t('buyer_address')" class="form-control p-2" >
+			<input type="text" name="buyer_address2" id="buyer_address2" ref="buyer_address2" :placeholder="$t('buyer_address2')" class="form-control p-2" >
+			<select v-model="buyer_country" class="form-control sel-adj">
+				<option value="" disabled selected>{{ $t('buyer_country') }}</option>
+				<option v-for="country_inst in this.product.countries" :value="country_inst">{{country_inst}}</option>
+			</select>
+			<input type="text" name="buyer_state" id="buyer_state" ref="buyer_state" class="form-control p-2" :placeholder="$t('buyer_state')">
+			<input type="text" name="buyer_city" id="buyer_city" ref="buyer_city" class="form-control p-2" :placeholder="$t('buyer_city')">
+			<input type="text" name="buyer_zip" id="buyer_zip" ref="buyer_zip" class="form-control p-2" :placeholder="$t('buyer_zip')">
+			<button v-on:click="checkout_product=false" class="btn btn-brand btn-lg border pt-2">{{ $t('Cancel') }}</button>
+			<button v-on:click="proceedBuyReal()" class="btn btn-brand btn-lg border pt-2">{{ $t('Proceed') }}</button>
+			<div v-if="buyInProgress && errorProceed==''">
+				<i class="fas fa-spin fa-spinner"></i>
+			</div>
+			<div v-else>
+				<span class="text-brand">{{errorProceed}}</span>
+			</div>
+		  </div>
 		  
 		  <BuyOptionsModal :id="'buyOptionsModal'+_uid" :ref="'buyOptionsModal'+_uid" :containerID="'#buyOptionsModal'+_uid" :modalTitle="$t('Buy_product')" :modalText="$t('buy_now_modal_desc').replace('_AMNT_', minAfitBuyTicket)" @proceed-purchase="proceedBuyNowHive"/>
 		  
@@ -209,6 +302,7 @@
 		  </div>
 		</no-ssr>
 		  
+		
 		  
         </div>
 		
@@ -224,12 +318,20 @@
   import BuyOptionsModal from '~/components/BuyOptionsModal'
   import CartModal from '~/components/CartModal'
   
+  //import VueLazyLoad from 'vue-lazyload'
+  //import LightBox from 'vue-image-lightbox'
+  
+  import '@morioh/v-lightbox/dist/lightbox.css';
+
+  //import Lightbox from '@morioh/v-lightbox'
 
   export default {
-    props: ['product', 'pros', 'userrank', 'gadgetStats', 'afitPrice'],
+    props: ['product', 'pros', 'userrank', 'afitCount', 'gadgetStats', 'afitPrice', 'realProducts'],
 	components: {
 		BuyOptionsModal,
-		CartModal
+		CartModal,
+		//LightBox,
+		//VueLazyLoad
 	},
     computed: {
       ...mapGetters('steemconnect', ['user']),
@@ -246,11 +348,6 @@
 		return '';
 		
 	  },
-      date() {
-        let date = new Date(this.product.approval_date)
-        let minutes = date.getMinutes()
-        return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() + ' ' + date.getHours() + ':' + (minutes < 10 ? '0' + minutes : minutes)
-      },
 	  boughtCount () {
 		if (this.user && this.product.type == 'ingame' && Array.isArray(this.gadgetStats) && this.gadgetStats.length > 0){
 			return this.consumedCount + this.activeCount;
@@ -274,15 +371,44 @@
 			}
 		}
 		return 0;
+	  },
+	  /* only allows user to buy more if they do not have pending orders */
+	  realProdBuyStatus (){
+		/*
+		actifit market order statuses:
+		placed
+		confirmed
+		inroute
+		delivered
+		cancelled
+		refunded
+		*/
+		if (this.user && this.product.type == 'real' && Array.isArray(this.realProducts) && this.realProducts.length > 0){
+			console.log('realProducts');
+			console.log(this.realProducts);
+			this.pendingOrders = this.realProducts.filter( entry => (entry.gadget === this.product._id && entry.status != 'delivered' && entry.status != 'cancelled' && entry.status != 'refunded' ));
+			console.log('pending orders');
+			console.log(this.pendingOrders );
+			//if we have a pending order user cannot buy more
+			if (Array.isArray(this.pendingOrders) && this.pendingOrders.length > 0){
+				return false;
+			}
+		}
+		return true;
 	  }
     }, 
 	data: function(){
 		return {
 			detailsOpen: false,
 			item_price: 0,
-			consumed_count: 0,
-			allReqtsFilled: false,
 			item_currency: 'AFIT',
+			orig_item_price: 0,
+			orig_item_currency: 'AFIT',
+			consumed_count: 0,
+			item_price_extra: 0,
+			item_extra_currency: '',
+			allReqtsFilled: false,
+			pendingOrders: [],
 			hive_currency: 'HIVE',
 			product_prov_pic: '',
 			buyAttempt: false,
@@ -300,7 +426,23 @@
 			profImgUrl: process.env.steemImgUrl,
 			minAfitBuyTicket: process.env.minAfitBuyEarnTicket,
 			userActvKey: '',
+			userRlActvKey: '',
 			prodRef: this,
+			checkout_product: false,
+			buyer_country: '',
+			order_quantity: 1,
+			/*media: [
+					  { // For image
+						thumb: 'http://localhost:3000/img/gadgets/real/Home-Resistance-Bands.png',
+						src: 'http://localhost:3000/img/gadgets/real/Home-Resistance-Bands.png',
+						//caption: 'caption to display. receive <html> <b>tag</b>', // Optional
+						//srcset: '...' // Optional for displaying responsive images
+					  },
+					],*/
+			images: [
+					'http://localhost:3000/img/gadgets/real/Home-Resistance-Bands.png',
+					'http://localhost:3000/img/gadgets/real/Home-Resistance-Bands.png'
+			]
 		}
 	},
 	watch: {
@@ -308,6 +450,7 @@
 	  pros: 'updateProPic',
 	  user: 'allReqtsMet',
 	  userrank: 'allReqtsMet',
+	  order_quantity: 'getPrice',
 	},
 	methods: {
 	  /**
@@ -320,7 +463,11 @@
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
-	  
+	  showDate(dt) {
+        let date = new Date(dt)
+        //let minutes = date.getMinutes()
+        return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear();// + ' ' + date.getHours() + ':' + (minutes < 10 ? '0' + minutes : minutes)
+      },
 	  async addCart(){
 		let res = await this.$store.commit('addCartEntry', this.product)
 		if (res){
@@ -368,6 +515,10 @@
 			//console.log(reqt.level);
 			//user rank case
 			if (parseFloat(this.userrank) >= parseFloat(reqt.level)){
+				return true;
+			}
+		}else if (reqt.item.toLowerCase() == 'AFIT'.toLowerCase()){
+			if (parseFloat(this.afitCount) >= parseFloat(reqt.count)){
 				return true;
 			}
 		}else{
@@ -448,8 +599,31 @@
 			let price_options_count = price_options.length;
 			for (let i=0; i < price_options_count; i++){
 				let entry = price_options[i];
-				this.item_price = entry.price;
+				this.item_price = entry.price * this.order_quantity;
 				this.item_currency = entry.currency;
+				if (this.item_currency == 'USD'){
+					console.log('>>>USD Product');
+					console.log(entry.percent_afit);
+					//keep track of original price
+					this.orig_item_currency = this.item_currency;
+					this.orig_item_price = this.item_price;
+					this.item_currency = 'AFIT';
+					//this being a USD product, convert to matching AFIT/HIVE amounts
+					/*if (parseInt(entry.percent_afit) == 100){
+						//convert price to matching AFIT val
+						console.log(this.afitPrice.afitHiveLastUsdPrice);
+						this.item_price = this.orig_item_price / this.afitPrice.afitHiveLastUsdPrice * entry.percent_afit / 100;
+					}else{*/
+						this.item_price = this.orig_item_price * entry.percent_afit / 100 / this.afitPrice.afitHiveLastUsdPrice;
+						this.item_price = Number(this.item_price.toFixed(2));
+						let calcHiveUsdPrice = this.afitPrice.afitHiveLastUsdPrice / this.afitPrice.afitHiveLastPrice;
+						console.log('HIVE price:'+calcHiveUsdPrice);
+						this.item_price_extra = this.orig_item_price * entry.percent_hive / 100 / calcHiveUsdPrice ;
+						this.item_price_extra = Number(this.item_price_extra.toFixed(2));
+						console.log('HIVE extra cost:'+this.item_price_extra);
+						this.item_extra_currency = 'HIVE';
+					//}
+				}
 			}
 			this.checkProductBought();
 		}
@@ -532,46 +706,6 @@
 			let accToken = localStorage.getItem('access_token')
 			
 			let op_json = JSON.stringify(operation)
-			
-			//TODO: move support to hive as well - now it's failing with dsteem
-			
-			/*
-			{ id: '8dbd67505244c12626ba6b16db8e7d9ea7517ba5',
-			  block_num: 41846303,
-			  trx_num: 1,
-			  expired: false,
-			  ref_block_num: 34317,
-			  ref_block_prefix: 2366159845,
-			  expiration: '2020-03-21T13:31:57',
-			  operations: [ [ 'custom_json', [Object] ] ],
-			  extensions: [],
-			  signatures:
-			   [ '1f2397bfc5100f56ad673bd47b53b5b6f9322c36b5abb26d87d4da2e0d1ec2901352fbe8832fddada800c66bd785014ce87949c1
-			31f3a394d57ae6925fe16d6780' ] }
-			{ tx:
-			   { id: '8dbd67505244c12626ba6b16db8e7d9ea7517ba5',
-				 block_num: 41846303,
-				 trx_num: 1,
-				 expired: false,
-				 ref_block_num: 34317,
-				 ref_block_prefix: 2366159845,
-				 expiration: '2020-03-21T13:31:57',
-				 operations: [ [Array] ],
-				 extensions: [],
-				 signatures:
-				  [ '1f2397bfc5100f56ad673bd47b53b5b6f9322c36b5abb26d87d4da2e0d1ec2901352fbe8832fddada800c66bd785014ce8794
-			9c131f3a394d57ae6925fe16d6780' ] } }
-			(node:38336) UnhandledPromiseRejectionWarning: TypeError: Cannot read property 'transaction_ids' of null
-				at DatabaseAPI.<anonymous> (C:\Mohammad\my own\steemit\actifit\actifit_newpost\actifitbot\actifitbot\node_
-			modules\dsteem\lib\helpers\database.js:147:31)
-				at Generator.next (<anonymous>)
-				at fulfilled (C:\Mohammad\my own\steemit\actifit\actifit_newpost\actifitbot\actifitbot\node_modules\dsteem
-			\lib\helpers\database.js:38:58)
-				at process._tickCallback (internal/process/next_tick.js:68:7)
-			(node:38336) UnhandledPromiseRejectionWarning: Unhandled promise rejection. This error originated either by th
-			rowing inside of an async function without a catch block, or by rejecting a promise which was not handled with
-			 .catch(). (rejection id: 7)
-			*/
 			
 			let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 			//let cur_bchain = 'STEEM';
@@ -814,6 +948,175 @@
 		console.log(cur_bchain);
 		return properNode;
 	  },
+	  async prepareCheckout(){
+		this.buyAttempt = true;
+		this.errorProceed = '';
+		if (!this.user){
+		  this.errorProceed = this.$t('need_login_signup_notice_vote');
+		  return;
+		}
+		//make sure requirements are met
+		if (!this.allReqtsFilled){
+		  this.errorProceed = this.$t('cannot_buy_reqts_not_filled');
+		  return;
+		}
+		//verify and display checkout details
+		if (this.product.count < 1){
+		  this.errorProceed = this.$t('cannot_buy_none_available');
+		  return;
+		}
+		if (this.userTokens < this.item_price){
+			this.errorProceed = this.$t('Not_enough_balance_to_buy') + this.$t('Buy_afit_here') ;
+			//console.log(this.errorProceed );
+			return;
+		}
+		if (this.user.account.balance.split(" ")[0] < this.item_price_extra ){
+			this.errorProceed = this.$t('Not_enough_hive_balance_to_buy') ;
+			this.buyInProgress = false;
+			//console.log(this.errorProceed );
+			return;
+		}
+		this.checkout_product = true;
+	  },
+	  async proceedBuyReal(){
+		this.buyAttempt = true;
+		this.errorProceed = '';
+		this.buyInProgress = true;
+		if (!this.user){
+			this.errorProceed = this.$t('need_login_signup_notice_vote');
+			this.buyInProgress = false;
+			return;
+		}
+		if (this.product.count < 1){
+		  this.errorProceed = this.$t('cannot_buy_none_available');
+		  this.buyInProgress = false;
+		  return;
+		}
+		//make sure requirements are met
+		if (!this.allReqtsFilled){
+		  this.errorProceed = this.$t('cannot_buy_reqts_not_filled');
+		  this.buyInProgress = false;
+		  return;
+		}
+		
+		
+		if (this.userTokens < this.item_price){
+			this.errorProceed = this.$t('Not_enough_balance_to_buy') + this.$t('Buy_afit_here') ;
+			this.buyInProgress = false;
+			//console.log(this.errorProceed );
+			return;
+		}
+		
+		if (this.user.account.balance.split(" ")[0] < this.item_price_extra ){
+			this.errorProceed = this.$t('Not_enough_hive_balance_to_buy') ;
+			this.buyInProgress = false;
+			//console.log(this.errorProceed );
+			return;
+		}
+		
+		//check all required fields
+		
+		if (this.$refs['buyer_name'].value == '' ||
+			this.$refs['buyer_phone'].value == '' ||
+			this.$refs['buyer_address'].value == '' ||
+			this.buyer_country == '' ||
+			this.$refs['buyer_state'].value == '' ||
+			this.$refs['buyer_city'].value == '' ||
+			this.$refs['buyer_zip'].value == ''){
+			
+			this.errorProceed = this.$t('all_fields_required');
+			this.buyInProgress = false;
+			//console.log(this.errorProceed );
+			return;
+		}
+		let transfer_trx = '';
+		//if this includes a HIVE payment as well, process it
+		if (this.item_price_extra > 0){
+			//check if active key was provided 
+			if (this.userRlActvKey == ''){
+			  this.errorProceed = this.$t('all_fields_required');
+			  this.buyInProgress = false;
+			  return;
+			}
+			/*let attempt = 1;
+			let payAmount = parseFloat(1000).toFixed(3);//this.item_price_extra
+			let memo = 'buy-real:'+this.product._id;
+			console.log('send HIVE');
+			let res = await hive.broadcast.transferAsync(this.userRlActvKey, this.user.account.name, process.env.actifitEscrow, payAmount + ' ' + 'HIVE', memo).then(;
+			
+			console.log(res);
+			//res.block_num
+			//res.id - trx id
+			return;*/
+			
+		}
+		
+		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+		
+		let accToken = localStorage.getItem('access_token');
+		
+		//let url = new URL(process.env.actiAppUrl + 'purchaseRealProduct/?user='+this.user.account.name+'&bchain='+cur_bchain);
+		let url = new URL('http://localhost:3120/' + 'purchaseRealProduct/?user='+this.user.account.name+'&bchain='+cur_bchain);
+		
+		let params = {
+			'product_id': this.product._id,
+			'buyer_name': this.$refs['buyer_name'].value,
+			'buyer_phone': this.$refs['buyer_phone'].value,
+			'buyer_address': this.$refs['buyer_address'].value,
+			'buyer_address2': this.$refs['buyer_address2'].value,
+			'buyer_country': this.buyer_country,
+			'buyer_state': this.$refs['buyer_state'].value,
+			'buyer_city': this.$refs['buyer_city'].value,
+			'buyer_zip': this.$refs['buyer_zip'].value,
+			'afit_amount': this.item_price,
+			'hive_amount': this.item_price_extra,
+			'active_key': this.userRlActvKey,
+			'order_quantity': this.order_quantity,
+		}
+			
+		let reqHeads = new Headers({
+		  'Content-Type': 'application/json',
+		  'x-acti-token': 'Bearer ' + accToken,
+		});
+		
+		let resSer = await fetch(url, {
+			method: 'POST',
+			headers: reqHeads,
+			body: JSON.stringify(params)
+		});
+		let outcome = await resSer.json();
+		console.log(outcome);
+		if (outcome.error){
+			console.log(outcome.error);
+			
+			//if this is authority error, means needs to be logged out
+			//example "missing required posting authority:Missing Posting Authority"
+			let err_msg = outcome.error;
+			
+			
+			this.$notify({
+			  group: 'error',
+			  text: err_msg,
+			  position: 'top center'
+			})
+			this.errorProceed = err_msg;
+			this.buyInProgress = false;
+			return {success: false, trx: null};
+			//this.$router.push('/login');
+		}else{
+			this.$store.dispatch('fetchUserTokens')
+			this.$notify({
+			  group: 'success',
+			  text: this.$t('product_bought').replace('_PRODUCT_', this.product.name),
+			  position: 'top center'
+			})
+			//this.$store.dispatch('fetchProducts')
+			this.errorProceed = this.$t('product_bought').replace('_PRODUCT_', this.product.name);
+			this.buyInProgress = false;
+			return {success: true, trx: outcome.trx};
+		}
+
+	  },
 	  async buyNow() {
 		this.buyAttempt = true;
 		this.buyInProgress = true;
@@ -832,6 +1135,11 @@
 			  return;
 			}
 			
+			if (this.product.count < 1){
+			  this.errorProceed = this.$t('cannot_buy_none_available');
+			  return;
+			}
+		}else if (this.product.type == 'real'){
 			if (this.product.count < 1){
 			  this.errorProceed = this.$t('cannot_buy_none_available');
 			  return;
@@ -1166,6 +1474,10 @@
 	  width: 20px;
 	  height: 20px;
 	}
+	.token-logo-md{
+	  width: 40px;
+	  height: 40px;
+	}
 	div.basic-info{
 	  border-bottom: 2px solid #dc3545!important;
 	}
@@ -1196,5 +1508,11 @@
 		background: #28a700;
 	}
 	.card-section{
+	}
+	.lb-item{
+		height: 75px !important;
+	}
+	.lbox-container{
+		height: 100px !important;
 	}
 </style>

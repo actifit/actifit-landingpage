@@ -97,6 +97,13 @@ export default {
 		}).catch(e => reject(e))
     })
   },
+  fetchUserBoughtRealProducts ({ state, commit }){
+	return new Promise((resolve, reject) => {
+		fetch(process.env.actiAppUrl+'realProductsBought/' + state.steemconnect.user.account.name.toLowerCase()).then(res => {
+			res.json().then(json => commit('setRealProducts', json || [])).catch(e => reject(e))
+		}).catch(e => reject(e))
+    })
+  },
   fetchTokenInfo ({ commit }) {
     commit('setUserCount', 0) // reset to trigger animation again
     commit('setTokensDistributed', 0) // reset to trigger animation again

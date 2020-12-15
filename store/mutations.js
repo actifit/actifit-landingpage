@@ -48,6 +48,9 @@ export default {
   setProducts (state, products) {
 	state.products = products
   },
+  setRealProducts (state, realProds) {
+	state.realProducts = realProds
+  },
   setGadgetStats (state, gadgetStats) {
 	state.gadgetStats = gadgetStats
   },

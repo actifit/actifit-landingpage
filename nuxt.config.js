@@ -23,15 +23,16 @@ module.exports = {
 	altHiveNodes: ["https://api.hive.blog/", "https://anyx.io", "https://api.openhive.network", "https://api.hivekings.com", "https://hived.privex.io", "https://api.deathwing.me", "rpc.ausbit.dev", "hive-api.arcange.eu", "hive.roelandp.nl"],
 	actiAppUrl: process.env.ACTI_API_URL || 'http://localhost:3120/',
 	actiAppBackUrl: process.env.ACTI_API_BACK_URL || 'http://localhost:3120/',
-	steemEngineRpc: 'https://api.steem-engine.com/rpc',
+	steemEngineRpc: 'https://steemapi.cryptoempirebot.com/rpc',
 	hiveEngineRpc: 'https://api.hive-engine.com/rpc',
-	steemEngineScot: 'https://scot-api.steem-engine.com/',
+	steemEngineScot: 'https://scot-api.cryptoempirebot.com/',
 	hiveEngineScotParam: '?hive=1',
 	minSignupUSDCost: 2,
 	minAfitBuyEarnTicket: 1000,
 	shortModeratorSignature: '<br/>![rulersig2.jpg](https://cdn.steemitimages.com/DQmXrZz658YfMQBXNTA12rmbzqWXASfaGcNSqatJJ2ba7NR/rulersig2.jpg)<sub>@Actifit Moderator</sub>',
 	standardModeratorSignature: '<br/>![rulersig2.jpg](https://cdn.steemitimages.com/DQmXrZz658YfMQBXNTA12rmbzqWXASfaGcNSqatJJ2ba7NR/rulersig2.jpg)<sub>@Actifit Moderator <br/>Vote for [Actifit as a Witness](https://hivesigner.com/sign/account-witness-vote?witness=actifit&approve=true) <br/>Delegate to Actifit [10SP](https://hivesigner.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=10%20SP)| [20SP](https://hivesigner.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=20%20SP)| [50SP](https://hivesigner.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=50%20SP)| [100SP](https://hivesigner.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=100%20SP)| [250SP](https://hivesigner.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=250%20SP)| [500SP](https://hivesigner.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=500%20SP)| [1000SP](https://hivesigner.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=1000%20SP)| [5000SP](https://hivesigner.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=5000%20SP)| [10000SP](https://hivesigner.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=10000%20SP)| [20000SP](https://hivesigner.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=20000%20SP)| [Custom Amount](https://steembottracker.com/delegation.html?delegatee=actifit) <br/>Chat with us on [discord](https://discord.gg/aHtcA6r) | Visit our [website](https://actifit.io/) <br/>[Download on playstore](https://bit.ly/actifit-app) | [Download on app store](https://bit.ly/actifit-ios)[FAQs](https://actifit.io/@katerinaramm/actifit-app-or-rewarding-fitness-activity-with-tokens-and-steemit-upvotes-faqs) | [Text Tutorial](https://actifit.io/@katerinaramm/tutorial-for-actifit-app-update-november-2018-version-v0-5-0) | [Video Tutorial](https://youtu.be/tqkaDoonyvI)</sub>',
 	actifitMarketBuy: 'actifit.market',
+	actifitEscrow: 'actifit.escrow',
 	hiveAppsScript: {
 	  "hiveblog": {
 		"name": "Hive blog",
@@ -266,6 +267,7 @@ module.exports = {
     { src: '~plugins/vue-carousel', ssr: false },
     { src: '~plugins/vue-notification', ssr: false },
     { src: '~plugins/vue-simplemde', ssr: false },
+	{ src: '~plugins/v-lightbox', mode: 'client' },
   ],
 
   /*

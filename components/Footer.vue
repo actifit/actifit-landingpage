@@ -121,6 +121,6 @@
 		padding: .1rem 1.1rem !important;
 	}
 	.btn{
-		border-radius: 3px;
+		border-radius: 5px;
 	}
 </style>

@@ -66,6 +66,7 @@
 			<option value="ingame">{{$t('Game')}}</option>
             <option value="service">{{$t('Consultation')}}</option>
 			<option value="ebook">{{$t('Ebook')}}</option>
+			<option value="real">{{$t('Real Products')}}</option>
         </select>
 	  </div>
 	  	  
@@ -85,7 +86,7 @@
       <!-- show listing of products -->
       <div class="row" v-if="prodList.length">
         <Product v-for="product in prodList" 
-			:product="product" :key="product._id" :pros="professionals" :userrank="userRank" :gadgetStats="gadgetStats"
+			:product="product" :key="product._id" :pros="professionals" :userrank="userRank" :afitCount="userTokens" :gadgetStats="gadgetStats" :realProducts="realProducts"
 			v-if="!product.specialevent && (!currentFilter || product.type == currentFilter)"
 			@update-prod="updateProd" :afitPrice="afitPrice" @refresh-tickets="refreshTickets"/>
       </div>
@@ -161,7 +162,7 @@
     },
     computed: {
 	  ...mapGetters('steemconnect', ['user']),
-      ...mapGetters(['userTokens', 'products', 'professionals', 'userRank', 'gadgetStats']),
+      ...mapGetters(['userTokens', 'products', 'professionals', 'userRank', 'gadgetStats', 'realProducts']),
     },
 	watch: {
 	  user: 'fetchUserData',
@@ -190,6 +191,7 @@
 		  this.$store.dispatch('fetchUserRank')
 		  this.$store.dispatch('fetchReferrals')
 		  this.$store.dispatch('fetchUserGadgetStats')
+		  this.$store.dispatch('fetchUserBoughtRealProducts')
 		  this.fetchUserBuyTicketEntries();
 		}
 	  },
@@ -299,7 +301,7 @@
 	  
 	  this.fetchGadgetPrizeCycle();
 	  
-	  this.prepareData();
+	  await this.prepareData();
 	  
 			  
 	  //hive.config.set('rebranded_api', true)
@@ -314,6 +316,9 @@
 	  
       // fetch products
       this.$store.dispatch('fetchProducts')
+	  
+	  // fetch user bought real products
+	  //this.$store.dispatch('fetchUserBoughtRealProducts');
 	  
 	  // fetch professionals
       this.$store.dispatch('fetchPros')

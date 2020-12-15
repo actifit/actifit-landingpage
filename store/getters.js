@@ -50,6 +50,9 @@ export default {
   products (state) {
 	return state.products  
   },
+  realProducts (state) {
+	return state.realProducts  
+  },
   gadgetStats (state) {
 	return state.gadgetStats
   },

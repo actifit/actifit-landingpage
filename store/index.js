@@ -25,6 +25,7 @@ const createStore = () => {
 	  ambassadors: [], //list of current ambassadors
 	  professionals: [], //list of professional approved trainers/nutritionists/...
 	  products: [], //list of products
+	  realProducts: [], //list of real products bought by user
 	  gadgetStats: [], //aggregate stats of user's bought gadgets
       activeReport: null, // report shown in the modal
       editReport: null, // report shown in the edit modal
