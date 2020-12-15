@@ -150,7 +150,7 @@
 				</div>
 		   </div>
 		   
-			<div v-if="product.type == 'real' && !checkout_product && realProdBuyStatus" class="card-body pb-md-2 text-left">
+			<div v-if="user && product.type == 'real' && !checkout_product && realProdBuyStatus" class="card-body pb-md-2 text-left">
 				<b>{{ $t('order_quantity')}} </b>
 				<select v-model="order_quantity" class="col-6 form-control sel-adj">
 					<option value="1" selected>1</option>
@@ -518,7 +518,7 @@
 				return true;
 			}
 		}else if (reqt.item.toLowerCase() == 'AFIT'.toLowerCase()){
-			if (parseFloat(this.afitCount) >= parseFloat(reqt.count)){
+			if (parseFloat(this.userTokens) >= parseFloat(reqt.count)){
 				return true;
 			}
 		}else{
@@ -1110,9 +1110,14 @@
 			  text: this.$t('product_bought').replace('_PRODUCT_', this.product.name),
 			  position: 'top center'
 			})
-			//this.$store.dispatch('fetchProducts')
+			
 			this.errorProceed = this.$t('product_bought').replace('_PRODUCT_', this.product.name);
 			this.buyInProgress = false;
+			this.buyAttempt = false;
+			this.checkout_product = false;
+			
+			this.$store.dispatch('fetchUserBoughtRealProducts');
+			
 			return {success: true, trx: outcome.trx};
 		}
 
