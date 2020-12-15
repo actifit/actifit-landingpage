@@ -427,6 +427,20 @@
             <a rel="nofollow noopener" href="https://actifit.io/@adventureready" target="_blank">Adventure Ready</a>
           </div>
 		  
+		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
+            <a rel="nofollow noopener" href="https://marketsquare.io/" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(./img/partners/Logo_MSQ.png);'"></div>
+            </a>
+            <a rel="nofollow noopener" href="https://marketsquare.io/" target="_blank">MarketSquare</a>
+          </div>
+		  
+		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
+            <a rel="nofollow noopener" href="https://ark.io/" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(./img/partners/Logo_ARK.io.png);'"></div>
+            </a>
+            <a rel="nofollow noopener" href="https://ark.io/" target="_blank">Ark</a>
+          </div>
+		  
 		</div>
 	  </div>
       
