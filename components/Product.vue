@@ -1,6 +1,6 @@
 <template>
   <!-- single card item for approved product -->	
-        <div class="card form mx-auto p-3 mt-3 mt-md-5 text-center card-border pro-card col-sm-4">
+        <div class="card form mx-auto p-3 mt-3 mt-md-5 text-center card-border pro-card col-sm-4" v-if="this.product.type != 'real' || (this.product.type == 'real' && user && (user.account.name=='mcfarhat' || user.account.name=='alfamano' || user.account.name=='rabihfarhat'))">
 		  <div class="text-center card-header">
 		    <div class="row basic-info">
 			  <h3 class="pro-name col-md-12">{{ this.product.name}}<span v-if="!product.specialevent && this.product.level">{{$t('level_short')}}{{this.product.level}}</span>
@@ -155,6 +155,13 @@
 				<select v-model="order_quantity" class="col-6 form-control sel-adj">
 					<option value="1" selected>1</option>
 					<option v-if="product.allowedQuantity && quant < product.allowedQuantity" v-for="quant in product.allowedQuantity" :value="quant+1">{{quant+1}}</option>
+				</select>
+			</div>
+			
+			<div v-if="user && product.type == 'real' && !checkout_product && realProdBuyStatus && product.colorOptions" class="card-body pb-md-2 text-left">
+				<b>{{ $t('color_choice')}} </b>
+				<select v-model="color_choice" class="col-6 form-control sel-adj">
+					<option v-if="Array.isArray(product.colorOptions) && product.colorOptions.length > 0" v-for="colr in product.colorOptions" :value="colr">{{colr}}</option>
 				</select>
 			</div>
 		   
@@ -431,6 +438,7 @@
 			checkout_product: false,
 			buyer_country: '',
 			order_quantity: 1,
+			color_choice: (this.product.colorOptions?this.product.colorOptions[0]:''),
 			/*media: [
 					  { // For image
 						thumb: 'http://localhost:3000/img/gadgets/real/Home-Resistance-Bands.png',
@@ -1072,6 +1080,7 @@
 			'hive_amount': this.item_price_extra,
 			'active_key': this.userRlActvKey,
 			'order_quantity': this.order_quantity,
+			'color_choice': this.color_choice,
 		}
 			
 		let reqHeads = new Headers({

@@ -730,4 +730,5 @@ module.exports = {
   with_status: '- Status:',
   product_images: 'Product Images',
   order_quantity: 'Order Quantity',
+  color_choice: 'Color',
 }
