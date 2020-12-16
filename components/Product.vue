@@ -393,10 +393,10 @@
 		*/
 		if (this.user && this.product.type == 'real' && Array.isArray(this.realProducts) && this.realProducts.length > 0){
 			console.log('realProducts');
-			console.log(this.realProducts);
+			//console.log(this.realProducts);
 			this.pendingOrders = this.realProducts.filter( entry => (entry.gadget === this.product._id && entry.status != 'delivered' && entry.status != 'cancelled' && entry.status != 'refunded' ));
 			console.log('pending orders');
-			console.log(this.pendingOrders );
+			//console.log(this.pendingOrders );
 			//if we have a pending order user cannot buy more
 			if (Array.isArray(this.pendingOrders) && this.pendingOrders.length > 0){
 				return false;
@@ -612,7 +612,7 @@
 				this.item_currency = entry.currency;
 				if (this.item_currency == 'USD'){
 					console.log('>>>USD Product');
-					console.log(entry.percent_afit);
+					//console.log(entry.percent_afit);
 					//keep track of original price
 					this.orig_item_currency = this.item_currency;
 					this.orig_item_price = this.item_price;
@@ -626,10 +626,10 @@
 						this.item_price = this.orig_item_price * entry.percent_afit / 100 / this.afitPrice.afitHiveLastUsdPrice;
 						this.item_price = Number(this.item_price.toFixed(2));
 						let calcHiveUsdPrice = this.afitPrice.afitHiveLastUsdPrice / this.afitPrice.afitHiveLastPrice;
-						console.log('HIVE price:'+calcHiveUsdPrice);
+						//console.log('HIVE price:'+calcHiveUsdPrice);
 						this.item_price_extra = this.orig_item_price * entry.percent_hive / 100 / calcHiveUsdPrice ;
 						this.item_price_extra = Number(this.item_price_extra.toFixed(2));
-						console.log('HIVE extra cost:'+this.item_price_extra);
+						//console.log('HIVE extra cost:'+this.item_price_extra);
 						this.item_extra_currency = 'HIVE';
 					//}
 				}
@@ -707,7 +707,7 @@
 			   [op_name, cstm_params]
 			];
 			//console.log('broadcasting');
-			console.log(operation);
+			//console.log(operation);
 			
 			//console.log(this.$steemconnect.accessToken);
 			//console.log(this.$store.state.accessToken);
@@ -777,7 +777,7 @@
 	  },
 	  async proceedBuyNowHive (){
 		try{
-			console.log(this.product.name);
+			//console.log(this.product.name);
 			this.buyAttempt = true;
 			this.buyInProgress = true;
 			this.errorProceed = '';
@@ -1095,7 +1095,7 @@
 			body: JSON.stringify(params)
 		});
 		let outcome = await resSer.json();
-		console.log(outcome);
+		//console.log(outcome);
 		if (outcome.error){
 			console.log(outcome.error);
 			
