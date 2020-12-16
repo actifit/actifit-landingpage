@@ -7,7 +7,8 @@
 			  </h3>
 			  
 			  <div v-if="this.product.type == 'ingame' || this.product.type == 'real'" class="col-md-6" :title="!product.specialevent?this.product.name + ' - Level ' + this.product.level:this.product.name">
-				<div :class="'avatar-'+this.product.level" class="avatar pro-card-av mx-auto" :style="'background-image: url(img/gadgets/' + this.product.image + ');'"></div>
+				<div v-if="this.product.image.startsWith('http')" :class="'avatar-'+this.product.level" class="avatar pro-card-av mx-auto" :style="'background-image: url(' + this.product.image + ');'"></div>
+				<div v-else :class="'avatar-'+this.product.level" class="avatar pro-card-av mx-auto" :style="'background-image: url(img/gadgets/' + this.product.image + ');'"></div>
 				<span v-for="iterl in this.product.level" :key="iterl">
 					<i class="fas fa-star text-brand"></i>
 				</span>
