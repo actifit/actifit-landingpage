@@ -26,7 +26,7 @@
 					<a v-if="this.product.type == 'service'" :href="'/consultants/?prof=' + this.product.provider_name" >{{ this.product.provider_name}}</a>
 					<a v-else :href="'/' + this.product.provider" >{{ this.product.provider_name}}</a>
 					<span v-if="this.product.type=='real'">
-						<span v-if="this.item_price_extra>0"><img class="token-logo-md " src="/img/hive.png">+</span>
+						<span v-if="this.item_price_extra>0"><img class="token-logo-md " src="/img/HIVE.png">+</span>
 						<span><img class="token-logo-md " src="/img/actifit_logo.png"></span>
 					</span>
 				  </h3>
@@ -145,7 +145,7 @@
 						<b>{{ $t('product_images') }}</b>
 						<br />
 					</div>
-					<div class="col-6">
+					<div class="col-9">
 						<lightbox css="h-200 h-lg-250 w-200" :cells="2" :items="product.prodImages"></lightbox>
 					</div>
 				</div>
@@ -169,7 +169,7 @@
 		  <div class="card-footer pb-md-2 text-center">
               <div v-if="product.type == 'real'">
 				<a v-if="!checkout_product && realProdBuyStatus" class="btn btn-success btn-lg book-button" @click.prevent="prepareCheckout()" :class="productBuyColor" style="float:left; border: 1px white solid;">{{ $t('Buy_now') }} <br/>
-				<span v-if="this.item_price_extra > 0">{{numberFormat(this.item_price_extra, 2)}} {{this.item_extra_currency}}<img class="token-logo-sm " src="/img/hive.png">+</span>
+				<span v-if="this.item_price_extra > 0">{{numberFormat(this.item_price_extra, 2)}} {{this.item_extra_currency}}<img class="token-logo-sm " src="/img/HIVE.png">+</span>
 				{{numberFormat(this.item_price, 2)}} {{this.item_currency}}<img class="token-logo-sm " src="/img/actifit_logo.png">
 				</a>
 				<span v-else-if="!checkout_product" >
