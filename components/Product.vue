@@ -173,10 +173,10 @@
 				{{numberFormat(this.item_price, 2)}} {{this.item_currency}}<img class="token-logo-sm " src="/img/actifit_logo.png">
 				</a>
 				<span v-else-if="!checkout_product" >
-				<span >{{$t('pending_real_order_notification') }}</span>
-				<div v-for="(entry, index) in pendingOrders" :key="index" :entry="entry">
-					<span class="text-brand">{{$t('item_bought')}} {{showDate(entry.date_bought)}} {{$t('with_status')}} {{ entry.status}}</span>
-				</div>
+					<span style='color:green'>{{$t('pending_real_order_notification') }}</span>
+					<div v-for="(entry, index) in pendingOrders" :key="index" :entry="entry">
+						<span style='color:green'><i class="fas fa-check text-success"></i>{{$t('item_bought')}} {{showDate(entry.date_bought)}} {{$t('with_status')}} {{ entry.status}}</span>
+					</div>
 				</span>
 			  </div>
 			  <div v-else-if="product.type == 'ingame'">
