@@ -1446,6 +1446,15 @@
 		this.getPrice();
 		this.updateProPic();
 		
+		//fix sorting of countries and color options
+		if (Array.isArray(this.product.colorOptions) && this.product.colorOptions.length > 0){
+			this.product.colorOptions.sort();
+		}
+		
+		if (Array.isArray(this.product.countries) && this.product.countries.length > 0){
+			this.product.countries.sort();
+		}
+		
 		//hive.config.set('rebranded_api', true)
 		//hive.broadcast.updateOperations()
 		hive.config.set('alternative_api_endpoints', process.env.altHiveNodes);
