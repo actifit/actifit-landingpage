@@ -440,18 +440,6 @@
 			buyer_country: '',
 			order_quantity: 1,
 			color_choice: (this.product.colorOptions?this.product.colorOptions[0]:''),
-			/*media: [
-					  { // For image
-						thumb: 'http://localhost:3000/img/gadgets/real/Home-Resistance-Bands.png',
-						src: 'http://localhost:3000/img/gadgets/real/Home-Resistance-Bands.png',
-						//caption: 'caption to display. receive <html> <b>tag</b>', // Optional
-						//srcset: '...' // Optional for displaying responsive images
-					  },
-					],*/
-			images: [
-					'http://localhost:3000/img/gadgets/real/Home-Resistance-Bands.png',
-					'http://localhost:3000/img/gadgets/real/Home-Resistance-Bands.png'
-			]
 		}
 	},
 	watch: {
@@ -1064,8 +1052,8 @@
 		
 		let accToken = localStorage.getItem('access_token');
 		
-		//let url = new URL(process.env.actiAppUrl + 'purchaseRealProduct/?user='+this.user.account.name+'&bchain='+cur_bchain);
-		let url = new URL('http://localhost:3120/' + 'purchaseRealProduct/?user='+this.user.account.name+'&bchain='+cur_bchain);
+		let url = new URL(process.env.actiAppUrl + 'purchaseRealProduct/?user='+this.user.account.name+'&bchain='+cur_bchain);
+		//let url = new URL('http://localhost:3120/' + 'purchaseRealProduct/?user='+this.user.account.name+'&bchain='+cur_bchain);
 		
 		let params = {
 			'product_id': this.product._id,
