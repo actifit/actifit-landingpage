@@ -71,22 +71,22 @@
 	  </div>
 	  	  
 	  <!-- show listing of special event products -->
-	  <!--
-	  <h5 class="text-center mb-5 market-sub">{{ $t('special_christmas_event') }}</h5>
+	  
+	  <h5 class="text-center pt-3 market-sub text-brand">{{ $t('special_christmas_event') }}</h5>
 	  
 	  <div class="row" v-if="prodList.length">
         <Product v-for="product in prodList" 
-			:product="product" :key="product._id" :pros="professionals" :userrank="userRank" :gadgetStats="gadgetStats"
+			:product="product" :key="product._id" :pros="professionals" :userrank="userRank" :gadgetStats="gadgetStats"  :realProducts="realProducts"
 			v-if="product.specialevent"
-			@update-prod="updateProd"/>
+			@update-prod="updateProd" :afitPrice="afitPrice" @refresh-tickets="refreshTickets"/>
       </div>
 	  <br/>
-	  -->
+	  
 	  
       <!-- show listing of products -->
       <div class="row" v-if="prodList.length">
         <Product v-for="product in prodList" 
-			:product="product" :key="product._id" :pros="professionals" :userrank="userRank" :afitCount="userTokens" :gadgetStats="gadgetStats" :realProducts="realProducts"
+			:product="product" :key="product._id" :pros="professionals" :userrank="userRank" :gadgetStats="gadgetStats" :realProducts="realProducts"
 			v-if="!product.specialevent && (!currentFilter || product.type == currentFilter)"
 			@update-prod="updateProd" :afitPrice="afitPrice" @refresh-tickets="refreshTickets"/>
       </div>

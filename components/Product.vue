@@ -334,7 +334,7 @@
   //import Lightbox from '@morioh/v-lightbox'
 
   export default {
-    props: ['product', 'pros', 'userrank', 'afitCount', 'gadgetStats', 'afitPrice', 'realProducts'],
+    props: ['product', 'pros', 'userrank', 'gadgetStats', 'afitPrice', 'realProducts'],
 	components: {
 		BuyOptionsModal,
 		CartModal,
@@ -592,7 +592,7 @@
 		return null;
 	  },
 	  getPrice() {
-		if (this.product){
+		if (this.product && this.afitPrice){
 			let price_options = this.product.price;
 			let price_options_count = price_options.length;
 			for (let i=0; i < price_options_count; i++){
