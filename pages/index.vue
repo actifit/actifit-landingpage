@@ -441,6 +441,12 @@
             <a rel="nofollow noopener" href="https://ark.io/" target="_blank">Ark</a>
           </div>
 		  
+		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
+            <a rel="nofollow noopener" href="https://appics.com/" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(./img/partners/Appics-Signet-black.png);'"></div>
+            </a>
+            <a rel="nofollow noopener" href="https://appics.com/" target="_blank">Appics</a>
+          </div>
 		</div>
 	  </div>
       

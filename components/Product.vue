@@ -448,6 +448,7 @@
 	  user: 'allReqtsMet',
 	  userrank: 'allReqtsMet',
 	  order_quantity: 'getPrice',
+	  afitPrice: 'getPrice',
 	},
 	methods: {
 	  /**
