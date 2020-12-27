@@ -19,7 +19,7 @@ module.exports = {
 	hiveImgUrl: 'https://images.hive.blog',
 	steemApiNode: 'https://api.steemit.com/',
 	hiveApiNode: 'https://api.hive.blog/',//'https://anyx.io',
-	hiveStateApiNode: 'https://anyx.io',
+	hiveStateApiNode: 'https://api.hive.blog/',
 	altHiveNodes: ["https://api.hive.blog/", "https://anyx.io", "https://api.openhive.network", "https://api.hivekings.com", "https://hived.privex.io", "https://api.deathwing.me", "rpc.ausbit.dev", "hive-api.arcange.eu", "hive.roelandp.nl"],
 	actiAppUrl: process.env.ACTI_API_URL || 'http://localhost:3120/',
 	actiAppBackUrl: process.env.ACTI_API_BACK_URL || 'http://localhost:3120/',
