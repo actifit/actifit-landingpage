@@ -48,7 +48,6 @@
 
 <script>
   import NavbarBrand from '~/components/NavbarBrand'
-  import Transaction from '~/components/Transaction'
   import Footer from '~/components/Footer'
   import steem from 'steem'
   import VueRecaptcha from 'vue-recaptcha';
@@ -71,7 +70,6 @@
 	},
     components: {
       NavbarBrand,
-      Transaction, // single transaction block
       Footer,
 	  //VueReCaptchaV3
 	  VueRecaptcha,

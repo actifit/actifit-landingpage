@@ -72,7 +72,7 @@
 	  	  
 	  <!-- show listing of special event products -->
 	  
-	  <h5 class="text-center pt-3 market-sub text-brand">{{ $t('special_christmas_event') }}</h5>
+	  <!--<h5 class="text-center pt-3 market-sub text-brand">{{ $t('special_christmas_event') }}</h5>
 	  
 	  <div class="row" v-if="prodList.length">
         <Product v-for="product in prodList" 
@@ -80,7 +80,7 @@
 			v-if="product.specialevent"
 			@update-prod="updateProd" :afitPrice="afitPrice" @refresh-tickets="refreshTickets"/>
       </div>
-	  <br/>
+	  <br/>-->
 	  
 	  
       <!-- show listing of products -->
@@ -111,16 +111,13 @@
 <script>
   import NavbarBrand from '~/components/NavbarBrand'
   import Product from '~/components/Product'
-  import Professional from '~/components/Professional'
   import Footer from '~/components/Footer'
-  
-  import Lodash from 'lodash'
 
   import { mapGetters } from 'vuex'
   
   import hive from '@hiveio/hive-js'
   
-  
+  import Lodash from 'lodash'
   
   import Countdown from 'vuejs-countdown'
   
@@ -139,9 +136,7 @@
 	components: {
       NavbarBrand,
       Product,
-	  Professional,
       Footer,
-	  Lodash,
 	  Countdown,
 	  NotifyModal
     },

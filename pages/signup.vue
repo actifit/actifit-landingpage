@@ -1,7 +1,6 @@
 <template>
   <div>
-	<!--<script src="https://www.google.com/recaptcha/api.js?onload=vueRecaptchaApiLoaded&render=explicit" async defer>-->
-</script> 
+	<!--<script src="https://www.google.com/recaptcha/api.js?onload=vueRecaptchaApiLoaded&render=explicit" async defer></script> -->
     <NavbarBrand />
 	
 	<section class="intro bg-light" id="content">
@@ -116,7 +115,6 @@
 
 <script>
   import NavbarBrand from '~/components/NavbarBrand'
-  import Transaction from '~/components/Transaction'
   import Footer from '~/components/Footer'
   import steem from 'steem'
   
@@ -138,7 +136,6 @@
 	},
     components: {
       NavbarBrand,
-      Transaction, // single transaction block
       Footer,
 	  VueRecaptcha,
     },

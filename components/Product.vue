@@ -30,8 +30,6 @@
 						<span><img class="token-logo-md " src="/img/actifit_logo.png"></span>
 					</span>
 				  </h3>
-				  <h3 v-else-if="">
-				  </h3>
 				  <!--<div class="pb-md-2 text-left" >
 					<b>{{ $t('price')}}: </b>{{numberFormat(this.item_price, 2)}} {{this.item_currency}}<img class="token-logo" src="/img/actifit_logo.png">
 				  </div>-->
@@ -155,14 +153,14 @@
 				<b>{{ $t('order_quantity')}} </b>
 				<select v-model="order_quantity" class="col-6 form-control sel-adj">
 					<option value="1" selected>1</option>
-					<option v-if="product.allowedQuantity && quant < product.allowedQuantity" v-for="quant in product.allowedQuantity" :value="quant+1">{{quant+1}}</option>
+					<option v-if="product.allowedQuantity && quant < product.allowedQuantity" v-for="quant in product.allowedQuantity" :value="quant+1" :key="quant+1">{{quant+1}}</option>
 				</select>
 			</div>
 			
 			<div v-if="user && product.type == 'real' && !checkout_product && realProdBuyStatus && product.colorOptions" class="card-body pb-md-2 text-left">
 				<b>{{ $t('color_choice')}} </b>
 				<select v-model="color_choice" class="col-6 form-control sel-adj">
-					<option v-if="Array.isArray(product.colorOptions) && product.colorOptions.length > 0" v-for="colr in product.colorOptions" :value="colr">{{colr}}</option>
+					<option v-if="Array.isArray(product.colorOptions) && product.colorOptions.length > 0" v-for="colr in product.colorOptions" :value="colr" :key="colr">{{colr}}</option>
 				</select>
 			</div>
 		   
@@ -284,7 +282,7 @@
 			<input type="text" name="buyer_address2" id="buyer_address2" ref="buyer_address2" :placeholder="$t('buyer_address2')" class="form-control p-2" >
 			<select v-model="buyer_country" class="form-control sel-adj">
 				<option value="" disabled selected>{{ $t('buyer_country') }}</option>
-				<option v-for="country_inst in this.product.countries" :value="country_inst">{{country_inst}}</option>
+				<option v-for="country_inst in this.product.countries" :value="country_inst" :key="country_inst">{{country_inst}}</option>
 			</select>
 			<input type="text" name="buyer_state" id="buyer_state" ref="buyer_state" class="form-control p-2" :placeholder="$t('buyer_state')">
 			<input type="text" name="buyer_city" id="buyer_city" ref="buyer_city" class="form-control p-2" :placeholder="$t('buyer_city')">
@@ -391,16 +389,9 @@
 		cancelled
 		refunded
 		*/
-		if (this.user && this.product.type == 'real' && Array.isArray(this.realProducts) && this.realProducts.length > 0){
-			console.log('realProducts');
-			//console.log(this.realProducts);
-			this.pendingOrders = this.realProducts.filter( entry => (entry.gadget === this.product._id && entry.status != 'delivered' && entry.status != 'cancelled' && entry.status != 'refunded' ));
-			console.log('pending orders');
-			//console.log(this.pendingOrders );
-			//if we have a pending order user cannot buy more
-			if (Array.isArray(this.pendingOrders) && this.pendingOrders.length > 0){
-				return false;
-			}
+		//if we have a pending order user cannot buy more
+		if (Array.isArray(this.pendingOrders) && this.pendingOrders.length > 0){
+			return false;
 		}
 		return true;
 	  }
@@ -449,6 +440,7 @@
 	  userrank: 'allReqtsMet',
 	  order_quantity: 'getPrice',
 	  afitPrice: 'getPrice',
+	  realProducts:'updateProdStat',
 	},
 	methods: {
 	  /**
@@ -461,6 +453,16 @@
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
+	  updateProdStat(){
+		if (this.user && this.product.type == 'real' && Array.isArray(this.realProducts) && this.realProducts.length > 0){
+			console.log('realProducts');
+			//console.log(this.realProducts);
+			this.pendingOrders = this.realProducts.filter( entry => (entry.gadget === this.product._id && entry.status != 'delivered' && entry.status != 'cancelled' && entry.status != 'refunded' ));
+			console.log('pending orders');
+			//console.log(this.pendingOrders );
+			
+		}
+	  },
 	  showDate(dt) {
         let date = new Date(dt)
         //let minutes = date.getMinutes()

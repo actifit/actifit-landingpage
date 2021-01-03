@@ -127,7 +127,6 @@
 
 <script>
   import NavbarBrand from '~/components/NavbarBrand'
-  import Referral from '~/components/Referral'
   import Footer from '~/components/Footer'
 
   import { mapGetters } from 'vuex'
@@ -140,7 +139,6 @@
 	},
     components: {
       NavbarBrand,
-      Referral, // single referral block
       Footer,
     },
 	data (){

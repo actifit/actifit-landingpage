@@ -811,7 +811,6 @@
 
 <script>
   import NavbarBrand from '~/components/NavbarBrand'
-  import UserMenu from '~/components/UserMenu'
   import Transaction from '~/components/Transaction'
   import Footer from '~/components/Footer'
   import steem from 'steem'
@@ -974,7 +973,6 @@
 	},
     components: {
       NavbarBrand,
-      UserMenu,
       Transaction, // single transaction block
       Footer,
 	  ExchangeQueue,
