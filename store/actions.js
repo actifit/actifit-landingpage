@@ -97,12 +97,25 @@ export default {
 		}).catch(e => reject(e))
     })
   },
-  fetchUserBoughtRealProducts ({ state, commit }){
-	return new Promise((resolve, reject) => {
-		fetch(process.env.actiAppUrl+'realProductsBought/' + state.steemconnect.user.account.name.toLowerCase()).then(res => {
-			res.json().then(json => commit('setRealProducts', json || [])).catch(e => reject(e))
-		}).catch(e => reject(e))
-    })
+  async fetchUserBoughtRealProducts ({ state, commit }, accToken){
+	//return new Promise((resolve, reject) => {
+		
+		let url = new URL(process.env.actiAppUrl + 'realProductsBought/?user=' + state.steemconnect.user.account.name.toLowerCase()+'&buyer='+ state.steemconnect.user.account.name.toLowerCase());
+			
+		let reqHeads = new Headers({
+		  'Content-Type': 'application/json',
+		  'x-acti-token': 'Bearer ' + accToken,
+		});
+		let res = await fetch(url, {
+			method: 'GET',
+			headers: reqHeads,
+		});
+		
+		let outcome = await res.json();
+		commit('setRealProducts', outcome || []);
+		
+		//}).catch(e => reject(e))
+    //})
   },
   fetchTokenInfo ({ commit }) {
     commit('setUserCount', 0) // reset to trigger animation again

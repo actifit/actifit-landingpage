@@ -731,4 +731,6 @@ module.exports = {
   product_images: 'Product Images',
   order_quantity: 'Order Quantity',
   color_choice: 'Color',
+  real_prod_name: 'Physical Product',
+  real_prod_notice: 'We will notify you as the product order gets set with seller, and on future progress via actifit notifications.<br/> Please note that shipping time will be dependant on the seller and your target country. <br/> Actifit is NOT the producer of those products, and they are handled by 3rd parties.<br/>'
 }

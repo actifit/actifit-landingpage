@@ -1,6 +1,6 @@
 <template>
   <!-- single card item for approved product -->	
-        <div class="card form mx-auto p-3 mt-3 mt-md-5 text-center card-border pro-card col-sm-4" v-if="this.product.type != 'real' || (this.product.type == 'real' && user && (user.account.name=='mcfarhat' || user.account.name=='alfamano' || user.account.name=='rabihfarhat'))">
+        <div class="card form mx-auto p-3 mt-3 mt-md-5 text-center pro-card col-sm-4" :class="productTypeBorder" v-if="this.product.type != 'real' || (this.product.type == 'real' && user && (user.account.name=='mcfarhat' || user.account.name=='alfamano' || user.account.name=='rabihfarhat'))">
 		  <div class="text-center card-header">
 		    <div class="row basic-info">
 			  <h3 class="pro-name col-md-12">{{ this.product.name}}<span v-if="!product.specialevent && this.product.level">{{$t('level_short')}}{{this.product.level}}</span>
@@ -22,7 +22,7 @@
 				  <div v-if="this.product.type == 'ingame'" class="avatar gaming-label mx-auto" :style="'background-image: url(img/gadgets/gaming.png);'"></div>
 				  <h4 v-else-if="this.product.type == 'ebook'"><i class="fas fa-book"></i></h4>
 				  <h4 v-else-if="this.product.type == 'service'"><i class='fas fa-phone-volume'></i></h4>
-				  <h3 class="product-type">{{ this.product.type}} <span v-if="this.product.type != 'ingame' && this.product.type != 'real'">{{ $t('By') }}</span> <br/> 
+				  <h3 class="product-type">{{ renderProdType}} <span v-if="this.product.type != 'ingame' && this.product.type != 'real'">{{ $t('By') }}</span> <br/> 
 					<a v-if="this.product.type == 'service'" :href="'/consultants/?prof=' + this.product.provider_name" >{{ this.product.provider_name}}</a>
 					<a v-else :href="'/' + this.product.provider" >{{ this.product.provider_name}}</a>
 					<span v-if="this.product.type=='real'">
@@ -287,6 +287,7 @@
 			<input type="text" name="buyer_state" id="buyer_state" ref="buyer_state" class="form-control p-2" :placeholder="$t('buyer_state')">
 			<input type="text" name="buyer_city" id="buyer_city" ref="buyer_city" class="form-control p-2" :placeholder="$t('buyer_city')">
 			<input type="text" name="buyer_zip" id="buyer_zip" ref="buyer_zip" class="form-control p-2" :placeholder="$t('buyer_zip')">
+			<div v-html="$t('real_prod_notice')" style='color:green'></div>
 			<button v-on:click="checkout_product=false" class="btn btn-brand btn-lg border pt-2">{{ $t('Cancel') }}</button>
 			<button v-on:click="proceedBuyReal()" class="btn btn-brand btn-lg border pt-2">{{ $t('Proceed') }}</button>
 			<div v-if="buyInProgress && errorProceed==''">
@@ -344,6 +345,18 @@
 	  ...mapGetters('steemconnect', ['stdLogin']),
 	  ...mapGetters(['userTokens']),
 	  ...mapGetters(['cartEntries']),
+	  renderProdType(){
+		if (this.product.type=='real'){
+			return this.$t('real_prod_name');
+		}
+		return this.product.type;
+	  },
+	  productTypeBorder (){
+		if (this.product.type == 'ingame'){
+			return 'card-border-real';
+		}
+		return 'card-border';
+	  },
 	  productBuyColor () {
 		if (!this.allReqtsFilled){ 
 			return 'bg-secondary';
@@ -1116,8 +1129,8 @@
 			this.buyInProgress = false;
 			this.buyAttempt = false;
 			this.checkout_product = false;
-			
-			this.$store.dispatch('fetchUserBoughtRealProducts');
+			let accToken = localStorage.getItem('access_token')
+			this.$store.dispatch('fetchUserBoughtRealProducts', accToken);
 			
 			return {success: true, trx: outcome.trx};
 		}
@@ -1458,6 +1471,10 @@
 <style>
 	.card-border{
 	  border: 2px solid #dc3545!important;
+	  border-radius: 10px;
+	}
+	.card-border-real{
+	  border: 2px solid #28a745!important;
 	  border-radius: 10px;
 	}
 	.pro-img-cls{

@@ -92,6 +92,58 @@
 			</div>
 		</div>
 		
+		<div class="col-md-12 row-sep m-2">
+			<div class="text-center row action-title">MARKET ORDERS</div>
+				<table class="table table-hover">
+				<thead class="text-brand">
+				<tr>
+				  <th scope="col">User</th>
+				  <th scope="col">Gadget ID</th>
+				  <th scope="col">Gadget Name</th>
+				  <th scope="col">quantity</th>
+				  <th scope="col">Color</th>
+				  <th scope="col">Status</th>
+				  <th scope="col">afit_paid</th>
+				  <th scope="col">hive_paid</th>
+				  <!--<th scope="col">buyer_name</th>
+				  <th scope="col">buyer_phone</th>
+				  <th scope="col">buyer_address</th>
+				  <th scope="col">buyer_address2</th>
+				  <th scope="col">buyer_country</th>
+				  <th scope="col">buyer_state</th>
+				  <th scope="col">buyer_city</th>
+				  <th scope="col">buyer_zip</th>
+				  <th scope="col">date_bought</th>
+				  <th scope="col">last_updated</th>
+				  <th scope="col">note</th>-->
+				</tr>
+			  </thead>
+			  <tbody>
+				<tr v-for="(entry, index) in purchaseOrders" v-bind:key="index">
+					<td>@{{entry.user}}</td>
+					<td>{{entry.gadget}}</td>
+					<td>{{entry.gadget_name}}</td>
+					<td>{{entry.quantity}}</td>
+					<td>{{entry.color}}</td>
+					<td>{{entry.status}}</td>
+					<td>{{entry.afit_paid}}</td>
+					<td>{{entry.hive_paid}}</td>
+					<!--<td>{{entry.buyer_name}}</td>
+					<td>{{entry.buyer_phone}}</td>
+					<td>{{entry.buyer_address}}</td>
+					<td>{{entry.buyer_address2}}</td>
+					<td>{{entry.buyer_country}}</td>
+					<td>{{entry.buyer_state}}</td>
+					<td>{{entry.buyer_city}}</td>
+					<td>{{entry.buyer_zip}}</td>
+					<td>{{entry.date_bought}}</td>
+					<td>{{entry.last_updated}}</td>
+					<td>{{entry.note}}</td>-->
+				</tr>
+				</tbody>
+			</table>
+		</div>
+		
 		<!--<div class="col-md-12 row-sep m-2">
 			<div class="text-center row action-title">VERIFY FUNDS PASSWORD</div>
 			<div :action='this.actiapimod' method="get" class="p-2">
@@ -153,6 +205,7 @@
 		topComments: -1,
 		topCommentor: '',
 		week: 1,
+		purchaseOrders: [],
 	  }
 	},
     computed: {
@@ -200,6 +253,21 @@
 				this.moderatorStats.push(entry);
 			}
 		}*/
+		
+		//grab market orders
+		let accToken = localStorage.getItem('access_token')
+		//this.$store.dispatch('fetchUserBoughtRealProducts', accToken)
+		let url = new URL(process.env.actiAppUrl + 'realProductsBought/?user=' + this.user.account.name.toLowerCase());
+			
+		let reqHeads = new Headers({
+		  'Content-Type': 'application/json',
+		  'x-acti-token': 'Bearer ' + accToken,
+		});
+		let res_t = await fetch(url, {
+			method: 'GET',
+			headers: reqHeads,
+		});
+		this.purchaseOrders = await res_t.json();
     },
 	created () {
 	  this.$store.dispatch('steemconnect/login')

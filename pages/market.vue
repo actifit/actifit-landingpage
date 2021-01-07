@@ -186,7 +186,8 @@
 		  this.$store.dispatch('fetchUserRank')
 		  this.$store.dispatch('fetchReferrals')
 		  this.$store.dispatch('fetchUserGadgetStats')
-		  this.$store.dispatch('fetchUserBoughtRealProducts')
+		  let accToken = localStorage.getItem('access_token')
+		  this.$store.dispatch('fetchUserBoughtRealProducts', accToken)
 		  this.fetchUserBuyTicketEntries();
 		}
 	  },
