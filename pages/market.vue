@@ -66,7 +66,7 @@
 			<option value="ingame">{{$t('Game')}}</option>
             <option value="service">{{$t('Consultation')}}</option>
 			<option value="ebook">{{$t('Ebook')}}</option>
-			<option value="real">{{$t('Real Products')}}</option>
+			<option value="real">{{$t('Physical Products')}}</option>
         </select>
 	  </div>
 	  	  
