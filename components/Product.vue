@@ -1,6 +1,6 @@
 <template>
   <!-- single card item for approved product -->	
-        <div class="card form mx-auto p-3 mt-3 mt-md-5 text-center pro-card col-sm-4" :class="productTypeBorder" v-if="this.product.type != 'real' || (this.product.type == 'real' && user && (user.account.name=='mcfarhat' || user.account.name=='alfamano' || user.account.name=='rabihfarhat'))">
+        <div class="card form mx-auto p-3 mt-3 mt-md-5 text-center pro-card col-sm-4" :class="productTypeBorder" v-if="this.product.type != 'real' || (this.product.type == 'real' && user && (user.account.name=='mcfarhat' || user.account.name=='alfamano' || user.account.name=='rabihfarhat' || user.account.name=='pjansen' || user.account.name=='priyanarc' || user.account.name=='katerinaramm' || user.account.name=='alokkumar121' || user.account.name=='deepu7' || user.account.name=='kpreddy' || user.account.name=='silvertop' || user.account.name=='elizabethbit'))">
 		  <div class="text-center card-header">
 		    <div class="row basic-info">
 			  <h3 class="pro-name col-md-12">{{ this.product.name}}<span v-if="!product.specialevent && this.product.level">{{$t('level_short')}}{{this.product.level}}</span>
