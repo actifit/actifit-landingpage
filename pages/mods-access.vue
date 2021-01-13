@@ -92,7 +92,59 @@
 			</div>
 		</div>
 		
-		<div class="col-md-12 row-sep m-2">
+		<div class="col-md-12 row-sep m-2" v-if="isAdmin">
+			<div class="text-center row action-title">MARKET ORDERS</div>
+				<table class="table table-hover">
+				<thead class="text-brand">
+				<tr>
+				  <th scope="col">User</th>
+				  <th scope="col">Gadget ID</th>
+				  <th scope="col">Gadget Name</th>
+				  <th scope="col">Quantity</th>
+				  <th scope="col">Color</th>
+				  <th scope="col">Status</th>
+				  <th scope="col">AFIT Paid</th>
+				  <th scope="col">HIVE Paid</th>
+				  <th scope="col">Date Purchase</th>
+				  <th scope="col">buyer_name</th>
+				  <th scope="col">buyer_phone</th>
+				  <th scope="col">buyer_address</th>
+				  <th scope="col">buyer_address2</th>
+				  <th scope="col">buyer_country</th>
+				  <th scope="col">buyer_state</th>
+				  <th scope="col">buyer_city</th>
+				  <th scope="col">buyer_zip</th>
+				  <th scope="col">last_updated</th>
+				  <th scope="col">note</th>
+				</tr>
+			  </thead>
+			  <tbody>
+				<tr v-for="(entry, index) in purchaseOrders" v-bind:key="index">
+					<td>@{{entry.user}}</td>
+					<td>{{entry.gadget}}</td>
+					<td>{{entry.gadget_name}}</td>
+					<td>{{entry.quantity}}</td>
+					<td>{{entry.color}}</td>
+					<td>{{entry.status}}</td>
+					<td>{{entry.afit_paid}}</td>
+					<td>{{entry.hive_paid}}</td>
+					<td>{{entry.date_bought}}</td>
+					<td>{{entry.buyer_name}}</td>
+					<td>{{entry.buyer_phone}}</td>
+					<td>{{entry.buyer_address}}</td>
+					<td>{{entry.buyer_address2}}</td>
+					<td>{{entry.buyer_country}}</td>
+					<td>{{entry.buyer_state}}</td>
+					<td>{{entry.buyer_city}}</td>
+					<td>{{entry.buyer_zip}}</td>
+					<td>{{entry.last_updated}}</td>
+					<td>{{entry.note}}</td>
+				</tr>
+				</tbody>
+			</table>
+		</div>
+		
+		<div class="col-md-12 row-sep m-2" v-else>
 			<div class="text-center row action-title">MARKET ORDERS</div>
 				<table class="table table-hover">
 				<thead class="text-brand">
@@ -206,6 +258,7 @@
 		topCommentor: '',
 		week: 1,
 		purchaseOrders: [],
+		isAdmin: false,
 	  }
 	},
     computed: {
@@ -308,6 +361,15 @@
 		  this.$store.dispatch('fetchReferrals')
 		  this.$store.dispatch('fetchUserRank')
 		  let baseUrl = window.location.origin;
+		  //is this admin user
+		  if (this.user.account.name == 'mcfarhat' ||
+				this.user.account.name == 'rabihfarhat' ||
+				this.user.account.name == 'alfamano' ||
+				this.user.account.name == 'pjansen'){
+			this.isAdmin = true;
+		  }else{
+			this.isAdmin = false;
+		  }
 		}
 	  },
 	  async processAction (targetAction){
