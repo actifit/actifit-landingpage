@@ -100,11 +100,12 @@
 				  <th scope="col">User</th>
 				  <th scope="col">Gadget ID</th>
 				  <th scope="col">Gadget Name</th>
-				  <th scope="col">quantity</th>
+				  <th scope="col">Quantity</th>
 				  <th scope="col">Color</th>
 				  <th scope="col">Status</th>
-				  <th scope="col">afit_paid</th>
-				  <th scope="col">hive_paid</th>
+				  <th scope="col">AFIT Paid</th>
+				  <th scope="col">HIVE Paid</th>
+				  <th scope="col">Date Purchase</th>
 				  <!--<th scope="col">buyer_name</th>
 				  <th scope="col">buyer_phone</th>
 				  <th scope="col">buyer_address</th>
@@ -113,7 +114,6 @@
 				  <th scope="col">buyer_state</th>
 				  <th scope="col">buyer_city</th>
 				  <th scope="col">buyer_zip</th>
-				  <th scope="col">date_bought</th>
 				  <th scope="col">last_updated</th>
 				  <th scope="col">note</th>-->
 				</tr>
@@ -128,6 +128,7 @@
 					<td>{{entry.status}}</td>
 					<td>{{entry.afit_paid}}</td>
 					<td>{{entry.hive_paid}}</td>
+					<td>{{entry.date_bought}}</td>
 					<!--<td>{{entry.buyer_name}}</td>
 					<td>{{entry.buyer_phone}}</td>
 					<td>{{entry.buyer_address}}</td>
@@ -136,7 +137,6 @@
 					<td>{{entry.buyer_state}}</td>
 					<td>{{entry.buyer_city}}</td>
 					<td>{{entry.buyer_zip}}</td>
-					<td>{{entry.date_bought}}</td>
 					<td>{{entry.last_updated}}</td>
 					<td>{{entry.note}}</td>-->
 				</tr>

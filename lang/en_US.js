@@ -360,7 +360,7 @@ module.exports = {
   price: 'Price',
   Buy_now: 'Buy Now',
   Not_enough_balance_to_buy: 'You do not have enough AFIT to buy this item.',
-  Not_enough_hive_balance_to_buy: 'You do not have enough HIVE to buy this item.',
+  Not_enough_hive_balance_to_buy: 'You do not have enough HIVE to peform the transaction.',
   Buy_afit_here: '<br/><a class="btn btn-brand" href="/wallet/?action=buy_afit">Buy AFIT</a>',
   purchase_confirm_part1: 'You are about to purchase ',
   purchase_confirm_part2: 'This will cost you ',
@@ -732,5 +732,12 @@ module.exports = {
   order_quantity: 'Order Quantity',
   color_choice: 'Color',
   real_prod_name: 'Physical Product',
-  real_prod_notice: 'We will notify you as the product order gets set with seller, and on future progress via actifit notifications.<br/> Please note that shipping time will be dependant on the seller and your target country. <br/> Actifit is NOT the producer of those products, and they are handled by 3rd parties.<br/>'
+  real_prod_notice: 'We will notify you as the product order gets set with seller, and on future progress via actifit notifications.<br/> Please note that shipping time will be dependant on the seller and your target country. <br/> Actifit is NOT the producer of those products, and they are handled by 3rd parties.<br/>',
+  Buy_afit_now: 'Buy AFIT Now',
+  buy_afit_title:'Buy AFIT',
+  AFIT_Amount: 'AFIT Amount',
+  HIVE_Amount: 'HIVE Amount',
+  confirm_buy_afit_hive: 'Are you sure you want to purchase _AFIT_ AFIT using _HIVE_ HIVE? Please note final amount depends on market value on exact transaction time according to AFIT/HIVE price on hive-engine.com.',
+  afit_buy_notice: 'AFIT tokens rates are according to AFIT/HIVE market rate on hive-engine.com',
+  afit_bought: '_AFIT_ AFIT Bought Successfully!'
 }

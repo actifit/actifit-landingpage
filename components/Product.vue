@@ -1,6 +1,6 @@
 <template>
   <!-- single card item for approved product -->	
-        <div class="card form mx-auto p-3 mt-3 mt-md-5 text-center pro-card col-sm-4" :class="productTypeBorder" v-if="this.product.type != 'real' || (this.product.type == 'real' && user && (user.account.name=='mcfarhat' || user.account.name=='alfamano' || user.account.name=='rabihfarhat' || user.account.name=='pjansen' || user.account.name=='priyanarc' || user.account.name=='katerinaramm' || user.account.name=='alokkumar121' || user.account.name=='deepu7' || user.account.name=='kpreddy' || user.account.name=='silvertop' || user.account.name=='elizabethbit'))">
+        <div class="card form mx-auto p-3 mt-3 mt-md-5 text-center pro-card col-sm-4" :class="productTypeBorder">
 		  <div class="text-center card-header">
 		    <div class="row basic-info">
 			  <h3 class="pro-name col-md-12">{{ this.product.name}}<span v-if="!product.specialevent && this.product.level">{{$t('level_short')}}{{this.product.level}}</span>
@@ -48,15 +48,54 @@
 					<b>{{ $t('Requirements') }}</b>
 					<div v-if="product.requirements == null || product.requirements.length == 0 || product.requirements.length == 1 && product.requirements[0].item == null"><span>{{ $t('none') }}</span></div>
 					<div v-else v-for="(reqt, index) in product.requirements" :key="index" class="text-left">
-						<span v-if="user" class="pr-1">
-							<i class="fas fa-check text-success" :title="$t('reqt_met')" v-if="reqt.met" ></i>
-							<i class="fas fa-times-circle text-dark" :title="$t('reqt_not_met')" v-else></i>
-							<!--<i class="fas fa-times text-brand" :title="$t('reqt_not_met')" v-else></i>-->
-						</span>
-						<span class="" v-if="reqt.item && reqt.item.toLowerCase() == 'User Rank'.toLowerCase()" :title="$t('user_rank_reqt').replace('_VAL_', reqt.level)">{{reqt.item}} &gt; {{reqt.level}}</span>
-						<span class="" v-else-if="reqt.item && reqt.item.toLowerCase() == 'AFIT'.toLowerCase()" :title="$t('afit_reqt').replace('_VAL_', reqt.level)">{{$t('user_afit_balace')}} &gt;= {{reqt.count}} {{reqt.item}} </span>
-						<span v-else :title="$t('consumed_reqt').replace('_AMOUNT_', reqt.count).replace('_ITEM_', reqt.item).replace('_LEVEL_', reqt.level)">{{$t('At_Least')}} {{reqt.count}} '{{reqt.item}} {{$t('level_short')}} {{reqt.level}}' {{$t('consumed')}}</span>
+						<div>
+							<span v-if="user" class="pr-1">
+								<i class="fas fa-check text-success" :title="$t('reqt_met')" v-if="reqt.met" ></i>
+								<i class="fas fa-times-circle text-dark" :title="$t('reqt_not_met')" v-else></i>
+								<!--<i class="fas fa-times text-brand" :title="$t('reqt_not_met')" v-else></i>-->
+							</span>
+							<span v-if="reqt.item && reqt.item.toLowerCase() == 'User Rank'.toLowerCase()" :title="$t('user_rank_reqt').replace('_VAL_', reqt.level)">{{reqt.item}} &gt; {{reqt.level}}</span>
+							<span v-else-if="reqt.item && reqt.item.toLowerCase() == 'AFIT'.toLowerCase()" :title="$t('afit_reqt').replace('_VAL_', reqt.count)">{{$t('user_afit_balace')}} &gt;= {{reqt.count}} {{reqt.item}} 
+							
+							</span>
+							<span v-else :title="$t('consumed_reqt').replace('_AMOUNT_', reqt.count).replace('_ITEM_', reqt.item).replace('_LEVEL_', reqt.level)">{{$t('At_Least')}} {{reqt.count}} '{{reqt.item}} {{$t('level_short')}} {{reqt.level}}' {{$t('consumed')}}</span>
+						</div>
+						<div v-if="user && reqt.item && reqt.item.toLowerCase() == 'AFIT'.toLowerCase()" >
+							<div v-if="!proceedBuyAFIT" class="text-right p-2">
+								<button v-on:click="proceedBuyAFIT=true" class="btn btn-brand btn-lg border">{{ $t('Buy_afit_now') }}</button>
+							</div>
+							<div v-else class="bg-light text-brand text-center w-100 p-2 rounded-top"><h4>{{ $t('buy_afit_title') }}</h4><small>{{ $t('afit_buy_notice') }}</small></div>
+						</div>
+						<div v-if="proceedBuyAFIT" class="bg-light text-brand rounded-bottom p-1">
+							<div class="row" >
+							  <div class="w-25 m-1 text-right" :value="reqt.count">{{ $t('AFIT_Amount') }}</div>
+							  <input type="number" id="afit-amount-buy" name="afit-amount-buy" ref="afit-amount-buy" class="form-control-lg w-50 m-1" v-model="afitBuyAmount"><img src="/img/actifit_logo.png" class="mr-1 token-logo-md"> 
+							</div>
+							<div class="row" >
+							  <div class="w-25 m-1 text-right">{{ $t('HIVE_Amount') }}</div>
+							  <input type="number" id="hive-amount-pay" name="hive-amount-pay" ref="hive-amount-pay" class="form-control-lg w-50 m-1" readonly="readonly" :value="getMatchingHIVE()">
+							  <img src="/img/HIVE.png" class="mr-2 token-logo-md">
+							</div>
+							<div class="row" >
+								<div class="w-25 m-1 text-right">{{ $t('Active_Key') }}</div>
+								<input type="password" id="active-key" name="active-key" ref="active-key" class="form-control-lg w-50 m-1" v-model="userActvKeyHv">
+							</div>
+							<div class="text-center">
+							  <button v-on:click="buyAFITNow" class="btn btn-brand btn-lg p-2 border">{{ $t('Proceed') }}</button>
+							  <button v-on:click="proceedBuyAFIT=false" class="btn btn-brand btn-lg p-2 border">{{ $t('Cancel') }}</button>
+							</div>
+							<div class="row">
+							  <div class="w-25"></div>
+							  <div v-if="buyAfitInProgress" class="w-50 text-brand">
+								<i class="fas fa-spin fa-spinner"></i>{{ $t('confirming_buy_transaction') }}
+							  </div>
+							  <div v-else-if="afit_buy_err_msg" class="w-75 text-brand">
+								{{ afit_buy_err_msg }}
+							  </div>
+							</div>
+						</div>
 					</div>
+					
 				  </div>
 			   </div>
 			</div>  
@@ -438,12 +477,20 @@
 			profImgUrl: process.env.steemImgUrl,
 			minAfitBuyTicket: process.env.minAfitBuyEarnTicket,
 			userActvKey: '',
+			userActvKeyHv: '',
+			afitBuyAmount: 1,
 			userRlActvKey: '',
 			prodRef: this,
 			checkout_product: false,
 			buyer_country: '',
 			order_quantity: 1,
 			color_choice: (this.product.colorOptions?this.product.colorOptions[0]:''),
+			proceedBuyAFIT: false,
+			afit_buy_err_msg: '',
+			transConfirmed: false,
+			checkingBought: false,
+			buyAfitInProgress: false,
+			buyAfitConfirmed: false,
 		}
 	},
 	watch: {
@@ -466,6 +513,53 @@
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
+	  async buyAFITNow(){
+		this.afit_buy_err_msg = '';
+		
+		if (!this.user){
+			this.afit_buy_err_msg = this.$t('need_login_signup_notice_vote');
+			return;
+		}
+		if (this.afitBuyAmount < 0){
+			this.afit_buy_err_msg = this.$t('amount_positive_int');
+			return;
+		}
+		if (this.getMatchingHIVE() < 0){
+			this.afit_buy_err_msg = this.$t('amount_positive_int');
+			return;
+		}
+		if (this.userActvKeyHv == ''){
+			this.afit_buy_err_msg = this.$t('all_fields_required');
+			return;
+		}
+		if (this.user.account.balance.split(" ")[0] < this.getMatchingHIVE() ){
+			this.afit_buy_err_msg = this.$t('Not_enough_hive_balance_to_buy') ;
+			//console.log(this.errorProceed );
+			return;
+		}
+		
+		this.buyAfitInProgress = true;
+		let hiveAmnt = this.getMatchingHIVE();
+		let afitAmnt = this.afitBuyAmount;
+		
+		//show user confirm for purchasing product/service
+		let user_prmpt =  this.$t('confirm_buy_afit_hive').replace('_AFIT_', afitAmnt).replace('_HIVE_',hiveAmnt);
+		
+		let decis = confirm(user_prmpt);
+		if (!decis){
+			this.buyAfitInProgress = false;
+			return;
+		}
+		//proceed with purchase transaction
+		let attempt = 1;
+		let memo = 'buy-afit:'+afitAmnt;
+		let res = await hive.broadcast.transferAsync(this.userActvKeyHv, this.user.account.name, process.env.actifitVault, hiveAmnt + ' ' + 'HIVE', memo).then(
+			res => this.confirmCompletion('buyAFITHive', hiveAmnt, res, attempt, afitAmnt)).catch(err=> this.errorCompletion(err, 'buyAFITHive'));
+		
+	  },
+	  getMatchingHIVE(){
+		return parseFloat(this.afitBuyAmount * this.afitPrice.afitHiveLastPrice).toFixed(3);
+	  },
 	  updateProdStat(){
 		if (this.user && this.product.type == 'real' && Array.isArray(this.realProducts) && this.realProducts.length > 0){
 			console.log('realProducts');
@@ -824,14 +918,24 @@
 			console.log(excp);
 		}
 	  },
-	  async errorCompletion(res){
+	  async errorCompletion(res, type){
 		//console.log(res);
 		let err_details = res;//JSON.parse();
 		this.errorProceed = err_details.cause.message;
 		//this.buyAttempt = false;
 		this.buyInProgress = false;
+		
+		if (type=='buyAFITHive'){
+			this.buyAfitInProgress = false;
+			this.$notify({
+			  group: 'error',
+			  text: this.$t('error_performing_operation'),
+			  position: 'top center'
+			})
+			//this.proceedBuyAFIT = false;
+		}
 	  },
-	  async confirmCompletion (type, amount, res, attempt){
+	  async confirmCompletion (type, amount, res, attempt, afitAmnt){
 		if (res.block_num){
 			//console.log (res);
 			
@@ -853,6 +957,17 @@
 							+ res.block_num + '/'
 							+ res.id + '/'
 							+ cur_bchain);
+							
+			if (type=='buyAFITHive'){
+				url = new URL(process.env.actiAppUrl + 'buyAfitHive/'
+							+ this.user.account.name + '/'
+							+ amount + '/'
+							+ afitAmnt + '/'
+							+ res.block_num + '/'
+							+ res.id + '/'
+							+ 'HIVE');//for now only support HIVE
+				//:user/:amnt/:afitAmnt/:blockNo/:trxID/:bchain
+			}
 			//}
 			//console.log(url);
 			//connect with our service to process buy order
@@ -863,39 +978,57 @@
 					if (attempt == 1){
 						//try again with another API node
 						console.log('>>>>try again');
-						this.confirmCompletion(type, amount, res, attempt + 1);
+						this.confirmCompletion(type, amount, res, attempt + 1, afitAmnt);
 					}else{
 						this.errorProceed = outcome;
 						console.error(outcome);
+						this.buyAfitInProgress = false;
+						this.$notify({
+						  group: 'error',
+						  text: this.$t('error_performing_operation'),
+						  position: 'top center'
+						})
 					}
 				}else{
-					//update user token count
-					
-					//update product status
-					this.checkProductBought();
-					
-					this.$store.dispatch('fetchProducts')
-					
-					if (this.product.type == 'service'){
-						//display proper success message
-						this.errorProceed = this.$t('purchase_success_service_part1') + this.product.name + ' ' 
-											+ this.$t('With') + ' ' + this.product.provider_name + '.\n'
-											+ this.$t('purchase_success_service_part2') + '.\n'
-					}else if (this.product.type == 'ebook'){
-						//display proper success message
-						this.errorProceed = this.$t('purchase_success_ebook_part1') + ' ' + this.product.name + ' '
-											+ this.$t('By') + ' ' + this.product.provider_name + '.<br/>';
-						this.firstDownloadHref = process.env.actiAppUrl 
-											+ 'downEbook/'
-											+ '?user=' + this.user.account.name
-											+ '&product_id=' + this.product._id
-											+ '&access_token=' + outcome.access_token;
-					}else if (this.product.type == 'ingame'){
-						//display proper success message
-						this.errorProceed = this.$t('purchase_success_ingame_part1') + ' ' + this.product.name + ' '
-											+ this.$t('Level') + ' ' + this.product.level + '. ' + this.$t('purchase_success_ingame_part2') + '.<br/>';
-											
-						this.$emit('refresh-tickets');
+					console.log('result IN');
+					console.log(outcome);
+					if (type=='buyAFITHive'){
+						//update user token count
+						this.$store.dispatch('fetchUserTokens')
+						this.$notify({
+						  group: 'success',
+						  text: this.$t('afit_bought').replace('_AFIT_', outcome.boughtAmnt),
+						  position: 'top center'
+						})
+						this.buyAfitInProgress = false;
+						this.proceedBuyAFIT = false;
+					}else{
+						//update product status
+						this.checkProductBought();
+						
+						this.$store.dispatch('fetchProducts')
+						
+						if (this.product.type == 'service'){
+							//display proper success message
+							this.errorProceed = this.$t('purchase_success_service_part1') + this.product.name + ' ' 
+												+ this.$t('With') + ' ' + this.product.provider_name + '.\n'
+												+ this.$t('purchase_success_service_part2') + '.\n'
+						}else if (this.product.type == 'ebook'){
+							//display proper success message
+							this.errorProceed = this.$t('purchase_success_ebook_part1') + ' ' + this.product.name + ' '
+												+ this.$t('By') + ' ' + this.product.provider_name + '.<br/>';
+							this.firstDownloadHref = process.env.actiAppUrl 
+												+ 'downEbook/'
+												+ '?user=' + this.user.account.name
+												+ '&product_id=' + this.product._id
+												+ '&access_token=' + outcome.access_token;
+						}else if (this.product.type == 'ingame'){
+							//display proper success message
+							this.errorProceed = this.$t('purchase_success_ingame_part1') + ' ' + this.product.name + ' '
+												+ this.$t('Level') + ' ' + this.product.level + '. ' + this.$t('purchase_success_ingame_part2') + '.<br/>';
+												
+							this.$emit('refresh-tickets');
+						}
 					}
 				}
 				//this.checkingFunds = false;
