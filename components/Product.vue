@@ -591,7 +591,6 @@
 	  //handles checking all requirements for the product
 	  async allReqtsMet (){
 		//console.log('>>>>>>>allReqtsMet');
-		return true;
 		if (Array.isArray(this.product.requirements) && this.product.requirements.length > 0){
 			for (let i=0; i<this.product.requirements.length;i++){
 				if (this.product.requirements[i].item){
