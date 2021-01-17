@@ -60,12 +60,12 @@
 							</span>
 							<span v-else :title="$t('consumed_reqt').replace('_AMOUNT_', reqt.count).replace('_ITEM_', reqt.item).replace('_LEVEL_', reqt.level)">{{$t('At_Least')}} {{reqt.count}} '{{reqt.item}} {{$t('level_short')}} {{reqt.level}}' {{$t('consumed')}}</span>
 						</div>
-						<div v-if="user && reqt.item && reqt.item.toLowerCase() == 'AFIT'.toLowerCase()" >
+						<!--<div v-if="user && reqt.item && reqt.item.toLowerCase() == 'AFIT'.toLowerCase()" >
 							<div v-if="!proceedBuyAFIT" class="text-right p-2">
 								<button v-on:click="proceedBuyAFIT=true" class="btn btn-brand btn-lg border">{{ $t('Buy_afit_now') }}</button>
 							</div>
 							<div v-else class="bg-light text-brand text-center w-100 p-2 rounded-top"><h4>{{ $t('buy_afit_title') }}</h4><small>{{ $t('afit_buy_notice') }}</small></div>
-						</div>
+						</div>-->
 						<div v-if="proceedBuyAFIT" class="bg-light text-brand rounded-bottom p-1">
 							<div class="row" >
 							  <div class="w-25 m-1 text-right" :value="reqt.count">{{ $t('AFIT_Amount') }}</div>
