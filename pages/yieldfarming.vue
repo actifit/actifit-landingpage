@@ -90,11 +90,11 @@
 			<!-- amount delegated -->
 			<span class="col-3 p-1">
 				<img :src="'/img/'+trx.chain+'.png'" style="max-height: 20px;">
-				<span v-if="trx.chain == 'HIVE' && topDelegators.hive && topDelegators.hive.length" class="p-1">{{ getDelegatedAmount(trx, 'hive') }} {{ $t('Hive_Power') }} 
-					<span v-if="randomAfitTrxHive == ''">{{setHiveTrx(trx, getDelegatedAmount(trx, 'hive'))}}</span>
+				<span v-if="trx.chain == 'HIVE' && topDelegators.hive && topDelegators.hive.length" class="p-1">{{ getDelegatedAmount(trx, 'hive', true) }} {{ $t('Hive_Power') }} 
+					<span v-if="randomAfitTrxHive == ''">{{setHiveTrx(trx, getDelegatedAmount(trx, 'hive', false))}}</span>
 				</span>
-				<span v-else-if="trx.chain == 'STEEM' && topDelegators.steem && topDelegators.steem.length" class="p-1">{{ getDelegatedAmount(trx, 'steem') }} {{ $t('Steem_Power') }} 
-					<span v-if="randomAfitTrxSteem == ''">{{setSteemTrx(trx, getDelegatedAmount(trx, 'steem'))}}</span>
+				<span v-else-if="trx.chain == 'STEEM' && topDelegators.steem && topDelegators.steem.length" class="p-1">{{ getDelegatedAmount(trx, 'steem', true) }} {{ $t('Steem_Power') }} 
+					<span v-if="randomAfitTrxSteem == ''">{{setSteemTrx(trx, getDelegatedAmount(trx, 'steem', false))}}</span>
 				</span>
 			</span>
 			<span class="col-3 p-1"><img class="token-logo-sm " src="/img/actifit_logo.png"> {{ getRewardedAmount(trx) }} {{ $t('AFIT_Token') }}  {{ $t('per_day') }}</span>
@@ -179,10 +179,16 @@
 	  setDelegationTransactions (trx){
 		this.delegationTransactions = trx;
 	  },
-	  getDelegatedAmount(trx, chain){
+	  getDelegatedAmount(trx, chain, fmt){
 		let match = this.topDelegators[chain].find(entry => (entry._id === trx.user));
+		//console.log(trx.user+' delegated amount');
 		if (match){
-			return this.numberFormat(match.steem_power, 0);
+			//console.log(match.steem_power);
+			if (fmt){
+				return this.numberFormat(match.steem_power, 0);
+			}else{
+				return match.steem_power;
+			}
 		}
 		return '';
 	  },
@@ -220,6 +226,8 @@
 		this.hivePrice = parseFloat(_hivePrice).toFixed(3);
 	  },
 	  setHiveTrx (trx, delegated_amount){
+		//console.log('setHiveTRX');
+		//console.log(delegated_amount);
 		this.randomAfitTrxHive = trx;
 		this.randomAfitTrxHive.delegated_amount = parseInt(delegated_amount);
 	  },
@@ -233,12 +241,15 @@
 				let hiveValue = this.randomAfitTrxHive.delegated_amount * this.hivePrice;
 				let afitValue = this.randomAfitTrxHive.token_count * this.afitPrice.afitHiveLastUsdPrice;
 				let dailyAPY = afitValue / hiveValue;//daily percentage return (Daily APY)
-				/*console.log(this.randomAfitTrxHive.delegated_amount)
+				/*console.log('calculateYearlyAPY');
+				console.log(this.randomAfitTrxHive);
+				console.log(this.randomAfitTrxHive.delegated_amount)
 				console.log(hiveValue);
 				console.log(this.randomAfitTrxHive.token_count);
 				console.log(afitValue);
-				console.log(dailyAPY);*/
-				return this.numberFormat(365 * dailyAPY, 3) + ' %';
+				console.log(dailyAPY);
+				console.log(365 * dailyAPY);*/
+				return this.numberFormat(365 * dailyAPY * 100, 3) + ' %';
 			}else{
 				let steemValue = this.randomAfitTrxSteem.delegated_amount * this.steemPrice;
 				let afitValue = this.randomAfitTrxSteem.token_count * this.afitPrice.afitHiveLastUsdPrice;
@@ -248,7 +259,7 @@
 				console.log(this.randomAfitTrxHive.token_count);
 				console.log(afitValue);
 				console.log(dailyAPY);*/
-				return this.numberFormat(365 * dailyAPY, 3) + ' %';
+				return this.numberFormat(365 * dailyAPY * 100, 3) + ' %';
 			}
 		}
 		return '- %';
