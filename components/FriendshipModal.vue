@@ -438,7 +438,7 @@
 </script>
 <style>
 	.acti-notify-comp{
-	  top:70px; 
+	  top:80px; 
 	  z-index:1; 
 	  font-size: 20px;
 	  vertical-align: top;
