@@ -394,7 +394,11 @@
 	  this.populateFriends();
 	  
 	  //grab recent verified posts to find suggested actifitters
-	  let res = await fetch(process.env.actiAppUrl + 'recentVerifiedPosts/?maxCount=20');
+	  let tgtUrl = process.env.actiAppUrl + 'recentVerifiedPosts/?maxCount=20';
+	  if (this.user.account.name){
+		tgtUrl += '&exclude='+this.user.account.name;
+	  }
+	  let res = await fetch(tgtUrl);
 	  let outcome = await res.json();
 	  console.log('recentVerifiedPosts');
 	  console.log(outcome);
