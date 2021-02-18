@@ -75,7 +75,7 @@
 </script>
 <style>
 	.acti-notify-comp{
-	  top:56px; 
+	  top:70px; 
 	  z-index:1; 
 	  font-size: 20px;
 	  vertical-align: top;
