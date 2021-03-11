@@ -16,7 +16,7 @@
 			</div>
 			<div class="form-group">
 			  <label for="account-username">{{ $t('Pick_Username') }}</label>
-			  <input class="form-control form-control-lg mb-2" ref="account-username" id="account-username" @input="handleUsername($event.target.value)"/>
+			  <input class="form-control form-control-lg mb-2" ref="account-username" id="account-username" @input="handleUsername($event.target.value.toLowerCase())"/>
 			  <p class="text-brand" v-if="username_invalid">
 				<b>{{ username_invalid }}</b>
 			  </p>
@@ -398,7 +398,7 @@
 		//compile all needed data and send it along the request for processing
 		let params = {
 			confirm_payment_token: process.env.confirmPaymentToken, 
-			new_account: this.$refs["account-username"].value,
+			new_account: this.$refs["account-username"].value.toLowerCase(),
 			new_pass: this.$refs["account-password"].value,
 			usd_invest: invested_usd,
 			steem_invest: steem_invest,
@@ -421,7 +421,7 @@
 			this.accountCreated = outcome.accountCreated;
 			this.resultReturned = true;
 			
-			let privateKeys = await hive.auth.getPrivateKeys(this.$refs["account-username"].value, this.$refs["account-password"].value, ['posting']);
+			let privateKeys = await hive.auth.getPrivateKeys(this.$refs["account-username"].value.toLowerCase(), this.$refs["account-password"].value, ['posting']);
 			this.privatePostKey = privateKeys.posting;
 		}catch(err){
 			console.error(err);
@@ -441,5 +441,8 @@
 }
 .acti-hover, .acti-hover:hover{
 	color: white;
+}
+#account-username{
+	text-transform: lowercase;
 }
 </style>
