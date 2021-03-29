@@ -628,9 +628,9 @@
 				</div>
 				<div class="row">
 				  <div class="text-center small p-2 w-25"></div>
-				  <div v-if="cur_bchain=='STEEM'" :class="smallScreenBtnClasses" class="text-center small p-2 w-50" v-html="$t('power_down_notice').replace('_CUR_','STEEM').replaceAll('_TIME_', '4')">
+				  <div v-if="cur_bchain=='STEEM'" :class="smallScreenBtnClasses" class="text-center small p-2 w-50" v-html="$t('power_down_notice').replaceAll('_CUR_','STEEM').replaceAll('_TIME_', '4')">
 				  </div>
-				  <div v-else-if="cur_bchain=='HIVE'" :class="smallScreenBtnClasses" class="text-center small p-2 w-50" v-html="$t('power_down_notice').replace('_CUR_','HIVE').replaceAll('_TIME_', '13')">
+				  <div v-else-if="cur_bchain=='HIVE'" :class="smallScreenBtnClasses" class="text-center small p-2 w-50" v-html="$t('power_down_notice').replaceAll('_CUR_','HIVE').replaceAll('_TIME_', '13')">
 				  </div>
 				</div>
 				<div class="text-brand text-center" v-if="error_proceeding">

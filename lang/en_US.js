@@ -100,7 +100,7 @@ module.exports = {
   power_up_hive_notice: '<i>Powering up HIVE converts your HIVE into <b>HIVE POWER (HP)</b>, providing you more stake on the Hive blockchain, and hence increasing your vote value on posts.<br/>HP can only be withdrawn using the Power Down option, which allows the conversion back to HIVE over the period of 13 weeks, with one portion out of 13 converted every week.</i>',
   Power_Up: 'Power Up',
   Power_Down: 'Power Down',
-  power_down_notice: '<i>Powering down allows you to convert your _CUR_ POWER back to withdrawable <b>liquid STEEM</b>. <br/>This process occurs over _TIME_ weeks, yielding one portion out of _TIME_ of the powered down amount to be converted every week.</i>',
+  power_down_notice: '<i>Powering down allows you to convert your _CUR_ POWER back to withdrawable <b>liquid _CUR_</b>. <br/>This process occurs over _TIME_ weeks, yielding one portion out of _TIME_ of the powered down amount to be converted every week.</i>',
   currently_powering_down: 'You are currently powering down at a weekly rate of',
   next_withdraw_on: 'Your next withdrawal occurs on',
   Power_Down: 'Power Down',
