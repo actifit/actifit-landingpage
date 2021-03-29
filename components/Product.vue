@@ -34,9 +34,16 @@
 					<b>{{ $t('price')}}: </b>{{numberFormat(this.item_price, 2)}} {{this.item_currency}}<img class="token-logo" src="/img/actifit_logo.png">
 				  </div>-->
 			  </div>
-			</div>  
+			</div>
+			<div class="row expansion-arrow">
+				<a class="arrow-icon" v-on:click="switchArrowStatus" :class="prodDispStatus" :title="prodDispStatusText">
+				  <span class="left-bar"></span>
+				  <span class="right-bar"></span>
+				</a>
+			</div>
 		  </div>
-		  
+		  <transition name="body-expan">
+		  <div class="body-container" v-if="this.prodDispStatus == 'open'">
 		  <div class="card-body" v-if="this.product.type == 'real'">
 			  <div class="row text-info pt-1">
 				<div class="pb-md-2 pt-md-2 col-12 text-center info-box info-box-orangered">
@@ -202,7 +209,9 @@
 					<option v-if="Array.isArray(product.colorOptions) && product.colorOptions.length > 0" v-for="colr in product.colorOptions" :value="colr" :key="colr">{{colr}}</option>
 				</select>
 			</div>
-		   
+			
+		   </div> <!-- body-container -->
+		   </transition>
 		  <div class="card-footer pb-md-2 text-center">
               <div v-if="product.type == 'real'">
 				<a v-if="!checkout_product && realProdBuyStatus" class="btn btn-success btn-lg book-button" @click.prevent="prepareCheckout()" :class="productBuyColor" style="float:left; border: 1px white solid;">{{ $t('Buy_now') }} <br/>
@@ -491,6 +500,8 @@
 			checkingBought: false,
 			buyAfitInProgress: false,
 			buyAfitConfirmed: false,
+			prodDispStatus: '', 
+			prodDispStatusText: 'Expand',
 		}
 	},
 	watch: {
@@ -513,6 +524,15 @@
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
+	  switchArrowStatus(){
+		if (this.prodDispStatus == ''){
+			this.prodDispStatus = 'open';
+			this.prodDispStatusText = 'Collapse';
+		} else {
+			this.prodDispStatus = '';
+			this.prodDispStatusText = 'Expand';
+		}
+	  },
 	  async buyAFITNow(){
 		this.afit_buy_err_msg = '';
 		
@@ -1680,4 +1700,112 @@
 	.lbox-container{
 		height: 100px !important;
 	}
+	
+	  
+  .left-bar:after, .right-bar:after{
+	animation: blink 3s infinite;/*20 alternate;*/
+  }
+
+@keyframes blink {
+  0%, 50%, 100% { background-color: pink; }
+  25%, 75% { background-color: red; }
+}
+</style>
+
+<style lang="scss">
+$background: lightcoral;
+$easing: cubic-bezier(.25,1.7,.35,.8);
+$duration: 0.5s;
+
+.arrow-icon {
+  height: 2.8em;
+  width: 2.8em;
+  display:block;
+  padding: 0.5em;
+  margin: 1em auto;
+  position: relative;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.left-bar {
+  position: absolute;
+  background-color: transparent;
+  top: 0;
+  left:0;
+  width: 40px;
+  height: 10px;
+  display: block;
+  transform: rotate(35deg);
+  float: right;
+  border-radius: 2px;
+  &:after {
+    content:"";
+    background-color: $background;
+    width: 40px;
+    height: 10px;
+    display: block;
+    float: right;
+    border-radius: 6px 10px 10px 6px;
+    transition: all $duration $easing;
+    z-index: -1;
+  }
+}
+
+.right-bar {
+  position: absolute;
+  background-color: transparent;
+  top: 0px;
+  left:26px;
+  width: 40px;
+  height: 10px;
+  display: block;
+  transform: rotate(-35deg);
+  float: right;
+  border-radius: 2px;
+  &:after {
+    content:"";
+    background-color: $background;
+    width: 40px;
+    height: 10px;
+    display: block;
+    float: right;
+    border-radius: 10px 6px 6px 10px;
+    transition: all $duration $easing;
+    z-index: -1;
+  }
+}
+
+.open {
+    .left-bar:after {
+    transform-origin: center center;
+    transform: rotate(-70deg);
+  }
+  .right-bar:after {
+    transform-origin: center center;
+    transform: rotate(70deg);
+  }
+
+}
+
+.expansion-arrow{
+	max-height: 40px;
+  }
+
+  
+/*  
+.body-expan-enter,
+.body-expan-leave-to {
+  visibility: hidden;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+}
+
+.body-expan-enter-active,
+.body-expan-leave-active {
+  transition: all 0.2s;
+}
+*/
 </style>
