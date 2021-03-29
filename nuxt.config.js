@@ -268,6 +268,7 @@ module.exports = {
     { src: '~plugins/vue-carousel', ssr: false },
     { src: '~plugins/vue-notification', ssr: false },
     { src: '~plugins/vue-simplemde', ssr: false },
+	{ src: '~plugins/vue-sanitize', ssr: false },
 	{ src: '~plugins/v-lightbox', mode: 'client' },
   ],
 

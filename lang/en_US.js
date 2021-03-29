@@ -696,6 +696,7 @@ module.exports = {
   Remove_Cart: 'Remove from <br /> Cart <i class="fas fa-minus-square"></i>',
   Checkout: 'Checkout <br /> <i class="fas fa-shopping-cart"></i>',
   success_add_cart: '_PROD_ successfully added to cart!',
+  success_receipt_set: '_PROD_ successfully confirmed as delivered. Congrats!',
   Cart_empty: 'Your cart is empty',
   Recent_draw_winner: 'Last Draw Winner',
   win_amount: ' won ',
@@ -732,6 +733,7 @@ module.exports = {
   order_quantity: 'Order Quantity',
   color_choice: 'Color',
   real_prod_name: 'Physical Product',
+  Physical_Products: 'Physical Products',
   real_prod_notice: 'We will notify you as the product order gets set with seller, and on future progress via actifit notifications.<br/> Please note that shipping time will be dependant on the seller and your target country. <br/> Actifit is NOT the producer of those products, and they are handled by 3rd parties.<br/>',
   Buy_afit_now: 'Buy AFIT Now',
   buy_afit_title:'Buy AFIT',
@@ -739,5 +741,7 @@ module.exports = {
   HIVE_Amount: 'HIVE Amount',
   confirm_buy_afit_hive: 'Are you sure you want to purchase _AFIT_ AFIT using _HIVE_ HIVE? Please note final amount depends on market value on exact transaction time according to AFIT/HIVE price on hive-engine.com.',
   afit_buy_notice: 'AFIT tokens rates are according to AFIT/HIVE market rate on hive-engine.com',
-  afit_bought: '_AFIT_ AFIT Bought Successfully!'
+  afit_bought: '_AFIT_ AFIT Bought Successfully!',
+  your_feedback: 'Your Feedback',
+  confirm_receipt: 'Confirm Receipt'
 }

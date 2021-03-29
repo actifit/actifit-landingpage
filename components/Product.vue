@@ -223,6 +223,12 @@
 					<div v-for="(entry, index) in pendingOrders" :key="index" :entry="entry">
 						<span style='color:green'><i class="fas fa-check text-success"></i>{{$t('item_bought')}} {{showDate(entry.date_bought)}} {{$t('with_status')}} {{ entry.status}}</span>
 					</div>
+					<!-- confirm order button -->
+					<textarea rows="4" cols="30" class="text-brand" ref="prodFeedback" id="prodFeedback" :placeholder="$t('your_feedback')">
+					</textarea >
+					
+					<a class="btn btn-success btn-lg book-button" @click.prevent="confirmReceipt()">{{ $t('confirm_receipt') }}</a>
+					
 				</span>
 			  </div>
 			  <div v-else-if="product.type == 'ingame'">
@@ -376,7 +382,7 @@
   //import VueLazyLoad from 'vue-lazyload'
   //import LightBox from 'vue-image-lightbox'
   
-  import '@morioh/v-lightbox/dist/lightbox.css';
+  import '@morioh/v-lightbox/dist/lightbox.css'; 
 
   //import Lightbox from '@morioh/v-lightbox'
 
@@ -385,6 +391,7 @@
 	components: {
 		BuyOptionsModal,
 		CartModal,
+		
 		//LightBox,
 		//VueLazyLoad
 	},
@@ -502,6 +509,7 @@
 			buyAfitConfirmed: false,
 			prodDispStatus: '', 
 			prodDispStatusText: 'Expand',
+			
 		}
 	},
 	watch: {
@@ -1439,6 +1447,65 @@
 			}
 		}
 		return false;
+	  },
+	  async confirmReceipt(){
+		if (this.pendingOrders.length > 0){
+			let accToken = localStorage.getItem('access_token')
+			
+			let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+			//let cur_bchain = 'STEEM';
+			
+			//find relevant trx
+			
+			//process.env.actiAppUrl 
+			let url_string = 'http://localhost:3120/'+ 'confirmProdReceipt/?user='+this.user.account.name
+								+ '&trx_id=' + this.pendingOrders[0]._id
+								+ '&note=' + this.$sanitize(this.$refs['prodFeedback'].value)
+								+ '&bchain=' + cur_bchain;
+			let url = new URL(url_string);
+			
+			let reqHeads = new Headers({
+			  'Content-Type': 'application/json',
+			  'x-acti-token': 'Bearer ' + accToken,
+			});
+			
+			//connect with our service to confirm item receipt
+			try{
+				let res = await fetch(url, {
+					headers: reqHeads
+				});
+				let outcome = await res.json();
+				if (outcome.error){
+					this.errorProceed = outcome;
+					console.error(outcome);
+				}else{
+					//update product status
+					this.checkProductBought();
+					//notify success confirming receipt
+					this.$notify({
+					  group: 'success',
+					  text: this.$t('success_receipt_set').replace('_PROD_',this.product.name),//this.$t('session_expired_login_again'),
+					  position: 'top center'
+					})
+					
+					//notify parent to refresh products
+					//this.$emit('refresh-prods');
+					this.$store.dispatch('fetchProducts')
+					
+					//update status
+					this.$store.dispatch('fetchUserBoughtRealProducts', accToken);
+					
+					//display proper success message
+					this.errorProceed = this.$t('success_receipt_set').replace('_PROD_',this.product.name+'-L'+this.product.level) + '.<br/>';
+				}
+				//this.checkingFunds = false;
+				//this.resultReturned = true;
+			
+			}catch(err){
+				console.error(err);
+				//this.checkingFunds = false;
+			}
+		}
 	  },
 	  async activateGadget() {
 		

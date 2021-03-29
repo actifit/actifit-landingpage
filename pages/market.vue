@@ -66,7 +66,7 @@
 			<option value="ingame">{{$t('Game')}}</option>
             <option value="service">{{$t('Consultation')}}</option>
 			<option value="ebook">{{$t('Ebook')}}</option>
-			<option value="real">{{$t('Physical Products')}}</option>
+			<option value="real">{{$t('Physical_Products')}}</option>
         </select>
 		
 		<div class="row expansion-arrow-all">
@@ -161,6 +161,7 @@
 		lastDrawWinner: '',
 		wonAmount: 0,
 		expandAllStatus: '',
+		expandAllStatusText: 'Expand All',
       }
     },
     computed: {
