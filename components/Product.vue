@@ -381,7 +381,7 @@
   //import Lightbox from '@morioh/v-lightbox'
 
   export default {
-    props: ['product', 'pros', 'userrank', 'gadgetStats', 'afitPrice', 'realProducts'],
+    props: ['product', 'pros', 'userrank', 'gadgetStats', 'afitPrice', 'realProducts', 'expandAll'],
 	components: {
 		BuyOptionsModal,
 		CartModal,
@@ -512,6 +512,7 @@
 	  order_quantity: 'getPrice',
 	  afitPrice: 'getPrice',
 	  realProducts:'updateProdStat',
+	  expandAll: 'adjustDisplay',
 	},
 	methods: {
 	  /**
@@ -532,6 +533,9 @@
 			this.prodDispStatus = '';
 			this.prodDispStatusText = 'Expand';
 		}
+	  },
+	  adjustDisplay(){
+		this.prodDispStatus = this.expandAll;
 	  },
 	  async buyAFITNow(){
 		this.afit_buy_err_msg = '';

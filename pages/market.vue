@@ -68,6 +68,13 @@
 			<option value="ebook">{{$t('Ebook')}}</option>
 			<option value="real">{{$t('Physical Products')}}</option>
         </select>
+		
+		<div class="row expansion-arrow-all">
+			<a class="arrow-icon" v-on:click="expandAllSwitchStatus" :class="expandAllStatus" :title="expandAllStatusText">
+			  <span class="left-bar"></span>
+			  <span class="right-bar"></span>
+			</a>
+		</div>
 	  </div>
 	  	  
 	  <!-- show listing of special event products -->
@@ -86,7 +93,7 @@
       <!-- show listing of products -->
       <div class="row" v-if="prodList.length">
         <Product v-for="product in prodList" 
-			:product="product" :key="product._id" :pros="professionals" :userrank="userRank" :gadgetStats="gadgetStats" :realProducts="realProducts"
+			:product="product" :key="product._id" :pros="professionals" :userrank="userRank" :gadgetStats="gadgetStats" :realProducts="realProducts" :expandAll="expandAllStatus"
 			v-if="!product.specialevent && (!currentFilter || product.type == currentFilter)"
 			@update-prod="updateProd" :afitPrice="afitPrice" @refresh-tickets="refreshTickets"/>
       </div>
@@ -153,6 +160,7 @@
 		nextGadgetBuyRewardDate: '',//'2020-10-15',//"August 18, 2020 00:00 GMT",
 		lastDrawWinner: '',
 		wonAmount: 0,
+		expandAllStatus: '',
       }
     },
     computed: {
@@ -175,6 +183,15 @@
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
+	  expandAllSwitchStatus(){
+		if (this.expandAllStatus == ''){
+			this.expandAllStatus = 'open';
+			this.expandAllStatusText = 'Collapse All';
+		} else {
+			this.expandAllStatus = '';
+			this.expandAllStatusText = 'Expand All';
+		}
+	  },
 	  refreshTickets () {
 		//console.log('>>>>refreshing');
 		this.fetchUserBuyTicketEntries();
@@ -356,4 +373,16 @@
 	border-bottom: 1px dashed red;
 	height: 40px;
   }
+  .left-bar:after, .right-bar:after{
+	animation: blink 3s infinite;/*20 alternate;*/
+  }
+
+	@keyframes blink {
+	  0%, 50%, 100% { background-color: pink; }
+	  25%, 75% { background-color: red; }
+	}
+	
+	.expansion-arrow-all{
+		display: contents;
+	}
 </style>
