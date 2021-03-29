@@ -1455,10 +1455,7 @@
 			let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 			//let cur_bchain = 'STEEM';
 			
-			//find relevant trx
-			
-			//process.env.actiAppUrl 
-			let url_string = 'http://localhost:3120/'+ 'confirmProdReceipt/?user='+this.user.account.name
+			let url_string = process.env.actiAppUrl + 'confirmProdReceipt/?user='+this.user.account.name
 								+ '&trx_id=' + this.pendingOrders[0]._id
 								+ '&note=' + this.$sanitize(this.$refs['prodFeedback'].value)
 								+ '&bchain=' + cur_bchain;
