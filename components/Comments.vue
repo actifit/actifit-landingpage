@@ -460,7 +460,7 @@
 		
 		//prepare meta data
 		let meta = [];
-		meta.tags = '[actifit]';
+		meta.tags = ['hive-193552', 'actifit'];
 		meta.app = 'actifit/0.4.1';
 		meta.suppEdit = 'actifit.io.comment';
 		
@@ -521,7 +521,7 @@
 		
 		//append meta data
 		let meta = JSON.parse(this.full_data.json_metadata);
-		meta.tags = '[actifit]';
+		meta.tags = ['hive-193552', 'actifit'];
 		meta.app = 'actifit/0.4.1';
 		meta.suppEdit = 'actifit.io.comment';
 		

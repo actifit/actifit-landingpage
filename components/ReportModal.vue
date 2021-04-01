@@ -496,7 +496,7 @@
 		
 		//prepare meta data
 		let meta = new Object();
-		meta.tags = '[actifit]';
+		meta.tags = ['hive-193552', 'actifit'];
 		meta.app = 'actifit/0.4.1';
 		meta.suppEdit = 'actifit.io.comment';
 		//console.log(this.stdLogin);
