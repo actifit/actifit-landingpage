@@ -10,8 +10,8 @@
 		  </div>
 		</a>
 		<a :href="'/@' + author + '/' + full_data.permlink" target="_blank">
-		  <div class="comment-user-section" :style="{ paddingLeft: depth * indentFactor + 'px' }">	
-			<small class="date-head text-muted">{{ date }}</small>
+		  <div class="comment-user-section pt-2" :style="{ paddingLeft: depth * indentFactor + 'px' }">	
+			<a :href="buildLink"><small class="date-head text-muted">{{ date }}</small>&nbsp;<i class="fas fa-link"></i></a>
 		  </div>
 		</a>
 		<vue-remarkable class="modal-body" v-if="!editBoxOpen" :source="commentBody()" :style="{ paddingLeft: depth * indentFactor + 'px' }" :options="{'html': true}"></vue-remarkable>
@@ -185,6 +185,9 @@
 	  ...mapGetters('steemconnect', ['stdLogin']),
 	  ...mapGetters(['moderators']),
 	  ...mapGetters(['newlyVotedPosts', 'bchain']),
+	  buildLink (){
+		return this.full_data.author + '/' + this.full_data.permlink;
+	  },
 	  getContent () {
 		return this.responseBody;
 	  },

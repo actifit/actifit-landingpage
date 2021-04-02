@@ -3,12 +3,16 @@
 	<NavbarBrand />
 	<div v-if="report && report.author" class="container pt-5 mt-5 pb-5 col-md-6" >
         <div class="report-head mb-3 col-md-12">
-          <h4 id="exampleModalLabel">{{ report.title }}</h4>
+          <!-- if this is a comment, display link to higher level comment/post -->
+		  <div v-if="report.parent_permlink">
+			{{$t('viewing_comment_note')}}&nbsp;<a :href="buildParentLink">{{$t('view_parent_thread')}}</a>
+		  </div>
+		  <h4>{{ report.title }}</h4>
 		  <h5 class="text-brand" >
 			<div class="user-avatar mid-avatar mr-1 mb-5"
 					   :style="'background-image: url('+profImgUrl+'/u/' + this.report.author + '/avatar)'"></div>
 			<a :href="'/'+report.author" target="_blank">@{{ report.author}} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></a></h5>
-		  <span class="date-head text-muted">{{ date }}</span>
+			<a :href="buildLink"><span class="date-head text-muted">{{ date }}</span>&nbsp;<i class="fas fa-link"></i></a>
 		  <div class="report-tags p-1" v-html="displayReportTags"></div>
         </div>
 		<vue-remarkable class="col-md-12" :source="body" :options="{'html': true}" ></vue-remarkable>
@@ -408,6 +412,12 @@
 	  ...mapGetters(['newlyVotedPosts']),
 	  ...mapGetters(['commentEntries'], 'commentCountToday'),
 	  ...mapGetters(['moderators', 'bchain']),
+	  buildParentLink(){
+		return this.report.parent_author+'/'+this.report.parent_permlink;
+	  },
+	  buildLink(){
+		return this.report.author+'/'+this.report.permlink;
+	  },
 	  adjustHiveClass () {
 		if (this.target_bchain != 'HIVE'){
 			return 'option-opaque';

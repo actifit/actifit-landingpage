@@ -743,5 +743,7 @@ module.exports = {
   afit_buy_notice: 'AFIT tokens rates are according to AFIT/HIVE market rate on hive-engine.com',
   afit_bought: '_AFIT_ AFIT Bought Successfully!',
   your_feedback: 'Your Feedback',
-  confirm_receipt: 'Confirm Receipt'
+  confirm_receipt: 'Confirm Receipt',
+  viewing_comment_note: 'You are viewing a reply. ',
+  view_parent_thread: 'Click to view upper level thread'
 }
