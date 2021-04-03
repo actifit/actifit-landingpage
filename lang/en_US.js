@@ -588,6 +588,8 @@ module.exports = {
   Active_Key: 'Active Key',
   Settings: 'Settings',
   Posting_settings: 'Posting Settings',
+  Notification_settings: 'Notification Settings',
+  Notification_types: 'Notification Types',
   Actifit_post_target: 'Actifit App Posts Go To:',
   successfully_updated_settings: 'Settings Successfully Saved!',
   error: 'Generic Error',
@@ -745,5 +747,6 @@ module.exports = {
   your_feedback: 'Your Feedback',
   confirm_receipt: 'Confirm Receipt',
   viewing_comment_note: 'You are viewing a reply. ',
-  view_parent_thread: 'Click to view upper level thread'
+  view_parent_thread: 'Click to view upper level thread',
+  notifications_enabled: 'Notifications Active'
 }
