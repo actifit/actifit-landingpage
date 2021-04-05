@@ -8,6 +8,8 @@
         <a href="https://www.twitter.com/Actifit_fitness" target="_blank" class="d-inline-block mx-3" :title="$t('Twitter')"><i class="fab fa-2x fa-twitter"></i></a>
         <a href="https://www.instagram.com/actifit.fitness/" target="_blank" class="d-inline-block mx-3" :title="$t('Instagram')"><i class="fab fa-2x fa-instagram"></i></a>
 		<a href="https://t.me/actifit" target="_blank" class="d-inline-block mx-3" :title="$t('Telegram')"><i class="fab fa-2x fa-telegram"></i></a>
+		<a href="https://medium.com/@actifit.fitness" target="_blank" class="d-inline-block mx-3" :title="$t('Medium')"><i class="fab fa-2x fa-medium"></i></a>
+		<a href="https://www.youtube.com/channel/UCNHxAGO79rXI7Hdiikwnqtw" target="_blank" class="d-inline-block mx-3" :title="$t('Medium')"><i class="fab fa-2x fa-youtube"></i></a>
       </div>
 	  <div class="row">
 		<div class="col text-center"><small>{{ $t('price_data_sentence') }}<a href="https://coingecko.com">{{ $t('CoinGecko') }}</a></small></div>
