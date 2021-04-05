@@ -4,7 +4,7 @@
 	<div v-if="report && report.author" class="container pt-5 mt-5 pb-5 col-md-6" >
         <div class="report-head mb-3 col-md-12">
           <!-- if this is a comment, display link to higher level comment/post -->
-		  <div v-if="report.parent_permlink">
+		  <div v-if="report.parent_author">
 			{{$t('viewing_comment_note')}}&nbsp;<a :href="buildParentLink">{{$t('view_parent_thread')}}</a>
 		  </div>
 		  <h4>{{ report.title }}</h4>
