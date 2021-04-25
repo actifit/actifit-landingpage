@@ -142,10 +142,10 @@
 		</div>
 		<div class="p-2 font-weight-bold">
 			<!--<button v-on:click="buyAFITwithSTEEM" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('BUY_AFIT_WITH_STEEM') }}</button>-->
-			<a v-if="cur_bchain=='STEEM'" href="https://steem-engine.com/?p=market&t=AFIT" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border " target="_blank" rel="noopener noreferrer">{{ $t('buy_afit_se') }}</a>
+			<a v-if="cur_bchain=='STEEM'" href="https://steem-engine.net/?p=market&t=AFIT" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border " target="_blank" rel="noopener noreferrer">{{ $t('buy_afit_se') }}</a>
 			<a v-else href="https://hive-engine.com/?p=market&t=AFIT" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border " target="_blank" rel="noopener noreferrer">{{ $t('buy_afit_he') }}</a>
 			
-			<a v-if="cur_bchain=='STEEM'" href="https://steem-engine.com/?p=market&t=AFITX" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border " target="_blank" rel="noopener noreferrer">{{ $t('buy_afitx_se') }}</a>
+			<a v-if="cur_bchain=='STEEM'" href="https://steem-engine.net/?p=market&t=AFITX" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border " target="_blank" rel="noopener noreferrer">{{ $t('buy_afitx_se') }}</a>
 			<a v-else href="https://hive-engine.com/?p=market&t=AFITX" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border " target="_blank" rel="noopener noreferrer">{{ $t('buy_afitx_he') }}</a>
 			
 			<button v-on:click="exchangeAFITforSTEEM" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('EXCHANGE_AFIT_FOR_STEEM') }}</button>
@@ -380,7 +380,7 @@
 						<div class="w-50">
 							<a href="#" class="btn btn-brand border p-2" v-on:click="moveAFITSEtoAFITPOWER">{{ $t('transfer_afit_from_se') }}</a>
 							<span class="text-brand">OR</span>
-							<a href="https://steem-engine.com/?p=market&t=AFIT" class="btn btn-brand border p-2">{{ $t('buy_afit_se') }}</a>
+							<a href="https://steem-engine.net/?p=market&t=AFIT" class="btn btn-brand border p-2">{{ $t('buy_afit_se') }}</a>
 						</div>
 					</div>
 					<div class="row">

@@ -64,7 +64,7 @@
           <div class="dropdown-divider"></div>
 		  <a class="dropdown-item text-brand" href="#" @click.prevent="$router.push('/mods-access/')" v-if="isUserModerator">Moderation</a>
 		  <div class="dropdown-divider" v-if="isUserModerator"></div>
-		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet?action=buy_afit')">{{ $t('buy_afit_menu') }}<br/></a>
+		  <!--<a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet?action=buy_afit')">{{ $t('buy_afit_menu') }}<br/></a>-->
 		  <a class="dropdown-item item-highlight" href="#" @click.prevent="$router.push('/market')">{{ $t('spend_afit_menu') }}<br/></a>
           <a class="dropdown-item" href="#" @click.prevent="$router.push('/' + user.account.name)">{{ $t('My_Profile') }}<br/></a>
 		  <SteemStats :user="user" minView="true" class="dropdown-item" :key="reload"/>
