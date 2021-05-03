@@ -181,7 +181,7 @@
 		localStorage.setItem('cur_bchain', this.bchain_val)
 		
 		this.login_in_progress = true;
-		let account_name = this.$refs["username"].value;
+		let account_name = this.$refs["username"].value.toLowerCase();
 		let priv_pkey = this.$refs["ppkey"].value;
 		let vue_ctnr = this;
 		let user_info = {
