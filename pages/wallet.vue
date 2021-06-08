@@ -900,7 +900,7 @@
 		verifyingPass: false,
 		errorSettingPass: '',
 		screenWidth: 1200,
-		afit_val_exchange: 500,
+		afit_val_exchange: 50,
 		afit_exch_matching_perc: 10,
 		afitPrice: 0.036,
 		pendingTokenSwap: '',
