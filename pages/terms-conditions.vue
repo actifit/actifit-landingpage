@@ -101,23 +101,28 @@ Third-party links on this site may direct you to third-party websites that are n
 We are not liable for any harm or damages of any sort made in connection with any third-party content or interacting with third-party websites. Please review carefully the third-party's policies and practices and make sure you understand them before you engage in any transaction. Complaints, claims, concerns, or questions regarding third-party products should be directed to the third-party.
 
 
-<h4>SECTION 9 - AFIT TOKENS. PARTICIPATING IN ACTIFIT ICO, IEO, ISO, OR ANY OTHER TOKEN SALE FORM</h4>
+<h4>SECTION 9 - AFIT AND OR AFITX TOKENS. PARTICIPATING IN ACTIFIT ICO, IEO, ISO, OR ANY OTHER TOKEN SALE FORM</h4>
 
-Your participation in purchasing AFIT tokens via any means, including a token sale, an ICO (Initial Coin Offering), IEO (Initial Exchange Offering), ISO (Initial Steem Offering), our website, to name a few, or any other means of purchasing and/or exchanging them from/to other forms of FIAT and/or crypto is done at your sole responsibility. 
-Actifit does not hold any responsibility for any potential loss of value, funds or investment via purchasing, exchanging, and/or holding AFIT tokens under any form.
+Your participation in purchasing AFIT/AFITX tokens via any means, including a token sale, an ICO (Initial Coin Offering), IEO (Initial Exchange Offering), ISO (Initial Steem Offering), our website, to name a few, or any other means of purchasing and/or exchanging them from/to other forms of FIAT and/or crypto is done at your sole responsibility. 
+Actifit does not hold any responsibility for any potential loss of value, funds or investment via purchasing, exchanging, and/or holding AFIT/AFITX tokens under any form.
 Token purchase transactions are non-reversible and non-refundable.
 
-AFIT token value is subject to change over time, and no guarantees are offered by Actifit team to maintain a certain price. Any Actifit marketing, promotion, or any similar initiative does not represent a financial advise. 
+AFIT and AFITX token value is subject to change over time, and no guarantees are offered by Actifit team to maintain a certain price. Any Actifit marketing, promotion, or any similar initiative does not represent a financial advise. 
 
-AFIT tokens are utility tokens, and do not represent a security nor intended to be used as such.
+AFIT tokens are utility tokens, AFITX tokens are governance tokens, and neither represent a security nor are intended to be used as such.
 
-Actifit business model may change or need to be modified due to any regulatory and compliance requirements from any applicable laws in any jurisdictions. Purchasers and holders of AFIT tokens acknowledge and understand that neither Actifit nor any of its affiliates shall be held liable for any direct or indirect loss or damages caused by such changes.
+Actifit business model may change or need to be modified due to any regulatory and compliance requirements from any applicable laws in any jurisdictions. Purchasers and holders of AFIT and/or AFITX tokens acknowledge and understand that neither Actifit nor any of its affiliates shall be held liable for any direct or indirect loss or damages caused by such changes.
 
 Actifit warns its buyers that token purchase represents a very high risk, and such activity should only be conducted after careful consideration do not invest what you cannot afford to lose.
 
 Actifit relies in its operation on third party technologies, including but not limited to Steem blockchain, Ethereum blockchain, and other tools and software. Actifit aims to undertake reasonable security measures to hold its tokens and users safe from any security concern, yet does not present any guarantees under this aspect.
 
 Lack of funding, token & other crypto valuation could have large impact on the growth, progress, and continuity of Actifit project among other reasons, hence Actifit does not provide any guarantee to the continuity of the project.
+
+PLEASE NOTE THAT IN THE CASE OF ANY SUCH TOKEN SALE RUN BY ACTIFIT TEAM, WE DO NOT ACCEPT INVESTMENT FROM THE FOLLOWING COUNTRIES:
+<li>Afghanistan, Albania, Bahamas, Barbados, Botswana, Cambodia, Canada, Cuba, Ghana, Iran (Islamic Republic of), Iraq, Jamaica, Korea (the Democratic People’s Republic of), Libya, Mauritius, Myanmar, Nicaragua, Panama, Pakistan, South Sudan, Sudan (North), Syrian Arab Republic, The Crimea, Trinidad and Tobago, Uganda, United States of America, Vanuatu, Yemen, Zimbabwe;</li>
+<li>Jurisdictions in which participation or ownership of tokens is prohibited by any applicable Law;</li>
+<li>Jurisdictions which are subject to United States, United Nations, or other applicable sanctions or embargoes.</li>
 
 <h4>SECTION 10 - USER COMMENTS, FEEDBACK AND OTHER SUBMISSIONS</h4>
 
