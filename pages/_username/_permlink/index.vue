@@ -564,7 +564,7 @@
 		//if (!this.stdLogin){
 			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
 			//console.log(res);
-			if (res.result.block_num) {
+			if (res.result.ref_block_num) {
 				console.log('success');
 				return {success: true, trx: res.result};
 			}else{

@@ -503,7 +503,7 @@
 				})
 		});
 		//console.log(res);
-		if (res && res.block_num){
+		if (res && res.ref_block_num){
 			let sel_chain = this.cur_bchain;
 			if (chain_choice){
 				sel_chain = chain_choice;
