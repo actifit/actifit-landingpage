@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@hiveio/dhive": "^0.14.1",
-    "@hiveio/hive-js": "^0.8.9",
+    "@hiveio/hive-js": "^2.0.1",
     "@morioh/v-lightbox": "^1.0.3",
     "@nuxtjs/google-adsense": "^1.1.3",
     "@nuxtjs/recaptcha": "^0.6.2",

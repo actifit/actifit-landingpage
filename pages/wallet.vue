@@ -2069,7 +2069,7 @@
 		}
 	  },
 	  async confirmCompletion (type, amount, res){
-		if (res.block_num){
+		if (res.ref_block_num){
 			console.log (res);
 			let note = 'Power down cancelled successfully!';
 			let power_type = 'SP';
@@ -2318,7 +2318,7 @@
 		//if (!this.stdLogin){
 			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
 			//console.log(res);
-			if (res.result.block_num) {
+			if (res.result.ref_block_num) {
 				console.log('success');
 				return {success: true, trx: res.result};
 			}else{
@@ -2667,7 +2667,7 @@
 			//console.log(tx.block_num);
 			console.log(tx);
 			
-			if (tx && tx.block_num){
+			if (tx && tx.ref_block_num){
 				//notify of success
 				this.$notify({
 				  group: 'success',
@@ -2790,7 +2790,7 @@
 		//console.log(tx.block_num);
 		console.log(tx);
 		
-		if (tx && tx.block_num){
+		if (tx && tx.ref_block_num){
 		
 			//proceed with moving tokens over to recipient
 			
@@ -2930,7 +2930,7 @@
 		//console.log(tx.block_num);
 		console.log(tx);
 		
-		if (tx && tx.block_num){
+		if (tx && tx.ref_block_num){
 		
 			//proceed with moving tokens over to recipient
 			
@@ -3057,7 +3057,7 @@
 			//console.log(tx.block_num);
 			console.log(tx);
 			
-			if (tx && tx.block_num){
+			if (tx && tx.ref_block_num){
 				//notify of success
 				this.$notify({
 				  group: 'success',
@@ -3153,7 +3153,7 @@
 			//console.log(tx.block_num);
 			console.log(tx);
 			
-			if (tx && tx.block_num){
+			if (tx && tx.ref_block_num){
 				//notify of success
 				this.$notify({
 				  group: 'success',
@@ -3263,7 +3263,7 @@
 			//console.log(tx.block_num);
 			console.log(tx);
 			
-			if (tx && tx.block_num){
+			if (tx && tx.ref_block_num){
 				//notify of success
 				this.$notify({
 				  group: 'success',
@@ -3383,7 +3383,7 @@
 			//console.log(tx.block_num);
 			console.log(tx);
 			
-			if (tx && tx.block_num){
+			if (tx && tx.ref_block_num){
 				//notify of success
 				this.$notify({
 				  group: 'success',
