@@ -825,7 +825,7 @@
 		if (!localStorage.getItem('std_login')){
 			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
 			//console.log(res);
-			if (res.result.block_num) {
+			if (res.result.ref_block_num) {
 				//console.log('success');
 				return {success: true, trx: res.result};
 			}else{
@@ -943,9 +943,10 @@
 			let attempt = 1;
 			let payAmount = parseFloat(this.item_price * this.afitPrice.afitHiveLastPrice).toFixed(3);
 			let memo = 'buy-gadget:'+this.product._id;
+			console.log('prior to call');
 			let res = await hive.broadcast.transferAsync(this.userActvKey, this.user.account.name, process.env.actifitMarketBuy, payAmount + ' ' + 'HIVE', memo).then(
 				res => this.confirmCompletion('transfer', payAmount, res, attempt)).catch(err=> this.errorCompletion(err));
-				
+			console.log('after call');
 		}catch(excp){
 			console.log(excp);
 		}
@@ -968,7 +969,7 @@
 		}
 	  },
 	  async confirmCompletion (type, amount, res, attempt, afitAmnt){
-		if (res.block_num){
+		if (res.ref_block_num){
 			//console.log (res);
 			
 			
@@ -986,7 +987,7 @@
 			url = new URL( process.env.actiAppUrl + 'buyGadgetHive/'
 							+ this.user.account.name + '/'
 							+ this.product._id + '/'
-							+ res.block_num + '/'
+							+ res.ref_block_num + '/'
 							+ res.id + '/'
 							+ cur_bchain);
 							
@@ -995,7 +996,7 @@
 							+ this.user.account.name + '/'
 							+ amount + '/'
 							+ afitAmnt + '/'
-							+ res.block_num + '/'
+							+ res.ref_block_num + '/'
 							+ res.id + '/'
 							+ 'HIVE');//for now only support HIVE
 				//:user/:amnt/:afitAmnt/:blockNo/:trxID/:bchain
@@ -1223,7 +1224,7 @@
 			let res = await hive.broadcast.transferAsync(this.userRlActvKey, this.user.account.name, process.env.actifitEscrow, payAmount + ' ' + 'HIVE', memo).then(;
 			
 			console.log(res);
-			//res.block_num
+			//res.ref_block_num
 			//res.id - trx id
 			return;*/
 			
@@ -1372,7 +1373,8 @@
 		let bcastRes;
 		
 		let res = await this.processTrxFunc('custom_json', cstm_params);
-		//console.log(res);
+		console.log('custom complete');
+		console.log(res);
 		if (res.success){
 			bcastRes = res.trx;
 		}else{
@@ -1386,7 +1388,7 @@
 			url = new URL( process.env.actiAppUrl + 'buyGadget/'
 							+ this.user.account.name + '/'
 							+ this.product._id + '/'
-							+ bcastRes.block_num + '/'
+							+ bcastRes.ref_block_num + '/'
 							+ bcastRes.id + '/'
 							+ cur_bchain);
 		}
@@ -1547,7 +1549,7 @@
 		let url_string = process.env.actiAppUrl + 'activateGadget/'
 							+ this.user.account.name + '/'
 							+ this.product._id + '/'
-							+ bcastRes.block_num + '/'
+							+ bcastRes.ref_block_num + '/'
 							+ bcastRes.id + '/'
 							+ cur_bchain;
 		//console.log('prodHasFriendBenefic');
@@ -1613,7 +1615,7 @@
 		let	url = new URL( process.env.actiAppUrl + 'deactivateGadget/'
 							+ this.user.account.name + '/'
 							+ this.product._id + '/'
-							+ bcastRes.block_num + '/'
+							+ bcastRes.ref_block_num + '/'
 							+ bcastRes.id + '/'
 							+ cur_bchain
 							);

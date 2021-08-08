@@ -214,7 +214,7 @@
 		if (!localStorage.getItem('std_login')){
 			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
 			//console.log(res);
-			if (res.result.block_num) {
+			if (res.result.ref_block_num) {
 				//console.log('success');
 				return {success: true, trx: res.result};
 			}else{
@@ -340,7 +340,7 @@
 		let url_string = process.env.actiAppUrl + 'activateMultiGadget/'
 							+ this.user.account.name + '/'
 							+ prod_list_str + '/'
-							+ bcastRes.block_num + '/'
+							+ bcastRes.ref_block_num + '/'
 							+ bcastRes.id + '/'
 							+ cur_bchain;
 		//console.log('prodHasFriendBenefic');
@@ -487,7 +487,7 @@
 		let url = new URL( process.env.actiAppUrl + 'buyMultiGadget/'
 						+ this.user.account.name + '/'
 						+ prod_list_str + '/'
-						+ bcastRes.block_num + '/'
+						+ bcastRes.ref_block_num + '/'
 						+ bcastRes.id + '/'
 						+ cur_bchain);
 	
@@ -607,7 +607,7 @@
 		this.buyInProgress = false;
 	  },
 	  async confirmCompletion (type, amount, res, attempt){
-		if (res.block_num){
+		if (res.ref_block_num){
 			//console.log (res);
 			
 			
@@ -631,7 +631,7 @@
 			url = new URL( tgtNode + 'buyMultiGadgetHive/'
 							+ this.user.account.name + '/'
 							+ memo + '/'
-							+ res.block_num + '/'
+							+ res.ref_block_num + '/'
 							+ res.id + '/'
 							+ cur_bchain);
 

@@ -219,7 +219,7 @@
 		//if (!this.stdLogin){
 			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
 			//console.log(res);
-			if (res.result.block_num) {
+			if (res.result.ref_block_num) {
 				console.log('success');
 				return {success: true, trx: res.result};
 			}else{
@@ -323,7 +323,7 @@
 		let req_res = await fetch(process.env.actiAppUrl+'addFriend/'
 			+ this.user.account.name + '/'
 			+ targetFriend + '/'
-			+ res.block_num + '/'
+			+ res.ref_block_num + '/'
 			+ res.id + '/' + this.cur_bchain);
 		let outcome = await req_res.json();
 		if (outcome.status=='success'){
