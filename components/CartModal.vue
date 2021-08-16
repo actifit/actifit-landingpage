@@ -592,8 +592,55 @@
 			}
 			console.log(memo);
 			let attempt = 1;
-			let res = await hive.broadcast.transferAsync(this.userActvKey, this.user.account.name, process.env.actifitMarketBuy, payAmount + ' ' + 'HIVE', memo).then(
+			/*let res = await hive.broadcast.transferAsync(this.userActvKey, this.user.account.name, process.env.actifitMarketBuy, payAmount + ' ' + 'HIVE', memo).then(
 				res => this.confirmCompletion('transfer', payAmount, res, attempt)).catch(err=> this.errorCompletion(err));
+			*/
+			//proceed with payment
+			//let chainLnk = await this.setProperNode ();
+			//transferToVesting(wif, from, to, amount)
+			//console.log('prior to call');
+			
+			let accToken = localStorage.getItem('access_token')
+			
+			let cstm_params = {
+			  "from": this.user.account.name,
+			  "to": process.env.actifitMarketBuy,
+			  "amount": payAmount + ' ' + 'HIVE',
+			  "memo": memo
+			};
+			
+			//let res = await this.processTrxFunc('transfer', cstm_params, this.cur_bchain);
+			
+			let operation = [ 
+			   ['transfer', cstm_params]
+			];
+			
+			
+			let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+			
+			let url = new URL(process.env.actiAppUrl + 'performTrxPost/?user='+this.user.account.name+'&bchain='+cur_bchain);
+			
+			let reqHeads = new Headers({
+			  'Content-Type': 'application/json',
+			  'x-acti-token': 'Bearer ' + accToken,
+			});
+			let res = await fetch(url, {
+				method: 'POST',
+				headers: reqHeads,
+				body: JSON.stringify({'operation': JSON.stringify(operation), 'active': this.userActvKey})
+			});
+			let outcome = await res.json();
+			
+			console.log(outcome);
+			if (outcome.success && outcome.trx){
+				
+				this.confirmCompletion('transfer', payAmount, outcome.trx.tx, attempt);
+				console.log('after call');
+				//this.$router.push('/login');
+			}else{
+				this.errorCompletion(outcome.error);
+				
+			}
 				
 		}catch(excp){
 			console.log(excp);
