@@ -17,7 +17,10 @@
 		  <div>
 		  <a href="https://actifit.io/@actifit/win-up-to-200000-usdt-with-actifit-early-bird-token-sale-kicks-off-september-15-1600-utc" class="btn btn-brand m-2" target="_blank">Event Details</a>
 		  <a href="https://www.youtube.com/watch?v=Vc6rpDU99nk" class="btn btn-brand m-2" target="_blank">Video Announcement</a> 
-		  <a href="https://youtu.be/nVcBy1JSSxg" class="btn btn-brand m-2" target="_blank">Investment Vid Tutorial</a></div>
+		  <a href="https://forms.gle/EQThRY4xiFzaxupH8" class="btn btn-brand m-2 back-red" target="_blank">Join NOW!</a>
+		  <a href="https://youtu.be/nVcBy1JSSxg" class="btn btn-brand m-2" target="_blank">Investment Tutorial</a>
+		  
+		  </div>
 		  <div><span class="end-string">Token Sale ends in </span><Countdown v-if="countDownReady" deadline="September 19, 2021 15:59 GMT"></Countdown><i v-else class="fas fa-spin fa-spinner text-brand"></i></div>
 		</div>
 	  </transition>
@@ -111,5 +114,11 @@
 	}
 	.img-container{
 	  
+	}
+	.back-red{
+		background: #a17f1a;
+	}
+	.back-red:hover{
+		background: gold;
 	}
 </style>
