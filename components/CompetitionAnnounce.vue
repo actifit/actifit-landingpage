@@ -88,7 +88,7 @@
 	  opacity: 1;
 	}
 	.acti-notify-comp-inner{
-	  background: white; 
+	  background: white!important; 
 	}
 	.vuejs-countdown .digit{
 	  font-size: 20px !important;
