@@ -1,7 +1,7 @@
 <template>
   <div :class="outserSmallScreenClasses" class="position-fixed text-brand mx-auto w-100 acti-notify-comp" >
 	<div :class="smallScreenClasses" class="text-center mx-auto acti-notify-comp-inner border-2 rounded">
-	  <div>Get in shape challenge with Actifit & APPICS!
+	  <div>Grab Your First AFIT/AFITX On Binance Smart Chain!<br />Win Up To 200,000 USDT!!
 		<a href="" @click.prevent="adjustVisibility" class="expand-comp-notice">
 			<span v-if="showCompDetails">&#9651;</span>
 			<span v-else>&#9661;</span>
@@ -9,13 +9,16 @@
 	  <transition name="fade">
 		<div class="extra-info" v-if="showCompDetails">
 		  <div class="img-container row">
-			<iframe v-if="screenWidth < 768" src="http://www.youtube.com/embed/kS6AXH1kY74" width="320" height="180" frameborder="0" class="mx-auto" allowfullscreen></iframe>
-			<iframe v-else src="https://www.youtube.com/embed/kS6AXH1kY74" width="640" height="360" frameborder="0" class="mx-auto" allowfullscreen></iframe>
+			<!--<iframe v-if="screenWidth < 768" src="http://www.youtube.com/embed/kS6AXH1kY74" width="320" height="180" frameborder="0" class="mx-auto" allowfullscreen></iframe>
+			<iframe v-else src="https://www.youtube.com/embed/kS6AXH1kY74" width="640" height="360" frameborder="0" class="mx-auto" allowfullscreen></iframe>-->
 			<!--<iframe width="640" height="360" src="https://www.youtube.com/embed/kS6AXH1kY74"></iframe>-->
-			<!--<img class="announce-img" src="/img/actifit-christmas-event.jpg">-->
+			<img class="announce-img" src="/img/early-bird-banner.png">
 		  </div>
-		  <div><a href="https://actifit.io/@actifit/get-in-shape-challenge-with-actifit-and-appics" class="btn btn-brand m-2">Event Details!</a></div>
-		  <div><span class="end-string">Event ends in </span><Countdown v-if="countDownReady" deadline="March 16, 2020 23:59 GMT"></Countdown><i v-else class="fas fa-spin fa-spinner text-brand"></i></div>
+		  <div>
+		  <a href="https://actifit.io/@actifit/win-up-to-200000-usdt-with-actifit-early-bird-token-sale-kicks-off-september-15-1600-utc" class="btn btn-brand m-2" target="_blank">Event Details</a>
+		  <a href="https://www.youtube.com/watch?v=Vc6rpDU99nk" class="btn btn-brand m-2" target="_blank">Video Announcement</a> 
+		  <a href="https://youtu.be/nVcBy1JSSxg" class="btn btn-brand m-2" target="_blank">Investment Vid Tutorial</a></div>
+		  <div><span class="end-string">Token Sale ends in </span><Countdown v-if="countDownReady" deadline="September 19, 2021 15:59 GMT"></Countdown><i v-else class="fas fa-spin fa-spinner text-brand"></i></div>
 		</div>
 	  </transition>
 	</div>
@@ -102,7 +105,7 @@
 	  padding-right: 5px;
 	}
 	.announce-img{
-	  max-height: 70vh;
+	  max-height: 65vh;
 	  margin: auto;
 	  max-width: 100%;
 	}
