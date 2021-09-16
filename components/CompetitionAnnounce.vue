@@ -105,12 +105,20 @@
 	.expand-comp-notice{
 	  float:right; 
 	  cursor: hand; 
-	  padding-right: 5px;
+	  padding-right: 10px;
 	}
 	.announce-img{
 	  max-height: 65vh;
 	  margin: auto;
 	  max-width: 100%;
+	}
+	
+	@media only screen and (max-width: 700px) {
+		.announce-img{
+		  max-height: 50vh;
+		  margin: auto;
+		  max-width: 90%;
+		}
 	}
 	.img-container{
 	  
