@@ -1,6 +1,6 @@
 <template>
   <div :class="outserSmallScreenClasses" class="position-fixed text-brand mx-auto w-100 acti-notify-comp" v-if="innerShowModal || showCompDetails" id="friendshipModal" tabindex="-1">
-	<div :class="smallScreenClasses" class="text-center mx-auto acti-notify-comp-inner border-2 rounded" role="document">
+	<div :class="smallScreenClasses" class="text-center mx-auto acti-notify-comp-inner-friend border-2 rounded" role="document">
 	  <div :class="titleClass" class="row max-acti-width text-white mx-auto px-2">
 		<div :class="mainTitleClass"><span>{{ $t('friendship_hook_title') }}</span>
 		<span class="d-none d-md-inline-block font-italic"><br/>{{ $t('friendship_subtitle') }}</span></div>
@@ -444,7 +444,7 @@
 	  vertical-align: top;
 	  opacity: 1;
 	}
-	.acti-notify-comp-inner{
+	.acti-notify-comp-inner-friend{
 	  background-color: darkred; 
 	}
 	.vuejs-countdown .digit{

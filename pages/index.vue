@@ -470,7 +470,7 @@
 
     <Footer isHomePage='true'/>
 	
-	<FriendshipModal v-if="user"/>
+	<!-- <FriendshipModal v-if="user"/> -->
 	
     <NewsModal :news="activeNews" />
 	<NotifyModal :modalTitle="$t('Actifit_Info')" :modalText="$t('VP_desc')"/>
@@ -490,7 +490,7 @@
   import { mapGetters } from 'vuex'
   import SteemStats from '~/components/SteemStats'
   import NotifyModal from '~/components/NotifyModal'
-  import FriendshipModal from '~/components/FriendshipModal'
+  //import FriendshipModal from '~/components/FriendshipModal'
   
   import CompetitionAnnounce from '~/components/CompetitionAnnounce'
 
@@ -501,8 +501,8 @@
       News,
       NewsModal,
 	  SteemStats,
-	  NotifyModal,
-	  FriendshipModal
+	  NotifyModal
+	  //,FriendshipModal
 	  ,CompetitionAnnounce
     },
     data () {
