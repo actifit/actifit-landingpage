@@ -20,7 +20,7 @@
 		  <a href="https://tokensale.actifit.io" class="btn btn-brand m-2 back-red" target="_blank">Join NOW!</a>
 		  
 		  </div>
-		  <div><span class="end-string">Token Sale ends in </span><Countdown v-if="countDownReady" deadline="October 1, 2021 00:00 GMT"></Countdown><i v-else class="fas fa-spin fa-spinner text-brand"></i></div>
+		  <div><span class="end-string">Token Sale ends in </span><Countdown v-if="countDownReady" deadline="October 31, 2021 22:00 GMT"></Countdown><i v-else class="fas fa-spin fa-spinner text-brand"></i></div>
 		</div>
 	  </transition>
 	</div>
