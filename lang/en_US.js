@@ -748,5 +748,9 @@ module.exports = {
   confirm_receipt: 'Confirm Receipt',
   viewing_comment_note: 'You are viewing a reply. ',
   view_parent_thread: 'Click to view upper level thread',
-  notifications_enabled: 'Notifications Active'
+  notifications_enabled: 'Notifications Active',
+  bsc_wallet: 'Your BSC Wallet Address',
+  error_saving_wallet: 'There was an error saving your wallet address',
+  address_successfully_stored: 'Your wallet address has been successfully saved!',
+  bsc_details_notice: 'Connecting your metamask wallet address allows you to benefit from connecting Actifit on Hive and Actifit on Binance Smart Chain. The first step in this direction is by benefitting from an airdrop providing you with AFIT tokens airdropped to your wallet on BSC. This connection also allows you to receive airdrop of AFITX tokens for participating in the token sale. This link will grow by interconnecting your AFIT/AFITX between chains and providing lots of cool features down the road.'
 }

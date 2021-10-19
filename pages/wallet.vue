@@ -7,12 +7,32 @@
       <!-- account balance -->
       <div class="text-center">
         <h3 class="mb-4">{{ $t('Hey') }} {{ user.account.name }}!</h3>
-		<h5>{{ $t('account_est_val') }}<i class="fas fa-info-circle" v-on:click="showDetailedCalc=!showDetailedCalc"></i></h5>
-		<h5 v-if="this.tokenMetrics.length > 0">
-			<div class="pb-2">{{ $t('in_usd') }}: ${{ totalAccountValue}}</div>
-			<div class="pb-2" v-if="this.cur_bchain=='STEEM'">{{ $t('in_steem') }}: <img src="/img/STEEM.png" class="token-logo-sm">{{ formattedSteemTotVal }}</div>
-			<div class="pb-2" v-else-if="this.cur_bchain=='HIVE'">{{ $t('in_hive') }}: <img src="/img/HIVE.png" class="token-logo-sm">{{ formattedSteemTotVal }}</div>
-		</h5>
+		<div v-if="this.tokenMetrics.length > 0" class="row">
+			<div class="col-md-6 row-sep row-sep-in">
+				<h5 class="token-title">{{ $t('account_est_val') }}<i class="fas fa-info-circle" v-on:click="showDetailedCalc=!showDetailedCalc"></i></h5>
+				<div class="pb-2">{{ $t('in_usd') }}: ${{ totalAccountValue}}</div>
+				<div class="pb-2" v-if="this.cur_bchain=='STEEM'">{{ $t('in_steem') }}: <img src="/img/STEEM.png" class="token-logo-sm">{{ formattedSteemTotVal }}</div>
+				<div class="pb-2" v-else-if="this.cur_bchain=='HIVE'">{{ $t('in_hive') }}: <img src="/img/HIVE.png" class="token-logo-sm">{{ formattedSteemTotVal }}</div>
+			</div>
+			<div class="col-md-6 row-sep row-sep-in">
+				<!-- section for the BSC wallet -->
+				<h5 class="token-title">{{ $t('bsc_wallet')}}<img src="/img/Binance-gold-coin.gif" width="25px" height="25px"><i class="fas fa-info-circle" v-on:click="showBSCDetails=!showBSCDetails"></i></h5>
+				<div class="row text-left" v-if="showBSCDetails">
+					{{ $t('bsc_details_notice') }}
+				</div>
+				<div class="row">
+					<div class="col-md-8">
+						<input type="text" id="bsc-wallet-address" name="bsc-wallet-address" ref="bsc-wallet-address" class="form-control-lg w-50 p-2" :value="this.getWalletAddress()" placeholder="0x......">
+						<div v-if="error_wallet!=''" class="text-brand text-center">{{ error_wallet}}</div>
+						<button v-on:click="updateWalletAddress" class="btn btn-brand btn-lg w-50 border"><span v-if="this.bsc_wallet_address">{{ $t('Save') }}</span><span v-else>{{ $t('Save') }}</span></button>
+					</div>
+					<div class="col-md-4">
+						<a href="https://tokensale.actifit.io" target="_blank" class="btn btn-brand btn-lg w-100 border"><span >{{ $t('Token Sale') }}</span></a>
+						<a href="https://tokensale.actifit.io" target="_blank" class="btn btn-brand btn-lg w-100 border"><span >{{ $t('Airdrop') }}</span></a>
+					</div>
+				</div>
+			</div>
+		</div>
 		<div v-if="this.showDetailedCalc" class="text-center">
 			<div class="row">
 				<div class="w-25"></div>
@@ -938,6 +958,7 @@
 		nextAfitPDTarget: '',
 		afitPowerDownText: '',
 		showAfitxInfo: false,
+		showBSCDetails: false,
 		totalAccountValue: 0,
 		totalAccountValueSteem: 0,
 		detailCalculation: '',
@@ -962,7 +983,8 @@
 		loadingDeleg: false,
 		activeDelegations: [],
 		cancellingDelegation: false,
-		
+		bsc_wallet_address: '',
+		error_wallet: '',
 		extra_reward_arr: [
 							{afit: 50, upvote: 10},
 							{afit: 100, upvote: 15},
@@ -1067,6 +1089,50 @@
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
+	  getWalletAddress (){
+		return this.bsc_wallet_address;
+	  },
+	  setUserWalletAddress (json){
+		console.log('setUserWalletAddress');
+		console.log(json);
+		if (Array.isArray(json) && json.length>0){
+			this.bsc_wallet_address = json[0].wallet;
+		}else{
+			console.log('error fetching wallet');
+		}
+	  },
+	  async updateWalletAddress (){
+		//return this.bsc_wallet_address;
+		this.error_wallet = '';
+		if (this.$refs['bsc-wallet-address'].value == ''){
+			this.error_wallet = this.$t('all_fields_required');
+			return;
+		}
+		//grab token
+		let accToken = localStorage.getItem('access_token')
+		
+		let url = new URL(process.env.actiAppUrl + 'storeUserWalletAddress/?user='+this.user.account.name+'&wallet='+this.$refs['bsc-wallet-address'].value);
+
+		let reqHeads = new Headers({
+		  'Content-Type': 'application/json',
+		  'x-acti-token': 'Bearer ' + accToken,
+		});
+		let res = await fetch(url, {
+			headers: reqHeads
+		});
+		let outcome = await res.json();
+		console.log(outcome);
+		if (outcome.error){
+			this.error_wallet = this.$t('error_saving_wallet');
+		}else{
+			console.log('success');
+			this.$notify({
+			  group: 'success',
+			  text: this.$t('address_successfully_stored'),
+			  position: 'top center'
+			})
+		}
+	  },
 	  renderTransAmount (nofrmt) {
 		if (this.transferType == 'SBD' || this.transferType == 'HBD'){
 			return this.renderSBDBalance(this.cur_bchain, nofrmt)
@@ -1489,6 +1555,13 @@
 		  }else{
 			this.tokenMetrics = await hsc.find('market', 'metrics', {symbol : { '$in' : tokensOfInterest.concat(['AFIT','AFITX']) }}, 1000, 0, '', false);	
 		  }
+		  
+		  //let's grab the user's wallet address
+		  fetch(process.env.actiAppUrl+'getUserWalletAddress?user='+this.user.account.name).then(
+			res => {res.json().then(json => this.setUserWalletAddress (json) ).catch(e => reject(e))
+		  }).catch(e => reject(e))
+		  
+		  
 		  //check if user is powering down AFIT to SE
 		  fetch(process.env.actiAppUrl+'isPoweringDown/'+this.user.account.name).then(
 			res => {res.json().then(json => this.setUserPDAfitStatus (json) ).catch(e => reject(e))
