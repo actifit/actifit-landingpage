@@ -28,7 +28,7 @@
 					</div>
 					<div class="col-md-4">
 						<a href="https://tokensale.actifit.io" target="_blank" class="btn btn-brand btn-lg w-100 border"><span >{{ $t('Token Sale') }}</span></a>
-						<a href="https://tokensale.actifit.io" target="_blank" class="btn btn-brand btn-lg w-100 border"><span >{{ $t('Airdrop') }}</span></a>
+						<a href="https://actifit.io/@actifit/your-free-afit-airdrop-on-bsc-is-here-setup-your-wallets-before-october-26" target="_blank" class="btn btn-brand btn-lg w-100 border"><span >{{ $t('Airdrop') }}</span></a>
 					</div>
 				</div>
 			</div>
