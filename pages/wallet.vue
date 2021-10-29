@@ -21,14 +21,23 @@
 					{{ $t('bsc_details_notice') }}
 				</div>
 				<div class="row">
-					<div class="col-md-8">
-						<input type="text" id="bsc-wallet-address" name="bsc-wallet-address" ref="bsc-wallet-address" class="form-control-lg w-50 p-2" :value="this.getWalletAddress()" placeholder="0x......">
-						<div v-if="error_wallet!=''" class="text-brand text-center">{{ error_wallet}}</div>
-						<button v-on:click="updateWalletAddress" class="btn btn-brand btn-lg w-50 border"><span v-if="this.bsc_wallet_address">{{ $t('Save') }}</span><span v-else>{{ $t('Save') }}</span></button>
+					<div class="col-md-12">
+						
+						<div class="font-weight-bold text-brand">{{$t('airdrop_results')}}</div>
+						<div v-if="this.airdropResults.user">{{$t('airdrop_reward').replace('_AFITBALANCE_',this.airdropResults.tokens_count).replace('_AFITBSC_',this.airdropResults.afit_bsc_reward)}}</div>
+						<div v-else>{{$t('airdrop_no_reward')}}</div>
+					
 					</div>
-					<div class="col-md-4">
-						<a href="https://tokensale.actifit.io" target="_blank" class="btn btn-brand btn-lg w-100 border"><span >{{ $t('Token Sale') }}</span></a>
-						<a href="https://actifit.io/@actifit/your-free-afit-airdrop-on-bsc-is-here-setup-your-wallets-before-october-26" target="_blank" class="btn btn-brand btn-lg w-100 border"><span >{{ $t('Airdrop') }}</span></a>
+					<div class="row col-md-12">
+						<div class="col-md-8">
+							<input type="text" id="bsc-wallet-address" name="bsc-wallet-address" ref="bsc-wallet-address" class="form-control-lg w-100 p-2" :value="this.getWalletAddress()" placeholder="0x......">
+							<div v-if="error_wallet!=''" class="text-brand text-center">{{ error_wallet}}</div>
+							<button v-on:click="updateWalletAddress" class="btn btn-brand btn-lg w-100 border"><span v-if="this.bsc_wallet_address">{{ $t('Save') }}</span><span v-else>{{ $t('Save') }}</span></button>
+						</div>
+						<div class="col-md-4">
+							<a href="https://tokensale.actifit.io" target="_blank" class="btn btn-brand btn-lg w-100 border"><span >{{ $t('Token Sale') }}</span></a>
+							<a href="https://actifit.io/@actifit/your-free-afit-airdrop-on-bsc-is-here-setup-your-wallets-before-october-26" target="_blank" class="btn btn-brand btn-lg w-100 border"><span >{{ $t('Airdrop') }}</span></a>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -991,6 +1000,7 @@
 							{afit: 150, upvote: 20},
 							{afit: 200, upvote: 25},
 						],
+		airdropResults: {},
 	  }
 	},
     components: {
@@ -1100,6 +1110,9 @@
 		}else{
 			console.log('error fetching wallet');
 		}
+	  },
+	  setAirdropResults (json){
+		this.airdropResults = json;
 	  },
 	  async updateWalletAddress (){
 		//return this.bsc_wallet_address;
@@ -1559,6 +1572,11 @@
 		  //let's grab the user's wallet address
 		  fetch(process.env.actiAppUrl+'getUserWalletAddress?user='+this.user.account.name).then(
 			res => {res.json().then(json => this.setUserWalletAddress (json) ).catch(e => reject(e))
+		  }).catch(e => reject(e))
+		  
+		  //grab user airdrop results
+		  fetch(process.env.actiAppUrl+'airdropResults?user='+this.user.account.name).then(
+			res => {res.json().then(json => this.setAirdropResults (json) ).catch(e => reject(e))
 		  }).catch(e => reject(e))
 		  
 		  
