@@ -1,7 +1,7 @@
 <template>
   <div :class="outserSmallScreenClasses" class="position-fixed text-brand mx-auto w-100 acti-notify-comp" >
 	<div :class="smallScreenClasses" class="text-center mx-auto acti-notify-comp-inner border-2 rounded">
-	  <div>Grab Your First AFIT/AFITX On Binance Smart Chain!<br />Win Up To 200,000 USDT!!
+	  <div>Actifit DeFi Soft Launch is LIVE!<br />Trade AFIT/AFITX, Setup Your Liquidity.
 		<a href="" @click.prevent="adjustVisibility" class="expand-comp-notice">
 			<span v-if="showCompDetails">&#9651;</span>
 			<span v-else>&#9661;</span>
@@ -12,15 +12,15 @@
 			<!--<iframe v-if="screenWidth < 768" src="http://www.youtube.com/embed/kS6AXH1kY74" width="320" height="180" frameborder="0" class="mx-auto" allowfullscreen></iframe>
 			<iframe v-else src="https://www.youtube.com/embed/kS6AXH1kY74" width="640" height="360" frameborder="0" class="mx-auto" allowfullscreen></iframe>-->
 			<!--<iframe width="640" height="360" src="https://www.youtube.com/embed/kS6AXH1kY74"></iframe>-->
-			<img class="announce-img" src="/img/token-sale-banner.png">
+			<img class="announce-img" src="/img/defi-soft-launch-announce.jpg">
 		  </div>
 		  <div>
-		  <a href="https://actifit.io/@actifit/we-have-winners-public-token-sale-kicks-off-today-t-7-hours" class="btn btn-brand m-2" target="_blank">Event Details</a>
+		  <!--<a href="https://actifit.io/@actifit/we-have-winners-public-token-sale-kicks-off-today-t-7-hours" class="btn btn-brand m-2" target="_blank">Event Details</a>
 		  <a href="https://www.youtube.com/watch?v=Vc6rpDU99nk" class="btn btn-brand m-2" target="_blank">Video Announcement</a> 
-		  <a href="https://tokensale.actifit.io" class="btn btn-brand m-2 back-red" target="_blank">Join NOW!</a>
-		  
+		  <a href="https://tokensale.actifit.io" class="btn btn-brand m-2 back-red" target="_blank">Join NOW!</a>-->
+		  <a href="https://defi.actifit.io" class="btn btn-brand m-2 back-red" target="_blank">Join NOW!</a>
 		  </div>
-		  <div><span class="end-string">Token Sale ends in </span><Countdown v-if="countDownReady" deadline="October 31, 2021 22:00 GMT"></Countdown><i v-else class="fas fa-spin fa-spinner text-brand"></i></div>
+		  <!--<div><span class="end-string">Token Sale ends in </span><Countdown v-if="countDownReady" deadline="October 31, 2021 22:00 GMT"></Countdown><i v-else class="fas fa-spin fa-spinner text-brand"></i></div>-->
 		</div>
 	  </transition>
 	</div>
@@ -29,11 +29,11 @@
 
 <script>
   import { mapGetters } from 'vuex'
-  import Countdown from 'vuejs-countdown'
+  //import Countdown from 'vuejs-countdown'
   
   export default {
 	components: {
-	  Countdown
+	  //Countdown
 	},
     data () {
       return {
