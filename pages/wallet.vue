@@ -79,6 +79,12 @@
 						<span class="btn btn-brand" :title="$t('move_afit_he_se_title')"><i class="fas fa-angle-double-left" v-on:click="moveAFITheSE"></i></span>
 					</span>
 				</h5>
+				<h5 class="mb-4 font-weight-bold row">
+					<span class="col-md-6">
+						<img src="/img/Binance-gold-coin.gif" width="25px" height="25px">{{ formattedUserAfitBSC }}
+					</span>
+				</h5>
+				
 				<div v-if="afitActivityMode == MOVE_AFIT_SE_HE || afitActivityMode == MOVE_AFIT_HE_SE">
 					  <div class="text-center p-2">
 						<div v-if="afitActivityMode == MOVE_AFIT_SE_HE" class="text-brand font-weight-bold">{{ $t('move_afit_se_he') }}</div>
@@ -133,6 +139,12 @@
 						{{ formattedUserAFITXHE }}
 						<br/>
 						<span class="btn btn-brand" :title="$t('move_afitx_he_se_title')"><i class="fas fa-angle-double-left" v-on:click="moveAFITXheSE"></i></span>
+					</span>
+				</h5>
+				<h5 class="mb-4 font-weight-bold row">
+					<span class="col-md-6">
+						<img src="/img/Binance-gold-coin.gif" width="25px" height="25px">
+						{{ formattedUserAFITXBSC }}
 					</span>
 				</h5>
 				<div v-if="afitActivityMode == MOVE_AFITX_SE_HE || afitActivityMode == MOVE_AFITX_HE_SE">
@@ -864,6 +876,29 @@
   const tokensOfInterest = ['SPORTS', 'PAL', 'APX', 'BEE'].concat(tokensNonStakable);
   
   import { mapGetters } from 'vuex'
+  
+  import Web3 from 'web3'
+  
+  const web3 = new Web3('https://bsc-dataseed1.binance.org:443');
+  
+  const minABI = [
+	  // balanceOf
+	  {
+		constant: true,
+		inputs: [{ name: "_owner", type: "address" }],
+		name: "balanceOf",
+		outputs: [{ name: "balance", type: "uint256" }],
+		type: "function",
+	  },
+	];
+	
+	//fetch AFIT + AFITX token address
+	const afitTokenAddress = "0x4516bb582f59befcbc945d8c2dac63ef21fba9f6";
+	const afitxTokenAddress = "0x246d22ff6e0b90f80f2278613e8db93ff7a09b95";
+	
+	const afitContract = new web3.eth.Contract(minABI, afitTokenAddress);
+	const afitxContract = new web3.eth.Contract(minABI, afitxTokenAddress);
+	
 
   export default {
 	head () {
@@ -946,6 +981,9 @@
 		
 		afit_he_balance: 0,
 		afitx_he_balance: 0,
+		
+		afitBalanceBSC: 0,
+		afitxBalanceBSC: 0,
 		
 		userAddedTokens: 0,
 		steemPrice: 0.1,
@@ -1032,11 +1070,17 @@
 	  formattedUserAfitHE () {
 		return this.numberFormat(parseFloat(this.afit_he_balance), 3) + " AFIT H-E";
       },
+	  formattedUserAfitBSC () {
+		return this.numberFormat(parseFloat(this.afitBalanceBSC), 3) + " AFIT BSC";
+      },
 	  formattedUserAFITXSE () {
 		return this.numberFormat(this.afitx_se_balance,3) + ' AFITX S-E';
 	  },
 	  formattedUserAFITXHE () {
 		return this.numberFormat(this.afitx_he_balance, 3) + ' AFITX H-E';
+	  },
+	  formattedUserAFITXBSC () {
+		return this.numberFormat(this.afitxBalanceBSC, 3) + ' AFITX BSC';
 	  },
 	  displayUserRank () {
 		return this.userRank
@@ -1102,6 +1146,19 @@
 	  getWalletAddress (){
 		return this.bsc_wallet_address;
 	  },
+	  async getBalance() {
+		console.log('>>getBalance');
+		let result = await afitContract.methods.balanceOf(this.bsc_wallet_address).call(); // 29803630997051883414242659
+		let format = web3.utils.fromWei(result); // 29803630.997051883414242659
+		console.log(format);
+		this.afitBalanceBSC = format;
+		
+		result = await afitxContract.methods.balanceOf(this.bsc_wallet_address).call(); // 29803630997051883414242659
+		format = web3.utils.fromWei(result); // 29803630.997051883414242659
+		console.log(format);
+		console.log('end get balance');
+		this.afitxBalanceBSC = format;
+	  },
 	  setUserWalletAddress (json){
 		console.log('setUserWalletAddress');
 		console.log(json);
@@ -1110,6 +1167,8 @@
 		}else{
 			console.log('error fetching wallet');
 		}
+		this.getBalance();
+		//grab token count in wallet
 	  },
 	  setAirdropResults (json){
 		this.airdropResults = json;
