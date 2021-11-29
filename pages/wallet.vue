@@ -82,10 +82,12 @@
 				<h5 class="mb-4 font-weight-bold row">
 					<span class="col-md-6">
 						<img src="/img/Binance-gold-coin.gif" width="25px" height="25px">{{ formattedUserAfitBSC }}
+						<a target="_blank" :href="'https://bscscan.com/address/'+afitTokenAddress"><i class="fas fa-file-contract text-brand"></i></a>
 						<br/>
 					</span>
 					<span class="col-md-6">
 						<img src="/img/Binance-gold-coin.gif" width="25px" height="25px">{{ formattedUserAfitBNBLPBSC }}
+						<a target="_blank" :href="'https://bscscan.com/address/'+afitBNBLPTokenAddress"><i class="fas fa-file-contract text-brand"></i></a>
 					</span>
 					
 				</h5>
@@ -150,10 +152,12 @@
 					<span class="col-md-6">
 						<img src="/img/Binance-gold-coin.gif" width="25px" height="25px">
 						{{ formattedUserAFITXBSC }}
+						<a target="_blank" :href="'https://bscscan.com/address/'+afitxTokenAddress"><i class="fas fa-file-contract text-brand"></i></a>
 						<br/>
 					</span>
 					<span class="col-md-6">
 						<img src="/img/Binance-gold-coin.gif" width="25px" height="25px">{{ formattedUserAFITXBNBLPBSC }}
+						<a target="_blank" :href="'https://bscscan.com/address/'+afitxBNBLPTokenAddressTokenAddress"><i class="fas fa-file-contract text-brand"></i></a>
 					</span>
 				</h5>
 				<div v-if="afitActivityMode == MOVE_AFITX_SE_HE || afitActivityMode == MOVE_AFITX_HE_SE">
@@ -912,7 +916,6 @@
 	const afitBNBLPContract = new web3.eth.Contract(minABI, afitBNBLPTokenAddress);
 	const afitxBNBLPContract = new web3.eth.Contract(minABI, afitxBNBLPTokenAddress);
 	
-
   export default {
 	head () {
 		return {
@@ -931,6 +934,10 @@
 		POWERDOWN_FUNDS: 3,
 		WITHDRAW_FUNDS: 4,
 		DELEGATE_FUNDS: 5,
+		afitTokenAddress: '',
+		afitxTokenAddress: '',
+		afitBNBLPTokenAddress: '',
+		afitxBNBLPTokenAddress: '',
 		EXCHANGE_AFIT_STEEM: 1,
 		MOVE_AFITX_SE_HE: 6,
 		MOVE_AFITX_HE_SE: 7,
@@ -3819,6 +3826,12 @@
 	  clearInterval(this.runningInterval);
 	},
     async mounted () {
+		this.afitTokenAddress = afitTokenAddress;
+		this.afitxTokenAddress = afitxTokenAddress;
+		this.afitBNBLPTokenAddress = afitBNBLPTokenAddress;
+		this.afitxBNBLPTokenAddress = afitxBNBLPTokenAddress;
+
+	
 	  //check which chain is active
 	  if (localStorage.getItem('cur_bchain')){
 		this.cur_bchain = localStorage.getItem('cur_bchain')
