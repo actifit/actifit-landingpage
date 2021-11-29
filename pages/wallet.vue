@@ -82,7 +82,12 @@
 				<h5 class="mb-4 font-weight-bold row">
 					<span class="col-md-6">
 						<img src="/img/Binance-gold-coin.gif" width="25px" height="25px">{{ formattedUserAfitBSC }}
+						<br/>
 					</span>
+					<span class="col-md-6">
+						<img src="/img/Binance-gold-coin.gif" width="25px" height="25px">{{ formattedUserAfitBNBLPBSC }}
+					</span>
+					
 				</h5>
 				
 				<div v-if="afitActivityMode == MOVE_AFIT_SE_HE || afitActivityMode == MOVE_AFIT_HE_SE">
@@ -145,6 +150,10 @@
 					<span class="col-md-6">
 						<img src="/img/Binance-gold-coin.gif" width="25px" height="25px">
 						{{ formattedUserAFITXBSC }}
+						<br/>
+					</span>
+					<span class="col-md-6">
+						<img src="/img/Binance-gold-coin.gif" width="25px" height="25px">{{ formattedUserAFITXBNBLPBSC }}
 					</span>
 				</h5>
 				<div v-if="afitActivityMode == MOVE_AFITX_SE_HE || afitActivityMode == MOVE_AFITX_HE_SE">
@@ -892,12 +901,16 @@
 	  },
 	];
 	
-	//fetch AFIT + AFITX token address
-	const afitTokenAddress = "0x4516bb582f59befcbc945d8c2dac63ef21fba9f6";
-	const afitxTokenAddress = "0x246d22ff6e0b90f80f2278613e8db93ff7a09b95";
+	//fetch AFIT, AFITX, & LP token addresses
+	const afitTokenAddress = process.env.afitTokenBSC;
+	const afitxTokenAddress = process.env.afitxTokenBSC;
+	const afitBNBLPTokenAddress = process.env.afitBNBLPTokenBSC;
+	const afitxBNBLPTokenAddress = process.env.afitxBNBLPTokenBSC;
 	
 	const afitContract = new web3.eth.Contract(minABI, afitTokenAddress);
 	const afitxContract = new web3.eth.Contract(minABI, afitxTokenAddress);
+	const afitBNBLPContract = new web3.eth.Contract(minABI, afitBNBLPTokenAddress);
+	const afitxBNBLPContract = new web3.eth.Contract(minABI, afitxBNBLPTokenAddress);
 	
 
   export default {
@@ -984,6 +997,8 @@
 		
 		afitBalanceBSC: 0,
 		afitxBalanceBSC: 0,
+		afitBNBLPBalanceBSC: 0,
+		afitxBNBLPBalanceBSC: 0,
 		
 		userAddedTokens: 0,
 		steemPrice: 0.1,
@@ -1073,6 +1088,12 @@
 	  formattedUserAfitBSC () {
 		return this.numberFormat(parseFloat(this.afitBalanceBSC), 3) + " AFIT BSC";
       },
+	  formattedUserAfitBNBLPBSC () {
+		return this.numberFormat(parseFloat(this.afitBNBLPBalanceBSC), 3) + " AFIT-BNB LP BSC";
+      },
+	  formattedUserAFITXBNBLPBSC () {
+		return this.numberFormat(parseFloat(this.afitxBNBLPBalanceBSC), 3) + " AFITX-BNB LP BSC";
+      },
 	  formattedUserAFITXSE () {
 		return this.numberFormat(this.afitx_se_balance,3) + ' AFITX S-E';
 	  },
@@ -1158,6 +1179,18 @@
 		console.log(format);
 		console.log('end get balance');
 		this.afitxBalanceBSC = format;
+		
+		result = await afitBNBLPContract.methods.balanceOf(this.bsc_wallet_address).call(); // 29803630997051883414242659
+		format = web3.utils.fromWei(result); // 29803630.997051883414242659
+		console.log(format);
+		console.log('end get balance');
+		this.afitBNBLPBalanceBSC = format;
+		
+		result = await afitxBNBLPContract.methods.balanceOf(this.bsc_wallet_address).call(); // 29803630997051883414242659
+		format = web3.utils.fromWei(result); // 29803630.997051883414242659
+		console.log(format);
+		console.log('end get balance');
+		this.afitxBNBLPBalanceBSC = format;
 	  },
 	  setUserWalletAddress (json){
 		console.log('setUserWalletAddress');
