@@ -2,14 +2,23 @@
   <div>
 	<NavbarBrand />
 	
-	<div class="container pt-5 mt-5 pb-5" v-if="user">
-	
+	<div class="container pt-5 mt-5 pb-5">
+		
 		<h4 class="text-center user-name">{{ $t('Password_management') }}</h4>
 		<div class=" pb-3">
+			<div class="row" v-if="!user">
+				<label for="username" class="font-weight-bold col-3">{{ $t('Your_Username') }}</label>
+				<input class="form-control form-control-lg mb-2 col-7" type="text" ref="username" id="username">
+			</div>
 			<div class="row">
 				<label for="passfetchdata" class="font-weight-bold col-3">{{ $t('Your_pass') }} {{ cur_bchain}} <img :src="'/img/'+cur_bchain+'.png'" style="max-height: 50px;"></label>
 				<input class="form-control form-control-lg mb-2 col-7" ref="passfetchdata" id="passfetchdata" />
 			</div>
+			<vue-recaptcha ref="recaptcha" @verify="onVerifyCaptcha" @render="captchaReady=true" @expired="onExpiredCaptcha" :loadRecaptchaScript="true" sitekey="6LdpcoMUAAAAAPGTqlvhKEK6Ayw5NqLDZz5Sjudq" v-if="!user">
+				</vue-recaptcha>
+			<p class="text-brand" v-if="!user && captcha_invalid">
+				  <b>{{ captcha_invalid }}</b>
+				</p>
 			<button v-on:click="fetchKeys" class="btn btn-brand btn-lg">{{ $t('Fetch_keys') }}<i class="fas fa-spin fa-spinner text-white" v-if="fetchingPass"></i></button>
 			<div class="text-brand" v-if="errorFetch">{{ errorFetch }}</div>
 			<div class="form-group">
@@ -40,86 +49,88 @@
 			  </div>
 			</div>
 			
-			<h5>{{ $t('Change_recovery_account') }}</h5>
-			
-			<div>{{ $t('Change_recovery_account_desc') }}</div>
-			
-			<div class="row">
-				<label for="curRecoveryAccount" class="font-weight-bold col-3">{{ $t('Current_recovery_account') }}</label>
-				<input class="form-control form-control-lg mb-2 col-7" ref="curRecoveryAccount" id="curRecoveryAccount" :value="user.account.recovery_account" readonly/>
-			</div>
-			<div class="row">
-				<label for="newRecoveryAccount" class="font-weight-bold col-3">{{ $t('New_recovery_account') }}</label>
-				<input class="form-control form-control-lg mb-2 col-7" ref="newRecoveryAccount" id="newRecoveryAccount" />
-			</div>
-			<div class="row">
-				<label for="ownKey" class="font-weight-bold col-3">{{ $t('Private_owner_key') }}</label>
-				<input class="form-control form-control-lg mb-2 col-7" ref="ownKey" id="ownKey"/>
-			</div>
-			<button v-on:click="changeRecoveryAccount" class="btn btn-brand btn-lg">
-				{{ $t('Change_recovery_account') }}
-				<i class="fas fa-spin fa-spinner text-white" v-if="updatingRecovery"></i>
-			</button><br/>
-			<div class="text-brand" v-if="errorUpdateRecovery">{{ errorUpdateRecovery }}</div>
-			
-			<h5>{{ $t('Change_password') }}</h5>
-			
-			
-			<div>{{ $t('Change_password_desc') }}</div>
-			<div class="row">
-				<div class="font-weight-bold pb-3 col-3">{{ $t('Apply_pass_change_to') }}</div>
-				<div class="bchain-option btn ml-2 p-2 row text-left">
-					<input type="radio" id="hive_steem" value="BOTH" v-model="target_bchain">
-					<img src="/img/HIVE.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px;" :class="adjustBothClass">
-					<img src="/img/STEEM.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px;" :class="adjustBothClass">
-					<label for="hive_steem">HIVE + STEEM</label>
+			<div v-if="user">
+				<h5>{{ $t('Change_recovery_account') }}</h5>
+				
+				<div>{{ $t('Change_recovery_account_desc') }}</div>
+				
+				<div class="row">
+					<label for="curRecoveryAccount" class="font-weight-bold col-3">{{ $t('Current_recovery_account') }}</label>
+					<input class="form-control form-control-lg mb-2 col-7" ref="curRecoveryAccount" id="curRecoveryAccount" :value="user.account.recovery_account" readonly/>
 				</div>
-				<div class="bchain-option btn ml-2 p-2 row text-left" v-if="cur_bchain=='HIVE'">
-					<input type="radio" id="hive" value="HIVE" v-model="target_bchain">
-					<img src="/img/HIVE.png" style="max-height: 50px;"  v-on:click="target_bchain = 'HIVE'" :class="adjustHiveClass">
-					<label for="hive">HIVE ONLY</label>
+				<div class="row">
+					<label for="newRecoveryAccount" class="font-weight-bold col-3">{{ $t('New_recovery_account') }}</label>
+					<input class="form-control form-control-lg mb-2 col-7" ref="newRecoveryAccount" id="newRecoveryAccount" />
 				</div>
-				<div class="bchain-option btn ml-2 p-2 row text-left" v-else-if="cur_bchain=='STEEM'">
-					<input type="radio" id="steem" value="STEEM" v-model="target_bchain">
-					<img src="/img/STEEM.png" style="max-height: 50px;"  v-on:click="target_bchain = 'STEEM'" :class="adjustSteemClass">
-					<label for="steem">STEEM ONLY</label>
+				<div class="row">
+					<label for="ownKey" class="font-weight-bold col-3">{{ $t('Private_owner_key') }}</label>
+					<input class="form-control form-control-lg mb-2 col-7" ref="ownKey" id="ownKey"/>
 				</div>
-			</div>
-			<div class="row">
-				<label for="passchangedata" class="font-weight-bold col-3">{{ $t('Your_current_pass') }} {{ cur_bchain}} <img :src="'/img/'+cur_bchain+'.png'" style="max-height: 50px;"></label>
-				<input class="form-control form-control-lg mb-2 col-7" ref="passchangedata" id="passchangedata" />
-				<button v-on:click="verifyPassByChain($refs['passchangedata'].value, cur_bchain, 1)" data-targetEl="newAcctPwdField" class="btn btn-brand btn-lg w-20 mb-2 ml-1">{{ $t('Verify') }}</button>
-				<div><i class="fas fa-spin fa-spinner text-brand m-lg-3" v-if="validatingA"></i>
-				<i class="fas fa-check text-success m-lg-3" v-if="passAValid"></i>
-				<i class="fas fa-times text-danger m-lg-3" v-else></i>
+				<button v-on:click="changeRecoveryAccount" class="btn btn-brand btn-lg">
+					{{ $t('Change_recovery_account') }}
+					<i class="fas fa-spin fa-spinner text-white" v-if="updatingRecovery"></i>
+				</button><br/>
+				<div class="text-brand" v-if="errorUpdateRecovery">{{ errorUpdateRecovery }}</div>
+				
+				<h5>{{ $t('Change_password') }}</h5>
+				
+				
+				<div>{{ $t('Change_password_desc') }}</div>
+				<div class="row">
+					<div class="font-weight-bold pb-3 col-3">{{ $t('Apply_pass_change_to') }}</div>
+					<div class="bchain-option btn ml-2 p-2 row text-left">
+						<input type="radio" id="hive_steem" value="BOTH" v-model="target_bchain">
+						<img src="/img/HIVE.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px;" :class="adjustBothClass">
+						<img src="/img/STEEM.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px;" :class="adjustBothClass">
+						<label for="hive_steem">HIVE + STEEM</label>
+					</div>
+					<div class="bchain-option btn ml-2 p-2 row text-left" v-if="cur_bchain=='HIVE'">
+						<input type="radio" id="hive" value="HIVE" v-model="target_bchain">
+						<img src="/img/HIVE.png" style="max-height: 50px;"  v-on:click="target_bchain = 'HIVE'" :class="adjustHiveClass">
+						<label for="hive">HIVE ONLY</label>
+					</div>
+					<div class="bchain-option btn ml-2 p-2 row text-left" v-else-if="cur_bchain=='STEEM'">
+						<input type="radio" id="steem" value="STEEM" v-model="target_bchain">
+						<img src="/img/STEEM.png" style="max-height: 50px;"  v-on:click="target_bchain = 'STEEM'" :class="adjustSteemClass">
+						<label for="steem">STEEM ONLY</label>
+					</div>
 				</div>
-			</div>
-			
-			<div class="row" v-if="target_bchain == 'BOTH'">
-				<label for="passchangedataother" class="font-weight-bold col-3">{{ $t('Your_current_pass') }} {{ (cur_bchain=='HIVE'?'STEEM':'HIVE')}} <img :src="'/img/'+(cur_bchain=='HIVE'?'STEEM':'HIVE')+'.png'" style="max-height: 50px;"></label>
-				<input class="form-control form-control-lg mb-2 col-7" ref="passchangedataother" id="passchangedataother" />
-				<button v-on:click="verifyPassByChain($refs['passchangedataother'].value, (cur_bchain=='HIVE'?'STEEM':'HIVE'), 2)" data-targetEl="newAcctPwdField" class="btn btn-brand btn-lg w-20 mb-2 ml-1">{{ $t('Verify') }}</button>
-				<div><i class="fas fa-spin fa-spinner text-brand m-lg-3" v-if="validatingB"></i>
-				<i class="fas fa-check text-success m-lg-3" v-if="passBValid"></i>
-				<i class="fas fa-times text-danger m-lg-3" v-else></i>
+				<div class="row">
+					<label for="passchangedata" class="font-weight-bold col-3">{{ $t('Your_current_pass') }} {{ cur_bchain}} <img :src="'/img/'+cur_bchain+'.png'" style="max-height: 50px;"></label>
+					<input class="form-control form-control-lg mb-2 col-7" ref="passchangedata" id="passchangedata" />
+					<button v-on:click="verifyPassByChain($refs['passchangedata'].value, cur_bchain, 1)" data-targetEl="newAcctPwdField" class="btn btn-brand btn-lg w-20 mb-2 ml-1">{{ $t('Verify') }}</button>
+					<div><i class="fas fa-spin fa-spinner text-brand m-lg-3" v-if="validatingA"></i>
+					<i class="fas fa-check text-success m-lg-3" v-if="passAValid"></i>
+					<i class="fas fa-times text-danger m-lg-3" v-else></i>
+					</div>
 				</div>
-			</div>
-			
-			<button v-on:click="setPasswordVal" class="btn btn-brand btn-lg w-20 mb-2">{{ $t('Generate_New_Password') }}</button>
-			
-			<div class="row">
-				<label for="newAcctPwdField" class="font-weight-bold col-3">{{ $t('Your_new_pass') }}</label>
-				<input class="form-control form-control-lg mb-2 col-7" ref="newAcctPwdField" id="newAcctPwdField" :value="newAcctPwd"/>
-				<button v-on:click="copyContent" data-targetEl="newAcctPwdField" class="btn btn-brand btn-lg w-20 mb-2 ml-1">{{ $t('Copy_Password') }}</button><br/><br/>
-			</div>
-			<div class="row">
-				<label for="acctPssConfirmField" class="font-weight-bold col-3">{{ $t('confirm_password_copy') }}</label><br/>
-				<input class="form-control form-control-lg mb-2 col-7" id="acctPassConfirmField" ref="acctPassConfirmField" /> 
-			</div>
-			
-			<div class="text-center p-2">
-				<button v-on:click="updatePassChains" class="btn btn-brand btn-lg">{{ $t('Update_pass') }}<i class="fas fa-spin fa-spinner text-white" v-if="updatingPass"></i></button>
-				<div class="text-brand" v-if="errorUpdate">{{ errorUpdate }}</div>
+				
+				<div class="row" v-if="target_bchain == 'BOTH'">
+					<label for="passchangedataother" class="font-weight-bold col-3">{{ $t('Your_current_pass') }} {{ (cur_bchain=='HIVE'?'STEEM':'HIVE')}} <img :src="'/img/'+(cur_bchain=='HIVE'?'STEEM':'HIVE')+'.png'" style="max-height: 50px;"></label>
+					<input class="form-control form-control-lg mb-2 col-7" ref="passchangedataother" id="passchangedataother" />
+					<button v-on:click="verifyPassByChain($refs['passchangedataother'].value, (cur_bchain=='HIVE'?'STEEM':'HIVE'), 2)" data-targetEl="newAcctPwdField" class="btn btn-brand btn-lg w-20 mb-2 ml-1">{{ $t('Verify') }}</button>
+					<div><i class="fas fa-spin fa-spinner text-brand m-lg-3" v-if="validatingB"></i>
+					<i class="fas fa-check text-success m-lg-3" v-if="passBValid"></i>
+					<i class="fas fa-times text-danger m-lg-3" v-else></i>
+					</div>
+				</div>
+				
+				<button v-on:click="setPasswordVal" class="btn btn-brand btn-lg w-20 mb-2">{{ $t('Generate_New_Password') }}</button>
+				
+				<div class="row">
+					<label for="newAcctPwdField" class="font-weight-bold col-3">{{ $t('Your_new_pass') }}</label>
+					<input class="form-control form-control-lg mb-2 col-7" ref="newAcctPwdField" id="newAcctPwdField" :value="newAcctPwd"/>
+					<button v-on:click="copyContent" data-targetEl="newAcctPwdField" class="btn btn-brand btn-lg w-20 mb-2 ml-1">{{ $t('Copy_Password') }}</button><br/><br/>
+				</div>
+				<div class="row">
+					<label for="acctPssConfirmField" class="font-weight-bold col-3">{{ $t('confirm_password_copy') }}</label><br/>
+					<input class="form-control form-control-lg mb-2 col-7" id="acctPassConfirmField" ref="acctPassConfirmField" /> 
+				</div>
+				
+				<div class="text-center p-2">
+					<button v-on:click="updatePassChains" class="btn btn-brand btn-lg">{{ $t('Update_pass') }}<i class="fas fa-spin fa-spinner text-white" v-if="updatingPass"></i></button>
+					<div class="text-brand" v-if="errorUpdate">{{ errorUpdate }}</div>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -131,8 +142,8 @@
 			<button v-on:click="copyContent" data-targetEl="newAcctInfo" class="btn btn-brand btn-lg w-20 mb-2 ml-1" style="max-height: 50px;">{{ $t('Copy') }}</button>
 		</div>
 	</div>	
-	<div :class="smallScreenClasses" class="container mt-5 pb-5 pt-5" v-if="!user">
-      <!-- account balance -->
+	<!--<div :class="smallScreenClasses" class="container mt-5 pb-5 pt-5" v-if="!user">
+      
       <div class="text-center p-5">
 		<div class="row pb-3">
 		  <div class="text-center text-brand w-100 lead">
@@ -149,7 +160,7 @@
 		  </div>
 		</div>
 	  </div>
-	</div>
+	</div>-->
 	
 	<Footer />
 	<no-ssr>
@@ -167,11 +178,13 @@
   import steem from 'steem'
   
   import hive from '@hiveio/hive-js'
+  import VueRecaptcha from 'vue-recaptcha';
   
   export default {
 	components: {
 	  NavbarBrand,
-	  Footer
+	  Footer,
+	  VueRecaptcha
     },
 	data () {
 		return {
@@ -199,6 +212,8 @@
 			passBValid: false,
 			validatingA: false,
 			validatingB: false,
+			captchaValid: false,
+			captcha_invalid: ''
 		}
 	},
 	watch: {
@@ -240,6 +255,12 @@
 	  },
 	},
 	methods: {
+	  onVerifyCaptcha (response) {
+		this.captchaValid = true;
+	  },
+	  onExpiredCaptcha () {
+		this.captchaValid = false;
+	  },
 	  resetKeys () {
 		this.privatePostKey = '';
 		this.privateActKey = '';
@@ -335,30 +356,77 @@
 		//console.log(res);
 		return res;
 	  },
+	  verifyUserPass (cur_pass, auths, user){
+		let res = hive.auth.verify(user, cur_pass, auths);
+		//console.log(res);
+		return res;
+	  },
 	  async fetchKeys () {
+		this.captcha_invalid = '';
+		if (!this.captchaValid){
+			this.captcha_invalid = this.$t('solve_captcha');
+			return;
+		}
 		//ensure we have proper password to fetch keys
 		this.fetchingPass = true;
 		this.errorFetch = '';
 		let chainLnk = await this.setProperNode();
-		let auths = {
-			posting: this.user.account.posting.key_auths,
-			active: this.user.account.active.key_auths,
-			owner: this.user.account.owner.key_auths,
-		};
-		if (this.$refs["passfetchdata"].value == '' || ! await this.verifyPass(this.$refs["passfetchdata"].value, auths)){
-		  this.errorFetch = this.$t('Error_provide_password');
-		  this.fetchingPass = false;
-		  this.resetKeys();
-		  return;
+		if (this.user){
+			let auths = {
+				posting: this.user.account.posting.key_auths,
+				active: this.user.account.active.key_auths,
+				owner: this.user.account.owner.key_auths,
+			};
+			if (this.$refs["passfetchdata"].value == '' || ! await this.verifyPass(this.$refs["passfetchdata"].value, auths)){
+			  this.errorFetch = this.$t('Error_provide_password');
+			  this.fetchingPass = false;
+			  this.resetKeys();
+			  return;
+			}
+			
+			let privateKeys = await chainLnk.auth.getPrivateKeys(this.user.account.name, this.$refs["passfetchdata"].value);
+			//console.log(privateKeys);
+			this.privatePostKey = privateKeys.posting;
+			this.privateActKey = privateKeys.active;
+			this.privateOwnKey = privateKeys.owner;
+			this.privateMemoKey = privateKeys.memo;
+		}else{
+			if (this.$refs["username"].value == ''){// || ! await this.verifyPass(this.$refs["passfetchdata"].value, auths)
+			  this.errorFetch = this.$t('Error_provide_password');
+			  this.fetchingPass = false;
+			  this.resetKeys();
+			  return;
+			}
+			//grab account info
+			let acctInfo = await chainLnk.api.getAccountsAsync([this.$refs["username"].value]);
+			console.log(acctInfo[0]);
+			if (Array.isArray(acctInfo) && acctInfo.length > 0){
+				let auths = {
+					posting: acctInfo[0].posting.key_auths,
+					active: acctInfo[0].active.key_auths,
+					owner: acctInfo[0].owner.key_auths,
+				};
+				if (this.$refs["passfetchdata"].value == '' || ! await this.verifyUserPass(this.$refs["passfetchdata"].value, auths, this.$refs["username"].value)){
+				  this.errorFetch = this.$t('Error_provide_password');
+				  this.fetchingPass = false;
+				  this.resetKeys();
+				  return;
+				}
+				let privateKeys = await chainLnk.auth.getPrivateKeys(this.$refs['username'].value, this.$refs["passfetchdata"].value);
+				//console.log(privateKeys);
+				this.privatePostKey = privateKeys.posting;
+				this.privateActKey = privateKeys.active;
+				this.privateOwnKey = privateKeys.owner;
+				this.privateMemoKey = privateKeys.memo;
+			}else{
+				this.errorFetch = this.$t('Error_provide_password');
+				this.fetchingPass = false;
+				this.resetKeys();
+				return;
+			}
 		}
-		
-		let privateKeys = await chainLnk.auth.getPrivateKeys(this.user.account.name, this.$refs["passfetchdata"].value);
-		//console.log(privateKeys);
-		this.privatePostKey = privateKeys.posting;
-		this.privateActKey = privateKeys.active;
-		this.privateOwnKey = privateKeys.owner;
-		this.privateMemoKey = privateKeys.memo;
 		this.fetchingPass = false;
+		
 	  },
 	  setPasswordVal(){
 		this.newAcctPwd = this.generatePassword(4);

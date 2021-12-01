@@ -613,7 +613,7 @@ module.exports = {
   Your_pass: 'Your Password',
   Your_current_pass: 'Current Password',
   Your_new_pass: 'New Password',
-  Posting_key_desc: 'Posting key is the key used to login to your actifit.io website. It allows you to perform actions such as posting, commenting and voting.',
+  Posting_key_desc: 'Posting key is the key used to login to your actifit.io website & post Actifit reports via the app. It allows you to perform actions such as posting, commenting and voting.',
   Active_key_desc: 'Active key is the key used for more sensitive actions, including transferring HIVE/STEEM.',
   Owner_key_desc: 'Owner key is the key used for recovering your account and/or generating other keys.',
   Memo_key_desc: 'Memo key is the key used for encrypting messages sent to other users.',

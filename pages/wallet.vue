@@ -157,7 +157,7 @@
 					</span>
 					<span class="col-md-6">
 						<img src="/img/Binance-gold-coin.gif" width="25px" height="25px">{{ formattedUserAFITXBNBLPBSC }}
-						<a target="_blank" :href="'https://bscscan.com/address/'+afitxBNBLPTokenAddressTokenAddress"><i class="fas fa-file-contract text-brand"></i></a>
+						<a target="_blank" :href="'https://bscscan.com/address/'+afitxBNBLPTokenAddress"><i class="fas fa-file-contract text-brand"></i></a>
 					</span>
 				</h5>
 				<div v-if="afitActivityMode == MOVE_AFITX_SE_HE || afitActivityMode == MOVE_AFITX_HE_SE">
