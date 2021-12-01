@@ -10,7 +10,9 @@
 			<div class="form-group">
 				<input type="text" id="username" name="username" :placeholder="$t('Username')" ref="username" class="form-control form-control-lg mb-2">
 				<input type="password" id="ppkey" name="ppkey" ref="ppkey" :placeholder="$t('Ppkey')"  class="form-control form-control-lg mb-2">
-				
+				<span class="row mb-2 form-control-lg">
+					<a href="/password" class="small">Forgot my posting key?</a>
+				</span>
 				<span class="row mb-2 form-control-lg ">
 				  <span class="bchain-option p-2 m-2 btn col-4 m-auto">
 					<input type="radio" id="hive_bchain" value="HIVE" v-model="bchain_val">
