@@ -20,24 +20,24 @@
 		<div v-html="$t('Rank_afit')"></div>
 		<div class="pl-3">
 		<span v-for="iterx in afit_token_rules.length" :key="iterx">
-			<span class="color-box-afit" :title="'('+matchVal(afit_token_rules, iterx)+' - '+ matchVal(afit_token_rules, iterx+1, true) + ' AFIT'" v-if="iterx<=revRankFactor(afit_token_rules, userRankObj.afit_tokens_score, afit_token_factor)"></span>
-			<span class="color-box-afit opaque-box" :title="'('+matchVal(afit_token_rules, iterx)+' - '+ matchVal(afit_token_rules, iterx+1, true) + ' AFIT'" v-else></span>
+			<span class="color-box-afit" :title="'('+matchVal(afit_token_rules, iterx)+' - '+ matchVal(afit_token_rules, iterx+1, true) + ') AFIT'" v-if="iterx<=revRank(afit_token_rules, userRankObj.full_afit_bal)"></span>
+			<span class="color-box-afit opaque-box" :title="'('+matchVal(afit_token_rules, iterx)+' - '+ matchVal(afit_token_rules, iterx+1, true) + ') AFIT'" v-else></span>
 		</span>
 		<span class="pl-2">+ {{userRankObj.afit_tokens_score}}</span>
 		</div>
 		<div v-html="$t('Rank_total_posts')"></div>
 		<div class="pl-3">
 		<span v-for="iterx in rewarded_posts_rules.length" :key="iterx">
-			<span class="color-box-afit" :title="'('+matchVal(rewarded_posts_rules, iterx)+' - '+ matchVal(rewarded_posts_rules, iterx+1, true) + ' Posts'" v-if="iterx<=revRankFactor(rewarded_posts_rules, userRankObj.tot_posts_score, rewarded_posts_factor)"></span>
-			<span class="color-box-afit opaque-box" :title="'('+matchVal(rewarded_posts_rules, iterx)+' - '+ matchVal(rewarded_posts_rules, iterx+1, true) + ' Posts'" v-else></span>
+			<span class="color-box-afit" :title="'('+matchVal(rewarded_posts_rules, iterx)+' - '+ matchVal(rewarded_posts_rules, iterx+1, true) + ') Posts'" v-if="iterx<=revRankFactor(rewarded_posts_rules, userRankObj.tot_posts_score, rewarded_posts_factor)"></span>
+			<span class="color-box-afit opaque-box" :title="'('+matchVal(rewarded_posts_rules, iterx)+' - '+ matchVal(rewarded_posts_rules, iterx+1, true) + ') Posts'" v-else></span>
 		</span>
 		<span class="pl-2">+ {{userRankObj.tot_posts_score}}</span>
 		</div>
 		<div v-html="$t('Rank_recent_posts')"></div>
 		<div class="pl-3">
 		<span v-for="iterx in recent_reward_posts_rules.length" :key="iterx">
-			<span class="color-box-afit" :title="'('+matchVal(recent_reward_posts_rules, iterx)+' - '+ matchVal(recent_reward_posts_rules, iterx+1, true) + ' Posts'" v-if="iterx<=revRankFactor(recent_reward_posts_rules, userRankObj.recent_posts_score, recent_posts_factor)"></span>
-			<span class="color-box-afit opaque-box" :title="'('+matchVal(recent_reward_posts_rules, iterx)+' - '+ matchVal(recent_reward_posts_rules, iterx+1, true) + ' Posts'" v-else></span>
+			<span class="color-box-afit" :title="'('+matchVal(recent_reward_posts_rules, iterx)+' - '+ matchVal(recent_reward_posts_rules, iterx+1, true) + ') Posts'" v-if="iterx<=revRankFactor(recent_reward_posts_rules, userRankObj.recent_posts_score, recent_posts_factor)"></span>
+			<span class="color-box-afit opaque-box" :title="'('+matchVal(recent_reward_posts_rules, iterx)+' - '+ matchVal(recent_reward_posts_rules, iterx+1, true) + ') Posts'" v-else></span>
 		</span>
 		<span class="pl-2">+ {{userRankObj.recent_posts_score}}</span>
 		</div>
@@ -119,15 +119,15 @@
 		//AFIT token calculation matrix
 		afit_token_rules: [
 			[9,0],
-			[999,0.10],
-			[4999,0.20],
-			[9999,0.30],
-			[19999,0.40],
-			[49999,0.50],
-			[99999,0.60],
-			[499999,0.70],
-			[999999,0.80],
-			[4999999,0.90],
+			[999,1],
+			[4999,3],
+			[9999,5],
+			[19999,8],
+			[49999,12],
+			[99999,16],
+			[499999,20],
+			[999999,24],
+			[4999999,30],
 			//[5000000,1]
 		],
 		
@@ -225,6 +225,20 @@
 			}
 		}
 		
+	  },
+	  revRank(arr, value){
+		let rnk = 0;
+		for (let i=0;i<arr.length;i++){
+			if (value < arr[i][0]){
+				//found matching array entry
+				return i;
+				//
+			}
+			else{
+				rnk = i + 1;
+			}
+		}
+		return rnk;
 	  }
 	},
   }
