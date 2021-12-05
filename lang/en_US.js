@@ -755,5 +755,8 @@ module.exports = {
   bsc_details_notice: 'Connecting your metamask wallet address allows you to benefit from connecting Actifit on Hive and Actifit on Binance Smart Chain. The first step in this direction is by benefitting from an airdrop providing you with AFIT tokens airdropped to your wallet on BSC. This connection also allows you to receive airdrop of AFITX tokens for participating in the token sale. This link will grow by interconnecting your AFIT/AFITX between chains and providing lots of cool features down the road.',
   airdrop_results: 'Airdrop Snapshot Results',
   airdrop_reward: 'Congrats! Your snapshot total AFIT amount was _AFITBALANCE_. This makes you eligible for _AFITBSC_ AFIT reward! Tokens will be distributed to your BSC wallet address upon actifit DeFi launch.',
-  airdrop_no_reward: 'Unfortunately your AFIT balance did not meet the min amount required in time to be eligible for AFIT on BSC airdrop.'
+  airdrop_no_reward: 'Unfortunately your AFIT balance did not meet the min amount required in time to be eligible for AFIT on BSC airdrop.',
+  your_posting_key: 'Your Private Posting Key',
+  posting_key_precaution: 'Save this key to use it next time to login to actifit.io and to use it in the Actifit app when creating actifit reports',
+  Copy_Posting_Key: 'Copy Posting Key'
 }

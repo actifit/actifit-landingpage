@@ -24,12 +24,18 @@
 				<b>{{ username_exists }}</b>
 			  </p>
 			  <label for="account-password">{{ $t('Your_Password') }}</label><br/>
-			  <input class="form-control form-control-lg" id="account-password" ref="account-password"/>
+			  <!-- we used change event, while we could have used input event, but that slows user experience slightly -->
+			  <input class="form-control form-control-lg" id="account-password" ref="account-password" v-on:change="genPrivKey"/>
 			  <p class="text-brand"><i>{{ $t('lost_password_precaution') }}</i></p>
 			  <button v-on:click="copyContent" data-targetEl="account-password" class="btn btn-brand btn-lg w-20">{{ $t('Copy_Password') }}</button><br/><br/>
 			  
 			  <label for="account-password-confirm">{{ $t('confirm_password_copy') }}</label><br/>
 			  <input class="form-control form-control-lg" id="account-password-confirm" ref="account-password-confirm"/>
+			  
+			  <label for="account-password">{{ $t('your_posting_key') }}</label><br/>
+			  <input class="form-control form-control-lg" id="posting-key" readonly ref="posting-key" :value="privatePostKey"/>
+			  <p class="text-brand"><i>{{ $t('posting_key_precaution') }}</i></p>
+			  <button v-on:click="copyContent" data-targetEl="posting-key" class="btn btn-brand btn-lg w-20">{{ $t('Copy_Posting_Key') }}</button><br/><br/>
 			  
 			  <label for="account-email">{{ $t('email_optional') }}</label><br/>
 			  <input class="form-control form-control-lg mb-2" id="account-email" ref="account-email" v-model="email"/>	
@@ -300,8 +306,15 @@
 		}
 		return parseFloat(usdInvest / this.afitPrice).toFixed(6);
 	  },
-	  setPasswordVal(){
+	  async genPrivKey(){
+		//generate posting key
+		let privateKeys = await hive.auth.getPrivateKeys(this.$refs["account-username"].value.toLowerCase(), this.$refs["account-password"].value, ['posting']);
+		this.privatePostKey = privateKeys.posting;
+	  },
+	  async setPasswordVal(){
 		this.$refs["account-password"].value = this.generatePassword(4);
+		this.genPrivKey();
+		//this.$refs["posting-key"].value = 
 	  },
 	  generatePassword (multip) {
 		//generate random 11 characters password
