@@ -47,6 +47,7 @@ module.exports = {
   wallet: {
 	title_process: 'Let\'s get you started on exchanging your AFIT for upvotes!',
 	step1_title: 'Step 1 / 3: You need to set up your funds password',
+	step1_desc: 'The funds password is different from your master account password and keys.<br/> It is used in special cases of moving/exchanging AFIT tokens around.',
 	step2_title: 'Step 2 / 3: Your funds password needs to be verified',
 	step2_desc: 'Please send at least 1 HIVE/HBD/STEEM/SBD to @actifit.exchange (one time fee) <br/>	to verify your funds password & activate your exchange service using form below.				<br/><span>DO NOT CLOSE this window till verification is complete.</span>',
 	step3_title: 'Step 3 / 3: You are ready to exchange AFIT for Vote Reward Boost!',
@@ -161,7 +162,7 @@ module.exports = {
 	q10: 'Can I exchange my AFIT into other crypto?',
 	a10: 'Yes, by transferring your earned AFIT to supported exchanges (hive-engine.com or steem-engine.net), you can actually exchange them to supported tokens on these exchanges. <br/>As we expand to BSC, you will be able to exchange them available tokens on BSC.',
 	q11: 'Why do I need a funds password and how can I reset it?',
-	a11: 'In order to move AFIT to the exchange, you will need to have a funds password. To create your funds password, head over to your wallet under <a href="https://actifit.io/wallet">https://actifit.io/wallet</a> and follow the instructions there.<br/>In case you forgot your funds password, you need to contact one of the moderators on actifit Discord (<a href="https://links.actifit.io/discord">https://links.actifit.io/discord</a>) ',
+	a11: 'In order to move AFIT to the exchange, you will need to have a funds password. This password is different than your master account password and your keys. <br/>To create your funds password, head over to your wallet under <a href="https://actifit.io/wallet">https://actifit.io/wallet</a> and follow the instructions there.<br/>In case you forgot your funds password, you need to contact one of the moderators on actifit Discord (<a href="https://links.actifit.io/discord">https://links.actifit.io/discord</a>) ',
 	q12: 'What is AFITX?',
 	a12: 'AFITX is a special benefits token for Actifit users & AFIT token holders. Holding this token enables users to:<li> Move extra daily AFIT tokens to Hive Engine and Steem Engine</li><li>Increases user rank</li><li>Increases post rewards via our different rewarded tokens</li><li>Receive priority when exchanging AFIT for HIVE/STEEM upvotes</li><li>Participate in contests</li><br/>As Binance Smart Chain and DeFi support is launched, AFITX will be used as a reward token and governance token on this platform.',
 	q13: 'How do I earn AFITX tokens?',

@@ -319,6 +319,8 @@
 				<div class="text-center grid p-2">
 					<div class="text-brand font-weight-bold">{{ $t('wallet.title_process') }}</div>
 					<h5>{{ $t('wallet.step1_title') }}</h5>
+					<div v-html="$t('wallet.step1_desc')">
+					</div>
 					<div class="row">
 					  <label for="funds-pass" class="w-25 p-2">{{ $t('Funds_Password') }}</label>
 					  <input type="text" id="funds-pass" name="funds-pass" ref="funds-pass" class="form-control-lg w-50 p-2">
