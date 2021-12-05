@@ -54,6 +54,9 @@
 		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
             <div style="display:inline-flex"><i class="fas fa-print text-white"></i><a class="nav-link text-white" href="/whitepaper/Actifit_White_Paper.pdf">{{ $t('Whitepaper') }}</a></div>
           </li>
+		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
+            <div style="display:inline-flex"><i class="fas fa-question text-white"></i><a class="nav-link text-white" href="/faq">{{ $t('FAQ') }}</a></div>
+          </li>
         </ul>
       </div>
 	  <UserMenu/>
