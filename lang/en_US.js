@@ -47,7 +47,7 @@ module.exports = {
   wallet: {
 	title_process: 'Let\'s get you started on exchanging your AFIT for upvotes!',
 	step1_title: 'Step 1 / 3: You need to set up your funds password',
-	step1_desc: 'The funds password is different from your master account password and keys.<br/> It is used in special cases of moving/exchanging AFIT tokens around.',
+	step1_desc: 'The funds password is different from your master account password and keys.<br/> It is used in special cases of moving/exchanging AFIT tokens on actifit.io.',
 	step2_title: 'Step 2 / 3: Your funds password needs to be verified',
 	step2_desc: 'Please send at least 1 HIVE/HBD/STEEM/SBD to @actifit.exchange (one time fee) <br/>	to verify your funds password & activate your exchange service using form below.				<br/><span>DO NOT CLOSE this window till verification is complete.</span>',
 	step3_title: 'Step 3 / 3: You are ready to exchange AFIT for Vote Reward Boost!',
