@@ -83,7 +83,7 @@
 	  
 	  <div class="row" v-if="prodList.length">
         <Product v-for="product in prodList" 
-			:product="product" :key="product._id" :pros="professionals" :userrank="userRank" :gadgetStats="gadgetStats"  :realProducts="realProducts"
+			:product="product" :key="product._id" :pros="professionals" :userrank="userRank" :gadgetStats="gadgetStats"  :realProducts="realProducts" :expandAll="expandAllStatus"
 			v-if="product.specialevent"
 			@update-prod="updateProd" :afitPrice="afitPrice" @refresh-tickets="refreshTickets"/>
       </div>
