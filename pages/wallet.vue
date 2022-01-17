@@ -20,24 +20,24 @@
 				<div class="row text-left" v-if="showBSCDetails">
 					{{ $t('bsc_details_notice') }}
 				</div>
-				<div class="row">
-					<div class="col-md-12">
+				<div>
+					<!--<div class="col-md-12">
 						
 						<div class="font-weight-bold text-brand">{{$t('airdrop_results')}}</div>
 						<div v-if="this.airdropResults.user">{{$t('airdrop_reward').replace('_AFITBALANCE_',this.airdropResults.tokens_count).replace('_AFITBSC_',this.airdropResults.afit_bsc_reward)}}</div>
 						<div v-else>{{$t('airdrop_no_reward')}}</div>
 					
-					</div>
-					<div class="row col-md-12">
-						<div class="col-md-8">
+					</div>-->
+					<div>
+						<!--<div class="col-md-8">-->
 							<input type="text" id="bsc-wallet-address" name="bsc-wallet-address" ref="bsc-wallet-address" class="form-control-lg w-100 p-2" :value="this.getWalletAddress()" placeholder="0x......">
 							<div v-if="error_wallet!=''" class="text-brand text-center">{{ error_wallet}}</div>
-							<button v-on:click="updateWalletAddress" class="btn btn-brand btn-lg w-100 border"><span v-if="this.bsc_wallet_address">{{ $t('Save') }}</span><span v-else>{{ $t('Save') }}</span></button>
-						</div>
+							<button v-on:click="updateWalletAddress" class="btn btn-brand btn-lg w-50 border"><span v-if="this.bsc_wallet_address">{{ $t('Save') }}</span><span v-else>{{ $t('Save') }}</span></button>
+						<!--</div>
 						<div class="col-md-4">
 							<a href="https://tokensale.actifit.io" target="_blank" class="btn btn-brand btn-lg w-100 border"><span >{{ $t('Token Sale') }}</span></a>
 							<a href="https://actifit.io/@actifit/your-free-afit-airdrop-on-bsc-is-here-setup-your-wallets-before-october-26" target="_blank" class="btn btn-brand btn-lg w-100 border"><span >{{ $t('Airdrop') }}</span></a>
-						</div>
+						</div>-->
 					</div>
 				</div>
 			</div>
