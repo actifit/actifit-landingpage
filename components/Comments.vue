@@ -17,7 +17,7 @@
 		<vue-remarkable class="modal-body" v-if="!editBoxOpen" :source="commentBody()" :style="{ paddingLeft: depth * indentFactor + 'px' }" :options="{'html': true}"></vue-remarkable>
 		<transition name="fade">
 		  <div class="comment-reply" v-if="editBoxOpen">
-			<markdown-editor v-model="full_data.body" :configs="editorConfig" ref="editor"></markdown-editor>
+			<vue-simplemde v-model="full_data.body" :configs="editorConfig" ref="editor"></vue-simplemde>
 			
 			<div class="modal-footer m-2">
 				<div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-if="cur_bchain=='HIVE'">
@@ -69,7 +69,7 @@
 		</div>
 		<transition name="fade">
 		  <div class="comment-reply" v-if="commentBoxOpen">
-			<markdown-editor v-model="replyBody" :configs="editorConfig" ref="editor"></markdown-editor>
+			<vue-simplemde v-model="replyBody" :configs="editorConfig" ref="editor"></vue-simplemde>
 			<div class="modal-footer m-2">
 				<div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-if="cur_bchain=='HIVE'">
 					<input type="radio" id="hive" value="HIVE" v-model="target_bchain">

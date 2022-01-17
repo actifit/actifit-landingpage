@@ -14,7 +14,7 @@
             <input class="form-control form-control-lg" id="report-title" v-model="title" />
           </div>
           <div class="form-group">
-			<markdown-editor v-model="body" :configs="editorConfig" ref="editor"></markdown-editor>
+			<vue-simplemde v-model="body" :configs="editorConfig" ref="editor"></vue-simplemde>
           </div>
 		  <div class="form-group">
 			<label for="image-upload">{{ $t('Upload_Images') }}</label><br/>

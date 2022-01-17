@@ -139,7 +139,7 @@
 		</div>
 		<transition name="fade">
 		  <div class="report-reply col-md-12" v-if="commentBoxOpen">
-			<markdown-editor v-model="replyBody" :configs="editorConfig" ref="editor"></markdown-editor>
+			<vue-simplemde v-model="replyBody" :configs="editorConfig" ref="editor"></vue-simplemde>
 			
 			<div class="modal-footer m-2">
 				<div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-if="cur_bchain=='HIVE'">
