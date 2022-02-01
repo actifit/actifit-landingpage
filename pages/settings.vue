@@ -12,6 +12,7 @@
 				<input type="radio" id="hive_steem" value="BOTH" v-model="target_bchain">
 				<img src="/img/HIVE.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px;"  :class="adjustBothClass">
 				<img src="/img/STEEM.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px;"  :class="adjustBothClass">
+				<img src="/img/BLURT.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px;"  :class="adjustBothClass">
 				<label for="hive_steem">HIVE + STEEM + BLURT</label>
 			  </div>
 			  <div class="bchain-option btn col-12 m-2 p-2 row text-left">
