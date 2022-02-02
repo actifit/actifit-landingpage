@@ -86,8 +86,16 @@
 				  {{ this.error_msg}}
 				</div>
 				<div class="mb-2">
-					<input type="checkbox" id="hive-only" v-model="hive_only" >
-					<label for="checkbox" class="p-2">{{ $t('hive_only_account') }}</label>
+					<input type="checkbox" id="hive-account" v-model="hive_account" >
+					<label for="checkbox" class="p-2">{{ $t('hive_account_text') }}</label>
+				</div>
+				<div class="mb-2">
+					<input type="checkbox" id="steem-account" v-model="steem_account" >
+					<label for="checkbox" class="p-2">{{ $t('steem_account_text') }}</label>
+				</div>
+				<div class="mb-2">
+					<input type="checkbox" id="blurt-account" v-model="blurt_account" >
+					<label for="checkbox" class="p-2">{{ $t('blurt_account_text') }}</label>
 				</div>
 				<div class="text-center pb-2">
 					<button v-on:click="checkFunds" class="btn btn-brand btn-lg w-20" v-if="!promo_code_chkbx">{{ $t('Steem_sent').replace('_CUR_', this.transferType) }}</button>
@@ -175,7 +183,9 @@
 		email: '',
 		promo_code_chkbx: false,
 		promo_code_val: '',
-		hive_only: false,
+		hive_account: true,
+		steem_account: true,
+		blurt_account: true,
 		reg: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/
 	  }
 	},
@@ -423,10 +433,19 @@
 			promo_code: this.promo_code_val,
 			//cur_bchain: 'HIVE',
 		}
-		if (this.hive_only){
-			params['cur_bchain'] = 'HIVE';
+		params['cur_bchain'] = '';
+		if (this.hive_account){
+			params['cur_bchain'] += 'HIVE|';
 		}
+		if (this.steem_account){
+			params['cur_bchain'] += 'STEEM|';
+		}
+		if (this.blurt_account){
+			params['cur_bchain'] += 'BLURT';
+		}
+		
 		Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
+		console.log(url);
 		try{
 			let res = await fetch(url);
 			let outcome = await res.json();
