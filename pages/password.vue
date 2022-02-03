@@ -82,7 +82,8 @@
 						<input type="radio" id="hive_steem" value="BOTH" v-model="target_bchain">
 						<img src="/img/HIVE.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px;" :class="adjustBothClass">
 						<img src="/img/STEEM.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px;" :class="adjustBothClass">
-						<label for="hive_steem">HIVE + STEEM</label>
+						<img src="/img/BLURT.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px;" :class="adjustBothClass">
+						<label for="hive_steem">HIVE + STEEM + BLURT</label>
 					</div>
 					<div class="bchain-option btn ml-2 p-2 row text-left" v-if="cur_bchain=='HIVE'">
 						<input type="radio" id="hive" value="HIVE" v-model="target_bchain">
@@ -111,6 +112,16 @@
 					<button v-on:click="verifyPassByChain($refs['passchangedataother'].value, (cur_bchain=='HIVE'?'STEEM':'HIVE'), 2)" data-targetEl="newAcctPwdField" class="btn btn-brand btn-lg w-20 mb-2 ml-1">{{ $t('Verify') }}</button>
 					<div><i class="fas fa-spin fa-spinner text-brand m-lg-3" v-if="validatingB"></i>
 					<i class="fas fa-check text-success m-lg-3" v-if="passBValid"></i>
+					<i class="fas fa-times text-danger m-lg-3" v-else></i>
+					</div>
+				</div>
+				
+				<div class="row" v-if="target_bchain == 'BOTH'">
+					<label for="passchangedataother2" class="font-weight-bold col-3">{{ $t('Your_current_pass') }} BLURT <img :src="'/img/BLURT.png'" style="max-height: 50px;"></label>
+					<input class="form-control form-control-lg mb-2 col-7" ref="passchangedataother2" id="passchangedataother2" />
+					<button v-on:click="verifyPassByChain($refs['passchangedataother2'].value, 'BLURT', 3)" data-targetEl="newAcctPwdField" class="btn btn-brand btn-lg w-20 mb-2 ml-1">{{ $t('Verify') }}</button>
+					<div><i class="fas fa-spin fa-spinner text-brand m-lg-3" v-if="validatingC"></i>
+					<i class="fas fa-check text-success m-lg-3" v-if="passCValid"></i>
 					<i class="fas fa-times text-danger m-lg-3" v-else></i>
 					</div>
 				</div>
@@ -178,6 +189,9 @@
   import steem from 'steem'
   
   import hive from '@hiveio/hive-js'
+  
+  import blurt from '@blurtfoundation/blurtjs'
+  
   import VueRecaptcha from 'vue-recaptcha';
   
   export default {
@@ -210,8 +224,10 @@
 			reloginNeeded: false,
 			passAValid: false,
 			passBValid: false,
+			passCValid: false,
 			validatingA: false,
 			validatingB: false,
+			validatingC: false,
 			captchaValid: false,
 			captcha_invalid: ''
 		}
@@ -311,6 +327,9 @@
 		if (cur_bchain == 'STEEM'){
 			properNode = steem;
 		}
+		if (cur_bchain == 'BLURT'){
+			properNode = blurt;
+		}
 		console.log(cur_bchain);
 		return properNode;
 	  },
@@ -319,6 +338,9 @@
 			this.validatingA = true;
 		}else if (target == 2){
 			this.validatingB = true;
+		}
+		else if (target == 3){
+			this.validatingC = true;
 		}
 		let chainLnk = this.setProperNode(chain);
 		let res = await chainLnk.api.getAccountsAsync([this.user.account.name]);
@@ -331,7 +353,7 @@
 			//console.log(res);
 			//console.log(pass);
 			//console.log(auths);
-			let passVerified = await this.verifyPass(pass, auths);
+			let passVerified = await chainLnk.auth.verify(this.user.account.name, pass, auths);//this.verifyPass(pass, auths);
 			
 			if (target == 1){
 				this.passAValid = passVerified;
@@ -339,6 +361,9 @@
 			}else if (target == 2){
 				this.passBValid = passVerified;
 				this.validatingB = false;
+			}else if (target == 3){
+				this.passCValid = passVerified;
+				this.validatingC = false;
 			}
 		}else{
 			if (target == 1){
@@ -347,6 +372,9 @@
 			}else if (target == 2){
 				this.passBValid = false;
 				this.validatingB = false;
+			}else if (target == 3){
+				this.passCValid = false;
+				this.validatingC = false;
 			}
 		}
 	  },
@@ -451,6 +479,10 @@
 			let other_chain = (this.cur_bchain=='HIVE'?'STEEM':'HIVE');
 			console.log(other_chain);
 			await this.updatePass(other_chain);
+			
+			//also update BLURT chain under this option
+			other_chain = 'BLURT';
+			await this.updatePass(other_chain);
 		}
 		//reset login if needed
 		await this.resetUserLogin();
@@ -493,6 +525,9 @@
 		if (chain_choice != this.cur_bchain){
 			passField = "passchangedataother";
 		}
+		if (chain_choice == 'BLURT'){
+			passField = "passchangedataother2";
+		}
 		
 		//console.log(this.$refs[passField].value);
 		
@@ -523,6 +558,7 @@
 		//let newWif = 'P' + chainLnk.auth.toWif(this.newAcctPwd);
 		//console.log('new wif');
 		//console.log(newWif);
+		console.log('generate new keys');
 		//generate new keys based on new wif
 		let newKeys = chainLnk.auth.getPrivateKeys(this.user.account.name, this.newAcctPwd, ['owner', 'active', 'posting', 'memo']); 
 		
@@ -543,60 +579,118 @@
 		let activeKey = {weight_threshold: 1, account_auths: [], key_auths: [[newKeys.activePubkey, 1]]};
 		let postingKey = {weight_threshold: 1, account_auths: [], key_auths: [[newKeys.postingPubkey, 1]]};
 		let memoKey = newKeys.memoPubkey;
-		let jsonMetadata = {};
+		//let jsonMetadata = {};
+		console.log('broadcast');
+		
+		/*if (chain_choice == 'BLURT'){
+			let res = await blurt.broadcast.accountUpdate(
+			curOwnerKey,
+			  this.user.account.name,
+			  ownerKey,
+			  activeKey,
+			  postingKey,
+			  memoKey,
+			  jsonMetadata
+			, function(err, result) {
+			  console.log(err, result);
+			});
+			
+			console.log('done');
 
-		// broadcast
-		let res = await chainLnk.broadcast.accountUpdateAsync(
-		  curOwnerKey,
-		  this.user.account.name,
-		  ownerKey,
-		  activeKey,
-		  postingKey,
-		  memoKey,
-		  jsonMetadata).catch(err =>{
-			  console.log(err);
-			  
-			  this.updatingPass = false;
-			  let sel_chain = this.cur_bchain;
-			  if (chain_choice){
-				sel_chain = chain_choice;
-			  }
-			  this.update_result += '\n>>>Error updating your password & keys on '+chain_choice+'\n';
-			  this.update_result += err.message;
-			  let note = 'There was an error updating your credentials on '+chain_choice+'!';
-			  this.$notify({
-				  group: 'error',
+		}else{*/
+			// broadcast
+			let res ;
+			
+			if (chain_choice == 'BLURT'){
+				res = await chainLnk.broadcast.accountUpdateAsync(
+				  curOwnerKey,
+				  this.user.account.name,
+				  ownerKey,
+				  activeKey,
+				  postingKey,
+				  memoKey,
+				  this.user.account.json_metadata,
+				  //extra params for blurt
+				  //https://gitlab.com/blurt/blurt/-/commit/ec77ea5a90a862e46266fd89752ad47a8052dd29
+				  //userAccount.posting_json_metadata,
+				  //null,
+				  //cb
+				  this.user.account.posting_json_metadata,
+				  null				  
+				  ).catch(err =>{
+					  console.log(err);
+					  
+					  this.updatingPass = false;
+					  let sel_chain = this.cur_bchain;
+					  if (chain_choice){
+						sel_chain = chain_choice;
+					  }
+					  this.update_result += '\n>>>Error updating your password & keys on '+chain_choice+'\n';
+					  this.update_result += err.message;
+					  let note = 'There was an error updating your credentials on '+chain_choice+'!';
+					  this.$notify({
+						  group: 'error',
+						  text: note,
+						  position: 'top center'
+						})
+				});
+			
+			}else{
+			
+				res = await chainLnk.broadcast.accountUpdateAsync(
+				  curOwnerKey,
+				  this.user.account.name,
+				  ownerKey,
+				  activeKey,
+				  postingKey,
+				  memoKey,
+				  this.user.account.json_metadata).catch(err =>{
+					  console.log(err);
+					  
+					  this.updatingPass = false;
+					  let sel_chain = this.cur_bchain;
+					  if (chain_choice){
+						sel_chain = chain_choice;
+					  }
+					  this.update_result += '\n>>>Error updating your password & keys on '+chain_choice+'\n';
+					  this.update_result += err.message;
+					  let note = 'There was an error updating your credentials on '+chain_choice+'!';
+					  this.$notify({
+						  group: 'error',
+						  text: note,
+						  position: 'top center'
+						})
+				});
+			
+			}
+
+			if (res && res.ref_block_num){
+				let sel_chain = this.cur_bchain;
+				if (chain_choice){
+					sel_chain = chain_choice;
+				}
+				this.update_result += '>>>Your New ' + sel_chain + ' Credentials:<<<\n';
+				
+				this.update_result += `Your New password         : ${this.newAcctPwd}\n`;
+				this.update_result += `New Private Posting key   : ${newKeys.posting}\n`;
+				this.update_result += `New Private Active key    : ${newKeys.active}\n`;
+				this.update_result += `New Private Owner key     : ${newKeys.owner}\n`;
+				this.update_result += `New Private Memo key      : ${newKeys.memo}\n`;
+						
+				this.updatingPass = false;
+				let note = 'Credentials successfully updated on '+sel_chain+'! Make sure to make a copy of them!'
+				this.$notify({
+				  group: 'success',
 				  text: note,
 				  position: 'top center'
 				})
-		});
-		//console.log(res);
-		if (res && res.ref_block_num){
-			let sel_chain = this.cur_bchain;
-			if (chain_choice){
-				sel_chain = chain_choice;
+				//this.$store.dispatch('steemconnect/refreshUser');
+				//as user gets invalidated if logged in on same chain, need to log him out
+				if (sel_chain == this.cur_bchain){
+					this.reloginNeeded = true;
+				}
 			}
-			this.update_result += '>>>Your New ' + sel_chain + ' Credentials:<<<\n';
-			
-			this.update_result += `Your New password         : ${this.newAcctPwd}\n`;
-			this.update_result += `New Private Posting key   : ${newKeys.posting}\n`;
-			this.update_result += `New Private Active key    : ${newKeys.active}\n`;
-			this.update_result += `New Private Owner key     : ${newKeys.owner}\n`;
-			this.update_result += `New Private Memo key      : ${newKeys.memo}\n`;
-					
-			this.updatingPass = false;
-			let note = 'Credentials successfully updated on '+sel_chain+'! Make sure to make a copy of them!'
-			this.$notify({
-			  group: 'success',
-			  text: note,
-			  position: 'top center'
-			})
-			//this.$store.dispatch('steemconnect/refreshUser');
-			//as user gets invalidated if logged in on same chain, need to log him out
-			if (sel_chain == this.cur_bchain){
-				this.reloginNeeded = true;
-			}
-		}
+		//}
 	  },
 	  
 	},
@@ -613,6 +707,8 @@
 		hive.config.set('alternative_api_endpoints', process.env.altHiveNodes);
 
 		hive.api.setOptions({ url: process.env.hiveApiNode });
+		//console.log('blurt broadcast');
+		//console.log(this.user.account);
 		await this.setProperNode();
 		this.$store.dispatch('steemconnect/login')
 	}
