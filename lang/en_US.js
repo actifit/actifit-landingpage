@@ -803,5 +803,7 @@ module.exports = {
   airdrop_no_reward: 'Unfortunately your AFIT balance did not meet the min amount required in time to be eligible for AFIT on BSC airdrop.',
   your_posting_key: 'Your Private Posting Key',
   posting_key_precaution: 'Save this key to use it next time to login to actifit.io and to use it in the Actifit app when creating actifit reports',
-  Copy_Posting_Key: 'Copy Posting Key'
+  Copy_Posting_Key: 'Copy Posting Key',
+  target_bchain: 'Blockchain Support',
+  leave_default_recommend: 'Account will be created on selected chain(s). Leave default (all selected) unless you are sure of what you are doing'
 }

@@ -23,6 +23,22 @@
 			  <p class="text-brand" v-if="username_exists">
 				<b>{{ username_exists }}</b>
 			  </p>
+			  <div class="target-bchain">
+				<label for="account-username">{{ $t('target_bchain') }}</label>
+				<p class="text-brand"><i>{{$t('leave_default_recommend')}}</i></p>
+				<div class="pl-2 mb-2">
+					<input type="checkbox" id="hive-account" v-model="hive_account" v-on:change="validateUserName">
+					<label for="checkbox" class="font-weight-normal">{{ $t('hive_account_text') }}</label>
+				</div>
+				<div class="pl-2 mb-2">
+					<input type="checkbox" id="steem-account" v-model="steem_account" v-on:change="validateUserName">
+					<label for="checkbox" class="font-weight-normal">{{ $t('steem_account_text') }}</label>
+				</div>
+				<div class="pl-2 mb-2">
+					<input type="checkbox" id="blurt-account" v-model="blurt_account" v-on:change="validateUserName">
+					<label for="checkbox" class="font-weight-normal">{{ $t('blurt_account_text') }}</label>
+				</div>
+			  </div>
 			  <label for="account-password">{{ $t('Your_Password') }}</label><br/>
 			  <!-- we used change event, while we could have used input event, but that slows user experience slightly -->
 			  <input class="form-control form-control-lg" id="account-password" ref="account-password" v-on:change="genPrivKey"/>
@@ -85,18 +101,6 @@
 				<div class="text-brand text-center" v-if="error_proceeding">
 				  {{ this.error_msg}}
 				</div>
-				<div class="mb-2">
-					<input type="checkbox" id="hive-account" v-model="hive_account" >
-					<label for="checkbox" class="p-2">{{ $t('hive_account_text') }}</label>
-				</div>
-				<div class="mb-2">
-					<input type="checkbox" id="steem-account" v-model="steem_account" >
-					<label for="checkbox" class="p-2">{{ $t('steem_account_text') }}</label>
-				</div>
-				<div class="mb-2">
-					<input type="checkbox" id="blurt-account" v-model="blurt_account" >
-					<label for="checkbox" class="p-2">{{ $t('blurt_account_text') }}</label>
-				</div>
 				<div class="text-center pb-2">
 					<button v-on:click="checkFunds" class="btn btn-brand btn-lg w-20" v-if="!promo_code_chkbx">{{ $t('Steem_sent').replace('_CUR_', this.transferType) }}</button>
 					<button v-on:click="checkFunds" class="btn btn-brand btn-lg w-20" v-else>{{ $t('create_account') }}</button>
@@ -133,6 +137,8 @@
   import steem from 'steem'
   
   import hive from '@hiveio/hive-js'
+  
+  import blurt from '@blurtfoundation/blurtjs'
   
   import VueRecaptcha from 'vue-recaptcha';
 
@@ -203,6 +209,10 @@
 	  hive.config.set('alternative_api_endpoints', process.env.altHiveNodes);
 	  
 	  hive.api.setOptions({ url: properNode });
+	  
+	  steem.api.setOptions({ url: process.env.steemApiNode });
+	  
+	  
 
 	  //if a promo code is available, let's set it accordingly
 	  if (this.$route.query.promo){
@@ -272,17 +282,29 @@
 			+ this.$t('signup.desc_part5') + this.afitTokensToEarn('100')
 			+ this.$t('signup.desc_part6');*/
 	  },
+	  validateUserName(){
+		this.handleUsername (this.$refs['account-username'].value);
+	  },
 	  handleUsername (val) {
 		let vue_ctnr = this;
 		this.username_invalid = '';
 		this.username_exists = '';
 		//validate format first
-				
-		let usernameValid = hive.utils.validateAccountName(val);
+		let chnLnk = hive;
+		if (this.hive_account){
+			//test against default, hive
+			chnLnk = hive;
+		}else if (this.steem_account){
+			chnLnk = steem;
+		}else{
+			chnLnk = blurt;
+		}
+		
+		let usernameValid = chnLnk.utils.validateAccountName(val);
 		//check for error msg
 		if (usernameValid == null){
 			//ensure no existing account matches same name
-			hive.api.getAccounts([val], function(err, result) {
+			chnLnk.api.getAccounts([val], function(err, result) {
 			  if (result.length>0){
 				vue_ctnr.username_exists = 'Please choose a different username';
 			  }
@@ -317,6 +339,7 @@
 		return parseFloat(usdInvest / this.afitPrice).toFixed(6);
 	  },
 	  async genPrivKey(){
+		console.log('generate priv key');
 		//generate posting key
 		let privateKeys = await hive.auth.getPrivateKeys(this.$refs["account-username"].value.toLowerCase(), this.$refs["account-password"].value, ['posting']);
 		this.privatePostKey = privateKeys.posting;
