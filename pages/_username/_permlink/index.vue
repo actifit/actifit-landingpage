@@ -264,7 +264,7 @@
 		/*}else{
 			await steem.api.setOptions({ url: process.env.steemApiNode });
 		}	  */
-		console.log('connect node');
+		//console.log('connect node');
 		let user_name = params.username.replace('@','');
 		let result = await steem.api.getContentAsync(user_name, params.permlink);
 		let is_steem = false;
