@@ -709,6 +709,8 @@
 		hive.api.setOptions({ url: process.env.hiveApiNode });
 		//console.log('blurt broadcast');
 		//console.log(this.user.account);
+		
+		blurt.api.setOptions({ url: process.env.blurtApiNode });
 		await this.setProperNode();
 		this.$store.dispatch('steemconnect/login')
 	}

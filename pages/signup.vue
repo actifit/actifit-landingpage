@@ -212,6 +212,8 @@
 	  
 	  steem.api.setOptions({ url: process.env.steemApiNode });
 	  
+	  blurt.api.setOptions({ url: process.env.blurtApiNode });
+	  
 	  
 
 	  //if a promo code is available, let's set it accordingly
