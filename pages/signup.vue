@@ -73,9 +73,10 @@
 				<span class="row m-0">
 					<input type="number" class="form-control form-control-lg w-50" id="invested-amount" ref="invested-amount" readonly :value="getMatchingAmount()" />
 					<select @change="adjustCurrency" id="invested-crypto" name="invested-crypto" ref="invested-crypto" text="$t('choose_cryto')" class="form-control form-control-lg w-50">
-						<option value="STEEM">{{ $t('STEEM') }}</option>
+						
 						<!--<option value="SBD">{{ $t('SBD') }}</option>-->
 						<option value="HIVE">{{ $t('HIVE') }}</option>
+						<option value="STEEM">{{ $t('STEEM') }}</option>
 						<!--<option value="STEEM">{{ $t('HBD') }}</option>-->
 					</select>
 				</span>
@@ -170,7 +171,7 @@
 		sbdPrice: 0.1,
 		hivePrice: 0.1,
 		hbdPrice: 0.1,
-		transferType: 'STEEM',//default option
+		transferType: 'HIVE',//default option
 		minUSD: process.env.minSignupUSDCost,
 		afitPrice: 0.5,
 		maxAfitRewardPerLot: 1000,
