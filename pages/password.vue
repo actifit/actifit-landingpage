@@ -4,7 +4,7 @@
 	
 	<div class="container pt-5 mt-5 pb-5">
 		
-		<h4 class="text-center user-name">{{ $t('Password_management') }}</h4>
+		<h5 class="p-3 acti-headr">{{ $t('Password_management') }}</h5>
 		<div class=" pb-3">
 			<div class="row" v-if="!user">
 				<label for="username" class="font-weight-bold col-3">{{ $t('Your_Username') }}</label>
@@ -50,7 +50,13 @@
 			</div>
 			
 			<div v-if="user">
-				<h5>{{ $t('Change_recovery_account') }}</h5>
+			
+				<!--<div>
+					<h5 class="p-3 acti-headr">{{ $t('authority_management') }}</h5>
+				</div>-->
+				
+				
+				<h5 class="p-3 acti-headr">{{ $t('Change_recovery_account') }}</h5>
 				
 				<div>{{ $t('Change_recovery_account_desc') }}</div>
 				
@@ -71,8 +77,8 @@
 					<i class="fas fa-spin fa-spinner text-white" v-if="updatingRecovery"></i>
 				</button><br/>
 				<div class="text-brand" v-if="errorUpdateRecovery">{{ errorUpdateRecovery }}</div>
-				
-				<h5>{{ $t('Change_password') }}</h5>
+				<br />
+				<h5 class="p-3 acti-headr">{{ $t('Change_password') }}</h5>
 				
 				
 				<div>{{ $t('Change_password_desc') }}</div>
@@ -716,3 +722,9 @@
 	}
   }
 </script>
+<style>
+.acti-headr{
+	background: radial-gradient(transparent, red);
+	color: white;
+}
+</style>

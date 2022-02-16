@@ -805,5 +805,15 @@ module.exports = {
   posting_key_precaution: 'Save this key to use it next time to login to actifit.io and to use it in the Actifit app when creating actifit reports',
   Copy_Posting_Key: 'Copy Posting Key',
   target_bchain: 'Blockchain Support',
-  leave_default_recommend: 'Account will be created on selected chain(s). Leave default (all selected) unless you are sure of what you are doing'
+  leave_default_recommend: 'Account will be created on selected chain(s). Leave default (all selected) unless you are sure of what you are doing',
+  authority_management: 'Manage Authority Permissions',
+  give_posting_auth: 'Grant Posting Authority',
+  revoke_posting_auth: 'Revoke Posting Authority',
+  posting_authority_desc: 'Use this option to post to other chains without the need for same password/keys across chains.<br/>By granting posting authority to actifit, you can use your Hive posting key to post via actifit app, with posts going to steem and blurt despite having different password/key(s).',
+  steem_posting_auth: 'Steem Posting Authority',
+  blurt_posting_auth: 'Blurt Posting Authority',
+  Error_provide_active_key: 'Please provide correct active key',
+  blurt_active_key: 'Blurt Private Active Key',
+  steem_active_key: 'Steem Private Active Key',
+  post_chains_setting: 'Posting To Other Chains'
 }
