@@ -1,0 +1,47 @@
+{
+  "producer_account_name":"actifittelos",
+  "org": {
+    "candidate_name":"Actifit Telos",
+    "website":"https://www.actifit.io",
+    "code_of_conduct":"https://www.actifit.io/conduct",
+    "ownership_disclosure":"https://www.actifit.io/ownership",
+    "email":"info@actifit.io",
+    "github_user": "actifit",
+    "branding":{
+      "logo_256":"https://actifit.io/img/actifit-logo-256.png",
+      "logo_1024":"https://actifit.io/img/actifit-logo-1024.png",
+      "logo_svg":"https://actifit.io/img/actifit-logo.svg",
+    },
+    "location": {
+      "name": "Beirut, LB",
+      "country": "LB",
+      "latitude": 33.789004,
+      "longitude": 35.498459
+    },
+    "social": {
+      "steemit": "actifit",
+	  "hive": "actifit",
+	  "youtube": "Actifitfitness",
+      "twitter": "actifit_fitness",
+      "reddit": "actifit",
+	  "facebook": "actifit.fitness",
+	  "linkedin": "actifit-io",
+	  "medium": "actifit.fitness",
+      "telegram": "actifit"
+    }
+  },
+  "nodes": [
+    {
+      "location": {
+        "name": "Helsinki, FL",
+        "country": "FL",
+        "latitude": 60.307843, 
+        "longitude": 24.869052
+      },
+      "node_type": "producer",
+      "p2p_endpoint": "",
+      "api_endpoint": "",
+      "ssl_endpoint": ""
+    },
+  ]
+}
