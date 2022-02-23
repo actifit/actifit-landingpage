@@ -13,7 +13,8 @@
 		<div>
 		<h4>Vision</h4>
 		Actifit kicked off its Telos branch as part of expansion efforts to other blockchains. We are currently running on 3 DPOS blockchains, namely Hive, Steem, and Blurt.
-		Actifit as a project has been running since 2018, we believe in open source and open communication. We are committed to providing an excellent experience to our community on Telos as we have on other chains.
+		Actifit as a project has been running since 2018, we believe in open source and open communication. We are committed to providing an excellent experience to our community on Telos as we have on other chains, and to help with Telos growth as we are as strong as our strongest partners.
+		We believe we are greatly positioned to expand the user base across all our different blockchains, and particularly Telos, as we provide unique use case by incentivizing and rewarding our users for living healthier and earning rewards for tracking their steps and daily activity.
 		</div>
 		<div class="pt-4">
 		<h4>Block Production</h4>
@@ -21,7 +22,7 @@
 		</div>
 		<div class="pt-4">
 		<h4>Governance</h4>
-		Actifit Telos adheres by the Telos governance documents available at https://telos.net, including arbitration and regproducer contract.
+		Actifit Telos adheres to the Telos governance documents available at https://telos.net, including arbitration,  regproducer, and operating agreements.
 		</div>
 		<div class="pt-4">
 		<h4>Arbitration</h4>
