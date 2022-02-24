@@ -24,6 +24,11 @@
 					<img src="/img/STEEM.png" style="max-height: 50px;" v-on:click="bchain_val = 'STEEM'" :class="adjustSteemClass">
 					<label for="steem_bchain">STEEM</label>
 				  </span>
+				  <span class="bchain-option p-2 m-2 btn col-4 m-auto">
+					<input type="radio" id="blurt_bchain" value="BLURT" v-model="bchain_val">
+					<img src="/img/BLURT.png" style="max-height: 50px;" v-on:click="bchain_val = 'BLURT'" :class="adjustBlurtClass">
+					<label for="blurt_bchain">BLURT</label>
+				  </span>
 				</span>
 				<span class="row mb-2 form-control-lg ">
 					<input type="checkbox" id="keeploggedin" v-model="keep_loggedin_val" >
@@ -51,14 +56,16 @@
 <script>
   import NavbarBrand from '~/components/NavbarBrand'
   import Footer from '~/components/Footer'
-  import steem from 'steem'
+  //import steem from 'steem'
   import VueRecaptcha from 'vue-recaptcha';
   
   //import { VueReCaptchaV3 } from 'vue-recaptcha-v3';
 
   import { mapGetters } from 'vuex'
   
-  import hive from '@hiveio/hive-js'
+  //import hive from '@hiveio/hive-js'
+  
+  //import blurt from '@blurtfoundation/blurtjs'
 
   export default {
 	head () {
@@ -104,6 +111,12 @@
 		},
 		adjustSteemClass () {
 			if (this.bchain_val != 'STEEM'){
+				return 'option-opaque';
+			}
+			return '';
+		},
+		adjustBlurtClass () {
+			if (this.bchain_val != 'BLURT'){
 				return 'option-opaque';
 			}
 			return '';

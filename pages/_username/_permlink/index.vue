@@ -2,6 +2,8 @@
   <div>
 	<NavbarBrand />
 	<div v-if="report && report.author" class="container pt-5 mt-5 pb-5 col-md-6" >
+		<ChainSelection />
+	
         <div class="report-head mb-3 col-md-12">
           <!-- if this is a comment, display link to higher level comment/post -->
 		  <div v-if="report.parent_author">
@@ -42,6 +44,7 @@
 				<small :title="postPayout">
 					<img src="/img/STEEM.png" class="mr-1 currency-logo-small" v-if="cur_bchain=='STEEM'">
 					<img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain=='HIVE'">
+					<img src="/img/BLURT.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain=='BLURT'">
 					{{ postPayout }}
 				</small>
 				<span @click.prevent="displayMorePayoutData = !displayMorePayoutData" class="text-brand pointer-cur-cls" :title="$t('more_token_rewards')">
@@ -218,6 +221,7 @@
 
 <script>
   import NavbarBrand from '~/components/NavbarBrand'
+  import ChainSelection from '~/components/ChainSelection'
   import Footer from '~/components/Footer'
 
   import steem from 'steem'
@@ -234,6 +238,10 @@
   import VoteModal from '~/components/VoteModal'
   
   import sanitize from 'sanitize-html'
+  
+  import hive from '@hiveio/hive-js'
+  
+  import blurt from '@blurtfoundation/blurtjs'
 
   //Vue.use( steemEditor );  
   
@@ -260,20 +268,32 @@
 		//let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE')
 		//if (cur_bchain == 'HIVE'){
 		//set HIVE as default chain, since we cannot use localstorage in here
-		await steem.api.setOptions({ url: process.env.hiveApiNode });
+		let chainLnk = hive;
+		await chainLnk.api.setOptions({ url: process.env.hiveApiNode });
 		/*}else{
 			await steem.api.setOptions({ url: process.env.steemApiNode });
 		}	  */
 		//console.log('connect node');
 		let user_name = params.username.replace('@','');
-		let result = await steem.api.getContentAsync(user_name, params.permlink);
+		let result = await chainLnk.api.getContentAsync(user_name, params.permlink);
 		let is_steem = false;
 		if (!result || !result.author){
-			//switch to other chain
-			await steem.api.setOptions({ url: process.env.steemApiNode });
-			result = await steem.api.getContentAsync(user_name, params.permlink);
+			//switch to Steem chain
+			chainLnk = steem
+			await chainLnk.api.setOptions({ url: process.env.steemApiNode });
+			result = await chainLnk.api.getContentAsync(user_name, params.permlink);
 			is_steem = true;
+			
+			if (!result || !result.author){
+				//if no result, switch to Blurt
+				chainLnk = blurt;
+				await chainLnk.api.setOptions({ url: process.env.blurtApiNode });
+				result = await chainLnk.api.getContentAsync(user_name, params.permlink);
+				is_steem = false;
+			}
 		}
+		console.log('pre-flight');
+		console.log(result);
 		let post_meta = JSON.parse(result.json_metadata)
 		let imgs = post_meta.image;
 		let meta_spec = {
@@ -404,7 +424,8 @@
 	  Comments,
 	  SocialSharing,
 	  VoteModal,
-	  NotifyModal
+	  NotifyModal,
+	  ChainSelection
 	},
     computed: {
 	  ...mapGetters('steemconnect', ['user']),
@@ -507,9 +528,9 @@
       },
 	  postPayout() {
 		if (this.postPaid()){
-			return this.report.total_payout_value.replace('SBD','').replace('STEEM','').replace('HBD','').replace('HIVE','')+' $'
+			return this.report.total_payout_value.replace('SBD','').replace('STEEM','').replace('HBD','').replace('HIVE','').replace('BLURT','')+' $'
 		}else{
-			return this.report.pending_payout_value.replace('SBD','').replace('STEEM','').replace('HBD','').replace('HIVE','')+' $'
+			return this.report.pending_payout_value.replace('SBD','').replace('STEEM','').replace('HBD','').replace('HIVE','').replace('BLURT','')+' $'
 		}
 	  },
 	  /*getUserRank() {
@@ -856,13 +877,19 @@
 	  async updatePostData () {
 		  // try to fetch matching report
 		  //set proper chain
+		  let chainLnk = hive;
+		  
 		  if (this.cur_bchain == 'HIVE'){
-			steem.api.setOptions({ url: process.env.hiveApiNode });
-		  }else{
-			steem.api.setOptions({ url: process.env.steemApiNode });
-		  }	  
+			await chainLnk.api.setOptions({ url: process.env.hiveApiNode });
+		  }else if (this.cur_bchain == 'STEEM'){
+			chainLnk = steem;
+			await chainLnk.api.setOptions({ url: process.env.steemApiNode });
+		  }else if (this.cur_bchain == 'BLURT'){
+			chainLnk = blurt;
+			await chainLnk.api.setOptions({ url: process.env.blurtApiNode });
+		  }
 		 
-		  steem.api.getContent(this.postAuthor, this.postPermLink, (err, result) => {
+		  chainLnk.api.getContent(this.postAuthor, this.postPermLink, (err, result) => {
 			this.report = result;
 			if (this.report && this.report.author){
 				this.fetchReportKeyData();

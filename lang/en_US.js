@@ -467,6 +467,7 @@ module.exports = {
   in_usd: 'In USD',
   in_steem: 'In STEEM',
   in_hive: 'In HIVE',
+  in_blurt: 'In BLURT',
   detailed_calc_title: 'Calculation Details:',
   top_afitx_holders: 'Top 25 AFITX Requests',
   Afitx_Bal: 'AFITX Held',
@@ -815,5 +816,17 @@ module.exports = {
   Error_provide_active_key: 'Please provide correct active key',
   blurt_active_key: 'Blurt Private Active Key',
   steem_active_key: 'Steem Private Active Key',
-  post_chains_setting: 'Posting To Other Chains'
+  post_chains_setting: 'Posting To Other Chains',
+  Your_Blurt_Balance: 'Your Blurt Balance',
+  BLURT_POWER_CAPS: 'BLURT POWER',
+  BLURT_POWER_BREAKDOWN: 'BLURT POWER BREAKDOWN',
+  BLURT: 'BLURT',
+  Received_BP: 'Received BP',
+  Delegated_BP: 'Delegated BP',
+  notify_Switch_Chain_HE_Tokens: 'Below tokens are available on hive-engine.com. To transact with those tokens please switch the active chain to Hive via your user menu.',
+  Blurt_Power: 'Blurt Power',
+  LinkedIn: 'LinkedIn',
+  FAQ: 'FAQ',
+  Youtube: 'Youtube',
+  Medium: 'Medium'
 }

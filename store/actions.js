@@ -3,6 +3,8 @@ import steem from 'steem'
 
 import hive from '@hiveio/hive-js'
 
+import blurt from '@blurtfoundation/blurtjs'
+
 //hive.config.set('rebranded_api', true)
 //hive.broadcast.updateOperations()
 hive.config.set('alternative_api_endpoints', process.env.altHiveNodes);
@@ -11,7 +13,7 @@ steem.api.setOptions({ url: process.env.steemApiNode });
 
 hive.api.setOptions({ url: process.env.hiveApiNode });
 
-
+blurt.api.setOptions({ url: process.env.blurtApiNode });
 
 // returning promises to be able to wait for data
 
@@ -187,6 +189,8 @@ export default {
 			  let chainLnk = hive;
 			  if (state.bchain == 'STEEM'){
 				chainLnk = steem;
+			  }else if (state.bchain == 'BLURT'){
+				chainLnk = blurt;
 			  }
 
 			  // get (next) 100 posts with actifit tag
@@ -227,6 +231,8 @@ export default {
 	  let chainLnk = hive;
 	  if (state.bchain == 'STEEM'){
 		chainLnk = steem;
+	  }else if (state.bchain == 'BLURT'){
+		chainLnk = blurt;
 	  }
 	  
       // get (next) 100 posts with actifit tag
@@ -253,6 +259,8 @@ export default {
 	  let chainLnk = hive;
 	  if (state.bchain == 'STEEM'){
 		chainLnk = steem;
+	  }else if (state.bchain == 'BLURT'){
+		chainLnk = blurt;
 	  }
 	  
       // get (next) 100 posts from the user
@@ -282,6 +290,8 @@ export default {
 	  hive.api.setOptions({ url: process.env.hiveStateApiNode });
 	  if (state.bchain == 'STEEM'){
 		chainLnk = steem;
+	  }else if (state.bchain == 'BLURT'){
+		chainLnk = blurt;
 	  }
 	  
 	  //using getState to fetch all level comments
@@ -319,6 +329,8 @@ export default {
 	  let chainLnk = hive;
 	  if (state.bchain == 'STEEM'){
 		chainLnk = steem;
+	  }else if (state.bchain == 'BLURT'){
+		chainLnk = blurt;
 	  }
 	  
 	  
@@ -351,6 +363,8 @@ export default {
 	  let chainLnk = hive;
 	  if (state.bchain == 'STEEM'){
 		chainLnk = steem;
+	  }else if (state.bchain == 'BLURT'){
+		chainLnk = blurt;
 	  }
 	  
       chainLnk.api.getDiscussionsByBlog({tag: username, limit: 100, start_author: start_author, start_permlink: start_permlink}, (err, posts) => {
@@ -371,6 +385,8 @@ export default {
 	  let chainLnk = hive;
 	  if (state.bchain == 'STEEM'){
 		chainLnk = steem;
+	  }else if (state.bchain == 'BLURT'){
+		chainLnk = blurt;
 	  }
 		
       chainLnk.api.getDiscussionsByBlog({tag: 'actifit', limit: 100}, (err, posts) => {

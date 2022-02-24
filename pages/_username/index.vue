@@ -327,6 +327,8 @@
   
   import hive from '@hiveio/hive-js'
   
+  import blurt from '@blurtfoundation/blurtjs'
+  
   import {mapGetters} from 'vuex'
   
   import Vue from 'vue'
@@ -1097,6 +1099,8 @@
 		let properNode = hive;
 		if (this.cur_bchain == 'STEEM'){
 			properNode = steem;
+		}else if (this.cur_bchain == 'BLURT'){
+			properNode = blurt;
 		}
 		console.log(this.cur_bchain);
 		return properNode;
@@ -1262,6 +1266,8 @@
 		hive.config.set('alternative_api_endpoints', process.env.altHiveNodes);
 		
 		hive.api.setOptions({ url: process.env.hiveApiNode });
+		
+		blurt.api.setOptions({ url: process.env.blurtApiNode });
 		// login
 		this.$store.dispatch('steemconnect/login')
 		this.fetchUserData();

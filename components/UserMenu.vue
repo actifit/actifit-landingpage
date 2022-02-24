@@ -73,12 +73,19 @@
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/referrals')">{{ $t('My_Referrals') }} <br/><span class="text-brand"> {{ referralCount }} </span></a>
           <a class="dropdown-item" href="#" @click.prevent="$router.push('/activity/' + user.account.name)">{{ $t('My_Activity') }}</a>
 		  <a class="dropdown-item" href="#">{{ $t('Active_chain') }} <br />
-			<img src="/img/HIVE.png" style="max-height: 20px;" v-on:click="setActiveChain('HIVE')" :class="adjustHiveClass" :title="(cur_bchain == 'HIVE'?$t('running_on_chain').replace('_CHAIN_', 'HIVE'):$t('switch_to_chain').replace('_CHAIN_', 'HIVE'))">
-			<span class="span-toggle-chain pl-2 pr-2 text-brand" :title="$t('switch_chain')">
+			<div class="pl-2" :class="adjustHiveClass" v-on:click="setActiveChain('HIVE')">
+			<img src="/img/HIVE.png" style="max-height: 20px;"   :title="(cur_bchain == 'HIVE'?$t('running_on_chain').replace('_CHAIN_', 'HIVE'):$t('switch_to_chain').replace('_CHAIN_', 'HIVE'))">{{$t('HIVE')}}
+			<!--<span class="span-toggle-chain pl-2 pr-2 text-brand" :title="$t('switch_chain')">
 				<i class="fas fa-toggle-on" v-if="cur_bchain == 'STEEM'" v-on:click="setActiveChain('HIVE')"></i>
 				<i class="fas fa-toggle-off" v-else-if="cur_bchain == 'HIVE'" v-on:click="setActiveChain('STEEM')"></i>
-			</span>
-			<img src="/img/STEEM.png" style="max-height: 20px;" v-on:click="setActiveChain('STEEM')" :class="adjustSteemClass" :title="(cur_bchain == 'STEEM'?$t('running_on_chain').replace('_CHAIN_', 'STEEM'):$t('switch_to_chain').replace('_CHAIN_', 'STEEM'))">
+			</span>-->
+			</div>
+			<div class="pl-2" :class="adjustSteemClass" v-on:click="setActiveChain('STEEM')">
+			<img src="/img/STEEM.png" style="max-height: 20px;"   :title="(cur_bchain == 'STEEM'?$t('running_on_chain').replace('_CHAIN_', 'STEEM'):$t('switch_to_chain').replace('_CHAIN_', 'STEEM'))">{{$t('STEEM')}}
+			</div>
+			<div class="pl-2" :class="adjustBlurtClass" v-on:click="setActiveChain('BLURT')" >
+			<img src="/img/BLURT.png" style="max-height: 20px;"  :title="(cur_bchain == 'BLURT'?$t('running_on_chain').replace('_CHAIN_', 'BLURT'):$t('switch_to_chain').replace('_CHAIN_', 'BLURT'))">{{$t('BLURT')}}
+			</div>
 		  </a>
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/password')">{{ $t('My_Password') }}</a>
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/settings')">{{ $t('Settings') }}</a>
@@ -149,6 +156,12 @@
 	  },
 	  adjustSteemClass () {
 		if (this.cur_bchain != 'STEEM'){
+			return 'option-opaque';
+		}
+		return 'active-spin';
+	  },
+	  adjustBlurtClass () {
+		if (this.cur_bchain != 'BLURT'){
 			return 'option-opaque';
 		}
 		return 'active-spin';
@@ -347,7 +360,7 @@
 			transform: rotateZ(360deg);
 		}
 	}
-	.active-spin{
+	.active-spin > img{
 		animation: spin 5s ease-in-out infinite alternate;
 	}
 	.span-toggle-chain{

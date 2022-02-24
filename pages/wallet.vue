@@ -13,6 +13,7 @@
 				<div class="pb-2">{{ $t('in_usd') }}: ${{ totalAccountValue}}</div>
 				<div class="pb-2" v-if="this.cur_bchain=='STEEM'">{{ $t('in_steem') }}: <img src="/img/STEEM.png" class="token-logo-sm">{{ formattedSteemTotVal }}</div>
 				<div class="pb-2" v-else-if="this.cur_bchain=='HIVE'">{{ $t('in_hive') }}: <img src="/img/HIVE.png" class="token-logo-sm">{{ formattedSteemTotVal }}</div>
+				<div class="pb-2" v-else-if="this.cur_bchain=='BLURT'">{{ $t('in_blurt') }}: <img src="/img/BLURT.png" class="token-logo-sm">{{ formattedSteemTotVal }}</div>
 			</div>
 			<div class="col-md-6 row-sep row-sep-in">
 				<!-- section for the BSC wallet -->
@@ -71,12 +72,12 @@
 					<span class="col-md-6">
 						{{ formattedUserAfitSE }}
 						<br/>
-						<span class="btn btn-brand" :title="$t('move_afit_se_he_title')"><i class="fas fa-angle-double-right" v-on:click="moveAFITseHE"></i></span>
+						<span v-if="cur_bchain!='BLURT'" class="btn btn-brand" :title="$t('move_afit_se_he_title')"><i class="fas fa-angle-double-right" v-on:click="moveAFITseHE"></i></span>
 					</span>
 					<span class="col-md-6">
 						{{ formattedUserAfitHE }}
 						<br/>
-						<span class="btn btn-brand" :title="$t('move_afit_he_se_title')"><i class="fas fa-angle-double-left" v-on:click="moveAFITheSE"></i></span>
+						<span v-if="cur_bchain!='BLURT'" class="btn btn-brand" :title="$t('move_afit_he_se_title')"><i class="fas fa-angle-double-left" v-on:click="moveAFITheSE"></i></span>
 					</span>
 				</h5>
 				<h5 class="mb-4 font-weight-bold row">
@@ -140,12 +141,12 @@
 					<span class="col-md-6">
 						{{ formattedUserAFITXSE }}
 						<br/>
-						<span class="btn btn-brand" :title="$t('move_afitx_se_he_title')"><i class="fas fa-angle-double-right" v-on:click="moveAFITXseHE"></i></span>
+						<span v-if="cur_bchain!='BLURT'" class="btn btn-brand" :title="$t('move_afitx_se_he_title')"><i class="fas fa-angle-double-right" v-on:click="moveAFITXseHE"></i></span>
 					</span>
 					<span class="col-md-6">
 						{{ formattedUserAFITXHE }}
 						<br/>
-						<span class="btn btn-brand" :title="$t('move_afitx_he_se_title')"><i class="fas fa-angle-double-left" v-on:click="moveAFITXheSE"></i></span>
+						<span v-if="cur_bchain!='BLURT'" class="btn btn-brand" :title="$t('move_afitx_he_se_title')"><i class="fas fa-angle-double-left" v-on:click="moveAFITXheSE"></i></span>
 					</span>
 				</h5>
 				<h5 class="mb-4 font-weight-bold row">
@@ -360,6 +361,7 @@
 					    <option v-if="cur_bchain=='STEEM'" value="SBD">{{ $t('SBD') }}</option>
 						<option v-if="cur_bchain=='HIVE'" value="HIVE">{{ $t('HIVE') }}</option>
 					    <option v-if="cur_bchain=='HIVE'" value="HBD">{{ $t('HBD') }}</option>
+						<!--<option v-if="cur_bchain=='BLURT'" value="BLURT">{{ $t('BLURT') }}</option>-->
 					  </select>
 					</div>
 					<div class="row">
@@ -522,18 +524,34 @@
 					</div>
 				</div>
 			</div>
+			<div class="col-md-6 row-sep-in" v-else-if="cur_bchain=='BLURT'">
+				<h5 class="token-title"><img src="/img/BLURT.png" class="mr-2 token-logo">{{ $t('Your_Blurt_Balance') }}</h5>
+				<div class="mb-4 font-weight-bold">
+					<div class="p-2">{{ this.renderSteemPower(2) }} {{ $t('BLURT_POWER_CAPS') }} | {{ this.renderBalance(this.cur_bchain) }}</div>
+					<div class="row">
+						<div class="p-2 col-md-6" id="ttip-area">
+							<small><i>{{ $t('BLURT_POWER_BREAKDOWN') }}: {{this.renderSteemPower(1)}} ({{ $t('Owned_BP') }}) + {{this.renderSteemPower(3)}} ({{ $t('Received_BP') }}) - {{this.renderSteemPower(4)}} ({{ $t('Delegated_BP') }}) - {{this.renderSteemPower(5)}} ({{ $t('Powering_Down_Amount') }})</i></small>
+						</div>
+					</div>
+					<div>
+						<button v-on:click="fetchDelegations(false)" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('FETCH_MY_DELEGATIONS') }}</button>
+					</div>
+				</div>
+			</div>
 			
 			<div v-if="tokensOfInterestBal.length > 0" class="col-md-6 row-sep-in">
 				<h5 class="token-title" v-if="cur_bchain == 'STEEM'">{{ $t('Your_Token_Balance') }}</h5>
-				<h5 class="token-title" v-else>{{ $t('Your_HE_Token_Balance') }}</h5>
+				<h5 class="token-title" v-else>{{ $t('Your_HE_Token_Balance') }}<span v-if="cur_bchain=='BLURT'"><i class="fas fa-info-circle" v-on:click="notifySwitchChain()"></i></span></h5>
 				<div class="mb-4 font-weight-bold">
 					<div class="p-2" v-for="(token, index) in tokensOfInterestBal" :key="index" :token="token">
 						{{ renderBal(token) }} {{ token.symbol }} <span v-if="parseFloat(renderStake(token)) > 0">+ {{ renderStake(token)}} {{ token.symbol }} {{ $t('Staked') }} </span>
 						<span v-if="parseFloat(delegStake(token)) > 0">( + {{ delegStake(token)}} {{ token.symbol }} {{ $t('Delegated') }}) </span>
-						<span v-if="token.stakable"><i class="fas fa-arrow-circle-up text-brand p-1" :title="$t('stake_tokens')" v-on:click="initiateStaking(token)"></i></span>
-						<span v-if="token.stakable"><i class="fas fa-arrow-circle-down text-brand p-1" :title="$t('unstake_tokens')" v-on:click="initiateUnStaking(token)"></i></span>
-						<span v-if="token.symbol == 'STEEMP' || token.symbol == 'SWAP.HIVE'"><i class="fas fa-upload text-brand p-1" :title="$t('withdraw_tokens')" v-on:click="initiateWithdraw(token)"></i></span>
-						<span><i class="fas fa-share-square text-brand p-1" :title="$t('transfer_tokens')" v-on:click="initiateTransfer(token)"></i></span>
+						<span class="token_actions" v-if="cur_bchain!='BLURT'">
+							<span v-if="token.stakable"><i class="fas fa-arrow-circle-up text-brand p-1" :title="$t('stake_tokens')" v-on:click="initiateStaking(token)"></i></span>
+							<span v-if="token.stakable"><i class="fas fa-arrow-circle-down text-brand p-1" :title="$t('unstake_tokens')" v-on:click="initiateUnStaking(token)"></i></span>
+							<span v-if="token.symbol == 'STEEMP' || token.symbol == 'SWAP.HIVE'"><i class="fas fa-upload text-brand p-1" :title="$t('withdraw_tokens')" v-on:click="initiateWithdraw(token)"></i></span>
+							<span><i class="fas fa-share-square text-brand p-1" :title="$t('transfer_tokens')" v-on:click="initiateTransfer(token)"></i></span>
+						</span>
 					</div>
 					<div class="row" v-if="tokenActions && curTokenAction == TRANSFER_FUNDS">
 					  <label for="token-target-account" class="w-25 p-2">{{ $t('Account') }} *</label>
@@ -579,17 +597,18 @@
 				  <input type="text" id="transfer-recipient" name="transfer-recipient" ref="transfer-recipient" class="form-control-lg w-50 p-2">
 				</div>
 				<div class="row">
-				<label for="transfer-type" class="w-25 p-2">{{ $t('Type') }} *</label>
-				<select @change="transferTypeChange" id="transfer-type" name="transfer-type" ref="transfer-type" text="Choose Type" class="form-control-lg w-50 p-2">
-				  <option value="STEEM">
-					<span v-if="cur_bchain=='STEEM'">{{ $t('STEEM') }}</span>
-					<span v-if="cur_bchain=='HIVE'">{{ $t('HIVE') }}</span>
-				  </option>
-				  <option value="SBD">
-					<span v-if="cur_bchain=='STEEM'">{{ $t('SBD') }}</span>
-					<span v-if="cur_bchain=='HIVE'">{{ $t('HBD') }}</span>
-				  </option>
-				</select>
+					<label for="transfer-type" class="w-25 p-2">{{ $t('Type') }} *</label>
+					<select @change="transferTypeChange" id="transfer-type" name="transfer-type" ref="transfer-type" text="Choose Type" class="form-control-lg w-50 p-2">
+					  <option value="STEEM" v-if="cur_bchain!='BLURT'">
+						<span v-if="cur_bchain=='STEEM'">{{ $t('STEEM') }}</span>
+						<span v-if="cur_bchain=='HIVE'">{{ $t('HIVE') }}</span>
+					  </option>
+					  <option value="SBD" v-if="cur_bchain!='BLURT'">
+						<span v-if="cur_bchain=='STEEM'">{{ $t('SBD') }}</span>
+						<span v-if="cur_bchain=='HIVE'">{{ $t('HBD') }}</span>
+					  </option>
+					  <option value="BLURT" v-if="cur_bchain=='BLURT'">{{ $t('BLURT') }}</option>
+					</select>
 				</div>
 				<div class="row">
 				  <label for="transfer-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
@@ -624,7 +643,7 @@
 			  </div>
 			</transition>
 			<transition name="fade">
-			  <div v-if="fundActivityMode == 2" class="text-center grid p-2">
+			  <div v-if="fundActivityMode == 2" class="text-center grid p-2 col-md-12">
 				<div class="row">
 				  <label for="powerup-recipient" class="w-25 p-2">{{ $t('To') }} *</label>
 				  <input type="text" id="powerup-recipient" name="powerup-recipient" ref="powerup-recipient" class="form-control-lg w-50 p-2" :value="user.account.name">
@@ -756,6 +775,7 @@
 						  <th scope="col">{{ $t('Delegatee') }}</th>
 						  <th scope="col" v-if="cur_bchain == 'STEEM' ">{{ $t('Steem_Power') }}</th>
 						  <th scope="col" v-else-if="cur_bchain == 'HIVE' ">{{ $t('Hive_Power') }}</th>
+						  <th scope="col" v-else-if="cur_bchain == 'BLURT' ">{{ $t('Blurt_Power') }}</th>
 						  <th scope="col">{{ $t('Date') }}</th>
 						  <th scope="col">{{ $t('Action') }}</th>
 						</tr>
@@ -781,7 +801,7 @@
 			  </div>
 			</transition>
 		</div>
-		<div class="row row-sep">
+		<div class="row row-sep" v-if="cur_bchain!='BLURT'">
 			<div v-if="isClaimableDataAvailable && cur_bchain=='STEEM'" class="col-md-6 row-sep-in">
 				<h5 class="token-title"><img src="/img/STEEM.png" class="mr-2 token-logo">{{ $t('Claimable_Steem_Rewards') }}</h5>
 				<div class="mb-4 font-weight-bold">
@@ -872,6 +892,8 @@
   import steem from 'steem'
   
   import hive from '@hiveio/hive-js'
+  import blurt from '@blurtfoundation/blurtjs'
+  
   import ExchangeQueue from '~/components/ExchangeQueueModal'
   import ExchangeHistory from '~/components/ExchangeHistoryModal'
   import SSC from 'sscjs'
@@ -1014,6 +1036,7 @@
 		sbdPrice: 0.1,
 		hivePrice: 0.1,
 		hbdPrice: 0.1,
+		blurtPrice: 0.01,
 		defaultAfit: 100,
 		afit_buy_error_proceeding: false,
 		afit_buy_err_msg: '',
@@ -1157,7 +1180,9 @@
 	  },
 	  bchain: function(newBchain) {
 		console.log('change in chain');
+		//load default blockchain values upon selection
 		this.cur_bchain = newBchain;
+		this.transferType = newBchain;
 		this.$store.dispatch('steemconnect/refreshUser');
 		//this.reload += 1;
 	  }
@@ -1258,7 +1283,9 @@
 		this.$refs['transfer-amount'].value = this.renderTransAmount('1').split(' ')[0];
 	  },
 	  resetTransAmount () {
-		this.$refs['transfer-amount'].value = '';
+		if (this.$refs['transfer-amount']){
+			this.$refs['transfer-amount'].value = '';
+		}
 	  },
 	  editDelegation(delegation){
 		this.$refs['delegate-recipient'].value = delegation.delegatee;
@@ -1328,6 +1355,10 @@
 		this.curTokenAction = this.WITHDRAW_FUNDS;
 		this.selTokenUp = token;
 	  },
+	  notifySwitchChain(){
+		let notice = this.$t('notify_Switch_Chain_HE_Tokens');
+		alert(notice);
+	  },
 	  topHolder(user){
 		if (this.topAFITXHolders.length){
 			return this.topAFITXHolders.find(v => v.account == user)
@@ -1379,6 +1410,9 @@
 			if (this.cur_bchain == 'HIVE' ){
 				baseCurrency = this.hivePrice
 				peggedCurrencyUnit = 'HBD';
+			}else if (this.cur_bchain == 'BLURT'){
+				baseCurrency = this.blurtPrice;
+				peggedCurrencyUnit = '';
 			}
 			//get AFIT standard val
 			let afitCoreVal = this.userTokens * this.afitPrice / baseCurrency;
@@ -1434,6 +1468,11 @@
 				let sbd_val = (parseFloat(this.user.account.sbd_balance) * this.sbdPrice / baseCurrency);;
 				this.totalAccountValue += sbd_val;
 				this.detailCalculation += parseFloat(this.user.account.sbd_balance) + ' '+peggedCurrencyUnit+' x '+ this.numberFormat((this.sbdPrice / baseCurrency), 4) + ' '+peggedCurrencyUnit+'/'+this.cur_bchain+' = ' + this.numberFormat(sbd_val, 4) + ' '+this.cur_bchain+'<br/>';
+			}else if (this.cur_bchain == 'BLURT'){
+				//BLURT does not support pegged currency
+				let sbd_val = 0;
+				this.totalAccountValue += sbd_val;
+				/*this.detailCalculation += parseFloat(this.user.account.sbd_balance) + ' '+peggedCurrencyUnit+' x '+ this.numberFormat((this.sbdPrice / baseCurrency), 4) + ' '+peggedCurrencyUnit+'/'+this.cur_bchain+' = ' + this.numberFormat(sbd_val, 4) + ' '+this.cur_bchain+'<br/>';*/
 			}else{
 				let sbd_val = (parseFloat(this.user.account.hbd_balance) * this.hbdPrice / baseCurrency);;
 				this.totalAccountValue += sbd_val;
@@ -1606,19 +1645,19 @@
 		  		  
 		  //grab SP
 		  this.steemPower = await this.vestsToSteemPower(this.user.account.vesting_shares);
-		
+		  console.log(this.steemPower );
 		  //grab Delegated SP
 		  this.delegatedSteemPower = await this.vestsToSteemPower(this.user.account.delegated_vesting_shares);
-		
+		  console.log(this.delegatedSteemPower );
 		  //grab received SP
 		  this.receivedSteemPower = await this.vestsToSteemPower(this.user.account.received_vesting_shares);
-		  
+		  console.log(this.receivedSteemPower );
 		  //grab powerdown SP
 		  this.powerDownRateVal = await this.vestsToSteemPower(this.user.account.vesting_withdraw_rate.split(' ')[0]);
-		  
+		  console.log(this.powerDownRateVal );
 		  //grab next power down withdrawal date
 		  this.powerDownWithdrawDate = this.date(this.user.account.next_vesting_withdrawal);
-		
+		console.log(this.powerDownWithdrawDate );
 		  //effective SP
 		  this.effectiveSteemPower = this.steemPower + this.receivedSteemPower - this.delegatedSteemPower - this.powerDownRateVal;
 		
@@ -1863,6 +1902,11 @@
 			let totalVests = Number(this.properties.total_vesting_shares.split(' ')[0]);
 			vests = Number(vests.split(' ')[0]);
 			return (totalSteem * (vests / totalVests));
+		}else if (this.cur_bchain == 'BLURT'){
+			let totalSteem = Number(this.properties.total_vesting_fund_blurt.split(' ')[0]);
+			let totalVests = Number(this.properties.total_vesting_shares.split(' ')[0]);
+			vests = Number(vests.split(' ')[0]);
+			return (totalSteem * (vests / totalVests));
 		}else{
 			let totalSteem = Number(this.properties.total_vesting_fund_hive.split(' ')[0]);
 			let totalVests = Number(this.properties.total_vesting_shares.split(' ')[0]);
@@ -1882,6 +1926,10 @@
 			let totalSteem = Number(this.properties.total_vesting_fund_steem.split(' ')[0]);
 			let totalVests = Number(this.properties.total_vesting_shares.split(' ')[0]);
 			return parseFloat(steemPower * totalVests / totalSteem).toFixed(6);
+		}else if (this.cur_bchain == 'BLURT'){
+			let totalSteem = Number(this.properties.total_vesting_fund_blurt.split(' ')[0]);
+			let totalVests = Number(this.properties.total_vesting_shares.split(' ')[0]);
+			return parseFloat(steemPower * totalVests / totalSteem).toFixed(6);
 		}else{
 			let totalSteem = Number(this.properties.total_vesting_fund_hive.split(' ')[0]);
 			let totalVests = Number(this.properties.total_vesting_shares.split(' ')[0]);
@@ -1891,15 +1939,21 @@
 	  claimableSTEEMRewards () {
 		//function handles preparing claimable STEEM rewards
 		if (typeof this.user != 'undefined' && this.user != null){
-		  this.claimSTEEM = this.user.account.reward_steem_balance;
-		  this.claimSP = this.user.account.reward_vesting_steem + " POWER";
+		  
 		  this.claimVests = this.user.account.reward_vesting_balance;
-		  this.claimSBD = this.user.account.reward_sbd_balance;
 		  if (this.cur_bchain=='HIVE'){
 			this.claimSTEEM = this.user.account.reward_hive_balance;
 			this.claimSP = this.user.account.reward_vesting_hive + " POWER";
 			this.claimSTEEM = this.claimSTEEM.replace('STEEM','HIVE');
 			this.claimSBD = this.user.account.reward_hbd_balance;
+		  }else if (this.cur_bchain == 'STEEM'){
+			this.claimSTEEM = this.user.account.reward_steem_balance;
+			this.claimSP = this.user.account.reward_vesting_steem + " POWER";
+			this.claimSBD = this.user.account.reward_sbd_balance;
+		  }else if (this.cur_bchain == 'BLURT'){
+			this.claimSTEEM = this.user.account.reward_blurt_balance;
+			this.claimSP = this.user.account.reward_vesting_blurt + " POWER";
+			this.claimSBD = 0;
 		  }
 		  return this.claimSP + this.claimSTEEM + this.claimSBD;
 		}
@@ -2154,7 +2208,7 @@
 			this.powerUpProcess = true;
 			let chainLnk = await this.setProperNode ();
 			//transferToVesting(wif, from, to, amount)
-			let res = await chainLnk.broadcast.transferToVestingAsync(this.$refs["p-ac-key-up"].value, this.user.account.name, this.user.account.name, parseFloat(this.$refs["powerup-amount"].value).toFixed(3) + ' ' + 'STEEM' ).then(
+			let res = await chainLnk.broadcast.transferToVestingAsync(this.$refs["p-ac-key-up"].value, this.user.account.name, this.user.account.name, parseFloat(this.$refs["powerup-amount"].value).toFixed(3) + ' ' + this.cur_bchain ).then(
 				res => this.confirmCompletion('powerup', this.$refs["powerup-amount"].value, res)).catch(err=>console.log(err));
 		}
 	  },
@@ -2267,6 +2321,8 @@
 			let power_type = 'SP';
 			if (this.cur_bchain=='HIVE'){
 				power_type = 'HP';
+			}else if (this.cur_bchain=='BLURT'){
+				power_type = 'BP';
 			}
 			if (type=='powerdown' && amount > 0){
 				note = 'Power down of '+amount + ' ' + power_type + ' started successfully!';
@@ -2368,6 +2424,8 @@
 		let properNode = hive;
 		if (cur_bchain == 'STEEM'){
 			properNode = steem;
+		}else if (cur_bchain == 'BLURT'){
+			properNode = blurt;
 		}
 		console.log(cur_bchain);
 		return properNode;
@@ -3819,6 +3877,9 @@
 	  },
 	  setHBDPrice (_hbdPrice){
 		this.hbdPrice = parseFloat(_hbdPrice).toFixed(3);
+	  },
+	  setBlurtPrice (_blurtPrice){
+		this.blurtPrice = parseFloat(_blurtPrice).toFixed(3);
 	  }
 	},
 	created () {
@@ -3846,6 +3907,9 @@
 	  hive.config.set('alternative_api_endpoints', process.env.altHiveNodes);
 	  
 	  hive.api.setOptions({ url: process.env.hiveApiNode });
+	  
+	  blurt.api.setOptions({ url: process.env.blurtApiNode });
+	  
 	  let chainLnk = await this.setProperNode();
       // login
       this.$store.dispatch('steemconnect/login')
@@ -3900,6 +3964,11 @@
 		res => {res.json().then(json => this.setHivePrice (json.hive.usd)).catch(e => reject(e))
 	  }).catch(e => reject(e))
 	  
+	  //grab BLURT price
+	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=blurt&vs_currencies=usd').then(
+		res => {res.json().then(json => this.setBlurtPrice (json.blurt.usd)).catch(e => reject(e))
+	  }).catch(e => reject(e))
+	  
 	  //grab SBD price
 	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem-dollars&vs_currencies=usd').then(
 		res => {res.json().then(json => this.setSBDPrice (json['steem-dollars'].usd)).catch(e => reject(e))
@@ -3911,6 +3980,10 @@
 		res => {res.json().then(json => this.setHBDPrice (json['hive_dollar'].usd)).catch(e => reject(e))
 	  }).catch(e => reject(e))
 	  this.loading = false;
+	  
+	  //set default option for transfer
+	  
+	  this.transferType = this.cur_bchain;
     }
   }
 </script>
