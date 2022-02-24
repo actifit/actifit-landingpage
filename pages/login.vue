@@ -14,21 +14,21 @@
 					<a href="/password" class="small">Forgot my posting key?</a>
 				</span>
 				<span class="row mb-2 form-control-lg ">
-				  <span class="bchain-option p-2 m-2 btn col-4 m-auto">
+				  <div class="bchain-option p-2 m-2 btn m-auto" :class="adjustHiveClass">
 					<input type="radio" id="hive_bchain" value="HIVE" v-model="bchain_val">
-					<img src="/img/HIVE.png" style="max-height: 50px;" v-on:click="bchain_val = 'HIVE'" :class="adjustHiveClass">
+					<img src="/img/HIVE.png" style="max-height: 50px;" v-on:click="bchain_val = 'HIVE'">
 					<label for="hive_bchain">HIVE</label>
-				  </span>
-				  <span class="bchain-option p-2 m-2 btn col-4 m-auto">
+				  </div>
+				  <div class="bchain-option p-2 m-2 btn m-auto" :class="adjustSteemClass">
 					<input type="radio" id="steem_bchain" value="STEEM" v-model="bchain_val">
-					<img src="/img/STEEM.png" style="max-height: 50px;" v-on:click="bchain_val = 'STEEM'" :class="adjustSteemClass">
+					<img src="/img/STEEM.png" style="max-height: 50px;" v-on:click="bchain_val = 'STEEM'" >
 					<label for="steem_bchain">STEEM</label>
-				  </span>
-				  <span class="bchain-option p-2 m-2 btn col-4 m-auto">
+				  </div>
+				  <div class="bchain-option p-2 m-2 btn m-auto" :class="adjustBlurtClass">
 					<input type="radio" id="blurt_bchain" value="BLURT" v-model="bchain_val">
-					<img src="/img/BLURT.png" style="max-height: 50px;" v-on:click="bchain_val = 'BLURT'" :class="adjustBlurtClass">
+					<img src="/img/BLURT.png" style="max-height: 50px;" v-on:click="bchain_val = 'BLURT'" >
 					<label for="blurt_bchain">BLURT</label>
-				  </span>
+				  </div>
 				</span>
 				<span class="row mb-2 form-control-lg ">
 					<input type="checkbox" id="keeploggedin" v-model="keep_loggedin_val" >
