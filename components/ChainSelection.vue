@@ -1,7 +1,7 @@
 <template>
 	<!-- login link or user dropdown menu when logged in, for navbar-->
 	<div class="row p-2">
-		<div class="col-sm-9" />
+		<div class="col-sm-9"></div>
 		<div class="col-sm-3">
 		  <select class="form-control sel-adj border-red rounded-top rounded-bottom" v-model="cur_bchain" @change="setActiveChain($event)">
 			<option value=""><i>--Active Chain--</i></option>
