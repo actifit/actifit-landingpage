@@ -6,7 +6,7 @@
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-5">
       <h2 class="text-center mb-5">{{ $t('Activity_Reports_by') }} {{ username }}</h2>
-	  <ChainSelection />
+	  <!--<ChainSelection />-->
 	  
       <!-- show spinner while loading -->
       <div class="text-center" v-if="loading">
