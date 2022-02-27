@@ -67,7 +67,7 @@ module.exports = {
   Amount: 'Amount',
   Send_Verify: 'Send & Verify',
   Send: 'Send',
-  Checking_Steem_Transfer: 'Checking Your STEEM Transfer',
+  Checking_Steem_Transfer: 'Checking Your Transfer',
   STEEM: 'STEEM',
   SBD: 'SBD',
   HIVE: 'HIVE',
