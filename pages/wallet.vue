@@ -983,8 +983,8 @@
 		claimWindow: '',
 		fundActivityMode: this.CLOSED_MODE,
 		afitActivityMode: this.CLOSED_MODE,
-		transferType: 'STEEM',
-		transferTypePass: 'STEEM',
+		transferType: 'HIVE',
+		transferTypePass: 'HIVE',
 		error_proceeding: '',
 		error_msg: '',
 		pass_error_proceeding: '',
@@ -3724,12 +3724,13 @@
 			
 			let confirmPopup = confirm(this.$t('Confirm_verf_transfer').replace('_AMOUNT_',this.$refs["pass-transfer-amount"].value).replace('_CURR_',this.transferTypePass));
 			if (!confirmPopup){
+				this.checkingFunds = false;
 				return;
 			}
 		
 			let chainLnk = await this.setProperNode ();
 			console.log('perform transfer');
-			console.log(this.$refs["p-ac-key-funds-ver"].value);
+			//console.log(this.$refs["p-ac-key-funds-ver"].value);
 			//transferToVesting(wif, from, to, amount)
 			let res = await chainLnk.broadcast.transferAsync(this.$refs["p-ac-key-funds-ver"].value, this.user.account.name, this.target_exchange_account, parseFloat(this.$refs["pass-transfer-amount"].value).toFixed(3) + ' ' + this.transferTypePass, '').then(
 				res => this.confirmCompletion('transfer-verify', this.$refs["pass-transfer-amount"].value, res)).catch(err=>console.log(err));
@@ -3898,6 +3899,12 @@
 	  //check which chain is active
 	  if (localStorage.getItem('cur_bchain')){
 		this.cur_bchain = localStorage.getItem('cur_bchain')
+	  }
+	  
+	  //set default current chain
+	  if (this.cur_bchain != 'BLURT'){
+		this.transferType = this.cur_bchain;
+		this.transferTypePass = this.cur_bchain;
 	  }
 	  steem.api.setOptions({ url: process.env.steemApiNode });
 	  

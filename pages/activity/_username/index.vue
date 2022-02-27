@@ -63,7 +63,7 @@
   import DailyActivityChartModal from '~/components/DailyActivityChartModal'
 
   import { mapGetters } from 'vuex'
-  import ChainSelection from '~/components/ChainSelection'
+  //import ChainSelection from '~/components/ChainSelection'
 
   export default {
     head () {
@@ -82,8 +82,8 @@
       ReportModal,
       EditReportModal,
       VoteModal,
-	  DailyActivityChartModal,
-	  ChainSelection
+	  DailyActivityChartModal //,
+	  //ChainSelection
     },
     data () {
       return {
