@@ -2,9 +2,9 @@
   "producer_account_name":"actifittelos",
   "org": {
     "candidate_name":"Actifit Telos",
-    "website":"https://www.actifit.io",
-    "code_of_conduct":"https://www.actifit.io/conduct",
-    "ownership_disclosure":"https://www.actifit.io/ownership",
+    "website":"https://actifit.io",
+    "code_of_conduct":"https://actifit.io/conduct",
+    "ownership_disclosure":"https://actifit.io/ownership",
     "email":"info@actifit.io",
     "github_user": "actifit",
     "branding":{
@@ -32,16 +32,26 @@
   },
   "nodes": [
     {
-      "location": {
-        "name": "Helsinki, FL",
-        "country": "FL",
-        "latitude": 60.307843, 
-        "longitude": 24.869052
-      },
-      "node_type": "producer",
-      "p2p_endpoint": "",
-      "api_endpoint": "",
-      "ssl_endpoint": ""
+		"location": {
+			"name": "Helsinki, FL",
+			"country": "FL",
+			"latitude": 60.307843, 
+			"longitude": 24.869052
+		},
+		"node_type": "producer"
     },
+	{
+		"location": {
+			"name": "Helsinki, FL",
+			"country": "FL",
+			"latitude": 60.307843, 
+			"longitude": 24.869052
+		},
+		"node_type": ["query", "seed"],
+		"api_endpoint": "http://telosapi.actifit.io",
+		"ssl_endpoint": "https://telosapi.actifit.io",
+		"p2p_endpoint": "telosapi.actifit.io:9876",
+		"features": ["chain-api","history"]
+	}
   ]
 }

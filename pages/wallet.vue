@@ -565,6 +565,10 @@
 					  <label for="p-ac-key-trans-token" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 					  <input type="password" id="p-ac-key-trans-token" name="p-ac-key-trans-token" ref="p-ac-key-trans-token" class="form-control-lg w-50 p-2">
 					</div>
+					<div class="row" v-if="tokenActions && curTokenAction == TRANSFER_FUNDS" >
+					  <label for="token-transfer-memo" class="w-25 p-2">{{ $t('Memo') }}</label>
+					  <input type="text" id="token-transfer-memo" name="token-transfer-memo" ref="token-transfer-memo" class="form-control-lg w-50 p-2">
+					</div>
 					
 					<div class="row" v-if="tokenActions">
 					  <div class="w-25"></div>
@@ -3434,6 +3438,8 @@
 		let tokenMaxVal = this.selTokenUp.balance;
 		let amount_to_send = this.$refs["token-powerup-amount"].value.trim();
 		let target_account = this.$refs["token-target-account"].value.trim();
+		let memo = this.$refs["token-transfer-memo"].value.trim();
+		
 		//ensure we have proper values
 		//confirm target account set
 		if (!target_account){
@@ -3461,7 +3467,7 @@
 			  required_auths: "[\"" + this.user.account.name + "\"]",
 			  required_posting_auths: "[]",
 			  id: 'ssc-mainnet1',
-			  json: "{\"contractName\":\"tokens\",\"contractAction\":\"transfer\",\"contractPayload\":{\"symbol\":\"" + this.selTokenUp.symbol + "\",\"to\":\"" + target_account + "\",\"quantity\":\"" + amount_to_send + "\",\"memo\":\"\"}}",
+			  json: "{\"contractName\":\"tokens\",\"contractAction\":\"transfer\",\"contractPayload\":{\"symbol\":\"" + this.selTokenUp.symbol + "\",\"to\":\"" + target_account + "\",\"quantity\":\"" + amount_to_send + "\",\"memo\":\""+memo+"\"}}",
 			  authority: 'active',
 			  auto_return: true,
 			}, window.location.origin + '/wallet?op='+this.$t('Transfer_token')+'&status=success');
@@ -3492,7 +3498,7 @@
 					symbol: this.selTokenUp.symbol,
 					to: target_account,
 					quantity: '' + amount_to_send,//needs to be string
-					memo: ''
+					memo: memo
 				}
 			}
 			
