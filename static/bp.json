@@ -8,9 +8,9 @@
     "email":"info@actifit.io",
     "github_user": "actifit",
     "branding":{
-      "logo_256":"https://actifit.io/img/actifit-logo-256.png",
+      "logo_256":"https://actifit.io/img/actifit_logo_256.png",
       "logo_1024":"https://actifit.io/img/actifit-logo-1024.png",
-      "logo_svg":"https://actifit.io/img/actifit-logo.svg"
+      "logo_svg":"https://actifit.io/img/actifit_logo.svg"
     },
     "location": {
       "name": "Beirut, LB",
@@ -33,8 +33,8 @@
   "nodes": [
     {
 		"location": {
-			"name": "Helsinki, FL",
-			"country": "FL",
+			"name": "Helsinki, FI",
+			"country": "FI",
 			"latitude": 60.307843, 
 			"longitude": 24.869052
 		},
@@ -42,16 +42,16 @@
     },
 	{
 		"location": {
-			"name": "Helsinki, FL",
-			"country": "FL",
+			"name": "Helsinki, FI",
+			"country": "FI",
 			"latitude": 60.307843, 
 			"longitude": 24.869052
 		},
-		"node_type": ["query", "seed", "full"],
+		"node_type": ["query", "seed"],
 		"api_endpoint": "http://telosapi.actifit.io",
 		"ssl_endpoint": "https://telosapi.actifit.io",
 		"p2p_endpoint": "telosapi.actifit.io:9876",
-		"features": ["chain-api","chain","history"]
+		"features": ["chain-api", "history-v1"]
 	}
   ]
 }
