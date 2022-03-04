@@ -6,7 +6,7 @@
     "code_of_conduct":"https://actifit.io/conduct",
     "ownership_disclosure":"https://actifit.io/ownership",
     "email":"info@actifit.io",
-    "github_user": "actifit",
+    "github_user": "mcfarhat",
     "branding":{
       "logo_256":"https://actifit.io/img/actifit_logo_256.png",
       "logo_1024":"https://actifit.io/img/actifit-logo-1024.png",
@@ -21,6 +21,7 @@
     "social": {
       "steemit": "actifit",
 	  "hive": "actifit",
+	  "github": "actifit",
 	  "youtube": "Actifitfitness",
       "twitter": "actifit_fitness",
       "reddit": "actifit",
