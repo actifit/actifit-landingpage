@@ -136,7 +136,7 @@ module.exports = {
   provide_funds_pass: 'Please provide your funds password',
   need_at_least: 'You need at least ',
   afit_tokens_to_exchange: ' AFIT tokens in your wallet to exchange for upvotes',
-  afit_steem_swap_success: 'AFIT Tokens Successfully swapped for additional STEEM upvote! Upvote will occurr on next reward cycle.',
+  afit_steem_swap_success: 'AFIT Tokens Successfully swapped for additional upvote! Upvote will occurr on next reward cycle.',
   completed_success: 'operation completed successfully !',
   Your: 'Your',
   faq: {
@@ -166,7 +166,7 @@ module.exports = {
 	q12: 'What is AFITX?',
 	a12: 'AFITX is a special benefits token for Actifit users & AFIT token holders. Holding this token enables users to:<li> Move extra daily AFIT tokens to Hive Engine and Steem Engine</li><li>Increases user rank</li><li>Increases post rewards via our different rewarded tokens</li><li>Receive priority when exchanging AFIT for HIVE/STEEM upvotes</li><li>Participate in contests</li><br/>As Binance Smart Chain and DeFi support is launched, AFITX will be used as a reward token and governance token on this platform.',
 	q13: 'How do I earn AFITX tokens?',
-	a13: 'Currently you can’t earn AFITX tokens, you can only purchase them on Hive Engine / Steem Engine and very soon on BSC as well.',
+	a13: 'Currently you earn AFITX tokens while providing liquitidy on Tribaldex diesel pools and in the near future on BSC as well.',
 	q14: 'Why am I not able to post my Actifit Report from the Mobile App?',
 	a14: 'Make sure you are using both the correct username and “private posting key” for your Actifit account. Actifit will automatically save your credentials when you post for the first time.<br/>You could be low on resource credits, which can be an issue when you have a limited amount of Hive Power / Steem Power. In this case you either need to wait till it has recovered or you need to add more Hive Power/Steem Power. More information on Resource credit can be found here <a href="https://hive.blog/faq.html#How_do_Resource_Credits_work_on_the_Hive_blockchain">https://hive.blog/faq.html#How_do_Resource_Credits_work_on_the_Hive_blockchain</a><br/>If in doubt, contact support on discord  (<a href="https://links.actifit.io/discord">https://links.actifit.io/discord</a>) ',
 	q15: 'Why would I delegate Hive Power (HP)/Steem Power(SP) to Actifit?',
