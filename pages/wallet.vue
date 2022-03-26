@@ -805,7 +805,7 @@
 			  </div>
 			</transition>
 		</div>
-		<div class="row row-sep" v-if="cur_bchain!='BLURT'">
+		<div class="row row-sep">
 			<div v-if="isClaimableDataAvailable && cur_bchain=='STEEM'" class="col-md-6 row-sep-in">
 				<h5 class="token-title"><img src="/img/STEEM.png" class="mr-2 token-logo">{{ $t('Claimable_Steem_Rewards') }}</h5>
 				<div class="mb-4 font-weight-bold">
@@ -826,7 +826,17 @@
 					</div>
 				</div>
 			</div>
-			<div v-if="claimableSETokens.length > 0" class="col-md-6 row-sep-in">
+			<div v-else-if="isClaimableDataAvailable && cur_bchain=='BLURT'" class="col-md-6 row-sep-in">
+				<h5 class="token-title"><img src="/img/BLURT.png" class="mr-2 token-logo">{{ $t('Claimable_Blurt_Rewards') }}</h5>
+				<div class="mb-4 font-weight-bold">
+					<span class="p-2">{{ this.claimSP }} | {{ this.claimSTEEM }}</span>
+					<div class="p-2"><button v-on:click="claimRewards" class="btn btn-brand btn-lg w-20">{{ $t('Claim_Blurt_Rewards') }}</button></div>
+					<div v-if="claimRewardsProcess">
+					  <i class="fas fa-spin fa-spinner" ></i>
+					</div>
+				</div>
+			</div>
+			<div v-if="cur_bchain!='BLURT' && claimableSETokens.length > 0" class="col-md-6 row-sep-in">
 				<h5 class="token-title" v-if="cur_bchain == 'STEEM'">{{ $t('Claimable_Token_Rewards') }}</h5>
 				<h5 class="token-title" v-else>{{ $t('Claimable_HE_Token_Rewards') }}</h5>
 				<div class="mb-4 font-weight-bold">
@@ -1959,6 +1969,7 @@
 			this.claimSP = this.user.account.reward_vesting_blurt + " POWER";
 			this.claimSBD = 0;
 		  }
+		  console.log('claimable rewards'+(this.claimSP + this.claimSTEEM + this.claimSBD));
 		  return this.claimSP + this.claimSTEEM + this.claimSBD;
 		}
 		return '';
@@ -2052,8 +2063,14 @@
 					"reward_hbd": this.claimSBD,
 					"reward_vests": this.claimVests
 				};
+			}else if (this.cur_bchain == 'BLURT') {
+				cstm_params = {
+					"account": this.user.account.name,
+					"reward_blurt": this.claimSTEEM,
+					//"reward_hbd": this.claimSBD,
+					"reward_vests": this.claimVests
+				};
 			}
-			
 			let res = await this.processTrxFunc('claim_reward_balance', cstm_params);
 			
 			if (res.success){
