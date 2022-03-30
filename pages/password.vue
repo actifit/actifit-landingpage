@@ -397,7 +397,7 @@
 	  },
 	  async fetchKeys () {
 		this.captcha_invalid = '';
-		if (!this.captchaValid){
+		if (!this.user && !this.captchaValid){
 			this.captcha_invalid = this.$t('solve_captcha');
 			return;
 		}
