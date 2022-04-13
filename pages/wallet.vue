@@ -549,7 +549,7 @@
 						<span class="token_actions" v-if="cur_bchain!='BLURT'">
 							<span v-if="token.stakable"><i class="fas fa-arrow-circle-up text-brand p-1" :title="$t('stake_tokens')" v-on:click="initiateStaking(token)"></i></span>
 							<span v-if="token.stakable"><i class="fas fa-arrow-circle-down text-brand p-1" :title="$t('unstake_tokens')" v-on:click="initiateUnStaking(token)"></i></span>
-							<span v-if="token.symbol == 'STEEMP' || token.symbol == 'SWAP.HIVE'"><i class="fas fa-upload text-brand p-1" :title="$t('withdraw_tokens')" v-on:click="initiateWithdraw(token)"></i></span>
+							<span v-if="withdrawableTokens.includes(token.symbol)"><i class="fas fa-upload text-brand p-1" :title="$t('withdraw_tokens')" v-on:click="initiateWithdraw(token)"></i></span>
 							<span><i class="fas fa-share-square text-brand p-1" :title="$t('transfer_tokens')" v-on:click="initiateTransfer(token)"></i></span>
 						</span>
 					</div>
@@ -568,6 +568,9 @@
 					<div class="row" v-if="tokenActions && curTokenAction == TRANSFER_FUNDS" >
 					  <label for="token-transfer-memo" class="w-25 p-2">{{ $t('Memo') }}</label>
 					  <input type="text" id="token-transfer-memo" name="token-transfer-memo" ref="token-transfer-memo" class="form-control-lg w-50 p-2">
+					</div>
+					<div class="row text-brand italic text-center" v-if="tokenActions && curTokenAction == WITHDRAW_FUNDS"  v-html='this.withdrawableSpecialInstrs[selTokenUp.symbol]'>
+						
 					</div>
 					
 					<div class="row" v-if="tokenActions">
@@ -923,7 +926,7 @@
   const hsc = new SSC(process.env.hiveEngineRpc);
   const scot_hive_api_param = process.env.hiveEngineScotParam;
 
-  const tokensNonStakable = ['AFITX', 'AFIT', 'STEEMP', 'SWAP.HIVE'];
+  const tokensNonStakable = ['AFITX', 'AFIT', 'STEEMP', 'SWAP.HIVE', 'SWAP.BLURT', 'SWAP.STEEM'];
   const tokensOfInterest = ['SPORTS', 'PAL', 'APX', 'BEE'].concat(tokensNonStakable);
   
   import { mapGetters } from 'vuex'
@@ -1100,6 +1103,11 @@
 							{afit: 200, upvote: 25},
 						],
 		airdropResults: {},
+		withdrawableTokens: ['SWAP.HIVE', 'STEEMP', 'SWAP.BLURT'],
+		withdrawableSpecialInstrs: {
+					'SWAP.BLURT':'Minimum withdrawal 5 BLURT. 0.75% fee on withdrawals as well as 0.100 SWAP.BLURT network transaction fee',
+					'SWAP.HIVE': '0.75% fee on withdrawals',
+				},
 	  }
 	},
     components: {
