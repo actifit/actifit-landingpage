@@ -24,7 +24,7 @@
 				<b>{{ username_exists }}</b>
 			  </p>
 			  <div class="target-bchain">
-				<label for="account-username">{{ $t('target_bchain') }}</label>
+				<label for="blockchain">{{ $t('target_bchain') }}</label>
 				<p class="text-brand"><i>{{$t('leave_default_recommend')}}</i></p>
 				<div class="pl-2 mb-2">
 					<input type="checkbox" id="hive-account" v-model="hive_account" v-on:change="validateUserName">
@@ -323,8 +323,6 @@
 			//test against default, hive
 			chnLnk.name = 'Hive';
 			usAv = await this.checkUserNameAv(chnLnk, val);
-			
-			
 		}
 		
 		if (usAv && this.steem_account){
@@ -337,7 +335,7 @@
 			chnLnk.name = 'Blurt';
 			usAv = await this.checkUserNameAv(chnLnk, val);
 		}
-		
+		this.genPrivKey();
 		
 	  },
 	  setSteemPrice (_steemPrice){
@@ -366,7 +364,6 @@
 		return parseFloat(usdInvest / this.afitPrice).toFixed(6);
 	  },
 	  async genPrivKey(){
-		console.log('generate priv key');
 		//generate posting key
 		let privateKeys = await hive.auth.getPrivateKeys(this.$refs["account-username"].value.toLowerCase(), this.$refs["account-password"].value, ['posting']);
 		this.privatePostKey = privateKeys.posting;
