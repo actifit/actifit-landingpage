@@ -288,33 +288,57 @@
 	  validateUserName(){
 		this.handleUsername (this.$refs['account-username'].value);
 	  },
-	  handleUsername (val) {
-		let vue_ctnr = this;
-		this.username_invalid = '';
-		this.username_exists = '';
-		//validate format first
-		let chnLnk = hive;
-		if (this.hive_account){
-			//test against default, hive
-			chnLnk = hive;
-		}else if (this.steem_account){
-			chnLnk = steem;
-		}else{
-			chnLnk = blurt;
-		}
-		
-		let usernameValid = chnLnk.utils.validateAccountName(val);
+	  async checkUserNameAv(testChain, val){
+		let usernameValid = testChain.utils.validateAccountName(val);
 		//check for error msg
 		if (usernameValid == null){
 			//ensure no existing account matches same name
-			chnLnk.api.getAccounts([val], function(err, result) {
+			let result = await testChain.api.getAccountsAsync([val]);
+			console.log(testChain.name);
 			  if (result.length>0){
-				vue_ctnr.username_exists = 'Please choose a different username';
+				if (testChain.name == 'Hive'){
+					this.username_exists += 'Username is not available. Please choose a different one.\n';
+				}else{
+					this.username_exists += 'Username is not available on '+testChain.name+'. Please choose a different one, or deselect '+testChain.name+' chain option.';
+				}
+				return false;
 			  }
-			});
+			  return true;
+			//});
 		}else{
 			this.username_invalid = usernameValid;
+			return false;
 		}
+	  },
+	  async handleUsername (val) {
+		this.username_invalid = '';
+		this.username_exists = '';
+		
+		//to avoid disruptions on other chains while creating the username, test against all selected chains
+		
+		//validate format first
+		let chnLnk = hive;
+		let usAv = true;
+		if (this.hive_account){
+			//test against default, hive
+			chnLnk.name = 'Hive';
+			usAv = await this.checkUserNameAv(chnLnk, val);
+			
+			
+		}
+		
+		if (usAv && this.steem_account){
+			chnLnk = steem;
+			chnLnk.name = 'Steem';
+			usAv = await this.checkUserNameAv(chnLnk, val);
+		}
+		if (usAv && this.blurt_account){
+			chnLnk = blurt;
+			chnLnk.name = 'Blurt';
+			usAv = await this.checkUserNameAv(chnLnk, val);
+		}
+		
+		
 	  },
 	  setSteemPrice (_steemPrice){
 		this.steemPrice = parseFloat(_steemPrice).toFixed(3);
