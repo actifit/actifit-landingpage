@@ -500,6 +500,10 @@
 				<h5 class="token-title"><img src="/img/STEEM.png" class="mr-2 token-logo">{{ $t('Your_Steem_Balance') }}</h5>
 				<div class="mb-4 font-weight-bold">
 					<div class="p-2">{{ this.renderSteemPower(2) }} {{ $t('STEEM_POWER_CAPS') }} | {{ this.renderBalance(this.cur_bchain) }} | {{ this.renderSBDBalance(this.cur_bchain) }}</div>
+					<div class="p-2">
+					UNDER SAVINGS: </div>
+					<div class="p-2">{{ this.renderSavings(this.cur_bchain) }} | {{ this.renderSBDSavings(this.cur_bchain) }}</div>
+					
 					<div class="row">
 						<div class="p-2 col-md-6" id="ttip-area">
 							<small><i>{{ $t('STEEM_POWER_BREAKDOWN') }}: {{this.renderSteemPower(1)}} ({{ $t('Owned_SP') }}) + {{this.renderSteemPower(3)}} ({{ $t('Received_SP') }}) - {{this.renderSteemPower(4)}} ({{ $t('Delegated_SP') }}) - {{this.renderSteemPower(5)}} ({{ $t('Powering_Down_Amount') }})</i></small>
@@ -514,6 +518,10 @@
 				<h5 class="token-title"><img src="/img/HIVE.png" class="mr-2 token-logo">{{ $t('Your_Hive_Balance') }}</h5>
 				<div class="mb-4 font-weight-bold">
 					<div class="p-2">{{ this.renderSteemPower(2) }} {{ $t('HIVE_POWER_CAPS') }} | {{ this.renderBalance(this.cur_bchain) }} | {{ this.renderSBDBalance(this.cur_bchain) }}</div>
+					<div class="p-2">
+					UNDER SAVINGS: </div>
+					<div class="p-2">{{ this.renderSavings(this.cur_bchain) }} | {{ this.renderSBDSavings(this.cur_bchain) }}</div>
+					
 					<div class="row">
 						<div class="p-2 col-md-6" id="ttip-area">
 							<small><i>{{ $t('HIVE_POWER_BREAKDOWN') }}: {{this.renderSteemPower(1)}} ({{ $t('Owned_HP') }}) + {{this.renderSteemPower(3)}} ({{ $t('Received_HP') }}) - {{this.renderSteemPower(4)}} ({{ $t('Delegated_HP') }}) - {{this.renderSteemPower(5)}} ({{ $t('Powering_Down_Amount') }})</i></small>
@@ -528,6 +536,11 @@
 				<h5 class="token-title"><img src="/img/BLURT.png" class="mr-2 token-logo">{{ $t('Your_Blurt_Balance') }}</h5>
 				<div class="mb-4 font-weight-bold">
 					<div class="p-2">{{ this.renderSteemPower(2) }} {{ $t('BLURT_POWER_CAPS') }} | {{ this.renderBalance(this.cur_bchain) }}</div>
+					
+					<div class="p-2">
+					UNDER SAVINGS: </div>
+					<div class="p-2">{{ this.renderSavings(this.cur_bchain) }} </div>
+					
 					<div class="row">
 						<div class="p-2 col-md-6" id="ttip-area">
 							<small><i>{{ $t('BLURT_POWER_BREAKDOWN') }}: {{this.renderSteemPower(1)}} ({{ $t('Owned_BP') }}) + {{this.renderSteemPower(3)}} ({{ $t('Received_BP') }}) - {{this.renderSteemPower(4)}} ({{ $t('Delegated_BP') }}) - {{this.renderSteemPower(5)}} ({{ $t('Powering_Down_Amount') }})</i></small>
@@ -1565,6 +1578,30 @@
 			return this.numberFormat(parseFloat(this.user.account.sbd_balance), 3) + ' ' + ((type == 'STEEM')?this.$t('SBD'):this.$t('HBD'));
 		}else{
 			return this.numberFormat(parseFloat(this.user.account.hbd_balance), 3) + ' ' + ((type == 'STEEM')?this.$t('SBD'):this.$t('HBD'));
+		}
+	  },
+	  renderSavings (type, nofrmt) {
+		if (nofrmt){
+			//if (this.cur_bchain == 'STEEM'){
+				return this.user.account.savings_balance;
+			/*}else{
+				return this.user.account.savings_hbd_balance;
+			}*/
+		}
+		return this.numberFormat(parseFloat(this.user.account.savings_balance), 3) + ' ' + type;
+	  },
+	  renderSBDSavings (type, nofrmt) {
+		if (nofrmt){
+			if (this.cur_bchain == 'STEEM'){
+				return this.user.account.savings_sbd_balance;
+			}else{
+				return this.user.account.savings_hbd_balance;
+			}
+		}
+		if (this.cur_bchain == 'STEEM'){
+			return this.numberFormat(parseFloat(this.user.account.savings_sbd_balance), 3) + ' ' + ((type == 'STEEM')?this.$t('SBD'):this.$t('HBD'));
+		}else{
+			return this.numberFormat(parseFloat(this.user.account.savings_hbd_balance), 3) + ' ' + ((type == 'STEEM')?this.$t('SBD'):this.$t('HBD'));
 		}
 	  },
 	  setUserPDAfitStatus (result) {
