@@ -50,7 +50,7 @@
 		"node_type": ["query", "seed"],
 		"api_endpoint": "http://telosapi.actifit.io",
 		"ssl_endpoint": "https://telosapi.actifit.io",
-		"p2p_endpoint": "telosapi.actifit.io:9876",
+		"p2p_endpoint": "telosp2p.actifit.io:9876",
 		"features": ["chain-api", "history-v1"]
 	}
   ]
