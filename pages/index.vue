@@ -77,6 +77,7 @@
     </div>
 	
     <!-- intro -->
+	<!--<transition type="animation">-->
     <section class="intro bg-light" id="content">
       <div class="container py-5">
         <h1 class="pt-5 mb-3 text-capitalize text-center headline" v-html="$t('homepage.section1_title')"></h1>
@@ -104,6 +105,7 @@
         </div>
       </div>
     </section>
+	<!--</transition>-->
 
     <!-- texts with images -->
     <section class="showcase">
