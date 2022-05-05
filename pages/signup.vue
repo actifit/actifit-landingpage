@@ -174,7 +174,7 @@
 		transferType: 'HIVE',//default option
 		minUSD: process.env.minSignupUSDCost,
 		afitPrice: 0.5,
-		maxAfitRewardPerLot: 1000,
+		maxAfitRewardPerLot: 100,
 		lotSizeUsd: 5,
 		userInputSTEEMAmount: 0,
 		userInputUSDAmount: this.minUSD,
