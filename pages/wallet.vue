@@ -67,6 +67,11 @@
 				</h5>
 				<h5 class="mb-4 font-weight-bold row">
 					<span class="col-md-12">{{ formattedUserAfit }}</span>
+					<span class="col-md-12 text-center"><button v-on:click="refreshBalance()" class="btn btn-brand btn-lg w-50 border">{{ $t('Refresh_balance') }}</button>
+					<span v-if="refreshinBal" >
+						<i class="fas fa-spin fa-spinner"></i>
+					</span>
+					</span>
 				</h5>
 				<h5 class="mb-4 font-weight-bold row">
 					<span class="col-md-6">
@@ -1121,6 +1126,7 @@
 					'SWAP.BLURT':'Minimum withdrawal 5 BLURT. 0.75% fee on withdrawals as well as 0.100 SWAP.BLURT network transaction fee',
 					'SWAP.HIVE': '0.75% fee on withdrawals',
 				},
+		refreshinBal: false,
 	  }
 	},
     components: {
@@ -1209,6 +1215,10 @@
 	  tokenMetrics: 'formattedTotAccountVal',
 	  steemPrice: 'formattedTotAccountVal',
 	  transferType: 'resetTransAmount',
+	  userTokens: function(param){
+		//if usertokens changes, no need to keep spinner on if it was on
+		this.refreshinBal = false;
+	  },
 	  afit_val_exchange: function(newVal){
 		let new_val = this.extra_reward_arr.find(match => match.afit == this.afit_val_exchange)
 		this.afit_exch_matching_perc = new_val.upvote;
@@ -3017,6 +3027,15 @@
 			}
 		}
 	
+	  },
+	  async refreshBalance(){
+		this.refreshinBal = true;
+		let pntr = this;
+		fetch(process.env.actiAppUrl+'recalculateUserTokens?user='+this.user.account.name).then(
+			res => {res.json().then(json => {this.fetchUserData();}).catch(e => reject(e))
+		  }).catch(e => reject(e))
+		//after 10 seconds of waiting, cancel spinner
+		setTimeout(function(){pntr.refreshinBal = false;}, 10000);
 	  },
 	  async proceedMoveAFIT(direction) {
 		//direction = 1: SE to HE

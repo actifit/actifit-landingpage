@@ -830,5 +830,6 @@ module.exports = {
   LinkedIn: 'LinkedIn',
   FAQ: 'FAQ',
   Youtube: 'Youtube',
-  Medium: 'Medium'
+  Medium: 'Medium',
+  Refresh_balance: 'Refresh Balance'
 }
