@@ -29,7 +29,7 @@ module.exports = {
 	actiAppUrl: process.env.ACTI_API_URL || 'http://localhost:3120/',
 	actiAppBackUrl: process.env.ACTI_API_BACK_URL || 'http://localhost:3120/',
 	steemEngineRpc: 'https://api.steem-engine.net/rpc',
-	hiveEngineRpc: 'https://api.hive-engine.com/rpc',
+	hiveEngineRpc: 'https://engine.rishipanthee.com/',
 	steemEngineScot: 'https://scot-api.steem-engine.net/',
 	hiveEngineScotParam: '?hive=1',
 	minSignupUSDCost: 2,
