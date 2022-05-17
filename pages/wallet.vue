@@ -569,16 +569,28 @@
 							<span v-if="token.stakable"><i class="fas fa-arrow-circle-down text-brand p-1" :title="$t('unstake_tokens')" v-on:click="initiateUnStaking(token)"></i></span>
 							<span v-if="withdrawableTokens.includes(token.symbol)"><i class="fas fa-upload text-brand p-1" :title="$t('withdraw_tokens')" v-on:click="initiateWithdraw(token)"></i></span>
 							<span><i class="fas fa-share-square text-brand p-1" :title="$t('transfer_tokens')" v-on:click="initiateTransfer(token)"></i></span>
+							<span><i class="fas fa-truck-loading text-brand p-1" v-if="token.symbol =='AFIT'" :title="$t('move_to_bsc')" v-on:click="initiateBSCTransfer(token)"></i></span>
 						</span>
 					</div>
 					<div class="row" v-if="tokenActions && curTokenAction == TRANSFER_FUNDS">
 					  <label for="token-target-account" class="w-25 p-2">{{ $t('Account') }} *</label>
 					  <span class="p-1">@</span><input type="text" id="token-target-account" name="token-target-account" ref="token-target-account" class="form-control-lg p-2">
 					</div>
+					
+					<div class="row" v-if="tokenActions && curTokenAction == TRANSFER_BSC">
+						<span class="text-brand">{{ $t('transfer_bsc_description') }}</span>
+					</div>
+					
 					<div class="row" v-if="tokenActions">
 					  <label for="token-powerup-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
-					  <input type="number" id="token-powerup-amount" name="token-powerup-amount" ref="token-powerup-amount" class="form-control-lg w-50 p-2"><span class="p-2">{{ selTokenUp.symbol }}</span>
+					  <input type="number" id="token-powerup-amount" name="token-powerup-amount" ref="token-powerup-amount" class="form-control-lg w-50 p-2" @change="calculateHBDAmount"><span class="p-2">{{ selTokenUp.symbol }}</span>
 					</div>
+					
+					<div class="row" v-if="tokenActions && curTokenAction == TRANSFER_BSC">
+					  <label for="token-hbd-amount" class="w-25 p-2">{{ $t('HBD_Amount') }} *</label>
+					  <input type="number" id="token-hbd-amount" name="token-hbd-amount" ref="token-hbd-amount" class="form-control-lg w-50 p-2" readonly><span class="p-2">{{ $t('HBD') }}</span>
+					</div>
+					
 					<div class="row" v-if="isStdLogin && tokenActions">
 					  <label for="p-ac-key-trans-token" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 					  <input type="password" id="p-ac-key-trans-token" name="p-ac-key-trans-token" ref="p-ac-key-trans-token" class="form-control-lg w-50 p-2">
@@ -597,13 +609,14 @@
 					  <button v-else-if="curTokenAction == POWERDOWN_FUNDS" v-on:click="proceedPowerDownToken" class="btn btn-brand btn-lg w-50 border">{{ $t('Power_Down') }}</button>
 					  <button v-else-if="curTokenAction == TRANSFER_FUNDS" v-on:click="proceedTransferToken" class="btn btn-brand btn-lg w-50 border">{{ $t('Send') }}</button>
 					  <button v-else-if="curTokenAction == WITHDRAW_FUNDS" v-on:click="proceedWithdrawToken" class="btn btn-brand btn-lg w-50 border">{{ $t('Withdraw') }}</button>
+					  <button v-else-if="curTokenAction == TRANSFER_BSC" v-on:click="proceedTransferBSC" class="btn btn-brand btn-lg w-50 border">{{ $t('Transfer') }}</button>
 					</div>
 					<div v-if="movingFunds" id="checking_funds">
 						<i class="fas fa-spin fa-spinner"></i>
 					</div>
 					<div class="row" v-if="afit_se_power_error_proceeding">
 					  <div class="w-25"></div>
-					  <div v-html="this.afit_se_power_err_msg"></div>
+					  <div class="text-brand" v-html="this.afit_se_power_err_msg"></div>
 					</div>
 				</div>
 			</div>
@@ -993,6 +1006,7 @@
 		POWERDOWN_FUNDS: 3,
 		WITHDRAW_FUNDS: 4,
 		DELEGATE_FUNDS: 5,
+		TRANSFER_BSC: 10,
 		afitTokenAddress: '',
 		afitxTokenAddress: '',
 		afitBNBLPTokenAddress: '',
@@ -1127,6 +1141,7 @@
 					'SWAP.HIVE': '0.75% fee on withdrawals',
 				},
 		refreshinBal: false,
+		afitHBDRate: process.env.afitHBDBridgeRate
 	  }
 	},
     components: {
@@ -1388,6 +1403,16 @@
 			this.tokenActions = true;
 		}
 		this.curTokenAction = this.TRANSFER_FUNDS;
+		this.selTokenUp = token;
+	  },
+	  initiateBSCTransfer(token){
+		//only adjust open/close is same button is clicked, otherwise adjust token being unstaked
+		if (this.selTokenUp == token && this.curTokenAction == this.TRANSFER_BSC){
+			this.tokenActions = !this.tokenActions;
+		}else{
+			this.tokenActions = true;
+		}
+		this.curTokenAction = this.TRANSFER_BSC;
 		this.selTokenUp = token;
 	  },
 	  initiateWithdraw(token){
@@ -2240,6 +2265,21 @@
 		  this.transferType = e.target.options[e.target.options.selectedIndex].value;
 		}
 	  },
+	  calculateHBDAmount (e) {
+		let afitVal = this.$refs['token-powerup-amount'].value.trim()
+		let hbdVal = this.$refs['token-hbd-amount'].value.trim()
+		let matchHbd = parseFloat(afitVal) * this.afitHBDRate;
+		matchHbd = parseFloat(matchHbd.toFixed(2));
+		this.$refs['token-hbd-amount'].value = matchHbd;
+		/*if (isNaN(hbdVal) || this.$refs["token-powerup-amount"].value == 0){
+		  this.error_proceeding = true;
+		  this.error_msg = this.$t('amount_positive_int');
+		  return;
+		}
+		console.log(afitVal)
+		console.log(hbdVal)*/
+		
+	  },
 	  async proceedPowerUp () {
 		//function handles the actual processing of the power up
 		let confirmPopup = confirm(this.$t('confirm_power_up'));
@@ -2390,9 +2430,10 @@
 				res => this.confirmCompletion('powerdown', this.$refs["powerdown-amount"].value, res)).catch(err=>console.log(err));
 		}
 	  },
-	  async confirmCompletion (type, amount, res){
+	  async confirmCompletion (type, amount, res, extraAFITTrx){
+		console.log (res);
 		if (res.ref_block_num){
-			console.log (res);
+			
 			let note = 'Power down cancelled successfully!';
 			let power_type = 'SP';
 			if (this.cur_bchain=='HIVE'){
@@ -2418,12 +2459,16 @@
 			if (type=='transfer-verify'){
 				note = 'Transfer completed. Verifying transaction.'
 			}
-			this.$notify({
-			  group: 'success',
-			  text: note,
-			  position: 'top center'
-			})
-			this.$store.dispatch('steemconnect/refreshUser');
+			if (type=='transfer-bsc'){
+				//note = 'Transfer completed. Your AFIT will appear on your BSC wallet shortly.'
+			}else{
+				this.$notify({
+				  group: 'success',
+				  text: note,
+				  position: 'top center'
+				})
+				this.$store.dispatch('steemconnect/refreshUser');
+			}
 		}else{
 			this.$notify({
 			  group: 'error',
@@ -2459,6 +2504,47 @@
 				console.error(err);
 			}
 			this.checkingFunds = false;
+		}else if (type=='transfer-bsc'){
+			//res is HBD
+			//extraAFITTrx is AFIT H-E
+			
+			
+			console.log(res.ref_block_num);
+		
+			//store transfer transaction for validation
+	
+		
+			//grab token
+			let accToken = localStorage.getItem('access_token')
+			
+			let url = new URL(process.env.actiAppUrl + 'appendBridgeTransaction/?user='+this.user.account.name+'&wallet='+this.$refs['bsc-wallet-address'].value+'&afitTrx='+extraAFITTrx.id+'&hbdTrx='+res.id);
+
+			let reqHeads = new Headers({
+			  'Content-Type': 'application/json',
+			  'x-acti-token': 'Bearer ' + accToken,
+			});
+			
+			res = await fetch(url, {
+				headers: reqHeads
+			});
+			let outcome = await res.json();
+			console.log(outcome);
+			if (outcome.error){
+				this.afit_se_power_error_proceeding = true;
+				this.afit_se_power_err_msg = this.$t('need_set_bsc_wallet');
+			}else{
+				console.log('success');
+				this.$notify({
+				  group: 'success',
+				  text: 'Fund Transfer completed. Your AFIT will appear on your BSC wallet shortly.',
+				  position: 'top center'
+				})
+			}
+
+			
+			
+			this.movingFunds = false;
+			
 		}
 	  },
 	  async cancelPowerDown () {
@@ -3636,6 +3722,199 @@
 			this.movingFunds = false;
 			
 		}
+	  },
+	  async proceedTransferBSC(){
+		//handles locking and moving tokens over to BSC
+		this.afit_se_power_error_proceeding = false;
+		this.afit_se_power_err_msg = '';
+		
+		let tokenMaxVal = parseFloat(this.selTokenUp.balance);
+		console.log(tokenMaxVal);
+		let amount_to_withdraw = this.$refs["token-powerup-amount"].value.trim();
+		//ensure we have proper values
+		console.log(amount_to_withdraw);
+		if (amount_to_withdraw == '' || isNaN(amount_to_withdraw) || parseFloat(amount_to_withdraw) < process.env.minAfitBSCTransfer){
+		  this.afit_se_power_error_proceeding = true;
+		  this.afit_se_power_err_msg = this.$t('min_amount_transf_bsc');
+		  return;
+		}
+		console.log((parseFloat(amount_to_withdraw) > tokenMaxVal));
+		if (parseFloat(amount_to_withdraw) > tokenMaxVal){
+		  this.afit_se_power_error_proceeding = true;
+		  this.afit_se_power_err_msg = this.$t('max_amount_transf_bsc');
+		  return;
+		}
+		if (parseFloat(amount_to_withdraw) > process.env.maxAfitBSCTransfer){
+		  this.afit_se_power_error_proceeding = true;
+		  this.afit_se_power_err_msg = this.$t('max_amount_limit_transf_bsc');
+		  return;
+		}
+		
+		//make sure proper HBD amount is being sent
+		let hbd_amount = this.$refs['token-hbd-amount'].value.trim();
+		if (isNaN(hbd_amount) || parseFloat(hbd_amount) < 1){
+		  this.afit_se_power_error_proceeding = true;
+		  this.afit_se_power_err_msg = this.$t('min_amount_transf_bsc');
+		  return;
+		}
+		//console.log(hbd_amount);
+		//console.log(this.user.account.hbd_balance);
+		let hbd_bal = parseFloat(this.user.account.hbd_balance.split(' ')[0]);
+		console.log(hbd_bal)
+		if (parseFloat(hbd_amount) > hbd_bal){
+		  this.afit_se_power_error_proceeding = true;
+		  this.afit_se_power_err_msg = this.$t('max_amount_transf_bsc');
+		  return;
+		}
+		
+		
+		if (this.$refs["p-ac-key-trans-token"].value == ''){
+		  this.afit_se_power_error_proceeding = true;
+		  this.afit_se_power_err_msg = this.$t('all_fields_required');
+		  return;
+		}
+		
+		//make sure user has a set wallet address
+		if (this.bsc_wallet_address == ''){
+		  this.afit_se_power_error_proceeding = true;
+		  this.afit_se_power_err_msg = this.$t('need_set_bsc_wallet');
+		  return;
+		}
+		
+		//check if user has a pending transaction for today already
+		
+		let url = new URL(process.env.actiAppUrl + 'userBridgeEligible/'+'?user=' + this.user.account.name);
+		try{
+			let res = await fetch(url);
+			let outcome = await res.json();
+			console.log('eligible to transact?');
+			console.log(outcome);
+			if (!outcome.eligible){
+				this.afit_se_power_error_proceeding = true;
+				this.afit_se_power_err_msg = this.$t('have_transacted_today');
+				return;
+			}
+		}catch(err){
+			console.log(err);
+		}
+		
+		
+		//let's go
+		
+		this.movingFunds = true;
+		
+		let targetAcct = process.env.bscBridgeAccount;
+		let transId = 'ssc-mainnet-hive';
+		/*if (this.cur_bchain == 'STEEM'){
+			targetAcct = 'actifit.s-e';
+			transId = 'ssc-mainnet1';
+		}*/
+		
+		let json_data = {
+			contractName: 'tokens',
+			contractAction: 'transfer',
+			contractPayload: {
+				symbol: 'AFIT',
+				to: targetAcct,
+				quantity: '' + amount_to_withdraw,//needs to be string
+				memo: ''
+			}
+		}
+		
+		let userKey = this.$refs["p-ac-key-trans-token"].value;
+		
+		//send out transaction to blockchain
+		//only works on hive
+		let chainLnk = hive;//await this.setProperNode();
+		let tx = await chainLnk.broadcast.customJsonAsync(
+				userKey, 
+				[ this.user.account.name ] , 
+				[], 
+				transId, 
+				JSON.stringify(json_data)
+			).catch(err => {
+				console.log(err.message);
+				this.afit_se_power_error_proceeding = true;
+				this.afit_se_power_err_msg = err.message;
+				this.movingFunds = false;
+		});
+		
+		/*
+		let hive_operations = [
+			
+		];
+		let hivepost = await hive.broadcast.sendAsync( 
+		   { operations: hive_operations, extensions: [] }, 
+		   { posting: posting_key }).catch(err => {
+		   
+		   });
+		
+		*/
+		if (this.afit_se_power_error_proceeding){
+			return;
+		}
+		//console.log(tx.block_num);
+		console.log(tx.id);
+		
+		//send HBD as well
+		//only works on hive
+		//let chainLnk = hive;//await this.setProperNode ();
+			//transferToVesting(wif, from, to, amount)
+		let outc;
+		let res = await chainLnk.broadcast.transferAsync(
+				userKey,
+				this.user.account.name, 
+				targetAcct, 
+				parseFloat(hbd_amount).toFixed(3) + ' HBD', 
+				'BSC bridge').then(
+			outc => this.confirmCompletion('transfer-bsc', 0, outc ,tx)).catch(err=>
+			{
+				console.log(err)
+				this.afit_se_power_error_proceeding = true;
+				this.afit_se_power_err_msg = err.message;
+				this.movingFunds = false;
+			});
+		
+		if (this.afit_se_power_error_proceeding){
+			return;
+		}
+		
+		
+		/*if (tx && tx.ref_block_num){
+			//notify of success
+			this.$notify({
+			  group: 'success',
+			  text: this.$t('Move_AFIT_to_Wallet')+ ' ' +this.$t('Scheduled_successfully'),
+			  position: 'top center'
+			})
+			
+			//initiate call to adjust AFIT token count
+			
+			//let url = new URL(process.env.actiAppUrl + 'confirmAFITSEReceipt/?user='+this.user.account.name+'&bchain='+this.cur_bchain);
+			
+			//connect with our service to confirm AFIT received to proper wallet
+			try{
+				
+				fetch(url).then(
+				  res => {res.json().then(json => {this.setUserAddedTokens(json);this.movingFunds = false;}).catch(e => {reject(e);this.movingFunds = false;})
+				}).catch(e => reject(e))
+				
+			
+			}catch(err){
+				console.error(err);
+				//this.checkingFunds = false;
+			}				
+		}else{
+			//notify of success
+			this.$notify({
+			  group: 'error',
+			  text: this.$t('error_performing_operation'),
+			  position: 'top center'
+			})
+			this.movingFunds = false;
+		}*/
+		
+		
 	  },
 	  async proceedWithdrawToken() {
 		//handles performing a token power down/unstaking

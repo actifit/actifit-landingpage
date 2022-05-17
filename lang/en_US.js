@@ -347,6 +347,9 @@ module.exports = {
   max_amount_AFIT_power: 'The amount needs to be within your Max AFIT balance on Hive-Engine',
   min_amount_token_power: 'The amount needs to be a minimum of 0.01',
   max_amount_token_power: 'The amount needs to be within your Max token balance on the exchange',
+  min_amount_transf_bsc: 'The amount needs to be a minimum of 50 AFIT and 5 HBD',
+  max_amount_transf_bsc: 'The amount needs to be within your Max AFIT balance on HE and your Max HBD balance',
+  max_amount_limit_transf_bsc: 'The amount cannot be greater than 10,000 AFIT and 1,000 HBD',
   max_amount_token_powerdown: 'The amount needs to be within your Max staked token balance on Steem-Engine',
   max_amount_AFIT_power_SE: 'The amount needs to be within your Max AFIT balance',
   max_amount_AFITX: 'The amount needs to be within your Max AFITX balance',
@@ -499,6 +502,9 @@ module.exports = {
   withdraw_tokens: 'Withdraw Tokens',
   Withdraw: 'Withdraw',
   transfer_tokens: 'Transfer Tokens',
+  move_to_bsc: 'Transfer to BSC',
+  HBD_Amount: 'HBD Amount to Lock',
+  transfer_bsc_description: 'In order to move your AFIT from hive-engine to BSC address(one you set under Your BSC Wallet Address section above), you will need to transfer a pair of tokens, including your intended AFIT tokens + an amount of HBD matching 10-1 of your AFIT. For instance, to send over 50 AFIT, you need to send along 5 HBD. You can later redeem your HBD by transferring back the AFIT amount from BSC to Hive-engine, following a minimum lockup period of 1 week. Please also note that for every transfer, 1 HBD is deducted as fees, or 1% of HBD value, whichever is greater.',
   Account: 'Account',
   missing_target_account: 'Please provide valid recipient account',
   VP_desc: 'Your VP (Voting Power) allows you to vote others and increase your & their rewards. Leaving your VP at 100% wastes rewards for both you and other users. Maintaining your VP at a min of 80% daily is recommended. VP replenishes at a rate of 20% per day.',
@@ -831,5 +837,7 @@ module.exports = {
   FAQ: 'FAQ',
   Youtube: 'Youtube',
   Medium: 'Medium',
-  Refresh_balance: 'Refresh Balance'
+  Refresh_balance: 'Refresh Balance',
+  need_set_bsc_wallet: 'Please set your BSC wallet address and save it under "Your BSC Wallet" section above',
+  have_transacted_today: 'You have already sent out a transaction today. You can only transact once per day.'
 }
