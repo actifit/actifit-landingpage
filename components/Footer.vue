@@ -3,7 +3,7 @@
   <div class="footer bg-light">
     <div class="container py-5">
       <div class="text-center social-links mb-4">
-        <a href="https://discord.gg/aHtcA6r" target="_blank" class="d-inline-block mx-3 mt-3" :title="$t('Discord')"><i class="fab fa-2x fa-discord"></i></a>
+        <a href="https://links.actifit.io/discord " target="_blank" class="d-inline-block mx-3 mt-3" :title="$t('Discord')"><i class="fab fa-2x fa-discord"></i></a>
         <a href="https://www.facebook.com/Actifit.fitness/" target="_blank" class="d-inline-block mx-3 mt-3" :title="$t('Facebook')"><i class="fab fa-2x fa-facebook"></i></a>
         <a href="https://www.twitter.com/Actifit_fitness" target="_blank" class="d-inline-block mx-3 mt-3" :title="$t('Twitter')"><i class="fab fa-2x fa-twitter"></i></a>
         <a href="https://www.instagram.com/actifit.fitness/" target="_blank" class="d-inline-block mx-3 mt-3" :title="$t('Instagram')"><i class="fab fa-2x fa-instagram"></i></a>
