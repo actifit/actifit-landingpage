@@ -44,9 +44,19 @@
 			<div class="row text-center action-title">VERIFY NEWBIE</div>
 			<div :action='this.actiapimod' method="get" class="p-2">
 			  User: <input type="text" id="newbieaccount" name="newbieaccount" ref="newbieaccount" value=""><br>
-			  Social Media Verify Link: <input type="text" name="verif_link" ref="verif_link" value="http://" ><br>
+			  Social Media Verify Link: <input type="text" name="verif_link" ref="verif_link" value="https://" ><br>
 			  <input type="button"  value="Verify Newbie" v-on:click="processAction('verifynewbie')">
 			  <div ref="verifynewbieresult" name="verifynewbieresult" class="text-brand" />
+			</div>
+		</div>
+		
+		<div class="col-md-12 row-sep m-2">
+			<div class="row text-center action-title">GENERATE FREE SIGNUP LINK</div>
+			<div :action='this.actiapimod' method="get" class="p-2">
+			  Signup Username: <input type="text" id="signusername" name="signusername" ref="signusername" value=""><br>
+			  Transaction Link: <input type="text" name="txlink" ref="txlink" id="txlink" value="https://"><br>
+			  <input type="button"  value="Generate Link" v-on:click="processAction('freesignup')">
+			  <div ref="freesignupresult" name="freesignupresult" class="text-brand" />
 			</div>
 		</div>
 		
@@ -248,7 +258,7 @@
 	data (){
 	  return {
 		screenWidth: 1200,
-		actiapimod: process.env.actiAppUrl + 'modAction',
+		actiapimod: process.env.actiAppUrl + 'modAction',//'http://localhost:3120/modAction', //
 		moderatorStats: [],
 		currentWeekStats: [],
 		priorWeekStats: [],
@@ -405,6 +415,11 @@
 			case 'verifynewbie':
 						params.account = this.$refs['newbieaccount'].value.trim();
 						params.verif_link = this.$refs['verif_link'].value.trim();
+						break;
+						
+			case 'freesignup':
+						params.username = this.$refs['signusername'].value.trim();
+						params.txlink = this.$refs['txlink'].value.trim();
 						break;
 		}
 		
