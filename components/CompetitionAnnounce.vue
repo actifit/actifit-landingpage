@@ -1,10 +1,10 @@
 <template>
   <div :class="outserSmallScreenClasses" class="position-fixed text-brand mx-auto w-100 acti-notify-comp" >
 	<div :class="smallScreenClasses" class="text-center mx-auto acti-notify-comp-inner border-2 rounded">
-	  <div>CryptoFitChallenge 2022 is ON - Final Week In Progress
-		<a href="" @click.prevent="adjustVisibility" class="expand-comp-notice">
-			<span v-if="showCompDetails">&#9651;</span>
-			<span v-else>&#9661;</span>
+	  <div>AFIT Listing on Digifinex! 100,000 AFIT In Rewards 🚀<!-- CryptoFitChallenge 2022 is ON - Final Week In Progress -->
+		<a href="" @click.prevent="adjustVisibility" class="expand-comp-notice nohoverunderline">
+			<span v-if="showCompDetails" title="minimize">🗕</span><!-- &#9651; -->
+			<span v-else title="maximize">🗖</span><!-- &#9661; -->
 		</a></div>
 	  <transition name="fade">
 		<div class="extra-info" v-if="showCompDetails">
@@ -12,15 +12,15 @@
 			<!--<iframe v-if="screenWidth < 768" src="http://www.youtube.com/embed/kS6AXH1kY74" width="320" height="180" frameborder="0" class="mx-auto" allowfullscreen></iframe>
 			<iframe v-else src="https://www.youtube.com/embed/kS6AXH1kY74" width="640" height="360" frameborder="0" class="mx-auto" allowfullscreen></iframe>-->
 			<!--<iframe width="640" height="360" src="https://www.youtube.com/embed/kS6AXH1kY74"></iframe>-->
-			<img class="announce-img" src="/img/cryptofitchallenge2022_week4.png" width="85%">
+			<img class="announce-img" src="/img/AFIT_DIGI_LISTING.jpg" width="85%">
 		  </div>
 		  <div>
 		  <!--<a href="https://actifit.io/@actifit/we-have-winners-public-token-sale-kicks-off-today-t-7-hours" class="btn btn-brand m-2" target="_blank">Event Details</a>
 		  <a href="https://www.youtube.com/watch?v=Vc6rpDU99nk" class="btn btn-brand m-2" target="_blank">Video Announcement</a> -->
-		  <a href="https://actifit.io/@actifit/are-you-ready-for-cryptofitchallenge2022-final-week-exercises" class="btn btn-brand m-2 back-red" target="_blank">Week 4 Exercises</a>
-		  <a href="https://actifit.io/@actifit/cryptofitchallenge2022-actifit-x-appics-fitness-challenge-march-2022" class="btn btn-brand m-2 back-red" target="_blank">Participation Rules</a>
+		  <a href="http://localhost:3000/@actifit/afit-listing-on-digifinex-this-saturday-10-am-utc-100000-afit-giveaway-to-events-participants" class="btn btn-brand m-2 back-red" target="_blank">Announcement</a>
+		  <a href="https://digifinex.zendesk.com/hc/en-us/articles/6871357968793" class="btn btn-brand m-2 back-red" target="_blank">Participation Rules</a>
 		  </div>
-		  <!--<div><span class="end-string">Token Sale ends in </span><Countdown v-if="countDownReady" deadline="October 31, 2021 22:00 GMT"></Countdown><i v-else class="fas fa-spin fa-spinner text-brand"></i></div>-->
+		  <div><span class="end-string">Listing Goes Live In </span><Countdown v-if="countDownReady" deadline="May 28, 2022 10:00 GMT"></Countdown><i v-else class="fas fa-spin fa-spinner text-brand"></i></div>
 		</div>
 	  </transition>
 	</div>
@@ -29,11 +29,11 @@
 
 <script>
   import { mapGetters } from 'vuex'
-  //import Countdown from 'vuejs-countdown'
+  import Countdown from 'vuejs-countdown'
   
   export default {
 	components: {
-	  //Countdown
+	  Countdown
 	},
     data () {
       return {
@@ -79,6 +79,9 @@
   }
 </script>
 <style>
+	.nohoverunderline:hover{
+		text-decoration: none;
+	}
 	.acti-notify-comp{
 	  top:80px; 
 	  z-index:1; 
