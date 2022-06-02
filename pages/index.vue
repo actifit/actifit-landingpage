@@ -492,7 +492,7 @@
   import Footer from '~/components/Footer'
   import News from '~/components/News'
   import NewsModal from '~/components/NewsModal'
-  import pendingRewardsModal from '~/components/pendingRewardsModal'
+  import pendingRewardsModal from '~/components/PendingRewardsModal'
   import { mapGetters } from 'vuex'
   import SteemStats from '~/components/SteemStats'
   import NotifyModal from '~/components/NotifyModal'

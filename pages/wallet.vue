@@ -957,7 +957,7 @@
   import TopHolders from '~/components/TopHoldersModal'
   import TopHoldersX from '~/components/TopHoldersXModal'
   
-  import pendingRewardsModal from '~/components/pendingRewardsModal'
+  import pendingRewardsModal from '~/components/PendingRewardsModal'
   
   const ssc = new SSC(process.env.steemEngineRpc);
   const scot_steemengine_api = process.env.steemEngineScot;
