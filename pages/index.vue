@@ -479,7 +479,10 @@
 	<NotifyModal id="notifyModalRC" ref="notifyModalRC" :modalTitle="$t('Actifit_Info')" :modalText="$t('RC_desc')"/>
 	
 	<CompetitionAnnounce />
-	 
+	
+	<pendingRewardsModal :pendingRewards="pendingRewards" :username="user"/>
+	
+	<a href="#" id="pendingRewardsKicker" name="pendingRewardsKicker" ref="pendingRewardsKicker" class="btn btn-white" data-toggle="modal" data-target="#pendingRewardsModal"></a>
   </div>
 </template>
 
@@ -489,6 +492,7 @@
   import Footer from '~/components/Footer'
   import News from '~/components/News'
   import NewsModal from '~/components/NewsModal'
+  import pendingRewardsModal from '~/components/pendingRewardsModal'
   import { mapGetters } from 'vuex'
   import SteemStats from '~/components/SteemStats'
   import NotifyModal from '~/components/NotifyModal'
@@ -503,7 +507,8 @@
       News,
       NewsModal,
 	  SteemStats,
-	  NotifyModal
+	  NotifyModal,
+	  pendingRewardsModal
 	  //,FriendshipModal
 	  ,CompetitionAnnounce
     },
@@ -516,6 +521,7 @@
         tweenedRewardedActivityCount: 0,
 		reload: 0,
 		profImgUrl: process.env.hiveImgUrl,
+		pendingRewards: {},
       }
     },
     computed: {
@@ -567,7 +573,8 @@
 		await this.$store.dispatch('steemconnect/refreshUser');
 		this.fetchUserData();
 		this.reload += 1;
-	  }
+	  },
+	  
     },
     methods: {
       /**
@@ -588,14 +595,33 @@
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
 	  
+	  async setPendingRewards(json){
+		//console.log(json);
+		this.pendingRewards = json;
+		//console.log(this.pendingRewards);
+		if (this.pendingRewards.pendingRewards.HIVE.amount || this.pendingRewards.pendingRewards.STEEM.amount || this.pendingRewards.pendingRewards.BLURT.amount){
+			//console.log('got results');
+			//console.log(this.pendingRewards);
+			this.$refs['pendingRewardsKicker'].click();
+		}
+	  },
+	  
 	  fetchUserData () {
 		if (typeof this.user != 'undefined' && this.user != null){
 		  this.$store.dispatch('fetchUserTokens')
 		  this.$store.dispatch('fetchUserRank')
 		  this.$store.dispatch('fetchUserReportCount')
 		  this.$store.dispatch('fetchReferrals')
+		  this.fetchUserPendingRewards();
 		}
 	  },
+	  fetchUserPendingRewards () {
+		//let's check if user already has a funds pass set
+		
+		  fetch(process.env.actiAppUrl+'pendingRewards/?user='+this.user.account.name).then(
+			res => {res.json().then(json => this.setPendingRewards(json)).catch(e => reject(e))
+		  }).catch(e => reject(e))
+	  }
     },
     async mounted () {
       // fetch data

@@ -98,6 +98,10 @@
 					
 				</h5>
 				
+				<h5>
+				<a href="#" id="pendingRewardsKicker" name="pendingRewardsKicker" ref="pendingRewardsKicker" class="btn btn-brand btn-lg w-50 border" data-toggle="modal" data-target="#pendingRewardsModal">{{$t('Check_Pending_Rewards')}}</a>
+				</h5>
+				
 				<div v-if="afitActivityMode == MOVE_AFIT_SE_HE || afitActivityMode == MOVE_AFIT_HE_SE">
 					  <div class="text-center p-2">
 						<div v-if="afitActivityMode == MOVE_AFIT_SE_HE" class="text-brand font-weight-bold">{{ $t('move_afit_se_he') }}</div>
@@ -923,6 +927,8 @@
 	  </div>
 	</div>
 	
+	<pendingRewardsModal :pendingRewards="pendingRewards" :username="user"/>
+	
 	<no-ssr>
       <div>
         <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
@@ -950,6 +956,8 @@
   
   import TopHolders from '~/components/TopHoldersModal'
   import TopHoldersX from '~/components/TopHoldersXModal'
+  
+  import pendingRewardsModal from '~/components/pendingRewardsModal'
   
   const ssc = new SSC(process.env.steemEngineRpc);
   const scot_steemengine_api = process.env.steemEngineScot;
@@ -1141,7 +1149,8 @@
 					'SWAP.HIVE': '0.75% fee on withdrawals',
 				},
 		refreshinBal: false,
-		afitHBDRate: process.env.afitHBDBridgeRate
+		afitHBDRate: process.env.afitHBDBridgeRate,
+		pendingRewards: {}
 	  }
 	},
     components: {
@@ -1152,7 +1161,8 @@
 	  ExchangeHistory,
 	  Countdown,
 	  TopHolders,
-	  TopHoldersX
+	  TopHoldersX,
+	  pendingRewardsModal
     },
     computed: {
       ...mapGetters('steemconnect', ['user']),
@@ -1695,6 +1705,7 @@
 		  this.$store.dispatch('fetchTransactions')
 		  this.$store.dispatch('fetchUserRank')
 		  this.$store.dispatch('fetchReferrals')
+		  this.fetchUserPendingRewards();
 		  
 		  //let's check if user already has a funds pass set
 		  fetch(process.env.actiAppUrl+'userHasFundsPassSet/'+this.user.account.name).then(
@@ -1835,6 +1846,21 @@
 		  }).catch(e => reject(e))
 		  
 		}
+	  },
+	  async setPendingRewards(json){
+		this.pendingRewards = json;
+		console.log(this.pendingRewards);
+		if (this.pendingRewards.pendingRewards.HIVE || this.pendingRewards.pendingRewards.STEEM || this.pendingRewards.pendingRewards.BLURT){
+			console.log('got results');
+			console.log(this.pendingRewards);
+		}
+	  },
+	  fetchUserPendingRewards () {
+		//let's check if user already has a funds pass set
+		
+		  fetch(process.env.actiAppUrl+'pendingRewards/?user='+this.user.account.name).then(
+			res => {res.json().then(json => this.setPendingRewards(json)).catch(e => reject(e))
+		  }).catch(e => reject(e))
 	  },
 	  async fetchAFITSE() {
 		let bal = await ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFIT' });
