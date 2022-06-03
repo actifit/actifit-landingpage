@@ -15,7 +15,7 @@
 		  <div class="pb-md-2 text-center">
 			  <img src="/img/actifit_logo.png" alt="Actifit" class="logo" />
 			  <h1 class="mt-3 mt-sm-2 text-brand title">{{ $t('Actifit') }}</h1>
-			  <h3 class="font-italic text-brand slogan">{{ $t('Slogan') }}</h3>
+			  <!--<h3 class="font-italic text-brand slogan">{{ $t('Slogan') }}</h3>-->
 			</div>
 		
           <div v-if="user">
@@ -75,7 +75,6 @@
         </a>
       </div>
     </div>
-	
     <!-- intro -->
 	<!--<transition type="animation">-->
     <section class="intro bg-light" id="content">
@@ -86,7 +85,7 @@
         </p>
 
         <!-- stats -->
-        <div class="row pb-5">
+        <!--<div class="row pb-5">
           <div class="col text-center">
             <h1><i class="fas fa-coins"></i></h1>
             <h4>{{ $t('Tokens_Distributed') }}</h4>
@@ -102,7 +101,7 @@
             <h4>{{ $t('Rewarded_Activities') }}</h4>
             <h2 class="text-brand">{{ numberFormat(animatedRewardedActivityCount, 0) }}</h2>
           </div>
-        </div>
+        </div>-->
       </div>
     </section>
 	<!--</transition>-->
@@ -648,8 +647,8 @@
 
 <style lang="sass">	
   .header
-    min-height: 100%
-    background: url('/img/header-3.jpg') center
+    
+    background: url('/img/header-4.png') top no-repeat
     background-size: cover
     .form
       max-width: 500px
@@ -709,6 +708,10 @@
         min-height: 15rem
 </style>
 <style>
+	.header{
+		background-repeat: no-repeat
+		/* min-height: 100% */
+	}
 	.home-card{
 	  opacity: 0.9;
 	}
