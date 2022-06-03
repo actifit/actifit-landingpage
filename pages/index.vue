@@ -288,14 +288,6 @@
 			<a href="https://www.linkedin.com/in/epirillo/" target="_blank"><i class="fab fa-linkedin"></i></a>
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
-            <a href="@alokkumar121" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/alokkumar.jpg);'"></div>
-            </a>
-            <a href="@alokkumar121" target="_blank">Alok Kumar</a>
-			<div><i>Moderator</i></div>
-			<a href="https://www.linkedin.com/in/alok-kumar-18373228" target="_blank"><i class="fab fa-linkedin"></i></a>
-          </div>
-		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@priyanarc" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/priyanfareen.jpg);'"></div>
             </a>
@@ -414,12 +406,12 @@
             <a rel="nofollow noopener" href="https://actifit.io/@beachready" target="_blank">Beach Ready</a>
           </div>
 		  
-		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
+		  <!--<div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a rel="nofollow noopener" href="https://coinpedia.org/" target="_blank">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url(./img/partners/coinpedia_logo_2.png);'"></div>
             </a>
             <a rel="nofollow noopener" href="https://coinpedia.org/" target="_blank">CoinPedia</a>
-          </div>
+          </div>-->
 		  
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a rel="nofollow noopener" href="https://actifit.io/@adventureready" target="_blank">
@@ -452,6 +444,30 @@
 	  </div>
       
     </section>
+	
+	<section id="infrastructure" class="py-5 bg-light">
+		<div class="container">
+			<h1 class="text-center pb-5">
+			  <i class="fas fa-cubes"></i><br>
+				{{ $t('Infrastructure') }}
+			</h1>
+			<div class="row">
+			  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
+				<img src="/img/HIVE.png" style="max-height: 100px;"><br/><span class="font-weight-bold">{{$t('HIVE')}}</span>
+			  </div>
+			  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
+				<img src="/img/STEEM.png" style="max-height: 100px;"><br/><span class="font-weight-bold">{{$t('STEEM')}}</span>
+			  </div>
+			  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
+				<img src="/img/BLURT.png" style="max-height: 100px;"><br/><span class="font-weight-bold">{{$t('BLURT')}}</span>
+			  </div>
+			  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
+				<img src="/img/BNB_CHAIN.webp" style="max-height: 100px;"><br/><span class="font-weight-bold">{{$t('BNB CHAIN (BSC)')}}</span>
+			  </div>
+			</div>
+		</div>
+	</section>
+	
 
     <!-- news -->
     <section id="news" class="py-5 bg-brand text-light">
