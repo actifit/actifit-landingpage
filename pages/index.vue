@@ -497,7 +497,9 @@
 	
 	<pendingRewardsModal :pendingRewards="pendingRewards" :username="user"/>
 	
-	<a href="#" id="pendingRewardsKicker" name="pendingRewardsKicker" ref="pendingRewardsKicker" class="btn btn-white" data-toggle="modal" data-target="#pendingRewardsModal"></a>
+	<a id="pendingRewardsKicker" name="pendingRewardsKicker" ref="pendingRewardsKicker" class="btn btn-white" data-toggle="modal" data-target="#pendingRewardsModal"></a>
+	
+	<a id="pendingRewardsHider" name="pendingRewardsHider" ref="pendingRewardsHider" class="btn btn-white" data-toggle="dismiss" data-target="#pendingRewardsModal"></a>
   </div>
 </template>
 
@@ -658,6 +660,9 @@
       this.$store.dispatch('steemconnect/login')
 	  this.fetchUserData();
     },
+	async beforeDestory(){
+		this.$refs['pendingRewardsHider'].click();
+	}
   }
 </script>
 
