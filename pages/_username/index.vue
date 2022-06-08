@@ -190,7 +190,7 @@
 						<img src="/img/actifit_logo.png" class="mr-2 token-logo">{{ displayAFITSEBal }} {{ $t('AFIT_SE_Tokens') }}<br/> 
 						<img src="/img/actifit_logo.png" class="mr-2 token-logo">{{ displayAFITHEBal }} {{ $t('AFIT_HE_Tokens') }}</a><br/>
 						<img src="/img/actifit_logo.png" class="mr-2 token-logo">{{ displayAFITTipBal}} {{ $t('AFIT_Tip_Tokens') }} <i class="fas fa-info-circle" v-on:click="showAfitTipInfo=!showAfitTipInfo"></i>
-						<div v-if="showAfitTipInfo" :v-html="$t('tipping_details')" />
+						<div v-if="showAfitTipInfo" style="color:red" v-html="$t('tipping_details')" />
 						<div>
 						<button class="btn btn-brand border" v-on:click="tipUser" >{{ $t('Send_tip') }}</button>
 						</div>
