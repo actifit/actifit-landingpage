@@ -440,6 +440,13 @@
             </a>
             <a rel="nofollow noopener" href="https://appics.com/" target="_blank">Appics</a>
           </div>
+		  
+		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
+            <a rel="nofollow noopener" href="https://nomics.com/" target="_blank">
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(./img/partners/Nomics_Logo.png);'"></div>
+            </a>
+            <a rel="nofollow noopener" href="https://nomics.com/" target="_blank">Nomics</a>
+          </div>
 		</div>
 	  </div>
       
