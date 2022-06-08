@@ -189,7 +189,11 @@
 						<img src="/img/actifit_logo.png" class="mr-2 token-logo">{{ numberFormat(userTokenCount, 3) }} {{ $t('AFIT_Tokens') }}<br/>
 						<img src="/img/actifit_logo.png" class="mr-2 token-logo">{{ displayAFITSEBal }} {{ $t('AFIT_SE_Tokens') }}<br/> 
 						<img src="/img/actifit_logo.png" class="mr-2 token-logo">{{ displayAFITHEBal }} {{ $t('AFIT_HE_Tokens') }}</a><br/>
+						<img src="/img/actifit_logo.png" class="mr-2 token-logo">{{ displayAFITTipBal}} {{ $t('AFIT_Tip_Tokens') }} <i class="fas fa-info-circle" v-on:click="showAfitTipInfo=!showAfitTipInfo"></i>
+						<div v-if="showAfitTipInfo" :v-html="$t('tipping_details')" />
+						<div>
 						<button class="btn btn-brand border" v-on:click="tipUser" >{{ $t('Send_tip') }}</button>
+						</div>
 					</div>
 					<div class="info-box-orange mb-2 col-md-6 cntnr">
 						
@@ -437,6 +441,7 @@
 			error_proceeding: false,
 			error_msg: '',
 			votingProgress: false,
+			showAfitTipInfo: false,
 		}
 	},
 	watch: {
@@ -481,6 +486,12 @@
 	  displayAFITHEBal () {
 		if (!isNaN(this.userAFITHETokenCount)){
 			return this.numberFormat(this.userAFITHETokenCount, 3);
+		}
+		return 0;
+	  },
+	  displayAFITTipBal () {
+		if (!isNaN(this.userAFITTipTokenCount)){
+			return this.numberFormat(this.userAFITTipTokenCount, 3);
 		}
 		return 0;
 	  },
@@ -1254,6 +1265,12 @@
 			this.lastActivityDate = this.pureDate(json[0].date);
 		}
 	  },
+	  async setTipBalance(json){
+	  console.log('setTipBalance');
+		if (json && json.tip_balance){
+			this.userAFITTipTokenCount = json.tip_balance
+		}
+	  }
 	},
 	async mounted () {
 	
@@ -1323,7 +1340,14 @@
 		  //let's check if this user is banned
 		  fetch(process.env.actiAppUrl+'is_banned/'+this.displayUser).then(
 			res => {res.json().then(json => this.account_banned = json)}).catch(e => reject(e))
-			
+		  
+		  console.log('availableTipBalance')
+		  //let's check if this user is banned
+		  fetch(process.env.actiAppUrl+'availableTipBalance?user='+this.displayUser).then(
+			res => {res.json().then(json => this.setTipBalance(json))}).catch(e => reject(e))
+		  
+		  
+		 	
 		  
 		  try{
 		  //fetch user's AFIT S-E balance
