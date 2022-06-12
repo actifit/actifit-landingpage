@@ -856,5 +856,6 @@ module.exports = {
   Refresh_balance: 'Refresh Balance',
   need_set_bsc_wallet: 'Please set your BSC wallet address and save it under "Your BSC Wallet" section above',
   have_transacted_today: 'You have already sent out a transaction today. You can only transact once per day.',
+  hide_pending_rewards_popup: 'Do not show again (you can always view this popup by visiting wallet page and clicking on pending rewards button)',
   tipping_details: 'This special onchain tipping functionality allows you to send out tips to users by commenting on their posts, and sends out AFIT directly onto their hive-engine account. For more details about how it works and how to load up balance, check out this post: <a href="https://links.actifit.io/tipping-afit">https://links.actifit.io/tipping-afit</a>'
 }

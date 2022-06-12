@@ -502,7 +502,7 @@
 	
 	<CompetitionAnnounce />
 	
-	<pendingRewardsModal :pendingRewards="pendingRewards" :username="user"/>
+	<pendingRewardsModal :pendingRewards="pendingRewards" :username="user" />
 	
 	<a id="pendingRewardsKicker" name="pendingRewardsKicker" ref="pendingRewardsKicker" class="btn btn-white" data-toggle="modal" data-target="#pendingRewardsModal"></a>
 	
@@ -626,7 +626,11 @@
 		if (this.pendingRewards.pendingRewards.HIVE.amount || this.pendingRewards.pendingRewards.STEEM.amount || this.pendingRewards.pendingRewards.BLURT.amount){
 			//console.log('got results');
 			//console.log(this.pendingRewards);
-			this.$refs['pendingRewardsKicker'].click();
+			
+			//only show if user has not opted out
+			if (!localStorage.getItem('preventRewardsPop')){
+				this.$refs['pendingRewardsKicker'].click();
+			}
 		}
 	  },
 	  

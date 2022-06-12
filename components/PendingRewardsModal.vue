@@ -21,7 +21,12 @@
 			</li>
 			{{$t('pending_rewards_note')}}
 			<br /><br />
-			<div class="text-center"><a v-if="username" :href="'./activity/'+username.account.name" class="btn btn-lg btn-brand w-50">{{ $t('My_Activity') }}</a></div>
+			<input type="checkbox" name="hidePendingRewards" id="hidePendingRewards" ref="hidePendingRewards" @change="updatePopupStoredStatus($event)"/>{{$t('hide_pending_rewards_popup')}}
+			<div class="text-center">
+			<button type="button" class="btn btn-lg btn-brand w-25" data-dismiss="modal" aria-label="Close">
+				&nbsp;{{$t('Close')}}
+			</button>
+			<a v-if="username" :href="'./activity/'+username.account.name" class="btn btn-lg btn-brand w-25">{{ $t('My_Activity') }}</a></div>
 		</div>
       </div>
     </div>
@@ -46,7 +51,8 @@
 			if (this.pendingRewards.pendingRewards && this.pendingRewards.pendingRewards.BLURT.amount)
 			return this.pendingRewards.pendingRewards.BLURT.amount*this.blurtPrice;
 			return 0;
-		}
+		},
+		
     },
 	methods: {
 		setBlurtPrice(_price){
@@ -59,6 +65,14 @@
 		  fetch('https://api.coingecko.com/api/v3/simple/price?ids=blurt&vs_currencies=usd').then(
 			res => {res.json().then(json => this.setBlurtPrice (json.blurt.usd)).catch(e => reject(e))
 		  }).catch(e => reject(e))
+		},
+		updatePopupStoredStatus(e){
+			this.$nextTick(() => {
+				//
+				console.log(e.target.checked)
+				localStorage.setItem('preventRewardsPop', e.target.checked);
+			})
+			
 		}
 	},
 	async mounted () {
