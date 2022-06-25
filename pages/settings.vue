@@ -8,7 +8,7 @@
 		<h5 class="p-3 acti-headr">{{ $t('Posting_settings') }}</h5>
 		<div class=" pb-3">
 			{{ $t('Actifit_post_target') }}
-			  <div class="bchain-option btn col-12 m-2 p-2 row text-left">
+			  <!--<div class="bchain-option btn col-12 m-2 p-2 row text-left">
 				<input type="radio" id="hive_steem" value="BOTH" v-model="target_bchain">
 				<img src="/img/HIVE.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px;"  :class="adjustBothClass">
 				<img src="/img/STEEM.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px;"  :class="adjustBothClass">
@@ -19,6 +19,17 @@
 				<input type="radio" id="hive" value="HIVE" v-model="target_bchain">
 				<img src="/img/HIVE.png" style="max-height: 50px;"  v-on:click="target_bchain = 'HIVE'" :class="adjustHiveClass">
 				<label for="hive">HIVE ONLY</label>
+			  </div>-->
+			  <div class="bchain-option btn col-12 m-2 p-2 row text-left">
+				<input type="checkbox" id="hive" value="Hive" ref="hive" checked="checked" disabled="disabled"><label for="hive">HIVE</label>
+			  </div>
+
+			  <div class="bchain-option btn col-12 m-2 p-2 row text-left">
+				<input type="checkbox" id="steem" value="Steem" ref="steem" :checked="is_chain_enabled('STEEM')" @change="adjustCheckbox($event)"><label for="steem">STEEM</label>
+			  </div>
+
+			  <div class="bchain-option btn col-12 m-2 p-2 row text-left">
+				<input type="checkbox" id="Blurt" value="Blurt" ref="blurt" :checked="is_chain_enabled('BLURT')" @change="adjustCheckbox($event)"><label for="blurt">BLURT</label>
 			  </div>
 			  
 			<h5 class="p-3 acti-headr">{{ $t('post_chains_setting') }}</h5>
@@ -168,6 +179,28 @@
 	  },
 	},
 	methods: {
+	  is_chain_enabled(postChain){
+		if (this.target_bchain == 'BOTH' || this.target_bchain == 'ALL' || this.target_bchain.includes(postChain)){
+			return true;
+		}
+		return false;
+	  },
+	  adjustCheckbox(ev){
+	    let parCont = this;
+		this.$nextTick(() => {
+		  console.log(ev)
+		  parCont.target_bchain = 'HIVE|';
+		  console.log(parCont.$refs['steem'].checked);
+		  console.log(parCont.$refs['blurt'].checked);
+		  if (parCont.$refs['steem'].checked){
+			parCont.target_bchain += 'STEEM';
+		  }
+		  if (parCont.$refs['blurt'].checked){
+			parCont.target_bchain += 'BLURT';
+		  }
+		  //parCont.target_bchain
+	    })
+	  },
 	  checkit(param){
 		//console.log('checkit'+param);
 		this.notif_active = param;
