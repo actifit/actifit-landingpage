@@ -21,7 +21,7 @@
 				<label for="hive">HIVE ONLY</label>
 			  </div>-->
 			  <div class="bchain-option btn col-12 m-2 p-2 row text-left">
-				<input type="checkbox" id="hive" value="Hive" ref="hive" checked="checked" disabled="disabled"><label for="hive">HIVE</label>
+				<input type="checkbox" id="hive" value="Hive" ref="hive" checked="checked" disabled="disabled"><label for="hive">HIVE (Hive is always active)</label>
 			  </div>
 
 			  <div class="bchain-option btn col-12 m-2 p-2 row text-left">
