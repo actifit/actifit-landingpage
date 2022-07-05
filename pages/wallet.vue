@@ -4351,6 +4351,9 @@
 	  }else if (this.$route.query.action === 'power_up'){
 		this.afitActivityMode = 0;
 		this.fundActivityMode = this.POWERUP_FUNDS;
+	  }else if (this.$route.query.action === 'lock_afit'){
+		this.afitActivityMode = this.MOVE_AFIT_SE;
+		this.fundActivityMode = 0;
 	  }
 	  
 	  //grab STEEM price
