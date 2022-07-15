@@ -35,7 +35,7 @@ module.exports = {
 	section3_title: 'AFIT tokens',
 	section3_desc: 'AFIT tokens can be exchanged on Actifit Market to signup for fitness or nutrition related consultation sessions, buying ebooks, boosting your rewards via purchasing actifit based booster gadgets, or earning extra HIVE rewards! <br/>You can buy AFIT tokens on:<li> <a href="https://hive-engine.com/?p=market&t=AFIT">Hive-Engine.com(Hive Version)</a> </li><li><a href="https://defi.actifit.io">Actifit DeFi (BSC Version)</a></li><li><a href="https://pancakeswap.finance/swap?inputCurrency=BNB&outputCurrency=0x4516bb582f59befcbc945d8c2dac63ef21fba9f6">Pancakeswap(BSC Version)</a></li>',
 	section4_title: 'Yield Farming with Actifit',
-	section4_desc: 'You can yield farm AFIT tokens if you are a token holder on Hive and/or Steem blockchain. Stake/Power Up to Hive Power / Steem Power, delegate to Actifit and earn your share of 100,000 AFIT tokens distributed per day to our delegators, as well as a weekly share of the 5% beneficiary reward of actifit posts.',
+	section4_desc: 'You can yield farm AFIT tokens if you are a token holder on Hive and/or Steem blockchain. Stake/Power Up to Hive Power / Steem Power, delegate to Actifit and earn your share of AFIT tokens pool distributed per day to our delegators, as well as a weekly share of the 5% beneficiary reward of actifit posts.',
   },
   Tokens_Distributed: 'Tokens Distributed',
   Token_Holders: 'Token Holders',
