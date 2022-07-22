@@ -390,6 +390,10 @@
 					</div>
 					<div class="row">
 					  <div class="w-25"></div>
+					  <button v-on:click="resetFundsPass" class="btn btn-brand btn-lg w-50 border">{{ $t('Reset_password') }}</button>
+					</div>
+					<div class="row">
+					  <div class="w-25"></div>
 					  <div v-if="checkingFunds" id="checking_funds">
 						<i class="fas fa-spin fa-spinner"></i>{{ $t('Checking_Steem_Transfer') }}
 					  </div>
@@ -437,6 +441,7 @@
 					<div class="row" >
 					  <div class="w-25 p-2 text-right">{{ $t('Funds_Password') }}</div>
 					  <input type="password" id="funds-pass-entry" name="funds-pass-entry" ref="funds-pass-entry" class="form-control-lg w-50 p-2">
+					  <button v-on:click="resetFundsPass" class="btn btn-brand btn-lg border">{{ $t('Reset_password') }}</button>
 					</div>
 					<div class="row" v-if="error_swap != ''" >
 					  <div class="w-25"></div>
@@ -4060,6 +4065,40 @@
 			
 			this.movingFunds = false;
 		}
+	  },
+	  async resetFundsPass(){
+		let confirmPopup = confirm(this.$t('Confirm_password_reset'));
+			if (!confirmPopup){
+				return;
+			}
+			let accToken = localStorage.getItem('access_token')
+			
+			let url = new URL(process.env.actiAppUrl + 'resetFundsPass/?user='+this.user.account.name);
+			
+			let reqHeads = new Headers({
+			  'Content-Type': 'application/json',
+			  'x-acti-token': 'Bearer ' + accToken,
+			});
+			let res = await fetch(url, {
+				headers: reqHeads
+			});
+			let outcome = await res.json();
+			console.log(outcome);
+			if (outcome.status=='success'){
+				this.$notify({
+				  group: 'success',
+				  text: this.$t('pass_reset_successfully'),
+				  position: 'top center'
+				})
+				console.log(outcome.error);
+				this.fetchUserData();
+			}else{
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('problem_reset_pass'),
+				  position: 'top center'
+				})
+			}
 	  },
 	  async proceedVerifyPass() {
 		//handles checking for proper confirmation of account via STEEM transfer
