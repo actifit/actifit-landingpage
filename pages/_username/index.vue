@@ -529,7 +529,8 @@
 	  },
 	  userMeta() {
 	    try{
-		  return JSON.parse(this.userinfo.json_metadata);
+		  //return JSON.parse(this.userinfo.json_metadata);
+		  return JSON.parse(this.userinfo.posting_json_metadata);
 		}catch(err){
 		  return null;
 		}
