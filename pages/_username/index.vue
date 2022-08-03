@@ -7,7 +7,7 @@
 		</div>
 	</div>
 	<div v-else-if="errorDisplay==''" class="container pt-5 mt-5 pb-5 col-md-9" >
-		<h5 class="d-flex flex-row text-brand user-name" v-if="displayUser">
+		<h5 class="text-brand user-name" v-if="displayUser">
 			<a :href="formattedProfileUrl" target="_blank">@{{ displayUser }} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></a>
 			<span v-if="!account_banned && !isOwnAccount()" class="text-brand">
 				<span :title="$t('you_are_friends_username').replace('_USERNAME_', displayUser)" v-if="isFriend()" >
@@ -29,24 +29,26 @@
 				<i class="fas fa-spin fa-spinner" v-if="friendshipLoader"></i>
 			</span>
 		</h5>
-		<h5 class="d-flex flex-row text-brand user-name" v-else-if="!noUserFound">
+		<h5 class="text-brand user-name" v-else-if="!noUserFound">
 			<a :href="formattedProfileUrl" target="_blank">@{{ displayUser }}</a>
 		</h5>
 		
-		<div class="d-flex flex-row">
-        <div class="d-flex flex-column mb-3">
-		  <div v-if="displayUser" class="user-avatar large-avatar mr-1 mb-3"
-					   :style="'background-image: url('+this.profImgUrl+'/u/' + this.displayUser + '/avatar)'"></div>
-		  <div class="acti-widget" v-if="displayUser">
-			<table>
-				<tr>
-					<td colspan="2"><div class="text-center"><div class="phishy"><h6>Activity Count</h6></div>
-						<span>{{ lastActivityCount }} <img src="/img/actifit_logo.png" class="activity-small-logo"></span></div></td>
-					<td colspan="2"><div class="text-center"><div class="phishy"><h6>Activity Date</h6></div>
-						<div><h6>{{ lastActivityDate }}</h6></div></div></td>
-				</tr>
-				<tr>
-					<td colspan="4">
+		<div > <!-- class="d-flex flex-row" -->
+        <div class="mb-3 row"> <!-- d-flex flex-column  -->
+		  <div v-if="displayUser" class="col-12 col-md-2">
+			<div class="user-avatar large-avatar mr-1 mb-3 col-12 col-md-12"
+					   :style="'background-image: url('+this.profImgUrl+'/u/' + this.displayUser + '/avatar)'"/>
+		  </div>
+		  <div class="acti-widget m-2 row col-12 col-md-9" v-if="displayUser">
+			<div class="row col-md-4 col-12">
+				<div class="text-center info-box-green col-6"><div class="phishy"><h6>Latest Activity Count</h6></div>
+							<span>{{ lastActivityCount }} <img src="/img/actifit_logo.png" class="activity-small-logo"></span></div>
+							
+				<div class="text-center info-box-green col-6"><div class="phishy"><h6>Latest Activity Date</h6></div>
+							<div><h6>{{ lastActivityDate }}</h6></div></div>
+				
+				<div class="text-center">
+					<div class="">
 						<a href="#" data-toggle="modal" class="btn btn-brand btn-block" 
 								 data-target="#activityChartModal" v-if="isFriend() || isOwnAccount()">
 							{{ $t('View_activity_chart') }}
@@ -57,79 +59,87 @@
 						<a href="#" class="btn btn-brand btn-block" v-on:click="displayLoginActivity=!displayLoginActivity" v-else >
 							{{ $t('View_activity_chart') }}
 						</a>
-						<div v-if="displayAddFriendActivity" class="border text-brand">
-							{{ $t('View_chart_notice').replace('_USER', this.username) }}
-							<span :title="$t('add_username_friend').replace('_USERNAME_', displayUser)" v-on:click="addFriend">
-								<i class="fas fa-user-plus p-2"></i>
-								<div v-if="addFriendError" v-html="addFriendError"></div>
-							</span>
-						</div>
-						<div v-if="displayLoginActivity">
-							  <div class="">
-								<a href="/login" class="btn btn-brand w-50">{{ $t('Login') }}</a>
-								<a href="/signup" class="btn btn-brand w-50">{{ $t('Sign_Up') }}</a>
-							  </div>
-						</div>
-					</td>
-				</tr>
-				<tr>
-					<!--<img src="https://cdn.steemitimages.com/DQmdnh1nApZieHZ3s1fEhCALDjnzytFwo78zbAY5CLUMpoG/TRACKM.png">-->
-					<td><div class="text-center"><div class="phishy"><h6>Height</h6></div>
-						<h6>{{ lastHeight + ' '+heightUnit }}</h6></div></td>
-					<td><img src="https://usermedia.actifit.io/height.png"></td>
-					<td><div class="text-center"><div class="phishy"><h6>Weight</h6></div>
-						<h6>{{ lastWeight+' '+weightUnit}}</h6></div></td>
-					<td><img src="https://usermedia.actifit.io/weight.png"></td>
-				</tr>
-				
-				<tr>
-					<td><div class="text-center"><div class="phishy"><h6>Body Fat</h6></div>
-						<h6>{{ lastBodyfat+' % '}}</h6></div></td>
-					<td><img src="https://usermedia.actifit.io/bodyfat.png"></td>
-					<td><div class="text-center"><div class="phishy"><h6>Chest</h6></div></div>
-						<div class="text-center"><h6>{{ lastChest+' '+chestUnit }}</h6></div></td>
-					<td><img src="https://usermedia.actifit.io/chest.png"></td>
-				</tr>
-
-				<tr>
-					<td><div class="text-center"><div class="phishy"><h6>Waist</h6></div></div>
-						<div class="text-center"><h6>{{ lastWaist+' '+waistUnit }}</h6></div></td>
-					<td><img src="https://usermedia.actifit.io/waist.png"></td>
-					<td><div class="text-center"><div class="phishy"><h6>Thighs</h6></div></div>
-						<div class="text-center"><h6>{{ lastThighs+' '+thighsUnit }}</h6></div></td>
-					<td><img src="https://usermedia.actifit.io/thighs.png"></td>
-					
-				</tr>
-				
-				<tr>
-					<td colspan="4" class="font-italic" v-if="lastUpdated!='' && lastUpdated!='-'">
-						<small>Last Updated On {{ pureDate(lastUpdated) }}</small>
-					</td>
-				</tr>
-			</table>
+					</div>
+					<div v-if="displayAddFriendActivity" class="col-12 border row text-brand">
+						{{ $t('View_chart_notice').replace('_USER', this.username) }}
+						<span :title="$t('add_username_friend').replace('_USERNAME_', displayUser)" v-on:click="addFriend">
+							<i class="fas fa-user-plus p-2"></i>
+							<div v-if="addFriendError" v-html="addFriendError"></div>
+						</span>
+					</div>
+					<div class="col-12" v-if="displayLoginActivity">
+						  <div class="row">
+							<a href="/login" class="btn btn-brand w-50">{{ $t('Login') }}</a>
+							<a href="/signup" class="btn btn-brand w-50">{{ $t('Sign_Up') }}</a>
+						  </div>
+					</div>
+				</div>
 			
-			<a href="#" data-toggle="modal" class="btn btn-brand btn-block" 
-					 data-target="#measureChartModal" v-if="isFriend() || isOwnAccount()">
-				{{ $t('Stats_chart') }}
-			</a>
-			<a href="#" class="btn btn-brand btn-block" v-on:click="displayAddFriendStats=!displayAddFriendStats" v-else-if="user" >
-				{{ $t('Stats_chart') }}
-			</a>
-			<a href="#" class="btn btn-brand btn-block" v-on:click="displayLoginStats=!displayLoginStats" v-else >
-				{{ $t('Stats_chart') }}
-			</a>
-			<div v-if="displayAddFriendStats" class="border text-brand">
-				{{ $t('View_chart_notice').replace('_USER', this.username) }}
-				<span :title="$t('add_username_friend').replace('_USERNAME_', displayUser)" v-on:click="addFriend">
-					<i class="fas fa-user-plus p-2"></i>
-					<div v-if="addFriendError" v-html="addFriendError"></div>
-				</span>
 			</div>
-			<div v-if="displayLoginStats">
-				  <div class="">
-					<a href="/login" class="btn btn-brand w-50">{{ $t('Login') }}</a>
-					<a href="/signup" class="btn btn-brand w-50">{{ $t('Sign_Up') }}</a>
-				  </div>
+			<div class="col-md-8 col-12 row">
+				
+				<div class="col-4 info-box-green">
+					<!--<img src="https://cdn.steemitimages.com/DQmdnh1nApZieHZ3s1fEhCALDjnzytFwo78zbAY5CLUMpoG/TRACKM.png">-->
+						<div class="text-center">
+							<div class="phishy"><img class="float-left" src="https://usermedia.actifit.io/height.png"><h6>Height</h6></div>
+							<h6>{{ lastHeight + ' '+heightUnit }}</h6></div>
+						
+						<div class="text-center">
+							<div class="phishy"><img class="float-left" src="https://usermedia.actifit.io/weight.png"><h6>Weight</h6></div>
+							<h6>{{ lastWeight+' '+weightUnit}}</h6></div>
+						
+				</div>
+				<div class="col-4 info-box-green">
+					<div class="text-center"><div class="phishy"><img class="float-left" src="https://usermedia.actifit.io/bodyfat.png"><h6>Body Fat</h6></div>
+						<h6>{{ lastBodyfat+' % '}}</h6></div>
+					
+					<div class="text-center"><div class="phishy"><img class="float-left" src="https://usermedia.actifit.io/chest.png"><h6>Chest</h6></div></div>
+						<div class="text-center"><h6>{{ lastChest+' '+chestUnit }}</h6></div>
+					
+				</div>
+
+				<div class="col-4 info-box-green">
+					<div class="text-center"><div class="phishy"><img class="float-left" src="https://usermedia.actifit.io/waist.png"><h6>Waist</h6></div></div>
+						<div class="text-center"><h6>{{ lastWaist+' '+waistUnit }}</h6></div>
+					
+					<div class="text-center"><div class="phishy"><img class="float-left" src="https://usermedia.actifit.io/thighs.png"><h6>Thighs</h6></div></div>
+						<div class="text-center"><h6>{{ lastThighs+' '+thighsUnit }}</h6></div>
+					
+					
+				</div>
+				
+				<div class="col-6">
+					<div class="font-italic text-right" v-if="lastUpdated!='' && lastUpdated!='-'">
+						<small>Last Updated On {{ pureDate(lastUpdated) }}</small>
+					</div>
+				</div>
+				<div class="col-6">
+			
+					<a href="#" data-toggle="modal" class="btn btn-brand btn-block" 
+							 data-target="#measureChartModal" v-if="isFriend() || isOwnAccount()">
+						{{ $t('Stats_chart') }}
+					</a>
+					<a href="#" class="btn btn-brand btn-block" v-on:click="displayAddFriendStats=!displayAddFriendStats" v-else-if="user" >
+						{{ $t('Stats_chart') }}
+					</a>
+					<a href="#" class="btn btn-brand btn-block" v-on:click="displayLoginStats=!displayLoginStats" v-else >
+						{{ $t('Stats_chart') }}
+					</a>
+			
+				</div>
+				<div v-if="displayAddFriendStats" class="border text-brand col-12">
+					{{ $t('View_chart_notice').replace('_USER', this.username) }}
+					<span class="col-12" :title="$t('add_username_friend').replace('_USERNAME_', displayUser)" v-on:click="addFriend">
+						<i class="fas fa-user-plus p-2"></i>
+						<div v-if="addFriendError" v-html="addFriendError"></div>
+					</span>
+				</div>
+				<div v-if="displayLoginStats" class="col-12">
+					  <div class="row">
+						<a href="/login" class="btn btn-brand w-50">{{ $t('Login') }}</a>
+						<a href="/signup" class="btn btn-brand w-50">{{ $t('Sign_Up') }}</a>
+					  </div>
+				</div>
 			</div>
 			
 		  </div>
@@ -1451,6 +1461,8 @@
 	}
 	.user-avatar{
 		margin-left: 10px;
+		background-repeat: no-repeat;
+		border-radius: 5px;
 	}
 	.badges-title{
 	  text-align: center;
@@ -1516,15 +1528,26 @@
 		border: 1px solid #fff;
 		color: #fff;
 		background: linear-gradient(30deg, red, transparent);
+		border-radius: 5px;
 	}
 	.info-box-orange{
 		color: #ff4500;
 		background: linear-gradient(30deg, orange, transparent);
+		border-radius: 5px;
+	}
+	.info-box-green{
+		/* color: #ff4500; */
+		border: 1px solid #fff;
+		color: white;
+		background: linear-gradient(30deg, green, orange);
+		padding-top: 3px;
+		border-radius: 5px;
 	}
 	.badge-entry{
 		color: #fff !important;
 		background: linear-gradient(45deg, green, orange);
 		border: 1px solid #fff;
+		border-radius: 5px;
 	}
 	.force-white-url{
 		color: white !important;
@@ -1534,7 +1557,7 @@
 		min-height: 80px;
 	}
 	.acti-widget{
-		border: 2px #ff112d solid;
+		/* border: 2px #ff112d solid; */
 	}
 	
 	.acti-widget img{
