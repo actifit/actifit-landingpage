@@ -239,7 +239,7 @@
         <div class="row">
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@mcfarhat" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/mohammadfarhat.jpg);'"></div>
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://usermedia.actifit.io/mohammadfarhat.jpg);'"></div>
             </a>
             <a href="@mcfarhat" target="_blank">Mohammad Farhat</a>
 			<div><i>CEO & Founder</i></div>
@@ -247,7 +247,7 @@
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@alfamano" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/alaafarhat.jpg);'"></div>
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://usermedia.actifit.io/alaafarhat.jpg);'"></div>
             </a>
             <a href="@alfamano" target="_blank">Alaa Farhat</a>
 			<div><i>Business Development Manager</i></div>
@@ -255,7 +255,7 @@
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@pjansen" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/pauljansen.jpg);'"></div>
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://usermedia.actifit.io/pauljansen.jpg);'"></div>
             </a>
             <a href="@pjansen" target="_blank">Paul Jansen</a>
 			<div><i>Operations Manager</i></div>
@@ -263,7 +263,7 @@
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@rabihfarhat" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/rabihfarhat.jpg);'"></div>
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://usermedia.actifit.io/rabihfarhat.jpg);'"></div>
             </a>
             <a href="@rabihfarhat" target="_blank">Rabih Farhat</a>
 			<div><i>Finance Manager</i></div>
@@ -271,7 +271,7 @@
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@katerinaramm" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/katerinaramm.jpg);'"></div>
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://usermedia.actifit.io/katerinaramm.jpg);'"></div>
             </a>
             <a href="@katerinaramm" target="_blank">Katerina Ramoutsaki</a>
 			<div><i>Social Media Manager</i></div>
@@ -281,7 +281,7 @@
 		<div class="row">
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@ciuoto" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/eugeniopirillo.jpg);'"></div>
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://usermedia.actifit.io/eugeniopirillo.jpg);'"></div>
             </a>
             <a href="@ciuoto" target="_blank">Eugenio Pirillo</a>
 			<div><i>Moderator</i></div>
@@ -289,7 +289,7 @@
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@priyanarc" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/priyanfareen.jpg);'"></div>
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://usermedia.actifit.io/priyanfareen.jpg);'"></div>
             </a>
             <a href="@priyanarc" target="_blank">Priyan Fareen</a>
 			<div><i>Moderator</i></div>
@@ -297,7 +297,7 @@
           </div>	  
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@kpreddy" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/praveen.jpg);'"></div>
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://usermedia.actifit.io/praveen.jpg);'"></div>
             </a>
             <a href="@kpreddy" target="_blank">Praveen Reddy</a>
 			<div><i>Moderator</i></div>
@@ -305,7 +305,7 @@
           </div>
 		  <!--<div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@sumit71428" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/sumitsingh.jpg);'"></div>
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://usermedia.actifit.io/sumitsingh.jpg);'"></div>
             </a>
             <a href="@sumit71428" target="_blank">Sumit Singh</a>
 			<div><i>Moderator</i></div>
@@ -313,14 +313,14 @@
           </div>-->
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@silvertop" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/silvertop.jpg);'"></div>
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://usermedia.actifit.io/silvertop.jpg);'"></div>
             </a>
             <a href="@silvertop" target="_blank">Mike Gutman</a>
 			<div><i>Moderator</i></div>
           </div>
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a href="@elizabethbit" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://actifit.s3.amazonaws.com/elizabethbit.jpg);'"></div>
+              <div class="avatar small mx-auto mb-3" :style="'background-image: url(https://usermedia.actifit.io/elizabethbit.jpg);'"></div>
             </a>
             <a href="@elizabethbit" target="_blank">Elizabeth Gutman</a>
 			<div><i>Moderator</i></div>
