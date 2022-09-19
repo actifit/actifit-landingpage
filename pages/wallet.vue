@@ -398,6 +398,11 @@
 						<i class="fas fa-spin fa-spinner"></i>{{ $t('Checking_Steem_Transfer') }}
 					  </div>
 					</div>
+					<div class="row" v-if="speed_up_on">
+						<div class="w-25"></div>
+						<div>{{ $t('speed_up_text') }} <a href="#a" v-on:click="speedUpVerify">{{ $t('speed_up') }}</a></div>
+						
+					</div>
 				</div>
 			  </transition>
 			  <transition name="fade" v-else-if="pendingTokenSwap == ''" >
@@ -1155,7 +1160,8 @@
 				},
 		refreshinBal: false,
 		afitHBDRate: process.env.afitHBDBridgeRate,
-		pendingRewards: {}
+		pendingRewards: {},
+		speed_up_on: true,
 	  }
 	},
     components: {
@@ -4066,6 +4072,29 @@
 			this.movingFunds = false;
 		}
 	  },
+	  async speedUpVerify(){
+			let url = new URL(process.env.actiAppUrl + 'confirmPaymentPasswordVerify?from='+this.user.account.name+'&bchain=' + this.cur_bchain);
+			let res = await fetch(url);
+			let outcome = await res.json();
+			console.log(outcome);
+			if (outcome.statusUpdated==true){
+				/*this.$notify({
+				  group: 'success',
+				  text: this.$t(''),
+				  position: 'top center'
+				})
+				console.log(outcome.error);*/
+				this.fetchUserData();
+				
+			}/*else{
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('problem_reset_pass'),
+				  position: 'top center'
+				})
+			}*/
+			this.checkingFunds = false;
+	  },
 	  async resetFundsPass(){
 		let confirmPopup = confirm(this.$t('Confirm_password_reset'));
 			if (!confirmPopup){
@@ -4175,7 +4204,8 @@
 			//console.log(this.$refs["p-ac-key-funds-ver"].value);
 			//transferToVesting(wif, from, to, amount)
 			let res = await chainLnk.broadcast.transferAsync(this.$refs["p-ac-key-funds-ver"].value, this.user.account.name, this.target_exchange_account, parseFloat(this.$refs["pass-transfer-amount"].value).toFixed(3) + ' ' + this.transferTypePass, '').then(
-				res => this.confirmCompletion('transfer-verify', this.$refs["pass-transfer-amount"].value, res)).catch(err=>{console.log(err);
+				res => this.confirmCompletion('transfer-verify', this.$refs["pass-transfer-amount"].value, res)
+				).catch(err=>{console.log(err);
 				this.$notify({
 				  group: 'error',
 				  text: this.$t('error_operation_active_key'),
