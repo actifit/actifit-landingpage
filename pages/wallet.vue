@@ -4109,8 +4109,13 @@
 		//ensure we have proper values
 		if (isNaN(this.$refs["pass-transfer-amount"].value.trim()) || this.$refs["pass-transfer-amount"].value < 1){
 		  this.error_proceeding = true;
-		  this.error_msg = this.$t('min_amount_1_STEEM_SBD');
+		  this.error_msg = this.$t('min_amount_1_HIVE_HBD');
 		  this.checkingFunds = false;
+		  this.$notify({
+				  group: 'error',
+				  text: this.$t('min_amount_1_HIVE_HBD'),
+				  position: 'top center'
+				})
 		  return;
 		}
 		
@@ -4149,6 +4154,12 @@
 			if (this.$refs["p-ac-key-funds-ver"].value == ''){
 			  this.error_proceeding = true;
 			  this.error_msg = this.$t('all_fields_required');
+			  this.checkingFunds = false;
+			  this.$notify({
+				  group: 'error',
+				  text: this.$t('all_fields_required'),
+				  position: 'top center'
+				})
 			  return;
 			}
 		
@@ -4164,7 +4175,16 @@
 			//console.log(this.$refs["p-ac-key-funds-ver"].value);
 			//transferToVesting(wif, from, to, amount)
 			let res = await chainLnk.broadcast.transferAsync(this.$refs["p-ac-key-funds-ver"].value, this.user.account.name, this.target_exchange_account, parseFloat(this.$refs["pass-transfer-amount"].value).toFixed(3) + ' ' + this.transferTypePass, '').then(
-				res => this.confirmCompletion('transfer-verify', this.$refs["pass-transfer-amount"].value, res)).catch(err=>console.log(err));
+				res => this.confirmCompletion('transfer-verify', this.$refs["pass-transfer-amount"].value, res)).catch(err=>{console.log(err);
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('error_operation_active_key'),
+				  position: 'top center'
+				})
+				this.error_proceeding = true;
+				this.error_msg = this.$t('error_operation_active_key');
+				this.checkingFunds = false;
+				});
 				
 			/*steem.broadcast.claimRewardBalanceAsync(this.user.account.name,this.claimSTEEM, this.claimSBD, this.claimSP).then(
 				res => ).catch(err=>console.log(err));*/
