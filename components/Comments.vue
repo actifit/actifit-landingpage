@@ -108,7 +108,7 @@
 				<div class="modal-author modal-title text-brand" >@{{ user.name }}<small class="date-head text-muted">{{ $t('Now') }}</small></div>
 			  </div>
 			</a>
-			<vue-remarkable class="modal-body" :source="getContent()" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }" ></vue-remarkable>
+			<vue-remarkable class="modal-body" :source="getContent" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }" ></vue-remarkable>
 			<!--<vue-markdown class="modal-body" v-html="responseBody" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }" ></vue-markdown>-->
 			<!--<article class="modal-body" v-html="$renderMD(responseBody)" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }" ></article>-->
 		</div>

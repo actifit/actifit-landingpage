@@ -1284,6 +1284,7 @@
 	  },
 	  async getBalance() {
 		console.log('>>getBalance');
+		if (this.bsc_wallet_address == '') return;
 		let result = await afitContract.methods.balanceOf(this.bsc_wallet_address).call(); // 29803630997051883414242659
 		let format = web3.utils.fromWei(result); // 29803630.997051883414242659
 		console.log(format);
@@ -4393,6 +4394,7 @@
 	  //hive.config.set('rebranded_api', true)
 	  //hive.broadcast.updateOperations()
 	  hive.config.set('alternative_api_endpoints', process.env.altHiveNodes);
+	  //hive.config.set('chain_id', '4200000000000000000000000000000000000000000000000000000000000000');
 	  
 	  hive.api.setOptions({ url: process.env.hiveApiNode });
 	  
