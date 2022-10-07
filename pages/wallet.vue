@@ -549,6 +549,9 @@
 					<div>
 						<button v-on:click="fetchDelegations(false)" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('FETCH_MY_DELEGATIONS') }}</button>
 					</div>
+					<div>
+						<button v-on:click="fetchRCDelegations(false)" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('FETCH_MY_RC_DELEGATIONS') }}</button>
+					</div>
 				</div>
 			</div>
 			<div class="col-md-6 row-sep-in" v-else-if="cur_bchain=='BLURT'">
@@ -641,6 +644,7 @@
 				<button v-on:click="powerUpFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{  $t('POWERUP_ACTION_TEXT') }} {{this.cur_bchain}}</button>
 				<button v-on:click="powerDownFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('POWERDOWN_ACTION_TEXT') }}{{this.cur_bchain}}</button>
 				<button v-on:click="delegateFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('DELEGATE_ACTION_TEXT') }}{{this.cur_bchain}}</button>
+				<button v-if="cur_bchain=='HIVE'" v-on:click="delegateRCs" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('DELEGATE_ACTION_TEXT') }}{{ $t('RCS')}}</button>
 			</div>
 			<transition name="fade">
 			  <div v-if="fundActivityMode == 1" class="text-center grid p-2 col-md-12">
@@ -852,6 +856,66 @@
 				</div>
 			  </div>
 			</transition>
+			
+			<transition name="fade">
+			  <div v-if="fundActivityMode == 6 && cur_bchain == 'HIVE' " class="text-center grid p-2 col-12">
+				<div class="row">
+				  <label for="delegate-recipient" class="w-25 p-2">{{ $t('To') }} *</label>
+				  <input type="text" id="delegate-recipient" name="delegate-recipient" ref="delegate-recipient" class="form-control-lg w-50 p-2" value="actifit">
+				</div>
+				<div class="row">
+				  <label for="delegate-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
+				  <input type="number" id="delegate-amount" name="delegate-amount" ref="delegate-amount" class="form-control-lg w-50 p-2">
+				</div>
+				<div class="row">
+				  <div class="text-center small p-2 w-25"></div>
+				  <div class="p-2 w-50"></div>
+				  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50" v-html="$t('rc_delegation_notice')">
+				  </div>
+				</div>
+				<div class="text-brand text-center" v-if="error_proceeding">
+				  {{ this.error_msg}}
+				</div>
+				<div class="row">
+				  <div class="w-25"></div>
+				  <button v-on:click="proceedRCDelegation" class="btn btn-brand btn-lg w-50 border">{{ $t('Delegate_rc') }}</button>
+				</div>
+				<div v-if="delegateProcess">
+				  <i class="fas fa-spin fa-spinner" ></i>
+				</div>
+				
+				
+				
+				<div>
+					<h5>{{ $t('active_delegations') }}</h5>
+					<table class="table table-hover">
+					  <thead class="text-brand">
+						<tr>
+						  <th scope="col">{{ $t('Delegatee') }}</th>
+						  <th scope="col">{{ $t('RC_Amount') }}</th>
+						  <!--<th scope="col">{{ $t('Date') }}</th>-->
+						  <th scope="col">{{ $t('Action') }}</th>
+						</tr>
+					  </thead>
+					  <tbody>
+						<tr v-for="(delegation, index) in activeRCDelegations" :key="index" :delegation="delegation">
+							<td><a :href="'./@'+delegation.delegatee" >@{{ delegation.to }}</a></td> 
+							<td>
+								{{ numberFormat(delegation.delegated_rc, 3) }} 
+							<!--<td>{{ date(delegation.min_delegation_time) }}</td>-->
+							<td><span ><a href="#" @click.prevent="editRCDelegation(delegation)" :title="$t('Edit_Delegation')"><i class="fas fa-edit"></i></a></span>&nbsp;
+							<span ><a href="#" @click.prevent="cancelRCDelegation(delegation)" :title="$t('Cancel_Delegation')"><i class="fas fa-trash-alt"></i><i class="fas fa-spin fa-spinner" v-if="cancellingDelegation"></i></a></span></td>
+						</tr>
+					  </tbody>
+					</table>
+				</div>
+				<button v-on:click="fetchRCDelegations(true)" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('FETCH_MY_RC_DELEGATIONS') }}</button>
+				<div v-if="loadingDeleg">
+				  <i class="fas fa-spin fa-spinner" ></i>
+				</div>
+			  </div>
+			</transition>
+			
 		</div>
 		<div class="row row-sep">
 			<div v-if="isClaimableDataAvailable && cur_bchain=='STEEM'" class="col-md-6 row-sep-in">
@@ -1024,6 +1088,7 @@
 		POWERDOWN_FUNDS: 3,
 		WITHDRAW_FUNDS: 4,
 		DELEGATE_FUNDS: 5,
+		DELEGATE_RCS: 6,
 		TRANSFER_BSC: 10,
 		afitTokenAddress: '',
 		afitxTokenAddress: '',
@@ -1143,6 +1208,7 @@
 		delegateProcess: false,
 		loadingDeleg: false,
 		activeDelegations: [],
+		activeRCDelegations: [],
 		cancellingDelegation: false,
 		bsc_wallet_address: '',
 		error_wallet: '',
@@ -1376,6 +1442,16 @@
 	  cancelDelegation(delegation){
 		this.$refs['delegate-recipient'].value = delegation.delegatee;
 		this.$refs['delegate-amount'].value = 0;
+		this.proceedDelegation(true);
+	  },
+	  editRCDelegation(delegation){
+		this.$refs['delegate-recipient'].value = delegation.to;
+		this.$refs['delegate-amount'].value = delegation.delegated_rc;
+	  },
+	  cancelRCDelegation(delegation){
+		this.$refs['delegate-recipient'].value = delegation.to;
+		this.$refs['delegate-amount'].value = 0;
+		this.proceedRCDelegation(true);
 	  },
 	  //grab account delegations
 	  async fetchDelegations(forceOpen){
@@ -1386,16 +1462,43 @@
 		this.loadingDeleg = true;
 		let max_limit = 1000;
 		let max_date = new Date(2016, 1, 1, 0, 0, 0, 0);
-		let delg = await chainLnk.api.getVestingDelegationsAsync(this.user.account.name, max_date, max_limit);
-		console.log(delg);
-		if (Array.isArray(delg) && delg.length > 0){
-			for (let i=0; i < delg.length; i++){
-				delg[i].power = await this.vestsToSteemPower(delg[i].vesting_shares);
+		try{
+			let delg = await chainLnk.api.getVestingDelegationsAsync(this.user.account.name, max_date, max_limit);
+			console.log(delg);
+			if (Array.isArray(delg) && delg.length > 0){
+				for (let i=0; i < delg.length; i++){
+					delg[i].power = await this.vestsToSteemPower(delg[i].vesting_shares);
+				}
 			}
+			this.activeDelegations = delg;
+			console.log('active delegations');
+			console.log(delg);
+		}catch(err){
+			console.log(err);
 		}
-		this.activeDelegations = delg;
 		this.loadingDeleg = false;
 	  },
+	  
+	  //handles fetching new HF26 RC delegations
+	  async fetchRCDelegations(forceOpen){
+		if (!forceOpen){
+			this.delegateRCs();
+		}
+		this.loadingDeleg = true;
+		let max_limit = 1000;
+		let max_date = new Date(2016, 1, 1, 0, 0, 0, 0);
+		//let delg = await chainLnk.api.getVestingDelegationsAsync(this.user.account.name, max_date, max_limit);
+		let delg = await hive.api.callAsync('rc_api.list_rc_direct_delegations', {start:[this.user.account.name, ''], limit: 1000});
+		//let delg;
+		/*hive.api.call('rc_api.list_rc_direct_delegations', {start:[this.user.account.name, ''], limit: 1000}, function (err, result) {
+            console.log(err, result);
+        })*/
+		this.activeRCDelegations = delg.rc_direct_delegations;
+		console.log(delg);
+		this.loadingDeleg = false;
+   
+	  },
+	  
 	  //handles setting proper token to be staked
 	  initiateStaking(token){
 		//only adjust open/close is same button is clicked, otherwise adjust token being staked
@@ -2246,6 +2349,18 @@
 		//hide upper activity section
 		this.afitActivityMode = 0;
 	  },
+	  delegateRCs () {
+		//function handles opening/closing of RC delegation section
+		
+		//set proper Fund Activity Mode controlling the display
+		if (this.fundActivityMode == this.DELEGATE_RCS ){
+		  this.fundActivityMode = 0;
+		}else{
+		  this.fundActivityMode = this.DELEGATE_RCS;
+		}
+		//hide upper activity section
+		this.afitActivityMode = 0;
+	  },
 	  async proceedTransfer () {
 		//function handles the actual processing of the transfer
 		
@@ -2367,9 +2482,14 @@
 		}
 	  },
 	  
-	  async proceedDelegation () {
+	  async proceedDelegation (cancellation) {
 		//function handles the actual processing of delegation
-		let confirmPopup = confirm(this.$t('confirm_delegation'));
+		let note = this.$t('confirm_delegation')
+		if (cancellation == true){
+			note = this.$t('confirm_delegation_cancel')
+		}
+		let confirmPopup = confirm(note);
+		
 		if (!confirmPopup){
 			return;
 		}
@@ -2420,6 +2540,70 @@
 					this.delegateProcess = false
 				});
 		}
+	  },
+	  
+	  async proceedRCDelegation(cancellation){
+		let note = this.$t('confirm_rc_delegation')
+		if (cancellation==true){
+			note = this.$t('confirm_rc_delegation_cancel')
+		}
+		let confirmPopup = confirm(note);
+		if (!confirmPopup){
+			return;
+		}
+		this.error_proceeding = false;
+		this.error_msg = '';
+		//ensure we have proper values
+		if (this.$refs["delegate-recipient"].value.trim() == '' ||
+			this.$refs["delegate-amount"].value.trim() == ''){
+		  this.error_proceeding = true;
+		  this.error_msg = this.$t('all_fields_required');
+		  return;
+		}
+		
+		if (isNaN(this.$refs["delegate-amount"].value.trim())){
+			this.error_proceeding = true;
+			this.error_msg = this.$t('amount_positive_int');
+			return;
+		}
+		
+		
+		let accToken = localStorage.getItem('access_token')
+			
+		//chain not needed, as only supported by hive
+		//let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
+		
+		
+		this.delegateProcess = true;
+		let url = new URL(process.env.actiAppUrl + 'delegateRC/?user='+this.user.account.name+'&delegatees='+this.$refs["delegate-recipient"].value.trim()+'&max_rc='+this.$refs["delegate-amount"].value.trim());
+		
+		let reqHeads = new Headers({
+		  'Content-Type': 'application/json',
+		  'x-acti-token': 'Bearer ' + accToken,
+		});
+		let res = await fetch(url, {
+			headers: reqHeads
+		});
+		let outcome = await res.json();
+		console.log(outcome);
+		if (outcome.id && outcome.ref_block_num){
+			//success
+			this.$notify({
+			  group: 'success',
+			  text: this.$t('rc_delegation_success'),
+			  position: 'top center'
+			});
+			//update RC delegations
+			this.fetchRCDelegations(true);
+		}else{
+			//error
+			this.$notify({
+			  group: 'error',
+			  text: this.$t('error_performing_operation'),
+			  position: 'top center'
+			})
+		}
+		this.delegateProcess = false;
 	  },
 	  
 	  async proceedPowerDown () {
@@ -2510,7 +2694,7 @@
 		}else{
 			this.$notify({
 			  group: 'error',
-			  text: this.$t('error performing action! '),
+			  text: this.$t('error_performing_operation'),
 			  position: 'top center'
 			})
 		}
@@ -3279,7 +3463,7 @@
 						this.movingAFIT = false;
 						
 					}).catch(e => {console.log(e);
-							this.$notify({
+						this.$notify({
 						  group: 'error',
 						  text: this.$t('afit_transfer_error'),
 						  position: 'top center'
@@ -4439,6 +4623,9 @@
 	  }else if (this.$route.query.action === 'delegate'){
 		this.afitActivityMode = 0;
 		this.fundActivityMode = this.DELEGATE_FUNDS;
+	  }else if (this.$route.query.action === 'delegate_rc'){
+		this.afitActivityMode = 0;
+		this.fundActivityMode = this.DELEGATE_RCS;
 	  }else if (this.$route.query.action === 'power_up'){
 		this.afitActivityMode = 0;
 		this.fundActivityMode = this.POWERUP_FUNDS;
