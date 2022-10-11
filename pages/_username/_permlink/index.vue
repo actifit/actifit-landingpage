@@ -515,7 +515,7 @@
 		let user_name = /([^\/])(@([\d\w-.]+))/igm;
         
 		report_content = report_content.replace(user_name,'$1<a href="https://actifit.io/$2">$2</a>')
-		return report_content;
+		return sanitize(report_content , { allowedTags: ['img'] });
       },
 	  getVoteCount(){
 		return Array.isArray(this.report.active_votes) ? this.report.active_votes.length : 0;

@@ -137,6 +137,8 @@
   
   import { mapGetters } from 'vuex'
   
+  import sanitize from 'sanitize-html'
+  
   //import steemEditor from 'steem-editor';
   //import 'steem-editor/dist/css/index.css';
   
@@ -280,7 +282,7 @@
 		let user_name = /([^\/])(@([\d\w-.]+))/igm;
         
 		report_content = report_content.replace(user_name,'$1<a href="https://actifit.io/$2">$2</a>')
-		return report_content;
+		return sanitize(report_content , { allowedTags: ['img'] });
       },
 	  meta() {
         return JSON.parse(this.full_data.json_metadata)
