@@ -1461,9 +1461,9 @@
 		let chainLnk = await this.setProperNode();
 		this.loadingDeleg = true;
 		let max_limit = 1000;
-		let max_date = new Date(2016, 1, 1, 0, 0, 0, 0);
+		//let max_date = new Date(2016, 1, 1, 0, 0, 0, 0);
 		try{
-			let delg = await chainLnk.api.getVestingDelegationsAsync(this.user.account.name, max_date, max_limit);
+			let delg = await chainLnk.api.getVestingDelegationsAsync(this.user.account.name, '', max_limit);
 			console.log(delg);
 			if (Array.isArray(delg) && delg.length > 0){
 				for (let i=0; i < delg.length; i++){
