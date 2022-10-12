@@ -643,7 +643,7 @@
 				<button v-on:click="transferFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('TRANSFER_FUNDS_ACTION_TEXT') }}</button>
 				<button v-on:click="powerUpFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{  $t('POWERUP_ACTION_TEXT') }} {{this.cur_bchain}}</button>
 				<button v-on:click="powerDownFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('POWERDOWN_ACTION_TEXT') }}{{this.cur_bchain}}</button>
-				<button v-on:click="delegateFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('DELEGATE_ACTION_TEXT') }}{{this.cur_bchain}}</button>
+				<button v-on:click="delegateFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('DELEGATE_ACTION_TEXT') }}{{this.cur_bchain}} {{ $t('POWER')}}</button>
 				<button v-if="cur_bchain=='HIVE'" v-on:click="delegateRCs" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('DELEGATE_ACTION_TEXT') }}{{ $t('RCS')}}</button>
 			</div>
 			<transition name="fade">
