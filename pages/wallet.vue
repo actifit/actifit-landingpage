@@ -909,6 +909,7 @@
 					  </tbody>
 					</table>
 				</div>
+				
 				<button v-on:click="fetchRCDelegations(true)" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('FETCH_MY_RC_DELEGATIONS') }}</button>
 				<div v-if="loadingDeleg">
 				  <i class="fas fa-spin fa-spinner" ></i>
@@ -1207,8 +1208,10 @@
 		cur_bchain: 'HIVE',
 		delegateProcess: false,
 		loadingDeleg: false,
+		rc_data: {},
 		activeDelegations: [],
 		activeRCDelegations: [],
+		activeIncomingRCDelegations: [],
 		cancellingDelegation: false,
 		bsc_wallet_address: '',
 		error_wallet: '',
@@ -1494,9 +1497,23 @@
             console.log(err, result);
         })*/
 		this.activeRCDelegations = delg.rc_direct_delegations;
+		
+		await this.fetchIncomingRCDelegations();
 		console.log(delg);
 		this.loadingDeleg = false;
    
+	  },
+	  
+	  async getRCHF26(){
+		console.log('get RCHF26');
+		//only applies to HIVE
+		if (this.cur_bchain == 'HIVE'){
+		//return new Promise(resolve => {
+			let res = await hive.api.callAsync('rc_api.find_rc_accounts', {accounts: [this.user.account.name]});
+			console.log(res);
+			this.rc_data = res.rc_accounts[0];
+		}
+    //});
 	  },
 	  
 	  //handles setting proper token to be staked
@@ -1959,6 +1976,11 @@
 		  fetch(process.env.actiAppUrl+'topAFITHolders/?count=100').then(
 			res => {res.json().then(json => this.afitHoldersList = json ).catch(e => reject(e))
 		  }).catch(e => reject(e))
+		  
+		  //fetch account RC
+		  
+		  this.getRCHF26();
+		  
 		  
 		}
 	  },
