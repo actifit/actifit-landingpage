@@ -10,7 +10,7 @@
 			
 			
 			<div v-for="quest in 100" class="row lead mb-4 p-3 w-100" :key="quest" v-if="$t('faq.q'+quest) != 'faq.q'+quest">
-				{{quest}}.&nbsp;<div v-html="$t('faq.q'+quest)" class="font-weight-bold"></div>
+				<span class="font-weight-bold">{{quest}}.&nbsp;</span><div v-html="$t('faq.q'+quest)" class="font-weight-bold"></div>
 				<div v-html="$t('faq.a'+quest)" class="w-100"></div>
 			</div>
       
