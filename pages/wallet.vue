@@ -868,6 +868,14 @@
 				  <input type="number" id="delegate-amount" name="delegate-amount" ref="delegate-amount" class="form-control-lg w-50 p-2">
 				</div>
 				<div class="row">
+					<div class="w-25"></div>
+					<b>{{$t('available_RC')}} / {{$t('full_RC')}} / {{$t('delegated_RC')}}</b>
+				</div>
+				<div class="row">
+					<div class="w-25"></div>
+					{{ showUserRC()}} / {{ showUserRC(1)}} / {{ showUserRC(2)}}
+				</div>
+				<div class="row">
 				  <div class="text-center small p-2 w-25"></div>
 				  <div class="p-2 w-50"></div>
 				  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50" v-html="$t('rc_delegation_notice')">
@@ -892,16 +900,18 @@
 					  <thead class="text-brand">
 						<tr>
 						  <th scope="col">{{ $t('Delegatee') }}</th>
-						  <th scope="col">{{ $t('RC_Amount') }}</th>
+						  <th scope="col">{{ $t('delegated_RC') }}</th>
+						  <th scope="col">{{ $t('owned_RC') }}</th>
 						  <!--<th scope="col">{{ $t('Date') }}</th>-->
 						  <th scope="col">{{ $t('Action') }}</th>
 						</tr>
 					  </thead>
 					  <tbody>
 						<tr v-for="(delegation, index) in activeRCDelegations" :key="index" :delegation="delegation">
-							<td><a :href="'./@'+delegation.delegatee" >@{{ delegation.to }}</a></td> 
+							<td><a :href="'./@'+delegation.to" >@{{ delegation.to }}</a></td> 
 							<td>
-								{{ numberFormat(delegation.delegated_rc, 3) }} 
+								{{ numberFormat(delegation.delegated_rc, 3) }} </td>
+							<td>{{ numberFormat(renderRCVal(delegation.to), 3) }}</td>
 							<!--<td>{{ date(delegation.min_delegation_time) }}</td>-->
 							<td><span ><a href="#" @click.prevent="editRCDelegation(delegation)" :title="$t('Edit_Delegation')"><i class="fas fa-edit"></i></a></span>&nbsp;
 							<span ><a href="#" @click.prevent="cancelRCDelegation(delegation)" :title="$t('Cancel_Delegation')"><i class="fas fa-trash-alt"></i><i class="fas fa-spin fa-spinner" v-if="cancellingDelegation"></i></a></span></td>
@@ -1231,6 +1241,7 @@
 		afitHBDRate: process.env.afitHBDBridgeRate,
 		pendingRewards: {},
 		speed_up_on: true,
+		rcDelgArray: [],
 	  }
 	},
     components: {
@@ -1467,15 +1478,15 @@
 		//let max_date = new Date(2016, 1, 1, 0, 0, 0, 0);
 		try{
 			let delg = await chainLnk.api.getVestingDelegationsAsync(this.user.account.name, '', max_limit);
-			console.log(delg);
+			//console.log(delg);
 			if (Array.isArray(delg) && delg.length > 0){
 				for (let i=0; i < delg.length; i++){
 					delg[i].power = await this.vestsToSteemPower(delg[i].vesting_shares);
 				}
 			}
 			this.activeDelegations = delg;
-			console.log('active delegations');
-			console.log(delg);
+			//console.log('active delegations');
+			//console.log(delg);
 		}catch(err){
 			console.log(err);
 		}
@@ -1489,7 +1500,7 @@
 		}
 		this.loadingDeleg = true;
 		let max_limit = 1000;
-		let max_date = new Date(2016, 1, 1, 0, 0, 0, 0);
+		//let max_date = new Date(2016, 1, 1, 0, 0, 0, 0);
 		//let delg = await chainLnk.api.getVestingDelegationsAsync(this.user.account.name, max_date, max_limit);
 		let delg = await hive.api.callAsync('rc_api.list_rc_direct_delegations', {start:[this.user.account.name, ''], limit: 1000});
 		//let delg;
@@ -1498,22 +1509,78 @@
         })*/
 		this.activeRCDelegations = delg.rc_direct_delegations;
 		
-		await this.fetchIncomingRCDelegations();
-		console.log(delg);
+		for (let j=0;j<this.activeRCDelegations.length;j++){
+			//console.log('store val');
+			await this.getRCHF26 (this.activeRCDelegations[j].to);
+		}
+		//fetch RC count per user and allow rendering it
+		
+		
+		//await this.fetchIncomingRCDelegations();
+		//console.log(this.rcDelgArray);
+		//console.log(this.rcDelgArray['vevita']);
+		//this.$forceUpdate();
 		this.loadingDeleg = false;
    
 	  },
-	  
-	  async getRCHF26(){
-		console.log('get RCHF26');
-		//only applies to HIVE
-		if (this.cur_bchain == 'HIVE'){
-		//return new Promise(resolve => {
+	  /*
+	  getRCHF26Mod(user){
+		return new Promise(resolve => {
 			let res = await hive.api.callAsync('rc_api.find_rc_accounts', {accounts: [this.user.account.name]});
 			console.log(res);
-			this.rc_data = res.rc_accounts[0];
+			if (!user){
+				this.rc_data = res.rc_accounts[0];
+			}else{
+				return res.rc_accounts[0].rc_manabar.current_mana;
+			}
+		}
+		}catch(err){
+			console.log(err);
+		}
+		});
+	  },
+	  */
+	  showUserRC(type){
+		if (type == 1){
+			//show max RC
+			return this.numberFormat(this.rc_data.max_rc, 3);
+		}else if (type == 2){
+			//show delegated RC
+			return this.numberFormat(this.rc_data.delegated_rc, 3);
+		}
+		return this.numberFormat(this.rc_data.rc_manabar.current_mana, 3);
+	  },
+	  async getRCHF26(user){
+		//console.log('get RCHF26');
+		//only applies to HIVE
+		try{
+			if (this.cur_bchain == 'HIVE'){
+			//return new Promise(resolve => {
+				if (!user){
+					let res = await hive.api.callAsync('rc_api.find_rc_accounts', {accounts: [this.user.account.name]});
+					this.rc_data = res.rc_accounts[0];
+				}else{
+					let res = await hive.api.callAsync('rc_api.find_rc_accounts', {accounts: [user]});
+					//console.log(res.rc_accounts[0].rc_manabar.current_mana);
+					//return res.rc_accounts[0].rc_manabar.current_mana;
+					this.rcDelgArray[user] = res.rc_accounts[0].rc_manabar.current_mana;
+				}
+			}
+		}catch(err){
+			console.log(err);
 		}
     //});
+	  },
+	  renderRCVal(user){
+		//console.log('renderRCVal:'+user);
+		//console.log(this.rcDelgArray);
+		//console.log(Array.isArray(this.rcDelgArray));
+		//console.log(this.rcDelgArray.length);
+		if (Array.isArray(this.rcDelgArray)){
+			//console.log(this.rcDelgArray[user]);
+			return this.rcDelgArray[user];
+		}
+		return '';
 	  },
 	  
 	  //handles setting proper token to be staked
