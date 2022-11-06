@@ -195,7 +195,7 @@ module.exports = {
 	q22: 'How can I delegate to Actifit?',
 	a22: 'To delegate, head over to your <a href="https://actifit.io/wallet">wallet</a>, set the number of tokens and enter @actifit as target account (default). Use your private active key to confirm the transaction and you’re good to go.<br/>Make sure you leave at least 15 HP/SP undelegated in your account. Furthermore, if you plan to increase your delegation, you need to use the new total amount as delegation amount so not only the increased amount. Otherwise only the new amount will be used, and the remaining will be undelegated.',
 	q23: 'How can I transfer AFIT to other Actifit accounts?',
-	a23: 'AFIT tokens can be transferred from your Profile page in the wallet. After selecting the Tip AFIT button, enter the user name and the amount of AFIT to be sent.',
+	a23: 'AFIT tokens can be transferred from your wallet to another user by heading over to their profile (for example https://actifit.io/mcfarhat. On that screen, you can find the Tip Button. Clicking it will allow you to send over AFIT tokens by putting the amount and your funds password.',
 	q24: 'Why should I increase my User Rank?',
 	a24: 'Actifit innovated its own <a href="https://actifit.io/@actifit/announcing-actifit-v2-reward-system-activity-content-engagement-user-ranks-delegation-moderation-and-more">ranking system</a> to qualify its users, and increase the rewards of those with a higher rank. User Rank determines 25% of the total reward value. The ranking system is scaled from 0 (lowest) to 100+, and is affected by a multitude of factors, while making it a dynamic system, as follows:<br/><li>Amount of Delegated Steem/HIVE Power (SP/HP)</li><li>Amount of owned AFIT Tokens</li><li>Total Activity Rewarded</li><li>Last 10 Days Activity Count</li><li>Amount of AFITX held on Hive-Engine, Steem-Engine and on BSC, whether in liquid or locked as liquidity vs BNB or BUSD</li><br/>You can check more details about your rank on <a href="https://actifit.io/userrank">https://actifit.io/userrank</a> ',
 	q25: 'Which blockchains Actifit runs on?',
@@ -893,5 +893,8 @@ module.exports = {
   need_set_bsc_wallet: 'Please set your BSC wallet address and save it under "Your BSC Wallet" section above',
   have_transacted_today: 'You have already sent out a transaction today. You can only transact once per day.',
   hide_pending_rewards_popup: 'Do not show again (you can always view this popup by visiting wallet page and clicking on pending rewards button)',
+  actifit_wallet: 'Actifit Wallet',
+  hive_engine: 'Hive Engine',
+  smart_contract: 'Smart Contract', 
   tipping_details: 'This special onchain tipping functionality allows you to send out tips to users by commenting on their posts, and sends out AFIT directly onto their hive-engine account. For more details about how it works and how to load up balance, check out this post: <a href="https://links.actifit.io/tipping-afit">https://links.actifit.io/tipping-afit</a>'
 }
