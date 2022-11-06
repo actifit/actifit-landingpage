@@ -1367,10 +1367,15 @@
 			  this.userAFITSETokenCount = bal.balance;
 		  }
 		  
+		  
+		  try{
 		  //fetch user's AFITX S-E balance
 		  bal = await ssc.findOne('tokens', 'balances', { account: this.displayUser, symbol: 'AFITX' });
 		  if (bal){
 			  this.userAFITXSETokenCount = bal.balance;
+		  }
+		  }catch(errIn){
+			console.log(errIn)
 		  }
 		  
 		  //fetch user's AFIT H-E balance
