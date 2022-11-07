@@ -114,6 +114,7 @@ module.exports = {
   Claim_Steem_Rewards: 'Claim STEEM Rewards',
   Claimable_Hive_Rewards: 'Claimable HIVE Rewards',
   Claim_Hive_Rewards: 'Claim HIVE Rewards',
+  Check_Claimable_Rewards: 'Check Claimable Rewards',
   Claimable_Blurt_Rewards: 'Claimable BLURT Rewards',
   Claim_Blurt_Rewards: 'Claim BLURT Rewards',
   Claimable_Token_Rewards: 'Claimable S-E Token Rewards',
