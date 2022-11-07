@@ -1358,37 +1358,42 @@
 			res => {res.json().then(json => this.setTipBalance(json))}).catch(e => reject(e))
 		  
 		  
-		 	
-		  
+		 	console.log('mounted');
+		  let bal;
 		  try{
-		  //fetch user's AFIT S-E balance
-		  let bal = await ssc.findOne('tokens', 'balances', { account: this.displayUser, symbol: 'AFIT' });
-		  if (bal){
-			  this.userAFITSETokenCount = bal.balance;
-		  }
-		  
-		  
-		  try{
-		  //fetch user's AFITX S-E balance
-		  bal = await ssc.findOne('tokens', 'balances', { account: this.displayUser, symbol: 'AFITX' });
-		  if (bal){
-			  this.userAFITXSETokenCount = bal.balance;
-		  }
-		  }catch(errIn){
-			console.log(errIn)
-		  }
-		  
-		  //fetch user's AFIT H-E balance
-		  bal = await hsc.findOne('tokens', 'balances', { account: this.displayUser, symbol: 'AFIT' });
-		  if (bal){
-			  this.userAFITHETokenCount = bal.balance;
-		  }
-		  
-		  //fetch user's AFITX H-E balance
-		  bal = await hsc.findOne('tokens', 'balances', { account: this.displayUser, symbol: 'AFITX' });
-		  if (bal){
-			  this.userAFITXHETokenCount = bal.balance;
-		  }
+			  try{
+				  //fetch user's AFIT S-E balance
+				  bal = await ssc.findOne('tokens', 'balances', { account: this.displayUser, symbol: 'AFIT' });
+				  if (bal){
+					  this.userAFITSETokenCount = bal.balance;
+				  }
+				  
+			  }catch(errIn){
+				console.log(errIn)
+			  }
+			  try{
+				  //fetch user's AFITX S-E balance
+				  bal = await ssc.findOne('tokens', 'balances', { account: this.displayUser, symbol: 'AFITX' });
+				  if (bal){
+					  this.userAFITXSETokenCount = bal.balance;
+				  }
+			  }catch(errIn){
+				console.log(errIn)
+			  }
+			  
+			  console.log('grab AFIT HE');
+			  
+			  //fetch user's AFIT H-E balance
+			  bal = await hsc.findOne('tokens', 'balances', { account: this.displayUser, symbol: 'AFIT' });
+			  if (bal){
+				  this.userAFITHETokenCount = bal.balance;
+			  }
+			  
+			  //fetch user's AFITX H-E balance
+			  bal = await hsc.findOne('tokens', 'balances', { account: this.displayUser, symbol: 'AFITX' });
+			  if (bal){
+				  this.userAFITXHETokenCount = bal.balance;
+			  }
 		  
 		  }catch(err){
 			//avoid time outs causing page not to load

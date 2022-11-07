@@ -2178,6 +2178,7 @@
 		  }).catch(e => reject(e))
 	  },
 	  async fetchAFITSE() {
+		try{
 		let bal = await ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFIT' });
 		  
 		  if (bal){
@@ -2201,6 +2202,9 @@
 				}
 			  }
 		  }
+		}catch(outErr){
+			console.log(outErr);
+		}
 	  },
 	  async fetchAFITHE() {
 		  let bal = await hsc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFIT' });
@@ -2209,6 +2213,7 @@
 		  }
 	  },
 	  fetchAFITXSE() {
+		try{
 		  let parnt = this
 		  ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' }).then(
 				function(bal) {
@@ -2219,6 +2224,9 @@
 					  }
 				}
 			)
+		}catch(outErr){
+			console.log(outErr);
+		}
 	  },
 	  fetchAFITXHE() {
 		  let parnt = this
@@ -3305,8 +3313,14 @@
 		
 		try{
 			//check if the user has enough AFITX S-E amount allowing him the transfers daily
-			let bal = await ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' });
+			let bal;
+			try{
 			
+				bal = await ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' });
+			
+			}catch(outErr){
+				console.log(outErr);
+			}
 			let bal_he = await hsc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' });
 			
 			this.afitx_se_balance = 0;
