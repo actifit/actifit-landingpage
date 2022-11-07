@@ -8,8 +8,6 @@
       <div class="text-center">
         <h3 class="mb-4">{{ $t('Hey') }} {{ user.account.name }}!</h3>
 		
-		<a href="#" id="pendingRewardsKicker" name="pendingRewardsKicker" ref="pendingRewardsKicker" class="btn btn-brand btn-lg w-50 border" data-toggle="modal" data-target="#pendingRewardsModal">{{$t('Check_Pending_Rewards')}}</a>
-		
 		<div v-if="isClaimableDataAvailable && cur_bchain=='STEEM'" class="col-md-6 row-sep-in">
 			<h5 class="token-title"><img src="/img/STEEM.png" class="mr-2 token-logo">{{ $t('Claimable_Steem_Rewards') }}</h5>
 			<div class="mb-4 font-weight-bold">
@@ -40,24 +38,26 @@
 				</div>
 			</div>
 		</div>
-		<div v-if="cur_bchain!='BLURT' && claimableSETokens.length > 0" class="col-md-6 row-sep-in">
-			<h5 class="token-title" v-if="cur_bchain == 'STEEM'">{{ $t('Claimable_Token_Rewards') }}</h5>
-			<h5 class="token-title" v-else>{{ $t('Claimable_HE_Token_Rewards') }}</h5>
-			<div class="mb-4 font-weight-bold">
-				<span class="p-2" v-for="(entry, index) in claimableSETokens" :key="index" :entry="entry">{{ renderTokenVal(entry.amount, entry.symbol) }} {{ entry.symbol }}</span>
-				<div class="p-2">
-					<button v-on:click="claimTokenRewards" class="btn btn-brand btn-lg w-20">{{ $t('Claim_Token_Rewards') }}</button>
-					<div v-if="claimingTokens">
-						<i class="fas fa-spin fa-spinner"></i>
-					</div>
-				</div>
-			</div>
-		</div>
 		
-		<button v-on:click="fetchDelegations(true)" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('FETCH_MY_DELEGATIONS') }}</button>
-		<button v-on:click="fetchRCDelegations(true)" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('FETCH_MY_RC_DELEGATIONS') }}</button>
-		<div v-if="loadingDeleg">
-		  <i class="fas fa-spin fa-spinner" ></i>
+		<div class="row top-action-container text-right col-12">
+			<div class="col-9"></div>
+			<div class="col-3">
+				<span class="btn btn-brand m-1" :title="$t('Check_Pending_Rewards')">
+					<a href="#" id="pendingRewardsKicker" name="pendingRewardsKicker" ref="pendingRewardsKicker" class="" data-toggle="modal" data-target="#pendingRewardsModal"><i class="fas fa-solid fa-hourglass"></i></a>
+				</span>
+				
+				<span class="btn btn-brand m-1" :title="$t('FETCH_MY_DELEGATIONS')" v-on:click="fetchDelegations(false)">
+					<i class="fas fa-donate"></i>
+				</span>
+				
+				<span class="btn btn-brand m-1" :title="$t('FETCH_MY_RC_DELEGATIONS')" v-on:click="fetchRCDelegations(false)">
+					<i class="fas fa-bolt"></i>
+				</span>
+				
+				<span v-if="loadingDeleg">
+				  <i class="fas fa-spin fa-spinner" ></i>
+				</span>
+			</div>
 		</div>
 		
 		<div v-if="this.tokenMetrics.length > 0" class="wallet-container">
@@ -77,7 +77,7 @@
 				<div class="col-1 text-right">-</div>
 				<div class="col-3">
 					<span class="btn btn-brand p-1">
-						<i class="fas fa-spinner" v-on:click="refreshBalance()" :title="$t('Refresh_balance')"/>
+						<i class="fas fa-solid fa-history" v-on:click="refreshBalance()" :title="$t('Refresh_balance')"/>
 						<span v-if="refreshinBal" >
 							<i class="fas fa-spin fa-spinner"></i>
 						</span>
@@ -115,7 +115,7 @@
 					<span class="btn btn-brand p-1"><i class="fas fa-arrow-circle-up p-1" :title="$t('POWERUP_ACTION_TEXT')" v-on:click="powerUpFunds"></i></span>
 					<span class="btn btn-brand p-1"><i class="fas fa-arrow-circle-down " :title="$t('POWERDOWN_ACTION_TEXT')" v-on:click="powerDownFunds"></i></span>
 					<span class="btn btn-brand p-1"><i class="fas fa-share-square " :title="$t('TRANSFER_FUNDS_ACTION_TEXT')" v-on:click="transferFunds"></i></span>
-					<span class="btn btn-brand p-1"><i class="fas fa-share-square " :title="$t('DELEGATE_ACTION_TEXT')" v-on:click="delegateFunds"></i></span>
+					<span class="btn btn-brand p-1"><i class="fas fa-donate" :title="$t('DELEGATE_ACTION_TEXT')" v-on:click="delegateFunds"></i></span>
 					<span class="btn btn-brand p-1" :title="$t('buy_afit_he')">
 						<a v-if="cur_bchain=='STEEM'" href="https://steem-engine.net/?p=market&t=AFIT" :class="smallScreenBtnClasses" target="_blank" rel="noopener noreferrer" :text="$t('buy_afit_se')">$</a>
 						<a v-else href="https://hive-engine.com/?p=market&t=AFIT" :class="smallScreenBtnClasses" target="_blank" rel="noopener noreferrer" :text="$t('buy_afit_he')">$</a>
@@ -220,6 +220,14 @@
 				</div>
 				
 				<div class="action-box">
+				
+					<h3 class="pro-name">
+						<span v-if="curTokenAction == TRANSFER_FUNDS">{{ $t('transfer_tokens') }}</span>
+						<span v-else-if="curTokenAction == TRANSFER_BSC">{{ $t('move_to_bsc') }}</span>
+						<span v-else-if="curTokenAction == POWERUP_FUNDS">{{ $t('stake_tokens') }}</span>
+						<span v-else-if="curTokenAction == POWERDOWN_FUNDS">{{ $t('unstake_tokens') }}</span>
+						<span v-else-if="curTokenAction == WITHDRAW_FUNDS">{{ $t('withdraw_tokens') }}</span>
+					</h3>
 					<div class="row" v-if="tokenActions && curTokenAction == TRANSFER_FUNDS">
 					  <label for="token-target-account" class="w-25 p-2">{{ $t('Account') }} *</label>
 					  <span class="p-1">@</span><input type="text" id="token-target-account" name="token-target-account" ref="token-target-account" class="form-control-lg p-2">
@@ -298,10 +306,11 @@
 			</div>
 			
 			
-			
+			<div id="detailsArea" />
 			<div class="row text-center">
 				<transition name="fade">
-				  <div v-if="fundActivityMode == 1" class="text-center grid p-2 col-md-12">
+				  <div v-if="fundActivityMode == 1" class="text-center grid col-md-12">
+					<h3 class="pro-name">{{ $t('TRANSFER_FUNDS_ACTION_TEXT') }}</h3>
 					<div class="row">
 					  <label for="transfer-recipient" class="w-25 p-2">{{ $t('To') }} *</label>
 					  <input type="text" id="transfer-recipient" name="transfer-recipient" ref="transfer-recipient" class="form-control-lg w-50 p-2">
@@ -353,7 +362,8 @@
 				  </div>
 				</transition>
 				<transition name="fade">
-				  <div v-if="fundActivityMode == 2" class="text-center grid p-2 col-md-12">
+				  <div v-if="fundActivityMode == 2" class="text-center grid col-md-12">
+					<h3 class="pro-name">{{ $t('Power_Up') }}</h3>
 					<div class="row">
 					  <label for="powerup-recipient" class="w-25 p-2">{{ $t('To') }} *</label>
 					  <input type="text" id="powerup-recipient" name="powerup-recipient" ref="powerup-recipient" class="form-control-lg w-50 p-2" :value="user.account.name">
@@ -390,8 +400,9 @@
 				  </div>
 				</transition>
 				<transition name="fade">
-				  <div v-if="fundActivityMode == 3" class="text-center grid p-2 col-md-12">
-					<div >
+				  <div v-if="fundActivityMode == 3" class="text-center grid col-md-12">
+					<h3 class="pro-name">{{ $t('Power_Down') }}</h3>
+					<div>
 					  <div class="row">
 						  <label for="powerdown-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
 						  <input type="number" id="powerdown-amount" name="powerdown-amount" ref="powerdown-amount" class="form-control-lg w-50 p-2">
@@ -439,7 +450,8 @@
 				  </div>
 				</transition>
 				<transition name="fade">
-				  <div v-if="fundActivityMode == 5" class="text-center grid p-2 col-12">
+				  <div v-if="fundActivityMode == DELEGATE_FUNDS" class="text-center grid col-12">
+					<h3 class="pro-name">{{ $t('DELEGATE_ACTION_TEXT') }} {{ $t('POWER') }}</h3>
 					<div class="row">
 					  <label for="delegate-recipient" class="w-25 p-2">{{ $t('To') }} *</label>
 					  <input type="text" id="delegate-recipient" name="delegate-recipient" ref="delegate-recipient" class="form-control-lg w-50 p-2" value="actifit">
@@ -508,7 +520,8 @@
 				</transition>
 				
 				<transition name="fade">
-				  <div v-if="fundActivityMode == 6 && cur_bchain == 'HIVE' " class="text-center grid p-2 col-12">
+				  <div v-if="fundActivityMode == DELEGATE_RCS && cur_bchain == 'HIVE' " class="text-center grid col-12">
+					<h3 class="pro-name">{{ $t('DELEGATE_ACTION_TEXT') }} {{ $t('RCS') }}</h3>
 					<div class="row">
 					  <label for="delegate-recipient" class="w-25 p-2">{{ $t('To') }} *</label>
 					  <input type="text" id="delegate-recipient" name="delegate-recipient" ref="delegate-recipient" class="form-control-lg w-50 p-2" value="actifit">
@@ -575,7 +588,8 @@
 				
 				<transition name="fade">
 					<div v-if="afitActivityMode == MOVE_AFITX_SE_HE || afitActivityMode == MOVE_AFITX_HE_SE">
-						  <div class="text-center p-2">
+						<!--<h3 class="pro-name">{{ $t('EXCHANGE_AFIT_FOR_STEEM') }}</h3>-->
+						  <div class="text-center">
 							<div v-if="afitActivityMode == MOVE_AFITX_SE_HE" class="text-brand font-weight-bold">{{ $t('move_afitx_se_he') }}</div>
 							<div v-else class="text-brand font-weight-bold">{{ $t('move_afitx_he_se') }}</div>
 							<div class="row" >
@@ -701,6 +715,7 @@
 			<button v-on:click="initiateAFITtoSE" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('INITIATE_AFIT_TO_HE') }}</button>
 			  <transition name="fade">
 			  <div v-if="afitActivityMode == MOVE_AFIT_SE">
+				<h3 class="pro-name">{{ $t('MOVE_AFIT_HE_AFIT_POWER') }}</h3>
 				  <div class="text-center grid p-2">
 					<div v-if="cur_bchain=='STEEM'" class="text-brand font-weight-bold">{{ $t('wallet.afit_se_to_power') }}</div>
 					<div v-else class="text-brand font-weight-bold">{{ $t('wallet.afit_he_to_power') }}</div>
@@ -729,6 +744,7 @@
 			  </div>
 			  
 			  <div v-else-if="afitActivityMode == INIT_AFIT_TO_SE">
+				<h3 class="pro-name">{{ $t('INITIATE_AFIT_TO_HE') }}</h3>
 				  <div class="text-center grid p-2">
 					<h5 class="text-brand font-weight-bold">{{ $t('wallet.initiate_afit_to_he') }}</h5>
 					<div v-if="userPDAfit.user">
@@ -807,6 +823,7 @@
 			  <div v-else-if="afitActivityMode == EXCHANGE_AFIT_STEEM">
 			  <transition name="fade" v-if="!userHasFundsPass" >
 				<div class="text-center grid p-2">
+				  <h3 class="pro-name">{{ $t('EXCHANGE_AFIT_FOR_STEEM') }}</h3>
 					<div class="text-brand font-weight-bold">{{ $t('wallet.title_process') }}</div>
 					<h5>{{ $t('wallet.step1_title') }}</h5>
 					<div v-html="$t('wallet.step1_desc')">
@@ -1126,6 +1143,8 @@
   
   import pendingRewardsModal from '~/components/PendingRewardsModal'
   
+  import VueScrollTo from 'vue-scrollto' // for smooth scrolling
+  
   const ssc = new SSC(process.env.steemEngineRpc);
   const scot_steemengine_api = process.env.steemEngineScot;
   
@@ -1441,6 +1460,14 @@
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
+	  
+	  /**
+       * Scrolls down to content area.
+       */
+      scrollAction () {
+        VueScrollTo.scrollTo('#detailsArea', 1000, {easing: 'ease-in-out', offset: -50})
+      },
+	  
 	  getWalletAddress (){
 		return this.bsc_wallet_address;
 	  },
@@ -1573,6 +1600,7 @@
 			console.log(err);
 		}
 		this.loadingDeleg = false;
+		//this.scrollAction();
 	  },
 	  
 	  //handles fetching new HF26 RC delegations
@@ -1603,6 +1631,7 @@
 		//console.log(this.rcDelgArray['vevita']);
 		//this.$forceUpdate();
 		this.loadingDeleg = false;
+		//this.scrollAction();
    
 	  },
 	  /*
@@ -1675,6 +1704,7 @@
 		}
 		this.curTokenAction = this.POWERUP_FUNDS;
 		this.selTokenUp = token;
+		this.afitActivityMode = 0;
 	  },
 	  initiateUnStaking(token){
 		//only adjust open/close is same button is clicked, otherwise adjust token being unstaked
@@ -1685,6 +1715,7 @@
 		}
 		this.curTokenAction = this.POWERDOWN_FUNDS;
 		this.selTokenUp = token;
+		this.afitActivityMode = 0;
 	  },
 	  initiateTransfer(token){
 		//only adjust open/close is same button is clicked, otherwise adjust token being unstaked
@@ -1695,6 +1726,7 @@
 		}
 		this.curTokenAction = this.TRANSFER_FUNDS;
 		this.selTokenUp = token;
+		this.afitActivityMode = 0;
 	  },
 	  initiateBSCTransfer(token){
 		//only adjust open/close is same button is clicked, otherwise adjust token being unstaked
@@ -1705,6 +1737,7 @@
 		}
 		this.curTokenAction = this.TRANSFER_BSC;
 		this.selTokenUp = token;
+		this.afitActivityMode = 0;
 	  },
 	  initiateWithdraw(token){
 		//only adjust open/close is same button is clicked, otherwise adjust token being unstaked
@@ -1715,6 +1748,7 @@
 		}
 		this.curTokenAction = this.WITHDRAW_FUNDS;
 		this.selTokenUp = token;
+		this.afitActivityMode = 0;
 	  },
 	  notifySwitchChain(){
 		let notice = this.$t('notify_Switch_Chain_HE_Tokens');
@@ -2517,61 +2551,66 @@
 		//function handles opening/closing transfer section
 		
 		//set proper Fund Activity Mode controlling the display
-		if (this.fundActivityMode == this.TRANSFER_FUNDS ){
-		  this.fundActivityMode = 0;
-		}else{
+		//if (this.fundActivityMode == this.TRANSFER_FUNDS ){
+		//  this.fundActivityMode = 0;
+		//}else{
 		  this.fundActivityMode = this.TRANSFER_FUNDS;
-		}
+		//}
 		//hide upper activity section
 		this.afitActivityMode = 0;
+		this.scrollAction();
 	  },
 	  powerUpFunds () {
 		//function handles opening/closing of power up section
 		
 		//set proper Fund Activity Mode controlling the display
-		if (this.fundActivityMode == this.POWERUP_FUNDS ){
-		  this.fundActivityMode = 0;
-		}else{
+		//if (this.fundActivityMode == this.POWERUP_FUNDS ){
+		//  this.fundActivityMode = 0;
+		//}else{
 		  this.fundActivityMode = this.POWERUP_FUNDS;
-		}
+		//}
 		//hide upper activity section
 		this.afitActivityMode = 0;
+		this.scrollAction();
 	  },
 	  powerDownFunds () {
 		//function handles opening/closing of power up section
 		
 		//set proper Fund Activity Mode controlling the display
-		if (this.fundActivityMode == this.POWERDOWN_FUNDS ){
-		  this.fundActivityMode = 0;
-		}else{
+		//if (this.fundActivityMode == this.POWERDOWN_FUNDS ){
+		//  this.fundActivityMode = 0;
+		//}else{
 		  this.fundActivityMode = this.POWERDOWN_FUNDS;
-		}
+		//}
 		//hide upper activity section
 		this.afitActivityMode = 0;
+		this.scrollAction();
 	  },
 	  delegateFunds () {
 		//function handles opening/closing of delegation section
 		
 		//set proper Fund Activity Mode controlling the display
-		if (this.fundActivityMode == this.DELEGATE_FUNDS ){
-		  this.fundActivityMode = 0;
-		}else{
+		//if (this.fundActivityMode == this.DELEGATE_FUNDS ){
+		//  this.fundActivityMode = 0;
+		//}else{
 		  this.fundActivityMode = this.DELEGATE_FUNDS;
-		}
+		//}
 		//hide upper activity section
 		this.afitActivityMode = 0;
+		this.scrollAction();
 	  },
 	  delegateRCs () {
 		//function handles opening/closing of RC delegation section
 		
 		//set proper Fund Activity Mode controlling the display
-		if (this.fundActivityMode == this.DELEGATE_RCS ){
-		  this.fundActivityMode = 0;
-		}else{
+		//if (this.fundActivityMode == this.DELEGATE_RCS ){
+		//  this.fundActivityMode = 0;
+		//}else{
 		  this.fundActivityMode = this.DELEGATE_RCS;
-		}
+		//}
 		//hide upper activity section
 		this.afitActivityMode = 0;
+		this.scrollAction();
 	  },
 	  async proceedTransfer () {
 		//function handles the actual processing of the transfer
@@ -3030,13 +3069,14 @@
 		//function handles opening/closing exchanging AFIT tokens for STEEM upvotes  section
 		
 		//set proper AFIT Activity Mode controlling the display
-		if (this.afitActivityMode == this.EXCHANGE_AFIT_STEEM ){
-		  this.afitActivityMode = 0;
-		}else{
+		//if (this.afitActivityMode == this.EXCHANGE_AFIT_STEEM ){
+		//  this.afitActivityMode = 0;
+		//}else{
 		  this.afitActivityMode = this.EXCHANGE_AFIT_STEEM;
-		}
+		//}
 		//hide lower section for STEEM actions
 		this.fundActivityMode = 0;
+		this.scrollAction();
 	  },
 	  moveAFITXseHE () {
 		//set proper AFIT Activity Mode controlling the display
@@ -3047,6 +3087,7 @@
 		//}
 		//hide lower section for STEEM actions
 		this.fundActivityMode = 0;
+		this.scrollAction();
 	  },
 	  moveAFITXheSE () {
 		//set proper AFIT Activity Mode controlling the display
@@ -3057,6 +3098,7 @@
 		//}
 		//hide lower section for STEEM actions
 		this.fundActivityMode = 0;
+		this.scrollAction();
 	  },
 	  moveAFITseHE () {
 		//set proper AFIT Activity Mode controlling the display
@@ -3067,6 +3109,7 @@
 		//}
 		//hide lower section for STEEM actions
 		this.fundActivityMode = 0;
+		this.scrollAction();
 	  },
 	  moveAFITheSE () {
 		//set proper AFIT Activity Mode controlling the display
@@ -3077,6 +3120,7 @@
 		//}
 		//hide lower section for STEEM actions
 		this.fundActivityMode = 0;
+		this.scrollAction();
 	  },
 	  buyAFITwithSTEEM () {
 		//function handles opening/closing exchanging AFIT tokens for STEEM upvotes  section
@@ -3101,6 +3145,7 @@
 		//}
 		//hide lower section for STEEM actions
 		this.fundActivityMode = 0;
+		this.scrollAction();
 	  },
 	  initiateAFITtoSE () {
 		//function handles opening/closing moving AFIT to SE
@@ -3113,6 +3158,7 @@
 		//}
 		//hide lower section for STEEM actions
 		this.fundActivityMode = 0;
+		this.scrollAction();
 	  },
 	  passTransferTypeChange (e) {
 	    //handles the drop down select option to ensure we have proper value
@@ -4964,5 +5010,9 @@
 	border: 2px solid red;
 	border-radius: 3px;
 	margin-bottom: 5px;
+  }
+  .pro-name {
+    background: radial-gradient(red,transparent);
+    color: #fff;
   }
 </style>
