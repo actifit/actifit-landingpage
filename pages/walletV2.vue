@@ -3399,7 +3399,7 @@
 			let bal;
 			try{
 			
-				bal = await ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' });
+				//bal = await ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' });
 			
 			}catch(outErr){
 				console.log(outErr);
