@@ -3200,7 +3200,7 @@
 			let bal;
 			try{
 			//check if the user has enough AFITX S-E amount allowing him the transfers daily
-			bal = await ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' });
+			//bal = await ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' });
 			}catch(innErr){
 				console.log(innErr);
 			}
