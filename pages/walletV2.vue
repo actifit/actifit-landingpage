@@ -202,9 +202,9 @@
 							<a v-else href="https://hive-engine.com/?p=market&t=AFIT" target="_blank" rel="noopener noreferrer" :text="$t('buy_afit_he')" >$</a>
 						</span>
 						
-						<span v-if="token.symbol=='AFIT'" class="btn btn-brand p-1" :title="$t('move_afit_he_se_title')"><i class="fas fa-angle-double-left" v-on:click="moveAFITheSE"></i></span>
+						<!--<span v-if="token.symbol=='AFIT'" class="btn btn-brand p-1" :title="$t('move_afit_he_se_title')"><i class="fas fa-angle-double-left" v-on:click="moveAFITheSE"></i></span>
 						
-						<span v-if="token.symbol=='AFITX'" class="btn btn-brand p-1" :title="$t('move_afitx_he_se_title')"><i class="fas fa-angle-double-left" v-on:click="moveAFITXheSE"></i></span>
+						<span v-if="token.symbol=='AFITX'" class="btn btn-brand p-1" :title="$t('move_afitx_he_se_title')"><i class="fas fa-angle-double-left" v-on:click="moveAFITXheSE"></i></span>-->
 						
 						<span v-if="token.stakable" class="btn btn-brand p-1"><i class="fas fa-arrow-circle-up p-1" :title="$t('stake_tokens')" v-on:click="initiateStaking(token)"></i></span>
 						<span v-if="token.stakable" class="btn btn-brand p-1"><i class="fas fa-arrow-circle-down " :title="$t('unstake_tokens')" v-on:click="initiateUnStaking(token)"></i></span>

@@ -155,7 +155,7 @@
 					<span class="col-md-6">
 						{{ formattedUserAFITXHE }}
 						<br/>
-						<span v-if="cur_bchain!='BLURT'" class="btn btn-brand" :title="$t('move_afitx_he_se_title')"><i class="fas fa-angle-double-left" v-on:click="moveAFITXheSE"></i></span>
+						<!--<span v-if="cur_bchain!='BLURT'" class="btn btn-brand" :title="$t('move_afitx_he_se_title')"><i class="fas fa-angle-double-left" v-on:click="moveAFITXheSE"></i></span>-->
 					</span>
 				</h5>
 				<h5 class="mb-4 font-weight-bold row">
