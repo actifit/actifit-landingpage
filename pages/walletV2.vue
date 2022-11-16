@@ -8,9 +8,9 @@
       <div class="text-center">
         <h3 class="mb-4">{{ $t('Hey') }} {{ user.account.name }}!</h3>
 		
-		<div class="row top-action-container text-right col-12">
+		<div class="row top-action-container text-right">
 			<div class="col-9"></div>
-			<div class="col-3">
+			<div class="col-12 col-lg-3 text-right">
 			
 			
 				<span class="btn btn-brand m-1" :title="$t('Check_Claimable_Rewards')">
@@ -30,6 +30,10 @@
 				
 				<span class="btn btn-brand m-1" :title="$t('FETCH_MY_RC_DELEGATIONS')" v-on:click="fetchRCDelegations(false)">
 					<i class="fas fa-bolt"></i>
+				</span>
+				
+				<span class="btn btn-brand m-1" :title="$t('AFIT_Transaction_History')" v-on:click="scrollAction()">
+					<i class="fas fa-file-invoice"></i>
 				</span>
 				
 				<span v-if="loadingDeleg">
@@ -94,10 +98,6 @@
 					<span class="btn btn-brand p-1"><i class="fas fa-arrow-circle-down " :title="$t('POWERDOWN_ACTION_TEXT')" v-on:click="powerDownFunds"></i></span>
 					<span class="btn btn-brand p-1"><i class="fas fa-share-square " :title="$t('TRANSFER_FUNDS_ACTION_TEXT')" v-on:click="transferFunds"></i></span>
 					<span class="btn btn-brand p-1"><i class="fas fa-donate" :title="$t('DELEGATE_ACTION_TEXT')" v-on:click="delegateFunds"></i></span>
-					<span class="btn btn-brand p-1" :title="$t('buy_afit_he')">
-						<a v-if="cur_bchain=='STEEM'" href="https://steem-engine.net/?p=market&t=AFIT" :class="smallScreenBtnClasses" target="_blank" rel="noopener noreferrer" :text="$t('buy_afit_se')">$</a>
-						<a v-else href="https://hive-engine.com/?p=market&t=AFIT" :class="smallScreenBtnClasses" target="_blank" rel="noopener noreferrer" :text="$t('buy_afit_he')">$</a>
-					</span>
 				</div>
 			</div>
 			
@@ -221,9 +221,9 @@
 					<div class="col-2 text-right">{{ formattedUserAfitSE }}</div>
 					<div class="col-2"></div>
 					<div class="col-1 text-right"></div>
-					<div class="col-3">
+					<!--<div class="col-3">
 						<span v-if="cur_bchain!='BLURT'" class="btn btn-brand p-1" :title="$t('move_afit_se_he_title')"><i class="fas fa-angle-double-right" v-on:click="moveAFITseHE"></i></span>
-					</div>
+					</div>-->
 				</div>
 				
 				<div class="token-entry row">
@@ -232,9 +232,9 @@
 					<div class="col-2 text-right">{{ formattedUserAFITXSE }}</div>
 					<div class="col-2"></div>
 					<div class="col-1 text-right"></div>
-					<div class="col-3">
+					<!--<div class="col-3">
 						<span v-if="cur_bchain!='BLURT'" class="btn btn-brand p-1" :title="$t('move_afitx_se_he_title')"><i class="fas fa-angle-double-right" v-on:click="moveAFITXseHE"></i></span>
-					</div>
+					</div>-->
 				</div>
 				
 				<div class="action-box">
@@ -587,7 +587,7 @@
 				
 				
 				<transition name="fade">
-					<div v-if="fundActivityMode == SHOW_CLAIMABLE_REW && isClaimableDataAvailable && cur_bchain=='STEEM'" class="">
+					<div v-if="fundActivityMode == SHOW_CLAIMABLE_REW && isClaimableDataAvailable && cur_bchain=='STEEM'" class="action-box">
 						<h5 class="pro-name"><img src="/img/STEEM.png" class="mr-2 token-logo">{{ $t('Claimable_Steem_Rewards') }}</h5>
 						<div class="mb-4 font-weight-bold">
 							<span class="p-2">{{ this.claimSP }} | {{ this.claimSTEEM }} | {{ this.claimSBD }}</span>
@@ -737,7 +737,7 @@
 			<!--<button v-on:click="buyAFITwithSTEEM" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('BUY_AFIT_WITH_STEEM') }}</button>-->
 			
 			  <transition name="fade">
-			  <div v-if="afitActivityMode == MOVE_AFIT_SE">
+			  <div v-if="afitActivityMode == MOVE_AFIT_SE" class="action-box">
 				<h3 class="pro-name">{{ $t('MOVE_AFIT_HE_AFIT_POWER') }}</h3>
 				  <div class="text-center grid p-2">
 					<div v-if="cur_bchain=='STEEM'" class="text-brand font-weight-bold">{{ $t('wallet.afit_se_to_power') }}</div>
@@ -1730,6 +1730,7 @@
 		this.curTokenAction = this.POWERUP_FUNDS;
 		this.selTokenUp = token;
 		this.afitActivityMode = 0;
+		this.scrollAction();
 	  },
 	  initiateUnStaking(token){
 		//only adjust open/close is same button is clicked, otherwise adjust token being unstaked
@@ -1741,6 +1742,7 @@
 		this.curTokenAction = this.POWERDOWN_FUNDS;
 		this.selTokenUp = token;
 		this.afitActivityMode = 0;
+		this.scrollAction();
 	  },
 	  initiateTransfer(token){
 		//only adjust open/close is same button is clicked, otherwise adjust token being unstaked
@@ -1752,6 +1754,7 @@
 		this.curTokenAction = this.TRANSFER_FUNDS;
 		this.selTokenUp = token;
 		this.afitActivityMode = 0;
+		this.scrollAction();
 	  },
 	  initiateBSCTransfer(token){
 		//only adjust open/close is same button is clicked, otherwise adjust token being unstaked
@@ -1763,6 +1766,7 @@
 		this.curTokenAction = this.TRANSFER_BSC;
 		this.selTokenUp = token;
 		this.afitActivityMode = 0;
+		this.scrollAction();
 	  },
 	  initiateWithdraw(token){
 		//only adjust open/close is same button is clicked, otherwise adjust token being unstaked
@@ -1774,6 +1778,7 @@
 		this.curTokenAction = this.WITHDRAW_FUNDS;
 		this.selTokenUp = token;
 		this.afitActivityMode = 0;
+		this.scrollAction();
 	  },
 	  notifySwitchChain(){
 		let notice = this.$t('notify_Switch_Chain_HE_Tokens');
@@ -5047,9 +5052,13 @@
 	border: 2px solid red;
 	border-radius: 3px;
 	margin-bottom: 5px;
+	min-width: 600px; /* make it scroll friendly on mobile size */
   }
   .pro-name {
     background: radial-gradient(red,transparent);
     color: #fff;
+  }
+  .action-box{
+	background-color: beige;
   }
 </style>
