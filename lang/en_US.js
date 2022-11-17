@@ -897,5 +897,6 @@ module.exports = {
   actifit_wallet: 'Actifit Wallet',
   hive_engine: 'Hive Engine',
   smart_contract: 'Smart Contract', 
+  actifit_signature_bsc: 'Actifit Validating Address BSC',
   tipping_details: 'This special onchain tipping functionality allows you to send out tips to users by commenting on their posts, and sends out AFIT directly onto their hive-engine account. For more details about how it works and how to load up balance, check out this post: <a href="https://links.actifit.io/tipping-afit">https://links.actifit.io/tipping-afit</a>'
 }

@@ -1057,7 +1057,8 @@
   
   import Web3 from 'web3'
   
-  const web3 = new Web3('https://bsc-dataseed1.binance.org:443');
+  let web3 = new Web3('https://bsc-dataseed1.binance.org:443');
+  
   
   const minABI = [
 	  // balanceOf
@@ -1409,6 +1410,56 @@
 			this.error_wallet = this.$t('all_fields_required');
 			return;
 		}
+		/*console.log(this.$refs['bsc-wallet-address'].value);
+		return;*/
+		
+		const accounts = await ethereum.request({
+			method: 'eth_requestAccounts',
+		});
+		
+		let contProc = false;
+		const nonce = this.generatePassword(2);
+		try{
+			let sign = await web3.eth.personal.sign(nonce, this.$refs['bsc-wallet-address'].value, "");
+			//console.log(sign)
+			
+			//verify proper setup
+			let accToken = localStorage.getItem('access_token')
+			
+			let url = new URL(process.env.actiAppUrl + 'verifySignBSCAdd/?user='+this.user.account.name+'&wallet='+this.$refs['bsc-wallet-address'].value+'&sign='+sign+'&nonce='+nonce);
+
+			let reqHeads = new Headers({
+			  'Content-Type': 'application/json',
+			  'x-acti-token': 'Bearer ' + accToken,
+			});
+			let res = await fetch(url, {
+				headers: reqHeads
+			});
+			let outcome = await res.json();
+			console.log(outcome);
+			if (outcome.error){
+				console.log('error');
+				this.error_wallet = this.$t('error_saving_wallet');
+				return;
+			}else if (outcome.success){
+				console.log('success. Next lets save');
+				contProc = true;
+				/*this.$notify({
+				  group: 'success',
+				  text: this.$t('address_successfully_stored'),
+				  position: 'top center'
+				})*/
+			}
+			
+		}catch(err){
+			console.log(err);
+		}
+		
+		if (!contProc){
+			this.error_wallet = this.$t('error_saving_wallet');
+			return;
+		}
+		
 		//grab token
 		let accToken = localStorage.getItem('access_token')
 		
@@ -4661,7 +4712,12 @@
 		this.afitxTokenAddress = afitxTokenAddress;
 		this.afitBNBLPTokenAddress = afitBNBLPTokenAddress;
 		this.afitxBNBLPTokenAddress = afitxBNBLPTokenAddress;
-
+		
+		//adjust to metamask if available
+	  if (typeof window.ethereum !== 'undefined'){
+		//metamask functional
+		web3 = new Web3(window.ethereum);
+	  }
 	
 	  //check which chain is active
 	  if (localStorage.getItem('cur_bchain')){

@@ -9,31 +9,34 @@
         <h3 class="mb-4">{{ $t('Hey') }} {{ user.account.name }}!</h3>
 		
 		<div class="row top-action-container text-right">
-			<div class="col-9"></div>
-			<div class="col-12 col-lg-3 text-right">
+			<div class="col-12 text-right">
 			
 			
-				<span class="btn btn-brand m-1" :title="$t('Check_Claimable_Rewards')">
+				<span class="btn btn-brand mb-1" :title="$t('Check_Claimable_Rewards')">
 					<i class="fas fa-solid fa-wallet" v-on:click="showClaimableRewards()"></i>
 				
 				</span>
 				
 				
 			
-				<span class="btn btn-brand m-1" :title="$t('Check_Pending_Rewards')">
+				<span class="btn btn-brand mb-1" :title="$t('Check_Pending_Rewards')">
 					<a href="#" id="pendingRewardsKicker" name="pendingRewardsKicker" ref="pendingRewardsKicker" class="" data-toggle="modal" data-target="#pendingRewardsModal"><i class="far fa-solid fa-hourglass"></i></a>
 				</span>
 				
-				<span class="btn btn-brand m-1" :title="$t('FETCH_MY_DELEGATIONS')" v-on:click="fetchDelegations(false)">
+				<span class="btn btn-brand mb-1" :title="$t('FETCH_MY_DELEGATIONS')" v-on:click="fetchDelegations(false)">
 					<i class="fas fa-donate"></i>
 				</span>
 				
-				<span class="btn btn-brand m-1" :title="$t('FETCH_MY_RC_DELEGATIONS')" v-on:click="fetchRCDelegations(false)">
+				<span class="btn btn-brand mb-1" :title="$t('FETCH_MY_RC_DELEGATIONS')" v-on:click="fetchRCDelegations(false)">
 					<i class="fas fa-bolt"></i>
 				</span>
 				
-				<span class="btn btn-brand m-1" :title="$t('AFIT_Transaction_History')" v-on:click="scrollAction()">
+				<span class="btn btn-brand mb-1" :title="$t('AFIT_Transaction_History')" v-on:click="scrollAction()">
 					<i class="fas fa-file-invoice"></i>
+				</span>
+				
+				<span class="btn btn-brand mb-1" :title="$t('bsc_wallet')" v-on:click="showBSCAddress()">
+					<img src="/img/Binance-gold-coin.gif" width="25px" height="25px">
 				</span>
 				
 				<span v-if="loadingDeleg">
@@ -692,6 +695,22 @@
 					</div>
 				</transition>
 				
+				
+				<transition name="fade">
+					<div v-if="afitActivityMode == showBSCDetails">
+						<h3 class="pro-name">{{ $t('bsc_wallet') }}</h3>
+						<span class="font-brand">{{ $t('bsc_details_notice') }}</span>
+						
+						<div>
+							
+								<input type="text" id="bsc-wallet-address" name="bsc-wallet-address" ref="bsc-wallet-address" class="form-control-lg w-50 p-2" :value="this.getWalletAddress()" placeholder="0x......">
+								<div v-if="error_wallet!=''" class="text-brand text-center">{{ error_wallet}}</div>
+								<button v-on:click="updateWalletAddress" class="btn btn-brand btn-lg w-50 border"><span v-if="this.bsc_wallet_address">{{ $t('Save') }}</span><span v-else>{{ $t('Save') }}</span></button>
+							
+						</div>
+					</div>
+				</transition>
+				
 			</div>
 			
 			
@@ -704,23 +723,7 @@
 				<div class="pb-2" v-else-if="this.cur_bchain=='HIVE'">{{ $t('in_hive') }}: <img src="/img/HIVE.png" class="token-logo-sm">{{ formattedSteemTotVal }}</div>
 				<div class="pb-2" v-else-if="this.cur_bchain=='BLURT'">{{ $t('in_blurt') }}: <img src="/img/BLURT.png" class="token-logo-sm">{{ formattedSteemTotVal }}</div>
 			</div>
-			<div class="col-md-6 row-sep row-sep-in">
-				<!-- section for the BSC wallet -->
-				<h5 class="token-title">{{ $t('bsc_wallet')}}<img src="/img/Binance-gold-coin.gif" width="25px" height="25px"><i class="fas fa-info-circle" v-on:click="showBSCDetails=!showBSCDetails"></i></h5>
-				<div class="row text-left" v-if="showBSCDetails">
-					{{ $t('bsc_details_notice') }}
-				</div>
-				<div>
-					
-					<div>
-						
-							<input type="text" id="bsc-wallet-address" name="bsc-wallet-address" ref="bsc-wallet-address" class="form-control-lg w-100 p-2" :value="this.getWalletAddress()" placeholder="0x......">
-							<div v-if="error_wallet!=''" class="text-brand text-center">{{ error_wallet}}</div>
-							<button v-on:click="updateWalletAddress" class="btn btn-brand btn-lg w-50 border"><span v-if="this.bsc_wallet_address">{{ $t('Save') }}</span><span v-else>{{ $t('Save') }}</span></button>
-						
-					</div>
-				</div>
-			</div>
+			
 		</div>
 		<div v-if="this.showDetailedCalc" class="text-center">
 			<div class="row">
@@ -1172,7 +1175,7 @@
   
   import Web3 from 'web3'
   
-  const web3 = new Web3('https://bsc-dataseed1.binance.org:443');
+  let web3 = new Web3('https://bsc-dataseed1.binance.org:443');
   
   const minABI = [
 	  // balanceOf
@@ -1217,6 +1220,7 @@
 		DELEGATE_RCS: 6,
 		TRANSFER_BSC: 10,
 		SHOW_CLAIMABLE_REW: 11,
+		showBSCDetails: 12,
 		afitTokenAddress: '',
 		afitxTokenAddress: '',
 		afitBNBLPTokenAddress: '',
@@ -1311,7 +1315,6 @@
 		nextAfitPDTarget: '',
 		afitPowerDownText: '',
 		showAfitxInfo: false,
-		showBSCDetails: false,
 		totalAccountValue: 0,
 		totalAccountValueSteem: 0,
 		detailCalculation: '',
@@ -1543,6 +1546,55 @@
 			this.error_wallet = this.$t('all_fields_required');
 			return;
 		}
+		
+		const accounts = await ethereum.request({
+			method: 'eth_requestAccounts',
+		});
+		
+		let contProc = false;
+		const nonce = this.generatePassword(2);
+		try{
+			let sign = await web3.eth.personal.sign(nonce, this.$refs['bsc-wallet-address'].value, "");
+			//console.log(sign)
+			
+			//verify proper setup
+			let accToken = localStorage.getItem('access_token')
+			
+			let url = new URL(process.env.actiAppUrl + 'verifySignBSCAdd/?user='+this.user.account.name+'&wallet='+this.$refs['bsc-wallet-address'].value+'&sign='+sign+'&nonce='+nonce);
+
+			let reqHeads = new Headers({
+			  'Content-Type': 'application/json',
+			  'x-acti-token': 'Bearer ' + accToken,
+			});
+			let res = await fetch(url, {
+				headers: reqHeads
+			});
+			let outcome = await res.json();
+			console.log(outcome);
+			if (outcome.error){
+				console.log('error');
+				this.error_wallet = this.$t('error_saving_wallet');
+				return;
+			}else if (outcome.success){
+				console.log('success. Next lets save');
+				contProc = true;
+				/*this.$notify({
+				  group: 'success',
+				  text: this.$t('address_successfully_stored'),
+				  position: 'top center'
+				})*/
+			}
+			
+		}catch(err){
+			console.log(err);
+		}
+		
+		if (!contProc){
+			this.error_wallet = this.$t('error_saving_wallet');
+			return;
+		}
+		
+		
 		//grab token
 		let accToken = localStorage.getItem('access_token')
 		
@@ -2630,6 +2682,14 @@
 		//}
 		//hide upper activity section
 		this.afitActivityMode = 0;
+		this.curTokenAction = 0;
+		this.scrollAction();
+	  },
+	  showBSCAddress (){
+		  this.fundActivityMode = 0;
+		//}
+		//hide upper activity section
+		this.afitActivityMode = this.showBSCDetails;
 		this.curTokenAction = 0;
 		this.scrollAction();
 	  },
@@ -4867,6 +4927,11 @@
 		this.afitBNBLPTokenAddress = afitBNBLPTokenAddress;
 		this.afitxBNBLPTokenAddress = afitxBNBLPTokenAddress;
 
+	//adjust to metamask if available
+	  if (typeof window.ethereum !== 'undefined'){
+		//metamask functional
+		web3 = new Web3(window.ethereum);
+	  }
 	
 	  //check which chain is active
 	  if (localStorage.getItem('cur_bchain')){
