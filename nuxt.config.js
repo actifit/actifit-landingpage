@@ -30,7 +30,7 @@ module.exports = {
 	actiAppUrl: process.env.ACTI_API_URL || 'http://localhost:3120/',
 	actiAppBackUrl: process.env.ACTI_API_BACK_URL || 'http://localhost:3120/',
 	steemEngineRpc: 'https://api.steem-engine.net/rpc',
-	hiveEngineRpc: 'https://engine.rishipanthee.com/',
+	hiveEngineRpc: 'https://herpc.actifit.io/', //'https://engine.rishipanthee.com/',
 	steemEngineScot: 'https://scot-api.steem-engine.net/',
 	bscBridgeAccount: 'actifit.bridge',
 	hiveEngineScotParam: '?hive=1',
