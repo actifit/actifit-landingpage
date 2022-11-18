@@ -36,7 +36,7 @@
 				</span>
 				
 				<span class="btn btn-brand mb-1" :title="$t('bsc_wallet')" v-on:click="showBSCAddress()">
-					<img src="/img/Binance-gold-coin.gif" width="25px" height="25px">
+					<img src="/img/Binance-logo.png" width="18px" height="18px">
 				</span>
 				
 				<span v-if="loadingDeleg">
@@ -5118,6 +5118,14 @@
 	border-radius: 3px;
 	margin-bottom: 5px;
 	min-width: 600px; /* make it scroll friendly on mobile size */
+	
+	/* 3D look */
+	-moz-box-shadow: 0px 1px 1px rgba(000,000,000,0.5), inset 1px 2px 0px rgba(255,255,255,0.4);
+    -webkit-box-shadow: 0px 1px 1px rgb(0 0 0 / 50%), inset 1px 2px 0px rgb(255 255 255 / 40%);
+    box-shadow: 0px 1px 1px rgb(0 0 0 / 50%), inset 1px 2px 0px rgb(255 255 255 / 40%);
+    text-shadow: 1px 1px 2px rgb(0 0 0 / 70%), 0px 1px 0px rgb(255 255 255 / 40%);
+	box-shadow: 0 70px 40px -20px rgb(0 0 0 / 20%);
+	
   }
   .pro-name {
     background: radial-gradient(red,transparent);
