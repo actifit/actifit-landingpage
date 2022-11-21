@@ -7,661 +7,102 @@
       <!-- account balance -->
       <div class="text-center">
         <h3 class="mb-4">{{ $t('Hey') }} {{ user.account.name }}!</h3>
-		
-		<div class="row top-action-container text-right">
-			<div class="col-12 text-right">
-			
-			
-				<span class="btn btn-brand mb-1" :title="$t('Check_Claimable_Rewards')">
-					<i class="fas fa-solid fa-wallet" v-on:click="showClaimableRewards()"></i>
-				
-				</span>
-				
-				
-			
-				<span class="btn btn-brand mb-1" :title="$t('Check_Pending_Rewards')">
-					<a href="#" id="pendingRewardsKicker" name="pendingRewardsKicker" ref="pendingRewardsKicker" class="" data-toggle="modal" data-target="#pendingRewardsModal"><i class="far fa-solid fa-hourglass"></i></a>
-				</span>
-				
-				<span class="btn btn-brand mb-1" :title="$t('FETCH_MY_DELEGATIONS')" v-on:click="fetchDelegations(false)">
-					<i class="fas fa-donate"></i>
-				</span>
-				
-				<span class="btn btn-brand mb-1" :title="$t('FETCH_MY_RC_DELEGATIONS')" v-on:click="fetchRCDelegations(false)">
-					<i class="fas fa-bolt"></i>
-				</span>
-				
-				<span class="btn btn-brand mb-1" :title="$t('AFIT_Transaction_History')" v-on:click="scrollAction()">
-					<i class="fas fa-file-invoice"></i>
-				</span>
-				
-				<span class="btn btn-brand mb-1" :title="$t('bsc_wallet')" v-on:click="showBSCAddress()">
-					<img src="/img/binance-logo.png" width="18px" height="18px">
-				</span>
-				
-				<span v-if="loadingDeleg">
-				  <i class="fas fa-spin fa-spinner" ></i>
-				</span>
+		<div v-if="this.tokenMetrics.length > 0" class="row">
+			<div class="col-md-6 row-sep row-sep-in">
+				<h5 class="token-title">{{ $t('account_est_val') }}<i class="fas fa-info-circle" v-on:click="showDetailedCalc=!showDetailedCalc"></i></h5>
+				<div class="pb-2">{{ $t('in_usd') }}: ${{ totalAccountValue}}</div>
+				<div class="pb-2" v-if="this.cur_bchain=='STEEM'">{{ $t('in_steem') }}: <img src="/img/STEEM.png" class="token-logo-sm">{{ formattedSteemTotVal }}</div>
+				<div class="pb-2" v-else-if="this.cur_bchain=='HIVE'">{{ $t('in_hive') }}: <img src="/img/HIVE.png" class="token-logo-sm">{{ formattedSteemTotVal }}</div>
+				<div class="pb-2" v-else-if="this.cur_bchain=='BLURT'">{{ $t('in_blurt') }}: <img src="/img/BLURT.png" class="token-logo-sm">{{ formattedSteemTotVal }}</div>
+			</div>
+			<div class="col-md-6 row-sep row-sep-in">
+				<!-- section for the BSC wallet -->
+				<h5 class="token-title">{{ $t('bsc_wallet')}}<img src="/img/Binance-gold-coin.gif" width="25px" height="25px"><i class="fas fa-info-circle" v-on:click="showBSCDetails=!showBSCDetails"></i></h5>
+				<div class="row text-left" v-if="showBSCDetails">
+					{{ $t('bsc_details_notice') }}
+				</div>
+				<div>
+					<!--<div class="col-md-12">
+						
+						<div class="font-weight-bold text-brand">{{$t('airdrop_results')}}</div>
+						<div v-if="this.airdropResults.user">{{$t('airdrop_reward').replace('_AFITBALANCE_',this.airdropResults.tokens_count).replace('_AFITBSC_',this.airdropResults.afit_bsc_reward)}}</div>
+						<div v-else>{{$t('airdrop_no_reward')}}</div>
+					
+					</div>-->
+					<div>
+						<!--<div class="col-md-8">-->
+							<input type="text" id="bsc-wallet-address" name="bsc-wallet-address" ref="bsc-wallet-address" class="form-control-lg w-100 p-2" :value="this.getWalletAddress()" placeholder="0x......">
+							<div v-if="error_wallet!=''" class="text-brand text-center">{{ error_wallet}}</div>
+							<button v-on:click="updateWalletAddress" class="btn btn-brand btn-lg w-50 border"><span v-if="this.bsc_wallet_address">{{ $t('Save') }}</span><span v-else>{{ $t('Save') }}</span></button>
+						<!--</div>
+						<div class="col-md-4">
+							<a href="https://tokensale.actifit.io" target="_blank" class="btn btn-brand btn-lg w-100 border"><span >{{ $t('Token Sale') }}</span></a>
+							<a href="https://actifit.io/@actifit/your-free-afit-airdrop-on-bsc-is-here-setup-your-wallets-before-october-26" target="_blank" class="btn btn-brand btn-lg w-100 border"><span >{{ $t('Airdrop') }}</span></a>
+						</div>-->
+					</div>
+				</div>
 			</div>
 		</div>
-		
-		<div v-if="this.tokenMetrics.length > 0" class="wallet-container">
-			<div class="row font-weight-bold token-entry thick-bottom">
-				<div class="col-2">Token</div>
-				<div class="col-2">Location</div>
-				<div class="col-2">Balance</div>
-				<div class="col-2">Staked</div>
-				<div class="col-1">Savings</div>
-				<div class="col-3">Actions</div>
+		<div v-if="this.showDetailedCalc" class="text-center">
+			<div class="row">
+				<div class="w-25"></div>
+				<h5 class="w-100">{{ $t('detailed_calc_title')}}</h5>
 			</div>
-			<div class="token-entry row">
-				<div class="col-2 text-left"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo">AFIT</div>
-				<div class="col-2">{{ $t('actifit_wallet')}}</div>
-				<div class="col-2 text-right">{{ formattedUserAfit }}</div>
-				<div class="col-2 text-right">-</div>
-				<div class="col-1 text-right">-</div>
-				<div class="col-3">
-					<span class="btn btn-brand p-1">
-						<i class="fas fa-solid fa-history" v-on:click="refreshBalance()" :title="$t('Refresh_balance')"/>
-						<span v-if="refreshinBal" >
-							<i class="fas fa-spin fa-spinner"></i>
-						</span>
-					</span>
-					<span class="btn btn-brand p-1">
-						<a href="#" data-toggle="modal" class="" data-target="#topHoldersModal" :title="$t('top_afit_holders_title')">
+			<div class="row text-right">
+				<div class="w-25"></div>
+				<div class="p-1 m-1 calc-data" v-html="this.detailCalculation"></div>
+			</div>
+		</div>
+        <div class="row row-sep">
+			<div class="col-md-6 row-sep-in small-pad-row">
+				<h5 class="token-title">
+					<img src="/img/actifit_logo.png" class="mr-1 token-logo">{{ $t('Your_Afit_Balance') }}
+					<small class="text-right">
+						<a href="#" data-toggle="modal" class="text-brand" data-target="#topHoldersModal" >
 							<i class="fas fa-list-ol"></i>
+							<span v-if="screenWidth > 500"> {{ $t('top_100_afit_holders') }}</span>
+							<span v-else> {{ $t('top_100') }}</span>
 						</a>
-					</span>
-					<span class="btn btn-brand p-1" :title="$t('buy_afit_he')">
-						<a v-if="cur_bchain=='STEEM'" href="https://steem-engine.net/?p=market&t=AFIT" :class="smallScreenBtnClasses" target="_blank" rel="noopener noreferrer" :text="$t('buy_afit_se')">$</a>
-						<a v-else href="https://hive-engine.com/?p=market&t=AFIT" :class="smallScreenBtnClasses" target="_blank" rel="noopener noreferrer" >$</a>
-					</span>
-					<span class="btn btn-brand p-1" :title="$t('EXCHANGE_AFIT_FOR_STEEM')">
-						<i class="fas fa-solid fa-thumbs-up" v-on:click="exchangeAFITforSTEEM"></i>
-					</span>
-					<span class="btn btn-brand p-1" :title="$t('INITIATE_AFIT_TO_HE')">
-						<i class="fas fa-solid fa-angle-double-right" v-on:click="initiateAFITtoSE"></i>
-					</span>
-				</div>
-			</div>
-			<div class="token-entry row">
-				<div class="col-2 text-left"><img src="/img/HIVE.png" class="mr-1 mini-token-logo">HIVE</div>
-				<div class="col-2">{{ $t('HIVE')}}</div>
-				<div class="col-2 text-right">{{ this.renderBalance(this.cur_bchain) }}</div>
-					
-				<div class="row" style="display:none">
-					<div class="p-2 col-md-6" id="ttip-area">
-						<small><i>{{ $t('STEEM_POWER_BREAKDOWN') }}: {{this.renderSteemPower(1)}} ({{ $t('Owned_SP') }}) + {{this.renderSteemPower(3)}} ({{ $t('Received_SP') }}) - {{this.renderSteemPower(4)}} ({{ $t('Delegated_SP') }}) - {{this.renderSteemPower(5)}} ({{ $t('Powering_Down_Amount') }})</i></small>
-					</div>
-				</div>
-				<div class="col-2 text-right">{{ this.renderSteemPower(2) }} {{ $t('HIVE_POWER_CAPS') }}</div>
-				<div class="col-1 text-right">{{ this.renderSavings(this.cur_bchain) }}</div>
-				<div class="col-3">
-					<span class="btn btn-brand p-1"><i class="fas fa-arrow-circle-up p-1" :title="$t('POWERUP_ACTION_TEXT')" v-on:click="powerUpFunds"></i></span>
-					<span class="btn btn-brand p-1"><i class="fas fa-arrow-circle-down " :title="$t('POWERDOWN_ACTION_TEXT')" v-on:click="powerDownFunds"></i></span>
-					<span class="btn btn-brand p-1"><i class="fas fa-share-square " :title="$t('TRANSFER_FUNDS_ACTION_TEXT')" v-on:click="transferFunds"></i></span>
-					<span class="btn btn-brand p-1"><i class="fas fa-donate" :title="$t('DELEGATE_ACTION_TEXT')" v-on:click="delegateFunds"></i></span>
-				</div>
-			</div>
-			
-			<div class="token-entry row">
-				<div class="col-2 text-left"><img src="/img/HIVE.png" class="mr-1 mini-token-logo">HBD</div>
-				<div class="col-2">{{ $t('HIVE')}}</div>
-				<div class="col-2 text-right">{{ this.renderSBDBalance(this.cur_bchain) }}</div>
-				<div class="col-2"></div>
-				<div class="col-1 text-right">{{ this.renderSBDSavings(this.cur_bchain) }}</div>
-				<div class="col-3">
-					<span class="btn btn-brand p-1"><i class="fas fa-share-square " :title="$t('TRANSFER_FUNDS_ACTION_TEXT')" v-on:click="transferFunds"></i></span>
-				</div>
-			</div>
-			
-			
-			<div class="token-entry row">
-				<div class="col-2 text-left"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo">AFIT</div>
-				<div class="col-2">{{ $t('BSC')}}</div>
-				<div class="col-2 text-right">{{ formattedUserAfitBSC }}</div>
-				<div class="col-2"></div>
-				<div class="col-1 text-right"></div>
-				<div class="col-3">
-					<span class="btn btn-brand p-1" :title="$t('smart_contract')">
-							<a target="_blank" :href="'https://bscscan.com/address/'+afitTokenAddress"><i class="fas fa-file-contract"></i></a>
-					</span>
-				</div>
-			</div>
-			
-			<div class="token-entry row">
-				<div class="col-2 text-left"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo">AFIT-BNB LP</div>
-				<div class="col-2">{{ $t('BSC')}}</div>
-				<div class="col-2 text-right">{{ formattedUserAfitBNBLPBSC }}</div>
-				<div class="col-2"></div>
-				<div class="col-1 text-right"></div>
-				<div class="col-3">
-					<span class="btn btn-brand p-1" :title="$t('smart_contract')">
-							<a target="_blank" :href="'https://bscscan.com/address/'+afitBNBLPTokenAddress"><i class="fas fa-file-contract"></i></a>
-					</span>
-				</div>
-			</div>
-			
-			
-			<div class="token-entry row">
-				<div class="col-2 text-left"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo">AFITX</div>
-				<div class="col-2">{{ $t('BSC')}}</div>
-				<div class="col-2 text-right">{{ formattedUserAFITXBSC }}</div>
-				<div class="col-2"></div>
-				<div class="col-1 text-right"></div>
-				<div class="col-3">
-					<span class="btn btn-brand p-1" :title="$t('smart_contract')">
-							<a target="_blank" :href="'https://bscscan.com/address/'+afitxTokenAddress"><i class="fas fa-file-contract"></i></a>
-					</span>
-				</div>
-			</div>
-			
-			<div class="token-entry row">
-				<div class="col-2 text-left"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo">AFITX-BNB LP</div>
-				<div class="col-2">{{ $t('BSC')}}</div>
-				<div class="col-2 text-right">{{ formattedUserAFITXBNBLPBSC }}</div>
-				<div class="col-2"></div>
-				<div class="col-1 text-right"></div>
-				<div class="col-3">
-					<span class="btn btn-brand p-1" :title="$t('smart_contract')">
-							<a target="_blank" :href="'https://bscscan.com/address/'+afitxBNBLPTokenAddress"><i class="fas fa-file-contract"></i></a>
-					</span>
-				</div>
-			</div>
-			
-			
-			<div v-if="tokensOfInterestBal.length > 0" >
-				<!--<h5 class="token-title" v-if="cur_bchain == 'STEEM'">{{ $t('Your_Token_Balance') }}</h5>
-				<h5 class="token-title" v-else>{{ $t('Your_HE_Token_Balance') }}<span v-if="cur_bchain=='BLURT'"><i class="fas fa-info-circle" v-on:click="notifySwitchChain()"></i></span></h5>-->
-				<div class="token-entry row" v-for="(token, index) in tokensOfInterestBal" :key="index" :token="token">
-				
-					<div class="col-2 text-left"><img :src="token.icon" class="mr-1 mini-token-logo" >{{ token.symbol }}</div>
-					<div class="col-2">{{ $t('hive_engine')}}</div>
-					<div class="col-2 text-right">{{ renderBal(token) }} {{ token.symbol }}</div>
-					<div class="col-2 text-right">{{ renderStake(token)}} {{ token.symbol }}</div>
-					<div class="col-1"></div>
-					<!--<span v-if="parseFloat(delegStake(token)) > 0">( + {{ delegStake(token)}} {{ token.symbol }} {{ $t('Delegated') }}) </span>-->
-					<div class="token_actions col-3" v-if="cur_bchain!='BLURT'">
-						<span v-if="token.symbol=='AFITX'" class="btn btn-brand p-1" >
-							<a href="#" data-toggle="modal" class="" data-target="#topHoldersXModal" :title="$t('top_100_afitx_holders')" >
-								<i class="fas fa-list-ol"></i>
-							</a>
-						</span>
-						
-						<span v-if="token.symbol=='AFITX'" class="btn btn-brand p-1" >
-						<a v-if="cur_bchain=='STEEM'" :title="$t('buy_afitx_se')" href="https://steem-engine.net/?p=market&t=AFITX" class="" target="_blank" rel="noopener noreferrer">$</a>
-						<a v-else :title="$t('buy_afitx_he')" href="https://hive-engine.com/?p=market&t=AFITX" class="" target="_blank" rel="noopener noreferrer">$</a>
-						</span>
-						
-						
-						<span v-if="token.symbol=='AFIT'" class="btn btn-brand p-1" :title="$t('buy_afit_he')">
-						<i class="fas fa-gopuram" v-on:click="moveAFITSEtoAFITPOWER" v-if="cur_bchain=='STEEM'" :title="$t('MOVE_AFIT_SE_AFIT_POWER')"></i>
-						<i class="fas fa-gopuram" v-on:click="moveAFITSEtoAFITPOWER" v-else :title="$t('MOVE_AFIT_HE_AFIT_POWER')"></i>
-						</span>
-						
-						
-						<span v-if="token.symbol=='AFIT'" class="btn btn-brand p-1" :title="$t('buy_afit_he')">
-							<a v-if="cur_bchain=='STEEM'" href="https://steem-engine.net/?p=market&t=AFIT" target="_blank" rel="noopener noreferrer" :text="$t('buy_afit_se')">$</a>
-							<a v-else href="https://hive-engine.com/?p=market&t=AFIT" target="_blank" rel="noopener noreferrer" :text="$t('buy_afit_he')" >$</a>
-						</span>
-						
-						<!--<span v-if="token.symbol=='AFIT'" class="btn btn-brand p-1" :title="$t('move_afit_he_se_title')"><i class="fas fa-angle-double-left" v-on:click="moveAFITheSE"></i></span>
-						
-						<span v-if="token.symbol=='AFITX'" class="btn btn-brand p-1" :title="$t('move_afitx_he_se_title')"><i class="fas fa-angle-double-left" v-on:click="moveAFITXheSE"></i></span>-->
-						
-						<span v-if="token.stakable" class="btn btn-brand p-1"><i class="fas fa-arrow-circle-up p-1" :title="$t('stake_tokens')" v-on:click="initiateStaking(token)"></i></span>
-						<span v-if="token.stakable" class="btn btn-brand p-1"><i class="fas fa-arrow-circle-down " :title="$t('unstake_tokens')" v-on:click="initiateUnStaking(token)"></i></span>
-						<span v-if="withdrawableTokens.includes(token.symbol)" class="btn btn-brand p-1"><i class="fas fa-upload " :title="$t('withdraw_tokens')" v-on:click="initiateWithdraw(token)"></i></span>
-						<span class="btn btn-brand p-1"><i class="fas fa-share-square " :title="$t('transfer_tokens')" v-on:click="initiateTransfer(token)"></i></span>
-						<span v-if="token.symbol =='AFIT'"  class="btn btn-brand p-1" ><i class="fas fa-truck-loading " :title="$t('move_to_bsc')" v-on:click="initiateBSCTransfer(token)"></i></span>
-					</div>
-				</div>
-				
-				<!-- steem engine tokens -->
-				<div class="token-entry row">
-					<div class="col-2 text-left"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo">AFIT</div>
-					<div class="col-2">{{ $t('Steem Engine')}}</div>
-					<div class="col-2 text-right">{{ formattedUserAfitSE }}</div>
-					<div class="col-2"></div>
-					<div class="col-1 text-right"></div>
-					<!--<div class="col-3">
-						<span v-if="cur_bchain!='BLURT'" class="btn btn-brand p-1" :title="$t('move_afit_se_he_title')"><i class="fas fa-angle-double-right" v-on:click="moveAFITseHE"></i></span>
-					</div>-->
-				</div>
-				
-				<div class="token-entry row">
-					<div class="col-2 text-left"><img src="/img/AFITX.png" class="mr-1 mini-token-logo">AFITX</div>
-					<div class="col-2">{{ $t('Steem Engine')}}</div>
-					<div class="col-2 text-right">{{ formattedUserAFITXSE }}</div>
-					<div class="col-2"></div>
-					<div class="col-1 text-right"></div>
-					<!--<div class="col-3">
-						<span v-if="cur_bchain!='BLURT'" class="btn btn-brand p-1" :title="$t('move_afitx_se_he_title')"><i class="fas fa-angle-double-right" v-on:click="moveAFITXseHE"></i></span>
-					</div>-->
-				</div>
-				
-				<div class="action-box">
-				
-					<h3 class="pro-name">
-						<span v-if="curTokenAction == TRANSFER_FUNDS">{{ $t('transfer_tokens') }}</span>
-						<span v-else-if="curTokenAction == TRANSFER_BSC">{{ $t('move_to_bsc') }}</span>
-						<span v-else-if="curTokenAction == POWERUP_FUNDS">{{ $t('stake_tokens') }}</span>
-						<span v-else-if="curTokenAction == POWERDOWN_FUNDS">{{ $t('unstake_tokens') }}</span>
-						<span v-else-if="curTokenAction == WITHDRAW_FUNDS">{{ $t('withdraw_tokens') }}</span>
-					</h3>
-					<div v-if="tokenActions && curTokenAction">
-					<div class="row" v-if="tokenActions && curTokenAction == TRANSFER_FUNDS">
-					  <label for="token-target-account" class="w-25 p-2">{{ $t('Account') }} *</label>
-					  <span class="p-1">@</span><input type="text" id="token-target-account" name="token-target-account" ref="token-target-account" class="form-control-lg p-2">
-					</div>
-					
-					<div class="row" v-if="tokenActions && curTokenAction == TRANSFER_BSC">
-						<span class="text-brand">{{ $t('transfer_bsc_description') }}</span>
-					</div>
-					
-					<div class="row" v-if="tokenActions">
-					  <label for="token-powerup-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
-					  <input type="number" id="token-powerup-amount" name="token-powerup-amount" ref="token-powerup-amount" class="form-control-lg w-50 p-2" @change="calculateHBDAmount"><span class="p-2"><img :src="selTokenUp.icon" class="mr-1 mini-token-logo" >{{ selTokenUp.symbol }}</span>
-					</div>
-					
-					<div class="row" v-if="tokenActions && curTokenAction == TRANSFER_BSC">
-					  <label for="token-hbd-amount" class="w-25 p-2">{{ $t('HBD_Amount') }} *</label>
-					  <input type="number" id="token-hbd-amount" name="token-hbd-amount" ref="token-hbd-amount" class="form-control-lg w-50 p-2" readonly><span class="p-2">{{ $t('HBD') }}</span>
-					</div>
-					
-					<div class="row" v-if="isStdLogin && tokenActions">
-					  <label for="p-ac-key-trans-token" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
-					  <input type="password" id="p-ac-key-trans-token" name="p-ac-key-trans-token" ref="p-ac-key-trans-token" class="form-control-lg w-50 p-2">
-					</div>
-					<div class="row" v-if="tokenActions && curTokenAction == TRANSFER_FUNDS" >
-					  <label for="token-transfer-memo" class="w-25 p-2">{{ $t('Memo') }}</label>
-					  <input type="text" id="token-transfer-memo" name="token-transfer-memo" ref="token-transfer-memo" class="form-control-lg w-50 p-2">
-					</div>
-					<div class="text-brand italic text-center" v-if="tokenActions && curTokenAction == WITHDRAW_FUNDS"  v-html='this.withdrawableSpecialInstrs[selTokenUp.symbol]'>
-						
-					</div>
-					
-					<div class="row" v-if="tokenActions">
-					  <div class="w-25"></div>
-					  <button v-if="curTokenAction == POWERUP_FUNDS" v-on:click="proceedPowerUpToken" class="btn btn-brand btn-lg w-50 border">{{ $t('Power_Up') }}</button>
-					  <button v-else-if="curTokenAction == POWERDOWN_FUNDS" v-on:click="proceedPowerDownToken" class="btn btn-brand btn-lg w-50 border">{{ $t('Power_Down') }}</button>
-					  <button v-else-if="curTokenAction == TRANSFER_FUNDS" v-on:click="proceedTransferToken" class="btn btn-brand btn-lg w-50 border">{{ $t('Send') }}</button>
-					  <button v-else-if="curTokenAction == WITHDRAW_FUNDS" v-on:click="proceedWithdrawToken" class="btn btn-brand btn-lg w-50 border">{{ $t('Withdraw') }}</button>
-					  <button v-else-if="curTokenAction == TRANSFER_BSC" v-on:click="proceedTransferBSC" class="btn btn-brand btn-lg w-50 border">{{ $t('Transfer') }}</button>
-					</div>
-					</div>
-					<div v-if="movingFunds" id="checking_funds">
+					</small>
+				</h5>
+				<h5 class="mb-4 font-weight-bold row">
+					<span class="col-md-12">{{ formattedUserAfit }}</span>
+					<span class="col-md-12 text-center"><button v-on:click="refreshBalance()" class="btn btn-brand btn-lg w-50 border">{{ $t('Refresh_balance') }}</button>
+					<span v-if="refreshinBal" >
 						<i class="fas fa-spin fa-spinner"></i>
-					</div>
-					<div class="row" v-if="afit_se_power_error_proceeding">
-					  <div class="w-25"></div>
-					  <div class="text-brand" v-html="this.afit_se_power_err_msg"></div>
-					</div>
+					</span>
+					</span>
+				</h5>
+				<h5 class="mb-4 font-weight-bold row">
+					<span class="col-md-6">
+						{{ formattedUserAfitSE }}
+						<br/>
+						<span v-if="cur_bchain!='BLURT'" class="btn btn-brand" :title="$t('move_afit_se_he_title')"><i class="fas fa-angle-double-right" v-on:click="moveAFITseHE"></i></span>
+					</span>
+					<span class="col-md-6">
+						{{ formattedUserAfitHE }}
+						<br/>
+						<!--<span v-if="cur_bchain!='BLURT'" class="btn btn-brand" :title="$t('move_afit_he_se_title')"><i class="fas fa-angle-double-left" v-on:click="moveAFITheSE"></i></span>-->
+					</span>
+				</h5>
+				<h5 class="mb-4 font-weight-bold row">
+					<span class="col-md-6">
+						<img src="/img/Binance-gold-coin.gif" width="25px" height="25px">{{ formattedUserAfitBSC }}
+						<a target="_blank" :href="'https://bscscan.com/address/'+afitTokenAddress"><i class="fas fa-file-contract text-brand"></i></a>
+						<br/>
+					</span>
+					<span class="col-md-6">
+						<img src="/img/Binance-gold-coin.gif" width="25px" height="25px">{{ formattedUserAfitBNBLPBSC }}
+						<a target="_blank" :href="'https://bscscan.com/address/'+afitBNBLPTokenAddress"><i class="fas fa-file-contract text-brand"></i></a>
+					</span>
 					
+				</h5>
 				
-				</div>
+				<h5>
+				<a href="#" id="pendingRewardsKicker" name="pendingRewardsKicker" ref="pendingRewardsKicker" class="btn btn-brand btn-lg w-50 border" data-toggle="modal" data-target="#pendingRewardsModal">{{$t('Check_Pending_Rewards')}}</a>
+				</h5>
 				
-				
-			</div>
-			
-			
-			
-			
-			
-			<div id="detailsArea" />
-			<div class="text-center">
-				<transition name="fade">
-				  <div v-if="fundActivityMode == 1" class="text-center grid col-md-12">
-					<h3 class="pro-name">{{ $t('TRANSFER_FUNDS_ACTION_TEXT') }}</h3>
-					<div class="row">
-					  <label for="transfer-recipient" class="w-25 p-2">{{ $t('To') }} *</label>
-					  <input type="text" id="transfer-recipient" name="transfer-recipient" ref="transfer-recipient" class="form-control-lg w-50 p-2">
-					</div>
-					<div class="row">
-						<label for="transfer-type" class="w-25 p-2">{{ $t('Type') }} *</label>
-						<select @change="transferTypeChange" id="transfer-type" name="transfer-type" ref="transfer-type" text="Choose Type" class="form-control-lg w-50 p-2">
-						  <option value="STEEM" v-if="cur_bchain!='BLURT'">
-							<span v-if="cur_bchain=='STEEM'">{{ $t('STEEM') }}</span>
-							<span v-if="cur_bchain=='HIVE'">{{ $t('HIVE') }}</span>
-						  </option>
-						  <option value="SBD" v-if="cur_bchain!='BLURT'">
-							<span v-if="cur_bchain=='STEEM'">{{ $t('SBD') }}</span>
-							<span v-if="cur_bchain=='HIVE'">{{ $t('HBD') }}</span>
-						  </option>
-						  <option value="BLURT" v-if="cur_bchain=='BLURT'">{{ $t('BLURT') }}</option>
-						</select>
-					</div>
-					<div class="row">
-					  <label for="transfer-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
-					  <input type="number" id="transfer-amount" name="transfer-amount" ref="transfer-amount" class="form-control-lg w-50 p-2">
-					  <span class="w-25 p-1 text-left text-brand" v-on:click="fillTransAmount()" :title="$t('select_full_balance')"><u>{{ this.renderTransAmount() }}</u></span>
-					</div>
-					<div class="row">
-					  <label for="transfer-memo" class="w-25 p-2">{{ $t('Memo') }}</label>
-					  <input type="text" id="transfer-memo" name="transfer-memo" ref="transfer-memo" class="form-control-lg w-50 p-2">				
-					</div>
-					<div class="row" v-if="isStdLogin">
-						  <label for="p-ac-key-trans" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
-						  <input type="password" id="p-ac-key-trans" name="p-ac-key-trans" ref="p-ac-key-trans" class="form-control-lg w-50 p-2">
-					</div>
-					<div class="row" v-if="isStdLogin">
-						<div class="text-center small p-2 w-25"></div>
-						<div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your <b>PRIVATE ACTIVE</b> key.*</div>
-					</div>
-					<div class="text-center small p-2">
-					  <i>{{ $t('wallet_memo_notice') }}</i>
-					</div>
-					<div class="text-brand text-center" v-if="error_proceeding">
-					  {{ this.error_msg}}
-					</div>
-					<div class="row">
-					  <div class="w-25"></div>
-					  <button v-on:click="proceedTransfer" class="btn btn-brand btn-lg w-50 border">{{ $t('Send') }}</button>
-					</div>
-					<div v-if="transferProcess">
-					  <i class="fas fa-spin fa-spinner" ></i>
-					</div>
-				  </div>
-				</transition>
-				<transition name="fade">
-				  <div v-if="fundActivityMode == 2" class="text-center grid col-md-12">
-					<h3 class="pro-name">{{ $t('Power_Up') }}</h3>
-					<div class="row">
-					  <label for="powerup-recipient" class="w-25 p-2">{{ $t('To') }} *</label>
-					  <input type="text" id="powerup-recipient" name="powerup-recipient" ref="powerup-recipient" class="form-control-lg w-50 p-2" :value="user.account.name">
-					</div>
-					<div class="row">
-					  <label for="powerup-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
-					  <input type="number" id="powerup-amount" name="powerup-amount" ref="powerup-amount" class="form-control-lg w-50 p-2">
-					</div>
-					<div class="row" v-if="isStdLogin">
-						  <label for="powerup-amount" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
-						  <input type="password" id="p-ac-key-up" name="p-ac-key-up" ref="p-ac-key-up" class="form-control-lg w-50 p-2">
-					</div>
-					<div class="row" v-if="isStdLogin">
-						<div class="text-center small p-2 w-25"></div>
-						<div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your <b>PRIVATE ACTIVE</b> key.*</div>
-					</div>
-					<div class="row">
-					  <div class="text-center small p-2 w-25"></div>
-					  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50" v-html="$t('power_up_notice')" v-if="cur_bchain=='STEEM'">
-					  </div>
-					  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50" v-html="$t('power_up_hive_notice')" v-else-if="cur_bchain=='HIVE'">
-					  </div>
-					</div>
-					<div class="text-brand text-center" v-if="error_proceeding">
-					  {{ this.error_msg}}
-					</div>
-					<div class="row">
-					  <div class="w-25"></div>
-					  <button v-on:click="proceedPowerUp" class="btn btn-brand btn-lg w-50 border">{{ $t('Power_Up') }}</button>
-					</div>
-					<div v-if="powerUpProcess">
-					  <i class="fas fa-spin fa-spinner" ></i>
-					</div>
-				  </div>
-				</transition>
-				<transition name="fade">
-				  <div v-if="fundActivityMode == 3" class="text-center grid col-md-12">
-					<h3 class="pro-name">{{ $t('Power_Down') }}</h3>
-					<div>
-					  <div class="row">
-						  <label for="powerdown-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
-						  <input type="number" id="powerdown-amount" name="powerdown-amount" ref="powerdown-amount" class="form-control-lg w-50 p-2">
-					  </div>
-					  <div class="row" v-if="isStdLogin">
-						  <label for="powerdown-amount" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
-						  <input type="password"  id="p-ac-key" name="p-ac-key" ref="p-ac-key" class="form-control-lg w-50 p-2">
-					  </div>
-					  <div class="row" v-if="isStdLogin">
-						<div class="text-center small p-2 w-25"></div>
-						<div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your <b>PRIVATE ACTIVE</b> key.*</div>
-					  </div>
-					</div>
-					<div class="row" v-if="isPoweringDown">
-					  <div class="text-center small p-2 w-25"></div>
-					  <div class="text-center text-brand small p-2 w-50"><b>{{ $t('currently_powering_down') }} {{this.renderSteemPower(5)}} {{this.cur_bchain}}<br/>
-						{{ $t('next_withdraw_on') }} {{this.powerDownWithdrawDate}}</b>
-					  </div>
-					</div>
-					<div class="row">
-					  <div class="text-center small p-2 w-25"></div>
-					  <div v-if="cur_bchain=='STEEM'" :class="smallScreenBtnClasses" class="text-center small p-2 w-50" v-html="$t('power_down_notice').replaceAll('_CUR_','STEEM').replaceAll('_TIME_', '4')">
-					  </div>
-					  <div v-else-if="cur_bchain=='HIVE'" :class="smallScreenBtnClasses" class="text-center small p-2 w-50" v-html="$t('power_down_notice').replaceAll('_CUR_','HIVE').replaceAll('_TIME_', '13')">
-					  </div>
-					</div>
-					<div class="text-brand text-center" v-if="error_proceeding">
-					  {{ this.error_msg}}
-					</div>
-					<div class="row" v-if="isPoweringDown">
-					  <div class="text-center small p-2 w-25"></div>
-					  <button v-on:click="proceedPowerDown" class="btn btn-brand btn-lg w-25 border">{{ $t('Power_Down') }}</button>
-					  <button v-on:click="cancelPowerDown" class="btn btn-brand btn-lg w-25 border">{{ $t('Cancel_Power_Down') }}</button>
-					  <div v-if="powerDownProcess">
-					  <i class="fas fa-spin fa-spinner" ></i>
-					  </div>
-					</div>
-					<div class="row" v-else>
-					  <div class="text-center small p-2 w-25"></div>
-					  <button v-on:click="proceedPowerDown" class="btn btn-brand btn-lg w-50 border">{{ $t('Power_Down') }}</button>
-					  <div v-if="powerDownProcess">
-					  <i class="fas fa-spin fa-spinner" ></i>
-					  </div>
-					</div>
-				  </div>
-				</transition>
-				<transition name="fade">
-				  <div v-if="fundActivityMode == DELEGATE_FUNDS" class="text-center grid col-12">
-					<h3 class="pro-name">{{ $t('DELEGATE_ACTION_TEXT') }} {{ $t('POWER') }}</h3>
-					<div class="row">
-					  <label for="delegate-recipient" class="w-25 p-2">{{ $t('To') }} *</label>
-					  <input type="text" id="delegate-recipient" name="delegate-recipient" ref="delegate-recipient" class="form-control-lg w-50 p-2" value="actifit">
-					</div>
-					<div class="row">
-					  <label for="delegate-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
-					  <input type="number" id="delegate-amount" name="delegate-amount" ref="delegate-amount" class="form-control-lg w-50 p-2">
-					</div>
-					<div class="row" v-if="isStdLogin">
-						  <label for="delegate-amount" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
-						  <input type="password" id="p-ac-key-delg" name="p-ac-key-delg" ref="p-ac-key-delg" class="form-control-lg w-50 p-2">
-					</div>
-					<div class="row" v-if="isStdLogin">
-						<div class="text-center small p-2 w-25"></div>
-						<div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your <b>PRIVATE ACTIVE</b> key.*</div>
-					</div>
-					<div class="row">
-					  <div class="text-center small p-2 w-25"></div>
-					  <div class="p-2 w-50"></div>
-					  <!--<div :class="smallScreenBtnClasses" class="text-center small p-2 w-50" v-html="$t('power_up_notice')" v-if="cur_bchain=='STEEM'">
-					  </div>
-					  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50" v-html="$t('power_up_hive_notice')" v-else-if="cur_bchain=='HIVE'">
-					  </div>-->
-					</div>
-					<div class="text-brand text-center" v-if="error_proceeding">
-					  {{ this.error_msg}}
-					</div>
-					<div class="row">
-					  <div class="w-25"></div>
-					  <button v-on:click="proceedDelegation" class="btn btn-brand btn-lg w-50 border">{{ $t('Delegate') }}</button>
-					</div>
-					<div v-if="delegateProcess">
-					  <i class="fas fa-spin fa-spinner" ></i>
-					</div>
-					
-					
-					
-					<div>
-						<h5>{{ $t('active_delegations') }}</h5>
-						<table class="table table-hover">
-						  <thead class="text-brand">
-							<tr>
-							  <th scope="col">{{ $t('Delegatee') }}</th>
-							  <th scope="col" v-if="cur_bchain == 'STEEM' ">{{ $t('Steem_Power') }}</th>
-							  <th scope="col" v-else-if="cur_bchain == 'HIVE' ">{{ $t('Hive_Power') }}</th>
-							  <th scope="col" v-else-if="cur_bchain == 'BLURT' ">{{ $t('Blurt_Power') }}</th>
-							  <th scope="col">{{ $t('Date') }}</th>
-							  <th scope="col">{{ $t('Action') }}</th>
-							</tr>
-						  </thead>
-						  <tbody>
-							<tr v-for="(delegation, index) in activeDelegations" :key="index" :delegation="delegation">
-								<td><a :href="'./@'+delegation.delegatee" >@{{ delegation.delegatee }}</a></td> 
-								<td>
-									{{ numberFormat(delegation.power, 3) }} 
-									<span v-if="cur_bchain == 'STEEM'">{{ $t('SP_Symbol') }}</span>
-									<span v-else-if="cur_bchain == 'HIVE'">{{ $t('HP_Symbol') }}</span></td> 
-								<td>{{ date(delegation.min_delegation_time) }}</td>
-								<td><span ><a href="#" @click.prevent="editDelegation(delegation)" :title="$t('Edit_Delegation')"><i class="fas fa-edit"></i></a></span>&nbsp;
-								<span ><a href="#" @click.prevent="cancelDelegation(delegation)" :title="$t('Cancel_Delegation')"><i class="fas fa-trash-alt"></i><i class="fas fa-spin fa-spinner" v-if="cancellingDelegation"></i></a></span></td>
-							</tr>
-						  </tbody>
-						</table>
-					</div>
-				  </div>
-				</transition>
-				
-				<transition name="fade">
-				  <div v-if="fundActivityMode == DELEGATE_RCS && cur_bchain == 'HIVE' " class="text-center grid col-12">
-					<h3 class="pro-name">{{ $t('DELEGATE_ACTION_TEXT') }} {{ $t('RCS') }}</h3>
-					<div class="row">
-					  <label for="delegate-recipient" class="w-25 p-2">{{ $t('To') }} *</label>
-					  <input type="text" id="delegate-recipient" name="delegate-recipient" ref="delegate-recipient" class="form-control-lg w-50 p-2" value="actifit">
-					</div>
-					<div class="row">
-					  <label for="delegate-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
-					  <input type="number" id="delegate-amount" name="delegate-amount" ref="delegate-amount" class="form-control-lg w-50 p-2">
-					</div>
-					<div class="row">
-						<div class="w-25"></div>
-						<b>{{$t('available_RC')}} / {{$t('full_RC')}} / {{$t('delegated_RC')}}</b>
-					</div>
-					<div class="row">
-						<div class="w-25"></div>
-						{{ showUserRC()}} / {{ showUserRC(1)}} / {{ showUserRC(2)}}
-					</div>
-					<div class="row">
-					  <div class="text-center small p-2 w-25"></div>
-					  <div class="p-2 w-50"></div>
-					  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50" v-html="$t('rc_delegation_notice')">
-					  </div>
-					</div>
-					<div class="text-brand text-center" v-if="error_proceeding">
-					  {{ this.error_msg}}
-					</div>
-					<div class="row">
-					  <div class="w-25"></div>
-					  <button v-on:click="proceedRCDelegation" class="btn btn-brand btn-lg w-50 border">{{ $t('Delegate_rc') }}</button>
-					</div>
-					<div v-if="delegateProcess">
-					  <i class="fas fa-spin fa-spinner" ></i>
-					</div>
-					
-					
-					
-					<div>
-						<h5>{{ $t('active_delegations') }}</h5>
-						<table class="table table-hover">
-						  <thead class="text-brand">
-							<tr>
-							  <th scope="col">{{ $t('Delegatee') }}</th>
-							  <th scope="col">{{ $t('delegated_RC') }}</th>
-							  <th scope="col">{{ $t('owned_RC') }}</th>
-							  <!--<th scope="col">{{ $t('Date') }}</th>-->
-							  <th scope="col">{{ $t('Action') }}</th>
-							</tr>
-						  </thead>
-						  <tbody>
-							<tr v-for="(delegation, index) in activeRCDelegations" :key="index" :delegation="delegation">
-								<td><a :href="'./@'+delegation.to" >@{{ delegation.to }}</a></td> 
-								<td>
-									{{ numberFormat(delegation.delegated_rc, 3) }} </td>
-								<td>{{ numberFormat(renderRCVal(delegation.to), 3) }}</td>
-								<!--<td>{{ date(delegation.min_delegation_time) }}</td>-->
-								<td><span ><a href="#" @click.prevent="editRCDelegation(delegation)" :title="$t('Edit_Delegation')"><i class="fas fa-edit"></i></a></span>&nbsp;
-								<span ><a href="#" @click.prevent="cancelRCDelegation(delegation)" :title="$t('Cancel_Delegation')"><i class="fas fa-trash-alt"></i><i class="fas fa-spin fa-spinner" v-if="cancellingDelegation"></i></a></span></td>
-							</tr>
-						  </tbody>
-						</table>
-					</div>
-					
-				  </div>
-				</transition>
-				
-				
-				<transition name="fade">
-					<div v-if="fundActivityMode == SHOW_CLAIMABLE_REW && isClaimableDataAvailable && cur_bchain=='STEEM'" class="action-box">
-						<h5 class="pro-name"><img src="/img/STEEM.png" class="mr-2 token-logo">{{ $t('Claimable_Steem_Rewards') }}</h5>
-						<div class="mb-4 font-weight-bold">
-							<span class="p-2">{{ this.claimSP }} | {{ this.claimSTEEM }} | {{ this.claimSBD }}</span>
-							<div class="p-2"><button v-on:click="claimRewards" class="btn btn-brand btn-lg w-20">{{ $t('Claim_Steem_Rewards') }}</button></div>
-							<div v-if="claimRewardsProcess">
-							  <i class="fas fa-spin fa-spinner" ></i>
-							</div>
-						</div>
-					</div>
-					<div v-else-if="fundActivityMode == SHOW_CLAIMABLE_REW && isClaimableDataAvailable && cur_bchain=='HIVE'" class="col-md-6 row-sep-in">
-						<h5 class="pro-name"><img src="/img/HIVE.png" class="mr-2 token-logo">{{ $t('Claimable_Hive_Rewards') }}</h5>
-						<div class="mb-4 font-weight-bold">
-							<span class="p-2">{{ this.claimSP }} | {{ this.claimSTEEM }} | {{ this.claimSBD }}</span>
-							<div class="p-2"><button v-on:click="claimRewards" class="btn btn-brand btn-lg w-20">{{ $t('Claim_Hive_Rewards') }}</button></div>
-							<div v-if="claimRewardsProcess">
-							  <i class="fas fa-spin fa-spinner" ></i>
-							</div>
-						</div>
-					</div>
-					<div v-else-if="fundActivityMode == SHOW_CLAIMABLE_REW && isClaimableDataAvailable && cur_bchain=='BLURT'" class="col-md-6 row-sep-in">
-						<h5 class="pro-name"><img src="/img/BLURT.png" class="mr-2 token-logo">{{ $t('Claimable_Blurt_Rewards') }}</h5>
-						<div class="mb-4 font-weight-bold">
-							<span class="p-2">{{ this.claimSP }} | {{ this.claimSTEEM }}</span>
-							<div class="p-2"><button v-on:click="claimRewards" class="btn btn-brand btn-lg w-20">{{ $t('Claim_Blurt_Rewards') }}</button></div>
-							<div v-if="claimRewardsProcess">
-							  <i class="fas fa-spin fa-spinner" ></i>
-							</div>
-						</div>
-					</div>
-				</transition>
-				
-				<transition name="fade">
-					<div v-if="afitActivityMode == MOVE_AFITX_SE_HE || afitActivityMode == MOVE_AFITX_HE_SE">
-						<!--<h3 class="pro-name">{{ $t('EXCHANGE_AFIT_FOR_STEEM') }}</h3>-->
-						  <div class="text-center">
-							<div v-if="afitActivityMode == MOVE_AFITX_SE_HE" class="text-brand font-weight-bold">{{ $t('move_afitx_se_he') }}</div>
-							<div v-else class="text-brand font-weight-bold">{{ $t('move_afitx_he_se') }}</div>
-							<div class="row" >
-							  <div class="w-25 p-2">{{ $t('Amount_To_Move') }}</div>
-							  <input type="number" id="afitx-se-he" name="afitx-se-he" ref="afitx-se-he" class="form-control-lg w-50 p-2">
-							</div>
-							<div class="row" v-if="isStdLogin">
-							  <label for="p-ac-key-afitx" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
-							  <input type="password" id="p-ac-key-afitx" name="p-ac-key-afitx" ref="p-ac-key-afitx" class="form-control-lg w-50 p-2">
-							</div>
-							<div class="row">
-								<div class="w-25"></div>
-								<div>{{ $t('percent_burn_afitx') }}</div>
-							</div>
-							<div class="text-brand text-center" v-if="afit_se_move_error_proceeding">
-							  {{ this.afit_se_move_err_msg }}
-							</div>
-							<div class="row">
-							  <div class="w-25"></div>
-							  <button v-if="afitActivityMode == MOVE_AFITX_SE_HE" v-on:click="proceedMoveAFITX(1)" class="btn btn-brand btn-lg w-50 border">{{ $t('Proceed') }}</button>
-							  <button v-else v-on:click="proceedMoveAFITX(2)" class="btn btn-brand btn-lg w-50 border">{{ $t('Proceed') }}</button>
-							</div>
-							<div class="row">
-							  <div class="w-25"></div>
-							  <div v-if="movingAFITX" >
-								<i class="fas fa-spin fa-spinner"></i>
-							  </div>
-							</div>
-						  </div>
-					</div>
-				
-				</transition>
-				
-				<transition name="fade">
-				
-					<div v-if="afitActivityMode == MOVE_AFIT_SE_HE || afitActivityMode == MOVE_AFIT_HE_SE">
+				<div v-if="afitActivityMode == MOVE_AFIT_SE_HE || afitActivityMode == MOVE_AFIT_HE_SE">
 					  <div class="text-center p-2">
 						<div v-if="afitActivityMode == MOVE_AFIT_SE_HE" class="text-brand font-weight-bold">{{ $t('move_afit_se_he') }}</div>
 						<div v-else class="text-brand font-weight-bold">{{ $t('move_afit_he_se') }}</div>
@@ -692,56 +133,94 @@
 						  </div>
 						</div>
 					  </div>
-					</div>
-				</transition>
-				
-				
-				<transition name="fade">
-					<div v-if="afitActivityMode == showBSCDetails">
-						<h3 class="pro-name">{{ $t('bsc_wallet') }}</h3>
-						<span class="font-brand">{{ $t('bsc_details_notice') }}</span>
-						
-						<div>
-							
-								<input type="text" id="bsc-wallet-address" name="bsc-wallet-address" ref="bsc-wallet-address" class="form-control-lg w-50 p-2" :value="this.getWalletAddress()" placeholder="0x......">
-								<div v-if="error_wallet!=''" class="text-brand text-center">{{ error_wallet}}</div>
-								<button v-on:click="updateWalletAddress" class="btn btn-brand btn-lg w-50 border"><span v-if="this.bsc_wallet_address">{{ $t('Save') }}</span><span v-else>{{ $t('Save') }}</span></button>
-							
+				</div>
+			</div>
+			<div class="col-md-6 row-sep-in small-pad-row">
+				<h5 class="token-title"><img src="/img/AFITX.png" class="mr-1 token-logo">{{ $t('Your_Afitx_Balance') }}<i class="fas fa-info-circle" v-on:click="showAfitxInfo=!showAfitxInfo"></i>&nbsp;
+					<small class="text-right">
+						<a href="#" data-toggle="modal" class="text-brand" data-target="#topHoldersXModal" >
+							<i class="fas fa-list-ol"></i>
+							<span v-if="screenWidth > 500"> {{ $t('top_100_afitx_holders') }}</span>
+							<span v-else> {{ $t('top_100') }}</span>
+						</a>
+					</small>
+				</h5>
+				<div v-if="showAfitxInfo" v-html="$t('afitx_info')"></div>
+				<h5 class="mb-4 font-weight-bold row">
+					<span class="col-md-6">
+						{{ formattedUserAFITXSE }}
+						<br/>
+						<span v-if="cur_bchain!='BLURT'" class="btn btn-brand" :title="$t('move_afitx_se_he_title')"><i class="fas fa-angle-double-right" v-on:click="moveAFITXseHE"></i></span>
+					</span>
+					<span class="col-md-6">
+						{{ formattedUserAFITXHE }}
+						<br/>
+						<!--<span v-if="cur_bchain!='BLURT'" class="btn btn-brand" :title="$t('move_afitx_he_se_title')"><i class="fas fa-angle-double-left" v-on:click="moveAFITXheSE"></i></span>-->
+					</span>
+				</h5>
+				<h5 class="mb-4 font-weight-bold row">
+					<span class="col-md-6">
+						<img src="/img/Binance-gold-coin.gif" width="25px" height="25px">
+						{{ formattedUserAFITXBSC }}
+						<a target="_blank" :href="'https://bscscan.com/address/'+afitxTokenAddress"><i class="fas fa-file-contract text-brand"></i></a>
+						<br/>
+					</span>
+					<span class="col-md-6">
+						<img src="/img/Binance-gold-coin.gif" width="25px" height="25px">{{ formattedUserAFITXBNBLPBSC }}
+						<a target="_blank" :href="'https://bscscan.com/address/'+afitxBNBLPTokenAddress"><i class="fas fa-file-contract text-brand"></i></a>
+					</span>
+				</h5>
+				<div v-if="afitActivityMode == MOVE_AFITX_SE_HE || afitActivityMode == MOVE_AFITX_HE_SE">
+					  <div class="text-center p-2">
+						<div v-if="afitActivityMode == MOVE_AFITX_SE_HE" class="text-brand font-weight-bold">{{ $t('move_afitx_se_he') }}</div>
+						<div v-else class="text-brand font-weight-bold">{{ $t('move_afitx_he_se') }}</div>
+						<div class="row" >
+						  <div class="w-25 p-2">{{ $t('Amount_To_Move') }}</div>
+						  <input type="number" id="afitx-se-he" name="afitx-se-he" ref="afitx-se-he" class="form-control-lg w-50 p-2">
 						</div>
-					</div>
-				</transition>
-				
+						<div class="row" v-if="isStdLogin">
+						  <label for="p-ac-key-afitx" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
+						  <input type="password" id="p-ac-key-afitx" name="p-ac-key-afitx" ref="p-ac-key-afitx" class="form-control-lg w-50 p-2">
+						</div>
+						<div class="row">
+							<div class="w-25"></div>
+							<div>{{ $t('percent_burn_afitx') }}</div>
+						</div>
+						<div class="text-brand text-center" v-if="afit_se_move_error_proceeding">
+						  {{ this.afit_se_move_err_msg }}
+						</div>
+						<div class="row">
+						  <div class="w-25"></div>
+						  <button v-if="afitActivityMode == MOVE_AFITX_SE_HE" v-on:click="proceedMoveAFITX(1)" class="btn btn-brand btn-lg w-50 border">{{ $t('Proceed') }}</button>
+						  <button v-else v-on:click="proceedMoveAFITX(2)" class="btn btn-brand btn-lg w-50 border">{{ $t('Proceed') }}</button>
+						</div>
+						<div class="row">
+						  <div class="w-25"></div>
+						  <div v-if="movingAFITX" >
+							<i class="fas fa-spin fa-spinner"></i>
+						  </div>
+						</div>
+					  </div>
+				</div>
 			</div>
-			
-			
 		</div>
-		<div v-if="this.tokenMetrics.length > 0 && false" class="row">
-			<div class="col-md-6 row-sep row-sep-in">
-				<h5 class="token-title">{{ $t('account_est_val') }}<i class="fas fa-info-circle" v-on:click="showDetailedCalc=!showDetailedCalc"></i></h5>
-				<div class="pb-2">{{ $t('in_usd') }}: ${{ totalAccountValue}}</div>
-				<div class="pb-2" v-if="this.cur_bchain=='STEEM'">{{ $t('in_steem') }}: <img src="/img/STEEM.png" class="token-logo-sm">{{ formattedSteemTotVal }}</div>
-				<div class="pb-2" v-else-if="this.cur_bchain=='HIVE'">{{ $t('in_hive') }}: <img src="/img/HIVE.png" class="token-logo-sm">{{ formattedSteemTotVal }}</div>
-				<div class="pb-2" v-else-if="this.cur_bchain=='BLURT'">{{ $t('in_blurt') }}: <img src="/img/BLURT.png" class="token-logo-sm">{{ formattedSteemTotVal }}</div>
-			</div>
-			
-		</div>
-		<div v-if="this.showDetailedCalc" class="text-center">
-			<div class="row">
-				<div class="w-25"></div>
-				<h5 class="w-100">{{ $t('detailed_calc_title')}}</h5>
-			</div>
-			<div class="row text-right">
-				<div class="w-25"></div>
-				<div class="p-1 m-1 calc-data" v-html="this.detailCalculation"></div>
-			</div>
-		</div>
-        
-		<div class="font-weight-bold">
+		<div class="p-2 font-weight-bold">
 			<!--<button v-on:click="buyAFITwithSTEEM" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('BUY_AFIT_WITH_STEEM') }}</button>-->
+			<a v-if="cur_bchain=='STEEM'" href="https://steem-engine.net/?p=market&t=AFIT" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border " target="_blank" rel="noopener noreferrer">{{ $t('buy_afit_se') }}</a>
+			<a v-else href="https://hive-engine.com/?p=market&t=AFIT" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border " target="_blank" rel="noopener noreferrer">{{ $t('buy_afit_he') }}</a>
 			
+			<a v-if="cur_bchain=='STEEM'" href="https://steem-engine.net/?p=market&t=AFITX" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border " target="_blank" rel="noopener noreferrer">{{ $t('buy_afitx_se') }}</a>
+			<a v-else href="https://hive-engine.com/?p=market&t=AFITX" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border " target="_blank" rel="noopener noreferrer">{{ $t('buy_afitx_he') }}</a>
+			
+			<button v-on:click="exchangeAFITforSTEEM" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('EXCHANGE_AFIT_FOR_STEEM') }}</button>
+			
+			<button v-if="cur_bchain=='STEEM'" v-on:click="moveAFITSEtoAFITPOWER" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('MOVE_AFIT_SE_AFIT_POWER') }}</button>
+			<button v-else v-on:click="moveAFITSEtoAFITPOWER" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('MOVE_AFIT_HE_AFIT_POWER') }}</button>
+			
+			<!--<button v-if="cur_bchain=='STEEM'" v-on:click="initiateAFITtoSE" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('INITIATE_AFIT_TO_SE') }}</button>-->
+			<button v-on:click="initiateAFITtoSE" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border">{{ $t('INITIATE_AFIT_TO_HE') }}</button>
 			  <transition name="fade">
-			  <div v-if="afitActivityMode == MOVE_AFIT_SE" class="action-box">
-				<h3 class="pro-name">{{ $t('MOVE_AFIT_HE_AFIT_POWER') }}</h3>
+			  <div v-if="afitActivityMode == MOVE_AFIT_SE">
 				  <div class="text-center grid p-2">
 					<div v-if="cur_bchain=='STEEM'" class="text-brand font-weight-bold">{{ $t('wallet.afit_se_to_power') }}</div>
 					<div v-else class="text-brand font-weight-bold">{{ $t('wallet.afit_he_to_power') }}</div>
@@ -770,7 +249,6 @@
 			  </div>
 			  
 			  <div v-else-if="afitActivityMode == INIT_AFIT_TO_SE">
-				<h3 class="pro-name">{{ $t('INITIATE_AFIT_TO_HE') }}</h3>
 				  <div class="text-center grid p-2">
 					<h5 class="text-brand font-weight-bold">{{ $t('wallet.initiate_afit_to_he') }}</h5>
 					<div v-if="userPDAfit.user">
@@ -849,7 +327,6 @@
 			  <div v-else-if="afitActivityMode == EXCHANGE_AFIT_STEEM">
 			  <transition name="fade" v-if="!userHasFundsPass" >
 				<div class="text-center grid p-2">
-				  <h3 class="pro-name">{{ $t('EXCHANGE_AFIT_FOR_STEEM') }}</h3>
 					<div class="text-brand font-weight-bold">{{ $t('wallet.title_process') }}</div>
 					<h5>{{ $t('wallet.step1_title') }}</h5>
 					<div v-html="$t('wallet.step1_desc')">
@@ -1037,7 +514,7 @@
 		</div>
 		
 		
-		<div class="row text-center row-sep" v-if="false">
+		<div class="row text-center row-sep">
 			<div class="col-md-6 row-sep-in" v-if="cur_bchain=='STEEM'">
 				<h5 class="token-title"><img src="/img/STEEM.png" class="mr-2 token-logo">{{ $t('Your_Steem_Balance') }}</h5>
 				<div class="mb-4 font-weight-bold">
@@ -1051,7 +528,9 @@
 							<small><i>{{ $t('STEEM_POWER_BREAKDOWN') }}: {{this.renderSteemPower(1)}} ({{ $t('Owned_SP') }}) + {{this.renderSteemPower(3)}} ({{ $t('Received_SP') }}) - {{this.renderSteemPower(4)}} ({{ $t('Delegated_SP') }}) - {{this.renderSteemPower(5)}} ({{ $t('Powering_Down_Amount') }})</i></small>
 						</div>
 					</div>
-					
+					<div>
+						<button v-on:click="fetchDelegations(false)" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('FETCH_MY_DELEGATIONS') }}</button>
+					</div>
 				</div>
 			</div>
 			<div class="col-md-6 row-sep-in" v-else-if="cur_bchain=='HIVE'">
@@ -1067,7 +546,12 @@
 							<small><i>{{ $t('HIVE_POWER_BREAKDOWN') }}: {{this.renderSteemPower(1)}} ({{ $t('Owned_HP') }}) + {{this.renderSteemPower(3)}} ({{ $t('Received_HP') }}) - {{this.renderSteemPower(4)}} ({{ $t('Delegated_HP') }}) - {{this.renderSteemPower(5)}} ({{ $t('Powering_Down_Amount') }})</i></small>
 						</div>
 					</div>
-					
+					<div>
+						<button v-on:click="fetchDelegations(false)" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('FETCH_MY_DELEGATIONS') }}</button>
+					</div>
+					<div>
+						<button v-on:click="fetchRCDelegations(false)" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('FETCH_MY_RC_DELEGATIONS') }}</button>
+					</div>
 				</div>
 			</div>
 			<div class="col-md-6 row-sep-in" v-else-if="cur_bchain=='BLURT'">
@@ -1084,10 +568,410 @@
 							<small><i>{{ $t('BLURT_POWER_BREAKDOWN') }}: {{this.renderSteemPower(1)}} ({{ $t('Owned_BP') }}) + {{this.renderSteemPower(3)}} ({{ $t('Received_BP') }}) - {{this.renderSteemPower(4)}} ({{ $t('Delegated_BP') }}) - {{this.renderSteemPower(5)}} ({{ $t('Powering_Down_Amount') }})</i></small>
 						</div>
 					</div>
-					
+					<div>
+						<button v-on:click="fetchDelegations(false)" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('FETCH_MY_DELEGATIONS') }}</button>
+					</div>
 				</div>
 			</div>
 			
+			<div v-if="tokensOfInterestBal.length > 0" class="col-md-6 row-sep-in">
+				<h5 class="token-title" v-if="cur_bchain == 'STEEM'">{{ $t('Your_Token_Balance') }}</h5>
+				<h5 class="token-title" v-else>{{ $t('Your_HE_Token_Balance') }}<span v-if="cur_bchain=='BLURT'"><i class="fas fa-info-circle" v-on:click="notifySwitchChain()"></i></span></h5>
+				<div class="mb-4 font-weight-bold">
+					<div class="p-2" v-for="(token, index) in tokensOfInterestBal" :key="index" :token="token">
+						{{ renderBal(token) }} {{ token.symbol }} <span v-if="parseFloat(renderStake(token)) > 0">+ {{ renderStake(token)}} {{ token.symbol }} {{ $t('Staked') }} </span>
+						<span v-if="parseFloat(delegStake(token)) > 0">( + {{ delegStake(token)}} {{ token.symbol }} {{ $t('Delegated') }}) </span>
+						<span class="token_actions" v-if="cur_bchain!='BLURT'">
+							<span v-if="token.stakable"><i class="fas fa-arrow-circle-up text-brand p-1" :title="$t('stake_tokens')" v-on:click="initiateStaking(token)"></i></span>
+							<span v-if="token.stakable"><i class="fas fa-arrow-circle-down text-brand p-1" :title="$t('unstake_tokens')" v-on:click="initiateUnStaking(token)"></i></span>
+							<span v-if="withdrawableTokens.includes(token.symbol)"><i class="fas fa-upload text-brand p-1" :title="$t('withdraw_tokens')" v-on:click="initiateWithdraw(token)"></i></span>
+							<span><i class="fas fa-share-square text-brand p-1" :title="$t('transfer_tokens')" v-on:click="initiateTransfer(token)"></i></span>
+							<span><i class="fas fa-truck-loading text-brand p-1" v-if="token.symbol =='AFIT'" :title="$t('move_to_bsc')" v-on:click="initiateBSCTransfer(token)"></i></span>
+						</span>
+					</div>
+					<div class="row" v-if="tokenActions && curTokenAction == TRANSFER_FUNDS">
+					  <label for="token-target-account" class="w-25 p-2">{{ $t('Account') }} *</label>
+					  <span class="p-1">@</span><input type="text" id="token-target-account" name="token-target-account" ref="token-target-account" class="form-control-lg p-2">
+					</div>
+					
+					<div class="row" v-if="tokenActions && curTokenAction == TRANSFER_BSC">
+						<span class="text-brand">{{ $t('transfer_bsc_description') }}</span>
+					</div>
+					
+					<div class="row" v-if="tokenActions">
+					  <label for="token-powerup-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
+					  <input type="number" id="token-powerup-amount" name="token-powerup-amount" ref="token-powerup-amount" class="form-control-lg w-50 p-2" @change="calculateHBDAmount"><span class="p-2">{{ selTokenUp.symbol }}</span>
+					</div>
+					
+					<div class="row" v-if="tokenActions && curTokenAction == TRANSFER_BSC">
+					  <label for="token-hbd-amount" class="w-25 p-2">{{ $t('HBD_Amount') }} *</label>
+					  <input type="number" id="token-hbd-amount" name="token-hbd-amount" ref="token-hbd-amount" class="form-control-lg w-50 p-2" readonly><span class="p-2">{{ $t('HBD') }}</span>
+					</div>
+					
+					<div class="row" v-if="isStdLogin && tokenActions">
+					  <label for="p-ac-key-trans-token" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
+					  <input type="password" id="p-ac-key-trans-token" name="p-ac-key-trans-token" ref="p-ac-key-trans-token" class="form-control-lg w-50 p-2">
+					</div>
+					<div class="row" v-if="tokenActions && curTokenAction == TRANSFER_FUNDS" >
+					  <label for="token-transfer-memo" class="w-25 p-2">{{ $t('Memo') }}</label>
+					  <input type="text" id="token-transfer-memo" name="token-transfer-memo" ref="token-transfer-memo" class="form-control-lg w-50 p-2">
+					</div>
+					<div class="row text-brand italic text-center" v-if="tokenActions && curTokenAction == WITHDRAW_FUNDS"  v-html='this.withdrawableSpecialInstrs[selTokenUp.symbol]'>
+						
+					</div>
+					
+					<div class="row" v-if="tokenActions">
+					  <div class="w-25"></div>
+					  <button v-if="curTokenAction == POWERUP_FUNDS" v-on:click="proceedPowerUpToken" class="btn btn-brand btn-lg w-50 border">{{ $t('Power_Up') }}</button>
+					  <button v-else-if="curTokenAction == POWERDOWN_FUNDS" v-on:click="proceedPowerDownToken" class="btn btn-brand btn-lg w-50 border">{{ $t('Power_Down') }}</button>
+					  <button v-else-if="curTokenAction == TRANSFER_FUNDS" v-on:click="proceedTransferToken" class="btn btn-brand btn-lg w-50 border">{{ $t('Send') }}</button>
+					  <button v-else-if="curTokenAction == WITHDRAW_FUNDS" v-on:click="proceedWithdrawToken" class="btn btn-brand btn-lg w-50 border">{{ $t('Withdraw') }}</button>
+					  <button v-else-if="curTokenAction == TRANSFER_BSC" v-on:click="proceedTransferBSC" class="btn btn-brand btn-lg w-50 border">{{ $t('Transfer') }}</button>
+					</div>
+					<div v-if="movingFunds" id="checking_funds">
+						<i class="fas fa-spin fa-spinner"></i>
+					</div>
+					<div class="row" v-if="afit_se_power_error_proceeding">
+					  <div class="w-25"></div>
+					  <div class="text-brand" v-html="this.afit_se_power_err_msg"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row text-center">
+			<div class="p-2 col-md-12">
+				<button v-on:click="transferFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('TRANSFER_FUNDS_ACTION_TEXT') }}</button>
+				<button v-on:click="powerUpFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{  $t('POWERUP_ACTION_TEXT') }} {{this.cur_bchain}}</button>
+				<button v-on:click="powerDownFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('POWERDOWN_ACTION_TEXT') }}{{this.cur_bchain}}</button>
+				<button v-on:click="delegateFunds" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('DELEGATE_ACTION_TEXT') }}{{this.cur_bchain}} {{ $t('POWER')}}</button>
+				<button v-if="cur_bchain=='HIVE'" v-on:click="delegateRCs" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('DELEGATE_ACTION_TEXT') }}{{ $t('RCS')}}</button>
+			</div>
+			<transition name="fade">
+			  <div v-if="fundActivityMode == 1" class="text-center grid p-2 col-md-12">
+				<div class="row">
+				  <label for="transfer-recipient" class="w-25 p-2">{{ $t('To') }} *</label>
+				  <input type="text" id="transfer-recipient" name="transfer-recipient" ref="transfer-recipient" class="form-control-lg w-50 p-2">
+				</div>
+				<div class="row">
+					<label for="transfer-type" class="w-25 p-2">{{ $t('Type') }} *</label>
+					<select @change="transferTypeChange" id="transfer-type" name="transfer-type" ref="transfer-type" text="Choose Type" class="form-control-lg w-50 p-2">
+					  <option value="STEEM" v-if="cur_bchain!='BLURT'">
+						<span v-if="cur_bchain=='STEEM'">{{ $t('STEEM') }}</span>
+						<span v-if="cur_bchain=='HIVE'">{{ $t('HIVE') }}</span>
+					  </option>
+					  <option value="SBD" v-if="cur_bchain!='BLURT'">
+						<span v-if="cur_bchain=='STEEM'">{{ $t('SBD') }}</span>
+						<span v-if="cur_bchain=='HIVE'">{{ $t('HBD') }}</span>
+					  </option>
+					  <option value="BLURT" v-if="cur_bchain=='BLURT'">{{ $t('BLURT') }}</option>
+					</select>
+				</div>
+				<div class="row">
+				  <label for="transfer-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
+				  <input type="number" id="transfer-amount" name="transfer-amount" ref="transfer-amount" class="form-control-lg w-50 p-2">
+			      <span class="w-25 p-1 text-left text-brand" v-on:click="fillTransAmount()" :title="$t('select_full_balance')"><u>{{ this.renderTransAmount() }}</u></span>
+				</div>
+				<div class="row">
+				  <label for="transfer-memo" class="w-25 p-2">{{ $t('Memo') }}</label>
+				  <input type="text" id="transfer-memo" name="transfer-memo" ref="transfer-memo" class="form-control-lg w-50 p-2">				
+				</div>
+				<div class="row" v-if="isStdLogin">
+					  <label for="p-ac-key-trans" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
+					  <input type="password" id="p-ac-key-trans" name="p-ac-key-trans" ref="p-ac-key-trans" class="form-control-lg w-50 p-2">
+				</div>
+				<div class="row" v-if="isStdLogin">
+					<div class="text-center small p-2 w-25"></div>
+					<div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your <b>PRIVATE ACTIVE</b> key.*</div>
+				</div>
+				<div class="text-center small p-2">
+				  <i>{{ $t('wallet_memo_notice') }}</i>
+				</div>
+				<div class="text-brand text-center" v-if="error_proceeding">
+				  {{ this.error_msg}}
+				</div>
+				<div class="row">
+				  <div class="w-25"></div>
+				  <button v-on:click="proceedTransfer" class="btn btn-brand btn-lg w-50 border">{{ $t('Send') }}</button>
+				</div>
+				<div v-if="transferProcess">
+				  <i class="fas fa-spin fa-spinner" ></i>
+				</div>
+			  </div>
+			</transition>
+			<transition name="fade">
+			  <div v-if="fundActivityMode == 2" class="text-center grid p-2 col-md-12">
+				<div class="row">
+				  <label for="powerup-recipient" class="w-25 p-2">{{ $t('To') }} *</label>
+				  <input type="text" id="powerup-recipient" name="powerup-recipient" ref="powerup-recipient" class="form-control-lg w-50 p-2" :value="user.account.name">
+				</div>
+				<div class="row">
+				  <label for="powerup-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
+				  <input type="number" id="powerup-amount" name="powerup-amount" ref="powerup-amount" class="form-control-lg w-50 p-2">
+				</div>
+				<div class="row" v-if="isStdLogin">
+					  <label for="powerup-amount" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
+					  <input type="password" id="p-ac-key-up" name="p-ac-key-up" ref="p-ac-key-up" class="form-control-lg w-50 p-2">
+				</div>
+				<div class="row" v-if="isStdLogin">
+					<div class="text-center small p-2 w-25"></div>
+					<div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your <b>PRIVATE ACTIVE</b> key.*</div>
+				</div>
+				<div class="row">
+				  <div class="text-center small p-2 w-25"></div>
+				  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50" v-html="$t('power_up_notice')" v-if="cur_bchain=='STEEM'">
+				  </div>
+				  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50" v-html="$t('power_up_hive_notice')" v-else-if="cur_bchain=='HIVE'">
+				  </div>
+				</div>
+				<div class="text-brand text-center" v-if="error_proceeding">
+				  {{ this.error_msg}}
+				</div>
+				<div class="row">
+				  <div class="w-25"></div>
+				  <button v-on:click="proceedPowerUp" class="btn btn-brand btn-lg w-50 border">{{ $t('Power_Up') }}</button>
+				</div>
+				<div v-if="powerUpProcess">
+				  <i class="fas fa-spin fa-spinner" ></i>
+				</div>
+			  </div>
+			</transition>
+			<transition name="fade">
+			  <div v-if="fundActivityMode == 3" class="text-center grid p-2 col-md-12">
+				<div >
+				  <div class="row">
+					  <label for="powerdown-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
+					  <input type="number" id="powerdown-amount" name="powerdown-amount" ref="powerdown-amount" class="form-control-lg w-50 p-2">
+				  </div>
+				  <div class="row" v-if="isStdLogin">
+					  <label for="powerdown-amount" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
+					  <input type="password"  id="p-ac-key" name="p-ac-key" ref="p-ac-key" class="form-control-lg w-50 p-2">
+				  </div>
+				  <div class="row" v-if="isStdLogin">
+					<div class="text-center small p-2 w-25"></div>
+					<div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your <b>PRIVATE ACTIVE</b> key.*</div>
+				  </div>
+				</div>
+				<div class="row" v-if="isPoweringDown">
+				  <div class="text-center small p-2 w-25"></div>
+				  <div class="text-center text-brand small p-2 w-50"><b>{{ $t('currently_powering_down') }} {{this.renderSteemPower(5)}} {{this.cur_bchain}}<br/>
+					{{ $t('next_withdraw_on') }} {{this.powerDownWithdrawDate}}</b>
+				  </div>
+				</div>
+				<div class="row">
+				  <div class="text-center small p-2 w-25"></div>
+				  <div v-if="cur_bchain=='STEEM'" :class="smallScreenBtnClasses" class="text-center small p-2 w-50" v-html="$t('power_down_notice').replaceAll('_CUR_','STEEM').replaceAll('_TIME_', '4')">
+				  </div>
+				  <div v-else-if="cur_bchain=='HIVE'" :class="smallScreenBtnClasses" class="text-center small p-2 w-50" v-html="$t('power_down_notice').replaceAll('_CUR_','HIVE').replaceAll('_TIME_', '13')">
+				  </div>
+				</div>
+				<div class="text-brand text-center" v-if="error_proceeding">
+				  {{ this.error_msg}}
+				</div>
+				<div class="row" v-if="isPoweringDown">
+				  <div class="text-center small p-2 w-25"></div>
+				  <button v-on:click="proceedPowerDown" class="btn btn-brand btn-lg w-25 border">{{ $t('Power_Down') }}</button>
+				  <button v-on:click="cancelPowerDown" class="btn btn-brand btn-lg w-25 border">{{ $t('Cancel_Power_Down') }}</button>
+				  <div v-if="powerDownProcess">
+				  <i class="fas fa-spin fa-spinner" ></i>
+				  </div>
+				</div>
+				<div class="row" v-else>
+				  <div class="text-center small p-2 w-25"></div>
+				  <button v-on:click="proceedPowerDown" class="btn btn-brand btn-lg w-50 border">{{ $t('Power_Down') }}</button>
+				  <div v-if="powerDownProcess">
+				  <i class="fas fa-spin fa-spinner" ></i>
+				  </div>
+				</div>
+			  </div>
+			</transition>
+			<transition name="fade">
+			  <div v-if="fundActivityMode == 5" class="text-center grid p-2 col-12">
+				<div class="row">
+				  <label for="delegate-recipient" class="w-25 p-2">{{ $t('To') }} *</label>
+				  <input type="text" id="delegate-recipient" name="delegate-recipient" ref="delegate-recipient" class="form-control-lg w-50 p-2" value="actifit">
+				</div>
+				<div class="row">
+				  <label for="delegate-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
+				  <input type="number" id="delegate-amount" name="delegate-amount" ref="delegate-amount" class="form-control-lg w-50 p-2">
+				</div>
+				<div class="row" v-if="isStdLogin">
+					  <label for="delegate-amount" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
+					  <input type="password" id="p-ac-key-delg" name="p-ac-key-delg" ref="p-ac-key-delg" class="form-control-lg w-50 p-2">
+				</div>
+				<div class="row" v-if="isStdLogin">
+					<div class="text-center small p-2 w-25"></div>
+					<div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your <b>PRIVATE ACTIVE</b> key.*</div>
+				</div>
+				<div class="row">
+				  <div class="text-center small p-2 w-25"></div>
+				  <div class="p-2 w-50"></div>
+				  <!--<div :class="smallScreenBtnClasses" class="text-center small p-2 w-50" v-html="$t('power_up_notice')" v-if="cur_bchain=='STEEM'">
+				  </div>
+				  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50" v-html="$t('power_up_hive_notice')" v-else-if="cur_bchain=='HIVE'">
+				  </div>-->
+				</div>
+				<div class="text-brand text-center" v-if="error_proceeding">
+				  {{ this.error_msg}}
+				</div>
+				<div class="row">
+				  <div class="w-25"></div>
+				  <button v-on:click="proceedDelegation" class="btn btn-brand btn-lg w-50 border">{{ $t('Delegate') }}</button>
+				</div>
+				<div v-if="delegateProcess">
+				  <i class="fas fa-spin fa-spinner" ></i>
+				</div>
+				
+				
+				
+				<div>
+					<h5>{{ $t('active_delegations') }}</h5>
+					<table class="table table-hover">
+					  <thead class="text-brand">
+						<tr>
+						  <th scope="col">{{ $t('Delegatee') }}</th>
+						  <th scope="col" v-if="cur_bchain == 'STEEM' ">{{ $t('Steem_Power') }}</th>
+						  <th scope="col" v-else-if="cur_bchain == 'HIVE' ">{{ $t('Hive_Power') }}</th>
+						  <th scope="col" v-else-if="cur_bchain == 'BLURT' ">{{ $t('Blurt_Power') }}</th>
+						  <th scope="col">{{ $t('Date') }}</th>
+						  <th scope="col">{{ $t('Action') }}</th>
+						</tr>
+					  </thead>
+					  <tbody>
+						<tr v-for="(delegation, index) in activeDelegations" :key="index" :delegation="delegation">
+							<td><a :href="'./@'+delegation.delegatee" >@{{ delegation.delegatee }}</a></td> 
+							<td>
+								{{ numberFormat(delegation.power, 3) }} 
+								<span v-if="cur_bchain == 'STEEM'">{{ $t('SP_Symbol') }}</span>
+								<span v-else-if="cur_bchain == 'HIVE'">{{ $t('HP_Symbol') }}</span></td> 
+							<td>{{ date(delegation.min_delegation_time) }}</td>
+							<td><span ><a href="#" @click.prevent="editDelegation(delegation)" :title="$t('Edit_Delegation')"><i class="fas fa-edit"></i></a></span>&nbsp;
+							<span ><a href="#" @click.prevent="cancelDelegation(delegation)" :title="$t('Cancel_Delegation')"><i class="fas fa-trash-alt"></i><i class="fas fa-spin fa-spinner" v-if="cancellingDelegation"></i></a></span></td>
+						</tr>
+					  </tbody>
+					</table>
+				</div>
+				<button v-on:click="fetchDelegations(true)" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('FETCH_MY_DELEGATIONS') }}</button>
+				<div v-if="loadingDeleg">
+				  <i class="fas fa-spin fa-spinner" ></i>
+				</div>
+			  </div>
+			</transition>
+			
+			<transition name="fade">
+			  <div v-if="fundActivityMode == 6 && cur_bchain == 'HIVE' " class="text-center grid p-2 col-12">
+				<div class="row">
+				  <label for="delegate-recipient" class="w-25 p-2">{{ $t('To') }} *</label>
+				  <input type="text" id="delegate-recipient" name="delegate-recipient" ref="delegate-recipient" class="form-control-lg w-50 p-2" value="actifit">
+				</div>
+				<div class="row">
+				  <label for="delegate-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
+				  <input type="number" id="delegate-amount" name="delegate-amount" ref="delegate-amount" class="form-control-lg w-50 p-2">
+				</div>
+				<div class="row">
+					<div class="w-25"></div>
+					<b>{{$t('available_RC')}} / {{$t('full_RC')}} / {{$t('delegated_RC')}}</b>
+				</div>
+				<div class="row">
+					<div class="w-25"></div>
+					{{ showUserRC()}} / {{ showUserRC(1)}} / {{ showUserRC(2)}}
+				</div>
+				<div class="row">
+				  <div class="text-center small p-2 w-25"></div>
+				  <div class="p-2 w-50"></div>
+				  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50" v-html="$t('rc_delegation_notice')">
+				  </div>
+				</div>
+				<div class="text-brand text-center" v-if="error_proceeding">
+				  {{ this.error_msg}}
+				</div>
+				<div class="row">
+				  <div class="w-25"></div>
+				  <button v-on:click="proceedRCDelegation" class="btn btn-brand btn-lg w-50 border">{{ $t('Delegate_rc') }}</button>
+				</div>
+				<div v-if="delegateProcess">
+				  <i class="fas fa-spin fa-spinner" ></i>
+				</div>
+				
+				
+				
+				<div>
+					<h5>{{ $t('active_delegations') }}</h5>
+					<table class="table table-hover">
+					  <thead class="text-brand">
+						<tr>
+						  <th scope="col">{{ $t('Delegatee') }}</th>
+						  <th scope="col">{{ $t('delegated_RC') }}</th>
+						  <th scope="col">{{ $t('owned_RC') }}</th>
+						  <!--<th scope="col">{{ $t('Date') }}</th>-->
+						  <th scope="col">{{ $t('Action') }}</th>
+						</tr>
+					  </thead>
+					  <tbody>
+						<tr v-for="(delegation, index) in activeRCDelegations" :key="index" :delegation="delegation">
+							<td><a :href="'./@'+delegation.to" >@{{ delegation.to }}</a></td> 
+							<td>
+								{{ numberFormat(delegation.delegated_rc, 3) }} </td>
+							<td>{{ numberFormat(renderRCVal(delegation.to), 3) }}</td>
+							<!--<td>{{ date(delegation.min_delegation_time) }}</td>-->
+							<td><span ><a href="#" @click.prevent="editRCDelegation(delegation)" :title="$t('Edit_Delegation')"><i class="fas fa-edit"></i></a></span>&nbsp;
+							<span ><a href="#" @click.prevent="cancelRCDelegation(delegation)" :title="$t('Cancel_Delegation')"><i class="fas fa-trash-alt"></i><i class="fas fa-spin fa-spinner" v-if="cancellingDelegation"></i></a></span></td>
+						</tr>
+					  </tbody>
+					</table>
+				</div>
+				
+				<button v-on:click="fetchRCDelegations(true)" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('FETCH_MY_RC_DELEGATIONS') }}</button>
+				<div v-if="loadingDeleg">
+				  <i class="fas fa-spin fa-spinner" ></i>
+				</div>
+			  </div>
+			</transition>
+			
+		</div>
+		<div class="row row-sep">
+			<div v-if="isClaimableDataAvailable && cur_bchain=='STEEM'" class="col-md-6 row-sep-in">
+				<h5 class="token-title"><img src="/img/STEEM.png" class="mr-2 token-logo">{{ $t('Claimable_Steem_Rewards') }}</h5>
+				<div class="mb-4 font-weight-bold">
+					<span class="p-2">{{ this.claimSP }} | {{ this.claimSTEEM }} | {{ this.claimSBD }}</span>
+					<div class="p-2"><button v-on:click="claimRewards" class="btn btn-brand btn-lg w-20">{{ $t('Claim_Steem_Rewards') }}</button></div>
+					<div v-if="claimRewardsProcess">
+					  <i class="fas fa-spin fa-spinner" ></i>
+					</div>
+				</div>
+			</div>
+			<div v-else-if="isClaimableDataAvailable && cur_bchain=='HIVE'" class="col-md-6 row-sep-in">
+				<h5 class="token-title"><img src="/img/HIVE.png" class="mr-2 token-logo">{{ $t('Claimable_Hive_Rewards') }}</h5>
+				<div class="mb-4 font-weight-bold">
+					<span class="p-2">{{ this.claimSP }} | {{ this.claimSTEEM }} | {{ this.claimSBD }}</span>
+					<div class="p-2"><button v-on:click="claimRewards" class="btn btn-brand btn-lg w-20">{{ $t('Claim_Hive_Rewards') }}</button></div>
+					<div v-if="claimRewardsProcess">
+					  <i class="fas fa-spin fa-spinner" ></i>
+					</div>
+				</div>
+			</div>
+			<div v-else-if="isClaimableDataAvailable && cur_bchain=='BLURT'" class="col-md-6 row-sep-in">
+				<h5 class="token-title"><img src="/img/BLURT.png" class="mr-2 token-logo">{{ $t('Claimable_Blurt_Rewards') }}</h5>
+				<div class="mb-4 font-weight-bold">
+					<span class="p-2">{{ this.claimSP }} | {{ this.claimSTEEM }}</span>
+					<div class="p-2"><button v-on:click="claimRewards" class="btn btn-brand btn-lg w-20">{{ $t('Claim_Blurt_Rewards') }}</button></div>
+					<div v-if="claimRewardsProcess">
+					  <i class="fas fa-spin fa-spinner" ></i>
+					</div>
+				</div>
+			</div>
+			<div v-if="cur_bchain!='BLURT' && claimableSETokens.length > 0" class="col-md-6 row-sep-in">
+				<h5 class="token-title" v-if="cur_bchain == 'STEEM'">{{ $t('Claimable_Token_Rewards') }}</h5>
+				<h5 class="token-title" v-else>{{ $t('Claimable_HE_Token_Rewards') }}</h5>
+				<div class="mb-4 font-weight-bold">
+					<span class="p-2" v-for="(entry, index) in claimableSETokens" :key="index" :entry="entry">{{ renderTokenVal(entry.amount, entry.symbol) }} {{ entry.symbol }}</span>
+					<div class="p-2">
+						<button v-on:click="claimTokenRewards" class="btn btn-brand btn-lg w-20">{{ $t('Claim_Token_Rewards') }}</button>
+						<div v-if="claimingTokens">
+							<i class="fas fa-spin fa-spinner"></i>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
       </div>
 	  
@@ -1160,8 +1044,6 @@
   
   import pendingRewardsModal from '~/components/PendingRewardsModal'
   
-  import VueScrollTo from 'vue-scrollto' // for smooth scrolling
-  
   const ssc = new SSC(process.env.steemEngineRpc);
   const scot_steemengine_api = process.env.steemEngineScot;
   
@@ -1176,6 +1058,7 @@
   import Web3 from 'web3'
   
   let web3 = new Web3('https://bsc-dataseed1.binance.org:443');
+  
   
   const minABI = [
 	  // balanceOf
@@ -1219,8 +1102,6 @@
 		DELEGATE_FUNDS: 5,
 		DELEGATE_RCS: 6,
 		TRANSFER_BSC: 10,
-		SHOW_CLAIMABLE_REW: 11,
-		showBSCDetails: 12,
 		afitTokenAddress: '',
 		afitxTokenAddress: '',
 		afitBNBLPTokenAddress: '',
@@ -1315,6 +1196,7 @@
 		nextAfitPDTarget: '',
 		afitPowerDownText: '',
 		showAfitxInfo: false,
+		showBSCDetails: false,
 		totalAccountValue: 0,
 		totalAccountValueSteem: 0,
 		detailCalculation: '',
@@ -1478,24 +1360,6 @@
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
-	  
-	  /**
-       * Scrolls down to content area.
-       */
-      scrollAction () {
-        VueScrollTo.scrollTo('#detailsArea', 1000, {easing: 'ease-in-out', offset: -50})
-      },
-	  
-	  showClaimableRewards() {
-		//}else{
-		  this.fundActivityMode = this.SHOW_CLAIMABLE_REW;
-		//}
-		//hide upper activity section
-		this.afitActivityMode = 0;
-		this.curTokenAction = 0;
-		this.scrollAction();
-	  },
-	  
 	  getWalletAddress (){
 		return this.bsc_wallet_address;
 	  },
@@ -1546,6 +1410,8 @@
 			this.error_wallet = this.$t('all_fields_required');
 			return;
 		}
+		/*console.log(this.$refs['bsc-wallet-address'].value);
+		return;*/
 		
 		const accounts = await ethereum.request({
 			method: 'eth_requestAccounts',
@@ -1593,7 +1459,6 @@
 			this.error_wallet = this.$t('error_saving_wallet');
 			return;
 		}
-		
 		
 		//grab token
 		let accToken = localStorage.getItem('access_token')
@@ -1677,7 +1542,6 @@
 			console.log(err);
 		}
 		this.loadingDeleg = false;
-		//this.scrollAction();
 	  },
 	  
 	  //handles fetching new HF26 RC delegations
@@ -1708,7 +1572,6 @@
 		//console.log(this.rcDelgArray['vevita']);
 		//this.$forceUpdate();
 		this.loadingDeleg = false;
-		//this.scrollAction();
    
 	  },
 	  /*
@@ -1781,8 +1644,6 @@
 		}
 		this.curTokenAction = this.POWERUP_FUNDS;
 		this.selTokenUp = token;
-		this.afitActivityMode = 0;
-		this.scrollAction();
 	  },
 	  initiateUnStaking(token){
 		//only adjust open/close is same button is clicked, otherwise adjust token being unstaked
@@ -1793,8 +1654,6 @@
 		}
 		this.curTokenAction = this.POWERDOWN_FUNDS;
 		this.selTokenUp = token;
-		this.afitActivityMode = 0;
-		this.scrollAction();
 	  },
 	  initiateTransfer(token){
 		//only adjust open/close is same button is clicked, otherwise adjust token being unstaked
@@ -1805,8 +1664,6 @@
 		}
 		this.curTokenAction = this.TRANSFER_FUNDS;
 		this.selTokenUp = token;
-		this.afitActivityMode = 0;
-		this.scrollAction();
 	  },
 	  initiateBSCTransfer(token){
 		//only adjust open/close is same button is clicked, otherwise adjust token being unstaked
@@ -1817,8 +1674,6 @@
 		}
 		this.curTokenAction = this.TRANSFER_BSC;
 		this.selTokenUp = token;
-		this.afitActivityMode = 0;
-		this.scrollAction();
 	  },
 	  initiateWithdraw(token){
 		//only adjust open/close is same button is clicked, otherwise adjust token being unstaked
@@ -1829,8 +1684,6 @@
 		}
 		this.curTokenAction = this.WITHDRAW_FUNDS;
 		this.selTokenUp = token;
-		this.afitActivityMode = 0;
-		this.scrollAction();
 	  },
 	  notifySwitchChain(){
 		let notice = this.$t('notify_Switch_Chain_HE_Tokens');
@@ -2189,37 +2042,12 @@
 		  
 		  
 		  //fetch user's tokensOfInterest S-E balance
-		  let tokenData, tokenExtraDetails
+		  let tokenData
 		  if (this.cur_bchain == 'STEEM'){
 			tokenData = await ssc.find('tokens', 'balances', { account: this.user.account.name, symbol : { '$in' : tokensOfInterest } });
-			
-			//grab full token data
-			tokenExtraDetails = await ssc.find('tokens', 'tokens', { symbol : { '$in' : tokensOfInterest } });
 		  }else{
 			tokenData = await hsc.find('tokens', 'balances', { account: this.user.account.name, symbol : { '$in' : tokensOfInterest } });
-			
-			//grab full token data
-			tokenExtraDetails = await hsc.find('tokens', 'tokens', { symbol : { '$in' : tokensOfInterest } });
 		  }
-		  
-		  //console.log(tokenExtraDetails);
-		  
-		  //loop through tokenData and set proper icon
-		  for (let x=0;x<tokenData.length;x++){
-			try{
-				//console.log(tokenData[x].symbol);
-				let matchEntry = tokenExtraDetails.find(v => v.symbol == tokenData[x].symbol);
-				//console.log(matchEntry);
-				tokenData[x].icon = JSON.parse(matchEntry.metadata).icon
-			}catch(parseErr){
-				console.log(parseErr);
-			}
-		  }
-		  
-		  let afitData = this.tokenMetrics.find(v => v.symbol == 'AFIT');
-		  
-		  //console.log('tokenData')
-		  //console.log(tokenData)
 		  
 		  if (tokenData){
 			this.tokensOfInterestBal = tokenData.sort(function tokenEntry(a, b) {
@@ -2235,10 +2063,6 @@
 		  }else{
 			this.tokenMetrics = await hsc.find('market', 'metrics', {symbol : { '$in' : tokensOfInterest.concat(['AFIT','AFITX']) }}, 1000, 0, '', false);	
 		  }
-		  
-		  
-		  //console.log('tokenMetrics');
-		  //console.log(this.tokenMetrics);
 		  
 		  //let's grab the user's wallet address
 		  fetch(process.env.actiAppUrl+'getUserWalletAddress?user='+this.user.account.name).then(
@@ -2318,8 +2142,8 @@
 				}
 			  }
 		  }
-		}catch(outErr){
-			console.log(outErr);
+		}catch(err){
+			console.log(err);
 		}
 	  },
 	  async fetchAFITHE() {
@@ -2340,8 +2164,8 @@
 					  }
 				}
 			)
-		}catch(outErr){
-			console.log(outErr);
+		}catch(err){
+			console.log(err);
 		}
 	  },
 	  fetchAFITXHE() {
@@ -2402,14 +2226,10 @@
 		return this.numberFormat(token.balance, prec);
 	  },
 	  renderStake (token) {
-		try{
-			let totalStaked = 0;
-			totalStaked += parseFloat(token.delegationsIn) + parseFloat(token.stake);
-			let prec = this.tokenOfInterestPrecision[token.symbol];
-			return this.numberFormat(totalStaked, prec);
-		}catch(err){
-			return '';
-		}
+		let totalStaked = 0;
+		totalStaked += parseFloat(token.delegationsIn) + parseFloat(token.stake);
+		let prec = this.tokenOfInterestPrecision[token.symbol];
+		return this.numberFormat(totalStaked, prec);
 	  },
 	  delegStake (token) {
 		let prec = this.tokenOfInterestPrecision[token.symbol];
@@ -2633,79 +2453,61 @@
 		//function handles opening/closing transfer section
 		
 		//set proper Fund Activity Mode controlling the display
-		//if (this.fundActivityMode == this.TRANSFER_FUNDS ){
-		//  this.fundActivityMode = 0;
-		//}else{
+		if (this.fundActivityMode == this.TRANSFER_FUNDS ){
+		  this.fundActivityMode = 0;
+		}else{
 		  this.fundActivityMode = this.TRANSFER_FUNDS;
-		//}
+		}
 		//hide upper activity section
 		this.afitActivityMode = 0;
-		this.curTokenAction = 0;
-		this.scrollAction();
 	  },
 	  powerUpFunds () {
 		//function handles opening/closing of power up section
 		
 		//set proper Fund Activity Mode controlling the display
-		//if (this.fundActivityMode == this.POWERUP_FUNDS ){
-		//  this.fundActivityMode = 0;
-		//}else{
+		if (this.fundActivityMode == this.POWERUP_FUNDS ){
+		  this.fundActivityMode = 0;
+		}else{
 		  this.fundActivityMode = this.POWERUP_FUNDS;
-		//}
+		}
 		//hide upper activity section
 		this.afitActivityMode = 0;
-		this.curTokenAction = 0;
-		this.scrollAction();
 	  },
 	  powerDownFunds () {
 		//function handles opening/closing of power up section
 		
 		//set proper Fund Activity Mode controlling the display
-		//if (this.fundActivityMode == this.POWERDOWN_FUNDS ){
-		//  this.fundActivityMode = 0;
-		//}else{
+		if (this.fundActivityMode == this.POWERDOWN_FUNDS ){
+		  this.fundActivityMode = 0;
+		}else{
 		  this.fundActivityMode = this.POWERDOWN_FUNDS;
-		//}
+		}
 		//hide upper activity section
 		this.afitActivityMode = 0;
-		this.curTokenAction = 0;
-		this.scrollAction();
 	  },
 	  delegateFunds () {
 		//function handles opening/closing of delegation section
 		
 		//set proper Fund Activity Mode controlling the display
-		//if (this.fundActivityMode == this.DELEGATE_FUNDS ){
-		//  this.fundActivityMode = 0;
-		//}else{
+		if (this.fundActivityMode == this.DELEGATE_FUNDS ){
+		  this.fundActivityMode = 0;
+		}else{
 		  this.fundActivityMode = this.DELEGATE_FUNDS;
-		//}
+		}
 		//hide upper activity section
 		this.afitActivityMode = 0;
-		this.curTokenAction = 0;
-		this.scrollAction();
-	  },
-	  showBSCAddress (){
-		  this.fundActivityMode = 0;
-		//}
-		//hide upper activity section
-		this.afitActivityMode = this.showBSCDetails;
-		this.curTokenAction = 0;
-		this.scrollAction();
 	  },
 	  delegateRCs () {
 		//function handles opening/closing of RC delegation section
 		
 		//set proper Fund Activity Mode controlling the display
-		//if (this.fundActivityMode == this.DELEGATE_RCS ){
-		//  this.fundActivityMode = 0;
-		//}else{
+		if (this.fundActivityMode == this.DELEGATE_RCS ){
+		  this.fundActivityMode = 0;
+		}else{
 		  this.fundActivityMode = this.DELEGATE_RCS;
-		//}
+		}
 		//hide upper activity section
 		this.afitActivityMode = 0;
-		this.curTokenAction = 0;
-		this.scrollAction();
 	  },
 	  async proceedTransfer () {
 		//function handles the actual processing of the transfer
@@ -3164,63 +2966,53 @@
 		//function handles opening/closing exchanging AFIT tokens for STEEM upvotes  section
 		
 		//set proper AFIT Activity Mode controlling the display
-		//if (this.afitActivityMode == this.EXCHANGE_AFIT_STEEM ){
-		//  this.afitActivityMode = 0;
-		//}else{
+		if (this.afitActivityMode == this.EXCHANGE_AFIT_STEEM ){
+		  this.afitActivityMode = 0;
+		}else{
 		  this.afitActivityMode = this.EXCHANGE_AFIT_STEEM;
-		//}
+		}
 		//hide lower section for STEEM actions
 		this.fundActivityMode = 0;
-		this.curTokenAction = 0;
-		this.scrollAction();
 	  },
 	  moveAFITXseHE () {
 		//set proper AFIT Activity Mode controlling the display
-		/*if (this.afitActivityMode == this.MOVE_AFITX_SE_HE ){
+		if (this.afitActivityMode == this.MOVE_AFITX_SE_HE ){
 		  this.afitActivityMode = 0;
-		}else{*/
+		}else{
 		  this.afitActivityMode = this.MOVE_AFITX_SE_HE;
-		//}
+		}
 		//hide lower section for STEEM actions
 		this.fundActivityMode = 0;
-		this.curTokenAction = 0;
-		this.scrollAction();
 	  },
 	  moveAFITXheSE () {
 		//set proper AFIT Activity Mode controlling the display
-		/*if (this.afitActivityMode == this.MOVE_AFITX_HE_SE ){
+		if (this.afitActivityMode == this.MOVE_AFITX_HE_SE ){
 		  this.afitActivityMode = 0;
-		}else{*/
+		}else{
 		  this.afitActivityMode = this.MOVE_AFITX_HE_SE;
-		//}
+		}
 		//hide lower section for STEEM actions
 		this.fundActivityMode = 0;
-		this.curTokenAction = 0;
-		this.scrollAction();
 	  },
 	  moveAFITseHE () {
 		//set proper AFIT Activity Mode controlling the display
-		/*if (this.afitActivityMode == this.MOVE_AFIT_SE_HE ){
+		if (this.afitActivityMode == this.MOVE_AFIT_SE_HE ){
 		  this.afitActivityMode = 0;
-		}else{*/
+		}else{
 		  this.afitActivityMode = this.MOVE_AFIT_SE_HE;
-		//}
+		}
 		//hide lower section for STEEM actions
 		this.fundActivityMode = 0;
-		this.curTokenAction = 0;
-		this.scrollAction();
 	  },
 	  moveAFITheSE () {
 		//set proper AFIT Activity Mode controlling the display
-		/*if (this.afitActivityMode == this.MOVE_AFIT_HE_SE ){
+		if (this.afitActivityMode == this.MOVE_AFIT_HE_SE ){
 		  this.afitActivityMode = 0;
-		}else{*/
+		}else{
 		  this.afitActivityMode = this.MOVE_AFIT_HE_SE;
-		//}
+		}
 		//hide lower section for STEEM actions
 		this.fundActivityMode = 0;
-		this.curTokenAction = 0;
-		this.scrollAction();
 	  },
 	  buyAFITwithSTEEM () {
 		//function handles opening/closing exchanging AFIT tokens for STEEM upvotes  section
@@ -3238,29 +3030,25 @@
 		//function handles opening/closing exchanging AFIT tokens for STEEM upvotes  section
 		
 		//set proper AFIT Activity Mode controlling the display
-		/*if (this.afitActivityMode == this.MOVE_AFIT_SE ){
+		if (this.afitActivityMode == this.MOVE_AFIT_SE ){
 		  this.afitActivityMode = 0;
-		}else{*/
+		}else{
 		  this.afitActivityMode = this.MOVE_AFIT_SE;
-		//}
+		}
 		//hide lower section for STEEM actions
 		this.fundActivityMode = 0;
-		this.curTokenAction = 0;
-		this.scrollAction();
 	  },
 	  initiateAFITtoSE () {
 		//function handles opening/closing moving AFIT to SE
 		
 		//set proper AFIT Activity Mode controlling the display
-		/*if (this.afitActivityMode == this.INIT_AFIT_TO_SE ){
+		if (this.afitActivityMode == this.INIT_AFIT_TO_SE ){
 		  this.afitActivityMode = 0;
-		}else{*/
+		}else{
 		  this.afitActivityMode = this.INIT_AFIT_TO_SE;
-		//}
+		}
 		//hide lower section for STEEM actions
 		this.fundActivityMode = 0;
-		this.curTokenAction = 0;
-		this.scrollAction();
 	  },
 	  passTransferTypeChange (e) {
 	    //handles the drop down select option to ensure we have proper value
@@ -3460,14 +3248,12 @@
 		this.initiateInProgress = true;
 		
 		try{
-			//check if the user has enough AFITX S-E amount allowing him the transfers daily
 			let bal;
 			try{
-			
-				//bal = await ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' });
-			
-			}catch(outErr){
-				console.log(outErr);
+			//check if the user has enough AFITX S-E amount allowing him the transfers daily
+			//bal = await ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' });
+			}catch(innErr){
+				console.log(innErr);
 			}
 			let bal_he = await hsc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' });
 			
@@ -4926,8 +4712,8 @@
 		this.afitxTokenAddress = afitxTokenAddress;
 		this.afitBNBLPTokenAddress = afitBNBLPTokenAddress;
 		this.afitxBNBLPTokenAddress = afitxBNBLPTokenAddress;
-
-	//adjust to metamask if available
+		
+		//adjust to metamask if available
 	  if (typeof window.ethereum !== 'undefined'){
 		//metamask functional
 		web3 = new Web3(window.ethereum);
@@ -5071,27 +4857,6 @@
 	width: 40px;
 	height: 40px;
   }
-  .token-entry{
-	padding-bottom: 1px;
-	padding-top: 1px;
-	border-bottom: inset;
-    border-bottom-color: red;
-    border-bottom-width: 1px;
-	margin: 0px;
-  }
-  .light-bottom{
-	border-bottom-width: 1px!important;
-  }
-  .thick-bottom{
-	border-bottom-width: 2px!important;
-  }
-  .no-bottom{
-	border-bottom-width: 0px;
-  }
-  .mini-token-logo{
-	width: 25px;
-	height: 25px;
-  }
   .text-center.grid.p-2, .calc-data{
 	border: 2px solid red;
 	border-radius: 5px;
@@ -5102,36 +4867,5 @@
   }
   .fas{
 	cursor: pointer;
-  }
-  .btn-brand{
-	min-width: 34px;
-	min-height: 34px;
-  }
-  .btn-brand a{
-	color: white;
-  }
-  .wallet-container{
-	/* background-color: red; 
-	opacity: 0.7; */
-	background-color: beige;
-	border: 2px solid red;
-	border-radius: 3px;
-	margin-bottom: 5px;
-	min-width: 600px; /* make it scroll friendly on mobile size */
-	
-	/* 3D look */
-	-moz-box-shadow: 0px 1px 1px rgba(000,000,000,0.5), inset 1px 2px 0px rgba(255,255,255,0.4);
-    -webkit-box-shadow: 0px 1px 1px rgb(0 0 0 / 50%), inset 1px 2px 0px rgb(255 255 255 / 40%);
-    box-shadow: 0px 1px 1px rgb(0 0 0 / 50%), inset 1px 2px 0px rgb(255 255 255 / 40%);
-    text-shadow: 1px 1px 2px rgb(0 0 0 / 70%), 0px 1px 0px rgb(255 255 255 / 40%);
-	box-shadow: 0 70px 40px -20px rgb(0 0 0 / 20%);
-	
-  }
-  .pro-name {
-    background: radial-gradient(red,transparent);
-    color: #fff;
-  }
-  .action-box{
-	background-color: beige;
   }
 </style>
