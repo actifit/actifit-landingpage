@@ -36,7 +36,7 @@
 				</span>
 				
 				<span class="btn btn-brand mb-1" :title="$t('bsc_wallet')" v-on:click="showBSCAddress()">
-					<img src="/img/Binance-logo.png" width="18px" height="18px">
+					<img src="/img/binance-logo.png" width="18px" height="18px">
 				</span>
 				
 				<span v-if="loadingDeleg">
