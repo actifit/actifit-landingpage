@@ -48,7 +48,7 @@
 			</div>
 		</div>
 		
-		<div v-if="this.tokenMetrics.length > 0" class="wallet-container">
+		<div v-if="this.tokenMetrics.length > 0 || this.tokensOfInterestBal.length > 0" class="wallet-container">
 			<div class="row font-weight-bold token-entry thick-bottom">
 				<div class="col-2">Token</div>
 				<div class="col-2">Location</div>
@@ -277,7 +277,8 @@
 					
 					<div class="row" v-if="tokenActions">
 					  <label for="token-powerup-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
-					  <input type="number" id="token-powerup-amount" name="token-powerup-amount" ref="token-powerup-amount" class="form-control-lg w-50 p-2" @change="calculateHBDAmount"><span class="p-2"><img :src="selTokenUp.icon" class="mr-1 mini-token-logo" >{{ selTokenUp.symbol }}</span>
+					  <input type="number" id="token-powerup-amount" name="token-powerup-amount" ref="token-powerup-amount" class="form-control-lg w-50 p-2" @change="calculateHBDAmount">
+					  <span class="p-2"><img :src="selTokenUp.icon" class="mr-1 mini-token-logo" >{{ selTokenUp.symbol }}</span>
 					</div>
 					
 					<div class="row" v-if="tokenActions && curTokenAction == TRANSFER_BSC">
@@ -1351,7 +1352,7 @@
 		claimRewardsProcess: false,
 		transferProcess: false,
 		cur_bchain: 'HIVE',
-		showPowerBreakdown: true,
+		showPowerBreakdown: false,
 		delegateProcess: false,
 		loadingDeleg: false,
 		rc_data: {},
@@ -1889,7 +1890,7 @@
       },
 	  formattedTotAccountVal () {
 		this.totalAccountValue = 0;
-		if (this.tokenMetrics.length > 0){
+		if (this.tokenMetrics.length > 0 || this.tokensOfInterestBal.length > 0){
 		
 			this.detailCalculation = '';
 			//get AFITX val
@@ -1928,6 +1929,7 @@
 					tokenData = new Object();
 					tokenData.lastPrice = 1;
 				}
+				console.log(token);
 				if( typeof token.stake === 'undefined' || token.stake === null || tokensNonStakable.includes(token.symbol)){
 					token.stake = 0;
 					token.stakable = false;
@@ -2791,11 +2793,14 @@
 		}
 	  },
 	  calculateHBDAmount (e) {
-		let afitVal = this.$refs['token-powerup-amount'].value.trim()
-		let hbdVal = this.$refs['token-hbd-amount'].value.trim()
-		let matchHbd = parseFloat(afitVal) * this.afitHBDRate;
-		matchHbd = parseFloat(matchHbd.toFixed(2));
-		this.$refs['token-hbd-amount'].value = matchHbd;
+		//only call upon it if transfer AFIT to BSC and calculate needed HBD amount
+		if (this.curTokenAction == this.TRANSFER_BSC){
+			let afitVal = this.$refs['token-powerup-amount'].value.trim()
+			let hbdVal = this.$refs['token-hbd-amount'].value.trim()
+			let matchHbd = parseFloat(afitVal) * this.afitHBDRate;
+			matchHbd = parseFloat(matchHbd.toFixed(2));
+			this.$refs['token-hbd-amount'].value = matchHbd;
+		}
 		/*if (isNaN(hbdVal) || this.$refs["token-powerup-amount"].value == 0){
 		  this.error_proceeding = true;
 		  this.error_msg = this.$t('amount_positive_int');
@@ -3659,7 +3664,7 @@
 			this.movingFunds = true;
 			
 			let targetAcct = 'actifit.h-e';
-			let transId = 'ssc-mainnet-hive';
+			let transId = process.env.hiveEngineChainId;
 			if (this.cur_bchain == 'STEEM'){
 				targetAcct = 'actifit.s-e';
 				transId = 'ssc-mainnet1';
@@ -3787,7 +3792,7 @@
 		//standard is moving tokens from S-E to H-E, which requires sending bcast to Steem.
 		
 		let targetAcct = 'afit.h-e';
-		let transId = 'ssc-mainnet-hive';
+		let transId = process.env.hiveEngineChainId;
 		//let targetBchain = 'STEEM';
 		//other option is moving tokens from H-E to S-E
 		if (direction == 1){
@@ -3927,7 +3932,7 @@
 		//standard is moving tokens from S-E to H-E, which requires sending bcast to Steem.
 		
 		let targetAcct = 'afitx.h-e';
-		let transId = 'ssc-mainnet-hive';
+		let transId = process.env.hiveEngineChainId;
 		//let targetBchain = 'STEEM';
 		//other option is moving tokens from H-E to S-E
 		if (direction == 1){
@@ -4058,7 +4063,7 @@
 			this.movingFunds = true;
 			
 			let targetAcct = 'actifit.h-e';
-			let transId = 'ssc-mainnet-hive';
+			let transId = process.env.hiveEngineChainId;
 			if (this.cur_bchain == 'STEEM'){
 				targetAcct = 'actifit.s-e';
 				transId = 'ssc-mainnet1';
@@ -4155,7 +4160,7 @@
 			this.movingFunds = true;
 			
 			let targetAcct = 'actifit.h-e';
-			let transId = 'ssc-mainnet-hive';
+			let transId = process.env.hiveEngineChainId;
 			if (this.cur_bchain == 'STEEM'){
 				targetAcct = 'actifit.s-e';
 				transId = 'ssc-mainnet1';
@@ -4266,7 +4271,7 @@
 			this.movingFunds = true;
 			
 			let targetAcct = 'actifit.h-e';
-			let transId = 'ssc-mainnet-hive';
+			let transId = process.env.hiveEngineChainId;
 			if (this.cur_bchain == 'STEEM'){
 				targetAcct = 'actifit.s-e';
 				transId = 'ssc-mainnet1';
@@ -4418,7 +4423,7 @@
 		this.movingFunds = true;
 		
 		let targetAcct = process.env.bscBridgeAccount;
-		let transId = 'ssc-mainnet-hive';
+		let transId = process.env.hiveEngineChainId;
 		/*if (this.cur_bchain == 'STEEM'){
 			targetAcct = 'actifit.s-e';
 			transId = 'ssc-mainnet1';
@@ -4578,7 +4583,7 @@
 			this.movingFunds = true;
 			
 			let targetAcct = 'actifit.h-e';
-			let transId = 'ssc-mainnet-hive';
+			let transId = process.env.hiveEngineChainId;
 			let curr = 'hivepegged';
 			if (this.cur_bchain == 'STEEM'){
 				targetAcct = 'actifit.s-e';
@@ -4974,9 +4979,13 @@
 		  
 	  //hive.config.set('rebranded_api', true)
 	  //hive.broadcast.updateOperations()
-	  hive.config.set('alternative_api_endpoints', process.env.altHiveNodes);
-	  //hive.config.set('chain_id', '4200000000000000000000000000000000000000000000000000000000000000');
+	  //
 	  
+	  if (process.env.hiveTestNetOn){
+		hive.config.set('chain_id', '4200000000000000000000000000000000000000000000000000000000000000');
+	  }else{
+		hive.config.set('alternative_api_endpoints', process.env.altHiveNodes);
+	  }
 	  hive.api.setOptions({ url: process.env.hiveApiNode });
 	  
 	  blurt.api.setOptions({ url: process.env.blurtApiNode });
