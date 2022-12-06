@@ -160,7 +160,7 @@
 			
 			
 			<div class="token-entry row">
-				<div class="col-2 text-left"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo">AFITX</div>
+				<div class="col-2 text-left"><img src="/img/AFITX.png" class="mr-1 mini-token-logo">AFITX</div>
 				<div class="col-2">{{ $t('BSC')}}</div>
 				<div class="col-2 text-right">{{ formattedUserAFITXBSC }}</div>
 				<div class="col-2"></div>
@@ -173,7 +173,7 @@
 			</div>
 			
 			<div class="token-entry row">
-				<div class="col-2 text-left"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo">AFITX-BNB LP</div>
+				<div class="col-2 text-left"><img src="/img/AFITX.png" class="mr-1 mini-token-logo">AFITX-BNB LP</div>
 				<div class="col-2">{{ $t('BSC')}}</div>
 				<div class="col-2 text-right">{{ formattedUserAFITXBNBLPBSC }}</div>
 				<div class="col-2"></div>
