@@ -1186,7 +1186,7 @@
   const scot_hive_api_param = process.env.hiveEngineScotParam;
 
   const tokensNonStakable = ['AFITX', 'AFIT', 'STEEMP', 'SWAP.HIVE', 'SWAP.BLURT', 'SWAP.STEEM'];
-  const tokensOfInterest = ['SPORTS', 'PAL', 'APX', 'BEE'].concat(tokensNonStakable);
+  const tokensOfInterest = ['SPORTS', 'PAL', 'APX', 'BEE', 'POSH', 'LEO'].concat(tokensNonStakable);
   
   import { mapGetters } from 'vuex'
   

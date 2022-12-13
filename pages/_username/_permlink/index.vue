@@ -505,8 +505,8 @@
 		report_content = report_content.replace(vid_reg,'<iframe width="640" height="360" src="https://www.youtube.com/embed/$1"></iframe>');
 		
 		/* let's find links sent as [](), and display them properly */
-		let href_lnks = /\[([\d\w\s-\.\(\)=[\:\/\.%\?&"<>]*)\]\(([\d\w-=[\:\/\.%\?&]+|(https?:\/\/[.\d\w-\/\:\%\(\)]*\.))[)]/igm;
-		report_content = report_content.replace(href_lnks,'<a href="$2">$1</a>');
+		//let href_lnks = /\[([\d\w\s-\.\(\)=[\:\/\.%\?&"<>]*)\]\(([\d\w-=[\:\/\.%\?&]+|(https?:\/\/[.\d\w-\/\:\%\(\)]*\.))[)]/igm;
+		//report_content = report_content.replace(href_lnks,'<a href="$2">$1</a>');
 		
 		//let href_lnks = /\[([\d\w-\.\@]*)\]\(([\d\w-\.\@\/\:]*)\)/igm;
 		//report_content = report_content.replace(href_lnks,'<a href="$2">$1</a>');
