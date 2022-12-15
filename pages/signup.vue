@@ -30,7 +30,7 @@
 					<input type="checkbox" id="hive-account" v-model="hive_account" v-on:change="validateUserName">
 					<label for="checkbox" class="font-weight-normal">{{ $t('hive_account_text') }}</label>
 				</div>
-				<div class="pl-2 mb-2">
+				<div class="pl-2 mb-2" style="display:none">
 					<input type="checkbox" id="steem-account" v-model="steem_account" v-on:change="validateUserName">
 					<label for="checkbox" class="font-weight-normal">{{ $t('steem_account_text') }}</label>
 				</div>
@@ -76,7 +76,7 @@
 						
 						<!--<option value="SBD">{{ $t('SBD') }}</option>-->
 						<option value="HIVE">{{ $t('HIVE') }}</option>
-						<option value="STEEM">{{ $t('STEEM') }}</option>
+						<!--<option value="STEEM">{{ $t('STEEM') }}</option>-->
 						<!--<option value="STEEM">{{ $t('HBD') }}</option>-->
 					</select>
 				</span>
@@ -191,7 +191,7 @@
 		promo_code_chkbx: false,
 		promo_code_val: '',
 		hive_account: true,
-		steem_account: true,
+		steem_account: false,
 		blurt_account: true,
 		reg: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/
 	  }

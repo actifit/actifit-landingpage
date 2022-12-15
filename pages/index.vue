@@ -459,17 +459,17 @@
 				{{ $t('Infrastructure') }}
 			</h1>
 			<div class="row">
-			  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
-				<img src="/img/HIVE.png" style="max-height: 100px;"><br/><span class="font-weight-bold">{{$t('HIVE')}}</span>
-			  </div>
-			  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
+			  <!--<div class="col-6 col-sm-4 col-md-3 text-center mb-4">
 				<img src="/img/STEEM.png" style="max-height: 100px;"><br/><span class="font-weight-bold">{{$t('STEEM')}}</span>
-			  </div>
-			  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
+			  </div>-->
+			  <div class="col-6 col-sm-4 col-md-4 text-center mb-4">
 				<img src="/img/BLURT.png" style="max-height: 100px;"><br/><span class="font-weight-bold">{{$t('BLURT')}}</span>
 			  </div>
-			  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
-				<img src="/img/BNB_CHAIN.webp" style="max-height: 100px;"><br/><span class="font-weight-bold">{{$t('BNB CHAIN (BSC)')}}</span>
+			  <div class="col-6 col-sm-4 col-md-4 text-center mb-4">
+				<img src="/img/HIVE.png" style="max-height: 100px;"><br/><span class="font-weight-bold">{{$t('HIVE')}}</span>
+			  </div>
+			  <div class="col-6 col-sm-4 col-md-4 text-center mb-4">
+				<img src="/img/BNB_CHAIN.webp" style="max-height: 100px;"><br/><span class="font-weight-bold">{{$t('BNB CHAIN')}}</span>
 			  </div>
 			</div>
 		</div>

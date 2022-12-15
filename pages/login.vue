@@ -19,7 +19,7 @@
 					<img src="/img/HIVE.png" style="max-height: 50px;" v-on:click="bchain_val = 'HIVE'">
 					<label for="hive_bchain">HIVE</label>
 				  </div>
-				  <div class="bchain-option p-2 m-2 btn m-auto" :class="adjustSteemClass">
+				  <div class="bchain-option p-2 m-2 btn m-auto" :class="adjustSteemClass" style="display:none">
 					<input type="radio" id="steem_bchain" value="STEEM" v-model="bchain_val">
 					<img src="/img/STEEM.png" style="max-height: 50px;" v-on:click="bchain_val = 'STEEM'" >
 					<label for="steem_bchain">STEEM</label>

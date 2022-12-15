@@ -2,7 +2,12 @@
   <!-- Footer used on all pages -->
   <div class="footer bg-light">
     <div class="container py-5">
-      <div class="text-center social-links mb-4">
+      <div class="row">
+		  <div class="col text-center">
+			<i>{{$t('powered_by')}}<img src="/img/HIVE.png" style="max-height: 30px;"></i>
+		  </div>
+	  </div>
+	  <div class="text-center social-links mb-4">
         <a href="https://links.actifit.io/discord " target="_blank" class="d-inline-block mx-3 mt-3" :title="$t('Discord')"><i class="fab fa-2x fa-discord"></i></a>
         <a href="https://www.facebook.com/Actifit.fitness/" target="_blank" class="d-inline-block mx-3 mt-3" :title="$t('Facebook')"><i class="fab fa-2x fa-facebook"></i></a>
         <a href="https://www.twitter.com/Actifit_fitness" target="_blank" class="d-inline-block mx-3 mt-3" :title="$t('Twitter')"><i class="fab fa-2x fa-twitter"></i></a>
