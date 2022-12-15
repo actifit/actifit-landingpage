@@ -170,13 +170,13 @@
             <a :href="delegator._id" target="_blank">@{{ delegator._id }}</a><br/>
 			<img src="/img/HIVE.png" style="max-height: 20px;"><a :href="delegator._id" target="_blank">{{ numberFormat(delegator.steem_power, 0) }} {{ $t('Hive_Power') }}</a>
           </div>
-		  <div  v-if="topDelegators.steem" class="col-6 col-sm-4 col-md-3 text-center mb-4" v-for="(delegator, index) in topDelegators.steem" :key="'steem'+index" :delegator="delegator">
+		  <!--<div  v-if="topDelegators.steem" class="col-6 col-sm-4 col-md-3 text-center mb-4" v-for="(delegator, index) in topDelegators.steem" :key="'steem'+index" :delegator="delegator">
             <a :href="delegator._id" target="_blank">
               <div class="avatar avatar-steem small mx-auto mb-3" :style="'background-image: url('+profImgUrl+'/u/' + delegator._id + '/avatar);'"></div>
             </a>
             <a :href="delegator._id" target="_blank">@{{ delegator._id }}</a><br/>
 			<img src="/img/STEEM.png" style="max-height: 20px;"><a :href="delegator._id" target="_blank">{{ numberFormat(delegator.steem_power, 0) }} {{ $t('Steem_Power') }}</a>
-          </div>
+          </div>-->
 		  <div class="full-div">
 			<nuxt-link to="/delegators" class="text-center btn btn-brand" data-target="#">{{ $t('View_All_Delegators') }}</nuxt-link>
 		  </div>
