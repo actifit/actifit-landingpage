@@ -9,8 +9,8 @@
           </button>
         </div>
 		<SteemStats class="modal-body" :user="user" v-if="user"/>
-        <div class="modal-body text-center">
-		  <div class="modal-footer m-2">
+        <div class="modal-body text-center" >
+		  <div class="modal-footer m-2" style="display:none">
 			<div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-if="cur_bchain=='HIVE'">
 				<input type="radio" id="hive" value="HIVE" v-model="target_bchain">
 				<img src="/img/HIVE.png" style="max-height: 50px" v-on:click="target_bchain = 'HIVE'" :class="adjustHiveClass">
