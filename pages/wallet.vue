@@ -49,7 +49,7 @@
 		</div>
 		
 		<div v-if="this.tokenMetrics.length > 0 || this.tokensOfInterestBal.length > 0" class="wallet-container">
-			<div class="row font-weight-bold token-entry thick-bottom">
+			<div class="row font-weight-bold token-entry thick-bottom head-title">
 				<div class="col-2">Token</div>
 				<div class="col-2">Location</div>
 				<div class="col-2">Balance</div>
@@ -63,7 +63,7 @@
 				<div class="col-2 text-right">{{ formattedUserAfit }}</div>
 				<div class="col-2 text-right">-</div>
 				<div class="col-1 text-right">-</div>
-				<div class="col-3">
+				<div class="col-3 token_actions">
 					<span class="btn btn-brand p-1">
 						<i class="fas fa-solid fa-history" v-on:click="refreshBalance()" :title="$t('Refresh_balance')"/>
 						<span v-if="refreshinBal" >
@@ -109,7 +109,7 @@
 				
 				</div>
 				<div class="col-1 text-right">{{ this.renderSavings(this.cur_bchain) }}</div>
-				<div class="col-3">
+				<div class="col-3 token_actions">
 					<span class="btn btn-brand p-1"><i class="fas fa-arrow-circle-up p-1" :title="$t('POWERUP_ACTION_TEXT')" v-on:click="powerUpFunds"></i></span>
 					<span class="btn btn-brand p-1"><i class="fas fa-arrow-circle-down " :title="$t('POWERDOWN_ACTION_TEXT')" v-on:click="powerDownFunds"></i></span>
 					<span class="btn btn-brand p-1"><i class="fas fa-share-square " :title="$t('TRANSFER_FUNDS_ACTION_TEXT')" v-on:click="transferFunds"></i></span>
@@ -126,7 +126,7 @@
 				<div class="col-2 text-right">{{ this.renderSBDBalance(this.cur_bchain) }}</div>
 				<div class="col-2"></div>
 				<div class="col-1 text-right">{{ this.renderSBDSavings(this.cur_bchain) }}</div>
-				<div class="col-3">
+				<div class="col-3 token_actions">
 					<span class="btn btn-brand p-1"><i class="fas fa-share-square " :title="$t('TRANSFER_FUNDS_ACTION_TEXT')" v-on:click="transferFunds"></i></span>
 				</div>
 			</div>
@@ -138,7 +138,7 @@
 				<div class="col-2 text-right">{{ formattedUserAfitBSC }}</div>
 				<div class="col-2"></div>
 				<div class="col-1 text-right"></div>
-				<div class="col-3">
+				<div class="col-3 token_actions">
 					<span class="btn btn-brand p-1" :title="$t('smart_contract')">
 							<a target="_blank" :href="'https://bscscan.com/address/'+afitTokenAddress"><i class="fas fa-file-contract"></i></a>
 					</span>
@@ -151,7 +151,7 @@
 				<div class="col-2 text-right">{{ formattedUserAfitBNBLPBSC }}</div>
 				<div class="col-2"></div>
 				<div class="col-1 text-right"></div>
-				<div class="col-3">
+				<div class="col-3 token_actions">
 					<span class="btn btn-brand p-1" :title="$t('smart_contract')">
 							<a target="_blank" :href="'https://bscscan.com/address/'+afitBNBLPTokenAddress"><i class="fas fa-file-contract"></i></a>
 					</span>
@@ -165,7 +165,7 @@
 				<div class="col-2 text-right">{{ formattedUserAFITXBSC }}</div>
 				<div class="col-2"></div>
 				<div class="col-1 text-right"></div>
-				<div class="col-3">
+				<div class="col-3 token_actions">
 					<span class="btn btn-brand p-1" :title="$t('smart_contract')">
 							<a target="_blank" :href="'https://bscscan.com/address/'+afitxTokenAddress"><i class="fas fa-file-contract"></i></a>
 					</span>
@@ -178,7 +178,7 @@
 				<div class="col-2 text-right">{{ formattedUserAFITXBNBLPBSC }}</div>
 				<div class="col-2"></div>
 				<div class="col-1 text-right"></div>
-				<div class="col-3">
+				<div class="col-3 token_actions">
 					<span class="btn btn-brand p-1" :title="$t('smart_contract')">
 							<a target="_blank" :href="'https://bscscan.com/address/'+afitxBNBLPTokenAddress"><i class="fas fa-file-contract"></i></a>
 					</span>
@@ -240,6 +240,7 @@
 					<div class="col-2 text-right">{{ formattedUserAfitSE }}</div>
 					<div class="col-2"></div>
 					<div class="col-1 text-right"></div>
+					<div class="col-3"></div>
 					<!--<div class="col-3">
 						<span v-if="cur_bchain!='BLURT'" class="btn btn-brand p-1" :title="$t('move_afit_se_he_title')"><i class="fas fa-angle-double-right" v-on:click="moveAFITseHE"></i></span>
 					</div>-->
@@ -251,6 +252,7 @@
 					<div class="col-2 text-right">{{ formattedUserAFITXSE }}</div>
 					<div class="col-2"></div>
 					<div class="col-1 text-right"></div>
+					<div class="col-3"></div>
 					<!--<div class="col-3">
 						<span v-if="cur_bchain!='BLURT'" class="btn btn-brand p-1" :title="$t('move_afitx_se_he_title')"><i class="fas fa-angle-double-right" v-on:click="moveAFITXseHE"></i></span>
 					</div>-->
@@ -1186,7 +1188,7 @@
   const scot_hive_api_param = process.env.hiveEngineScotParam;
 
   const tokensNonStakable = ['AFITX', 'AFIT', 'STEEMP', 'SWAP.HIVE', 'SWAP.BLURT', 'SWAP.STEEM'];
-  const tokensOfInterest = ['SPORTS', 'PAL', 'APX', 'BEE', 'POSH', 'LEO', 'POSH'].concat(tokensNonStakable);
+  const tokensOfInterest = ['SPORTS', 'PAL', 'APX', 'BEE', 'POSH', 'LEO'].concat(tokensNonStakable);
   
   import { mapGetters } from 'vuex'
   
@@ -5110,7 +5112,7 @@
 	padding-bottom: 1px;
 	padding-top: 1px;
 	border-bottom: inset;
-    border-bottom-color: red;
+    /* border-bottom-color: red; */
     border-bottom-width: 1px;
 	margin: 0px;
   }
@@ -5149,24 +5151,39 @@
 	/* background-color: red; 
 	opacity: 0.7; */
 	background-color: beige;
-	border: 2px solid red;
+	/* border: 2px solid red; */
 	border-radius: 3px;
 	margin-bottom: 5px;
 	min-width: 600px; /* make it scroll friendly on mobile size */
 	
 	/* 3D look */
-	-moz-box-shadow: 0px 1px 1px rgba(000,000,000,0.5), inset 1px 2px 0px rgba(255,255,255,0.4);
+	/* -moz-box-shadow: 0px 1px 1px rgba(000,000,000,0.5), inset 1px 2px 0px rgba(255,255,255,0.4);
     -webkit-box-shadow: 0px 1px 1px rgb(0 0 0 / 50%), inset 1px 2px 0px rgb(255 255 255 / 40%);
     box-shadow: 0px 1px 1px rgb(0 0 0 / 50%), inset 1px 2px 0px rgb(255 255 255 / 40%);
     text-shadow: 1px 1px 2px rgb(0 0 0 / 70%), 0px 1px 0px rgb(255 255 255 / 40%);
-	box-shadow: 0 70px 40px -20px rgb(0 0 0 / 20%);
+	box-shadow: 0 70px 40px -20px rgb(0 0 0 / 20%); */
 	
   }
+  
+  .head-title{
+	    min-height: 40px;
+  }
+  
+  .wallet-container .token-entry.row div {
+    /* border: none; */
+    /* font-size: 16px; */
+    box-shadow: 3px 3px 3px rgb(255 0 0 / 20%);
+  }
+  
   .pro-name {
     background: radial-gradient(red,transparent);
     color: #fff;
   }
   .action-box{
 	background-color: beige;
+  }
+  
+  .token_actions .btn{
+	margin: 3px;
   }
 </style>
