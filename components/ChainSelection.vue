@@ -6,7 +6,7 @@
 		  <select class="form-control sel-adj border-red rounded-top rounded-bottom" v-model="cur_bchain" @change="setActiveChain($event)">
 			<option value=""><i>--Active Chain--</i></option>
 			<option value="HIVE" :selected="cur_bchain == 'HIVE' ? 'true' : 'false'">Hive</option> 
-			<option value="STEEM" :selected="cur_bchain == 'STEEM' ? 'true' : 'false'">Steem</option> 
+			<!--<option value="STEEM" :selected="cur_bchain == 'STEEM' ? 'true' : 'false'">Steem</option> -->
 			<option value="BLURT" :selected="cur_bchain == 'BLURT' ? 'true' : 'false'">Blurt</option>
 		  </select>
 		</div>
