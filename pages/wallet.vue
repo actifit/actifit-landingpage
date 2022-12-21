@@ -1187,7 +1187,7 @@
   const hsc = new SSC(process.env.hiveEngineRpc);
   const scot_hive_api_param = process.env.hiveEngineScotParam;
 
-  const tokensNonStakable = ['AFITX', 'AFIT', 'STEEMP', 'SWAP.HIVE', 'SWAP.BLURT', 'SWAP.STEEM'];
+  const tokensNonStakable = ['AFITX', 'AFIT', 'SWAP.HIVE', 'SWAP.BLURT'];
   const tokensOfInterest = ['SPORTS', 'PAL', 'APX', 'BEE', 'POSH', 'LEO'].concat(tokensNonStakable);
   
   import { mapGetters } from 'vuex'
@@ -5167,12 +5167,18 @@
   
   .head-title{
 	    min-height: 40px;
+		background-color: red;
+		color: white;
   }
   
   .wallet-container .token-entry.row div {
     /* border: none; */
     /* font-size: 16px; */
     box-shadow: 3px 3px 3px rgb(255 0 0 / 20%);
+  }
+  
+   .head-title div{
+	box-shadow: 3px 3px 3px rgb(255 255 255 / 60%) !important;
   }
   
   .pro-name {

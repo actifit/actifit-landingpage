@@ -7,6 +7,11 @@
       <!-- account balance -->
       <div class="text-center">
         <h3 class="mb-4">{{ $t('Hey') }} {{ user.account.name }}!</h3>
+		
+		<div>
+			<a href="/wallet"><i>{{$t('check_new_wallet_layout')}}</i></a>
+		</div>
+		
 		<div v-if="this.tokenMetrics.length > 0" class="row">
 			<div class="col-md-6 row-sep row-sep-in">
 				<h5 class="token-title">{{ $t('account_est_val') }}<i class="fas fa-info-circle" v-on:click="showDetailedCalc=!showDetailedCalc"></i></h5>

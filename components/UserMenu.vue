@@ -80,9 +80,9 @@
 				<i class="fas fa-toggle-off" v-else-if="cur_bchain == 'HIVE'" v-on:click="setActiveChain('STEEM')"></i>
 			</span>-->
 			</div>
-			<!--<div class="pl-2" :class="adjustSteemClass" v-on:click="setActiveChain('STEEM')">
+			<div v-if="isUserModerator" class="pl-2" :class="adjustSteemClass" v-on:click="setActiveChain('STEEM')">
 			<img src="/img/STEEM.png" style="max-height: 20px;"   :title="(cur_bchain == 'STEEM'?$t('running_on_chain').replace('_CHAIN_', 'STEEM'):$t('switch_to_chain').replace('_CHAIN_', 'STEEM'))">{{$t('STEEM')}}
-			</div>-->
+			</div>
 			<div class="pl-2" :class="adjustBlurtClass" v-on:click="setActiveChain('BLURT')" >
 			<img src="/img/BLURT.png" style="max-height: 20px;"  :title="(cur_bchain == 'BLURT'?$t('running_on_chain').replace('_CHAIN_', 'BLURT'):$t('switch_to_chain').replace('_CHAIN_', 'BLURT'))">{{$t('BLURT')}}
 			</div>
