@@ -1,7 +1,7 @@
 <template>
   <div :class="outserSmallScreenClasses" class="position-fixed text-brand mx-auto w-100 acti-notify-comp" >
 	<div :class="smallScreenClasses" class="text-center mx-auto acti-notify-comp-inner border-2 rounded">
-	  <div>Actifit 4th Year Anniversary🥳🎉 HiveFest 2 Tickets Giveaway 🎁<!-- CryptoFitChallenge 2022 is ON - Final Week In Progress -->
+	  <div>Actifit Growth & Development Plans 2023 - Vote For Our DHF Proposal!<!-- CryptoFitChallenge 2022 is ON - Final Week In Progress -->
 		<a href="" @click.prevent="adjustVisibility" class="expand-comp-notice nohoverunderline">
 			<span v-if="showCompDetails" title="minimize">🗕</span><!-- &#9651; -->
 			<span v-else title="maximize">🗖</span><!-- &#9661; -->
@@ -12,15 +12,16 @@
 			<!--<iframe v-if="screenWidth < 768" src="http://www.youtube.com/embed/kS6AXH1kY74" width="320" height="180" frameborder="0" class="mx-auto" allowfullscreen></iframe>
 			<iframe v-else src="https://www.youtube.com/embed/kS6AXH1kY74" width="640" height="360" frameborder="0" class="mx-auto" allowfullscreen></iframe>-->
 			<!--<iframe width="640" height="360" src="https://www.youtube.com/embed/kS6AXH1kY74"></iframe>-->
-			<img class="announce-img" src="/img/actifit_hive_fest_4th_anniversary.png" width="85%">
+			<img class="announce-img" src="/img/dhf_announcement_2.jpeg" >
 		  </div>
-		  <div>
-		  <!--<a href="https://actifit.io/@actifit/we-have-winners-public-token-sale-kicks-off-today-t-7-hours" class="btn btn-brand m-2" target="_blank">Event Details</a>
-		  <a href="https://www.youtube.com/watch?v=Vc6rpDU99nk" class="btn btn-brand m-2" target="_blank">Video Announcement</a> -->
-		  <a href="https://actifit.io/@actifit/actifit-4th-year-anniversary-hivefest-2-tickets-giveaway" class="btn btn-brand m-2 back-red" target="_blank">Announcement</a>
-		  <!--<a href="https://digifinex.zendesk.com/hc/en-us/articles/6871357968793" class="btn btn-brand m-2 back-red" target="_blank">Participation Rules</a>-->
+		  <div class="p-2">
+			  <!--<a href="https://actifit.io/@actifit/we-have-winners-public-token-sale-kicks-off-today-t-7-hours" class="btn btn-brand m-2" target="_blank">Event Details</a>
+			  <a href="https://www.youtube.com/watch?v=Vc6rpDU99nk" class="btn btn-brand m-2" target="_blank">Video Announcement</a> -->
+			  <a href="https://actifit.io/@actifit/proposal-for-the-support-of-actifit-hives-flagship-move2earn-dapp" target="_blank" class="btn btn-brand">Announcement</a>
+			  <a href="https://peakd.com/proposals/250" target="_blank" class="btn btn-brand">Vote Now!</a>
+			  <!--<a href="https://digifinex.zendesk.com/hc/en-us/articles/6871357968793" class="btn btn-brand m-2 back-red" target="_blank">Participation Rules</a>-->
 		  </div>
-		  <div><span class="end-string">Event ends in </span><Countdown v-if="countDownReady" deadline="August 5, 2022 23:59 GMT"></Countdown><i v-else class="fas fa-spin fa-spinner text-brand"></i></div>
+		  <div style="display:none"><span class="end-string">Event ends in </span><Countdown v-if="countDownReady" deadline="August 5, 2022 23:59 GMT"></Countdown><i v-else class="fas fa-spin fa-spinner text-brand"></i></div>
 		</div>
 	  </transition>
 	</div>
