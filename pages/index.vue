@@ -141,8 +141,8 @@
 
         <!-- delegation -->
         <div class="row no-gutters">
-          <div class="col-lg-6 order-lg-2 text-white showcase-img" style="background-image: url('/img/showcase-3.jpg');"></div>
-          <div class="col-lg-6 order-lg-1 my-auto showcase-text">
+          <div class="col-lg-6 order-lg-2 text-white showcase-img rounded" style="background-image: url('/img/showcase-3.jpg');"></div>
+          <div class="col-lg-6 order-lg-1 my-auto showcase-text rounded">
             <h2 class="text-capitalize">{{ $t('homepage.section4_title') }}</h2>
             <p class="lead mb-0">{{ $t('homepage.section4_desc') }}</p>
 			<div class="text-center row pt-2">
@@ -741,8 +741,28 @@
 </style>
 <style>
 	.header{
-		background-repeat: no-repeat
+		background-repeat: no-repeat;
+		/* box-shadow: 5px 0px 5px rgb(255 0 0 / 50%), 0px 5px 5px rgb(255 0 0 / 50%); */
+		 box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
 		/* min-height: 100% */
+	}
+	section{
+		margin-bottom: 0.2em;
+		box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
+		/* box-shadow: 5px 0px 5px rgb(255 0 0 / 50%), 0px 5px 5px rgb(255 0 0 / 50%); */
+	}
+	section.showcase {
+		box-shadow: none;
+	}
+	div.footer{
+		/* margin-top: 0.2em; */
+	}
+	.showcase .showcase-img{
+		padding: 2px;
+	}
+	.showcase .showcase-text, .showcase .showcase-img{
+		box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
+		/* box-shadow: 5px 0px 5px rgb(255 0 0 / 50%), 0px 5px 5px rgb(255 0 0 / 50%); */
 	}
 	.home-card{
 	  opacity: 0.9;
