@@ -1,14 +1,14 @@
 <template>
   <div :class="outserSmallScreenClasses" class="position-fixed text-brand mx-auto w-100 acti-notify-comp" >
 	<div :class="smallScreenClasses" class="text-center mx-auto acti-notify-comp-inner border-2 rounded">
-	  <div>Actifit Growth & Development Plans 2023 - Vote For Our DHF Proposal!<!-- CryptoFitChallenge 2022 is ON - Final Week In Progress -->
+	  <div class="announce-title">Actifit Growth & Development Plans 2023 - Vote For Our DHF Proposal!<!-- CryptoFitChallenge 2022 is ON - Final Week In Progress -->
 		<a href="" @click.prevent="adjustVisibility" class="expand-comp-notice nohoverunderline">
 			<span v-if="showCompDetails" title="minimize">🗕</span><!-- &#9651; -->
 			<span v-else title="maximize">🗖</span><!-- &#9661; -->
 		</a></div>
 	  <transition name="fade">
 		<div class="extra-info" v-if="showCompDetails">
-		  <div class="img-container row">
+		  <div class="img-container row p-2">
 			<!--<iframe v-if="screenWidth < 768" src="http://www.youtube.com/embed/kS6AXH1kY74" width="320" height="180" frameborder="0" class="mx-auto" allowfullscreen></iframe>
 			<iframe v-else src="https://www.youtube.com/embed/kS6AXH1kY74" width="640" height="360" frameborder="0" class="mx-auto" allowfullscreen></iframe>-->
 			<!--<iframe width="640" height="360" src="https://www.youtube.com/embed/kS6AXH1kY74"></iframe>-->
@@ -92,6 +92,10 @@
 	}
 	.acti-notify-comp-inner{
 	  background: white!important; 
+	  box-shadow: 5px 5px 5px rgb(255 0 0 / 80%);
+	}
+	.announce-title{
+		box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
 	}
 	.vuejs-countdown .digit{
 	  font-size: 20px !important;
@@ -103,7 +107,7 @@
 	  vertical-align: top;
 	}
 	.border-2{
-	  border: 2px solid #ff112d;
+	  /* border: 2px solid #ff112d; */
 	}
 	.expand-comp-notice{
 	  float:right; 
@@ -122,6 +126,9 @@
 		  margin: auto;
 		  max-width: 90%;
 		}
+	}
+	.announce-title{
+		box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
 	}
 	.img-container{
 	  
