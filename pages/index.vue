@@ -23,12 +23,12 @@
               <div class="col-sm-6">
                 <p class="lead text-muted mb-0">{{ $t('Balance') }}</p>
                 <h3><b>{{ numberFormat(formattedUserTokens, 3) }}</b><br><small>{{ $t('AFIT_Token') }}</small></h3>
-                <a href="#" @click.prevent="$router.push('/wallet')" class="btn btn-lg btn-brand w-100">{{ $t('My_Wallet') }}</a>
+                <a href="#" @click.prevent="$router.push('/wallet')" class="btn btn-lg btn-brand w-100 acti-shadow">{{ $t('My_Wallet') }}</a>
               </div>
               <div class="col-sm-6 mt-4 mt-sm-0">
                 <p class="lead text-muted mb-0">{{ $t('Activity') }}</p>
                 <h3><b>{{ grabUserReportCount }}</b><br><small>{{ $t('Reports') }}</small></h3>
-                <a href="#" class="btn btn-lg btn-brand w-100" @click.prevent="$router.push('/activity/' + user.account.name)">{{ $t('My_Activity') }}</a>
+                <a href="#" class="btn btn-lg btn-brand w-100 acti-shadow" @click.prevent="$router.push('/activity/' + user.account.name)">{{ $t('My_Activity') }}</a>
               </div>
             </div>
 			<div class="pb-md-2 row text-center">
@@ -36,10 +36,10 @@
 			</div>
 			<div class="pb-md-2 pt-2 row text-center">
 			  <div class="col-6 mb-3">
-				<a href="#" class="btn btn-lg btn-brand w-100" @click.prevent="$router.push('/activity/')">{{ $t('activity_feed') }}</a>
+				<a href="#" class="btn btn-lg btn-brand w-100 acti-shadow" @click.prevent="$router.push('/activity/')">{{ $t('activity_feed') }}</a>
 			  </div>
 			  <div class="col-6">
-				<a href="#" class="btn btn-lg btn-brand w-100" @click.prevent="$router.push('/market')">{{ $t('Market') }}</a>
+				<a href="#" class="btn btn-lg btn-brand w-100 acti-shadow" @click.prevent="$router.push('/market')">{{ $t('Market') }}</a>
 			  </div>
 			</div>
 		  </div>
@@ -49,19 +49,19 @@
             <!--<p class="lead py-md-3 form-info">Log in to see your current token balance, or sign up for a Steem account to start getting rewarded for your activity.</p>-->
             <div class="row">
               <div class="col-6">
-                <a href="/login" class="btn btn-brand btn-lg w-100">{{ $t('Login') }}</a>
+                <a href="/login" class="btn btn-brand btn-lg w-100 acti-shadow">{{ $t('Login') }}</a>
 				<!--<a :href="$steemconnect.getLoginURL()" class="btn btn-brand btn-lg w-100">{{ $t('Login') }}</a>-->
               </div>
               <div class="col-6">
-                <a href="/signup" class="btn btn-brand btn-lg w-100">{{ $t('Sign_Up') }}</a>
+                <a href="/signup" class="btn btn-brand btn-lg w-100 acti-shadow">{{ $t('Sign_Up') }}</a>
               </div>
             </div>
 			<div class="row pb-md-2 pt-2 ">
               <div class="col-6">
-				<a href="#" class="btn btn-lg btn-brand w-100" @click.prevent="$router.push('/activity/')">{{ $t('activity_feed') }}</a>
+				<a href="#" class="btn btn-lg btn-brand w-100 acti-shadow" @click.prevent="$router.push('/activity/')">{{ $t('activity_feed') }}</a>
 			  </div>
 			  <div class="col-6">
-				<a href="#" class="btn btn-lg btn-brand w-100" @click.prevent="$router.push('/market/')">{{ $t('Market') }}</a>
+				<a href="#" class="btn btn-lg btn-brand w-100 acti-shadow" @click.prevent="$router.push('/market/')">{{ $t('Market') }}</a>
 			  </div>
             </div>
           </div>
@@ -146,8 +146,8 @@
             <h2 class="text-capitalize">{{ $t('homepage.section4_title') }}</h2>
             <p class="lead mb-0">{{ $t('homepage.section4_desc') }}</p>
 			<div class="text-center row pt-2">
-				<a href="/yieldfarming" class="btn btn-brand btn-lg w-50 border-light">{{ $t('yield_farming') }}</a>
-				<a href="/wallet?action=delegate" class="btn btn-brand btn-lg w-50 border-light">{{ $t('Delegate') }}</a>
+				<a href="/yieldfarming" class="btn btn-brand btn-lg w-50 border-light acti-shadow">{{ $t('yield_farming') }}</a>
+				<a href="/wallet?action=delegate" class="btn btn-brand btn-lg w-50 border-light acti-shadow">{{ $t('Delegate') }}</a>
 			</div>
           </div>
         </div>
@@ -178,7 +178,7 @@
 			<img src="/img/STEEM.png" style="max-height: 20px;"><a :href="delegator._id" target="_blank">{{ numberFormat(delegator.steem_power, 0) }} {{ $t('Steem_Power') }}</a>
           </div>-->
 		  <div class="full-div">
-			<nuxt-link to="/delegators" class="text-center btn btn-brand" data-target="#">{{ $t('View_All_Delegators') }}</nuxt-link>
+			<nuxt-link to="/delegators" class="text-center btn btn-brand acti-shadow" data-target="#">{{ $t('View_All_Delegators') }}</nuxt-link>
 		  </div>
         </div>
       </div>
@@ -224,7 +224,7 @@
           </div>
         </div>
 		<div class="full-div">
-			<nuxt-link to="/leaderboard" class="text-center btn delegator-btn text-brand mt-2 leader-cls-btn" data-target="#">{{ $t('View_leaderboard') }}</nuxt-link>
+			<nuxt-link to="/leaderboard" class="text-center btn delegator-btn text-brand mt-2 leader-cls-btn acti-shadow-inverse" data-target="#">{{ $t('View_leaderboard') }}</nuxt-link>
 		</div>
       </div>
     </section>
@@ -759,6 +759,12 @@
 	}
 	.showcase .showcase-img{
 		padding: 2px;
+	}
+	.acti-shadow{
+		box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
+	}
+	.acti-shadow-inverse{
+		box-shadow: 3px 3px 3px rgb(255 255 255 / 40%);
 	}
 	.showcase .showcase-text, .showcase .showcase-img{
 		box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
