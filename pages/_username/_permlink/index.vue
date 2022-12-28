@@ -62,10 +62,10 @@
 		  </div>
 		  <div class="text-brand col-md-6"> 
 			<social-sharing :url="formattedReportUrl"
-						  title="Actifit - Rewarding Your Everyday Activity"
-						  description="Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity "
-						  quote="Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity"
-						  hashtags="actifit,steem,health,mobile"
+						  :title="socialSharingTitle"
+						  :description="socialSharingDesc"
+						  :quote="socialSharingQuote"
+						  :hashtags="hashtags"
 						  twitter-user="actifit_fitness"
 						  inline-template>
 				 <div class="share-links-actifit">
@@ -399,6 +399,10 @@
 			target_bchain: 'HIVE',
 			reload: 0,
 			profImgUrl: process.env.hiveImgUrl,
+			socialSharingTitle: process.env.socialSharingTitle,
+			socialSharingDesc: process.env.socialSharingDesc,
+			socialSharingQuote: process.env.socialSharingQuote,
+			hashtags: process.env.socialSharingHashtags,
 		}
 	},
 	watch: {

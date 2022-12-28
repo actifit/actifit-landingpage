@@ -17,7 +17,7 @@
 						  title="Actifit - Rewarding Your Everyday Activity"
 						  description="Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity "
 						  quote="Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity"
-						  hashtags="actifit,steem,health,mobile"
+						  :hashtags="hashtags"
 						  twitter-user="actifit_fitness"
 						  inline-template>
 				 <div class="share-links-actifit">
@@ -177,6 +177,10 @@
 		userTokensMin: 50000,
 		userRankMin: 30,
 		afitxMin: 50,
+		socialSharingTitle: process.env.socialSharingTitle,
+		socialSharingDesc: process.env.socialSharingDesc,
+		socialSharingQuote: process.env.socialSharingQuote,
+		hashtags: process.env.socialSharingHashtags,
 	  }
 	},
     computed: {
