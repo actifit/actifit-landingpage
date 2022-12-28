@@ -483,6 +483,8 @@
 		//console.log(this.report);
 		let report_content = this.report.body;
 		
+		//sanitize content first hand
+		report_content = sanitize(report_content , { allowedTags: ['img'] });
 		//console.log(report_content);
 		
 		/* let's find images sent as ![](), and display them properly */
@@ -515,7 +517,7 @@
 		let user_name = /([^\/])(@([\d\w-.]+))/igm;
         
 		report_content = report_content.replace(user_name,'$1<a href="https://actifit.io/$2">$2</a>')
-		return sanitize(report_content , { allowedTags: ['img'] });
+		return report_content
       },
 	  getVoteCount(){
 		return Array.isArray(this.report.active_votes) ? this.report.active_votes.length : 0;

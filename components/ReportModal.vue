@@ -296,6 +296,8 @@
       body () {
 		let report_content = this.report.body;
 		
+		//sanitize content first hand
+		sanitize(report_content , { allowedTags: ['img'] });
 		/* let's find images sent as ![](), and display them properly */
 		//let img_links_reg = /^(?:(?!=").)*((https?:\/\/[./\d\w-]*\.(?:png|jpg|jpeg|gif))|((https?:\/\/usermedia\.actifit\.io\/[./\d\w-]+)))/igm;
 		let img_links_reg = /[!]\[[\d\w\s-\.\(\)]*\]\((((https?:\/\/actifit\.s3\.amazonaws\.com\/)|((https?:\/\/usermedia\.actifit\.io\/))|((https:\/\/ipfs\.busy\.org\/ipfs\/))|((https:\/\/steemitimages\.com\/)))[\d\w-=&[\:\/\.\%\?]+|(https?:\/\/[.\d\w-\/\:\%]*(\.(?:png|jpg|jpeg|gif)(\??[\d\w-=&[\:\/\.\%\?]+)?)?))[)]/igm;
@@ -323,7 +325,7 @@
 		let user_name = /([^\/])(@([\d\w-.]+))/igm;
         
 		report_content = report_content.replace(user_name,'$1<a href="https://actifit.io/$2">$2</a>')
-		return sanitize(report_content , { allowedTags: ['img'] });
+		return report_content;
       },
 	  formattedReportUrl () {
 		return "https://actifit.io" + this.report.url;

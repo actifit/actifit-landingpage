@@ -247,8 +247,13 @@
     },
     methods: {
       commentBody () {
-		//console.log(this.report);
+		//console.log('comment body');
+		//console.log(this.full_data.body);
 		let report_content = this.full_data.body;
+		
+		
+		//sanitize content first hand
+		report_content = sanitize(report_content , { allowedTags: ['img'] });
 		
 		//console.log(report_content);
 		
@@ -282,7 +287,7 @@
 		let user_name = /([^\/])(@([\d\w-.]+))/igm;
         
 		report_content = report_content.replace(user_name,'$1<a href="https://actifit.io/$2">$2</a>')
-		return sanitize(report_content , { allowedTags: ['img'] });
+		return report_content;
       },
 	  meta() {
         return JSON.parse(this.full_data.json_metadata)
