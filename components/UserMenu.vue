@@ -5,12 +5,12 @@
 	  <li class="nav-item" v-if="!user">
 		<a :href="'/signup'" >{{ $t('Signup_Link') }}</a> | <a :href="'/login'" >{{ $t('Login') }}</a>
 	  </li>
-	  <li class="nav-item mr-2" v-if="user" >
+	  <!--<li class="nav-item mr-2" v-if="user" >
         <span class="navbar-text py-0 text-brand" >{{ $t('Rank') }}&nbsp;<br><b>{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRankObj && this.userRankObj.afitx_rank">{{  displayIncreasedUserRank }}</span></b></span>
       </li>
       <li class="nav-item mr-2" v-if="user">
         <span class="navbar-text py-0">{{ $t('Balance') }}<br><b>{{ formattedUserTokens }}</b></span>
-      </li>
+      </li>-->
 	  <li class="nav-item mr-2" v-if="user">
 		<span class="user-avatar-notif-menu group-class notification-class text-brand" v-if="activeNotificationsLen > 0">{{ this.activeNotificationsLen }}</span>
         <span class="user-avatar group-class" v-if="activeNotificationsLen > 0">
@@ -60,7 +60,7 @@
           <div class="user-avatar group-class" :style="'background-image: url('+profImgUrl+'/u/' + user.account.name + '/avatar)'"></div>
         </a>
         <div class="dropdown-menu dropdown-menu-right">
-          <h6 class="dropdown-header text-center">@{{ user.account.name }}</h6>
+          <h6 class="dropdown-header text-center"><a class="dropdown-item" href="#" @click.prevent="$router.push('/' + user.account.name)">@{{ user.account.name }}</a></h6>
           <div class="dropdown-divider"></div>
 		  <a class="dropdown-item text-brand" href="#" @click.prevent="$router.push('/mods-access/')" v-if="isUserModerator">Moderation</a>
 		  <div class="dropdown-divider" v-if="isUserModerator"></div>
