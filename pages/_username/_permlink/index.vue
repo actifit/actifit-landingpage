@@ -1,11 +1,11 @@
 <template>
   <div>
 	<NavbarBrand />
-	<div class="container pt-5 mt-5 col-md-6" >
-		<ChainSelection />
-	</div>
-	<div v-if="report && report.author" class="container pt-1 mt-1 pb-5 col-md-6" >
 	
+	<div v-if="report && report.author" class="container pt-5 mt-5 pb-5 col-md-6" >
+		<div class="text-right" >
+			<ChainSelection />
+		</div>
         <div class="report-head mb-3 col-md-12">
           <!-- if this is a comment, display link to higher level comment/post -->
 		  <div v-if="report.parent_author">
