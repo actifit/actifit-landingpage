@@ -15,6 +15,7 @@ module.exports = {
 	webEditToken: process.env.WEB_EDIT_REWARD_KEY,
 	webVoteToken: process.env.WEB_VOTE_REWARD_KEY,
 	webCommentToken: process.env.WEB_COMMENT_REWARD_KEY,
+	poshVerificationUrl: 'https://hiveposh.com/api/v0/twitter/',
 	socialSharingHashtags: 'actifit,hive,move2earn,health,fitness',
 	socialSharingTitle: 'Actifit - Rewarding Your Everyday Activity',
 	socialSharingDesc: 'Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity ',

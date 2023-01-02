@@ -2,9 +2,9 @@
   <!-- single report item for activity pages -->
   <div >
     <div class="card report">
-      <h6 class="mb-0 text-center">
+      <h6 class="mb-0 text-center report-title">
         <a :href="report.url" target="_blank">
-          {{ report.title }}
+          {{ truncateString(report.title) }}
 		  <i class="fas fa-external-link-alt"></i>
         </a>
 		<span v-if="this.afitReward" :title="$t('Rewarded_report')" class="check-tooltip"><i class="fas fa-check p-2"></i></span>
@@ -56,6 +56,19 @@
           </div>
           <div class="col-6 text-right">
             <small>
+				<social-sharing :url="'https://actifit.io'+report.url"
+							  :title="socialSharingTitle"
+							  :description="socialSharingDesc"
+							  :quote="socialSharingQuote"
+							  :hashtags="hashtags"
+							  twitter-user="actifit_fitness"
+							  inline-template>
+					<span class="share-links-actifit">
+					  <network network="twitter">
+						<i class="fab fa-twitter text-brand" title="twitter"></i>
+					  </network>
+					</span>
+				</social-sharing>
               <a href="#" class="text-brand pr-2" @click="$store.commit('setActiveReport', report)" data-toggle="modal"
                  data-target="#dailyActivityChartModal" :title="$t('Activity_chart')">
                 <i class="fas fa-chart-line"></i>
@@ -150,6 +163,8 @@
   import steem from 'steem'
   
   import hive from '@hiveio/hive-js'
+  
+  import SocialSharing from 'vue-social-sharing'
 
   export default {
     props: ['report'],
@@ -233,7 +248,14 @@
 			postUpvoted: false,
 			cur_bchain: 'HIVE',
 			profImgUrl: process.env.hiveImgUrl,
+			socialSharingTitle: process.env.socialSharingTitle,
+			socialSharingDesc: process.env.socialSharingDesc,
+			socialSharingQuote: process.env.socialSharingQuote,
+			hashtags: process.env.socialSharingHashtags,
 		}
+	},
+	components: {
+		SocialSharing,
 	},
 	watch: {
 	  postUpvoted: 'updatePostData',
@@ -248,6 +270,13 @@
 			return true;
 		}
 		return false;
+	  },
+	  //function handles displaying cut off version of text to avoid lengthy titles
+	  truncateString(str) {
+		  if (str.length > 70) {
+			return str.substring(0, 67) + "...";
+		  }
+		  return str;
 	  },
 	  /* function checks if logged in user has upvoted current report */
 	  userVotedThisPost() {
@@ -350,5 +379,11 @@
 	}
 	.increased-rank{
 		color: #76BB0E;
+	}
+	.report-title{
+		min-height: 60px;
+	}
+	.card{
+		box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
 	}
 </style>

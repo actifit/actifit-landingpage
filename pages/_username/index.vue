@@ -11,19 +11,19 @@
 			<a :href="formattedProfileUrl" target="_blank">@{{ displayUser }} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></a>
 			<span v-if="!account_banned && !isOwnAccount()" class="text-brand">
 				<span :title="$t('you_are_friends_username').replace('_USERNAME_', displayUser)" v-if="isFriend()" >
-					<i class="fas fa-user-friends  p-2" ></i>
-					<span :title="$t('cancel_friendship')" v-on:click="dropFriend"><i class="fas fa-user-times"></i></span>
+					<i class="fas fa-user-friends  p-2 acti-shadow" ></i>
+					<span :title="$t('cancel_friendship')" v-on:click="dropFriend"><i class="fas fa-user-times acti-shadow"></i></span>
 					<div v-if="addFriendError" v-html="addFriendError"></div>
 				</span>
 				<span :title="$t('friendship_pending_approval')" v-else-if="isPendingFriend()">
-					<i class="fas fa-user-clock  p-2"></i>
-					<span :title="$t('cancel_friend_request')" v-on:click="cancelFriendRequest" v-if="isPendingFriend().direction == 0"><i class="fas fa-user-times"></i></span>
-					<span :title="$t('accept_friend_request')" v-on:click="acceptFriend" v-else-if="isPendingFriend().direction == 1"><i class="fas fa-user-check"></i></span>
+					<i class="fas fa-user-clock  p-2 acti-shadow"></i>
+					<span :title="$t('cancel_friend_request')" v-on:click="cancelFriendRequest" v-if="isPendingFriend().direction == 0"><i class="fas fa-user-times acti-shadow"></i></span>
+					<span :title="$t('accept_friend_request')" v-on:click="acceptFriend" v-else-if="isPendingFriend().direction == 1"><i class="fas fa-user-check acti-shadow"></i></span>
 					<div v-if="addFriendError" v-html="addFriendError"></div>
 				</span>
 				<span :title="$t('add_username_friend').replace('_USERNAME_', displayUser)" v-else
 					v-on:click="addFriend">
-					<i class="fas fa-user-plus  p-2"></i>
+					<i class="fas fa-user-plus  p-2 acti-shadow"></i>
 					<div v-if="addFriendError" v-html="addFriendError"></div>
 				</span>
 				<i class="fas fa-spin fa-spinner" v-if="friendshipLoader"></i>
@@ -34,7 +34,8 @@
 		</h5>
 		
 		<div > <!-- class="d-flex flex-row" -->
-        <div class="mb-3 row"> <!-- d-flex flex-column  -->
+        <!-- actifit specific data display -->
+		<div class="mb-3 row"> <!-- d-flex flex-column  -->
 		  <div v-if="displayUser" class="col-12 col-md-2">
 			<div class="user-avatar large-avatar mr-1 mb-3 col-12 col-md-12"
 					   :style="'background-image: url('+this.profImgUrl+'/u/' + this.displayUser + '/avatar)'"/>
@@ -63,7 +64,7 @@
 					<div v-if="displayAddFriendActivity" class="col-12 border row text-brand">
 						{{ $t('View_chart_notice').replace('_USER', this.username) }}
 						<span :title="$t('add_username_friend').replace('_USERNAME_', displayUser)" v-on:click="addFriend">
-							<i class="fas fa-user-plus p-2"></i>
+							<i class="fas fa-user-plus p-2 acti-shadow"></i>
 							<div v-if="addFriendError" v-html="addFriendError"></div>
 						</span>
 					</div>
@@ -130,7 +131,7 @@
 				<div v-if="displayAddFriendStats" class="border text-brand col-12">
 					{{ $t('View_chart_notice').replace('_USER', this.username) }}
 					<span class="col-12" :title="$t('add_username_friend').replace('_USERNAME_', displayUser)" v-on:click="addFriend">
-						<i class="fas fa-user-plus p-2"></i>
+						<i class="fas fa-user-plus p-2 acti-shadow"></i>
 						<div v-if="addFriendError" v-html="addFriendError"></div>
 					</span>
 				</div>
@@ -157,9 +158,26 @@
 				<div class="info-box col-md-6 cntnr"><i class="fas fa-pen mr-2"></i> {{ numberFormat(userinfo.post_count, 0) }} {{ $t('Steem_posts_comments') }}</div>
 			</div>
 			<div v-if="!account_banned" class="row m-0">
+				<!-- display posh verification status -->
+				<div class="mb-2 mt-2 info-box info-box-orange col-md-12 cntnr">
+					<img src="/img/poshlogo.png" class="mr-2 user-menu-container">
+					<span v-if="poshVerified">
+						<i class="fas fa-check text-success" style="font-size:xxx-large"></i>
+						<a :href="this.poshUserData.twitter_profile" v-if="poshUserData.twitter_username">@{{this.poshUserData.twitter_username}}</a>
+					</span>
+					<span v-else>
+						<a class="btn btn-brand m-2" href="https://hiveposh.com/" target="_blank">{{ $t('Posh_verify') }}</a>
+					</span>
+					<div v-html="$t('posh_desc_profile')"></div>
+				</div>
+				
 				<div class="friends-count mb-2 mt-2 info-box info-box-orange col-md-12 cntnr">
-					<i class="fas fa-user-friends text-brand mr-2" ></i><a href="./friends" >{{ this.userFriends.length }} {{ $t('friends') }} <span v-html="showFriendsSnippet()"></span></a>
-					<a class="btn btn-brand m-2" href="./friends">{{ $t('View_friends') }}</a>
+					<i class="fas fa-user-friends text-brand mr-2" ></i>
+					{{ this.userFriends.length }} {{ $t('friends') }} .
+					<div>
+						<span v-html="showFriendsSnippet()"></span>
+						<a class="btn btn-brand m-2" href="./friends">{{ $t('View_friends') }}</a>
+					</div>
 				</div>
 				<div class="info-box-orange mb-2 col-md-6 cntnr"><i class="fas fa-angle-double-left text-brand mr-2"></i>{{ $t('Followers') }}: {{ getFollowerCount }}</div>
 				<div class="info-box-orange mb-2 col-md-6 cntnr"><i class="fas fa-angle-double-right text-brand mr-2"></i>{{ $t('Following') }}: {{ getFollowingCount }}</div>
@@ -452,6 +470,8 @@
 			error_msg: '',
 			votingProgress: false,
 			showAfitTipInfo: false,
+			poshVerified: false,
+			poshUserData: '',
 		}
 	},
 	watch: {
@@ -1277,9 +1297,22 @@
 		}
 	  },
 	  async setTipBalance(json){
-	  console.log('setTipBalance');
+		//console.log('setTipBalance');
 		if (json && json.tip_balance){
 			this.userAFITTipTokenCount = json.tip_balance
+		}
+	  },
+	  async setPoshVerifStatus(json){
+		if (json && json.twitter_username){
+			this.poshVerified = true;
+			if (this.user){
+				if (this.displayUser == this.user.account.name){
+					this.poshUserData = json;
+				}
+			}
+		}else{
+			this.poshVerified = false;
+			this.poshUserData = '';
 		}
 	  }
 	},
@@ -1356,6 +1389,11 @@
 		  //let's check if this user is banned
 		  fetch(process.env.actiAppUrl+'availableTipBalance?user='+this.displayUser).then(
 			res => {res.json().then(json => this.setTipBalance(json))}).catch(e => reject(e))
+		  
+		  
+		  //check user posh verification status
+		  fetch(process.env.poshVerificationUrl+this.displayUser).then(
+			res => {res.json().then(json => this.setPoshVerifStatus(json))}).catch(e => reject(e))
 		  
 		  
 		 	console.log('mounted');
@@ -1538,12 +1576,14 @@
 		border: 1px solid #fff;
 		color: #fff;
 		background: linear-gradient(30deg, red, transparent);
-		border-radius: 5px;
+		border-radius: 10px;
+		box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
 	}
 	.info-box-orange{
 		color: #ff4500;
 		background: linear-gradient(30deg, orange, transparent);
-		border-radius: 5px;
+		border-radius: 10px;
+		box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
 	}
 	.info-box-green{
 		/* color: #ff4500; */
@@ -1551,13 +1591,16 @@
 		color: white;
 		background: linear-gradient(30deg, green, orange);
 		padding-top: 3px;
-		border-radius: 5px;
+		border-radius: 10px;
+		box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);	
+		min-height: 120px;		
 	}
 	.badge-entry{
 		color: #fff !important;
 		background: linear-gradient(45deg, green, orange);
 		border: 1px solid #fff;
-		border-radius: 5px;
+		border-radius: 10px;
+	    box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
 	}
 	.force-white-url{
 		color: white !important;
@@ -1579,5 +1622,9 @@
 	}
 	.phishy h6{
 		font-weight: bold;
+	}
+	.btn-brand{
+		box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
+		margin-top: 2px;
 	}
 </style>

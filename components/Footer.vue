@@ -131,4 +131,10 @@
 	.btn{
 		border-radius: 5px;
 	}
+	.btn-brand{
+		box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
+	}
+	.acti-shadow{
+		box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
+	}
 </style>
