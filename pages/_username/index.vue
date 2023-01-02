@@ -163,7 +163,7 @@
 					<img src="/img/poshlogo.png" class="mr-2 user-menu-container">
 					<span v-if="poshVerified">
 						<i class="fas fa-check text-success" style="font-size:xxx-large"></i>
-						<a :href="this.poshUserData.twitter_profile" v-if="poshUserData.twitter_username">@{{this.poshUserData.twitter_username}}</a>
+						<a :href="this.poshUserData.twitter_profile" v-if="this.poshUserData.twitter_username">@{{this.poshUserData.twitter_username}}</a>
 					</span>
 					<span v-else>
 						<a class="btn btn-brand m-2" href="https://hiveposh.com/" target="_blank">{{ $t('Posh_verify') }}</a>
@@ -1133,6 +1133,13 @@
 		  //ensure we fetch proper logged in user data
 		  this.$store.dispatch('fetchUserTokens')
 		  this.$store.dispatch('fetchUserRank')
+		  
+		  //check user posh verification status
+		  fetch(process.env.poshVerificationUrl+this.displayUser).then(
+			res => {res.json().then(json => this.setPoshVerifStatus(json))}).catch(e => reject(e))
+		  
+		 
+		  
 		  this.$forceUpdate()
 		}
 	  },
@@ -1305,6 +1312,7 @@
 	  async setPoshVerifStatus(json){
 		if (json && json.twitter_username){
 			this.poshVerified = true;
+			console.log(this.user);
 			if (this.user){
 				if (this.displayUser == this.user.account.name){
 					this.poshUserData = json;
