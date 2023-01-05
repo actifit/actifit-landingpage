@@ -13,9 +13,9 @@
 			<li v-if="pendingRewards.pendingRewards.HIVE"><!--  -->
 				$ {{pendingRewards.pendingRewards.HIVE.amount.toFixed(2)}} ({{pendingRewards.pendingRewards.HIVE.amount.toFixed(2)}} {{pendingRewards.pendingRewards.HIVE.currency}} <img src="/img/HIVE.png" class="token-logo-sm" title="HIVE Rewards">)
 			</li>
-			<li v-if="pendingRewards.pendingRewards.STEEM"><!--   -->
+			<!--<li v-if="pendingRewards.pendingRewards.STEEM">
 				$ {{pendingRewards.pendingRewards.STEEM.amount.toFixed(2)}} ({{pendingRewards.pendingRewards.STEEM.amount.toFixed(2)}} {{pendingRewards.pendingRewards.STEEM.currency}}<img src="/img/STEEM.png" class="token-logo-sm" title="STEEM Rewards">)
-			</li>
+			</li>-->
 			<li v-if="pendingRewards.pendingRewards.BLURT"><!--   -->
 				$ {{displayBlurtPriceUSD.toFixed(2)}} ({{pendingRewards.pendingRewards.BLURT.amount.toFixed(2)}} {{pendingRewards.pendingRewards.BLURT.currency}}<img src="/img/BLURT.png" class="token-logo-sm" title="BLURT Rewards">)
 			</li>

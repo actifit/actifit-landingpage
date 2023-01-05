@@ -15,12 +15,12 @@
 			<span v-if="hivePrice">
 				<img src="/img/HIVE.png" style="max-height: 20px;">{{ $t('Current') }} {{ $t('HIVE')}} {{ $t('price')}}: $ {{ hivePrice }} | 
 			</span>
-			<span v-if="steemPrice">
+			<!--<span v-if="steemPrice">
 				<img src="/img/STEEM.png" style="max-height: 20px;">{{ $t('Current') }} {{ $t('STEEM')}} {{ $t('price')}}: $ {{ steemPrice }}
-			</span>
+			</span>-->
 		  </div>
 		  <div class="row row-sep">
-			<div class="col-md-6 row-sep-in small-pad-row p-2 text-left">
+			<div class="col-md-12 row-sep-in small-pad-row p-2 text-left">
 				<span v-if="topDelegators.hive">
 					<h4 class="text-center">{{ $t('Daily_pool') }} - {{$t('Hive_delegators')}} <img src="/img/HIVE.png" style="max-height: 20px;"> </h4>
 					
@@ -41,7 +41,7 @@
 					<i class="fas fa-spin fa-spinner text-brand"></i>
 				</span>
 			</div>
-			<div class="col-md-6 row-sep-in small-pad-row p-2 text-left">
+			<!--<div class="col-md-6 row-sep-in small-pad-row p-2 text-left">
 				<span v-if="topDelegators.steem">
 					<h4 class="text-center">{{ $t('Daily_pool') }} - {{$t('Steem_delegators')}} <img src="/img/STEEM.png" style="max-height: 20px;"> </h4>
 					
@@ -60,7 +60,7 @@
 				<span v-else>
 					<i class="fas fa-spin fa-spinner text-brand"></i>
 				</span>
-			</div>
+			</div>-->
 		  </div>
 		
 	  </div>

@@ -24,8 +24,8 @@
 				<input type="checkbox" id="hive" value="Hive" ref="hive" checked="checked" disabled="disabled"><label for="hive">HIVE (Hive is always active)</label>
 			  </div>
 
-			  <div class="bchain-option btn col-12 m-2 p-2 row text-left">
-				<input type="checkbox" id="steem" value="Steem" ref="steem" :checked="is_chain_enabled('STEEM')" @change="adjustCheckbox($event)"><label for="steem">STEEM</label>
+			  <div class="bchain-option btn col-12 m-2 p-2 row text-left" style="display:none">
+				<input type="checkbox" id="steem" value="Steem" ref="steem" :checked="is_chain_enabled('STEEM')" @change="adjustCheckbox($event)" ><label for="steem">STEEM</label>
 			  </div>
 
 			  <div class="bchain-option btn col-12 m-2 p-2 row text-left">
@@ -35,7 +35,7 @@
 			<h5 class="p-3 acti-headr">{{ $t('post_chains_setting') }}</h5>
 			<span class="text-brand" v-html="$t('posting_authority_desc')"></span>
 			<div v-if="auth_loaded">
-			  <div>
+			  <div style="display:none">
 				<span><i class="fas fa-check text-success m-lg-3" v-if="this.posting_auth['steem']==true"></i>
 				<i class="fas fa-times text-danger m-lg-3" v-else></i>
 				<span class="font-weight-bold">{{$t('steem_posting_auth')}}</span><img src="/img/STEEM.png" style="max-height: 50px;"/></span>
