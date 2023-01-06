@@ -11,6 +11,9 @@ export default {
   setReferrals (state, referrals) {
     state.referrals = referrals
   },
+  setUserSettings (state, settings){
+	state.userSettings = settings  
+  },
   setUserRank (state, userRank) {
     state.userRankObj = userRank
 	state.userRank = userRank.user_rank

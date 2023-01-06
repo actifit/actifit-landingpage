@@ -14,6 +14,9 @@ export default {
   userRank (state) {
 	return state.userRank
   },
+  userSettings (state){
+	return state.userSettings
+  },
   userRankObj (state) {
 	return state.userRankObj
   },

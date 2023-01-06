@@ -25,6 +25,13 @@ export default {
       }).catch(e => reject(e))
     })
   },
+  fetchUserSettings({state, commit}){
+	return new Promise((resolve, reject) => {
+      fetch(process.env.actiAppUrl+'userSettings/' + state.steemconnect.user.account.name.toLowerCase()).then(res => {
+        res.json().then(json => commit('setUserSettings', json.settings)).catch(e => reject(e))
+      }).catch(e => reject(e))
+    })
+  },
   fetchUserReportCount ({ state, commit }) {
     return new Promise((resolve, reject) => {
       fetch(process.env.actiAppUrl+'userRewardedPostCount/' + state.steemconnect.user.account.name.toLowerCase()).then(res => {

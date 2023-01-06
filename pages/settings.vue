@@ -60,6 +60,30 @@
 			</div>
 		</div>
 		
+		<h5 class="p-3 acti-headr" style="display: none">{{ $t('Active_hive_node') }}</h5>
+		<div class="container pb-3" style="display: none">
+			<div class="">
+				{{$t('Active_hive_node')}}
+				<select class="form-control form-control-lg mb-2 col-4" v-model="sel_node" :disabled="custom_node_active">
+					<option v-for="(node, index) in hive_nodes" :key="index" v-if="node" :value="node">{{node}}</option>
+				</select>
+			</div>
+			<div class="">
+				<input type="checkbox" id="customNode" v-model="custom_node_active">
+				<label for="customNode">{{$t('Custom_hive_node')}}</label>
+				<input class="form-control form-control-lg mb-2 col-4" type="text" 
+				v-model="custom_node" id="custom_node" :disabled="!custom_node_active">
+			</div>
+			<div class="">
+				<input type="checkbox" id="testnet" :ref="testnet" v-model="testnet" :disabled="!custom_node_active">
+				<label for="testnet">{{$t('Testnet')}}</label>
+			</div>
+			<div class="">
+				<span >{{$t('Chain_id')}}</span>
+				<input class="form-control form-control-lg mb-2 col-4" type="text" v-model="chain_id" id="chain_id" :disabled="!custom_node_active || !testnet">
+			</div>
+		</div>
+		
 		<h5 class="p-3 acti-headr">{{ $t('Notification_settings') }}</h5>
 		<div class=" pb-3">
 					  
@@ -75,7 +99,7 @@
 			  </div>
 			  
 			  <h6 v-if="notif_active == true">{{ $t('Notification_types') }}</h6>
-			  <div id="notif_type_container" v-if="notif_active == true">
+			  <div id="notif_type_container" v-if="notif_active">
 				  
 				  <div class="notif-option btn col-12 ml-3 row text-left" v-for="(notif_tp, index) in notif_types" :notif_tp="notif_tp" :key="index" v-if="notif_tp">
 					<input type="checkbox" :id="'sub_'+notif_tp.category" :ref="'sub_'+notif_tp.category" v-model="subset[notif_tp.category]">
@@ -150,6 +174,12 @@
 			steem_error_processing: '',
 			blurt_error_processing: '',
 			auth_loaded: false,
+			hive_nodes: [],
+			sel_node: '',
+			custom_node_active: false,
+			custom_node: '',
+			testnet: '',
+			chain_id: '',
 		}
 	},
 	watch: {
@@ -208,10 +238,24 @@
 		this.$forceUpdate();
 	  },
 	  async fetchSettings () {
+		//console.log('fetch settings')
 		//let's fetch all available notification types
 		let quer = await fetch(process.env.actiAppUrl + 'notificationTypes/');
 		
 		this.notif_types = await quer.json();
+		//console.log(this.notif_types);
+		
+		//also fetch available hive nodes
+		let hiveNodes = await fetch(process.env.actiAppUrl + 'availableHiveNodes/');
+		//console.log('hive nodes');
+		//console.log(hiveNodes);
+		let nodeDataContainer = await hiveNodes.json();
+		try{
+			this.hive_nodes = nodeDataContainer.hiveNodes;
+		}catch(err){
+		
+		}
+		//return;
 		//console.log(this.notif_types);
 		if (this.user){
 			this.$store.dispatch('fetchUserTokens')
@@ -227,6 +271,21 @@
 					}
 					if (typeof this.user_settings.notifications_active !== 'undefined'){
 						this.notif_active = this.user_settings.notifications_active;
+					}
+					
+					//load proper node
+					if (typeof this.user_settings.node_active !== 'undefined'){
+						console.log('stored node data');
+						console.log(this.user_settings.node_active.customNode);
+						if (!this.user_settings.node_active.customNode){
+							this.sel_node = this.user_settings.node_active.stdNode;
+							this.custom_node_active = false;
+						}else{
+							this.custom_node_active = true;//this.user_settings.node_active.customNode;
+							this.custom_node = this.user_settings.node_active.customNodeUrl;
+							this.testnet = this.user_settings.node_active.isTestnet;
+							this.chain_id = this.user_settings.node_active.chainId;
+						}
 					}
 					try{
 					for (let i=0;i<this.notif_types.length;i++){
@@ -367,10 +426,42 @@
 	  },
 	  async saveSettings () {
 		this.save_progress = true;
+		/*console.log(this.sel_node);
+		console.log(this.testnet);
+		console.log(this.chain_id);
+		console.log(this.custom_node);
+		console.log(this.custom_node_active);*/
+		//return;
 		try{
 			if (!this.user_settings){
 				this.user_settings = new Object();
 				//this.user_settings.user = this.user.account.name;
+			}
+			if (this.custom_node_active){
+				this.subset['node_active'] = {
+					customNode: true,
+					customNodeUrl: this.custom_node,
+					isTestnet: this.testnet,
+					chainId: this.chain_id
+				}
+			}else{
+				this.subset['node_active'] = {
+					stdNode: this.sel_node,
+					customNode: false,
+				}
+			}
+			
+			//store node data
+			if (typeof this.user_settings.node_active !== 'undefined'){
+				if (!this.user_settings.node_active.customNode){
+					this.sel_node = this.user_settings.node_active.stdNode;
+					this.custom_node_active = false;
+				}else{
+					this.custom_node_active = true;
+					this.custom_node = this.user_settings.node_active.customNodeUrl;
+					this.testnet = this.user_settings.node_active.isTestnet;
+					this.chain_id = this.user_settings.node_active.chainId;
+				}
 			}
 
 			this.subset['post_target_bchain'] = this.target_bchain;
