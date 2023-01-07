@@ -151,17 +151,17 @@
       // login
       this.$store.dispatch('steemconnect/login')
 	  this.fetchUserData();
+
+      // fetch reports
+	  
+	  let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+	  this.$store.commit('setBchain', cur_bchain);
 	  
       // reset previously fetched posts to get latest
       this.$store.commit('setUserReports', [])
 
       // disable load more button and only show if there actually are more posts to load
       this.$store.commit('setMoreUserReportsAvailable', false)
-
-      // fetch reports
-	  
-	  let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
-	  this.$store.commit('setBchain', cur_bchain);
 	  
       await this.$store.dispatch('fetchUserReports', this.username)
 

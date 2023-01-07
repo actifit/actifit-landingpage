@@ -424,7 +424,7 @@ const userPostsFilter = username => (post) => {
 	  // actual activity posts must have those two properties in metadata
 	  // since, in this case, posts are fetched by users blog, we also need to check for the actifit tag
 	  // add to that, we need to skip resteems, so we need to ensure this is the same author
-	  return meta.hasOwnProperty('step_count') && meta.hasOwnProperty('activity_type') && post.author === username && ( ( meta.hasOwnProperty('tags') && meta.tags.indexOf('actifit') !== -1) || post.category == 'actifit' || ( meta.hasOwnProperty('community') && meta.community.indexOf('actifit') !== -1) ) 
+	  return meta.hasOwnProperty('step_count') && meta.hasOwnProperty('activity_type') && post.author === username && ( ( meta.hasOwnProperty('tags') && ( meta.tags.indexOf('actifit') !== -1 || meta.tags.indexOf('hive-193552') !== -1)) || post.category == 'actifit' || post.category == 'hive-193552' || ( meta.hasOwnProperty('community') && (meta.community.indexOf('actifit') !== -1) || meta.community.indexOf('hive-193552') !== -1) ) 
   }catch(exc){
 	  return false;
   }
