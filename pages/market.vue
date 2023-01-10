@@ -77,7 +77,7 @@
 		</div>
 	  </div>
 	  	  
-	  <!-- show listing of special event products -->
+	  <!-- show listing of special event products
 	  
 	  <h5 class="text-center pt-3 market-sub text-brand">{{ $t('special_christmas_event') }}</h5>
 	  
@@ -88,6 +88,8 @@
 			@update-prod="updateProd" :afitPrice="afitPrice" @refresh-tickets="refreshTickets"/>
       </div>
 	  <br/>
+	  
+	   -->
 	  
 	  
       <!-- show listing of products -->
