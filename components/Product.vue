@@ -1738,12 +1738,14 @@
 
 <style>
 	.card-border{
-	  border: 2px solid #dc3545!important;
-	  border-radius: 10px;
+	  /*border: 2px solid #dc3545!important;
+	  border-radius: 10px;*/
+	  box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
 	}
 	.card-border-real{
-	  border: 2px solid #28a745!important;
-	  border-radius: 10px;
+	  /*border: 2px solid #28a745!important;
+	  border-radius: 10px;*/
+	  box-shadow: 3px 3px 3px rgb(0 255 0 / 40%);
 	}
 	.pro-img-cls{
 	  width: 100%;

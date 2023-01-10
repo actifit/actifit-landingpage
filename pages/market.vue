@@ -13,17 +13,17 @@
 	  <div class="col-md-12 text-center text-primary mb-5 notice-text">
 		  <h4>{{$t('prize_tickets_buy_gadgets')}}<a href="#" data-toggle="modal" data-target="#notifyModal"><i class="fas fa-info-circle" :title="$t('view_details')"></i></a></h4> 
 		  <div class="row row-sep">
-			<div class="col-md-4 row-sep-in small-pad-row">
+			<div class="col-md-4 row-sep-in small-pad-row acti-shadow">
 			  <h5 class="token-title pt-2 notice-text">{{$t('my_tickets_collected')}}</h5>
 			  <div v-if="user"><i class="fas fa-ticket-alt text-brand" ></i>&nbsp;{{ ticketCount }} {{$t('tickets_collected')}}</div>
 			  <div v-else >-</div>
 			</div>
-			<div class="col-md-4 row-sep-in small-pad-row">
+			<div class="col-md-4 row-sep-in small-pad-row acti-shadow">
 			  <h5 class="token-title pt-2 notice-text">{{$t('prize_pool')}}</h5>
 			  <div v-if="prizePoolValue!=''"><i class="fas fa-donate text-brand" ></i>&nbsp;{{ prizePoolValue }} {{$t('HIVE')}}<img src="/img/HIVE.png" class="token-logo-sm"></div>
 			  <div v-else ><i class="fas fa-spin fa-spinner text-brand"></i></div>
 			</div>
-			<div class="col-md-4 row-sep-in small-pad-row">
+			<div class="col-md-4 row-sep-in small-pad-row acti-shadow">
 			  <h5 class="token-title pt-2 notice-text">{{ $t('next_draw') }}&nbsp;</h5>
 			  <Countdown v-if="countDownReady && nextGadgetBuyRewardDate" :deadline="nextGadgetBuyRewardDate"></Countdown>
 			  <div v-else ><i class="fas fa-spin fa-spinner text-brand"></i></div>
@@ -31,7 +31,7 @@
 		  </div>
 		  <div class="row row-sep">
 			<div class="col-md-4"></div>
-			<div class="col-md-4 row-sep-in">
+			<div class="col-md-4 row-sep-in acti-shadow">
 				<h5 class="token-title pt-2 notice-text"><i class="fas text-brand fa-trophy"></i> {{ $t('Recent_draw_winner') }}</h5>
 				<div><a :href="'/'+lastDrawWinner">@{{ lastDrawWinner }}</a> {{ wonAmount }} {{ $t('HIVE') }}<img src="/img/HIVE.png" class="token-logo-sm"></div>
 			</div>
@@ -385,5 +385,8 @@
 	
 	.expansion-arrow-all{
 		display: contents;
+	}
+	.book-button {
+		box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
 	}
 </style>
