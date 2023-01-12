@@ -35,7 +35,7 @@ module.exports = {
 	actiAppUrl: process.env.ACTI_API_URL || 'http://localhost:3120/',
 	actiAppBackUrl: process.env.ACTI_API_BACK_URL || 'http://localhost:3120/',
 	steemEngineRpc: 'https://api.steem-engine.net/rpc',
-	hiveEngineRpc: 'https://herpc.actifit.io', //'https://mirrorengine.rishipanthee.com', //'https://engine.rishipanthee.com/',
+	hiveEngineRpc: 'https://engine.rishipanthee.com/', //'https://herpc.actifit.io', //'https://mirrorengine.rishipanthee.com', //'https://engine.rishipanthee.com/',
 	steemEngineScot: 'https://scot-api.steem-engine.net/',
 	hiveEngineChainId: 'ssc-mainnet-hive', //'ssc-testnet-hive', //
 	hiveTestNetOn: false,
