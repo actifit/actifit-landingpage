@@ -5,7 +5,7 @@
 
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-5">
-      <h2 class="text-center mb-5">{{ username }}'s {{$t('Blog')}}</h2>
+      <h2 class="text-center mb-5">{{ username }}'s {{$t('Blog')}} <img src="/img/HIVE.png" class="mr-2 token-logo-md"></h2>
 	  <!--<ChainSelection />-->
 	  
       <!-- show spinner while loading -->
@@ -22,7 +22,7 @@
       <!-- show listing when loaded -->
 	  <div class="row" v-if="userPosts.length">
 		<div class="row"  v-for="iterx in Math.ceil(userPosts.length / splitFactor)" :key="iterx">
-			<div v-for="itery in splitFactor" :key="itery" class="col-md-6 col-lg-3 mb-4">
+			<div v-for="itery in splitFactor" :key="itery" class="col-md-6 col-lg-4 mb-4">
 				<Post v-if="(iterx - 1) * splitFactor + (itery - 1) < userPosts.length" :post="userPosts[(iterx - 1) * splitFactor + (itery - 1)]" :displayUsername="username" />
 			</div>
 			<div class="col-md-6 col-lg-12 mb-4" v-if="(iterx - 1) < inlineAds">

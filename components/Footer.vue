@@ -125,6 +125,10 @@
 		width: 20px;
 		height: 20px;
 	}
+	.token-logo-md{
+		width: 30px;
+		height: 30px;
+	}
 	.dropdown-menu > .dropdown-item{
 		padding: .1rem 1.1rem !important;
 	}

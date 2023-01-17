@@ -5,7 +5,7 @@
 
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-5">
-      <h2 class="text-center mb-5">{{ username }}'s {{$t('Videos')}}</h2>
+      <h2 class="text-center mb-5">{{ username }}'s {{$t('Videos')}} <img src="/img/3speak.png" class="mr-2 token-logo-md"></h2>
 	  <!--<ChainSelection />-->
 	  
       <!-- show spinner while loading -->
