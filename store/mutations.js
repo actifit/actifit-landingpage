@@ -36,6 +36,12 @@ export default {
   setReports (state, reports) {
     state.reports = reports
   },
+  setPosts (state, posts){
+	state.posts = posts
+  },
+  setVideos (state, videos){
+	state.videos = videos  
+  },
   setTopDelegators (state, topDelegators) {
     state.topDelegators = topDelegators
   },
@@ -63,6 +69,12 @@ export default {
   setEditReport (state, report) {
     state.editReport = report
   },
+  setActivePost (state, post) {
+    state.activePost = post
+  },
+  setEditPost (state, post) {
+    state.editPost = post
+  },
   setMoreReportsAvailable (state, moreReportsAvailable) {
     state.moreReportsAvailable = moreReportsAvailable
   },
@@ -71,6 +83,21 @@ export default {
   },
   setMoreUserReportsAvailable (state, moreUserReportsAvailable) {
     state.moreUserReportsAvailable = moreUserReportsAvailable
+  },
+  setMorePostsAvailable (state, morePostsAvailable) {
+    state.morePostsAvailable = morePostsAvailable
+  },
+  setUserPosts (state, userPosts) {
+    state.userPosts = userPosts
+  },
+  setMoreUserPostsAvailable (state, moreUserPostsAvailable) {
+    state.moreUserPostsAvailable = moreUserPostsAvailable
+  },
+  setUserVideos (state, userVideos) {
+    state.userVideos = userVideos
+  },
+  setMoreUserVideosAvailable (state, moreUserVideosAvailable) {
+    state.moreUserVideosAvailable = moreUserVideosAvailable
   },
   setNews (state, news) {
     state.news = news

@@ -83,8 +83,13 @@ module.exports = {
 	  },
 	  "3speak": {
 		"name": "3Speak",
-		"homepage": "https://3speak.online",
-		"url_scheme": "https://3speak.online/watch?v={username}/{permlink}"
+		"homepage": "https://3speak.tv",
+		"url_scheme": "https://3speak.tv/watch?v={username}/{permlink}"
+	  },
+	  "ecency": {
+		"name": "Ecency",
+		"homepage": "https://ecency.com",
+		"url_scheme": "https://ecency.com/{category}/@{username}/{permlink}"
 	  }
 	},
 	steemAppsScript: {

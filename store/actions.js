@@ -254,6 +254,90 @@ export default {
       })
     })
   },
+  
+  fetchPosts ({ state, commit, dispatch }) {
+    // fetches initial posts or more posts if invoked again
+	
+	//grab list of banned users first
+	let bannedUsers = [];
+	fetch(process.env.actiAppUrl+'banned_users').then(res => {
+		res.json().then(json => {
+			bannedUsers = json;
+			
+			//proceed with grabbing posts
+			return new Promise((resolve, reject) => {
+				console.log('let\'s get discussions');
+			  // if there are posts already, take the last one as starting point
+			  let lastPost = state.posts.length ? state.posts[state.posts.length - 1] : null
+			  let start_author = lastPost ? lastPost.author : null
+			  let start_permlink = lastPost ? lastPost.permlink : null
+
+			  //set proper blockchain selection
+			  let chainLnk = hive;
+			  if (state.bchain == 'STEEM'){
+				chainLnk = steem;
+			  }else if (state.bchain == 'BLURT'){
+				chainLnk = blurt;
+			  }
+
+			  // get (next) 100 posts with actifit tag
+			  chainLnk.api.getDiscussionsByCreated({tag: '', limit: 100, start_author, start_permlink}, (err, posts) => {
+				if (err) reject(err)
+				else {
+				  posts.shift() // remove the first posts because its the last post from before
+				  //posts = posts.filter(postsFilter) // get only actual activity posts
+				  //posts = posts.filter(bannedUsersFilter([{user:'inlakech'},{user:'tecire'},{user:'sssssss'}])) //get rid of banned users posts
+				  //new function to filter out banned users and their posts
+				  posts = posts.filter(function (post) {
+					   let user_banned = false;
+						for (let n = 0; n < bannedUsers.length; n++) {
+							if (post.author == bannedUsers[n].user){
+								user_banned = true;
+								break;
+							}
+						}   
+						return !user_banned
+					});
+				  commit('setPosts', [...state.posts, ...posts]) // append them to current posts
+				  dispatch('checkIfMorePostsAvailable') // check if there's more to load (to show load more button or not)
+				  resolve()
+				}
+			  })
+			})
+		}).catch(e => (console.log(e),reject(e)))
+	}).catch(e => reject(e))
+  },
+  
+
+  checkIfMorePostsAvailable ({ state, commit }) {
+    return new Promise((resolve, reject) => {
+      // if there are posts already, take the last one as starting point
+      let lastPost = state.posts.length ? state.posts[state.posts.length - 1] : null
+      let start_author = lastPost ? lastPost.author : null
+      let start_permlink = lastPost ? lastPost.permlink : null
+	  
+	   //set proper blockchain selection
+	  let chainLnk = hive;
+	  if (state.bchain == 'STEEM'){
+		chainLnk = steem;
+	  }else if (state.bchain == 'BLURT'){
+		chainLnk = blurt;
+	  }
+	  
+      // get (next) 100 posts with actifit tag
+      chainLnk.api.getDiscussionsByCreated({tag: '', limit: 100, start_author, start_permlink}, (err, posts) => {
+        if (err) reject(err)
+        else {
+          posts.shift() // remove the first posts because its the last post from before
+          //posts = posts.filter(postsFilter) // get only actual activity posts
+          commit('setMorePostsAvailable', !!posts.length) // if posts were found, show load more button
+          resolve()
+        }
+      })
+    })
+  },
+    
+  
   fetchUserReports ({ state, commit, dispatch }, username) {
     // fetches initial posts or more posts if invoked again
     return new Promise((resolve, reject) => {
@@ -283,6 +367,70 @@ export default {
       })
     })
   },
+  
+  fetchUserPosts ({ state, commit, dispatch }, username) {
+    // fetches initial posts or more posts if invoked again
+    return new Promise((resolve, reject) => {
+      // if there are posts already, take the last one as starting point
+      let lastPost = state.userPosts.length ? state.userPosts[state.userPosts.length - 1] : null
+      let start_author = lastPost ? lastPost.author : null
+      let start_permlink = lastPost ? lastPost.permlink : null
+	  
+	   //set proper blockchain selection
+	  let chainLnk = hive;
+	  if (state.bchain == 'STEEM'){
+		chainLnk = steem;
+	  }else if (state.bchain == 'BLURT'){
+		chainLnk = blurt;
+	  }
+	  
+      // get (next) 100 posts from the user
+      chainLnk.api.getDiscussionsByBlog({tag: username, limit: 100, start_author: start_author, start_permlink: start_permlink}, (err, posts) => {
+        if (err) reject(err)
+        else {
+          if (start_author && start_permlink) posts.shift() // remove the first posts because its the last post from before
+		  //posts = posts.filter(userPostsFilter(username)) // get only actual activity posts
+          commit('setUserPosts', [...state.userPosts, ...posts])
+          dispatch('checkIfMoreUserPostsAvailable', username)
+          resolve()
+        }
+      })
+    })
+  },
+  
+  fetchUserVideos ({ state, commit, dispatch }, username) {
+    // fetches initial videos or more videos if invoked again
+    return new Promise((resolve, reject) => {
+      // if there are videos already, take the last one as starting point
+      let lastVideo = state.userVideos.length ? state.userVideos[state.userVideos.length - 1] : null
+      let start_author = lastVideo ? lastVideo.author : null
+      let start_permlink = lastVideo ? lastVideo.permlink : null
+	  
+	   //set proper blockchain selection
+	  let chainLnk = hive;
+	  if (state.bchain == 'STEEM'){
+		chainLnk = steem;
+	  }else if (state.bchain == 'BLURT'){
+		chainLnk = blurt;
+	  }
+	  
+      // get (next) 100 videos from the user
+      chainLnk.api.getDiscussionsByBlog({tag: username, limit: 100, start_author: start_author, start_permlink: start_permlink}, (err, videos) => {
+        if (err) reject(err)
+        else {
+          if (start_author && start_permlink) videos.shift() // remove the first videos because its the last video from before
+		  videos = videos.filter(userVideosFilter(username)) // get only actual activity videos
+          commit('setUserVideos', [...state.userVideos, ...videos])
+		  console.log('found videos:');
+		  console.log(videos);
+          dispatch('checkIfMoreUserVideosAvailable', username)
+          resolve()
+        }
+      })
+    })
+  },
+  
+  
   fetchReportComments ({ state, commit, dispatch }, report) {
 	// handles grabbing comments for currently opened post
 	return new Promise((resolve, reject) => {
@@ -330,6 +478,55 @@ export default {
 	  });
 	})
   },
+  
+  fetchPostComments ({ state, commit, dispatch }, post) {
+	// handles grabbing comments for currently opened post
+	return new Promise((resolve, reject) => {
+	  let post_param = post.category + '/@' + post.author + '/' + post.permlink;
+	  let cur_ref = this;
+	  
+	  //set proper blockchain selection
+ 
+	   //set proper blockchain selection
+	   //particularly for the getstate, we need a node supporting getstate, so we will use specifically 
+	  let chainLnk = hive;
+	  hive.api.setOptions({ url: process.env.hiveStateApiNode });
+	  if (state.bchain == 'STEEM'){
+		chainLnk = steem;
+	  }else if (state.bchain == 'BLURT'){
+		chainLnk = blurt;
+	  }
+	  
+	  //using getState to fetch all level comments
+	  chainLnk.api.getState (post_param, function (err, result){
+		//sort results by depth so as we display entries properly
+		let comments_found = Object.values(result.content).sort( function (comment_a, comment_b){
+		  return comment_a.depth < comment_b.depth? -1:1; 
+		});
+		//go through sorted items, set them up in a suitable tree chart for proper display
+
+		//loop through all entries starting at the very bottom
+		for (let i = comments_found.length - 1 ; i > 0 ;--i){
+			//try to match the parent of each entry to build a proper tree
+			for (let j = i - 1; j >= 0 ; --j){
+				if (comments_found[i].parent_author == comments_found[j].author
+					&& comments_found[i].parent_permlink == comments_found[j].permlink){
+					if (comments_found[j].reply_entries == null){
+						comments_found[j].reply_entries = [];
+					}
+					comments_found[j].reply_entries.push(comments_found[i]);
+				}
+			}
+		}
+		//the proper tree now lies in entry 0 with all subsequent comments, let's set it to our comment rendering var
+
+		commit('setCommentEntries', comments_found.slice(0, 1)[0]) // if posts were found, show load more button
+		resolve()
+
+	  });
+	})
+  },
+  
   updateReport ({ state, commit }, options) {
 	  
 	//set proper blockchain selection
@@ -385,6 +582,90 @@ export default {
       })
     })
   },
+  
+  
+  updatePost ({ state, commit }, options) {
+	  
+	//set proper blockchain selection
+	  let chainLnk = hive;
+	  if (state.bchain == 'STEEM'){
+		chainLnk = steem;
+	  }else if (state.bchain == 'BLURT'){
+		chainLnk = blurt;
+	  }
+	  
+	  
+    chainLnk.api.getContent(options.author, options.permlink, (err, updatedPost) => {
+      if (err) console.log(err)
+      else {
+        // update posts
+        let index = state.posts.findIndex(post => post.author === updatedPost.author && post.permlink === updatedPost.permlink)
+        if (index !== -1) {
+          // use Vue.set because of: https://vuejs.org/v2/guide/list.html#Caveats
+          Vue.set(state.posts, index, updatedPost)
+        }
+
+        // update user posts
+        index = state.userPosts.findIndex(post => post.author === updatedPost.author && post.permlink === updatedPost.permlink)
+        if (index !== -1) {
+          // use Vue.set because of: https://vuejs.org/v2/guide/list.html#Caveats
+          Vue.set(state.userPosts, index, updatedPost)
+        }
+      }
+    })
+  },
+  checkIfMoreUserPostsAvailable ({ state, commit }, username) {
+    return new Promise((resolve, reject) => {
+      let lastPost = state.userPosts.length ? state.userPosts[state.userPosts.length - 1] : null
+      let start_author = lastPost ? lastPost.author : null
+      let start_permlink = lastPost ? lastPost.permlink : null
+	  
+	  //set proper blockchain selection
+	  let chainLnk = hive;
+	  if (state.bchain == 'STEEM'){
+		chainLnk = steem;
+	  }else if (state.bchain == 'BLURT'){
+		chainLnk = blurt;
+	  }
+	  
+      chainLnk.api.getDiscussionsByBlog({tag: username, limit: 100, start_author: start_author, start_permlink: start_permlink}, (err, posts) => {
+        if (err) reject(err)
+        else {
+          posts.shift() // remove the first posts because its the last post from before
+          posts = posts.filter(userPostsFilter(username)) // get only actual activity posts
+          commit('setMoreUserPostsAvailable', !!posts.length) // if posts were found, show load more button
+          resolve()
+        }
+      })
+    })
+  },
+  
+  checkIfMoreUserVideosAvailable ({ state, commit }, username) {
+    return new Promise((resolve, reject) => {
+      let lastVideo = state.userVideos.length ? state.userVideos[state.userVideos.length - 1] : null
+      let start_author = lastVideo ? lastVideo.author : null
+      let start_permlink = lastVideo ? lastVideo.permlink : null
+	  
+	  //set proper blockchain selection
+	  let chainLnk = hive;
+	  if (state.bchain == 'STEEM'){
+		chainLnk = steem;
+	  }else if (state.bchain == 'BLURT'){
+		chainLnk = blurt;
+	  }
+	  
+      chainLnk.api.getDiscussionsByBlog({tag: username, limit: 100, start_author: start_author, start_permlink: start_permlink}, (err, videos) => {
+        if (err) reject(err)
+        else {
+          videos.shift() // remove the first videos because its the last video from before
+          videos = videos.filter(userVideosFilter(username)) // get only actual activity videos
+          commit('setMoreUserVideosAvailable', !!videos.length) // if videos were found, show load more button
+          resolve()
+        }
+      })
+    })
+  },
+  
   fetchNews ({ state, commit }) {
     return new Promise((resolve, reject) => {
 		
@@ -425,6 +706,16 @@ const userPostsFilter = username => (post) => {
 	  // since, in this case, posts are fetched by users blog, we also need to check for the actifit tag
 	  // add to that, we need to skip resteems, so we need to ensure this is the same author
 	  return meta.hasOwnProperty('step_count') && meta.hasOwnProperty('activity_type') && post.author === username && ( ( meta.hasOwnProperty('tags') && ( meta.tags.indexOf('actifit') !== -1 || meta.tags.indexOf('hive-193552') !== -1)) || post.category == 'actifit' || post.category == 'hive-193552' || ( meta.hasOwnProperty('community') && (meta.community.indexOf('actifit') !== -1) || meta.community.indexOf('hive-193552') !== -1) ) 
+  }catch(exc){
+	  return false;
+  }
+}
+
+const userVideosFilter = username => (post) => {
+  try{
+	  let meta = JSON.parse(post.json_metadata)
+	  // videos posts are the ones belonging to 3speak community
+	  return post.author === username && meta.hasOwnProperty('type') && ( meta.type.indexOf('3speak/video') !== -1) && meta.hasOwnProperty('video');// && post.category == 'hive-181335';// || ( meta.hasOwnProperty('community') && meta.community.indexOf('hive-181335') !== -1 ) 
   }catch(exc){
 	  return false;
   }

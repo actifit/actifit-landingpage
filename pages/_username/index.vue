@@ -37,9 +37,18 @@
         <!-- actifit specific data display -->
 		<div class="mb-3 row"> <!-- d-flex flex-column  -->
 		  <div v-if="displayUser" class="col-12 col-md-2">
-			<div class="user-avatar large-avatar mr-1 mb-3 col-12 col-md-12"
+			<div class="user-avatar large-avatar mr-1 mb-3 col-12 col-md-12 float-left"
 					   :style="'background-image: url('+this.profImgUrl+'/u/' + this.displayUser + '/avatar)'"/>
+				
+				<div>
+					<a :href="'/activity/'+displayUser" class="btn btn-brand border" :class="smallScreenBtnClasses"><img src="/img/actifit_logo.png" class="mr-2 token-logo">&nbsp;{{ $t('Actifit_reports') }}</a>
+				
+					<a :href="'/' + displayUser+'/blog'" class="btn btn-brand border" :class="smallScreenBtnClasses"><img src="/img/HIVE.png" class="mr-2 token-logo">&nbsp;{{ $t('Hive_blog') }}</a>
+				
+					<a :href="'/' + displayUser+'/videos'" class="btn btn-brand border" :class="smallScreenBtnClasses"><img src="/img/3speak.png" class="mr-2 token-logo">&nbsp;{{ $t('Threespeak_videos') }}</a>
+				</div>
 		  </div>
+
 		  <div class="acti-widget m-2 row col-12 col-md-9" v-if="displayUser">
 			<div class="row col-md-4 col-12">
 				<div class="text-center info-box-green col-6"><div class="phishy"><h6>Latest Activity Count</h6></div>
@@ -110,11 +119,6 @@
 				</div>
 				
 				<div class="col-6">
-					<div class="font-italic text-right" v-if="lastUpdated!='' && lastUpdated!='-'">
-						<small>Last Updated On {{ pureDate(lastUpdated) }}</small>
-					</div>
-				</div>
-				<div class="col-6">
 			
 					<a href="#" data-toggle="modal" class="btn btn-brand btn-block" 
 							 data-target="#measureChartModal" v-if="isFriend() || isOwnAccount()">
@@ -128,6 +132,13 @@
 					</a>
 			
 				</div>
+				
+				<div class="col-6">
+					<div class="font-italic text-right" v-if="lastUpdated!='' && lastUpdated!='-'">
+						<small>Last Updated On {{ pureDate(lastUpdated) }}</small>
+					</div>
+				</div>
+				
 				<div v-if="displayAddFriendStats" class="border text-brand col-12">
 					{{ $t('View_chart_notice').replace('_USER', this.username) }}
 					<span class="col-12" :title="$t('add_username_friend').replace('_USERNAME_', displayUser)" v-on:click="addFriend">
@@ -154,8 +165,8 @@
 				<div class="info-box col-md-4 cntnr"><i class="fas fa-link mr-2"></i>&nbsp;<a :href="userMeta.profile.website" class="force-white-url">{{ userMeta.profile.website }}</a></div>
 			</div>
 			<div class="row m-0">
-				<div class="info-box col-md-6 cntnr"><i class="fas fa-calendar-alt mr-2"></i> {{ $t('Joined_On') }} {{ pureDate(userinfo.created) }}</div>
-				<div class="info-box col-md-6 cntnr"><i class="fas fa-pen mr-2"></i> {{ numberFormat(userinfo.post_count, 0) }} {{ $t('Steem_posts_comments') }}</div>
+				<div class="info-box col-md-12 cntnr"><i class="fas fa-calendar-alt mr-2"></i> {{ $t('Joined_On') }} {{ pureDate(userinfo.created) }}</div>
+				<!--<div class="info-box col-md-6 cntnr"><i class="fas fa-pen mr-2"></i> {{ numberFormat(userinfo.post_count, 0) }} {{ $t('Steem_posts_comments') }}</div>-->
 			</div>
 			<div v-if="!account_banned" class="row m-0">
 				<!-- display posh verification status -->
@@ -179,6 +190,28 @@
 						<a class="btn btn-brand m-2" href="./friends">{{ $t('View_friends') }}</a>
 					</div>
 				</div>
+				
+				<div class="info-box-orange mb-2 col-md-12 cntnr">
+					<i class="fab fa-angellist mr-2"></i><a :href="'/activity/'+displayUser" >{{ numberFormat(rewardedPostCount, 0) }} {{ $t('Activity_Reports_Rewarded') }}
+					<img src="/img/actifit_logo.png" class="mr-2 token-logo">
+					</a>&nbsp;
+					<a :href="'/activity/'+displayUser" class="btn btn-brand border m-2">{{ $t('View_reports') }}</a>
+				</div>
+				<!--<i class="fas fa-pen mr-2"></i>--> 
+				<div class="info-box-orange mb-2 col-md-12 cntnr">
+					<a :href="'/' + displayUser+'/blog'" ><i class="fas fa-solid fa-book mr-2"></i>{{ numberFormat(userinfo.post_count, 0) }} {{ $t('Steem_posts_comments') }}
+					<img src="/img/HIVE.png" class="mr-2 token-logo">
+					</a>&nbsp;
+					<a :href="displayUser+'/blog'" class="btn btn-brand border m-2">{{ $t('View_blog') }}</a>
+				</div>
+				<!--  {{ numberFormat(video_count_3s, 0) }} -->
+				<div class="info-box-orange mb-2 col-md-12 cntnr">
+					<a :href="'/' + displayUser+'/videos'" ><i class="fas fa-solid fa-video mr-2"></i> {{ $t('Videos_3speak') }}
+					<img src="/img/3speak.png" class="mr-2 token-logo">
+					</a>&nbsp;
+					<a :href="displayUser+'/videos'" class="btn btn-brand border m-2">{{ $t('View_videos') }}</a>
+				</div>
+				
 				<div class="info-box-orange mb-2 col-md-6 cntnr"><i class="fas fa-angle-double-left text-brand mr-2"></i>{{ $t('Followers') }}: {{ getFollowerCount }}</div>
 				<div class="info-box-orange mb-2 col-md-6 cntnr"><i class="fas fa-angle-double-right text-brand mr-2"></i>{{ $t('Following') }}: {{ getFollowingCount }}</div>
 				<div class="info-box-orange mb-2 col-md-6 cntnr">
@@ -248,10 +281,6 @@
 						<button v-on:click="proceedTipActivity" class="btn btn-brand w-50 border m-3">{{ $t('Proceed') }}</button>
 						<i class="fas fa-spin fa-spinner" v-if="tipInProgress"></i>
 					</div>
-				</div>
-				<div class="info-box-orange mb-2 col-md-12 cntnr">
-					<i class="fab fa-angellist mr-2"></i><a :href="'/activity/'+displayUser" >{{ numberFormat(rewardedPostCount, 0) }} {{ $t('Activity_Reports_Rewarded') }}</a>&nbsp;
-					<a :href="'/activity/'+displayUser" class="btn btn-brand border m-2">{{ $t('View_reports') }}</a>
 				</div>
 			</div>
 		  </div>
@@ -399,6 +428,7 @@
 			userinfo: '',
 			follower_count: 0,
 			following_count: 0,
+			video_count_3s: 0,
 			noUserFound: false,
 			userTokenCount: '',
 			userFriends: [],
@@ -429,6 +459,7 @@
 			proceedTip: false,
 			addFriendError: '',
 			cur_bchain: 'HIVE',
+			screenWidth: 1200,
 			acti_goog_ad_square:{display:'inline-block', maxWidth:'300px', maxHeight: '350px'},
 			rewarded_posts_rules: [
 									[9,0],
@@ -506,6 +537,13 @@
 			return this.numberFormat(this.userAFITSETokenCount, 3);
 		}
 		return 0;
+	  },
+	  smallScreenBtnClasses () {
+		//use proper classes for neat display
+		if (this.screenWidth < 768){
+		  return "w-50";
+		}
+		return "w-100";
 	  },
 	  displayAFITXHEBal () {
 		if (!isNaN(this.userAFITXHETokenCount)){
@@ -1169,7 +1207,7 @@
 		chainLnk.api.getAccounts([this.displayUser], function(err, result) {
 			parentRef.loadingData = false;
 			//result now contains the account details
-			if (result.length == 0){
+			if (err || result.length == 0){
 			  parentRef.noUserFound = true;
 			  parentRef.errorDisplay = parentRef.$t('user_not_found_error');
 			}else{
@@ -1329,7 +1367,7 @@
 		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		steem.api.setOptions({ url: process.env.steemApiNode });
 				
-				
+		this.screenWidth = screen.width;
 		//hive.config.set('rebranded_api', true)
 		//hive.broadcast.updateOperations()
 		hive.config.set('alternative_api_endpoints', process.env.altHiveNodes);

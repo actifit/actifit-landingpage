@@ -65,13 +65,15 @@
 		  <a class="dropdown-item text-brand" href="#" @click.prevent="$router.push('/mods-access/')" v-if="isUserModerator">Moderation</a>
 		  <div class="dropdown-divider" v-if="isUserModerator"></div>
 		  <!--<a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet?action=buy_afit')">{{ $t('buy_afit_menu') }}<br/></a>-->
-		  <a class="dropdown-item item-highlight" href="#" @click.prevent="$router.push('/market')">{{ $t('spend_afit_menu') }}<br/></a>
+		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/market')">{{ $t('spend_afit_menu') }}<br/></a>
           <a class="dropdown-item" href="#" @click.prevent="$router.push('/' + user.account.name)">{{ $t('My_Profile') }}<br/></a>
 		  <SteemStats :user="user" minView="true" class="dropdown-item" :key="reload"/>
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/userrank')">{{ $t('My_Rank') }} <br/><span class="text-brand"> {{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRankObj && this.userRankObj.afitx_rank">{{  displayIncreasedUserRank }}</span> </span></a>
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet')">{{ $t('My_Wallet') }} <br/><span class="text-brand">  {{ formattedUserTokens }}</span></a>
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/referrals')">{{ $t('My_Referrals') }} <br/><span class="text-brand"> {{ referralCount }} </span></a>
           <a class="dropdown-item" href="#" @click.prevent="$router.push('/activity/' + user.account.name)">{{ $t('My_Activity') }}</a>
+		  <a class="dropdown-item" href="#" @click.prevent="$router.push(user.account.name + '/blog')">{{ $t('My_Blog') }}</a>
+		  <a class="dropdown-item" href="#" @click.prevent="$router.push(user.account.name + '/videos')">{{ $t('My_Videos') }}</a>
 		  <a class="dropdown-item" href="#">{{ $t('Active_chain') }} <br />
 			<div class="pl-2" :class="adjustHiveClass" v-on:click="setActiveChain('HIVE')">
 			<img src="/img/HIVE.png" style="max-height: 20px;"   :title="(cur_bchain == 'HIVE'?$t('running_on_chain').replace('_CHAIN_', 'HIVE'):$t('switch_to_chain').replace('_CHAIN_', 'HIVE'))">{{$t('HIVE')}}

@@ -21,6 +21,8 @@ const createStore = () => {
       leaderboard: [], // top users
 	  extLeaderboard: [], //top users extended
       reports: [], // all activity reports/posts
+	  posts: [], // all posts
+	  videos: [], // all video posts
 	  topDelegators: [], //list of top delegators
 	  moderators: [], //list of current moderators
 	  ambassadors: [], //list of current ambassadors
@@ -30,9 +32,16 @@ const createStore = () => {
 	  gadgetStats: [], //aggregate stats of user's bought gadgets
       activeReport: null, // report shown in the modal
       editReport: null, // report shown in the edit modal
+	  activePost: null, // post shown in the modal
+	  editPost: null, // post shown in the edit modal
       moreReportsAvailable: false, // indicator if there are more reports to load
+	  morePostsAvailable: false, // indicator if there are more posts to load
       userReports: [], // logged-in user's activity reports/posts
+	  userPosts: [], // logged-in user's posts
+	  userVideos: [], // logged-in user's videos
       moreUserReportsAvailable: false, // indicator if there are more user reports to load
+	  moreUserPostsAvailable: false, // indicator if there are more user posts to load
+	  moreUserVideosAvailable: false, // indicator if there are more user videos to load
       news: [], // all news update posts from actifit account
       activeNews: null, // news shown in the modal
       voteWeight: 100, // vote weight for voting on posts

@@ -38,6 +38,12 @@ export default {
   reports (state) {
     return state.reports
   },
+  posts (state){
+	return state.posts
+  },
+  videos (state){
+	return state.videos  
+  },
   topDelegators (state) {
     return state.topDelegators
   },
@@ -73,6 +79,27 @@ export default {
   },
   moreUserReportsAvailable (state) {
     return state.moreUserReportsAvailable
+  },
+  activePost (state) {
+    return state.activePost
+  },
+  editPost (state) {
+    return state.editPost
+  },
+  morePostsAvailable (state) {
+    return state.morePostsAvailable
+  },
+  userPosts (state) {
+    return state.userPosts
+  },
+  moreUserPostsAvailable (state) {
+    return state.moreUserPostsAvailable
+  },
+  userVideos (state) {
+    return state.userVideos
+  },
+  moreUserVideosAvailable (state) {
+    return state.moreUserVideosAvailable
   },
   news (state) {
     return state.news
