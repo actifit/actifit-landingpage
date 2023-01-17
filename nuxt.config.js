@@ -90,6 +90,11 @@ module.exports = {
 		"name": "Ecency",
 		"homepage": "https://ecency.com",
 		"url_scheme": "https://ecency.com/{category}/@{username}/{permlink}"
+	  },
+	  "leofinance": {
+		"name": "Leofinance",
+		"homepage": "https://leofinance.io",
+		"url_scheme": "https://leofinance.io/{category}/@{username}/{permlink}",
 	  }
 	},
 	steemAppsScript: {
