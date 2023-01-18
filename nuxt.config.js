@@ -29,7 +29,7 @@ module.exports = {
 	steemApiNode: 'https://api.steemit.com/',
 	hiveApiNode: 'https://api.hive.blog',
 	blurtApiNode: 'https://blurtrpc.actifit.io',
-	hiveStateApiNode: 'https://anyx.io',
+	hiveStateApiNode: 'https://api.deathwing.me',
 	hiveTestNode: 'https://testnet.openhive.network', //'https://api.fake.openhive.network',
 	altHiveNodes: ["https://anyx.io", "https://api.openhive.network", "https://api.hivekings.com", "https://hived.privex.io", "https://api.deathwing.me", "rpc.ausbit.dev", "hive-api.arcange.eu", "hive.roelandp.nl"],
 	actiAppUrl: process.env.ACTI_API_URL || 'http://localhost:3120/',
