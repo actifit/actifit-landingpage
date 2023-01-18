@@ -303,9 +303,9 @@
         // prepare tags
         const meta = JSON.parse(this.editPost.json_metadata)
         meta.tags = [
-          'actifit',
+          //'actifit',
           ...this.tags
-            .filter(tag => tag !== 'actifit') // remove actifit tag, its the first tag automatically
+            //.filter(tag => tag !== 'actifit') // remove actifit tag, its the first tag automatically
             .filter(String) // remove empty values
             .map(tag => tag.trim()) // trim leading and trailing whitespaces from tags
         ]
@@ -340,7 +340,7 @@
 		
 		//ensure that the app info is actifit specific, for example edited by a different editor
 		if (!meta.app.includes('actifit')){
-			meta.app = 'actifit/0.4.1';
+			meta.app = 'actifit/0.5.0';
 		}
 		meta.suppEdit = 'actifit.io';
 		console.log(this.stdLogin);
