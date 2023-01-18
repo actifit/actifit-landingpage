@@ -8,22 +8,22 @@
 	</div>
 	<div v-else-if="errorDisplay==''" class="container pt-5 mt-5 pb-5 col-md-9" >
 		<h5 class="text-brand user-name" v-if="displayUser">
-			<a :href="formattedProfileUrl" target="_blank">@{{ displayUser }} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></a>
+			<a :href="formattedProfileUrl" target="_blank" class="p-2">@{{ displayUser }} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></a>
 			<span v-if="!account_banned && !isOwnAccount()" class="text-brand">
 				<span :title="$t('you_are_friends_username').replace('_USERNAME_', displayUser)" v-if="isFriend()" >
-					<i class="fas fa-user-friends  p-2 acti-shadow" ></i>
-					<span :title="$t('cancel_friendship')" v-on:click="dropFriend"><i class="fas fa-user-times acti-shadow"></i></span>
+					<i class="fas fa-user-friends p-2 acti-shadow" ></i>
+					<i class="fas fa-user-times p-2 acti-shadow" :title="$t('cancel_friendship')"  v-on:click="dropFriend"></i>
 					<div v-if="addFriendError" v-html="addFriendError"></div>
 				</span>
 				<span :title="$t('friendship_pending_approval')" v-else-if="isPendingFriend()">
-					<i class="fas fa-user-clock  p-2 acti-shadow"></i>
-					<span :title="$t('cancel_friend_request')" v-on:click="cancelFriendRequest" v-if="isPendingFriend().direction == 0"><i class="fas fa-user-times acti-shadow"></i></span>
-					<span :title="$t('accept_friend_request')" v-on:click="acceptFriend" v-else-if="isPendingFriend().direction == 1"><i class="fas fa-user-check acti-shadow"></i></span>
+					<i class="fas fa-user-clock p-2 acti-shadow"></i>
+					<i class="fas fa-user-times p-2 acti-shadow" :title="$t('cancel_friend_request')" v-on:click="cancelFriendRequest" v-if="isPendingFriend().direction == 0"></i>
+					<i class="fas fa-user-check p-2 acti-shadow" :title="$t('accept_friend_request')" v-on:click="acceptFriend" v-else-if="isPendingFriend().direction == 1"></i>
 					<div v-if="addFriendError" v-html="addFriendError"></div>
 				</span>
 				<span :title="$t('add_username_friend').replace('_USERNAME_', displayUser)" v-else
 					v-on:click="addFriend">
-					<i class="fas fa-user-plus  p-2 acti-shadow"></i>
+					<i class="fas fa-user-plus p-2 acti-shadow"></i>
 					<div v-if="addFriendError" v-html="addFriendError"></div>
 				</span>
 				<i class="fas fa-spin fa-spinner" v-if="friendshipLoader"></i>
@@ -59,14 +59,14 @@
 				
 				<div class="text-center">
 					<div class="">
-						<a href="#" data-toggle="modal" class="btn btn-brand btn-block" 
+						<a href="#" data-toggle="modal" class="btn btn-brand btn-block p-2 acti-shadow" 
 								 data-target="#activityChartModal" v-if="isFriend() || isOwnAccount()">
 							{{ $t('View_activity_chart') }}
 						</a>
-						<a href="#" class="btn btn-brand btn-block" v-on:click="displayAddFriendActivity=!displayAddFriendActivity" v-else-if="user" >
+						<a href="#" class="btn btn-brand btn-block p-2 acti-shadow" v-on:click="displayAddFriendActivity=!displayAddFriendActivity" v-else-if="user" >
 							{{ $t('View_activity_chart') }}
 						</a>
-						<a href="#" class="btn btn-brand btn-block" v-on:click="displayLoginActivity=!displayLoginActivity" v-else >
+						<a href="#" class="btn btn-brand btn-block p-2 acti-shadow" v-on:click="displayLoginActivity=!displayLoginActivity" v-else >
 							{{ $t('View_activity_chart') }}
 						</a>
 					</div>
