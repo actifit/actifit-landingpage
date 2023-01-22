@@ -2,6 +2,10 @@ const pkg = require('./package')
 
 const { I18N } = require('./config')
 
+//load env file if present
+import * as dotenv from 'dotenv'
+dotenv.config()
+
 module.exports = {
   mode: 'universal',
   env: {
@@ -308,6 +312,7 @@ module.exports = {
     { src: '~plugins/vue-simplemde', ssr: false },
 	{ src: '~plugins/vue-sanitize', ssr: false },
 	{ src: '~plugins/v-lightbox', mode: 'client' },
+	{ src: '@/plugins/vue-mavon-editor', ssr: false },
   ],
 
   /*

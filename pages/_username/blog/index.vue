@@ -13,10 +13,10 @@
         <i class="fas fa-spinner fa-spin text-brand"></i>
       </div>
 	  <div class="text-center p-3" v-else-if="user">
-		<!--<a href="#" @click="$store.commit('setEditPost', null)" data-toggle="modal"
+		<a href="#" @click="initiateNewPost()" data-toggle="modal"
 			 data-target="#editPostModal" :title="$t('Create_post')" class="btn btn-brand border">
 			{{ $t('Create_post') }}
-		</a>-->
+		</a>
 	  </div>
 
       <!-- show listing when loaded -->
@@ -131,6 +131,11 @@
       }
     },
     methods: {
+	  initiateNewPost() {
+		let newPost = {};
+		newPost.isNewPost = true;
+		this.$store.commit('setEditPost', newPost);
+	  },
       async loadMore () {
         this.loadingMore = true
 		
@@ -175,7 +180,7 @@
 	  
       await this.$store.dispatch('fetchUserPosts', this.username)
 	  
-	  console.log(this.userPosts);
+	  //console.log(this.userPosts);
 
       // remove loading indicator
       this.loading = false

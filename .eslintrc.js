@@ -17,5 +17,7 @@ module.exports = {
     'vue'
   ],
   // add your custom rules here
-  rules: {}
+  rules: {
+      "vue/no-use-v-if-with-v-for": "off"
+  }
 }

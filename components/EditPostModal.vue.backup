@@ -19,7 +19,57 @@
 			<a id="post_permlnk" :href="'/'+editPost.author+'/'+editPost.permlink">{{$t('actifit_web_url')}}/{{editPost.permlink}}</a>
 		  </div>
           <div class="form-group">
-			<CustomTextEditor ref="editor" :initialContent="body" ></CustomTextEditor>
+			
+			<div class="mavonEditor acti-shadow">
+				<no-ssr>
+
+					<!-- :toolbars="markdownOption" -->
+				  <mavon-editor language="en" 
+								markdown-it-emoji="true" 
+								v-model="body" 
+								ref="editor"
+								@imgAdd="mavonUpImg">
+					<!-- Add a custom button after the left toolbar  -->
+					  <template slot="left-toolbar-after">
+						
+						
+						<emoji-picker :search="search">
+						  <span slot="emoji-invoker" slot-scope="{ events: { click: clickEvent } }" @click.stop="clickEvent">
+							<button
+							  type="button"
+							  class="op-icon far fa-smile"
+							  aria-hidden="true"
+							  title="Insert Emoji"
+							></button>
+						  </span>
+						  <div slot="emoji-picker" slot-scope="{ emojis }"><!--, selectEmoji-->
+							<div class="emoji-picker" :style="{ top: top + 'px', left: left + 'px'}"> <!-- top: display.y + 'px', left: display.x + 'px' } -->
+							  <div class="emoji-picker__search">
+								<input type="text" v-model="search" v-focus>
+							  </div>
+							  <div>
+								<div v-for="(emojiGroup, category) in emojis" :key="category">
+								  <h5>{{ category }}</h5>
+								  <div class="emojis">
+									<span
+									  v-for="(emoji, emojiName) in emojiGroup"
+									  :key="emojiName"
+									  @click="selectEmoji(emoji)"
+									  :title="emojiName"
+									>{{ emoji }}</span>
+								  </div>
+								</div>
+							  </div>
+							</div>
+						  </div>
+						</emoji-picker>
+
+						
+						
+					  </template>
+				  </mavon-editor>
+				</no-ssr>
+			</div>
 			
           </div>
 		  <!--<div class="form-group">
@@ -69,9 +119,28 @@
   import marked from 'marked'
   //import InputTag from 'vue-input-tag'
   import { mapGetters } from 'vuex'
+  import AWS from 'aws-sdk'
   
-  import CustomTextEditor from '~/components/CustomTextEditor';
-  import TagInput from '~/components/TagInput';
+	// Import data/twitter.json to reduce size, all.json contains data for
+	// all emoji sets.
+	import data from "emoji-mart-vue-fast/data/all.json";
+	// Import default CSS
+	import "emoji-mart-vue-fast/css/emoji-mart.css";
+	
+	// Vue 2:
+	//import { Picker, EmojiIndex } from "emoji-mart-vue-fast";
+	
+	//import data from '@emoji-mart/data'
+	//import { Picker } from 'emoji-mart'
+	
+	//new Picker({ data })
+
+	
+	// Create emoji data index.
+	// We can change it (for example, filter by category) before passing to the component.
+	let emojiIndex;
+	//emojiIndex = new EmojiIndex(data);
+
 
 	/* handles outside clicks for the picker */
 	/* begin */
@@ -94,20 +163,59 @@
 		}
 	});
 	/* end */
-   
+  
+  import TagInput from '~/components/TagInput';
+  
+  const actifit_host = 'https://usermedia.actifit.io/'
+  const bucketName = 'actifit';
+  
+  AWS.config.update({ "accessKeyId": process.env.AWS_ACCESS_KEY_ID, "secretAccessKey": process.env.AWS_SECRET_ACCESS_KEY, "region":"us-east-1"});
+  
+  import EmojiPicker from 'vue-emoji-picker'
+
+
   export default {
     components: {
-	  CustomTextEditor,
+      //InputTag,
+	  //Picker,
+	  //VuemojiPicker,
+	  EmojiPicker,
 	  TagInput
     },
     data () {
       return {
+		input: '',
+		search: '',
         title: '', // post title
         body: '', // post body
         tags: [], // post tags
+		file: '', //image
         loading: false, // loading animation in submit button
+		imgUploading: false, // loading animation while image upload in progress
 		cur_bchain: 'HIVE', //bchain used to edit/save
 		target_bchain: 'HIVE', //bchain to which edits will go
+		markdownOption: {
+			bold: true,
+			// more params
+		},
+		editorConfig: { // markdown editor for post body
+          autofocus: true,
+          spellChecker: false,
+          previewRender: (body) => {
+            return marked(body.replace(/@([\w-]+)(?![\w-])/g,'[$&](https://actifit.io/$&)'))
+          },
+          forceSync: true,
+          status: ['lines', 'words'],
+          promptURLs: true
+        },
+		emojiIndex: emojiIndex,
+		emojisOutput: "",
+		displayEmojiPicker: false,
+		initialClick: false,
+		top: 0,
+        left: 0,
+		searchEnabled: false,
+		getSkin: 1,
       }
     },
     computed: {
@@ -162,7 +270,118 @@
         }, 250)
       }
     },
+	directives: {
+		focus: {
+		  inserted(el) {
+			el.focus()
+		  },
+		},
+	},
     methods: {
+		handlePaste(event){
+			console.log(event);
+			const clipboardData = event.clipboardData || window.clipboardData;
+			const items = clipboardData.items;
+			  
+			for (let i = 0; i < items.length; i++) {
+				if (items[i].type.indexOf('image') !== -1) {
+				  const file = items[i].getAsFile();
+				  //this.uploadImage(file);
+				  this.uploadImage([file]);
+				  break;//only allow one image upload
+				}
+			}
+		},
+		/*insert(emoji) {
+		  this.input += emoji
+		},*/
+		selectEmoji(emoji) {
+		  /*this.emojisOutput = this.emojisOutput + emoji.native;
+		  this.body += emoji.native*/
+		  this.emojisOutput = this.emojisOutput + emoji;
+		  this.body += emoji;
+		  //setMessageToSend(messageToSend + emoji.native)
+		},
+		async mavonUpImg(pos, file){
+		  let url = await this.uploadImage(pos, [file])
+		  //$vm = this.$refs.md
+		  //this.$refs.editor.$img2Url(pos, url);
+		},
+		async uploadImage (pos, file) {
+		  //display image upload animation
+		  this.imgUploading = true;
+		  
+		  //generate new key/name for the image to store
+		  var key = (Date.now().toString(36) + Math.random().toString(36).substr(2, 11) + Math.random().toString(36).substr(2, 11)).toUpperCase();
+		  
+		  //initialize S3 instance to process the upload
+		  const s3 = new AWS.S3()
+		  var params = {
+			Bucket: bucketName,
+			Key: key, // this will be your share url name
+			ContentType: 'image/jpeg',
+			Body: file[0], 
+			ACL: 'public-read' 
+		  }
+		  
+		  let img_orig_name = file[0].name
+		  let img_url = actifit_host + key
+		  
+		  //let txt_editor = this.$refs.editor.simplemde; 
+		  let txt_editor = this.$el.querySelector('textarea');
+		  
+		  //reference to this to be used inside the s3 response method
+		  let main_container = this;
+		  
+		  s3.putObject(params).promise().then(function(data) {
+			main_container.$refs.editor.$img2Url(pos, img_url);
+		  })
+		  
+		  return;
+		  //Execute the upload process
+		  s3.putObject(params, function (err, data) {
+			if (err){ 
+			  //alert(err) // displaying error message
+			  console.log(err);
+			  main_container.imgUploading = false;
+			  //return '';
+			} else {
+			  console.log("image successfully uploaded");
+			  console.log(data);
+			  console.log('File uploaded to ' + img_url);
+			  //return img_url;
+			  
+			  //insert the image markdown within the editor as cursor position
+			  
+			  /*let pos = txt_editor.codemirror.getCursor();
+			  txt_editor.codemirror.setSelection(pos, pos);
+			  txt_editor.codemirror.replaceSelection('!['+img_orig_name+']('+img_url+')');*/
+			  
+			  //below works: for now disable logic to try and use mavon's own logic
+			  /*
+			  let startPos = txt_editor.selectionStart;
+			  let endPos = txt_editor.selectionEnd;
+			  let newText = '!['+img_orig_name+']('+img_url+')';
+			  console.log(txt_editor.selectionStart)
+			  console.log(txt_editor.selectionEnd)
+			  txt_editor.setSelectionRange(txt_editor.selectionStart, txt_editor.selectionEnd);
+			  //txt_editor.replaceSelection('!['+img_orig_name+']('+img_url+')');
+			  txt_editor.value = txt_editor.value.substring(0, startPos) 
+					+ newText
+					+ txt_editor.value.substring(endPos, txt_editor.value.length);
+			  txt_editor.setSelectionRange(startPos, startPos + newText.length);
+
+			  main_container.imgUploading = false;
+			  */
+			}
+			/*
+			main_container.$notify({
+              group: err ? 'error' : 'success',
+              text: err ? main_container.$t('Img_Upload_Fail') : main_container.$t('Img_Upload_Success'),
+              position: 'top center'
+            })*/
+		  });
+		},
 	  async processTrxFunc(op_name, cstm_params, bchain_option){
 		if (!localStorage.getItem('std_login')){
 		//if (!this.stdLogin){
@@ -329,7 +548,7 @@
 		if (this.editPost.isNewPost){
 			//let permlnk = this.title.replaceAll('.','-').replaceAll('  ',' ').replaceAll(' ','-').toLowerCase();
 			let permlnk = this.title.replaceAll('  ',' ').replaceAll(' ','-').replaceAll('--','-').replace(/[^a-zA-Z0-9\-]/g, '').toLowerCase();
-			//console.log(permlnk);
+			console.log(permlnk);
 			//return;
 			//"actifit-"+this.user.account.name.replace('.','-')+"-"+new Date().toISOString().replace(/-|:|\./g, '').toLowerCase();
 			this.editPost.parent_author = '';
@@ -346,6 +565,10 @@
 				benef_list.push(ref_benef);
 			}*/
 			
+			//user selected to get paid only in AFIT tokens
+			/*if (typeof req.body.full_afit_pay!= "undefined" && req.body.full_afit_pay!=""){
+				benef_list.push({ 'account':'actifit.funds', 'weight':remaining_pct })//{ 'account':'actifit', 'weight':500 }, 
+			}*/
 			
 			//default value for 50-50 pay
 			let percent_sbd = 10000;
@@ -369,7 +592,7 @@
 			  this.editPost.author,
 			  this.editPost.permlink,
 			  this.title,
-			  this.$refs.editor.content,
+			  this.body,
 			  meta,
 			  (err) => {
 				this.commentSuccess(err, true, 'STEEM');
@@ -379,16 +602,12 @@
 			let cstm_params = {
 			  "author": this.editPost.author,
 			  "title": this.title,
-			  "body": this.$refs.editor.content,
+			  "body": this.body,
 			  "parent_author": this.editPost.parent_author,
 			  "parent_permlink": this.editPost.parent_permlink,
 			  "permlink": this.editPost.permlink,
 			  "json_metadata": JSON.stringify(meta)
 			};
-			
-			//console.log(cstm_params);
-			
-			//return;
 			
 			let res = await this.processTrxFunc('comment', cstm_params, this.cur_bchain);
 			
@@ -446,6 +665,112 @@
   }
 </script>
 <style>
+.v-note-panel{
+	min-height: 350px;
+	max-height: 500px;
+}
+.maximized {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  background-color: white;
+  overflow: auto;
+}
 
+/* emoji picker styling */
+/* Tailwind CSS-styled demo is available here: https://codepen.io/DCzajkowski/pen/Brxvzj */
 
+.wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.regular-input {
+  padding: 0.5rem 1rem;
+  border-radius: 3px;
+  border: 1px solid #ccc;
+  width: 20rem;
+  height: 12rem;
+  outline: none;
+}
+
+.regular-input:focus {
+  box-shadow: 0 0 0 3px rgba(66,153,225,.5);
+}
+
+.emoji-invoker {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+  background: transparent;
+  border: 0;
+}
+.emoji-invoker:hover {
+  transform: scale(1.1);
+}
+.emoji-invoker > svg {
+  fill: #b1c6d0;
+}
+
+.emoji-picker {
+  position: absolute;
+  z-index: 1;
+  font-family: Montserrat;
+  border: 1px solid #ccc;
+  width: 15rem;
+  height: 20rem;
+  overflow: scroll;
+  padding: 1rem;
+  box-sizing: border-box;
+  border-radius: 0.5rem;
+  background: #fff;
+  box-shadow: 1px 1px 8px #c7dbe6;
+}
+.emoji-picker__search {
+  display: flex;
+}
+.emoji-picker__search > input {
+  flex: 1;
+  border-radius: 10rem;
+  border: 1px solid #ccc;
+  padding: 0.5rem 1rem;
+  outline: none;
+}
+.emoji-picker h5 {
+  margin-bottom: 0;
+  color: #b1b1b1;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  cursor: default;
+}
+.emoji-picker .emojis {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+.emoji-picker .emojis:after {
+  content: "";
+  flex: auto;
+}
+.emoji-picker .emojis span {
+  padding: 0.2rem;
+  cursor: pointer;
+  border-radius: 5px;
+}
+.emoji-picker .emojis span:hover {
+  background: #ececec;
+  cursor: pointer;
+}
+.v-note-wrapper .v-note-op .v-left-item div:has(.op-icon.fa-smile){
+	float: left;
+}
 </style>

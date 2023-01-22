@@ -181,7 +181,13 @@
         return this.meta.dataTrackingSource
       },
       meta() {
-        return JSON.parse(this.post.json_metadata)
+		try{
+			return JSON.parse(this.post.json_metadata)
+		}catch(err){
+			//console.log(this.post.json_metadata);
+			//console.log(err);
+			return {};
+		}
       },
 	  postPayout() {
 		if (this.postPaid()){
@@ -246,7 +252,7 @@
 		  
 		  dateParam = new Date(dateParam);
 		  
-		  console.log(dateParam);
+		  //console.log(dateParam);
 
 		  let difference = currentDate.getTime() - dateParam.getTime();
 		  let mins = Math.floor(difference / (1000 * 60 ));
