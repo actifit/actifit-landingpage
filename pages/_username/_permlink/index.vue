@@ -145,8 +145,7 @@
 		</div>
 		<transition name="fade">
 		  <div class="report-reply col-md-12" v-if="commentBoxOpen">
-			<vue-simplemde v-model="replyBody" :configs="editorConfig" ref="editor"></vue-simplemde>
-			
+			<CustomTextEditor ref="editor" :initialContent="replyBody" ></CustomTextEditor>
 			<div class="modal-footer m-2" style="display:none">
 				<div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-if="cur_bchain=='HIVE'">
 					<input type="radio" id="hive" value="HIVE" v-model="target_bchain">
@@ -233,6 +232,8 @@
   import NotifyModal from '~/components/NotifyModal'
   
   import vueRemarkable from 'vue-remarkable';
+  
+  import CustomTextEditor from '~/components/CustomTextEditor'
     
   import Vue from 'vue'
   
@@ -436,6 +437,7 @@
 	components: {
 	  NavbarBrand,
 	  Footer,
+	  CustomTextEditor,
 	  vueRemarkable,
 	  Comments,
 	  SocialSharing,
@@ -723,6 +725,7 @@
 		meta.tags = ['hive-193552', 'actifit'];
 		meta.app = 'actifit/0.4.1';
 		meta.suppEdit = 'actifit.io.comment';
+		this.replyBody = this.$refs.editor.content;
 		
 		//if (!this.stdLogin){
 		if (!localStorage.getItem('std_login')){
