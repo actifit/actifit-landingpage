@@ -44,22 +44,25 @@ export default {
       items = items.filter(i => i !== "");
 	  let proceed = true;
 		if (Array.isArray(this.items) && this.items.length > 0){
-			if (!this.items.includes(this.newItem)){
+			if (this.items.includes(this.newItem.replace(',',''))){
 				proceed = false;
 			}
 		}
 		if (proceed){
 			this.items.push(...items);
-	  }
+	    }
 	  event.preventDefault();
       this.newItem = '';
 	  return false;
     },
     addItem() {
+	  console.log('new tag a');
+	  console.log(this.newItem);
+	  console.log(this.items);
       if (this.newItem) {
 		let proceed = true;
 		if (Array.isArray(this.items) && this.items.length > 0){
-			if (!this.items.includes(this.newItem)){
+			if (this.items.includes(this.newItem.replace(',',''))){
 				proceed = false;
 			}
 		}
