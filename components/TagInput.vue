@@ -3,7 +3,7 @@
     <span class="row">
 	<input v-model="newItem" @keyup="keyCheck" @paste="handlePaste" :placeholder="$t('Tags')" class="form-control form-control-lg w-25" style="border: none;"/>
     <ul style="list-style: none; display: flex; flex-flow: wrap;">
-      <li v-for="(item, index) in items" :key="item" style="margin-right: 8px; padding: 8px; border: 1px solid gray; border-radius: 3px;" class="acti-shadow">
+      <li v-for="(item, index) in items" :key="item" style="border: 1px solid gray; border-radius: 3px;" class="acti-shadow mr-2 mb-2 p-2">
         {{ item }}
         <button @click="removeItem(index)" style="float: right; background: none; border: none;">x</button>
       </li>
@@ -32,7 +32,7 @@ export default {
   },
   methods: {
     keyCheck(event) {
-	  console.log(this.initialItems)
+	  //console.log(this.initialItems)
       if (event.keyCode === 32 || event.keyCode === 188) {
         event.preventDefault();
         this.addItem();
@@ -42,12 +42,30 @@ export default {
       const pastedText = event.clipboardData.getData('text');
       let items = pastedText.split(/[\s,]+/);
       items = items.filter(i => i !== "");
-      this.items.push(...items);
+	  let proceed = true;
+		if (Array.isArray(this.items) && this.items.length > 0){
+			if (!this.items.includes(this.newItem)){
+				proceed = false;
+			}
+		}
+		if (proceed){
+			this.items.push(...items);
+	  }
+	  event.preventDefault();
       this.newItem = '';
+	  return false;
     },
     addItem() {
       if (this.newItem) {
-        this.items.push(this.newItem.replace(',',''));
+		let proceed = true;
+		if (Array.isArray(this.items) && this.items.length > 0){
+			if (!this.items.includes(this.newItem)){
+				proceed = false;
+			}
+		}
+		if (proceed){
+			this.items.push(this.newItem.replace(',',''));
+		}
         this.newItem = '';
       }
     },

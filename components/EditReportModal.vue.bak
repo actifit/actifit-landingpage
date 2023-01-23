@@ -14,21 +14,21 @@
             <input class="form-control form-control-lg acti-shadow" :placeholder="$t('Title')" id="report-title" v-model="title" />
           </div>
           <!-- show permalink if post is edit -->
-		  <div v-if="!editReport.isNewPost" class="form-group">
-			<a id="post_permlnk" :href="'/'+editReport.author+'/'+editReport.permlink">{{$t('actifit_web_url')}}/{{editReport.permlink}}</a>
+		  <div v-if="!editPost.isNewPost" class="form-group">
+			<a id="post_permlnk" :href="'/'+editPost.author+'/'+editPost.permlink">{{$t('actifit_web_url')}}/{{editPost.permlink}}</a>
 		  </div>
 		  <div class="form-group">
 			<CustomTextEditor ref="editor" :initialContent="body" ></CustomTextEditor>
 			
           </div>
-		  <div class="form-group">
+		  
 		   <!--<div class="form-group">
 			<label for="image-upload">{{ $t('Upload_Images') }}</label><br/>
 			<input id="image-upload" type="file" v-on:change="fileChange($event.target.files)" /> 
 			<i class="fas fa-spin fa-spinner" v-if="imgUploading"></i>
 		  </div>
           <div class="form-group">
-            <label for="report-tags">{{ $t('Tags') }}</label>
+            <!--<label for="report-tags">{{ $t('Tags') }}</label>
             <input id="report-tags" v-model="tags" :addTagOnBlur="true" />-->
             <TagInput id="tagItem" ref="tagItem" :initialItems="tags" class="form-control form-control-lg acti-shadow"/>
             <small class="form-text text-muted">{{ $t('Tag_Edit_Note') }}</small>
@@ -322,7 +322,7 @@
 			  this.editReport.author,
 			  this.editReport.permlink,
 			  this.title,
-			  this.$refs.editor.content,
+			  this.body,
 			  meta,
 			  (err) => {
 				this.commentSuccess(err, true, 'STEEM');
@@ -332,7 +332,7 @@
 			let cstm_params = {
 			  "author": this.editReport.author,
 			  "title": this.title,
-			  "body": this.$refs.editor.content,
+			  "body": this.body,
 			  "parent_author": this.editReport.parent_author,
 			  "parent_permlink": this.editReport.parent_permlink,
 			  "permlink": this.editReport.permlink,

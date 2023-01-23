@@ -1,37 +1,36 @@
 <template>
-  <div class="modal fade" id="editReportModal" tabindex="-1">
+  <div class="modal fade" id="editPostModal" tabindex="-1">
     <div class="modal-dialog modal-lg" role="document">
-      <div class="modal-content" v-if="editReport">
+      <div class="modal-content" v-if="editPost">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">{{ $t('Editing') }} {{ title }}</h5>
+		  <h5 v-if="editPost.isNewPost" class="modal-title" id="exampleModalLabel">{{ $t('Blog_on_hive') }}</h5>
+		  <h5 v-else class="modal-title" id="exampleModalLabel">{{ $t('Editing') }} <a :href="'/'+editPost.author+'/'+editPost.permlink">{{ title }}</a></h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
           <div class="form-group">
-            <label for="report-title" style="display: none">{{ $t('Title') }}</label>
-            <input class="form-control form-control-lg acti-shadow" :placeholder="$t('Title')" id="report-title" v-model="title" />
+            <label for="post-title" style="display: none">{{ $t('Title') }}</label>
+            <input class="form-control form-control-lg acti-shadow" :placeholder="$t('Title')" id="post-title" v-model="title" />
           </div>
-          <!-- show permalink if post is edit -->
-		  <div v-if="!editReport.isNewPost" class="form-group">
-			<a id="post_permlnk" :href="'/'+editReport.author+'/'+editReport.permlink">{{$t('actifit_web_url')}}/{{editReport.permlink}}</a>
+		  <!-- show permalink if post is edit -->
+		  <div v-if="!editPost.isNewPost" class="form-group">
+			<a id="post_permlnk" :href="'/'+editPost.author+'/'+editPost.permlink">{{$t('actifit_web_url')}}/{{editPost.permlink}}</a>
 		  </div>
-		  <div class="form-group">
+          <div class="form-group">
 			<CustomTextEditor ref="editor" :initialContent="body" ></CustomTextEditor>
 			
           </div>
-		  <div class="form-group">
-		   <!--<div class="form-group">
+		  <!--<div class="form-group">
 			<label for="image-upload">{{ $t('Upload_Images') }}</label><br/>
-			<input id="image-upload" type="file" v-on:change="fileChange($event.target.files)" /> 
+			<input id="image-upload" type="file" v-on:change="uploadImage($event.target.files)" /> 
 			<i class="fas fa-spin fa-spinner" v-if="imgUploading"></i>
-		  </div>
+		  </div>-->
           <div class="form-group">
-            <label for="report-tags">{{ $t('Tags') }}</label>
-            <input id="report-tags" v-model="tags" :addTagOnBlur="true" />-->
-            <TagInput id="tagItem" ref="tagItem" :initialItems="tags" class="form-control form-control-lg acti-shadow"/>
-            <small class="form-text text-muted">{{ $t('Tag_Edit_Note') }}</small>
+            <!--<label for="post-tags" style="display: none">{{ $t('Tags') }}</label>
+            <input class="form-control form-control-lg acti-shadow" :placeholder="$t('Tags')"/>-->
+			<TagInput id="tagItem" ref="tagItem" :initialItems="tags" class="form-control form-control-lg acti-shadow"/>
           </div>
         </div>
 		<div class="modal-footer m-2" style="display: none">
@@ -56,7 +55,7 @@
           <button type="button" class="btn btn-white border border-danger text-red acti-shadow" @click.prevent="save()">
             <i class="fas fa-spin fa-spinner" v-if="loading"></i>
             <i class="fas fa-paper-plane" v-else></i>
-            {{ $t('Save') }}
+            <span v-if="editPost.isNewPost">{{ $t('Publish') }}</span><span v-else>{{ $t('Save') }}</span>
 			<img src="/img/HIVE.png" style="max-height: 25px" v-if="target_bchain=='HIVE' || target_bchain=='BOTH'">
 			<img src="/img/STEEM.png" style="max-height: 25px" v-if="target_bchain=='STEEM' || target_bchain=='BOTH'">
           </button>
@@ -70,10 +69,11 @@
   import marked from 'marked'
   //import InputTag from 'vue-input-tag'
   import { mapGetters } from 'vuex'
-
+  
   import CustomTextEditor from '~/components/CustomTextEditor';
   import TagInput from '~/components/TagInput';
-/* handles outside clicks for the picker */
+
+	/* handles outside clicks for the picker */
 	/* begin */
 	import Vue from 'vue';
 
@@ -95,12 +95,11 @@
 	});
 	/* end */
    
-
   export default {
     components: {
 	  CustomTextEditor,
 	  TagInput
-	},
+    },
     data () {
       return {
         title: '', // post title
@@ -109,11 +108,10 @@
         loading: false, // loading animation in submit button
 		cur_bchain: 'HIVE', //bchain used to edit/save
 		target_bchain: 'HIVE', //bchain to which edits will go
-		
       }
     },
     computed: {
-      ...mapGetters(['editReport', 'bchain']),
+      ...mapGetters(['editPost', 'bchain']),
 	  ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters('steemconnect', ['stdLogin']),
 	  adjustHiveClass () {
@@ -143,22 +141,28 @@
 		await this.$store.dispatch('steemconnect/refreshUser');
 		//this.reload += 1;
 	  },
-      editReport () {
+      editPost () {
+		console.log('editPost');
         // set initial values after edit button was clicked
-        this.title = this.editReport.title
-        this.body = this.editReport.body
-
-        const meta = JSON.parse(this.editReport.json_metadata)
-        this.tags = meta.hasOwnProperty('tags') ? meta.tags.filter(tag => tag !== 'actifit') : [] // actifit as default tag, if no tags are present (for some reason)
-
+        this.title = (this.editPost?this.editPost.title:'')
+        this.body = (this.editPost?this.editPost.body:'')
+		
+		this.tags = [];
+		if (this.editPost && !this.editPost.isNewPost){
+			const meta = JSON.parse(this.editPost.json_metadata)
+			this.tags = meta.hasOwnProperty('tags') ? meta.tags : [] // actifit as default tag, if no tags are present (for some reason)
+		}
+		//console.log(this.tags);
+		//set paste handling script for images
+		//this.$el.querySelector('textarea').addEventListener('paste', this.handlePaste);
         // refresh editor
-        /*setTimeout(() => {
-          this.$refs.editor.simplemde.codemirror.refresh()
-        }, 250)*/
+        setTimeout(() => {
+          //this.$refs.editor.simplemde.codemirror.refresh()
+		  //console.log(this.$refs.editor.textarea.value);
+        }, 250)
       }
     },
     methods: {
-		
 	  async processTrxFunc(op_name, cstm_params, bchain_option){
 		if (!localStorage.getItem('std_login')){
 		//if (!this.stdLogin){
@@ -231,10 +235,10 @@
 		}
 	  },
 	  commentSuccess (err, finalize, bchain) {
-		
+		let mainRef = this;
 		this.$notify({
 		  group: err ? 'error' : 'success',
-		  text: err ? this.$t('Save_Error') : this.$t('Save_Success_Chain').replace('_CHAIN_', bchain),
+		  text: err ? mainRef.$t('Save_Error') : mainRef.$t('Save_Success_Chain').replace('_CHAIN_', bchain),
 		  position: 'top center'
 		})
 		
@@ -247,10 +251,10 @@
 			// stop loading animation and show notification
 			this.loading = false
 			this.RewardUserEdit();
-			// update report in store
-			this.$store.dispatch('updateReport', {
-			  author: this.editReport.author,
-			  permlink: this.editReport.permlink
+			// update post in store
+			this.$store.dispatch('updatePost', {
+			  author: this.editPost.author,
+			  permlink: this.editPost.permlink
 			})
 			
 		}
@@ -259,6 +263,8 @@
         this.loading = true // start loading animation
 		//only convert to array if not already array
 		this.tags = this.$refs.tagItem.items;
+		//console.log(this.tags);
+		//return;
 		if (!Array.isArray(this.tags)){
 			if (this.tags.indexOf(',')!==-1){
 				//contains commas, treat accordingly
@@ -269,14 +275,18 @@
 			}
 		}
         // prepare tags
-        const meta = JSON.parse(this.editReport.json_metadata)
+        let meta = (!this.editPost.isNewPost && this.editPost.json_metadata?JSON.parse(this.editPost.json_metadata):{});
         meta.tags = [
-          'actifit',
+          //'actifit',
           ...this.tags
-            .filter(tag => tag !== 'actifit') // remove actifit tag, its the first tag automatically
+            //.filter(tag => tag !== 'actifit') // remove actifit tag, its the first tag automatically
             .filter(String) // remove empty values
             .map(tag => tag.trim()) // trim leading and trailing whitespaces from tags
         ]
+		
+		if (this.editPost.isNewPost){
+			meta.image = [];
+		}
 		
 		//cleanup images to remove any ones which could have been removed
 		for (let i = 0;i < meta.image.length;i++){
@@ -307,20 +317,57 @@
 		}
 		
 		//ensure that the app info is actifit specific, for example edited by a different editor
+		if (!meta.app){
+			meta.app = 'actifit/0.5.0';
+		}
 		if (!meta.app.includes('actifit')){
 			meta.app = 'actifit/0.5.0';
 		}
 		meta.suppEdit = 'actifit.io';
+		
+		//append post specific data for new posts
+		if (this.editPost.isNewPost){
+			//let permlnk = this.title.replaceAll('.','-').replaceAll('  ',' ').replaceAll(' ','-').toLowerCase();
+			let permlnk = this.title.replaceAll('  ',' ').replaceAll(' ','-').replaceAll('--','-').replace(/[^a-zA-Z0-9\-]/g, '').toLowerCase();
+			//console.log(permlnk);
+			//return;
+			//"actifit-"+this.user.account.name.replace('.','-')+"-"+new Date().toISOString().replace(/-|:|\./g, '').toLowerCase();
+			this.editPost.parent_author = '';
+			this.editPost.parent_permlink = this.tags[0];
+			this.editPost.author = this.user.account.name;
+			this.editPost.permlink = permlnk;
+			
+			//fetch beneficiaries from user selection
+			var benef_list = [{ 'account':'actifit.pay', 'weight':500 }];//, { 'account':'actifit', 'weight':500 }
+			//let remaining_pct -= 500;
+			//console.log('ref_benef');
+			//console.log(ref_benef);
+			/*if (ref_benef){
+				benef_list.push(ref_benef);
+			}*/
+			
+			
+			//default value for 50-50 pay
+			let percent_sbd = 10000;
+			
+			//check if user selected a different report pay structure than 50-50 SBD/STEEM pay. Other option would be 100% SP
+			/*if (typeof req.body.reportSTEEMPayMode!= "undefined" && req.body.reportSTEEMPayMode!=""){
+				if (req.body.reportSTEEMPayMode == 'full_SP_Pay'){
+					//only change on default if we have a full SP Pay
+					percent_sbd = 0;
+				}
+			}*/
+		}
 		console.log(this.stdLogin);
         // save changes
 		if (!localStorage.getItem('std_login')){
 		//if (!this.stdLogin){
 		
 			this.$steemconnect.comment(
-			  this.editReport.parent_author,
-			  this.editReport.parent_permlink,
-			  this.editReport.author,
-			  this.editReport.permlink,
+			  this.editPost.parent_author,
+			  this.editPost.parent_permlink,
+			  this.editPost.author,
+			  this.editPost.permlink,
 			  this.title,
 			  this.$refs.editor.content,
 			  meta,
@@ -330,14 +377,18 @@
 			)
 		}else{
 			let cstm_params = {
-			  "author": this.editReport.author,
+			  "author": this.editPost.author,
 			  "title": this.title,
 			  "body": this.$refs.editor.content,
-			  "parent_author": this.editReport.parent_author,
-			  "parent_permlink": this.editReport.parent_permlink,
-			  "permlink": this.editReport.permlink,
+			  "parent_author": this.editPost.parent_author,
+			  "parent_permlink": this.editPost.parent_permlink,
+			  "permlink": this.editPost.permlink,
 			  "json_metadata": JSON.stringify(meta)
 			};
+			
+			//console.log(cstm_params);
+			
+			//return;
 			
 			let res = await this.processTrxFunc('comment', cstm_params, this.cur_bchain);
 			
@@ -362,11 +413,11 @@
 		}
       },
 	  async RewardUserEdit () {
-		let url = new URL(process.env.actiAppUrl + 'rewardActifitWebEdit/'+this.editReport.author);
+		let url = new URL(process.env.actiAppUrl + 'rewardActifitWebEdit/'+this.editPost.author);
 		//compile all needed data and send it along the request for processing
 		let params = {
 			web_edit_token: process.env.webEditToken,
-			url: this.editReport.url,
+			url: this.editPost.url,
 		}
 		Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
 		try{
@@ -387,8 +438,14 @@
 	  }
     },
 	async mounted () {
+		console.log('edit screen mounted');
 		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		this.$store.commit('setBchain', this.cur_bchain);
+		
 	}
   }
 </script>
+<style>
+
+
+</style>

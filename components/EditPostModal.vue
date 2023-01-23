@@ -156,10 +156,10 @@
 		//set paste handling script for images
 		//this.$el.querySelector('textarea').addEventListener('paste', this.handlePaste);
         // refresh editor
-        setTimeout(() => {
+        /*setTimeout(() => {
           //this.$refs.editor.simplemde.codemirror.refresh()
 		  //console.log(this.$refs.editor.textarea.value);
-        }, 250)
+        }, 250)*/
       }
     },
     methods: {
