@@ -198,8 +198,9 @@
   import steem from 'steem'
   import {mapGetters} from 'vuex'
   import Comments from '~/components/Comments'  
-  import CustomTextEditor from '~/components/CustomTextEditor' 
+  import Comments from '~/components/CustomTextEditor' 
   
+  import Vue from 'vue'
   import vueRemarkable from 'vue-remarkable';
   
   import SocialSharing from 'vue-social-sharing';

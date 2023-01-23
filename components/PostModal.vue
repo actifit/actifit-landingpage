@@ -138,7 +138,7 @@
 		</div>
 		<transition name="fade">
 		  <div class="post-reply modal-body" v-if="commentBoxOpen">
-			<vue-simplemde v-model="replyBody" :configs="editorConfig" ref="editor"></vue-simplemde>
+			<CustomTextEditor ref="editor" :initialContent="replyBody" ></CustomTextEditor>
 			<div class="modal-footer m-2" style="display:none">
 				<div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-if="cur_bchain=='HIVE'">
 					<input type="radio" id="hive" value="HIVE" v-model="target_bchain">
@@ -198,6 +198,7 @@
   import steem from 'steem'
   import {mapGetters} from 'vuex'
   import Comments from '~/components/Comments'  
+  import CustomTextEditor from '~/components/CustomTextEditor' 
   
   import Vue from 'vue'
   import vueRemarkable from 'vue-remarkable';
@@ -226,16 +227,6 @@
 			target_bchain: 'HIVE',
 			errPosting: '',
 			responseBody: '',
-			editorConfig: { // markdown editor for post body
-			  autofocus: true,
-			  spellChecker: false,
-			  /*previewRender: (body) => {
-				return marked(body.replace(/@([\w-]+)(?![\w-])/g,'[$&](https://actifit.io/$&)'))
-			  },*/
-			  forceSync: true,
-			  //status: false,//['lines', 'words'],
-			  promptURLs: true
-			},
 			displayMorePayoutData: false,
 			cur_bchain: 'HIVE',
 			profImgUrl: process.env.steemImgUrl,
@@ -255,6 +246,7 @@
     props: ['post'],
 	components: {
 	  Comments,
+	  CustomTextEditor,
 	  SocialSharing,
 	  vueRemarkable
 	},
@@ -514,8 +506,9 @@
 		//prepare meta data
 		let meta = new Object();
 		meta.tags = ['hive-193552', 'actifit'];
-		meta.app = 'actifit/0.4.1';
+		meta.app = 'actifit/0.5.0';
 		meta.suppEdit = 'actifit.io.comment';
+		this.replyBody = this.$refs.editor.content;
 		//console.log(this.stdLogin);
 		if (!localStorage.getItem('std_login')){
 		//if (!this.stdLogin){

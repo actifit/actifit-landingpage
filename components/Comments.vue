@@ -17,7 +17,7 @@
 		<vue-remarkable class="modal-body" v-if="!editBoxOpen" :source="commentBody()" :style="{ paddingLeft: depth * indentFactor + 'px' }" :options="{'html': true}"></vue-remarkable>
 		<transition name="fade">
 		  <div class="comment-reply" v-if="editBoxOpen">
-			<vue-simplemde v-model="full_data.body" :configs="editorConfig" ref="editor"></vue-simplemde>
+			<CustomTextEditor ref="editor" :initialContent="full_data.body" ></CustomTextEditor>
 			
 			<div class="modal-footer m-2" style="display: none">
 				<div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-if="cur_bchain=='HIVE'">
@@ -70,6 +70,7 @@
 		<transition name="fade">
 		  <div class="comment-reply" v-if="commentBoxOpen">
 			<vue-simplemde v-model="replyBody" :configs="editorConfig" ref="editor"></vue-simplemde>
+			<CustomTextEditor ref="editor" :initialContent="replyBody" ></CustomTextEditor>
 			<div class="modal-footer m-2" style="display:none">
 				<div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-if="cur_bchain=='HIVE'">
 					<input type="radio" id="hive" value="HIVE" v-model="target_bchain">
@@ -139,8 +140,8 @@
   
   import sanitize from 'sanitize-html'
   
-  //import steemEditor from 'steem-editor';
-  //import 'steem-editor/dist/css/index.css';
+  import CustomTextEditor from '~/components/CustomTextEditor' 
+  
   
   export default { 
     props: [ 'author', 'reply_entries', 'depth', 'body', 'full_data', 'main_post_author', 'main_post_permlink', 'main_post_cat' ],
@@ -163,13 +164,7 @@
 			cur_bchain: 'HIVE',
 			target_bchain: 'HIVE',
 			profImgUrl: process.env.hiveImgUrl,
-			editorConfig: { // markdown editor for post body
-			  autofocus: true,
-			  spellChecker: false,
-			  forceSync: true,
-			  //status: false,//['lines', 'words'],
-			  promptURLs: true
-			}
+			
 		}
 	},
 	watch: {
@@ -180,6 +175,7 @@
 	  }
 	},
 	components: {
+	  CustomTextEditor,
 	  vueRemarkable
 	},
     computed: {
@@ -479,9 +475,9 @@
 		//prepare meta data
 		let meta = [];
 		meta.tags = ['hive-193552', 'actifit'];
-		meta.app = 'actifit/0.4.1';
+		meta.app = 'actifit/0.5.0';
 		meta.suppEdit = 'actifit.io.comment';
-		
+		this.replyBody = this.$refs.editor.content;
 		
 		if (!localStorage.getItem('std_login')){
 		//if (!this.stdLogin){
@@ -542,6 +538,8 @@
 		meta.tags = ['hive-193552', 'actifit'];
 		meta.app = 'actifit/0.4.1';
 		meta.suppEdit = 'actifit.io.comment';
+		this.full_data.body = this.$refs.editor.content;
+		
 		
 		if (!localStorage.getItem('std_login')){
 			this.$steemconnect.comment(

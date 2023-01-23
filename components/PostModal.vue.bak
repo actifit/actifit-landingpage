@@ -1,11 +1,11 @@
 <template>
-  <div class="modal fade" id="reportModal" tabindex="-1">
+  <div class="modal fade" id="postModal" tabindex="-1">
     <div class="modal-dialog modal-lg" role="document">
-      <div class="modal-content" v-if="report">
+      <div class="modal-content" v-if="post">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">{{ report.title }}</h5><br/>
-		  <a :href="report.author" target="_blank">
-			<h5 class="modal-author modal-title text-brand" >@{{ report.author}} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></h5>
+          <h5 class="modal-title" id="exampleModalLabel">{{ post.title }}</h5><br/>
+		  <a :href="post.author" target="_blank">
+			<h5 class="modal-author modal-title text-brand" >@{{ post.author}} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></h5>
 		  </a>
 		  <span class="date-head text-muted">{{ date }}</span>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -13,12 +13,12 @@
           </button>
         </div>
 		<div class="modal-header">
-			<div class="report-tags p-1" v-html="displayReportTags"></div>
+			<div class="post-tags p-1" v-html="displayPostTags"></div>
 		</div>
 		<vue-remarkable class="modal-body" :source="body" :options="{'html': true}"></vue-remarkable>
 		<div class="modal-body goog-ad-horiz-90"><adsbygoogle ad-slot="5716623705" /></div>
 		<div class="modal-footer">
-		  <div class="report-modal-prelim-info col-md-6">
+		  <div class="post-modal-prelim-info col-md-6">
 			<span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i class="fas fa-reply"></i></a></span>
 			<span>
 				<small>
@@ -30,7 +30,7 @@
 					 data-target="#voteModal" class="actifit-link-plain" v-else>
 					<i class="far fa-thumbs-up"></i> {{ getVoteCount }}
 				  </a>
-				  <i class="far fa-comments ml-2"></i> {{ report.children }}
+				  <i class="far fa-comments ml-2"></i> {{ post.children }}
 				</small>
 			</span>
 			<span>
@@ -57,7 +57,7 @@
 			</span>
 		  </div>
 		  <div class="text-brand col-md-6"> 
-			<social-sharing :url="formattedReportUrl"
+			<social-sharing :url="formattedPostUrl"
 						  title="Actifit - Rewarding Your Everyday Activity"
 						  description="Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity "
 						  quote="Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity"
@@ -137,7 +137,7 @@
 			</small>
 		</div>
 		<transition name="fade">
-		  <div class="report-reply modal-body" v-if="commentBoxOpen">
+		  <div class="post-reply modal-body" v-if="commentBoxOpen">
 			<CustomTextEditor ref="editor" :initialContent="replyBody" ></CustomTextEditor>
 			<div class="modal-footer m-2" style="display:none">
 				<div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-if="cur_bchain=='HIVE'">
@@ -169,7 +169,7 @@
 			<div class="text-brand" v-html="errPosting"></div>
 		  </div>
 		</transition>
-		<div class="report-reply modal-body" v-if="responsePosted">
+		<div class="post-reply modal-body" v-if="responsePosted">
 			<a :href="this.user.name" target="_blank">
 			  <div class="comment-user-section">	
 				<div class="user-avatar mr-1"
@@ -179,14 +179,14 @@
 			</a>
 			<vue-remarkable class="modal-body" :source="body" :options="{'html': true}"></vue-remarkable>
 		</div>
-		<div class="report-comments modal-body" v-if="commentsAvailable">
+		<div class="post-comments modal-body" v-if="commentsAvailable">
 			<Comments 
 				:author="commentEntries.author" 
 				:body="commentEntries.body" 
 				:reply_entries.sync="commentEntries.reply_entries" 
-				:main_post_author="report.author"
-				:main_post_permlink="report.permlink"
-				:main_post_cat="report.category"
+				:main_post_author="post.author"
+				:main_post_permlink="post.permlink"
+				:main_post_cat="post.category"
 				:depth="0" />
 		</div>
       </div>
@@ -198,8 +198,9 @@
   import steem from 'steem'
   import {mapGetters} from 'vuex'
   import Comments from '~/components/Comments'  
-  import CustomTextEditor from '~/components/CustomTextEditor' 
+  import Comments from '~/components/CustomTextEditor' 
   
+  import Vue from 'vue'
   import vueRemarkable from 'vue-remarkable';
   
   import SocialSharing from 'vue-social-sharing';
@@ -236,13 +237,13 @@
 		}
 	},
 	watch: {
-	  report : 'fetchReportData',
+	  post : 'fetchPostData',
 	  bchain: function(newBchain) {
 		this.cur_bchain = newBchain;
 		this.target_bchain = newBchain;
 	  }
 	},
-    props: ['report'],
+    props: ['post'],
 	components: {
 	  Comments,
 	  CustomTextEditor,
@@ -274,14 +275,14 @@
 		return '';
 	  },
 	  date() {
-        let date = new Date(this.report.created)
+        let date = new Date(this.post.created)
         let minutes = date.getMinutes()
         return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() + ' ' + date.getHours() + ':' + (minutes < 10 ? '0' + minutes : minutes)
       },
-	  displayReportTags(){
+	  displayPostTags(){
 		let tagDisplay = "";
-		if (this.report && this.report.json_metadata){
-			let meta_data = JSON.parse(this.report.json_metadata);
+		if (this.post && this.post.json_metadata){
+			let meta_data = JSON.parse(this.post.json_metadata);
 			for (let i in meta_data.tags){
 				tagDisplay += '<span class="single-tag p-1">' + meta_data.tags[i] + '</span> ';
 			};
@@ -289,61 +290,61 @@
 		return tagDisplay;
 	  },
       body () {
-		let report_content = this.report.body;
+		let post_content = this.post.body;
 		
 		//sanitize content first hand
-		report_content = sanitize(report_content , { allowedTags: ['img'] });
+		post_content = sanitize(post_content , { allowedTags: ['img'] });
 		/* let's find images sent as ![](), and display them properly */
 		//let img_links_reg = /^(?:(?!=").)*((https?:\/\/[./\d\w-]*\.(?:png|jpg|jpeg|gif))|((https?:\/\/usermedia\.actifit\.io\/[./\d\w-]+)))/igm;
 		let img_links_reg = /[!]\[[\d\w\s-\.\(\)]*\]\((((https?:\/\/actifit\.s3\.amazonaws\.com\/)|((https?:\/\/usermedia\.actifit\.io\/))|((https:\/\/ipfs\.busy\.org\/ipfs\/))|((https:\/\/steemitimages\.com\/)))[\d\w-=&[\:\/\.\%\?]+|(https?:\/\/[.\d\w-\/\:\%]*(\.(?:png|jpg|jpeg|gif)(\??[\d\w-=&[\:\/\.\%\?]+)?)?))[)]/igm;
-		report_content = report_content.replace(img_links_reg,'<img src="$1">');
+		post_content = post_content.replace(img_links_reg,'<img src="$1">');
 		
 		/* let's find images sent as pure URLs, and display them as actual images, while avoiding well established images */
 		/* negative lookbehinds are not supported ?<! we need to switch to another approach */
 		//img_links_reg = /(?<!=")(?<!]\()(((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|(https?:\/\/[./\d\w-]*\.(?:png|jpg|jpeg|gif)))/igm;
 		//img_links_reg = /(((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|(https?:\/\/[./\d\w-]*\.(?:png|jpg|jpeg|gif)))(?!")/igm;
 		img_links_reg = /(((https?:\/\/actifit\.s3\.amazonaws\.com\/)[\d\w-]+)|((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|((https:\/\/ipfs\.busy\.org\/ipfs\/)[\d\w-]+)|((https:\/\/steemitimages\.com\/)[\d\w-[\:\/\.]+)|(https?:\/\/[.\/\d\w-]*\.(?:png|jpg|jpeg|gif)))[\s]/igm;
-		report_content = report_content.replace(img_links_reg,'<img src="$1">');
+		post_content = post_content.replace(img_links_reg,'<img src="$1">');
 		
 		/* let's match youtube vidoes and display them in a player */
 		//let vid_reg = /^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+/gm;
 		let vid_reg = /https?:\/\/(?:[0-9A-Z-]+\.)?(?:youtu\.be\/|youtube\.com\S*[^\w\-\s])([\w\-]{11})(?=[^\w\-]|$)(?![?=&amp;+%\w]*(?:['"][^&lt;&gt;]*&gt;|&lt;\/a&gt;))[?=&amp;+%\w-]*/ig;
 		
 		//swap into a player format, and introduce embed format for proper playing of videos
-		report_content = report_content.replace(vid_reg,'<iframe width="640" height="360" src="https://www.youtube.com/embed/$1"></iframe>');
+		post_content = post_content.replace(vid_reg,'<iframe width="640" height="360" src="https://www.youtube.com/embed/$1"></iframe>');
 		
 		//add support for 3speak videos embedded within iframe
 		//let threespk_reg = /[.*](https?:\/\/3speak\.tv\/watch\?v=([\w-]+\/[\w-]+))/i;
 		//let threespk_reg = /(?:\[!\[\]\()?https?:\/\/3speak\.tv\/watch\?v=([\w-]+\/[\w-]+)(?:\)\])?/i;
 		let threespk_reg = /(?:\[.*\]\()?https?:\/\/3speak\.tv\/watch\?v=([\w-]+\/[\w-]+)(?:\))?/i;
-		report_content = report_content.replace(threespk_reg,'<iframe width="640" height="360" src="//3speak.tv/embed?v=$1&autoplay=false"></iframe>');
+		post_content = post_content.replace(threespk_reg,'<iframe width="640" height="360" src="//3speak.tv/embed?v=$1&autoplay=false"></iframe>');
 		//examples: 
 		//https://3speak.tv/watch?v=jongolson/vhtttbyf		//[![](https://ipfs-3speak.b-cdn.net/ipfs/bafkreiee4k3q5sax6stbqzty6yktbhmk4mi2opf6r7hckti3ypkjvigjhi/)](https://3speak.tv/watch?v=jongolson/vhtttbyf)
 		
 		/* let's find links sent as [](), and display them properly */
 		let href_lnks = /\[([\d\w\s-\.\(\)=[\:\/\.%\?&"<>]*)\]\(([\d\w-=[\:\/\.%\?&]+|(https?:\/\/[.\d\w-\/\:\%\(\)]*\.))[)]/igm;
-		report_content = report_content.replace(href_lnks,'<a href="$2">$1</a>');
+		post_content = post_content.replace(href_lnks,'<a href="$2">$1</a>');
 		
 		/* regex to match @ words and convert them to steem user links. Need to skip special occurrences such as name within a link (preceded by /) */
 		let user_name = /([^\/])(@([\d\w-.]+))/igm;
         
-		report_content = report_content.replace(user_name,'$1<a href="https://actifit.io/$2">$2</a>')
-		return report_content;
+		post_content = post_content.replace(user_name,'$1<a href="https://actifit.io/$2">$2</a>')
+		return post_content;
       },
-	  formattedReportUrl () {
-		return "https://actifit.io" + this.report.url;
+	  formattedPostUrl () {
+		return "https://actifit.io" + this.post.url;
 	  },
 	  getVoteCount(){
-		return Array.isArray(this.report.active_votes) ? this.report.active_votes.length : 0;
+		return Array.isArray(this.post.active_votes) ? this.post.active_votes.length : 0;
 	  },
 	  meta() {
-        return JSON.parse(this.report.json_metadata)
+        return JSON.parse(this.post.json_metadata)
       },
 	  postPayout() {
 		if (this.postPaid()){
-			return this.report.total_payout_value.replace('SBD','').replace('STEEM','').replace('HBD','').replace('HIVE','')+' $'
+			return this.post.total_payout_value.replace('SBD','').replace('STEEM','').replace('HBD','').replace('HIVE','')+' $'
 		}else{
-			return this.report.pending_payout_value.replace('SBD','').replace('STEEM','').replace('HBD','').replace('HIVE','')+' $'
+			return this.post.pending_payout_value.replace('SBD','').replace('STEEM','').replace('HBD','').replace('HIVE','')+' $'
 		}
 	  },
 	  /*getUserRank() {
@@ -369,8 +370,8 @@
 	  /* function checks to see if post reached its payout period */
 	  postPaid() {
 		//check if last_payout is after cashout_time which means post got paid
-		let last_payout = new Date(this.report.last_payout);
-		let cashout_time = new Date(this.report.cashout_time);
+		let last_payout = new Date(this.post.last_payout);
+		let cashout_time = new Date(this.post.cashout_time);
 		if (last_payout.getTime() > cashout_time.getTime()){
 			return true;
 		}
@@ -397,8 +398,8 @@
 			this.responsePosted = true;
 			this.responseBody = this.replyBody;
 			
-			//refetch report data anew, but only after 10 seconds to ensure data has been made available
-			setTimeout( this.fetchReportCommentData, 10000);
+			//refetch post data anew, but only after 10 seconds to ensure data has been made available
+			setTimeout( this.fetchPostCommentData, 10000);
 			
 			
 			//check if comment is lengthy enough, increase tracked count by 1
@@ -500,19 +501,20 @@
 		this.loading = true
 		
 		//build the permlink
-		let comment_perm = this.user.account.name.replace('.','-') + '-re-' + this.report.author.replace('.','-') + '-' + this.report.permlink + new Date().toISOString().replace(/[^a-zA-Z0-9]+/g, '').toLowerCase();
+		let comment_perm = this.user.account.name.replace('.','-') + '-re-' + this.post.author.replace('.','-') + '-' + this.post.permlink + new Date().toISOString().replace(/[^a-zA-Z0-9]+/g, '').toLowerCase();
 		
 		//prepare meta data
 		let meta = new Object();
 		meta.tags = ['hive-193552', 'actifit'];
-		meta.app = 'actifit/0.4.1';
+		meta.app = 'actifit/0.5.0';
 		meta.suppEdit = 'actifit.io.comment';
+		this.replyBody = this.$refs.editor.content;
 		//console.log(this.stdLogin);
 		if (!localStorage.getItem('std_login')){
 		//if (!this.stdLogin){
 			this.$steemconnect.comment(
-			  this.report.author,
-			  this.report.permlink,
+			  this.post.author,
+			  this.post.permlink,
 			  this.user.account.name,
 			  comment_perm,
 			  '',
@@ -528,8 +530,8 @@
 			  "author": this.user.account.name,
 			  "title": '',
 			  "body": this.replyBody,
-			  "parent_author": this.report.author,
-			  "parent_permlink": this.report.permlink,
+			  "parent_author": this.post.author,
+			  "parent_permlink": this.post.permlink,
 			  "permlink": comment_perm,
 			  "json_metadata": JSON.stringify(meta)
 			};
@@ -564,7 +566,7 @@
 		//compile all needed data and send it along the request for processing
 		let params = {
 			web_comment_token: process.env.webCommentToken,
-			url: this.report.url,
+			url: this.post.url,
 		}
 		Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
 		try{
@@ -583,11 +585,11 @@
 			console.error(err);
 		}
 	  },
-	  /* function checks if logged in user has upvoted current report */
+	  /* function checks if logged in user has upvoted current post */
 	  userVotedThisPost() {
 		let curUser = this.user.account.name;
 		//check if the post contains in its original voters current user, or if it has been upvoted in current session
-		this.postUpvoted = this.report.active_votes.filter(voter => (voter.voter === curUser)).length > 0 || this.newlyVotedPosts.indexOf(this.report.post_id)!==-1;
+		this.postUpvoted = this.post.active_votes.filter(voter => (voter.voter === curUser)).length > 0 || this.newlyVotedPosts.indexOf(this.post.post_id)!==-1;
 		
 		return this.postUpvoted;
 	  },
@@ -609,38 +611,38 @@
 	  votePrompt(e) {
 		
 		  //proceed normally showing vote popup
-		  this.$store.commit('setPostToVote', this.report)
+		  this.$store.commit('setPostToVote', this.post)
 		//}
 	  },
-	  fetchReportData () {
-		//function handling propagating calls to grab key report data and comment info
-		this.fetchReportKeyData()
-		this.fetchReportCommentData()
+	  fetchPostData () {
+		//function handling propagating calls to grab key post data and comment info
+		this.fetchPostKeyData()
+		this.fetchPostCommentData()
 	  },
-	  fetchReportCommentData () {
+	  fetchPostCommentData () {
 	  
 		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		this.target_bchain = this.cur_bchain;
 		this.$store.commit('setBchain', this.cur_bchain);
 		
-		//regrab report data to fix comments
-		this.$store.dispatch('fetchReportComments', this.report)
+		//regrab post data to fix comments
+		this.$store.dispatch('fetchPostComments', this.post)
 		
 		//clear the placeholder comment displayed
 		this.responsePosted = false;
 		this.responseBody = this.moderatorSignature;
 	  },
-	  fetchReportKeyData () {
-		fetch(process.env.actiAppUrl+'getPostReward?user=' + this.report.author+'&url='+this.report.url).then(res => {
+	  fetchPostKeyData () {
+		fetch(process.env.actiAppUrl+'getPostReward?user=' + this.post.author+'&url='+this.post.url).then(res => {
 		//grab the post's reward to display it properly
 				res.json().then(json => this.afitReward = json.token_count)}).catch(e => reject(e))
 				
 		//grab the author's rank
-		fetch(process.env.actiAppUrl+'getRank/' + this.report.author).then(res => {
+		fetch(process.env.actiAppUrl+'getRank/' + this.post.author).then(res => {
 				res.json().then(json => this.userRank = json)}).catch(e => reject(e))
 				
 		//grab post full pay if full pay mode enabled
-		fetch(process.env.actiAppUrl+'getPostFullAFITPayReward?user=' + this.report.author+'&url='+this.report.url).then(res => {
+		fetch(process.env.actiAppUrl+'getPostFullAFITPayReward?user=' + this.post.author+'&url='+this.post.url).then(res => {
 				res.json().then(json => this.fullAFITReward = json.token_count)}).catch(e => reject(e))
 				
 		//grab moderators' list
@@ -653,13 +655,13 @@
 			this.profImgUrl = process.env.steemImgUrl;
 			
 			//grab post S-E token pay
-			fetch(scot_steemengine_api+'@'+this.report.author+'/'+this.report.permlink ).then(
-				res => {res.json().then(json => this.setReportTokenRewards (json) ).catch(e => reject(e))
+			fetch(scot_steemengine_api+'@'+this.post.author+'/'+this.post.permlink ).then(
+				res => {res.json().then(json => this.setPostTokenRewards (json) ).catch(e => reject(e))
 			}).catch(e => reject(e))
 		}else{
 			//grab post H-E token pay
-			fetch(scot_steemengine_api+'@'+this.report.author+'/'+this.report.permlink +scot_hive_api_param).then(
-				res => {res.json().then(json => this.setReportTokenRewards (json) ).catch(e => reject(e))
+			fetch(scot_steemengine_api+'@'+this.post.author+'/'+this.post.permlink +scot_hive_api_param).then(
+				res => {res.json().then(json => this.setPostTokenRewards (json) ).catch(e => reject(e))
 			}).catch(e => reject(e))
 		}
 	  },
@@ -681,15 +683,15 @@
 		return this.numberFormat(val, token.precision) + ' ' + token.token;
 	  },
 	  fixSubModal () {
-		//handles fixing parent class to properly interpret existing report modal
-		//need to make sure this is subentry of a report modal, meaning report modal is showing
-		if ($('#reportModal').hasClass('show')){
+		//handles fixing parent class to properly interpret existing post modal
+		//need to make sure this is subentry of a post modal, meaning post modal is showing
+		if ($('#postModal').hasClass('show')){
 		  $('body').addClass('modal-open');
 		}
 	  },
-	   async setReportTokenRewards (result) {
+	   async setPostTokenRewards (result) {
 		this.tokenRewards = result;
-		this.report.specTokenRewards = this.tokenRewards;
+		this.post.specTokenRewards = this.tokenRewards;
 	  },
 	  /**
        * Formats numbers with commas and dots.
@@ -703,8 +705,8 @@
       }
 	},
 	async mounted () {
-	  if (this.report != null){
-		this.fetchReportKeyData();
+	  if (this.post != null){
+		this.fetchPostKeyData();
 	  }
 	
 	  //fix modal overlay
@@ -737,7 +739,7 @@
 	.date-head{
 	  padding-left: 2px;
 	}
-	.report-reply{
+	.post-reply{
 	  padding-left: 40px;
 	}
 	.share-links-actifit{
@@ -747,7 +749,7 @@
 	  padding: 5px;
 	  cursor: pointer;
 	}
-	.report-modal-prelim-info span{
+	.post-modal-prelim-info span{
 	  padding: 5px;
 	}
 	.increased-rank{
