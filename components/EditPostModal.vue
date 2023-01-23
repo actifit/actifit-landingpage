@@ -263,6 +263,8 @@
         this.loading = true // start loading animation
 		//only convert to array if not already array
 		this.tags = this.$refs.tagItem.items;
+		
+		this.body = this.$refs.editor.content;
 		//console.log(this.tags);
 		//return;
 		if (!Array.isArray(this.tags)){
