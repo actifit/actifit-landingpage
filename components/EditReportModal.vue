@@ -15,7 +15,7 @@
           </div>
           <!-- show permalink if post is edit -->
 		  <div v-if="!editReport.isNewPost" class="form-group">
-			<a id="post_permlnk" :href="'/'+editReport.author+'/'+editReport.permlink">{{$t('actifit_web_url')}}/{{editReport.permlink}}</a>
+			<a id="post_permlnk" :href="'/'+editReport.author+'/'+editReport.permlink">{{$t('actifit_web_url')}}/{{editReport.author}}/{{editReport.permlink}}</a>
 		  </div>
 		  <div class="form-group">
 			<CustomTextEditor ref="editor" :initialContent="body" ></CustomTextEditor>
