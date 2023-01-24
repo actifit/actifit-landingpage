@@ -505,8 +505,9 @@
 		//prepare meta data
 		let meta = new Object();
 		meta.tags = ['hive-193552', 'actifit'];
-		meta.app = 'actifit/0.4.1';
+		meta.app = 'actifit/0.5.0';
 		meta.suppEdit = 'actifit.io.comment';
+		this.replyBody = this.$refs.editor.content;
 		//console.log(this.stdLogin);
 		if (!localStorage.getItem('std_login')){
 		//if (!this.stdLogin){
