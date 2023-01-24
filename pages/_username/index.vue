@@ -206,7 +206,7 @@
 				</div>
 				<!--  {{ numberFormat(video_count_3s, 0) }} -->
 				<div class="info-box-orange mb-2 col-md-12 cntnr">
-					<a :href="'/' + displayUser+'/videos'" ><i class="fas fa-solid fa-video mr-2"></i> {{ $t('Videos_3speak') }}
+					<a :href="'/' + displayUser+'/videos'" ><i class="fas fa-solid fa-video mr-2"></i>{{ numberFormat(video_count_3s, 0) }} {{ $t('Videos_3speak') }}
 					<img src="/img/3speak.png" class="mr-2 token-logo">
 					</a>&nbsp;
 					<a :href="displayUser+'/videos'" class="btn btn-brand border m-2">{{ $t('View_videos') }}</a>
@@ -1360,6 +1360,13 @@
 			this.poshVerified = false;
 			this.poshUserData = '';
 		}
+	  },
+	  async set3SVideoCount(json){
+		console.log('3sVideos');
+		console.log(json)
+		if (json && json.count){
+			this.video_count_3s = json.count;
+		}
 	  }
 	},
 	async mounted () {
@@ -1441,6 +1448,9 @@
 		  fetch(process.env.poshVerificationUrl+this.displayUser).then(
 			res => {res.json().then(json => this.setPoshVerifStatus(json))}).catch(e => reject(e))
 		  
+		  //grab user video count
+		  fetch(process.env.threeSpeakApiVidCount.replace('_USERNAME_',this.displayUser)).then(
+			res => {res.json().then(json => this.set3SVideoCount(json))}).catch(e => reject(e))
 		  
 		 	console.log('mounted');
 		  let bal;

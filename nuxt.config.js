@@ -44,6 +44,8 @@ module.exports = {
 	hiveEngineChainId: 'ssc-mainnet-hive', //'ssc-testnet-hive', //
 	hiveTestNetOn: false,
 	bscBridgeAccount: 'actifit.bridge',
+	threeSpeakApi: 'https://3speak.tv/apiv2/feeds/',
+	threeSpeakApiVidCount: 'https://3speak.tv/apiv2/feeds/@_USERNAME_/count',
 	hiveEngineScotParam: '?hive=1',
 	minSignupUSDCost: 2,
 	minAfitBuyEarnTicket: 1000,
