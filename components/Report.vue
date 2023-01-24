@@ -56,8 +56,8 @@
           </div>
           <div class="col-6 text-right">
             <small>
-				<social-sharing :url="'https://actifit.io'+report.url"
-							  :title="socialSharingTitle"
+				<social-sharing :url="'https://actifit.io/@'+report.author+'/'+report.permlink"
+							  :title="report.title"
 							  :description="socialSharingDesc"
 							  :quote="socialSharingQuote"
 							  :hashtags="hashtags"

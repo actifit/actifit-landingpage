@@ -65,7 +65,7 @@
 		  </div>
 		  <div class="text-brand col-md-6"> 
 			<social-sharing :url="formattedReportUrl"
-						  :title="socialSharingTitle"
+						  :title="report.title"
 						  :description="socialSharingDesc"
 						  :quote="socialSharingQuote"
 						  :hashtags="hashtags"
@@ -552,7 +552,7 @@
 		return Array.isArray(this.report.active_votes) ? this.report.active_votes.length : 0;
 	  },
 	  formattedReportUrl () {
-		return "https://actifit.io" + this.report.url;
+		return "https://actifit.io/@"+this.report.author + '/' + this.report.permlink; //+ this.report.url;
 	  },
 	  meta() {
         return JSON.parse(this.report.json_metadata)

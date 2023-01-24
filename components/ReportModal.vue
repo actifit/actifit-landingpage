@@ -58,7 +58,7 @@
 		  </div>
 		  <div class="text-brand col-md-6"> 
 			<social-sharing :url="formattedReportUrl"
-						  title="Actifit - Rewarding Your Everyday Activity"
+						  :title="report.title"
 						  description="Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity "
 						  quote="Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity"
 						  :hashtags="hashtags"
@@ -331,7 +331,7 @@
 		return report_content;
       },
 	  formattedReportUrl () {
-		return "https://actifit.io" + this.report.url;
+		return "https://actifit.io/@"+this.report.author + '/' + this.report.permlink;
 	  },
 	  getVoteCount(){
 		return Array.isArray(this.report.active_votes) ? this.report.active_votes.length : 0;

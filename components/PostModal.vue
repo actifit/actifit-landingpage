@@ -58,7 +58,7 @@
 		  </div>
 		  <div class="text-brand col-md-6"> 
 			<social-sharing :url="formattedPostUrl"
-						  title="Actifit - Rewarding Your Everyday Activity"
+						  :title="post.title"
 						  description="Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity "
 						  quote="Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity"
 						  :hashtags="hashtags"
@@ -332,7 +332,7 @@
 		return post_content;
       },
 	  formattedPostUrl () {
-		return "https://actifit.io" + this.post.url;
+		return "https://actifit.io/@" + this.post.author + '/' + this.post.permlink;
 	  },
 	  getVoteCount(){
 		return Array.isArray(this.post.active_votes) ? this.post.active_votes.length : 0;
