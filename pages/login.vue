@@ -140,6 +140,14 @@
 	  onVerifyCaptcha (response) {
 		this.captchaValid = true;
 	  },
+	  generateToken (multip) {
+		//generate random 11 characters password
+		let passString = '';
+		for (let i=0;i<multip;i++){
+			passString += Math.random().toString(36).substr(2, 13);
+		}
+		return passString;
+	  },
 	  onExpiredCaptcha () {
 		this.captchaValid = false;
 	  },
@@ -154,7 +162,7 @@
 			//append proper login data for SC, while making sure this is recognized as a normal login
 			this.is_logged_in = true;
 			this.$store.commit('setStdLoginUser', true);
-			localStorage.setItem('access_token', json.token)
+			localStorage.setItem('access_token', this.generateToken(2));
 			localStorage.setItem('std_login', true)
 			localStorage.setItem('std_login_name', userSC.account.name)
 			localStorage.setItem('acti_login_method', 'keychain');
