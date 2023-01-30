@@ -11,6 +11,8 @@
         </div>
         <div class="modal-body">
           <div class="form-group">
+			<!--<input id="image-upload" type="file" v-on:change="uploadImage($event.target.files)" /> -->
+		  
             <label for="post-title" style="display: none">{{ $t('Title') }}</label>
             <input class="form-control form-control-lg acti-shadow" :placeholder="$t('Title')" id="post-title" v-model="title" />
           </div>
@@ -94,6 +96,11 @@
 		}
 	});
 	/* end */
+	
+	
+	//import tus from 'tus-js-client'
+	import * as tus from "tus-js-client";
+
    
   export default {
     components: {
@@ -162,9 +169,43 @@
           //this.$refs.editor.simplemde.codemirror.refresh()
 		  //console.log(this.$refs.editor.textarea.value);
         }, 250)*/
+		
+		
       }
     },
     methods: {
+	  async uploadImage(files){
+		const upload = new tus.Upload(files[0], {
+		  endpoint   : 'https://uploads.3speak.tv/files', //'https://tusd.tusdemo.net/files/',
+		  retryDelays: [0, 1000, 3000, 5000],
+		  /*metadata   : {
+			filename: `photo.${extension}`,
+			filetype: this.getMimeType(extension),
+		  },*/
+		  onError: (error) => {
+			console.log(error)
+			/*this.setState({
+			  status: `upload failed ${error}`,
+			})*/
+		  },
+		  onProgress: (uploadedBytes, totalBytes) => {
+			//console.log(uploadedBytes, totalBytes)
+			const percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2)
+			console.log(bytesUploaded, bytesTotal, `${percentage}%`)
+			/*this.setState({
+			  totalBytes,
+			  uploadedBytes,
+			})*/
+		  },
+		  onSuccess: () => {
+			/*this.setState({
+			  status   : 'upload finished',
+			  uploadUrl: upload.url,
+			})*/
+			console.log('Success! Upload URL:', upload.url)
+		  },
+		})
+	  },
 	  async connectSession3S(){
 		
 			console.log('3S session');
