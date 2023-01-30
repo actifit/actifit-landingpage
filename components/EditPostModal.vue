@@ -115,6 +115,7 @@
         loading: false, // loading animation in submit button
 		cur_bchain: 'HIVE', //bchain used to edit/save
 		target_bchain: 'HIVE', //bchain to which edits will go
+		//comment_options: {},
       }
     },
     computed: {
@@ -150,6 +151,7 @@
 	  },
       editPost () {
 		console.log('editPost');
+		console.log(this.editPost);
         // set initial values after edit button was clicked
         this.title = (this.editPost?this.editPost.title:'')
         this.body = (this.editPost?this.editPost.body:'')
@@ -478,6 +480,41 @@
 				this.commentSuccess(err, true, 'STEEM');
 			  }
 			)
+		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
+			
+			/*keychain.requestPost('stoodkev', 'Hello World!', '## This is a blog post \
+\
+And this is some text', 'Blog', null, {format:'markdown',description:'A blog post',tags:['Blog']},'hello-world', {"author":"stoodkev","permlink":"hi","max_accepted_payout":"100000.000 SBD","percent_steem_dollars":10000,"allow_votes":true,"allow_curation_rewards":true,"extensions":[[0,{"beneficiaries":[{"account":"yabapmatt","weight":1000},{"account":"steemplus-pay","weight":500}]}]]}, (response) => {
+  console.log(response);
+});
+		*/
+			let comment_options = { 
+				author: this.editPost.author, 
+				permlink: this.editPost.permlink, 
+				max_accepted_payout: '1000000.000 HBD', 
+				percent_hbd: 10000, 
+				allow_votes: true, 
+				allow_curation_rewards: true, 
+				extensions: []//extensions: [[0, { 'beneficiaries': [] }]]
+			};
+			console.log(comment_options);
+			window.hive_keychain.requestPost(
+				this.editPost.author, 
+				this.title, 
+				this.$refs.editor.content,
+				this.editPost.parent_permlink,
+				this.editPost.parent_author,
+				JSON.stringify(meta),
+				this.editPost.permlink,
+				JSON.stringify(comment_options), (response) => {
+				  console.log(response);
+				  if (response.success){
+					this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain);
+				  }else{
+					this.commentSuccess(response.message, false, this.cur_bchain);
+				  }
+				});	
+			
 		}else{
 			let cstm_params = {
 			  "author": this.editPost.author,

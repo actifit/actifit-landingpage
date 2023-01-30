@@ -56,9 +56,9 @@ export default {
 	  return false;
     },
     addItem() {
-	  console.log('new tag a');
-	  console.log(this.newItem);
-	  console.log(this.items);
+	  //console.log('new tag a');
+	  //console.log(this.newItem);
+	  //console.log(this.items);
       if (this.newItem) {
 		let proceed = true;
 		if (Array.isArray(this.items) && this.items.length > 0){
@@ -67,7 +67,7 @@ export default {
 			}
 		}
 		if (proceed){
-			this.items.push(this.newItem.replace(',',''));
+			this.items.push(this.newItem.replace(',','').trim());
 		}
         this.newItem = '';
       }
