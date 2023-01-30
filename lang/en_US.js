@@ -322,6 +322,7 @@ module.exports = {
   Img_Upload_Success: 'Image successfully added!',
   Save_Success: 'Changes successfully saved!',
   Save_Success_Chain: 'Changes successfully saved to _CHAIN_',
+  Post_created_successfully: 'Post created successfully!',
   Save_Error: 'Unknown error: Your changes could not be saved.',
   Ex_Trans_History: 'My Exchange Transactions History',
   User: 'User',

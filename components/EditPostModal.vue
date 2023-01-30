@@ -1,5 +1,5 @@
 <template>
-  <div class="modal fade" id="editPostModal" tabindex="-1">
+  <div class="modal fade" id="editPostModal" tabindex="-1" ref="editPostModal">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content" v-if="editPost">
         <div class="modal-header">
@@ -337,22 +337,28 @@
 			}
 		}
 	  },
-	  commentSuccess (err, finalize, bchain) {
+	  commentSuccess (err, finalize, bchain, newPost) {
 		let mainRef = this;
+		let successMsg =  mainRef.$t('Save_Success_Chain').replace('_CHAIN_', bchain);
+		if (newPost){
+			successMsg = mainRef.$t('Post_created_successfully');
+		}
 		this.$notify({
 		  group: err ? 'error' : 'success',
-		  text: err ? mainRef.$t('Save_Error') : mainRef.$t('Save_Success_Chain').replace('_CHAIN_', bchain),
+		  text: err ? mainRef.$t('Save_Error') : successMsg,
 		  position: 'top center'
 		})
 		
 		//let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
-		//this.$store.commit('setBchain', cur_bchain);
-		
+		//this.$store.commit('setBchain', cur_bchain);		
 		
 		//reward the user for a new edit
 		if (finalize){
 			// stop loading animation and show notification
 			this.loading = false
+			if (newPost){
+				$(this.$refs.editPostModal).modal('hide')
+			}
 			this.RewardUserEdit();
 			// update post in store
 			this.$store.dispatch('updatePost', {
@@ -498,6 +504,8 @@ And this is some text', 'Blog', null, {format:'markdown',description:'A blog pos
 				extensions: []//extensions: [[0, { 'beneficiaries': [] }]]
 			};
 			console.log(comment_options);
+			//this.$nuxt.refresh()
+
 			window.hive_keychain.requestPost(
 				this.editPost.author, 
 				this.title, 
@@ -509,7 +517,7 @@ And this is some text', 'Blog', null, {format:'markdown',description:'A blog pos
 				JSON.stringify(comment_options), (response) => {
 				  console.log(response);
 				  if (response.success){
-					this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain);
+					this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain, this.editPost.isNewPost);
 				  }else{
 					this.commentSuccess(response.message, false, this.cur_bchain);
 				  }
@@ -533,7 +541,7 @@ And this is some text', 'Blog', null, {format:'markdown',description:'A blog pos
 			let res = await this.processTrxFunc('comment', cstm_params, this.cur_bchain);
 			
 			if (res.success){
-				this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain);
+				this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain, this.editPost.isNewPost);
 			}else{
 				this.commentSuccess('error saving', false, this.cur_bchain);
 			}
@@ -545,7 +553,7 @@ And this is some text', 'Blog', null, {format:'markdown',description:'A blog pos
 				let res = await this.processTrxFunc('comment', cstm_params, other_chain);
 			
 				if (res.success){
-					this.commentSuccess(null, true, other_chain);
+					this.commentSuccess(null, true, other_chain, this.editPost.isNewPost);
 				}else{
 					this.commentSuccess('error saving', false, other_chain);
 				}
