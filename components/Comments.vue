@@ -69,7 +69,7 @@
 		</div>
 		<transition name="fade">
 		  <div class="comment-reply" v-if="commentBoxOpen">
-			<vue-simplemde v-model="replyBody" :configs="editorConfig" ref="editor"></vue-simplemde>
+			<!--<vue-simplemde v-model="replyBody" :configs="editorConfig" ref="editor"></vue-simplemde>-->
 			<CustomTextEditor ref="editor" :initialContent="replyBody" ></CustomTextEditor>
 			<div class="modal-footer m-2" style="display:none">
 				<div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-if="cur_bchain=='HIVE'">
@@ -494,6 +494,37 @@
 				this.commentSuccess(err, true, 'STEEM');
 			  }
 			)
+		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+		
+			let comment_options = { 
+				author: this.user.account.name, 
+				permlink: comment_perm, 
+				max_accepted_payout: '1000000.000 HBD', 
+				percent_hbd: 10000, 
+				allow_votes: true, 
+				allow_curation_rewards: true, 
+				extensions: []//extensions: [[0, { 'beneficiaries': [] }]]
+			};
+			//console.log(comment_options);
+			//this.$nuxt.refresh()
+
+			window.hive_keychain.requestPost(
+				this.user.account.name, 
+				"", 
+				this.replyBody,
+				this.full_data.permlink,
+				this.full_data.author,
+				JSON.stringify(meta),
+				comment_perm,
+				JSON.stringify(comment_options), (response) => {
+				  //console.log(response);
+				  if (response.success){
+					this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain);
+				  }else{
+					this.commentSuccess(response.message, false, this.cur_bchain);
+				  }
+				});	
+			
 		}else{
 			let cstm_params = {
 			  "author": this.user.account.name,
@@ -567,6 +598,37 @@
 
 			  }
 			)
+				}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+		
+			let comment_options = { 
+				author: this.user.account.name, 
+				permlink: this.full_data.permlink, 
+				max_accepted_payout: '1000000.000 HBD', 
+				percent_hbd: 10000, 
+				allow_votes: true, 
+				allow_curation_rewards: true, 
+				extensions: []//extensions: [[0, { 'beneficiaries': [] }]]
+			};
+			//console.log(comment_options);
+			//this.$nuxt.refresh()
+
+			window.hive_keychain.requestPost(
+				this.user.account.name, 
+				this.full_data.title, 
+				this.full_data.body,
+				this.full_data.parent_permlink,
+				this.full_data.parent_author,
+				JSON.stringify(meta),
+				this.full_data.permlink,
+				JSON.stringify(comment_options), (response) => {
+				  //console.log(response);
+				  if (response.success){
+					this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain);
+				  }else{
+					this.commentSuccess(response.message, false, this.cur_bchain);
+				  }
+				});	
+			
 		}else{
 			let cstm_params = {
 			  "author": this.full_data.author,

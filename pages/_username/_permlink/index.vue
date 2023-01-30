@@ -741,6 +741,37 @@
 				this.commentSuccess(err, true, 'STEEM');
 			  }
 			)
+		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+		
+			let comment_options = { 
+				author: this.user.account.name, 
+				permlink: comment_perm, 
+				max_accepted_payout: '1000000.000 HBD', 
+				percent_hbd: 10000, 
+				allow_votes: true, 
+				allow_curation_rewards: true, 
+				extensions: []//extensions: [[0, { 'beneficiaries': [] }]]
+			};
+			//console.log(comment_options);
+			//this.$nuxt.refresh()
+
+			window.hive_keychain.requestPost(
+				this.user.account.name, 
+				"", 
+				this.replyBody,
+				this.report.permlink,
+				this.report.author,
+				JSON.stringify(meta),
+				comment_perm,
+				JSON.stringify(comment_options), (response) => {
+				  //console.log(response);
+				  if (response.success){
+					this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain);
+				  }else{
+					this.commentSuccess(response.message, false, this.cur_bchain);
+				  }
+				});	
+		
 		}else{
 			let cstm_params = {
 			  "author": this.user.account.name,

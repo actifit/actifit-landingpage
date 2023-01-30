@@ -486,14 +486,8 @@
 				this.commentSuccess(err, true, 'STEEM');
 			  }
 			)
-		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
-			
-			/*keychain.requestPost('stoodkev', 'Hello World!', '## This is a blog post \
-\
-And this is some text', 'Blog', null, {format:'markdown',description:'A blog post',tags:['Blog']},'hello-world', {"author":"stoodkev","permlink":"hi","max_accepted_payout":"100000.000 SBD","percent_steem_dollars":10000,"allow_votes":true,"allow_curation_rewards":true,"extensions":[[0,{"beneficiaries":[{"account":"yabapmatt","weight":1000},{"account":"steemplus-pay","weight":500}]}]]}, (response) => {
-  console.log(response);
-});
-		*/
+		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+		
 			let comment_options = { 
 				author: this.editPost.author, 
 				permlink: this.editPost.permlink, 
@@ -503,7 +497,7 @@ And this is some text', 'Blog', null, {format:'markdown',description:'A blog pos
 				allow_curation_rewards: true, 
 				extensions: []//extensions: [[0, { 'beneficiaries': [] }]]
 			};
-			console.log(comment_options);
+			//console.log(comment_options);
 			//this.$nuxt.refresh()
 
 			window.hive_keychain.requestPost(
@@ -515,7 +509,7 @@ And this is some text', 'Blog', null, {format:'markdown',description:'A blog pos
 				JSON.stringify(meta),
 				this.editPost.permlink,
 				JSON.stringify(comment_options), (response) => {
-				  console.log(response);
+				  //console.log(response);
 				  if (response.success){
 					this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain, this.editPost.isNewPost);
 				  }else{
