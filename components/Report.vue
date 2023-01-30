@@ -267,7 +267,7 @@
 		  
 		  dateParam = new Date(dateParam);
 		  
-		  console.log(dateParam);
+		  //console.log(dateParam);
 
 		  let difference = currentDate.getTime() - dateParam.getTime();
 		  let mins = Math.floor(difference / (1000 * 60 ));

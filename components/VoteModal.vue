@@ -426,9 +426,10 @@
 	  },
 	  voteSuccess (err, finalize, bchain) {
 		  if (err) {
+			this.loading = false
 			this.$notify({
 			  group: 'error',
-			  text: this.$t('Vote_Error'),
+			  text: err,//this.$t('Vote_Error'),
 			  position: 'top center'
 			});
 		  }
@@ -479,6 +480,15 @@
 			this.$steemconnect.vote(this.user.account.name, this.postToVote.author, this.postToVote.permlink, this.voteWeight * 100, (err) => {
 			  this.voteSuccess(err, true, 'STEEM');
 			});
+		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
+			window.hive_keychain.requestVote(this.user.account.name, this.postToVote.permlink, this.postToVote.author, this.voteWeight * 100, (response) => {
+				console.log(response);
+				if (response.success){
+					this.voteSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain);
+				}else{
+					this.voteSuccess(response.message, false, this.cur_bchain);
+				}
+			});
 		}else{
 			let cstm_params = {
 			  "voter": this.user.account.name,
@@ -495,7 +505,7 @@
 				this.voteSuccess('error voting', false, this.cur_bchain);
 			}
 			
-			//also send the same post again to the other chain
+			//also send the vote again to the other chain
 			let other_chain = this.cur_bchain=='HIVE'?'STEEM':'HIVE';
 			if (this.target_bchain == 'BOTH'){
 				//this.loading = true;

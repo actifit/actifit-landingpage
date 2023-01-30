@@ -259,10 +259,7 @@
 			});
 
 		}
-		//test vote
-		//window.hive_keychain.requestVote('mcfarhat', 'permlink', 'user', 5000, (response) => {
-		  //console.log(response);
-		//});
+		
 	  },
 	  async proceedLogin () {
 		this.captcha_invalid = '';
