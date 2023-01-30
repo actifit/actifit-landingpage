@@ -327,6 +327,31 @@
 				//console.log(err);
 				return {success: false, trx: null};
 			}
+		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+			await window.hive_keychain.requestBroadcast(
+				this.user.account.name, 
+				[[op_name, cstm_params]], 
+				'Active', (response) => {
+				console.log(response);
+				if (op_name == 'delete_comment'){
+					this.deleteSuccess();
+				}
+			});
+			
+			/*[
+				  [
+					'account_witness_vote',
+					{
+					  account: 'npfedwards',
+					  witness: 'stoodkev',
+					  approve: true
+					}
+				  ]
+				], 'Active', (response) => {
+				  console.log(response);
+				});*/
+
+
 		}else{
 			let operation = [ 
 			   [op_name, cstm_params]
@@ -420,6 +445,14 @@
 
 			  }
 			)
+			}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+				let cstm_params = {
+			  "author": this.full_data.author,
+			  "permlink": this.full_data.permlink
+			};
+			
+			let res = await this.processTrxFunc('delete_comment', cstm_params);
+			
 		  }else{
 			let cstm_params = {
 			  "author": this.full_data.author,
