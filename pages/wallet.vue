@@ -288,7 +288,7 @@
 					  <input type="number" id="token-hbd-amount" name="token-hbd-amount" ref="token-hbd-amount" class="form-control-lg w-50 p-2" readonly><span class="p-2">{{ $t('HBD') }}</span>
 					</div>
 					
-					<div class="row" v-if="isStdLogin && tokenActions">
+					<div class="row" v-if="!isKeychainLogin && isStdLogin && tokenActions">
 					  <label for="p-ac-key-trans-token" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 					  <input type="password" id="p-ac-key-trans-token" name="p-ac-key-trans-token" ref="p-ac-key-trans-token" class="form-control-lg w-50 p-2">
 					</div>
@@ -359,11 +359,11 @@
 					  <label for="transfer-memo" class="w-25 p-2">{{ $t('Memo') }}</label>
 					  <input type="text" id="transfer-memo" name="transfer-memo" ref="transfer-memo" class="form-control-lg w-50 p-2">				
 					</div>
-					<div class="row" v-if="isStdLogin">
+					<div class="row" v-if="!isKeychainLogin && isStdLogin">
 						  <label for="p-ac-key-trans" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 						  <input type="password" id="p-ac-key-trans" name="p-ac-key-trans" ref="p-ac-key-trans" class="form-control-lg w-50 p-2">
 					</div>
-					<div class="row" v-if="isStdLogin">
+					<div class="row" v-if="!isKeychainLogin && isStdLogin">
 						<div class="text-center small p-2 w-25"></div>
 						<div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your <b>PRIVATE ACTIVE</b> key.*</div>
 					</div>
@@ -393,11 +393,11 @@
 					  <label for="powerup-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
 					  <input type="number" id="powerup-amount" name="powerup-amount" ref="powerup-amount" class="form-control-lg w-50 p-2">
 					</div>
-					<div class="row" v-if="isStdLogin">
+					<div class="row" v-if="!isKeychainLogin && isStdLogin">
 						  <label for="powerup-amount" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 						  <input type="password" id="p-ac-key-up" name="p-ac-key-up" ref="p-ac-key-up" class="form-control-lg w-50 p-2">
 					</div>
-					<div class="row" v-if="isStdLogin">
+					<div class="row" v-if="!isKeychainLogin && isStdLogin">
 						<div class="text-center small p-2 w-25"></div>
 						<div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your <b>PRIVATE ACTIVE</b> key.*</div>
 					</div>
@@ -428,11 +428,11 @@
 						  <label for="powerdown-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
 						  <input type="number" id="powerdown-amount" name="powerdown-amount" ref="powerdown-amount" class="form-control-lg w-50 p-2">
 					  </div>
-					  <div class="row" v-if="isStdLogin">
+					  <div class="row" v-if="!isKeychainLogin && isStdLogin">
 						  <label for="powerdown-amount" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 						  <input type="password"  id="p-ac-key" name="p-ac-key" ref="p-ac-key" class="form-control-lg w-50 p-2">
 					  </div>
-					  <div class="row" v-if="isStdLogin">
+					  <div class="row" v-if="!isKeychainLogin && isStdLogin">
 						<div class="text-center small p-2 w-25"></div>
 						<div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your <b>PRIVATE ACTIVE</b> key.*</div>
 					  </div>
@@ -481,11 +481,11 @@
 					  <label for="delegate-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
 					  <input type="number" id="delegate-amount" name="delegate-amount" ref="delegate-amount" class="form-control-lg w-50 p-2">
 					</div>
-					<div class="row" v-if="isStdLogin">
+					<div class="row" v-if="!isKeychainLogin && isStdLogin">
 						  <label for="delegate-amount" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 						  <input type="password" id="p-ac-key-delg" name="p-ac-key-delg" ref="p-ac-key-delg" class="form-control-lg w-50 p-2">
 					</div>
-					<div class="row" v-if="isStdLogin">
+					<div class="row" v-if="!isKeychainLogin && isStdLogin">
 						<div class="text-center small p-2 w-25"></div>
 						<div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your <b>PRIVATE ACTIVE</b> key.*</div>
 					</div>
@@ -651,7 +651,7 @@
 							  <div class="w-25 p-2">{{ $t('Amount_To_Move') }}</div>
 							  <input type="number" id="afitx-se-he" name="afitx-se-he" ref="afitx-se-he" class="form-control-lg w-50 p-2">
 							</div>
-							<div class="row" v-if="isStdLogin">
+							<div class="row" v-if="!isKeychainLogin && isStdLogin">
 							  <label for="p-ac-key-afitx" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 							  <input type="password" id="p-ac-key-afitx" name="p-ac-key-afitx" ref="p-ac-key-afitx" class="form-control-lg w-50 p-2">
 							</div>
@@ -688,7 +688,7 @@
 						  <div class="w-25 p-2">{{ $t('Amount_To_Move') }}</div>
 						  <input type="number" id="afit-se-he" name="afit-se-he" ref="afit-se-he" class="form-control-lg w-50 p-2">
 						</div>
-						<div class="row" v-if="isStdLogin">
+						<div class="row" v-if="!isKeychainLogin && isStdLogin">
 						  <label for="p-ac-key-afit" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 						  <input type="password" id="p-ac-key-afit" name="p-ac-key-afit" ref="p-ac-key-afit" class="form-control-lg w-50 p-2">
 						</div>
@@ -768,7 +768,7 @@
 					  <div class="w-25 p-2">{{ $t('Amount_To_Move') }}</div>
 					  <input type="number" id="afit-se-move-power" name="afit-se-move-power" ref="afit-se-move-power" class="form-control-lg w-50 p-2">
 					</div>
-					<div class="row" v-if="isStdLogin">
+					<div class="row" v-if="!isKeychainLogin && isStdLogin">
 					  <label for="p-ac-key-power" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 					  <input type="password" id="p-ac-key-power" name="p-ac-key-power" ref="p-ac-key-power" class="form-control-lg w-50 p-2">
 					</div>
@@ -919,7 +919,7 @@
 					  <label for="pass-transfer-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
 					  <input type="number" id="pass-transfer-amount" name="pass-transfer-amount" ref="pass-transfer-amount" class="form-control-lg w-50 p-2"  v-model="transfer_amount">
 					</div>
-					<div class="row" v-if="isStdLogin">
+					<div class="row" v-if="!isKeychainLogin && isStdLogin">
 					  <label for="p-ac-key-funds-ver" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 					  <input type="password" id="p-ac-key-funds-ver" name="p-ac-key-funds-ver" ref="p-ac-key-funds-ver" class="form-control-lg w-50 p-2">
 					</div>
@@ -1398,6 +1398,9 @@
       ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters('steemconnect', ['stdLogin']),
       ...mapGetters(['userTokens', 'transactions', 'userRank', 'bchain']),
+	  isKeychainLogin (){
+		return localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain
+	  },
       isStdLogin () {
 		return localStorage.getItem('std_login')
 	  },
@@ -2653,7 +2656,7 @@
 			let res = await this.processTrxFunc('claim_reward_balance', cstm_params);
 			
 			if (res.success){
-				this.confirmCompletion('claimrewards', 0, res.trx.tx);
+				this.confirmCompletion('claimrewards', 0, res);
 			}
 			/*steem.broadcast.claimRewardBalanceAsync(this.user.account.name,this.claimSTEEM, this.claimSBD, this.claimSP).then(
 				res => ).catch(err=>console.log(err));*/
@@ -2740,9 +2743,11 @@
 	  async proceedTransfer () {
 		//function handles the actual processing of the transfer
 		
-		let confirmPopup = confirm(this.$t('confirm_transfer'));
-		if (!confirmPopup){
-			return;
+		if (!this.isKeychainLogin && this.isStdLogin){
+			let confirmPopup = confirm(this.$t('confirm_transfer'));
+			if (!confirmPopup){
+				return;
+			}
 		}
 		
 		this.error_proceeding = false;
@@ -2760,7 +2765,7 @@
 		  return;
 		}
 		
-		if (localStorage.getItem('std_login')){
+		if (!this.isKeychainLogin && this.isStdLogin){
 			if (this.$refs["p-ac-key-trans"].value == ''){
 			  this.error_proceeding = true;
 			  this.error_msg = this.$t('all_fields_required');
@@ -2780,6 +2785,14 @@
 			}, window.location.origin + '/wallet?op=transfer&status=success');
 			//launch the SC window
 			window.open(link);
+		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+			return new Promise((resolve) => {
+				window.hive_keychain.requestTransfer(this.user.account.name, this.$refs["transfer-recipient"].value, parseFloat(this.$refs["transfer-amount"].value).toFixed(3),'',this.transferType,(response) => {
+				  console.log(response);
+				  this.confirmCompletion('transfer', this.$refs["transfer-amount"].value, response)
+				}, true);
+			});	
+			
 		}else{
 			this.transferProcess = true;
 			let chainLnk = await this.setProperNode ();
@@ -2833,7 +2846,7 @@
 		  return;
 		}
 		
-		if (localStorage.getItem('std_login')){
+		if (!this.isKeychainLogin && this.isStdLogin){
 			if (this.$refs["p-ac-key-up"].value == ''){
 			  this.error_proceeding = true;
 			  this.error_msg = this.$t('all_fields_required');
@@ -2887,7 +2900,7 @@
 		  return;
 		}*/
 		
-		if (localStorage.getItem('std_login')){
+		if (!this.isKeychainLogin && this.isStdLogin){
 			if (this.$refs["p-ac-key-delg"].value == ''){
 			  this.error_proceeding = true;
 			  this.error_msg = this.$t('all_fields_required');
@@ -3001,7 +3014,7 @@
 		  this.error_msg = this.$t('all_fields_required');
 		  return;
 		}
-		if (localStorage.getItem('std_login')){
+		if (!this.isKeychainLogin && this.isStdLogin){
 			if (this.$refs["p-ac-key"].value == ''){
 			  this.error_proceeding = true;
 			  this.error_msg = this.$t('all_fields_required');
@@ -3033,7 +3046,7 @@
 	  },
 	  async confirmCompletion (type, amount, res, extraAFITTrx){
 		console.log (res);
-		if (res.ref_block_num){
+		if (res.ref_block_num || res.success){
 			
 			let note = 'Power down cancelled successfully!';
 			let power_type = 'SP';
@@ -3156,7 +3169,7 @@
 			return;
 		}
 		
-		if (localStorage.getItem('std_login')){
+		if (!this.isKeychainLogin && this.isStdLogin){
 			if (this.$refs["p-ac-key"].value == ''){
 			  this.error_proceeding = true;
 			  this.error_msg = this.$t('all_fields_required');
@@ -3352,6 +3365,17 @@
 				//console.log(err);
 				return {success: false, trx: null};
 			}
+		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+			return new Promise((resolve) => {
+				window.hive_keychain.requestBroadcast(
+					this.user.account.name, 
+					[[op_name, cstm_params]], 
+					'Posting', (response) => {
+					console.log(response);
+					//resolve(response);
+					resolve({success: response.success})
+				});
+			});
 		}else{
 			let operation = [ 
 			   [op_name, cstm_params]
@@ -4262,6 +4286,9 @@
 			
 			//redirect to proper action
 			window.location = link;
+			
+		//TODO	
+			
 		}else{
 			if (this.$refs["p-ac-key-trans-token"].value == ''){
 			  this.afit_se_power_error_proceeding = true;
@@ -4388,11 +4415,12 @@
 		  return;
 		}
 		
-		
-		if (this.$refs["p-ac-key-trans-token"].value == ''){
-		  this.afit_se_power_error_proceeding = true;
-		  this.afit_se_power_err_msg = this.$t('all_fields_required');
-		  return;
+		if (!this.isKeychainLogin && this.isStdLogin){
+			if (this.$refs["p-ac-key-trans-token"].value == ''){
+			  this.afit_se_power_error_proceeding = true;
+			  this.afit_se_power_err_msg = this.$t('all_fields_required');
+			  return;
+			}
 		}
 		
 		//make sure user has a set wallet address
@@ -4574,6 +4602,9 @@
 			
 			//redirect to proper action
 			window.location = link;
+		
+		//TODO
+			
 		}else{
 			if (this.$refs["p-ac-key-trans-token"].value == ''){
 			  this.afit_se_power_error_proceeding = true;
@@ -4762,6 +4793,8 @@
 			}
 			this.checkingFunds = false;
 			
+		//TODO
+
 		}else{
 			
 			if (this.$refs["p-ac-key-funds-ver"].value == ''){

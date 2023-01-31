@@ -8,29 +8,38 @@
 			<h3 class="p-3">{{ $t('Login_actifit') }}</h3>
 			<!--<h5 class="col-md-6"><img src="/img/STEEM.png" class="token-logo-sm">Standard Login</h5>-->
 			<div class="form-group">
-				<input type="text" id="username" name="username" :placeholder="$t('Username')" ref="username" class="form-control form-control-lg mb-2">
-				<input type="password" id="ppkey" name="ppkey" ref="ppkey" :placeholder="$t('Ppkey')"  class="form-control form-control-lg mb-2">
-				<span class="row mb-2 form-control-lg">
+			
+				<div class="row">
+				<input type="text" id="username" name="username" :placeholder="$t('Username')" ref="username" class="form-control m-1 col-md-6 acti-shadow">
+				<button v-on:click="loginKeychain" class="btn btn-brand keychain-btn login-stdd-btn m-1"></button>
+				</div>
+				
+				<div class="row">
+				<input type="password" id="ppkey" name="ppkey" ref="ppkey" :placeholder="$t('Ppkey')"  class="form-control m-1 col-md-6 acti-shadow">
+				<button v-on:click="proceedLogin" class="btn btn-brand login-stdd-btn m-1">{{ $t('Login') }}<i class="fas fa-spin fa-spinner text-white" v-if="login_in_progress"></i></button>
+				</div>
+				
+				<span class="row mb-1 form-control-lg">
 					<a href="/password" class="small">Forgot my posting key?</a>
 				</span>
-				<span class="row mb-2 form-control-lg ">
-				  <div class="bchain-option p-2 m-2 btn m-auto" :class="adjustHiveClass">
+				<span class="row mb-1 form-control-lg ">
+				  <div class="bchain-option p-1 m-1 btn" :class="adjustHiveClass">
 					<input type="radio" id="hive_bchain" value="HIVE" v-model="bchain_val">
 					<img src="/img/HIVE.png" style="max-height: 50px;" v-on:click="bchain_val = 'HIVE'">
 					<label for="hive_bchain">HIVE</label>
 				  </div>
-				  <div class="bchain-option p-2 m-2 btn m-auto" :class="adjustSteemClass" style="display:none">
+				  <div class="bchain-option p-1 m-1 btn m-auto" :class="adjustSteemClass" style="display:none">
 					<input type="radio" id="steem_bchain" value="STEEM" v-model="bchain_val">
 					<img src="/img/STEEM.png" style="max-height: 50px;" v-on:click="bchain_val = 'STEEM'" >
 					<label for="steem_bchain">STEEM</label>
 				  </div>
-				  <div class="bchain-option p-2 m-2 btn m-auto" :class="adjustBlurtClass">
+				  <div class="bchain-option p-1 m-1 btn" :class="adjustBlurtClass">
 					<input type="radio" id="blurt_bchain" value="BLURT" v-model="bchain_val">
 					<img src="/img/BLURT.png" style="max-height: 50px;" v-on:click="bchain_val = 'BLURT'" >
 					<label for="blurt_bchain">BLURT</label>
 				  </div>
 				</span>
-				<span class="row mb-2 form-control-lg ">
+				<span class="row mb-1 form-control-lg ">
 					<input type="checkbox" id="keeploggedin" v-model="keep_loggedin_val" >
 					<label for="keeploggedin" class="ml-2">Keep me logged in</label>
 				</span>
@@ -42,10 +51,6 @@
 				</p>
 				<div class="text-brand text-center" v-if="error_proceeding">
 				  {{ this.error_msg}}
-				</div>
-				<div class="text-center p-2">
-					<button v-on:click="proceedLogin" class="btn btn-brand login-stdd-btn m-1">{{ $t('Login') }}<i class="fas fa-spin fa-spinner text-white" v-if="login_in_progress"></i></button>
-					<button v-on:click="loginKeychain" class="btn btn-brand keychain-btn login-stdd-btn m-1"></button>
 				</div>
 			</div>
 		</div>
@@ -336,8 +341,8 @@
 	opacity: 0.5;
 }
 .login-stdd-btn{
-	height: 70px;
-	width: 200px;
+	height: 50px;
+	width: 150px;
 }
 .keychain-btn{
 	background: url(/img/keychain.png) round !important;
