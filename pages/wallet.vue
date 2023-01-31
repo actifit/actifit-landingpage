@@ -3672,10 +3672,12 @@
 		  return;
 		}
 		
-		if (this.$refs["p-ac-key-power"].value == ''){
-		  this.afit_se_move_error_proceeding = true;
-		  this.afit_se_move_err_msg = this.$t('all_fields_required');
-		  return;
+		if (!this.isKeychainLogin && this.isStdLogin){
+			if (this.$refs["p-ac-key-power"].value == ''){
+			  this.afit_se_move_error_proceeding = true;
+			  this.afit_se_move_err_msg = this.$t('all_fields_required');
+			  return;
+			}
 		}
 		
 		//store the transaction to Steem BC according to S-E protocol for transfer
@@ -3693,34 +3695,66 @@
 			//redirect to proper action
 			window.location = link;
 		
+		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+			return new Promise((resolve) => {
+				let targetAcct = 'actifit.h-e';
+				let transId = process.env.hiveEngineChainId;
+				if (this.cur_bchain == 'STEEM'){
+					targetAcct = 'actifit.s-e';
+					transId = 'ssc-mainnet1';
+				}
+				
+				let json_data = {
+					contractName: 'tokens',
+					contractAction: 'transfer',
+					contractPayload: {
+						symbol: 'AFIT',
+						to: targetAcct,
+						quantity: '' + amount_to_power,//needs to be string
+						memo: ''
+					}
+				}
+				
+
+				window.hive_keychain.requestCustomJson(this.user.account.name, transId, 'Active', JSON.stringify(json_data), this.$t('MOVE_AFIT_HE_AFIT_POWER'), (response) => {
+					console.log(response);
+					//notify of success
+					if (response.success){
+					
+						this.$notify({
+						  group: 'success',
+						  text: this.$t('Move_AFIT_to_Wallet')+ ' ' +this.$t('Scheduled_successfully'),
+						  position: 'top center'
+						})
+						
+						//initiate call to adjust AFIT token count
+						
+						let url = new URL(process.env.actiAppUrl + 'confirmAFITSEReceipt/?user='+this.user.account.name+'&bchain='+this.cur_bchain);
+						//connect with our service to confirm AFIT received to proper wallet
+						try{
+							fetch(url).then(
+							  res => {res.json().then(json => {this.setUserAddedTokens(json);this.movingFunds = false;}).catch(e => {reject(e);this.movingFunds = false;})
+							}).catch(e => reject(e))
+							
+						}catch(err){
+							console.error(err);
+							//this.checkingFunds = false;
+						}				
+					}else{
+						//notify of success
+						this.$notify({
+						  group: 'error',
+						  text: this.$t('error_performing_operation'),
+						  position: 'top center'
+						})
+					}
+				});
+			});		
+		
+		
+		
 		}else{
 		
-			/*
-			let json_data = {
-				contractName: 'tokens',
-				contractAction: 'transfer',
-				contractPayload: {
-					symbol: 'AFITX',
-					to: entry.user,
-					quantity: '' + rewardAFITX,//needs to be string
-					memo: ''
-				}
-			}
-			console.log(json_data);
-			totalAFITXSpent += parseFloat(rewardAFITX);
-			totalUsersRewarded += 1;
-			client.broadcast.json({
-				//required_auths: [config.token_dist_account],
-				required_auths: [config.account],
-				required_posting_auths: [],
-				id: 'ssc-mainnet1',
-				json: JSON.stringify(json_data),
-			}, privateKey).then(
-				result => { console.log(result) },
-				error => { console.error(error) }
-			)
-			
-			*/
 			this.movingFunds = true;
 			
 			let targetAcct = 'actifit.h-e';
@@ -3803,6 +3837,8 @@
 		setTimeout(function(){pntr.refreshinBal = false;}, 10000);
 	  },
 	  async proceedMoveAFIT(direction) {
+		//TODO: if we are to reinstate this functionality after SE goes back online, we need to setup code for keychain support
+		
 		//direction = 1: SE to HE
 		//direction = 2: HE to SE
 		
@@ -3946,6 +3982,7 @@
 		}
 	  },
 	  async proceedMoveAFITX(direction) {
+		//TODO: if we are to reinstate this functionality after SE goes back online, we need to setup code for keychain support
 		//direction = 1: SE to HE
 		//direction = 2: HE to SE
 		
@@ -4119,6 +4156,48 @@
 			
 			//redirect to proper action
 			window.location = link;
+			
+		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+				return new Promise((resolve) => {
+				let targetAcct = 'actifit.h-e';
+				let transId = process.env.hiveEngineChainId;
+				if (this.cur_bchain == 'STEEM'){
+					targetAcct = 'actifit.s-e';
+					transId = 'ssc-mainnet1';
+				}
+				
+				let json_data = {
+					contractName: 'tokens',
+					contractAction: 'stake',
+					contractPayload: {
+						symbol: this.selTokenUp.symbol,
+						to: this.user.account.name,
+						quantity: '' + amount_to_power,//needs to be string
+						memo: ''
+					}
+				}
+				
+				window.hive_keychain.requestCustomJson(this.user.account.name, transId, 'Active', JSON.stringify(json_data), this.$t('Power_Up'), (response) => {
+					console.log(response);
+					//notify of success
+					if (response.success){
+						this.$notify({
+						  group: 'success',
+						  text: this.$t('Power_up_token')+ ' ' +this.$t('completed_success'),
+						  position: 'top center'
+						})
+					}else{
+						//notify of success
+						this.$notify({
+						  group: 'error',
+						  text: this.$t('error_performing_operation'),
+						  position: 'top center'
+						})
+					}
+				});
+			});		
+					
+			
 		}else{
 			this.movingFunds = true;
 			
@@ -4215,6 +4294,45 @@
 			
 			//redirect to proper action
 			window.location = link;
+			
+		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+			return new Promise((resolve) => {
+				let targetAcct = 'actifit.h-e';
+				let transId = process.env.hiveEngineChainId;
+				if (this.cur_bchain == 'STEEM'){
+					targetAcct = 'actifit.s-e';
+					transId = 'ssc-mainnet1';
+				}
+				
+				let json_data = {
+					contractName: 'tokens',
+					contractAction: 'unstake',
+					contractPayload: {
+						symbol: this.selTokenUp.symbol,
+						quantity: '' + amount_to_powerdown,//needs to be string
+						memo: ''
+					}
+				}
+				
+				window.hive_keychain.requestCustomJson(this.user.account.name, transId, 'Active', JSON.stringify(json_data), this.$t('Power_Down'), (response) => {
+					console.log(response);
+					//notify of success
+					if (response.success){
+						this.$notify({
+						  group: 'success',
+						  text: this.$t('Power_down_token')+ ' ' +this.$t('completed_success'),
+						  position: 'top center'
+						})
+					}else{
+						//notify of success
+						this.$notify({
+						  group: 'error',
+						  text: this.$t('error_performing_operation'),
+						  position: 'top center'
+						})
+					}
+				});
+			});		
 		
 		}else{
 			this.movingFunds = true;
@@ -4321,7 +4439,45 @@
 			//redirect to proper action
 			window.location = link;
 			
-		//TODO	
+		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+			return new Promise((resolve) => {
+				let targetAcct = 'actifit.h-e';
+				let transId = process.env.hiveEngineChainId;
+				if (this.cur_bchain == 'STEEM'){
+					targetAcct = 'actifit.s-e';
+					transId = 'ssc-mainnet1';
+				}
+				
+				let json_data = {
+					contractName: 'tokens',
+					contractAction: 'transfer',
+					contractPayload: {
+						symbol: this.selTokenUp.symbol,
+						to: target_account,
+						quantity: '' + amount_to_send,//needs to be string
+						memo: memo
+					}
+				}
+				window.hive_keychain.requestCustomJson(this.user.account.name, transId, 'Active', JSON.stringify(json_data), this.$t('Transfer_token'), (response) => {
+					console.log(response);
+					//notify of success
+					if (response.success){
+						this.$notify({
+						  group: 'success',
+						  text: this.$t('Transfer_token')+ ' ' +this.$t('completed_success'),
+						  position: 'top center'
+						})
+					}else{
+						//notify of success
+						this.$notify({
+						  group: 'error',
+						  text: this.$t('error_performing_operation'),
+						  position: 'top center'
+						})
+					}
+				});
+			});		
+		
 			
 		}else{
 			if (this.$refs["p-ac-key-trans-token"].value == ''){
@@ -4637,7 +4793,50 @@
 			//redirect to proper action
 			window.location = link;
 		
-		//TODO
+			
+		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+			return new Promise((resolve) => {
+			
+				let targetAcct = 'actifit.h-e';
+				let transId = process.env.hiveEngineChainId;
+				let curr = 'hivepegged';
+				if (this.cur_bchain == 'STEEM'){
+					targetAcct = 'actifit.s-e';
+					transId = 'ssc-mainnet1';
+					curr = 'steempegged';
+				}
+				
+				
+				
+				let json_data = {
+					contractName: curr,
+					contractAction: 'withdraw',
+					contractPayload: {
+						quantity: '' + amount_to_withdraw,//needs to be string
+					}
+				}
+				
+			
+				window.hive_keychain.requestCustomJson(this.user.account.name, transId, 'Active', JSON.stringify(json_data), this.$t('Withdraw_token'), (response) => {
+					console.log(response);
+					//notify of success
+					if (response.success){
+						this.$notify({
+						  group: 'success',
+						  text: this.$t('Withdraw_token')+ ' ' +this.$t('completed_success'),
+						  position: 'top center'
+						})
+					}else{
+						//notify of success
+						this.$notify({
+						  group: 'error',
+						  text: this.$t('error_performing_operation'),
+						  position: 'top center'
+						})
+					}
+				});
+			});		
+		
 			
 		}else{
 			if (this.$refs["p-ac-key-trans-token"].value == ''){
@@ -4827,8 +5026,14 @@
 			}
 			this.checkingFunds = false;
 			
-		//TODO
-
+		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+			return new Promise((resolve) => {
+				window.hive_keychain.requestTransfer(this.user.account.name, this.target_exchange_account, parseFloat(this.$refs["pass-transfer-amount"].value).toFixed(3),'',this.transferTypePass,(response) => {
+				  console.log(response);
+				  this.confirmCompletion('transfer-verify', this.$refs["pass-transfer-amount"].value, response)
+				}, true);
+			});	
+			
 		}else{
 			
 			if (this.$refs["p-ac-key-funds-ver"].value == ''){

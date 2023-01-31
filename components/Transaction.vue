@@ -1,6 +1,6 @@
 <template>
   <!-- single transaction item for wallet page -->
-  <div class="card p-3 my-2">
+  <div class="acti-shadow card p-3 my-2">
     <div class="d-flex flex-row justify-content-between">
       <div>
         <h4 class="mb-0">{{ transaction.token_count }} <small>{{ $t('AFIT_Token') }}</small></h4>
