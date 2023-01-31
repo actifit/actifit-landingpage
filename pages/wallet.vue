@@ -8,9 +8,9 @@
       <div class="text-center">
         <h3 class="mb-4">{{ $t('Hey') }} {{ user.account.name }}!</h3>
 		
-		<div>
+		<!--<div>
 			<a href="/walletV1"><i>New Wallet Layout. Click to switch back to old version</i></a>
-		</div>
+		</div>-->
 		
 		<div class="row top-action-container text-right">
 			<div class="col-12 text-right">
