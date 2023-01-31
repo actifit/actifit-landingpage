@@ -2827,9 +2827,11 @@
 	  },
 	  async proceedPowerUp () {
 		//function handles the actual processing of the power up
-		let confirmPopup = confirm(this.$t('confirm_power_up'));
-		if (!confirmPopup){
-			return;
+		if (!this.isKeychainLogin){
+			let confirmPopup = confirm(this.$t('confirm_power_up'));
+			if (!confirmPopup){
+				return;
+			}
 		}
 		this.error_proceeding = false;
 		this.error_msg = '';
@@ -2865,6 +2867,13 @@
 			}, window.location.origin + '/wallet?op=power up&status=success');
 			//launch the SC window
 			window.open(link);
+		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+			return new Promise((resolve) => {
+				window.hive_keychain.requestPowerUp(this.user.account.name, this.user.account.name, parseFloat(this.$refs["powerup-amount"].value).toFixed(3), (response) => {
+					console.log(response);
+					this.confirmCompletion('powerup', this.$refs["powerup-amount"].value, response)
+				});
+			});		
 		}else{
 			this.powerUpProcess = true;
 			let chainLnk = await this.setProperNode ();
@@ -2919,6 +2928,15 @@
 			}, window.location.origin + '/wallet?op=delegate&status=success');
 			//launch the SC window
 			window.open(link);*/
+		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+			return new Promise((resolve) => {
+				window.hive_keychain.requestDelegation(this.user.account.name, this.$refs["delegate-recipient"].value.trim(), parseFloat(this.$refs["delegate-amount"].value).toFixed(3), 'HP', (response) => {
+					console.log(response);
+					this.confirmCompletion('delegate', this.$refs["delegate-amount"].value, response)
+				});
+			});			
+			
+		
 		}else{
 			this.delegateProcess = true;
 			let chainLnk = await this.setProperNode ();
@@ -3000,12 +3018,12 @@
 	  
 	  async proceedPowerDown () {
 		//function handles the actual processing of the power down
-		
-		let confirmPopup = confirm(this.$t('confirm_power_down'));
-		if (!confirmPopup){
-			return;
+		if (!this.isKeychainLogin){
+			let confirmPopup = confirm(this.$t('confirm_power_down'));
+			if (!confirmPopup){
+				return;
+			}
 		}
-		
 		this.error_proceeding = false;
 		this.error_msg = '';
 		//ensure we have proper values
@@ -3037,6 +3055,14 @@
 			}, window.location.origin + '/wallet?op=power down&status=success');
 			//launch the SC window
 			window.open(link);
+		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+			return new Promise((resolve) => {
+				window.hive_keychain.requestPowerDown(this.user.account.name, this.user.account.name, parseFloat(this.$refs["powerdown-amount"].value).toFixed(3), (response) => {
+					console.log(response);
+					this.confirmCompletion('powerdown', this.$refs["powerdown-amount"].value, response)
+				});
+			});		
+		
 		}else{
 			this.powerDownProcess = true;
 			let chainLnk = await this.setProperNode ();
@@ -3184,6 +3210,14 @@
 			}, window.location.origin + '/wallet?op=cancel power down&status=success');
 			//launch the SC window
 			window.open(link);
+		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+			return new Promise((resolve) => {
+				window.hive_keychain.requestPowerDown(this.user.account.name, this.user.account.name, '0.000', (response) => {
+					console.log(response);
+					this.confirmCompletion('powerdown', 0, response)
+				});
+			});			
+			
 		}else{
 			this.powerDownProcess = true;
 			//steem.api.setOptions({ url: "https://api.steemit.com" });
