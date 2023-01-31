@@ -339,11 +339,11 @@
 					<div class="row">
 						<label for="transfer-type" class="w-25 p-2">{{ $t('Type') }} *</label>
 						<select @change="transferTypeChange" id="transfer-type" name="transfer-type" ref="transfer-type" text="Choose Type" class="form-control-lg w-50 p-2">
-						  <option value="STEEM" v-if="cur_bchain!='BLURT'">
+						  <option value="HIVE" v-if="cur_bchain!='BLURT'">
 							<span v-if="cur_bchain=='STEEM'">{{ $t('STEEM') }}</span>
 							<span v-if="cur_bchain=='HIVE'">{{ $t('HIVE') }}</span>
 						  </option>
-						  <option value="SBD" v-if="cur_bchain!='BLURT'">
+						  <option value="HBD" v-if="cur_bchain!='BLURT'">
 							<span v-if="cur_bchain=='STEEM'">{{ $t('SBD') }}</span>
 							<span v-if="cur_bchain=='HIVE'">{{ $t('HBD') }}</span>
 						  </option>
@@ -2786,6 +2786,8 @@
 			//launch the SC window
 			window.open(link);
 		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+			console.log(this.transferType);
+			console.log('>>pop')
 			return new Promise((resolve) => {
 				window.hive_keychain.requestTransfer(this.user.account.name, this.$refs["transfer-recipient"].value, parseFloat(this.$refs["transfer-amount"].value).toFixed(3),'',this.transferType,(response) => {
 				  console.log(response);
@@ -2978,42 +2980,87 @@
 		}
 		
 		
-		let accToken = localStorage.getItem('access_token')
+		if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+			const op_name = 'custom_json';
+			//['delegate_rc', {
+			const json_data = JSON.stringify(['delegate_rc', { 
+					from: this.user.account.name,
+					delegatees: [this.$refs["delegate-recipient"].value.trim()],
+					max_rc: this.$refs["delegate-amount"].value.trim()
+				}]);
+				//}]);
+			const transId = 'rc';
+			const cstm_params = {
+				required_auths: [],
+				required_posting_auths: [this.user.account.name],
+				id: transId,
+				json: json_data
+			}
+			/*
+			let operation = [ 
+			   [op_name, cstm_params]
+			];*/
 			
-		//chain not needed, as only supported by hive
-		//let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
+			let res = await this.processTrxFunc(op_name, cstm_params);
 		
-		
-		this.delegateProcess = true;
-		let url = new URL(process.env.actiAppUrl + 'delegateRC/?user='+this.user.account.name+'&delegatees='+this.$refs["delegate-recipient"].value.trim()+'&max_rc='+this.$refs["delegate-amount"].value.trim());
-		
-		let reqHeads = new Headers({
-		  'Content-Type': 'application/json',
-		  'x-acti-token': 'Bearer ' + accToken,
-		});
-		let res = await fetch(url, {
-			headers: reqHeads
-		});
-		let outcome = await res.json();
-		console.log(outcome);
-		if (outcome.id && outcome.ref_block_num){
-			//success
-			this.$notify({
-			  group: 'success',
-			  text: this.$t('rc_delegation_success'),
-			  position: 'top center'
-			});
-			//update RC delegations
-			this.fetchRCDelegations(true);
+			console.log('trx status:'+res.success);
+			if (res.success){
+				//success
+				this.$notify({
+				  group: 'success',
+				  text: this.$t('rc_delegation_success'),
+				  position: 'top center'
+				});
+				//update RC delegations
+				this.fetchRCDelegations(true);
+			}else{
+				//error
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('error_performing_operation'),
+				  position: 'top center'
+				})
+			}
+			
 		}else{
-			//error
-			this.$notify({
-			  group: 'error',
-			  text: this.$t('error_performing_operation'),
-			  position: 'top center'
-			})
+		
+			let accToken = localStorage.getItem('access_token')
+				
+			//chain not needed, as only supported by hive
+			//let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
+			
+			
+			this.delegateProcess = true;
+			let url = new URL(process.env.actiAppUrl + 'delegateRC/?user='+this.user.account.name+'&delegatees='+this.$refs["delegate-recipient"].value.trim()+'&max_rc='+this.$refs["delegate-amount"].value.trim());
+		
+			let reqHeads = new Headers({
+			  'Content-Type': 'application/json',
+			  'x-acti-token': 'Bearer ' + accToken,
+			});
+			let res = await fetch(url, {
+				headers: reqHeads
+			});
+			let outcome = await res.json();
+			console.log(outcome);
+			if (outcome.id && outcome.ref_block_num){
+				//success
+				this.$notify({
+				  group: 'success',
+				  text: this.$t('rc_delegation_success'),
+				  position: 'top center'
+				});
+				//update RC delegations
+				this.fetchRCDelegations(true);
+			}else{
+				//error
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('error_performing_operation'),
+				  position: 'top center'
+				})
+			}
+			this.delegateProcess = false;
 		}
-		this.delegateProcess = false;
 	  },
 	  
 	  async proceedPowerDown () {
@@ -3057,7 +3104,7 @@
 			window.open(link);
 		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
 			return new Promise((resolve) => {
-				window.hive_keychain.requestPowerDown(this.user.account.name, this.user.account.name, parseFloat(this.$refs["powerdown-amount"].value).toFixed(3), (response) => {
+				window.hive_keychain.requestPowerDown(this.user.account.name, parseFloat(this.$refs["powerdown-amount"].value).toFixed(3), (response) => {
 					console.log(response);
 					this.confirmCompletion('powerdown', this.$refs["powerdown-amount"].value, response)
 				});
@@ -3212,7 +3259,7 @@
 			window.open(link);
 		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
 			return new Promise((resolve) => {
-				window.hive_keychain.requestPowerDown(this.user.account.name, this.user.account.name, '0.000', (response) => {
+				window.hive_keychain.requestPowerDown(this.user.account.name, '0.000', (response) => {
 					console.log(response);
 					this.confirmCompletion('powerdown', 0, response)
 				});
