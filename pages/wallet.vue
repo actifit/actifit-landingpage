@@ -1808,6 +1808,7 @@
 		}else{
 			this.tokenActions = true;
 		}
+		this.fundActivityMode = 0;
 		this.curTokenAction = this.POWERUP_FUNDS;
 		this.selTokenUp = token;
 		this.afitActivityMode = 0;
@@ -1820,6 +1821,7 @@
 		}else{
 			this.tokenActions = true;
 		}
+		this.fundActivityMode = 0;
 		this.curTokenAction = this.POWERDOWN_FUNDS;
 		this.selTokenUp = token;
 		this.afitActivityMode = 0;
@@ -1832,6 +1834,7 @@
 		}else{
 			this.tokenActions = true;
 		}
+		this.fundActivityMode = 0;
 		this.curTokenAction = this.TRANSFER_FUNDS;
 		this.selTokenUp = token;
 		this.afitActivityMode = 0;
@@ -1844,6 +1847,7 @@
 		}else{
 			this.tokenActions = true;
 		}
+		this.fundActivityMode = 0;
 		this.curTokenAction = this.TRANSFER_BSC;
 		this.selTokenUp = token;
 		this.afitActivityMode = 0;
@@ -1856,6 +1860,7 @@
 		}else{
 			this.tokenActions = true;
 		}
+		this.fundActivityMode = 0;
 		this.curTokenAction = this.WITHDRAW_FUNDS;
 		this.selTokenUp = token;
 		this.afitActivityMode = 0;
