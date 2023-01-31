@@ -997,9 +997,9 @@
 					<div class="row" v-if="buyMore">
 						<div class="w-25"></div>
 						<div class="w-50">
-							<a href="#" class="btn btn-brand border p-2" v-on:click="moveAFITSEtoAFITPOWER">{{ $t('transfer_afit_from_se') }}</a>
+							<a href="#" class="btn btn-brand border p-2" v-on:click="moveAFITSEtoAFITPOWER">{{ $t('transfer_afit_from_he') }}</a>
 							<span class="text-brand">OR</span>
-							<a href="https://steem-engine.net/?p=market&t=AFIT" class="btn btn-brand border p-2">{{ $t('buy_afit_se') }}</a>
+							<a href="https://hive-engine.com/?p=market&t=AFIT" class="btn btn-brand border p-2">{{ $t('buy_afit_he') }}</a>
 						</div>
 					</div>
 					<div class="row">

@@ -530,6 +530,7 @@ module.exports = {
   top_100: 'Top 100',
   OR: 'OR',
   transfer_afit_from_se: 'Transfer AFIT From S-E',
+  transfer_afit_from_he: 'Transfer AFIT From H-E',
   buy_afit_se: 'Buy AFIT On S-E',
   buy_afit_he: 'Buy AFIT On H-E',
   buy_afitx_se: 'Buy AFITX On S-E',
