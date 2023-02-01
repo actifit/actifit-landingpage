@@ -3238,6 +3238,8 @@
 			this.movingFunds = false;
 			
 		}
+		//update balances 
+		setTimeout(this.fetchTokenBalance , 5);
 	  },
 	  async cancelPowerDown () {
 		//function handles cancelling the power down
