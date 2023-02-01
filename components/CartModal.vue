@@ -75,12 +75,12 @@
 	
 	  <BuyOptionsModal id="buyOptionsModalCart" ref="buyOptionsModalCart" containerID="#buyOptionsModalCart" :modalTitle="$t('Buy_product')" :modalText="$t('buy_now_modal_desc').replace('_AMNT_', minAfitBuyTicket)" @proceed-purchase="proceedBuyNowHive"/>
 	
-	<no-ssr>
+	<client-only>
       <div>
         <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
         <notifications :group="'error'" :position="'top center'" :classes="'vue-notification error'" />
       </div>
-    </no-ssr>
+    </client-only>
   </div>
 </template>
 

@@ -49,12 +49,12 @@
     <PostModal :post="activePost" />
     <EditPostModal />
     <VoteModal />
-    <no-ssr>
+    <client-only>
       <div>
         <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
         <notifications :group="'error'" :position="'top center'" :classes="'vue-notification error'" />
       </div>
-    </no-ssr>
+    </client-only>
   </div>
 </template>
 

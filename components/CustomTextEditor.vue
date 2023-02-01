@@ -1,6 +1,6 @@
 <template>
 	<div class="mavonEditor acti-shadow">
-		<no-ssr>
+		<client-only>
 
 			<!-- :toolbars="markdownOption" -->
 		  <mavon-editor language="en" 
@@ -47,7 +47,7 @@
 				
 			  </template>
 		  </mavon-editor>
-		</no-ssr>
+		</client-only>
 	</div>
 </template>
 <script>

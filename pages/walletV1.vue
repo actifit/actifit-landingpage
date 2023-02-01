@@ -1019,12 +1019,12 @@
 	
 	<pendingRewardsModal :pendingRewards="pendingRewards" :username="user"/>
 	
-	<no-ssr>
+	<client-only>
       <div>
         <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
         <notifications :group="'error'" :position="'top center'" :classes="'vue-notification error'" />
       </div>
-    </no-ssr>
+    </client-only>
     <Footer />
   </div>
 </template>

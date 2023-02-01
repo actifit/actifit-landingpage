@@ -482,13 +482,13 @@
         <i class="far fa-newspaper"></i><br>
         {{ $t('News') }}
       </h1>
-      <no-ssr>
+      <client-only>
         <carousel :perPageCustom="[[0, 1], [768, 2], [1024, 3], [1280, 4]]" :paginationColor="'rgba(255, 255, 255, 0.5)'" :paginationActiveColor="'#fff'">
           <slide v-for="(post, index) in news" :post="post" :key="index">
             <News :post="post" />
           </slide>
         </carousel>
-      </no-ssr>
+      </client-only>
     </section>
 	
 

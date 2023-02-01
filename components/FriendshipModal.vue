@@ -59,12 +59,12 @@
 	  </div>
 	</div>
 	</div>
-	<no-ssr>
+	<client-only>
       <div>
         <notifications :group="'success'" :position="'bottom center'" :classes="'vue-notification success'" />
         <notifications :group="'error'" :position="'bottom center'" :classes="'vue-notification error'" />
       </div>
-    </no-ssr>
+    </client-only>
   </div>
 </template>
 
