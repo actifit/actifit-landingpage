@@ -252,7 +252,7 @@
 				body: JSON.stringify(user_info)
 			})
 		let contt = await outc.json();
-		//console.log(contt)
+		console.log(contt)
 		
 		if (contt.message){
 			window.hive_keychain.requestVerifyKey(account_name, contt.message, 'Posting', (response) => {
