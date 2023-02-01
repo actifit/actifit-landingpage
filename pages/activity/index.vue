@@ -38,14 +38,15 @@
     </div>
 
     <Footer />
-    <ReportModal :report="activeReport" />
-	<DailyActivityChartModal :report="activeReport" />
-    <EditReportModal />
-    <VoteModal :report="activeReport"/>
-	<NotifyModal :modalTitle="$t('Actifit_Info')" :modalText="$t('VP_desc')"/>
-	<NotifyModal id="notifyModalRC" ref="notifyModalRC" :modalTitle="$t('Actifit_Info')" :modalText="$t('RC_desc')"/>
     <client-only>
       <div>
+
+		<ReportModal :report="activeReport" />
+		<DailyActivityChartModal :report="activeReport" />
+		<EditReportModal />
+		<VoteModal :report="activeReport"/>
+		<NotifyModal :modalTitle="$t('Actifit_Info')" :modalText="$t('VP_desc')"/>
+		<NotifyModal id="notifyModalRC" ref="notifyModalRC" :modalTitle="$t('Actifit_Info')" :modalText="$t('RC_desc')"/>
         <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
         <notifications :group="'error'" :position="'top center'" :classes="'vue-notification error'" />
       </div>

@@ -46,11 +46,12 @@
     </div>
 
     <Footer />
-    <PostModal :post="activePost" />
-    <EditPostModal />
-    <VoteModal />
-    <client-only>
+	<client-only>    
       <div>
+
+		<PostModal :post="activePost" />
+		<EditPostModal />
+		<VoteModal />
         <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
         <notifications :group="'error'" :position="'top center'" :classes="'vue-notification error'" />
       </div>

@@ -46,12 +46,12 @@
     </div>
 
     <Footer />
-    <PostModal :post="activePost" />
-	<DailyActivityChartModal :post="activePost" />
-    <EditPostModal />
-    <VoteModal />
     <client-only>
       <div>
+	<PostModal :post="activePost" />
+    <EditPostModal />
+    <VoteModal />
+    
         <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
         <notifications :group="'error'" :position="'top center'" :classes="'vue-notification error'" />
       </div>
@@ -66,7 +66,6 @@
   import PostModal from '~/components/PostModal'
   import EditPostModal from '~/components/EditPostModal'
   import VoteModal from '~/components/VoteModal'
-  import DailyActivityChartModal from '~/components/DailyActivityChartModal'
 
   import { mapGetters } from 'vuex'
   //import ChainSelection from '~/components/ChainSelection'
@@ -88,7 +87,7 @@
       PostModal,
       EditPostModal,
       VoteModal,
-	  DailyActivityChartModal //,
+	  //DailyActivityChartModal //,
 	  //ChainSelection
     },
     data () {
@@ -168,7 +167,7 @@
     },
     async mounted () {
       // login
-      await this.$store.dispatch('steemconnect/login')
+      this.$store.dispatch('steemconnect/login')
 	  this.fetchUserData();
 
       // fetch posts

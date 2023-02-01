@@ -40,12 +40,12 @@
     </div>
 
     <Footer />
-    <ReportModal :report="activeReport" />
-	<DailyActivityChartModal :report="activeReport" />
-    <EditReportModal />
-    <VoteModal />
-    <client-only>
+	<client-only>
       <div>
+		<ReportModal :report="activeReport" />
+		<DailyActivityChartModal :report="activeReport" />
+		<EditReportModal />
+		<VoteModal />
         <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
         <notifications :group="'error'" :position="'top center'" :classes="'vue-notification error'" />
       </div>
