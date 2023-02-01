@@ -1,5 +1,5 @@
 diff --git a/node_modules/vue-steemconnect/dist/index.js b/node_modules/vue-steemconnect/dist/index.js
-index c11f6a3..48b3c93 100644
+index c11f6a3..6ac74a5 100644
 --- a/node_modules/vue-steemconnect/dist/index.js
 +++ b/node_modules/vue-steemconnect/dist/index.js
 @@ -4,10 +4,11 @@ Object.defineProperty(exports, "__esModule", {
@@ -66,7 +66,7 @@ index c11f6a3..48b3c93 100644
              // don't do anything if user data is already set
              if (!state.user) {
                // in that case we look for an access token in localStorage
-@@ -68,24 +82,144 @@ var VueSteemConnect = {
+@@ -68,24 +82,145 @@ var VueSteemConnect = {
                if (accessToken) {
                  // set access token and try to fetch user object
                  Vue.SteemConnect().setAccessToken(accessToken);
@@ -159,9 +159,10 @@ index c11f6a3..48b3c93 100644
 +						userSC.account = acct_data;
 +						//append proper login data for SC, while making sure this is recognized as a normal login
 +						commit('setStdLogin', true);
++						
++						//commit('setAccessToken', accessToken);
 +						commit('login', userSC)
-+						commit('setAccessToken', accessToken);
-+						resolve();
++						//resolve();
 +					}else{
 +						localStorage.removeItem('access_token');
 +						localStorage.removeItem('std_login');
@@ -170,7 +171,7 @@ index c11f6a3..48b3c93 100644
 +						commit('logout');
 +						commit('setStdLogin', false);
 +						commit('setAccessToken', null);
-+						reject('error loading data');
++						//reject('error loading data');
 +					}
 +				}else{
 +					let username = localStorage.getItem('std_login_name');
