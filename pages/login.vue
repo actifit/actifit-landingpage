@@ -212,16 +212,20 @@
 		}
 	  },
 	  async verifyKeychain () {
-		if (window.hive_keychain) {
-			this.keychain = window.hive_keychain
-			let mainRef = this;
-			this.keychain.requestHandshake(() => {
-                console.log('keychain installed');
-				this.keychain_available = true;
-            });
-		}
+		return new Promise((resolve) => {
+			if (window.hive_keychain) {
+				this.keychain = window.hive_keychain
+				let mainRef = this;
+				this.keychain.requestHandshake(() => {
+					console.log('keychain installed');
+					this.keychain_available = true;
+					resolve();
+				});
+			}
+		})
 	  },
 	  async loginKeychain () {
+		await this.verifyKeychain();
 		if (!this.keychain_available){
 			console.log("You do not have hive keychain installed");
 			return;
@@ -244,6 +248,8 @@
 						'username': account_name,
 						'bchain': this.bchain_val
 					}
+		console.log('loginkeychain attempt')
+		console.log(process.env.actiAppUrl);
 		let outc = await fetch(process.env.actiAppUrl+'loginKeychain',{
 				method: 'POST',
 				headers: {
