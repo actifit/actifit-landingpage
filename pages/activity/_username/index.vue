@@ -105,7 +105,8 @@
 
 		// disable load more button and only show if there actually are more posts to load
 		this.$store.commit('setMoreUserReportsAvailable', false)
-		this.$store.dispatch('fetchUserReports', this.username)
+		await this.$store.dispatch('fetchUserReports', this.username)
+		this.loading = false
 		//this.reload += 1;
 	  }
 	},

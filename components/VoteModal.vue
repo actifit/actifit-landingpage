@@ -104,11 +104,13 @@
 	watch: {
 	  postToVote: 'fetchVoterData',
 	  bchain: function(newBchain) {
-		console.log('change in chain - voter modal');
-		this.cur_bchain = newBchain;
-		this.target_bchain = newBchain;
-		this.$store.dispatch('steemconnect/refreshUser');
-		//this.reload += 1;
+		if (this.cur_bchain != newBchain){
+			console.log('change in chain - voter modal');
+			this.cur_bchain = newBchain;
+			this.target_bchain = newBchain;
+			this.$store.dispatch('steemconnect/refreshUser');
+			//this.reload += 1;
+		}
 	  }
 	},
 	components: {

@@ -383,9 +383,10 @@ export default {
 	  }else if (state.bchain == 'BLURT'){
 		chainLnk = blurt;
 	  }
-	  
+	  console.log('get blog posts');
       // get (next) 100 posts from the user
       chainLnk.api.getDiscussionsByBlog({tag: username, limit: 100, start_author: start_author, start_permlink: start_permlink}, (err, posts) => {
+		console.log(err,posts);
         if (err) reject(err)
         else {
           if (start_author && start_permlink) posts.shift() // remove the first posts because its the last post from before

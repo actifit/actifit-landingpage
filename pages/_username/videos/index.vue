@@ -110,7 +110,8 @@
 		this.$store.commit('setMoreUserVideosAvailable', false)
 		console.log('dispatch fetching user Videos')
 		console.log(this.username)
-		this.$store.dispatch('fetchUserVideos', this.username)
+		await this.$store.dispatch('fetchUserVideos', this.username)
+		this.loading = false
 		//this.reload += 1;
 	  }
 	},
