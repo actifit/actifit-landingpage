@@ -2794,7 +2794,7 @@
 			console.log(this.transferType);
 			console.log('>>pop')
 			return new Promise((resolve) => {
-				window.hive_keychain.requestTransfer(this.user.account.name, this.$refs["transfer-recipient"].value, parseFloat(this.$refs["transfer-amount"].value).toFixed(3),'',this.transferType,(response) => {
+				window.hive_keychain.requestTransfer(this.user.account.name, this.$refs["transfer-recipient"].value, parseFloat(this.$refs["transfer-amount"].value).toFixed(3),this.$refs["transfer-memo"].value,this.transferType,(response) => {
 				  console.log(response);
 				  this.confirmCompletion('transfer', this.$refs["transfer-amount"].value, response)
 				}, true);
