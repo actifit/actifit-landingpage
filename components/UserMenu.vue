@@ -121,6 +121,7 @@
 	  bchain: function(newBchain) {
 		//console.log('change in chain');
 		this.cur_bchain = newBchain;
+		console.log('usermenu');
 		this.$store.dispatch('steemconnect/refreshUser');
 		this.reload += 1;
 	  }

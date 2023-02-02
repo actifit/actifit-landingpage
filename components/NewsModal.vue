@@ -17,6 +17,7 @@
 <script>
   import Vue from 'vue'
   import vueRemarkable from 'vue-remarkable';
+  import sanitize from 'sanitize-html'
 
   export default {
     props: ['news'],
