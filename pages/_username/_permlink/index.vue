@@ -292,94 +292,99 @@
 		let is_steem = false;
 		if (!result || !result.author){
 			//switch to Steem chain
-			chainLnk = steem
+			/*chainLnk = steem
 			await chainLnk.api.setOptions({ url: process.env.steemApiNode });
 			result = await chainLnk.api.getContentAsync(user_name, params.permlink);
 			is_steem = true;
 			
-			if (!result || !result.author){
+			if (!result || !result.author){*/
 				//if no result, switch to Blurt
 				chainLnk = blurt;
 				await chainLnk.api.setOptions({ url: process.env.blurtApiNode });
 				result = await chainLnk.api.getContentAsync(user_name, params.permlink);
 				is_steem = false;
-			}
+			//}
 		}
 		console.log('pre-flight');
 		console.log(result);
-		let post_meta = JSON.parse(result.json_metadata)
-		let imgs = post_meta.image;
-		let meta_spec = {
-			postTitle: result.title,
-		}
-		if (Array.isArray(imgs) && imgs.length > 0 ){
-			meta_spec.postImg = imgs[0];
-		}
-		
-		//let's set proper canonical url based of app
-		let canonUrl = '';
+		try{
+			let post_meta = JSON.parse(result.json_metadata)
+			let imgs = post_meta.image;
+			let meta_spec = {
+				postTitle: result.title,
+			}
+			if (Array.isArray(imgs) && imgs.length > 0 ){
+				meta_spec.postImg = imgs[0];
+			}
+			
+			//let's set proper canonical url based of app
+			let canonUrl = '';
 
-		if (post_meta.app){
-			let src_app = post_meta.app.split('/')[0];
-			//fetch post original category
-			let post_cat = result.category;
-			
-			//fallback
-			if (!post_cat){
-				post_cat = post_meta.community;
-			}
-			
-			//list of current apps applying proper formal scripting. Default as hive
-			let appsPatterns = process.env.hiveAppsScript;
-			
-			//fallback to steem 
-			if (is_steem){
-				appsPatterns = process.env.steemAppsScript;
-			}
-			
-			for (let appPat in appsPatterns) {
-				if (src_app.toLowerCase() == appPat.toLowerCase()){
-					//found, grab pattern
-					if (appsPatterns[appPat].url_scheme){
-						//some might not have a pattern, skip them
-						canonUrl = appsPatterns[appPat].url_scheme.replace('{username}', user_name)
-														.replace('{permlink}', params.permlink)
-														.replace('{category}', post_cat);
+			if (post_meta.app){
+				let src_app = post_meta.app.split('/')[0];
+				//fetch post original category
+				let post_cat = result.category;
+				
+				//fallback
+				if (!post_cat){
+					post_cat = post_meta.community;
+				}
+				
+				//list of current apps applying proper formal scripting. Default as hive
+				let appsPatterns = process.env.hiveAppsScript;
+				
+				//fallback to steem 
+				if (is_steem){
+					appsPatterns = process.env.steemAppsScript;
+				}
+				
+				for (let appPat in appsPatterns) {
+					if (src_app.toLowerCase() == appPat.toLowerCase()){
+						//found, grab pattern
+						if (appsPatterns[appPat].url_scheme){
+							//some might not have a pattern, skip them
+							canonUrl = appsPatterns[appPat].url_scheme.replace('{username}', user_name)
+															.replace('{permlink}', params.permlink)
+															.replace('{category}', post_cat);
+						}
+						break;
 					}
-					break;
 				}
 			}
-		}
-		meta_spec.canonUrl = canonUrl;
-		//console.log(result);
-		//console.log(result.body);
+			meta_spec.canonUrl = canonUrl;
+			//console.log(result);
+			//console.log(result.body);
 
-		//remove all tags from text
-		let desc = sanitize(result.body, { allowedTags: [] });
-		
-		//remove all links/image links
-		let img_links_reg = /[!]?\[[\d\w\s-\.\(\)]*\]\(((((https?:\/\/usermedia\.actifit\.io\/))|((https:\/\/ipfs\.busy\.org\/ipfs\/))|((https:\/\/steemitimages\.com\/)))[\d\w-[\:\/\.\%]+|(https?:\/\/[.\d\w-\/\:\%\(\)]*\.(?:png|jpg|jpeg|gif)))[)]/igm;
-		desc = desc.replace(img_links_reg,'');
-		
-		/* let's find images sent as pure URLs */
-		img_links_reg = /(((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|((https:\/\/ipfs\.busy\.org\/ipfs\/)[\d\w-]+)|((https:\/\/steemitimages\.com\/)[\d\w-[\:\/\.]+)|(https?:\/\/[.\/\d\w-]*\.(?:png|jpg|jpeg|gif)))[\s]/igm;
-		desc = desc.replace(img_links_reg,'');
-		
-		/* replace spaces with single separating space */
-		desc = desc.replace(/\s+/g,' ');
-		
-		/* cleanup some markdown known syntax */
-		desc = desc.replace(/\#/g,'')
-					.replace(/\*/g,'')
-					.replace(/\_/g,'');
-		
-		//make sure we don't over consume desc size
-		if (desc.length > 140){
-			desc = desc.substr(0, 140) + '...';
+			//remove all tags from text
+			let desc = sanitize(result.body, { allowedTags: [] });
+			
+			//remove all links/image links
+			let img_links_reg = /[!]?\[[\d\w\s-\.\(\)]*\]\(((((https?:\/\/usermedia\.actifit\.io\/))|((https:\/\/ipfs\.busy\.org\/ipfs\/))|((https:\/\/steemitimages\.com\/)))[\d\w-[\:\/\.\%]+|(https?:\/\/[.\d\w-\/\:\%\(\)]*\.(?:png|jpg|jpeg|gif)))[)]/igm;
+			desc = desc.replace(img_links_reg,'');
+			
+			/* let's find images sent as pure URLs */
+			img_links_reg = /(((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|((https:\/\/ipfs\.busy\.org\/ipfs\/)[\d\w-]+)|((https:\/\/steemitimages\.com\/)[\d\w-[\:\/\.]+)|(https?:\/\/[.\/\d\w-]*\.(?:png|jpg|jpeg|gif)))[\s]/igm;
+			desc = desc.replace(img_links_reg,'');
+			
+			/* replace spaces with single separating space */
+			desc = desc.replace(/\s+/g,' ');
+			
+			/* cleanup some markdown known syntax */
+			desc = desc.replace(/\#/g,'')
+						.replace(/\*/g,'')
+						.replace(/\_/g,'');
+			
+			//make sure we don't over consume desc size
+			if (desc.length > 140){
+				desc = desc.substr(0, 140) + '...';
+			}
+			//console.log(desc);
+			meta_spec.desc = desc;
+			return meta_spec;
+		}catch(preerr){
+			console.log(preerr);
+			return '';
 		}
-		//console.log(desc);
-		meta_spec.desc = desc;
-		return meta_spec;
 	},
 	data () {
 		return {
