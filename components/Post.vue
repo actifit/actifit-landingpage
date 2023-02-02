@@ -156,30 +156,13 @@
         let minutes = date.getMinutes()
         return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() + ' ' + date.getHours() + ':' + (minutes < 10 ? '0' + minutes : minutes)
       },
-      steps() {
-        return this.meta.step_count[0]
-      },
-      type() {
-        return '';//this.meta.activity_type.join(', ')
-      },
 	  appType() {
         return this.meta.appType
       },
 	  appVersion() {
         return this.meta.app
       },
-	  actUserID() {
-		if (Array.isArray(this.meta.actifitUserID) && this.meta.actifitUserID.length>0){
-		  return this.meta.actifitUserID[0]
-		}
-		return this.meta.actifitUserID
-	  },
-	  trackingDevice() {
-	    if (Array.isArray(this.meta.dataTrackingSource) && this.meta.dataTrackingSource.length>0){
-		  return this.meta.dataTrackingSource[0]
-		}
-        return this.meta.dataTrackingSource
-      },
+	  
       meta() {
 		try{
 			return JSON.parse(this.post.json_metadata)
