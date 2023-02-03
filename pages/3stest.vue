@@ -88,7 +88,8 @@ export default {
 	  },
 	},
 	async mounted () {
-		await this.$store.dispatch('steemconnect/refreshUser');
+		await this.$store.dispatch('steemconnect/login')
+		//await this.$store.dispatch('steemconnect/refreshUser');
 		//console.log('session 3S');
 		//this.connectSession3S();
 	}
