@@ -1,5 +1,5 @@
 diff --git a/node_modules/vue-steemconnect/dist/index.js b/node_modules/vue-steemconnect/dist/index.js
-index c11f6a3..13d2e97 100644
+index c11f6a3..63ea4e8 100644
 --- a/node_modules/vue-steemconnect/dist/index.js
 +++ b/node_modules/vue-steemconnect/dist/index.js
 @@ -4,10 +4,11 @@ Object.defineProperty(exports, "__esModule", {
@@ -163,7 +163,7 @@ index c11f6a3..13d2e97 100644
 +						//commit('setAccessToken', accessToken);
 +						commit('login', userSC)
 +						//resolve();
-+					}else{
++					}/*else{
 +						localStorage.removeItem('access_token');
 +						localStorage.removeItem('std_login');
 +						localStorage.removeItem('std_login_name');
@@ -172,7 +172,7 @@ index c11f6a3..13d2e97 100644
 +						commit('setStdLogin', false);
 +						commit('setAccessToken', null);
 +						//reject('error loading data');
-+					}
++					}*/
 +				}else{
 +					let username = localStorage.getItem('std_login_name');
 +					let url = new URL(process.env.actiAppUrl + 'fetchUserData/?user='+username+'&bchain='+(localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):''));
