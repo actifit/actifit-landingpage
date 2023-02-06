@@ -63,8 +63,8 @@
 		  //grab price
 		  console.log('fetchBlurtPrice');
 		  fetch('https://api.coingecko.com/api/v3/simple/price?ids=blurt&vs_currencies=usd').then(
-			res => {res.json().then(json => this.setBlurtPrice (json.blurt.usd)).catch(e => reject(e))
-		  }).catch(e => reject(e))
+			res => {res.json().then(json => this.setBlurtPrice (json.blurt.usd)).catch(e => console.log(e))
+		  }).catch(e => console.log(e))
 		},
 		updatePopupStoredStatus(e){
 			this.$nextTick(() => {

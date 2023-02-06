@@ -2141,23 +2141,23 @@
 		  
 		  //let's check if user already has a funds pass set
 		  fetch(process.env.actiAppUrl+'userHasFundsPassSet/'+this.user.account.name).then(
-			res => {res.json().then(json => this.setUserPassStatus (json)).catch(e => reject(e))
-		  }).catch(e => reject(e))
+			res => {res.json().then(json => this.setUserPassStatus (json)).catch(e => console.log(e))
+		  }).catch(e => console.log(e))
 		  
 		  //let's check if user has a pending AFIT tokens exchange
 		  fetch(process.env.actiAppUrl+'userHasPendingTokenSwap/'+this.user.account.name).then(
-			res => {res.json().then(json => this.setUserTokenSwapStatus (json) ).catch(e => reject(e))
-		  }).catch(e => reject(e))
+			res => {res.json().then(json => this.setUserTokenSwapStatus (json) ).catch(e => console.log(e))
+		  }).catch(e => console.log(e))
 		  
 		  //let's grab the full queue of pending AFIT tokens exchange
 		  fetch(process.env.actiAppUrl+'getPendingTokenSwapTrans/').then(
-			res => {res.json().then(json => this.setTokenSwapQueue (json) ).catch(e => reject(e))
-		  }).catch(e => reject(e))
+			res => {res.json().then(json => this.setTokenSwapQueue (json) ).catch(e => console.log(e))
+		  }).catch(e => console.log(e))
 		  
 		  //let's grab the user's history AFIT tokens exchange
 		  fetch(process.env.actiAppUrl+'getUserTokenSwapHistory/'+this.user.account.name).then(
-			res => {res.json().then(json => this.setUserTokenSwapHistory (json) ).catch(e => reject(e))
-		  }).catch(e => reject(e))
+			res => {res.json().then(json => this.setUserTokenSwapHistory (json) ).catch(e => console.log(e))
+		  }).catch(e => console.log(e))
 
 		  //let's grab the user's steem-engine tokens too
 		  this.fetchTokenBalance();
@@ -2165,20 +2165,20 @@
 		  //let's grab the user's steem-engine tokens too
 		  if (this.cur_bchain == 'STEEM'){
 			  fetch(scot_steemengine_api+'@'+this.user.account.name).then(
-				res => {res.json().then(json => this.setUserClaimableSETokens (json) ).catch(e => reject(e))
-			  }).catch(e => reject(e))
+				res => {res.json().then(json => this.setUserClaimableSETokens (json) ).catch(e => console.log(e))
+			  }).catch(e => console.log(e))
 		  
 		  }else{
 			  fetch(scot_steemengine_api+'@'+this.user.account.name+scot_hive_api_param).then(
-				res => {res.json().then(json => this.setUserClaimableSETokens (json) ).catch(e => reject(e))
-			  }).catch(e => reject(e))
+				res => {res.json().then(json => this.setUserClaimableSETokens (json) ).catch(e => console.log(e))
+			  }).catch(e => console.log(e))
 
 		  }
 		  
 		  //let's grab the number of pending token swap transactions to see if we can add more
 		  /*fetch(process.env.actiAppUrl+'getPendingTokenSwapTransCount').then(
-			res => {res.json().then(json => this.pendingTokenSwapTransCount = json ).catch(e => reject(e))
-		  }).catch(e => reject(e))*/
+			res => {res.json().then(json => this.pendingTokenSwapTransCount = json ).catch(e => console.log(e))
+		  }).catch(e => console.log(e))*/
 		  		  
 		  //grab SP
 		  this.steemPower = await this.vestsToSteemPower(this.user.account.vesting_shares);
@@ -2219,8 +2219,8 @@
 		  
 		  //fetch user's AFITX Rank
 		   fetch(process.env.actiAppUrl+'afitxData/'+this.user.account.name).then(
-			res => {res.json().then(json => this.userAFITXRank = json.ind ).catch(e => reject(e))
-		  }).catch(e => reject(e))
+			res => {res.json().then(json => this.userAFITXRank = json.ind ).catch(e => console.log(e))
+		  }).catch(e => console.log(e))
 		  
 		  
 		  //fetch user's tokensOfInterest S-E balance
@@ -2277,34 +2277,34 @@
 		  
 		  //let's grab the user's wallet address
 		  fetch(process.env.actiAppUrl+'getUserWalletAddress?user='+this.user.account.name).then(
-			res => {res.json().then(json => this.setUserWalletAddress (json) ).catch(e => reject(e))
-		  }).catch(e => reject(e))
+			res => {res.json().then(json => this.setUserWalletAddress (json) ).catch(e => console.log(e))
+		  }).catch(e => console.log(e))
 		  
 		  //grab user airdrop results
 		  fetch(process.env.actiAppUrl+'airdropResults?user='+this.user.account.name).then(
-			res => {res.json().then(json => this.setAirdropResults (json) ).catch(e => reject(e))
-		  }).catch(e => reject(e))
+			res => {res.json().then(json => this.setAirdropResults (json) ).catch(e => console.log(e))
+		  }).catch(e => console.log(e))
 		  
 		  
 		  //check if user is powering down AFIT to SE
 		  fetch(process.env.actiAppUrl+'isPoweringDown/'+this.user.account.name).then(
-			res => {res.json().then(json => this.setUserPDAfitStatus (json) ).catch(e => reject(e))
-		  }).catch(e => reject(e))
+			res => {res.json().then(json => this.setUserPDAfitStatus (json) ).catch(e => console.log(e))
+		  }).catch(e => console.log(e))
 		  
 		  //grab list of top 25 AFITX token holders
 		  fetch(process.env.actiAppUrl+'topAFITXHolders/?count=25').then(
-			res => {res.json().then(json => this.topAFITXHolders = json ).catch(e => reject(e))
-		  }).catch(e => reject(e))
+			res => {res.json().then(json => this.topAFITXHolders = json ).catch(e => console.log(e))
+		  }).catch(e => console.log(e))
 		  
 		  //grab list of top 100 AFITX token holders
 		  fetch(process.env.actiAppUrl+'topAFITXHolders/?count=100').then(
-			res => {res.json().then(json => this.afitxHoldersList = json ).catch(e => reject(e))
-		  }).catch(e => reject(e))
+			res => {res.json().then(json => this.afitxHoldersList = json ).catch(e => console.log(e))
+		  }).catch(e => console.log(e))
 		  
 		  //grab list of top 100 AFIT token holders
 		  fetch(process.env.actiAppUrl+'topAFITHolders/?count=100').then(
-			res => {res.json().then(json => this.afitHoldersList = json ).catch(e => reject(e))
-		  }).catch(e => reject(e))
+			res => {res.json().then(json => this.afitHoldersList = json ).catch(e => console.log(e))
+		  }).catch(e => console.log(e))
 		  
 		  //fetch account RC
 		  
@@ -2328,8 +2328,8 @@
 		//let's check if user already has a funds pass set
 		
 		  fetch(process.env.actiAppUrl+'pendingRewards/?user='+this.user.account.name).then(
-			res => {res.json().then(json => this.setPendingRewards(json)).catch(e => reject(e))
-		  }).catch(e => reject(e))
+			res => {res.json().then(json => this.setPendingRewards(json)).catch(e => console.log(e))
+		  }).catch(e => console.log(e))
 	  },
 	  async fetchAFITSE() {
 		try{
@@ -2346,8 +2346,8 @@
 				try{
 					
 					fetch(url).then(
-					  res => {res.json().then(json => this.setUserAddedTokens(json)).catch(e => reject(e))
-					}).catch(e => reject(e))
+					  res => {res.json().then(json => this.setUserAddedTokens(json)).catch(e => console.log(e))
+					}).catch(e => console.log(e))
 					
 				
 				}catch(err){
@@ -2599,12 +2599,12 @@
 		//let's grab the precision for our tokens of interest for proper value display
 		if (this.cur_bchain == 'STEEM'){  
 		  fetch(scot_steemengine_api+'info').then(
-			res => {res.json().then(json => this.setSETokensPrecision (json) ).catch(e => reject(e))
-		  }).catch(e => reject(e))
+			res => {res.json().then(json => this.setSETokensPrecision (json) ).catch(e => console.log(e))
+		  }).catch(e => console.log(e))
 		}else{
 		  fetch(scot_steemengine_api+'info'+scot_hive_api_param).then(
-			res => {res.json().then(json => this.setSETokensPrecision (json) ).catch(e => reject(e))
-		  }).catch(e => reject(e))
+			res => {res.json().then(json => this.setSETokensPrecision (json) ).catch(e => console.log(e))
+		  }).catch(e => console.log(e))
 		}
 	  },
 	  async claimRewards () {
@@ -3693,8 +3693,8 @@
 			}
 			//check if user is powering down AFIT to SE
 			  /*fetch(process.env.actiAppUrl+'isPoweringDown/'+this.user.account.name).then(
-				res => {res.json().then(json => this.setUserPDAfitStatus (json) ).catch(e => reject(e))
-			  }).catch(e => reject(e))*/
+				res => {res.json().then(json => this.setUserPDAfitStatus (json) ).catch(e => console.log(e))
+			  }).catch(e => console.log(e))*/
 			
 		}else{
 			this.afit_se_move_error_proceeding = true;
@@ -3787,8 +3787,8 @@
 						//connect with our service to confirm AFIT received to proper wallet
 						try{
 							fetch(url).then(
-							  res => {res.json().then(json => {this.setUserAddedTokens(json);this.movingFunds = false;}).catch(e => {reject(e);this.movingFunds = false;})
-							}).catch(e => reject(e))
+							  res => {res.json().then(json => {this.setUserAddedTokens(json);this.movingFunds = false;}).catch(e => {console.log(e);this.movingFunds = false;})
+							}).catch(e => console.log(e))
 							
 						}catch(err){
 							console.error(err);
@@ -3861,8 +3861,8 @@
 				try{
 					
 					fetch(url).then(
-					  res => {res.json().then(json => {this.setUserAddedTokens(json);this.movingFunds = false;}).catch(e => {reject(e);this.movingFunds = false;})
-					}).catch(e => reject(e))
+					  res => {res.json().then(json => {this.setUserAddedTokens(json);this.movingFunds = false;}).catch(e => {console.log(e);this.movingFunds = false;})
+					}).catch(e => console.log(e))
 					
 				
 				}catch(err){
@@ -3885,8 +3885,8 @@
 		this.refreshinBal = true;
 		let pntr = this;
 		fetch(process.env.actiAppUrl+'recalculateUserTokens?user='+this.user.account.name).then(
-			res => {res.json().then(json => {this.fetchUserData();}).catch(e => reject(e))
-		  }).catch(e => reject(e))
+			res => {res.json().then(json => {this.fetchUserData();}).catch(e => console.log(e))
+		  }).catch(e => console.log(e))
 		//after 10 seconds of waiting, cancel spinner
 		setTimeout(function(){pntr.refreshinBal = false;}, 10000);
 	  },
@@ -4593,8 +4593,8 @@
 				try{
 					
 					fetch(url).then(
-					  res => {res.json().then(json => {this.setUserAddedTokens(json);this.movingFunds = false;}).catch(e => {reject(e);this.movingFunds = false;})
-					}).catch(e => reject(e))
+					  res => {res.json().then(json => {this.setUserAddedTokens(json);this.movingFunds = false;}).catch(e => {console.log(e);this.movingFunds = false;})
+					}).catch(e => console.log(e))
 					
 				
 				}catch(err){
@@ -4789,8 +4789,8 @@
 			try{
 				
 				fetch(url).then(
-				  res => {res.json().then(json => {this.setUserAddedTokens(json);this.movingFunds = false;}).catch(e => {reject(e);this.movingFunds = false;})
-				}).catch(e => reject(e))
+				  res => {res.json().then(json => {this.setUserAddedTokens(json);this.movingFunds = false;}).catch(e => {console.log(e);this.movingFunds = false;})
+				}).catch(e => console.log(e))
 				
 			
 			}catch(err){
@@ -4953,8 +4953,8 @@
 				try{
 					
 					fetch(url).then(
-					  res => {res.json().then(json => {this.setUserAddedTokens(json);this.movingFunds = false;}).catch(e => {reject(e);this.movingFunds = false;})
-					}).catch(e => reject(e))
+					  res => {res.json().then(json => {this.setUserAddedTokens(json);this.movingFunds = false;}).catch(e => {console.log(e);this.movingFunds = false;})
+					}).catch(e => console.log(e))
 					
 				
 				}catch(err){
@@ -5329,8 +5329,8 @@
 	  
 	  //grab AFIT price
 	  fetch(process.env.actiAppUrl+'curAFITPrice').then(
-		res => {res.json().then(json => this.setAFITPrice (json.unit_price_usd)).catch(e => reject(e))
-	  }).catch(e => reject(e))
+		res => {res.json().then(json => this.setAFITPrice (json.unit_price_usd)).catch(e => console.log(e))
+	  }).catch(e => console.log(e))
 	  
 	  this.screenWidth = screen.width;
 	  //check if this is the result of an operation
@@ -5370,29 +5370,29 @@
 	  
 	  //grab STEEM price
 	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem&vs_currencies=usd').then(
-		res => {res.json().then(json => this.setSteemPrice (json.steem.usd)).catch(e => reject(e))
-	  }).catch(e => reject(e))
+		res => {res.json().then(json => this.setSteemPrice (json.steem.usd)).catch(e => console.log(e))
+	  }).catch(e => console.log(e))
 	  
 	  //grab HIVE price
 	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=hive&vs_currencies=usd').then(
-		res => {res.json().then(json => this.setHivePrice (json.hive.usd)).catch(e => reject(e))
-	  }).catch(e => reject(e))
+		res => {res.json().then(json => this.setHivePrice (json.hive.usd)).catch(e => console.log(e))
+	  }).catch(e => console.log(e))
 	  
 	  //grab BLURT price
 	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=blurt&vs_currencies=usd').then(
-		res => {res.json().then(json => this.setBlurtPrice (json.blurt.usd)).catch(e => reject(e))
-	  }).catch(e => reject(e))
+		res => {res.json().then(json => this.setBlurtPrice (json.blurt.usd)).catch(e => console.log(e))
+	  }).catch(e => console.log(e))
 	  
 	  //grab SBD price
 	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem-dollars&vs_currencies=usd').then(
-		res => {res.json().then(json => this.setSBDPrice (json['steem-dollars'].usd)).catch(e => reject(e))
-	  }).catch(e => reject(e))
+		res => {res.json().then(json => this.setSBDPrice (json['steem-dollars'].usd)).catch(e => console.log(e))
+	  }).catch(e => console.log(e))
 	  this.loading = false;
 	  
 	  //grab HBD price
 	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=hive_dollar&vs_currencies=usd').then(
-		res => {res.json().then(json => this.setHBDPrice (json['hive_dollar'].usd)).catch(e => reject(e))
-	  }).catch(e => reject(e))
+		res => {res.json().then(json => this.setHBDPrice (json['hive_dollar'].usd)).catch(e => console.log(e))
+	  }).catch(e => console.log(e))
 	  this.loading = false;
 	  
 	  //set default option for transfer

@@ -188,13 +188,13 @@
 	  
 	  //grab STEEM price, needed for vote value calculation
 	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem&vs_currencies=usd').then(
-		res => {res.json().then(json => this.setSteemPrice (json.steem.usd)).catch(e => reject(e))
-	  }).catch(e => reject(e))
+		res => {res.json().then(json => this.setSteemPrice (json.steem.usd)).catch(e => console.log(e))
+	  }).catch(e => console.log(e))
 	  
 	  //grab SBD price, needed for vote value calculation
 	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem-dollars&vs_currencies=usd').then(
-		res => {res.json().then(json => this.setSBDPrice (json['steem-dollars'].usd)).catch(e => reject(e))
-	  }).catch(e => reject(e))
+		res => {res.json().then(json => this.setSBDPrice (json['steem-dollars'].usd)).catch(e => console.log(e))
+	  }).catch(e => console.log(e))
 	
 	  //in addition to the default updating of VP upon each render, we need to take into consideration leaving window open. 
 	  //for this purpose, let's update every 30 seconds
