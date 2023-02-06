@@ -1,5 +1,5 @@
 diff --git a/node_modules/vue-steemconnect/dist/index.js b/node_modules/vue-steemconnect/dist/index.js
-index c11f6a3..4c4c97a 100644
+index c11f6a3..31ad69d 100644
 --- a/node_modules/vue-steemconnect/dist/index.js
 +++ b/node_modules/vue-steemconnect/dist/index.js
 @@ -4,10 +4,11 @@ Object.defineProperty(exports, "__esModule", {
@@ -66,7 +66,7 @@ index c11f6a3..4c4c97a 100644
              // don't do anything if user data is already set
              if (!state.user) {
                // in that case we look for an access token in localStorage
-@@ -68,24 +82,150 @@ var VueSteemConnect = {
+@@ -68,24 +82,156 @@ var VueSteemConnect = {
                if (accessToken) {
                  // set access token and try to fetch user object
                  Vue.SteemConnect().setAccessToken(accessToken);
@@ -79,6 +79,8 @@ index c11f6a3..4c4c97a 100644
 -                  }
 -                });
 +				//grab localstorage val to see if SC login used
++				console.log('login_method')
++				console.log(localStorage.getItem('acti_login_method'))
 +				
 +				if (!std_login){
 +					Vue.SteemConnect().me(function (err, user) {
@@ -147,6 +149,10 @@ index c11f6a3..4c4c97a 100644
 +			let std_login = localStorage.getItem('std_login')
 +			let accessToken = localStorage.getItem('access_token');
 +			if (std_login && accessToken){
++				
++				console.log('refresh: login_method')
++				console.log(localStorage.getItem('acti_login_method'))
++
 +				
 +				if (localStorage.getItem('acti_login_method') == 'keychain'){
 +					console.log('keychain refresh')
