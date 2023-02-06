@@ -652,6 +652,10 @@
 	  }
     },
     async mounted () {
+		  // login
+      this.$store.dispatch('steemconnect/login')
+	  this.fetchUserData();
+	
       // fetch data
       this.$store.dispatch('fetchRewardedActivityCount')
       this.$store.dispatch('fetchLeaderboard')
@@ -667,9 +671,6 @@
 
       this.$store.dispatch('fetchNews')
 	  
-	  // login
-      this.$store.dispatch('steemconnect/login')
-	  this.fetchUserData();
     },
 	async beforeDestory(){
 		this.$refs['pendingRewardsHider'].click();
