@@ -83,7 +83,7 @@
 							  <input type="number" id="hive-amount-pay" name="hive-amount-pay" ref="hive-amount-pay" class="form-control-lg w-50 m-1" readonly="readonly" :value="getMatchingHIVE()">
 							  <img src="/img/HIVE.png" class="mr-2 token-logo-md">
 							</div>
-							<div class="row" >
+							<div class="row" v-if="!isKeychainActive" >
 								<div class="w-25 m-1 text-right">{{ $t('Active_Key') }}</div>
 								<input type="password" id="active-key" name="active-key" ref="active-key" class="form-control-lg w-50 m-1" v-model="userActvKeyHv">
 							</div>
@@ -243,7 +243,7 @@
 				<div v-else>
 					<a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNow()" :class="productBuyColor" style="float:left; border: 1px white solid;">{{ $t('Buy_now') }} <br/> {{numberFormat(this.item_price, 2)}} {{this.item_currency}}<img class="token-logo-sm " src="/img/actifit_logo.png"></a>
 					<a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNowHive()" :class="productBuyColor" style="border: 1px white solid;">{{ $t('Buy_now') }} <br/> {{numberFormat(this.item_price * this.afitPrice.afitHiveLastPrice, 3)}} {{this.hive_currency}}<img class="token-logo-sm " src="/img/HIVE.png"></a>
-					<div class="row" v-if="buyHiveExpand">
+					<div class="row" v-if="buyHiveExpand && !isKeychainActive">
 					  <label for="active-key" class="p-2">{{ $t('Active_Key') }} *</label>
 					  <input type="password" id="active-key" name="active-key" ref="active-key" class="form-control-lg w-50 p-2" v-model="userActvKey">
 					</div>
@@ -325,7 +325,7 @@
 			  </div>
 		  </div>
 		  <div v-if="checkout_product">
-			<div v-if="item_price_extra > 0">
+			<div v-if="item_price_extra > 0 && !isKeychainActive">
 				<label for="active-key" class="p-2">{{ $t('Active_Key') }} *</label>
 				<input type="password" id="rl-active-key" name="rl-active-key" ref="rl-active-key" class="form-control-lg w-50 p-2" v-model="userRlActvKey">
 			</div>
@@ -400,6 +400,9 @@
 	  ...mapGetters('steemconnect', ['stdLogin']),
 	  ...mapGetters(['userTokens']),
 	  ...mapGetters(['cartEntries']),
+	  isKeychainActive(){
+		return (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain)
+	  },
 	  renderProdType(){
 		if (this.product.type=='real'){
 			return this.$t('real_prod_name');
@@ -821,7 +824,33 @@
 		}
 		this.downloadAgainRunning = false;
 	  },
-	  async processTrxFunc(op_name, cstm_params){
+	  async verifyTrx(result, operation){
+		
+			//if success, find, verify and store trx
+
+			let accToken = localStorage.getItem('access_token')
+	
+			let op_json = JSON.stringify(operation)
+			
+			let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+			//let cur_bchain = 'STEEM';
+			
+			let url = new URL(process.env.actiAppUrl + 'findVerifyTrx/?user='+this.user.account.name+'&txid='+result.id+'&operation='+op_json+'&bchain='+cur_bchain);
+			
+			/*
+			let reqHeads = new Headers({
+			  'Content-Type': 'application/json',
+			  'x-acti-token': 'Bearer ' + accToken,
+			});*/
+			let reslt = await fetch(url); /*, {
+				headers: reqHeads
+			});*/
+			let outcome = await reslt.json();
+			console.log(outcome);
+			
+	  },
+	  
+	  async processTrxFunc(op_name, cstm_params, forceActive){
 		if (!localStorage.getItem('std_login')){
 			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
 			//console.log(res);
@@ -832,6 +861,25 @@
 				//console.log(err);
 				return {success: false, trx: null};
 			}
+		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+			return new Promise((resolve) => {
+				window.hive_keychain.requestBroadcast(
+					this.user.account.name, 
+					[[op_name, cstm_params]], 
+					forceActive?'Active':'Posting', async (response) => {
+						//console.log(response);
+						//resolve(response);
+						
+						if (response.success){
+							//await this.verifyTrx(response.result, operation);
+							resolve({success: response.success, trx:{id: response.result.id}})
+						}else{
+							reject({error: response.error});
+						}
+						
+					}
+				);
+			});
 		}else{
 			let operation = [ 
 			   [op_name, cstm_params]
@@ -932,7 +980,7 @@
 			}
 			//check if active key was provided 
 			//console.log(this.$refs);
-			if (this.userActvKey == ''){
+			if (localStorage.getItem('acti_login_method') != 'keychain' && this.userActvKey == ''){
 			  this.errorProceed = this.$t('all_fields_required');
 			  return;
 			}
@@ -955,9 +1003,10 @@
 			};
 			
 			//let res = await this.processTrxFunc('transfer', cstm_params, this.cur_bchain);
+			let op_name = 'transfer';
 			
 			let operation = [ 
-			   ['transfer', cstm_params]
+			   [op_name, cstm_params]
 			];
 			
 			/*let res = await hive.broadcast.transferAsync(this.userActvKey, this.user.account.name, process.env.actifitMarketBuy, payAmount + ' ' + 'HIVE', memo).then(
@@ -965,29 +1014,57 @@
 			console.log('after call');*/
 			
 			
-			let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
-			
-			let url = new URL(process.env.actiAppUrl + 'performTrxPost/?user='+this.user.account.name+'&bchain='+cur_bchain);
-			
-			let reqHeads = new Headers({
-			  'Content-Type': 'application/json',
-			  'x-acti-token': 'Bearer ' + accToken,
-			});
-			let res = await fetch(url, {
-				method: 'POST',
-				headers: reqHeads,
-				body: JSON.stringify({'operation': JSON.stringify(operation), 'active': this.userActvKey})
-			});
-			let outcome = await res.json();
-			
-			console.log(outcome);
-			if (outcome.success && outcome.trx){
+			if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
 				
-				this.confirmCompletion('transfer', payAmount, outcome.trx.tx, attempt);
-				console.log('after call');
-				//this.$router.push('/login');
+				let bcastRes;
+				let res = await this.processTrxFunc(op_name, cstm_params, true);//last param to use Active key instead of Posting
+				console.log(res);
+				if (res.success){
+					bcastRes = res.trx;
+					let op_json = JSON.stringify(operation)
+					this.confirmCompletion('transfer', payAmount, bcastRes, attempt, 0, op_json);
+					
+				}else{
+					console.log(err);
+				}
+				/*let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+				let url_string = process.env.actiAppUrl + 'activateMultiGadget/'
+									+ this.user.account.name + '/'
+									+ this.product._id + '/'
+									+ bcastRes.ref_block_num + '/'
+									+ bcastRes.id + '/'
+									+ cur_bchain;
+				//console.log('prodHasFriendBenefic');
+				*/
+
+				
 			}else{
-				this.errorCompletion(outcome.error);
+			
+				let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+				
+				let url = new URL(process.env.actiAppUrl + 'performTrxPost/?user='+this.user.account.name+'&bchain='+cur_bchain);
+				
+				let reqHeads = new Headers({
+				  'Content-Type': 'application/json',
+				  'x-acti-token': 'Bearer ' + accToken,
+				});
+				let res = await fetch(url, {
+					method: 'POST',
+					headers: reqHeads,
+					body: JSON.stringify({'operation': JSON.stringify(operation), 'active': this.userActvKey})
+				});
+				let outcome = await res.json();
+				
+				console.log(outcome);
+				if (outcome.success && outcome.trx){
+					
+					this.confirmCompletion('transfer', payAmount, outcome.trx.tx, attempt);
+					console.log('after call');
+					//this.$router.push('/login');
+				}else{
+					this.errorCompletion(outcome.error);
+					
+				}
 				
 			}
 			
@@ -1012,9 +1089,9 @@
 			//this.proceedBuyAFIT = false;
 		}
 	  },
-	  async confirmCompletion (type, amount, res, attempt, afitAmnt){
+	  async confirmCompletion (type, amount, res, attempt, afitAmnt, op_json){
 		console.log(res)
-		if (res.ref_block_num){
+		if (res.ref_block_num || res.id){
 			//console.log (res);
 			
 			
@@ -1046,6 +1123,16 @@
 							+ 'HIVE');//for now only support HIVE
 				//:user/:amnt/:afitAmnt/:blockNo/:trxID/:bchain
 			}
+			
+			
+			if (this.isKeychainActive){
+				url = new URL( process.env.actiAppUrl + 'buyGadgetHiveKeychain/'
+							+ this.user.account.name + '/'
+							+ this.product._id + '/'
+							//+ res.ref_block_num + '/'
+							+ res.id + '/'
+							+ cur_bchain + '?operation='+op_json);
+			}
 			//}
 			//console.log(url);
 			//connect with our service to process buy order
@@ -1056,7 +1143,7 @@
 					if (attempt == 1){
 						//try again with another API node
 						console.log('>>>>try again');
-						this.confirmCompletion(type, amount, res, attempt + 1, afitAmnt);
+						this.confirmCompletion(type, amount, res, attempt + 1, afitAmnt, op_json);
 					}else{
 						this.errorProceed = outcome;
 						console.error(outcome);
@@ -1117,7 +1204,7 @@
 				if (attempt == 1){
 					//try again with another API node
 					console.log('>>>>try again');
-					this.confirmCompletion(type, amount, res, attempt + 1);
+					this.confirmCompletion(type, amount, res, attempt + 1, afitAmnt, op_json);
 				}else{
 					this.errorProceed = outcome;
 					console.error(outcome);
@@ -1416,8 +1503,13 @@
 			  };
 		}
 		let bcastRes;
+		let op_name = 'custom_json';
+		let operation = [ 
+		   [op_name, cstm_params]
+		];
 		
-		let res = await this.processTrxFunc('custom_json', cstm_params);
+		
+		let res = await this.processTrxFunc(op_name, cstm_params);
 		console.log('custom complete');
 		console.log(res);
 		if (res.success){
@@ -1436,6 +1528,16 @@
 							+ bcastRes.ref_block_num + '/'
 							+ bcastRes.id + '/'
 							+ cur_bchain);
+		}
+		if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){			
+			
+			let op_json = JSON.stringify(operation)
+			url = new URL( process.env.actiAppUrl + 'buyGadgetKeychain/'
+							+ this.user.account.name + '/'
+							+ this.product._id + '/'
+							//+ bcastRes.ref_block_num + '/'
+							+ bcastRes.id + '/'
+							+ cur_bchain + '?operation='+op_json);
 		}
 		//console.log(url);
 		//connect with our service to process buy order
@@ -1582,8 +1684,12 @@
 			cstm_params['json'] = "{\"transaction\": \"activate-gadget\" , \"gadget\": \""+this.product._id+"\", \"benefic\": \""+appendFriend+"\"}";
 		}
 		let bcastRes;
+		let op_name = 'custom_json';
+		let operation = [ 
+			   [op_name, cstm_params]
+			];
 		
-		let res = await this.processTrxFunc('custom_json', cstm_params);
+		let res = await this.processTrxFunc(op_name, cstm_params);
 		//console.log(res);
 		if (res.success){
 			bcastRes = res.trx;
@@ -1591,17 +1697,33 @@
 			console.log(err);
 		}
 		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
-		let url_string = process.env.actiAppUrl + 'activateGadget/'
+		let url_string = process.env.actiAppUrl + 'activateMultiGadget/'
 							+ this.user.account.name + '/'
 							+ this.product._id + '/'
 							+ bcastRes.ref_block_num + '/'
 							+ bcastRes.id + '/'
 							+ cur_bchain;
 		//console.log('prodHasFriendBenefic');
+		
 		if (appendFriend){
 			//console.log(this.$refs["friend"].value);
 			url_string += '/' + appendFriend;
 		}
+		
+		if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){			
+			
+			let op_json = JSON.stringify(operation)
+			url_string = new URL( process.env.actiAppUrl + 'activateMultiGadgetKeychain/'
+							+ this.user.account.name + '/'
+							+ this.product._id + '/'
+							//+ bcastRes.ref_block_num + '/'
+							+ bcastRes.id + '/'
+							+ cur_bchain + '/'
+							+ (appendFriend? (appendFriend):'')
+							+ '?operation='+op_json);
+		}
+
+		console.log(url_string)
 		let	url = new URL( url_string );
 		
 		//console.log(url);
@@ -1609,6 +1731,7 @@
 		try{
 			let res = await fetch(url);
 			let outcome = await res.json();
+			
 			if (outcome.error){
 				this.errorProceed = outcome;
 				console.error(outcome);
@@ -1648,8 +1771,13 @@
 			json: "{\"transaction\": \"deactivate-gadget\" , \"gadget\": \""+this.product._id+"\"}"
 		};
 		let bcastRes;
+		let op_name = 'custom_json';
+		let operation = [ 
+			[op_name, cstm_params]
+		];
+
 		
-		let res = await this.processTrxFunc('custom_json', cstm_params);
+		let res = await this.processTrxFunc(op_name, cstm_params);
 		//console.log(res);
 		if (res.success){
 			bcastRes = res.trx;
@@ -1664,6 +1792,18 @@
 							+ bcastRes.id + '/'
 							+ cur_bchain
 							);
+							
+		if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){			
+						
+			let op_json = JSON.stringify(operation)
+			url = new URL( process.env.actiAppUrl + 'deactivateGadgetKeychain/'
+							+ this.user.account.name + '/'
+							+ this.product._id + '/'
+							//+ bcastRes.ref_block_num + '/'
+							+ bcastRes.id + '/'
+							+ cur_bchain + '?operation='+op_json);
+		}
+
 		
 		//console.log(url);
 		//connect with our service to process buy order
