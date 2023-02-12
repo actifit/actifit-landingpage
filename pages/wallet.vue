@@ -240,10 +240,9 @@
 					<div class="col-2 text-right">{{ formattedUserAfitSE }}</div>
 					<div class="col-2"></div>
 					<div class="col-1 text-right"></div>
-					<div class="col-3"></div>
-					<!--<div class="col-3">
+					<div class="col-3">
 						<span v-if="cur_bchain!='BLURT'" class="btn btn-brand p-1" :title="$t('move_afit_se_he_title')"><i class="fas fa-angle-double-right" v-on:click="moveAFITseHE"></i></span>
-					</div>-->
+					</div>
 				</div>
 				
 				<div class="token-entry row">
@@ -252,10 +251,9 @@
 					<div class="col-2 text-right">{{ formattedUserAFITXSE }}</div>
 					<div class="col-2"></div>
 					<div class="col-1 text-right"></div>
-					<div class="col-3"></div>
-					<!--<div class="col-3">
+					<div class="col-3">
 						<span v-if="cur_bchain!='BLURT'" class="btn btn-brand p-1" :title="$t('move_afitx_se_he_title')"><i class="fas fa-angle-double-right" v-on:click="moveAFITXseHE"></i></span>
-					</div>-->
+					</div>
 				</div>
 				
 				<div class="action-box">
@@ -3932,11 +3930,13 @@
 		  return;
 		}
 		
-		if (this.$refs["p-ac-key-afit"].value == ''){
-		  this.afit_se_move_error_proceeding = true;
-		  this.afit_se_move_err_msg = this.$t('all_fields_required');
-		  return;
-		}
+		//if (!this.isKeychainLogin){
+			if (this.$refs["p-ac-key-afit"].value == ''){
+			  this.afit_se_move_error_proceeding = true;
+			  this.afit_se_move_err_msg = this.$t('all_fields_required');
+			  return;
+			}
+		//}
 	  
 		this.movingAFIT = true;
 		//standard is moving tokens from S-E to H-E, which requires sending bcast to Steem.
@@ -3963,77 +3963,141 @@
 			}
 		}
 		
-		let userKey = this.$refs["p-ac-key-afit"].value;
-		
-		//send out transaction to blockchain
-		let chainLnk = await this.setProperNode((direction==1?'STEEM':'HIVE'));
-		let tx = await chainLnk.broadcast.customJsonAsync(
-				userKey, 
-				[ this.user.account.name ] , 
-				[], 
-				transId, 
-				JSON.stringify(json_data)
-			).catch(err => {
-				console.log(err.message);
-		});
-		
-		//console.log(tx.block_num);
-		console.log(tx);
-		
-		if (tx && tx.ref_block_num){
-		
-			//proceed with moving tokens over to recipient
-			
-			//let's check if user already has a funds pass set
-			fetch(process.env.actiAppUrl+'proceedAfitTransition/?user='+this.user.account.name+'&txid='+tx.id+'&amount='+amount_to_move+'&bchain='+(direction==1?'STEEM':'HIVE')).then(
-				res => {res.json().then(json => 
-					{
-						
-						if (parseFloat(json.afit_amount) > 0){
-							//notify of success
-							this.$notify({
-							  group: 'success',
-							  text: this.$t('afit_transfer_complete'),
-							  position: 'top center'
-							});
-							
-							//update balances
-							setTimeout(this.fetchAFITSE, 3000);
-							setTimeout(this.fetchAFITHE, 3000);
-						}else{
-							this.$notify({
-							  group: 'error',
-							  text: this.$t('afit_transfer_error'),
-							  position: 'top center'
-							});
-						}
-						this.movingAFIT = false;
-						
-					}).catch(e => {console.log(e);
+		/*if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
+			return new Promise((resolve) => {
+				let targetAcct = 'actifit.h-e';
+				let transId = process.env.hiveEngineChainId;
+				
+				window.hive_keychain.requestCustomJson(this.user.account.name, transId, 'Active', JSON.stringify(json_data), this.$t('MOVE_AFIT_SE_HE'), (response) => {
+					console.log(response);
+					//notify of success
+					if (response.success && response.result.id){
+						//let's check if user already has a funds pass set
+					fetch(process.env.actiAppUrl+'proceedAfitTransition/?user='+this.user.account.name+'&txid='+response.result.id+'&amount='+amount_to_move+'&bchain='+(direction==1?'STEEM':'HIVE')).then(
+						res => {res.json().then(json => 
+							{
+								
+								if (parseFloat(json.afit_amount) > 0){
+									//notify of success
+									this.$notify({
+									  group: 'success',
+									  text: this.$t('afit_transfer_complete'),
+									  position: 'top center'
+									});
+									
+									//update balances
+									setTimeout(this.fetchAFITSE, 3000);
+									setTimeout(this.fetchAFITHE, 3000);
+								}else{
+									this.$notify({
+									  group: 'error',
+									  text: this.$t('afit_transfer_error'),
+									  position: 'top center'
+									});
+								}
+								this.movingAFIT = false;
+								
+							}).catch(e => {console.log(e);
+								this.$notify({
+								  group: 'error',
+								  text: this.$t('afit_transfer_error'),
+								  position: 'top center'
+								});
+								this.movingAFIT = false;
+								})
+							}).catch(e => {console.log(e);
+									this.$notify({
+									  group: 'error',
+									  text: this.$t('afit_transfer_error'),
+									  position: 'top center'
+									});
+									this.movingAFIT = false;})
+					
+					}else{
+						//notify of success
 						this.$notify({
 						  group: 'error',
-						  text: this.$t('afit_transfer_error'),
+						  text: this.$t('error_performing_operation'),
 						  position: 'top center'
-						});
-						this.movingAFIT = false;
 						})
-					}).catch(e => {console.log(e);
+					}
+				});
+			});		
+		
+		}else{*/
+		
+			let userKey = this.$refs["p-ac-key-afit"].value;
+			
+			//send out transaction to blockchain
+			let chainLnk = await this.setProperNode((direction==1?'STEEM':'HIVE'));
+			let tx = await chainLnk.broadcast.customJsonAsync(
+					userKey, 
+					[ this.user.account.name ] , 
+					[], 
+					transId, 
+					JSON.stringify(json_data)
+				).catch(err => {
+					console.log(err.message);
+			});
+			
+			//console.log(tx.block_num);
+			console.log(tx);
+		
+			if (tx && tx.ref_block_num){
+			
+				//proceed with moving tokens over to recipient
+				
+				//let's check if user already has a funds pass set
+				fetch(process.env.actiAppUrl+'proceedAfitTransition/?user='+this.user.account.name+'&txid='+tx.id+'&amount='+amount_to_move+'&bchain='+(direction==1?'STEEM':'HIVE')).then(
+					res => {res.json().then(json => 
+						{
+							
+							if (parseFloat(json.afit_amount) > 0){
+								//notify of success
+								this.$notify({
+								  group: 'success',
+								  text: this.$t('afit_transfer_complete'),
+								  position: 'top center'
+								});
+								
+								//update balances
+								setTimeout(this.fetchAFITSE, 3000);
+								setTimeout(this.fetchAFITHE, 3000);
+							}else{
+								this.$notify({
+								  group: 'error',
+								  text: this.$t('afit_transfer_error'),
+								  position: 'top center'
+								});
+							}
+							this.movingAFIT = false;
+							
+						}).catch(e => {console.log(e);
 							this.$notify({
 							  group: 'error',
 							  text: this.$t('afit_transfer_error'),
 							  position: 'top center'
 							});
-							this.movingAFIT = false;})
-			
-			
-		}else{
-			this.$notify({
-			  group: 'error',
-			  text: this.$t('afit_transfer_error'),
-			  position: 'top center'
-			})
-			this.movingAFIT = false;
-		}
+							this.movingAFIT = false;
+							})
+						}).catch(e => {console.log(e);
+								this.$notify({
+								  group: 'error',
+								  text: this.$t('afit_transfer_error'),
+								  position: 'top center'
+								});
+								this.movingAFIT = false;})
+				
+				
+			}else{
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('afit_transfer_error'),
+				  position: 'top center'
+				})
+				this.movingAFIT = false;
+			}
+		//}
 	  },
 	  async proceedMoveAFITX(direction) {
 		//TODO: if we are to reinstate this functionality after SE goes back online, we need to setup code for keychain support
