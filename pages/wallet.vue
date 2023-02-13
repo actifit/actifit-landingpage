@@ -649,7 +649,7 @@
 							  <div class="w-25 p-2">{{ $t('Amount_To_Move') }}</div>
 							  <input type="number" id="afitx-se-he" name="afitx-se-he" ref="afitx-se-he" class="form-control-lg w-50 p-2">
 							</div>
-							<div class="row" v-if="!isKeychainLogin && isStdLogin">
+							<div class="row" v-if="isStdLogin">
 							  <label for="p-ac-key-afitx" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 							  <input type="password" id="p-ac-key-afitx" name="p-ac-key-afitx" ref="p-ac-key-afitx" class="form-control-lg w-50 p-2">
 							</div>
@@ -686,7 +686,7 @@
 						  <div class="w-25 p-2">{{ $t('Amount_To_Move') }}</div>
 						  <input type="number" id="afit-se-he" name="afit-se-he" ref="afit-se-he" class="form-control-lg w-50 p-2">
 						</div>
-						<div class="row" v-if="!isKeychainLogin && isStdLogin">
+						<div class="row" v-if="isStdLogin">
 						  <label for="p-ac-key-afit" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 						  <input type="password" id="p-ac-key-afit" name="p-ac-key-afit" ref="p-ac-key-afit" class="form-control-lg w-50 p-2">
 						</div>
