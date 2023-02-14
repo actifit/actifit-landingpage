@@ -22,7 +22,7 @@
 	  </div>
       <div class="row">
         <div class="col text-center">
-          <small class="text-muted">&copy; {{ $t('Copyright_Actifit') }} {{ currentYear }} | v1.0.3.2</small> |
+          <small class="text-muted">&copy; {{ $t('Copyright_Actifit') }} {{ currentYear }} | v1.0.3.3</small> |
 		  <small class="text-muted"><nuxt-link to="/privacy-policy">{{ $t('Privacy_Policy') }}</nuxt-link></small> |
 		  <small class="text-muted"><nuxt-link to="/terms-conditions">{{ $t('Terms_Conditions') }}</nuxt-link></small>
         </div>

@@ -5,19 +5,25 @@
 		<div class="container pt-5 mt-5 pb-5">
 			<!--<input type="button" @click="connectSession3S()" value="Test">-->
 			
-			<input type="file" ref="fileInput" @change="upload"/>
-			<p v-if="progress">{{ progress }}</p>
+			<input type="file" ref="fileInput" @change="uploadVideo"/>
+			<p v-if="thumbprogress">{{ thumbprogress }}</p>
+			<p v-if="vidprogress">{{ vidprogress }}</p>
 			<button @click="updateVideoInfo">Create Video Post</button>
 			
-			<!--<input type="button" @click="generateThumbnail()" value="Thumbnail">-->
+			<input type="button" @click="generateThumbnail()" value="Thumbnail">
 			
 			<p v-if="videoSize">Video Size: {{ videoSize }}</p>
 			<!--<p v-if="videoLength">Video Length: {{ videoLength }}</p>-->
-			
-			<img v-if="thumbnail" :src="thumbnail"/>
+			<video ref="video" id="video" style="display:none">
+			</video>
+			<canvas ref="canvas" id="canvas" style="display: none"/>
+			<img id="thumb" :src="thumbnail" class="max-img"/>
 
 		</div>
+		<!--<Beneficiary />-->
+		<Footer />
 	</div>
+	
 </template>
 
 <script>
@@ -29,7 +35,8 @@ import * as tus from "tus-js-client";
 
 //fix for "ReferenceError: SharedArrayBuffer is not defined"
 
-
+//import Beneficiary from '~/components/Beneficiary'
+import Footer from '~/components/Footer'
 
 let ffmpeg;
 /* tus installation:
@@ -39,43 +46,106 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 export default {
 	data (){
 		return {
+			video: null,
 			videoSize: null,
 			videoLength: null,
 			filename: '',
 			origFilename: '',
 			//ffmpeg: null,
-			progress: null,
+			vidprogress: null,
+			thumbprogress: null,
 			thumbnail: null,
-			selFile: null,
+			thumbnailName : '',
+			//selFile: null,
 		}
 	},
 	components: {
-		NavbarBrand
+		NavbarBrand,
+		Footer,
+		//Beneficiary
 	},
 	computed: {
 	  ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters('steemconnect', ['stdLogin']),
 	},
 	methods: {
-		startUpload () {
+		/*startUpload () {
 		  this.upload()
-		},
-		async upload () {
+		},*/
+		
+		/*async uploadVideo () {
 		  let input = this.$refs.fileInput
 		  let file = input.files[0]
-		  this.selFile = file;
+		  this.video = file;
+		*/
+		async uploadVideo (event) {
+		  
+			this.video = event.target.files[0];
+			let file = this.video;
+			this.origFilename = file.name;
+			//await upload.start()
+			this.generateThumbnail()//upload.file)
+
+		},
+		
+		async generateThumbnail () {
+		  //
 		  let upRef = this;
+		  //this.video = event.target.files[0]
+		  let URL = URL || window.URL
+		  let videoURL = URL.createObjectURL(this.video)
+		  console.log(videoURL);
+		  let canvas = this.$refs['canvas']//document.createElement('canvas')
+		  let context = canvas.getContext('2d')
+		  //let video = document.createElement('video')
+		  let video = this.$refs['video'];
+		  /*let source = this.$refs['source'];
+		  source.src = videoURL;//'https://www.youtube.com/watch?v=l0739Qbucoc';//
+		  source.type = 'video/mp4';*/
+		  //const source = document.createElement('source')
+
+		  this.$refs['video'].src = videoURL;
+		  //video.addEventListener('loadeddata', async () => {
+		  video.addEventListener('loadedmetadata', async () => {
+			
+			//console.log('loadeddata')
+			//set current video time. Go to 25%
+			video.currentTime = video.duration * 0.25;//5
+			//console.log(video)
+			
+			canvas.width = video.videoWidth
+			canvas.height = video.videoHeight
+			//console.log(canvas.width)
+			//console.log(canvas.height)
+
+			upRef.videoLength = video.duration;// + ' seconds'
+			//console.log(upRef.thumbnail);
+			//console.log(upRef.videoLength)
+			//return;
+			
+		  })
+		  //capture the seeking event, and set proper image accordingly
+		  video.addEventListener('seeked', async () => {
+			context.drawImage(video, 0, 0, canvas.width, canvas.height)
+			upRef.thumbnail = canvas.toDataURL()
+			
+			await upRef.startThumbnailUpload()
+			await upRef.startVideoUpload()
+			
+		  })
 		  
-		  this.origFilename = file.name;
-		  
-		  //grab file duration
-		  /*ffmpeg.getData(file, (data) => {
-			this.videoLength = data.format.duration
-		  })*/
-		  
+		},
+		
+		
+		async startVideoUpload(){
+		  console.log('start video upload');
+		  let file = this.video
+		  console.log(this.video);
+		  let upRef = this;
 		  let upload = new tus.Upload(file, {
 			//endpoint: 'https://master.tus.io/files/',
 			endpoint: 'https://uploads.3speak.tv/files',
+			chunkSize: 100 * 1024,
 			retryDelays: [0, 1000, 3000, 5000],
 			metadata: {
 			  filename: file.name,
@@ -86,49 +156,76 @@ export default {
 			},
 			onProgress (bytesUploaded, bytesTotal) {
 			  let percentage = (bytesUploaded / bytesTotal * 100).toFixed(2)
-			  upRef.progress = percentage + '%';
+			  upRef.vidprogress = 'Video Upload '  + percentage + '%';
 			  //console.log(bytesUploaded, bytesTotal, percentage + '%')
 			},
 			onSuccess () {
 			  console.log('Upload completed!')
 			  console.log("Download %s from %s", upload.file.name, upload.url)
 			  upRef.filename = upload.file.name;
-			  upRef.videoSize = `${(file.size / 1024 / 1024).toFixed(2)} MB`
-			  //upRef.videoLength = `${file.duration} seconds`
 			  
+			  upRef.filename = upload.url.replace('https://uploads.3speak.tv/files/', '');			  
+			  upRef.videoSize = `${(file.size / 1024 / 1024).toFixed(2)} MB`
+			  console.log(upRef.filename)
 			  //send over data to 3speak creating video post
 			  //upRef.updateVideoInfo()
 			}
 		  })
 		  
-			await upload.start()
-			//this.generateThumbnail(upload.file)
-
+		  await upload.start()
+		 
 		},
 		
-		async generateThumbnail (file) {
-		  //
+		async startThumbnailUpload() {
+		  console.log('startthumbnailupload');
+		  let upRef = this;
+		  /*
+		  let data = this.thumbnail.split(',')[1]
+		  let binary = atob(data)
+		  let array = []
 		  
-		  //also grab duration
-		  const probe = await ffmpeg.probe(file.name)
-		  this.videoLength = probe.format.duration
-		  
-		  await ffmpeg.load()
-		  if (! file){
-			file = this.selFile;
+		  for (let i = 0; i < binary.length; i++) {
+			array.push(binary.charCodeAt(i))
 		  }
-		  const videoPath = file.name
-		  const outputPath = `path/to/your/thumbnail/${file.name}.jpg`
-		  const command = `-i ${videoPath} -vframes 1 -y ${outputPath}`
-		  //alternatively try this approach: ffmpeg -i video.mp4 -y -vf fps=1/24 thumb%04d.jpg
-		  const result = await ffmpeg.run(command)
-		  //or try this
-		  //  await ffmpeg.run('-i', 'flame.avi', '-i', 'flame.avi', '-filter_complex', 'hstack', 'flame.mp4');
+		  let thumbnailBlob = new Blob([new Uint8Array(array)], {type: 'image/jpeg'})
+		  */
+		  let thumbnailBlob = this.dataURItoBlob(this.thumbnail);
 
-		  console.log(result.stderr)
-		  this.thumbnail = URL.createObjectURL(new Blob([result.stdout]))
-		  
-		  
+		  let thumbnailUpload = new tus.Upload(thumbnailBlob, {
+			endpoint: 'https://uploads.3speak.tv/files',
+			chunkSize: 100 * 1024,
+			metadata: {
+			  filename: 'thumbnail.png'
+			},
+			onError: function (error) {
+			  console.log("Failed because: " + error)
+			},
+			onProgress: function (bytesUploaded, bytesTotal) {
+			  let percentage = (bytesUploaded / bytesTotal * 100).toFixed(2)
+			  //console.log(`Thumbnail: ${bytesUploaded}/${bytesTotal} (${percentage}%)`)
+			  upRef.thumbprogress = 'Thumbnail Upload '+percentage + '%';
+			},
+			onSuccess: function () {
+			  console.log('Thumbnail Upload completed!')
+			  //console.log(thumbnailUpload);
+			  upRef.thumbnailName =  thumbnailUpload.url.replace('https://uploads.3speak.tv/files/', '')//thumbnailUpload.file.name;
+			  console.log("Download %s from %s", upRef.thumbnailName, thumbnailUpload.url)
+			  
+			  console.log(`Thumbnail uploaded: ${thumbnailUpload.url}`)
+			}
+		  })
+		  await thumbnailUpload.start()
+		},
+		
+		dataURItoBlob (dataURI) {
+		  const byteString = atob(dataURI.split(',')[1])
+		  const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0]
+		  const ab = new ArrayBuffer(byteString.length)
+		  const ia = new Uint8Array(ab)
+		  for (let i = 0; i < byteString.length; i++) {
+			ia[i] = byteString.charCodeAt(i)
+		  }
+		  return new Blob([ab], { type: mimeString })
 		},
 		
 		async updateVideoInfo(){
@@ -137,7 +234,7 @@ export default {
 			  'oFilename': this.origFilename,
 			  'size': this.videoSize,
 			  'duration': this.videoLength,
-			  'thumbnail': this.thumbnail,
+			  'thumbnail': this.thumbnailName,
 			  'owner': this.user.account.name,
 			}
 			
@@ -210,8 +307,7 @@ export default {
 				res = await fetch(process.env.threeSpeakApiSession.replace('_USERNAME_', this.user.account.name)+'&access_token=' + xcstkn, {
 					credentials: 'include',
 				});
-				console.log(res);
-				//console.log(res.headers);
+				//console.log(res);
 				outcome = await res.json();
 				console.log(outcome);	
 			}
@@ -223,23 +319,15 @@ export default {
 	async mounted () {
 		await this.$store.dispatch('steemconnect/login')
 		await this.connectSession3S();
-		//console.log('tus');
-		//console.log(tus);
-		//this.ffmpeg = createFFmpeg({
-        //    log: true,
-        //})
-        // Initialise loadFFmpeg
-		//if (!crossOriginIsolated) SharedArrayBuffer = ArrayBuffer;
-		/*ffmpeg = await createFFmpeg({
-			//corePath: "/ffmpeg_core_dist/ffmpeg-core.js",
-			corePath: "https://unpkg.com/@ffmpeg/core@0.10.0/dist/ffmpeg-core.js",
-			//corePath: 'https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js',
-            log: true,
-        })
-        await ffmpeg.load();*/
-		//await this.$store.dispatch('steemconnect/refreshUser');
-		//console.log('session 3S');
-		//this.connectSession3S();
+		
 	}
 }
 </script>
+<style>
+.max-img{
+	max-width: 300px;
+    max-height: 200px;
+    width: auto;
+    height: auto;
+}
+</style>
