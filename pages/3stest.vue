@@ -20,7 +20,6 @@
 			<img id="thumb" :src="thumbnail" class="max-img"/>
 
 		</div>
-		<!--<Beneficiary />-->
 		<Footer />
 	</div>
 	
@@ -56,6 +55,10 @@ export default {
 			thumbprogress: null,
 			thumbnail: null,
 			thumbnailName : '',
+			defaultBenefic : [
+				{ 'account':'actifit.pay', 'weight':500 },
+				{ 'account':'mcfarhat', 'weight':500 }
+			]
 			//selFile: null,
 		}
 	},

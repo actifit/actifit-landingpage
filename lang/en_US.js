@@ -920,6 +920,7 @@ module.exports = {
   Hive_blog: 'Hive Blog',
   Threespeak_videos: '3Speak Videos',
   actifit_web_url: 'https://actifit.io',
+  afit_transfer_complete: 'AFIT Transfer Completed Successfully',
   add_beneficiary: 'Add Beneficiary',
   current_benefic_list: 'Current Beneficiaries List',
   beneficiaries: 'Beneficiaries',

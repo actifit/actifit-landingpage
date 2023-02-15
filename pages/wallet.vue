@@ -186,10 +186,10 @@
 			</div>
 			
 			
-			<div v-if="tokensOfInterestBal.length > 0" >
+			<div  >
 				<!--<h5 class="token-title" v-if="cur_bchain == 'STEEM'">{{ $t('Your_Token_Balance') }}</h5>
 				<h5 class="token-title" v-else>{{ $t('Your_HE_Token_Balance') }}<span v-if="cur_bchain=='BLURT'"><i class="fas fa-info-circle" v-on:click="notifySwitchChain()"></i></span></h5>-->
-				<div class="token-entry row" v-for="(token, index) in tokensOfInterestBal" :key="index" :token="token">
+				<div v-if="tokensOfInterestBal.length > 0" class="token-entry row" v-for="(token, index) in tokensOfInterestBal" :key="index" :token="token">
 				
 					<div class="col-2 text-left"><img :src="token.icon" class="mr-1 mini-token-logo" >{{ token.symbol }}</div>
 					<div class="col-2">{{ $t('hive_engine')}}</div>
@@ -2366,10 +2366,12 @@
 	  },
 	  fetchAFITXSE() {
 		try{
+		  console.log('fetch AFITX SE');
 		  let parnt = this
 		  ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' }).then(
 				function(bal) {
-					
+					console.log('>>bal')
+					console.log(bal);
 					
 					if (bal){
 						  parnt.afitx_se_balance = bal.balance;
@@ -3608,7 +3610,7 @@
 			try{
 			
 				bal = await ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' });
-			
+				console.log(bal);
 			}catch(outErr){
 				console.log(outErr);
 			}

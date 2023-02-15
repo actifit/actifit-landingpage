@@ -33,7 +33,9 @@
             <!--<label for="post-tags" style="display: none">{{ $t('Tags') }}</label>
             <input class="form-control form-control-lg acti-shadow" :placeholder="$t('Tags')"/>-->
 			<TagInput id="tagItem" ref="tagItem" :initialItems="tags" class="form-control form-control-lg acti-shadow"/>
-          </div>
+			<Beneficiary :initialEntries="benef_list" :viewOnly="!editPost.isNewPost" style="display: none"/>
+		  </div>
+		  
         </div>
 		<div class="modal-footer m-2" style="display: none">
 			<div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-if="cur_bchain=='HIVE'">
@@ -74,6 +76,7 @@
   
   import CustomTextEditor from '~/components/CustomTextEditor';
   import TagInput from '~/components/TagInput';
+  import Beneficiary from '~/components/Beneficiary';
 
 	/* handles outside clicks for the picker */
 	/* begin */
@@ -105,7 +108,8 @@
   export default {
     components: {
 	  CustomTextEditor,
-	  TagInput
+	  TagInput,
+	  Beneficiary
     },
     data () {
       return {
@@ -115,6 +119,7 @@
         loading: false, // loading animation in submit button
 		cur_bchain: 'HIVE', //bchain used to edit/save
 		target_bchain: 'HIVE', //bchain to which edits will go
+		benef_list: [],
 		//comment_options: {},
       }
     },
@@ -449,7 +454,7 @@
 			this.editPost.permlink = permlnk;
 			
 			//fetch beneficiaries from user selection
-			var benef_list = [{ 'account':'actifit.pay', 'weight':500 }];//, { 'account':'actifit', 'weight':500 }
+			this.benef_list = [{ 'account':'actifit.pay', 'weight':500 }];//, { 'account':'actifit', 'weight':500 }
 			//let remaining_pct -= 500;
 			//console.log('ref_benef');
 			//console.log(ref_benef);
