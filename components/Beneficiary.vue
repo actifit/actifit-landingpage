@@ -1,7 +1,8 @@
 <template>
   <div>
-    <button @click="openModal">{{$t('beneficiaries')}}</button>
+    <button @click="openModal" class="btn border text-brand acti-shadow mt-2">{{$t('manage_beneficiaries')}}<span v-if="entries.length > 0">({{entries.length}})</span></button>
     <div v-if="isModalOpen" class="modal">
+	<!--<div class="modal-dialog modal-lg" role="document">-->
       <div class="modal-header">
 		<span>{{$t('current_benefic_list')}}</span>
 		<span class="close" @click="closeModal">&times;</span>
@@ -41,6 +42,7 @@
 			</div>
 		</div>
       </div>
+	  <!--</div>-->
     </div>
   </div>
 </template>
@@ -60,12 +62,18 @@ export default {
   data() {
     return {
       isModalOpen: false,
-      entries: this.initialEntries.map(entry => ({ account: entry.account, weight: entry.weight / 100 })),
+      entries: this.initialEntries.map(entry => ({ account: entry.account, weight: entry.weight })),
       newEntry: {
         account: '',
         weight: 0
       }
     }
+  },
+  watch: {
+	initialEntries: function (){
+		console.log('adjust initial entries')
+		this.entries = this.initialEntries.map(entry => ({ account: entry.account, weight: entry.weight }))
+	}
   },
   computed: {
     totalValue() {
@@ -89,6 +97,13 @@ export default {
 		console.log(this.newEntry.weight)
         if (this.totalValue + parseInt(this.newEntry.weight) <= 100) {
           this.entries.push({ ...this.newEntry })
+		  //sort alpha as this is required when creating content 
+		  this.entries = this.entries.sort((a, b) => a.account.localeCompare(b.account));
+		  //save data properly as int for weight
+		  this.entries = this.entries.map(obj => ({
+			  account: obj.account,
+			  weight: parseInt(obj.weight)
+		  }));
           this.newEntry.account = ''
           this.newEntry.weight = 0
         } else {
@@ -102,8 +117,8 @@ export default {
       this.entries.splice(index, 1)
     },
     saveEntries() {
-      const formattedEntries = this.entries.map(entry => ({ account: entry.account, weight: entry.weight * 100 }))
-      console.log(formattedEntries)
+      //const formattedEntries = this.entries.map(entry => ({ account: entry.account, weight: parseInt(entry.weight * 100) }))
+      //console.log(formattedEntries)
       this.closeModal()
     }
   }

@@ -33,7 +33,7 @@
             <!--<label for="post-tags" style="display: none">{{ $t('Tags') }}</label>
             <input class="form-control form-control-lg acti-shadow" :placeholder="$t('Tags')"/>-->
 			<TagInput id="tagItem" ref="tagItem" :initialItems="tags" class="form-control form-control-lg acti-shadow"/>
-			<Beneficiary :initialEntries="benef_list" :viewOnly="!editPost.isNewPost" style="display: none"/>
+			<Beneficiary ref="beneficiaryList" :initialEntries="benef_list" :viewOnly="!editPost.isNewPost" style="display:none"/>
 		  </div>
 		  
         </div>
@@ -56,7 +56,7 @@
 			</div>
 		</div>
 		<div class="modal-footer">
-          <button type="button" class="btn btn-white border border-danger text-red acti-shadow" @click.prevent="save()">
+          <button type="button" class="btn btn-white border text-red acti-shadow" @click.prevent="save()">
             <i class="fas fa-spin fa-spinner" v-if="loading"></i>
             <i class="fas fa-paper-plane" v-else></i>
             <span v-if="editPost.isNewPost">{{ $t('Publish') }}</span><span v-else>{{ $t('Save') }}</span>
@@ -160,7 +160,8 @@
         // set initial values after edit button was clicked
         this.title = (this.editPost?this.editPost.title:'')
         this.body = (this.editPost?this.editPost.body:'')
-		
+		this.benef_list = (this.editPost?this.editPost.beneficiaries:[]);
+		console.log(this.benef_list);
 		this.tags = [];
 		if (this.editPost && !this.editPost.isNewPost){
 			const meta = JSON.parse(this.editPost.json_metadata)
@@ -271,7 +272,7 @@
 				console.log(outcome);	
 			}
 	  },
-	  async processTrxFunc(op_name, cstm_params, bchain_option){
+	  async processTrxFunc(op_name, cstm_params, bchain_option, op2, params2){
 		if (!localStorage.getItem('std_login')){
 		//if (!this.stdLogin){
 			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
@@ -287,6 +288,9 @@
 			let operation = [ 
 			   [op_name, cstm_params]
 			];
+			if (op2 && params2){
+				operation.push([op2, params2])
+			}
 			console.log('broadcasting');
 			console.log(operation);
 			
@@ -379,6 +383,42 @@
 		this.tags = this.$refs.tagItem.items;
 		
 		this.body = this.$refs.editor.content;
+		
+		
+		console.log(this.title);
+		if (typeof this.title === "undefined" || this.title == ''){
+			//post requires a title
+			this.$notify({
+				  group: 'error',
+				  text: this.$t('post_requires_title'),
+				  position: 'top center'
+				})
+			this.loading = false
+			return;
+		}
+		
+		if (this.body == ''){
+			//post requires a title
+			this.$notify({
+				  group: 'error',
+				  text: this.$t('no_empty_post'),
+				  position: 'top center'
+				})
+			this.loading = false
+			return;
+		}
+		
+		if (!Array.isArray(this.tags) || this.tags.length < 1){
+			//cannot miss having at least 1 tag
+			this.$notify({
+				  group: 'error',
+				  text: this.$t('need_one_tag_min'),
+				  position: 'top center'
+				})
+			this.loading = false
+			return;
+		}
+		
 		//console.log(this.tags);
 		//return;
 		if (!Array.isArray(this.tags)){
@@ -454,7 +494,11 @@
 			this.editPost.permlink = permlnk;
 			
 			//fetch beneficiaries from user selection
-			this.benef_list = [{ 'account':'actifit.pay', 'weight':500 }];//, { 'account':'actifit', 'weight':500 }
+			this.benef_list = this.$refs['beneficiaryList'].entries;
+			//[{ 'account':'actifit.pay', 'weight':500 }];//, { 'account':'actifit', 'weight':500 }
+			//loop through benefic list, ensure values are integer
+			
+			console.log(this.benef_list);
 			//let remaining_pct -= 500;
 			//console.log('ref_benef');
 			//console.log(ref_benef);
@@ -475,6 +519,27 @@
 			}*/
 		}
 		console.log(this.stdLogin);
+		
+		let percent_hbd = 10000;
+	
+		//check if user selected a different report pay structure than 50-50 SBD/STEEM pay. Other option would be 100% SP
+		//percent_hbd = 0;
+		
+		let comment_options = { 
+			author: this.editPost.author, 
+			permlink: this.editPost.permlink, 
+			max_accepted_payout: '1000000.000 HBD', 
+			percent_hbd: percent_hbd, 
+			allow_votes: true, 
+			allow_curation_rewards: true, 
+			extensions: []//extensions: [[0, { 'beneficiaries': [] }]]
+		};
+		if (Array.isArray(this.benef_list) && this.benef_list.length > 0){
+		
+			comment_options.extensions = [[0,{'beneficiaries':this.benef_list}]];
+			//[{"account":"yabapmatt","weight":1000},{"account":"steemplus-pay","weight":500}
+		}
+		
         // save changes
 		if (!localStorage.getItem('std_login')){
 		//if (!this.stdLogin){
@@ -492,19 +557,11 @@
 			  }
 			)
 		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
-		
-			let comment_options = { 
-				author: this.editPost.author, 
-				permlink: this.editPost.permlink, 
-				max_accepted_payout: '1000000.000 HBD', 
-				percent_hbd: 10000, 
-				allow_votes: true, 
-				allow_curation_rewards: true, 
-				extensions: []//extensions: [[0, { 'beneficiaries': [] }]]
-			};
 			//console.log(comment_options);
 			//this.$nuxt.refresh()
-
+			
+			console.log(JSON.stringify(comment_options));
+			
 			window.hive_keychain.requestPost(
 				this.editPost.author, 
 				this.title, 
@@ -537,7 +594,8 @@
 			
 			//return;
 			
-			let res = await this.processTrxFunc('comment', cstm_params, this.cur_bchain);
+				   
+			let res = await this.processTrxFunc('comment', cstm_params, this.cur_bchain, 'comment_options', comment_options);
 			
 			if (res.success){
 				this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain, this.editPost.isNewPost);
