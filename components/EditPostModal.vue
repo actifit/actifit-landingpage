@@ -554,7 +554,7 @@
 		
 		console.log(payout_amnt);
 		console.log(percent_hbd);
-		return;
+		
 		//check if user selected a different report pay structure than 50-50 SBD/STEEM pay. Other option would be 100% SP
 		//percent_hbd = 0;
 		
