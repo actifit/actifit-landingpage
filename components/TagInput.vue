@@ -33,7 +33,8 @@ export default {
   methods: {
     keyCheck(event) {
 	  //console.log(this.initialItems)
-      if (event.keyCode === 32 || event.keyCode === 188) {
+      if (event.keyCode === 32 || event.keyCode === 188 || event.keyCode === 13) {
+		// Code to handle when the spacebar, comma, or enter key is pressed
         event.preventDefault();
         this.addItem();
       }
