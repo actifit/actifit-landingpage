@@ -33,7 +33,26 @@
             <!--<label for="post-tags" style="display: none">{{ $t('Tags') }}</label>
             <input class="form-control form-control-lg acti-shadow" :placeholder="$t('Tags')"/>-->
 			<TagInput id="tagItem" ref="tagItem" :initialItems="tags" class="form-control form-control-lg acti-shadow"/>
-			<Beneficiary ref="beneficiaryList" :initialEntries="benef_list" :viewOnly="!editPost.isNewPost" style="display:none"/>
+		  </div>
+		  
+		  <div class="form-group acti-shadow extra-container">
+			<Beneficiary ref="beneficiaryList" :initialEntries="benef_list" :viewOnly="!editPost.isNewPost" class="float-left"/>
+			<!--<span class="m-2 p-2">
+				<label for="paymentApproach" class="inline-class">{{$t('payment_approach')}}</label>
+				<select id="paymentApproach" ref="paymentApproach" class="form-control inline-class">
+					<option value="split">50/50 Split</option>
+					<option value="hp">Full HP</option>
+					<option value="decline">Decline</option>
+				</select>
+			</span>-->
+			<div class="form-group d-flex align-items-center p-1" style="min-height: 70px;">
+			  <label for="paymentApproach" class="mr-2 label-payment">{{$t('payment_approach')}}</label>
+			  <select id="paymentApproach" ref="paymentApproach" class="form-control paymentApproach">
+				<option value="split">50/50 Split</option>
+				<option value="hp">Full HP</option>
+				<option value="decline">Decline</option>
+			  </select>
+			</div>
 		  </div>
 		  
         </div>
@@ -120,6 +139,8 @@
 		cur_bchain: 'HIVE', //bchain used to edit/save
 		target_bchain: 'HIVE', //bchain to which edits will go
 		benef_list: [],
+		percent_hbd: 10000,
+		max_accepted_payout: '1000000.000 HBD',		
 		//comment_options: {},
       }
     },
@@ -161,11 +182,13 @@
         this.title = (this.editPost?this.editPost.title:'')
         this.body = (this.editPost?this.editPost.body:'')
 		this.benef_list = (this.editPost?this.editPost.beneficiaries:[]);
-		console.log(this.benef_list);
+		//console.log(this.benef_list);
 		this.tags = [];
 		if (this.editPost && !this.editPost.isNewPost){
 			const meta = JSON.parse(this.editPost.json_metadata)
 			this.tags = meta.hasOwnProperty('tags') ? meta.tags : [] // actifit as default tag, if no tags are present (for some reason)
+			this.max_accepted_payout = this.editPost.max_accepted_payout;
+			this.percent_hbd = this.editPost.percent_hbd;
 		}
 		//console.log('session 3S');
 		//this.connectSession3S();
@@ -520,15 +543,25 @@
 		}
 		console.log(this.stdLogin);
 		
-		let percent_hbd = 10000;
-	
+		let percent_hbd = this.percent_hbd;
+		let payout_amnt = this.max_accepted_payout;
+		console.log(this.$refs['paymentApproach'].value);
+		if (this.$refs['paymentApproach'].value=='decline'){
+			payout_amnt = '0.000 HBD';
+		}else if (this.$refs['paymentApproach'].value=='hp'){
+			percent_hbd = 0;
+		}
+		
+		console.log(payout_amnt);
+		console.log(percent_hbd);
+		return;
 		//check if user selected a different report pay structure than 50-50 SBD/STEEM pay. Other option would be 100% SP
 		//percent_hbd = 0;
 		
 		let comment_options = { 
 			author: this.editPost.author, 
 			permlink: this.editPost.permlink, 
-			max_accepted_payout: '1000000.000 HBD', 
+			max_accepted_payout: payout_amnt, 
 			percent_hbd: percent_hbd, 
 			allow_votes: true, 
 			allow_curation_rewards: true, 
@@ -651,6 +684,14 @@
   }
 </script>
 <style>
-
-
+.inline-class{
+	display: inline;
+}
+.label-payment{
+	white-space: nowrap;
+}
+.extra-container{
+	display: flex; 
+	justify-content: space-between;
+}
 </style>

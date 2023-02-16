@@ -1,8 +1,8 @@
 <template>
   <div>
     <button @click="openModal" class="btn border text-brand acti-shadow mt-2">{{$t('manage_beneficiaries')}}<span v-if="entries.length > 0">({{entries.length}})</span></button>
+	<transition name="modal-transition">
     <div v-if="isModalOpen" class="modal">
-	<!--<div class="modal-dialog modal-lg" role="document">-->
       <div class="modal-header">
 		<span>{{$t('current_benefic_list')}}</span>
 		<span class="close" @click="closeModal">&times;</span>
@@ -42,8 +42,8 @@
 			</div>
 		</div>
       </div>
-	  <!--</div>-->
     </div>
+	</transition>
   </div>
 </template>
 
@@ -197,5 +197,13 @@ export default {
 
 .table-row {
   display: table-row;
+}
+.modal-transition-enter-active,
+.modal-transition-leave-active {
+  transition: all 0.5s ease-out;
+}
+.modal-transition-enter,
+.modal-transition-leave-to {
+  transform: translateY(-100%);
 }
 </style>
