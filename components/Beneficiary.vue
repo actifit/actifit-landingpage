@@ -62,7 +62,7 @@ export default {
   data() {
     return {
       isModalOpen: false,
-      entries: this.initialEntries.map(entry => ({ account: entry.account, weight: entry.weight })),
+      entries: this.initialEntries.map(entry => ({ account: entry.account, weight: parseInt(entry.weight) / 100 })),
       newEntry: {
         account: '',
         weight: 0
@@ -72,7 +72,7 @@ export default {
   watch: {
 	initialEntries: function (){
 		console.log('adjust initial entries')
-		this.entries = this.initialEntries.map(entry => ({ account: entry.account, weight: entry.weight }))
+		this.entries = this.initialEntries.map(entry => ({ account: entry.account, weight: parseInt(entry.weight) / 100 }))
 	}
   },
   computed: {
@@ -81,7 +81,10 @@ export default {
     },
     remainingValue() {
       return 100 - this.totalValue
-    }
+    },
+	formattedEntries() {
+		return this.entries.map(entry => ({ account: entry.account, weight: parseInt(entry.weight * 100) }))
+	}
   },
   methods: {
     openModal() {

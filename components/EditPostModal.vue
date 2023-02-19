@@ -517,11 +517,13 @@
 			this.editPost.permlink = permlnk;
 			
 			//fetch beneficiaries from user selection
-			this.benef_list = this.$refs['beneficiaryList'].entries;
+			this.benef_list = this.$refs['beneficiaryList'].formattedEntries;
 			//[{ 'account':'actifit.pay', 'weight':500 }];//, { 'account':'actifit', 'weight':500 }
 			//loop through benefic list, ensure values are integer
 			
 			console.log(this.benef_list);
+			
+			
 			//let remaining_pct -= 500;
 			//console.log('ref_benef');
 			//console.log(ref_benef);
