@@ -168,7 +168,8 @@ export default {
 			  upRef.filename = upload.file.name;
 			  
 			  upRef.filename = upload.url.replace('https://uploads.3speak.tv/files/', '');			  
-			  upRef.videoSize = `${(file.size / 1024 / 1024).toFixed(2)} MB`
+			  //upRef.videoSize = `${(file.size / 1024 / 1024).toFixed(2)} MB`
+			  upRef.videoSize = file.size
 			  console.log(upRef.filename)
 			  //send over data to 3speak creating video post
 			  //upRef.updateVideoInfo()
