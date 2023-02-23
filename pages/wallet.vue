@@ -13,11 +13,17 @@
 		</div>-->
 		
 		<div class="row top-action-container text-right">
-			<div class="col-12 text-right">
+			<div class="col-4 text-left">
+				
+				<span class="btn btn-brand mb-1" :title="show_only_tokens_interest?$t('show_all_tokens'):$t('show_core_tokens')">
+					<i class="fas fa-solid fa-filter" v-on:click="switchTokenDisplay"></i>
+				</span>
+				
+			</div>
+			<div class="col-8 text-right">
 			
 				<span class="btn btn-brand mb-1" :title="$t('Check_Claimable_Rewards')">
 					<i class="fas fa-solid fa-wallet" v-on:click="showClaimableRewards()"></i>
-				
 				</span>
 				
 				
@@ -47,7 +53,6 @@
 				</span>
 			</div>
 		</div>
-		
 		<div v-if="this.tokenMetrics.length > 0 || this.tokensOfInterestBal.length > 0" class="wallet-container">
 			<div class="row font-weight-bold token-entry thick-bottom head-title">
 				<div class="col-2">Token</div>
@@ -55,7 +60,8 @@
 				<div class="col-2">Balance</div>
 				<div class="col-2">Staked</div>
 				<div class="col-1">Savings</div>
-				<div class="col-3">Actions</div>
+				<div class="col-1">USD Value</div>
+				<div class="col-2">Actions</div>
 			</div>
 			<div class="token-entry row">
 				<div class="col-2 text-left"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo">AFIT</div>
@@ -63,7 +69,8 @@
 				<div class="col-2 text-right">{{ formattedUserAfit }}</div>
 				<div class="col-2 text-right">-</div>
 				<div class="col-1 text-right">-</div>
-				<div class="col-3 token_actions">
+				<div class="col-1 text-right">-</div>
+				<div class="col-2 token_actions">
 					<span class="btn btn-brand p-1">
 						<i class="fas fa-solid fa-history" v-on:click="refreshBalance()" :title="$t('Refresh_balance')"/>
 						<span v-if="refreshinBal" >
@@ -109,7 +116,8 @@
 				
 				</div>
 				<div class="col-1 text-right">{{ this.renderSavings(this.cur_bchain) }}</div>
-				<div class="col-3 token_actions">
+				<div class="col-1 text-right">-</div>
+				<div class="col-2 token_actions">
 					<span class="btn btn-brand p-1"><i class="fas fa-arrow-circle-up p-1" :title="$t('POWERUP_ACTION_TEXT')" v-on:click="powerUpFunds"></i></span>
 					<span class="btn btn-brand p-1"><i class="fas fa-arrow-circle-down " :title="$t('POWERDOWN_ACTION_TEXT')" v-on:click="powerDownFunds"></i></span>
 					<span class="btn btn-brand p-1"><i class="fas fa-share-square " :title="$t('TRANSFER_FUNDS_ACTION_TEXT')" v-on:click="transferFunds"></i></span>
@@ -126,7 +134,8 @@
 				<div class="col-2 text-right">{{ this.renderSBDBalance(this.cur_bchain) }}</div>
 				<div class="col-2"></div>
 				<div class="col-1 text-right">{{ this.renderSBDSavings(this.cur_bchain) }}</div>
-				<div class="col-3 token_actions">
+				<div class="col-1 text-right">-</div>
+				<div class="col-2 token_actions">
 					<span class="btn btn-brand p-1"><i class="fas fa-share-square " :title="$t('TRANSFER_FUNDS_ACTION_TEXT')" v-on:click="transferFunds"></i></span>
 				</div>
 			</div>
@@ -138,7 +147,8 @@
 				<div class="col-2 text-right">{{ formattedUserAfitBSC }}</div>
 				<div class="col-2"></div>
 				<div class="col-1 text-right"></div>
-				<div class="col-3 token_actions">
+				<div class="col-1 text-right">-</div>
+				<div class="col-2 token_actions">
 					<span class="btn btn-brand p-1" :title="$t('smart_contract')">
 							<a target="_blank" :href="'https://bscscan.com/address/'+afitTokenAddress"><i class="fas fa-file-contract"></i></a>
 					</span>
@@ -151,7 +161,8 @@
 				<div class="col-2 text-right">{{ formattedUserAfitBNBLPBSC }}</div>
 				<div class="col-2"></div>
 				<div class="col-1 text-right"></div>
-				<div class="col-3 token_actions">
+				<div class="col-1 text-right">-</div>
+				<div class="col-2 token_actions">
 					<span class="btn btn-brand p-1" :title="$t('smart_contract')">
 							<a target="_blank" :href="'https://bscscan.com/address/'+afitBNBLPTokenAddress"><i class="fas fa-file-contract"></i></a>
 					</span>
@@ -165,7 +176,8 @@
 				<div class="col-2 text-right">{{ formattedUserAFITXBSC }}</div>
 				<div class="col-2"></div>
 				<div class="col-1 text-right"></div>
-				<div class="col-3 token_actions">
+				<div class="col-1 text-right">-</div>
+				<div class="col-2 token_actions">
 					<span class="btn btn-brand p-1" :title="$t('smart_contract')">
 							<a target="_blank" :href="'https://bscscan.com/address/'+afitxTokenAddress"><i class="fas fa-file-contract"></i></a>
 					</span>
@@ -178,7 +190,8 @@
 				<div class="col-2 text-right">{{ formattedUserAFITXBNBLPBSC }}</div>
 				<div class="col-2"></div>
 				<div class="col-1 text-right"></div>
-				<div class="col-3 token_actions">
+				<div class="col-1 text-right">-</div>
+				<div class="col-2 token_actions">
 					<span class="btn btn-brand p-1" :title="$t('smart_contract')">
 							<a target="_blank" :href="'https://bscscan.com/address/'+afitxBNBLPTokenAddress"><i class="fas fa-file-contract"></i></a>
 					</span>
@@ -186,18 +199,19 @@
 			</div>
 			
 			
-			<div  >
+			<div>
 				<!--<h5 class="token-title" v-if="cur_bchain == 'STEEM'">{{ $t('Your_Token_Balance') }}</h5>
 				<h5 class="token-title" v-else>{{ $t('Your_HE_Token_Balance') }}<span v-if="cur_bchain=='BLURT'"><i class="fas fa-info-circle" v-on:click="notifySwitchChain()"></i></span></h5>-->
-				<div v-if="tokensOfInterestBal.length > 0" class="token-entry row" v-for="(token, index) in tokensOfInterestBal" :key="index" :token="token">
-				
+				<div v-if="tokensOfInterestBal.length > 0 && renderToken(token)" class="token-entry row" v-for="(token, index) in tokensOfInterestBal" :key="index" :token="token">
+				  <!--<div v-if=" ">-->
 					<div class="col-2 text-left"><img :src="token.icon" class="mr-1 mini-token-logo" >{{ token.symbol }}</div>
 					<div class="col-2">{{ $t('hive_engine')}}</div>
 					<div class="col-2 text-right">{{ renderBal(token) }} {{ token.symbol }}</div>
 					<div class="col-2 text-right">{{ renderStake(token)}} {{ token.symbol }}</div>
 					<div class="col-1"></div>
+					<div class="col-1">${{ usdVal(token) }}</div>
 					<!--<span v-if="parseFloat(delegStake(token)) > 0">( + {{ delegStake(token)}} {{ token.symbol }} {{ $t('Delegated') }}) </span>-->
-					<div class="token_actions col-3" v-if="cur_bchain!='BLURT'">
+					<div class="token_actions col-2" v-if="cur_bchain!='BLURT'">
 						<span v-if="token.symbol=='AFITX'" class="btn btn-brand p-1" >
 							<a href="#" data-toggle="modal" class="" data-target="#topHoldersXModal" :title="$t('top_100_afitx_holders')" >
 								<i class="fas fa-list-ol"></i>
@@ -231,6 +245,7 @@
 						<span class="btn btn-brand p-1"><i class="fas fa-share-square " :title="$t('transfer_tokens')" v-on:click="initiateTransfer(token)"></i></span>
 						<span v-if="token.symbol =='AFIT'"  class="btn btn-brand p-1" ><i class="fas fa-truck-loading " :title="$t('move_to_bsc')" v-on:click="initiateBSCTransfer(token)"></i></span>
 					</div>
+				  <!--</div>-->
 				</div>
 				
 				<!-- steem engine tokens -->
@@ -240,7 +255,8 @@
 					<div class="col-2 text-right">{{ formattedUserAfitSE }}</div>
 					<div class="col-2"></div>
 					<div class="col-1 text-right"></div>
-					<div class="col-3">
+					<div class="col-1 text-right">-</div>
+					<div class="col-2">
 						<span v-if="cur_bchain!='BLURT'" class="btn btn-brand p-1" :title="$t('move_afit_se_he_title')"><i class="fas fa-angle-double-right" v-on:click="moveAFITseHE"></i></span>
 					</div>
 				</div>
@@ -251,7 +267,8 @@
 					<div class="col-2 text-right">{{ formattedUserAFITXSE }}</div>
 					<div class="col-2"></div>
 					<div class="col-1 text-right"></div>
-					<div class="col-3">
+					<div class="col-1 text-right">-</div>
+					<div class="col-2">
 						<span v-if="cur_bchain!='BLURT'" class="btn btn-brand p-1" :title="$t('move_afitx_se_he_title')"><i class="fas fa-angle-double-right" v-on:click="moveAFITXseHE"></i></span>
 					</div>
 				</div>
@@ -1379,6 +1396,7 @@
 		pendingRewards: {},
 		speed_up_on: true,
 		rcDelgArray: [],
+		show_only_tokens_interest: true,
 	  }
 	},
     components: {
@@ -1505,6 +1523,15 @@
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
+	  
+	  renderToken (token) {
+		if (!this.show_only_tokens_interest) return true;
+		return this.show_only_tokens_interest && tokensOfInterest.includes(token.symbol)
+	  },
+	  
+	  switchTokenDisplay() {
+		this.show_only_tokens_interest=!this.show_only_tokens_interest
+	  },
 	  
 	  /**
        * Scrolls down to content area.
@@ -1937,7 +1964,7 @@
 					tokenData = new Object();
 					tokenData.lastPrice = 1;
 				}
-				console.log(token);
+				//console.log(token);
 				if( typeof token.stake === 'undefined' || token.stake === null || tokensNonStakable.includes(token.symbol)){
 					token.stake = 0;
 					token.stakable = false;
@@ -2034,6 +2061,20 @@
 					
 			case 5: return this.numberFormat(this.powerDownRateVal, 3);
 		}
+	  },
+	  usdVal (token){
+		if (this.tokenMetrics.length > 0){
+			let tokenData = this.tokenMetrics.find(v => v.symbol == token.symbol);
+			if (token.symbol == 'AFIT'){
+				console.log(tokenData)
+			}
+
+			if (tokenData && tokenData.lastPrice){
+				return this.numberFormat((token.balance * parseFloat(tokenData.lastPrice)).toFixed(3), 2)
+			}
+			return '';
+		}
+		return '';
 	  },
 	  renderBalance (type, nofrmt) {
 		if (nofrmt){
@@ -2229,10 +2270,23 @@
 			//grab full token data
 			tokenExtraDetails = await ssc.find('tokens', 'tokens', { symbol : { '$in' : tokensOfInterest } });
 		  }else{*/
-			tokenData = await hsc.find('tokens', 'balances', { account: this.user.account.name, symbol : { '$in' : tokensOfInterest } });
 			
+			/*
+			OLD specific token listing
+			tokenData = await hsc.find('tokens', 'balances', { account: this.user.account.name, symbol : { '$in' : tokensOfInterest } });
+
 			//grab full token data
 			tokenExtraDetails = await hsc.find('tokens', 'tokens', { symbol : { '$in' : tokensOfInterest } });
+			*/
+			
+			//new full token balance listing
+			tokenData = await hsc.find('tokens', 'balances', { account: this.user.account.name});
+			
+			console.log(tokenData);
+			
+			//grab full token data
+			tokenExtraDetails = await hsc.find('tokens', 'tokens', {});
+			
 		  //}
 		  
 		  //console.log(tokenExtraDetails);
@@ -2244,6 +2298,7 @@
 				let matchEntry = tokenExtraDetails.find(v => v.symbol == tokenData[x].symbol);
 				//console.log(matchEntry);
 				tokenData[x].icon = JSON.parse(matchEntry.metadata).icon
+				console.log(tokenData[x].icon);
 			}catch(parseErr){
 				console.log(parseErr);
 			}
@@ -2266,7 +2321,14 @@
 		  /*if (this.cur_bchain == 'STEEM'){
 			this.tokenMetrics = await ssc.find('market', 'metrics', {symbol : { '$in' : tokensOfInterest.concat(['AFIT','AFITX']) }}, 1000, 0, '', false);	  
 		  }else{*/
-			this.tokenMetrics = await hsc.find('market', 'metrics', {symbol : { '$in' : tokensOfInterest.concat(['AFIT','AFITX']) }}, 1000, 0, '', false);	
+		  
+		  //build up a list of the user's current tokenlist
+		  //this.userTokenList = tokenData.map((obj) => obj.symbol);
+		  
+		  //this.tokenMetrics = await hsc.find('market', 'metrics', {symbol : { '$in' : tokensOfInterest.concat(['AFIT','AFITX']) }}, 1000, 0, '', false);	
+		  
+		  //extract prices for all user balances
+		  this.tokenMetrics = await hsc.find('market', 'metrics', {}, 1000, 0, '', false);	
 		  //}
 		  
 		  

@@ -932,6 +932,8 @@ module.exports = {
   manage_beneficiaries: 'Manage Beneficiaries',
   error_no_posts: 'User appears to have no posts .. yet',
   error_no_Videos: 'User appears to have no videos .. yet',
+  show_core_tokens: 'Show Core Tokens',
+  show_all_tokens: 'Show Full List',
   posh_desc_profile: 'Earn <u><a href="https://hiveposh.com/">POSH Tokens</a></u> by sharing your posts on twitter',
   tipping_details: 'This special onchain tipping functionality allows you to send out tips to users by commenting on their posts, and sends out AFIT directly onto their hive-engine account. For more details about how it works and how to load up balance, check out this post: <a href="https://links.actifit.io/tipping-afit">https://links.actifit.io/tipping-afit</a>'
 }
