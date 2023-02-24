@@ -163,6 +163,11 @@
 		console.log('keychain login');
 		console.log(json);
 		if (json && json.HIVE){
+			
+			//hide captcha as well
+			const recaptcha = this.$recaptchaInstance
+
+			
 			let acct_data = json.HIVE;
 			
 			let userSC = new Object();

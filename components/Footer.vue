@@ -2,11 +2,6 @@
   <!-- Footer used on all pages -->
   <div class="footer bg-light">
     <div class="container py-5">
-      <div class="row">
-		  <div class="col text-center">
-			<i>{{$t('powered_by')}}<img src="/img/HIVE.png" style="max-height: 30px;"></i>
-		  </div>
-	  </div>
 	  <div class="text-center social-links mb-4">
         <a href="https://links.actifit.io/discord " target="_blank" class="d-inline-block mx-3 mt-3" :title="$t('Discord')"><i class="fab fa-2x fa-discord"></i></a>
         <a href="https://www.facebook.com/Actifit.fitness/" target="_blank" class="d-inline-block mx-3 mt-3" :title="$t('Facebook')"><i class="fab fa-2x fa-facebook"></i></a>
@@ -18,11 +13,16 @@
 		<a href="https://www.linkedin.com/company/actifit-io" target="_blank" class="d-inline-block mx-3 mt-3" :title="$t('LinkedIn')"><i class="fab fa-2x fa-linkedin"></i></a>
       </div>
 	  <div class="row">
+		  <div class="col text-center">
+			<i>{{$t('powered_by')}}<img src="/img/HIVE.png" style="max-height: 30px;"></i>
+		  </div>
+	  </div>
+	  <div class="row">
 		<div class="col text-center"><small>{{ $t('price_data_sentence') }}<a href="https://coingecko.com">{{ $t('CoinGecko') }}</a></small></div>
 	  </div>
       <div class="row">
         <div class="col text-center">
-          <small class="text-muted">&copy; {{ $t('Copyright_Actifit') }} {{ currentYear }} | v1.0.4.2</small> |
+          <small class="text-muted">&copy; {{ $t('Copyright_Actifit') }} {{ currentYear }} | v1.0.5</small> |
 		  <small class="text-muted"><nuxt-link to="/privacy-policy">{{ $t('Privacy_Policy') }}</nuxt-link></small> |
 		  <small class="text-muted"><nuxt-link to="/terms-conditions">{{ $t('Terms_Conditions') }}</nuxt-link></small>
         </div>
