@@ -13,17 +13,22 @@
 		</div>-->
 		
 		<div class="row top-action-container text-right">
-			<div class="col-4 text-left">
+			<div class="col-6 text-left">
 				
-				<span class="btn btn-brand mb-1" :title="show_only_tokens_interest?$t('show_all_tokens'):$t('show_core_tokens')">
-					<i class="fas fa-solid fa-filter" v-on:click="switchTokenDisplay"></i>
+				<span class="btn btn-brand mb-1" :title="show_only_tokens_interest?$t('show_all_tokens'):$t('show_core_tokens')" v-on:click="switchTokenDisplay">
+					<i class="fas fa-solid fa-filter" ></i>
 				</span>
 				
+				<span class="btn btn-brand mb-1" :title="hide_small_balances?$t('show_all_tokens'):$t('hide_small_balances')" v-on:click="switchHideSmall">
+					<i class="fas fa-solid fa-creative-commons-zero" ></i>
+				</span>
+				
+				<span>{{$t('account_est_val')}} ${{this.totalAccountValue}}</span>
 			</div>
-			<div class="col-8 text-right">
+			<div class="col-6 text-right">
 			
-				<span class="btn btn-brand mb-1" :title="$t('Check_Claimable_Rewards')">
-					<i class="fas fa-solid fa-wallet" v-on:click="showClaimableRewards()"></i>
+				<span class="btn btn-brand mb-1" :title="$t('Check_Claimable_Rewards')" v-on:click="showClaimableRewards()">
+					<i class="fas fa-solid fa-wallet" ></i>
 				</span>
 				
 				
@@ -69,7 +74,7 @@
 				<div class="col-2 text-right">{{ formattedUserAfit }}</div>
 				<div class="col-2 text-right">-</div>
 				<div class="col-1 text-right">-</div>
-				<div class="col-1 text-right">-</div>
+				<div class="col-1 text-right">${{ this.afitValueUSD }}</div>
 				<div class="col-2 token_actions">
 					<span class="btn btn-brand p-1">
 						<i class="fas fa-solid fa-history" v-on:click="refreshBalance()" :title="$t('Refresh_balance')"/>
@@ -116,7 +121,7 @@
 				
 				</div>
 				<div class="col-1 text-right">{{ this.renderSavings(this.cur_bchain) }}</div>
-				<div class="col-1 text-right">-</div>
+				<div class="col-1 text-right">${{ this.hiveValueUSD }}</div>
 				<div class="col-2 token_actions">
 					<span class="btn btn-brand p-1"><i class="fas fa-arrow-circle-up p-1" :title="$t('POWERUP_ACTION_TEXT')" v-on:click="powerUpFunds"></i></span>
 					<span class="btn btn-brand p-1"><i class="fas fa-arrow-circle-down " :title="$t('POWERDOWN_ACTION_TEXT')" v-on:click="powerDownFunds"></i></span>
@@ -134,7 +139,7 @@
 				<div class="col-2 text-right">{{ this.renderSBDBalance(this.cur_bchain) }}</div>
 				<div class="col-2"></div>
 				<div class="col-1 text-right">{{ this.renderSBDSavings(this.cur_bchain) }}</div>
-				<div class="col-1 text-right">-</div>
+				<div class="col-1 text-right">${{ this.hbdValueUSD }}</div>
 				<div class="col-2 token_actions">
 					<span class="btn btn-brand p-1"><i class="fas fa-share-square " :title="$t('TRANSFER_FUNDS_ACTION_TEXT')" v-on:click="transferFunds"></i></span>
 				</div>
@@ -740,7 +745,7 @@
 								<input type="text" id="bsc-wallet-address" name="bsc-wallet-address" ref="bsc-wallet-address" class="form-control-lg w-50 p-2" :value="this.getWalletAddress()" placeholder="0x......">
 								<div v-if="error_wallet!=''" class="text-brand text-center">{{ error_wallet}}</div>
 								<button v-on:click="updateWalletAddress" class="btn btn-brand btn-lg w-50 border"><span v-if="this.bsc_wallet_address">{{ $t('Save') }}</span><span v-else>{{ $t('Save') }}</span></button>
-							
+								<button v-on:click="deleteWalletAddress" class="btn btn-brand btn-lg w-50 border">{{ $t('Reset') }}</button>
 						</div>
 					</div>
 				</transition>
@@ -1273,6 +1278,12 @@
 		effectiveSteemPower: 0,
 		delegatedSteemPower: 0,
 		receivedSteemPower: 0,
+		hbdValue: 0,
+		hiveValue: 0,
+		afitValue: 0,
+		afitxValue: 0,
+		afitBSCValue: 0,
+		afitxBSCValue: 0,
 		claimSP: '',
 		claimSTEEM: '',
 		claimVests: '',
@@ -1397,6 +1408,8 @@
 		speed_up_on: true,
 		rcDelgArray: [],
 		show_only_tokens_interest: true,
+		hide_small_balances: false,
+		heTokenBalances: [],
 	  }
 	},
     components: {
@@ -1419,6 +1432,24 @@
 	  },
       isStdLogin () {
 		return localStorage.getItem('std_login')
+	  },
+	  afitValueUSD () {
+		return this.numberFormat(parseFloat(this.userTokens) * this.afitPrice, 2);
+	  },
+	  hbdValueUSD () {
+		return this.numberFormat(parseFloat(this.user.account.hbd_balance) * this.hbdPrice, 2)
+	  },
+	  hiveValueUSD () {
+		console.log(this.steemPower)
+		console.log(this.hivePrice)
+		return this.numberFormat((parseFloat(this.user.account.balance) + parseFloat(this.steemPower)) * this.hivePrice, 2);
+	  },
+	  totalBalanceUSD () {
+		console.log('totalBalanceUSD');
+		//calculate full balance HE tokens
+		let heUSDVals = this.heTokenBalances.reduce((accumulator, currentValue) => accumulator + parseFloat(currentValue), 0);
+		console.log(heUSDVals)
+		return this.numberFormat((parseFloat(this.afitValueUSD) + parseFloat(this.hbdValueUSD) + parseFloat(this.hiveValueUSD) + parseFloat(heUSDVals)).toFixed(3), 3)
 	  },
 	  formattedSteemTotVal () {
 		return this.numberFormat(this.totalAccountValueSteem, 3) + ' ' + this.cur_bchain;
@@ -1525,12 +1556,21 @@
       },
 	  
 	  renderToken (token) {
+		//check small balances flag
+		if (this.hide_small_balances && this.usdVal(token) < 1){
+			return false;
+		}
+		//check show only tokens of interest flag
 		if (!this.show_only_tokens_interest) return true;
 		return this.show_only_tokens_interest && tokensOfInterest.includes(token.symbol)
 	  },
 	  
 	  switchTokenDisplay() {
 		this.show_only_tokens_interest=!this.show_only_tokens_interest
+	  },
+	  
+	  switchHideSmall() {
+		this.hide_small_balances = !this.hide_small_balances
 	  },
 	  
 	  /**
@@ -1593,9 +1633,47 @@
 	  setAirdropResults (json){
 		this.airdropResults = json;
 	  },
+	  
+	  async deleteWalletAddress () {
+		//only reset if stored value is non-empty
+		if (this.bsc_wallet_address != ''){
+			let confirmPopup = confirm(this.$t('confirm_wallet_reset'));
+			if (!confirmPopup){
+				return;
+			}
+			let accToken = localStorage.getItem('access_token')
+			
+			let url = new URL(process.env.actiAppUrl + 'deleteUserWalletAddress/?user='+this.user.account.name);
+
+			let reqHeads = new Headers({
+			  'Content-Type': 'application/json',
+			  'x-acti-token': 'Bearer ' + accToken,
+			});
+			let res = await fetch(url, {
+				headers: reqHeads
+			});
+			let outcome = await res.json();
+			console.log(outcome);
+			if (outcome.error){
+				this.error_wallet = this.$t('error_resetting_wallet');
+			}else{
+				console.log('success');
+				this.$refs['bsc-wallet-address'].value = '';
+				this.$notify({
+				  group: 'success',
+				  text: this.$t('address_reset_successfully'),
+				  position: 'top center'
+				})
+			}
+		}
+		if (this.$refs['bsc-wallet-address'].value == ''){
+			this.$refs['bsc-wallet-address'].value = '';
+		}
+	  },
 	  async updateWalletAddress (){
 		//return this.bsc_wallet_address;
 		this.error_wallet = '';
+		
 		if (this.$refs['bsc-wallet-address'].value == ''){
 			this.error_wallet = this.$t('all_fields_required');
 			return;
@@ -1607,6 +1685,8 @@
 		
 		let contProc = false;
 		const nonce = this.generatePassword(2);
+		console.log('add');
+		console.log(this.$refs['bsc-wallet-address'].value);
 		try{
 			let sign = await web3.eth.personal.sign(nonce, this.$refs['bsc-wallet-address'].value, "");
 			//console.log(sign)
@@ -2065,12 +2145,16 @@
 	  usdVal (token){
 		if (this.tokenMetrics.length > 0){
 			let tokenData = this.tokenMetrics.find(v => v.symbol == token.symbol);
-			if (token.symbol == 'AFIT'){
-				console.log(tokenData)
-			}
+			
 
 			if (tokenData && tokenData.lastPrice){
-				return this.numberFormat((token.balance * parseFloat(tokenData.lastPrice)).toFixed(3), 2)
+				let valueUSD = token.balance * parseFloat(tokenData.lastPrice) * this.hivePrice;
+				this.heTokenBalances[token.symbol] = valueUSD;
+				if (token.symbol == 'AFIT'){
+					console.log(token.symbol)
+					console.log(token.balance+ ' * ' + tokenData.lastPrice +' * ' + this.hivePrice + ' =' + token.balance * parseFloat(tokenData.lastPrice)) * this.hivePrice;
+				}
+				return this.numberFormat(valueUSD.toFixed(3), 2)
 			}
 			return '';
 		}
@@ -2298,7 +2382,7 @@
 				let matchEntry = tokenExtraDetails.find(v => v.symbol == tokenData[x].symbol);
 				//console.log(matchEntry);
 				tokenData[x].icon = JSON.parse(matchEntry.metadata).icon
-				console.log(tokenData[x].icon);
+				//console.log(tokenData[x].icon);
 			}catch(parseErr){
 				console.log(parseErr);
 			}
