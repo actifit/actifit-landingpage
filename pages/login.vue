@@ -166,7 +166,9 @@
 			
 			//hide captcha as well
 			const recaptcha = this.$recaptchaInstance
-
+			
+			// Hide reCAPTCHA badge:
+			recaptcha.hideBadge();
 			
 			let acct_data = json.HIVE;
 			
