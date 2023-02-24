@@ -23,7 +23,7 @@
 					<i class="fas fa-solid fa-creative-commons-zero" ></i>
 				</span>
 				
-				<span>{{$t('account_est_val')}} ${{this.totalAccountValue}}</span>
+				<span class="pl-2">{{$t('account_est_val')}} ${{this.totalAccountValue}}</span>
 			</div>
 			<div class="col-6 text-right">
 			
@@ -74,7 +74,7 @@
 				<div class="col-2 text-right">{{ formattedUserAfit }}</div>
 				<div class="col-2 text-right">-</div>
 				<div class="col-1 text-right">-</div>
-				<div class="col-1 text-right">${{ this.afitValueUSD }}</div>
+				<div class="col-1 text-right break-val">${{ this.afitValueUSD }}</div>
 				<div class="col-2 token_actions">
 					<span class="btn btn-brand p-1">
 						<i class="fas fa-solid fa-history" v-on:click="refreshBalance()" :title="$t('Refresh_balance')"/>
@@ -121,7 +121,7 @@
 				
 				</div>
 				<div class="col-1 text-right">{{ this.renderSavings(this.cur_bchain) }}</div>
-				<div class="col-1 text-right">${{ this.hiveValueUSD }}</div>
+				<div class="col-1 text-right break-val">${{ this.hiveValueUSD }}</div>
 				<div class="col-2 token_actions">
 					<span class="btn btn-brand p-1"><i class="fas fa-arrow-circle-up p-1" :title="$t('POWERUP_ACTION_TEXT')" v-on:click="powerUpFunds"></i></span>
 					<span class="btn btn-brand p-1"><i class="fas fa-arrow-circle-down " :title="$t('POWERDOWN_ACTION_TEXT')" v-on:click="powerDownFunds"></i></span>
@@ -139,7 +139,7 @@
 				<div class="col-2 text-right">{{ this.renderSBDBalance(this.cur_bchain) }}</div>
 				<div class="col-2"></div>
 				<div class="col-1 text-right">{{ this.renderSBDSavings(this.cur_bchain) }}</div>
-				<div class="col-1 text-right">${{ this.hbdValueUSD }}</div>
+				<div class="col-1 text-right break-val">${{ this.hbdValueUSD }}</div>
 				<div class="col-2 token_actions">
 					<span class="btn btn-brand p-1"><i class="fas fa-share-square " :title="$t('TRANSFER_FUNDS_ACTION_TEXT')" v-on:click="transferFunds"></i></span>
 				</div>
@@ -152,7 +152,7 @@
 				<div class="col-2 text-right">{{ formattedUserAfitBSC }}</div>
 				<div class="col-2"></div>
 				<div class="col-1 text-right"></div>
-				<div class="col-1 text-right">-</div>
+				<div class="col-1 text-right break-val">{{ formattedUserAfitBSCVal}}</div>
 				<div class="col-2 token_actions">
 					<span class="btn btn-brand p-1" :title="$t('smart_contract')">
 							<a target="_blank" :href="'https://bscscan.com/address/'+afitTokenAddress"><i class="fas fa-file-contract"></i></a>
@@ -181,7 +181,7 @@
 				<div class="col-2 text-right">{{ formattedUserAFITXBSC }}</div>
 				<div class="col-2"></div>
 				<div class="col-1 text-right"></div>
-				<div class="col-1 text-right">-</div>
+				<div class="col-1 text-right break-val">{{ formattedUserAfitxBSCVal}}</div>
 				<div class="col-2 token_actions">
 					<span class="btn btn-brand p-1" :title="$t('smart_contract')">
 							<a target="_blank" :href="'https://bscscan.com/address/'+afitxTokenAddress"><i class="fas fa-file-contract"></i></a>
@@ -214,7 +214,7 @@
 					<div class="col-2 text-right">{{ renderBal(token) }} {{ token.symbol }}</div>
 					<div class="col-2 text-right">{{ renderStake(token)}} {{ token.symbol }}</div>
 					<div class="col-1"></div>
-					<div class="col-1">${{ usdVal(token) }}</div>
+					<div class="col-1 text-right break-val">${{ usdVal(token) }}</div>
 					<!--<span v-if="parseFloat(delegStake(token)) > 0">( + {{ delegStake(token)}} {{ token.symbol }} {{ $t('Delegated') }}) </span>-->
 					<div class="token_actions col-2" v-if="cur_bchain!='BLURT'">
 						<span v-if="token.symbol=='AFITX'" class="btn btn-brand p-1" >
@@ -256,7 +256,7 @@
 				<!-- steem engine tokens -->
 				<div class="token-entry row">
 					<div class="col-2 text-left"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo">AFIT</div>
-					<div class="col-2">{{ $t('Steem Engine')}}</div>
+					<div class="col-2">{{ $t('Steem_Engine')}}</div>
 					<div class="col-2 text-right">{{ formattedUserAfitSE }}</div>
 					<div class="col-2"></div>
 					<div class="col-1 text-right"></div>
@@ -1319,6 +1319,8 @@
 		afit_val_exchange: 50,
 		afit_exch_matching_perc: 10,
 		afitPrice: 0.036,
+		afitBSCPrice: 0.01,
+		afitxBSCPrice: 1,
 		pendingTokenSwap: '',
 		transfer_amount: 1,
 		min_tokens_required: 10000,
@@ -1436,6 +1438,12 @@
 	  afitValueUSD () {
 		return this.numberFormat(parseFloat(this.userTokens) * this.afitPrice, 2);
 	  },
+	  afitBSCValueUSD () {
+		return parseFloat(this.afitBalanceBSC) * this.afitBSCPrice;
+	  },
+	  afitxBSCValueUSD () {
+		return parseFloat(this.afitxBalanceBSC) * this.afitxBSCPrice;
+	  },
 	  hbdValueUSD () {
 		return this.numberFormat(parseFloat(this.user.account.hbd_balance) * this.hbdPrice, 2)
 	  },
@@ -1449,7 +1457,14 @@
 		//calculate full balance HE tokens
 		let heUSDVals = this.heTokenBalances.reduce((accumulator, currentValue) => accumulator + parseFloat(currentValue), 0);
 		console.log(heUSDVals)
-		return this.numberFormat((parseFloat(this.afitValueUSD) + parseFloat(this.hbdValueUSD) + parseFloat(this.hiveValueUSD) + parseFloat(heUSDVals)).toFixed(3), 3)
+		return this.numberFormat(
+			(parseFloat(this.afitValueUSD) + 
+				parseFloat(this.hbdValueUSD) + 
+				parseFloat(this.hiveValueUSD) + 
+				parseFloat(heUSDVals) +
+				parseFloat(this.afitBSCValueUSD) + 
+				parseFloat(this.afitxBSCValueUSD)
+			).toFixed(3), 3)
 	  },
 	  formattedSteemTotVal () {
 		return this.numberFormat(this.totalAccountValueSteem, 3) + ' ' + this.cur_bchain;
@@ -1466,6 +1481,12 @@
 	  formattedUserAfitBSC () {
 		return this.numberFormat(parseFloat(this.afitBalanceBSC), 3) + " AFIT BSC";
       },
+	  formattedUserAfitBSCVal () {
+		return '$' + this.numberFormat(parseFloat(this.afitBalanceBSC) * this.afitBSCPrice, 3)
+	  },
+	  formattedUserAfitxBSCVal () {
+		return '$' + this.numberFormat(parseFloat(this.afitxBalanceBSC) * this.afitxBSCPrice, 3)
+	  },
 	  formattedUserAfitBNBLPBSC () {
 		return this.numberFormat(parseFloat(this.afitBNBLPBalanceBSC), 3) + " AFIT-BNB LP BSC";
       },
@@ -1519,6 +1540,10 @@
 	  user: 'fetchUserData',
 	  tokenMetrics: 'formattedTotAccountVal',
 	  steemPrice: 'formattedTotAccountVal',
+	  afitBSCPrice: 'formattedTotAccountVal',
+	  afitxBSCPrice: 'formattedTotAccountVal',
+	  afitBalanceBSC: 'formattedTotAccountVal',
+	  afitxBalanceBSC: 'formattedTotAccountVal',
 	  transferType: 'resetTransAmount',
 	  userTokens: function(param){
 		//if usertokens changes, no need to keep spinner on if it was on
@@ -1603,25 +1628,25 @@
 		
 		result = await afitxContract.methods.balanceOf(this.bsc_wallet_address).call(); // 29803630997051883414242659
 		format = web3.utils.fromWei(result); // 29803630.997051883414242659
-		console.log(format);
-		console.log('end get balance');
+		//console.log(format);
+		//console.log('end get balance');
 		this.afitxBalanceBSC = format;
 		
 		result = await afitBNBLPContract.methods.balanceOf(this.bsc_wallet_address).call(); // 29803630997051883414242659
 		format = web3.utils.fromWei(result); // 29803630.997051883414242659
-		console.log(format);
-		console.log('end get balance');
+		//console.log(format);
+		//console.log('end get balance');
 		this.afitBNBLPBalanceBSC = format;
 		
 		result = await afitxBNBLPContract.methods.balanceOf(this.bsc_wallet_address).call(); // 29803630997051883414242659
 		format = web3.utils.fromWei(result); // 29803630.997051883414242659
-		console.log(format);
-		console.log('end get balance');
+		//console.log(format);
+		//console.log('end get balance');
 		this.afitxBNBLPBalanceBSC = format;
 	  },
 	  setUserWalletAddress (json){
-		console.log('setUserWalletAddress');
-		console.log(json);
+		//console.log('setUserWalletAddress');
+		//console.log(json);
 		if (Array.isArray(json) && json.length>0){
 			this.bsc_wallet_address = json[0].wallet;
 		}else{
@@ -2034,6 +2059,15 @@
 			let afitCoreVal = this.userTokens * this.afitPrice / baseCurrency;
 			//console.log(afitCoreVal);
 			this.totalAccountValue += afitCoreVal;
+			
+			console.log('this.afitBSCValueUSD:'+this.afitBSCValueUSD)
+			console.log('this.afitxBSCValueUSD:'+this.afitxBSCValueUSD)
+			//add AFIT BSC and AFITX BSC
+			this.totalAccountValue += (this.afitBSCValueUSD / baseCurrency);
+			this.totalAccountValue += (this.afitxBSCValueUSD / baseCurrency);
+			
+			console.log(this.totalAccountValue);
+			
 			this.detailCalculation += this.userTokens + ' AFIT x '+ this.numberFormat((this.afitPrice / baseCurrency), 4) + ' AFIT/'+this.cur_bchain+' = ' + this.numberFormat(afitCoreVal, 4) + ' '+this.cur_bchain+'<br/>';
 			
 			let par = this;
@@ -2150,10 +2184,10 @@
 			if (tokenData && tokenData.lastPrice){
 				let valueUSD = token.balance * parseFloat(tokenData.lastPrice) * this.hivePrice;
 				this.heTokenBalances[token.symbol] = valueUSD;
-				if (token.symbol == 'AFIT'){
-					console.log(token.symbol)
-					console.log(token.balance+ ' * ' + tokenData.lastPrice +' * ' + this.hivePrice + ' =' + token.balance * parseFloat(tokenData.lastPrice)) * this.hivePrice;
-				}
+				//if (token.symbol == 'AFIT'){
+					//console.log(token.symbol)
+					//console.log(token.balance+ ' * ' + tokenData.lastPrice +' * ' + this.hivePrice + ' =' + token.balance * parseFloat(tokenData.lastPrice)) * this.hivePrice;
+				//}
 				return this.numberFormat(valueUSD.toFixed(3), 2)
 			}
 			return '';
@@ -2543,6 +2577,14 @@
 	  
 	  setAFITPrice (_afitPrice){
 		this.afitPrice = parseFloat(_afitPrice).toFixed(6);
+	  },
+	  setAFITBSCPrice (_afitPrice){
+		this.afitBSCPrice = parseFloat(_afitPrice).toFixed(6);
+		console.log('afitBSCPrice'+this.afitBSCPrice);
+	  },
+	  setAFITXBSCPrice (_afitxPrice){
+		this.afitxBSCPrice = parseFloat(_afitxPrice).toFixed(6);
+		console.log('afitxBSCPrice'+this.afitxBSCPrice);
 	  },
 	  setUserPassStatus (result) {
 		//handles setting funds password status
@@ -5544,6 +5586,16 @@
 		res => {res.json().then(json => this.setAFITPrice (json.unit_price_usd)).catch(e => console.log(e))
 	  }).catch(e => console.log(e))
 	  
+	  //grab AFIT BSC price
+	  fetch(process.env.actiAppUrl+'AFITBSCPrice').then(
+		res => {res.json().then(json => this.setAFITBSCPrice (json.price)).catch(e => console.log(e))
+	  }).catch(e => console.log(e))
+	  
+	  //grab AFITX BSC price
+	  fetch(process.env.actiAppUrl+'AFITXBSCPrice').then(
+		res => {res.json().then(json => this.setAFITXBSCPrice (json.price)).catch(e => console.log(e))
+	  }).catch(e => console.log(e))
+	  
 	  this.screenWidth = screen.width;
 	  //check if this is the result of an operation
 	  if (this.$route.query.op && this.$route.query.status){
@@ -5729,5 +5781,8 @@
   
   .token_actions .btn{
 	margin: 3px;
+  }
+  .break-val{
+	line-break: anywhere;
   }
 </style>
