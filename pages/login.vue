@@ -1,6 +1,6 @@
 <template>
   <div>
-	<!--<script src="https://www.google.com/recaptcha/api.js?onload=vueRecaptchaApiLoaded&render=explicit" async defer></script> -->
+	
     <NavbarBrand />
 
     <div class="container pt-5 mt-5 pb-5">
@@ -9,20 +9,20 @@
 			<!--<h5 class="col-md-6"><img src="/img/STEEM.png" class="token-logo-sm">Standard Login</h5>-->
 			<div class="form-group">
 			
-				<div class="row">
+				<div class="row form-control-lg">
 				<input type="text" id="username" name="username" :placeholder="$t('Username')" ref="username" class="form-control m-1 col-md-6 acti-shadow">
 				<button v-on:click="loginKeychain" class="btn btn-brand keychain-btn login-stdd-btn m-1"></button>
 				</div>
 				
-				<div class="row">
-				<input type="password" id="ppkey" name="ppkey" ref="ppkey" :placeholder="$t('Ppkey')"  class="form-control m-1 col-md-6 acti-shadow">
-				<button v-on:click="proceedLogin" class="btn btn-brand login-stdd-btn m-1">{{ $t('Login') }}<i class="fas fa-spin fa-spinner text-white" v-if="login_in_progress"></i></button>
+				<div class="row form-control-lg">
+					<input type="password" id="ppkey" name="ppkey" ref="ppkey" :placeholder="$t('Ppkey')"  class="form-control m-1 col-md-6 acti-shadow">
+					<button v-on:click="proceedLogin" class="btn btn-brand login-stdd-btn m-1">{{ $t('Login') }}<i class="fas fa-spin fa-spinner text-white" v-if="login_in_progress"></i></button>
 				</div>
 				
-				<span class="row mb-1 form-control-lg">
+				<span class="row form-control-lg ml-0">
 					<a href="/password" class="small">Forgot my posting key?</a>
 				</span>
-				<span class="row mb-1 form-control-lg ">
+				<span class="row mb-1 form-control-lg " style="display: none">
 				  <div class="bchain-option p-1 m-1 btn" :class="adjustHiveClass">
 					<input type="radio" id="hive_bchain" value="HIVE" v-model="bchain_val">
 					<img src="/img/HIVE.png" style="max-height: 50px;" v-on:click="bchain_val = 'HIVE'">
@@ -39,16 +39,10 @@
 					<label for="blurt_bchain">BLURT</label>
 				  </div>
 				</span>
-				<span class="row mb-1 form-control-lg ">
+				<span class="row mb-1 form-control-lg ml-0">
 					<input type="checkbox" id="keeploggedin" v-model="keep_loggedin_val" >
 					<label for="keeploggedin" class="ml-2">Keep me logged in</label>
 				</span>
-				<i class="fas fa-spin fa-spinner text-brand" v-if="!captchaReady"></i>
-				<vue-recaptcha ref="recaptcha" @verify="onVerifyCaptcha" @render="captchaReady=true" @expired="onExpiredCaptcha" :loadRecaptchaScript="true" sitekey="6LdpcoMUAAAAAPGTqlvhKEK6Ayw5NqLDZz5Sjudq">
-				</vue-recaptcha>
-				<p class="text-brand" v-if="captcha_invalid">
-				  <b>{{ captcha_invalid }}</b>
-				</p>
 				<div class="text-brand text-center" v-if="error_proceeding">
 				  {{ this.error_msg}}
 				</div>
@@ -62,8 +56,11 @@
 <script>
   import NavbarBrand from '~/components/NavbarBrand'
   import Footer from '~/components/Footer'
-  //import steem from 'steem'
-  import VueRecaptcha from 'vue-recaptcha';
+  
+  //import VueRecaptcha from 'vue-recaptcha';
+  
+  import { VueReCaptcha } from 'vue-recaptcha-v3'
+
   
   //import { VueReCaptchaV3 } from 'vue-recaptcha-v3';
 
@@ -75,6 +72,8 @@
   
   //import {keychain, isKeychainInstalled, hasKeychainBeenUsed} from '@hiveio/keychain'
 
+  import Vue from 'vue'
+  Vue.use(VueReCaptcha, { siteKey: process.env.captchaV3Key })
 	
   export default {
 	head () {
@@ -90,7 +89,8 @@
       NavbarBrand,
       Footer,
 	  //VueReCaptchaV3
-	  VueRecaptcha,
+	  //VueRecaptcha,
+	  //VueReCaptcha,
     },
 	data () {
       return {
@@ -139,6 +139,9 @@
 		} catch (e) {
 		  console.log(e);
 		}*/
+		console.log('load recaptcha')
+		await this.$recaptchaLoaded()
+		console.log('complete')
 		this.verifyKeychain();
 	},
 	methods: {
@@ -186,6 +189,12 @@
 		
 		//console.log(json);
 		if (json.success && json.token){
+		
+			//hide captcha as well
+			const recaptcha = this.$recaptchaInstance
+
+			// Hide reCAPTCHA badge:
+			recaptcha.hideBadge();
 		
 			localStorage.setItem('actiToken', json.token);
 			
@@ -285,16 +294,36 @@
 		this.error_proceeding = false;
 		this.error_msg = '';
 		
-		if (!this.captchaValid){
+		/*if (!this.captchaValid){
 			this.captcha_invalid = this.$t('solve_captcha');
 			return;
-		}
+		}*/
 		
 		if (this.$refs["username"].value == '' || this.$refs["ppkey"].value == ''){
 			this.error_proceeding = true;
 			this.error_msg = this.$t('login_error');
 			return;
 		}
+		
+		//check captcha V3
+		// Execute reCAPTCHA with action "login".
+		const token = await this.$recaptcha('login')
+		
+		//verify recaptcha-v3
+		
+		let outc = await fetch(process.env.actiAppUrl+'verifyLoginCaptcha?token='+token);
+		console.log(outc);
+		//let outc = await outc.json();
+		
+		if (outc.error){
+			this.error_proceeding = true;
+			this.login_in_progress = false;
+			this.error_msg = this.$t('login_error');
+			return;
+		}
+		//otherwise, we're good, continue
+
+		console.log(token);
 		
 		//set proper blockchain selected
 		this.$store.commit('setBchain', this.bchain_val);
