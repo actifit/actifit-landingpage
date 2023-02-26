@@ -204,7 +204,10 @@
 				:key="reload"/>
 		</div>
 	</div>
-	<div v-else-if="errorDisplay" class="container pt-5 mt-5 pb-5" >
+	<div v-else-if="errorDisplay" class="container pt-5 mt-5 pb-5 col-md-6" >
+		<div class="text-right" >
+			<ChainSelection />
+		</div>
 		<div class="mb-3 text-center">
           <h4>{{ errorDisplay }}</h4>
 		</div>
