@@ -8,7 +8,7 @@
 		</div>
 	</div>-->
 	
-	<div v-if="report && report.author" class="container pb-5 col-md-6" >
+	<div v-if="report && report.author" class="container pt-5 mt-5 pb-5 col-md-6" >
 		<div class="text-right" >
 			<ChainSelection />
 		</div>
