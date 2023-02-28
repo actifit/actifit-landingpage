@@ -306,7 +306,6 @@ export default {
 			  'x-acti-token': 'Bearer ' + accToken,
 			});
 			res = await fetch(url, {
-				credentials: 'include',
 				method: 'POST',
 				headers: reqHeads,
 				body: JSON.stringify({'memo': memo})
