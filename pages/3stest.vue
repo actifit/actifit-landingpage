@@ -3,7 +3,7 @@
 	<div>
 		<NavbarBrand />
 		<div class="container pt-5 mt-5 pb-5">
-			<!--<input type="button" @click="connectSession3S()" value="Test">-->
+			<input type="button" @click="connectSession3S()" value="Test">
 			
 			<input type="file" ref="fileInput" @change="uploadVideo"/>
 			<p v-if="thumbprogress">{{ thumbprogress }}</p>
@@ -240,18 +240,22 @@ export default {
 			  'duration': this.videoLength,
 			  'thumbnail': this.thumbnailName,
 			  'owner': this.user.account.name,
+			  'isReel': true
 			}
 			
 			let reqHeads = new Headers({
 				'Content-Type': 'application/json',
-				credentials: 'include',
+				'credentials': 'include',
+				//'Cookie': 'connect.sid=s%3ArfBowB6t8rH0pV4wSkamopj0mZARXwNr.%2FS1bwFv%2FuG2IdthqJXV1YyrE4ZwrlDCpxnfdBiPWaUk'
+
 			});
 			
 			console.log(videoInfo);
 
 			let res = await fetch(process.env.threeSpeakUploadInfo, {
 				method: 'POST',
-				headers: reqHeads
+				headers: reqHeads,
+				body: JSON.stringify(videoInfo)
 			});
 			console.log(res);
 			let outcome = await res.json();
