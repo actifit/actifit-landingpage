@@ -37,6 +37,12 @@ import * as tus from "tus-js-client";
 //import Beneficiary from '~/components/Beneficiary'
 import Footer from '~/components/Footer'
 
+import Vue from 'vue'
+
+import VueCookies from 'vue-cookies'
+Vue.use(VueCookies);
+
+
 let ffmpeg;
 /* tus installation:
 https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbfa6/docs/installation.md
@@ -144,6 +150,12 @@ export default {
 		  console.log('start video upload');
 		  let file = this.video
 		  console.log(this.video);
+		  
+		  //this.$cookies.set("connect.sid","s%3AV4_SdjzaTTAKQ6cPUsztSmwOYOaJErtc.oLdKsvBfueMkUsPDamPQls1EAeiwthMfM2UK4%2FhAvqU");
+		  
+		  let cook = this.$cookies.get("connect.sid") // vuejs
+		  console.log(cook);
+		  
 		  let upRef = this;
 		  let upload = new tus.Upload(file, {
 			//endpoint: 'https://master.tus.io/files/',
@@ -253,6 +265,7 @@ export default {
 			console.log(videoInfo);
 
 			let res = await fetch(process.env.threeSpeakUploadInfo, {
+				credentials: 'include',
 				method: 'POST',
 				headers: reqHeads,
 				body: JSON.stringify(videoInfo)
@@ -293,6 +306,7 @@ export default {
 			  'x-acti-token': 'Bearer ' + accToken,
 			});
 			res = await fetch(url, {
+				credentials: 'include',
 				method: 'POST',
 				headers: reqHeads,
 				body: JSON.stringify({'memo': memo})
@@ -315,7 +329,8 @@ export default {
 				res = await fetch(process.env.threeSpeakApiSession.replace('_USERNAME_', this.user.account.name)+'&access_token=' + xcstkn, {
 					credentials: 'include',
 				});
-				//console.log(res);
+				console.log(res);
+				console.log( res.headers.get('set-cookie'))
 				outcome = await res.json();
 				console.log(outcome);	
 			}
@@ -326,7 +341,7 @@ export default {
 	},
 	async mounted () {
 		await this.$store.dispatch('steemconnect/login')
-		await this.connectSession3S();
+		//await this.connectSession3S();
 		
 	}
 }
