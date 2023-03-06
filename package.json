@@ -45,7 +45,7 @@
     "lodash": "^4.17.21",
     "marked": "^4.2.5",
     "mavon-editor": "^2.10.4",
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "node-fetch-cookies": "^2.0.4",
     "nuxt": ">=2.13.3",
     "nuxt-helmet": "^1.2.3",
