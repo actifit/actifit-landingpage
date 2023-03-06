@@ -3,7 +3,7 @@
 	<div>
 		<NavbarBrand />
 		<div class="container pt-5 mt-5 pb-5">
-			<input type="button" @click="connectSession3S()" value="Test">
+			<!--<input type="button" @click="connectSession3S()" value="Test">-->
 			
 			<input type="file" ref="fileInput" @change="uploadVideo"/>
 			<p v-if="thumbprogress">{{ thumbprogress }}</p>
@@ -29,21 +29,24 @@
 import NavbarBrand from '~/components/NavbarBrand'
 import {mapGetters} from 'vuex'
 import * as tus from "tus-js-client";
-//import tus from 'tus-js-client'
-//import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';//,fetchFile
 
-//fix for "ReferenceError: SharedArrayBuffer is not defined"
-
-//import Beneficiary from '~/components/Beneficiary'
 import Footer from '~/components/Footer'
 
 import Vue from 'vue'
 
-import VueCookies from 'vue-cookies'
-Vue.use(VueCookies);
+//import VueCookies from 'vue-cookies'
+//Vue.use(VueCookies);
 
+//import {fetch, CookieJar} from "node-fetch-cookies";
 
-let ffmpeg;
+//const cookieJar = new CookieJar();
+import axios from 'axios';
+import { wrapper } from "axios-cookiejar-support";
+import { CookieJar } from "tough-cookie";
+
+const jar = new CookieJar();
+const client = wrapper(axios.create({ jar }));
+
 /* tus installation:
 https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbfa6/docs/installation.md
 */
@@ -56,16 +59,10 @@ export default {
 			videoLength: null,
 			filename: '',
 			origFilename: '',
-			//ffmpeg: null,
 			vidprogress: null,
 			thumbprogress: null,
 			thumbnail: null,
-			thumbnailName : '',
-			defaultBenefic : [
-				{ 'account':'actifit.pay', 'weight':500 },
-				{ 'account':'mcfarhat', 'weight':500 }
-			]
-			//selFile: null,
+			thumbnailName : ''
 		}
 	},
 	components: {
@@ -78,15 +75,7 @@ export default {
 	  ...mapGetters('steemconnect', ['stdLogin']),
 	},
 	methods: {
-		/*startUpload () {
-		  this.upload()
-		},*/
 		
-		/*async uploadVideo () {
-		  let input = this.$refs.fileInput
-		  let file = input.files[0]
-		  this.video = file;
-		*/
 		async uploadVideo (event) {
 		  
 			this.video = event.target.files[0];
@@ -100,24 +89,18 @@ export default {
 		async generateThumbnail () {
 		  //
 		  let upRef = this;
-		  //this.video = event.target.files[0]
 		  let URL = URL || window.URL
 		  let videoURL = URL.createObjectURL(this.video)
 		  console.log(videoURL);
 		  let canvas = this.$refs['canvas']//document.createElement('canvas')
 		  let context = canvas.getContext('2d')
-		  //let video = document.createElement('video')
 		  let video = this.$refs['video'];
-		  /*let source = this.$refs['source'];
-		  source.src = videoURL;//'https://www.youtube.com/watch?v=l0739Qbucoc';//
-		  source.type = 'video/mp4';*/
-		  //const source = document.createElement('source')
+
 
 		  this.$refs['video'].src = videoURL;
 		  //video.addEventListener('loadeddata', async () => {
 		  video.addEventListener('loadedmetadata', async () => {
 			
-			//console.log('loadeddata')
 			//set current video time. Go to 25%
 			video.currentTime = video.duration * 0.25;//5
 			//console.log(video)
@@ -153,12 +136,11 @@ export default {
 		  
 		  //this.$cookies.set("connect.sid","s%3AV4_SdjzaTTAKQ6cPUsztSmwOYOaJErtc.oLdKsvBfueMkUsPDamPQls1EAeiwthMfM2UK4%2FhAvqU");
 		  
-		  let cook = this.$cookies.get("connect.sid") // vuejs
-		  console.log(cook);
+		  //let cook = this.$cookies.get("connect.sid") // vuejs
+		  //console.log(cook);
 		  
 		  let upRef = this;
 		  let upload = new tus.Upload(file, {
-			//endpoint: 'https://master.tus.io/files/',
 			endpoint: 'https://uploads.3speak.tv/files',
 			chunkSize: 100 * 1024,
 			retryDelays: [0, 1000, 3000, 5000],
@@ -264,15 +246,28 @@ export default {
 			
 			console.log(videoInfo);
 
-			let res = await fetch(process.env.threeSpeakUploadInfo, {
+			/*let res = await fetch(process.env.threeSpeakUploadInfo, {
 				credentials: 'include',
 				method: 'POST',
 				headers: reqHeads,
 				body: JSON.stringify(videoInfo)
-			});
-			console.log(res);
-			let outcome = await res.json();
-			console.log(outcome);
+			});*/
+			try{
+				let res = await client.post(process.env.threeSpeakUploadInfo, 
+					JSON.stringify(videoInfo),
+					{
+						withCredentials: true,
+						headers: {
+						  "Content-Type": "application/json",
+						},
+					}
+				);
+				console.log(res);
+			}catch(err){
+				console.log(err);
+			}
+			//let outcome = await res.json();
+			//console.log(outcome);
 
 		},
 
@@ -282,13 +277,22 @@ export default {
 			
 			//fetch 3speak memo
 			
-			let res = await fetch(process.env.threeSpeakApiSession.replace('_USERNAME_', this.user.account.name));
+			//let res = await fetch(process.env.threeSpeakApiSession.replace('_USERNAME_', this.user.account.name));
+			let res = await client.get(process.env.threeSpeakApiSession.replace('_USERNAME_', this.user.account.name),
+					{
+						withCredentials: true,
+						headers: {
+						  "Content-Type": "application/json",
+						},
+					}
+				);
+			
 			console.log(res);
-			let outcome = await res.json();
-			console.log(outcome);
+			//let outcome = await res.json();
+			//console.log(outcome);
 			let memo = '';
-			if (outcome && outcome.memo){
-				memo = outcome.memo;
+			if (res && res.data && res.data.memo){
+				memo = res.data.memo;
 			}
 			console.log(memo);
 			
@@ -310,7 +314,7 @@ export default {
 				headers: reqHeads,
 				body: JSON.stringify({'memo': memo})
 			});
-			outcome = await res.json();
+			let outcome = await res.json();
 			console.log(outcome);
 			let xcstkn = '';
 			if (outcome.error){
@@ -325,13 +329,21 @@ export default {
 				if (xcstkn.startsWith('#')){
 					xcstkn = xcstkn.substring(1);//remove first character from token #
 				}
-				res = await fetch(process.env.threeSpeakApiSession.replace('_USERNAME_', this.user.account.name)+'&access_token=' + xcstkn, {
+				/*res = await fetch(process.env.threeSpeakApiSession.replace('_USERNAME_', this.user.account.name)+'&access_token=' + xcstkn, {
 					credentials: 'include',
-				});
+				});*/
+				res = await client.get(process.env.threeSpeakApiSession.replace('_USERNAME_', this.user.account.name)+'&access_token=' + xcstkn,{
+						withCredentials: true,
+						headers: {
+						  "Content-Type": "application/json",
+						},
+					}
+				)
 				console.log(res);
-				console.log( res.headers.get('set-cookie'))
-				outcome = await res.json();
-				console.log(outcome);	
+				//console.log( res.headers.get('set-cookie'))
+				console.log(res.headers["set-cookie"]);
+				//outcome = await res.json();
+				//console.log(outcome);	
 			}
 			}catch(exc){
 				console.log(exc);
@@ -340,7 +352,7 @@ export default {
 	},
 	async mounted () {
 		await this.$store.dispatch('steemconnect/login')
-		//await this.connectSession3S();
+		await this.connectSession3S();
 		
 	}
 }
