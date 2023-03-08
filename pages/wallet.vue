@@ -373,7 +373,7 @@
 					<div class="row">
 					  <label for="transfer-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
 					  <input type="number" id="transfer-amount" name="transfer-amount" ref="transfer-amount" class="form-control-lg w-50 p-2">
-					  <span class="w-25 p-1 text-left text-brand" v-on:click="fillTransAmount()" :title="$t('select_full_balance')"><u>{{ this.renderTransAmount() }}</u></span>
+					  <span class="w-25 p-1 text-left text-brand" v-on:click="fillTransAmount()" :title="$t('select_full_balance')"><img src="/img/HIVE.png" class="mr-1 mini-token-logo" ><u>{{ this.renderTransAmount() }}</u></span>
 					</div>
 					<div class="row">
 					  <label for="transfer-memo" class="w-25 p-2">{{ $t('Memo') }}</label>
@@ -412,7 +412,7 @@
 					<div class="row">
 					  <label for="powerup-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
 					  <input type="number" id="powerup-amount" name="powerup-amount" ref="powerup-amount" class="form-control-lg w-50 p-2">
-					  <span v-on:click="fillPowerupAmount()" :title="$t('select_full_balance')"><u>{{this.renderBalance (this.cur_bchain, true)}}</u></span>
+					  <span v-on:click="fillPowerupAmount()" :title="$t('select_full_balance')"><img src="/img/HIVE.png" class="mr-1 mini-token-logo" ><u>{{this.renderBalance (this.cur_bchain, true)}}</u></span>
 					</div>
 					<div class="row" v-if="!isKeychainLogin && isStdLogin">
 						  <label for="powerup-amount" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
@@ -452,7 +452,7 @@
 					  <div class="row" v-if="!isKeychainLogin && isStdLogin">
 						  <label for="powerdown-amount" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 						  <input type="password"  id="p-ac-key" name="p-ac-key" ref="p-ac-key" class="form-control-lg w-50 p-2">
-						  <span v-on:click="fillPowerdownAmount()" :title="$t('select_full_balance')"><u>{{this.renderSteemPower(1)}}</u></span>
+						  <span v-on:click="fillPowerdownAmount()" :title="$t('select_full_balance')"><img src="/img/HIVE.png" class="mr-1 mini-token-logo" ><u>{{this.renderSteemPower(1)}}</u></span>
 					  </div>
 					  <div class="row" v-if="!isKeychainLogin && isStdLogin">
 						<div class="text-center small p-2 w-25"></div>
@@ -502,6 +502,7 @@
 					<div class="row">
 					  <label for="delegate-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
 					  <input type="number" id="delegate-amount" name="delegate-amount" ref="delegate-amount" class="form-control-lg w-50 p-2">
+					  <span v-on:click="fillDelegateAmount()" :title="$t('select_full_balance')"><img src="/img/HIVE.png" class="mr-1 mini-token-logo" ><u>{{this.renderSteemPower(1)}}</u></span>
 					</div>
 					<div class="row" v-if="!isKeychainLogin && isStdLogin">
 						  <label for="delegate-amount" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
@@ -1802,6 +1803,9 @@
 	  },
 	  fillPowerdownAmount (){
 		this.$refs['powerdown-amount'].value = this.steemPower;//this.renderSteemPower(1);
+	  },
+	  fillDelegateAmount (){
+		this.$refs['delegate-amount'].value = this.steemPower;//this.renderSteemPower(1);
 	  },
 	  fillTokenTransAmount (){
 		if (this.curTokenAction == this.POWERDOWN_FUNDS){
