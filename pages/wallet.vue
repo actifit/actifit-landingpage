@@ -76,8 +76,8 @@
 				<div class="col-1 text-right">-</div>
 				<div class="col-1 text-right break-val">${{ this.afitValueUSD }}</div>
 				<div class="col-2 token_actions">
-					<span class="btn btn-brand p-1">
-						<i class="fas fa-solid fa-history" v-on:click="refreshBalance()" :title="$t('Refresh_balance')"/>
+					<span class="btn btn-brand p-1" v-on:click="refreshBalance()" >
+						<i class="fas fa-solid fa-history" :title="$t('Refresh_balance')"/>
 						<span v-if="refreshinBal" >
 							<i class="fas fa-spin fa-spinner"></i>
 						</span>
@@ -91,11 +91,11 @@
 						<a v-if="cur_bchain=='STEEM'" href="https://steem-engine.net/?p=market&t=AFIT" :class="smallScreenBtnClasses" target="_blank" rel="noopener noreferrer" :text="$t('buy_afit_se')">$</a>
 						<a v-else href="https://hive-engine.com/?p=market&t=AFIT" :class="smallScreenBtnClasses" target="_blank" rel="noopener noreferrer" >$</a>
 					</span>
-					<span class="btn btn-brand p-1" :title="$t('EXCHANGE_AFIT_FOR_STEEM')">
-						<i class="fas fa-solid fa-thumbs-up" v-on:click="exchangeAFITforSTEEM"></i>
+					<span class="btn btn-brand p-1" :title="$t('EXCHANGE_AFIT_FOR_STEEM')" v-on:click="exchangeAFITforSTEEM">
+						<i class="fas fa-solid fa-thumbs-up" ></i>
 					</span>
-					<span class="btn btn-brand p-1" :title="$t('INITIATE_AFIT_TO_HE')">
-						<i class="fas fa-solid fa-angle-double-right" v-on:click="initiateAFITtoSE"></i>
+					<span class="btn btn-brand p-1" :title="$t('INITIATE_AFIT_TO_HE')" v-on:click="initiateAFITtoSE">
+						<i class="fas fa-solid fa-angle-double-right" ></i>
 					</span>
 				</div>
 			</div>
@@ -123,10 +123,10 @@
 				<div class="col-1 text-right">{{ this.renderSavings(this.cur_bchain) }}</div>
 				<div class="col-1 text-right break-val">${{ this.hiveValueUSD }}</div>
 				<div class="col-2 token_actions">
-					<span class="btn btn-brand p-1"><i class="fas fa-arrow-circle-up p-1" :title="$t('POWERUP_ACTION_TEXT')" v-on:click="powerUpFunds"></i></span>
-					<span class="btn btn-brand p-1"><i class="fas fa-arrow-circle-down " :title="$t('POWERDOWN_ACTION_TEXT')" v-on:click="powerDownFunds"></i></span>
-					<span class="btn btn-brand p-1"><i class="fas fa-share-square " :title="$t('TRANSFER_FUNDS_ACTION_TEXT')" v-on:click="transferFunds"></i></span>
-					<span class="btn btn-brand p-1"><i class="fas fa-donate" :title="$t('DELEGATE_ACTION_TEXT')" v-on:click="delegateFunds"></i></span>
+					<span class="btn btn-brand p-1" v-on:click="powerUpFunds"><i class="fas fa-arrow-circle-up p-1" :title="$t('POWERUP_ACTION_TEXT')" ></i></span>
+					<span class="btn btn-brand p-1" v-on:click="powerDownFunds"><i class="fas fa-arrow-circle-down " :title="$t('POWERDOWN_ACTION_TEXT')" ></i></span>
+					<span class="btn btn-brand p-1" v-on:click="transferFunds('HIVE')"><i class="fas fa-share-square " :title="$t('TRANSFER_FUNDS_ACTION_TEXT')" ></i></span>
+					<span class="btn btn-brand p-1" v-on:click="delegateFunds"><i class="fas fa-donate" :title="$t('DELEGATE_ACTION_TEXT')"></i></span>
 				</div>
 			</div>
 			
@@ -141,7 +141,7 @@
 				<div class="col-1 text-right">{{ this.renderSBDSavings(this.cur_bchain) }}</div>
 				<div class="col-1 text-right break-val">${{ this.hbdValueUSD }}</div>
 				<div class="col-2 token_actions">
-					<span class="btn btn-brand p-1"><i class="fas fa-share-square " :title="$t('TRANSFER_FUNDS_ACTION_TEXT')" v-on:click="transferFunds"></i></span>
+					<span class="btn btn-brand p-1" v-on:click="transferFunds('HBD')"><i class="fas fa-share-square " :title="$t('TRANSFER_FUNDS_ACTION_TEXT')" ></i></span>
 				</div>
 			</div>
 			
@@ -229,9 +229,9 @@
 						</span>
 						
 						
-						<span v-if="token.symbol=='AFIT'" class="btn btn-brand p-1" :title="$t('buy_afit_he')">
-						<i class="fas fa-gopuram" v-on:click="moveAFITSEtoAFITPOWER" v-if="cur_bchain=='STEEM'" :title="$t('MOVE_AFIT_SE_AFIT_POWER')"></i>
-						<i class="fas fa-gopuram" v-on:click="moveAFITSEtoAFITPOWER" v-else :title="$t('MOVE_AFIT_HE_AFIT_POWER')"></i>
+						<span v-if="token.symbol=='AFIT'" class="btn btn-brand p-1" :title="$t('buy_afit_he')" v-on:click="moveAFITSEtoAFITPOWER" >
+							<i class="fas fa-gopuram" v-if="cur_bchain=='STEEM'" :title="$t('MOVE_AFIT_SE_AFIT_POWER')"></i>
+							<i class="fas fa-gopuram" v-else :title="$t('MOVE_AFIT_HE_AFIT_POWER')"></i>
 						</span>
 						
 						
@@ -244,11 +244,11 @@
 						
 						<span v-if="token.symbol=='AFITX'" class="btn btn-brand p-1" :title="$t('move_afitx_he_se_title')"><i class="fas fa-angle-double-left" v-on:click="moveAFITXheSE"></i></span>-->
 						
-						<span v-if="token.stakable" class="btn btn-brand p-1"><i class="fas fa-arrow-circle-up p-1" :title="$t('stake_tokens')" v-on:click="initiateStaking(token)"></i></span>
-						<span v-if="token.stakable" class="btn btn-brand p-1"><i class="fas fa-arrow-circle-down " :title="$t('unstake_tokens')" v-on:click="initiateUnStaking(token)"></i></span>
-						<span v-if="withdrawableTokens.includes(token.symbol)" class="btn btn-brand p-1"><i class="fas fa-upload " :title="$t('withdraw_tokens')" v-on:click="initiateWithdraw(token)"></i></span>
-						<span class="btn btn-brand p-1"><i class="fas fa-share-square " :title="$t('transfer_tokens')" v-on:click="initiateTransfer(token)"></i></span>
-						<span v-if="token.symbol =='AFIT'"  class="btn btn-brand p-1" ><i class="fas fa-truck-loading " :title="$t('move_to_bsc')" v-on:click="initiateBSCTransfer(token)"></i></span>
+						<span v-if="token.stakable" class="btn btn-brand p-1" v-on:click="initiateStaking(token)"><i class="fas fa-arrow-circle-up p-1" :title="$t('stake_tokens')" ></i></span>
+						<span v-if="token.stakable" class="btn btn-brand p-1" v-on:click="initiateUnStaking(token)"><i class="fas fa-arrow-circle-down " :title="$t('unstake_tokens')" ></i></span>
+						<span v-if="withdrawableTokens.includes(token.symbol)" class="btn btn-brand p-1" v-on:click="initiateWithdraw(token)"><i class="fas fa-upload " :title="$t('withdraw_tokens')" ></i></span>
+						<span class="btn btn-brand p-1" v-on:click="initiateTransfer(token)"><i class="fas fa-share-square " :title="$t('transfer_tokens')" ></i></span>
+						<span v-if="token.symbol =='AFIT'"  class="btn btn-brand p-1" v-on:click="initiateBSCTransfer(token)"><i class="fas fa-truck-loading " :title="$t('move_to_bsc')" ></i></span>
 					</div>
 				  <!--</div>-->
 				</div>
@@ -262,7 +262,7 @@
 					<div class="col-1 text-right"></div>
 					<div class="col-1 text-right">-</div>
 					<div class="col-2">
-						<span v-if="cur_bchain!='BLURT'" class="btn btn-brand p-1" :title="$t('move_afit_se_he_title')"><i class="fas fa-angle-double-right" v-on:click="moveAFITseHE"></i></span>
+						<span v-if="cur_bchain!='BLURT'" class="btn btn-brand p-1" :title="$t('move_afit_se_he_title')" v-on:click="moveAFITseHE"><i class="fas fa-angle-double-right" ></i></span>
 					</div>
 				</div>
 				
@@ -274,7 +274,7 @@
 					<div class="col-1 text-right"></div>
 					<div class="col-1 text-right">-</div>
 					<div class="col-2">
-						<span v-if="cur_bchain!='BLURT'" class="btn btn-brand p-1" :title="$t('move_afitx_se_he_title')"><i class="fas fa-angle-double-right" v-on:click="moveAFITXseHE"></i></span>
+						<span v-if="cur_bchain!='BLURT'" class="btn btn-brand p-1" :title="$t('move_afitx_se_he_title')" v-on:click="moveAFITXseHE"><i class="fas fa-angle-double-right" ></i></span>
 					</div>
 				</div>
 				
@@ -359,15 +359,15 @@
 					<div class="row">
 						<label for="transfer-type" class="w-25 p-2">{{ $t('Type') }} *</label>
 						<select @change="transferTypeChange" id="transfer-type" name="transfer-type" ref="transfer-type" text="Choose Type" class="form-control-lg w-50 p-2">
-						  <option value="HIVE" v-if="cur_bchain!='BLURT'">
-							<span v-if="cur_bchain=='STEEM'">{{ $t('STEEM') }}</span>
+						  <option value="HIVE" v-if="cur_bchain!='BLURT'" :selected="transferType=='HIVE'">
+							<span v-if="cur_bchain=='STEEM'">{{ $t('STEEM') }}</span> 
 							<span v-if="cur_bchain=='HIVE'">{{ $t('HIVE') }}</span>
 						  </option>
-						  <option value="HBD" v-if="cur_bchain!='BLURT'">
+						  <option value="HBD" v-if="cur_bchain!='BLURT'" :selected="transferType=='HBD'">
 							<span v-if="cur_bchain=='STEEM'">{{ $t('SBD') }}</span>
 							<span v-if="cur_bchain=='HIVE'">{{ $t('HBD') }}</span>
 						  </option>
-						  <option value="BLURT" v-if="cur_bchain=='BLURT'">{{ $t('BLURT') }}</option>
+						  <option value="BLURT" v-if="cur_bchain=='BLURT'" :selected="transferType=='BLURT'">{{ $t('BLURT') }}</option>
 						</select>
 					</div>
 					<div class="row">
@@ -2855,7 +2855,7 @@
 				res => ).catch(err=>console.log(err));*/
 		}
 	  },
-	  transferFunds () {
+	  transferFunds (cur) {
 		//function handles opening/closing transfer section
 		
 		//set proper Fund Activity Mode controlling the display
@@ -2863,6 +2863,8 @@
 		//  this.fundActivityMode = 0;
 		//}else{
 		  this.fundActivityMode = this.TRANSFER_FUNDS;
+		  //this.$refs['transfer-type'].value = cur;
+		  this.transferType = cur;
 		//}
 		//hide upper activity section
 		this.afitActivityMode = 0;
