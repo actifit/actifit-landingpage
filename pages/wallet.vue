@@ -2228,7 +2228,6 @@
 		if (this.tokenMetrics.length > 0){
 			let tokenData = this.tokenMetrics.find(v => v.symbol == token.symbol);
 			
-
 			if (tokenData && tokenData.lastPrice){
 				let valueUSD = token.balance * parseFloat(tokenData.lastPrice) * this.hivePrice;
 				this.heTokenBalances[token.symbol] = valueUSD;
@@ -2236,6 +2235,12 @@
 					//console.log(token.symbol)
 					//console.log(token.balance+ ' * ' + tokenData.lastPrice +' * ' + this.hivePrice + ' =' + token.balance * parseFloat(tokenData.lastPrice)) * this.hivePrice;
 				//}
+				return this.numberFormat(valueUSD.toFixed(3), 2)
+			}else if (token.symbol == 'SWAP.HIVE'){
+				console.log('swap.hive')
+				//console.log(tokenData.lastPrice)
+				let valueUSD = token.balance * this.hivePrice;
+				this.heTokenBalances[token.symbol] = valueUSD;
 				return this.numberFormat(valueUSD.toFixed(3), 2)
 			}
 			return '';
