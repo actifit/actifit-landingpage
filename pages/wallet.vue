@@ -347,7 +347,7 @@
 			
 			
 			
-			<div id="detailsArea" />
+			<div id="detailsArea" ref="detailsArea"></div>
 			<div class="text-center">
 				<transition name="fade">
 				  <div v-if="fundActivityMode == 1" class="text-center grid col-md-12">
@@ -1253,6 +1253,8 @@
 	},
 	data () {
 	  return {
+		observerSet: false,
+		detailsViewable: false,
 	    CLOSED_MODE: 0,
 		TRANSFER_FUNDS: 1,
 		POWERUP_FUNDS: 2,
@@ -1583,6 +1585,21 @@
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
 	  
+	  /* for scrolling monitoring purposes */
+	  handleIntersection(entries) {
+		  entries.forEach(entry => {
+			if (entry.isIntersecting) {
+			  //console.log('Element is visible');
+			  this.detailsViewable = true;
+			  // Do something when the element is visible
+			} else {
+			  //console.log('Element is not visible');
+			  this.detailsViewable = false;
+			  // Do something when the element is not visible
+			}
+		  });
+	  },
+	  
 	  renderToken (token) {
 		//check small balances flag
 		if (this.hide_small_balances && this.usdVal(token) < 1){
@@ -1605,7 +1622,10 @@
        * Scrolls down to content area.
        */
       scrollAction () {
-        VueScrollTo.scrollTo('#detailsArea', 1000, {easing: 'ease-in-out', offset: -50})
+		//only scroll if we cannot see details area
+		if (!this.detailsViewable){
+			VueScrollTo.scrollTo('#detailsArea', 1000, {easing: 'ease-in-out', offset: -50})
+		}
       },
 	  
 	  showClaimableRewards() {
@@ -5564,6 +5584,33 @@
 	destroyed () {
 	  clearInterval(this.runningInterval);
 	},
+	updated: function () {
+	  this.$nextTick(function () {
+		// Code that will run only after the
+		// entire view has been re-rendered
+		//console.log('updated');
+		//console.log(this.$refs['detailsArea']);
+		//monitor visibility of details area to avoid multiple scrolls there
+		/***************/
+		if (!this.observerSet){
+			const observer = new IntersectionObserver(this.handleIntersection, {
+			  rootMargin: '0px',
+			  threshold: 1.0
+			});
+			//console.log(this.$refs);
+			const element = this.$refs['detailsArea'];
+			//console.log(element);
+			if (element) {
+				observer.observe(this.$refs['detailsArea']);
+				console.log('observer set')
+				this.observerSet = true;
+			}else{
+				console.error("Element not found.");
+			}
+		}
+		/***************/
+	  })
+	},
     async mounted () {
 		this.afitTokenAddress = afitTokenAddress;
 		this.afitxTokenAddress = afitxTokenAddress;
@@ -5575,7 +5622,7 @@
 		//metamask functional
 		web3 = new Web3(window.ethereum);
 	  }
-	
+		
 	  //check which chain is active
 	  if (localStorage.getItem('cur_bchain')){
 		this.cur_bchain = localStorage.getItem('cur_bchain')
