@@ -300,7 +300,7 @@
 					<div class="row" v-if="tokenActions">
 					  <label for="token-powerup-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
 					  <input type="number" id="token-powerup-amount" name="token-powerup-amount" ref="token-powerup-amount" class="form-control-lg w-50 p-2" @change="calculateHBDAmount">
-					  <span class="p-2" v-on:click="fillTokenTransAmount()" :title="$t('select_full_balance')"><img :src="selTokenUp.icon" class="mr-1 mini-token-logo" ><u>{{selTokenUp.balance}} {{ selTokenUp.symbol }}</u></span>
+					  <span class="p-2" v-on:click="fillTokenTransAmount()" :title="$t('select_full_balance')"><img :src="selTokenUp.icon" class="mr-1 mini-token-logo" ><u>{{showMaxBal(selTokenUp)}} {{ selTokenUp.symbol }}</u></span>
 					</div>
 					
 					<div class="row" v-if="tokenActions && curTokenAction == TRANSFER_BSC">
@@ -412,6 +412,7 @@
 					<div class="row">
 					  <label for="powerup-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
 					  <input type="number" id="powerup-amount" name="powerup-amount" ref="powerup-amount" class="form-control-lg w-50 p-2">
+					  <span v-on:click="fillPowerupAmount()" :title="$t('select_full_balance')"><u>{{this.renderBalance (this.cur_bchain, true)}}</u></span>
 					</div>
 					<div class="row" v-if="!isKeychainLogin && isStdLogin">
 						  <label for="powerup-amount" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
@@ -451,6 +452,7 @@
 					  <div class="row" v-if="!isKeychainLogin && isStdLogin">
 						  <label for="powerdown-amount" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 						  <input type="password"  id="p-ac-key" name="p-ac-key" ref="p-ac-key" class="form-control-lg w-50 p-2">
+						  <span v-on:click="fillPowerdownAmount()" :title="$t('select_full_balance')"><u>{{this.renderSteemPower(1)}}</u></span>
 					  </div>
 					  <div class="row" v-if="!isKeychainLogin && isStdLogin">
 						<div class="text-center small p-2 w-25"></div>
@@ -1786,8 +1788,27 @@
 			return this.renderBalance(this.cur_bchain, nofrmt) 
 		}
 	  },
+	  showMaxBal (){
+		console.log('showMaxBal');
+		
+		if (this.curTokenAction == this.POWERDOWN_FUNDS){
+			console.log('POWERDOWN_FUNDS')
+			return this.selTokenUp.stake
+		}
+		return this.selTokenUp.balance;
+	  },
+	  fillPowerupAmount (){
+		this.$refs['powerup-amount'].value = parseFloat(this.user.account.balance);//this.renderBalance(this.cur_bchain, true);
+	  },
+	  fillPowerdownAmount (){
+		this.$refs['powerdown-amount'].value = this.steemPower;//this.renderSteemPower(1);
+	  },
 	  fillTokenTransAmount (){
-		this.$refs['token-powerup-amount'].value = this.selTokenUp.balance;
+		if (this.curTokenAction == this.POWERDOWN_FUNDS){
+			this.$refs['token-powerup-amount'].value = this.selTokenUp.stake
+		}else{
+			this.$refs['token-powerup-amount'].value = this.selTokenUp.balance;
+		}
 	  },
 	  fillTransAmount (){
 		this.$refs['transfer-amount'].value = this.renderTransAmount('1').split(' ')[0];
