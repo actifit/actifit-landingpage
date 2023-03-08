@@ -64,18 +64,18 @@
 				<div class="col-2">Location</div>
 				<div class="col-2">Balance</div>
 				<div class="col-2">Staked</div>
-				<div class="col-1">Savings</div>
-				<div class="col-1">USD Value</div>
-				<div class="col-2">Actions</div>
+				<div class="col-lg-1 col-2">Savings</div>
+				<div class="col-1">USD</div>
+				<div class="col-lg-2 col-1"><i class="fa-solid fa-wave-square" :title="$t('Actions')"></i></div>
 			</div>
 			<div class="token-entry row">
 				<div class="col-2 text-left"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo">AFIT</div>
 				<div class="col-2">{{ $t('actifit_wallet')}}</div>
 				<div class="col-2 text-right">{{ formattedUserAfit }}</div>
 				<div class="col-2 text-right">-</div>
-				<div class="col-1 text-right">-</div>
+				<div class="col-lg-1 col-2 text-right">-</div>
 				<div class="col-1 text-right break-val">${{ this.afitValueUSD }}</div>
-				<div class="col-2 token_actions">
+				<div class="col-lg-2 col-1 token_actions">
 					<span class="btn btn-brand p-1" v-on:click="refreshBalance()" >
 						<i class="fas fa-solid fa-history" :title="$t('Refresh_balance')"/>
 						<span v-if="refreshinBal" >
@@ -120,9 +120,9 @@
 				<span v-if="showPowerBreakdown"><li>{{this.renderSteemPower(1)}} ({{ $t('Owned_SP') }})</li><li> + {{this.renderSteemPower(3)}} ({{ $t('Received_SP') }})</li><li> - {{this.renderSteemPower(4)}} ({{ $t('Delegated_SP') }})</li><li> - {{this.renderSteemPower(5)}} ({{ $t('Powering_Down_Amount') }})</li></span>
 				
 				</div>
-				<div class="col-1 text-right">{{ this.renderSavings(this.cur_bchain) }}</div>
+				<div class="col-lg-1 col-2 text-right">{{ this.renderSavings(this.cur_bchain) }}</div>
 				<div class="col-1 text-right break-val">${{ this.hiveValueUSD }}</div>
-				<div class="col-2 token_actions">
+				<div class="col-lg-2 col-1 token_actions">
 					<span class="btn btn-brand p-1" v-on:click="powerUpFunds"><i class="fas fa-arrow-circle-up p-1" :title="$t('POWERUP_ACTION_TEXT')" ></i></span>
 					<span class="btn btn-brand p-1" v-on:click="powerDownFunds"><i class="fas fa-arrow-circle-down " :title="$t('POWERDOWN_ACTION_TEXT')" ></i></span>
 					<span class="btn btn-brand p-1" v-on:click="transferFunds('HIVE')"><i class="fas fa-share-square " :title="$t('TRANSFER_FUNDS_ACTION_TEXT')" ></i></span>
@@ -138,9 +138,9 @@
 				<div class="col-2">{{ this.cur_bchain }}</div>
 				<div class="col-2 text-right">{{ this.renderSBDBalance(this.cur_bchain) }}</div>
 				<div class="col-2"></div>
-				<div class="col-1 text-right">{{ this.renderSBDSavings(this.cur_bchain) }}</div>
+				<div class="col-lg-1 col-2 text-right">{{ this.renderSBDSavings(this.cur_bchain) }}</div>
 				<div class="col-1 text-right break-val">${{ this.hbdValueUSD }}</div>
-				<div class="col-2 token_actions">
+				<div class="col-lg-2 col-1 token_actions">
 					<span class="btn btn-brand p-1" v-on:click="transferFunds('HBD')"><i class="fas fa-share-square " :title="$t('TRANSFER_FUNDS_ACTION_TEXT')" ></i></span>
 				</div>
 			</div>
@@ -151,9 +151,9 @@
 				<div class="col-2">{{ $t('BSC')}}</div>
 				<div class="col-2 text-right">{{ formattedUserAfitBSC }}</div>
 				<div class="col-2"></div>
-				<div class="col-1 text-right"></div>
+				<div class="col-lg-1 col-2 text-right"></div>
 				<div class="col-1 text-right break-val">{{ formattedUserAfitBSCVal}}</div>
-				<div class="col-2 token_actions">
+				<div class="col-lg-2 col-1 token_actions">
 					<span class="btn btn-brand p-1" :title="$t('smart_contract')">
 							<a target="_blank" :href="'https://bscscan.com/address/'+afitTokenAddress"><i class="fas fa-file-contract"></i></a>
 					</span>
@@ -165,9 +165,9 @@
 				<div class="col-2">{{ $t('BSC')}}</div>
 				<div class="col-2 text-right">{{ formattedUserAfitBNBLPBSC }}</div>
 				<div class="col-2"></div>
-				<div class="col-1 text-right"></div>
+				<div class="col-lg-1 col-2 text-right"></div>
 				<div class="col-1 text-right">-</div>
-				<div class="col-2 token_actions">
+				<div class="col-lg-2 col-1 token_actions">
 					<span class="btn btn-brand p-1" :title="$t('smart_contract')">
 							<a target="_blank" :href="'https://bscscan.com/address/'+afitBNBLPTokenAddress"><i class="fas fa-file-contract"></i></a>
 					</span>
@@ -180,9 +180,9 @@
 				<div class="col-2">{{ $t('BSC')}}</div>
 				<div class="col-2 text-right">{{ formattedUserAFITXBSC }}</div>
 				<div class="col-2"></div>
-				<div class="col-1 text-right"></div>
+				<div class="col-lg-1 col-2 text-right"></div>
 				<div class="col-1 text-right break-val">{{ formattedUserAfitxBSCVal}}</div>
-				<div class="col-2 token_actions">
+				<div class="col-lg-2 col-1 token_actions">
 					<span class="btn btn-brand p-1" :title="$t('smart_contract')">
 							<a target="_blank" :href="'https://bscscan.com/address/'+afitxTokenAddress"><i class="fas fa-file-contract"></i></a>
 					</span>
@@ -194,9 +194,9 @@
 				<div class="col-2">{{ $t('BSC')}}</div>
 				<div class="col-2 text-right">{{ formattedUserAFITXBNBLPBSC }}</div>
 				<div class="col-2"></div>
-				<div class="col-1 text-right"></div>
+				<div class="col-lg-1 col-2 text-right"></div>
 				<div class="col-1 text-right">-</div>
-				<div class="col-2 token_actions">
+				<div class="col-lg-2 col-1 token_actions">
 					<span class="btn btn-brand p-1" :title="$t('smart_contract')">
 							<a target="_blank" :href="'https://bscscan.com/address/'+afitxBNBLPTokenAddress"><i class="fas fa-file-contract"></i></a>
 					</span>
@@ -213,10 +213,10 @@
 					<div class="col-2">{{ $t('hive_engine')}}</div>
 					<div class="col-2 text-right">{{ renderBal(token) }} {{ token.symbol }}</div>
 					<div class="col-2 text-right">{{ renderStake(token)}} {{ token.symbol }}</div>
-					<div class="col-1"></div>
+					<div class="col-lg-1 col-2"></div>
 					<div class="col-1 text-right break-val">${{ usdVal(token) }}</div>
 					<!--<span v-if="parseFloat(delegStake(token)) > 0">( + {{ delegStake(token)}} {{ token.symbol }} {{ $t('Delegated') }}) </span>-->
-					<div class="token_actions col-2" v-if="cur_bchain!='BLURT'">
+					<div class="token_actions col-lg-2 col-1" v-if="cur_bchain!='BLURT'">
 						<span v-if="token.symbol=='AFITX'" class="btn btn-brand p-1" >
 							<a href="#" data-toggle="modal" class="" data-target="#topHoldersXModal" :title="$t('top_100_afitx_holders')" >
 								<i class="fas fa-list-ol"></i>
@@ -259,9 +259,9 @@
 					<div class="col-2">{{ $t('Steem_Engine')}}</div>
 					<div class="col-2 text-right">{{ formattedUserAfitSE }}</div>
 					<div class="col-2"></div>
-					<div class="col-1 text-right"></div>
+					<div class="col-lg-1 col-2 text-right"></div>
 					<div class="col-1 text-right">-</div>
-					<div class="col-2">
+					<div class="col-lg-2 col-1">
 						<span v-if="cur_bchain!='BLURT'" class="btn btn-brand p-1" :title="$t('move_afit_se_he_title')" v-on:click="moveAFITseHE"><i class="fas fa-angle-double-right" ></i></span>
 					</div>
 				</div>
@@ -271,9 +271,9 @@
 					<div class="col-2">{{ $t('Steem Engine')}}</div>
 					<div class="col-2 text-right">{{ formattedUserAFITXSE }}</div>
 					<div class="col-2"></div>
-					<div class="col-1 text-right"></div>
+					<div class="col-lg-1 col-2 text-right"></div>
 					<div class="col-1 text-right">-</div>
-					<div class="col-2">
+					<div class="col-lg-2 col-1">
 						<span v-if="cur_bchain!='BLURT'" class="btn btn-brand p-1" :title="$t('move_afitx_se_he_title')" v-on:click="moveAFITXseHE"><i class="fas fa-angle-double-right" ></i></span>
 					</div>
 				</div>

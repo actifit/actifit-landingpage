@@ -940,6 +940,7 @@ module.exports = {
   error_resetting_wallet: 'There was an error resetting your wallet address',
   address_reset_successfully: 'Wallet address successfully removed',
   BSC: 'BSC',
+  Actions: 'Actions',
   posh_desc_profile: 'Earn <u><a href="https://hiveposh.com/">POSH Tokens</a></u> by sharing your posts on twitter',
   tipping_details: 'This special onchain tipping functionality allows you to send out tips to users by commenting on their posts, and sends out AFIT directly onto their hive-engine account. For more details about how it works and how to load up balance, check out this post: <a href="https://links.actifit.io/tipping-afit">https://links.actifit.io/tipping-afit</a>'
 }
