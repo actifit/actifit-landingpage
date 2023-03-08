@@ -300,7 +300,7 @@
 					<div class="row" v-if="tokenActions">
 					  <label for="token-powerup-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
 					  <input type="number" id="token-powerup-amount" name="token-powerup-amount" ref="token-powerup-amount" class="form-control-lg w-50 p-2" @change="calculateHBDAmount">
-					  <span class="p-2"><img :src="selTokenUp.icon" class="mr-1 mini-token-logo" >{{ selTokenUp.symbol }}</span>
+					  <span class="p-2" v-on:click="fillTokenTransAmount()" :title="$t('select_full_balance')"><img :src="selTokenUp.icon" class="mr-1 mini-token-logo" ><u>{{selTokenUp.balance}} {{ selTokenUp.symbol }}</u></span>
 					</div>
 					
 					<div class="row" v-if="tokenActions && curTokenAction == TRANSFER_BSC">
@@ -1785,6 +1785,9 @@
 		}else{
 			return this.renderBalance(this.cur_bchain, nofrmt) 
 		}
+	  },
+	  fillTokenTransAmount (){
+		this.$refs['token-powerup-amount'].value = this.selTokenUp.balance;
 	  },
 	  fillTransAmount (){
 		this.$refs['transfer-amount'].value = this.renderTransAmount('1').split(' ')[0];
