@@ -60,12 +60,24 @@
 		</div>
 		<div v-if="this.tokenMetrics.length > 0 || this.tokensOfInterestBal.length > 0" class="wallet-container">
 			<div class="row font-weight-bold token-entry thick-bottom head-title">
-				<div class="col-2">Token</div>
-				<div class="col-2">Location</div>
-				<div class="col-2">Balance</div>
+				<div class="col-2">Token 
+					<span v-on:click="sortTokenData('symbol')">
+						<span v-if="tokenSort=='symbol' && tsortDir==1" >▼△</span>
+						<span v-else-if="tokenSort=='symbol'">▽▲</span>
+						<span v-else>▽△</span>
+					</span>
+				</div>
+				<div class="col-2">Location <span v-if="tokenSort=='location'">▽▼△▲</span></div>
+				<div class="col-2">Balance 
+					<span v-on:click="sortTokenData('balance')">
+						<span v-if="tokenSort=='balance' && tsortDir==1" >▼△</span>
+						<span v-else-if="tokenSort=='balance'">▽▲</span>
+						<span v-else>▽△</span>
+					</span>
+				</div>
 				<div class="col-2">Staked</div>
 				<div class="col-lg-1 col-2">Savings</div>
-				<div class="col-1">USD</div>
+				<div class="col-1">USD <span v-if="tokenSort=='usdval'">▽▼△▲</span></div>
 				<div class="col-lg-2 col-1"><i class="fa-solid fa-wave-square" :title="$t('Actions')"></i></div>
 			</div>
 			<div class="token-entry row">
@@ -1255,6 +1267,8 @@
 	  return {
 		observerSet: false,
 		detailsViewable: false,
+		tokenSort: 'symbol',//default sort by token name
+		tsortDir: 1,//1 asc -1 desc
 	    CLOSED_MODE: 0,
 		TRANSFER_FUNDS: 1,
 		POWERUP_FUNDS: 2,
@@ -2481,11 +2495,8 @@
 		  //console.log(tokenData)
 		  
 		  if (tokenData){
-			this.tokensOfInterestBal = tokenData.sort(function tokenEntry(a, b) {
-				return b.symbol < a.symbol ?  1
-						: b.symbol > a.symbol ? -1
-						: 0;
-			});
+			this.tokensOfInterestBal = tokenData;
+			await this.sortTokenData(this.tokenSort, true);
 		  }
 		  
 		  //fetch tokens' data (price et al)
@@ -2546,6 +2557,27 @@
 		  
 		  
 		}
+	  },
+	  async sortTokenData (type, keepDir) {
+		//sort alpha / default
+		this.tokenSort = type;
+		if (keepDir){
+			//
+		}else{ 
+			this.tsortDir *= -1;
+		}
+		let upRef = this;
+		this.tokensOfInterestBal = this.tokensOfInterestBal.sort(function tokenEntry(a, b) {
+			if (type=='balance'){
+				return parseFloat(b[type]) < parseFloat(a[type]) ?  upRef.tsortDir
+					: parseFloat(b[type]) > parseFloat(a[type]) ? -1 * upRef.tsortDir
+					: 0;
+				
+			}
+			return b[type] < a[type] ?  upRef.tsortDir
+					: b[type] > a[type] ? -1 * upRef.tsortDir
+					: 0;
+		});
 	  },
 	  async setPendingRewards(json){
 		this.pendingRewards = json;
