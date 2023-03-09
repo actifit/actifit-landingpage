@@ -351,6 +351,7 @@
 		max-height: 300px;
 		overflow-y: auto;
 		overflow-x: hidden;
+		min-width: 300px;
 	}
 	.option-opaque{
 		opacity: 0.3;
