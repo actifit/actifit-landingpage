@@ -16,11 +16,11 @@
 			<div class="col-6 text-left">
 				
 				<span class="btn btn-brand mb-1" :title="show_only_tokens_interest?$t('show_all_tokens'):$t('show_core_tokens')" v-on:click="switchTokenDisplay">
-					<i class="fas fa-solid fa-filter" ></i>
+					<i class="fas fa-solid fa-filter" :style="show_only_tokens_interest?'color:green':'color:white'"></i>
 				</span>
 				
 				<span class="btn btn-brand mb-1" :title="hide_small_balances?$t('show_all_tokens'):$t('hide_small_balances')" v-on:click="switchHideSmall">
-					<i class="fas fa-solid fa-creative-commons-zero" ></i>
+					<i class="fas fa-solid fa-creative-commons-zero" :style="hide_small_balances?'color:green':'color:white'"></i>
 				</span>
 				
 				<span class="pl-2">{{$t('account_est_val')}} ${{this.totalAccountValue}}</span>
@@ -61,7 +61,7 @@
 		<div v-if="this.tokenMetrics.length > 0 || this.tokensOfInterestBal.length > 0" class="wallet-container">
 			<div class="row font-weight-bold token-entry thick-bottom head-title">
 				<div class="col-2">Token 
-					<span v-on:click="sortTokenData('symbol')">
+					<span v-on:click="sortTokenData('symbol')" class="clickable">
 						<span v-if="tokenSort=='symbol' && tsortDir==1" >▼△</span>
 						<span v-else-if="tokenSort=='symbol'">▽▲</span>
 						<span v-else>▽△</span>
@@ -69,7 +69,7 @@
 				</div>
 				<div class="col-2">Location <span v-if="tokenSort=='location'">▽▼△▲</span></div>
 				<div class="col-2">Balance 
-					<span v-on:click="sortTokenData('balance')">
+					<span v-on:click="sortTokenData('balance')" class="clickable">
 						<span v-if="tokenSort=='balance' && tsortDir==1" >▼△</span>
 						<span v-else-if="tokenSort=='balance'">▽▲</span>
 						<span v-else>▽△</span>
@@ -5842,6 +5842,9 @@
 	padding-right: 5px;
   }
   .fas{
+	cursor: pointer;
+  }
+  .clickable{
 	cursor: pointer;
   }
   .btn-brand{
