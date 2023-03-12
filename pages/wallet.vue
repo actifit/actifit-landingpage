@@ -77,7 +77,11 @@
 				</div>
 				<div class="col-2">Staked</div>
 				<div class="col-lg-1 col-2">Savings</div>
-				<div class="col-1">USD <span v-if="tokenSort=='usdval'">▽▼△▲</span></div>
+				<div class="col-1">USD <span v-on:click="sortTokenData('usdval')" class="clickable">
+						<span v-if="tokenSort=='usdval' && tsortDir==1" >▼△</span>
+						<span v-else-if="tokenSort=='usdval'">▽▲</span>
+						<span v-else>▽△</span>
+					</span></div>
 				<div class="col-lg-2 col-1"><i class="fa-solid fa-wave-square" :title="$t('Actions')"></i></div>
 			</div>
 			<div class="token-entry row">
@@ -2238,7 +2242,7 @@
 			case 5: return this.numberFormat(this.powerDownRateVal, 3);
 		}
 	  },
-	  usdVal (token){
+	  usdVal (token, nofrmt){
 		if (this.tokenMetrics.length > 0){
 			let tokenData = this.tokenMetrics.find(v => v.symbol == token.symbol);
 			
@@ -2249,15 +2253,27 @@
 					//console.log(token.symbol)
 					//console.log(token.balance+ ' * ' + tokenData.lastPrice +' * ' + this.hivePrice + ' =' + token.balance * parseFloat(tokenData.lastPrice)) * this.hivePrice;
 				//}
+				if (nofrmt){
+					return parseFloat(valueUSD);
+				}
 				return this.numberFormat(valueUSD.toFixed(3), 2)
 			}else if (token.symbol == 'SWAP.HIVE'){
 				console.log('swap.hive')
 				//console.log(tokenData.lastPrice)
 				let valueUSD = token.balance * this.hivePrice;
 				this.heTokenBalances[token.symbol] = valueUSD;
+				if (nofrmt){
+					return parseFloat(valueUSD);
+				}
 				return this.numberFormat(valueUSD.toFixed(3), 2)
 			}
+			if (nofrmt){
+				return 0;
+			}
 			return '';
+		}
+		if (nofrmt){
+			return 0;
 		}
 		return '';
 	  },
@@ -2573,6 +2589,10 @@
 					: parseFloat(b[type]) > parseFloat(a[type]) ? -1 * upRef.tsortDir
 					: 0;
 				
+			}else if (type == 'usdval'){
+				return upRef.usdVal(b, true) < upRef.usdVal(a, true) ? upRef.tsortDir
+					: upRef.usdVal(b, true) > upRef.usdVal(a, true) ? -1 * upRef.tsortDir
+					: 0;
 			}
 			return b[type] < a[type] ?  upRef.tsortDir
 					: b[type] > a[type] ? -1 * upRef.tsortDir
