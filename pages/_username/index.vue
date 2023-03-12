@@ -224,7 +224,7 @@
 					</div>
 				
 					<div v-if="voteWitnessDisplay">  
-						<div>
+						<div v-if="!isKeychainLogin && isStdLogin">
 							<label for="p-ac-key" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 							<input type="password" id="p-ac-key" name="p-ac-key" ref="p-ac-key" class="form-control-lg w-50 p-2">
 						</div>
@@ -986,53 +986,104 @@
 	  voteWitness() {
 		this.voteWitnessDisplay = !this.voteWitnessDisplay;
 	  },
+	  isKeychainLogin (){
+		return localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain
+	  },
+      isStdLogin () {
+		return localStorage.getItem('std_login')
+	  },
+
 	  proceedWitnessVote(isProxy) {
 		this.error_proceeding = false;
-		if (this.$refs["p-ac-key"].value == ''){
-		  this.error_proceeding = true;
-		  this.error_msg = this.$t('all_fields_required');
-		  return;
+		if (!this.isKeychainLogin && this.isStdLogin){
+			if (this.$refs["p-ac-key"].value == ''){
+			  this.error_proceeding = true;
+			  this.error_msg = this.$t('all_fields_required');
+			  return;
+			}
 		}
 		this.votingProgress = true;
 		let parentRef = this;
 		if (isProxy){
-			hive.broadcast.accountWitnessProxy(this.$refs["p-ac-key"].value, this.displayUser, 'actifit', function(err, result) {
-			  console.log(err, result);
-			  if (err){
-				parentRef.error_proceeding = true;
-				parentRef.error_msg = parentRef.$t('Error_sending_vote');
-				parentRef.votingProgress = false;
-			  }else{
-				parentRef.votingProgress = false;
-				parentRef.voteWitnessDisplay = false;
-				//notify of success
-				parentRef.$notify({
-				  group: 'success',
-				  text: parentRef.$t('Witness_proxy_set_successfully'),
-				  position: 'top center'
-				})
-				parentRef.getAccountData();
-			  }
-			});
+			if (!this.isKeychainLogin && this.isStdLogin){
+				hive.broadcast.accountWitnessProxy(this.$refs["p-ac-key"].value, this.displayUser, 'actifit', function(err, result) {
+				  console.log(err, result);
+				  if (err){
+					parentRef.error_proceeding = true;
+					parentRef.error_msg = parentRef.$t('Error_sending_vote_proxy');
+					parentRef.votingProgress = false;
+				  }else{
+					parentRef.votingProgress = false;
+					parentRef.voteWitnessDisplay = false;
+					//notify of success
+					parentRef.$notify({
+					  group: 'success',
+					  text: parentRef.$t('Witness_proxy_set_successfully'),
+					  position: 'top center'
+					})
+					parentRef.getAccountData();
+				  }
+				});
+			}else if (this.isKeychainLogin){
+				window.hive_keychain.requestProxy(this.displayUser, 'actifit', (response) => {
+					console.log(response);
+					if (response.success){
+						parentRef.votingProgress = false;
+						parentRef.voteWitnessDisplay = false;
+						//notify of success
+						parentRef.$notify({
+						  group: 'success',
+						  text: parentRef.$t('Witness_proxy_set_successfully'),
+						  position: 'top center'
+						})
+						parentRef.getAccountData();
+					}else{
+						parentRef.error_proceeding = true;
+						parentRef.error_msg = parentRef.$t('Error_sending_vote_proxy');;
+						parentRef.votingProgress = false;
+					}
+				});
+			}
 		}else{
-			hive.broadcast.accountWitnessVote(this.$refs["p-ac-key"].value, this.displayUser, 'actifit', 1, function(err, result) {
-			  console.log(err, result);
-			  if (err){
-				parentRef.error_proceeding = true;
-				parentRef.error_msg = parentRef.$t('Error_sending_vote_proxy');;
-				parentRef.votingProgress = false;
-			  }else{
-				parentRef.votingProgress = false;
-				parentRef.voteWitnessDisplay = false;
-				//notify of success
-				parentRef.$notify({
-				  group: 'success',
-				  text: parentRef.$t('Witness_voted_successfully'),
-				  position: 'top center'
-				})
-				parentRef.getAccountData();
-			  }
-			});
+			if (!this.isKeychainLogin && this.isStdLogin){
+				hive.broadcast.accountWitnessVote(this.$refs["p-ac-key"].value, this.displayUser, 'actifit', 1, function(err, result) {
+				  console.log(err, result);
+				  if (err){
+					parentRef.error_proceeding = true;
+					parentRef.error_msg = parentRef.$t('Error_sending_vote');;
+					parentRef.votingProgress = false;
+				  }else{
+					parentRef.votingProgress = false;
+					parentRef.voteWitnessDisplay = false;
+					//notify of success
+					parentRef.$notify({
+					  group: 'success',
+					  text: parentRef.$t('Witness_voted_successfully'),
+					  position: 'top center'
+					})
+					parentRef.getAccountData();
+				  }
+				});
+			}else if (this.isKeychainLogin){
+				window.hive_keychain.requestWitnessVote(this.displayUser, 'actifit', true, (response) => {
+					console.log(response);
+					if (response.success){
+						parentRef.votingProgress = false;
+						parentRef.voteWitnessDisplay = false;
+						//notify of success
+						parentRef.$notify({
+						  group: 'success',
+						  text: parentRef.$t('Witness_voted_successfully'),
+						  position: 'top center'
+						})
+						parentRef.getAccountData();
+					}else{
+						parentRef.error_proceeding = true;
+						parentRef.error_msg = parentRef.$t('Error_sending_vote');;
+						parentRef.votingProgress = false;
+					}
+				  });
+			}
 		}
 	
 	  },

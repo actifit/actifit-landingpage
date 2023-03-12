@@ -62,7 +62,8 @@ export default {
 			vidprogress: null,
 			thumbprogress: null,
 			thumbnail: null,
-			thumbnailName : ''
+			thumbnailName : '',
+			xcstkn: ''
 		}
 	},
 	components: {
@@ -239,7 +240,7 @@ export default {
 			
 			let reqHeads = new Headers({
 				'Content-Type': 'application/json',
-				'credentials': 'include',
+				//'credentials': 'include',
 				//'Cookie': 'connect.sid=s%3ArfBowB6t8rH0pV4wSkamopj0mZARXwNr.%2FS1bwFv%2FuG2IdthqJXV1YyrE4ZwrlDCpxnfdBiPWaUk'
 
 			});
@@ -256,9 +257,10 @@ export default {
 				let res = await client.post(process.env.threeSpeakUploadInfo, 
 					JSON.stringify(videoInfo),
 					{
-						withCredentials: true,
+						withCredentials: false,
 						headers: {
 						  "Content-Type": "application/json",
+						  "Authorization": `Bearer ${this.xcstkn}`
 						},
 					}
 				);
@@ -280,7 +282,7 @@ export default {
 			//let res = await fetch(process.env.threeSpeakApiSession.replace('_USERNAME_', this.user.account.name));
 			let res = await client.get(process.env.threeSpeakApiSession.replace('_USERNAME_', this.user.account.name),
 					{
-						withCredentials: true,
+						withCredentials: false,
 						headers: {
 						  "Content-Type": "application/json",
 						},
@@ -316,24 +318,24 @@ export default {
 			});
 			let outcome = await res.json();
 			console.log(outcome);
-			let xcstkn = '';
+			this.xcstkn = '';
 			if (outcome.error){
 				console.log(outcome.error);
 				return;
 			}else{
-				xcstkn = outcome.xcstkn;
+				this.xcstkn = outcome.xcstkn;
 			}
 			
 			//request cookie
-			if (xcstkn){
-				if (xcstkn.startsWith('#')){
-					xcstkn = xcstkn.substring(1);//remove first character from token #
+			if (this.xcstkn){
+				if (this.xcstkn.startsWith('#')){
+					this.xcstkn = this.xcstkn.substring(1);//remove first character from token #
 				}
 				/*res = await fetch(process.env.threeSpeakApiSession.replace('_USERNAME_', this.user.account.name)+'&access_token=' + xcstkn, {
 					credentials: 'include',
 				});*/
-				res = await client.get(process.env.threeSpeakApiSession.replace('_USERNAME_', this.user.account.name)+'&access_token=' + xcstkn,{
-						withCredentials: true,
+				res = await client.get(process.env.threeSpeakApiSession.replace('_USERNAME_', this.user.account.name)+'&access_token=' + this.xcstkn,{
+						withCredentials: false,
 						headers: {
 						  "Content-Type": "application/json",
 						},
