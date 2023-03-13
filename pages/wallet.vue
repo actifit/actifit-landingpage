@@ -84,7 +84,7 @@
 					</span></div>
 				<div class="col-lg-2 col-1"><i class="fa-solid fa-wave-square" :title="$t('Actions')"></i></div>
 			</div>
-			<div class="token-entry row">
+			<div class="token-entry row main-token">
 				<div class="col-2 text-left"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo">AFIT</div>
 				<div class="col-2">{{ $t('actifit_wallet')}}</div>
 				<div class="col-2 text-right">{{ formattedUserAfit }}</div>
@@ -115,7 +115,7 @@
 					</span>
 				</div>
 			</div>
-			<div class="token-entry row">
+			<div class="token-entry row main-token">
 				<div class="col-2 text-left">
 					<span v-if="cur_bchain == 'HIVE'"><img src="/img/HIVE.png" class="mr-1 mini-token-logo">HIVE</span>
 					<span v-else-if="cur_bchain == 'STEEM'"><img src="/img/STEEM.png" class="mr-1 mini-token-logo">STEEM</span>
@@ -146,7 +146,7 @@
 				</div>
 			</div>
 			
-			<div class="token-entry row" v-if="cur_bchain != 'BLURT'">
+			<div class="token-entry row main-token" v-if="cur_bchain != 'BLURT'">
 				<div class="col-2 text-left">
 					<span v-if="cur_bchain == 'HIVE'"><img src="/img/HIVE.png" class="mr-1 mini-token-logo">HBD</span>
 					<span v-else-if="cur_bchain == 'STEEM'"><img src="/img/STEEM.png" class="mr-1 mini-token-logo">SBD</span>
@@ -162,7 +162,7 @@
 			</div>
 			
 			
-			<div class="token-entry row">
+			<div class="token-entry row main-token">
 				<div class="col-2 text-left"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo">AFIT</div>
 				<div class="col-2">{{ $t('BSC')}}</div>
 				<div class="col-2 text-right">{{ formattedUserAfitBSC }}</div>
@@ -176,7 +176,7 @@
 				</div>
 			</div>
 			
-			<div class="token-entry row">
+			<div class="token-entry row main-token">
 				<div class="col-2 text-left"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo">AFIT-BNB LP</div>
 				<div class="col-2">{{ $t('BSC')}}</div>
 				<div class="col-2 text-right">{{ formattedUserAfitBNBLPBSC }}</div>
@@ -191,7 +191,7 @@
 			</div>
 			
 			
-			<div class="token-entry row">
+			<div class="token-entry row main-token">
 				<div class="col-2 text-left"><img src="/img/AFITX.png" class="mr-1 mini-token-logo">AFITX</div>
 				<div class="col-2">{{ $t('BSC')}}</div>
 				<div class="col-2 text-right">{{ formattedUserAFITXBSC }}</div>
@@ -205,7 +205,7 @@
 				</div>
 			</div>
 			
-			<div class="token-entry row">
+			<div class="token-entry row main-token">
 				<div class="col-2 text-left"><img src="/img/AFITX.png" class="mr-1 mini-token-logo">AFITX-BNB LP</div>
 				<div class="col-2">{{ $t('BSC')}}</div>
 				<div class="col-2 text-right">{{ formattedUserAFITXBNBLPBSC }}</div>
@@ -2585,17 +2585,17 @@
 		let upRef = this;
 		this.tokensOfInterestBal = this.tokensOfInterestBal.sort(function tokenEntry(a, b) {
 			if (type=='balance'){
-				return parseFloat(b[type]) < parseFloat(a[type]) ?  upRef.tsortDir
-					: parseFloat(b[type]) > parseFloat(a[type]) ? -1 * upRef.tsortDir
+				return parseFloat(b[type]) < parseFloat(a[type]) ? -1 * upRef.tsortDir
+					: parseFloat(b[type]) > parseFloat(a[type]) ? upRef.tsortDir
 					: 0;
 				
 			}else if (type == 'usdval'){
-				return upRef.usdVal(b, true) < upRef.usdVal(a, true) ? upRef.tsortDir
-					: upRef.usdVal(b, true) > upRef.usdVal(a, true) ? -1 * upRef.tsortDir
+				return upRef.usdVal(b, true) < upRef.usdVal(a, true) ? -1 * upRef.tsortDir
+					: upRef.usdVal(b, true) > upRef.usdVal(a, true) ? upRef.tsortDir
 					: 0;
 			}
-			return b[type] < a[type] ?  upRef.tsortDir
-					: b[type] > a[type] ? -1 * upRef.tsortDir
+			return b[type] < a[type] ?  -1 * upRef.tsortDir
+					: b[type] > a[type] ? upRef.tsortDir
 					: 0;
 		});
 	  },
@@ -5873,6 +5873,9 @@
   }
   .btn-brand a{
 	color: white;
+  }
+  .main-token{
+	background-color: whitesmoke;
   }
   .wallet-container{
 	/* background-color: red; 
