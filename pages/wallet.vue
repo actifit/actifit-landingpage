@@ -141,7 +141,7 @@
 				<div class="col-lg-2 col-1 token_actions">
 					<span class="btn btn-brand p-1" v-on:click="powerUpFunds"><i class="fas fa-arrow-circle-up p-1" :title="$t('POWERUP_ACTION_TEXT')" ></i></span>
 					<span class="btn btn-brand p-1" v-on:click="powerDownFunds"><i class="fas fa-arrow-circle-down " :title="$t('POWERDOWN_ACTION_TEXT')" ></i></span>
-					<span class="btn btn-brand p-1" v-on:click="transferFunds('HIVE')"><i class="fas fa-share-square " :title="$t('TRANSFER_FUNDS_ACTION_TEXT')" ></i></span>
+					<span class="btn btn-brand p-1" v-on:click="transferFunds(cur_bchain)"><i class="fas fa-share-square " :title="$t('TRANSFER_FUNDS_ACTION_TEXT')" ></i></span>
 					<span class="btn btn-brand p-1" v-on:click="delegateFunds"><i class="fas fa-donate" :title="$t('DELEGATE_ACTION_TEXT')"></i></span>
 				</div>
 			</div>
@@ -3098,6 +3098,9 @@
 		}else{
 			this.transferProcess = true;
 			let chainLnk = await this.setProperNode ();
+			
+			console.log(this.transferType)
+			//return;
 			//transferToVesting(wif, from, to, amount)
 			let res = await chainLnk.broadcast.transferAsync(this.$refs["p-ac-key-trans"].value, this.user.account.name, this.$refs["transfer-recipient"].value, parseFloat(this.$refs["transfer-amount"].value).toFixed(3) + ' ' + this.transferType, this.$refs["transfer-memo"].value).then(
 				res => this.confirmCompletion('transfer', this.$refs["transfer-amount"].value, res)).catch(err=>console.log(err));
@@ -5686,10 +5689,10 @@
 	  }
 	  
 	  //set default current chain
-	  if (this.cur_bchain != 'BLURT'){
+	  //if (this.cur_bchain != 'BLURT'){
 		this.transferType = this.cur_bchain;
 		this.transferTypePass = this.cur_bchain;
-	  }
+	  //}
 	  steem.api.setOptions({ url: process.env.steemApiNode });
 	  
 		  

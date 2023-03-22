@@ -9,6 +9,7 @@
 			<p v-if="thumbprogress">{{ thumbprogress }}</p>
 			<p v-if="vidprogress">{{ vidprogress }}</p>
 			<button @click="updateVideoInfo">Create Video Post</button>
+			<button @click="postToHive">post to hive</button>
 			
 			<input type="button" @click="generateThumbnail()" value="Thumbnail">
 			
@@ -18,6 +19,21 @@
 			</video>
 			<canvas ref="canvas" id="canvas" style="display: none"/>
 			<img id="thumb" :src="thumbnail" class="max-img"/>
+			
+			
+			<div>
+				<div v-if="userVidList.length > 0" v-for="(video, index) in userVidList" :key="index" :video="video">
+					<img :src="video.thumbUrl" class="max-img">
+					<div>{{video.title}}</div>
+					<div>{{(video.size / 1024 / 1024).toFixed(2)}} MB</div>
+					<div>{{video.duration}} s</div>
+					<div>{{video.created}}</div>
+					<div>{{video.status}} ({{statusList.find(row => row[0] === video.status)[2]}})</div>
+					<div>{{video.encodingProgress}}</div>
+					<button @click="postToHive(video)">post to hive</button>
+					<button @click="markVideoPublished(video)">Mark published</button>
+				</div>
+			</div>
 
 		</div>
 		<Footer />
@@ -54,6 +70,11 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 export default {
 	data (){
 		return {
+			title: '', // post title
+			body: '', // post body
+			tags: [], // post tags
+			percent_hbd: 10000,
+			max_accepted_payout: '1000000.000 HBD',	
 			video: null,
 			videoSize: null,
 			videoLength: null,
@@ -63,7 +84,21 @@ export default {
 			thumbprogress: null,
 			thumbnail: null,
 			thumbnailName : '',
-			xcstkn: ''
+			xcstkn: '',
+			userVidList: [],
+			newVid: {},
+			statusList: [['uploaded', 0, 'video was just uploaded'],
+						['encoding_queued', 1, 'video is now queued for encoding'],
+						['encoding', 2, 'video is now being encoded'],
+						['encoding_failed', 3, 'video encoding failed after 5 attempts from different encoder nodes'],
+						['deleted', 4, 'user can mark this video as deleted'],
+						['publish_manual', 5, 'video is ready to be published'],
+						['published', 6, 'video was published']],
+			benef_list: [
+							{account: 'spk.beneficiary', weight: 850},
+							{account: 'threespeakleader', weight: 100},
+						],
+			vidPostContent: '',
 		}
 	},
 	components: {
@@ -85,6 +120,318 @@ export default {
 			//await upload.start()
 			this.generateThumbnail()//upload.file)
 
+		},
+		
+		async grabVideoUrl (vid){
+			let targetField = vid.video_v2//vid.filename;//
+			if (targetField){
+				if (targetField.startsWith('http')){
+					//we're good, no changes needed
+					return targetField;//vid.video_v2;
+				}
+				return process.env.threeSpeakCDN + '/' + targetField.replaceAll('ipfs://','');
+				//vid.video_v2.replaceAll('ipfs://','');
+			}
+			return '';
+		},
+		
+		async processTrxFunc(op_name, cstm_params, bchain_option, op2, params2){
+			if (!localStorage.getItem('std_login')){
+			//if (!this.stdLogin){
+				let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
+				//console.log(res);
+				if (res.result.ref_block_num) {
+					console.log('success');
+					return {success: true, trx: res.result};
+				}else{
+					//console.log(err);
+					return {success: false, trx: null};
+				}
+			}else{
+				let operation = [ 
+				   [op_name, cstm_params]
+				];
+				if (op2 && params2){
+					operation.push([op2, params2])
+				}
+				console.log('broadcasting');
+				console.log(operation);
+				
+				//console.log(this.$steemconnect.accessToken);
+				//console.log(this.$store.state.accessToken);
+				//grab token
+				let accToken = localStorage.getItem('access_token')
+				
+				let op_json = JSON.stringify(operation)
+				
+				let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+				
+				if (bchain_option){
+					cur_bchain = bchain_option;
+				}
+				
+				let url = new URL(process.env.actiAppUrl + 'performTrxPost/?user='+this.user.account.name+'&bchain='+cur_bchain);
+				
+				let reqHeads = new Headers({
+				  'Content-Type': 'application/json',
+				  'x-acti-token': 'Bearer ' + accToken,
+				});
+				let res = await fetch(url, {
+					method: 'POST',
+					headers: reqHeads,
+					body: JSON.stringify({'operation': JSON.stringify(operation)})
+				});
+				let outcome = await res.json();
+				console.log(outcome);
+				if (outcome.error){
+					console.log(outcome.error);
+					
+					//if this is authority error, means needs to be logged out
+					//example "missing required posting authority:Missing Posting Authority"
+					let err_msg = outcome.trx.tx.error;
+					if (err_msg.includes('missing') && err_msg.includes('authority') && this.cur_bchain == bchain_option){
+						//clear entry
+						localStorage.removeItem('access_token');
+						//this.$store.commit('setStdLoginUser', false);
+						this.error_msg = this.$t('session_expired_login_again');
+						this.$store.dispatch('steemconnect/logout');
+					}
+					
+					this.$notify({
+					  group: 'error',
+					  text: err_msg,
+					  position: 'top center'
+					})
+					return {success: false, trx: null};
+					//this.$router.push('/login');
+				}else{
+					return {success: true, trx: outcome.trx};
+				}
+			}
+		  },
+		  commentSuccess (err, finalize, bchain, newPost) {
+			let mainRef = this;
+			let successMsg =  mainRef.$t('Save_Success_Chain').replace('_CHAIN_', bchain);
+			if (newPost){
+				successMsg = mainRef.$t('Post_created_successfully');
+			}
+			this.$notify({
+			  group: err ? 'error' : 'success',
+			  text: err ? mainRef.$t('Save_Error') : successMsg,
+			  position: 'top center'
+			})
+			
+			//let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+			//this.$store.commit('setBchain', cur_bchain);		
+			
+			// stop loading animation and show notification
+			this.loading = false
+			//reward the user for a new edit
+			/*if (finalize){
+				// stop loading animation and show notification
+				this.loading = false
+				if (newPost){
+					$(this.$refs.editPostModal).modal('hide')
+				}
+				this.RewardUserEdit();
+				// update post in store
+				this.$store.dispatch('updatePost', {
+				  author: this.editPost.author,
+				  permlink: this.editPost.permlink
+				})
+				
+			}*/
+		  },
+
+			
+		async postToHive (vid) {
+			console.log(this.userVidList);
+			//let vid = this.userVidList[0];
+			//console.log(vid.beneficiaries);
+			
+			if (!vid){
+				vid = this.newVid;
+			}
+			
+			let percent_hbd = this.percent_hbd;
+			let payout_amnt = this.max_accepted_payout;
+			
+			//if (vid.)
+			//grab beneficiaries from video and append them to post
+			
+			/*let extra_benef = JSON.parse(vid.beneficiaries);
+			//console.log(vid.beneficiaries);
+			let new_benef = extra_benef.map((beneficiary) => {
+			  return [beneficiary.account, beneficiary.weight];
+			});
+			console.log(new_benef);
+			this.benef_list = this.benef_list.concat(new_benef);*/
+			let benef = this.benef_list.concat(JSON.parse(vid.beneficiaries));
+			
+			//if list does not include required account, append it
+			let sagarRecord = benef.find(record => record.account === 'sagarkothari88');
+
+			if (sagarRecord === undefined) {
+				// If the record is not found, insert a new entry
+				benef.push({account: 'sagarkothari88', weight: 100});
+			}
+			
+			//console.log(this.benef_list)
+			//sort as this is required for posting properly
+			benef = benef.sort((a, b) => a.account.localeCompare(b.account));
+			console.log('beneficiaries')
+			console.log(benef)
+			
+			//return;
+			//setup proper video metadata for 3speak
+			let vidJsonMeta = {
+				video: {
+					info: {
+					  platform: '3speak',
+					  title: vid.title,
+					  author: vid.owner,
+					  permlink: vid.permlink,
+					  duration: vid.duration,
+					  filesize: vid.size,
+					  file: vid.filename,
+					  lang: 'en',
+					  firstUpload: false,
+					  video_v2: vid.video_v2,
+					  sourceMap: [
+						{
+							type: "thumbnail",
+							url: vid.thumbnail,
+						},
+						{
+							type: "video",
+							url: vid.video_v2,
+							format: "m3u8",
+						}
+					  ],
+					},
+					content: {
+					  description: '',
+					  tags: ['actifit','3speak'],
+					},
+				},
+			}
+			//return;
+			let comment_options = { 
+				author: vid.owner, 
+				permlink: vid.permlink, 
+				max_accepted_payout: payout_amnt, 
+				percent_hbd: percent_hbd, 
+				allow_votes: true, 
+				allow_curation_rewards: true, 
+				extensions: [[0,{'beneficiaries':benef}]]
+			};
+			
+			let meta = {};
+			meta.app = '3speak/0.3.0';//'actifit/0.5.0';
+			meta.tags = ['actifit', '3speak'];
+			meta.video = vidJsonMeta.video;
+			
+			console.log(meta);
+			
+			//set content of the post body first as video url:
+			this.vidPostContent = 
+			'[![]('+vid.thumbUrl+')](https://3speak.tv/watch?v='+vid.owner+'/'+vid.permlink+')'
+			//'[![](https://ipfs-3speak.b-cdn.net/ipfs/bafybeibla6isfwwbxbgrxp5y6ntaufdtp7mruih3bhro73qe3utj2ykf4i/)](https://3speak.tv/watch?v=theycallmedan/puewbyjo)'
+			
+			//await this.grabVideoUrl(vid);
+			console.log(this.vidPostContent);
+			//return;
+			//send the post
+			let postSuccess = false;
+			if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+				//console.log(comment_options);
+				//this.$nuxt.refresh()
+				
+				console.log(JSON.stringify(comment_options));
+				
+				window.hive_keychain.requestPost(
+					vid.owner, 
+					vid.title, 
+					this.vidPostContent,
+					'actifit',
+					'',
+					JSON.stringify(meta),
+					vid.permlink,
+					//this.$refs.editor.content,
+					//this.editPost.parent_permlink,
+					//this.editPost.parent_author,
+					//JSON.stringify(meta),
+					//this.editPost.permlink,
+					JSON.stringify(comment_options), (response) => {
+					  console.log(response);
+					  if (response.success){
+						postSuccess = true;
+						//this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain, this.editPost.isNewPost);
+					  }else{
+						//this.commentSuccess(response.message, false, this.cur_bchain);
+					  }
+					});	
+				
+			}else{
+				let cstm_params = {
+				  "author": vid.owner,
+				  "title": vid.title,
+				  "body": this.vidPostContent,
+				  "parent_author": '',
+				  "parent_permlink": 'actifit',
+				  "permlink": vid.permlink,
+				  "json_metadata": JSON.stringify(meta)
+				};
+				
+				//console.log(cstm_params);
+				
+				//return;
+				
+					   
+				let res = await this.processTrxFunc('comment', cstm_params, this.cur_bchain, 'comment_options', comment_options);
+				console.log(res);
+				if (res.success){
+					postSuccess = true
+					//this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain, this.editPost.isNewPost);
+				}else{
+					//this.commentSuccess('error saving', false, this.cur_bchain);
+				}
+				
+				
+			}
+			
+			if (postSuccess){
+				let outc = await this.markVideoPublished(vid);
+			}
+			
+			
+		},
+		
+		async getAllVideoStatuses(access_token) {
+			console.log('get all videos')
+			console.log(process.env.threeSpeakUserVideoList);
+			try {
+			  let response = await client.get(process.env.threeSpeakUserVideoList,
+				{
+				  withCredentials: false,
+				  headers: {
+					"Content-Type": "application/json",
+					"Authorization": `Bearer ${access_token}`
+				  },
+				}
+			  );
+			  console.log(response);
+			  if (response.data){
+				//set user videos array
+				this.userVidList = response.data;//JSON.stringify(myAllVideosWithStatusInfo)
+				console.log(this.userVidList);
+				//console.log(`All Videos Info response: userVidList${}`);
+			  }
+			  return response.data;
+			} catch (err) {
+			  console.log(err);
+			  throw err;
+			}
 		},
 		
 		async generateThumbnail () {
@@ -238,23 +585,41 @@ export default {
 			  'isReel': true
 			}
 			
-			let reqHeads = new Headers({
-				'Content-Type': 'application/json',
-				//'credentials': 'include',
-				//'Cookie': 'connect.sid=s%3ArfBowB6t8rH0pV4wSkamopj0mZARXwNr.%2FS1bwFv%2FuG2IdthqJXV1YyrE4ZwrlDCpxnfdBiPWaUk'
-
-			});
-			
 			console.log(videoInfo);
-
-			/*let res = await fetch(process.env.threeSpeakUploadInfo, {
-				credentials: 'include',
-				method: 'POST',
-				headers: reqHeads,
-				body: JSON.stringify(videoInfo)
-			});*/
+			
 			try{
 				let res = await client.post(process.env.threeSpeakUploadInfo, 
+					JSON.stringify(videoInfo),
+					{
+						withCredentials: false,
+						headers: {
+						  "Content-Type": "application/json",
+						  "Authorization": `Bearer ${this.xcstkn}`
+						},
+					}
+				);
+				console.log(res);
+				if (res.status == 200){
+					this.newVid = res.data;
+				}
+			}catch(err){
+				console.log(err);
+			}
+
+		},
+		
+		async markVideoPublished(vid){
+			let videoInfo = {
+			  'videoid': ''+vid._id,//vid.videoid,
+			  'title': vid.title,
+			  'description': vid.description,
+			  'tags': 'actifit',//vid.tags,
+			  'thumbnail': vid.thumbnail
+			}
+			
+			console.log(videoInfo);
+			try{
+				let res = await client.post(process.env.threeSpeakUserVideoList+"/iPublished", 
 					JSON.stringify(videoInfo),
 					{
 						withCredentials: false,
@@ -268,8 +633,6 @@ export default {
 			}catch(err){
 				console.log(err);
 			}
-			//let outcome = await res.json();
-			//console.log(outcome);
 
 		},
 
@@ -342,8 +705,16 @@ export default {
 					}
 				)
 				console.log(res);
+				
+				//also grab user's videos
+				let myAllVideosWithStatusInfo = await this.getAllVideoStatuses(this.xcstkn);
+				//console.log(`All Videos Info response: ${JSON.stringify(myAllVideosWithStatusInfo)}`);
+
+				//const videoID = myAllVideosWithStatusInfo[0]._id;
+				//console.log(videoID);
+				//
 				//console.log( res.headers.get('set-cookie'))
-				console.log(res.headers["set-cookie"]);
+				//console.log(res.headers["set-cookie"]);
 				//outcome = await res.json();
 				//console.log(outcome);	
 			}

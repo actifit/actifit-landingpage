@@ -49,6 +49,8 @@ module.exports = {
 	threeSpeakApiVidCount: 'https://3speak.tv/apiv2/feeds/@_USERNAME_/count',
 	threeSpeakApiSession: 'https://studio.3speak.tv/mobile/login?username=_USERNAME_',
 	threeSpeakUploadInfo: 'https://studio.3speak.tv/mobile/api/upload_info',
+	threeSpeakUserVideoList: 'https://studio.3speak.tv/mobile/api/my-videos',
+	threeSpeakCDN: 'https://ipfs-3speak.b-cdn.net/ipfs',
 	hiveEngineScotParam: '?hive=1',
 	minSignupUSDCost: 2,
 	minAfitBuyEarnTicket: 1000,
