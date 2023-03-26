@@ -586,6 +586,16 @@
 			//[{"account":"yabapmatt","weight":1000},{"account":"steemplus-pay","weight":500}
 		}
 		
+		let cstm_params = {
+		  "author": this.editPost.author,
+		  "title": this.title,
+		  "body": this.$refs.editor.content,
+		  "parent_author": this.editPost.parent_author,
+		  "parent_permlink": this.editPost.parent_permlink,
+		  "permlink": this.editPost.permlink,
+		  "json_metadata": JSON.stringify(meta)
+		};
+		
         // save changes
 		if (!localStorage.getItem('std_login')){
 		//if (!this.stdLogin){
@@ -607,16 +617,9 @@
 			//this.$nuxt.refresh()
 			
 			console.log(JSON.stringify(comment_options));
-			
-			window.hive_keychain.requestPost(
-				this.editPost.author, 
-				this.title, 
-				this.$refs.editor.content,
-				this.editPost.parent_permlink,
-				this.editPost.parent_author,
-				JSON.stringify(meta),
-				this.editPost.permlink,
-				JSON.stringify(comment_options), (response) => {
+			if (!this.editPost.isNewPost){
+				//cannot broadcast again if editing
+				window.hive_keychain.requestBroadcast(this.editPost.author, [['comment', cstm_params]], 'Posting',(response) => {
 				  //console.log(response);
 				  if (response.success){
 					this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain, this.editPost.isNewPost);
@@ -624,18 +627,27 @@
 					this.commentSuccess(response.message, false, this.cur_bchain);
 				  }
 				});	
+			}else{
 			
+				window.hive_keychain.requestPost(
+					this.editPost.author, 
+					this.title, 
+					this.$refs.editor.content,
+					this.editPost.parent_permlink,
+					this.editPost.parent_author,
+					JSON.stringify(meta),
+					this.editPost.permlink,
+					JSON.stringify(comment_options), (response) => {
+					  //console.log(response);
+					  if (response.success){
+						this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain, this.editPost.isNewPost);
+					  }else{
+						this.commentSuccess(response.message, false, this.cur_bchain);
+					  }
+					});	
+			}
 		}else{
-			let cstm_params = {
-			  "author": this.editPost.author,
-			  "title": this.title,
-			  "body": this.$refs.editor.content,
-			  "parent_author": this.editPost.parent_author,
-			  "parent_permlink": this.editPost.parent_permlink,
-			  "permlink": this.editPost.permlink,
-			  "json_metadata": JSON.stringify(meta)
-			};
-			
+						
 			//console.log(cstm_params);
 			
 			//return;
