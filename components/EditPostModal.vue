@@ -18,7 +18,7 @@
           </div>
 		  <!-- show permalink if post is edit -->
 		  <div v-if="!editPost.isNewPost" class="form-group">
-			<a id="post_permlnk" :href="'/'+editPost.author+'/'+editPost.permlink">{{$t('actifit_web_url')}}/{{editPost.permlink}}</a>
+			<a id="post_permlnk" :href="'/'+editPost.author+'/'+editPost.permlink">{{$t('actifit_web_url')}}/{{editPost.author}}/{{editPost.permlink}}</a>
 		  </div>
           <div class="form-group">
 			<CustomTextEditor ref="editor" :initialContent="body" ></CustomTextEditor>
@@ -96,6 +96,8 @@
   import CustomTextEditor from '~/components/CustomTextEditor';
   import TagInput from '~/components/TagInput';
   import Beneficiary from '~/components/Beneficiary';
+  
+  import hive from '@hiveio/hive-js'
 
 	/* handles outside clicks for the picker */
 	/* begin */
@@ -462,8 +464,8 @@
             .filter(String) // remove empty values
             .map(tag => tag.trim()) // trim leading and trailing whitespaces from tags
         ]
-		
-		if (this.editPost.isNewPost){
+		console.log(meta);
+		if (this.editPost.isNewPost || meta.image === undefined){
 			meta.image = [];
 		}
 		
@@ -515,6 +517,15 @@
 			this.editPost.parent_permlink = this.tags[0];
 			this.editPost.author = this.user.account.name;
 			this.editPost.permlink = permlnk;
+			
+			//check also if a similar post exists, to adjust permlink
+			let chainLnk = hive;
+			await chainLnk.api.setOptions({ url: process.env.hiveApiNode });
+			let result = await chainLnk.api.getContentAsync(this.user.account.name, permlnk);
+			if (result && result.author){
+				//found a match
+				this.editPost.permlink += "-"+new Date().toISOString().replace(/-|:|\./g, '').toLowerCase();
+			}
 			
 			//fetch beneficiaries from user selection
 			this.benef_list = this.$refs['beneficiaryList'].formattedEntries;
@@ -628,10 +639,14 @@
 			//console.log(cstm_params);
 			
 			//return;
+			let res
 			
+			if (this.editPost.isNewPost){
 				   
-			let res = await this.processTrxFunc('comment', cstm_params, this.cur_bchain, 'comment_options', comment_options);
-			
+				res = await this.processTrxFunc('comment', cstm_params, this.cur_bchain, 'comment_options', comment_options);
+			}else{
+				res = await this.processTrxFunc('comment', cstm_params, this.cur_bchain);
+			}
 			if (res.success){
 				this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain, this.editPost.isNewPost);
 			}else{

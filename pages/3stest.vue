@@ -27,6 +27,7 @@
 					<div>{{video.title}}</div>
 					<div>{{(video.size / 1024 / 1024).toFixed(2)}} MB</div>
 					<div>{{video.duration}} s</div>
+					<div>{{video.permlink}}</div>
 					<div>{{video.created}}</div>
 					<div>{{video.status}} ({{statusList.find(row => row[0] === video.status)[2]}})</div>
 					<div>{{video.encodingProgress}}</div>
