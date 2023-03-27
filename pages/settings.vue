@@ -302,6 +302,7 @@
 					
 					if (this.user_settings.default_vote_weight !== undefined){
 						this.default_vote_weight = this.user_settings.default_vote_weight
+						this.$refs['default_vote_weight'].value = this.default_vote_weight;
 					}
 					
 					console.log('load new settings')

@@ -99,10 +99,12 @@
 		votersList: [],
 		cur_bchain: 'HIVE',
 		target_bchain: 'HIVE',
+		default_vote_weight: 0,
       }
     },
 	watch: {
 	  postToVote: 'fetchVoterData',
+	  user: 'grabSettings',
 	  bchain: function(newBchain) {
 		if (this.cur_bchain != newBchain){
 			console.log('change in chain - voter modal');
@@ -571,9 +573,37 @@
 		console.log(this.cur_bchain);
 		return properNode;
 	  },
-    },
+		async setUserSettings(result){
+			console.log('fetched user settings');
+			//console.log(result)
+			if (result && result.settings){
+				let val = result.settings
+				if (val.default_vote_weight !== undefined){
+					this.default_vote_weight = val.default_vote_weight;
+					try{
+						if (parseInt(this.default_vote_weight) > 0 && parseInt(this.default_vote_weight) <= 100)
+						this.voteWeight = parseInt(this.default_vote_weight);
+						this.$store.commit('setVoteWeight', this.default_vote_weight)
+						//return this.default_vote_weight;
+					}catch(err){
+						
+					}
+				}
+			}
+				
+		},
+		async grabSettings(){
+			if (this.user){
+				//grab user settings to find any default vote weight
+				fetch(process.env.actiAppUrl+'userSettings/'+this.user.account.name).then(
+					res => {res.json().then(json => this.setUserSettings (json)).catch(e => console.log(e))
+				}).catch(e => console.log(e))
+			}
+		},
+	},
 	async mounted () {
 	
+	    
 	  client = new dsteem.Client(process.env.steemApiNode)
 	  hiveclient = new dhive.Client(process.env.altHiveNodes)
 	  
