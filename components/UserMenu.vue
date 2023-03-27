@@ -60,39 +60,38 @@
           <div class="user-avatar group-class" :style="'background-image: url('+profImgUrl+'/u/' + user.account.name + '/avatar)'"></div>
         </a>
         <div class="dropdown-menu dropdown-menu-right">
-          <h6 class="dropdown-header text-center"><a class="dropdown-item" href="#" @click.prevent="$router.push('/' + user.account.name)">@{{ user.account.name }}</a></h6>
+          <h6 class="dropdown-header"><a class="dropdown-item" href="#" @click.prevent="$router.push('/' + user.account.name)"><i class="fa-solid fa-user text-brand"></i>&nbsp;@{{ user.account.name }}</a></h6>
           <div class="dropdown-divider"></div>
 		  <a class="dropdown-item text-brand" href="#" @click.prevent="$router.push('/mods-access/')" v-if="isUserModerator">Moderation</a>
 		  <div class="dropdown-divider" v-if="isUserModerator"></div>
 		  <!--<a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet?action=buy_afit')">{{ $t('buy_afit_menu') }}<br/></a>-->
-		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/market')">{{ $t('spend_afit_menu') }}<br/></a>
-          <a class="dropdown-item" href="#" @click.prevent="$router.push('/' + user.account.name)">{{ $t('My_Profile') }}<br/></a>
+		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/market')"><i class="fas fa-shopping-cart text-brand"></i>&nbsp;{{ $t('spend_afit_menu') }}<br/></a>
 		  <SteemStats :user="user" minView="true" class="dropdown-item" :key="reload"/>
-		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/userrank')">{{ $t('My_Rank') }} <br/><span class="text-brand"> {{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRankObj && this.userRankObj.afitx_rank">{{  displayIncreasedUserRank }}</span> </span></a>
-		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet')">{{ $t('My_Wallet') }} <br/><span class="text-brand">  {{ formattedUserTokens }}</span></a>
-		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/referrals')">{{ $t('My_Referrals') }} <br/><span class="text-brand"> {{ referralCount }} </span></a>
-          <a class="dropdown-item" href="#" @click.prevent="$router.push('/activity/' + user.account.name)">{{ $t('My_Activity') }}</a>
-		  <a class="dropdown-item" href="#" @click.prevent="$router.push(user.account.name + '/blog')">{{ $t('My_Blog') }}</a>
-		  <a class="dropdown-item" href="#" @click.prevent="$router.push(user.account.name + '/videos')">{{ $t('My_Videos') }}</a>
-		  <a class="dropdown-item" href="#">{{ $t('Active_chain') }} <br />
-			<div class="pl-2" :class="adjustHiveClass" v-on:click="setActiveChain('HIVE')">
+		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/userrank')"><i class="fa-solid fa-list-ol text-brand"></i>&nbsp;{{ $t('My_Rank') }} <br/><span class="text-brand pl-4"> {{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRankObj && this.userRankObj.afitx_rank">{{  displayIncreasedUserRank }}</span> </span></a>
+		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet')"><i class="fa-solid fa-wallet text-brand"></i>&nbsp;{{ $t('My_Wallet') }} <br/><span class="text-brand pl-4">  {{ formattedUserTokens }}</span></a>
+		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/referrals')"><i class="fas fa-user-friends text-brand"></i>&nbsp;{{ $t('My_Referrals') }} <br/><span class="text-brand pl-4"> {{ referralCount }} </span></a>
+          <a class="dropdown-item" href="#" @click.prevent="$router.push('/activity/' + user.account.name)"><i class="fas fa-running text-brand"></i>&nbsp;{{ $t('My_Activity') }}</a>
+		  <a class="dropdown-item" href="#" @click.prevent="$router.push(user.account.name + '/blog')"><i class="fa-solid fa-pen-to-square text-brand"></i>&nbsp;{{ $t('My_Blog') }}</a>
+		  <a class="dropdown-item" href="#" @click.prevent="$router.push(user.account.name + '/videos')"><i class="fa-solid fa-video text-brand"></i>&nbsp;{{ $t('My_Videos') }}</a>
+		  <a class="dropdown-item" href="#"><i class="fa-solid fa-link text-brand"></i>&nbsp;{{ $t('Active_chain') }} <br />
+			<div class="pl-4" :class="adjustHiveClass" v-on:click="setActiveChain('HIVE')">
 			<img src="/img/HIVE.png" style="max-height: 20px;"   :title="(cur_bchain == 'HIVE'?$t('running_on_chain').replace('_CHAIN_', 'HIVE'):$t('switch_to_chain').replace('_CHAIN_', 'HIVE'))">{{$t('HIVE')}}
 			<!--<span class="span-toggle-chain pl-2 pr-2 text-brand" :title="$t('switch_chain')">
 				<i class="fas fa-toggle-on" v-if="cur_bchain == 'STEEM'" v-on:click="setActiveChain('HIVE')"></i>
 				<i class="fas fa-toggle-off" v-else-if="cur_bchain == 'HIVE'" v-on:click="setActiveChain('STEEM')"></i>
 			</span>-->
 			</div>
-			<div v-if="isUserModerator" class="pl-2" :class="adjustSteemClass" v-on:click="setActiveChain('STEEM')">
+			<div v-if="isUserModerator" class="pl-4" :class="adjustSteemClass" v-on:click="setActiveChain('STEEM')">
 			<img src="/img/STEEM.png" style="max-height: 20px;"   :title="(cur_bchain == 'STEEM'?$t('running_on_chain').replace('_CHAIN_', 'STEEM'):$t('switch_to_chain').replace('_CHAIN_', 'STEEM'))">{{$t('STEEM')}}
 			</div>
-			<div class="pl-2" :class="adjustBlurtClass" v-on:click="setActiveChain('BLURT')" >
+			<div class="pl-4" :class="adjustBlurtClass" v-on:click="setActiveChain('BLURT')" >
 			<img src="/img/BLURT.png" style="max-height: 20px;"  :title="(cur_bchain == 'BLURT'?$t('running_on_chain').replace('_CHAIN_', 'BLURT'):$t('switch_to_chain').replace('_CHAIN_', 'BLURT'))">{{$t('BLURT')}}
 			</div>
 		  </a>
-		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/password')">{{ $t('My_Password') }}</a>
-		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/settings')">{{ $t('Settings') }}</a>
+		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/password')"><i class="fa-sharp fa-solid fa-key text-brand"></i>&nbsp;{{ $t('My_Password') }}</a>
+		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/settings')"><i class="fa-solid fa-gear text-brand"></i>&nbsp;{{ $t('Settings') }}</a>
           <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="#" @click.prevent="proceedLogout()">{{ $t('Logout') }}</a>
+          <a class="dropdown-item" href="#" @click.prevent="proceedLogout()"><i class="fa-solid fa-right-from-bracket text-brand"></i>&nbsp;{{ $t('Logout') }}</a>
         </div>
       </li>
     </ul>
@@ -369,5 +368,8 @@
 	}
 	.span-toggle-chain{
 		font-size: 1.2rem;
+	}
+	.dropdown-header{
+		padding-left: 0px;
 	}
 </style>
