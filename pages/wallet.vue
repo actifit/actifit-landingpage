@@ -20,8 +20,10 @@
 				</span>
 				
 				<span class="btn btn-brand mb-1" :title="hide_small_balances?$t('show_all_tokens'):$t('hide_small_balances')" v-on:click="switchHideSmall">
-					<i class="fas fa-solid fa-creative-commons-zero" :style="hide_small_balances?'color:green':'color:white'"></i>
+					<i class="fas fa-solid fa-battery-empty" :style="hide_small_balances?'color:green':'color:white'"></i>
 				</span>
+				
+				<span class="btn btn-brand mb-1" :title="$t('save_filter_default_settings')" v-on:click="saveSettings"><i class="fa-gear fas" :style="settings_set?'color:green':'color:white'"></i><i class="fas fa-spin fa-spinner text-white" v-if="save_progress"></i></span>
 				
 				<span class="pl-2">{{$t('account_est_val')}} ${{this.totalAccountValue}}</span>
 			</div>
@@ -1434,6 +1436,9 @@
 		rcDelgArray: [],
 		show_only_tokens_interest: true,
 		hide_small_balances: false,
+		settings_set: false,
+		user_settings: {},
+		save_progress: false,
 		heTokenBalances: [],
 	  }
 	},
@@ -1634,6 +1639,55 @@
 	  
 	  switchHideSmall() {
 		this.hide_small_balances = !this.hide_small_balances
+	  },
+	  async saveSettings (){
+		this.save_progress = true;
+		/*console.log(this.sel_node);
+		console.log(this.testnet);
+		console.log(this.chain_id);
+		console.log(this.custom_node);
+		console.log(this.custom_node_active);*/
+		//return;
+		try{
+			if (!this.user_settings){
+				this.user_settings = new Object();
+			}
+			this.user_settings['hide_small_balances'] = this.hide_small_balances;
+			this.user_settings['show_only_tokens_interest'] = this.show_only_tokens_interest;
+			
+			let url = new URL(process.env.actiAppUrl + 'updateSettings/?user=' + this.user.account.name+'&settings='+JSON.stringify(this.user_settings));
+			//console.log(url);
+
+			let accToken = localStorage.getItem('access_token')
+			
+			let reqHeads = new Headers({
+			  'Content-Type': 'application/json',
+			  'x-acti-token': 'Bearer ' + accToken,
+			});
+			let res = await fetch(url, {
+				headers: reqHeads
+			});
+			let outcome = await res.json();
+			//console.log(outcome);
+			
+			if (outcome.success){
+				this.$notify({
+				  group: 'success',
+				  text: this.$t('successfully_updated_settings'),
+				  position: 'top center'
+				})
+			}else{
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('error'),
+				  position: 'top center'
+				})
+			}
+			
+		}catch(err){
+			console.log(err);
+		}
+		this.save_progress = false;
 	  },
 	  
 	  /**
@@ -2415,6 +2469,12 @@
 
 		  }
 		  
+		  //grab user settings
+		  fetch(process.env.actiAppUrl+'userSettings/'+this.user.account.name).then(
+			res => {res.json().then(json => this.setUserSettings (json)).catch(e => console.log(e))
+		  }).catch(e => console.log(e))
+		  
+		  
 		  //let's grab the number of pending token swap transactions to see if we can add more
 		  /*fetch(process.env.actiAppUrl+'getPendingTokenSwapTransCount').then(
 			res => {res.json().then(json => this.pendingTokenSwapTransCount = json ).catch(e => console.log(e))
@@ -2767,6 +2827,20 @@
 			console.error(e);
 		  }
 		});
+	  },
+	  setUserSettings (result){
+		console.log('fetched user settings');
+		console.log(result)
+		if (result && result.settings){
+			let val = result.settings
+			console.log(val)
+			this.user_settings = val;
+			if (val.show_only_tokens_interest !== undefined || val.hide_small_balances !== undefined){
+				this.hide_small_balances = val.hide_small_balances;
+				this.show_only_tokens_interest = val.show_only_tokens_interest;
+				this.settings_set = true;
+			}
+		}
 	  },
 	  setUserClaimableSETokens (result) {
 		let par = this;
@@ -5732,6 +5806,7 @@
 	  fetch(process.env.actiAppUrl+'AFITXBSCPrice').then(
 		res => {res.json().then(json => this.setAFITXBSCPrice (json.price)).catch(e => console.log(e))
 	  }).catch(e => console.log(e))
+	  
 	  
 	  this.screenWidth = screen.width;
 	  //check if this is the result of an operation

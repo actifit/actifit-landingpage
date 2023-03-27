@@ -32,6 +32,22 @@
 				<input type="checkbox" id="Blurt" value="Blurt" ref="blurt" :checked="is_chain_enabled('BLURT')" @change="adjustCheckbox($event)"><label for="blurt">BLURT</label>
 			  </div>
 			  
+			<h5 class="p-3 acti-headr">{{ $t('Wallet_settings') }}</h5> 
+			  <div class="bchain-option btn col-12 m-2 p-2 row text-left">
+				<input type="checkbox" id="hide_small_balances" value="hide_small_balances" ref="hide_small_balances" :checked="hide_small_balances"><label for="hide_small_balances">{{$t('hide_small_balances_setting')}}</label>
+			  </div>
+			  <div class="bchain-option btn col-12 m-2 p-2 row text-left">
+				<input type="checkbox" id="show_full_token_list" value="show_full_token_list" ref="show_full_token_list" :checked="show_full_token_list"><label for="show_full_token_list">{{$t('show_full_token_list_setting')}}</label>
+			  </div>
+			
+			<h5 class="p-3 acti-headr">{{ $t('voting_settings') }}</h5>  
+			
+				<div class="bchain-option btn col-12 m-2 p-2 row text-left">
+					<label for="default_vote_weight">{{$t('default_vote_weight')}}</label>
+					<span><input class="form-control mb-2 col-1" type="number" ref="default_vote_weight" id="default_vote_weight" style="display: inline" min=0 max=100>%</span>
+					<span>{{$t('vote_weight_settings_note')}}</span>
+				</div>
+			  
 			<h5 class="p-3 acti-headr">{{ $t('post_chains_setting') }}</h5>
 			<span class="text-brand" v-html="$t('posting_authority_desc')"></span>
 			<div v-if="auth_loaded">
@@ -180,6 +196,9 @@
 			custom_node: '',
 			testnet: '',
 			chain_id: '',
+			hide_small_balances: false,
+			show_full_token_list: false,
+			default_vote_weight: 0,
 		}
 	},
 	watch: {
@@ -272,6 +291,22 @@
 					if (typeof this.user_settings.notifications_active !== 'undefined'){
 						this.notif_active = this.user_settings.notifications_active;
 					}
+					
+					if (this.user_settings.hide_small_balances !== undefined){
+						this.hide_small_balances = this.user_settings.hide_small_balances
+					}
+					
+					if (this.user_settings.show_full_token_list !== undefined){
+						this.show_full_token_list = this.user_settings.show_full_token_list
+					}
+					
+					if (this.user_settings.default_vote_weight !== undefined){
+						this.default_vote_weight = this.user_settings.default_vote_weight
+					}
+					
+					console.log('load new settings')
+					console.log(this.hide_small_balances);
+					console.log(this.show_full_token_list);
 					
 					//load proper node
 					if (typeof this.user_settings.node_active !== 'undefined'){
@@ -450,7 +485,20 @@
 					customNode: false,
 				}
 			}
-			
+			/*console.log('new settings');
+			console.log(this.$refs['hide_small_balances'].checked)
+			console.log(this.hide_small_balances);
+			console.log(this.$refs['show_full_token_list']);*/
+			this.subset['hide_small_balances'] = this.$refs['hide_small_balances'].checked;
+			this.subset['show_full_token_list'] = this.$refs['show_full_token_list'].checked;
+			try{
+				let voteVal = parseInt(this.$refs['default_vote_weight'].value);
+				if (voteVal > 100) voteVal = 100;
+				if (voteVal < 0) voteVal = 0;
+				this.subset['default_vote_weight'] = this.$refs['default_vote_weight'].value;
+			}catch(err){
+				console.log(err)
+			}
 			//store node data
 			if (typeof this.user_settings.node_active !== 'undefined'){
 				if (!this.user_settings.node_active.customNode){

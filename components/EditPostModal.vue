@@ -37,14 +37,7 @@
 		  
 		  <div class="form-group acti-shadow extra-container">
 			<Beneficiary ref="beneficiaryList" :initialEntries="benef_list" :viewOnly="!editPost.isNewPost" class="float-left"/>
-			<!--<span class="m-2 p-2">
-				<label for="paymentApproach" class="inline-class">{{$t('payment_approach')}}</label>
-				<select id="paymentApproach" ref="paymentApproach" class="form-control inline-class">
-					<option value="split">50/50 Split</option>
-					<option value="hp">Full HP</option>
-					<option value="decline">Decline</option>
-				</select>
-			</span>-->
+			
 			<div class="form-group d-flex align-items-center p-1" style="min-height: 70px;">
 			  <label for="paymentApproach" class="mr-2 label-payment">{{$t('payment_approach')}}</label>
 			  <select id="paymentApproach" ref="paymentApproach" class="form-control paymentApproach">
