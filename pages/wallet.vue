@@ -2829,8 +2829,8 @@
 		});
 	  },
 	  setUserSettings (result){
-		console.log('fetched user settings');
-		console.log(result)
+		//console.log('fetched user settings');
+		//console.log(result)
 		if (result && result.settings){
 			let val = result.settings
 			console.log(val)

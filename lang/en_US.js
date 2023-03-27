@@ -924,6 +924,7 @@ module.exports = {
   Threespeak_videos: '3Speak Videos',
   save_filter_default_settings: 'Save your current filtering selection as default settings',
   save_vote_default_settings: 'Save your current vote percent as default settings',
+  restore_default: 'Restore your default voting value',
   Wallet_settings: 'Wallet Settings',
   voting_settings: 'Voting Settings',
   hide_small_balances_setting: 'Hide Small Balances',

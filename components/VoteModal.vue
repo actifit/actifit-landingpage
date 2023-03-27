@@ -40,6 +40,10 @@
             <li :class="{'page-item': true, disabled: voteWeight === 100}"><a class="page-link vote-controls text-success" href="#" @click.prevent="changeVoteWeight(10)">+10</a></li>
             <li :class="{'page-item': true, disabled: voteWeight === 100}"><a class="page-link vote-controls" href="#" @click.prevent="setVoteWeight(100)"><i class="far fa-thumbs-up text-success"></i></a></li>
           </ul>
+		  <div>
+			<span class="btn btn-brand mb-1" :title="$t('save_vote_default_settings')" v-on:click="saveSettings"><i class="fa-gear fas" :style="settings_set?'color:green':'color:white'"></i><i class="fas fa-spin fa-spinner text-white" v-if="save_progress"></i></span>
+			<span class="btn btn-brand mb-1" :title="$t('restore_default')" v-if="settings_set" v-on:click="restoreDefault"><i class="fa-solid fa-arrows-rotate"></i></span>
+		  </div>
 		  <div class="text-center"><span>{{ $t('Your_Vote_Value') }}:</span><span>{{vote_value_usd}}</span></div>
 		  <button type="submit" class="btn btn-brand border" @click="vote($event)" v-if="voteWeight">
             <i class="fas fa-thumbs-up" v-if="voteWeight > 0"></i>
@@ -100,6 +104,9 @@
 		cur_bchain: 'HIVE',
 		target_bchain: 'HIVE',
 		default_vote_weight: 0,
+		user_settings: {},
+		settings_set: false,
+		save_progress: false,
       }
     },
 	watch: {
@@ -578,16 +585,21 @@
 			//console.log(result)
 			if (result && result.settings){
 				let val = result.settings
+				this.user_settings = val;
 				if (val.default_vote_weight !== undefined){
+					this.settings_set = true;
 					this.default_vote_weight = val.default_vote_weight;
 					try{
 						if (parseInt(this.default_vote_weight) > 0 && parseInt(this.default_vote_weight) <= 100)
-						this.voteWeight = parseInt(this.default_vote_weight);
-						this.$store.commit('setVoteWeight', this.default_vote_weight)
+						//this.voteWeight = parseInt(this.default_vote_weight);
+						this.setVoteWeight(parseInt(this.default_vote_weight));
+						//this.$store.commit('setVoteWeight', parseInt(this.default_vote_weight))
 						//return this.default_vote_weight;
 					}catch(err){
-						
+						console.log(err);
 					}
+				}else{
+					this.settings_set = false;
 				}
 			}
 				
@@ -599,6 +611,66 @@
 					res => {res.json().then(json => this.setUserSettings (json)).catch(e => console.log(e))
 				}).catch(e => console.log(e))
 			}
+		},
+		async restoreDefault(){
+			try{
+				if (parseInt(this.default_vote_weight) > 0 && parseInt(this.default_vote_weight) <= 100)
+				//this.voteWeight = parseInt(this.default_vote_weight);
+				this.setVoteWeight(parseInt(this.default_vote_weight));
+				//this.$store.commit('setVoteWeight', parseInt(this.default_vote_weight))
+				//return this.default_vote_weight;
+			}catch(err){
+				console.log(err);
+			}
+		},
+		async saveSettings(){
+			this.save_progress = true;
+			/*console.log(this.sel_node);
+			console.log(this.testnet);
+			console.log(this.chain_id);
+			console.log(this.custom_node);
+			console.log(this.custom_node_active);*/
+			//return;
+			try{
+				if (!this.user_settings){
+					this.user_settings = new Object();
+				}
+				this.user_settings['default_vote_weight'] = this.voteWeight;
+				
+				let url = new URL(process.env.actiAppUrl + 'updateSettings/?user=' + this.user.account.name+'&settings='+JSON.stringify(this.user_settings));
+				//console.log(url);
+
+				let accToken = localStorage.getItem('access_token')
+				
+				let reqHeads = new Headers({
+				  'Content-Type': 'application/json',
+				  'x-acti-token': 'Bearer ' + accToken,
+				});
+				let res = await fetch(url, {
+					headers: reqHeads
+				});
+				let outcome = await res.json();
+				//console.log(outcome);
+				
+				if (outcome.success){
+					this.default_vote_weight = this.voteWeight;
+					this.$notify({
+					  group: 'success',
+					  text: this.$t('successfully_updated_settings'),
+					  position: 'top center'
+					})
+				}else{
+					this.$notify({
+					  group: 'error',
+					  text: this.$t('error'),
+					  position: 'top center'
+					})
+				}
+				
+			}catch(err){
+				console.log(err);
+			}
+			this.save_progress = false;
 		},
 	},
 	async mounted () {

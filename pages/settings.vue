@@ -44,9 +44,10 @@
 			
 				<div class="bchain-option btn col-12 m-2 p-2 row text-left">
 					<label for="default_vote_weight">{{$t('default_vote_weight')}}</label>
-					<span><input class="form-control mb-2 col-1" type="number" ref="default_vote_weight" id="default_vote_weight" style="display: inline" min=0 max=100>%</span>
-					<span>{{$t('vote_weight_settings_note')}}</span>
+					<span><input class="form-control mb-2 col-1" type="number" ref="default_vote_weight" id="default_vote_weight" style="display: inline" min=0 max=100>&nbsp;%&nbsp;</span>
+					<span class="text-brand">{{$t('vote_weight_settings_note')}}</span>
 				</div>
+				
 			  
 			<h5 class="p-3 acti-headr">{{ $t('post_chains_setting') }}</h5>
 			<span class="text-brand" v-html="$t('posting_authority_desc')"></span>
