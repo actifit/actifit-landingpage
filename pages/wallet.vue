@@ -1655,35 +1655,80 @@
 			this.user_settings['hide_small_balances'] = this.hide_small_balances;
 			this.user_settings['show_only_tokens_interest'] = this.show_only_tokens_interest;
 			
-			let url = new URL(process.env.actiAppUrl + 'updateSettings/?user=' + this.user.account.name+'&settings='+JSON.stringify(this.user_settings));
-			//console.log(url);
-
-			let accToken = localStorage.getItem('access_token')
 			
-			let reqHeads = new Headers({
-			  'Content-Type': 'application/json',
-			  'x-acti-token': 'Bearer ' + accToken,
-			});
-			let res = await fetch(url, {
-				headers: reqHeads
-			});
-			let outcome = await res.json();
-			//console.log(outcome);
-			
-			if (outcome.success){
-				this.$notify({
-				  group: 'success',
-				  text: this.$t('successfully_updated_settings'),
-				  position: 'top center'
-				})
+			if (this.isKeychainLogin){
+				//in case of keychain login, broadcast to chain
+				//broadcast the transaction to Steem BC
+				let cstm_params = {
+					required_auths: [],
+					required_posting_auths: [this.user.account.name],
+					id: 'actifit-settings',
+					json: JSON.stringify(this.user_settings)
+				  };
+				console.log(this.stdLogin);
+				
+				let res = await this.processTrxFunc('custom_json', cstm_params);
+				console.log('post keychain');
+				console.log(res);
+				
+				if (res.success){
+					//console.log(res.txID);
+					let url = new URL(process.env.actiAppUrl + 'updateSettingsKeychain/'+res.txID+'/?user=' + this.user.account.name+'&operation='+JSON.stringify([['custom_json',cstm_params]]));
+					
+					let res2 = await fetch(url);
+					let outcome = await res2.json();
+					console.log(outcome);
+					if (outcome.success){
+						this.$notify({
+						  group: 'success',
+						  text: this.$t('successfully_updated_settings'),
+						  position: 'top center'
+						})
+					}else{
+						this.$notify({
+						  group: 'error',
+						  text: this.$t('error'),
+						  position: 'top center'
+						})
+					}
+				}else{
+					this.$notify({
+					  group: 'error',
+					  text: this.$t('error'),
+					  position: 'top center'
+					})
+				}
+				
 			}else{
-				this.$notify({
-				  group: 'error',
-				  text: this.$t('error'),
-				  position: 'top center'
-				})
+				let url = new URL(process.env.actiAppUrl + 'updateSettings/?user=' + this.user.account.name+'&settings='+JSON.stringify(this.user_settings));
+				//console.log(url);
+
+				let accToken = localStorage.getItem('access_token')
+				
+				let reqHeads = new Headers({
+				  'Content-Type': 'application/json',
+				  'x-acti-token': 'Bearer ' + accToken,
+				});
+				let res = await fetch(url, {
+					headers: reqHeads
+				});
+				let outcome = await res.json();
+				//console.log(outcome);
+				
+				if (outcome.success){
+					this.$notify({
+					  group: 'success',
+					  text: this.$t('successfully_updated_settings'),
+					  position: 'top center'
+					})
+				}else{
+					this.$notify({
+					  group: 'error',
+					  text: this.$t('error'),
+					  position: 'top center'
+					})
+				}
 			}
-			
 		}catch(err){
 			console.log(err);
 		}
@@ -3833,7 +3878,7 @@
 					'Posting', (response) => {
 					console.log(response);
 					//resolve(response);
-					resolve({success: response.success})
+					resolve({success: response.success, txID: response.result.id})
 				});
 			});
 		}else{

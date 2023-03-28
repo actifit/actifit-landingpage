@@ -311,7 +311,7 @@
 					console.log(this.show_full_token_list);
 					
 					//load proper node
-					if (typeof this.user_settings.node_active !== 'undefined'){
+					/*if (typeof this.user_settings.node_active !== 'undefined'){
 						console.log('stored node data');
 						console.log(this.user_settings.node_active.customNode);
 						if (!this.user_settings.node_active.customNode){
@@ -323,7 +323,8 @@
 							this.testnet = this.user_settings.node_active.isTestnet;
 							this.chain_id = this.user_settings.node_active.chainId;
 						}
-					}
+					}*/
+					
 					try{
 					for (let i=0;i<this.notif_types.length;i++){
 						//console.log(i);
@@ -474,6 +475,8 @@
 				this.user_settings = new Object();
 				//this.user_settings.user = this.user.account.name;
 			}
+			
+			/*
 			if (this.custom_node_active){
 				this.subset['node_active'] = {
 					customNode: true,
@@ -486,7 +489,7 @@
 					stdNode: this.sel_node,
 					customNode: false,
 				}
-			}
+			}*/
 			/*console.log('new settings');
 			console.log(this.$refs['hide_small_balances'].checked)
 			console.log(this.hide_small_balances);
@@ -502,7 +505,7 @@
 				console.log(err)
 			}
 			//store node data
-			if (typeof this.user_settings.node_active !== 'undefined'){
+			/*if (typeof this.user_settings.node_active !== 'undefined'){
 				if (!this.user_settings.node_active.customNode){
 					this.sel_node = this.user_settings.node_active.stdNode;
 					this.custom_node_active = false;
@@ -512,7 +515,7 @@
 					this.testnet = this.user_settings.node_active.isTestnet;
 					this.chain_id = this.user_settings.node_active.chainId;
 				}
-			}
+			}*/
 
 			this.subset['post_target_bchain'] = this.target_bchain;
 			this.subset['notifications_active'] = this.notif_active;
