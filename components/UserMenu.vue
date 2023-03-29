@@ -71,8 +71,9 @@
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet')"><i class="fa-solid fa-wallet text-brand"></i>&nbsp;{{ $t('My_Wallet') }} <br/><span class="text-brand pl-4">  {{ formattedUserTokens }}</span></a>
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/referrals')"><i class="fas fa-user-friends text-brand"></i>&nbsp;{{ $t('My_Referrals') }} <br/><span class="text-brand pl-4"> {{ referralCount }} </span></a>
           <a class="dropdown-item" href="#" @click.prevent="$router.push('/activity/' + user.account.name)"><i class="fas fa-running text-brand"></i>&nbsp;{{ $t('My_Activity') }}</a>
-		  <a class="dropdown-item" href="#" @click.prevent="$router.push(user.account.name + '/blog')"><i class="fa-solid fa-pen-to-square text-brand"></i>&nbsp;{{ $t('My_Blog') }}</a>
-		  <a class="dropdown-item" href="#" @click.prevent="$router.push(user.account.name + '/videos')"><i class="fa-solid fa-video text-brand"></i>&nbsp;{{ $t('My_Videos') }}</a>
+		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/'+user.account.name + '/blog')"><i class="fa-solid fa-pen-to-square text-brand"></i>&nbsp;{{ $t('My_Blog') }}</a>
+		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/'+user.account.name + '/blog/new')"><i class="fa-solid fa-plus-square text-brand"></i>&nbsp;{{ $t('New_Blog') }}</a>
+		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/'+user.account.name + '/videos')"><i class="fa-solid fa-video text-brand"></i>&nbsp;{{ $t('My_Videos') }}</a>
 		  <a class="dropdown-item" href="#"><i class="fa-solid fa-link text-brand"></i>&nbsp;{{ $t('Active_chain') }} <br />
 			<div class="pl-4" :class="adjustHiveClass" v-on:click="setActiveChain('HIVE')">
 			<img src="/img/HIVE.png" style="max-height: 20px;"   :title="(cur_bchain == 'HIVE'?$t('running_on_chain').replace('_CHAIN_', 'HIVE'):$t('switch_to_chain').replace('_CHAIN_', 'HIVE'))">{{$t('HIVE')}}

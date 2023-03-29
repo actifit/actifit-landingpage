@@ -20,6 +20,7 @@ module.exports = {
   My_Wallet: 'My Wallet',
   My_Activity: 'My Activity',
   My_Blog: 'My Blog',
+  New_Blog: 'New Blog',
   My_Videos: 'My Videos',
   Reports: 'Reports',
   Login: 'Login',
