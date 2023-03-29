@@ -10,7 +10,7 @@
 		<span v-if="this.afitReward" :title="$t('Rewarded_report')" class="check-tooltip"><i class="fas fa-check p-2"></i></span>
       </h6>
       <div class="report-body">
-        <div class="row">
+        <div class="row pb-1">
           <div class="col-8">
             <a :href="'/'+report.author" target="_blank">
 			
@@ -24,6 +24,31 @@
             <small class="text-muted" :title="date">{{ getTimeDifference(report.created) }}</small>
           </div>
         </div>
+		<div class="row">
+		  <div class="col-12">
+			<a href="#" class="text-brand" @click="$store.commit('setActiveReport', report)" data-toggle="modal"
+				 data-target="#reportModal" :title="$t('read_more_small')" v-if="hasImage()">
+				<img :src="fetchReportImage()" :alt="report.title" class="report-image">
+			</a>
+		  </div>
+		</div>
+		<div class="row">
+		  <div class="col-12">
+			<a href="#" class="" @click="$store.commit('setActiveReport', report)" data-toggle="modal"
+				 data-target="#reportModal" :title="$t('read_more_small')">
+			<!--<a :href="'/'+report.author+'/'+report.permlink" target="_blank">-->
+				<div ref="report_body" id="report_body" style="display: none">
+					<!--{{ renderSnippet(report.body) }}-->
+					<vue-remarkable :source="renderSnippet(report.body)" :options="{'html': true, 'xhtmlOut': true}"></vue-remarkable>
+				</div>
+				<div>
+					<span id="report_body_render" v-html="fixedContent()"></span>
+					<i class="fas fa-external-link-alt"></i>
+				</div>
+			</a>
+		  </div>
+		  
+		</div>
         <div class="row details mt-2">
           <div class="col-8">
             <small class="d-block">
@@ -165,6 +190,10 @@
   import hive from '@hiveio/hive-js'
   
   import SocialSharing from 'vue-social-sharing'
+  
+  import vueRemarkable from 'vue-remarkable';
+  
+  import sanitize from 'sanitize-html'
 
   export default {
     props: ['report'],
@@ -256,6 +285,7 @@
 	},
 	components: {
 		SocialSharing,
+		vueRemarkable
 	},
 	watch: {
 	  postUpvoted: 'updatePostData',
@@ -301,6 +331,54 @@
 			return true;
 		}
 		return false;
+	  },
+	  hasImage(){
+		let metaData = this.meta;
+		if (metaData.image){
+			if (Array.isArray(metaData.image) && metaData.image.length > 0){
+				return true;
+			}
+		}
+		return false;
+	  },
+	  fetchReportImage(){
+		if (this.hasImage()){
+			return this.meta.image[0];
+		}
+		return "";
+	  },
+	  fixedContent(){
+		if (this.$refs["report_body"]){
+			//console.log(this.$refs["report_body"].innerHTML);
+			//remove html tags from text
+			return this.$refs["report_body"].innerHTML.replace(/<[^>]+>/g, '');;
+		}
+		return "";
+	  },
+	  renderSnippet(content){
+		//remove extra content
+		let img_links_reg = /[!]\[[\d\w\s-\.\(\)]*\]\((((https?:\/\/actifit\.s3\.amazonaws\.com\/)|((https?:\/\/usermedia\.actifit\.io\/))|((https:\/\/ipfs\.busy\.org\/ipfs\/))|((https:\/\/steemitimages\.com\/)))[\d\w-=&[\:\/\.\%\?]+|(https?:\/\/[.\d\w-\/\:\%]*(\.(?:png|jpg|jpeg|gif)(\??[\d\w-=&[\:\/\.\%\?]+)?)?))[)]/igm;
+		let post_content = content.replace(img_links_reg,'');
+		img_links_reg = /(((https?:\/\/actifit\.s3\.amazonaws\.com\/)[\d\w-]+)|((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|((https:\/\/ipfs\.busy\.org\/ipfs\/)[\d\w-]+)|((https:\/\/steemitimages\.com\/)[\d\w-[\:\/\.]+)|(https?:\/\/[.\/\d\w-]*\.(?:png|jpg|jpeg|gif)))[\s]/igm;
+		post_content = post_content.replace(img_links_reg,'');
+		let vid_reg = /https?:\/\/(?:[0-9A-Z-]+\.)?(?:youtu\.be\/|youtube\.com\S*[^\w\-\s])([\w\-]{11})(?=[^\w\-]|$)(?![?=&amp;+%\w]*(?:['"][^&lt;&gt;]*&gt;|&lt;\/a&gt;))[?=&amp;+%\w-]*/ig;
+		
+		//swap into a player format, and introduce embed format for proper playing of videos
+		post_content = post_content.replace(vid_reg,'');
+		
+		let threespk_reg = /(?:\[.*\]\()?https?:\/\/3speak\.tv\/watch\?v=([\w-]+\/[\w-]+)(?:\))?/i;
+		post_content = post_content.replace(threespk_reg,'');
+		
+		let href_lnks = /\[([\d\w\s-\.\(\)=[\:\/\.%\?&"<>]*)\]\(([\d\w-=[\:\/\.%\?&]+|(https?:\/\/[.\d\w-\/\:\%\(\)]*\.))[)]/igm;
+		post_content = post_content.replace(href_lnks,'<a href="$2">$1</a>');
+		
+		let user_name = /([^\/])(@([\d\w-.]+))/igm;
+        
+		post_content = post_content.replace(user_name,'$1<a href="https://actifit.io/$2">$2</a>')
+	  
+		post_content = sanitize(post_content)
+		post_content = this.truncateString(post_content, 150);
+		return post_content;
 	  },
 	  //function handles displaying cut off version of text to avoid lengthy titles
 	  truncateString(str) {
@@ -416,5 +494,10 @@
 	}
 	.card{
 		box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
+	}
+	.report-image{
+		width: 100%;
+		height: 150px;
+		object-fit: cover;
 	}
 </style>
