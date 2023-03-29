@@ -462,6 +462,87 @@
 			console.log(this.posting_auth);
 		}
 	  },
+	  async processTrxFunc(op_name, cstm_params, bchain_option){
+		if (!localStorage.getItem('std_login')){
+		//if (!this.stdLogin){
+			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
+			//console.log(res);
+			if (res.result.ref_block_num) {
+				console.log('success');
+				return {success: true, trx: res.result};
+			}else{
+				//console.log(err);
+				return {success: false, trx: null};
+			}
+		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+			return new Promise((resolve) => {
+				window.hive_keychain.requestBroadcast(
+					this.user.account.name, 
+					[[op_name, cstm_params]], 
+					'Posting', (response) => {
+					console.log(response);
+					//resolve(response);
+					resolve({success: response.success, txID: response.result.id})
+				});
+			});
+		}else{
+			let operation = [ 
+			   [op_name, cstm_params]
+			];
+			console.log('broadcasting');
+			console.log(operation);
+			
+			//console.log(this.$steemconnect.accessToken);
+			//console.log(this.$store.state.accessToken);
+			//grab token
+			let accToken = localStorage.getItem('access_token')
+			
+			let op_json = JSON.stringify(operation)
+			
+			let bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+			
+			if (bchain_option){
+				bchain = bchain_option;
+			}
+			
+			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+op_json+'&bchain='+bchain);
+
+			
+			let reqHeads = new Headers({
+			  'Content-Type': 'application/json',
+			  'x-acti-token': 'Bearer ' + accToken,
+			});
+			let res = await fetch(url, {
+				headers: reqHeads
+			});
+			let outcome = await res.json();
+			console.log(outcome);
+			if (outcome.error){
+				console.log(outcome.error);
+				
+				//if this is authority error, means needs to be logged out
+				//example "missing required posting authority:Missing Posting Authority"
+				let err_msg = outcome.trx.tx.error;
+				if (err_msg.includes('missing') && err_msg.includes('authority') && this.cur_bchain == bchain_option){
+					//clear entry
+					localStorage.removeItem('access_token');
+					//this.$store.commit('setStdLoginUser', false);
+					this.error_msg = this.$t('session_expired_login_again');
+					this.$store.dispatch('steemconnect/logout');
+				}
+				
+				this.$notify({
+				  group: 'error',
+				  text: err_msg,
+				  position: 'top center'
+				})
+				return {success: false, trx: null};
+				//this.$router.push('/login');
+			}else{
+				return {success: true, trx: outcome.trx};
+			}
+		}
+	  },
 	  async saveSettings () {
 		this.save_progress = true;
 		/*console.log(this.sel_node);
@@ -520,39 +601,84 @@
 			this.subset['post_target_bchain'] = this.target_bchain;
 			this.subset['notifications_active'] = this.notif_active;
 			
-			let url = new URL(process.env.actiAppUrl + 'updateSettings/?user=' + this.user.account.name+'&settings='+JSON.stringify(this.subset));
-			//console.log(url);
-
-			let accToken = localStorage.getItem('access_token')
-			
-			let reqHeads = new Headers({
-			  'Content-Type': 'application/json',
-			  'x-acti-token': 'Bearer ' + accToken,
-			});
-			let res = await fetch(url, {
-				headers: reqHeads
-			});
-			let outcome = await res.json();
-			//console.log(outcome);
-			
-			if (outcome.success){
-				this.$notify({
-				  group: 'success',
-				  text: this.$t('successfully_updated_settings'),
-				  position: 'top center'
-				})
+			if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
+				//in case of keychain login, broadcast to chain
+				//broadcast the transaction to Steem BC
+				let cstm_params = {
+					required_auths: [],
+					required_posting_auths: [this.user.account.name],
+					id: 'actifit-settings',
+					json: JSON.stringify(this.subset)
+				  };
+				
+				let res = await this.processTrxFunc('custom_json', cstm_params);
+				console.log('post keychain');
+				console.log(res);
+				
+				if (res.success){
+					//console.log(res.txID);
+					let url = new URL(process.env.actiAppUrl + 'updateSettingsKeychain/'+res.txID+'/?user=' + this.user.account.name+'&operation='+JSON.stringify([['custom_json',cstm_params]]));
+					
+					let res2 = await fetch(url);
+					let outcome = await res2.json();
+					console.log(outcome);
+					if (outcome.success){
+						this.$notify({
+						  group: 'success',
+						  text: this.$t('successfully_updated_settings'),
+						  position: 'top center'
+						})
+					}else{
+						this.$notify({
+						  group: 'error',
+						  text: this.$t('error'),
+						  position: 'top center'
+						})
+					}
+				}else{
+					this.$notify({
+					  group: 'error',
+					  text: this.$t('error'),
+					  position: 'top center'
+					})
+				}
+				
 			}else{
-				this.$notify({
-				  group: 'error',
-				  text: this.$t('error'),
-				  position: 'top center'
-				})
+			
+			
+				let url = new URL(process.env.actiAppUrl + 'updateSettings/?user=' + this.user.account.name+'&settings='+JSON.stringify(this.subset));
+				//console.log(url);
+
+				let accToken = localStorage.getItem('access_token')
+				
+				let reqHeads = new Headers({
+				  'Content-Type': 'application/json',
+				  'x-acti-token': 'Bearer ' + accToken,
+				});
+				let res = await fetch(url, {
+					headers: reqHeads
+				});
+				let outcome = await res.json();
+				//console.log(outcome);
+				
+				if (outcome.success){
+					this.$notify({
+					  group: 'success',
+					  text: this.$t('successfully_updated_settings'),
+					  position: 'top center'
+					})
+				}else{
+					this.$notify({
+					  group: 'error',
+					  text: this.$t('error'),
+					  position: 'top center'
+					})
+				}
 			}
-			this.save_progress = false;
 		}catch(save_err){
 			console.log(save_err);
-			this.save_progress = false;
 		}
+		this.save_progress = false;
 	  }
 	},
 	async mounted () {
