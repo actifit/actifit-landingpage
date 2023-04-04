@@ -31,7 +31,7 @@
 	   <div class="row" v-if="userComments.length">
 		<div class="row"  v-for="iterx in Math.ceil(userComments.length / splitFactor)" :key="iterx">
 			<div v-for="itery in splitFactor" :key="itery" class="col-md-6 col-lg-4 mb-4">
-				<Post v-if="(iterx - 1) * splitFactor + (itery - 1) < userComments.length" :post="userComments[(iterx - 1) * splitFactor + (itery - 1)]" />
+				<Post v-if="(iterx - 1) * splitFactor + (itery - 1) < userComments.length" :post="userComments[(iterx - 1) * splitFactor + (itery - 1)]" :displayUsername="username"/>
 			</div>
 			<div class="col-md-6 col-lg-4 mb-4" v-if="(iterx - 1) < inlineAds">
 				<client-only>

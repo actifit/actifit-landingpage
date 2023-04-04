@@ -3,6 +3,12 @@
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content" v-if="post">
         <div class="modal-header">
+		  <!-- if this is a comment, display link to higher level comment/post -->
+		  <div v-if="post.parent_author" class="row col-12">
+			{{$t('viewing_comment_note')}}&nbsp;<a :href="buildParentLink">{{$t('view_parent_thread')}}</a>
+		  </div>
+		</div>
+		<div class="modal-header">
           <h5 class="modal-title" id="exampleModalLabel">{{ post.title }}</h5><br/>
 		  <a :href="post.author" target="_blank">
 			<h5 class="modal-author modal-title text-brand" >@{{ post.author}} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></h5>
@@ -256,6 +262,9 @@
 	  ...mapGetters(['newlyVotedPosts']),
 	  ...mapGetters(['commentEntries'], 'commentCountToday'),
 	  ...mapGetters(['moderators', 'bchain']),
+	  buildParentLink(){
+		return this.post.parent_author+'/'+this.post.parent_permlink;
+	  },
 	  adjustHiveClass () {
 		if (this.target_bchain != 'HIVE'){
 			return 'option-opaque';
@@ -281,11 +290,15 @@
       },
 	  displayPostTags(){
 		let tagDisplay = "";
-		if (this.post && this.post.json_metadata){
-			let meta_data = JSON.parse(this.post.json_metadata);
-			for (let i in meta_data.tags){
-				tagDisplay += '<span class="single-tag p-1">' + meta_data.tags[i] + '</span> ';
-			};
+		try{
+			if (this.post && this.post.json_metadata){
+				let meta_data = JSON.parse(this.post.json_metadata);
+				for (let i in meta_data.tags){
+					tagDisplay += '<span class="single-tag p-1">' + meta_data.tags[i] + '</span> ';
+				};
+			}
+		}catch(err){
+			console.log(err)
 		}
 		return tagDisplay;
 	  },
@@ -338,7 +351,12 @@
 		return Array.isArray(this.post.active_votes) ? this.post.active_votes.length : 0;
 	  },
 	  meta() {
-        return JSON.parse(this.post.json_metadata)
+        try{
+			return JSON.parse(this.post.json_metadata)
+		}catch(err){
+			console.log(err);
+			return {}
+		}
       },
 	  postPayout() {
 		if (this.postPaid()){

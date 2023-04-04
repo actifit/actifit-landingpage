@@ -3,12 +3,25 @@
   <div >
     <div class="card post">
       <h6 class="mb-0 text-center post-title">
-        <a :href="post.url" target="_blank">
+        <!--<a :href="post.url" target="_blank">-->
+		<a :href="buildLink" target="_blank">
           {{ truncateString(post.title, 70) }}
 		  <i class="fas fa-external-link-alt"></i>
         </a>
       </h6>
+	  
       <div class="post-body">
+		<div class="row">
+		<!-- if this is a comment, display link to higher level comment/post -->
+		  <div v-if="post.parent_author" class="text-right col-12">
+			<small>
+				<a :href="buildParentLink"><i class="fas fa-reply text-brand"></i>&nbsp;
+					<div class="user-avatar mr-1 float-right" :style="'background-image: url('+profImgUrl+'/u/' + post.parent_author + '/avatar)'"></div>
+				  @{{ post.parent_author }}
+				</a>
+			</small>
+		  </div>
+		</div>
         <div class="row">
           <div class="col-8">
             <a :href="'/'+post.author" target="_blank">
@@ -151,6 +164,12 @@
       ...mapGetters(['postToVote']),
 	  ...mapGetters(['newlyVotedPosts']),
 	  ...mapGetters(['moderators']),
+	  buildParentLink(){
+		return '/'+this.post.parent_author+'/'+this.post.parent_permlink;
+	  },
+	  buildLink(){
+		return '/'+this.post.author+'/'+this.post.permlink;
+	  },
       date() {
         let date = new Date(this.post.created)
         let minutes = date.getMinutes()

@@ -281,6 +281,7 @@ module.exports = {
   Activity_Reports_by: 'Activity Reports by',
   Comments_by: 'Comments by',
   error_no_comments: 'User has no comments',
+  reply_post_by: 'Reply comment to post by',
   error_no_tracked_activity: 'has not tracked any activity yet.',
   load_more: 'load more',
   Activity_Reports: 'Activity Reports',

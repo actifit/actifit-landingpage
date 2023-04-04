@@ -466,10 +466,10 @@
 	  ...mapGetters(['commentEntries'], 'commentCountToday'),
 	  ...mapGetters(['moderators', 'bchain']),
 	  buildParentLink(){
-		return this.report.parent_author+'/'+this.report.parent_permlink;
+		return '/'+this.report.parent_author+'/'+this.report.parent_permlink;
 	  },
 	  buildLink(){
-		return this.report.author+'/'+this.report.permlink;
+		return '/'+this.report.author+'/'+this.report.permlink;
 	  },
 	  adjustHiveClass () {
 		if (this.target_bchain != 'HIVE'){
