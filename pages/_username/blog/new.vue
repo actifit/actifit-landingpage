@@ -2,9 +2,14 @@
   <div>
 	<NavbarBrand />
       <div class="container pt-5 mt-5 pb-5">
-		  <h5 v-if="editPost.isNewPost" class="modal-title" id="exampleModalLabel">{{ $t('Blog_on_hive') }}</h5>
+		<div>
+		  <h5 v-if="editPost.isNewPost" class="modal-title" id="exampleModalLabel">{{ $t('Create_post') }}</h5>
 		  <h5 v-else class="modal-title" id="exampleModalLabel">{{ $t('Editing') }} <a :href="'/'+editPost.author+'/'+editPost.permlink">{{ title }}</a></h5>
-        <div>
+        </div>  
+		<div class="row text-right" v-if="user">
+			<div class="col-12 pb-2"><a href="#" class="btn btn-brand border" @click.prevent="$router.push('/' + user.account.name+'/blog')" :title="$t('view_blog')"><i class="fa-solid fa-pen-to-square"></i></a>&nbsp;<a href="#" class="btn btn-brand border" @click.prevent="$router.push('/' + user.account.name+'/comments')" :title="$t('view_comments')"><i class="far fa-comments"></i></a></div>
+		</div>
+		<div>
           <div class="form-group">
 			<!--<input id="image-upload" type="file" v-on:change="uploadImage($event.target.files)" /> -->
 		  

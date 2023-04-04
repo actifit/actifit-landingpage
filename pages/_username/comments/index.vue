@@ -28,6 +28,10 @@
 		</select>
 	  </div>-->
 	  
+	  <div class="row text-right" v-if="user">
+		<div class="col-12 pb-2"><a href="#" class="btn btn-brand border" @click.prevent="$router.push('/' + user.account.name+'/blog')" :title="$t('view_blog')"><i class="fa-solid fa-pen-to-square"></i></a></div>
+	  </div>
+	  
 	   <div class="row" v-if="userComments.length">
 		<div class="row"  v-for="iterx in Math.ceil(userComments.length / splitFactor)" :key="iterx">
 			<div v-for="itery in splitFactor" :key="itery" class="col-md-6 col-lg-4 mb-4">

@@ -920,6 +920,8 @@ module.exports = {
   Posh_verify: 'Posh Connect',
   Create_post: 'Create New Post',
   Blog_on_hive: 'Blog On Hive',
+  view_blog: 'View Blog Posts',
+  view_comments: 'View Comments',
   need_one_tag_min: 'You need to have at least 1 tag in your post',
   no_empty_post: 'Your post content cannot be empty',
   post_requires_title: 'Please provide a title for your post',
