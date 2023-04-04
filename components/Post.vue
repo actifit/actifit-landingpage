@@ -211,7 +211,7 @@
 		return {
 			afitReward: '',
 			userRank: '',
-			fullAFITReward: '',
+			//fullAFITReward: '',
 			postUpvoted: false,
 			cur_bchain: 'HIVE',
 			profImgUrl: process.env.hiveImgUrl,
@@ -379,8 +379,8 @@
 			res.json().then(json => this.userRank = json)}).catch(e => reject(e))
 			
 		//grab post full pay if full pay mode enabled
-		fetch(process.env.actiAppUrl+'getPostFullAFITPayReward?user=' + this.post.author+'&url='+this.post.url).then(res => {
-			res.json().then(json => this.fullAFITReward = json.token_count)}).catch(e => reject(e))
+		//fetch(process.env.actiAppUrl+'getPostFullAFITPayReward?user=' + this.post.author+'&url='+this.post.url).then(res => {
+			//res.json().then(json => this.fullAFITReward = json.token_count)}).catch(e => reject(e))
 		
 		//grab moderators' list
 		this.$store.dispatch('fetchModerators')

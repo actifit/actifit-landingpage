@@ -75,8 +75,14 @@ export default {
   setEditPost (state, post) {
     state.editPost = post
   },
+  setMoreUserCommentsAvailable(state, moreUserCommentsAvailable){
+	state.moreUserCommentsAvailable = moreUserCommentsAvailable  
+  },
   setMoreReportsAvailable (state, moreReportsAvailable) {
     state.moreReportsAvailable = moreReportsAvailable
+  },
+  setUserComments (state, userComments) {
+	state.userComments = userComments  
   },
   setUserReports (state, userReports) {
     state.userReports = userReports

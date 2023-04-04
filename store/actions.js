@@ -336,7 +336,36 @@ export default {
       })
     })
   },
-    
+  
+  fetchUserComments ({ state, commit, dispatch }, username) {
+    // fetches initial posts or more posts if invoked again
+    return new Promise((resolve, reject) => {
+      // if there are comments already, take the last one as starting point
+      let lastComment = state.userComments.length ? state.userComments[state.userComments.length - 1] : null
+      let start_author = lastComment ? lastComment.author : null
+      let start_permlink = lastComment ? lastComment.permlink : null
+	  
+	   //set proper blockchain selection
+	  let chainLnk = hive;
+	  if (state.bchain == 'STEEM'){
+		chainLnk = steem;
+	  }else if (state.bchain == 'BLURT'){
+		chainLnk = blurt;
+	  }
+	  console.log(username);
+	  //let outc = await chainLnk.api.callAsync('bridge.get_account_posts', {sort: 'comments', account: username, limit: 100, start_author: start_author, start_permlink: start_permlink})
+	  let outc = chainLnk.api.call('bridge.get_account_posts', {sort: 'comments', account: username, limit: 100, start_author: start_author, start_permlink: start_permlink}, (err, comments) => {
+			if (err) reject(err)
+			else {
+				//console.log(comments)
+				commit('setUserComments', [...state.userComments, ...comments])
+				console.log(comments);
+				dispatch('checkIfMoreUserCommentsAvailable', username)
+				resolve()	  
+			}
+		})
+    })
+  },
   
   fetchUserReports ({ state, commit, dispatch }, username) {
     // fetches initial posts or more posts if invoked again
@@ -583,6 +612,35 @@ export default {
       })
     })
   },
+  
+  checkIfMoreUserCommentsAvailable ({ state, commit }, username) {
+    return new Promise((resolve, reject) => {
+      let lastComment = state.userComments.length ? state.userComments[state.userComments.length - 1] : null
+      let start_author = lastComment ? lastComment.author : null
+      let start_permlink = lastComment ? lastComment.permlink : null
+	  
+	  //set proper blockchain selection
+	  let chainLnk = hive;
+	  if (state.bchain == 'STEEM'){
+		chainLnk = steem;
+	  }else if (state.bchain == 'BLURT'){
+		chainLnk = blurt;
+	  }
+	  
+	  let outc = chainLnk.api.call('bridge.get_account_posts', {sort: 'comments', account: username, limit: 100, start_author: start_author, start_permlink: start_permlink}, (err, comments) => {
+			if (err) reject(err)
+			else {
+				//console.log(comments)
+				commit('setUserComments', [...state.userComments, ...comments])
+				console.log(comments);
+				//dispatch('checkIfMoreUserCommentsAvailable', username)
+				commit('setMoreUserCommentsAvailable', !!comments.length) // if posts were found, show load more button
+				resolve()	  
+			}
+		})
+    })
+  },
+  
   
   
   updatePost ({ state, commit }, options) {

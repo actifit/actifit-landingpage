@@ -279,6 +279,8 @@ module.exports = {
   Hive_Power_Delegators: 'Hive Power Delegators',
   Steem_Power_Delegators: 'Steem Power Delegators',
   Activity_Reports_by: 'Activity Reports by',
+  Comments_by: 'Comments by',
+  error_no_comments: 'User has no comments',
   error_no_tracked_activity: 'has not tracked any activity yet.',
   load_more: 'load more',
   Activity_Reports: 'Activity Reports',

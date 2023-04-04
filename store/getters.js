@@ -77,6 +77,12 @@ export default {
   userReports (state) {
     return state.userReports
   },
+  userComments (state) {
+    return state.userComments
+  },
+  moreUserCommentsAvailable (state) {
+    return state.moreUserCommentsAvailable
+  },
   moreUserReportsAvailable (state) {
     return state.moreUserReportsAvailable
   },

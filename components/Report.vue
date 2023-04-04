@@ -232,7 +232,12 @@
         return this.meta.dataTrackingSource
       },
       meta() {
-        return JSON.parse(this.report.json_metadata)
+        try{
+			return JSON.parse(this.report.json_metadata)
+		}catch(err){
+			console.log(err);
+			return {};
+		}
       },
 	  postPayout() {
 		if (this.postPaid()){
