@@ -35,7 +35,7 @@
 	   <div class="row" v-if="userComments.length">
 		<div class="row"  v-for="iterx in Math.ceil(userComments.length / splitFactor)" :key="iterx">
 			<div v-for="itery in splitFactor" :key="itery" class="col-md-6 col-lg-4 mb-4">
-				<Post v-if="(iterx - 1) * splitFactor + (itery - 1) < userComments.length" :post="userComments[(iterx - 1) * splitFactor + (itery - 1)]" :displayUsername="username"/>
+				<Post v-if="(iterx - 1) * splitFactor + (itery - 1) < userComments.length" :post="userComments[(iterx - 1) * splitFactor + (itery - 1)]" :displayUsername="username" :pstId="(iterx - 1) * splitFactor + (itery - 1)"/>
 			</div>
 			<div class="col-md-6 col-lg-4 mb-4" v-if="(iterx - 1) < inlineAds">
 				<client-only>
@@ -62,7 +62,7 @@
     <Footer />
 	<client-only>
       <div>
-		<PostModal :post="activePost" />
+		<PostModal :post="activePost" @nextPost="nextPost(1)" @prevPost="nextPost(-1)"/>
 		<EditPostModal />
 		<VoteModal />
         <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
@@ -146,6 +146,28 @@
       }
     },
     methods: {
+	  nextPost (direction){
+		let pstId = this.activePost.pstId;
+		console.log(pstId);
+		let proceed = false;
+		if (direction < 0){
+			console.log('move back');
+			if (pstId >= 1){
+				pstId -= 1;
+				proceed = true;
+			}
+		}else{
+			console.log('move front');
+			if (pstId < this.userComments.length){
+				pstId += 1;
+				proceed = true;
+			}
+		}
+		if (proceed){
+			this.userComments[pstId].pstId = pstId;
+			this.$store.commit('setActivePost', this.userComments[pstId]);
+		}
+	  },
 	  async reorderComments(){
 		try{
 			//console.log(this.currentSort);

@@ -4,8 +4,14 @@
       <div class="modal-content" v-if="post">
 	    <div class="modal-header">
 			<div class="col-12">
-				<button type="button" class="btn btn-link float-left" @click="loadNextPost(-1)"><i class="fas fa-chevron-left"></i> Previous Post</button>
-				<button type="button" class="btn btn-link float-right" @click="loadNextPost(1)">Next Post <i class="fas fa-chevron-right"></i></button>
+				<button type="button" class="btn btn-link float-left" @click="loadNextPost(-1)"><i class="fas fa-chevron-left"></i> Previous 
+					<span v-if="post.parent_author">Comment</span>
+					<span v-else>Post</span>	
+				</button>
+				<button type="button" class="btn btn-link float-right" @click="loadNextPost(1)">Next 
+					<span v-if="post.parent_author">Comment</span>
+					<span v-else>Post</span>					
+				<i class="fas fa-chevron-right"></i></button>
 			</div>
 		</div>
         <div class="modal-header">
