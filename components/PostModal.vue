@@ -2,6 +2,12 @@
   <div class="modal fade" id="postModal" tabindex="-1">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content" v-if="post">
+	    <div class="modal-header">
+		<div class="col-12">
+			<button type="button" class="btn btn-link float-left" @click="loadNextPost(-1)"><i class="fas fa-chevron-left"></i> Previous Post</button>
+			<button type="button" class="btn btn-link float-right" @click="loadNextPost(1)">Next Post <i class="fas fa-chevron-right"></i></button>
+		</div>
+		</div>
         <div class="modal-header">
 		  <!-- if this is a comment, display link to higher level comment/post -->
 		  <div v-if="post.parent_author" class="row col-12">
@@ -196,7 +202,8 @@
 				:depth="0" />
 		</div>
       </div>
-    </div>
+	  
+	</div>
   </div>
 </template>
 
@@ -384,7 +391,16 @@
 		return this.commentEntries != null;
 	  }
     },
-	methods: {
+	methods: { 
+	  loadNextPost(direction){
+		if (direction <0){
+			console.log('previous')
+			this.$emit('prevPost');
+		}else{
+			console.log('next');
+			this.$emit('nextPost');
+		}
+	  },
 	  /* function checks to see if post reached its payout period */
 	  postPaid() {
 		//check if last_payout is after cashout_time which means post got paid
@@ -750,7 +766,20 @@
        */
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
-      }
+      },
+	  handleKeyDown(event) {
+		  switch (event.key) {
+			case 'ArrowLeft':
+			  this.loadNextPost(-1);
+			  break;
+			case 'ArrowRight':
+			  this.loadNextPost(1);
+			  break;
+		  }
+	  }
+	},
+	beforeDestroy() {
+		window.removeEventListener('keydown', this.handleKeyDown);
 	},
 	async mounted () {
 	  if (this.post != null){
@@ -761,6 +790,10 @@
 	  $('#voteModal').on("hidden.bs.modal", this.fixSubModal)
 	  
 	  this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+	  
+	  //capture key clicks
+	  window.addEventListener('keydown', this.handleKeyDown);
+
 	}
   }
 </script>

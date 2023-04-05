@@ -39,7 +39,7 @@
         </div>
 		<div class="row">
           <div class="col-12">
-			<a href="#" class="text-brand" @click="$store.commit('setActivePost', post)" data-toggle="modal"
+			<a href="#" class="text-brand" @click="post.pstId = pstId; $store.commit('setActivePost', post)" data-toggle="modal"
                  data-target="#postModal" :title="$t('read_more_small')" v-if="hasImage()">
 				<img :src="fetchPostImage()" :alt="post.title" class="post-image">
 			</a>
@@ -47,7 +47,7 @@
 		</div>
 		<div class="row">
           <div class="col-12">
-			<a href="#" class="" @click="$store.commit('setActivePost', post)" data-toggle="modal"
+			<a href="#" class="" @click="post.pstId = pstId; $store.commit('setActivePost', post)" data-toggle="modal"
                  data-target="#postModal" :title="$t('read_more_small')">
             <!--<a :href="'/'+post.author+'/'+post.permlink" target="_blank">-->
 				<div ref="post_body" id="post_body" style="display: none">
@@ -107,7 +107,7 @@
 					  </network>
 					</span>
 				</social-sharing>
-              <!--<a href="#" class="text-brand pr-2" @click="$store.commit('setActivePost', post)" data-toggle="modal"
+              <!--<a href="#" class="text-brand pr-2" @click="post.pstId = pstId; $store.commit('setActivePost', post)" data-toggle="modal"
                  data-target="#dailyActivityChartModal" :title="$t('Activity_chart')">
                 <i class="fas fa-chart-line"></i>
               </a>-->
@@ -115,7 +115,7 @@
                  data-target="#editPostModal" v-if="user && post.author === user.account.name" :title="$t('Edit_note')">
                 <i class="fas fa-edit"></i>
               </a>
-              <a href="#" class="text-brand" @click="$store.commit('setActivePost', post)" data-toggle="modal"
+              <a href="#" class="text-brand" @click="post.pstId = pstId; $store.commit('setActivePost', post)" data-toggle="modal"
                  data-target="#postModal" :title="$t('read_more_small')">
                 <i class="fas fa-book-open"></i>
               </a>
@@ -158,7 +158,7 @@
   import sanitize from 'sanitize-html'
 
   export default {
-    props: ['post', 'displayUsername'],
+    props: ['post', 'displayUsername', 'pstId'],
     computed: {
       ...mapGetters('steemconnect', ['user']),
       ...mapGetters(['postToVote']),

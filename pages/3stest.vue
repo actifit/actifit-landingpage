@@ -405,13 +405,12 @@ export default {
 				let outc = await this.markVideoPublished(vid);
 			}
 			
-			
 		},
 		
 		async getAllVideoStatuses(access_token) {
 			console.log('get all videos')
 			console.log(process.env.threeSpeakUserVideoList);
-			console.log(access_token);
+			//console.log(access_token);
 			try {
 			  let response = await client.get(process.env.threeSpeakUserVideoList,
 				{
@@ -612,7 +611,7 @@ export default {
 		
 		async markVideoPublished(vid){
 			let videoInfo = {
-			  'videoid': ''+vid._id,//vid.videoid,
+			  'videoId': ''+vid._id,//vid.videoid,
 			  'title': vid.title,
 			  'description': vid.description,
 			  'tags': 'actifit',//vid.tags,
