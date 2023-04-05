@@ -411,6 +411,7 @@ export default {
 		async getAllVideoStatuses(access_token) {
 			console.log('get all videos')
 			console.log(process.env.threeSpeakUserVideoList);
+			console.log(access_token);
 			try {
 			  let response = await client.get(process.env.threeSpeakUserVideoList,
 				{

@@ -3,7 +3,10 @@
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content" v-if="editPost">
         <div class="modal-header">
-		  <h5 v-if="editPost.isNewPost" class="modal-title" id="exampleModalLabel">{{ $t('Blog_on_hive') }}</h5>
+		  <h5 v-if="editPost.isNewPost" class="modal-title" id="exampleModalLabel">
+			{{ $t('Blog_on_hive') }}
+			<a v-if="user" :href="'/'+user.account.name+'/blog/new'" class="btn btn-brand border" ><i class="fa-regular fa-maximize fas"></i></a>
+		  </h5>
 		  <h5 v-else class="modal-title" id="exampleModalLabel">{{ $t('Editing') }} <a :href="'/'+editPost.author+'/'+editPost.permlink">{{ title }}</a></h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
