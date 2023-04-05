@@ -136,7 +136,7 @@
 		let proceed = false;
 		if (direction < 0){
 			console.log('move back');
-			if (rptId > 1){
+			if (rptId >= 1){
 				rptId -= 1;
 				proceed = true;
 			}

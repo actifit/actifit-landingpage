@@ -748,6 +748,7 @@
 		}
 	  },
 	  handleKeyDown(event) {
+		if (!this.commentBoxOpen){
 		  switch (event.key) {
 			case 'ArrowLeft':
 			  this.loadNextReport(-1);
@@ -756,6 +757,7 @@
 			  this.loadNextReport(1);
 			  break;
 		  }
+		}
 	  }
 	},
 	beforeDestroy() {

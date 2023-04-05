@@ -146,7 +146,7 @@
 		let proceed = false;
 		if (direction < 0){
 			console.log('move back');
-			if (pstId > 1){
+			if (pstId >= 1){
 				pstId -= 1;
 				proceed = true;
 			}

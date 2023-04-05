@@ -768,6 +768,7 @@
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
 	  handleKeyDown(event) {
+		if (!this.commentBoxOpen){
 		  switch (event.key) {
 			case 'ArrowLeft':
 			  this.loadNextPost(-1);
@@ -776,6 +777,7 @@
 			  this.loadNextPost(1);
 			  break;
 		  }
+		}
 	  }
 	},
 	beforeDestroy() {
