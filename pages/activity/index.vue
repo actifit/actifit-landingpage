@@ -16,7 +16,7 @@
 	 <div v-if="reports.length">
 		<div class="row"  v-for="iterx in Math.ceil(reports.length / splitFactor)" :key="iterx">
 			<div v-for="itery in splitFactor" :key="itery" class="col-md-6 col-lg-4 mb-4">
-				<Report v-if="(iterx - 1) * splitFactor + (itery - 1) < reports.length" :report="reports[(iterx - 1) * splitFactor + (itery - 1)]" />
+				<Report v-if="(iterx - 1) * splitFactor + (itery - 1) < reports.length" :report="reports[(iterx - 1) * splitFactor + (itery - 1)]" :rptId="(iterx - 1) * splitFactor + (itery - 1)"/>
 			</div>
 			<div class="col-md-6 col-lg-4 mb-4" v-if="(iterx - 1) < inlineAds">
 				<adsbygoogle ad-slot="7038919015" ad-format="fluid" ad-layout-key="-fb+5w+4e-db+86"/>
@@ -41,7 +41,7 @@
     <client-only>
       <div>
 
-		<ReportModal :report="activeReport" />
+		<ReportModal :report="activeReport" @nextReport="nextReport(1)" @prevReport="nextReport(-1)"/>
 		<DailyActivityChartModal :report="activeReport" />
 		<EditReportModal />
 		<VoteModal :report="activeReport"/>
@@ -104,6 +104,28 @@
 	  user: 'fetchUserData',
 	},
     methods: {
+	  nextReport (direction){
+		let rptId = this.activeReport.rptId;
+		console.log(rptId);
+		let proceed = false;
+		if (direction < 0){
+			console.log('move back');
+			if (rptId > 1){
+				rptId -= 1;
+				proceed = true;
+			}
+		}else{
+			console.log('move front');
+			if (rptId < this.reports.length){
+				rptId += 1;
+				proceed = true;
+			}
+		}
+		if (proceed){
+			this.reports[rptId].rptId = rptId;
+			this.$store.commit('setActiveReport', this.reports[rptId]);
+		}
+	  },
       async loadMore () {
         this.loadingMore = true
 		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');

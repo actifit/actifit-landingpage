@@ -26,7 +26,7 @@
         </div>
 		<div class="row">
 		  <div class="col-12">
-			<a href="#" class="text-brand" @click="$store.commit('setActiveReport', report)" data-toggle="modal"
+			<a href="#" class="text-brand" @click="report.rptId = rptId; $store.commit('setActiveReport', report)" data-toggle="modal"
 				 data-target="#reportModal" :title="$t('read_more_small')" v-if="hasImage()">
 				<img :src="fetchReportImage()" :alt="report.title" class="report-image">
 			</a>
@@ -34,7 +34,7 @@
 		</div>
 		<div class="row">
 		  <div class="col-12">
-			<a href="#" class="" @click="$store.commit('setActiveReport', report)" data-toggle="modal"
+			<a href="#" class="" @click="report.rptId = rptId;$store.commit('setActiveReport', report)" data-toggle="modal"
 				 data-target="#reportModal" :title="$t('read_more_small')">
 			<!--<a :href="'/'+report.author+'/'+report.permlink" target="_blank">-->
 				<div ref="report_body" id="report_body" style="display: none">
@@ -94,7 +94,7 @@
 					  </network>
 					</span>
 				</social-sharing>
-              <a href="#" class="text-brand pr-2" @click="$store.commit('setActiveReport', report)" data-toggle="modal"
+              <a href="#" class="text-brand pr-2" @click="report.rptId = rptId;$store.commit('setActiveReport', report)" data-toggle="modal"
                  data-target="#dailyActivityChartModal" :title="$t('Activity_chart')">
                 <i class="fas fa-chart-line"></i>
               </a>
@@ -102,7 +102,7 @@
                  data-target="#editReportModal" v-if="user && report.author === user.account.name" :title="$t('Edit_note')">
                 <i class="fas fa-edit p-2"></i>
               </a>
-              <a href="#" class="text-brand" @click="$store.commit('setActiveReport', report)" data-toggle="modal"
+              <a href="#" class="text-brand" @click="report.rptId = rptId;$store.commit('setActiveReport', report)" data-toggle="modal"
                  data-target="#reportModal" :title="$t('read_more_small')">
                 <i class="fas fa-book-open"></i>
               </a>
@@ -196,7 +196,7 @@
   import sanitize from 'sanitize-html'
 
   export default {
-    props: ['report'],
+    props: ['report', 'rptId'],
     computed: {
       ...mapGetters('steemconnect', ['user']),
       ...mapGetters(['postToVote']),

@@ -2,6 +2,12 @@
   <div class="modal fade" id="reportModal" tabindex="-1">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content" v-if="report">
+	    <div class="modal-header">
+			<div class="col-12">
+				<button type="button" class="btn btn-link float-left" @click="loadNextReport(-1)"><i class="fas fa-chevron-left"></i> Previous Report</button>
+				<button type="button" class="btn btn-link float-right" @click="loadNextReport(1)">Next Report <i class="fas fa-chevron-right"></i></button>
+			</div>
+		</div>
         <div class="modal-header">
           <h5 class="modal-title" id="exampleModalLabel">{{ report.title }}</h5><br/>
 		  <a :href="report.author" target="_blank">
@@ -731,7 +737,29 @@
        */
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
-      }
+      },
+	  loadNextReport(direction){
+		if (direction <0){
+			console.log('previous')
+			this.$emit('prevReport');
+		}else{
+			console.log('next');
+			this.$emit('nextReport');
+		}
+	  },
+	  handleKeyDown(event) {
+		  switch (event.key) {
+			case 'ArrowLeft':
+			  this.loadNextReport(-1);
+			  break;
+			case 'ArrowRight':
+			  this.loadNextReport(1);
+			  break;
+		  }
+	  }
+	},
+	beforeDestroy() {
+		window.removeEventListener('keydown', this.handleKeyDown);
 	},
 	async mounted () {
 	  if (this.report != null){
@@ -742,6 +770,9 @@
 	  $('#voteModal').on("hidden.bs.modal", this.fixSubModal)
 	  
 	  this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+	  
+	  //capture key clicks
+	  window.addEventListener('keydown', this.handleKeyDown);
 	}
   }
 </script>

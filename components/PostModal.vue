@@ -3,10 +3,10 @@
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content" v-if="post">
 	    <div class="modal-header">
-		<div class="col-12">
-			<button type="button" class="btn btn-link float-left" @click="loadNextPost(-1)"><i class="fas fa-chevron-left"></i> Previous Post</button>
-			<button type="button" class="btn btn-link float-right" @click="loadNextPost(1)">Next Post <i class="fas fa-chevron-right"></i></button>
-		</div>
+			<div class="col-12">
+				<button type="button" class="btn btn-link float-left" @click="loadNextPost(-1)"><i class="fas fa-chevron-left"></i> Previous Post</button>
+				<button type="button" class="btn btn-link float-right" @click="loadNextPost(1)">Next Post <i class="fas fa-chevron-right"></i></button>
+			</div>
 		</div>
         <div class="modal-header">
 		  <!-- if this is a comment, display link to higher level comment/post -->

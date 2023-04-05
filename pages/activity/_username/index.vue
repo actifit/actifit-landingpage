@@ -21,7 +21,7 @@
 	  <div class="row" v-if="userReports.length">
 		<div class="row"  v-for="iterx in Math.ceil(userReports.length / splitFactor)" :key="iterx">
 			<div v-for="itery in splitFactor" :key="itery" class="col-md-6 col-lg-4 mb-4">
-				<Report v-if="(iterx - 1) * splitFactor + (itery - 1) < userReports.length" :report="userReports[(iterx - 1) * splitFactor + (itery - 1)]" />
+				<Report v-if="(iterx - 1) * splitFactor + (itery - 1) < userReports.length" :report="userReports[(iterx - 1) * splitFactor + (itery - 1)]" :rptId="(iterx - 1) * splitFactor + (itery - 1)"/>
 			</div>
 			<div class="col-md-6 col-lg-4 mb-4" v-if="(iterx - 1) < inlineAds">
 				<client-only>
@@ -48,7 +48,7 @@
     <Footer />
 	<client-only>
       <div>
-		<ReportModal :report="activeReport" />
+		<ReportModal :report="activeReport" @nextReport="nextReport(1)" @prevReport="nextReport(-1)"/>
 		<DailyActivityChartModal :report="activeReport" />
 		<EditReportModal />
 		<VoteModal />
@@ -130,6 +130,28 @@
       }
     },
     methods: {
+	  nextReport (direction){
+		let rptId = this.activeReport.rptId;
+		console.log(rptId);
+		let proceed = false;
+		if (direction < 0){
+			console.log('move back');
+			if (rptId > 1){
+				rptId -= 1;
+				proceed = true;
+			}
+		}else{
+			console.log('move front');
+			if (rptId < this.userReports.length){
+				rptId += 1;
+				proceed = true;
+			}
+		}
+		if (proceed){
+			this.userReports[rptId].rptId = rptId;
+			this.$store.commit('setActiveReport', this.userReports[rptId]);
+		}
+	  },
       async loadMore () {
         this.loadingMore = true
 		
