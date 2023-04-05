@@ -38,6 +38,14 @@
 		  <div class="form-group acti-shadow extra-container">
 			<Beneficiary ref="beneficiaryList" :initialEntries="benef_list" :viewOnly="!editPost.isNewPost" class="float-left"/>
 			
+			<!-- also select community to post to -->
+			<div class="form-group d-flex align-items-center p-1">
+				<select id="targetCommunity" ref="targetCommunity" class="form-control targetCommunity">
+					<option value="_blog_">--Select Community--</option>
+					<option v-for="com in communitySubs" :value="com[0]" :key="com[0]">{{com[1]}}</option>
+				</select>
+			</div>
+			
 			<div class="form-group d-flex align-items-center p-1" style="min-height: 70px;">
 			  <label for="paymentApproach" class="mr-2 label-payment">{{$t('payment_approach')}}</label>
 			  <select id="paymentApproach" ref="paymentApproach" class="form-control paymentApproach">
@@ -156,6 +164,7 @@
 		benef_list: [],
 		percent_hbd: 10000,
 		max_accepted_payout: '1000000.000 HBD',
+		communitySubs: [],
 		editPost: {
 			isNewPost: true,
 		}
@@ -193,6 +202,9 @@
 		await this.$store.dispatch('steemconnect/refreshUser');
 		//this.reload += 1;
 	  },
+	  user (){
+		this.fetchCommunities();
+	  },
       editPost () {
 		//enforce new post till and if we implement full screen edit
 		//this.editPost.isNewPost = true;
@@ -225,6 +237,12 @@
       }
     },
     methods: {
+	  async fetchCommunities(){
+		if (this.user){
+			this.communitySubs = await this.$store.dispatch('fetchUserCommunitySubs');
+			console.log(this.communitySubs);
+		}
+	  },
 	  async uploadImage(files){
 		const upload = new tus.Upload(files[0], {
 		  endpoint   : 'https://uploads.3speak.tv/files', //'https://tusd.tusdemo.net/files/',
@@ -482,6 +500,15 @@
             .filter(String) // remove empty values
             .map(tag => tag.trim()) // trim leading and trailing whitespaces from tags
         ]
+		
+		//add community tag at the start if user selected one.
+		/*targetCommunity*/
+		if (this.$refs['targetCommunity'].value !='_blog_'){
+			meta.tags.unshift(this.$refs['targetCommunity'].value )
+		}
+		console.log(meta.tags);
+		//return;
+		
 		console.log(meta);
 		if (this.editPost.isNewPost || meta.image === undefined){
 			meta.image = [];
@@ -532,7 +559,7 @@
 			//return;
 			//"actifit-"+this.user.account.name.replace('.','-')+"-"+new Date().toISOString().replace(/-|:|\./g, '').toLowerCase();
 			this.editPost.parent_author = '';
-			this.editPost.parent_permlink = this.tags[0];
+			this.editPost.parent_permlink = meta.tags[0];
 			this.editPost.author = this.user.account.name;
 			this.editPost.permlink = permlnk;
 			
@@ -726,7 +753,7 @@
 		console.log('edit screen mounted');
 		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		this.$store.commit('setBchain', this.cur_bchain);
-		
+		this.fetchCommunities();
 	}
   }
 </script>

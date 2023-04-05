@@ -175,6 +175,17 @@ export default {
       }).catch(e => reject(e))
     })
   },
+  fetchUserCommunitySubs ({state, commit}){
+	return new Promise((resolve, reject) => {
+	  let outc = hive.api.call('bridge.list_all_subscriptions', {account: state.steemconnect.user.account.name.toLowerCase()}, (err, result) => {
+		console.log(err, result);
+		if (err) reject(err)
+		else {
+			resolve(result);
+		}
+	  });
+	})
+  },
   fetchReports ({ state, commit, dispatch }) {
     // fetches initial posts or more posts if invoked again
 	
