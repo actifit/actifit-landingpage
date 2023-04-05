@@ -325,6 +325,7 @@ module.exports = {
 	{ src: '~plugins/vue-sanitize', ssr: false },
 	{ src: '~plugins/v-lightbox', mode: 'client' },
 	{ src: '@/plugins/vue-mavon-editor', ssr: false },
+	{ src: '~plugins/vue-custom.js'},
   ],
 
   /*

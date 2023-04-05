@@ -859,7 +859,7 @@ module.exports = {
   afit_bought: '_AFIT_ AFIT Bought Successfully!',
   your_feedback: 'Your Feedback',
   confirm_receipt: 'Confirm Receipt',
-  viewing_comment_note: 'You are viewing a reply. ',
+  viewing_comment_note: 'You are viewing a reply to ',
   view_parent_thread: 'Click to view upper level thread',
   notifications_enabled: 'Notifications Active',
   bsc_wallet: 'Your BSC Wallet Address',

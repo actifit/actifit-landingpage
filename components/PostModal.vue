@@ -17,7 +17,10 @@
         <div class="modal-header">
 		  <!-- if this is a comment, display link to higher level comment/post -->
 		  <div v-if="post.parent_author" class="row col-12">
-			{{$t('viewing_comment_note')}}&nbsp;<a :href="buildParentLink">{{$t('view_parent_thread')}}</a>
+			<div class="text-right col-12">
+			<i class="fas fa-reply text-brand"></i>&nbsp;{{$t('viewing_comment_note')}}<span class="user-avatar mr-1 float-right" :style="'background-image: url('+profImgUrl+'/u/' + post.parent_author + '/avatar)'"></span>
+				  <a :href="'/'+post.parent_author">@{{ post.parent_author }}</a><a :href="buildParentLink"><br />{{$t('view_parent_thread')}}</a>
+			</div>
 		  </div>
 		</div>
 		<div class="modal-header">
@@ -25,7 +28,7 @@
 		  <a :href="post.author" target="_blank">
 			<h5 class="modal-author modal-title text-brand" >@{{ post.author}} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></h5>
 		  </a>
-		  <span class="date-head text-muted">{{ date }}</span>
+		  <span class="date-head text-muted" :title="date">{{ $getTimeDifference(date) }}</span>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -276,7 +279,7 @@
 	  ...mapGetters(['commentEntries'], 'commentCountToday'),
 	  ...mapGetters(['moderators', 'bchain']),
 	  buildParentLink(){
-		return this.post.parent_author+'/'+this.post.parent_permlink;
+		return '/'+this.post.parent_author+'/'+this.post.parent_permlink;
 	  },
 	  adjustHiveClass () {
 		if (this.target_bchain != 'HIVE'){

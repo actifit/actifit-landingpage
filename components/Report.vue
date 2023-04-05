@@ -21,7 +21,7 @@
             </a>
           </div>
           <div class="col-4 text-right">
-            <small class="text-muted" :title="date">{{ getTimeDifference(report.created) }}</small>
+            <small class="text-muted" :title="date">{{ $getTimeDifference(report.created) }}</small>
           </div>
         </div>
 		<div class="row">
@@ -296,37 +296,6 @@
 	  postUpvoted: 'updatePostData',
 	},
 	methods: {
-	  getTimeDifference(dateParam) {
-		//console.log(dateParam)
-		  let currentDate = new Date();
-		  
-		  dateParam = new Date(dateParam);
-		  
-		  //console.log(dateParam);
-
-		  let difference = currentDate.getTime() - dateParam.getTime();
-		  let mins = Math.floor(difference / (1000 * 60 ));
-		  let hours = Math.floor(difference / (1000 * 60 * 60));
-		  let days = Math.floor(hours / 24);
-		  let weeks = Math.floor(days / 7);
-		  let months = Math.floor(weeks / 4);
-		  let years = Math.floor(months / 12);
-		  let remainingMonths = months % 12;
-
-		  if (mins < 24) {
-			return `${mins} min(s)`;
-		  } else if (hours < 24) {
-			return `${hours} hour(s)`;
-		  } else if (days < 7) {
-			return `${days} day(s)`;
-		  } else if (weeks < 4) {
-			return `${weeks} week(s)`;
-		  } else if (months < 12) {
-			return `${months} month(s)`;
-		  } else {
-			return `${years} year(s)`;//`${years} years and ${remainingMonths} month(s)`;
-		  }
-		},
 	  /* function checks to see if post reached its payout period */
 	  postPaid() {
 		//check if last_payout is after cashout_time which means post got paid
