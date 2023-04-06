@@ -16,7 +16,7 @@
 		  <div v-if="post.parent_author" class="text-right col-12">
 			<small>
 				<a :href="buildParentLink"><i class="fas fa-reply text-brand"></i>&nbsp;
-					<div class="user-avatar mr-1 float-right" :style="'background-image: url('+profImgUrl+'/u/' + post.parent_author + '/avatar)'"></div>
+					<div class="user-avatar ml-1 mr-1 float-right" :style="'background-image: url('+profImgUrl+'/u/' + post.parent_author + '/avatar)'"></div>
 				  @{{ post.parent_author }}
 				</a>
 			</small>

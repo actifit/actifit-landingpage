@@ -23,16 +23,21 @@
 			</div>
 		  </div>
 		</div>
-		<div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">{{ post.title }}</h5><br/>
-		  <a :href="post.author" target="_blank">
-			<h5 class="modal-author modal-title text-brand" >@{{ post.author}} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></h5>
-		  </a>
-		  <span class="date-head text-muted" :title="date">{{ $getTimeDifference(post.created) }}</span>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
+		<div class="modal-header border-0 pb-0">
+          <h5 class="modal-title" id="exampleModalLabel">{{ post.title }}</h5>
+		  <div class="text-right">
+				  <span class="date-head text-muted" :title="date">{{ $getTimeDifference(post.created) }}</span>
+				  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				  </button>
+		  </div>
+		</div>
+		<div class="p-1">
+			  <a :href="'/'+post.author" target="_blank">
+			    <span class="user-avatar m-2" :style="'background-image: url('+profImgUrl+'/u/' + post.author + '/avatar)'"></span>
+				<h5 class="modal-author modal-title text-brand" >@{{ post.author}} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></h5>
+			  </a>
+		</div>
 		<div class="modal-header">
 			<div class="post-tags p-1" v-html="displayPostTags"></div>
 		</div>

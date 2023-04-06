@@ -14,9 +14,10 @@
 		</div>
         <div class="report-head mb-3 col-md-12">
           <!-- if this is a comment, display link to higher level comment/post -->
-		  <div v-if="report.parent_author">
-			{{$t('viewing_comment_note')}}&nbsp;<a :href="buildParentLink">{{$t('view_parent_thread')}}</a>
+		  <div v-if="report.parent_author" class="text-right">
+			<i class="fas fa-reply text-brand"></i>&nbsp;{{$t('viewing_comment_note')}}<span class="user-avatar mr-1 float-right" :style="'background-image: url('+profImgUrl+'/u/' + report.parent_author + '/avatar)'"></span><a :href="'/'+report.parent_author">@{{ report.parent_author }}.</a>&nbsp;<a :href="buildParentLink">{{$t('view_parent_thread')}}</a>
 		  </div>
+		  
 		  <h4>{{ report.title }}</h4>
 		  <h5 class="text-brand" >
 			<div class="user-avatar mid-avatar mr-1 mb-5"
