@@ -28,7 +28,7 @@
 		  <a :href="post.author" target="_blank">
 			<h5 class="modal-author modal-title text-brand" >@{{ post.author}} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></h5>
 		  </a>
-		  <span class="date-head text-muted" :title="date">{{ $getTimeDifference(date) }}</span>
+		  <span class="date-head text-muted" :title="date">{{ $getTimeDifference(post.created) }}</span>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
