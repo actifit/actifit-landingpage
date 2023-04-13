@@ -12,11 +12,11 @@
       <div class="text-center" v-if="loading">
         <i class="fas fa-spinner fa-spin text-brand"></i>
       </div>
+	  
 	  <div class="text-center p-3" v-else-if="user">
-		<!--<a href="#" @click="$store.commit('setEditVideo', null)" data-toggle="modal"
-			 data-target="#editVideoModal" :title="$t('Create_Video')" class="btn btn-brand border">
+		<a :href="'/'+user.account.name+'/videos/new'" :title="$t('Create_Video')" class="btn btn-brand border">
 			{{ $t('Create_Video') }}
-		</a>-->
+		</a>
 	  </div>
 
       <!-- show listing when loaded -->

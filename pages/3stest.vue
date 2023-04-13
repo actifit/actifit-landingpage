@@ -11,7 +11,7 @@
 			<button @click="updateVideoInfo">Create Video Post</button>
 			<button @click="postToHive">post to hive</button>
 			
-			<input type="button" @click="generateThumbnail()" value="Thumbnail">
+<!--			<input type="button" @click="generateThumbnail()" value="Thumbnail">-->
 			
 			<p v-if="videoSize">Video Size: {{ videoSize }}</p>
 			<!--<p v-if="videoLength">Video Length: {{ videoLength }}</p>-->
@@ -21,7 +21,7 @@
 			<img id="thumb" :src="thumbnail" class="max-img"/>
 			
 			
-			<div>
+			<div class="card post">
 				<div v-if="userVidList.length > 0" v-for="(video, index) in userVidList" :key="index" :video="video">
 					<img :src="video.thumbUrl" class="max-img">
 					<div>{{video.title}}</div>

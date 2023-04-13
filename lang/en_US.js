@@ -919,6 +919,8 @@ module.exports = {
   check_new_wallet_layout: 'Click to Check out our New Wallet Layout!',
   Posh_verify: 'Posh Connect',
   Create_post: 'Create New Post',
+  Create_Video: 'Create New Video',
+  Create_new_vid: 'Create New Video Post',
   Blog_on_hive: 'Blog On Hive',
   view_blog: 'View Blog Posts',
   view_comments: 'View Comments',
@@ -956,6 +958,8 @@ module.exports = {
   address_reset_successfully: 'Wallet address successfully removed',
   BSC: 'BSC',
   Actions: 'Actions',
+  benefic_3s: 'Kindly note that 3speak requires several beneficaries which cannot be removed from the beneficiary list above, including 1-2 encoder nodes which will be dynamically added, in total amounting to 11.5% of beneficiary value',
+  new_video_placeholder: 'Upload New Video',
   posh_desc_profile: 'Earn <u><a href="https://hiveposh.com/">POSH Tokens</a></u> by sharing your posts on twitter',
   tipping_details: 'This special onchain tipping functionality allows you to send out tips to users by commenting on their posts, and sends out AFIT directly onto their hive-engine account. For more details about how it works and how to load up balance, check out this post: <a href="https://links.actifit.io/tipping-afit">https://links.actifit.io/tipping-afit</a>'
 }

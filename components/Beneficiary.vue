@@ -21,11 +21,17 @@
 				<div class="table-cell">{{ entry.account }}</div>
 				<div class="table-cell">{{ entry.weight }}</div>
 				<div class="table-cell">
-				  <button @click="removeEntry(index)" v-if="!viewOnly">Remove</button>
+				  <button @click="removeEntry(index)" v-if="!viewOnly && isRemovable(index)">Remove</button>
 				</div>
+			  </div>
+			  <div v-if="restrictedPercent > 0" class="table-row">
+				<div class="table-cell">&lt;dynamic-encoder-recipients&gt;</div>
+				<div class="table-cell">{{ restrictedPercent }}</div>
+				<div class="table-cell"></div>
 			  </div>
 			</div>
 		</div>
+		<div v-if="extraNote != ''"><i>{{extraNote}}</i><br /></div>
 		<div v-if="!viewOnly">
 			<div><b><i>{{$t('add_beneficiary')}}</i></b></div>
 			<div>
@@ -57,12 +63,24 @@ export default {
 	viewOnly: {
 	  type: Boolean,
 	  default: false
+	},
+	requiredEntries: {
+	  type: Array,
+      default: () => []
+	},
+	restrictedPercent: {
+	  type: Number,
+	  default: 0
+	},
+	extraNote: {
+	  type: String,
+	  default: ''
 	}
   },//['initialEntries', 'viewOnly'], 
   data() {
     return {
       isModalOpen: false,
-      entries: this.initialEntries.map(entry => ({ account: entry.account, weight: parseInt(entry.weight) / 100 })),
+      entries: this.initialEntries.map(entry => ({ account: entry.account, weight: parseFloat(entry.weight) / 100 })),
       newEntry: {
         account: '',
         weight: 0
@@ -72,18 +90,18 @@ export default {
   watch: {
 	initialEntries: function (){
 		console.log('adjust initial entries')
-		this.entries = this.initialEntries.map(entry => ({ account: entry.account, weight: parseInt(entry.weight) / 100 }))
+		this.entries = this.initialEntries.map(entry => ({ account: entry.account, weight: parseFloat(entry.weight) / 100 }))
 	}
   },
   computed: {
     totalValue() {
-      return this.entries.reduce((acc, entry) => parseInt(acc) + parseInt(entry.weight), 0)
+      return this.entries.reduce((acc, entry) => parseFloat(acc) + parseFloat(entry.weight), 0) + this.restrictedPercent;
     },
     remainingValue() {
       return 100 - this.totalValue
     },
 	formattedEntries() {
-		return this.entries.map(entry => ({ account: entry.account, weight: parseInt(entry.weight * 100) }))
+		return this.entries.map(entry => ({ account: entry.account, weight: parseFloat(entry.weight * 100) }))
 	}
   },
   methods: {
@@ -98,14 +116,14 @@ export default {
       if (this.newEntry.account && this.newEntry.weight) {
 	    console.log(this.totalValue)
 		console.log(this.newEntry.weight)
-        if (this.totalValue + parseInt(this.newEntry.weight) <= 100) {
+        if (this.totalValue + parseFloat(this.newEntry.weight) <= 100) {
           this.entries.push({ ...this.newEntry })
 		  //sort alpha as this is required when creating content 
 		  this.entries = this.entries.sort((a, b) => a.account.localeCompare(b.account));
 		  //save data properly as int for weight
 		  this.entries = this.entries.map(obj => ({
 			  account: obj.account,
-			  weight: parseInt(obj.weight)
+			  weight: parseFloat(obj.weight)
 		  }));
           this.newEntry.account = ''
           this.newEntry.weight = 0
@@ -116,7 +134,14 @@ export default {
         alert('Please fill in both fields')
       }
     },
+	isRemovable(index) {
+		return !(this.requiredEntries.length > 0 && this.requiredEntries.includes(this.entries[index].account));
+	},
     removeEntry(index) {
+	  if (!this.isRemovable(index)){
+		//cannot remove this entry
+		return;
+	  }
       this.entries.splice(index, 1)
     },
     saveEntries() {

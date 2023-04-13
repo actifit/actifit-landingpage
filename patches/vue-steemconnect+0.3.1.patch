@@ -1,5 +1,5 @@
 diff --git a/node_modules/vue-steemconnect/dist/index.js b/node_modules/vue-steemconnect/dist/index.js
-index c11f6a3..a54f3b1 100644
+index c11f6a3..5f6ac50 100644
 --- a/node_modules/vue-steemconnect/dist/index.js
 +++ b/node_modules/vue-steemconnect/dist/index.js
 @@ -4,10 +4,11 @@ Object.defineProperty(exports, "__esModule", {
@@ -66,7 +66,7 @@ index c11f6a3..a54f3b1 100644
              // don't do anything if user data is already set
              if (!state.user) {
                // in that case we look for an access token in localStorage
-@@ -68,24 +82,156 @@ var VueSteemConnect = {
+@@ -68,24 +82,159 @@ var VueSteemConnect = {
                if (accessToken) {
                  // set access token and try to fetch user object
                  Vue.SteemConnect().setAccessToken(accessToken);
@@ -196,12 +196,13 @@ index c11f6a3..a54f3b1 100644
 +					let outcome = await res.json();
 +					//console.log(outcome);
 +					if (outcome.error || !outcome.success){
-+						console.log('error fetching user data')
++						console.log('cleanup data')
 +						// remove access token and unset user in store
 +						  localStorage.removeItem('access_token');
 +						  localStorage.removeItem('std_login');
 +						  localStorage.removeItem('std_login_name');
 +						  localStorage.removeItem('acti_login_method')
++						  localStorage.removeItem('3s_access_token')
 +						  commit('logout');
 +						  commit('setStdLogin', false);
 +						  commit('setAccessToken', null);
@@ -223,11 +224,13 @@ index c11f6a3..a54f3b1 100644
            var commit = _ref2.commit;
 -
 +		  console.log('logout');
++		  console.log('cleanup data')
            // remove access token and unset user in store
            localStorage.removeItem('access_token');
 +		  localStorage.removeItem('std_login');
 +		  localStorage.removeItem('std_login_name');
 +		  localStorage.removeItem('acti_login_method')
++		  localStorage.removeItem('3s_access_token')
            commit('logout');
 +		  commit('setStdLogin', false);
            commit('setAccessToken', null);
