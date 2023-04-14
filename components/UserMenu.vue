@@ -19,7 +19,7 @@
 			</a>
 			<div class="dropdown-menu dropdown-menu-right notif-container">
 			  <div class="text-right m-2">
-				<a href='./notifications' class="btn btn-brand border" >{{ $t('View_all') }}</a>
+				<a href='/notifications' class="btn btn-brand border" >{{ $t('View_all') }}</a>
 				<a href='#' class="btn btn-brand border" v-on:click="markAllRead()" >{{ $t('Clear_all') }}</a>
 			  </div>
 			  <div class="row p-2 border-top" v-for="(notif, index) in activeNotifications" :key="index" :notif="notif">
@@ -45,7 +45,7 @@
 			</a>
 			<div class="dropdown-menu dropdown-menu-right">
 				<div class="text-right m-2">
-					<a href='./notifications' class="btn btn-brand border" >{{ $t('View_all') }}</a>
+					<a href='/notifications' class="btn btn-brand border" >{{ $t('View_all') }}</a>
 					<a href='#' class="btn btn-brand border" v-on:click="markAllRead()" >{{ $t('Clear_all') }}</a>
 				</div>
 				<div class="p-2">{{ $t('no_notifications') }}</div>
@@ -72,7 +72,7 @@
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/referrals')"><i class="fas fa-user-friends text-brand"></i>&nbsp;{{ $t('My_Referrals') }} <br/><span class="text-brand pl-4"> {{ referralCount }} </span></a>
           <a class="dropdown-item" href="#" @click.prevent="$router.push('/activity/' + user.account.name)"><i class="fas fa-running text-brand"></i>&nbsp;{{ $t('My_Activity') }}</a>
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/'+user.account.name + '/blog')"><i class="fa-solid fa-pen-to-square text-brand"></i>&nbsp;{{ $t('My_Blog') }}</a>
-		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/'+user.account.name + '/blog/new')"><i class="fa-solid fa-plus-square text-brand"></i>&nbsp;{{ $t('New_Blog') }}</a>
+		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/blog/new')"><i class="fa-solid fa-plus-square text-brand"></i>&nbsp;{{ $t('New_Blog') }}</a>
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/'+user.account.name + '/videos')"><i class="fa-solid fa-video text-brand"></i>&nbsp;{{ $t('My_Videos') }}</a>
 		  <a class="dropdown-item" href="#"><i class="fa-solid fa-link text-brand"></i>&nbsp;{{ $t('Active_chain') }} <br />
 			<div class="pl-4" :class="adjustHiveClass" v-on:click="setActiveChain('HIVE')">

@@ -14,7 +14,7 @@
       </div>
 	  
 	  <div class="text-center p-3" v-else-if="user">
-		<a :href="'/'+user.account.name+'/videos/new'" :title="$t('Create_Video')" class="btn btn-brand border">
+		<a :href="'/videos/new'" :title="$t('Create_Video')" target="_blank" class="btn btn-brand border">
 			{{ $t('Create_Video') }}
 		</a>
 	  </div>

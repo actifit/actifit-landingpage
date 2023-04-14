@@ -78,7 +78,7 @@
 		  </div>
 		  
 		  <div class="form-group acti-shadow extra-container">
-			<Beneficiary ref="beneficiaryList" :initialEntries="benef_list" :viewOnly="!editPost.isNewPost" class="float-left" :requiredEntries="benef_list.map(obj => obj.account)" :extraNote="$t('benefic_3s')" :restrictedPercent="parseInt(2)" />
+			<Beneficiary ref="beneficiaryList" :initialEntries="benef_list" :viewOnly="!editPost.isNewPost" class="float-left" :requiredEntries="benef_list.map(obj => obj.account)" :extraNote="$t('benefic_3s')" :restrictedPercent="parseInt(1)" />
 			
 			<!-- also select community to post to -->
 			<div class="form-group d-flex align-items-center p-1">
@@ -244,7 +244,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 					['publish_manual', 5, 'Ready to publish'],
 					['published', 6, 'Published✓']],
 		benef_list: [
-						{account: 'spk.beneficiary', weight: 850},
+						{account: 'spk.beneficiary', weight: 900},
 						{account: 'threespeakleader', weight: 100},
 					],
 		vidPostContent: '',
@@ -686,12 +686,12 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 		let benef = this.benef_list.concat(JSON.parse(vid.beneficiaries));
 		
 		//if list does not include required account, append it
-		let sagarRecord = benef.find(record => record.account === 'sagarkothari88');
+		/*let sagarRecord = benef.find(record => record.account === 'sagarkothari88');
 
 		if (sagarRecord === undefined) {
 			// If the record is not found, insert a new entry
 			benef.push({account: "sagarkothari88", weight: 100});
-		}
+		}*/
 		
 		//console.log(this.benef_list)
 		//sort as this is required for posting properly
@@ -1025,7 +1025,8 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 			  'duration': this.videoLength,
 			  'thumbnail': this.thumbnailName,
 			  'owner': this.user.account.name,
-			  'isReel': true
+			  'app': 'actifit',
+			  'isReel': false
 			}
 			
 			console.log(videoInfo);
@@ -1042,17 +1043,17 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 					}
 				);
 				console.log(res);
+				
 				if (res.status == 200){
 					this.selVid = res.data;
 					this.newVid = this.selVid;
 					this.newVidSubmitted = true;
+									
+					//embed video link to post including image thumb and video
+					let thumbUrl = 'https://ipfs-3speak.b-cdn.net/ipfs/'+this.selVid.thumbnail.replace('ipfs://','');
+					
+					this.$refs['editor'].content += '[![]('+thumbUrl+')](https://3speak.tv/watch?v='+this.selVid.owner+'/'+this.selVid.permlink+')';
 				}
-				
-				//embed video link to post including image thumb and video
-				let thumbUrl = 'https://ipfs-3speak.b-cdn.net/ipfs/'+this.selVid.thumbnail.replace('ipfs://','');
-				
-				this.$refs['editor'].content += '[![]('+thumbUrl+')](https://3speak.tv/watch?v='+this.selVid.owner+'/'+this.selVid.permlink+')';
-				
 				
 			}catch(err){
 				console.log(err);

@@ -8,6 +8,20 @@ dotenv.config()
 
 module.exports = {
   mode: 'universal',
+  router: {
+    extendRoutes(routes, resolve) {
+      routes.push({
+        path: '/_username/videos/new',
+        alias: '/videos/new',
+        component: resolve(__dirname, 'pages/_username/videos/new.vue')
+      }),
+	  routes.push({
+        path: '/_username/blog/new',
+        alias: '/blog/new',
+        component: resolve(__dirname, 'pages/_username/blog/new.vue')
+      })
+    }
+  },
   /*router: {
     base: '/'
   },*/
