@@ -14,9 +14,10 @@
 				<button @click="startRecording" v-if="!recording">Start Recording</button>
 				<button @click="stopRecording" v-else>Stop Recording</button>
 				<button @click="playBack" v-if="!recording">Play Back</button>
-				<button @click="uploadRecVideo" v-if="!recording">Upload Video</button>
 				<a v-if="recordedVideoUrl" :href="recordedVideoUrl" download="recorded-video.mp4">Download Video</a>
 			</div>
+
+			
 			
 			
 			<input type="file" ref="fileInput" @change="uploadVideo"/>
@@ -75,9 +76,6 @@ import axios from 'axios';
 import { wrapper } from "axios-cookiejar-support";
 import { CookieJar } from "tough-cookie";
 
-import fixWebmDuration from 'fix-webm-duration';
-
-
 const jar = new CookieJar();
 const client = wrapper(axios.create({ jar }));
 
@@ -95,7 +93,6 @@ export default {
 			  maxDuration: 30, // Maximum recording duration in seconds
 			  timer: null, // Timer to stop the recording after maxDuration seconds
 			  startTime: null, // Start time of the recording
-			  recordedVid: null, //the actual recorded video
 			  recordedVideoUrl: null, // URL of the recorded video
 			  timeLeft: this.maxDuration,
 			
@@ -158,18 +155,12 @@ export default {
             this.chunks.push(event.data);
           }
         });
-        this.mediaRecorder.addEventListener('stop', async () => {
-		  console.log('event listener stop')
-		  let blob = new Blob(this.chunks, { type: 'video/mp4' });
-		  let duration = Date.now() - this.startTime;
-		  blob = await fixWebmDuration(blob, duration, {logger: false});
-          //const blob = await fixWebmDuration(new Blob(this.chunks, { type: 'video/mp4' }), duration);
-		  this.recordedVid = new File([blob], 'recorded-video.mp4', { type: blob.type });
+        this.mediaRecorder.addEventListener('stop', () => {
+          const blob = new Blob(this.chunks, { type: 'video/mp4' });
           this.recordedVideoUrl = URL.createObjectURL(blob);
           this.chunks = [];
           this.mediaRecorder = null;
           this.stream = null;
-		  this.$refs.recvideo.srcObject = null;
         });
         this.startTime = Date.now();
         this.mediaRecorder.start();
@@ -192,15 +183,11 @@ export default {
       }
     },
     stopRecording() {
-	  console.log('stoprecording func');
       this.mediaRecorder.stop();
       clearInterval(this.timer);
       this.recording = false;
-	  //console.log(this.mediaRecorder)
-	  //const blob = new Blob(this.recordedChunks, { type: 'video/mp4' });
+	  this.$refs.recvideo.srcObject = null;
 
-	  //console.log(blob);
-	  //this.recordedVid = new File([blob], 'recorded-video.mp4', { type: blob.type });
     },
 	
 	playBack() {
@@ -208,15 +195,7 @@ export default {
 			this.$refs.recvideo.src = this.recordedVideoUrl;
 	  }
     },
-		async uploadRecVideo (vid){
-			this.video = this.recordedVid;
-			let file = this.video;
-			this.origFilename = file.name;
-			console.log(file.name)
-			//await upload.start()
-			this.generateThumbnail(this.recordedVideoUrl)//upload.file)
-		
-		},
+	
 		
 		async uploadVideo (event) {
 		  
@@ -540,27 +519,21 @@ export default {
 			}
 		},
 		
-		async generateThumbnail (vidUrl) {
+		async generateThumbnail () {
 		  //
 		  let upRef = this;
 		  let URL = URL || window.URL
-		  let videoURL
-		  if (vidUrl){
-			videoURL = vidUrl;
-		  }else{
-			videoURL = URL.createObjectURL(this.video)
-		  }
+		  let videoURL = URL.createObjectURL(this.video)
 		  console.log(videoURL);
 		  let canvas = this.$refs['canvas']//document.createElement('canvas')
 		  let context = canvas.getContext('2d')
 		  let video = this.$refs['video'];
 
 
-		  video.src = videoURL;
+		  this.$refs['video'].src = videoURL;
 		  //video.addEventListener('loadeddata', async () => {
 		  video.addEventListener('loadedmetadata', async () => {
-			console.log(video);
-			console.log('duration:'+video.duration)
+			
 			//set current video time. Go to 25%
 			video.currentTime = video.duration * 0.25;//5
 			//console.log(video)

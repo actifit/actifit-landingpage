@@ -102,18 +102,20 @@
 	watch: {
 	  user: 'fetchUserData',
 	  bchain: async function(newBchain) {
-		console.log('user activity change in chain '+newBchain);
-		this.cur_bchain = newBchain;
-		await this.$store.dispatch('steemconnect/refreshUser');
-		
-		// reset previously fetched posts to get latest
-		this.$store.commit('setUserReports', [])
+		if (!this.loading){
+			console.log('user activity change in chain '+newBchain);
+			this.cur_bchain = newBchain;
+			await this.$store.dispatch('steemconnect/refreshUser');
+			
+			// reset previously fetched posts to get latest
+			this.$store.commit('setUserReports', [])
 
-		// disable load more button and only show if there actually are more posts to load
-		this.$store.commit('setMoreUserReportsAvailable', false)
-		await this.$store.dispatch('fetchUserReports', this.username)
-		this.loading = false
-		//this.reload += 1;
+			// disable load more button and only show if there actually are more posts to load
+			this.$store.commit('setMoreUserReportsAvailable', false)
+			await this.$store.dispatch('fetchUserReports', this.username)
+			this.loading = false
+			//this.reload += 1;
+		}
 	  }
 	},
     computed: {

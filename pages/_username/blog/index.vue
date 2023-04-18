@@ -107,7 +107,7 @@
 	watch: {
 	  user: 'fetchUserData',
 	  bchain: async function(newBchain) {
-		if (this.cur_bchain != newBchain){
+		if (this.cur_bchain != newBchain && !this.loading){
 			//only update if changed
 			console.log('user activity change in chain '+newBchain);
 			this.cur_bchain = newBchain;

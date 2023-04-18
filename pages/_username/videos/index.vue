@@ -100,20 +100,24 @@
 	watch: {
 	  user: 'fetchUserData',
 	  bchain: async function(newBchain) {
-		console.log('user activity change in chain '+newBchain);
-		this.cur_bchain = newBchain;
-		await this.$store.dispatch('steemconnect/refreshUser');
-		
-		// reset previously fetched Videos to get latest
-		this.$store.commit('setUserVideos', [])
+	    //only process if we are not loading
+		if (!this.loading){
+			console.log('bchain change')
+			console.log('user activity change in chain '+newBchain);
+			this.cur_bchain = newBchain;
+			await this.$store.dispatch('steemconnect/refreshUser');
+			
+			// reset previously fetched Videos to get latest
+			await this.$store.commit('setUserVideos', [])
 
-		// disable load more button and only show if there actually are more Videos to load
-		this.$store.commit('setMoreUserVideosAvailable', false)
-		console.log('dispatch fetching user Videos')
-		console.log(this.username)
-		await this.$store.dispatch('fetchUserVideos', this.username)
-		this.loading = false
+			// disable load more button and only show if there actually are more Videos to load
+			this.$store.commit('setMoreUserVideosAvailable', false)
+			console.log('dispatch fetching user Videos')
+			console.log(this.username)
+			await this.$store.dispatch('fetchUserVideos', this.username)
+			this.loading = false
 		//this.reload += 1;
+		}
 	  }
 	},
     computed: {
@@ -164,16 +168,19 @@
       // fetch Videos
 	  
 	  let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
-	  this.$store.commit('setBchain', cur_bchain);
+	  await this.$store.commit('setBchain', cur_bchain);
 	  
       // reset previously fetched Videos to get latest
-      this.$store.commit('setUserVideos', [])
+      await this.$store.commit('setUserVideos', [])
 
       // disable load more button and only show if there actually are more Videos to load
-      this.$store.commit('setMoreUserVideosAvailable', false)
+      await this.$store.commit('setMoreUserVideosAvailable', false)
 	  
-      await this.$store.dispatch('fetchUserVideos', this.username)
-
+	  console.log('mounted dispatch videos')
+	  
+      let res = await this.$store.dispatch('fetchUserVideos', this.username)
+	  console.log('done fetching vids')
+	  console.log(res);
       // remove loading indicator
       this.loading = false
     }

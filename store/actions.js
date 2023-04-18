@@ -785,7 +785,9 @@ const userVideosFilter = username => (post) => {
   try{
 	  let meta = JSON.parse(post.json_metadata)
 	  // videos posts are the ones belonging to 3speak community
-	  return post.author === username && meta.hasOwnProperty('type') && ( meta.type.indexOf('3speak/video') !== -1) && meta.hasOwnProperty('video');// && post.category == 'hive-181335';// || ( meta.hasOwnProperty('community') && meta.community.indexOf('hive-181335') !== -1 ) 
+	  return post.author === username && meta.hasOwnProperty('video');// && post.category == 'hive-181335';// || ( meta.hasOwnProperty('community') && meta.community.indexOf('hive-181335') !== -1 ) 
+	  //removing 3speak app requirement as vids can be submitted via other dapps such as actifit 
+	  //meta.hasOwnProperty('type') && ( meta.type.indexOf('3speak/video') !== -1) && 
   }catch(exc){
 	  return false;
   }
