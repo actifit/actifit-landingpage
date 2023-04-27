@@ -165,6 +165,10 @@
       this.$store.dispatch('steemconnect/login')
 	  this.fetchUserData();
 
+	
+	  console.log('keychain>>>')
+				console.log(window.hive_keychain)
+
       // fetch Videos
 	  
 	  let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');

@@ -5,7 +5,7 @@
   "author": "mktcode",
   "private": true,
   "engines": {
-    "node": "=14.18.0",
+    "node": "=16.13.0",
     "npm": "<=8.4.0 >6.0.0"
   },
   "scripts": {
@@ -37,6 +37,7 @@
     "chart.js": "^2.9.4",
     "chartjs-plugin-annotation": "^0.5.7",
     "cheerio": "^1.0.0-rc.3",
+    "chokidar": "^3.5.3",
     "core-js": "^2.6.5",
     "dotenv": "^16.0.3",
     "dsteem": "^0.11.3",
@@ -53,6 +54,8 @@
     "nuxt-i18n": "^6.13.1",
     "remarkable": "^2.0.1",
     "sanitize-html": "^2.3.2",
+    "sass": "^1.62.0",
+    "sass-loader": "^10.4.1",
     "sscjs": "0.0.7",
     "steem": "^0.7.4",
     "steem-editor": "^1.1.7",
@@ -90,8 +93,6 @@
     "eslint": "^7.5.0",
     "eslint-loader": "^4.0.2",
     "eslint-plugin-vue": "^6.2.2",
-    "node-sass": "^4.14.1",
-    "patch-package": "^6.2.1",
-    "sass-loader": "^9.0.2"
+    "patch-package": "^6.2.1"
   }
 }

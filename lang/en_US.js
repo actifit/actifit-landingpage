@@ -922,6 +922,7 @@ module.exports = {
   Create_Video: 'Create New Video',
   Create_new_vid: 'Create New Video Post',
   Blog_on_hive: 'Blog On Hive',
+  view_videos: 'View Video Posts',
   view_blog: 'View Blog Posts',
   view_comments: 'View Comments',
   need_one_tag_min: 'You need to have at least 1 tag in your post',
@@ -953,6 +954,8 @@ module.exports = {
   show_all_tokens: 'Show Full List',
   hide_small_balances: 'Hide Small Balances',
   Steem_Engine: 'Steem Engine',
+  sel_suitable_vid: 'You need to select a video ready to be published first',
+  success_submit_wait_encoding: 'You have successfully submitted the video. Please wait for its status to switch to "Ready to publish" prior to publishing your post. <br />Click the "Refresh" button <i class="fas fa-solid fa-refresh text-brand"></i> next to the status of the video to check. <br />Depending on the size of your video, you can either wait on this page, or revisit it back in a few mins.',
   confirm_wallet_reset: 'Are you sure you want to remove your associated BSC wallet address?',
   error_resetting_wallet: 'There was an error resetting your wallet address',
   address_reset_successfully: 'Wallet address successfully removed',
@@ -960,6 +963,11 @@ module.exports = {
   Actions: 'Actions',
   benefic_3s: 'Kindly note that 3speak requires beneficaries which cannot be removed from the beneficiary list above, in total amounting to 11% of beneficiary value',
   new_video_placeholder: 'Upload New Video',
+  rec_video_placeholder: 'Record New Video',
+  existing_recording: 'Would you like to overwrite your existing recording?',
+  rec_video: 'Record Video',
+  video_post_created: 'Your video post has been created!', 
+  issue_marking_published: 'There was an issue with marking it as published. Please revisit this screen later and attempt to mark it published again.',
   posh_desc_profile: 'Earn <u><a href="https://hiveposh.com/">POSH Tokens</a></u> by sharing your posts on twitter',
   tipping_details: 'This special onchain tipping functionality allows you to send out tips to users by commenting on their posts, and sends out AFIT directly onto their hive-engine account. For more details about how it works and how to load up balance, check out this post: <a href="https://links.actifit.io/tipping-afit">https://links.actifit.io/tipping-afit</a>'
 }

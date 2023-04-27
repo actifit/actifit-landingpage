@@ -768,4 +768,8 @@
 	display: flex; 
 	justify-content: space-between;
 }
+/* avoid editor taking out menu */
+.v-note-wrapper {
+    z-index: 100!important;
+}
 </style>

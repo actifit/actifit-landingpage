@@ -2,44 +2,73 @@
   <div>
 	<NavbarBrand />
       <div class="container pt-5 mt-5 pb-5">
+		<a href="#a" data-toggle="modal" id="modenabler" name="modenabler" ref="modenabler" data-target="#notifyModal"></a>
 		<div class="text-center font-weight">
-		  <h5 v-if="editPost.isNewPost" class="modal-title" id="exampleModalLabel">{{ $t('Create_new_vid') }}</h5>
+		  <h5 v-if="editPost.isNewPost" class="modal-title" id="exampleModalLabel">{{ $t('Create_new_vid') }}&nbsp;<img src="/img/3speak.png" class="mr-2 token-logo-md"></h5>
 		  <h5 v-else class="modal-title" id="exampleModalLabel">{{ $t('Editing') }} <a :href="'/'+editPost.author+'/'+editPost.permlink">{{ title }}</a></h5>
         </div>
 	  
 		<div class="vid-container" v-if="xcstkn != ''">
-			<div class="card post w-25 p-4 m-4 float-left">
+			<div class="card post p-4 m-4 float-left" :class="smallScreenCheck" ref="mainCard">
 				<div class="text-center font-weight-bold">{{$t('new_video_placeholder')}}</div>
-				<input type="file" ref="fileInput" @change="uploadVideo"/>
-				<div v-if="thumbprogress">{{ thumbprogress }}</div>
-				<div v-if="vidprogress">{{ vidprogress }}</div>
-				
+								
 				<div>
-				<span v-if="videoLength">{{ videoLength.toFixed(2) }} sec | </span>
-				<span v-if="videoSize">{{ (videoSize / 1024 / 1024).toFixed(2) }} MB</span>
+					<!-- video upload section -->
+					<input type="file" ref="fileInput" @change="uploadVideo" @click="setUploadEnvt()"/>
+					
+					<!--<div v-if="selVid == newVid">Selected</div>-->
 				</div>
-				<video ref="video" id="video" style="display:none">
-				</video>
-				<canvas ref="canvas" id="canvas" style="display: none"/>
-				<img id="thumb" :src="thumbnail" class="max-img"/>
 				<div>
-					<i class="fas fa-spin fa-spinner text-brand" v-if="processing"></i>
+					<!-- video recording section -->
+					<div class="text-center font-weight-bold">{{$t('rec_video_placeholder')}}</div>
+					<button @click="setRecordingEnvt()" class="btn btn-white border text-red acti-shadow mt-2 mb-2">{{$t('rec_video')}}</button>
+					<transition name="fade">
+						<div v-if="userSelection=='recording'">
+							<video ref="recvideo" width="480" height="360" autoplay controls></video>
+							<div v-if="recording">Recording: {{ timeLeft }} (s) Left</div>
+							<div>
+								<button @click="startRecording" v-if="!recording" class="btn btn-white border text-red acti-shadow mt-2">Start Recording</button>
+								<button @click="stopRecording" v-else class="btn btn-white border text-red acti-shadow mt-2">Stop Recording</button>
+								<!--<button @click="playBack" v-if="!recording" class="btn btn-white border text-red acti-shadow mt-2">Play Back</button>-->
+								<button @click="uploadRecVideo" v-if="!recording" class="btn btn-white border text-red acti-shadow mt-2">Upload Recording</button>
+								<!--<a v-if="recordedVideoUrl" :href="recordedVideoUrl" download="recorded-video.mp4" class="btn btn-white border text-red acti-shadow mt-2">Download Recording</a>-->
+							</div>		
+						</div>
+					</transition>
 				</div>
-				<button class="btn btn-white border text-red acti-shadow mt-2" @click="updateVideoInfo" v-if="videoReady && !newVidSubmitted">Submit Video</button>
-				<button class="btn btn-white border text-red acti-shadow" @click="selectVid(newVid)" v-if="newVidSubmitted">Add to Post</button>
-				<!--<div v-if="selVid == newVid">Selected</div>-->
+				<div>
+					<div v-if="thumbprogress">{{ thumbprogress }}</div>
+					<div v-if="vidprogress">{{ vidprogress }}</div>
+					
+					<div>
+						<span v-if="videoLength">{{ videoLength.toFixed(2) }} sec | </span>
+						<span v-if="videoSize">{{ (videoSize / 1024 / 1024).toFixed(2) }} MB</span>
+					</div>
+					<div v-if="videoLength">Now</div>
+					<div v-if="videoLength">New Vid <i class="fas fa-solid fa-refresh text-brand" @click="getAllVideoStatuses()" :class="{ 'fa-spin': isRotating }"></i></div>
+					
+					<video ref="video" id="video" style="display:none">
+					</video>
+					<canvas ref="canvas" id="canvas" style="display: none"/>
+					<img id="thumb" :src="thumbnail" class="max-img"/>
+					<div>
+						<i class="fas fa-spin fa-spinner text-brand" v-if="processing"></i>
+					</div>
+					<button class="btn btn-white border text-red acti-shadow mt-2" @click="updateVideoInfo" v-if="videoReady && !newVidSubmitted">Submit Video</button>
+					<button class="btn btn-white border text-red acti-shadow mt-2" @click="selectVid(newVid)" v-if="newVidSubmitted">Add to Post</button>
+				</div>
 			</div>
-			<div class="card post w-25 p-4 m-4"  v-if="userVidList.length > 0" v-for="(video, index) in userVidList" :key="index" :video="video">
+			<div class="card post p-4 m-4" :class="smallScreenCheck" v-if="userVidList.length > 0" v-for="(video, index) in userVidList" :key="index" :video="video">
 				<img :src="video.thumbUrl" class="max-img">
-				<div>{{video.title}}</div>
+				<div class="vid-title">{{video.title}}</div>
 				<div>{{video.duration.toFixed(2)}} sec | {{(video.size / 1024 / 1024).toFixed(2)}} MB</div>
 				<!--<div>{{video.permlink}}</div>-->
 				<div :title="video.created">{{ $getTimeDifference(video.created) }}</div>
-				<div>{{statusList.find(row => row[0] === video.status)[2]}}</div>
+				<div>{{dispStatusWording(video)}} <i class="fas fa-solid fa-refresh text-brand" @click="getAllVideoStatuses()" :class="{ 'fa-spin': isRotating }"></i></div>
 				<!--<div>{{video.encodingProgress}}</div>-->
-				<button class="btn btn-white border text-red acti-shadow" @click="selectVid(video)">Add to Post</button>
-				<button v-if="!isVideoPublished(video)" class="btn btn-white border text-red acti-shadow" @click="video = markVideoPublished(video)">Mark published <i v-if="marking==video._id" class="fas fa-spin fa-spinner text-brand"></i></button>
-				<a v-else class="btn btn-white border text-red acti-shadow" :href="'/'+video.owner+'/'+video.permlink" target="_blank">View Post</a>
+				<button class="btn btn-white border text-red acti-shadow" v-if="!isVideoPublished(video) && !isVideoFailed(video)"  @click="selectVid(video)">Add to Post</button>
+				<button v-if="!isVideoPublished(video) && !isVideoFailed(video)" class="btn btn-white border text-red acti-shadow" @click="video = markVideoPublished(video)">Mark published <i v-if="marking==video._id" class="fas fa-spin fa-spinner text-brand"></i></button>
+				<a v-else class="btn btn-white border text-red acti-shadow float-right" :href="'/'+video.owner+'/'+video.permlink" target="_blank">View Post</a>
 				<!--<div v-if="selVid == video">Selected</div>-->
 			</div>
 		</div>
@@ -49,7 +78,11 @@
 		
 		
 		<div class="row text-right" v-if="user">
-			<div class="col-12 pb-2"><a href="#" class="btn btn-brand border" @click.prevent="$router.push('/' + user.account.name+'/blog')" :title="$t('view_blog')"><i class="fa-solid fa-pen-to-square"></i></a>&nbsp;<a :href="'/'+user.account.name+'/comments'"  class="btn btn-brand border" :title="$t('view_comments')"><i class="far fa-comments"></i></a></div>
+			<div class="col-12 pb-2">
+				<a :href="'/'+user.account.name+'/videos'" ref="my-videos" class="btn btn-brand border" :title="$t('view_videos')"><i class="fa-solid fa-video"></i></a>&nbsp;
+				<a :href="'/'+user.account.name+'/blog'" class="btn btn-brand border" :title="$t('view_blog')"><i class="fa-solid fa-pen-to-square"></i></a>&nbsp;
+				<a :href="'/'+user.account.name+'/comments'"  class="btn btn-brand border" :title="$t('view_comments')"><i class="far fa-comments"></i></a>
+			</div>
 		</div>
 		<div>
           <div class="form-group">
@@ -118,20 +151,25 @@
 			</div>
 		</div>
 		<div class="modal-footer">
-          <button type="button" class="btn btn-white border text-red acti-shadow" @click.prevent="save()">
+          <button type="button" class="btn btn-white border text-red acti-shadow" :disabled="!selVidReadyForPublish()" @click.prevent="save()">
             <i class="fas fa-spin fa-spinner" v-if="loading"></i>
             <i class="fas fa-paper-plane" v-else></i>
-            <span v-if="editPost.isNewPost">{{ $t('Publish') }}</span><span v-else>{{ $t('Save') }}</span>
+            <span >{{ $t('Publish') }}</span>
+			<!--<span v-if="editPost.isNewPost">{{ $t('Publish') }}</span><span v-else>{{ $t('Save') }}</span>-->
 			<img src="/img/HIVE.png" style="max-height: 25px" v-if="target_bchain=='HIVE' || target_bchain=='BOTH'">
 			<img src="/img/STEEM.png" style="max-height: 25px" v-if="target_bchain=='STEEM' || target_bchain=='BOTH'">
           </button>
         </div>
+		<div class="modal-footer border-0 p-0">
+		  <div class="text-brand float-right" v-if="!selVidReadyForPublish()">{{$t('sel_suitable_vid')}}</div>
+		</div>
       </div>
 	  <Footer />
 	<client-only>
       <div>
         <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
         <notifications :group="'error'" :position="'top center'" :classes="'vue-notification error'" />
+		<NotifyModal id="notifyModal" ref="notifyModal" :modalTitle="$t('Actifit_Info')" :modalText="$t('success_submit_wait_encoding')"/>
       </div>
     </client-only>
   </div>
@@ -146,10 +184,15 @@
   import TagInput from '~/components/TagInput';
   import Beneficiary from '~/components/Beneficiary';
   
+  import NotifyModal from '~/components/NotifyModal';
+  
   import hive from '@hiveio/hive-js'
   
   import NavbarBrand from '~/components/NavbarBrand';
   import Footer from '~/components/Footer';
+  
+  //needed to fix incorrect duration when recording video
+  import fixWebmDuration from 'fix-webm-duration';
   
   import axios from 'axios';
   import * as tus from "tus-js-client";
@@ -200,15 +243,31 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 	  NavbarBrand, 
 	  CustomTextEditor,
 	  TagInput,
-	  Beneficiary
+	  Beneficiary,
+	  NotifyModal
     },
     data () {
       return {
+		/* recording vid section */
+		recording: false,
+		chunks: [],
+		mediaRecorder: null,
+		stream: null,
+		maxDuration: 60, // Maximum recording duration in seconds
+		timer: null, // Timer to stop the recording after maxDuration seconds
+		startTime: null, // Start time of the recording
+		recordedVid: null, //the actual recorded video
+		recordedVideoUrl: null, // URL of the recorded video
+		timeLeft: this.maxDuration,
+		/* end */
+		
+		isRotating: false,
         runnerProc: -1, //interval to mark vid as published
 		title: '', // post title
         body: '', // post body
         tags: [], // post tags
         loading: false, // loading animation in submit button
+		loadingxcstkn: false,
 		cur_bchain: 'HIVE', //bchain used to edit/save
 		target_bchain: 'HIVE', //bchain to which edits will go
 		//benef_list: [],
@@ -236,9 +295,10 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 		selVid: {},
 		newVid: {},
 		newVidSubmitted: false,
+		userSelection: 'upload',
 		statusList: [['uploaded', 0, 'Uploaded'],
 					['encoding_queued', 1, 'Queued for Encoding'],
-					['encoding', 2, 'Processing Encoding'],
+					['encoding_ipfs', 2, 'Processing Encoding'],
 					['encoding_failed', 3, 'Encoding Failed'],
 					['deleted', 4, 'Deleted'],
 					['publish_manual', 5, 'Ready to publish'],
@@ -255,6 +315,14 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
       ...mapGetters(['bchain']),//'editPost', 
 	  ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters('steemconnect', ['stdLogin']),
+	  smallScreenCheck () {
+		//use proper classes for neat display
+		if (screen.width < 768){
+		  return "";
+		}
+		return "w-25";
+		//return "";
+	  },
 	  adjustHiveClass () {
 		if (this.target_bchain != 'HIVE'){
 			return 'option-opaque';
@@ -318,8 +386,118 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
       }
     },
     methods: {
+		dispStatusWording(video){
+			//console.log(video.status);
+			let match = this.statusList.find(row => row[0] === video.status);
+			if (Array.isArray(match)){
+				return match[2]
+			}
+			return '';
+		},
+		setUploadEnvt(){
+			this.$nextTick(() => {
+				if (screen.width >= 768){
+					this.$refs.mainCard.classList.add('w-25');
+				}
+				this.userSelection='upload';
+			});
+		},
+		setRecordingEnvt() {
+			this.$nextTick(() => {
+				if (screen.width >= 768){
+					this.$refs.mainCard.classList.remove('w-25');
+				}
+				this.userSelection='recording';
+			});
+		},
+		async startRecording() {
+		  try {
+			console.log(this.recordedVideoUrl);
+			if (this.recordedVideoUrl != null ){
+				let userPrmpt = confirm(this.$t('existing_recording'));
+				if (!userPrmpt){
+					return;
+				}
+			}
+			this.stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+			this.$refs.recvideo.srcObject = this.stream;
+			this.mediaRecorder = new MediaRecorder(this.stream);
+			this.mediaRecorder.addEventListener('dataavailable', (event) => {
+			  if (event.data.size > 0) {
+				this.chunks.push(event.data);
+			  }
+			});
+			this.mediaRecorder.addEventListener('stop', async () => {
+			  console.log('event listener stop')
+			  let blob = new Blob(this.chunks, { type: 'video/mp4' });
+			  let duration = Date.now() - this.startTime;
+			  blob = await fixWebmDuration(blob, duration, {logger: false});
+			  //const blob = await fixWebmDuration(new Blob(this.chunks, { type: 'video/mp4' }), duration);
+			  this.recordedVid = new File([blob], 'recorded-video.mp4', { type: blob.type });
+			  this.recordedVideoUrl = URL.createObjectURL(blob);
+			  this.chunks = [];
+			  this.mediaRecorder = null;
+			  this.stream = null;
+			  this.$refs.recvideo.srcObject = null;
+			  //set proper src for video
+			  this.$refs.recvideo.src = this.recordedVideoUrl;
+			});
+			this.startTime = Date.now();
+			this.mediaRecorder.start();
+			this.recording = true;
+			this.timer = setInterval(() => {
+			  /*if (this.timeLeft <= 0) {
+				this.stopRecording();
+			  }*/
+			  const elapsedSeconds = Math.floor((Date.now() - this.startTime) / 1000);
+			  const timeLeft = Math.max(this.mediaRecorder && this.mediaRecorder.state === 'recording' ? this.maxDuration - elapsedSeconds : 0);
+			  this.$nextTick(() => {
+				this.timeLeft = timeLeft;
+			  });
+			  if (timeLeft <= 0) {
+				this.stopRecording();
+			  }
+			}, 1000);
+		  } catch (error) {
+			console.error('Error starting video recording:', error);
+		  }
+		},
+		stopRecording() {
+		  console.log('stoprecording func');
+		  this.mediaRecorder.stop();
+		  clearInterval(this.timer);
+		  this.recording = false;
+		  
+		  //set video ready for playback
+		  this.playBack();
+		  //console.log(this.mediaRecorder)
+		  //const blob = new Blob(this.recordedChunks, { type: 'video/mp4' });
+
+		  //console.log(blob);
+		  //this.recordedVid = new File([blob], 'recorded-video.mp4', { type: blob.type });
+		},
+		playBack() {
+			if (!this.recording){
+				this.$refs.recvideo.src = this.recordedVideoUrl;
+			}
+		},
+		async uploadRecVideo (vid){
+			this.video = this.recordedVid;
+			let file = this.video;
+			this.origFilename = file.name;
+			console.log(file.name)
+			//await upload.start()
+			this.generateThumbnail(this.recordedVideoUrl)//upload.file)
+		
+		},
+		selVidReadyForPublish(){
+			return (this.selVid && this.selVid.status && this.selVid.status=='publish_manual');
+		},
 		isVideoPublished(video){
 			return video.status == 'published';//this.statusList.find(row => row[0] === )[2]}
+		},
+		isVideoFailed(video){
+			return video.status == 'encoding_failed';//this.statusList.find(row => row[0] === )[2]}
 		},
 		selectVid(video){
 			this.selVid = video;
@@ -790,6 +968,13 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 			console.log(outc)
 			if (outc.success){
 				postSuccess = true;
+			}else{
+				this.loading = false;
+				this.$notify({
+				  group: 'error',
+				  text: 'there was an error creating the video post',
+				  position: 'top center'
+				})
 			}
 		}else{
 						
@@ -809,9 +994,11 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 				postSuccess = true;
 			}else{
 				//this.commentSuccess('error saving', false, this.cur_bchain);
+				this.loading = false;
 			}
 			
 			//also send the same post again to the other chain
+			/*
 			let other_chain = this.cur_bchain=='HIVE'?'STEEM':'HIVE';
 			if (this.target_bchain == 'BOTH'){
 				this.loading = true;
@@ -823,25 +1010,69 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 				}else{
 					//this.commentSuccess('error saving', false, other_chain);
 				}
-			}
+			}*/
 		}
 		console.log(postSuccess);
-		if (postSuccess){
+		let attempts = 0;
+		let maxAttempts = 10;
+		let markVidPublished = true;//false;
+		if (postSuccess && markVidPublished){
 			//wait a second or two to validate on blockchain
 			this.runnerProc = setInterval(async () => {
 			  //this.$refs.editor.simplemde.codemirror.refresh()
 			  //console.log(this.$refs.editor.textarea.value);
 				console.log('mark video published');
+				attempts += 1;
 				let vidUpdate = await this.markVideoPublished(vid, true);
 				if (vidUpdate.status == 'published'){
 					clearInterval(this.runnerProc)
+					this.$notify({
+					  group: 'success',
+					  text: this.$t('video_post_created') ,
+					  position: 'top center'
+					})
+					this.loading = false;
+					//this.$router.push('/'+this.user.account.name+'/videos');
+					this.$refs['my-videos'].click();
+				}
+				else if (attempts > maxAttempts){
+					clearInterval(this.runnerProc);
+					this.$notify({
+					  group: 'error',
+					  text: this.$t('video_post_created') + ' ' + this.$t('issue_marking_published'),
+					  position: 'top center'
+					})
+					this.loading = false;
 				}
 			}, 3000)
 				
 		}
       },
 	  
-	  async getAllVideoStatuses(access_token) {
+	  resetNewVidData(){
+		this.videoLength = '';
+		this.video = null;
+		this.videoSize = null;
+		this.videoLength = null;
+		this.videoReady = false;
+		this.processing = false;
+		this.filename = '';
+		this.origFilename = '';
+		this.vidprogress = null;
+		this.thumbprogress = null;
+		this.thumbnail = null;
+		this.thumbnailName  = '';
+		this.thumbnailUrl = '';
+		this.newVidSubmitted = false;
+		
+		if (this.$refs.recVideo){
+			this.$refs.recVideo.src = '';
+		}
+		this.timeLeft = this.maxDuration;
+	  },
+	  
+	  async getAllVideoStatuses() {
+			this.isRotating = true;
 			console.log('get all videos')
 			console.log(process.env.threeSpeakUserVideoList);
 			//console.log(access_token);
@@ -851,7 +1082,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 				  withCredentials: false,
 				  headers: {
 					"Content-Type": "application/json",
-					"Authorization": `Bearer ${access_token}`
+					"Authorization": `Bearer ${this.xcstkn}`
 				  },
 				}
 			  );
@@ -862,27 +1093,36 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 				console.log(this.userVidList);
 				//console.log(`All Videos Info response: userVidList${}`);
 			  }
+			  this.resetNewVidData();
+			  this.isRotating = false;
 			  return response.data;
 			} catch (err) {
 			  console.log(err);
 			  //reset session data
 			  localStorage.removeItem('3s_access_token');
+			  this.isRotating = false;
 			  throw err;
 			}
+			
 		},
 		
-		async generateThumbnail () {
+		async generateThumbnail (vidUrl) {
 		  //
 		  let upRef = this;
 		  let URL = URL || window.URL
-		  let videoURL = URL.createObjectURL(this.video)
+		  let videoURL
+		  if (vidUrl){
+			videoURL = vidUrl;
+		  }else{
+			videoURL = URL.createObjectURL(this.video)
+		  }
 		  console.log(videoURL);
 		  let canvas = this.$refs['canvas']//document.createElement('canvas')
 		  let context = canvas.getContext('2d')
 		  let video = this.$refs['video'];
 
 
-		  this.$refs['video'].src = videoURL;
+		  video.src = videoURL;
 		  //video.addEventListener('loadeddata', async () => {
 		  video.addEventListener('loadedmetadata', async () => {
 			
@@ -1025,14 +1265,13 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 			  'duration': this.videoLength,
 			  'thumbnail': this.thumbnailName,
 			  'owner': this.user.account.name,
-			  'app': 'actifit',
 			  'isReel': false
 			}
 			
 			console.log(videoInfo);
 			
 			try{
-				let res = await client.post(process.env.threeSpeakUploadInfo, 
+				let res = await client.post(process.env.threeSpeakUploadInfo+'?app=actifit', 
 					JSON.stringify(videoInfo),
 					{
 						withCredentials: false,
@@ -1048,11 +1287,20 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 					this.selVid = res.data;
 					this.newVid = this.selVid;
 					this.newVidSubmitted = true;
+					
+					//show success message and wait for video ready
+					//refresh vid list
+					this.getAllVideoStatuses();
+					
+					console.log(this.$refs['modenabler']);
+					this.$refs['modenabler'].click();
 									
+					/*				
 					//embed video link to post including image thumb and video
 					let thumbUrl = 'https://ipfs-3speak.b-cdn.net/ipfs/'+this.selVid.thumbnail.replace('ipfs://','');
 					
 					this.$refs['editor'].content += '[![]('+thumbUrl+')](https://3speak.tv/watch?v='+this.selVid.owner+'/'+this.selVid.permlink+')';
+					*/
 				}
 				
 			}catch(err){
@@ -1166,110 +1414,120 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 
 		async connectSession3S(){
 			try{
-			console.log('3S session');
-			//check if token already exists, if so skip below
-			const ts_tkn = localStorage.getItem('3s_access_token');
-			if (ts_tkn){
-				this.xcstkn = ts_tkn;
-			}else{
-			
-				//fetch 3speak memo
+				if (this.loadingxcstkn){
+					//do nothing, already loading
+					return;
+				}
+				this.loadingxcstkn = true;
+				console.log('keychain>>>')
+				console.log(window.hive_keychain)
+				console.log('3S session');
+				//check if token already exists, if so skip below
+				const ts_tkn = localStorage.getItem('3s_access_token');
+				if (ts_tkn){
+					this.xcstkn = ts_tkn;
+				}else{
 				
-				//let res = await fetch(process.env.threeSpeakApiSession.replace('_USERNAME_', this.user.account.name));
-				let res = await client.get(process.env.threeSpeakApiSession.replace('_USERNAME_', this.user.account.name),
-						{
+					//fetch 3speak memo
+					
+					//let res = await fetch(process.env.threeSpeakApiSession.replace('_USERNAME_', this.user.account.name));
+					let res = await client.get(process.env.threeSpeakApiSession.replace('_USERNAME_', this.user.account.name),
+							{
+								withCredentials: false,
+								headers: {
+								  "Content-Type": "application/json",
+								},
+							}
+						);
+					
+					console.log(res);
+					//let outcome = await res.json();
+					//console.log(outcome);
+					let memo = '';
+					if (res && res.data && res.data.memo){
+						memo = res.data.memo;
+					}
+					console.log(memo);
+					
+					//decode memo
+
+					//grab actifit token
+					let outcome = {};
+					
+					if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
+						
+						
+						console.log('utils decodememo')
+						outcome = await this.keychainDecode(memo);
+						console.log(outcome);
+					}else{
+						let accToken = localStorage.getItem('access_token')
+						
+						let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+						
+						let url = new URL(process.env.actiAppUrl + 'memoDecode/?user='+this.user.account.name+'&bchain='+cur_bchain);
+						
+						let reqHeads = new Headers({
+						  'Content-Type': 'application/json',
+						  'x-acti-token': 'Bearer ' + accToken,
+						});
+						res = await fetch(url, {
+							method: 'POST',
+							headers: reqHeads,
+							body: JSON.stringify({'memo': memo})
+						});
+						outcome = await res.json();
+						console.log(outcome);
+					
+					}
+					this.xcstkn = '';
+					if (outcome.error){
+						console.log(outcome.error);
+						this.loadingxcstkn = false;
+						return;
+					}else{
+						this.xcstkn = outcome.xcstkn;
+						this.loadingxcstkn = false;
+					}
+				
+					//store token under localstorage
+					localStorage.setItem('3s_access_token', this.xcstkn);
+				
+				}
+				
+				
+				//request cookie
+				if (this.xcstkn){
+					if (this.xcstkn.startsWith('#')){
+						this.xcstkn = this.xcstkn.substring(1);//remove first character from token #
+					}
+					/*res = await fetch(process.env.threeSpeakApiSession.replace('_USERNAME_', this.user.account.name)+'&access_token=' + xcstkn, {
+						credentials: 'include',
+					});*/
+					let res = await client.get(process.env.threeSpeakApiSession.replace('_USERNAME_', this.user.account.name)+'&access_token=' + this.xcstkn,{
 							withCredentials: false,
 							headers: {
 							  "Content-Type": "application/json",
 							},
 						}
-					);
-				
-				console.log(res);
-				//let outcome = await res.json();
-				//console.log(outcome);
-				let memo = '';
-				if (res && res.data && res.data.memo){
-					memo = res.data.memo;
-				}
-				console.log(memo);
-				
-				//decode memo
+					)
+					console.log(res);
+					
+					//also grab user's videos
+					let myAllVideosWithStatusInfo = await this.getAllVideoStatuses();
+					//console.log(`All Videos Info response: ${JSON.stringify(myAllVideosWithStatusInfo)}`);
 
-				//grab actifit token
-				let outcome = {};
-				
-				if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
-					
-					
-					console.log('utils decodememo')
-					outcome = await this.keychainDecode(memo);
-					console.log(outcome);
-				}else{
-					let accToken = localStorage.getItem('access_token')
-					
-					let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
-					
-					let url = new URL(process.env.actiAppUrl + 'memoDecode/?user='+this.user.account.name+'&bchain='+cur_bchain);
-					
-					let reqHeads = new Headers({
-					  'Content-Type': 'application/json',
-					  'x-acti-token': 'Bearer ' + accToken,
-					});
-					res = await fetch(url, {
-						method: 'POST',
-						headers: reqHeads,
-						body: JSON.stringify({'memo': memo})
-					});
-					outcome = await res.json();
-					console.log(outcome);
-				
+					//const videoID = myAllVideosWithStatusInfo[0]._id;
+					//console.log(videoID);
+					//
+					//console.log( res.headers.get('set-cookie'))
+					//console.log(res.headers["set-cookie"]);
+					//outcome = await res.json();
+					//console.log(outcome);	
 				}
-				this.xcstkn = '';
-				if (outcome.error){
-					console.log(outcome.error);
-					return;
-				}else{
-					this.xcstkn = outcome.xcstkn;
-				}
-			
-				//store token under localstorage
-				localStorage.setItem('3s_access_token', this.xcstkn);
-			
-			}
-			
-			
-			//request cookie
-			if (this.xcstkn){
-				if (this.xcstkn.startsWith('#')){
-					this.xcstkn = this.xcstkn.substring(1);//remove first character from token #
-				}
-				/*res = await fetch(process.env.threeSpeakApiSession.replace('_USERNAME_', this.user.account.name)+'&access_token=' + xcstkn, {
-					credentials: 'include',
-				});*/
-				let res = await client.get(process.env.threeSpeakApiSession.replace('_USERNAME_', this.user.account.name)+'&access_token=' + this.xcstkn,{
-						withCredentials: false,
-						headers: {
-						  "Content-Type": "application/json",
-						},
-					}
-				)
-				console.log(res);
-				
-				//also grab user's videos
-				let myAllVideosWithStatusInfo = await this.getAllVideoStatuses(this.xcstkn);
-				//console.log(`All Videos Info response: ${JSON.stringify(myAllVideosWithStatusInfo)}`);
-
-				//const videoID = myAllVideosWithStatusInfo[0]._id;
-				//console.log(videoID);
-				//
-				//console.log( res.headers.get('set-cookie'))
-				//console.log(res.headers["set-cookie"]);
-				//outcome = await res.json();
-				//console.log(outcome);	
-			}
 			}catch(exc){
 				console.log(exc);
+				this.loadingxcstkn = false;
 				//localStorage.removeItem('3s_access_token');
 			}
 	  },
@@ -1304,9 +1562,12 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 		console.log('edit screen mounted');
 		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		this.$store.commit('setBchain', this.cur_bchain);
-		//await this.$store.dispatch('steemconnect/login')
+		await this.$store.dispatch('steemconnect/login')
 		await this.connectSession3S();
 		this.fetchCommunities();
+		
+		//this.$refs['modenabler'].click();
+
 		
 		//customize file input to follow our standard
 		/*
@@ -1329,6 +1590,22 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
   white-space: nowrap; /* prevent blocks from wrapping to the next line */
   min-height: 100px;
 }
+/* Style for the scrollbar */
+.vid-container::-webkit-scrollbar {
+    height: 10px;
+    background-color: #f5f5f5;
+  }
+  /* Style for the thumb */
+.vid-container::-webkit-scrollbar-thumb {
+    background-color: #ff112d;
+    border-radius: 5px;
+  }
+  /* Style for the thumb on hover */
+.vid-container::-webkit-scrollbar-thumb:hover {
+    background-color: pink !important;
+  }
+  
+  
 .post {
   display: inline-block;
   min-height: 100px;
@@ -1352,6 +1629,9 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 }
 .post-title{
 	min-height: 60px;
+}
+.vid-title{
+	overflow: hidden;
 }
 .card{
 	box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
@@ -1379,6 +1659,22 @@ input::file-selector-button:hover{
     box-shadow: none;
 	text-decoration: none;
 	cursor: pointer;
+}
+
+/* transitions */
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.8s ease-in-out;
+}
+
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
+}
+/* avoid editor taking out menu */
+.v-note-wrapper {
+    z-index: 100 !important;
 }
 </style>
 <style lang="sass">
