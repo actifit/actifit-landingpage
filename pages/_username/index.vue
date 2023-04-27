@@ -41,11 +41,13 @@
 					   :style="'background-image: url('+this.profImgUrl+'/u/' + this.displayUser + '/avatar)'"/>
 				
 				<div>
-					<a :href="'/activity/'+displayUser" class="btn btn-brand border" :class="smallScreenBtnClasses"><img src="/img/actifit_logo.png" class="mr-2 token-logo">&nbsp;{{ $t('Actifit_reports') }}</a>
+					<a :href="'/activity/'+displayUser" class="btn btn-brand btn-white border" :class="smallScreenBtnClasses"><img src="/img/actifit_logo.png" class="mr-2 token-logo">&nbsp;{{ $t('Actifit_reports') }}</a>
 				
-					<a :href="'/' + displayUser+'/blog'" class="btn btn-brand border" :class="smallScreenBtnClasses"><img src="/img/HIVE.png" class="mr-2 token-logo">&nbsp;{{ $t('Hive_blog') }}</a>
+					<a :href="'/' + displayUser+'/blog'" class="btn btn-brand btn-white border" :class="smallScreenBtnClasses"><img src="/img/HIVE.png" class="mr-2 token-logo">&nbsp;{{ $t('Hive_blog') }}</a>
 				
-					<a :href="'/' + displayUser+'/videos'" class="btn btn-brand border" :class="smallScreenBtnClasses"><img src="/img/3speak.png" class="mr-2 token-logo">&nbsp;{{ $t('Threespeak_videos') }}</a>
+					<a :href="'/' + displayUser+'/videos'" class="btn btn-brand btn-white border" :class="smallScreenBtnClasses"><img src="/img/3speak.png" class="mr-2 token-logo">&nbsp;{{ $t('Threespeak_videos') }}</a>
+					
+					<a :href="'/' + displayUser+'/comments'" class="btn btn-brand btn-white border" :class="smallScreenBtnClasses"><i class="far fa-comments"></i>&nbsp;{{ $t('Hive_comments') }}</a>
 				</div>
 		  </div>
 

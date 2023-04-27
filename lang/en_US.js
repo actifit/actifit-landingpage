@@ -931,6 +931,7 @@ module.exports = {
   Actifit_reports: 'Actifit Reports',
   Hive_blog: 'Hive Blog',
   Threespeak_videos: '3Speak Videos',
+  Hive_comments: 'Comments',
   save_filter_default_settings: 'Save your current filtering selection as default settings',
   save_vote_default_settings: 'Save your current vote percent as default settings',
   restore_default: 'Restore your default voting value',
