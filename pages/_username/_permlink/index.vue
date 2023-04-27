@@ -28,7 +28,7 @@
         </div>
 		<vue-remarkable class="col-md-12" :source="body" :options="{'html': true}" ></vue-remarkable>
 		<!--<div v-html="body"></div>-->
-		<div class="modal-body goog-ad-horiz-90"><adsbygoogle ad-slot="4921049809" /></div>
+		<!--<div class="modal-body goog-ad-horiz-90"><adsbygoogle ad-slot="4921049809" /></div>-->
 		<div class="modal-footer col-md-12">
 		  <div class="report-modal-prelim-info col-md-6">
 			<span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i class="fas fa-reply"></i></a></span>

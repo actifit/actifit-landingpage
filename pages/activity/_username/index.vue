@@ -23,11 +23,11 @@
 			<div v-for="itery in splitFactor" :key="itery" class="col-md-6 col-lg-4 mb-4">
 				<Report v-if="(iterx - 1) * splitFactor + (itery - 1) < userReports.length" :report="userReports[(iterx - 1) * splitFactor + (itery - 1)]" :rptId="(iterx - 1) * splitFactor + (itery - 1)"/>
 			</div>
-			<div class="col-md-6 col-lg-4 mb-4" v-if="(iterx - 1) < inlineAds">
+			<!--<div class="col-md-6 col-lg-4 mb-4" v-if="(iterx - 1) < inlineAds">
 				<client-only>
 				<adsbygoogle ad-slot="7038919015" ad-format="fluid" ad-layout-key="-fb+5w+4e-db+86"/>
 				</client-only>
-			</div>
+			</div>-->
 		</div>
       </div>
 
