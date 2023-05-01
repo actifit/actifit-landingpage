@@ -18,6 +18,10 @@
 			{{ $t('Create_Video') }}
 		</a>
 	  </div>
+	  
+	  <div class="row text-right">
+		<div class="col-12 pb-2"><a :href="'/'+username+'/comments'" class="btn btn-brand border"  :title="$t('view_comments')"><i class="far fa-comments"></i></a>&nbsp;<a :href="'/'+username+'/blog'" class="btn btn-brand border"  :title="$t('view_blog')"><i class="fas fa-pen-to-square"></i></a></div>
+	  </div>
 
       <!-- show listing when loaded -->
 	  <div class="row" v-if="userVideos.length">

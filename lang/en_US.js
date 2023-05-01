@@ -932,6 +932,7 @@ module.exports = {
   Hive_blog: 'Hive Blog',
   Threespeak_videos: '3Speak Videos',
   Hive_comments: 'Comments',
+  file_too_large: 'File Size is too large. We currently support a maximum file size of _MAXSIZE_',
   save_filter_default_settings: 'Save your current filtering selection as default settings',
   save_vote_default_settings: 'Save your current vote percent as default settings',
   restore_default: 'Restore your default voting value',

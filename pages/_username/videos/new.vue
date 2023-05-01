@@ -14,7 +14,7 @@
 								
 				<div>
 					<!-- video upload section -->
-					<input type="file" ref="fileInput" @change="uploadVideo" @click="setUploadEnvt()"/>
+					<input type="file" ref="fileInput" @change="uploadVideo" @click="setUploadEnvt()" :max-size="maxFileSize"/>
 					
 					<!--<div v-if="selVid == newVid">Selected</div>-->
 				</div>
@@ -260,7 +260,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 		recordedVideoUrl: null, // URL of the recorded video
 		timeLeft: this.maxDuration,
 		/* end */
-		
+		maxFileSize: 250 * 1000 * 1000, // max 250M
 		isRotating: false,
         runnerProc: -1, //interval to mark vid as published
 		title: '', // post title
@@ -508,9 +508,20 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 			'[![]('+thumbUrl+')](https://3speak.tv/watch?v='+video.owner+'/'+video.permlink+')';
 		},
 		async uploadVideo (event) {
-		  
+			
+			
+			
 			this.video = event.target.files[0];
 			let file = this.video;
+			if (file.size > this.maxFileSize){
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('file_too_large').replace('_MAXSIZE_',this.maxFileSize / 1000 / 1000+' MB '),
+				  position: 'top center'
+				})
+				event.target.value = null;
+				return;
+			}
 			this.origFilename = file.name;
 			//await upload.start()
 			this.generateThumbnail()//upload.file)

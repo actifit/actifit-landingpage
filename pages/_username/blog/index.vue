@@ -19,8 +19,8 @@
 			{{ $t('Create_post') }}
 		</a>
 	  </div>
-	  <div class="row text-right" v-if="user">
-		<div class="col-12 pb-2"><a :href="'/'+user.account.name+'/comments'" class="btn btn-brand border"  :title="$t('view_comments')"><i class="far fa-comments"></i></a></div>
+	  <div class="row text-right">
+		<div class="col-12 pb-2"><a :href="'/'+username+'/comments'" class="btn btn-brand border"  :title="$t('view_comments')"><i class="far fa-comments"></i></a>&nbsp;<a :href="'/'+username+'/videos'" class="btn btn-brand border"  :title="$t('view_videos')"><i class="fas fa-video"></i></a></div>
 	  </div>
 	  
       <!-- show listing when loaded -->

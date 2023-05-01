@@ -28,8 +28,8 @@
 		</select>
 	  </div>-->
 	  
-	  <div class="row text-right" v-if="user">
-		<div class="col-12 pb-2"><a href="#" class="btn btn-brand border" @click.prevent="$router.push('/' + user.account.name+'/blog')" :title="$t('view_blog')"><i class="fa-solid fa-pen-to-square"></i></a></div>
+	  <div class="row text-right">
+		<div class="col-12 pb-2"><a :href="'/' + username+'/blog'" class="btn btn-brand border" :title="$t('view_blog')"><i class="fa-solid fa-pen-to-square"></i></a>&nbsp;<a :href="'/' + username +'/videos'" class="btn btn-brand border" :title="$t('view_videos')"><i class="fa-solid fa-video"></i></a></div>
 	  </div>
 	  
 	   <div class="row" v-if="userComments.length">
