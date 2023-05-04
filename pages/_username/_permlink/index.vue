@@ -91,15 +91,6 @@
 				  <network network="whatsapp">
 					<i class="fab fa-whatsapp" title="whatsapp"></i>
 				  </network>
-				  <network network="weibo">
-					<i class="fab fa-weibo" title="weibo"></i>
-				  </network> 
-				  <network network="googleplus">
-					<i class="fab fa-google-plus" title="google+"></i>
-				  </network>
-				  <network network="line">
-					<i class="fab fa-line" title="line"></i>
-				  </network>
 				  <network network="linkedin">
 					<i class="fab fa-linkedin" title="linkedin"></i>
 				  </network>
