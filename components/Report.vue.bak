@@ -69,14 +69,14 @@
           <div class="col-6">
             <small>
               <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 
-                 data-target="#voteModal" v-if="user && userVotedThisPost()==true" :title="$t('votes')">
+                 data-target="#voteModal" v-if="user && userVotedThisPost()==true">
                 <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
               </a>
 			  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal"
-                 data-target="#voteModal" v-else :title="$t('votes')">
+                 data-target="#voteModal" v-else>
                 <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
               </a>
-              <i class="far fa-comments ml-2" :title="$t('comments')"></i> {{ report.children }}
+              <i class="far fa-comments ml-2"></i> {{ report.children }}
             </small>
           </div>
           <div class="col-6 text-right">
@@ -114,31 +114,12 @@
 				<small>
 					<img src="/img/STEEM.png" class="mr-1 currency-logo-small" v-if="cur_bchain=='STEEM'">
 					<img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain=='HIVE'">
-					<!--{{ postPayout }}-->
-					<span v-if="postPaid()">
-						<!--<i class="fa-solid fa-wallet text-green"></i>-->
-						<span class="m-1" :title="$t('author')">
-							<i class="fa-solid fa-user" ></i>
-							{{paidValue()}}
-						</span>
-						<span class="m-1" :title="$t('voters')">
-							<i class="fa-solid fa-users" ></i>
-							{{report.curator_payout_value}}
-						</span>
-						<i class="fa-solid fa-check text-green text-bold"></i>
-					</span>
-					<span v-else>
-						<span class="text-brand text-bold">{{ report.pending_payout_value.replace('SBD','')}}</span>
-						<i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
-					</span>
-					<span v-if="hasBeneficiaries()" :title="beneficiariesDisplay()">
-						<i class="fas fa-user-pen"><sup>{{report.beneficiaries.length}}</sup></i>
-					</span>
+					{{ postPayout }}
 				</small>
 			</div>
 			<div class="col-6 text-right">
 				<small>
-					<img src="/img/actifit_logo.png" class="mr-1 currency-logo-small" :title="$t('afit_payout')">{{ afitReward }} {{ $t('AFIT_Token') }}
+					<img src="/img/actifit_logo.png" class="mr-1 currency-logo-small">{{ afitReward }} {{ $t('AFIT_Token') }}
 				</small>
 			</div>
 		</div>
@@ -373,23 +354,6 @@
 		post_content = this.truncateString(post_content, 150);
 		return post_content;
 	  },
-	  /* function checks if post has beneficiaries */
-	  hasBeneficiaries() {
-		return Array.isArray(this.report.beneficiaries) && this.report.beneficiaries.length > 0;
-	  },
-	  beneficiariesDisplay(){
-		let output = '';
-		for (let i=0;i<this.report.beneficiaries.length;i++){
-			output += this.report.beneficiaries[i].account+ ': ' + this.report.beneficiaries[i].weight/100 + '% \n';
-		}
-		return output;
-	  },
-	  /* function returns author payout value */
-	  paidValue() {
-		if (this.report.total_payout_value ) return this.report.total_payout_value
-		if (this.report.author_payout_value ) return this.report.author_payout_value
-	  },
-	  
 	  //function handles displaying cut off version of text to avoid lengthy titles
 	  truncateString(str) {
 		  if (str.length > 70) {

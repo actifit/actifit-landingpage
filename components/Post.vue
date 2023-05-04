@@ -82,14 +82,14 @@
           <div class="col-6">
             <small>
               <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 
-                 data-target="#voteModal" v-if="user && userVotedThisPost()==true">
+                 data-target="#voteModal" v-if="user && userVotedThisPost()==true" :title="$t('votes')">
                 <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
               </a>
 			  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal"
-                 data-target="#voteModal" v-else>
+                 data-target="#voteModal" v-else :title="$t('votes')">
                 <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
               </a>
-              <i class="far fa-comments ml-2"></i> {{ post.children }}
+              <i class="far fa-comments ml-2" :title="$t('comments')"></i> {{ post.children }}
             </small>
           </div>
           <div class="col-6 text-right">
@@ -123,11 +123,30 @@
           </div>
         </div>
 		<div class="row details mt-2">
-			<div class="col-6">
+			<div class="col-12">
 				<small>
 					<img src="/img/STEEM.png" class="mr-1 currency-logo-small" v-if="cur_bchain=='STEEM'">
 					<img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain=='HIVE'">
-					{{ postPayout }}
+					<!--{{ postPayout }}-->
+					<span v-if="postPaid()">
+						<!--<i class="fa-solid fa-wallet text-green"></i>-->
+						<span class="m-1" :title="$t('author')">
+							<i class="fa-solid fa-user" ></i>
+							{{paidValue()}}
+						</span>
+						<span class="m-1"  :title="$t('voters')">
+							<i class="fa-solid fa-users"></i>
+							{{post.curator_payout_value}}
+						</span>
+						<i class="fa-solid fa-check text-green text-bold"></i>
+					</span>
+					<span v-else>
+						<span class="text-brand text-bold">{{ post.pending_payout_value.replace('SBD','')}}</span>
+						<i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
+					</span>
+					<span v-if="hasBeneficiaries()" :title="beneficiariesDisplay()">
+						<i class="fas fa-user-pen"><sup>{{post.beneficiaries.length}}</sup></i>
+					</span>
 				</small>
 			</div>
 			<div class="col-6 text-right" v-if="afitReward != ''">
@@ -193,7 +212,7 @@
       },
 	  postPayout() {
 		if (this.postPaid()){
-			return this.post.total_payout_value.replace('SBD','').replace('STEEM','').replace('HBD','').replace('HIVE','')+' $'
+			return '';
 		}else{
 			return this.post.pending_payout_value.replace('SBD','').replace('STEEM','').replace('HBD','').replace('HIVE','')+' $'
 		}
@@ -296,8 +315,29 @@
 		post_content = this.truncateString(post_content, 150);
 		return post_content;
 	  },
+	  /* function checks if post has beneficiaries */
+	  hasBeneficiaries() {
+		return Array.isArray(this.post.beneficiaries) && this.post.beneficiaries.length > 0;
+	  },
+	  beneficiariesDisplay(){
+		let output = '';
+		for (let i=0;i<this.post.beneficiaries.length;i++){
+			output += this.post.beneficiaries[i].account+ ': ' + this.post.beneficiaries[i].weight/100 + '% \n';
+		}
+		return output;
+	  },
+	  /* function returns author payout value */
+	  paidValue() {
+		if (this.post.total_payout_value ) return this.post.total_payout_value
+		if (this.post.author_payout_value ) return this.post.author_payout_value
+	  },
 	  /* function checks to see if post reached its payout period */
 	  postPaid() {
+		console.log(this.post);
+		if (this.post.is_paidout){
+			//works for comments
+			return true;
+		}
 		//check if last_payout is after cashout_time which means post got paid
 		let last_payout = new Date(this.post.last_payout);
 		let cashout_time = new Date(this.post.cashout_time);
