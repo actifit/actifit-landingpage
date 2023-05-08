@@ -577,6 +577,8 @@
 		}
 	  },
 	  async fetchVoterData(){
+		console.log('postToVote')
+		console.log(this.postToVote)
 		  if (!this.postToVote){
 			return;
 		  }

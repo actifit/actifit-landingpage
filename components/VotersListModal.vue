@@ -21,7 +21,7 @@
 				<tr>
 				  <th scope="col">{{ $t('Voter') }}</th>
 				  <th scope="col">{{ $t('Voting_Action') }}</th>
-				  <th scope="col">{{ $t('Voting_Percent') }}</th>
+				  <th scope="col" v-if="showPercent">{{ $t('Voting_Percent') }}</th>
 				  <th scope="col">{{ $t('Voting_Value') }}</th>
 				  <!--<th scope="col">{{ $t('Voting_Date') }}</th>-->
 				</tr>
@@ -35,10 +35,10 @@
 					</a>
 				  </td>
 				  <td>
-					<i v-if="voteEntry.percent >= 0" class="fas fa-thumbs-up text-green"></i>
+					<i v-if="voteEntry.percent >= 0 || voteEntry.rshares >= 0" class="fas fa-thumbs-up text-green"></i>
 					<i v-else class="fas fa-thumbs-down text-brand"></i>
 				  </td>
-				  <td>{{ voteEntry.percent / 100 }} %</td>
+				  <td v-if="showPercent">{{ voteEntry.percent / 100 }} %</td>
 				  <td>{{ voteValue(voteEntry) }}</td>
 				</tr>
 			  </tbody>
@@ -63,6 +63,7 @@
 		tokenRewards: [],
 		activeVotersList : [],
 		cur_bchain: 'HIVE',
+		showPercent: true,
 	  }
 	},
     props: [ 'modalTitle', 'votersList', 'postData' ],
@@ -102,9 +103,14 @@
 			//calculate various needed data for vote value
 			if (this.currentToken != this.cur_bchain){
 				this.activeVotersList = this.tokenRewards[this.currentToken].active_votes;
+				//case for comments:
+				let finalPay = parseFloat(this.tokenRewards[this.currentToken].total_payout_value);
+				if (isNaN(finalPay)){
+					finalPay = parseFloat(this.tokenRewards[this.currentToken].author_payout_value);
+				}
 				totalPayout =
 				  parseFloat(this.tokenRewards[this.currentToken].pending_token) +
-				  parseFloat(this.tokenRewards[this.currentToken].total_payout_value) +
+				  parseFloat(finalPay) +
 				  parseFloat(this.tokenRewards[this.currentToken].curator_payout_value);
 				
 				totalPayout /= Math.pow(10, this.tokenRewards[this.currentToken].precision);
@@ -115,9 +121,16 @@
 			}else{
 				this.activeVotersList = this.votersList;
 				//calculate various needed data for vote value
+				//case for comments:
+				let finalPay = parseFloat(this.postData.total_payout_value);
+				console.log(finalPay)
+				if (isNaN(finalPay)){
+					finalPay = parseFloat(this.postData.author_payout_value);
+				}
+				console.log(finalPay)
 				totalPayout =
 				  parseFloat(this.postData.pending_payout_value) +
-				  parseFloat(this.postData.total_payout_value) +
+				  parseFloat(finalPay) +
 				  parseFloat(this.postData.curator_payout_value);
 				  
 				voteRshares = this.postData.active_votes.reduce((a, b) => a + parseFloat(b.rshares), 0);
@@ -127,6 +140,14 @@
 			this.activeVotersList = this.activeVotersList.sort(function sortVoters(a, b) {
 					return Math.abs(b.rshares) - Math.abs(a.rshares);
 			});
+			this.showPercent = true;
+			//check if we have percentages
+			if (Array.isArray(this.activeVotersList) && this.activeVotersList.length > 0){
+				//check first vote for percent value
+				if (typeof(this.activeVotersList[0].percent) === 'undefined'){
+					this.showPercent = false;
+				}
+			}			
 			
 			ratio = (voteRshares === 0) ? 0 : totalPayout / voteRshares;
 		}
@@ -138,10 +159,10 @@
 			this.cur_bchain = localStorage.getItem('cur_bchain')
 			this.currentToken = this.cur_bchain;
 		}
-		console.log('mounted');
+		//console.log('mounted');
 		if (this.postData){
-			console.log('postData');
-			console.log(this.postData);
+			//console.log('postData');
+			//console.log(this.postData);
 			this.initializePostCalc();
 		}
 	}
