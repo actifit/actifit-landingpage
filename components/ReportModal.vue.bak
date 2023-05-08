@@ -27,7 +27,7 @@
 		  <div class="report-modal-prelim-info col-md-6">
 			<span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i class="fas fa-reply"></i></a></span>
 			<span>
-				
+				<small>
 				  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 
 					 data-target="#voteModal" v-if="this.$parent.user && userVotedThisPost()==true">
 					<i class="far fa-thumbs-up"></i> {{getVoteCount }}
@@ -37,16 +37,16 @@
 					<i class="far fa-thumbs-up"></i> {{ getVoteCount }}
 				  </a>
 				  <i class="far fa-comments ml-2"></i> {{ report.children }}
-				
+				</small>
 			</span>
 			<span>
-				<span :title="afitReward +' ' + $t('AFIT_Token')">
+				<small :title="afitReward +' ' + $t('AFIT_Token')">
 					<img src="/img/actifit_logo.png" class="mr-1 currency-logo-small">{{ afitReward }} {{ $t('AFIT_Token') }}
-				</span>
+				</small>
 				
-					<img src="/img/STEEM.png" class="mr-0 currency-logo-small" v-if="cur_bchain=='STEEM'">
-					<img src="/img/HIVE.png" class="mr-0 currency-logo-small" v-else-if="cur_bchain=='HIVE'">
-					<img src="/img/BLURT.png" class="mr-0 currency-logo-small" v-else-if="cur_bchain=='BLURT'">
+					<img src="/img/STEEM.png" class="mr-1 currency-logo-small" v-if="cur_bchain=='STEEM'">
+					<img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain=='HIVE'">
+					<img src="/img/BLURT.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain=='BLURT'">
 					<!--{{ postPayout }}-->
 				
 				<span v-if="postPaid()">
@@ -394,11 +394,6 @@
 			output += this.report.beneficiaries[i].account+ ': ' + this.report.beneficiaries[i].weight/100 + '% \n';
 		}
 		return output;
-	  },
-/* function returns author payout value */
-	  paidValue() {
-		if (this.report.total_payout_value ) return this.report.total_payout_value
-		if (this.report.author_payout_value ) return this.report.author_payout_value
 	  },
 	  /* function checks to see if post reached its payout period */
 	  postPaid() {
@@ -840,7 +835,7 @@
 	  cursor: pointer;
 	}
 	.report-modal-prelim-info span{
-	  /* padding: 5px; */
+	  padding: 5px;
 	}
 	.increased-rank{
 		color: #76BB0E;

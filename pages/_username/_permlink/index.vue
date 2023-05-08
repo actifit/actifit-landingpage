@@ -55,7 +55,28 @@
 					<img src="/img/STEEM.png" class="mr-1 currency-logo-small" v-if="cur_bchain=='STEEM'">
 					<img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain=='HIVE'">
 					<img src="/img/BLURT.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain=='BLURT'">
-					{{ postPayout }}
+					<!--{{ postPayout }}-->
+					<span v-if="postPaid()">
+						<!--<i class="fa-solid fa-wallet text-green"></i>-->
+						<span class="m-1" :title="$t('author_payout')">
+							<i class="fa-solid fa-user" ></i>
+							{{paidValue()}}
+						</span>
+						<span class="m-1"  :title="$t('voters_payout')">
+							<i class="fa-solid fa-users"></i>
+							{{report.curator_payout_value}}
+						</span>
+						<i class="fa-solid fa-check text-green text-bold"></i>
+					</span>
+					<span v-else>
+						<span class="text-brand text-bold">{{ report.pending_payout_value.replace('SBD','')}}</span>
+						<i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
+					</span>
+					<span v-if="hasBeneficiaries()" :title="beneficiariesDisplay()">
+						<i class="fas fa-user-pen"><sup>{{report.beneficiaries.length}}</sup></i>
+					</span>
+					
+					
 				</small>
 				<span @click.prevent="displayMorePayoutData = !displayMorePayoutData" class="text-brand pointer-cur-cls" :title="$t('more_token_rewards')">
 					<i class="fas fa-chevron-circle-down" v-if="!displayMorePayoutData"></i>
@@ -565,9 +586,9 @@
       },
 	  postPayout() {
 		if (this.postPaid()){
-			return this.report.total_payout_value.replace('SBD','').replace('STEEM','').replace('HBD','').replace('HIVE','').replace('BLURT','')+' $'
+			return '';
 		}else{
-			return this.report.pending_payout_value.replace('SBD','').replace('STEEM','').replace('HBD','').replace('HIVE','').replace('BLURT','')+' $'
+			return this.report.pending_payout_value.replace('SBD','').replace('STEEM','').replace('HBD','').replace('HIVE','')+' $'
 		}
 	  },
 	  /*getUserRank() {
@@ -590,8 +611,28 @@
 	  }
     },
 	methods: {
+	  hasBeneficiaries() {
+		return Array.isArray(this.report.beneficiaries) && this.report.beneficiaries.length > 0;
+	  },
+	  beneficiariesDisplay(){
+		let output = 'Beneficiaries:\n';
+		for (let i=0;i<this.report.beneficiaries.length;i++){
+			output += this.report.beneficiaries[i].account+ ': ' + this.report.beneficiaries[i].weight/100 + '% \n';
+		}
+		return output;
+	  },
+	  /* function returns author payout value */
+	  paidValue() {
+		if (this.report.total_payout_value ) return this.report.total_payout_value
+		if (this.report.author_payout_value ) return this.report.author_payout_value
+	  },
 	  /* function checks to see if post reached its payout period */
 	  postPaid() {
+		console.log(this.post);
+		if (this.report.is_paidout){
+			//works for comments
+			return true;
+		}
 		//check if last_payout is after cashout_time which means post got paid
 		let last_payout = new Date(this.report.last_payout);
 		let cashout_time = new Date(this.report.cashout_time);
@@ -599,17 +640,6 @@
 			return true;
 		}
 		return false;
-		
-		//compare today v/s payout date calculated based on 7 days payout time
-		/*let reportDate = new Date() 
-		let payoutDays = 7;
-		let reportPayout = new Date(this.report.created);
-		reportPayout.setDate(reportPayout.getDate() + payoutDays);
-		let today = new Date();
-		if (today.getTime() > reportPayout.getTime()){
-			return true;
-		}
-		return false;*/
 	  },
 	  /* function handles closing open comment box and resetting data */
 	  resetOpenComment () {

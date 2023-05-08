@@ -67,7 +67,6 @@
         </div>
         <div class="row details mt-2">
           <div class="col-6">
-            <small>
               <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 
                  data-target="#voteModal" v-if="user && userVotedThisPost()==true" :title="$t('votes')">
                 <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
@@ -77,69 +76,67 @@
                 <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
               </a>
               <i class="far fa-comments ml-2" :title="$t('comments')"></i> {{ report.children }}
-            </small>
           </div>
           <div class="col-6 text-right">
-            <small>
-				<social-sharing :url="'https://actifit.io/@'+report.author+'/'+report.permlink"
-							  :title="report.title"
-							  :description="socialSharingDesc"
-							  :quote="socialSharingQuote"
-							  :hashtags="hashtags"
-							  twitter-user="actifit_fitness"
-							  inline-template>
-					<span class="share-links-actifit">
-					  <network network="twitter">
-						<i class="fab fa-twitter text-brand" title="twitter"></i>
-					  </network>
-					</span>
-				</social-sharing>
-              <a href="#" class="text-brand pr-2" @click="report.rptId = rptId;$store.commit('setActiveReport', report)" data-toggle="modal"
-                 data-target="#dailyActivityChartModal" :title="$t('Activity_chart')">
-                <i class="fas fa-chart-line"></i>
-              </a>
-			  <a href="#" class="text-brand" @click="$store.commit('setEditReport', report)" data-toggle="modal"
-                 data-target="#editReportModal" v-if="user && report.author === user.account.name" :title="$t('Edit_note')">
-                <i class="fas fa-edit p-2"></i>
-              </a>
-              <a href="#" class="text-brand" @click="report.rptId = rptId;$store.commit('setActiveReport', report)" data-toggle="modal"
-                 data-target="#reportModal" :title="$t('read_more_small')">
-                <i class="fas fa-book-open"></i>
-              </a>
-            </small>
+
+			<social-sharing :url="'https://actifit.io/@'+report.author+'/'+report.permlink"
+						  :title="report.title"
+						  :description="socialSharingDesc"
+						  :quote="socialSharingQuote"
+						  :hashtags="hashtags"
+						  twitter-user="actifit_fitness"
+						  inline-template>
+				<span class="share-links-actifit">
+				  <network network="twitter">
+					<i class="fab fa-twitter text-brand" title="twitter"></i>
+				  </network>
+				</span>
+			</social-sharing>
+			<a href="#" class="text-brand pr-2" @click="report.rptId = rptId;$store.commit('setActiveReport', report)" data-toggle="modal"
+			 data-target="#dailyActivityChartModal" :title="$t('Activity_chart')">
+				<i class="fas fa-chart-line"></i>
+			</a>
+			<a href="#" class="text-brand" @click="$store.commit('setEditReport', report)" data-toggle="modal"
+			 data-target="#editReportModal" v-if="user && report.author === user.account.name" :title="$t('Edit_note')">
+				<i class="fas fa-edit p-2"></i>
+			</a>
+			<a href="#" class="text-brand" @click="report.rptId = rptId;$store.commit('setActiveReport', report)" data-toggle="modal"
+			 data-target="#reportModal" :title="$t('read_more_small')">
+				<i class="fas fa-book-open"></i>
+			</a>
+
           </div>
         </div>
 		<div class="row details mt-2">
-			<div class="col-6">
-				<small>
-					<img src="/img/STEEM.png" class="mr-1 currency-logo-small" v-if="cur_bchain=='STEEM'">
-					<img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain=='HIVE'">
-					<!--{{ postPayout }}-->
-					<span v-if="postPaid()">
-						<!--<i class="fa-solid fa-wallet text-green"></i>-->
-						<span class="m-1" :title="$t('author_payout')">
-							<i class="fa-solid fa-user" ></i>
-							{{paidValue()}}
-						</span>
-						<span class="m-1" :title="$t('voters_payout')">
-							<i class="fa-solid fa-users" ></i>
-							{{report.curator_payout_value}}
-						</span>
-						<i class="fa-solid fa-check text-green text-bold"></i>
+			<div class="col-6 payoutCustomDisplay">
+				<img src="/img/STEEM.png" class="mr-1 currency-logo-small" v-if="cur_bchain=='STEEM'">
+				<img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain=='HIVE'">
+				<!--{{ postPayout }}-->
+				<span v-if="postPaid()">
+					<!--<i class="fa-solid fa-wallet text-green"></i>-->
+					<span class="m-1" :title="$t('author_payout')">
+						<i class="fa-solid fa-user" ></i>
+						{{paidValue()}}
 					</span>
-					<span v-else>
-						<span class="text-brand text-bold">{{ report.pending_payout_value.replace('SBD','')}}</span>
-						<i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
+					<span class="m-1" :title="$t('voters_payout')">
+						<i class="fa-solid fa-users" ></i>
+						{{report.curator_payout_value}}
 					</span>
-					<span v-if="hasBeneficiaries()" :title="beneficiariesDisplay()">
-						<i class="fas fa-user-pen"><sup>{{report.beneficiaries.length}}</sup></i>
-					</span>
-				</small>
+					<i class="fa-solid fa-check text-green text-bold"></i>
+				</span>
+				<span v-else>
+					<span class="text-brand text-bold">{{ report.pending_payout_value.replace('SBD','')}}</span>
+					<i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
+				</span>
+				<span v-if="hasBeneficiaries()" :title="beneficiariesDisplay()">
+					<i class="fas fa-user-pen"><sup>{{report.beneficiaries.length}}</sup></i>
+				</span>
+
 			</div>
 			<div class="col-6 text-right">
-				<small>
-					<img src="/img/actifit_logo.png" class="mr-1 currency-logo-small" :title="$t('afit_payout')">{{ afitReward }} {{ $t('AFIT_Token') }}
-				</small>
+				
+				<img src="/img/actifit_logo.png" class="mr-1 currency-logo-small" :title="$t('afit_payout')">{{ afitReward }} {{ $t('AFIT_Token') }}
+			
 			</div>
 		</div>
 		<!-- adding section to display additional FULL Payout option -->
@@ -378,7 +375,7 @@
 		return Array.isArray(this.report.beneficiaries) && this.report.beneficiaries.length > 0;
 	  },
 	  beneficiariesDisplay(){
-		let output = '';
+		let output = 'Beneficiaries:\n';
 		for (let i=0;i<this.report.beneficiaries.length;i++){
 			output += this.report.beneficiaries[i].account+ ': ' + this.report.beneficiaries[i].weight/100 + '% \n';
 		}
@@ -509,5 +506,8 @@
 		width: 100%;
 		height: 150px;
 		object-fit: cover;
+	}
+	.payoutCustomDisplay {
+		line-height: 1.5;
 	}
 </style>

@@ -80,7 +80,6 @@
         </div>-->
         <div class="row details mt-2">
           <div class="col-6">
-            <small>
               <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 
                  data-target="#voteModal" v-if="user && userVotedThisPost()==true" :title="$t('votes')">
                 <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
@@ -90,10 +89,8 @@
                 <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
               </a>
               <i class="far fa-comments ml-2" :title="$t('comments')"></i> {{ post.children }}
-            </small>
           </div>
           <div class="col-6 text-right">
-            <small>
 				<social-sharing :url="'https://actifit.io/@'+post.author+'/'+post.permlink"
 							  :title="post.title"
 							  :description="socialSharingDesc"
@@ -119,35 +116,34 @@
                  data-target="#postModal" :title="$t('read_more_small')">
                 <i class="fas fa-book-open"></i>
               </a>
-            </small>
           </div>
         </div>
 		<div class="row details mt-2">
 			<div class="col-12">
-				<small>
-					<img src="/img/STEEM.png" class="mr-1 currency-logo-small" v-if="cur_bchain=='STEEM'">
-					<img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain=='HIVE'">
-					<!--{{ postPayout }}-->
-					<span v-if="postPaid()">
-						<!--<i class="fa-solid fa-wallet text-green"></i>-->
-						<span class="m-1" :title="$t('author_payout')">
-							<i class="fa-solid fa-user" ></i>
-							{{paidValue()}}
-						</span>
-						<span class="m-1"  :title="$t('voters_payout')">
-							<i class="fa-solid fa-users"></i>
-							{{post.curator_payout_value}}
-						</span>
-						<i class="fa-solid fa-check text-green text-bold"></i>
+				
+				<img src="/img/STEEM.png" class="mr-1 currency-logo-small" v-if="cur_bchain=='STEEM'">
+				<img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain=='HIVE'">
+				<!--{{ postPayout }}-->
+				<span v-if="postPaid()">
+					<!--<i class="fa-solid fa-wallet text-green"></i>-->
+					<span class="m-1" :title="$t('author_payout')">
+						<i class="fa-solid fa-user" ></i>
+						{{paidValue()}}
 					</span>
-					<span v-else>
-						<span class="text-brand text-bold">{{ post.pending_payout_value.replace('SBD','')}}</span>
-						<i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
+					<span class="m-1"  :title="$t('voters_payout')">
+						<i class="fa-solid fa-users"></i>
+						{{post.curator_payout_value}}
 					</span>
-					<span v-if="hasBeneficiaries()" :title="beneficiariesDisplay()">
-						<i class="fas fa-user-pen"><sup>{{post.beneficiaries.length}}</sup></i>
-					</span>
-				</small>
+					<i class="fa-solid fa-check text-green text-bold"></i>
+				</span>
+				<span v-else>
+					<span class="text-brand text-bold">{{ post.pending_payout_value.replace('SBD','')}}</span>
+					<i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
+				</span>
+				<span v-if="hasBeneficiaries()" :title="beneficiariesDisplay()">
+					<i class="fas fa-user-pen"><sup>{{post.beneficiaries.length}}</sup></i>
+				</span>
+			
 			</div>
 			<div class="col-6 text-right" v-if="afitReward != ''">
 				<small>
@@ -320,7 +316,7 @@
 		return Array.isArray(this.post.beneficiaries) && this.post.beneficiaries.length > 0;
 	  },
 	  beneficiariesDisplay(){
-		let output = '';
+		let output = 'Beneficiaries:\n';
 		for (let i=0;i<this.post.beneficiaries.length;i++){
 			output += this.post.beneficiaries[i].account+ ': ' + this.post.beneficiaries[i].weight/100 + '% \n';
 		}
@@ -333,7 +329,7 @@
 	  },
 	  /* function checks to see if post reached its payout period */
 	  postPaid() {
-		console.log(this.post);
+		//console.log(this.post);
 		if (this.post.is_paidout){
 			//works for comments
 			return true;

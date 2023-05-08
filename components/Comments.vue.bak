@@ -753,10 +753,6 @@
 	  },
 	  /* function checks to see if post reached its payout period */
 	  postPaid() {
-		if (this.full_data.is_paidout){
-			//works for comments
-			return true;
-		}
 		//check if last_payout is after cashout_time which means post got paid
 		let last_payout = new Date(this.full_data.last_payout);
 		let cashout_time = new Date(this.full_data.cashout_time);

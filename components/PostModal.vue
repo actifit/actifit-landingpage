@@ -47,28 +47,49 @@
 		  <div class="post-modal-prelim-info col-md-6">
 			<span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i class="fas fa-reply"></i></a></span>
 			<span>
-				<small>
-				  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 
-					 data-target="#voteModal" v-if="this.$parent.user && userVotedThisPost()==true">
-					<i class="far fa-thumbs-up"></i> {{getVoteCount }}
-				  </a>
-				  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal"
-					 data-target="#voteModal" class="actifit-link-plain" v-else>
-					<i class="far fa-thumbs-up"></i> {{ getVoteCount }}
-				  </a>
-				  <i class="far fa-comments ml-2"></i> {{ post.children }}
-				</small>
+			
+			  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 
+				 data-target="#voteModal" v-if="this.$parent.user && userVotedThisPost()==true">
+				<i class="far fa-thumbs-up"></i> {{getVoteCount }}
+			  </a>
+			  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal"
+				 data-target="#voteModal" class="actifit-link-plain" v-else>
+				<i class="far fa-thumbs-up"></i> {{ getVoteCount }}
+			  </a>
+			  <i class="far fa-comments ml-2"></i> {{ post.children }}
+				
 			</span>
 			<span>
-				<small :title="afitReward +' ' + $t('AFIT_Token')">
+				<!--<small :title="afitReward +' ' + $t('AFIT_Token')">
 					<img src="/img/actifit_logo.png" class="mr-1 currency-logo-small">{{ afitReward }} {{ $t('AFIT_Token') }}
-				</small>
-				<small :title="postPayout">
-					<img src="/img/STEEM.png" class="mr-1 currency-logo-small" v-if="cur_bchain=='STEEM'">
-					<img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain=='HIVE'">
-					<img src="/img/BLURT.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain=='BLURT'">
-					{{ postPayout }}
-				</small>
+				</small>-->
+				<span :title="postPayout" class="p-0 m-0">
+					<img src="/img/STEEM.png" class="currency-logo-small" v-if="cur_bchain=='STEEM'">
+					<img src="/img/HIVE.png" class="currency-logo-small" v-else-if="cur_bchain=='HIVE'">
+					<img src="/img/BLURT.png" class="currency-logo-small" v-else-if="cur_bchain=='BLURT'">
+					<!--{{ postPayout }}-->
+				</span>
+				
+				<span v-if="postPaid()">
+						<!--<i class="fa-solid fa-wallet text-green"></i>-->
+						<span class="m-1" :title="$t('author_payout')">
+							<i class="fa-solid fa-user" ></i>
+							{{paidValue()}}
+						</span>
+						<span class="m-1"  :title="$t('voters_payout')">
+							<i class="fa-solid fa-users"></i>
+							{{post.curator_payout_value}}
+						</span>
+						<i class="fa-solid fa-check text-green text-bold"></i>
+					</span>
+					<span v-else>
+						<span class="text-brand text-bold">{{ post.pending_payout_value.replace('SBD','')}}</span>
+						<i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
+					</span>
+					<span v-if="hasBeneficiaries()" :title="beneficiariesDisplay()">
+						<i class="fas fa-user-pen"><sup>{{post.beneficiaries.length}}</sup></i>
+					</span>
+				
 				<span @click.prevent="displayMorePayoutData = !displayMorePayoutData" class="text-brand pointer-cur-cls" :title="$t('more_token_rewards')">
 					<i class="fas fa-chevron-circle-down" v-if="!displayMorePayoutData"></i>
 					<i class="fas fa-chevron-circle-up" v-else></i>
@@ -406,8 +427,28 @@
 			this.$emit('nextPost');
 		}
 	  },
+	  /* function checks if post has beneficiaries */
+	  hasBeneficiaries() {
+		return Array.isArray(this.post.beneficiaries) && this.post.beneficiaries.length > 0;
+	  },
+	  beneficiariesDisplay(){
+		let output = 'Beneficiaries:\n';
+		for (let i=0;i<this.post.beneficiaries.length;i++){
+			output += this.post.beneficiaries[i].account+ ': ' + this.post.beneficiaries[i].weight/100 + '% \n';
+		}
+		return output;
+	  },
+	  /* function returns author payout value */
+	  paidValue() {
+		if (this.post.total_payout_value ) return this.post.total_payout_value
+		if (this.post.author_payout_value ) return this.post.author_payout_value
+	  },
 	  /* function checks to see if post reached its payout period */
 	  postPaid() {
+	  	if (this.post.is_paidout){
+			//works for comments
+			return true;
+		}
 		//check if last_payout is after cashout_time which means post got paid
 		let last_payout = new Date(this.post.last_payout);
 		let cashout_time = new Date(this.post.cashout_time);
