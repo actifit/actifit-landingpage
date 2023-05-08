@@ -393,7 +393,7 @@
       },
 	  postPayout() {
 		if (this.postPaid()){
-			return '';
+			return this.post.total_payout_value.replace('SBD','').replace('STEEM','').replace('HBD','').replace('HIVE','')+' $'
 		}else{
 			return this.post.pending_payout_value.replace('SBD','').replace('STEEM','').replace('HBD','').replace('HIVE','')+' $'
 		}
