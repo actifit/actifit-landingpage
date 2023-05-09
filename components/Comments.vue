@@ -1,6 +1,6 @@
 <template>
-  <div class="comments" v-if="!commentDeleted">
-    <div class="modal-body comment-info" v-if="depth > 0">
+  <div class="comments mb-2" v-if="!commentDeleted">
+    <div class="modal-body comment-info acti-shadow mb-2" v-if="depth > 0">
 		<a :href="'/' + author" target="_blank">
 		  <div class="comment-user-section" :style="{ paddingLeft: depth * indentFactor + 'px' }">	
 			<div class="user-avatar mr-1"
@@ -9,12 +9,13 @@
 			</div>
 		  </div>
 		</a>
-		<a :href="'/@' + author + '/' + full_data.permlink" target="_blank">
+		<!--<a :href="'/@' + author + '/' + full_data.permlink" target="_blank">-->
 		  <div class="comment-user-section pt-2" :style="{ paddingLeft: depth * indentFactor + 'px' }">	
-			<a :href="buildLink"><small class="date-head text-muted">{{ date }}</small>&nbsp;<i class="fas fa-link"></i></a>
+			<a :title="$t('comment_link')" :href="buildLink" id="comment-link" ref="comment-link"><small class="date-head text-muted" :title="date">{{ $getTimeDifference(full_data.created) }}</small>&nbsp;<i class="fas fa-link"></i></a>
+			<i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent" data-targetEl="comment-link"></i>
 		  </div>
-		</a>
-		<vue-remarkable class="modal-body" v-if="!editBoxOpen" :source="commentBody()" :style="{ paddingLeft: depth * indentFactor + 'px' }" :options="{'html': true}"></vue-remarkable>
+		<!--</a>-->
+		<vue-remarkable class="modal-body pb-0" v-if="!editBoxOpen" :source="commentBody()" :style="{ paddingLeft: depth * indentFactor + 'px' }" :options="{'html': true}"></vue-remarkable>
 		<transition name="fade">
 		  <div class="comment-reply" v-if="editBoxOpen">
 			<CustomTextEditor ref="editor" :initialContent="full_data.body" ></CustomTextEditor>
@@ -49,17 +50,17 @@
 			<div v-if="commentDeletable()"><a href="#" @click.prevent="deleteComment" :title="$t('Delete_note')"><i class="fas fa-trash-alt"></i><i class="fas fa-spin fa-spinner" v-if="deleting"></i></a></div>
 			<div><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i class="fas fa-reply"></i></a></div>
 			<div>
-				<small>
-				  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 
-					 data-target="#voteModal" v-if="this.user && userVotedThisPost()==true">
-					<i class="far fa-thumbs-up"></i> {{getVoteCount }}
-				  </a>
-				  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal"
-					 data-target="#voteModal" class="actifit-link-plain" v-else>
-					<i class="far fa-thumbs-up"></i> {{ getVoteCount }}
-				  </a>
-				  <i class="far fa-comments ml-2"></i> {{ full_data.children }}
-				</small>
+				
+			  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 
+				 data-target="#voteModal" v-if="this.user && userVotedThisPost()==true">
+				<i class="far fa-thumbs-up"></i> {{getVoteCount }}
+			  </a>
+			  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal"
+				 data-target="#voteModal" class="actifit-link-plain" v-else>
+				<i class="far fa-thumbs-up"></i> {{ getVoteCount }}
+			  </a>
+			  <i class="far fa-comments ml-2"></i> {{ full_data.children }}
+			
 			</div>
 			<div>
 				<!--<small>
@@ -203,7 +204,7 @@
 	  ...mapGetters(['moderators']),
 	  ...mapGetters(['newlyVotedPosts', 'bchain']),
 	  buildLink (){
-		return this.full_data.author + '/' + this.full_data.permlink;
+		return '/@' + this.full_data.author + '/' + this.full_data.permlink;
 	  },
 	  getContent () {
 		return this.responseBody;
@@ -261,6 +262,27 @@
 	  },
     },
     methods: {
+	  
+		copyContent (event){
+			navigator.clipboard.writeText('https://actifit.io/@' + this.full_data.author + '/' + this.full_data.permlink)
+			.then(() => {
+				this.$notify({
+				  group: 'success',
+				  text: this.$t('copied_successfully'),
+				  position: 'top center'
+				})
+				return;
+			})
+			.catch((error) => {
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('error_copying'),
+				  position: 'top center'
+				})
+				return;					
+			});
+			
+		},
       commentBody () {
 		//console.log('comment body');
 		//console.log(this.full_data.body);
@@ -826,12 +848,33 @@
   border: 1px solid #e9ecef;
 }
 .user-avatar{
-  width: 20px;
-  height: 20px;
+  width: 30px;
+  height: 30px;
   background-position: center center;
   background-size: cover;
   border-radius: 50%;
   float: left;
   border: solid 1px #ddd;
 }
+
+/*
+.comments {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: #f9f9f9;
+}
+
+.comment-info {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.comment-user-section {
+  display: flex;
+  align-items: center;
+}
+*/
 </style>
