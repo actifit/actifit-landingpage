@@ -1,6 +1,22 @@
 <template>
   <div class="comments mb-2" v-if="!commentDeleted">
-    <div class="modal-body comment-info acti-shadow mb-2" v-if="depth > 0">
+	<div class="col-12 row" v-if="depth == 0">
+		<div class="col-md-9"></div>
+		<select v-model="currentSort" class="form-control col-md-3 sel-adj float-right" >
+			<option value="">-- {{$t('Sort_By')}} --</option>
+			<option :value="JSON.stringify({value: 'author', direction: 'asc'})">{{$t('Name')}}▲</option>
+			<option :value="JSON.stringify({value: 'author', direction: 'desc'})">{{$t('Name')}}▼</option>
+			<option :value="JSON.stringify({value: 'total_payout_value', direction: 'asc'})">{{$t('Payout')}}▲</option>
+			<option :value="JSON.stringify({value: 'total_payout_value', direction: 'desc'})">{{$t('Payout')}}▼</option>
+			<option :value="JSON.stringify({value: 'children', direction: 'asc'})">{{$t('Replies')}}▲</option>
+			<option :value="JSON.stringify({value: 'children', direction: 'desc'})">{{$t('Replies')}}▼</option>
+			<option :value="JSON.stringify({value: 'active_votes', direction: 'asc'})">{{$t('Votes')}}▲</option>
+			<option :value="JSON.stringify({value: 'active_votes', direction: 'desc'})">{{$t('Votes')}}▼</option>
+			<option :value="JSON.stringify({value: 'created', direction: 'asc'})">{{$t('Date')}}▲</option>
+			<option :value="JSON.stringify({value: 'created', direction: 'desc'})">{{$t('Date')}}▼</option>
+		</select>
+    </div>
+	<div class="modal-body comment-info acti-shadow mb-2" v-if="depth > 0">
 		<div class="main-user-info pt-2">
 			<a :href="'/' + author" target="_blank">
 			  <div class="comment-user-section" :style="{ paddingLeft: depth * indentFactor + 'px' }">	
@@ -171,6 +187,7 @@
     name: 'Comments',
 	data () {
 		return {
+			currentSort: JSON.stringify({value: 'created', direction: 'desc'}),
 			postUpvoted: false,
 			commentDeleted: false,
 			userRank: 0,
@@ -192,6 +209,7 @@
 	},
 	watch: {
 	  full_data : 'fetchReportData',
+	  currentSort: 'reorderComments',
 	  bchain: function(newBchain) {
 		this.cur_bchain = newBchain;
 		this.target_bchain = newBchain;
@@ -265,7 +283,24 @@
 	  },
     },
     methods: {
-	  
+		reorderComments () {
+			try{
+				//console.log(this.currentSort);
+				let sortApproach = JSON.parse(this.currentSort);
+				//console.log(sortApproach.value);
+				if (sortApproach.value){
+					//console.log(sortApproach.value);
+					/*if (sortApproach.value == 'price'){
+						this.reply_entries = _.orderBy(this.reply_entries, function(e) { return e.price[0].price },[sortApproach.direction]);
+					}else{*/
+						this.reply_entries = _.orderBy(this.reply_entries, [sortApproach.value],[sortApproach.direction]);
+					//}
+					this.$forceUpdate();
+				}
+			}catch(err){
+				console.log(err);
+			}
+		},
 		copyContent (event){
 			navigator.clipboard.writeText('https://actifit.io/@' + this.full_data.author + '/' + this.full_data.permlink)
 			.then(() => {
