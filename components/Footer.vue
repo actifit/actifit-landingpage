@@ -119,7 +119,7 @@
 		display: none !important;
 	}
 	.currency-logo-small{
-		height: 15px;
+		height: 20px;
 	}
 	.token-logo-sm{
 		width: 20px;
@@ -140,5 +140,12 @@
 	}
 	.acti-shadow{
 		box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
+	}
+	.main-user-info{
+		background-color: antiquewhite;
+	}
+	.main-payment-info{
+		background-color: lightcoral;
+		color: white !important;
 	}
 </style>

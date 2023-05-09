@@ -1,20 +1,23 @@
 <template>
   <div class="comments mb-2" v-if="!commentDeleted">
     <div class="modal-body comment-info acti-shadow mb-2" v-if="depth > 0">
-		<a :href="'/' + author" target="_blank">
-		  <div class="comment-user-section" :style="{ paddingLeft: depth * indentFactor + 'px' }">	
-			<div class="user-avatar mr-1"
-                   :style="'background-image: url('+this.profImgUrl+'/u/' + author + '/avatar)'"></div>
-			<div class="modal-author modal-title text-brand" >@{{ author }}<small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small>
-			</div>
-		  </div>
-		</a>
+		<div class="main-user-info pt-2">
+			<a :href="'/' + author" target="_blank">
+			  <div class="comment-user-section" :style="{ paddingLeft: depth * indentFactor + 'px' }">	
+				<div class="user-avatar mr-1"
+					   :style="'background-image: url('+this.profImgUrl+'/u/' + author + '/avatar)'"></div>
+				<div class="modal-author modal-title text-brand" >@{{ author }}<small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small>
+				</div>
+			  </div>
+			</a>
 		<!--<a :href="'/@' + author + '/' + full_data.permlink" target="_blank">-->
-		  <div class="comment-user-section pt-2" :style="{ paddingLeft: depth * indentFactor + 'px' }">	
-			<a :title="$t('comment_link')" :href="buildLink" id="comment-link" ref="comment-link"><small class="date-head text-muted" :title="date">{{ $getTimeDifference(full_data.created) }}</small>&nbsp;<i class="fas fa-link"></i></a>
-			<i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent" ></i>
-		  </div>
+			<div class="comment-user-section pt-2" :style="{ paddingLeft: depth * indentFactor + 'px' }">	
+				<a :title="$t('comment_link')" :href="buildLink" id="comment-link" ref="comment-link"><small class="date-head text-muted" :title="date">{{ $getTimeDifference(full_data.created) }}</small>&nbsp;<i class="fas fa-link"></i></a>
+				<i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent" ></i>
+			</div>
 		<!--</a>-->
+		</div>
+		
 		<vue-remarkable class="modal-body pb-0" v-if="!editBoxOpen" :source="commentBody()" :style="{ paddingLeft: depth * indentFactor + 'px' }" :options="{'html': true}"></vue-remarkable>
 		<transition name="fade">
 		  <div class="comment-reply" v-if="editBoxOpen">
@@ -45,7 +48,7 @@
 			<a href="#" @click.prevent="insertFullModSignature" class="btn btn-brand border reply-btn w-25" v-if="(this.user && this.moderators.find( mod => mod.name == this.user.account.name && mod.title == 'moderator'))">{{ $t('Full_Signature') }}</a>
 		  </div>
 		</transition>
-		<div class="modal-footer">
+		<div class="modal-footer main-payment-info">
 			<div v-if="this.user && this.user.account.name == this.full_data.author"><a href="#" @click.prevent="editBoxOpen = !editBoxOpen" :title="$t('Edit_note')"><i class="fas fa-edit"></i></a></div>
 			<div v-if="commentDeletable()"><a href="#" @click.prevent="deleteComment" :title="$t('Delete_note')"><i class="fas fa-trash-alt"></i><i class="fas fa-spin fa-spinner" v-if="deleting"></i></a></div>
 			<div><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i class="fas fa-reply"></i></a></div>

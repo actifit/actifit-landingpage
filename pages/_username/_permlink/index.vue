@@ -19,23 +19,26 @@
 		  </div>
 		  
 		  <h4>{{ report.title }}</h4>
-		  <h5 class="text-brand" >
-			<div class="user-avatar mid-avatar mr-1 mb-5"
+		  <div class="main-user-info">
+			<h5 class="text-brand" >
+				<div class="user-avatar mid-avatar mr-1 mb-5"
 					   :style="'background-image: url('+profImgUrl+'/u/' + this.report.author + '/avatar)'"></div>
-			<a :href="'/'+report.author" target="_blank">@{{ report.author}} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></a></h5>
+				<a :href="'/'+report.author" target="_blank">@{{ report.author}} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></a>
+			</h5>
 			<a :href="buildLink"><span class="date-head text-muted">{{ date }}</span>&nbsp;<i class="fas fa-link"></i></a>
 			<i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent" ></i>
-		  <div class="report-tags p-1" v-html="displayReportTags"></div>
+		  
+			<div class="report-tags p-1" v-html="displayReportTags"></div>
+		  </div>
         </div>
 		<vue-remarkable class="col-md-12" :source="body" :options="{'html': true}" ></vue-remarkable>
 		<!--<div v-html="body"></div>-->
 		<!--<div class="modal-body goog-ad-horiz-90"><adsbygoogle ad-slot="4921049809" /></div>-->
-		<div class="modal-footer col-md-12">
+		<div class="modal-footer col-md-12 main-payment-info">
 		  <div class="report-modal-prelim-info col-md-6">
 			<span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i class="fas fa-reply"></i></a></span>
 			
 			<span>
-				<small>
 				  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 
 					 data-target="#voteModal" v-if="this.user && userVotedThisPost()==true">
 					<i class="far fa-thumbs-up"></i> {{getVoteCount }}
@@ -45,14 +48,12 @@
 					<i class="far fa-thumbs-up"></i> {{ getVoteCount }}
 				  </a>
 				  <i class="far fa-comments ml-2"></i> {{ report.children }}
-				</small>
-				
 			</span>
-			<span>
-				<small :title="afitReward +' ' + $t('AFIT_Token')">
+			<div>
+				<span :title="afitReward +' ' + $t('AFIT_Token')">
 					<img src="/img/actifit_logo.png" class="mr-1 currency-logo-small">{{ afitReward }} {{ $t('AFIT_Token') }}
-				</small>
-				<small :title="postPayout">
+				</span>
+				<span :title="postPayout">
 					<img src="/img/STEEM.png" class="mr-1 currency-logo-small" v-if="cur_bchain=='STEEM'">
 					<img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain=='HIVE'">
 					<img src="/img/BLURT.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain=='BLURT'">
@@ -78,7 +79,7 @@
 					</span>
 					
 					
-				</small>
+				</span>
 				<span @click.prevent="displayMorePayoutData = !displayMorePayoutData" class="text-brand pointer-cur-cls" :title="$t('more_token_rewards')">
 					<i class="fas fa-chevron-circle-down" v-if="!displayMorePayoutData"></i>
 					<i class="fas fa-chevron-circle-up" v-else></i>
@@ -90,7 +91,7 @@
 						</small>
 					</div>
 				</transition>
-			</span>
+			</div>
 		  </div>
 		  <div class="text-brand col-md-6"> 
 			<social-sharing :url="formattedReportUrl"
@@ -1082,7 +1083,7 @@
 		margin-left: 10px !important;
 	}
 	.actifit-link-plain{
-	  color: black;
+	  color: white;
 	}
 	.modal-body{
 	  word-break: break-word;
@@ -1122,7 +1123,7 @@
 	  cursor: pointer;
 	}
 	.report-modal-prelim-info span{
-	  padding: 5px;
+	  /* padding: 5px; */
 	}
 	.increased-rank{
 		color: #76BB0E;

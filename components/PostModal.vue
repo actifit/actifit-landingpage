@@ -43,8 +43,8 @@
 		</div>
 		<vue-remarkable class="modal-body" :source="body" :options="{'html': true}"></vue-remarkable>
 		<div class="modal-body goog-ad-horiz-90"><adsbygoogle ad-slot="5716623705" /></div>
-		<div class="modal-footer">
-		  <div class="post-modal-prelim-info col-md-6">
+		<div class="main-payment-info modal-footer">
+		  <div class="col-md-6">
 			<span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i class="fas fa-reply"></i></a></span>
 			<span>
 			
@@ -59,7 +59,7 @@
 			  <i class="far fa-comments ml-2"></i> {{ post.children }}
 				
 			</span>
-			<span>
+			<div>
 				<!--<small :title="afitReward +' ' + $t('AFIT_Token')">
 					<img src="/img/actifit_logo.png" class="mr-1 currency-logo-small">{{ afitReward }} {{ $t('AFIT_Token') }}
 				</small>-->
@@ -101,9 +101,9 @@
 						</small>
 					</div>
 				</transition>
-			</span>
+			</div>
 		  </div>
-		  <div class="text-brand col-md-6"> 
+		  <div class="col-md-6"> 
 			<social-sharing :url="formattedPostUrl"
 						  :title="post.title"
 						  description="Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity "
@@ -851,7 +851,7 @@
 		margin-left: 10px !important;
 	}
 	.actifit-link-plain{
-	  color: black;
+	  color: white;
 	}
 	.modal-body{
 	  word-break: break-word;
