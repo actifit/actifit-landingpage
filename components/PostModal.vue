@@ -14,9 +14,9 @@
 				<i class="fas fa-chevron-right"></i></button>
 			</div>
 		</div>
-        <div class="modal-header">
-		  <!-- if this is a comment, display link to higher level comment/post -->
-		  <div v-if="post.parent_author" class="row col-12">
+		<!-- if this is a comment, display link to higher level comment/post -->
+        <div v-if="post.parent_author" class="modal-header">
+		  <div class="row col-12">
 			<div class="text-right col-12">
 			<i class="fas fa-reply text-brand"></i>&nbsp;{{$t('viewing_comment_note')}}<span class="user-avatar mr-1 float-right" :style="'background-image: url('+profImgUrl+'/u/' + post.parent_author + '/avatar)'"></span>
 				  <a :href="'/'+post.parent_author">@{{ post.parent_author }}</a><a :href="buildParentLink"><br />{{$t('view_parent_thread')}}</a>
