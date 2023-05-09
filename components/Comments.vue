@@ -12,7 +12,7 @@
 			</a>
 		<!--<a :href="'/@' + author + '/' + full_data.permlink" target="_blank">-->
 			<div class="comment-user-section pt-2" :style="{ paddingLeft: depth * indentFactor + 'px' }">	
-				<a :title="$t('comment_link')" :href="buildLink" id="comment-link" ref="comment-link"><small class="date-head text-muted" :title="date">{{ $getTimeDifference(full_data.created) }}</small>&nbsp;<i class="fas fa-link"></i></a>
+				<a :title="$t('comment_link')" :href="buildLink" id="comment-link" ref="comment-link"><span class="date-head text-muted" :title="date">{{ $getTimeDifference(full_data.created) }}</span>&nbsp;<i class="fas fa-link"></i></a>
 				<i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent" ></i>
 			</div>
 		<!--</a>-->
@@ -82,7 +82,7 @@
 						<i class="fa-solid fa-check text-green text-bold"></i>
 					</span>
 					<span v-else>
-						<span class="text-brand text-bold">{{ full_data.pending_payout_value.replace('SBD','')}}</span>
+						<span class="text-bold">{{ full_data.pending_payout_value.replace('SBD','')}}</span>
 						<i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
 					</span>
 					<span v-if="hasBeneficiaries()" :title="beneficiariesDisplay()">

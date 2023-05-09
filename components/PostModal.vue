@@ -26,20 +26,27 @@
 		<div class="modal-header border-0 pb-0">
           <h5 class="modal-title" id="exampleModalLabel">{{ post.title }}</h5>
 		  <div class="text-right">
-				  <span class="date-head text-muted" :title="date">{{ $getTimeDifference(post.created) }}</span>
 				  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				  </button>
 		  </div>
 		</div>
-		<div class="p-1">
-			  <a :href="'/'+post.author" target="_blank">
-			    <span class="user-avatar m-2" :style="'background-image: url('+profImgUrl+'/u/' + post.author + '/avatar)'"></span>
-				<h5 class="modal-author modal-title text-brand" >@{{ post.author}} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></h5>
-			  </a>
-		</div>
-		<div class="modal-header">
-			<div class="post-tags p-1" v-html="displayPostTags"></div>
+		<div class="main-user-info">
+			<div class="p-1">
+				  <a :href="'/'+post.author" target="_blank">
+					<span class="user-avatar m-2" :style="'background-image: url('+profImgUrl+'/u/' + post.author + '/avatar)'"></span>
+					<h5 class="modal-author modal-title text-brand" >@{{ post.author}} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></h5>
+				  </a>
+				  
+			</div>
+			<span>
+				<span class="date-head text-muted" :title="date">{{ $getTimeDifference(post.created) }}</span>
+				<a :href="'/@' + this.post.author + '/' + this.post.permlink"><i class="fas fa-link text-brand"></i></a>
+				<i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent" ></i>
+			</span>
+			<div class="modal-header">
+				<div class="post-tags p-1" v-html="displayPostTags"></div>
+			</div>
 		</div>
 		<vue-remarkable class="modal-body" :source="body" :options="{'html': true}"></vue-remarkable>
 		<div class="modal-body goog-ad-horiz-90"><adsbygoogle ad-slot="5716623705" /></div>
@@ -83,7 +90,7 @@
 						<i class="fa-solid fa-check text-green text-bold"></i>
 					</span>
 					<span v-else>
-						<span class="text-brand text-bold">{{ post.pending_payout_value}}</span>
+						<span class="text-bold">{{ post.pending_payout_value}}</span>
 						<i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
 					</span>
 					<span v-if="hasBeneficiaries()" :title="beneficiariesDisplay()">
@@ -418,6 +425,26 @@
 	  }
     },
 	methods: { 
+	  copyContent (event){
+			navigator.clipboard.writeText('https://actifit.io/@' + this.post.author + '/' + this.post.permlink)
+			.then(() => {
+				this.$notify({
+				  group: 'success',
+				  text: this.$t('copied_successfully'),
+				  position: 'top center'
+				})
+				return;
+			})
+			.catch((error) => {
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('error_copying'),
+				  position: 'top center'
+				})
+				return;					
+			});
+			
+		},
 	  loadNextPost(direction){
 		if (direction <0){
 			console.log('previous')

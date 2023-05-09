@@ -10,20 +10,30 @@
 		</div>
         <div class="modal-header">
           <h5 class="modal-title" id="exampleModalLabel">{{ report.title }}</h5><br/>
-		  <a :href="report.author" target="_blank">
-			<h5 class="modal-author modal-title text-brand" >@{{ report.author}} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></h5>
-		  </a>
-		  <span class="date-head text-muted">{{ date }}</span>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
-        </div>
+		</div>
+        <div class="main-user-info">
+			<div class="p-1">
+				  <a :href="'/'+report.author" target="_blank">
+					<span class="user-avatar m-2" :style="'background-image: url('+profImgUrl+'/u/' + report.author + '/avatar)'"></span>
+					<h5 class="modal-author modal-title text-brand" >@{{ report.author}} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></h5>
+				  </a>
+				  <span>
+					<span class="date-head text-muted" :title="date">{{ $getTimeDifference(report.created) }}</span>
+					<a :href="'/@' + this.report.author + '/' + this.report.permlink"><i class="fas fa-link text-brand"></i></a>
+					<i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent" ></i>
+				</span>
+			</div>
+          
 		<div class="modal-header">
 			<div class="report-tags p-1" v-html="displayReportTags"></div>
 		</div>
+		</div>
 		<vue-remarkable class="modal-body" :source="body" :options="{'html': true}"></vue-remarkable>
 		<div class="modal-body goog-ad-horiz-90"><adsbygoogle ad-slot="5716623705" /></div>
-		<div class="modal-footer">
+		<div class="modal-footer main-payment-info">
 		  <div class="report-modal-prelim-info col-md-6">
 			<span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i class="fas fa-reply"></i></a></span>
 			<span>
@@ -39,7 +49,7 @@
 				  <i class="far fa-comments ml-2"></i> {{ report.children }}
 				
 			</span>
-			<span>
+			<div>
 				<span :title="afitReward +' ' + $t('AFIT_Token')">
 					<img src="/img/actifit_logo.png" class="mr-1 currency-logo-small">{{ afitReward }} {{ $t('AFIT_Token') }}
 				</span>
@@ -62,7 +72,7 @@
 					<i class="fa-solid fa-check text-green text-bold"></i>
 				</span>
 				<span v-else>
-					<span class="text-brand text-bold">{{ report.pending_payout_value.replace('SBD','')}}</span>
+					<span class="text-bold">{{ report.pending_payout_value.replace('SBD','')}}</span>
 					<i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
 				</span>
 				<span v-if="hasBeneficiaries()" :title="beneficiariesDisplay()">
@@ -81,9 +91,9 @@
 						</small>
 					</div>
 				</transition>
-			</span>
+			</div>
 		  </div>
-		  <div class="text-brand col-md-6"> 
+		  <div class="col-md-6"> 
 			<social-sharing :url="formattedReportUrl"
 						  :title="report.title"
 						  description="Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity "
@@ -766,6 +776,26 @@
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
+	  copyContent (event){
+			navigator.clipboard.writeText('https://actifit.io/@' + this.report.author + '/' + this.report.permlink)
+			.then(() => {
+				this.$notify({
+				  group: 'success',
+				  text: this.$t('copied_successfully'),
+				  position: 'top center'
+				})
+				return;
+			})
+			.catch((error) => {
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('error_copying'),
+				  position: 'top center'
+				})
+				return;					
+			});
+			
+		},
 	  loadNextReport(direction){
 		if (direction <0){
 			console.log('previous')
@@ -812,7 +842,7 @@
 		margin-left: 10px !important;
 	}
 	.actifit-link-plain{
-	  color: black;
+	  color: white;
 	}
 	.modal-body{
 	  word-break: break-word;
