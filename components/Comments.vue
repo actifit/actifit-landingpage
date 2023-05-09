@@ -12,7 +12,7 @@
 		<!--<a :href="'/@' + author + '/' + full_data.permlink" target="_blank">-->
 		  <div class="comment-user-section pt-2" :style="{ paddingLeft: depth * indentFactor + 'px' }">	
 			<a :title="$t('comment_link')" :href="buildLink" id="comment-link" ref="comment-link"><small class="date-head text-muted" :title="date">{{ $getTimeDifference(full_data.created) }}</small>&nbsp;<i class="fas fa-link"></i></a>
-			<i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent" data-targetEl="comment-link"></i>
+			<i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent" ></i>
 		  </div>
 		<!--</a>-->
 		<vue-remarkable class="modal-body pb-0" v-if="!editBoxOpen" :source="commentBody()" :style="{ paddingLeft: depth * indentFactor + 'px' }" :options="{'html': true}"></vue-remarkable>

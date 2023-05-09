@@ -24,6 +24,7 @@
 					   :style="'background-image: url('+profImgUrl+'/u/' + this.report.author + '/avatar)'"></div>
 			<a :href="'/'+report.author" target="_blank">@{{ report.author}} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></a></h5>
 			<a :href="buildLink"><span class="date-head text-muted">{{ date }}</span>&nbsp;<i class="fas fa-link"></i></a>
+			<i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent" ></i>
 		  <div class="report-tags p-1" v-html="displayReportTags"></div>
         </div>
 		<vue-remarkable class="col-md-12" :source="body" :options="{'html': true}" ></vue-remarkable>
@@ -611,6 +612,26 @@
 	  }
     },
 	methods: {
+	  copyContent (event){
+			navigator.clipboard.writeText('https://actifit.io/@' + this.report.author + '/' + this.report.permlink)
+			.then(() => {
+				this.$notify({
+				  group: 'success',
+				  text: this.$t('copied_successfully'),
+				  position: 'top center'
+				})
+				return;
+			})
+			.catch((error) => {
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('error_copying'),
+				  position: 'top center'
+				})
+				return;					
+			});
+			
+		},
 	  hasBeneficiaries() {
 		return Array.isArray(this.report.beneficiaries) && this.report.beneficiaries.length > 0;
 	  },
