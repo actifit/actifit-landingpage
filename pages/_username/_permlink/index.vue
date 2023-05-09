@@ -71,7 +71,7 @@
 						<i class="fa-solid fa-check text-green text-bold"></i>
 					</span>
 					<span v-else>
-						<span class="text-brand text-bold">{{ report.pending_payout_value.replace('SBD','')}}</span>
+						<span class="text-bold">{{ report.pending_payout_value.replace('SBD','')}}</span>
 						<i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
 					</span>
 					<span v-if="hasBeneficiaries()" :title="beneficiariesDisplay()">
@@ -93,7 +93,7 @@
 				</transition>
 			</div>
 		  </div>
-		  <div class="text-brand col-md-6"> 
+		  <div class="col-md-6"> 
 			<social-sharing :url="formattedReportUrl"
 						  :title="report.title"
 						  :description="socialSharingDesc"

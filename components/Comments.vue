@@ -6,8 +6,8 @@
 			<option value="">-- {{$t('Sort_By')}} --</option>
 			<option :value="JSON.stringify({value: 'author', direction: 'asc'})">{{$t('Name')}}▲</option>
 			<option :value="JSON.stringify({value: 'author', direction: 'desc'})">{{$t('Name')}}▼</option>
-			<option :value="JSON.stringify({value: 'total_payout_value', direction: 'asc'})">{{$t('Payout')}}▲</option>
-			<option :value="JSON.stringify({value: 'total_payout_value', direction: 'desc'})">{{$t('Payout')}}▼</option>
+			<option :value="JSON.stringify({value: 'pending_payout_value', direction: 'asc'})">{{$t('Payout')}}▲</option>
+			<option :value="JSON.stringify({value: 'pending_payout_value', direction: 'desc'})">{{$t('Payout')}}▼</option>
 			<option :value="JSON.stringify({value: 'children', direction: 'asc'})">{{$t('Replies')}}▲</option>
 			<option :value="JSON.stringify({value: 'children', direction: 'desc'})">{{$t('Replies')}}▼</option>
 			<option :value="JSON.stringify({value: 'active_votes', direction: 'asc'})">{{$t('Votes')}}▲</option>
