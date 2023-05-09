@@ -142,10 +142,12 @@
 		box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
 	}
 	.main-user-info{
-		background-color: antiquewhite;
+		/* background-color: antiquewhite; */
+		background: linear-gradient(20deg,orange,transparent);
 	}
 	.main-payment-info{
-		background-color: lightcoral;
+		/* background-color: lightcoral; */
+		background: linear-gradient(180deg,lightcoral,coral);
 		color: white !important;
 	}
 </style>
