@@ -986,6 +986,8 @@ module.exports = {
   author_payout: 'Author Payout',
   voters_payout: 'Voters Payout',
   post_link: 'Link to Post',
+  hide_comment: 'Hide Comment Thread',
+  show_comment: 'Show Comment Thread',
   comment_link: 'Link to Comment',
   copy_link: 'Copy Link',
   copied_successfully: 'Copied Successfully!',

@@ -1,8 +1,10 @@
 <template>
-  <div class="comments mb-2" v-if="!commentDeleted">
+  <transition name="fade">
+  <div class="comments mb-2" v-if="!commentDeleted && !commentMinimized">
+
 	<div class="col-12 row" v-if="depth == 0">
 		<div class="col-md-9"></div>
-		<select v-model="currentSort" class="form-control col-md-3 sel-adj float-right" >
+		<select v-model="currentSort" class="form-control col-md-2 sel-adj float-right" >
 			<option value="">-- {{$t('Sort_By')}} --</option>
 			<option :value="JSON.stringify({value: 'author', direction: 'asc'})">{{$t('Name')}}▲</option>
 			<option :value="JSON.stringify({value: 'author', direction: 'desc'})">{{$t('Name')}}▼</option>
@@ -15,7 +17,12 @@
 			<option :value="JSON.stringify({value: 'created', direction: 'asc'})">{{$t('Date')}}▲</option>
 			<option :value="JSON.stringify({value: 'created', direction: 'desc'})">{{$t('Date')}}▼</option>
 		</select>
+		
+		<span class="p-2 col-md-1"><i class="fa-solid fa-circle-arrow-up text-brand" v-on:click="commentMinimized=!commentMinimized" :title="$t('hide_comment')" style="cursor: pointer"></i></span>
     </div>
+	<div v-else class="col-12 text-right">
+		<i class="fa-solid fa-circle-arrow-up text-brand" v-on:click="commentMinimized=!commentMinimized" :title="$t('hide_comment')" style="cursor: pointer"></i>
+	</div>
 	<div class="modal-body comment-info acti-shadow mb-2" v-if="depth > 0">
 		<div class="main-user-info pt-2">
 			<a :href="'/' + author" target="_blank">
@@ -64,7 +71,7 @@
 			<a href="#" @click.prevent="insertFullModSignature" class="btn btn-brand border reply-btn w-25" v-if="(this.user && this.moderators.find( mod => mod.name == this.user.account.name && mod.title == 'moderator'))">{{ $t('Full_Signature') }}</a>
 		  </div>
 		</transition>
-		<div class="modal-footer main-payment-info">
+		<div class="modal-footer main-payment-info p-2">
 			<div v-if="this.user && this.user.account.name == this.full_data.author"><a href="#" @click.prevent="editBoxOpen = !editBoxOpen" :title="$t('Edit_note')"><i class="fas fa-edit"></i></a></div>
 			<div v-if="commentDeletable()"><a href="#" @click.prevent="deleteComment" :title="$t('Delete_note')"><i class="fas fa-trash-alt"></i><i class="fas fa-spin fa-spinner" v-if="deleting"></i></a></div>
 			<div><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i class="fas fa-reply"></i></a></div>
@@ -166,6 +173,12 @@
 				:depth="depth + 1">
 	</Comments>
   </div>
+  <div class="comments mb-2" v-else-if="!commentDeleted && commentMinimized">
+	<div class="col-12 text-right">
+		<i class="fa-solid fa-circle-arrow-down text-brand" v-on:click="commentMinimized=!commentMinimized" :title="$t('show_comment')" style="cursor: pointer"></i>
+	</div>
+  </div>
+  </transition>
 </template>
 <script>
 
@@ -190,6 +203,7 @@
 			currentSort: JSON.stringify({value: 'created', direction: 'desc'}),
 			postUpvoted: false,
 			commentDeleted: false,
+			commentMinimized: false,
 			userRank: 0,
 			commentBoxOpen: false,
 			editBoxOpen: false,
@@ -893,6 +907,17 @@
   border-radius: 50%;
   float: left;
   border: solid 1px #ddd;
+}
+
+.arrow-icon {
+  height: 2.8em;
+  width: 2.8em;
+  display:block;
+  padding: 0.5em;
+  margin: 1em auto;
+  position: relative;
+  cursor: pointer;
+  border-radius: 4px;
 }
 
 /*
