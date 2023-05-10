@@ -18,10 +18,10 @@
 			<option :value="JSON.stringify({value: 'created', direction: 'desc'})">{{$t('Date')}}▼</option>
 		</select>
 		
-		<span class="p-2 col-md-1"><i class="fa-solid fa-circle-arrow-up text-brand" v-on:click="commentMinimized=!commentMinimized" :title="$t('hide_comment')" style="cursor: pointer"></i></span>
+		<span class="p-2 col-md-1"><i class="fa-solid fa-circle-minus text-brand" v-on:click="commentMinimized=!commentMinimized" :title="$t('hide_comment')" style="cursor: pointer"></i></span>
     </div>
 	<div v-else class="col-12 text-right">
-		<i class="fa-solid fa-circle-arrow-up text-brand" v-on:click="commentMinimized=!commentMinimized" :title="$t('hide_comment')" style="cursor: pointer"></i>
+		<i class="fa-solid fa-circle-minus text-brand" v-on:click="commentMinimized=!commentMinimized" :title="$t('hide_comment')" style="cursor: pointer"></i>
 	</div>
 	<div class="modal-body comment-info acti-shadow mb-2" v-if="depth > 0">
 		<div class="main-user-info pt-2">
@@ -175,7 +175,7 @@
   </div>
   <div class="comments mb-2" v-else-if="!commentDeleted && commentMinimized">
 	<div class="col-12 text-right">
-		<i class="fa-solid fa-circle-arrow-down text-brand" v-on:click="commentMinimized=!commentMinimized" :title="$t('show_comment')" style="cursor: pointer"></i>
+		<i class="fa-solid fa-circle-plus text-brand" v-on:click="commentMinimized=!commentMinimized" :title="$t('show_comment')" style="cursor: pointer"></i>
 	</div>
   </div>
   </transition>
