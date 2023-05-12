@@ -35,7 +35,7 @@
 		<div class="modal-body goog-ad-horiz-90"><adsbygoogle ad-slot="5716623705" /></div>
 		<div class="modal-footer main-payment-info">
 		  <div class="report-modal-prelim-info col-md-6">
-			<span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i class="fas fa-reply"></i></a></span>
+			<span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i class="text-white fas fa-reply"></i></a></span>
 			<span>
 				
 				  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 

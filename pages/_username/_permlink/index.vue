@@ -18,7 +18,7 @@
 			<i class="fas fa-reply text-brand"></i>&nbsp;{{$t('viewing_comment_note')}}<span class="user-avatar mr-1 float-right" :style="'background-image: url('+profImgUrl+'/u/' + report.parent_author + '/avatar)'"></span><a :href="'/'+report.parent_author">@{{ report.parent_author }}.</a>&nbsp;<a :href="buildParentLink">{{$t('view_parent_thread')}}</a>
 		  </div>
 		  
-		  <h4>{{ report.title }}</h4>
+		  <h2>{{ report.title }}</h2>
 		  <div class="main-user-info">
 			<h5 class="text-brand" >
 				<div class="user-avatar mid-avatar mr-1 mb-5"
@@ -36,9 +36,9 @@
 		<!--<div class="modal-body goog-ad-horiz-90"><adsbygoogle ad-slot="4921049809" /></div>-->
 		<div class="modal-footer col-md-12 main-payment-info">
 		  <div class="report-modal-prelim-info col-md-6">
-			<span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i class="fas fa-reply"></i></a></span>
+			<span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i class="text-white fas fa-reply"></i></a></span>
 			
-			<span>
+			<span class="ml-1">
 				  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 
 					 data-target="#voteModal" v-if="this.user && userVotedThisPost()==true">
 					<i class="far fa-thumbs-up"></i> {{getVoteCount }}

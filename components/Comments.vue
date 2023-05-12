@@ -72,9 +72,9 @@
 		  </div>
 		</transition>
 		<div class="modal-footer main-payment-info p-2">
-			<div v-if="this.user && this.user.account.name == this.full_data.author"><a href="#" @click.prevent="editBoxOpen = !editBoxOpen" :title="$t('Edit_note')"><i class="fas fa-edit"></i></a></div>
-			<div v-if="commentDeletable()"><a href="#" @click.prevent="deleteComment" :title="$t('Delete_note')"><i class="fas fa-trash-alt"></i><i class="fas fa-spin fa-spinner" v-if="deleting"></i></a></div>
-			<div><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i class="fas fa-reply"></i></a></div>
+			<div v-if="this.user && this.user.account.name == this.full_data.author"><a href="#" @click.prevent="editBoxOpen = !editBoxOpen" :title="$t('Edit_note')"><i class="fas fa-edit text-white"></i></a></div>
+			<div v-if="commentDeletable()"><a href="#" @click.prevent="deleteComment" :title="$t('Delete_note')"><i class="fas fa-trash-alt text-white"></i><i class="fas fa-spin fa-spinner" v-if="deleting"></i></a></div>
+			<div><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i class="fas fa-reply  text-white"></i></a></div>
 			<div>
 				
 			  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 

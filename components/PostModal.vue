@@ -24,7 +24,7 @@
 		  </div>
 		</div>
 		<div class="modal-header border-0 pb-0">
-          <h5 class="modal-title" id="exampleModalLabel">{{ post.title }}</h5>
+          <h2 class="modal-title" id="exampleModalLabel">{{ post.title }}</h2>
 		  <div class="text-right">
 				  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
@@ -52,8 +52,8 @@
 		<div class="modal-body goog-ad-horiz-90"><adsbygoogle ad-slot="5716623705" /></div>
 		<div class="main-payment-info modal-footer">
 		  <div class="col-md-6">
-			<span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i class="fas fa-reply"></i></a></span>
-			<span>
+			<span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i class="text-white fas fa-reply"></i></a></span>
+			<span class="ml-2">
 			
 			  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 
 				 data-target="#voteModal" v-if="this.$parent.user && userVotedThisPost()==true">
