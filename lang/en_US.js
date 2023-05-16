@@ -991,6 +991,7 @@ module.exports = {
   comment_link: 'Link to Comment',
   copy_link: 'Copy Link',
   copied_successfully: 'Copied Successfully!',
+  hiveauth_instructions: 'Scan this QR code using your HiveAuth-compatible mobile app',
   error_copying: 'Error Copying!',
   benefic_3s: 'Kindly note that 3speak requires beneficaries which cannot be removed from the beneficiary list above, in total amounting to 11% of beneficiary value',
   new_video_placeholder: 'Upload New Video',

@@ -401,7 +401,9 @@ module.exports = {
 		config.node = {
             fs: 'empty'
         }
-    }
+    },
+	//fixes issue with hive-auth-wrapper plugin integration
+	transpile: ['hive-auth-wrapper']
 	
   }
 }

@@ -10,13 +10,28 @@
 			<div class="form-group">
 			
 				<div class="row form-control-lg">
-				<input type="text" id="username" name="username" :placeholder="$t('Username')" ref="username" class="form-control m-1 col-md-6 acti-shadow">
-				<button v-on:click="loginKeychain" class="btn btn-brand keychain-btn login-stdd-btn m-1"></button>
+					<input type="text" id="username" name="username" :placeholder="$t('Username')" ref="username" class="form-control m-1 col-md-6 acti-shadow">
+					<button v-on:click="loginKeychain" class="btn btn-brand keychain-btn login-stdd-btn m-1"></button>
+					
+					
 				</div>
 				
 				<div class="row form-control-lg">
+					<div class="m-1 col-md-6"/>
+					<button v-on:click="loginHiveauth" class="btn hiveauth-btn acti-shadow login-stdd-btn m-1"></button>
+				</div>
+				<transition name="fade">
+					<div v-if="hiveauth_wait">
+						<div id="hiveauth-instructions">{{ $t('hiveauth_instructions')}}</div>
+						<a href="#" id="hiveauth-qr-link" ref="hiveauth-qr-link" target="_blank" rel="noreferrer noopener">
+							<canvas id="hiveauth-qr" ref="hiveauth-qr" />
+						</a>
+					</div>
+				</transition>
+                				
+				<div class="row form-control-lg">
 					<input type="password" id="ppkey" name="ppkey" ref="ppkey" :placeholder="$t('Ppkey')"  class="form-control m-1 col-md-6 acti-shadow">
-					<button v-on:click="proceedLogin" class="btn btn-brand login-stdd-btn m-1">{{ $t('Login') }}<i class="fas fa-spin fa-spinner text-white" v-if="login_in_progress"></i></button>
+					<button v-on:click="proceedLogin" class="btn btn-brand login-stdd-btn m-1"><b>{{ $t('Login') }}</b><i class="fas fa-spin fa-spinner text-white" v-if="login_in_progress"></i></button>
 				</div>
 				
 				<span class="row form-control-lg ml-0">
@@ -74,6 +89,21 @@
 
   import Vue from 'vue'
   Vue.use(VueReCaptcha, { siteKey: process.env.captchaV3Key })
+  
+  //Hive auth services
+  import HAS from 'hive-auth-wrapper';
+  
+  //QR display for hive auth
+  import QRious from 'qrious';
+  
+  //to validates keys for hive
+  import { PublicKey, Signature, hash } from '@hiveio/hive-js/lib/auth/ecc';
+
+  /*import HasClient from 'hive-auth-client';
+  const client = new HasClient('hive-auth.arcange.eu', '', true);
+  client.addEventHandler('ConnectionSuccess', connectedHAS);*/
+
+
 	
   export default {
 	head () {
@@ -111,6 +141,10 @@
 		keep_loggedin_val: false,
 		keychain: {},
 		keychain_available: false,
+		hiveauth_wait: false,
+		hiveauth_key: undefined,
+		hiveauth_token: undefined,
+		hiveauth_expire: undefined,
 	  }
 	},
     computed: {
@@ -158,6 +192,24 @@
 	  },
 	  onExpiredCaptcha () {
 		this.captchaValid = false;
+	  },
+	  setHiveauthLoginStatus (json){
+		
+		let acct_data = json.HIVE;
+		
+		let userSC = new Object();
+		userSC.account = acct_data;
+		//append proper login data for SC, while making sure this is recognized as a normal login
+		this.is_logged_in = true;
+		this.$store.commit('setStdLoginUser', true);
+		localStorage.setItem('acti_login_method', 'hiveauth');
+		localStorage.setItem('access_token', this.hiveauth_token);
+		localStorage.setItem('expires', this.hiveauth_expire);
+		localStorage.setItem('key', this.hiveauth_key);
+		localStorage.setItem('std_login', true)
+		localStorage.setItem('std_login_name', userSC.account.name)
+		this.$store.commit('steemconnect/login', userSC);
+		this.$router.push('/');
 	  },
 	  setKeychainLoginStatus (json){
 		console.log('keychain login');
@@ -226,6 +278,135 @@
 			this.error_msg = this.$t('login_error');
 			return;
 		}
+	  },
+	  verifyHiveauth (challenge, data){
+			// Validate signature against account public key
+		console.log(challenge);
+		console.log(data);
+		const sig = Signature.fromHex(data.challenge);
+		const buf = hash.sha256(challenge, null, 0);
+		return sig.verifyHash(buf, PublicKey.fromString(data.pubkey));
+	  },
+	  async loginHiveauth (){
+		if (this.$refs["username"].value == ''){
+			this.error_proceeding = true;
+			this.error_msg = this.$t('login_error');
+			return;
+		}
+		let account = this.$refs["username"].value;
+		const APP_META = {
+			name:"actifit", 
+			description:"Actifit - Rewarding Your EveryDay Activity", 
+			icon:"https://actifit.io/img/actifit_logo.png"
+		}
+		// Create an authentication object
+		const auth = {
+		  username: account,
+		  expire: undefined,
+		  key: undefined,
+		}
+		// Retrieving connection status
+		const status = HAS.status()
+		console.log(status)
+		let challenge_data = undefined
+		
+		challenge_data = {
+			key_type: "posting",
+			challenge: JSON.stringify({
+				login: account,
+				ts: Date.now(),
+			})
+		}
+		let mainRef = this;
+		HAS.authenticate(auth, APP_META, challenge_data, (message) => {
+			console.log(message)    // process auth_wait message
+			const {
+				data, uuid, authData,
+			} = message;
+			console.log(data);
+			if (message.cmd && message.cmd === 'auth_wait'){
+				this.hiveauth_wait = true;
+				this.$nextTick(() => {
+					//this.timeLeft = timeLeft;
+					const authPayload = {
+						uuid: message.uuid,
+						account: account,
+						key: message.key,
+						host: 'wss://hive-auth.arcange.eu'
+					};
+					this.hiveauth_key = message.key;
+					//authentication url
+					const authUri = `has://auth_req/${btoa(JSON.stringify(authPayload))}`;
+
+					const qrLinkElement = mainRef.$refs['hiveauth-qr-link'];
+					const qrElement = mainRef.$refs['hiveauth-qr'];
+					const QR = new QRious({
+							element: qrElement,
+							background: 'white',
+							backgroundAlpha: 0.8,
+							foreground: 'black',
+							size: 200,
+						});
+					QR.value = authUri;
+					qrLinkElement.href = authUri;
+				});
+				
+			}
+		}).then(message => {
+			//resolve(res)
+			console.log(message);
+			if (message.cmd && message.cmd === 'auth_ack'){
+				//approved, verify pub key
+				const {
+					data, uuid, authData,
+				} = message;
+				//console.log(data);
+				//console.log(uuid);
+				const { expire, token, challenge: challengeResponse } = data;
+				/*const {
+					data, uuid, authData: { token, key, expire },
+				} = message;
+				const { challenge: challengeResponse } = data;*/
+				console.log(data)
+				//console.log(challengeResponse);
+				const success = this.verifyHiveauth(challenge_data.challenge, data.challenge);
+				//const success = this.verifyHiveauth(challenge, challengeResponse);
+				console.log(success);
+				this.hiveauth_wait = false;
+				this.hiveauth_expire = expire;
+				this.hiveauth_token = token;
+				if (success){
+					//hide captcha as well
+					const recaptcha = this.$recaptchaInstance
+					
+					// Hide reCAPTCHA badge:
+					recaptcha.hideBadge();
+					
+					
+					fetch(process.env.actiAppUrl+'getAccountData?user='+account+'&bchain=HIVE').then(
+					res => {
+						res.json().then(json => 
+							{
+								this.setHiveauthLoginStatus (json)
+							}
+						).catch(e => reject(e))
+					}).catch(e => reject(e))
+				}else{
+					//display error message
+					this.error_proceeding = true;
+					this.login_in_progress = false;
+					this.error_msg = this.$t('login_error');
+					return;
+				}
+				
+			}
+		}) 
+		.catch(err => {
+			console.error(err)
+			this.hiveauth_wait = false;
+		})
+		
+		
 	  },
 	  async verifyKeychain () {
 		return new Promise((resolve) => {
@@ -388,5 +569,17 @@
 }
 .keychain-btn{
 	background: url(/img/keychain.png) round !important;
+}
+.hiveauth-btn{
+	/* background: url(/img/hiveauth2.png) round !important; */
+	background-size: contain;
+    background-repeat: no-repeat;
+    background-color: black;
+    background-position: center;
+	background-origin: content-box;
+    background-image: url(/img/hiveauth3.png);
+}
+.hiveauth-btn:hover, .keychain-btn:hover{
+	background-color: darkred;
 }
 </style>
