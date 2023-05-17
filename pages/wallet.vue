@@ -138,15 +138,54 @@
 				<span v-if="showPowerBreakdown"><li>{{this.renderSteemPower(1)}} ({{ $t('Owned_SP') }})</li><li> + {{this.renderSteemPower(3)}} ({{ $t('Received_SP') }})</li><li> - {{this.renderSteemPower(4)}} ({{ $t('Delegated_SP') }})</li><li> - {{this.renderSteemPower(5)}} ({{ $t('Powering_Down_Amount') }})</li></span>
 				
 				</div>
-				<div class="col-lg-1 col-2 text-right">{{ this.renderSavings(this.cur_bchain) }}</div>
+				<div class="col-lg-1 col-2 text-right">
+					{{ this.renderSavings(this.cur_bchain) }}
+					
+					<span v-if="hasPendingHiveSavingsWithdrawals() == true">
+						<span :title="$t('hive_withdraw_progress')"><br/>
+							<i class="far fa-solid fa-hourglass text-brand"></i>
+							
+							<i v-if="!showHiveWithdrawalDetails" class="fas fa-solid fa-arrow-circle-down text-brand" v-on:click="showHiveWithdrawalDetails=!showHiveWithdrawalDetails" :title="$t('show_pending_withdrawals')"></i>
+							<i v-else class="fas fa-solid fa-arrow-circle-up text-brand" v-on:click="showHiveWithdrawalDetails=!showHiveWithdrawalDetails" :title="$t('show_pending_withdrawals')"></i>
+						</span>
+					</span>
+					
+					
+				</div>
 				<div class="col-1 text-right break-val">${{ this.hiveValueUSD }}</div>
 				<div class="col-lg-2 col-1 token_actions">
 					<span class="btn btn-brand p-1" v-on:click="powerUpFunds"><i class="fas fa-arrow-circle-up p-1" :title="$t('POWERUP_ACTION_TEXT')" ></i></span>
 					<span class="btn btn-brand p-1" v-on:click="powerDownFunds"><i class="fas fa-arrow-circle-down " :title="$t('POWERDOWN_ACTION_TEXT')" ></i></span>
 					<span class="btn btn-brand p-1" v-on:click="transferFunds(cur_bchain)"><i class="fas fa-share-square " :title="$t('TRANSFER_FUNDS_ACTION_TEXT')" ></i></span>
 					<span class="btn btn-brand p-1" v-on:click="delegateFunds"><i class="fas fa-donate" :title="$t('DELEGATE_ACTION_TEXT')"></i></span>
+					<span class="btn btn-brand p-1" v-on:click="transferToSavings(cur_bchain)" :title="$t('TRANSFER_FUNDS_SAVINGS')"><i class="fas fa-piggy-bank"></i></span>
+					<span class="btn btn-brand p-1" v-on:click="transferFromSavings(cur_bchain)" :title="$t('REMOVE_FUNDS_SAVINGS')"><i class="fas fa-box-open"></i></span>
 				</div>
 			</div>
+			
+			<!-- special row for HBD savings -->
+			<transition name="fade">
+			<div class="token-entry row main-token" v-if="showHiveWithdrawalDetails">
+				<div class="col-6"></div>
+				<div class="col-6">
+					
+						<span>
+							<div class="col-12 row font-weight-bold"><div class="col-4">Amount </div><div class="col-4">Completion Date </div></div>
+							<div v-for="(entry, index) in pendingSavingsWithdrawals" :key="index" :entry="entry" v-if="entry.amount.includes('HIVE')" class="col-12 row"><div class="col-4">{{entry.amount}} </div><div class="col-4"> {{entry.complete}}</div><div class="col-4"><button class="btn btn-brand" v-on:click="cancelSavingsWithdrawal(entry.request_id)"><i class="fas fa-times-circle" :title="$t('cancel_savings_withdrawal')"></i></button></div>
+							</div>
+							<div class="row" v-if="!isKeychainLogin && isStdLogin">
+							  <label for="cancel-withdraw-act-key" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
+							  <input type="password" id="cancel-withdraw-act-key" name="cancel-withdraw-act-key" ref="cancel-withdraw-act-key" class="form-control-lg w-50 p-2">
+							</div>
+							<div class="text-brand text-center" v-if="error_proceeding">
+							  {{ this.error_msg}}
+							</div>
+						</span>
+				</div>
+			</div>
+			</transition>
+			
+			
 			
 			<div class="token-entry row main-token" v-if="cur_bchain != 'BLURT'">
 				<div class="col-2 text-left">
@@ -158,7 +197,17 @@
 				<div class="col-2"></div>
 				<div class="col-lg-1 col-2 text-right">
 					{{ this.renderSBDSavings(this.cur_bchain) }}
-					<span v-if="user.account.savings_withdraw_requests>0" :title="$t('hbd_withdraw_progress')"><br/><i class="far fa-solid fa-hourglass text-brand"></i></span>
+					
+					
+					<span v-if="hasPendingHBDSavingsWithdrawals() == true">
+						<span :title="$t('hbd_withdraw_progress')"><br/>
+							<i class="far fa-solid fa-hourglass text-brand"></i>
+							
+							<i v-if="!showHBDWithdrawalDetails" class="fas fa-solid fa-arrow-circle-down text-brand" v-on:click="showHBDWithdrawalDetails=!showHBDWithdrawalDetails" :title="$t('show_pending_withdrawals')"></i>
+							<i v-else class="fas fa-solid fa-arrow-circle-up text-brand" v-on:click="showHBDWithdrawalDetails=!showHBDWithdrawalDetails" :title="$t('show_pending_withdrawals')"></i>
+						</span>
+					</span>
+					
 				</div>
 				<div class="col-1 text-right break-val">${{ this.hbdValueUSD }}</div>
 				<div class="col-lg-2 col-1 token_actions">
@@ -168,7 +217,27 @@
 					
 				</div>
 			</div>
-			
+			<!-- special row for HBD savings -->
+			<transition name="fade">
+			<div class="token-entry row main-token" v-if="showHBDWithdrawalDetails">
+				<div class="col-6"></div>
+				<div class="col-6">
+					
+						<span>
+							<div class="col-12 row font-weight-bold"><div class="col-4">Amount </div><div class="col-4">Completion Date </div></div>
+							<div v-for="(entry, index) in pendingSavingsWithdrawals" :key="index" :entry="entry" v-if="entry.amount.includes('HBD')" class="col-12 row"><div class="col-4">{{entry.amount}} </div><div class="col-4"> {{entry.complete}}</div><div class="col-4"><button class="btn btn-brand" v-on:click="cancelSavingsWithdrawal(entry.request_id)"><i class="fas fa-times-circle" :title="$t('cancel_savings_withdrawal')"></i></button></div>
+							</div>
+							<div class="row" v-if="!isKeychainLogin && isStdLogin">
+							  <label for="cancel-withdraw-act-key" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
+							  <input type="password" id="cancel-withdraw-act-key" name="cancel-withdraw-act-key" ref="cancel-withdraw-act-key" class="form-control-lg w-50 p-2">
+							</div>
+							<div class="text-brand text-center" v-if="error_proceeding">
+							  {{ this.error_msg}}
+							</div>
+						</span>
+				</div>
+			</div>
+			</transition>
 			
 			<div class="token-entry row main-token">
 				<div class="col-2 text-left"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo">AFIT</div>
@@ -1461,6 +1530,7 @@
 		afitBSCPrice: 0.01,
 		afitxBSCPrice: 1,
 		pendingTokenSwap: '',
+		pendingSavingsWithdrawals: [],
 		transfer_amount: 1,
 		min_tokens_required: 10000,
 		pendingTokenSwapTransCount: 0,
@@ -1522,6 +1592,8 @@
 		transferProcess: false,
 		cur_bchain: 'HIVE',
 		showPowerBreakdown: false,
+		showHBDWithdrawalDetails: false,
+		showHiveWithdrawalDetails: false,
 		delegateProcess: false,
 		loadingDeleg: false,
 		rc_data: {},
@@ -2032,6 +2104,16 @@
 			  position: 'top center'
 			})
 		}
+	  },
+	  async getPendingSavingsWithdrawals() {
+		this.pendingSavingsWithdrawals = await hive.api.getSavingsWithdrawFromAsync(this.user.account.name);
+		console.log(this.pendingSavingsWithdrawals);
+	  },
+	  hasPendingHBDSavingsWithdrawals(){
+		return this.pendingSavingsWithdrawals.some(obj => obj.hasOwnProperty('amount') && obj.amount.includes('HBD'));
+	  },
+	  hasPendingHiveSavingsWithdrawals(){
+		return this.pendingSavingsWithdrawals.some(obj => obj.hasOwnProperty('amount') && obj.amount.includes('HIVE'));
 	  },
 	  renderTransAmount (nofrmt) {
 		if (this.transferType == 'SBD' || this.transferType == 'HBD'){
@@ -2651,6 +2733,8 @@
 			res => {res.json().then(json => this.setUserSettings (json)).catch(e => console.log(e))
 		  }).catch(e => console.log(e))
 		  
+		  //grab user pending withdrawals
+		  this.getPendingSavingsWithdrawals();
 		  
 		  //let's grab the number of pending token swap transactions to see if we can add more
 		  /*fetch(process.env.actiAppUrl+'getPendingTokenSwapTransCount').then(
@@ -3305,6 +3389,67 @@
 		this.curTokenAction = 0;
 		this.scrollAction();
 	  },
+	  async cancelSavingsWithdrawal (request_id){
+		if (!this.isKeychainLogin && this.isStdLogin){
+			//check for active key
+			if (this.$refs["cancel-withdraw-act-key"].value == ''){
+			  this.error_proceeding = true;
+			  this.error_msg = this.$t('all_fields_required');
+			  return;
+			}
+			let confirmPopup = confirm(this.$t('confirm_cancel_withdraw'));
+			if (!confirmPopup){
+				return;
+			}
+		}
+		
+		this.error_proceeding = false;
+		this.error_msg = '';
+		if (!localStorage.getItem('std_login')){
+			
+			//https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
+			var link = this.$steemconnect.sign('transfer', {
+			  from: this.user.account.name,
+			  to: this.$refs["transfer-recipient"].value,
+			  amount: this.$refs["transfer-amount"].value + ' ' + this.transferType,
+			  memo: this.$refs["transfer-memo"].value,
+			  auto_return: true,
+			}, window.location.origin + '/wallet?op=transfer&status=success');
+			//launch the SC window
+			window.open(link);
+		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+			console.log(this.transferType);
+			console.log('>>pop')
+			/*return new Promise((resolve) => {
+				window.hive_keychain.requestTransfer(this.user.account.name, this.$refs["transfer-recipient"].value, parseFloat(this.$refs["transfer-amount"].value).toFixed(3),this.$refs["transfer-memo"].value,this.transferType,(response) => {
+				  console.log(response);
+				  this.confirmCompletion('transfer', this.$refs["transfer-amount"].value, response)
+				}, true);
+			});	*/
+			let opname = 'cancel_transfer_from_savings';
+			let	params = {
+					"from": this.user.account.name,
+					"request_id": request_id
+				};
+			let res = await this.processTrxFunc(opname, params, true);
+			
+			if (res.success){
+				this.confirmCompletion('cancel-savings-withdraw', '', res)
+			}
+			
+		}else{
+			this.transferProcess = true;
+			let chainLnk = await this.setProperNode ();
+			
+			console.log(this.transferType)
+			//return;
+			//transferToVesting(wif, from, to, amount)
+			let res = await chainLnk.broadcast.cancelTransferFromSavingsAsync(this.$refs["cancel-withdraw-act-key"].value, this.user.account.name, //from
+			request_id
+			).then(
+				res => this.confirmCompletion('cancel-savings-withdraw', this.$refs["transfer-amount"].value, res)).catch(err=>console.log(err));
+		}
+	  },
 	  async proceedRemoveSavings () {
 		//console.log(this.user.account);
 		//function handles sending to savings
@@ -3873,6 +4018,9 @@
 			}
 			if (type=='transfer-verify'){
 				note = 'Transfer completed. Verifying transaction.'
+			}
+			if (type=='cancel-savings-withdraw'){
+				note = 'Savings withdrawal cancelled.'
 			}
 			if (type=='transfer-bsc'){
 				//note = 'Transfer completed. Your AFIT will appear on your BSC wallet shortly.'
