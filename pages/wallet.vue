@@ -156,10 +156,16 @@
 				<div class="col-2">{{ this.cur_bchain }}</div>
 				<div class="col-2 text-right">{{ this.renderSBDBalance(this.cur_bchain) }}</div>
 				<div class="col-2"></div>
-				<div class="col-lg-1 col-2 text-right">{{ this.renderSBDSavings(this.cur_bchain) }}</div>
+				<div class="col-lg-1 col-2 text-right">
+					{{ this.renderSBDSavings(this.cur_bchain) }}
+					<span v-if="user.account.savings_withdraw_requests>0" :title="$t('hbd_withdraw_progress')"><br/><i class="far fa-solid fa-hourglass text-brand"></i></span>
+				</div>
 				<div class="col-1 text-right break-val">${{ this.hbdValueUSD }}</div>
 				<div class="col-lg-2 col-1 token_actions">
 					<span class="btn btn-brand p-1" v-on:click="transferFunds('HBD')"><i class="fas fa-share-square " :title="$t('TRANSFER_FUNDS_ACTION_TEXT')" ></i></span>
+					<span class="btn btn-brand p-1" v-on:click="transferToSavings('HBD')" :title="$t('TRANSFER_FUNDS_SAVINGS')"><i class="fas fa-piggy-bank"></i></span>
+					<span class="btn btn-brand p-1" v-on:click="transferFromSavings('HBD')" :title="$t('REMOVE_FUNDS_SAVINGS')"><i class="fas fa-box-open"></i></span>
+					
 				</div>
 			</div>
 			
@@ -372,7 +378,7 @@
 					<h3 class="pro-name">{{ $t('TRANSFER_FUNDS_ACTION_TEXT') }}</h3>
 					<div class="row">
 					  <label for="transfer-recipient" class="w-25 p-2">{{ $t('To') }} *</label>
-					  <input type="text" id="transfer-recipient" name="transfer-recipient" ref="transfer-recipient" class="form-control-lg w-50 p-2">
+					  <input type="text" id="transfer-recipient" name="transfer-recipient" ref="transfer-recipient" class="form-control-lg w-50 p-2" >
 					</div>
 					<div class="row">
 						<label for="transfer-type" class="w-25 p-2">{{ $t('Type') }} *</label>
@@ -510,6 +516,112 @@
 					</div>
 				  </div>
 				</transition>
+				
+				<transition name="fade">
+				  <div v-if="fundActivityMode === TRANSFER_FUNDS_SAVINGS" class="text-center grid col-md-12">
+					<h3 class="pro-name">{{ $t('TRANSFER_FUNDS_SAVINGS') }}</h3>
+					<div class="row">
+					  <label for="transfer-recipient" class="w-25 p-2">{{ $t('To') }} *</label>
+					  <input type="text" id="transfer-recipient" name="transfer-recipient" ref="transfer-recipient" class="form-control-lg w-50 p-2" :value="user.account.name">
+					</div>
+					<div class="row">
+						<label for="transfer-type" class="w-25 p-2">{{ $t('Type') }} *</label>
+						<select @change="transferTypeChange" id="transfer-type" name="transfer-type" ref="transfer-type" text="Choose Type" class="form-control-lg w-50 p-2">
+						  <option value="HIVE" v-if="cur_bchain!='BLURT'" :selected="transferType=='HIVE'">
+							<span v-if="cur_bchain=='STEEM'">{{ $t('STEEM') }}</span> 
+							<span v-if="cur_bchain=='HIVE'">{{ $t('HIVE') }}</span>
+						  </option>
+						  <option value="HBD" v-if="cur_bchain!='BLURT'" :selected="transferType=='HBD'">
+							<span v-if="cur_bchain=='STEEM'">{{ $t('SBD') }}</span>
+							<span v-if="cur_bchain=='HIVE'">{{ $t('HBD') }}</span>
+						  </option>
+						  <option value="BLURT" v-if="cur_bchain=='BLURT'" :selected="transferType=='BLURT'">{{ $t('BLURT') }}</option>
+						</select>
+					</div>
+					<div class="row">
+					  <label for="transfer-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
+					  <input type="number" id="transfer-amount" name="transfer-amount" ref="transfer-amount" class="form-control-lg w-50 p-2">
+					  <span class="w-25 p-1 text-left text-brand" v-on:click="fillTransAmount()" :title="$t('select_full_balance')"><img src="/img/HIVE.png" class="mr-1 mini-token-logo" ><u>{{ this.renderTransAmount() }}</u></span>
+					</div>
+					<div class="row">
+					  <label for="transfer-memo" class="w-25 p-2">{{ $t('Memo') }}</label>
+					  <input type="text" id="transfer-memo" name="transfer-memo" ref="transfer-memo" class="form-control-lg w-50 p-2">				
+					</div>
+					<div class="row" v-if="!isKeychainLogin && isStdLogin">
+						  <label for="p-ac-key-trans" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
+						  <input type="password" id="p-ac-key-trans" name="p-ac-key-trans" ref="p-ac-key-trans" class="form-control-lg w-50 p-2">
+					</div>
+					<div class="row" v-if="!isKeychainLogin && isStdLogin">
+						<div class="text-center small p-2 w-25"></div>
+						<div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your <b>PRIVATE ACTIVE</b> key.*</div>
+					</div>
+					<div class="text-center small p-2">
+					  <i>{{ $t('wallet_memo_notice') }}</i>
+					</div>
+					<div class="text-brand text-center" v-if="error_proceeding">
+					  {{ this.error_msg}}
+					</div>
+					<div class="row">
+					  <div class="w-25"></div>
+					  <button v-on:click="proceedTransferSavings" class="btn btn-brand btn-lg w-50 border">{{ $t('Send') }}</button>
+					</div>
+					<div v-if="transferProcess">
+					  <i class="fas fa-spin fa-spinner" ></i>
+					</div>
+				  </div>
+				</transition>
+				
+				<transition name="fade">
+				  <div v-if="fundActivityMode === REMOVE_FUNDS_SAVINGS" class="text-center grid col-md-12">
+					<h3 class="pro-name">{{ $t('REMOVE_FUNDS_SAVINGS') }}</h3>
+					<h5>{{$t('Withdraw_savings_notice')}}</h5>
+					<div class="row">
+						<label for="transfer-type" class="w-25 p-2">{{ $t('Type') }} *</label>
+						<select @change="transferTypeChange" id="transfer-type" name="transfer-type" ref="transfer-type" text="Choose Type" class="form-control-lg w-50 p-2">
+						  <option value="HIVE" v-if="cur_bchain!='BLURT'" :selected="transferType=='HIVE'">
+							<span v-if="cur_bchain=='STEEM'">{{ $t('STEEM') }}</span> 
+							<span v-if="cur_bchain=='HIVE'">{{ $t('HIVE') }}</span>
+						  </option>
+						  <option value="HBD" v-if="cur_bchain!='BLURT'" :selected="transferType=='HBD'">
+							<span v-if="cur_bchain=='STEEM'">{{ $t('SBD') }}</span>
+							<span v-if="cur_bchain=='HIVE'">{{ $t('HBD') }}</span>
+						  </option>
+						  <option value="BLURT" v-if="cur_bchain=='BLURT'" :selected="transferType=='BLURT'">{{ $t('BLURT') }}</option>
+						</select>
+					</div>
+					<div class="row">
+					  <label for="transfer-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
+					  <input type="number" id="transfer-amount" name="transfer-amount" ref="transfer-amount" class="form-control-lg w-50 p-2">
+					  <span class="w-25 p-1 text-left text-brand" v-on:click="fillSavingsAmount()" :title="$t('select_full_balance')"><img src="/img/HIVE.png" class="mr-1 mini-token-logo" ><u>{{ this.renderSavingsAmount() }}</u></span>
+					</div>
+					<div class="row">
+					  <label for="transfer-memo" class="w-25 p-2">{{ $t('Memo') }}</label>
+					  <input type="text" id="transfer-memo" name="transfer-memo" ref="transfer-memo" class="form-control-lg w-50 p-2">				
+					</div>
+					<div class="row" v-if="!isKeychainLogin && isStdLogin">
+						  <label for="p-ac-key-trans" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
+						  <input type="password" id="p-ac-key-trans" name="p-ac-key-trans" ref="p-ac-key-trans" class="form-control-lg w-50 p-2">
+					</div>
+					<div class="row" v-if="!isKeychainLogin && isStdLogin">
+						<div class="text-center small p-2 w-25"></div>
+						<div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your <b>PRIVATE ACTIVE</b> key.*</div>
+					</div>
+					<div class="text-center small p-2">
+					  <i>{{ $t('wallet_memo_notice') }}</i>
+					</div>
+					<div class="text-brand text-center" v-if="error_proceeding">
+					  {{ this.error_msg}}
+					</div>
+					<div class="row">
+					  <div class="w-25"></div>
+					  <button v-on:click="proceedRemoveSavings" class="btn btn-brand btn-lg w-50 border">{{ $t('Send') }}</button>
+					</div>
+					<div v-if="transferProcess">
+					  <i class="fas fa-spin fa-spinner" ></i>
+					</div>
+				  </div>
+				</transition>
+				
 				<transition name="fade">
 				  <div v-if="fundActivityMode == DELEGATE_FUNDS" class="text-center grid col-12">
 					<h3 class="pro-name">{{ $t('DELEGATE_ACTION_TEXT') }} {{ $t('POWER') }}</h3>
@@ -1285,6 +1397,8 @@
 		TRANSFER_BSC: 10,
 		SHOW_CLAIMABLE_REW: 11,
 		showBSCDetails: 12,
+		TRANSFER_FUNDS_SAVINGS: 13,
+		REMOVE_FUNDS_SAVINGS: 14,
 		afitTokenAddress: '',
 		afitxTokenAddress: '',
 		afitBNBLPTokenAddress: '',
@@ -1953,6 +2067,24 @@
 	  },
 	  fillTransAmount (){
 		this.$refs['transfer-amount'].value = this.renderTransAmount('1').split(' ')[0];
+	  },
+	  fillSavingsAmount () {
+		if (this.transferType == this.cur_bchain){
+			//HIVE CASE
+			this.$refs['transfer-amount'].value = this.renderSavings(this.cur_bchain, 1).split(' ')[0];
+		}else{
+			this.$refs['transfer-amount'].value = this.renderSBDSavings(this.cur_bchain, 1).split(' ')[0];
+		}
+		console.log(this.renderSBDSavings(this.cur_bchain, 1))
+		console.log(this.renderSavings(this.cur_bchain, 1))
+	  },
+	  renderSavingsAmount () {
+		if (this.transferType == this.cur_bchain){
+			//HIVE CASE
+			return this.renderSavings(this.cur_bchain);
+		}else{
+			return this.renderSBDSavings(this.cur_bchain);
+		}
 	  },
 	  resetTransAmount () {
 		if (this.$refs['transfer-amount']){
@@ -3079,6 +3211,20 @@
 				res => ).catch(err=>console.log(err));*/
 		}
 	  },
+	  transferToSavings (cur) {
+		this.fundActivityMode = this.TRANSFER_FUNDS_SAVINGS;
+		this.transferType = cur;
+		this.afitActivityMode = 0;
+		this.curTokenAction = 0;
+		this.scrollAction();
+	  },
+	  transferFromSavings (cur){
+		this.fundActivityMode = this.REMOVE_FUNDS_SAVINGS;
+		this.transferType = cur;
+		this.afitActivityMode = 0;
+		this.curTokenAction = 0;
+		this.scrollAction();
+	  },
 	  transferFunds (cur) {
 		//function handles opening/closing transfer section
 		
@@ -3159,6 +3305,166 @@
 		this.curTokenAction = 0;
 		this.scrollAction();
 	  },
+	  async proceedRemoveSavings () {
+		//console.log(this.user.account);
+		//function handles sending to savings
+		if (!this.isKeychainLogin && this.isStdLogin){
+			let confirmPopup = confirm(this.$t('confirm_transfer'));
+			if (!confirmPopup){
+				return;
+			}
+		}
+		
+		this.error_proceeding = false;
+		this.error_msg = '';
+		//ensure we have proper values
+		if (this.$refs["transfer-amount"].value.trim() == ''){
+		  this.error_proceeding = true;
+		  this.error_msg = this.$t('all_fields_required');
+		  return;
+		}
+		if (isNaN(this.$refs["transfer-amount"].value.trim()) || this.$refs["transfer-amount"].value == 0){
+		  this.error_proceeding = true;
+		  this.error_msg = this.$t('amount_positive_int');
+		  return;
+		}
+		
+		if (!this.isKeychainLogin && this.isStdLogin){
+			if (this.$refs["p-ac-key-trans"].value == ''){
+			  this.error_proceeding = true;
+			  this.error_msg = this.$t('all_fields_required');
+			  return;
+			}
+		}
+		
+		if (!localStorage.getItem('std_login')){
+			
+			//https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
+			var link = this.$steemconnect.sign('transfer', {
+			  from: this.user.account.name,
+			  to: this.$refs["transfer-recipient"].value,
+			  amount: this.$refs["transfer-amount"].value + ' ' + this.transferType,
+			  memo: this.$refs["transfer-memo"].value,
+			  auto_return: true,
+			}, window.location.origin + '/wallet?op=transfer&status=success');
+			//launch the SC window
+			window.open(link);
+		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+			console.log(this.transferType);
+			console.log('>>pop')
+			/*return new Promise((resolve) => {
+				window.hive_keychain.requestTransfer(this.user.account.name, this.$refs["transfer-recipient"].value, parseFloat(this.$refs["transfer-amount"].value).toFixed(3),this.$refs["transfer-memo"].value,this.transferType,(response) => {
+				  console.log(response);
+				  this.confirmCompletion('transfer', this.$refs["transfer-amount"].value, response)
+				}, true);
+			});	*/
+			let opname = 'transfer_from_savings';
+			let	params = {
+					"from": this.user.account.name,
+					"to": this.user.account.name,
+					"request_id": Math.floor(Date.now() / 1000),//timestamp
+					"amount": parseFloat(this.$refs["transfer-amount"].value).toFixed(3)+' '+this.transferType,
+					"memo": this.$refs["transfer-memo"].value
+				};
+			let res = await this.processTrxFunc(opname, params, true);
+			
+			if (res.success){
+				this.confirmCompletion('transfer', this.$refs["transfer-amount"].value, res)
+			}
+			
+		}else{
+			this.transferProcess = true;
+			let chainLnk = await this.setProperNode ();
+			
+			console.log(this.transferType)
+			//return;
+			//transferToVesting(wif, from, to, amount)
+			let res = await chainLnk.broadcast.transferFromSavingsAsync(this.$refs["p-ac-key-trans"].value, this.user.account.name, //from
+			Math.floor(Date.now() / 1000),//timestamp
+			this.user.account.name, 
+			parseFloat(this.$refs["transfer-amount"].value).toFixed(3) + ' ' + this.transferType, 
+			this.$refs["transfer-memo"].value).then(
+				res => this.confirmCompletion('transfer', this.$refs["transfer-amount"].value, res)).catch(err=>console.log(err));
+		}
+	  },
+	  async proceedTransferSavings () {
+		//function handles sending to savings
+		if (!this.isKeychainLogin && this.isStdLogin){
+			let confirmPopup = confirm(this.$t('confirm_transfer'));
+			if (!confirmPopup){
+				return;
+			}
+		}
+		
+		this.error_proceeding = false;
+		this.error_msg = '';
+		//ensure we have proper values
+		if (this.$refs["transfer-recipient"].value.trim() == '' ||
+			this.$refs["transfer-amount"].value.trim() == ''){
+		  this.error_proceeding = true;
+		  this.error_msg = this.$t('all_fields_required');
+		  return;
+		}
+		if (isNaN(this.$refs["transfer-amount"].value.trim()) || this.$refs["transfer-amount"].value == 0){
+		  this.error_proceeding = true;
+		  this.error_msg = this.$t('amount_positive_int');
+		  return;
+		}
+		
+		if (!this.isKeychainLogin && this.isStdLogin){
+			if (this.$refs["p-ac-key-trans"].value == ''){
+			  this.error_proceeding = true;
+			  this.error_msg = this.$t('all_fields_required');
+			  return;
+			}
+		}
+		
+		if (!localStorage.getItem('std_login')){
+			
+			//https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
+			var link = this.$steemconnect.sign('transfer', {
+			  from: this.user.account.name,
+			  to: this.$refs["transfer-recipient"].value,
+			  amount: this.$refs["transfer-amount"].value + ' ' + this.transferType,
+			  memo: this.$refs["transfer-memo"].value,
+			  auto_return: true,
+			}, window.location.origin + '/wallet?op=transfer&status=success');
+			//launch the SC window
+			window.open(link);
+		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+			console.log(this.transferType);
+			console.log('>>pop')
+			/*return new Promise((resolve) => {
+				window.hive_keychain.requestTransfer(this.user.account.name, this.$refs["transfer-recipient"].value, parseFloat(this.$refs["transfer-amount"].value).toFixed(3),this.$refs["transfer-memo"].value,this.transferType,(response) => {
+				  console.log(response);
+				  this.confirmCompletion('transfer', this.$refs["transfer-amount"].value, response)
+				}, true);
+			});	*/
+			let opname = 'transfer_to_savings';
+			let	params = {
+					"from": this.user.account.name,
+					"to": this.$refs["transfer-recipient"].value,
+					"amount": parseFloat(this.$refs["transfer-amount"].value).toFixed(3)+' '+this.transferType,
+					"memo": this.$refs["transfer-memo"].value
+				};
+			let res = await this.processTrxFunc(opname, params, true);
+			
+			if (res.success){
+				this.confirmCompletion('transfer', this.$refs["transfer-amount"].value, res)
+			}
+			
+		}else{
+			this.transferProcess = true;
+			let chainLnk = await this.setProperNode ();
+			
+			console.log(this.transferType)
+			//return;
+			//transferToVesting(wif, from, to, amount)
+			let res = await chainLnk.broadcast.transferToSavingsAsync(this.$refs["p-ac-key-trans"].value, this.user.account.name, this.$refs["transfer-recipient"].value, parseFloat(this.$refs["transfer-amount"].value).toFixed(3) + ' ' + this.transferType, this.$refs["transfer-memo"].value).then(
+				res => this.confirmCompletion('transfer', this.$refs["transfer-amount"].value, res)).catch(err=>console.log(err));
+		}
+	  },
+	  
 	  async proceedTransfer () {
 		//function handles the actual processing of the transfer
 		
@@ -3858,7 +4164,7 @@
 			this.errorSettingPass = outcome.error;
 		}
 	  },
-	  async processTrxFunc(op_name, cstm_params){
+	  async processTrxFunc(op_name, cstm_params, active){
 		if (!localStorage.getItem('std_login')){
 		//if (!this.stdLogin){
 			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
@@ -3875,7 +4181,7 @@
 				window.hive_keychain.requestBroadcast(
 					this.user.account.name, 
 					[[op_name, cstm_params]], 
-					'Posting', (response) => {
+					active?'Active':'Posting', (response) => {
 					console.log(response);
 					//resolve(response);
 					resolve({success: response.success, txID: response.result.id})
