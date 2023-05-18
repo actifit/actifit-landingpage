@@ -430,21 +430,49 @@
 					this.deleteSuccess();
 				}
 			});
-			
-			/*[
-				  [
-					'account_witness_vote',
-					{
-					  account: 'npfedwards',
-					  witness: 'stoodkev',
-					  approve: true
+		}else if (localStorage.getItem('acti_login_method') == 'hiveauth'){	
+			return new Promise((resolve) => {
+			const auth = {
+				  username: this.user.account.name,
+				  token: localStorage.getItem('access_token'),//should be changed in V1 (current V0.8)
+				  expire: localStorage.getItem('expires'),
+				  key: localStorage.getItem('key')
+				}
+				console.log(auth);
+				this.$HAS.broadcast(auth, 'active', [[op_name, cstm_params]], (evt)=> {
+					console.log(evt)    // process sign_wait message
+					let msg = this.$t('verify_hiveauth_app');
+					this.$notify({
+					  group: 'warn',
+					  text: msg,
+					  duration: -1, //keep alive till clicked
+					  position: 'top center'
+					})
+				})
+				.then(response => {
+					console.log(response);
+					this.$notify({
+					  group: 'warn',
+					  clean: true
+					})
+					if (response.cmd && response.cmd === 'sign_ack'){
+						resolve({success: true, trx:{id: response.data}})
+						if (op_name == 'delete_comment'){
+							this.deleteSuccess();
+						}
+					}else if (response.cmd && response.cmd === 'sign_nack'){
+						resolve({success: false})
 					}
-				  ]
-				], 'Active', (response) => {
-				  console.log(response);
-				});*/
-
-
+				} ) // transaction approved and successfully broadcasted
+				.catch(err => {
+					this.$notify({
+					  group: 'warn',
+					  clean: true
+					})
+					console.log(err);
+					resolve({success: false})
+				} )
+			})
 		}else{
 			let operation = [ 
 			   [op_name, cstm_params]

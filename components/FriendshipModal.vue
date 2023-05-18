@@ -62,6 +62,7 @@
 	<client-only>
       <div>
         <notifications :group="'success'" :position="'bottom center'" :classes="'vue-notification success'" />
+		<notifications :group="'warn'" :position="'top center'" :classes="'vue-notification warn'" />
         <notifications :group="'error'" :position="'bottom center'" :classes="'vue-notification error'" />
       </div>
     </client-only>

@@ -48,6 +48,7 @@
 		<NotifyModal :modalTitle="$t('Actifit_Info')" :modalText="$t('VP_desc')"/>
 		<NotifyModal id="notifyModalRC" ref="notifyModalRC" :modalTitle="$t('Actifit_Info')" :modalText="$t('RC_desc')"/>
         <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
+		<notifications :group="'warn'" :position="'top center'" :classes="'vue-notification warn'" />
         <notifications :group="'error'" :position="'top center'" :classes="'vue-notification error'" />
       </div>
     </client-only>
