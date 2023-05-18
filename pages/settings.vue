@@ -485,6 +485,39 @@
 					resolve({success: response.success, txID: response.result.id})
 				});
 			});
+		}else if (localStorage.getItem('acti_login_method') == 'hiveauth'){	
+			return new Promise((resolve) => {
+				const auth = {
+				  username: this.user.account.name,
+				  token: localStorage.getItem('access_token'),//should be changed in V1 (current V0.8)
+				  expire: localStorage.getItem('expires'),
+				  key: localStorage.getItem('key')
+				}
+				console.log(auth);
+				this.$HAS.broadcast(auth, "posting", [[op_name, cstm_params]], (evt)=> {
+					console.log(evt)    // process sign_wait message
+					let msg = this.$t('verify_hiveauth_app');
+					this.$notify({
+					  group: 'error',
+					  text: msg,
+					  duration: -1, //keep alive till clicked
+					  position: 'top center'
+					})
+				})
+				.then(response => {
+					console.log(response);
+					this.$notify({
+					  group: 'error',
+					  clean: true
+					})
+					if (response.cmd && response.cmd === 'sign_ack'){
+						resolve({success: true, txID: response.data})
+					}else if (response.cmd && response.cmd === 'sign_nack'){
+						resolve({success: false})
+					}
+				} ) // transaction approved and successfully broadcasted
+				.catch(err => {console.log(err);resolve({success: false})} )
+			});
 		}else{
 			let operation = [ 
 			   [op_name, cstm_params]
@@ -601,7 +634,8 @@
 			this.subset['post_target_bchain'] = this.target_bchain;
 			this.subset['notifications_active'] = this.notif_active;
 			
-			if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
+			if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain)||
+				(localStorage.getItem('acti_login_method') == 'hiveauth')){
 				//in case of keychain login, broadcast to chain
 				//broadcast the transaction to Steem BC
 				let cstm_params = {
@@ -612,7 +646,7 @@
 				  };
 				
 				let res = await this.processTrxFunc('custom_json', cstm_params);
-				console.log('post keychain');
+				console.log('post call');
 				console.log(res);
 				
 				if (res.success){

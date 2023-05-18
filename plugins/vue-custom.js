@@ -1,10 +1,10 @@
 import Vue from 'vue'
 
-Vue.prototype.$myGlobalFunction = function(param1, param2) {
-  // Do something with the parameters
-  return /* the output of your function */;
-}
+//Hive auth services
+import HAS from 'hive-auth-wrapper';
+Vue.prototype.$HAS = HAS;
 
+//global function
 Vue.prototype.$getTimeDifference = function(dateParam) {
 	
   let localDate = new Date();

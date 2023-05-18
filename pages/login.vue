@@ -90,9 +90,6 @@
   import Vue from 'vue'
   Vue.use(VueReCaptcha, { siteKey: process.env.captchaV3Key })
   
-  //Hive auth services
-  import HAS from 'hive-auth-wrapper';
-  
   //QR display for hive auth
   import QRious from 'qrious';
   
@@ -293,6 +290,7 @@
 			this.error_msg = this.$t('login_error');
 			return;
 		}
+		this.login_in_progress = true;
 		let account = this.$refs["username"].value;
 		const APP_META = {
 			name:"actifit", 
@@ -306,7 +304,7 @@
 		  key: undefined,
 		}
 		// Retrieving connection status
-		const status = HAS.status()
+		const status = this.$HAS.status()
 		console.log(status)
 		let challenge_data = undefined
 		
@@ -318,7 +316,7 @@
 			})
 		}
 		let mainRef = this;
-		HAS.authenticate(auth, APP_META, challenge_data, (message) => {
+		this.$HAS.authenticate(auth, APP_META, challenge_data, (message) => {
 			console.log(message)    // process auth_wait message
 			const {
 				data, uuid, authData,
@@ -381,7 +379,7 @@
 					
 					// Hide reCAPTCHA badge:
 					recaptcha.hideBadge();
-					
+					this.login_in_progress = false;
 					
 					fetch(process.env.actiAppUrl+'getAccountData?user='+account+'&bchain=HIVE').then(
 					res => {
@@ -399,11 +397,20 @@
 					return;
 				}
 				
+			}else if (message.cmd && message.cmd === 'auth_nack'){
+				//display error message
+				this.error_proceeding = true;
+				this.login_in_progress = false;
+				this.error_msg = this.$t('auth_rejected_by_user');
+				return;
 			}
 		}) 
 		.catch(err => {
 			console.error(err)
+			this.error_proceeding = true;
+			this.error_msg = err;
 			this.hiveauth_wait = false;
+			this.login_in_progress = false;
 		})
 		
 		
