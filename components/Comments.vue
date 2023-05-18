@@ -432,7 +432,7 @@
 			});
 		}else if (localStorage.getItem('acti_login_method') == 'hiveauth'){	
 			return new Promise((resolve) => {
-			const auth = {
+				const auth = {
 				  username: this.user.account.name,
 				  token: localStorage.getItem('access_token'),//should be changed in V1 (current V0.8)
 				  expire: localStorage.getItem('expires'),

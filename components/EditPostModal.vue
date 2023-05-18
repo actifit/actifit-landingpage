@@ -323,6 +323,53 @@
 				//console.log(err);
 				return {success: false, trx: null};
 			}
+		}else if (localStorage.getItem('acti_login_method') == 'hiveauth'){	
+			return new Promise((resolve) => {
+				const auth = {
+				  username: this.user.account.name,
+				  token: localStorage.getItem('access_token'),//should be changed in V1 (current V0.8)
+				  expire: localStorage.getItem('expires'),
+				  key: localStorage.getItem('key')
+				}
+				
+				let operation = [ 
+				   [op_name, cstm_params]
+				];
+				if (op2 && params2){
+					operation.push([op2, params2])
+				}
+				
+				this.$HAS.broadcast(auth, 'posting', operation, (evt)=> {
+					console.log(evt)    // process sign_wait message
+					let msg = this.$t('verify_hiveauth_app');
+					this.$notify({
+					  group: 'warn',
+					  text: msg,
+					  duration: -1, //keep alive till clicked
+					  position: 'top center'
+					})
+				})
+				.then(response => {
+					console.log(response);
+					this.$notify({
+					  group: 'warn',
+					  clean: true
+					})
+					if (response.cmd && response.cmd === 'sign_ack'){
+						resolve({success: true, trx: response.data});
+					}else if (response.cmd && response.cmd === 'sign_nack'){
+						resolve ({success: false})
+					}
+				} ) // transaction approved and successfully broadcasted
+				.catch(err => {
+					this.$notify({
+					  group: 'warn',
+					  clean: true
+					})
+					console.log(err);
+					resolve ({success: false})
+				} )
+			})
 		}else{
 			let operation = [ 
 			   [op_name, cstm_params]
@@ -386,6 +433,7 @@
 		}
 	  },
 	  commentSuccess (err, finalize, bchain, newPost) {
+		console.log('commentsuccess')
 		let mainRef = this;
 		let successMsg =  mainRef.$t('Save_Success_Chain').replace('_CHAIN_', bchain);
 		if (newPost){
@@ -670,6 +718,7 @@
 					  }
 					});	
 			}
+		
 		}else{
 						
 			//console.log(cstm_params);
