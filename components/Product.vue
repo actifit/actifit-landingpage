@@ -83,7 +83,7 @@
 							  <input type="number" id="hive-amount-pay" name="hive-amount-pay" ref="hive-amount-pay" class="form-control-lg w-50 m-1" readonly="readonly" :value="getMatchingHIVE()">
 							  <img src="/img/HIVE.png" class="mr-2 token-logo-md">
 							</div>
-							<div class="row" v-if="!isKeychainActive" >
+							<div class="row" v-if="!isKeychainActive && !isHiveauthActive" >
 								<div class="w-25 m-1 text-right">{{ $t('Active_Key') }}</div>
 								<input type="password" id="active-key" name="active-key" ref="active-key" class="form-control-lg w-50 m-1" v-model="userActvKeyHv">
 							</div>
@@ -243,7 +243,7 @@
 				<div v-else>
 					<a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNow()" :class="productBuyColor" style="float:left; border: 1px white solid;">{{ $t('Buy_now') }} <br/> {{numberFormat(this.item_price, 2)}} {{this.item_currency}}<img class="token-logo-sm " src="/img/actifit_logo.png"></a>
 					<a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNowHive()" :class="productBuyColor" style="border: 1px white solid;">{{ $t('Buy_now') }} <br/> {{numberFormat(this.item_price * this.afitPrice.afitHiveLastPrice, 3)}} {{this.hive_currency}}<img class="token-logo-sm " src="/img/HIVE.png"></a>
-					<div class="row" v-if="buyHiveExpand && !isKeychainActive">
+					<div class="row" v-if="buyHiveExpand && !isKeychainActive && !isHiveauthActive">
 					  <label for="active-key" class="p-2">{{ $t('Active_Key') }} *</label>
 					  <input type="password" id="active-key" name="active-key" ref="active-key" class="form-control-lg w-50 p-2" v-model="userActvKey">
 					</div>
@@ -325,7 +325,7 @@
 			  </div>
 		  </div>
 		  <div v-if="checkout_product">
-			<div v-if="item_price_extra > 0 && !isKeychainActive">
+			<div v-if="item_price_extra > 0 && !isKeychainActive && !isHiveauthActive">
 				<label for="active-key" class="p-2">{{ $t('Active_Key') }} *</label>
 				<input type="password" id="rl-active-key" name="rl-active-key" ref="rl-active-key" class="form-control-lg w-50 p-2" v-model="userRlActvKey">
 			</div>
@@ -403,6 +403,9 @@
 	  ...mapGetters(['cartEntries']),
 	  isKeychainActive(){
 		return (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain)
+	  },
+	  isHiveauthActive(){
+		return (localStorage.getItem('acti_login_method') == 'hiveauth')
 	  },
 	  renderProdType(){
 		if (this.product.type=='real'){
@@ -881,6 +884,49 @@
 					}
 				);
 			});
+		}else if (localStorage.getItem('acti_login_method') == 'hiveauth'){
+			return new Promise((resolve) => {
+				const auth = {
+				  username: this.user.account.name,
+				  token: localStorage.getItem('access_token'),//should be changed in V1 (current V0.8)
+				  expire: localStorage.getItem('expires'),
+				  key: localStorage.getItem('key')
+				}
+				let operation = [ 
+				   [op_name, cstm_params]
+				];
+				
+				this.$HAS.broadcast(auth, forceActive?'active':'posting', operation, (evt)=> {
+					console.log(evt)    // process sign_wait message
+					let msg = this.$t('verify_hiveauth_app');
+					this.$notify({
+					  group: 'warn',
+					  text: msg,
+					  duration: -1, //keep alive till clicked
+					  position: 'top center'
+					})
+				})
+				.then(response => {
+					console.log(response);
+					this.$notify({
+					  group: 'warn',
+					  clean: true
+					})
+					if (response.cmd && response.cmd === 'sign_ack'){
+						resolve({success: true, trx:{id: response.data}})
+					}else if (response.cmd && response.cmd === 'sign_nack'){
+						resolve ({success: false})
+					}
+				} ) // transaction approved and successfully broadcasted
+				.catch(err => {
+					this.$notify({
+					  group: 'warn',
+					  clean: true
+					})
+					console.log(err);
+					resolve ({success: false})
+				} )
+			});
 		}else{
 			let operation = [ 
 			   [op_name, cstm_params]
@@ -981,7 +1027,9 @@
 			}
 			//check if active key was provided 
 			//console.log(this.$refs);
-			if (localStorage.getItem('acti_login_method') != 'keychain' && this.userActvKey == ''){
+			if (localStorage.getItem('acti_login_method') != 'keychain' && 
+				localStorage.getItem('acti_login_method') != 'hiveauth' && 
+				this.userActvKey == ''){
 			  this.errorProceed = this.$t('all_fields_required');
 			  return;
 			}
@@ -1015,7 +1063,8 @@
 			console.log('after call');*/
 			
 			
-			if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
+			if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) ||
+				localStorage.getItem('acti_login_method') == 'hiveauth'){
 				
 				let bcastRes;
 				let res = await this.processTrxFunc(op_name, cstm_params, true);//last param to use Active key instead of Posting

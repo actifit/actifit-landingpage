@@ -388,6 +388,49 @@
 					resolve({success: response.success, txID: response.result.id})
 				});
 			});
+		}else if (localStorage.getItem('acti_login_method') == 'hiveauth'){
+			return new Promise((resolve) => {
+				const auth = {
+				  username: this.user.account.name,
+				  token: localStorage.getItem('access_token'),//should be changed in V1 (current V0.8)
+				  expire: localStorage.getItem('expires'),
+				  key: localStorage.getItem('key')
+				}
+				let operation = [ 
+				   [op_name, cstm_params]
+				];
+				
+				this.$HAS.broadcast(auth, 'posting', operation, (evt)=> {
+					console.log(evt)    // process sign_wait message
+					let msg = this.$t('verify_hiveauth_app');
+					this.$notify({
+					  group: 'warn',
+					  text: msg,
+					  duration: -1, //keep alive till clicked
+					  position: 'top center'
+					})
+				})
+				.then(response => {
+					console.log(response);
+					this.$notify({
+					  group: 'warn',
+					  clean: true
+					})
+					if (response.cmd && response.cmd === 'sign_ack'){
+						resolve({success: true, txID: response.data})
+					}else if (response.cmd && response.cmd === 'sign_nack'){
+						resolve ({success: false})
+					}
+				} ) // transaction approved and successfully broadcasted
+				.catch(err => {
+					this.$notify({
+					  group: 'warn',
+					  clean: true
+					})
+					console.log(err);
+					resolve ({success: false})
+				} )
+			});
 		}else{
 			let operation = [ 
 			   [op_name, cstm_params]
