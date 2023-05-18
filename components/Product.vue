@@ -1175,7 +1175,7 @@
 			}
 			
 			
-			if (this.isKeychainActive){
+			if (this.isKeychainActive || this.isHiveauthActive){
 				url = new URL( process.env.actiAppUrl + 'buyGadgetHiveKeychain/'
 							+ this.user.account.name + '/'
 							+ this.product._id + '/'
