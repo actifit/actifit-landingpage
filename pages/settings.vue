@@ -154,6 +154,7 @@
 	<client-only>
       <div>
         <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
+		<notifications :group="'warn'" :position="'top center'" :classes="'vue-notification warn'" />
         <notifications :group="'error'" :position="'top center'" :classes="'vue-notification error'" />
       </div>
     </client-only>
@@ -498,7 +499,7 @@
 					console.log(evt)    // process sign_wait message
 					let msg = this.$t('verify_hiveauth_app');
 					this.$notify({
-					  group: 'error',
+					  group: 'warn',
 					  text: msg,
 					  duration: -1, //keep alive till clicked
 					  position: 'top center'
@@ -507,7 +508,7 @@
 				.then(response => {
 					console.log(response);
 					this.$notify({
-					  group: 'error',
+					  group: 'warn',
 					  clean: true
 					})
 					if (response.cmd && response.cmd === 'sign_ack'){
@@ -516,7 +517,14 @@
 						resolve({success: false})
 					}
 				} ) // transaction approved and successfully broadcasted
-				.catch(err => {console.log(err);resolve({success: false})} )
+				.catch(err => {
+					this.$notify({
+					  group: 'warn',
+					  clean: true
+					})
+					console.log(err);
+					resolve({success: false})
+				} )
 			});
 		}else{
 			let operation = [ 

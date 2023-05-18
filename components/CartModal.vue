@@ -23,7 +23,7 @@
 				<a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNow()" style="float:left; border: 1px white solid;">{{ $t('Buy_now') }} <br/> {{numberFormat(this.product_price_afit, 2)}} {{this.item_currency}}<img class="token-logo-sm " src="/img/actifit_logo.png"></a>
 				<a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNowHive()" style="border: 1px white solid;">{{ $t('Buy_now') }} <br/> {{numberFormat(this.product_price_afit * this.afitPrice.afitHiveLastPrice, 3)}} {{this.hive_currency}}<img class="token-logo-sm " src="/img/HIVE.png"></a>
 			  
-				<div class="row m-0" v-if="buyHiveExpand && !isKeychainActive" >
+				<div class="row m-0" v-if="buyHiveExpand && !isKeychainActive && !isHiveauthActive" >
 				  <label for="active-key" class="p-2 col-sm-3">{{ $t('Active_Key') }} *</label>
 				  <input type="password" id="active-key" name="active-key" ref="active-key" class="form-control-lg col-sm-8 p-2" v-model="userActvKey">
 				</div>
@@ -147,6 +147,9 @@
 	  isKeychainActive (){
 		return (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain)
 	  },
+	  isHiveauthActive (){
+		return (localStorage.getItem('acti_login_method') == 'hiveauth')
+	  },
 	  adjustHiveClass () {
 		if (this.target_bchain != 'HIVE'){
 			return 'option-opaque';
@@ -230,9 +233,7 @@
 					this.user.account.name, 
 					[[op_name, cstm_params]], 
 					forceActive?'Active':'Posting', async (response) => {
-						//console.log(response);
-						//resolve(response);
-						
+
 						if (response.success){
 							//await this.verifyTrx(response.result, operation);
 							resolve({success: response.success, trx:{id: response.result.id}})
@@ -242,6 +243,46 @@
 						
 					}
 				);
+			});
+		}else if (localStorage.getItem('acti_login_method') == 'hiveauth'){	
+			return new Promise((resolve) => {
+				const auth = {
+				  username: this.user.account.name,
+				  token: localStorage.getItem('access_token'),//should be changed in V1 (current V0.8)
+				  expire: localStorage.getItem('expires'),
+				  key: localStorage.getItem('key')
+				}
+				console.log(auth);
+				this.$HAS.broadcast(auth, forceActive?'active':'posting', [[op_name, cstm_params]], (evt)=> {
+					console.log(evt)    // process sign_wait message
+					let msg = this.$t('verify_hiveauth_app');
+					this.$notify({
+					  group: 'warn',
+					  text: msg,
+					  duration: -1, //keep alive till clicked
+					  position: 'top center'
+					})
+				})
+				.then(response => {
+					console.log(response);
+					this.$notify({
+					  group: 'warn',
+					  clean: true
+					})
+					if (response.cmd && response.cmd === 'sign_ack'){
+						resolve({success: true, trx:{id: response.data}})
+					}else if (response.cmd && response.cmd === 'sign_nack'){
+						resolve({success: false})
+					}
+				} ) // transaction approved and successfully broadcasted
+				.catch(err => {
+					this.$notify({
+					  group: 'warn',
+					  clean: true
+					})
+					console.log(err);
+					resolve({success: false})
+				} )
 			});
 			
 		}else{
@@ -376,7 +417,8 @@
 			url_string += '/' + appendFriend;
 		}
 		
-		if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){			
+		if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) || 
+			(localStorage.getItem('acti_login_method') == 'hiveauth')){			
 			
 			let op_json = JSON.stringify(operation)
 			url_string = new URL( process.env.actiAppUrl + 'activateMultiGadgetKeychain/'
@@ -537,7 +579,8 @@
 						+ bcastRes.id + '/'
 						+ cur_bchain);
 						
-		if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){			
+		if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) || 
+			(localStorage.getItem('acti_login_method') == 'hiveauth')){			
 			
 			let op_json = JSON.stringify(operation)
 			url = new URL( process.env.actiAppUrl + 'buyMultiGadgetKeychain/'
@@ -630,7 +673,7 @@
 			}*/
 			//check if active key was provided 
 			//console.log(this.$refs);
-			if (!this.isKeychainActive && this.userActvKey == ''){
+			if (!this.isKeychainActive && !this.isHiveauthActive && this.userActvKey == ''){
 			  this.errorProceed = this.$t('all_fields_required');
 			  return;
 			}
@@ -673,7 +716,8 @@
 			];
 			
 			
-			if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
+			if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain)||
+				(localStorage.getItem('acti_login_method') == 'hiveauth')){
 				
 				let bcastRes;
 				let res = await this.processTrxFunc(op_name, cstm_params, true);//last param to use Active key instead of Posting
@@ -753,7 +797,7 @@
 							+ res.id + '/'
 							+ cur_bchain);
 							
-			if (this.isKeychainActive){
+			if (this.isKeychainActive || this.isHiveauthActive){
 				url = new URL( tgtNode + 'buyMultiGadgetHiveKeychain/'
 							+ this.user.account.name + '/'
 							+ memo + '/'
