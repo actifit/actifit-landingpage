@@ -348,6 +348,7 @@
 				</div>
 				
 				<!-- steem engine tokens -->
+				<!--
 				<div class="token-entry row">
 					<div class="col-2 text-left"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo">AFIT</div>
 					<div class="col-2">{{ $t('Steem_Engine')}}</div>
@@ -370,7 +371,7 @@
 					<div class="col-lg-2 col-1">
 						<span v-if="cur_bchain!='BLURT'" class="btn btn-brand p-1" :title="$t('move_afitx_se_he_title')" v-on:click="moveAFITXseHE"><i class="fas fa-angle-double-right" ></i></span>
 					</div>
-				</div>
+				</div>-->
 				
 				<div class="action-box">
 				
@@ -1404,8 +1405,9 @@
   
   import VueScrollTo from 'vue-scrollto' // for smooth scrolling
   
-  const ssc = new SSC(process.env.steemEngineRpc);
-  const scot_steemengine_api = process.env.steemEngineScot;
+  //Disable: EOL for S-E
+  //const ssc = new SSC(process.env.steemEngineRpc);
+  //const scot_steemengine_api = process.env.steemEngineScot;
   
   const hsc = new SSC(process.env.hiveEngineRpc);
   const scot_hive_api_param = process.env.hiveEngineScotParam;
@@ -2780,8 +2782,8 @@
 		  
 		   
 		  //fetch user's AFIT S-E balance
-		  
-		  this.fetchAFITSE();
+		  //disable: EOL for S-E
+		  //this.fetchAFITSE();
 		  
 		  //fetch user's AFIT H-E balance
 		  
@@ -2789,7 +2791,8 @@
 		  
 		  
 		  //fetch user's AFITX S-E balance
-		  this.fetchAFITXSE();
+		  //disable: EOL for S-E
+		  //this.fetchAFITXSE();
 		  
 		  //fetch user's AFITX H-E balance
 		  this.fetchAFITXHE();
@@ -4950,7 +4953,8 @@
 								});
 								
 								//update balances
-								setTimeout(this.fetchAFITSE, 3000);
+								//disable: EOL for S-E
+								//setTimeout(this.fetchAFITSE, 3000);
 								setTimeout(this.fetchAFITHE, 3000);
 							}else{
 								this.$notify({
@@ -5090,7 +5094,8 @@
 							  position: 'top center'
 							});
 							//update balances
-							setTimeout(this.fetchAFITXSE, 3000);
+							//Disable: EOL for S-E
+							//setTimeout(this.fetchAFITXSE, 3000);
 							setTimeout(this.fetchAFITXHE, 3000);
 						}else{
 							this.$notify({

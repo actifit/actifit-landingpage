@@ -250,7 +250,7 @@
 					<div class="info-box-orange mb-2 col-md-6 cntnr">
 						<a href="/wallet" >
 						<img src="/img/actifit_logo.png" class="mr-2 token-logo">{{ numberFormat(userTokenCount, 3) }} {{ $t('AFIT_Tokens') }}<br/>
-						<img src="/img/actifit_logo.png" class="mr-2 token-logo">{{ displayAFITSEBal }} {{ $t('AFIT_SE_Tokens') }}<br/> 
+						<!--<img src="/img/actifit_logo.png" class="mr-2 token-logo">{{ displayAFITSEBal }} {{ $t('AFIT_SE_Tokens') }}<br/> -->
 						<img src="/img/actifit_logo.png" class="mr-2 token-logo">{{ displayAFITHEBal }} {{ $t('AFIT_HE_Tokens') }}</a><br/>
 						<img src="/img/actifit_logo.png" class="mr-2 token-logo">{{ displayAFITTipBal}} {{ $t('AFIT_Tip_Tokens') }} <i class="fas fa-info-circle" v-on:click="showAfitTipInfo=!showAfitTipInfo"></i>
 						<div v-if="showAfitTipInfo" style="color:red" v-html="$t('tipping_details')" />
@@ -261,7 +261,7 @@
 					<div class="info-box-orange mb-2 col-md-6 cntnr">
 						
 						<a href="/wallet" >
-						<img src="/img/AFITX.png" class="mr-2 token-logo">{{ displayAFITXBal }} {{ $t('AFITX_Tokens') }} <br/>
+						<!--<img src="/img/AFITX.png" class="mr-2 token-logo">{{ displayAFITXBal }} {{ $t('AFITX_Tokens') }} <br/>-->
 						<img src="/img/AFITX.png" class="mr-2 token-logo">{{ displayAFITXHEBal }} {{ $t('AFITX_HE_Tokens') }}
 						</a>
 					</div>
@@ -405,7 +405,7 @@
   Vue.use(BadgePlugin)
   
   import SSC from 'sscjs'
-  const ssc = new SSC(process.env.steemEngineRpc);
+  //const ssc = new SSC(process.env.steemEngineRpc);
   
   const hsc = new SSC(process.env.hiveEngineRpc);
 
@@ -1508,7 +1508,8 @@
 		 	console.log('mounted');
 		  let bal;
 		  try{
-			  try{
+				//Disable: EOL for S-E
+			  /*try{
 				  //fetch user's AFIT S-E balance
 				  bal = await ssc.findOne('tokens', 'balances', { account: this.displayUser, symbol: 'AFIT' });
 				  if (bal){
@@ -1526,7 +1527,7 @@
 				  }
 			  }catch(errIn){
 				console.log(errIn)
-			  }
+			  }*/
 			  
 			  console.log('grab AFIT HE');
 			  
