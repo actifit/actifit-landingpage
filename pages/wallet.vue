@@ -141,6 +141,7 @@
 				<div class="col-lg-1 col-2 text-right">
 					{{ this.renderSavings(this.cur_bchain) }}
 					
+					{{ this.pendingSavingsWithdrawVal('HIVE')}}
 					<span v-if="hasPendingHiveSavingsWithdrawals() == true">
 						<span :title="$t('hive_withdraw_progress')"><br/>
 							<i class="far fa-solid fa-hourglass text-brand"></i>
@@ -198,7 +199,7 @@
 				<div class="col-lg-1 col-2 text-right">
 					{{ this.renderSBDSavings(this.cur_bchain) }}
 					
-					
+					{{ this.pendingSavingsWithdrawVal('HBD')}}
 					<span v-if="hasPendingHBDSavingsWithdrawals() == true">
 						<span :title="$t('hbd_withdraw_progress')"><br/>
 							<i class="far fa-solid fa-hourglass text-brand"></i>
@@ -2108,6 +2109,21 @@
 	  async getPendingSavingsWithdrawals() {
 		this.pendingSavingsWithdrawals = await hive.api.getSavingsWithdrawFromAsync(this.user.account.name);
 		console.log(this.pendingSavingsWithdrawals);
+	  },
+	  pendingSavingsWithdrawVal(cur){
+		const sum = this.pendingSavingsWithdrawals.reduce((acc, obj) => {
+		  if (obj.hasOwnProperty('amount') && obj.amount.includes(cur)) {
+			const numericValue = parseFloat(obj.amount.split(' ')[0]);
+			
+			if (!isNaN(numericValue)) {
+			  acc += numericValue;
+			}
+		  }
+		  return acc;
+		}, 0);
+		if (sum > 0){
+			return "(+"+sum+" "+cur+")";
+		}
 	  },
 	  hasPendingHBDSavingsWithdrawals(){
 		return this.pendingSavingsWithdrawals.some(obj => obj.hasOwnProperty('amount') && obj.amount.includes('HBD'));
