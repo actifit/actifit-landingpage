@@ -1407,7 +1407,7 @@
   
   //Disable: EOL for S-E
   //const ssc = new SSC(process.env.steemEngineRpc);
-  //const scot_steemengine_api = process.env.steemEngineScot;
+  const scot_steemengine_api = process.env.steemEngineScot;
   
   const hsc = new SSC(process.env.hiveEngineRpc);
   const scot_hive_api_param = process.env.hiveEngineScotParam;
@@ -2731,9 +2731,10 @@
 		  }).catch(e => console.log(e))
 
 		  //let's grab the user's steem-engine tokens too
+		  //Disable: EOL for S-E
+		  /*
 		  this.fetchTokenBalance();
 		  
-		  //let's grab the user's steem-engine tokens too
 		  if (this.cur_bchain == 'STEEM'){
 			  fetch(scot_steemengine_api+'@'+this.user.account.name).then(
 				res => {res.json().then(json => this.setUserClaimableSETokens (json) ).catch(e => console.log(e))
@@ -2745,6 +2746,7 @@
 			  }).catch(e => console.log(e))
 
 		  }
+		  */
 		  
 		  //grab user settings
 		  fetch(process.env.actiAppUrl+'userSettings/'+this.user.account.name).then(
@@ -4129,7 +4131,7 @@
 			
 		}
 		//update balances 
-		setTimeout(this.fetchTokenBalance , 5);
+		//setTimeout(this.fetchTokenBalance , 5);
 	  },
 	  async cancelPowerDown () {
 		//function handles cancelling the power down
