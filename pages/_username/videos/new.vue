@@ -593,6 +593,53 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 				//console.log(err);
 				return {success: false, trx: null};
 			}
+		}else if (localStorage.getItem('acti_login_method') == 'hiveauth'){	
+			return new Promise((resolve) => {
+				const auth = {
+				  username: this.user.account.name,
+				  token: localStorage.getItem('access_token'),//should be changed in V1 (current V0.8)
+				  expire: localStorage.getItem('expires'),
+				  key: localStorage.getItem('key')
+				}
+				
+				let operation = [ 
+				   [op_name, cstm_params]
+				];
+				if (op2 && params2){
+					operation.push([op2, params2])
+				}
+				
+				this.$HAS.broadcast(auth, 'posting', operation, (evt)=> {
+					console.log(evt)    // process sign_wait message
+					let msg = this.$t('verify_hiveauth_app');
+					this.$notify({
+					  group: 'warn',
+					  text: msg,
+					  duration: -1, //keep alive till clicked
+					  position: 'top center'
+					})
+				})
+				.then(response => {
+					console.log(response);
+					this.$notify({
+					  group: 'warn',
+					  clean: true
+					})
+					if (response.cmd && response.cmd === 'sign_ack'){
+						resolve({success: true, trx: response.data});
+					}else if (response.cmd && response.cmd === 'sign_nack'){
+						resolve ({success: false})
+					}
+				} ) // transaction approved and successfully broadcasted
+				.catch(err => {
+					this.$notify({
+					  group: 'warn',
+					  clean: true
+					})
+					console.log(err);
+					resolve ({success: false})
+				} )
+			})
 		}else{
 			let operation = [ 
 			   [op_name, cstm_params]
@@ -1472,6 +1519,17 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 						console.log('utils decodememo')
 						outcome = await this.keychainDecode(memo);
 						console.log(outcome);
+					}else if (localStorage.getItem('acti_login_method') == 'hiveauth'){
+						const auth = {
+						  username: this.user.account.name,
+						  token: localStorage.getItem('access_token'),//should be changed in V1 (current V0.8)
+						  expire: localStorage.getItem('expires'),
+						  key: localStorage.getItem('key')
+						}
+						//TODO: implement hiveauth approach to decode memo
+						/*let operation = [ 
+						   ['decode', {}]
+						];*/
 					}else{
 						let accToken = localStorage.getItem('access_token')
 						
