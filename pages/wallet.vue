@@ -174,7 +174,7 @@
 							<div class="col-12 row font-weight-bold"><div class="col-4">Amount </div><div class="col-4">Completion Date </div></div>
 							<div v-for="(entry, index) in pendingSavingsWithdrawals" :key="index" :entry="entry" v-if="entry.amount.includes('HIVE')" class="col-12 row"><div class="col-4">{{entry.amount}} </div><div class="col-4"> {{entry.complete}}</div><div class="col-4"><button class="btn btn-brand" v-on:click="cancelSavingsWithdrawal(entry.request_id)"><i class="fas fa-times-circle" :title="$t('cancel_savings_withdrawal')"></i></button></div>
 							</div>
-							<div class="row" v-if="!isKeychainLogin && isStdLogin">
+							<div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
 							  <label for="cancel-withdraw-act-key" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 							  <input type="password" id="cancel-withdraw-act-key" name="cancel-withdraw-act-key" ref="cancel-withdraw-act-key" class="form-control-lg w-50 p-2">
 							</div>
@@ -228,7 +228,7 @@
 							<div class="col-12 row font-weight-bold"><div class="col-4">Amount </div><div class="col-4">Completion Date </div></div>
 							<div v-for="(entry, index) in pendingSavingsWithdrawals" :key="index" :entry="entry" v-if="entry.amount.includes('HBD')" class="col-12 row"><div class="col-4">{{entry.amount}} </div><div class="col-4"> {{entry.complete}}</div><div class="col-4"><button class="btn btn-brand" v-on:click="cancelSavingsWithdrawal(entry.request_id)"><i class="fas fa-times-circle" :title="$t('cancel_savings_withdrawal')"></i></button></div>
 							</div>
-							<div class="row" v-if="!isKeychainLogin && isStdLogin">
+							<div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
 							  <label for="cancel-withdraw-act-key" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 							  <input type="password" id="cancel-withdraw-act-key" name="cancel-withdraw-act-key" ref="cancel-withdraw-act-key" class="form-control-lg w-50 p-2">
 							</div>
@@ -403,7 +403,7 @@
 					  <input type="number" id="token-hbd-amount" name="token-hbd-amount" ref="token-hbd-amount" class="form-control-lg w-50 p-2" readonly><span class="p-2">{{ $t('HBD') }}</span>
 					</div>
 					
-					<div class="row" v-if="!isKeychainLogin && isStdLogin && tokenActions">
+					<div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin && tokenActions">
 					  <label for="p-ac-key-trans-token" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 					  <input type="password" id="p-ac-key-trans-token" name="p-ac-key-trans-token" ref="p-ac-key-trans-token" class="form-control-lg w-50 p-2">
 					</div>
@@ -474,11 +474,11 @@
 					  <label for="transfer-memo" class="w-25 p-2">{{ $t('Memo') }}</label>
 					  <input type="text" id="transfer-memo" name="transfer-memo" ref="transfer-memo" class="form-control-lg w-50 p-2">				
 					</div>
-					<div class="row" v-if="!isKeychainLogin && isStdLogin">
+					<div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
 						  <label for="p-ac-key-trans" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 						  <input type="password" id="p-ac-key-trans" name="p-ac-key-trans" ref="p-ac-key-trans" class="form-control-lg w-50 p-2">
 					</div>
-					<div class="row" v-if="!isKeychainLogin && isStdLogin">
+					<div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
 						<div class="text-center small p-2 w-25"></div>
 						<div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your <b>PRIVATE ACTIVE</b> key.*</div>
 					</div>
@@ -509,11 +509,11 @@
 					  <input type="number" id="powerup-amount" name="powerup-amount" ref="powerup-amount" class="form-control-lg w-50 p-2">
 					  <span v-on:click="fillPowerupAmount()" :title="$t('select_full_balance')"><img src="/img/HIVE.png" class="mr-1 mini-token-logo" ><u>{{this.renderBalance (this.cur_bchain, true)}}</u></span>
 					</div>
-					<div class="row" v-if="!isKeychainLogin && isStdLogin">
+					<div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
 						  <label for="powerup-amount" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 						  <input type="password" id="p-ac-key-up" name="p-ac-key-up" ref="p-ac-key-up" class="form-control-lg w-50 p-2">
 					</div>
-					<div class="row" v-if="!isKeychainLogin && isStdLogin">
+					<div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
 						<div class="text-center small p-2 w-25"></div>
 						<div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your <b>PRIVATE ACTIVE</b> key.*</div>
 					</div>
@@ -544,12 +544,12 @@
 						  <label for="powerdown-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
 						  <input type="number" id="powerdown-amount" name="powerdown-amount" ref="powerdown-amount" class="form-control-lg w-50 p-2">
 					  </div>
-					  <div class="row" v-if="!isKeychainLogin && isStdLogin">
+					  <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
 						  <label for="powerdown-amount" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 						  <input type="password"  id="p-ac-key" name="p-ac-key" ref="p-ac-key" class="form-control-lg w-50 p-2">
 						  <span v-on:click="fillPowerdownAmount()" :title="$t('select_full_balance')"><img src="/img/HIVE.png" class="mr-1 mini-token-logo" ><u>{{this.renderSteemPower(1)}}</u></span>
 					  </div>
-					  <div class="row" v-if="!isKeychainLogin && isStdLogin">
+					  <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
 						<div class="text-center small p-2 w-25"></div>
 						<div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your <b>PRIVATE ACTIVE</b> key.*</div>
 					  </div>
@@ -618,11 +618,11 @@
 					  <label for="transfer-memo" class="w-25 p-2">{{ $t('Memo') }}</label>
 					  <input type="text" id="transfer-memo" name="transfer-memo" ref="transfer-memo" class="form-control-lg w-50 p-2">				
 					</div>
-					<div class="row" v-if="!isKeychainLogin && isStdLogin">
+					<div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
 						  <label for="p-ac-key-trans" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 						  <input type="password" id="p-ac-key-trans" name="p-ac-key-trans" ref="p-ac-key-trans" class="form-control-lg w-50 p-2">
 					</div>
-					<div class="row" v-if="!isKeychainLogin && isStdLogin">
+					<div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
 						<div class="text-center small p-2 w-25"></div>
 						<div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your <b>PRIVATE ACTIVE</b> key.*</div>
 					</div>
@@ -669,11 +669,11 @@
 					  <label for="transfer-memo" class="w-25 p-2">{{ $t('Memo') }}</label>
 					  <input type="text" id="transfer-memo" name="transfer-memo" ref="transfer-memo" class="form-control-lg w-50 p-2">				
 					</div>
-					<div class="row" v-if="!isKeychainLogin && isStdLogin">
+					<div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
 						  <label for="p-ac-key-trans" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 						  <input type="password" id="p-ac-key-trans" name="p-ac-key-trans" ref="p-ac-key-trans" class="form-control-lg w-50 p-2">
 					</div>
-					<div class="row" v-if="!isKeychainLogin && isStdLogin">
+					<div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
 						<div class="text-center small p-2 w-25"></div>
 						<div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your <b>PRIVATE ACTIVE</b> key.*</div>
 					</div>
@@ -705,11 +705,11 @@
 					  <input type="number" id="delegate-amount" name="delegate-amount" ref="delegate-amount" class="form-control-lg w-50 p-2">
 					  <span v-on:click="fillDelegateAmount()" :title="$t('select_full_balance')"><img src="/img/HIVE.png" class="mr-1 mini-token-logo" ><u>{{this.renderSteemPower(1)}}</u></span>
 					</div>
-					<div class="row" v-if="!isKeychainLogin && isStdLogin">
+					<div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
 						  <label for="delegate-amount" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 						  <input type="password" id="p-ac-key-delg" name="p-ac-key-delg" ref="p-ac-key-delg" class="form-control-lg w-50 p-2">
 					</div>
-					<div class="row" v-if="!isKeychainLogin && isStdLogin">
+					<div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
 						<div class="text-center small p-2 w-25"></div>
 						<div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your <b>PRIVATE ACTIVE</b> key.*</div>
 					</div>
@@ -992,7 +992,7 @@
 					  <div class="w-25 p-2">{{ $t('Amount_To_Move') }}</div>
 					  <input type="number" id="afit-se-move-power" name="afit-se-move-power" ref="afit-se-move-power" class="form-control-lg w-50 p-2">
 					</div>
-					<div class="row" v-if="!isKeychainLogin && isStdLogin">
+					<div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
 					  <label for="p-ac-key-power" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 					  <input type="password" id="p-ac-key-power" name="p-ac-key-power" ref="p-ac-key-power" class="form-control-lg w-50 p-2">
 					</div>
@@ -1143,7 +1143,7 @@
 					  <label for="pass-transfer-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
 					  <input type="number" id="pass-transfer-amount" name="pass-transfer-amount" ref="pass-transfer-amount" class="form-control-lg w-50 p-2"  v-model="transfer_amount">
 					</div>
-					<div class="row" v-if="!isKeychainLogin && isStdLogin">
+					<div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
 					  <label for="p-ac-key-funds-ver" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 					  <input type="password" id="p-ac-key-funds-ver" name="p-ac-key-funds-ver" ref="p-ac-key-funds-ver" class="form-control-lg w-50 p-2">
 					</div>
@@ -1650,6 +1650,9 @@
 	  isKeychainLogin (){
 		return localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain
 	  },
+	  isHiveauthLogin (){
+		return localStorage.getItem('acti_login_method') == 'hiveauth'
+	  },
       isStdLogin () {
 		return localStorage.getItem('std_login')
 	  },
@@ -1846,7 +1849,7 @@
 			this.user_settings['show_only_tokens_interest'] = this.show_only_tokens_interest;
 			
 			
-			if (this.isKeychainLogin){
+			if (this.isKeychainLogin || this.isHiveauthLogin){
 				//in case of keychain login, broadcast to chain
 				//broadcast the transaction to Steem BC
 				let cstm_params = {
@@ -3412,7 +3415,7 @@
 		this.scrollAction();
 	  },
 	  async cancelSavingsWithdrawal (request_id){
-		if (!this.isKeychainLogin && this.isStdLogin){
+		if (!this.isKeychainLogin && !this.isHiveauthLogin &&  this.isStdLogin){
 			//check for active key
 			if (this.$refs["cancel-withdraw-act-key"].value == ''){
 			  this.error_proceeding = true;
@@ -3439,7 +3442,8 @@
 			}, window.location.origin + '/wallet?op=transfer&status=success');
 			//launch the SC window
 			window.open(link);
-		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+		}else if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) || 
+			(localStorage.getItem('acti_login_method') == 'hiveauth')){	
 			console.log(this.transferType);
 			console.log('>>pop')
 			/*return new Promise((resolve) => {
@@ -3475,7 +3479,7 @@
 	  async proceedRemoveSavings () {
 		//console.log(this.user.account);
 		//function handles sending to savings
-		if (!this.isKeychainLogin && this.isStdLogin){
+		if (!this.isKeychainLogin && !this.isHiveauthLogin && this.isStdLogin){
 			let confirmPopup = confirm(this.$t('confirm_transfer'));
 			if (!confirmPopup){
 				return;
@@ -3496,7 +3500,7 @@
 		  return;
 		}
 		
-		if (!this.isKeychainLogin && this.isStdLogin){
+		if (!this.isKeychainLogin && !this.isHiveauthLogin && this.isStdLogin){
 			if (this.$refs["p-ac-key-trans"].value == ''){
 			  this.error_proceeding = true;
 			  this.error_msg = this.$t('all_fields_required');
@@ -3516,7 +3520,8 @@
 			}, window.location.origin + '/wallet?op=transfer&status=success');
 			//launch the SC window
 			window.open(link);
-		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+		}else if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain)||
+				(localStorage.getItem('acti_login_method') == 'hiveauth')){	
 			console.log(this.transferType);
 			console.log('>>pop')
 			/*return new Promise((resolve) => {
@@ -3556,7 +3561,7 @@
 	  },
 	  async proceedTransferSavings () {
 		//function handles sending to savings
-		if (!this.isKeychainLogin && this.isStdLogin){
+		if (!this.isKeychainLogin && !this.isHiveauthLogin && this.isStdLogin){
 			let confirmPopup = confirm(this.$t('confirm_transfer'));
 			if (!confirmPopup){
 				return;
@@ -3578,7 +3583,7 @@
 		  return;
 		}
 		
-		if (!this.isKeychainLogin && this.isStdLogin){
+		if (!this.isKeychainLogin && !this.isHiveauthLogin && this.isStdLogin){
 			if (this.$refs["p-ac-key-trans"].value == ''){
 			  this.error_proceeding = true;
 			  this.error_msg = this.$t('all_fields_required');
@@ -3598,7 +3603,8 @@
 			}, window.location.origin + '/wallet?op=transfer&status=success');
 			//launch the SC window
 			window.open(link);
-		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+		}else if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain)||
+				(localStorage.getItem('acti_login_method') == 'hiveauth')){	
 			console.log(this.transferType);
 			console.log('>>pop')
 			/*return new Promise((resolve) => {
@@ -3635,7 +3641,7 @@
 	  async proceedTransfer () {
 		//function handles the actual processing of the transfer
 		
-		if (!this.isKeychainLogin && this.isStdLogin){
+		if (!this.isKeychainLogin && !this.isHiveauthLogin && this.isStdLogin){
 			let confirmPopup = confirm(this.$t('confirm_transfer'));
 			if (!confirmPopup){
 				return;
@@ -3657,7 +3663,7 @@
 		  return;
 		}
 		
-		if (!this.isKeychainLogin && this.isStdLogin){
+		if (!this.isKeychainLogin && !this.isHiveauthLogin && this.isStdLogin){
 			if (this.$refs["p-ac-key-trans"].value == ''){
 			  this.error_proceeding = true;
 			  this.error_msg = this.$t('all_fields_required');
@@ -3677,7 +3683,7 @@
 			}, window.location.origin + '/wallet?op=transfer&status=success');
 			//launch the SC window
 			window.open(link);
-		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+		}else if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain)){
 			console.log(this.transferType);
 			console.log('>>pop')
 			return new Promise((resolve) => {
@@ -3686,7 +3692,19 @@
 				  this.confirmCompletion('transfer', this.$refs["transfer-amount"].value, response)
 				}, true);
 			});	
+		}else if (this.isHiveauthLogin){
+			let opname = 'transfer';
+			let	params = {
+					"from": this.user.account.name,
+					"to": this.$refs["transfer-recipient"].value,
+					"amount": parseFloat(this.$refs["transfer-amount"].value).toFixed(3)+' '+this.transferType,
+					"memo": this.$refs["transfer-memo"].value
+				};
+			let res = await this.processTrxFunc(opname, params, true);
 			
+			if (res.success){
+				this.confirmCompletion('transfer', this.$refs["transfer-amount"].value, res)
+			}
 		}else{
 			this.transferProcess = true;
 			let chainLnk = await this.setProperNode ();
@@ -3724,7 +3742,7 @@
 	  },
 	  async proceedPowerUp () {
 		//function handles the actual processing of the power up
-		if (!this.isKeychainLogin){
+		if (!this.isKeychainLogin && !this.isHiveauthLogin){
 			let confirmPopup = confirm(this.$t('confirm_power_up'));
 			if (!confirmPopup){
 				return;
@@ -3745,7 +3763,7 @@
 		  return;
 		}
 		
-		if (!this.isKeychainLogin && this.isStdLogin){
+		if (!this.isKeychainLogin && !this.isHiveauthLogin && this.isStdLogin){
 			if (this.$refs["p-ac-key-up"].value == ''){
 			  this.error_proceeding = true;
 			  this.error_msg = this.$t('all_fields_required');
@@ -3771,6 +3789,18 @@
 					this.confirmCompletion('powerup', this.$refs["powerup-amount"].value, response)
 				});
 			});		
+		}else if (this.isHiveauthLogin){
+			let opname = 'transfer_to_vesting';
+			let	params = {
+					"from": this.user.account.name,
+					"to": this.user.account.name,
+					"amount": parseFloat(this.$refs["powerup-amount"].value).toFixed(3)+' '+this.transferType
+				};
+			let res = await this.processTrxFunc(opname, params, true);
+			
+			if (res.success){
+				this.confirmCompletion('powerup', this.$refs["powerup-amount"].value, res)
+			}
 		}else{
 			this.powerUpProcess = true;
 			let chainLnk = await this.setProperNode ();
@@ -3806,7 +3836,7 @@
 		  return;
 		}*/
 		
-		if (!this.isKeychainLogin && this.isStdLogin){
+		if (!this.isKeychainLogin && !this.isHiveauthLogin && this.isStdLogin){
 			if (this.$refs["p-ac-key-delg"].value == ''){
 			  this.error_proceeding = true;
 			  this.error_msg = this.$t('all_fields_required');
@@ -3832,8 +3862,19 @@
 					this.confirmCompletion('delegate', this.$refs["delegate-amount"].value, response)
 				});
 			});			
+		}else if (this.isHiveauthLogin){
+			let vestsValue = await this.steemPowerToVests(this.$refs["delegate-amount"].value);
+			let opname = 'delegate_vesting_shares';
+			let	params = {
+					"delegator": this.user.account.name,
+					"delegatee": this.$refs["delegate-recipient"].value.trim(),
+					"vesting_shares": vestsValue+' '+'VESTS'
+				};
+			let res = await this.processTrxFunc(opname, params, true);
 			
-		
+			if (res.success){
+				this.confirmCompletion('delegate', this.$refs["delegate-amount"].value, res)
+			}
 		}else{
 			this.delegateProcess = true;
 			let chainLnk = await this.setProperNode ();
@@ -3875,7 +3916,8 @@
 		}
 		
 		
-		if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+		if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain)||
+			(localStorage.getItem('acti_login_method') == 'hiveauth')){	
 			const op_name = 'custom_json';
 			//['delegate_rc', {
 			const json_data = JSON.stringify(['delegate_rc', { 
@@ -3960,7 +4002,7 @@
 	  
 	  async proceedPowerDown () {
 		//function handles the actual processing of the power down
-		if (!this.isKeychainLogin){
+		if (!this.isKeychainLogin && !this.isHiveauthLogin){
 			let confirmPopup = confirm(this.$t('confirm_power_down'));
 			if (!confirmPopup){
 				return;
@@ -3974,7 +4016,7 @@
 		  this.error_msg = this.$t('all_fields_required');
 		  return;
 		}
-		if (!this.isKeychainLogin && this.isStdLogin){
+		if (!this.isKeychainLogin && !this.isHiveauthLogin && this.isStdLogin){
 			if (this.$refs["p-ac-key"].value == ''){
 			  this.error_proceeding = true;
 			  this.error_msg = this.$t('all_fields_required');
@@ -4004,7 +4046,17 @@
 					this.confirmCompletion('powerdown', this.$refs["powerdown-amount"].value, response)
 				});
 			});		
-		
+		}else if (this.isHiveauthLogin){
+			let opname = 'withdraw_vesting';
+			let	params = {
+					"account": this.user.account.name,
+					"vesting_shares": vestsValue+' '+'VESTS'
+				};
+			let res = await this.processTrxFunc(opname, params, true);
+			
+			if (res.success){
+				this.confirmCompletion('powerdown', this.$refs["powerdown-amount"].value, res)
+			}
 		}else{
 			this.powerDownProcess = true;
 			let chainLnk = await this.setProperNode ();
@@ -4142,7 +4194,7 @@
 			return;
 		}
 		
-		if (!this.isKeychainLogin && this.isStdLogin){
+		if (!this.isKeychainLogin && !this.isHiveauthLogin && this.isStdLogin){
 			if (this.$refs["p-ac-key"].value == ''){
 			  this.error_proceeding = true;
 			  this.error_msg = this.$t('all_fields_required');
@@ -4164,7 +4216,17 @@
 					this.confirmCompletion('powerdown', 0, response)
 				});
 			});			
+		}else if (this.isHiveauthLogin){
+			let opname = 'withdraw_vesting';
+			let	params = {
+					"account": this.user.account.name,
+					"vesting_shares": '0.000000'+' '+'VESTS'
+				};
+			let res = await this.processTrxFunc(opname, params, true);
 			
+			if (res.success){
+				this.confirmCompletion('powerdown', 0, res)
+			}
 		}else{
 			this.powerDownProcess = true;
 			//steem.api.setOptions({ url: "https://api.steemit.com" });
@@ -4356,6 +4418,49 @@
 					//resolve(response);
 					resolve({success: response.success, txID: response.result.id})
 				});
+			});
+		}else if (localStorage.getItem('acti_login_method') == 'hiveauth'){
+			return new Promise((resolve) => {
+				const auth = {
+				  username: this.user.account.name,
+				  token: localStorage.getItem('access_token'),//should be changed in V1 (current V0.8)
+				  expire: localStorage.getItem('expires'),
+				  key: localStorage.getItem('key')
+				}
+				let operation = [ 
+				   [op_name, cstm_params]
+				];
+				
+				this.$HAS.broadcast(auth, active?'active':'posting', operation, (evt)=> {
+					console.log(evt)    // process sign_wait message
+					let msg = this.$t('verify_hiveauth_app');
+					this.$notify({
+					  group: 'warn',
+					  text: msg,
+					  duration: -1, //keep alive till clicked
+					  position: 'top center'
+					})
+				})
+				.then(response => {
+					console.log(response);
+					this.$notify({
+					  group: 'warn',
+					  clean: true
+					})
+					if (response.cmd && response.cmd === 'sign_ack'){
+						resolve({success: true, txID: response.data})
+					}else if (response.cmd && response.cmd === 'sign_nack'){
+						resolve ({success: false})
+					}
+				} ) // transaction approved and successfully broadcasted
+				.catch(err => {
+					this.$notify({
+					  group: 'warn',
+					  clean: true
+					})
+					console.log(err);
+					resolve ({success: false})
+				} )
 			});
 		}else{
 			let operation = [ 
@@ -4619,7 +4724,7 @@
 		  return;
 		}
 		
-		if (!this.isKeychainLogin && this.isStdLogin){
+		if (!this.isKeychainLogin && !this.isHiveauthLogin && this.isStdLogin){
 			if (this.$refs["p-ac-key-power"].value == ''){
 			  this.afit_se_move_error_proceeding = true;
 			  this.afit_se_move_err_msg = this.$t('all_fields_required');
@@ -4697,8 +4802,68 @@
 					}
 				});
 			});		
-		
-		
+		}else if (this.isHiveauthLogin){
+			let targetAcct = 'actifit.h-e';
+			let transId = process.env.hiveEngineChainId;
+			if (this.cur_bchain == 'STEEM'){
+				targetAcct = 'actifit.s-e';
+				transId = 'ssc-mainnet1';
+			}
+			
+			let json_data = {
+				contractName: 'tokens',
+				contractAction: 'transfer',
+				contractPayload: {
+					symbol: 'AFIT',
+					to: targetAcct,
+					quantity: '' + amount_to_power,//needs to be string
+					memo: ''
+				}
+			}
+			
+			let op_name = 'custom_json';
+			let cstm_params = {
+				required_auths: [this.user.account.name],
+				required_posting_auths: [],
+				id: 'actifit',
+				json: JSON.stringify(json_data)
+			  };
+			let operation = [ 
+			   [op_name, cstm_params]
+			];
+			
+			let response = await this.processTrxFunc(op_name, cstm_params, true);
+			
+			if (response.success){
+					
+				this.$notify({
+				  group: 'success',
+				  text: this.$t('Move_AFIT_to_Wallet')+ ' ' +this.$t('Scheduled_successfully'),
+				  position: 'top center'
+				})
+				
+				//initiate call to adjust AFIT token count
+				
+				let url = new URL(process.env.actiAppUrl + 'confirmAFITSEReceipt/?user='+this.user.account.name+'&bchain='+this.cur_bchain);
+				//connect with our service to confirm AFIT received to proper wallet
+				try{
+					fetch(url).then(
+					  res => {res.json().then(json => {this.setUserAddedTokens(json);this.movingFunds = false;}).catch(e => {console.log(e);this.movingFunds = false;})
+					}).catch(e => console.log(e))
+					
+				}catch(err){
+					console.error(err);
+					//this.checkingFunds = false;
+				}				
+			}else{
+				//notify of success
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('error_performing_operation'),
+				  position: 'top center'
+				})
+			}
+
 		
 		}else{
 		
@@ -5212,6 +5377,53 @@
 				});
 			});		
 					
+		}else if (this.isHiveauthLogin){
+			let targetAcct = 'actifit.h-e';
+			let transId = process.env.hiveEngineChainId;
+			if (this.cur_bchain == 'STEEM'){
+				targetAcct = 'actifit.s-e';
+				transId = 'ssc-mainnet1';
+			}
+			
+			let json_data = {
+				contractName: 'tokens',
+				contractAction: 'stake',
+				contractPayload: {
+					symbol: this.selTokenUp.symbol,
+					to: this.user.account.name,
+					quantity: '' + amount_to_power,//needs to be string
+					memo: ''
+				}
+			}
+			
+			let op_name = 'custom_json';
+			let cstm_params = {
+				required_auths: [this.user.account.name],
+				required_posting_auths: [],
+				id: 'actifit',
+				json: JSON.stringify(json_data)
+			  };
+			let operation = [ 
+			   [op_name, cstm_params]
+			];
+			
+			let response = await this.processTrxFunc(op_name, cstm_params, true);
+			
+			//notify of success
+			if (response.success){
+				this.$notify({
+				  group: 'success',
+				  text: this.$t('Power_up_token')+ ' ' +this.$t('completed_success'),
+				  position: 'top center'
+				})
+			}else{
+				//notify of success
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('error_performing_operation'),
+				  position: 'top center'
+				})
+			}
 			
 		}else{
 			this.movingFunds = true;
@@ -5348,6 +5560,54 @@
 					}
 				});
 			});		
+		
+				
+		}else if (this.isHiveauthLogin){
+			let targetAcct = 'actifit.h-e';
+			let transId = process.env.hiveEngineChainId;
+			if (this.cur_bchain == 'STEEM'){
+				targetAcct = 'actifit.s-e';
+				transId = 'ssc-mainnet1';
+			}
+			
+			let json_data = {
+				contractName: 'tokens',
+				contractAction: 'unstake',
+				contractPayload: {
+					symbol: this.selTokenUp.symbol,
+					quantity: '' + amount_to_powerdown,//needs to be string
+					memo: ''
+				}
+			}
+			
+			let op_name = 'custom_json';
+			let cstm_params = {
+				required_auths: [this.user.account.name],
+				required_posting_auths: [],
+				id: 'actifit',
+				json: JSON.stringify(json_data)
+			  };
+			let operation = [ 
+			   [op_name, cstm_params]
+			];
+			
+			let response = await this.processTrxFunc(op_name, cstm_params, true);
+			
+			//notify of success
+			if (response.success){
+				this.$notify({
+				  group: 'success',
+				  text: this.$t('Power_down_token')+ ' ' +this.$t('completed_success'),
+				  position: 'top center'
+				})
+			}else{
+				//notify of success
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('error_performing_operation'),
+				  position: 'top center'
+				})
+			}
 		
 		}else{
 			this.movingFunds = true;
@@ -5494,6 +5754,54 @@
 			});		
 		
 			
+		}else if (this.isHiveauthLogin){
+			let targetAcct = 'actifit.h-e';
+			let transId = process.env.hiveEngineChainId;
+			if (this.cur_bchain == 'STEEM'){
+				targetAcct = 'actifit.s-e';
+				transId = 'ssc-mainnet1';
+			}
+			
+			let json_data = {
+				contractName: 'tokens',
+				contractAction: 'transfer',
+				contractPayload: {
+					symbol: this.selTokenUp.symbol,
+					to: target_account,
+					quantity: '' + amount_to_send,//needs to be string
+					memo: memo
+				}
+			}
+			
+			let op_name = 'custom_json';
+			let cstm_params = {
+				required_auths: [this.user.account.name],
+				required_posting_auths: [],
+				id: 'actifit',
+				json: JSON.stringify(json_data)
+			  };
+			let operation = [ 
+			   [op_name, cstm_params]
+			];
+			
+			let response = await this.processTrxFunc(op_name, cstm_params, true);
+			
+			//notify of success
+			if (response.success){
+				this.$notify({
+				  group: 'success',
+				  text: this.$t('Transfer_token')+ ' ' +this.$t('completed_success'),
+				  position: 'top center'
+				})
+			}else{
+				//notify of success
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('error_performing_operation'),
+				  position: 'top center'
+				})
+			}
+			
 		}else{
 			if (this.$refs["p-ac-key-trans-token"].value == ''){
 			  this.afit_se_power_error_proceeding = true;
@@ -5620,7 +5928,7 @@
 		  return;
 		}
 		
-		if (!this.isKeychainLogin && this.isStdLogin){
+		if (!this.isKeychainLogin && !this.isHiveauthLogin && this.isStdLogin){
 			if (this.$refs["p-ac-key-trans-token"].value == ''){
 			  this.afit_se_power_error_proceeding = true;
 			  this.afit_se_power_err_msg = this.$t('all_fields_required');
@@ -5851,7 +6159,55 @@
 					}
 				});
 			});		
-		
+		}else if (this.isHiveauthLogin){
+			let targetAcct = 'actifit.h-e';
+			let transId = process.env.hiveEngineChainId;
+			let curr = 'hivepegged';
+			if (this.cur_bchain == 'STEEM'){
+				targetAcct = 'actifit.s-e';
+				transId = 'ssc-mainnet1';
+				curr = 'steempegged';
+			}
+			
+			
+			
+			let json_data = {
+				contractName: curr,
+				contractAction: 'withdraw',
+				contractPayload: {
+					quantity: '' + amount_to_withdraw,//needs to be string
+				}
+			}
+			
+			let op_name = 'custom_json';
+			let cstm_params = {
+				required_auths: [this.user.account.name],
+				required_posting_auths: [],
+				id: 'actifit',
+				json: JSON.stringify(json_data)
+			  };
+			let operation = [ 
+			   [op_name, cstm_params]
+			];
+			
+			let response = await this.processTrxFunc(op_name, cstm_params, true);
+			
+			//notify of success
+			if (response.success){
+				this.$notify({
+				  group: 'success',
+				  text: this.$t('Withdraw_token')+ ' ' +this.$t('completed_success'),
+				  position: 'top center'
+				})
+			}else{
+				//notify of success
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('error_performing_operation'),
+				  position: 'top center'
+				})
+			}
+			
 			
 		}else{
 			if (this.$refs["p-ac-key-trans-token"].value == ''){
@@ -6048,6 +6404,20 @@
 				  this.confirmCompletion('transfer-verify', this.$refs["pass-transfer-amount"].value, response)
 				}, true);
 			});	
+			
+		}else if (this.isHiveauthLogin){
+			let opname = 'transfer';
+			let	params = {
+					"from": this.user.account.name,
+					"to": this.target_exchange_account,
+					"amount": parseFloat(this.$refs["pass-transfer-amount"].value).toFixed(3)+' '+this.transferTypePass,
+					"memo": ""
+				};
+			let res = await this.processTrxFunc(opname, params, true);
+			
+			if (res.success){
+				this.confirmCompletion('transfer-verify', this.$refs["pass-transfer-amount"].value, res)
+			}
 			
 		}else{
 			
