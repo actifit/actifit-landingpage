@@ -9,15 +9,13 @@
 			<!--<h5 class="col-md-6"><img src="/img/STEEM.png" class="token-logo-sm">Standard Login</h5>-->
 			<div class="form-group">
 			
-				<div class="row form-control-lg">
+				<div class="row form-control-lg col-12">
 					<input type="text" id="username" name="username" :placeholder="$t('Username')" ref="username" class="form-control m-1 col-md-6 acti-shadow">
-					<button v-on:click="loginKeychain" class="btn btn-brand keychain-btn login-stdd-btn m-1"></button>
-					
 					
 				</div>
 				
-				<div class="row form-control-lg">
-					<div class="m-1 col-md-6"/>
+				<div class="row form-control-lg col-12">
+					<button v-on:click="loginKeychain" class="btn btn-brand keychain-btn login-stdd-btn m-1"></button>
 					<button v-on:click="loginHiveauth" class="btn hiveauth-btn acti-shadow login-stdd-btn m-1"></button>
 				</div>
 				<transition name="fade">
@@ -29,8 +27,11 @@
 					</div>
 				</transition>
                 				
-				<div class="row form-control-lg">
+				<div class="row form-control-lg col-12">
 					<input type="password" id="ppkey" name="ppkey" ref="ppkey" :placeholder="$t('Ppkey')"  class="form-control m-1 col-md-6 acti-shadow">
+				</div>
+				
+				<div class="row form-control-lg col-12">
 					<button v-on:click="proceedLogin" class="btn btn-brand login-stdd-btn m-1"><b>{{ $t('Login') }}</b><i class="fas fa-spin fa-spinner text-white" v-if="login_in_progress"></i></button>
 				</div>
 				
