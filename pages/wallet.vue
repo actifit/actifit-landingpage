@@ -62,16 +62,16 @@
 		</div>
 		<div v-if="this.tokenMetrics.length > 0 || this.tokensOfInterestBal.length > 0" class="wallet-container">
 			<div class="row font-weight-bold token-entry thick-bottom head-title">
-				<div class="col-2">Token 
-					<span v-on:click="sortTokenData('symbol')" class="clickable">
+				<div class="col-2 clickable" v-on:click="sortTokenData('symbol')" >Token 
+					<span >
 						<span v-if="tokenSort=='symbol' && tsortDir==1" >▼△</span>
 						<span v-else-if="tokenSort=='symbol'">▽▲</span>
 						<span v-else>▽△</span>
 					</span>
 				</div>
 				<div class="col-2">Location <span v-if="tokenSort=='location'">▽▼△▲</span></div>
-				<div class="col-2">Balance 
-					<span v-on:click="sortTokenData('balance')" class="clickable">
+				<div class="col-2 clickable" v-on:click="sortTokenData('balance')" >Balance 
+					<span >
 						<span v-if="tokenSort=='balance' && tsortDir==1" >▼△</span>
 						<span v-else-if="tokenSort=='balance'">▽▲</span>
 						<span v-else>▽△</span>
@@ -79,7 +79,7 @@
 				</div>
 				<div class="col-2">Staked</div>
 				<div class="col-lg-1 col-2">Savings</div>
-				<div class="col-1">USD <span v-on:click="sortTokenData('usdval')" class="clickable">
+				<div class="col-1 clickable" v-on:click="sortTokenData('usdval')" >USD <span >
 						<span v-if="tokenSort=='usdval' && tsortDir==1" >▼△</span>
 						<span v-else-if="tokenSort=='usdval'">▽▲</span>
 						<span v-else>▽△</span>
