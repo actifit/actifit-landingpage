@@ -209,6 +209,10 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 	/* handles outside clicks for the picker */
 	/* begin */
 	import Vue from 'vue';
+	
+	//for hiveauth
+	import { Signature, hash, PublicKey, ec } from 'elliptic';
+
 
 	Vue.directive('click-outside', {
 		bind(el, binding, vnode) {
@@ -1520,13 +1524,48 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 						outcome = await this.keychainDecode(memo);
 						console.log(outcome);
 					}else if (localStorage.getItem('acti_login_method') == 'hiveauth'){
-						const auth = {
+						this.$notify({
+						  group: 'error',
+						  text: this.$t('operation_ns_hiveauth'),
+						  position: 'top center'
+						})
+						/*const auth = {
 						  username: this.user.account.name,
 						  token: localStorage.getItem('access_token'),//should be changed in V1 (current V0.8)
 						  expire: localStorage.getItem('expires'),
 						  key: localStorage.getItem('key')
 						}
-						//TODO: implement hiveauth approach to decode memo
+						const challenge_data = {
+							key_type: "posting",
+							challenge: JSON.stringify({
+								login: auth.username,
+								ts: this.user.account.name
+							})
+						}*/
+						
+						/*const ecc = new ec('secp256k1');						
+						const res = await this.$HAS.challenge(auth, challenge_data)
+						console.log(res);
+						const sig = Signature.fromHex(res.data.challenge) //ecc.
+						const buf = hash.sha256(challenge, null, 0) //ecc.
+						const verified = sig.verifyHash(buf, ecc.PublicKey.fromString(res.data.pubkey));
+						console.log(buf);
+						console.log(verified);
+						if(verified) {
+							console.log("challenge succeeded")
+						} else {
+							console.error("challenge failed")
+						}*/
+						
+						/*let op_name = 'decode';
+						let cstm_params = {
+							key: ,
+							message: memo
+						}
+						let operation = [ 
+						   [op_name, cstm_params]
+						];*/
+						//TODO: implement hiveauth approach to decode memo. Currently hiveauth does not support such calls
 						/*let operation = [ 
 						   ['decode', {}]
 						];*/

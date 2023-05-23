@@ -41,6 +41,7 @@
     "core-js": "^2.6.5",
     "dotenv": "^16.0.3",
     "dsteem": "^0.11.3",
+    "elliptic": "^6.5.4",
     "emoji-mart-vue-fast": "^12.0.1",
     "fix-webm-duration": "^1.0.5",
     "hive-auth-client": "^0.1.5",
