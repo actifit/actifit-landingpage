@@ -292,7 +292,7 @@
 			return;
 		}
 		this.login_in_progress = true;
-		let account = this.$refs["username"].value;
+		let account = this.$refs["username"].value.trim().toLowerCase();
 		const APP_META = {
 			name:"actifit", 
 			description:"Actifit - Rewarding Your EveryDay Activity", 
@@ -446,7 +446,7 @@
 		
 		localStorage.setItem('cur_bchain', this.bchain_val)
 		
-		let account_name = this.$refs["username"].value.toLowerCase();
+		let account_name = this.$refs["username"].value.trim().toLowerCase();
 		const message = account_name + Date.now();
 		
 		let user_info = {
@@ -527,7 +527,7 @@
 		localStorage.setItem('cur_bchain', this.bchain_val)
 		
 		this.login_in_progress = true;
-		let account_name = this.$refs["username"].value.toLowerCase();
+		let account_name = this.$refs["username"].value.trim().toLowerCase();
 		let priv_pkey = this.$refs["ppkey"].value;
 		let vue_ctnr = this;
 		let user_info = {
