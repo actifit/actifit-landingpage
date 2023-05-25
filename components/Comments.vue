@@ -8,8 +8,8 @@
 			<option value="">-- {{$t('Sort_By')}} --</option>
 			<option :value="JSON.stringify({value: 'author', direction: 'asc'})">{{$t('Name')}}▲</option>
 			<option :value="JSON.stringify({value: 'author', direction: 'desc'})">{{$t('Name')}}▼</option>
-			<option :value="JSON.stringify({value: 'pending_payout_value', direction: 'asc'})">{{$t('Payout')}}▲</option>
-			<option :value="JSON.stringify({value: 'pending_payout_value', direction: 'desc'})">{{$t('Payout')}}▼</option>
+			<option :value="JSON.stringify({value: 'payout', direction: 'asc'})">{{$t('Payout')}}▲</option>
+			<option :value="JSON.stringify({value: 'payout', direction: 'desc'})">{{$t('Payout')}}▼</option>
 			<option :value="JSON.stringify({value: 'children', direction: 'asc'})">{{$t('Replies')}}▲</option>
 			<option :value="JSON.stringify({value: 'children', direction: 'desc'})">{{$t('Replies')}}▼</option>
 			<option :value="JSON.stringify({value: 'active_votes', direction: 'asc'})">{{$t('Votes')}}▲</option>
@@ -194,6 +194,7 @@
   
   import CustomTextEditor from '~/components/CustomTextEditor' 
   
+  import Lodash from 'lodash'
   
   export default { 
     props: [ 'author', 'reply_entries', 'depth', 'body', 'full_data', 'main_post_author', 'main_post_permlink', 'main_post_cat' ],
@@ -304,11 +305,15 @@
 				//console.log(sortApproach.value);
 				if (sortApproach.value){
 					//console.log(sortApproach.value);
-					/*if (sortApproach.value == 'price'){
-						this.reply_entries = _.orderBy(this.reply_entries, function(e) { return e.price[0].price },[sortApproach.direction]);
-					}else{*/
+					if (sortApproach.value == 'payout'){
+						this.reply_entries = _.orderBy(this.reply_entries, function(e) { 
+								let val = parseFloat(e.pending_payout_value)
+								if (val > 0) return val;
+								else return parseFloat(e.total_payout_value)
+							},[sortApproach.direction]);
+					}else{
 						this.reply_entries = _.orderBy(this.reply_entries, [sortApproach.value],[sortApproach.direction]);
-					//}
+					}
 					this.$forceUpdate();
 				}
 			}catch(err){
