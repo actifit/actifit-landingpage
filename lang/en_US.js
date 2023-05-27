@@ -1000,7 +1000,7 @@ module.exports = {
   comment_link: 'Link to Comment',
   copy_link: 'Copy Link',
   copied_successfully: 'Copied Successfully!',
-  hiveauth_instructions: 'Scan this QR code using your Hive Auth-compatible mobile app',
+  hiveauth_instructions: 'Scan or Tap this QR code using your Hive Auth-compatible mobile app',
   operation_ns_hiveauth: 'This operation is currently not supported via hive auth. Please log out and log back in using other login methods',
   error_copying: 'Error Copying!',
   benefic_3s: 'Kindly note that 3speak requires beneficaries which cannot be removed from the beneficiary list above, in total amounting to 11% of beneficiary value',
