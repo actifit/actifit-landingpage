@@ -152,6 +152,9 @@
 		  meta: [
 			{ hid: 'description', name: 'description', content: `Signup for an account at actifit.io` },
 			{ hid: 'ogdescription', name: 'og:description', content: `Signup for an account at actifit.io` }
+		  ],
+		  link: [
+				{ rel: 'canonical', href: `https://actifit.io/signup`}
 		  ]
 		}
 	},
