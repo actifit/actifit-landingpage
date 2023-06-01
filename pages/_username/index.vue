@@ -417,6 +417,9 @@
 		  meta: [
 			{ hid: 'description', name: 'description', content: `Actifit profile view for ${this.username}` },
 			{ hid: 'ogdescription', name: 'og:description', content: `Actifit profile view for ${this.username}` }
+		  ],
+		  link: [
+				{ rel: 'canonical', href: `https://actifit.io/${this.username}`}
 		  ]
 		}
 	},
