@@ -32,10 +32,10 @@
 	  </div>
 	  
       <!-- show listing when loaded -->
-	  <div class="row" v-if="communitiesList.length">
+	  <div class="row" v-if="finalCommList.length">
 		<!--<div class="row"  v-for="iterx in Math.ceil(communitiesList.length / splitFactor)" :key="iterx">-->
-			<div v-for="iterx in communitiesList.length" :key="iterx" class="col-md-6 col-lg-4 mb-4" v-if="showCommunity(communitiesList[iterx-1])" >
-				<Community :community="communitiesList[(iterx - 1)]" :pstId="iterx - 1" :userSubscribed="isUserSubscribed(communitiesList[(iterx - 1)])" />
+			<div v-for="iterx in finalCommList.length" :key="iterx" class="col-md-6 col-lg-4 mb-4" v-if="showCommunity(finalCommList[iterx-1])" >
+				<Community :community="finalCommList[(iterx - 1)]" :pstId="iterx - 1" :userSubscribed="isUserSubscribed(finalCommList[(iterx - 1)])" />
 			</div>
 			<!--<div class="col-md-6 col-lg-12 mb-4" v-if="(iterx - 1) < inlineAds">
 				<client-only>
@@ -112,10 +112,14 @@
 		communitySubs: [],
 		showOnlySubscribed: false,
 		sortOrder: 'rank',//default by rank (options: subs, rank, new)
+		finalCommList: [],
       }
     },
 	watch: {
 	  user: 'fetchUserData',
+	  communitiesList: async function (){
+		this.finalCommList = this.communitiesList;
+	  },
 	  bchain: async function(newBchain) {
 		if (this.cur_bchain != newBchain && !this.loading){
 			//only update if changed
@@ -130,9 +134,10 @@
 			this.$store.commit('setMoreCommunitiesAvailable', false)
 			console.log('dispatch fetching communities')
 			
+			await this.$store.dispatch('fetchCommunities', this.sortOrder)
+			
 			await this.fetchUserCommunities();
 			
-			await this.$store.dispatch('fetchCommunities', this.sortOrder)
 			this.loading = false
 		}
 		//this.reload += 1;
@@ -169,9 +174,41 @@
 			this.communitySubs = await this.$store.dispatch('fetchUserCommunitySubs');
 			console.log('community subs')
 			console.log(this.communitySubs);
+			//we also need to check if those communities are included in the current display list, if not, to add them
+			await this.fetchUserMissingCommunities();
 			this.loading = false;
 		}
 	  },
+	  /*async fetchUserMissingCommunities(){
+		//for (this.communitiesList)
+		this.communitySubs.forEach(([entry]) => { 
+			const exists = this.communitiesList.some(obj => obj.name === entry);
+			console.log('extras')
+			console.log(entry)
+			console.log(exists);
+		
+			let commData = await this.$store.dispatch('fetchSpecificCommunity', entry);
+			this.communitiesList.push(commData);
+		});
+	  },*/
+	  async fetchUserMissingCommunities() {
+		  await Promise.all(this.communitySubs.map(async ([entry]) => {
+			const exists = this.communitiesList.some(obj => obj.name === entry);
+			console.log('extras');
+			console.log(entry);
+			console.log(exists);
+
+			if (!exists) {
+			  let commData = await this.$store.dispatch('fetchSpecificCommunity', entry);
+			  this.communitiesList.push(commData);
+			}
+		  }));
+		  //cleanup data
+		  this.finalCommList = Object.values(this.communitiesList.reduce((acc, obj) => {
+			  acc[obj.name] = obj;
+			  return acc;
+			}, {}));
+		},
       async loadMore () {
         this.loadingMore = true
 		
@@ -200,6 +237,7 @@
 	  async reFetchCommunities(){
 		this.loading = true;
 		await this.$store.dispatch('fetchCommunities', this.sortOrder)
+		await this.fetchUserCommunities();
 		this.loading = false;
 	  }
     },
@@ -216,10 +254,9 @@
       // disable load more button and only show if there actually are more posts to load
       this.$store.commit('setMoreCommunitiesAvailable', false)
 	  
-	  await this.fetchUserCommunities();
-	  
       await this.$store.dispatch('fetchCommunities', this.sortOrder)
 	  
+	  await this.fetchUserCommunities();
 	  
       // remove loading indicator
       this.loading = false

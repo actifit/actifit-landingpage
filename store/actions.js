@@ -199,6 +199,17 @@ export default {
 		});
 	})	  
   },
+  fetchSpecificCommunity ({state, commit}, name){
+	return new Promise((resolve, reject) => {
+		let outc = hive.api.call('bridge.get_community', {name: name}, (err, result) => {
+			console.log(err, result);
+			if (err) reject(err)
+			else {
+				resolve(result);
+			}
+		});
+	})	  
+  },
   /*fetchPopCommunities ({state, commit}){
 	return new Promise((resolve, reject) => {
 	  let outc = hive.api.call('bridge.list_pop_communities', {limit: 10}, (err, result) => {
