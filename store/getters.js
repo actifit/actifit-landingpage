@@ -11,6 +11,12 @@ export default {
   referrals (state) {
     return state.referrals
   },
+  communitiesList (state){
+	return state.communitiesList;
+  },
+  moreCommunitiesAvailable (state) {
+    return state.moreCommunitiesAvailable
+  },
   userRank (state) {
 	return state.userRank
   },

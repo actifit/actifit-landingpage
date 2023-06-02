@@ -30,6 +30,12 @@ export default {
   setLeaderboard (state, leaderboard) {
     state.leaderboard = leaderboard
   },
+  setCommunitiesList (state, list) {
+    state.communitiesList = list
+  },
+  setMoreCommunitiesAvailable (state, moreCommunitiesAvailable){
+	state.moreCommunitiesAvailable = moreCommunitiesAvailable
+  },
   setExtendedLeaderboard (state, leaderboard) {
     state.extLeaderboard = leaderboard
   },

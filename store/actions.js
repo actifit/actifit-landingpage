@@ -186,6 +186,29 @@ export default {
 	  });
 	})
   },
+  fetchCommunities ({state, commit}){
+	return new Promise((resolve, reject) => {
+	  let outc = hive.api.call('bridge.list_communities', {limit: 100}, (err, result) => {
+		console.log(err, result);
+		if (err) reject(err)
+		else {
+			commit('setCommunitiesList', result)
+			resolve(result);
+		}
+	  });
+	})	  
+  },
+  /*fetchPopCommunities ({state, commit}){
+	return new Promise((resolve, reject) => {
+	  let outc = hive.api.call('bridge.list_pop_communities', {limit: 10}, (err, result) => {
+		console.log(err, result);
+		if (err) reject(err)
+		else {
+			resolve(result);
+		}
+	  });
+	})
+  },*/
   fetchReports ({ state, commit, dispatch }) {
     // fetches initial posts or more posts if invoked again
 	

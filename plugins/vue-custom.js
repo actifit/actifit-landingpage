@@ -36,3 +36,13 @@ Vue.prototype.$getTimeDifference = function(dateParam) {
 	return `${years} year(s)`;//`${years} years and ${remainingMonths} month(s)`;
   }
 }
+/**
+       * Formats numbers with commas and dots.
+       *
+       * @param number
+	   * @param precision
+       * @returns {string}
+       */
+Vue.prototype.$numberFormat = function(number, precision) {
+        return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
+      }

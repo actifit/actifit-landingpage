@@ -16,6 +16,8 @@ const createStore = () => {
 	  userRank: 0, // logged-in user's rank
 	  userRankObj: '', // full details about user's rank
       userCount: 0, // users using actifit
+	  communitiesList: [], //list of hive communities
+	  moreCommunitiesAvailable: false, //indicator if more communities can be loaded
       tokensDistributed: 0, // total amount of distributed tokens
       rewardedActivityCount: 0, // total amount of activity posts
       leaderboard: [], // top users
