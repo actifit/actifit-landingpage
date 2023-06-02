@@ -1002,6 +1002,8 @@ module.exports = {
   authors: 'Community Authors Count',
   subscribers: 'Community Subscribers Count',
   pending_rewards: 'Community Pending rewards',
+  comm_posts: 'Community Posts',
+  Show_only_subscribed: 'Show Only Subscribed', 
   Subscribe: 'Subscribe',
   Unsubscribe: 'Unsubscribe',
   comment_link: 'Link to Comment',

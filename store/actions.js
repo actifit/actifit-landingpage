@@ -186,16 +186,17 @@ export default {
 	  });
 	})
   },
-  fetchCommunities ({state, commit}){
+  fetchCommunities ({state, commit}, sortOrder){
 	return new Promise((resolve, reject) => {
-	  let outc = hive.api.call('bridge.list_communities', {limit: 100}, (err, result) => {
-		console.log(err, result);
-		if (err) reject(err)
-		else {
-			commit('setCommunitiesList', result)
-			resolve(result);
-		}
-	  });
+		let sOrder = sortOrder?sortOrder:'subs';//default sort by subscribers count unless specified otherwise
+		let outc = hive.api.call('bridge.list_communities', {limit: 100, sort: sOrder}, (err, result) => {
+			console.log(err, result);
+			if (err) reject(err)
+			else {
+				commit('setCommunitiesList', result)
+				resolve(result);
+			}
+		});
 	})	  
   },
   /*fetchPopCommunities ({state, commit}){

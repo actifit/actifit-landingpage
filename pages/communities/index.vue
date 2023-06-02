@@ -13,21 +13,38 @@
         <i class="fas fa-spinner fa-spin text-brand"></i>
       </div>
 	  
+	  <div class="col-12 row p-2">
 	  
+		  <div v-if="user">
+			<input type="checkbox" id="showOnlySubscribed" v-model="showOnlySubscribed" >
+			<label for="showOnlySubscribed" class="ml-2">{{$t('Show_only_subscribed')}}</label>
+		  </div>
+		  
+		  <div class="pl-2">
+			  <select @change="reFetchCommunities" v-model="sortOrder" class="form-control sel-adj">
+					<!--<option value="">-- {{$t('Sort_By')}} --</option>-->
+					<option value="subs">{{$t('Subscribers')}}</option>
+					<option value="rank">{{$t('Rank')}}</option>
+					<option value="new">{{$t('New')}}</option>
+			  </select>
+		  </div>
+	  
+	  </div>
 	  
       <!-- show listing when loaded -->
 	  <div class="row" v-if="communitiesList.length">
-		<div class="row"  v-for="iterx in Math.ceil(communitiesList.length / splitFactor)" :key="iterx">
-			<div v-for="itery in splitFactor" :key="itery" class="col-md-6 col-lg-4 mb-4">
-				<Community v-if="(iterx - 1) * splitFactor + (itery - 1) < communitiesList.length" :community="communitiesList[(iterx - 1) * splitFactor + (itery - 1)]" :pstId="(iterx - 1) * splitFactor + (itery - 1)" :userSubscribed="isUserSubscribed(communitiesList[(iterx - 1) * splitFactor + (itery - 1)])"/>
+		<!--<div class="row"  v-for="iterx in Math.ceil(communitiesList.length / splitFactor)" :key="iterx">-->
+			<div v-for="iterx in communitiesList.length" :key="iterx" class="col-md-6 col-lg-4 mb-4" v-if="showCommunity(communitiesList[iterx-1])" >
+				<Community :community="communitiesList[(iterx - 1)]" :pstId="iterx - 1" :userSubscribed="isUserSubscribed(communitiesList[(iterx - 1)])" />
 			</div>
 			<!--<div class="col-md-6 col-lg-12 mb-4" v-if="(iterx - 1) < inlineAds">
 				<client-only>
 				<adsbygoogle ad-slot="7038919015" ad-format="fluid" ad-layout-key="-fb+5w+4e-db+86"/>
 				</client-only>
-			</div>-->
-		</div>
+			</div>
+		</div>-->
       </div>
+	  
 
       <!-- or no content message when no posts found -->
       <div class="text-center text-muted" v-if="!communitiesList.length && !loading">
@@ -93,6 +110,8 @@
 		splitFactor: 9,
 		inlineAds: 2,
 		communitySubs: [],
+		showOnlySubscribed: false,
+		sortOrder: 'rank',//default by rank (options: subs, rank, new)
       }
     },
 	watch: {
@@ -113,7 +132,7 @@
 			
 			await this.fetchUserCommunities();
 			
-			await this.$store.dispatch('fetchCommunities')
+			await this.$store.dispatch('fetchCommunities', this.sortOrder)
 			this.loading = false
 		}
 		//this.reload += 1;
@@ -127,6 +146,14 @@
       
     },
     methods: {
+	  showCommunity(community){
+		//only active if user logged in and user selected to show only subscribed
+		if (this.user && this.user.account.name){
+			if (this.showOnlySubscribed && !this.isUserSubscribed(community))
+				return false;
+		}
+		return true
+	  },
 	  isUserSubscribed(community){
 		//console.log('subscribed')
 		//console.log(this.communitySubs)
@@ -138,9 +165,11 @@
 	  },
 	  async fetchUserCommunities(){
 		if (this.user){
+			this.loading = true;
 			this.communitySubs = await this.$store.dispatch('fetchUserCommunitySubs');
 			console.log('community subs')
 			console.log(this.communitySubs);
+			this.loading = false;
 		}
 	  },
       async loadMore () {
@@ -150,7 +179,7 @@
 		this.$store.commit('setBchain', cur_bchain);
 		console.log('dispatch MORE fetching user posts')
 
-        await this.$store.dispatch('fetchCommunities')
+        await this.$store.dispatch('fetchCommunities', this.sortOrder)
         this.loadingMore = false
       },
 	  async fetchUserData () {
@@ -165,8 +194,14 @@
 		  //ensure we fetch proper logged in user data
 		  this.$store.dispatch('fetchUserTokens')
 		  this.$store.dispatch('fetchUserRank')
+		  await this.fetchUserCommunities();
 		}
 	  },
+	  async reFetchCommunities(){
+		this.loading = true;
+		await this.$store.dispatch('fetchCommunities', this.sortOrder)
+		this.loading = false;
+	  }
     },
     async mounted () {
       // login
@@ -183,7 +218,7 @@
 	  
 	  await this.fetchUserCommunities();
 	  
-      await this.$store.dispatch('fetchCommunities')
+      await this.$store.dispatch('fetchCommunities', this.sortOrder)
 	  
 	  
       // remove loading indicator
