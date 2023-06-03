@@ -21,7 +21,7 @@
 			<!--<small class="text-muted d-block" :title="date">Created {{ $getTimeDifference(this.community.created_at) }}</small>-->
 			<div ><a :href="buildLink" target="_blank" class="text-brand">#{{community.name}}</a></div>
 			<div>{{community.about}}</div>
-			<small class="text-right" :title="date">Since {{date}}</small>
+			<small class="text-right curs-point" :title="'Created '+date"><i class="fas fa-calendar"></i>&nbsp;Since {{date}}</small>
             <!--<a :href="'/'+community.author" target="_blank">
 			
               <div class="user-avatar mr-1"
