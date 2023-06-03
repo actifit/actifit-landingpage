@@ -30,6 +30,9 @@ export default {
   setLeaderboard (state, leaderboard) {
     state.leaderboard = leaderboard
   },
+  appendCommunitiesList (state, list) {
+    state.communitiesList.push(...list)
+  },
   setCommunitiesList (state, list) {
     state.communitiesList = list
   },

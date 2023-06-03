@@ -123,6 +123,7 @@
 		sortOrder: 'rank',//default by rank (options: subs, rank, new)
 		finalCommList: [],
 		filterActive: false,
+		moreCommunitiesAvailable: false,
       }
     },
 	watch: {
@@ -141,12 +142,18 @@
 			//this.$store.commit('setUserPosts', [])
 
 			// disable load more button and only show if there actually are more posts to load
-			this.$store.commit('setMoreCommunitiesAvailable', false)
+			//this.$store.commit('setMoreCommunitiesAvailable', false)
 			console.log('dispatch fetching communities')
 			
 			await this.$store.dispatch('fetchCommunities', {sortOrder: this.sortOrder})
 			
 			await this.fetchUserCommunities();
+			
+			this.moreCommunitiesAvailable = true;
+			if (this.communitiesList.length < 1){
+				this.moreCommunitiesAvailable = false;
+			}
+
 			
 			this.loading = false
 		}
@@ -156,7 +163,7 @@
     computed: {
 	  ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters('steemconnect', ['stdLogin']),
-      ...mapGetters(['communitiesList', 'moreCommunitiesAvailable', 'bchain']),
+      ...mapGetters(['communitiesList', 'bchain']),
 
       
     },
@@ -246,7 +253,13 @@
 		this.$store.commit('setBchain', cur_bchain);
 		console.log('dispatch MORE fetching user posts')
 
-        await this.$store.dispatch('fetchCommunities', {sortOrder: this.sortOrder})
+        await this.$store.dispatch('fetchCommunities', {sortOrder: this.sortOrder, last: this.communitiesList[this.communitiesList.length -1].name})
+		
+		this.moreCommunitiesAvailable = true;
+		if (this.communitiesList.length < 1){
+			this.moreCommunitiesAvailable = false;
+		}
+		
         this.loadingMore = false
       },
 	  async fetchUserData () {
@@ -282,12 +295,17 @@
 	  this.$store.commit('setBchain', cur_bchain);
 
       // disable load more button and only show if there actually are more posts to load
-      this.$store.commit('setMoreCommunitiesAvailable', false)
+      //this.$store.commit('setMoreCommunitiesAvailable', false)
 	  
       await this.$store.dispatch('fetchCommunities', {sortOrder: this.sortOrder})
 	  
 	  await this.fetchUserCommunities();
 	  
+		this.moreCommunitiesAvailable = true;
+		if (this.communitiesList.length < 1){
+			this.moreCommunitiesAvailable = false;
+		}
+
       // remove loading indicator
       this.loading = false
     }
