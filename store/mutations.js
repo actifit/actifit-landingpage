@@ -108,6 +108,9 @@ export default {
   setMoreUserPostsAvailable (state, moreUserPostsAvailable) {
     state.moreUserPostsAvailable = moreUserPostsAvailable
   },
+  appendCommunityPosts (state, newPosts) {
+    state.communityPosts.push(...newPosts)
+  },
   setCommunityPosts (state, communityPosts) {
     state.communityPosts = communityPosts
   },

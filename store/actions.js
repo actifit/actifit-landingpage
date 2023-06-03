@@ -504,13 +504,23 @@ export default {
 	  }else if (state.bchain == 'BLURT'){
 		chainLnk = blurt;
 	  }
-	  
+	  let callQuery = {sort: params.type, tag: params.community};
+	  let appendMode = false;
+	  if (params.lastAuth && params.lastPerm){
+		  callQuery['start_author'] = params.lastAuth;
+          callQuery['start_permlink'] = params.lastPerm;
+		  appendMode = true;
+	  }
       // get (next) 100 posts from the user
-      let outc = chainLnk.api.call('bridge.get_ranked_posts', {sort: params.type, tag: params.community}, (err, posts) => {
+      let outc = chainLnk.api.call('bridge.get_ranked_posts', callQuery, (err, posts) => {
 			if (err) reject(err)
 			else {
 				//console.log(comments)
-				commit('setCommunityPosts', [...state.communityPosts, ...posts])
+				if (appendMode){
+					commit('appendCommunityPosts', posts)
+				}else{
+					commit('setCommunityPosts', [...state.communityPosts, ...posts])
+				}
 				console.log(posts);
 				//dispatch('checkIfMoreUserCommentsAvailable', username)
 				commit('setMoreCommunityPostsAvailable', !!posts.length) // if posts were found, show load more button

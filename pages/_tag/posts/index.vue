@@ -196,8 +196,8 @@
 		this.$store.commit('setBchain', cur_bchain);
 		console.log('dispatch MORE fetching user posts')
 		console.log(this.community)
-
-        await this.$store.dispatch('fetchCommunityPosts', {community:this.community, type:this.type})
+		let lastPost = this.communityPosts[this.communityPosts.length -1];
+        await this.$store.dispatch('fetchCommunityPosts', {community:this.community, type:this.type, lastAuth: lastPost.author, lastPerm: lastPost.permlink})
         this.loadingMore = false
       },
 	  async fetchUserData () {
