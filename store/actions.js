@@ -474,6 +474,38 @@ export default {
     })
   },
   
+  fetchCommunityPosts ({ state, commit, dispatch }, params) {
+    // fetches initial posts or more posts if invoked again
+    return new Promise((resolve, reject) => {
+		console.log('get community posts:'+params.community+' - '+params.type);
+      // if there are posts already, take the last one as starting point
+      let lastPost = state.communityPosts.length ? state.communityPosts[state.communityPosts.length - 1] : null
+      let start_author = lastPost ? lastPost.author : null
+      let start_permlink = lastPost ? lastPost.permlink : null
+	  
+	   //set proper blockchain selection
+	  let chainLnk = hive;
+	  if (state.bchain == 'STEEM'){
+		chainLnk = steem;
+	  }else if (state.bchain == 'BLURT'){
+		chainLnk = blurt;
+	  }
+	  
+      // get (next) 100 posts from the user
+      let outc = chainLnk.api.call('bridge.get_ranked_posts', {sort: params.type, tag: params.community}, (err, posts) => {
+			if (err) reject(err)
+			else {
+				//console.log(comments)
+				commit('setCommunityPosts', [...state.communityPosts, ...posts])
+				console.log(posts);
+				//dispatch('checkIfMoreUserCommentsAvailable', username)
+				commit('setMoreCommunityPostsAvailable', !!posts.length) // if posts were found, show load more button
+				resolve()	  
+			}
+		})
+    })
+  },
+  
   fetchUserVideos ({ state, commit, dispatch }, username) {
     // fetches initial videos or more videos if invoked again
     return new Promise((resolve, reject) => {

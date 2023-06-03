@@ -74,7 +74,7 @@
          
           <div class="col-12 text-center">
 				
-			  <div class="text-center"><a :href="'./'+community.name+'/posts'" class="btn btn-brand btn-lg btn-white border m-1">{{ $t('Posts') }}</a>
+			  <div class="text-center"><a :href="buildLink+'/posts'" class="btn btn-brand btn-lg btn-white border m-1">{{ $t('Posts') }}</a>
 				  <a v-if="user && user.account.name" href="#a" class="btn btn-brand btn-lg btn-white m-1 border" v-on:click="subscribe()">
 					<span v-if="userSubscribed">{{ $t('Unsubscribe') }}</span>
 					<span v-else>{{ $t('Subscribe') }}</span>
@@ -108,7 +108,7 @@
       ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters(['moderators']),
 	  buildLink(){
-		return '/'+this.community.name;
+		return './'+this.community.name;
 	  },
       date() {
         let date = new Date(this.community.created_at)

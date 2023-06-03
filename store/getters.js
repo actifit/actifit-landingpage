@@ -101,6 +101,12 @@ export default {
   morePostsAvailable (state) {
     return state.morePostsAvailable
   },
+  communityPosts (state) {
+    return state.communityPosts
+  },
+  moreCommunityPostsAvailable (state) {
+    return state.moreCommunityPostsAvailable
+  },
   userPosts (state) {
     return state.userPosts
   },

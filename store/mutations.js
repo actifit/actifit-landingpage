@@ -105,6 +105,12 @@ export default {
   setMoreUserPostsAvailable (state, moreUserPostsAvailable) {
     state.moreUserPostsAvailable = moreUserPostsAvailable
   },
+  setCommunityPosts (state, communityPosts) {
+    state.communityPosts = communityPosts
+  },
+  setMoreCommunityPostsAvailable (state, moreCommunityPostsAvailable) {
+    state.moreCommunityPostsAvailable = moreCommunityPostsAvailable
+  },
   setUserVideos (state, userVideos) {
     state.userVideos = userVideos
   },

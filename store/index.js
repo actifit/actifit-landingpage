@@ -41,6 +41,8 @@ const createStore = () => {
       userReports: [], // logged-in user's activity reports/posts
 	  userComments: [], //logged-in user's comments
 	  userPosts: [], // logged-in user's posts
+	  communityPosts: [], //community posts
+	  moreCommunityPostsAvailable: false, //indicator for more community posts to load
 	  userVideos: [], // logged-in user's videos
       moreUserReportsAvailable: false, // indicator if there are more user reports to load
 	  moreUserCommentsAvailable: false, // indicator if more user comments available to load
