@@ -1,10 +1,10 @@
 <template>
   <!-- single post item for activity pages -->
   <div >
-    <div class="card post">
+    <div class="card post" :class="{'card-subscribed':userSubscribed}">
       <h6 class="mb-0 text-center post-title">
         <!--<a :href="community.url" target="_blank">-->
-		<a :href="buildLink" target="_blank">
+		<a :href="buildLink+'/posts'" target="_blank">
           {{ truncateString(community.title, 70) }}
 		  <i class="fas fa-external-link-alt"></i>
         </a>
@@ -30,13 +30,6 @@
 			  
             </a>-->
           </div>
-<!--		  community.about
-		  community.avatar_url
-		  community.admins
-		   "subscribers": 6,
-		"sum_pending": 0,
-		"num_pending": 0,
-		"num_authors": 0, -->
           
         </div>
 		
@@ -286,6 +279,10 @@
 	}
 	.card{
 		box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
+		overflow: hidden;
+	}
+	.card-subscribed{
+		box-shadow: 3px 3px 3px rgba(0, 255, 0, 0.4);
 		overflow: hidden;
 	}
 	.community-image{
