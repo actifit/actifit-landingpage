@@ -71,6 +71,7 @@
 				  <a v-if="user && user.account.name" href="#a" class="btn btn-brand btn-lg btn-white m-1 border" v-on:click="subscribe()">
 					<span v-if="userSubscribed">{{ $t('Unsubscribe') }}</span>
 					<span v-else>{{ $t('Subscribe') }}</span>
+					<i class="fas fa-spin fa-spinner" v-if="loading"></i>
 				  </a>
 			  </div>
           </div>
@@ -148,6 +149,7 @@
 			postUpvoted: false,
 			cur_bchain: 'HIVE',
 			profImgUrl: process.env.hiveImgUrl,
+			loading: false,
 			//socialSharingTitle: process.env.socialSharingTitle,
 			//socialSharingDesc: process.env.socialSharingDesc,
 			//socialSharingQuote: process.env.socialSharingQuote,
@@ -162,15 +164,53 @@
 	  postUpvoted: 'updatePostData',
 	},
 	methods: {
-	  subscribe(){
+	  async subscribe(){
+		let cstm_params;
 		if (this.userSubscribed){
+			let userConf = confirm(this.$t('confirm_user_unsubsribe').replace('_COMMN_', this.community.title));
+			if (!userConf) {
+			  return;
+			}
+			this.loading = true;
 			//user is subscribed, unsubscribe
-			
+			cstm_params = {
+				required_auths: [],
+				required_posting_auths: [this.user.account.name],
+				id: 'community',
+				json: "[\"unsubscribe\",{\"community\":\""+this.community.name+"\"}]"//JSON.stringify([])
+			};
+			this.community.added = false;
 		}else{
+			let userConf = confirm(this.$t('confirm_user_subsribe').replace('_COMMN_', this.community.title));
+			if (!userConf) {
+			  return;
+			}
+			this.loading = true;
 			//user is subsribing
-			
-		
+			cstm_params = {
+				required_auths: [],
+				required_posting_auths: [this.user.account.name],
+				id: 'community',
+				json: "[\"subscribe\",{\"community\":\""+this.community.name+"\"}]"//JSON.stringify([])
+			};
+			this.community.added = true;
+			/*[
+			  "custom_json",
+			  {
+				"required_auths": [],
+				"required_posting_auths": ["alice"],
+				"id": "community",
+				"json": "[\"subscribe\",{\"community\":\"hive-123456\"}]"
+			  }
+			]*/
 		}
+		let res = await this.$processTrxFunc('custom_json', cstm_params, false);
+		console.log(res)
+		if (res.success){
+			//update community status
+			this.$emit('update-community', this.community);
+		}
+		this.loading = false;
 	  },
 	  hasImage(){
 		let metaData = this.meta;

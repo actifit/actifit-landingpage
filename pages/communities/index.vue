@@ -35,7 +35,8 @@
 	  <div class="row" v-if="finalCommList.length">
 		<!--<div class="row"  v-for="iterx in Math.ceil(communitiesList.length / splitFactor)" :key="iterx">-->
 			<div v-for="iterx in finalCommList.length" :key="iterx" class="col-md-6 col-lg-4 mb-4" v-if="showCommunity(finalCommList[iterx-1])" >
-				<Community :community="finalCommList[(iterx - 1)]" :pstId="iterx - 1" :userSubscribed="isUserSubscribed(finalCommList[(iterx - 1)])" />
+				<Community :community="finalCommList[(iterx - 1)]" :pstId="iterx - 1" :userSubscribed="isUserSubscribed(finalCommList[(iterx - 1)])" 
+				@update-community="updateCommunity"/>
 			</div>
 			<!--<div class="col-md-6 col-lg-12 mb-4" v-if="(iterx - 1) < inlineAds">
 				<client-only>
@@ -151,6 +152,26 @@
       
     },
     methods: {
+	  async updateCommunity (community) {
+		//let ind = this.prodList.findIndex( product => (product._id === prod._id ));
+		//this.prodList[ind] = prod;
+		//await this.reFetchCommunities();
+		console.log(community);
+		if (community.added){
+			this.communitySubs.push([community.name, community.title,'guest','']);
+		}else{
+			const index = this.communitySubs.findIndex(item => item[0] === community.name);
+			if (index !== -1) {
+			  this.communitySubs.splice(index, 1);
+			}
+			//this.communitySubs.push(community);
+		}
+		console.log(this.communitySubs);
+		setTimeout(function (){this.$forceUpdate;console.log('updating')}, 2000);
+		//this.$forceUpdate();
+		//console.log('updateProd');
+		//console.log(this.prodList[ind]);
+	  },
 	  showCommunity(community){
 		//only active if user logged in and user selected to show only subscribed
 		if (this.user && this.user.account.name){

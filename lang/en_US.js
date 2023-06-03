@@ -1003,6 +1003,8 @@ module.exports = {
   subscribers: 'Community Subscribers Count',
   pending_rewards: 'Community Pending rewards',
   comm_posts: 'Community Posts',
+  confirm_user_unsubsribe: 'Are you sure you want to unsubscribe from _COMMN_ community?',
+  confirm_user_subsribe: 'Are you sure you want to subscribe to _COMMN_ community?',
   Show_only_subscribed: 'Show Only Subscribed', 
   Subscribe: 'Subscribe',
   Unsubscribe: 'Unsubscribe',
