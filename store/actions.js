@@ -186,11 +186,18 @@ export default {
 	  });
 	})
   },
-  fetchCommunities ({state, commit}, sortOrder){
+  fetchCommunities ({state, commit}, params){
 	return new Promise((resolve, reject) => {
-		let sOrder = sortOrder?sortOrder:'subs';//default sort by subscribers count unless specified otherwise
-		let outc = hive.api.call('bridge.list_communities', {limit: 100, sort: sOrder}, (err, result) => {
-			console.log(err, result);
+		console.log(params);
+		let sOrder = params.sortOrder?params.sortOrder:'subs';//default sort by subscribers count unless specified otherwise
+		let finalQuery = {limit: 100, sort: sOrder};
+		if (params.query && params.query != ''){
+			finalQuery['query'] = params.query;
+		}
+		console.log('final query')
+		console.log(finalQuery);
+		let outc = hive.api.call('bridge.list_communities', finalQuery, (err, result) => {
+			//console.log(err, result);
 			if (err) reject(err)
 			else {
 				commit('setCommunitiesList', result)

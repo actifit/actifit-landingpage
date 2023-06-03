@@ -11,7 +11,7 @@
 	  <div class="text-right col-12 row pb-2">
 			<div class="col-9"/>
 			<select @change="reFetchCommunityPosts" v-model="type" class="form-control sel-adj col-3">
-				<!--<option value="">-- {{$t('Sort_By')}} --</option>-->
+				<option disabled>-- {{$t('Sort_By')}} --</option>
 				<option value="trending">{{$t('Trending')}}</option>
 				<option value="hot">{{$t('Hot')}}</option>
 				<option value="created">{{$t('New')}}</option>

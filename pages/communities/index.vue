@@ -8,21 +8,23 @@
       <h2 class="text-center mb-5">{{ $t('Hive_communities') }} <img src="/img/HIVE.png" class="mr-2 token-logo-md"></h2>
 	  <!--<ChainSelection />-->
 	  
-      <!-- show spinner while loading -->
-      <div class="text-center" v-if="loading">
-        <i class="fas fa-spinner fa-spin text-brand"></i>
-      </div>
+      
+	  <div class="col-12 row p-2 m-2">
 	  
-	  <div class="col-12 row p-2">
-	  
-		  <div v-if="user">
+		  <div v-if="user" class="col-3">
 			<input type="checkbox" id="showOnlySubscribed" v-model="showOnlySubscribed" >
 			<label for="showOnlySubscribed" class="ml-2">{{$t('Show_only_subscribed')}}</label>
 		  </div>
 		  
+		  <div class="pr-2 pl-2 row col-6">
+			<input type="text" id="search" name="search" :placeholder="$t('Search')" ref="search" class="form-control acti-shadow search-term col-6">
+			<input type="button" id="go" name="go" value="Go" class="btn btn-brand btn-white border ml-2" v-on:click="performSearch" >
+
+		  </div>
+
 		  <div class="pl-2">
 			  <select @change="reFetchCommunities" v-model="sortOrder" class="form-control sel-adj">
-					<!--<option value="">-- {{$t('Sort_By')}} --</option>-->
+					<option disabled>-- {{$t('Sort_By')}} --</option>
 					<option value="subs">{{$t('Subscribers')}}</option>
 					<option value="rank">{{$t('Rank')}}</option>
 					<option value="new">{{$t('New')}}</option>
@@ -30,6 +32,12 @@
 		  </div>
 	  
 	  </div>
+	  
+	  <!-- show spinner while loading -->
+      <div class="text-center" v-if="loading">
+        <i class="fas fa-spinner fa-spin text-brand"></i>
+      </div>
+	  
 	  
       <!-- show listing when loaded -->
 	  <div class="row" v-if="finalCommList.length">
@@ -114,6 +122,7 @@
 		showOnlySubscribed: false,
 		sortOrder: 'rank',//default by rank (options: subs, rank, new)
 		finalCommList: [],
+		filterActive: false,
       }
     },
 	watch: {
@@ -135,7 +144,7 @@
 			this.$store.commit('setMoreCommunitiesAvailable', false)
 			console.log('dispatch fetching communities')
 			
-			await this.$store.dispatch('fetchCommunities', this.sortOrder)
+			await this.$store.dispatch('fetchCommunities', {sortOrder: this.sortOrder})
 			
 			await this.fetchUserCommunities();
 			
@@ -152,6 +161,15 @@
       
     },
     methods: {
+	  async performSearch(){
+		if (this.$refs['search'].value==''){
+			this.filterActive = false;
+			//return;
+		}else{
+			this.filterActive = true;
+		}
+		await this.reFetchCommunities(null, this.$refs['search'].value.trim())
+	  },
 	  async updateCommunity (community) {
 		//let ind = this.prodList.findIndex( product => (product._id === prod._id ));
 		//this.prodList[ind] = prod;
@@ -200,19 +218,10 @@
 			this.loading = false;
 		}
 	  },
-	  /*async fetchUserMissingCommunities(){
-		//for (this.communitiesList)
-		this.communitySubs.forEach(([entry]) => { 
-			const exists = this.communitiesList.some(obj => obj.name === entry);
-			console.log('extras')
-			console.log(entry)
-			console.log(exists);
-		
-			let commData = await this.$store.dispatch('fetchSpecificCommunity', entry);
-			this.communitiesList.push(commData);
-		});
-	  },*/
 	  async fetchUserMissingCommunities() {
+		  //only runs if no filtering is in place
+		  if (this.filterActive) return;
+		  
 		  await Promise.all(this.communitySubs.map(async ([entry]) => {
 			const exists = this.communitiesList.some(obj => obj.name === entry);
 			console.log('extras');
@@ -237,7 +246,7 @@
 		this.$store.commit('setBchain', cur_bchain);
 		console.log('dispatch MORE fetching user posts')
 
-        await this.$store.dispatch('fetchCommunities', this.sortOrder)
+        await this.$store.dispatch('fetchCommunities', {sortOrder: this.sortOrder})
         this.loadingMore = false
       },
 	  async fetchUserData () {
@@ -255,9 +264,9 @@
 		  await this.fetchUserCommunities();
 		}
 	  },
-	  async reFetchCommunities(){
+	  async reFetchCommunities(event, query){
 		this.loading = true;
-		await this.$store.dispatch('fetchCommunities', this.sortOrder)
+		await this.$store.dispatch('fetchCommunities', {sortOrder: this.sortOrder, query: query})
 		await this.fetchUserCommunities();
 		this.loading = false;
 	  }
@@ -275,7 +284,7 @@
       // disable load more button and only show if there actually are more posts to load
       this.$store.commit('setMoreCommunitiesAvailable', false)
 	  
-      await this.$store.dispatch('fetchCommunities', this.sortOrder)
+      await this.$store.dispatch('fetchCommunities', {sortOrder: this.sortOrder})
 	  
 	  await this.fetchUserCommunities();
 	  
@@ -284,3 +293,8 @@
     }
   }
 </script>
+<style>
+.search-term{
+	display: inline;
+}
+</style>

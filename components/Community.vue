@@ -34,21 +34,21 @@
         </div>
 		
 		<div class="details m-2 text-center">
-			<div class="row col-12 mb-2">
+			<div class="row mb-2">
 				<div class="col-3 curs-point">
-					<i class="fa-solid fa-users m-1" :title="$t('subscribers')"><span class="m-1">{{$numberFormat(community.subscribers)}}</span></i>
+					<i class="fa-solid fa-users m-1" :title="$t('subscribers')"><span class="m-1 font-weight-normal">{{$numberFormat(community.subscribers)}}</span></i>
 				</div>
 				
 				<div class="col-3 curs-point">
-					<i class="fa-solid fa-user-pen m-1" :title="$t('authors')"><span class="m-1">{{$numberFormat(community.num_authors)}}</span></i>
+					<i class="fa-solid fa-user-pen m-1" :title="$t('authors')"><span class="m-1 font-weight-normal">{{$numberFormat(community.num_authors)}}</span></i>
 				</div>
 				
 				<div class="col-3 curs-point">
-					<i class="fa-solid fa-book-open m-1" :title="$t('comm_posts')"><span class="m-1">{{$numberFormat(community.num_pending)}}</span></i>
+					<i class="fa-solid fa-book-open m-1" :title="$t('comm_posts')"><span class="m-1 font-weight-normal">{{$numberFormat(community.num_pending)}}</span></i>
 				</div>
 				
 				<div class="col-3 curs-point">
-					<i class="fa-solid fa-hourglass m-1" :title="$t('pending_rewards')"><span class="m-1">{{$numberFormat(community.sum_pending)}}</span></i>
+					<i class="fa-solid fa-hourglass m-1" :title="$t('pending_rewards')"><span class="m-1 font-weight-normal">{{$numberFormat(community.sum_pending)}}</span></i>
 				</div>
 				
 			</div>

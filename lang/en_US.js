@@ -1008,6 +1008,8 @@ module.exports = {
   Show_only_subscribed: 'Show Only Subscribed', 
   Subscribe: 'Subscribe',
   Unsubscribe: 'Unsubscribe',
+  Subscribers: 'Subscribers',
+  Search: 'Search',
   Trending: 'Trending',
   Hot: 'Hot',
   New: 'New',
