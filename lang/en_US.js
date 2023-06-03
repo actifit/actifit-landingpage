@@ -1009,6 +1009,7 @@ module.exports = {
   Trending: 'Trending',
   Hot: 'Hot',
   New: 'New',
+  pinned_post: 'Pinned Post',
   comment_link: 'Link to Comment',
   copy_link: 'Copy Link',
   copied_successfully: 'Copied Successfully!',

@@ -1,12 +1,14 @@
 <template>
   <!-- single post item for activity pages -->
   <div >
-    <div class="card post">
+    <div class="card post" :class="{'card-pinned': isPostPinned}">
       <h6 class="mb-0 text-center post-title">
         <!--<a :href="post.url" target="_blank">-->
 		<a :href="buildLink" target="_blank">
           {{ truncateString(post.title, 70) }}
 		  <i class="fas fa-external-link-alt"></i>
+		  
+		  <span v-if="isPostPinned" :title="$t('pinned_post')">&nbsp;<i class="fas fa-thumbtack text-warning"></i></span>
         </a>
       </h6>
 	  
@@ -184,6 +186,11 @@
 	  },
 	  buildLink(){
 		return '/'+this.post.author+'/'+this.post.permlink;
+	  },
+	  isPostPinned (){
+		let stats = this.post.stats
+		console.log(stats);
+		return (stats?stats.is_pinned:false);
 	  },
       date() {
         let date = new Date(this.post.created)
@@ -460,6 +467,10 @@
 	}
 	.card{
 		box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
+		overflow: hidden;
+	}
+	.card-pinned{
+		box-shadow: 3px 3px 3px rgba(204, 204, 0, 0.4);
 		overflow: hidden;
 	}
 	.post-image{
