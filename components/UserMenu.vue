@@ -373,4 +373,22 @@
 	.dropdown-header{
 		padding-left: 0px;
 	}
+	.dropdown-menu{
+		max-height: 420px;
+		overflow: auto
+	}
+	/* Style for the scrollbar */
+	.dropdown-menu::-webkit-scrollbar {
+		width: 10px;
+		background-color: #f5f5f5;
+	}
+	/* Style for the thumb */
+	.dropdown-menu::-webkit-scrollbar-thumb {
+		background-color: #ff112d;
+		border-radius: 5px;
+	}
+	/* Style for the thumb on hover */
+	.dropdown-menu::-webkit-scrollbar-thumb:hover {
+		background-color: pink !important;
+	}
 </style>
