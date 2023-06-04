@@ -23,12 +23,12 @@
             <div style="display:inline-flex"><i class="fas fa-seedling text-white"></i><a class="nav-link text-white" href="#" @click.prevent="$router.push('/yieldfarming')">{{ $t('yield_farming') }}</a></div>
           </li>
 		  
-          <li class="nav-item btn btn-brand m-1 p-1 nav-item-border" v-if="home">
+          <!--<li class="nav-item btn btn-brand m-1 p-1 nav-item-border" v-if="home">
             <div style="display:inline-flex"><i class="fas fa-heart text-white"></i><a class="nav-link text-white" href="#" @click.prevent="$emit('scrollTo', '#delegators')">{{ $t('Delegators') }}</a></div>
           </li>
-		  <!--<li class="nav-item">
+		  <li class="nav-item">
             <a class="nav-link" href="#" @click.prevent="scrollTo('#professionals')">{{ $t('Professionals') }}</a>
-          </li>-->
+          </li>
 		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border" v-if="home">
             <div style="display:inline-flex"><i class="fas fa-medal text-white"></i><a class="nav-link text-white" href="#" @click.prevent="$emit('scrollTo', '#leaderboard')">{{ $t('Leaderboard') }}</a></div>
           </li>
@@ -36,16 +36,20 @@
             <div style="display:inline-flex"><i class="fas fa-users text-white"></i><a class="nav-link text-white" href="#" @click.prevent="$emit('scrollTo', '#team')">{{ $t('Team') }}</a></div>
           </li>
 		  
-          <!--<li class="nav-item">
+          <li class="nav-item">
             <a class="nav-link" href="#" @click.prevent="scrollTo('#athletes')">{{ $t('Sponsored_Athletes') }}</a>
-          </li>-->
+          </li>
 		  
 		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border" v-if="home">
             <div style="display:inline-flex"><i class="far fa-handshake text-white"></i><a class="nav-link text-white" href="#" @click.prevent="$emit('scrollTo', '#partners')">{{ $t('Partners') }}</a></div>
-          </li>
+          </li>-->
 		  
           <li class="nav-item btn btn-brand m-1 p-1 nav-item-border" v-if="home">
             <div style="display:inline-flex"><i class="far fa-newspaper text-white"></i><a class="nav-link text-white" href="#" @click.prevent="$emit('scrollTo', '#news')">{{ $t('News') }}</a></div>
+          </li>
+		  
+		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
+            <div style="display:inline-flex"><i class="far fa-newspaper text-white"></i><a class="nav-link text-white" href="./communities">{{ $t('Communities') }}</a></div>
           </li>
 
 		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
