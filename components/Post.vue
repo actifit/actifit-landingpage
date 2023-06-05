@@ -189,7 +189,7 @@
 	  },
 	  isPostPinned (){
 		let stats = this.post.stats
-		console.log(stats);
+		//console.log(stats);
 		return (stats?stats.is_pinned:false);
 	  },
       date() {
@@ -208,7 +208,10 @@
 		try{
 			return JSON.parse(this.post.json_metadata)
 		}catch(err){
-			//console.log(this.post.json_metadata);
+			console.log(err);
+			console.log('meta:')
+			console.log(this.post.json_metadata);
+			return JSON.parse(JSON.stringify(this.post.json_metadata));
 			//console.log(err);
 			return {};
 		}
