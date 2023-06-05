@@ -49,7 +49,7 @@
           </li>
 		  
 		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
-            <div style="display:inline-flex"><i class="far fa-newspaper text-white"></i><a class="nav-link text-white" href="./communities">{{ $t('Communities') }}</a></div>
+            <div style="display:inline-flex"><i class="far fa-newspaper text-white"></i><a class="nav-link text-white" href="/communities">{{ $t('Communities') }}</a></div>
           </li>
 
 		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
