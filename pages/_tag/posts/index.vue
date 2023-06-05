@@ -5,7 +5,7 @@
 
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-5" v-if="communityData.title">
-      <h2 class="text-center mb-5">{{ communityData.title }}'s {{$t('Posts')}} <img src="/img/HIVE.png" class="mr-2 token-logo-md"></h2>
+      <h2 class="text-center mb-5">{{ communityData.title }} {{$t('comm_posts')}} <img src="/img/HIVE.png" class="mr-2 token-logo-md"></h2>
 	  <!--<ChainSelection />-->
 	  
 	  <div class="text-right col-12 row pb-2">
