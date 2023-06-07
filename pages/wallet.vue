@@ -351,6 +351,7 @@
 						<span v-if="withdrawableTokens.includes(token.symbol)" class="btn btn-brand p-1" v-on:click="initiateWithdraw(token)"><i class="fas fa-upload " :title="$t('withdraw_tokens')" ></i></span>
 						<span class="btn btn-brand p-1" v-on:click="initiateTransfer(token)"><i class="fas fa-share-square " :title="$t('transfer_tokens')" ></i></span>
 						<span v-if="token.symbol =='AFIT'"  class="btn btn-brand p-1" v-on:click="initiateBSCTransfer(token)"><i class="fas fa-truck-loading " :title="$t('move_to_bsc')" ></i></span>
+						<span v-if="token.stakable" class="btn btn-brand p-1" v-on:click="initiateDelegation(token)"><i class="fas fa-donate p-1" :title="$t('delegate_tokens')" ></i></span>
 					</div>
 				  <!--</div>-->
 				</div>
@@ -389,6 +390,7 @@
 						<span v-else-if="curTokenAction == POWERUP_FUNDS">{{ $t('stake_tokens') }}</span>
 						<span v-else-if="curTokenAction == POWERDOWN_FUNDS">{{ $t('unstake_tokens') }}</span>
 						<span v-else-if="curTokenAction == WITHDRAW_FUNDS">{{ $t('withdraw_tokens') }}</span>
+						<span v-else-if="curTokenAction == DELEGATE_FUNDS">{{ $t('delegate_tokens') }}</span>
 					</h3>
 					<div v-if="tokenActions && curTokenAction">
 					<div class="row" v-if="tokenActions && curTokenAction == TRANSFER_FUNDS">
@@ -404,6 +406,11 @@
 					  <label for="token-powerup-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
 					  <input type="number" id="token-powerup-amount" name="token-powerup-amount" ref="token-powerup-amount" class="form-control-lg w-50 p-2" @change="calculateHBDAmount">
 					  <span class="p-2" v-on:click="fillTokenTransAmount()" :title="$t('select_full_balance')"><img :src="selTokenUp.icon" class="mr-1 mini-token-logo" ><u>{{showMaxBal(selTokenUp)}} {{ selTokenUp.symbol }}</u></span>
+					</div>
+					
+					<div class="row" v-if="tokenActions && curTokenAction == DELEGATE_FUNDS">
+					  <label for="token-delegate-recipient" class="w-25 p-2">{{ $t('To') }} *</label>
+					  <input type="text" id="token-delegate-recipient" name="token-delegate-recipient" ref="token-delegate-recipient" class="form-control-lg w-50 p-2" value="actifit">
 					</div>
 					
 					<div class="row" v-if="tokenActions && curTokenAction == TRANSFER_BSC">
@@ -430,6 +437,7 @@
 					  <button v-else-if="curTokenAction == TRANSFER_FUNDS" v-on:click="proceedTransferToken" class="btn btn-brand btn-lg w-50 border">{{ $t('Send') }}</button>
 					  <button v-else-if="curTokenAction == WITHDRAW_FUNDS" v-on:click="proceedWithdrawToken" class="btn btn-brand btn-lg w-50 border">{{ $t('Withdraw') }}</button>
 					  <button v-else-if="curTokenAction == TRANSFER_BSC" v-on:click="proceedTransferBSC" class="btn btn-brand btn-lg w-50 border">{{ $t('Transfer') }}</button>
+					  <button v-else-if="curTokenAction == DELEGATE_FUNDS" v-on:click="proceedDelegateToken" class="btn btn-brand btn-lg w-50 border">{{ $t('Delegate') }}</button>
 					</div>
 					</div>
 					<div v-if="movingFunds" id="checking_funds">
@@ -438,6 +446,31 @@
 					<div class="row" v-if="afit_se_power_error_proceeding">
 					  <div class="w-25"></div>
 					  <div class="text-brand" v-html="this.afit_se_power_err_msg"></div>
+					</div>
+					
+					<div v-if="tokenActions && curTokenAction == DELEGATE_FUNDS">
+						<h5>{{ $t('active_delegations') }}</h5>
+						<table class="table table-hover">
+						  <thead class="text-brand">
+							<tr>
+							  <th scope="col">{{ $t('Delegatee') }}</th>
+							  <th scope="col">{{ $t('Stake') }}</th>
+							  <th scope="col">{{ $t('Date') }}</th>
+							  <th scope="col">{{ $t('Action') }}</th>
+							</tr>
+						  </thead>
+						  <tbody>
+							<tr v-for="(delegation, index) in heTokenDelegations" :key="index" :delegation="delegation" v-if="delegation.symbol==selTokenUp.symbol">
+								<td><a :href="'./@'+delegation.delegatee" >@{{ delegation.to }}</a></td> 
+								<td>
+									{{ numberFormat(delegation.quantity, 3) }} {{delegation.symbol}} 
+								</td> 
+								<td>{{ date(new Date(delegation.updated)) }}</td>
+								<td><span ><a href="#" @click.prevent="editDelegation(delegation)" :title="$t('Edit_Delegation')"><i class="fas fa-edit"></i></a></span>&nbsp;
+								<span ><a href="#" @click.prevent="cancelDelegation(delegation)" :title="$t('Cancel_Delegation')"><i class="fas fa-trash-alt"></i><i class="fas fa-spin fa-spinner" v-if="cancellingDelegation"></i></a></span></td>
+							</tr>
+						  </tbody>
+						</table>
 					</div>
 					
 				
@@ -1638,6 +1671,7 @@
 		user_settings: {},
 		save_progress: false,
 		heTokenBalances: [],
+		heTokenDelegations: [],
 	  }
 	},
     components: {
@@ -2376,6 +2410,19 @@
 		this.afitActivityMode = 0;
 		this.scrollAction();
 	  },
+	  initiateDelegation(token){
+		//only adjust open/close is same button is clicked, otherwise adjust token being unstaked
+		if (this.selTokenUp == token && this.curTokenAction == this.DELEGATE_FUNDS){
+			this.tokenActions = !this.tokenActions;
+		}else{
+			this.tokenActions = true;
+		}
+		this.fundActivityMode = 0;
+		this.curTokenAction = this.DELEGATE_FUNDS;
+		this.selTokenUp = token;
+		this.afitActivityMode = 0;
+		this.scrollAction();
+	  },
 	  initiateTransfer(token){
 		//only adjust open/close is same button is clicked, otherwise adjust token being unstaked
 		if (this.selTokenUp == token && this.curTokenAction == this.TRANSFER_FUNDS){
@@ -2849,7 +2896,9 @@
 			//new full token balance listing
 			tokenData = await hsc.find('tokens', 'balances', { account: this.user.account.name});
 			
-			console.log(tokenData);
+			this.heTokenDelegations = await hsc.find('tokens', 'delegations', { from: this.user.account.name}, 200, 0, []);
+			console.log('delegations')
+			console.log(this.heTokenDelegations);
 			
 			//grab full token data
 			tokenExtraDetails = await hsc.find('tokens', 'tokens', {});
@@ -5514,6 +5563,201 @@
 		}
 	
 	  },
+	  
+	  async proceedDelegateToken (){
+		
+		this.afit_se_power_error_proceeding = false;
+		this.afit_se_power_err_msg = '';
+		
+		
+		
+		let tokenMaxVal = this.selTokenUp.stake;
+		let recipient = this.$refs["token-delegate-recipient"].value.trim();
+		let amount_to_powerdown = this.$refs["token-powerup-amount"].value.trim();
+		//ensure we have proper values
+		if (isNaN(amount_to_powerdown) || parseFloat(amount_to_powerdown) < 0.01){
+		  this.afit_se_power_error_proceeding = true;
+		  this.afit_se_power_err_msg = this.$t('min_amount_token_power');
+		  return;
+		}
+		if (recipient==''){
+			this.afit_se_power_error_proceeding = true;
+			this.afit_se_power_err_msg = this.$t('all_fields_required');
+			return;
+		}
+		//ensure user is delegating amount he has staked
+		if (parseFloat(amount_to_powerdown) > parseFloat(tokenMaxVal)){
+		  this.afit_se_power_error_proceeding = true;
+		  this.afit_se_power_err_msg = this.$t('max_amount_token_powerdown');
+		  return;
+		}
+		
+		
+		if (!localStorage.getItem('std_login')){
+			//store the transaction to Steem BC according to S-E protocol for power down
+			let link = this.$steemconnect.sign('custom_json', {
+			  required_auths: "[\"" + this.user.account.name + "\"]",
+			  required_posting_auths: "[]",
+			  id: 'ssc-mainnet1',
+			  json: "{\"contractName\":\"tokens\",\"contractAction\":\"delegate\",\"contractPayload\":{\"to\":\"" + recipient + "\",\"symbol\":\"" + this.selTokenUp.symbol + "\",\"quantity\":\"" + amount_to_powerdown + "\",\"memo\":\"\"}}",
+			  authority: 'active',
+			  auto_return: true,
+			}, window.location.origin + '/wallet?op='+this.$t('delegate_token')+'&status=success');
+			
+			//redirect to proper action
+			window.location = link;
+			
+		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+			return new Promise((resolve) => {
+				let targetAcct = 'actifit.h-e';
+				let transId = process.env.hiveEngineChainId;
+				if (this.cur_bchain == 'STEEM'){
+					targetAcct = 'actifit.s-e';
+					transId = 'ssc-mainnet1';
+				}
+				
+				let json_data = {
+					contractName: 'tokens',
+					contractAction: 'delegate',
+					contractPayload: {
+						to: recipient,
+						symbol: this.selTokenUp.symbol,
+						quantity: '' + amount_to_powerdown,//needs to be string
+						memo: ''
+					}
+				}
+				
+				window.hive_keychain.requestCustomJson(this.user.account.name, transId, 'Active', JSON.stringify(json_data), this.$t('Power_Down'), (response) => {
+					console.log(response);
+					//notify of success
+					if (response.success){
+						this.$notify({
+						  group: 'success',
+						  text: this.$t('delegate_token')+ ' ' +this.$t('completed_success'),
+						  position: 'top center'
+						})
+					}else{
+						//notify of success
+						this.$notify({
+						  group: 'error',
+						  text: this.$t('error_performing_operation'),
+						  position: 'top center'
+						})
+					}
+				});
+			});		
+		
+				
+		}else if (this.isHiveauthLogin){
+			let targetAcct = 'actifit.h-e';
+			let transId = process.env.hiveEngineChainId;
+			if (this.cur_bchain == 'STEEM'){
+				targetAcct = 'actifit.s-e';
+				transId = 'ssc-mainnet1';
+			}
+			
+			let json_data = {
+				contractName: 'tokens',
+				contractAction: 'delegate',
+				contractPayload: {
+					to: recipient,
+					symbol: this.selTokenUp.symbol,
+					quantity: '' + amount_to_powerdown,//needs to be string
+					memo: ''
+				}
+			}
+			
+			let op_name = 'custom_json';
+			let cstm_params = {
+				required_auths: [this.user.account.name],
+				required_posting_auths: [],
+				id: 'actifit',
+				json: JSON.stringify(json_data)
+			  };
+			let operation = [ 
+			   [op_name, cstm_params]
+			];
+			
+			let response = await this.processTrxFunc(op_name, cstm_params, true);
+			
+			//notify of success
+			if (response.success){
+				this.$notify({
+				  group: 'success',
+				  text: this.$t('delegate_token')+ ' ' +this.$t('completed_success'),
+				  position: 'top center'
+				})
+			}else{
+				//notify of success
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('error_performing_operation'),
+				  position: 'top center'
+				})
+			}
+		
+		}else{
+			this.movingFunds = true;
+			
+			let targetAcct = 'actifit.h-e';
+			let transId = process.env.hiveEngineChainId;
+			if (this.cur_bchain == 'STEEM'){
+				targetAcct = 'actifit.s-e';
+				transId = 'ssc-mainnet1';
+			}
+			
+			let json_data = {
+				contractName: 'tokens',
+				contractAction: 'unstake',
+				contractPayload: {
+					to: recipient,
+					symbol: this.selTokenUp.symbol,
+					quantity: '' + amount_to_powerdown,//needs to be string
+					memo: ''
+				}
+			}
+			
+			let userKey = this.$refs["p-ac-key-trans-token"].value;
+			
+			//send out transaction to blockchain
+			let chainLnk = await this.setProperNode();
+			let tx = await chainLnk.broadcast.customJsonAsync(
+					userKey, 
+					[ this.user.account.name ] , 
+					[], 
+					transId, 
+					JSON.stringify(json_data)
+				).catch(err => {
+					console.log(err.message);
+			});
+			
+			//console.log(tx.block_num);
+			console.log(tx);
+			
+			if (tx && tx.ref_block_num){
+				//notify of success
+				this.$notify({
+				  group: 'success',
+				  text: this.$t('delegate_token')+ ' ' +this.$t('completed_success'),
+				  position: 'top center'
+				})
+				
+			}else{
+				//notify of success
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('error_performing_operation'),
+				  position: 'top center'
+				})
+				
+			}
+			
+			this.movingFunds = false;
+		}
+	  },
+	  
+	  
+	  
 	  async proceedPowerDownToken() {
 		//handles performing a token power down/unstaking
 		this.afit_se_power_error_proceeding = false;
