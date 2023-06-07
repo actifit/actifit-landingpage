@@ -132,10 +132,10 @@
 					</div>
 				</div>
 				<div class="col-2 text-right">{{ this.renderSteemPower(2) }} {{ this.cur_bchain}} {{ $t('POWER') }}
-					<i v-if="!showPowerBreakdown" class="fas fa-solid fa-arrow-circle-down text-brand" v-on:click="showPowerBreakdown=!showPowerBreakdown" :title="$t('STEEM_POWER_BREAKDOWN')"></i>
-					<i v-else class="fas fa-solid fa-arrow-circle-up text-brand" v-on:click="showPowerBreakdown=!showPowerBreakdown" :title="$t('STEEM_POWER_BREAKDOWN')"></i>
+					<i v-if="!showPowerBreakdown['HIVE']" class="fas fa-solid fa-arrow-circle-down text-brand" v-on:click="showPowerBreakdown['HIVE']=true" :title="$t('STEEM_POWER_BREAKDOWN')"></i>
+					<i v-else class="fas fa-solid fa-arrow-circle-up text-brand" v-on:click="showPowerBreakdown['HIVE']=false" :title="$t('STEEM_POWER_BREAKDOWN')"></i>
 				
-				<span v-if="showPowerBreakdown"><li>{{this.renderSteemPower(1)}} ({{ $t('Owned_SP') }})</li><li> + {{this.renderSteemPower(3)}} ({{ $t('Received_SP') }})</li><li> - {{this.renderSteemPower(4)}} ({{ $t('Delegated_SP') }})</li><li> - {{this.renderSteemPower(5)}} ({{ $t('Powering_Down_Amount') }})</li></span>
+					<span v-if="showPowerBreakdown['HIVE']"><li>{{this.renderSteemPower(1)}} ({{ $t('Owned_SP') }})</li><li> + {{this.renderSteemPower(3)}} ({{ $t('Received_SP') }})</li><li> - {{this.renderSteemPower(4)}} ({{ $t('Delegated_SP') }})</li><li> - {{this.renderSteemPower(5)}} ({{ $t('Powering_Down_Amount') }})</li></span>
 				
 				</div>
 				<div class="col-lg-1 col-2 text-right">
@@ -306,7 +306,15 @@
 					<div class="col-2 text-left"><img :src="token.icon" class="mr-1 mini-token-logo" >{{ token.symbol }}</div>
 					<div class="col-2">{{ $t('hive_engine')}}</div>
 					<div class="col-2 text-right">{{ renderBal(token) }} {{ token.symbol }}</div>
-					<div class="col-2 text-right">{{ renderStake(token)}} {{ token.symbol }}</div>
+					<div class="col-2 text-right">
+					
+						{{ renderStake(token)}} {{ token.symbol }}
+						<i v-if="!powerDisplayOn(token)" class="fas fa-solid fa-arrow-circle-down text-brand" v-on:click="adjustPowerDisplay(token, true)" :title="$t('POWER_BREAKDOWN')"></i>
+						
+						<i v-else class="fas fa-solid fa-arrow-circle-up text-brand" v-on:click="adjustPowerDisplay(token, false)" :title="$t('POWER_BREAKDOWN')"></i>
+						
+						<span v-if="powerDisplayOn(token)"><li>{{renderStake(token, 1)}} ({{ $t('Owned') }})</li><li> + {{renderStake(token, 2)}} ({{ $t('Received_Power') }})</li><li> - {{renderStake(token, 4)}} ({{ $t('Delegated_Power') }})</li><li> - {{renderStake(token, 3)}} ({{ $t('Unstaking') }})</li></span>
+					</div>
 					<div class="col-lg-1 col-2"></div>
 					<div class="col-1 text-right break-val">${{ usdVal(token) }}</div>
 					<!--<span v-if="parseFloat(delegStake(token)) > 0">( + {{ delegStake(token)}} {{ token.symbol }} {{ $t('Delegated') }}) </span>-->
@@ -1595,7 +1603,7 @@
 		claimRewardsProcess: false,
 		transferProcess: false,
 		cur_bchain: 'HIVE',
-		showPowerBreakdown: false,
+		showPowerBreakdown: {HIVE: false},
 		showHBDWithdrawalDetails: false,
 		showHiveWithdrawalDetails: false,
 		delegateProcess: false,
@@ -1800,6 +1808,16 @@
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
+	  
+	  adjustPowerDisplay(token, status){
+		console.log('adjust for '+token+ 'to '+status)
+		this.showPowerBreakdown[token.symbol]=status
+		console.log(this.showPowerBreakdown);
+		this.$forceUpdate();
+	  },
+	  powerDisplayOn(token){
+		return this.showPowerBreakdown[token.symbol];
+	  },
 	  
 	  /* for scrolling monitoring purposes */
 	  handleIntersection(entries) {
@@ -2474,6 +2492,8 @@
 			let par = this;
 			//grab tokens of interest vals as well
 			this.tokensOfInterestBal.forEach(function(token, index){
+				par.showPowerBreakdown[token.symbol] = false;
+				
 				let tokenData = par.tokenMetrics.find(v => v.symbol == token.symbol);
 				if( !tokenData || (typeof tokenData.lastPrice === 'undefined' || tokenData.lastPrice === null )){
 					tokenData = new Object();
@@ -3078,13 +3098,22 @@
 		let prec = this.tokenOfInterestPrecision[token.symbol];
 		return this.numberFormat(token.balance, prec);
 	  },
-	  renderStake (token) {
+	  renderStake (token, type) {
 		try{
 			let totalStaked = 0;
-			totalStaked += parseFloat(token.delegationsIn) + parseFloat(token.stake);
 			let prec = this.tokenOfInterestPrecision[token.symbol];
+			if (type){
+				switch (type){
+					case 1: return this.numberFormat(parseFloat(token.stake), prec);
+					case 2: return this.numberFormat(parseFloat(token.delegationsIn), prec);
+					case 3: return this.numberFormat(parseFloat(token.pendingUnstake), prec);
+					case 4: return this.numberFormat(parseFloat(token.delegationsOut), prec);
+				}
+			}
+			totalStaked += parseFloat(token.delegationsIn) + parseFloat(token.stake) - parseFloat(token.pendingUnstake) - parseFloat(token.delegationsOut);
 			return this.numberFormat(totalStaked, prec);
 		}catch(err){
+			console.log(err);
 			return '';
 		}
 	  },
@@ -6895,5 +6924,8 @@
   }
   .break-val{
 	line-break: anywhere;
+  }
+  .token-entry li {
+    list-style: none;
   }
 </style>
