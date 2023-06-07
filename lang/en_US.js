@@ -420,6 +420,7 @@ module.exports = {
   Proceed: 'Proceed',
   Move_AFIT_to_Wallet: 'Move AFIT to Wallet',
   Scheduled_successfully: ' scheduled successfully',
+  undelegate_token: 'Undelegate Token',
   Power_up_token: 'Power Up Token',
   Power_down_token: 'Power Down Token',
   delegate_token: 'Delegate Token',

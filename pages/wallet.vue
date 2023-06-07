@@ -466,8 +466,8 @@
 									{{ numberFormat(delegation.quantity, 3) }} {{delegation.symbol}} 
 								</td> 
 								<td>{{ date(new Date(delegation.updated)) }}</td>
-								<td><span ><a href="#" @click.prevent="editDelegation(delegation)" :title="$t('Edit_Delegation')"><i class="fas fa-edit"></i></a></span>&nbsp;
-								<span ><a href="#" @click.prevent="cancelDelegation(delegation)" :title="$t('Cancel_Delegation')"><i class="fas fa-trash-alt"></i><i class="fas fa-spin fa-spinner" v-if="cancellingDelegation"></i></a></span></td>
+								<td>
+								<span ><a href="#" @click.prevent="proceedUnDelegateToken(delegation)" :title="$t('Cancel_Delegation')"><i class="fas fa-trash-alt"></i><i class="fas fa-spin fa-spinner" v-if="cancellingDelegation"></i></a></span></td>
 							</tr>
 						  </tbody>
 						</table>
@@ -2898,7 +2898,7 @@
 			
 			this.heTokenDelegations = await hsc.find('tokens', 'delegations', { from: this.user.account.name}, 200, 0, []);
 			console.log('delegations')
-			console.log(this.heTokenDelegations);
+			//console.log(this.heTokenDelegations);
 			
 			//grab full token data
 			tokenExtraDetails = await hsc.find('tokens', 'tokens', {});
@@ -5739,6 +5739,199 @@
 				this.$notify({
 				  group: 'success',
 				  text: this.$t('delegate_token')+ ' ' +this.$t('completed_success'),
+				  position: 'top center'
+				})
+				
+			}else{
+				//notify of success
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('error_performing_operation'),
+				  position: 'top center'
+				})
+				
+			}
+			
+			this.movingFunds = false;
+		}
+	  },
+	  
+	  async proceedUnDelegateToken (delegation){
+		
+		this.afit_se_power_error_proceeding = false;
+		this.afit_se_power_err_msg = '';
+		
+		
+		
+		//let tokenMaxVal = this.selTokenUp.stake;
+		let recipient = delegation.to;
+		let amount_to_powerdown = delegation.quantity;
+		let tokenSymbol = delegation.symbol;
+		//ensure we have proper values
+		if (isNaN(amount_to_powerdown) || parseFloat(amount_to_powerdown) < 0.01){
+		  this.afit_se_power_error_proceeding = true;
+		  this.afit_se_power_err_msg = this.$t('min_amount_token_power');
+		  return;
+		}
+		if (recipient==''){
+			this.afit_se_power_error_proceeding = true;
+			this.afit_se_power_err_msg = this.$t('all_fields_required');
+			return;
+		}
+		//ensure user is delegating amount he has staked
+		/*if (parseFloat(amount_to_powerdown) > parseFloat(tokenMaxVal)){
+		  this.afit_se_power_error_proceeding = true;
+		  this.afit_se_power_err_msg = this.$t('max_amount_token_powerdown');
+		  return;
+		}*/
+		
+		
+		if (!localStorage.getItem('std_login')){
+			//store the transaction to Steem BC according to S-E protocol for power down
+			let link = this.$steemconnect.sign('custom_json', {
+			  required_auths: "[\"" + this.user.account.name + "\"]",
+			  required_posting_auths: "[]",
+			  id: 'ssc-mainnet1',
+			  json: "{\"contractName\":\"tokens\",\"contractAction\":\"undelegate\",\"contractPayload\":{\"from\":\"" + recipient + "\",\"symbol\":\"" + tokenSymbol + "\",\"quantity\":\"" + amount_to_powerdown + "\",\"memo\":\"\"}}",
+			  authority: 'active',
+			  auto_return: true,
+			}, window.location.origin + '/wallet?op='+this.$t('undelegate_token')+'&status=success');
+			
+			//redirect to proper action
+			window.location = link;
+			
+		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+			return new Promise((resolve) => {
+				let targetAcct = 'actifit.h-e';
+				let transId = process.env.hiveEngineChainId;
+				if (this.cur_bchain == 'STEEM'){
+					targetAcct = 'actifit.s-e';
+					transId = 'ssc-mainnet1';
+				}
+				
+				let json_data = {
+					contractName: 'tokens',
+					contractAction: 'undelegate',
+					contractPayload: {
+						from: recipient,
+						symbol: tokenSymbol,
+						quantity: '' + amount_to_powerdown,//needs to be string
+						memo: ''
+					}
+				}
+				
+				window.hive_keychain.requestCustomJson(this.user.account.name, transId, 'Active', JSON.stringify(json_data), this.$t('Power_Down'), (response) => {
+					console.log(response);
+					//notify of success
+					if (response.success){
+						this.$notify({
+						  group: 'success',
+						  text: this.$t('undelegate_token')+ ' ' +this.$t('completed_success'),
+						  position: 'top center'
+						})
+					}else{
+						//notify of success
+						this.$notify({
+						  group: 'error',
+						  text: this.$t('error_performing_operation'),
+						  position: 'top center'
+						})
+					}
+				});
+			});		
+		
+				
+		}else if (this.isHiveauthLogin){
+			let targetAcct = 'actifit.h-e';
+			let transId = process.env.hiveEngineChainId;
+			if (this.cur_bchain == 'STEEM'){
+				targetAcct = 'actifit.s-e';
+				transId = 'ssc-mainnet1';
+			}
+			
+			let json_data = {
+				contractName: 'tokens',
+				contractAction: 'undelegate',
+				contractPayload: {
+					from: recipient,
+					symbol: tokenSymbol,
+					quantity: '' + amount_to_powerdown,//needs to be string
+					memo: ''
+				}
+			}
+			
+			let op_name = 'custom_json';
+			let cstm_params = {
+				required_auths: [this.user.account.name],
+				required_posting_auths: [],
+				id: 'actifit',
+				json: JSON.stringify(json_data)
+			  };
+			let operation = [ 
+			   [op_name, cstm_params]
+			];
+			
+			let response = await this.processTrxFunc(op_name, cstm_params, true);
+			
+			//notify of success
+			if (response.success){
+				this.$notify({
+				  group: 'success',
+				  text: this.$t('undelegate_token')+ ' ' +this.$t('completed_success'),
+				  position: 'top center'
+				})
+			}else{
+				//notify of success
+				this.$notify({
+				  group: 'error',
+				  text: this.$t('error_performing_operation'),
+				  position: 'top center'
+				})
+			}
+		
+		}else{
+			this.movingFunds = true;
+			
+			let targetAcct = 'actifit.h-e';
+			let transId = process.env.hiveEngineChainId;
+			if (this.cur_bchain == 'STEEM'){
+				targetAcct = 'actifit.s-e';
+				transId = 'ssc-mainnet1';
+			}
+			
+			let json_data = {
+				contractName: 'tokens',
+				contractAction: 'unstake',
+				contractPayload: {
+					from: recipient,
+					symbol: tokenSymbol,
+					quantity: '' + amount_to_powerdown,//needs to be string
+					memo: ''
+				}
+			}
+			
+			let userKey = this.$refs["p-ac-key-trans-token"].value;
+			
+			//send out transaction to blockchain
+			let chainLnk = await this.setProperNode();
+			let tx = await chainLnk.broadcast.customJsonAsync(
+					userKey, 
+					[ this.user.account.name ] , 
+					[], 
+					transId, 
+					JSON.stringify(json_data)
+				).catch(err => {
+					console.log(err.message);
+			});
+			
+			//console.log(tx.block_num);
+			console.log(tx);
+			
+			if (tx && tx.ref_block_num){
+				//notify of success
+				this.$notify({
+				  group: 'success',
+				  text: this.$t('undelegate_token')+ ' ' +this.$t('completed_success'),
 				  position: 'top center'
 				})
 				
