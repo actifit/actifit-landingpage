@@ -473,6 +473,10 @@
 						</table>
 					</div>
 					
+					
+					<div v-else-if="tokenActions && curTokenAction == POWERDOWN_FUNDS">
+						<span v-html="renderUnstakingVals()"></span>
+					</div>
 				
 				</div>
 				
@@ -1672,6 +1676,7 @@
 		save_progress: false,
 		heTokenBalances: [],
 		heTokenDelegations: [],
+		heTokenUnstakes: [],
 	  }
 	},
     components: {
@@ -1842,6 +1847,20 @@
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
+	  
+	  renderUnstakingVals(){
+		let unstakingToken = this.heTokenUnstakes.find(v => v.symbol == this.selTokenUp.symbol);
+		if (unstakingToken){
+			return this.$t('unstaking_details').replace('_QTTY_', unstakingToken.quantity)
+			.replaceAll('_TOKEN_', unstakingToken.symbol)
+			.replace('_TXLEFT_', unstakingToken.numberTransactionsLeft)
+			.replace('_NXTDATE_', this.date(new Date(unstakingToken.nextTransactionTimestamp)))
+			.replace('_TKNCOUNT_', unstakingToken.quantityLeft)
+			
+		}
+		return '';
+		
+	  },
 	  
 	  adjustPowerDisplay(token, status){
 		console.log('adjust for '+token+ 'to '+status)
@@ -2897,8 +2916,11 @@
 			tokenData = await hsc.find('tokens', 'balances', { account: this.user.account.name});
 			
 			this.heTokenDelegations = await hsc.find('tokens', 'delegations', { from: this.user.account.name}, 200, 0, []);
-			console.log('delegations')
-			//console.log(this.heTokenDelegations);
+			
+			this.heTokenUnstakes = await hsc.find('tokens', 'pendingUnstakes', { account: this.user.account.name}, 200, 0, []);
+			//console.log('delegations')
+			console.log('unstakes');
+			console.log(this.heTokenUnstakes);
 			
 			//grab full token data
 			tokenExtraDetails = await hsc.find('tokens', 'tokens', {});
