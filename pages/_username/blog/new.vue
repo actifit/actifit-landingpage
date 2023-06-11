@@ -479,6 +479,8 @@
 			// stop loading animation and show notification
 			this.loading = false
 			if (newPost){
+				//cleanup drafts
+				this.$clearDraft(this.user.account.name, 'blog');
 				$(this.$refs.editPostModal).modal('hide')
 			}
 			this.RewardUserEdit();
@@ -487,6 +489,14 @@
 			  author: this.editPost.author,
 			  permlink: this.editPost.permlink
 			})
+			
+			if (newPost){
+				//redirect after 2 seconds
+				let par = this;
+				setTimeout(function (){
+					par.$router.push('/'+par.user.account.name+'/blog')
+					}, 2000);
+			}
 			
 		}
 	  },

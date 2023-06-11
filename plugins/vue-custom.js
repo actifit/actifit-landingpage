@@ -157,7 +157,6 @@ Vue.prototype.$processTrxFunc = async function (op_name, cstm_params, active) {
 
 Vue.prototype.$clearDraft = function (username, type){
 	localStorage.removeItem(username+'_draft_'+type);
-	
 };
 
 Vue.prototype.$storeDraft = function (username, data, type) {
