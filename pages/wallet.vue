@@ -69,7 +69,7 @@
 						<span v-else>▽△</span>
 					</span>
 				</div>
-				<div class="col-2">Location <span v-if="tokenSort=='location'">▽▼△▲</span></div>
+				<div class="col-2 col-lg-1">Location <span v-if="tokenSort=='location'">▽▼△▲</span></div>
 				<div class="col-2 clickable" v-on:click="sortTokenData('balance')" >Balance 
 					<span >
 						<span v-if="tokenSort=='balance' && tsortDir==1" >▼△</span>
@@ -79,7 +79,7 @@
 				</div>
 				<div class="col-2">Staked</div>
 				<div class="col-lg-1 col-2">Savings</div>
-				<div class="col-1 clickable" v-on:click="sortTokenData('usdval')" >USD <span >
+				<div class="col-1 col-lg-2 clickable" v-on:click="sortTokenData('usdval')" >USD <span >
 						<span v-if="tokenSort=='usdval' && tsortDir==1" >▼△</span>
 						<span v-else-if="tokenSort=='usdval'">▽▲</span>
 						<span v-else>▽△</span>
@@ -88,11 +88,11 @@
 			</div>
 			<div class="token-entry row main-token">
 				<div class="col-2 text-left"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo">AFIT</div>
-				<div class="col-2">{{ $t('actifit_wallet')}}</div>
+				<div class="col-2 col-lg-1">{{ $t('actifit_wallet')}}</div>
 				<div class="col-2 text-right">{{ formattedUserAfit }}</div>
 				<div class="col-2 text-right">-</div>
 				<div class="col-lg-1 col-2 text-right">-</div>
-				<div class="col-1 text-right break-val">${{ this.afitValueUSD }}</div>
+				<div class="col-1 col-lg-2 text-right break-val">${{ this.afitValueUSD }}</div>
 				<div class="col-lg-2 col-1 token_actions">
 					<span class="btn btn-brand p-1" v-on:click="refreshBalance()" >
 						<i class="fas fa-solid fa-history" :title="$t('Refresh_balance')"/>
@@ -123,7 +123,7 @@
 					<span v-else-if="cur_bchain == 'STEEM'"><img src="/img/STEEM.png" class="mr-1 mini-token-logo">STEEM</span>
 					<span v-else-if="cur_bchain == 'BLURT'"><img src="/img/BLURT.png" class="mr-1 mini-token-logo">BLURT</span>
 				</div>
-				<div class="col-2">{{ this.cur_bchain }}</div>
+				<div class="col-2 col-lg-1">{{ this.cur_bchain }}</div>
 				<div class="col-2 text-right">{{ this.renderBalance(this.cur_bchain) }}</div>
 					
 				<div class="row" style="display:none">
@@ -153,7 +153,7 @@
 					
 					
 				</div>
-				<div class="col-1 text-right break-val">${{ this.hiveValueUSD }}</div>
+				<div class="col-1 col-lg-2 text-right break-val">${{ this.hiveValueUSD }}</div>
 				<div class="col-lg-2 col-1 token_actions">
 					<span class="btn btn-brand p-1" v-on:click="powerUpFunds"><i class="fas fa-arrow-circle-up p-1" :title="$t('POWERUP_ACTION_TEXT')" ></i></span>
 					<span class="btn btn-brand p-1" v-on:click="powerDownFunds"><i class="fas fa-arrow-circle-down " :title="$t('POWERDOWN_ACTION_TEXT')" ></i></span>
@@ -193,7 +193,7 @@
 					<span v-if="cur_bchain == 'HIVE'"><img src="/img/HIVE.png" class="mr-1 mini-token-logo">HBD</span>
 					<span v-else-if="cur_bchain == 'STEEM'"><img src="/img/STEEM.png" class="mr-1 mini-token-logo">SBD</span>
 				</div>
-				<div class="col-2">{{ this.cur_bchain }}</div>
+				<div class="col-2 col-lg-1">{{ this.cur_bchain }}</div>
 				<div class="col-2 text-right">{{ this.renderSBDBalance(this.cur_bchain) }}</div>
 				<div class="col-2"></div>
 				<div class="col-lg-1 col-2 text-right">
@@ -210,7 +210,7 @@
 					</span>
 					
 				</div>
-				<div class="col-1 text-right break-val">${{ this.hbdValueUSD }}</div>
+				<div class="col-1 col-lg-2 text-right break-val">${{ this.hbdValueUSD }}</div>
 				<div class="col-lg-2 col-1 token_actions">
 					<span class="btn btn-brand p-1" v-on:click="transferFunds('HBD')"><i class="fas fa-share-square " :title="$t('TRANSFER_FUNDS_ACTION_TEXT')" ></i></span>
 					<span class="btn btn-brand p-1" v-on:click="transferToSavings('HBD')" :title="$t('TRANSFER_FUNDS_SAVINGS')"><i class="fas fa-piggy-bank"></i></span>
@@ -242,11 +242,11 @@
 			
 			<div class="token-entry row main-token">
 				<div class="col-2 text-left"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo">AFIT</div>
-				<div class="col-2">{{ $t('BSC')}}</div>
+				<div class="col-2 col-lg-1">{{ $t('BSC')}}</div>
 				<div class="col-2 text-right">{{ formattedUserAfitBSC }}</div>
 				<div class="col-2"></div>
 				<div class="col-lg-1 col-2 text-right"></div>
-				<div class="col-1 text-right break-val">{{ formattedUserAfitBSCVal}}</div>
+				<div class="col-1 col-lg-2 text-right break-val">{{ formattedUserAfitBSCVal}}</div>
 				<div class="col-lg-2 col-1 token_actions">
 					<span class="btn btn-brand p-1" :title="$t('smart_contract')">
 							<a target="_blank" :href="'https://bscscan.com/address/'+afitTokenAddress"><i class="fas fa-file-contract"></i></a>
@@ -256,11 +256,11 @@
 			
 			<div class="token-entry row main-token">
 				<div class="col-2 text-left"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo">AFIT-BNB LP</div>
-				<div class="col-2">{{ $t('BSC')}}</div>
+				<div class="col-2 col-lg-1">{{ $t('BSC')}}</div>
 				<div class="col-2 text-right">{{ formattedUserAfitBNBLPBSC }}</div>
 				<div class="col-2"></div>
 				<div class="col-lg-1 col-2 text-right"></div>
-				<div class="col-1 text-right">-</div>
+				<div class="col-1 col-lg-2 text-right">-</div>
 				<div class="col-lg-2 col-1 token_actions">
 					<span class="btn btn-brand p-1" :title="$t('smart_contract')">
 							<a target="_blank" :href="'https://bscscan.com/address/'+afitBNBLPTokenAddress"><i class="fas fa-file-contract"></i></a>
@@ -271,11 +271,11 @@
 			
 			<div class="token-entry row main-token">
 				<div class="col-2 text-left"><img src="/img/AFITX.png" class="mr-1 mini-token-logo">AFITX</div>
-				<div class="col-2">{{ $t('BSC')}}</div>
+				<div class="col-2 col-lg-1">{{ $t('BSC')}}</div>
 				<div class="col-2 text-right">{{ formattedUserAFITXBSC }}</div>
 				<div class="col-2"></div>
 				<div class="col-lg-1 col-2 text-right"></div>
-				<div class="col-1 text-right break-val">{{ formattedUserAfitxBSCVal}}</div>
+				<div class="col-1 col-lg-2 text-right break-val">{{ formattedUserAfitxBSCVal}}</div>
 				<div class="col-lg-2 col-1 token_actions">
 					<span class="btn btn-brand p-1" :title="$t('smart_contract')">
 							<a target="_blank" :href="'https://bscscan.com/address/'+afitxTokenAddress"><i class="fas fa-file-contract"></i></a>
@@ -285,11 +285,11 @@
 			
 			<div class="token-entry row main-token">
 				<div class="col-2 text-left"><img src="/img/AFITX.png" class="mr-1 mini-token-logo">AFITX-BNB LP</div>
-				<div class="col-2">{{ $t('BSC')}}</div>
+				<div class="col-2 col-lg-1">{{ $t('BSC')}}</div>
 				<div class="col-2 text-right">{{ formattedUserAFITXBNBLPBSC }}</div>
 				<div class="col-2"></div>
 				<div class="col-lg-1 col-2 text-right"></div>
-				<div class="col-1 text-right">-</div>
+				<div class="col-1 col-lg-2 text-right">-</div>
 				<div class="col-lg-2 col-1 token_actions">
 					<span class="btn btn-brand p-1" :title="$t('smart_contract')">
 							<a target="_blank" :href="'https://bscscan.com/address/'+afitxBNBLPTokenAddress"><i class="fas fa-file-contract"></i></a>
@@ -304,7 +304,7 @@
 				<div v-if="tokensOfInterestBal.length > 0 && renderToken(token)" class="token-entry row" v-for="(token, index) in tokensOfInterestBal" :key="index" :token="token">
 				  <!--<div v-if=" ">-->
 					<div class="col-2 text-left"><img :src="token.icon" class="mr-1 mini-token-logo" >{{ token.symbol }}</div>
-					<div class="col-2">{{ $t('hive_engine')}}</div>
+					<div class="col-2 col-lg-1">{{ $t('hive_engine')}}</div>
 					<div class="col-2 text-right">{{ renderBal(token) }} {{ token.symbol }}</div>
 					<div class="col-2 text-right">
 					
@@ -316,7 +316,7 @@
 						<span v-if="powerDisplayOn(token)"><li>{{renderStake(token, 1)}} ({{ $t('Owned') }})</li><li> + {{renderStake(token, 2)}} ({{ $t('Received_Power') }})</li><li> - {{renderStake(token, 4)}} ({{ $t('Delegated_Power') }})</li><li> - {{renderStake(token, 3)}} ({{ $t('Unstaking') }})</li></span>
 					</div>
 					<div class="col-lg-1 col-2"></div>
-					<div class="col-1 text-right break-val">${{ usdVal(token) }}</div>
+					<div class="col-1 col-lg-2 text-right break-val">${{ usdVal(token) }}</div>
 					<!--<span v-if="parseFloat(delegStake(token)) > 0">( + {{ delegStake(token)}} {{ token.symbol }} {{ $t('Delegated') }}) </span>-->
 					<div class="token_actions col-lg-2 col-1" v-if="cur_bchain!='BLURT'">
 						<span v-if="token.symbol=='AFITX'" class="btn btn-brand p-1" >
