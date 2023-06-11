@@ -205,6 +205,10 @@
 	  },
 	  user (){
 		this.fetchCommunities();
+		//load saved draft
+		this.runDraftLoader();
+		//save draft in intervals
+		setInterval(this.runDraftSaver, 20000);
 	  },
       editPost () {
 		//enforce new post till and if we implement full screen edit
@@ -795,6 +799,34 @@
 		}catch(err){
 			console.error(err);
 		}
+	  },
+	  runDraftLoader (){
+		console.log('load stored draft');
+		let data = this.$loadDraft(this.user.account.name, 'blog');
+		let jsonRes = JSON.parse(data);
+		console.log(jsonRes);
+		if (jsonRes){
+			this.title = jsonRes.title;
+			this.body = jsonRes.body;
+			this.tags = jsonRes.tags;
+			this.benef_list = jsonRes.beneficiaries;
+			this.$refs['targetCommunity'].value = jsonRes.targetCommunity;
+			console.log('data loaded');
+		}
+	  },
+	  runDraftSaver (){
+		console.log('runDraftSaver');
+		//if we have any user input content, save to draft
+		if (this.title!='' || this.body!='' && this.editPost.isNewPost){
+			let data = {
+				title: this.title,
+				body: this.$refs.editor.content,
+				tags: this.$refs.tagItem.items,
+				beneficiaries: this.$refs['beneficiaryList'].formattedEntries,
+				targetCommunity: this.$refs['targetCommunity'].value,
+			}
+			this.$storeDraft(this.user.account.name, data,'blog');
+		}
 	  }
     },
 	async mounted () {
@@ -802,6 +834,12 @@
 		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		this.$store.commit('setBchain', this.cur_bchain);
 		this.fetchCommunities();
+		if (this.user){
+			//load saved draft
+			this.runDraftLoader();
+			//save draft in intervals
+			setInterval(this.runDraftSaver, 20000);
+		}
 	}
   }
 </script>

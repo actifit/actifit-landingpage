@@ -4,7 +4,7 @@ import Vue from 'vue'
 import HAS from 'hive-auth-wrapper';
 Vue.prototype.$HAS = HAS;
 
-//global function
+//global functions
 Vue.prototype.$getTimeDifference = function(dateParam) {
 	
   let localDate = new Date();
@@ -153,4 +153,24 @@ Vue.prototype.$processTrxFunc = async function (op_name, cstm_params, active) {
 	  return { success: true, trx: outcome.trx };
 	}
   }
+};
+
+Vue.prototype.$clearDraft = function (username, type){
+	localStorage.removeItem(username+'_draft_'+type);
+	
+};
+
+Vue.prototype.$storeDraft = function (username, data, type) {
+	localStorage.setItem(username+'_draft_'+type, JSON.stringify(data));
+};
+
+Vue.prototype.$loadDraft = function (username, type) {
+	try{
+		let data = localStorage.getItem(username+'_draft_'+type);
+		console.log(data);
+		return data;
+	}catch(err){
+		console.log(err);
+		return '';
+	}
 };
