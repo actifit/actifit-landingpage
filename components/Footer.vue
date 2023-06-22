@@ -150,4 +150,7 @@
 		background: linear-gradient(180deg,lightcoral,coral);
 		color: white !important;
 	}
+	.far, .fas{
+	  cursor: pointer;
+	}
 </style>
