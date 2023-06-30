@@ -275,7 +275,6 @@
 	  }
 	},
     async mounted () {
-		
 		//grab current active chain
 		if (localStorage.getItem('cur_bchain')){
 			this.cur_bchain = localStorage.getItem('cur_bchain')

@@ -66,6 +66,9 @@
     },
 	components: {
 		VueCookieAcceptDecline
+	},
+	async mounted(){
+		console.log('mounted footer')
 	}
   }
 </script>

@@ -74,6 +74,9 @@
 		components: {
 		  UserMenu,
 		  
+		},
+		async mounted () {
+			console.log('navbar mounted');
 		}
 	
 	}

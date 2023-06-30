@@ -2,9 +2,9 @@
   <div class="home" ref="homePage">
     <!-- top anchor -->
     <a id="top"></a>
-
+	<div id="navbar-container" ref="navbar-container" v-if="renderReady">
     <NavbarBrand :home="true" @scrollTo="scrollTo"/>
-
+	</div>
     <!-- header with fullscreen background -->
 	<div class="header pt-4 pt-md-5 position-relative">
 	  <div class="container py-5">
@@ -546,6 +546,7 @@
 		reload: 0,
 		profImgUrl: process.env.hiveImgUrl,
 		pendingRewards: {},
+		renderReady: false,
       }
     },
     computed: {
@@ -649,10 +650,47 @@
 		  fetch(process.env.actiAppUrl+'pendingRewards/?user='+this.user.account.name).then(
 			res => {res.json().then(json => this.setPendingRewards(json)).catch(e => reject(e))
 		  }).catch(e => reject(e))
+	  },
+	  addNavbarBrandComponent(){
+		const navbarContainer = document.getElementById('navbar-container');
+
+		if (navbarContainer) {
+			/*const navbarBrandComponent = this.$createElement('NavbarBrand', {
+			  props: {
+				home: true
+			  },
+			  on: {
+				scrollTo: this.scrollTo
+			  }
+			});*/
+			const navbarBrandComponent = new NavbarBrand({
+			  propsData: {
+				home: true
+			  },
+			  methods: {
+				handleScrollTo() {
+				  // Method logic for scroll event
+				}
+			  }
+			});
+
+			navbarBrandComponent.$mount();
+			//const navbarBrandComponent = document.createElement('NavbarBrand');
+			//const navbarBrandComponent = this.$createElement(NavbarBrand);
+
+			this.$nextTick(() => {
+			  const tgt = navbarBrandComponent.outerHTML;
+			  console.log(tgt);
+			  //console.log(navbarBrandComponent.$el);
+			  //navbarContainer.appendChild(tgt);
+			  navbarContainer.insertAdjacentHTML('beforebegin', navbarBrandComponent.$el);
+			});
+		}
 	  }
     },
     async mounted () {
 		  // login
+		  console.log('main mounted');
       this.$store.dispatch('steemconnect/login')
 	  this.fetchUserData();
 	
@@ -670,6 +708,10 @@
 	  this.$store.dispatch('fetchAmbassadors')
 
       this.$store.dispatch('fetchNews')
+	  
+	  //dynamically add the navbar to avoid multiple calls into it
+	  //this.addNavbarBrandComponent();
+	  this.renderReady = true;
 	  
     },
 	async beforeDestory(){
