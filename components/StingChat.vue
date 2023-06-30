@@ -107,7 +107,7 @@ export default {
 		  if (hasChildNodes) return;
 		  console.log('post return');
 		  var element = this.widget.createElement('450px', '556px', true /* overlay */, true /* resizable */);
-		  this.widget.setStyle({ direction: 'rtl', top: '51px', right: '32px' }); //add custom styles
+		  this.widget.setStyle({ direction: 'rtl', top: '75px', right: '0px' }); //add custom styles
 		  // Add direction: 'rtl' if you would like the widget to be expandable by dragging the 
 		  // bottom-left corner instead of bottom-right corner
 
