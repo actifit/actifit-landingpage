@@ -128,8 +128,15 @@
 					<span class="text-brand text-bold">{{ report.pending_payout_value.replace('SBD','')}}</span>
 					<i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
 				</span>
-				<span v-if="hasBeneficiaries()" :title="beneficiariesDisplay()">
+				<span v-if="hasBeneficiaries()" 
+						:title="beneficiariesDisplay()" 
+						@click="toggleTooltip()"
+						@mouseenter="showTooltip()"
+						@mouseleave="hideTooltip()"
+						@touchstart="showTooltip()"
+						@touchend="hideTooltip()">
 					<i class="fas fa-user-pen"><sup>{{report.beneficiaries.length}}</sup></i>
+					<div class="custom-tooltip" v-if="isTooltipVisible">{{ beneficiariesDisplay() }}</div>
 				</span>
 
 			</div>
@@ -302,6 +309,7 @@
 			socialSharingDesc: process.env.socialSharingDesc,
 			socialSharingQuote: process.env.socialSharingQuote,
 			hashtags: process.env.socialSharingHashtags,
+			isTooltipVisible: false,
 		}
 	},
 	components: {
@@ -322,6 +330,15 @@
 		}
 		return false;
 	  },
+	  showTooltip() {
+		this.isTooltipVisible = true;
+	  },
+	  hideTooltip() {
+	    this.isTooltipVisible = false;
+	  },
+	  toggleTooltip() {
+        this.isTooltipVisible = !this.isTooltipVisible;
+      },
 	  hasImage(){
 		let metaData = this.meta;
 		if (metaData.image){

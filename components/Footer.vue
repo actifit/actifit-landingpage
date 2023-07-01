@@ -156,4 +156,30 @@
 	.far, .fas{
 	  cursor: pointer;
 	}
+	.tooltip {
+	  position: relative;
+	  cursor: pointer;
+	}
+
+	/*.custom-tooltip {
+	  position: absolute;
+	  top: 100%;
+	  left: 50%;
+	  transform: translateX(-50%);
+	  padding: 8px;
+	  background-color: #000;
+	  color: #fff;
+	  border-radius: 4px;
+	  font-size: 14px;
+	  white-space: nowrap;
+	  opacity: 0;
+	  visibility: hidden;
+	  transition: opacity 0.3s, visibility 0.3s;
+	}
+
+	.tooltip + .custom-tooltip,
+	.custom-tooltip:hover {
+	  opacity: 1;
+	  visibility: visible;
+	}*/
 </style>
