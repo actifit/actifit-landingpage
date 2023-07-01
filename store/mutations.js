@@ -14,6 +14,9 @@ export default {
   setUserSettings (state, settings){
 	state.userSettings = settings  
   },
+  setDarkMode (state, darkMode){
+	state.darkMode = darkMode
+  },
   setUserRank (state, userRank) {
     state.userRankObj = userRank
 	state.userRank = userRank.user_rank

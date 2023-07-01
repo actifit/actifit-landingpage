@@ -1,0 +1,7 @@
+.dark-mode {
+  --primary-color: #ffffff;
+  --background-color: #212121;
+  --background-color-1: #303030;
+  --hover-color: #000000;
+  /* CSS variables with dark mode styles */
+}

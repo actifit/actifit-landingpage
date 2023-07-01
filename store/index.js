@@ -59,6 +59,7 @@ const createStore = () => {
 	  bchain: '',//current active blockchain
 	  cartEntries: [], //contains current items being bought via market
 	  purchaseSuccess: false, //references latest purchase transaction using cart
+	  darkMode: false, //controls whether dark mode is active for this user's display
     },
     getters,
     mutations,

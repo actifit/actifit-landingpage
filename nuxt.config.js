@@ -324,7 +324,9 @@ module.exports = {
   ** Global CSS
   */
   css: [
-    '~/assets/css/main.sass'
+    '~/assets/css/main.sass',
+	'~/assets/css/normal.css',
+	'~/assets/css/dark-mode.css'
   ],
 
   /*
@@ -340,6 +342,7 @@ module.exports = {
 	{ src: '~plugins/v-lightbox', mode: 'client' },
 	{ src: '@/plugins/vue-mavon-editor', ssr: false },
 	{ src: '~plugins/vue-custom.js'},
+	{ src: '~/plugins/dark-mode.js'},
   ],
 
   /*

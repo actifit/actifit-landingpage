@@ -114,6 +114,7 @@ module.exports = {
   next_withdraw_on: 'Your next withdrawal occurs on',
   Power_Down: 'Power Down',
   sting_chat: 'Sting Chat',
+  toggle_dark_mode: 'Toggle Dark Mode',
   Cancel_Power_Down: 'Cancel Power Down',
   Claimable_Steem_Rewards: 'Claimable STEEM Rewards',
   Claim_Steem_Rewards: 'Claim STEEM Rewards',

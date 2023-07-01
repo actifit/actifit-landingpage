@@ -11,6 +11,12 @@
       <li class="nav-item mr-2" v-if="user">
         <span class="navbar-text py-0">{{ $t('Balance') }}<br><b>{{ formattedUserTokens }}</b></span>
       </li>-->
+	  <li class="nav-item mr-2" @click="toggleDarkMode" :title="$t('toggle_dark_mode')">
+		<span class="user-avatar group-class">
+			<i v-if="$store.state.darkMode" class="fa-solid fa-sun p-2"></i>
+			<i v-else class="fa-solid fa-moon text-brand p-2"></i>
+		</span>
+	  </li>
 	  <li class="nav-item mr-2" v-if="user">
 		<!--<button @click="toggleWidget">Toggle Widget</button>-->
 		<StingChat :user="this.user"/>
@@ -186,6 +192,9 @@
        */
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
+      },
+	  toggleDarkMode() {
+        this.$store.dispatch('toggleDarkMode');
       },
 	  setActiveChain(chain){
 		if (this.cur_bchain == chain){

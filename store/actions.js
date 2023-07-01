@@ -18,6 +18,9 @@ blurt.api.setOptions({ url: process.env.blurtApiNode });
 // returning promises to be able to wait for data
 
 export default {
+  toggleDarkMode ({state, commit}){
+	commit('setDarkMode', !state.darkMode)
+  },
   fetchUserTokens ({ state, commit }) {
     return new Promise((resolve, reject) => {
       fetch(process.env.actiAppUrl+'user/' + state.steemconnect.user.account.name.toLowerCase()).then(res => {

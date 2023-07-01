@@ -64,6 +64,19 @@
         return (new Date()).getFullYear()
       },
     },
+	/*watch: {
+		//darkMode(newDarkMode) {
+		'$darkMode.getDarkModeClass'(newDarkMode) {
+		  // Update CSS variables dynamically when dark mode state changes
+		  const root = document.documentElement;
+		  /*root.style.setProperty('--light-primary-color', newDarkMode ? '#ff112d' : '#333');
+		  root.style.setProperty('--light-background-color', newDarkMode ? '#fff' : '#222');
+		  root.style.setProperty('--dark-primary-color', newDarkMode ? '#ff112d' : '#fff');
+		  root.style.setProperty('--dark-background-color', newDarkMode ? '#333' : '#0a0c16');*/
+		  /*document.documentElement.classList.toggle('dark-mode', newDarkMode);
+
+		}
+	},*/
 	components: {
 		VueCookieAcceptDecline
 	},
@@ -153,7 +166,7 @@
 		background: linear-gradient(180deg,lightcoral,coral);
 		color: white !important;
 	}
-	.far, .fas{
+	.far, .fas, .fa-solid{
 	  cursor: pointer;
 	}
 	.tooltip {

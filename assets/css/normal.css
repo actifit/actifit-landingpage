@@ -1,0 +1,57 @@
+:root {
+  --primary-color: #ff112d;
+  --background-color: #fff;
+  /* Other CSS variables for dark mode */
+}
+
+body {
+  background-color: var(--background-color);
+  color: var(--primary-color);
+}
+
+a {
+  color: var(--primary-color);
+}
+
+a:hover {
+  color: var(--hover-color);
+}
+
+.card {
+  background-color: var(--background-color);
+}
+
+.card-header {
+  background-color: var(--background-color-1);
+}
+
+.card-body {
+  color: var(--primary-color);
+}
+
+.table {
+  background-color: var(--background-color);
+}
+
+.table-header {
+  background-color: var(--background-color-1);
+}
+
+.table-row, .navbar {
+  background-color: var(--background-color)!important;
+}
+
+.table-cell {
+  color: var(--primary-color);
+}
+
+.table-cell:hover, .navbar:hover, .token-entry {
+  background-color: var(--background-color-1)!important;
+}
+/*
+
+.card {
+  color: var(--primary-color);
+  background-color: var(--background-color);
+}
+*/
