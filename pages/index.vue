@@ -650,42 +650,6 @@
 		  fetch(process.env.actiAppUrl+'pendingRewards/?user='+this.user.account.name).then(
 			res => {res.json().then(json => this.setPendingRewards(json)).catch(e => reject(e))
 		  }).catch(e => reject(e))
-	  },
-	  addNavbarBrandComponent(){
-		const navbarContainer = document.getElementById('navbar-container');
-
-		if (navbarContainer) {
-			/*const navbarBrandComponent = this.$createElement('NavbarBrand', {
-			  props: {
-				home: true
-			  },
-			  on: {
-				scrollTo: this.scrollTo
-			  }
-			});*/
-			const navbarBrandComponent = new NavbarBrand({
-			  propsData: {
-				home: true
-			  },
-			  methods: {
-				handleScrollTo() {
-				  // Method logic for scroll event
-				}
-			  }
-			});
-
-			navbarBrandComponent.$mount();
-			//const navbarBrandComponent = document.createElement('NavbarBrand');
-			//const navbarBrandComponent = this.$createElement(NavbarBrand);
-
-			this.$nextTick(() => {
-			  const tgt = navbarBrandComponent.outerHTML;
-			  console.log(tgt);
-			  //console.log(navbarBrandComponent.$el);
-			  //navbarContainer.appendChild(tgt);
-			  navbarContainer.insertAdjacentHTML('beforebegin', navbarBrandComponent.$el);
-			});
-		}
 	  }
     },
     async mounted () {
@@ -710,7 +674,6 @@
       this.$store.dispatch('fetchNews')
 	  
 	  //dynamically add the navbar to avoid multiple calls into it
-	  //this.addNavbarBrandComponent();
 	  this.renderReady = true;
 	  
     },
