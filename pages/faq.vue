@@ -2,7 +2,7 @@
   <div>
     <NavbarBrand />
 	
-	<section class="intro bg-light" id="content">
+	<section class="intro" id="content">
 		<div class="container pt-5 mt-5 pb-5">
 
 	  

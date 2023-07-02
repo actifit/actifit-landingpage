@@ -1,32 +1,66 @@
 :root {
   --primary-color: #ff112d;
   --background-color: #fff;
+  --background-color-1: #ff112d;
+  --text-color: #000;
+  --text-brand: #ff4500;
   /* Other CSS variables for dark mode */
+}
+
+.dark-mode {
+  --primary-color: #ffffff;
+  --background-color: #212121;
+  --background-color-1: #303030;
+  --hover-color: #000000;
+  --text-color: #fff;
+  --text-brand: #fff;
+  /* CSS variables with dark mode styles */
+}
+
+section {
+	background-color: var(--background-color)!important;
 }
 
 body {
   background-color: var(--background-color);
-  color: var(--primary-color);
+  color: var(--text-color);
 }
 
 a {
   color: var(--primary-color);
 }
 
+.info-box-orange{
+	color: var(--text-brand)!important;
+}
+
+.report a, .report-body, .post a, .post-body{
+	color: var(--text-color)!important;
+}
+
+.report h6{
+	background-color: var(--background-color-1)!important;
+}
+
 a:hover {
   color: var(--hover-color);
 }
 
+.footer, .modal-content, .card, .notif-container, .dropdown-menu{
+	background-color: var(--background-color)!important;
+}
+
+/*
 .card {
   background-color: var(--background-color);
+}*/
+
+.card-header, .action-box {
+  background-color: var(--background-color-1)!important;
 }
 
-.card-header {
-  background-color: var(--background-color-1);
-}
-
-.card-body {
-  color: var(--primary-color);
+.card-body, .admin-name a, .dropdown-menu a, .dropdown-menu span {
+  color: var(--primary-color)!important;
 }
 
 .table {

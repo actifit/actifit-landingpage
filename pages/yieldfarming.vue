@@ -6,7 +6,7 @@
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-5">
 	  
-	  <div class="col-md-12 text-center text-primary mb-5 notice-text">
+	  <div class="col-md-12 text-center mb-5 notice-text">
 		  <h2 class="text-center mb-5">{{ $t('Daily_yield') }}<a href="#" data-toggle="modal" data-target="#notifyModal"><i class="fas fa-info-circle" :title="$t('view_details')"></i></a></h2>
 		  <div class="text-center row p-2">
 			<span v-if="afitPrice">
@@ -20,7 +20,7 @@
 			</span>-->
 		  </div>
 		  <div class="row row-sep">
-			<div class="col-md-12 row-sep-in small-pad-row p-2 text-left">
+			<div class="col-md-12 row-sep-in small-pad-row yf-main-notif p-2 text-left">
 				<span v-if="topDelegators.hive">
 					<h4 class="text-center">{{ $t('Daily_pool') }} - {{$t('Hive_delegators')}} <img src="/img/HIVE.png" style="max-height: 20px;"> </h4>
 					

@@ -54,7 +54,7 @@
 			</div>
 			<div class="text-center text-brand col-12">{{$t('admins')}}</div>
 			<div class="row col-12">
-				<div v-for="(admin, index) in community.admins" :key="index" :admin="admin" class="m-1 p-1">
+				<div v-for="(admin, index) in community.admins" :key="index" :admin="admin" class="m-1 p-1 admin-name">
 					<a :href="'./'+admin">
 						<div class="user-avatar mr-1" :style="'background-image: url('+profImgUrl+'/u/' + admin + '/avatar)'"></div>
 						@{{admin}}

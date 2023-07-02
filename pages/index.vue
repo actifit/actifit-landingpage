@@ -77,7 +77,7 @@
     </div>
     <!-- intro -->
 	<!--<transition type="animation">-->
-    <section class="intro bg-light" id="content">
+    <section class="intro" id="content">
       <div class="container py-5">
         <h1 class="pt-5 mb-3 text-capitalize text-center headline" v-html="$t('homepage.section1_title')"></h1>
         <p class="lead mb-4 pb-5 text-center">
@@ -156,7 +156,7 @@
 
 
 	<!-- top Delegators -->
-    <section id="delegators" class="py-5 bg-light">
+    <section id="delegators" class="py-5">
       <div class="container">
         <h1 class="text-center pb-5">
           <i class="fas fa-heart"></i><br>
@@ -230,7 +230,7 @@
     </section>
 
     <!-- team -->
-    <section id="team" class="py-5 bg-light">
+    <section id="team" class="py-5">
       <div class="container">
         <h1 class="text-center pb-5">
           <i class="fas fa-users"></i><br>
@@ -452,7 +452,7 @@
       
     </section>
 	
-	<section id="infrastructure" class="py-5 bg-light">
+	<section id="infrastructure" class="py-5">
 		<div class="container">
 			<h1 class="text-center pb-5">
 			  <i class="fas fa-cubes"></i><br>
