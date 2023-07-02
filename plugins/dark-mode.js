@@ -26,4 +26,7 @@ export default function ({ app, store }) {
 
   // Call the initial update to set the dark mode class
   updateDarkModeClass();
+  
+  //fetch initial setting
+  store.dispatch('initializeDarkMode');
 }

@@ -11,7 +11,7 @@
       <li class="nav-item mr-2" v-if="user">
         <span class="navbar-text py-0">{{ $t('Balance') }}<br><b>{{ formattedUserTokens }}</b></span>
       </li>-->
-	  <li class="nav-item mr-2" @click="toggleDarkMode" :title="$t('toggle_dark_mode')">
+	  <li class="nav-item mr-2" @click="toggleDarkMode" :title="$t('toggle_dark_mode')" v-if="user">
 		<span class="user-avatar group-class">
 			<i v-if="$store.state.darkMode" class="fa-solid fa-sun p-2 text-brand"></i>
 			<i v-else class="fa-solid fa-moon text-brand p-2"></i>

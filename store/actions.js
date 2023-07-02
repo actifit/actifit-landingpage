@@ -18,8 +18,20 @@ blurt.api.setOptions({ url: process.env.blurtApiNode });
 // returning promises to be able to wait for data
 
 export default {
+  initializeDarkMode ({state, commit}){
+	if (process.client) {
+	const storedDarkMode = localStorage.getItem('darkMode');
+    if (storedDarkMode) {
+      state.darkMode = JSON.parse(storedDarkMode);
+	  commit('setDarkMode', state.darkMode);
+    }
+	}
+  },
   toggleDarkMode ({state, commit}){
-	commit('setDarkMode', !state.darkMode)
+	console.log(state.darkMode);
+	state.darkMode = !state.darkMode;
+	commit('setDarkMode', state.darkMode);
+	localStorage.setItem('darkMode', state.darkMode);
   },
   fetchUserTokens ({ state, commit }) {
     return new Promise((resolve, reject) => {
