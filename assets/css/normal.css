@@ -4,6 +4,7 @@
   --background-color-1: #ff112d;
   --text-color: #000;
   --text-brand: #ff4500;
+  --nav-col: rgba(255, 255, 255, 0.8);
   /* Other CSS variables for dark mode */
 }
 
@@ -14,11 +15,20 @@
   --hover-color: #000000;
   --text-color: #fff;
   --text-brand: #fff;
+  --nav-col: rgba(0, 0, 0, 0.8);
   /* CSS variables with dark mode styles */
 }
 
 section {
 	background-color: var(--background-color)!important;
+}
+
+.navbar-light{
+	background-color: var(--nav-col);
+}
+
+.navbar-light:hover{
+	background-color: var(--background-color);
 }
 
 body {
@@ -75,7 +85,7 @@ a:hover {
   background-color: var(--background-color-1);
 }
 
-.table-row, .navbar {
+.table-row {
   background-color: var(--background-color)!important;
 }
 
@@ -83,7 +93,7 @@ a:hover {
   color: var(--primary-color);
 }
 
-.table-cell:hover, .navbar:hover, .token-entry {
+.table-cell:hover, .token-entry {
   background-color: var(--background-color-1)!important;
 }
 /*
