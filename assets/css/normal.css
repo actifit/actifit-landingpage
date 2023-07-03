@@ -73,8 +73,12 @@ a:hover {
   background-color: var(--background-color-1)!important;
 }
 
-.card-body, .admin-name a, .dropdown-menu a, .dropdown-menu span {
+.card-body, .admin-name a {
   color: var(--primary-color)!important;
+}
+
+.dropdown-menu a, .dropdown-menu span {
+  color: var(--text-color);
 }
 
 .table {
