@@ -36,6 +36,7 @@ module.exports = {
 	webEditToken: process.env.WEB_EDIT_REWARD_KEY,
 	webVoteToken: process.env.WEB_VOTE_REWARD_KEY,
 	webCommentToken: process.env.WEB_COMMENT_REWARD_KEY,
+	maxTagDisplay: 10,
 	captchaV3Key: '6LchW94ZAAAAAOjLg0G_0AiRgHrlBfbP_HrReBBE',
 	poshVerificationUrl: 'https://hiveposh.com/api/v0/twitter/',
 	socialSharingHashtags: 'actifit,hive,move2earn,health,fitness',

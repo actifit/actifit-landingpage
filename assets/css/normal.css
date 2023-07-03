@@ -42,6 +42,10 @@ a {
 	background-color: var(--background-color-1)!important;
 }
 
+.report h6 a, .post h6 a{
+	color: white!important;
+}
+
 a:hover {
   color: var(--hover-color);
 }
@@ -89,3 +93,8 @@ a:hover {
   background-color: var(--background-color);
 }
 */
+
+
+.report-title, .post-title{
+	color: #fff!important;
+}
