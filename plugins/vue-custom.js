@@ -160,7 +160,7 @@ Vue.prototype.$processTrxFunc = async function (op_name, cstm_params, active) {
 
 Vue.prototype.$cleanBody = function (report_content){
 	//sanitize content first hand
-	report_content = sanitize(report_content);// , { allowedTags: ['img', 'details', 'summary', 'iframe', 'blockquote'] } );
+	report_content = sanitize(report_content, { allowedTags: ['img', 'details', 'summary', 'iframe', 'blockquote'] } );
 	
 	//fix for lost blockquotes
 	report_content = report_content.replaceAll('&gt;','>');
