@@ -55,16 +55,16 @@
 			<span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i class="text-white fas fa-reply"></i></a></span>
 			<span class="ml-2">
 			
-			  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 
-				 data-target="#voteModal" v-if="this.$parent.user && userVotedThisPost()==true">
-				<i class="far fa-thumbs-up"></i> {{getVoteCount }}
-			  </a>
-			  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal"
-				 data-target="#voteModal" class="actifit-link-plain" v-else>
-				<i class="far fa-thumbs-up"></i> {{ getVoteCount }}
-			  </a>
-			  <i class="far fa-comments ml-2"></i> {{ post.children }}
-				
+				<a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 
+					 data-target="#voteModal" v-if="this.$parent.user && userVotedThisPost()==true">
+					<i class="far fa-thumbs-up"></i> {{getVoteCount }}
+				</a>
+				<a href="#" @click.prevent="votePrompt($event)" data-toggle="modal"
+					 data-target="#voteModal" class="actifit-link-plain" v-else>
+					<i class="far fa-thumbs-up"></i> {{ getVoteCount }}
+				</a>
+				<i class="far fa-comments ml-2"></i> {{ post.children }}
+				<i class="far fa-share-square ml-2" @click.prevent="$reblog(user, post)" v-if="user && post.author != this.user.account.name" :title="$t('reblog')"></i>
 			</span>
 			<div>
 				<!--<small :title="afitReward +' ' + $t('AFIT_Token')">

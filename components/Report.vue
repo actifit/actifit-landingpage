@@ -76,6 +76,7 @@
                 <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
               </a>
               <i class="far fa-comments ml-2" :title="$t('comments')"></i> {{ report.children }}
+			  <i class="far fa-share-square ml-2" @click.prevent="$reblog(user, report)" v-if="user && report.author != this.user.account.name" :title="$t('reblog')"></i>
           </div>
           <div class="col-6 text-right">
 
