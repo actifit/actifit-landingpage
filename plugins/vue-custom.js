@@ -158,10 +158,19 @@ Vue.prototype.$processTrxFunc = async function (op_name, cstm_params, active) {
   }
 };
 
-Vue.prototype.$cleanBody = function (report_content){
+Vue.prototype.$cleanBody = function (report_content, full_cleanup){
 	//sanitize content first hand
-	report_content = sanitize(report_content, { allowedTags: ['img', 'details', 'summary', 'iframe', 'blockquote'] } );
+	let img_replacement = '<img src="$1">';
+	let vid_replacement = '<iframe width="640" height="360" src="https://www.youtube.com/embed/$1"></iframe>';
+	let user_link_replacement = '$1<a href="https://actifit.io/$2">$2</a>';
 	
+	if (full_cleanup){
+		report_content = sanitize(report_content, { allowedTags: []});
+		img_replacement = '';
+		vid_replacement = '';
+	}else{
+		report_content = sanitize(report_content, { allowedTags: ['img', 'details', 'summary', 'iframe', 'blockquote'] } );
+	}
 	//fix for lost blockquotes
 	report_content = report_content.replaceAll('&gt;','>');
 	//console.log(report_content);
@@ -170,21 +179,21 @@ Vue.prototype.$cleanBody = function (report_content){
 	/* let's find images sent as ![](), and display them properly */
 	//let img_links_reg = /^(?:(?!=").)*((https?:\/\/[./\d\w-]*\.(?:png|jpg|jpeg|gif))|((https?:\/\/usermedia\.actifit\.io\/[./\d\w-]+)))/igm;
 	let img_links_reg = /[!]\[[\d\w\s-\.\(\)]*\]\((((https?:\/\/actifit\.s3\.amazonaws\.com\/)|((https?:\/\/usermedia\.actifit\.io\/))|((https:\/\/ipfs\.busy\.org\/ipfs\/))|((https:\/\/steemitimages\.com\/)))[\d\w-=&[\:\/\.\%\?]+|(https?:\/\/[.\d\w-\/\:\%]*(\.(?:png|jpg|jpeg|gif)(\??[\d\w-=&[\:\/\.\%\?]+)?)?))[)]/igm;
-	report_content = report_content.replace(img_links_reg,'<img src="$1">');
+	report_content = report_content.replace(img_links_reg, img_replacement);
 	
 	/* let's find images sent as pure URLs, and display them as actual images, while avoiding well established images */
 	/* negative lookbehinds are not supported ?<! we need to switch to another approach */
 	//img_links_reg = /(?<!=")(?<!]\()(((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|(https?:\/\/[./\d\w-]*\.(?:png|jpg|jpeg|gif)))/igm;
 	//img_links_reg = /(((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|(https?:\/\/[./\d\w-]*\.(?:png|jpg|jpeg|gif)))(?!")/igm;
 	img_links_reg = /(((https?:\/\/actifit\.s3\.amazonaws\.com\/)[\d\w-]+)|((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|((https:\/\/ipfs\.busy\.org\/ipfs\/)[\d\w-]+)|((https:\/\/steemitimages\.com\/)[\d\w-[\:\/\.]+)|(https?:\/\/[.\/\d\w-]*\.(?:png|jpg|jpeg|gif)))[\s]/igm;
-	report_content = report_content.replace(img_links_reg,'<img src="$1">');
+	report_content = report_content.replace(img_links_reg, img_replacement);
 	
 	/* let's match youtube videos and display them in a player */
 	//let vid_reg = /^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+/gm;
 	let vid_reg = /https?:\/\/(?:[0-9A-Z-]+\.)?(?:youtu\.be\/|youtube\.com\S*[^\w\-\s])([\w\-]{11})(?=[^\w\-]|$)(?![?=&amp;+%\w]*(?:['"][^&lt;&gt;]*&gt;|&lt;\/a&gt;))[?=&amp;+%\w-]*/ig;
 	
 	//swap into a player format, and introduce embed format for proper playing of videos
-	report_content = report_content.replace(vid_reg,'<iframe width="640" height="360" src="https://www.youtube.com/embed/$1"></iframe>');
+	report_content = report_content.replace(vid_reg, vid_replacement);
 	
 	//add support for 3speak videos embedded within iframe
 	//let threespk_reg = /[.*](https?:\/\/3speak\.tv\/watch\?v=([\w-]+\/[\w-]+))/i;
@@ -203,10 +212,11 @@ Vue.prototype.$cleanBody = function (report_content){
 	//report_content = report_content.replace(href_lnks,'<a href="$2">$1</a>');
 	
 	/* regex to match @ words and convert them to steem user links. Need to skip special occurrences such as name within a link (preceded by /) */
-	let user_name = /([^\/])(@([\d\w-.]+))/igm;
-	
-	report_content = report_content.replace(user_name,'$1<a href="https://actifit.io/$2">$2</a>')
-	
+	if (!full_cleanup){
+		let user_name = /([^\/])(@([\d\w-.]+))/igm;
+		
+		report_content = report_content.replace(user_name, user_link_replacement);
+	}
 	
 	//return md.render(report_content);
 	//return sanitize(md.render(report_content) , { allowedTags: ['img', 'details', 'summary', 'iframe', 'blockquote'] })

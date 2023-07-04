@@ -316,27 +316,7 @@
 		return "";
 	  },
 	  renderSnippet(content){
-		//remove extra content
-		let img_links_reg = /[!]\[[\d\w\s-\.\(\)]*\]\((((https?:\/\/actifit\.s3\.amazonaws\.com\/)|((https?:\/\/usermedia\.actifit\.io\/))|((https:\/\/ipfs\.busy\.org\/ipfs\/))|((https:\/\/steemitimages\.com\/)))[\d\w-=&[\:\/\.\%\?]+|(https?:\/\/[.\d\w-\/\:\%]*(\.(?:png|jpg|jpeg|gif)(\??[\d\w-=&[\:\/\.\%\?]+)?)?))[)]/igm;
-		let post_content = content.replace(img_links_reg,'');
-		img_links_reg = /(((https?:\/\/actifit\.s3\.amazonaws\.com\/)[\d\w-]+)|((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|((https:\/\/ipfs\.busy\.org\/ipfs\/)[\d\w-]+)|((https:\/\/steemitimages\.com\/)[\d\w-[\:\/\.]+)|(https?:\/\/[.\/\d\w-]*\.(?:png|jpg|jpeg|gif)))[\s]/igm;
-		post_content = post_content.replace(img_links_reg,'');
-		let vid_reg = /https?:\/\/(?:[0-9A-Z-]+\.)?(?:youtu\.be\/|youtube\.com\S*[^\w\-\s])([\w\-]{11})(?=[^\w\-]|$)(?![?=&amp;+%\w]*(?:['"][^&lt;&gt;]*&gt;|&lt;\/a&gt;))[?=&amp;+%\w-]*/ig;
-		
-		//swap into a player format, and introduce embed format for proper playing of videos
-		post_content = post_content.replace(vid_reg,'');
-		
-		let threespk_reg = /(?:\[.*\]\()?https?:\/\/3speak\.tv\/watch\?v=([\w-]+\/[\w-]+)(?:\))?/i;
-		post_content = post_content.replace(threespk_reg,'');
-		
-		let href_lnks = /\[([\d\w\s-\.\(\)=[\:\/\.%\?&"<>]*)\]\(([\d\w-=[\:\/\.%\?&]+|(https?:\/\/[.\d\w-\/\:\%\(\)]*\.))[)]/igm;
-		post_content = post_content.replace(href_lnks,'<a href="$2">$1</a>');
-		
-		let user_name = /([^\/])(@([\d\w-.]+))/igm;
-        
-		post_content = post_content.replace(user_name,'$1<a href="https://actifit.io/$2">$2</a>')
-	  
-		post_content = sanitize(post_content)
+		let post_content = this.$cleanBody(content, true);//2nd param confirms to remove all tags
 		post_content = this.truncateString(post_content, 150);
 		return post_content;
 	  },
