@@ -50,6 +50,37 @@ Vue.prototype.$numberFormat = function(number, precision) {
 	return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
 }
 
+Vue.prototype.$reblog = async function (user, post){
+	let user_prmpt = this.$t('reblog_confirm');
+	let decis = confirm(user_prmpt);
+	if (!decis){
+		return;
+	}
+	let op_name = 'custom_json';
+	let cstm_params;
+	cstm_params = {
+		required_auths: [],
+		required_posting_auths: [user.account.name],
+		id: 'reblog',
+		json: "[\"reblog\",{\"account\":\""+user.account.name+"\", \"author\":\""+post.author+"\", \"permlink\":\""+post.permlink+"\"}]"//JSON.stringify([])
+	};
+	let outc = await this.$processTrxFunc(op_name, cstm_params, false);
+	if (outc.success){
+		this.$notify({
+		group: 'success',
+		text: 'success',
+		position: 'top center'
+	  });
+	}else{
+		this.$notify({
+		group: 'error',
+		text: 'error',
+		position: 'top center'
+	  });
+	}
+	
+}
+
 /** global function to process API calls to blockchain **/
 Vue.prototype.$processTrxFunc = async function (op_name, cstm_params, active) {
   if (!localStorage.getItem('std_login')) {

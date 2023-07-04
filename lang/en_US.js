@@ -947,6 +947,8 @@ module.exports = {
   Testnet: 'Testnet',
   Chain_id: 'Chain ID',
   reblogged: 'Reblogged',
+  reblog: 'Reblog',
+  reblog_confirm: 'This post will be reblogged to your profile. Proceed?',
   actifit_signature_bsc: 'Actifit Validating Address BSC',
   check_new_wallet_layout: 'Click to Check out our New Wallet Layout!',
   Posh_verify: 'Posh Connect',

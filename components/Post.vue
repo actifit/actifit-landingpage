@@ -91,6 +91,7 @@
                 <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
               </a>
               <i class="far fa-comments ml-2" :title="$t('comments')"></i> {{ post.children }}
+			  <i class="far fa-share-square ml-2" @click.prevent="$reblog(user, post)" v-if="user && post.author != this.user.account.name" :title="$t('reblog')"></i>
           </div>
           <div class="col-6 text-right">
 				<social-sharing :url="'https://actifit.io/@'+post.author+'/'+post.permlink"
@@ -376,6 +377,7 @@
 		  this.$store.commit('setPostToVote', this.post)
 		}
 	  },
+	  
 	  newlyVotedPostsQuery() {
 		//handles returning a list of recently manually upvoted on this current session
 		return this.newlyVotedPosts.length;
