@@ -86,6 +86,13 @@
   }
 </script>
 <style>
+	blockquote{
+		font-size: 15px;
+		padding: 10px;
+		margin: 0 0 20px;
+		border-left: 5px solid #eee;
+		margin-bottom: 1rem;
+	}
 	.numberCircle {
 	  width: 10px;
 	  line-height: 10px;

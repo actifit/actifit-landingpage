@@ -8,7 +8,7 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-		<vue-remarkable class="modal-body" :source="body" :options="{'html': true}"></vue-remarkable>
+		<vue-remarkable class="modal-body" :source="body" :options="{'html': true, 'breaks': true, 'typographer': true}"></vue-remarkable>
       </div>
     </div>
   </div>

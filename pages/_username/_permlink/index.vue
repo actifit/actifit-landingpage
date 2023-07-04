@@ -31,7 +31,7 @@
 			<div class="report-tags p-1" v-html="displayReportTags"></div>
 		  </div>
         </div>
-		<vue-remarkable class="col-md-12" :source="body" :options="{'html': true}" ></vue-remarkable>
+		<vue-remarkable class="col-md-12" :source="body" :options="{'html': true, 'breaks': true, 'typographer': true}" ></vue-remarkable>
 		<!--<div v-html="body"></div>-->
 		<!--<div class="modal-body goog-ad-horiz-90"><adsbygoogle ad-slot="4921049809" /></div>-->
 		<div class="modal-footer col-md-12 main-payment-info">
@@ -205,7 +205,7 @@
 				<div class="modal-author modal-title text-brand" >@{{ user.account.name }}<small class="date-head text-muted">{{ $t('Now') }}</small></div>
 			  </div>
 			</a>
-			<vue-remarkable :source="responseBody" :options="{'html': true}" ></vue-remarkable>
+			<vue-remarkable :source="responseBody" :options="{'html': true, 'breaks': true, 'typographer': true}" ></vue-remarkable>
 		</div>
 		<div class="report-comments col-md-12" v-if="commentsAvailable">
 			<Comments 
@@ -276,9 +276,13 @@
   import RemarkableSpoiler from '@quochuync/remarkable-spoiler';
   import '@quochuync/remarkable-spoiler/styles.css';
   
-  var md = new Remarkable({html: true});
-  md.use(RemarkableSpoiler);
- 
+  //var md = new Remarkable({html: true});
+  //md.use(RemarkableSpoiler);
+  
+  
+  import { mavonEditor } from 'mavon-editor'
+  const md = mavonEditor.getMarkdownIt()
+  
   //console.log(md.render('# Remarkable rulezz!>! This is a spoiler content. > This is a second line'));
 
   //Vue.use( steemEditor );  
@@ -330,8 +334,8 @@
 				is_steem = false;
 			//}
 		}
-		console.log('pre-flight');
-		console.log(result);
+		//console.log('pre-flight');
+		//console.log(result);
 		try{
 			let post_meta = JSON.parse(result.json_metadata)
 			let imgs = post_meta.image;
@@ -530,54 +534,7 @@
 	  },
       body () {
 		//console.log(this.report.body);
-		let report_content = this.report.body;
-		
-		//sanitize content first hand
-		report_content = sanitize(report_content , { allowedTags: ['img'] });
-		//console.log(report_content);
-		
-		/* let's find images sent as ![](), and display them properly */
-		//let img_links_reg = /^(?:(?!=").)*((https?:\/\/[./\d\w-]*\.(?:png|jpg|jpeg|gif))|((https?:\/\/usermedia\.actifit\.io\/[./\d\w-]+)))/igm;
-		let img_links_reg = /[!]\[[\d\w\s-\.\(\)]*\]\((((https?:\/\/actifit\.s3\.amazonaws\.com\/)|((https?:\/\/usermedia\.actifit\.io\/))|((https:\/\/ipfs\.busy\.org\/ipfs\/))|((https:\/\/steemitimages\.com\/)))[\d\w-=&[\:\/\.\%\?]+|(https?:\/\/[.\d\w-\/\:\%]*(\.(?:png|jpg|jpeg|gif)(\??[\d\w-=&[\:\/\.\%\?]+)?)?))[)]/igm;
-		report_content = report_content.replace(img_links_reg,'<img src="$1">');
-		
-		/* let's find images sent as pure URLs, and display them as actual images, while avoiding well established images */
-		/* negative lookbehinds are not supported ?<! we need to switch to another approach */
-		//img_links_reg = /(?<!=")(?<!]\()(((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|(https?:\/\/[./\d\w-]*\.(?:png|jpg|jpeg|gif)))/igm;
-		//img_links_reg = /(((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|(https?:\/\/[./\d\w-]*\.(?:png|jpg|jpeg|gif)))(?!")/igm;
-		img_links_reg = /(((https?:\/\/actifit\.s3\.amazonaws\.com\/)[\d\w-]+)|((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|((https:\/\/ipfs\.busy\.org\/ipfs\/)[\d\w-]+)|((https:\/\/steemitimages\.com\/)[\d\w-[\:\/\.]+)|(https?:\/\/[.\/\d\w-]*\.(?:png|jpg|jpeg|gif)))[\s]/igm;
-		report_content = report_content.replace(img_links_reg,'<img src="$1">');
-		
-		/* let's match youtube videos and display them in a player */
-		//let vid_reg = /^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+/gm;
-		let vid_reg = /https?:\/\/(?:[0-9A-Z-]+\.)?(?:youtu\.be\/|youtube\.com\S*[^\w\-\s])([\w\-]{11})(?=[^\w\-]|$)(?![?=&amp;+%\w]*(?:['"][^&lt;&gt;]*&gt;|&lt;\/a&gt;))[?=&amp;+%\w-]*/ig;
-		
-		//swap into a player format, and introduce embed format for proper playing of videos
-		report_content = report_content.replace(vid_reg,'<iframe width="640" height="360" src="https://www.youtube.com/embed/$1"></iframe>');
-		
-		//add support for 3speak videos embedded within iframe
-		//let threespk_reg = /[.*](https?:\/\/3speak\.tv\/watch\?v=([\w-]+\/[\w-]+))/i;
-		//let threespk_reg = /(?:\[!\[\]\()?https?:\/\/3speak\.tv\/watch\?v=([\w-]+\/[\w-]+)(?:\)\])?/i;
-		let threespk_reg = /(?:\[.*\]\()?https?:\/\/3speak\.tv\/watch\?v=([\w-]+\/[\w-]+)(?:\))?/i;
-		report_content = report_content.replace(threespk_reg,'<iframe width="640" height="360" src="//3speak.tv/embed?v=$1&autoplay=false"></iframe>');
-		//examples: 
-		//https://3speak.tv/watch?v=jongolson/vhtttbyf		//[![](https://ipfs-3speak.b-cdn.net/ipfs/bafkreiee4k3q5sax6stbqzty6yktbhmk4mi2opf6r7hckti3ypkjvigjhi/)](https://3speak.tv/watch?v=jongolson/vhtttbyf)
-
-		
-		/* let's find links sent as [](), and display them properly */
-		//let href_lnks = /\[([\d\w\s-\.\(\)=[\:\/\.%\?&"<>]*)\]\(([\d\w-=[\:\/\.%\?&]+|(https?:\/\/[.\d\w-\/\:\%\(\)]*\.))[)]/igm;
-		//report_content = report_content.replace(href_lnks,'<a href="$2">$1</a>');
-		
-		//let href_lnks = /\[([\d\w-\.\@]*)\]\(([\d\w-\.\@\/\:]*)\)/igm;
-		//report_content = report_content.replace(href_lnks,'<a href="$2">$1</a>');
-		
-		/* regex to match @ words and convert them to steem user links. Need to skip special occurrences such as name within a link (preceded by /) */
-		let user_name = /([^\/])(@([\d\w-.]+))/igm;
-        
-		report_content = report_content.replace(user_name,'$1<a href="https://actifit.io/$2">$2</a>')
-		//return md.render(report_content);
-		//return sanitize(md.render(report_content) , { allowedTags: ['img', 'details', 'summary', 'iframe'] })
-		return report_content;
+		return this.$cleanBody(this.report.body);
       },
 	  getVoteCount(){
 		return Array.isArray(this.report.active_votes) ? this.report.active_votes.length : 0;
@@ -652,7 +609,7 @@
 	  },
 	  /* function checks to see if post reached its payout period */
 	  postPaid() {
-		console.log(this.post);
+		//console.log(this.post);
 		if (this.report.is_paidout){
 			//works for comments
 			return true;

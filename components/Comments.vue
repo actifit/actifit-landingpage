@@ -41,7 +41,7 @@
 		<!--</a>-->
 		</div>
 		
-		<vue-remarkable class="modal-body pb-0" v-if="!editBoxOpen" :source="commentBody()" :style="{ paddingLeft: depth * indentFactor + 'px' }" :options="{'html': true}"></vue-remarkable>
+		<vue-remarkable class="modal-body pb-0" v-if="!editBoxOpen" :source="commentBody()" :style="{ paddingLeft: depth * indentFactor + 'px' }" :options="{'html': true, 'breaks': true, 'typographer': true}"></vue-remarkable>
 		<transition name="fade">
 		  <div class="comment-reply" v-if="editBoxOpen">
 			<CustomTextEditor ref="editor" :initialContent="full_data.body" ></CustomTextEditor>

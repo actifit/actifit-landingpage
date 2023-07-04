@@ -48,7 +48,7 @@
 				<div class="post-tags p-1" v-html="displayPostTags"></div>
 			</div>
 		</div>
-		<vue-remarkable class="modal-body" :source="body" :options="{'html': true}"></vue-remarkable>
+		<vue-remarkable class="modal-body" :source="body" :options="{'html': true, 'breaks': true, 'typographer': true}"></vue-remarkable>
 		<div class="modal-body goog-ad-horiz-90"><adsbygoogle ad-slot="5716623705" /></div>
 		<div class="main-payment-info modal-footer">
 		  <div class="col-md-6">
@@ -222,7 +222,7 @@
 				<div class="modal-author modal-title text-brand" >@{{ user.name }}<small class="date-head text-muted">{{ $t('Now') }}</small></div>
 			  </div>
 			</a>
-			<vue-remarkable class="modal-body" :source="body" :options="{'html': true}"></vue-remarkable>
+			<vue-remarkable class="modal-body" :source="body" :options="{'html': true, 'breaks': true, 'typographer': true}"></vue-remarkable>
 		</div>
 		<div class="post-comments modal-body" v-if="commentsAvailable">
 			<Comments 

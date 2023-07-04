@@ -31,7 +31,7 @@
 			<div class="report-tags p-1" v-html="displayReportTags"></div>
 		</div>
 		</div>
-		<vue-remarkable class="modal-body" :source="body" :options="{'html': true}"></vue-remarkable>
+		<vue-remarkable class="modal-body" :source="body" :options="{'html': true, 'breaks': true, 'typographer': true}"></vue-remarkable>
 		<div class="modal-body goog-ad-horiz-90"><adsbygoogle ad-slot="5716623705" /></div>
 		<div class="modal-footer main-payment-info">
 		  <div class="report-modal-prelim-info col-md-6">
@@ -205,7 +205,7 @@
 				<div class="modal-author modal-title text-brand" >@{{ user.name }}<small class="date-head text-muted">{{ $t('Now') }}</small></div>
 			  </div>
 			</a>
-			<vue-remarkable class="modal-body" :source="body" :options="{'html': true}"></vue-remarkable>
+			<vue-remarkable class="modal-body" :source="body" :options="{'html': true, 'breaks': true, 'typographer': true}"></vue-remarkable>
 		</div>
 		<div class="report-comments modal-body" v-if="commentsAvailable">
 			<Comments 
@@ -321,7 +321,7 @@
 		let report_content = this.report.body;
 		
 		//sanitize content first hand
-		report_content = sanitize(report_content , { allowedTags: ['img'] });
+		report_content = sanitize(report_content);// , { allowedTags: ['img'] });
 		/* let's find images sent as ![](), and display them properly */
 		//let img_links_reg = /^(?:(?!=").)*((https?:\/\/[./\d\w-]*\.(?:png|jpg|jpeg|gif))|((https?:\/\/usermedia\.actifit\.io\/[./\d\w-]+)))/igm;
 		let img_links_reg = /[!]\[[\d\w\s-\.\(\)]*\]\((((https?:\/\/actifit\.s3\.amazonaws\.com\/)|((https?:\/\/usermedia\.actifit\.io\/))|((https:\/\/ipfs\.busy\.org\/ipfs\/))|((https:\/\/steemitimages\.com\/)))[\d\w-=&[\:\/\.\%\?]+|(https?:\/\/[.\d\w-\/\:\%]*(\.(?:png|jpg|jpeg|gif)(\??[\d\w-=&[\:\/\.\%\?]+)?)?))[)]/igm;

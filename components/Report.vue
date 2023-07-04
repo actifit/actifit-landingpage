@@ -39,7 +39,7 @@
 			<!--<a :href="'/'+report.author+'/'+report.permlink" target="_blank">-->
 				<div ref="report_body" id="report_body" style="display: none">
 					<!--{{ renderSnippet(report.body) }}-->
-					<vue-remarkable :source="renderSnippet(report.body)" :options="{'html': true, 'xhtmlOut': true}"></vue-remarkable>
+					<vue-remarkable :source="renderSnippet(report.body)" :options="{'html': true, 'breaks': true, 'typographer': true, 'xhtmlOut': true}"></vue-remarkable>
 				</div>
 				<div>
 					<span id="report_body_render" v-html="fixedContent()"></span>
