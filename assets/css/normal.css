@@ -113,7 +113,7 @@ a:hover {
 
 .wallet-container .token-entry.head-title{
 	background-color: red!important;
-	color: var(--text-color)!important;
+	/*color: var(--inv-text-color)!important;*/
 }
 /*
 
