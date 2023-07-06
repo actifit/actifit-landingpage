@@ -72,8 +72,12 @@ a:hover {
 .card {
   background-color: var(--background-color);
 }*/
+/*
+.card-header {
+  background-color: var(--background-color-1);
+}*/
 
-.card-header, .action-box {
+.action-box {
   background-color: var(--background-color-1)!important;
 }
 
