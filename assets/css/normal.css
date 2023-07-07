@@ -68,7 +68,7 @@ a:hover {
   color: var(--hover-color);
 }
 
-.footer, .modal-content, .card, .notif-container, .dropdown-menu{
+.footer, .modal-content, .card, .notif-container, .dropdown-menu, .modal-header{
 	background-color: var(--background-color)!important;
 }
 
@@ -96,9 +96,10 @@ a:hover {
 .table {
   background-color: var(--background-color);
 }
-
+/*
 .table-header {
   background-color: var(--background-color-1);
+  color: var(--inv-text-color);
 }
 
 .table-row {
@@ -113,7 +114,7 @@ a:hover {
 
 .table-cell:hover, .token-entry {
   background-color: var(--background-color-1)!important;
-}
+}*/
 
 .wallet-container .token-entry{
 	background-color: var(--background-color-2)!important;
