@@ -219,6 +219,10 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup){
 	img_links_reg = /(((https?:\/\/actifit\.s3\.amazonaws\.com\/)[\d\w-]+)|((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|((https:\/\/ipfs\.busy\.org\/ipfs\/)[\d\w-]+)|((https:\/\/steemitimages\.com\/)[\d\w-[\:\/\.]+)|(https?:\/\/[.\/\d\w-]*\.(?:png|jpg|jpeg|gif)))[\s]/igm;
 	report_content = report_content.replace(img_links_reg, img_replacement);
 	
+	//final catch all for images converting any left overs to proper tag:
+	img_links_reg = /^(?!<img\s+src=)([^<>\s]+\.(?:png|jpe?g|gif|bmp|ico|svg))$/igm;
+	report_content = report_content.replace(img_links_reg, img_replacement);
+	
 	/* let's match youtube videos and display them in a player */
 	//let vid_reg = /^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+/gm;
 	let vid_reg = /https?:\/\/(?:[0-9A-Z-]+\.)?(?:youtu\.be\/|youtube\.com\S*[^\w\-\s])([\w\-]{11})(?=[^\w\-]|$)(?![?=&amp;+%\w]*(?:['"][^&lt;&gt;]*&gt;|&lt;\/a&gt;))[?=&amp;+%\w-]*/ig;
