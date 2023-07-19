@@ -532,6 +532,12 @@
 	  ...mapGetters('steemconnect', ['stdLogin']),
 	  ...mapGetters(['newlyVotedPosts', 'bchain']),
 	  ...mapGetters(['userTokens'],['commentEntries'], 'commentCountToday'),
+	  isKeychainActive(){
+		return (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain)
+	  },
+	  isHiveauthActive(){
+		return (localStorage.getItem('acti_login_method') == 'hiveauth')
+	  },
 	  displayAFITXBal () {
 		if (!isNaN(this.userAFITXSETokenCount)){
 			return this.numberFormat(this.userAFITXSETokenCount, 3);
@@ -665,7 +671,7 @@
 		}
 		return result;
 	  },
-	  async processTrxFunc(op_name, cstm_params){
+	  /*async processTrxFunc(op_name, cstm_params){
 		if (!localStorage.getItem('std_login')){
 		//if (!this.stdLogin){
 			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
@@ -728,7 +734,7 @@
 				return {success: true, trx: outcome.trx};
 			}
 		}
-	  },
+	  },*/
 	  //handles sending add friend request
 	  async addFriend() {
 		this.addFriendError = '';
@@ -757,21 +763,39 @@
 			id: 'actifit',
 			json: JSON.stringify({'transaction': 'add-friend-request', 'target': this.displayUser})
 		  };
-		let res = await this.processTrxFunc('custom_json', cstm_params);
+		let op_name = 'custom_json';
+		let operation = [ 
+			   [op_name, cstm_params]
+			];
+		let res = await this.$processTrxFunc(op_name, cstm_params);
 		console.log(res.success);
 		if (res.success){
 			//success, store request to DB
-			this.propagateFriendReq(res.trx.tx);
+			this.propagateFriendReq(res.trx.tx, operation);
 		}else{  			
 			this.friendshipLoader = false;
 		}
 	  },
-	  async propagateFriendReq(res) {
-		let req_res = await fetch(process.env.actiAppUrl+'addFriend/'
+	  async propagateFriendReq(res, operation) {
+		let url = new URL(process.env.actiAppUrl+'addFriend/'
 			+ this.user.account.name + '/'
 			+ this.displayUser + '/'
 			+ res.ref_block_num + '/'
 			+ res.id + '/' + this.cur_bchain);
+			
+		if (this.isKeychainActive || this.isHiveauthActive){
+			
+			let op_json = JSON.stringify(operation)
+			url = new URL( process.env.actiAppUrl + 'addFriendHiveKeychain/'
+						+ this.user.account.name + '/'
+						+ this.displayUser + '/'
+						+ res.ref_block_num + '/'
+						+ res.id + '/'
+						+ this.cur_bchain + '?operation='+op_json);
+		}
+		
+		let req_res = await fetch(url);	
+		
 		let outcome = await req_res.json();
 		if (outcome.status=='success'){
 			console.log('friend request sent');
@@ -817,21 +841,40 @@
 			id: 'actifit',
 			json: JSON.stringify({'transaction': 'cancel-friend-request', 'target': this.displayUser})
 		  };
-		let res = await this.processTrxFunc('custom_json', cstm_params);
+		let op_name = 'custom_json';
+		let operation = [ 
+			   [op_name, cstm_params]
+			];
+		let res = await this.$processTrxFunc(op_name, cstm_params);
 		//console.log(res);
 		if (res.success){
 			//success, store request to DB
-			this.cancelFriendReq(res.trx.tx);
+			this.cancelFriendReq(res.trx.tx, operation);
 		}else{
 			this.friendshipLoader = false;
 		}
 	  },
-	  async cancelFriendReq(res) {
-		let req_res = await fetch(process.env.actiAppUrl+'cancelFriendRequest/'
+	  async cancelFriendReq(res, operation) {
+		
+		let url = new URL(process.env.actiAppUrl+'cancelFriendRequest/'
 			+ this.user.account.name + '/'
 			+ this.displayUser + '/'
 			+ res.ref_block_num + '/'
 			+ res.id + '/' + this.cur_bchain);
+			
+		if (this.isKeychainActive || this.isHiveauthActive){
+			
+			let op_json = JSON.stringify(operation)
+			url = new URL( process.env.actiAppUrl + 'cancelFriendRequestHiveKeychain/'
+						+ this.user.account.name + '/'
+						+ this.displayUser + '/'
+						+ res.ref_block_num + '/'
+						+ res.id + '/'
+						+ this.cur_bchain + '?operation='+op_json);
+		}
+		
+		let req_res = await fetch(url);
+		
 		let outcome = await req_res.json();
 		if (outcome.status=='success'){
 			console.log('friend request cancelled');
@@ -877,21 +920,40 @@
 			id: 'actifit',
 			json: JSON.stringify({'transaction': 'cancel-friendship', 'target': this.displayUser})
 		  };
-		let res = await this.processTrxFunc('custom_json', cstm_params);
+		let op_name = 'custom_json';
+		let operation = [ 
+			   [op_name, cstm_params]
+			];
+		let res = await this.$processTrxFunc(op_name, cstm_params);
 		console.log(res);
 		if (res.success){
 			//success, store request to DB
-			this.dropFriendship(res.trx.tx);
+			this.dropFriendship(res.trx.tx, operation);
 		}else{
 			this.friendshipLoader = false;
 		}
 	  },
-	  async dropFriendship(res) {
-		let req_res = await fetch(process.env.actiAppUrl+'dropFriendship/'
+	  async dropFriendship(res, operation) {
+		
+		let url = new URL( process.env.actiAppUrl+'dropFriendship/'
 			+ this.user.account.name + '/'
 			+ this.displayUser + '/'
 			+ res.ref_block_num + '/'
 			+ res.id + '/' + this.cur_bchain);
+			
+		if (this.isKeychainActive || this.isHiveauthActive){
+			
+			let op_json = JSON.stringify(operation)
+			url = new URL( process.env.actiAppUrl + 'dropFriendshipHiveKeychain/'
+						+ this.user.account.name + '/'
+						+ this.displayUser + '/'
+						+ res.ref_block_num + '/'
+						+ res.id + '/'
+						+ this.cur_bchain + '?operation='+op_json);
+		}	
+		
+		let req_res = await fetch(url);
+			
 		let outcome = await req_res.json();
 		if (outcome.status=='success'){
 			console.log('friendship dropped');
@@ -937,21 +999,42 @@
 			id: 'actifit',
 			json: JSON.stringify({'transaction': 'accept-friendship', 'target': this.displayUser})
 		  };
-		let res = await this.processTrxFunc('custom_json', cstm_params);
+		let op_name = 'custom_json';
+		let operation = [ 
+			   [op_name, cstm_params]
+			];
+		let res = await this.$processTrxFunc(op_name, cstm_params);
 		console.log(res);
 		if (res.success){
 			//success, store request to DB
-			this.acceptFriendPropagate(res.trx.tx);
+			this.acceptFriendPropagate(res.trx.tx, operation);
 		}else{
 			this.friendshipLoader = false;
 		}
 	  },
-	  async acceptFriendPropagate(res) {
-		let req_res = await fetch(process.env.actiAppUrl+'acceptFriend/'
+	  async acceptFriendPropagate(res, operation) {
+		
+		
+		
+		let url = new URL(process.env.actiAppUrl+'acceptFriend/'
 			+ this.user.account.name + '/'
 			+ this.displayUser + '/'
 			+ res.ref_block_num + '/'
 			+ res.id + '/' + this.cur_bchain);
+		
+		if (this.isKeychainActive || this.isHiveauthActive){
+			
+			let op_json = JSON.stringify(operation)
+			url = new URL( process.env.actiAppUrl + 'acceptFriendHiveKeychain/'
+						+ this.user.account.name + '/'
+						+ this.displayUser + '/'
+						+ res.ref_block_num + '/'
+						+ res.id + '/'
+						+ this.cur_bchain + '?operation='+op_json);
+		}	
+		
+		let req_res = await fetch(url);
+		
 		let outcome = await req_res.json();
 		if (outcome.status=='success'){
 			console.log('friendship accepted');
@@ -1248,7 +1331,7 @@
 				id: 'actifit',
 				json: JSON.stringify(tipTransaction)
 			};
-			let res = await this.processTrxFunc('custom_json', cstm_params);
+			let res = await this.$processTrxFunc('custom_json', cstm_params);
 			//console.log(res);
 			if (res.success){
 				//notify of success
@@ -1459,7 +1542,7 @@
 						id: 'actifit',
 						json: "{ \"claimed_badge\": \""+badgeType+"\"}"
 					};
-					let res = await this.processTrxFunc('custom_json', cstm_params);
+					let res = await this.$processTrxFunc('custom_json', cstm_params);
 					//console.log(res);
 					if (res.success){
 						console.log('success');

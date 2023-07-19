@@ -99,7 +99,7 @@ Vue.prototype.$processTrxFunc = async function (op_name, cstm_params, active) {
 		active ? 'Active' : 'Posting',
 		(response) => {
 		  console.log(response);
-		  resolve({ success: response.success, txID: response.result.id });
+		  resolve({ success: response.success, txID: response.result.id, trx: {tx: {id:response.result.id}} });
 		}
 	  );
 	});
@@ -131,7 +131,7 @@ Vue.prototype.$processTrxFunc = async function (op_name, cstm_params, active) {
 			clean: true
 		  });
 		  if (response.cmd && response.cmd === 'sign_ack') {
-			resolve({ success: true, txID: response.data });
+			resolve({ success: true, txID: response.data, trx: {tx: {id: response.data} }});
 		  } else if (response.cmd && response.cmd === 'sign_nack') {
 			resolve({ success: false });
 		  }
