@@ -200,6 +200,11 @@
 					{{ this.renderSBDSavings(this.cur_bchain) }}
 					
 					{{ this.pendingSavingsWithdrawVal('HBD')}}
+					
+					<span>Last Payout {{ this.lastIPaymentRelative}}</span>
+					<span>Current HBD Savings Interest Rate at {{ this.hbdInterestRate / 100}}%</span>
+					<span>Payout due in {{ this.remainingDays}} days.</span>
+					<span>Estimated Reward ${{ this.estimatedInterest}}</span>
 					<span v-if="hasPendingHBDSavingsWithdrawals() == true">
 						<span :title="$t('hbd_withdraw_progress')"><br/>
 							<i class="far fa-solid fa-hourglass text-brand"></i>
@@ -1677,6 +1682,11 @@
 		heTokenBalances: [],
 		heTokenDelegations: [],
 		heTokenUnstakes: [],
+		lastIPaymentRelative: '',
+		hbdInterestRate: 0,
+		remainingDays: 0,
+		estimatedInterest: 0,
+		
 	  }
 	},
     components: {
@@ -2800,6 +2810,9 @@
 		  this.$store.dispatch('fetchReferrals')
 		  this.fetchUserPendingRewards();
 		  
+		  //calculate savings params
+		  this.cancluateSavingsRewardsParams();
+		  
 		  //let's check if user already has a funds pass set
 		  fetch(process.env.actiAppUrl+'userHasFundsPassSet/'+this.user.account.name).then(
 			res => {res.json().then(json => this.setUserPassStatus (json)).catch(e => console.log(e))
@@ -3313,6 +3326,94 @@
 		  return this.claimSP + this.claimSTEEM + this.claimSBD;
 		}
 		return '';
+	  },
+	  
+	  async cancluateSavingsRewardsParams(){
+		//current interest rate set by witnesses
+		const hbdInterestRate = this.properties.hbd_interest_rate;
+		this.hbdInterestRate = hbdInterestRate;
+		
+		const lastIPaymentRelative =
+		  this.user.account.savings_hbd_last_interest_payment == "1970-01-01T00:00:00"
+			? null
+			: this.$dateToFullRelative(this.user.account.savings_hbd_last_interest_payment);
+			
+		this.lastIPaymentRelative = lastIPaymentRelative;
+		const lastIPaymentDiff = this.$dayDiff(
+		  this.user.account.savings_hbd_last_interest_payment == "1970-01-01T00:00:00"
+			? this.user.account.savings_hbd_seconds_last_update
+			: this.user.account.savings_hbd_last_interest_payment
+		);
+		
+		//720hrs=30 days
+		const remainingHours =
+		  720 -
+		  this.$hourDiff(
+			this.user.account.savings_hbd_last_interest_payment == "1970-01-01T00:00:00"
+			  ? this.user.account.savings_hbd_seconds_last_update
+			  : this.user.account.savings_hbd_last_interest_payment
+		  );
+		console.log('remaininghours:'+remainingHours);
+		
+		const secondsSincePayment = this.$secondDiff(this.user.account.savings_hbd_seconds_last_update);
+		console.log('secondsSincePayment :'+secondsSincePayment )
+		const pendingSeconds = parseFloat(this.user.account.savings_hbd_balance) * secondsSincePayment;
+		console.log('pendingSeconds :'+pendingSeconds )
+		const secondsToEstimate = this.user.account.savings_hbd_seconds / 1000 + pendingSeconds;
+		console.log('secondsToEstimate :'+secondsToEstimate )
+		const estimatedUIn = (secondsToEstimate / (60 * 60 * 24 * 365)) * (hbdInterestRate / 10000);
+		console.log('last payment made:'+lastIPaymentRelative)
+		const estimatedInterest = this.numberFormat(estimatedUIn, 3);
+		console.log('estimatedInterest :$'+estimatedInterest )
+		this.estimatedInterest = estimatedInterest;
+		const remainingDays = 30 - lastIPaymentDiff;
+		console.log('remainingDays :'+remainingDays )
+		this.remainingDays = remainingDays;
+	  },
+	  
+	  
+	  async claimSavingsRewards (){
+		//to claim rewards, need to issue 2 ops, transfer + cancel transfer
+		let request_id = Math.floor(Date.now() / 1000)//timestamp
+		let opname = 'transfer_from_savings';
+		let	params = {
+			"from": this.user.account.name,
+			"to": this.user.account.name,
+			"request_id": request_id,//timestamp
+			"amount": parseFloat("0.001").toFixed(3)+' '+this.transferType,
+			"memo": this.$refs["transfer-memo"].value
+		};
+		let opname2 = 'cancel_transfer_from_savings';
+		let	params2 = {
+			"from": this.user.account.name,
+			"request_id": request_id
+		};
+		
+		let res = await this.processTrxFunc(opname, params, true, opname2, params2);
+			
+		if (res.success){
+			this.confirmCompletion('claimrewards', 0, res);
+		}
+		/*let res = await this.processTrxFunc('custom_json', cstm_params);
+		const rid = new Date().getTime() >>> 0;
+		  const op: Operation = [
+			"transfer_from_savings",
+			{
+			  from,
+			  to,
+			  amount,
+			  memo,
+			  request_id: rid
+			}
+		  ];
+		  const cop: Operation = [
+			"cancel_transfer_from_savings",
+			{
+			  from,
+			  request_id: rid
+			}
+		  ];
+		*/
 	  },
 	  async claimTokenRewards () {
 		//function handles claiming token rewards
@@ -4496,7 +4597,7 @@
 			this.errorSettingPass = outcome.error;
 		}
 	  },
-	  async processTrxFunc(op_name, cstm_params, active){
+	  async processTrxFunc(op_name, cstm_params, active, op2, params2){
 		if (!localStorage.getItem('std_login')){
 		//if (!this.stdLogin){
 			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
@@ -4510,9 +4611,13 @@
 			}
 		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
 			return new Promise((resolve) => {
+				let operation = [[op_name, cstm_params]];
+				if (op2 && params2){
+					operation.push([op2, params2]);
+				}
 				window.hive_keychain.requestBroadcast(
 					this.user.account.name, 
-					[[op_name, cstm_params]], 
+					operation, 
 					active?'Active':'Posting', (response) => {
 					console.log(response);
 					//resolve(response);
@@ -4530,7 +4635,9 @@
 				let operation = [ 
 				   [op_name, cstm_params]
 				];
-				
+				if (op2 && params2){
+					operation.push([op2, params2]);
+				}
 				this.$HAS.broadcast(auth, active?'active':'posting', operation, (evt)=> {
 					console.log(evt)    // process sign_wait message
 					let msg = this.$t('verify_hiveauth_app');
@@ -4566,6 +4673,9 @@
 			let operation = [ 
 			   [op_name, cstm_params]
 			];
+			if (op2 && params2){
+				operation.push([op2, params2]);
+			}
 			console.log('broadcasting');
 			console.log(operation);
 			

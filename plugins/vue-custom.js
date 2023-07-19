@@ -7,6 +7,8 @@ Vue.prototype.$HAS = HAS;
 //sanitization
 import sanitize from 'sanitize-html'
 
+import moment from "moment";
+
 //global functions
 Vue.prototype.$getTimeDifference = function(dateParam) {
 	
@@ -276,3 +278,34 @@ Vue.prototype.$loadDraft = function (username, type) {
 		return '';
 	}
 };
+
+Vue.prototype.$dateToFullRelative = function (d){
+	  const isTimeZoned = d.indexOf(".") !== -1 || d.indexOf("+") !== -1 ? d : `${d}.000Z`;
+	  const dm = moment(new Date(isTimeZoned));
+	  return dm.fromNow();
+	};
+	
+Vue.prototype.$dayDiff = function (d) {
+	  const isTimeZoned = d.indexOf(".") !== -1 || d.indexOf("+") !== -1 ? d : `${d}.000Z`;
+	  const _MS_PER_DAY = 1000 * 60 * 60 * 24;
+	  const a = new Date(isTimeZoned);
+	  const b = new Date();
+
+	  const utc1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
+	  const utc2 = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
+
+	  return Math.floor((utc2 - utc1) / _MS_PER_DAY);
+	};
+	
+Vue.prototype.$hourDiff = function (d) {
+	  const isTimeZoned = d.indexOf(".") !== -1 || d.indexOf("+") !== -1 ? d : `${d}.000Z`;
+	  let diff = (new Date().getTime() - new Date(isTimeZoned).getTime()) / 1000;
+	  diff /= 60 * 60;
+	  return Math.abs(Math.round(diff));
+	};
+	
+Vue.prototype.$secondDiff = function (d) {
+	  const isTimeZoned = d.indexOf(".") !== -1 || d.indexOf("+") !== -1 ? d : `${d}.000Z`;
+	  let diff = (new Date().getTime() - new Date(isTimeZoned).getTime()) / 1000;
+	  return Math.abs(Math.round(diff));
+	};
