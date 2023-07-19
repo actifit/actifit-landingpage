@@ -152,12 +152,6 @@
 	  ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters('steemconnect', ['stdLogin']),
 	  ...mapGetters(['userTokens']),
-	  isKeychainActive(){
-		return (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain)
-	  },
-	  isHiveauthActive(){
-		return (localStorage.getItem('acti_login_method') == 'hiveauth')
-	  },
 	  formattedProfileUrl () {
 		return "https://actifit.io/" + this.displayUser;
 	  },
@@ -290,6 +284,7 @@
 		console.log(res.success);
 		if (res.success){
 
+			console.log(res.result);
 			//success, store request to DB
 			this.propagateFriendReq(res.trx.tx, targetUser, operation);
 		}else{  			

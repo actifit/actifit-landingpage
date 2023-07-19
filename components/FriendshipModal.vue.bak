@@ -96,12 +96,6 @@
 	},
     computed: {
 	  ...mapGetters('steemconnect', ['user']),
-	  isKeychainActive(){
-		return (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain)
-	  },
-	  isHiveauthActive(){
-		return (localStorage.getItem('acti_login_method') == 'hiveauth')
-	  },
 	  smallScreenClasses () {
 		//use proper classes for neat display
 		let clsString = "";//modal-dialog modal-lg
@@ -336,18 +330,6 @@
 			+ targetFriend + '/'
 			+ res.ref_block_num + '/'
 			+ res.id + '/' + this.cur_bchain);
-		if (this.isKeychainActive || this.isHiveauthActive){
-			
-			let op_json = JSON.stringify(operation)
-			url = new URL( process.env.actiAppUrl + 'addFriendHiveKeychain/'
-						+ this.user.account.name + '/'
-						+ targetFriend + '/'
-						+ res.ref_block_num + '/'
-						+ res.id + '/'
-						+ this.cur_bchain + '?operation='+op_json);
-		}
-		
-		let req_res = await fetch(url);	
 		let outcome = await req_res.json();
 		if (outcome.status=='success'){
 			console.log('friend request sent');
