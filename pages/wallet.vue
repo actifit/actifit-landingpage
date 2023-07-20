@@ -200,11 +200,23 @@
 					{{ this.renderSBDSavings(this.cur_bchain) }}
 					
 					{{ this.pendingSavingsWithdrawVal('HBD')}}
-					
-					<span>Last Payout {{ this.lastIPaymentRelative}}</span>
-					<span>Current HBD Savings Interest Rate at {{ this.hbdInterestRate / 100}}%</span>
-					<span>Payout due in {{ this.remainingDays}} days.</span>
-					<span>Estimated Reward ${{ this.estimatedInterest}}</span>
+						<div class="savings-rewards" v-if="estimatedInterest > 0.001">
+							<span>Last Payout {{ this.lastIPaymentRelative}}</span>
+							<span>Current HBD Savings Interest Rate at {{ this.hbdInterestRate / 100}}%</span>
+							<span>Payout due in {{ this.remainingDays}} days.</span>
+							<span>Estimated Reward ${{ this.estimatedInterest}}</span>
+							<div v-if="this.remainingHours > 1">
+								<div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
+								  <label for="claim-savings-rew-act-key" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
+								  <input type="password" id="claim-savings-rew-act-key" name="claim-savings-rew-act-key" ref="claim-savings-rew-act-key" class="form-control-lg w-50 p-2">
+								</div>
+								<i class="fas fa-spin fa-spinner" v-if="claiming_rewards"></i>
+								<div class="text-brand text-center" v-if="error_proceeding">
+								  {{ this.error_msg}}
+								</div>
+								<button class="btn btn-brand" v-on:click="claimSavingsRewards()">{{$t('claim_rewards')}}</button>
+							</div>
+						</div>
 					<span v-if="hasPendingHBDSavingsWithdrawals() == true">
 						<span :title="$t('hbd_withdraw_progress')"><br/>
 							<i class="far fa-solid fa-hourglass text-brand"></i>
@@ -1506,6 +1518,7 @@
 	},
 	data () {
 	  return {
+		claiming_rewards: false,
 		observerSet: false,
 		detailsViewable: false,
 		tokenSort: 'symbol',//default sort by token name
@@ -1685,6 +1698,7 @@
 		lastIPaymentRelative: '',
 		hbdInterestRate: 0,
 		remainingDays: 0,
+		remainingHours: 100,//any positive value by default
 		estimatedInterest: 0,
 		
 	  }
@@ -3330,8 +3344,16 @@
 	  
 	  async cancluateSavingsRewardsParams(){
 		//current interest rate set by witnesses
+		if (this.properties == ''){
+		  //not loaded yet
+		  let chainLnk = await this.setProperNode ();
+		  this.properties = await chainLnk.api.getDynamicGlobalPropertiesAsync();
+		}
 		const hbdInterestRate = this.properties.hbd_interest_rate;
+		
 		this.hbdInterestRate = hbdInterestRate;
+		console.log(this.properties);
+		console.log('hbdInterestRate:'+hbdInterestRate);
 		
 		const lastIPaymentRelative =
 		  this.user.account.savings_hbd_last_interest_payment == "1970-01-01T00:00:00"
@@ -3354,6 +3376,7 @@
 			  : this.user.account.savings_hbd_last_interest_payment
 		  );
 		console.log('remaininghours:'+remainingHours);
+		this.remainingHours = remainingHours;
 		
 		const secondsSincePayment = this.$secondDiff(this.user.account.savings_hbd_seconds_last_update);
 		console.log('secondsSincePayment :'+secondsSincePayment )
@@ -3361,7 +3384,7 @@
 		console.log('pendingSeconds :'+pendingSeconds )
 		const secondsToEstimate = this.user.account.savings_hbd_seconds / 1000 + pendingSeconds;
 		console.log('secondsToEstimate :'+secondsToEstimate )
-		const estimatedUIn = (secondsToEstimate / (60 * 60 * 24 * 365)) * (hbdInterestRate / 10000);
+		const estimatedUIn = (secondsToEstimate / (60 * 60 * 24 * 365)) * (this.hbdInterestRate / 10000);
 		console.log('last payment made:'+lastIPaymentRelative)
 		const estimatedInterest = this.numberFormat(estimatedUIn, 3);
 		console.log('estimatedInterest :$'+estimatedInterest )
@@ -3373,6 +3396,21 @@
 	  
 	  
 	  async claimSavingsRewards (){
+		
+		//check if we need active key
+		if (!this.isKeychainLogin && !this.isHiveauthLogin &&  this.isStdLogin){
+			//check for active key
+			if (this.$refs["claim-savings-rew-act-key"].value == ''){
+			  this.error_proceeding = true;
+			  this.error_msg = this.$t('all_fields_required');
+			  return;
+			}
+			/*let confirmPopup = confirm(this.$t('confirm_cancel_withdraw'));
+			if (!confirmPopup){
+				return;
+			}*/
+		}
+		
 		//to claim rewards, need to issue 2 ops, transfer + cancel transfer
 		let request_id = Math.floor(Date.now() / 1000)//timestamp
 		let opname = 'transfer_from_savings';
@@ -3380,20 +3418,30 @@
 			"from": this.user.account.name,
 			"to": this.user.account.name,
 			"request_id": request_id,//timestamp
-			"amount": parseFloat("0.001").toFixed(3)+' '+this.transferType,
-			"memo": this.$refs["transfer-memo"].value
+			"amount": parseFloat("0.001").toFixed(3)+' HBD',
+			"memo": this.$t('claim_rewards_trx'),
 		};
 		let opname2 = 'cancel_transfer_from_savings';
 		let	params2 = {
 			"from": this.user.account.name,
 			"request_id": request_id
 		};
+		this.claiming_rewards = true;
+		let res;
+		if (!this.isKeychainLogin && !this.isHiveauthLogin && this.isStdLogin){
 		
-		let res = await this.processTrxFunc(opname, params, true, opname2, params2);
-			
-		if (res.success){
-			this.confirmCompletion('claimrewards', 0, res);
+			res = await hive.broadcast.sendAsync( 
+			   { operations: [[opname, params], [opname2, params2]], extensions: [] }, 
+			   { active: this.$refs["claim-savings-rew-act-key"].value }).catch(err => {
+				console.log(err);
+			   });
+		}else{
+			res = await this.processTrxFunc(opname, params, true, opname2, params2);
 		}
+		console.log(res);
+		this.confirmCompletion('claimrewards', 0, res);
+		
+		this.claiming_rewards = false;
 		/*let res = await this.processTrxFunc('custom_json', cstm_params);
 		const rid = new Date().getTime() >>> 0;
 		  const op: Operation = [
@@ -4267,7 +4315,7 @@
 	  },
 	  async confirmCompletion (type, amount, res, extraAFITTrx){
 		console.log (res);
-		if (res.ref_block_num || res.success){
+		if (res && (res.ref_block_num || res.success)){
 			
 			let note = 'Power down cancelled successfully!';
 			let power_type = 'SP';

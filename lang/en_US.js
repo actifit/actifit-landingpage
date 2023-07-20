@@ -296,6 +296,8 @@ module.exports = {
   Referral_Reward_Breakdown: 'Your Referral Reward ',
   referral_monthly_reward: 'of your referral\'s actifit report rewards for one month, across all tokens rewarded (AFIT, HIVE, ...) ',
   referral_default_reward: '20% Onetime Referral Signup Bonus',
+  claim_rewards: 'Claim Rewards',
+  claim_rewards_trx: 'Claim Rewards Dummy Trx',
   referral_rec_default_reward: '20% of your referral\'s actifit report rewards for one month',
   referral_user_rank_reqt: '+5% if User Rank >= 30',
   referral_afit_bal: '+5% if AFIT Balance >= 50,000',
