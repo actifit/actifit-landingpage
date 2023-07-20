@@ -232,7 +232,7 @@
 					<div class="savings-rewards" v-if="estimatedInterest > 0.001">
 						<span>{{$t('last_payout')}} {{ this.lastIPaymentRelative}}<br/></span>
 						<span>{{$t('cur_int_rate')}} {{ this.hbdInterestRate / 100}}%<br/></span>
-						<span>{{$t('payout_in')}} {{ this.remainingDays}} days.<br/></span>
+						<span v-if="remainingHours > 1">{{$t('payout_in')}} {{ this.remainingDays}} days.<br/></span>
 						<span>{{$t('estimated_reward')}} ${{ this.estimatedInterest}}<br/></span>
 						<div v-if="this.remainingHours < 1">
 							<div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
