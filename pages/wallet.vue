@@ -200,23 +200,10 @@
 					{{ this.renderSBDSavings(this.cur_bchain) }}
 					
 					{{ this.pendingSavingsWithdrawVal('HBD')}}
-						<div class="savings-rewards" v-if="estimatedInterest > 0.001">
-							<span>Last Payout {{ this.lastIPaymentRelative}}</span>
-							<span>Current HBD Savings Interest Rate at {{ this.hbdInterestRate / 100}}%</span>
-							<span>Payout due in {{ this.remainingDays}} days.</span>
-							<span>Estimated Reward ${{ this.estimatedInterest}}</span>
-							<div v-if="this.remainingHours > 1">
-								<div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
-								  <label for="claim-savings-rew-act-key" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
-								  <input type="password" id="claim-savings-rew-act-key" name="claim-savings-rew-act-key" ref="claim-savings-rew-act-key" class="form-control-lg w-50 p-2">
-								</div>
-								<i class="fas fa-spin fa-spinner" v-if="claiming_rewards"></i>
-								<div class="text-brand text-center" v-if="error_proceeding">
-								  {{ this.error_msg}}
-								</div>
-								<button class="btn btn-brand" v-on:click="claimSavingsRewards()">{{$t('claim_rewards')}}</button>
-							</div>
-						</div>
+					test
+					<i v-if="!showHBDSavingsDetails" class="fas fa-solid fa-arrow-circle-down text-brand" v-on:click="showHBDSavingsDetails=!showHBDSavingsDetails" :title="$t('show_pending_withdrawals')"></i>
+					<i v-else class="fas fa-solid fa-arrow-circle-up text-brand" v-on:click="showHBDSavingsDetails=!showHBDSavingsDetails" :title="$t('show_pending_withdrawals')"></i>
+					
 					<span v-if="hasPendingHBDSavingsWithdrawals() == true">
 						<span :title="$t('hbd_withdraw_progress')"><br/>
 							<i class="far fa-solid fa-hourglass text-brand"></i>
@@ -235,6 +222,33 @@
 					
 				</div>
 			</div>
+			
+			<!-- special row for HBD savings rewards -->
+			<transition name="fade">
+			<div class="token-entry row main-token" v-if="showHBDSavingsDetails">
+				<div class="col-6"></div>
+				<div class="col-6">
+					<div class="savings-rewards" v-if="estimatedInterest > 0.001">
+						<span>{{$t('last_payout')}} {{ this.lastIPaymentRelative}}<br/></span>
+						<span>{{$t('cur_int_rate')}} {{ this.hbdInterestRate / 100}}%<br/></span>
+						<span>{{$t('payout_in')}} {{ this.remainingDays}} days.<br/></span>
+						<span>{{$t('estimated_reward')}} ${{ this.estimatedInterest}}<br/></span>
+						<div v-if="this.remainingHours > 1">
+							<div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
+							  <label for="claim-savings-rew-act-key" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
+							  <input type="password" id="claim-savings-rew-act-key" name="claim-savings-rew-act-key" ref="claim-savings-rew-act-key" class="form-control-lg w-50 p-2">
+							</div>
+							<i class="fas fa-spin fa-spinner" v-if="claiming_rewards"></i>
+							<div class="text-brand text-center" v-if="error_proceeding">
+							  {{ this.error_msg}}
+							</div>
+							<button class="btn btn-brand" v-on:click="claimSavingsRewards()">{{$t('claim_rewards')}}</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			</transition>
+			
 			<!-- special row for HBD savings -->
 			<transition name="fade">
 			<div class="token-entry row main-token" v-if="showHBDWithdrawalDetails">
@@ -1661,6 +1675,7 @@
 		showPowerBreakdown: {HIVE: false},
 		showHBDWithdrawalDetails: false,
 		showHiveWithdrawalDetails: false,
+		showHBDSavingsDetails: false,
 		delegateProcess: false,
 		loadingDeleg: false,
 		rc_data: {},
