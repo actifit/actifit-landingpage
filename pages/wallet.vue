@@ -115,6 +115,7 @@
 					<span class="btn btn-brand p-1" :title="$t('INITIATE_AFIT_TO_HE')" v-on:click="initiateAFITtoSE">
 						<i class="fas fa-solid fa-angle-double-right" ></i>
 					</span>
+					<span class="btn btn-brand p-1" v-on:click="initiateTipUser"><i class="fas fa-share-square " :title="$t('TIP_AFIT')" ></i></span>
 				</div>
 			</div>
 			<div class="token-entry row main-token">
@@ -200,7 +201,7 @@
 					{{ this.renderSBDSavings(this.cur_bchain) }}
 					
 					{{ this.pendingSavingsWithdrawVal('HBD')}}
-					test
+					
 					<i v-if="!showHBDSavingsDetails" class="fas fa-solid fa-arrow-circle-down text-brand" v-on:click="showHBDSavingsDetails=!showHBDSavingsDetails" :title="$t('show_pending_withdrawals')"></i>
 					<i v-else class="fas fa-solid fa-arrow-circle-up text-brand" v-on:click="showHBDSavingsDetails=!showHBDSavingsDetails" :title="$t('show_pending_withdrawals')"></i>
 					
@@ -1088,6 +1089,37 @@
 				  </div>
 			  </div>
 			  
+			  <div v-else-if="afitActivityMode == INIT_AFIT_TIP">
+				<h3 class="pro-name">{{ $t('SEND_AFIT_TO_USER') }}</h3>
+				<div class="text-center grid p-2">
+					<div>
+						<div class="row">
+							<label for="tip-amount" class="w-25 p-2">{{ $t('Recipient') }}</label>
+							<input type="text" id="tip-recipient" name="tip-recipient" ref="tip-recipient" class="form-control-lg w-50 p-2">
+						</div>
+						<div class="row">
+							<label for="tip-amount" class="w-25 p-2">{{ $t('Tip_Amount') }}</label>
+							<input type="number" id="tip-amount" name="tip-amount" ref="tip-amount" class="form-control-lg w-50 p-2">
+						</div>
+						<div class="row">
+							<label for="funds-pass" class="w-25 p-2">{{ $t('Funds_Password') }}</label>
+							<input type="password" id="funds-pass" name="funds-pass" ref="funds-pass" class="form-control-lg w-50 p-2">
+							<a href="/wallet?action=set_funds_pass" target="_blank" class="btn btn-brand border m-1">{{ $t('create_pass_short') }}</a>
+						</div>
+						<div class="row">
+							<div v-if="tipError" v-html="tipError" class="m-3"></div>
+						</div>
+						
+						<div class="row">
+							<div class="col-2"></div>
+							<div class="col-8"><button v-on:click="proceedTipActivity" class="btn btn-brand w-50 border m-3">{{ $t('Proceed') }}</button>
+							<i class="fas fa-spin fa-spinner" v-if="tipInProgress"></i>
+							</div>
+						</div>
+					</div>
+				</div>
+			  </div>
+			  
 			  <div v-else-if="afitActivityMode == INIT_AFIT_TO_SE">
 				<h3 class="pro-name">{{ $t('INITIATE_AFIT_TO_HE') }}</h3>
 				  <div class="text-center grid p-2">
@@ -1532,6 +1564,8 @@
 	},
 	data () {
 	  return {
+		tipInProgress: false,
+		tipError: '',
 		claiming_rewards: false,
 		observerSet: false,
 		detailsViewable: false,
@@ -1561,6 +1595,7 @@
 		MOVE_AFIT_SE: 2,
 		BUY_AFIT_STEEM: 3,
 		INIT_AFIT_TO_SE: 4,
+		INIT_AFIT_TIP: 5,
 		powerDownRateVal: '',
 		powerDownWithdrawDate: '',	
 		steemPower: 0,
@@ -4608,9 +4643,16 @@
 		/*if (this.afitActivityMode == this.INIT_AFIT_TO_SE ){
 		  this.afitActivityMode = 0;
 		}else{*/
-		  this.afitActivityMode = this.INIT_AFIT_TO_SE;
+	  this.afitActivityMode = this.INIT_AFIT_TO_SE;
 		//}
 		//hide lower section for STEEM actions
+		this.fundActivityMode = 0;
+		this.curTokenAction = 0;
+		this.scrollAction();
+	  },
+	  initiateTipUser(){
+		this.afitActivityMode = this.INIT_AFIT_TIP;
+		//hide lower section for other actions
 		this.fundActivityMode = 0;
 		this.curTokenAction = 0;
 		this.scrollAction();
@@ -4842,6 +4884,78 @@
 			this.afit_se_move_err_msg = outcome.error;
 		}
 		this.initiateInProgress = false;
+	  },
+	  async proceedTipActivity(){
+		this.tipError = '';
+		if (!this.user){
+			this.tipError = this.$t('Need_login_tip');
+			return false;
+		}
+		if (this.$refs['tip-recipient'].value == ''){
+			this.tipError = this.$t('Cannot_tip_self');
+			return false;
+		}
+		if (this.$refs['tip-recipient'].value == this.user.account.name){
+			this.tipError = this.$t('Cannot_tip_self');
+			return false;
+		}
+		if (this.$refs["funds-pass"].value == ''){
+		  this.tipError = this.$t('error_missing_funds_pass') + ' <u><a href="/wallet?action=set_funds_pass">' + this.$t('create_funds_pass') + '</a></u>';
+		  return;
+		}
+		if (this.$refs["tip-amount"].value == ''){
+		  this.tipError = this.$t('amount_positive_int');
+		  return;
+		}
+		//check if user has enough funds
+		if (parseFloat(this.$refs["tip-amount"].value) > parseFloat(this.userTokens)){
+		  this.tipError = this.$t('amount_above_balance');
+		  return;
+		}
+		this.tipInProgress = true;
+		//proceed with tipping
+		let res = await fetch(process.env.actiAppUrl+'tipAccount/'
+			+ '?user=' + this.user.account.name
+			+ '&targetUser=' + this.$refs['tip-recipient'].value
+			+ '&amount=' + this.$refs["tip-amount"].value
+			+ '&fundsPass=' + this.$refs["funds-pass"].value);
+		let outcome = await res.json();
+		if (outcome.status=='Success'){
+			let tipTransaction = { action: 'Tip', amount: outcome.tipAmount, recipient: this.displayUser};
+			//store the transaction to Steem BC
+			let cstm_params = {
+				required_auths: [],
+				required_posting_auths: [this.user.account.name],
+				id: 'actifit',
+				json: JSON.stringify(tipTransaction)
+			};
+			let res = await this.$processTrxFunc('custom_json', cstm_params);
+			//console.log(res);
+			if (res.success){
+				//notify of success
+				this.$notify({
+				  group: 'success',
+				  text: this.$t('tip_successfully_sent'),
+				  position: 'top center'
+				})
+				
+				//refresh user balance
+				this.refreshBalance();
+				//update sender token count
+				//ensure we fetch proper logged in user data
+				this.$store.dispatch('fetchUserTokens')
+				
+				//update transactions
+				this.$store.dispatch('fetchTransactions')
+				//update recipient token count
+				//this.userTokenCount = outcome.recipientTokenCount;
+			}
+			
+			this.proceedTip = false;
+		}else{
+			this.tipError = outcome.error;
+		}
+		this.tipInProgress = false;
 	  },
 	  async proceedMoveToSE() {
 		
