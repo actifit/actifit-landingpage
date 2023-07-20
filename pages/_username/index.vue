@@ -266,7 +266,7 @@
 						</a>
 					</div>
 				</div>
-				<div v-if="proceedTip">
+				<div v-if="proceedTip" class="cntnr info-box-orange m-0 mb-2 col-12">
 					<div class="tip-details">
 						<div class="row">
 							<label for="tip-amount" class="w-25 p-2">{{ $t('Tip_Amount') }}</label>
@@ -280,8 +280,12 @@
 						<div class="row">
 							<div v-if="tipError" v-html="tipError" class="m-3"></div>
 						</div>
-						<button v-on:click="proceedTipActivity" class="btn btn-brand w-50 border m-3">{{ $t('Proceed') }}</button>
-						<i class="fas fa-spin fa-spinner" v-if="tipInProgress"></i>
+						<div class="row">
+							<div class="col-2"></div>
+							<div class="col-8"><button v-on:click="proceedTipActivity" class="btn btn-brand w-50 border m-3">{{ $t('Proceed') }}</button>
+							<i class="fas fa-spin fa-spinner" v-if="tipInProgress"></i>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -1838,7 +1842,7 @@
 	  margin: 10px;
 	}
 	.tip-details{
-	  border: 2px #ff112d solid;
+	  /*border: 2px #ff112d solid;*/
 	  margin: 10px;
 	  padding: 10px;
 	}
