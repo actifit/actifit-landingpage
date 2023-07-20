@@ -212,15 +212,6 @@
 		}
 		this.loading = false;
 	  },
-	  hasImage(){
-		let metaData = this.meta;
-		if (metaData.image){
-			if (Array.isArray(metaData.image) && metaData.image.length > 0){
-				return true;
-			}
-		}
-		return false;
-	  },
 	  
 	  //function handles displaying cut off version of text to avoid lengthy titles
 	  truncateString(str, ln) {

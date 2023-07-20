@@ -27,8 +27,8 @@
 		<div class="row">
 		  <div class="col-12">
 			<a href="#" class="text-brand" @click="report.rptId = rptId; $store.commit('setActiveReport', report)" data-toggle="modal"
-				 data-target="#reportModal" :title="$t('read_more_small')" v-if="hasImage()">
-				<img :src="fetchReportImage()" :alt="report.title" class="report-image">
+				 data-target="#reportModal" :title="$t('read_more_small')" v-if="$postHasImage(meta)">
+				<img :src="$fetchPostImage(meta)" :alt="report.title" class="report-image">
 			</a>
 		  </div>
 		</div>
@@ -348,12 +348,6 @@
 			}
 		}
 		return false;
-	  },
-	  fetchReportImage(){
-		if (this.hasImage()){
-			return this.meta.image[0];
-		}
-		return "";
 	  },
 	  fixedContent(){
 		if (this.$refs["report_body"]){

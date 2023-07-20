@@ -309,3 +309,29 @@ Vue.prototype.$secondDiff = function (d) {
 	  let diff = (new Date().getTime() - new Date(isTimeZoned).getTime()) / 1000;
 	  return Math.abs(Math.round(diff));
 	};
+	
+Vue.prototype.$postHasImage = function(metaData){
+	if (metaData.image){
+		if (Array.isArray(metaData.image) && metaData.image.length > 0){
+			return true;
+		}
+	}
+	if (metaData.images){
+		if (Array.isArray(metaData.images) && metaData.images.length > 0){
+			return true;
+		}
+	}
+	return false;
+};
+
+Vue.prototype.$fetchPostImage = function (metaData){
+	if (this.$postHasImage(metaData)){
+		try{
+			return metaData.image[0];
+		}catch(err){
+			//alt image case
+			return metaData.images[0];
+		}
+	}
+	return "";
+};

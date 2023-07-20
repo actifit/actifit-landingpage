@@ -42,8 +42,8 @@
 		<div class="row">
           <div class="col-12">
 			<a href="#" class="text-brand" @click="post.pstId = pstId; $store.commit('setActivePost', post)" data-toggle="modal"
-                 data-target="#postModal" :title="$t('read_more_small')" v-if="hasImage()">
-				<img :src="fetchPostImage()" :alt="post.title" class="post-image">
+                 data-target="#postModal" :title="$t('read_more_small')" v-if="$postHasImage(meta)">
+				<img :src="$fetchPostImage(meta)" :alt="post.title" class="post-image">
 			</a>
 		  </div>
 		</div>
@@ -293,21 +293,6 @@
 	  toggleTooltip() {
         this.isTooltipVisible = !this.isTooltipVisible;
       },
-	  hasImage(){
-		let metaData = this.meta;
-		if (metaData.image){
-			if (Array.isArray(metaData.image) && metaData.image.length > 0){
-				return true;
-			}
-		}
-		return false;
-	  },
-	  fetchPostImage(){
-		if (this.hasImage()){
-			return this.meta.image[0];
-		}
-		return "";
-	  },
 	  fixedContent(){
 		if (this.$refs["post_body"]){
 			//console.log(this.$refs["post_body"].innerHTML);
