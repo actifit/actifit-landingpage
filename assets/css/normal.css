@@ -3,6 +3,7 @@
   --background-color: #fff;
   --background-color-1: #ff112d;
   --background-color-2: #fff;
+  --ab-background-color: beige;
   --text-color: #000;
   --inv-text-color: #fff;
   --text-brand: #ff4500;
@@ -15,6 +16,7 @@
   --background-color: #212121;
   --background-color-1: #303030;
   --background-color-2: #303030;
+  --ab-background-color: black;
   --hover-color: #000000;
   --text-color: #fff;
   --inv-text-color: #000;
@@ -83,6 +85,10 @@ a:hover {
 
 .action-box {
   background-color: var(--background-color-1)!important;
+}
+
+.wallet-container .action-box, .font-weight-bold .action-box{
+	background-color: var(--ab-background-color)!important;
 }
 
 .card-body, .admin-name a {

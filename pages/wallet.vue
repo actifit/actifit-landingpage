@@ -1089,7 +1089,7 @@
 				  </div>
 			  </div>
 			  
-			  <div v-else-if="afitActivityMode == INIT_AFIT_TIP">
+			  <div v-else-if="afitActivityMode == INIT_AFIT_TIP" class="action-box">
 				<h3 class="pro-name">{{ $t('SEND_AFIT_TO_USER') }}</h3>
 				<div class="text-center grid p-2">
 					<div>
@@ -1106,6 +1106,7 @@
 							<input type="password" id="funds-pass" name="funds-pass" ref="funds-pass" class="form-control-lg w-50 p-2">
 							<a href="/wallet?action=set_funds_pass" target="_blank" class="btn btn-brand border m-1">{{ $t('create_pass_short') }}</a>
 						</div>
+						<div class="row"><div class="col-2"></div><div class="col-8">{{$t('tip_note')}}</div></div>
 						<div class="row">
 							<div v-if="tipError" v-html="tipError" class="m-3"></div>
 						</div>
@@ -1120,7 +1121,7 @@
 				</div>
 			  </div>
 			  
-			  <div v-else-if="afitActivityMode == INIT_AFIT_TO_SE">
+			  <div v-else-if="afitActivityMode == INIT_AFIT_TO_SE" class="action-box">
 				<h3 class="pro-name">{{ $t('INITIATE_AFIT_TO_HE') }}</h3>
 				  <div class="text-center grid p-2">
 					<h5 class="text-brand font-weight-bold">{{ $t('wallet.initiate_afit_to_he') }}</h5>

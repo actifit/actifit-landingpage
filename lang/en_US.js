@@ -523,6 +523,7 @@ module.exports = {
   amount_above_balance: 'Amount is beyond than your current balance',
   amount_above_daily_limit: 'Amount is beyond your daily tipping limit',
   tip_successfully_sent: 'Tip Sent Successfully!',
+  tip_note: 'You can tip a maximum of up to 10,000 AFIT tokens daily',
   create_funds_pass: 'You can create your funds password here.',
   create_pass_short: 'Create Password',
   INITIATE_AFIT_TO_SE: 'Move AFIT Daily to S-E',
