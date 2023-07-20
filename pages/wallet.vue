@@ -233,7 +233,7 @@
 						<span>{{$t('cur_int_rate')}} {{ this.hbdInterestRate / 100}}%<br/></span>
 						<span>{{$t('payout_in')}} {{ this.remainingDays}} days.<br/></span>
 						<span>{{$t('estimated_reward')}} ${{ this.estimatedInterest}}<br/></span>
-						<div v-if="this.remainingHours > 1">
+						<div v-if="this.remainingHours < 1">
 							<div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
 							  <label for="claim-savings-rew-act-key" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 							  <input type="password" id="claim-savings-rew-act-key" name="claim-savings-rew-act-key" ref="claim-savings-rew-act-key" class="form-control-lg w-50 p-2">
