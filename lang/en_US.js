@@ -528,6 +528,8 @@ module.exports = {
   create_pass_short: 'Create Password',
   INITIATE_AFIT_TO_SE: 'Move AFIT Daily to S-E',
   INITIATE_AFIT_TO_HE: 'Move AFIT Daily to H-E',
+  buy_afit_bsc: 'Buy AFIT on BSC',
+  buy_afitx_bsc: 'Buy AFITX on BSC',
   Amount_To_Move_Daily: 'Amount to Move Daily',
   Afit_Move_SE_Desc: 'This process enables you to move your AFIT tokens from Actifit wallet to Hive-Engine AFIT. The process is daily and runs for one week (7 days), after which it will auto-cancel. The max amount that can be moved daily depends on how many AFITX tokens you hold. ',
   no_proper_afitx_funds: 'You do not have the minimum amount of 1 AFITX required to perform the move.',

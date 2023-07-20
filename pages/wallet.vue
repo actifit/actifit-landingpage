@@ -105,10 +105,10 @@
 							<i class="fas fa-list-ol"></i>
 						</a>
 					</span>
-					<span class="btn btn-brand p-1" :title="$t('buy_afit_he')">
-						<a v-if="cur_bchain=='STEEM'" href="https://steem-engine.net/?p=market&t=AFIT" :class="smallScreenBtnClasses" target="_blank" rel="noopener noreferrer" :text="$t('buy_afit_se')">$</a>
-						<a v-else href="https://hive-engine.com/?p=market&t=AFIT" :class="smallScreenBtnClasses" target="_blank" rel="noopener noreferrer" >$</a>
-					</span>
+					
+					<a v-if="cur_bchain=='STEEM'" href="https://steem-engine.net/?p=market&t=AFIT" :class="smallScreenBtnClasses" target="_blank" rel="noopener noreferrer" :text="$t('buy_afit_se')"><span class="btn btn-brand p-1" :title="$t('buy_afit_he')">$</span></a>
+					<a v-else href="https://hive-engine.com/?p=market&t=AFIT" :class="smallScreenBtnClasses" target="_blank" rel="noopener noreferrer" ><span class="btn btn-brand p-1" :title="$t('buy_afit_he')">$</span></a>
+					
 					<span class="btn btn-brand p-1" :title="$t('EXCHANGE_AFIT_FOR_STEEM')" v-on:click="exchangeAFITforSTEEM">
 						<i class="fas fa-solid fa-thumbs-up" ></i>
 					</span>
@@ -283,6 +283,9 @@
 					<span class="btn btn-brand p-1" :title="$t('smart_contract')">
 							<a target="_blank" :href="'https://bscscan.com/address/'+afitTokenAddress"><i class="fas fa-file-contract"></i></a>
 					</span>
+					<a href="https://defi.actifit.io/swap?outputCurrency=0x4516bb582f59befcbc945d8c2dac63ef21fba9f6" :class="smallScreenBtnClasses" target="_blank" ><span class="btn btn-brand p-1" :title="$t('buy_afit_bsc')">
+						$
+					</span></a>
 				</div>
 			</div>
 			
@@ -312,6 +315,9 @@
 					<span class="btn btn-brand p-1" :title="$t('smart_contract')">
 							<a target="_blank" :href="'https://bscscan.com/address/'+afitxTokenAddress"><i class="fas fa-file-contract"></i></a>
 					</span>
+					<a href="https://defi.actifit.io/swap?outputCurrency=0x246d22ff6e0b90f80f2278613e8db93ff7a09b95" :class="smallScreenBtnClasses" target="_blank" ><span class="btn btn-brand p-1" :title="$t('buy_afitx_bsc')">
+						$
+					</span></a>
 				</div>
 			</div>
 			
@@ -1035,6 +1041,7 @@
 			
 			
 		</div>
+		<div v-else><i class="fas fa-spin fa-spinner text-brand"></i></div>
 		<div v-if="this.tokenMetrics.length > 0 && false" class="row">
 			<div class="col-md-6 row-sep row-sep-in">
 				<h5 class="token-title">{{ $t('account_est_val') }}<i class="fas fa-info-circle" v-on:click="showDetailedCalc=!showDetailedCalc"></i></h5>
