@@ -351,7 +351,7 @@
 						
 						<i v-else class="fas fa-solid fa-arrow-circle-up text-brand" v-on:click="adjustPowerDisplay(token, false)" :title="$t('POWER_BREAKDOWN')"></i>
 						
-						<span v-if="powerDisplayOn(token)"><li>{{renderStake(token, 1)}} ({{ $t('Owned') }})</li><li> + {{renderStake(token, 2)}} ({{ $t('Received_Power') }})</li><li> - {{renderStake(token, 4)}} ({{ $t('Delegated_Power') }})</li><li> - {{renderStake(token, 3)}} ({{ $t('Unstaking') }})</li></span>
+						<span v-if="powerDisplayOn(token)"><li>{{renderStake(token, 1)}} ({{ $t('Owned') }})</li><li> + {{renderStake(token, 2)}} ({{ $t('Received_Power') }})</li><li> - {{renderStake(token, 4)}} ({{ $t('Delegated_Power') }})</li><li> ( {{renderStake(token, 3)}} ({{ $t('Total_unstaking') }}))</li></span>
 					</div>
 					<div class="col-lg-1 col-2"></div>
 					<div class="col-1 col-lg-2 text-right break-val">${{ usdVal(token) }}</div>
@@ -3266,7 +3266,7 @@
 					case 4: return this.numberFormat(parseFloat(token.delegationsOut), prec);
 				}
 			}
-			totalStaked += parseFloat(token.delegationsIn) + parseFloat(token.stake) - parseFloat(token.pendingUnstake) - parseFloat(token.delegationsOut);
+			totalStaked += parseFloat(token.delegationsIn) + parseFloat(token.stake) - parseFloat(token.delegationsOut);
 			return this.numberFormat(totalStaked, prec);
 		}catch(err){
 			console.log(err);

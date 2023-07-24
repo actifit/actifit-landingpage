@@ -1038,6 +1038,7 @@ module.exports = {
   Received_Power: 'Received',
   Delegated_Power: 'Delegated',
   Unstaking: 'Unstaking',
+  Total_unstaking: 'Total Unstaking',
   pinned_post: 'Pinned Post',
   comment_link: 'Link to Comment',
   copy_link: 'Copy Link',
