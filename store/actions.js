@@ -531,15 +531,19 @@ export default {
 			if (err) reject(err)
 			else {
 				//console.log(comments)
-				if (appendMode){
-					commit('appendCommunityPosts', posts)
+				if (params.returnData){
+					resolve(posts);
 				}else{
-					commit('setCommunityPosts', [...state.communityPosts, ...posts])
-				}
-				console.log(posts);
-				//dispatch('checkIfMoreUserCommentsAvailable', username)
-				commit('setMoreCommunityPostsAvailable', !!posts.length) // if posts were found, show load more button
-				resolve()	  
+					if (appendMode){
+						commit('appendCommunityPosts', posts)
+					}else{
+						commit('setCommunityPosts', [...state.communityPosts, ...posts])
+					}
+					console.log(posts);
+					//dispatch('checkIfMoreUserCommentsAvailable', username)
+					commit('setMoreCommunityPostsAvailable', !!posts.length) // if posts were found, show load more button
+					resolve()	
+				}				
 			}
 		})
     })

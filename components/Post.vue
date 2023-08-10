@@ -1,7 +1,7 @@
 <template>
   <!-- single post item for activity pages -->
   <div >
-    <div class="card post" :class="{'card-pinned': isPostPinned}">
+    <div :class="{'card-pinned': isPostPinned, 'card, post': isStandardPost}">
       <h6 class="mb-0 text-center post-title">
         <!--<a :href="post.url" target="_blank">-->
 		<a :href="buildLink" target="_blank">
@@ -185,7 +185,7 @@
   import sanitize from 'sanitize-html'
 
   export default {
-    props: ['post', 'displayUsername', 'pstId'],
+    props: ['post', 'displayUsername', 'pstId', 'explorePost'],
     computed: {
       ...mapGetters('steemconnect', ['user']),
       ...mapGetters(['postToVote']),
@@ -201,6 +201,9 @@
 		let stats = this.post.stats
 		//console.log(stats);
 		return (stats?stats.is_pinned:false);
+	  },
+	  isStandardPost (){
+		return !this.explorePost;
 	  },
       date() {
         let date = new Date(this.post.created)
