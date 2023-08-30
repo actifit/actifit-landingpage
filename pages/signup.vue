@@ -113,7 +113,14 @@
 					<div id="account_creation" v-if="resultReturned">
 						<div v-if="accountCreated">
 							<i class="fas fa-check"></i><span> {{ $t('account_created_success') }} <br/><br/> {{ $t('post_account_creation_notice') }}</span>
-							<div>{{ $t('posting_key_notice') }}<br/> <b>{{this.privatePostKey}}</b><br/>{{ $t('copy_safe_location') }} <br/><br/>{{ $t('delegation_received') }}</div>
+							<div>{{ $t('posting_key_notice') }}<br/> <b>{{this.privatePostKey}}</b><br/>{{ $t('copy_safe_location') }} <br/>{{ $t('delegation_received') }}<br/><br/></div>
+							
+							
+							<button class="btn btn-brand btn-lg w-20" @click="generateAndDownloadFile">{{$t('signup.download_keys_backup')}}</button>
+							
+							<div v-html="$t('signup.signup_completion')"></div>
+							
+							
 						</div>
 						<div v-else v-html="$t('error_account_creation')">
 							
@@ -188,6 +195,9 @@
 		targetAccount: 'actifit.signup',
 		delegatedSteem: 10,
 		privatePostKey: '',
+		privateActiveKey: '',
+		privateOwnerKey: '',
+		privateMemoKey: '',
 		error_proceeding: '',
 		error_msg: '',
 		email: '',
@@ -269,6 +279,40 @@
 	  
     },
 	methods: {
+	  generateAndDownloadFile(){
+		let content = 'Please keep this file secure and confidential, as it holds information about your private account.';
+		content += '\nUsername:'+this.$refs['account-username'].value;
+		content += '\n# posting key is used to login to actifit or hive blockchain, and to broadcast simple transactions such as votes/comments/posts,...'
+		content += '\nPrivate Posting Key:'+this.privatePostKey;
+		content += '\n# Active key is used for more financial focused transactions, such as sending out HIVE and other funds'
+		content += '\nPrivate Active Key:'+this.privateActiveKey;
+		content += '\n# Owner key is used for higher level transactions';
+		content += '\nPrivate Owner Key:'+this.privateOwnerKey;
+		content += '\n# Memo key is used encode transactions between 2 parties';
+		content += '\nPrivate Memo Key:'+this.privateMemoKey;
+		content += '\n# Below is the main password for the account';
+		content += '\nMaster Password:'+this.$refs["account-password"].value;
+		
+		const blob = new Blob([content], { type: "text/plain" });
+		
+		// Create a URL for the Blob
+		const blobUrl = URL.createObjectURL(blob);
+
+		  // Create a link element for downloading
+		const link = document.createElement("a");
+		link.href = blobUrl;
+		link.download = "actifitkeys.txt";
+
+		  // Append the link to the DOM
+		document.body.appendChild(link);
+
+		  // Click the link to trigger download
+		link.click();
+
+		  // Clean up
+		document.body.removeChild(link);
+		URL.revokeObjectURL(blobUrl);
+	  },
 	  adjustCurrency(e){
 		if(e.target.options.selectedIndex > -1) {
 		  this.transferType = e.target.options[e.target.options.selectedIndex].value;
@@ -368,8 +412,11 @@
 	  },
 	  async genPrivKey(){
 		//generate posting key
-		let privateKeys = await hive.auth.getPrivateKeys(this.$refs["account-username"].value.toLowerCase(), this.$refs["account-password"].value, ['posting']);
+		let privateKeys = await hive.auth.getPrivateKeys(this.$refs["account-username"].value.toLowerCase(), this.$refs["account-password"].value);//, ['posting']);
 		this.privatePostKey = privateKeys.posting;
+		this.privateActiveKey = privateKeys.active;
+		this.privateOwnerKey = privateKeys.owner;
+		this.privateMemoKey = privateKeys.memo;
 	  },
 	  async setPasswordVal(){
 		this.$refs["account-password"].value = this.generatePassword(4);
@@ -526,5 +573,13 @@
 }
 #account-username{
 	text-transform: lowercase;
+}
+#account_creation{
+	word-wrap: break-word;
+}
+@media only screen and (max-width: 500px) {
+	#account_creation img{
+		max-width: 150px;
+	}
 }
 </style>

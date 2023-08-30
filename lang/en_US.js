@@ -253,6 +253,8 @@ module.exports = {
 	desc_part5: '$ investment, your User Rank will stand at 3%. For instance, <span class="afit-tokens-earned text-brand">investing 100$ will earn you ',
 	desc_part6: ' AFIT tokens</span>, and will increase your User Rank to 6%, reflecting in an <span class="afit-tokens-earned text-brand">increase in your daily STEEM and AFIT rewards.</span></li></ul>',
 	buy_text: '<div class="w-100 p-2">You can buy & send STEEM using any of the following exchanges</div><div class="w-30 p-3"><a href="https://bittrex.com/" >Bittrex</a></div><div class="w-70 p-3"><a href="https://www.binance.com/" >Binance</a></div><div class="w-30 p-3"><a href="https://poloniex.com/" >Poloniex</a></div><div class="w-70 p-3"><a href="https://www.huobi.com/" >Huobi</a></div><div class="w-100 p-2">Or check out any of the other exchanges listed on <a href="https://coinmarketcap.com/currencies/steem/#markets">Coinmarketcap</a></div>',
+	signup_completion: 'Click below to download the actifit app and start earning.<br/> <a href="https://links.actifit.io/android" ><img src="img/google-play.png"></a>&nbsp;<a href="https://links.actifit.io/ios" ><img src="img/app-store.png"></a>',
+	download_keys_backup: 'Download Keys Backup'
   },
   Your_Username: 'Your Username',
   Your_Password: 'Choose a Password (or use the auto-generated one)',
@@ -282,7 +284,7 @@ module.exports = {
   posting_key_notice: 'For the Actifit Mobile App, you need your private posting key to send out your reports, which is the following:',
   copy_safe_location: 'Please copy this also to a safe place.',
   copy_password_confirm: 'Please copy the password into a safe location, and confirm doing that by pasting it to the "Confirm Your Password" field above.',
-  delegation_received: 'You also received RC & SP delegation for 3 months to help sustain your account.',
+  delegation_received: 'You also received RC delegation for 3 months to help sustain your account.',
   invalid_email_format: 'The email format used is incorrect.',
   amount_too_low: 'The USD amount chosen is too low. You need to use a min of USD ',
   choose_proper_username: 'Please choose a proper username for your new account.',
