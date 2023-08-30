@@ -42,8 +42,10 @@
 			  <label for="account-password">{{ $t('Your_Password') }}</label><br/>
 			  <!-- we used change event, while we could have used input event, but that slows user experience slightly -->
 			  <input class="form-control form-control-lg" id="account-password" ref="account-password" v-on:change="genPrivKey"/>
-			  <p class="text-brand"><i>{{ $t('lost_password_precaution') }}</i></p>
-			  <button v-on:click="copyContent" data-targetEl="account-password" class="btn btn-brand btn-lg w-20">{{ $t('Copy_Password') }}</button><br/><br/>
+			  <div class="text-brand"><i>{{ $t('lost_password_precaution') }}</i></div>
+			  <button v-on:click="setPasswordVal" class="btn btn-brand btn-lg w-20">{{ $t('Regenerate') }}</button>
+			  
+			  <button v-on:click="copyContent" data-targetEl="account-password" class="btn btn-brand btn-lg w-20 m-2">{{ $t('Copy_Password') }}</button><br/><br/>
 			  
 			  <label for="account-password-confirm">{{ $t('confirm_password_copy') }}</label><br/>
 			  <input class="form-control form-control-lg" id="account-password-confirm" ref="account-password-confirm"/>
@@ -77,23 +79,22 @@
 						<!--<option value="SBD">{{ $t('SBD') }}</option>-->
 						<option value="HIVE">{{ $t('HIVE') }}</option>
 						<!--<option value="STEEM">{{ $t('STEEM') }}</option>-->
-						<!--<option value="STEEM">{{ $t('HBD') }}</option>-->
+						<option value="HBD">{{ $t('HBD') }}</option>
 					</select>
 				</span>
-			    <button v-on:click="copyContent" data-targetEl="invested-amount" class="btn btn-brand btn-lg w-20">{{ $t('copy_amount') }}</button><br/><br/>
+			    <button v-on:click="copyContent" data-targetEl="invested-amount" class="btn btn-brand btn-lg w-20 mt-2">{{ $t('copy_amount') }}</button><br/><br/>
 			    <p class="lead mb-4">
 			    {{ $t('notice_send_amount').replace('_CUR_', this.transferType) }}
 			    </p>
 			  
 			    <label for="actifit-address">{{ $t('Address') }}</label><br/>
 			    <input class="form-control form-control-lg w-80" id="actifit-address" ref="actifit-address" readonly :value="getTargetAccount()"/>
-				<button v-on:click="copyContent" data-targetEl="actifit-address" class="btn btn-brand btn-lg w-20">{{ $t('Copy_Address') }}</button><br/><br/>
+				<button v-on:click="copyContent" data-targetEl="actifit-address" class="btn btn-brand btn-lg w-20 mt-2">{{ $t('Copy_Address') }}</button><br/><br/>
 				<label for="actifit-memo">{{ $t('Memo') }}</label><br/>
 				<input class="form-control form-control-lg w-80" id="actifit-memo" ref="actifit-memo" readonly />	
-				<button v-on:click="copyContent" data-targetEl="actifit-memo" class="btn btn-brand btn-lg w-20 mb-2">{{ $t('Copy_Memo') }}</button>	
+				<button v-on:click="setMemoValue" class="btn btn-brand btn-lg w-20 ">{{ $t('Regenerate') }}</button>
+				<button v-on:click="copyContent" data-targetEl="actifit-memo" class="btn btn-brand btn-lg w-20 m-2">{{ $t('Copy_Memo') }}</button>	
 			  </div>	
-				<!--<vue-recaptcha ref="recaptcha" @verify="onVerifyCaptcha" @expired="onExpiredCaptcha" :loadRecaptchaScript="true" sitekey="6LdpcoMUAAAAAPGTqlvhKEK6Ayw5NqLDZz5Sjudq">
-				</vue-recaptcha>-->
 				<p class="text-brand" v-if="captcha_invalid">
 				  <b>{{ captcha_invalid }}</b>
 				</p>
@@ -102,7 +103,7 @@
 				<div class="text-brand text-center" v-if="error_proceeding">
 				  {{ this.error_msg}}
 				</div>
-				<div class="text-center pb-2">
+				<div class="text-center pb-2" id="create_action_container">
 					<button v-on:click="checkFunds" class="btn btn-brand btn-lg w-20" v-if="!promo_code_chkbx">{{ $t('Steem_sent').replace('_CUR_', this.transferType) }}</button>
 					<button v-on:click="checkFunds" class="btn btn-brand btn-lg w-20" v-else>{{ $t('create_account') }}</button>
 				</div>
@@ -181,10 +182,10 @@
 		processStarted: false,
 		resultReturned: false,
 		accountCreated: false,
-		steemPrice: 0.1,
-		sbdPrice: 0.1,
+		//steemPrice: 0.1,
+		//sbdPrice: 0.1,
 		hivePrice: 0.1,
-		hbdPrice: 0.1,
+		hbdPrice: 1,
 		transferType: 'HIVE',//default option
 		minUSD: process.env.minSignupUSDCost,
 		afitPrice: 0.5,
@@ -242,14 +243,14 @@
 
 	  
 	  //grab STEEM price
-	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem&vs_currencies=usd').then(
+	  /*fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem&vs_currencies=usd').then(
 		res => {res.json().then(json => this.setSteemPrice (json.steem.usd)).catch(e => reject(e))
 	  }).catch(e => reject(e))
 	  
 	  //grab SBD price
 	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem-dollar&vs_currencies=usd').then(
 		res => {res.json().then(json => this.setSBDPrice (json['steem-dollar'].usd)).catch(e => reject(e))
-	  }).catch(e => reject(e))
+	  }).catch(e => reject(e))*/
 	  
 	  //grab HIVE price
 	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=hive&vs_currencies=usd').then(
@@ -288,13 +289,13 @@
 	  generateAndDownloadFile(){
 		let content = 'Please keep this file secure and confidential, as it holds information about your private account.';
 		content += '\nUsername:'+this.$refs['account-username'].value;
-		content += '\n# posting key is used to login to actifit or hive blockchain, and to broadcast simple transactions such as votes/comments/posts,...'
+		content += '\n# '+this.$t('Posting_key_desc');
 		content += '\nPrivate Posting Key:'+this.privatePostKey;
-		content += '\n# Active key is used for more financial focused transactions, such as sending out HIVE and other funds'
+		content += '\n# '+this.$t('Active_key_desc');
 		content += '\nPrivate Active Key:'+this.privateActiveKey;
-		content += '\n# Owner key is used for higher level transactions';
+		content += '\n# '+this.$t('Owner_key_desc');
 		content += '\nPrivate Owner Key:'+this.privateOwnerKey;
-		content += '\n# Memo key is used encode transactions between 2 parties';
+		content += '\n# '+this.$t('Memo_key_desc');
 		content += '\nPrivate Memo Key:'+this.privateMemoKey;
 		content += '\n# Below is the main password for the account';
 		content += '\nMaster Password:'+this.$refs["account-password"].value;
@@ -391,22 +392,22 @@
 		this.genPrivKey();
 		
 	  },
-	  setSteemPrice (_steemPrice){
+	  /*setSteemPrice (_steemPrice){
 		this.steemPrice = parseFloat(_steemPrice).toFixed(3);
 	  },
 	  setSBDPrice (_sbdPrice){
 		this.sbdPrice = parseFloat(_sbdPrice).toFixed(3);
-	  },
+	  },*/
 	  setHivePrice (_hivePrice){
 		this.hivePrice = parseFloat(_hivePrice).toFixed(3);
 	  },
 	  setHBDPrice (_hbdPrice){
 		this.hbdPrice = parseFloat(_hbdPrice).toFixed(3);
 	  },
-	  minSteemAmount () {
+	  /*minSteemAmount () {
 		//take into consideration potential charges, and remove 0.1 STEEM for potential transfer loss
 		return parseFloat(this.minUSD / this.steemPrice - 0.1).toFixed(3);
-	  },
+	  },*/
 	  setAFITPrice (_afitPrice){
 		this.afitPrice = parseFloat(_afitPrice).toFixed(6);
 	  },
@@ -456,10 +457,13 @@
 	  },
 	  getMatchingAmount () {
 		console.log(this.transferType);
-		if (this.transferType == 'STEEM'){
+		/*if (this.transferType == 'STEEM'){
 			return parseFloat(this.userInputUSDAmount / this.steemPrice).toFixed(3);
-		}else if (this.transferType == 'HIVE'){
+		}else*/ 
+		if (this.transferType == 'HIVE'){
 			return parseFloat(this.userInputUSDAmount / this.hivePrice).toFixed(3);
+		}else if (this.transferType == 'HBD'){
+			return parseFloat(this.userInputUSDAmount / this.hbdPrice).toFixed(3);
 		}
 	  },
 	  setMemoValue () {
@@ -575,8 +579,11 @@
 			this.accountCreated = outcome.accountCreated;
 			this.resultReturned = true;
 			
-			let privateKeys = await hive.auth.getPrivateKeys(this.$refs["account-username"].value.toLowerCase(), this.$refs["account-password"].value, ['posting']);
+			let privateKeys = await hive.auth.getPrivateKeys(this.$refs["account-username"].value.toLowerCase(), this.$refs["account-password"].value);//, ['posting']);
 			this.privatePostKey = privateKeys.posting;
+			this.privateActiveKey = privateKeys.active;
+			this.privateOwnerKey = privateKeys.owner;
+			this.privateMemoKey = privateKeys.memo;
 		}catch(err){
 			console.error(err);
 			this.checkingFunds = false;
