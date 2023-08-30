@@ -92,8 +92,8 @@
 				<input class="form-control form-control-lg w-80" id="actifit-memo" ref="actifit-memo" readonly />	
 				<button v-on:click="copyContent" data-targetEl="actifit-memo" class="btn btn-brand btn-lg w-20 mb-2">{{ $t('Copy_Memo') }}</button>	
 			  </div>	
-				<vue-recaptcha ref="recaptcha" @verify="onVerifyCaptcha" @expired="onExpiredCaptcha" :loadRecaptchaScript="true" sitekey="6LdpcoMUAAAAAPGTqlvhKEK6Ayw5NqLDZz5Sjudq">
-				</vue-recaptcha>
+				<!--<vue-recaptcha ref="recaptcha" @verify="onVerifyCaptcha" @expired="onExpiredCaptcha" :loadRecaptchaScript="true" sitekey="6LdpcoMUAAAAAPGTqlvhKEK6Ayw5NqLDZz5Sjudq">
+				</vue-recaptcha>-->
 				<p class="text-brand" v-if="captcha_invalid">
 				  <b>{{ captcha_invalid }}</b>
 				</p>
@@ -148,9 +148,13 @@
   
   import blurt from '@blurtfoundation/blurtjs'
   
-  import VueRecaptcha from 'vue-recaptcha';
+  //import VueRecaptcha from 'vue-recaptcha';
+  import { VueReCaptcha } from 'vue-recaptcha-v3'
 
   import { mapGetters } from 'vuex'
+  
+  import Vue from 'vue'
+  Vue.use(VueReCaptcha, { siteKey: process.env.captchaV3Key })
 
   export default {
 	head () {
@@ -168,7 +172,7 @@
     components: {
       NavbarBrand,
       Footer,
-	  VueRecaptcha,
+	  //VueRecaptcha,
     },
 	data () {
       return {
@@ -276,6 +280,8 @@
       this.$store.dispatch('fetchTransactions')
 	  this.$store.dispatch('fetchUserRank')
 	  this.$store.dispatch('fetchReferrals')
+	  
+	  await this.$recaptchaLoaded()
 	  
     },
 	methods: {
@@ -484,10 +490,10 @@
 		if (!this.promo_code_chkbx){
 		  invested_usd = this.$refs["invested-usd"].value;
 		}
-		if (!this.captchaValid){
+		/*if (!this.captchaValid){
 			this.captcha_invalid = this.$t('solve_captcha');
 			return;
-		}
+		}*/
 		if (this.username_exists || this.username_invalid || this.$refs["account-username"].value==''){
 			this.error_proceeding = true;
 			this.error_msg = this.$t('choose_proper_username');
@@ -509,6 +515,25 @@
 		  this.error_msg = this.$t('copy_password_confirm');
 		  return;
 		}
+		
+		//verify captcha 
+		//check captcha V3
+		// Execute reCAPTCHA with action "login".
+		
+		const token = await this.$recaptcha('signup')
+		
+		//verify recaptcha-v3
+		
+		let outc = await fetch(process.env.actiAppUrl+'verifyLoginCaptcha?token='+token);
+		console.log(outc);
+		//let outc = await outc.json();
+		
+		if (outc.error){
+			this.error_proceeding = true;
+			this.error_msg = this.$t('captcha_invalid');
+			return;
+		}
+		
 		//to prevent tampering with STEEM and AFIT values
 		const steem_invest = this.getMatchingAmount ();
 		const afit_reward = this.getMatchingAFIT ();
