@@ -1,7 +1,7 @@
 <template>
   <!-- single post item for activity pages -->
   <div >
-    <div :class="{'card-pinned': isPostPinned, 'card, post': isStandardPost}">
+    <div :class="{'card-pinned': isPostPinned, 'card post': isStandardPost}">
       <h6 class="mb-0 text-center post-title">
         <!--<a :href="post.url" target="_blank">-->
 		<a :href="buildLink" target="_blank">
@@ -52,12 +52,13 @@
 			<a href="#" class="" @click="post.pstId = pstId; $store.commit('setActivePost', post)" data-toggle="modal"
                  data-target="#postModal" :title="$t('read_more_small')">
             <!--<a :href="'/'+post.author+'/'+post.permlink" target="_blank">-->
-				<div ref="post_body" id="post_body" style="display: none">
-					<!--{{ renderSnippet(post.body) }}-->
+				<!--<div ref="post_body" id="post_body" style="display: none">
+					
 					<vue-remarkable :source="renderSnippet(post.body)" :options="{'html': true, 'xhtmlOut': true}"></vue-remarkable>
-				</div>
+				</div>-->
 				<div>
-					<span id="post_body_render" v-html="fixedContent()"></span>
+					<!--<span id="post_body_render" v-html="fixedContent()"></span>-->
+					<span id="post_body_render">{{renderSnippet(post.body)}}</span>
 					<i class="fas fa-external-link-alt"></i>
 				</div>
             </a>
@@ -180,7 +181,7 @@
   
   import SocialSharing from 'vue-social-sharing'
   
-  import vueRemarkable from 'vue-remarkable';
+  //import vueRemarkable from 'vue-remarkable';
 
   import sanitize from 'sanitize-html'
 
@@ -221,9 +222,9 @@
 		try{
 			return JSON.parse(this.post.json_metadata)
 		}catch(err){
-			console.log(err);
-			console.log('meta:')
-			console.log(this.post.json_metadata);
+			//console.log(err);
+			//console.log('meta:')
+			//console.log(this.post.json_metadata);
 			return JSON.parse(JSON.stringify(this.post.json_metadata));
 			//console.log(err);
 			return {};
@@ -281,7 +282,7 @@
 	},
 	components: {
 		SocialSharing,
-		vueRemarkable
+		//vueRemarkable
 	},
 	watch: {
 	  postUpvoted: 'updatePostData',
@@ -300,6 +301,7 @@
 		if (this.$refs["post_body"]){
 			//console.log(this.$refs["post_body"].innerHTML);
 			//remove html tags from text
+			console.log('post_body'+this.$refs['post_body'].innerHTML);
 			return this.$refs["post_body"].innerHTML.replace(/<[^>]+>/g, '');;
 		}
 		return "";
@@ -307,7 +309,7 @@
 	  renderSnippet(content){
 		let post_content = this.$cleanBody(content, true);//2nd param confirms to remove all tags
 		post_content = this.truncateString(post_content, 150);
-		return post_content;
+		return post_content.replace(/<[^>]+>/g, '');
 	  },
 	  /* function checks if post has beneficiaries */
 	  hasBeneficiaries() {
@@ -469,5 +471,11 @@
 		width: 100%;
 		height: 150px;
 		object-fit: cover;
+	}
+	.post h6 a, #post_body_render{
+		text-wrap: balance;
+	}
+	.post{
+		vertical-align: top;
 	}
 </style>
