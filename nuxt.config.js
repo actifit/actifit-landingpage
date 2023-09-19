@@ -19,6 +19,11 @@ module.exports = {
         path: '/_username/blog/new',
         alias: '/blog/new',
         component: resolve(__dirname, 'pages/_username/blog/new.vue')
+      }),
+	  routes.push({
+        path: '/_username/wallet',
+        alias: '/wallet',
+        component: resolve(__dirname, 'pages/_username/wallet.vue')
       })
     }
   },
