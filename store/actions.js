@@ -28,15 +28,24 @@ export default {
 	}
   },
   toggleDarkMode ({state, commit}){
-	console.log(state.darkMode);
+	//console.log(state.darkMode);
 	state.darkMode = !state.darkMode;
 	commit('setDarkMode', state.darkMode);
 	localStorage.setItem('darkMode', state.darkMode);
   },
-  fetchUserTokens ({ state, commit }) {
+  fetchUserTokens ({ state, commit }, tgtUser) {
     return new Promise((resolve, reject) => {
-      fetch(process.env.actiAppUrl+'user/' + state.steemconnect.user.account.name.toLowerCase()).then(res => {
+	  let user = (tgtUser && tgtUser != '')?tgtUser:state.steemconnect.user.account.name.toLowerCase();
+      fetch(process.env.actiAppUrl+'user/' + user).then(res => {
         res.json().then(json => commit('setUserTokens', json.tokens)).catch(e => reject(e))
+      }).catch(e => reject(e))
+    })
+  },
+  fetchUserTokensReturn ({ state, commit }, tgtUser) {
+    return new Promise((resolve, reject) => {
+	  let user = (tgtUser && tgtUser != '')?tgtUser:state.steemconnect.user.account.name.toLowerCase();
+      fetch(process.env.actiAppUrl+'user/' + user).then(res => {
+        res.json().then(json => resolve(json.tokens)).catch(e => reject(e))
       }).catch(e => reject(e))
     })
   },
@@ -54,9 +63,10 @@ export default {
       }).catch(e => reject(e))
     })
   },
-  fetchTransactions ({ state, commit }) {
+  fetchTransactions ({ state, commit }, tgtUser) {
+	let user = (tgtUser && tgtUser != '')?tgtUser:state.steemconnect.user.account.name.toLowerCase();
     return new Promise((resolve, reject) => {
-      fetch(process.env.actiAppUrl+'transactions/' + state.steemconnect.user.account.name.toLowerCase()).then(res => {
+      fetch(process.env.actiAppUrl+'transactions/' + user).then(res => {
         res.json().then(json => commit('setTransactions', json || [])).catch(e => reject(e))
       }).catch(e => reject(e))
     })
@@ -212,8 +222,8 @@ export default {
 		if (params.last && params.last != ''){
 			finalQuery['last'] = params.last;
 		}
-		console.log('final query')
-		console.log(finalQuery);
+		//console.log('final query')
+		//console.log(finalQuery);
 		let outc = hive.api.call('bridge.list_communities', finalQuery, (err, result) => {
 			//console.log(err, result);
 			if (err) reject(err)
@@ -261,7 +271,7 @@ export default {
 			
 			//proceed with grabbing posts
 			return new Promise((resolve, reject) => {
-				console.log('let\'s get discussions');
+				//console.log('let\'s get discussions');
 			  // if there are posts already, take the last one as starting point
 			  let lastReport = state.reports.length ? state.reports[state.reports.length - 1] : null
 			  let start_author = lastReport ? lastReport.author : null
@@ -341,7 +351,7 @@ export default {
 			
 			//proceed with grabbing posts
 			return new Promise((resolve, reject) => {
-				console.log('let\'s get discussions');
+				//console.log('let\'s get discussions');
 			  // if there are posts already, take the last one as starting point
 			  let lastPost = state.posts.length ? state.posts[state.posts.length - 1] : null
 			  let start_author = lastPost ? lastPost.author : null
@@ -427,14 +437,14 @@ export default {
 	  }else if (state.bchain == 'BLURT'){
 		chainLnk = blurt;
 	  }
-	  console.log(username);
+	  //console.log(username);
 	  //let outc = await chainLnk.api.callAsync('bridge.get_account_posts', {sort: 'comments', account: username, limit: 100, start_author: start_author, start_permlink: start_permlink})
 	  let outc = chainLnk.api.call('bridge.get_account_posts', {sort: 'comments', account: username, limit: 100, start_author: start_author, start_permlink: start_permlink}, (err, comments) => {
 			if (err) reject(err)
 			else {
 				//console.log(comments)
 				commit('setUserComments', [...state.userComments, ...comments])
-				console.log(comments);
+				//console.log(comments);
 				dispatch('checkIfMoreUserCommentsAvailable', username)
 				resolve()	  
 			}
@@ -487,7 +497,7 @@ export default {
 	  }else if (state.bchain == 'BLURT'){
 		chainLnk = blurt;
 	  }
-	  console.log('get blog posts');
+	  //console.log('get blog posts');
       // get (next) 100 posts from the user
       chainLnk.api.getDiscussionsByBlog({tag: username, limit: 100, start_author: start_author, start_permlink: start_permlink}, (err, posts) => {
 		//console.log(err,posts);
@@ -503,10 +513,27 @@ export default {
     })
   },
   
+  //fetch popular communities: top 20
+  fetchPopCommunities({ state, commit }){
+	return new Promise((resolve, reject) => {
+		let chainLnk = hive;
+	
+		let callQuery = {limit: 20};
+		let outc = chainLnk.api.call('bridge.list_pop_communities ', callQuery, (err, comms) => {
+			if (err) reject(err)
+			else {
+				console.log('fetchpop');
+				console.log(comms)
+				resolve(comms);
+			}
+		});
+	});
+  },
+  
   fetchCommunityPosts ({ state, commit, dispatch }, params) {
     // fetches initial posts or more posts if invoked again
     return new Promise((resolve, reject) => {
-		console.log('get community posts:'+params.community+' - '+params.type);
+		//console.log('get community posts:'+params.community+' - '+params.type);
       // if there are posts already, take the last one as starting point
       let lastPost = state.communityPosts.length ? state.communityPosts[state.communityPosts.length - 1] : null
       let start_author = lastPost ? lastPost.author : null
@@ -532,14 +559,15 @@ export default {
 			else {
 				//console.log(comments)
 				if (params.returnData){
-					resolve(posts);
+					//console.log(posts);
+					resolve({posts: posts, morePostsAvailable: !!posts.length});
 				}else{
 					if (appendMode){
 						commit('appendCommunityPosts', posts)
 					}else{
 						commit('setCommunityPosts', [...state.communityPosts, ...posts])
 					}
-					console.log(posts);
+					//console.log(posts);
 					//dispatch('checkIfMoreUserCommentsAvailable', username)
 					commit('setMoreCommunityPostsAvailable', !!posts.length) // if posts were found, show load more button
 					resolve()	
@@ -572,8 +600,8 @@ export default {
           if (start_author && start_permlink) videos.shift() // remove the first videos because its the last video from before
 		  videos = videos.filter(userVideosFilter(username)) // get only actual activity videos
           commit('setUserVideos', [...state.userVideos, ...videos])
-		  console.log('found videos:');
-		  console.log(videos);
+		  //console.log('found videos:');
+		  //console.log(videos);
           dispatch('checkIfMoreUserVideosAvailable', username)
           resolve()
         }
@@ -753,7 +781,7 @@ export default {
 			else {
 				//console.log(comments)
 				commit('setUserComments', [...state.userComments, ...comments])
-				console.log(comments);
+				//console.log(comments);
 				//dispatch('checkIfMoreUserCommentsAvailable', username)
 				commit('setMoreUserCommentsAvailable', !!comments.length) // if posts were found, show load more button
 				resolve()	  
