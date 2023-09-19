@@ -14,7 +14,7 @@
         <div class="row col-12">
 			<div class="col-6">
 			<a :href="community.name" class="text-brand" >
-				<img :src="getCommunityLogo" :alt="community.title" class="community-image" >
+				<img :src="$getCommunityLogo(community.name)" :alt="community.title" class="community-image" >
 			</a>
 		  </div>
           <div class="col-6">
@@ -114,9 +114,6 @@
 	  appVersion() {
         return this.meta.app
       },
-	  getCommunityLogo(){
-		return 'https://images.hive.blog/u/'+this.community.name+'/avatar';
-	  },
       meta() {
 		try{
 			return JSON.parse(this.community.json_metadata)

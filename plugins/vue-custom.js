@@ -335,3 +335,7 @@ Vue.prototype.$fetchPostImage = function (metaData){
 	}
 	return "";
 };
+
+Vue.prototype.$getCommunityLogo = function (communityName){
+	return 'https://images.hive.blog/u/'+communityName+'/avatar';
+};

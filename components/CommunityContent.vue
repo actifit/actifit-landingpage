@@ -4,19 +4,30 @@
     
 
     <!-- listing -->
-    <div class="container pt-5 mt-5 pb-5">
-      <h2 class="text-center mb-5">{{ community }} <img src="/img/HIVE.png" class="mr-2 token-logo-md"></h2>
+    <div class="container mb-2 pb-2">
+      <!--<h2 class="text-center mb-5">{{ community }} <img src="/img/HIVE.png" class="mr-2 token-logo-md"></h2>-->
 	  <!--<ChainSelection />-->
 	  
       <!-- show spinner while loading -->
       <div class="text-center" v-if="loading">
         <i class="fas fa-spinner fa-spin text-brand"></i>
       </div>
-	  
+	  <div style="float:right" v-else>
+		<a :href="community" class="text-brand" >
+			<img :src="$getCommunityLogo(community)" :alt="community" class="community-image" >
+		</a>
+	  </div>
 	  <div class="vid-container" v-if="communityPosts.length">
 		
-			<Post v-for="iterx in communityPosts.length" :key="iterx" :post="communityPosts[(iterx - 1)]" :displayUsername="username" :pstId="(iterx - 1)" class="card post w-25 p-1 m-1 " explorePost="true"/>
+		<Post v-for="iterx in communityPosts.length" :key="iterx" :post="communityPosts[(iterx - 1)]" :displayUsername="username" :pstId="(iterx - 1)" class="card post col-md-4 p-1 m-1 " explorePost="true"/>
 		
+			<!-- show load more button if there are more posts available -->
+		<div class="text-center pt-5 moreblock pr-4" v-if="moreCommunityPostsAvailable">
+			<a href="#" class="btn btn-brand" @click.prevent="loadMore()">
+			  {{ $t('load_more') }}
+			  <i class="fas fa-spinner fa-spin" v-if="loadingMore"></i>
+			</a>
+		</div>
 	  </div>
 	  
       <!-- show listing when loaded -->
@@ -31,14 +42,6 @@
       <!-- or no content message when no posts found -->
       <div class="text-center text-muted" v-if="!communityPosts.length && !loading">
         {{ $t('no_posts') }}
-      </div>
-
-      <!-- show load more button if there are more posts available -->
-      <div class="text-center" v-if="moreCommunityPostsAvailable">
-        <a href="#" class="btn btn-brand" @click.prevent="loadMore()">
-          {{ $t('load_more') }}
-          <i class="fas fa-spinner fa-spin" v-if="loadingMore"></i>
-        </a>
       </div>
     </div>
 
@@ -92,7 +95,8 @@
       }
     },
 	watch: {
-	  user: 'fetchUserData',
+	  //user: 'fetchUserData',
+	  type: 'reFetchCommunityPosts',
 	  bchain: async function(newBchain) {
 		if (this.cur_bchain != newBchain && !this.loading){
 			//only update if changed
@@ -100,15 +104,7 @@
 			this.cur_bchain = newBchain;
 			await this.$store.dispatch('steemconnect/refreshUser');
 			
-			// reset previously fetched posts to get latest
-			//this.$store.commit('setCommunityPosts', [])
-
-			// disable load more button and only show if there actually are more posts to load
-			//this.$store.commit('setMoreCommunityPostsAvailable', false)
-			console.log('dispatch fetching user posts')
-			console.log(this.username)
-			this.communityPosts = await this.$store.dispatch('fetchCommunityPosts', {community:this.community, type:this.type, returnData: true});
-			this.loading = false
+			this.reFetchCommunityPosts();
 		}
 		//this.reload += 1;
 	  }
@@ -155,42 +151,38 @@
 		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		this.$store.commit('setBchain', cur_bchain);
 		console.log('dispatch MORE fetching user posts')
-		console.log(this.username)
-
-        this.communityPosts = await this.$store.dispatch('fetchCommunityPosts', {community:this.community, type:this.type, returnData: true});
+		
+		let lastPost = this.communityPosts[this.communityPosts.length -1];
+        
+		let result = await this.$store.dispatch('fetchCommunityPosts', {community:this.community, type:this.type, lastAuth: lastPost.author, lastPerm: lastPost.permlink, returnData: true});
+		
+		let newPosts = result.posts;
+		this.moreCommunityPostsAvailable = result.morePostsAvailable;
+		if (Array.isArray(newPosts) && newPosts.length > 0){
+			this.communityPosts = this.communityPosts.concat(newPosts);
+		}
         this.loadingMore = false
       },
 	  
 	  async reFetchCommunityPosts(){
 		this.loading = true
-		//this.$store.commit('setCommunityPosts', [])
-		this.communityData = await this.$store.dispatch('fetchCommunityPosts', {community:this.community, type:this.type, returnData: true})
-		//this.communityData = await this.$store.dispatch('fetchSpecificCommunity', this.community);
+		let result = await this.$store.dispatch('fetchCommunityPosts', {community:this.community, type:this.type, returnData: true});
+		this.communityPosts = result.posts;
+		this.moreCommunityPostsAvailable = result.morePostsAvailable;
 		this.loading = false
 	  }
     },
     async mounted () {
       // login
-      //this.$store.dispatch('steemconnect/login')
+      this.$store.dispatch('steemconnect/login')
 	  //this.fetchUserData();
 
       // fetch posts
 	  
 	  let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 	  this.$store.commit('setBchain', cur_bchain);
-	  
-      // reset previously fetched posts to get latest
-      //this.$store.commit('setCommunityPosts', [])
-
-      // disable load more button and only show if there actually are more posts to load
-      //this.$store.commit('setMoreCommunityPostsAvailable', false)
-	  
-      this.communityPosts = await this.$store.dispatch('fetchCommunityPosts', {community:this.community, type:this.type, returnData: true});
-	  
-	  //console.log(this.communityPosts);
-
-      // remove loading indicator
-      this.loading = false
+	  //this.$store.dispatch('steemconnect/login')
+      this.reFetchCommunityPosts();
     }
   }
 </script>
@@ -206,5 +198,9 @@
     display: inline-block!important;
     min-height: 100px;
     background-color: #faebd7;
+}
+.moreblock{
+	display: inline-block;
+	vertical-align: top;
 }
 </style>
