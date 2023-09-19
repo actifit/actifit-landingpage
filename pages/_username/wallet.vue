@@ -2754,7 +2754,8 @@
 			let tokenData = this.tokenMetrics.find(v => v.symbol == token.symbol);
 			
 			if (tokenData && tokenData.lastPrice){
-				let valueUSD = token.balance * parseFloat(tokenData.lastPrice) * this.hivePrice;
+				//console.log('stake:'+token.stake)
+				let valueUSD = (parseFloat(token.balance) + parseFloat(token.stake)) * parseFloat(tokenData.lastPrice) * this.hivePrice;
 				this.heTokenBalances[token.symbol] = valueUSD;
 				//if (token.symbol == 'AFIT'){
 					//console.log(token.symbol)
