@@ -48,6 +48,8 @@
 					<a :href="'/' + displayUser+'/videos'" class="btn btn-brand btn-white border" :class="smallScreenBtnClasses"><img src="/img/3speak.png" class="mr-2 token-logo">&nbsp;{{ $t('Threespeak_videos') }}</a>
 					
 					<a :href="'/' + displayUser+'/comments'" class="btn btn-brand btn-white border" :class="smallScreenBtnClasses"><i class="far fa-comments"></i>&nbsp;{{ $t('Hive_comments') }}</a>
+					
+					<a :href="'/' + displayUser+'/wallet'" class="btn btn-brand btn-white border" :class="smallScreenBtnClasses"><i class="fas fa-solid fa-wallet"></i>&nbsp;{{ $t('wallet.wallet') }}</a>
 				</div>
 		  </div>
 
@@ -241,7 +243,7 @@
 						</div>
 					</div>
 				</div>				
-				<div class="info-box-orange mb-2 col-md-6 cntnr" v-if="actifitDelegator"><i class="fas fa-file-invoice-dollar text-brand mr-2"></i>&nbsp;{{ $t('Delegates_to_Actifit') }} {{ actifitDelegator.steem_power }} {{ $t('Steem_Power') }}</div>
+				<div class="info-box-orange mb-2 col-md-6 cntnr" v-if="actifitDelegator"><i class="fas fa-file-invoice-dollar text-brand mr-2"></i>&nbsp;{{ $t('Delegates_to_Actifit') }} {{ actifitDelegator.steem_power }} {{ $t('Hive_Power') }}</div>
 				<div class="info-box-orange mb-2 col-md-6 cntnr" v-else><i class="fas fa-file-invoice-dollar text-brand"></i>&nbsp;<a class="btn btn-brand" href="/wallet" target="_blank">{{ $t('Delegate_Now_Actifit') }}</a></div>
 			</div>
 			
