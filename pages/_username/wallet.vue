@@ -3287,7 +3287,7 @@
 					case 4: return this.numberFormat(parseFloat(token.delegationsOut), prec);
 				}
 			}
-			totalStaked += parseFloat(token.delegationsIn) + parseFloat(token.stake) - parseFloat(token.delegationsOut);
+			totalStaked += parseFloat(token.delegationsIn) + parseFloat(token.stake) + parseFloat(token.delegationsOut);
 			return this.numberFormat(totalStaked, prec);
 		}catch(err){
 			console.log(err);
