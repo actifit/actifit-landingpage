@@ -1062,6 +1062,9 @@ module.exports = {
   rec_video: 'Record Video',
   video_post_created: 'Your video post has been created!', 
   issue_marking_published: 'There was an issue with marking it as published. Please revisit this screen later and attempt to mark it published again.',
+  Hive_official: 'Hive Official',
+  Hive_block_explorer: 'Hive Block Explorer',
+  Explore: 'Explore',
   filter_content_by_pop_community: 'Explore Hive content by popular communities',
   posh_desc_profile: 'Earn <u><a href="https://hiveposh.com/">POSH Tokens</a></u> by sharing your posts on twitter',
   tipping_details: 'This special onchain tipping functionality allows you to send out tips to users by commenting on their posts, and sends out AFIT directly onto their hive-engine account. For more details about how it works and how to load up balance, check out this post: <a href="https://links.actifit.io/tipping-afit">https://links.actifit.io/tipping-afit</a>'

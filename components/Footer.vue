@@ -12,6 +12,26 @@
 		<a href="https://www.youtube.com/channel/UCNHxAGO79rXI7Hdiikwnqtw" target="_blank" class="d-inline-block mx-3 mt-3" :title="$t('Youtube')"><i class="fab fa-2x fa-youtube"></i></a>
 		<a href="https://www.linkedin.com/company/actifit-io" target="_blank" class="d-inline-block mx-3 mt-3" :title="$t('LinkedIn')"><i class="fab fa-2x fa-linkedin"></i></a>
       </div>
+	  <div class="columns">
+		<div class="column">
+			<img src="/img/actifit_logo_50.png" class="ml-3" style="max-height: 30px">{{$t('Actifit')}}
+			<a class="nav-link " href="#" @click.prevent="$router.push('/activity')">{{ $t('Activity') }}</a>
+			<a class="nav-link " href="#" @click.prevent="$router.push('/market')">{{ $t('Market') }}</a>
+			<a class="nav-link " href="#" @click.prevent="$router.push('/yieldfarming')">{{ $t('yield_farming') }}</a>
+			<a class="nav-link " href="#" @click.prevent="$router.push('/referrals')">{{ $t('Refer_A_Friend') }}</a>
+			<a class="nav-link " href="/whitepaper/Actifit_White_Paper.pdf">{{ $t('Whitepaper') }}</a>
+			<a class="nav-link " href="/faq">{{ $t('FAQ') }}</a>
+		</div>
+		<div class="column">
+			<img src="/img/HIVE.png" class="ml-3" style="max-height: 30px">{{$t('Hive')}}
+			<a class="nav-link " href="/communities">{{ $t('Communities') }}</a>
+			<a class="nav-link " href="/explore">{{ $t('Explore') }}</a>
+			<a class="nav-link " target="_blank" href="https://hive.io">{{ $t('Hive_official') }}</a>
+			<a class="nav-link " target="_blank" href="https://hiveblockexplorer.com">{{ $t('Hive_block_explorer') }}</a>
+		
+		</div>
+	  </div>
+	  
 	  <div class="row">
 		  <div class="col text-center">
 			<i>{{$t('powered_by')}}<img src="/img/HIVE.png" style="max-height: 30px;"></i>
@@ -205,4 +225,19 @@
 	  opacity: 1;
 	  visibility: visible;
 	}*/
+	
+	.columns {
+	  display: flex;
+	}
+
+	.column {
+	  flex: 1;
+	}
+
+	.column a {
+	  display: block;
+	  margin-bottom: 10px;
+	  text-decoration: none;
+	  width: fit-content;
+	}
 </style>
