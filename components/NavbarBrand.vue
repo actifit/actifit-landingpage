@@ -47,14 +47,19 @@
           <li class="nav-item btn btn-brand m-1 p-1 nav-item-border" v-if="home">
             <div style="display:inline-flex"><i class="far fa-newspaper text-white"></i><a class="nav-link text-white" href="#" @click.prevent="$emit('scrollTo', '#news')">{{ $t('News') }}</a></div>
           </li>
-		  
-		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
-            <div style="display:inline-flex"><i class="far fa-newspaper text-white"></i><a class="nav-link text-white" href="/communities">{{ $t('Communities') }}</a></div>
-          </li>
 
 		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
             <div style="display:inline-flex"><i class="fas fa-user-friends text-white"></i><a class="nav-link text-white" href="#" @click.prevent="$router.push('/referrals')">{{ $t('Refer_A_Friend') }}</a></div>
           </li>
+		  
+		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
+            <div style="display:inline-flex"><i class="far fa-newspaper text-white"></i><a class="nav-link text-white" href="/communities">{{ $t('Communities') }}</a></div>
+          </li>
+		  
+		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
+            <div style="display:inline-flex"><i class="far fa-newspaper text-white"></i><a class="nav-link text-white" href="/explore">{{ $t('Explore') }}</a></div>
+          </li>
+		  
         </ul>
       </div>
 	  <UserMenu/>
