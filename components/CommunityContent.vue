@@ -4,7 +4,7 @@
     
 
     <!-- listing -->
-    <div class="container mb-2 pb-2">
+    <div class="container mb-2 pb-2 scroll-container">
       <!--<h2 class="text-center mb-5">{{ community }} <img src="/img/HIVE.png" class="mr-2 token-logo-md"></h2>-->
 	  <!--<ChainSelection />-->
 	  
@@ -17,9 +17,9 @@
 			<img :src="$getCommunityLogo(community)" :alt="community" class="community-image" >
 		</a>
 	  </div>
-	  <div class="vid-container" v-if="communityPosts.length">
+	  <div class="cmm-container content" :id="community" v-if="communityPosts.length">
 		
-		<Post v-for="iterx in communityPosts.length" :key="iterx" :post="communityPosts[(iterx - 1)]" :displayUsername="username" :pstId="(iterx - 1)" class="card post col-md-4 p-1 m-1 " explorePost="true"/>
+		<Post v-for="iterx in communityPosts.length" :key="iterx" :post="communityPosts[(iterx - 1)]" :displayUsername="username" :pstId="(iterx - 1)" class="card post col-md-4 p-1 m-1 " explorePost="false"/>
 		
 			<!-- show load more button if there are more posts available -->
 		<div class="text-center pt-5 moreblock pr-4" v-if="moreCommunityPostsAvailable">
@@ -29,6 +29,8 @@
 			</a>
 		</div>
 	  </div>
+	  <button v-if="communityPosts.length" @click.prevent="scrollContent(community, -200, 0)" class="scroll-button left m-2 p-3">&lt;</button>
+	  <button v-if="communityPosts.length" @click.prevent="scrollContent(community, 200, 0)" class="scroll-button right m-2 p-3">&gt;</button>
 	  
       <!-- show listing when loaded -->
 	  <!--<div class="row" >
@@ -170,6 +172,14 @@
 		this.communityPosts = result.posts;
 		this.moreCommunityPostsAvailable = result.morePostsAvailable;
 		this.loading = false
+	  },
+	  scrollContent(community, horizontal, vertical) {
+		var content = document.querySelector('#'+community);
+		content.scrollBy({
+			top: vertical,
+			left: horizontal,
+			behavior: 'smooth'
+		});
 	  }
     },
     async mounted () {
@@ -187,7 +197,7 @@
   }
 </script>
 <style>
-.vid-container {
+.cmm-container {
     width: 100%;
     overflow-x: auto;
     white-space: nowrap;
@@ -203,4 +213,17 @@
 	display: inline-block;
 	vertical-align: top;
 }
+/* Container for the scrollable content */
+.scroll-container {
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  /* border: 1px solid #ccc; Just for visual reference, you can remove this */
+}
+
+/* Content that can be scrolled */
+.content {
+  /*display: inline-block;*/
+}
+
 </style>

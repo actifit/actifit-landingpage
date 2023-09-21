@@ -180,6 +180,9 @@
 	  position: relative;
 	  cursor: pointer;
 	}
+	div#voteModal{
+		z-index: 99999; /* fix for proper voting popup placement */
+	}
 
 	/*.custom-tooltip {
 	  position: absolute;

@@ -518,8 +518,8 @@ export default {
 	return new Promise((resolve, reject) => {
 		let chainLnk = hive;
 	
-		let callQuery = {limit: 20};
-		let outc = chainLnk.api.call('bridge.list_pop_communities ', callQuery, (err, comms) => {
+		let callQuery = {limit: 25};
+		let outc = chainLnk.api.call('bridge.list_pop_communities', callQuery, (err, comms) => {
 			if (err) reject(err)
 			else {
 				console.log('fetchpop');
