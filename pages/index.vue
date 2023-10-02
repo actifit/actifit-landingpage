@@ -686,7 +686,7 @@
 <style lang="sass">	
   .header
     
-    background: url('/img/header-4.png') top no-repeat
+    background: url('/img/header-5.png') top no-repeat
     background-size: cover
     .form
       max-width: 500px
