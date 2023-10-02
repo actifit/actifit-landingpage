@@ -229,7 +229,7 @@
 			<div class="token-entry row main-token" v-if="showHBDSavingsDetails">
 				<div class="col-6"></div>
 				<div class="col-6">
-					<div class="savings-rewards" v-if="estimatedInterest > 0.001">
+					<div class="savings-rewards" v-if="parseFloat(estimatedInterest) > parseFloat(0.001)">
 						<span>{{$t('last_payout')}} {{ this.lastIPaymentRelative}}<br/></span>
 						<span>{{$t('cur_int_rate')}} {{ this.hbdInterestRate / 100}}%<br/></span>
 						<span v-if="remainingHours > 1">{{$t('payout_in')}} {{ this.remainingDays}} days.<br/></span>
