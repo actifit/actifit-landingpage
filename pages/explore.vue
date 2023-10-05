@@ -139,7 +139,7 @@
 		username: '',
 		popComms: [],
 		//supportedCommunities:['hive-181335', 'hive-193552', 'hive-163772', 'hive-174578' ,'hive-193084'],
-		defaultCommunities: [['hive-181335', '3Speak'], ['hive-193552', 'Actifit'], ['hive-163772', 'Pinmapple'] , ['hive-174578', 'OCD'],['hive-193084', 'dbuzz'], ['hive-167922', 'LeoFinance'], ['hive-13323','Splinterlands']],
+		defaultCommunities: [['hive-181335', '3Speak'], ['hive-193552', 'Actifit'], ['hive-163772', 'Pinmapple'] , ['hive-174578', 'OCD'],['hive-193084', 'dbuzz'], ['hive-167922', 'LeoFinance'], ['hive-13323','Splinterlands'], ['hive-147010', 'Liketu']],
 		selCommunities: [],
       }
     },
@@ -241,7 +241,7 @@
 	  async fetchUserData () {
 		console.log('fetchUserData')
 		if (typeof this.user != 'undefined' && this.user != null){	  
-		  
+		  console.log('user data available')
 		  if (!localStorage.getItem('std_login')){
 		  //if (!this.stdLogin){
 			  //update user info from blockchain
@@ -256,7 +256,7 @@
     },
     async mounted () {
 		// login
-		await this.$store.dispatch('steemconnect/login')
+		this.$store.dispatch('steemconnect/login')
 		this.fetchUserData();
 	  
 		//grab popular communities

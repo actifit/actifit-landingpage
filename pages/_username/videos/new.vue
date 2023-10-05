@@ -265,7 +265,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 		recordedVideoUrl: null, // URL of the recorded video
 		timeLeft: this.maxDuration,
 		/* end */
-		maxFileSize: 250 * 1000 * 1000, // max 250M
+		maxFileSize: 750 * 1000 * 1000, // max 250M
 		isRotating: false,
         runnerProc: -1, //interval to mark vid as published
 		title: '', // post title
