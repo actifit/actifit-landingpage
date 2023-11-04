@@ -28,18 +28,52 @@ Vue.prototype.$getTimeDifference = function(dateParam) {
   let remainingMonths = months % 12;
 
   if (mins < 60) {
-	return `${mins} min(s)`;
+	return `${mins} min(s) ago`;
   } else if (hours < 24) {
-	return `${hours} hour(s)`;
+	return `${hours} hour(s) ago`;
   } else if (days < 7) {
-	return `${days} day(s)`;
+	return `${days} day(s) ago`;
   } else if (weeks < 4) {
-	return `${weeks} week(s)`;
+	return `${weeks} week(s) ago`;
   } else if (months < 12) {
-	return `${months} month(s)`;
+	return `${months} month(s) ago`;
   } else {
-	return `${years} year(s)`;//`${years} years and ${remainingMonths} month(s)`;
+	return `${years} year(s) ago`;//`${years} years and ${remainingMonths} month(s)`;
   }
+}
+
+
+Vue.prototype.$getDaysDifference = function(firstDate, secondDate) {
+	
+  let localDate = new Date();
+  
+  const dateParam = new Date(Date.parse(firstDate));//Date(dateParam);
+  const currentDate = new Date(Date.parse(secondDate));
+  const difference = Math.abs(dateParam.getTime() - currentDate);// - localDate.getTimezoneOffset() * 60000);
+  
+  //let difference = utcTime - dateParam.getTime();//currentDate.getUTCTime() - dateParam.getTime();
+  let mins = Math.floor(difference / (1000 * 60 ));
+  let hours = Math.floor(difference / (1000 * 60 * 60));
+  let days = Math.floor(hours / 24);
+  /*let weeks = Math.floor(days / 7);
+  let months = Math.floor(weeks / 4);
+  let years = Math.floor(months / 12);
+  let remainingMonths = months % 12;*/
+  return days;
+
+  /*if (mins < 60) {
+	return `${mins} min(s) ago`;
+  } else if (hours < 24) {
+	return `${hours} hour(s) ago`;
+  } else if (days < 7) {
+	return `${days} day(s) ago`;
+  } else if (weeks < 4) {
+	return `${weeks} week(s) ago`;
+  } else if (months < 12) {
+	return `${months} month(s) ago`;
+  } else {
+	return `${years} year(s) ago`;//`${years} years and ${remainingMonths} month(s)`;
+  }*/
 }
 /**
        * Formats numbers with commas and dots.
@@ -235,7 +269,7 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup){
 	//add support for 3speak videos embedded within iframe
 	//let threespk_reg = /[.*](https?:\/\/3speak\.tv\/watch\?v=([\w-]+\/[\w-]+))/i;
 	//let threespk_reg = /(?:\[!\[\]\()?https?:\/\/3speak\.tv\/watch\?v=([\w-]+\/[\w-]+)(?:\)\])?/i;
-	let threespk_reg = /(?:\[.*\]\()?https?:\/\/3speak\.tv\/watch\?v=([\w-]+\/[\w-]+)(?:\))?/i;
+	let threespk_reg = /(?:\[.*\]\()?https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+)(?:\))?/i;
 	report_content = report_content.replace(threespk_reg,'<iframe width="640" height="360" src="//3speak.tv/embed?v=$1&autoplay=false"></iframe>');
 	//examples: 
 	//https://3speak.tv/watch?v=jongolson/vhtttbyf		//[![](https://ipfs-3speak.b-cdn.net/ipfs/bafkreiee4k3q5sax6stbqzty6yktbhmk4mi2opf6r7hckti3ypkjvigjhi/)](https://3speak.tv/watch?v=jongolson/vhtttbyf)
