@@ -60,7 +60,7 @@
 				</span>
 			</div>
 		</div>
-		<div v-if="this.tokenMetrics.length > 0 || this.tokensOfInterestBal.length > 0" class="wallet-container">
+		<div class="wallet-container" v-if="userTokensWallet >= 0">
 			<div class="row font-weight-bold token-entry thick-bottom head-title">
 				<div class="col-2 clickable" v-on:click="sortTokenData('symbol')" >Token 
 					<span >
@@ -336,7 +336,7 @@
 			</div>
 			
 			
-			<div>
+			<div v-if="this.tokenMetrics.length > 0 || this.tokensOfInterestBal.length > 0" >
 				<!--<h5 class="token-title" v-if="cur_bchain == 'STEEM'">{{ $t('Your_Token_Balance') }}</h5>
 				<h5 class="token-title" v-else>{{ $t('Your_HE_Token_Balance') }}<span v-if="cur_bchain=='BLURT'"><i class="fas fa-info-circle" v-on:click="notifySwitchChain()"></i></span></h5>-->
 				<div v-if="tokensOfInterestBal.length > 0 && renderToken(token)" class="token-entry row" v-for="(token, index) in tokensOfInterestBal" :key="index" :token="token">
@@ -495,7 +495,7 @@
 				
 			</div>
 			
-			
+			<div v-else><i class="fas fa-spin fa-spinner text-brand"></i></div>
 			
 			
 			
@@ -1737,7 +1737,7 @@
 		displayUser: '',
 		displayUserData: null,
 		profImgUrl: process.env.hiveImgUrl,
-		userTokensWallet: 0,
+		userTokensWallet: -1,
 	  }
 	},
     components: {
