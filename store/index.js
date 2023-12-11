@@ -12,6 +12,7 @@ const createStore = () => {
 	  userReportCount: 0, // logged-in user's report count
       transactions: [], // logged-in user's transactions
 	  referrals: [], //logged-in user's referrals
+	  proposals: [], //proposals
 	  userSettings: {}, //logged-in user's settings
 	  userRank: 0, // logged-in user's rank
 	  userRankObj: '', // full details about user's rank

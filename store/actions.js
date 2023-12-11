@@ -577,6 +577,34 @@ export default {
     })
   },
   
+  //fetch popular communities: top 20
+  fetchProposals({ state, commit }, params){
+	return new Promise(async (resolve, reject) => {
+		
+		let sOrder = params && params.sortOrder?params.sortOrder:'by_creator';//default sort by vote count unless specified otherwise
+		let soDir = params && params.sortDir?params.sortDir:'ascending';
+		let stats = params && params.stat?params.stat:'active';
+		let limit = params && params.limit?params.limit:1000;
+		let cstmParam = params && params.cstmparam?params.cstmparam:'';
+		let chainLnk = hive;
+	
+		//https://developers.hive.io/apidefinitions/#condenser_api.list_proposals
+		
+		//by_creator
+		let outc = await chainLnk.api.callAsync('condenser_api.list_proposals',[[cstmParam], limit, sOrder, soDir, stats]);
+		//let outc = chainLnk.api.call('bridge.list_pop_communities', callQuery, (err, comms) => {
+			if (outc){
+				console.log('fetch proposals');
+				console.log(outc)
+				commit('setProposals', outc)
+				resolve(outc);
+			}else{
+				 reject('error');
+			}
+		//});
+	});
+  },
+  
   fetchUserVideos ({ state, commit, dispatch }, username) {
     // fetches initial videos or more videos if invoked again
     return new Promise((resolve, reject) => {

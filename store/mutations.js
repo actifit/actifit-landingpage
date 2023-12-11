@@ -8,6 +8,9 @@ export default {
   setTransactions (state, transactions) {
     state.transactions = transactions
   },
+  setProposals (state, proposals){
+	  state.proposals = proposals
+  },
   setReferrals (state, referrals) {
     state.referrals = referrals
   },

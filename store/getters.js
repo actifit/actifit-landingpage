@@ -8,6 +8,9 @@ export default {
   transactions (state) {
     return state.transactions
   },
+  proposals (state){
+	return state.proposals  
+  },
   referrals (state) {
     return state.referrals
   },
