@@ -340,7 +340,7 @@ module.exports = {
   */
   plugins: [
     '~/plugins/vue-steemconnect',
-	{ src: '~plugins/ga.js', ssr: false },
+	//{ src: '~plugins/ga.js', ssr: false },
     { src: '~plugins/vue-carousel', ssr: false },
     { src: '~plugins/vue-notification', ssr: false },
     { src: '~plugins/vue-simplemde', ssr: false },
@@ -356,6 +356,7 @@ module.exports = {
   */
   modules: [
 	'nuxt-helmet',
+	'@nuxtjs/gtm',
 	//['@nuxtjs/axios'],
     ['nuxt-i18n', I18N],
 	['@nuxtjs/google-adsense', {
@@ -363,6 +364,10 @@ module.exports = {
 	  pageLevelAds: true
     }],
   ],
+  
+  gtm: {
+    id: 'G-HPZKPFM9GK', // Used as fallback if no runtime config is provided
+  },
   
   "browserslist": [
     "defaults",
