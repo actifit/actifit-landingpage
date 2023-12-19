@@ -1,7 +1,7 @@
 <template>
   <div :class="outserSmallScreenClasses" class="position-fixed text-brand mx-auto w-100 acti-notify-comp" >
 	<div :class="smallScreenClasses" class="text-center mx-auto acti-notify-comp-inner border-2 rounded">
-	  <div class="announce-title">Actifit Growth & Development Plans 2023 - Vote For Our DHF Proposal!<!-- CryptoFitChallenge 2022 is ON - Final Week In Progress -->
+	  <div class="announce-title">Actifit Growth & Development Plans 2024 - Vote For Our DHF Proposal!<!-- CryptoFitChallenge 2022 is ON - Final Week In Progress -->
 		<a href="" @click.prevent="adjustVisibility" class="expand-comp-notice nohoverunderline">
 			<span v-if="showCompDetails" title="minimize">🗕</span><!-- &#9651; -->
 			<span v-else title="maximize">🗖</span><!-- &#9661; -->
@@ -12,13 +12,13 @@
 			<!--<iframe v-if="screenWidth < 768" src="http://www.youtube.com/embed/kS6AXH1kY74" width="320" height="180" frameborder="0" class="mx-auto" allowfullscreen></iframe>
 			<iframe v-else src="https://www.youtube.com/embed/kS6AXH1kY74" width="640" height="360" frameborder="0" class="mx-auto" allowfullscreen></iframe>-->
 			<!--<iframe width="640" height="360" src="https://www.youtube.com/embed/kS6AXH1kY74"></iframe>-->
-			<img class="announce-img" src="/img/dhf_announcement_2.jpeg" >
+			<img class="announce-img" src="/img/dhf_image_2.png" >
 		  </div>
 		  <div class="p-2">
 			  <!--<a href="https://actifit.io/@actifit/we-have-winners-public-token-sale-kicks-off-today-t-7-hours" class="btn btn-brand m-2" target="_blank">Event Details</a>
 			  <a href="https://www.youtube.com/watch?v=Vc6rpDU99nk" class="btn btn-brand m-2 acti-shadow" target="_blank">Video Announcement</a> -->
-			  <a href="https://actifit.io/@actifit/proposal-for-the-support-of-actifit-hives-flagship-move2earn-dapp" target="_blank" class="btn btn-brand acti-shadow">Announcement</a>
-			  <a href="https://peakd.com/proposals/250" target="_blank" class="btn btn-brand acti-shadow">Vote Now!</a>
+			  <a href="https://actifit.io/@actifit/actifit-proposal-year-2--growing-hive-via-collabs-development-infrastructure--onboarding" target="_blank" class="btn btn-brand acti-shadow">Announcement</a>
+			  <a href="https://peakd.com/proposals/292" target="_blank" class="btn btn-brand acti-shadow">Vote Now!</a>
 			  <!--<a href="https://digifinex.zendesk.com/hc/en-us/articles/6871357968793" class="btn btn-brand m-2 back-red" target="_blank">Participation Rules</a>-->
 		  </div>
 		  <div style="display:none"><span class="end-string">Event ends in </span><Countdown v-if="countDownReady" deadline="August 5, 2022 23:59 GMT"></Countdown><i v-else class="fas fa-spin fa-spinner text-brand"></i></div>
@@ -117,7 +117,7 @@
 	.announce-img{
 	  max-height: 65vh;
 	  margin: auto;
-	  max-width: 100%;
+	  max-width: 95%;
 	}
 	
 	@media only screen and (max-width: 700px) {
