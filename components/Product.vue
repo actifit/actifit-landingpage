@@ -266,9 +266,10 @@
 				  <a class="btn btn-brand btn-lg w-100 book-button" @click.prevent="requestFundsPass = true">{{ $t('Download_again') }}</a>
 				</div>
 				<div v-if="this.requestFundsPass && !this.downloadAgainReady" class="pt-2">
-				  <label for="funds-pass" class="w-50">{{ $t('Funds_Password') }}</label>
-				  <input type="text" id="funds-pass" name="funds-pass" ref="funds-pass" class="form-control-lg w-50">
-				  <a href="/wallet?action=set_funds_pass">{{ $t('No_funds_pass_wallet') }}</a>
+				  <label for="funds-pass" class="w-100">{{ $t('Funds_Password') }}</label>
+				  <input type="text" id="funds-pass" name="funds-pass" ref="funds-pass" class="form-control-lg w-100">
+				  <a href="/wallet?action=set_funds_pass">{{ $t('No_funds_pass_wallet') }}&nbsp;
+				  <i class="fas fa-solid fa-wallet"></i></a>
 				  <div class="pt-2">
 				    <a class="btn btn-brand btn-lg w-100 book-button" @click.prevent="downloadAgain()">{{ $t('Proceed') }}</a>
 				  </div>
@@ -1578,16 +1579,17 @@
 							+ bcastRes.ref_block_num + '/'
 							+ bcastRes.id + '/'
 							+ cur_bchain);
-		}
-		if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){			
-			
-			let op_json = JSON.stringify(operation)
-			url = new URL( process.env.actiAppUrl + 'buyGadgetKeychain/'
-							+ this.user.account.name + '/'
-							+ this.product._id + '/'
-							//+ bcastRes.ref_block_num + '/'
-							+ bcastRes.id + '/'
-							+ cur_bchain + '?operation='+op_json);
+		
+			if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){			
+				
+				let op_json = JSON.stringify(operation)
+				url = new URL( process.env.actiAppUrl + 'buyGadgetKeychain/'
+								+ this.user.account.name + '/'
+								+ this.product._id + '/'
+								//+ bcastRes.ref_block_num + '/'
+								+ bcastRes.id + '/'
+								+ cur_bchain + '?operation='+op_json);
+			}
 		}
 		//console.log(url);
 		//connect with our service to process buy order
