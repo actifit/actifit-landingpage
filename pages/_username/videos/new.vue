@@ -1350,7 +1350,11 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 					this.selVid = res.data;
 					this.newVid = this.selVid;
 					this.newVidSubmitted = true;
-					
+					let vidPermLink = this.selVid.permlink;
+					//register this video for monitoring to update user about its status
+					let url = new URL(process.env.actiAppUrl+"userAddedVid/"+
+						this.user.account.name+"/"+vidPermLink+"/new");
+					let subres = await fetch(url);
 					//show success message and wait for video ready
 					//refresh vid list
 					this.getAllVideoStatuses();
