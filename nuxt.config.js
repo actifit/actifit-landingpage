@@ -55,7 +55,7 @@ module.exports = {
 	steemImgUrl: 'https://steemitimages.com',
 	hiveImgUrl: 'https://images.hive.blog',
 	steemApiNode: 'https://api.steemit.com/',
-	hiveApiNode: 'https://api.hive.blog',
+	hiveApiNode: 'https://api.deathwing.me',
 	blurtApiNode: 'https://blurt-rpc.saboin.com', //'http://164.68.116.86/', //'https://blurt-rpc.saboin.com/', //'https://blurtrpc.actifit.io',
 	hiveStateApiNode: 'https://api.deathwing.me',
 	hiveTestNode: 'https://testnet.openhive.network', //'https://api.fake.openhive.network',
