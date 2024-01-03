@@ -12,7 +12,7 @@
 			</div>
 			<div class="row">
 				<label for="passfetchdata" class="font-weight-bold col-3">{{ $t('Your_pass') }} {{ cur_bchain}} <img :src="'/img/'+cur_bchain+'.png'" style="max-height: 50px;"></label>
-				<input class="form-control form-control-lg mb-2 col-7" ref="passfetchdata" id="passfetchdata" />
+				<input type="password" class="form-control form-control-lg mb-2 col-7" ref="passfetchdata" id="passfetchdata" />
 			</div>
 			<vue-recaptcha ref="recaptcha" @verify="onVerifyCaptcha" @render="captchaReady=true" @expired="onExpiredCaptcha" :loadRecaptchaScript="true" sitekey="6LdpcoMUAAAAAPGTqlvhKEK6Ayw5NqLDZz5Sjudq" v-if="!user">
 				</vue-recaptcha>
@@ -26,26 +26,26 @@
 			  <div class="row">
 				  <label for="ppostkey" class="font-weight-bold col-3">{{ $t('Private_posting_key') }}</label>
 				  <input class="form-control form-control-lg mb-2 col-7" ref="ppostkey" id="ppostkey" :value="privatePostKey" readonly/>
-				  <button v-on:click="copyContent" data-targetEl="ppostkey" class="btn btn-brand btn-lg w-20 mb-2 ml-1">{{ $t('Copy') }}</button><br/><br/>
+				  <button v-on:click="copyContent" data-targetEl="ppostkey" class="btn btn-brand btn-lg w-20 mb-2 ml-1 mr-1">{{ $t('Copy') }}</button><canvas id="postkey-qr" ref="postkey-qr" /><br/><br/>
 			  </div>
 			  <div class="font-italic mb-2">{{ $t('Active_key_desc') }}</div>
 			  <div class="row">
 				  <label for="pactkey" class="font-weight-bold col-3">{{ $t('Private_active_key') }}</label>
 				  <input class="form-control form-control-lg mb-2 col-7" ref="pactkey" id="pactkey" :value="privateActKey" readonly/>
-				  <button v-on:click="copyContent" data-targetEl="pactkey" class="btn btn-brand btn-lg w-20  mb-2 ml-1">{{ $t('Copy') }}</button><br/><br/>
+				  <button v-on:click="copyContent" data-targetEl="pactkey" class="btn btn-brand btn-lg w-20  mb-2 ml-1 mr-1">{{ $t('Copy') }}</button><canvas id="actkey-qr" ref="actkey-qr" /><br/><br/>
 			  </div>
 			  <div class="font-italic mb-2">{{ $t('Owner_key_desc') }}</div>
 			  <div class="row">
 				 
 				  <label for="pownkey" class="font-weight-bold col-3">{{ $t('Private_owner_key') }}</label>
 				  <input class="form-control form-control-lg mb-2 col-7" ref="pownkey" id="pownkey" :value="privateOwnKey" readonly/>
-				  <button v-on:click="copyContent" data-targetEl="pownkey" class="btn btn-brand btn-lg w-20  mb-2 ml-1">{{ $t('Copy') }}</button><br/><br/>
+				  <button v-on:click="copyContent" data-targetEl="pownkey" class="btn btn-brand btn-lg w-20  mb-2 ml-1 mr-1">{{ $t('Copy') }}</button><canvas id="ownkey-qr" ref="ownkey-qr" /><br/><br/>
 			  </div>
 			  <div class="font-italic mb-2">{{ $t('Memo_key_desc') }}</div>
 			  <div class="row">
 				  <label for="pmemokey" class="font-weight-bold col-3">{{ $t('Private_memo_key') }}</label>
 				  <input class="form-control form-control-lg mb-2 col-7" ref="pmemokey" id="pmemokey" :value="privateMemoKey" readonly/>
-				  <button v-on:click="copyContent" data-targetEl="pmemokey" class="btn btn-brand btn-lg w-20  mb-2 ml-1">{{ $t('Copy') }}</button><br/><br/>
+				  <button v-on:click="copyContent" data-targetEl="pmemokey" class="btn btn-brand btn-lg w-20  mb-2 ml-1 mr-1">{{ $t('Copy') }}</button><canvas id="memokey-qr" ref="memokey-qr" /><br/><br/>
 			  </div>
 			</div>
 			
@@ -200,6 +200,8 @@
   import blurt from '@blurtfoundation/blurtjs'
   
   import VueRecaptcha from 'vue-recaptcha';
+  
+  import QRious from 'qrious';
   
   export default {
 	components: {
@@ -396,6 +398,24 @@
 		//console.log(res);
 		return res;
 	  },
+	  async assignQRCode(qrElement, keyval){
+		//console.log(qrElement);
+		//console.log(keyval);
+		const QR = new QRious({
+							element: qrElement,
+							background: 'white',
+							backgroundAlpha: 0.8,
+							foreground: 'black',
+							size: 80,
+						});
+		QR.value = keyval;
+	  },
+	  async genQRCodes(privateKeys){
+		this.assignQRCode(this.$refs['postkey-qr'], privateKeys.posting);
+		this.assignQRCode(this.$refs['actkey-qr'], privateKeys.active);
+		this.assignQRCode(this.$refs['ownkey-qr'], privateKeys.owner);
+		this.assignQRCode(this.$refs['memokey-qr'], privateKeys.memo);
+	  },
 	  async fetchKeys () {
 		this.captcha_invalid = '';
 		if (!this.user && !this.captchaValid){
@@ -425,6 +445,9 @@
 			this.privateActKey = privateKeys.active;
 			this.privateOwnKey = privateKeys.owner;
 			this.privateMemoKey = privateKeys.memo;
+			
+			//also generate proper QR codes
+			this.genQRCodes(privateKeys);
 		}else{
 			if (this.$refs["username"].value == ''){// || ! await this.verifyPass(this.$refs["passfetchdata"].value, auths)
 			  this.errorFetch = this.$t('Error_provide_password');
@@ -434,7 +457,7 @@
 			}
 			//grab account info
 			let acctInfo = await chainLnk.api.getAccountsAsync([this.$refs["username"].value]);
-			console.log(acctInfo[0]);
+			//console.log(acctInfo[0]);
 			if (Array.isArray(acctInfo) && acctInfo.length > 0){
 				let auths = {
 					posting: acctInfo[0].posting.key_auths,
@@ -453,6 +476,9 @@
 				this.privateActKey = privateKeys.active;
 				this.privateOwnKey = privateKeys.owner;
 				this.privateMemoKey = privateKeys.memo;
+				
+				//also generate proper QR codes
+				this.genQRCodes(privateKeys);
 			}else{
 				this.errorFetch = this.$t('Error_provide_password');
 				this.fetchingPass = false;
@@ -727,5 +753,11 @@
 .acti-headr{
 	background: radial-gradient(transparent, red);
 	color: white;
+}
+.form-control{
+	max-height: 50px;
+}
+.btn{
+	max-height: 50px;
 }
 </style>
