@@ -940,6 +940,19 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 		console.log('beneficiaries')
 		console.log(benef)
 		
+		if (benef.length > 4){
+			//adding condition to prevent overassigning beneficiaries due to issue with video encoding on 3speak end with more than 5 beneficiaries
+			//post requires a title
+			this.$notify({
+				  group: 'error',
+				  text: this.$t('benefic_count_exceeded'),
+				  position: 'top center'
+				})
+			this.loading = false
+			return;
+		
+		}
+		
 		//return;
 		//setup proper video metadata for 3speak
 		let vidJsonMeta = {

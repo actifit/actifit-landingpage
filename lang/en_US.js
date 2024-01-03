@@ -978,6 +978,7 @@ module.exports = {
   need_one_tag_min: 'You need to have at least 1 tag in your post',
   no_empty_post: 'Your post content cannot be empty',
   post_requires_title: 'Please provide a title for your post',
+  benefic_count_exceeded: 'Please decrease the number of beneficiaries for your video',
   Actifit_reports: 'Actifit Reports',
   Hive_blog: 'Hive Blog',
   Threespeak_videos: '3Speak Videos',
