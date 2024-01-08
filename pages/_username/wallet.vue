@@ -7567,7 +7567,7 @@
 	  }).catch(e => console.log(e))
 	  
 	  //grab HIVE price
-	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=hive&vs_currencies=usd').then(
+	  fetch(process.env.actiAppUrl+'hivePrice').then(
 		res => {res.json().then(json => this.setHivePrice (json.hive.usd)).catch(e => console.log(e))
 	  }).catch(e => console.log(e))
 	  
