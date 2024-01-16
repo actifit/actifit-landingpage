@@ -34,7 +34,7 @@
 					<input type="checkbox" id="steem-account" v-model="steem_account" v-on:change="validateUserName">
 					<label for="checkbox" class="font-weight-normal">{{ $t('steem_account_text') }}</label>
 				</div>
-				<div class="pl-2 mb-2">
+				<div class="pl-2 mb-2" v-if="blurt_active">
 					<input type="checkbox" id="blurt-account" v-model="blurt_account" v-on:change="validateUserName">
 					<label for="checkbox" class="font-weight-normal">{{ $t('blurt_account_text') }}</label>
 				</div>
@@ -211,6 +211,7 @@
 		hive_account: true,
 		steem_account: false,
 		blurt_account: true,
+		blurt_active: true,
 		reg: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/
 	  }
 	},
@@ -233,7 +234,11 @@
 	  
 	  blurt.api.setOptions({ url: process.env.blurtApiNode });
 	  
-	  
+	  //check if we need to show blurt signup option
+	  if (this.$route.query.chain && this.$route.query.chain == 'hive'){
+		this.blurt_active = false;
+		this.blurt_account = false;
+	  }
 
 	  //if a promo code is available, let's set it accordingly
 	  if (this.$route.query.promo){
