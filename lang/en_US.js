@@ -1073,6 +1073,7 @@ module.exports = {
   Hive_official: 'Hive Official',
   Hive_block_explorer: 'Hive Block Explorer',
   Explore: 'Explore',
+  need_hive_account: 'You need to select at least Hive chain above.',
   Hive_proposals: 'Hive Proposals',
   filter_content_by_pop_community: 'Explore Hive content by popular communities',
   posh_desc_profile: 'Earn <u><a href="https://hiveposh.com/">POSH Tokens</a></u> by sharing your posts on twitter',

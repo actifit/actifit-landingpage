@@ -525,6 +525,12 @@
 		  return;
 		}
 		
+		if (!this.hive_account && !this.blurt_account){
+			this.error_proceeding = true;
+			this.error_msg = this.$t('need_hive_account');
+			return;
+		}
+		
 		//verify captcha 
 		//check captcha V3
 		// Execute reCAPTCHA with action "login".
