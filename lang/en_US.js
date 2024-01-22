@@ -1073,6 +1073,8 @@ module.exports = {
   Hive_official: 'Hive Official',
   Hive_block_explorer: 'Hive Block Explorer',
   Explore: 'Explore',
+  main_chain: 'Primary Chain',
+  secondary_chains:'Secondary Chains',
   need_hive_account: 'You need to select at least Hive chain above.',
   Hive_proposals: 'Hive Proposals',
   filter_content_by_pop_community: 'Explore Hive content by popular communities',

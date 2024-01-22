@@ -385,7 +385,7 @@
     </section>-->
 
 	<!-- partners -->
-	<section id="partners" class="py-5 bold-content">
+	<!--<section id="partners" class="py-5 bold-content">
       <div class="container">
         <h1 class="text-center pb-5">
           <i class="far fa-handshake"></i><br>
@@ -406,12 +406,7 @@
             <a rel="nofollow noopener" href="https://actifit.io/@beachready" target="_blank">Beach Ready</a>
           </div>
 		  
-		  <!--<div class="col-6 col-sm-4 col-md-3 text-center mb-4">
-            <a rel="nofollow noopener" href="https://coinpedia.org/" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url(./img/partners/coinpedia_logo_2.png);'"></div>
-            </a>
-            <a rel="nofollow noopener" href="https://coinpedia.org/" target="_blank">CoinPedia</a>
-          </div>-->
+		 
 		  
 		  <div class="col-6 col-sm-4 col-md-3 text-center mb-4">
             <a rel="nofollow noopener" href="https://actifit.io/@adventureready" target="_blank">
@@ -452,6 +447,8 @@
       
     </section>
 	
+	-->
+	
 	<section id="infrastructure" class="py-5">
 		<div class="container">
 			<h1 class="text-center pb-5">
@@ -459,16 +456,19 @@
 				{{ $t('Infrastructure') }}
 			</h1>
 			<div class="row">
+				<div class="col-12 text-center mb-4" :title="$t('main_chain')">
+				<img src="/img/HIVE.png" style="max-height: 150px;"><br/><span class="font-weight-bold">{{$t('HIVE')}}</span>
+			  </div>
+			</div>
+			<div class="row" :title="$t('secondary_chains')">
 			  <!--<div class="col-6 col-sm-4 col-md-3 text-center mb-4">
 				<img src="/img/STEEM.png" style="max-height: 100px;"><br/><span class="font-weight-bold">{{$t('STEEM')}}</span>
 			  </div>-->
-			  <div class="col-6 col-sm-4 col-md-4 text-center mb-4">
+			  <div class="col-6 text-center mb-4">
 				<img src="/img/BLURT.png" style="max-height: 100px;"><br/><span class="font-weight-bold">{{$t('BLURT')}}</span>
 			  </div>
-			  <div class="col-6 col-sm-4 col-md-4 text-center mb-4">
-				<img src="/img/HIVE.png" style="max-height: 100px;"><br/><span class="font-weight-bold">{{$t('HIVE')}}</span>
-			  </div>
-			  <div class="col-6 col-sm-4 col-md-4 text-center mb-4">
+			 
+			  <div class="col-6 text-center mb-4">
 				<img src="/img/BNB_CHAIN.webp" style="max-height: 100px;"><br/><span class="font-weight-bold">{{$t('BNB CHAIN')}}</span>
 			  </div>
 			</div>
