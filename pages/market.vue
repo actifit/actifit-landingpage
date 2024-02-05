@@ -79,6 +79,8 @@
 	  	  
 	  <!-- show listing of special event products -->
 	  
+	  
+	  <!--
 	  <h5 class="text-center pt-3 market-sub text-brand">{{ $t('special_christmas_event') }}</h5>
 	  
 	  <div class="row" v-if="prodList.length">
@@ -89,7 +91,7 @@
       </div>
 	  <br/>
 	  
-	  
+	  -->
 	  
 	  
       <!-- show listing of products -->
