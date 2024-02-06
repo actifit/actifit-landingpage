@@ -33,7 +33,7 @@ You must not transmit any worms or viruses or any code of a destructive nature.
 You may use only one single unique account in using our Actifit Service. The use and/or engagement via multiple accounts by the same real user is considered abusive behaviour and subjects the user to potential ban from access to our Service.
 Actifit reserves the right to ban any user to its own discretion based on any suspicion, doubt, or proof of potential abuse, or for any reason as decided by the Actifit team.
 
-If you use the account deletion functionality, given that your account data is stored the blockchain, Actifit is not able to delete such data. We will restrict login to your account via our platform. Your offchain data may be preserved for some time to account for potential of account restoration. Your account may still be accessible via other front ends on hive blockchain and related posts/content and other data cannot be removed.
+If you use the account deletion functionality, given that your account data is stored the blockchain, Actifit is not able to delete such data. We will restrict login to your account via our platform. Your offchain data may be preserved for some time to account for potential of account restoration upon your request. Your account may still be accessible via other front ends on hive blockchain and related posts/content and other data cannot be removed.
 
 A breach or violation of any of the Terms will result in an immediate termination of your Services.
 
