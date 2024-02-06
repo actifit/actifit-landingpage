@@ -127,6 +127,11 @@
 		</div>
 		<div class=" pb-3">
 			<div class="text-center p-2">
+				<button v-on:click="deleteAccount" class="btn btn-brand btn-lg">{{ $t('Delete_account') }}<i class="fas fa-spin fa-spinner text-white" v-if="delete_progress" ></i></button>
+			</div>
+		</div>
+		<div class=" pb-3">
+			<div class="text-center p-2">
 				<button v-on:click="saveSettings" class="btn btn-brand btn-lg">{{ $t('Save') }}<i class="fas fa-spin fa-spinner text-white" v-if="save_progress"></i></button>
 			</div>
 		</div>
@@ -181,6 +186,7 @@
 			target_bchain: 'BOTH',
 			notif_active: false,
 			save_progress: false,
+			delete_progress: false,
 			user_settings: [],
 			notif_types: [],
 			screenWidth: 1200,
@@ -583,6 +589,90 @@
 				return {success: true, trx: outcome.trx};
 			}
 		}
+	  },
+	  async deleteAccount(){
+		let proceed = confirm(this.$t('Delete_confirmation'));
+		if (!proceed){
+			return;
+		}
+		this.delete_progress = true;
+		if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain)||
+				(localStorage.getItem('acti_login_method') == 'hiveauth')){
+				//in case of keychain login, broadcast to chain
+				//broadcast the transaction to Steem BC
+				let cstm_params = {
+					required_auths: [],
+					required_posting_auths: [this.user.account.name],
+					id: 'actifit-delete-acct',
+					json: JSON.stringify(this.subset)
+				  };
+				
+				let res = await this.processTrxFunc('custom_json', cstm_params);
+				console.log('post call');
+				console.log(res);
+				
+				if (res.success){
+					//console.log(res.txID);
+					let url = new URL(process.env.actiAppUrl + 'deleteAccountKeychain/'+res.txID+'/?user=' + this.user.account.name+'&approach=keychain&platform=web&operation='+JSON.stringify([['custom_json',cstm_params]]));
+					
+					let res2 = await fetch(url);
+					let outcome = await res2.json();
+					console.log(outcome);
+					if (outcome.success){
+						this.$notify({
+						  group: 'success',
+						  text: this.$t('account_deleted_successfully'),
+						  position: 'top center'
+						})
+						this.$store.dispatch('steemconnect/logout');
+					}else{
+						this.$notify({
+						  group: 'error',
+						  text: this.$t('error'),
+						  position: 'top center'
+						})
+					}
+				}else{
+					this.$notify({
+					  group: 'error',
+					  text: this.$t('error'),
+					  position: 'top center'
+					})
+				}
+				this.delete_progress = false;
+			}else{
+		
+				let url = new URL(process.env.actiAppUrl + 'deleteAccount/?user=' + this.user.account.name+'&approach=keylogin&platform=web');
+					//console.log(url);
+
+				let accToken = localStorage.getItem('access_token')
+				
+				let reqHeads = new Headers({
+				  'Content-Type': 'application/json',
+				  'x-acti-token': 'Bearer ' + accToken,
+				});
+				let res = await fetch(url, {
+					headers: reqHeads
+				});
+				let outcome = await res.json();
+				//console.log(outcome);
+				
+				if (outcome.success){
+					this.$notify({
+					  group: 'success',
+					  text: this.$t('account_deleted_successfully'),
+					  position: 'top center'
+					})
+					this.$store.dispatch('steemconnect/logout');
+				}else{
+					this.$notify({
+					  group: 'error',
+					  text: this.$t('error'),
+					  position: 'top center'
+					})
+				}
+				this.delete_progress = false;
+			}
 	  },
 	  async saveSettings () {
 		this.save_progress = true;
