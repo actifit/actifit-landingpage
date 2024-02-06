@@ -125,14 +125,17 @@
 			  
 			  </div>
 		</div>
+		<h5 class="p-3 acti-headr">{{ $t('Account_deletion') }}</h5>
 		<div class=" pb-3">
-			<div class="text-center p-2">
+			<div class="p-2">
+				<div>{{$t('data_deletion_notice')}}</div>
 				<button v-on:click="deleteAccount" class="btn btn-brand btn-lg">{{ $t('Delete_account') }}<i class="fas fa-spin fa-spinner text-white" v-if="delete_progress" ></i></button>
+				
 			</div>
 		</div>
 		<div class=" pb-3">
 			<div class="text-center p-2">
-				<button v-on:click="saveSettings" class="btn btn-brand btn-lg">{{ $t('Save') }}<i class="fas fa-spin fa-spinner text-white" v-if="save_progress"></i></button>
+				<button v-on:click="saveSettings" class="btn btn-brand btn-lg">{{ $t('Save_settings') }}<i class="fas fa-spin fa-spinner text-white" v-if="save_progress"></i></button>
 			</div>
 		</div>
 	</div>
