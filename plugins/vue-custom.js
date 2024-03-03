@@ -9,6 +9,8 @@ import sanitize from 'sanitize-html'
 
 import moment from "moment";
 
+import Lodash from 'lodash';
+
 //global functions
 Vue.prototype.$getTimeDifference = function(dateParam) {
 	
@@ -372,4 +374,17 @@ Vue.prototype.$fetchPostImage = function (metaData){
 
 Vue.prototype.$getCommunityLogo = function (communityName){
 	return 'https://images.hive.blog/u/'+communityName+'/avatar';
+};
+
+Vue.prototype.$findCardCountByRarity = async function (userCards, rarityParam){
+	let match = {rarity: rarityParam}
+	//using filter to find all matches
+	let matchCount = _.filter(userCards, match);
+	if (matchCount != null && matchCount.length > 0){
+		console.log('cards with rarity '+ rarityParam + ':'+matchCount.length)
+		return matchCount.length;
+	}else{
+		console.log('zero matches for rarity '+rarityParam);
+		return 0;
+	}
 };

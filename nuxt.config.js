@@ -74,6 +74,8 @@ module.exports = {
 	threeSpeakUploadInfo: 'https://studio.3speak.tv/mobile/api/upload_info',
 	threeSpeakUserVideoList: 'https://studio.3speak.tv/mobile/api/my-videos',
 	threeSpeakCDN: 'https://ipfs-3speak.b-cdn.net/ipfs',
+	splinter_api_url_user_collections: "https://api.splinterlands.com/cards/collection/_USERNAME_",
+	splinter_api_all_cards: "https://api.splinterlands.com/cards/get_details",
 	hiveEngineScotParam: '?hive=1',
 	minSignupUSDCost: 2,
 	minAfitBuyEarnTicket: 1000,

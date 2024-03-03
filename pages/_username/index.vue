@@ -208,6 +208,30 @@
 					</a>&nbsp;
 					<a :href="displayUser+'/blog'" class="btn btn-brand border m-2">{{ $t('View_blog') }}</a>
 				</div>
+				
+				
+				<!-- display splinerlands data -->
+				<div class="info-box-orange mb-2 col-md-12 cntnr">
+					<i class="fa-solid fa-gamepad mr-2"></i>{{$t('Splinterlands')}}<img src="https://d36mxiodymuqjm.cloudfront.net/website/icons/img_icon_splinterlands.svg" class="mr-2 user-menu-container" :alt="$t('Splinterlands')" :title="$t('Splinterlands')">
+					<div v-if="splinterRarities!=null && splinterRarities.length >0">
+						<div>{{$t('Common')}}: {{splinterRarities[1]}} {{$t('Cards')}} 
+							<span v-if="parseInt(splinterRarities[1]) > 10"><i class="fas fa-check text-success"></i>{{$t('splinter_extra_rewards_common')}}</span>
+						</div>
+						<div>{{$t('Rare')}}: {{splinterRarities[2]}} {{$t('Cards')}}
+							<span v-if="parseInt(splinterRarities[2]) > 10"><i class="fas fa-check text-success"></i>{{$t('splinter_extra_rewards_rare')}}</span>
+						</div>
+						<div>{{$t('Epic')}}: {{splinterRarities[3]}} {{$t('Cards')}}
+							<span v-if="parseInt(splinterRarities[3]) > 10"><i class="fas fa-check text-success"></i>{{$t('splinter_extra_rewards_epic')}}</span>						
+						</div>
+						<div>{{$t('Legendary')}}: {{splinterRarities[4]}} {{$t('Cards')}}
+							<span v-if="parseInt(splinterRarities[4]) > 10"><i class="fas fa-check text-success"></i>{{$t('splinter_extra_rewards_legendary')}}</span>
+						</div>
+					</div>
+					<a href="https://splinterlands.com/" class="btn btn-brand border mt-2" >
+						{{ $t('Play_splinterlands') }}
+					</a>
+				</div>
+				
 				<!--  {{ numberFormat(video_count_3s, 0) }} -->
 				<div class="info-box-orange mb-2 col-md-12 cntnr">
 					<a :href="'/' + displayUser+'/videos'" ><i class="fas fa-solid fa-video mr-2"></i>{{ numberFormat(video_count_3s, 0) }} {{ $t('Videos_3speak') }}
@@ -415,6 +439,8 @@
   //const ssc = new SSC(process.env.steemEngineRpc);
   
   const hsc = new SSC(process.env.hiveEngineRpc);
+  
+  import Lodash from 'lodash';
 
   export default {
 	head () {
@@ -515,6 +541,9 @@
 			showAfitTipInfo: false,
 			poshVerified: false,
 			poshUserData: '',
+			splinterCards: [],
+			userSplinterCards: [],
+			splinterRarities: [],
 		}
 	},
 	watch: {
@@ -1627,6 +1656,41 @@
 		if (json && json.count){
 			this.video_count_3s = json.count;
 		}
+	  },
+	  async setSplinterCards(json){
+		console.log('splintercards');
+		
+		console.log(json);
+		this.splinterCards = json;
+		//grab user's splinterlands collections
+		fetch(process.env.splinter_api_url_user_collections.replace('_USERNAME_',this.displayUser)).then(
+			res => {res.json().then(json => this.setUserSplinterCards(json))}).catch(e => reject(e))
+			
+	  
+	  },
+	  async setUserSplinterCards(json){
+		console.log('user cards');
+		console.log(json);
+		if (json && json.player == this.displayUser && json.cards.length > 0){
+			this.userSplinterCards = json.cards;
+			//match - join properties
+			for (let i=0;i<this.userSplinterCards.length;i++){
+				//prepare entry
+				let ent = this.userSplinterCards[i];
+				let matchCriteria = {id:ent.card_detail_id};
+				let matchEntry = _.find(this.splinterCards, matchCriteria);
+				//console.log(matchEntry);
+				ent.rarity = matchEntry.rarity;
+				ent.name = matchEntry.name;
+				ent.color = matchEntry.color;
+				ent.type = matchEntry.type;
+				ent.id = matchEntry.card_detail_id;
+			}
+			//also calculate rarities
+			for (let i=1;i<5;i++){
+				this.splinterRarities[i] = await this.$findCardCountByRarity(this.userSplinterCards, i);
+			}
+		}
 	  }
 	},
 	async mounted () {
@@ -1711,6 +1775,12 @@
 		  //grab user video count
 		  fetch(process.env.threeSpeakApiVidCount.replace('_USERNAME_',this.displayUser)).then(
 			res => {res.json().then(json => this.set3SVideoCount(json))}).catch(e => reject(e))
+		  
+		  
+		  //grab splinterlands cards
+		  fetch(process.env.splinter_api_all_cards).then(
+			res => {res.json().then(json => this.setSplinterCards(json))}).catch(e => reject(e))
+			
 		  
 		 	console.log('mounted');
 		  let bal;
