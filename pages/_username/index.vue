@@ -213,6 +213,7 @@
 				<!-- display splinerlands data -->
 				<div class="info-box-orange mb-2 col-md-12 cntnr">
 					<i class="fa-solid fa-gamepad mr-2"></i>{{$t('Splinterlands')}}<img src="https://d36mxiodymuqjm.cloudfront.net/website/icons/img_icon_splinterlands.svg" class="mr-2 user-menu-container" :alt="$t('Splinterlands')" :title="$t('Splinterlands')">
+					<a href="#" data-toggle="modal" data-target="#notifyModal"><i class="fas fa-info-circle" :title="$t('view_details')"></i></a>
 					<div v-if="splinterRarities!=null && splinterRarities.length >0">
 						<div>{{$t('Common')}}: {{splinterRarities[1]}} {{$t('Cards')}} 
 							<span v-if="parseInt(splinterRarities[1]) > 10"><i class="fas fa-check text-success"></i>{{$t('splinter_extra_rewards_common')}}</span>
@@ -402,6 +403,8 @@
 	
 	<ActivityChartModal :userActivity="userActivity"	/>
 	
+	<NotifyModal :modalTitle="$t('Actifit_Info')" :modalText="$t('splinterlands_extra_rewards_desc')"/>
+	
 	<Footer />
 	<client-only>
       <div>
@@ -439,6 +442,8 @@
   //const ssc = new SSC(process.env.steemEngineRpc);
   
   const hsc = new SSC(process.env.hiveEngineRpc);
+  
+  import NotifyModal from '~/components/NotifyModal'
   
   import Lodash from 'lodash';
 
@@ -560,7 +565,8 @@
 	  NavbarBrand,
 	  Footer,
 	  MeasureChartModal,
-	  ActivityChartModal
+	  ActivityChartModal,
+	  NotifyModal
 	},
     computed: {
 	  ...mapGetters('steemconnect', ['user']),
