@@ -216,16 +216,16 @@
 					<a href="#" data-toggle="modal" data-target="#notifyModal"><i class="fas fa-info-circle" :title="$t('view_details')"></i></a>
 					<div v-if="splinterRarities!=null && splinterRarities.length >0">
 						<div>{{$t('Common')}}: {{splinterRarities[1]}} {{$t('Cards')}} 
-							<span v-if="parseInt(splinterRarities[1]) > 10"><i class="fas fa-check text-success"></i>{{$t('splinter_extra_rewards_common')}}</span>
+							<span v-if="parseInt(splinterRarities[1]) >= 10"><i class="fas fa-check text-success"></i>{{$t('splinter_extra_rewards_common')}}</span>
 						</div>
 						<div>{{$t('Rare')}}: {{splinterRarities[2]}} {{$t('Cards')}}
-							<span v-if="parseInt(splinterRarities[2]) > 10"><i class="fas fa-check text-success"></i>{{$t('splinter_extra_rewards_rare')}}</span>
+							<span v-if="parseInt(splinterRarities[2]) >= 10"><i class="fas fa-check text-success"></i>{{$t('splinter_extra_rewards_rare')}}</span>
 						</div>
 						<div>{{$t('Epic')}}: {{splinterRarities[3]}} {{$t('Cards')}}
-							<span v-if="parseInt(splinterRarities[3]) > 10"><i class="fas fa-check text-success"></i>{{$t('splinter_extra_rewards_epic')}}</span>						
+							<span v-if="parseInt(splinterRarities[3]) >= 10"><i class="fas fa-check text-success"></i>{{$t('splinter_extra_rewards_epic')}}</span>						
 						</div>
 						<div>{{$t('Legendary')}}: {{splinterRarities[4]}} {{$t('Cards')}}
-							<span v-if="parseInt(splinterRarities[4]) > 10"><i class="fas fa-check text-success"></i>{{$t('splinter_extra_rewards_legendary')}}</span>
+							<span v-if="parseInt(splinterRarities[4]) >= 10"><i class="fas fa-check text-success"></i>{{$t('splinter_extra_rewards_legendary')}}</span>
 						</div>
 					</div>
 					<a href="https://splinterlands.com/" class="btn btn-brand border mt-2" >
