@@ -416,7 +416,7 @@
 					
 					<div class="row" v-if="tokenActions">
 					  <label for="token-powerup-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
-					  <input type="number" id="token-powerup-amount" name="token-powerup-amount" ref="token-powerup-amount" class="form-control-lg w-50 p-2" @change="calculateHBDAmount">
+					  <input type="number" id="token-powerup-amount" name="token-powerup-amount" ref="token-powerup-amount" class="form-control-lg w-50 p-2" @input="calculateHBDAmount">
 					  <span class="p-2" v-on:click="fillTokenTransAmount()" :title="$t('select_full_balance')"><img :src="selTokenUp.icon" class="mr-1 mini-token-logo" ><u>{{showMaxBal(selTokenUp)}} {{ selTokenUp.symbol }}</u></span>
 					</div>
 					
@@ -4057,6 +4057,7 @@
 			let hbdVal = this.$refs['token-hbd-amount'].value.trim()
 			let matchHbd = parseFloat(afitVal) * this.afitHBDRate;
 			matchHbd = parseFloat(matchHbd.toFixed(2));
+			if (matchHbd < 0.1) matchHbd = 0.1;
 			this.$refs['token-hbd-amount'].value = matchHbd;
 		}
 		/*if (isNaN(hbdVal) || this.$refs["token-powerup-amount"].value == 0){
@@ -4482,7 +4483,9 @@
 			//grab token
 			let accToken = localStorage.getItem('access_token')
 			
-			let url = new URL(process.env.actiAppUrl + 'appendBridgeTransaction/?user='+this.user.account.name+'&wallet='+this.$refs['bsc-wallet-address'].value+'&afitTrx='+extraAFITTrx.id+'&hbdTrx='+res.id);
+			let url = new URL(process.env.actiAppUrl + 'appendBridgeTransaction/?user='+this.user.account.name+'&wallet='+//this.$refs['bsc-wallet-address'].value
+			this.bsc_wallet_address
+			+'&afitTrx='+extraAFITTrx.id+'&hbdTrx='+res.id);
 
 			let reqHeads = new Headers({
 			  'Content-Type': 'application/json',
@@ -6717,7 +6720,7 @@
 		
 		//make sure proper HBD amount is being sent
 		let hbd_amount = this.$refs['token-hbd-amount'].value.trim();
-		if (isNaN(hbd_amount) || parseFloat(hbd_amount) < 1){
+		if (isNaN(hbd_amount) || parseFloat(hbd_amount) < 0.1){
 		  this.afit_se_power_error_proceeding = true;
 		  this.afit_se_power_err_msg = this.$t('min_amount_transf_bsc');
 		  return;
