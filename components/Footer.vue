@@ -19,7 +19,7 @@
 			<a class="nav-link " href="/explore">{{ $t('Explore') }}</a>
 			<a class="nav-link " target="_blank" href="https://hive.io">{{ $t('Hive_official') }}</a>
 			<a class="nav-link " target="_blank" href="https://hivescan.info">{{ $t('Hive_block_explorer') }}</a>
-		
+			<a class="nav-link " target="_blank" href="https://hivescan.info/witnesses">{{ $t('Hive_block_explorer') }}</a>
 		</div>
 	  </div>
 	
@@ -44,7 +44,7 @@
 	  </div>
       <div class="row">
         <div class="col text-center">
-          <small class="text-muted">&copy; {{ $t('Copyright_Actifit') }} {{ currentYear }} | v1.4.8.1</small> |
+          <small class="text-muted">&copy; {{ $t('Copyright_Actifit') }} {{ currentYear }} | v1.4.8.2</small> |
 		  <small class="text-muted"><nuxt-link to="/privacy-policy">{{ $t('Privacy_Policy') }}</nuxt-link></small> |
 		  <small class="text-muted"><nuxt-link to="/terms-conditions">{{ $t('Terms_Conditions') }}</nuxt-link></small>
         </div>

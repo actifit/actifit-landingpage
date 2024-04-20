@@ -1079,6 +1079,7 @@ module.exports = {
   issue_marking_published: 'There was an issue with marking it as published. Please revisit this screen later and attempt to mark it published again.',
   Hive_official: 'Hive Official',
   Hive_block_explorer: 'Hive Block Explorer',
+  Hive_witnesses: 'Hive Witnesses (Block Producers)'
   Explore: 'Explore',
   main_chain: 'Primary Chain',
   secondary_chains:'Secondary Chains',
