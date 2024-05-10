@@ -363,10 +363,11 @@ Vue.prototype.$postHasImage = function(metaData){
 Vue.prototype.$fetchPostImage = function (metaData){
 	if (this.$postHasImage(metaData)){
 		try{
-			return metaData.image[0];
+			//find first occurrence that is url
+			return metaData.image.find(element => /^(http|https):\/\//.test(element));
 		}catch(err){
 			//alt image case
-			return metaData.images[0];
+			return metaData.images.find(element => /^(http|https):\/\//.test(element));
 		}
 	}
 	return "";
