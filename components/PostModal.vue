@@ -35,7 +35,7 @@
 			<div class="p-1">
 				  <a :href="'/'+post.author" target="_blank">
 					<span class="user-avatar m-2" :style="'background-image: url('+profImgUrl+'/u/' + post.author + '/avatar)'"></span>
-					<h5 class="modal-author modal-title text-brand" >@{{ post.author}} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></h5>
+					<h5 class="modal-author modal-title" >@{{ post.author}} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></h5>
 				  </a>
 				  
 			</div>
@@ -219,7 +219,7 @@
 			  <div class="comment-user-section">	
 				<div class="user-avatar mr-1"
 					   :style="'background-image: url('+profImgUrl+'/u/' + this.user.name + '/avatar)'"></div>
-				<div class="modal-author modal-title text-brand" >@{{ user.name }}<small class="date-head text-muted">{{ $t('Now') }}</small></div>
+				<div class="modal-author modal-title" >@{{ user.name }}<small class="date-head text-muted">{{ $t('Now') }}</small></div>
 			  </div>
 			</a>
 			<vue-remarkable class="modal-body" :source="body" :options="{'html': true, 'breaks': true, 'typographer': true}"></vue-remarkable>
