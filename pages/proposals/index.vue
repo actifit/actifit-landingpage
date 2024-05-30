@@ -6,7 +6,7 @@
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-5">
       <h2 class="text-center mb-5">{{ $t('Hive_proposals') }}</h2>
-	  <div>{{proposals}}</div>
+	  <!--<div>{{proposals}}</div>-->
 	  
 	  <!-- enable display of up to 2 ads among content -->
 	 <div v-if="proposals.length > 0">
