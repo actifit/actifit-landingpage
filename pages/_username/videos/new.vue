@@ -309,8 +309,8 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 					['publish_manual', 5, 'Ready to publish'],
 					['published', 6, 'Published✓']],
 		benef_list: [
-						{account: 'spk.beneficiary', weight: 900},
-						{account: 'threespeakleader', weight: 100},
+						{account: 'spk.beneficiary', weight: 1000},
+						//{account: 'threespeakleader', weight: 100},
 					],
 		vidPostContent: '',
 		//comment_options: {},
