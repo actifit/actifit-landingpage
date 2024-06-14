@@ -2096,7 +2096,7 @@
 	  showRewardError(){
 		this.$notify({
 		  group: 'error',
-		  text: 'You currently do not have any pending rewards',//this.$t('no_pending_rewards'),
+		  text: this.$t('no_pending_rewards'),
 		  position: 'top center'
 		})
 	  },
