@@ -2103,9 +2103,8 @@
 	  
 
 	  showClaimableRewards() {
-		//console.log("wallet pressed"); //for testing
-		//check if user has any pending rewards
-		const hasPendingRewards = this.claimSTEEM > 0 || this.claimSP > 0 || this.claimSBD > 0;
+
+		const hasPendingRewards = this.isClaimableDataAvailable;
 		if (!hasPendingRewards){
 			//show error message
 			this.showRewardError();
@@ -2116,7 +2115,7 @@
 			this.afitActivityMode = 0;
 			this.curTokenAction = 0;
 			this.scrollAction();
-		}
+		}	
 
 	  },
 	  getWalletAddress (){
