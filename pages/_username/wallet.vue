@@ -2093,16 +2093,32 @@
 		}
       },
 	  
-	  showClaimableRewards() {
-		//}else{
-		  this.fundActivityMode = this.SHOW_CLAIMABLE_REW;
-		//}
-		//hide upper activity section
-		this.afitActivityMode = 0;
-		this.curTokenAction = 0;
-		this.scrollAction();
+	  showRewardError(){
+		this.$notify({
+		  group: 'error',
+		  text: this.$t('no_pending_rewards'),
+		  position: 'top center'
+		})
 	  },
 	  
+
+	  showClaimableRewards() {
+		//console.log("wallet pressed"); //for testing
+		//check if user has any pending rewards
+		const hasPendingRewards = this.claimSTEEM > 0 || this.claimSP > 0 || this.claimSBD > 0;
+		if (!hasPendingRewards){
+			//show error message
+			this.showRewardError();
+			
+		} else{
+			//scroll down to rewards section
+			this.fundActivityMode = this.SHOW_CLAIMABLE_REW;
+			this.afitActivityMode = 0;
+			this.curTokenAction = 0;
+			this.scrollAction();
+		}
+
+	  },
 	  getWalletAddress (){
 		return this.bsc_wallet_address;
 	  },

@@ -1,4 +1,5 @@
 module.exports = {
+  no_pending_rewards: 'You currently have no pending rewards',
   What_is_actifit: 'What is Actifit?',
   Your_Afit_Balance: 'Your AFIT Balance',
   Your_Afitx_Balance: 'Your AFITX Balance',
