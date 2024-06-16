@@ -110,12 +110,16 @@ module.exports = {
 	  "actifit": {
 		"name": "Actifit",
 		"homepage": "https://actifit.io",
-		"url_scheme": "https://actifit.io/@{username}/{permlink}"
+		"url_scheme": "https://actifit.io/@{username}/{permlink}",
 	  },
 	  "travelfeed": {
 		"name": "TravelFeed",
 		"homepage": "https://travelfeed.io",
-		"url_scheme": "https://travelfeed.io/@{username}/{permlink}"
+		"url_scheme": "https://travelfeed.io/@{username}/{permlink}",
+		"api_endpoints": {
+			primary: "https://api.actifit.io",
+			secondary: "https://api2.actifit.io"
+		  }
 	  },
 	  "3speak": {
 		"name": "3Speak",
