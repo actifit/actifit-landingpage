@@ -107,11 +107,18 @@ module.exports = {
 		"name": "SteemPress",
 		"homepage": "https://wordpress.org/plugins/steempress/"
 	  },
-	  "actifit": {
-		"name": "Actifit",
-		"homepage": "https://actifit.io",
-		"url_scheme": "https://actifit.io/@{username}/{permlink}"
-	  },
+	  
+		"actifit": {
+		  "name": "Actifit",
+		  "homepage": "https://actifit.io",
+		  "url_scheme": "https://actifit.io/@{username}/{permlink}",
+		  "api_endpoints": [
+			"https://api.actifit.io",
+			"https://api2.actifit.io"
+		  ]
+		}
+	  }
+	  ,
 	  "travelfeed": {
 		"name": "TravelFeed",
 		"homepage": "https://travelfeed.io",
