@@ -60,7 +60,7 @@ module.exports = {
 	hiveStateApiNode: 'https://api.deathwing.me',
 	hiveTestNode: 'https://testnet.openhive.network', //'https://api.fake.openhive.network',
 	altHiveNodes: ["https://api.hive.blog", "https://api.deathwing.me", "https://api.openhive.network", "https://hiveapi.actifit.io", "https://hived.privex.io", "https://api.deathwing.me", "https://rpc.ausbit.dev", "https://hive-api.arcange.eu", "https://hive.roelandp.nl", "https://anyx.io",],
-	actiAppUrl: process.env.ACTI_API_URL || 'http://localhost:3120/',
+	actiAppUrl: process.env.ACTI_API_URL || 'https://api.actifit.io',
 	actiAppBackUrl: process.env.ACTI_API_BACK_URL || 'http://localhost:3120/',
 	steemEngineRpc: 'https://api.steem-engine.net/rpc',
 	hiveEngineRpc: 'https://herpc.actifit.io', //'https://mirrorengine.rishipanthee.com', //'https://engine.rishipanthee.com/',
