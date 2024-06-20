@@ -1,7 +1,7 @@
 <template>
   <!-- single post item for activity pages -->
   <div >
-    <div :class="{'card-pinned': isPostPinned, 'card post': isStandardPost}">
+    <div :class="[isOnlyPost ? 'card post single' : {'card-pinned': isPostPinned, 'card post': isStandardPost}]">
       <h6 class="mb-0 text-center post-title">
         <!--<a :href="post.url" target="_blank">-->
 		<a :href="buildLink" target="_blank">
@@ -104,7 +104,7 @@
 							  inline-template>
 					<span class="share-links-actifit">
 					  <network network="twitter">
-						<i class="fab fa-twitter text-brand" title="twitter"></i>
+						<i class="fab fa-x-twitter text-brand" title="twitter"></i>
 					  </network>
 					</span>
 				</social-sharing>
@@ -186,12 +186,19 @@
   import sanitize from 'sanitize-html'
 
   export default {
-    props: ['post', 'displayUsername', 'pstId', 'explorePost'],
+    props: ['userPosts', 'post', 'displayUsername', 'pstId', 'explorePost'],
     computed: {
       ...mapGetters('steemconnect', ['user']),
       ...mapGetters(['postToVote']),
 	  ...mapGetters(['newlyVotedPosts']),
 	  ...mapGetters(['moderators']),
+	  ...mapGetters(['userPosts']),
+
+	  isOnlyPost() {
+        return this.userPosts && this.userPosts.length === 1 // check if there's only one post in the store
+		
+      },
+
 	  buildParentLink(){
 		return '/'+this.post.parent_author+'/'+this.post.parent_permlink;
 	  },
@@ -466,6 +473,9 @@
 	.card-pinned{
 		box-shadow: 3px 3px 3px rgba(204, 204, 0, 0.4);
 		overflow: hidden;
+	}
+	.single{
+		min-width: 17em;
 	}
 	.post-image{
 		width: 100%;
