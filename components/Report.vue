@@ -90,7 +90,7 @@
 						  inline-template>
 				<span class="share-links-actifit">
 				  <network network="twitter">
-					<i class="fab fa-twitter text-brand" title="twitter"></i>
+					<i class="fab fa-x-twitter text-brand" title="X (twitter)"></i>
 				  </network>
 				</span>
 			</social-sharing>

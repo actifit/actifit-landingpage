@@ -4,7 +4,7 @@
 	
 	<div class="container pt-5 mt-5 pb-5" v-if="user">
 	
-		<h4 class="user-name">@{{ user.account.name }} {{ $t('Notifications') }}</h4>
+		<h4 class="user-name">@{{ `${user.account.name}\'s`  }} {{ $t('Notifications') }}</h4>
 		
 		<div class="row text-right">
 			<select v-model="currentFilter" class="form-control col-md-2 sel-adj float-right">

@@ -4,7 +4,7 @@
 	
 	<div class="container pt-5 mt-5 pb-5" v-if="user">
 	
-		<h4 class="text-brand user-name">@{{ user.account.name }} {{ $t('Friendships') }}</h4>
+		<h4 class="text-brand user-name">@{{ `${user.account.name}\'s`}} {{ $t('Friendships') }}</h4>
 		<h5>{{ $t('Active_Friendships') }}</h5>
 		<div class="row pb-3">
 			<div v-if="userFriends && Array.isArray(userFriends) && userFriends.length>0" v-for="(curFriend, index) in userFriends" :key="index" class="col-md-3">

@@ -107,7 +107,7 @@
 					<i class="fab fa-facebook" title="facebook"></i>
 				  </network>
 				  <network network="twitter">
-					<i class="fab fa-twitter" title="twitter"></i>
+					<i class="fab fa-x-twitter" title="X (twitter)"></i>
 				  </network>
 				  <network network="telegram">
 					<i class="fab fa-telegram" title="telegram"></i>
