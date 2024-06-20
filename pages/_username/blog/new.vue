@@ -7,7 +7,7 @@
 		  <h5 v-else class="modal-title" id="exampleModalLabel">{{ $t('Editing') }} <a :href="'/'+editPost.author+'/'+editPost.permlink">{{ title }}</a></h5>
         </div>  
 		<div class="row text-right" v-if="user">
-			<div class="col-12 pb-2"><a href="#" class="btn btn-brand border" @click.prevent="$router.push('/' + user.account.name+'/blog')" :title="$t('view_blog')"><i class="fa-solid fa-pen-to-square"></i></a>&nbsp;<a :href="'/'+user.account.name+'/comments'"  class="btn btn-brand border" :title="$t('view_comments')"><i class="far fa-comments"></i></a></div>
+			<div class="col-12 pb-2"><a href="#" class="btn btn-brand border" @click.prevent="$router.push('/\@' + user.account.name+'/blog')" :title="$t('view_blog')"><i class="fa-solid fa-pen-to-square"></i></a>&nbsp;<a :href="'/'+user.account.name+'/comments'"  class="btn btn-brand border" :title="$t('view_comments')"><i class="far fa-comments"></i></a></div>
 		</div>
 		<div>
           <div class="form-group">

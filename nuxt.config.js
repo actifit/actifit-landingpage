@@ -310,7 +310,7 @@ module.exports = {
     link: [
       { rel: 'icon', type: 'image/x-icon', href: '/img/actifit_logo.png' },
       //{ rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css' },
-	  { rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css' },
+	  { rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css' },
 	  
       { rel: 'stylesheet', href: 'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css' },
       { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css?family=Roboto' }
