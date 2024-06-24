@@ -1964,11 +1964,12 @@
 			return;
 		}
 		const username = this.user.account.name;
-		const partner = 'actifit.swap';
-		const toToken = 'AFIT';
+		const partner = process.env.swap_partner;
+		const toToken = process.env.swap_to_token;
 		const fromToken = token.symbol; 
+		const fee = process.env.partner_fee;
 
-		this.swapWidgetUrl = `https://swapwidget.hive-keychain.com/?username=${username}&partnerUsername=${partner}&from=${fromToken}&to=${toToken}&partnerFee=1`;
+		this.swapWidgetUrl = `https://swapwidget.hive-keychain.com/?username=${username}&partnerUsername=${partner}&from=${fromToken}&to=${toToken}&partnerFee=${fee}`;
 		$('#swapTokensModal').modal('show');
 	},
       numberFormat (number, precision) {

@@ -31,6 +31,9 @@ module.exports = {
     base: '/'
   },*/
   env: {
+	swap_partner: 'actifit.swap',
+	swap_to_token: 'AFIT',
+	partner_fee: '1',
     scRedirectUrl: process.env.SC_REDIRECT_URL || 'http://localhost:3000/auth',
 	AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
 	AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
