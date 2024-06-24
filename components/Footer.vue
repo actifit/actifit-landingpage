@@ -26,7 +26,7 @@
 	  <div class="text-center social-links mb-4">
         <a href="https://links.actifit.io/discord " target="_blank" class="d-inline-block mx-3 mt-3" :title="$t('Discord')"><i class="fab fa-2x fa-discord"></i></a>
         <a href="https://www.facebook.com/Actifit.fitness/" target="_blank" class="d-inline-block mx-3 mt-3" :title="$t('Facebook')"><i class="fab fa-2x fa-facebook"></i></a>
-		<a href="https://www.x.com/Actifit_fitness" target="_blank" class="d-inline-block mx-3 mt-3" :title="$t('X')"><i class="fa-brands fa-2x fa-square-x-twitter"></i></a>
+		<a href="https://www.x.com/Actifit_fitness" target="_blank" class="d-inline-block mx-3 mt-3" :title="$t('X_twitter')"><i class="fa-brands fa-2x fa-square-x-twitter"></i></a>
         <a href="https://www.instagram.com/actifit.fitness/" target="_blank" class="d-inline-block mx-3 mt-3" :title="$t('Instagram')"><i class="fab fa-2x fa-instagram"></i></a>
 		<a href="https://t.me/actifit" target="_blank" class="d-inline-block mx-3 mt-3" :title="$t('Telegram')"><i class="fab fa-2x fa-telegram"></i></a>
 		<a href="https://medium.com/@actifit.fitness" target="_blank" class="d-inline-block mx-3 mt-3" :title="$t('Medium')"><i class="fab fa-2x fa-medium"></i></a>
