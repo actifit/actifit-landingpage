@@ -390,10 +390,39 @@
 						<span class="btn btn-brand p-1" v-on:click="initiateTransfer(token)"><i class="fas fa-share-square " :title="$t('transfer_tokens')" ></i></span>
 						<span v-if="token.symbol =='AFIT'"  class="btn btn-brand p-1" v-on:click="initiateBSCTransfer(token)"><i class="fas fa-truck-loading " :title="$t('move_to_bsc')" ></i></span>
 						<span v-if="token.stakable" class="btn btn-brand p-1" v-on:click="initiateDelegation(token)"><i class="fas fa-donate p-1" :title="$t('delegate_tokens')" ></i></span>
+						<span class="btn btn-brand p-1" v-if="user && cur_bchain == 'HIVE'" :title="$t('swap_tokens')" v-on:click="openSwapModal(token)">
+							<i class="fa-regular fa-money-bill-1"></i>
+						</span>
+
 					</div>
 				  <!--</div>-->
 				</div>
-				
+					<!-- Swap Tokens Modal -->
+					<template>
+					<div class="modal fade" id="swapTokensModal" ref="swapTokensModal" tabindex="-1">
+						<div class="modal-dialog modal-lg" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+							<h5 class="modal-title">{{ $t('swap_tokens') }}</h5>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+							</div>
+							<div class="modal-body">
+							<iframe
+								id="swapWidgetkeychain"
+								title="Swap Tokens with Keychain"
+								:src="swapWidgetUrl"
+								allow="clipboard-write"
+								width="435"
+								height="435"
+							/>
+							</div>
+						</div>
+						</div>
+					</div>
+					</template>
+
 				<div class="action-box" v-if="!nonAuthUser">
 				
 					<h3 class="pro-name">
@@ -1548,6 +1577,7 @@
 	},
 	data () {
 	  return {
+		swapWidgetUrl: '',
 		tipInProgress: false,
 		tipError: '',
 		claiming_rewards: false,
@@ -1928,6 +1958,19 @@
 	   * @param precision
        * @returns {string}
        */
+	openSwapModal(token) {
+		if (!token) {
+			console.error('Token object is undefined');
+			return;
+		}
+		const username = this.user.account.name;
+		const partner = 'actifit.swap';
+		const toToken = 'AFIT';
+		const fromToken = token.symbol; 
+
+		this.swapWidgetUrl = `https://swapwidget.hive-keychain.com/?username=${username}&partnerUsername=${partner}&from=${fromToken}&to=${toToken}&partnerFee=1`;
+		$('#swapTokensModal').modal('show');
+	},
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
@@ -7618,6 +7661,11 @@
     max-width: 500px
 </style>
 <style>
+@media screen and (max-width: 600px) {
+  .modal-content {
+    padding: .3rem;
+  }
+}
   .afit-ex-option{
 	border-style: solid;
 	display: inline-block;
