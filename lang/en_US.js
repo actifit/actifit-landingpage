@@ -1,4 +1,5 @@
 module.exports = {
+  X_twitter: 'X',
   swap_tokens: 'Swap Tokens',
   no_pending_rewards: 'You currently have no pending rewards',
   What_is_actifit: 'What is Actifit?',
