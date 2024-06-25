@@ -400,7 +400,7 @@
 					<!-- Swap Tokens Modal -->
 					<template>
 					<div class="modal fade" id="swapTokensModal" ref="swapTokensModal" tabindex="-1">
-						<div class="modal-dialog modal-lg" role="document">
+						<div class="modal-dialog modal-lg" role="document" >
 						<div class="modal-content">
 							<div class="modal-header">
 							<h5 class="modal-title">{{ $t('swap_tokens') }}</h5>
@@ -414,8 +414,9 @@
 								title="Swap Tokens with Keychain"
 								:src="swapWidgetUrl"
 								allow="clipboard-write"
-								width="435"
-								height="435"
+								width="400"
+								height="400"
+								style="border: none;"
 							/>
 							</div>
 						</div>
@@ -7662,6 +7663,19 @@
     max-width: 500px
 </style>
 <style>
+.modal-dialog.modal-lg {
+	margin-left: auto;
+	margin-right: auto;
+	width: 450px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	position: fixed;
+	top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
 @media screen and (max-width: 600px) {
   .modal-content {
     padding: .3rem;
