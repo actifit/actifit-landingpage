@@ -400,7 +400,7 @@
 					<!-- Swap Tokens Modal -->
 					<template>
 					<div class="modal fade" id="swapTokensModal" ref="swapTokensModal" tabindex="-1">
-						<div class="modal-dialog modal-lg" role="document" >
+						<div class="modalOfSwap modal-dialog" role="document" >
 						<div class="modal-content">
 							<div class="modal-header">
 							<h5 class="modal-title">{{ $t('swap_tokens') }}</h5>
@@ -7663,7 +7663,7 @@
     max-width: 500px
 </style>
 <style>
-.modal-dialog.modal-lg {
+.modalOfSwap {
 	margin-left: auto;
 	margin-right: auto;
 	width: 450px;
