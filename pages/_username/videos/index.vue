@@ -24,7 +24,7 @@
 	  </div>
 
       <!-- show listing when loaded -->
-	  <div class="row" v-if="userVideos.length">
+	  <div :class="{'single-video': isSingleVideo, 'multiple-videos': !isSingleVideo}">
 		<div class="row"  v-for="iterx in Math.ceil(userVideos.length / splitFactor)" :key="iterx">
 			<div v-for="itery in splitFactor" :key="itery" class="col-md-6 col-lg-4 mb-4">
 				<Post v-if="(iterx - 1) * splitFactor + (itery - 1) < userVideos.length" :post="userVideos[(iterx - 1) * splitFactor + (itery - 1)]" :displayUsername="username" />
@@ -129,6 +129,10 @@
 	  ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters('steemconnect', ['stdLogin']),
       ...mapGetters(['userVideos', 'moreUserVideosAvailable', 'activePost', 'bchain']),
+
+	  isSingleVideo(){
+		return this.userVideos && this.userVideos.length === 1;
+	  },
 
       // get username from url
       username () {
