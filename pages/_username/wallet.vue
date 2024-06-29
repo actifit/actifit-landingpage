@@ -390,40 +390,14 @@
 						<span class="btn btn-brand p-1" v-on:click="initiateTransfer(token)"><i class="fas fa-share-square " :title="$t('transfer_tokens')" ></i></span>
 						<span v-if="token.symbol =='AFIT'"  class="btn btn-brand p-1" v-on:click="initiateBSCTransfer(token)"><i class="fas fa-truck-loading " :title="$t('move_to_bsc')" ></i></span>
 						<span v-if="token.stakable" class="btn btn-brand p-1" v-on:click="initiateDelegation(token)"><i class="fas fa-donate p-1" :title="$t('delegate_tokens')" ></i></span>
-						<span class="btn btn-brand p-1" v-if="user && cur_bchain == 'HIVE'" :title="$t('swap_tokens')" v-on:click="openSwapModal(token)">
-							<i class="fa-regular fa-money-bill-1"></i>
+						<span class="btn btn-brand p-1" v-if="user" :title="$t('Swap Tokens')" v-on:click="openSwapModal(token)">
+							<i class="fas fa-money-bill-wave"></i>
 						</span>
 
 					</div>
 				  <!--</div>-->
 				</div>
-					<!-- Swap Tokens Modal -->
-					<template>
-					<div class="modal fade" id="swapTokensModal" ref="swapTokensModal" tabindex="-1">
-						<div class="modalOfSwap" role="document" >
-						<div class="modal-content">
-							<div class="modal-header">
-							<h5 class="modal-title">{{ $t('swap_tokens') }}</h5>
-							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-								<span aria-hidden="true">&times;</span>
-							</button>
-							</div>
-							<div class="modal-body">
-							<iframe
-								id="swapWidgetkeychain"
-								title="Swap Tokens with Keychain"
-								:src="swapWidgetUrl"
-								allow="clipboard-write"
-								width="400"
-								height="400"
-								style="border: none;"
-							/>
-							</div>
-						</div>
-						</div>
-					</div>
-					</template>
-
+				
 				<div class="action-box" v-if="!nonAuthUser">
 				
 					<h3 class="pro-name">
@@ -1466,6 +1440,8 @@
       </div>
 	  	<TopHolders :user="targetUserWallet" :holdersList="afitHoldersList"/>
 		<TopHoldersX :user="targetUserWallet" :holdersList="afitxHoldersList"/>
+		<SwapTokenModal :swapWidgetUrl="swapWidgetUrl" />
+		
     </div>
 	
 	<!-- show spinner while loading -->
@@ -1523,6 +1499,7 @@
   
   import TopHolders from '~/components/TopHoldersModal'
   import TopHoldersX from '~/components/TopHoldersXModal'
+  import SwapTokenModal from '~/components/SwapTokenModal'
   
   import pendingRewardsModal from '~/components/PendingRewardsModal'
   
@@ -1780,6 +1757,7 @@
 	  Countdown,
 	  TopHolders,
 	  TopHoldersX,
+	  SwapTokenModal,
 	  pendingRewardsModal,
     },
     computed: {
@@ -1960,6 +1938,7 @@
        * @returns {string}
        */
 	openSwapModal(token) {
+		console.log(`pressed`)
 		if (!token) {
 			console.error('Token object is undefined');
 			return;
@@ -1971,7 +1950,8 @@
 		const fee = process.env.partner_fee;
 
 		this.swapWidgetUrl = `https://swapwidget.hive-keychain.com/?username=${username}&partnerUsername=${partner}&from=${fromToken}&to=${toToken}&partnerFee=${fee}`;
-		$('#swapTokensModal').modal('show');
+		console.log('Opening swap modal with URL:', this.swapWidgetUrl);
+		$('#swapTokenModal').modal('show');
 	},
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
@@ -7663,19 +7643,7 @@
     max-width: 500px
 </style>
 <style>
-.modalOfSwap {
-	margin-left: auto;
-	margin-right: auto;
-	width: 450px;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	position: fixed;
-	top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-}
+
 @media screen and (max-width: 600px) {
   .modal-content {
     padding: .3rem;
