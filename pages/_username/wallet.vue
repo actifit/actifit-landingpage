@@ -390,8 +390,8 @@
 						<span class="btn btn-brand p-1" v-on:click="initiateTransfer(token)"><i class="fas fa-share-square " :title="$t('transfer_tokens')" ></i></span>
 						<span v-if="token.symbol =='AFIT'"  class="btn btn-brand p-1" v-on:click="initiateBSCTransfer(token)"><i class="fas fa-truck-loading " :title="$t('move_to_bsc')" ></i></span>
 						<span v-if="token.stakable" class="btn btn-brand p-1" v-on:click="initiateDelegation(token)"><i class="fas fa-donate p-1" :title="$t('delegate_tokens')" ></i></span>
-						<span class="btn btn-brand p-1" v-if="user" :title="$t('Swap Tokens')" v-on:click="openSwapModal(token)">
-							<i class="fas fa-money-bill-wave"></i>
+						<span class="btn btn-brand p-1" v-if="user && cur_bchain == 'HIVE'" :title="$t('swap_tokens')" v-on:click="openSwapModal(token)">
+							<i class="fa-regular fa-money-bill-1"></i>
 						</span>
 
 					</div>
