@@ -18,7 +18,7 @@
 	  </div>
 
       <!-- show listing when loaded -->
-	  <div class="row" v-if="userReports.length">
+      <div :class="{'single-report': isSingleReport, 'multiple-reports': !isSingleReport}" v-if="userReports.length">
 		<div class="row"  v-for="iterx in Math.ceil(userReports.length / splitFactor)" :key="iterx">
 			<div v-for="itery in splitFactor" :key="itery" class="col-md-6 col-lg-4 mb-4">
 				<Report v-if="(iterx - 1) * splitFactor + (itery - 1) < userReports.length" :report="userReports[(iterx - 1) * splitFactor + (itery - 1)]" :rptId="(iterx - 1) * splitFactor + (itery - 1)"/>
@@ -123,6 +123,11 @@
 	  ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters('steemconnect', ['stdLogin']),
       ...mapGetters(['userReports', 'moreUserReportsAvailable', 'activeReport', 'bchain']),
+
+	  
+	  isSingleReport() {
+        return this.userReports.length === 1;
+      },
 
       // get username from url
       username () {
