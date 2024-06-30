@@ -397,7 +397,7 @@
 					</div>
 				  <!--</div>-->
 				</div>
-				
+
 				<div class="action-box" v-if="!nonAuthUser">
 				
 					<h3 class="pro-name">
