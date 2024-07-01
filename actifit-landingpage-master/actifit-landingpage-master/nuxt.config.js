@@ -315,9 +315,10 @@ module.exports = {
       { rel: 'icon', type: 'image/x-icon', href: '/img/actifit_logo.png' },
       //{ rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css' },
 	  { rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css' },
-	  
+	  { rel:'stylesheet', href:'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css'},
       { rel: 'stylesheet', href: 'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css' },
-      { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css?family=Roboto' }
+      { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css?family=Roboto' },
+	  { rel:'stylesheet', href:'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css'}
     ],
     script: [
       { src: 'https://code.jquery.com/jquery-3.2.1.slim.min.js' },

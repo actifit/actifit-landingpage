@@ -34,7 +34,9 @@
 		<div class="main-user-info">
 			<div class="p-1">
 				  <a :href="'/'+post.author" target="_blank">
-					<span class="user-avatar m-2" :style="'background-image: url('+profImgUrl+'/u/' + post.author + '/avatar)'"></span>
+					<span class="user-avatar m-2" :style="'background-image: url('+profImgUrl+'/u/' + post.author + '/avatar)'">
+						
+					</span>
 					<h5 class="modal-author modal-title" >@{{ post.author}} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></h5>
 				  </a>
 				  
@@ -43,6 +45,7 @@
 				<span class="date-head text-muted" :title="date">{{ $getTimeDifference(post.created) }}</span>
 				<a :href="'/@' + this.post.author + '/' + this.post.permlink"><i class="fas fa-link text-brand"></i></a>
 				<i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent" ></i>
+				<i class="fa-solid fa-language"></i>
 			</span>
 			<div class="modal-header">
 				<div class="post-tags p-1" v-html="displayPostTags"></div>
