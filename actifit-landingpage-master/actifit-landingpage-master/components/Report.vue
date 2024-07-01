@@ -24,6 +24,7 @@
 					  <span class="date-head text-muted" :title="date">{{ $getTimeDifference(report.created) }}</span>
 					  <a :href="'/@' + this.report.author + '/' + this.report.permlink"><i class="fas fa-link text-brand"></i></a>
 					  <i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent" ></i>
+					  <i class="fa-solid fa-language"></i>
 				  </span>
 			  </div>
 			
