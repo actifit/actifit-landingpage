@@ -1,7 +1,7 @@
 <template>
   <div>
 	<NavbarBrand />
-	
+	<i class="fa-solid fa-language ml-2"></i>
 	<!--<div class="container pt-5 mt-5 col-md-6" >
 		<div class="text-right" >
 			<ChainSelection />
@@ -23,7 +23,12 @@
 			<h5 class="text-brand" >
 				<div class="user-avatar mid-avatar mr-1 mb-5"
 					   :style="'background-image: url('+profImgUrl+'/u/' + this.report.author + '/avatar)'"></div>
-				<a :href="'/'+report.author" target="_blank">@{{ report.author}} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></a>
+				<a :href="'/'+report.author" target="_blank">@{{ report.author}} 
+					<small class="text-brand numberCircle">{{ displayCoreUserRank }} 
+						<span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }} </span>
+					</small>
+				</a>
+				
 			</h5>
 			<a :href="buildLink"><span class="date-head text-muted">{{ date }}</span>&nbsp;<i class="fas fa-link"></i></a>
 			<i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent" ></i>
