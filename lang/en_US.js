@@ -1,4 +1,7 @@
 module.exports = {
+  website_not_provided: 'Website not provided',
+  description_not_provided: 'Description not provided',
+  location_not_provided: 'Location not provided',
   X_twitter: 'X',
   swap_tokens: 'Swap Tokens',
   no_pending_rewards: 'You currently have no pending rewards',

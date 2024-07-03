@@ -7,7 +7,9 @@
 						markdown-it-emoji="true" 
 						v-model="content" 
 						ref="editor"
-						@imgAdd="mavonUpImg">
+						:shortCut=false
+						@imgAdd="mavonUpImg"
+						@keydown.native="handleKeydown">
 			<!-- Add a custom button after the left toolbar  -->
 			  <template slot="left-toolbar-after">
 				
@@ -92,6 +94,45 @@
 			},
 		},
 		methods: {
+			handleKeydown(event) {
+				if (event.ctrlKey && event.key === 'Backspace') {
+
+				event.preventDefault();
+				
+				// get the textarea element
+				const textareaElement = this.$el.querySelector('textarea');
+				console.log(`content: ${textareaElement.value}`);
+
+				// get the current cursor position (to know where to start deleting)
+				const cursorPosition = textareaElement.selectionStart;
+				console.log(`selection start: ${cursorPosition}`);
+
+				// get the text before the cursor (when we start deleting)
+				const textBeforeCursor = textareaElement.value.substring(0, cursorPosition);
+
+				// match the word before the cursor
+				const wordRange = /\s*\S+\s*$/.exec(textBeforeCursor);
+
+				//if a word is found, delete it
+				if (wordRange) {
+					const wordStartIndex = cursorPosition - wordRange[0].length;
+					const newValue = 
+					textBeforeCursor.substring(0, wordStartIndex) +
+					textareaElement.value.substring(cursorPosition);
+
+					//update the content bound to v-model					
+					this.content = newValue;
+				
+				      // update the cursor position (so the cursor doesnt always go back to the end of the text when deleted)
+					this.$nextTick(() => {
+						textareaElement.selectionStart = wordStartIndex;
+						textareaElement.selectionEnd = wordStartIndex;
+						textareaElement.focus();
+						console.log(`cursor position set to: ${wordStartIndex}`);
+					});
+			}
+		}
+		},
 			handlePaste(event){
 				console.log(event);
 				const clipboardData = event.clipboardData || window.clipboardData;

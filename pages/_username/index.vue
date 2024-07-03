@@ -163,10 +163,21 @@
 		  <div class="d-flex flex-column">
 		  <div v-if="userinfo" class="user-details">
 			<div class="info-box p-2"><i class="fas fa-user mr-2"></i> {{ userinfo.name }} <b-badge v-if="account_banned" variant="danger" :title="$t('Account_banned_tip')" >{{ $t('Account_banned') }}</b-badge></div>
-			<div v-if="userMeta && userMeta.profile" class="row m-0">
-				<div class="location-text info-box col-md-4 cntnr" ><i class="fas fa-street-view mr-2"></i> {{ userMeta.profile.location }}</div>
-				<div class="info-box col-md-4 cntnr"><i class="fas fa-address-card mr-2"></i> {{ userMeta.profile.about }}</div>
-				<div class="info-box col-md-4 cntnr"><i class="fas fa-link mr-2"></i>&nbsp;<a :href="userMeta.profile.website" class="force-white-url">{{ userMeta.profile.website }}</a></div>
+			<div class="row m-0">
+				<div class="location-text info-box col-md-4 cntnr">
+					<i class="fas fa-street-view mr-2"></i> 
+					{{ (userMeta && userMeta.profile && userMeta.profile.location) || $t('location_not_provided') }}
+				</div>
+				<div class="info-box col-md-4 cntnr">
+					<i class="fas fa-address-card mr-2"></i> 
+					{{ (userMeta && userMeta.profile && userMeta.profile.about) || $t('description_not_provided') }}
+				</div>
+				<div class="info-box col-md-4 cntnr">
+					<i class="fas fa-link mr-2"></i>&nbsp;
+					<a :href="(userMeta && userMeta.profile && userMeta.profile.website) ? userMeta.profile.website : '#'" class="force-white-url">
+						{{ (userMeta && userMeta.profile && userMeta.profile.website) || $t('website_not_provided') }}
+					</a>
+				</div>
 			</div>
 			<div class="row m-0">
 				<div class="info-box col-md-12 cntnr"><i class="fas fa-calendar-alt mr-2"></i> {{ $t('Joined_On') }} {{ pureDate(userinfo.created) }}</div>
