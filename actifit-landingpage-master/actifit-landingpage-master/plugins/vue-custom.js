@@ -3,7 +3,7 @@ import Vue from 'vue'
 //Hive auth services
 import HAS from 'hive-auth-wrapper';
 Vue.prototype.$HAS = HAS;
-
+console.log('Hive Auth Service initialized:', HAS);
 //sanitization
 import sanitize from 'sanitize-html'
 

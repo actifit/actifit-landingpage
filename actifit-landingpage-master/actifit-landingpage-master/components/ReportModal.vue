@@ -24,7 +24,8 @@
 					<span class="date-head text-muted" :title="date">{{ $getTimeDifference(report.created) }}</span>
 					<a :href="'/@' + this.report.author + '/' + this.report.permlink"><i class="fas fa-link text-brand"></i></a>
 					<i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent" ></i>
-					<i class="fa-solid fa-language"></i>
+					<i class="fa-solid fa-language" style="color: red;" v-on:click="translateContent"></i>
+					<i v-if="translatedContent" class="fa-solid fa-eye" style="color: blue;" v-on:click="showOriginalPost" :title="$t('Show_Original')"></i>
 				</span>
 			</div>
           
@@ -263,6 +264,7 @@
 			socialSharingDesc: process.env.socialSharingDesc,
 			socialSharingQuote: process.env.socialSharingQuote,
 			hashtags: process.env.socialSharingHashtags,
+			translatedContent: '',  // Added to store translated content
 		}
 	},
 	watch: {
@@ -357,495 +359,421 @@
 		return this.commentEntries != null;
 	  }
     },
-	methods: {
-	/* function checks if post has beneficiaries */
-	  hasBeneficiaries() {
-		return Array.isArray(this.report.beneficiaries) && this.report.beneficiaries.length > 0;
-	  },
-	  beneficiariesDisplay(){
-		let output = 'Beneficiaries:\n';
-		for (let i=0;i<this.report.beneficiaries.length;i++){
-			output += this.report.beneficiaries[i].account+ ': ' + this.report.beneficiaries[i].weight/100 + '% \n';
-		}
-		return output;
-	  },
-/* function returns author payout value */
-	  paidValue() {
-		if (this.report.total_payout_value ) return this.report.total_payout_value
-		if (this.report.author_payout_value ) return this.report.author_payout_value
-	  },
-	  /* function checks to see if post reached its payout period */
-	  postPaid() {
-		//check if last_payout is after cashout_time which means post got paid
-		let last_payout = new Date(this.report.last_payout);
-		let cashout_time = new Date(this.report.cashout_time);
-		if (last_payout.getTime() > cashout_time.getTime()){
-			return true;
-		}
-		return false;
-	  },
-	  /* function handles closing open comment box and resetting data */
-	  resetOpenComment () {
-		this.replyBody = this.moderatorSignature;
-		this.commentBoxOpen=false;
-	  },
-	  
-	  commentSuccess (err, finalize, bchain) {
-		// stop loading animation and show notification
-		this.loading = false
-		this.$notify({
-		  group: err ? 'error' : 'success',
-		  text: err ? this.$t('Comment_Error') : this.$t('Comment_Success_Chain').replace('_CHAIN_', bchain),
-		  position: 'top center'
-		})
-		
-		if (finalize){
-		
-			//display comment placeholder till blockchain data comes through
-			this.responsePosted = true;
-			this.responseBody = this.replyBody;
-			
-			//refetch report data anew, but only after 10 seconds to ensure data has been made available
-			setTimeout( this.fetchReportCommentData, 10000);
-			
-			
-			//check if comment is lengthy enough, increase tracked count by 1
-			if (this.responseBody.length >= 50){
-				if (isNaN(this.commentCountToday)){
-					this.commentCountToday = 0;
-				}
-				this.commentCountToday += 1;
-			}
-			this.$store.commit('setCommentCountToday', this.commentCountToday);
-			
-			//reward the user for interacting with 3 different posts via comments
-			if (this.commentCountToday >= 3){
-				this.rewardUserComment();
-			}
-		}
-		
-		//reset open comment
-		this.resetOpenComment();
-	  },
-	  
-	  async processTrxFunc(op_name, cstm_params, bchain_option){
-		if (!localStorage.getItem('std_login')){
-		//if (!this.stdLogin){
-			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
-			//console.log(res);
-			if (res.result.ref_block_num) {
-				console.log('success');
-				return {success: true, trx: res.result};
-			}else{
-				//console.log(err);
-				return {success: false, trx: null};
-			}
-		}else if (localStorage.getItem('acti_login_method') == 'hiveauth'){
-			return new Promise((resolve) => {
-				const auth = {
-				  username: this.user.account.name,
-				  token: localStorage.getItem('access_token'),//should be changed in V1 (current V0.8)
-				  expire: localStorage.getItem('expires'),
-				  key: localStorage.getItem('key')
-				}
-				let operation = [ 
-				   [op_name, cstm_params]
-				];
-				
-				this.$HAS.broadcast(auth, 'posting', operation, (evt)=> {
-					console.log(evt)    // process sign_wait message
-					let msg = this.$t('verify_hiveauth_app');
-					this.$notify({
-					  group: 'warn',
-					  text: msg,
-					  duration: -1, //keep alive till clicked
-					  position: 'top center'
-					})
-				})
-				.then(response => {
-					console.log(response);
-					this.$notify({
-					  group: 'warn',
-					  clean: true
-					})
-					if (response.cmd && response.cmd === 'sign_ack'){
-						resolve({success: true, trx: response.data})
-					}else if (response.cmd && response.cmd === 'sign_nack'){
-						resolve ({success: false})
-					}
-				} ) // transaction approved and successfully broadcasted
-				.catch(err => {
-					this.$notify({
-					  group: 'warn',
-					  clean: true
-					})
-					console.log(err);
-					resolve ({success: false})
-				} )
-			});
-		
-		}else{
-			let operation = [ 
-			   [op_name, cstm_params]
-			];
-			console.log('broadcasting');
-			console.log(operation);
-			
-			//console.log(this.$steemconnect.accessToken);
-			//console.log(this.$store.state.accessToken);
-			//grab token
-			let accToken = localStorage.getItem('access_token')
-			
-			let op_json = JSON.stringify(operation)
-			
-			let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
-			
-			if (bchain_option){
-				cur_bchain = bchain_option;
-			}
-			
-			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+encodeURIComponent(op_json)+'&bchain='+cur_bchain);
-			
-			let reqHeads = new Headers({
-			  'Content-Type': 'application/json',
-			  'x-acti-token': 'Bearer ' + accToken,
-			});
-			let res = await fetch(url, {
-				headers: reqHeads
-			});
-			let outcome = await res.json();
-			console.log(outcome);
-			if (outcome.error){
-				console.log(outcome.error);
-				//if this is authority error, means needs to be logged out
-				//example "missing required posting authority:Missing Posting Authority"
-				let err_msg = outcome.trx.tx.error;
-				if (err_msg.includes('missing') && err_msg.includes('authority') && this.cur_bchain == bchain_option){
-					//clear entry
-					localStorage.removeItem('access_token');
-					//this.$store.commit('setStdLoginUser', false);
-					this.error_msg = this.$t('session_expired_login_again');
-					this.$store.dispatch('steemconnect/logout');
-				}
-				this.$notify({
-				  group: 'error',
-				  text: err_msg,
-				  position: 'top center'
-				})
-				return {success: false, trx: null};
-				//this.$router.push('/login');
-			}else{
-				return {success: true, trx: outcome.trx};
-			}
-		}
-	  },
-	  
-	  /* function handles sending out the comment to the blockchain */
-	  async postResponse(event) {
-		// proceed with saving the comment
-		
-		if (!this.user){
-			this.errPosting = this.$t('Need_login');
-			return;
-		}
-		
-		this.loading = true
-		
-		//build the permlink
-		let comment_perm = this.user.account.name.replace('.','-') + '-re-' + this.report.author.replace('.','-') + '-' + this.report.permlink + new Date().toISOString().replace(/[^a-zA-Z0-9]+/g, '').toLowerCase();
-		
-		//prepare meta data
-		let meta = new Object();
-		meta.tags = ['hive-193552', 'actifit'];
-		meta.app = 'actifit/0.5.0';
-		meta.suppEdit = 'actifit.io.comment';
-		this.replyBody = this.$refs.editor.content;
-		//console.log(this.stdLogin);
-		if (!localStorage.getItem('std_login')){
-		//if (!this.stdLogin){
-			this.$steemconnect.comment(
-			  this.report.author,
-			  this.report.permlink,
-			  this.user.account.name,
-			  comment_perm,
-			  '',
-			  this.replyBody,
-			  meta,
-			  (err) => {
-				this.commentSuccess(err, true, 'STEEM');
-			  }
-			)
-		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
-		
-			let comment_options = { 
-				author: this.user.account.name, 
-				permlink: comment_perm, 
-				max_accepted_payout: '1000000.000 HBD', 
-				percent_hbd: 10000, 
-				allow_votes: true, 
-				allow_curation_rewards: true, 
-				extensions: []//extensions: [[0, { 'beneficiaries': [] }]]
-			};
-			//console.log(comment_options);
-			//this.$nuxt.refresh()
+	methods: { 
 
-			window.hive_keychain.requestPost(
-				this.user.account.name, 
-				"", 
-				this.replyBody,
-				this.report.permlink,
-				this.report.author,
-				JSON.stringify(meta),
-				comment_perm,
-				JSON.stringify(comment_options), (response) => {
-				  //console.log(response);
-				  if (response.success){
-					this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain);
-				  }else{
-					this.commentSuccess(response.message, false, this.cur_bchain);
-				  }
-				});	
-		
-		}else{
-			let cstm_params = {
-			  "author": this.user.account.name,
-			  "title": '',
-			  "body": this.replyBody,
-			  "parent_author": this.report.author,
-			  "parent_permlink": this.report.permlink,
-			  "permlink": comment_perm,
-			  "json_metadata": JSON.stringify(meta)
-			};
-			
-			let res = await this.processTrxFunc('comment', cstm_params, this.cur_bchain);
-			
-			if (res.success){
-				this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain);
-			}else{
-				this.commentSuccess('error saving', false, this.cur_bchain);
-			}
-			
-			//also send the same post again to the other chain
-			let other_chain = this.cur_bchain=='HIVE'?'STEEM':'HIVE';
-			if (this.target_bchain == 'BOTH'){
-				this.loading = true;
-				let res = await this.processTrxFunc('comment', cstm_params, other_chain);
-			
-				if (res.success){
-					this.commentSuccess(null, true, other_chain);
-				}else{
-					this.commentSuccess('error saving', false, other_chain);
-				}
-			}
-		}
-		
-	  },
-	  /* function handles rewarding user for comments */
-	  async rewardUserComment () {
-		console.log('rewarding comments');
-		let url = new URL(process.env.actiAppUrl + 'rewardActifitWebComment/'+this.user.account.name);
-		//compile all needed data and send it along the request for processing
-		let params = {
-			web_comment_token: process.env.webCommentToken,
-			url: this.report.url,
-		}
-		Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
-		try{
-			let res = await fetch(url);
-			let outcome = await res.json();
-			if (outcome.rewarded){
-				// notify the user that he received an additional reward
-				this.$notify({
-				  group: 'success',
-				  text: this.$t('youve_been_rewarded') + outcome.amount + this.$t('reward_for_comment'),
-				  position: 'top center'
-				})
-			}
-			console.log(outcome);
-		}catch(err){
-			console.error(err);
-		}
-	  },
-	  /* function checks if logged in user has upvoted current report */
-	  userVotedThisPost() {
-		let curUser = this.user.account.name;
-		//check if the post contains in its original voters current user, or if it has been upvoted in current session
-		this.postUpvoted = this.report.active_votes.filter(voter => (voter.voter === curUser)).length > 0 || this.newlyVotedPosts.indexOf(this.report.post_id)!==-1;
-		
-		return this.postUpvoted;
-	  },
-	  /* function handles appending moderators signature */
-	  insertModSignature () {
-		if (this.user && this.moderators.find( mod => mod.name == this.user.account.name && mod.title == 'moderator')) {
-		  this.moderatorSignature = process.env.shortModeratorSignature;
-		  this.replyBody += this.moderatorSignature;
-		}
-	  },
-	  /* function handles appending full moderator signature */
-	  insertFullModSignature () {
-		if (this.user && this.moderators.find( mod => mod.name == this.user.account.name && mod.title == 'moderator')) {
-		  this.moderatorSignature = process.env.standardModeratorSignature;
-		  this.replyBody += this.moderatorSignature;
-		}
-	  },
-	  /* function handles confirming if the user had voted already to prevent issues */
-	  votePrompt(e) {
-		
-		  //proceed normally showing vote popup
-		  this.$store.commit('setPostToVote', this.report)
-		//}
-	  },
-	  fetchReportData () {
-		//function handling propagating calls to grab key report data and comment info
-		this.fetchReportKeyData()
-		this.fetchReportCommentData()
-	  },
-	  fetchReportCommentData () {
-	  
-		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
-		this.target_bchain = this.cur_bchain;
-		this.$store.commit('setBchain', this.cur_bchain);
-		
-		//regrab report data to fix comments
-		this.$store.dispatch('fetchReportComments', this.report)
-		
-		//clear the placeholder comment displayed
-		this.responsePosted = false;
-		this.responseBody = this.moderatorSignature;
-	  },
-	  fetchReportKeyData () {
-		fetch(process.env.actiAppUrl+'getPostReward?user=' + this.report.author+'&url='+this.report.url).then(res => {
-		//grab the post's reward to display it properly
-				res.json().then(json => this.afitReward = json.token_count)}).catch(e => reject(e))
-				
-		//grab the author's rank
-		fetch(process.env.actiAppUrl+'getRank/' + this.report.author).then(res => {
-				res.json().then(json => this.userRank = json)}).catch(e => reject(e))
-				
-		//grab post full pay if full pay mode enabled
-		fetch(process.env.actiAppUrl+'getPostFullAFITPayReward?user=' + this.report.author+'&url='+this.report.url).then(res => {
-				res.json().then(json => this.fullAFITReward = json.token_count)}).catch(e => reject(e))
-				
-		//grab moderators' list
-		this.$store.dispatch('fetchModerators')
-		
-		this.profImgUrl = process.env.hiveImgUrl;
-		
-		if (this.cur_bchain == 'STEEM'){
-		
-			this.profImgUrl = process.env.steemImgUrl;
-			
-			//grab post S-E token pay
-			fetch(scot_steemengine_api+'@'+this.report.author+'/'+this.report.permlink ).then(
-				res => {res.json().then(json => this.setReportTokenRewards (json) ).catch(e => reject(e))
-			}).catch(e => reject(e))
-		}else{
-			//grab post H-E token pay
-			fetch(scot_steemengine_api+'@'+this.report.author+'/'+this.report.permlink +scot_hive_api_param).then(
-				res => {res.json().then(json => this.setReportTokenRewards (json) ).catch(e => reject(e))
-			}).catch(e => reject(e))
-		}
-	  },
-	  /* function handles proper display for post token rewards */
-	  displayTokenValue (token) {
-		let val;
-		//if already paid
-		if (parseFloat(token.total_payout_value)>0){
-			val = parseFloat(token.total_payout_value) / Math.pow(10, token.precision);
-			return this.numberFormat(val, token.precision) + ' ' + token.token;
-		}
-		if (isNaN(token.pending_token)){
-			return "";
-		}
-		if (parseFloat(token.pending_token) == 0){
-			return this.numberFormat(val, token.precision) + ' ' + token.token;
-		}
-		val = parseFloat(token.pending_token) / Math.pow(10, token.precision);
-		return this.numberFormat(val, token.precision) + ' ' + token.token;
-	  },
-	  fixSubModal () {
-		//handles fixing parent class to properly interpret existing report modal
-		//need to make sure this is subentry of a report modal, meaning report modal is showing
-		if ($('#reportModal').hasClass('show')){
-		  $('body').addClass('modal-open');
-		}
-	  },
-	   async setReportTokenRewards (result) {
-		this.tokenRewards = result;
-		this.report.specTokenRewards = this.tokenRewards;
-	  },
-	  /**
-       * Formats numbers with commas and dots.
-       *
-       * @param number
-	   * @param precision
-       * @returns {string}
-       */
-      numberFormat (number, precision) {
-        return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
-      },
-	  copyContent (event){
-			navigator.clipboard.writeText('https://actifit.io/@' + this.report.author + '/' + this.report.permlink)
-			.then(() => {
-				this.$notify({
-				  group: 'success',
-				  text: this.$t('copied_successfully'),
-				  position: 'top center'
-				})
-				return;
-			})
-			.catch((error) => {
-				this.$notify({
-				  group: 'error',
-				  text: this.$t('error_copying'),
-				  position: 'top center'
-				})
-				return;					
-			});
-			
-		},
-	  loadNextReport(direction){
-		if (direction <0){
-			console.log('previous')
-			this.$emit('prevReport');
-		}else{
-			console.log('next');
-			this.$emit('nextReport');
-		}
-	  },
-	  handleKeyDown(event) {
-		if (!this.commentBoxOpen){
-		  switch (event.key) {
-			case 'ArrowLeft':
-			  this.loadNextReport(-1);
-			  break;
-			case 'ArrowRight':
-			  this.loadNextReport(1);
-			  break;
-		  }
-		}
-	  }
-	},
-	beforeDestroy() {
-		window.removeEventListener('keydown', this.handleKeyDown);
-	},
-	async mounted () {
-	  if (this.report != null){
-		this.fetchReportKeyData();
-	  }
-	
-	  //fix modal overlay
-	  $('#voteModal').on("hidden.bs.modal", this.fixSubModal)
-	  
-	  this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
-	  
-	  //capture key clicks
-	  window.addEventListener('keydown', this.handleKeyDown);
+/* function checks if post has beneficiaries */
+hasBeneficiaries() {
+	return Array.isArray(this.report.beneficiaries) && this.report.beneficiaries.length > 0;
+},
+beneficiariesDisplay(){
+	let output = 'Beneficiaries:\n';
+	for (let i=0;i<this.report.beneficiaries.length;i++){
+		output += this.report.beneficiaries[i].account+ ': ' + this.report.beneficiaries[i].weight/100 + '% \n';
 	}
+	return output;
+},
+/* function returns author payout value */
+paidValue() {
+	if (this.report.total_payout_value ) return this.report.total_payout_value
+	if (this.report.author_payout_value ) return this.report.author_payout_value
+},
+/* function checks to see if post reached its payout period */
+postPaid() {
+	//check if last_payout is after cashout_time which means post got paid
+	let last_payout = new Date(this.report.last_payout);
+	let cashout_time = new Date(this.report.cashout_time);
+	if (last_payout.getTime() > cashout_time.getTime()){
+		return true;
+	}
+	return false;
+},
+/* function handles closing open comment box and resetting data */
+resetOpenComment () {
+	this.replyBody = this.moderatorSignature;
+	this.commentBoxOpen=false;
+},
+commentSuccess (err, finalize, bchain) {
+	// stop loading animation and show notification
+	this.loading = false
+	this.$notify({
+		group: err ? 'error' : 'success',
+		text: err ? this.$t('Comment_Error') : this.$t('Comment_Success_Chain').replace('_CHAIN_', bchain),
+		position: 'top center'
+	})
+	
+	if (finalize){
+	
+		//display comment placeholder till blockchain data comes through
+		this.responsePosted = true;
+		this.responseBody = this.replyBody;
+		
+		//refetch report data anew, but only after 10 seconds to ensure data has been made available
+		setTimeout( this.fetchReportCommentData, 10000);
+		
+		//check if comment is lengthy enough, increase tracked count by 1
+		if (this.responseBody.length >= 50){
+			if (isNaN(this.commentCountToday)){
+				this.commentCountToday = 0;
+			}
+			this.commentCountToday += 1;
+		}
+		this.$store.commit('setCommentCountToday', this.commentCountToday);
+		
+		//reward the user for interacting with 3 different posts via comments
+		if (this.commentCountToday >= 3){
+			this.rewardUserComment();
+		}
+	}
+	
+	//reset open comment
+	this.resetOpenComment();
+},
+async processTrxFunc(op_name, cstm_params, bchain_option) {
+  // Ensure user is initialized
+  if (!this.user || !this.user.account || !this.user.account.name) {
+    console.error('Error: User is not initialized or account name is missing');
+    this.$notify({
+      group: 'error',
+      text: this.$t('Need_login'),
+      position: 'top center'
+    });
+    return { success: false, trx: null };
+  }
+
+  const user = this.user.account.name;
+  console.log('User found:', user);
+
+  // Check for standard login
+  if (!localStorage.getItem('std_login')) {
+    console.log('Using SteemConnect for transaction');
+    try {
+      let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
+      if (res.result.ref_block_num) {
+        console.log('SteemConnect broadcast success:', res.result);
+        return { success: true, trx: res.result };
+      } else {
+        console.error('SteemConnect broadcast failed:', res);
+        return { success: false, trx: null };
+      }
+    } catch (error) {
+      console.error('Error during SteemConnect broadcast:', error);
+      this.$notify({
+        group: 'error',
+        text: this.$t('Error during SteemConnect broadcast'),
+        position: 'top center'
+      });
+      return { success: false, trx: null };
+    }
+  } 
+  // Check for HiveAuth login
+  else if (localStorage.getItem('acti_login_method') === 'hiveauth') {
+    console.log('Using HiveAuth for transaction');
+    return new Promise((resolve) => {
+      const auth = {
+        username: user,
+        token: localStorage.getItem('access_token'),
+        expire: localStorage.getItem('expires'),
+        key: localStorage.getItem('key')
+      };
+      let operation = [[op_name, cstm_params]];
+
+      console.log('HiveAuth operation:', operation);
+
+      this.$HAS.broadcast(auth, 'posting', operation, (evt) => {
+        console.log('HiveAuth event:', evt);
+        let msg = this.$t('verify_hiveauth_app');
+        this.$notify({
+          group: 'warn',
+          text: msg,
+          duration: -1, // keep alive till clicked
+          position: 'top center'
+        });
+      })
+      .then((response) => {
+        console.log('HiveAuth response:', response);
+        this.$notify({
+          group: 'warn',
+          clean: true
+        });
+        if (response.cmd === 'sign_ack') {
+          resolve({ success: true, trx: response.data });
+        } else if (response.cmd === 'sign_nack') {
+          resolve({ success: false });
+        }
+      })
+      .catch((err) => {
+        this.$notify({
+          group: 'warn',
+          clean: true
+        });
+        console.error('Error during HiveAuth broadcast:', err);
+        resolve({ success: false });
+      });
+    });
+  } 
+  // Use default process for other login methods
+  else {
+    console.log('Using default method for transaction');
+    try {
+      let operation = [[op_name, cstm_params]];
+      console.log('Operation:', operation);
+
+      let accToken = localStorage.getItem('access_token');
+      let op_json = JSON.stringify(operation);
+      console.log('Operation JSON:', op_json);
+
+      let cur_bchain = localStorage.getItem('cur_bchain') || 'HIVE';
+      if (bchain_option) {
+        cur_bchain = bchain_option;
+      }
+      console.log('Current blockchain:', cur_bchain);
+
+      let url = new URL(process.env.actiAppUrl + 'performTrx/?user=' + user + '&operation=' + encodeURIComponent(op_json) + '&bchain=' + cur_bchain);
+      console.log('Request URL:', url);
+
+      let reqHeads = new Headers({
+        'Content-Type': 'application/json',
+        'x-acti-token': 'Bearer ' + accToken,
+      });
+      console.log('Request headers:', reqHeads);
+
+      let res = await fetch(url, { headers: reqHeads });
+      let outcome = await res.json();
+      console.log('Transaction outcome:', outcome);
+
+      if (outcome.error) {
+        console.error('Transaction error:', outcome.error);
+        let err_msg = outcome.trx.tx.error;
+        if (err_msg.includes('missing') && err_msg.includes('authority') && cur_bchain === bchain_option) {
+          localStorage.removeItem('access_token');
+          this.error_msg = this.$t('session_expired_login_again');
+          this.$store.dispatch('steemconnect/logout');
+        }
+        this.$notify({
+          group: 'error',
+          text: err_msg,
+          position: 'top center'
+        });
+        return { success: false, trx: null };
+      } else {
+        console.log('Transaction successful:', outcome.trx);
+        return { success: true, trx: outcome.trx };
+      }
+    } catch (error) {
+      console.error('Error during transaction:', error);
+      this.$notify({
+        group: 'error',
+        text: this.$t('Error during transaction'),
+        position: 'top center'
+      });
+      return { success: false, trx: null };
+    }
+  }
+},
+
+
+
+
+async vote(type, report) {
+  if (!this.user) {
+    this.error_msg = this.$t('Need_login');
+    this.$notify({
+      group: 'error',
+      text: this.error_msg,
+      position: 'top center'
+    });
+    return;
+  }
+  
+  this.voteProcessing = true;
+  let voter = this.user.account.name;
+  let weight = type === 'vote' ? 10000 : 0;
+
+  try {
+    if (!localStorage.getItem('std_login')) {
+      await this.$steemconnect.vote(voter, report.author, report.permlink, weight);
+      this.$notify({
+        group: 'success',
+        text: this.$t('Vote_Success'),
+        position: 'top center'
+      });
+    } else if (localStorage.getItem('acti_login_method') === 'keychain' && window.hive_keychain) {
+      let kp_perm = this.cur_bchain === 'HIVE' ? 'HIVE' : 'STEEM';
+      const response = await new Promise((resolve, reject) => {
+        window.hive_keychain.requestVote(this.user.account.name, report.author, report.permlink, weight, kp_perm, (res) => {
+          if (res.success) resolve(res);
+          else reject(res);
+        });
+      });
+      this.$notify({
+        group: 'success',
+        text: this.$t('Vote_Success'),
+        position: 'top center'
+      });
+    } else {
+      let cstm_params = {
+        voter: voter,
+        author: report.author,
+        permlink: report.permlink,
+        weight: weight
+      };
+
+      let res = await this.processTrxFunc('vote', cstm_params, this.cur_bchain);
+      if (res.success) {
+        this.$notify({
+          group: 'success',
+          text: this.$t('Vote_Success'),
+          position: 'top center'
+        });
+      } else {
+        throw new Error(res.error || 'Vote_Failed');
+      }
+
+      if (this.target_bchain === 'BOTH') {
+        let other_chain = this.cur_bchain === 'HIVE' ? 'STEEM' : 'HIVE';
+        res = await this.processTrxFunc('vote', cstm_params, other_chain);
+        if (res.success) {
+          this.$notify({
+            group: 'success',
+            text: this.$t('Vote_Success'),
+            position: 'top center'
+          });
+        } else {
+          throw new Error(res.error || 'Vote_Failed');
+        }
+      }
+    }
+  } catch (error) {
+    console.error(error);
+    this.$notify({
+      group: 'error',
+      text: this.$t('Vote_Failed') + ' : ' + (error.message || error),
+      position: 'top center'
+    });
+  } finally {
+    this.voteProcessing = false;
+    this.loading = false;
+  }
+},
+
+fetchReportData () {
+	this.loading = true
+	this.$store.dispatch('fetchPost', {
+		report: this.report,
+		full: true
+	}).then(() => {
+		this.loading = false
+	})
+},
+handleKeyDown(event) {
+	if (event.key === 'Enter' && event.ctrlKey) {
+		this.postResponse()
+	}
+},
+translate (lang) {
+	let currentLang = localStorage.getItem('lang') || 'en';
+	let newLang = lang;
+	
+	if (currentLang != lang) {
+		this.$i18n.locale = lang;
+		localStorage.setItem('lang', lang);
+		this.$store.dispatch('fetchTranslation', {
+			lang: lang,
+			resource: 'post',
+			id: this.report._id
+		})
+	}
+},
+fixSubModal(){
+	let modals = document.getElementsByClassName('modal-backdrop');
+	for (let i=0; i<modals.length; i++){
+		modals[i].parentNode.removeChild(modals[i]);
+	}
+},
+async translateText(content) {
+	try {
+		const response = await fetch('https://your-translation-api-endpoint', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': 'Bearer ' + process.env.translationApiKey,
+			},
+			body: JSON.stringify({
+				text: content,
+				target_lang: 'EN'
+			}),
+		});
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		const data = await response.json();
+		if (!data || !data.translated_text) {
+			throw new Error('No translated text found in response');
+		}
+
+		console.log('Translation successful:', data.translated_text);
+		return data.translated_text;
+	} catch (error) {
+		console.error('Error translating text:', error);
+		this.$notify({
+			group: 'error',
+			text: this.$t('Error_translating_text'),
+			position: 'top center'
+		});
+		return null; // Return null in case of an error
+	}
+},
+async translatePost() {
+	if (this.report) {
+		this.loading = true;
+		this.translatedContent = await this.translateText(this.report.body);
+		this.loading = false;
+	}
+},
+
+async translateContent() {
+    if (this.report) {
+      this.loading = true;
+      try {
+        const response = await fetch('https://your-translation-api-endpoint', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + process.env.translationApiKey,
+          },
+          body: JSON.stringify({
+            text: this.report.body,
+            target_lang: 'EN' // or any other target language
+          }),
+        });
+		if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+        const data = await response.json();
+        this.translatedContent = data.translated_text;
+      } catch (error) {
+        console.error('Error translating text:', error);
+        this.$notify({
+          group: 'error',
+          text: this.$t('Error_translating_text'),
+          position: 'top center'
+        });
+      } finally {
+        this.loading = false;
+      }
+    }
+  },
+
+  showOriginalPost() {
+    this.translatedContent = '';
+  },
+}
   }
 </script>
 
 <style>
+	
 	.modal-author{
 		margin-left: 10px !important;
 	}
