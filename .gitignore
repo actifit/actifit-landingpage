@@ -15,3 +15,5 @@ dist
 
 # Local envt
 .env
+.vscode/launch.json
+.vscode/settings.json
