@@ -9,6 +9,14 @@
 	<div v-else-if="errorDisplay==''" class="container pt-5 mt-5 pb-5 col-md-9" >
 		<h5 class="text-brand user-name" v-if="displayUser">
 			<a :href="formattedProfileUrl" target="_blank" class="p-2">@{{ displayUser }} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></a>
+			<span v-if="user && user.account.name === displayUser">
+				<span v-if="!editOn">
+					<a href="#" class="p-2"><i class="fas fa-edit" v-on:click="turnEditOn"></i></a>
+				</span>
+				<span v-else>
+					<a href="#" class="p-2"><i class="fa-regular fa-eye" v-on:click="turnEditOff"></i></a>
+				</span>
+			</span>
 			<span v-if="!account_banned && !isOwnAccount()" class="text-brand">
 				<span :title="$t('you_are_friends_username').replace('_USERNAME_', displayUser)" v-if="isFriend()" >
 					<i class="fas fa-user-friends p-2 acti-shadow" ></i>
@@ -37,8 +45,16 @@
         <!-- actifit specific data display -->
 		<div class="mb-3 row"> <!-- d-flex flex-column  -->
 		  <div v-if="displayUser" class="col-12 col-md-2">
-			<div class="user-avatar large-avatar mr-1 mb-3 col-12 col-md-12 float-left"
-					   :style="'background-image: url('+this.profImgUrl+'/u/' + this.displayUser + '/avatar)'"/>
+
+			<div class="user-avatar large-avatar mr-1 mb-3 col-12 col-md-12 float-left" 
+				:style="'background-image: url('+this.profImgUrl+'/u/' + this.displayUser + '/avatar)'">
+
+				<span v-if="editOn" class="profileButtonMove">
+					<a href="#" class="btn btn-brand p-2 acti-shadow square-btn" data-toggle="modal" data-target="#profileImageModal" v-on:click="showProfileImageModal">
+						<i class="fas fa-edit"></i>
+					</a>
+				</span>
+			</div>
 				
 				<div>
 					<a :href="'/activity/'+displayUser" class="btn btn-brand btn-white border" :class="smallScreenBtnClasses"><img src="/img/actifit_logo.png" class="mr-2 token-logo">&nbsp;{{ $t('Actifit_reports') }}</a>
@@ -162,21 +178,86 @@
 		</div>
 		  <div class="d-flex flex-column">
 		  <div v-if="userinfo" class="user-details">
-			<div class="info-box p-2"><i class="fas fa-user mr-2"></i> {{ userinfo.name }} <b-badge v-if="account_banned" variant="danger" :title="$t('Account_banned_tip')" >{{ $t('Account_banned') }}</b-badge></div>
-			<div class="row m-0">
-				<div class="location-text info-box col-md-4 cntnr">
-					<i class="fas fa-street-view mr-2"></i> 
-					{{ (userMeta && userMeta.profile && userMeta.profile.location) || $t('location_not_provided') }}
-				</div>
-				<div class="info-box col-md-4 cntnr">
-					<i class="fas fa-address-card mr-2"></i> 
-					{{ (userMeta && userMeta.profile && userMeta.profile.about) || $t('description_not_provided') }}
-				</div>
-				<div class="info-box col-md-4 cntnr">
-					<i class="fas fa-link mr-2"></i>&nbsp;
-					<a :href="(userMeta && userMeta.profile && userMeta.profile.website) ? userMeta.profile.website : '#'" class="force-white-url">
-						{{ (userMeta && userMeta.profile && userMeta.profile.website) || $t('website_not_provided') }}
+			<div class="info-box p-2">
+				<span v-if="!usernameEditOn">
+					<i class="fas fa-user mr-2"></i> 
+					{{ (userMeta && userMeta.profile && userMeta.profile.name) || $t('name_not_provided') }} 
+				</span>
+				<span v-else>
+					<textarea v-model="textAreaUsernameValue"></textarea>
+					<a class="btn btn-brand p-2 acti-shadow square-btn">
+						<i class="fa-solid fa-check" style="color: #63E6BE;" v-on:click="saveFunc('username')"></i>
 					</a>
+					<a class="btn btn-brand p-2 acti-shadow square-btn" v-on:click="turnUsernameEditOff">
+						<i class="fa-solid fa-xmark" style="color: white;"></i>
+					</a>
+				</span>
+				<span v-if="editOn && !usernameEditOn">
+					<a href="#" class="btn btn-brand p-2 acti-shadow square-btn" v-on:click="turnUsernameEditOn"><i class="fas fa-edit"></i></a>
+				</span>
+				<b-badge v-if="account_banned" variant="danger" :title="$t('Account_banned_tip')" >
+					{{ $t('Account_banned') }}
+				</b-badge>
+			</div>
+			<div class="row m-0">
+
+				<div class="location-text info-box col-md-4 cntnr">
+					<span>
+						<span v-if="!locationEditOn">
+							<i class="fas fa-street-view mr-2"></i> 
+							{{ (userMeta && userMeta.profile && userMeta.profile.location) || $t('location_not_provided') }}
+						</span>
+						<span v-else>
+							<textarea v-model="textAreaLocationValue"></textarea>
+							<a class="btn btn-brand p-2 acti-shadow square-btn" v-on:click="saveFunc('location')">
+								<i class="fa-solid fa-check" style="color: #63E6BE;" ></i>
+							</a>
+							<a class="btn btn-brand p-2 acti-shadow square-btn" v-on:click="turnLocationEditOff">
+								<i class="fa-solid fa-xmark" style="color: white;" ></i>
+							</a>
+						</span>
+						<a href="#" class="btn btn-brand p-2 acti-shadow square-btn" v-if="editOn && !locationEditOn" v-on:click="turnLocationEditOn"><i class="fas fa-edit" ></i></a>
+					</span>
+				</div>
+
+				<div class="info-box col-md-4 cntnr">
+					<span>
+						<span v-if="!descriptionEditOn">
+							<i class="fas fa-address-card mr-2"></i> 
+							{{ (userMeta && userMeta.profile && userMeta.profile.about) || $t('description_not_provided') }}
+						</span>
+						<span v-else>
+							<textarea v-model="textAreaDescriptionValue"></textarea>
+							<a class="btn btn-brand p-2 acti-shadow square-btn" v-on:click="saveFunc('description')">
+								<i class="fa-solid fa-check" style="color: #63E6BE;" ></i>
+							</a>
+							<a class="btn btn-brand p-2 acti-shadow square-btn" v-on:click="turnDescriptionEditOff">
+								<i class="fa-solid fa-xmark" style="color: white;" ></i>
+							</a>
+						</span>
+						<a href="#" class="btn btn-brand p-2 acti-shadow square-btn" v-if="editOn && !descriptionEditOn" v-on:click="turnDescriptionEditOn"><i class="fas fa-edit" ></i></a>
+					</span>
+				</div>
+
+				<div class="info-box col-md-4 cntnr">	
+					<span>
+						<span v-if="!linkEditOn">
+							<i class="fas fa-link mr-2"></i>&nbsp;
+							<a :href="(userMeta && userMeta.profile && userMeta.profile.website) ? userMeta.profile.website : '#'" class="force-white-url">
+								{{ (userMeta && userMeta.profile && userMeta.profile.website) || $t('website_not_provided') }}
+							</a>
+						</span>
+						<span v-else>
+							<textarea v-model="textAreaLinkValue"></textarea>
+							<a class="btn btn-brand p-2 acti-shadow square-btn" v-on:click="saveFunc('link')">
+								<i class="fa-solid fa-check" style="color: #63E6BE;"></i>
+							</a>
+							<a class="btn btn-brand p-2 acti-shadow square-btn" v-on:click="turnLinkEditOff">
+								<i class="fa-solid fa-xmark" style="color: white;" ></i>
+							</a>
+						</span>
+						<a href="#" class="btn btn-brand p-2 acti-shadow square-btn" v-if="editOn && !linkEditOn" v-on:click="turnLinkEditOn"><i class="fas fa-edit" ></i></a>
+					</span>
 				</div>
 			</div>
 			<div class="row m-0">
@@ -413,6 +494,12 @@
 	<MeasureChartModal :userMeasurements="userMeasurements"	/>
 	
 	<ActivityChartModal :userActivity="userActivity"	/>
+    <ProfileImageModal
+      :existingImage="linkForImage"
+      v-if="isProfileImageModalVisible"
+      @close="closeProfileImageModal"
+      @image-changed="updateProfileImage"
+    />
 	
 	<NotifyModal :modalTitle="$t('Actifit_Info')" :modalText="$t('splinterlands_extra_rewards_desc')"/>
 	
@@ -444,6 +531,8 @@
   import MeasureChartModal from '~/components/MeasureChartModal'
   
   import ActivityChartModal from '~/components/ActivityChartModal'
+
+  import ProfileImageModal from '~/components/ProfileImageModal'
   
   /* import badges component */
   import { BadgePlugin } from 'bootstrap-vue'
@@ -560,6 +649,19 @@
 			splinterCards: [],
 			userSplinterCards: [],
 			splinterRarities: [],
+			editOn: false,
+			usernameEditOn: false,
+			profilePicEditon: false,
+			locationEditOn: false,
+			descriptionEditOn: false,
+			linkEditOn: false,
+			textAreaLocationValue: '',
+			textAreaUsernameValue: '',
+			textAreaDescriptionValue: '',
+			textAreaLinkValue: '',
+			linkForImage: this.profImgUrl + '/u/' + this.displayUser + '/avatar',
+			isProfileImageModalVisible: false,
+			textAreaProfileImageValue: '',
 		}
 	},
 	watch: {
@@ -570,20 +672,58 @@
 		await this.$store.dispatch('steemconnect/refreshUser');
 		this.fetchUserData();
 		//this.reload += 1;
-	  }
+	  },
+
+	textAreaLocation(newVal){
+		this.textAreaLocationValue = newVal;
+	},
+	textAreaUsername(newVal){
+		this.textAreaUsernameValue = newVal;
+	},
+	textAreaLink(newVal){
+		this.textAreaLinkValue = newVal;
+	},
+	textAreaDescription(newVal){
+		this.textAreaDescriptionValue = newVal;
+	},
 	},
 	components: {
 	  NavbarBrand,
 	  Footer,
 	  MeasureChartModal,
 	  ActivityChartModal,
-	  NotifyModal
+	  NotifyModal,
+	  ProfileImageModal
 	},
     computed: {
 	  ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters('steemconnect', ['stdLogin']),
 	  ...mapGetters(['newlyVotedPosts', 'bchain']),
 	  ...mapGetters(['userTokens'],['commentEntries'], 'commentCountToday'),
+	
+	  displayUsersName(){
+		return this.getUsersName();
+	  },
+	  textAreaUsername(){
+		return this.userMeta && this.userMeta.profile && this.userMeta.profile.name
+        ? this.userMeta.profile.name
+        : '';
+	  },
+	  textAreaLocation(){
+		return this.userMeta && this.userMeta.profile && this.userMeta.profile.location
+        ? this.userMeta.profile.location
+        : '';
+	  },
+	  textAreaDescription(){
+		return this.userMeta && this.userMeta.profile && this.userMeta.profile.about
+        ? this.userMeta.profile.about
+        : '';
+	  },
+	  textAreaLink(){
+		return this.userMeta && this.userMeta.profile && this.userMeta.profile.website
+        ? this.userMeta.profile.website
+        : '';
+	  },
 	  isKeychainActive(){
 		return (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain)
 	  },
@@ -676,6 +816,140 @@
       }
     },
 	methods: {
+		showProfileImageModal() {
+		this.isProfileImageModalVisible = true;
+		},
+		closeProfileImageModal() {
+			this.isProfileImageModalVisible = false;
+		},
+		getUsersName(){
+			return this.displayUser;
+		},
+		turnUsernameEditOn(){
+			this.usernameEditOn = true;
+			return;
+		},
+		turnUsernameEditOff(){
+			this.usernameEditOn = false;
+			return;
+		},
+		turnProfileEditOn(){
+			this.profilePicEditon = true;
+			return;
+		},
+		turnProfileEditOff(){
+			this.profilePicEditon = false;
+			return;
+		},
+		turnLocationEditOn(){
+			this.locationEditOn = true;
+			return;
+		},
+		turnLocationEditOff(){
+			this.locationEditOn = false;
+			return;
+		},
+		turnDescriptionEditOn(){
+			this.descriptionEditOn = true;
+			return;
+		},
+		turnDescriptionEditOff(){
+			this.descriptionEditOn = false;
+			return;
+		},
+		turnLinkEditOn(){
+			this.linkEditOn = true;
+			return;
+		},
+		turnLinkEditOff(){
+			this.linkEditOn = false;
+			return;
+		},
+		turnEditOn(){
+			this.editOn = true;
+			return;
+		},
+		turnEditOff(){
+			this.editOn = false;
+			this.turnLinkEditOff();
+			this.turnUsernameEditOff();
+			this.turnDescriptionEditOff();
+			this.turnLocationEditOff();
+			return;	
+		},
+		async broadcastUpdate(updateData, field) {
+			let parsedData = JSON.parse(this.user.account.posting_json_metadata);
+
+			//only update the edited field and then send all in the transaction
+			if(field === 'location'){
+				parsedData.profile.location = updateData;
+			}
+			else if(field ==='description'){
+				parsedData.profile.about = updateData;
+			}
+			else if(field === 'link'){
+				parsedData.profile.website = updateData;
+			}
+			else if(field === 'username'){
+				parsedData.profile.name = updateData;
+			}
+			else if(field === 'profile_image'){
+				parsedData.profile.profile_image = updateData; //get the link
+			}
+			let pst = {
+				profile: {
+					profile_image: parsedData.profile.profile_image,
+					location: parsedData.profile.location,
+					about: parsedData.profile.about,
+					website: parsedData.profile.website,
+					name: parsedData.profile.name,
+					version: 2
+				}
+			}
+
+			let transaction = 			
+					{account: this.user.account.name,
+					json_metadata: '',
+					posting_json_metadata: JSON.stringify(pst),
+					extensions: []
+					};
+
+			await this.$processTrxFunc('account_update2',transaction);
+		},
+		async updateProfileImage(imageUrl) {
+			this.textAreaProfileImageValue = imageUrl;
+			await this.broadcastUpdate(imageUrl, 'profile_image');
+			this.closeProfileImageModal();
+			this.linkForImage = imageUrl; // Update the profile image link
+		},
+		saveFunc(field) {
+		let updatePromise;
+
+		if (field === 'username') {
+			updatePromise = this.broadcastUpdate(this.textAreaUsernameValue, 'username');
+			this.turnUsernameEditOff();
+		} else if (field === 'description') {
+			updatePromise = this.broadcastUpdate(this.textAreaDescriptionValue, 'description');
+			this.turnDescriptionEditOff();
+		} else if (field === 'link') {
+			updatePromise = this.broadcastUpdate(this.textAreaLinkValue, 'link');
+			this.turnLinkEditOff();
+		} else if (field === 'location') {
+			updatePromise = this.broadcastUpdate(this.textAreaLocationValue, 'location');
+			this.turnLocationEditOff();
+		} else if(field === 'profile_image') {
+			updatePromise = this.broadcastUpdate(this.textAreaProfileImageValue, 'profile_image');
+			this.turnProfileEditOff();
+		}
+		if (updatePromise) {
+			updatePromise.then(() => {
+			window.location.reload();
+			}).catch((error) => {
+			console.error('Error updating profile:', error);
+			});
+		}
+		},
+
 	  /**
        * Formats numbers with commas and dots.
        *
@@ -1711,6 +1985,11 @@
 	  }
 	},
 	async mounted () {
+		//populate the text area with initial data.
+		this.textAreaLocationValue = this.textAreaLocation;
+		this.textAreaDescriptionValue = this.textAreaDescription;
+		this.textAreaLinkValue = this.textAreaLink;
+		this.textAreaUsernameValue = this.textAreaUsername;
 	
 		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		steem.api.setOptions({ url: process.env.steemApiNode });
@@ -1852,6 +2131,19 @@
 </script>
 
 <style>
+.square-btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: auto; 
+    height: auto;
+    padding: 0;
+}
+
+
+.profileButtonMove{
+	margin-left: 7em;
+}
 	.user-name{
 		margin-left: 10px;
 		padding: 10px;

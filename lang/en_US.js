@@ -1,7 +1,11 @@
 module.exports = {
+  change_profile_image: 'Change Profile Image',
+  upload_image: 'Upload Image',
+  or_paste_url: 'Or Paste URL',
   website_not_provided: 'Website not provided',
   description_not_provided: 'Description not provided',
   location_not_provided: 'Location not provided',
+  name_not_provided: 'Name not provided',
   X_twitter: 'X',
   swap_tokens: 'Swap Tokens',
   no_pending_rewards: 'You currently have no pending rewards',
