@@ -447,7 +447,7 @@
 		  this.loading = false
 		  this.$notify({
 			group: err ? 'error' : 'success',
-			text: err ? this.$t('Comment_Error') : this.$t('Comment_Success_Chain').replace('_CHAIN_', bchain),
+			text: err ? this.$t('Comment_Error') : this.$t('Comment_Success_Chain').replace('CHAIN', bchain),
 			position: 'top center'
 		  })
 		  
