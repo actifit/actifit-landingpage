@@ -9,8 +9,8 @@
           </button>
         </div>
         <div class="modal-body">
-          <div class="image-preview" v-if="existingImage">
-            <img :src="existingImage" alt="Profile Image" width="150" height="150" />
+          <div class="image-preview">
+            <img :src="`${this.profImgUrl}/u/${username}/avatar`" alt="Profile Image" width="150" height="150" />
           </div>
           <div class="form-group">
             <label for="imageUpload">{{ $t('upload_image') }}</label>
@@ -33,6 +33,7 @@
 <script>
 import AWS from 'aws-sdk';
 
+
 const bucketName = 'actifit';
 const actifit_host = 'https://usermedia.actifit.io/'
 AWS.config.update({
@@ -41,12 +42,13 @@ AWS.config.update({
   region: 'us-east-1'
 });
 export default {
-  props: ['existingImage'],
+  props: ['username'],
   data() {
     return {
       imageUrl: '',
       uploadedImage: null,
       imgUploading: false,
+      profImgUrl: process.env.hiveImgUrl,
     };
   },
   methods: {
