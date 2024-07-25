@@ -10,11 +10,11 @@
 		<h5 class="text-brand user-name" v-if="displayUser">
 			<a :href="formattedProfileUrl" target="_blank" class="p-2">@{{ displayUser }} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></a>
 			<span v-if="user && user.account.name === displayUser">
-				<span v-if="!editOn">
-					<a href="#" class="p-2"><i class="fas fa-edit" v-on:click="turnEditOn"></i></a>
+				<span v-show="!editOn">
+					<a class="p-2"><i class="fas fa-edit" v-on:click="turnEditOn"></i></a>
 				</span>
-				<span v-else>
-					<a href="#" class="p-2"><i class="fa-regular fa-eye" v-on:click="turnEditOff"></i></a>
+				<span v-show="editOn">
+					<a class="p-2"><i class="fa-regular fa-eye" v-on:click="turnEditOff"></i></a>
 				</span>
 			</span>
 			<span v-if="!account_banned && !isOwnAccount()" class="text-brand">
@@ -199,7 +199,7 @@
 						</a>
 					</span>
 					<span v-if="editOn && !usernameEditOn">
-						<a href="#" class="btn btn-brand p-2 acti-shadow square-btn" v-on:click="turnUsernameEditOn"><i class="fas fa-edit"></i></a>
+						<a class="btn btn-brand p-2 acti-shadow square-btn" v-on:click="turnUsernameEditOn"><i class="fas fa-edit"></i></a>
 					</span>
 					<b-badge v-if="account_banned" variant="danger" :title="$t('Account_banned_tip')" >
 						{{ $t('Account_banned') }}
@@ -227,7 +227,7 @@
 								<i class="fa-solid fa-xmark" style="color: white;" ></i>
 							</a>
 						</span>
-						<a href="#" class="btn btn-brand p-2 acti-shadow square-btn" v-if="editOn && !locationEditOn" v-on:click="turnLocationEditOn"><i class="fas fa-edit" ></i></a>
+						<a class="btn btn-brand p-2 acti-shadow square-btn" v-if="editOn && !locationEditOn" v-on:click="turnLocationEditOn"><i class="fas fa-edit" ></i></a>
 					</span>
 				</div>
 				
@@ -251,7 +251,7 @@
 								<i class="fa-solid fa-xmark" style="color: white;" ></i>
 							</a>
 						</span>
-						<a href="#" class="btn btn-brand p-2 acti-shadow square-btn" v-if="editOn && !descriptionEditOn" v-on:click="turnDescriptionEditOn"><i class="fas fa-edit" ></i></a>
+						<a class="btn btn-brand p-2 acti-shadow square-btn" v-if="editOn && !descriptionEditOn" v-on:click="turnDescriptionEditOn"><i class="fas fa-edit" ></i></a>
 					</span>
 				</div>
 
@@ -260,13 +260,13 @@
 						<i class="fas fa-spinner fa-spin text-brand"></i>
 					</div>
 					<span v-else>
-						<span v-if="!linkEditOn">
+						<span v-show="!linkEditOn">
 							<i class="fas fa-link mr-2"></i>&nbsp;
 							<a :href="(userMeta && userMeta.profile && userMeta.profile.website) ? userMeta.profile.website : '#'" class="force-white-url">
 								{{ textAreaLinkValue }}
 							</a>
 						</span>
-						<span v-else>
+						<span v-show="linkEditOn">
 							<textarea v-model="textAreaLinkValue"></textarea>
 							<a class="btn btn-brand p-2 acti-shadow square-btn" v-on:click="saveFunc('link')">
 								<i class="fa-solid fa-check" style="color: #63E6BE;"></i>
@@ -275,7 +275,7 @@
 								<i class="fa-solid fa-xmark" style="color: white;" ></i>
 							</a>
 						</span>
-						<a href="#" class="btn btn-brand p-2 acti-shadow square-btn" v-if="editOn && !linkEditOn" v-on:click="turnLinkEditOn"><i class="fas fa-edit" ></i></a>
+						<a class="btn btn-brand p-2 acti-shadow square-btn" v-if="editOn && !linkEditOn" v-on:click="turnLinkEditOn"><i class="fas fa-edit" ></i></a>
 					</span>
 				</div>
 			</div>
@@ -686,6 +686,11 @@
 			displayLocation: '',
 			displayAbout: '',
 			displayLink: '',
+			tempName: '',
+			tempLocation: '',
+			tempLink: '',
+			tempDescription: '',
+			tempPic: '',
 		}
 	},
 	watch: {
@@ -851,10 +856,12 @@
 		},
 		turnUsernameEditOn(){
 			this.usernameEditOn = true;
+			this.tempName = this.textAreaUsernameValue;
 			return;
 		},
 		turnUsernameEditOff(){
 			this.usernameEditOn = false;
+			this.textAreaUsernameValue = this.tempName
 			return;
 		},
 		turnProfileEditOn(){
@@ -867,26 +874,32 @@
 		},
 		turnLocationEditOn(){
 			this.locationEditOn = true;
+			this.tempLocation = this.textAreaLocationValue;
 			return;
 		},
 		turnLocationEditOff(){
 			this.locationEditOn = false;
+			this.textAreaLocationValue = this.tempLocation;
 			return;
 		},
 		turnDescriptionEditOn(){
 			this.descriptionEditOn = true;
+			this.tempDescription = this.textAreaDescriptionValue;
 			return;
 		},
 		turnDescriptionEditOff(){
 			this.descriptionEditOn = false;
+			this.textAreaDescriptionValue = this.tempDescription;
 			return;
 		},
 		turnLinkEditOn(){
 			this.linkEditOn = true;
+			this.tempLink = this.textAreaLinkValue;
 			return;
 		},
 		turnLinkEditOff(){
 			this.linkEditOn = false;
+			this.textAreaLinkValue = this.tempLink;
 			return;
 		},
 		turnEditOn(){
@@ -895,10 +908,10 @@
 		},
 		turnEditOff(){
 			this.editOn = false;
-			this.turnLinkEditOff();
-			this.turnUsernameEditOff();
-			this.turnDescriptionEditOff();
-			this.turnLocationEditOff();
+			this.linkEditOn = false;
+			this.usernameEditOn = false;
+			this.descriptionEditOn = false;
+			this.locationeditOn = false;
 			return;	
 		},
 		async broadcastUpdate(updateData, field) {
@@ -926,19 +939,19 @@
 			let parsedData = JSON.parse(this.user.account.posting_json_metadata);
 
 			//only update the edited field and then send all in the transaction
-			if(field === 'location'){
-				parsedData.profile.location = updateData;
-			}
-			else if(field ==='description'){
-				parsedData.profile.about = updateData;
-			}
-			else if(field === 'link'){
-				parsedData.profile.website = updateData;
-			}
-			else if(field === 'username'){
-				parsedData.profile.name = updateData;
-			}
-			else if(field === 'profile_image'){
+			
+				parsedData.profile.location = this.textAreaLocationValue;
+			
+			
+				parsedData.profile.about = this.textAreaDescriptionValue;
+			
+			
+				parsedData.profile.website = this.textAreaLinkValue;
+			
+			
+				parsedData.profile.name = this.textAreaUsernameValue;
+			
+			if(field === 'profile_image'){
 				parsedData.profile.profile_image = updateData; //get the link
 			}
 			let pst = {
@@ -976,34 +989,34 @@
 				updatePromise = this.broadcastUpdate(this.textAreaUsernameValue, 'username');
 				await updatePromise;
 				this.username = this.textAreaUsernameValue;
-				this.turnUsernameEditOff();
+				this.usernameEditOn = false;
 			} else if (field === 'description') {
 				updatePromise = this.broadcastUpdate(this.textAreaDescriptionValue, 'description');
 				await updatePromise;
 				this.description = this.textAreaDescriptionValue;
-				this.turnDescriptionEditOff();
+				this.descriptionEditOn = false;
 			} else if (field === 'link') {
 				updatePromise = this.broadcastUpdate(this.textAreaLinkValue, 'link');
 				await updatePromise;
 				this.link = this.textAreaLinkValue;
-				this.turnLinkEditOff();
+				this.linkEditOn = false;
 			} else if (field === 'location') {
 				updatePromise = this.broadcastUpdate(this.textAreaLocationValue, 'location');
 				await updatePromise;
 				this.location = this.textAreaLocationValue;
-				this.turnLocationEditOff();
+				this.locationEditOn = false;
 			} else if(field === 'profile_image') {
 				updatePromise = this.broadcastUpdate(this.textAreaProfileImageValue, 'profile_image');
 				await updatePromise;
 				this.profileImage = this.textAreaProfileImageValue;
-				this.turnProfileEditOff();
+				this.profilePicEditon = false;
 			}
 			this.$nextTick(() => {
-				if (field === 'username') this.turnUsernameEditOff();
-				else if (field === 'description') this.turnDescriptionEditOff();
-				else if (field === 'link') this.turnLinkEditOff();
-				else if (field === 'location') this.turnLocationEditOff();
-				else if (field === 'profile_image') this.turnProfileEditOff();
+				if (field === 'username') this.usernameEditOn = false;
+				else if (field === 'description') this.descriptionEditOn = false;
+				else if (field === 'link') this.linkEditOn = false;
+				else if (field === 'location') this.locationEditOn = false;
+				else if (field === 'profile_image') this.profilePicEditon = false;
 			});
 		} finally{
 			this.updatingField = null;
