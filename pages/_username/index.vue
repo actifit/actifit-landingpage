@@ -10,11 +10,11 @@
 		<h5 class="text-brand user-name" v-if="displayUser">
 			<a :href="formattedProfileUrl" target="_blank" class="p-2">@{{ displayUser }} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></a>
 			<span v-if="user && user.account.name === displayUser">
-				<span v-if="!editOn">
-					<a href="#" class="p-2"><i class="fas fa-edit" v-on:click="turnEditOn"></i></a>
+				<span v-show="!editOn">
+					<a class="p-2"><i class="fas fa-edit" v-on:click="turnEditOn"></i></a>
 				</span>
-				<span v-else>
-					<a href="#" class="p-2"><i class="fa-regular fa-eye" v-on:click="turnEditOff"></i></a>
+				<span v-show="editOn">
+					<a class="p-2"><i class="fa-regular fa-eye" v-on:click="turnEditOff"></i></a>
 				</span>
 			</span>
 			<span v-if="!account_banned && !isOwnAccount()" class="text-brand">
@@ -177,35 +177,46 @@
 		  </div>
 		</div>
 		  <div class="d-flex flex-column">
+			
 		  <div v-if="userinfo" class="user-details">
+
 			<div class="info-box p-2">
-				<span v-if="!usernameEditOn">
-					<i class="fas fa-user mr-2"></i> 
-					{{ (userMeta && userMeta.profile && userMeta.profile.name) || $t('name_not_provided') }} 
-				</span>
+				<div v-if="updatingField === 'username'" class="d-flex justify-content-center align-items-center h-100">
+					<i class="fas fa-spinner fa-spin text-brand"></i>
+				</div>
 				<span v-else>
-					<textarea v-model="textAreaUsernameValue"></textarea>
-					<a class="btn btn-brand p-2 acti-shadow square-btn">
-						<i class="fa-solid fa-check" style="color: #63E6BE;" v-on:click="saveFunc('username')"></i>
-					</a>
-					<a class="btn btn-brand p-2 acti-shadow square-btn" v-on:click="turnUsernameEditOff">
-						<i class="fa-solid fa-xmark" style="color: white;"></i>
-					</a>
+					<span v-if="!usernameEditOn">
+						<i class="fas fa-user mr-2"></i> 
+						{{ textAreaUsernameValue }} 
+					</span>
+					<span v-else>
+						<textarea v-model="textAreaUsernameValue"></textarea>
+						<a class="btn btn-brand p-2 acti-shadow square-btn" v-on:click="saveFunc('username')">
+							<i class="fa-solid fa-check" style="color: #63E6BE;"></i>
+						</a>
+						<a class="btn btn-brand p-2 acti-shadow square-btn" v-on:click="turnUsernameEditOff">
+							<i class="fa-solid fa-xmark" style="color: white;"></i>
+						</a>
+					</span>
+					<span v-if="editOn && !usernameEditOn">
+						<a class="btn btn-brand p-2 acti-shadow square-btn" v-on:click="turnUsernameEditOn"><i class="fas fa-edit"></i></a>
+					</span>
+					<b-badge v-if="account_banned" variant="danger" :title="$t('Account_banned_tip')" >
+						{{ $t('Account_banned') }}
+					</b-badge>
 				</span>
-				<span v-if="editOn && !usernameEditOn">
-					<a href="#" class="btn btn-brand p-2 acti-shadow square-btn" v-on:click="turnUsernameEditOn"><i class="fas fa-edit"></i></a>
-				</span>
-				<b-badge v-if="account_banned" variant="danger" :title="$t('Account_banned_tip')" >
-					{{ $t('Account_banned') }}
-				</b-badge>
 			</div>
 			<div class="row m-0">
 
+
 				<div class="location-text info-box col-md-4 cntnr">
-					<span>
+					<div v-if="updatingField === 'location'" class="d-flex justify-content-center align-items-center h-100">
+						<i class="fas fa-spinner fa-spin text-brand"></i>
+					</div>
+					<span v-else>
 						<span v-if="!locationEditOn">
 							<i class="fas fa-street-view mr-2"></i> 
-							{{ (userMeta && userMeta.profile && userMeta.profile.location) || $t('location_not_provided') }}
+							{{ textAreaLocationValue }}
 						</span>
 						<span v-else>
 							<textarea v-model="textAreaLocationValue"></textarea>
@@ -216,15 +227,20 @@
 								<i class="fa-solid fa-xmark" style="color: white;" ></i>
 							</a>
 						</span>
-						<a href="#" class="btn btn-brand p-2 acti-shadow square-btn" v-if="editOn && !locationEditOn" v-on:click="turnLocationEditOn"><i class="fas fa-edit" ></i></a>
+						<a class="btn btn-brand p-2 acti-shadow square-btn" v-if="editOn && !locationEditOn" v-on:click="turnLocationEditOn"><i class="fas fa-edit" ></i></a>
 					</span>
 				</div>
+				
 
 				<div class="info-box col-md-4 cntnr">
-					<span>
+					<div v-if="updatingField === 'description'" class="d-flex justify-content-center align-items-center h-100">
+					<i class="fas fa-spinner fa-spin text-brand"></i>
+				</div>
+					
+					<span v-else>
 						<span v-if="!descriptionEditOn">
 							<i class="fas fa-address-card mr-2"></i> 
-							{{ (userMeta && userMeta.profile && userMeta.profile.about) || $t('description_not_provided') }}
+							{{ textAreaDescriptionValue }}
 						</span>
 						<span v-else>
 							<textarea v-model="textAreaDescriptionValue"></textarea>
@@ -235,19 +251,22 @@
 								<i class="fa-solid fa-xmark" style="color: white;" ></i>
 							</a>
 						</span>
-						<a href="#" class="btn btn-brand p-2 acti-shadow square-btn" v-if="editOn && !descriptionEditOn" v-on:click="turnDescriptionEditOn"><i class="fas fa-edit" ></i></a>
+						<a class="btn btn-brand p-2 acti-shadow square-btn" v-if="editOn && !descriptionEditOn" v-on:click="turnDescriptionEditOn"><i class="fas fa-edit" ></i></a>
 					</span>
 				</div>
 
-				<div class="info-box col-md-4 cntnr">	
-					<span>
-						<span v-if="!linkEditOn">
+				<div class="info-box col-md-4 cntnr">
+					<div v-if="updatingField === 'link'" class="d-flex justify-content-center align-items-center h-100">
+						<i class="fas fa-spinner fa-spin text-brand"></i>
+					</div>
+					<span v-else>
+						<span v-show="!linkEditOn">
 							<i class="fas fa-link mr-2"></i>&nbsp;
 							<a :href="(userMeta && userMeta.profile && userMeta.profile.website) ? userMeta.profile.website : '#'" class="force-white-url">
-								{{ (userMeta && userMeta.profile && userMeta.profile.website) || $t('website_not_provided') }}
+								{{ textAreaLinkValue }}
 							</a>
 						</span>
-						<span v-else>
+						<span v-show="linkEditOn">
 							<textarea v-model="textAreaLinkValue"></textarea>
 							<a class="btn btn-brand p-2 acti-shadow square-btn" v-on:click="saveFunc('link')">
 								<i class="fa-solid fa-check" style="color: #63E6BE;"></i>
@@ -256,7 +275,7 @@
 								<i class="fa-solid fa-xmark" style="color: white;" ></i>
 							</a>
 						</span>
-						<a href="#" class="btn btn-brand p-2 acti-shadow square-btn" v-if="editOn && !linkEditOn" v-on:click="turnLinkEditOn"><i class="fas fa-edit" ></i></a>
+						<a class="btn btn-brand p-2 acti-shadow square-btn" v-if="editOn && !linkEditOn" v-on:click="turnLinkEditOn"><i class="fas fa-edit" ></i></a>
 					</span>
 				</div>
 			</div>
@@ -495,7 +514,7 @@
 	
 	<ActivityChartModal :userActivity="userActivity"	/>
     <ProfileImageModal
-      :existingImage="linkForImage"
+      :username="this.user.account.name"
       v-if="isProfileImageModalVisible"
       @close="closeProfileImageModal"
       @image-changed="updateProfileImage"
@@ -659,9 +678,19 @@
 			textAreaUsernameValue: '',
 			textAreaDescriptionValue: '',
 			textAreaLinkValue: '',
-			linkForImage: this.profImgUrl + '/u/' + this.displayUser + '/avatar',
+			linkForImage: `${this.profImgUrl}/u/${this.displayUser}/avatar`,
 			isProfileImageModalVisible: false,
 			textAreaProfileImageValue: '',
+			updatingField: null,
+			displayUsersName: '',
+			displayLocation: '',
+			displayAbout: '',
+			displayLink: '',
+			tempName: '',
+			tempLocation: '',
+			tempLink: '',
+			tempDescription: '',
+			tempPic: '',
 		}
 	},
 	watch: {
@@ -701,7 +730,7 @@
 	  ...mapGetters(['newlyVotedPosts', 'bchain']),
 	  ...mapGetters(['userTokens'],['commentEntries'], 'commentCountToday'),
 	
-	  displayUsersName(){
+	  displayUsersNames(){
 		return this.getUsersName();
 	  },
 	  textAreaUsername(){
@@ -827,10 +856,12 @@
 		},
 		turnUsernameEditOn(){
 			this.usernameEditOn = true;
+			this.tempName = this.textAreaUsernameValue;
 			return;
 		},
 		turnUsernameEditOff(){
 			this.usernameEditOn = false;
+			this.textAreaUsernameValue = this.tempName
 			return;
 		},
 		turnProfileEditOn(){
@@ -843,26 +874,32 @@
 		},
 		turnLocationEditOn(){
 			this.locationEditOn = true;
+			this.tempLocation = this.textAreaLocationValue;
 			return;
 		},
 		turnLocationEditOff(){
 			this.locationEditOn = false;
+			this.textAreaLocationValue = this.tempLocation;
 			return;
 		},
 		turnDescriptionEditOn(){
 			this.descriptionEditOn = true;
+			this.tempDescription = this.textAreaDescriptionValue;
 			return;
 		},
 		turnDescriptionEditOff(){
 			this.descriptionEditOn = false;
+			this.textAreaDescriptionValue = this.tempDescription;
 			return;
 		},
 		turnLinkEditOn(){
 			this.linkEditOn = true;
+			this.tempLink = this.textAreaLinkValue;
 			return;
 		},
 		turnLinkEditOff(){
 			this.linkEditOn = false;
+			this.textAreaLinkValue = this.tempLink;
 			return;
 		},
 		turnEditOn(){
@@ -871,29 +908,50 @@
 		},
 		turnEditOff(){
 			this.editOn = false;
-			this.turnLinkEditOff();
-			this.turnUsernameEditOff();
-			this.turnDescriptionEditOff();
-			this.turnLocationEditOff();
+			this.linkEditOn = false;
+			this.usernameEditOn = false;
+			this.descriptionEditOn = false;
+			this.locationeditOn = false;
 			return;	
 		},
 		async broadcastUpdate(updateData, field) {
+			if(this.user.account.posting_json_metadata === ''){
+				let pre_pst = {
+					profile: {
+						profile_image: '',
+						location: '',
+						about: '',
+						website: '',
+						name: '',
+						version: 2
+					}
+				};
+
+				let pre_transaction =
+					{account: this.user.account.name,
+					json_metadata: '',
+					posting_json_metadata: JSON.stringify(pre_pst),
+					extensions: []
+					};
+				await this.$processTrxFunc('account_update2',pre_transaction);
+			}
+
 			let parsedData = JSON.parse(this.user.account.posting_json_metadata);
 
 			//only update the edited field and then send all in the transaction
-			if(field === 'location'){
-				parsedData.profile.location = updateData;
-			}
-			else if(field ==='description'){
-				parsedData.profile.about = updateData;
-			}
-			else if(field === 'link'){
-				parsedData.profile.website = updateData;
-			}
-			else if(field === 'username'){
-				parsedData.profile.name = updateData;
-			}
-			else if(field === 'profile_image'){
+			
+				parsedData.profile.location = this.textAreaLocationValue;
+			
+			
+				parsedData.profile.about = this.textAreaDescriptionValue;
+			
+			
+				parsedData.profile.website = this.textAreaLinkValue;
+			
+			
+				parsedData.profile.name = this.textAreaUsernameValue;
+			
+			if(field === 'profile_image'){
 				parsedData.profile.profile_image = updateData; //get the link
 			}
 			let pst = {
@@ -922,31 +980,41 @@
 			this.closeProfileImageModal();
 			this.linkForImage = imageUrl; // Update the profile image link
 		},
-		saveFunc(field) {
+		
+		async saveFunc(field) {
+		this.updatingField = field;
 		let updatePromise;
-
-		if (field === 'username') {
-			updatePromise = this.broadcastUpdate(this.textAreaUsernameValue, 'username');
-			this.turnUsernameEditOff();
-		} else if (field === 'description') {
-			updatePromise = this.broadcastUpdate(this.textAreaDescriptionValue, 'description');
-			this.turnDescriptionEditOff();
-		} else if (field === 'link') {
-			updatePromise = this.broadcastUpdate(this.textAreaLinkValue, 'link');
-			this.turnLinkEditOff();
-		} else if (field === 'location') {
-			updatePromise = this.broadcastUpdate(this.textAreaLocationValue, 'location');
-			this.turnLocationEditOff();
-		} else if(field === 'profile_image') {
-			updatePromise = this.broadcastUpdate(this.textAreaProfileImageValue, 'profile_image');
-			this.turnProfileEditOff();
-		}
-		if (updatePromise) {
-			updatePromise.then(() => {
-			window.location.reload();
-			}).catch((error) => {
-			console.error('Error updating profile:', error);
+		try{
+			if (field === 'username') {
+				updatePromise = this.broadcastUpdate(this.textAreaUsernameValue, 'username');
+				await updatePromise;
+				this.username = this.textAreaUsernameValue;
+				this.usernameEditOn = false;
+			} else if (field === 'description') {
+				updatePromise = this.broadcastUpdate(this.textAreaDescriptionValue, 'description');
+				await updatePromise;
+				this.description = this.textAreaDescriptionValue;
+				this.descriptionEditOn = false;
+			} else if (field === 'link') {
+				updatePromise = this.broadcastUpdate(this.textAreaLinkValue, 'link');
+				await updatePromise;
+				this.link = this.textAreaLinkValue;
+				this.linkEditOn = false;
+			} else if (field === 'location') {
+				updatePromise = this.broadcastUpdate(this.textAreaLocationValue, 'location');
+				await updatePromise;
+				this.location = this.textAreaLocationValue;
+				this.locationEditOn = false;
+			}
+			this.$nextTick(() => {
+				if (field === 'username') this.usernameEditOn = false;
+				else if (field === 'description') this.descriptionEditOn = false;
+				else if (field === 'link') this.linkEditOn = false;
+				else if (field === 'location') this.locationEditOn = false;
+				else if (field === 'profile_image') this.profilePicEditon = false;
 			});
+		} finally{
+			this.updatingField = null;
 		}
 		},
 
