@@ -1,4 +1,5 @@
 module.exports = {
+  profile_image_disclaimer: 'Please note that the profile image change might not be reflected till after 24 hours.',
   change_profile_image: 'Change Profile Image',
   upload_image: 'Upload Image',
   or_paste_url: 'Or Paste URL',

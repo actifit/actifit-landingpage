@@ -9,6 +9,9 @@
           </button>
         </div>
         <div class="modal-body">
+          <div class="disclaimer alert alert-info">
+            {{ $t('profile_image_disclaimer') }}
+          </div>
           <div class="image-preview">
             <img v-if="!imgUploading" :src="imagePreviewUrl" alt="Profile Image" width="150" height="150" />
             <div v-else class="loader"></div>
@@ -216,5 +219,10 @@ export default {
 @keyframes load {
   0% { width: 0; }
   100% { width: 100%; }
+}
+.disclaimer {
+  margin-bottom: 15px;
+  font-size: 0.9em;
+  text-align: center;
 }
 </style>

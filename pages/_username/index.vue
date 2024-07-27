@@ -680,7 +680,7 @@
 			textAreaLinkValue: '',
 			linkForImage: `${this.profImgUrl}/u/${this.displayUser}/avatar`,
 			isProfileImageModalVisible: false,
-			textAreaProfileImageValue: `${this.profImgUrl}/u/${this.username}/avatar`,
+			textAreaProfileImageValue: '',
 			updatingField: null,
 			displayUsersName: '',
 			displayLocation: '',
@@ -914,7 +914,7 @@
 			this.locationeditOn = false;
 			return;	
 		},
-		async broadcastUpdate() {
+		async broadcastUpdate(updateData, field) {
 			if(this.user.account.posting_json_metadata === ''){
 				let pre_pst = {
 					profile: {
@@ -938,13 +938,22 @@
 
 			let parsedData = JSON.parse(this.user.account.posting_json_metadata);
 
-			//update all fields, the saveFunc will have changed the value for the edited ones
-			parsedData.profile.location = this.textAreaLocationValue;
-			parsedData.profile.about = this.textAreaDescriptionValue;
-			parsedData.profile.website = this.textAreaLinkValue;
-			parsedData.profile.name = this.textAreaUsernameValue;
-			parsedData.profile.profile_image = this.textAreaProfileImageValue; //get the link
+			//only update the edited field and then send all in the transaction
 			
+				parsedData.profile.location = this.textAreaLocationValue;
+			
+			
+				parsedData.profile.about = this.textAreaDescriptionValue;
+			
+			
+				parsedData.profile.website = this.textAreaLinkValue;
+			
+			
+				parsedData.profile.name = this.textAreaUsernameValue;
+			
+			if(field === 'profile_image'){
+				parsedData.profile.profile_image = updateData; //get the link
+			}
 			let pst = {
 				profile: {
 					profile_image: parsedData.profile.profile_image,
@@ -967,7 +976,7 @@
 		},
 		async updateProfileImage(imageUrl) {
 			this.textAreaProfileImageValue = imageUrl;
-			await this.broadcastUpdate();
+			await this.broadcastUpdate(imageUrl, 'profile_image');
 			this.closeProfileImageModal();
 			this.linkForImage = imageUrl; // Update the profile image link
 		},
@@ -977,22 +986,22 @@
 		let updatePromise;
 		try{
 			if (field === 'username') {
-				updatePromise = this.broadcastUpdate();
+				updatePromise = this.broadcastUpdate(this.textAreaUsernameValue, 'username');
 				await updatePromise;
 				this.username = this.textAreaUsernameValue;
 				this.usernameEditOn = false;
 			} else if (field === 'description') {
-				updatePromise = this.broadcastUpdate();
+				updatePromise = this.broadcastUpdate(this.textAreaDescriptionValue, 'description');
 				await updatePromise;
 				this.description = this.textAreaDescriptionValue;
 				this.descriptionEditOn = false;
 			} else if (field === 'link') {
-				updatePromise = this.broadcastUpdate();
+				updatePromise = this.broadcastUpdate(this.textAreaLinkValue, 'link');
 				await updatePromise;
 				this.link = this.textAreaLinkValue;
 				this.linkEditOn = false;
 			} else if (field === 'location') {
-				updatePromise = this.broadcastUpdate();
+				updatePromise = this.broadcastUpdate(this.textAreaLocationValue, 'location');
 				await updatePromise;
 				this.location = this.textAreaLocationValue;
 				this.locationEditOn = false;
