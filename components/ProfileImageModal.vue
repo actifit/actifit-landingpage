@@ -22,7 +22,12 @@
           </div>
           <div class="form-group">
             <label for="imageUrl">{{ $t('or_paste_url') }}</label>
-            <input id="imageUrl" v-model="imageUrl" class="form-control" type="text" @blur="handleUrlUpload" />
+            <div class="input-group">
+              <input id="imageUrl" v-model="imageUrl" class="form-control" type="text" />
+              <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button" @click="handleUrlUpload">{{ $t('upload_image') }}</button>
+              </div>
+            </div>
           </div>
         </div>
         <div class="modal-footer">
@@ -58,18 +63,19 @@ export default {
       imagePreviewUrl: '',
       profImgUrl: process.env.hiveImgUrl,
       isSaving: false,
+      allowedTypes : ['image/bmp', 'image/png', 'image/gif', 'image/jpeg', 'image/jpg'],
+
     };
   },
   methods: {
     handleImageUpload(event) {
       const file = event.target.files[0];
       if (file) {
-        const allowedTypes = ['image/bmp', 'image/png', 'image/gif', 'image/jpeg'];
         const fileType = file.type;
         const fileName = file.name.toLowerCase();
         const fileExtension = fileName.substring(fileName.lastIndexOf('.'));
 
-        if (!allowedTypes.includes(fileType) || !['.bmp', '.png', '.gif', '.jpeg', '.jpg'].includes(fileExtension)) {
+        if (!this.allowedTypes.includes(fileType) || !['.bmp', '.png', '.gif', '.jpeg', '.jpg'].includes(fileExtension)) {
           alert('Please upload a valid image file (BMP, PNG, GIF, JPEG, JPG).');
           event.target.value = '';
           return;
@@ -92,45 +98,76 @@ export default {
     handleUrlUpload() {
       if (this.imageUrl) {
         this.imgUploading = true;
-        const img = new Image();
-        img.onload = () => {
-          this.imagePreviewUrl = this.imageUrl;
-          this.imgUploading = false;
-        };
-        img.onerror = () => {
-          alert('Invalid image URL.');
-          this.imgUploading = false;
-        };
-        img.src = this.imageUrl;
+        fetch(this.imageUrl)
+          .then(response => response.blob())
+          .then(blob => {
+            if (this.allowedTypes.includes(blob.type)) {
+              const img = new Image();
+              img.onload = () => {
+                this.imagePreviewUrl = URL.createObjectURL(blob);
+                this.imgUploading = false;
+              };
+              img.onerror = () => {
+                this.handleInvalidImage();
+              };
+              img.src = URL.createObjectURL(blob);
+            } else {
+              this.handleInvalidImage();
+            }
+          })
+          .catch((error) => {
+            console.error('Failed to fetch image:', error);
+            this.handleInvalidImage();
+          });
       }
     },
+
+    handleInvalidImage() {
+      alert('Invalid image URL. Please provide a valid image URL.');
+      this.imageUrl = '';
+      this.imgUploading = false;
+    },
+
     cancel() {
       this.$emit('close');
       this.reset();
     },
     async save() {
-      this.isSaving = true;
-      let imageUrl = this.imageUrl;
-      if (this.uploadedImage) {
-        try {
-          imageUrl = await this.uploadImage(this.uploadedImage);
-        } catch (error) {
-          console.error('Image upload failed:', error);
-          this.isSaving = false;
-          return;
-        }
-      }
-      // Broadcast transaction to blockchain here
-      // Simulating blockchain confirmation delay
-      setTimeout(() => {
-        this.$emit('image-changed', imageUrl);
-        this.$emit('close');
-        this.reset();
-        this.isSaving = false;
-        $(this.$refs.profileImageModal).modal('hide');
-        $('.modal-backdrop').remove();
-      }, 2000);
-    },
+  this.isSaving = true;
+
+  let imageUrl = this.imageUrl;
+
+  try {
+    if (this.uploadedImage) {
+      imageUrl = await this.uploadImage(this.uploadedImage);
+    } else if (this.imageUrl) {
+      // Validate the URL is an actual image
+      await new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = this.imageUrl;
+      });
+    } else {
+      throw new Error('No image selected');
+    }
+
+    // Broadcast transaction to blockchain here
+    // Simulating blockchain confirmation delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    this.$emit('image-changed', imageUrl);
+    this.$emit('close');
+    this.reset();
+    $(this.$refs.profileImageModal).modal('hide');
+    $('.modal-backdrop').remove();
+  } catch (error) {
+    console.error('Image update failed:', error);
+    // Handle the error appropriately (e.g., show an error message to the user)
+  } finally {
+    this.isSaving = false;
+  }
+},
     reset() {
       this.imageUrl = '';
       this.uploadedImage = null;
