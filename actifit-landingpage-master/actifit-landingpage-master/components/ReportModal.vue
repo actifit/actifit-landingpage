@@ -28,17 +28,6 @@
 					  <i class="fa-solid fa-language" style="color: red;" @click="translateContent"></i>
 				  </span>
 			  </div>
-						<!-- Translation Toggle Link -->
-						<div v-if="isTranslated" @click="toggleContent" class="translation-toggle">
-				Auto-Translated Content. Click to view original.
-				</div>
-				 <!-- Post Content -->
-				 <div v-if="!isTranslated">
-             		{{ postContent }}
-    			 </div>
-				 <div v-else>
-      				{{ translatedContent }}
-    			 </div>
 			
 		  <div class="modal-header">
 			  <div class="report-tags p-1" v-html="displayReportTags"></div>
@@ -275,8 +264,7 @@
 			  socialSharingDesc: process.env.socialSharingDesc,
 			  socialSharingQuote: process.env.socialSharingQuote,
 			  hashtags: process.env.socialSharingHashtags,
-			  translatedContent: '', // Holds translated content
-      		  isTranslated: false // Flag to toggle between original and translated content
+			
 		  }
 	  },
 	  watch: {
@@ -373,43 +361,7 @@
 	  },
 	  methods: {
 	
-		async translateContent() {
-        const apiUrl = 'https://libretranslate.com/translate';
 		
-        const requestData = {
-            q: this.report.content,
-            source: 'auto', // Auto-detect language
-            target: 'en',   // Translate to English
-            format: 'text',
-            alternatives: 3,
-            api_key: 'AIzaSyDS50fkaAgg8icJqEn3LA6JsGLz867XntA' // If needed, replace with your API key
-        };
-        try {
-            const res = await fetch(apiUrl, {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json' 
-                },
-                body: JSON.stringify(requestData)
-            });
-
-            if (!res.ok) {
-                throw new Error('Network response was not ok');
-            }
-
-            const data = await res.json();
-
-            // Handle the translated data here
-            this.translatedContent = data.translations[0].translatedText; // Adjust based on actual response structure
-            this.translationMode = true;
-            this.showOriginalContentLink = true;
-        } catch (error) {
-            console.error('There was a problem with your fetch operation:', error);
-        }
-        },
-		toggleContent() {
-      this.isTranslated = !this.isTranslated;
-    },
 	  /* function checks if post has beneficiaries */
 		hasBeneficiaries() {
 		  return Array.isArray(this.report.beneficiaries) && this.report.beneficiaries.length > 0;
