@@ -13,8 +13,15 @@
             {{ $t('profile_image_disclaimer') }}
           </div>
           <div class="image-preview">
-            <img v-if="!imgUploading" :src="imagePreviewUrl" alt="Profile Image" width="150" height="150" />
-            <div v-else class="loader"></div>
+            <img 
+              :src="imagePreviewUrl" 
+              alt="Profile Image" 
+              width="150" 
+              height="150"
+              @load="handleImageLoadSuccess"
+              @error="handleImageLoadError"
+              v-show="!imgUploading"/>
+            <div v-show="imgUploading" class="loader"></div>
           </div>
           <div class="form-group">
             <label for="imageUpload">{{ $t('upload_image') }}</label>
@@ -64,7 +71,6 @@ export default {
       profImgUrl: process.env.hiveImgUrl,
       isSaving: false,
       allowedTypes : ['image/bmp', 'image/png', 'image/gif', 'image/jpeg', 'image/jpg'],
-
     };
   },
   methods: {
@@ -98,76 +104,59 @@ export default {
     handleUrlUpload() {
       if (this.imageUrl) {
         this.imgUploading = true;
-        fetch(this.imageUrl)
-          .then(response => response.blob())
-          .then(blob => {
-            if (this.allowedTypes.includes(blob.type)) {
-              const img = new Image();
-              img.onload = () => {
-                this.imagePreviewUrl = URL.createObjectURL(blob);
-                this.imgUploading = false;
-              };
-              img.onerror = () => {
-                this.handleInvalidImage();
-              };
-              img.src = URL.createObjectURL(blob);
-            } else {
-              this.handleInvalidImage();
-            }
-          })
-          .catch((error) => {
-            console.error('Failed to fetch image:', error);
-            this.handleInvalidImage();
-          });
+        this.imagePreviewUrl = this.imageUrl;
       }
     },
-
+    handleImageLoadSuccess() {
+      console.log('Image loaded successfully');
+      this.imgUploading = false;
+    },
+    handleImageLoadError() {
+      console.error('Image failed to load');
+      this.handleInvalidImage();
+    },
     handleInvalidImage() {
       alert('Invalid image URL. Please provide a valid image URL.');
       this.imageUrl = '';
+      this.imagePreviewUrl = `${this.profImgUrl}/u/${this.username}/avatar`;
       this.imgUploading = false;
     },
-
     cancel() {
       this.$emit('close');
       this.reset();
     },
     async save() {
-  this.isSaving = true;
+      this.isSaving = true;
 
-  let imageUrl = this.imageUrl;
+      let imageUrl = this.imageUrl;
 
-  try {
-    if (this.uploadedImage) {
-      imageUrl = await this.uploadImage(this.uploadedImage);
-    } else if (this.imageUrl) {
-      // Validate the URL is an actual image
-      await new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = resolve;
-        img.onerror = reject;
-        img.src = this.imageUrl;
-      });
-    } else {
-      throw new Error('No image selected');
-    }
+      try {
+        if (this.uploadedImage) {
+          imageUrl = await this.uploadImage(this.uploadedImage);
+        } else if (this.imageUrl) {
+          await new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = resolve;
+            img.onerror = reject;
+            img.src = this.imageUrl;
+          });
+        } else {
+          throw new Error('No image selected');
+        }
 
-    // Broadcast transaction to blockchain here
-    // Simulating blockchain confirmation delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 2000));
 
-    this.$emit('image-changed', imageUrl);
-    this.$emit('close');
-    this.reset();
-    $(this.$refs.profileImageModal).modal('hide');
-    $('.modal-backdrop').remove();
-  } catch (error) {
-    console.error('Image update failed:', error);
-    // Handle the error appropriately (e.g., show an error message to the user)
-  } finally {
-    this.isSaving = false;
-  }
-},
+        this.$emit('image-changed', imageUrl);
+        this.$emit('close');
+        this.reset();
+        $(this.$refs.profileImageModal).modal('hide');
+        $('.modal-backdrop').remove();
+      } catch (error) {
+        console.error('Image update failed:', error);
+      } finally {
+        this.isSaving = false;
+      }
+    },
     reset() {
       this.imageUrl = '';
       this.uploadedImage = null;
