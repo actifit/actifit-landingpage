@@ -14,6 +14,7 @@
 			  <span aria-hidden="true">&times;</span>
 			</button>
 		  </div>
+		  
 		  <div class="main-user-info" >
 			  <div class="p-1" >
 					<a :href="'/'+report.author" target="_blank">
@@ -28,6 +29,7 @@
 					  <i class="fa-solid fa-language" style="color: red;" @click="translateContent"></i>
 				  </span>
 			  </div>
+			
 			
 		  <div class="modal-header">
 			  <div class="report-tags p-1" v-html="displayReportTags"></div>
