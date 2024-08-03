@@ -1,0 +1,154 @@
+:root {
+  --primary-color: #ff112d;
+  --background-color: #fff;
+  --background-color-1: #ff112d;
+  --background-color-2: #fff;
+  --ab-background-color: beige;
+  --text-color: #000;
+  --inv-text-color: #fff;
+  --text-brand: #ff4500;
+  --nav-col: rgba(255, 255, 255, 0.8);
+  /* Other CSS variables for dark mode */
+}
+
+.dark-mode {
+  --primary-color: #ffffff;
+  --background-color: #212121;
+  --background-color-1: #303030;
+  --background-color-2: #303030;
+  --ab-background-color: black;
+  --hover-color: #000000;
+  --text-color: #fff;
+  --inv-text-color: #000;
+  --text-brand: #fff;
+  --nav-col: rgba(0, 0, 0, 0.8);
+  /* CSS variables with dark mode styles */
+}
+
+/* Cancels hover effect */
+.main-user-info a {
+  background-color: inherit; /* Inherit background color from parent element */
+  text-decoration: none;
+}
+
+section {
+	background-color: var(--background-color)!important;
+}
+
+.navbar-light{
+	background-color: var(--nav-col);
+}
+
+.navbar-light:hover{
+	background-color: var(--background-color);
+}
+
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+a {
+  color: var(--primary-color);
+}
+
+.info-box-orange{
+	color: var(--text-brand)!important;
+}
+
+.report a, .report-body, .post a, .post-body{
+	color: var(--text-color)!important;
+}
+
+.report a.text-brand, .post a.text-brand{
+	color: #ff112d!important;
+}
+
+.report h6{
+	background-color: var(--background-color-1)!important;
+}
+
+.report h6 a, .post h6 a{
+	color: white!important;
+}
+
+a:hover {
+  color: var(--hover-color);
+}
+
+.footer, .modal-content, .card, .notif-container, .dropdown-menu, .modal-header{
+	background-color: var(--background-color)!important;
+}
+
+.modal-header .close {
+	color: var(--primary-color);
+}
+
+/*
+.card {
+  background-color: var(--background-color);
+}*/
+/*
+.card-header {
+  background-color: var(--background-color-1);
+}*/
+
+.action-box {
+  background-color: var(--background-color-1)!important;
+}
+
+.wallet-container .action-box, .font-weight-bold .action-box{
+	background-color: var(--ab-background-color)!important;
+}
+
+.card-body, .admin-name a {
+  color: var(--primary-color)!important;
+}
+
+.dropdown-menu a, .dropdown-menu span {
+  color: var(--text-color);
+}
+
+.table {
+  background-color: var(--background-color);
+}
+/*
+.table-header {
+  background-color: var(--background-color-1);
+  color: var(--inv-text-color);
+}
+
+.table-row {
+  background-color: var(--background-color)!important;
+}
+
+.table-cell {
+  color: var(--primary-color);
+}
+
+
+
+.table-cell:hover, .token-entry {
+  background-color: var(--background-color-1)!important;
+}*/
+
+.wallet-container .token-entry{
+	background-color: var(--background-color-2)!important;
+}
+
+.wallet-container .token-entry.head-title{
+	background-color: red!important;
+	/*color: var(--inv-text-color)!important;*/
+}
+/*
+
+.card {
+  color: var(--primary-color);
+  background-color: var(--background-color);
+}
+*/
+
+
+.report-title, .post-title{
+	color: #fff!important;
+}

@@ -1,0 +1,549 @@
+diff --git a/node_modules/vue-steemconnect/dist/index.js b/node_modules/vue-steemconnect/dist/index.js
+index c11f6a3..3dce53f 100644
+--- a/node_modules/vue-steemconnect/dist/index.js
++++ b/node_modules/vue-steemconnect/dist/index.js
+@@ -4,10 +4,11 @@ Object.defineProperty(exports, "__esModule", {
+   value: true
+ });
+ 
+-var _sc2Sdk = require('sc2-sdk');
++var _sc2Sdk = require('steemconnect');
+ 
+-var sc2 = require('sc2-sdk');
++var sc2 = require('steemconnect');
+ 
++/* edit this file to make changes / patches */
+ 
+ var VueSteemConnect = {
+   install: function install(Vue, _options) {
+@@ -33,7 +34,8 @@ var VueSteemConnect = {
+       namespaced: true,
+       state: {
+         user: null, // steemconnect user
+-        accessToken: null // steemconnect access token
++        accessToken: null, // steemconnect access token
++		stdLogin: false //identifies login type
+       },
+       getters: {
+         user: function user(state) {
+@@ -41,7 +43,10 @@ var VueSteemConnect = {
+         },
+         accessToken: function accessToken(state) {
+           return state.accessToken;
+-        }
++        },
++		stdLogin: function stdLogin(state) {
++		  return state.stdLogin;
++		}
+       },
+       mutations: {
+         login: function login(state, user) {
+@@ -52,15 +57,26 @@ var VueSteemConnect = {
+         },
+         setAccessToken: function setAccessToken(state, accessToken) {
+           state.accessToken = accessToken;
+-        }
++        },
++		setStdLogin: function setStdLogin(state, stdLogin) {
++          state.stdLogin = stdLogin;
++        },
+       },
+       actions: {
+-        login: function login(_ref) {
++        login: async function login(_ref) {
++			
+           var commit = _ref.commit,
+               dispatch = _ref.dispatch,
+               state = _ref.state;
+ 
+-          return new Promise(function (resolve, reject) {
++          return new Promise(async function (resolve, reject) {
++			//take into consideration stdlogin case:
++			try{
++			let std_login = localStorage.getItem('std_login')
++			console.log('found std_login LS:::'+std_login);
++			console.log('user state');
++			
++			console.log(state.user);
+             // don't do anything if user data is already set
+             if (!state.user) {
+               // in that case we look for an access token in localStorage
+@@ -68,24 +84,164 @@ var VueSteemConnect = {
+               if (accessToken) {
+                 // set access token and try to fetch user object
+                 Vue.SteemConnect().setAccessToken(accessToken);
+-                Vue.SteemConnect().me(function (err, user) {
+-                  if (err) reject(err);else {
+-                    // save user object in store
+-                    commit('login', user);
+-                    commit('setAccessToken', accessToken);
+-                    resolve();
+-                  }
+-                });
++				//grab localstorage val to see if SC login used
++				console.log('login_method')
++				console.log(localStorage.getItem('acti_login_method'))
++				
++				if (!std_login){
++					Vue.SteemConnect().me(function (err, user) {
++					  if (err) reject(err);else {
++						// save user object in store
++						commit('login', user);
++						commit('setAccessToken', accessToken);
++						commit('setStdLogin', false);
++						resolve();
++					  }
++					});
++				}else if (localStorage.getItem('acti_login_method') == 'keychain'){
++					let username = localStorage.getItem('std_login_name');
++					let url = new URL(process.env.actiAppUrl + 'getAccountData/?user='+username+'&bchain='+(localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):''));
++					let res = await fetch(url);
++					let json = await res.json();
++					if (json && json.HIVE){
++						let acct_data = json.HIVE;
++						let userSC = new Object();
++						userSC.account = acct_data;
++						//append proper login data for SC, while making sure this is recognized as a normal login
++						commit('setStdLogin', true);
++						commit('login', userSC)
++						commit('setAccessToken', accessToken);
++						//localStorage.setItem('acti_login_method', 'keychain');				
++					}
++					resolve();
++				}else{
++					let username = localStorage.getItem('std_login_name');
++					let url = new URL(process.env.actiAppUrl + 'fetchUserData/?user='+username+'&bchain='+(localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):''));
++			
++					let reqHeads = new Headers({
++					  'Content-Type': 'application/json',
++					  'x-acti-token': 'Bearer ' + accessToken,
++					});
++					let res = await fetch(url, {
++						headers: reqHeads
++					});
++					let outcome = await res.json();
++					//console.log(outcome);
++					if (outcome.error || !outcome.success){
++						reject(outcome.error)
++					}else{
++						//attempt to auth and grab user data
++						let userSC = new Object();
++						userSC.account = outcome.userdata;
++						console.log('success stdLogin');
++						// save user object in store
++						commit('setStdLogin', true);
++						commit('login', userSC)
++						commit('setAccessToken', accessToken);
++						resolve();
++					}
++				}
+               }
+-            }
++            }else{
++				commit('setStdLogin', std_login);
++				resolve();
++			}
++		  }catch(err){
++			  
++			  console.log(err)
++		  }
++		  
+           });
+         },
++		refreshUser: async function refreshUser(_ref3){
++			console.log('SC plugin refreshUser v3.2');
++			let commit = _ref3.commit;
++			let std_login = localStorage.getItem('std_login')
++			let accessToken = localStorage.getItem('access_token');
++			if (std_login && accessToken){
++				
++				console.log('refresh: login_method')
++				console.log(localStorage.getItem('acti_login_method'))
++
++				
++				if (localStorage.getItem('acti_login_method') == 'keychain'){
++					console.log('keychain refresh')
++					let username = localStorage.getItem('std_login_name');
++					let url = new URL(process.env.actiAppUrl + 'getAccountData/?user='+username+'&bchain='+(localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):''));
++					let res = await fetch(url);
++					let json = await res.json();
++					if (json && json.HIVE){
++						console.log('success getting user data')
++						let acct_data = json.HIVE;
++						let userSC = new Object();
++						userSC.account = acct_data;
++						//append proper login data for SC, while making sure this is recognized as a normal login
++						commit('setStdLogin', true);
++						
++						//commit('setAccessToken', accessToken);
++						commit('login', userSC)
++						//resolve();
++					}/*else{
++						localStorage.removeItem('access_token');
++						localStorage.removeItem('std_login');
++						localStorage.removeItem('std_login_name');
++						localStorage.removeItem('acti_login_method')
++						commit('logout');
++						commit('setStdLogin', false);
++						commit('setAccessToken', null);
++						//reject('error loading data');
++					}*/
++				}else{
++					console.log('standard refresh')
++					let username = localStorage.getItem('std_login_name');
++					let url = new URL(process.env.actiAppUrl + 'fetchUserData/?user='+username+'&bchain='+(localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):''));
++			
++					let reqHeads = new Headers({
++					  'Content-Type': 'application/json',
++					  'x-acti-token': 'Bearer ' + accessToken,
++					});
++					let res = await fetch(url, {
++						headers: reqHeads
++					});
++					let outcome = await res.json();
++					//console.log(outcome);
++					if (outcome.error || !outcome.success){
++						console.log('cleanup data')
++						// remove access token and unset user in store
++						  localStorage.removeItem('access_token');
++						  localStorage.removeItem('std_login');
++						  localStorage.removeItem('std_login_name');
++						  localStorage.removeItem('acti_login_method')
++						  localStorage.removeItem('3s_access_token')
++						  commit('logout');
++						  commit('setStdLogin', false);
++						  commit('setAccessToken', null);
++						  //reject(outcome.error)
++					}else{
++						console.log('success fetching user data')
++						//attempt to auth and grab user data
++						let userSC = new Object();
++						userSC.account = outcome.userdata;
++						console.log('success stdLogin');
++						// save user object in store
++						commit('setStdLogin', true);
++						commit('login', userSC)
++					}
++				}
++			}
++		},
+         logout: function logout(_ref2) {
+           var commit = _ref2.commit;
+-
++		  console.log('logout');
++		  console.log('cleanup data')
+           // remove access token and unset user in store
+           localStorage.removeItem('access_token');
++		  localStorage.removeItem('std_login');
++		  localStorage.removeItem('std_login_name');
++		  localStorage.removeItem('acti_login_method')
++		  localStorage.removeItem('3s_access_token')
+           commit('logout');
++		  commit('setStdLogin', false);
+           commit('setAccessToken', null);
+         }
+       }
+diff --git a/node_modules/vue-steemconnect/src/index.js b/node_modules/vue-steemconnect/src/index.js
+index eaed874..29e7a15 100644
+--- a/node_modules/vue-steemconnect/src/index.js
++++ b/node_modules/vue-steemconnect/src/index.js
+@@ -1,83 +1,252 @@
+-const sc2 = require('sc2-sdk');
+-import { Initialize } from 'sc2-sdk';
++'use strict';
+ 
+-const VueSteemConnect = {
+-  install(Vue, _options) {
+-    const options = Object.assign({}, _options, {
++Object.defineProperty(exports, "__esModule", {
++  value: true
++});
++
++var _sc2Sdk = require('steemconnect');
++
++var sc2 = require('steemconnect');
++
++
++
++var VueSteemConnect = {
++  install: function install(Vue, _options) {
++    var options = Object.assign({}, _options, {
+       scope: _options.scope || ['vote', 'comment']
+-    })
++    });
+ 
+-    const api = sc2.Initialize({
++    var api = sc2.Initialize({
+       baseURL: options.baseURL || 'https://steemconnect.com',
+       app: options.app,
+       callbackURL: options.callbackURL,
+       scope: options.scope || ['vote', 'comment']
+-    })
++    });
+ 
+-    Vue.prototype.$steemconnect = api
++    Vue.prototype.$steemconnect = api;
+     // setting the api directly as the value does not work, methods are removed (why? serialization?)
+-    Vue.SteemConnect = () => {
++    Vue.SteemConnect = function () {
+       return api;
+-    }
++    };
+ 
+     // store module
+     Vue.SteemConnectStore = {
+       namespaced: true,
+       state: {
+         user: null, // steemconnect user
+-        accessToken: null // steemconnect access token
++        accessToken: null, // steemconnect access token
++		stdLogin: false //identifies login type
+       },
+       getters: {
+-        user (state) {
+-          return state.user
++        user: function user(state) {
++          return state.user;
+         },
+-        accessToken (state) {
+-          return state.accessToken
+-        }
++        accessToken: function accessToken(state) {
++          return state.accessToken;
++        },
++		stdLogin: function stdLogin(state) {
++		  return state.stdLogin;
++		}
+       },
+       mutations: {
+-        login (state, user) {
+-          state.user = user
++        login: function login(state, user) {
++          state.user = user;
+         },
+-        logout (state) {
+-          state.user = null
++        logout: function logout(state) {
++          state.user = null;
++        },
++        setAccessToken: function setAccessToken(state, accessToken) {
++          state.accessToken = accessToken;
++        },
++		setStdLogin: function setStdLogin(state, stdLogin) {
++          state.stdLogin = stdLogin;
+         },
+-        setAccessToken (state, accessToken) {
+-          state.accessToken = accessToken
+-        }
+       },
+       actions: {
+-        login ({ commit, dispatch, state }) {
+-          return new Promise((resolve, reject) => {
++        login: async function login(_ref) {
++			
++          var commit = _ref.commit,
++              dispatch = _ref.dispatch,
++              state = _ref.state;
++
++          return new Promise(async function (resolve, reject) {
++			//take into consideration stdlogin case:
++			try{
++			let std_login = localStorage.getItem('std_login')
++			console.log('found std_login LS:::'+std_login);
++			console.log('user state');
++			
++			console.log(state.user);
+             // don't do anything if user data is already set
+             if (!state.user) {
+               // in that case we look for an access token in localStorage
+-              const accessToken = localStorage.getItem('access_token')
++              var accessToken = localStorage.getItem('access_token');
+               if (accessToken) {
+                 // set access token and try to fetch user object
+-                Vue.SteemConnect().setAccessToken(accessToken)
+-                Vue.SteemConnect().me((err, user) => {
+-                  if (err) reject(err)
+-                  else {
+-                    // save user object in store
+-                    commit('login', user)
+-                    commit('setAccessToken', accessToken)
+-                    resolve()
+-                  }
+-                })
++                Vue.SteemConnect().setAccessToken(accessToken);
++				//grab localstorage val to see if SC login used
++				console.log('login_method')
++				console.log(localStorage.getItem('acti_login_method'))
++				
++				if (!std_login){
++					Vue.SteemConnect().me(function (err, user) {
++					  if (err) reject(err);else {
++						// save user object in store
++						commit('login', user);
++						commit('setAccessToken', accessToken);
++						commit('setStdLogin', false);
++						resolve();
++					  }
++					});
++				}else if (localStorage.getItem('acti_login_method') == 'keychain'){
++					let username = localStorage.getItem('std_login_name');
++					let url = new URL(process.env.actiAppUrl + 'getAccountData/?user='+username+'&bchain='+(localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):''));
++					let res = await fetch(url);
++					let json = await res.json();
++					if (json && json.HIVE){
++						let acct_data = json.HIVE;
++						let userSC = new Object();
++						userSC.account = acct_data;
++						//append proper login data for SC, while making sure this is recognized as a normal login
++						commit('setStdLogin', true);
++						commit('login', userSC)
++						commit('setAccessToken', accessToken);
++						//localStorage.setItem('acti_login_method', 'keychain');				
++					}
++					resolve();
++				}else{
++					let username = localStorage.getItem('std_login_name');
++					let url = new URL(process.env.actiAppUrl + 'fetchUserData/?user='+username+'&bchain='+(localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):''));
++			
++					let reqHeads = new Headers({
++					  'Content-Type': 'application/json',
++					  'x-acti-token': 'Bearer ' + accessToken,
++					});
++					let res = await fetch(url, {
++						headers: reqHeads
++					});
++					let outcome = await res.json();
++					//console.log(outcome);
++					if (outcome.error || !outcome.success){
++						reject(outcome.error)
++					}else{
++						//attempt to auth and grab user data
++						let userSC = new Object();
++						userSC.account = outcome.userdata;
++						console.log('success stdLogin');
++						// save user object in store
++						commit('setStdLogin', true);
++						commit('login', userSC)
++						commit('setAccessToken', accessToken);
++						resolve();
++					}
++				}
+               }
+-            }
+-          })
++            }else{
++				commit('setStdLogin', std_login);
++				resolve();
++			}
++		  }catch(err){
++			  
++			  console.log(err)
++		  }
++		  
++          });
+         },
+-        logout ({ commit }) {
++		refreshUser: async function refreshUser(_ref3){
++			console.log('SC plugin refreshUser v3.2');
++			let commit = _ref3.commit;
++			let std_login = localStorage.getItem('std_login')
++			let accessToken = localStorage.getItem('access_token');
++			if (std_login && accessToken){
++				
++				console.log('refresh: login_method')
++				console.log(localStorage.getItem('acti_login_method'))
++
++				
++				if (localStorage.getItem('acti_login_method') == 'keychain'){
++					console.log('keychain refresh')
++					let username = localStorage.getItem('std_login_name');
++					let url = new URL(process.env.actiAppUrl + 'getAccountData/?user='+username+'&bchain='+(localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):''));
++					let res = await fetch(url);
++					let json = await res.json();
++					if (json && json.HIVE){
++						console.log('success getting user data')
++						let acct_data = json.HIVE;
++						let userSC = new Object();
++						userSC.account = acct_data;
++						//append proper login data for SC, while making sure this is recognized as a normal login
++						commit('setStdLogin', true);
++						
++						//commit('setAccessToken', accessToken);
++						commit('login', userSC)
++						//resolve();
++					}/*else{
++						localStorage.removeItem('access_token');
++						localStorage.removeItem('std_login');
++						localStorage.removeItem('std_login_name');
++						localStorage.removeItem('acti_login_method')
++						commit('logout');
++						commit('setStdLogin', false);
++						commit('setAccessToken', null);
++						//reject('error loading data');
++					}*/
++				}else{
++					console.log('standard refresh')
++					let username = localStorage.getItem('std_login_name');
++					let url = new URL(process.env.actiAppUrl + 'fetchUserData/?user='+username+'&bchain='+(localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):''));
++			
++					let reqHeads = new Headers({
++					  'Content-Type': 'application/json',
++					  'x-acti-token': 'Bearer ' + accessToken,
++					});
++					let res = await fetch(url, {
++						headers: reqHeads
++					});
++					let outcome = await res.json();
++					//console.log(outcome);
++					if (outcome.error || !outcome.success){
++						console.log('cleanup data')
++						// remove access token and unset user in store
++						  localStorage.removeItem('access_token');
++						  localStorage.removeItem('std_login');
++						  localStorage.removeItem('std_login_name');
++						  localStorage.removeItem('acti_login_method')
++						  localStorage.removeItem('3s_access_token')
++						  commit('logout');
++						  commit('setStdLogin', false);
++						  commit('setAccessToken', null);
++						  //reject(outcome.error)
++					}else{
++						console.log('success fetching user data')
++						//attempt to auth and grab user data
++						let userSC = new Object();
++						userSC.account = outcome.userdata;
++						console.log('success stdLogin');
++						// save user object in store
++						commit('setStdLogin', true);
++						commit('login', userSC)
++					}
++				}
++			}
++		},
++        logout: function logout(_ref2) {
++          var commit = _ref2.commit;
++		  console.log('logout');
++		  console.log('cleanup data')
+           // remove access token and unset user in store
+-          localStorage.removeItem('access_token')
+-          commit('logout')
+-          commit('setAccessToken', null)
++          localStorage.removeItem('access_token');
++		  localStorage.removeItem('std_login');
++		  localStorage.removeItem('std_login_name');
++		  localStorage.removeItem('acti_login_method')
++		  localStorage.removeItem('3s_access_token')
++          commit('logout');
++		  commit('setStdLogin', false);
++          commit('setAccessToken', null);
+         }
+       }
+-    }
++    };
+   }
+-}
++};
+ 
+-export default VueSteemConnect
++exports.default = VueSteemConnect;
+\ No newline at end of file

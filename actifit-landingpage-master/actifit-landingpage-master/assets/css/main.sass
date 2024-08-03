@@ -1,0 +1,132 @@
+$brand-color: #ff112d
+
+body,
+html,
+#__nuxt,
+#__layout,
+#__layout > div
+  height: 100%
+  min-height: 100%
+
+body *
+  font-family: 'Roboto', sans-serif
+
+.text-brand
+  color: $brand-color !important
+
+.bg-brand
+  background-color: $brand-color !important
+
+.btn,
+.card,
+.form-control
+  border-radius: 0
+
+a,
+.btn-link
+  color: $brand-color
+  &:hover
+    color: darken($brand-color, 10)
+.bg-brand
+  a
+    color: #f8f9fa
+
+.btn-brand
+  background: $brand-color
+  color: #fff
+  &:hover,
+  &:focus
+    background: darken($brand-color, 10)
+    color: #fff
+    box-shadow: none
+
+.btn-white
+  background: #fff
+  color: $brand-color !important
+  &:hover,
+  &:focus
+    background: #f8f8f8
+    color: $brand-color
+    box-shadow: none
+
+.avatar
+  width: 150px
+  height: 150px
+  background-position: center center
+  background-size: cover
+  border-radius: 50%
+  border: solid 8px #eee
+  &.small
+    width: 120px
+    height: 120px
+
+.dropdown-item.active,
+.dropdown-item:active
+  background: $brand-color
+
+.navbar
+  background: rgba(255, 255, 255, 0.8)
+  transition: background-color .3s ease
+  &:hover
+    background: #fff
+  .navbar-toggler
+    border: none
+    outline: none
+  .navbar-nav
+    .nav-link
+      &:hover,
+      &:focus
+        color: #ff112d
+  .navbar-back
+    font-size: 1.3rem
+
+.modal-content
+  border-radius: 0
+  border: none
+  .modal-body
+    img
+      max-width: 100%
+
+.page-item
+  &.disabled
+    opacity: .5
+
+.VueCarousel-slide
+    border: 3px solid
+    radius: 5px
+    border-left: none
+    &:nth-child(5)
+        border-left: 3px solid
+	
+.VueCarousel-slide
+    &:nth-child(4n+1)
+        border-left: 3px solid
+	
+.news a.btn.btn-white
+    margin-bottom: 20px
+	
+.news h5
+    height: 100px
+	
+.full-div
+    width: 100%
+    text-align: center
+	
+.delegator-btn
+    background: #fff
+    color: $brand-color
+    &:hover,
+    &:focus
+        background: $brand-color
+        color: white        
+        box-shadow: none
+
+body // to have stronger specificy
+  .vue-input-tag-wrapper
+    .input-tag
+      background-color: lighten($brand-color, 40)
+      border-color: lighten($brand-color, 30)
+      color: $brand-color
+      padding: 4px 10px
+      .remove
+        color: $brand-color

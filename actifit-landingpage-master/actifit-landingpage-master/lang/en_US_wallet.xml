@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+	<string name="title_process">Let\'s get you started on exchanging your AFIT for STEEM upvotes!</string>
+	<string name="step1_title">Step 1 / 3: You need to set up your funds password</string>
+	<string name="step2_title">Step 2 / 3: Your funds password needs to be verified</string>
+	<string name="step2_desc">Please send at least 1 STEEM/SBD to @actifit.exchange (one time fee) <br/>	to verify your funds password &amp; activate your exchange service using form below.				<br/><span>DO NOT CLOSE this window till verification is complete.</span></string>
+	<string name="step3_title">Step 3 / 3: You are ready to exchange AFIT for STEEM Upvotes!</string>
+	<string name="step3_desc1">Upvotes take place on your next actifit post/report with proof of activity.</string>
+	<string name="step3_desc2">Choose an option</string>
+	<string name="afit_se_to_power">Move AFIT (Steem-Engine) To Actifit Wallet</string>
+	<string name="initiate_afit_to_se">Move AFIT to S-E</string>
+</resources>
