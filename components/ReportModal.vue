@@ -18,7 +18,7 @@
 			  <div class="p-1" >
 					<a :href="'/'+report.author" target="_blank">
 					  <span class="user-avatar m-2" :style=" 'background-image: url('+profImgUrl+'/u/' + report.author + '/avatar)'"></span>
-					  <h5 class="modal-author modal-title" style="display: inline-block;" >@{{ report.author}} 
+					  <h5 class="modal-author modal-title" style="display: inline-block;" >@{{ report.author}} <!-- here is the fix-->
 						<small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></h5>
 					</a>
 					<span><br>
