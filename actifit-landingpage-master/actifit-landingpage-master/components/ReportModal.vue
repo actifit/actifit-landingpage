@@ -14,7 +14,8 @@
 			  <span aria-hidden="true">&times;</span>
 			</button>
 		  </div>
-		  
+
+
 		  <div class="main-user-info" >
 			  <div class="p-1" >
 					<a :href="'/'+report.author" target="_blank">
@@ -22,6 +23,8 @@
 					  <h5 class="modal-author modal-title" style="display: inline-block;" >@{{ report.author}} 
 						<small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></h5>
 					</a>
+
+					
 					<span><br>
 					  <span class="date-head text-muted" :title="date">{{ $getTimeDifference(report.created) }}</span>
 					  <a :href="'/@' + this.report.author + '/' + this.report.permlink"><i class="fas fa-link text-brand"></i></a>
