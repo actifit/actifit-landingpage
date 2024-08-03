@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="section1_title"><span class="text-brand">Actifit:</span> An innovative dapp that rewards your everyday activity!</string>
+	<string name="section1_desc">Built as one of the first Smart Media Tokens on top of the Steem blockchain, with beta Android and iOS mobile apps already available on playstore and app store, Actifit tracks and rewards your activity with Actifit (AFIT) tokens, but also STEEM rewards via upvotes on your Steem posts.</string>
+	<string name="section2_title">Earn tokens as simple as one two three</string>
+	<string name="section2_desc">1. Download the Actifit mobile app.<br/>2. Go for a jog, walk your dog, mow your lawn, go to the gym, move around your office,... with an aim to reach a minimum of 5,000 activity count.<br/>3. Post via app to the Steem blockchain, and get rewarded!</string>
+	<string name="section3_title">Actifit (AFIT) tokens use cases</string>
+	<string name="section3_desc">AFIT tokens will be available for purchasing fitness related equipment, tools, gadgets, sports wear, gym memberships... and any transactions between providers and actifiters.<br/><br/>As a Steem Smart Media Token, AFIT tokens are planned to have their own valuation per STEEM as well as FIAT currencies, and hence to be cashed out for actual FIAT currency.</string>
+	<string name="section4_title">Delegate to earn more rewards</string>
+	<string name="section4_desc">You can earn more AFIT tokens if you are a STEEM token holder. Delegate Steem Power to Actifit and earn your share of 100,000 AFIT tokens distributed per day to our delegators, as well as a weekly share of the 5% beneficiary reward of actifit posts.</string>
+</resources>

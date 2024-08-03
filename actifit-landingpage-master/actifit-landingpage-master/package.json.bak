@@ -1,0 +1,59 @@
+{
+  "name": "actifit-landingpage",
+  "version": "1.0.0",
+  "description": "Actifit is an innovative dapp that aims to incentivize fitness and healthy lifestyle via rewarding daily activity.",
+  "author": "mktcode",
+  "private": true,
+  "engines": {
+	"node": "10.6.0"
+  },
+  "scripts": {
+    "dev": "nuxt",
+    "build": "nuxt build",
+    "start": "nuxt start",
+    "generate": "nuxt generate",
+    "lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
+    "precommit": "npm run lint",
+    "heroku-postbuild": "npm run build",
+    "prepare": "patch-package"
+  },
+  "dependencies": {
+    "@nuxtjs/google-adsense": "^1.1.3",
+    "aws-sdk": "^2.388.0",
+    "bootstrap-vue": "^2.0.0-rc.27",
+    "cheerio": "^1.0.0-rc.3",
+    "dsteem": "^0.11.3",
+    "marked": "^0.6.2",
+    "nuxt": "^1.4.2",
+    "nuxt-i18n": "^5.8.5",
+    "remarkable": "^2.0.0",
+    "sanitize-html": "^1.20.1",
+    "sscjs": "0.0.7",
+    "steem": "^0.7.4",
+    "steem-editor": "^1.0.8",
+    "steemconnect": "^2.0.1",
+    "vue-carousel": "^0.11.0",
+    "vue-cookie-accept-decline": "^5.1.0",
+    "vue-cookie-law": "^1.8.0",
+    "vue-input-tag": "^1.0.4",
+    "vue-markdown": "^2.2.4",
+    "vue-notification": "^1.3.14",
+    "vue-recaptcha": "^1.1.1",
+    "vue-scrollto": "^2.13.0",
+    "vue-simplemde": "^0.5.1",
+    "vue-social-sharing": "^2.3.3",
+    "vue-steemconnect": "^0.3.1",
+    "vuejs-countdown": "^0.2.1",
+    "whatwg-fetch": "^2.0.4"
+  },
+  "devDependencies": {
+    "babel-eslint": "^8.2.1",
+    "cross-env": "^5.0.1",
+    "eslint": "^5.16.0",
+    "eslint-loader": "^2.1.0",
+    "eslint-plugin-vue": "^4.7.1",
+    "node-sass": "^4.11.0",
+    "patch-package": "^5.1.1",
+    "sass-loader": "^7.1.0"
+  }
+}
