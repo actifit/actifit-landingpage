@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "../../internship/actifit-landingpage-master/actifit-landingpage-master"
+		},
+		{
+			"name": "actifit-landingpage-internshipp",
+			"path": "."
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "actifit-landingpage-internshipp"
+	}
+}
