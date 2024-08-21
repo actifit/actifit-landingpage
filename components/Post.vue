@@ -366,6 +366,8 @@
 	  /* function handles confirming if the user had voted already to prevent issues */
 	  votePrompt(e) {
 		//if no user is logged in, prompt to login
+		//hasan this is responsible for not letting not logged in users access it
+		/*
 		if (!this.user){
 		  alert(this.$t('need_login_signup_notice_vote'));
 		  e.stopPropagation();
@@ -373,6 +375,8 @@
 		  //proceed normally showing vote popup
 		  this.$store.commit('setPostToVote', this.post)
 		}
+		*/
+		this.$store.commit('setPostToVote', this.post)
 	  },
 	  
 	  newlyVotedPostsQuery() {
