@@ -1,12 +1,12 @@
 <template>
 	<div class="steem-stats pt-2" v-if="getVotingPower">
-		<span v-if="!minView"><span><i class="fa-solid fa-thumbs-up text-brand"></i>&nbsp;{{ $t('Your_Voting_Power') }} </span><span :style="displayProperColor">{{getVotingPower}}</span><span><small> ({{ $t('Full_In') }} {{timeToFull(this.currentVotingPower)}})</small> <a href="#" data-toggle="modal" data-target="#notifyModal"><i class="fas fa-info-circle"></i></a></span></span>
+		<span v-if="!minView"><span><i class="fa-solid fa-thumbs-up text-brand"></i>&nbsp;{{ $t('Your_Voting_Power') }} </span><span :style="displayProperColor">{{getVotingPower}}</span><span><small v-if="this.user"> ({{ $t('Full_In') }} {{timeToFull(this.currentVotingPower)}})</small> <a href="#" data-toggle="modal" data-target="#notifyModal"><i class="fas fa-info-circle"></i></a></span></span>
 		<span v-else><span><i class="fa-solid fa-thumbs-up text-brand"></i>&nbsp;{{ $t('My_Voting_Power') }} </span><span :style="displayProperColor">{{getVotingPower}}</span></span>
 		<div v-if="showVPInfo">{{ $t('VP_desc') }}</div>
 		<div class="progress ml-4">
 		  <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" :aria-valuenow="currentVotingPower" aria-valuemin="0" aria-valuemax="100" :style="{ width: currentVotingPower + '%' }"></div>
 		</div>
-		<span v-if="!minView"><span><i class="fa-sharp fa-solid fa-bolt text-brand"></i>&nbsp;{{ $t('Your_RC') }} </span><span :style="displayProperColor">{{this.currentRCPercent}}</span><span><small> ({{ $t('Full_In') }} {{timeToFull(this.currentRC)}})</small> <a href="#" data-toggle="modal" data-target="#notifyModalRC"><i class="fas fa-info-circle"></i></a></span></span>
+		<span v-if="!minView"><span><i class="fa-sharp fa-solid fa-bolt text-brand"></i>&nbsp;{{ $t('Your_RC') }} </span><span :style="displayProperColor">{{this.currentRCPercent}}</span><span><small v-if="this.user"> ({{ $t('Full_In') }} {{timeToFull(this.currentRC)}})</small> <a href="#" data-toggle="modal" data-target="#notifyModalRC"><i class="fas fa-info-circle"></i></a></span></span>
 		<span v-else><span><i class="fa-sharp fa-solid fa-bolt text-brand"></i>&nbsp;{{ $t('My_RC') }} </span><span :style="displayProperColor">{{this.currentRCPercent}}</span></span>
 		<div v-if="showRCInfo">{{ $t('RC_desc') }}</div>
 		<div class="progress ml-4">

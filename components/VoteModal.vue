@@ -8,7 +8,7 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-		<SteemStats class="modal-body" :user="user" v-if="user"/>
+		<SteemStats class="modal-body" :user="user"/>
         <div class="modal-body text-center" >
 		  <div class="modal-footer m-2" style="display:none">
 			<div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-if="cur_bchain=='HIVE'">
@@ -29,7 +29,7 @@
 			</div>
 		  </div>
           <small class="text-muted">{{ $t('Adjust_Vote_Weight') }}</small>
-          <ul class="pagination justify-content-center mt-2">
+          <ul class="pagination justify-content-center mt-2" v-if="this.user">
             <li :class="{'page-item': true, disabled: voteWeight === -100}"><a class="page-link vote-controls" href="#" @click.prevent="setVoteWeight(-100)"><i class="far fa-flag text-danger"></i></a></li>
             <li :class="{'page-item': true, disabled: voteWeight === -100}"><a class="page-link vote-controls text-danger" href="#" @click.prevent="changeVoteWeight(-10)">-10</a></li>
             <li :class="{'page-item': true, disabled: voteWeight === -100}"><a class="page-link vote-controls text-danger" href="#" @click.prevent="changeVoteWeight(-1)">-1</a></li>
@@ -40,7 +40,7 @@
             <li :class="{'page-item': true, disabled: voteWeight === 100}"><a class="page-link vote-controls text-success" href="#" @click.prevent="changeVoteWeight(10)">+10</a></li>
             <li :class="{'page-item': true, disabled: voteWeight === 100}"><a class="page-link vote-controls" href="#" @click.prevent="setVoteWeight(100)"><i class="far fa-thumbs-up text-success"></i></a></li>
           </ul>
-		  <div>
+		  <div v-if="this.user">
 			<span class="btn btn-brand mb-1" :title="$t('save_vote_default_settings')" v-on:click="saveSettings"><i class="fa-gear fas" :style="settings_set?'color:green':'color:white'"></i><i class="fas fa-spin fa-spinner text-white" v-if="save_progress"></i></span>
 			<span class="btn btn-brand mb-1" :title="$t('restore_default')" v-if="settings_set" v-on:click="restoreDefault"><i class="fa-solid fa-arrows-rotate"></i></span>
 		  </div>
@@ -97,7 +97,7 @@
 		steem_price: 1,
 		hbd_price: 1,
 		hive_price: 1,
-		vote_value_usd: '',
+		vote_value_usd: '0$',
 		STEEMIT_100_PERCENT: 10000,
 		STEEMIT_VOTE_REGENERATION_SECONDS: (5 * 60 * 60 * 24),
 		votersList: [],
@@ -523,12 +523,14 @@
 	  },
 	  async vote (e) {
         //if no user is logged in, prompt to login
+		
 		if (!this.user || !this.user.account){
 		//if (!this.$store.state.steemconnect.user){
 		  alert(this.$t('need_login_signup_notice_vote'));
 		  e.stopPropagation();
 		  return;
 		}
+		
 		
 		//if the user already voted, confirm vote change
 		//if this post is already voted by the user, we need to show a confirmation
