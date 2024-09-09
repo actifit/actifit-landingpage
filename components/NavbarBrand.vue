@@ -1,5 +1,6 @@
 <template>
   <!-- navbar links with smooth scrolling to sections -->
+   <div>
     <nav class="navbar fixed-top navbar-expand-lg navbar-light px-1">
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -62,21 +63,41 @@
 		  
         </ul>
       </div>
-	  <UserMenu/>
+	  <UserMenu @modal-opened="handleModalOpened"/>
     </nav>
+    <LoginModal v-if="isModalOpen" @close="showModal = false" @login-successful="handleLoginSuccessful"/>
+  </div>
+
 </template>
 <script>
-	import UserMenu from '~/components/UserMenu';
+	import { method } from 'lodash';
+import UserMenu from '~/components/UserMenu';
+import LoginModal from '~/components/LoginModal'
 	
 	export default {
+    data(){
+      return{
+        isModalOpen: false,
+      }
+    },
 		props: ['home'],
 		components: {
 		  UserMenu,
+      LoginModal
 		  
 		},
 		async mounted () {
 			console.log('navbar mounted');
-		}
+		},
+    methods: {
+      handleModalOpened(isOpen){
+        this.isModalOpen = isOpen;
+      },
+      handleLoginSuccessful() {
+        // Refresh the current component or perform any necessary updates
+        this.$forceUpdate();
+      },
+    }
 	
 	}
 </script>

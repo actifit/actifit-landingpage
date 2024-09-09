@@ -49,7 +49,7 @@
             <!--<p class="lead py-md-3 form-info">Log in to see your current token balance, or sign up for a Steem account to start getting rewarded for your activity.</p>-->
             <div class="row">
               <div class="col-6">
-                <a href="/login" class="btn btn-brand btn-lg w-100 acti-shadow">{{ $t('Login') }}</a>
+                <a href="#" data-toggle="modal" data-target="#loginModal" @click="showModalFunc" class="btn btn-brand btn-lg w-100 acti-shadow">{{ $t('Login') }}</a>
 				<!--<a :href="$steemconnect.getLoginURL()" class="btn btn-brand btn-lg w-100">{{ $t('Login') }}</a>-->
               </div>
               <div class="col-6">
@@ -499,6 +499,7 @@
     <NewsModal :news="activeNews" />
 	<NotifyModal :modalTitle="$t('Actifit_Info')" :modalText="$t('VP_desc')"/>
 	<NotifyModal id="notifyModalRC" ref="notifyModalRC" :modalTitle="$t('Actifit_Info')" :modalText="$t('RC_desc')"/>
+  <LoginModal v-if="showModal" @close="showModal = false" />
 	
 	<!--<CompetitionAnnounce />-->
 	
@@ -520,12 +521,15 @@
   import { mapGetters } from 'vuex'
   import SteemStats from '~/components/SteemStats'
   import NotifyModal from '~/components/NotifyModal'
+  import LoginModal from '~/components/LoginModal'
+
   //import FriendshipModal from '~/components/FriendshipModal'
   
   //import CompetitionAnnounce from '~/components/CompetitionAnnounce'
 
   export default {
     components: {
+      LoginModal,
 	  NavbarBrand,
       Footer,
       News,
@@ -538,6 +542,7 @@
     },
     data () {
       return {
+        showModal: false,
         username: '', // username whose funds to show
         // animated numbers
         tweenedUserCount: 0,
@@ -618,6 +623,15 @@
        */
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
+      },
+      showModalFunc() {
+        this.$nextTick(() => {
+          this.showModal = true;
+          // If you're still using jQuery, make sure it's properly imported
+          if ($ && typeof $.fn.modal === 'function') {
+            $('#loginModal').modal('show');
+          }
+        });
       },
 	  
 	  async setPendingRewards(json){

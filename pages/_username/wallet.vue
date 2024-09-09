@@ -1460,7 +1460,7 @@
 		</div>
 		<div class="row pb-3">
 		  <div class="w-50">
-			<a href="/login" class="btn btn-brand btn-lg w-75">{{ $t('Login') }}</a>
+			<a href="#" data-toggle="modal" data-target="#loginModal" @click="showModalFunc" class="btn btn-brand btn-lg w-75">{{ $t('Login') }}</a>
 		  </div>
 		  <div class="w-50">
 			<a href="/signup" class="btn btn-brand btn-lg w-75">{{ $t('Sign_Up') }}</a>
@@ -1470,6 +1470,7 @@
 	</div>
 	
 	<pendingRewardsModal :pendingRewards="pendingRewards" :username="user"/>
+	<LoginModal v-if="showModal" @close="showModal = false" />
 	
 	<client-only>
       <div>
@@ -1483,6 +1484,7 @@
 </template>
 
 <script>
+  import LoginModal from '~/components/LoginModal'
   import NavbarBrand from '~/components/NavbarBrand'
   import Transaction from '~/components/Transaction'
   import Footer from '~/components/Footer'
@@ -1555,6 +1557,7 @@
 	},
 	data () {
 	  return {
+		showModal: false,
 		swapWidgetUrl: '',
 		tipInProgress: false,
 		tipError: '',
@@ -1749,6 +1752,7 @@
 	  }
 	},
     components: {
+	  LoginModal,
       NavbarBrand,
       Transaction, // single transaction block
       Footer,
@@ -1953,6 +1957,15 @@
 		console.log('Opening swap modal with URL:', this.swapWidgetUrl);
 		$('#swapTokenModal').modal('show');
 	},
+	showModalFunc() {
+        this.$nextTick(() => {
+          this.showModal = true;
+          // If you're still using jQuery, make sure it's properly imported
+          if ($ && typeof $.fn.modal === 'function') {
+            $('#loginModal').modal('show');
+          }
+        });
+      },
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
