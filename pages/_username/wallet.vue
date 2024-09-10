@@ -1960,7 +1960,6 @@
 	showModalFunc() {
         this.$nextTick(() => {
           this.showModal = true;
-          // If you're still using jQuery, make sure it's properly imported
           if ($ && typeof $.fn.modal === 'function') {
             $('#loginModal').modal('show');
           }

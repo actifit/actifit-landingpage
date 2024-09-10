@@ -74,8 +74,8 @@
 		</div>
 		<div class="row pb-3">
 		  <div class="w-50">
-			<a href="/login" class="btn btn-brand btn-lg w-75">{{ $t('Login') }}</a>
-		  </div>
+			<a href="#" data-toggle="modal" data-target="#loginModal" @click="showModalFunc" class="btn btn-brand btn-lg w-75">{{ $t('Login') }}</a>
+		</div>
 		  <div class="w-50">
 			<a href="/signup" class="btn btn-brand btn-lg w-75">{{ $t('Sign_Up') }}</a>
 		  </div>
@@ -93,10 +93,12 @@
         <notifications :group="'error'" :position="'top center'" :classes="'vue-notification error'" />
       </div>
     </client-only>
+	<LoginModal v-if="showModalLog" @close="showModalLog = false" />
   </div>
 </template>
 
 <script>
+  import LoginModal from '~/components/LoginModal'
   import NavbarBrand from '~/components/NavbarBrand'
   import Footer from '~/components/Footer'
 
@@ -119,6 +121,7 @@
 	},
 	data () {
 		return {
+			showModalLog: false,
 			userRank: '',
 			rewardedPostCount: '',
 			loading: false,
@@ -146,7 +149,8 @@
 	components: {
 	  NavbarBrand,
 	  Footer,
-	  FriendshipModal
+	  FriendshipModal,
+	  LoginModal,
 	},
     computed: {
 	  ...mapGetters('steemconnect', ['user']),
@@ -186,6 +190,14 @@
        */
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
+      },
+	  showModalFunc() {
+        this.$nextTick(() => {
+          this.showModalLog = true;
+          if ($ && typeof $.fn.modal === 'function') {
+            $('#loginModal').modal('show');
+          }
+        });
       },
 	  hideSuggFriends () {
 		console.log('testttt');

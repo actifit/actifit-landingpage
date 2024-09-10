@@ -99,7 +99,7 @@
 					</div>
 					<div class="col-12" v-if="displayLoginActivity">
 						  <div class="row">
-							<a href="/login" class="btn btn-brand w-50">{{ $t('Login') }}</a>
+							<a href="#" data-toggle="modal" data-target="#loginModal" @click="showModalFunc" class="btn btn-brand btn-lg w-75">{{ $t('Login') }}</a>
 							<a href="/signup" class="btn btn-brand w-50">{{ $t('Sign_Up') }}</a>
 						  </div>
 					</div>
@@ -168,7 +168,7 @@
 				</div>
 				<div v-if="displayLoginStats" class="col-12">
 					  <div class="row">
-						<a href="/login" class="btn btn-brand w-50">{{ $t('Login') }}</a>
+						<a href="#" data-toggle="modal" data-target="#loginModal" @click="showModalFunc" class="btn btn-brand btn-lg w-75">{{ $t('Login') }}</a>
 						<a href="/signup" class="btn btn-brand w-50">{{ $t('Sign_Up') }}</a>
 					  </div>
 				</div>
@@ -530,10 +530,12 @@
         <notifications :group="'error'" :position="'top center'" :classes="'vue-notification error'" />
       </div>
     </client-only>
+	<LoginModal v-if="showModal" @close="showModal = false" />
   </div>
 </template>
 
 <script>
+  import LoginModal from '~/components/LoginModal'
   import NavbarBrand from '~/components/NavbarBrand'
   import Footer from '~/components/Footer'
 
@@ -581,6 +583,7 @@
 	},
 	data () {
 		return {
+			showModal: false,
 			report: '',
 			displayUser: '',
 			errorDisplay: '',
@@ -722,7 +725,8 @@
 	  MeasureChartModal,
 	  ActivityChartModal,
 	  NotifyModal,
-	  ProfileImageModal
+	  ProfileImageModal,
+	  LoginModal,
 	},
     computed: {
 	  ...mapGetters('steemconnect', ['user']),
@@ -845,6 +849,14 @@
       }
     },
 	methods: {
+		showModalFunc() {
+			this.$nextTick(() => {
+			this.showModal = true;
+			if ($ && typeof $.fn.modal === 'function') {
+				$('#loginModal').modal('show');
+			}
+			});
+		},
 		showProfileImageModal() {
 		this.isProfileImageModalVisible = true;
 		},
