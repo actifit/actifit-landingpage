@@ -113,7 +113,7 @@
 		</div>
 		<div class="row pb-3">
 		  <div class="w-50">
-			<a href="/login" class="btn btn-brand btn-lg w-75">{{ $t('Login') }}</a>
+			<a href="#" data-toggle="modal" data-target="#loginModal" @click="showModalFunc" class="btn btn-brand btn-lg w-75">{{ $t('Login') }}</a>
 		  </div>
 		  <div class="w-50">
 			<a href="/signup" class="btn btn-brand btn-lg w-75">{{ $t('Sign_Up') }}</a>
@@ -123,6 +123,7 @@
 	</div>
 	
     <Footer />
+	<LoginModal v-if="showModal" @close="showModal = false" />
   </div>
 </template>
 
@@ -130,6 +131,7 @@
   import NavbarBrand from '~/components/NavbarBrand'
   import Referral from '~/components/Referral'
   import Footer from '~/components/Footer'
+  import LoginModal from '~/components/LoginModal'
   
   import SocialSharing from 'vue-social-sharing'
 
@@ -156,9 +158,11 @@
       Referral, // single referral block
       Footer,
 	  SocialSharing,
+	  LoginModal,
     },
 	data (){
 	  return {
+		showModal: false,
 	    refUrl: '',
 		screenWidth: 1200,
 		afitx_he_balance: 0,
@@ -210,6 +214,15 @@
 		  document.execCommand("copy");
 		  return;
 	  },
+	  showModalFunc() {
+		this.$nextTick(() => {
+			this.showModal = true;
+			// If you're still using jQuery, make sure it's properly imported
+			if ($ && typeof $.fn.modal === 'function') {
+			$('#loginModal').modal('show');
+			}
+		});
+		},
 	  fetchUserInfo () {
 		if (typeof this.user != 'undefined' && this.user != null){
 		  this.$store.dispatch('fetchUserTokens')

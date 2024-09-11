@@ -53,7 +53,7 @@
 			  <div v-if="!user">
 			    <div class="row pb-3">
 				  <div class="w-50">
-					<a href="/login" class="btn btn-brand btn-lg w-75">{{ $t('Login') }}</a>
+					<a href="#" data-toggle="modal" data-target="#loginModal" @click="showModalFunc" class="btn btn-brand btn-lg w-75">{{ $t('Login') }}</a>
 				  </div>
 				  <div class="w-50">
 					<a href="/signup" class="btn btn-brand btn-lg w-75">{{ $t('Sign_Up') }}</a>
@@ -82,10 +82,12 @@
         <notifications :group="'error'" :position="'top center'" :classes="'vue-notification error'" />
       </div>
     </client-only>
+	<LoginModal v-if="showModal" @close="showModal = false" />
   </div>
 </template>
 
 <script>
+  import LoginModal from '~/components/LoginModal'
   import { mapGetters } from 'vuex'
   import steem from 'steem'
   
@@ -97,6 +99,7 @@
      props: ['afitPrice'],
 	data () {
       return {
+		showModal: false,
         loading: false,
 		sbd_price: 1,
 		steem_price: 1,
@@ -136,7 +139,8 @@
 	  }
 	},
 	components: {
-		BuyOptionsModal
+		BuyOptionsModal,
+		LoginModal,
 	},
     computed: {
       ...mapGetters('steemconnect', ['user']),
@@ -184,6 +188,14 @@
        */
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
+      },
+	  showModalFunc() {
+        this.$nextTick(() => {
+          this.showModal = true;
+          if ($ && typeof $.fn.modal === 'function') {
+            $('#loginModal').modal('show');
+          }
+        });
       },
 	  getProductPrice (product){
 		let price_options = product.price;

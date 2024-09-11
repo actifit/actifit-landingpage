@@ -63,7 +63,7 @@
 		</div>
 		<div class="row pb-3">
 		  <div class="w-50">
-			<a href="/login" class="btn btn-brand btn-lg w-75">{{ $t('Login') }}</a>
+			<a href="#" data-toggle="modal" data-target="#loginModal" @click="showModalFunc" class="btn btn-brand btn-lg w-75">{{ $t('Login') }}</a>
 		  </div>
 		  <div class="w-50">
 			<a href="/signup" class="btn btn-brand btn-lg w-75">{{ $t('Sign_Up') }}</a>
@@ -73,10 +73,13 @@
 	</div>
 	
     <Footer />
+	<LoginModal v-if="showModal" @close="showModal = false" />
   </div>
 </template>
 
 <script>
+  import LoginModal from '~/components/LoginModal'
+
   import NavbarBrand from '~/components/NavbarBrand'
   import Footer from '~/components/Footer'
   
@@ -96,9 +99,11 @@
     components: {
       NavbarBrand,
       Footer,
+	  LoginModal,
     },
 	data (){
 	  return {
+		showModal: false,
 	    refUrl: '',
 		screenWidth: 1200,
 		//delegation calculation matrix
@@ -189,6 +194,14 @@
 	  user : 'fetchUserInfo'
 	},
 	methods: {
+		showModalFunc() {
+			this.$nextTick(() => {
+			this.showModal = true;
+			if ($ && typeof $.fn.modal === 'function') {
+				$('#loginModal').modal('show');
+			}
+			});
+		},
 	  /**
        * Formats numbers with commas and dots.
        *
