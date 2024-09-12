@@ -27,6 +27,9 @@
 			</h5>
 			<a :href="buildLink"><span class="date-head text-muted">{{ date }}</span>&nbsp;<i class="fas fa-link"></i></a>
 			<i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent" ></i>
+			<button @click="handleTranslate" class="btn btn-secondary mt-2">
+				<i class="fas fa-language"></i> {{ translated ? 'Show Original' : 'Translate' }}
+			</button>
 		  
 			<div class="report-tags p-1" v-html="displayReportTags"></div>
 		  </div>
@@ -572,7 +575,52 @@
 		return this.commentEntries != null;
 	  }
     },
+	data() {
+		return {
+			translated: false,
+			originalText: '',
+			translatedText: '',
+			isTooltipVisible: false,
+		};
+	},
 	methods: {
+		
+		async translateText() {
+			try {
+				const response = await axios.post(
+				`https://translation.googleapis.com/language/translate/v2?key=YOUR_API_KEY`,
+				{
+					q: this.originalText,
+					target: 'en',
+				}
+				);
+				this.translatedText = response.data.data.translations[0].translatedText;
+				this.translated = true;
+			} catch (error) {
+				console.error('Translation API error:', error);
+				this.translatedText = 'Translation failed.';
+				this.translated = true;
+			}
+			},
+			async handleTranslate() {
+			if (!this.translated) {
+				this.originalText = this.report.body; // assuming report body is the text to be translated
+				await this.translateText();
+			}
+			},
+			truncateString(str, num = 30) {
+			if (str.length > num) {
+				return str.slice(0, num) + '...';
+			} else {
+				return str;
+			}
+			},
+			renderSnippet(text) {
+				return text.length > 150 ? text.substring(0, 150) + "..." : text;
+			},
+			fixedContent() {
+				return this.translated ? this.translatedText : this.renderSnippet(this.report.body);
+			},
 	  copyContent (event){
 			navigator.clipboard.writeText('https://actifit.io/@' + this.report.author + '/' + this.report.permlink)
 			.then(() => {

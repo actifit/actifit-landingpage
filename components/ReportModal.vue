@@ -24,12 +24,18 @@
 					<span class="date-head text-muted" :title="date">{{ $getTimeDifference(report.created) }}</span>
 					<a :href="'/@' + this.report.author + '/' + this.report.permlink"><i class="fas fa-link text-brand"></i></a>
 					<i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent" ></i>
+					<!--add a button here that calls the translation function for the text-->
+					<i v-if="!showTranslated" class="fa-solid fa-language text-brand" v-on:click="translateContent"></i>
 				</span>
 			</div>
           
 		<div class="modal-header">
 			<div class="report-tags p-1" v-html="displayReportTags"></div>
 		</div>
+		</div>
+		<div v-if="showTranslated" class="translation-notice">
+			<span>{{ $t('auto_translated_content') }}</span>
+			<a href="#" v-on:click="cancelTranslation">{{ $t('click_to_view_original') }}</a>
 		</div>
 		<vue-remarkable class="modal-body" :source="body" :options="{'html': true, 'breaks': true, 'typographer': true}"></vue-remarkable>
 		<div class="modal-body goog-ad-horiz-90"><adsbygoogle ad-slot="5716623705" /></div>
@@ -226,15 +232,17 @@
 <script>
   import steem from 'steem'
   import {mapGetters} from 'vuex'
-  import Comments from '~/components/Comments'  
+  import Comments from '~/components/Comments' 
   import CustomTextEditor from '~/components/CustomTextEditor' 
   
   import vueRemarkable from 'vue-remarkable';
   
   import SocialSharing from 'vue-social-sharing';
   
-  import sanitize from 'sanitize-html'
-  
+  import sanitizeHtml from 'sanitize-html';
+
+  import { translateText } from '~/components/deepl-client';
+
   const scot_steemengine_api = process.env.steemEngineScot;
   const scot_hive_api_param = process.env.hiveEngineScotParam;
   const tokensOfInterest = ['SPORTS', 'PAL', 'APX'];
@@ -356,7 +364,111 @@
 		return this.commentEntries != null;
 	  }
     },
+	data() {
+		return {
+			safety_post_content: ``,
+			translatedContent: '',
+			showTranslated: false,
+			translationError: ''
+		};
+		},
 	methods: {
+		cancelTranslation(){
+			this.report.body = this.safety_post_content;
+			this.showTranslated = false;
+		},
+		async translateContent() {
+			try {
+				//console.log(`Original content: ${this.report.body}`);
+				this.safety_post_content = this.report.body;
+				const result = await translateText(this.report.body , 'en');
+				
+				//const temp = await translateText(result.translations[0].text, 'en');
+
+				const translatedText = result.translations[0].text || "Translation failed";
+		
+				//const translatedMarkdown = this.reintegrateTranslationsIntoMarkdown(this.report.body, translatedText);
+				//console.log(`this is the non markdown: ${this.report.body}`);
+				//console.log(`this is the one after markdown: ${translatedMarkdown}`)
+/*
+				this.translatedContent = translatedMarkdown;
+				*/
+				this.showTranslated = true;
+
+				this.report.body = translatedText;
+				//console.log(`Original content: ${this.report.body.length}`);
+				//console.log(`Original content: ${post_content}`);
+				console.log(`Translated content: ${translatedText}`);
+
+			} catch (error) {
+				this.translationError = 'Unable to translate content. Try again later.';
+				console.error('Translation error:', error);
+			}
+		},
+
+
+extractTextFromMarkdown(markdown) {
+    const markdownRegex = /(!?\[.*?\]\(.*?\))|(`[^`]*`)|(\*\*[^*]+\*\*)|(__[^_]+__)|(\*\*.*\*\*)|(__.*__)/g;
+
+    let textSegments = [];
+    let lastIndex = 0;
+    let match;
+
+    while ((match = markdownRegex.exec(markdown)) !== null) {
+        if (match.index > lastIndex) {
+            textSegments.push(markdown.slice(lastIndex, match.index).trim());
+        }
+        lastIndex = markdownRegex.lastIndex;
+    }
+
+    if (lastIndex < markdown.length) {
+        textSegments.push(markdown.slice(lastIndex).trim());
+    }
+
+    return textSegments.filter(segment => segment.length > 0);
+},
+
+reintegrateTranslationsIntoMarkdown(markdown, translatedTexts) {
+    const markdownRegex = /(!?\[.*?\]\(.*?\))|(`[^`]*`)|(\*\*[^*]+\*\*)|(__[^_]+__)|(\*\*.*\*\*)|(__.*__)|(<img .*?>)|(<a .*?>.*?<\/a>)|(<.*?>)/g;
+
+    let translationIndex = 0;
+    let result = '';
+    let lastIndex = 0;
+    let match;
+
+    while ((match = markdownRegex.exec(markdown)) !== null) {
+        if (match.index > lastIndex) {
+            result += translatedTexts[translationIndex++] || '';
+        }
+        result += match[0];
+        lastIndex = markdownRegex.lastIndex;
+    }
+
+    if (lastIndex < markdown.length) {
+        result += translatedTexts[translationIndex++] || '';
+    }
+
+    return result;
+},
+			async handleTranslate() {
+			if (!this.translated) {
+				this.originalText = this.report.body; // assuming report body is the text to be translated
+				await this.translateText();
+			}
+			},
+			truncateString(str, num = 30) {
+			if (str.length > num) {
+				return str.slice(0, num) + '...';
+			} else {
+				return str;
+			}
+			},
+			renderSnippet(text) {
+				return text.length > 150 ? text.substring(0, 150) + "..." : text;
+			},
+			fixedContent() {
+				return this.translated ? this.translatedText : this.renderSnippet(this.report.body);
+			},
 	/* function checks if post has beneficiaries */
 	  hasBeneficiaries() {
 		return Array.isArray(this.report.beneficiaries) && this.report.beneficiaries.length > 0;
@@ -888,5 +1000,22 @@
 	}
 	.pointer-cur-cls{
 		cursor: pointer;
+	}
+	.translation-notice {
+		background-color: #f8f9fa;
+		border: 1px solid #e9ecef;
+		padding: 10px;
+		margin-bottom: 15px;
+		border-radius: 4px;
+	}
+
+	.translation-notice a {
+		color: #007bff;
+		text-decoration: none;
+		margin-left: 5px;
+	}
+
+	.translation-notice a:hover {
+		text-decoration: underline;
 	}
 </style>
