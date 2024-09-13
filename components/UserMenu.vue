@@ -1,9 +1,9 @@
-<template>
-  <!-- login link or user dropdown menu when logged in, for navbar-->
+<template>	
   <div class="user-menu-container ml-auto position-absolute d-flex align-items-center">
+	
     <ul class="navbar-nav mr-auto user-menu flex-row">
 	  <li class="nav-item" v-if="!user">
-		<a :href="'/signup'" >{{ $t('Signup_Link') }}</a> | <a :href="'/login'" >{{ $t('Login') }}</a>
+		<a :href="'/signup'" >{{ $t('Signup_Link') }}</a> | <a href="#" data-toggle="modal" data-target="#loginModal" @click="showModalFunc">{{ $t('Login') }}</a>
 	  </li>
 	  <!--<li class="nav-item mr-2" v-if="user" >
         <span class="navbar-text py-0 text-brand" >{{ $t('Rank') }}&nbsp;<br><b>{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRankObj && this.userRankObj.afitx_rank">{{  displayIncreasedUserRank }}</span></b></span>
@@ -117,7 +117,7 @@
   export default {
 	components: {
 	  SteemStats,
-	  StingChat
+	  StingChat,
     },
 	data () {
 		return {
@@ -193,6 +193,9 @@
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
+	  showModalFunc() {
+		this.$emit('modal-opened', true);
+		},
 	  toggleDarkMode() {
         this.$store.dispatch('toggleDarkMode');
       },
