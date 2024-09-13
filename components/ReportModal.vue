@@ -379,25 +379,14 @@
 		},
 		async translateContent() {
 			try {
-				//console.log(`Original content: ${this.report.body}`);
 				this.safety_post_content = this.report.body;
 				const result = await translateText(this.report.body , 'en');
 				
-				//const temp = await translateText(result.translations[0].text, 'en');
-
 				const translatedText = result.translations[0].text || "Translation failed";
 		
-				//const translatedMarkdown = this.reintegrateTranslationsIntoMarkdown(this.report.body, translatedText);
-				//console.log(`this is the non markdown: ${this.report.body}`);
-				//console.log(`this is the one after markdown: ${translatedMarkdown}`)
-/*
-				this.translatedContent = translatedMarkdown;
-				*/
 				this.showTranslated = true;
 
 				this.report.body = translatedText;
-				//console.log(`Original content: ${this.report.body.length}`);
-				//console.log(`Original content: ${post_content}`);
 				console.log(`Translated content: ${translatedText}`);
 
 			} catch (error) {
@@ -406,69 +395,6 @@
 			}
 		},
 
-
-extractTextFromMarkdown(markdown) {
-    const markdownRegex = /(!?\[.*?\]\(.*?\))|(`[^`]*`)|(\*\*[^*]+\*\*)|(__[^_]+__)|(\*\*.*\*\*)|(__.*__)/g;
-
-    let textSegments = [];
-    let lastIndex = 0;
-    let match;
-
-    while ((match = markdownRegex.exec(markdown)) !== null) {
-        if (match.index > lastIndex) {
-            textSegments.push(markdown.slice(lastIndex, match.index).trim());
-        }
-        lastIndex = markdownRegex.lastIndex;
-    }
-
-    if (lastIndex < markdown.length) {
-        textSegments.push(markdown.slice(lastIndex).trim());
-    }
-
-    return textSegments.filter(segment => segment.length > 0);
-},
-
-reintegrateTranslationsIntoMarkdown(markdown, translatedTexts) {
-    const markdownRegex = /(!?\[.*?\]\(.*?\))|(`[^`]*`)|(\*\*[^*]+\*\*)|(__[^_]+__)|(\*\*.*\*\*)|(__.*__)|(<img .*?>)|(<a .*?>.*?<\/a>)|(<.*?>)/g;
-
-    let translationIndex = 0;
-    let result = '';
-    let lastIndex = 0;
-    let match;
-
-    while ((match = markdownRegex.exec(markdown)) !== null) {
-        if (match.index > lastIndex) {
-            result += translatedTexts[translationIndex++] || '';
-        }
-        result += match[0];
-        lastIndex = markdownRegex.lastIndex;
-    }
-
-    if (lastIndex < markdown.length) {
-        result += translatedTexts[translationIndex++] || '';
-    }
-
-    return result;
-},
-			async handleTranslate() {
-			if (!this.translated) {
-				this.originalText = this.report.body; // assuming report body is the text to be translated
-				await this.translateText();
-			}
-			},
-			truncateString(str, num = 30) {
-			if (str.length > num) {
-				return str.slice(0, num) + '...';
-			} else {
-				return str;
-			}
-			},
-			renderSnippet(text) {
-				return text.length > 150 ? text.substring(0, 150) + "..." : text;
-			},
-			fixedContent() {
-				return this.translated ? this.translatedText : this.renderSnippet(this.report.body);
-			},
 	/* function checks if post has beneficiaries */
 	  hasBeneficiaries() {
 		return Array.isArray(this.report.beneficiaries) && this.report.beneficiaries.length > 0;
