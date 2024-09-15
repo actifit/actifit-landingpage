@@ -183,17 +183,17 @@ module.exports = {
       { src: 'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js' },
       { src: 'https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/TweenMax.min.js' },
 	  // Google tag (gtag.js)
-	  { src: 'https://www.googletagmanager.com/gtag/js?id=G-HPZKPFM9GK', 
-		async:true },
-		{
-			children: `
+	  /*{ src: 'https://www.googletagmanager.com/gtag/js?id=G-HPZKPFM9GK', 
+		async:true,
+		script: { children: `
 				window.dataLayer = window.dataLayer || [];
 				function gtag(){dataLayer.push(arguments);}
 				gtag('js', new Date());
 
 				gtag('config', 'G-HPZKPFM9GK');
 			`,
-		},
+  			}
+		},*/
     ]
   },
 
@@ -216,7 +216,7 @@ module.exports = {
   */
   plugins: [
     '~/plugins/vue-steemconnect',
-	//{ src: '~plugins/ga.js', ssr: false },
+	{ src: '~plugins/ga.js', ssr: false },
     { src: '~plugins/vue-carousel', ssr: false },
     { src: '~plugins/vue-notification', ssr: false },
     { src: '~plugins/vue-simplemde', ssr: false },
