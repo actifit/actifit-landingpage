@@ -1,29 +1,26 @@
 /* eslint-disable */
 
 export default ({ app }) => {
-  /*
-  ** Only run on client-side and only in production mode
-  */
-  if (process.env.NODE_ENV !== 'production') return
-  /*
-  ** Include Google Analytics Script
-  */
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-  /*
-  ** Set the current page
-  */
-  ga('create', 'UA-122850341-1', 'auto')
-  /*
-  ** Every time the route changes (fired on initialization too)
-  */
-  app.router.afterEach((to, from) => {
-    /*
-    ** We tell Google Analytics to add a `pageview`
-    */
-    ga('set', 'page', to.fullPath)
-    ga('send', 'pageview')
-  })
+  // Replace 'YOUR_TRACKING_ID' with your actual Google Analytics tracking ID
+  const trackingId = 'G-HPZKPFM9GK';
+
+  // Create a script tag for the Google Analytics tracking code
+  const script = document.createElement('script');
+  script.async = true;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${trackingId}`;
+  document.head.appendChild(script);   
+
+
+  // Define the gtag function
+  window.dataLayer = window.dataLayer || [];
+  function gtag() { dataLayer.push(arguments); }
+
+  // Initialize gtag
+  gtag('js', new Date());
+  gtag('config', trackingId);
+
+  // Track page views
+  app.router.afterEach((to) => {
+    gtag('config', trackingId, { page_path: to.fullPath });
+  });
 }
