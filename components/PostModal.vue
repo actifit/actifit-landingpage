@@ -43,10 +43,15 @@
 				<span class="date-head text-muted" :title="date">{{ $getTimeDifference(post.created) }}</span>
 				<a :href="'/@' + this.post.author + '/' + this.post.permlink"><i class="fas fa-link text-brand"></i></a>
 				<i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent" ></i>
+				<i v-if="!showTranslated" class="fa-solid fa-language text-brand" v-on:click="translateContent"></i>
 			</span>
 			<div class="modal-header">
 				<div class="post-tags p-1" v-html="displayPostTags"></div>
 			</div>
+		</div>
+		<div v-if="showTranslated" class="translation-notice">
+			<span>{{ $t('auto_translated_content') }}</span>
+			<a href="#" v-on:click="cancelTranslation">{{ $t('click_to_view_original') }}</a>
 		</div>
 		<vue-remarkable class="modal-body" :source="body" :options="{'html': true, 'breaks': true, 'typographer': true}"></vue-remarkable>
 		<div class="modal-body goog-ad-horiz-90"><adsbygoogle ad-slot="5716623705" /></div>
@@ -252,6 +257,7 @@
   import SocialSharing from 'vue-social-sharing';
   
   import sanitize from 'sanitize-html'
+  import { translateText } from '~/components/deepl-client';
   
   const scot_steemengine_api = process.env.steemEngineScot;
   const scot_hive_api_param = process.env.hiveEngineScotParam;
@@ -260,6 +266,9 @@
   export default {
 	data () {
 		return {
+			safety_post_content: ``,
+			showTranslated: false,
+			translationError: '',
 			afitReward: 0,
 			tokenRewards: [],
 			userRank: '',
@@ -387,6 +396,26 @@
 	  }
     },
 	methods: { 
+		cancelTranslation(){
+			this.post.body = this.safety_post_content;
+			this.showTranslated = false;
+		},
+		async translateContent() {
+			try {
+				this.safety_post_content = this.post.body;
+				const result = await translateText(this.post.body , 'en');
+				
+				const translatedText = result.translations[0].text || "Translation failed";
+		
+				this.showTranslated = true;
+
+				this.post.body = translatedText;
+
+			} catch (error) {
+				this.translationError = 'Unable to translate content. Try again later.';
+				console.error('Translation error:', error);
+			}
+		},
 	  copyContent (event){
 			navigator.clipboard.writeText('https://actifit.io/@' + this.post.author + '/' + this.post.permlink)
 			.then(() => {
@@ -923,5 +952,22 @@
 	}
 	.pointer-cur-cls{
 		cursor: pointer;
+	}
+	.translation-notice {
+		background-color: #f8f9fa;
+		border: 1px solid #e9ecef;
+		padding: 10px;
+		margin-bottom: 15px;
+		border-radius: 4px;
+	}
+
+	.translation-notice a {
+		color: #007bff;
+		text-decoration: none;
+		margin-left: 5px;
+	}
+
+	.translation-notice a:hover {
+		text-decoration: underline;
 	}
 </style>

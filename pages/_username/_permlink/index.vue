@@ -7,7 +7,6 @@
 			<ChainSelection />
 		</div>
 	</div>-->
-	
 	<div v-if="report && report.author" class="container pt-5 mt-5 pb-5 col-md-6" >
 		<div class="text-right" >
 			<ChainSelection />
@@ -27,10 +26,15 @@
 			</h5>
 			<a :href="buildLink"><span class="date-head text-muted">{{ date }}</span>&nbsp;<i class="fas fa-link"></i></a>
 			<i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent" ></i>
+			<i v-if="!showTranslated" class="fa-solid fa-language text-brand" v-on:click="translateContent"></i>
 		  
 			<div class="report-tags p-1" v-html="displayReportTags"></div>
 		  </div>
         </div>
+		<div v-if="showTranslated" class="translation-notice">
+			<span>{{ $t('auto_translated_content') }}</span>
+			<a href="#" v-on:click="cancelTranslation">{{ $t('click_to_view_original') }}</a>
+		</div>
 		<vue-remarkable class="col-md-12" :source="body" :options="{'html': true, 'breaks': true, 'typographer': true}" ></vue-remarkable>
 		<!--<div v-html="body"></div>-->
 		<!--<div class="modal-body goog-ad-horiz-90"><adsbygoogle ad-slot="4921049809" /></div>-->
@@ -276,6 +280,7 @@
   import { Remarkable } from 'remarkable';
   import RemarkableSpoiler from '@quochuync/remarkable-spoiler';
   import '@quochuync/remarkable-spoiler/styles.css';
+  import { translateText } from '~/components/deepl-client';
   
   //var md = new Remarkable({html: true});
   //md.use(RemarkableSpoiler);
@@ -418,6 +423,9 @@
 	},
 	data () {
 		return {
+			safety_post_content: ``,
+			showTranslated: false,
+			translationError: '',
 			report: '',
 			postAuthor: '',
 			errorDisplay: '',
@@ -572,7 +580,36 @@
 		return this.commentEntries != null;
 	  }
     },
+	data() {
+		return {
+			translated: false,
+			originalText: '',
+			translatedText: '',
+			isTooltipVisible: false,
+		};
+	},
 	methods: {
+		cancelTranslation(){
+			this.report.body = this.safety_post_content;
+			this.showTranslated = false;
+		},
+		async translateContent() {
+			try {
+				this.safety_post_content = this.report.body;
+				const result = await translateText(this.report.body , 'en');
+				
+				const translatedText = result.translations[0].text || "Translation failed";
+		
+				this.showTranslated = true;
+
+				this.report.body = translatedText;
+
+			} catch (error) {
+				this.translationError = 'Unable to translate content. Try again later.';
+				console.error('Translation error:', error);
+			}
+		},
+
 	  copyContent (event){
 			navigator.clipboard.writeText('https://actifit.io/@' + this.report.author + '/' + this.report.permlink)
 			.then(() => {
@@ -1137,5 +1174,22 @@
 	}
 	.pointer-cur-cls{
 		cursor: pointer;
+	}
+	.translation-notice {
+		background-color: #f8f9fa;
+		border: 1px solid #e9ecef;
+		padding: 10px;
+		margin-bottom: 15px;
+		border-radius: 4px;
+	}
+
+	.translation-notice a {
+		color: #007bff;
+		text-decoration: none;
+		margin-left: 5px;
+	}
+
+	.translation-notice a:hover {
+		text-decoration: underline;
 	}
 </style>

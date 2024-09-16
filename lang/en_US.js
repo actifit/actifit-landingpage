@@ -1,4 +1,6 @@
 module.exports = {
+  auto_translated_content: 'Auto-Translated Content.',
+  click_to_view_original: 'Click to view original',
   profile_image_disclaimer: 'Please note that the profile image change might not be reflected till after 24 hours.',
   change_profile_image: 'Change Profile Image',
   upload_image: 'Upload Image',
