@@ -24,7 +24,6 @@
 					<span class="date-head text-muted" :title="date">{{ $getTimeDifference(report.created) }}</span>
 					<a :href="'/@' + this.report.author + '/' + this.report.permlink"><i class="fas fa-link text-brand"></i></a>
 					<i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent" ></i>
-					<!--add a button here that calls the translation function for the text-->
 					<i v-if="!showTranslated" class="fa-solid fa-language text-brand" v-on:click="translateContent"></i>
 				</span>
 			</div>
@@ -250,6 +249,9 @@
   export default {
 	data () {
 		return {
+			safety_post_content: ``,
+			showTranslated: false,
+			translationError: '',
 			afitReward: 0,
 			tokenRewards: [],
 			userRank: '',
@@ -364,14 +366,7 @@
 		return this.commentEntries != null;
 	  }
     },
-	data() {
-		return {
-			safety_post_content: ``,
-			translatedContent: '',
-			showTranslated: false,
-			translationError: ''
-		};
-		},
+
 	methods: {
 		cancelTranslation(){
 			this.report.body = this.safety_post_content;
@@ -387,7 +382,6 @@
 				this.showTranslated = true;
 
 				this.report.body = translatedText;
-				console.log(`Translated content: ${translatedText}`);
 
 			} catch (error) {
 				this.translationError = 'Unable to translate content. Try again later.';

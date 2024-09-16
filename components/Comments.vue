@@ -37,10 +37,14 @@
 			<div class="comment-user-section pt-2" :style="{ paddingLeft: depth * indentFactor + 'px' }">	
 				<a :title="$t('comment_link')" :href="buildLink" id="comment-link" ref="comment-link"><span class="date-head text-muted" :title="date">{{ $getTimeDifference(full_data.created) }}</span>&nbsp;<i class="fas fa-link"></i></a>
 				<i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent" ></i>
+				<i v-if="!showTranslated" class="fa-solid fa-language text-brand" v-on:click="translateContent"></i>
 			</div>
 		<!--</a>-->
 		</div>
-		
+		<div v-if="showTranslated" class="translation-notice">
+			<span>{{ $t('auto_translated_content') }}</span>
+			<a href="#" v-on:click="cancelTranslation">{{ $t('click_to_view_original') }}</a>
+		</div>
 		<vue-remarkable class="modal-body pb-0" v-if="!editBoxOpen" :source="commentBody()" :style="{ paddingLeft: depth * indentFactor + 'px' }" :options="{'html': true, 'breaks': true, 'typographer': true}"></vue-remarkable>
 		<transition name="fade">
 		  <div class="comment-reply" v-if="editBoxOpen">
@@ -181,6 +185,7 @@
   </transition>
 </template>
 <script>
+  import { translateText } from '~/components/deepl-client';
 
   import vueRemarkable from 'vue-remarkable';
 
@@ -201,6 +206,9 @@
     name: 'Comments',
 	data () {
 		return {
+			safety_post_content: ``,
+			showTranslated: false,
+			translationError: '',
 			currentSort: JSON.stringify({value: 'created', direction: 'desc'}),
 			postUpvoted: false,
 			commentDeleted: false,
@@ -298,6 +306,26 @@
 	  },
     },
     methods: {
+		cancelTranslation(){
+			this.responseBody = this.safety_post_content;
+			this.showTranslated = false;
+		},
+		async translateContent() {
+			try {
+				this.safety_post_content = this.responseBody;
+				const result = await translateText(this.responseBody , 'en');
+				
+				const translatedText = result.translations[0].text || "Translation failed";
+		
+				this.showTranslated = true;
+
+				this.responseBody = translatedText;
+
+			} catch (error) {
+				this.translationError = 'Unable to translate content. Try again later.';
+				console.error('Translation error:', error);
+			}
+		},
 		reorderComments () {
 			try{
 				//console.log(this.currentSort);
@@ -952,6 +980,23 @@
   cursor: pointer;
   border-radius: 4px;
 }
+.translation-notice {
+		background-color: #f8f9fa;
+		border: 1px solid #e9ecef;
+		padding: 10px;
+		margin-bottom: 15px;
+		border-radius: 4px;
+	}
+
+	.translation-notice a {
+		color: #007bff;
+		text-decoration: none;
+		margin-left: 5px;
+	}
+
+	.translation-notice a:hover {
+		text-decoration: underline;
+	}
 
 /*
 .comments {

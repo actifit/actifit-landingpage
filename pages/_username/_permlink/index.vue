@@ -7,7 +7,6 @@
 			<ChainSelection />
 		</div>
 	</div>-->
-	
 	<div v-if="report && report.author" class="container pt-5 mt-5 pb-5 col-md-6" >
 		<div class="text-right" >
 			<ChainSelection />
@@ -27,13 +26,15 @@
 			</h5>
 			<a :href="buildLink"><span class="date-head text-muted">{{ date }}</span>&nbsp;<i class="fas fa-link"></i></a>
 			<i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent" ></i>
-			<button @click="handleTranslate" class="btn btn-secondary mt-2">
-				<i class="fas fa-language"></i> {{ translated ? 'Show Original' : 'Translate' }}
-			</button>
+			<i v-if="!showTranslated" class="fa-solid fa-language text-brand" v-on:click="translateContent"></i>
 		  
 			<div class="report-tags p-1" v-html="displayReportTags"></div>
 		  </div>
         </div>
+		<div v-if="showTranslated" class="translation-notice">
+			<span>{{ $t('auto_translated_content') }}</span>
+			<a href="#" v-on:click="cancelTranslation">{{ $t('click_to_view_original') }}</a>
+		</div>
 		<vue-remarkable class="col-md-12" :source="body" :options="{'html': true, 'breaks': true, 'typographer': true}" ></vue-remarkable>
 		<!--<div v-html="body"></div>-->
 		<!--<div class="modal-body goog-ad-horiz-90"><adsbygoogle ad-slot="4921049809" /></div>-->
@@ -279,6 +280,7 @@
   import { Remarkable } from 'remarkable';
   import RemarkableSpoiler from '@quochuync/remarkable-spoiler';
   import '@quochuync/remarkable-spoiler/styles.css';
+  import { translateText } from '~/components/deepl-client';
   
   //var md = new Remarkable({html: true});
   //md.use(RemarkableSpoiler);
@@ -421,6 +423,9 @@
 	},
 	data () {
 		return {
+			safety_post_content: ``,
+			showTranslated: false,
+			translationError: '',
 			report: '',
 			postAuthor: '',
 			errorDisplay: '',
@@ -584,43 +589,27 @@
 		};
 	},
 	methods: {
-		
-		async translateText() {
+		cancelTranslation(){
+			this.report.body = this.safety_post_content;
+			this.showTranslated = false;
+		},
+		async translateContent() {
 			try {
-				const response = await axios.post(
-				`https://translation.googleapis.com/language/translate/v2?key=YOUR_API_KEY`,
-				{
-					q: this.originalText,
-					target: 'en',
-				}
-				);
-				this.translatedText = response.data.data.translations[0].translatedText;
-				this.translated = true;
+				this.safety_post_content = this.report.body;
+				const result = await translateText(this.report.body , 'en');
+				
+				const translatedText = result.translations[0].text || "Translation failed";
+		
+				this.showTranslated = true;
+
+				this.report.body = translatedText;
+
 			} catch (error) {
-				console.error('Translation API error:', error);
-				this.translatedText = 'Translation failed.';
-				this.translated = true;
+				this.translationError = 'Unable to translate content. Try again later.';
+				console.error('Translation error:', error);
 			}
-			},
-			async handleTranslate() {
-			if (!this.translated) {
-				this.originalText = this.report.body; // assuming report body is the text to be translated
-				await this.translateText();
-			}
-			},
-			truncateString(str, num = 30) {
-			if (str.length > num) {
-				return str.slice(0, num) + '...';
-			} else {
-				return str;
-			}
-			},
-			renderSnippet(text) {
-				return text.length > 150 ? text.substring(0, 150) + "..." : text;
-			},
-			fixedContent() {
-				return this.translated ? this.translatedText : this.renderSnippet(this.report.body);
-			},
+		},
+
 	  copyContent (event){
 			navigator.clipboard.writeText('https://actifit.io/@' + this.report.author + '/' + this.report.permlink)
 			.then(() => {
@@ -1185,5 +1174,22 @@
 	}
 	.pointer-cur-cls{
 		cursor: pointer;
+	}
+	.translation-notice {
+		background-color: #f8f9fa;
+		border: 1px solid #e9ecef;
+		padding: 10px;
+		margin-bottom: 15px;
+		border-radius: 4px;
+	}
+
+	.translation-notice a {
+		color: #007bff;
+		text-decoration: none;
+		margin-left: 5px;
+	}
+
+	.translation-notice a:hover {
+		text-decoration: underline;
 	}
 </style>
