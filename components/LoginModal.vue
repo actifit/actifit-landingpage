@@ -14,18 +14,13 @@
         
           <div class="login-container">
             <div class="form home-card mx-auto p-3">
-              <!--<h5 class="col-md-6"><img src="/img/STEEM.png" class="token-logo-sm">Standard Login</h5>-->
               <div class="form-group login-form-centered">
               
-                  <div class=""><!--form-control-lg -->
                       <input type="text" id="username" name="username" :placeholder="$t('Username')" ref="username" class="form-control form-control-lg m-1 col-md-8 acti-shadow">
-                      
-                  </div>
                   
-                  <div class="">
                       <button v-on:click="loginKeychain" class="btn btn-brand keychain-btn login-stdd-btn m-1"></button>
+
                       <button v-on:click="loginHiveauth" class="btn hiveauth-btn acti-shadow login-stdd-btn m-1"></button>
-                  </div>
                   <transition name="fade">
                       <div v-if="hiveauth_wait">
                           <div id="hiveauth-instructions">{{ $t('hiveauth_instructions')}}</div>
@@ -35,37 +30,33 @@
                       </div>
                   </transition>
                                   
-                  <div class="">
                       <input type="password" id="ppkey" name="ppkey" ref="ppkey" :placeholder="$t('Ppkey')"  class="form-control form-control-lg m-1 col-md-8 acti-shadow">
-                  </div>
                   
-                  <div class="">
                       <button v-on:click="proceedLogin" class="btn btn-brand login-stdd-btn m-1"><b>{{ $t('Login') }}</b><i class="fas fa-spin fa-spinner text-white" v-if="login_in_progress"></i></button>
-                  </div>
                   
                   <span class="form-control-lg ml-0">
-                      <a href="/password" class="small">Forgot my posting key?</a>
+                      <a href="/password" class="small">{{ $t('forgot_my_posting_key') }}</a>
                   </span>
                   <span class="mb-1 form-control-lg " style="display: none">
                     <div class="bchain-option p-1 m-1 btn" :class="adjustHiveClass">
                       <input type="radio" id="hive_bchain" value="HIVE" v-model="bchain_val">
                       <img src="/img/HIVE.png" style="max-height: 50px;" v-on:click="bchain_val = 'HIVE'">
-                      <label for="hive_bchain">HIVE</label>
+                      <label for="hive_bchain">{{ $t('HIVE') }}</label>
                     </div>
                     <div class="bchain-option p-1 m-1 btn m-auto" :class="adjustSteemClass" style="display:none">
                       <input type="radio" id="steem_bchain" value="STEEM" v-model="bchain_val">
                       <img src="/img/STEEM.png" style="max-height: 50px;" v-on:click="bchain_val = 'STEEM'" >
-                      <label for="steem_bchain">STEEM</label>
+                      <label for="steem_bchain">{{ $t('STEEM') }}</label>
                     </div>
                     <div class="bchain-option p-1 m-1 btn" :class="adjustBlurtClass">
                       <input type="radio" id="blurt_bchain" value="BLURT" v-model="bchain_val">
                       <img src="/img/BLURT.png" style="max-height: 50px;" v-on:click="bchain_val = 'BLURT'" >
-                      <label for="blurt_bchain">BLURT</label>
+                      <label for="blurt_bchain">{{ $t('BLURT') }}</label>
                     </div>
                   </span>
                   <span class="row mb-1 form-control-lg ml-0">
                       <input type="checkbox" id="keeploggedin" v-model="keep_loggedin_val" >
-                      <label for="keeploggedin" class="ml-2">Keep me logged in</label>
+                      <label for="keeploggedin" class="ml-2">{{ $t('keep_loggedin') }}</label>
                   </span>
                   <div class="text-brand text-center" v-if="error_proceeding">
                     {{ this.error_msg}}
@@ -107,6 +98,7 @@
       },
       data () {
         return {
+          originalTitle: document.title,
           resultReturned: false,
           username_exists: '',
           username_invalid: '',
@@ -151,16 +143,26 @@
           }
       },
       async mounted () {
-        console.log('try this out')
+    $(this.$refs.loginModal).on('show.bs.modal', () => {
+      this.originalTitle = document.title;
+      document.title = this.$t('Login_actifit');
+    });
+        $(this.$refs.loginModal).on('hidden.bs.modal', () => {
+      document.title = this.originalTitle;
+    });
           console.log('load recaptcha')
           await this.$recaptchaLoaded()
           console.log('complete')
           this.verifyKeychain();
       },
+      beforeDestroy() {
+    $(this.$refs.loginModal).off('show.bs.modal hidden.bs.modal');
+  },
       methods: {
         closeModal() {
-    $(this.$refs.loginModal).modal('hide');
-  },
+      $(this.$refs.loginModal).modal('hide');
+      document.title = this.originalTitle;
+    },
         onVerifyCaptcha (response) {
           this.captchaValid = true;
         },
