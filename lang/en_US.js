@@ -1,4 +1,6 @@
 module.exports = {
+  keep_loggedin: 'Keep me logged in',
+  forgot_my_posting_key: 'Forgot my posting key?',
   auto_translated_content: 'Auto-Translated Content.',
   click_to_view_original: 'Click to view original',
   profile_image_disclaimer: 'Please note that the profile image change might not be reflected till after 24 hours.',
