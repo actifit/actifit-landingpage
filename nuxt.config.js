@@ -31,6 +31,7 @@ module.exports = {
     base: '/'
   },*/
   env: {
+	auth_Key: process.env.DEEPL_WEB_KEY,
 	swap_partner: 'actifit.swap',
 	swap_to_token: 'AFIT',
 	partner_fee: '1',

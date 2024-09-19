@@ -1,12 +1,10 @@
 import axios from 'axios';
 
-const authKey = process.env.DEEPL_WEB_KEY; 
-
 export async function translateText(text, targetLang = 'en') {
     try {
         const response = await axios.post('https://api.deepl.com/v2/translate', null, {
             params: {
-                auth_key: authKey,
+                auth_key: process.env.auth_Key,
                 text,
                 target_lang: targetLang,
             }
