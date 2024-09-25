@@ -40,7 +40,7 @@
 			
 			<!-- also select community to post to -->
 			<div class="form-group d-flex align-items-center p-1">
-				<select id="targetCommunity" ref="targetCommunity" class="form-control targetCommunity select_pad">
+				<select id="targetCommunity" ref="targetCommunity" class="form-control targetCommunity">
 					<option value="_blog_">--Select Community--</option>
 					<option v-for="com in communitySubs" :value="com[0]" :key="com[0]">{{com[1]}}</option>
 				</select>
@@ -48,7 +48,7 @@
 			
 			<div class="form-group d-flex align-items-center p-1" style="min-height: 70px;">
 			  <label for="paymentApproach" class="mr-2 label-payment">{{$t('payment_approach')}}</label>
-			  <select id="paymentApproach" ref="paymentApproach" class="form-control paymentApproach select_pad">
+			  <select id="paymentApproach" ref="paymentApproach" class="form-control paymentApproach">
 				<option value="split">50/50 Split</option>
 				<option value="hp">Full HP</option>
 				<option value="decline">Decline</option>
@@ -854,9 +854,6 @@
   }
 </script>
 <style>
-.select_pad{
-  padding: 0.3em;
-}
 .inline-class{
 	display: inline;
 }

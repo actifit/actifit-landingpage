@@ -1,6 +1,6 @@
 <template>
   <div>
-    <span class="row tags_box">
+    <span class="row">
 	<input v-model="newItem" @keyup="keyCheck" @paste="handlePaste" :placeholder="$t('Tags')" class="form-control form-control-lg w-25" style="border: none;"/>
     <ul style="list-style: none; display: flex; flex-flow: wrap;">
       <li v-for="(item, index) in items" :key="item" style="border: 1px solid gray; border-radius: 3px;" class="acti-shadow mr-2 mb-2 p-2">
@@ -79,9 +79,3 @@ export default {
   }
 }
 </script>
-<style>
-.tags_box{
-  padding-left: 1em;
-}
-
-</style>

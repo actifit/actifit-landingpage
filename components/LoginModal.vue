@@ -570,10 +570,7 @@
   border-radius: 10px;
 }
 
-.form-control {
-  font-size: 1.1rem;
-  padding: 10px;
-}
+
 
 .btn-primary {
   background-color: #007bff;
