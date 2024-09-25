@@ -49,7 +49,6 @@
   import Proposal from '~/components/Proposal'
   import Footer from '~/components/Footer'
   //import ProposalModal from '~/components/ProposalModal'
-  import EditReportModal from '~/components/EditReportModal'
   import VoteModal from '~/components/VoteModal'
   //import VotingStatus from '~/components/VotingStatus'
   import NotifyModal from '~/components/NotifyModal'
@@ -73,7 +72,6 @@
       //Report,
       Footer,
       //ReportModal,
-      //EditReportModal,
       VoteModal,
 	  //VotingStatus,
 	  NotifyModal,

@@ -35,7 +35,7 @@
 			<TagInput id="tagItem" ref="tagItem" :initialItems="tags" class="form-control form-control-lg acti-shadow"/>
 		  </div>
 		  
-		  <div class="form-group acti-shadow extra-container">
+		  <div class="form-group acti-shadow extra-container form-control form-control-lg">
 			<Beneficiary ref="beneficiaryList" :initialEntries="benef_list" :viewOnly="!editPost.isNewPost" class="float-left"/>
 			
 			<!-- also select community to post to -->

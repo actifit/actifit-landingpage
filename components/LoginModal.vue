@@ -194,7 +194,6 @@
           localStorage.setItem('std_login_name', userSC.account.name)
           this.$store.commit('steemconnect/login', userSC);
           this.closeModal();
-          this.$router.push('/');
         },
         setKeychainLoginStatus (json){
           console.log('keychain login');
@@ -220,7 +219,6 @@
               localStorage.setItem('acti_login_method', 'keychain');
               this.$store.commit('steemconnect/login', userSC);
               this.closeModal();
-              this.$router.push('/');
           }else{
               //display error message
               this.error_proceeding = true;
@@ -572,10 +570,7 @@
   border-radius: 10px;
 }
 
-.form-control {
-  font-size: 1.1rem;
-  padding: 10px;
-}
+
 
 .btn-primary {
   background-color: #007bff;
