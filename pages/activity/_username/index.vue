@@ -50,7 +50,7 @@
       <div>
 		<ReportModal :report="activeReport" @nextReport="nextReport(1)" @prevReport="nextReport(-1)"/>
 		<DailyActivityChartModal :report="activeReport" />
-		<EditReportModal />
+		<EditPostModal />
 		<VoteModal />
         <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
 		<notifications :group="'warn'" :position="'top center'" :classes="'vue-notification warn'" />
@@ -65,7 +65,7 @@
   import Report from '~/components/Report'
   import Footer from '~/components/Footer'
   import ReportModal from '~/components/ReportModal'
-  import EditReportModal from '~/components/EditReportModal'
+  import EditPostModal from '~/components/EditPostModal'
   import VoteModal from '~/components/VoteModal'
   import DailyActivityChartModal from '~/components/DailyActivityChartModal'
 
@@ -87,7 +87,7 @@
       Report,
       Footer,
       ReportModal,
-      EditReportModal,
+	  EditPostModal,
       VoteModal,
 	  DailyActivityChartModal //,
 	  //ChainSelection

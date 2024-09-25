@@ -43,7 +43,7 @@
 
 		<ReportModal :report="activeReport" @nextReport="nextReport(1)" @prevReport="nextReport(-1)"/>
 		<DailyActivityChartModal :report="activeReport" />
-		<EditReportModal />
+		<EditPostModal />
 		<VoteModal :report="activeReport"/>
 		<NotifyModal :modalTitle="$t('Actifit_Info')" :modalText="$t('VP_desc')"/>
 		<NotifyModal id="notifyModalRC" ref="notifyModalRC" :modalTitle="$t('Actifit_Info')" :modalText="$t('RC_desc')"/>
@@ -60,7 +60,7 @@
   import Report from '~/components/Report'
   import Footer from '~/components/Footer'
   import ReportModal from '~/components/ReportModal'
-  import EditReportModal from '~/components/EditReportModal'
+  import EditPostModal from '~/components/EditPostModal'
   import VoteModal from '~/components/VoteModal'
   import VotingStatus from '~/components/VotingStatus'
   import NotifyModal from '~/components/NotifyModal'
@@ -83,7 +83,7 @@
       Report,
       Footer,
       ReportModal,
-      EditReportModal,
+	  EditPostModal,
       VoteModal,
 	  VotingStatus,
 	  NotifyModal,
