@@ -896,7 +896,7 @@
 				
 				
 				<transition name="fade">
-					<div v-if="fundActivityMode == SHOW_CLAIMABLE_REW && isClaimableDataAvailable && cur_bchain=='STEEM'" class="action-box">
+					<div v-if="fundActivityMode == SHOW_CLAIMABLE_REW && isClaimableDataAvailableTEMP && cur_bchain=='STEEM'" class="action-box">
 						<h5 class="pro-name"><img src="/img/STEEM.png" class="mr-2 token-logo">{{ $t('Claimable_Steem_Rewards') }}</h5>
 						<div class="mb-4 font-weight-bold">
 							<span class="p-2">{{ this.claimSP }} | {{ this.claimSTEEM }} | {{ this.claimSBD }}</span>
@@ -906,7 +906,7 @@
 							</div>
 						</div>
 					</div>
-					<div v-else-if="fundActivityMode == SHOW_CLAIMABLE_REW && isClaimableDataAvailable && cur_bchain=='HIVE'" class="col-md-6 row-sep-in">
+					<div v-else-if="fundActivityMode == SHOW_CLAIMABLE_REW && isClaimableDataAvailableTEMP && cur_bchain=='HIVE'" class="col-md-6 row-sep-in">
 						<h5 class="pro-name"><img src="/img/HIVE.png" class="mr-2 token-logo">{{ $t('Claimable_Hive_Rewards') }}</h5>
 						<div class="mb-4 font-weight-bold">
 							<span class="p-2">{{ this.claimSP }} | {{ this.claimSTEEM }} | {{ this.claimSBD }}</span>
@@ -916,7 +916,7 @@
 							</div>
 						</div>
 					</div>
-					<div v-else-if="fundActivityMode == SHOW_CLAIMABLE_REW && isClaimableDataAvailable && cur_bchain=='BLURT'" class="col-md-6 row-sep-in">
+					<div v-else-if="fundActivityMode == SHOW_CLAIMABLE_REW && isClaimableDataAvailableTEMP && cur_bchain=='BLURT'" class="col-md-6 row-sep-in">
 						<h5 class="pro-name"><img src="/img/BLURT.png" class="mr-2 token-logo">{{ $t('Claimable_Blurt_Rewards') }}</h5>
 						<div class="mb-4 font-weight-bold">
 							<span class="p-2">{{ this.claimSP }} | {{ this.claimSTEEM }}</span>
@@ -1470,7 +1470,7 @@
 	</div>
 	
 	<pendingRewardsModal :pendingRewards="pendingRewards" :username="user"/>
-	<LoginModal v-if="showModal" @close="showModal = false" />
+	<LoginModal v-if="showModal" @close="showModal = false" @login-successful="onUserLoggedIn" />
 	
 	<client-only>
       <div>
@@ -1558,6 +1558,7 @@
 	data () {
 	  return {
 		showModal: false,
+		isClaimableDataAvailableTEMP: false,
 		swapWidgetUrl: '',
 		tipInProgress: false,
 		tipError: '',
@@ -1910,6 +1911,9 @@
 	  afitBalanceBSC: 'formattedTotAccountVal',
 	  afitxBalanceBSC: 'formattedTotAccountVal',
 	  transferType: 'resetTransAmount',
+	  isClaimableDataAvailable(newValue) {
+		this.isClaimableDataAvailableTEMP = newValue;
+	},
 	  userTokens: function(param){
 		//if usertokens changes, no need to keep spinner on if it was on
 		this.refreshinBal = false;
@@ -1941,8 +1945,10 @@
 	   * @param precision
        * @returns {string}
        */
+	   onUserLoggedIn() {
+			this.fetchUserData();
+		},
 	openSwapModal(token) {
-		console.log(`pressed`)
 		if (!token) {
 			console.error('Token object is undefined');
 			return;
@@ -2141,7 +2147,7 @@
 
 	  showClaimableRewards() {
 
-		const hasPendingRewards = this.isClaimableDataAvailable;
+		const hasPendingRewards = this.isClaimableDataAvailableTEMP;
 		if (!hasPendingRewards){
 			//show error message
 			this.showRewardError();
@@ -2687,8 +2693,6 @@
 			this.totalAccountValue += (this.afitBSCValueUSD / baseCurrency);
 			this.totalAccountValue += (this.afitxBSCValueUSD / baseCurrency);
 			
-			console.log(this.totalAccountValue);
-			
 			this.detailCalculation += this.userTokensWallet + ' AFIT x '+ this.numberFormat((this.afitPrice / baseCurrency), 4) + ' AFIT/'+this.cur_bchain+' = ' + this.numberFormat(afitCoreVal, 4) + ' '+this.cur_bchain+'<br/>';
 			
 			let par = this;
@@ -2838,11 +2842,17 @@
 		return '';
 	  },
 	  renderBalance (type, nofrmt) {
-		if (nofrmt){
+		//handle case when balance is not yet available
+		if (!this.displayUserData || !this.displayUserData.balance) {
+			return <i class="fas fa-spin fa-spinner text-white"></i>; // Show loading or default text if balance is unavailable
+		}
+
+		if (nofrmt) {
 			return this.displayUserData.balance;
 		}
+
 		return this.numberFormat(parseFloat(this.displayUserData.balance), 3) + ' ' + type;
-	  },
+	},
 	  renderSBDBalance (type, nofrmt) {
 		if (nofrmt){
 			if (this.cur_bchain == 'STEEM'){
@@ -2918,257 +2928,230 @@
 		}
 	  },
 	  async fetchUserData () {
-		if ((typeof this.user != 'undefined' && this.user != null)||this.displayUser!=''){	  
-		  console.log('stdLoginUser');
-		  console.log(this.stdLogin);
-		  console.log(this.user);
-		  
-		  //update user info from blockchain
-		  if (!localStorage.getItem('std_login')){
-		  //if (!this.stdLogin){
-			try{
+		if ((typeof this.user != 'undefined' && this.user != null) || this.displayUser != '') {
+			console.log('stdLoginUser');
+			console.log(this.stdLogin);
+			console.log(this.user);
+			
+			this.resetUserData(); // Reset balances, tokens, etc.
+			if (!localStorage.getItem('std_login')) {
+			try {
 				let user_data = await this.$steemconnect.me();
 				this.user.account = user_data.account;
-			}catch(excp){
+			} catch (excp) {
 				console.log(excp);
 			}
-		  }
-		  
-		  //default
-			if (!this.displayUserData){
-				this.displayUserData = this.user.account;
 			}
-		  /*if (this.displayUser!=''){
-			fetch(process.env.actiAppUrl+'user/' + this.displayUser).then(res => {
-				res.json().then(json => this.userTokens = json.tokens)}).catch(e => console.log(e))
-			 
-		  }else{*/
-			this.userTokensWallet = await this.$store.dispatch('fetchUserTokensReturn', this.displayUser, false)
-			
-		 // }
-		  this.$store.dispatch('fetchUserTokens')
-		  this.$store.dispatch('fetchTransactions', this.displayUser)
-		  this.$store.dispatch('fetchUserRank')
-		  this.$store.dispatch('fetchReferrals')
-		  this.fetchUserPendingRewards(this.targetUserWallet);
-		  
-		  //calculate savings params
-		  try{
+			if (!this.displayUserData) {
+			this.displayUserData = this.user.account;
+			}
+			this.userTokensWallet = await this.$store.dispatch('fetchUserTokensReturn', this.displayUser, false);
+			this.$store.dispatch('fetchUserTokens');
+			this.$store.dispatch('fetchTransactions', this.displayUser);
+			this.$store.dispatch('fetchUserRank');
+			this.$store.dispatch('fetchReferrals');
+			this.fetchUserPendingRewards(this.targetUserWallet);
+			try {
 			this.cancluateSavingsRewardsParams();
-		  }catch(error){
+			} catch (error) {
 			console.log(error);
-		  }
-		  //let's check if user already has a funds pass set
-		  fetch(process.env.actiAppUrl+'userHasFundsPassSet/'+this.displayUserData.name).then(
-			res => {res.json().then(json => this.setUserPassStatus (json)).catch(e => console.log(e))
-		  }).catch(e => console.log(e))
-		  
-		  //let's check if user has a pending AFIT tokens exchange
-		  fetch(process.env.actiAppUrl+'userHasPendingTokenSwap/'+this.displayUserData.name).then(
-			res => {res.json().then(json => this.setUserTokenSwapStatus (json) ).catch(e => console.log(e))
-		  }).catch(e => console.log(e))
-		  
-		  //let's grab the full queue of pending AFIT tokens exchange
-		  fetch(process.env.actiAppUrl+'getPendingTokenSwapTrans/').then(
-			res => {res.json().then(json => this.setTokenSwapQueue (json) ).catch(e => console.log(e))
-		  }).catch(e => console.log(e))
-		  
-		  //let's grab the user's history AFIT tokens exchange
-		  fetch(process.env.actiAppUrl+'getUserTokenSwapHistory/'+this.displayUserData.name).then(
-			res => {res.json().then(json => this.setUserTokenSwapHistory (json) ).catch(e => console.log(e))
-		  }).catch(e => console.log(e))
-
-		  //let's grab the user's steem-engine tokens too
-		  //Disable: EOL for S-E
-		  /*
-		  this.fetchTokenBalance();
-		  
-		  if (this.cur_bchain == 'STEEM'){
-			  fetch(scot_steemengine_api+'@'+this.user.account.name).then(
-				res => {res.json().then(json => this.setUserClaimableSETokens (json) ).catch(e => console.log(e))
-			  }).catch(e => console.log(e))
-		  
-		  }else{
-			  fetch(scot_steemengine_api+'@'+this.user.account.name+scot_hive_api_param).then(
-				res => {res.json().then(json => this.setUserClaimableSETokens (json) ).catch(e => console.log(e))
-			  }).catch(e => console.log(e))
-
-		  }
-		  */
-		  
-		  //grab user settings
-		  fetch(process.env.actiAppUrl+'userSettings/'+this.displayUserData.name).then(
-			res => {res.json().then(json => this.setUserSettings (json)).catch(e => console.log(e))
-		  }).catch(e => console.log(e))
-		  
-		  //grab user pending withdrawals
-		  this.getPendingSavingsWithdrawals();
-		  
-		  //let's grab the number of pending token swap transactions to see if we can add more
-		  /*fetch(process.env.actiAppUrl+'getPendingTokenSwapTransCount').then(
-			res => {res.json().then(json => this.pendingTokenSwapTransCount = json ).catch(e => console.log(e))
-		  }).catch(e => console.log(e))*/
-		  		  
-		  //grab SP
-		  this.steemPower = await this.vestsToSteemPower(this.displayUserData.vesting_shares);
-		  console.log(this.steemPower );
-		  //grab Delegated SP
-		  this.delegatedSteemPower = await this.vestsToSteemPower(this.displayUserData.delegated_vesting_shares);
-		  console.log(this.delegatedSteemPower );
-		  //grab received SP
-		  this.receivedSteemPower = await this.vestsToSteemPower(this.displayUserData.received_vesting_shares);
-		  console.log(this.receivedSteemPower );
-		  //grab powerdown SP
-		  this.powerDownRateVal = await this.vestsToSteemPower(this.displayUserData.vesting_withdraw_rate.split(' ')[0]);
-		  console.log(this.powerDownRateVal );
-		  //grab next power down withdrawal date
-		  this.powerDownWithdrawDate = this.date(this.displayUserData.next_vesting_withdrawal);
-		console.log(this.powerDownWithdrawDate );
-		  //effective SP
-		  this.effectiveSteemPower = this.steemPower + this.receivedSteemPower - this.delegatedSteemPower - this.powerDownRateVal;
-		
-		  //also update claimable amounts
-		  this.claimableSTEEMRewards();
-		  
-		   
-		  //fetch user's AFIT S-E balance
-		  //disable: EOL for S-E
-		  //this.fetchAFITSE();
-		  
-		  //fetch user's AFIT H-E balance
-		  
-		  this.fetchAFITHE();
-		  
-		  
-		  //fetch user's AFITX S-E balance
-		  //disable: EOL for S-E
-		  //this.fetchAFITXSE();
-		  
-		  //fetch user's AFITX H-E balance
-		  this.fetchAFITXHE();
-		  
-		  //fetch user's AFITX Rank
-		   fetch(process.env.actiAppUrl+'afitxData/'+this.displayUserData.name).then(
-			res => {res.json().then(json => this.userAFITXRank = json.ind ).catch(e => console.log(e))
-		  }).catch(e => console.log(e))
-		  
-		  
-		  //fetch user's tokensOfInterest S-E balance
-		  let tokenData, tokenExtraDetails
-		  /*if (this.cur_bchain == 'STEEM'){
-			tokenData = await ssc.find('tokens', 'balances', { account: this.user.account.name, symbol : { '$in' : tokensOfInterest } });
-			
-			//grab full token data
-			tokenExtraDetails = await ssc.find('tokens', 'tokens', { symbol : { '$in' : tokensOfInterest } });
-		  }else{*/
-			
-			/*
-			OLD specific token listing
-			tokenData = await hsc.find('tokens', 'balances', { account: this.user.account.name, symbol : { '$in' : tokensOfInterest } });
-
-			//grab full token data
-			tokenExtraDetails = await hsc.find('tokens', 'tokens', { symbol : { '$in' : tokensOfInterest } });
-			*/
-			
-			//new full token balance listing
-			tokenData = await hsc.find('tokens', 'balances', { account: this.displayUserData.name});
-			
-			this.heTokenDelegations = await hsc.find('tokens', 'delegations', { from: this.displayUserData.name}, 200, 0, []);
-			
-			this.heTokenUnstakes = await hsc.find('tokens', 'pendingUnstakes', { account: this.displayUserData.name}, 200, 0, []);
-			//console.log('delegations')
-			console.log('unstakes');
-			console.log(this.heTokenUnstakes);
-			
-			//grab full token data
-			tokenExtraDetails = await hsc.find('tokens', 'tokens', {});
-			
-		  //}
-		  
-		  //console.log(tokenExtraDetails);
-		  
-		  //loop through tokenData and set proper icon
-		  for (let x=0;x<tokenData.length;x++){
-			try{
-				//console.log(tokenData[x].symbol);
-				let matchEntry = tokenExtraDetails.find(v => v.symbol == tokenData[x].symbol);
-				//console.log(matchEntry);
-				tokenData[x].icon = JSON.parse(matchEntry.metadata).icon
-				//console.log(tokenData[x].icon);
-			}catch(parseErr){
-				console.log(parseErr);
 			}
-		  }
-		  
-		  let afitData = this.tokenMetrics.find(v => v.symbol == 'AFIT');
-		  
-		  //console.log('tokenData')
-		  //console.log(tokenData)
-		  
-		  if (tokenData){
-			this.tokensOfInterestBal = tokenData;
-			await this.sortTokenData(this.tokenSort, true);
-		  }
-		  
-		  //fetch tokens' data (price et al)
-		  /*if (this.cur_bchain == 'STEEM'){
-			this.tokenMetrics = await ssc.find('market', 'metrics', {symbol : { '$in' : tokensOfInterest.concat(['AFIT','AFITX']) }}, 1000, 0, '', false);	  
-		  }else{*/
-		  
-		  //build up a list of the user's current tokenlist
-		  //this.userTokenList = tokenData.map((obj) => obj.symbol);
-		  
-		  //this.tokenMetrics = await hsc.find('market', 'metrics', {symbol : { '$in' : tokensOfInterest.concat(['AFIT','AFITX']) }}, 1000, 0, '', false);	
-		  
-		  //extract prices for all user balances
-		  this.tokenMetrics = await hsc.find('market', 'metrics', {}, 1000, 0, '', false);	
-		  //}
-		  
-		  
-		  //console.log('tokenMetrics');
-		  //console.log(this.tokenMetrics);
-		  
-		  //let's grab the user's wallet address
-		  fetch(process.env.actiAppUrl+'getUserWalletAddress?user='+this.displayUserData.name).then(
-			res => {res.json().then(json => this.setUserWalletAddress (json) ).catch(e => console.log(e))
-		  }).catch(e => console.log(e))
-		  
-		  //grab user airdrop results
-		  fetch(process.env.actiAppUrl+'airdropResults?user='+this.displayUserData.name).then(
-			res => {res.json().then(json => this.setAirdropResults (json) ).catch(e => console.log(e))
-		  }).catch(e => console.log(e))
-		  
-		  
-		  //check if user is powering down AFIT to SE
-		  fetch(process.env.actiAppUrl+'isPoweringDown/'+this.displayUserData.name).then(
-			res => {res.json().then(json => this.setUserPDAfitStatus (json) ).catch(e => console.log(e))
-		  }).catch(e => console.log(e))
-		  
-		  //grab list of top 25 AFITX token holders
-		  fetch(process.env.actiAppUrl+'topAFITXHolders/?count=25').then(
-			res => {res.json().then(json => this.topAFITXHolders = json ).catch(e => console.log(e))
-		  }).catch(e => console.log(e))
-		  
-		  //grab list of top 100 AFITX token holders
-		  fetch(process.env.actiAppUrl+'topAFITXHolders/?count=100').then(
-			res => {res.json().then(json => this.afitxHoldersList = json ).catch(e => console.log(e))
-		  }).catch(e => console.log(e))
-		  
-		  //grab list of top 100 AFIT token holders
-		  fetch(process.env.actiAppUrl+'topAFITHolders/?count=100').then(
-			res => {res.json().then(json => this.afitHoldersList = json ).catch(e => console.log(e))
-		  }).catch(e => console.log(e))
-		  
-		  //fetch account RC
-		  
-		  this.getRCHF26();
-		  
-		  //force refresh data
-		  //this.$forceUpdate();
-		  
-		  
+			await this.updateUserData();
+
+			await this.calculateSteemPower();
+
+			this.updateBalanceDisplay();
 		}
-	  },
+		},
+		resetUserData() {
+			this.displayUserData = null;
+			this.balances = {};         
+			this.transactions = [];     
+			this.userTokensWallet = null;
+			this.steemPower = null;
+			this.delegatedSteemPower = null;
+			this.receivedSteemPower = null;
+			this.effectiveSteemPower = null;
+			this.powerDownRateVal = null;
+			this.powerDownWithdrawDate = null;
+		},
+
+		async updateUserData() {
+			await fetch(process.env.actiAppUrl + 'userHasFundsPassSet/' + this.displayUserData.name)
+			.then(res => res.json().then(json => this.setUserPassStatus(json)))
+			.catch(e => console.log(e));
+
+			await fetch(process.env.actiAppUrl + 'getUserTokenSwapHistory/' + this.displayUserData.name)
+			.then(res => res.json().then(json => this.setUserTokenSwapHistory(json)))
+			.catch(e => console.log(e));
+						//let's check if user has a pending AFIT tokens exchange
+						fetch(process.env.actiAppUrl+'userHasPendingTokenSwap/'+this.displayUserData.name).then(
+			  res => {res.json().then(json => this.setUserTokenSwapStatus (json) ).catch(e => console.log(e))
+			}).catch(e => console.log(e))
+			
+			//let's grab the full queue of pending AFIT tokens exchange
+			fetch(process.env.actiAppUrl+'getPendingTokenSwapTrans/').then(
+			  res => {res.json().then(json => this.setTokenSwapQueue (json) ).catch(e => console.log(e))
+			}).catch(e => console.log(e))
+						//let's grab the user's history AFIT tokens exchange
+			fetch(process.env.actiAppUrl+'getUserTokenSwapHistory/'+this.displayUserData.name).then(
+			  res => {res.json().then(json => this.setUserTokenSwapHistory (json) ).catch(e => console.log(e))
+			}).catch(e => console.log(e))
+
+			await fetch(process.env.actiAppUrl + 'userSettings/' + this.displayUserData.name)
+			.then(res => res.json().then(json => this.setUserSettings(json)))
+			.catch(e => console.log(e));
+						this.getPendingSavingsWithdrawals();
+						
+
+
+		},
+
+		async calculateSteemPower() {
+			this.steemPower = await this.vestsToSteemPower(this.displayUserData.vesting_shares);
+			console.log(this.steemPower);
+
+			this.delegatedSteemPower = await this.vestsToSteemPower(this.displayUserData.delegated_vesting_shares);
+			console.log(this.delegatedSteemPower);
+
+			this.receivedSteemPower = await this.vestsToSteemPower(this.displayUserData.received_vesting_shares);
+			console.log(this.receivedSteemPower);
+
+			this.powerDownRateVal = await this.vestsToSteemPower(this.displayUserData.vesting_withdraw_rate.split(' ')[0]);
+			console.log(this.powerDownRateVal);
+
+			this.powerDownWithdrawDate = this.date(this.displayUserData.next_vesting_withdrawal);
+			console.log(this.powerDownWithdrawDate);
+
+			this.effectiveSteemPower = this.steemPower + this.receivedSteemPower - this.delegatedSteemPower - this.powerDownRateVal;
+			this.claimableSTEEMRewards();
+		},
+
+		async updateBalanceDisplay() {
+						this.fetchAFITHE();
+			this.fetchAFITXHE();
+			fetch(process.env.actiAppUrl+'afitxData/'+this.displayUserData.name).then(
+			  res => {res.json().then(json => this.userAFITXRank = json.ind ).catch(e => console.log(e))
+			}).catch(e => console.log(e))
+			
+			
+			//fetch user's tokensOfInterest S-E balance
+			let tokenData, tokenExtraDetails
+			/*if (this.cur_bchain == 'STEEM'){
+			  tokenData = await ssc.find('tokens', 'balances', { account: this.user.account.name, symbol : { '$in' : tokensOfInterest } });
+			  
+			  //grab full token data
+			  tokenExtraDetails = await ssc.find('tokens', 'tokens', { symbol : { '$in' : tokensOfInterest } });
+			}else{*/
+			  
+			  /*
+			  OLD specific token listing
+			  tokenData = await hsc.find('tokens', 'balances', { account: this.user.account.name, symbol : { '$in' : tokensOfInterest } });
+  
+			  //grab full token data
+			  tokenExtraDetails = await hsc.find('tokens', 'tokens', { symbol : { '$in' : tokensOfInterest } });
+			  */
+			  
+			  //new full token balance listing
+			  tokenData = await hsc.find('tokens', 'balances', { account: this.displayUserData.name});
+			  
+			  this.heTokenDelegations = await hsc.find('tokens', 'delegations', { from: this.displayUserData.name}, 200, 0, []);
+			  
+			  this.heTokenUnstakes = await hsc.find('tokens', 'pendingUnstakes', { account: this.displayUserData.name}, 200, 0, []);
+			  //console.log('delegations')
+			  console.log('unstakes');
+			  console.log(this.heTokenUnstakes);
+			  
+			  //grab full token data
+			  tokenExtraDetails = await hsc.find('tokens', 'tokens', {});
+			  
+			//}
+			
+			//console.log(tokenExtraDetails);
+			
+			//loop through tokenData and set proper icon
+			for (let x=0;x<tokenData.length;x++){
+			  try{
+				  //console.log(tokenData[x].symbol);
+				  let matchEntry = tokenExtraDetails.find(v => v.symbol == tokenData[x].symbol);
+				  //console.log(matchEntry);
+				  tokenData[x].icon = JSON.parse(matchEntry.metadata).icon
+				  //console.log(tokenData[x].icon);
+			  }catch(parseErr){
+				  console.log(parseErr);
+			  }
+			}
+			
+			let afitData = this.tokenMetrics.find(v => v.symbol == 'AFIT');
+			
+			//console.log('tokenData')
+			//console.log(tokenData)
+			
+			if (tokenData){
+			  this.tokensOfInterestBal = tokenData;
+			  await this.sortTokenData(this.tokenSort, true);
+			}
+			
+			//fetch tokens' data (price et al)
+			/*if (this.cur_bchain == 'STEEM'){
+			  this.tokenMetrics = await ssc.find('market', 'metrics', {symbol : { '$in' : tokensOfInterest.concat(['AFIT','AFITX']) }}, 1000, 0, '', false);	  
+			}else{*/
+			
+			//build up a list of the user's current tokenlist
+			//this.userTokenList = tokenData.map((obj) => obj.symbol);
+			
+			//this.tokenMetrics = await hsc.find('market', 'metrics', {symbol : { '$in' : tokensOfInterest.concat(['AFIT','AFITX']) }}, 1000, 0, '', false);	
+			
+			//extract prices for all user balances
+			this.tokenMetrics = await hsc.find('market', 'metrics', {}, 1000, 0, '', false);	
+			//}
+			
+			
+			//console.log('tokenMetrics');
+			//console.log(this.tokenMetrics);
+			
+			//let's grab the user's wallet address
+			fetch(process.env.actiAppUrl+'getUserWalletAddress?user='+this.displayUserData.name).then(
+			  res => {res.json().then(json => this.setUserWalletAddress (json) ).catch(e => console.log(e))
+			}).catch(e => console.log(e))
+			
+			//grab user airdrop results
+			fetch(process.env.actiAppUrl+'airdropResults?user='+this.displayUserData.name).then(
+			  res => {res.json().then(json => this.setAirdropResults (json) ).catch(e => console.log(e))
+			}).catch(e => console.log(e))
+			
+			
+			//check if user is powering down AFIT to SE
+			fetch(process.env.actiAppUrl+'isPoweringDown/'+this.displayUserData.name).then(
+			  res => {res.json().then(json => this.setUserPDAfitStatus (json) ).catch(e => console.log(e))
+			}).catch(e => console.log(e))
+			
+			//grab list of top 25 AFITX token holders
+			fetch(process.env.actiAppUrl+'topAFITXHolders/?count=25').then(
+			  res => {res.json().then(json => this.topAFITXHolders = json ).catch(e => console.log(e))
+			}).catch(e => console.log(e))
+			
+			//grab list of top 100 AFITX token holders
+			fetch(process.env.actiAppUrl+'topAFITXHolders/?count=100').then(
+			  res => {res.json().then(json => this.afitxHoldersList = json ).catch(e => console.log(e))
+			}).catch(e => console.log(e))
+			
+			//grab list of top 100 AFIT token holders
+			fetch(process.env.actiAppUrl+'topAFITHolders/?count=100').then(
+			  res => {res.json().then(json => this.afitHoldersList = json ).catch(e => console.log(e))
+			}).catch(e => console.log(e))
+			
+			//fetch account RC
+			
+			this.getRCHF26();
+			
+			//force refresh data
+			//this.$forceUpdate();
+			
+			
+		  
+
+		},
 	  async sortTokenData (type, keepDir) {
 		//sort alpha / default
 		this.tokenSort = type;
@@ -3695,6 +3678,7 @@
 			
 			if (res.success){
 				this.confirmCompletion('claimrewards', 0, res);
+				this.isClaimableDataAvailableTEMP = false
 			}
 			/*steem.broadcast.claimRewardBalanceAsync(this.user.account.name,this.claimSTEEM, this.claimSBD, this.claimSP).then(
 				res => ).catch(err=>console.log(err));*/
@@ -7498,6 +7482,7 @@
 	  })
 	},
     async mounted () {
+		this.fetchUserData();
 		this.afitTokenAddress = afitTokenAddress;
 		this.afitxTokenAddress = afitxTokenAddress;
 		this.afitBNBLPTokenAddress = afitBNBLPTokenAddress;
