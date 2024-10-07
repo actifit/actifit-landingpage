@@ -34,9 +34,9 @@
                   
                       <button v-on:click="proceedLogin" class="btn btn-brand login-stdd-btn m-1"><b>{{ $t('Login') }}</b><i class="fas fa-spin fa-spinner text-white" v-if="login_in_progress"></i></button>
                   
-                  <span class="form-control-lg ml-0">
+                  <div class="form-control-lg ml-0 mt-2">
                       <a href="/password" class="small">{{ $t('forgot_my_posting_key') }}</a>
-                  </span>
+                  </div>
                   <span class="mb-1 form-control-lg " style="display: none">
                     <div class="bchain-option p-1 m-1 btn" :class="adjustHiveClass">
                       <input type="radio" id="hive_bchain" value="HIVE" v-model="bchain_val">
