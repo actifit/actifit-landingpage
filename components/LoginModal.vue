@@ -159,10 +159,18 @@
     $(this.$refs.loginModal).off('show.bs.modal hidden.bs.modal');
   },
       methods: {
+        resetForm() {
+          this.$refs.username.value = '';
+          this.$refs.ppkey.value = '';
+          this.login_in_progress = false;
+          this.error_proceeding = false;
+          this.error_msg = '';
+          this.hiveauth_wait = false;
+        },
         closeModal() {
-      $(this.$refs.loginModal).modal('hide');
-      document.title = this.originalTitle;
-    },
+          $(this.$refs.loginModal).modal('hide');
+          document.title = this.originalTitle;
+        },
         onVerifyCaptcha (response) {
           this.captchaValid = true;
         },
@@ -194,6 +202,7 @@
           localStorage.setItem('std_login_name', userSC.account.name)
           this.$store.commit('steemconnect/login', userSC);
           this.closeModal();
+          this.resetForm();
         },
         setKeychainLoginStatus (json){
           console.log('keychain login');
@@ -219,6 +228,7 @@
               localStorage.setItem('acti_login_method', 'keychain');
               this.$store.commit('steemconnect/login', userSC);
               this.closeModal();
+              this.resetForm();
           }else{
               //display error message
               this.error_proceeding = true;
@@ -252,6 +262,7 @@
               this.$store.commit('steemconnect/login', userSC);
               this.$emit('login-successful');
               this.closeModal();
+              this.resetForm();
           }else{
               //display error message
               this.error_proceeding = true;
