@@ -2928,7 +2928,7 @@
 			
 			//update user info from blockchain
 			if (!localStorage.getItem('std_login')){
-			//if (!this.stdLogin){
+			//if (!this.stdLogin)
 			  try{
 				  let user_data = await this.$steemconnect.me();
 				  this.user.account = user_data.account;
