@@ -896,7 +896,7 @@
 				  
 				  
 				  <transition name="fade">
-					  <div v-if="fundActivityMode == SHOW_CLAIMABLE_REW && isClaimableDataAvailable && cur_bchain=='STEEM'" class="action-box">
+					  <div v-if="fundActivityMode == SHOW_CLAIMABLE_REW && isClaimableDataAvailableTEMP && cur_bchain=='STEEM'" class="action-box">
 						  <h5 class="pro-name"><img src="/img/STEEM.png" class="mr-2 token-logo">{{ $t('Claimable_Steem_Rewards') }}</h5>
 						  <div class="mb-4 font-weight-bold">
 							  <span class="p-2">{{ this.claimSP }} | {{ this.claimSTEEM }} | {{ this.claimSBD }}</span>
@@ -906,7 +906,7 @@
 							  </div>
 						  </div>
 					  </div>
-					  <div v-else-if="fundActivityMode == SHOW_CLAIMABLE_REW && isClaimableDataAvailable && cur_bchain=='HIVE'" class="col-md-6 row-sep-in">
+					  <div v-else-if="fundActivityMode == SHOW_CLAIMABLE_REW && isClaimableDataAvailableTEMP && cur_bchain=='HIVE'" class="col-md-6 row-sep-in">
 						  <h5 class="pro-name"><img src="/img/HIVE.png" class="mr-2 token-logo">{{ $t('Claimable_Hive_Rewards') }}</h5>
 						  <div class="mb-4 font-weight-bold">
 							  <span class="p-2">{{ this.claimSP }} | {{ this.claimSTEEM }} | {{ this.claimSBD }}</span>
@@ -916,7 +916,7 @@
 							  </div>
 						  </div>
 					  </div>
-					  <div v-else-if="fundActivityMode == SHOW_CLAIMABLE_REW && isClaimableDataAvailable && cur_bchain=='BLURT'" class="col-md-6 row-sep-in">
+					  <div v-else-if="fundActivityMode == SHOW_CLAIMABLE_REW && isClaimableDataAvailableTEMP && cur_bchain=='BLURT'" class="col-md-6 row-sep-in">
 						  <h5 class="pro-name"><img src="/img/BLURT.png" class="mr-2 token-logo">{{ $t('Claimable_Blurt_Rewards') }}</h5>
 						  <div class="mb-4 font-weight-bold">
 							  <span class="p-2">{{ this.claimSP }} | {{ this.claimSTEEM }}</span>
@@ -1558,6 +1558,7 @@
 	  data () {
 		return {
 		  showModal: false,
+		  isClaimableDataAvailableTEMP: false,
 		  swapWidgetUrl: '',
 		  tipInProgress: false,
 		  tipError: '',
@@ -1910,6 +1911,9 @@
 		afitBalanceBSC: 'formattedTotAccountVal',
 		afitxBalanceBSC: 'formattedTotAccountVal',
 		transferType: 'resetTransAmount',
+		isClaimableDataAvailable(newValue) {
+		  this.isClaimableDataAvailableTEMP = newValue;
+	  },
 		userTokens: function(param){
 		  //if usertokens changes, no need to keep spinner on if it was on
 		  this.refreshinBal = false;
@@ -1943,9 +1947,8 @@
 		 */
 		 onUserLoggedIn() {
 			window.location.reload();
-		},
+		  },
 	  openSwapModal(token) {
-		  console.log(`pressed`)
 		  if (!token) {
 			  console.error('Token object is undefined');
 			  return;
@@ -2144,7 +2147,7 @@
   
 		showClaimableRewards() {
   
-		  const hasPendingRewards = this.isClaimableDataAvailable;
+		  const hasPendingRewards = this.isClaimableDataAvailableTEMP;
 		  if (!hasPendingRewards){
 			  //show error message
 			  this.showRewardError();
@@ -2690,8 +2693,6 @@
 			  this.totalAccountValue += (this.afitBSCValueUSD / baseCurrency);
 			  this.totalAccountValue += (this.afitxBSCValueUSD / baseCurrency);
 			  
-			  console.log(this.totalAccountValue);
-			  
 			  this.detailCalculation += this.userTokensWallet + ' AFIT x '+ this.numberFormat((this.afitPrice / baseCurrency), 4) + ' AFIT/'+this.cur_bchain+' = ' + this.numberFormat(afitCoreVal, 4) + ' '+this.cur_bchain+'<br/>';
 			  
 			  let par = this;
@@ -2841,11 +2842,17 @@
 		  return '';
 		},
 		renderBalance (type, nofrmt) {
-		  if (nofrmt){
+		  //handle case when balance is not yet available
+		  if (!this.displayUserData || !this.displayUserData.balance) {
+			  return <i class="fas fa-spin fa-spinner text-white"></i>; // Show loading or default text if balance is unavailable
+		  }
+  
+		  if (nofrmt) {
 			  return this.displayUserData.balance;
 		  }
+  
 		  return this.numberFormat(parseFloat(this.displayUserData.balance), 3) + ' ' + type;
-		},
+	  },
 		renderSBDBalance (type, nofrmt) {
 		  if (nofrmt){
 			  if (this.cur_bchain == 'STEEM'){
@@ -3698,6 +3705,7 @@
 			  
 			  if (res.success){
 				  this.confirmCompletion('claimrewards', 0, res);
+				  this.isClaimableDataAvailableTEMP = false
 			  }
 			  /*steem.broadcast.claimRewardBalanceAsync(this.user.account.name,this.claimSTEEM, this.claimSBD, this.claimSP).then(
 				  res => ).catch(err=>console.log(err));*/
@@ -7501,6 +7509,7 @@
 		})
 	  },
 	  async mounted () {
+		  this.fetchUserData();
 		  this.afitTokenAddress = afitTokenAddress;
 		  this.afitxTokenAddress = afitxTokenAddress;
 		  this.afitBNBLPTokenAddress = afitBNBLPTokenAddress;
