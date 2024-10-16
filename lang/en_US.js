@@ -1,5 +1,5 @@
 module.exports = {
-  switch_user: 'Switch Users',
+  switch_user: 'Switch User',
   keep_loggedin: 'Keep me logged in',
   forgot_my_posting_key: 'Forgot my posting key?',
   auto_translated_content: 'Auto-Translated Content.',
