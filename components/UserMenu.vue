@@ -102,14 +102,18 @@
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/password')"><i class="fa-sharp fa-solid fa-key text-brand"></i>&nbsp;{{ $t('My_Password') }}</a>
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/settings')"><i class="fa-solid fa-gear text-brand"></i>&nbsp;{{ $t('Settings') }}</a>
           <div class="dropdown-divider"></div>
+		  <a href="#" data-toggle="modal" data-target="#loginModal" @click="showModalFuncLOGIN" class="dropdown-item"><i class="fa-solid fa-user-group text-brand"></i>&nbsp;{{ $t('switch_user') }}</a>
+		  <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="#" @click.prevent="proceedLogout()"><i class="fa-solid fa-right-from-bracket text-brand"></i>&nbsp;{{ $t('Logout') }}</a>
         </div>
       </li>
     </ul>
+	<LoginModal v-if="showModal" @close="showModal = false" />
   </div>
 </template>
 
 <script>
+	import LoginModal from '~/components/LoginModal'
   import { mapGetters } from 'vuex'
   import SteemStats from '~/components/SteemStats'
   import StingChat from '~/components/StingChat'
@@ -118,6 +122,7 @@
 	components: {
 	  SteemStats,
 	  StingChat,
+	  LoginModal
     },
 	data () {
 		return {
@@ -190,6 +195,14 @@
 	   * @param precision
        * @returns {string}
        */
+	   showModalFuncLOGIN() {
+		  this.$nextTick(() => {
+			this.showModal = true;
+			if ($ && typeof $.fn.modal === 'function') {
+			  $('#loginModal').modal('show');
+			}
+		  });
+		},
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },

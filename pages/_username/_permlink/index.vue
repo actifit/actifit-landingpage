@@ -214,17 +214,24 @@
 			  </a>
 			  <vue-remarkable :source="responseBody" :options="{'html': true, 'breaks': true, 'typographer': true}" ></vue-remarkable>
 		  </div>
-		  <div class="report-comments col-md-12" v-if="commentsAvailable">
-			  <Comments 
-				  :author="commentEntries.author" 
-				  :body="commentEntries.body" 
-				  :reply_entries.sync="commentEntries.reply_entries" 
-				  :main_post_author="report.author"
-				  :main_post_permlink="report.permlink"
-				  :main_post_cat="report.category"
-				  :depth="0" 
-				  :key="reload"/>
-		  </div>
+		  <div class="report-comments col-md-12" v-if="report.children > 0">
+				<div v-if="showCommentsLoader" class="comments-loader">
+					<span class="btn btn-brand mb-1">
+					<i class="fas fa-spin fa-spinner"></i> {{ $t('loading_comments') }}
+					</span>
+				</div>
+				<Comments 
+					v-if="commentsAvailable"
+					:author="commentEntries.author" 
+					:body="commentEntries.body" 
+					:reply_entries.sync="commentEntries.reply_entries" 
+					:main_post_author="report.author"
+					:main_post_permlink="report.permlink"
+					:main_post_cat="report.category"
+					:depth="0" 
+					:key="reload"/>
+				</div>
+
 	  </div>
 	  <div v-else-if="errorDisplay" class="container pt-5 mt-5 pb-5 col-md-6" >
 		  <div class="text-right" >
@@ -425,6 +432,7 @@
 	  },
 	  data () {
 		  return {
+			commentsLoading: true,
 			translatedText: '',
 			safety_post_content: ``,
 			showTranslated: false,
@@ -579,9 +587,12 @@
 		  return '(+' + parseFloat(this.userRank.afitx_rank).toFixed(2) + ')';
 		},
 		commentsAvailable() {
-  
-		  return this.commentEntries != null;
+			return this.commentEntries != null && !this.commentsLoading;
+		},
+		showCommentsLoader() {
+			return this.report.children > 0 && this.commentsLoading;
 		}
+
 	  },
 	  methods: {
 		cancelTranslation(){
@@ -957,17 +968,18 @@
 			this.fetchReportCommentData()
 		  }
 		},
-		fetchReportCommentData () {
-		  this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
-		  this.target_bchain = this.cur_bchain;
-		  this.$store.commit('setBchain', this.cur_bchain);
-		
-		  //regrab report data to fix comments
-		  this.$store.dispatch('fetchReportComments', this.report)
-		  
-		  //clear the placeholder comment displayed
-		  this.responsePosted = false;
-		  this.responseBody = this.moderatorSignature;
+		fetchReportCommentData() {
+			this.commentsLoading = true;
+			this.cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
+			this.target_bchain = this.cur_bchain;
+			this.$store.commit('setBchain', this.cur_bchain);
+
+			this.$store.dispatch('fetchReportComments', this.report).then(() => {
+				this.commentsLoading = false;
+			});
+			
+			this.responsePosted = false;
+			this.responseBody = this.moderatorSignature;
 		},
 		fetchReportKeyData () {
 		  fetch(process.env.actiAppUrl+'getPostReward?user=' + this.report.author+'&url='+this.report.url).then(res => {
