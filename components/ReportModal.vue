@@ -213,8 +213,14 @@
 			</a>
 			<vue-remarkable class="modal-body" :source="body" :options="{'html': true, 'breaks': true, 'typographer': true}"></vue-remarkable>
 		</div>
-		<div class="report-comments modal-body" v-if="commentsAvailable">
+		<div class="report-comments modal-body" v-if="report.children > 0">
+			<div v-if="showCommentsLoader" class="comments-loader">
+				<span class="btn btn-brand mb-1">
+				<i class="fas fa-spin fa-spinner text-white"></i>
+				</span>
+			</div>
 			<Comments 
+				v-if="commentsAvailable"
 				:author="commentEntries.author" 
 				:body="commentEntries.body" 
 				:reply_entries.sync="commentEntries.reply_entries" 
@@ -222,7 +228,8 @@
 				:main_post_permlink="report.permlink"
 				:main_post_cat="report.category"
 				:depth="0" />
-		</div>
+			</div>
+
       </div>
     </div>
   </div>
@@ -249,6 +256,7 @@
   export default {
 	data () {
 		return {
+			commentsLoading: true,
 			safety_post_content: ``,
 			showTranslated: false,
 			translationError: '',
@@ -362,9 +370,12 @@
 		return '(+' + parseFloat(this.userRank.afitx_rank).toFixed(2) + ')';
 	  },
 	  commentsAvailable() {
+		return this.commentEntries != null && !this.commentsLoading;
+	},
+	showCommentsLoader() {
+		return this.report.children > 0 && this.commentsLoading;
+	}
 
-		return this.commentEntries != null;
-	  }
     },
 
 	methods: {
@@ -731,19 +742,19 @@
 		this.fetchReportKeyData()
 		this.fetchReportCommentData()
 	  },
-	  fetchReportCommentData () {
-	  
-		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+	  fetchReportCommentData() {
+		this.commentsLoading = true;
+		this.cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
 		this.target_bchain = this.cur_bchain;
 		this.$store.commit('setBchain', this.cur_bchain);
 		
-		//regrab report data to fix comments
-		this.$store.dispatch('fetchReportComments', this.report)
+		this.$store.dispatch('fetchReportComments', this.report).then(() => {
+			this.commentsLoading = false;
+		});
 		
-		//clear the placeholder comment displayed
 		this.responsePosted = false;
 		this.responseBody = this.moderatorSignature;
-	  },
+		},
 	  fetchReportKeyData () {
 		fetch(process.env.actiAppUrl+'getPostReward?user=' + this.report.author+'&url='+this.report.url).then(res => {
 		//grab the post's reward to display it properly

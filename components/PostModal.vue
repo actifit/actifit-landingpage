@@ -229,8 +229,14 @@
 			</a>
 			<vue-remarkable class="modal-body" :source="body" :options="{'html': true, 'breaks': true, 'typographer': true}"></vue-remarkable>
 		</div>
-		<div class="post-comments modal-body" v-if="commentsAvailable">
+		<div class="post-comments modal-body" v-if="post.children > 0">
+			<div v-if="showCommentsLoader" class="comments-loader">
+				<span class="btn btn-brand mb-1">
+				<i class="fas fa-spin fa-spinner text-white"></i> 
+				</span>
+			</div>
 			<Comments 
+				v-if="commentsAvailable"
 				:author="commentEntries.author" 
 				:body="commentEntries.body" 
 				:reply_entries.sync="commentEntries.reply_entries" 
@@ -238,7 +244,9 @@
 				:main_post_permlink="post.permlink"
 				:main_post_cat="post.category"
 				:depth="0" />
-		</div>
+			</div>
+
+
       </div>
 	  
 	</div>
@@ -266,6 +274,7 @@
   export default {
 	data () {
 		return {
+			commentsLoading: true,
 			safety_post_content: ``,
 			showTranslated: false,
 			translationError: '',
@@ -391,9 +400,12 @@
 		return '(+' + parseFloat(this.userRank.afitx_rank).toFixed(2) + ')';
 	  },
 	  commentsAvailable() {
+		return this.commentEntries != null && !this.commentsLoading;
+	},
+	showCommentsLoader() {
+		return this.post.children > 0 && this.commentsLoading;
+	}
 
-		return this.commentEntries != null;
-	  }
     },
 	methods: { 
 		cancelTranslation(){
@@ -792,14 +804,15 @@
 		this.fetchPostCommentData()
 	  },
 	  fetchPostCommentData () {
-	  
+	    this.commentsLoading = true;
 		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		this.target_bchain = this.cur_bchain;
 		this.$store.commit('setBchain', this.cur_bchain);
 		
 		//regrab post data to fix comments
-		this.$store.dispatch('fetchPostComments', this.post)
-		
+		this.$store.dispatch('fetchPostComments', this.post).then(() => {
+			this.commentsLoading = false;
+		});		
 		//clear the placeholder comment displayed
 		this.responsePosted = false;
 		this.responseBody = this.moderatorSignature;
@@ -970,4 +983,9 @@
 	.translation-notice a:hover {
 		text-decoration: underline;
 	}
+	.comments-loader {
+		text-align: center;
+		padding: 20px;
+		}
+
 </style>
