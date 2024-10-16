@@ -216,7 +216,7 @@
 		<div class="report-comments modal-body" v-if="report.children > 0">
 			<div v-if="showCommentsLoader" class="comments-loader">
 				<span class="btn btn-brand mb-1">
-				<i class="fas fa-spin fa-spinner text-white"></i>
+				<i class="fas fa-spin fa-spinner"></i>
 				</span>
 			</div>
 			<Comments 
