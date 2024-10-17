@@ -1,6 +1,6 @@
 <template>
   <div class="modal fade" id="loginModal" ref="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-custom-size" role="document">
+    <div class="modal-dialog modal-dialog-centered modal-custom-size modal-dialog-scrollable" role="document">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">{{ $t('Login_actifit') }}</h5>
@@ -630,4 +630,28 @@
   width: 100%;
   max-width: 400px;
 }
+@media (max-width: 768px) {
+  .modal-custom-size {
+    width: 95%;
+    margin: 0 auto;
+  }
+
+  .login-stdd-btn {
+    width: 100%;
+    margin: 5px 0;
+  }
+
+  .form-control-lg {
+    font-size: 16px;
+  }
+
+  .modal-body {
+    padding: 15px;
+  }
+
+  .home-card {
+    padding: 15px;
+  }
+}
+
 </style>
