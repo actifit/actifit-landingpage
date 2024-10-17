@@ -537,7 +537,7 @@
     }
       
   </script>
-  <style>
+  <style scoped>
   
   .icon-steemconnect:before {
       content: "\e6c1";
@@ -609,10 +609,6 @@
   justify-content: center;
   align-items: center;
 }
-.modal-custom-size {
-  max-width: 90%;
-  width: 35%;
-}
 
 .modal-content {
   max-height: 90vh;
@@ -630,15 +626,15 @@
   width: 100%;
   max-width: 400px;
 }
+.modal-custom-size {
+  max-width: 90%;
+  width: 35%;
+}
+
 @media (max-width: 768px) {
   .modal-custom-size {
     width: 95%;
     margin: 0 auto;
-  }
-
-  .login-stdd-btn {
-    width: 100%;
-    margin: 5px 0;
   }
 
   .form-control-lg {
@@ -652,6 +648,12 @@
   .home-card {
     padding: 15px;
   }
+}
+
+.modal-content {
+  overflow-y: auto;
+  padding: 10px;
+  max-height: 80vh;
 }
 
 </style>
