@@ -95,7 +95,7 @@ import LoginModal from '~/components/LoginModal'
       },
       handleLoginSuccessful() {
         // Refresh the current component or perform any necessary updates
-        this.$forceUpdate();
+        window.location.reload();
       },
     }
 	
