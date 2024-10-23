@@ -102,7 +102,7 @@
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/password')"><i class="fa-sharp fa-solid fa-key text-brand"></i>&nbsp;{{ $t('My_Password') }}</a>
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/settings')"><i class="fa-solid fa-gear text-brand"></i>&nbsp;{{ $t('Settings') }}</a>
           <div class="dropdown-divider"></div>
-		  <a href="#" data-toggle="modal" data-target="#loginModal" @click="showModalFuncLOGIN" class="dropdown-item"><i class="fa-solid fa-user-group text-brand"></i>&nbsp;{{ $t('switch_user') }}</a>
+		  <a href="#" data-toggle="modal" data-target="#loginModal" @click="showModalFunc" class="dropdown-item"><i class="fa-solid fa-user-group text-brand"></i>&nbsp;{{ $t('switch_user') }}</a>
 		  <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="#" @click.prevent="proceedLogout()"><i class="fa-solid fa-right-from-bracket text-brand"></i>&nbsp;{{ $t('Logout') }}</a>
         </div>
@@ -126,6 +126,7 @@
     },
 	data () {
 		return {
+			showModal: false,
 			activeNotifications: [],
 			activeNotificationsLen: 1,
 			cur_bchain: 'HIVE',
@@ -196,12 +197,8 @@
        * @returns {string}
        */
 	   showModalFuncLOGIN() {
-		  this.$nextTick(() => {
-			this.showModal = true;
-			if ($ && typeof $.fn.modal === 'function') {
-			  $('#loginModal').modal('show');
-			}
-		  });
+		this.proceedLogout();
+		this.$emit('modal-opened', true);
 		},
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
