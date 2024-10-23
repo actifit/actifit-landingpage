@@ -449,6 +449,7 @@
 			
 		},
 	  loadNextPost(direction){
+		this.cancelTranslation();
 		if (direction <0){
 			console.log('previous')
 			this.$emit('prevPost');
@@ -911,7 +912,9 @@
 	
 	  //fix modal overlay
 	  $('#voteModal').on("hidden.bs.modal", this.fixSubModal)
-	  
+	    //reset translation when modal closes
+  	  $('#reportModal').on("hidden.bs.modal", this.cancelTranslation)
+  
 	  this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 	  
 	  //capture key clicks
