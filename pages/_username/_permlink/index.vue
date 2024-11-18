@@ -217,7 +217,7 @@
 		  <div class="report-comments col-md-12" v-if="report.children > 0">
 				<div v-if="showCommentsLoader" class="comments-loader">
 					<span class="btn btn-brand mb-1">
-					<i class="fas fa-spin fa-spinner"></i> {{ $t('loading_comments') }}
+					<i class="fas fa-spin fa-spinner"></i>
 					</span>
 				</div>
 				<Comments 
