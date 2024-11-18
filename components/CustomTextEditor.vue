@@ -170,7 +170,7 @@
 				try {
 					const response = await axios.post('https://usermedia.actifit.io/upload', formData, {
 					headers: {
-						'Authorization': 'a6iSgyExViuVt6V10fOjZjfezh2B',
+						'Authorization': SEC_IMG_UPL_KEY,
 						'Content-Type': 'multipart/form-data'
 					}
 					});
