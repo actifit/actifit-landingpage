@@ -31,6 +31,7 @@ module.exports = {
     base: '/'
   },*/
   env: {
+	sec_img_upl: process.env.SEC_IMG_UPL_KEY,
 	auth_Key: process.env.DEEPL_WEB_KEY,
 	swap_partner: 'actifit.swap',
 	swap_to_token: 'AFIT',
