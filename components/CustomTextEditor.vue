@@ -53,13 +53,9 @@
 	</div>
 </template>
 <script>
-	import AWS from 'aws-sdk'
+	import axios from 'axios';
 	import EmojiPicker from 'vue-emoji-picker'
 	
-	const actifit_host = 'https://usermedia.actifit.io/'
-	const bucketName = 'actifit';
-  
-	AWS.config.update({ "accessKeyId": process.env.AWS_ACCESS_KEY_ID, "secretAccessKey": process.env.AWS_SECRET_ACCESS_KEY, "region":"us-east-1"});
 	
 	export default {
 		components: {
@@ -159,42 +155,37 @@
 			  //$vm = this.$refs.md
 			  //this.$refs.editor.$img2Url(pos, url);
 			},
-			async uploadImage (pos, file) {
-			  //display image upload animation
-			  this.imgUploading = true;
-			  
-			  //generate new key/name for the image to store
-			  var key = (Date.now().toString(36) + Math.random().toString(36).substr(2, 11) + Math.random().toString(36).substr(2, 11)).toUpperCase();
-			  
-			  //initialize S3 instance to process the upload
-			  const s3 = new AWS.S3()
-			  var params = {
-				Bucket: bucketName,
-				Key: key, // this will be your share url name
-				ContentType: 'image/jpeg',
-				Body: file[0], 
-				ACL: 'public-read' 
-			  }
-			  
-			  let img_orig_name = file[0].name
-			  let img_url = actifit_host + key
-			  
-			  //let txt_editor = this.$refs.editor.simplemde; 
-			  let txt_editor = this.$el.querySelector('textarea');
-			  
-			  //reference to this to be used inside the s3 response method
-			  let main_container = this;
-			  
-			  s3.putObject(params).promise().then(function(data) {
-				main_container.$refs.editor.$img2Url(pos, img_url);
-			  });
-				/*
-				main_container.$notify({
-				  group: err ? 'error' : 'success',
-				  text: err ? main_container.$t('Img_Upload_Fail') : main_container.$t('Img_Upload_Success'),
-				  position: 'top center'
-				})*/
-			}
+			async uploadImage(pos, file) {
+				const key = (
+					Date.now().toString(36) +
+					Math.random().toString(36).substr(2, 11) +
+					Math.random().toString(36).substr(2, 11)
+				).toUpperCase();
+
+				const renamedFile = new File([file[0]], key, { type: file[0].type });
+				
+				const formData = new FormData();
+				formData.append('image', renamedFile);
+
+				try {
+					const response = await axios.post('https://usermedia.actifit.io/upload', formData, {
+					headers: {
+						'Authorization': 'a6iSgyExViuVt6V10fOjZjfezh2B',
+						'Content-Type': 'multipart/form-data'
+					}
+					});
+					
+					console.log('meow Upload Success:', response.data);
+					const imageUrl = 'https://usermedia.actifit.io/' + key;
+					this.$refs.editor.$img2Url(pos, imageUrl);
+					return imageUrl;
+					
+				} catch (error) {
+					console.log('meow Upload Error:', error);
+					throw error;
+				}
+				}
+
 		}
 		
 	}
