@@ -346,7 +346,7 @@
 				}
 			}catch(err){
 				console.log(err);
-			}
+			} 
 		},
 		copyContent (event){
 			navigator.clipboard.writeText('https://actifit.io/@' + this.full_data.author + '/' + this.full_data.permlink)
