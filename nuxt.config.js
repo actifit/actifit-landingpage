@@ -31,13 +31,12 @@ module.exports = {
     base: '/'
   },*/
   env: {
+	sec_img_upl: process.env.SEC_IMG_UPL_KEY,
 	auth_Key: process.env.DEEPL_WEB_KEY,
 	swap_partner: 'actifit.swap',
 	swap_to_token: 'AFIT',
 	partner_fee: '1',
     scRedirectUrl: process.env.SC_REDIRECT_URL || 'http://localhost:3000/auth',
-	AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
-	AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
 	CREATE_ACCOUNT_API_KEY: process.env.CREATE_ACCOUNT_API_KEY,
 	REWARD_REFERRAL_API_KEY: process.env.REWARD_REFERRAL_API_KEY,
 	DELEGATE_ACCOUNT_API_KEY: process.env.DELEGATE_ACCOUNT_API_KEY,
