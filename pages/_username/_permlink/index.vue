@@ -214,8 +214,8 @@
 			  </a>
 			  <vue-remarkable :source="responseBody" :options="{'html': true, 'breaks': true, 'typographer': true}" ></vue-remarkable>
 		  </div>
-		  <div class="report-comments col-md-12" v-if="report.children > 0">
-				<div class="pb-md-2 text-center">
+		  <div class="report-comments modal-body" v-if="report.children > 0">
+				<div v-if="showCommentsLoader" class="pb-md-2 text-center">
 					<i class="fas fa-spinner fa-spin text-brand"></i>
 				</div>
 				<Comments 
