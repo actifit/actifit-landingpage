@@ -214,10 +214,8 @@
 			<vue-remarkable class="modal-body" :source="body" :options="{'html': true, 'breaks': true, 'typographer': true}"></vue-remarkable>
 		</div>
 		<div class="report-comments modal-body" v-if="report.children > 0">
-			<div v-if="showCommentsLoader" class="comments-loader">
-				<span class="btn btn-brand mb-1">
-				<i class="fas fa-spin fa-spinner"></i>
-				</span>
+			<div v-if="showCommentsLoader" class="pb-md-2 text-center">
+				<i class="fas fa-spinner fa-spin text-brand"></i>
 			</div>
 			<Comments 
 				v-if="commentsAvailable"

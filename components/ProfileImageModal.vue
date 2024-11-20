@@ -50,15 +50,8 @@
 </template>
 
 <script>
-import AWS from 'aws-sdk';
+import axios from 'axios';
 
-const bucketName = 'actifit';
-const actifit_host = 'https://usermedia.actifit.io/';
-AWS.config.update({
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  region: 'us-east-1',
-});
 
 export default {
   props: ['username'],
@@ -90,9 +83,11 @@ export default {
         this.imgUploading = true;
         this.uploadedImage = file;
         this.imageUrl = '';
+        console.log(`meow uploadedImage: ${this.uploadedImage}`)
         this.uploadImage(file)
           .then((url) => {
             this.imagePreviewUrl = url;
+            console.log(`meow url: ${this.imagePreviewUrl}`)
             this.imgUploading = false;
           })
           .catch((error) => {
@@ -112,11 +107,11 @@ export default {
       this.imgUploading = false;
     },
     handleImageLoadError() {
-      console.error('Image failed to load');
+      console.error('meow Image failed to load');
       this.handleInvalidImage();
     },
     handleInvalidImage() {
-      alert('Invalid image URL. Please provide a valid image URL.');
+      alert('meow Invalid image URL. Please provide a valid image URL.');
       this.imageUrl = '';
       this.imagePreviewUrl = `${this.profImgUrl}/u/${this.username}/avatar`;
       this.imgUploading = false;
@@ -163,30 +158,35 @@ export default {
       this.imagePreviewUrl = `${this.profImgUrl}/u/${this.username}/avatar`;
     },
     async uploadImage(file) {
-      const key = (
-        Date.now().toString(36) +
-        Math.random().toString(36).substr(2, 11) +
-        Math.random().toString(36).substr(2, 11)
-      ).toUpperCase();
+        const key = (
+          Date.now().toString(36) +
+          Math.random().toString(36).substr(2, 11) +
+          Math.random().toString(36).substr(2, 11)
+        ).toUpperCase();
 
-      const s3 = new AWS.S3();
-      const params = {
-        Bucket: bucketName,
-        Key: key,
-        ContentType: file.type,
-        Body: file,
-        ACL: 'public-read',
-      };
+        const renamedFile = new File([file], key, { type: file.type });
+        
+        const formData = new FormData();
+        formData.append('image', renamedFile);
 
-      const img_url = actifit_host + key;
-
-      try {
-        await s3.putObject(params).promise();
-        return img_url;
-      } catch (error) {
-        throw error;
-      }
-    },
+        try {
+          const response = await axios.post('https://usermedia.actifit.io/upload', formData, {
+            headers: {
+              'Authorization': process.env.sec_img_upl,
+              'Content-Type': 'multipart/form-data'
+            }
+          });
+          
+          console.log('Upload Success:', response.data);
+          const imageUrl = 'https://usermedia.actifit.io/' + key;
+          console.log(`meow imageurl: ${imageUrl}`)
+          return imageUrl;
+          
+        } catch (error) {
+          console.log('meow Upload Error:', error);
+          throw error;
+        }
+      },
   },
   mounted() {
     this.imagePreviewUrl = `${this.profImgUrl}/u/${this.username}/avatar`;
