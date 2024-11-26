@@ -3705,7 +3705,8 @@
 			  
 			  if (res.success){
 				  this.confirmCompletion('claimrewards', 0, res);
-				  this.isClaimableDataAvailableTEMP = false
+				  this.isClaimableDataAvailableTEMP = false;
+				  await this.formattedTotAccountVal();
 			  }
 			  /*steem.broadcast.claimRewardBalanceAsync(this.user.account.name,this.claimSTEEM, this.claimSBD, this.claimSP).then(
 				  res => ).catch(err=>console.log(err));*/
