@@ -58,7 +58,7 @@ module.exports = {
 	steemImgUrl: 'https://steemitimages.com',
 	hiveImgUrl: 'https://images.hive.blog',
 	steemApiNode: 'https://api.steemit.com/',
-	hiveApiNode: 'https://hiveapi.actifit.io', //'https://api.hive.blog',//'https://anyx.io',
+	hiveApiNode: 'https://api.hive.blog',//'https://anyx.io', 'https://hiveapi.actifit.io', //
 	blurtApiNode: 'https://blurtrpc.actifit.io', //'https://blurt-rpc.saboin.com', //'http://164.68.116.86/', //'https://blurt-rpc.saboin.com/', //
 	hiveStateApiNode: 'https://api.deathwing.me',
 	hiveTestNode: 'https://testnet.openhive.network', //'https://api.fake.openhive.network',
@@ -137,10 +137,10 @@ module.exports = {
 	  }
 	},
 	steemAppsScript: {
-	  
+
 	}
   },
-  
+
   render: {
 		static: {
 		setHeaders(res) {
@@ -173,7 +173,7 @@ module.exports = {
       { rel: 'icon', type: 'image/x-icon', href: '/img/actifit_logo.png' },
       //{ rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css' },
 	  { rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css' },
-	  
+
       { rel: 'stylesheet', href: 'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css' },
       { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css?family=Roboto' }
     ],
@@ -183,7 +183,7 @@ module.exports = {
       { src: 'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js' },
       { src: 'https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/TweenMax.min.js' },
 	  // Google tag (gtag.js)
-	  /*{ src: 'https://www.googletagmanager.com/gtag/js?id=G-HPZKPFM9GK', 
+	  /*{ src: 'https://www.googletagmanager.com/gtag/js?id=G-HPZKPFM9GK',
 		async:true,
 		script: { children: `
 				window.dataLayer = window.dataLayer || [];
@@ -240,11 +240,11 @@ module.exports = {
 	  pageLevelAds: true
     }],
   ],
-  
+
   gtm: {
     id: 'G-HPZKPFM9GK', // Used as fallback if no runtime config is provided
   },
-  
+
   "browserslist": [
     "defaults",
     "not dead"
@@ -252,9 +252,9 @@ module.exports = {
   /*"browserslist": {
     "defaults"
   },*/
-  
+
   /*helmet: {
-   
+
     dnsPrefetchControl: false,
     expectCt: false,
     featurePolicy: false,
@@ -267,7 +267,7 @@ module.exports = {
     permittedCrossDomainPolicies: false,
     referrerPolicy: false,
     xssFilter: false,
-   
+
  },*/
   /*
   ** Build configuration
@@ -279,7 +279,7 @@ module.exports = {
     extend(config, ctx) {
       // Run ESLint on save
       if (ctx.isDev && ctx.isClient) {
-		
+
         config.module.rules.push({
           enforce: 'pre',
           test: /\.(js|vue)$/,
@@ -287,13 +287,13 @@ module.exports = {
           exclude: /(node_modules)/
         })
       }
-	  
+
 		config.node = {
             fs: 'empty'
         }
     },
 	//fixes issue with hive-auth-wrapper plugin integration
 	transpile: ['hive-auth-wrapper']
-	
+
   }
 }
