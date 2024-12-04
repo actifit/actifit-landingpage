@@ -6,12 +6,12 @@
     <div class="container pt-5 mt-5 pb-5">
       <h2 class="text-center">{{ $t('market_title') }}</h2>
 	  <h3 class="text-center m-4 text-brand market-sub">{{ $t('market_subtitle') }}</h3>
-	  
-	  
+
+
 	  <!-- ticket prize section / gadgets purchase -->
-	  
+
 	  <div class="col-md-12 text-center text-primary mb-5 notice-text">
-		  <h4>{{$t('prize_tickets_buy_gadgets')}}<a href="#" data-toggle="modal" data-target="#notifyModal"><i class="fas fa-info-circle" :title="$t('view_details')"></i></a></h4> 
+		  <h4>{{$t('prize_tickets_buy_gadgets')}}<a href="#" data-toggle="modal" data-target="#notifyModal"><i class="fas fa-info-circle" :title="$t('view_details')"></i></a></h4>
 		  <div class="row row-sep">
 			<div class="col-md-4 row-sep-in small-pad-row acti-shadow">
 			  <h5 class="token-title pt-2 notice-text">{{$t('my_tickets_collected')}}</h5>
@@ -36,10 +36,10 @@
 				<div><a :href="'/'+lastDrawWinner">@{{ lastDrawWinner }}</a> {{ wonAmount }} {{ $t('HIVE') }}<img src="/img/HIVE.png" class="token-logo-sm"></div>
 			</div>
 		  </div>
-		
+
 	  </div>
-	  
-	  
+
+
 	  <!-- allow sorting & filtering products -->
 	  <div class="row col-md-12" v-if="prodList.length">
 		<span class="col-md-5"></span>
@@ -68,7 +68,7 @@
 			<option value="ebook">{{$t('Ebook')}}</option>
 			<option value="real">{{$t('Physical_Products')}}</option>
         </select>
-		
+
 		<div class="row expansion-arrow-all">
 			<a class="arrow-icon" v-on:click="expandAllSwitchStatus" :class="expandAllStatus" :title="expandAllStatusText">
 			  <span class="left-bar"></span>
@@ -76,27 +76,27 @@
 			</a>
 		</div>
 	  </div>
-	  	  
+
 	  <!-- show listing of special event products -->
-	  
-	  
-	  <!--
+
+
+
 	  <h5 class="text-center pt-3 market-sub text-brand">{{ $t('special_christmas_event') }}</h5>
-	  
+
 	  <div class="row" v-if="prodList.length">
-        <Product v-for="product in prodList" 
+        <Product v-for="product in prodList"
 			:product="product" :key="product._id" :pros="professionals" :userrank="userRank" :gadgetStats="gadgetStats"  :realProducts="realProducts" :expandAll="expandAllStatus"
 			v-if="product.specialevent"
 			@update-prod="updateProd" :afitPrice="afitPrice" @refresh-tickets="refreshTickets"/>
       </div>
 	  <br/>
-	  
-	  -->
-	  
-	  
+
+
+
+
       <!-- show listing of products -->
       <div class="row" v-if="prodList.length">
-        <Product v-for="product in prodList" 
+        <Product v-for="product in prodList"
 			:product="product" :key="product._id" :pros="professionals" :userrank="userRank" :gadgetStats="gadgetStats" :realProducts="realProducts" :expandAll="expandAllStatus"
 			v-if="!product.specialevent && (!currentFilter || product.type == currentFilter)"
 			@update-prod="updateProd" :afitPrice="afitPrice" @refresh-tickets="refreshTickets"/>
@@ -104,10 +104,10 @@
 	  <div class="text-center text-brand" v-else><i class="fas fa-spin fa-spinner"></i></div>
 
     </div>
-	
+
 	<NotifyModal :modalTitle="$t('Actifit_Info')" :modalText="$t('weekly_pay_prize_desc')"/>
-	
-	
+
+
 
     <Footer />
     <client-only>
@@ -126,13 +126,13 @@
   import Footer from '~/components/Footer'
 
   import { mapGetters } from 'vuex'
-  
+
   import hive from '@hiveio/hive-js'
-  
+
   import Lodash from 'lodash'
-  
+
   import Countdown from 'vuejs-countdown'
-  
+
   import NotifyModal from '~/components/NotifyModal'
 
   export default {
@@ -280,12 +280,12 @@
 	  },
 	  async prepareData () {
 		this.fetchAfitPrice();
-		
+
 		this.fetchUserBuyTicketEntries();
-	  
+
 		this.fetchPrizePool();
 	  },
-	  
+
 	  setNextPrizeDate (json){
 		console.log('setNextPrizeDate');
 		console.log(json);
@@ -297,51 +297,51 @@
 		this.nextGadgetBuyRewardDate = targetDate.getFullYear() + '-' + mnth  + '-' + targetDate.getDate() + ' 00:00 GMT' ;
 		console.log('nextGadgetBuyRewardDate');
 		console.log(this.nextGadgetBuyRewardDate);
-		
+
 		//also set last draw winner display
 		this.lastDrawWinner = json.winner[0].name;
 		this.wonAmount = this.numberFormat(json.winner[0].reward, 3);
 	  },
-	  
+
 	  async fetchGadgetPrizeCycle() {
 		fetch(process.env.actiAppUrl+'recentGadgetBuyPrizeCycle/').then(
 		  res => {res.json().then(json => this.setNextPrizeDate (json)).catch(e => reject(e))
 		}).catch(e => reject(e))
-		
+
 	  }
-	  
+
     },
-	
+
     async mounted () {
 	  this.countDownReady = true;
-	  
+
 	  this.$store.dispatch('steemconnect/login')
 	  this.fetchUserData();
-	  
+
 	  this.fetchGadgetPrizeCycle();
-	  
+
 	  await this.prepareData();
-	  
-			  
+
+
 	  //hive.config.set('rebranded_api', true)
 	  //hive.broadcast.updateOperations()
 	  hive.config.set('alternative_api_endpoints', process.env.altHiveNodes);
-	  
+
 	  hive.api.setOptions({ url: process.env.hiveApiNode });
-	  
+
 	  //refetch price every 2 mins
 	  setInterval(this.prepareData, 2 * 60 * 1000);
-	 
-	  
+
+
       // fetch products
       this.$store.dispatch('fetchProducts')
-	  
+
 	  // fetch user bought real products
 	  //this.$store.dispatch('fetchUserBoughtRealProducts');
-	  
+
 	  // fetch professionals
       this.$store.dispatch('fetchPros')
-	  
+
     }
   }
 </script>
@@ -349,15 +349,15 @@
   .market-sub{
 	font-style: italic;
   }
-  .selcls { 
-    padding: 9px; 
-    border: solid 1px #517B97; 
-    outline: 0; 
-    background: -webkit-gradient(linear, left top, left 25, from(#FFFFFF), color-stop(4%, #CAD9E3), to(#FFFFFF)); 
-    background: -moz-linear-gradient(top, #FFFFFF, #CAD9E3 1px, #FFFFFF 25px); 
-    box-shadow: rgba(0,0,0, 0.1) 0px 0px 8px; 
-    -moz-box-shadow: rgba(0,0,0, 0.1) 0px 0px 8px; 
-    -webkit-box-shadow: rgba(0,0,0, 0.1) 0px 0px 8px; 
+  .selcls {
+    padding: 9px;
+    border: solid 1px #517B97;
+    outline: 0;
+    background: -webkit-gradient(linear, left top, left 25, from(#FFFFFF), color-stop(4%, #CAD9E3), to(#FFFFFF));
+    background: -moz-linear-gradient(top, #FFFFFF, #CAD9E3 1px, #FFFFFF 25px);
+    box-shadow: rgba(0,0,0, 0.1) 0px 0px 8px;
+    -moz-box-shadow: rgba(0,0,0, 0.1) 0px 0px 8px;
+    -webkit-box-shadow: rgba(0,0,0, 0.1) 0px 0px 8px;
   }
   .sel-adj{
 	margin-bottom: 3px;
@@ -387,7 +387,7 @@
 	  0%, 50%, 100% { background-color: pink; }
 	  25%, 75% { background-color: red; }
 	}
-	
+
 	.expansion-arrow-all{
 		display: contents;
 	}
