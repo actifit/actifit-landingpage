@@ -14,7 +14,7 @@
 		  
 		  <div class="row top-action-container text-right">
 			  <div class="col-6 text-left">
-				  <span class="btn btn-brand mb-1" :title="show_only_tokens_interest?$t('show_all_tokens'):$t('show_core_tokens')" v-on:click="switchTokenDisplay">
+ 				  <span class="btn btn-brand mb-1" :title="show_only_tokens_interest?$t('show_all_tokens'):$t('show_core_tokens')" v-on:click="switchTokenDisplay">
 					  <i class="fas fa-solid fa-filter" :style="show_only_tokens_interest?'color:green':'color:white'"></i>
 				  </span>
 				  
