@@ -14,7 +14,6 @@
 		  
 		  <div class="row top-action-container text-right">
 			  <div class="col-6 text-left">
-				  
 				  <span class="btn btn-brand mb-1" :title="show_only_tokens_interest?$t('show_all_tokens'):$t('show_core_tokens')" v-on:click="switchTokenDisplay">
 					  <i class="fas fa-solid fa-filter" :style="show_only_tokens_interest?'color:green':'color:white'"></i>
 				  </span>
@@ -3666,6 +3665,8 @@
 			  }, window.location.origin + '/wallet?op=claim rewards&status=success');
   
 			  window.open(link);
+			  await this.fetchUserData();
+			  
 			  
 			  //Below would have been preferred approach, but claimRewardBalance keeps failing as it requires more authority. Keeping here for future further exploration
 			  /*
@@ -3706,7 +3707,7 @@
 			  if (res.success){
 				  this.confirmCompletion('claimrewards', 0, res);
 				  this.isClaimableDataAvailableTEMP = false;
-				  await this.formattedTotAccountVal();
+				  this.fetchUserData();
 			  }
 			  /*steem.broadcast.claimRewardBalanceAsync(this.user.account.name,this.claimSTEEM, this.claimSBD, this.claimSP).then(
 				  res => ).catch(err=>console.log(err));*/
