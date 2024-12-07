@@ -3651,9 +3651,6 @@
 		},
 		async claimRewards () {
 		  //function handles claiming STEEM rewards
-		  
-		  
-		  
 		  if (!localStorage.getItem('std_login')){
 			  //sample link: https://steemconnect.com/sign/claim-reward-balance?account=sdsf&reward_steem=33&reward_sbd=2342&reward_vests=23432
 			  var link = this.$steemconnect.sign('claim-reward-balance', {
@@ -3665,7 +3662,7 @@
 			  }, window.location.origin + '/wallet?op=claim rewards&status=success');
   
 			  window.open(link);
-			  await this.fetchUserData();
+			  await this.waitAndFetchBalance();
 			  
 			  
 			  //Below would have been preferred approach, but claimRewardBalance keeps failing as it requires more authority. Keeping here for future further exploration
@@ -3707,11 +3704,33 @@
 			  if (res.success){
 				  this.confirmCompletion('claimrewards', 0, res);
 				  this.isClaimableDataAvailableTEMP = false;
-				  this.fetchUserData();
+				  this.waitAndFetchBalance();
 			  }
 			  /*steem.broadcast.claimRewardBalanceAsync(this.user.account.name,this.claimSTEEM, this.claimSBD, this.claimSP).then(
 				  res => ).catch(err=>console.log(err));*/
 		  }
+		},
+		//this so we could still call the fetch user balance but with some delay (as requested)
+		async waitAndFetchBalance() {
+			let attempts = 0;
+			const maxAttempts = 2; //will try twice over 6 seconds (iff at 3 secs it still didnt finish, system will retry at 6 seconds.)
+			
+			const checkBalance = async () => {
+			try {
+				await this.fetchUserData();
+				attempts++;
+				
+				if (attempts < maxAttempts) {
+				//wait another 3 seconds before trying again
+				setTimeout(checkBalance, 3000);
+				}
+			} catch (error) {
+				console.error('Error fetching balance:', error);
+			}
+			};
+		
+			//start the first check after 3 seconds
+			setTimeout(checkBalance, 3000);
 		},
 		transferToSavings (cur) {
 		  this.fundActivityMode = this.TRANSFER_FUNDS_SAVINGS;
