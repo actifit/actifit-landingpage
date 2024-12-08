@@ -3651,9 +3651,6 @@
 		},
 		async claimRewards () {
 		  //function handles claiming STEEM rewards
-		  
-		  
-		  
 		  if (!localStorage.getItem('std_login')){
 			  //sample link: https://steemconnect.com/sign/claim-reward-balance?account=sdsf&reward_steem=33&reward_sbd=2342&reward_vests=23432
 			  var link = this.$steemconnect.sign('claim-reward-balance', {
@@ -3665,8 +3662,7 @@
 			  }, window.location.origin + '/wallet?op=claim rewards&status=success');
   
 			  window.open(link);
-			  await this.fetchUserData();
-			  
+			  setTimeout(() => this.fetchUserData(), 3000);
 			  
 			  //Below would have been preferred approach, but claimRewardBalance keeps failing as it requires more authority. Keeping here for future further exploration
 			  /*
@@ -3707,8 +3703,8 @@
 			  if (res.success){
 				  this.confirmCompletion('claimrewards', 0, res);
 				  this.isClaimableDataAvailableTEMP = false;
-				  this.fetchUserData();
-			  }
+				  setTimeout(() => this.fetchUserData(), 3000);
+				}
 			  /*steem.broadcast.claimRewardBalanceAsync(this.user.account.name,this.claimSTEEM, this.claimSBD, this.claimSP).then(
 				  res => ).catch(err=>console.log(err));*/
 		  }
