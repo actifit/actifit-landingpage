@@ -1,4 +1,9 @@
 module.exports = {
+  afit_balance: 'AFIT Balance',
+  hive_balance: 'HIVE Balance',
+  view_full_profile: 'View Full Profile',
+  blog_posts: 'Blog Posts',
+  videos: 'Videos',
   switch_user: 'Switch User',
   keep_loggedin: 'Keep me logged in',
   forgot_my_posting_key: 'Forgot my posting key?',
