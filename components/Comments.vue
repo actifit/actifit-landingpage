@@ -29,8 +29,17 @@
 			  <div class="comment-user-section" :style="{ paddingLeft: depth * indentFactor + 'px' }">	
 				<div class="user-avatar mr-1"
 					   :style="'background-image: url('+this.profImgUrl+'/u/' + author + '/avatar)'"></div>
-				<div class="modal-author modal-title" >@{{ author }}<small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small>
-				</div>
+					   <UserHoverCard :username="author">
+						<div class="modal-author modal-title">
+						@{{ author }}
+						<small class="text-brand numberCircle">
+							{{ displayCoreUserRank }}
+							<span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">
+							{{ displayIncreasedUserRank }}
+							</span>
+						</small>
+						</div>
+					</UserHoverCard>
 			  </div>
 			</a>
 		<!--<a :href="'/@' + author + '/' + full_data.permlink" target="_blank">-->
@@ -185,6 +194,7 @@
   </transition>
 </template>
 <script>
+import UserHoverCard from './UserHoverCard.vue'
   import { translateText } from '~/components/deepl-client';
 
   import vueRemarkable from 'vue-remarkable';
@@ -240,7 +250,8 @@
 	},
 	components: {
 	  CustomTextEditor,
-	  vueRemarkable
+	  vueRemarkable,
+	  UserHoverCard
 	},
     computed: {
 	  ...mapGetters('steemconnect', ['user']),

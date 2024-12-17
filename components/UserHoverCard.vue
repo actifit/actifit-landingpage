@@ -1,0 +1,390 @@
+<template>
+  <div class="hover-card-container">
+    <div @mouseenter="handleMouseEnter" 
+         @mouseleave="handleMouseLeave">
+      <slot></slot>
+    </div>
+    
+    <transition name="fade">
+      <div v-if="isVisible" 
+           class="hover-card-wrapper" 
+           :style="cardPosition"
+           @mouseenter="handleCardEnter"
+           @mouseleave="handleCardLeave">
+        <div v-if="loading" class="user-hover-card card">
+          <div class="card-header">
+            <div class="row align-items-center">
+              <div class="col-auto">
+                <div class="skeleton-avatar"></div>
+              </div>
+              <div class="col">
+                <div class="skeleton-text"></div>
+                <div class="skeleton-text-sm"></div>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="skeleton-section"></div>
+            <div class="skeleton-section"></div>
+          </div>
+        </div>
+
+        <div v-else class="user-hover-card card">
+          <div class="card-header">
+            <div class="row align-items-center">
+              <div class="col-auto position-relative">
+                <div class="user-avatar-large"
+                     :style="'background-image: url('+profImgUrl+'/u/' + username + '/avatar)'">
+                </div>
+                <span class="rank-badge">{{ userRank }}</span>
+              </div>
+              <div class="col">
+                <h3 class="mb-1">@{{ username }}</h3>
+                <small class="text-muted">
+                  <i class="far fa-calendar"></i>
+                  Joined {{ joinDate }}
+                </small>
+              </div>
+            </div>
+          </div>
+      
+          <div class="card-body">
+            <div class="row balance-section mb-3">
+              <div class="col-6 text-center">
+                <small class="text-muted d-block">{{ $t('hive_balance') }}</small>
+                <div class="text-brand font-weight-bold">{{ hiveBalance || 'N/A' }}</div>
+              </div>
+              <div class="col-6 text-center">
+                <small class="text-muted d-block">{{ $t('afit_balance') }}</small>
+                <div class="text-brand font-weight-bold">{{ afitBalance || 'N/A' }}</div>
+              </div>
+            </div>
+      
+            <div class="links-section">
+              <a :href="'/'+username+'/blog'" class="d-block mb-2">
+                <i class="fas fa-book-open mr-2"></i>
+                {{ $t('blog_posts') }}
+              </a>
+              <a :href="'/'+username+'/comments'" class="d-block mb-2">
+                <i class="far fa-comments mr-2"></i>
+                {{ $t('comments') }}
+              </a>
+              <a :href="'/'+username+'/videos'" class="d-block mb-2">
+                <i class="fas fa-video mr-2"></i>
+                {{ $t('videos') }}
+              </a>
+              <a :href="'/activity/'+username" class="d-block mb-2">
+                <i class="fas fa-running mr-2"></i>
+                {{ $t('Actifit_reports') }}
+              </a>
+              <a :href="'/'+username+'/wallet'" class="d-block mb-2">
+                <i class="fas fa-wallet mr-2"></i>
+                {{ $t('Wallet') }}
+              </a>
+            </div>
+      
+            <a :href="'/'+username" class="btn btn-brand-profile btn-block">
+              {{ $t('view_full_profile') }}
+            </a>
+          </div>
+        </div>
+      </div>
+    </transition>
+  </div>
+</template>
+
+<script>
+import { mapGetters } from 'vuex'
+import hive from '@hiveio/hive-js'
+import steem from 'steem'
+export default {
+  name: 'UserHoverCard',
+  
+  props: {
+    username: {
+      type: String,
+      required: true
+    }
+  },
+
+  data() {
+    return {
+      userRank: '0.00',
+      hiveBalance: '0',
+      afitBalance: '0',
+      userAddedTokens: '0',
+      joinDate: '',
+      profImgUrl: process.env.hiveImgUrl,
+      loading: true,
+      isVisible: false,
+      hoverTimeout: null,
+      leaveTimeout: null,
+      mouseX: 0,
+      mouseY: 0,
+      isHoveringCard: false
+    }
+  },
+
+  computed: {
+  ...mapGetters(['userTokensWallet']),
+  cardPosition() {
+  const CARD_WIDTH = 300
+  const CARD_HEIGHT = 400
+  const MARGIN = 20
+  
+  let left = this.mouseX
+  let top = this.mouseY + MARGIN
+
+  //check if card overflows right edge
+  if (left + CARD_WIDTH > window.innerWidth) {
+    left = this.mouseX - CARD_WIDTH
+  }
+
+  //check if card overflows bottom edge
+  if (top + CARD_HEIGHT > window.innerHeight) {
+    top = this.mouseY - CARD_HEIGHT - MARGIN
+  }
+
+  //ensure card never goes off-screen (that way the user always sees the full card)
+  left = Math.max(MARGIN, Math.min(left, window.innerWidth - CARD_WIDTH - MARGIN))
+  top = Math.max( MARGIN, Math.min(top, window.innerHeight  - CARD_HEIGHT - MARGIN))
+
+  return {
+    left: `${left}px`,
+    top: `${top}px`
+  }
+},
+  formattedAfitBalance() {
+    const balance = parseFloat(this.userTokensWallet || 0) + parseFloat(this.userAddedTokens || 0)
+    return this.numberFormat(balance, 3)
+  }
+},
+mounted() {
+    //initialize blockchain APIs
+    steem.api.setOptions({ url: process.env.steemApiNode })
+    hive.api.setOptions({ url: process.env.hiveApiNode })
+    
+    // Set proper image URL
+    this.profImgUrl = (localStorage.getItem('cur_bchain') === 'STEEM') 
+      ? process.env.steemImgUrl 
+      : process.env.hiveImgUrl
+
+  },
+  
+watch: {
+  userTokensWallet: {
+    immediate: true,
+    handler(newVal) {
+      if (newVal) {
+        this.afitBalance = this.formattedAfitBalance
+      }
+    }
+  }
+},
+
+  methods: {
+    numberFormat(number, precision) {
+      return new Intl.NumberFormat('en-EN', { maximumFractionDigits: precision }).format(number)
+    },
+    handleMouseEnter(event) {
+  if (this.leaveTimeout) {
+    clearTimeout(this.leaveTimeout)
+    this.leaveTimeout = null
+  }
+
+  //update mouse position
+  this.mouseX = event.clientX
+  this.mouseY = event.clientY
+
+  //show card after short delay (better looking)
+  this.hoverTimeout = setTimeout(() => {
+    this.isVisible = true
+    this.fetchUserData()
+  }, 150)
+},
+
+handleMouseLeave() {
+  if (this.hoverTimeout) {
+    clearTimeout(this.hoverTimeout)
+    this.hoverTimeout = null
+  }
+
+  //only hide if not hovering card
+  if (!this.isHoveringCard) {
+    this.leaveTimeout = setTimeout(() => {
+      this.isVisible = false
+    }, 100)
+  }
+},
+
+    handleCardEnter() {
+      this.isHoveringCard = true
+      if (this.leaveTimeout) {
+        clearTimeout(this.leaveTimeout)
+        this.leaveTimeout = null
+      }
+    },
+
+    handleCardLeave() {
+      this.isHoveringCard = false
+      this.leaveTimeout = setTimeout(() => {
+        this.isVisible = false
+      }, 300)
+    },
+
+    async fetchUserData() {
+  try {
+    const chainLnk = localStorage.getItem('cur_bchain') === 'STEEM' ? steem : hive
+        const [rankResponse, accountData] = await Promise.all([
+          fetch(`${process.env.actiAppUrl}getRank/${this.username}`)
+            .then(res => res.json())
+            .catch(() => ({ rank_no_afitx: null })),
+
+      new Promise((resolve) => {
+            chainLnk.api.getAccounts([this.username], (err, result) => {
+              if (err || !result || result.length === 0) {
+                resolve(null)
+              } else {
+                resolve(result[0])
+              }
+            })
+          })
+        ])
+
+    if (rankResponse && rankResponse.rank_no_afitx) {
+      this.userRank = parseFloat(rankResponse.rank_no_afitx).toFixed(2)
+    }
+
+    if (accountData) {
+      const balance = accountData.balance.split(' ')[0]
+      this.hiveBalance = this.numberFormat(parseFloat(balance), 3)
+      this.joinDate = new Date(accountData.created).toLocaleDateString()
+    }
+
+    const userTokens = await this.$store.dispatch('fetchUserTokensReturn', this.username, false)
+    
+    if (userTokens) {
+      const afitBalance = parseFloat(userTokens) + parseFloat(this.userAddedTokens || 0)
+      this.afitBalance = this.numberFormat(afitBalance, 3)
+    }
+
+  } catch (error) {
+    console.error('Error fetching user data:', error)
+  } finally {
+    this.loading = false
+  }
+}
+  }
+}
+</script>
+
+<style lang="sass" scoped>
+
+.hover-card-container
+  position: relative
+  display: inline-block
+
+.hover-card-wrapper
+  position: fixed
+  z-index: 99999
+  pointer-events: auto
+
+
+.user-hover-card
+  width: 300px
+  background: white
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15)
+  border-radius: 8px
+  overflow: hidden
+
+.card-header
+  background: #ff112d
+  color: white
+  padding: 1rem
+
+.user-avatar-large
+  width: 64px
+  height: 64px
+  background-position: center
+  background-size: cover
+  border-radius: 50%
+  border: 2px solid white
+
+.rank-badge
+  position: absolute
+  bottom: -5px
+  right: -5px
+  background: #ff112d
+  color: white
+  font-size: 0.75rem
+  padding: 2px 8px
+  border-radius: 10px
+  border: 2px solid white
+
+.balance-section
+  background: #f8f9fa
+  padding: 1rem
+  border-radius: 8px
+  margin: -5px 0
+
+.links-section
+  a
+    color: #333
+    &:hover
+      color: #ff112d
+      text-decoration: none
+
+
+@keyframes shimmer
+  0%
+    background-position: -468px 0
+  100%
+    background-position: 468px 0
+
+.skeleton-avatar
+  width: 64px
+  height: 64px
+  border-radius: 50%
+  background: #f6f7f8
+  background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%)
+  background-repeat: no-repeat
+  animation: shimmer 1s linear infinite forwards
+
+.skeleton-text
+  height: 20px
+  width: 150px
+  background: #f6f7f8
+  background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%)
+  background-repeat: no-repeat
+  animation: shimmer 1s linear infinite forwards
+  margin-bottom: 8px
+
+.skeleton-text-sm
+  @extend .skeleton-text
+  width: 100px
+  height: 16px
+
+.skeleton-section
+  height: 40px
+  background: #f6f7f8
+  background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%)
+  background-repeat: no-repeat
+  animation: shimmer 1s linear infinite forwards
+  margin-bottom: 16px
+
+.fade-enter-active, .fade-leave-active
+  transition: opacity .2s, transform .2s
+  transform-origin: top left
+
+.fade-enter, .fade-leave-to
+  opacity: 0
+  transform: translateY(-10px)
+
+.btn-brand-profile
+  background: #ff112d !important
+  color: white !important
+  &:hover
+    background: darken(#ff112d, 10%) !important
+    color: white !important
+</style>
+
