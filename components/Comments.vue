@@ -165,8 +165,11 @@
 			  <div class="comment-user-section" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }">
 				<div class="user-avatar mr-1"
 					   :style="'background-image: url('+this.profImgUrl+'/u/' + this.user.account.name + '/avatar)'"></div>
+					   <UserHoverCard :username="user.name">
 				<div class="modal-author modal-title" >@{{ user.name }}<small class="date-head text-muted">{{ $t('Now') }}</small></div>
+					   </UserHoverCard>
 			  </div>
+			  <!--add here -hasan-->
 			</a>
 			<vue-remarkable class="modal-body" :source="getContent" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }" ></vue-remarkable>
 			<!--<vue-markdown class="modal-body" v-html="responseBody" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }" ></vue-markdown>-->
