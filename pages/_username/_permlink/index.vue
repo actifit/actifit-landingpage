@@ -15,15 +15,19 @@
 		  <div class="report-head mb-3 col-md-12">
 			<!-- if this is a comment, display link to higher level comment/post -->
 			<div v-if="report.parent_author" class="text-right">
+				<UserHoverCard :username="report.parent_author">
 			  <i class="fas fa-reply text-brand"></i>&nbsp;{{$t('viewing_comment_note')}}<span class="user-avatar mr-1 float-right" :style="'background-image: url('+profImgUrl+'/u/' + report.parent_author + '/avatar)'"></span><a :href="'/'+report.parent_author">@{{ report.parent_author }}.</a>&nbsp;<a :href="buildParentLink">{{$t('view_parent_thread')}}</a>
+			  </UserHoverCard>
 			</div>
 			
 			<h2>{{ report.title }}</h2>
 			<div class="main-user-info">
 			  <h5 class="text-brand" >
+				<UserHoverCard :username="report.author">
 				  <div class="user-avatar mid-avatar mr-1 mb-5"
 						 :style="'background-image: url('+profImgUrl+'/u/' + this.report.author + '/avatar)'"></div>
 				  <a :href="'/'+report.author" target="_blank">@{{ report.author}} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></a>
+				  </UserHoverCard>
 			  </h5>
 			  <a :href="buildLink"><span class="date-head text-muted">{{ date }}</span>&nbsp;<i class="fas fa-link"></i></a>
 			  <i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent" ></i>
@@ -207,9 +211,11 @@
 		  <div class="report-reply col-md-12" v-if="responsePosted">
 			  <a :href="'/'+this.user.account.name" target="_blank">
 				<div class="comment-user-section">	
+					<UserHoverCard :username="user.account.name">
 				  <div class="user-avatar mr-1"
 						 :style="'background-image: url('+profImgUrl+'/u/' + this.user.account.name + '/avatar)'"></div>
 				  <div class="modal-author modal-title text-brand" >@{{ user.account.name }}<small class="date-head text-muted">{{ $t('Now') }}</small></div>
+					</UserHoverCard>
 				</div>
 			  </a>
 			  <vue-remarkable :source="responseBody" :options="{'html': true, 'breaks': true, 'typographer': true}" ></vue-remarkable>
@@ -259,6 +265,8 @@
   </template>
   
   <script>
+  import UserHoverCard from '~/components/UserHoverCard.vue'
+
 	import NavbarBrand from '~/components/NavbarBrand'
 	import ChainSelection from '~/components/ChainSelection'
 	import Footer from '~/components/Footer'
@@ -495,7 +503,8 @@
 		SocialSharing,
 		VoteModal,
 		NotifyModal,
-		ChainSelection
+		ChainSelection,
+		UserHoverCard
 	  },
 	  computed: {
 		...mapGetters('steemconnect', ['user']),
