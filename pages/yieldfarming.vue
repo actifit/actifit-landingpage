@@ -76,7 +76,7 @@
 			<h4>{{ $t('delegated_amount') }}</h4>
 		</span>
 		<span class="col-3 p-2">
-			<h4>{{ $t('daily_yield') }}</h4>
+			<h4>{{ $t('daily_yield') }}</h4> <!--work here -sprinklepancake-->
 		</span>
       </div>
       <div v-if="delegationTransactions && delegationTransactions.length && topDelegators.hive" >
@@ -85,7 +85,9 @@
 				<a :href="trx.user" target="_blank" >
 				  <div class="yield-avatar mb-3" :style="'background-image: url('+profImgUrl+'/u/' + trx.user + '/avatar);'"></div>
 				</a>
+				<UserHoverCard :username="trx.user">
 				<a :href="trx.user" target="_blank" >@{{ trx.user }}</a><br/>
+			</UserHoverCard>
 			</span>
 			<!-- amount delegated -->
 			<span class="col-3 p-1">
@@ -118,6 +120,7 @@
   import { mapGetters } from 'vuex'
   
   import NotifyModal from '~/components/NotifyModal'
+import UserHoverCard from '~/components/UserHoverCard.vue';
 
   export default {
     head () {
@@ -132,7 +135,8 @@
 	components: {
       NavbarBrand,
       Footer,
-	  NotifyModal
+	  NotifyModal,
+	  UserHoverCard
     },
     data () {
       return {
