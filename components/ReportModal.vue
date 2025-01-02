@@ -16,10 +16,14 @@
 		</div>
         <div class="main-user-info">
 			<div class="p-1">
+				
 				  <a :href="'/'+report.author" target="_blank">
 					<span class="user-avatar m-2" :style="'background-image: url('+profImgUrl+'/u/' + report.author + '/avatar)'"></span>
-					<h5 class="modal-author modal-title" >@{{ report.author}} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></h5>
+					<UserHoverCard :username="report.author">
+					<h5 class="modal-author modal-title" >@{{ report.author}}<small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></h5>
+				</UserHoverCard>
 				  </a>
+				
 				  <span>
 					<span class="date-head text-muted" :title="date">{{ $getTimeDifference(report.created) }}</span>
 					<a :href="'/@' + this.report.author + '/' + this.report.permlink"><i class="fas fa-link text-brand"></i></a>
@@ -206,9 +210,11 @@
 		<div class="report-reply modal-body" v-if="responsePosted">
 			<a :href="this.user.name" target="_blank">
 			  <div class="comment-user-section">	
+				<UserHoverCard :username="user.name">
 				<div class="user-avatar mr-1"
 					   :style="'background-image: url('+profImgUrl+'/u/' + this.user.name + '/avatar)'"></div>
 				<div class="modal-author modal-title" >@{{ user.name }}<small class="date-head text-muted">{{ $t('Now') }}</small></div>
+				</UserHoverCard>
 			  </div>
 			</a>
 			<vue-remarkable class="modal-body" :source="body" :options="{'html': true, 'breaks': true, 'typographer': true}"></vue-remarkable>
@@ -234,6 +240,8 @@
 </template>
 
 <script>
+import UserHoverCard from './UserHoverCard.vue'
+
   import steem from 'steem'
   import {mapGetters} from 'vuex'
   import Comments from '~/components/Comments' 
@@ -254,6 +262,8 @@
   export default {
 	data () {
 		return {
+			originalContent: null,
+			currentReport: null,
 			commentsLoading: true,
 			safety_post_content: ``,
 			showTranslated: false,
@@ -281,18 +291,28 @@
 		}
 	},
 	watch: {
-	  report : 'fetchReportData',
-	  bchain: function(newBchain) {
-		this.cur_bchain = newBchain;
-		this.target_bchain = newBchain;
-	  }
+		report: {
+			immediate: true,
+			handler(newReport) {
+			if (newReport) {
+				this.originalContent = newReport.body;
+				this.currentReport = {...newReport};
+				this.fetchReportData();
+			}
+			}
+		},
+		bchain: function(newBchain) {
+			this.cur_bchain = newBchain;
+			this.target_bchain = newBchain;
+		}
 	},
     props: ['report'],
 	components: {
 	  Comments,
 	  CustomTextEditor,
 	  SocialSharing,
-	  vueRemarkable
+	  vueRemarkable,
+	  UserHoverCard
 	},
     computed: {
 	  ...mapGetters('steemconnect', ['user']),
@@ -377,24 +397,26 @@
     },
 
 	methods: {
-		cancelTranslation(){
-			this.report.body = this.safety_post_content;
+		cancelTranslation() {
+			if (this.originalContent) {
+			this.report.body = this.originalContent;
 			this.showTranslated = false;
+			}
 		},
 		async translateContent() {
 			try {
-				this.safety_post_content = this.report.body;
-				const result = await translateText(this.report.body , 'en');
-				
-				const translatedText = result.translations[0].text || "Translation failed";
-		
-				this.showTranslated = true;
-
-				this.report.body = translatedText;
-
+			if (!this.originalContent) {
+				this.originalContent = this.report.body;
+			}
+			
+			const result = await translateText(this.originalContent, 'en');
+			const translatedText = result.translations[0].text || "Translation failed";
+			
+			this.showTranslated = true;
+			this.report.body = translatedText;
 			} catch (error) {
-				this.translationError = 'Unable to translate content. Try again later.';
-				console.error('Translation error:', error);
+			this.translationError = 'Unable to translate content. Try again later.';
+			console.error('Translation error:', error);
 			}
 		},
 
@@ -844,16 +866,17 @@
 			});
 			
 		},
-	  loadNextReport(direction){
-		this.cancelTranslation();
-		if (direction <0){
-			console.log('previous')
+		loadNextReport(direction) {
+			this.showTranslated = false;
+			this.originalContent = null;
+			this.currentReport = null;
+			
+			if (direction < 0) {
 			this.$emit('prevReport');
-		}else{
-			console.log('next');
+			} else {
 			this.$emit('nextReport');
-		}
-	  },
+			}
+		},
 	  handleKeyDown(event) {
 		if (!this.commentBoxOpen){
 		  switch (event.key) {
@@ -869,6 +892,9 @@
 	},
 	beforeDestroy() {
 		window.removeEventListener('keydown', this.handleKeyDown);
+		this.cancelTranslation();
+		this.originalContent = null;
+		this.currentReport = null;
 	},
 	async mounted () {
 	  if (this.report != null){
@@ -889,6 +915,13 @@
 </script>
 
 <style>
+	.modal-dialog {
+	transform: none !important;
+	}
+
+	.modal-content {
+	transform: none !important;
+	}
 	.modal-author{
 		margin-left: 10px !important;
 	}
