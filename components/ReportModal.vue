@@ -898,6 +898,13 @@ import UserHoverCard from './UserHoverCard.vue'
 </script>
 
 <style>
+	.modal-dialog {
+	transform: none !important;
+	}
+
+	.modal-content {
+	transform: none !important;
+	}
 	.modal-author{
 		margin-left: 10px !important;
 	}

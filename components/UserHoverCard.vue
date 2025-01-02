@@ -97,6 +97,7 @@
 import { mapGetters } from 'vuex'
 import hive from '@hiveio/hive-js'
 import steem from 'steem'
+
 export default {
   name: 'UserHoverCard',
   
@@ -121,45 +122,62 @@ export default {
       leaveTimeout: null,
       mouseX: 0,
       mouseY: 0,
+      modalOffsetX: 0,
+      modalOffsetY: 0,
       isHoveringCard: false
     }
   },
 
   computed: {
-  ...mapGetters(['userTokensWallet']),
-  cardPosition() {
-  const CARD_WIDTH = 300
-  const CARD_HEIGHT = 400
-  const MARGIN = 20
-  
-  let left = this.mouseX
-  let top = this.mouseY + MARGIN
+    ...mapGetters(['userTokensWallet']),
+    formattedAfitBalance() {
+      const balance = parseFloat(this.userTokensWallet || 0) + parseFloat(this.userAddedTokens || 0)
+      return this.numberFormat(balance, 3)
+    },
+    cardPosition() {
+      const CARD_WIDTH = 300
+      const CARD_HEIGHT = 400
+      const MARGIN = 20
+      
+      let left = this.mouseX
+      let top = this.mouseY
+      
+      if (this.modalOffsetX || this.modalOffsetY) {
+        left = left + MARGIN * 2
+        top = top - MARGIN
+        
+        if (left + CARD_WIDTH > window.innerWidth) {
+          left = this.mouseX - CARD_WIDTH - MARGIN
+        }
+        
+        if (top + CARD_HEIGHT > window.innerHeight) {
+          top = window.innerHeight - CARD_HEIGHT - MARGIN
+        }
+      } else {
+        left = left + MARGIN
+        
+        if (left + CARD_WIDTH > window.innerWidth) {
+          left = this.mouseX - CARD_WIDTH - MARGIN
+        }
+        
+        if (top + CARD_HEIGHT > window.innerHeight) {
+          top = this.mouseY - CARD_HEIGHT - MARGIN
+        }
+      }
+      
+      left = Math.max(MARGIN, left)
+      top = Math.max(MARGIN, top)
 
-  //check if card overflows right edge
-  if (left + CARD_WIDTH > window.innerWidth) {
-    left = this.mouseX - CARD_WIDTH
-  }
+      return {
+        position: 'fixed',
+        left: `${left}px`,
+        top: `${top}px`,
+        zIndex: 1000000
+      }
+    }
+  },
 
-  //check if card overflows bottom edge
-  if (top + CARD_HEIGHT > window.innerHeight) {
-    top = this.mouseY - CARD_HEIGHT - MARGIN
-  }
-
-  //ensure card never goes off-screen (that way the user always sees the full card)
-  left = Math.max(MARGIN, Math.min(left, window.innerWidth - CARD_WIDTH - MARGIN))
-  top = Math.max( MARGIN, Math.min(top, window.innerHeight  - CARD_HEIGHT - MARGIN))
-
-  return {
-    left: `${left}px`,
-    top: `${top}px`
-  }
-},
-  formattedAfitBalance() {
-    const balance = parseFloat(this.userTokensWallet || 0) + parseFloat(this.userAddedTokens || 0)
-    return this.numberFormat(balance, 3)
-  }
-},
-mounted() {
+  mounted() {
     //initialize blockchain APIs
     steem.api.setOptions({ url: process.env.steemApiNode })
     hive.api.setOptions({ url: process.env.hiveApiNode })
@@ -168,54 +186,71 @@ mounted() {
     this.profImgUrl = (localStorage.getItem('cur_bchain') === 'STEEM') 
       ? process.env.steemImgUrl 
       : process.env.hiveImgUrl
+  },
 
+  beforeDestroy() {
+    if (this.hoverTimeout) {
+      clearTimeout(this.hoverTimeout)
+    }
+    if (this.leaveTimeout) {
+      clearTimeout(this.leaveTimeout)
+    }
   },
   
-watch: {
-  userTokensWallet: {
-    immediate: true,
-    handler(newVal) {
-      if (newVal) {
-        this.afitBalance = this.formattedAfitBalance
+  watch: {
+    userTokensWallet: {
+      immediate: true,
+      handler(newVal) {
+        if (newVal) {
+          this.afitBalance = this.formattedAfitBalance
+        }
       }
     }
-  }
-},
+  },
 
   methods: {
-    numberFormat(number, precision) {
-      return new Intl.NumberFormat('en-EN', { maximumFractionDigits: precision }).format(number)
-    },
     handleMouseEnter(event) {
-  if (this.leaveTimeout) {
-    clearTimeout(this.leaveTimeout)
-    this.leaveTimeout = null
-  }
+      if (this.leaveTimeout) {
+        clearTimeout(this.leaveTimeout)
+        this.leaveTimeout = null
+      }
 
-  //update mouse position
-  this.mouseX = event.clientX
-  this.mouseY = event.clientY
+      const modalElement = event.target.closest('.modal-content')
+      
+      if (modalElement) {
+        const modalRect = modalElement.getBoundingClientRect()
+        const triggerRect = event.target.getBoundingClientRect()
+        
+        this.mouseX = triggerRect.left
+        this.mouseY = triggerRect.top
+        
+        this.modalOffsetX = modalRect.left
+        this.modalOffsetY = modalRect.top
+      } else {
+        this.mouseX = event.clientX
+        this.mouseY = event.clientY
+        this.modalOffsetX = 0
+        this.modalOffsetY = 0
+      }
 
-  //show card after short delay (better looking)
-  this.hoverTimeout = setTimeout(() => {
-    this.isVisible = true
-    this.fetchUserData()
-  }, 150)
-},
+      this.hoverTimeout = setTimeout(() => {
+        this.isVisible = true
+        this.fetchUserData()
+      }, 150)
+    },
 
-handleMouseLeave() {
-  if (this.hoverTimeout) {
-    clearTimeout(this.hoverTimeout)
-    this.hoverTimeout = null
-  }
+    handleMouseLeave() {
+      if (this.hoverTimeout) {
+        clearTimeout(this.hoverTimeout)
+        this.hoverTimeout = null
+      }
 
-  //only hide if not hovering card
-  if (!this.isHoveringCard) {
-    this.leaveTimeout = setTimeout(() => {
-      this.isVisible = false
-    }, 100)
-  }
-},
+      if (!this.isHoveringCard) {
+        this.leaveTimeout = setTimeout(() => {
+          this.isVisible = false
+        }, 100)
+      }
+    },
 
     handleCardEnter() {
       this.isHoveringCard = true
@@ -232,15 +267,19 @@ handleMouseLeave() {
       }, 300)
     },
 
+    numberFormat(number, precision) {
+      return new Intl.NumberFormat('en-EN', { maximumFractionDigits: precision }).format(number)
+    },
+
     async fetchUserData() {
-  try {
-    const chainLnk = localStorage.getItem('cur_bchain') === 'STEEM' ? steem : hive
+      try {
+        const chainLnk = localStorage.getItem('cur_bchain') === 'STEEM' ? steem : hive
         const [rankResponse, accountData] = await Promise.all([
           fetch(`${process.env.actiAppUrl}getRank/${this.username}`)
             .then(res => res.json())
             .catch(() => ({ rank_no_afitx: null })),
 
-      new Promise((resolve) => {
+          new Promise((resolve) => {
             chainLnk.api.getAccounts([this.username], (err, result) => {
               if (err || !result || result.length === 0) {
                 resolve(null)
@@ -251,45 +290,42 @@ handleMouseLeave() {
           })
         ])
 
-    if (rankResponse && rankResponse.rank_no_afitx) {
-      this.userRank = parseFloat(rankResponse.rank_no_afitx).toFixed(2)
-    }
+        if (rankResponse && rankResponse.rank_no_afitx) {
+          this.userRank = parseFloat(rankResponse.rank_no_afitx).toFixed(2)
+        }
 
-    if (accountData) {
-      const balance = accountData.balance.split(' ')[0]
-      this.hiveBalance = this.numberFormat(parseFloat(balance), 3)
-      this.joinDate = new Date(accountData.created).toLocaleDateString()
-    }
+        if (accountData) {
+          const balance = accountData.balance.split(' ')[0]
+          this.hiveBalance = this.numberFormat(parseFloat(balance), 3)
+          this.joinDate = new Date(accountData.created).toLocaleDateString()
+        }
 
-    const userTokens = await this.$store.dispatch('fetchUserTokensReturn', this.username, false)
-    
-    if (userTokens) {
-      const afitBalance = parseFloat(userTokens) + parseFloat(this.userAddedTokens || 0)
-      this.afitBalance = this.numberFormat(afitBalance, 3)
-    }
+        const userTokens = await this.$store.dispatch('fetchUserTokensReturn', this.username, false)
+        
+        if (userTokens) {
+          const afitBalance = parseFloat(userTokens) + parseFloat(this.userAddedTokens || 0)
+          this.afitBalance = this.numberFormat(afitBalance, 3)
+        }
 
-  } catch (error) {
-    console.error('Error fetching user data:', error)
-  } finally {
-    this.loading = false
-  }
-}
+      } catch (error) {
+        console.error('Error fetching user data:', error)
+      } finally {
+        this.loading = false
+      }
+    }
   }
 }
 </script>
 
 <style lang="sass" scoped>
-
 .hover-card-container
-  position: relative
   display: inline-block
+  position: static
 
 .hover-card-wrapper
-  position: fixed
-  z-index: 99999
+  position: fixed !important
+  z-index: 1000000 !important
   pointer-events: auto
-
-
 .user-hover-card
   width: 300px
   background: white
@@ -333,7 +369,6 @@ handleMouseLeave() {
     &:hover
       color: #ff112d
       text-decoration: none
-
 
 @keyframes shimmer
   0%
@@ -387,4 +422,3 @@ handleMouseLeave() {
     background: darken(#ff112d, 10%) !important
     color: white !important
 </style>
-
