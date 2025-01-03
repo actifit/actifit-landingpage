@@ -1,9 +1,18 @@
 <template>
   <div class="hover-card-container">
-    <div @mouseenter="handleMouseEnter" 
-         @mouseleave="handleMouseLeave">
-      <slot></slot>
-    </div>
+    <a :href="'/' + username" class="user-display d-flex align-items-center" 
+       @mouseenter="handleMouseEnter" 
+       @mouseleave="handleMouseLeave">
+      <div class="user-avatar mr-2"
+           :style="'background-image: url('+profImgUrl+'/u/' + username + '/avatar)'">
+      </div>
+      <div class="modal-author">
+        @{{ username }}
+        <small class="text-brand numberCircle" v-if="userRank">
+          {{ userRank }}
+        </small>
+      </div>
+    </a>
     
     <transition name="fade">
       <div v-if="isVisible" 
@@ -316,7 +325,6 @@ export default {
   }
 }
 </script>
-
 <style lang="sass" scoped>
 .hover-card-container
   display: inline-block
