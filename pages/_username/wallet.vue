@@ -1,6 +1,6 @@
 <template>
 	<div>
-	  <NavbarBrand />
+		<NavbarBrand @user-switched="refreshAllWalletData" />
   
 	  <div class="container pt-5 mt-5 pb-5" v-if="user || displayUser">
   
@@ -1470,7 +1470,7 @@
 	  </div>
 	  
 	  <pendingRewardsModal :pendingRewards="pendingRewards" :username="user"/>
-	  <LoginModal v-if="showModal" @close="showModal = false" @login-successful="onUserLoggedIn" />
+	  <LoginModal v-if="showModal" @close="showModal = false" @login-successful="refreshAllWalletData" />
 	  
 	  <client-only>
 		<div>
@@ -1903,40 +1903,81 @@
 		},
 	  },
 	  watch: {
-		user: 'fetchUserData',
-		tokenMetrics: 'formattedTotAccountVal',
-		steemPrice: 'formattedTotAccountVal',
-		afitBSCPrice: 'formattedTotAccountVal',
-		afitxBSCPrice: 'formattedTotAccountVal',
-		afitBalanceBSC: 'formattedTotAccountVal',
-		afitxBalanceBSC: 'formattedTotAccountVal',
-		transferType: 'resetTransAmount',
+  user: 'fetchUserData',
+  tokenMetrics: 'formattedTotAccountVal',
+  steemPrice: 'formattedTotAccountVal',
+  afitBSCPrice: 'formattedTotAccountVal',
+  afitxBSCPrice: 'formattedTotAccountVal',
+  afitBalanceBSC: 'formattedTotAccountVal',
+  afitxBalanceBSC: 'formattedTotAccountVal',
+  transferType: 'resetTransAmount',
+  'user.account': {
+    immediate: true,
+    handler: async function(newVal, oldVal) {
+      if (newVal && (!oldVal || newVal.name !== oldVal.name)) {
+        await this.refreshAllWalletData();
+      }
+    },
+    deep: true
+  },
+  
+
 		isClaimableDataAvailable(newValue) {
 		  this.isClaimableDataAvailableTEMP = newValue;
 	  },
-		userTokens: function(param){
-		  //if usertokens changes, no need to keep spinner on if it was on
-		  this.refreshinBal = false;
+
+		userTokens: {
+			handler: async function(newVal, oldVal) {
+			this.refreshinBal = false;
+			if (JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
+				await this.fetchTokenBalance();
+				if (this.cur_bchain == 'HIVE') {
+				await this.fetchAFITHE();
+				}
+				this.formattedTotAccountVal();
+			}
+			},
+			deep: true
 		},
-		afit_val_exchange: function(newVal){
-		  let new_val = this.extra_reward_arr.find(match => match.afit == this.afit_val_exchange)
-		  this.afit_exch_matching_perc = new_val.upvote;
+
+		afit_val_exchange: function(newVal) {
+			let new_val = this.extra_reward_arr.find(match => match.afit == this.afit_val_exchange)
+			this.afit_exch_matching_perc = new_val.upvote;
 		},
+
 		bchain: async function(newBchain) {
-		  console.log('change in chain');
-		  //load default blockchain values upon selection
-		  this.cur_bchain = newBchain;
-		  this.transferType = newBchain;
-		  this.$store.dispatch('steemconnect/refreshUser');
-		  
-		  //fix chain data:
-		  let chainLnk = await this.setProperNode();
-		  this.properties = await chainLnk.api.getDynamicGlobalPropertiesAsync();
-		  
-		  this.fetchUserData();
-		  //this.reload += 1;
+			console.log('change in chain');
+			this.cur_bchain = newBchain;
+			this.transferType = newBchain;
+			this.$store.dispatch('steemconnect/refreshUser');
+			
+			let chainLnk = await this.setProperNode();
+			this.properties = await chainLnk.api.getDynamicGlobalPropertiesAsync();
+			
+			await this.fetchUserData();
+			await this.fetchTokenBalance();
+			if (this.cur_bchain == 'HIVE') {
+			await this.fetchAFITHE();
+			}
+			this.formattedTotAccountVal();
+			this.$forceUpdate();
+		},
+
+		claimSBD: function() {
+			this.formattedTotAccountVal();
+		},
+		
+		claimSTEEM: function() {
+			this.formattedTotAccountVal();
+		},
+
+		pendingRewards: {
+			handler: function() {
+			this.formattedTotAccountVal();
+			},
+			deep: true
 		}
-	  },
+		},
 	  methods: {
 		/**
 		 * Formats numbers with commas and dots.
@@ -1945,9 +1986,7 @@
 		 * @param precision
 		 * @returns {string}
 		 */
-		 onUserLoggedIn() {
-			window.location.reload();
-		  },
+
 	  openSwapModal(token) {
 		  if (!token) {
 			  console.error('Token object is undefined');
@@ -1963,6 +2002,82 @@
 		  console.log('Opening swap modal with URL:', this.swapWidgetUrl);
 		  $('#swapTokenModal').modal('show');
 	  },
+	  async refreshAllWalletData(){
+		try {
+			// reset states
+			this.tokensOfInterestBal = [];
+			this.tokenMetrics = [];
+			this.userTokensWallet = -1;
+			this.totalAccountValue = 0;
+			this.steemPower = 0;
+			this.delegatedSteemPower = 0;
+			this.receivedSteemPower = 0;
+			this.powerDownRateVal = 0;
+			this.effectiveSteemPower = 0;
+			this.heTokenDelegations = [];
+			this.heTokenUnstakes = [];
+
+			if (this.displayUser) {
+			let account_res = await hive.api.getAccountsAsync([this.displayUser]);
+			if (account_res && account_res.length > 0) {
+				this.displayUserData = account_res[0];
+			}
+			} else if (this.user && this.user.account) {
+			this.displayUserData = this.user.account;
+			}
+
+			await this.fetchUserData();
+
+			try {
+			const tokenData = await hsc.find('tokens', 'balances', { account: this.displayUserData.name });
+			const tokenExtraDetails = await hsc.find('tokens', 'tokens', {});
+			
+			this.heTokenDelegations = await hsc.find('tokens', 'delegations', { from: this.displayUserData.name }, 200, 0, []);
+			this.heTokenUnstakes = await hsc.find('tokens', 'pendingUnstakes', { account: this.displayUserData.name }, 200, 0, []);
+			
+			if (tokenData && tokenData.length > 0) {
+				tokenData.forEach(token => {
+				try {
+					const matchEntry = tokenExtraDetails.find(v => v.symbol === token.symbol);
+					if (matchEntry && matchEntry.metadata) {
+					const metadata = JSON.parse(matchEntry.metadata);
+					token.icon = metadata.icon;
+					}
+				} catch(err) {
+					console.log('Error processing token:', token.symbol, err);
+				}
+				});
+
+				this.tokensOfInterestBal = tokenData;
+				await this.sortTokenData(this.tokenSort, true);
+			}
+
+			this.tokenMetrics = await hsc.find('market', 'metrics', {}, 1000, 0, '', false);
+			} catch(err) {
+			console.error('Error fetching token data:', err);
+			}
+
+			await this.$nextTick();
+			this.$forceUpdate();
+		} catch(err) {
+			console.error('Error refreshing wallet data:', err);
+		}
+		},
+
+	  onUserLoggedIn(){
+		this.completeUserDataRefresh();
+	},
+		async retryOperation(operation, maxAttempts = 3, delay = 2000){
+			for(let attempt = 1; attempt <= maxAttempts; attempt++){
+				try{
+				return await operation();
+				}catch (err){
+				if(attempt === maxAttempts) throw err;
+				console.log(`Attempt ${attempt} failed, retrying in ${delay}ms...`);
+				await new Promise(resolve => setTimeout(resolve, delay));
+				}
+			}
+			},
 	  showModalFunc() {
 		  this.$nextTick(() => {
 			this.showModal = true;
@@ -2165,31 +2280,36 @@
 		  return this.bsc_wallet_address;
 		},
 		async getBalance() {
-		  console.log('>>getBalance');
-		  if (this.bsc_wallet_address == '') return;
-		  let result = await afitContract.methods.balanceOf(this.bsc_wallet_address).call(); // 29803630997051883414242659
-		  let format = web3.utils.fromWei(result); // 29803630.997051883414242659
-		  console.log(format);
-		  this.afitBalanceBSC = format;
-		  
-		  result = await afitxContract.methods.balanceOf(this.bsc_wallet_address).call(); // 29803630997051883414242659
-		  format = web3.utils.fromWei(result); // 29803630.997051883414242659
-		  //console.log(format);
-		  //console.log('end get balance');
-		  this.afitxBalanceBSC = format;
-		  
-		  result = await afitBNBLPContract.methods.balanceOf(this.bsc_wallet_address).call(); // 29803630997051883414242659
-		  format = web3.utils.fromWei(result); // 29803630.997051883414242659
-		  //console.log(format);
-		  //console.log('end get balance');
-		  this.afitBNBLPBalanceBSC = format;
-		  
-		  result = await afitxBNBLPContract.methods.balanceOf(this.bsc_wallet_address).call(); // 29803630997051883414242659
-		  format = web3.utils.fromWei(result); // 29803630.997051883414242659
-		  //console.log(format);
-		  //console.log('end get balance');
-		  this.afitxBNBLPBalanceBSC = format;
-		},
+			try{
+				if (!this.bsc_wallet_address) return;
+				
+				try{
+				const result = await afitContract.methods.balanceOf(this.bsc_wallet_address).call();
+				this.afitBalanceBSC = web3.utils.fromWei(result);
+				}catch (err){
+				console.log('Error getting AFIT balance:', err);
+				}
+
+				try{
+				const result = await afitxContract.methods.balanceOf(this.bsc_wallet_address).call();
+				this.afitxBalanceBSC = web3.utils.fromWei(result);
+				}catch(err){
+				console.log('Error getting AFITX balance:', err);
+				}
+
+				try{
+				let result = await afitBNBLPContract.methods.balanceOf(this.bsc_wallet_address).call();
+				this.afitBNBLPBalanceBSC = web3.utils.fromWei(result);
+				
+				result = await afitxBNBLPContract.methods.balanceOf(this.bsc_wallet_address).call();
+				this.afitxBNBLPBalanceBSC = web3.utils.fromWei(result);
+				}catch(err){
+				console.log('Error getting LP balances:', err);
+				}
+			}catch(err){
+				console.error('Error in getBalance:', err);
+			}
+			},
 		setUserWalletAddress (json){
 		  //console.log('setUserWalletAddress');
 		  //console.log(json);
@@ -2927,6 +3047,22 @@
 			  }
 		  }
 		},
+		async completeUserDataRefresh(){
+			try{
+				this.userTokensWallet = -1;
+				this.tokensOfInterestBal = [];
+				this.tokenMetrics = [];
+				this.totalAccountValue = 0;
+				
+				await this.fetchUserData();
+				
+				await this.$nextTick();
+				this.$forceUpdate();
+
+			}catch(err){
+				console.error('Error in completeUserDataRefresh:', err);
+			}
+		},
 		async fetchUserData () {
 		  if ((typeof this.user != 'undefined' && this.user != null)||this.displayUser!=''){	  
 			console.log('stdLoginUser');
@@ -3638,17 +3774,56 @@
 		  }
 		  this.claimingTokens = false;
 		},
-		async fetchTokenBalance () {
-		  //let's grab the precision for our tokens of interest for proper value display
-		  if (this.cur_bchain == 'STEEM'){  
-			fetch(scot_steemengine_api+'info').then(
-			  res => {res.json().then(json => this.setSETokensPrecision (json) ).catch(e => console.log(e))
-			}).catch(e => console.log(e))
-		  }else{
-			fetch(scot_steemengine_api+'info'+scot_hive_api_param).then(
-			  res => {res.json().then(json => this.setSETokensPrecision (json) ).catch(e => console.log(e))
-			}).catch(e => console.log(e))
-		  }
+		async fetchTokenBalance() {
+			try{
+				if (this.cur_bchain == 'HIVE'){
+				try{
+					const response = await fetch(scot_steemengine_api + 'info' + scot_hive_api_param);
+					const json = await response.json();
+					if(json){
+					this.setSETokensPrecision(json);
+					}
+				}catch(e){
+					console.log('Error fetching token precisions:', e);
+				}
+				}
+
+				const tokenData = await hsc.find('tokens', 'balances', { account: this.displayUserData.name });
+				const tokenExtraDetails = await hsc.find('tokens', 'tokens', {});
+
+				if(Array.isArray(tokenData)){
+				tokenData.forEach(token => {
+					try{
+					const matchEntry = tokenExtraDetails.find(v => v.symbol == token.symbol);
+					if(matchEntry && matchEntry.metadata){
+						try{
+						const metadata = JSON.parse(matchEntry.metadata);
+						token.icon = metadata.icon;
+						}catch(parseErr){
+						console.log('Error parsing metadata for token:', token.symbol);
+						}
+					}
+					}catch(err){
+					console.log('Error processing token:', token.symbol);
+					}
+				});
+				}
+
+				if(tokenData){
+				this.tokensOfInterestBal = tokenData;
+				await this.sortTokenData(this.tokenSort, true);
+				}
+
+				try{
+				this.tokenMetrics = await hsc.find('market', 'metrics', {}, 1000, 0, '', false);
+				}catch(err){
+				console.log('Error fetching token metrics:', err);
+				this.tokenMetrics = [];
+				}
+
+			}catch(err){
+				console.error('Error in fetchTokenBalance:', err);
+			}
 		},
 		async claimRewards () {
 		  //function handles claiming STEEM rewards
@@ -4474,8 +4649,24 @@
 				  note = 'Power up of '+amount+ ' ' + power_type + ' completed successfully!';
 			  }
 			  if (type=='claimrewards'){
-				  note = 'Rewards claimed successfully!';
-			  }
+				this.claimRewardsProcess = false;
+				this.claimSP = '';
+				this.claimSTEEM = '';
+				this.claimVests = '';
+				this.claimSBD = 0;
+				this.isClaimableDataAvailableTEMP = false;
+
+				this.fetchUserData();
+				
+				setTimeout(async () => {
+					await this.fetchUserData();
+					await this.fetchTokenBalance();
+					if(this.cur_bchain == 'HIVE'){
+					await this.fetchAFITHE();
+					}
+					this.$forceUpdate();
+				}, 3000);
+				}
 			  if (type=='delegate'){
 				  note = 'Delegation completed successfully!';
 			  }
@@ -7509,156 +7700,134 @@
 		})
 	  },
 	  async mounted () {
-		  this.fetchUserData();
-		  this.afitTokenAddress = afitTokenAddress;
-		  this.afitxTokenAddress = afitxTokenAddress;
-		  this.afitBNBLPTokenAddress = afitBNBLPTokenAddress;
-		  this.afitxBNBLPTokenAddress = afitxBNBLPTokenAddress;
-		  
-		  
-		  if ((typeof this.$route.params !== 'undefined') && (typeof this.$route.params.username !== 'undefined') ) {
-			this.displayUser = this.$route.params.username
-			if (this.$route.params.username.startsWith('@')){
-			  this.displayUser = this.$route.params.username.substring(1, this.$route.params.username.length);
+		try{
+			this.fetchUserData();
+			this.afitTokenAddress = afitTokenAddress;
+			this.afitxTokenAddress = afitxTokenAddress;
+			this.afitBNBLPTokenAddress = afitBNBLPTokenAddress;
+			this.afitxBNBLPTokenAddress = afitxBNBLPTokenAddress;
+
+			if ((typeof this.$route.params !== 'undefined') && (typeof this.$route.params.username !== 'undefined')) {
+			this.displayUser = this.$route.params.username;
+			if (this.$route.params.username.startsWith('@')) {
+				this.displayUser = this.$route.params.username.substring(1);
 			}
-		  }
-		  
-		  if (this.displayUser!=''){
-			  //console.log('display user ready');
-			  //grab display user data
-			  let account_res = await hive.api.getAccountsAsync([this.displayUser]);
-			  //console.log('done');
-			  //console.log(account_res);
-			  if (account_res && account_res.length >0){
-				  this.displayUserData = account_res[0];
-			  }
-		  }
-		  
-  
-	  //adjust to metamask if available
-		if (typeof window.ethereum !== 'undefined'){
-		  //metamask functional
-		  web3 = new Web3(window.ethereum);
-		}
-		  
-		//check which chain is active
-		if (localStorage.getItem('cur_bchain')){
-		  this.cur_bchain = localStorage.getItem('cur_bchain')
-		}
-		
-		//set default current chain
-		//if (this.cur_bchain != 'BLURT'){
-		  this.transferType = this.cur_bchain;
-		  this.transferTypePass = this.cur_bchain;
-		//}
-		steem.api.setOptions({ url: process.env.steemApiNode });
-		
+			}
+
+			if (this.displayUser !== ''){
+			try {
+				const account_res = await this.retryOperation(async () => {
+				return await hive.api.getAccountsAsync([this.displayUser]);
+				});
+				if (account_res && account_res.length > 0) {
+				this.displayUserData = account_res[0];
+				}
+			} catch (err) {
+				console.error('Error fetching display user:', err);
+			}
+			}
+
+			if (typeof window.ethereum !== 'undefined') {
+			web3 = new Web3(window.ethereum);
+			}
+
+			if (localStorage.getItem('cur_bchain')) {
+			this.cur_bchain = localStorage.getItem('cur_bchain');
+			}
+			this.transferType = this.cur_bchain;
+			this.transferTypePass = this.cur_bchain;
+
+			steem.api.setOptions({ url: process.env.steemApiNode });
+			if (process.env.hiveTestNetOn) {
+			hive.config.set('chain_id', '4200000000000000000000000000000000000000000000000000000000000000');
+			} else {
+			hive.config.set('alternative_api_endpoints', process.env.altHiveNodes);
+			}
+			hive.api.setOptions({ url: process.env.hiveApiNode });
+			blurt.api.setOptions({ url: process.env.blurtApiNode });
+
+			const chainLnk = await this.setProperNode();
+			this.$store.dispatch('steemconnect/login');
+			await this.fetchUserData();
+
+			try {
+			this.properties = await this.retryOperation(async () => {
+				return await chainLnk.api.getDynamicGlobalPropertiesAsync();
+			});
+			} catch (err) {
+			console.error('Error getting properties:', err);
+			}
+
+			const fetchPrice = async (url, setter) => {
+			try {
+				const response = await this.retryOperation(async () => {
+				const res = await fetch(url);
+				return res.json();
+				});
+				setter(response);
+			} catch (err) {
+				console.error('Error fetching price:', err);
+			}
+			};
+
+			await Promise.all([
+			fetchPrice(`${process.env.actiAppUrl}curAFITPrice`, 
+				json => this.setAFITPrice(json.unit_price_usd)),
+			fetchPrice(`${process.env.actiAppUrl}AFITBSCPrice`, 
+				json => this.setAFITBSCPrice(json.price)),
+			fetchPrice(`${process.env.actiAppUrl}AFITXBSCPrice`, 
+				json => this.setAFITXBSCPrice(json.price)),
+			fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=steem&vs_currencies=usd', 
+				json => this.setSteemPrice(json.steem.usd)),
+			fetchPrice(`${process.env.actiAppUrl}hivePrice`, 
+				json => this.setHivePrice(json.hive.usd)),
+			fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=blurt&vs_currencies=usd', 
+				json => this.setBlurtPrice(json.blurt.usd)),
+			fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=steem-dollars&vs_currencies=usd', 
+				json => this.setSBDPrice(json['steem-dollars'].usd)),
+			fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=hive_dollar&vs_currencies=usd', 
+				json => this.setHBDPrice(json['hive_dollar'].usd))
+			]);
+
+			this.screenWidth = screen.width;
 			
-		//hive.config.set('rebranded_api', true)
-		//hive.broadcast.updateOperations()
-		//
-		
-		if (process.env.hiveTestNetOn){
-		  hive.config.set('chain_id', '4200000000000000000000000000000000000000000000000000000000000000');
-		}else{
-		  hive.config.set('alternative_api_endpoints', process.env.altHiveNodes);
+			if (this.$route.query.op && this.$route.query.status) {
+			this.$notify({
+				group: 'success',
+				text: this.$t('Your') + ' "' + this.$route.query.op + '" ' + this.$t('completed_success'),
+				position: 'top center'
+			});
+			if (history && history.pushState) {
+				history.pushState('wallet', document.title, window.location.href.split('?')[0]);
+			}
+			}
+
+			if (this.$route.query.action === 'buy_afit') {
+			this.afitActivityMode = this.BUY_AFIT_STEEM;
+			} else if (this.$route.query.action === 'set_funds_pass') {
+			this.afitActivityMode = this.EXCHANGE_AFIT_STEEM;
+			} else if (this.$route.query.action === 'delegate') {
+			this.afitActivityMode = 0;
+			this.fundActivityMode = this.DELEGATE_FUNDS;
+			} else if (this.$route.query.action === 'delegate_rc') {
+			this.afitActivityMode = 0;
+			this.fundActivityMode = this.DELEGATE_RCS;
+			} else if (this.$route.query.action === 'power_up') {
+			this.afitActivityMode = 0;
+			this.fundActivityMode = this.POWERUP_FUNDS;
+			} else if (this.$route.query.action === 'lock_afit') {
+			this.afitActivityMode = this.MOVE_AFIT_SE;
+			this.fundActivityMode = 0;
+			}
+
+			this.loading = false;
+			this.transferType = this.cur_bchain;
+
+		} catch (err) {
+			console.error('Error in mounted:', err);
+			this.loading = false;
 		}
-		hive.api.setOptions({ url: process.env.hiveApiNode });
-		
-		blurt.api.setOptions({ url: process.env.blurtApiNode });
-		
-		let chainLnk = await this.setProperNode();
-		// login
-		this.$store.dispatch('steemconnect/login')
-		this.fetchUserData();
-		let ref_id = this;
-		
-		//let's load the properties to properly convert SP to Vests and vice-versa
-		this.properties = await chainLnk.api.getDynamicGlobalPropertiesAsync();
-		
-		//grab AFIT price
-		fetch(process.env.actiAppUrl+'curAFITPrice').then(
-		  res => {res.json().then(json => this.setAFITPrice (json.unit_price_usd)).catch(e => console.log(e))
-		}).catch(e => console.log(e))
-		
-		//grab AFIT BSC price
-		fetch(process.env.actiAppUrl+'AFITBSCPrice').then(
-		  res => {res.json().then(json => this.setAFITBSCPrice (json.price)).catch(e => console.log(e))
-		}).catch(e => console.log(e))
-		
-		//grab AFITX BSC price
-		fetch(process.env.actiAppUrl+'AFITXBSCPrice').then(
-		  res => {res.json().then(json => this.setAFITXBSCPrice (json.price)).catch(e => console.log(e))
-		}).catch(e => console.log(e))
-		
-		
-		this.screenWidth = screen.width;
-		//check if this is the result of an operation
-		if (this.$route.query.op && this.$route.query.status){
-		  // notify the user that operation was successful
-		  this.$notify({
-			group: 'success',
-			text: this.$t('Your') + ' "' + this.$route.query.op + '" ' + this.$t('completed_success'),
-			position: 'top center'
-		  })
-		  //reset success state
-		  if (history && history.pushState) {
-			  let historyState = {};
-			  //Only do this if history.pushState is supported by the browser
-			  history.pushState('wallet', document.title, window.location.href.split('?')[0]);
-		  }
 		}
-		
-		//check if we need to open the buy token screen
-		if (this.$route.query.action === 'buy_afit'){
-		  this.afitActivityMode = this.BUY_AFIT_STEEM;
-		}else if (this.$route.query.action === 'set_funds_pass'){
-		  this.afitActivityMode = this.EXCHANGE_AFIT_STEEM;
-		}else if (this.$route.query.action === 'delegate'){
-		  this.afitActivityMode = 0;
-		  this.fundActivityMode = this.DELEGATE_FUNDS;
-		}else if (this.$route.query.action === 'delegate_rc'){
-		  this.afitActivityMode = 0;
-		  this.fundActivityMode = this.DELEGATE_RCS;
-		}else if (this.$route.query.action === 'power_up'){
-		  this.afitActivityMode = 0;
-		  this.fundActivityMode = this.POWERUP_FUNDS;
-		}else if (this.$route.query.action === 'lock_afit'){
-		  this.afitActivityMode = this.MOVE_AFIT_SE;
-		  this.fundActivityMode = 0;
-		}
-		
-		//grab STEEM price
-		fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem&vs_currencies=usd').then(
-		  res => {res.json().then(json => this.setSteemPrice (json.steem.usd)).catch(e => console.log(e))
-		}).catch(e => console.log(e))
-		
-		//grab HIVE price
-		fetch(process.env.actiAppUrl+'hivePrice').then(
-		  res => {res.json().then(json => this.setHivePrice (json.hive.usd)).catch(e => console.log(e))
-		}).catch(e => console.log(e))
-		
-		//grab BLURT price
-		fetch('https://api.coingecko.com/api/v3/simple/price?ids=blurt&vs_currencies=usd').then(
-		  res => {res.json().then(json => this.setBlurtPrice (json.blurt.usd)).catch(e => console.log(e))
-		}).catch(e => console.log(e))
-		
-		//grab SBD price
-		fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem-dollars&vs_currencies=usd').then(
-		  res => {res.json().then(json => this.setSBDPrice (json['steem-dollars'].usd)).catch(e => console.log(e))
-		}).catch(e => console.log(e))
-		this.loading = false;
-		
-		//grab HBD price
-		fetch('https://api.coingecko.com/api/v3/simple/price?ids=hive_dollar&vs_currencies=usd').then(
-		  res => {res.json().then(json => this.setHBDPrice (json['hive_dollar'].usd)).catch(e => console.log(e))
-		}).catch(e => console.log(e))
-		this.loading = false;
-		
-		//set default option for transfer
-		
-		this.transferType = this.cur_bchain;
-	  }
 	}
   </script>
   

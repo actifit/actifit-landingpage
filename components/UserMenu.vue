@@ -235,23 +235,22 @@
 		this.$store.dispatch('steemconnect/logout')
 	  },
 	  async updateUserData () {
-		//console.log('updateUserData '+this.cur_bchain)
-		//grab user's notifications
 		if (this.user){
+			try{
 			let res = await fetch(process.env.actiAppUrl + 'activeNotifications/' + this.user.account.name);
 			let outcome = await res.json();
-			/*console.log('notifications>>>>>>');
-			console.log(outcome);
-			console.log(outcome.status);*/
 			try{
 				this.activeNotificationsLen = outcome.length;
 				this.activeNotifications = outcome;
 			}catch(err){
 				console.log('error fetching notifications');
 			}
+			}catch(err){
+			console.error('Error updating user data:', err);
+			}
+			this.$forceUpdate();
 		}
-		this.$forceUpdate()
-	  },
+		},
 	  async markRead(notif){
 		let accToken = localStorage.getItem('access_token')
 		
