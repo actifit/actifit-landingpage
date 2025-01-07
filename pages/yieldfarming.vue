@@ -85,9 +85,7 @@
 				<a :href="trx.user" target="_blank" >
 				  <div class="yield-avatar mb-3" :style="'background-image: url('+profImgUrl+'/u/' + trx.user + '/avatar);'"></div>
 				</a>
-				<UserHoverCard :username="trx.user">
-				<a :href="trx.user" target="_blank" >@{{ trx.user }}</a><br/>
-			</UserHoverCard>
+				<UserHoverCard :username="trx.user" displayMode="no-rank"/>
 			</span>
 			<!-- amount delegated -->
 			<span class="col-3 p-1">

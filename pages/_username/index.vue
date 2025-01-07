@@ -304,12 +304,7 @@
 					<span>
 						<UserHoverCard v-for="friend in displayedFriends" 
 									:key="friend.friend" 
-									:username="friend.friend">
-						<div class="user-avatar-small mr-1" 
-							:title="friend.friend" 
-							:style="'background-image: url('+profImgUrl+'/u/' + friend.friend + '/avatar)'">
-						</div>
-						</UserHoverCard>
+									:username="friend.friend" displayMode="avatar-only"/>
 						<span v-if="userFriends.length > maxFriendDisplay">
 						+ {{ userFriends.length - maxFriendDisplay }} {{ $t('other') }} {{ $t('friends') }}
 						</span>

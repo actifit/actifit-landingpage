@@ -58,14 +58,7 @@
 		</div>
 			<div class="row col-12">
 				<div v-for="(admin, index) in community.admins" :key="index" :admin="admin" >
-					<UserHoverCard :username="admin">
-						<div class="m-1 p-1 admin-name details m-2">
-					<a :href="'./'+admin">
-						<div class="user-avatar mr-1" :style="'background-image: url('+profImgUrl+'/u/' + admin + '/avatar)'"></div>
-						@{{admin}}
-					</a>
-				</div>
-				</UserHoverCard>
+					<UserHoverCard :username="admin" displayMode="no-rank"/>
 				</div>
 			</div>
 		

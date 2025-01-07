@@ -1,19 +1,38 @@
 <template>
   <div class="hover-card-container">
-    <a :href="'/' + username" class="user-display d-flex align-items-center" 
-       @mouseenter="handleMouseEnter" 
-       @mouseleave="handleMouseLeave">
-      <div class="user-avatar mr-2"
-           :style="'background-image: url('+profImgUrl+'/u/' + username + '/avatar)'">
-      </div>
-      <div class="modal-author">
-        @{{ username }}
-        <small class="text-brand numberCircle" v-if="userRank">
-          {{ userRank }}
-        </small>
-      </div>
-    </a>
+    <!-- Display based on mode -->
+    <template v-if="displayMode === 'avatar-only'">
+      <a :href="'/' + username" class="avatar-only-display" 
+         @mouseenter="handleMouseEnter" 
+         @mouseleave="handleMouseLeave">
+        <div class="user-avatar-small" 
+             :title="username"
+             :style="'background-image: url('+profImgUrl+'/u/' + username + '/avatar)'">
+        </div>
+      </a>
+    </template>
     
+    <template v-else>
+      <a :href="'/' + username" class="user-display d-flex align-items-center" 
+         target="_blank"
+         @mouseenter="handleMouseEnter" 
+         @mouseleave="handleMouseLeave">
+        <div class="user-avatar mr-1"
+             :style="'background-image: url('+profImgUrl+'/u/' + username + '/avatar)'">
+        </div>
+        <div class="user-info">
+          <small class="d-inline-block align-top">@{{ username }}</small>
+          <small v-if="displayMode === 'full' && displayCoreUserRank" class="text-brand numberCircle ml-1">
+            {{ displayCoreUserRank }}
+            <span class="increased-rank" v-if="displayIncreasedUserRank">
+              +{{ displayIncreasedUserRank }}
+            </span>
+          </small>
+        </div>
+      </a>
+    </template>
+    
+    <!-- Hover Card -->
     <transition name="fade">
       <div v-if="isVisible" 
            class="hover-card-wrapper" 
@@ -45,7 +64,11 @@
                 <div class="user-avatar-large"
                      :style="'background-image: url('+profImgUrl+'/u/' + username + '/avatar)'">
                 </div>
-                <span class="rank-badge">{{ userRank }}</span>
+                <span class="rank-badge">{{ displayCoreUserRank }}
+                  <span class="increased-rank" v-if="displayIncreasedUserRank">
+                    +{{ displayIncreasedUserRank }}
+                  </span>
+                </span>
               </div>
               <div class="col">
                 <h3 class="mb-1">@{{ username }}</h3>
@@ -114,17 +137,26 @@ export default {
     username: {
       type: String,
       required: true
+    },
+    displayMode: {
+      type: String,
+      default: 'full',
+      validator: function(value) {
+        return ['full', 'avatar-only', 'no-rank'].indexOf(value) !== -1
+      }
     }
   },
 
   data() {
     return {
-      userRank: '0.00',
+      userRankData: null,
+      displayCoreUserRank: '',
+      displayIncreasedUserRank: '',
+      profImgUrl: process.env.hiveImgUrl,
       hiveBalance: '0',
       afitBalance: '0',
       userAddedTokens: '0',
       joinDate: '',
-      profImgUrl: process.env.hiveImgUrl,
       loading: true,
       isVisible: false,
       hoverTimeout: null,
@@ -187,14 +219,17 @@ export default {
   },
 
   mounted() {
-    //initialize blockchain APIs
     steem.api.setOptions({ url: process.env.steemApiNode })
     hive.api.setOptions({ url: process.env.hiveApiNode })
     
-    // Set proper image URL
     this.profImgUrl = (localStorage.getItem('cur_bchain') === 'STEEM') 
       ? process.env.steemImgUrl 
       : process.env.hiveImgUrl
+
+    // Only fetch rank data if we need to show it
+    if (this.displayMode === 'full') {
+      this.fetchUserRank()
+    }
   },
 
   beforeDestroy() {
@@ -280,14 +315,27 @@ export default {
       return new Intl.NumberFormat('en-EN', { maximumFractionDigits: precision }).format(number)
     },
 
+    async fetchUserRank() {
+      try {
+        const response = await fetch(`${process.env.actiAppUrl}getRank/${this.username}`)
+        const rankData = await response.json()
+        
+        if (rankData) {
+          this.userRankData = rankData
+          this.displayCoreUserRank = rankData.rank_no_afitx ? parseFloat(rankData.rank_no_afitx).toFixed(2) : ''
+          this.displayIncreasedUserRank = rankData.afitx_rank ? parseFloat(rankData.afitx_rank).toFixed(2) : ''
+        }
+      } catch (error) {
+        console.error('Error fetching user rank:', error)
+      }
+    },
+
     async fetchUserData() {
       try {
         const chainLnk = localStorage.getItem('cur_bchain') === 'STEEM' ? steem : hive
-        const [rankResponse, accountData] = await Promise.all([
-          fetch(`${process.env.actiAppUrl}getRank/${this.username}`)
-            .then(res => res.json())
-            .catch(() => ({ rank_no_afitx: null })),
-
+        
+        // Fetch all data in parallel
+        const [accountData, userTokens] = await Promise.all([
           new Promise((resolve) => {
             chainLnk.api.getAccounts([this.username], (err, result) => {
               if (err || !result || result.length === 0) {
@@ -296,12 +344,9 @@ export default {
                 resolve(result[0])
               }
             })
-          })
+          }),
+          this.$store.dispatch('fetchUserTokensReturn', this.username, false)
         ])
-
-        if (rankResponse && rankResponse.rank_no_afitx) {
-          this.userRank = parseFloat(rankResponse.rank_no_afitx).toFixed(2)
-        }
 
         if (accountData) {
           const balance = accountData.balance.split(' ')[0]
@@ -309,11 +354,14 @@ export default {
           this.joinDate = new Date(accountData.created).toLocaleDateString()
         }
 
-        const userTokens = await this.$store.dispatch('fetchUserTokensReturn', this.username, false)
-        
         if (userTokens) {
           const afitBalance = parseFloat(userTokens) + parseFloat(this.userAddedTokens || 0)
           this.afitBalance = this.numberFormat(afitBalance, 3)
+        }
+
+        // Fetch rank data if needed and not already loaded
+        if (this.displayMode === 'full' && !this.displayCoreUserRank) {
+          await this.fetchUserRank()
         }
 
       } catch (error) {
