@@ -65,7 +65,7 @@
       </div>
 	  <UserMenu @modal-opened="handleModalOpened"/>
     </nav>
-    <LoginModal v-if="isModalOpen" @close="showModal = false" @login-successful="handleLoginSuccessful"/>
+    <LoginModal v-if="isModalOpen" @close="handleModalOpened(false)" @login-successful="handleLoginSuccessful"/>
   </div>
 
 </template>
@@ -94,9 +94,10 @@ import LoginModal from '~/components/LoginModal'
         this.isModalOpen = isOpen;
       },
       handleLoginSuccessful() {
-        // Refresh the current component or perform any necessary updates
-        window.location.reload();
-      },
+        this.$emit('user-switched');
+        this.handleModalOpened(false);
+        this.$store.dispatch('steemconnect/refreshUser');
+      }
     }
 	
 	}
