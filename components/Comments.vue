@@ -27,19 +27,8 @@
 		<div class="main-user-info pt-2">
 			<a :href="'/' + author" target="_blank">
 			  <div class="comment-user-section" :style="{ paddingLeft: depth * indentFactor + 'px' }">	
-				<div class="user-avatar mr-1"
-					   :style="'background-image: url('+this.profImgUrl+'/u/' + author + '/avatar)'"></div>
-					   <UserHoverCard :username="author">
-						<div class="modal-author modal-title">
-						@{{ author }}
-						<small class="text-brand numberCircle">
-							{{ displayCoreUserRank }}
-							<span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">
-							{{ displayIncreasedUserRank }}
-							</span>
-						</small>
-						</div>
-					</UserHoverCard>
+					   <UserHoverCard :username="author"/>
+						
 			  </div>
 			</a>
 		<!--<a :href="'/@' + author + '/' + full_data.permlink" target="_blank">-->
@@ -163,11 +152,8 @@
 		<div class="comment-reply" v-if="responsePosted">
 			<a :href="this.user.account.name" target="_blank">
 			  <div class="comment-user-section" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }">
-				<div class="user-avatar mr-1"
-					   :style="'background-image: url('+this.profImgUrl+'/u/' + this.user.account.name + '/avatar)'"></div>
-					   <UserHoverCard :username="user.name">
-				<div class="modal-author modal-title" >@{{ user.name }}<small class="date-head text-muted">{{ $t('Now') }}</small></div>
-					   </UserHoverCard>
+					   <UserHoverCard :username="user.name"/>
+
 			  </div>
 			  <!--add here -hasan-->
 			</a>

@@ -17,10 +17,12 @@
 		<!-- if this is a comment, display link to higher level comment/post -->
         <div v-if="post.parent_author" class="modal-header">
 		  <div class="row col-12">
+			
 			<div class="text-right col-12">
 			<i class="fas fa-reply text-brand"></i>&nbsp;{{$t('viewing_comment_note')}}<span class="user-avatar mr-1 float-right" :style="'background-image: url('+profImgUrl+'/u/' + post.parent_author + '/avatar)'"></span>
-				  <a :href="'/'+post.parent_author">@{{ post.parent_author }}</a><a :href="buildParentLink"><br />{{$t('view_parent_thread')}}</a>
+			<UserHoverCard :username="post.parent_author"/>
 			</div>
+			
 		  </div>
 		</div>
 		<div class="modal-header border-0 pb-0">
@@ -33,11 +35,8 @@
 		</div>
 		<div class="main-user-info">
 			<div class="p-1">
-				  <a :href="'/'+post.author" target="_blank">
-					<span class="user-avatar m-2" :style="'background-image: url('+profImgUrl+'/u/' + post.author + '/avatar)'"></span>
-					<h5 class="modal-author modal-title" >@{{ post.author}} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></h5>
-				  </a>
-				  
+				<UserHoverCard :username="post.author"/>
+
 			</div>
 			<span>
 				<span class="date-head text-muted" :title="date">{{ $getTimeDifference(post.created) }}</span>
@@ -222,9 +221,7 @@
 		<div class="post-reply modal-body" v-if="responsePosted">
 			<a :href="this.user.name" target="_blank">
 			  <div class="comment-user-section">	
-				<div class="user-avatar mr-1"
-					   :style="'background-image: url('+profImgUrl+'/u/' + this.user.name + '/avatar)'"></div>
-				<div class="modal-author modal-title" >@{{ user.name }}<small class="date-head text-muted">{{ $t('Now') }}</small></div>
+				<UserHoverCard :username="user.name"/>
 			  </div>
 			</a>
 			<vue-remarkable class="modal-body" :source="body" :options="{'html': true, 'breaks': true, 'typographer': true}"></vue-remarkable>
@@ -254,6 +251,7 @@
 </template>
 
 <script>
+import UserHoverCard from './UserHoverCard.vue'
   import steem from 'steem'
   import {mapGetters} from 'vuex'
   import Comments from '~/components/Comments'  
@@ -312,7 +310,8 @@
 	  Comments,
 	  CustomTextEditor,
 	  SocialSharing,
-	  vueRemarkable
+	  vueRemarkable,
+	  UserHoverCard
 	},
     computed: {
 	  ...mapGetters('steemconnect', ['user']),
