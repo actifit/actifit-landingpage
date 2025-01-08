@@ -1,11 +1,11 @@
 <template>
   <div>
 	<NavbarBrand />
-	
+
 	<div class="container pt-5 mt-5 pb-5" v-if="user">
-	
+
 		<h4 class="user-name">@{{ `${user.account.name}\'s`  }} {{ $t('Notifications') }}</h4>
-		
+
 		<div class="row text-right">
 			<select v-model="currentFilter" class="form-control col-md-2 sel-adj float-right">
 				<option value="all">{{ $t('all') }}</option>
@@ -14,7 +14,7 @@
 			</select>
 			<a href='#' class="btn btn-brand border float-right" v-on:click="markAllRead()" :title="$t('Mark_all_read')"><i class="fas fa-tasks"></i></a>
 		</div>
-		
+
 		<div class="row p-2 border border-bottom-0" v-for="(notif, index) in notifications" :key="index" :notif="notif" v-if="renderNotif(notif)">
 			<span class="col-md-2">
 			  <a :href="notif.url" v-on:click="markRead(notif)" >{{ date(notif.date) }}</a>
@@ -36,13 +36,13 @@
 			  <a href="#" v-on:click="markUnread(notif)" :title="$t('mark_as_unread')"  v-else><i class="far fa-square"></i></a>
 			</span>
 		  </div>
-		
+
 		<!--<adsbygoogle ad-slot="8625360638" :ad-style="acti_goog_ad_square"/>-->
-		
-      
-		
+
+
+
 	</div>
-	
+
 	<div class="container mt-5 pb-5 pt-5" v-else>
       <!-- account balance -->
       <div class="text-center p-5">
@@ -61,7 +61,7 @@
 		</div>
 	  </div>
 	</div>
-	
+
 	<Footer />
 	<client-only>
       <div>
@@ -81,7 +81,7 @@
 
   import steem from 'steem'
   import {mapGetters} from 'vuex'
-  
+
   import Vue from 'vue'
 
   export default {
@@ -142,10 +142,10 @@
 	  date(val) {
         let date = new Date(val)
         let minutes = date.getMinutes()
-        return date.getDate() + '/' 
-			+ (date.getMonth() + 1) + '/' 
-			+ date.getFullYear() + ' ' 
-			+ date.getHours() + ':' 
+        return date.getDate() + '/'
+			+ (date.getMonth() + 1) + '/'
+			+ date.getFullYear() + ' '
+			+ date.getHours() + ':'
 			+ (minutes < 10 ? '0' + minutes : minutes)
       },
 	  renderNotif(notif){
@@ -167,16 +167,16 @@
 				console.log(excp);
 			}
 		  }
-		  
+
 		this.$store.dispatch('fetchUserTokens')
 		this.$store.dispatch('fetchUserRank')
-		  
+
 		//grab user's notifications
 		if (this.user){
 			let res = await fetch(process.env.actiAppUrl + 'allNotifications/' + this.user.account.name);
 			let outcome = await res.json();
 			try{
-				this.notifications = outcome;
+				this.notifications = outcome.reverse();
 			}catch(err){
 				console.log('error fetching notifications');
 			}
@@ -185,9 +185,9 @@
 	  },
 	  async markRead(notif){
 		let accToken = localStorage.getItem('access_token')
-		
+
 		let url = new URL(process.env.actiAppUrl + 'markRead/' + notif._id + '?user=' + this.user.account.name);
-			
+
 		let reqHeads = new Headers({
 		  'Content-Type': 'application/json',
 		  'x-acti-token': 'Bearer ' + accToken,
@@ -196,7 +196,7 @@
 			method: 'GET',
 			headers: reqHeads,
 		});
-		
+
 		let outcome = await res.json();
 		console.log(outcome);
 		console.log(outcome.status);
@@ -204,9 +204,9 @@
 	  },
 	  async markUnread(notif){
 		let accToken = localStorage.getItem('access_token')
-		
+
 		let url = new URL(process.env.actiAppUrl + 'markUnread/' + notif._id + '?user=' + this.user.account.name);
-			
+
 		let reqHeads = new Headers({
 		  'Content-Type': 'application/json',
 		  'x-acti-token': 'Bearer ' + accToken,
@@ -215,7 +215,7 @@
 			method: 'GET',
 			headers: reqHeads,
 		});
-		
+
 		let outcome = await res.json();
 		console.log(outcome);
 		console.log(outcome.status);
@@ -226,11 +226,11 @@
 		if (!userConf) {
 		  return;
 		}
-		
+
 		let accToken = localStorage.getItem('access_token')
-		
+
 		let url = new URL(process.env.actiAppUrl + 'markAllRead/?user=' + this.user.account.name);
-		
+
 		let reqHeads = new Headers({
 		  'Content-Type': 'application/json',
 		  'x-acti-token': 'Bearer ' + accToken,
@@ -239,7 +239,7 @@
 			method: 'GET',
 			headers: reqHeads,
 		});
-		
+
 		let outcome = await res.json();
 		console.log(outcome);
 		console.log(outcome.status);
@@ -249,18 +249,18 @@
 	async mounted () {
 		// login
 		this.$store.dispatch('steemconnect/login')
-		
+
 		this.updateUserData()
-		
+
 		this.profImgUrl = process.env.hiveImgUrl;
 		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		if (cur_bchain == 'STEEM'){
 			this.profImgUrl = process.env.steemImgUrl;
 		}
-		
+
 		//fetch new notifications every minute
 		setInterval(this.updateUserData, 60000);
-		  	
+
 	}
   }
 </script>
