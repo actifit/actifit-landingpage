@@ -151,8 +151,9 @@
 		</transition>
 		<div class="comment-reply" v-if="responsePosted">
 			<a :href="this.user.account.name" target="_blank">
+				<UserHoverCard :username="user.name"/>
 			  <div class="comment-user-section" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }">
-					   <UserHoverCard :username="user.name"/>
+					   
 
 			  </div>
 			  <!--add here -hasan-->

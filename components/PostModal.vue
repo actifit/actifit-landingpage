@@ -19,7 +19,7 @@
 		  <div class="row col-12">
 			
 			<div class="text-right col-12">
-			<i class="fas fa-reply text-brand"></i>&nbsp;{{$t('viewing_comment_note')}}<span class="user-avatar mr-1 float-right" :style="'background-image: url('+profImgUrl+'/u/' + post.parent_author + '/avatar)'"></span>
+			<i class="fas fa-reply text-brand"></i>&nbsp;{{$t('viewing_comment_note')}}
 			<UserHoverCard :username="post.parent_author"/>
 			</div>
 			
