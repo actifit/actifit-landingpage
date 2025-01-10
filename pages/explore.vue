@@ -7,7 +7,7 @@
     <div class="container pt-5 mt-5 pb-2">
       <h2 class="text-center mb-2">{{ $t('Explore_hive') }} <img src="/img/HIVE.png" class="mr-2 token-logo-md"></h2>
 	  <!--<ChainSelection />-->
-	  
+
 	  <div class="text-right col-12 row pb-2">
 			<div class="col-9"/>
 			<select v-model="type" class="form-control sel-adj col-3">
@@ -22,7 +22,7 @@
 			<span v-for="(selComm) in popComms" :key="selComm[0]+'chk'" class="comm-selector col-3">
 				<input type="checkbox" :ref="selComm[0]+'chk'" :id="selComm[0]+'chk'" @change="($event) => handleCheckboxChange($event, selComm[0], selComm[1])">
 				<!--<a :href="selComm[0]" class="text-brand" >-->
-					
+
 					<label :for="selComm[0]+'chk'" :value="selComm[1]"><img :src="$getCommunityLogo(selComm[0])" :alt="selComm[1]" class="community-image" >{{selComm[1]}}</label>
 				<!--</a>-->
 			</span>
@@ -35,7 +35,7 @@
       <!--<div class="text-center" v-if="loading">
         <i class="fas fa-spinner fa-spin text-brand"></i>
       </div>-->
-	  
+
 	  <div class="text-center p-3" v-if="user && user.account.name == username">
 		<a href="#" @click="initiateNewPost" data-toggle="modal"
 			 data-target="#editPostModal" :title="$t('Create_post')" class="btn btn-brand border">
@@ -45,16 +45,16 @@
 	  <!--<div class="row text-right">
 		<div class="col-12 pb-2"><a :href="'/'+username+'/comments'" class="btn btn-brand border"  :title="$t('view_comments')"><i class="far fa-comments"></i></a>&nbsp;<a :href="'/'+username+'/videos'" class="btn btn-brand border"  :title="$t('view_videos')"><i class="fas fa-video"></i></a></div>
 	  </div>-->
-	  
+
 	  <!--<div class="vid-container" v-if="communityPosts.length">
-		
+
 			<Post v-for="iterx in communityPosts.length" :key="iterx" :post="communityPosts[(iterx - 1)]" :displayUsername="username" :pstId="(iterx - 1)" class="card post w-25 p-1 m-1 " explorePost="true"/>
-		
+
 	  </div>-->
 		<div v-for="(community, index) in selCommunities" :key="index" :community="community">
 			<CommunityContent :community='community[0]' :type="type" />
 		</div>
-			
+
       <!-- show listing when loaded -->
 	  <!--<div class="row" >
 		<div class="row"  v-for="iterx in Math.ceil(communityPosts.length / splitFactor)" :key="iterx">
@@ -84,7 +84,7 @@
 	<PostModal :post="activePost" @nextPost="nextPost(1)" @prevPost="nextPost(-1)"/>
     <EditPostModal />
     <VoteModal />
-    
+
         <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
 		<notifications :group="'warn'" :position="'top center'" :classes="'vue-notification warn'" />
         <notifications :group="'error'" :position="'top center'" :classes="'vue-notification error'" />
@@ -151,7 +151,7 @@
 			console.log('user activity change in chain '+newBchain);
 			this.cur_bchain = newBchain;
 			await this.$store.dispatch('steemconnect/refreshUser');
-			
+
 
 		}
 		//this.reload += 1;
@@ -180,22 +180,22 @@
 				return false; // Target value not found
 			}
 		},
-      
+
     },
     methods: {
 		expandComms(){
 			this.$nextTick(() => {
-			
+
 				this.$refs['switcher'].classList.toggle('fa-arrow-circle-up');
 				this.$refs['switcher'].classList.toggle('fa-arrow-circle-down');
-				
+
 				this.$refs['comm-container'].classList.toggle('comm-container');
 			});
 		},
 		handleCheckboxChange ( e, param1, param2){
-			console.log(e);
-			console.log(param1)
-			console.log(param2)
+			// console.log(e);
+			// console.log(param1)
+			// console.log(param2)
 			let tgtEntry = [param1, param2];
 			if (e.target.checked){
 				//load
@@ -211,16 +211,16 @@
 		},
 		nextPost (direction){
 		let pstId = this.activePost.pstId;
-		console.log(pstId);
+		// console.log(pstId);
 		let proceed = false;
 		if (direction < 0){
-			console.log('move back');
+			// console.log('move back');
 			if (pstId >= 1){
 				pstId -= 1;
 				proceed = true;
 			}
 		}else{
-			console.log('move front');
+			// console.log('move front');
 			if (pstId < this.communityPosts.length){
 				pstId += 1;
 				proceed = true;
@@ -237,11 +237,11 @@
 		newPost.isNewPost = true;
 		this.$store.commit('setEditPost', newPost);
 	  },
-     
+
 	  async fetchUserData () {
-		console.log('fetchUserData')
-		if (typeof this.user != 'undefined' && this.user != null){	  
-		  console.log('user data available')
+		// console.log('fetchUserData')
+		if (typeof this.user != 'undefined' && this.user != null){
+		  // console.log('user data available')
 		  if (!localStorage.getItem('std_login')){
 		  //if (!this.stdLogin){
 			  //update user info from blockchain
@@ -258,11 +258,11 @@
 		// login
 		this.$store.dispatch('steemconnect/login')
 		this.fetchUserData();
-	  
+
 		//grab popular communities
 		this.popComms = await this.$store.dispatch('fetchPopCommunities');
 		//console.log(this.popComms);
-	  
+
 		let defaultSet = new Set(this.defaultCommunities.map(JSON.stringify));
 		let selSet = new Set(this.popComms.map(JSON.stringify));
 		//console.log('default')
@@ -351,7 +351,7 @@
 	cursor: pointer;
 }
 .expander{
-	float:right; 
+	float:right;
 	font-size: 28px;
 }
 </style>

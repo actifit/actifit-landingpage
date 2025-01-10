@@ -298,11 +298,18 @@
 				</div>
 				
 				<div class="friends-count mb-2 mt-2 info-box info-box-orange col-md-12 cntnr">
-					<i class="fas fa-user-friends text-brand mr-2" ></i>
-					{{ this.userFriends.length }} {{ $t('friends') }} .
+					<i class="fas fa-user-friends text-brand mr-2"></i>
+					{{ this.userFriends.length }} {{ $t('friends') }}
 					<div>
-						<span v-html="showFriendsSnippet()"></span>
-						<a class="btn btn-brand m-2" href="./friends">{{ $t('View_friends') }}</a>
+					<span>
+						<UserHoverCard v-for="friend in displayedFriends" 
+									:key="friend.friend" 
+									:username="friend.friend" displayMode="avatar-only"/>
+						<span v-if="userFriends.length > maxFriendDisplay">
+						+ {{ userFriends.length - maxFriendDisplay }} {{ $t('other') }} {{ $t('friends') }}
+						</span>
+					</span>
+					<a class="btn btn-brand m-2" href="./friends">{{ $t('View_friends') }}</a>
 					</div>
 				</div>
 				
@@ -535,6 +542,7 @@
 </template>
 
 <script>
+	import UserHoverCard from '~/components/UserHoverCard'
   import LoginModal from '~/components/LoginModal'
   import NavbarBrand from '~/components/NavbarBrand'
   import Footer from '~/components/Footer'
@@ -727,6 +735,7 @@
 	  NotifyModal,
 	  ProfileImageModal,
 	  LoginModal,
+	  UserHoverCard
 	},
     computed: {
 	  ...mapGetters('steemconnect', ['user']),
@@ -737,6 +746,9 @@
 	  displayUsersNames(){
 		return this.getUsersName();
 	  },
+	  	displayedFriends() {
+			return this.userFriends.slice(0, this.maxFriendDisplay);
+		},
 	  textAreaUsername(){
 		return this.userMeta && this.userMeta.profile && this.userMeta.profile.name
         ? this.userMeta.profile.name
@@ -1920,6 +1932,8 @@
 		}
 		return false;
 	  },
+	  //we dont need this function anymore (added a different function to handle the friends list in the computed section, will keep this here for future reference -sprinklepancake)
+	  /*
 	  //handles displaying some of the logos of friends
 	  showFriendsSnippet(){
 		let snipp = '<span>';
@@ -1932,6 +1946,7 @@
 		snipp += '</span>';
 		return snipp;
 	  },
+	  */
 	  /* handles the actual claim of a badge */
 	  async claimBadge(badgeType) {
 		if (this.badgeClaimable(badgeType)){

@@ -12,13 +12,7 @@
       <div class="report-body">
         <div class="row pb-1">
           <div class="col-8">
-            <a :href="'/'+report.author" target="_blank">
-			
-              <div class="user-avatar mr-1"
-                   :style="'background-image: url('+profImgUrl+'/u/' + report.author + '/avatar)'"></div>
-              <small class="d-inline-block align-top">@{{ report.author }}</small>
-			  <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small>
-            </a>
+			<UserHoverCard :username="report.author"/>
           </div>
           <div class="col-4 text-right">
             <small class="text-muted" :title="date">{{ $getTimeDifference(report.created) }}</small>
@@ -208,6 +202,8 @@
 </template>
 
 <script>
+import UserHoverCard from './UserHoverCard.vue'
+
   import {mapGetters} from 'vuex'
   
   import steem from 'steem'
@@ -316,7 +312,8 @@
 	},
 	components: {
 		SocialSharing,
-		vueRemarkable
+		vueRemarkable,
+		UserHoverCard
 	},
 	watch: {
 	  postUpvoted: 'updatePostData',

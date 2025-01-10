@@ -14,8 +14,7 @@
 		  
 		  <div class="row top-action-container text-right">
 			  <div class="col-6 text-left">
-				  
-				  <span class="btn btn-brand mb-1" :title="show_only_tokens_interest?$t('show_all_tokens'):$t('show_core_tokens')" v-on:click="switchTokenDisplay">
+ 				  <span class="btn btn-brand mb-1" :title="show_only_tokens_interest?$t('show_all_tokens'):$t('show_core_tokens')" v-on:click="switchTokenDisplay">
 					  <i class="fas fa-solid fa-filter" :style="show_only_tokens_interest?'color:green':'color:white'"></i>
 				  </span>
 				  
@@ -3827,9 +3826,6 @@
 		},
 		async claimRewards () {
 		  //function handles claiming STEEM rewards
-		  
-		  
-		  
 		  if (!localStorage.getItem('std_login')){
 			  //sample link: https://steemconnect.com/sign/claim-reward-balance?account=sdsf&reward_steem=33&reward_sbd=2342&reward_vests=23432
 			  var link = this.$steemconnect.sign('claim-reward-balance', {
@@ -3841,6 +3837,7 @@
 			  }, window.location.origin + '/wallet?op=claim rewards&status=success');
   
 			  window.open(link);
+			  setTimeout(() => this.fetchUserData(), 3000);
 			  
 			  //Below would have been preferred approach, but claimRewardBalance keeps failing as it requires more authority. Keeping here for future further exploration
 			  /*
@@ -3880,8 +3877,9 @@
 			  
 			  if (res.success){
 				  this.confirmCompletion('claimrewards', 0, res);
-				  this.isClaimableDataAvailableTEMP = false
-			  }
+				  this.isClaimableDataAvailableTEMP = false;
+				  setTimeout(() => this.fetchUserData(), 3000);
+				}
 			  /*steem.broadcast.claimRewardBalanceAsync(this.user.account.name,this.claimSTEEM, this.claimSBD, this.claimSP).then(
 				  res => ).catch(err=>console.log(err));*/
 		  }

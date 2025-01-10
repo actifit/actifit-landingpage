@@ -27,10 +27,8 @@
 		<div class="main-user-info pt-2">
 			<a :href="'/' + author" target="_blank">
 			  <div class="comment-user-section" :style="{ paddingLeft: depth * indentFactor + 'px' }">	
-				<div class="user-avatar mr-1"
-					   :style="'background-image: url('+this.profImgUrl+'/u/' + author + '/avatar)'"></div>
-				<div class="modal-author modal-title" >@{{ author }}<small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small>
-				</div>
+					   <UserHoverCard :username="author"/>
+						
 			  </div>
 			</a>
 		<!--<a :href="'/@' + author + '/' + full_data.permlink" target="_blank">-->
@@ -154,10 +152,10 @@
 		<div class="comment-reply" v-if="responsePosted">
 			<a :href="this.user.account.name" target="_blank">
 			  <div class="comment-user-section" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }">
-				<div class="user-avatar mr-1"
-					   :style="'background-image: url('+this.profImgUrl+'/u/' + this.user.account.name + '/avatar)'"></div>
-				<div class="modal-author modal-title" >@{{ user.name }}<small class="date-head text-muted">{{ $t('Now') }}</small></div>
+					   <UserHoverCard :username="user.name"/>
+
 			  </div>
+			  <!--add here -hasan-->
 			</a>
 			<vue-remarkable class="modal-body" :source="getContent" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }" ></vue-remarkable>
 			<!--<vue-markdown class="modal-body" v-html="responseBody" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }" ></vue-markdown>-->
@@ -185,6 +183,7 @@
   </transition>
 </template>
 <script>
+import UserHoverCard from './UserHoverCard.vue'
   import { translateText } from '~/components/deepl-client';
 
   import vueRemarkable from 'vue-remarkable';
@@ -240,7 +239,8 @@
 	},
 	components: {
 	  CustomTextEditor,
-	  vueRemarkable
+	  vueRemarkable,
+	  UserHoverCard
 	},
     computed: {
 	  ...mapGetters('steemconnect', ['user']),

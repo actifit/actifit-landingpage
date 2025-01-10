@@ -12,29 +12,23 @@
         </a>
       </h6>
 	  
-      <div class="post-body">
-		<div class="row">
-		<!-- if this is a comment, display link to higher level comment/post -->
-		  <div v-if="post.parent_author" class="text-right col-12">
-			<small>
-				<a :href="buildParentLink"><i class="fas fa-reply text-brand"></i>&nbsp;
-					<div class="user-avatar ml-1 mr-1 float-right" :style="'background-image: url('+profImgUrl+'/u/' + post.parent_author + '/avatar)'"></div>
-				  @{{ post.parent_author }}
-				</a>
-			</small>
-		  </div>
-		</div>
-        <div class="row">
-          <div class="col-8">
-            <a :href="'/'+post.author" target="_blank">
-			
-              <div class="user-avatar mr-1"
-                   :style="'background-image: url('+profImgUrl+'/u/' + post.author + '/avatar)'"></div>
-              <small class="d-inline-block align-top">@{{ post.author }}</small>
-			  <i class="far fa-share-square text-brand" v-if="post.author != this.displayUsername" :title="$t('reblogged')"></i>
-			  <!--<small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small>-->
-            </a>
-          </div>
+	  <div class="post-body">
+  <div class="row">
+    <!-- if this is a comment, display link to higher level comment/post -->
+	<div v-if="post.parent_author" class="col-12">
+  
+    <a :href="buildParentLink" class="d-flex justify-content-end align-items-center">
+		<div class="text-right">
+			<i class="fas fa-reply text-brand"></i>&nbsp;
+      <UserHoverCard :username="post.parent_author" />
+        </div>
+    </a>
+</div>
+  </div>        
+  <div class="row">
+	<div class="col-8">
+		<UserHoverCard :username="post.author"/>
+</div>
           <div class="col-4 text-right">
             <small class="text-muted d-block" :title="date">{{ $getTimeDifference(this.post.created) }}</small>
           </div>
@@ -173,6 +167,8 @@
 </template>
 
 <script>
+import UserHoverCard from './UserHoverCard.vue'
+
   import {mapGetters} from 'vuex'
   
   import steem from 'steem'
@@ -289,6 +285,7 @@
 	},
 	components: {
 		SocialSharing,
+		UserHoverCard,
 		//vueRemarkable
 	},
 	watch: {

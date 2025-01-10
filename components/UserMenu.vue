@@ -1,6 +1,6 @@
-<template>	
+<template>
   <div class="user-menu-container ml-auto position-absolute d-flex align-items-center">
-	
+
     <ul class="navbar-nav mr-auto user-menu flex-row">
 	  <li class="nav-item" v-if="!user">
 		<a :href="'/signup'" >{{ $t('Signup_Link') }}</a> | <a href="#" data-toggle="modal" data-target="#loginModal" @click="showModalFunc">{{ $t('Login') }}</a>
@@ -47,7 +47,7 @@
 				</span>
 			  </div>
 			</div>
-			
+
 		</span>
 		<span class="user-avatar group-class" v-else>
 			<a class="nav-link dropdown-toggle p-0" id="user_menu_navlink" href="#" data-toggle="dropdown">
@@ -220,9 +220,9 @@
 		}
 		this.cur_bchain = chain;
 		this.$store.commit('setBchain', this.cur_bchain);
-		
+
 		localStorage.setItem('cur_bchain', this.cur_bchain);
-		
+
 		this.profImgUrl = process.env.hiveImgUrl;
 		if (this.cur_bchain == 'STEEM'){
 			this.profImgUrl = process.env.steemImgUrl;
@@ -241,7 +241,7 @@
 			let outcome = await res.json();
 			try{
 				this.activeNotificationsLen = outcome.length;
-				this.activeNotifications = outcome;
+				this.activeNotifications = outcome.reverse();
 			}catch(err){
 				console.log('error fetching notifications');
 			}
@@ -253,9 +253,9 @@
 		},
 	  async markRead(notif){
 		let accToken = localStorage.getItem('access_token')
-		
+
 		let url = new URL(process.env.actiAppUrl + 'markRead/' + notif._id + '?user=' + this.user.account.name);
-			
+
 		let reqHeads = new Headers({
 		  'Content-Type': 'application/json',
 		  'x-acti-token': 'Bearer ' + accToken,
@@ -264,7 +264,7 @@
 			method: 'GET',
 			headers: reqHeads,
 		});
-		
+
 		let outcome = await res.json();
 		//console.log(outcome);
 		//console.log(outcome.status);
@@ -275,11 +275,11 @@
 		if (!userConf) {
 		  return;
 		}
-		
+
 		let accToken = localStorage.getItem('access_token')
-		
+
 		let url = new URL(process.env.actiAppUrl + 'markAllRead/?user=' + this.user.account.name);
-		
+
 		let reqHeads = new Headers({
 		  'Content-Type': 'application/json',
 		  'x-acti-token': 'Bearer ' + accToken,
@@ -288,7 +288,7 @@
 			method: 'GET',
 			headers: reqHeads,
 		});
-		
+
 		let outcome = await res.json();
 		//console.log(outcome);
 		//console.log(outcome.status);
@@ -300,18 +300,18 @@
 		if (localStorage.getItem('cur_bchain')){
 			this.cur_bchain = localStorage.getItem('cur_bchain')
 		}
-		
-		
+
+
 		this.profImgUrl = process.env.hiveImgUrl;
 		if (this.cur_bchain == 'STEEM'){
 			this.profImgUrl = process.env.steemImgUrl;
 		}
-		
+
 		//grab moderators' list
 		this.$store.dispatch('fetchModerators')
-		
+
 		this.updateUserData()
-		
+
 		//fetch new notifications every minute
 		setInterval(this.updateUserData, 60000);
     },

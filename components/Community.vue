@@ -52,16 +52,15 @@
 				</div>
 				
 			</div>
+		</div>
+		<div class="details m-2 text-center">
 			<div class="text-center text-brand col-12">{{$t('admins')}}</div>
+		</div>
 			<div class="row col-12">
-				<div v-for="(admin, index) in community.admins" :key="index" :admin="admin" class="m-1 p-1 admin-name">
-					<a :href="'./'+admin">
-						<div class="user-avatar mr-1" :style="'background-image: url('+profImgUrl+'/u/' + admin + '/avatar)'"></div>
-						@{{admin}}
-					</a>
+				<div v-for="(admin, index) in community.admins" :key="index" :admin="admin" >
+					<UserHoverCard :username="admin" displayMode="no-rank"/>
 				</div>
 			</div>
-		</div>
 		
         <div class="row details mt-2">
          
@@ -95,6 +94,7 @@
   //import vueRemarkable from 'vue-remarkable';
 
   import sanitize from 'sanitize-html'
+import UserHoverCard from '~/components/UserHoverCard.vue';
 
   export default {
     props: ['community', 'pstId', 'userSubscribed'],
@@ -155,7 +155,8 @@
 	},
 	components: {
 		//SocialSharing,
-		//vueRemarkable
+		//vueRemarkable,
+		UserHoverCard
 	},
 	watch: {
 	  postUpvoted: 'updatePostData',
