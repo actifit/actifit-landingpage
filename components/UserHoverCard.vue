@@ -11,6 +11,30 @@
         </div>
       </a>
     </template>
+
+    <template v-else-if="displayMode === 'no-rank'">
+      <a :href="'/' + username" class="user-display d-flex align-items-center"
+         target="_blank"
+         @mouseenter="handleMouseEnter" 
+         @mouseleave="handleMouseLeave">
+				  <div class="user-avatar mr-1 yield-avatar" :style="'background-image: url('+profImgUrl+'/u/' + username + '/avatar);'"></div>
+        <div class="user-info">
+          <small class="d-inline-block align-top">@{{ username }}</small>
+        </div>
+      </a>
+    </template>
+
+    <template v-if="displayMode==='username-only'">
+      <a :href="'/' + username" class="user-display align-items-center" 
+         target="_blank"
+         @mouseenter="handleMouseEnter" 
+         @mouseleave="handleMouseLeave">
+
+        <span class="user-info">
+          <small class="d-inline-block align-top">@{{ username }}</small>
+        </span>
+      </a>
+    </template>
     
     <template v-else>
       <a :href="'/' + username" class="user-display align-items-center" 
