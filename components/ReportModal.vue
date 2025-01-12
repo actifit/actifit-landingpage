@@ -18,8 +18,6 @@
 			<div class="p-1">
 				
 				  <a :href="'/'+report.author" target="_blank">
-					<span class="user-avatar m-2" :style="'background-image: url('+profImgUrl+'/u/' + report.author + '/avatar)'"></span>
-
 					<UserHoverCard :username="report.author"/>
 				  </a>
 				

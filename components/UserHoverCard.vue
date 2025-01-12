@@ -11,16 +11,28 @@
         </div>
       </a>
     </template>
-    
-    <template v-else>
-      <a :href="'/' + username" class="user-display d-flex align-items-center" 
+
+    <template v-else-if="displayMode === 'no-rank'">
+      <a :href="'/' + username" class="user-display d-flex align-items-center"
          target="_blank"
          @mouseenter="handleMouseEnter" 
          @mouseleave="handleMouseLeave">
-        <div class="user-avatar mr-1"
-             :style="'background-image: url('+profImgUrl+'/u/' + username + '/avatar)'">
-        </div>
+				  <div class="user-avatar mr-1 yield-avatar" :style="'background-image: url('+profImgUrl+'/u/' + username + '/avatar);'"></div>
         <div class="user-info">
+          <small class="d-inline-block align-top">@{{ username }}</small>
+        </div>
+      </a>
+    </template>
+    
+    <template v-else>
+      <a :href="'/' + username" class="user-display align-items-center" 
+         target="_blank"
+         @mouseenter="handleMouseEnter" 
+         @mouseleave="handleMouseLeave">
+        <span class="user-avatar mr-1"
+             :style="'background-image: url('+profImgUrl+'/u/' + username + '/avatar);'">
+        </span>
+        <span class="user-info">
           <small class="d-inline-block align-top">@{{ username }}</small>
           <small v-if="displayMode === 'full' && displayCoreUserRank" class="text-brand numberCircle ml-1">
             {{ displayCoreUserRank }}
@@ -28,7 +40,7 @@
               +{{ displayIncreasedUserRank }}
             </span>
           </small>
-        </div>
+        </span>
       </a>
     </template>
     
@@ -147,11 +159,12 @@ export default {
     }
   },
 
+
   data() {
     return {
       userRankData: null,
-      displayCoreUserRank: '',
-      displayIncreasedUserRank: '',
+      displayCoreUserRank: 0.00,
+      displayIncreasedUserRank: 0.00,
       profImgUrl: process.env.hiveImgUrl,
       hiveBalance: '0',
       afitBalance: '0',
@@ -226,10 +239,7 @@ export default {
       ? process.env.steemImgUrl 
       : process.env.hiveImgUrl
 
-    // Only fetch rank data if we need to show it
-    if (this.displayMode === 'full') {
       this.fetchUserRank()
-    }
   },
 
   beforeDestroy() {
@@ -320,11 +330,11 @@ export default {
         const response = await fetch(`${process.env.actiAppUrl}getRank/${this.username}`)
         const rankData = await response.json()
         
-        if (rankData) {
+        
           this.userRankData = rankData
-          this.displayCoreUserRank = rankData.rank_no_afitx ? parseFloat(rankData.rank_no_afitx).toFixed(2) : ''
-          this.displayIncreasedUserRank = rankData.afitx_rank ? parseFloat(rankData.afitx_rank).toFixed(2) : ''
-        }
+          this.displayCoreUserRank = rankData.rank_no_afitx ? parseFloat(rankData.rank_no_afitx).toFixed(2) : "0.00"
+          this.displayIncreasedUserRank = rankData.afitx_rank ? parseFloat(rankData.afitx_rank).toFixed(2) : 0.00
+      
       } catch (error) {
         console.error('Error fetching user rank:', error)
       }
