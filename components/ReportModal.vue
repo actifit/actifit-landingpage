@@ -17,7 +17,7 @@
         <div class="main-user-info">
 			<div class="p-1">
 				
-				  <a :href="'/'+report.author" target="_blank">
+				  <a target="_blank">
 					<UserHoverCard :username="report.author"/>
 				  </a>
 				
@@ -205,7 +205,7 @@
 		  </div>
 		</transition>
 		<div class="report-reply modal-body" v-if="responsePosted">
-			<a :href="this.user.name" target="_blank">
+			<a target="_blank">
 			  <div class="comment-user-section">	
 				<UserHoverCard :username="user.name"/>
 			  </div>

@@ -204,7 +204,7 @@
 			</div>
 		  </transition>
 		  <div class="report-reply col-md-12" v-if="responsePosted">
-			  <a :href="'/'+this.user.account.name" target="_blank">
+			  <a target="_blank">
 				<div class="comment-user-section">	
 					<UserHoverCard :username="user.account.name"/>
 				</div>

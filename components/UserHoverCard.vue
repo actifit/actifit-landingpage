@@ -2,7 +2,7 @@
   <div class="hover-card-container">
     <!-- Display based on mode -->
     <template v-if="displayMode === 'avatar-only'">
-      <a :href="'/' + username" class="avatar-only-display" 
+      <a class="avatar-only-display" 
          @mouseenter="handleMouseEnter" 
          @mouseleave="handleMouseLeave">
         <div class="user-avatar-small" 
@@ -13,7 +13,7 @@
     </template>
 
     <template v-else-if="displayMode === 'no-rank'">
-      <a :href="'/' + username" class="user-display d-flex align-items-center"
+      <a class="user-display d-flex align-items-center"
          target="_blank"
          @mouseenter="handleMouseEnter" 
          @mouseleave="handleMouseLeave">
@@ -24,7 +24,7 @@
       </a>
     </template>
 
-    <template v-if="displayMode==='username-only'">
+    <template v-else-if="displayMode==='username-only'">
       <a :href="'/' + username" class="user-display align-items-center" 
          target="_blank"
          @mouseenter="handleMouseEnter" 
@@ -37,7 +37,7 @@
     </template>
     
     <template v-else>
-      <a :href="'/' + username" class="user-display align-items-center" 
+      <a class="user-display align-items-center" 
          target="_blank"
          @mouseenter="handleMouseEnter" 
          @mouseleave="handleMouseLeave">

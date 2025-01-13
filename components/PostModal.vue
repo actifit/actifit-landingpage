@@ -219,7 +219,7 @@
 		  </div>
 		</transition>
 		<div class="post-reply modal-body" v-if="responsePosted">
-			<a :href="this.user.name" target="_blank">
+			<a target="_blank">
 			  <div class="comment-user-section">	
 				<UserHoverCard :username="user.name"/>
 			  </div>

@@ -25,7 +25,7 @@
 	</div>
 	<div class="modal-body comment-info acti-shadow mb-2" v-if="depth > 0">
 		<div class="main-user-info pt-2">
-			<a :href="'/' + author" target="_blank">
+			<a target="_blank">
 			  <div class="comment-user-section" :style="{ paddingLeft: depth * indentFactor + 'px' }">	
 					   <UserHoverCard :username="author"/>
 						
@@ -150,7 +150,7 @@
 		  </div>
 		</transition>
 		<div class="comment-reply" v-if="responsePosted">
-			<a :href="this.user.account.name" target="_blank">
+			<a target="_blank">
 				<UserHoverCard :username="user.name"/>
 			  <!--add here -hasan-->
 			</a>
