@@ -42,7 +42,7 @@
          @mouseenter="handleMouseEnter" 
          @mouseleave="handleMouseLeave">
         <span class="user-avatar mr-1"
-             :style="'background-image: url('+profImgUrl+'/u/' + username + '/avatar)'">
+             :style="'background-image: url('+profImgUrl+'/u/' + username + '/avatar);'">
         </span>
         <span class="user-info">
           <small class="d-inline-block align-top">@{{ username }}</small>
