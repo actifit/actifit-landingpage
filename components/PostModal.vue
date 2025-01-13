@@ -219,11 +219,9 @@
 		  </div>
 		</transition>
 		<div class="post-reply modal-body" v-if="responsePosted">
-			<a target="_blank">
 			  <div class="comment-user-section">	
 				<UserHoverCard :username="user.name"/>
 			  </div>
-			</a>
 			<vue-remarkable class="modal-body" :source="body" :options="{'html': true, 'breaks': true, 'typographer': true}"></vue-remarkable>
 		</div>
 		<div class="post-comments modal-body" v-if="post.children > 0">

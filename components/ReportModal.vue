@@ -17,9 +17,7 @@
         <div class="main-user-info">
 			<div class="p-1">
 				
-				  <a target="_blank">
 					<UserHoverCard :username="report.author"/>
-				  </a>
 				
 				  <span>
 					<span class="date-head text-muted" :title="date">{{ $getTimeDifference(report.created) }}</span>
@@ -205,11 +203,9 @@
 		  </div>
 		</transition>
 		<div class="report-reply modal-body" v-if="responsePosted">
-			<a target="_blank">
 			  <div class="comment-user-section">	
 				<UserHoverCard :username="user.name"/>
 			  </div>
-			</a>
 			<vue-remarkable class="modal-body" :source="body" :options="{'html': true, 'breaks': true, 'typographer': true}"></vue-remarkable>
 		</div>
 		<div class="report-comments modal-body" v-if="report.children > 0">
