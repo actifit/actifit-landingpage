@@ -18,7 +18,7 @@
 	<div v-if="post.parent_author" class="col-12">
   
     <a :href="buildParentLink" class="d-flex justify-content-end align-items-center">
-		<div class="text-right">
+		<div class="">
 			<i class="fas fa-reply text-brand"></i>&nbsp;
       <UserHoverCard :username="post.parent_author" />
         </div>
