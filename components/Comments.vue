@@ -151,10 +151,7 @@
 		</transition>
 		<div class="comment-reply" v-if="responsePosted">
 			<a :href="this.user.account.name" target="_blank">
-			  <div class="comment-user-section" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }">
-					   <UserHoverCard :username="user.name"/>
-
-			  </div>
+				<UserHoverCard :username="user.name"/>
 			  <!--add here -hasan-->
 			</a>
 			<vue-remarkable class="modal-body" :source="getContent" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }" ></vue-remarkable>
