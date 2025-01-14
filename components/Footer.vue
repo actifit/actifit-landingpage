@@ -2,7 +2,7 @@
   <!-- Footer used on all pages -->
   <div class="footer bg-light">
     <div class="container py-5">
-	
+
 	<div class="columns">
 		<div class="column">
 			<img src="/img/actifit_logo_50.png" class="ml-3" style="max-height: 30px">{{$t('Actifit')}}
@@ -22,7 +22,7 @@
 			<a class="nav-link " target="_blank" href="https://hivescan.info/witnesses">{{ $t('Hive_witnesses') }}</a>
 		</div>
 	  </div>
-	
+
 	  <div class="text-center social-links mb-4">
         <a href="https://links.actifit.io/discord " target="_blank" class="d-inline-block mx-3 mt-3" :title="$t('Discord')"><i class="fab fa-2x fa-discord"></i></a>
         <a href="https://www.facebook.com/Actifit.fitness/" target="_blank" class="d-inline-block mx-3 mt-3" :title="$t('Facebook')"><i class="fab fa-2x fa-facebook"></i></a>
@@ -33,7 +33,7 @@
 		<a href="https://www.youtube.com/channel/UCNHxAGO79rXI7Hdiikwnqtw" target="_blank" class="d-inline-block mx-3 mt-3" :title="$t('Youtube')"><i class="fab fa-2x fa-youtube"></i></a>
 		<a href="https://www.linkedin.com/company/actifit-io" target="_blank" class="d-inline-block mx-3 mt-3" :title="$t('LinkedIn')"><i class="fab fa-2x fa-linkedin"></i></a>
       </div>
-	  
+
 	  <div class="row">
 		  <div class="col text-center">
 			<i>{{$t('powered_by')}}<img src="/img/HIVE.png" style="max-height: 30px;"></i>
@@ -44,7 +44,7 @@
 	  </div>
       <div class="row">
         <div class="col text-center">
-          <small class="text-muted">&copy; {{ $t('Copyright_Actifit') }} {{ currentYear }} | v1.6.3.3</small> |
+          <small class="text-muted">&copy; {{ $t('Copyright_Actifit') }} {{ currentYear }} | v1.6.4</small> |
 		  <small class="text-muted"><nuxt-link to="/privacy-policy">{{ $t('Privacy_Policy') }}</nuxt-link></small> |
 		  <small class="text-muted"><nuxt-link to="/terms-conditions">{{ $t('Terms_Conditions') }}</nuxt-link></small>
         </div>
@@ -61,7 +61,7 @@
     :showPostponeButton="false"
     >
 
-    
+
     <!-- Optional -->
     <div slot="message">
         {{ $t('cookies_notice') }}
@@ -227,7 +227,7 @@
 	  opacity: 1;
 	  visibility: visible;
 	}*/
-	
+
 	.columns {
 	  display: flex;
 	}
