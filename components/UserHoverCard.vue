@@ -2,7 +2,7 @@
   <div class="hover-card-container">
     <!-- Display based on mode -->
     <template v-if="displayMode === 'avatar-only'">
-      <a :href="'/' + username" class="avatar-only-display d-inline-flex align-items-center" 
+      <a class="avatar-only-display d-inline-flex align-items-center" 
         @mouseenter="handleMouseEnter" 
         @mouseleave="handleMouseLeave">
         <div class="user-avatar-small" 
@@ -13,18 +13,18 @@
     </template>
 
     <template v-else-if="displayMode === 'no-rank'">
-      <a :href="'/' + username" class="user-display d-inline-flex align-items-center"
-        target="_blank"
-        @mouseenter="handleMouseEnter" 
-        @mouseleave="handleMouseLeave">
-        <div class="user-avatar mr-1" :style="'background-image: url('+profImgUrl+'/u/' + username + '/avatar);'"></div>
+      <a class="user-display d-inline-flex align-items-center"
+         target="_blank"
+         @mouseenter="handleMouseEnter" 
+         @mouseleave="handleMouseLeave">
+				  <div class="user-avatar mr-1" :style="'background-image: url('+profImgUrl+'/u/' + username + '/avatar);'"></div>
         <div class="user-info">
           <small class="d-inline-block align-top">@{{ username }}</small>
         </div>
       </a>
     </template>
 
-    <template v-if="displayMode==='username-only'">
+    <template v-else-if="displayMode==='username-only'">
       <a :href="'/' + username" class="user-display align-items-center" 
          target="_blank"
          @mouseenter="handleMouseEnter" 
@@ -37,13 +37,13 @@
     </template>
     
     <template v-else>
-      <a :href="'/' + username" class="user-display d-inline-flex align-items-center" 
-        target="_blank"
-        @mouseenter="handleMouseEnter" 
-        @mouseleave="handleMouseLeave">
-        <div class="user-avatar mr-1"
-            :style="'background-image: url('+profImgUrl+'/u/' + username + '/avatar);'">
-        </div>
+      <a class="user-display d-inline-flex align-items-center" 
+         target="_blank"
+         @mouseenter="handleMouseEnter" 
+         @mouseleave="handleMouseLeave">
+        <span class="user-avatar mr-1"
+             :style="'background-image: url('+profImgUrl+'/u/' + username + '/avatar);'">
+        </span>
         <span class="user-info">
           <small class="d-inline-block align-top">@{{ username }}</small>
           <small v-if="displayMode === 'full' && !isLoadingRank && displayCoreUserRank" class="text-brand numberCircle ml-1">
