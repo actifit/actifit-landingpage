@@ -82,9 +82,7 @@
       <div v-if="delegationTransactions && delegationTransactions.length && topDelegators.hive" >
 		  <div class="row" v-for="(trx, index) in delegationTransactions" :key="index">
 			<span class="col-6 p-1">
-				<a :href="trx.user" target="_blank" >
-				  <div class="yield-avatar mb-3" :style="'background-image: url('+profImgUrl+'/u/' + trx.user + '/avatar);'"></div>
-				</a>
+
 				<UserHoverCard :username="trx.user" displayMode="no-rank"/>
 			</span>
 			<!-- amount delegated -->

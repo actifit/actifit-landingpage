@@ -25,12 +25,10 @@
 	</div>
 	<div class="modal-body comment-info acti-shadow mb-2" v-if="depth > 0">
 		<div class="main-user-info pt-2">
-			<a :href="'/' + author" target="_blank">
 			  <div class="comment-user-section" :style="{ paddingLeft: depth * indentFactor + 'px' }">	
 					   <UserHoverCard :username="author"/>
 						
 			  </div>
-			</a>
 		<!--<a :href="'/@' + author + '/' + full_data.permlink" target="_blank">-->
 			<div class="comment-user-section pt-2" :style="{ paddingLeft: depth * indentFactor + 'px' }">	
 				<a :title="$t('comment_link')" :href="buildLink" id="comment-link" ref="comment-link"><span class="date-head text-muted" :title="date">{{ $getTimeDifference(full_data.created) }}</span>&nbsp;<i class="fas fa-link"></i></a>
@@ -150,13 +148,7 @@
 		  </div>
 		</transition>
 		<div class="comment-reply" v-if="responsePosted">
-			<a :href="this.user.account.name" target="_blank">
-			  <div class="comment-user-section" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }">
-					   <UserHoverCard :username="user.name"/>
-
-			  </div>
-			  <!--add here -hasan-->
-			</a>
+				<UserHoverCard :username="user.name"/>
 			<vue-remarkable class="modal-body" :source="getContent" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }" ></vue-remarkable>
 			<!--<vue-markdown class="modal-body" v-html="responseBody" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }" ></vue-markdown>-->
 			<!--<article class="modal-body" v-html="$renderMD(responseBody)" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }" ></article>-->

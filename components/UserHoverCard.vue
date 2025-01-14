@@ -2,33 +2,57 @@
   <div class="hover-card-container">
     <!-- Display based on mode -->
     <template v-if="displayMode === 'avatar-only'">
-      <a :href="'/' + username" class="avatar-only-display" 
+      <a class="avatar-only-display d-inline-flex align-items-center" 
+        @mouseenter="handleMouseEnter" 
+        @mouseleave="handleMouseLeave">
+        <div class="user-avatar-small" 
+            :title="username"
+            :style="'background-image: url('+profImgUrl+'/u/' + username + '/avatar)'">
+        </div>
+      </a>
+    </template>
+
+    <template v-else-if="displayMode === 'no-rank'">
+      <a class="user-display d-inline-flex align-items-center"
+         target="_blank"
          @mouseenter="handleMouseEnter" 
          @mouseleave="handleMouseLeave">
-        <div class="user-avatar-small" 
-             :title="username"
-             :style="'background-image: url('+profImgUrl+'/u/' + username + '/avatar)'">
+				  <div class="user-avatar mr-1" :style="'background-image: url('+profImgUrl+'/u/' + username + '/avatar);'"></div>
+        <div class="user-info">
+          <small class="d-inline-block align-top">@{{ username }}</small>
         </div>
+      </a>
+    </template>
+
+    <template v-else-if="displayMode==='username-only'">
+      <a :href="'/' + username" class="user-display align-items-center" 
+         target="_blank"
+         @mouseenter="handleMouseEnter" 
+         @mouseleave="handleMouseLeave">
+
+        <span class="user-info">
+          <small class="d-inline-block align-top">@{{ username }}</small>
+        </span>
       </a>
     </template>
     
     <template v-else>
-      <a :href="'/' + username" class="user-display d-flex align-items-center" 
+      <a class="user-display d-inline-flex align-items-center" 
          target="_blank"
          @mouseenter="handleMouseEnter" 
          @mouseleave="handleMouseLeave">
-        <div class="user-avatar mr-1"
-             :style="'background-image: url('+profImgUrl+'/u/' + username + '/avatar)'">
-        </div>
-        <div class="user-info">
+        <span class="user-avatar mr-1"
+             :style="'background-image: url('+profImgUrl+'/u/' + username + '/avatar);'">
+        </span>
+        <span class="user-info">
           <small class="d-inline-block align-top">@{{ username }}</small>
-          <small v-if="displayMode === 'full' && displayCoreUserRank" class="text-brand numberCircle ml-1">
+          <small v-if="displayMode === 'full' && !isLoadingRank && displayCoreUserRank" class="text-brand numberCircle ml-1">
             {{ displayCoreUserRank }}
-            <span class="increased-rank" v-if="displayIncreasedUserRank">
+            <span class="increased-rank" v-if="parseFloat(displayIncreasedUserRank) > 0">
               +{{ displayIncreasedUserRank }}
             </span>
           </small>
-        </div>
+        </span>
       </a>
     </template>
     
@@ -147,11 +171,14 @@ export default {
     }
   },
 
+
   data() {
     return {
+      isLoadingRank: true,
+      currentUsername: null,
       userRankData: null,
-      displayCoreUserRank: '',
-      displayIncreasedUserRank: '',
+      displayCoreUserRank: 0.00,
+      displayIncreasedUserRank: 0.00,
       profImgUrl: process.env.hiveImgUrl,
       hiveBalance: '0',
       afitBalance: '0',
@@ -226,10 +253,7 @@ export default {
       ? process.env.steemImgUrl 
       : process.env.hiveImgUrl
 
-    // Only fetch rank data if we need to show it
-    if (this.displayMode === 'full') {
       this.fetchUserRank()
-    }
   },
 
   beforeDestroy() {
@@ -247,6 +271,15 @@ export default {
       handler(newVal) {
         if (newVal) {
           this.afitBalance = this.formattedAfitBalance
+        }
+      }
+    },
+    username: {
+      immediate: true,
+      handler(newUsername) {
+        this.currentUsername = newUsername
+        if (this.displayMode === 'full') {
+          this.fetchUserRank()
         }
       }
     }
@@ -316,20 +349,42 @@ export default {
     },
 
     async fetchUserRank() {
+      this.isLoadingRank = true
+      this.displayCoreUserRank = null
+      this.displayIncreasedUserRank = null
+      
       try {
+        if (this.currentUsername !== this.username) {
+          return
+        }
+
         const response = await fetch(`${process.env.actiAppUrl}getRank/${this.username}`)
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+        
         const rankData = await response.json()
         
-        if (rankData) {
+        if (this.currentUsername === this.username) {
           this.userRankData = rankData
-          this.displayCoreUserRank = rankData.rank_no_afitx ? parseFloat(rankData.rank_no_afitx).toFixed(2) : ''
-          this.displayIncreasedUserRank = rankData.afitx_rank ? parseFloat(rankData.afitx_rank).toFixed(2) : ''
+          this.displayCoreUserRank = (rankData && rankData.rank_no_afitx != null) 
+            ? parseFloat(rankData.rank_no_afitx).toFixed(2) 
+            : null
+            
+          this.displayIncreasedUserRank = (rankData && rankData.afitx_rank != null && parseFloat(rankData.afitx_rank) > 0)
+            ? parseFloat(rankData.afitx_rank).toFixed(2)
+            : null
         }
       } catch (error) {
         console.error('Error fetching user rank:', error)
+        this.displayCoreUserRank = null
+        this.displayIncreasedUserRank = null
+      } finally {
+        if (this.currentUsername === this.username) {
+          this.isLoadingRank = false
+        }
       }
     },
-
     async fetchUserData() {
       try {
         const chainLnk = localStorage.getItem('cur_bchain') === 'STEEM' ? steem : hive
@@ -477,4 +532,16 @@ export default {
   &:hover
     background: darken(#ff112d, 10%) !important
     color: white !important
+.user-avatar, .user-avatar-small
+  width: 32px
+  height: 32px
+  background-position: center
+  background-size: cover
+  border-radius: 50%
+  display: inline-block
+  vertical-align: middle
+
+.user-avatar-small
+  width: 24px
+  height: 24px
 </style>

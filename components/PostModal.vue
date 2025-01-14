@@ -19,7 +19,7 @@
 		  <div class="row col-12">
 			
 			<div class="text-right col-12">
-			<i class="fas fa-reply text-brand"></i>&nbsp;{{$t('viewing_comment_note')}}<span class="user-avatar mr-1 float-right" :style="'background-image: url('+profImgUrl+'/u/' + post.parent_author + '/avatar)'"></span>
+			<i class="fas fa-reply text-brand"></i>&nbsp;{{$t('viewing_comment_note')}}
 			<UserHoverCard :username="post.parent_author"/>
 			</div>
 			
@@ -219,11 +219,9 @@
 		  </div>
 		</transition>
 		<div class="post-reply modal-body" v-if="responsePosted">
-			<a :href="this.user.name" target="_blank">
 			  <div class="comment-user-section">	
 				<UserHoverCard :username="user.name"/>
 			  </div>
-			</a>
 			<vue-remarkable class="modal-body" :source="body" :options="{'html': true, 'breaks': true, 'typographer': true}"></vue-remarkable>
 		</div>
 		<div class="post-comments modal-body" v-if="post.children > 0">
@@ -924,6 +922,9 @@ import UserHoverCard from './UserHoverCard.vue'
 </script>
 
 <style>
+	.modal-dialog {
+	transform: none !important;
+	}
 	.modal-author{
 		margin-left: 10px !important;
 	}

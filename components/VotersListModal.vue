@@ -30,9 +30,8 @@
 				<!-- voter, percent, reputation, rshares -->
 				<tr v-for="(voteEntry, key) in activeVotersList" :key="key" :class="{'bg-danger': user && user.name === voteEntry.voter, 'text-white': user && user.name === voteEntry.voter}">
 				  <td>
-					<a :href="'/'+voteEntry.voter" target="_blank" :class="{'text-white': user && user.name === voteEntry.voter}">
-						@{{ voteEntry.voter }}
-					</a>
+						<UserHoverCard :username="voteEntry.voter" displayMode="username-only"/>
+
 				  </td>
 				  <td>
 					<i v-if="voteEntry.percent >= 0 || voteEntry.rshares >= 0" class="fas fa-thumbs-up text-green"></i>
@@ -55,6 +54,7 @@
   let totalPayout;
   let voteRshares;
   let ratio;
+  import UserHoverCard from '~/components/UserHoverCard.vue';
   
   export default {
 	data () {
@@ -68,7 +68,7 @@
 	},
     props: [ 'modalTitle', 'votersList', 'postData' ],
 	components: {
-	  
+	  UserHoverCard,
 	},
 	computed: {
       ...mapGetters('steemconnect', ['user']),
