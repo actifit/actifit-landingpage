@@ -204,9 +204,11 @@
 			</div>
 		  </transition>
 		  <div class="report-reply col-md-12" v-if="responsePosted">
+			  <a target="_blank">
 				<div class="comment-user-section">	
 					<UserHoverCard :username="user.account.name"/>
 				</div>
+			  </a>
 			  <vue-remarkable :source="responseBody" :options="{'html': true, 'breaks': true, 'typographer': true}" ></vue-remarkable>
 		  </div>
 		  <div class="report-comments modal-body" v-if="report.children > 0">
