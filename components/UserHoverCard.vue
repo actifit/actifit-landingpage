@@ -24,7 +24,7 @@
       </a>
     </template>
 
-    <template v-else-if="displayMode==='username-only'">
+    <template v-if="displayMode==='username-only'">
       <a :href="'/' + username" class="user-display align-items-center" 
          target="_blank"
          @mouseenter="handleMouseEnter" 
@@ -35,6 +35,7 @@
         </span>
       </a>
     </template>
+  
     
     <template v-else>
       <a class="user-display d-inline-flex align-items-center" 

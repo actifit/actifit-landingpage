@@ -149,6 +149,7 @@
     });
         $(this.$refs.loginModal).on('hidden.bs.modal', () => {
       document.title = this.originalTitle;
+      this.resetform();
     });
           console.log('load recaptcha')
           await this.$recaptchaLoaded()
@@ -186,12 +187,11 @@
           this.captchaValid = false;
         },
         setHiveauthLoginStatus (json){
-          
           let acct_data = json.HIVE;
           
           let userSC = new Object();
           userSC.account = acct_data;
-          //append proper login data for SC, while making sure this is recognized as a normal login
+          
           this.is_logged_in = true;
           this.$store.commit('setStdLoginUser', true);
           localStorage.setItem('acti_login_method', 'hiveauth');
@@ -203,16 +203,14 @@
           this.$store.commit('steemconnect/login', userSC);
           this.closeModal();
           this.resetForm();
+          this.$store.dispatch('steemconnect/refreshUser');
+          this.$store.dispatch('fetchModerators');
         },
         setKeychainLoginStatus (json){
           console.log('keychain login');
           console.log(json);
           if (json && json.HIVE){
-              
-              //hide captcha as well
               const recaptcha = this.$recaptchaInstance
-              
-              // Hide reCAPTCHA badge:
               recaptcha.hideBadge();
               
               let acct_data = json.HIVE;
@@ -229,6 +227,11 @@
               this.$store.commit('steemconnect/login', userSC);
               this.closeModal();
               this.resetForm();
+              
+              // refresh user data without page reload
+              this.$store.dispatch('steemconnect/refreshUser');
+              this.$store.dispatch('fetchModerators');
+            
           }else{
               //display error message
               this.error_proceeding = true;
@@ -240,15 +243,11 @@
         setUserLoginStatus (json) {
           this.is_logged_in = json.success; 
           
-          //console.log(json);
           if (json.success && json.token){
-          
               //hide captcha as well
               const recaptcha = this.$recaptchaInstance
-  
               // Hide reCAPTCHA badge:
               recaptcha.hideBadge();
-          
               localStorage.setItem('actiToken', json.token);
               
               let userSC = new Object();
@@ -260,15 +259,16 @@
               localStorage.setItem('std_login_name', userSC.account.name)
               localStorage.setItem('acti_login_method', '');
               this.$store.commit('steemconnect/login', userSC);
-              this.$emit('login-successful');
               this.closeModal();
               this.resetForm();
+              this.$store.dispatch('steemconnect/refreshUser');
+              this.$store.dispatch('fetchModerators');
+              
+              this.$emit('login-successful');
           }else{
-              //display error message
               this.error_proceeding = true;
               this.login_in_progress = false;
               this.error_msg = this.$t('login_error');
-              return;
           }
         },
         verifyHiveauth (challenge, data){
