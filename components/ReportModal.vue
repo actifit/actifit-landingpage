@@ -15,21 +15,24 @@
           </button>
 		</div>
         <div class="main-user-info">
+			<div class="pl-4">
+
 			<div class="p-1">
 				
 					<UserHoverCard :username="report.author"/>
 				
-				  <span>
+				  <div>
 					<span class="date-head text-muted" :title="date">{{ $getTimeDifference(report.created) }}</span>
 					<a :href="'/@' + this.report.author + '/' + this.report.permlink"><i class="fas fa-link text-brand"></i></a>
 					<i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent" ></i>
 					<i v-if="!showTranslated" class="fa-solid fa-language text-brand" v-on:click="translateContent"></i>
-				</span>
+				  </div>
 			</div>
           
 		<div class="modal-header">
 			<div class="report-tags p-1" v-html="displayReportTags"></div>
 		</div>
+	</div>
 		</div>
 		<div v-if="showTranslated" class="translation-notice">
 			<span>{{ $t('auto_translated_content') }}</span>

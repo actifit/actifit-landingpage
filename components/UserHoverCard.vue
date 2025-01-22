@@ -24,8 +24,8 @@
       </a>
     </template>
 
-    <template v-else-if="displayMode==='username-only'">
-      <a :href="'/' + username" class="user-display align-items-center" 
+    <template v-if="displayMode==='username-only'">
+      <a class="user-display align-items-center" 
          target="_blank"
          @mouseenter="handleMouseEnter" 
          @mouseleave="handleMouseLeave">
@@ -36,17 +36,18 @@
       </a>
     </template>
     
+    
     <template v-else>
       <a class="user-display d-inline-flex align-items-center" 
          target="_blank"
          @mouseenter="handleMouseEnter" 
          @mouseleave="handleMouseLeave">
-        <span class="user-avatar mr-1"
+        <div class="user-avatar mr-1"
              :style="'background-image: url('+profImgUrl+'/u/' + username + '/avatar);'">
-        </span>
+        </div>
         <span class="user-info">
           <small class="d-inline-block align-top">@{{ username }}</small>
-          <small v-if="displayMode === 'full' && !isLoadingRank && displayCoreUserRank" class="text-brand numberCircle ml-1">
+          <small v-if="displayMode === 'full' && !isLoadingRank && displayCoreUserRank" class="inline-rank-badge ml-1">
             {{ displayCoreUserRank }}
             <span class="increased-rank" v-if="parseFloat(displayIncreasedUserRank) > 0">
               +{{ displayIncreasedUserRank }}
@@ -468,6 +469,22 @@ export default {
   border-radius: 10px
   border: 2px solid white
 
+.inline-rank-badge
+  background: #ff112d
+  color: white
+  font-size: 0.75rem
+  padding: 4px 6px
+  border-radius: 10px
+  display: inline-flex
+  align-items: center
+  line-height: 1
+  transform: translateY(-4px)
+  position: relative
+  border: 2px solid white
+  box-shadow: 0 0 0 2px #ff112d
+  
+  .increased-rank
+    margin-left: 3px
 .balance-section
   background: #f8f9fa
   padding: 1rem
