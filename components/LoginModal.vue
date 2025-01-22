@@ -149,7 +149,7 @@
     });
         $(this.$refs.loginModal).on('hidden.bs.modal', () => {
       document.title = this.originalTitle;
-      this.resetform();
+      this.resetForm();
     });
           console.log('load recaptcha')
           await this.$recaptchaLoaded()
