@@ -9,7 +9,7 @@
 	<div v-else-if="errorDisplay==''" class="container pt-5 mt-5 pb-5 col-md-9" >
 		<h5 class="text-brand user-name" v-if="displayUser">
 			<a :href="formattedProfileUrl" target="_blank" class="p-2">@{{ displayUser }} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></a>
-			<span v-if="user && user.account.name === displayUser">
+			<span v-if="user && user.account.name === displayUser && !account_banned">
 				<span v-show="!editOn">
 					<a class="p-2"><i class="fas fa-edit" v-on:click="turnEditOn"></i></a>
 				</span>
@@ -40,107 +40,107 @@
 		<h5 class="text-brand user-name" v-else-if="!noUserFound">
 			<a :href="formattedProfileUrl" target="_blank">@{{ displayUser }}</a>
 		</h5>
-		
+
 		<div > <!-- class="d-flex flex-row" -->
         <!-- actifit specific data display -->
 		<div class="mb-3 row"> <!-- d-flex flex-column  -->
 		  <div v-if="displayUser" class="col-12 col-md-2">
 
-			<div class="user-avatar large-avatar mr-1 mb-3 col-12 col-md-12 float-left" 
-				:style="'background-image: url('+this.profImgUrl+'/u/' + this.displayUser + '/avatar)'">
+        <div class="user-avatar large-avatar mr-1 mb-3 col-12 col-md-12 float-left"
+          :style="'background-image: url('+this.profImgUrl+'/u/' + this.displayUser + '/avatar)'">
 
-				<span v-if="editOn" class="profileButtonMove">
-					<a href="#" class="btn btn-brand p-2 acti-shadow square-btn" data-toggle="modal" data-target="#profileImageModal" v-on:click="showProfileImageModal">
-						<i class="fas fa-edit"></i>
-					</a>
-				</span>
-			</div>
-				
-				<div>
+          <span v-if="!account_banned && editOn" class="profileButtonMove">
+            <a href="#" class="btn btn-brand p-2 acti-shadow square-btn" data-toggle="modal" data-target="#profileImageModal" v-on:click="showProfileImageModal">
+              <i class="fas fa-edit"></i>
+            </a>
+          </span>
+        </div>
+
+				<div v-if="!account_banned">
 					<a :href="'/activity/'+displayUser" class="btn btn-brand btn-white border" :class="smallScreenBtnClasses"><img src="/img/actifit_logo.png" class="mr-2 token-logo">&nbsp;{{ $t('Actifit_reports') }}</a>
-				
+
 					<a :href="'/' + displayUser+'/blog'" class="btn btn-brand btn-white border" :class="smallScreenBtnClasses"><img src="/img/HIVE.png" class="mr-2 token-logo">&nbsp;{{ $t('Hive_blog') }}</a>
-				
+
 					<a :href="'/' + displayUser+'/videos'" class="btn btn-brand btn-white border" :class="smallScreenBtnClasses"><img src="/img/3speak.png" class="mr-2 token-logo">&nbsp;{{ $t('Threespeak_videos') }}</a>
-					
+
 					<a :href="'/' + displayUser+'/comments'" class="btn btn-brand btn-white border" :class="smallScreenBtnClasses"><i class="far fa-comments"></i>&nbsp;{{ $t('Hive_comments') }}</a>
-					
+
 					<a :href="'/' + displayUser+'/wallet'" class="btn btn-brand btn-white border" :class="smallScreenBtnClasses"><i class="fas fa-solid fa-wallet"></i>&nbsp;{{ $t('wallet.wallet') }}</a>
 				</div>
 		  </div>
 
-		  <div class="acti-widget m-2 row col-12 col-md-9" v-if="displayUser">
-			<div class="row col-md-4 col-12">
-				<div class="text-center info-box-green col-6"><div class="phishy"><h6>Latest Activity Count</h6></div>
-							<span>{{ lastActivityCount }} <img src="/img/actifit_logo.png" class="activity-small-logo"></span></div>
-							
-				<div class="text-center info-box-green col-6"><div class="phishy"><h6>Latest Activity Date</h6></div>
-							<div><h6>{{ lastActivityDate }}</h6></div></div>
-				
-				<div class="text-center">
-					<div class="">
-						<a href="#" data-toggle="modal" class="btn btn-brand btn-block p-2 acti-shadow" 
-								 data-target="#activityChartModal" v-if="isFriend() || isOwnAccount()">
-							{{ $t('View_activity_chart') }}
-						</a>
-						<a href="#" class="btn btn-brand btn-block p-2 acti-shadow" v-on:click="displayAddFriendActivity=!displayAddFriendActivity" v-else-if="user" >
-							{{ $t('View_activity_chart') }}
-						</a>
-						<a href="#" class="btn btn-brand btn-block p-2 acti-shadow" v-on:click="displayLoginActivity=!displayLoginActivity" v-else >
-							{{ $t('View_activity_chart') }}
-						</a>
-					</div>
-					<div v-if="displayAddFriendActivity" class="col-12 border row text-brand">
-						{{ $t('View_chart_notice').replace('_USER', this.username) }}
-						<span :title="$t('add_username_friend').replace('_USERNAME_', displayUser)" v-on:click="addFriend">
-							<i class="fas fa-user-plus p-2 acti-shadow"></i>
-							<div v-if="addFriendError" v-html="addFriendError"></div>
-						</span>
-					</div>
-					<div class="col-12" v-if="displayLoginActivity">
-						  <div class="row">
-							<a href="#" data-toggle="modal" data-target="#loginModal" @click="showModalFunc" class="btn btn-brand btn-lg w-75">{{ $t('Login') }}</a>
-							<a href="/signup" class="btn btn-brand w-50">{{ $t('Sign_Up') }}</a>
-						  </div>
-					</div>
-				</div>
-			
+		  <div class="acti-widget m-2 row col-12 col-md-9" v-if="displayUser && !account_banned">
+        <div class="row col-md-4 col-12">
+          <div class="text-center info-box-green col-6"><div class="phishy"><h6>Latest Activity Count</h6></div>
+                <span>{{ lastActivityCount }} <img src="/img/actifit_logo.png" class="activity-small-logo"></span></div>
+
+          <div class="text-center info-box-green col-6"><div class="phishy"><h6>Latest Activity Date</h6></div>
+                <div><h6>{{ lastActivityDate }}</h6></div></div>
+
+          <div class="text-center">
+            <div class="">
+              <a href="#" data-toggle="modal" class="btn btn-brand btn-block p-2 acti-shadow"
+                  data-target="#activityChartModal" v-if="isFriend() || isOwnAccount()">
+                {{ $t('View_activity_chart') }}
+              </a>
+              <a href="#" class="btn btn-brand btn-block p-2 acti-shadow" v-on:click="displayAddFriendActivity=!displayAddFriendActivity" v-else-if="user" >
+                {{ $t('View_activity_chart') }}
+              </a>
+              <a href="#" class="btn btn-brand btn-block p-2 acti-shadow" v-on:click="displayLoginActivity=!displayLoginActivity" v-else >
+                {{ $t('View_activity_chart') }}
+              </a>
+            </div>
+            <div v-if="displayAddFriendActivity" class="col-12 border row text-brand">
+              {{ $t('View_chart_notice').replace('_USER', this.username) }}
+              <span :title="$t('add_username_friend').replace('_USERNAME_', displayUser)" v-on:click="addFriend">
+                <i class="fas fa-user-plus p-2 acti-shadow"></i>
+                <div v-if="addFriendError" v-html="addFriendError"></div>
+              </span>
+            </div>
+            <div class="col-12" v-if="displayLoginActivity">
+                <div class="row">
+                <a href="#" data-toggle="modal" data-target="#loginModal" @click="showModalFunc" class="btn btn-brand btn-lg w-75">{{ $t('Login') }}</a>
+                <a href="/signup" class="btn btn-brand w-50">{{ $t('Sign_Up') }}</a>
+                </div>
+            </div>
+          </div>
+
 			</div>
 			<div class="col-md-8 col-12 row">
-				
+
 				<div class="col-4 info-box-green">
 					<!--<img src="https://cdn.steemitimages.com/DQmdnh1nApZieHZ3s1fEhCALDjnzytFwo78zbAY5CLUMpoG/TRACKM.png">-->
 						<div class="text-center">
 							<div class="phishy"><img class="float-left" src="https://usermedia.actifit.io/height.png"><h6>Height</h6></div>
 							<h6>{{ lastHeight + ' '+heightUnit }}</h6></div>
-						
+
 						<div class="text-center">
 							<div class="phishy"><img class="float-left" src="https://usermedia.actifit.io/weight.png"><h6>Weight</h6></div>
 							<h6>{{ lastWeight+' '+weightUnit}}</h6></div>
-						
+
 				</div>
 				<div class="col-4 info-box-green">
 					<div class="text-center"><div class="phishy"><img class="float-left" src="https://usermedia.actifit.io/bodyfat.png"><h6>Body Fat</h6></div>
 						<h6>{{ lastBodyfat+' % '}}</h6></div>
-					
+
 					<div class="text-center"><div class="phishy"><img class="float-left" src="https://usermedia.actifit.io/chest.png"><h6>Chest</h6></div></div>
 						<div class="text-center"><h6>{{ lastChest+' '+chestUnit }}</h6></div>
-					
+
 				</div>
 
 				<div class="col-4 info-box-green">
 					<div class="text-center"><div class="phishy"><img class="float-left" src="https://usermedia.actifit.io/waist.png"><h6>Waist</h6></div></div>
 						<div class="text-center"><h6>{{ lastWaist+' '+waistUnit }}</h6></div>
-					
+
 					<div class="text-center"><div class="phishy"><img class="float-left" src="https://usermedia.actifit.io/thighs.png"><h6>Thighs</h6></div></div>
 						<div class="text-center"><h6>{{ lastThighs+' '+thighsUnit }}</h6></div>
-					
-					
+
+
 				</div>
-				
+
 				<div class="col-6">
-			
-					<a href="#" data-toggle="modal" class="btn btn-brand btn-block" 
+
+					<a href="#" data-toggle="modal" class="btn btn-brand btn-block"
 							 data-target="#measureChartModal" v-if="isFriend() || isOwnAccount()">
 						{{ $t('Stats_chart') }}
 					</a>
@@ -150,15 +150,15 @@
 					<a href="#" class="btn btn-brand btn-block" v-on:click="displayLoginStats=!displayLoginStats" v-else >
 						{{ $t('Stats_chart') }}
 					</a>
-			
+
 				</div>
-				
+
 				<div class="col-6">
 					<div class="font-italic text-right" v-if="lastUpdated!='' && lastUpdated!='-'">
 						<small>Last Updated On {{ pureDate(lastUpdated) }}</small>
 					</div>
 				</div>
-				
+
 				<div v-if="displayAddFriendStats" class="border text-brand col-12">
 					{{ $t('View_chart_notice').replace('_USER', this.username) }}
 					<span class="col-12" :title="$t('add_username_friend').replace('_USERNAME_', displayUser)" v-on:click="addFriend">
@@ -173,11 +173,11 @@
 					  </div>
 				</div>
 			</div>
-			
+
 		  </div>
 		</div>
 		  <div class="d-flex flex-column">
-			
+
 		  <div v-if="userinfo" class="user-details">
 
 			<div class="info-box p-2">
@@ -186,8 +186,8 @@
 				</div>
 				<span v-else>
 					<span v-if="!usernameEditOn">
-						<i class="fas fa-user mr-2"></i> 
-						{{ textAreaUsernameValue }} 
+						<i class="fas fa-user mr-2"></i>
+						{{ textAreaUsernameValue }}
 					</span>
 					<span v-else>
 						<textarea v-model="textAreaUsernameValue"></textarea>
@@ -206,7 +206,7 @@
 					</b-badge>
 				</span>
 			</div>
-			<div class="row m-0">
+			<div class="row m-0" v-if="!account_banned">
 
 
 				<div class="location-text info-box col-md-4 cntnr">
@@ -215,7 +215,7 @@
 					</div>
 					<span v-else>
 						<span v-if="!locationEditOn">
-							<i class="fas fa-street-view mr-2"></i> 
+							<i class="fas fa-street-view mr-2"></i>
 							{{ textAreaLocationValue }}
 						</span>
 						<span v-else>
@@ -230,16 +230,16 @@
 						<a class="btn btn-brand p-2 acti-shadow square-btn" v-if="editOn && !locationEditOn" v-on:click="turnLocationEditOn"><i class="fas fa-edit" ></i></a>
 					</span>
 				</div>
-				
+
 
 				<div class="info-box col-md-4 cntnr">
 					<div v-if="updatingField === 'description'" class="d-flex justify-content-center align-items-center h-100">
 					<i class="fas fa-spinner fa-spin text-brand"></i>
 				</div>
-					
+
 					<span v-else>
 						<span v-if="!descriptionEditOn">
-							<i class="fas fa-address-card mr-2"></i> 
+							<i class="fas fa-address-card mr-2"></i>
 							{{ textAreaDescriptionValue }}
 						</span>
 						<span v-else>
@@ -279,7 +279,7 @@
 					</span>
 				</div>
 			</div>
-			<div class="row m-0">
+			<div v-if="!account_banned" class="row m-0">
 				<div class="info-box col-md-12 cntnr"><i class="fas fa-calendar-alt mr-2"></i> {{ $t('Joined_On') }} {{ pureDate(userinfo.created) }}</div>
 				<!--<div class="info-box col-md-6 cntnr"><i class="fas fa-pen mr-2"></i> {{ numberFormat(userinfo.post_count, 0) }} {{ $t('Steem_posts_comments') }}</div>-->
 			</div>
@@ -296,14 +296,14 @@
 					</span>
 					<div v-html="$t('posh_desc_profile')"></div>
 				</div>
-				
+
 				<div class="friends-count mb-2 mt-2 info-box info-box-orange col-md-12 cntnr">
 					<i class="fas fa-user-friends text-brand mr-2"></i>
 					{{ this.userFriends.length }} {{ $t('friends') }}
 					<div>
 					<span>
-						<UserHoverCard v-for="friend in displayedFriends" 
-									:key="friend.friend" 
+						<UserHoverCard v-for="friend in displayedFriends"
+									:key="friend.friend"
 									:username="friend.friend" displayMode="avatar-only"/>
 						<span v-if="userFriends.length > maxFriendDisplay">
 						+ {{ userFriends.length - maxFriendDisplay }} {{ $t('other') }} {{ $t('friends') }}
@@ -312,35 +312,35 @@
 					<a class="btn btn-brand m-2" href="./friends">{{ $t('View_friends') }}</a>
 					</div>
 				</div>
-				
+
 				<div class="info-box-orange mb-2 col-md-12 cntnr">
 					<i class="fab fa-angellist mr-2"></i><a :href="'/activity/'+displayUser" >{{ numberFormat(rewardedPostCount, 0) }} {{ $t('Activity_Reports_Rewarded') }}
 					<img src="/img/actifit_logo.png" class="mr-2 token-logo">
 					</a>&nbsp;
 					<a :href="'/activity/'+displayUser" class="btn btn-brand border m-2">{{ $t('View_reports') }}</a>
 				</div>
-				<!--<i class="fas fa-pen mr-2"></i>--> 
+				<!--<i class="fas fa-pen mr-2"></i>-->
 				<div class="info-box-orange mb-2 col-md-12 cntnr">
 					<a :href="'/' + displayUser+'/blog'" ><i class="fas fa-solid fa-book mr-2"></i>{{ numberFormat(userinfo.post_count, 0) }} {{ $t('Steem_posts_comments') }}
 					<img src="/img/HIVE.png" class="mr-2 token-logo">
 					</a>&nbsp;
 					<a :href="displayUser+'/blog'" class="btn btn-brand border m-2">{{ $t('View_blog') }}</a>
 				</div>
-				
-				
+
+
 				<!-- display splinerlands data -->
 				<div class="info-box-orange mb-2 col-md-12 cntnr">
 					<i class="fa-solid fa-gamepad mr-2"></i>{{$t('Splinterlands')}}<img src="https://d36mxiodymuqjm.cloudfront.net/website/icons/img_icon_splinterlands.svg" class="mr-2 user-menu-container" :alt="$t('Splinterlands')" :title="$t('Splinterlands')">
 					<a href="#" data-toggle="modal" data-target="#notifyModal"><i class="fas fa-info-circle" :title="$t('view_details')"></i></a>
 					<div v-if="splinterRarities!=null && splinterRarities.length >0">
-						<div>{{$t('Common')}}: {{splinterRarities[1]}} {{$t('Cards')}} 
+						<div>{{$t('Common')}}: {{splinterRarities[1]}} {{$t('Cards')}}
 							<span v-if="parseInt(splinterRarities[1]) >= 10"><i class="fas fa-check text-success"></i>{{$t('splinter_extra_rewards_common')}}</span>
 						</div>
 						<div>{{$t('Rare')}}: {{splinterRarities[2]}} {{$t('Cards')}}
 							<span v-if="parseInt(splinterRarities[2]) >= 10"><i class="fas fa-check text-success"></i>{{$t('splinter_extra_rewards_rare')}}</span>
 						</div>
 						<div>{{$t('Epic')}}: {{splinterRarities[3]}} {{$t('Cards')}}
-							<span v-if="parseInt(splinterRarities[3]) >= 10"><i class="fas fa-check text-success"></i>{{$t('splinter_extra_rewards_epic')}}</span>						
+							<span v-if="parseInt(splinterRarities[3]) >= 10"><i class="fas fa-check text-success"></i>{{$t('splinter_extra_rewards_epic')}}</span>
 						</div>
 						<div>{{$t('Legendary')}}: {{splinterRarities[4]}} {{$t('Cards')}}
 							<span v-if="parseInt(splinterRarities[4]) >= 10"><i class="fas fa-check text-success"></i>{{$t('splinter_extra_rewards_legendary')}}</span>
@@ -350,7 +350,7 @@
 						{{ $t('Play_splinterlands') }}
 					</a>
 				</div>
-				
+
 				<!--  {{ numberFormat(video_count_3s, 0) }} -->
 				<div class="info-box-orange mb-2 col-md-12 cntnr">
 					<a :href="'/' + displayUser+'/videos'" ><i class="fas fa-solid fa-video mr-2"></i>{{ numberFormat(video_count_3s, 0) }} {{ $t('Videos_3speak') }}
@@ -358,7 +358,7 @@
 					</a>&nbsp;
 					<a :href="displayUser+'/videos'" class="btn btn-brand border m-2">{{ $t('View_videos') }}</a>
 				</div>
-				
+
 				<div class="info-box-orange mb-2 col-md-6 cntnr"><i class="fas fa-angle-double-left text-brand mr-2"></i>{{ $t('Followers') }}: {{ getFollowerCount }}</div>
 				<div class="info-box-orange mb-2 col-md-6 cntnr"><i class="fas fa-angle-double-right text-brand mr-2"></i>{{ $t('Following') }}: {{ getFollowingCount }}</div>
 				<div class="info-box-orange mb-2 col-md-6 cntnr">
@@ -369,8 +369,8 @@
 					<div v-else>
 						<i class="fas fa-cubes text-brand mr-2"></i>&nbsp;<button class="btn btn-brand border" v-on:click="voteWitness" >{{ $t('Vote_Now_Actifit_Witness') }}</button>
 					</div>
-				
-					<div v-if="voteWitnessDisplay">  
+
+					<div v-if="voteWitnessDisplay">
 						<div v-if="!isKeychainLogin() && isStdLogin() && !isHiveauthLogin()">
 							<label for="p-ac-key" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 							<input type="password" id="p-ac-key" name="p-ac-key" ref="p-ac-key" class="form-control-lg w-50 p-2">
@@ -385,11 +385,11 @@
 						  {{ this.error_msg }}
 						</div>
 					</div>
-				</div>				
+				</div>
 				<div class="info-box-orange mb-2 col-md-6 cntnr" v-if="actifitDelegator"><i class="fas fa-file-invoice-dollar text-brand mr-2"></i>&nbsp;{{ $t('Delegates_to_Actifit') }} {{ actifitDelegator.steem_power }} {{ $t('Hive_Power') }}</div>
 				<div class="info-box-orange mb-2 col-md-6 cntnr" v-else><i class="fas fa-file-invoice-dollar text-brand"></i>&nbsp;<a class="btn btn-brand" href="/wallet" target="_blank">{{ $t('Delegate_Now_Actifit') }}</a></div>
 			</div>
-			
+
 			<div class="text-brand" v-if="!account_banned" >
 				<div class="row m-0">
 					<div class="info-box-orange mb-2 col-md-6 cntnr">
@@ -404,7 +404,7 @@
 						</div>
 					</div>
 					<div class="info-box-orange mb-2 col-md-6 cntnr">
-						
+
 						<a href="/wallet" >
 						<!--<img src="/img/AFITX.png" class="mr-2 token-logo">{{ displayAFITXBal }} {{ $t('AFITX_Tokens') }} <br/>-->
 						<img src="/img/AFITX.png" class="mr-2 token-logo">{{ displayAFITXHEBal }} {{ $t('AFITX_HE_Tokens') }}
@@ -435,9 +435,9 @@
 				</div>
 			</div>
 		  </div>
-		  
+
 			<!--<adsbygoogle ad-slot="8625360638" :ad-style="acti_goog_ad_square"/>-->
-			
+
 		  <!-- badges section -->
 		  <div v-if="userinfo && !account_banned" class="user-badges">
 		    <h3 class="text-brand badges-title"><i class="fas fa-trophy"></i> {{ $t('Badges') }}</h3>
@@ -453,10 +453,10 @@
 				</div>
 			  </div>
 			</div>
-			
+
 			<div class="badge-entry rew-activity-badge">
 			  <div class="badge-title">{{ $t('rew_activity_badge_title') }}</div>
-			  <div v-for="level in rewarded_posts_rules" :key="level[1]" 
+			  <div v-for="level in rewarded_posts_rules" :key="level[1]"
 				class="single-rew-activity-badge" :style="{left: (level[1]-1) * activ_badge_indent + 'px'}"
 				:title="$t('rew_activity_badge_level_title') + ' ' + level[1]">
 				<div v-if="level[1] > 0 && level[1] <= maxClaimedActivityBadgeLevel()">
@@ -479,7 +479,7 @@
 				</div>
 			  </div>
 			</div>
-			
+
 			<div class="badge-entry doubledup-activity-badge">
 				<div class="badge-title">{{ $t('doubledup_badge_title') }}</div>
 				<div :title="$t('doubledup_badge_title')">
@@ -492,7 +492,7 @@
 					</div>
 				</div>
 			</div>
-			
+
 			<div class="badge-entry charity-activity-badge">
 				<div class="badge-title">{{ $t('charity_badge_title') }}</div>
 				<div :title="$t('charity_badge_title')">
@@ -505,11 +505,11 @@
 					</div>
 				</div>
 			</div>
-			
+
 			<div v-if="claimError">{{ claimErrorDesc }}</div>
 		  </div>
 		  </div>
-        
+
 		</div>
 	</div>
 	<div v-else class="container pt-5 mt-5 pb-5" >
@@ -518,7 +518,7 @@
 		</div>
 	</div>
 	<MeasureChartModal :userMeasurements="userMeasurements"	/>
-	
+
 	<ActivityChartModal :userActivity="userActivity"	/>
     <ProfileImageModal
       :username="this.user.account.name"
@@ -526,9 +526,9 @@
       @close="closeProfileImageModal"
       @image-changed="updateProfileImage"
     />
-	
+
 	<NotifyModal :modalTitle="$t('Actifit_Info')" :modalText="$t('splinterlands_extra_rewards_desc')"/>
-	
+
 	<Footer />
 	<client-only>
       <div>
@@ -548,32 +548,32 @@
   import Footer from '~/components/Footer'
 
   import steem from 'steem'
-  
+
   import hive from '@hiveio/hive-js'
-  
+
   import blurt from '@blurtfoundation/blurtjs'
-  
+
   import {mapGetters} from 'vuex'
-  
+
   import Vue from 'vue'
-  
+
   import MeasureChartModal from '~/components/MeasureChartModal'
-  
+
   import ActivityChartModal from '~/components/ActivityChartModal'
 
   import ProfileImageModal from '~/components/ProfileImageModal'
-  
+
   /* import badges component */
   import { BadgePlugin } from 'bootstrap-vue'
   Vue.use(BadgePlugin)
-  
+
   import SSC from 'sscjs'
   //const ssc = new SSC(process.env.steemEngineRpc);
-  
+
   const hsc = new SSC(process.env.hiveEngineRpc);
-  
+
   import NotifyModal from '~/components/NotifyModal'
-  
+
   import Lodash from 'lodash';
 
   export default {
@@ -611,7 +611,7 @@
 			userAFITSETokenCount: '',
 			userAFITXSETokenCount: '',
 			userAFITHETokenCount: '',
-			userAFITXHETokenCount: '',			
+			userAFITXHETokenCount: '',
 			isoParticipant: [],
 			doubledupWinner: [],
 			charityDonor: [],
@@ -742,7 +742,7 @@
 	  ...mapGetters('steemconnect', ['stdLogin']),
 	  ...mapGetters(['newlyVotedPosts', 'bchain']),
 	  ...mapGetters(['userTokens'],['commentEntries'], 'commentCountToday'),
-	
+
 	  displayUsersNames(){
 		return this.getUsersName();
 	  },
@@ -817,14 +817,14 @@
 		/*if (!isNaN(this.follower_count)){
 			return '';
 		}*/
-		
+
 		return this.numberFormat(this.follower_count,0);
 	  },
 	  getFollowingCount() {
 		/*if (!isNaN(this.following_count)){
 			return '';
 		}*/
-		
+
 		return this.numberFormat(this.following_count,0);
 	  },
 	  formattedProfileUrl () {
@@ -936,7 +936,7 @@
 			this.usernameEditOn = false;
 			this.descriptionEditOn = false;
 			this.locationeditOn = false;
-			return;	
+			return;
 		},
 		async broadcastUpdate(updateData, field) {
 			if(this.user.account.posting_json_metadata === ''){
@@ -963,18 +963,18 @@
 			let parsedData = JSON.parse(this.user.account.posting_json_metadata);
 
 			//only update the edited field and then send all in the transaction
-			
+
 				parsedData.profile.location = this.textAreaLocationValue;
-			
-			
+
+
 				parsedData.profile.about = this.textAreaDescriptionValue;
-			
-			
+
+
 				parsedData.profile.website = this.textAreaLinkValue;
-			
-			
+
+
 				parsedData.profile.name = this.textAreaUsernameValue;
-			
+
 			if(field === 'profile_image'){
 				parsedData.profile.profile_image = updateData; //get the link
 			}
@@ -989,7 +989,7 @@
 				}
 			}
 
-			let transaction = 			
+			let transaction =
 					{account: this.user.account.name,
 					json_metadata: '',
 					posting_json_metadata: JSON.stringify(pst),
@@ -1004,7 +1004,7 @@
 			this.closeProfileImageModal();
 			this.linkForImage = imageUrl; // Update the profile image link
 		},
-		
+
 		async saveFunc(field) {
 		this.updatingField = field;
 		let updatePromise;
@@ -1070,7 +1070,7 @@
 	  },
 	  /**
 	  * function handles mapping and calculating relevant score
-	  * params: 
+	  * params:
 	  * * 2D array providing couplets of rules
 	  * * factor multipier for data
 	  * * current value to compare
@@ -1079,10 +1079,10 @@
 		var result;
 		for (var i=0; i<rules_array.length; i++){
 			var rule = rules_array[i];
-			
+
 			//default until we find a larger range that fits better
 			result = rule[1];
-			
+
 			if (parseInt(value) <= parseInt(rule[0])){
 				break;
 			}
@@ -1102,22 +1102,22 @@
 				return {success: false, trx: null};
 			}
 		}else{
-			let operation = [ 
+			let operation = [
 			   [op_name, cstm_params]
 			];
 			console.log('broadcasting');
 			console.log(operation);
-			
+
 			//console.log(this.$steemconnect.accessToken);
 			//console.log(this.$store.state.accessToken);
 			//grab token
 			let accToken = localStorage.getItem('access_token')
-			
+
 			let op_json = JSON.stringify(operation)
-			
+
 			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+op_json+'&bchain='+this.cur_bchain);
 
-			
+
 			let reqHeads = new Headers({
 			  'Content-Type': 'application/json',
 			  'x-acti-token': 'Bearer ' + accToken,
@@ -1129,7 +1129,7 @@
 			console.log(outcome);
 			if (outcome.error){
 				console.log(outcome.error);
-				
+
 				//if this is authority error, means needs to be logged out
 				//example "missing required posting authority:Missing Posting Authority"
 				let err_msg = outcome.trx.tx.error;
@@ -1140,7 +1140,7 @@
 					this.error_msg = this.$t('session_expired_login_again');
 					this.$store.dispatch('steemconnect/logout');
 				}
-				
+
 				this.$notify({
 				  group: 'error',
 				  text: err_msg,
@@ -1171,7 +1171,7 @@
 		let userConf = confirm(this.$t('confirm_add_friend').replace('_USERNAME_', this.displayUser));
 		if (!userConf) {
 		  return;
-		}		
+		}
 		this.friendshipLoader = true;
 		//send request to BC
 		//broadcast the transaction to Steem BC
@@ -1182,7 +1182,7 @@
 			json: JSON.stringify({'transaction': 'add-friend-request', 'target': this.displayUser})
 		  };
 		let op_name = 'custom_json';
-		let operation = [ 
+		let operation = [
 			   [op_name, cstm_params]
 			];
 		let res = await this.$processTrxFunc(op_name, cstm_params);
@@ -1190,7 +1190,7 @@
 		if (res.success){
 			//success, store request to DB
 			this.propagateFriendReq(res.trx.tx, operation);
-		}else{  			
+		}else{
 			this.friendshipLoader = false;
 		}
 	  },
@@ -1200,9 +1200,9 @@
 			+ this.displayUser + '/'
 			+ res.ref_block_num + '/'
 			+ res.id + '/' + this.cur_bchain);
-			
+
 		if (this.isKeychainActive || this.isHiveauthActive){
-			
+
 			let op_json = JSON.stringify(operation)
 			url = new URL( process.env.actiAppUrl + 'addFriendHiveKeychain/'
 						+ this.user.account.name + '/'
@@ -1211,9 +1211,9 @@
 						+ res.id + '/'
 						+ this.cur_bchain + '?operation='+op_json);
 		}
-		
-		let req_res = await fetch(url);	
-		
+
+		let req_res = await fetch(url);
+
 		let outcome = await req_res.json();
 		if (outcome.status=='success'){
 			console.log('friend request sent');
@@ -1260,7 +1260,7 @@
 			json: JSON.stringify({'transaction': 'cancel-friend-request', 'target': this.displayUser})
 		  };
 		let op_name = 'custom_json';
-		let operation = [ 
+		let operation = [
 			   [op_name, cstm_params]
 			];
 		let res = await this.$processTrxFunc(op_name, cstm_params);
@@ -1273,15 +1273,15 @@
 		}
 	  },
 	  async cancelFriendReq(res, operation) {
-		
+
 		let url = new URL(process.env.actiAppUrl+'cancelFriendRequest/'
 			+ this.user.account.name + '/'
 			+ this.displayUser + '/'
 			+ res.ref_block_num + '/'
 			+ res.id + '/' + this.cur_bchain);
-			
+
 		if (this.isKeychainActive || this.isHiveauthActive){
-			
+
 			let op_json = JSON.stringify(operation)
 			url = new URL( process.env.actiAppUrl + 'cancelFriendRequestHiveKeychain/'
 						+ this.user.account.name + '/'
@@ -1290,9 +1290,9 @@
 						+ res.id + '/'
 						+ this.cur_bchain + '?operation='+op_json);
 		}
-		
+
 		let req_res = await fetch(url);
-		
+
 		let outcome = await req_res.json();
 		if (outcome.status=='success'){
 			console.log('friend request cancelled');
@@ -1339,7 +1339,7 @@
 			json: JSON.stringify({'transaction': 'cancel-friendship', 'target': this.displayUser})
 		  };
 		let op_name = 'custom_json';
-		let operation = [ 
+		let operation = [
 			   [op_name, cstm_params]
 			];
 		let res = await this.$processTrxFunc(op_name, cstm_params);
@@ -1352,15 +1352,15 @@
 		}
 	  },
 	  async dropFriendship(res, operation) {
-		
+
 		let url = new URL( process.env.actiAppUrl+'dropFriendship/'
 			+ this.user.account.name + '/'
 			+ this.displayUser + '/'
 			+ res.ref_block_num + '/'
 			+ res.id + '/' + this.cur_bchain);
-			
+
 		if (this.isKeychainActive || this.isHiveauthActive){
-			
+
 			let op_json = JSON.stringify(operation)
 			url = new URL( process.env.actiAppUrl + 'dropFriendshipHiveKeychain/'
 						+ this.user.account.name + '/'
@@ -1368,10 +1368,10 @@
 						+ res.ref_block_num + '/'
 						+ res.id + '/'
 						+ this.cur_bchain + '?operation='+op_json);
-		}	
-		
+		}
+
 		let req_res = await fetch(url);
-			
+
 		let outcome = await req_res.json();
 		if (outcome.status=='success'){
 			console.log('friendship dropped');
@@ -1418,7 +1418,7 @@
 			json: JSON.stringify({'transaction': 'accept-friendship', 'target': this.displayUser})
 		  };
 		let op_name = 'custom_json';
-		let operation = [ 
+		let operation = [
 			   [op_name, cstm_params]
 			];
 		let res = await this.$processTrxFunc(op_name, cstm_params);
@@ -1431,17 +1431,17 @@
 		}
 	  },
 	  async acceptFriendPropagate(res, operation) {
-		
-		
-		
+
+
+
 		let url = new URL(process.env.actiAppUrl+'acceptFriend/'
 			+ this.user.account.name + '/'
 			+ this.displayUser + '/'
 			+ res.ref_block_num + '/'
 			+ res.id + '/' + this.cur_bchain);
-		
+
 		if (this.isKeychainActive || this.isHiveauthActive){
-			
+
 			let op_json = JSON.stringify(operation)
 			url = new URL( process.env.actiAppUrl + 'acceptFriendHiveKeychain/'
 						+ this.user.account.name + '/'
@@ -1449,10 +1449,10 @@
 						+ res.ref_block_num + '/'
 						+ res.id + '/'
 						+ this.cur_bchain + '?operation='+op_json);
-		}	
-		
+		}
+
 		let req_res = await fetch(url);
-		
+
 		let outcome = await req_res.json();
 		if (outcome.status=='success'){
 			console.log('friendship accepted');
@@ -1478,7 +1478,7 @@
 		this.userFriends = outcome;
 		//console.log(outcome);
 		//console.log(this.userFriends);
-		
+
 		//grab pending user friend requests (sent and received)
 		let quer = await fetch(process.env.actiAppUrl+'userFriendRequests/'+this.displayUser);
 		this.friendRequests = await quer.json();
@@ -1504,7 +1504,7 @@
 	  },
 
 	  proceedWitnessVote(isProxy) {
-		
+
 		this.error_proceeding = false;
 		if (!this.isKeychainLogin() && !this.isHiveauthLogin() && this.isStdLogin()){
 			if (this.$refs["p-ac-key"].value == ''){
@@ -1569,10 +1569,10 @@
 					account: this.user.account.name,
 					proxy: 'actifit',
 				}
-				let operation = [ 
+				let operation = [
 				   [op_name, cstm_params]
 				];
-				
+
 				this.$HAS.broadcast(auth, 'active', operation, (evt)=> {
 					console.log(evt)    // process sign_wait message
 					let msg = this.$t('verify_hiveauth_app');
@@ -1663,10 +1663,10 @@
 					witness: 'actifit',
 					approve: true
 				}
-				let operation = [ 
+				let operation = [
 				   [op_name, cstm_params]
 				];
-				
+
 				this.$HAS.broadcast(auth, 'active', operation, (evt)=> {
 					console.log(evt)    // process sign_wait message
 					let msg = this.$t('verify_hiveauth_app');
@@ -1706,7 +1706,7 @@
 				} )
 			}
 		}
-	
+
 	  },
 	  //handles actual tipping action
 	  async proceedTipActivity() {
@@ -1761,13 +1761,13 @@
 				//update sender token count
 				//ensure we fetch proper logged in user data
 				this.$store.dispatch('fetchUserTokens')
-				
+
 				//update recipient token count
 				this.userTokenCount = outcome.recipientTokenCount;
 			}else{
 				this.friendshipLoader = false;
 			}
-			
+
 			this.proceedTip = false;
 		}else{
 			this.tipError = outcome.error;
@@ -1775,7 +1775,7 @@
 		this.tipInProgress = false;
 	  },
 	  getUserActivityLevel() {
-		return this.calcScore(this.rewarded_posts_rules, this.rewardedPostCount) 
+		return this.calcScore(this.rewarded_posts_rules, this.rewardedPostCount)
 	  },
 	  /* handles checking if the user had claimed this badge already */
 	  userHasBadge(badgeType) {
@@ -1822,13 +1822,13 @@
 			return '';
 		}
         let date = new Date(val)
-        return date.getDate() + '/' 
-			+ (date.getMonth() + 1) + '/' 
+        return date.getDate() + '/'
+			+ (date.getMonth() + 1) + '/'
 			+ date.getFullYear()
       },
 	  async fetchUserData () {
-		if (typeof this.user != 'undefined' && this.user != null){	  
-		  
+		if (typeof this.user != 'undefined' && this.user != null){
+
 		  //update user info from blockchain
 		  //console.log(this.stdLogin);
 		  if (!localStorage.getItem('std_login')){
@@ -1843,13 +1843,13 @@
 		  //ensure we fetch proper logged in user data
 		  this.$store.dispatch('fetchUserTokens')
 		  this.$store.dispatch('fetchUserRank')
-		  
+
 		  //check user posh verification status
 		  fetch(process.env.poshVerificationUrl+this.displayUser).then(
 			res => {res.json().then(json => this.setPoshVerifStatus(json))}).catch(e => reject(e))
-		  
-		 
-		  
+
+
+
 		  this.$forceUpdate()
 		}
 	  },
@@ -1866,16 +1866,16 @@
 	  },
 	  /* handles fetching of user related info */
 	  async getAccountData () {
-		
+
 		let parentRef = this;
-		
+
 		let chainLnk = await this.setProperNode();
-		
+
 		this.profImgUrl = process.env.hiveImgUrl;
 		if (this.cur_bchain == 'STEEM'){
 			this.profImgUrl = process.env.steemImgUrl;
 		}
-		
+
 		chainLnk.api.getAccounts([this.displayUser], function(err, result) {
 			parentRef.loadingData = false;
 			//result now contains the account details
@@ -1885,7 +1885,7 @@
 			}else{
 			  parentRef.userinfo = result[0];
 			  console.log(parentRef.userinfo);
-			  
+
 			  //grab and display follower and following count
 				chainLnk.api.getFollowCount(parentRef.displayUser, function(err, result) {
 					//console.log(err, result);
@@ -1897,7 +1897,7 @@
 				});
 			}
 		});
-		 
+
 		this.refreshFriendStatus();
 	  },
 	  isFriend(){
@@ -1970,7 +1970,7 @@
 					}else{
 						console.log('error');
 					}
-					
+
 					this.userBadges.push(outcome);
 				}else{
 					console.error(outcome);
@@ -2045,14 +2045,14 @@
 	  },
 	  async setSplinterCards(json){
 		console.log('splintercards');
-		
+
 		console.log(json);
 		this.splinterCards = json;
 		//grab user's splinterlands collections
 		fetch(process.env.splinter_api_url_user_collections.replace('_USERNAME_',this.displayUser)).then(
 			res => {res.json().then(json => this.setUserSplinterCards(json))}).catch(e => reject(e))
-			
-	  
+
+
 	  },
 	  async setUserSplinterCards(json){
 		console.log('user cards');
@@ -2085,94 +2085,94 @@
 		this.textAreaDescriptionValue = this.textAreaDescription;
 		this.textAreaLinkValue = this.textAreaLink;
 		this.textAreaUsernameValue = this.textAreaUsername;
-	
+
 		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		steem.api.setOptions({ url: process.env.steemApiNode });
-				
+
 		this.screenWidth = screen.width;
 		//hive.config.set('rebranded_api', true)
 		//hive.broadcast.updateOperations()
 		hive.config.set('alternative_api_endpoints', process.env.altHiveNodes);
-		
+
 		hive.api.setOptions({ url: process.env.hiveApiNode });
-		
+
 		blurt.api.setOptions({ url: process.env.blurtApiNode });
 		// login
 		this.$store.dispatch('steemconnect/login')
 		this.fetchUserData();
-		
+
 		// try to fetch data
 	    if ((typeof this.$route.params !== 'undefined') && (typeof this.$route.params.username !== 'undefined') ) {
 		  this.displayUser = this.$route.params.username
 		  if (this.$route.params.username.startsWith('@')){
 			this.displayUser = this.$route.params.username.substring(1, this.$route.params.username.length);
 		  }
-		  
+
 		  //grab the user's latest stats if available
 		  fetch(process.env.actiAppUrl+'trackedMeasurements/' + this.displayUser).then(res => {
 			res.json().then(json => this.setUserMeasurements(json))}).catch(e => console.log(e))
-		  
+
 		  //grab the user's latest posts data
 		  fetch(process.env.actiAppUrl+'trackedActivity/' + this.displayUser).then(res => {
 			res.json().then(json => this.setUserActivity(json))}).catch(e => console.log(e))
-		  
+
 		  //grab the author's rank
 		  fetch(process.env.actiAppUrl+'getRank/' + this.displayUser).then(res => {
 			res.json().then(json => this.userRank = json)}).catch(e => reject(e))
-		  
+
 		  fetch(process.env.actiAppUrl+'userRewardedPostCount/' + this.displayUser).then(res => {
 			res.json().then(json => this.rewardedPostCount = json.rewarded_post_count)}).catch(e => reject(e))
-		
+
 		  //let's grab the user's AFIT tokens balance
 		  fetch(process.env.actiAppUrl+'user/'+this.displayUser).then(
 			res => {res.json().then(json => this.userTokenCount = json.tokens)}).catch(e => console.log(e))
-		
+
 		  //let's grab user's current badges
 		  fetch(process.env.actiAppUrl+'userBadges/'+this.displayUser).then(
 			res => {res.json().then(json => this.userBadges = json)}).catch(e => reject(e))
-		
+
 		  //let's check if user participated in ISO event
 		  fetch(process.env.actiAppUrl+'isoParticipant/'+this.displayUser).then(
 			res => {res.json().then(json => this.isoParticipant = json)}).catch(e => reject(e))
-			
+
 		  //let's check if this user delegates to Actifit
 		  fetch(process.env.actiAppUrl+'delegation/'+this.displayUser).then(
 			res => {res.json().then(json => this.actifitDelegator = json)}).catch(e => reject(e))
-			
-		
+
+
 		  //let's check if this user had won lucky doubled up before
 		  fetch(process.env.actiAppUrl+'luckyWinner/'+this.displayUser).then(
 			res => {res.json().then(json => this.doubledupWinner = json)}).catch(e => reject(e))
-			
+
 		  //let's check if this user had any charity contributions before
 		  fetch(process.env.actiAppUrl+'charityDonor/'+this.displayUser).then(
-			res => {res.json().then(json => this.charityDonor = json)}).catch(e => reject(e))	
-			
-			
+			res => {res.json().then(json => this.charityDonor = json)}).catch(e => reject(e))
+
+
 		  //let's check if this user is banned
 		  fetch(process.env.actiAppUrl+'is_banned/'+this.displayUser).then(
 			res => {res.json().then(json => this.account_banned = json)}).catch(e => reject(e))
-		  
+
 		  console.log('availableTipBalance')
 		  //let's check if this user is banned
 		  fetch(process.env.actiAppUrl+'availableTipBalance?user='+this.displayUser).then(
 			res => {res.json().then(json => this.setTipBalance(json))}).catch(e => reject(e))
-		  
-		  
+
+
 		  //check user posh verification status
 		  fetch(process.env.poshVerificationUrl+this.displayUser).then(
 			res => {res.json().then(json => this.setPoshVerifStatus(json))}).catch(e => reject(e))
-		  
+
 		  //grab user video count
 		  fetch(process.env.threeSpeakApiVidCount.replace('_USERNAME_',this.displayUser)).then(
 			res => {res.json().then(json => this.set3SVideoCount(json))}).catch(e => reject(e))
-		  
-		  
+
+
 		  //grab splinterlands cards
 		  fetch(process.env.splinter_api_all_cards).then(
 			res => {res.json().then(json => this.setSplinterCards(json))}).catch(e => reject(e))
-			
-		  
+
+
 		 	console.log('mounted');
 		  let bal;
 		  try{
@@ -2183,7 +2183,7 @@
 				  if (bal){
 					  this.userAFITSETokenCount = bal.balance;
 				  }
-				  
+
 			  }catch(errIn){
 				console.log(errIn)
 			  }
@@ -2196,31 +2196,31 @@
 			  }catch(errIn){
 				console.log(errIn)
 			  }*/
-			  
+
 			  console.log('grab AFIT HE');
-			  
+
 			  //fetch user's AFIT H-E balance
 			  bal = await hsc.findOne('tokens', 'balances', { account: this.displayUser, symbol: 'AFIT' });
 			  if (bal){
 				  this.userAFITHETokenCount = bal.balance;
 			  }
-			  
+
 			  //fetch user's AFITX H-E balance
 			  bal = await hsc.findOne('tokens', 'balances', { account: this.displayUser, symbol: 'AFITX' });
 			  if (bal){
 				  this.userAFITXHETokenCount = bal.balance;
 			  }
-		  
+
 		  }catch(err){
 			//avoid time outs causing page not to load
 			console.log(err);
 		  }
-		
+
 		  this.getAccountData();
 		}else{
 		  this.errorDisplay = this.$t('user_not_found_error');
 		}
-		  	
+
 	}
   }
 </script>
@@ -2230,7 +2230,7 @@
     display: inline-flex;
     justify-content: center;
     align-items: center;
-    width: auto; 
+    width: auto;
     height: auto;
     padding: 0;
 }
@@ -2275,7 +2275,7 @@
 		.user-avatar{
 		  float: left;
 		}
-		
+
 		.badge-img, .claimed-check{
 		  width: 150px;
 		  text-align: center;
@@ -2383,8 +2383,8 @@
 		background: linear-gradient(30deg, green, orange);
 		padding-top: 3px;
 		border-radius: 10px;
-		box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);	
-		min-height: 120px;		
+		box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
+		min-height: 120px;
 	}
 	.badge-entry{
 		color: #fff !important;
@@ -2403,7 +2403,7 @@
 	.acti-widget{
 		/* border: 2px #ff112d solid; */
 	}
-	
+
 	.acti-widget img{
 		width: 50px;
 		max-width: unset;
