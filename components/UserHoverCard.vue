@@ -482,9 +482,11 @@ export default {
   position: relative
   border: 2px solid white
   box-shadow: 0 0 0 2px #ff112d
+  margin-top: 6px
   
   .increased-rank
     margin-left: 3px
+    color: yellow
 .balance-section
   background: #f8f9fa
   padding: 1rem
@@ -561,4 +563,19 @@ export default {
 .user-avatar-small
   width: 24px
   height: 24px
+.user-display
+  display: inline-flex
+  align-items: center
+
+.user-info
+  display: flex
+  align-items: center
+  line-height: 1
+  small:not(.inline-rank-badge)
+    color: #ff112d
+    transition: color 0.2s ease
+    &:hover
+      color: #000
+
+
 </style>
