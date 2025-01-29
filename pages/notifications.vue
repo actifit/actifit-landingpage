@@ -376,9 +376,6 @@
 	  width: 20px;
 	  height: 20px;
     }
-	.increased-rank{
-		color: #76BB0E;
-	}
 	.fas{
 	  cursor: pointer;
 	}

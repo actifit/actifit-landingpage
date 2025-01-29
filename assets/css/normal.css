@@ -152,3 +152,8 @@ a:hover {
 .report-title, .post-title{
 	color: #fff!important;
 }
+
+.increased-rank{
+  margin-left: 3px;
+  color: yellow;
+}

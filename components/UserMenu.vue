@@ -344,9 +344,6 @@
 	#user_menu_navlink{
 		height: 40px;
 	}
-	.increased-rank{
-		color: #76BB0E;
-	}
 	.group-class{
 		margin-left: 0px !important;
 		display: inline-block;
