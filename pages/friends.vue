@@ -1,9 +1,9 @@
 <template>
   <div>
 	<NavbarBrand />
-	
+
 	<div class="container pt-5 mt-5 pb-5" v-if="user">
-	
+
 		<h4 class="text-brand user-name">@{{ `${user.account.name}\'s`}} {{ $t('Friendships') }}</h4>
 		<h5>{{ $t('Active_Friendships') }}</h5>
 		<div class="row pb-3">
@@ -15,7 +15,7 @@
 				<div>{{$t('no_friends_current')}}</div>
 			</div>
 		</div>
-		
+
 		<h5>{{ $t('Pending_Friendships') }}</h5>
 		<div class="row pb-3">
 			<div v-if="friendRequests && Array.isArray(friendRequests.sent_pending) && friendRequests.sent_pending.length>0" v-for="pendFriend in friendRequests.sent_pending" :key="pendFriend.target" class="col-md-3  text-brand">
@@ -34,7 +34,7 @@
 				<div>{{$t('no_pending_friends')}}</div>
 			</div>
 		</div>
-		
+
 		<div class="row pb-3">
 			<a href="#" class="btn btn-brand" @click.prevent="$refs.friendMod.displayMod()">{{ $t('Suggested_friends') }}</a>
 		</div>
@@ -46,7 +46,7 @@
 			</span>
 			<span :title="$t('friendship_pending_approval')" v-else-if="isPendingFriend()">
 				<i class="fas fa-user-clock  p-2"></i>
-				
+
 				<div v-if="addFriendError" v-html="addFriendError"></div>
 			</span>
 			<span :title="$t('add_username_friend').replace('_USERNAME_', displayUser)" v-else
@@ -56,14 +56,14 @@
 			</span>
 			<i class="fas fa-spin fa-spinner" v-if="friendshipLoader"></i>
 		</span>-->
-		
-		
+
+
 		<!--<adsbygoogle ad-slot="8625360638" :ad-style="acti_goog_ad_square"/>-->
-		
-      
-		
+
+
+
 	</div>
-	
+
 	<div class="container mt-5 pb-5 pt-5" v-else>
       <!-- account balance -->
       <div class="text-center p-5">
@@ -82,9 +82,9 @@
 		</div>
 	  </div>
 	</div>
-	
+
 	<FriendshipModal v-if="user" :showModal="showModal" class="friend-mod" ref="friendMod"/>
-	
+
 	<Footer />
 	<client-only>
       <div>
@@ -104,9 +104,9 @@
 
   import steem from 'steem'
   import {mapGetters} from 'vuex'
-  
+
   import Vue from 'vue'
-  
+
   import FriendshipModal from '~/components/FriendshipModal'
 
   export default {
@@ -125,13 +125,13 @@
 			userRank: '',
 			rewardedPostCount: '',
 			loading: false,
-			
+
 			noUserFound: false,
 			userTokenCount: '',
 			userFriends: [],
 			friendRequests: [],
 			friendshipLoader: false,
-			
+
 			actifitDelegator: '',
 			activ_badge_indent: 10,
 			claimable_badge_indent: 125,
@@ -216,19 +216,19 @@
 				return {success: false, trx: null};
 			}
 		}else{
-			let operation = [ 
+			let operation = [
 			   [op_name, cstm_params]
 			];
 			console.log('broadcasting');
 			console.log(operation);
-			
+
 			//console.log(this.$steemconnect.accessToken);
 			//console.log(this.$store.state.accessToken);
 			//grab token
 			let accToken = localStorage.getItem('access_token')
-			
+
 			let op_json = JSON.stringify(operation)
-			
+
 			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+op_json+'&bchain='+this.cur_bchain);
 
 			let reqHeads = new Headers({
@@ -242,7 +242,7 @@
 			console.log(outcome);
 			if (outcome.error){
 				console.log(outcome.error);
-				
+
 				//if this is authority error, means needs to be logged out
 				//example "missing required posting authority:Missing Posting Authority"
 				let err_msg = outcome.trx.tx.error;
@@ -253,7 +253,7 @@
 					this.error_msg = this.$t('session_expired_login_again');
 					this.$store.dispatch('steemconnect/logout');
 				}
-				
+
 				this.$notify({
 				  group: 'error',
 				  text: err_msg,
@@ -284,7 +284,7 @@
 		let userConf = confirm(this.$t('confirm_add_friend').replace('_USERNAME_', targetUser));
 		if (!userConf) {
 		  return;
-		}		
+		}
 		this.friendshipLoader = true;
 		//send request to BC
 		//broadcast the transaction to Steem BC
@@ -295,7 +295,7 @@
 			json: JSON.stringify({'transaction': 'add-friend-request', 'target': targetUser})
 		  };
 		let op_name = 'custom_json';
-		let operation = [ 
+		let operation = [
 			   [op_name, cstm_params]
 			];
 		let res = await this.$processTrxFunc(op_name, cstm_params);
@@ -304,7 +304,7 @@
 
 			//success, store request to DB
 			this.propagateFriendReq(res.trx.tx, targetUser, operation);
-		}else{  			
+		}else{
 			this.friendshipLoader = false;
 		}
 	  },
@@ -315,7 +315,7 @@
 			+ res.ref_block_num + '/'
 			+ res.id + '/' + this.cur_bchain);
 		if (this.isKeychainActive || this.isHiveauthActive){
-			
+
 			let op_json = JSON.stringify(operation)
 			url = new URL( process.env.actiAppUrl + 'addFriendHiveKeychain/'
 						+ this.user.account.name + '/'
@@ -324,8 +324,8 @@
 						+ res.id + '/'
 						+ this.cur_bchain + '?operation='+op_json);
 		}
-		
-		let req_res = await fetch(url);	
+
+		let req_res = await fetch(url);
 		let outcome = await req_res.json();
 		if (outcome.status=='success'){
 			console.log('friend request sent');
@@ -372,7 +372,7 @@
 			json: JSON.stringify({'transaction': 'cancel-friend-request', 'target': targetUser})
 		  };
 		let op_name = 'custom_json';
-		let operation = [ 
+		let operation = [
 			   [op_name, cstm_params]
 			];
 		let res = await this.$processTrxFunc(op_name, cstm_params);
@@ -391,7 +391,7 @@
 			+ res.ref_block_num + '/'
 			+ res.id + '/' + this.cur_bchain);
 		if (this.isKeychainActive || this.isHiveauthActive){
-			
+
 			let op_json = JSON.stringify(operation)
 			url = new URL( process.env.actiAppUrl + 'cancelFriendRequestHiveKeychain/'
 						+ this.user.account.name + '/'
@@ -400,7 +400,7 @@
 						+ res.id + '/'
 						+ this.cur_bchain + '?operation='+op_json);
 		}
-		
+
 		let req_res = await fetch(url);
 		let outcome = await req_res.json();
 		if (outcome.status=='success'){
@@ -448,7 +448,7 @@
 			json: JSON.stringify({'transaction': 'cancel-friendship', 'target': targetUser})
 		  };
 		let op_name = 'custom_json';
-		let operation = [ 
+		let operation = [
 			   [op_name, cstm_params]
 			];
 		let res = await this.$processTrxFunc(op_name, cstm_params);
@@ -467,7 +467,7 @@
 			+ res.ref_block_num + '/'
 			+ res.id + '/' + this.cur_bchain);
 		if (this.isKeychainActive || this.isHiveauthActive){
-			
+
 			let op_json = JSON.stringify(operation)
 			url = new URL( process.env.actiAppUrl + 'dropFriendshipHiveKeychain/'
 						+ this.user.account.name + '/'
@@ -475,8 +475,8 @@
 						+ res.ref_block_num + '/'
 						+ res.id + '/'
 						+ this.cur_bchain + '?operation='+op_json);
-		}	
-		
+		}
+
 		let req_res = await fetch(url);
 		let outcome = await req_res.json();
 		if (outcome.status=='success'){
@@ -524,7 +524,7 @@
 			json: JSON.stringify({'transaction': 'accept-friendship', 'target': targetUser})
 		  };
 		let op_name = 'custom_json';
-		let operation = [ 
+		let operation = [
 			   [op_name, cstm_params]
 			];
 		let res = await this.$processTrxFunc(op_name, cstm_params);
@@ -543,7 +543,7 @@
 			+ res.ref_block_num + '/'
 			+ res.id+ '/' + this.cur_bchain);
 		if (this.isKeychainActive || this.isHiveauthActive){
-			
+
 			let op_json = JSON.stringify(operation)
 			url = new URL( process.env.actiAppUrl + 'acceptFriendHiveKeychain/'
 						+ this.user.account.name + '/'
@@ -551,8 +551,8 @@
 						+ res.ref_block_num + '/'
 						+ res.id + '/'
 						+ this.cur_bchain + '?operation='+op_json);
-		}	
-		
+		}
+
 		let req_res = await fetch(url);
 		let outcome = await req_res.json();
 		if (outcome.status=='success'){
@@ -579,7 +579,7 @@
 		this.userFriends = outcome;
 		//console.log(outcome);
 		//console.log(this.userFriends);
-		
+
 		//grab pending user friend requests (sent and received)
 		let quer = await fetch(process.env.actiAppUrl+'userFriendRequests/'+this.user.account.name);
 		this.friendRequests = await quer.json();
@@ -587,18 +587,18 @@
 		//console.log(this.friendRequests);
 	  },
 	  getUserActivityLevel() {
-		return this.calcScore(this.rewarded_posts_rules, this.rewardedPostCount) 
+		return this.calcScore(this.rewarded_posts_rules, this.rewardedPostCount)
 	  },
 	  /* handles returning the date portion without time */
 	  pureDate(val) {
         let date = new Date(val)
-        return date.getDate() + '/' 
-			+ (date.getMonth() + 1) + '/' 
+        return date.getDate() + '/'
+			+ (date.getMonth() + 1) + '/'
 			+ date.getFullYear()
       },
 	  async fetchUserData () {
-		if (typeof this.user != 'undefined' && this.user != null){	  
-		  
+		if (typeof this.user != 'undefined' && this.user != null){
+
 		  //update user info from blockchain
 		  console.log(this.stdLogin);
 		  if (!localStorage.getItem('std_login')){
@@ -610,13 +610,13 @@
 				console.log(excp);
 			}
 		  }
-		  
+
 		  //ensure we fetch proper logged in user data
 		  this.$store.dispatch('fetchUserTokens')
 		  this.$store.dispatch('fetchUserRank')
-		  
+
 		  this.refreshFriendStatus();
-		  
+
 		}
 	  },
 	  isFriend(){
@@ -657,7 +657,7 @@
 		snipp += '</span>';
 		return snipp;
 	  },
-	  
+
 	},
 	async mounted () {
 		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
@@ -668,7 +668,7 @@
 		// login
 		this.$store.dispatch('steemconnect/login')
 		this.fetchUserData();
-		  	
+
 	}
   }
 </script>
@@ -784,9 +784,6 @@
 	  width: 20px;
 	  height: 20px;
     }
-	.increased-rank{
-		color: #76BB0E;
-	}
 	.fas{
 	  cursor: pointer;
 	}

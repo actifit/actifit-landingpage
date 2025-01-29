@@ -20,7 +20,7 @@
         </div>
 		<div class="row">
 		  <div class="col-12">
-			
+
 			<a href="#" class="text-brand" @click="report.rptId = rptId; $store.commit('setActiveReport', report)" data-toggle="modal"
 				 data-target="#reportModal" :title="$t('read_more_small')" v-if="$postHasImage(meta)">
 				<img :src="$fetchPostImage(meta)" :alt="report.title" class="report-image">
@@ -42,7 +42,7 @@
 				</div>
 			</a>
 		  </div>
-		  
+
 		</div>
         <div class="row details mt-2">
           <div class="col-8">
@@ -62,7 +62,7 @@
         </div>
         <div class="row details mt-2">
           <div class="col-6">
-              <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 
+              <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand"
                  data-target="#voteModal" v-if="user && userVotedThisPost()==true" :title="$t('votes')">
                 <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
               </a>
@@ -124,8 +124,8 @@
 					<span class="text-brand text-bold">{{ report.pending_payout_value.replace('SBD','')}}</span>
 					<i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
 				</span>
-				<span v-if="hasBeneficiaries()" 
-						:title="beneficiariesDisplay()" 
+				<span v-if="hasBeneficiaries()"
+						:title="beneficiariesDisplay()"
 						@click="toggleTooltip()"
 						@mouseenter="showTooltip()"
 						@mouseleave="hideTooltip()"
@@ -137,9 +137,9 @@
 
 			</div>
 			<div class="col-6 text-right">
-				
+
 				<img src="/img/actifit_logo.png" class="mr-1 currency-logo-small" :title="$t('afit_payout')">{{ afitReward }} {{ $t('AFIT_Token') }}
-			
+
 			</div>
 		</div>
 		<!-- adding section to display additional FULL Payout option -->
@@ -193,8 +193,8 @@
 			  <div class="mt-2">{{ $t('healthapp') }}</div>
 			</span>
 			<div v-else>{{ trackingDevice }}</div>
-		  </div>		 
-		  <div class="col-12 text-brand mt-2">UserID: {{ actUserID }}</div>		  
+		  </div>
+		  <div class="col-12 text-brand mt-2">UserID: {{ actUserID }}</div>
 		</div>
       </div>
     </div>
@@ -205,15 +205,15 @@
 import UserHoverCard from './UserHoverCard.vue'
 
   import {mapGetters} from 'vuex'
-  
+
   import steem from 'steem'
-  
+
   import hive from '@hiveio/hive-js'
-  
+
   import SocialSharing from 'vue-social-sharing'
-  
+
   import vueRemarkable from 'vue-remarkable';
-  
+
   import sanitize from 'sanitize-html'
 
   export default {
@@ -293,8 +293,8 @@ import UserHoverCard from './UserHoverCard.vue'
 		}
 		return false;
 	  }
-	  	  
-    }, 
+
+    },
 	data: function(){
 		return {
 			afitReward: '',
@@ -377,7 +377,7 @@ import UserHoverCard from './UserHoverCard.vue'
 		if (this.report.total_payout_value ) return this.report.total_payout_value
 		if (this.report.author_payout_value ) return this.report.author_payout_value
 	  },
-	  
+
 	  //function handles displaying cut off version of text to avoid lengthy titles
 	  truncateString(str) {
 		  if (str.length > 70) {
@@ -433,26 +433,26 @@ import UserHoverCard from './UserHoverCard.vue'
 		fetch(process.env.actiAppUrl+'getPostReward?user=' + this.report.author+'&url='+this.report.url).then(res => {
 		//grab the post's reward to display it properly
 			res.json().then(json => this.afitReward = json.token_count)}).catch(e => reject(e))
-			
+
 		//grab the author's rank
 		fetch(process.env.actiAppUrl+'getRank/' + this.report.author).then(res => {
 			res.json().then(json => this.userRank = json)}).catch(e => reject(e))
-			
+
 		//grab post full pay if full pay mode enabled
 		fetch(process.env.actiAppUrl+'getPostFullAFITPayReward?user=' + this.report.author+'&url='+this.report.url).then(res => {
 			res.json().then(json => this.fullAFITReward = json.token_count)}).catch(e => reject(e))
-		
+
 		//grab moderators' list
 		this.$store.dispatch('fetchModerators')
-		
+
 		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
-		
+
 		this.profImgUrl = process.env.hiveImgUrl;
 		if (this.cur_bchain == 'STEEM'){
 			this.profImgUrl = process.env.steemImgUrl;
 		}
 	},
-	
+
   }
 </script>
 
@@ -487,9 +487,6 @@ import UserHoverCard from './UserHoverCard.vue'
 	}
 	.check-tooltip{
 	  color: white;
-	}
-	.increased-rank{
-		color: #76BB0E;
 	}
 	.report-title{
 		min-height: 60px;

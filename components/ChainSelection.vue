@@ -5,7 +5,7 @@
 		<div class="col-sm-3">
 		  <select class="form-control sel-adj border-red rounded-top rounded-bottom" v-model="cur_bchain" @change="setActiveChain($event)">
 			<option value=""><i>--Active Chain--</i></option>
-			<option value="HIVE" :selected="cur_bchain == 'HIVE' ? 'true' : 'false'">Hive</option> 
+			<option value="HIVE" :selected="cur_bchain == 'HIVE' ? 'true' : 'false'">Hive</option>
 			<!--<option value="STEEM" :selected="cur_bchain == 'STEEM' ? 'true' : 'false'">Steem</option> -->
 			<option value="BLURT" :selected="cur_bchain == 'BLURT' ? 'true' : 'false'">Blurt</option>
 		  </select>
@@ -18,7 +18,7 @@
 
   export default {
 	components: {
-	  
+
     },
 	data () {
 		return {
@@ -40,8 +40,8 @@
     computed: {
       ...mapGetters('steemconnect', ['user']),
       ...mapGetters(['bchain']),
-	  
-	  
+
+
     },
 	methods: {
 	  /**
@@ -54,7 +54,7 @@
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
-	  
+
 	  setActiveChain(event){
 		console.log(event.target.value);
 		console.log(this.cur_bchain);
@@ -71,33 +71,33 @@
 		}
 		this.prior_chain = chain;
 		this.$store.commit('setBchain', this.cur_bchain);
-		
+
 		localStorage.setItem('cur_bchain', this.cur_bchain);
-		
+
 		this.profImgUrl = process.env.hiveImgUrl;
 		/*if (this.cur_bchain == 'STEEM'){
 			this.profImgUrl = process.env.steemImgUrl;
 		}*/
 	  },
-	  
-	  
+
+
 	},
     async mounted () {
-		
+
 		//grab current active chain
 		if (localStorage.getItem('cur_bchain')){
 			this.cur_bchain = localStorage.getItem('cur_bchain')
 			this.prior_chain = this.cur_bchain;
 		}
-		
-		
+
+
 		/*this.profImgUrl = process.env.hiveImgUrl;
 		if (this.cur_bchain == 'STEEM'){
 			this.profImgUrl = process.env.steemImgUrl;
 		}*/
-		
+
 		/* this.updateUserData()
-		
+
 		//fetch new notifications every minute
 		setInterval(this.updateUserData, 60000); */
     },
@@ -129,9 +129,6 @@
 <style>
 	#user_menu_navlink{
 		height: 40px;
-	}
-	.increased-rank{
-		color: #76BB0E;
 	}
 	.group-class{
 		margin-left: 0px !important;
