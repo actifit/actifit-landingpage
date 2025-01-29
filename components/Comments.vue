@@ -17,7 +17,7 @@
 			<option :value="JSON.stringify({value: 'created', direction: 'asc'})">{{$t('Date')}}▲</option>
 			<option :value="JSON.stringify({value: 'created', direction: 'desc'})">{{$t('Date')}}▼</option>
 		</select>
-		
+
 		<span class="p-2 col-md-1"><i class="fa-solid fa-circle-minus text-brand" v-on:click="commentMinimized=!commentMinimized" :title="$t('hide_comment')" style="cursor: pointer"></i></span>
     </div>
 	<div v-else class="col-12 text-right">
@@ -25,13 +25,13 @@
 	</div>
 	<div class="modal-body comment-info acti-shadow mb-2" v-if="depth > 0">
 		<div class="main-user-info pt-2">
-			  <div class="comment-user-section" :style="{ paddingLeft: depth * indentFactor + 'px' }">	
+			  <div class="comment-user-section" :style="{ paddingLeft: depth * indentFactor + 'px' }">
 					   <UserHoverCard :username="author"/>
-						
+
 			  </div>
 		<!--<a :href="'/@' + author + '/' + full_data.permlink" target="_blank">-->
-			<div class="comment-user-section pt-2" :style="{ paddingLeft: depth * indentFactor + 'px' }">	
-				<a :title="$t('comment_link')" :href="buildLink" id="comment-link" ref="comment-link"><span class="date-head text-muted" :title="date">{{ $getTimeDifference(full_data.created) }}</span>&nbsp;<i class="fas fa-link"></i></a>
+			<div class="comment-user-section pt-2" :style="{ paddingLeft: depth * indentFactor + 'px' }">
+				<a :title="$t('comment_link')" class="p-1" :href="buildLink" id="comment-link" ref="comment-link"><span class="date-head text-muted" :title="date">{{ $getTimeDifference(full_data.created) }}</span>&nbsp;<i class="fas fa-link"></i></a>
 				<i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent" ></i>
 				<i v-if="!showTranslated" class="fa-solid fa-language text-brand" v-on:click="translateContent"></i>
 			</div>
@@ -45,7 +45,7 @@
 		<transition name="fade">
 		  <div class="comment-reply" v-if="editBoxOpen">
 			<CustomTextEditor ref="editor" :initialContent="full_data.body" ></CustomTextEditor>
-			
+
 			<div class="modal-footer m-2" style="display: none">
 				<div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-if="cur_bchain=='HIVE'">
 					<input type="radio" id="hive" value="HIVE" v-model="target_bchain">
@@ -64,7 +64,7 @@
 					<label for="hive_steem">HIVE + STEEM</label>
 				</div>
 			</div>
-			
+
 			<a href="#" @click.prevent="editResponse($event)" class="btn btn-brand border reply-btn w-25">{{ $t('Post') }}<i class="fas fa-spin fa-spinner" v-if="loading"></i></a>
 			<a href="#" @click.prevent="editBoxOpen = !editBoxOpen" class="btn btn-brand border reply-btn w-25">{{ $t('Cancel') }}</a>
 			<a href="#" @click.prevent="insertModSignature" class="btn btn-brand border reply-btn w-25" v-if="(this.user && this.moderators.find( mod => mod.name == this.user.account.name && mod.title == 'moderator'))">{{ $t('Short_Signature') }}</a>
@@ -76,8 +76,8 @@
 			<div v-if="commentDeletable()"><a href="#" @click.prevent="deleteComment" :title="$t('Delete_note')"><i class="fas fa-trash-alt text-white"></i><i class="fas fa-spin fa-spinner" v-if="deleting"></i></a></div>
 			<div><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i class="fas fa-reply  text-white"></i></a></div>
 			<div>
-				
-			  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 
+
+			  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand"
 				 data-target="#voteModal" v-if="this.user && userVotedThisPost()==true">
 				<i class="far fa-thumbs-up"></i> {{getVoteCount }}
 			  </a>
@@ -86,7 +86,7 @@
 				<i class="far fa-thumbs-up"></i> {{ getVoteCount }}
 			  </a>
 			  <i class="far fa-comments ml-2"></i> {{ full_data.children }}
-			
+
 			</div>
 			<div>
 				<!--<small>
@@ -154,10 +154,10 @@
 			<!--<article class="modal-body" v-html="$renderMD(responseBody)" :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }" ></article>-->
 		</div>
 	</div>
-    <Comments 
-				v-for="comment in reply_entries" 
+    <Comments
+				v-for="comment in reply_entries"
 				:key="comment.id"
-				:reply_entries="comment.reply_entries" 
+				:reply_entries="comment.reply_entries"
 				:author="comment.author"
 				:body="comment.body"
 				:full_data="comment"
@@ -181,18 +181,18 @@ import UserHoverCard from './UserHoverCard.vue'
   import vueRemarkable from 'vue-remarkable';
 
   import steem from 'steem'
-  
+
   import Vue from 'vue'
-  
+
   import { mapGetters } from 'vuex'
-  
+
   import sanitize from 'sanitize-html'
-  
-  import CustomTextEditor from '~/components/CustomTextEditor' 
-  
+
+  import CustomTextEditor from '~/components/CustomTextEditor'
+
   import Lodash from 'lodash'
-  
-  export default { 
+
+  export default {
     props: [ 'author', 'reply_entries', 'depth', 'body', 'full_data', 'main_post_author', 'main_post_permlink', 'main_post_cat' ],
     name: 'Comments',
 	data () {
@@ -218,7 +218,7 @@ import UserHoverCard from './UserHoverCard.vue'
 			cur_bchain: 'HIVE',
 			target_bchain: 'HIVE',
 			profImgUrl: process.env.hiveImgUrl,
-			
+
 		}
 	},
 	watch: {
@@ -306,9 +306,9 @@ import UserHoverCard from './UserHoverCard.vue'
 			try {
 				this.safety_post_content = this.responseBody;
 				const result = await translateText(this.responseBody , 'en');
-				
+
 				const translatedText = result.translations[0].text || "Translation failed";
-		
+
 				this.showTranslated = true;
 
 				this.responseBody = translatedText;
@@ -326,7 +326,7 @@ import UserHoverCard from './UserHoverCard.vue'
 				if (sortApproach.value){
 					//console.log(sortApproach.value);
 					if (sortApproach.value == 'payout'){
-						this.reply_entries = _.orderBy(this.reply_entries, function(e) { 
+						this.reply_entries = _.orderBy(this.reply_entries, function(e) {
 								let val = parseFloat(e.pending_payout_value)
 								if (val > 0) return val;
 								else return parseFloat(e.total_payout_value)
@@ -338,7 +338,7 @@ import UserHoverCard from './UserHoverCard.vue'
 				}
 			}catch(err){
 				console.log(err);
-			} 
+			}
 		},
 		copyContent (event){
 			navigator.clipboard.writeText('https://actifit.io/@' + this.full_data.author + '/' + this.full_data.permlink)
@@ -356,58 +356,58 @@ import UserHoverCard from './UserHoverCard.vue'
 				  text: this.$t('error_copying'),
 				  position: 'top center'
 				})
-				return;					
+				return;
 			});
-			
+
 		},
       commentBody () {
 		//console.log('comment body');
 		//console.log(this.full_data.body);
 		let report_content = this.full_data.body;
-		
-		
+
+
 		//sanitize content first hand
 		report_content = sanitize(report_content , { allowedTags: ['img'] });
-		
+
 		//console.log(report_content);
-		
+
 		/* let's find images sent as ![](), and display them properly */
 		//let img_links_reg = /^(?:(?!=").)*((https?:\/\/[./\d\w-]*\.(?:png|jpg|jpeg|gif))|((https?:\/\/usermedia\.actifit\.io\/[./\d\w-]+)))/igm;
 		let img_links_reg = /!\[[\d\w\s\-.\(\)]*\]\((https?:\/\/(?:usermedia\.actifit\.io|ipfs\.busy\.org\/ipfs|steemitimages\.com)\/[\d\w\-\.\/\%\?\=\&]*|https?:\/\/[\d\w\-\.\/\%\?\=\&]*(?:png|jpg|jpeg|gif)(?:\?[^\)]*)?)\)/igm;
 		report_content = report_content.replace(img_links_reg,'<img src="$1">');
-		
+
 		/* let's find images sent as pure URLs, and display them as actual images, while avoiding well established images */
 		/* negative lookbehinds are not supported ?<! we need to switch to another approach */
 		//img_links_reg = /(?<!=")(?<!]\()(((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|(https?:\/\/[./\d\w-]*\.(?:png|jpg|jpeg|gif)))/igm;
 		//img_links_reg = /(((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|(https?:\/\/[./\d\w-]*\.(?:png|jpg|jpeg|gif)))(?!")/igm;
 		img_links_reg = /(((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|((https:\/\/ipfs\.busy\.org\/ipfs\/)[\d\w-]+)|((https:\/\/steemitimages\.com\/)[\d\w-[\:\/\.]+)|(https?:\/\/[.\/\d\w-]*\.(?:png|jpg|jpeg|gif)))[\s]/igm;
 		report_content = report_content.replace(img_links_reg,'<img src="$1">');
-		
+
 		/* let's match youtube videos and display them in a player */
 		//let vid_reg = /^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+/gm;
 		let vid_reg = /https?:\/\/(?:[0-9A-Z-]+\.)?(?:youtu\.be\/|youtube\.com\S*[^\w\-\s])([\w\-]{11})(?=[^\w\-]|$)(?![?=&amp;+%\w]*(?:['"][^&lt;&gt;]*&gt;|&lt;\/a&gt;))[?=&amp;+%\w-]*/ig;
-		
+
 		//swap into a player format, and introduce embed format for proper playing of videos
 		report_content = report_content.replace(vid_reg,'<iframe width="640" height="360" src="https://www.youtube.com/embed/$1"></iframe>');
-		
+
 		//add support for 3speak videos embedded within iframe
 		//let threespk_reg = /[.*](https?:\/\/3speak\.tv\/watch\?v=([\w-]+\/[\w-]+))/i;
 		//let threespk_reg = /(?:\[!\[\]\()?https?:\/\/3speak\.tv\/watch\?v=([\w-]+\/[\w-]+)(?:\)\])?/i;
 		let threespk_reg = /(?:\[.*\]\()?https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+)(?:\))?/i;
 		report_content = report_content.replace(threespk_reg,'<iframe width="640" height="360" src="//3speak.tv/embed?v=$1&autoplay=false"></iframe>');
-		//examples: 
+		//examples:
 		//https://3speak.tv/watch?v=jongolson/vhtttbyf		//[![](https://ipfs-3speak.b-cdn.net/ipfs/bafkreiee4k3q5sax6stbqzty6yktbhmk4mi2opf6r7hckti3ypkjvigjhi/)](https://3speak.tv/watch?v=jongolson/vhtttbyf)
-		
+
 		/* let's find links sent as [](), and display them properly */
 		let href_lnks = /\[([\d\w\s-\.\(\)=[\:\/\.%\?&"<>]*)\]\(([\d\w-=[\:\/\.%\?&]+|(https?:\/\/[.\d\w-\/\:\%\(\)]*\.))[)]/igm;
 		report_content = report_content.replace(href_lnks,'<a href="$2">$1</a>');
-		
+
 		//let href_lnks = /\[([\d\w-\.\@]*)\]\(([\d\w-\.\@\/\:]*)\)/igm;
 		//report_content = report_content.replace(href_lnks,'<a href="$2">$1</a>');
-		
+
 		/* regex to match @ words and convert them to steem user links. Need to skip special occurrences such as name within a link (preceded by /) */
 		let user_name = /([^\/])(@([\d\w-.]+))/igm;
-        
+
 		report_content = report_content.replace(user_name,'$1<a href="https://actifit.io/$2">$2</a>')
 		return report_content;
       },
@@ -415,14 +415,14 @@ import UserHoverCard from './UserHoverCard.vue'
         return JSON.parse(this.full_data.json_metadata)
       },
 	  fetchReportCommentData () {
-	  
+
 		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		this.target_bchain = this.cur_bchain;
 		this.$store.commit('setBchain', this.cur_bchain);
-		
+
 		//regrab report data to fix comments
 		this.$store.dispatch('fetchReportComments', {author: this.main_post_author, category: this.main_post_cat, permlink: this.main_post_permlink})
-		
+
 		//clear the placeholder comment displayed
 		this.responsePosted = false;
 		this.responseBody = this.moderatorSignature;
@@ -432,7 +432,7 @@ import UserHoverCard from './UserHoverCard.vue'
 		this.replyBody = this.moderatorSignature;
 		this.commentBoxOpen=false;
 	  },
-	  
+
 	  async processTrxFunc(op_name, cstm_params, bchain_option){
 		if (!localStorage.getItem('std_login')){
 		//if (!this.stdLogin){
@@ -445,17 +445,17 @@ import UserHoverCard from './UserHoverCard.vue'
 				//console.log(err);
 				return {success: false, trx: null};
 			}
-		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
 			await window.hive_keychain.requestBroadcast(
-				this.user.account.name, 
-				[[op_name, cstm_params]], 
+				this.user.account.name,
+				[[op_name, cstm_params]],
 				'Active', (response) => {
 				console.log(response);
 				if (op_name == 'delete_comment'){
 					this.deleteSuccess();
 				}
 			});
-		}else if (localStorage.getItem('acti_login_method') == 'hiveauth'){	
+		}else if (localStorage.getItem('acti_login_method') == 'hiveauth'){
 			return new Promise((resolve) => {
 				const auth = {
 				  username: this.user.account.name,
@@ -499,27 +499,27 @@ import UserHoverCard from './UserHoverCard.vue'
 				} )
 			})
 		}else{
-			let operation = [ 
+			let operation = [
 			   [op_name, cstm_params]
 			];
 			console.log('broadcasting');
 			console.log(operation);
-			
+
 			//console.log(this.$steemconnect.accessToken);
 			//console.log(this.$store.state.accessToken);
 			//grab token
 			let accToken = localStorage.getItem('access_token')
-			
+
 			let op_json = JSON.stringify(operation)
-			
+
 			let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
-			
+
 			if (bchain_option){
 				cur_bchain = bchain_option;
 			}
-			
+
 			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+encodeURIComponent(op_json)+'&bchain='+cur_bchain);
-			
+
 			let reqHeads = new Headers({
 			  'Content-Type': 'application/json',
 			  'x-acti-token': 'Bearer ' + accToken,
@@ -531,7 +531,7 @@ import UserHoverCard from './UserHoverCard.vue'
 			console.log(outcome);
 			if (outcome.error){
 				console.log(outcome.error);
-				
+
 				//if this is authority error, means needs to be logged out
 				//example "missing required posting authority:Missing Posting Authority"
 				let err_msg = outcome.trx.tx.error;
@@ -542,7 +542,7 @@ import UserHoverCard from './UserHoverCard.vue'
 					this.error_msg = this.$t('session_expired_login_again');
 					this.$store.dispatch('steemconnect/logout');
 				}
-				
+
 				this.$notify({
 				  group: 'error',
 				  text: err_msg,
@@ -555,7 +555,7 @@ import UserHoverCard from './UserHoverCard.vue'
 			}
 		}
 	  },
-	  
+
 	  deleteSuccess (err) {
 		// stop deleting animation and show notification
 		this.deleting = false
@@ -564,11 +564,11 @@ import UserHoverCard from './UserHoverCard.vue'
 		  text: err ? this.$t('Delete_Error') : this.$t('Delete_Success'),
 		  position: 'top center'
 		})
-		
+
 		//display comment placeholder till blockchain data comes through
-		if (!err){	
+		if (!err){
 			this.commentDeleted = true;
-		}	
+		}
 
 		//refetch report data anew, but only after 10 seconds to ensure data has been made available
 		setTimeout( this.fetchReportCommentData, 10000);
@@ -591,22 +591,22 @@ import UserHoverCard from './UserHoverCard.vue'
 
 			  }
 			)
-			}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+			}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
 				let cstm_params = {
 			  "author": this.full_data.author,
 			  "permlink": this.full_data.permlink
 			};
-			
+
 			let res = await this.processTrxFunc('delete_comment', cstm_params);
-			
+
 		  }else{
 			let cstm_params = {
 			  "author": this.full_data.author,
 			  "permlink": this.full_data.permlink
 			};
-			
+
 			let res = await this.processTrxFunc('delete_comment', cstm_params);
-			
+
 			if (res.success){
 				this.deleteSuccess();
 			}
@@ -614,24 +614,24 @@ import UserHoverCard from './UserHoverCard.vue'
 	  },
 	  commentSuccess (err, finalize, bchain) {
 		// stop loading animation and show notification
-		
+
 		this.$notify({
 		  group: err ? 'error' : 'success',
 		  text: err ? this.$t('Comment_Error') : this.$t('Comment_Success_Chain').replace('_CHAIN_', bchain),
 		  position: 'top center'
 		})
-		
+
 		if (finalize){
 			this.loading = false
 			this.editBoxOpen = false;
-			
+
 			//display comment placeholder till blockchain data comes through
 			this.responsePosted = true;
 			this.responseBody = this.replyBody;
 
 			//refetch report data anew, but only after 10 seconds to ensure data has been made available
 			setTimeout( this.fetchReportCommentData, 10000);
-			
+
 			//reset open comment
 			this.resetOpenComment();
 		}
@@ -639,28 +639,28 @@ import UserHoverCard from './UserHoverCard.vue'
 	  /* function handles sending out the comment to the blockchain */
 	  async postResponse(event) {
 		// proceed with saving the comment
-		
+
 		if (!this.user){
 			this.errPosting = this.$t('Need_login');
 			return;
 		}
-		
+
 		this.loading = true
-		
+
 		//build the permlink
-		
+
 		let comment_perm = this.user.account.name.replace('.','-') + '-re-' + this.full_data.author.replace('.','-') + '-' + this.full_data.permlink + new Date().toISOString().replace(/[^a-zA-Z0-9]+/g, '').toLowerCase();
-		
+
 		//prepare meta data
 		let meta = [];
 		meta.tags = ['hive-193552', 'actifit'];
 		meta.app = 'actifit/0.5.0';
 		meta.suppEdit = 'actifit.io.comment';
 		this.replyBody = this.$refs.editor.content;
-		
+
 		if (!localStorage.getItem('std_login')){
 		//if (!this.stdLogin){
-		
+
 			this.$steemconnect.comment(
 			  this.full_data.author,
 			  this.full_data.permlink,
@@ -673,23 +673,23 @@ import UserHoverCard from './UserHoverCard.vue'
 				this.commentSuccess(err, true, 'STEEM');
 			  }
 			)
-		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
-		
-			let comment_options = { 
-				author: this.user.account.name, 
-				permlink: comment_perm, 
-				max_accepted_payout: '1000000.000 HBD', 
-				percent_hbd: 10000, 
-				allow_votes: true, 
-				allow_curation_rewards: true, 
+		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
+
+			let comment_options = {
+				author: this.user.account.name,
+				permlink: comment_perm,
+				max_accepted_payout: '1000000.000 HBD',
+				percent_hbd: 10000,
+				allow_votes: true,
+				allow_curation_rewards: true,
 				extensions: []//extensions: [[0, { 'beneficiaries': [] }]]
 			};
 			//console.log(comment_options);
 			//this.$nuxt.refresh()
 
 			window.hive_keychain.requestPost(
-				this.user.account.name, 
-				"", 
+				this.user.account.name,
+				"",
 				this.replyBody,
 				this.full_data.permlink,
 				this.full_data.author,
@@ -702,8 +702,8 @@ import UserHoverCard from './UserHoverCard.vue'
 				  }else{
 					this.commentSuccess(response.message, false, this.cur_bchain);
 				  }
-				});	
-			
+				});
+
 		}else{
 			let cstm_params = {
 			  "author": this.user.account.name,
@@ -714,21 +714,21 @@ import UserHoverCard from './UserHoverCard.vue'
 			  "permlink": comment_perm,
 			  "json_metadata": JSON.stringify(meta)
 			};
-			
+
 			let res = await this.processTrxFunc('comment', cstm_params, this.cur_bchain);
-			
+
 			if (res.success){
 				this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain);
 			}else{
 				this.commentSuccess('error saving', false, this.cur_bchain);
 			}
-			
+
 			//also send the same post again to the other chain
 			let other_chain = this.cur_bchain=='HIVE'?'STEEM':'HIVE';
 			if (this.target_bchain == 'BOTH'){
 				//this.loading = true;
 				let res = await this.processTrxFunc('comment', cstm_params, other_chain);
-			
+
 				if (res.success){
 					this.commentSuccess(null, true, other_chain);
 				}else{
@@ -740,17 +740,17 @@ import UserHoverCard from './UserHoverCard.vue'
 	  /* function handles editing out the comment to the blockchain */
 	  async editResponse(event) {
 		// proceed with saving the comment
-		
-		this.loading = true		
-		
+
+		this.loading = true
+
 		//append meta data
 		let meta = JSON.parse(this.full_data.json_metadata);
 		meta.tags = ['hive-193552', 'actifit'];
 		meta.app = 'actifit/0.4.1';
 		meta.suppEdit = 'actifit.io.comment';
 		this.full_data.body = this.$refs.editor.content;
-		
-		
+
+
 		if (!localStorage.getItem('std_login')){
 			this.$steemconnect.comment(
 			  this.full_data.parent_author,
@@ -768,7 +768,7 @@ import UserHoverCard from './UserHoverCard.vue'
 				  text: err ? this.$t('Edit_Error') : this.$t('Edit_Success'),
 				  position: 'top center'
 				})
-				
+
 				//display comment placeholder till blockchain data comes through
 				this.editBoxOpen = false;
 
@@ -777,23 +777,23 @@ import UserHoverCard from './UserHoverCard.vue'
 
 			  }
 			)
-				}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
-		
-			let comment_options = { 
-				author: this.user.account.name, 
-				permlink: this.full_data.permlink, 
-				max_accepted_payout: '1000000.000 HBD', 
-				percent_hbd: 10000, 
-				allow_votes: true, 
-				allow_curation_rewards: true, 
+				}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
+
+			let comment_options = {
+				author: this.user.account.name,
+				permlink: this.full_data.permlink,
+				max_accepted_payout: '1000000.000 HBD',
+				percent_hbd: 10000,
+				allow_votes: true,
+				allow_curation_rewards: true,
 				extensions: []//extensions: [[0, { 'beneficiaries': [] }]]
 			};
 			//console.log(comment_options);
 			//this.$nuxt.refresh()
 
 			window.hive_keychain.requestPost(
-				this.user.account.name, 
-				this.full_data.title, 
+				this.user.account.name,
+				this.full_data.title,
 				this.full_data.body,
 				this.full_data.parent_permlink,
 				this.full_data.parent_author,
@@ -806,8 +806,8 @@ import UserHoverCard from './UserHoverCard.vue'
 				  }else{
 					this.commentSuccess(response.message, false, this.cur_bchain);
 				  }
-				});	
-			
+				});
+
 		}else{
 			let cstm_params = {
 			  "author": this.full_data.author,
@@ -818,21 +818,21 @@ import UserHoverCard from './UserHoverCard.vue'
 			  "permlink": this.full_data.permlink,
 			  "json_metadata": JSON.stringify(meta)
 			};
-			
+
 			let res = await this.processTrxFunc('comment', cstm_params, this.cur_bchain);
-			
+
 			if (res.success){
 				this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain);
 			}else{
 				this.commentSuccess('error saving', false, this.cur_bchain);
 			}
-			
+
 			//also send the same post again to the other chain
 			let other_chain = this.cur_bchain=='HIVE'?'STEEM':'HIVE';
 			if (this.target_bchain == 'BOTH'){
 				//this.loading = true;
 				let res = await this.processTrxFunc('comment', cstm_params, other_chain);
-			
+
 				if (res.success){
 					this.commentSuccess(null, true, other_chain);
 				}else{
@@ -840,7 +840,7 @@ import UserHoverCard from './UserHoverCard.vue'
 				}
 			}
 		}
-		
+
 	  },
 	  /* function checks if logged in user has upvoted current report */
 	  userVotedThisPost() {
@@ -851,12 +851,12 @@ import UserHoverCard from './UserHoverCard.vue'
 			return this.postUpvoted;
 		}
 		this.postUpvoted = this.full_data.active_votes.filter(voter => (voter.voter === curUser)).length > 0 || this.newlyVotedPosts.indexOf(this.full_data.post_id)!==-1;
-		
+
 		return this.postUpvoted;
 	  },
 	  /* function checks if the comment can be deleted */
 	  commentDeletable () {
-		return (parseInt(this.full_data.children) == 0 
+		return (parseInt(this.full_data.children) == 0
 				&& this.user && this.user.account.name == this.full_data.author
 				&& parseInt(this.full_data.pending_payout_value.replace('SBD','').replace('STEEM','')) == 0
 				&& parseInt(this.full_data.total_payout_value.replace('SBD','').replace('STEEM','')) == 0
@@ -896,16 +896,16 @@ import UserHoverCard from './UserHoverCard.vue'
 		/*fetch(process.env.actiAppUrl+'getPostReward?user=' + this.author+'&url='+this.full_data.url).then(res => {
 		//grab the post's reward to display it properly
 				res.json().then(json => this.afitReward = json.token_count)}).catch(e => reject(e))*/
-		
+
 		//console.log(this.full_data);
-		
+
 		//grab the author's rank
 		fetch(process.env.actiAppUrl+'getRank/' + this.author).then(res => {
 				res.json().then(json => this.userRank = json)}).catch(e => reject(e))
-		
+
 		//grab moderators' list
 		this.$store.dispatch('fetchModerators')
-				
+
 	  },
 	  /* function handles appending moderators signature */
 	  insertModSignature () {
@@ -949,7 +949,7 @@ import UserHoverCard from './UserHoverCard.vue'
 .comment-info{
   overflow: auto;
   padding-top: 10px;
-  padding-bottom: 0px; 
+  padding-bottom: 0px;
   border: 1px solid #e9ecef;
 }
 .user-avatar{

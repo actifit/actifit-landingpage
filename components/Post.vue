@@ -15,26 +15,26 @@
 	  <div class="post-body">
   <div class="row">
     <!-- if this is a comment, display link to higher level comment/post -->
-	<div v-if="post.parent_author" class="col-12">
+    <div v-if="post.parent_author" class="col-12">
 
 
-    <span class="d-flex justify-content-end align-items-center">
-        <div class="">
-          <i class="fas fa-reply text-brand"></i>&nbsp;
-          <UserHoverCard :username="post.parent_author" />
-        </div>
-    </span>
-</div>
+      <span class="d-flex justify-content-end align-items-center">
+          <div class="">
+            <i class="fas fa-reply text-brand"></i>&nbsp;
+            <UserHoverCard :username="post.parent_author" />
+          </div>
+      </span>
+    </div>
   </div>
   <div class="row">
-	<div class="col-8">
-		<UserHoverCard :username="post.author"/>
-</div>
-          <div class="col-4 text-right">
-            <small class="text-muted d-block" :title="date">{{ $getTimeDifference(this.post.created) }}</small>
-          </div>
-        </div>
-		<div class="row">
+    <div class="col-8">
+      <UserHoverCard :username="post.author"/>
+    </div>
+    <div class="col-4 text-right">
+      <small class="text-muted d-block" :title="date">{{ $getTimeDifference(this.post.created) }}</small>
+    </div>
+  </div>
+  <div class="row">
           <div class="col-12">
 			<a href="#" class="text-brand" @click="post.pstId = pstId; $store.commit('setActivePost', post)" data-toggle="modal"
                  data-target="#postModal" :title="$t('read_more_small')" v-if="$postHasImage(meta)">
