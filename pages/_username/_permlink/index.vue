@@ -20,16 +20,17 @@
 			</div>
 
 			<h2>{{ report.title }}</h2>
-			<div class="main-user-info">
+			<div class="main-user-info pl-4">
 			  <h5 class="text-brand" >
 				<UserHoverCard :username="report.author"/>
 			  </h5>
-			  <a :href="buildLink"><span class="date-head text-muted">{{ date }}</span>&nbsp;<i class="fas fa-link"></i></a>
+			  <a :href="buildLink" class="p-1"><span class="date-head text-muted">{{ date }}</span>&nbsp;<i class="fas fa-link"></i></a>
 			  <i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent" ></i>
 			  <i v-if="!showTranslated" class="fa-solid fa-language text-brand" v-on:click="translateContent"></i>
 
-
-			  <div class="report-tags p-1" v-html="displayReportTags"></div>
+        <div class="modal-header">
+          <div class="report-tags p-1" v-html="displayReportTags"></div>
+        </div>
 			</div>
 			<div v-if="showTranslated" class="translation-notice">
 				<span>{{ $t('auto_translated_content') }}</span>

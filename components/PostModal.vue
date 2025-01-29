@@ -33,8 +33,8 @@
 				  </button>
 		  </div>
 		</div>
-		<div class="main-user-info">
-			<div class="p-1">
+		<div class="main-user-info pl-4">
+			<div>
 				<UserHoverCard :username="post.author"/>
 
 			</div>

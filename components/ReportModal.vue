@@ -14,26 +14,24 @@
             <span aria-hidden="true">&times;</span>
           </button>
 		</div>
-        <div class="main-user-info">
-			<div class="pl-4">
+        <div class="main-user-info pl-4">
 
-			<div class="p-1">
+          <div>
 
-					<UserHoverCard :username="report.author"/>
+              <UserHoverCard :username="report.author"/>
 
-				  <div>
-					<span class="date-head text-muted" :title="date">{{ $getTimeDifference(report.created) }}</span>
-					<a :href="'/@' + this.report.author + '/' + this.report.permlink"><i class="fas fa-link text-brand"></i></a>
-					<i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent" ></i>
-					<i v-if="!showTranslated" class="fa-solid fa-language text-brand" v-on:click="translateContent"></i>
-				  </div>
-			</div>
+              <div >
+              <span class="date-head text-muted" :title="date">{{ $getTimeDifference(report.created) }}</span>
+              <a :href="'/@' + this.report.author + '/' + this.report.permlink"><i class="fas fa-link text-brand"></i></a>
+              <i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent" ></i>
+              <i v-if="!showTranslated" class="fa-solid fa-language text-brand" v-on:click="translateContent"></i>
+              </div>
+          </div>
 
-		<div class="modal-header">
-			<div class="report-tags p-1" v-html="displayReportTags"></div>
-		</div>
-	</div>
-		</div>
+          <div class="modal-header">
+            <div class="report-tags p-1" v-html="displayReportTags"></div>
+          </div>
+		  </div>
 		<div v-if="showTranslated" class="translation-notice">
 			<span>{{ $t('auto_translated_content') }}</span>
 			<a href="#" v-on:click="cancelTranslation">{{ $t('click_to_view_original') }}</a>
