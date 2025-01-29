@@ -8,6 +8,13 @@ dotenv.config()
 
 module.exports = {
   mode: 'universal',
+
+  // Runtime configuration
+  publicRuntimeConfig: {
+    version: '1.6.5',
+  },
+
+
   router: {
     extendRoutes(routes, resolve) {
       routes.push({
@@ -31,115 +38,115 @@ module.exports = {
     base: '/'
   },*/
   env: {
-	sec_img_upl: process.env.SEC_IMG_UPL_KEY,
-	auth_Key: process.env.DEEPL_WEB_KEY,
-	swap_partner: 'actifit.swap',
-	swap_to_token: 'AFIT',
-	partner_fee: '1',
-    scRedirectUrl: process.env.SC_REDIRECT_URL || 'http://localhost:3000/auth',
-	CREATE_ACCOUNT_API_KEY: process.env.CREATE_ACCOUNT_API_KEY,
-	REWARD_REFERRAL_API_KEY: process.env.REWARD_REFERRAL_API_KEY,
-	DELEGATE_ACCOUNT_API_KEY: process.env.DELEGATE_ACCOUNT_API_KEY,
-	confirmPaymentToken: process.env.CONFIRM_PAYMENT_API_KEY,
-	webEditToken: process.env.WEB_EDIT_REWARD_KEY,
-	webVoteToken: process.env.WEB_VOTE_REWARD_KEY,
-	webCommentToken: process.env.WEB_COMMENT_REWARD_KEY,
-	maxTagDisplay: 10,
-	captchaV3Key: '6LchW94ZAAAAAOjLg0G_0AiRgHrlBfbP_HrReBBE',
-	poshVerificationUrl: 'https://hiveposh.com/api/v0/twitter/',
-	socialSharingHashtags: 'actifit,hive,move2earn,health,fitness',
-	socialSharingTitle: 'Actifit - Rewarding Your Everyday Activity',
-	socialSharingDesc: 'Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity ',
-	socialSharingQuote: 'Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity',
-	afitTokenBSC: '0x4516bb582f59befcbc945d8c2dac63ef21fba9f6',
-	afitxTokenBSC: '0x246d22ff6e0b90f80f2278613e8db93ff7a09b95',
-	afitBNBLPTokenBSC: '0xffff75bb7bf133a9e98bc62665f20a84e152b689',
-	afitxBNBLPTokenBSC: '0x150c81246df4e31847a613e18cab5ef601ca265a',
-	steemImgUrl: 'https://steemitimages.com',
-	hiveImgUrl: 'https://images.hive.blog',
-	steemApiNode: 'https://api.steemit.com/',
-	hiveApiNode: 'https://api.hive.blog',//'https://anyx.io', 'https://hiveapi.actifit.io', //
-	blurtApiNode: 'https://blurtrpc.actifit.io', //'https://blurt-rpc.saboin.com', //'http://164.68.116.86/', //'https://blurt-rpc.saboin.com/', //
-	hiveStateApiNode: 'https://api.deathwing.me',
-	hiveTestNode: 'https://testnet.openhive.network', //'https://api.fake.openhive.network',
-	altHiveNodes: ["https://api.hive.blog", "https://api.deathwing.me", "https://api.openhive.network", "https://hiveapi.actifit.io", "https://hived.privex.io", "https://api.deathwing.me", "https://rpc.ausbit.dev", "https://hive-api.arcange.eu", "https://hive.roelandp.nl", "https://anyx.io",],
-	actiAppUrl: process.env.ACTI_API_URL || 'http://localhost:3120/',
-	actiAppBackUrl: process.env.ACTI_API_BACK_URL || 'http://localhost:3120/',
-	steemEngineRpc: 'https://api.steem-engine.net/rpc',
-	hiveEngineRpc: 'https://herpc.actifit.io', //'https://mirrorengine.rishipanthee.com', //'https://engine.rishipanthee.com/',
-	steemEngineScot: 'https://scot-api.steem-engine.net/',
-	hiveEngineChainId: 'ssc-mainnet-hive', //'ssc-testnet-hive', //
-	hiveTestNetOn: false,
-	bscBridgeAccount: 'actifit.bridge',
-	threeSpeakApi: 'https://3speak.tv/apiv2/feeds/',
-	threeSpeakApiVidCount: 'https://3speak.tv/apiv2/feeds/@_USERNAME_/count',
-	threeSpeakApiSession: 'https://studio.3speak.tv/mobile/login?username=_USERNAME_',
-	threeSpeakUploadInfo: 'https://studio.3speak.tv/mobile/api/upload_info',
-	threeSpeakUserVideoList: 'https://studio.3speak.tv/mobile/api/my-videos',
-	threeSpeakCDN: 'https://ipfs-3speak.b-cdn.net/ipfs',
-	splinter_api_url_user_collections: "https://api.splinterlands.com/cards/collection/_USERNAME_",
-	splinter_api_all_cards: "https://api.splinterlands.com/cards/get_details",
-	hiveEngineScotParam: '?hive=1',
-	minSignupUSDCost: 2,
-	minAfitBuyEarnTicket: 1000,
-	minAfitBSCTransfer: 50,
-	maxAfitBSCTransfer: 50000,
-	afitHBDBridgeRate: 0.0001,
-  maxPostCount: 20,//maximum number of posts to return per query
-	shortModeratorSignature: '<br/>![rulersig2.jpg](https://cdn.steemitimages.com/DQmXrZz658YfMQBXNTA12rmbzqWXASfaGcNSqatJJ2ba7NR/rulersig2.jpg)<sub>@Actifit Moderator</sub>',
-	standardModeratorSignature: '<br/>![rulersig2.jpg](https://cdn.steemitimages.com/DQmXrZz658YfMQBXNTA12rmbzqWXASfaGcNSqatJJ2ba7NR/rulersig2.jpg)<sub>@Actifit Moderator <br/>Vote for [Actifit as a Witness](https://hivesigner.com/sign/account-witness-vote?witness=actifit&approve=true) <br/>Delegate to Actifit [10SP](https://hivesigner.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=10%20SP)| [20SP](https://hivesigner.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=20%20SP)| [50SP](https://hivesigner.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=50%20SP)| [100SP](https://hivesigner.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=100%20SP)| [250SP](https://hivesigner.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=250%20SP)| [500SP](https://hivesigner.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=500%20SP)| [1000SP](https://hivesigner.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=1000%20SP)| [5000SP](https://hivesigner.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=5000%20SP)| [10000SP](https://hivesigner.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=10000%20SP)| [20000SP](https://hivesigner.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=20000%20SP)| [Custom Amount](https://steembottracker.com/delegation.html?delegatee=actifit) <br/>Chat with us on [discord](https://discord.gg/aHtcA6r) | Visit our [website](https://actifit.io/) <br/>[Download on playstore](https://bit.ly/actifit-app) | [Download on app store](https://bit.ly/actifit-ios)[FAQs](https://actifit.io/@katerinaramm/actifit-app-or-rewarding-fitness-activity-with-tokens-and-steemit-upvotes-faqs) | [Text Tutorial](https://actifit.io/@katerinaramm/tutorial-for-actifit-app-update-november-2018-version-v0-5-0) | [Video Tutorial](https://youtu.be/tqkaDoonyvI)</sub>',
-	actifitMarketBuy: 'actifit.market',
-	actifitEscrow: 'actifit.escrow',
-	actifitVault: 'actifit.vault',
-	hiveAppsScript: {
-	  "hiveblog": {
-		"name": "Hive blog",
-		"homepage": "https://hive.blog",
-		"url_scheme": "https://hive.blog/{category}/@{username}/{permlink}"
-	  },
-	  "esteem": {
-		"name": "Esteem",
-		"homepage": "https://esteem.app",
-		"url_scheme": "https://esteem.app/{category}/@{username}/{permlink}"
-	  },
-	  "peakd": {
-		"name": "PeakD",
-		"homepage": "https://peakd.com",
-		"url_scheme": "https://peakd.com/{category}/@{username}/{permlink}"
-	  },
-	  "steempress": {
-		"name": "SteemPress",
-		"homepage": "https://wordpress.org/plugins/steempress/"
-	  },
-	  "actifit": {
-		"name": "Actifit",
-		"homepage": "https://actifit.io",
-		"url_scheme": "https://actifit.io/@{username}/{permlink}"
-	  },
-	  "travelfeed": {
-		"name": "TravelFeed",
-		"homepage": "https://travelfeed.io",
-		"url_scheme": "https://travelfeed.io/@{username}/{permlink}"
-	  },
-	  "3speak": {
-		"name": "3Speak",
-		"homepage": "https://3speak.tv",
-		"url_scheme": "https://3speak.tv/watch?v={username}/{permlink}"
-	  },
-	  "ecency": {
-		"name": "Ecency",
-		"homepage": "https://ecency.com",
-		"url_scheme": "https://ecency.com/{category}/@{username}/{permlink}"
-	  },
-	  "leofinance": {
-		"name": "Leofinance",
-		"homepage": "https://leofinance.io",
-		"url_scheme": "https://leofinance.io/{category}/@{username}/{permlink}",
-	  }
-	},
-	steemAppsScript: {
+    sec_img_upl: process.env.SEC_IMG_UPL_KEY,
+    auth_Key: process.env.DEEPL_WEB_KEY,
+    swap_partner: 'actifit.swap',
+    swap_to_token: 'AFIT',
+    partner_fee: '1',
+      scRedirectUrl: process.env.SC_REDIRECT_URL || 'http://localhost:3000/auth',
+    CREATE_ACCOUNT_API_KEY: process.env.CREATE_ACCOUNT_API_KEY,
+    REWARD_REFERRAL_API_KEY: process.env.REWARD_REFERRAL_API_KEY,
+    DELEGATE_ACCOUNT_API_KEY: process.env.DELEGATE_ACCOUNT_API_KEY,
+    confirmPaymentToken: process.env.CONFIRM_PAYMENT_API_KEY,
+    webEditToken: process.env.WEB_EDIT_REWARD_KEY,
+    webVoteToken: process.env.WEB_VOTE_REWARD_KEY,
+    webCommentToken: process.env.WEB_COMMENT_REWARD_KEY,
+    maxTagDisplay: 10,
+    captchaV3Key: '6LchW94ZAAAAAOjLg0G_0AiRgHrlBfbP_HrReBBE',
+    poshVerificationUrl: 'https://hiveposh.com/api/v0/twitter/',
+    socialSharingHashtags: 'actifit,hive,move2earn,health,fitness',
+    socialSharingTitle: 'Actifit - Rewarding Your Everyday Activity',
+    socialSharingDesc: 'Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity ',
+    socialSharingQuote: 'Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity',
+    afitTokenBSC: '0x4516bb582f59befcbc945d8c2dac63ef21fba9f6',
+    afitxTokenBSC: '0x246d22ff6e0b90f80f2278613e8db93ff7a09b95',
+    afitBNBLPTokenBSC: '0xffff75bb7bf133a9e98bc62665f20a84e152b689',
+    afitxBNBLPTokenBSC: '0x150c81246df4e31847a613e18cab5ef601ca265a',
+    steemImgUrl: 'https://steemitimages.com',
+    hiveImgUrl: 'https://images.hive.blog',
+    steemApiNode: 'https://api.steemit.com/',
+    hiveApiNode: 'https://api.hive.blog',//'https://anyx.io', 'https://hiveapi.actifit.io', //
+    blurtApiNode: 'https://blurtrpc.actifit.io', //'https://blurt-rpc.saboin.com', //'http://164.68.116.86/', //'https://blurt-rpc.saboin.com/', //
+    hiveStateApiNode: 'https://api.deathwing.me',
+    hiveTestNode: 'https://testnet.openhive.network', //'https://api.fake.openhive.network',
+    altHiveNodes: ["https://api.hive.blog", "https://api.deathwing.me", "https://api.openhive.network", "https://hiveapi.actifit.io", "https://hived.privex.io", "https://api.deathwing.me", "https://rpc.ausbit.dev", "https://hive-api.arcange.eu", "https://hive.roelandp.nl", "https://anyx.io",],
+    actiAppUrl: process.env.ACTI_API_URL || 'http://localhost:3120/',
+    actiAppBackUrl: process.env.ACTI_API_BACK_URL || 'http://localhost:3120/',
+    steemEngineRpc: 'https://api.steem-engine.net/rpc',
+    hiveEngineRpc: 'https://herpc.actifit.io', //'https://mirrorengine.rishipanthee.com', //'https://engine.rishipanthee.com/',
+    steemEngineScot: 'https://scot-api.steem-engine.net/',
+    hiveEngineChainId: 'ssc-mainnet-hive', //'ssc-testnet-hive', //
+    hiveTestNetOn: false,
+    bscBridgeAccount: 'actifit.bridge',
+    threeSpeakApi: 'https://3speak.tv/apiv2/feeds/',
+    threeSpeakApiVidCount: 'https://3speak.tv/apiv2/feeds/@_USERNAME_/count',
+    threeSpeakApiSession: 'https://studio.3speak.tv/mobile/login?username=_USERNAME_',
+    threeSpeakUploadInfo: 'https://studio.3speak.tv/mobile/api/upload_info',
+    threeSpeakUserVideoList: 'https://studio.3speak.tv/mobile/api/my-videos',
+    threeSpeakCDN: 'https://ipfs-3speak.b-cdn.net/ipfs',
+    splinter_api_url_user_collections: "https://api.splinterlands.com/cards/collection/_USERNAME_",
+    splinter_api_all_cards: "https://api.splinterlands.com/cards/get_details",
+    hiveEngineScotParam: '?hive=1',
+    minSignupUSDCost: 2,
+    minAfitBuyEarnTicket: 1000,
+    minAfitBSCTransfer: 50,
+    maxAfitBSCTransfer: 50000,
+    afitHBDBridgeRate: 0.0001,
+    maxPostCount: 20,//maximum number of posts to return per query
+    shortModeratorSignature: '<br/>![rulersig2.jpg](https://cdn.steemitimages.com/DQmXrZz658YfMQBXNTA12rmbzqWXASfaGcNSqatJJ2ba7NR/rulersig2.jpg)<sub>@Actifit Moderator</sub>',
+    standardModeratorSignature: '<br/>![rulersig2.jpg](https://cdn.steemitimages.com/DQmXrZz658YfMQBXNTA12rmbzqWXASfaGcNSqatJJ2ba7NR/rulersig2.jpg)<sub>@Actifit Moderator <br/>Vote for [Actifit as a Witness](https://hivesigner.com/sign/account-witness-vote?witness=actifit&approve=true) <br/>Delegate to Actifit [10SP](https://hivesigner.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=10%20SP)| [20SP](https://hivesigner.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=20%20SP)| [50SP](https://hivesigner.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=50%20SP)| [100SP](https://hivesigner.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=100%20SP)| [250SP](https://hivesigner.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=250%20SP)| [500SP](https://hivesigner.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=500%20SP)| [1000SP](https://hivesigner.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=1000%20SP)| [5000SP](https://hivesigner.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=5000%20SP)| [10000SP](https://hivesigner.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=10000%20SP)| [20000SP](https://hivesigner.com/sign/delegateVestingShares?delegatee=actifit&vesting_shares=20000%20SP)| [Custom Amount](https://steembottracker.com/delegation.html?delegatee=actifit) <br/>Chat with us on [discord](https://discord.gg/aHtcA6r) | Visit our [website](https://actifit.io/) <br/>[Download on playstore](https://bit.ly/actifit-app) | [Download on app store](https://bit.ly/actifit-ios)[FAQs](https://actifit.io/@katerinaramm/actifit-app-or-rewarding-fitness-activity-with-tokens-and-steemit-upvotes-faqs) | [Text Tutorial](https://actifit.io/@katerinaramm/tutorial-for-actifit-app-update-november-2018-version-v0-5-0) | [Video Tutorial](https://youtu.be/tqkaDoonyvI)</sub>',
+    actifitMarketBuy: 'actifit.market',
+    actifitEscrow: 'actifit.escrow',
+    actifitVault: 'actifit.vault',
+    hiveAppsScript: {
+      "hiveblog": {
+      "name": "Hive blog",
+      "homepage": "https://hive.blog",
+      "url_scheme": "https://hive.blog/{category}/@{username}/{permlink}"
+      },
+      "esteem": {
+      "name": "Esteem",
+      "homepage": "https://esteem.app",
+      "url_scheme": "https://esteem.app/{category}/@{username}/{permlink}"
+      },
+      "peakd": {
+      "name": "PeakD",
+      "homepage": "https://peakd.com",
+      "url_scheme": "https://peakd.com/{category}/@{username}/{permlink}"
+      },
+      "steempress": {
+      "name": "SteemPress",
+      "homepage": "https://wordpress.org/plugins/steempress/"
+      },
+      "actifit": {
+      "name": "Actifit",
+      "homepage": "https://actifit.io",
+      "url_scheme": "https://actifit.io/@{username}/{permlink}"
+      },
+      "travelfeed": {
+      "name": "TravelFeed",
+      "homepage": "https://travelfeed.io",
+      "url_scheme": "https://travelfeed.io/@{username}/{permlink}"
+      },
+      "3speak": {
+      "name": "3Speak",
+      "homepage": "https://3speak.tv",
+      "url_scheme": "https://3speak.tv/watch?v={username}/{permlink}"
+      },
+      "ecency": {
+      "name": "Ecency",
+      "homepage": "https://ecency.com",
+      "url_scheme": "https://ecency.com/{category}/@{username}/{permlink}"
+      },
+      "leofinance": {
+      "name": "Leofinance",
+      "homepage": "https://leofinance.io",
+      "url_scheme": "https://leofinance.io/{category}/@{username}/{permlink}",
+      }
+    },
+    steemAppsScript: {
 
-	}
+    }
   },
 
   render: {
