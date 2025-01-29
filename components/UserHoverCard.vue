@@ -469,20 +469,6 @@ export default {
   border-radius: 10px
   border: 2px solid white
 
-.inline-rank-badge
-  background: #ff112d
-  color: white
-  font-size: 0.75rem
-  padding: 4px 6px
-  border-radius: 10px
-  display: inline-flex
-  align-items: center
-  line-height: 1
-  transform: translateY(-4px)
-  position: relative
-  border: 2px solid white
-  box-shadow: 0 0 0 2px #ff112d
-  margin-top: 6px
 
 .balance-section
   background: #f8f9fa
