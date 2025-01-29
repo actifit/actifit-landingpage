@@ -2,45 +2,45 @@
   <div class="hover-card-container">
     <!-- Display based on mode -->
     <template v-if="displayMode === 'avatar-only'">
-      <a class="avatar-only-display d-inline-flex align-items-center" 
-        @mouseenter="handleMouseEnter" 
+      <span class="avatar-only-display d-inline-flex align-items-center"
+        @mouseenter="handleMouseEnter"
         @mouseleave="handleMouseLeave">
-        <div class="user-avatar-small" 
+        <div class="user-avatar-small"
             :title="username"
             :style="'background-image: url('+profImgUrl+'/u/' + username + '/avatar)'">
         </div>
-      </a>
+      </span>
     </template>
 
     <template v-else-if="displayMode === 'no-rank'">
-      <a class="user-display d-inline-flex align-items-center"
+      <span class="user-display d-inline-flex align-items-center"
          target="_blank"
-         @mouseenter="handleMouseEnter" 
+         @mouseenter="handleMouseEnter"
          @mouseleave="handleMouseLeave">
 				  <div class="user-avatar mr-1" :style="'background-image: url('+profImgUrl+'/u/' + username + '/avatar);'"></div>
         <div class="user-info">
           <small class="d-inline-block align-top">@{{ username }}</small>
         </div>
-      </a>
+      </span>
     </template>
 
-    <template v-if="displayMode==='username-only'">
-      <a class="user-display align-items-center" 
+    <template v-else-if="displayMode==='username-only'">
+      <span class="user-display align-items-center"
          target="_blank"
-         @mouseenter="handleMouseEnter" 
+         @mouseenter="handleMouseEnter"
          @mouseleave="handleMouseLeave">
 
         <span class="user-info">
           <small class="d-inline-block align-top">@{{ username }}</small>
         </span>
-      </a>
+      </span>
     </template>
-    
-    
+
+
     <template v-else>
-      <a class="user-display d-inline-flex align-items-center" 
+      <span class="user-display d-inline-flex align-items-center"
          target="_blank"
-         @mouseenter="handleMouseEnter" 
+         @mouseenter="handleMouseEnter"
          @mouseleave="handleMouseLeave">
         <div class="user-avatar mr-1"
              :style="'background-image: url('+profImgUrl+'/u/' + username + '/avatar);'">
@@ -54,13 +54,13 @@
             </span>
           </small>
         </span>
-      </a>
+      </span>
     </template>
-    
+
     <!-- Hover Card -->
     <transition name="fade">
-      <div v-if="isVisible" 
-           class="hover-card-wrapper" 
+      <div v-if="isVisible"
+           class="hover-card-wrapper"
            :style="cardPosition"
            @mouseenter="handleCardEnter"
            @mouseleave="handleCardLeave">
@@ -104,7 +104,7 @@
               </div>
             </div>
           </div>
-      
+
           <div class="card-body">
             <div class="row balance-section mb-3">
               <div class="col-6 text-center">
@@ -116,7 +116,7 @@
                 <div class="text-brand font-weight-bold">{{ afitBalance || 'N/A' }}</div>
               </div>
             </div>
-      
+
             <div class="links-section">
               <a :href="'/'+username+'/blog'" class="d-block mb-2">
                 <i class="fas fa-book-open mr-2"></i>
@@ -139,7 +139,7 @@
                 {{ $t('Wallet') }}
               </a>
             </div>
-      
+
             <a :href="'/'+username" class="btn btn-brand-profile btn-block">
               {{ $t('view_full_profile') }}
             </a>
@@ -157,7 +157,7 @@ import steem from 'steem'
 
 export default {
   name: 'UserHoverCard',
-  
+
   props: {
     username: {
       type: String,
@@ -207,33 +207,33 @@ export default {
       const CARD_WIDTH = 300
       const CARD_HEIGHT = 400
       const MARGIN = 20
-      
+
       let left = this.mouseX
       let top = this.mouseY
-      
+
       if (this.modalOffsetX || this.modalOffsetY) {
         left = left + MARGIN * 2
         top = top - MARGIN
-        
+
         if (left + CARD_WIDTH > window.innerWidth) {
           left = this.mouseX - CARD_WIDTH - MARGIN
         }
-        
+
         if (top + CARD_HEIGHT > window.innerHeight) {
           top = window.innerHeight - CARD_HEIGHT - MARGIN
         }
       } else {
         left = left + MARGIN
-        
+
         if (left + CARD_WIDTH > window.innerWidth) {
           left = this.mouseX - CARD_WIDTH - MARGIN
         }
-        
+
         if (top + CARD_HEIGHT > window.innerHeight) {
           top = this.mouseY - CARD_HEIGHT - MARGIN
         }
       }
-      
+
       left = Math.max(MARGIN, left)
       top = Math.max(MARGIN, top)
 
@@ -249,9 +249,9 @@ export default {
   mounted() {
     steem.api.setOptions({ url: process.env.steemApiNode })
     hive.api.setOptions({ url: process.env.hiveApiNode })
-    
-    this.profImgUrl = (localStorage.getItem('cur_bchain') === 'STEEM') 
-      ? process.env.steemImgUrl 
+
+    this.profImgUrl = (localStorage.getItem('cur_bchain') === 'STEEM')
+      ? process.env.steemImgUrl
       : process.env.hiveImgUrl
 
       this.fetchUserRank()
@@ -265,7 +265,7 @@ export default {
       clearTimeout(this.leaveTimeout)
     }
   },
-  
+
   watch: {
     userTokensWallet: {
       immediate: true,
@@ -294,14 +294,14 @@ export default {
       }
 
       const modalElement = event.target.closest('.modal-content')
-      
+
       if (modalElement) {
         const modalRect = modalElement.getBoundingClientRect()
         const triggerRect = event.target.getBoundingClientRect()
-        
+
         this.mouseX = triggerRect.left
         this.mouseY = triggerRect.top
-        
+
         this.modalOffsetX = modalRect.left
         this.modalOffsetY = modalRect.top
       } else {
@@ -353,7 +353,7 @@ export default {
       this.isLoadingRank = true
       this.displayCoreUserRank = null
       this.displayIncreasedUserRank = null
-      
+
       try {
         if (this.currentUsername !== this.username) {
           return
@@ -363,15 +363,15 @@ export default {
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
         }
-        
+
         const rankData = await response.json()
-        
+
         if (this.currentUsername === this.username) {
           this.userRankData = rankData
-          this.displayCoreUserRank = (rankData && rankData.rank_no_afitx != null) 
-            ? parseFloat(rankData.rank_no_afitx).toFixed(2) 
+          this.displayCoreUserRank = (rankData && rankData.rank_no_afitx != null)
+            ? parseFloat(rankData.rank_no_afitx).toFixed(2)
             : null
-            
+
           this.displayIncreasedUserRank = (rankData && rankData.afitx_rank != null && parseFloat(rankData.afitx_rank) > 0)
             ? parseFloat(rankData.afitx_rank).toFixed(2)
             : null
@@ -389,7 +389,7 @@ export default {
     async fetchUserData() {
       try {
         const chainLnk = localStorage.getItem('cur_bchain') === 'STEEM' ? steem : hive
-        
+
         // Fetch all data in parallel
         const [accountData, userTokens] = await Promise.all([
           new Promise((resolve) => {
@@ -433,6 +433,7 @@ export default {
 .hover-card-container
   display: inline-block
   position: static
+  cursor: pointer
 
 .hover-card-wrapper
   position: fixed !important
@@ -469,22 +470,7 @@ export default {
   border-radius: 10px
   border: 2px solid white
 
-.inline-rank-badge
-  background: #ff112d
-  color: white
-  font-size: 0.75rem
-  padding: 4px 6px
-  border-radius: 10px
-  display: inline-flex
-  align-items: center
-  line-height: 1
-  transform: translateY(-4px)
-  position: relative
-  border: 2px solid white
-  box-shadow: 0 0 0 2px #ff112d
-  
-  .increased-rank
-    margin-left: 3px
+
 .balance-section
   background: #f8f9fa
   padding: 1rem
@@ -561,4 +547,19 @@ export default {
 .user-avatar-small
   width: 24px
   height: 24px
+.user-display
+  display: inline-flex
+  align-items: center
+
+.user-info
+  display: flex
+  align-items: center
+  line-height: 1
+  small:not(.inline-rank-badge)
+    color: #ff112d
+    transition: color 0.2s ease
+    &:hover
+      color: #000
+
+
 </style>

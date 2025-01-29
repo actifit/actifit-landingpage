@@ -8,7 +8,11 @@
 	</div>
 	<div v-else-if="errorDisplay==''" class="container pt-5 mt-5 pb-5 col-md-9" >
 		<h5 class="text-brand user-name" v-if="displayUser">
-			<a :href="formattedProfileUrl" target="_blank" class="p-2">@{{ displayUser }} <small class="text-brand numberCircle">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small></a>
+			<a :href="formattedProfileUrl" target="_blank" class="p-2">@{{ displayUser }}
+        <span class="user-info">
+        <small class="inline-rank-badge ml-1">{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRank && this.userRank.afitx_rank">{{ displayIncreasedUserRank }}</span></small>
+        </span>
+      </a>
 			<span v-if="user && user.account.name === displayUser && !account_banned">
 				<span v-show="!editOn">
 					<a class="p-2"><i class="fas fa-edit" v-on:click="turnEditOn"></i></a>
@@ -2357,9 +2361,6 @@
 	  width: 20px;
 	  height: 20px;
     }
-	.increased-rank{
-		color: #76BB0E;
-	}
 	.fas{
 	  cursor: pointer;
 	}

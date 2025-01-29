@@ -9,7 +9,7 @@
 		  <i class="fas fa-external-link-alt"></i>
         </a>
       </h6>
-	
+
       <div class="post-body">
         <div class="row col-12">
 			<div class="col-6">
@@ -23,34 +23,34 @@
 			<div>{{community.about}}</div>
 			<small class="text-right curs-point" :title="'Created '+date"><i class="fas fa-calendar"></i>&nbsp;Since {{date}}</small>
             <!--<a :href="'/'+community.author" target="_blank">
-			
+
               <div class="user-avatar mr-1"
                    :style="'background-image: url('+profImgUrl+'/u/' + community.author + '/avatar)'"></div>
               <small class="d-inline-block align-top">@{{ community.author }}</small>
-			  
+
             </a>-->
           </div>
-          
+
         </div>
-		
+
 		<div class="details m-2 text-center">
 			<div class="row mb-2">
 				<div class="col-3 curs-point">
 					<i class="fa-solid fa-users m-1" :title="$t('subscribers')"><span class="m-1 font-weight-normal">{{$numberFormat(community.subscribers)}}</span></i>
 				</div>
-				
+
 				<div class="col-3 curs-point">
 					<i class="fa-solid fa-user-pen m-1" :title="$t('authors')"><span class="m-1 font-weight-normal">{{$numberFormat(community.num_authors)}}</span></i>
 				</div>
-				
+
 				<div class="col-3 curs-point">
 					<i class="fa-solid fa-book-open m-1" :title="$t('comm_posts')"><span class="m-1 font-weight-normal">{{$numberFormat(community.num_pending)}}</span></i>
 				</div>
-				
+
 				<div class="col-3 curs-point">
 					<i class="fa-solid fa-hourglass m-1" :title="$t('pending_rewards')"><span class="m-1 font-weight-normal">{{$numberFormat(community.sum_pending)}}</span></i>
 				</div>
-				
+
 			</div>
 		</div>
 		<div class="details m-2 text-center">
@@ -61,11 +61,11 @@
 					<UserHoverCard :username="admin" displayMode="no-rank"/>
 				</div>
 			</div>
-		
+
         <div class="row details mt-2">
-         
+
           <div class="col-12 text-center">
-				
+
 			  <div class="text-center"><a :href="buildLink+'/posts'" class="btn btn-brand btn-lg btn-white border m-1">{{ $t('Posts') }}</a>
 				  <a v-if="user && user.account.name" href="#a" class="btn btn-brand btn-lg btn-white m-1 border" v-on:click="subscribe()">
 					<span v-if="userSubscribed">{{ $t('Unsubscribe') }}</span>
@@ -75,8 +75,8 @@
 			  </div>
           </div>
         </div>
-		
-		
+
+
       </div>
     </div>
   </div>
@@ -84,13 +84,13 @@
 
 <script>
   import {mapGetters} from 'vuex'
-  
+
   import steem from 'steem'
-  
+
   import hive from '@hiveio/hive-js'
-  
+
   //import SocialSharing from 'vue-social-sharing'
-  
+
   //import vueRemarkable from 'vue-remarkable';
 
   import sanitize from 'sanitize-html'
@@ -123,7 +123,7 @@ import UserHoverCard from '~/components/UserHoverCard.vue';
 			return {};
 		}
       },
-	  
+
 	  votedByUser() {
 		return this.postUpvoted;
 	  },
@@ -136,8 +136,8 @@ import UserHoverCard from '~/components/UserHoverCard.vue';
 		}
 		return false;
 	  }
-	  	  
-    }, 
+
+    },
 	data: function(){
 		return {
 			afitReward: '',
@@ -210,7 +210,7 @@ import UserHoverCard from '~/components/UserHoverCard.vue';
 		}
 		this.loading = false;
 	  },
-	  
+
 	  //function handles displaying cut off version of text to avoid lengthy titles
 	  truncateString(str, ln) {
 		  if (str.length > ln) {
@@ -218,7 +218,7 @@ import UserHoverCard from '~/components/UserHoverCard.vue';
 		  }
 		  return str;
 	  },
-	  
+
 	  /* function handles confirming if the user had voted already to prevent issues */
 	  votePrompt(e) {
 		//if no user is logged in, prompt to login
@@ -241,30 +241,30 @@ import UserHoverCard from '~/components/UserHoverCard.vue';
 		}
 		return properNode;
 	  },
-	  
+
 	},
 	async mounted () {
 		//console.log(this.community);
 		//console.log('post details');
 		//console.log(this.post);
 		//return;
-		
-		
+
+
 		//grab post full pay if full pay mode enabled
 		//fetch(process.env.actiAppUrl+'getPostFullAFITPayReward?user=' + this.community.author+'&url='+this.community.url).then(res => {
 			//res.json().then(json => this.fullAFITReward = json.token_count)}).catch(e => reject(e))
-		
+
 		//grab moderators' list
 		this.$store.dispatch('fetchModerators')
-		
+
 		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
-		
+
 		this.profImgUrl = process.env.hiveImgUrl;
 		if (this.cur_bchain == 'STEEM'){
 			this.profImgUrl = process.env.steemImgUrl;
 		}
 	},
-	
+
   }
 </script>
 
@@ -299,9 +299,6 @@ import UserHoverCard from '~/components/UserHoverCard.vue';
 	}
 	.check-tooltip{
 	  color: white;
-	}
-	.increased-rank{
-		color: #76BB0E;
 	}
 	.post-title{
 		min-height: 60px;

@@ -7,34 +7,34 @@
 		<a :href="buildLink" target="_blank">
           {{ truncateString(post.title, 70) }}
 		  <i class="fas fa-external-link-alt"></i>
-		  
+
 		  <span v-if="isPostPinned" :title="$t('pinned_post')">&nbsp;<i class="fas fa-thumbtack text-warning"></i></span>
         </a>
       </h6>
-	  
+
 	  <div class="post-body">
   <div class="row">
     <!-- if this is a comment, display link to higher level comment/post -->
-	<div v-if="post.parent_author" class="col-12">
-  
+    <div v-if="post.parent_author" class="col-12">
 
-    <span class="d-flex justify-content-end align-items-center">
-        <div class="">
-          <i class="fas fa-reply text-brand"></i>&nbsp;
-          <UserHoverCard :username="post.parent_author" />
-        </div>
-    </span>
-</div>
-  </div>        
-  <div class="row">
-	<div class="col-8">
-		<UserHoverCard :username="post.author"/>
-</div>
-          <div class="col-4 text-right">
-            <small class="text-muted d-block" :title="date">{{ $getTimeDifference(this.post.created) }}</small>
+
+      <span class="d-flex justify-content-end align-items-center">
+          <div class="">
+            <i class="fas fa-reply text-brand"></i>&nbsp;
+            <UserHoverCard :username="post.parent_author" />
           </div>
-        </div>
-		<div class="row">
+      </span>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-8">
+      <UserHoverCard :username="post.author"/>
+    </div>
+    <div class="col-4 text-right">
+      <small class="text-muted d-block" :title="date">{{ $getTimeDifference(this.post.created) }}</small>
+    </div>
+  </div>
+  <div class="row">
           <div class="col-12">
 			<a href="#" class="text-brand" @click="post.pstId = pstId; $store.commit('setActivePost', post)" data-toggle="modal"
                  data-target="#postModal" :title="$t('read_more_small')" v-if="$postHasImage(meta)">
@@ -48,7 +48,7 @@
                  data-target="#postModal" :title="$t('read_more_small')">
             <!--<a :href="'/'+post.author+'/'+post.permlink" target="_blank">-->
 				<!--<div ref="post_body" id="post_body" style="display: none">
-					
+
 					<vue-remarkable :source="renderSnippet(post.body)" :options="{'html': true, 'xhtmlOut': true}"></vue-remarkable>
 				</div>-->
 				<div>
@@ -58,7 +58,7 @@
 				</div>
             </a>
           </div>
-          
+
         </div>
         <!--<div class="row details mt-2">
           <div class="col-8">
@@ -78,7 +78,7 @@
         </div>-->
         <div class="row details mt-2">
           <div class="col-6">
-              <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 
+              <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand"
                  data-target="#voteModal" v-if="user && userVotedThisPost()==true" :title="$t('votes')">
                 <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
               </a>
@@ -119,7 +119,7 @@
         </div>
 		<div class="row details mt-2">
 			<div class="col-12">
-				
+
 				<img src="/img/STEEM.png" class="mr-1 currency-logo-small" v-if="cur_bchain=='STEEM'">
 				<img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain=='HIVE'">
 				<!--{{ postPayout }}-->
@@ -139,8 +139,8 @@
 					<span class="text-brand text-bold">{{ post.pending_payout_value.replace('SBD','')}}</span>
 					<i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
 				</span>
-				<span v-if="hasBeneficiaries()" 
-						:title="beneficiariesDisplay()" 
+				<span v-if="hasBeneficiaries()"
+						:title="beneficiariesDisplay()"
 						@click="toggleTooltip()"
 						@mouseenter="showTooltip()"
 						@mouseleave="hideTooltip()"
@@ -149,9 +149,9 @@
 					<i class="fas fa-user-pen"><sup>{{post.beneficiaries.length}}</sup></i>
 					<div class="custom-tooltip" v-if="isTooltipVisible">{{ beneficiariesDisplay() }}</div>
 				</span>
-				
 
-			
+
+
 			</div>
 			<div class="col-6 text-right" v-if="afitReward != ''">
 				<small>
@@ -159,9 +159,9 @@
 				</small>
 			</div>
 		</div>
-		
-		
-		
+
+
+
       </div>
     </div>
   </div>
@@ -171,13 +171,13 @@
 import UserHoverCard from './UserHoverCard.vue'
 
   import {mapGetters} from 'vuex'
-  
+
   import steem from 'steem'
-  
+
   import hive from '@hiveio/hive-js'
-  
+
   import SocialSharing from 'vue-social-sharing'
-  
+
   //import vueRemarkable from 'vue-remarkable';
 
   import sanitize from 'sanitize-html'
@@ -193,7 +193,7 @@ import UserHoverCard from './UserHoverCard.vue'
 
 	  isOnlyPost() {
         return this.userPosts && this.userPosts.length === 1 // check if there's only one post in the store
-		
+
       },
 
 	  buildParentLink(){
@@ -221,7 +221,7 @@ import UserHoverCard from './UserHoverCard.vue'
 	  appVersion() {
         return this.meta.app
       },
-	  
+
       meta() {
 		try{
 			return JSON.parse(this.post.json_metadata)
@@ -267,8 +267,8 @@ import UserHoverCard from './UserHoverCard.vue'
 		}
 		return false;
 	  }
-	  	  
-    }, 
+
+    },
 	data: function(){
 		return {
 			afitReward: '',
@@ -376,7 +376,7 @@ import UserHoverCard from './UserHoverCard.vue'
 		*/
 		this.$store.commit('setPostToVote', this.post)
 	  },
-	  
+
 	  newlyVotedPostsQuery() {
 		//handles returning a list of recently manually upvoted on this current session
 		return this.newlyVotedPosts.length;
@@ -403,30 +403,30 @@ import UserHoverCard from './UserHoverCard.vue'
 		fetch(process.env.actiAppUrl+'getPostReward?user=' + this.post.author+'&url='+this.post.url).then(res => {
 		//grab the post's reward to display it properly
 			res.json().then(json => this.afitReward = json.token_count)}).catch(e => reject(e))
-		
+
 		//console.log('post details');
 		//console.log(this.post);
 		//return;
-		
+
 		//grab the author's rank
 		fetch(process.env.actiAppUrl+'getRank/' + this.post.author).then(res => {
 			res.json().then(json => this.userRank = json)}).catch(e => reject(e))
-			
+
 		//grab post full pay if full pay mode enabled
 		//fetch(process.env.actiAppUrl+'getPostFullAFITPayReward?user=' + this.post.author+'&url='+this.post.url).then(res => {
 			//res.json().then(json => this.fullAFITReward = json.token_count)}).catch(e => reject(e))
-		
+
 		//grab moderators' list
 		this.$store.dispatch('fetchModerators')
-		
+
 		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
-		
+
 		this.profImgUrl = process.env.hiveImgUrl;
 		if (this.cur_bchain == 'STEEM'){
 			this.profImgUrl = process.env.steemImgUrl;
 		}
 	},
-	
+
   }
 </script>
 
@@ -461,9 +461,6 @@ import UserHoverCard from './UserHoverCard.vue'
 	}
 	.check-tooltip{
 	  color: white;
-	}
-	.increased-rank{
-		color: #76BB0E;
 	}
 	.post-title{
 		min-height: 60px;

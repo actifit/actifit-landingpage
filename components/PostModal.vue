@@ -4,25 +4,25 @@
       <div class="modal-content" v-if="post">
 	    <div class="modal-header">
 			<div class="col-12">
-				<button type="button" class="btn btn-link float-left" @click="loadNextPost(-1)"><i class="fas fa-chevron-left"></i> Previous 
+				<button type="button" class="btn btn-link float-left" @click="loadNextPost(-1)"><i class="fas fa-chevron-left"></i> Previous
 					<span v-if="post.parent_author">Comment</span>
-					<span v-else>Post</span>	
+					<span v-else>Post</span>
 				</button>
-				<button type="button" class="btn btn-link float-right" @click="loadNextPost(1)">Next 
+				<button type="button" class="btn btn-link float-right" @click="loadNextPost(1)">Next
 					<span v-if="post.parent_author">Comment</span>
-					<span v-else>Post</span>					
+					<span v-else>Post</span>
 				<i class="fas fa-chevron-right"></i></button>
 			</div>
 		</div>
 		<!-- if this is a comment, display link to higher level comment/post -->
         <div v-if="post.parent_author" class="modal-header">
 		  <div class="row col-12">
-			
+
 			<div class="text-right col-12">
 			<i class="fas fa-reply text-brand"></i>&nbsp;{{$t('viewing_comment_note')}}
 			<UserHoverCard :username="post.parent_author"/>
 			</div>
-			
+
 		  </div>
 		</div>
 		<div class="modal-header border-0 pb-0">
@@ -33,8 +33,8 @@
 				  </button>
 		  </div>
 		</div>
-		<div class="main-user-info">
-			<div class="p-1">
+		<div class="main-user-info pl-4">
+			<div>
 				<UserHoverCard :username="post.author"/>
 
 			</div>
@@ -58,8 +58,8 @@
 		  <div class="col-md-6">
 			<span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i class="text-white fas fa-reply"></i></a></span>
 			<span class="ml-2">
-			
-				<a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand" 
+
+				<a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand"
 					 data-target="#voteModal" v-if="this.$parent.user && userVotedThisPost()==true">
 					<i class="far fa-thumbs-up"></i> {{getVoteCount }}
 				</a>
@@ -80,7 +80,7 @@
 					<img src="/img/BLURT.png" class="currency-logo-small" v-else-if="cur_bchain=='BLURT'">
 					<!--{{ postPayout }}-->
 				</span>
-				
+
 				<span v-if="postPaid()">
 						<!--<i class="fa-solid fa-wallet text-green"></i>-->
 						<span class="m-1" :title="$t('author_payout')">
@@ -100,7 +100,7 @@
 					<span v-if="hasBeneficiaries()" :title="beneficiariesDisplay()">
 						<i class="fas fa-user-pen"><sup>{{post.beneficiaries.length}}</sup></i>
 					</span>
-				
+
 				<span @click.prevent="displayMorePayoutData = !displayMorePayoutData" class="text-brand pointer-cur-cls" :title="$t('more_token_rewards')">
 					<i class="fas fa-chevron-circle-down" v-if="!displayMorePayoutData"></i>
 					<i class="fas fa-chevron-circle-up" v-else></i>
@@ -108,13 +108,13 @@
 				<transition name="fade" v-if="displayMorePayoutData">
 					<div class="m-2">
 						<small v-for="(token, index) in tokenRewards" :key="index" :title="displayTokenValue(token)">
-							{{displayTokenValue(token)}} | 
+							{{displayTokenValue(token)}} |
 						</small>
 					</div>
 				</transition>
 			</div>
 		  </div>
-		  <div class="col-md-6"> 
+		  <div class="col-md-6">
 			<social-sharing :url="formattedPostUrl"
 						  :title="post.title"
 						  description="Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity "
@@ -219,7 +219,7 @@
 		  </div>
 		</transition>
 		<div class="post-reply modal-body" v-if="responsePosted">
-			  <div class="comment-user-section">	
+			  <div class="comment-user-section">
 				<UserHoverCard :username="user.name"/>
 			  </div>
 			<vue-remarkable class="modal-body" :source="body" :options="{'html': true, 'breaks': true, 'typographer': true}"></vue-remarkable>
@@ -227,14 +227,14 @@
 		<div class="post-comments modal-body" v-if="post.children > 0">
 			<div v-if="showCommentsLoader" class="comments-loader">
 				<span class="btn btn-brand mb-1">
-				<i class="fas fa-spin fa-spinner"></i> 
+				<i class="fas fa-spin fa-spinner"></i>
 				</span>
 			</div>
-			<Comments 
+			<Comments
 				v-if="commentsAvailable"
-				:author="commentEntries.author" 
-				:body="commentEntries.body" 
-				:reply_entries.sync="commentEntries.reply_entries" 
+				:author="commentEntries.author"
+				:body="commentEntries.body"
+				:reply_entries.sync="commentEntries.reply_entries"
 				:main_post_author="post.author"
 				:main_post_permlink="post.permlink"
 				:main_post_cat="post.category"
@@ -243,7 +243,7 @@
 
 
       </div>
-	  
+
 	</div>
   </div>
 </template>
@@ -252,21 +252,21 @@
 import UserHoverCard from './UserHoverCard.vue'
   import steem from 'steem'
   import {mapGetters} from 'vuex'
-  import Comments from '~/components/Comments'  
-  import CustomTextEditor from '~/components/CustomTextEditor' 
-  
+  import Comments from '~/components/Comments'
+  import CustomTextEditor from '~/components/CustomTextEditor'
+
   import Vue from 'vue'
   import vueRemarkable from 'vue-remarkable';
-  
+
   import SocialSharing from 'vue-social-sharing';
-  
+
   import sanitize from 'sanitize-html'
   import { translateText } from '~/components/deepl-client';
-  
+
   const scot_steemengine_api = process.env.steemEngineScot;
   const scot_hive_api_param = process.env.hiveEngineScotParam;
   const tokensOfInterest = ['SPORTS', 'PAL', 'APX'];
-  
+
   export default {
 	data () {
 		return {
@@ -404,7 +404,7 @@ import UserHoverCard from './UserHoverCard.vue'
 	}
 
     },
-	methods: { 
+	methods: {
 		cancelTranslation(){
 			this.post.body = this.safety_post_content;
 			this.showTranslated = false;
@@ -413,9 +413,9 @@ import UserHoverCard from './UserHoverCard.vue'
 			try {
 				this.safety_post_content = this.post.body;
 				const result = await translateText(this.post.body , 'en');
-				
+
 				const translatedText = result.translations[0].text || "Translation failed";
-		
+
 				this.showTranslated = true;
 
 				this.post.body = translatedText;
@@ -441,9 +441,9 @@ import UserHoverCard from './UserHoverCard.vue'
 				  text: this.$t('error_copying'),
 				  position: 'top center'
 				})
-				return;					
+				return;
 			});
-			
+
 		},
 	  loadNextPost(direction){
 		this.cancelTranslation();
@@ -490,7 +490,7 @@ import UserHoverCard from './UserHoverCard.vue'
 		this.replyBody = this.moderatorSignature;
 		this.commentBoxOpen=false;
 	  },
-	  
+
 	  commentSuccess (err, finalize, bchain) {
 		// stop loading animation and show notification
 		this.loading = false
@@ -499,17 +499,17 @@ import UserHoverCard from './UserHoverCard.vue'
 		  text: err ? this.$t('Comment_Error') : this.$t('Comment_Success_Chain').replace('_CHAIN_', bchain),
 		  position: 'top center'
 		})
-		
+
 		if (finalize){
-		
+
 			//display comment placeholder till blockchain data comes through
 			this.responsePosted = true;
 			this.responseBody = this.replyBody;
-			
+
 			//refetch post data anew, but only after 10 seconds to ensure data has been made available
 			setTimeout( this.fetchPostCommentData, 10000);
-			
-			
+
+
 			//check if comment is lengthy enough, increase tracked count by 1
 			if (this.responseBody.length >= 50){
 				if (isNaN(this.commentCountToday)){
@@ -518,17 +518,17 @@ import UserHoverCard from './UserHoverCard.vue'
 				this.commentCountToday += 1;
 			}
 			this.$store.commit('setCommentCountToday', this.commentCountToday);
-			
+
 			//reward the user for interacting with 3 different posts via comments
 			if (this.commentCountToday >= 3){
 				this.rewardUserComment();
 			}
 		}
-		
+
 		//reset open comment
 		this.resetOpenComment();
 	  },
-	  
+
 	  async processTrxFunc(op_name, cstm_params, bchain_option){
 		if (!localStorage.getItem('std_login')){
 		//if (!this.stdLogin){
@@ -541,7 +541,7 @@ import UserHoverCard from './UserHoverCard.vue'
 				//console.log(err);
 				return {success: false, trx: null};
 			}
-		}else if (localStorage.getItem('acti_login_method') == 'hiveauth'){	
+		}else if (localStorage.getItem('acti_login_method') == 'hiveauth'){
 			return new Promise((resolve) => {
 				const auth = {
 				  username: this.user.account.name,
@@ -549,11 +549,11 @@ import UserHoverCard from './UserHoverCard.vue'
 				  expire: localStorage.getItem('expires'),
 				  key: localStorage.getItem('key')
 				}
-				
-				let operation = [ 
+
+				let operation = [
 				   [op_name, cstm_params]
 				];
-				
+
 				this.$HAS.broadcast(auth, 'posting', operation, (evt)=> {
 					console.log(evt)    // process sign_wait message
 					let msg = this.$t('verify_hiveauth_app');
@@ -586,27 +586,27 @@ import UserHoverCard from './UserHoverCard.vue'
 				} )
 			})
 		}else{
-			let operation = [ 
+			let operation = [
 			   [op_name, cstm_params]
 			];
 			console.log('broadcasting');
 			console.log(operation);
-			
+
 			//console.log(this.$steemconnect.accessToken);
 			//console.log(this.$store.state.accessToken);
 			//grab token
 			let accToken = localStorage.getItem('access_token')
-			
+
 			let op_json = JSON.stringify(operation)
-			
+
 			let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
-			
+
 			if (bchain_option){
 				cur_bchain = bchain_option;
 			}
-			
+
 			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+encodeURIComponent(op_json)+'&bchain='+cur_bchain);
-			
+
 			let reqHeads = new Headers({
 			  'Content-Type': 'application/json',
 			  'x-acti-token': 'Bearer ' + accToken,
@@ -640,21 +640,21 @@ import UserHoverCard from './UserHoverCard.vue'
 			}
 		}
 	  },
-	  
+
 	  /* function handles sending out the comment to the blockchain */
 	  async postResponse(event) {
 		// proceed with saving the comment
-		
+
 		if (!this.user){
 			this.errPosting = this.$t('Need_login');
 			return;
 		}
-		
+
 		this.loading = true
-		
+
 		//build the permlink
 		let comment_perm = this.user.account.name.replace('.','-') + '-re-' + this.post.author.replace('.','-') + '-' + this.post.permlink + new Date().toISOString().replace(/[^a-zA-Z0-9]+/g, '').toLowerCase();
-		
+
 		//prepare meta data
 		let meta = new Object();
 		meta.tags = ['hive-193552', 'actifit'];
@@ -676,23 +676,23 @@ import UserHoverCard from './UserHoverCard.vue'
 				this.commentSuccess(err, true, 'STEEM');
 			  }
 			)
-		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
-		
-			let comment_options = { 
-				author: this.user.account.name, 
-				permlink: comment_perm, 
-				max_accepted_payout: '1000000.000 HBD', 
-				percent_hbd: 10000, 
-				allow_votes: true, 
-				allow_curation_rewards: true, 
+		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
+
+			let comment_options = {
+				author: this.user.account.name,
+				permlink: comment_perm,
+				max_accepted_payout: '1000000.000 HBD',
+				percent_hbd: 10000,
+				allow_votes: true,
+				allow_curation_rewards: true,
 				extensions: []//extensions: [[0, { 'beneficiaries': [] }]]
 			};
 			//console.log(comment_options);
 			//this.$nuxt.refresh()
 
 			window.hive_keychain.requestPost(
-				this.user.account.name, 
-				"", 
+				this.user.account.name,
+				"",
 				this.replyBody,
 				this.post.permlink,
 				this.post.author,
@@ -705,8 +705,8 @@ import UserHoverCard from './UserHoverCard.vue'
 				  }else{
 					this.commentSuccess(response.message, false, this.cur_bchain);
 				  }
-				});	
-		
+				});
+
 		}else{
 			let cstm_params = {
 			  "author": this.user.account.name,
@@ -717,21 +717,21 @@ import UserHoverCard from './UserHoverCard.vue'
 			  "permlink": comment_perm,
 			  "json_metadata": JSON.stringify(meta)
 			};
-			
+
 			let res = await this.processTrxFunc('comment', cstm_params, this.cur_bchain);
-			
+
 			if (res.success){
 				this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain);
 			}else{
 				this.commentSuccess('error saving', false, this.cur_bchain);
 			}
-			
+
 			//also send the same post again to the other chain
 			let other_chain = this.cur_bchain=='HIVE'?'STEEM':'HIVE';
 			if (this.target_bchain == 'BOTH'){
 				this.loading = true;
 				let res = await this.processTrxFunc('comment', cstm_params, other_chain);
-			
+
 				if (res.success){
 					this.commentSuccess(null, true, other_chain);
 				}else{
@@ -739,7 +739,7 @@ import UserHoverCard from './UserHoverCard.vue'
 				}
 			}
 		}
-		
+
 	  },
 	  /* function handles rewarding user for comments */
 	  async rewardUserComment () {
@@ -772,7 +772,7 @@ import UserHoverCard from './UserHoverCard.vue'
 		let curUser = this.user.account.name;
 		//check if the post contains in its original voters current user, or if it has been upvoted in current session
 		this.postUpvoted = this.post.active_votes.filter(voter => (voter.voter === curUser)).length > 0 || this.newlyVotedPosts.indexOf(this.post.post_id)!==-1;
-		
+
 		return this.postUpvoted;
 	  },
 	  /* function handles appending moderators signature */
@@ -791,7 +791,7 @@ import UserHoverCard from './UserHoverCard.vue'
 	  },
 	  /* function handles confirming if the user had voted already to prevent issues */
 	  votePrompt(e) {
-		
+
 		  //proceed normally showing vote popup
 		  this.$store.commit('setPostToVote', this.post)
 		//}
@@ -806,11 +806,11 @@ import UserHoverCard from './UserHoverCard.vue'
 		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		this.target_bchain = this.cur_bchain;
 		this.$store.commit('setBchain', this.cur_bchain);
-		
+
 		//regrab post data to fix comments
 		this.$store.dispatch('fetchPostComments', this.post).then(() => {
 			this.commentsLoading = false;
-		});		
+		});
 		//clear the placeholder comment displayed
 		this.responsePosted = false;
 		this.responseBody = this.moderatorSignature;
@@ -819,24 +819,24 @@ import UserHoverCard from './UserHoverCard.vue'
 		fetch(process.env.actiAppUrl+'getPostReward?user=' + this.post.author+'&url='+this.post.url).then(res => {
 		//grab the post's reward to display it properly
 				res.json().then(json => this.afitReward = json.token_count)}).catch(e => reject(e))
-				
+
 		//grab the author's rank
 		fetch(process.env.actiAppUrl+'getRank/' + this.post.author).then(res => {
 				res.json().then(json => this.userRank = json)}).catch(e => reject(e))
-				
+
 		//grab post full pay if full pay mode enabled
 		fetch(process.env.actiAppUrl+'getPostFullAFITPayReward?user=' + this.post.author+'&url='+this.post.url).then(res => {
 				res.json().then(json => this.fullAFITReward = json.token_count)}).catch(e => reject(e))
-				
+
 		//grab moderators' list
 		this.$store.dispatch('fetchModerators')
-		
+
 		this.profImgUrl = process.env.hiveImgUrl;
-		
+
 		if (this.cur_bchain == 'STEEM'){
-		
+
 			this.profImgUrl = process.env.steemImgUrl;
-			
+
 			//grab post S-E token pay
 			fetch(scot_steemengine_api+'@'+this.post.author+'/'+this.post.permlink ).then(
 				res => {res.json().then(json => this.setPostTokenRewards (json) ).catch(e => reject(e))
@@ -906,14 +906,14 @@ import UserHoverCard from './UserHoverCard.vue'
 	  if (this.post != null){
 		this.fetchPostKeyData();
 	  }
-	
+
 	  //fix modal overlay
 	  $('#voteModal').on("hidden.bs.modal", this.fixSubModal)
 	    //reset translation when modal closes
   	  $('#reportModal').on("hidden.bs.modal", this.cancelTranslation)
-  
+
 	  this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
-	  
+
 	  //capture key clicks
 	  window.addEventListener('keydown', this.handleKeyDown);
 
@@ -958,9 +958,6 @@ import UserHoverCard from './UserHoverCard.vue'
 	}
 	.post-modal-prelim-info span{
 	  padding: 5px;
-	}
-	.increased-rank{
-		color: #76BB0E;
 	}
 	.single-tag{
 		background-color: red;
