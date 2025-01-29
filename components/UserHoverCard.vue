@@ -2,18 +2,18 @@
   <div class="hover-card-container">
     <!-- Display based on mode -->
     <template v-if="displayMode === 'avatar-only'">
-      <a class="avatar-only-display d-inline-flex align-items-center"
+      <span class="avatar-only-display d-inline-flex align-items-center"
         @mouseenter="handleMouseEnter"
         @mouseleave="handleMouseLeave">
         <div class="user-avatar-small"
             :title="username"
             :style="'background-image: url('+profImgUrl+'/u/' + username + '/avatar)'">
         </div>
-      </a>
+      </span>
     </template>
 
     <template v-else-if="displayMode === 'no-rank'">
-      <a class="user-display d-inline-flex align-items-center"
+      <span class="user-display d-inline-flex align-items-center"
          target="_blank"
          @mouseenter="handleMouseEnter"
          @mouseleave="handleMouseLeave">
@@ -21,11 +21,11 @@
         <div class="user-info">
           <small class="d-inline-block align-top">@{{ username }}</small>
         </div>
-      </a>
+      </span>
     </template>
 
     <template v-else-if="displayMode==='username-only'">
-      <a class="user-display align-items-center"
+      <span class="user-display align-items-center"
          target="_blank"
          @mouseenter="handleMouseEnter"
          @mouseleave="handleMouseLeave">
@@ -33,12 +33,12 @@
         <span class="user-info">
           <small class="d-inline-block align-top">@{{ username }}</small>
         </span>
-      </a>
+      </span>
     </template>
 
 
     <template v-else>
-      <a class="user-display d-inline-flex align-items-center"
+      <span class="user-display d-inline-flex align-items-center"
          target="_blank"
          @mouseenter="handleMouseEnter"
          @mouseleave="handleMouseLeave">
@@ -54,7 +54,7 @@
             </span>
           </small>
         </span>
-      </a>
+      </span>
     </template>
 
     <!-- Hover Card -->
@@ -433,6 +433,7 @@ export default {
 .hover-card-container
   display: inline-block
   position: static
+  cursor: pointer
 
 .hover-card-wrapper
   position: fixed !important
