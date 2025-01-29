@@ -24,7 +24,7 @@
       </a>
     </template>
 
-    <template v-if="displayMode==='username-only'">
+    <template v-else-if="displayMode==='username-only'">
       <a class="user-display align-items-center" 
          target="_blank"
          @mouseenter="handleMouseEnter" 
