@@ -78,6 +78,35 @@ export default {
       }).catch(e => reject(e))
     })
   },
+  async fetchClaimableSignupLinks({ state, commit }) {
+    try {
+        const response = await fetch(process.env.actiAppUrl + 'claimableFreeAccounts/' + state.steemconnect.user.account.name.toLowerCase());
+        if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(`HTTP Error: ${response.status} - ${errorData.message}`);
+        }
+        const jsonData = await response.json();
+        return jsonData;
+    } catch (error) {
+        console.error("Error fetching claimable signup links:", error);
+        throw error; // Re-throw the error to be handled by the caller
+    }
+  },
+  async claimSignupLinks({ state, commit }) {
+    try {
+        const response = await fetch(process.env.actiAppUrl + 'claimFreeSignupAccounts/' + state.steemconnect.user.account.name.toLowerCase());
+        if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(`HTTP Error: ${response.status} - ${errorData.message}`);
+        }
+        const jsonData = await response.json();
+        return jsonData;
+    } catch (error) {
+        console.error("Error fetching claimable signup links:", error);
+        throw error; // Re-throw the error to be handled by the caller
+    }
+  },
+
   fetchUserRank ({ state, commit }) {
     return new Promise((resolve, reject) => {
       fetch(process.env.actiAppUrl+'getRank/' + state.steemconnect.user.account.name.toLowerCase()).then(res => {
