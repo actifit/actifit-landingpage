@@ -19,5 +19,13 @@ module.exports = {
   // add your custom rules here
   rules: {
       "vue/no-use-v-if-with-v-for": "off"
-  }
+  },
+  overrides: [
+    {
+         files: ['*'],
+         rules: {
+          'vue/no-mutating-props': 'off', //Disable rule only for vue files
+         }
+     }
+ ]
 }

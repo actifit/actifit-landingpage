@@ -96,7 +96,7 @@
     "cross-env": "^7.0.2",
     "eslint": "^7.5.0",
     "eslint-loader": "^4.0.2",
-    "eslint-plugin-vue": "^6.2.2",
+    "eslint-plugin-vue": "^7.1.0",
     "patch-package": "^6.2.1"
   }
 }
