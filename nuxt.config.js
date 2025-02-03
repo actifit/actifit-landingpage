@@ -11,7 +11,7 @@ module.exports = {
 
   // Runtime configuration
   publicRuntimeConfig: {
-    version: '1.6.5',
+    version: '1.6.5.1',
   },
 
 
@@ -65,7 +65,7 @@ module.exports = {
     steemImgUrl: 'https://steemitimages.com',
     hiveImgUrl: 'https://images.hive.blog',
     steemApiNode: 'https://api.steemit.com/',
-    hiveApiNode: 'https://api.hive.blog',//'https://anyx.io', 'https://hiveapi.actifit.io', //
+    hiveApiNode: 'https://hiveapi.actifit.io',//'https://anyx.io', 'https://hiveapi.actifit.io', //https://api.hive.blog
     blurtApiNode: 'https://blurtrpc.actifit.io', //'https://blurt-rpc.saboin.com', //'http://164.68.116.86/', //'https://blurt-rpc.saboin.com/', //
     hiveStateApiNode: 'https://api.deathwing.me',
     hiveTestNode: 'https://testnet.openhive.network', //'https://api.fake.openhive.network',
@@ -295,6 +295,10 @@ module.exports = {
           exclude: /(node_modules)/
         })
       }
+
+      /*if (ctx.isClient){
+        config.resolve.alias['axios'] = require.resolve('axios/dist/browser/axios.cjs');
+      }*/
 
 		config.node = {
             fs: 'empty'

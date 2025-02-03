@@ -4647,6 +4647,7 @@
 				  note = 'Power up of '+amount+ ' ' + power_type + ' completed successfully!';
 			  }
 			  if (type=='claimrewards'){
+				note = 'Rewards claimed successfully!';
 				this.claimRewardsProcess = false;
 				this.claimSP = '';
 				this.claimSTEEM = '';
