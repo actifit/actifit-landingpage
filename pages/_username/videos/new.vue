@@ -7,15 +7,15 @@
 		  <h5 v-if="editPost.isNewPost" class="modal-title" id="exampleModalLabel">{{ $t('Create_new_vid') }}&nbsp;<img src="/img/3speak.png" class="mr-2 token-logo-md"></h5>
 		  <h5 v-else class="modal-title" id="exampleModalLabel">{{ $t('Editing') }} <a :href="'/'+editPost.author+'/'+editPost.permlink">{{ title }}</a></h5>
         </div>
-	  
+
 		<div class="vid-container" v-if="xcstkn != ''">
 			<div class="card post p-4 m-4 float-left" :class="smallScreenCheck" ref="mainCard">
 				<div class="text-center font-weight-bold">{{$t('new_video_placeholder')}}</div>
-								
+
 				<div>
 					<!-- video upload section -->
 					<input type="file" ref="fileInput" @change="uploadVideo" @click="setUploadEnvt()" :max-size="maxFileSize"/>
-					
+
 					<!--<div v-if="selVid == newVid">Selected</div>-->
 				</div>
 				<div>
@@ -32,21 +32,21 @@
 								<!--<button @click="playBack" v-if="!recording" class="btn btn-white border text-red acti-shadow mt-2">Play Back</button>-->
 								<button @click="uploadRecVideo" v-if="!recording" class="btn btn-white border text-red acti-shadow mt-2">Upload Recording</button>
 								<!--<a v-if="recordedVideoUrl" :href="recordedVideoUrl" download="recorded-video.mp4" class="btn btn-white border text-red acti-shadow mt-2">Download Recording</a>-->
-							</div>		
+							</div>
 						</div>
 					</transition>
 				</div>
 				<div>
 					<div v-if="thumbprogress">{{ thumbprogress }}</div>
 					<div v-if="vidprogress">{{ vidprogress }}</div>
-					
+
 					<div>
 						<span v-if="videoLength">{{ videoLength.toFixed(2) }} sec | </span>
 						<span v-if="videoSize">{{ (videoSize / 1024 / 1024).toFixed(2) }} MB</span>
 					</div>
 					<div v-if="videoLength">Now</div>
 					<div v-if="videoLength">New Vid <i class="fas fa-solid fa-refresh text-brand" @click="getAllVideoStatuses()" :class="{ 'fa-spin': isRotating }"></i></div>
-					
+
 					<video ref="video" id="video" style="display:none">
 					</video>
 					<canvas ref="canvas" id="canvas" style="display: none"/>
@@ -75,8 +75,8 @@
 	    <div class="vid-container" v-else>
 			<button class="btn btn-white border text-red acti-shadow" @click="connectSession3S">Load Videos</button>
 		</div>
-		
-		
+
+
 		<div class="row text-right" v-if="user">
 			<div class="col-12 pb-2">
 				<a :href="'/'+user.account.name+'/videos'" ref="my-videos" class="btn btn-brand border" :title="$t('view_videos')"><i class="fa-solid fa-video"></i></a>&nbsp;
@@ -87,7 +87,7 @@
 		<div>
           <div class="form-group">
 			<!--<input id="image-upload" type="file" v-on:change="uploadImage($event.target.files)" /> -->
-		  
+
             <label for="post-title" style="display: none">{{ $t('Title') }}</label>
             <input class="form-control form-control-lg acti-shadow" :placeholder="$t('Title')" id="post-title" v-model="title" />
           </div>
@@ -97,11 +97,11 @@
 		  </div>
           <div class="form-group">
 			<CustomTextEditor ref="editor" :initialContent="body" ></CustomTextEditor>
-			
+
           </div>
 		  <!--<div class="form-group">
 			<label for="image-upload">{{ $t('Upload_Images') }}</label><br/>
-			<input id="image-upload" type="file" v-on:change="uploadImage($event.target.files)" /> 
+			<input id="image-upload" type="file" v-on:change="uploadImage($event.target.files)" />
 			<i class="fas fa-spin fa-spinner" v-if="imgUploading"></i>
 		  </div>-->
           <div class="form-group">
@@ -109,10 +109,10 @@
             <input class="form-control form-control-lg acti-shadow" :placeholder="$t('Tags')"/>-->
 			<TagInput id="tagItem" ref="tagItem" :initialItems="tags" class="form-control form-control-lg acti-shadow"/>
 		  </div>
-		  
+
 		  <div class="form-group acti-shadow extra-container">
 			<Beneficiary ref="beneficiaryList" :initialEntries="benef_list" :viewOnly="!editPost.isNewPost" class="float-left" :requiredEntries="benef_list.map(obj => obj.account)" :extraNote="$t('benefic_3s')" :restrictedPercent="parseInt(1)" />
-			
+
 			<!-- also select community to post to -->
 			<div class="form-group d-flex align-items-center p-1">
 				<select id="targetCommunity" ref="targetCommunity" class="form-control targetCommunity">
@@ -120,7 +120,7 @@
 					<option v-for="com in communitySubs" :value="com[0]" :key="com[0]">{{com[1]}}</option>
 				</select>
 			</div>
-			
+
 			<div class="form-group d-flex align-items-center p-1" style="min-height: 70px;">
 			  <label for="paymentApproach" class="mr-2 label-payment">{{$t('payment_approach')}}</label>
 			  <select id="paymentApproach" ref="paymentApproach" class="form-control paymentApproach">
@@ -130,7 +130,7 @@
 			  </select>
 			</div>
 		  </div>
-		  
+
         </div>
 		<div class="modal-footer m-2" style="display: none">
 			<div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-if="cur_bchain=='HIVE'">
@@ -180,21 +180,21 @@
   import marked from 'marked'
   //import InputTag from 'vue-input-tag'
   import { mapGetters } from 'vuex'
-  
+
   import CustomTextEditor from '~/components/CustomTextEditor';
   import TagInput from '~/components/TagInput';
   import Beneficiary from '~/components/Beneficiary';
-  
+
   import NotifyModal from '~/components/NotifyModal';
-  
+
   import hive from '@hiveio/hive-js'
-  
+
   import NavbarBrand from '~/components/NavbarBrand';
   import Footer from '~/components/Footer';
-  
+
   //needed to fix incorrect duration when recording video
   import fixWebmDuration from 'fix-webm-duration';
-  
+
   import axios from 'axios';
   import * as tus from "tus-js-client";
 	import { wrapper } from "axios-cookiejar-support";
@@ -209,7 +209,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 	/* handles outside clicks for the picker */
 	/* begin */
 	import Vue from 'vue';
-	
+
 	//for hiveauth
 	import { Signature, hash, PublicKey, ec } from 'elliptic';
 
@@ -232,7 +232,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 	});
 	/* end */
 
-   
+
   export default {
 	head () {
 		return {
@@ -245,7 +245,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 	},
     components: {
 	  Footer,
-	  NavbarBrand, 
+	  NavbarBrand,
 	  CustomTextEditor,
 	  TagInput,
 	  Beneficiary,
@@ -317,7 +317,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
       }
     },
     computed: {
-      ...mapGetters(['bchain']),//'editPost', 
+      ...mapGetters(['bchain']),//'editPost',
 	  ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters('steemconnect', ['stdLogin']),
 	  smallScreenCheck () {
@@ -346,7 +346,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 		}
 		return '';
 	  },
-	  
+
     },
     watch: {
 	  bchain: async function(newBchain) {
@@ -386,8 +386,8 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
           //this.$refs.editor.simplemde.codemirror.refresh()
 		  //console.log(this.$refs.editor.textarea.value);
         }, 250)*/
-		
-		
+
+
       }
     },
     methods: {
@@ -472,7 +472,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 		  this.mediaRecorder.stop();
 		  clearInterval(this.timer);
 		  this.recording = false;
-		  
+
 		  //set video ready for playback
 		  this.playBack();
 		  //console.log(this.mediaRecorder)
@@ -493,7 +493,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 			console.log(file.name)
 			//await upload.start()
 			this.generateThumbnail(this.recordedVideoUrl)//upload.file)
-		
+
 		},
 		selVidReadyForPublish(){
 			return (this.selVid && this.selVid.status && this.selVid.status=='publish_manual');
@@ -508,14 +508,14 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 			this.selVid = video;
 			//set content of the post body first as video url:
 			let thumbUrl = 'https://ipfs-3speak.b-cdn.net/ipfs/'+video.thumbnail.replace('ipfs://','');
-			
-			this.$refs['editor'].content = 
+
+			this.$refs['editor'].content =
 			'[![]('+thumbUrl+')](https://3speak.tv/watch?v='+video.owner+'/'+video.permlink+')';
 		},
 		async uploadVideo (event) {
-			
-			
-			
+
+
+
 			this.video = event.target.files[0];
 			let file = this.video;
 			if (file.size > this.maxFileSize){
@@ -532,7 +532,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 			this.generateThumbnail()//upload.file)
 
 		},
-		
+
 		async grabVideoUrl (vid){
 			let targetField = vid.video_v2//vid.filename;//
 			if (targetField){
@@ -546,7 +546,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 			return '';
 		},
 
-	
+
 	  async fetchCommunities(){
 		if (this.user){
 			this.communitySubs = await this.$store.dispatch('fetchUserCommunitySubs');
@@ -597,7 +597,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 				//console.log(err);
 				return {success: false, trx: null};
 			}
-		}else if (localStorage.getItem('acti_login_method') == 'hiveauth'){	
+		}else if (localStorage.getItem('acti_login_method') == 'hiveauth'){
 			return new Promise((resolve) => {
 				const auth = {
 				  username: this.user.account.name,
@@ -605,14 +605,14 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 				  expire: localStorage.getItem('expires'),
 				  key: localStorage.getItem('key')
 				}
-				
-				let operation = [ 
+
+				let operation = [
 				   [op_name, cstm_params]
 				];
 				if (op2 && params2){
 					operation.push([op2, params2])
 				}
-				
+
 				this.$HAS.broadcast(auth, 'posting', operation, (evt)=> {
 					console.log(evt)    // process sign_wait message
 					let msg = this.$t('verify_hiveauth_app');
@@ -645,7 +645,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 				} )
 			})
 		}else{
-			let operation = [ 
+			let operation = [
 			   [op_name, cstm_params]
 			];
 			if (op2 && params2){
@@ -653,22 +653,22 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 			}
 			console.log('broadcasting');
 			console.log(operation);
-			
+
 			//console.log(this.$steemconnect.accessToken);
 			//console.log(this.$store.state.accessToken);
 			//grab token
 			let accToken = localStorage.getItem('access_token')
-			
+
 			let op_json = JSON.stringify(operation)
-			
+
 			let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
-			
+
 			if (bchain_option){
 				cur_bchain = bchain_option;
 			}
-			
+
 			let url = new URL(process.env.actiAppUrl + 'performTrxPost/?user='+this.user.account.name+'&bchain='+cur_bchain);
-			
+
 			let reqHeads = new Headers({
 			  'Content-Type': 'application/json',
 			  'x-acti-token': 'Bearer ' + accToken,
@@ -682,7 +682,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 			console.log(outcome);
 			if (outcome.error){
 				console.log(outcome.error);
-				
+
 				//if this is authority error, means needs to be logged out
 				//example "missing required posting authority:Missing Posting Authority"
 				let err_msg = outcome.trx.tx.error;
@@ -693,7 +693,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 					this.error_msg = this.$t('session_expired_login_again');
 					this.$store.dispatch('steemconnect/logout');
 				}
-				
+
 				this.$notify({
 				  group: 'error',
 				  text: err_msg,
@@ -717,10 +717,10 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 		  text: err ? mainRef.$t('Save_Error') : successMsg,
 		  position: 'top center'
 		})
-		
+
 		//let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
-		//this.$store.commit('setBchain', cur_bchain);		
-		
+		//this.$store.commit('setBchain', cur_bchain);
+
 		//reward the user for a new edit
 		if (finalize){
 			// stop loading animation and show notification
@@ -734,17 +734,17 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 			  author: this.editPost.author,
 			  permlink: this.editPost.permlink
 			})
-			
+
 		}
 	  },
       async save (vid) {
         this.loading = true // start loading animation
 		//only convert to array if not already array
 		this.tags = this.$refs.tagItem.items;
-		
+
 		this.body = this.$refs.editor.content;
-		
-		
+
+
 		console.log(this.title);
 		if (typeof this.title === "undefined" || this.title == ''){
 			//post requires a title
@@ -756,7 +756,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 			this.loading = false
 			return;
 		}
-		
+
 		if (this.body == ''){
 			//post requires a title
 			this.$notify({
@@ -767,7 +767,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 			this.loading = false
 			return;
 		}
-		
+
 		if (!Array.isArray(this.tags) || this.tags.length < 1){
 			//cannot miss having at least 1 tag
 			this.$notify({
@@ -778,7 +778,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 			this.loading = false
 			return;
 		}
-		
+
 		//console.log(this.tags);
 		//return;
 		if (!Array.isArray(this.tags)){
@@ -799,7 +799,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
             .filter(String) // remove empty values
             .map(tag => tag.trim()) // trim leading and trailing whitespaces from tags
         ]
-		
+
 		//add community tag at the start if user selected one.
 		/*targetCommunity*/
 		if (this.$refs['targetCommunity'].value !='_blog_'){
@@ -807,12 +807,12 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 		}
 		console.log(meta.tags);
 		//return;
-		
+
 		console.log(meta);
 		if (this.editPost.isNewPost || meta.image === undefined){
 			meta.image = [];
 		}
-		
+
 		//cleanup images to remove any ones which could have been removed
 		for (let i = 0;i < meta.image.length;i++){
 			if (!this.body.includes(meta.image[i])){
@@ -821,26 +821,26 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 				i--;
 			}
 		}
-		
+
 		//fetch any new images to add them as proper thumbnails
-		
-		//matching our image markdown pattern 
+
+		//matching our image markdown pattern
 		const regex = /!\[(.*?)\]\((.*?)\)/g;
-		
+
 		let markdown_imgs = this.body.match(regex);
-		
+
 		if (markdown_imgs != null){
 			for (let mimgct = markdown_imgs.length - 1;mimgct >= 0;mimgct--){
 				//grab url only
 				let img_src_url = markdown_imgs[mimgct].substring(markdown_imgs[mimgct].indexOf('(')+1,markdown_imgs[mimgct].indexOf(')'));
-				
+
 				//append at the start if not already part of meta
 				if (!meta.image.includes(img_src_url)){
 					meta.image.unshift(img_src_url);
 				}
 			}
 		}
-		
+
 		//ensure that the app info is actifit specific, for example edited by a different editor
 		if (!meta.app){
 			meta.app = 'actifit/0.5.0';
@@ -849,18 +849,18 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 			meta.app = 'actifit/0.5.0';
 		}
 		meta.suppEdit = 'actifit.io';
-		
+
 		if (!vid){
 			vid = this.selVid;
 		}
-		
+
 		//append post specific data for new posts
 		if (this.editPost.isNewPost){
 			//let permlnk = this.title.replaceAll('.','-').replaceAll('  ',' ').replaceAll(' ','-').toLowerCase();
 			//let permlnk = this.title.replaceAll('  ',' ').replaceAll(' ','-').replaceAll('--','-').replace(/[^a-zA-Z0-9\-]/g, '').toLowerCase();
-			
-			
-			
+
+
+
 			//console.log(permlnk);
 			//return;
 			//"actifit-"+this.user.account.name.replace('.','-')+"-"+new Date().toISOString().replace(/-|:|\./g, '').toLowerCase();
@@ -869,7 +869,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 			this.editPost.author = this.user.account.name;
 			//use video permlink for post permlink
 			this.editPost.permlink = vid.permlink;//permlnk;
-			
+
 			//check also if a similar post exists, to adjust permlink
 			let chainLnk = hive;
 			await chainLnk.api.setOptions({ url: process.env.hiveApiNode });
@@ -878,26 +878,26 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 				//found a match
 				this.editPost.permlink += "-"+new Date().toISOString().replace(/-|:|\./g, '').toLowerCase();
 			}
-			
+
 			//fetch beneficiaries from user selection
 			this.benef_list = this.$refs['beneficiaryList'].formattedEntries;
 			//[{ 'account':'actifit.pay', 'weight':500 }];//, { 'account':'actifit', 'weight':500 }
 			//loop through benefic list, ensure values are integer
-			
+
 			console.log(this.benef_list);
-			
-			
+
+
 			//let remaining_pct -= 500;
 			//console.log('ref_benef');
 			//console.log(ref_benef);
 			/*if (ref_benef){
 				benef_list.push(ref_benef);
 			}*/
-			
-			
+
+
 			//default value for 50-50 pay
 			let percent_sbd = 10000;
-			
+
 			//check if user selected a different report pay structure than 50-50 SBD/STEEM pay. Other option would be 100% SP
 			/*if (typeof req.body.reportSTEEMPayMode!= "undefined" && req.body.reportSTEEMPayMode!=""){
 				if (req.body.reportSTEEMPayMode == 'full_SP_Pay'){
@@ -907,7 +907,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 			}*/
 		}
 		console.log(this.stdLogin);
-		
+
 		let percent_hbd = this.percent_hbd;
 		let payout_amnt = this.max_accepted_payout;
 		console.log(this.$refs['paymentApproach'].value);
@@ -916,16 +916,16 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 		}else if (this.$refs['paymentApproach'].value=='hp'){
 			percent_hbd = 0;
 		}
-		
+
 		console.log(payout_amnt);
 		console.log(percent_hbd);
-		
-		
+
+
 		//video specific requirements
 
 
 		let benef = this.benef_list.concat(JSON.parse(vid.beneficiaries));
-		
+
 		//if list does not include required account, append it
 		/*let sagarRecord = benef.find(record => record.account === 'sagarkothari88');
 
@@ -933,13 +933,13 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 			// If the record is not found, insert a new entry
 			benef.push({account: "sagarkothari88", weight: 100});
 		}*/
-		
+
 		//console.log(this.benef_list)
 		//sort as this is required for posting properly
 		benef = benef.sort((a, b) => a.account.localeCompare(b.account));
 		console.log('beneficiaries')
 		console.log(benef)
-		
+
 		if (benef.length > 4){
 			//adding condition to prevent overassigning beneficiaries due to issue with video encoding on 3speak end with more than 5 beneficiaries
 			//post requires a title
@@ -950,9 +950,9 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 				})
 			this.loading = false
 			return;
-		
+
 		}
-		
+
 		//return;
 		//setup proper video metadata for 3speak
 		let vidJsonMeta = {
@@ -986,30 +986,30 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 				},
 			},
 		}
-		
+
 		meta.video = vidJsonMeta.video;
-		
+
 		//set content of the post body first as video url:
 		let thumbUrl = 'https://ipfs-3speak.b-cdn.net/ipfs/'+vid.thumbnail.replace('ipfs://','');
-		
-		this.vidPostContent = 
+
+		this.vidPostContent =
 		'[![]('+thumbUrl+')](https://3speak.tv/watch?v='+vid.owner+'/'+vid.permlink+')'
-		
+
 		//return;
-		let comment_options = { 
-			author: vid.owner, 
-			permlink: this.editPost.permlink,//vid.permlink, 
-			max_accepted_payout: payout_amnt, 
-			percent_hbd: percent_hbd, 
-			allow_votes: true, 
-			allow_curation_rewards: true, 
+		let comment_options = {
+			author: vid.owner,
+			permlink: this.editPost.permlink,//vid.permlink,
+			max_accepted_payout: payout_amnt,
+			percent_hbd: percent_hbd,
+			allow_votes: true,
+			allow_curation_rewards: true,
 			extensions: [[0,{'beneficiaries':benef}]]
 		};
-			
-		
+
+
 		//check if user selected a different report pay structure than 50-50 SBD/STEEM pay. Other option would be 100% SP
 		//percent_hbd = 0;
-		
+
 		let cstm_params = {
 		  "author": this.editPost.author,
 		  "title": this.title,
@@ -1019,12 +1019,12 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 		  "permlink": this.editPost.permlink,
 		  "json_metadata": JSON.stringify(meta)
 		};
-		
+
         // save changes
 		let postSuccess = false;
 		if (!localStorage.getItem('std_login')){
 		//if (!this.stdLogin){
-		
+
 			this.$steemconnect.comment(
 			  this.editPost.parent_author,
 			  this.editPost.parent_permlink,
@@ -1037,7 +1037,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 				this.commentSuccess(err, true, 'STEEM');
 			  }
 			)
-		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
 			//console.log(comment_options);
 			//this.$nuxt.refresh()
 			let outc = await this.postKeychain(cstm_params, comment_options);
@@ -1053,14 +1053,14 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 				})
 			}
 		}else{
-						
+
 			//console.log(cstm_params);
-			
+
 			//return;
 			let res
-			
+
 			if (this.editPost.isNewPost){
-				   
+
 				res = await this.processTrxFunc('comment', cstm_params, this.cur_bchain, 'comment_options', comment_options);
 			}else{
 				res = await this.processTrxFunc('comment', cstm_params, this.cur_bchain);
@@ -1072,14 +1072,14 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 				//this.commentSuccess('error saving', false, this.cur_bchain);
 				this.loading = false;
 			}
-			
+
 			//also send the same post again to the other chain
 			/*
 			let other_chain = this.cur_bchain=='HIVE'?'STEEM':'HIVE';
 			if (this.target_bchain == 'BOTH'){
 				this.loading = true;
 				let res = await this.processTrxFunc('comment', cstm_params, other_chain);
-			
+
 				if (res.success){
 					postSuccess = true;
 					//this.commentSuccess(null, true, other_chain, this.editPost.isNewPost);
@@ -1121,10 +1121,10 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 					this.loading = false;
 				}
 			}, 3000)
-				
+
 		}
       },
-	  
+
 	  resetNewVidData(){
 		this.videoLength = '';
 		this.video = null;
@@ -1140,13 +1140,13 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 		this.thumbnailName  = '';
 		this.thumbnailUrl = '';
 		this.newVidSubmitted = false;
-		
+
 		if (this.$refs.recVideo){
 			this.$refs.recVideo.src = '';
 		}
 		this.timeLeft = this.maxDuration;
 	  },
-	  
+
 	  async getAllVideoStatuses() {
 			this.isRotating = true;
 			console.log('get all videos')
@@ -1179,9 +1179,9 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 			  this.isRotating = false;
 			  throw err;
 			}
-			
+
 		},
-		
+
 		async generateThumbnail (vidUrl) {
 		  //
 		  let upRef = this;
@@ -1201,11 +1201,11 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 		  video.src = videoURL;
 		  //video.addEventListener('loadeddata', async () => {
 		  video.addEventListener('loadedmetadata', async () => {
-			
+
 			//set current video time. Go to 25%
 			video.currentTime = video.duration * 0.25;//5
 			//console.log(video)
-			
+
 			canvas.width = video.videoWidth
 			canvas.height = video.videoHeight
 			//console.log(canvas.width)
@@ -1215,32 +1215,32 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 			//console.log(upRef.thumbnail);
 			//console.log(upRef.videoLength)
 			//return;
-			
+
 		  })
 		  //capture the seeking event, and set proper image accordingly
 		  video.addEventListener('seeked', async () => {
 			upRef.processing = true;
 			context.drawImage(video, 0, 0, canvas.width, canvas.height)
 			upRef.thumbnail = canvas.toDataURL()
-			
+
 			await upRef.startThumbnailUpload()
 			await upRef.startVideoUpload()
-			
+
 		  })
-		  
+
 		},
-		
-		
+
+
 		async startVideoUpload(){
 		  console.log('start video upload');
 		  let file = this.video
 		  console.log(this.video);
-		  
+
 		  //this.$cookies.set("connect.sid","s%3AV4_SdjzaTTAKQ6cPUsztSmwOYOaJErtc.oLdKsvBfueMkUsPDamPQls1EAeiwthMfM2UK4%2FhAvqU");
-		  
+
 		  //let cook = this.$cookies.get("connect.sid") // vuejs
 		  //console.log(cook);
-		  
+
 		  let upRef = this;
 		  let upload = new tus.Upload(file, {
 			endpoint: 'https://uploads.3speak.tv/files',
@@ -1262,8 +1262,8 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 			  console.log('Upload completed!')
 			  console.log("Download %s from %s", upload.file.name, upload.url)
 			  upRef.filename = upload.file.name;
-			  
-			  upRef.filename = upload.url.replace('https://uploads.3speak.tv/files/', '');			  
+
+			  upRef.filename = upload.url.replace('https://uploads.3speak.tv/files/', '');
 			  //upRef.videoSize = `${(file.size / 1024 / 1024).toFixed(2)} MB`
 			  upRef.videoSize = file.size
 			  upRef.videoReady = true;
@@ -1273,11 +1273,11 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 			  //upRef.updateVideoInfo()
 			}
 		  })
-		  
+
 		  await upload.start()
-		 
+
 		},
-		
+
 		async startThumbnailUpload() {
 		  console.log('startthumbnailupload');
 		  let upRef = this;
@@ -1285,7 +1285,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 		  let data = this.thumbnail.split(',')[1]
 		  let binary = atob(data)
 		  let array = []
-		  
+
 		  for (let i = 0; i < binary.length; i++) {
 			array.push(binary.charCodeAt(i))
 		  }
@@ -1314,13 +1314,13 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 			  upRef.thumbnailUrl = thumbnailUpload.url;
 			  //thumbnailUpload.file.name;
 			  console.log("Download %s from %s", upRef.thumbnailName, thumbnailUpload.url)
-			  
+
 			  console.log(`Thumbnail uploaded: ${thumbnailUpload.url}`)
 			}
 		  })
 		  await thumbnailUpload.start()
 		},
-		
+
 		dataURItoBlob (dataURI) {
 		  const byteString = atob(dataURI.split(',')[1])
 		  const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0]
@@ -1331,7 +1331,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 		  }
 		  return new Blob([ab], { type: mimeString })
 		},
-		
+
 		async updateVideoInfo(){
 			this.processing = true;
 			let videoInfo = {
@@ -1343,11 +1343,11 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 			  'owner': this.user.account.name,
 			  'isReel': false
 			}
-			
+
 			console.log(videoInfo);
-			
+
 			try{
-				let res = await client.post(process.env.threeSpeakUploadInfo+'?app=actifit', 
+				let res = await client.post(process.env.threeSpeakUploadInfo+'?app=actifit',
 					JSON.stringify(videoInfo),
 					{
 						withCredentials: false,
@@ -1358,7 +1358,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 					}
 				);
 				console.log(res);
-				
+
 				if (res.status == 200){
 					this.selVid = res.data;
 					this.newVid = this.selVid;
@@ -1371,25 +1371,25 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 					//show success message and wait for video ready
 					//refresh vid list
 					this.getAllVideoStatuses();
-					
+
 					console.log(this.$refs['modenabler']);
 					this.$refs['modenabler'].click();
-									
-					/*				
+
+					/*
 					//embed video link to post including image thumb and video
 					let thumbUrl = 'https://ipfs-3speak.b-cdn.net/ipfs/'+this.selVid.thumbnail.replace('ipfs://','');
-					
+
 					this.$refs['editor'].content += '[![]('+thumbUrl+')](https://3speak.tv/watch?v='+this.selVid.owner+'/'+this.selVid.permlink+')';
 					*/
 				}
-				
+
 			}catch(err){
 				console.log(err);
 			}
 			this.processing = false;
 
 		},
-		
+
 		async markVideoPublished(vid, keepactivefail){
 			this.processing = true;
 			this.marking = vid._id;
@@ -1400,10 +1400,10 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 			  'tags': vid.tags,
 			  'thumbnail': vid.thumbnail
 			}
-			
+
 			console.log(videoInfo);
 			try{
-				let res = await client.post(process.env.threeSpeakUserVideoList+"/iPublished", 
+				let res = await client.post(process.env.threeSpeakUserVideoList+"/iPublished",
 					JSON.stringify(videoInfo),
 					{
 						withCredentials: false,
@@ -1436,7 +1436,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 			}
 			return vid;
 		},
-		
+
 		async postKeychain(cstm_params, comment_options){
 			return new Promise((resolve, reject) => {
 				console.log(JSON.stringify(comment_options));
@@ -1451,12 +1451,12 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 					    resolve({error: true})
 						//this.commentSuccess(response.message, false, this.cur_bchain);
 					  }
-					});	
+					});
 				}else{
 					window.hive_keychain.requestBroadcast(this.editPost.author, [['comment', cstm_params], ['comment_options', comment_options]], 'Posting',(response) => {
 					/*window.hive_keychain.requestPost(
-					this.editPost.author, 
-					this.title, 
+					this.editPost.author,
+					this.title,
 					this.$refs.editor.content,
 					this.editPost.parent_permlink,
 					this.editPost.parent_author,
@@ -1471,11 +1471,11 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 					    resolve({error: true})
 						//this.commentSuccess(response.message, false, this.cur_bchain);
 					  }
-					});	
+					});
 				}
 			})
 		},
-		
+
 		async keychainDecode(memo){
 			return new Promise((resolve, reject) => {
 					const keychain = window.hive_keychain;
@@ -1489,7 +1489,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 					  }
 					});
 				})
-				
+
 		},
 
 		async connectSession3S(){
@@ -1507,9 +1507,9 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 				if (ts_tkn){
 					this.xcstkn = ts_tkn;
 				}else{
-				
+
 					//fetch 3speak memo
-					
+
 					//let res = await fetch(process.env.threeSpeakApiSession.replace('_USERNAME_', this.user.account.name));
 					let res = await client.get(process.env.threeSpeakApiSession.replace('_USERNAME_', this.user.account.name),
 							{
@@ -1519,7 +1519,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 								},
 							}
 						);
-					
+
 					console.log(res);
 					//let outcome = await res.json();
 					//console.log(outcome);
@@ -1528,15 +1528,15 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 						memo = res.data.memo;
 					}
 					console.log(memo);
-					
+
 					//decode memo
 
 					//grab actifit token
 					let outcome = {};
-					
+
 					if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
-						
-						
+
+
 						console.log('utils decodememo')
 						outcome = await this.keychainDecode(memo);
 						console.log(outcome);
@@ -1559,8 +1559,8 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 								ts: this.user.account.name
 							})
 						}*/
-						
-						/*const ecc = new ec('secp256k1');						
+
+						/*const ecc = new ec('secp256k1');
 						const res = await this.$HAS.challenge(auth, challenge_data)
 						console.log(res);
 						const sig = Signature.fromHex(res.data.challenge) //ecc.
@@ -1573,26 +1573,26 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 						} else {
 							console.error("challenge failed")
 						}*/
-						
+
 						/*let op_name = 'decode';
 						let cstm_params = {
 							key: ,
 							message: memo
 						}
-						let operation = [ 
+						let operation = [
 						   [op_name, cstm_params]
 						];*/
 						//TODO: implement hiveauth approach to decode memo. Currently hiveauth does not support such calls
-						/*let operation = [ 
+						/*let operation = [
 						   ['decode', {}]
 						];*/
 					}else{
 						let accToken = localStorage.getItem('access_token')
-						
+
 						let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
-						
+
 						let url = new URL(process.env.actiAppUrl + 'memoDecode/?user='+this.user.account.name+'&bchain='+cur_bchain);
-						
+
 						let reqHeads = new Headers({
 						  'Content-Type': 'application/json',
 						  'x-acti-token': 'Bearer ' + accToken,
@@ -1604,7 +1604,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 						});
 						outcome = await res.json();
 						console.log(outcome);
-					
+
 					}
 					this.xcstkn = '';
 					if (outcome.error){
@@ -1615,13 +1615,13 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 						this.xcstkn = outcome.xcstkn;
 						this.loadingxcstkn = false;
 					}
-				
+
 					//store token under localstorage
 					localStorage.setItem('3s_access_token', this.xcstkn);
-				
+
 				}
-				
-				
+
+
 				//request cookie
 				if (this.xcstkn){
 					if (this.xcstkn.startsWith('#')){
@@ -1638,7 +1638,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 						}
 					)
 					console.log(res);
-					
+
 					//also grab user's videos
 					let myAllVideosWithStatusInfo = await this.getAllVideoStatuses();
 					//console.log(`All Videos Info response: ${JSON.stringify(myAllVideosWithStatusInfo)}`);
@@ -1649,7 +1649,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 					//console.log( res.headers.get('set-cookie'))
 					//console.log(res.headers["set-cookie"]);
 					//outcome = await res.json();
-					//console.log(outcome);	
+					//console.log(outcome);
 				}
 			}catch(exc){
 				console.log(exc);
@@ -1657,8 +1657,8 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 				//localStorage.removeItem('3s_access_token');
 			}
 	  },
-	  
-	  
+
+
 	  async RewardUserEdit () {
 		let url = new URL(process.env.actiAppUrl + 'rewardActifitWebEdit/'+this.editPost.author);
 		//compile all needed data and send it along the request for processing
@@ -1691,10 +1691,10 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 		await this.$store.dispatch('steemconnect/login')
 		await this.connectSession3S();
 		this.fetchCommunities();
-		
+
 		//this.$refs['modenabler'].click();
 
-		
+
 		//customize file input to follow our standard
 		/*
 		try{
@@ -1730,8 +1730,8 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 .vid-container::-webkit-scrollbar-thumb:hover {
     background-color: pink !important;
   }
-  
-  
+
+
 .post {
   display: inline-block;
   min-height: 100px;
@@ -1750,7 +1750,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 	white-space: nowrap;
 }
 .extra-container{
-	display: flex; 
+	display: flex;
 	justify-content: space-between;
 }
 .post-title{

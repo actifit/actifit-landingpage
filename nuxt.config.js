@@ -296,6 +296,10 @@ module.exports = {
         })
       }
 
+      /*if (ctx.isClient){
+        config.resolve.alias['axios'] = require.resolve('axios/dist/browser/axios.cjs');
+      }*/
+
 		config.node = {
             fs: 'empty'
         }

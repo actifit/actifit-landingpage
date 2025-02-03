@@ -3,17 +3,17 @@
 		<client-only>
 
 			<!-- :toolbars="markdownOption" -->
-		  <mavon-editor language="en" 
-						markdown-it-emoji="true" 
-						v-model="content" 
+		  <mavon-editor language="en"
+						markdown-it-emoji="true"
+						v-model="content"
 						ref="editor"
 						:shortCut=false
 						@imgAdd="mavonUpImg"
 						@keydown.native="handleKeydown">
 			<!-- Add a custom button after the left toolbar  -->
 			  <template slot="left-toolbar-after">
-				
-				
+
+
 				<emoji-picker :search="search">
 				  <span slot="emoji-invoker" slot-scope="{ events: { click: clickEvent } }" @click.stop="clickEvent">
 					<button
@@ -45,8 +45,8 @@
 				  </div>
 				</emoji-picker>
 
-				
-				
+
+
 			  </template>
 		  </mavon-editor>
 		</client-only>
@@ -55,8 +55,8 @@
 <script>
 	import axios from 'axios';
 	import EmojiPicker from 'vue-emoji-picker'
-	
-	
+
+
 	export default {
 		components: {
 			EmojiPicker
@@ -67,7 +67,7 @@
 			  default: () => ''
 			}
 		},
-		  watch: { 
+		  watch: {
 			initialContent: function(newVal, oldVal) { // watch it
 			  this.content = newVal;
 			}
@@ -94,7 +94,7 @@
 				if (event.ctrlKey && event.key === 'Backspace') {
 
 				event.preventDefault();
-				
+
 				// get the textarea element
 				const textareaElement = this.$el.querySelector('textarea');
 				console.log(`content: ${textareaElement.value}`);
@@ -112,13 +112,13 @@
 				//if a word is found, delete it
 				if (wordRange) {
 					const wordStartIndex = cursorPosition - wordRange[0].length;
-					const newValue = 
+					const newValue =
 					textBeforeCursor.substring(0, wordStartIndex) +
 					textareaElement.value.substring(cursorPosition);
 
-					//update the content bound to v-model					
+					//update the content bound to v-model
 					this.content = newValue;
-				
+
 				      // update the cursor position (so the cursor doesnt always go back to the end of the text when deleted)
 					this.$nextTick(() => {
 						textareaElement.selectionStart = wordStartIndex;
@@ -133,7 +133,7 @@
 				console.log(event);
 				const clipboardData = event.clipboardData || window.clipboardData;
 				const items = clipboardData.items;
-				  
+
 				for (let i = 0; i < items.length; i++) {
 					if (items[i].type.indexOf('image') !== -1) {
 					  const file = items[i].getAsFile();
@@ -163,23 +163,25 @@
 				).toUpperCase();
 
 				const renamedFile = new File([file[0]], key, { type: file[0].type });
-				
+
 				const formData = new FormData();
 				formData.append('image', renamedFile);
 
 				try {
-					const response = await axios.post('https://usermedia.actifit.io/upload', formData, {
+					//const axios = await import('axios');
+          //const response = await axios.default.post('https://usermedia.actifit.io/upload', formData, {
+          const response = await axios.post('https://usermedia.actifit.io/upload', formData, {
 					headers: {
 						'Authorization': process.env.sec_img_upl,
 						'Content-Type': 'multipart/form-data'
 					}
 					});
-					
+
 					console.log('meow Upload Success:', response.data);
 					const imageUrl = 'https://usermedia.actifit.io/' + key;
 					this.$refs.editor.$img2Url(pos, imageUrl);
 					return imageUrl;
-					
+
 				} catch (error) {
 					console.log('meow Upload Error:', error);
 					throw error;
@@ -187,9 +189,9 @@
 				}
 
 		}
-		
+
 	}
-		
+
 </script>
 <style>
 .v-note-panel{
