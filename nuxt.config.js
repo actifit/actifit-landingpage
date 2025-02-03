@@ -11,7 +11,7 @@ module.exports = {
 
   // Runtime configuration
   publicRuntimeConfig: {
-    version: '1.6.5',
+    version: '1.6.5.1',
   },
 
 
