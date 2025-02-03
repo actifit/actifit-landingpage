@@ -58,6 +58,7 @@ module.exports = {
     socialSharingTitle: 'Actifit - Rewarding Your Everyday Activity',
     socialSharingDesc: 'Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity ',
     socialSharingQuote: 'Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity',
+    web3Node: 'https://bsc-dataseed1.binance.org:443',
     afitTokenBSC: '0x4516bb582f59befcbc945d8c2dac63ef21fba9f6',
     afitxTokenBSC: '0x246d22ff6e0b90f80f2278613e8db93ff7a09b95',
     afitBNBLPTokenBSC: '0xffff75bb7bf133a9e98bc62665f20a84e152b689',
