@@ -1119,6 +1119,7 @@ module.exports = {
   Legendary: 'Legendary',
   Rarity: 'Rarity',
   Cards: 'Cards',
+  BNB_CHAIN: 'BNB Chain',
   Play_splinterlands: 'Play Splinterlands',
   splinter_extra_rewards_common:' +5 AFIT rewards per report',
   splinter_extra_rewards_rare:' +10 AFIT rewards per report',

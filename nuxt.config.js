@@ -38,12 +38,13 @@ module.exports = {
     base: '/'
   },*/
   env: {
+    actifit_community: 'hive-193552',
     sec_img_upl: process.env.SEC_IMG_UPL_KEY,
     auth_Key: process.env.DEEPL_WEB_KEY,
     swap_partner: 'actifit.swap',
     swap_to_token: 'AFIT',
     partner_fee: '1',
-      scRedirectUrl: process.env.SC_REDIRECT_URL || 'http://localhost:3000/auth',
+    scRedirectUrl: process.env.SC_REDIRECT_URL || 'http://localhost:3000/auth',
     CREATE_ACCOUNT_API_KEY: process.env.CREATE_ACCOUNT_API_KEY,
     REWARD_REFERRAL_API_KEY: process.env.REWARD_REFERRAL_API_KEY,
     DELEGATE_ACCOUNT_API_KEY: process.env.DELEGATE_ACCOUNT_API_KEY,
