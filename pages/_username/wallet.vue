@@ -1,9 +1,9 @@
 <template>
 	<div>
 		<NavbarBrand @user-switched="refreshAllWalletData" />
-  
+
 	  <div class="container pt-5 mt-5 pb-5" v-if="user || displayUser">
-  
+
 		<!-- account balance -->
 		<div class="text-center">
 		  <h3 class="mb-4" v-if="displayUser"><div class="user-wallet-avatar group-class" :style="'background-image: url('+profImgUrl+'/u/' + displayUser + '/avatar)'"></div><span>{{ displayUser }}'s {{ $t('wallet.wallet')}}</span></h3>
@@ -11,49 +11,49 @@
 		  <!--<div>
 			  <a href="/walletV1"><i>New Wallet Layout. Click to switch back to old version</i></a>
 		  </div>-->
-		  
+
 		  <div class="row top-action-container text-right">
 			  <div class="col-6 text-left">
  				  <span class="btn btn-brand mb-1" :title="show_only_tokens_interest?$t('show_all_tokens'):$t('show_core_tokens')" v-on:click="switchTokenDisplay">
 					  <i class="fas fa-solid fa-filter" :style="show_only_tokens_interest?'color:green':'color:white'"></i>
 				  </span>
-				  
+
 				  <span class="btn btn-brand mb-1" :title="hide_small_balances?$t('show_all_tokens'):$t('hide_small_balances')" v-on:click="switchHideSmall">
 					  <i class="fas fa-solid fa-battery-empty" :style="hide_small_balances?'color:green':'color:white'"></i>
 				  </span>
-				  
+
 				  <span class="btn btn-brand mb-1" :title="$t('save_filter_default_settings')" v-if="!nonAuthUser" v-on:click="saveSettings"><i class="fa-gear fas" :style="settings_set?'color:green':'color:white'"></i><i class="fas fa-spin fa-spinner text-white" v-if="save_progress"></i></span>
-				  
+
 				  <span class="pl-2">{{$t('account_est_val')}} ${{this.totalAccountValue}}</span>
 			  </div>
 			  <div class="col-6 text-right">
-			  
+
 				  <span class="btn btn-brand mb-1" :title="$t('Check_Claimable_Rewards')" v-on:click="showClaimableRewards()">
 					  <i class="fas fa-solid fa-wallet" ></i>
 				  </span>
-				  
-				  
-			  
+
+
+
 				  <span class="btn btn-brand mb-1" :title="$t('Check_Pending_Rewards')">
 					  <a href="#" id="pendingRewardsKicker" name="pendingRewardsKicker" ref="pendingRewardsKicker" class="" data-toggle="modal" data-target="#pendingRewardsModal"><i class="far fa-solid fa-hourglass"></i></a>
 				  </span>
-				  
+
 				  <span class="btn btn-brand mb-1" :title="$t('FETCH_MY_DELEGATIONS')" v-on:click="fetchDelegations(false)">
 					  <i class="fas fa-donate"></i>
 				  </span>
-				  
+
 				  <span class="btn btn-brand mb-1" :title="$t('FETCH_MY_RC_DELEGATIONS')" v-on:click="fetchRCDelegations(false)">
 					  <i class="fas fa-bolt"></i>
 				  </span>
-				  
+
 				  <span class="btn btn-brand mb-1" :title="$t('AFIT_Transaction_History')" v-on:click="scrollAction()">
 					  <i class="fas fa-file-invoice"></i>
 				  </span>
-				  
+
 				  <span class="btn btn-brand mb-1" :title="$t('bsc_wallet')" v-on:click="showBSCAddress()">
 					  <img src="/img/binance-logo.png" width="18px" height="18px">
 				  </span>
-				  
+
 				  <span v-if="loadingDeleg">
 					<i class="fas fa-spin fa-spinner" ></i>
 				  </span>
@@ -61,7 +61,7 @@
 		  </div>
 		  <div class="wallet-container" v-if="userTokensWallet >= 0">
 			  <div class="row font-weight-bold token-entry thick-bottom head-title">
-				  <div class="col-2 clickable" v-on:click="sortTokenData('symbol')" >Token 
+				  <div class="col-2 clickable" v-on:click="sortTokenData('symbol')" >Token
 					  <span >
 						  <span v-if="tokenSort=='symbol' && tsortDir==1" >▼△</span>
 						  <span v-else-if="tokenSort=='symbol'">▽▲</span>
@@ -69,7 +69,7 @@
 					  </span>
 				  </div>
 				  <div class="col-2 col-lg-1">Location <span v-if="tokenSort=='location'">▽▼△▲</span></div>
-				  <div class="col-2 clickable" v-on:click="sortTokenData('balance')" >Balance 
+				  <div class="col-2 clickable" v-on:click="sortTokenData('balance')" >Balance
 					  <span >
 						  <span v-if="tokenSort=='balance' && tsortDir==1" >▼△</span>
 						  <span v-else-if="tokenSort=='balance'">▽▲</span>
@@ -104,10 +104,10 @@
 							  <i class="fas fa-list-ol"></i>
 						  </a>
 					  </span>
-					  
+
 					  <a v-if="cur_bchain=='STEEM'" href="https://steem-engine.net/?p=market&t=AFIT" :class="smallScreenBtnClasses" target="_blank" rel="noopener noreferrer" :text="$t('buy_afit_se')"><span class="btn btn-brand p-1" :title="$t('buy_afit_he')">$</span></a>
 					  <a v-else href="https://hive-engine.com/?p=market&t=AFIT" :class="smallScreenBtnClasses" target="_blank" rel="noopener noreferrer" ><span class="btn btn-brand p-1" :title="$t('buy_afit_he')">$</span></a>
-					  
+
 					  <span class="btn btn-brand p-1" :title="$t('EXCHANGE_AFIT_FOR_STEEM')" v-on:click="exchangeAFITforSTEEM">
 						  <i class="fas fa-solid fa-thumbs-up" ></i>
 					  </span>
@@ -125,7 +125,7 @@
 				  </div>
 				  <div class="col-2 col-lg-1">{{ this.cur_bchain }}</div>
 				  <div class="col-2 text-right">{{ this.renderBalance(this.cur_bchain) }}</div>
-					  
+
 				  <div class="row" style="display:none">
 					  <div class="p-2 col-md-6" id="ttip-area">
 						  <small><i>{{ $t('STEEM_POWER_BREAKDOWN') }}: {{this.renderSteemPower(1)}} ({{ $t('Owned_SP') }}) + {{this.renderSteemPower(3)}} ({{ $t('Received_SP') }}) - {{this.renderSteemPower(4)}} ({{ $t('Delegated_SP') }}) - {{this.renderSteemPower(5)}} ({{ $t('Powering_Down_Amount') }})</i></small>
@@ -134,24 +134,24 @@
 				  <div class="col-2 text-right">{{ this.renderSteemPower(2) }} {{ this.cur_bchain}} {{ $t('POWER') }}
 					  <i v-if="!showPowerBreakdown['HIVE']" class="fas fa-solid fa-arrow-circle-down text-brand" v-on:click="showPowerBreakdown['HIVE']=true" :title="$t('STEEM_POWER_BREAKDOWN')"></i>
 					  <i v-else class="fas fa-solid fa-arrow-circle-up text-brand" v-on:click="showPowerBreakdown['HIVE']=false" :title="$t('STEEM_POWER_BREAKDOWN')"></i>
-				  
+
 					  <span v-if="showPowerBreakdown['HIVE']"><li>{{this.renderSteemPower(1)}} ({{ $t('Owned_SP') }})</li><li> + {{this.renderSteemPower(3)}} ({{ $t('Received_SP') }})</li><li> - {{this.renderSteemPower(4)}} ({{ $t('Delegated_SP') }})</li><li> - {{this.renderSteemPower(5)}} ({{ $t('Powering_Down_Amount') }})</li></span>
-				  
+
 				  </div>
 				  <div class="col-lg-1 col-2 text-right">
 					  {{ this.renderSavings(this.cur_bchain) }}
-					  
+
 					  {{ this.pendingSavingsWithdrawVal('HIVE')}}
 					  <span v-if="hasPendingHiveSavingsWithdrawals() == true">
 						  <span :title="$t('hive_withdraw_progress')"><br/>
 							  <i class="far fa-solid fa-hourglass text-brand"></i>
-							  
+
 							  <i v-if="!showHiveWithdrawalDetails" class="fas fa-solid fa-arrow-circle-down text-brand" v-on:click="showHiveWithdrawalDetails=!showHiveWithdrawalDetails" :title="$t('show_pending_withdrawals')"></i>
 							  <i v-else class="fas fa-solid fa-arrow-circle-up text-brand" v-on:click="showHiveWithdrawalDetails=!showHiveWithdrawalDetails" :title="$t('show_pending_withdrawals')"></i>
 						  </span>
 					  </span>
-					  
-					  
+
+
 				  </div>
 				  <div class="col-1 col-lg-2 text-right break-val">${{ this.hiveValueUSD }}</div>
 				  <div class="col-lg-2 col-1 token_actions" v-if="!nonAuthUser">
@@ -163,13 +163,13 @@
 					  <span class="btn btn-brand p-1" v-on:click="transferFromSavings(cur_bchain)" :title="$t('REMOVE_FUNDS_SAVINGS')"><i class="fas fa-box-open"></i></span>
 				  </div>
 			  </div>
-			  
+
 			  <!-- special row for HBD savings -->
 			  <transition name="fade">
 			  <div class="token-entry row main-token" v-if="showHiveWithdrawalDetails">
 				  <div class="col-6"></div>
 				  <div class="col-6">
-					  
+
 						  <span>
 							  <div class="col-12 row font-weight-bold"><div class="col-4">Amount </div><div class="col-4">Completion Date </div></div>
 							  <div v-for="(entry, index) in pendingSavingsWithdrawals" :key="index" :entry="entry" v-if="entry.amount.includes('HIVE')" class="col-12 row"><div class="col-4">{{entry.amount}} </div><div class="col-4"> {{entry.complete}}</div><div class="col-4"><button class="btn btn-brand" v-on:click="cancelSavingsWithdrawal(entry.request_id)"><i class="fas fa-times-circle" :title="$t('cancel_savings_withdrawal')"></i></button></div>
@@ -185,9 +185,9 @@
 				  </div>
 			  </div>
 			  </transition>
-			  
-			  
-			  
+
+
+
 			  <div class="token-entry row main-token" v-if="cur_bchain != 'BLURT'">
 				  <div class="col-2 text-left">
 					  <span v-if="cur_bchain == 'HIVE'"><img src="/img/HIVE.png" class="mr-1 mini-token-logo">HBD</span>
@@ -198,31 +198,31 @@
 				  <div class="col-2"></div>
 				  <div class="col-lg-1 col-2 text-right">
 					  {{ this.renderSBDSavings(this.cur_bchain) }}
-					  
+
 					  {{ this.pendingSavingsWithdrawVal('HBD')}}
-					  
+
 					  <i v-if="!showHBDSavingsDetails" class="fas fa-solid fa-arrow-circle-down text-brand" v-on:click="showHBDSavingsDetails=!showHBDSavingsDetails" :title="$t('show_pending_withdrawals')"></i>
 					  <i v-else class="fas fa-solid fa-arrow-circle-up text-brand" v-on:click="showHBDSavingsDetails=!showHBDSavingsDetails" :title="$t('show_pending_withdrawals')"></i>
-					  
+
 					  <span v-if="hasPendingHBDSavingsWithdrawals() == true">
 						  <span :title="$t('hbd_withdraw_progress')"><br/>
 							  <i class="far fa-solid fa-hourglass text-brand"></i>
-							  
+
 							  <i v-if="!showHBDWithdrawalDetails" class="fas fa-solid fa-arrow-circle-down text-brand" v-on:click="showHBDWithdrawalDetails=!showHBDWithdrawalDetails" :title="$t('show_pending_withdrawals')"></i>
 							  <i v-else class="fas fa-solid fa-arrow-circle-up text-brand" v-on:click="showHBDWithdrawalDetails=!showHBDWithdrawalDetails" :title="$t('show_pending_withdrawals')"></i>
 						  </span>
 					  </span>
-					  
+
 				  </div>
 				  <div class="col-1 col-lg-2 text-right break-val">${{ this.hbdValueUSD }}</div>
 				  <div class="col-lg-2 col-1 token_actions" v-if="!nonAuthUser">
 					  <span class="btn btn-brand p-1" v-on:click="transferFunds('HBD')"><i class="fas fa-share-square " :title="$t('TRANSFER_FUNDS_ACTION_TEXT')" ></i></span>
 					  <span class="btn btn-brand p-1" v-on:click="transferToSavings('HBD')" :title="$t('TRANSFER_FUNDS_SAVINGS')"><i class="fas fa-piggy-bank"></i></span>
 					  <span class="btn btn-brand p-1" v-on:click="transferFromSavings('HBD')" :title="$t('REMOVE_FUNDS_SAVINGS')"><i class="fas fa-box-open"></i></span>
-					  
+
 				  </div>
 			  </div>
-			  
+
 			  <!-- special row for HBD savings rewards -->
 			  <transition name="fade">
 			  <div class="token-entry row main-token" v-if="showHBDSavingsDetails">
@@ -248,13 +248,13 @@
 				  </div>
 			  </div>
 			  </transition>
-			  
+
 			  <!-- special row for HBD savings -->
 			  <transition name="fade">
 			  <div class="token-entry row main-token" v-if="showHBDWithdrawalDetails">
 				  <div class="col-6"></div>
 				  <div class="col-6">
-					  
+
 						  <span>
 							  <div class="col-12 row font-weight-bold"><div class="col-4">Amount </div><div class="col-4">Completion Date </div></div>
 							  <div v-for="(entry, index) in pendingSavingsWithdrawals" :key="index" :entry="entry" v-if="entry.amount.includes('HBD')" class="col-12 row"><div class="col-4">{{entry.amount}} </div><div class="col-4"> {{entry.complete}}</div><div class="col-4"><button class="btn btn-brand" v-on:click="cancelSavingsWithdrawal(entry.request_id)"><i class="fas fa-times-circle" :title="$t('cancel_savings_withdrawal')"></i></button></div>
@@ -270,7 +270,7 @@
 				  </div>
 			  </div>
 			  </transition>
-			  
+
 			  <div class="token-entry row main-token">
 				  <div class="col-2 text-left"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo">AFIT</div>
 				  <div class="col-2 col-lg-1">{{ $t('BSC')}}</div>
@@ -287,7 +287,7 @@
 					  </span></a>
 				  </div>
 			  </div>
-			  
+
 			  <div class="token-entry row main-token">
 				  <div class="col-2 text-left"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo">AFIT-BNB LP</div>
 				  <div class="col-2 col-lg-1">{{ $t('BSC')}}</div>
@@ -301,8 +301,8 @@
 					  </span>
 				  </div>
 			  </div>
-			  
-			  
+
+
 			  <div class="token-entry row main-token">
 				  <div class="col-2 text-left"><img src="/img/AFITX.png" class="mr-1 mini-token-logo">AFITX</div>
 				  <div class="col-2 col-lg-1">{{ $t('BSC')}}</div>
@@ -319,7 +319,7 @@
 					  </span></a>
 				  </div>
 			  </div>
-			  
+
 			  <div class="token-entry row main-token">
 				  <div class="col-2 text-left"><img src="/img/AFITX.png" class="mr-1 mini-token-logo">AFITX-BNB LP</div>
 				  <div class="col-2 col-lg-1">{{ $t('BSC')}}</div>
@@ -333,8 +333,8 @@
 					  </span>
 				  </div>
 			  </div>
-			  
-			  
+
+
 			  <div v-if="this.tokenMetrics.length > 0 || this.tokensOfInterestBal.length > 0" >
 				  <!--<h5 class="token-title" v-if="cur_bchain == 'STEEM'">{{ $t('Your_Token_Balance') }}</h5>
 				  <h5 class="token-title" v-else>{{ $t('Your_HE_Token_Balance') }}<span v-if="cur_bchain=='BLURT'"><i class="fas fa-info-circle" v-on:click="notifySwitchChain()"></i></span></h5>-->
@@ -344,12 +344,12 @@
 					  <div class="col-2 col-lg-1">{{ $t('hive_engine')}}</div>
 					  <div class="col-2 text-right">{{ renderBal(token) }} {{ token.symbol }}</div>
 					  <div class="col-2 text-right">
-					  
+
 						  {{ renderStake(token)}} {{ token.symbol }}
 						  <i v-if="!powerDisplayOn(token)" class="fas fa-solid fa-arrow-circle-down text-brand" v-on:click="adjustPowerDisplay(token, true)" :title="$t('POWER_BREAKDOWN')"></i>
-						  
+
 						  <i v-else class="fas fa-solid fa-arrow-circle-up text-brand" v-on:click="adjustPowerDisplay(token, false)" :title="$t('POWER_BREAKDOWN')"></i>
-						  
+
 						  <span v-if="powerDisplayOn(token)"><li>{{renderStake(token, 1)}} ({{ $t('Owned') }})</li><li> + {{renderStake(token, 2)}} ({{ $t('Received_Power') }})</li><li> - {{renderStake(token, 4)}} ({{ $t('Delegated_Power') }})</li><li> ( {{renderStake(token, 3)}} ({{ $t('Total_unstaking') }}))</li></span>
 					  </div>
 					  <div class="col-lg-1 col-2"></div>
@@ -361,28 +361,28 @@
 								  <i class="fas fa-list-ol"></i>
 							  </a>
 						  </span>
-						  
+
 						  <span v-if="token.symbol=='AFITX'" class="btn btn-brand p-1" >
 						  <a v-if="cur_bchain=='STEEM'" :title="$t('buy_afitx_se')" href="https://steem-engine.net/?p=market&t=AFITX" class="" target="_blank" rel="noopener noreferrer">$</a>
 						  <a v-else :title="$t('buy_afitx_he')" href="https://hive-engine.com/?p=market&t=AFITX" class="" target="_blank" rel="noopener noreferrer">$</a>
 						  </span>
-						  
-						  
+
+
 						  <span v-if="token.symbol=='AFIT'" class="btn btn-brand p-1" :title="$t('buy_afit_he')" v-on:click="moveAFITSEtoAFITPOWER" >
 							  <i class="fas fa-gopuram" v-if="cur_bchain=='STEEM'" :title="$t('MOVE_AFIT_SE_AFIT_POWER')"></i>
 							  <i class="fas fa-gopuram" v-else :title="$t('MOVE_AFIT_HE_AFIT_POWER')"></i>
 						  </span>
-						  
-						  
+
+
 						  <span v-if="token.symbol=='AFIT'" class="btn btn-brand p-1" :title="$t('buy_afit_he')">
 							  <a v-if="cur_bchain=='STEEM'" href="https://steem-engine.net/?p=market&t=AFIT" target="_blank" rel="noopener noreferrer" :text="$t('buy_afit_se')">$</a>
 							  <a v-else href="https://hive-engine.com/?p=market&t=AFIT" target="_blank" rel="noopener noreferrer" :text="$t('buy_afit_he')" >$</a>
 						  </span>
-						  
+
 						  <!--<span v-if="token.symbol=='AFIT'" class="btn btn-brand p-1" :title="$t('move_afit_he_se_title')"><i class="fas fa-angle-double-left" v-on:click="moveAFITheSE"></i></span>
-						  
+
 						  <span v-if="token.symbol=='AFITX'" class="btn btn-brand p-1" :title="$t('move_afitx_he_se_title')"><i class="fas fa-angle-double-left" v-on:click="moveAFITXheSE"></i></span>-->
-						  
+
 						  <span v-if="token.stakable" class="btn btn-brand p-1" v-on:click="initiateStaking(token)"><i class="fas fa-arrow-circle-up p-1" :title="$t('stake_tokens')" ></i></span>
 						  <span v-if="token.stakable" class="btn btn-brand p-1" v-on:click="initiateUnStaking(token)"><i class="fas fa-arrow-circle-down " :title="$t('unstake_tokens')" ></i></span>
 						  <span v-if="withdrawableTokens.includes(token.symbol)" class="btn btn-brand p-1" v-on:click="initiateWithdraw(token)"><i class="fas fa-upload " :title="$t('withdraw_tokens')" ></i></span>
@@ -392,13 +392,13 @@
 						  <span class="btn btn-brand p-1" v-if="user && cur_bchain == 'HIVE'" :title="$t('swap_tokens')" v-on:click="openSwapModal(token)">
 							  <i class="fa-regular fa-money-bill-1"></i>
 						  </span>
-  
+
 					  </div>
 					<!--</div>-->
 				  </div>
-  
+
 				  <div class="action-box" v-if="!nonAuthUser">
-				  
+
 					  <h3 class="pro-name">
 						  <span v-if="curTokenAction == TRANSFER_FUNDS">{{ $t('transfer_tokens') }}</span>
 						  <span v-else-if="curTokenAction == TRANSFER_BSC">{{ $t('move_to_bsc') }}</span>
@@ -412,27 +412,27 @@
 						<label for="token-target-account" class="w-25 p-2">{{ $t('Account') }} *</label>
 						<span class="p-1">@</span><input type="text" id="token-target-account" name="token-target-account" ref="token-target-account" class="form-control-lg p-2">
 					  </div>
-					  
+
 					  <div class="row" v-if="tokenActions && curTokenAction == TRANSFER_BSC">
 						  <span class="text-brand">{{ $t('transfer_bsc_description') }}</span>
 					  </div>
-					  
+
 					  <div class="row" v-if="tokenActions">
 						<label for="token-powerup-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
 						<input type="number" id="token-powerup-amount" name="token-powerup-amount" ref="token-powerup-amount" class="form-control-lg w-50 p-2" @input="calculateHBDAmount">
 						<span class="p-2" v-on:click="fillTokenTransAmount()" :title="$t('select_full_balance')"><img :src="selTokenUp.icon" class="mr-1 mini-token-logo" ><u>{{showMaxBal(selTokenUp)}} {{ selTokenUp.symbol }}</u></span>
 					  </div>
-					  
+
 					  <div class="row" v-if="tokenActions && curTokenAction == DELEGATE_FUNDS">
 						<label for="token-delegate-recipient" class="w-25 p-2">{{ $t('To') }} *</label>
 						<input type="text" id="token-delegate-recipient" name="token-delegate-recipient" ref="token-delegate-recipient" class="form-control-lg w-50 p-2" value="actifit">
 					  </div>
-					  
+
 					  <div class="row" v-if="tokenActions && curTokenAction == TRANSFER_BSC">
 						<label for="token-hbd-amount" class="w-25 p-2">{{ $t('HBD_Amount') }} *</label>
 						<input type="number" id="token-hbd-amount" name="token-hbd-amount" ref="token-hbd-amount" class="form-control-lg w-50 p-2" readonly><span class="p-2">{{ $t('HBD') }}</span>
 					  </div>
-					  
+
 					  <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin && tokenActions">
 						<label for="p-ac-key-trans-token" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
 						<input type="password" id="p-ac-key-trans-token" name="p-ac-key-trans-token" ref="p-ac-key-trans-token" class="form-control-lg w-50 p-2">
@@ -442,9 +442,9 @@
 						<input type="text" id="token-transfer-memo" name="token-transfer-memo" ref="token-transfer-memo" class="form-control-lg w-50 p-2">
 					  </div>
 					  <div class="text-brand italic text-center" v-if="tokenActions && curTokenAction == WITHDRAW_FUNDS"  v-html='this.withdrawableSpecialInstrs[selTokenUp.symbol]'>
-						  
+
 					  </div>
-					  
+
 					  <div class="row" v-if="tokenActions">
 						<div class="w-25"></div>
 						<button v-if="curTokenAction == POWERUP_FUNDS" v-on:click="proceedPowerUpToken" class="btn btn-brand btn-lg w-50 border">{{ $t('Power_Up') }}</button>
@@ -462,7 +462,7 @@
 						<div class="w-25"></div>
 						<div class="text-brand" v-html="this.afit_se_power_err_msg"></div>
 					  </div>
-					  
+
 					  <div v-if="tokenActions && curTokenAction == DELEGATE_FUNDS">
 						  <h5>{{ $t('active_delegations') }}</h5>
 						  <table class="table table-hover">
@@ -476,10 +476,10 @@
 							</thead>
 							<tbody>
 							  <tr v-for="(delegation, index) in heTokenDelegations" :key="index" :delegation="delegation" v-if="delegation.symbol==selTokenUp.symbol">
-								  <td><a :href="'./@'+delegation.delegatee" >@{{ delegation.to }}</a></td> 
+								  <td><a :href="'./@'+delegation.delegatee" >@{{ delegation.to }}</a></td>
 								  <td>
-									  {{ numberFormat(delegation.quantity, 3) }} {{delegation.symbol}} 
-								  </td> 
+									  {{ numberFormat(delegation.quantity, 3) }} {{delegation.symbol}}
+								  </td>
 								  <td>{{ date(new Date(delegation.updated)) }}</td>
 								  <td>
 								  <span ><a href="#" @click.prevent="proceedUnDelegateToken(delegation)" :title="$t('Cancel_Delegation')"><i class="fas fa-trash-alt"></i><i class="fas fa-spin fa-spinner" v-if="cancellingDelegation"></i></a></span></td>
@@ -487,21 +487,21 @@
 							</tbody>
 						  </table>
 					  </div>
-					  
-					  
+
+
 					  <div v-else-if="tokenActions && curTokenAction == POWERDOWN_FUNDS">
 						  <span v-html="renderUnstakingVals()"></span>
 					  </div>
-				  
+
 				  </div>
-				  
-				  
+
+
 			  </div>
-			  
+
 			  <div v-else><i class="fas fa-spin fa-spinner text-brand"></i></div>
-			  
-			  
-			  
+
+
+
 			  <div id="detailsArea" ref="detailsArea"></div>
 			  <div class="text-center">
 				  <transition name="fade">
@@ -515,7 +515,7 @@
 						  <label for="transfer-type" class="w-25 p-2">{{ $t('Type') }} *</label>
 						  <select @change="transferTypeChange" id="transfer-type" name="transfer-type" ref="transfer-type" text="Choose Type" class="form-control-lg w-50 p-2">
 							<option value="HIVE" v-if="cur_bchain!='BLURT'" :selected="transferType=='HIVE'">
-							  <span v-if="cur_bchain=='STEEM'">{{ $t('STEEM') }}</span> 
+							  <span v-if="cur_bchain=='STEEM'">{{ $t('STEEM') }}</span>
 							  <span v-if="cur_bchain=='HIVE'">{{ $t('HIVE') }}</span>
 							</option>
 							<option value="HBD" v-if="cur_bchain!='BLURT'" :selected="transferType=='HBD'">
@@ -532,7 +532,7 @@
 					  </div>
 					  <div class="row">
 						<label for="transfer-memo" class="w-25 p-2">{{ $t('Memo') }}</label>
-						<input type="text" id="transfer-memo" name="transfer-memo" ref="transfer-memo" class="form-control-lg w-50 p-2">				
+						<input type="text" id="transfer-memo" name="transfer-memo" ref="transfer-memo" class="form-control-lg w-50 p-2">
 					  </div>
 					  <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
 							<label for="p-ac-key-trans" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
@@ -647,7 +647,7 @@
 					  </div>
 					</div>
 				  </transition>
-				  
+
 				  <transition name="fade">
 					<div v-if="fundActivityMode === TRANSFER_FUNDS_SAVINGS" class="text-center grid col-md-12">
 					  <h3 class="pro-name">{{ $t('TRANSFER_FUNDS_SAVINGS') }}</h3>
@@ -659,7 +659,7 @@
 						  <label for="transfer-type" class="w-25 p-2">{{ $t('Type') }} *</label>
 						  <select @change="transferTypeChange" id="transfer-type" name="transfer-type" ref="transfer-type" text="Choose Type" class="form-control-lg w-50 p-2">
 							<option value="HIVE" v-if="cur_bchain!='BLURT'" :selected="transferType=='HIVE'">
-							  <span v-if="cur_bchain=='STEEM'">{{ $t('STEEM') }}</span> 
+							  <span v-if="cur_bchain=='STEEM'">{{ $t('STEEM') }}</span>
 							  <span v-if="cur_bchain=='HIVE'">{{ $t('HIVE') }}</span>
 							</option>
 							<option value="HBD" v-if="cur_bchain!='BLURT'" :selected="transferType=='HBD'">
@@ -676,7 +676,7 @@
 					  </div>
 					  <div class="row">
 						<label for="transfer-memo" class="w-25 p-2">{{ $t('Memo') }}</label>
-						<input type="text" id="transfer-memo" name="transfer-memo" ref="transfer-memo" class="form-control-lg w-50 p-2">				
+						<input type="text" id="transfer-memo" name="transfer-memo" ref="transfer-memo" class="form-control-lg w-50 p-2">
 					  </div>
 					  <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
 							<label for="p-ac-key-trans" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
@@ -701,7 +701,7 @@
 					  </div>
 					</div>
 				  </transition>
-				  
+
 				  <transition name="fade">
 					<div v-if="fundActivityMode === REMOVE_FUNDS_SAVINGS" class="text-center grid col-md-12">
 					  <h3 class="pro-name">{{ $t('REMOVE_FUNDS_SAVINGS') }}</h3>
@@ -710,7 +710,7 @@
 						  <label for="transfer-type" class="w-25 p-2">{{ $t('Type') }} *</label>
 						  <select @change="transferTypeChange" id="transfer-type" name="transfer-type" ref="transfer-type" text="Choose Type" class="form-control-lg w-50 p-2">
 							<option value="HIVE" v-if="cur_bchain!='BLURT'" :selected="transferType=='HIVE'">
-							  <span v-if="cur_bchain=='STEEM'">{{ $t('STEEM') }}</span> 
+							  <span v-if="cur_bchain=='STEEM'">{{ $t('STEEM') }}</span>
 							  <span v-if="cur_bchain=='HIVE'">{{ $t('HIVE') }}</span>
 							</option>
 							<option value="HBD" v-if="cur_bchain!='BLURT'" :selected="transferType=='HBD'">
@@ -727,7 +727,7 @@
 					  </div>
 					  <div class="row">
 						<label for="transfer-memo" class="w-25 p-2">{{ $t('Memo') }}</label>
-						<input type="text" id="transfer-memo" name="transfer-memo" ref="transfer-memo" class="form-control-lg w-50 p-2">				
+						<input type="text" id="transfer-memo" name="transfer-memo" ref="transfer-memo" class="form-control-lg w-50 p-2">
 					  </div>
 					  <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
 							<label for="p-ac-key-trans" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
@@ -752,7 +752,7 @@
 					  </div>
 					</div>
 				  </transition>
-				  
+
 				  <transition name="fade">
 					<div v-if="fundActivityMode == DELEGATE_FUNDS" class="text-center grid col-12">
 					  <div v-if="!nonAuthUser">
@@ -792,9 +792,9 @@
 					  <div v-if="delegateProcess">
 						<i class="fas fa-spin fa-spinner" ></i>
 					  </div>
-					  
+
 					  </div>
-					  
+
 					  <div>
 						  <h5>{{ $t('active_delegations') }}</h5>
 						  <table class="table table-hover">
@@ -810,11 +810,11 @@
 							</thead>
 							<tbody>
 							  <tr v-for="(delegation, index) in activeDelegations" :key="index" :delegation="delegation">
-								  <td><a :href="'./@'+delegation.delegatee" >@{{ delegation.delegatee }}</a></td> 
+								  <td><a :href="'./@'+delegation.delegatee" >@{{ delegation.delegatee }}</a></td>
 								  <td>
-									  {{ numberFormat(delegation.power, 3) }} 
+									  {{ numberFormat(delegation.power, 3) }}
 									  <span v-if="cur_bchain == 'STEEM'">{{ $t('SP_Symbol') }}</span>
-									  <span v-else-if="cur_bchain == 'HIVE'">{{ $t('HP_Symbol') }}</span></td> 
+									  <span v-else-if="cur_bchain == 'HIVE'">{{ $t('HP_Symbol') }}</span></td>
 								  <td>{{ date(delegation.min_delegation_time) }}</td>
 								  <td v-if="!nonAuthUser"><span ><a href="#" @click.prevent="editDelegation(delegation)" :title="$t('Edit_Delegation')"><i class="fas fa-edit"></i></a></span>&nbsp;
 								  <span ><a href="#" @click.prevent="cancelDelegation(delegation)" :title="$t('Cancel_Delegation')"><i class="fas fa-trash-alt"></i><i class="fas fa-spin fa-spinner" v-if="cancellingDelegation"></i></a></span></td>
@@ -824,7 +824,7 @@
 					  </div>
 					</div>
 				  </transition>
-				  
+
 				  <transition name="fade">
 					<div v-if="fundActivityMode == DELEGATE_RCS && cur_bchain == 'HIVE' " class="text-center grid col-12">
 					  <div v-if="!nonAuthUser">
@@ -861,9 +861,9 @@
 					  <div v-if="delegateProcess">
 						<i class="fas fa-spin fa-spinner" ></i>
 					  </div>
-					  
+
 					  </div>
-					  
+
 					  <div>
 						  <h5>{{ $t('active_delegations') }}</h5>
 						  <table class="table table-hover">
@@ -878,7 +878,7 @@
 							</thead>
 							<tbody>
 							  <tr v-for="(delegation, index) in activeRCDelegations" :key="index" :delegation="delegation">
-								  <td><a :href="'./@'+delegation.to" >@{{ delegation.to }}</a></td> 
+								  <td><a :href="'./@'+delegation.to" >@{{ delegation.to }}</a></td>
 								  <td>
 									  {{ numberFormat(delegation.delegated_rc, 3) }} </td>
 								  <td>{{ numberFormat(renderRCVal(delegation.to), 3) }}</td>
@@ -889,11 +889,11 @@
 							</tbody>
 						  </table>
 					  </div>
-					  
+
 					</div>
 				  </transition>
-				  
-				  
+
+
 				  <transition name="fade">
 					  <div v-if="fundActivityMode == SHOW_CLAIMABLE_REW && isClaimableDataAvailableTEMP && cur_bchain=='STEEM'" class="action-box">
 						  <h5 class="pro-name"><img src="/img/STEEM.png" class="mr-2 token-logo">{{ $t('Claimable_Steem_Rewards') }}</h5>
@@ -926,7 +926,7 @@
 						  </div>
 					  </div>
 				  </transition>
-				  
+
 				  <transition name="fade">
 					  <div v-if="afitActivityMode == MOVE_AFITX_SE_HE || afitActivityMode == MOVE_AFITX_HE_SE">
 						  <!--<h3 class="pro-name">{{ $t('EXCHANGE_AFIT_FOR_STEEM') }}</h3>-->
@@ -961,11 +961,11 @@
 							  </div>
 							</div>
 					  </div>
-				  
+
 				  </transition>
-				  
+
 				  <transition name="fade">
-				  
+
 					  <div v-if="afitActivityMode == MOVE_AFIT_SE_HE || afitActivityMode == MOVE_AFIT_HE_SE">
 						<div class="text-center p-2">
 						  <div v-if="afitActivityMode == MOVE_AFIT_SE_HE" class="text-brand font-weight-bold">{{ $t('move_afit_se_he') }}</div>
@@ -999,15 +999,15 @@
 						</div>
 					  </div>
 				  </transition>
-				  
-				  
+
+
 				  <transition name="fade">
 					  <div v-if="afitActivityMode == showBSCDetails">
 						  <h3 class="pro-name">{{ $t('bsc_wallet') }}</h3>
 						  <span class="font-brand">{{ $t('bsc_details_notice') }}</span>
-						  
+
 						  <div>
-							  
+
 								  <input type="text" id="bsc-wallet-address" name="bsc-wallet-address" ref="bsc-wallet-address" class="form-control-lg w-50 p-2" :value="this.getWalletAddress()" placeholder="0x......">
 								  <div v-if="error_wallet!=''" class="text-brand text-center">{{ error_wallet}}</div>
 								  <button v-if="!nonAuthUser" v-on:click="updateWalletAddress" class="btn btn-brand btn-lg w-50 border"><span v-if="this.bsc_wallet_address">{{ $t('Save') }}</span><span v-else>{{ $t('Save') }}</span></button>
@@ -1015,10 +1015,10 @@
 						  </div>
 					  </div>
 				  </transition>
-				  
+
 			  </div>
-			  
-			  
+
+
 		  </div>
 		  <div v-else><i class="fas fa-spin fa-spinner text-brand"></i></div>
 		  <div v-if="this.tokenMetrics.length > 0 && false" class="row">
@@ -1029,7 +1029,7 @@
 				  <div class="pb-2" v-else-if="this.cur_bchain=='HIVE'">{{ $t('in_hive') }}: <img src="/img/HIVE.png" class="token-logo-sm">{{ formattedSteemTotVal }}</div>
 				  <div class="pb-2" v-else-if="this.cur_bchain=='BLURT'">{{ $t('in_blurt') }}: <img src="/img/BLURT.png" class="token-logo-sm">{{ formattedSteemTotVal }}</div>
 			  </div>
-			  
+
 		  </div>
 		  <div v-if="this.showDetailedCalc" class="text-center">
 			  <div class="row">
@@ -1041,10 +1041,10 @@
 				  <div class="p-1 m-1 calc-data" v-html="this.detailCalculation"></div>
 			  </div>
 		  </div>
-		  
+
 		  <div class="font-weight-bold">
 			  <!--<button v-on:click="buyAFITwithSTEEM" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('BUY_AFIT_WITH_STEEM') }}</button>-->
-			  
+
 				<transition name="fade">
 				<div v-if="afitActivityMode == MOVE_AFIT_SE" class="action-box">
 				  <h3 class="pro-name">{{ $t('MOVE_AFIT_HE_AFIT_POWER') }}</h3>
@@ -1074,7 +1074,7 @@
 					  </div>
 					</div>
 				</div>
-				
+
 				<div v-else-if="afitActivityMode == INIT_AFIT_TIP" class="action-box">
 				  <h3 class="pro-name">{{ $t('SEND_AFIT_TO_USER') }}</h3>
 				  <div class="text-center grid p-2">
@@ -1096,7 +1096,7 @@
 						  <div class="row">
 							  <div v-if="tipError" v-html="tipError" class="m-3"></div>
 						  </div>
-						  
+
 						  <div class="row">
 							  <div class="col-2"></div>
 							  <div class="col-8"><button v-on:click="proceedTipActivity" class="btn btn-brand w-50 border m-3">{{ $t('Proceed') }}</button>
@@ -1106,7 +1106,7 @@
 					  </div>
 				  </div>
 				</div>
-				
+
 				<div v-else-if="afitActivityMode == INIT_AFIT_TO_SE" class="action-box">
 				  <h3 class="pro-name">{{ $t('INITIATE_AFIT_TO_HE') }}</h3>
 					<div class="text-center grid p-2">
@@ -1116,7 +1116,7 @@
 					  </div>
 					  <!--<div v-if="cur_bchain=='STEEM'">{{ $t('move_afit_se_notice') }}</div>-->
 					  <div>{{ $t('move_afit_he_notice') }}</div>
-					  
+
 					  <div>{{ $t('move_afit_se_notice2') }}</div>
 					  <div>{{ $t('move_afit_se_notice3') }}</div>
 					  <div>
@@ -1147,10 +1147,10 @@
 							</div>
 						  </div>
 					  </div>
-					  
+
 					</div>
 				</div>
-				
+
 				<div v-else-if="afitActivityMode == BUY_AFIT_STEEM">
 					<div class="text-center grid p-2">
 					  <div class="row" >
@@ -1183,7 +1183,7 @@
 					  </div>
 					</div>
 				</div>
-				
+
 				<div v-else-if="afitActivityMode == EXCHANGE_AFIT_STEEM">
 				<transition name="fade" v-if="!userHasFundsPass" >
 				  <div class="text-center grid p-2">
@@ -1262,7 +1262,7 @@
 					  <div class="row" v-if="speed_up_on">
 						  <div class="w-25"></div>
 						  <div>{{ $t('speed_up_text') }} <a href="#a" v-on:click="speedUpVerify">{{ $t('speed_up') }}</a></div>
-						  
+
 					  </div>
 				  </div>
 				</transition>
@@ -1370,11 +1370,11 @@
 				<ExchangeQueue :transList="tokenSwapQueue.pendingTransactions" :user="targetUserWallet" :topAFITXList="topAFITXHolders"/>
 				<ExchangeHistory :transList="userTokenSwapHistory.userTokenSwapHist"/>
 				</div>
-			  
+
 			  </transition>
 		  </div>
-		  
-		  
+
+
 		  <div class="row text-center row-sep" v-if="false">
 			  <div class="col-md-6 row-sep-in" v-if="cur_bchain=='STEEM'">
 				  <h5 class="token-title"><img src="/img/STEEM.png" class="mr-2 token-logo">{{ $t('Your_Steem_Balance') }}</h5>
@@ -1383,13 +1383,13 @@
 					  <div class="p-2">
 					  UNDER SAVINGS: </div>
 					  <div class="p-2">{{ this.renderSavings(this.cur_bchain) }} | {{ this.renderSBDSavings(this.cur_bchain) }}</div>
-					  
+
 					  <div class="row">
 						  <div class="p-2 col-md-6" id="ttip-area">
 							  <small><i>{{ $t('STEEM_POWER_BREAKDOWN') }}: {{this.renderSteemPower(1)}} ({{ $t('Owned_SP') }}) + {{this.renderSteemPower(3)}} ({{ $t('Received_SP') }}) - {{this.renderSteemPower(4)}} ({{ $t('Delegated_SP') }}) - {{this.renderSteemPower(5)}} ({{ $t('Powering_Down_Amount') }})</i></small>
 						  </div>
 					  </div>
-					  
+
 				  </div>
 			  </div>
 			  <div class="col-md-6 row-sep-in" v-else-if="cur_bchain=='HIVE'">
@@ -1399,38 +1399,38 @@
 					  <div class="p-2">
 					  UNDER SAVINGS: </div>
 					  <div class="p-2">{{ this.renderSavings(this.cur_bchain) }} | {{ this.renderSBDSavings(this.cur_bchain) }}</div>
-					  
+
 					  <div class="row">
 						  <div class="p-2 col-md-6" id="ttip-area">
 							  <small><i>{{ $t('HIVE_POWER_BREAKDOWN') }}: {{this.renderSteemPower(1)}} ({{ $t('Owned_HP') }}) + {{this.renderSteemPower(3)}} ({{ $t('Received_HP') }}) - {{this.renderSteemPower(4)}} ({{ $t('Delegated_HP') }}) - {{this.renderSteemPower(5)}} ({{ $t('Powering_Down_Amount') }})</i></small>
 						  </div>
 					  </div>
-					  
+
 				  </div>
 			  </div>
 			  <div class="col-md-6 row-sep-in" v-else-if="cur_bchain=='BLURT'">
 				  <h5 class="token-title"><img src="/img/BLURT.png" class="mr-2 token-logo">{{ $t('Your_Blurt_Balance') }}</h5>
 				  <div class="mb-4 font-weight-bold">
 					  <div class="p-2">{{ this.renderSteemPower(2) }} {{ $t('BLURT_POWER_CAPS') }} | {{ this.renderBalance(this.cur_bchain) }}</div>
-					  
+
 					  <div class="p-2">
 					  UNDER SAVINGS: </div>
 					  <div class="p-2">{{ this.renderSavings(this.cur_bchain) }} </div>
-					  
+
 					  <div class="row">
 						  <div class="p-2 col-md-6" id="ttip-area">
 							  <small><i>{{ $t('BLURT_POWER_BREAKDOWN') }}: {{this.renderSteemPower(1)}} ({{ $t('Owned_BP') }}) + {{this.renderSteemPower(3)}} ({{ $t('Received_BP') }}) - {{this.renderSteemPower(4)}} ({{ $t('Delegated_BP') }}) - {{this.renderSteemPower(5)}} ({{ $t('Powering_Down_Amount') }})</i></small>
 						  </div>
 					  </div>
-					  
+
 				  </div>
 			  </div>
-			  
+
 		  </div>
 		</div>
-		
-		  
-		
+
+
+
 		<!-- transaction history -->
 		<div class="history mx-auto">
 		  <h3 class="text-center mt-5">{{ $t('AFIT_Transaction_History') }}</h3>
@@ -1440,9 +1440,9 @@
 			<TopHolders :user="targetUserWallet" :holdersList="afitHoldersList"/>
 		  <TopHoldersX :user="targetUserWallet" :holdersList="afitxHoldersList"/>
 		  <SwapTokenModal :swapWidgetUrl="swapWidgetUrl" />
-		  
+
 	  </div>
-	  
+
 	  <!-- show spinner while loading -->
 	  <div :class="smallScreenClasses" class="container mt-5 pb-5 pt-5" v-else-if="loading">
 		<div class="text-center">
@@ -1467,10 +1467,10 @@
 		  </div>
 		</div>
 	  </div>
-	  
+
 	  <pendingRewardsModal :pendingRewards="pendingRewards" :username="user"/>
 	  <LoginModal v-if="showModal" @close="showModal = false" @login-successful="refreshAllWalletData" />
-	  
+
 	  <client-only>
 		<div>
 		  <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
@@ -1481,47 +1481,47 @@
 	  <Footer />
 	</div>
   </template>
-  
+
   <script>
 	import LoginModal from '~/components/LoginModal'
 	import NavbarBrand from '~/components/NavbarBrand'
 	import Transaction from '~/components/Transaction'
 	import Footer from '~/components/Footer'
 	import steem from 'steem'
-	
+
 	import hive from '@hiveio/hive-js'
 	import blurt from '@blurtfoundation/blurtjs'
-	
+
 	import ExchangeQueue from '~/components/ExchangeQueueModal'
 	import ExchangeHistory from '~/components/ExchangeHistoryModal'
 	import SSC from 'sscjs'
-	
+
 	import Countdown from 'vuejs-countdown'
-	
+
 	import TopHolders from '~/components/TopHoldersModal'
 	import TopHoldersX from '~/components/TopHoldersXModal'
 	import SwapTokenModal from '~/components/SwapTokenModal'
-	
+
 	import pendingRewardsModal from '~/components/PendingRewardsModal'
-	
+
 	import VueScrollTo from 'vue-scrollto' // for smooth scrolling
-	
+
 	//Disable: EOL for S-E
 	//const ssc = new SSC(process.env.steemEngineRpc);
 	const scot_steemengine_api = process.env.steemEngineScot;
-	
+
 	const hsc = new SSC(process.env.hiveEngineRpc);
 	const scot_hive_api_param = process.env.hiveEngineScotParam;
-  
+
 	const tokensNonStakable = ['AFITX', 'AFIT', 'SWAP.HIVE', 'SWAP.BLURT'];
 	const tokensOfInterest = ['SPORTS', 'PAL', 'APX', 'BEE', 'POSH', 'LEO'].concat(tokensNonStakable);
-	
+
 	import { mapGetters } from 'vuex'
-	
+
 	import Web3 from 'web3'
-	
-	let web3 = new Web3('https://bsc-dataseed1.binance.org:443');
-	
+
+	let web3 = new Web3(process.env.web3Node);
+
 	const minABI = [
 		// balanceOf
 		{
@@ -1532,18 +1532,18 @@
 		  type: "function",
 		},
 	  ];
-	  
+
 	  //fetch AFIT, AFITX, & LP token addresses
 	  const afitTokenAddress = process.env.afitTokenBSC;
 	  const afitxTokenAddress = process.env.afitxTokenBSC;
 	  const afitBNBLPTokenAddress = process.env.afitBNBLPTokenBSC;
 	  const afitxBNBLPTokenAddress = process.env.afitxBNBLPTokenBSC;
-	  
+
 	  const afitContract = new web3.eth.Contract(minABI, afitTokenAddress);
 	  const afitxContract = new web3.eth.Contract(minABI, afitxTokenAddress);
 	  const afitBNBLPContract = new web3.eth.Contract(minABI, afitBNBLPTokenAddress);
 	  const afitxBNBLPContract = new web3.eth.Contract(minABI, afitxBNBLPTokenAddress);
-	  
+
 	export default {
 	  head () {
 		  return {
@@ -1592,7 +1592,7 @@
 		  INIT_AFIT_TO_SE: 4,
 		  INIT_AFIT_TIP: 5,
 		  powerDownRateVal: '',
-		  powerDownWithdrawDate: '',	
+		  powerDownWithdrawDate: '',
 		  steemPower: 0,
 		  effectiveSteemPower: 0,
 		  delegatedSteemPower: 0,
@@ -1652,15 +1652,15 @@
 		  runningInterval: '',
 		  afit_se_balance: 0,
 		  afitx_se_balance: 0,
-		  
+
 		  afit_he_balance: 0,
 		  afitx_he_balance: 0,
-		  
+
 		  afitBalanceBSC: 0,
 		  afitxBalanceBSC: 0,
 		  afitBNBLPBalanceBSC: 0,
 		  afitxBNBLPBalanceBSC: 0,
-		  
+
 		  userAddedTokens: 0,
 		  steemPrice: 0.1,
 		  sbdPrice: 0.1,
@@ -1787,7 +1787,7 @@
 				  }
 			  }
 		  }
-		  return true; 
+		  return true;
 		},
 		targetUserWallet(){
 		  if (this.displayUser!='') return this.displayUser;
@@ -1823,11 +1823,11 @@
 		  let heUSDVals = this.heTokenBalances.reduce((accumulator, currentValue) => accumulator + parseFloat(currentValue), 0);
 		  console.log(heUSDVals)
 		  return this.numberFormat(
-			  (parseFloat(this.afitValueUSD) + 
-				  parseFloat(this.hbdValueUSD) + 
-				  parseFloat(this.hiveValueUSD) + 
+			  (parseFloat(this.afitValueUSD) +
+				  parseFloat(this.hbdValueUSD) +
+				  parseFloat(this.hiveValueUSD) +
 				  parseFloat(heUSDVals) +
-				  parseFloat(this.afitBSCValueUSD) + 
+				  parseFloat(this.afitBSCValueUSD) +
 				  parseFloat(this.afitxBSCValueUSD)
 			  ).toFixed(3), 3)
 		},
@@ -1919,7 +1919,7 @@
     },
     deep: true
   },
-  
+
 
 		isClaimableDataAvailable(newValue) {
 		  this.isClaimableDataAvailableTEMP = newValue;
@@ -1949,10 +1949,10 @@
 			this.cur_bchain = newBchain;
 			this.transferType = newBchain;
 			this.$store.dispatch('steemconnect/refreshUser');
-			
+
 			let chainLnk = await this.setProperNode();
 			this.properties = await chainLnk.api.getDynamicGlobalPropertiesAsync();
-			
+
 			await this.fetchUserData();
 			await this.fetchTokenBalance();
 			if (this.cur_bchain == 'HIVE') {
@@ -1965,7 +1965,7 @@
 		claimSBD: function() {
 			this.formattedTotAccountVal();
 		},
-		
+
 		claimSTEEM: function() {
 			this.formattedTotAccountVal();
 		},
@@ -1994,9 +1994,9 @@
 		  const username = this.user.account.name;
 		  const partner = process.env.swap_partner;
 		  const toToken = process.env.swap_to_token;
-		  const fromToken = token.symbol; 
+		  const fromToken = token.symbol;
 		  const fee = process.env.partner_fee;
-  
+
 		  this.swapWidgetUrl = `https://swapwidget.hive-keychain.com/?username=${username}&partnerUsername=${partner}&from=${fromToken}&to=${toToken}&partnerFee=${fee}`;
 		  console.log('Opening swap modal with URL:', this.swapWidgetUrl);
 		  $('#swapTokenModal').modal('show');
@@ -2030,10 +2030,10 @@
 			try {
 			const tokenData = await hsc.find('tokens', 'balances', { account: this.displayUserData.name });
 			const tokenExtraDetails = await hsc.find('tokens', 'tokens', {});
-			
+
 			this.heTokenDelegations = await hsc.find('tokens', 'delegations', { from: this.displayUserData.name }, 200, 0, []);
 			this.heTokenUnstakes = await hsc.find('tokens', 'pendingUnstakes', { account: this.displayUserData.name }, 200, 0, []);
-			
+
 			if (tokenData && tokenData.length > 0) {
 				tokenData.forEach(token => {
 				try {
@@ -2088,7 +2088,7 @@
 		numberFormat (number, precision) {
 		  return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
 		},
-		
+
 		renderUnstakingVals(){
 		  let unstakingToken = this.heTokenUnstakes.find(v => v.symbol == this.selTokenUp.symbol);
 		  if (unstakingToken){
@@ -2097,12 +2097,12 @@
 			  .replace('_TXLEFT_', unstakingToken.numberTransactionsLeft)
 			  .replace('_NXTDATE_', this.date(new Date(unstakingToken.nextTransactionTimestamp)))
 			  .replace('_TKNCOUNT_', unstakingToken.quantityLeft)
-			  
+
 		  }
 		  return '';
-		  
+
 		},
-		
+
 		adjustPowerDisplay(token, status){
 		  console.log('adjust for '+token+ 'to '+status)
 		  this.showPowerBreakdown[token.symbol]=status
@@ -2112,7 +2112,7 @@
 		powerDisplayOn(token){
 		  return this.showPowerBreakdown[token.symbol];
 		},
-		
+
 		/* for scrolling monitoring purposes */
 		handleIntersection(entries) {
 			entries.forEach(entry => {
@@ -2127,7 +2127,7 @@
 			  }
 			});
 		},
-		
+
 		renderToken (token) {
 		  //check small balances flag
 		  if (this.hide_small_balances && this.usdVal(token) < 1){
@@ -2137,11 +2137,11 @@
 		  if (!this.show_only_tokens_interest) return true;
 		  return this.show_only_tokens_interest && tokensOfInterest.includes(token.symbol)
 		},
-		
+
 		switchTokenDisplay() {
 		  this.show_only_tokens_interest=!this.show_only_tokens_interest
 		},
-		
+
 		switchHideSmall() {
 		  this.hide_small_balances = !this.hide_small_balances
 		},
@@ -2159,8 +2159,8 @@
 			  }
 			  this.user_settings['hide_small_balances'] = this.hide_small_balances;
 			  this.user_settings['show_only_tokens_interest'] = this.show_only_tokens_interest;
-			  
-			  
+
+
 			  if (this.isKeychainLogin || this.isHiveauthLogin){
 				  //in case of keychain login, broadcast to chain
 				  //broadcast the transaction to Steem BC
@@ -2171,15 +2171,15 @@
 					  json: JSON.stringify(this.user_settings)
 					};
 				  console.log(this.stdLogin);
-				  
+
 				  let res = await this.processTrxFunc('custom_json', cstm_params);
 				  console.log('post keychain');
 				  console.log(res);
-				  
+
 				  if (res.success){
 					  //console.log(res.txID);
 					  let url = new URL(process.env.actiAppUrl + 'updateSettingsKeychain/'+res.txID+'/?user=' + this.user.account.name+'&operation='+JSON.stringify([['custom_json',cstm_params]]));
-					  
+
 					  let res2 = await fetch(url);
 					  let outcome = await res2.json();
 					  console.log(outcome);
@@ -2203,13 +2203,13 @@
 						position: 'top center'
 					  })
 				  }
-				  
+
 			  }else{
 				  let url = new URL(process.env.actiAppUrl + 'updateSettings/?user=' + this.user.account.name+'&settings='+JSON.stringify(this.user_settings));
 				  //console.log(url);
-  
+
 				  let accToken = localStorage.getItem('access_token')
-				  
+
 				  let reqHeads = new Headers({
 					'Content-Type': 'application/json',
 					'x-acti-token': 'Bearer ' + accToken,
@@ -2219,7 +2219,7 @@
 				  });
 				  let outcome = await res.json();
 				  //console.log(outcome);
-				  
+
 				  if (outcome.success){
 					  this.$notify({
 						group: 'success',
@@ -2239,7 +2239,7 @@
 		  }
 		  this.save_progress = false;
 		},
-		
+
 		/**
 		 * Scrolls down to content area.
 		 */
@@ -2249,7 +2249,7 @@
 			  VueScrollTo.scrollTo('#detailsArea', 1000, {easing: 'ease-in-out', offset: -50})
 		  }
 		},
-		
+
 		showRewardError(){
 		  this.$notify({
 			group: 'error',
@@ -2257,23 +2257,23 @@
 			position: 'top center'
 		  })
 		},
-		
-  
+
+
 		showClaimableRewards() {
-  
+
 		  const hasPendingRewards = this.isClaimableDataAvailableTEMP;
 		  if (!hasPendingRewards){
 			  //show error message
 			  this.showRewardError();
-			  
+
 		  } else{
 			  //scroll down to rewards section
 			  this.fundActivityMode = this.SHOW_CLAIMABLE_REW;
 			  this.afitActivityMode = 0;
 			  this.curTokenAction = 0;
 			  this.scrollAction();
-		  }	
-  
+		  }
+
 		},
 		getWalletAddress (){
 		  return this.bsc_wallet_address;
@@ -2281,7 +2281,7 @@
 		async getBalance() {
 			try{
 				if (!this.bsc_wallet_address) return;
-				
+
 				try{
 				const result = await afitContract.methods.balanceOf(this.bsc_wallet_address).call();
 				this.afitBalanceBSC = web3.utils.fromWei(result);
@@ -2299,7 +2299,7 @@
 				try{
 				let result = await afitBNBLPContract.methods.balanceOf(this.bsc_wallet_address).call();
 				this.afitBNBLPBalanceBSC = web3.utils.fromWei(result);
-				
+
 				result = await afitxBNBLPContract.methods.balanceOf(this.bsc_wallet_address).call();
 				this.afitxBNBLPBalanceBSC = web3.utils.fromWei(result);
 				}catch(err){
@@ -2323,7 +2323,7 @@
 		setAirdropResults (json){
 		  this.airdropResults = json;
 		},
-		
+
 		async deleteWalletAddress () {
 		  //only reset if stored value is non-empty
 		  if (this.bsc_wallet_address != ''){
@@ -2332,9 +2332,9 @@
 				  return;
 			  }
 			  let accToken = localStorage.getItem('access_token')
-			  
+
 			  let url = new URL(process.env.actiAppUrl + 'deleteUserWalletAddress/?user='+this.user.account.name);
-  
+
 			  let reqHeads = new Headers({
 				'Content-Type': 'application/json',
 				'x-acti-token': 'Bearer ' + accToken,
@@ -2363,16 +2363,16 @@
 		async updateWalletAddress (){
 		  //return this.bsc_wallet_address;
 		  this.error_wallet = '';
-		  
+
 		  if (this.$refs['bsc-wallet-address'].value == ''){
 			  this.error_wallet = this.$t('all_fields_required');
 			  return;
 		  }
-		  
+
 		  const accounts = await ethereum.request({
 			  method: 'eth_requestAccounts',
 		  });
-		  
+
 		  let contProc = false;
 		  const nonce = this.generatePassword(2);
 		  console.log('add');
@@ -2380,12 +2380,12 @@
 		  try{
 			  let sign = await web3.eth.personal.sign(nonce, this.$refs['bsc-wallet-address'].value, "");
 			  //console.log(sign)
-			  
+
 			  //verify proper setup
 			  let accToken = localStorage.getItem('access_token')
-			  
+
 			  let url = new URL(process.env.actiAppUrl + 'verifySignBSCAdd/?user='+this.user.account.name+'&wallet='+this.$refs['bsc-wallet-address'].value+'&sign='+sign+'&nonce='+nonce);
-  
+
 			  let reqHeads = new Headers({
 				'Content-Type': 'application/json',
 				'x-acti-token': 'Bearer ' + accToken,
@@ -2408,22 +2408,22 @@
 					position: 'top center'
 				  })*/
 			  }
-			  
+
 		  }catch(err){
 			  console.log(err);
 		  }
-		  
+
 		  if (!contProc){
 			  this.error_wallet = this.$t('error_saving_wallet');
 			  return;
 		  }
-		  
-		  
+
+
 		  //grab token
 		  let accToken = localStorage.getItem('access_token')
-		  
+
 		  let url = new URL(process.env.actiAppUrl + 'storeUserWalletAddress/?user='+this.user.account.name+'&wallet='+this.$refs['bsc-wallet-address'].value);
-  
+
 		  let reqHeads = new Headers({
 			'Content-Type': 'application/json',
 			'x-acti-token': 'Bearer ' + accToken,
@@ -2452,7 +2452,7 @@
 		  const sum = this.pendingSavingsWithdrawals.reduce((acc, obj) => {
 			if (obj.hasOwnProperty('amount') && obj.amount.includes(cur)) {
 			  const numericValue = parseFloat(obj.amount.split(' ')[0]);
-			  
+
 			  if (!isNaN(numericValue)) {
 				acc += numericValue;
 			  }
@@ -2473,12 +2473,12 @@
 		  if (this.transferType == 'SBD' || this.transferType == 'HBD'){
 			  return this.renderSBDBalance(this.cur_bchain, nofrmt)
 		  }else{
-			  return this.renderBalance(this.cur_bchain, nofrmt) 
+			  return this.renderBalance(this.cur_bchain, nofrmt)
 		  }
 		},
 		showMaxBal (){
 		  console.log('showMaxBal');
-		  
+
 		  if (this.curTokenAction == this.POWERDOWN_FUNDS){
 			  console.log('POWERDOWN_FUNDS')
 			  return this.selTokenUp.stake
@@ -2571,7 +2571,7 @@
 		  this.loadingDeleg = false;
 		  //this.scrollAction();
 		},
-		
+
 		//handles fetching new HF26 RC delegations
 		async fetchRCDelegations(forceOpen){
 		  if (!forceOpen){
@@ -2587,21 +2587,21 @@
 			  console.log(err, result);
 		  })*/
 		  this.activeRCDelegations = delg.rc_direct_delegations;
-		  
+
 		  for (let j=0;j<this.activeRCDelegations.length;j++){
 			  //console.log('store val');
 			  await this.getRCHF26 (this.activeRCDelegations[j].to);
 		  }
 		  //fetch RC count per user and allow rendering it
-		  
-		  
+
+
 		  //await this.fetchIncomingRCDelegations();
 		  //console.log(this.rcDelgArray);
 		  //console.log(this.rcDelgArray['vevita']);
 		  //this.$forceUpdate();
 		  this.loadingDeleg = false;
 		  //this.scrollAction();
-	 
+
 		},
 		/*
 		getRCHF26Mod(user){
@@ -2662,7 +2662,7 @@
 		  }
 		  return '';
 		},
-		
+
 		//handles setting proper token to be staked
 		initiateStaking(token){
 		  //only adjust open/close is same button is clicked, otherwise adjust token being staked
@@ -2768,29 +2768,29 @@
 		date(val) {
 		  let date = new Date(val)
 		  let minutes = date.getMinutes()
-		  return date.getDate() + '/' 
-			  + (date.getMonth() + 1) + '/' 
-			  + date.getFullYear() + ' ' 
-			  + date.getHours() + ':' 
+		  return date.getDate() + '/'
+			  + (date.getMonth() + 1) + '/'
+			  + date.getFullYear() + ' '
+			  + date.getHours() + ':'
 			  + (minutes < 10 ? '0' + minutes : minutes)
 		},
 		formattedTotAccountVal () {
 		  this.totalAccountValue = 0;
 		  if (this.tokenMetrics.length > 0 || this.tokensOfInterestBal.length > 0){
-		  
+
 			  this.detailCalculation = '';
 			  //get AFITX val
 			  /*let afitxData = this.tokenMetrics.find(v => v.symbol == 'AFITX');
 			  let afitxVal = this.afitx_se_balance * parseFloat(afitxData.lastPrice)
 			  this.totalAccountValue += afitxVal
 			  this.detailCalculation += this.afitx_se_balance + ' AFITX x '+ afitxData.lastPrice + ' AFITX/STEEM = ' + this.numberFormat(afitxVal, 4) + ' STEEM<br/>';
-			  
+
 			  //get AFIT SE val
 			  let afitData = this.tokenMetrics.find(v => v.symbol == 'AFIT');
 			  let afitseVal = this.afit_se_balance * parseFloat(afitData.lastPrice);
 			  this.totalAccountValue += afitseVal
 			  this.detailCalculation += this.afit_se_balance + ' AFIT S-E x '+ afitData.lastPrice + ' AFIT S-E/STEEM = ' + this.numberFormat(afitseVal, 4) + ' STEEM<br/>';*/
-			  
+
 			  //base currency (STEEM v/s HIVE)
 			  let baseCurrency = this.steemPrice
 			  let peggedCurrencyUnit = 'SBD';
@@ -2805,20 +2805,20 @@
 			  let afitCoreVal = this.userTokensWallet * this.afitPrice / baseCurrency;
 			  //console.log(afitCoreVal);
 			  this.totalAccountValue += afitCoreVal;
-			  
+
 			  //console.log('this.afitBSCValueUSD:'+this.afitBSCValueUSD)
 			  //console.log('this.afitxBSCValueUSD:'+this.afitxBSCValueUSD)
 			  //add AFIT BSC and AFITX BSC
 			  this.totalAccountValue += (this.afitBSCValueUSD / baseCurrency);
 			  this.totalAccountValue += (this.afitxBSCValueUSD / baseCurrency);
-			  
+
 			  this.detailCalculation += this.userTokensWallet + ' AFIT x '+ this.numberFormat((this.afitPrice / baseCurrency), 4) + ' AFIT/'+this.cur_bchain+' = ' + this.numberFormat(afitCoreVal, 4) + ' '+this.cur_bchain+'<br/>';
-			  
+
 			  let par = this;
 			  //grab tokens of interest vals as well
 			  this.tokensOfInterestBal.forEach(function(token, index){
 				  par.showPowerBreakdown[token.symbol] = false;
-				  
+
 				  let tokenData = par.tokenMetrics.find(v => v.symbol == token.symbol);
 				  if( !tokenData || (typeof tokenData.lastPrice === 'undefined' || tokenData.lastPrice === null )){
 					  tokenData = new Object();
@@ -2837,7 +2837,7 @@
 				  par.detailCalculation += '(' + token.balance + ' + ' + token.stake + ') ' + token.symbol + ' x '+ tokenData.lastPrice + ' ' + token.symbol + '/'+par.cur_bchain+' = ' + par.numberFormat(tokenVal, 4) + ' '+par.cur_bchain+'<br/>';
 				  //console.log('value for '+token.symbol+ ' $ ' + tokenVal);
 			  });
-			  
+
 			  //grab claimable tokens of interest vals as well
 			  this.claimableSETokens.forEach(function(token, index){
 				  let tokenData = par.tokenMetrics.find(v => v.symbol == token.symbol);
@@ -2852,14 +2852,14 @@
 				  }
 				  //console.log('claimable value for '+token.symbol+ ' $ ' + tokenVal);
 			  });
-			  
-  
+
+
 			  //append STEEM + SP amount
 			  let totSteem = parseFloat(this.displayUserData.balance) + parseFloat(this.steemPower);
 			  this.totalAccountValue += totSteem;
-			  
+
 			  this.detailCalculation += '(' + parseFloat(this.displayUserData.balance) + ' + ' + this.steemPower + ') '+this.cur_bchain+' x 1 = ' + this.numberFormat(totSteem, 4) + ' '+this.cur_bchain+'<br/>';
-			  
+
 			  //append SBD amount after conversion to STEEM
 			  if (this.cur_bchain == 'STEEM'){
 				  let sbd_val = (parseFloat(this.displayUserData.sbd_balance) * this.sbdPrice / baseCurrency);;
@@ -2875,14 +2875,14 @@
 				  this.totalAccountValue += sbd_val;
 				  this.detailCalculation += parseFloat(this.displayUserData.hbd_balance) + ' '+peggedCurrencyUnit+' x '+ this.numberFormat((this.hbdPrice / baseCurrency), 4) + ' '+peggedCurrencyUnit+'/'+this.cur_bchain+' = ' + this.numberFormat(sbd_val, 4) + ' '+this.cur_bchain+'<br/>';
 			  }
-						  
-  
+
+
 			  //append claimable STEEM + SP
 			  /*
-			  let totClaimSteem = parseFloat(this.claimSP) + parseFloat(this.claimSTEEM); 
+			  let totClaimSteem = parseFloat(this.claimSP) + parseFloat(this.claimSTEEM);
 			  console.log(totClaimSteem);
 			  this.totalAccountValue += totClaimSteem;
-			  
+
 			  this.detailCalculation += '(' + parseFloat(this.claimSTEEM) + ' + ' + parseFloat(this.claimSP) + ') '+this.cur_bchain+' x 1 = ' + this.numberFormat(totClaimSteem, 4) + ' '+this.cur_bchain+'<br/>';
 			  */
 			  //console.log(parseFloat(this.claimSBD) * this.sbdPrice / this.steemPrice);
@@ -2896,38 +2896,38 @@
 				  this.detailCalculation += parseFloat(this.claimSBD) + ' '+peggedCurrencyUnit+' x '+ this.numberFormat((this.hbdPrice / baseCurrency), 4) + ' '+peggedCurrencyUnit+'/'+this.cur_bchain+' = ' + this.numberFormat(claim_sbd, 4) + ' '+this.cur_bchain+'<br/>';
 			  }
 			  this.detailCalculation += '-----<br/>';
-			  
+
 			  this.totalAccountValueSteem = this.totalAccountValue;
-			  
+
 			  //convert amount to STEEM price
 			  //console.log(this.totalAccountValue);
 			  this.totalAccountValue *= baseCurrency;
 			  console.log(baseCurrency);
 			  this.detailCalculation += this.numberFormat(this.totalAccountValueSteem, 4) + ' '+this.cur_bchain+' x '+ baseCurrency + ' '+this.cur_bchain+'/USD = $ ' + this.numberFormat(this.totalAccountValue, 4) + ' USD<br/>';
-			  
+
 			  //console.log(baseCurrency);
 			  //console.log(this.totalAccountValue);
 			  this.totalAccountValue = this.numberFormat(this.totalAccountValue, 2);
-			  
-		  } 
+
+		  }
 		},
 		renderSteemPower (type) {
 		  switch(type){
 			  case 1: return this.numberFormat(this.steemPower, 3);
-					  
+
 			  case 2: return this.numberFormat(this.effectiveSteemPower, 3);
-					  
+
 			  case 3: return this.numberFormat(this.receivedSteemPower, 3);
-					  
+
 			  case 4: return this.numberFormat(this.delegatedSteemPower, 3);
-					  
+
 			  case 5: return this.numberFormat(this.powerDownRateVal, 3);
 		  }
 		},
 		usdVal (token, nofrmt){
 		  if (this.tokenMetrics.length > 0){
 			  let tokenData = this.tokenMetrics.find(v => v.symbol == token.symbol);
-			  
+
 			  if (tokenData && tokenData.lastPrice){
 				  //console.log('stake:'+token.stake)
 				  let valueUSD = (parseFloat(token.balance) + parseFloat(token.stake)) * parseFloat(tokenData.lastPrice) * this.hivePrice;
@@ -2965,11 +2965,11 @@
 		  if (!this.displayUserData || !this.displayUserData.balance) {
 			  return <i class="fas fa-spin fa-spinner text-white"></i>; // Show loading or default text if balance is unavailable
 		  }
-  
+
 		  if (nofrmt) {
 			  return this.displayUserData.balance;
 		  }
-  
+
 		  return this.numberFormat(parseFloat(this.displayUserData.balance), 3) + ' ' + type;
 	  },
 		renderSBDBalance (type, nofrmt) {
@@ -3021,7 +3021,7 @@
 			  let curDate = new Date();
 			  let voteDate = new Date();
 			  let timeString = (curDate.getUTCHours()<10?'0'+curDate.getUTCHours():curDate.getUTCHours()) + '' + (curDate.getUTCMinutes()<10?'0'+curDate.getUTCMinutes():curDate.getUTCMinutes());
-  
+
 			  //time passed, jump till tomorrow
 			  if (parseInt(timeString) > 1000){//10:00 AM
 				  //add one day till next vote
@@ -3030,7 +3030,7 @@
 			  voteDate.setUTCHours(10);
 			  voteDate.setUTCMinutes(0);
 			  voteDate.setUTCSeconds(0);
-			  
+
 			  this.nextAfitPDTarget = ""+voteDate;//"August 14, 2019 13:00 GMT";//
 			  this.afitPowerDownText = this.$t('next_afit_powerdown').replace('AFIT_AMOUNT', this.userPDAfit.daily_afit_transfer+ ' AFIT');
 			  this.countDownReady = true;
@@ -3052,9 +3052,9 @@
 				this.tokensOfInterestBal = [];
 				this.tokenMetrics = [];
 				this.totalAccountValue = 0;
-				
+
 				await this.fetchUserData();
-				
+
 				await this.$nextTick();
 				this.$forceUpdate();
 
@@ -3063,11 +3063,11 @@
 			}
 		},
 		async fetchUserData () {
-		  if ((typeof this.user != 'undefined' && this.user != null)||this.displayUser!=''){	  
+		  if ((typeof this.user != 'undefined' && this.user != null)||this.displayUser!=''){
 			console.log('stdLoginUser');
 			console.log(this.stdLogin);
 			console.log(this.user);
-			
+
 			//update user info from blockchain
 			if (!localStorage.getItem('std_login')){
 			//if (!this.stdLogin)
@@ -3078,7 +3078,7 @@
 				  console.log(excp);
 			  }
 			}
-			
+
 			//default
 			  if (!this.displayUserData){
 				  this.displayUserData = this.user.account;
@@ -3086,17 +3086,17 @@
 			/*if (this.displayUser!=''){
 			  fetch(process.env.actiAppUrl+'user/' + this.displayUser).then(res => {
 				  res.json().then(json => this.userTokens = json.tokens)}).catch(e => console.log(e))
-			   
+
 			}else{*/
 			  this.userTokensWallet = await this.$store.dispatch('fetchUserTokensReturn', this.displayUser, false)
-			  
+
 		   // }
 			this.$store.dispatch('fetchUserTokens')
 			this.$store.dispatch('fetchTransactions', this.displayUser)
 			this.$store.dispatch('fetchUserRank')
 			this.$store.dispatch('fetchReferrals')
 			this.fetchUserPendingRewards(this.targetUserWallet);
-			
+
 			//calculate savings params
 			try{
 			  this.cancluateSavingsRewardsParams();
@@ -3107,53 +3107,53 @@
 			fetch(process.env.actiAppUrl+'userHasFundsPassSet/'+this.displayUserData.name).then(
 			  res => {res.json().then(json => this.setUserPassStatus (json)).catch(e => console.log(e))
 			}).catch(e => console.log(e))
-			
+
 			//let's check if user has a pending AFIT tokens exchange
 			fetch(process.env.actiAppUrl+'userHasPendingTokenSwap/'+this.displayUserData.name).then(
 			  res => {res.json().then(json => this.setUserTokenSwapStatus (json) ).catch(e => console.log(e))
 			}).catch(e => console.log(e))
-			
+
 			//let's grab the full queue of pending AFIT tokens exchange
 			fetch(process.env.actiAppUrl+'getPendingTokenSwapTrans/').then(
 			  res => {res.json().then(json => this.setTokenSwapQueue (json) ).catch(e => console.log(e))
 			}).catch(e => console.log(e))
-			
+
 			//let's grab the user's history AFIT tokens exchange
 			fetch(process.env.actiAppUrl+'getUserTokenSwapHistory/'+this.displayUserData.name).then(
 			  res => {res.json().then(json => this.setUserTokenSwapHistory (json) ).catch(e => console.log(e))
 			}).catch(e => console.log(e))
-  
+
 			//let's grab the user's steem-engine tokens too
 			//Disable: EOL for S-E
 			/*
 			this.fetchTokenBalance();
-			
+
 			if (this.cur_bchain == 'STEEM'){
 				fetch(scot_steemengine_api+'@'+this.user.account.name).then(
 				  res => {res.json().then(json => this.setUserClaimableSETokens (json) ).catch(e => console.log(e))
 				}).catch(e => console.log(e))
-			
+
 			}else{
 				fetch(scot_steemengine_api+'@'+this.user.account.name+scot_hive_api_param).then(
 				  res => {res.json().then(json => this.setUserClaimableSETokens (json) ).catch(e => console.log(e))
 				}).catch(e => console.log(e))
-  
+
 			}
 			*/
-			
+
 			//grab user settings
 			fetch(process.env.actiAppUrl+'userSettings/'+this.displayUserData.name).then(
 			  res => {res.json().then(json => this.setUserSettings (json)).catch(e => console.log(e))
 			}).catch(e => console.log(e))
-			
+
 			//grab user pending withdrawals
 			this.getPendingSavingsWithdrawals();
-			
+
 			//let's grab the number of pending token swap transactions to see if we can add more
 			/*fetch(process.env.actiAppUrl+'getPendingTokenSwapTransCount').then(
 			  res => {res.json().then(json => this.pendingTokenSwapTransCount = json ).catch(e => console.log(e))
 			}).catch(e => console.log(e))*/
-					  
+
 			//grab SP
 			this.steemPower = await this.vestsToSteemPower(this.displayUserData.vesting_shares);
 			console.log(this.steemPower );
@@ -3171,67 +3171,67 @@
 		  console.log(this.powerDownWithdrawDate );
 			//effective SP
 			this.effectiveSteemPower = this.steemPower + this.receivedSteemPower - this.delegatedSteemPower - this.powerDownRateVal;
-		  
+
 			//also update claimable amounts
 			this.claimableSTEEMRewards();
-			
-			 
+
+
 			//fetch user's AFIT S-E balance
 			//disable: EOL for S-E
 			//this.fetchAFITSE();
-			
+
 			//fetch user's AFIT H-E balance
-			
+
 			this.fetchAFITHE();
-			
-			
+
+
 			//fetch user's AFITX S-E balance
 			//disable: EOL for S-E
 			//this.fetchAFITXSE();
-			
+
 			//fetch user's AFITX H-E balance
 			this.fetchAFITXHE();
-			
+
 			//fetch user's AFITX Rank
 			 fetch(process.env.actiAppUrl+'afitxData/'+this.displayUserData.name).then(
 			  res => {res.json().then(json => this.userAFITXRank = json.ind ).catch(e => console.log(e))
 			}).catch(e => console.log(e))
-			
-			
+
+
 			//fetch user's tokensOfInterest S-E balance
 			let tokenData, tokenExtraDetails
 			/*if (this.cur_bchain == 'STEEM'){
 			  tokenData = await ssc.find('tokens', 'balances', { account: this.user.account.name, symbol : { '$in' : tokensOfInterest } });
-			  
+
 			  //grab full token data
 			  tokenExtraDetails = await ssc.find('tokens', 'tokens', { symbol : { '$in' : tokensOfInterest } });
 			}else{*/
-			  
+
 			  /*
 			  OLD specific token listing
 			  tokenData = await hsc.find('tokens', 'balances', { account: this.user.account.name, symbol : { '$in' : tokensOfInterest } });
-  
+
 			  //grab full token data
 			  tokenExtraDetails = await hsc.find('tokens', 'tokens', { symbol : { '$in' : tokensOfInterest } });
 			  */
-			  
+
 			  //new full token balance listing
 			  tokenData = await hsc.find('tokens', 'balances', { account: this.displayUserData.name});
-			  
+
 			  this.heTokenDelegations = await hsc.find('tokens', 'delegations', { from: this.displayUserData.name}, 200, 0, []);
-			  
+
 			  this.heTokenUnstakes = await hsc.find('tokens', 'pendingUnstakes', { account: this.displayUserData.name}, 200, 0, []);
 			  //console.log('delegations')
 			  console.log('unstakes');
 			  console.log(this.heTokenUnstakes);
-			  
+
 			  //grab full token data
 			  tokenExtraDetails = await hsc.find('tokens', 'tokens', {});
-			  
+
 			//}
-			
+
 			//console.log(tokenExtraDetails);
-			
+
 			//loop through tokenData and set proper icon
 			for (let x=0;x<tokenData.length;x++){
 			  try{
@@ -3244,74 +3244,74 @@
 				  console.log(parseErr);
 			  }
 			}
-			
+
 			let afitData = this.tokenMetrics.find(v => v.symbol == 'AFIT');
-			
+
 			//console.log('tokenData')
 			//console.log(tokenData)
-			
+
 			if (tokenData){
 			  this.tokensOfInterestBal = tokenData;
 			  await this.sortTokenData(this.tokenSort, true);
 			}
-			
+
 			//fetch tokens' data (price et al)
 			/*if (this.cur_bchain == 'STEEM'){
-			  this.tokenMetrics = await ssc.find('market', 'metrics', {symbol : { '$in' : tokensOfInterest.concat(['AFIT','AFITX']) }}, 1000, 0, '', false);	  
+			  this.tokenMetrics = await ssc.find('market', 'metrics', {symbol : { '$in' : tokensOfInterest.concat(['AFIT','AFITX']) }}, 1000, 0, '', false);
 			}else{*/
-			
+
 			//build up a list of the user's current tokenlist
 			//this.userTokenList = tokenData.map((obj) => obj.symbol);
-			
-			//this.tokenMetrics = await hsc.find('market', 'metrics', {symbol : { '$in' : tokensOfInterest.concat(['AFIT','AFITX']) }}, 1000, 0, '', false);	
-			
+
+			//this.tokenMetrics = await hsc.find('market', 'metrics', {symbol : { '$in' : tokensOfInterest.concat(['AFIT','AFITX']) }}, 1000, 0, '', false);
+
 			//extract prices for all user balances
-			this.tokenMetrics = await hsc.find('market', 'metrics', {}, 1000, 0, '', false);	
+			this.tokenMetrics = await hsc.find('market', 'metrics', {}, 1000, 0, '', false);
 			//}
-			
-			
+
+
 			//console.log('tokenMetrics');
 			//console.log(this.tokenMetrics);
-			
+
 			//let's grab the user's wallet address
 			fetch(process.env.actiAppUrl+'getUserWalletAddress?user='+this.displayUserData.name).then(
 			  res => {res.json().then(json => this.setUserWalletAddress (json) ).catch(e => console.log(e))
 			}).catch(e => console.log(e))
-			
+
 			//grab user airdrop results
 			fetch(process.env.actiAppUrl+'airdropResults?user='+this.displayUserData.name).then(
 			  res => {res.json().then(json => this.setAirdropResults (json) ).catch(e => console.log(e))
 			}).catch(e => console.log(e))
-			
-			
+
+
 			//check if user is powering down AFIT to SE
 			fetch(process.env.actiAppUrl+'isPoweringDown/'+this.displayUserData.name).then(
 			  res => {res.json().then(json => this.setUserPDAfitStatus (json) ).catch(e => console.log(e))
 			}).catch(e => console.log(e))
-			
+
 			//grab list of top 25 AFITX token holders
 			fetch(process.env.actiAppUrl+'topAFITXHolders/?count=25').then(
 			  res => {res.json().then(json => this.topAFITXHolders = json ).catch(e => console.log(e))
 			}).catch(e => console.log(e))
-			
+
 			//grab list of top 100 AFITX token holders
 			fetch(process.env.actiAppUrl+'topAFITXHolders/?count=100').then(
 			  res => {res.json().then(json => this.afitxHoldersList = json ).catch(e => console.log(e))
 			}).catch(e => console.log(e))
-			
+
 			//grab list of top 100 AFIT token holders
 			fetch(process.env.actiAppUrl+'topAFITHolders/?count=100').then(
 			  res => {res.json().then(json => this.afitHoldersList = json ).catch(e => console.log(e))
 			}).catch(e => console.log(e))
-			
+
 			//fetch account RC
-			
+
 			this.getRCHF26();
-			
+
 			//force refresh data
 			//this.$forceUpdate();
-			
-			
+
+
 		  }
 		},
 		async sortTokenData (type, keepDir) {
@@ -3319,7 +3319,7 @@
 		  this.tokenSort = type;
 		  if (keepDir){
 			  //
-		  }else{ 
+		  }else{
 			  this.tsortDir *= -1;
 		  }
 		  let upRef = this;
@@ -3328,7 +3328,7 @@
 				  return parseFloat(b[type]) < parseFloat(a[type]) ? -1 * upRef.tsortDir
 					  : parseFloat(b[type]) > parseFloat(a[type]) ? upRef.tsortDir
 					  : 0;
-				  
+
 			  }else if (type == 'usdval'){
 				  return upRef.usdVal(b, true) < upRef.usdVal(a, true) ? -1 * upRef.tsortDir
 					  : upRef.usdVal(b, true) > upRef.usdVal(a, true) ? upRef.tsortDir
@@ -3349,7 +3349,7 @@
 		},
 		fetchUserPendingRewards (tgtUser) {
 		  //let's check if user already has a funds pass set
-		  
+
 			fetch(process.env.actiAppUrl+'pendingRewards/?user='+tgtUser).then(
 			  res => {res.json().then(json => this.setPendingRewards(json)).catch(e => console.log(e))
 			}).catch(e => console.log(e))
@@ -3357,22 +3357,22 @@
 		async fetchAFITSE() {
 		  try{
 		  let bal = await ssc.findOne('tokens', 'balances', { account: this.displayUserData.name, symbol: 'AFIT' });
-			
+
 			if (bal){
 				this.afit_se_balance = bal.balance;
-				
+
 				//if this operation relates to powering up AFIT from S-E, need to also initiate call to adjust AFIT token count
 				if (this.$route.query.confirm_trans == 1){
-				  
+
 				  let url = new URL(process.env.actiAppUrl + 'confirmAFITSEReceipt/?user='+this.user.name+'&bchain='+this.cur_bchain);
 				  //connect with our service to confirm AFIT received to proper wallet
 				  try{
-					  
+
 					  fetch(url).then(
 						res => {res.json().then(json => this.setUserAddedTokens(json)).catch(e => console.log(e))
 					  }).catch(e => console.log(e))
-					  
-				  
+
+
 				  }catch(err){
 					  console.error(err);
 					  //this.checkingFunds = false;
@@ -3397,7 +3397,7 @@
 				  function(bal) {
 					  console.log('>>bal')
 					  console.log(bal);
-					  
+
 					  if (bal){
 							parnt.afitx_se_balance = bal.balance;
 						}
@@ -3411,15 +3411,15 @@
 			let parnt = this
 			hsc.findOne('tokens', 'balances', { account: this.displayUserData.name, symbol: 'AFITX' }).then(
 				  function(bal) {
-					  
-					  
+
+
 					  if (bal){
 							parnt.afitx_he_balance = bal.balance;
 						}
 				  }
 			  )
 		},
-		
+
 		setAFITPrice (_afitPrice){
 		  this.afitPrice = parseFloat(_afitPrice).toFixed(6);
 		},
@@ -3435,7 +3435,7 @@
 		  //handles setting funds password status
 		  //set proper value for funds pass confirmation
 		  this.userHasFundsPass = result.hasFundsPass;
-		  
+
 		  //set proper value for verified funds pass status
 		  this.userFundsPassVerified = result.passVerified;
 		},
@@ -3545,7 +3545,7 @@
 			}catch(e){
 			  console.error(e);
 			}
-		  });		
+		  });
 		},
 		async vestsToSteemPower (vests) {
 		  //function handles converting Vests to SP
@@ -3570,7 +3570,7 @@
 			  vests = Number(vests.split(' ')[0]);
 			  return (totalSteem * (vests / totalVests));
 		  }
-		  
+
 		},
 		async steemPowerToVests (steemPower) {
 		  //function handles conversting SP to Vests
@@ -3596,7 +3596,7 @@
 		claimableSTEEMRewards () {
 		  //function handles preparing claimable STEEM rewards
 		  if ((typeof this.user != 'undefined' && this.user != null)|| this.displayUserData !=''){
-			
+
 			this.claimVests = this.displayUserData.reward_vesting_balance;
 			if (this.cur_bchain=='HIVE'){
 			  this.claimSTEEM = this.displayUserData.reward_hive_balance;
@@ -3617,7 +3617,7 @@
 		  }
 		  return '';
 		},
-		
+
 		async cancluateSavingsRewardsParams(){
 		  //current interest rate set by witnesses
 		  if (this.properties == ''){
@@ -3626,23 +3626,23 @@
 			this.properties = await chainLnk.api.getDynamicGlobalPropertiesAsync();
 		  }
 		  const hbdInterestRate = this.properties.hbd_interest_rate;
-		  
+
 		  this.hbdInterestRate = hbdInterestRate;
 		  console.log(this.properties);
 		  console.log('hbdInterestRate:'+hbdInterestRate);
-		  
+
 		  const lastIPaymentRelative =
 			this.displayUserData.savings_hbd_last_interest_payment == "1970-01-01T00:00:00"
 			  ? null
 			  : this.$dateToFullRelative(this.displayUserData.savings_hbd_last_interest_payment);
-			  
+
 		  this.lastIPaymentRelative = lastIPaymentRelative;
 		  const lastIPaymentDiff = this.$dayDiff(
 			this.displayUserData.savings_hbd_last_interest_payment == "1970-01-01T00:00:00"
 			  ? this.displayUserData.savings_hbd_seconds_last_update
 			  : this.displayUserData.savings_hbd_last_interest_payment
 		  );
-		  
+
 		  //720hrs=30 days
 		  const remainingHours =
 			720 -
@@ -3653,7 +3653,7 @@
 			);
 		  console.log('remaininghours:'+remainingHours);
 		  this.remainingHours = remainingHours;
-		  
+
 		  const secondsSincePayment = this.$secondDiff(this.displayUserData.savings_hbd_seconds_last_update);
 		  console.log('secondsSincePayment :'+secondsSincePayment )
 		  const pendingSeconds = parseFloat(this.displayUserData.savings_hbd_balance) * secondsSincePayment;
@@ -3669,10 +3669,10 @@
 		  console.log('remainingDays :'+remainingDays )
 		  this.remainingDays = remainingDays;
 		},
-		
-		
+
+
 		async claimSavingsRewards (){
-		  
+
 		  //check if we need active key
 		  if (!this.isKeychainLogin && !this.isHiveauthLogin &&  this.isStdLogin){
 			  //check for active key
@@ -3686,7 +3686,7 @@
 				  return;
 			  }*/
 		  }
-		  
+
 		  //to claim rewards, need to issue 2 ops, transfer + cancel transfer
 		  let request_id = Math.floor(Date.now() / 1000)//timestamp
 		  let opname = 'transfer_from_savings';
@@ -3705,9 +3705,9 @@
 		  this.claiming_rewards = true;
 		  let res;
 		  if (!this.isKeychainLogin && !this.isHiveauthLogin && this.isStdLogin){
-		  
-			  res = await hive.broadcast.sendAsync( 
-				 { operations: [[opname, params], [opname2, params2]], extensions: [] }, 
+
+			  res = await hive.broadcast.sendAsync(
+				 { operations: [[opname, params], [opname2, params2]], extensions: [] },
 				 { active: this.$refs["claim-savings-rew-act-key"].value }).catch(err => {
 				  console.log(err);
 				 });
@@ -3716,7 +3716,7 @@
 		  }
 		  console.log(res);
 		  this.confirmCompletion('claimrewards', 0, res);
-		  
+
 		  this.claiming_rewards = false;
 		  /*let res = await this.processTrxFunc('custom_json', cstm_params);
 		  const rid = new Date().getTime() >>> 0;
@@ -3755,9 +3755,9 @@
 			  json: JSON.stringify(claimableTokens)
 			};
 		  console.log(this.stdLogin);
-		  
+
 		  let res = await this.processTrxFunc('custom_json', cstm_params);
-		  
+
 		  console.log('trx status:'+res.success);
 		  if (res.success){
 			  this.$notify({
@@ -3767,7 +3767,7 @@
 			  })
 			  //reset claimable tokens
 			  this.claimableSETokens = [];
-			  
+
 			  //also run after 30 seconds a refresh on token count
 			  setTimeout(this.fetchTokenBalance , 20);
 		  }
@@ -3835,10 +3835,10 @@
 				reward_vests: this.claimVests,
 				auto_return: true,
 			  }, window.location.origin + '/wallet?op=claim rewards&status=success');
-  
+
 			  window.open(link);
 			  setTimeout(() => this.fetchUserData(), 3000);
-			  
+
 			  //Below would have been preferred approach, but claimRewardBalance keeps failing as it requires more authority. Keeping here for future further exploration
 			  /*
 			  console.log(this.claimSTEEM.split(' ')[0]);
@@ -3857,7 +3857,7 @@
 				  "reward_sbd": this.claimSBD,
 				  "reward_vests": this.claimVests
 			  };
-			  
+
 			  if (this.cur_bchain == 'HIVE') {
 				  cstm_params = {
 					  "account": this.user.account.name,
@@ -3874,7 +3874,7 @@
 				  };
 			  }
 			  let res = await this.processTrxFunc('claim_reward_balance', cstm_params);
-			  
+
 			  if (res.success){
 				  this.confirmCompletion('claimrewards', 0, res);
 				  this.isClaimableDataAvailableTEMP = false;
@@ -3900,7 +3900,7 @@
 		},
 		transferFunds (cur) {
 		  //function handles opening/closing transfer section
-		  
+
 		  //set proper Fund Activity Mode controlling the display
 		  //if (this.fundActivityMode == this.TRANSFER_FUNDS ){
 		  //  this.fundActivityMode = 0;
@@ -3916,7 +3916,7 @@
 		},
 		powerUpFunds () {
 		  //function handles opening/closing of power up section
-		  
+
 		  //set proper Fund Activity Mode controlling the display
 		  //if (this.fundActivityMode == this.POWERUP_FUNDS ){
 		  //  this.fundActivityMode = 0;
@@ -3930,7 +3930,7 @@
 		},
 		powerDownFunds () {
 		  //function handles opening/closing of power up section
-		  
+
 		  //set proper Fund Activity Mode controlling the display
 		  //if (this.fundActivityMode == this.POWERDOWN_FUNDS ){
 		  //  this.fundActivityMode = 0;
@@ -3944,7 +3944,7 @@
 		},
 		delegateFunds () {
 		  //function handles opening/closing of delegation section
-		  
+
 		  //set proper Fund Activity Mode controlling the display
 		  //if (this.fundActivityMode == this.DELEGATE_FUNDS ){
 		  //  this.fundActivityMode = 0;
@@ -3966,7 +3966,7 @@
 		},
 		delegateRCs () {
 		  //function handles opening/closing of RC delegation section
-		  
+
 		  //set proper Fund Activity Mode controlling the display
 		  //if (this.fundActivityMode == this.DELEGATE_RCS ){
 		  //  this.fundActivityMode = 0;
@@ -3991,11 +3991,11 @@
 				  return;
 			  }
 		  }
-		  
+
 		  this.error_proceeding = false;
 		  this.error_msg = '';
 		  if (!localStorage.getItem('std_login')){
-			  
+
 			  //https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
 			  var link = this.$steemconnect.sign('transfer', {
 				from: this.user.account.name,
@@ -4006,8 +4006,8 @@
 			  }, window.location.origin + '/wallet?op=transfer&status=success');
 			  //launch the SC window
 			  window.open(link);
-		  }else if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) || 
-			  (localStorage.getItem('acti_login_method') == 'hiveauth')){	
+		  }else if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) ||
+			  (localStorage.getItem('acti_login_method') == 'hiveauth')){
 			  console.log(this.transferType);
 			  console.log('>>pop')
 			  /*return new Promise((resolve) => {
@@ -4022,15 +4022,15 @@
 					  "request_id": request_id
 				  };
 			  let res = await this.processTrxFunc(opname, params, true);
-			  
+
 			  if (res.success){
 				  this.confirmCompletion('cancel-savings-withdraw', '', res)
 			  }
-			  
+
 		  }else{
 			  this.transferProcess = true;
 			  let chainLnk = await this.setProperNode ();
-			  
+
 			  console.log(this.transferType)
 			  //return;
 			  //transferToVesting(wif, from, to, amount)
@@ -4049,7 +4049,7 @@
 				  return;
 			  }
 		  }
-		  
+
 		  this.error_proceeding = false;
 		  this.error_msg = '';
 		  //ensure we have proper values
@@ -4063,7 +4063,7 @@
 			this.error_msg = this.$t('amount_positive_int');
 			return;
 		  }
-		  
+
 		  if (!this.isKeychainLogin && !this.isHiveauthLogin && this.isStdLogin){
 			  if (this.$refs["p-ac-key-trans"].value == ''){
 				this.error_proceeding = true;
@@ -4071,9 +4071,9 @@
 				return;
 			  }
 		  }
-		  
+
 		  if (!localStorage.getItem('std_login')){
-			  
+
 			  //https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
 			  var link = this.$steemconnect.sign('transfer', {
 				from: this.user.account.name,
@@ -4085,7 +4085,7 @@
 			  //launch the SC window
 			  window.open(link);
 		  }else if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain)||
-				  (localStorage.getItem('acti_login_method') == 'hiveauth')){	
+				  (localStorage.getItem('acti_login_method') == 'hiveauth')){
 			  console.log(this.transferType);
 			  console.log('>>pop')
 			  /*return new Promise((resolve) => {
@@ -4103,22 +4103,22 @@
 					  "memo": this.$refs["transfer-memo"].value
 				  };
 			  let res = await this.processTrxFunc(opname, params, true);
-			  
+
 			  if (res.success){
 				  this.confirmCompletion('transfer', this.$refs["transfer-amount"].value, res)
 			  }
-			  
+
 		  }else{
 			  this.transferProcess = true;
 			  let chainLnk = await this.setProperNode ();
-			  
+
 			  console.log(this.transferType)
 			  //return;
 			  //transferToVesting(wif, from, to, amount)
 			  let res = await chainLnk.broadcast.transferFromSavingsAsync(this.$refs["p-ac-key-trans"].value, this.user.account.name, //from
 			  Math.floor(Date.now() / 1000),//timestamp
-			  this.user.account.name, 
-			  parseFloat(this.$refs["transfer-amount"].value).toFixed(3) + ' ' + this.transferType, 
+			  this.user.account.name,
+			  parseFloat(this.$refs["transfer-amount"].value).toFixed(3) + ' ' + this.transferType,
 			  this.$refs["transfer-memo"].value).then(
 				  res => this.confirmCompletion('transfer', this.$refs["transfer-amount"].value, res)).catch(err=>console.log(err));
 		  }
@@ -4131,7 +4131,7 @@
 				  return;
 			  }
 		  }
-		  
+
 		  this.error_proceeding = false;
 		  this.error_msg = '';
 		  //ensure we have proper values
@@ -4146,7 +4146,7 @@
 			this.error_msg = this.$t('amount_positive_int');
 			return;
 		  }
-		  
+
 		  if (!this.isKeychainLogin && !this.isHiveauthLogin && this.isStdLogin){
 			  if (this.$refs["p-ac-key-trans"].value == ''){
 				this.error_proceeding = true;
@@ -4154,9 +4154,9 @@
 				return;
 			  }
 		  }
-		  
+
 		  if (!localStorage.getItem('std_login')){
-			  
+
 			  //https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
 			  var link = this.$steemconnect.sign('transfer', {
 				from: this.user.account.name,
@@ -4168,7 +4168,7 @@
 			  //launch the SC window
 			  window.open(link);
 		  }else if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain)||
-				  (localStorage.getItem('acti_login_method') == 'hiveauth')){	
+				  (localStorage.getItem('acti_login_method') == 'hiveauth')){
 			  console.log(this.transferType);
 			  console.log('>>pop')
 			  /*return new Promise((resolve) => {
@@ -4185,15 +4185,15 @@
 					  "memo": this.$refs["transfer-memo"].value
 				  };
 			  let res = await this.processTrxFunc(opname, params, true);
-			  
+
 			  if (res.success){
 				  this.confirmCompletion('transfer', this.$refs["transfer-amount"].value, res)
 			  }
-			  
+
 		  }else{
 			  this.transferProcess = true;
 			  let chainLnk = await this.setProperNode ();
-			  
+
 			  console.log(this.transferType)
 			  //return;
 			  //transferToVesting(wif, from, to, amount)
@@ -4201,17 +4201,17 @@
 				  res => this.confirmCompletion('transfer', this.$refs["transfer-amount"].value, res)).catch(err=>console.log(err));
 		  }
 		},
-		
+
 		async proceedTransfer () {
 		  //function handles the actual processing of the transfer
-		  
+
 		  if (!this.isKeychainLogin && !this.isHiveauthLogin && this.isStdLogin){
 			  let confirmPopup = confirm(this.$t('confirm_transfer'));
 			  if (!confirmPopup){
 				  return;
 			  }
 		  }
-		  
+
 		  this.error_proceeding = false;
 		  this.error_msg = '';
 		  //ensure we have proper values
@@ -4226,7 +4226,7 @@
 			this.error_msg = this.$t('amount_positive_int');
 			return;
 		  }
-		  
+
 		  if (!this.isKeychainLogin && !this.isHiveauthLogin && this.isStdLogin){
 			  if (this.$refs["p-ac-key-trans"].value == ''){
 				this.error_proceeding = true;
@@ -4234,9 +4234,9 @@
 				return;
 			  }
 		  }
-		  
+
 		  if (!localStorage.getItem('std_login')){
-			  
+
 			  //https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
 			  var link = this.$steemconnect.sign('transfer', {
 				from: this.user.account.name,
@@ -4255,7 +4255,7 @@
 					console.log(response);
 					this.confirmCompletion('transfer', this.$refs["transfer-amount"].value, response)
 				  }, true);
-			  });	
+			  });
 		  }else if (this.isHiveauthLogin){
 			  let opname = 'transfer';
 			  let	params = {
@@ -4265,14 +4265,14 @@
 					  "memo": this.$refs["transfer-memo"].value
 				  };
 			  let res = await this.processTrxFunc(opname, params, true);
-			  
+
 			  if (res.success){
 				  this.confirmCompletion('transfer', this.$refs["transfer-amount"].value, res)
 			  }
 		  }else{
 			  this.transferProcess = true;
 			  let chainLnk = await this.setProperNode ();
-			  
+
 			  console.log(this.transferType)
 			  //return;
 			  //transferToVesting(wif, from, to, amount)
@@ -4303,7 +4303,7 @@
 		  }
 		  console.log(afitVal)
 		  console.log(hbdVal)*/
-		  
+
 		},
 		async proceedPowerUp () {
 		  //function handles the actual processing of the power up
@@ -4327,7 +4327,7 @@
 			this.error_msg = this.$t('amount_positive_int');
 			return;
 		  }
-		  
+
 		  if (!this.isKeychainLogin && !this.isHiveauthLogin && this.isStdLogin){
 			  if (this.$refs["p-ac-key-up"].value == ''){
 				this.error_proceeding = true;
@@ -4335,9 +4335,9 @@
 				return;
 			  }
 		  }
-		  
+
 		  if (!localStorage.getItem('std_login')){
-			  
+
 			  //https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
 			  var link = this.$steemconnect.sign('transfer-to-vesting', {
 				from: this.user.account.name,
@@ -4347,13 +4347,13 @@
 			  }, window.location.origin + '/wallet?op=power up&status=success');
 			  //launch the SC window
 			  window.open(link);
-		  }else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+		  }else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
 			  return new Promise((resolve) => {
 				  window.hive_keychain.requestPowerUp(this.user.account.name, this.user.account.name, parseFloat(this.$refs["powerup-amount"].value).toFixed(3), (response) => {
 					  console.log(response);
 					  this.confirmCompletion('powerup', this.$refs["powerup-amount"].value, response)
 				  });
-			  });		
+			  });
 		  }else if (this.isHiveauthLogin){
 			  let opname = 'transfer_to_vesting';
 			  let	params = {
@@ -4362,7 +4362,7 @@
 					  "amount": parseFloat(this.$refs["powerup-amount"].value).toFixed(3)+' '+this.transferType
 				  };
 			  let res = await this.processTrxFunc(opname, params, true);
-			  
+
 			  if (res.success){
 				  this.confirmCompletion('powerup', this.$refs["powerup-amount"].value, res)
 			  }
@@ -4374,7 +4374,7 @@
 				  res => this.confirmCompletion('powerup', this.$refs["powerup-amount"].value, res)).catch(err=>console.log(err));
 		  }
 		},
-		
+
 		async proceedDelegation (cancellation) {
 		  //function handles the actual processing of delegation
 		  let note = this.$t('confirm_delegation')
@@ -4382,7 +4382,7 @@
 			  note = this.$t('confirm_delegation_cancel')
 		  }
 		  let confirmPopup = confirm(note);
-		  
+
 		  if (!confirmPopup){
 			  return;
 		  }
@@ -4400,7 +4400,7 @@
 			this.error_msg = this.$t('amount_positive_int');
 			return;
 		  }*/
-		  
+
 		  if (!this.isKeychainLogin && !this.isHiveauthLogin && this.isStdLogin){
 			  if (this.$refs["p-ac-key-delg"].value == ''){
 				this.error_proceeding = true;
@@ -4408,9 +4408,9 @@
 				return;
 			  }
 		  }
-		  
+
 		  if (!localStorage.getItem('std_login')){
-			  
+
 			  //https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
 			  /*var link = this.$steemconnect.sign('transfer-to-vesting', {
 				from: this.user.account.name,
@@ -4420,13 +4420,13 @@
 			  }, window.location.origin + '/wallet?op=delegate&status=success');
 			  //launch the SC window
 			  window.open(link);*/
-		  }else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+		  }else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
 			  return new Promise((resolve) => {
 				  window.hive_keychain.requestDelegation(this.user.account.name, this.$refs["delegate-recipient"].value.trim(), parseFloat(this.$refs["delegate-amount"].value).toFixed(3), 'HP', (response) => {
 					  console.log(response);
 					  this.confirmCompletion('delegate', this.$refs["delegate-amount"].value, response)
 				  });
-			  });			
+			  });
 		  }else if (this.isHiveauthLogin){
 			  let vestsValue = await this.steemPowerToVests(this.$refs["delegate-amount"].value);
 			  let opname = 'delegate_vesting_shares';
@@ -4436,7 +4436,7 @@
 					  "vesting_shares": vestsValue+' '+'VESTS'
 				  };
 			  let res = await this.processTrxFunc(opname, params, true);
-			  
+
 			  if (res.success){
 				  this.confirmCompletion('delegate', this.$refs["delegate-amount"].value, res)
 			  }
@@ -4454,7 +4454,7 @@
 				  });
 		  }
 		},
-		
+
 		async proceedRCDelegation(cancellation){
 		  let note = this.$t('confirm_rc_delegation')
 		  if (cancellation==true){
@@ -4473,19 +4473,19 @@
 			this.error_msg = this.$t('all_fields_required');
 			return;
 		  }
-		  
+
 		  if (isNaN(this.$refs["delegate-amount"].value.trim())){
 			  this.error_proceeding = true;
 			  this.error_msg = this.$t('amount_positive_int');
 			  return;
 		  }
-		  
-		  
+
+
 		  if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain)||
-			  (localStorage.getItem('acti_login_method') == 'hiveauth')){	
+			  (localStorage.getItem('acti_login_method') == 'hiveauth')){
 			  const op_name = 'custom_json';
 			  //['delegate_rc', {
-			  const json_data = JSON.stringify(['delegate_rc', { 
+			  const json_data = JSON.stringify(['delegate_rc', {
 					  from: this.user.account.name,
 					  delegatees: [this.$refs["delegate-recipient"].value.trim()],
 					  max_rc: this.$refs["delegate-amount"].value.trim()
@@ -4499,12 +4499,12 @@
 				  json: json_data
 			  }
 			  /*
-			  let operation = [ 
+			  let operation = [
 				 [op_name, cstm_params]
 			  ];*/
-			  
+
 			  let res = await this.processTrxFunc(op_name, cstm_params);
-		  
+
 			  console.log('trx status:'+res.success);
 			  if (res.success){
 				  //success
@@ -4523,18 +4523,18 @@
 					position: 'top center'
 				  })
 			  }
-			  
+
 		  }else{
-		  
+
 			  let accToken = localStorage.getItem('access_token')
-				  
+
 			  //chain not needed, as only supported by hive
 			  //let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
-			  
-			  
+
+
 			  this.delegateProcess = true;
 			  let url = new URL(process.env.actiAppUrl + 'delegateRC/?user='+this.user.account.name+'&delegatees='+this.$refs["delegate-recipient"].value.trim()+'&max_rc='+this.$refs["delegate-amount"].value.trim());
-		  
+
 			  let reqHeads = new Headers({
 				'Content-Type': 'application/json',
 				'x-acti-token': 'Bearer ' + accToken,
@@ -4564,7 +4564,7 @@
 			  this.delegateProcess = false;
 		  }
 		},
-		
+
 		async proceedPowerDown () {
 		  //function handles the actual processing of the power down
 		  if (!this.isKeychainLogin && !this.isHiveauthLogin){
@@ -4595,7 +4595,7 @@
 		  }
 		  let vestsValue = await this.steemPowerToVests(this.$refs["powerdown-amount"].value);
 		  //https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
-		  
+
 		  if (!localStorage.getItem('std_login')){
 			  var link = this.$steemconnect.sign('withdraw-vesting', {
 				account: this.user.account.name,
@@ -4604,13 +4604,13 @@
 			  }, window.location.origin + '/wallet?op=power down&status=success');
 			  //launch the SC window
 			  window.open(link);
-		  }else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+		  }else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
 			  return new Promise((resolve) => {
 				  window.hive_keychain.requestPowerDown(this.user.account.name, parseFloat(this.$refs["powerdown-amount"].value).toFixed(3), (response) => {
 					  console.log(response);
 					  this.confirmCompletion('powerdown', this.$refs["powerdown-amount"].value, response)
 				  });
-			  });		
+			  });
 		  }else if (this.isHiveauthLogin){
 			  let opname = 'withdraw_vesting';
 			  let	params = {
@@ -4618,7 +4618,7 @@
 					  "vesting_shares": vestsValue+' '+'VESTS'
 				  };
 			  let res = await this.processTrxFunc(opname, params, true);
-			  
+
 			  if (res.success){
 				  this.confirmCompletion('powerdown', this.$refs["powerdown-amount"].value, res)
 			  }
@@ -4632,7 +4632,7 @@
 		async confirmCompletion (type, amount, res, extraAFITTrx){
 		  console.log (res);
 		  if (res && (res.ref_block_num || res.success)){
-			  
+
 			  let note = 'Power down cancelled successfully!';
 			  let power_type = 'SP';
 			  if (this.cur_bchain=='HIVE'){
@@ -4656,7 +4656,7 @@
 				this.isClaimableDataAvailableTEMP = false;
 
 				this.fetchUserData();
-				
+
 				setTimeout(async () => {
 					await this.fetchUserData();
 					await this.fetchTokenBalance();
@@ -4726,25 +4726,25 @@
 		  }else if (type=='transfer-bsc'){
 			  //res is HBD
 			  //extraAFITTrx is AFIT H-E
-			  
-			  
+
+
 			  console.log(res.ref_block_num);
-		  
+
 			  //store transfer transaction for validation
-	  
-		  
+
+
 			  //grab token
 			  let accToken = localStorage.getItem('access_token')
-			  
+
 			  let url = new URL(process.env.actiAppUrl + 'appendBridgeTransaction/?user='+this.user.account.name+'&wallet='+//this.$refs['bsc-wallet-address'].value
 			  this.bsc_wallet_address
 			  +'&afitTrx='+extraAFITTrx.id+'&hbdTrx='+res.id);
-  
+
 			  let reqHeads = new Headers({
 				'Content-Type': 'application/json',
 				'x-acti-token': 'Bearer ' + accToken,
 			  });
-			  
+
 			  res = await fetch(url, {
 				  headers: reqHeads
 			  });
@@ -4761,23 +4761,23 @@
 					position: 'top center'
 				  })
 			  }
-  
-			  
-			  
+
+
+
 			  this.movingFunds = false;
-			  
+
 		  }
-		  //update balances 
+		  //update balances
 		  //setTimeout(this.fetchTokenBalance , 5);
 		},
 		async cancelPowerDown () {
 		  //function handles cancelling the power down
-		  
+
 		  let confirmPopup = confirm(this.$t('confirm_cancel_power_down'));
 		  if (!confirmPopup){
 			  return;
 		  }
-		  
+
 		  if (!this.isKeychainLogin && !this.isHiveauthLogin && this.isStdLogin){
 			  if (this.$refs["p-ac-key"].value == ''){
 				this.error_proceeding = true;
@@ -4793,13 +4793,13 @@
 			  }, window.location.origin + '/wallet?op=cancel power down&status=success');
 			  //launch the SC window
 			  window.open(link);
-		  }else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+		  }else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
 			  return new Promise((resolve) => {
 				  window.hive_keychain.requestPowerDown(this.user.account.name, '0.000', (response) => {
 					  console.log(response);
 					  this.confirmCompletion('powerdown', 0, response)
 				  });
-			  });			
+			  });
 		  }else if (this.isHiveauthLogin){
 			  let opname = 'withdraw_vesting';
 			  let	params = {
@@ -4807,7 +4807,7 @@
 					  "vesting_shares": '0.000000'+' '+'VESTS'
 				  };
 			  let res = await this.processTrxFunc(opname, params, true);
-			  
+
 			  if (res.success){
 				  this.confirmCompletion('powerdown', 0, res)
 			  }
@@ -4835,7 +4835,7 @@
 		},
 		exchangeAFITforSTEEM () {
 		  //function handles opening/closing exchanging AFIT tokens for STEEM upvotes  section
-		  
+
 		  //set proper AFIT Activity Mode controlling the display
 		  //if (this.afitActivityMode == this.EXCHANGE_AFIT_STEEM ){
 		  //  this.afitActivityMode = 0;
@@ -4897,7 +4897,7 @@
 		},
 		buyAFITwithSTEEM () {
 		  //function handles opening/closing exchanging AFIT tokens for STEEM upvotes  section
-		  
+
 		  //set proper AFIT Activity Mode controlling the display
 		  if (this.afitActivityMode == this.BUY_AFIT_STEEM ){
 			this.afitActivityMode = 0;
@@ -4909,7 +4909,7 @@
 		},
 		moveAFITSEtoAFITPOWER () {
 		  //function handles opening/closing exchanging AFIT tokens for STEEM upvotes  section
-		  
+
 		  //set proper AFIT Activity Mode controlling the display
 		  /*if (this.afitActivityMode == this.MOVE_AFIT_SE ){
 			this.afitActivityMode = 0;
@@ -4923,7 +4923,7 @@
 		},
 		initiateAFITtoSE () {
 		  //function handles opening/closing moving AFIT to SE
-		  
+
 		  //set proper AFIT Activity Mode controlling the display
 		  /*if (this.afitActivityMode == this.INIT_AFIT_TO_SE ){
 			this.afitActivityMode = 0;
@@ -4999,15 +4999,15 @@
 				  //console.log(err);
 				  return {success: false, trx: null};
 			  }
-		  }else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+		  }else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
 			  return new Promise((resolve) => {
 				  let operation = [[op_name, cstm_params]];
 				  if (op2 && params2){
 					  operation.push([op2, params2]);
 				  }
 				  window.hive_keychain.requestBroadcast(
-					  this.user.account.name, 
-					  operation, 
+					  this.user.account.name,
+					  operation,
 					  active?'Active':'Posting', (response) => {
 					  console.log(response);
 					  //resolve(response);
@@ -5022,7 +5022,7 @@
 					expire: localStorage.getItem('expires'),
 					key: localStorage.getItem('key')
 				  }
-				  let operation = [ 
+				  let operation = [
 					 [op_name, cstm_params]
 				  ];
 				  if (op2 && params2){
@@ -5060,7 +5060,7 @@
 				  } )
 			  });
 		  }else{
-			  let operation = [ 
+			  let operation = [
 				 [op_name, cstm_params]
 			  ];
 			  if (op2 && params2){
@@ -5068,18 +5068,18 @@
 			  }
 			  console.log('broadcasting');
 			  console.log(operation);
-			  
+
 			  //console.log(this.$steemconnect.accessToken);
 			  //console.log(this.$store.state.accessToken);
 			  //grab token
 			  let accToken = localStorage.getItem('access_token')
-			  
+
 			  let op_json = JSON.stringify(operation)
-			  
+
 			  let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
-			  
+
 			  let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+op_json+'&bchain='+cur_bchain);
-			  
+
 			  let reqHeads = new Headers({
 				'Content-Type': 'application/json',
 				'x-acti-token': 'Bearer ' + accToken,
@@ -5091,7 +5091,7 @@
 			  console.log(outcome);
 			  if (outcome.error){
 				  console.log(outcome.error);
-				  
+
 				  //if this is authority error, means needs to be logged out
 				  //example "missing required posting authority:Missing Posting Authority"
 				  let err_msg = outcome.trx.tx.error;
@@ -5102,7 +5102,7 @@
 					  this.error_msg = this.$t('session_expired_login_again');
 					  this.$store.dispatch('steemconnect/logout');
 				  }
-				  
+
 				  this.$notify({
 					group: 'error',
 					text: err_msg,
@@ -5121,8 +5121,8 @@
 		  if (!userConf) {
 			return;
 		  }
-		  
-		  
+
+
 		  //make sure password is provided
 		  //ensure user provided funds-pass
 		  if (this.$refs["move-funds-pass"].value == ''){
@@ -5130,9 +5130,9 @@
 			this.afit_se_move_err_msg = this.$t('error_missing_funds_pass') + ' <u><a href="/wallet?action=set_funds_pass">' + this.$t('create_funds_pass') + '</a></u>';
 			return;
 		  }
-		  
+
 		  this.initiateInProgress = true;
-		  
+
 		  //proceed with tipping
 		  let res = await fetch(process.env.actiAppUrl+'cancelAFITMoveSE/'
 			  + '?user=' + this.user.account.name
@@ -5148,9 +5148,9 @@
 				  id: 'actifit',
 				  json: JSON.stringify(afitCancPDTransaction)
 			  };
-			  
+
 			  let res = await this.processTrxFunc('custom_json', cstm_params);
-			  
+
 			  if (res.success){
 				  //notify of success
 				  this.$notify({
@@ -5158,12 +5158,12 @@
 					text: this.$t('afit_power_down_canceled'),
 					position: 'top center'
 				  })
-				  
+
 				  //unset the value of existing transfer
 				  this.userPDAfit = false
 			  }
-			  
-			  
+
+
 		  }else{
 			  this.afit_se_move_error_proceeding = true;
 			  this.afit_se_move_err_msg = outcome.error;
@@ -5223,19 +5223,19 @@
 					text: this.$t('tip_successfully_sent'),
 					position: 'top center'
 				  })
-				  
+
 				  //refresh user balance
 				  this.refreshBalance();
 				  //update sender token count
 				  //ensure we fetch proper logged in user data
 				  this.$store.dispatch('fetchUserTokens')
-				  
+
 				  //update transactions
 				  this.$store.dispatch('fetchTransactions')
 				  //update recipient token count
 				  //this.userTokenCount = outcome.recipientTokenCount;
 			  }
-			  
+
 			  this.proceedTip = false;
 		  }else{
 			  this.tipError = outcome.error;
@@ -5243,12 +5243,12 @@
 		  this.tipInProgress = false;
 		},
 		async proceedMoveToSE() {
-		  
+
 		  this.afit_se_move_error_proceeding = false;
 		  this.afit_se_move_err_msg = '';
-		  
+
 		  let amount_to_powerdown = this.$refs["afit-move-to-se"].value.trim();
-		  
+
 		  //ensure user provided funds-pass
 		  if (this.$refs["move-funds-pass"].value == ''){
 			this.afit_se_move_error_proceeding = true;
@@ -5264,7 +5264,7 @@
 		  }
 		  amount_to_powerdown = parseFloat(amount_to_powerdown);
 		  //console.log(amount_to_powerdown);
-		  
+
 		  //ensure user is powering down value he has
 		  if (amount_to_powerdown > parseFloat(this.userTokensWallet)){
 			this.afit_se_move_error_proceeding = true;
@@ -5273,19 +5273,19 @@
 			return;
 		  }
 		  this.initiateInProgress = true;
-		  
+
 		  try{
 			  //check if the user has enough AFITX S-E amount allowing him the transfers daily
 			  let bal;
 			  try{
-			  
+
 				  bal = await ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' });
 				  console.log(bal);
 			  }catch(outErr){
 				  console.log(outErr);
 			  }
 			  let bal_he = await hsc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' });
-			  
+
 			  this.afitx_se_balance = 0;
 			  this.afitx_he_balance = 0;
 			  if (bal){
@@ -5298,10 +5298,10 @@
 			  let afitx_afit_move_ratio = 100;
 			  if (amount_to_powerdown > free_movable_afit_day){
 				  if (bal || bal_he){
-					
+
 					let tot_afitx_bal = this.afitx_se_balance + this.afitx_he_balance;
 					//console.log('AFITX balance: '+this.afitx_se_balance);
-					
+
 					//make sure user has at least 0.1 AFITX to move tokens
 					/*if (tot_afitx_bal < 0.1){
 					  this.afit_se_move_error_proceeding = true;
@@ -5332,8 +5332,8 @@
 			  return;
 		  }
 		  //otherwise we're good, let's register the move
-		  
-		  
+
+
 		  //proceed with tipping
 		  let res = await fetch(process.env.actiAppUrl+'initiateAFITMoveSE/'
 			  + '?user=' + this.user.account.name
@@ -5350,7 +5350,7 @@
 				  json: JSON.stringify(afitPDTransaction)
 			  };
 			  let res = await this.processTrxFunc('custom_json', cstm_params);
-			  
+
 			  if (res.success){
 				  //notify of success
 				  this.$notify({
@@ -5358,20 +5358,20 @@
 					text: this.$t('power_down_successfully_initiated'),
 					position: 'top center'
 				  })
-				  
+
 				  this.setUserPDAfitStatus(outcome.trx);
 			  }
 			  //check if user is powering down AFIT to SE
 				/*fetch(process.env.actiAppUrl+'isPoweringDown/'+this.user.account.name).then(
 				  res => {res.json().then(json => this.setUserPDAfitStatus (json) ).catch(e => console.log(e))
 				}).catch(e => console.log(e))*/
-			  
+
 		  }else{
 			  this.afit_se_move_error_proceeding = true;
 			  this.afit_se_move_err_msg = outcome.error;
 		  }
 		  this.initiateInProgress = false;
-		  
+
 		},
 		async proceedMoveSEPower() {
 		  //handles checking for proper confirmation of account via STEEM transfer
@@ -5379,7 +5379,7 @@
 		  //function handles the actual processing of the transfer
 		  this.afit_se_move_error_proceeding = false;
 		  this.afit_se_move_err_msg = '';
-		  
+
 		  let amount_to_power = this.$refs["afit-se-move-power"].value.trim();
 		  //ensure we have proper values
 		  if (isNaN(amount_to_power) || parseFloat(amount_to_power) < 0.01){
@@ -5395,7 +5395,7 @@
 			//this.movingFunds = false;
 			return;
 		  }
-		  
+
 		  if (!this.isKeychainLogin && !this.isHiveauthLogin && this.isStdLogin){
 			  if (this.$refs["p-ac-key-power"].value == ''){
 				this.afit_se_move_error_proceeding = true;
@@ -5403,9 +5403,9 @@
 				return;
 			  }
 		  }
-		  
+
 		  //store the transaction to Steem BC according to S-E protocol for transfer
-		  
+
 		  if (!localStorage.getItem('std_login')){
 			  let link = this.$steemconnect.sign('custom_json', {
 				required_auths: "[\"" + this.user.account.name + "\"]",
@@ -5415,11 +5415,11 @@
 				authority: 'active',
 				auto_return: true,
 			  }, window.location.origin + '/wallet?op='+this.$t('Move_AFIT_to_Wallet')+'&status=success&confirm_trans=1');
-			  
+
 			  //redirect to proper action
 			  window.location = link;
-		  
-		  }else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+
+		  }else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
 			  return new Promise((resolve) => {
 				  let targetAcct = 'actifit.h-e';
 				  let transId = process.env.hiveEngineChainId;
@@ -5427,7 +5427,7 @@
 					  targetAcct = 'actifit.s-e';
 					  transId = 'ssc-mainnet1';
 				  }
-				  
+
 				  let json_data = {
 					  contractName: 'tokens',
 					  contractAction: 'transfer',
@@ -5438,32 +5438,32 @@
 						  memo: ''
 					  }
 				  }
-				  
-  
+
+
 				  window.hive_keychain.requestCustomJson(this.user.account.name, transId, 'Active', JSON.stringify(json_data), this.$t('MOVE_AFIT_HE_AFIT_POWER'), (response) => {
 					  console.log(response);
 					  //notify of success
 					  if (response.success){
-					  
+
 						  this.$notify({
 							group: 'success',
 							text: this.$t('Move_AFIT_to_Wallet')+ ' ' +this.$t('Scheduled_successfully'),
 							position: 'top center'
 						  })
-						  
+
 						  //initiate call to adjust AFIT token count
-						  
+
 						  let url = new URL(process.env.actiAppUrl + 'confirmAFITSEReceipt/?user='+this.user.account.name+'&bchain='+this.cur_bchain);
 						  //connect with our service to confirm AFIT received to proper wallet
 						  try{
 							  fetch(url).then(
 								res => {res.json().then(json => {this.setUserAddedTokens(json);this.movingFunds = false;}).catch(e => {console.log(e);this.movingFunds = false;})
 							  }).catch(e => console.log(e))
-							  
+
 						  }catch(err){
 							  console.error(err);
 							  //this.checkingFunds = false;
-						  }				
+						  }
 					  }else{
 						  //notify of success
 						  this.$notify({
@@ -5473,7 +5473,7 @@
 						  })
 					  }
 				  });
-			  });		
+			  });
 		  }else if (this.isHiveauthLogin){
 			  let targetAcct = 'actifit.h-e';
 			  let transId = process.env.hiveEngineChainId;
@@ -5481,7 +5481,7 @@
 				  targetAcct = 'actifit.s-e';
 				  transId = 'ssc-mainnet1';
 			  }
-			  
+
 			  let json_data = {
 				  contractName: 'tokens',
 				  contractAction: 'transfer',
@@ -5492,7 +5492,7 @@
 					  memo: ''
 				  }
 			  }
-			  
+
 			  let op_name = 'custom_json';
 			  let cstm_params = {
 				  required_auths: [this.user.account.name],
@@ -5500,33 +5500,33 @@
 				  id: 'actifit',
 				  json: JSON.stringify(json_data)
 				};
-			  let operation = [ 
+			  let operation = [
 				 [op_name, cstm_params]
 			  ];
-			  
+
 			  let response = await this.processTrxFunc(op_name, cstm_params, true);
-			  
+
 			  if (response.success){
-					  
+
 				  this.$notify({
 					group: 'success',
 					text: this.$t('Move_AFIT_to_Wallet')+ ' ' +this.$t('Scheduled_successfully'),
 					position: 'top center'
 				  })
-				  
+
 				  //initiate call to adjust AFIT token count
-				  
+
 				  let url = new URL(process.env.actiAppUrl + 'confirmAFITSEReceipt/?user='+this.user.account.name+'&bchain='+this.cur_bchain);
 				  //connect with our service to confirm AFIT received to proper wallet
 				  try{
 					  fetch(url).then(
 						res => {res.json().then(json => {this.setUserAddedTokens(json);this.movingFunds = false;}).catch(e => {console.log(e);this.movingFunds = false;})
 					  }).catch(e => console.log(e))
-					  
+
 				  }catch(err){
 					  console.error(err);
 					  //this.checkingFunds = false;
-				  }				
+				  }
 			  }else{
 				  //notify of success
 				  this.$notify({
@@ -5535,19 +5535,19 @@
 					position: 'top center'
 				  })
 			  }
-  
-		  
+
+
 		  }else{
-		  
+
 			  this.movingFunds = true;
-			  
+
 			  let targetAcct = 'actifit.h-e';
 			  let transId = process.env.hiveEngineChainId;
 			  if (this.cur_bchain == 'STEEM'){
 				  targetAcct = 'actifit.s-e';
 				  transId = 'ssc-mainnet1';
 			  }
-			  
+
 			  let json_data = {
 				  contractName: 'tokens',
 				  contractAction: 'transfer',
@@ -5558,24 +5558,24 @@
 					  memo: ''
 				  }
 			  }
-			  
+
 			  let userKey = this.$refs["p-ac-key-power"].value;
-			  
+
 			  //send out transaction to blockchain
 			  let chainLnk = await this.setProperNode();
 			  let tx = await chainLnk.broadcast.customJsonAsync(
-					  userKey, 
-					  [ this.user.account.name ] , 
-					  [], 
-					  transId, 
+					  userKey,
+					  [ this.user.account.name ] ,
+					  [],
+					  transId,
 					  JSON.stringify(json_data)
 				  ).catch(err => {
 					  console.log(err.message);
 			  });
-			  
+
 			  //console.log(tx.block_num);
 			  console.log(tx);
-			  
+
 			  if (tx && tx.ref_block_num){
 				  //notify of success
 				  this.$notify({
@@ -5583,22 +5583,22 @@
 					text: this.$t('Move_AFIT_to_Wallet')+ ' ' +this.$t('Scheduled_successfully'),
 					position: 'top center'
 				  })
-				  
+
 				  //initiate call to adjust AFIT token count
-				  
+
 				  let url = new URL(process.env.actiAppUrl + 'confirmAFITSEReceipt/?user='+this.user.account.name+'&bchain='+this.cur_bchain);
 				  //connect with our service to confirm AFIT received to proper wallet
 				  try{
-					  
+
 					  fetch(url).then(
 						res => {res.json().then(json => {this.setUserAddedTokens(json);this.movingFunds = false;}).catch(e => {console.log(e);this.movingFunds = false;})
 					  }).catch(e => console.log(e))
-					  
-				  
+
+
 				  }catch(err){
 					  console.error(err);
 					  //this.checkingFunds = false;
-				  }				
+				  }
 			  }else{
 				  //notify of success
 				  this.$notify({
@@ -5609,7 +5609,7 @@
 				  this.movingFunds = false;
 			  }
 		  }
-	  
+
 		},
 		async refreshBalance(){
 		  this.refreshinBal = true;
@@ -5622,26 +5622,26 @@
 		},
 		async proceedMoveAFIT(direction) {
 		  //TODO: if we are to reinstate this functionality after SE goes back online, we need to setup code for keychain support
-		  
+
 		  //direction = 1: SE to HE
 		  //direction = 2: HE to SE
-		  
+
 		  //handles checking for proper confirmation of account via STEEM transfer
 		  //this.movingFunds = true
 		  //function handles the actual processing of the transfer
 		  this.afit_se_move_error_proceeding = false;
 		  this.afit_se_move_err_msg = '';
-		  
-		  
+
+
 		  let amount_to_move = this.$refs["afit-se-he"].value.trim();
-		  
-		  
+
+
 		  let confirmPopup = confirm(this.$t('confirm_transfer_afit_exchange').replace('_CUR_',amount_to_move+' AFIT').replace('_EXCH1_',(direction == 1?'SE':'HE')).replace('_EXCH2_',(direction == 1?'HE':'SE')));
 		  if (!confirmPopup){
 			  return;
 		  }
-		  
-		  
+
+
 		  //ensure we have proper values
 		  if (isNaN(amount_to_move) || parseFloat(amount_to_move) < 0.01){
 			this.afit_se_move_error_proceeding = true;
@@ -5661,7 +5661,7 @@
 			//this.movingFunds = false;
 			return;
 		  }
-		  
+
 		  //if (!this.isKeychainLogin){
 			  if (this.$refs["p-ac-key-afit"].value == ''){
 				this.afit_se_move_error_proceeding = true;
@@ -5669,10 +5669,10 @@
 				return;
 			  }
 		  //}
-		
+
 		  this.movingAFIT = true;
 		  //standard is moving tokens from S-E to H-E, which requires sending bcast to Steem.
-		  
+
 		  let targetAcct = 'afit.h-e';
 		  let transId = process.env.hiveEngineChainId;
 		  //let targetBchain = 'STEEM';
@@ -5683,7 +5683,7 @@
 			  transId = 'ssc-mainnet1';
 			  //targetBchain = 'HIVE';
 		  }
-		  
+
 		  let json_data = {
 			  contractName: 'tokens',
 			  contractAction: 'transfer',
@@ -5694,21 +5694,21 @@
 				  memo: ''
 			  }
 		  }
-		  
+
 		  /*if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
 			  return new Promise((resolve) => {
 				  let targetAcct = 'actifit.h-e';
 				  let transId = process.env.hiveEngineChainId;
-				  
+
 				  window.hive_keychain.requestCustomJson(this.user.account.name, transId, 'Active', JSON.stringify(json_data), this.$t('MOVE_AFIT_SE_HE'), (response) => {
 					  console.log(response);
 					  //notify of success
 					  if (response.success && response.result.id){
 						  //let's check if user already has a funds pass set
 					  fetch(process.env.actiAppUrl+'proceedAfitTransition/?user='+this.user.account.name+'&txid='+response.result.id+'&amount='+amount_to_move+'&bchain='+(direction==1?'STEEM':'HIVE')).then(
-						  res => {res.json().then(json => 
+						  res => {res.json().then(json =>
 							  {
-								  
+
 								  if (parseFloat(json.afit_amount) > 0){
 									  //notify of success
 									  this.$notify({
@@ -5716,7 +5716,7 @@
 										text: this.$t('afit_transfer_complete'),
 										position: 'top center'
 									  });
-									  
+
 									  //update balances
 									  setTimeout(this.fetchAFITSE, 3000);
 									  setTimeout(this.fetchAFITHE, 3000);
@@ -5728,7 +5728,7 @@
 									  });
 								  }
 								  this.movingAFIT = false;
-								  
+
 							  }).catch(e => {console.log(e);
 								  this.$notify({
 									group: 'error',
@@ -5744,7 +5744,7 @@
 										position: 'top center'
 									  });
 									  this.movingAFIT = false;})
-					  
+
 					  }else{
 						  //notify of success
 						  this.$notify({
@@ -5754,36 +5754,36 @@
 						  })
 					  }
 				  });
-			  });		
-		  
+			  });
+
 		  }else{*/
-		  
+
 			  let userKey = this.$refs["p-ac-key-afit"].value;
-			  
+
 			  //send out transaction to blockchain
 			  let chainLnk = await this.setProperNode((direction==1?'STEEM':'HIVE'));
 			  let tx = await chainLnk.broadcast.customJsonAsync(
-					  userKey, 
-					  [ this.user.account.name ] , 
-					  [], 
-					  transId, 
+					  userKey,
+					  [ this.user.account.name ] ,
+					  [],
+					  transId,
 					  JSON.stringify(json_data)
 				  ).catch(err => {
 					  console.log(err.message);
 			  });
-			  
+
 			  //console.log(tx.block_num);
 			  console.log(tx);
-		  
+
 			  if (tx && tx.ref_block_num){
-			  
+
 				  //proceed with moving tokens over to recipient
-				  
+
 				  //let's check if user already has a funds pass set
 				  fetch(process.env.actiAppUrl+'proceedAfitTransition/?user='+this.user.account.name+'&txid='+tx.id+'&amount='+amount_to_move+'&bchain='+(direction==1?'STEEM':'HIVE')).then(
-					  res => {res.json().then(json => 
+					  res => {res.json().then(json =>
 						  {
-							  
+
 							  if (parseFloat(json.afit_amount) > 0){
 								  //notify of success
 								  this.$notify({
@@ -5791,7 +5791,7 @@
 									text: this.$t('afit_transfer_complete'),
 									position: 'top center'
 								  });
-								  
+
 								  //update balances
 								  //disable: EOL for S-E
 								  //setTimeout(this.fetchAFITSE, 3000);
@@ -5804,7 +5804,7 @@
 								  });
 							  }
 							  this.movingAFIT = false;
-							  
+
 						  }).catch(e => {console.log(e);
 							  this.$notify({
 								group: 'error',
@@ -5820,8 +5820,8 @@
 									position: 'top center'
 								  });
 								  this.movingAFIT = false;})
-				  
-				  
+
+
 			  }else{
 				  this.$notify({
 					group: 'error',
@@ -5836,20 +5836,20 @@
 		  //TODO: if we are to reinstate this functionality after SE goes back online, we need to setup code for keychain support
 		  //direction = 1: SE to HE
 		  //direction = 2: HE to SE
-		  
+
 		  //handles checking for proper confirmation of account via STEEM transfer
 		  //this.movingFunds = true
 		  //function handles the actual processing of the transfer
 		  this.afit_se_move_error_proceeding = false;
 		  this.afit_se_move_err_msg = '';
-		  
+
 		  let amount_to_move = this.$refs["afitx-se-he"].value.trim();
-		  
+
 		  let confirmPopup = confirm(this.$t('confirm_transfer_afit_exchange').replace('_CUR_',amount_to_move+' AFITX').replace('_EXCH1_',(direction == 1?'SE':'HE')).replace('_EXCH2_',(direction == 1?'HE':'SE')));
 		  if (!confirmPopup){
 			  return;
 		  }
-		  
+
 		  //ensure we have proper values
 		  if (isNaN(amount_to_move) || parseFloat(amount_to_move) < 0.01){
 			this.afit_se_move_error_proceeding = true;
@@ -5869,16 +5869,16 @@
 			//this.movingFunds = false;
 			return;
 		  }
-		  
+
 		  if (this.$refs["p-ac-key-afitx"].value == ''){
 			this.afit_se_move_error_proceeding = true;
 			this.afit_se_move_err_msg = this.$t('all_fields_required');
 			return;
 		  }
-		
+
 		  this.movingAFITX = true;
 		  //standard is moving tokens from S-E to H-E, which requires sending bcast to Steem.
-		  
+
 		  let targetAcct = 'afitx.h-e';
 		  let transId = process.env.hiveEngineChainId;
 		  //let targetBchain = 'STEEM';
@@ -5889,7 +5889,7 @@
 			  transId = 'ssc-mainnet1';
 			  //targetBchain = 'HIVE';
 		  }
-		  
+
 		  let json_data = {
 			  contractName: 'tokens',
 			  contractAction: 'transfer',
@@ -5900,31 +5900,31 @@
 				  memo: ''
 			  }
 		  }
-		  
+
 		  let userKey = this.$refs["p-ac-key-afitx"].value;
-		  
+
 		  //send out transaction to blockchain
 		  let chainLnk = await this.setProperNode((direction==1?'STEEM':'HIVE'));
 		  let tx = await chainLnk.broadcast.customJsonAsync(
-				  userKey, 
-				  [ this.user.account.name ] , 
-				  [], 
-				  transId, 
+				  userKey,
+				  [ this.user.account.name ] ,
+				  [],
+				  transId,
 				  JSON.stringify(json_data)
 			  ).catch(err => {
 				  console.log(err.message);
 		  });
-		  
+
 		  //console.log(tx.block_num);
 		  console.log(tx);
-		  
+
 		  if (tx && tx.ref_block_num){
-		  
+
 			  //proceed with moving tokens over to recipient
-			  
+
 			  //let's check if user already has a funds pass set
 			  fetch(process.env.actiAppUrl+'proceedAfitxTransition/?user='+this.user.account.name+'&txid='+tx.id+'&amount='+amount_to_move+'&bchain='+(direction==1?'STEEM':'HIVE')).then(
-				  res => {res.json().then(json => 
+				  res => {res.json().then(json =>
 					  {
 						  if (parseFloat(json.afitx_amount) > 0){
 							  //notify of success
@@ -5945,7 +5945,7 @@
 							  });
 						  }
 						  this.movingAFITX = false;
-						  
+
 					  }).catch(e => {console.log(e);
 							  this.$notify({
 							group: 'error',
@@ -5961,8 +5961,8 @@
 								position: 'top center'
 							  });
 							  this.movingAFITX = false;})
-			  
-			  
+
+
 		  }else{
 			  this.$notify({
 				group: 'error',
@@ -5976,9 +5976,9 @@
 		  //handles performing a token power up/staking
 		  this.afit_se_power_error_proceeding = false;
 		  this.afit_se_power_err_msg = '';
-		  
+
 		  let tokenMaxVal = this.selTokenUp.balance;
-		  
+
 		  let amount_to_power = this.$refs["token-powerup-amount"].value.trim();
 		  //ensure we have proper values
 		  if (isNaN(amount_to_power) || parseFloat(amount_to_power) < 0.01){
@@ -5994,7 +5994,7 @@
 			//this.movingFunds = false;
 			return;
 		  }
-		  
+
 		  if (!localStorage.getItem('std_login')){
 			  //store the transaction to Steem BC according to S-E protocol for power up
 			  let link = this.$steemconnect.sign('custom_json', {
@@ -6005,11 +6005,11 @@
 				authority: 'active',
 				auto_return: true,
 			  }, window.location.origin + '/wallet?op='+this.$t('Power_up_token')+'&status=success');
-			  
+
 			  //redirect to proper action
 			  window.location = link;
-			  
-		  }else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+
+		  }else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
 				  return new Promise((resolve) => {
 				  let targetAcct = 'actifit.h-e';
 				  let transId = process.env.hiveEngineChainId;
@@ -6017,7 +6017,7 @@
 					  targetAcct = 'actifit.s-e';
 					  transId = 'ssc-mainnet1';
 				  }
-				  
+
 				  let json_data = {
 					  contractName: 'tokens',
 					  contractAction: 'stake',
@@ -6028,7 +6028,7 @@
 						  memo: ''
 					  }
 				  }
-				  
+
 				  window.hive_keychain.requestCustomJson(this.user.account.name, transId, 'Active', JSON.stringify(json_data), this.$t('Power_Up'), (response) => {
 					  console.log(response);
 					  //notify of success
@@ -6047,8 +6047,8 @@
 						  })
 					  }
 				  });
-			  });		
-					  
+			  });
+
 		  }else if (this.isHiveauthLogin){
 			  let targetAcct = 'actifit.h-e';
 			  let transId = process.env.hiveEngineChainId;
@@ -6056,7 +6056,7 @@
 				  targetAcct = 'actifit.s-e';
 				  transId = 'ssc-mainnet1';
 			  }
-			  
+
 			  let json_data = {
 				  contractName: 'tokens',
 				  contractAction: 'stake',
@@ -6067,7 +6067,7 @@
 					  memo: ''
 				  }
 			  }
-			  
+
 			  let op_name = 'custom_json';
 			  let cstm_params = {
 				  required_auths: [this.user.account.name],
@@ -6075,12 +6075,12 @@
 				  id: 'actifit',
 				  json: JSON.stringify(json_data)
 				};
-			  let operation = [ 
+			  let operation = [
 				 [op_name, cstm_params]
 			  ];
-			  
+
 			  let response = await this.processTrxFunc(op_name, cstm_params, true);
-			  
+
 			  //notify of success
 			  if (response.success){
 				  this.$notify({
@@ -6096,17 +6096,17 @@
 					position: 'top center'
 				  })
 			  }
-			  
+
 		  }else{
 			  this.movingFunds = true;
-			  
+
 			  let targetAcct = 'actifit.h-e';
 			  let transId = process.env.hiveEngineChainId;
 			  if (this.cur_bchain == 'STEEM'){
 				  targetAcct = 'actifit.s-e';
 				  transId = 'ssc-mainnet1';
 			  }
-			  
+
 			  let json_data = {
 				  contractName: 'tokens',
 				  contractAction: 'stake',
@@ -6117,24 +6117,24 @@
 					  memo: ''
 				  }
 			  }
-			  
+
 			  let userKey = this.$refs["p-ac-key-trans-token"].value;
-			  
+
 			  //send out transaction to blockchain
 			  let chainLnk = await this.setProperNode();
 			  let tx = await chainLnk.broadcast.customJsonAsync(
-					  userKey, 
-					  [ this.user.account.name ] , 
-					  [], 
-					  transId, 
+					  userKey,
+					  [ this.user.account.name ] ,
+					  [],
+					  transId,
 					  JSON.stringify(json_data)
 				  ).catch(err => {
 					  console.log(err.message);
 			  });
-			  
+
 			  //console.log(tx.block_num);
 			  console.log(tx);
-			  
+
 			  if (tx && tx.ref_block_num){
 				  //notify of success
 				  this.$notify({
@@ -6142,7 +6142,7 @@
 					text: this.$t('Power_up_token')+ ' ' +this.$t('completed_success'),
 					position: 'top center'
 				  })
-				  
+
 			  }else{
 				  //notify of success
 				  this.$notify({
@@ -6150,21 +6150,21 @@
 					text: this.$t('error_performing_operation'),
 					position: 'top center'
 				  })
-				  
+
 			  }
-			  
+
 			  this.movingFunds = false;
 		  }
-	  
+
 		},
-		
+
 		async proceedDelegateToken (){
-		  
+
 		  this.afit_se_power_error_proceeding = false;
 		  this.afit_se_power_err_msg = '';
-		  
-		  
-		  
+
+
+
 		  let tokenMaxVal = this.selTokenUp.stake;
 		  let recipient = this.$refs["token-delegate-recipient"].value.trim();
 		  let amount_to_powerdown = this.$refs["token-powerup-amount"].value.trim();
@@ -6185,8 +6185,8 @@
 			this.afit_se_power_err_msg = this.$t('max_amount_token_powerdown');
 			return;
 		  }
-		  
-		  
+
+
 		  if (!localStorage.getItem('std_login')){
 			  //store the transaction to Steem BC according to S-E protocol for power down
 			  let link = this.$steemconnect.sign('custom_json', {
@@ -6197,11 +6197,11 @@
 				authority: 'active',
 				auto_return: true,
 			  }, window.location.origin + '/wallet?op='+this.$t('delegate_token')+'&status=success');
-			  
+
 			  //redirect to proper action
 			  window.location = link;
-			  
-		  }else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+
+		  }else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
 			  return new Promise((resolve) => {
 				  let targetAcct = 'actifit.h-e';
 				  let transId = process.env.hiveEngineChainId;
@@ -6209,7 +6209,7 @@
 					  targetAcct = 'actifit.s-e';
 					  transId = 'ssc-mainnet1';
 				  }
-				  
+
 				  let json_data = {
 					  contractName: 'tokens',
 					  contractAction: 'delegate',
@@ -6220,7 +6220,7 @@
 						  memo: ''
 					  }
 				  }
-				  
+
 				  window.hive_keychain.requestCustomJson(this.user.account.name, transId, 'Active', JSON.stringify(json_data), this.$t('Power_Down'), (response) => {
 					  console.log(response);
 					  //notify of success
@@ -6239,9 +6239,9 @@
 						  })
 					  }
 				  });
-			  });		
-		  
-				  
+			  });
+
+
 		  }else if (this.isHiveauthLogin){
 			  let targetAcct = 'actifit.h-e';
 			  let transId = process.env.hiveEngineChainId;
@@ -6249,7 +6249,7 @@
 				  targetAcct = 'actifit.s-e';
 				  transId = 'ssc-mainnet1';
 			  }
-			  
+
 			  let json_data = {
 				  contractName: 'tokens',
 				  contractAction: 'delegate',
@@ -6260,7 +6260,7 @@
 					  memo: ''
 				  }
 			  }
-			  
+
 			  let op_name = 'custom_json';
 			  let cstm_params = {
 				  required_auths: [this.user.account.name],
@@ -6268,12 +6268,12 @@
 				  id: 'actifit',
 				  json: JSON.stringify(json_data)
 				};
-			  let operation = [ 
+			  let operation = [
 				 [op_name, cstm_params]
 			  ];
-			  
+
 			  let response = await this.processTrxFunc(op_name, cstm_params, true);
-			  
+
 			  //notify of success
 			  if (response.success){
 				  this.$notify({
@@ -6289,17 +6289,17 @@
 					position: 'top center'
 				  })
 			  }
-		  
+
 		  }else{
 			  this.movingFunds = true;
-			  
+
 			  let targetAcct = 'actifit.h-e';
 			  let transId = process.env.hiveEngineChainId;
 			  if (this.cur_bchain == 'STEEM'){
 				  targetAcct = 'actifit.s-e';
 				  transId = 'ssc-mainnet1';
 			  }
-			  
+
 			  let json_data = {
 				  contractName: 'tokens',
 				  contractAction: 'unstake',
@@ -6310,24 +6310,24 @@
 					  memo: ''
 				  }
 			  }
-			  
+
 			  let userKey = this.$refs["p-ac-key-trans-token"].value;
-			  
+
 			  //send out transaction to blockchain
 			  let chainLnk = await this.setProperNode();
 			  let tx = await chainLnk.broadcast.customJsonAsync(
-					  userKey, 
-					  [ this.user.account.name ] , 
-					  [], 
-					  transId, 
+					  userKey,
+					  [ this.user.account.name ] ,
+					  [],
+					  transId,
 					  JSON.stringify(json_data)
 				  ).catch(err => {
 					  console.log(err.message);
 			  });
-			  
+
 			  //console.log(tx.block_num);
 			  console.log(tx);
-			  
+
 			  if (tx && tx.ref_block_num){
 				  //notify of success
 				  this.$notify({
@@ -6335,7 +6335,7 @@
 					text: this.$t('delegate_token')+ ' ' +this.$t('completed_success'),
 					position: 'top center'
 				  })
-				  
+
 			  }else{
 				  //notify of success
 				  this.$notify({
@@ -6343,20 +6343,20 @@
 					text: this.$t('error_performing_operation'),
 					position: 'top center'
 				  })
-				  
+
 			  }
-			  
+
 			  this.movingFunds = false;
 		  }
 		},
-		
+
 		async proceedUnDelegateToken (delegation){
-		  
+
 		  this.afit_se_power_error_proceeding = false;
 		  this.afit_se_power_err_msg = '';
-		  
-		  
-		  
+
+
+
 		  //let tokenMaxVal = this.selTokenUp.stake;
 		  let recipient = delegation.to;
 		  let amount_to_powerdown = delegation.quantity;
@@ -6378,8 +6378,8 @@
 			this.afit_se_power_err_msg = this.$t('max_amount_token_powerdown');
 			return;
 		  }*/
-		  
-		  
+
+
 		  if (!localStorage.getItem('std_login')){
 			  //store the transaction to Steem BC according to S-E protocol for power down
 			  let link = this.$steemconnect.sign('custom_json', {
@@ -6390,11 +6390,11 @@
 				authority: 'active',
 				auto_return: true,
 			  }, window.location.origin + '/wallet?op='+this.$t('undelegate_token')+'&status=success');
-			  
+
 			  //redirect to proper action
 			  window.location = link;
-			  
-		  }else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+
+		  }else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
 			  return new Promise((resolve) => {
 				  let targetAcct = 'actifit.h-e';
 				  let transId = process.env.hiveEngineChainId;
@@ -6402,7 +6402,7 @@
 					  targetAcct = 'actifit.s-e';
 					  transId = 'ssc-mainnet1';
 				  }
-				  
+
 				  let json_data = {
 					  contractName: 'tokens',
 					  contractAction: 'undelegate',
@@ -6413,7 +6413,7 @@
 						  memo: ''
 					  }
 				  }
-				  
+
 				  window.hive_keychain.requestCustomJson(this.user.account.name, transId, 'Active', JSON.stringify(json_data), this.$t('Power_Down'), (response) => {
 					  console.log(response);
 					  //notify of success
@@ -6432,9 +6432,9 @@
 						  })
 					  }
 				  });
-			  });		
-		  
-				  
+			  });
+
+
 		  }else if (this.isHiveauthLogin){
 			  let targetAcct = 'actifit.h-e';
 			  let transId = process.env.hiveEngineChainId;
@@ -6442,7 +6442,7 @@
 				  targetAcct = 'actifit.s-e';
 				  transId = 'ssc-mainnet1';
 			  }
-			  
+
 			  let json_data = {
 				  contractName: 'tokens',
 				  contractAction: 'undelegate',
@@ -6453,7 +6453,7 @@
 					  memo: ''
 				  }
 			  }
-			  
+
 			  let op_name = 'custom_json';
 			  let cstm_params = {
 				  required_auths: [this.user.account.name],
@@ -6461,12 +6461,12 @@
 				  id: 'actifit',
 				  json: JSON.stringify(json_data)
 				};
-			  let operation = [ 
+			  let operation = [
 				 [op_name, cstm_params]
 			  ];
-			  
+
 			  let response = await this.processTrxFunc(op_name, cstm_params, true);
-			  
+
 			  //notify of success
 			  if (response.success){
 				  this.$notify({
@@ -6482,17 +6482,17 @@
 					position: 'top center'
 				  })
 			  }
-		  
+
 		  }else{
 			  this.movingFunds = true;
-			  
+
 			  let targetAcct = 'actifit.h-e';
 			  let transId = process.env.hiveEngineChainId;
 			  if (this.cur_bchain == 'STEEM'){
 				  targetAcct = 'actifit.s-e';
 				  transId = 'ssc-mainnet1';
 			  }
-			  
+
 			  let json_data = {
 				  contractName: 'tokens',
 				  contractAction: 'unstake',
@@ -6503,24 +6503,24 @@
 					  memo: ''
 				  }
 			  }
-			  
+
 			  let userKey = this.$refs["p-ac-key-trans-token"].value;
-			  
+
 			  //send out transaction to blockchain
 			  let chainLnk = await this.setProperNode();
 			  let tx = await chainLnk.broadcast.customJsonAsync(
-					  userKey, 
-					  [ this.user.account.name ] , 
-					  [], 
-					  transId, 
+					  userKey,
+					  [ this.user.account.name ] ,
+					  [],
+					  transId,
 					  JSON.stringify(json_data)
 				  ).catch(err => {
 					  console.log(err.message);
 			  });
-			  
+
 			  //console.log(tx.block_num);
 			  console.log(tx);
-			  
+
 			  if (tx && tx.ref_block_num){
 				  //notify of success
 				  this.$notify({
@@ -6528,7 +6528,7 @@
 					text: this.$t('undelegate_token')+ ' ' +this.$t('completed_success'),
 					position: 'top center'
 				  })
-				  
+
 			  }else{
 				  //notify of success
 				  this.$notify({
@@ -6536,22 +6536,22 @@
 					text: this.$t('error_performing_operation'),
 					position: 'top center'
 				  })
-				  
+
 			  }
-			  
+
 			  this.movingFunds = false;
 		  }
 		},
-		
-		
-		
+
+
+
 		async proceedPowerDownToken() {
 		  //handles performing a token power down/unstaking
 		  this.afit_se_power_error_proceeding = false;
 		  this.afit_se_power_err_msg = '';
-		  
-		  
-		  
+
+
+
 		  let tokenMaxVal = this.selTokenUp.stake;
 		  let amount_to_powerdown = this.$refs["token-powerup-amount"].value.trim();
 		  //ensure we have proper values
@@ -6566,8 +6566,8 @@
 			this.afit_se_power_err_msg = this.$t('max_amount_token_powerdown');
 			return;
 		  }
-		  
-		  
+
+
 		  if (!localStorage.getItem('std_login')){
 			  //store the transaction to Steem BC according to S-E protocol for power down
 			  let link = this.$steemconnect.sign('custom_json', {
@@ -6578,11 +6578,11 @@
 				authority: 'active',
 				auto_return: true,
 			  }, window.location.origin + '/wallet?op='+this.$t('Power_down_token')+'&status=success');
-			  
+
 			  //redirect to proper action
 			  window.location = link;
-			  
-		  }else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+
+		  }else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
 			  return new Promise((resolve) => {
 				  let targetAcct = 'actifit.h-e';
 				  let transId = process.env.hiveEngineChainId;
@@ -6590,7 +6590,7 @@
 					  targetAcct = 'actifit.s-e';
 					  transId = 'ssc-mainnet1';
 				  }
-				  
+
 				  let json_data = {
 					  contractName: 'tokens',
 					  contractAction: 'unstake',
@@ -6600,7 +6600,7 @@
 						  memo: ''
 					  }
 				  }
-				  
+
 				  window.hive_keychain.requestCustomJson(this.user.account.name, transId, 'Active', JSON.stringify(json_data), this.$t('Power_Down'), (response) => {
 					  console.log(response);
 					  //notify of success
@@ -6619,9 +6619,9 @@
 						  })
 					  }
 				  });
-			  });		
-		  
-				  
+			  });
+
+
 		  }else if (this.isHiveauthLogin){
 			  let targetAcct = 'actifit.h-e';
 			  let transId = process.env.hiveEngineChainId;
@@ -6629,7 +6629,7 @@
 				  targetAcct = 'actifit.s-e';
 				  transId = 'ssc-mainnet1';
 			  }
-			  
+
 			  let json_data = {
 				  contractName: 'tokens',
 				  contractAction: 'unstake',
@@ -6639,7 +6639,7 @@
 					  memo: ''
 				  }
 			  }
-			  
+
 			  let op_name = 'custom_json';
 			  let cstm_params = {
 				  required_auths: [this.user.account.name],
@@ -6647,12 +6647,12 @@
 				  id: 'actifit',
 				  json: JSON.stringify(json_data)
 				};
-			  let operation = [ 
+			  let operation = [
 				 [op_name, cstm_params]
 			  ];
-			  
+
 			  let response = await this.processTrxFunc(op_name, cstm_params, true);
-			  
+
 			  //notify of success
 			  if (response.success){
 				  this.$notify({
@@ -6668,17 +6668,17 @@
 					position: 'top center'
 				  })
 			  }
-		  
+
 		  }else{
 			  this.movingFunds = true;
-			  
+
 			  let targetAcct = 'actifit.h-e';
 			  let transId = process.env.hiveEngineChainId;
 			  if (this.cur_bchain == 'STEEM'){
 				  targetAcct = 'actifit.s-e';
 				  transId = 'ssc-mainnet1';
 			  }
-			  
+
 			  let json_data = {
 				  contractName: 'tokens',
 				  contractAction: 'unstake',
@@ -6688,24 +6688,24 @@
 					  memo: ''
 				  }
 			  }
-			  
+
 			  let userKey = this.$refs["p-ac-key-trans-token"].value;
-			  
+
 			  //send out transaction to blockchain
 			  let chainLnk = await this.setProperNode();
 			  let tx = await chainLnk.broadcast.customJsonAsync(
-					  userKey, 
-					  [ this.user.account.name ] , 
-					  [], 
-					  transId, 
+					  userKey,
+					  [ this.user.account.name ] ,
+					  [],
+					  transId,
 					  JSON.stringify(json_data)
 				  ).catch(err => {
 					  console.log(err.message);
 			  });
-			  
+
 			  //console.log(tx.block_num);
 			  console.log(tx);
-			  
+
 			  if (tx && tx.ref_block_num){
 				  //notify of success
 				  this.$notify({
@@ -6713,7 +6713,7 @@
 					text: this.$t('Power_down_token')+ ' ' +this.$t('completed_success'),
 					position: 'top center'
 				  })
-				  
+
 			  }else{
 				  //notify of success
 				  this.$notify({
@@ -6721,9 +6721,9 @@
 					text: this.$t('error_performing_operation'),
 					position: 'top center'
 				  })
-				  
+
 			  }
-			  
+
 			  this.movingFunds = false;
 		  }
 		},
@@ -6731,14 +6731,14 @@
 		  //handles performing a token power down/unstaking
 		  this.afit_se_power_error_proceeding = false;
 		  this.afit_se_power_err_msg = '';
-		  
-		  
-		  
+
+
+
 		  let tokenMaxVal = this.selTokenUp.balance;
 		  let amount_to_send = this.$refs["token-powerup-amount"].value.trim();
 		  let target_account = this.$refs["token-target-account"].value.trim();
 		  let memo = this.$refs["token-transfer-memo"].value.trim();
-		  
+
 		  //ensure we have proper values
 		  //confirm target account set
 		  if (!target_account){
@@ -6746,7 +6746,7 @@
 			this.afit_se_power_err_msg = this.$t('missing_target_account');
 			return;
 		  }
-		  
+
 		  if (isNaN(amount_to_send) || parseFloat(amount_to_send) < 0.01){
 			this.afit_se_power_error_proceeding = true;
 			this.afit_se_power_err_msg = this.$t('min_amount_token_power');
@@ -6758,8 +6758,8 @@
 			this.afit_se_power_err_msg = this.$t('max_amount_token_power');
 			return;
 		  }
-  
-		  
+
+
 		  if (!localStorage.getItem('std_login')){
 			  //store the transaction to Steem BC according to S-E protocol for transfer
 			  let link = this.$steemconnect.sign('custom_json', {
@@ -6770,11 +6770,11 @@
 				authority: 'active',
 				auto_return: true,
 			  }, window.location.origin + '/wallet?op='+this.$t('Transfer_token')+'&status=success');
-			  
+
 			  //redirect to proper action
 			  window.location = link;
-			  
-		  }else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+
+		  }else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
 			  return new Promise((resolve) => {
 				  let targetAcct = 'actifit.h-e';
 				  let transId = process.env.hiveEngineChainId;
@@ -6782,7 +6782,7 @@
 					  targetAcct = 'actifit.s-e';
 					  transId = 'ssc-mainnet1';
 				  }
-				  
+
 				  let json_data = {
 					  contractName: 'tokens',
 					  contractAction: 'transfer',
@@ -6811,9 +6811,9 @@
 						  })
 					  }
 				  });
-			  });		
-		  
-			  
+			  });
+
+
 		  }else if (this.isHiveauthLogin){
 			  let targetAcct = 'actifit.h-e';
 			  let transId = process.env.hiveEngineChainId;
@@ -6821,7 +6821,7 @@
 				  targetAcct = 'actifit.s-e';
 				  transId = 'ssc-mainnet1';
 			  }
-			  
+
 			  let json_data = {
 				  contractName: 'tokens',
 				  contractAction: 'transfer',
@@ -6832,7 +6832,7 @@
 					  memo: memo
 				  }
 			  }
-			  
+
 			  let op_name = 'custom_json';
 			  let cstm_params = {
 				  required_auths: [this.user.account.name],
@@ -6840,12 +6840,12 @@
 				  id: 'actifit',
 				  json: JSON.stringify(json_data)
 				};
-			  let operation = [ 
+			  let operation = [
 				 [op_name, cstm_params]
 			  ];
-			  
+
 			  let response = await this.processTrxFunc(op_name, cstm_params, true);
-			  
+
 			  //notify of success
 			  if (response.success){
 				  this.$notify({
@@ -6861,24 +6861,24 @@
 					position: 'top center'
 				  })
 			  }
-			  
+
 		  }else{
 			  if (this.$refs["p-ac-key-trans-token"].value == ''){
 				this.afit_se_power_error_proceeding = true;
 				this.afit_se_power_err_msg = this.$t('all_fields_required');
 				return;
 			  }
-			  
-			  
+
+
 			  this.movingFunds = true;
-			  
+
 			  let targetAcct = 'actifit.h-e';
 			  let transId = process.env.hiveEngineChainId;
 			  if (this.cur_bchain == 'STEEM'){
 				  targetAcct = 'actifit.s-e';
 				  transId = 'ssc-mainnet1';
 			  }
-			  
+
 			  let json_data = {
 				  contractName: 'tokens',
 				  contractAction: 'transfer',
@@ -6889,24 +6889,24 @@
 					  memo: memo
 				  }
 			  }
-			  
+
 			  let userKey = this.$refs["p-ac-key-trans-token"].value;
-			  
+
 			  //send out transaction to blockchain
 			  let chainLnk = await this.setProperNode();
 			  let tx = await chainLnk.broadcast.customJsonAsync(
-					  userKey, 
-					  [ this.user.account.name ] , 
-					  [], 
-					  transId, 
+					  userKey,
+					  [ this.user.account.name ] ,
+					  [],
+					  transId,
 					  JSON.stringify(json_data)
 				  ).catch(err => {
 					  console.log(err.message);
 			  });
-			  
+
 			  //console.log(tx.block_num);
 			  console.log(tx);
-			  
+
 			  if (tx && tx.ref_block_num){
 				  //notify of success
 				  this.$notify({
@@ -6914,22 +6914,22 @@
 					text: this.$t('Transfer_token')+ ' ' +this.$t('completed_success'),
 					position: 'top center'
 				  })
-				  
+
 				  //initiate call to adjust AFIT token count
-				  
+
 				  /*let url = new URL(process.env.actiAppUrl + 'confirmAFITSEReceipt/?user='+this.user.account.name+'&bchain='+this.cur_bchain);
 				  //connect with our service to confirm AFIT received to proper wallet
 				  try{
-					  
+
 					  fetch(url).then(
 						res => {res.json().then(json => {this.setUserAddedTokens(json);this.movingFunds = false;}).catch(e => {console.log(e);this.movingFunds = false;})
 					  }).catch(e => console.log(e))
-					  
-				  
+
+
 				  }catch(err){
 					  console.error(err);
 					  //this.checkingFunds = false;
-				  }		*/		
+				  }		*/
 			  }else{
 				  //notify of success
 				  this.$notify({
@@ -6937,18 +6937,18 @@
 					text: this.$t('error_performing_operation'),
 					position: 'top center'
 				  })
-				  
+
 			  }
-			  
+
 			  this.movingFunds = false;
-			  
+
 		  }
 		},
 		async proceedTransferBSC(){
 		  //handles locking and moving tokens over to BSC
 		  this.afit_se_power_error_proceeding = false;
 		  this.afit_se_power_err_msg = '';
-		  
+
 		  let tokenMaxVal = parseFloat(this.selTokenUp.balance);
 		  console.log(tokenMaxVal);
 		  let amount_to_withdraw = this.$refs["token-powerup-amount"].value.trim();
@@ -6970,7 +6970,7 @@
 			this.afit_se_power_err_msg = this.$t('max_amount_limit_transf_bsc');
 			return;
 		  }
-		  
+
 		  //make sure proper HBD amount is being sent
 		  let hbd_amount = this.$refs['token-hbd-amount'].value.trim();
 		  if (isNaN(hbd_amount) || parseFloat(hbd_amount) < 0.1){
@@ -6987,7 +6987,7 @@
 			this.afit_se_power_err_msg = this.$t('max_amount_transf_bsc');
 			return;
 		  }
-		  
+
 		  if (!this.isKeychainLogin && !this.isHiveauthLogin && this.isStdLogin){
 			  if (this.$refs["p-ac-key-trans-token"].value == ''){
 				this.afit_se_power_error_proceeding = true;
@@ -6995,16 +6995,16 @@
 				return;
 			  }
 		  }
-		  
+
 		  //make sure user has a set wallet address
 		  if (this.bsc_wallet_address == ''){
 			this.afit_se_power_error_proceeding = true;
 			this.afit_se_power_err_msg = this.$t('need_set_bsc_wallet');
 			return;
 		  }
-		  
+
 		  //check if user has a pending transaction for today already
-		  
+
 		  let url = new URL(process.env.actiAppUrl + 'userBridgeEligible/'+'?user=' + this.user.account.name);
 		  try{
 			  let res = await fetch(url);
@@ -7019,19 +7019,19 @@
 		  }catch(err){
 			  console.log(err);
 		  }
-		  
-		  
+
+
 		  //let's go
-		  
+
 		  this.movingFunds = true;
-		  
+
 		  let targetAcct = process.env.bscBridgeAccount;
 		  let transId = process.env.hiveEngineChainId;
 		  /*if (this.cur_bchain == 'STEEM'){
 			  targetAcct = 'actifit.s-e';
 			  transId = 'ssc-mainnet1';
 		  }*/
-		  
+
 		  let json_data = {
 			  contractName: 'tokens',
 			  contractAction: 'transfer',
@@ -7042,17 +7042,17 @@
 				  memo: ''
 			  }
 		  }
-		  
+
 		  let userKey = this.$refs["p-ac-key-trans-token"].value;
-		  
+
 		  //send out transaction to blockchain
 		  //only works on hive
 		  let chainLnk = hive;//await this.setProperNode();
 		  let tx = await chainLnk.broadcast.customJsonAsync(
-				  userKey, 
-				  [ this.user.account.name ] , 
-				  [], 
-				  transId, 
+				  userKey,
+				  [ this.user.account.name ] ,
+				  [],
+				  transId,
 				  JSON.stringify(json_data)
 			  ).catch(err => {
 				  console.log(err.message);
@@ -7060,24 +7060,24 @@
 				  this.afit_se_power_err_msg = err.message;
 				  this.movingFunds = false;
 		  });
-		  
+
 		  /*
 		  let hive_operations = [
-			  
+
 		  ];
-		  let hivepost = await hive.broadcast.sendAsync( 
-			 { operations: hive_operations, extensions: [] }, 
+		  let hivepost = await hive.broadcast.sendAsync(
+			 { operations: hive_operations, extensions: [] },
 			 { posting: posting_key }).catch(err => {
-			 
+
 			 });
-		  
+
 		  */
 		  if (this.afit_se_power_error_proceeding){
 			  return;
 		  }
 		  //console.log(tx.block_num);
 		  console.log(tx.id);
-		  
+
 		  //send HBD as well
 		  //only works on hive
 		  //let chainLnk = hive;//await this.setProperNode ();
@@ -7085,9 +7085,9 @@
 		  let outc;
 		  let res = await chainLnk.broadcast.transferAsync(
 				  userKey,
-				  this.user.account.name, 
-				  targetAcct, 
-				  parseFloat(hbd_amount).toFixed(3) + ' HBD', 
+				  this.user.account.name,
+				  targetAcct,
+				  parseFloat(hbd_amount).toFixed(3) + ' HBD',
 				  'BSC bridge').then(
 			  outc => this.confirmCompletion('transfer-bsc', 0, outc ,tx)).catch(err=>
 			  {
@@ -7096,12 +7096,12 @@
 				  this.afit_se_power_err_msg = err.message;
 				  this.movingFunds = false;
 			  });
-		  
+
 		  if (this.afit_se_power_error_proceeding){
 			  return;
 		  }
-		  
-		  
+
+
 		  /*if (tx && tx.ref_block_num){
 			  //notify of success
 			  this.$notify({
@@ -7109,23 +7109,23 @@
 				text: this.$t('Move_AFIT_to_Wallet')+ ' ' +this.$t('Scheduled_successfully'),
 				position: 'top center'
 			  })
-			  
+
 			  //initiate call to adjust AFIT token count
-			  
+
 			  //let url = new URL(process.env.actiAppUrl + 'confirmAFITSEReceipt/?user='+this.user.account.name+'&bchain='+this.cur_bchain);
-			  
+
 			  //connect with our service to confirm AFIT received to proper wallet
 			  try{
-				  
+
 				  fetch(url).then(
 					res => {res.json().then(json => {this.setUserAddedTokens(json);this.movingFunds = false;}).catch(e => {console.log(e);this.movingFunds = false;})
 				  }).catch(e => console.log(e))
-				  
-			  
+
+
 			  }catch(err){
 				  console.error(err);
 				  //this.checkingFunds = false;
-			  }				
+			  }
 		  }else{
 			  //notify of success
 			  this.$notify({
@@ -7135,20 +7135,20 @@
 			  })
 			  this.movingFunds = false;
 		  }*/
-		  
-		  
+
+
 		},
 		async proceedWithdrawToken() {
 		  //handles performing a token power down/unstaking
 		  this.afit_se_power_error_proceeding = false;
 		  this.afit_se_power_err_msg = '';
-		  
-		  
-		  
+
+
+
 		  let tokenMaxVal = this.selTokenUp.balance;
 		  let amount_to_withdraw = this.$refs["token-powerup-amount"].value.trim();
 		  //ensure we have proper values
-		  
+
 		  if (isNaN(amount_to_withdraw) || parseFloat(amount_to_withdraw) < 0.01){
 			this.afit_se_power_error_proceeding = true;
 			this.afit_se_power_err_msg = this.$t('min_amount_token_power');
@@ -7160,9 +7160,9 @@
 			this.afit_se_power_err_msg = this.$t('max_amount_token_power');
 			return;
 		  }
-		  
+
 		  if (!localStorage.getItem('std_login')){
-		  
+
 			  //store the transaction to Steem BC according to S-E protocol for withdraw
 			  let link = this.$steemconnect.sign('custom_json', {
 				required_auths: "[\"" + this.user.account.name + "\"]",
@@ -7172,14 +7172,14 @@
 				authority: 'active',
 				auto_return: true,
 			  }, window.location.origin + '/wallet?op='+this.$t('Withdraw_token')+'&status=success');
-			  
+
 			  //redirect to proper action
 			  window.location = link;
-		  
-			  
-		  }else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+
+
+		  }else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
 			  return new Promise((resolve) => {
-			  
+
 				  let targetAcct = 'actifit.h-e';
 				  let transId = process.env.hiveEngineChainId;
 				  let curr = 'hivepegged';
@@ -7188,9 +7188,9 @@
 					  transId = 'ssc-mainnet1';
 					  curr = 'steempegged';
 				  }
-				  
-				  
-				  
+
+
+
 				  let json_data = {
 					  contractName: curr,
 					  contractAction: 'withdraw',
@@ -7198,8 +7198,8 @@
 						  quantity: '' + amount_to_withdraw,//needs to be string
 					  }
 				  }
-				  
-			  
+
+
 				  window.hive_keychain.requestCustomJson(this.user.account.name, transId, 'Active', JSON.stringify(json_data), this.$t('Withdraw_token'), (response) => {
 					  console.log(response);
 					  //notify of success
@@ -7218,7 +7218,7 @@
 						  })
 					  }
 				  });
-			  });		
+			  });
 		  }else if (this.isHiveauthLogin){
 			  let targetAcct = 'actifit.h-e';
 			  let transId = process.env.hiveEngineChainId;
@@ -7228,9 +7228,9 @@
 				  transId = 'ssc-mainnet1';
 				  curr = 'steempegged';
 			  }
-			  
-			  
-			  
+
+
+
 			  let json_data = {
 				  contractName: curr,
 				  contractAction: 'withdraw',
@@ -7238,7 +7238,7 @@
 					  quantity: '' + amount_to_withdraw,//needs to be string
 				  }
 			  }
-			  
+
 			  let op_name = 'custom_json';
 			  let cstm_params = {
 				  required_auths: [this.user.account.name],
@@ -7246,12 +7246,12 @@
 				  id: 'actifit',
 				  json: JSON.stringify(json_data)
 				};
-			  let operation = [ 
+			  let operation = [
 				 [op_name, cstm_params]
 			  ];
-			  
+
 			  let response = await this.processTrxFunc(op_name, cstm_params, true);
-			  
+
 			  //notify of success
 			  if (response.success){
 				  this.$notify({
@@ -7267,18 +7267,18 @@
 					position: 'top center'
 				  })
 			  }
-			  
-			  
+
+
 		  }else{
 			  if (this.$refs["p-ac-key-trans-token"].value == ''){
 				this.afit_se_power_error_proceeding = true;
 				this.afit_se_power_err_msg = this.$t('all_fields_required');
 				return;
 			  }
-			  
-			  
+
+
 			  this.movingFunds = true;
-			  
+
 			  let targetAcct = 'actifit.h-e';
 			  let transId = process.env.hiveEngineChainId;
 			  let curr = 'hivepegged';
@@ -7287,9 +7287,9 @@
 				  transId = 'ssc-mainnet1';
 				  curr = 'steempegged';
 			  }
-			  
-			  
-			  
+
+
+
 			  let json_data = {
 				  contractName: curr,
 				  contractAction: 'withdraw',
@@ -7297,24 +7297,24 @@
 					  quantity: '' + amount_to_withdraw,//needs to be string
 				  }
 			  }
-			  
+
 			  let userKey = this.$refs["p-ac-key-trans-token"].value;
-			  
+
 			  //send out transaction to blockchain
 			  let chainLnk = await this.setProperNode();
 			  let tx = await chainLnk.broadcast.customJsonAsync(
-					  userKey, 
-					  [ this.user.account.name ] , 
-					  [], 
-					  transId, 
+					  userKey,
+					  [ this.user.account.name ] ,
+					  [],
+					  transId,
 					  JSON.stringify(json_data)
 				  ).catch(err => {
 					  console.log(err.message);
 			  });
-			  
+
 			  //console.log(tx.block_num);
 			  console.log(tx);
-			  
+
 			  if (tx && tx.ref_block_num){
 				  //notify of success
 				  this.$notify({
@@ -7322,22 +7322,22 @@
 					text: this.$t('Withdraw_token')+ ' ' +this.$t('completed_success'),
 					position: 'top center'
 				  })
-				  
+
 				  //initiate call to adjust AFIT token count
-				  
+
 				  /*let url = new URL(process.env.actiAppUrl + 'confirmAFITSEReceipt/?user='+this.user.account.name+'&bchain='+this.cur_bchain);
 				  //connect with our service to confirm AFIT received to proper wallet
 				  try{
-					  
+
 					  fetch(url).then(
 						res => {res.json().then(json => {this.setUserAddedTokens(json);this.movingFunds = false;}).catch(e => {console.log(e);this.movingFunds = false;})
 					  }).catch(e => console.log(e))
-					  
-				  
+
+
 				  }catch(err){
 					  console.error(err);
 					  //this.checkingFunds = false;
-				  }		*/		
+				  }		*/
 			  }else{
 				  //notify of success
 				  this.$notify({
@@ -7345,9 +7345,9 @@
 					text: this.$t('error_performing_operation'),
 					position: 'top center'
 				  })
-				  
+
 			  }
-			  
+
 			  this.movingFunds = false;
 		  }
 		},
@@ -7364,7 +7364,7 @@
 				  })
 				  console.log(outcome.error);*/
 				  this.fetchUserData();
-				  
+
 			  }/*else{
 				  this.$notify({
 					group: 'error',
@@ -7380,9 +7380,9 @@
 				  return;
 			  }
 			  let accToken = localStorage.getItem('access_token')
-			  
+
 			  let url = new URL(process.env.actiAppUrl + 'resetFundsPass/?user='+this.user.account.name);
-			  
+
 			  let reqHeads = new Headers({
 				'Content-Type': 'application/json',
 				'x-acti-token': 'Bearer ' + accToken,
@@ -7426,7 +7426,7 @@
 				  })
 			return;
 		  }
-		  
+
 		  if (!localStorage.getItem('std_login')){
 			  //https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
 			  var link = this.$steemconnect.sign('transfer', {
@@ -7436,10 +7436,10 @@
 				memo: '',//no memo needed
 				auto_return: true,
 			  });
-		  
+
 			  //launch the SC window
 			  window.open(link);
-			  
+
 			  //also start verification process
 			  let url = new URL(process.env.actiAppUrl + 'confirmPaymentPasswordVerify/'+'?bchain=' + this.cur_bchain);
 			  //compile all needed data and send it along the request for processing
@@ -7456,15 +7456,15 @@
 				  console.error(err);
 			  }
 			  this.checkingFunds = false;
-			  
-		  }else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
+
+		  }else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
 			  return new Promise((resolve) => {
 				  window.hive_keychain.requestTransfer(this.user.account.name, this.target_exchange_account, parseFloat(this.$refs["pass-transfer-amount"].value).toFixed(3),'',this.transferTypePass,(response) => {
 					console.log(response);
 					this.confirmCompletion('transfer-verify', this.$refs["pass-transfer-amount"].value, response)
 				  }, true);
-			  });	
-			  
+			  });
+
 		  }else if (this.isHiveauthLogin){
 			  let opname = 'transfer';
 			  let	params = {
@@ -7474,13 +7474,13 @@
 					  "memo": ""
 				  };
 			  let res = await this.processTrxFunc(opname, params, true);
-			  
+
 			  if (res.success){
 				  this.confirmCompletion('transfer-verify', this.$refs["pass-transfer-amount"].value, res)
 			  }
-			  
+
 		  }else{
-			  
+
 			  if (this.$refs["p-ac-key-funds-ver"].value == ''){
 				this.error_proceeding = true;
 				this.error_msg = this.$t('all_fields_required');
@@ -7492,14 +7492,14 @@
 				  })
 				return;
 			  }
-		  
-			  
+
+
 			  let confirmPopup = confirm(this.$t('Confirm_verf_transfer').replace('_AMOUNT_',this.$refs["pass-transfer-amount"].value).replace('_CURR_',this.transferTypePass));
 			  if (!confirmPopup){
 				  this.checkingFunds = false;
 				  return;
 			  }
-		  
+
 			  let chainLnk = await this.setProperNode ();
 			  console.log('perform transfer');
 			  //console.log(this.$refs["p-ac-key-funds-ver"].value);
@@ -7516,12 +7516,12 @@
 				  this.error_msg = this.$t('error_operation_active_key');
 				  this.checkingFunds = false;
 				  });
-				  
+
 			  /*steem.broadcast.claimRewardBalanceAsync(this.user.account.name,this.claimSTEEM, this.claimSBD, this.claimSP).then(
 				  res => ).catch(err=>console.log(err));*/
 		  }
-		  
-		  
+
+
 		},
 		async proceedBuyAFIT () {
 		  //function handles the actual processing of the buy event
@@ -7529,7 +7529,7 @@
 		  this.afit_buy_error_proceeding = false;
 		  this.afit_buy_err_msg = '';
 		  this.transConfirmed = false;
-		  
+
 		  let afit_amount_to_buy = this.$refs["afit-amount-buy"].value.trim();
 		  //ensure we have proper values
 		  if (isNaN(afit_amount_to_buy) || parseFloat(afit_amount_to_buy) < 1){
@@ -7538,7 +7538,7 @@
 			this.checkingBought = false;
 			return;
 		  }
-		  
+
 		  var link = this.$steemconnect.sign('transfer', {
 			from: this.user.account.name,
 			to: this.target_buy_account,
@@ -7546,10 +7546,10 @@
 			memo: '',//no memo needed
 			auto_return: true,
 		  });
-		  
+
 		  //launch the SC window
 		  window.open(link);
-		  
+
 		  //also start verification process
 		  let url = new URL(process.env.actiAppUrl + 'confirmBuyAction');
 		  //compile all needed data and send it along the request for processing
@@ -7562,7 +7562,7 @@
 		  try{
 			  let res = await fetch(url);
 			  let outcome = await res.json();
-			  
+
 			  if (outcome.paymentReceivedTx != ''){
 				  //notify user
 				  this.transConfirmed = true;
@@ -7572,7 +7572,7 @@
 		  }catch(err){
 			  console.error(err);
 		  }
-		  
+
 		  this.checkingBought = false;
 		},
 		async exchangeTokensUpvote () {
@@ -7594,7 +7594,7 @@
 			this.buyMore = true;
 			return;
 		  }
-		  
+
 		  //proceed with storing the swap and decreasing user AFIT tokens count
 		  let url = new URL(process.env.actiAppUrl + 'performAfitSteemExchange');
 		  //compile all needed data and send it along the request for processing
@@ -7617,7 +7617,7 @@
 					  case '200': exchange_cat = 4; break;
 					  default: exchange_cat = -1;
 				  }
-				  
+
 				  //store the transaction to Steem BC
 				  let cstm_params = {
 					  required_auths: [],
@@ -7625,15 +7625,15 @@
 					  id: 'actifit',
 					  json: "{ \"afit_upvote_exchange_type\": \""+exchange_cat+"\"}"
 					};
-			
-				  
+
+
 				  let res = await this.processTrxFunc('custom_json', cstm_params);
-		  
+
 				  console.log('trx status:'+res.success);
 				  /*if (res.success){
-					  
+
 				  }*/
-				  
+
 				  this.swapResult = this.$t('afit_steem_swap_success');
 				  //update user data
 				  this.fetchUserData();
@@ -7649,7 +7649,7 @@
 		  return parseFloat(this.afitBuyAmount * this.afitPrice / this.steemPrice).toFixed(3);
 		},
 		setSteemPrice (_steemPrice){
-		  
+
 		  this.steemPrice = parseFloat(_steemPrice).toFixed(3);
 		},
 		setSBDPrice (_sbdPrice){
@@ -7770,26 +7770,26 @@
 			};
 
 			await Promise.all([
-			fetchPrice(`${process.env.actiAppUrl}curAFITPrice`, 
+			fetchPrice(`${process.env.actiAppUrl}curAFITPrice`,
 				json => this.setAFITPrice(json.unit_price_usd)),
-			fetchPrice(`${process.env.actiAppUrl}AFITBSCPrice`, 
+			fetchPrice(`${process.env.actiAppUrl}AFITBSCPrice`,
 				json => this.setAFITBSCPrice(json.price)),
-			fetchPrice(`${process.env.actiAppUrl}AFITXBSCPrice`, 
+			fetchPrice(`${process.env.actiAppUrl}AFITXBSCPrice`,
 				json => this.setAFITXBSCPrice(json.price)),
-			fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=steem&vs_currencies=usd', 
+			fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=steem&vs_currencies=usd',
 				json => this.setSteemPrice(json.steem.usd)),
-			fetchPrice(`${process.env.actiAppUrl}hivePrice`, 
+			fetchPrice(`${process.env.actiAppUrl}hivePrice`,
 				json => this.setHivePrice(json.hive.usd)),
-			fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=blurt&vs_currencies=usd', 
+			fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=blurt&vs_currencies=usd',
 				json => this.setBlurtPrice(json.blurt.usd)),
-			fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=steem-dollars&vs_currencies=usd', 
+			fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=steem-dollars&vs_currencies=usd',
 				json => this.setSBDPrice(json['steem-dollars'].usd)),
-			fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=hive_dollar&vs_currencies=usd', 
+			fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=hive_dollar&vs_currencies=usd',
 				json => this.setHBDPrice(json['hive_dollar'].usd))
 			]);
 
 			this.screenWidth = screen.width;
-			
+
 			if (this.$route.query.op && this.$route.query.status) {
 			this.$notify({
 				group: 'success',
@@ -7829,13 +7829,13 @@
 		}
 	}
   </script>
-  
+
   <style lang="sass">
 	.history
 	  max-width: 500px
   </style>
   <style>
-  
+
   @media screen and (max-width: 600px) {
 	.modal-content {
 	  padding: .3rem;
@@ -7914,39 +7914,39 @@
 	  background-color: whitesmoke;
 	}
 	.wallet-container{
-	  /* background-color: red; 
+	  /* background-color: red;
 	  opacity: 0.7; */
 	  background-color: beige;
 	  /* border: 2px solid red; */
 	  border-radius: 3px;
 	  margin-bottom: 5px;
 	  min-width: 600px; /* make it scroll friendly on mobile size */
-	  
+
 	  /* 3D look */
 	  /* -moz-box-shadow: 0px 1px 1px rgba(000,000,000,0.5), inset 1px 2px 0px rgba(255,255,255,0.4);
 	  -webkit-box-shadow: 0px 1px 1px rgb(0 0 0 / 50%), inset 1px 2px 0px rgb(255 255 255 / 40%);
 	  box-shadow: 0px 1px 1px rgb(0 0 0 / 50%), inset 1px 2px 0px rgb(255 255 255 / 40%);
 	  text-shadow: 1px 1px 2px rgb(0 0 0 / 70%), 0px 1px 0px rgb(255 255 255 / 40%);
 	  box-shadow: 0 70px 40px -20px rgb(0 0 0 / 20%); */
-	  
+
 	}
-	
+
 	.head-title{
 		  min-height: 40px;
 		  background-color: red;
 		  color: white;
 	}
-	
+
 	.wallet-container .token-entry.row div {
 	  /* border: none; */
 	  /* font-size: 16px; */
 	  box-shadow: 3px 3px 3px rgb(255 0 0 / 20%);
 	}
-	
+
 	 .head-title div{
 	  box-shadow: 3px 3px 3px rgb(255 255 255 / 60%) !important;
 	}
-	
+
 	.pro-name {
 	  background: radial-gradient(red,transparent);
 	  color: #fff;
@@ -7954,7 +7954,7 @@
 	.action-box{
 	  background-color: beige;
 	}
-	
+
 	.token_actions .btn{
 	  margin: 3px;
 	}

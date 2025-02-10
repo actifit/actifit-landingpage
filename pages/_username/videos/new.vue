@@ -211,7 +211,7 @@ https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbf
 	import Vue from 'vue';
 
 	//for hiveauth
-	import { Signature, hash, PublicKey, ec } from 'elliptic';
+	//import { Signature, hash, PublicKey, ec } from 'elliptic';
 
 
 	Vue.directive('click-outside', {

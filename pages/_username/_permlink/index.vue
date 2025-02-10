@@ -24,7 +24,7 @@
 			  <h5 class="text-brand" >
 				<UserHoverCard :username="report.author"/>
 			  </h5>
-			  <a :href="buildLink" class="p-1"><span class="date-head text-muted">{{ date }}</span>&nbsp;<i class="fas fa-link"></i></a>
+			  <a :href="buildLink" class="p-1"><span class="date-head text-muted" :title="date">{{ $getTimeDifference(report.created) }}</span>&nbsp;<i class="fas fa-link"></i></a>
 			  <i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent" ></i>
 			  <i v-if="!showTranslated" class="fa-solid fa-language text-brand" v-on:click="translateContent"></i>
 
