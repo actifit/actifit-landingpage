@@ -438,6 +438,7 @@ module.exports = {
   Rank_total_posts: '<b>Posts Rewarded:</b> The more activity reports you make and get rewarded, the higher this component scores your rank increases according to below thresholds, with each box representing 4 points.',
   Rank_recent_posts: '<b>Recent Posts Rewarded:</b> This dynamic factor is affected by the number of posts rewarded over the last 10 days. The more you are active and posting over the last 10 days, the higher this component scores according to below thresholds, with each box representing 2 points.',
   User_rank_details: 'User Rank Details',
+  BNB_CHAIN: 'BNB CHAIN',
   Wallet: 'Wallet',
   Vote_on: 'Vote on',
   Your_Voting_Power: 'Your Voting Power:',
