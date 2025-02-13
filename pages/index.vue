@@ -84,7 +84,7 @@
     </div>
     <!-- intro -->
     <!--<transition type="animation">-->
-    <section class="intro" id="content">
+    <section class="intro reveal" id="content">
       <div class="container py-5">
         <h1 class="pt-5 mb-3 text-capitalize text-center headline" v-html="$t('homepage.section1_title')"></h1>
         <p class="lead mb-4 pb-5 text-center">
@@ -114,7 +114,7 @@
     <!--</transition>-->
 
     <!-- texts with images -->
-    <section class="showcase">
+    <section class="showcase reveal">
       <div class="container-fluid p-0">
 
         <!-- app -->
@@ -125,12 +125,12 @@
             <h2 class="text-capitalize">{{ $t('homepage.section2_title') }}</h2>
             <p class="lead mb-0" v-html="$t('homepage.section2_desc')"></p>
             <div class="text-center mt-5">
-              <a href="https://bit.ly/actifit-app" target="_blank">
+              <a href="https://links.actifit.io/android" target="_blank">
                 <img src="/img/google-play.png" />
               </a>
               <br>
               <br>
-              <a href="https://bit.ly/actifit-ios" target="_blank">
+              <a href="https://links.actifit.io/ios" target="_blank">
                 <img src="/img/app-store.png" />
               </a>
             </div>
@@ -138,7 +138,7 @@
         </div>
 
         <!-- use case -->
-        <div class="row no-gutters">
+        <div class="row no-gutters slide-in-left">
           <div class="col-lg-6 text-white showcase-img" style="background-image: url('/img/showcase-4.jpg');"></div>
           <div class="col-lg-6 my-auto showcase-text">
             <h2 class="text-capitalize">{{ $t('homepage.section3_title') }}</h2>
@@ -148,7 +148,7 @@
         </div>
 
         <!-- delegation -->
-        <div class="row no-gutters">
+        <div class="row no-gutters slide-in-right">
           <div class="col-lg-6 order-lg-2 text-white showcase-img rounded"
             style="background-image: url('/img/showcase-3.jpg');"></div>
           <div class="col-lg-6 order-lg-1 my-auto showcase-text rounded">
@@ -167,7 +167,7 @@
 
 
     <!-- top Delegators -->
-    <section id="delegators" class="py-5">
+    <section id="delegators" class="reveal py-5">
       <div class="container">
         <h1 class="text-center pb-5">
           <i class="fas fa-heart"></i><br>
@@ -193,7 +193,7 @@
     </section>
 
     <!-- leaderboard -->
-    <section id="leaderboard" class="py-5 bg-brand text-light">
+    <section id="leaderboard" class="py-5 bg-brand text-light reveal">
       <div class="container">
         <h1 class="text-center pb-5">
           <i class="fas fa-medal"></i><br>
@@ -249,7 +249,7 @@
     </section>
 
     <!-- team -->
-    <section id="team" class="py-5">
+    <section id="team" class="py-5 reveal">
       <div class="container">
         <h1 class="text-center pb-5">
           <i class="fas fa-users"></i><br>
@@ -515,7 +515,7 @@
 
 
     <!-- news -->
-    <section id="news" class="py-5 bg-brand text-light">
+    <section id="news" class="reveal py-5 bg-brand text-light">
       <h1 class="text-center pb-3">
         <i class="far fa-newspaper"></i><br>
         {{ $t('News') }}
@@ -706,6 +706,23 @@ export default {
         res => {
           res.json().then(json => this.setPendingRewards(json)).catch(e => reject(e))
         }).catch(e => reject(e))
+    },
+    animator(){
+      this.observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+          } else {
+            entry.target.classList.remove('active');
+          }
+        });
+      });
+
+      // Observe all sections with the "reveal" class
+      const sections = this.$el.querySelectorAll('.reveal, .slide-in-left, .slide-in-right');
+      sections.forEach(section => {
+        this.observer.observe(section);
+      });
     }
   },
   async mounted() {
@@ -713,6 +730,10 @@ export default {
     console.log('main mounted');
     this.$store.dispatch('steemconnect/login')
     this.fetchUserData();
+
+
+    //prepare animations
+    this.animator();
 
     // fetch data
     this.$store.dispatch('fetchRewardedActivityCount')
@@ -732,9 +753,13 @@ export default {
     //dynamically add the navbar to avoid multiple calls into it
     this.renderReady = true;
 
+
   },
   async beforeDestory() {
     this.$refs['pendingRewardsHider'].click();
+    if (this.observer) {
+      this.observer.disconnect();
+    }
   }
 }
 </script>
@@ -866,4 +891,6 @@ div.footer {
 .bold-content {
   font-weight: bold;
 }
+
+
 </style>
