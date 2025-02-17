@@ -195,3 +195,12 @@ a:hover {
   transform: translateY(0);
   opacity: 1;
 }
+
+.bg-gradient {
+  background: linear-gradient(90deg, #FF0000, rgba(255, 0, 0, 0.2));
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.font-weight-semibold {
+  font-weight: 600;
+}

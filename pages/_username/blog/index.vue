@@ -5,14 +5,16 @@
 
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-5">
-      <h2 class="text-center mb-5">{{ username }}'s {{$t('Blog')}} <img src="/img/HIVE.png" class="mr-2 token-logo-md"></h2>
+      <div class="bg-gradient rounded mb-5 p-2">
+        <h2 class="font-weight-semibold text-white text-left h4">{{ username }}'s {{$t('Blog')}} <img src="/img/HIVE.png" class="mr-2 token-logo-md"></h2>
+      </div>
 	  <!--<ChainSelection />-->
-	  
+
       <!-- show spinner while loading -->
       <div class="text-center" v-if="loading">
         <i class="fas fa-spinner fa-spin text-brand"></i>
       </div>
-	  
+
 	  <div class="text-center p-3" v-else-if="user && user.account.name == username">
 		<a href="#" @click="initiateNewPost" data-toggle="modal"
 			 data-target="#editPostModal" :title="$t('Create_post')" class="btn btn-brand border">
@@ -22,9 +24,9 @@
 	  <div class="row text-right">
 		<div class="col-12 pb-2"><a :href="'/'+username+'/comments'" class="btn btn-brand border"  :title="$t('view_comments')"><i class="far fa-comments"></i></a>&nbsp;<a :href="'/'+username+'/videos'" class="btn btn-brand border"  :title="$t('view_videos')"><i class="fas fa-video"></i></a></div>
 	  </div>
-	  
+
       <!-- show listing when loaded -->
-	  <div class="row" v-if="userPosts.length">
+	  <div v-if="userPosts.length">
 		<div class="row"  v-for="iterx in Math.ceil(userPosts.length / splitFactor)" :key="iterx">
 			<div v-for="itery in splitFactor" :key="itery" class="col-md-6 col-lg-4 mb-4">
 				<Post v-if="(iterx - 1) * splitFactor + (itery - 1) < userPosts.length" :post="userPosts[(iterx - 1) * splitFactor + (itery - 1)]" :displayUsername="username" :pstId="(iterx - 1) * splitFactor + (itery - 1)"/>
@@ -57,7 +59,7 @@
 	<PostModal :post="activePost" @nextPost="nextPost(1)" @prevPost="nextPost(-1)"/>
     <EditPostModal />
     <VoteModal />
-    
+
         <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
 		<notifications :group="'warn'" :position="'top center'" :classes="'vue-notification warn'" />
         <notifications :group="'error'" :position="'top center'" :classes="'vue-notification error'" />
@@ -113,7 +115,7 @@
 			console.log('user activity change in chain '+newBchain);
 			this.cur_bchain = newBchain;
 			await this.$store.dispatch('steemconnect/refreshUser');
-			
+
 			// reset previously fetched posts to get latest
 			this.$store.commit('setUserPosts', [])
 
@@ -171,7 +173,7 @@
 	  },
       async loadMore () {
         this.loadingMore = true
-		
+
 		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		this.$store.commit('setBchain', cur_bchain);
 		console.log('dispatch MORE fetching user posts')
@@ -181,8 +183,8 @@
         this.loadingMore = false
       },
 	  async fetchUserData () {
-		if (typeof this.user != 'undefined' && this.user != null){	  
-		  
+		if (typeof this.user != 'undefined' && this.user != null){
+
 		  if (!localStorage.getItem('std_login')){
 		  //if (!this.stdLogin){
 			  //update user info from blockchain
@@ -201,18 +203,18 @@
 	  this.fetchUserData();
 
       // fetch posts
-	  
+
 	  let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 	  this.$store.commit('setBchain', cur_bchain);
-	  
+
       // reset previously fetched posts to get latest
       this.$store.commit('setUserPosts', [])
 
       // disable load more button and only show if there actually are more posts to load
       this.$store.commit('setMoreUserPostsAvailable', false)
-	  
+
       await this.$store.dispatch('fetchUserPosts', this.username)
-	  
+
 	  //console.log(this.userPosts);
 
       // remove loading indicator
