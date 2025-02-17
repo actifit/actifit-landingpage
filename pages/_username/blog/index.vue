@@ -5,9 +5,9 @@
 
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-5">
-      <div class="bg-gradient rounded mb-5 p-2">
-        <h2 class="font-weight-semibold text-white text-left h4">{{ username }}'s {{$t('Blog')}} <img src="/img/HIVE.png" class="mr-2 token-logo-md"></h2>
-      </div>
+
+      <ListHeadingSection :username="username" :textualDisplay="textualTitle"></ListHeadingSection>
+
 	  <!--<ChainSelection />-->
 
       <!-- show spinner while loading -->
@@ -75,8 +75,10 @@
   import PostModal from '~/components/PostModal'
   import EditPostModal from '~/components/EditPostModal'
   import VoteModal from '~/components/VoteModal'
+  import ListHeadingSection from '~/components/ListHeadingSection.vue'
 
   import { mapGetters } from 'vuex'
+
   //import ChainSelection from '~/components/ChainSelection'
 
   export default {
@@ -96,6 +98,7 @@
       PostModal,
       EditPostModal,
       VoteModal,
+      ListHeadingSection
 	  //DailyActivityChartModal //,
 	  //ChainSelection
     },
@@ -103,8 +106,8 @@
       return {
         loading: true, // initial loading state
         loadingMore: false, // loading state for loading more posts
-		splitFactor: 9,
-		inlineAds: 2,
+		    splitFactor: 9,
+		    inlineAds: 2,
       }
     },
 	watch: {
@@ -136,10 +139,13 @@
 
       // get username from url
       username () {
-	    if (this.$route.params.username.startsWith('@')){
-		  return this.$route.params.username.substring(1, this.$route.params.username.length);
-		}
+	      if (this.$route.params.username.startsWith('@')){
+		      return this.$route.params.username.substring(1, this.$route.params.username.length);
+		    }
         return this.$route.params.username
+      },
+      textualTitle (){
+        return this.username+"'s "+this.$t('Blog') + " <img src='/img/HIVE.png' class='mr-2 token-logo-md'>";
       }
     },
     methods: {

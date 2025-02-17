@@ -1,0 +1,30 @@
+<template>
+  <div class="bg-gradient rounded mb-5 p-2">
+    <div class="user-avatar large-avatar mr-1 mb-3 col-12 col-md-12 float-left"
+      :style="'background-image: url('+this.profImgUrl+'/u/' + this.username + '/avatar)'">
+    </div>
+
+    <h2 class="font-weight-semibold text-white text-left h4" v-html="textualDisplay"></h2>
+
+  </div>
+</template>
+<script>
+
+export default {
+  props: {
+    username: {
+      type: String,
+      required: true
+    },
+    textualDisplay: {
+      type:String,
+      required: true
+    }
+  },
+  data (){
+    return {
+      profImgUrl: process.env.hiveImgUrl,
+    }
+  }
+}
+</script>

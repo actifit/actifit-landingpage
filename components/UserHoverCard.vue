@@ -247,10 +247,10 @@ export default {
   mounted() {
     hive.api.setOptions({ url: process.env.hiveApiNode })
 
-    this.profImgUrl = //(localStorage.getItem('cur_bchain') === 'STEEM')
+    //this.profImgUrl = //(localStorage.getItem('cur_bchain') === 'STEEM')
       //? process.env.steemImgUrl
       //:
-      process.env.hiveImgUrl
+    //  process.env.hiveImgUrl
 
       this.fetchUserRank()
   },
