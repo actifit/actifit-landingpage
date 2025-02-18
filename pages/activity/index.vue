@@ -5,13 +5,13 @@
 
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-5">
-      <h2 class="text-center mb-5">{{ $t('Activity_Reports') }}</h2>
-	  
+      <ListHeadingSection :textualDisplay="$t('Activity_Reports')" />
+
 	  <!-- show voting counter -->
 	  <VotingStatus v-if="reports.length" />
-	  
+
 	  <!--<div class="col-md-12 goog-ad-horiz-90"><adsbygoogle ad-slot="6804482273"/></div>-->
-	  
+
 	  <!-- enable display of up to 2 ads among content -->
 	 <div v-if="reports.length">
 		<div class="row"  v-for="iterx in Math.ceil(reports.length / splitFactor)" :key="iterx">
@@ -23,7 +23,7 @@
 			</div>-->
 		</div>
       </div>
-	  
+
 	  <div class="col-md-12 text-center" v-else>
 		<i class="fas fa-spinner fa-spin text-brand"></i>
 	  </div>
@@ -65,7 +65,8 @@
   import VotingStatus from '~/components/VotingStatus'
   import NotifyModal from '~/components/NotifyModal'
   import DailyActivityChartModal from '~/components/DailyActivityChartModal'
-	
+  import ListHeadingSection from '../../components/ListHeadingSection.vue'
+
   import { mapGetters } from 'vuex'
 
   export default {
@@ -83,11 +84,12 @@
       Report,
       Footer,
       ReportModal,
-	  EditPostModal,
+	    EditPostModal,
       VoteModal,
-	  VotingStatus,
-	  NotifyModal,
-	  DailyActivityChartModal
+      ListHeadingSection,
+      VotingStatus,
+      NotifyModal,
+      DailyActivityChartModal
     },
     data () {
       return {
@@ -148,16 +150,16 @@
 
       // disable load more button and only show if there actually are more posts to load
       this.$store.commit('setMoreReportsAvailable', false)
-	  
+
 	  this.$store.dispatch('steemconnect/login')
 	  this.fetchUserData();
-	  
+
       // fetch reports
 	  let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
 	  this.$store.commit('setBchain', cur_bchain);
-	  
+
       await this.$store.dispatch('fetchReports')
-	  
+
       // remove loading indicator
       this.loading = false
     }
