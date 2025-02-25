@@ -118,9 +118,9 @@
       <div class="container-fluid p-0">
 
         <!-- app -->
-        <div class="row no-gutters">
+        <div class="row no-gutters fade-blur">
           <div class="col-lg-6 order-lg-2 text-white showcase-img"
-            style="background-image: url('/img/showcase-1.jpg');"></div>
+            style="background-image: url('/img/landingimgs/healthier_you.jpeg');"></div>
           <div class="col-lg-6 order-lg-1 my-auto showcase-text">
             <h2 class="text-capitalize">{{ $t('homepage.section2_title') }}</h2>
             <p class="lead mb-0" v-html="$t('homepage.section2_desc')"></p>
@@ -138,8 +138,8 @@
         </div>
 
         <!-- use case -->
-        <div class="row no-gutters slide-in-left">
-          <div class="col-lg-6 text-white showcase-img" style="background-image: url('/img/showcase-4.jpg');"></div>
+        <div class="row no-gutters fade-scale"><!--slide-in-left-->
+          <div class="col-lg-6 text-white showcase-img" style="background-image: url('/img/landingimgs/actifit_gym_pay_back.jpeg');"></div>
           <div class="col-lg-6 my-auto showcase-text">
             <h2 class="text-capitalize">{{ $t('homepage.section3_title') }}</h2>
             <p class="lead mb-0" v-html="$t('homepage.section3_desc')">
@@ -148,9 +148,9 @@
         </div>
 
         <!-- delegation -->
-        <div class="row no-gutters slide-in-right">
+        <div class="row no-gutters fade-blur"><!--slide-in-right-->
           <div class="col-lg-6 order-lg-2 text-white showcase-img rounded"
-            style="background-image: url('/img/showcase-3.jpg');"></div>
+            style="background-image: url('/img/landingimgs/effort_rewarded_crypto.jpeg');"></div>
           <div class="col-lg-6 order-lg-1 my-auto showcase-text rounded">
             <h2 class="text-capitalize">{{ $t('homepage.section4_title') }}</h2>
             <p class="lead mb-0">{{ $t('homepage.section4_desc') }}</p>
@@ -719,7 +719,7 @@ export default {
       });
 
       // Observe all sections with the "reveal" class
-      const sections = this.$el.querySelectorAll('.reveal, .slide-in-left, .slide-in-right');
+      const sections = this.$el.querySelectorAll('.reveal, .fade-blur, .fade-scale');//.slide-in-left, .slide-in-right');
       sections.forEach(section => {
         this.observer.observe(section);
       });
@@ -842,10 +842,6 @@ section {
 
 section.showcase {
   box-shadow: none;
-}
-
-div.footer {
-  /* margin-top: 0.2em; */
 }
 
 .showcase .showcase-img {
