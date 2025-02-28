@@ -1121,9 +1121,6 @@
 	  img{
 		  max-width: 100%;
 	  }
-	  .report-tags{
-		  font-style: italic;
-	  }
 	  .modal-author{
 		  margin-left: 10px !important;
 	  }
@@ -1169,10 +1166,6 @@
 	  }
 	  .report-modal-prelim-info span{
 		/* padding: 5px; */
-	  }
-	  .single-tag{
-		  background-color: red;
-		  color: white;
 	  }
 	  .pointer-cur-cls{
 		  cursor: pointer;

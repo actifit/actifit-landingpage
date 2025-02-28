@@ -946,10 +946,6 @@ import UserHoverCard from './UserHoverCard.vue'
 	.report-modal-prelim-info span{
 	  /* padding: 5px; */
 	}
-	.single-tag{
-		background-color: red;
-		color: white;
-	}
 	.pointer-cur-cls{
 		cursor: pointer;
 	}

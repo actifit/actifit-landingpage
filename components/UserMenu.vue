@@ -79,7 +79,7 @@
 		  <SteemStats :user="user" minView="true" class="dropdown-item" :key="reload"/>
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/userrank')"><i class="fa-solid fa-list-ol text-brand"></i>&nbsp;{{ $t('My_Rank') }} <br/><span class="text-brand pl-4"> {{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRankObj && this.userRankObj.afitx_rank">{{  displayIncreasedUserRank }}</span> </span></a>
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet')"><i class="fa-solid fa-wallet text-brand"></i>&nbsp;{{ $t('My_Wallet') }} <br/><span class="text-brand pl-4">  {{ formattedUserTokens }}</span></a>
-		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/referrals')"><i class="fas fa-user-friends text-brand"></i>&nbsp;{{ $t('My_Referrals') }} <br/><span class="text-brand pl-4"> {{ referralCount }} </span></a>
+		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/referrals')"><i class="fas fa-user-friends text-brand"></i>&nbsp;{{ $t('Referrals') }} <br/><span class="text-brand pl-4"> {{ referralCount }} </span></a>
           <a class="dropdown-item" href="#" @click.prevent="$router.push('/activity/' + user.account.name)"><i class="fas fa-running text-brand"></i>&nbsp;{{ $t('My_Activity') }}</a>
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/'+user.account.name + '/blog')"><i class="fa-solid fa-pen-to-square text-brand"></i>&nbsp;{{ $t('My_Blog') }}</a>
 		  <a class="dropdown-item" href="#" @click.prevent="$router.push('/blog/new')"><i class="fa-solid fa-plus-square text-brand"></i>&nbsp;{{ $t('New_Blog') }}</a>
