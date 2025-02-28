@@ -1,13 +1,13 @@
 <template>
   <!-- blog listing for single user -->
   <div>
-    
+
 
     <!-- listing -->
-    <div class="container mb-2 pb-2 scroll-container">
+    <div class="mb-2 pb-2 scroll-container">
       <!--<h2 class="text-center mb-5">{{ community }} <img src="/img/HIVE.png" class="mr-2 token-logo-md"></h2>-->
 	  <!--<ChainSelection />-->
-	  
+
       <!-- show spinner while loading -->
       <div class="text-center" v-if="loading">
         <i class="fas fa-spinner fa-spin text-brand"></i>
@@ -18,9 +18,9 @@
 		</a>
 	  </div>
 	  <div class="cmm-container content" :id="community" v-if="communityPosts.length">
-		
+
 		<Post v-for="iterx in communityPosts.length" :key="iterx" :post="communityPosts[(iterx - 1)]" :displayUsername="username" :pstId="(iterx - 1)" class="card post col-md-4 p-1 m-1 " explorePost="false"/>
-		
+
 			<!-- show load more button if there are more posts available -->
 		<div class="text-center pt-5 moreblock pr-4" v-if="moreCommunityPostsAvailable">
 			<a href="#" class="btn btn-brand" @click.prevent="loadMore()">
@@ -31,7 +31,7 @@
 	  </div>
 	  <button v-if="communityPosts.length" @click.prevent="scrollContent(community, -200, 0)" class="scroll-button left m-2 p-3">&lt;</button>
 	  <button v-if="communityPosts.length" @click.prevent="scrollContent(community, 200, 0)" class="scroll-button right m-2 p-3">&gt;</button>
-	  
+
       <!-- show listing when loaded -->
 	  <!--<div class="row" >
 		<div class="row"  v-for="iterx in Math.ceil(communityPosts.length / splitFactor)" :key="iterx">
@@ -53,7 +53,7 @@
 	<!--<PostModal :post="activePost" @nextPost="nextPost(1)" @prevPost="nextPost(-1)"/>
     <EditPostModal />-->
     <VoteModal />
-    
+
         <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
 		<notifications :group="'warn'" :position="'top center'" :classes="'vue-notification warn'" />
         <notifications :group="'error'" :position="'top center'" :classes="'vue-notification error'" />
@@ -105,7 +105,7 @@
 			console.log('user activity change in chain '+newBchain);
 			this.cur_bchain = newBchain;
 			await this.$store.dispatch('steemconnect/refreshUser');
-			
+
 			this.reFetchCommunityPosts();
 		}
 		//this.reload += 1;
@@ -116,7 +116,7 @@
 	  ...mapGetters('steemconnect', ['stdLogin']),
       //...mapGetters(['communityPosts', 'moreCommunityPostsAvailable', 'activePost', 'bchain']),
 
-      
+
     },
     methods: {
 	  nextPost (direction){
@@ -149,15 +149,15 @@
 	  },
       async loadMore () {
         this.loadingMore = true
-		
+
 		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		this.$store.commit('setBchain', cur_bchain);
 		console.log('dispatch MORE fetching user posts')
-		
+
 		let lastPost = this.communityPosts[this.communityPosts.length -1];
-        
+
 		let result = await this.$store.dispatch('fetchCommunityPosts', {community:this.community, type:this.type, lastAuth: lastPost.author, lastPerm: lastPost.permlink, returnData: true});
-		
+
 		let newPosts = result.posts;
 		this.moreCommunityPostsAvailable = result.morePostsAvailable;
 		if (Array.isArray(newPosts) && newPosts.length > 0){
@@ -165,7 +165,7 @@
 		}
         this.loadingMore = false
       },
-	  
+
 	  async reFetchCommunityPosts(){
 		this.loading = true
 		let result = await this.$store.dispatch('fetchCommunityPosts', {community:this.community, type:this.type, returnData: true});
@@ -188,7 +188,7 @@
 	  //this.fetchUserData();
 
       // fetch posts
-	  
+
 	  let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 	  this.$store.commit('setBchain', cur_bchain);
 	  //this.$store.dispatch('steemconnect/login')

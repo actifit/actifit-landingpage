@@ -65,7 +65,7 @@
   import VotingStatus from '~/components/VotingStatus'
   import NotifyModal from '~/components/NotifyModal'
   import DailyActivityChartModal from '~/components/DailyActivityChartModal'
-  import ListHeadingSection from '../../components/ListHeadingSection.vue'
+  import ListHeadingSection from '~/components/ListHeadingSection.vue'
 
   import { mapGetters } from 'vuex'
 

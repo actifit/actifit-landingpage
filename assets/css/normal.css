@@ -229,3 +229,7 @@ a:hover {
 .font-weight-semibold {
   font-weight: 600;
 }
+
+.shadowed-view{
+  box-shadow: 3px 3px 3px rgb(255 0 0 / 40%)
+}

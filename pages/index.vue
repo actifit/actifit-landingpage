@@ -11,7 +11,7 @@
 
         <!-- wallet/activities preview -->
 
-        <div class="card form mx-auto p-3 mt-3 mt-md-2 text-center border-0 home-card">
+        <div class="card form mx-auto p-3 mt-3 mt-md-2 text-center border-0 home-card shadow rounded">
           <div class="pb-md-2 text-center">
             <img src="/img/actifit_logo.png" alt="Actifit" class="logo" />
             <h1 class="mt-3 mt-sm-2 text-brand title">{{ $t('Actifit') }}</h1>
@@ -864,6 +864,7 @@ section.showcase {
 
 .home-card {
   opacity: 0.9;
+  box-shadow: 3px 3px 3px rgb(255 0 0 / 40%) !important;
 }
 
 .avatar-hive {

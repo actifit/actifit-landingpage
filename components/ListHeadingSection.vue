@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gradient rounded mb-5 p-2">
+  <div class="bg-gradient rounded mb-3 p-2">
     <div v-if="username" class="user-avatar large-avatar mr-1 mb-3 col-12 col-md-12 float-left"
       :style="'background-image: url('+this.profImgUrl+'/u/' + this.username + '/avatar)'">
     </div>

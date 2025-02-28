@@ -5,30 +5,28 @@
 
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-5">
-	  
+
 	  <div class="col-md-12 text-center mb-5 notice-text">
-		  <h2 class="text-center mb-5">{{ $t('Daily_yield') }}<a href="#" data-toggle="modal" data-target="#notifyModal"><i class="fas fa-info-circle" :title="$t('view_details')"></i></a></h2>
-		  <div class="text-center row p-2">
+      <ListHeadingSection :textualDisplay="textualTitle" />
+
+		  <div class="text-left">
 			<span v-if="afitPrice">
-				<img class="token-logo-sm " src="/img/actifit_logo.png">{{ $t('Current') }} {{ $t('AFIT_Token')}} {{ $t('price')}}: $ {{ numberFormat(afitPrice.afitHiveLastUsdPrice, 5) }} | 
+				<img class="token-logo-sm " src="/img/actifit_logo.png">&nbsp;{{ $t('AFIT_Token')}} {{ $t('price')}}: $ {{ numberFormat(afitPrice.afitHiveLastUsdPrice, 5) }} |
 			</span>
 			<span v-if="hivePrice">
-				<img src="/img/HIVE.png" style="max-height: 20px;">{{ $t('Current') }} {{ $t('HIVE')}} {{ $t('price')}}: $ {{ hivePrice }} | 
+				<img src="/img/HIVE.png" style="max-height: 20px;">&nbsp;{{ $t('HIVE')}} {{ $t('price')}}: $ {{ hivePrice }}
 			</span>
-			<!--<span v-if="steemPrice">
-				<img src="/img/STEEM.png" style="max-height: 20px;">{{ $t('Current') }} {{ $t('STEEM')}} {{ $t('price')}}: $ {{ steemPrice }}
-			</span>-->
 		  </div>
-		  <div class="row row-sep">
-			<div class="col-md-12 row-sep-in small-pad-row yf-main-notif p-2 text-left">
+		  <div class="row-sep">
+			<div class="col-md-12 row-sep-in small-pad-row yf-main-notif p-2 text-left shadowed-view">
 				<span v-if="topDelegators.hive">
 					<h4 class="text-center">{{ $t('Daily_pool') }} - {{$t('Hive_delegators')}} <img src="/img/HIVE.png" style="max-height: 20px;"> </h4>
-					
+
 					<h5>
-						{{ $t('daily_amount') }}: {{ dailyHivePool }} {{ $t('AFIT_Token') }} 
+						{{ $t('daily_amount') }}: {{ dailyHivePool }} {{ $t('AFIT_Token') }}
 						<img class="token-logo-sm " src="/img/actifit_logo.png">
 					</h5>
-					
+
 					<h5>{{$t('total_delegations')}}: {{numberFormat(topDelegators.hive.length,0)}}</h5>
 					<h5>{{$t('total_amount_locked')}}: {{numberFormat(delegatedHiveAmount,0)}} {{$t('HIVE')}} ( $ {{numberFormat(delegatedHiveAmount * hivePrice,2)}} )</h5>
 					<h5 v-if="afitPrice && hivePrice">{{$t('yearly_apy')}}: {{calculateYearlyAPY('hive')}}</h5>
@@ -44,7 +42,7 @@
 			<!--<div class="col-md-6 row-sep-in small-pad-row p-2 text-left">
 				<span v-if="topDelegators.steem">
 					<h4 class="text-center">{{ $t('Daily_pool') }} - {{$t('Steem_delegators')}} <img src="/img/STEEM.png" style="max-height: 20px;"> </h4>
-					
+
 					<h5>
 						{{ $t('daily_amount') }}: {{ dailySteemPool }} {{ $t('AFIT_Token') }}
 						<img class="token-logo-sm " src="/img/actifit_logo.png">
@@ -62,11 +60,11 @@
 				</span>
 			</div>-->
 		  </div>
-		
+
 	  </div>
-	  
+
 	  <div class="col-md-12" v-html="$t('yield_farm_note')"></div>
-	  
+
       <!-- show listing when loaded -->
 	  <div class="row" >
 		<span class="col-6 p-2">
@@ -88,10 +86,10 @@
 			<!-- amount delegated -->
 			<span class="col-3 p-1">
 				<img :src="'/img/'+trx.chain+'.png'" style="max-height: 20px;">
-				<span v-if="trx.chain == 'HIVE' && topDelegators.hive && topDelegators.hive.length" class="p-1">{{ getDelegatedAmount(trx, 'hive', true) }} {{ $t('Hive_Power') }} 
+				<span v-if="trx.chain == 'HIVE' && topDelegators.hive && topDelegators.hive.length" class="p-1">{{ getDelegatedAmount(trx, 'hive', true) }} {{ $t('Hive_Power') }}
 					<span v-if="randomAfitTrxHive == ''">{{setHiveTrx(trx, getDelegatedAmount(trx, 'hive', false))}}</span>
 				</span>
-				<span v-else-if="trx.chain == 'STEEM' && topDelegators.steem && topDelegators.steem.length" class="p-1">{{ getDelegatedAmount(trx, 'steem', true) }} {{ $t('Steem_Power') }} 
+				<span v-else-if="trx.chain == 'STEEM' && topDelegators.steem && topDelegators.steem.length" class="p-1">{{ getDelegatedAmount(trx, 'steem', true) }} {{ $t('Steem_Power') }}
 					<span v-if="randomAfitTrxSteem == ''">{{setSteemTrx(trx, getDelegatedAmount(trx, 'steem', false))}}</span>
 				</span>
 			</span>
@@ -102,7 +100,7 @@
 		<i class="fas fa-spin fa-spinner"></i>
 	  </div>
     </div>
-	
+
 	<NotifyModal :modalTitle="$t('Actifit_Info')" :modalText="$t('yield_farm_note')"/>
 
     <Footer />
@@ -112,11 +110,10 @@
 <script>
   import NavbarBrand from '~/components/NavbarBrand'
   import Footer from '~/components/Footer'
-
   import { mapGetters } from 'vuex'
-  
   import NotifyModal from '~/components/NotifyModal'
-import UserHoverCard from '~/components/UserHoverCard.vue';
+  import UserHoverCard from '~/components/UserHoverCard.vue';
+  import ListHeadingSection from '~/components/ListHeadingSection.vue';
 
   export default {
     head () {
@@ -131,8 +128,9 @@ import UserHoverCard from '~/components/UserHoverCard.vue';
 	components: {
       NavbarBrand,
       Footer,
-	  NotifyModal,
-	  UserHoverCard
+      NotifyModal,
+      UserHoverCard,
+      ListHeadingSection
     },
     data () {
       return {
@@ -151,7 +149,10 @@ import UserHoverCard from '~/components/UserHoverCard.vue';
       }
     },
     computed: {
-      ...mapGetters(['topDelegators'])
+      ...mapGetters(['topDelegators']),
+      textualTitle (){
+        return this.$t('Daily_yield') + '&nbsp;<a href="#" data-toggle="modal" data-target="#notifyModal"><i class="fas fa-info-circle text-white" :title="'+this.$t('view_details')+'"></i></a>';
+      }
     },
 	watch: {
 		topDelegators: function(){
@@ -208,12 +209,12 @@ import UserHoverCard from '~/components/UserHoverCard.vue';
 		  fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem&vs_currencies=usd').then(
 			res => {res.json().then(json => this.setSteemPrice (json.steem.usd)).catch(e => reject(e))
 		  }).catch(e => reject(e))
-		  
+
 		  //grab HIVE price
 		  fetch('https://api.coingecko.com/api/v3/simple/price?ids=hive&vs_currencies=usd').then(
 			res => {res.json().then(json => this.setHivePrice (json.hive.usd)).catch(e => reject(e))
-		  }).catch(e => reject(e))	
-		
+		  }).catch(e => reject(e))
+
 		//fetch AFIT price
 	    fetch(process.env.actiAppUrl+'exchangeAFITPrice').then(
 		  res => {res.json().then(json => this.setAFITPrice (json)).catch(e => reject(e))
@@ -271,20 +272,20 @@ import UserHoverCard from '~/components/UserHoverCard.vue';
 
       // fetch full delegators list
       this.$store.dispatch('fetchTopDelegators')
-	  
+
 	  fetch(process.env.actiAppUrl+'transactionsByType?type=Delegation&sortByToken=-1').then(//
 		  res => {res.json().then(json => this.setDelegationTransactions (json)).catch(e => reject(e))
 		}).catch(e => reject(e))
-	  
+
 	  fetch(process.env.actiAppUrl+'getDailyDelegationPool').then(
 		  res => {res.json().then(json => this.setPools (json)).catch(e => reject(e))
 		}).catch(e => reject(e))
-		
-	  
+
+
 	  this.fetchPriceData();
-		
+
 		setInterval(this.fetchPriceData, 2*60*1000);
-	  
+
 		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		this.profImgUrl = process.env.hiveImgUrl;
 		if (cur_bchain == 'STEEM'){
