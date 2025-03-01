@@ -180,8 +180,6 @@ import UserHoverCard from './UserHoverCard.vue'
 
   //import vueRemarkable from 'vue-remarkable';
 
-  import sanitize from 'sanitize-html'
-
   export default {
     props: ['post', 'displayUsername', 'pstId', 'explorePost'],
     computed: {
@@ -306,7 +304,6 @@ import UserHoverCard from './UserHoverCard.vue'
 		if (this.$refs["post_body"]){
 			//console.log(this.$refs["post_body"].innerHTML);
 			//remove html tags from text
-			console.log('post_body'+this.$refs['post_body'].innerHTML);
 			return this.$refs["post_body"].innerHTML.replace(/<[^>]+>/g, '');;
 		}
 		return "";

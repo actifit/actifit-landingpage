@@ -119,7 +119,6 @@ export default {
     bchain: async function (newBchain) {
       if (this.cur_bchain != newBchain && !this.loading) {
         //only update if changed
-        console.log('user activity change in chain ' + newBchain);
         this.cur_bchain = newBchain;
         await this.$store.dispatch('steemconnect/refreshUser');
 
@@ -128,8 +127,7 @@ export default {
 
         // disable load more button and only show if there actually are more posts to load
         this.$store.commit('setMoreUserPostsAvailable', false)
-        console.log('dispatch fetching user posts')
-        console.log(this.username)
+
         await this.$store.dispatch('fetchUserPosts', this.username)
         this.loading = false
       }
@@ -155,16 +153,13 @@ export default {
   methods: {
     nextPost(direction) {
       let pstId = this.activePost.pstId;
-      console.log('active post id:' + pstId);
       let proceed = false;
       if (direction < 0) {
-        console.log('move back');
         if (pstId >= 1) {
           pstId -= 1;
           proceed = true;
         }
       } else {
-        console.log('move front');
         if (pstId < this.userPosts.length) {
           pstId += 1;
           proceed = true;
@@ -186,8 +181,6 @@ export default {
 
       let cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
       this.$store.commit('setBchain', cur_bchain);
-      console.log('dispatch MORE fetching user posts')
-      console.log(this.username)
 
       await this.$store.dispatch('fetchUserPosts', this.username)
       this.loadingMore = false
