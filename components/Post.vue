@@ -183,7 +183,7 @@ import UserHoverCard from './UserHoverCard.vue'
   import sanitize from 'sanitize-html'
 
   export default {
-    props: ['userPosts', 'post', 'displayUsername', 'pstId', 'explorePost'],
+    props: ['post', 'displayUsername', 'pstId', 'explorePost'],
     computed: {
       ...mapGetters('steemconnect', ['user']),
       ...mapGetters(['postToVote']),
