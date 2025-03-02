@@ -60,7 +60,7 @@
         </div>
         <div class="main-payment-info modal-footer">
           <div class="col-md-6">
-            <span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i
+            <span><a href="#" @click.prevent="toggleCommentBox()" :title="$t('Reply')"><i
                   class="text-white fas fa-reply"></i></a></span>
             <span class="ml-2">
 
@@ -216,12 +216,14 @@
             </div>
             <a href="#" @click.prevent="postResponse($event)" class="btn btn-brand border reply-btn w-25">
               {{ $t('Post') }}
-              <img src="/img/HIVE.png" style="max-height: 25px" v-if="target_bchain == 'HIVE' || target_bchain == 'BOTH'">
-              <img src="/img/STEEM.png" style="max-height: 25px" v-if="target_bchain == 'STEEM' || target_bchain == 'BOTH'">
+              <img src="/img/HIVE.png" style="max-height: 25px"
+                v-if="target_bchain == 'HIVE' || target_bchain == 'BOTH'">
+              <img src="/img/STEEM.png" style="max-height: 25px"
+                v-if="target_bchain == 'STEEM' || target_bchain == 'BOTH'">
               <i class="fas fa-spin fa-spinner" v-if="loading"></i>
             </a>
             <a href="#" @click.prevent="resetOpenComment()" class="btn btn-brand border reply-btn w-25">{{ $t('Cancel')
-              }}</a>
+            }}</a>
             <a href="#" @click.prevent="insertModSignature" class="btn btn-brand border reply-btn w-25"
               v-if="(this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator'))">{{
                 $t('Short_Signature') }}</a>
@@ -413,8 +415,12 @@ export default {
 
   },
   methods: {
+    toggleCommentBox() {
+      this.commentBoxOpen = !this.commentBoxOpen;
+      localStorage.setItem('commentBoxOpen', this.commentBoxOpen);
+    },
     cancelTranslation() {
-      if (this.safety_post_content != ''){
+      if (this.safety_post_content != '') {
         this.post.body = this.safety_post_content;
       }
       this.showTranslated = false;
@@ -497,6 +503,7 @@ export default {
     resetOpenComment() {
       this.replyBody = this.moderatorSignature;
       this.commentBoxOpen = false;
+      localStorage.setItem('commentBoxOpen', this.commentBoxOpen);
     },
 
     commentSuccess(err, finalize, bchain) {
@@ -892,14 +899,15 @@ export default {
        * Formats numbers with commas and dots.
        *
        * @param number
-     * @param precision
+       * @param precision
        * @returns {string}
        */
     numberFormat(number, precision) {
       return new Intl.NumberFormat('en-EN', { maximumFractionDigits: precision }).format(number)
     },
     handleKeyDown(event) {
-      if (!this.commentBoxOpen) {
+      let commentBoxOpenTest = localStorage.getItem('commentBoxOpen') === 'true';
+      if (!commentBoxOpenTest) {
         switch (event.key) {
           case 'ArrowLeft':
             this.loadNextPost(-1);
@@ -912,6 +920,7 @@ export default {
     }
   },
   beforeDestroy() {
+    console.log('destroy');
     window.removeEventListener('keydown', this.handleKeyDown);
   },
   async mounted() {

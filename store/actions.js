@@ -466,8 +466,6 @@ export default {
       } else if (state.bchain == 'BLURT') {
         chainLnk = blurt;
       }
-      //console.log(username);
-      //let outc = await chainLnk.api.callAsync('bridge.get_account_posts', {sort: 'comments', account: username, limit: 100, start_author: start_author, start_permlink: start_permlink})
       let outc = chainLnk.api.call('bridge.get_account_posts', { sort: 'comments', account: username, limit: process.env.maxPostCount, start_author: start_author, start_permlink: start_permlink }, (err, comments) => {
         if (err) reject(err)
         else {
