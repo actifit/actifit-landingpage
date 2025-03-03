@@ -2228,7 +2228,7 @@ export default {
       this.transferType = newBchain;
       this.$store.dispatch('steemconnect/refreshUser');
 
-      let chainLnk = await this.setProperNode();
+      let chainLnk = this.setProperNode();
       this.properties = await chainLnk.api.getDynamicGlobalPropertiesAsync();
 
       await this.fetchUserData();
@@ -2828,7 +2828,7 @@ export default {
       if (!forceOpen) {
         this.delegateFunds();
       }
-      let chainLnk = await this.setProperNode();
+      let chainLnk = this.setProperNode();
       this.loadingDeleg = true;
       let max_limit = 1000;
       //let max_date = new Date(2016, 1, 1, 0, 0, 0, 0);
@@ -3840,7 +3840,7 @@ export default {
     },
     async vestsToSteemPower(vests) {
       //function handles converting Vests to SP
-      let chainLnk = await this.setProperNode();
+      let chainLnk = this.setProperNode();
       if (this.properties == '') {
         //not loaded yet
         this.properties = await chainLnk.api.getDynamicGlobalPropertiesAsync();
@@ -3865,7 +3865,7 @@ export default {
     },
     async steemPowerToVests(steemPower) {
       //function handles conversting SP to Vests
-      let chainLnk = await this.setProperNode();
+      let chainLnk = this.setProperNode();
       if (this.properties == '') {
         //not loaded yet
         this.properties = await chainLnk.api.getDynamicGlobalPropertiesAsync();
@@ -3913,7 +3913,7 @@ export default {
       //current interest rate set by witnesses
       if (this.properties == '') {
         //not loaded yet
-        let chainLnk = await this.setProperNode();
+        let chainLnk = this.setProperNode();
         this.properties = await chainLnk.api.getDynamicGlobalPropertiesAsync();
       }
       const hbdInterestRate = this.properties.hbd_interest_rate;
@@ -4139,7 +4139,7 @@ export default {
         console.log('done');*/
       } else {
         this.claimRewardsProcess = true;
-        let chainLnk = await this.setProperNode();
+        let chainLnk = this.setProperNode();
         console.log('claiming rewards');
         //TODO: below replace functions are needed for compatibility now with steem-js still using STEEM & SBD terminology for HIVE
         let cstm_params = {
@@ -4320,7 +4320,7 @@ export default {
 
       } else {
         this.transferProcess = true;
-        let chainLnk = await this.setProperNode();
+        let chainLnk = this.setProperNode();
 
         console.log(this.transferType)
         //return;
@@ -4401,7 +4401,7 @@ export default {
 
       } else {
         this.transferProcess = true;
-        let chainLnk = await this.setProperNode();
+        let chainLnk = this.setProperNode();
 
         console.log(this.transferType)
         //return;
@@ -4483,7 +4483,7 @@ export default {
 
       } else {
         this.transferProcess = true;
-        let chainLnk = await this.setProperNode();
+        let chainLnk = this.setProperNode();
 
         console.log(this.transferType)
         //return;
@@ -4562,7 +4562,7 @@ export default {
         }
       } else {
         this.transferProcess = true;
-        let chainLnk = await this.setProperNode();
+        let chainLnk = this.setProperNode();
 
         console.log(this.transferType)
         //return;
@@ -4659,7 +4659,7 @@ export default {
         }
       } else {
         this.powerUpProcess = true;
-        let chainLnk = await this.setProperNode();
+        let chainLnk = this.setProperNode();
         //transferToVesting(wif, from, to, amount)
         let res = await chainLnk.broadcast.transferToVestingAsync(this.$refs["p-ac-key-up"].value, this.user.account.name, this.user.account.name, parseFloat(this.$refs["powerup-amount"].value).toFixed(3) + ' ' + this.cur_bchain).then(
           res => this.confirmCompletion('powerup', this.$refs["powerup-amount"].value, res)).catch(err => console.log(err));
@@ -4733,7 +4733,7 @@ export default {
         }
       } else {
         this.delegateProcess = true;
-        let chainLnk = await this.setProperNode();
+        let chainLnk = this.setProperNode();
         //transferToVesting(wif, from, to, amount)
         let vestsValue = await this.steemPowerToVests(this.$refs["delegate-amount"].value);
         let res = await chainLnk.broadcast.delegateVestingSharesAsync(this.$refs["p-ac-key-delg"].value, this.user.account.name, this.$refs["delegate-recipient"].value.trim(), vestsValue + ' ' + 'VESTS').then(
@@ -4915,7 +4915,7 @@ export default {
         }
       } else {
         this.powerDownProcess = true;
-        let chainLnk = await this.setProperNode();
+        let chainLnk = this.setProperNode();
         let res = await chainLnk.broadcast.withdrawVestingAsync(this.$refs["p-ac-key"].value, this.user.account.name, vestsValue + ' VESTS').then(
           res => this.confirmCompletion('powerdown', this.$refs["powerdown-amount"].value, res)).catch(err => console.log(err));
       }
@@ -5105,7 +5105,7 @@ export default {
       } else {
         this.powerDownProcess = true;
         //steem.api.setOptions({ url: "https://api.steemit.com" });
-        let chainLnk = await this.setProperNode();
+        let chainLnk = this.setProperNode();
         let res = await chainLnk.broadcast.withdrawVestingAsync(this.$refs["p-ac-key"].value, this.user.account.name, '0.000000 VESTS').then(
           res => this.confirmCompletion('powerdown', 0, res)).catch(err => console.log(err));
       }
@@ -5855,7 +5855,7 @@ export default {
         let userKey = this.$refs["p-ac-key-power"].value;
 
         //send out transaction to blockchain
-        let chainLnk = await this.setProperNode();
+        let chainLnk = this.setProperNode();
         let tx = await chainLnk.broadcast.customJsonAsync(
           userKey,
           [this.user.account.name],
@@ -6056,7 +6056,7 @@ export default {
       let userKey = this.$refs["p-ac-key-afit"].value;
 
       //send out transaction to blockchain
-      let chainLnk = await this.setProperNode((direction == 1 ? 'STEEM' : 'HIVE'));
+      let chainLnk = this.setProperNode((direction == 1 ? 'STEEM' : 'HIVE'));
       let tx = await chainLnk.broadcast.customJsonAsync(
         userKey,
         [this.user.account.name],
@@ -6202,7 +6202,7 @@ export default {
       let userKey = this.$refs["p-ac-key-afitx"].value;
 
       //send out transaction to blockchain
-      let chainLnk = await this.setProperNode((direction == 1 ? 'STEEM' : 'HIVE'));
+      let chainLnk = this.setProperNode((direction == 1 ? 'STEEM' : 'HIVE'));
       let tx = await chainLnk.broadcast.customJsonAsync(
         userKey,
         [this.user.account.name],
@@ -6422,7 +6422,7 @@ export default {
         let userKey = this.$refs["p-ac-key-trans-token"].value;
 
         //send out transaction to blockchain
-        let chainLnk = await this.setProperNode();
+        let chainLnk = this.setProperNode();
         let tx = await chainLnk.broadcast.customJsonAsync(
           userKey,
           [this.user.account.name],
@@ -6615,7 +6615,7 @@ export default {
         let userKey = this.$refs["p-ac-key-trans-token"].value;
 
         //send out transaction to blockchain
-        let chainLnk = await this.setProperNode();
+        let chainLnk = this.setProperNode();
         let tx = await chainLnk.broadcast.customJsonAsync(
           userKey,
           [this.user.account.name],
@@ -6808,7 +6808,7 @@ export default {
         let userKey = this.$refs["p-ac-key-trans-token"].value;
 
         //send out transaction to blockchain
-        let chainLnk = await this.setProperNode();
+        let chainLnk = this.setProperNode();
         let tx = await chainLnk.broadcast.customJsonAsync(
           userKey,
           [this.user.account.name],
@@ -6993,7 +6993,7 @@ export default {
         let userKey = this.$refs["p-ac-key-trans-token"].value;
 
         //send out transaction to blockchain
-        let chainLnk = await this.setProperNode();
+        let chainLnk = this.setProperNode();
         let tx = await chainLnk.broadcast.customJsonAsync(
           userKey,
           [this.user.account.name],
@@ -7194,7 +7194,7 @@ export default {
         let userKey = this.$refs["p-ac-key-trans-token"].value;
 
         //send out transaction to blockchain
-        let chainLnk = await this.setProperNode();
+        let chainLnk = this.setProperNode();
         let tx = await chainLnk.broadcast.customJsonAsync(
           userKey,
           [this.user.account.name],
@@ -7348,7 +7348,7 @@ export default {
 
       //send out transaction to blockchain
       //only works on hive
-      let chainLnk = hive;//await this.setProperNode();
+      let chainLnk = hive;//this.setProperNode();
       let tx = await chainLnk.broadcast.customJsonAsync(
         userKey,
         [this.user.account.name],
@@ -7381,7 +7381,7 @@ export default {
 
       //send HBD as well
       //only works on hive
-      //let chainLnk = hive;//await this.setProperNode ();
+      //let chainLnk = hive;//this.setProperNode ();
       //transferToVesting(wif, from, to, amount)
       let outc;
       let res = await chainLnk.broadcast.transferAsync(
@@ -7601,7 +7601,7 @@ export default {
         let userKey = this.$refs["p-ac-key-trans-token"].value;
 
         //send out transaction to blockchain
-        let chainLnk = await this.setProperNode();
+        let chainLnk = this.setProperNode();
         let tx = await chainLnk.broadcast.customJsonAsync(
           userKey,
           [this.user.account.name],
@@ -7800,7 +7800,7 @@ export default {
           return;
         }
 
-        let chainLnk = await this.setProperNode();
+        let chainLnk = this.setProperNode();
         console.log('perform transfer');
         //console.log(this.$refs["p-ac-key-funds-ver"].value);
         //transferToVesting(wif, from, to, amount)
@@ -8046,7 +8046,7 @@ export default {
       hive.api.setOptions({ url: process.env.hiveApiNode });
       blurt.api.setOptions({ url: process.env.blurtApiNode });
 
-      const chainLnk = await this.setProperNode();
+      const chainLnk = this.setProperNode();
       this.$store.dispatch('steemconnect/login');
       await this.fetchUserData();
 
