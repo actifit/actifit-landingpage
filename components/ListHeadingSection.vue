@@ -29,3 +29,14 @@ export default {
   }
 }
 </script>
+<style>
+.user-avatar {
+  width: 30px;
+  height: 30px;
+  background-position: center center;
+  background-size: cover;
+  border-radius: 50%;
+  float: left;
+  border: solid 1px #ddd;
+}
+</style>

@@ -7,14 +7,11 @@
       <!-- account balance -->
       <div class="text-center">
         <h3 class="mb-4" v-if="displayUser">
-          <div class="user-wallet-avatar group-class"
-            :style="'background-image: url(' + profImgUrl + '/u/' + displayUser + '/avatar)'"></div><span>{{ displayUser
-            }}'s {{ $t('wallet.wallet') }}</span>
+          <ListHeadingSection :username="displayUser" :textualDisplay="textualDisplayTitle" />
         </h3>
         <h3 class="mb-4" v-else-if="user">
-          <div class="user-wallet-avatar group-class"
-            :style="'background-image: url(' + profImgUrl + '/u/' + user.account.name + '/avatar)'"></div>{{ $t('Hey') }} {{
-              user.account.name }}!
+          <ListHeadingSection :username="user.account.name" :textualDisplay="textualTitle" />
+
         </h3>
         <!--<div>
 			  <a href="/walletV1"><i>New Wallet Layout. Click to switch back to old version</i></a>
@@ -1779,6 +1776,7 @@ import Countdown from 'vuejs-countdown'
 import TopHolders from '~/components/TopHoldersModal'
 import TopHoldersX from '~/components/TopHoldersXModal'
 import SwapTokenModal from '~/components/SwapTokenModal'
+import ListHeadingSection from '~/components/ListHeadingSection'
 
 import pendingRewardsModal from '~/components/PendingRewardsModal'
 
@@ -2041,6 +2039,7 @@ export default {
     TopHoldersX,
     SwapTokenModal,
     pendingRewardsModal,
+    ListHeadingSection
   },
   computed: {
     ...mapGetters('steemconnect', ['user']),
@@ -2048,6 +2047,14 @@ export default {
     ...mapGetters(['userTokens', 'transactions', 'userRank', 'bchain']),
     isKeychainLogin() {
       return localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain
+    },
+    textualDisplayTitle(){
+      return this.displayUser +' \'s ' + this.$t('Wallet');
+      //return '<div class="user-wallet-avatar group-class" :style="\'background-image: url(' + this.profImgUrl + '/u/' + this.displayUser + '/avatar)\'"></div>' + this.displayUser +' \'s ' + this.$t('Wallet');
+    },
+    textualTitle(){
+      return this.user.account.name +' \'s ' + this.$t('Wallet');
+      //return '<div class="user-wallet-avatar group-class" :style="\'background-image: url(' + this.profImgUrl + '/u/' + this.user.account.name + '/avatar)\'"></div>' + this.user.account.name +' \'s ' + this.$t('Wallet');
     },
     nonAuthUser() {
       if (!this.displayUser || this.displayUser == '') {
