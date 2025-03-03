@@ -1083,7 +1083,7 @@
 
 
             <transition name="fade">
-              <div v-if="fundActivityMode == SHOW_CLAIMABLE_REW && isClaimableDataAvailableTEMP && cur_bchain == 'STEEM'"
+              <div v-if="fundActivityMode == SHOW_CLAIMABLE_REW && isClaimableDataAvailable && cur_bchain == 'STEEM'"
                 class="action-box">
                 <h5 class="pro-name"><img src="/img/STEEM.png" class="mr-2 token-logo">{{ $t('Claimable_Steem_Rewards')
                   }}</h5>
@@ -1097,7 +1097,7 @@
                 </div>
               </div>
               <div
-                v-else-if="fundActivityMode == SHOW_CLAIMABLE_REW && isClaimableDataAvailableTEMP && cur_bchain == 'HIVE'"
+                v-else-if="fundActivityMode == SHOW_CLAIMABLE_REW && isClaimableDataAvailable && cur_bchain == 'HIVE'"
                 class="col-md-6 row-sep-in">
                 <h5 class="pro-name"><img src="/img/HIVE.png" class="mr-2 token-logo">{{ $t('Claimable_Hive_Rewards') }}
                 </h5>
@@ -1111,7 +1111,7 @@
                 </div>
               </div>
               <div
-                v-else-if="fundActivityMode == SHOW_CLAIMABLE_REW && isClaimableDataAvailableTEMP && cur_bchain == 'BLURT'"
+                v-else-if="fundActivityMode == SHOW_CLAIMABLE_REW && isClaimableDataAvailable && cur_bchain == 'BLURT'"
                 class="col-md-6 row-sep-in">
                 <h5 class="pro-name"><img src="/img/BLURT.png" class="mr-2 token-logo">{{ $t('Claimable_Blurt_Rewards')
                   }}</h5>
@@ -1835,7 +1835,7 @@ export default {
   data() {
     return {
       showModal: false,
-      isClaimableDataAvailableTEMP: false,
+      //isClaimableDataAvailableTEMP: false,
       swapWidgetUrl: '',
       tipInProgress: false,
       tipError: '',
@@ -2199,9 +2199,9 @@ export default {
     },
 
 
-    isClaimableDataAvailable(newValue) {
+    /*isClaimableDataAvailable(newValue) {
       this.isClaimableDataAvailableTEMP = newValue;
-    },
+    },*/
 
     userTokens: {
       handler: async function (newVal, oldVal) {
@@ -2539,7 +2539,7 @@ export default {
 
     showClaimableRewards() {
 
-      const hasPendingRewards = this.isClaimableDataAvailableTEMP;
+      const hasPendingRewards = this.isClaimableDataAvailable;
       if (!hasPendingRewards) {
         //show error message
         this.showRewardError();
@@ -3340,11 +3340,11 @@ export default {
         console.error('Error in completeUserDataRefresh:', err);
       }
     },
+    fixUserData(newUserData){
+      this.displayUserData = newUserData;
+    },
     async fetchUserData() {
       if ((typeof this.user != 'undefined' && this.user != null) || this.displayUser != '') {
-        console.log('stdLoginUser');
-        console.log(this.stdLogin);
-        console.log(this.user);
 
         //update user info from blockchain
         if (!localStorage.getItem('std_login')) {
@@ -3377,7 +3377,7 @@ export default {
 
         //calculate savings params
         try {
-          this.cancluateSavingsRewardsParams();
+          this.calculateSavingsRewardsParams();
         } catch (error) {
           console.log(error);
         }
@@ -3909,7 +3909,7 @@ export default {
       return '';
     },
 
-    async cancluateSavingsRewardsParams() {
+    async calculateSavingsRewardsParams() {
       //current interest rate set by witnesses
       if (this.properties == '') {
         //not loaded yet
@@ -4165,10 +4165,11 @@ export default {
           };
         }
         let res = await this.processTrxFunc('claim_reward_balance', cstm_params);
-
+        console.log('done with claim')
+        console.log(res.success);
         if (res.success) {
           this.confirmCompletion('claimrewards', 0, res);
-          this.isClaimableDataAvailableTEMP = false;
+          //this.isClaimableDataAvailableTEMP = false;
           setTimeout(() => this.fetchUserData(), 3000);
         }
         /*steem.broadcast.claimRewardBalanceAsync(this.user.account.name,this.claimSTEEM, this.claimSBD, this.claimSP).then(
@@ -4944,18 +4945,25 @@ export default {
           this.claimSTEEM = '';
           this.claimVests = '';
           this.claimSBD = 0;
-          this.isClaimableDataAvailableTEMP = false;
+          //this.isClaimableDataAvailableTEMP = false;
 
-          this.fetchUserData();
 
-          setTimeout(async () => {
+          await this.$store.dispatch('steemconnect/refreshUser');
+
+          this.fixUserData(this.user.account);
+
+          //console.log(this.user);
+
+          //this.fetchUserData();
+
+          /*setTimeout(async () => {
             await this.fetchUserData();
             await this.fetchTokenBalance();
             if (this.cur_bchain == 'HIVE') {
               await this.fetchAFITHE();
             }
             this.$forceUpdate();
-          }, 3000);
+          }, 3000);*/
         }
         if (type == 'delegate') {
           note = 'Delegation completed successfully!';
