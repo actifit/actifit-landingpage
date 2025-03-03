@@ -75,7 +75,7 @@ const createStore = () => {
     if (mutation.type === 'login') {
       store.dispatch('fetchUserTokens')
       store.dispatch('fetchUserReportCount')
-	  store.dispatch('fetchUserRank')
+	    store.dispatch('fetchUserRank')
     }
   })
 

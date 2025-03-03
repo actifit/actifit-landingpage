@@ -13,13 +13,13 @@ import Lodash from 'lodash';
 
 //global functions
 Vue.prototype.$getTimeDifference = function(dateParam) {
-	
+
   let localDate = new Date();
-  
+
   dateParam = new Date(Date.parse(dateParam));//Date(dateParam);
   const currentDate = Date.now();
   const difference = Math.abs(dateParam.getTime() - currentDate - localDate.getTimezoneOffset() * 60000);
-  
+
   //let difference = utcTime - dateParam.getTime();//currentDate.getUTCTime() - dateParam.getTime();
   let mins = Math.floor(difference / (1000 * 60 ));
   let hours = Math.floor(difference / (1000 * 60 * 60));
@@ -46,13 +46,13 @@ Vue.prototype.$getTimeDifference = function(dateParam) {
 
 
 Vue.prototype.$getDaysDifference = function(firstDate, secondDate) {
-	
+
   let localDate = new Date();
-  
+
   const dateParam = new Date(Date.parse(firstDate));//Date(dateParam);
   const currentDate = new Date(Date.parse(secondDate));
   const difference = Math.abs(dateParam.getTime() - currentDate);// - localDate.getTimezoneOffset() * 60000);
-  
+
   //let difference = utcTime - dateParam.getTime();//currentDate.getUTCTime() - dateParam.getTime();
   let mins = Math.floor(difference / (1000 * 60 ));
   let hours = Math.floor(difference / (1000 * 60 * 60));
@@ -116,7 +116,7 @@ Vue.prototype.$reblog = async function (user, post){
 		position: 'top center'
 	  });
 	}
-	
+
 }
 
 /** global function to process API calls to blockchain **/
@@ -232,7 +232,7 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup){
 	let img_replacement = '<img src="$1">';
 	let vid_replacement = '<iframe width="640" height="360" src="https://www.youtube.com/embed/$1"></iframe>';
 	let user_link_replacement = '$1<a href="https://actifit.io/$2">$2</a>';
-	
+
 	if (full_cleanup){
 		report_content = sanitize(report_content, { allowedTags: []});
 		img_replacement = '';
@@ -249,48 +249,48 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup){
 	//let img_links_reg = /^(?:(?!=").)*((https?:\/\/[./\d\w-]*\.(?:png|jpg|jpeg|gif))|((https?:\/\/usermedia\.actifit\.io\/[./\d\w-]+)))/igm;
 	let img_links_reg = /!\[[\d\w\s\-.\(\)]*\]\((https?:\/\/(?:usermedia\.actifit\.io|ipfs\.busy\.org\/ipfs|steemitimages\.com)\/[\d\w\-\.\/\%\?\=\&]*|https?:\/\/[\d\w\-\.\/\%\?\=\&]*(?:png|jpg|jpeg|gif)(?:\?[^\)]*)?)\)/igm;
 	report_content = report_content.replace(img_links_reg, img_replacement);
-	
+
 	/* let's find images sent as pure URLs, and display them as actual images, while avoiding well established images */
 	/* negative lookbehinds are not supported ?<! we need to switch to another approach */
 	//img_links_reg = /(?<!=")(?<!]\()(((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|(https?:\/\/[./\d\w-]*\.(?:png|jpg|jpeg|gif)))/igm;
 	//img_links_reg = /(((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|(https?:\/\/[./\d\w-]*\.(?:png|jpg|jpeg|gif)))(?!")/igm;
 	img_links_reg = /(((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|((https:\/\/ipfs\.busy\.org\/ipfs\/)[\d\w-]+)|((https:\/\/steemitimages\.com\/)[\d\w-[\:\/\.]+)|(https?:\/\/[.\/\d\w-]*\.(?:png|jpg|jpeg|gif)))[\s]/igm;
 	report_content = report_content.replace(img_links_reg, img_replacement);
-	
+
 	//final catch all for images converting any left overs to proper tag:
 	img_links_reg = /^(?!<img\s+src=)([^<>\s]+\.(?:png|jpe?g|gif|bmp|ico|svg))$/igm;
 	report_content = report_content.replace(img_links_reg, img_replacement);
-	
+
 	/* let's match youtube videos and display them in a player */
 	//let vid_reg = /^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+/gm;
 	let vid_reg = /https?:\/\/(?:[0-9A-Z-]+\.)?(?:youtu\.be\/|youtube\.com\S*[^\w\-\s])([\w\-]{11})(?=[^\w\-]|$)(?![?=&amp;+%\w]*(?:['"][^&lt;&gt;]*&gt;|&lt;\/a&gt;))[?=&amp;+%\w-]*/ig;
-	
+
 	//swap into a player format, and introduce embed format for proper playing of videos
 	report_content = report_content.replace(vid_reg, vid_replacement);
-	
+
 	//add support for 3speak videos embedded within iframe
 	//let threespk_reg = /[.*](https?:\/\/3speak\.tv\/watch\?v=([\w-]+\/[\w-]+))/i;
 	//let threespk_reg = /(?:\[!\[\]\()?https?:\/\/3speak\.tv\/watch\?v=([\w-]+\/[\w-]+)(?:\)\])?/i;
 	let threespk_reg = /(?:\[.*\]\()?https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+)(?:\))?/i;
 	report_content = report_content.replace(threespk_reg,'<iframe width="640" height="360" src="//3speak.tv/embed?v=$1&autoplay=false"></iframe>');
-	//examples: 
+	//examples:
 	//https://3speak.tv/watch?v=jongolson/vhtttbyf		//[![](https://ipfs-3speak.b-cdn.net/ipfs/bafkreiee4k3q5sax6stbqzty6yktbhmk4mi2opf6r7hckti3ypkjvigjhi/)](https://3speak.tv/watch?v=jongolson/vhtttbyf)
 
-	
+
 	/* let's find links sent as [](), and display them properly */
 	//let href_lnks = /\[([\d\w\s-\.\(\)=[\:\/\.%\?&"<>]*)\]\(([\d\w-=[\:\/\.%\?&]+|(https?:\/\/[.\d\w-\/\:\%\(\)]*\.))[)]/igm;
 	//report_content = report_content.replace(href_lnks,'<a href="$2">$1</a>');
-	
+
 	//let href_lnks = /\[([\d\w-\.\@]*)\]\(([\d\w-\.\@\/\:]*)\)/igm;
 	//report_content = report_content.replace(href_lnks,'<a href="$2">$1</a>');
-	
+
 	/* regex to match @ words and convert them to steem user links. Need to skip special occurrences such as name within a link (preceded by /) */
 	if (!full_cleanup){
 		let user_name = /([^\/])(@([\d\w-.]+))/igm;
-		
+
 		report_content = report_content.replace(user_name, user_link_replacement);
 	}
-	
+
 	//return md.render(report_content);
 	//return sanitize(md.render(report_content) , { allowedTags: ['img', 'details', 'summary', 'iframe', 'blockquote'] })
 	return report_content;
@@ -320,7 +320,7 @@ Vue.prototype.$dateToFullRelative = function (d){
 	  const dm = moment(new Date(isTimeZoned));
 	  return dm.fromNow();
 	};
-	
+
 Vue.prototype.$dayDiff = function (d) {
 	  const isTimeZoned = d.indexOf(".") !== -1 || d.indexOf("+") !== -1 ? d : `${d}.000Z`;
 	  const _MS_PER_DAY = 1000 * 60 * 60 * 24;
@@ -332,20 +332,20 @@ Vue.prototype.$dayDiff = function (d) {
 
 	  return Math.floor((utc2 - utc1) / _MS_PER_DAY);
 	};
-	
+
 Vue.prototype.$hourDiff = function (d) {
 	  const isTimeZoned = d.indexOf(".") !== -1 || d.indexOf("+") !== -1 ? d : `${d}.000Z`;
 	  let diff = (new Date().getTime() - new Date(isTimeZoned).getTime()) / 1000;
 	  diff /= 60 * 60;
 	  return Math.abs(Math.round(diff));
 	};
-	
+
 Vue.prototype.$secondDiff = function (d) {
 	  const isTimeZoned = d.indexOf(".") !== -1 || d.indexOf("+") !== -1 ? d : `${d}.000Z`;
 	  let diff = (new Date().getTime() - new Date(isTimeZoned).getTime()) / 1000;
 	  return Math.abs(Math.round(diff));
 	};
-	
+
 Vue.prototype.$postHasImage = function(metaData){
 	if (metaData.image){
 		if (Array.isArray(metaData.image) && metaData.image.length > 0){

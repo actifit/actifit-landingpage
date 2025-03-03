@@ -5,20 +5,21 @@
 
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-5">
-      <h2 class="text-center mb-5">{{ username }}'s {{$t('Videos')}} <img src="/img/3speak.png" class="mr-2 token-logo-md"></h2>
+      <ListHeadingSection :username="username" :textualDisplay="textualTitle" ></ListHeadingSection>
+
 	  <!--<ChainSelection />-->
-	  
+
       <!-- show spinner while loading -->
       <div class="text-center" v-if="loading">
         <i class="fas fa-spinner fa-spin text-brand"></i>
       </div>
-	  
+
 	  <div class="text-center p-3" v-else-if="user">
 		<a :href="'/videos/new'" :title="$t('Create_Video')" target="_blank" class="btn btn-brand border">
 			{{ $t('Create_Video') }}
 		</a>
 	  </div>
-	  
+
 	  <div class="row text-right">
 		<div class="col-12 pb-2"><a :href="'/'+username+'/comments'" class="btn btn-brand border"  :title="$t('view_comments')"><i class="far fa-comments"></i></a>&nbsp;<a :href="'/'+username+'/blog'" class="btn btn-brand border"  :title="$t('view_blog')"><i class="fas fa-pen-to-square"></i></a></div>
 	  </div>
@@ -50,7 +51,7 @@
     </div>
 
     <Footer />
-	<client-only>    
+	<client-only>
       <div>
 
 		<PostModal :post="activePost" />
@@ -71,6 +72,7 @@
   import PostModal from '~/components/PostModal'
   import EditPostModal from '~/components/EditPostModal'
   import VoteModal from '~/components/VoteModal'
+  import ListHeadingSection from '~/components/ListHeadingSection'
 
   import { mapGetters } from 'vuex'
   //import ChainSelection from '~/components/ChainSelection'
@@ -92,14 +94,15 @@
       PostModal,
       EditPostModal,
       VoteModal,
+      ListHeadingSection
 	  //ChainSelection
     },
     data () {
       return {
         loading: true, // initial loading state
         loadingMore: false, // loading state for loading more Videos
-		splitFactor: 9,
-		inlineAds: 2,
+		    splitFactor: 9,
+		    inlineAds: 2,
       }
     },
 	watch: {
@@ -111,7 +114,7 @@
 			console.log('user activity change in chain '+newBchain);
 			this.cur_bchain = newBchain;
 			await this.$store.dispatch('steemconnect/refreshUser');
-			
+
 			// reset previously fetched Videos to get latest
 			await this.$store.commit('setUserVideos', [])
 
@@ -136,16 +139,19 @@
 
       // get username from url
       username () {
-	    if (this.$route.params.username.startsWith('@')){
-		  return this.$route.params.username.substring(1, this.$route.params.username.length);
-		}
+	      if (this.$route.params.username.startsWith('@')){
+		      return this.$route.params.username.substring(1, this.$route.params.username.length);
+		    }
         return this.$route.params.username
+      },
+      textualTitle (){
+        return this.username+"'s "+this.$t('Videos') + " <img src='/img/3speak.png' class='mr-2 token-logo-md'>";
       }
     },
     methods: {
       async loadMore () {
         this.loadingMore = true
-		
+
 		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		this.$store.commit('setBchain', cur_bchain);
 		console.log('dispatch MORE fetching user Videos')
@@ -155,8 +161,8 @@
         this.loadingMore = false
       },
 	  async fetchUserData () {
-		if (typeof this.user != 'undefined' && this.user != null){	  
-		  
+		if (typeof this.user != 'undefined' && this.user != null){
+
 		  if (!localStorage.getItem('std_login')){
 		  //if (!this.stdLogin){
 			  //update user info from blockchain
@@ -175,18 +181,18 @@
 	  this.fetchUserData();
 
       // fetch Videos
-	  
+
 	  let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 	  await this.$store.commit('setBchain', cur_bchain);
-	  
+
       // reset previously fetched Videos to get latest
       await this.$store.commit('setUserVideos', [])
 
       // disable load more button and only show if there actually are more Videos to load
       await this.$store.commit('setMoreUserVideosAvailable', false)
-	  
+
 	  console.log('mounted dispatch videos')
-	  
+
       let res = await this.$store.dispatch('fetchUserVideos', this.username)
 	  console.log('done fetching vids')
 	  console.log(res);

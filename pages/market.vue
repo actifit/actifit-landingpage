@@ -4,8 +4,8 @@
 
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-5">
-      <h2 class="text-center">{{ $t('market_title') }}</h2>
-	  <h3 class="text-center m-4 text-brand market-sub">{{ $t('market_subtitle') }}</h3>
+      <ListHeadingSection :textualDisplay="$t('market_title')" />
+      <div class="text-left mb-4 text-brand market-sub">{{ $t('market_subtitle') }}</div>
 
 
 	  <!-- ticket prize section / gadgets purchase -->
@@ -124,16 +124,11 @@
   import NavbarBrand from '~/components/NavbarBrand'
   import Product from '~/components/Product'
   import Footer from '~/components/Footer'
-
   import { mapGetters } from 'vuex'
-
   import hive from '@hiveio/hive-js'
-
-  import Lodash from 'lodash'
-
   import Countdown from 'vuejs-countdown'
-
   import NotifyModal from '~/components/NotifyModal'
+  import ListHeadingSection from '~/components/ListHeadingSection.vue'
 
   export default {
     head () {
@@ -149,8 +144,9 @@
       NavbarBrand,
       Product,
       Footer,
-	  Countdown,
-	  NotifyModal
+	    Countdown,
+	    NotifyModal,
+      ListHeadingSection
     },
     data () {
       return {

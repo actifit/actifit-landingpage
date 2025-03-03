@@ -5,14 +5,14 @@
 
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-5">
-      <h2 class="text-center mb-5">{{ $t('Activity_Reports_by') }} {{ username }}</h2>
+      <ListHeadingSection :username="username" :textualDisplay="$t('Activity_Reports_by')+' ' + username"></ListHeadingSection>
 	  <!--<ChainSelection />-->
-	  
+
       <!-- show spinner while loading -->
       <div class="text-center" v-if="loading">
         <i class="fas fa-spinner fa-spin text-brand"></i>
       </div>
-	  
+
 	  <div class="row text-right" v-if="user">
 		<div class="col-12 pb-2"><a :href="'/'+user.account.name+'/comments'" class="btn btn-brand border"  :title="$t('view_comments')"><i class="far fa-comments"></i></a></div>
 	  </div>
@@ -68,6 +68,7 @@
   import EditPostModal from '~/components/EditPostModal'
   import VoteModal from '~/components/VoteModal'
   import DailyActivityChartModal from '~/components/DailyActivityChartModal'
+  import ListHeadingSection from '~/components/ListHeadingSection'
 
   import { mapGetters } from 'vuex'
   //import ChainSelection from '~/components/ChainSelection'
@@ -87,9 +88,10 @@
       Report,
       Footer,
       ReportModal,
-	  EditPostModal,
+	    EditPostModal,
       VoteModal,
-	  DailyActivityChartModal //,
+      ListHeadingSection,
+	    DailyActivityChartModal //,
 	  //ChainSelection
     },
     data () {
@@ -107,7 +109,7 @@
 			console.log('user activity change in chain '+newBchain);
 			this.cur_bchain = newBchain;
 			await this.$store.dispatch('steemconnect/refreshUser');
-			
+
 			// reset previously fetched posts to get latest
 			this.$store.commit('setUserReports', [])
 
@@ -124,7 +126,7 @@
 	  ...mapGetters('steemconnect', ['stdLogin']),
       ...mapGetters(['userReports', 'moreUserReportsAvailable', 'activeReport', 'bchain']),
 
-	  
+
 	  isSingleReport() {
         return this.userReports.length === 1;
       },
@@ -162,16 +164,16 @@
 	  },
       async loadMore () {
         this.loadingMore = true
-		
+
 		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		this.$store.commit('setBchain', cur_bchain);
-	  
+
         await this.$store.dispatch('fetchUserReports', this.username)
         this.loadingMore = false
       },
 	  async fetchUserData () {
-		if (typeof this.user != 'undefined' && this.user != null){	  
-		  
+		if (typeof this.user != 'undefined' && this.user != null){
+
 		  if (!localStorage.getItem('std_login')){
 		  //if (!this.stdLogin){
 			  //update user info from blockchain
@@ -190,16 +192,16 @@
 	  this.fetchUserData();
 
       // fetch reports
-	  
+
 	  let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 	  this.$store.commit('setBchain', cur_bchain);
-	  
+
       // reset previously fetched posts to get latest
       this.$store.commit('setUserReports', [])
 
       // disable load more button and only show if there actually are more posts to load
       this.$store.commit('setMoreUserReportsAvailable', false)
-	  
+
       await this.$store.dispatch('fetchUserReports', this.username)
 
       // remove loading indicator

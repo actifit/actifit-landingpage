@@ -25,6 +25,7 @@ module.exports = {
          files: ['*'],
          rules: {
           'vue/no-mutating-props': 'off', //Disable rule only for vue files
+          'vue/comment-directive': 'off',
          }
      }
  ]

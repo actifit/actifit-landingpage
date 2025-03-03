@@ -157,3 +157,79 @@ a:hover {
   margin-left: 3px;
   color: yellow;
 }
+
+/* animations for landing page */
+
+.fade-blur {
+  opacity: 0;
+  filter: blur(5px); /* Initial blur */
+  transition: filter 1.4s ease, opacity 1.4s ease;
+}
+
+.fade-blur.active {
+  opacity: 1;
+  filter: blur(0); /* Remove blur */
+}
+
+.fade-scale {
+  opacity: 0;
+  transform: scale(0.9); /* Start slightly smaller */
+  transition: transform 1.4s ease, opacity 1.4s ease;
+}
+
+.fade-scale.active {
+  opacity: 1;
+  transform: scale(1); /* Scale back to normal size */
+}
+
+
+/*slide-in-left*/
+/*
+.slide-in-left {
+  opacity: 0;
+  transform: translateX(-50px); // Start position: 50px left
+  transition: transform 1.4s ease, opacity 1.4s ease;
+}
+
+.slide-in-left.active {
+  transform: translateX(0); // End position: Normal position
+  opacity: 1;
+}
+
+
+.slide-in-right {
+  opacity: 0;
+  transform: translateX(50px); // Start position: 50px right
+  transition: transform 1.4s ease, opacity 1.4s ease;
+}
+
+.slide-in-right.active {
+  transform: translateX(0); // End position: Normal position
+  opacity: 1;
+}
+
+*/
+.reveal {
+  position: relative;
+  transform: translateY(50px);
+  opacity: 0;
+  transition: 1.4s all ease;
+}
+
+.reveal.active {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.bg-gradient {
+  background: linear-gradient(90deg, #FF0000, rgba(255, 0, 0, 0.2));
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.font-weight-semibold {
+  font-weight: 600;
+}
+
+.shadowed-view{
+  box-shadow: 3px 3px 3px rgb(255 0 0 / 40%)
+}

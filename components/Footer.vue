@@ -1,7 +1,7 @@
 <template>
   <!-- Footer used on all pages -->
   <div class="footer bg-light">
-    <div class="container py-5">
+    <div class="container">
 
 	<div class="columns">
 		<div class="column">

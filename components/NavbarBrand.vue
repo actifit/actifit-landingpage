@@ -13,7 +13,7 @@
           <li class="nav-item btn btn-brand m-1 p-1 nav-item-border" v-if="!home">
             <div style="display:inline-flex"><i class="fas fa-home text-white"></i><a class="nav-link text-white" href="#" @click.prevent="$router.push('/')">{{ $t('Home') }}</a></div>
           </li>
-		  
+
 		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
             <div style="display:inline-flex"><i class="fas fa-running text-white"></i><a class="nav-link text-white" href="#" @click.prevent="$router.push('/activity')">{{ $t('Activity') }}</a></div>
           </li>
@@ -23,7 +23,7 @@
 		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
             <div style="display:inline-flex"><i class="fas fa-seedling text-white"></i><a class="nav-link text-white" href="#" @click.prevent="$router.push('/yieldfarming')">{{ $t('yield_farming') }}</a></div>
           </li>
-		  
+
           <!--<li class="nav-item btn btn-brand m-1 p-1 nav-item-border" v-if="home">
             <div style="display:inline-flex"><i class="fas fa-heart text-white"></i><a class="nav-link text-white" href="#" @click.prevent="$emit('scrollTo', '#delegators')">{{ $t('Delegators') }}</a></div>
           </li>
@@ -36,15 +36,15 @@
           <li class="nav-item btn btn-brand m-1 p-1 nav-item-border" v-if="home">
             <div style="display:inline-flex"><i class="fas fa-users text-white"></i><a class="nav-link text-white" href="#" @click.prevent="$emit('scrollTo', '#team')">{{ $t('Team') }}</a></div>
           </li>
-		  
+
           <li class="nav-item">
             <a class="nav-link" href="#" @click.prevent="scrollTo('#athletes')">{{ $t('Sponsored_Athletes') }}</a>
           </li>
-		  
+
 		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border" v-if="home">
             <div style="display:inline-flex"><i class="far fa-handshake text-white"></i><a class="nav-link text-white" href="#" @click.prevent="$emit('scrollTo', '#partners')">{{ $t('Partners') }}</a></div>
           </li>-->
-		  
+
           <li class="nav-item btn btn-brand m-1 p-1 nav-item-border" v-if="home">
             <div style="display:inline-flex"><i class="far fa-newspaper text-white"></i><a class="nav-link text-white" href="#" @click.prevent="$emit('scrollTo', '#news')">{{ $t('News') }}</a></div>
           </li>
@@ -52,15 +52,15 @@
 		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
             <div style="display:inline-flex"><i class="fas fa-user-friends text-white"></i><a class="nav-link text-white" href="#" @click.prevent="$router.push('/referrals')">{{ $t('Refer_A_Friend') }}</a></div>
           </li>
-		  
+
 		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
             <div style="display:inline-flex"><i class="fas fa-users text-white"></i><a class="nav-link text-white" href="/communities">{{ $t('Communities') }}</a></div>
           </li>
-		  
+
 		  <li class="nav-item btn btn-brand m-1 p-1 nav-item-border">
             <div style="display:inline-flex"><i class="fas fa-search text-white"></i><a class="nav-link text-white" href="/explore">{{ $t('Explore') }}</a></div>
           </li>
-		  
+
         </ul>
       </div>
 	  <UserMenu @modal-opened="handleModalOpened"/>
@@ -73,7 +73,7 @@
 	import { method } from 'lodash';
 import UserMenu from '~/components/UserMenu';
 import LoginModal from '~/components/LoginModal'
-	
+
 	export default {
     data(){
       return{
@@ -84,7 +84,7 @@ import LoginModal from '~/components/LoginModal'
 		components: {
 		  UserMenu,
       LoginModal
-		  
+
 		},
 		async mounted () {
 			console.log('navbar mounted');
@@ -99,7 +99,7 @@ import LoginModal from '~/components/LoginModal'
         this.$store.dispatch('steemconnect/refreshUser');
       }
     }
-	
+
 	}
 </script>
 
@@ -114,7 +114,7 @@ import LoginModal from '~/components/LoginModal'
 </style>
 <style>
 	.nav-item-border{
-		opacity: 0.7;
+		opacity: 0.9;
 		background-color: #ff112d;
 		border: 1px solid #ff112d;
 		border-radius: 3px;

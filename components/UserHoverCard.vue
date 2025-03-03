@@ -113,7 +113,7 @@
               </div>
               <div class="col-6 text-center">
                 <small class="text-muted d-block">{{ $t('afit_balance') }}</small>
-                <div class="text-brand font-weight-bold">{{ afitBalance || 'N/A' }}</div>
+                <div class="text-brand font-weight-bold">{{ userTokensWallet || 'N/A' }}</div>
               </div>
             </div>
 
@@ -151,9 +151,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
 import hive from '@hiveio/hive-js'
-import steem from 'steem'
 
 export default {
   name: 'UserHoverCard',
@@ -182,7 +180,7 @@ export default {
       displayIncreasedUserRank: 0.00,
       profImgUrl: process.env.hiveImgUrl,
       hiveBalance: '0',
-      afitBalance: '0',
+      //afitBalance: '0',
       userAddedTokens: '0',
       joinDate: '',
       loading: true,
@@ -193,14 +191,14 @@ export default {
       mouseY: 0,
       modalOffsetX: 0,
       modalOffsetY: 0,
-      isHoveringCard: false
+      isHoveringCard: false,
+      userTokensWallet: 0,
     }
   },
 
   computed: {
-    ...mapGetters(['userTokensWallet']),
     formattedAfitBalance() {
-      const balance = parseFloat(this.userTokensWallet || 0) + parseFloat(this.userAddedTokens || 0)
+      const balance = parseFloat(this.userTokensWallet || 0);// + parseFloat(this.userAddedTokens || 0)
       return this.numberFormat(balance, 3)
     },
     cardPosition() {
@@ -247,12 +245,12 @@ export default {
   },
 
   mounted() {
-    steem.api.setOptions({ url: process.env.steemApiNode })
     hive.api.setOptions({ url: process.env.hiveApiNode })
 
-    this.profImgUrl = (localStorage.getItem('cur_bchain') === 'STEEM')
-      ? process.env.steemImgUrl
-      : process.env.hiveImgUrl
+    //this.profImgUrl = //(localStorage.getItem('cur_bchain') === 'STEEM')
+      //? process.env.steemImgUrl
+      //:
+    //  process.env.hiveImgUrl
 
       this.fetchUserRank()
   },
@@ -267,14 +265,6 @@ export default {
   },
 
   watch: {
-    userTokensWallet: {
-      immediate: true,
-      handler(newVal) {
-        if (newVal) {
-          this.afitBalance = this.formattedAfitBalance
-        }
-      }
-    },
     username: {
       immediate: true,
       handler(newUsername) {
@@ -388,7 +378,7 @@ export default {
     },
     async fetchUserData() {
       try {
-        const chainLnk = localStorage.getItem('cur_bchain') === 'STEEM' ? steem : hive
+        const chainLnk = hive;//localStorage.getItem('cur_bchain') === 'STEEM' ? steem : hive
 
         // Fetch all data in parallel
         const [accountData, userTokens] = await Promise.all([
@@ -401,7 +391,6 @@ export default {
               }
             })
           }),
-          this.$store.dispatch('fetchUserTokensReturn', this.username, false)
         ])
 
         if (accountData) {
@@ -410,10 +399,12 @@ export default {
           this.joinDate = new Date(accountData.created).toLocaleDateString()
         }
 
-        if (userTokens) {
+        this.userTokensWallet = await this.$store.dispatch('fetchUserTokensReturn', this.username, false)
+
+        /*if (userTokens) {
           const afitBalance = parseFloat(userTokens) + parseFloat(this.userAddedTokens || 0)
           this.afitBalance = this.numberFormat(afitBalance, 3)
-        }
+        }*/
 
         // Fetch rank data if needed and not already loaded
         if (this.displayMode === 'full' && !this.displayCoreUserRank) {

@@ -5,12 +5,11 @@
 
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-2">
-      <h2 class="text-center mb-2">{{ $t('Explore_hive') }} <img src="/img/HIVE.png" class="mr-2 token-logo-md"></h2>
-	  <!--<ChainSelection />-->
+      <ListHeadingSection :textualDisplay="textualTitle"/>
 
 	  <div class="text-right col-12 row pb-2">
-			<div class="col-9"/>
-			<select v-model="type" class="form-control sel-adj col-3">
+			<div class="col-lg-9 col-sm-8"/>
+			<select v-model="type" class="form-control sel-adj col-lg-3 col-sm-4">
 				<option disabled>-- {{$t('Sort_By')}} --</option>
 				<option value="trending">{{$t('Trending')}}</option>
 				<option value="hot">{{$t('Hot')}}</option>
@@ -18,7 +17,7 @@
 			</select>
 	  </div>
 		<h3>{{$t('filter_content_by_pop_community')}}</h3>
-		<div v-if="popComms && popComms.length > 0" class="row comm-container" ref="comm-container">
+		<div v-if="popComms && popComms.length > 0" class="row comm-container col-12" ref="comm-container">
 			<span v-for="(selComm) in popComms" :key="selComm[0]+'chk'" class="comm-selector col-3">
 				<input type="checkbox" :ref="selComm[0]+'chk'" :id="selComm[0]+'chk'" @change="($event) => handleCheckboxChange($event, selComm[0], selComm[1])">
 				<!--<a :href="selComm[0]" class="text-brand" >-->
@@ -42,15 +41,7 @@
 			{{ $t('Create_post') }}
 		</a>
 	  </div>
-	  <!--<div class="row text-right">
-		<div class="col-12 pb-2"><a :href="'/'+username+'/comments'" class="btn btn-brand border"  :title="$t('view_comments')"><i class="far fa-comments"></i></a>&nbsp;<a :href="'/'+username+'/videos'" class="btn btn-brand border"  :title="$t('view_videos')"><i class="fas fa-video"></i></a></div>
-	  </div>-->
 
-	  <!--<div class="vid-container" v-if="communityPosts.length">
-
-			<Post v-for="iterx in communityPosts.length" :key="iterx" :post="communityPosts[(iterx - 1)]" :displayUsername="username" :pstId="(iterx - 1)" class="card post w-25 p-1 m-1 " explorePost="true"/>
-
-	  </div>-->
 		<div v-for="(community, index) in selCommunities" :key="index" :community="community">
 			<CommunityContent :community='community[0]' :type="type" />
 		</div>
@@ -95,15 +86,14 @@
 
 <script>
   import NavbarBrand from '~/components/NavbarBrand'
-  import Post from '~/components/Post'
   import Footer from '~/components/Footer'
   import PostModal from '~/components/PostModal'
   import EditPostModal from '~/components/EditPostModal'
   import VoteModal from '~/components/VoteModal'
   import CommunityContent from '~/components/CommunityContent'
-
+  import ListHeadingSection from '~/components/ListHeadingSection';
   import { mapGetters } from 'vuex'
-  import Vue from 'vue'
+
   //import ChainSelection from '~/components/ChainSelection'
 
   export default {
@@ -123,7 +113,9 @@
       PostModal,
       EditPostModal,
       VoteModal,
-	  CommunityContent
+	    CommunityContent,
+      ListHeadingSection
+
 	  //DailyActivityChartModal //,
 	  //ChainSelection
     },
@@ -131,16 +123,16 @@
       return {
         loading: true, // initial loading state
         loadingMore: false, // loading state for loading more posts
-		splitFactor: 9,
-		inlineAds: 2,
-		communityPosts: [],
-		moreCommunityPostsAvailable: false,
-		type: 'trending',//default
-		username: '',
-		popComms: [],
-		//supportedCommunities:['hive-181335', 'hive-193552', 'hive-163772', 'hive-174578' ,'hive-193084'],
-		defaultCommunities: [['hive-181335', '3Speak'], ['hive-193552', 'Actifit'], ['hive-163772', 'Pinmapple'] , ['hive-174578', 'OCD'],['hive-193084', 'dbuzz'], ['hive-167922', 'LeoFinance'], ['hive-13323','Splinterlands'], ['hive-147010', 'Liketu']],
-		selCommunities: [],
+        splitFactor: 9,
+        inlineAds: 2,
+        communityPosts: [],
+        moreCommunityPostsAvailable: false,
+        type: 'trending',//default
+        username: '',
+        popComms: [],
+        //supportedCommunities:['hive-181335', 'hive-193552', 'hive-163772', 'hive-174578' ,'hive-193084'],
+        defaultCommunities: [['hive-181335', '3Speak'], ['hive-193552', 'Actifit'], ['hive-163772', 'Pinmapple'] , ['hive-174578', 'OCD'],['hive-193084', 'dbuzz'], ['hive-167922', 'LeoFinance'], ['hive-13323','Splinterlands'], ['hive-147010', 'Liketu']],
+        selCommunities: [],
       }
     },
 	watch: {
@@ -179,7 +171,10 @@
 				}
 				return false; // Target value not found
 			}
-		},
+		  },
+      textualTitle(){
+        return this.$t('Explore_hive')+ '<img src="/img/HIVE.png" class="mr-2 token-logo-md">';
+      }
 
     },
     methods: {
@@ -346,6 +341,11 @@
 .comm-container{
 	max-height: 50px;
 	overflow-y: hidden;
+}
+@media (max-width: 768px){
+  .comm-container{
+    max-height: 100px;
+  }
 }
 .fa-arrow-circle-down{
 	cursor: pointer;

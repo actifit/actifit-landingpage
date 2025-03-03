@@ -5,17 +5,18 @@
 
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-5">
-      <h2 class="text-center mb-5">{{ $t('Hive_communities') }} <img src="/img/HIVE.png" class="mr-2 token-logo-md"></h2>
+      <ListHeadingSection :textualDisplay="textualTitle" />
+      <h2 class="text-center mb-5"></h2>
 	  <!--<ChainSelection />-->
-	  
-      
+
+
 	  <div class="col-12 row p-2 m-2">
-	  
+
 		  <div v-if="user" class="col-3">
 			<input type="checkbox" id="showOnlySubscribed" v-model="showOnlySubscribed" >
 			<label for="showOnlySubscribed" class="ml-2">{{$t('Show_only_subscribed')}}</label>
 		  </div>
-		  
+
 		  <div class="pr-2 pl-2 row col-6">
 			<input type="text" id="search" name="search" :placeholder="$t('Search')" ref="search" class="form-control acti-shadow search-term col-6">
 			<input type="button" id="go" name="go" value="Go" class="btn btn-brand btn-white border ml-2" v-on:click="performSearch" >
@@ -30,20 +31,20 @@
 					<option value="new">{{$t('New')}}</option>
 			  </select>
 		  </div>
-	  
+
 	  </div>
-	  
+
 	  <!-- show spinner while loading -->
       <div class="text-center" v-if="loading">
         <i class="fas fa-spinner fa-spin text-brand"></i>
       </div>
-	  
-	  
+
+
       <!-- show listing when loaded -->
 	  <div class="row" v-if="finalCommList.length">
 		<!--<div class="row"  v-for="iterx in Math.ceil(communitiesList.length / splitFactor)" :key="iterx">-->
 			<div v-for="iterx in finalCommList.length" :key="iterx" class="col-md-6 col-lg-4 mb-4" v-if="showCommunity(finalCommList[iterx-1])" >
-				<Community :community="finalCommList[(iterx - 1)]" :pstId="iterx - 1" :userSubscribed="isUserSubscribed(finalCommList[(iterx - 1)])" 
+				<Community :community="finalCommList[(iterx - 1)]" :pstId="iterx - 1" :userSubscribed="isUserSubscribed(finalCommList[(iterx - 1)])"
 				@update-community="updateCommunity"/>
 			</div>
 			<!--<div class="col-md-6 col-lg-12 mb-4" v-if="(iterx - 1) < inlineAds">
@@ -53,7 +54,7 @@
 			</div>
 		</div>-->
       </div>
-	  
+
 
       <!-- or no content message when no posts found -->
       <div class="text-center text-muted" v-if="!communitiesList.length && !loading">
@@ -71,7 +72,7 @@
 
     <Footer />
     <client-only>
-      <div>    
+      <div>
         <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
 		<notifications :group="'warn'" :position="'top center'" :classes="'vue-notification warn'" />
         <notifications :group="'error'" :position="'top center'" :classes="'vue-notification error'" />
@@ -81,14 +82,14 @@
 </template>
 
 <script>
-  import NavbarBrand from '~/components/NavbarBrand'
-  import Community from '~/components/Community'
-  import Footer from '~/components/Footer'
+  import NavbarBrand from '~/components/NavbarBrand';
+  import Community from '~/components/Community';
+  import Footer from '~/components/Footer';
   //import PostModal from '~/components/PostModal'
   //import EditPostModal from '~/components/EditPostModal'
-  import VoteModal from '~/components/VoteModal'
+  import ListHeadingSection from '~/components/ListHeadingSection';
 
-  import { mapGetters } from 'vuex'
+  import { mapGetters } from 'vuex';
   //import ChainSelection from '~/components/ChainSelection'
 
   export default {
@@ -103,9 +104,10 @@
 	},
 	components: {
       NavbarBrand,
-	  Community,
+	    Community,
       //Post,
       Footer,
+      ListHeadingSection
       //PostModal,
       //EditPostModal,
       //VoteModal,
@@ -116,14 +118,14 @@
       return {
         loading: true, // initial loading state
         loadingMore: false, // loading state for loading more posts
-		splitFactor: 9,
-		inlineAds: 2,
-		communitySubs: [],
-		showOnlySubscribed: false,
-		sortOrder: 'rank',//default by rank (options: subs, rank, new)
-		finalCommList: [],
-		filterActive: false,
-		moreCommunitiesAvailable: false,
+        splitFactor: 9,
+        inlineAds: 2,
+        communitySubs: [],
+        showOnlySubscribed: false,
+        sortOrder: 'rank',//default by rank (options: subs, rank, new)
+        finalCommList: [],
+        filterActive: false,
+        moreCommunitiesAvailable: false,
       }
     },
 	watch: {
@@ -137,35 +139,38 @@
 			console.log('user activity change in chain '+newBchain);
 			this.cur_bchain = newBchain;
 			await this.$store.dispatch('steemconnect/refreshUser');
-			
+
 			// reset previously fetched posts to get latest
 			//this.$store.commit('setUserPosts', [])
 
 			// disable load more button and only show if there actually are more posts to load
 			//this.$store.commit('setMoreCommunitiesAvailable', false)
 			console.log('dispatch fetching communities')
-			
+
 			await this.$store.dispatch('fetchCommunities', {sortOrder: this.sortOrder})
-			
+
 			await this.fetchUserCommunities();
-			
+
 			this.moreCommunitiesAvailable = true;
 			if (this.communitiesList.length < 1){
 				this.moreCommunitiesAvailable = false;
 			}
 
-			
+
 			this.loading = false
 		}
 		//this.reload += 1;
 	  }
 	},
     computed: {
-	  ...mapGetters('steemconnect', ['user']),
-	  ...mapGetters('steemconnect', ['stdLogin']),
+	    ...mapGetters('steemconnect', ['user']),
+	    ...mapGetters('steemconnect', ['stdLogin']),
       ...mapGetters(['communitiesList', 'bchain']),
+      textualTitle(){
+        return this.$t('Hive_communities')+'<img src="/img/HIVE.png" class="mr-2 token-logo-md">';
+      }
 
-      
+
     },
     methods: {
 	  async performSearch(){
@@ -212,7 +217,7 @@
 			return false;
 		const containsCommunity = this.communitySubs.some(([entry]) => entry === community.name);
 		return containsCommunity;
-		
+
 	  },
 	  async fetchUserCommunities(){
 		if (this.user){
@@ -228,7 +233,7 @@
 	  async fetchUserMissingCommunities() {
 		  //only runs if no filtering is in place
 		  if (this.filterActive) return;
-		  
+
 		  await Promise.all(this.communitySubs.map(async ([entry]) => {
 			const exists = this.communitiesList.some(obj => obj.name === entry);
 			console.log('extras');
@@ -248,23 +253,23 @@
 		},
       async loadMore () {
         this.loadingMore = true
-		
+
 		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		this.$store.commit('setBchain', cur_bchain);
 		console.log('dispatch MORE fetching user posts')
 
         await this.$store.dispatch('fetchCommunities', {sortOrder: this.sortOrder, last: this.communitiesList[this.communitiesList.length -1].name})
-		
+
 		this.moreCommunitiesAvailable = true;
 		if (this.communitiesList.length < 1){
 			this.moreCommunitiesAvailable = false;
 		}
-		
+
         this.loadingMore = false
       },
 	  async fetchUserData () {
-		if (typeof this.user != 'undefined' && this.user != null){	  
-		  
+		if (typeof this.user != 'undefined' && this.user != null){
+
 		  if (!localStorage.getItem('std_login')){
 		  //if (!this.stdLogin){
 			  //update user info from blockchain
@@ -290,17 +295,17 @@
 	  this.fetchUserData();
 
       // fetch communities
-	  
+
 	  let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 	  this.$store.commit('setBchain', cur_bchain);
 
       // disable load more button and only show if there actually are more posts to load
       //this.$store.commit('setMoreCommunitiesAvailable', false)
-	  
+
       await this.$store.dispatch('fetchCommunities', {sortOrder: this.sortOrder})
-	  
+
 	  await this.fetchUserCommunities();
-	  
+
 		this.moreCommunitiesAvailable = true;
 		if (this.communitiesList.length < 1){
 			this.moreCommunitiesAvailable = false;
