@@ -2091,15 +2091,11 @@ export default {
       return this.numberFormat(parseFloat(this.displayUserData.hbd_balance) * this.hbdPrice, 2)
     },
     hiveValueUSD() {
-      console.log(this.steemPower)
-      console.log(this.hivePrice)
       return this.numberFormat((parseFloat(this.displayUserData.balance) + parseFloat(this.steemPower)) * this.hivePrice, 2);
     },
     totalBalanceUSD() {
-      console.log('totalBalanceUSD');
       //calculate full balance HE tokens
       let heUSDVals = this.heTokenBalances.reduce((accumulator, currentValue) => accumulator + parseFloat(currentValue), 0);
-      console.log(heUSDVals)
       return this.numberFormat(
         (parseFloat(this.afitValueUSD) +
           parseFloat(this.hbdValueUSD) +
@@ -3180,7 +3176,6 @@ export default {
         //convert amount to STEEM price
         //console.log(this.totalAccountValue);
         this.totalAccountValue *= baseCurrency;
-        console.log(baseCurrency);
         this.detailCalculation += this.numberFormat(this.totalAccountValueSteem, 4) + ' ' + this.cur_bchain + ' x ' + baseCurrency + ' ' + this.cur_bchain + '/USD = $ ' + this.numberFormat(this.totalAccountValue, 4) + ' USD<br/>';
 
         //console.log(baseCurrency);
@@ -3219,7 +3214,6 @@ export default {
           }
           return this.numberFormat(valueUSD.toFixed(3), 2)
         } else if (token.symbol == 'SWAP.HIVE') {
-          console.log('swap.hive')
           //console.log(tokenData.lastPrice)
           let valueUSD = token.balance * this.hivePrice;
           this.heTokenBalances[token.symbol] = valueUSD;
