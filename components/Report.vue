@@ -24,7 +24,7 @@
 
             <a href="#" class="text-brand" @click="report.rptId = rptId; $store.commit('setActiveReport', report)"
               data-toggle="modal" data-target="#reportModal" :title="$t('read_more_small')" v-if="$postHasImage(meta)">
-              <img :src="$fetchPostImage(meta)" :alt="report.title" class="report-image">
+              <img :src="$fetchPostImage(meta)" :alt="report.title" class="report-image" @error="handleImageError($event, meta)">
             </a>
           </div>
         </div>
@@ -315,6 +315,13 @@ export default {
     postUpvoted: 'updatePostData',
   },
   methods: {
+    handleImageError(event, meta){
+      const image = event.target;
+      //this.imageError = true;
+      let src = this.$fetchHiveFmtPostImage(meta);
+      image.src = src;
+      event.target.onerror = null;
+    },
     /* function checks to see if post reached its payout period */
     postPaid() {
       //check if last_payout is after cashout_time which means post got paid

@@ -39,7 +39,7 @@
           <div class="col-12">
             <a href="#" class="text-brand" @click="post.pstId = pstId; $store.commit('setActivePost', post)"
               data-toggle="modal" data-target="#postModal" :title="$t('read_more_small')" v-if="$postHasImage(meta)">
-              <img :src="$fetchPostImage(meta)" :alt="post.title" class="post-image">
+              <img :src="$fetchPostImage(meta)" :alt="post.title" class="post-image" @error="handleImageError($event, meta)">
             </a>
           </div>
         </div>
@@ -271,6 +271,13 @@ export default {
     postUpvoted: 'updatePostData',
   },
   methods: {
+    handleImageError(event, meta){
+      const image = event.target;
+      //this.imageError = true;
+      let src = this.$fetchHiveFmtPostImage(meta);
+      image.src = src;
+      event.target.onerror = null;
+    },
     showTooltip() {
       this.isTooltipVisible = true;
     },

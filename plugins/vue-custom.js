@@ -360,6 +360,19 @@ Vue.prototype.$postHasImage = function(metaData){
 	return false;
 };
 
+Vue.prototype.$fetchHiveFmtPostImage = function (metaData){
+	if (this.$postHasImage(metaData)){
+		try{
+			//find first occurrence that is url
+			return 'https://images.hive.blog/0x0/' + metaData.image.find(element => /^(http|https):\/\//.test(element));
+		}catch(err){
+			//alt image case
+			return 'https://images.hive.blog/0x0/' + metaData.images.find(element => /^(http|https):\/\//.test(element));
+		}
+	}
+	return "";
+};
+
 Vue.prototype.$fetchPostImage = function (metaData){
 	if (this.$postHasImage(metaData)){
 		try{
