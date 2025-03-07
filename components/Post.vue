@@ -1,7 +1,7 @@
 <template>
   <!-- single post item for activity pages -->
   <div>
-    <div :class="[isOnlyPost ? 'card post single' : { 'card-pinned': isPostPinned, 'card post': isStandardPost }]">
+    <div :class="[isOnlyPost ? 'card post single p-1' : { 'card-pinned p-1': isPostPinned, 'card post p-1': isStandardPost }]">
       <h6 class="mb-0 text-center post-title">
         <!--<a :href="post.url" target="_blank">-->
         <a :href="buildLink" target="_blank">
@@ -47,11 +47,7 @@
           <div class="col-12">
             <a href="#" class="" @click="post.pstId = pstId; $store.commit('setActivePost', post)" data-toggle="modal"
               data-target="#postModal" :title="$t('read_more_small')">
-              <!--<a :href="'/'+post.author+'/'+post.permlink" target="_blank">-->
-              <!--<div ref="post_body" id="post_body" style="display: none">
 
-					<vue-remarkable :source="renderSnippet(post.body)" :options="{'html': true, 'xhtmlOut': true}"></vue-remarkable>
-				</div>-->
               <div>
                 <!--<span id="post_body_render" v-html="fixedContent()"></span>-->
                 <span id="post_body_render">{{ renderSnippet(post.body) }}</span>
@@ -61,102 +57,88 @@
           </div>
 
         </div>
-        <!--<div class="row details mt-2">
-          <div class="col-8">
-            <small class="d-block">
-              <b>{{ $t('Activity_Type') }}:</b>
-            </small>
-            <small class="d-block text-truncate" :title="type">
-              {{ type }}
-            </small>
-          </div>
-          <div class="col-4 text-right">
-            <small>
-              <b>{{ $t('Activity_Count') }}:</b><br>
-              {{ steps }}
-            </small>
-          </div>
-        </div>-->
-        <div class="row details mt-2">
-          <div class="col-6">
-            <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand"
-              data-target="#voteModal" v-if="user && userVotedThisPost() == true" :title="$t('votes')">
-              <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
-            </a>
-            <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" data-target="#voteModal" v-else
-              :title="$t('votes')">
-              <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
-            </a>
-            <i class="far fa-comments ml-2" :title="$t('comments')"></i> {{ post.children }}
-            <i class="far fa-share-square ml-2" @click.prevent="$reblog(user, post)"
-              v-if="user && post.author != this.user.account.name" :title="$t('reblog')"></i>
-          </div>
-          <div class="col-6 text-right">
-            <social-sharing :url="'https://actifit.io/@' + post.author + '/' + post.permlink" :title="post.title"
-              :description="socialSharingDesc" :quote="socialSharingQuote" :hashtags="hashtags"
-              twitter-user="actifit_fitness" inline-template>
-              <span class="share-links-actifit">
-                <network network="twitter">
-                  <i class="fab fa-x-twitter text-brand" title="twitter"></i>
-                </network>
-              </span>
-            </social-sharing>
-            <!--<a href="#" class="text-brand pr-2" @click="post.pstId = pstId; $store.commit('setActivePost', post)" data-toggle="modal"
-                 data-target="#dailyActivityChartModal" :title="$t('Activity_chart')">
-                <i class="fas fa-chart-line"></i>
-              </a>-->
-            <a href="#" class="text-brand" @click="$store.commit('setEditPost', post)" data-toggle="modal"
-              data-target="#editPostModal" v-if="user && post.author === user.account.name" :title="$t('Edit_note')">
-              <i class="fas fa-edit"></i>
-            </a>
-            <a href="#" class="text-brand" @click="post.pstId = pstId; $store.commit('setActivePost', post)"
-              data-toggle="modal" data-target="#postModal" :title="$t('read_more_small')">
-              <i class="fas fa-book-open"></i>
-            </a>
-          </div>
-        </div>
-        <div class="row details mt-2">
-          <div class="col-12">
-
-            <img src="/img/STEEM.png" class="mr-1 currency-logo-small" v-if="cur_bchain == 'STEEM'">
-            <img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain == 'HIVE'">
-            <!--{{ postPayout }}-->
-            <span v-if="postPaid()">
-              <!--<i class="fa-solid fa-wallet text-green"></i>-->
-              <span class="m-1" :title="$t('author_payout')">
-                <i class="fa-solid fa-user"></i>
-                {{ paidValue() }}
-              </span>
-              <span class="m-1" :title="$t('voters_payout')">
-                <i class="fa-solid fa-users"></i>
-                {{ post.curator_payout_value }}
-              </span>
-              <i class="fa-solid fa-check text-green text-bold"></i>
-            </span>
-            <span v-else>
-              <span class="text-brand text-bold">{{ post.pending_payout_value.replace('SBD', '') }}</span>
-              <i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
-            </span>
-            <span v-if="hasBeneficiaries()" :title="beneficiariesDisplay()" @click="toggleTooltip()"
-              @mouseenter="showTooltip()" @mouseleave="hideTooltip()" @touchstart="showTooltip()"
-              @touchend="hideTooltip()">
-              <i class="fas fa-user-pen"><sup>{{ post.beneficiaries.length }}</sup></i>
-              <div class="custom-tooltip" v-if="isTooltipVisible">{{ beneficiariesDisplay() }}</div>
-            </span>
-
-
-
-          </div>
-          <div class="col-6 text-right" v-if="afitReward != ''">
-            <small>
-              <img src="/img/actifit_logo.png" class="mr-1 currency-logo-small">{{ afitReward }} {{ $t('AFIT_Token') }}
-            </small>
-          </div>
-        </div>
 
 
 
       </div>
+      <div class="post-footer mt-auto">
+          <div class="row details mt-2">
+            <div class="col-6">
+              <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand"
+                data-target="#voteModal" v-if="user && userVotedThisPost() == true" :title="$t('votes')">
+                <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
+              </a>
+              <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" data-target="#voteModal" v-else
+                :title="$t('votes')">
+                <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
+              </a>
+              <i class="far fa-comments ml-2" :title="$t('comments')"></i> {{ post.children }}
+              <i class="far fa-share-square ml-2" @click.prevent="$reblog(user, post)"
+                v-if="user && post.author != this.user.account.name" :title="$t('reblog')"></i>
+            </div>
+            <div class="col-6 text-right">
+              <social-sharing :url="'https://actifit.io/@' + post.author + '/' + post.permlink" :title="post.title"
+                :description="socialSharingDesc" :quote="socialSharingQuote" :hashtags="hashtags"
+                twitter-user="actifit_fitness" inline-template>
+                <span class="share-links-actifit">
+                  <network network="twitter">
+                    <i class="fab fa-x-twitter text-brand" title="twitter"></i>
+                  </network>
+                </span>
+              </social-sharing>
+              <!--<a href="#" class="text-brand pr-2" @click="post.pstId = pstId; $store.commit('setActivePost', post)" data-toggle="modal"
+                  data-target="#dailyActivityChartModal" :title="$t('Activity_chart')">
+                  <i class="fas fa-chart-line"></i>
+                </a>-->
+              <a href="#" class="text-brand" @click="$store.commit('setEditPost', post)" data-toggle="modal"
+                data-target="#editPostModal" v-if="user && post.author === user.account.name" :title="$t('Edit_note')">
+                <i class="fas fa-edit"></i>
+              </a>
+              <a href="#" class="text-brand" @click="post.pstId = pstId; $store.commit('setActivePost', post)"
+                data-toggle="modal" data-target="#postModal" :title="$t('read_more_small')">
+                <i class="fas fa-book-open"></i>
+              </a>
+            </div>
+          </div>
+          <div class="row details mt-2">
+            <div class="col-12">
+
+              <img src="/img/STEEM.png" class="mr-1 currency-logo-small" v-if="cur_bchain == 'STEEM'">
+              <img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain == 'HIVE'">
+              <!--{{ postPayout }}-->
+              <span v-if="postPaid()">
+                <!--<i class="fa-solid fa-wallet text-green"></i>-->
+                <span class="m-1" :title="$t('author_payout')">
+                  <i class="fa-solid fa-user"></i>
+                  {{ paidValue() }}
+                </span>
+                <span class="m-1" :title="$t('voters_payout')">
+                  <i class="fa-solid fa-users"></i>
+                  {{ post.curator_payout_value }}
+                </span>
+                <i class="fa-solid fa-check text-green text-bold"></i>
+              </span>
+              <span v-else>
+                <span class="text-brand text-bold">{{ post.pending_payout_value.replace('SBD', '') }}</span>
+                <i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
+              </span>
+              <span v-if="hasBeneficiaries()" :title="beneficiariesDisplay()" @click="toggleTooltip()"
+                @mouseenter="showTooltip()" @mouseleave="hideTooltip()" @touchstart="showTooltip()"
+                @touchend="hideTooltip()">
+                <i class="fas fa-user-pen"><sup>{{ post.beneficiaries.length }}</sup></i>
+                <div class="custom-tooltip" v-if="isTooltipVisible">{{ beneficiariesDisplay() }}</div>
+              </span>
+
+
+
+            </div>
+            <div class="col-6 text-right" v-if="afitReward != ''">
+              <small>
+                <img src="/img/actifit_logo.png" class="mr-1 currency-logo-small">{{ afitReward }} {{ $t('AFIT_Token') }}
+              </small>
+            </div>
+          </div>
+        </div>
     </div>
   </div>
 </template>
@@ -435,8 +417,6 @@ export default {
       padding: 8px 10px
       a
         color: #fff
-    .post-body
-      padding: 8px 10px
     a
       color: #333
       &:hover
@@ -468,6 +448,7 @@ export default {
 .card {
   box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
   overflow: hidden;
+  min-height: 400px;
 }
 
 .card-pinned {
