@@ -1,7 +1,7 @@
 <template>
   <!-- single post item for activity pages -->
   <div>
-    <div :class="[isOnlyPost ? 'card post single p-1' : { 'card-pinned p-1': isPostPinned, 'card post p-1': isStandardPost }]">
+    <div :class="[isOnlyPost ? 'card post single' : { 'card-pinned': isPostPinned, 'card post': isStandardPost }]">
       <h6 class="mb-0 text-center post-title">
         <!--<a :href="post.url" target="_blank">-->
         <a :href="buildLink" target="_blank">
@@ -13,7 +13,7 @@
         </a>
       </h6>
 
-      <div class="post-body">
+      <div class="post-body  p-1">
         <div class="row" v-if="post.parent_author" >
           <!-- if this is a comment, display link to higher level comment/post -->
           <div class="col-12">
@@ -61,7 +61,7 @@
 
 
       </div>
-      <div class="post-footer mt-auto">
+      <div class="post-footer mt-auto p-1">
           <div class="row details mt-2">
             <div class="col-6">
               <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand"
