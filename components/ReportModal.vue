@@ -39,7 +39,7 @@
           <span>{{ $t('auto_translated_content') }}</span>
           <a href="#" v-on:click="cancelTranslation">{{ $t('click_to_view_original') }}</a>
         </div>
-        <vue-remarkable class="modal-body" :source="body"
+        <vue-remarkable class="modal-body" :source="body" ref="remarkableContent"
           :options="{ 'html': true, 'breaks': true, 'typographer': true }"></vue-remarkable>
         <div class="modal-body goog-ad-horiz-90">
           <adsbygoogle ad-slot="5716623705" />
@@ -289,6 +289,7 @@ export default {
       socialSharingDesc: process.env.socialSharingDesc,
       socialSharingQuote: process.env.socialSharingQuote,
       hashtags: process.env.socialSharingHashtags,
+      imageError: new Set(),
     }
   },
   watch: {
@@ -305,6 +306,14 @@ export default {
     bchain: function (newBchain) {
       this.cur_bchain = newBchain;
       this.target_bchain = newBchain;
+    },
+    'report.body':{
+      handler(){
+        //Re-attach to newly rendered content
+        this.$nextTick(() => {
+              this.attachImageErrorHandlers();
+          });
+      }
     }
   },
   props: ['report'],
@@ -818,6 +827,9 @@ export default {
             res.json().then(json => this.setReportTokenRewards(json)).catch(e => reject(e))
           }).catch(e => reject(e))
       }
+
+      //attach image error handles
+      this.attachImageErrorHandlers();
     },
     /* function handles proper display for post token rewards */
     displayTokenValue(token) {
@@ -900,7 +912,40 @@ export default {
             break;
         }
       }
-    }
+    },
+    attachImageErrorHandlers() {
+      //return;
+      const vm = this; // Store this to vm variable
+      // Ensure that vm.$refs.remarkableContent is accessible
+      // and its $el is mounted by the time this function is called
+      this.$nextTick(() => {
+        const contentEl = vm.$refs.remarkableContent.$el;
+        if (!contentEl) {
+            console.warn('VueRemarkable component not found!');
+            return;
+        }
+
+        const images = contentEl.querySelectorAll('img');
+
+        images.forEach(img => {
+          img.onerror = (event) => {
+            // Check if ID exists (to prevent duplicate triggers)
+            if (!this.imageError.has(img.id)) {
+
+              // generate ID if its not set
+              if (!img.id){
+                img.id = this.$uuidv4();
+              }
+              this.imageError.add(img.id);
+
+              img.src = process.env.hiveStandardPostUrl + img.src;
+              img.onerror = null; // prevent double triggers
+              //console.log('Image failed to load.  Set to fallback: ' + img.src);
+            }
+          };
+        });
+      });
+    },
   },
   beforeDestroy() {
     window.removeEventListener('keydown', this.handleKeyDown);

@@ -260,6 +260,7 @@ export default {
       socialSharingQuote: process.env.socialSharingQuote,
       hashtags: process.env.socialSharingHashtags,
       isTooltipVisible: false,
+      imageError: false,
     }
   },
   components: {
@@ -272,11 +273,13 @@ export default {
   },
   methods: {
     handleImageError(event, meta){
-      const image = event.target;
-      //this.imageError = true;
-      let src = this.$fetchHiveFmtPostImage(meta);
-      image.src = src;
-      event.target.onerror = null;
+      if(!this.imageError){
+        const image = event.target;
+        this.imageError = true;
+        let src = this.$fetchHiveFmtPostImage(meta);
+        image.src = src;
+        event.target.onerror = null;
+      }
     },
     showTooltip() {
       this.isTooltipVisible = true;

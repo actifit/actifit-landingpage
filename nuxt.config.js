@@ -63,6 +63,7 @@ module.exports = {
     afitxTokenBSC: '0x246d22ff6e0b90f80f2278613e8db93ff7a09b95',
     afitBNBLPTokenBSC: '0xffff75bb7bf133a9e98bc62665f20a84e152b689',
     afitxBNBLPTokenBSC: '0x150c81246df4e31847a613e18cab5ef601ca265a',
+    hiveStandardPostUrl: 'https://images.hive.blog/0x0/',
     steemImgUrl: 'https://steemitimages.com',
     hiveImgUrl: 'https://images.hive.blog',
     steemApiNode: 'https://api.steemit.com/',

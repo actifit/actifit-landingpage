@@ -37,7 +37,7 @@
 				<a href="#" v-on:click="cancelTranslation">{{ $t('click_to_view_original') }}</a>
 			</div>
 		  </div>
-		  <vue-remarkable class="col-md-12" :source="body" :options="{'html': true, 'breaks': true, 'typographer': true}" ></vue-remarkable>
+		  <vue-remarkable class="col-md-12" ref="remarkableContent" :source="body" :options="{'html': true, 'breaks': true, 'typographer': true}" ></vue-remarkable>
 		  <!--<div v-html="body"></div>-->
 		  <!--<div class="modal-body goog-ad-horiz-90"><adsbygoogle ad-slot="4921049809" /></div>-->
 		  <div class="modal-footer col-md-12 main-payment-info">
@@ -468,6 +468,7 @@
 			  socialSharingDesc: process.env.socialSharingDesc,
 			  socialSharingQuote: process.env.socialSharingQuote,
 			  hashtags: process.env.socialSharingHashtags,
+        imageError: new Set(),
 		  }
 	  },
 	  watch: {
@@ -484,7 +485,15 @@
 			  this.profImgUrl = process.env.steemImgUrl;
 		  }
 		  this.reload += 1;
-		}
+		},
+    'report.body':{
+      handler(){
+        //Re-attach to newly rendered content
+        this.$nextTick(() => {
+              this.attachImageErrorHandlers();
+          });
+      }
+    }
 	  },
 	  components: {
 		NavbarBrand,
@@ -644,6 +653,39 @@
 		  }
 		  return output;
 		},
+    attachImageErrorHandlers() {
+      //return;
+      const vm = this; // Store this to vm variable
+      // Ensure that vm.$refs.remarkableContent is accessible
+      // and its $el is mounted by the time this function is called
+      this.$nextTick(() => {
+        const contentEl = vm.$refs.remarkableContent.$el;
+        if (!contentEl) {
+            console.warn('VueRemarkable component not found!');
+            return;
+        }
+
+        const images = contentEl.querySelectorAll('img');
+
+        images.forEach(img => {
+          img.onerror = (event) => {
+            // Check if ID exists (to prevent duplicate triggers)
+            if (!this.imageError.has(img.id)) {
+
+              // generate ID if its not set
+              if (!img.id){
+                img.id = this.$uuidv4();
+              }
+              this.imageError.add(img.id);
+
+              img.src = process.env.hiveStandardPostUrl + img.src;
+              img.onerror = null; // prevent double triggers
+              //console.log('Image failed to load.  Set to fallback: ' + img.src);
+            }
+          };
+        });
+      });
+    },
 		/* function returns author payout value */
 		paidValue() {
 		  if (this.report.total_payout_value ) return this.report.total_payout_value
@@ -1006,6 +1048,9 @@
 				  res => {res.json().then(json => this.setReportTokenRewards (json) ).catch(e => reject(e))
 			  }).catch(e => reject(e))
 		  }
+
+      //attach image error handles
+      this.attachImageErrorHandlers();
 
 		},
 		/* function handles proper display for post token rewards */
