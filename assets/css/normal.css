@@ -31,6 +31,10 @@
   text-decoration: none;
 }
 
+.modal-top-actions{
+  color: white !important;
+}
+
 section {
 	background-color: var(--background-color)!important;
 }
