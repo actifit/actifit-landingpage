@@ -924,6 +924,7 @@ export default {
       }
     },
     handleKeyDown(event) {
+      if (!$('#reportModal').hasClass('show')) return;
       let commentBoxOpenTest = localStorage.getItem('commentBoxOpen') === 'true';
       if (!commentBoxOpenTest) {
         switch (event.key) {

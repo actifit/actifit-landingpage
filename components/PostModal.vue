@@ -940,6 +940,8 @@ export default {
       return new Intl.NumberFormat('en-EN', { maximumFractionDigits: precision }).format(number)
     },
     handleKeyDown(event) {
+      //only execute if postmodal is visible
+      if (!$('#postModal').hasClass('show')) return;
       let commentBoxOpenTest = localStorage.getItem('commentBoxOpen') === 'true';
       if (!commentBoxOpenTest) {
         switch (event.key) {

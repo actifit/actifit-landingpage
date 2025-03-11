@@ -205,7 +205,6 @@ export default {
       });
     },
     handlePaste(event) {
-      console.log(event);
       const clipboardData = event.clipboardData || window.clipboardData;
       const items = clipboardData.items;
 
@@ -252,7 +251,6 @@ export default {
           }
         });
 
-        console.log('meow Upload Success:', response.data);
         const imageUrl = 'https://usermedia.actifit.io/' + key;
         this.$refs.editor.$img2Url(pos, imageUrl);
         return imageUrl;
