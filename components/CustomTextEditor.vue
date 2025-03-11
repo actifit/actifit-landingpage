@@ -40,8 +40,9 @@
         </template>
       </mavon-editor>
       <!-- username autocomplete -->
-      <ul v-if="showMentionList" class="mention-dropdown" :style="mentionDropdownStyle">
-        <li v-for="(mention, index) in mentionList" :key="index" @click="selectMention(mention)">
+      <ul v-if="showMentionList" class="mention-dropdown" ref="mentionDropdown" :style="mentionDropdownStyle">
+        <li v-for="(mention, index) in mentionList" :key="index" @click="selectMention(mention)"
+        :class="{ 'selected': index === selectedMentionIndex }">
           {{ mention }}
         </li>
       </ul>
@@ -78,6 +79,7 @@ export default {
       content: this.initialContent,
       //new data related to username auto-complete
       searchQuery: '',
+      selectedMentionIndex: 0,
       mentionList: [],
       showMentionList: false,
       cursorPosition: 0,
@@ -103,11 +105,22 @@ export default {
         console.error('Error fetching mentions:', error);
       }
     },
+    scrollDropdownIntoView() {
+      this.$nextTick(() => {
+        const mentionDropdown = this.$refs.mentionDropdown;
+        const selectedMention = mentionDropdown.children[this.selectedMentionIndex];
+        if (selectedMention) {
+          selectedMention.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      });
+    },
     selectMention(username) {
       const textBefore = this.content.slice(0, this.cursorPosition - this.searchQuery.length - 1);
+      //this.content.slice(0, this.cursorPosition);//
       const textAfter = this.content.slice(this.cursorPosition);
 
-      this.content = `${textBefore}[@${username}](https://actifit.io/@${username}) ${textAfter}`;
+      //this.content = `${textBefore}[@${username}](https://actifit.io/@${username}) ${textAfter}`;
+      this.content = `${textBefore}@${username} ${textAfter}`;
       this.showMentionList = false;
       this.mentionList = [];
     },
@@ -117,18 +130,24 @@ export default {
 
       if (event.key === '@') {
         this.showMentionList = true;
+        this.selectedMentionIndex = 0;//default
         this.searchQuery = '';
         this.mentionList = [];
         this.updateDropdownPosition();
       } else if (this.showMentionList) {
         if (event.key === 'ArrowDown') {
-          event.preventDefault();
-          // Navigate dropdown
+          this.selectedMentionIndex = (this.selectedMentionIndex + 1) % this.mentionList.length;
+          this.scrollDropdownIntoView();
+        } else if (event.key === 'ArrowUp') {
+          this.selectedMentionIndex = (this.selectedMentionIndex - 1 + this.mentionList.length) % this.mentionList.length;
+          this.scrollDropdownIntoView();
         } else if (event.key === 'Enter') {
           event.preventDefault();
-          this.selectMention(this.mentionList[0]);
+          this.selectMention(this.mentionList[this.selectedMentionIndex]);
         } else if (event.key === 'Backspace') {
           this.searchQuery = this.searchQuery.slice(0, -1);
+        } else if (event.key === 'Escape') {
+          this.showMentionList = false;
         } else {
           this.searchQuery += event.key;
         }
@@ -140,12 +159,8 @@ export default {
 
         event.preventDefault();
 
-        // get the textarea element
-        console.log(`content: ${textareaElement.value}`);
-
         // get the current cursor position (to know where to start deleting)
         const cursorPosition = textareaElement.selectionStart;
-        console.log(`selection start: ${cursorPosition}`);
 
         // get the text before the cursor (when we start deleting)
         const textBeforeCursor = textareaElement.value.substring(0, cursorPosition);
@@ -168,7 +183,6 @@ export default {
             textareaElement.selectionStart = wordStartIndex;
             textareaElement.selectionEnd = wordStartIndex;
             textareaElement.focus();
-            console.log(`cursor position set to: ${wordStartIndex}`);
           });
         }
       }
@@ -176,7 +190,6 @@ export default {
     updateDropdownPosition() {
       this.$nextTick(() => {
         const editor = this.$el.querySelector('textarea');
-        console.log(editor);
         if (!editor) return;
 
         const cursorPosition = this.cursorPosition;
@@ -380,7 +393,7 @@ export default {
   padding: 5px;
   cursor: pointer;
 }
-.mention-dropdown li:hover {
+.mention-dropdown li.selected, .mention-dropdown li:hover {
   background: #f0f0f0;
 }
 </style>
