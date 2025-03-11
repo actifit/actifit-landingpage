@@ -172,7 +172,7 @@ export default {
         if (wordRange) {
           const wordStartIndex = cursorPosition - wordRange[0].length;
           const newValue =
-            textBeforeCursor.substring(0, wordStartIndex) +
+            textBeforeCursor.substring(0, wordStartIndex) + ' ' +
             textareaElement.value.substring(cursorPosition);
 
           //update the content bound to v-model
@@ -180,8 +180,8 @@ export default {
 
           // update the cursor position (so the cursor doesnt always go back to the end of the text when deleted)
           this.$nextTick(() => {
-            textareaElement.selectionStart = wordStartIndex;
-            textareaElement.selectionEnd = wordStartIndex;
+            textareaElement.selectionStart = wordStartIndex + 1;
+            textareaElement.selectionEnd = wordStartIndex + 1;
             textareaElement.focus();
           });
         }
