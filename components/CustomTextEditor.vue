@@ -115,15 +115,11 @@ export default {
       const textareaElement = this.$el.querySelector('textarea');
       this.cursorPosition = textareaElement.selectionStart;
 
-      const selection = window.getSelection();
-      const range = selection.getRangeAt(0);
-      const rect = range.getBoundingClientRect();
-
       if (event.key === '@') {
         this.showMentionList = true;
         this.searchQuery = '';
         this.mentionList = [];
-        this.updateDropdownPosition(rect);
+        this.updateDropdownPosition();
       } else if (this.showMentionList) {
         if (event.key === 'ArrowDown') {
           event.preventDefault();
@@ -177,23 +173,21 @@ export default {
         }
       }
     },
-    updateDropdownPosition(rect) {
-      // Dummy positioning logic, update as needed
-      //this.mentionDropdownStyle = { top: '50px', left: '100px' };
-      /*this.$nextTick(() => {
+    updateDropdownPosition() {
+      this.$nextTick(() => {
         const editor = this.$el.querySelector('textarea');
+        console.log(editor);
         if (!editor) return;
 
-        const rect = editor.getBoundingClientRect();
+        const cursorPosition = this.cursorPosition;
+        const lines = editor.value.substr(0, cursorPosition).split("\n");
+        const line = lines.length - 1;
+        const charIndex = lines[line].length;
+        const lineHeight = 20; // Approximate line height in pixels
+
         this.mentionDropdownStyle = {
-          top: `${rect.top + window.scrollY + 40}px`,
-          left: `${rect.left + window.scrollX + 10}px`,
-        };
-      });*/
-      this.$nextTick(() => {
-        this.mentionDropdownStyle = {
-          top: `${rect.bottom + window.scrollY + 5}px`,
-          left: `${rect.left + window.scrollX}px`,
+          top: `${window.scrollY + lineHeight * line + 20}px`,
+          left: `${window.scrollX + charIndex * 8}px`
         };
       });
     },
