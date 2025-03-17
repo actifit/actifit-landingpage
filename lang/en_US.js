@@ -46,6 +46,8 @@ module.exports = {
   account_deleted_successfully: 'Account successfully scheduled for deletion',
   data_deletion_notice: 'Please note that using the account deletion functionality will schedule your account for deletion. As your account is created on blockchain, some data cannot be deleted and will remain publicly available, including your username and posts/content created. Other off chain data will be removed after 30 days of initiating the account deletion process, this includes your AFIT balance, gadgets bought and friendships.',
   Save_settings: 'Save Settings',
+  Hive: 'Hive',
+  Blog: 'Blog',
   My_Blog: 'My Blog',
   New_Blog: 'New Blog',
   My_Videos: 'My Videos',
