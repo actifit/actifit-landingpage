@@ -1116,6 +1116,7 @@ module.exports = {
   secondary_chains:'Secondary Chains',
   need_hive_account: 'You need to select at least Hive chain above.',
   Hive_proposals: 'Hive Proposals',
+  Infrastructure: 'Infrastructure',
   Splinterlands: 'Splinterlands',
   Common: 'Common',
   Rare: 'Rare',
