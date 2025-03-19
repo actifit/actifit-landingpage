@@ -106,19 +106,10 @@ module.exports = {
       "homepage": "https://hive.blog",
       "url_scheme": "https://hive.blog/{category}/@{username}/{permlink}"
       },
-      "esteem": {
-      "name": "Esteem",
-      "homepage": "https://esteem.app",
-      "url_scheme": "https://esteem.app/{category}/@{username}/{permlink}"
-      },
       "peakd": {
       "name": "PeakD",
       "homepage": "https://peakd.com",
       "url_scheme": "https://peakd.com/{category}/@{username}/{permlink}"
-      },
-      "steempress": {
-      "name": "SteemPress",
-      "homepage": "https://wordpress.org/plugins/steempress/"
       },
       "actifit": {
       "name": "Actifit",
@@ -127,8 +118,8 @@ module.exports = {
       },
       "travelfeed": {
       "name": "TravelFeed",
-      "homepage": "https://travelfeed.io",
-      "url_scheme": "https://travelfeed.io/@{username}/{permlink}"
+      "homepage": "https://travelfeed.com",
+      "url_scheme": "https://travelfeed.com/@{username}/{permlink}"
       },
       "3speak": {
       "name": "3Speak",
