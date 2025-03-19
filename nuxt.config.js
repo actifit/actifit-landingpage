@@ -101,6 +101,37 @@ module.exports = {
     actifitMarketBuy: 'actifit.market',
     actifitEscrow: 'actifit.escrow',
     actifitVault: 'actifit.vault',
+    exchangesList:[
+      {
+        "name": "binance",
+        "address": "bdhivesteem"
+      },
+      {
+        "name": "Gate.io",
+        "address": "gateiodeposit"
+      },
+      {
+        "name": "Bitget",
+        "address": "bitgethive"
+      },
+      {
+        "name": "HTX",
+        "address": "huobi-pro"
+      },
+      {
+        "name": "Bithumb",
+        "address": "user.dunamu"
+      },
+      {
+        "name": "MEXC",
+        "address": "mxchive"
+      },
+      {
+        "name": "Probit",
+        "address": "probithive"
+      }
+
+    ],
     hiveAppsScript: {
       "hiveblog": {
       "name": "Hive blog",

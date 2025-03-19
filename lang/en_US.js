@@ -180,6 +180,8 @@ module.exports = {
   wallet_memo_notice: 'If sending funds to an exchange, make sure to use the memo field.',
   amount_positive_int: 'The amount needs to be a positive numeric value.',
   all_fields_required: 'Please ensure to fill all required fields properly.',
+  exchange_do_not_allow_hbd: 'You appear to be transferring HBD funds to an exchange. Exchanges DO NOT support HBD',
+  exchange_requires_memo: 'You appear to be transferring HBD funds to an exchange. Exchanges Require a memo',
   error_missing_funds_pass: 'Please enter a funds password or generate one.',
   error_passwords_mismatch: 'Your confirmation password needs to match your funds password',
   min_amount_1_STEEM_SBD: 'The amount needs to be a minimum of 1 STEEM/SBD',

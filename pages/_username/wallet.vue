@@ -4505,10 +4505,44 @@ export default {
         }
       }
 
+      const recipient = this.$refs["transfer-recipient"].value.trim().toLowerCase();
+      const memo = this.$refs["transfer-memo"].value.trim();
+
+      //check if user is sending funds to an exchange
+      // Case-insensitive check
+      const matchExch = process.env.exchangesList.find(exchange => exchange.address.toLowerCase() === recipient);
+      if (matchExch){
+        //exchanges don't support HBD, if he is trying to send HBD, bail out
+        if (this.transferType == 'HBD'){
+          this.error_proceeding = true;
+          this.error_msg = this.$t('exchange_do_not_allow_hbd');
+          this.$notify({
+                group: 'error',
+                text: this.$t('exchange_do_not_allow_hbd'),
+                position: 'top center'
+              })
+          return;
+        }
+        //also check for memo
+        if (memo == ""){
+          this.error_proceeding = true;
+          this.error_msg = this.$t('exchange_requires_memo');
+          this.$refs["transfer-memo"].focus();
+          this.$notify({
+                group: 'error',
+                text: this.$t('exchange_requires_memo'),
+                position: 'top center'
+              })
+          return;
+        }
+      }
+
+      //return;
+
       this.error_proceeding = false;
       this.error_msg = '';
       //ensure we have proper values
-      if (this.$refs["transfer-recipient"].value.trim() == '' ||
+      if (recipient == '' ||
         this.$refs["transfer-amount"].value.trim() == '') {
         this.error_proceeding = true;
         this.error_msg = this.$t('all_fields_required');
@@ -4533,9 +4567,9 @@ export default {
         //https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
         var link = this.$steemconnect.sign('transfer', {
           from: this.user.account.name,
-          to: this.$refs["transfer-recipient"].value,
+          to: recipient,
           amount: this.$refs["transfer-amount"].value + ' ' + this.transferType,
-          memo: this.$refs["transfer-memo"].value,
+          memo: memo,
           auto_return: true,
         }, window.location.origin + '/wallet?op=transfer&status=success');
         //launch the SC window
@@ -4544,7 +4578,7 @@ export default {
         console.log(this.transferType);
         console.log('>>pop')
         return new Promise((resolve) => {
-          window.hive_keychain.requestTransfer(this.user.account.name, this.$refs["transfer-recipient"].value, parseFloat(this.$refs["transfer-amount"].value).toFixed(3), this.$refs["transfer-memo"].value, this.transferType, (response) => {
+          window.hive_keychain.requestTransfer(this.user.account.name, recipient, parseFloat(this.$refs["transfer-amount"].value).toFixed(3), memo, this.transferType, (response) => {
             console.log(response);
             this.confirmCompletion('transfer', this.$refs["transfer-amount"].value, response)
           }, true);
@@ -4553,9 +4587,9 @@ export default {
         let opname = 'transfer';
         let params = {
           "from": this.user.account.name,
-          "to": this.$refs["transfer-recipient"].value,
+          "to": recipient,
           "amount": parseFloat(this.$refs["transfer-amount"].value).toFixed(3) + ' ' + this.transferType,
-          "memo": this.$refs["transfer-memo"].value
+          "memo": memo
         };
         let res = await this.processTrxFunc(opname, params, true);
 
@@ -4569,7 +4603,7 @@ export default {
         console.log(this.transferType)
         //return;
         //transferToVesting(wif, from, to, amount)
-        let res = await chainLnk.broadcast.transferAsync(this.$refs["p-ac-key-trans"].value, this.user.account.name, this.$refs["transfer-recipient"].value, parseFloat(this.$refs["transfer-amount"].value).toFixed(3) + ' ' + this.transferType, this.$refs["transfer-memo"].value).then(
+        let res = await chainLnk.broadcast.transferAsync(this.$refs["p-ac-key-trans"].value, this.user.account.name, recipient, parseFloat(this.$refs["transfer-amount"].value).toFixed(3) + ' ' + this.transferType, memo).then(
           res => this.confirmCompletion('transfer', this.$refs["transfer-amount"].value, res)).catch(err => console.log(err));
       }
     },
