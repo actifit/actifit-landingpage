@@ -35,7 +35,7 @@ module.exports = {
   Professionals: 'Professionals',
   Refer_A_Friend: 'Refer A Friend',
   Actifit: 'Actifit',
-  Slogan: 'Rewarding Your Everyday Activity',
+  Slogan: 'It Pays to be Fit',
   Balance: 'Balance',
   AFIT_Token: 'AFIT',
   My_Wallet: 'My Wallet',

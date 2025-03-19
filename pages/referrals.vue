@@ -15,7 +15,7 @@
 		    <div class="text-brand">
           <span class="share-txt">{{ $t('Share') }} </span>
           <social-sharing :url="refUrl"
-						  title="Actifit - Rewarding Your Everyday Activity"
+						  :title="socialSharingTitle"
 						  description="Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity "
 						  quote="Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity"
 						  :hashtags="hashtags"

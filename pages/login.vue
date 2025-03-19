@@ -1,6 +1,6 @@
 <template>
   <div>
-	
+
     <NavbarBrand />
 
     <div class="container pt-5 mt-5 pb-5">
@@ -8,12 +8,12 @@
 			<h3 class="p-3">{{ $t('Login_actifit') }}</h3>
 			<!--<h5 class="col-md-6"><img src="/img/STEEM.png" class="token-logo-sm">Standard Login</h5>-->
 			<div class="form-group">
-			
+
 				<div class="row col-12"><!--form-control-lg -->
 					<input type="text" id="username" name="username" :placeholder="$t('Username')" ref="username" class="form-control form-control-lg m-1 col-md-8 acti-shadow">
-					
+
 				</div>
-				
+
 				<div class="row col-12">
 					<button v-on:click="loginKeychain" class="btn btn-brand keychain-btn login-stdd-btn m-1"></button>
 					<button v-on:click="loginHiveauth" class="btn hiveauth-btn acti-shadow login-stdd-btn m-1"></button>
@@ -26,15 +26,15 @@
 						</a>
 					</div>
 				</transition>
-                				
+
 				<div class="row col-12">
 					<input type="password" id="ppkey" name="ppkey" ref="ppkey" :placeholder="$t('Ppkey')"  class="form-control form-control-lg m-1 col-md-8 acti-shadow">
 				</div>
-				
+
 				<div class="row col-12">
 					<button v-on:click="proceedLogin" class="btn btn-brand login-stdd-btn m-1"><b>{{ $t('Login') }}</b><i class="fas fa-spin fa-spinner text-white" v-if="login_in_progress"></i></button>
 				</div>
-				
+
 				<span class="row form-control-lg ml-0">
 					<a href="/password" class="small">Forgot my posting key?</a>
 				</span>
@@ -72,28 +72,28 @@
 <script>
   import NavbarBrand from '~/components/NavbarBrand'
   import Footer from '~/components/Footer'
-  
+
   //import VueRecaptcha from 'vue-recaptcha';
-  
+
   import { VueReCaptcha } from 'vue-recaptcha-v3'
 
-  
+
   //import { VueReCaptchaV3 } from 'vue-recaptcha-v3';
 
   import { mapGetters } from 'vuex'
-  
+
   //import hive from '@hiveio/hive-js'
-  
+
   //import blurt from '@blurtfoundation/blurtjs'
-  
+
   //import {keychain, isKeychainInstalled, hasKeychainBeenUsed} from '@hiveio/keychain'
 
   import Vue from 'vue'
   Vue.use(VueReCaptcha, { siteKey: process.env.captchaV3Key })
-  
+
   //QR display for hive auth
   import QRious from 'qrious';
-  
+
   //to validates keys for hive
   import { PublicKey, Signature, hash } from '@hiveio/hive-js/lib/auth/ecc';
 
@@ -102,7 +102,7 @@
   client.addEventHandler('ConnectionSuccess', connectedHAS);*/
 
 
-	
+
   export default {
 	head () {
 		return {
@@ -192,9 +192,9 @@
 		this.captchaValid = false;
 	  },
 	  setHiveauthLoginStatus (json){
-		
+
 		let acct_data = json.HIVE;
-		
+
 		let userSC = new Object();
 		userSC.account = acct_data;
 		//append proper login data for SC, while making sure this is recognized as a normal login
@@ -213,15 +213,15 @@
 		console.log('keychain login');
 		console.log(json);
 		if (json && json.HIVE){
-			
+
 			//hide captcha as well
 			const recaptcha = this.$recaptchaInstance
-			
+
 			// Hide reCAPTCHA badge:
 			recaptcha.hideBadge();
-			
+
 			let acct_data = json.HIVE;
-			
+
 			let userSC = new Object();
 			userSC.account = acct_data;
 			//append proper login data for SC, while making sure this is recognized as a normal login
@@ -242,19 +242,19 @@
 		}
 	  },
 	  setUserLoginStatus (json) {
-		this.is_logged_in = json.success; 
-		
+		this.is_logged_in = json.success;
+
 		//console.log(json);
 		if (json.success && json.token){
-		
+
 			//hide captcha as well
 			const recaptcha = this.$recaptchaInstance
 
 			// Hide reCAPTCHA badge:
 			recaptcha.hideBadge();
-		
+
 			localStorage.setItem('actiToken', json.token);
-			
+
 			let userSC = new Object();
 			userSC.account = json.userdata;
 			//append proper login data for SC, while making sure this is recognized as a normal login
@@ -267,7 +267,7 @@
 			//this.$store.commit('steemconnect/setAccessToken',)
 			//this.$steemconnect.login(this.$store.state, json.userdata);
 			//console.log(this.$store.state.stdLoginUser);
-			//await 
+			//await
 			this.$router.push('/');
 		}else{
 			//display error message
@@ -294,8 +294,8 @@
 		this.login_in_progress = true;
 		let account = this.$refs["username"].value.trim().toLowerCase();
 		const APP_META = {
-			name:"actifit", 
-			description:"Actifit - Rewarding Your EveryDay Activity", 
+			name:"actifit",
+			description:process.env.socialSharingTitle,
 			icon:"https://actifit.io/img/actifit_logo.png"
 		}
 		// Create an authentication object
@@ -308,7 +308,7 @@
 		const status = this.$HAS.status()
 		console.log(status)
 		let challenge_data = undefined
-		
+
 		challenge_data = {
 			key_type: "posting",
 			challenge: JSON.stringify({
@@ -349,7 +349,7 @@
 					QR.value = authUri;
 					qrLinkElement.href = authUri;
 				});
-				
+
 			}
 		}).then(message => {
 			//resolve(res)
@@ -377,14 +377,14 @@
 				if (success){
 					//hide captcha as well
 					const recaptcha = this.$recaptchaInstance
-					
+
 					// Hide reCAPTCHA badge:
 					recaptcha.hideBadge();
 					this.login_in_progress = false;
-					
+
 					fetch(process.env.actiAppUrl+'getAccountData?user='+account+'&bchain=HIVE').then(
 					res => {
-						res.json().then(json => 
+						res.json().then(json =>
 							{
 								this.setHiveauthLoginStatus (json)
 							}
@@ -397,7 +397,7 @@
 					this.error_msg = this.$t('login_error');
 					return;
 				}
-				
+
 			}else if (message.cmd && message.cmd === 'auth_nack'){
 				//display error message
 				this.error_proceeding = true;
@@ -405,7 +405,7 @@
 				this.error_msg = this.$t('auth_rejected_by_user');
 				return;
 			}
-		}) 
+		})
 		.catch(err => {
 			console.error(err)
 			this.error_proceeding = true;
@@ -413,8 +413,8 @@
 			this.hiveauth_wait = false;
 			this.login_in_progress = false;
 		})
-		
-		
+
+
 	  },
 	  async verifyKeychain () {
 		return new Promise((resolve) => {
@@ -440,15 +440,15 @@
 			this.error_msg = this.$t('login_error');
 			return;
 		}
-		
+
 		//set proper blockchain selected
 		this.$store.commit('setBchain', this.bchain_val);
-		
+
 		localStorage.setItem('cur_bchain', this.bchain_val)
-		
+
 		let account_name = this.$refs["username"].value.trim().toLowerCase();
 		const message = account_name + Date.now();
-		
+
 		let user_info = {
 						'username': account_name,
 						'bchain': this.bchain_val
@@ -464,16 +464,16 @@
 			})
 		let contt = await outc.json();
 		//console.log(contt)
-		
+
 		if (contt.message){
 			window.hive_keychain.requestVerifyKey(account_name, contt.message, 'Posting', (response) => {
 			  //console.log(response);
 			  if (response.success === true) {
 				//successfully verified user
-				
+
 				fetch(process.env.actiAppUrl+'getAccountData?user='+account_name+'&bchain=HIVE').then(
 					res => {
-						res.json().then(json => 
+						res.json().then(json =>
 							{
 								this.setKeychainLoginStatus (json)
 							}
@@ -483,34 +483,34 @@
 			});
 
 		}
-		
+
 	  },
 	  async proceedLogin () {
 		this.captcha_invalid = '';
 		this.error_proceeding = false;
 		this.error_msg = '';
-		
+
 		/*if (!this.captchaValid){
 			this.captcha_invalid = this.$t('solve_captcha');
 			return;
 		}*/
-		
+
 		if (this.$refs["username"].value == '' || this.$refs["ppkey"].value == ''){
 			this.error_proceeding = true;
 			this.error_msg = this.$t('login_error');
 			return;
 		}
-		
+
 		//check captcha V3
 		// Execute reCAPTCHA with action "login".
 		const token = await this.$recaptcha('login')
-		
+
 		//verify recaptcha-v3
-		
+
 		let outc = await fetch(process.env.actiAppUrl+'verifyLoginCaptcha?token='+token);
 		console.log(outc);
 		//let outc = await outc.json();
-		
+
 		if (outc.error){
 			this.error_proceeding = true;
 			this.login_in_progress = false;
@@ -520,12 +520,12 @@
 		//otherwise, we're good, continue
 
 		console.log(token);
-		
+
 		//set proper blockchain selected
 		this.$store.commit('setBchain', this.bchain_val);
-		
+
 		localStorage.setItem('cur_bchain', this.bchain_val)
-		
+
 		this.login_in_progress = true;
 		let account_name = this.$refs["username"].value.trim().toLowerCase();
 		let priv_pkey = this.$refs["ppkey"].value;
@@ -546,11 +546,11 @@
 			}).then(
 			res => {res.json().then(json => this.setUserLoginStatus (json)).catch(e => reject(e))
 		}).catch(e => reject(e))
-		
+
 	  },
 	}
   }
-	
+
 </script>
 <style>
 .icon-steemconnect:before {

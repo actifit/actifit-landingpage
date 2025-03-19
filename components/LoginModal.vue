@@ -289,7 +289,7 @@
           let account = this.$refs["username"].value.trim().toLowerCase();
           const APP_META = {
               name:"actifit",
-              description:"Actifit - Rewarding Your EveryDay Activity",
+              description: process.env.socialSharingTitle,
               icon:"https://actifit.io/img/actifit_logo.png"
           }
           // Create an authentication object
