@@ -1,5 +1,5 @@
 <template>
-  <div class="modal fade" id="postModal" tabindex="-1">
+  <div class="modal fade" id="postModal" ref="postModal" tabindex="-1">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content" v-if="post">
         <div class="modal-header">
@@ -45,6 +45,23 @@
             <i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent"></i>
             <i v-if="!showTranslated" class="fa-solid fa-language text-brand" v-on:click="translateContent"></i>
           </span>
+          <div class="p-1 modal-top-actions">
+              <span><a href="#" @click.prevent="toggleCommentBox()" :title="$t('Reply')"><i
+                    class="text-white fas fa-reply"></i></a></span>
+              <span>
+                <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand"
+                  data-target="#voteModal" v-if="this.$parent.user && userVotedThisPost() == true">
+                  <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
+                </a>
+                <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" data-target="#voteModal"
+                  class="actifit-link-plain" v-else>
+                  <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
+                </a>
+                <i class="far fa-comments ml-2" @click.prevent="headToComments()"></i> {{ post.children }}
+                <i class="far fa-share-square ml-2" @click.prevent="$reblog(user, post)"
+                  v-if="user && post.author != this.user.account.name" :title="$t('reblog')"></i>
+              </span>
+            </div>
           <div class="modal-header">
             <div class="post-tags p-1" v-html="displayPostTags"></div>
           </div>
@@ -53,12 +70,12 @@
           <span>{{ $t('auto_translated_content') }}</span>
           <a href="#" v-on:click="cancelTranslation">{{ $t('click_to_view_original') }}</a>
         </div>
-        <vue-remarkable class="modal-body" :source="body"
+        <vue-remarkable class="modal-body" :source="body" ref="remarkableContent"
           :options="{ 'html': true, 'breaks': true, 'typographer': true }"></vue-remarkable>
         <div class="modal-body goog-ad-horiz-90">
           <adsbygoogle ad-slot="5716623705" />
         </div>
-        <div class="main-payment-info modal-footer">
+        <div class="main-payment-info modal-footer" id="modal-footer">
           <div class="col-md-6">
             <span><a href="#" @click.prevent="toggleCommentBox()" :title="$t('Reply')"><i
                   class="text-white fas fa-reply"></i></a></span>
@@ -72,7 +89,7 @@
                 class="actifit-link-plain" v-else>
                 <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
               </a>
-              <i class="far fa-comments ml-2"></i> {{ post.children }}
+              <i class="far fa-comments ml-2" @click.prevent="headToComments()"></i> {{ post.children }}
               <i class="far fa-share-square ml-2" @click.prevent="$reblog(user, post)"
                 v-if="user && post.author != this.user.account.name" :title="$t('reblog')"></i>
             </span>
@@ -260,7 +277,7 @@
 
 <script>
 import UserHoverCard from './UserHoverCard.vue'
-import steem from 'steem'
+
 import { mapGetters } from 'vuex'
 import Comments from '~/components/Comments'
 import CustomTextEditor from '~/components/CustomTextEditor'
@@ -270,7 +287,8 @@ import vueRemarkable from 'vue-remarkable';
 
 import SocialSharing from 'vue-social-sharing';
 
-import sanitize from 'sanitize-html'
+import VueScrollTo from 'vue-scrollto'
+
 import { translateText } from '~/components/deepl-client';
 
 const scot_steemengine_api = process.env.steemEngineScot;
@@ -304,6 +322,7 @@ export default {
       socialSharingDesc: process.env.socialSharingDesc,
       socialSharingQuote: process.env.socialSharingQuote,
       hashtags: process.env.socialSharingHashtags,
+      imageError: new Set(),
     }
   },
   watch: {
@@ -311,6 +330,14 @@ export default {
     bchain: function (newBchain) {
       this.cur_bchain = newBchain;
       this.target_bchain = newBchain;
+    },
+    'post.body':{
+      handler(){
+        //Re-attach to newly rendered content
+        this.$nextTick(() => {
+              this.attachImageErrorHandlers();
+          });
+      }
     }
   },
   props: ['post'],
@@ -415,6 +442,10 @@ export default {
 
   },
   methods: {
+    headToComments(){
+      const container = this.$refs.postModal;
+      VueScrollTo.scrollTo('#modal-footer', 1000, { easing: 'ease-in-out', offset: 0, container: container });
+    },
     toggleCommentBox() {
       this.commentBoxOpen = !this.commentBoxOpen;
       localStorage.setItem('commentBoxOpen', this.commentBoxOpen);
@@ -866,6 +897,9 @@ export default {
             res.json().then(json => this.setPostTokenRewards(json)).catch(e => reject(e))
           }).catch(e => reject(e))
       }
+
+      //attach image error handles
+      this.attachImageErrorHandlers();
     },
     /* function handles proper display for post token rewards */
     displayTokenValue(token) {
@@ -906,6 +940,8 @@ export default {
       return new Intl.NumberFormat('en-EN', { maximumFractionDigits: precision }).format(number)
     },
     handleKeyDown(event) {
+      //only execute if postmodal is visible
+      if (!$('#postModal').hasClass('show')) return;
       let commentBoxOpenTest = localStorage.getItem('commentBoxOpen') === 'true';
       if (!commentBoxOpenTest) {
         switch (event.key) {
@@ -917,7 +953,40 @@ export default {
             break;
         }
       }
-    }
+    },
+    attachImageErrorHandlers() {
+      //return;
+      const vm = this; // Store this to vm variable
+      // Ensure that vm.$refs.remarkableContent is accessible
+      // and its $el is mounted by the time this function is called
+      this.$nextTick(() => {
+        const contentEl = vm.$refs.remarkableContent.$el;
+        if (!contentEl) {
+            console.warn('VueRemarkable component not found!');
+            return;
+        }
+
+        const images = contentEl.querySelectorAll('img');
+
+        images.forEach(img => {
+          img.onerror = (event) => {
+            // Check if ID exists (to prevent duplicate triggers)
+            if (!this.imageError.has(img.id)) {
+
+              // generate ID if its not set
+              if (!img.id){
+                img.id = this.$uuidv4();
+              }
+              this.imageError.add(img.id);
+
+              img.src = process.env.hiveStandardPostUrl + img.src;
+              img.onerror = null; // prevent double triggers
+              //console.log('Image failed to load.  Set to fallback: ' + img.src);
+            }
+          };
+        });
+      });
+    },
   },
   beforeDestroy() {
     console.log('destroy');
@@ -928,6 +997,9 @@ export default {
       this.fetchPostKeyData();
     }
 
+    //associate scrolling with the modal
+    VueScrollTo.scrollTo = VueScrollTo.scrollTo.bind(this);
+
     //fix modal overlay
     $('#voteModal').on("hidden.bs.modal", this.fixSubModal)
     //reset translation when modal closes
@@ -937,6 +1009,8 @@ export default {
 
     //capture key clicks
     window.addEventListener('keydown', this.handleKeyDown);
+
+
 
   }
 }

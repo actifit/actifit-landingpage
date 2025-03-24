@@ -11,7 +11,7 @@ module.exports = {
 
   // Runtime configuration
   publicRuntimeConfig: {
-    version: '1.6.6',
+    version: '1.6.7',
   },
 
 
@@ -55,7 +55,8 @@ module.exports = {
     captchaV3Key: '6LchW94ZAAAAAOjLg0G_0AiRgHrlBfbP_HrReBBE',
     poshVerificationUrl: 'https://hiveposh.com/api/v0/twitter/',
     socialSharingHashtags: 'actifit,hive,move2earn,health,fitness',
-    socialSharingTitle: 'Actifit - Rewarding Your Everyday Activity',
+    slogan: 'It Pays to be Fit',
+    socialSharingTitle: 'Actifit - It Pays to be Fit',
     socialSharingDesc: 'Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity ',
     socialSharingQuote: 'Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity',
     web3Node: 'https://bsc-dataseed1.binance.org:443',
@@ -63,6 +64,7 @@ module.exports = {
     afitxTokenBSC: '0x246d22ff6e0b90f80f2278613e8db93ff7a09b95',
     afitBNBLPTokenBSC: '0xffff75bb7bf133a9e98bc62665f20a84e152b689',
     afitxBNBLPTokenBSC: '0x150c81246df4e31847a613e18cab5ef601ca265a',
+    hiveStandardPostUrl: 'https://images.hive.blog/0x0/',
     steemImgUrl: 'https://steemitimages.com',
     hiveImgUrl: 'https://images.hive.blog',
     steemApiNode: 'https://api.steemit.com/',
@@ -99,25 +101,47 @@ module.exports = {
     actifitMarketBuy: 'actifit.market',
     actifitEscrow: 'actifit.escrow',
     actifitVault: 'actifit.vault',
+    exchangesList:[
+      {
+        "name": "binance",
+        "address": "bdhivesteem"
+      },
+      {
+        "name": "Gate.io",
+        "address": "gateiodeposit"
+      },
+      {
+        "name": "Bitget",
+        "address": "bitgethive"
+      },
+      {
+        "name": "HTX",
+        "address": "huobi-pro"
+      },
+      {
+        "name": "Bithumb",
+        "address": "user.dunamu"
+      },
+      {
+        "name": "MEXC",
+        "address": "mxchive"
+      },
+      {
+        "name": "Probit",
+        "address": "probithive"
+      }
+
+    ],
     hiveAppsScript: {
       "hiveblog": {
       "name": "Hive blog",
       "homepage": "https://hive.blog",
       "url_scheme": "https://hive.blog/{category}/@{username}/{permlink}"
       },
-      "esteem": {
-      "name": "Esteem",
-      "homepage": "https://esteem.app",
-      "url_scheme": "https://esteem.app/{category}/@{username}/{permlink}"
-      },
       "peakd": {
       "name": "PeakD",
       "homepage": "https://peakd.com",
       "url_scheme": "https://peakd.com/{category}/@{username}/{permlink}"
-      },
-      "steempress": {
-      "name": "SteemPress",
-      "homepage": "https://wordpress.org/plugins/steempress/"
       },
       "actifit": {
       "name": "Actifit",
@@ -126,8 +150,8 @@ module.exports = {
       },
       "travelfeed": {
       "name": "TravelFeed",
-      "homepage": "https://travelfeed.io",
-      "url_scheme": "https://travelfeed.io/@{username}/{permlink}"
+      "homepage": "https://travelfeed.com",
+      "url_scheme": "https://travelfeed.com/@{username}/{permlink}"
       },
       "3speak": {
       "name": "3Speak",

@@ -5,6 +5,9 @@
       <!-- :toolbars="markdownOption" -->
       <mavon-editor language="en" markdown-it-emoji="true" v-model="content" ref="editor" :shortCut=false
         @imgAdd="mavonUpImg" @keydown.native="handleKeydown">
+
+
+
         <!-- Add a custom button after the left toolbar  -->
         <template slot="left-toolbar-after">
 
@@ -36,6 +39,13 @@
 
         </template>
       </mavon-editor>
+      <!-- username autocomplete -->
+      <ul v-if="showMentionList" class="mention-dropdown" ref="mentionDropdown" :style="mentionDropdownStyle">
+        <li v-for="(mention, index) in mentionList" :key="index" @click="selectMention(mention)"
+        :class="{ 'selected': index === selectedMentionIndex }">
+          {{ mention }}
+        </li>
+      </ul>
     </client-only>
   </div>
 </template>
@@ -67,6 +77,13 @@ export default {
       file: '', //image
       imgUploading: false, // loading animation while image upload in progress
       content: this.initialContent,
+      //new data related to username auto-complete
+      searchQuery: '',
+      selectedMentionIndex: 0,
+      mentionList: [],
+      showMentionList: false,
+      cursorPosition: 0,
+      mentionDropdownStyle: { top: '0px', left: '0px' },
     }
   },
   directives: {
@@ -77,18 +94,73 @@ export default {
     },
   },
   methods: {
+    async fetchMentions() {
+      if (!this.searchQuery) return;
+      try {
+        const response = await axios.get(
+          process.env.hiveApiNode+`/hafbe-api/input-type/${this.searchQuery}%25`
+        );
+        this.mentionList = response.data.input_value || [];
+      } catch (error) {
+        console.error('Error fetching mentions:', error);
+      }
+    },
+    scrollDropdownIntoView() {
+      this.$nextTick(() => {
+        const mentionDropdown = this.$refs.mentionDropdown;
+        const selectedMention = mentionDropdown.children[this.selectedMentionIndex];
+        if (selectedMention) {
+          selectedMention.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      });
+    },
+    selectMention(username) {
+      const textBefore = this.content.slice(0, this.cursorPosition - this.searchQuery.length - 1);
+      //this.content.slice(0, this.cursorPosition);//
+      const textAfter = this.content.slice(this.cursorPosition);
+
+      //this.content = `${textBefore}[@${username}](https://actifit.io/@${username}) ${textAfter}`;
+      this.content = `${textBefore}@${username} ${textAfter}`;
+      this.showMentionList = false;
+      this.mentionList = [];
+    },
     handleKeydown(event) {
-      if (event.ctrlKey && event.key === 'Backspace') {
+      const textareaElement = this.$el.querySelector('textarea');
+      this.cursorPosition = textareaElement.selectionStart;
+
+      if (event.key === '@') {
+        this.showMentionList = true;
+        this.selectedMentionIndex = 0;//default
+        this.searchQuery = '';
+        this.mentionList = [];
+        this.updateDropdownPosition();
+      } else if (this.showMentionList) {
+        if (event.key === 'ArrowDown') {
+          this.selectedMentionIndex = (this.selectedMentionIndex + 1) % this.mentionList.length;
+          this.scrollDropdownIntoView();
+        } else if (event.key === 'ArrowUp') {
+          this.selectedMentionIndex = (this.selectedMentionIndex - 1 + this.mentionList.length) % this.mentionList.length;
+          this.scrollDropdownIntoView();
+        } else if (event.key === 'Enter') {
+          event.preventDefault();
+          this.selectMention(this.mentionList[this.selectedMentionIndex]);
+        } else if (event.key === 'Backspace') {
+          this.searchQuery = this.searchQuery.slice(0, -1);
+        } else if (event.key === 'Escape') {
+          this.showMentionList = false;
+        } else {
+          this.searchQuery += event.key;
+        }
+
+        if (this.searchQuery.length >= 3) {
+          this.fetchMentions();
+        }
+      }else if (event.ctrlKey && event.key === 'Backspace') {
 
         event.preventDefault();
 
-        // get the textarea element
-        const textareaElement = this.$el.querySelector('textarea');
-        console.log(`content: ${textareaElement.value}`);
-
         // get the current cursor position (to know where to start deleting)
         const cursorPosition = textareaElement.selectionStart;
-        console.log(`selection start: ${cursorPosition}`);
 
         // get the text before the cursor (when we start deleting)
         const textBeforeCursor = textareaElement.value.substring(0, cursorPosition);
@@ -100,7 +172,7 @@ export default {
         if (wordRange) {
           const wordStartIndex = cursorPosition - wordRange[0].length;
           const newValue =
-            textBeforeCursor.substring(0, wordStartIndex) +
+            textBeforeCursor.substring(0, wordStartIndex) + ' ' +
             textareaElement.value.substring(cursorPosition);
 
           //update the content bound to v-model
@@ -108,16 +180,31 @@ export default {
 
           // update the cursor position (so the cursor doesnt always go back to the end of the text when deleted)
           this.$nextTick(() => {
-            textareaElement.selectionStart = wordStartIndex;
-            textareaElement.selectionEnd = wordStartIndex;
+            textareaElement.selectionStart = wordStartIndex + 1;
+            textareaElement.selectionEnd = wordStartIndex + 1;
             textareaElement.focus();
-            console.log(`cursor position set to: ${wordStartIndex}`);
           });
         }
       }
     },
+    updateDropdownPosition() {
+      this.$nextTick(() => {
+        const editor = this.$el.querySelector('textarea');
+        if (!editor) return;
+
+        const cursorPosition = this.cursorPosition;
+        const lines = editor.value.substr(0, cursorPosition).split("\n");
+        const line = lines.length - 1;
+        const charIndex = lines[line].length;
+        const lineHeight = 20; // Approximate line height in pixels
+
+        this.mentionDropdownStyle = {
+          top: `${window.scrollY + lineHeight * line + 20}px`,
+          left: `${window.scrollX + charIndex * 8}px`
+        };
+      });
+    },
     handlePaste(event) {
-      console.log(event);
       const clipboardData = event.clipboardData || window.clipboardData;
       const items = clipboardData.items;
 
@@ -164,7 +251,6 @@ export default {
           }
         });
 
-        console.log('meow Upload Success:', response.data);
         const imageUrl = 'https://usermedia.actifit.io/' + key;
         this.$refs.editor.$img2Url(pos, imageUrl);
         return imageUrl;
@@ -288,5 +374,24 @@ export default {
 
 .v-note-wrapper .v-note-op .v-left-item div:has(.op-icon.fa-smile) {
   float: left;
+}
+
+.mention-dropdown {
+  position: absolute;
+  background: white;
+  border: 1px solid #ccc;
+  list-style: none;
+  padding: 5px;
+  margin: 0;
+  max-height: 150px;
+  overflow-y: auto;
+  z-index: 5000; /* Higher value to ensure it appears above other elements */
+}
+.mention-dropdown li {
+  padding: 5px;
+  cursor: pointer;
+}
+.mention-dropdown li.selected, .mention-dropdown li:hover {
+  background: #f0f0f0;
 }
 </style>
