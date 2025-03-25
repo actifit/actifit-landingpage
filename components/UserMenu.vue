@@ -22,9 +22,9 @@
 		<StingChat :user="this.user"/>
 	  </li>
 	  <li class="nav-item mr-2" v-if="user">
-		<span class="user-avatar-notif-menu group-class notification-class text-brand" v-if="activeNotificationsLen > 0">{{ this.activeNotificationsLen }}</span>
+		<span class="user-avatar-notif-menu group-class notification-class text-brand" v-if="activeNotificationsLen > 0">{{ notificationsNotice }}</span>
         <span class="user-avatar group-class" v-if="activeNotificationsLen > 0">
-			<a class="nav-link dropdown-toggle p-0" id="user_menu_navlink" href="#" data-toggle="dropdown" :title="$t('Notifications_popup').replace('_count_', activeNotificationsLen)">
+			<a class="nav-link dropdown-toggle p-0" id="user_menu_navlink" href="#" data-toggle="dropdown" :title="$t('Notifications_popup').replace('_count_', notificationsNotice) ">
 				<i class="fas fa-bell p-2 text-brand"></i>
 			</a>
 			<div class="dropdown-menu dropdown-menu-right notif-container">
@@ -131,15 +131,13 @@
 			activeNotificationsLen: 1,
 			cur_bchain: 'HIVE',
 			reload: 0,
-			profImgUrl: process.env.steemImgUrl,
+			profImgUrl: process.env.hiveImgUrl,
 		}
 	},
 	watch: {
 	  user: 'updateUserData',
 	  bchain: function(newBchain) {
-		//console.log('change in chain');
 		this.cur_bchain = newBchain;
-		console.log('usermenu');
 		this.$store.dispatch('steemconnect/refreshUser');
 		this.reload += 1;
 	  }
@@ -148,6 +146,10 @@
       ...mapGetters('steemconnect', ['user']),
       ...mapGetters(['userTokens', 'userRank', 'userRankObj', 'referrals', 'bchain']),
 	  ...mapGetters(['moderators']),
+    notificationsNotice(){
+
+      return this.activeNotificationsLen + (this.activeNotificationsLen>=process.env.notificationsCutoff?'+':'');
+    },
 	  formattedUserTokens () {
         return this.numberFormat(parseFloat(this.userTokens).toFixed(3), 3) + ' AFIT'
       },
@@ -300,7 +302,6 @@
 		if (localStorage.getItem('cur_bchain')){
 			this.cur_bchain = localStorage.getItem('cur_bchain')
 		}
-
 
 		this.profImgUrl = process.env.hiveImgUrl;
 		if (this.cur_bchain == 'STEEM'){
