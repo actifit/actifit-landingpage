@@ -22,8 +22,8 @@
 
             <UserHoverCard :username="report.author" />
 
-            <div>
-              <span class="date-head text-muted" :title="date">{{ $getTimeDifference(report.created) }}</span>
+            <div class="modal-top-actions">
+              <span class="date-head" :title="date">{{ $getTimeDifference(report.created) }}</span>
               <a :href="'/@' + this.report.author + '/' + this.report.permlink"><i
                   class="fas fa-link text-brand"></i></a>
               <i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent"></i>

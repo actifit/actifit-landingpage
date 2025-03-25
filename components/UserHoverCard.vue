@@ -97,7 +97,7 @@
               </div>
               <div class="col">
                 <h3 class="mb-1">@{{ username }}</h3>
-                <small class="text-muted">
+                <small class="">
                   <i class="far fa-calendar"></i>
                   Joined {{ joinDate }}
                 </small>
