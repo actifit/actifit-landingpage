@@ -2,14 +2,7 @@
   <div>
     <NavbarBrand />
 
-    <!--<div class="container pt-5 mt-5 col-md-6" >
-		  <div class="text-right" >
-			  <ChainSelection />
-		  </div>
-	  </div>-->
-
-    <div v-if="report && report.author" class="container pt-5 mt-5 pb-5 col-md-6" id="postContainer"
-      ref="postContainer">
+    <div v-if="report && report.author" class="container pt-5 mt-5 pb-5 col-md-6">
       <div class="text-right">
         <ChainSelection />
       </div>
@@ -22,7 +15,7 @@
         </div>
 
         <h2>{{ report.title }}</h2>
-        <div class="main-user-info pl-4"></div>
+        <div class="main-user-info pl-4">
           <h5 class="text-brand">
             <UserHoverCard :username="report.author" />
           </h5>
@@ -253,7 +246,7 @@
       </div>
 
     </div>
-    <div v-else-if="errorDisplay" class="container pt-5 mt-5 pb-5 col-md-6">
+    <div v-else-if="errorDisplay" class="container pt-5 mt-5 pb-5 col-md-6" >
       <div class="text-right">
         <ChainSelection />
       </div>

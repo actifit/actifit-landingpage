@@ -165,7 +165,7 @@ export default {
       type: String,
       default: 'full',
       validator: function(value) {
-        return ['full', 'avatar-only', 'no-rank'].indexOf(value) !== -1
+        return ['full', 'avatar-only', 'no-rank', 'username-only'].indexOf(value) !== -1
       }
     }
   },
