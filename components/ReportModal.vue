@@ -22,8 +22,8 @@
 
             <UserHoverCard :username="report.author" />
 
-            <div>
-              <span class="date-head text-muted" :title="date">{{ $getTimeDifference(report.created) }}</span>
+            <div class="modal-top-actions">
+              <span class="date-head" :title="date">{{ $getTimeDifference(report.created) }}</span>
               <a :href="'/@' + this.report.author + '/' + this.report.permlink"><i
                   class="fas fa-link text-brand"></i></a>
               <i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent"></i>
@@ -51,7 +51,7 @@
           </div>
 
           <div class="modal-header">
-            <div class="report-tags p-1" v-html="displayReportTags"></div>
+            <div class="report-tags p-1" v-html="$fetchReportTags(report)"></div>
           </div>
         </div>
         <div v-if="showTranslated" class="translation-notice">
@@ -371,17 +371,6 @@ export default {
       let date = new Date(this.report.created)
       let minutes = date.getMinutes()
       return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() + ' ' + date.getHours() + ':' + (minutes < 10 ? '0' + minutes : minutes)
-    },
-    displayReportTags() {
-      let tagDisplay = "";
-      if (this.report && this.report.json_metadata) {
-        let meta_data = JSON.parse(this.report.json_metadata);
-        for (let i in meta_data.tags) {
-          tagDisplay += '<span class="single-tag p-1">' + meta_data.tags[i] + '</span> ';
-          if (i > process.env.maxTagDisplay - 1) break;
-        };
-      }
-      return tagDisplay;
     },
     body() {
       return this.$cleanBody(this.report.body);

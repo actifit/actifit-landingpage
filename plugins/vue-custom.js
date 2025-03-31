@@ -44,6 +44,21 @@ Vue.prototype.$getTimeDifference = function(dateParam) {
   }
 }
 
+Vue.prototype.$fetchReportTags = function(report){
+  let tagDisplay = "";
+  if (report && report.json_metadata) {
+    let meta_data = JSON.parse(report.json_metadata);
+    for (let i in meta_data.tags) {
+      //skip empty tags
+      if (meta_data.tags[i].trim() != ''){
+        tagDisplay += '<span class="single-tag p-1">' + meta_data.tags[i] + '</span> ';
+      }
+      if (i > process.env.maxTagDisplay - 1) break;
+    };
+  }
+  return tagDisplay;
+}
+
 
 Vue.prototype.$getDaysDifference = function(firstDate, secondDate) {
 

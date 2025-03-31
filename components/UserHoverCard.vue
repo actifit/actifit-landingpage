@@ -97,7 +97,7 @@
               </div>
               <div class="col">
                 <h3 class="mb-1">@{{ username }}</h3>
-                <small class="text-muted">
+                <small class="">
                   <i class="far fa-calendar"></i>
                   Joined {{ joinDate }}
                 </small>
@@ -165,7 +165,7 @@ export default {
       type: String,
       default: 'full',
       validator: function(value) {
-        return ['full', 'avatar-only', 'no-rank'].indexOf(value) !== -1
+        return ['full', 'avatar-only', 'no-rank', 'username-only'].indexOf(value) !== -1
       }
     }
   },

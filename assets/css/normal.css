@@ -25,8 +25,16 @@
   /* CSS variables with dark mode styles */
 }
 
+.dark-mode .hover-card-container .user-info .d-inline-block{
+  color: white!important;
+}
+
+.main-user-info .spec-btns{
+  color: white!important;
+}
+
 /* Cancels hover effect */
-.main-user-info a {
+.main-user-info a{
   background-color: inherit; /* Inherit background color from parent element */
   text-decoration: none;
 }

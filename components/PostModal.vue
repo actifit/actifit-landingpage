@@ -39,8 +39,8 @@
             <UserHoverCard :username="post.author" />
 
           </div>
-          <span>
-            <span class="date-head text-muted" :title="date">{{ $getTimeDifference(post.created) }}</span>
+          <span class="modal-top-actions">
+            <span class="date-head" :title="date">{{ $getTimeDifference(post.created) }}</span>
             <a :href="'/@' + this.post.author + '/' + this.post.permlink"><i class="fas fa-link text-brand"></i></a>
             <i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent"></i>
             <i v-if="!showTranslated" class="fa-solid fa-language text-brand" v-on:click="translateContent"></i>
@@ -63,7 +63,7 @@
               </span>
             </div>
           <div class="modal-header">
-            <div class="post-tags p-1" v-html="displayPostTags"></div>
+            <div class="post-tags p-1" v-html="$fetchReportTags(post)"></div>
           </div>
         </div>
         <div v-if="showTranslated" class="translation-notice">
@@ -379,21 +379,6 @@ export default {
       let date = new Date(this.post.created)
       let minutes = date.getMinutes()
       return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() + ' ' + date.getHours() + ':' + (minutes < 10 ? '0' + minutes : minutes)
-    },
-    displayPostTags() {
-      let tagDisplay = "";
-      try {
-        if (this.post && this.post.json_metadata) {
-          let meta_data = JSON.parse(this.post.json_metadata);
-          for (let i in meta_data.tags) {
-            tagDisplay += '<span class="single-tag p-1">' + meta_data.tags[i] + '</span> ';
-            if (i > process.env.maxTagDisplay - 1) break;
-          };
-        }
-      } catch (err) {
-        console.log(err)
-      }
-      return tagDisplay;
     },
     body() {
       return this.$cleanBody(this.post.body);
