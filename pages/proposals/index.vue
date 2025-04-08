@@ -7,14 +7,14 @@
     <div class="container pt-5 mt-5 pb-5">
       <h2 class="text-center mb-5">{{ $t('Hive_proposals') }}</h2>
 	  <!--<div>{{proposals}}</div>-->
-	  
+
 	  <!-- enable display of up to 2 ads among content -->
 	 <div v-if="proposals.length > 0">
 		<div class="row" v-for="iterx in proposals.length" :key="iterx" >
 			<Proposal :proposal="proposals[iterx - 1]" :propId="iterx - 1" class="col-md-12 col-lg-12 "/>
 		</div>
       </div>
-	  
+
 	  <div class="col-md-12 text-center" v-else>
 		<i class="fas fa-spinner fa-spin text-brand"></i>
 	  </div>
@@ -52,8 +52,7 @@
   import VoteModal from '~/components/VoteModal'
   //import VotingStatus from '~/components/VotingStatus'
   import NotifyModal from '~/components/NotifyModal'
-  import DailyActivityChartModal from '~/components/DailyActivityChartModal'
-	
+
   import { mapGetters } from 'vuex'
 
   export default {
@@ -134,16 +133,16 @@
 
       // disable load more button and only show if there actually are more posts to load
 //      this.$store.commit('setMoreproposalsAvailable', false)
-	  
+
 	  this.$store.dispatch('steemconnect/login')
 	  this.fetchUserData();
-	  
+
       // fetch proposals
 	  let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
 	  this.$store.commit('setBchain', cur_bchain);
-	  
+
       await this.$store.dispatch('fetchProposals')
-	  
+
       // remove loading indicator
       this.loading = false
     }
