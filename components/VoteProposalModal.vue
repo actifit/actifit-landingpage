@@ -3,7 +3,7 @@
     role="dialog" data-backdrop="false">
     <div ><!-- class="modal-dialog" role="document" -- -->
       <div class="modal-content">
-        <div v-if="modalTitle" class="modal-header">
+        <div v-if="modalTitle" class="modal-header p-1">
           <h5 class="modal-title">{{ modalTitle }}</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close" @click="closeModal">
             <span aria-hidden="true">&times;</span>

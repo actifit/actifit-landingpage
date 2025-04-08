@@ -132,6 +132,7 @@ body.modal-open {
   top: unset !important; /* Remove any `top` style */
   left: unset !important; /* Remove any `left` style */
   transform: none !important; /* Remove Bootstrap's centering transform */
+  box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
 }
 
 
