@@ -8246,6 +8246,13 @@ export default {
   height: 25px;
 }
 
+.grid{
+  background-color: var(--background-color-2) !important;
+  border: 2px solid red;
+  border-radius: 5px;
+  box-shadow: 3px 3px 3px rgb(255 0 0 / 20%);
+}
+
 .text-center.grid.p-2,
 .calc-data {
   border: 2px solid red;
