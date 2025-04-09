@@ -1,5 +1,5 @@
 <template>
-  <div v-if="visible" id="voteProposalModal" ref="voteProposalModal" class="modal fade" tabindex="-1"
+  <div v-if="visible" id="voteProposalModal" ref="voteProposalModal" :class="{ 'visible': visible}" class="modal fade" tabindex="-1"
     role="dialog" data-backdrop="false">
     <div ><!-- class="modal-dialog" role="document" -- -->
       <div class="modal-content">
@@ -33,17 +33,23 @@ export default {
     },
     propUrl:{
       type: String,
-      default: 'https://peakd.com/me/proposals/337',
+      default: 'https://peakd.com/proposals/337',
     }
   },
   data() {
     return {
-      visible: true, // Controls modal visibility
-      username: null, // Holds the logged-in username dynamically
+      visible: false,
+      username: null,
     };
+  },
+  watch: {
+    user: function (){
+      this.adjustVisibility();
+    },
   },
   computed: {
     ...mapGetters('steemconnect', ['user']),
+    ...mapGetters(['proposalVoters']),
   },
   methods: {
     closeModal(){
@@ -68,15 +74,33 @@ export default {
     },
     readMore(){
       window.open(this.propUrl, '_blank'); // Opens the link in a new tab
+    },
+    userVotedProposal(){
+      const username = this.user && this.user.account && this.user.account.name || null;
+      console.log(username);
+      if (!username) return false;
+      if (this.proposalVoters != null && this.proposalVoters.length > 0){
+        if (this.proposalVoters.includes(username)){
+          return true;
+        }
+      }
+    },
+    adjustVisibility(){
+      this.visible = !this.userVotedProposal();
     }
   },
-  mounted() {
-
+  async mounted() {
+    await this.$store.dispatch('fetchProposalVoters', {proposalId: this.$config.proposalId});
+    this.adjustVisibility();
   },
 };
 </script>
 
 <style scoped>
+.modal.visible{
+  display: block;
+  opacity: 1;
+}
 .modal {
   /*display: block;*/
   position: fixed;

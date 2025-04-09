@@ -11,11 +11,14 @@ export default {
   setProposals (state, proposals){
 	  state.proposals = proposals
   },
+  setProposalVoters (state, proposalVoters){
+    state.proposalVoters = proposalVoters;
+  },
   setReferrals (state, referrals) {
     state.referrals = referrals
   },
   setUserSettings (state, settings){
-	state.userSettings = settings  
+	state.userSettings = settings
   },
   setDarkMode (state, darkMode){
 	state.darkMode = darkMode
@@ -55,7 +58,7 @@ export default {
 	state.posts = posts
   },
   setVideos (state, videos){
-	state.videos = videos  
+	state.videos = videos
   },
   setTopDelegators (state, topDelegators) {
     state.topDelegators = topDelegators
@@ -91,13 +94,13 @@ export default {
     state.editPost = post
   },
   setMoreUserCommentsAvailable(state, moreUserCommentsAvailable){
-	state.moreUserCommentsAvailable = moreUserCommentsAvailable  
+	state.moreUserCommentsAvailable = moreUserCommentsAvailable
   },
   setMoreReportsAvailable (state, moreReportsAvailable) {
     state.moreReportsAvailable = moreReportsAvailable
   },
   setUserComments (state, userComments) {
-	state.userComments = userComments  
+	state.userComments = userComments
   },
   setUserReports (state, userReports) {
     state.userReports = userReports
