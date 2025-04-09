@@ -739,14 +739,14 @@ export default {
     this.$store.dispatch('fetchRewardedActivityCount')
     this.$store.dispatch('fetchLeaderboard')
 
-    this.$store.dispatch('fetchTokenInfo')
+    //this.$store.dispatch('fetchTokenInfo')
 
     //grab top 12 delegators
     this.$store.dispatch('fetchTopDelegators', 12)
 
     //grab team listing
     //this.$store.dispatch('fetchModerators')
-    this.$store.dispatch('fetchAmbassadors')
+    //this.$store.dispatch('fetchAmbassadors')
 
     this.$store.dispatch('fetchNews')
 

@@ -77,7 +77,6 @@ export default {
     },
     userVotedProposal(){
       const username = this.user && this.user.account && this.user.account.name || null;
-      console.log(username);
       if (!username) return false;
       if (this.proposalVoters != null && this.proposalVoters.length > 0){
         if (this.proposalVoters.includes(username)){
