@@ -1,17 +1,15 @@
 <template>
   <div>
 	<NavbarBrand />
-	
+
 	<div class="container pt-5 mt-5 pb-5">
-		<h1 class="text-center pb-5">
-          <i class="fas fa-medal"></i><br>
-          {{ $t('Daily_Leaderboard') }}
-        </h1>
+    <ListHeadingSection :textualDisplay="$t('Daily_Leaderboard')" />
 		<div v-if="!Array.isArray(extLeaderboard) || extLeaderboard.length < 3" class="md-col-12 text-center"><i class="fas fa-spin fa-spinner text-brand"></i></div>
 		<div v-else>
-			<div v-if="user" class="text-right"><button target="_blank" :class="smallScreenBtnClasses" class="btn btn-lg btn-brand border" v-on:click="findUser">{{ $t('Find_me') }}</button></div>
+			<div v-if="user" class="text-right"><button target="_blank" class="btn btn-lg btn-brand btn-group-vertical" v-on:click="findUser">{{ $t('Find_me') }}</button></div>
 		</div>
-		<div class="row border-actifit" v-if="extLeaderboard.length >= 3" v-for="(curEntry, index) in extLeaderboard" :key="index" :class="entryRelClass(curEntry.author, curEntry.activityCount[0])" :ref="curEntry.author">
+		<div v-if="extLeaderboard.length >= 3" class="col-12">
+    <div class="row border-actifit" v-for="(curEntry, index) in extLeaderboard" :key="index" :class="entryRelClass(curEntry.author, curEntry.activityCount[0])" :ref="curEntry.author">
           <div class="row col-md-12 m-3 mb-sm-0">
               <span class="avatar pro-card-av rank-class" style="background-image: url(img/gadgets/friend-ranker.png);" >
 				<div class="p-3">{{index+1}}</div>
@@ -21,26 +19,28 @@
               </a>
               <a :href="curEntry.author" target="_blank" class="col-md-3 mt-3"><span>@{{ curEntry.author }}</span></a><br/>
 			  <a :href="curEntry.author" target="_blank" class="col-md-3 mt-3"><span>{{ numberFormat(curEntry.activityCount[0], 0) }} {{$t('Recorded_Activity')}}</span></a>
-			  <a :href="curEntry.url" target="_blank" :class="smallScreenBtnClasses" class="btn btn-lg btn-brand border">{{ $t('View_post_details') }}</a>
+			  <div><a :href="curEntry.url" target="_blank" class="btn btn-lg btn-brand btn-group-vertical">{{ $t('View_post_details') }}</a></div>
           </div>
         </div>
-	
+      </div>
 	</div>
-	
+
 	<Footer />
   </div>
 </template>
 
 <script>
- 
+
   import { mapGetters } from 'vuex'
   import NavbarBrand from '~/components/NavbarBrand'
   import Footer from '~/components/Footer'
+  import ListHeadingSection from '~/components/ListHeadingSection';
 
   export default {
 	components: {
 	  NavbarBrand,
-	  Footer
+	  Footer,
+    ListHeadingSection
 	},
 	computed: {
       ...mapGetters('steemconnect', ['user']),
@@ -86,7 +86,7 @@
 		try{
 			let userClass = "";
 			if (this.user && curUser == this.user.name){
-				userClass = "emboss-user "; 
+				userClass = "emboss-user ";
 			}
 			activCount = parseInt(activCount);
 			if (activCount >= 10000 ){
@@ -109,7 +109,7 @@
       this.$store.dispatch('fetchExtendedLeaderboard')
 	  this.$store.dispatch('steemconnect/login')
 	  this.fetchUserData();
-	  
+
 	  let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		this.profImgUrl = process.env.hiveImgUrl;
 		if (cur_bchain == 'STEEM'){

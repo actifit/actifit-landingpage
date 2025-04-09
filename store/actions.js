@@ -604,7 +604,7 @@ export default {
     })
   },
 
-  //fetch popular communities: top 20
+  //fetch proposals
   fetchProposals({ state, commit }, params) {
     return new Promise(async (resolve, reject) => {
 
@@ -624,6 +624,31 @@ export default {
         console.log('fetch proposals');
         console.log(outc)
         commit('setProposals', outc)
+        resolve(outc);
+      } else {
+        reject('error');
+      }
+      //});
+    });
+  },
+
+  fetchProposalVoters({ state, commit }, params) {
+    return new Promise(async (resolve, reject) => {
+
+      let proposalId = params && params.proposalId ? params.proposalId : '337';
+      let chainLnk = hive;
+
+      //https://developers.hive.io/apidefinitions/#condenser_api.list_proposals
+
+
+      let outc = await chainLnk.api.callAsync('condenser_api.list_proposal_votes', [[proposalId], 1000, 'by_proposal_voter', 'ascending', 'all']);
+      let proposalVotersArray = outc.filter((obj) => obj.proposal['id'] === proposalId)
+							.map((obj) => obj.voter).sort();
+      //let outc = chainLnk.api.call('bridge.list_pop_communities', callQuery, (err, comms) => {
+      if (outc) {
+        //console.log('fetch proposals Voters');
+        //console.log(outc)
+        commit('setProposalVoters', proposalVotersArray)
         resolve(outc);
       } else {
         reject('error');

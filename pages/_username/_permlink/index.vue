@@ -333,7 +333,7 @@ export default {
       ]
     }
   },
-  async asyncData({ params }) {
+  async asyncData({ params, app }) {
     //let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE')
     //if (cur_bchain == 'HIVE'){
     //set HIVE as default chain, since we cannot use localstorage in here
@@ -367,7 +367,7 @@ export default {
       let post_meta = JSON.parse(result.json_metadata)
       let imgs = post_meta.image;
       let meta_spec = {
-        postTitle: result.title,
+        postTitle: result.title || 'Comment', //since $t is not accessible at this point
       }
       if (Array.isArray(imgs) && imgs.length > 0) {
         meta_spec.postImg = imgs[0];

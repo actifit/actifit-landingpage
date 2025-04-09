@@ -8,27 +8,25 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-		<div class="modal-body" v-html="modalText"></div>
+        <div class="modal-body" v-html="modalText"></div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
- 
-  export default {
-    props: [ 'modalTitle', 'modalText' ],
-	components: {
-	  
-	},
-    computed: {
-      
-    },
-	methods: {
-	  
-	}
-  }
-</script>
-<style>
 
-</style>
+export default {
+  props: ['modalTitle', 'modalText'],
+  components: {
+
+  },
+  computed: {
+
+  },
+  methods: {
+
+  }
+}
+</script>
+<style></style>

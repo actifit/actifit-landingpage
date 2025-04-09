@@ -9,7 +9,10 @@ export default {
     return state.transactions
   },
   proposals (state){
-	return state.proposals  
+	  return state.proposals;
+  },
+  proposalVoters (state){
+    return state.proposalVoters;
   },
   referrals (state) {
     return state.referrals
@@ -51,7 +54,7 @@ export default {
 	return state.posts
   },
   videos (state){
-	return state.videos  
+	return state.videos
   },
   topDelegators (state) {
     return state.topDelegators
@@ -63,13 +66,13 @@ export default {
     return state.ambassadors
   },
   professionals (state) {
-	return state.professionals  
+	return state.professionals
   },
   products (state) {
-	return state.products  
+	return state.products
   },
   realProducts (state) {
-	return state.realProducts  
+	return state.realProducts
   },
   gadgetStats (state) {
 	return state.gadgetStats
