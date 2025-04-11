@@ -765,6 +765,7 @@ module.exports = {
   confirm_power_down: 'Are you sure you want to start a power down?',
   confirm_power_up: 'Are you sure you want to power up?',
   confirm_cancel_power_down: 'Are you sure you want to cancel your power down?',
+  confirm_bad_actor_transfer: 'The recipient is flagged as a potential bad actor. Are you sure you want to proceed?',
   Active_Key: 'Active Key',
   Settings: 'Settings',
   Posting_settings: 'Posting Settings',

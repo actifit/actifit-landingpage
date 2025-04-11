@@ -1794,7 +1794,9 @@ const tokensOfInterest = ['SPORTS', 'PAL', 'APX', 'BEE', 'POSH', 'LEO'].concat(t
 
 import { mapGetters } from 'vuex'
 
-import Web3 from 'web3'
+import Web3 from 'web3';
+
+import badActors from '~/utils/BadActorList';
 
 let web3 = new Web3(process.env.web3Node);
 
@@ -2025,6 +2027,8 @@ export default {
       displayUserData: null,
       profImgUrl: process.env.hiveImgUrl,
       userTokensWallet: -1,
+      badActors: badActors,
+      badActorWarning: false,
     }
   },
   components: {
@@ -4425,10 +4429,12 @@ export default {
         }
       }
 
+      const target_account = this.$refs["transfer-recipient"].value.trim();
+
       this.error_proceeding = false;
       this.error_msg = '';
       //ensure we have proper values
-      if (this.$refs["transfer-recipient"].value.trim() == '' ||
+      if (target_account == '' ||
         this.$refs["transfer-amount"].value.trim() == '') {
         this.error_proceeding = true;
         this.error_msg = this.$t('all_fields_required');
@@ -4448,12 +4454,20 @@ export default {
         }
       }
 
+      //make sure user is fine sending to this recipient
+      if (badActors.includes(target_account)){
+        let confirmPopup = confirm(this.$t('confirm_bad_actor_transfer'));
+        if (!confirmPopup) {
+          return;
+        }
+      }
+
       if (!localStorage.getItem('std_login')) {
 
         //https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
         var link = this.$steemconnect.sign('transfer', {
           from: this.user.account.name,
-          to: this.$refs["transfer-recipient"].value,
+          to: target_account,
           amount: this.$refs["transfer-amount"].value + ' ' + this.transferType,
           memo: this.$refs["transfer-memo"].value,
           auto_return: true,
@@ -4473,7 +4487,7 @@ export default {
         let opname = 'transfer_to_savings';
         let params = {
           "from": this.user.account.name,
-          "to": this.$refs["transfer-recipient"].value,
+          "to": target_account,
           "amount": parseFloat(this.$refs["transfer-amount"].value).toFixed(3) + ' ' + this.transferType,
           "memo": this.$refs["transfer-memo"].value
         };
@@ -4490,7 +4504,7 @@ export default {
         console.log(this.transferType)
         //return;
         //transferToVesting(wif, from, to, amount)
-        let res = await chainLnk.broadcast.transferToSavingsAsync(this.$refs["p-ac-key-trans"].value, this.user.account.name, this.$refs["transfer-recipient"].value, parseFloat(this.$refs["transfer-amount"].value).toFixed(3) + ' ' + this.transferType, this.$refs["transfer-memo"].value).then(
+        let res = await chainLnk.broadcast.transferToSavingsAsync(this.$refs["p-ac-key-trans"].value, this.user.account.name, target_account, parseFloat(this.$refs["transfer-amount"].value).toFixed(3) + ' ' + this.transferType, this.$refs["transfer-memo"].value).then(
           res => this.confirmCompletion('transfer', this.$refs["transfer-amount"].value, res)).catch(err => console.log(err));
       }
     },
@@ -4507,6 +4521,15 @@ export default {
 
       const recipient = this.$refs["transfer-recipient"].value.trim().toLowerCase();
       const memo = this.$refs["transfer-memo"].value.trim();
+
+
+      //make sure user is fine sending to this recipient
+      if (badActors.includes(recipient)){
+        let confirmPopup = confirm(this.$t('confirm_bad_actor_transfer'));
+        if (!confirmPopup) {
+          return;
+        }
+      }
 
       //check if user is sending funds to an exchange
       // Case-insensitive check
@@ -7102,6 +7125,15 @@ export default {
         this.afit_se_power_err_msg = this.$t('max_amount_token_power');
         return;
       }
+
+      //make sure user is fine sending to this recipient
+      if (badActors.includes(target_account)){
+        let confirmPopup = confirm(this.$t('confirm_bad_actor_transfer'));
+        if (!confirmPopup) {
+          return;
+        }
+      }
+
 
 
       if (!localStorage.getItem('std_login')) {
