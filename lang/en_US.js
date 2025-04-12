@@ -787,6 +787,7 @@ module.exports = {
   POWER: ' Power',
   RCS: 'RC',
   confirm_transfer: 'Are you sure you want to transfer your funds over?',
+  search_user: 'Find Users',
   Pick_Username: 'Choose a Username',
   FETCH_MY_DELEGATIONS: 'Fetch My HP Delegations',
   FETCH_MY_RC_DELEGATIONS: 'Fetch My RC Delegations',

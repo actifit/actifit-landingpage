@@ -13,7 +13,7 @@
       @blur="hideDropdown"
       @focus="showDropdown"
       :class="inputClass"
-      placeholder=""
+      :placeholder="placeHolderVal"
     />
     <ul v-if="showDropdownList && mentionList.length" class="mention-dropdown" ref="mentionDropdown">
       <li
@@ -21,7 +21,8 @@
         :key="index"
         @mouseover="highlightOption(index)"
         @click="selectMention(mention)"
-        class="text-left"
+        class="text-left text-brand"
+        style=""
         :class="{ 'selected': index === highlightedIndex }"
         ref="mentionItems">
         {{ mention }}
@@ -46,7 +47,15 @@ export default {
     passedValue: {
       type: String,
       default: "",
-    }
+    },
+    placeHolderVal: {
+      type: String,
+      default: "",
+    },
+    enableRedirect: {
+      type: Boolean,
+      default: false, // Toggle for redirection behavior
+    },
   },
   data() {
     return {
@@ -115,6 +124,12 @@ export default {
       this.inputValue = mention;
       this.showDropdownList = false;
       this.$emit("select", mention);
+
+      // Check if redirection is enabled
+      if (this.enableRedirect) {
+        const url = `https://actifit.io/${mention}`;
+        window.location.href = url; // Redirect to the generated URL
+      }
     },
     scrollToHighlighted() {
       const items = this.$refs.mentionItems;
