@@ -513,7 +513,7 @@
                   <span class="p-1">@</span>
                   <!--<input type="text" id="token-target-account" name="token-target-account"
                     ref="token-target-account" class="form-control-lg p-2">-->
-                    <AutocompleteUsernameInput id="token-target-account" name="token-target-account" ref="token-target-account" customClass="w-50" inputClass="form-control-lg w-100"/>
+                    <AutocompleteUsernameInput id="token-target-account" name="token-target-account" ref="token-target-account" customClass="w-50" inputClass="form-control-lg w-100 pl-2"/>
                 </div>
 
                 <div class="row" v-if="tokenActions && curTokenAction == TRANSFER_BSC">
@@ -632,7 +632,7 @@
                   <label for="transfer-recipient" class="w-25 p-2">{{ $t('To') }} *</label>
                   <!--<input type="text" id="transfer-recipient" name="transfer-recipient" ref="transfer-recipient"
                     class="form-control-lg w-50 p-2">-->
-                    <AutocompleteUsernameInput id="transfer-recipient" name="transfer-recipient" ref="transfer-recipient" customClass="w-50" inputClass="form-control-lg w-100" />
+                    <AutocompleteUsernameInput id="transfer-recipient" name="transfer-recipient" ref="transfer-recipient" customClass="w-50" inputClass="form-control-lg w-100 pl-2" />
                 </div>
                 <div class="row">
                   <label for="transfer-type" class="w-25 p-2">{{ $t('Type') }} *</label>
@@ -805,7 +805,7 @@
                   <label for="transfer-recipient" class="w-25 p-2">{{ $t('To') }} *</label>
                   <!--<input type="text" id="transfer-recipient" name="transfer-recipient" ref="transfer-recipient"
                     class="form-control-lg w-50 p-2" :value="user.account.name">-->
-                    <AutocompleteUsernameInput id="transfer-recipient" name="transfer-recipient" ref="transfer-recipient" customClass="w-50" inputClass="form-control-lg w-100" :passedValue="user.account.name" />
+                    <AutocompleteUsernameInput id="transfer-recipient" name="transfer-recipient" ref="transfer-recipient" customClass="w-50" inputClass="form-control-lg w-100 pl-2" :passedValue="user.account.name" />
                 </div>
                 <div class="row">
                   <label for="transfer-type" class="w-25 p-2">{{ $t('Type') }} *</label>

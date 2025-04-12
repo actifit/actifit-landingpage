@@ -19,9 +19,11 @@
       <li
         v-for="(mention, index) in mentionList"
         :key="index"
+        @mouseover="highlightOption(index)"
         @click="selectMention(mention)"
+        class="text-left"
         :class="{ 'selected': index === highlightedIndex }"
-      >
+        ref="mentionItems">
         {{ mention }}
       </li>
     </ul>
@@ -87,14 +89,22 @@ export default {
     },
     highlightNext() {
       if (this.mentionList.length > 0) {
+        // Increment index and wrap around
         this.highlightedIndex = (this.highlightedIndex + 1) % this.mentionList.length;
+        this.scrollToHighlighted();
       }
     },
     highlightPrevious() {
       if (this.mentionList.length > 0) {
+        // Decrement index and wrap around
         this.highlightedIndex =
           (this.highlightedIndex - 1 + this.mentionList.length) % this.mentionList.length;
+        this.scrollToHighlighted();
       }
+    },
+    highlightOption(index) {
+      this.highlightedIndex = index;
+      this.scrollToHighlighted();
     },
     selectHighlighted() {
       if (this.highlightedIndex >= 0) {
@@ -106,6 +116,32 @@ export default {
       this.showDropdownList = false;
       this.$emit("select", mention);
     },
+    scrollToHighlighted() {
+      const items = this.$refs.mentionItems;
+      const dropdown = this.$refs.mentionDropdown;
+
+      if (items && items[this.highlightedIndex]) {
+        const item = items[this.highlightedIndex];
+
+        // Get the item's position and dimensions
+        const itemTop = item.offsetTop;
+        const itemBottom = itemTop + item.offsetHeight;
+
+        // Get the dropdown's visible area
+        const dropdownScrollTop = dropdown.scrollTop;
+        const dropdownHeight = dropdown.offsetHeight;
+
+        // Scroll up if the item is above the visible area
+        if (itemTop < dropdownScrollTop) {
+          dropdown.scrollTop = itemTop;
+        }
+        // Scroll down if the item is below the visible area
+        else if (itemBottom > dropdownScrollTop + dropdownHeight) {
+          dropdown.scrollTop = itemBottom - dropdownHeight;
+        }
+      }
+    },
+
   },
   mounted() {
     // Forward the ref to make it accessible via the parent component
