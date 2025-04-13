@@ -74,11 +74,6 @@
                 $t('Explore') }}</span></a>
             </div>
           </li>
-          <li class="nav-item btn btn-brand m-1 nav-item-border" :title="$t('Explore')">
-            <div style="display:inline-flex">
-              <AutocompleteUsernameInput id="search-user" name="search-user" ref="search-user" customClass="" inputClass="form-control-lg " :placeHolderVal="$t('search_user')" :enableRedirect="true" />
-            </div>
-          </li>
 
         </ul>
 
@@ -93,7 +88,6 @@
 
 import UserMenu from '~/components/UserMenu';
 import LoginModal from '~/components/LoginModal';
-import AutocompleteUsernameInput from '~/components/AutocompleteUsernameInput';
 
 export default {
   data() {
@@ -105,7 +99,6 @@ export default {
   components: {
     UserMenu,
     LoginModal,
-    AutocompleteUsernameInput
   },
   async mounted() {
     console.log('navbar mounted');

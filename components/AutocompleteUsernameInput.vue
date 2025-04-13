@@ -127,7 +127,7 @@ export default {
 
       // Check if redirection is enabled
       if (this.enableRedirect) {
-        const url = `https://actifit.io/${mention}`;
+        const url = `/${mention}`;
         window.location.href = url; // Redirect to the generated URL
       }
     },
