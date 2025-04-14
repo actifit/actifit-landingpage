@@ -1,30 +1,16 @@
 <template>
   <div :class="['autocomplete-input', customClass]">
-    <input
-      type="text"
-      v-model="inputValue"
-      ref="inputElement"
-      id="username"
-      name="username"
-      @input="onInput"
-      @keydown.down="highlightNext"
-      @keydown.up="highlightPrevious"
-      @keydown.enter="selectHighlighted"
-      @blur="hideDropdown"
-      @focus="showDropdown"
-      :class="inputClass"
-      :placeholder="placeHolderVal"
-    />
+    <div class="input-with-icon">
+      <i class="fa fa-search"></i>
+
+      <input type="text" v-model="inputValue" ref="inputElement" id="username" name="username" @input="onInput"
+        @keydown.down="highlightNext" @keydown.up="highlightPrevious" @keydown.enter="selectHighlighted"
+        @blur="hideDropdown" @focus="showDropdown" :class="inputClass" :placeholder="placeHolderVal" />
+    </div>
     <ul v-if="showDropdownList && mentionList.length" class="mention-dropdown" ref="mentionDropdown">
-      <li
-        v-for="(mention, index) in mentionList"
-        :key="index"
-        @mouseover="highlightOption(index)"
-        @click="selectMention(mention)"
-        class="text-left text-brand"
-        style=""
-        :class="{ 'selected': index === highlightedIndex }"
-        ref="mentionItems">
+      <li v-for="(mention, index) in mentionList" :key="index" @mouseover="highlightOption(index)"
+        @click="selectMention(mention)" class="text-left text-brand" style=""
+        :class="{ 'selected': index === highlightedIndex }" ref="mentionItems">
         {{ mention }}
       </li>
     </ul>
@@ -169,11 +155,13 @@ export default {
 .autocomplete-input {
   position: relative;
 }
+
 .text-input {
   width: 100%;
   padding: 10px;
   font-size: 16px;
 }
+
 .mention-dropdown {
   position: absolute;
   top: 100%;
@@ -188,12 +176,46 @@ export default {
   max-height: 200px;
   overflow-y: auto;
 }
+
 .mention-dropdown li {
   padding: 10px;
   cursor: pointer;
 }
+
 .mention-dropdown li:hover,
 .mention-dropdown li.selected {
   background-color: #f0f0f0;
+}
+
+.input-with-icon {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  /* Ensures input field spans the full width */
+}
+
+.input-with-icon .fa-search {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  color: gray;
+  /* Customize icon color */
+  font-size: 16px;
+}
+
+.input-with-icon input {
+  padding-left: 35px;
+  /* Create space for the icon */
+  width: 100%;
+  /* Ensures input field spans the container */
+}
+
+.hiddenIcon .fa-search{
+  display:none;
+}
+
+.hiddenIcon .input-with-icon input {
+  padding-left: 3px;
 }
 </style>

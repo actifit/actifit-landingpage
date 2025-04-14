@@ -1,10 +1,10 @@
 <template>
   <div class="user-menu-container  align-items-center"> <!--ml-auto d-flex position-absolute-->
 
-    <ul class="navbar-nav mr-auto user-menu flex-row pt-2">
-      <li class="nav-item mr-2 btn btn-brand nav-item-border">
+    <ul class="navbar-nav mr-auto user-menu flex-row">
+      <li class="nav-item mr-2 btn btn-brand nav-item-border p-0 search-li">
         <div style="display:inline-flex">
-          <AutocompleteUsernameInput id="search-user" name="search-user" ref="search-user" customClass="" :inputClass="computedInputClass" :placeHolderVal="$t('search_user')" :enableRedirect="true" />
+          <AutocompleteUsernameInput id="search-user" name="search-user" ref="search-user" :customClass="computedCustomClass" :inputClass="computedInputClass" :placeHolderVal="$t('search_user')" :enableRedirect="true" />
         </div>
       </li>
       <li class="nav-item" v-if="!user">
@@ -19,13 +19,13 @@
       <li class="nav-item mr-2" v-if="user">
         <span class="navbar-text py-0">{{ $t('Balance') }}<br><b>{{ formattedUserTokens }}</b></span>
       </li>-->
-      <li class="nav-item mr-2" @click="toggleDarkMode" :title="$t('toggle_dark_mode')" v-if="user">
+      <li class="nav-item mr-2" @click="toggleDarkMode" :title="$t('toggle_dark_mode')" v-if="user && !hideComponent">
         <span class="user-avatar group-class">
           <i v-if="$store.state.darkMode" class="fa-solid fa-sun p-2 text-brand"></i>
           <i v-else class="fa-solid fa-moon text-brand p-2"></i>
         </span>
       </li>
-      <li class="nav-item mr-2" v-if="user">
+      <li class="nav-item mr-2" v-if="user && !hideComponent">
         <!--<button @click="toggleWidget">Toggle Widget</button>-->
         <StingChat :user="this.user" />
       </li>
@@ -189,9 +189,24 @@ export default {
     computedInputClass() {
       if (process.client) {
         // Check if the screen width is less than 768px (standard for mobile)
+        if (window.innerWidth <500) return 'form-control-sm';
         return window.innerWidth < 768 ? '' : 'form-control-lg';
       }
       return '';
+    },
+    computedCustomClass(){
+      if (process.client) {
+        // Check if the screen width is less than 768px (standard for mobile)
+        if (window.innerWidth <500) return "hiddenIcon";
+      }
+      return "";
+    },
+    hideComponent() {
+      if (process.client) {
+        // Check if the screen width is less than 768px (standard for mobile)
+        if (window.innerWidth <500) return true;
+      }
+      return false;
     },
     notificationsNotice() {
 
@@ -477,5 +492,9 @@ export default {
 /* Style for the thumb on hover */
 .dropdown-menu::-webkit-scrollbar-thumb:hover {
   background-color: pink !important;
+}
+
+.search-li{
+  height: fit-content;
 }
 </style>
