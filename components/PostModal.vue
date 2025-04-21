@@ -391,7 +391,10 @@ export default {
     },
     meta() {
       try {
-        return JSON.parse(this.post.json_metadata)
+        return (typeof this.post.json_metadata === "string")
+          ? JSON.parse(this.post.json_metadata)
+          : this.post.json_metadata;
+        //return JSON.parse(this.post.json_metadata)
       } catch (err) {
         console.log(err);
         return {}

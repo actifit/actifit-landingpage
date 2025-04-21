@@ -510,8 +510,10 @@
               <div v-if="tokenActions && curTokenAction">
                 <div class="row" v-if="tokenActions && curTokenAction == TRANSFER_FUNDS">
                   <label for="token-target-account" class="w-25 p-2">{{ $t('Account') }} *</label>
-                  <span class="p-1">@</span><input type="text" id="token-target-account" name="token-target-account"
-                    ref="token-target-account" class="form-control-lg p-2">
+                  <span class="p-1">@</span>
+                  <!--<input type="text" id="token-target-account" name="token-target-account"
+                    ref="token-target-account" class="form-control-lg p-2">-->
+                    <AutocompleteUsernameInput id="token-target-account" name="token-target-account" ref="token-target-account" customClass="w-50" inputClass="form-control-lg w-100 pl-2"/>
                 </div>
 
                 <div class="row" v-if="tokenActions && curTokenAction == TRANSFER_BSC">
@@ -628,8 +630,9 @@
                 <h3 class="pro-name">{{ $t('TRANSFER_FUNDS_ACTION_TEXT') }}</h3>
                 <div class="row">
                   <label for="transfer-recipient" class="w-25 p-2">{{ $t('To') }} *</label>
-                  <input type="text" id="transfer-recipient" name="transfer-recipient" ref="transfer-recipient"
-                    class="form-control-lg w-50 p-2">
+                  <!--<input type="text" id="transfer-recipient" name="transfer-recipient" ref="transfer-recipient"
+                    class="form-control-lg w-50 p-2">-->
+                    <AutocompleteUsernameInput id="transfer-recipient" name="transfer-recipient" ref="transfer-recipient" customClass="w-50" inputClass="form-control-lg w-100 pl-2" />
                 </div>
                 <div class="row">
                   <label for="transfer-type" class="w-25 p-2">{{ $t('Type') }} *</label>
@@ -800,8 +803,9 @@
                 <h3 class="pro-name">{{ $t('TRANSFER_FUNDS_SAVINGS') }}</h3>
                 <div class="row">
                   <label for="transfer-recipient" class="w-25 p-2">{{ $t('To') }} *</label>
-                  <input type="text" id="transfer-recipient" name="transfer-recipient" ref="transfer-recipient"
-                    class="form-control-lg w-50 p-2" :value="user.account.name">
+                  <!--<input type="text" id="transfer-recipient" name="transfer-recipient" ref="transfer-recipient"
+                    class="form-control-lg w-50 p-2" :value="user.account.name">-->
+                    <AutocompleteUsernameInput id="transfer-recipient" name="transfer-recipient" ref="transfer-recipient" customClass="w-50" inputClass="form-control-lg w-100 pl-2" :passedValue="user.account.name" />
                 </div>
                 <div class="row">
                   <label for="transfer-type" class="w-25 p-2">{{ $t('Type') }} *</label>
@@ -1794,7 +1798,10 @@ const tokensOfInterest = ['SPORTS', 'PAL', 'APX', 'BEE', 'POSH', 'LEO'].concat(t
 
 import { mapGetters } from 'vuex'
 
-import Web3 from 'web3'
+import Web3 from 'web3';
+
+import badActors from '~/utils/BadActorList';
+import AutocompleteUsernameInput from '~/components/AutocompleteUsernameInput';
 
 let web3 = new Web3(process.env.web3Node);
 
@@ -2025,6 +2032,8 @@ export default {
       displayUserData: null,
       profImgUrl: process.env.hiveImgUrl,
       userTokensWallet: -1,
+      badActors: badActors,
+      badActorWarning: false,
     }
   },
   components: {
@@ -2039,7 +2048,8 @@ export default {
     TopHoldersX,
     SwapTokenModal,
     pendingRewardsModal,
-    ListHeadingSection
+    ListHeadingSection,
+    AutocompleteUsernameInput
   },
   computed: {
     ...mapGetters('steemconnect', ['user']),
@@ -4287,12 +4297,13 @@ export default {
 
       this.error_proceeding = false;
       this.error_msg = '';
+      const recipient = this.$refs["transfer-recipient"].$refs['input'].value.trim().toLowerCase();
       if (!localStorage.getItem('std_login')) {
 
         //https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
         var link = this.$steemconnect.sign('transfer', {
           from: this.user.account.name,
-          to: this.$refs["transfer-recipient"].value,
+          to: recipient,
           amount: this.$refs["transfer-amount"].value + ' ' + this.transferType,
           memo: this.$refs["transfer-memo"].value,
           auto_return: true,
@@ -4365,12 +4376,14 @@ export default {
         }
       }
 
+      const recipient = this.$refs["transfer-recipient"].$refs['input'].value.trim().toLowerCase();
+
       if (!localStorage.getItem('std_login')) {
 
         //https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
         var link = this.$steemconnect.sign('transfer', {
           from: this.user.account.name,
-          to: this.$refs["transfer-recipient"].value,
+          to: recipient,
           amount: this.$refs["transfer-amount"].value + ' ' + this.transferType,
           memo: this.$refs["transfer-memo"].value,
           auto_return: true,
@@ -4425,10 +4438,12 @@ export default {
         }
       }
 
+      const recipient = this.$refs["transfer-recipient"].$refs['input'].value.trim().toLowerCase();
+
       this.error_proceeding = false;
       this.error_msg = '';
       //ensure we have proper values
-      if (this.$refs["transfer-recipient"].value.trim() == '' ||
+      if (recipient == '' ||
         this.$refs["transfer-amount"].value.trim() == '') {
         this.error_proceeding = true;
         this.error_msg = this.$t('all_fields_required');
@@ -4448,12 +4463,20 @@ export default {
         }
       }
 
+      //make sure user is fine sending to this recipient
+      if (badActors.includes(recipient)){
+        let confirmPopup = confirm(this.$t('confirm_bad_actor_transfer'));
+        if (!confirmPopup) {
+          return;
+        }
+      }
+
       if (!localStorage.getItem('std_login')) {
 
         //https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
         var link = this.$steemconnect.sign('transfer', {
           from: this.user.account.name,
-          to: this.$refs["transfer-recipient"].value,
+          to: recipient,
           amount: this.$refs["transfer-amount"].value + ' ' + this.transferType,
           memo: this.$refs["transfer-memo"].value,
           auto_return: true,
@@ -4462,8 +4485,8 @@ export default {
         window.open(link);
       } else if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) ||
         (localStorage.getItem('acti_login_method') == 'hiveauth')) {
-        console.log(this.transferType);
-        console.log('>>pop')
+        //console.log(this.transferType);
+        //console.log('>>pop')
         /*return new Promise((resolve) => {
           window.hive_keychain.requestTransfer(this.user.account.name, this.$refs["transfer-recipient"].value, parseFloat(this.$refs["transfer-amount"].value).toFixed(3),this.$refs["transfer-memo"].value,this.transferType,(response) => {
           console.log(response);
@@ -4473,7 +4496,7 @@ export default {
         let opname = 'transfer_to_savings';
         let params = {
           "from": this.user.account.name,
-          "to": this.$refs["transfer-recipient"].value,
+          "to": recipient,
           "amount": parseFloat(this.$refs["transfer-amount"].value).toFixed(3) + ' ' + this.transferType,
           "memo": this.$refs["transfer-memo"].value
         };
@@ -4487,10 +4510,10 @@ export default {
         this.transferProcess = true;
         let chainLnk = this.setProperNode();
 
-        console.log(this.transferType)
+        //console.log(this.transferType)
         //return;
         //transferToVesting(wif, from, to, amount)
-        let res = await chainLnk.broadcast.transferToSavingsAsync(this.$refs["p-ac-key-trans"].value, this.user.account.name, this.$refs["transfer-recipient"].value, parseFloat(this.$refs["transfer-amount"].value).toFixed(3) + ' ' + this.transferType, this.$refs["transfer-memo"].value).then(
+        let res = await chainLnk.broadcast.transferToSavingsAsync(this.$refs["p-ac-key-trans"].value, this.user.account.name, recipient, parseFloat(this.$refs["transfer-amount"].value).toFixed(3) + ' ' + this.transferType, this.$refs["transfer-memo"].value).then(
           res => this.confirmCompletion('transfer', this.$refs["transfer-amount"].value, res)).catch(err => console.log(err));
       }
     },
@@ -4505,8 +4528,16 @@ export default {
         }
       }
 
-      const recipient = this.$refs["transfer-recipient"].value.trim().toLowerCase();
+      const recipient = this.$refs["transfer-recipient"].$refs['input'].value.trim().toLowerCase();//.value.trim().toLowerCase();
       const memo = this.$refs["transfer-memo"].value.trim();
+
+      //make sure user is fine sending to this recipient
+      if (badActors.includes(recipient)){
+        let confirmPopup = confirm(this.$t('confirm_bad_actor_transfer'));
+        if (!confirmPopup) {
+          return;
+        }
+      }
 
       //check if user is sending funds to an exchange
       // Case-insensitive check
@@ -7080,7 +7111,9 @@ export default {
 
       let tokenMaxVal = this.selTokenUp.balance;
       let amount_to_send = this.$refs["token-powerup-amount"].value.trim();
-      let target_account = this.$refs["token-target-account"].value.trim();
+
+
+      let target_account = this.$refs["token-target-account"].$refs['input'].value.trim().toLowerCase();//this.$refs["token-target-account"].value.trim();
       let memo = this.$refs["token-transfer-memo"].value.trim();
 
       //ensure we have proper values
@@ -7102,6 +7135,15 @@ export default {
         this.afit_se_power_err_msg = this.$t('max_amount_token_power');
         return;
       }
+
+      //make sure user is fine sending to this recipient
+      if (badActors.includes(target_account)){
+        let confirmPopup = confirm(this.$t('confirm_bad_actor_transfer'));
+        if (!confirmPopup) {
+          return;
+        }
+      }
+
 
 
       if (!localStorage.getItem('std_login')) {
