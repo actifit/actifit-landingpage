@@ -985,6 +985,8 @@ module.exports = {
   Youtube: 'Youtube',
   Medium: 'Medium',
   Reset_password: 'Reset Password',
+  Reset: 'Reset',
+  Close: 'Close',
   verify_hiveauth_app: 'Please approve the transaction using your Hive Auth-compatible mobile app',
   Confirm_password_reset: 'Are you sure you wish to reset your funds password? Only do so if you have forgotten your funds password.',
   Delegator: 'Delegator',
