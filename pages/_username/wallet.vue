@@ -2655,7 +2655,9 @@ export default {
       //return this.bsc_wallet_address;
       this.error_wallet = '';
 
-      if (this.$refs['bsc-wallet-address'].value == '') {
+      const walletBSC = this.$refs['bsc-wallet-address'].value.trim();
+
+      if (walletBSC == '') {
         this.error_wallet = this.$t('all_fields_required');
         return;
       }
@@ -2667,73 +2669,112 @@ export default {
       let contProc = false;
       const nonce = this.generatePassword(2);
       console.log('add');
-      console.log(this.$refs['bsc-wallet-address'].value);
+      console.log(walletBSC);
       try {
-        let sign = await web3.eth.personal.sign(nonce, this.$refs['bsc-wallet-address'].value, "");
+        let sign = await web3.eth.personal.sign(nonce, walletBSC, "");
         //console.log(sign)
 
         //verify proper setup
         let accToken = localStorage.getItem('access_token')
 
-        let url = new URL(process.env.actiAppUrl + 'verifySignBSCAdd/?user=' + this.user.account.name + '&wallet=' + this.$refs['bsc-wallet-address'].value + '&sign=' + sign + '&nonce=' + nonce);
 
-        let reqHeads = new Headers({
-          'Content-Type': 'application/json',
-          'x-acti-token': 'Bearer ' + accToken,
-        });
-        let res = await fetch(url, {
-          headers: reqHeads
-        });
-        let outcome = await res.json();
-        console.log(outcome);
-        if (outcome.error) {
-          console.log('error');
-          this.error_wallet = this.$t('error_saving_wallet');
-          return;
-        } else if (outcome.success) {
-          console.log('success. Next lets save');
-          contProc = true;
-          /*this.$notify({
-          group: 'success',
-          text: this.$t('address_successfully_stored'),
-          position: 'top center'
-          })*/
+        if (this.isKeychainLogin || this.isHiveauthLogin) {
+          //in case of keychain login, broadcast to chain
+          //broadcast the transaction to Steem BC
+          let cstm_params = {
+            required_auths: [],
+            required_posting_auths: [this.user.account.name],
+            id: 'actifit-bsc-wallet',
+            json: JSON.stringify({'wallet': walletBSC })
+            };
+
+          let res = await this.processTrxFunc('custom_json', cstm_params);
+          console.log('post call');
+          console.log(res);
+
+          if (res.success){
+            //console.log(res.txID);
+            let url = new URL(process.env.actiAppUrl + 'verifySignBSCAddKeychain/'+res.txID+'/?user=' + this.user.account.name+'&wallet='+walletBSC+'&operation='+JSON.stringify([['custom_json',cstm_params]]) + '&sign=' + sign + '&nonce=' + nonce);
+
+            let res2 = await fetch(url);
+            let outcome = await res2.json();
+            console.log(outcome);
+            if (outcome.status=='success'){
+              this.$notify({
+                group: 'success',
+                text: this.$t('successfully_updated_settings'),
+                position: 'top center'
+              })
+            }else{
+              this.$notify({
+                group: 'error',
+                text: this.$t('error'),
+                position: 'top center'
+              })
+            }
+          }else{
+            this.$notify({
+              group: 'error',
+              text: this.$t('error'),
+              position: 'top center'
+            })
+          }
+
+        }else{
+          let url = new URL(process.env.actiAppUrl + 'verifySignBSCAdd/?user=' + this.user.account.name + '&wallet=' + this.$refs['bsc-wallet-address'].value + '&sign=' + sign + '&nonce=' + nonce);
+
+          let reqHeads = new Headers({
+            'Content-Type': 'application/json',
+            'x-acti-token': 'Bearer ' + accToken,
+          });
+          let res = await fetch(url, {
+            headers: reqHeads
+          });
+          let outcome = await res.json();
+          console.log(outcome);
+          if (outcome.error) {
+            console.log('error');
+            this.error_wallet = this.$t('error_saving_wallet');
+            return;
+          } else if (outcome.success) {
+            console.log('success. Next lets save');
+
+            //grab token
+            let accToken = localStorage.getItem('access_token')
+
+            let url = new URL(process.env.actiAppUrl + 'storeUserWalletAddress/?user=' + this.user.account.name + '&wallet=' + this.$refs['bsc-wallet-address'].value);
+
+            let reqHeads = new Headers({
+              'Content-Type': 'application/json',
+              'x-acti-token': 'Bearer ' + accToken,
+            });
+            let res = await fetch(url, {
+              headers: reqHeads
+            });
+            let outcome = await res.json();
+            console.log(outcome);
+            if (outcome.error) {
+              this.error_wallet = this.$t('error_saving_wallet');
+            } else {
+              console.log('success');
+              this.$notify({
+                group: 'success',
+                text: this.$t('address_successfully_stored'),
+                position: 'top center'
+              })
+            }
+            /*this.$notify({
+            group: 'success',
+            text: this.$t('address_successfully_stored'),
+            position: 'top center'
+            })*/
+          }
         }
 
       } catch (err) {
         console.log(err);
       }
 
-      if (!contProc) {
-        this.error_wallet = this.$t('error_saving_wallet');
-        return;
-      }
-
-
-      //grab token
-      let accToken = localStorage.getItem('access_token')
-
-      let url = new URL(process.env.actiAppUrl + 'storeUserWalletAddress/?user=' + this.user.account.name + '&wallet=' + this.$refs['bsc-wallet-address'].value);
-
-      let reqHeads = new Headers({
-        'Content-Type': 'application/json',
-        'x-acti-token': 'Bearer ' + accToken,
-      });
-      let res = await fetch(url, {
-        headers: reqHeads
-      });
-      let outcome = await res.json();
-      console.log(outcome);
-      if (outcome.error) {
-        this.error_wallet = this.$t('error_saving_wallet');
-      } else {
-        console.log('success');
-        this.$notify({
-          group: 'success',
-          text: this.$t('address_successfully_stored'),
-          position: 'top center'
-        })
-      }
     },
     async getPendingSavingsWithdrawals() {
       this.pendingSavingsWithdrawals = await hive.api.getSavingsWithdrawFromAsync(this.targetUserWallet);
