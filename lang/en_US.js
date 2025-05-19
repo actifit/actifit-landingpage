@@ -961,7 +961,7 @@ module.exports = {
   posting_key_precaution: 'Save this key to use it next time to login to actifit.io and to use it in the Actifit app when creating actifit reports',
   Copy_Posting_Key: 'Copy Posting Key',
   target_bchain: 'Blockchain Support',
-  leave_default_recommend: 'Account will be created on selected chain(s). Leave default (all selected) unless you are sure of what you are doing. A Hive account is REQUIRED to use actifit.',
+  leave_default_recommend: 'Account will be created on selected chain(s). A Hive account is REQUIRED to use actifit.',
   authority_management: 'Manage Authority Permissions',
   give_posting_auth: 'Grant Posting Authority',
   revoke_posting_auth: 'Revoke Posting Authority',
