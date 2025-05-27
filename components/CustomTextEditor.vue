@@ -114,12 +114,10 @@ export default {
           // If query is invalid for fetching, but a newer fetch has already been initiated,
           // don't clear state here.
           if (fetchId < this.latestFetchId) {
-              console.log(`Fetch ${fetchId}: Query too short/empty, but newer fetch (${this.latestFetchId}) exists. Ignoring.`);
               return; // Ignore if a newer request has started
           }
 
           // If this is the *latest* request context, clear the list data.
-          console.log(`Fetch ${fetchId}: Query too short/empty, clearing list.`);
           this.mentionList = [];
           this.selectedMentionIndex = 0;
             // Note: showMentionList state is managed by the handlers (input/cursorMove)
@@ -137,19 +135,16 @@ export default {
 
 
         if (fetchId < this.latestFetchId) { // <-- Check the ID here
-             console.log(`Fetch ${fetchId}: Response received, but newer fetch (${this.latestFetchId}) has started. Ignoring response.`);
              return; // Ignore this response if a newer fetch has been initiated
         }
 
         // --- Check the input_type field ---
         if (responseData.input_type === 'invalid_input') {
-          console.log(`Fetch mentions: Invalid input type received for query "${this.searchQuery}"`);
           this.mentionList = []; // Clear list for invalid input
           this.showMentionList = false; // Explicitly hide list for invalid input
           this.selectedMentionIndex = 0; // Reset selection
         } else {
           // --- Handle valid input type ---
-          console.log(`Fetch mentions: Valid input type received for query "${this.searchQuery}"`);
           this.mentionList = responseData.input_value || []; // Populate list with valid value
 
           // If the list has results, ensure showMentionList is true and update visuals
@@ -173,7 +168,6 @@ export default {
 
       } catch (error) {
         if (fetchId < this.latestFetchId) { // <-- Check the ID here
-          console.log(`Fetch ${fetchId}: Error received, but newer fetch (${this.latestFetchId}) has started. Ignoring error.`);
           return; // Ignore this error if a newer fetch has been initiated
         }
 
@@ -284,8 +278,6 @@ export default {
 
       let currentMentionQuery = null; // Use null initially
 
-      console.log(`[handleCursorMove] After logic, showMentionList: ${this.showMentionList}`);
-
       // Find the @username word that CONTAINS the cursor or is immediately after it
       // Use /@(\w+)/g to find actual mentions (requires at least one word char after @)
       const mentionRegex = /@([a-zA-Z0-9_.-]+)/g;
@@ -310,7 +302,6 @@ export default {
         // If the query has actually changed OR the list is currently hidden
         // This prevents unnecessary state updates and index resets when just moving WITHIN the same word.
         if (this.searchQuery !== currentMentionQuery || !this.showMentionList) {
-          console.log('handleCursorMove: Found new @word+ context, showing list');
           this.searchQuery = currentMentionQuery;
           this.showMentionList = true; // Show the list
           this.selectedMentionIndex = 0; // Reset selection
@@ -324,30 +315,18 @@ export default {
             this.mentionList = [];
           }
         } else {
-          console.log('handleCursorMove: Still in same @word+ context, list already visible');
-          // Cursor moved WITHIN the same @word or to its immediate end, list is already shown and query is the same.
-          // Just ensure position is updated.
           this.updateDropdownPosition();
         }
 
-      } else { // Cursor is NOT within or immediately after an @word+
-        // *** ONLY hide the list if it was showing AND the current searchQuery is NOT empty ***
-        // If searchQuery is empty, it means the user likely just typed '@'
+      } else {
         if (this.showMentionList && this.searchQuery !== '') {
-          console.log('handleCursorMove: Not in @word+ context and query is not empty, hiding list');
           this.showMentionList = false;
           this.searchQuery = ''; // Clear query
           this.mentionList = [];
           this.selectedMentionIndex = 0;
         } else if (this.showMentionList && this.searchQuery === '') {
-          // This case happens right after typing '@'.
-          // Cursor is not in @word+ (because regex is @(\w+)), but query IS empty.
-          // The list *should* stay visible showing "Start typing...".
-          // No action needed here, list remains visible.
-          console.log('handleCursorMove: Not in @word+ context, but query is empty (@). List remains visible.');
           this.updateDropdownPosition(); // Still update position in case text lines changed
         } else {
-          console.log('handleCursorMove: Not in @word+ context, list already hidden');
           // List was already hidden, do nothing.
         }
       }
@@ -364,17 +343,12 @@ export default {
       // Use /@(\w*)$/ to match "@" followed by 0 or more word chars at the end
       const textBeforeCursor = textareaElement.value.slice(0, cursorPos);
       const currentWordMatch = textBeforeCursor.match(/@([a-zA-Z0-9_.-]*)$/);
-
-      console.log(`[handleInput] After logic, showMentionList: ${this.showMentionList}`);
-
-
       if (currentWordMatch) {
         // Cursor is immediately after an @word (including just after '@')
         const currentQuery = currentWordMatch[1]; // The part after "@"
 
         // If the query has changed or the list was hidden
         if (this.searchQuery !== currentQuery || !this.showMentionList) {
-          console.log('handleInput: Cursor immediately after @word, showing/updating list. Query:', currentQuery);
           this.searchQuery = currentQuery;
           this.showMentionList = true; // Ensure list is shown
           this.selectedMentionIndex = 0; // Reset selection when typing
@@ -388,7 +362,6 @@ export default {
             // If searchQuery is '', list is empty, template shows message. showMentionList is true. Correct.
           }
         } else {
-          console.log('handleInput: Still same @word ending at cursor, list already visible.');
           // Typing continued within the same @word, list already shown, query is the same.
           // Just ensure position is updated.
           this.updateDropdownPosition();
@@ -396,15 +369,13 @@ export default {
 
       } else {
         // Cursor is NOT immediately after an @word (e.g., typed space, comma, or typing elsewhere)
-        console.log('handleInput: Cursor NOT immediately after @word');
         if (this.showMentionList) { // If list was showing, hide it.
-          console.log('handleInput: Hiding list');
           this.showMentionList = false;
           this.searchQuery = ''; // Clear query
           this.mentionList = []; // Clear list
           this.selectedMentionIndex = 0;
         } else {
-          console.log('handleInput: List already hidden');
+          //already hidden
         }
       }
     },
@@ -420,21 +391,16 @@ export default {
       const textBeforeCursor = textareaElement.value.slice(0, cursorPos);
       const isCursorAfterAtWordEnding = textBeforeCursor.match(/@\w*$/);
 
-      console.log(`[handleKeydown] Key: "${event.key}", current showMentionList: ${this.showMentionList}`);
-
-
       if (this.showMentionList) {
           // Handle selection keys (Enter, Space, Tab) ONLY IF:
           // 1. The list has items to select from (`this.mentionList.length > 0`)
           // 2. The cursor is positioned immediately after the @word being typed/edited (`isCursorAfterAtWordEnding` is true)
           if (['Enter',' ','Tab'].includes(key) && this.mentionList.length > 0 && isCursorAfterAtWordEnding) {
-            console.log('handleKeydown: Handling selection key', key, 'at end of @word');
             event.preventDefault(); // Prevent default only when performing a selection
             this.selectMention(this.mentionList[this.selectedMentionIndex]);
           } else if (key === 'ArrowDown' || key === 'ArrowUp') {
             // Still handle arrow keys globally when list is open to navigate suggestions
             if (this.mentionList.length > 0) {
-                console.log('handleKeydown: Handling Arrow key for selection navigation');
                 event.preventDefault(); // Prevent cursor movement in textarea
                 if (key === 'ArrowDown') {
                     this.selectedMentionIndex = (this.selectedMentionIndex + 1) % this.mentionList.length;
@@ -444,7 +410,6 @@ export default {
                 this.scrollDropdownIntoView();
             }
           } else if (key === 'Escape') {
-            console.log('handleKeydown: Handling Escape');
             event.preventDefault(); // Prevent default Escape behavior
             this.showMentionList = false;
             this.searchQuery = '';
@@ -460,7 +425,6 @@ export default {
       } else { // List is NOT showing
           if (key === '@') {
               // If @ is typed and list is NOT already active
-                console.log('handleKeydown: Typed @, initiating mention flow');
                 // Initiate the flow. The subsequent 'input' event will set searchQuery='' based on the text,
                 // and ensure showMentionList is true. This just provides immediate visual feedback.
                 this.showMentionList = true; // Immediate visual feedback
@@ -475,7 +439,6 @@ export default {
                   });
 
           } else if (event.ctrlKey && key === 'Backspace') {
-                console.log('handleKeydown: Ctrl+Backspace');
                 event.preventDefault();
                 const textBeforeCursor = textareaElement.value.substring(0, cursorPos);
                 const wordRange = /\s*\S+$/.exec(textBeforeCursor);
@@ -581,11 +544,9 @@ export default {
         // Position ABOVE only if there is NOT enough space BELOW *in the viewport* AND there *is* enough space ABOVE *in the viewport*
         if (spaceBelowInViewport >= dropdownHeight || spaceAboveInViewport < dropdownHeight) {
             // Position BELOW
-            console.log('Positioning dropdown BELOW (relative to container)');
             finalTop = preferredTopBelow;
         } else {
             // Position ABOVE
-            console.log('Positioning dropdown ABOVE (relative to container)');
             finalTop = cursorYRelativeToContainer - dropdownHeight - offsetY;
         }
 
@@ -637,8 +598,6 @@ export default {
           // bottom: 'auto', // Explicitly set bottom to auto
         };
 
-        console.log('Calculated relative Dropdown Style:', this.mentionDropdownStyle);
-
         // --- Horizontal Boundary Check (relative to CONTAINER) ---
         // Check if the right edge of the dropdown goes beyond the CONTAINER's right edge
         const dropdownRightEdgeRelativeToContainer = finalLeft + dropdownWidth;
@@ -651,14 +610,12 @@ export default {
             finalLeft = Math.max(0, finalLeft); // Ensure it's not less than 0
 
             this.mentionDropdownStyle.left = `${finalLeft}px`;
-            console.log('Adjusted Dropdown Style (Right edge, relative):', this.mentionDropdownStyle);
 
         }
         // Add check for left edge too (e.g., if aligning with a word very close to the container's left edge)
         if (finalLeft < 0) {
             finalLeft = 0; // Align with the left edge of the container
             this.mentionDropdownStyle.left = `${finalLeft}px`;
-            console.log('Adjusted Dropdown Style (Left edge, relative):', this.mentionDropdownStyle);
         }
         // Vertical boundary check relative to container might also be needed if the container has overflow
         // and a fixed height, but for a scrollable editor within a container, viewport check is often more relevant.
@@ -678,17 +635,16 @@ export default {
           // This logic might need tweaking depending on what mavon-editor's DOM structure is like when blurred.
           // A simpler check: If focus is NOT within the dropdown AND is NOT within the textarea
           if (!this.textareaElement.contains(activeElement) && !(dropdownElement && dropdownElement.contains(activeElement))) {
-            console.log("Blur detected, hiding list");
             this.showMentionList = false;
             this.searchQuery = '';
             this.mentionList = [];
             this.selectedMentionIndex = 0;
           } else {
-            console.log("Blur occurred, but focus remains in textarea or dropdown.");
+            //"Blur occurred, but focus remains in textarea or dropdown."
           }
 
         } else {
-          console.log("Blur occurred, but focus is still within the component (and not in the dropdown). This case needs careful handling depending on mavon-editor's structure.");
+          //"Blur occurred, but focus is still within the component (and not in the dropdown). This case needs careful handling depending on mavon-editor's structure."
           // If focus goes to the preview area, maybe keep the list? Or hide it?
           // Hiding is usually safer unless the list is relevant to the preview. Let's hide.
           if (activeElement !== this.textareaElement && !(dropdownElement && dropdownElement.contains(activeElement))) {
@@ -768,8 +724,6 @@ export default {
         this.textareaElement = editorEl.querySelector('textarea') || editorEl.querySelector('.v-note-edit-area .auto-textarea-input');
 
         if (this.textareaElement) {
-          console.log("Mavon editor textarea element found. Attaching listeners.");
-
           // Mouse events for cursor movement
           this.boundHandleCursorMove = this.handleCursorMove.bind(this);
           this.textareaElement.addEventListener('mouseup', this.boundHandleCursorMove);
