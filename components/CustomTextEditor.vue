@@ -141,7 +141,7 @@ export default {
         } else if (event.key === 'ArrowUp') {
           this.selectedMentionIndex = (this.selectedMentionIndex - 1 + this.mentionList.length) % this.mentionList.length;
           this.scrollDropdownIntoView();
-        } else if (event.key === 'Enter') {
+        } else if (['Enter',' ','Tab'].includes(event.key)) {
           event.preventDefault();
           this.selectMention(this.mentionList[this.selectedMentionIndex]);
         } else if (event.key === 'Backspace') {
