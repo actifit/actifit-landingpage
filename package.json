@@ -9,7 +9,7 @@
     "npm": "<=8.4.0 >6.0.0"
   },
   "scripts": {
-    "dev": "nuxt",
+    "dev": "nuxt dev",
     "build": "nuxt build",
     "start": "nuxt start",
     "generate": "nuxt generate",
