@@ -8,7 +8,7 @@
 
 
         <h1 class="pt-5 mb-3 text-capitalize text-center headline"><span class="text-brand">{{ $t('signup.headline')
-            }}</span></h1>
+        }}</span></h1>
         <div class="lead mb-2 " v-html="signupProcessDetails()">
         </div>
 
@@ -25,6 +25,10 @@
           <p class="text-brand" v-if="username_exists">
             <b>{{ username_exists }}</b>
           </p>
+          <p class="text-brand" v-if="username_pattern_error">
+            <b>{{ username_pattern_error }}</b>
+          </p>
+
           <div class="target-bchain">
             <label for="blockchain">{{ $t('target_bchain') }}</label>
             <p class="text-brand"><i>{{ $t('leave_default_recommend') }}</i></p>
@@ -137,8 +141,8 @@
                   $t('copy_safe_location') }} <br />{{ $t('delegation_received') }}<br /><br /></div>
 
 
-                <button class="btn btn-brand btn-lg w-20"
-                  @click="generateAndDownloadFile">{{ $t('signup.download_keys_backup') }}</button>
+                <button class="btn btn-brand btn-lg w-20" @click="generateAndDownloadFile">{{
+                  $t('signup.download_keys_backup') }}</button>
 
                 <div v-html="$t('signup.signup_completion')"></div>
 
@@ -373,7 +377,7 @@ export default {
       this.handleUsername(this.$refs['account-username'].value);
       this.updateMinAmount();
     },
-    updateMinAmount(){
+    updateMinAmount() {
       this.userInputUSDAmount = this.blurt_account ? this.minUSD * 2 : this.minUSD;
     },
     async checkUserNameAv(testChain, val) {
@@ -401,8 +405,26 @@ export default {
     async handleUsername(val) {
       this.username_invalid = '';
       this.username_exists = '';
+      this.username_pattern_error = ''; // Clear any previous pattern error
 
-      //to avoid disruptions on other chains while creating the username, test against all selected chains
+      if (!val) {
+        this.username_invalid = 'Username cannot be empty.';
+        return;
+      }
+
+      // Check 1: Starts with "uid"
+      if (val.toLowerCase().startsWith('uid')) {
+        this.username_pattern_error = 'Username cannot start with "uid".';
+        return;
+      }
+      const tenConsecutiveAlphanumericRegex = /[a-zA-Z0-9]{10}/;
+
+      if (tenConsecutiveAlphanumericRegex.test(val)) {
+        this.username_pattern_error = 'Username cannot contain 10 consecutive letters or digits.';
+        // Or use this.username_invalid
+        // this.username_invalid = 'Invalid username pattern.';
+        return;
+      }
 
       //validate format first
       let chnLnk = hive;
@@ -422,8 +444,12 @@ export default {
         chnLnk = blurt;
         chnLnk.name = 'Blurt';
         usAv = await this.checkUserNameAv(chnLnk, val);
+        if (!usAv) return;
       }
-      this.genPrivKey();
+
+      if (usAv) { // Only proceed if all checks passed
+        this.genPrivKey();
+      }
 
     },
     /*setSteemPrice (_steemPrice){
@@ -449,7 +475,7 @@ export default {
       if (typeof usdInvest == 'undefined' || usdInvest == null || usdInvest == '' || usdInvest == 0) {
         usdInvest = this.blurt_account ? this.minUSD * 2 : this.minUSD;
       }
-      console.log("usdInvest"+usdInvest);
+      console.log("usdInvest" + usdInvest);
       return parseFloat(usdInvest / this.afitPrice).toFixed(6);
     },
     async genPrivKey() {
