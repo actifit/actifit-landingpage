@@ -1141,5 +1141,7 @@ module.exports = {
   splinter_extra_rewards_legendary:' +20 AFIT rewards per report',
   filter_content_by_pop_community: 'Explore Hive content by popular communities',
   posh_desc_profile: 'Earn <u><a href="https://hiveposh.com/">POSH Tokens</a></u> by sharing your posts on twitter',
-  tipping_details: 'This special onchain tipping functionality allows you to send out tips to users by commenting on their posts, and sends out AFIT directly onto their hive-engine account. For more details about how it works and how to load up balance, check out this post: <a href="https://links.actifit.io/tipping-afit">https://links.actifit.io/tipping-afit</a>'
+  tipping_details: 'This special onchain tipping functionality allows you to send out tips to users by commenting on their posts, and sends out AFIT directly onto their hive-engine account. For more details about how it works and how to load up balance, check out this post: <a href="https://links.actifit.io/tipping-afit">https://links.actifit.io/tipping-afit</a>',
+  
+  invalid_username: 'Username is invalid. Usernames cannot: start with "uid" followed by any special character  or only by digits, consist of exactly 10 digits, or contain 10 consecutive digits anywhere.'
 }

@@ -8,4 +8,5 @@
 	<string name="desc_part5">$ investment, your User Rank will stand at 3%. For instance, <span class="afit-tokens-earned text-brand">investing 100$ will earn you </span></string>
 	<string name="desc_part6"><span class="afit-tokens-earned text-brand"> AFIT tokens</span>, and will increase your User Rank to 6%, reflecting in an <span class="afit-tokens-earned text-brand">increase in your daily STEEM and AFIT rewards.</span></string>
 	<string name="buy_text"><div class="w-100 p-2">You can buy &amp; send STEEM using any of the following exchanges</div><div class="w-30 p-3"><a href="https://bittrex.com/" >Bittrex</a></div><div class="w-70 p-3"><a href="https://www.binance.com/" >Binance</a></div><div class="w-30 p-3"><a href="https://poloniex.com/" >Poloniex</a></div><div class="w-70 p-3"><a href="https://www.huobi.com/" >Huobi</a></div><div class="w-100 p-2">Or check out any of the other exchanges listed on <a href="https://coinmarketcap.com/currencies/steem/#markets">Coinmarketcap</a></div></string>
+	
 </resources>
