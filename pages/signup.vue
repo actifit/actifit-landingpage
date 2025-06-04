@@ -398,16 +398,21 @@ export default {
         return false;
       }
     },
-    async handleUsername(val) {
+      async handleUsername(val) {
       this.username_invalid = '';
       this.username_exists = '';
-      // Prevent usernames starting with "uid" or exactly 10-digit numbers
-      const scamPattern = /^(uid\d*|\d{10})$/i;
-      if (scamPattern.test(val)) {
-        this.username_invalid = 'Usernames starting with "uid" or 10-digit numbers are not allowed.';
-        return;
-      }
+      const scamPattern = /^uid|^uid[^a-zA-Z0-9]|^\d{10}$|\d{10}/i;
 
+       if (scamPattern.test(val)) {
+        
+        
+
+        
+        
+        this.username_invalid = this.$t('invalid_username');
+
+        return ;
+      }
       //to avoid disruptions on other chains while creating the username, test against all selected chains
 
       //validate format first
