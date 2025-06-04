@@ -1,11 +1,3 @@
-You're right, it's helpful to see the specific changes highlighted.
-
-The modifications for the CTRL+Backspace fix are located within the handleKeydown method, specifically in the else if (event.ctrlKey && key === 'Backspace') block.
-
-I'll use // ***** START OF CTRL+Backspace FIX ***** and // ***** END OF CTRL+Backspace FIX ***** comments to clearly mark the new code block. I've also added a small comment within the $nextTick to clarify the textareaElement reference.
-
-Here is the full code again with the relevant section highlighted:
-
 <template>
   <div class="mavonEditor acti-shadow">
     <client-only>
