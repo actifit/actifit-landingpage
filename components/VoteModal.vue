@@ -849,3 +849,10 @@
     padding: 4px 8px
 	
 </style>
+
+<style>
+body{
+	color:white;
+}
+
+</style>

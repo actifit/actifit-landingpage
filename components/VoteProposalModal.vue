@@ -96,6 +96,9 @@ export default {
 </script>
 
 <style scoped>
+body{
+  color:white;
+}
 .modal.visible{
   display: block;
   opacity: 1;
