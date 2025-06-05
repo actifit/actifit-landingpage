@@ -218,4 +218,30 @@ export default {
 .hiddenIcon .input-with-icon input {
   padding-left: 3px;
 }
+
+@media (max-width: 500px) {
+  .autocomplete-input.autocomplete-condensed {
+    min-width: 60px;
+    max-width: 100px; /* Adjust this based on testing */
+  }
+
+  .autocomplete-input.autocomplete-condensed .input-with-icon input.search-input-condensed {
+    font-size: 0.75rem !important;
+    padding: 2px 3px !important; /* Minimal padding */
+    height: auto !important;
+  }
+
+  .autocomplete-input.autocomplete-condensed.hiddenIcon .input-with-icon input.search-input-condensed {
+    padding-left: 3px !important; /* Minimal left padding if internal search icon is hidden */
+  }
+
+  .autocomplete-input.autocomplete-condensed .mention-dropdown {
+     min-width: 150px; /* Dropdown can be wider than input */
+     font-size: 0.9em;
+  }
+
+  .autocomplete-input.autocomplete-condensed .mention-dropdown li {
+     padding: 6px 10px;
+  }
+}
 </style>
