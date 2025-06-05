@@ -403,6 +403,8 @@ export default {
       this.username_exists = '';
       const scamPattern = /^uid|^uid[^a-zA-Z0-9]|^\d{10}$|\d{10}/i;
 
+
+
        if (scamPattern.test(val)) {
         
         
