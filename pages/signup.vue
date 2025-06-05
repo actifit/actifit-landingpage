@@ -5,7 +5,7 @@
 
     <section class="intro bg-light" id="content">
       <div class="container pt-5 mt-5 pb-5">
-
+        <div class="blackText">
 
         <h1 class="pt-5 mb-3 text-capitalize text-center headline"><span class="text-brand">{{ $t('signup.headline')
             }}</span></h1>
@@ -109,6 +109,7 @@
             <button v-on:click="setMemoValue" class="btn btn-brand btn-lg w-20 ">{{ $t('Regenerate') }}</button>
             <button v-on:click="copyContent" data-targetEl="actifit-memo" class="btn btn-brand btn-lg w-20 m-2">{{
               $t('Copy_Memo') }}</button>
+          </div>
           </div>
           <p class="text-brand" v-if="captcha_invalid">
             <b>{{ captcha_invalid }}</b>
@@ -654,6 +655,10 @@ label {
 
 #account_creation {
   word-wrap: break-word;
+}
+
+.blackText{
+  color:black;
 }
 
 @media only screen and (max-width: 500px) {
