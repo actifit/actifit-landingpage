@@ -25,6 +25,9 @@
           <p class="text-brand" v-if="username_exists">
             <b>{{ username_exists }}</b>
           </p>
+          <p class="text-brand" v-if="username_pattern_error">
+            <b>{{ username_pattern_error }}</b>
+          </p>
           <div class="target-bchain">
             <label for="blockchain">{{ $t('target_bchain') }}</label>
             <p class="text-brand"><i>{{ $t('leave_default_recommend') }}</i></p>
@@ -401,31 +404,54 @@ export default {
     async handleUsername(val) {
       this.username_invalid = '';
       this.username_exists = '';
-
+      this.username_pattern_error = '';
       //to avoid disruptions on other chains while creating the username, test against all selected chains
 
-      //validate format first
-      let chnLnk = hive;
-      let usAv = true;
-      if (this.hive_account) {
-        //test against default, hive
-        chnLnk.name = 'Hive';
-        usAv = await this.checkUserNameAv(chnLnk, val);
-      }
+        if (!val) {
+    this.username_invalid = 'Username cannot be empty.';
+    return;
+  }
 
-      if (usAv && this.steem_account) {
-        chnLnk = steem;
-        chnLnk.name = 'Steem';
-        usAv = await this.checkUserNameAv(chnLnk, val);
-      }
-      if (usAv && this.blurt_account) {
-        chnLnk = blurt;
-        chnLnk.name = 'Blurt';
-        usAv = await this.checkUserNameAv(chnLnk, val);
-      }
-      this.genPrivKey();
+  // Check 1: Starts with "uid"
+  if (val.toLowerCase().startsWith('uid')) {
+    this.username_pattern_error = 'Username cannot start with "uid".';
+    return;
+  }
+  const tenConsecutiveAlphanumericRegex = /[a-zA-Z0-9]{10}/;
 
-    },
+  if (tenConsecutiveAlphanumericRegex.test(val)) {
+    this.username_pattern_error = 'Username cannot contain 10 consecutive letters or digits.';
+    // Or use this.username_invalid
+    // this.username_invalid = 'Invalid username pattern.';
+    return;
+  }
+
+  //validate format first
+  let chnLnk = hive;
+  let usAv = true;
+  if (this.hive_account) {
+    //test against default, hive
+    chnLnk.name = 'Hive';
+    usAv = await this.checkUserNameAv(chnLnk, val);
+  }
+
+  if (usAv && this.steem_account) {
+    chnLnk = steem;
+    chnLnk.name = 'Steem';
+    usAv = await this.checkUserNameAv(chnLnk, val);
+  }
+  if (usAv && this.blurt_account) {
+    chnLnk = blurt;
+    chnLnk.name = 'Blurt';
+    usAv = await this.checkUserNameAv(chnLnk, val);
+    if (!usAv) return;
+  }
+
+  if (usAv) { // Only proceed if all checks passed
+    this.genPrivKey();
+  }
+
+},
     /*setSteemPrice (_steemPrice){
     this.steemPrice = parseFloat(_steemPrice).toFixed(3);
     },
