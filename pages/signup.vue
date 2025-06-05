@@ -4,7 +4,7 @@
     <NavbarBrand />
 
     <section class="intro bg-light" id="content">
-      <div class="container pt-5 mt-5 pb-5">
+      <div class="container pt-5 mt-5 pb-5 blackText">
 
 
         <h1 class="pt-5 mb-3 text-capitalize text-center headline"><span class="text-brand">{{ $t('signup.headline')
@@ -660,5 +660,8 @@ label {
   #account_creation img {
     max-width: 150px;
   }
+}
+.blackText{
+  color:black;
 }
 </style>
