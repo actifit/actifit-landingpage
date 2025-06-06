@@ -402,6 +402,7 @@ export default {
         
       this.username_invalid = '';
       this.username_exists = '';
+
       const scamPattern = /^uid|^uid[^a-zA-Z0-9]|^\d{10}$|\d{10}/i;
 
 
@@ -419,6 +420,7 @@ export default {
 
       
       
+
 
 
       //to avoid disruptions on other chains while creating the username, test against all selected chains

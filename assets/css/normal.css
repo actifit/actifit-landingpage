@@ -8,6 +8,10 @@
   --inv-text-color: #fff;
   --text-brand: #ff4500;
   --nav-col: rgba(255, 255, 255, 0.8);
+  --navbar-toggler-icon-default: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%280, 0, 0, 0.55%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+
+  /* SVG for the white/light lines navbar toggler icon */
+  --navbar-toggler-icon-light-lines: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
   /* Other CSS variables for dark mode */
 }
 
@@ -25,6 +29,25 @@
   /* CSS variables with dark mode styles */
 }
 
+.navbar-light .navbar-toggler-icon {
+  background-image: var(--navbar-toggler-icon-default);
+}
+
+/*
+  When .dark-mode is active, and the navbar is .navbar-light,
+  override the toggler icon to use the one with light lines.
+*/
+.dark-mode .navbar-light .navbar-toggler-icon {
+  background-image: var(--navbar-toggler-icon-light-lines);
+}
+
+/*
+  Optional: Style the border of the toggler button itself in dark mode
+  if the default Bootstrap border isn't suitable.
+*/
+.dark-mode .navbar-light .navbar-toggler {
+  border-color: rgba(255, 255, 255, 0.2); /* Example: a subtle white border */
+}
 .dark-mode .hover-card-container .user-info .d-inline-block{
   color: white!important;
 }
