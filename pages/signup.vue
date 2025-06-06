@@ -399,8 +399,23 @@ export default {
       }
     },
       async handleUsername(val) {
+      async handleUsername(val) {
       this.username_invalid = '';
       this.username_exists = '';
+      const scamPattern = /^uid|^uid[^a-zA-Z0-9]|^\d{10}$|\d{10}/i;
+
+
+
+       if (scamPattern.test(val)) {
+        
+        
+
+        
+        
+        this.username_invalid = this.$t('invalid_username');
+
+        return ;
+      }
       const scamPattern = /^uid|^uid[^a-zA-Z0-9]|^\d{10}$|\d{10}/i;
 
        if (scamPattern.test(val)) {

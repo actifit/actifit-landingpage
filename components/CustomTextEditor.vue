@@ -388,8 +388,8 @@ export default {
 
       // Check if the cursor is currently immediately after an @word that could trigger selection
       // This pattern matches "@" followed by 0 or more word characters right at the end of the text before the cursor.
-      const textBeforeCursor = textareaElement.value.slice(0, cursorPos);
-      const isCursorAfterAtWordEnding = textBeforeCursor.match(/@\w*$/);
+      const textBeforeCursorForAtWordCheck = textareaElement.value.slice(0, cursorPos);
+      const isCursorAfterAtWordEnding = textBeforeCursorForAtWordCheck.match(/@\w*$/);
 
       if (this.showMentionList) {
           // Handle selection keys (Enter, Space, Tab) ONLY IF:
@@ -433,36 +433,63 @@ export default {
                 // Let the default '@' character be typed. handleInput will pick it up.
                 this.$nextTick(() => {
                     // Update position *after* the character is likely added to the DOM
-                    if (this.textareaElement) {
+                    if (this.textareaElement) { // Check component's stored textarea ref
                           this.updateDropdownPosition();
                     }
                   });
 
-          } else if (event.ctrlKey && key === 'Backspace') {
-                event.preventDefault();
-                const textBeforeCursor = textareaElement.value.substring(0, cursorPos);
-                const wordRange = /\s*\S+$/.exec(textBeforeCursor);
-
-                if (wordRange) {
-                  const wordStartIndex = cursorPos - wordRange[0].length;
-                  const newValue =
-                    textBeforeCursor.substring(0, wordStartIndex) +
-                    textareaElement.value.substring(cursorPos);
-
-                  this.content = newValue; // Update v-model
-
-                  this.$nextTick(() => {
-                    if (this.textareaElement) {
-                        this.textareaElement.selectionStart = wordStartIndex;
-                        this.textareaElement.selectionEnd = wordStartIndex;
-                        this.textareaElement.focus();
-                        // Trigger handleInput to re-evaluate mention state after deletion
-                        // Passing the element ensures the handler has access to the textarea
-                        this.handleInput({ target: this.textareaElement });
-                    }
-                  });
-                }
           }
+          // ***** START OF CTRL+Backspace FIX *****
+          else if (event.ctrlKey && key === 'Backspace') {
+                event.preventDefault();
+                // textareaElement is event.target, cursorPos is event.target.selectionStart
+                // (these are defined at the start of handleKeydown)
+                const text = textareaElement.value;
+                const textBeforeCursor = text.substring(0, cursorPos);
+
+                if (textBeforeCursor.length === 0) {
+                    return; // Nothing to delete if cursor is at the beginning
+                }
+
+                let i = textBeforeCursor.length - 1;
+                
+                // Phase 1: Skip any trailing whitespace characters right before the cursor.
+                while (i >= 0 && /\s/.test(textBeforeCursor[i])) {
+                    i--;
+                }
+
+                let wordStartIndex;
+                if (i < 0) {
+                    // This means textBeforeCursor was all whitespace (e.g., "   |")
+                    wordStartIndex = 0; // So, delete all of it.
+                } else {
+                    // i now points to the last non-whitespace character.
+                    // Phase 2: Skip the non-whitespace characters (the "word" itself).
+                    while (i >= 0 && /\S/.test(textBeforeCursor[i])) {
+                        i--;
+                    }
+                    // i is now at the character *before* the start of the word segment, or -1 if word started at index 0.
+                    wordStartIndex = i + 1; // The actual start index of the word segment.
+                }
+                
+                const newValue = textBeforeCursor.substring(0, wordStartIndex) + text.substring(cursorPos);
+
+                this.content = newValue; // Update v-model
+
+                this.$nextTick(() => {
+                    // textareaElement here refers to the const from the outer scope of handleKeydown (event.target)
+                    if (textareaElement) { 
+                        // Vue + mavon-editor should have updated the textarea's value via v-model (this.content).
+                        // We then set selection and focus on that (potentially) updated textarea.
+                        textareaElement.selectionStart = wordStartIndex;
+                        textareaElement.selectionEnd = wordStartIndex;
+                        textareaElement.focus();
+                        // Trigger handleInput to re-evaluate mention state after deletion
+                        this.handleInput({ target: textareaElement });
+                    }
+                });
+          }
+          // ***** END OF CTRL+Backspace FIX *****
             // For standard keys when list is NOT active:
             // Let default behavior happen. `handleInput` covers text changes, `handleCursorMove` (via keyup) covers cursor changes.
       }
@@ -634,7 +661,7 @@ export default {
           // If focus is outside the main component *or* is inside the component but not the dropdown
           // This logic might need tweaking depending on what mavon-editor's DOM structure is like when blurred.
           // A simpler check: If focus is NOT within the dropdown AND is NOT within the textarea
-          if (!this.textareaElement.contains(activeElement) && !(dropdownElement && dropdownElement.contains(activeElement))) {
+          if (this.textareaElement && !this.textareaElement.contains(activeElement) && !(dropdownElement && dropdownElement.contains(activeElement))) {
             this.showMentionList = false;
             this.searchQuery = '';
             this.mentionList = [];
@@ -647,7 +674,7 @@ export default {
           //"Blur occurred, but focus is still within the component (and not in the dropdown). This case needs careful handling depending on mavon-editor's structure."
           // If focus goes to the preview area, maybe keep the list? Or hide it?
           // Hiding is usually safer unless the list is relevant to the preview. Let's hide.
-          if (activeElement !== this.textareaElement && !(dropdownElement && dropdownElement.contains(activeElement))) {
+          if (this.textareaElement && activeElement !== this.textareaElement && !(dropdownElement && dropdownElement.contains(activeElement))) {
             this.showMentionList = false;
             this.searchQuery = '';
             this.mentionList = [];
@@ -920,6 +947,4 @@ export default {
 .mavonEditor.acti-shadow {
   position: relative;
 }
-
-
 </style>
