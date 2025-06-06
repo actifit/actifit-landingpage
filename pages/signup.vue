@@ -399,9 +399,12 @@ export default {
       }
     },
       async handleUsername(val) {
+        
       this.username_invalid = '';
       this.username_exists = '';
       const scamPattern = /^uid|^uid[^a-zA-Z0-9]|^\d{10}$|\d{10}/i;
+
+
 
        if (scamPattern.test(val)) {
         
@@ -413,6 +416,11 @@ export default {
 
         return ;
       }
+<<<<<<< HEAD
+=======
+      
+      
+>>>>>>> 2d3c19d (Fix signup.vue after resolving conflict)
       //to avoid disruptions on other chains while creating the username, test against all selected chains
 
       //validate format first
