@@ -416,11 +416,11 @@ export default {
 
         return ;
       }
-<<<<<<< HEAD
-=======
+
       
       
->>>>>>> 2d3c19d (Fix signup.vue after resolving conflict)
+
+
       //to avoid disruptions on other chains while creating the username, test against all selected chains
 
       //validate format first
