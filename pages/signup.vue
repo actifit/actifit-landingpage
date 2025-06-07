@@ -398,23 +398,29 @@ export default {
         return false;
       }
     },
-    async handleUsername(val) {
+      async handleUsername(val) {
+        
       this.username_invalid = '';
       this.username_exists = '';
-      // Combined pattern to check for all three conditions:
-  // 1. Starts with "uid" and is followed only by digits (e.g., "uid", "uid123").
 
-  // 2. Consists of exactly 10 digits (e.g., "1234567890").
-  
-  // 3. Contains 10 consecutive digits anywhere in the string (e.g., "abc1234567890xyz").
-  
-  const scamPattern = /^(uid\d*)$|^(?:\d{10})$|\d{10}/i;
+      const scamPattern = /^uid|^uid[^a-zA-Z0-9]|^\d{10}$|\d{10}/i;
 
-  if (scamPattern.test(val)) {
-    // Updated error message to be more comprehensive and clear about the reasons.
-    this.username_invalid = 'Username is invalid. Usernames cannot: start with "uid" followed only by digits, consist of exactly 10 digits, or contain 10 consecutive digits anywhere.';
-    return;
-  }
+
+
+       if (scamPattern.test(val)) {
+        
+        
+
+        
+        
+        this.username_invalid = this.$t('invalid_username');
+
+        return ;
+      }
+
+      
+      
+
 
 
       //to avoid disruptions on other chains while creating the username, test against all selected chains
