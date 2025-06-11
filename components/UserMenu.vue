@@ -83,10 +83,11 @@
           <div class="user-avatar group-class"
             :style="'background-image: url(' + profImgUrl + '/u/' + user.account.name + '/avatar)'"></div>
         </a>
-        <div class="dropdown-menu dropdown-menu-right">
-          <h6 class="dropdown-header"><a class="dropdown-item" href="#"
+        <div class="dropdown-menu dropdown-menu-right user-dropdown">
+          <div class="dropdown-header user-info-sticky"><a class="dropdown-item" href="#"
               @click.prevent="$router.push('/' + user.account.name)"><i
-                class="fa-solid fa-user text-brand"></i>&nbsp;@{{ user.account.name }}</a></h6>
+                class="fa-solid fa-user text-brand"></i>&nbsp;@{{ user.account.name }}</a></div>
+          <div class="dropdown-scrollable">
           <div class="dropdown-divider"></div>
           <a class="dropdown-item text-brand" href="#" @click.prevent="$router.push('/mods-access/')"
             v-if="isUserModerator">Moderation</a>
@@ -94,7 +95,7 @@
           <!--<a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet?action=buy_afit')">{{ $t('buy_afit_menu') }}<br/></a>-->
           <a class="dropdown-item" href="#" @click.prevent="$router.push('/market')"><i
               class="fas fa-shopping-cart text-brand"></i>&nbsp;{{ $t('spend_afit_menu') }}<br /></a>
-          <SteemStats :user="user" minView="true" class="dropdown-item" :key="reload" />
+          <SteemStats :user="user" minView="true" class="dropdown-item"      :key="reload" />
           <a class="dropdown-item" href="#" @click.prevent="$router.push('/userrank')"><i
               class="fa-solid fa-list-ol text-brand"></i>&nbsp;{{ $t('My_Rank') }} <br /><span class="text-brand pl-4">
               {{ displayCoreUserRank }} <span class="increased-rank"
@@ -142,6 +143,7 @@
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="#" @click.prevent="proceedLogout()"><i
               class="fa-solid fa-right-from-bracket text-brand"></i>&nbsp;{{ $t('Logout') }}</a>
+              </div>
         </div>
       </li>
     </ul>
