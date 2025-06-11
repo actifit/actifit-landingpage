@@ -14,7 +14,7 @@
       </li>
 
       <li class="nav-item mr-2" @click="toggleDarkMode" :title="$t('toggle_dark_mode')" v-if="user && !hideVisualControls">
-        <span class="user-avatar group-class main-icon-wrapper">
+        <span class="user-avatar group-class">
           <i v-if="$store.state.darkMode" class="fa-solid fa-sun text-brand"></i>
           <i v-else class="fa-solid fa-moon text-brand"></i>
         </span>
@@ -24,13 +24,14 @@
       </li>
       
       <li class="nav-item mr-2 notification-item-container" v-if="user">
-        <span class="notification-class text-brand"
-          v-if="activeNotificationsLen > 0">{{ notificationsNotice }}</span>
+        <!-- MODIFIED: Show this span if user is logged in, text comes from notificationsNotice (which will include "0") -->
+        <span class="notification-class" 
+          v-if="user">{{ notificationsNotice }}</span> 
         
-        <span class="user-avatar group-class main-icon-wrapper" v-if="activeNotificationsLen > 0"> 
-          <a class="nav-link dropdown-toggle p-0" id="user_menu_navlink_notif" href="#" data-toggle="dropdown" 
-            :title="$t('Notifications_popup').replace('_count_', notificationsNotice)">
-            <i class="fas fa-bell text-brand"></i>
+        <span class="user-avatar group-class" v-if="activeNotificationsLen > 0"> 
+          <a class="nav-link dropdown-toggle p-0 notification-bell-link" id="user_menu_navlink_notif" href="#" data-toggle="dropdown" 
+            :title="$t('Notifications_popup').replace('_count_', String(activeNotificationsLen))">
+            <i class="fas fa-bell"></i>
           </a>
           <div class="dropdown-menu dropdown-menu-right notif-container">
             <div class="text-right m-2">
@@ -55,8 +56,8 @@
             </div>
           </div>
         </span>
-        <span class="user-avatar group-class main-icon-wrapper" v-else> 
-          <a class="nav-link dropdown-toggle p-0" id="user_menu_navlink_notif_empty" href="#" data-toggle="dropdown">
+        <span class="user-avatar group-class" v-else> 
+          <a class="nav-link dropdown-toggle p-0 notification-bell-link" id="user_menu_navlink_notif_empty" href="#" data-toggle="dropdown">
             <i class="fas fa-bell"></i>
           </a>
           <div class="dropdown-menu dropdown-menu-right">
@@ -68,15 +69,10 @@
           </div>
         </span>
       </li>
-      <!--
-      <li class="nav-item mr-2" v-if="user && !hideFriendsIcon">
-        <a href="#" @click.prevent="$router.push('/friends')" :title="$t('friends')"><span
-            class="user-avatar group-class main-icon-wrapper text-brand"><i class="fas fa-user-friends"></i></span></a>
-      </li>
-      -->
+      
       <li class="nav-item dropdown" v-if="user">
         <a class="nav-link dropdown-toggle p-0" id="user_menu_navlink_avatar" href="#" data-toggle="dropdown">
-          <div class="user-avatar group-class main-icon-wrapper"
+          <div class="user-avatar group-class"
             :style="'background-image: url(' + profImgUrl + '/u/' + user.account.name + '/avatar)'"></div>
         </a>
         <div class="dropdown-menu dropdown-menu-right">
@@ -144,8 +140,6 @@
 </template>
 
 <script>
-// Script remains the same as the previous "entire updated code" version
-// with the corrected notificationsNotice computed property.
 import LoginModal from '~/components/LoginModal'
 import { mapGetters } from 'vuex'
 import SteemStats from '~/components/SteemStats'
@@ -206,18 +200,26 @@ export default {
     },
     hideFriendsIcon() {
       if (process.client) {
-        return window.innerWidth < 450; 
+        // Hiding friends icon to ensure space for other critical icons
+        return window.innerWidth < 500; // Or a more aggressive breakpoint like < 450
       }
       return false;
     },
     notificationsNotice() {
-      const cutoff = parseInt(process.env.notificationsCutoff || '10');
-      if (process.client && window.innerWidth < 500) {
-        if (this.activeNotificationsLen > 9) return "9+"; 
-        if (this.activeNotificationsLen > 0) return String(this.activeNotificationsLen);
-        return ""; 
+      const cutoff = parseInt(process.env.notificationsCutoff || '100'); 
+      
+      if (this.activeNotificationsLen === 0) {
+        return "0"; // Always show "0" if count is zero
       }
-      return this.activeNotificationsLen + (this.activeNotificationsLen >= cutoff ? '+' : '');
+      
+      if (process.client && window.innerWidth < 500) {
+        // Mobile View: Cap at 99+
+        if (this.activeNotificationsLen > 99) return "99+";
+        return String(this.activeNotificationsLen);
+      } else {
+        // Desktop View
+        return this.activeNotificationsLen + (this.activeNotificationsLen >= cutoff ? '+' : '');
+      }
     },
     formattedUserTokens() {
       if (!this.userTokens && this.userTokens !== 0) return '0 AFIT';
@@ -378,7 +380,7 @@ export default {
     flex-wrap: nowrap 
 
     .user-avatar 
-      width: 40px
+      width: 40px 
       height: 40px
       background-position: center center
       background-size: cover
@@ -403,46 +405,67 @@ export default {
   align-items: center;
 }
 
-.group-class { 
+.user-menu .nav-item {
+  margin-right: 0.6rem; 
+}
+.user-menu .nav-item:last-child {
+  margin-right: 0; 
+}
+
+.user-menu .nav-item .group-class:not(.notification-class) {
+  width: 40px; 
+  height: 40px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  padding: 0; 
+  position: relative; 
 }
 
+.user-menu .nav-item .group-class:not(.notification-class) > i,
+.user-menu .nav-item .group-class:not(.notification-class) > a > i { 
+  font-size: 1.15em; 
+  padding: 0;        
+}
+
+/* Default (PC) styles for the notification counter badge */
 .notification-class { 
-  background-color: red;
-  color: white !important;
-  text-align: center;
-  font-size: 12px; 
+  background-color: red !important; /* Red background */
+  color: black !important;    /* Black text */
+  font-size: 10px; 
   display: inline-flex; 
   align-items: center;
   justify-content: center;
-  min-width: 20px; 
-  height: 20px;    
-  line-height: normal; 
-  border-radius: 10px; 
-  padding: 0 6px;      
+  min-width: 16px; 
+  height: 16px;    
+  line-height: 16px; 
+  border-radius: 8px; 
+  padding: 0 4px;      
+  box-sizing: border-box;
   position: relative; 
-  z-index: 1; 
-  /* Note: No user-avatar-notif-menu class, as notification-class is specific enough */
+  margin-right: 2px;  
+  z-index: 5; 
+  /* Removed text-brand from span, color is handled here */
 }
 
-.user-avatar { 
-  text-align: center;
+/* Bell icon color */
+.notification-bell-link .fa-bell {
+  color: #FF0000 !important; 
+}
+.notification-bell-link:hover .fa-bell {
+  color: #FF0000 !important; 
 }
 
 .user-avatar-medium { 
   width: 30px !important;
   height: 30px !important;
 }
-
 .notif-container {
   max-height: 300px;
   overflow-y: auto;
   overflow-x: hidden;
   min-width: 280px; 
 }
-
 .option-opaque { opacity: 0.3; }
 @keyframes spin { 0% { transform: rotateZ(0); } 100% { transform: rotateZ(360deg); } }
 .active-spin > img { animation: spin 5s ease-in-out infinite alternate; }
@@ -451,7 +474,6 @@ export default {
 .dropdown-menu::-webkit-scrollbar { width: 8px; background-color: #f5f5f5; }
 .dropdown-menu::-webkit-scrollbar-thumb { background-color: #ff112d; border-radius: 4px; }
 .dropdown-menu::-webkit-scrollbar-thumb:hover { background-color: #e0001a !important; }
-
 .search-li { 
   padding: 0 !important; 
   display: flex;
@@ -460,37 +482,29 @@ export default {
 
 @media only screen and (max-width: 500px) {
   .user-menu-container .user-menu .nav-item {
-    margin-right: 3px !important; 
+    margin-right: 2px !important; 
     padding: 0 !important;        
     display: flex;               
     align-items: center;         
   }
 
-  .user-menu-container .user-menu .nav-item .main-icon-wrapper { 
-    width: 35px !important;   
-    height: 35px !important;  
+  .user-menu-container .user-menu .nav-item .user-avatar, 
+  .user-menu-container .user-menu .nav-item .group-class:not(.notification-class) { 
+    width: 28px !important;   
+    height: 28px !important;  
     display: inline-flex !important; 
     align-items: center !important;
     justify-content: center !important;
     padding: 0 !important; 
     position: relative; 
-  }
-  
-  .user-menu-container .user-menu .nav-item .group-class:not(.notification-class):not([style*="background-image"]) {
-    width: 35px !important;   
-    height: 35px !important;  
-    display: inline-flex !important; 
-    align-items: center !important;
-    justify-content: center !important;
-    padding: 0 !important; 
-    position: relative; 
+    border-width: 1px !important; 
   }
 
-  .user-menu-container .user-menu .nav-item .main-icon-wrapper > i,
-  .user-menu-container .user-menu .nav-item .main-icon-wrapper > a > i, 
+  .user-menu-container .user-menu .nav-item .user-avatar > i,
+  .user-menu-container .user-menu .nav-item .user-avatar > a > i,
   .user-menu-container .user-menu .nav-item .group-class:not(.notification-class) > i,
   .user-menu-container .user-menu .nav-item > a > .group-class:not(.notification-class) > i { 
-    font-size: 0.85em !important;  
+    font-size: 0.8em !important;  
     padding: 0 !important;        
   }
 
@@ -500,26 +514,28 @@ export default {
     align-items: center;
   }
 
+  /* Mobile: Notification counter badge */
   .user-menu-container .user-menu .notification-class { 
     background-color: red !important; 
-    color: white !important;         
-    width: 13px !important;         
-    height: 13px !important;        
-    min-width: 13px !important;     
+    color: black !important; /* Black text */       
+    width: auto !important;         
+    min-width: 12px !important;     
+    max-width: 22px !important;     
+    height: 12px !important;        
     font-size: 7px !important;      
-    line-height: 13px !important;   
+    line-height: 12px !important;   
     font-weight: bold !important;   
-    padding: 0 !important;          
+    padding: 0 3px !important;          
     text-align: center !important;  
-    border-radius: 50% !important;  
+    border-radius: 6px !important;  
     box-sizing: border-box !important; 
     
     position: absolute !important;  
-    top: -4px !important;          
-    right: -2px !important;        
+    top: -3px !important;           
+    right: -3px !important;         
     z-index: 10 !important;         
     
-    margin: 0 !important;
+    margin: 0 !important; 
     border: none !important;        
     transform: none !important;     
     float: none !important;         
@@ -529,7 +545,7 @@ export default {
     overflow: hidden !important;    
   }
   
-  .user-menu-container .user-menu .nav-item > a { 
+  .user-menu-container .user-menu .nav-item > a:not(.dropdown-toggle) {
      font-size: 0.8rem;
   }
 }
