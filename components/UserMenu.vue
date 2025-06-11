@@ -24,9 +24,7 @@
       </li>
       
       <li class="nav-item mr-2 notification-item-container" v-if="user">
-        <!-- MODIFIED: Show this span if user is logged in, text comes from notificationsNotice (which will include "0") -->
-        <span class="notification-class" 
-          v-if="user">{{ notificationsNotice }}</span> 
+        <span class="notification-class" v-if="activeNotificationsLen > 0">{{ notificationsNotice }}</span> 
         
         <span class="user-avatar group-class" v-if="activeNotificationsLen > 0"> 
           <a class="nav-link dropdown-toggle p-0 notification-bell-link" id="user_menu_navlink_notif" href="#" data-toggle="dropdown" 
@@ -200,8 +198,7 @@ export default {
     },
     hideFriendsIcon() {
       if (process.client) {
-        // Hiding friends icon to ensure space for other critical icons
-        return window.innerWidth < 500; // Or a more aggressive breakpoint like < 450
+        return window.innerWidth < 500;
       }
       return false;
     },
@@ -209,15 +206,13 @@ export default {
       const cutoff = parseInt(process.env.notificationsCutoff || '100'); 
       
       if (this.activeNotificationsLen === 0) {
-        return "0"; // Always show "0" if count is zero
+        return "0";
       }
       
       if (process.client && window.innerWidth < 500) {
-        // Mobile View: Cap at 99+
         if (this.activeNotificationsLen > 99) return "99+";
         return String(this.activeNotificationsLen);
       } else {
-        // Desktop View
         return this.activeNotificationsLen + (this.activeNotificationsLen >= cutoff ? '+' : '');
       }
     },
@@ -380,8 +375,8 @@ export default {
     flex-wrap: nowrap 
 
     .user-avatar 
-      width: 40px 
-      height: 40px
+      width: 50px 
+      height: 50px
       background-position: center center
       background-size: cover
       border-radius: 50%
@@ -397,6 +392,10 @@ export default {
 </style>
 
 <style>
+.notification-item-container {
+  position: relative;
+}
+
 #user_menu_navlink_notif,
 #user_menu_navlink_notif_empty,
 #user_menu_navlink_avatar {
@@ -406,15 +405,15 @@ export default {
 }
 
 .user-menu .nav-item {
-  margin-right: 0.6rem; 
+  margin-right: 0.8rem; 
 }
 .user-menu .nav-item:last-child {
   margin-right: 0; 
 }
 
 .user-menu .nav-item .group-class:not(.notification-class) {
-  width: 40px; 
-  height: 40px;
+  width: 50px; 
+  height: 50px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -424,31 +423,29 @@ export default {
 
 .user-menu .nav-item .group-class:not(.notification-class) > i,
 .user-menu .nav-item .group-class:not(.notification-class) > a > i { 
-  font-size: 1.15em; 
+  font-size: 1.6em; 
   padding: 0;        
 }
 
-/* Default (PC) styles for the notification counter badge */
 .notification-class { 
-  background-color: red !important; /* Red background */
-  color: black !important;    /* Black text */
-  font-size: 10px; 
-  display: inline-flex; 
+  background-color: red !important;
+  color: white !important;
+  font-size: 10px;
+  font-weight: bold;
+  display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 16px; 
-  height: 16px;    
-  line-height: 16px; 
-  border-radius: 8px; 
-  padding: 0 4px;      
+  width: 20px; 
+  height: 20px;    
+  border-radius: 50%; 
+  padding: 0;      
   box-sizing: border-box;
-  position: relative; 
-  margin-right: 2px;  
-  z-index: 5; 
-  /* Removed text-brand from span, color is handled here */
+  position: absolute;
+  top: 4px;
+  left: -5px;
+  z-index: 10;
 }
 
-/* Bell icon color */
 .notification-bell-link .fa-bell {
   color: #FF0000 !important; 
 }
@@ -482,7 +479,7 @@ export default {
 
 @media only screen and (max-width: 500px) {
   .user-menu-container .user-menu .nav-item {
-    margin-right: 2px !important; 
+    margin-right: 8px !important; 
     padding: 0 !important;        
     display: flex;               
     align-items: center;         
@@ -490,21 +487,15 @@ export default {
 
   .user-menu-container .user-menu .nav-item .user-avatar, 
   .user-menu-container .user-menu .nav-item .group-class:not(.notification-class) { 
-    width: 28px !important;   
-    height: 28px !important;  
-    display: inline-flex !important; 
-    align-items: center !important;
-    justify-content: center !important;
-    padding: 0 !important; 
-    position: relative; 
-    border-width: 1px !important; 
+    width: 40px !important;   
+    height: 40px !important;  
   }
 
   .user-menu-container .user-menu .nav-item .user-avatar > i,
   .user-menu-container .user-menu .nav-item .user-avatar > a > i,
   .user-menu-container .user-menu .nav-item .group-class:not(.notification-class) > i,
   .user-menu-container .user-menu .nav-item > a > .group-class:not(.notification-class) > i { 
-    font-size: 0.8em !important;  
+    font-size: 1.1em !important;  
     padding: 0 !important;        
   }
 
@@ -514,35 +505,12 @@ export default {
     align-items: center;
   }
 
-  /* Mobile: Notification counter badge */
   .user-menu-container .user-menu .notification-class { 
-    background-color: red !important; 
-    color: black !important; /* Black text */       
-    width: auto !important;         
-    min-width: 12px !important;     
-    max-width: 22px !important;     
-    height: 12px !important;        
-    font-size: 7px !important;      
-    line-height: 12px !important;   
-    font-weight: bold !important;   
-    padding: 0 3px !important;          
-    text-align: center !important;  
-    border-radius: 6px !important;  
-    box-sizing: border-box !important; 
-    
-    position: absolute !important;  
-    top: -3px !important;           
-    right: -3px !important;         
-    z-index: 10 !important;         
-    
-    margin: 0 !important; 
-    border: none !important;        
-    transform: none !important;     
-    float: none !important;         
-    display: flex !important;       
-    align-items: center !important;
-    justify-content: center !important;
-    overflow: hidden !important;    
+    width: 16px !important;
+    height: 16px !important;
+    font-size: 8px !important;
+    top: -2px !important;
+    left: -2px !important;
   }
   
   .user-menu-container .user-menu .nav-item > a:not(.dropdown-toggle) {
