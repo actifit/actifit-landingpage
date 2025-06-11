@@ -1,6 +1,6 @@
 <template>
   <div class="col-md-4">
-    <!-- MODIFICATION 2: Added a class to control top margin -->
+    
     <div class="user-sidebar sticky-top" :class="[darkModeClass, 'align-to-content']">
       <div v-if="authorAccountInfo" class="user-sidebar-content">
         
@@ -11,22 +11,22 @@
           </nuxt-link>
           <div class="ml-3">
             <div class="d-flex align-items-center">
-              <!-- MODIFICATION 4: h4 removed to make username not bold by default -->
+             
               <span class="card-title mb-0">
                 <nuxt-link :to="'/@' + report.author" class="username-link">@{{ report.author }}</nuxt-link>
               </span>
-              <!-- MODIFICATION 3: User rank moved here as a badge -->
+            
               <span v-if="userRank" class="user-rank-badge ml-2">{{ displayCoreUserRank }}</span>
             </div>
             <small v-if="authorAccountInfo.created" class="text-muted">Joined {{ formatDate(authorAccountInfo.created) }}</small>
           </div>
         </div>
 
-        <!-- MODIFICATION 6: Added user description -->
+       
         <p v-if="userProfile.about" class="user-description mb-4">{{ userProfile.about }}</p>
 
         <ul class="list-unstyled stats-list mb-4">
-          <!-- MODIFICATION 3: User Rank list item removed from here -->
+    
           <li>
             <span>HIVE Balance</span>
             <strong>{{ authorAccountInfo.balance.replace(' HIVE', '') }}</strong>
@@ -35,7 +35,7 @@
             <span>AFIT Balance</span>
             <strong>{{ authorAfitBalance != null ? parseFloat(authorAfitBalance).toFixed(3) : '...' }}</strong>
           </li>
-          <!-- MODIFICATION 6: Added Post Count -->
+       
           <li v-if="authorAccountInfo.post_count !== undefined">
             <span>Posts</span>
             <strong>{{ authorAccountInfo.post_count }}</strong>
@@ -45,9 +45,9 @@
       
         <ul class="list-unstyled nav-list">
           <li>
-          
+            <!-- THIS ICON IS NOW AN OPEN BOOK -->
             <nuxt-link :to="'/@' + report.author+'/blog'">
-              <i class="fas fa-book fa-fw"></i> Blog Posts
+              <i class="fas fa-book-open fa-fw"></i> Blog Posts
             </nuxt-link>
           </li>
           <li>
@@ -61,7 +61,6 @@
             </nuxt-link>
           </li>
           <li>
-          
             <nuxt-link :to="'/activity/@' + report.author">
               <i class="fas fa-running fa-fw"></i> Actifit Reports
             </nuxt-link>
@@ -73,7 +72,6 @@
           </li>
         </ul>
        
-
       </div>
       
       <div v-else class="py-5 text-center">
@@ -208,9 +206,6 @@ export default {
 .stats-list li {
   justify-content: space-between;
 }
-
-
-
 
 .stats-list li:last-child, .nav-list li:last-child a {
   border-bottom: none;
