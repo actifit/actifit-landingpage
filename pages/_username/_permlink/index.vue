@@ -12,7 +12,7 @@
           :user-rank="userRank"
         />
 
-        <!-- Main Post Content -->
+       
         <div class="col-md-8">
           <div class="text-right">
             <ChainSelection />
@@ -268,11 +268,14 @@ export default {
 
   },
   mounted() {
+    
+    this.$store.dispatch('steemconnect/login');
+
+    
     this.fetchPageData();
   }
 }
 </script>
-
 <style>
 
 .text-muted { color: #adb5bd !important; }

@@ -1,28 +1,32 @@
 <template>
   <div class="col-md-4">
-    <div class="user-sidebar sticky-top" :class="darkModeClass">
+    <!-- MODIFICATION 2: Added a class to control top margin -->
+    <div class="user-sidebar sticky-top" :class="[darkModeClass, 'align-to-content']">
       <div v-if="authorAccountInfo" class="user-sidebar-content">
         
-       
-        <div class="d-flex align-items-center mb-4 user-header">
+        <div class="d-flex align-items-center mb-3 user-header">
           <nuxt-link :to="'/@' + report.author">
             <img :src="`https://images.hive.blog/u/${report.author}/avatar/large`" class="sidebar-avatar"
                  @error="$event.target.src='https://actifit.io/img/user-default.png'">
           </nuxt-link>
           <div class="ml-3">
-            <h4 class="card-title mb-0">
-              <nuxt-link :to="'/@' + report.author" class="username-link">@{{ report.author }}</nuxt-link>
-            </h4>
+            <div class="d-flex align-items-center">
+              <!-- MODIFICATION 4: h4 removed to make username not bold by default -->
+              <span class="card-title mb-0">
+                <nuxt-link :to="'/@' + report.author" class="username-link">@{{ report.author }}</nuxt-link>
+              </span>
+              <!-- MODIFICATION 3: User rank moved here as a badge -->
+              <span v-if="userRank" class="user-rank-badge ml-2">{{ displayCoreUserRank }}</span>
+            </div>
             <small v-if="authorAccountInfo.created" class="text-muted">Joined {{ formatDate(authorAccountInfo.created) }}</small>
           </div>
         </div>
 
-       
+        <!-- MODIFICATION 6: Added user description -->
+        <p v-if="userProfile.about" class="user-description mb-4">{{ userProfile.about }}</p>
+
         <ul class="list-unstyled stats-list mb-4">
-          <li v-if="userRank">
-            <span>User Rank</span>
-            <strong>{{ displayCoreUserRank }}</strong>
-          </li>
+          <!-- MODIFICATION 3: User Rank list item removed from here -->
           <li>
             <span>HIVE Balance</span>
             <strong>{{ authorAccountInfo.balance.replace(' HIVE', '') }}</strong>
@@ -31,18 +35,35 @@
             <span>AFIT Balance</span>
             <strong>{{ authorAfitBalance != null ? parseFloat(authorAfitBalance).toFixed(3) : '...' }}</strong>
           </li>
+          <!-- MODIFICATION 6: Added Post Count -->
+          <li v-if="authorAccountInfo.post_count !== undefined">
+            <span>Posts</span>
+            <strong>{{ authorAccountInfo.post_count }}</strong>
+          </li>
         </ul>
 
-        
+      
         <ul class="list-unstyled nav-list">
           <li>
-            <nuxt-link :to="'/@' + report.author + '/blog'">
-              <i class="fas fa-blog fa-fw"></i> Blog Posts
+          
+            <nuxt-link :to="'/@' + report.author+'/blog'">
+              <i class="fas fa-book fa-fw"></i> Blog Posts
             </nuxt-link>
           </li>
           <li>
             <nuxt-link :to="'/@' + report.author + '/comments'">
-              <i class="fas fa-comments fa-fw"></i> Comments
+              <i class="far fa-comments fa-fw"></i> Comments
+            </nuxt-link>
+          </li>
+          <li>
+            <nuxt-link :to="'/@' + report.author + '/videos'">
+              <i class="fas fa-video fa-fw"></i> Videos
+            </nuxt-link>
+          </li>
+          <li>
+          
+            <nuxt-link :to="'/activity/@' + report.author">
+              <i class="fas fa-running fa-fw"></i> Actifit Reports
             </nuxt-link>
           </li>
           <li>
@@ -51,6 +72,7 @@
             </nuxt-link>
           </li>
         </ul>
+       
 
       </div>
       
@@ -79,18 +101,36 @@ export default {
         return 'dark-mode-active';
       }
       return '';
+    },
+    
+    userProfile() {
+      try {
+        if (this.authorAccountInfo && this.authorAccountInfo.posting_json_metadata) {
+          const metadata = JSON.parse(this.authorAccountInfo.posting_json_metadata);
+          return metadata.profile || {};
+        }
+      } catch (e) {
+       
+      }
+      return {};
     }
   },
   methods: {
     formatDate(isoDate) {
-      if (!isoDate) return 'N/A';
-      return new Date(isoDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      if (!isoDate) return 'NA';
+      
+      return new Date(isoDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     }
   }
 }
 </script>
 
 <style scoped>
+
+.align-to-content {
+  margin-top: 140px; 
+}
+
 /* Light Mode */
 .user-sidebar {
   background: linear-gradient(to bottom, #fdddb3, #ffffff 250px);
@@ -116,9 +156,9 @@ export default {
   border: 2px solid #ff112d;
 }
 
+
 .user-header .card-title {
   font-size: 1.25rem;
-  font-weight: bold;
 }
 
 .username-link {
@@ -135,15 +175,42 @@ export default {
   transition: color 0.3s ease;
 }
 
+
+.user-rank-badge {
+  background-color: #d9001b;
+  color: white;
+  padding: 2px 6px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  border-radius: 4px;
+  line-height: 1.2;
+}
+
+
+.user-description {
+  font-size: 0.9rem;
+  color: #666;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 1rem;
+}
+
+
 .stats-list li, .nav-list li a {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   padding: 0.8rem 0;
   border-bottom: 1px solid #eee;
   font-size: 0.9rem;
   transition: border-color 0.3s ease;
 }
+
+
+.stats-list li {
+  justify-content: space-between;
+}
+
+
+
 
 .stats-list li:last-child, .nav-list li:last-child a {
   border-bottom: none;
@@ -155,9 +222,9 @@ export default {
 .nav-list a {
   color: #555;
   text-decoration: none;
-  transition: color 0.2s ease-in-out, padding-left 0.2s ease-in-out;
+  transition: color 0.2s ease-in-out;
   width: 100%;
-  justify-content: flex-start;
+ 
 }
 
 .nav-list a:hover,
@@ -165,9 +232,7 @@ export default {
     color: #ff112d;
 }
 
-.nav-list a:hover {
-  padding-left: 5px;
-}
+
 
 .nav-list .fa-fw {
   width: 25px;
@@ -180,11 +245,8 @@ export default {
 
 
 /*Dark Mode */
-
 .user-sidebar.dark-mode-active {
-  
   background: linear-gradient(to bottom, #9c651b, #202022 250px);
-  
   border-color: #543810;
   color: #e0e0e0;
 }
@@ -197,9 +259,13 @@ export default {
   color: #b09a7a !important; 
 }
 
+.dark-mode-active .user-description {
+  color: #ccc;
+  border-bottom-color: #543810;
+}
+
 .dark-mode-active .stats-list li,
 .dark-mode-active .nav-list li a {
-  
   border-bottom-color: #543810;
 }
 
