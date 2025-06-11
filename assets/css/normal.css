@@ -153,9 +153,16 @@ a:hover {
 }
 
 .user-dropdown {
-  max-height: 420px;
+  max-height: none;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.nav-item.dropdown.show .user-dropdown {
   display: flex;
   flex-direction: column;
+  max-height: 420px;
   overflow: hidden;
 }
 

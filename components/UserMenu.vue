@@ -143,8 +143,7 @@
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="#" @click.prevent="proceedLogout()"><i
               class="fa-solid fa-right-from-bracket text-brand"></i>&nbsp;{{ $t('Logout') }}</a>
-              </div>
-        </div>
+        </div></div>
       </li>
     </ul>
     <LoginModal v-if="showModal" @close="showModal = false" />
