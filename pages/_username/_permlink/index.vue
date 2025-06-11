@@ -4,41 +4,13 @@
 
     <div v-if="!isLoading && report && report.author" class="container pt-5 mt-5 pb-5">
       <div class="row">
-        <!-- User Info Sidebar -->
-        <div class="col-md-4">
-          <div class="card user-sidebar sticky-top">
-            <div class="card-body text-center">
-              <div v-if="authorAccountInfo">
-                <nuxt-link :to="'/@' + report.author">
-                  <img :src="`https://images.hive.blog/u/${report.author}/avatar`" class="rounded-circle mb-3"
-                    style="width: 100px; height: 100px;"
-                    @error="$event.target.src='https://actifit.io/img/user-default.png'">
-                </nuxt-link>
-                <h4 class="card-title">
-                  <nuxt-link :to="'/@' + report.author" class="text-brand">@{{ report.author }}</nuxt-link>
-                </h4>
-                <p v-if="userRank" class="text-muted small">User Rank: <strong>{{ displayCoreUserRank }}</strong></p>
-                <small v-if="authorAccountInfo.created" class="text-muted">Joined {{ formatDate(authorAccountInfo.created) }}</small>
-                <div class="d-flex justify-content-around my-4">
-                  <div>
-                    <h5 class="mb-0">{{ authorAccountInfo.balance.replace(' HIVE', '') }}</h5>
-                    <small class="text-muted">HIVE</small>
-                  </div>
-                  <div>
-                    <h5 class="mb-0">{{ authorAfitBalance != null ? parseFloat(authorAfitBalance).toFixed(3) : '...' }}</h5>
-                    <small class="text-muted">AFIT</small>
-                  </div>
-                </div>
-                <ul class="list-group list-group-flush text-left">
-                  <li class="list-group-item"><i class="fas fa-blog fa-fw mr-2"></i><nuxt-link :to="'/@' + report.author">Blog Posts</nuxt-link></li>
-                  <li class="list-group-item"><i class="fas fa-comments fa-fw mr-2"></i><nuxt-link :to="'/@' + report.author + '/comments'">Comments</nuxt-link></li>
-                  <li class="list-group-item"><i class="fas fa-wallet fa-fw mr-2"></i><nuxt-link :to="'/@' + report.author + '/wallet'">Wallet</nuxt-link></li>
-                </ul>
-              </div>
-              <div v-else class="py-5"><i class="fas fa-spinner fa-spin fa-2x text-brand"></i></div>
-            </div>
-          </div>
-        </div>
+        <!-- UserSidebar  -->
+        <UserSidebar 
+          :report="report"
+          :author-account-info="authorAccountInfo"
+          :author-afit-balance="authorAfitBalance"
+          :user-rank="userRank"
+        />
 
         <!-- Main Post Content -->
         <div class="col-md-8">
@@ -167,11 +139,15 @@ import CustomTextEditor from '~/components/CustomTextEditor'
 import Comments from '~/components/Comments'
 import SocialSharing from 'vue-social-sharing'
 import vueRemarkable from 'vue-remarkable'
+// Import usersidebar
+import UserSidebar from '~/components/UserSidebar.vue'
 
 export default {
   components: {
     NavbarBrand, ChainSelection, Footer, VoteModal, NotifyModal, UserHoverCard,
     CustomTextEditor, Comments, SocialSharing, vueRemarkable,
+    
+    UserSidebar
   },
   head() { return { title: this.pageTitle } },
   data() {
@@ -196,9 +172,7 @@ export default {
     body() {
       return this.report ? this.$cleanBody(this.report.body) : '';
     },
-    displayCoreUserRank() {
-      return (this.userRank ? parseFloat(this.userRank.rank_no_afitx).toFixed(2) : 'N/A');
-    },
+   
     commentsAvailable() {
       return this.commentEntries != null && !this.commentsLoading;
     },
@@ -214,7 +188,6 @@ export default {
     formattedReportUrl() { return this.report ? `https://actifit.io/@${this.report.author}/${this.report.permlink}` : ''; },
   },
   watch: {
-    //watcher handles all navigation logic.
     '$route.path': 'fetchPageData'
   },
   methods: {
@@ -283,10 +256,7 @@ export default {
       this.pageTitle = 'Loading...';
       if (this.$store) this.$store.commit('setCommentEntries', null);
     },
-    formatDate(isoDate) {
-      if (!isoDate) return 'N/A';
-      return new Date(isoDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-    },
+    
     userVotedThisPost() {
         if (!this.user || !this.report) return false;
         const curUser = this.user.account.name;
@@ -295,7 +265,7 @@ export default {
     votePrompt() { if (this.report) this.$store.commit('setPostToVote', this.report); },
     resetOpenComment() { this.commentBoxOpen = false; this.replyBody = ''; },
     copyContent() { navigator.clipboard.writeText(this.formattedReportUrl); },
-    
+
   },
   mounted() {
     this.fetchPageData();
@@ -305,13 +275,6 @@ export default {
 
 <style>
 
-.user-sidebar.sticky-top { top: 1rem; }
-.user-sidebar { background-color: #2e2e2e; color: white; border: 1px solid #444; }
-.user-sidebar .card-body { padding: 1.5rem; }
-.user-sidebar .list-group-item { background-color: transparent; border-top: 1px solid #444; padding: .75rem 0; }
-.user-sidebar .list-group-item:first-child { border-top: none; }
-.user-sidebar .list-group-item a { color: white; text-decoration: none; }
-.user-sidebar .list-group-item a:hover { color: #ff112d; }
 .text-muted { color: #adb5bd !important; }
 .mid-avatar { width: 30px !important; height: 30px !important; }
 .report-head { border-bottom: 1px solid red; }
