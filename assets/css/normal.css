@@ -1,6 +1,7 @@
 :root {
   --primary-color: #ff112d;
   --background-color: #fff;
+  --notif-text-color: #000;
   --background-color-1: #ff112d;
   --background-color-2: #fff;
   --ab-background-color: beige;
@@ -16,6 +17,7 @@
 }
 
 .dark-mode {
+  --notif-text-color: #fff;
   --primary-color: #ffffff;
   --background-color: #212121;
   --background-color-1: #303030;
@@ -153,9 +155,16 @@ a:hover {
 }
 
 .user-dropdown {
-  max-height: 420px;
+  max-height: none;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.nav-item.dropdown.show .user-dropdown {
   display: flex;
   flex-direction: column;
+  max-height: 420px;
   overflow: hidden;
 }
 
