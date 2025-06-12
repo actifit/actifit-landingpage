@@ -1,87 +1,92 @@
 <template>
-  <div class="col-md-4">
+  <!-- Column and ordering classes are now self-contained in this component -->
+  <div class="col-md-4 order-md-1">
     
     <div class="user-sidebar sticky-top" :class="[darkModeClass, 'align-to-content']">
-      <div v-if="authorAccountInfo" class="user-sidebar-content">
-        
-        <div class="d-flex align-items-center mb-3 user-header">
-          <nuxt-link :to="'/@' + report.author">
-            <img :src="`https://images.hive.blog/u/${report.author}/avatar/large`" class="sidebar-avatar"
-                 @error="$event.target.src='https://actifit.io/img/user-default.png'">
-          </nuxt-link>
-          <div class="ml-3">
-            <div class="d-flex align-items-center">
-             
-              <span class="card-title mb-0">
-                <nuxt-link :to="'/@' + report.author" class="username-link">@{{ report.author }}</nuxt-link>
-              </span>
-            
-              <span v-if="userRank" class="user-rank-badge ml-2">{{ displayCoreUserRank }}</span>
+      <!-- This is the new scrollable wrapper -->
+      <div class="sidebar-scroll-container">
+        <div v-if="authorAccountInfo" class="user-sidebar-content">
+          
+          <div class="d-flex align-items-center mb-3 user-header">
+            <nuxt-link :to="'/@' + report.author">
+              <img :src="`https://images.hive.blog/u/${report.author}/avatar/large`" class="sidebar-avatar"
+                   @error="$event.target.src='https://actifit.io/img/user-default.png'">
+            </nuxt-link>
+            <div class="ml-3">
+              <div class="d-flex align-items-center">
+               
+                <span class="card-title mb-0">
+                  <nuxt-link :to="'/@' + report.author" class="username-link">@{{ report.author }}</nuxt-link>
+                </span>
+              
+                <!-- Badge style updated via CSS -->
+                <span v-if="userRank" class="user-rank-badge ml-2">{{ displayCoreUserRank }}</span>
+              </div>
+              <small v-if="authorAccountInfo.created" class="text-muted">Joined {{ formatDate(authorAccountInfo.created) }}</small>
             </div>
-            <small v-if="authorAccountInfo.created" class="text-muted">Joined {{ formatDate(authorAccountInfo.created) }}</small>
           </div>
+
+        
+          <p v-if="userProfile.about" class="user-description mb-4">{{ userProfile.about }}</p>
+
+          <ul class="list-unstyled stats-list mb-4">
+      
+            <li>
+              <span>HIVE Balance</span>
+              <strong>{{ authorAccountInfo.balance.replace(' HIVE', '') }}</strong>
+            </li>
+            <li>
+              <span>AFIT Balance</span>
+              <strong>{{ authorAfitBalance != null ? parseFloat(authorAfitBalance).toFixed(3) : '...' }}</strong>
+            </li>
+        
+            <li v-if="authorAccountInfo.post_count !== undefined">
+              <span>Posts</span>
+              <strong>{{ authorAccountInfo.post_count }}</strong>
+            </li>
+          </ul>
+
+        
+          <ul class="list-unstyled nav-list">
+            <li>
+              <nuxt-link :to="'/@' + report.author+'/blog'">
+                <i class="fas fa-book-open fa-fw"></i> Blog Posts
+              </nuxt-link>
+            </li>
+            <li>
+              <nuxt-link :to="'/@' + report.author + '/comments'">
+                <i class="far fa-comments fa-fw"></i> Comments
+              </nuxt-link>
+            </li>
+            <li>
+              <nuxt-link :to="'/@' + report.author + '/videos'">
+                <i class="fas fa-video fa-fw"></i> Videos
+              </nuxt-link>
+            </li>
+            <li>
+              <nuxt-link :to="'/activity/@' + report.author">
+                <i class="fas fa-running fa-fw"></i> Actifit Reports
+              </nuxt-link>
+            </li>
+            <li>
+              <nuxt-link :to="'/@' + report.author + '/wallet'">
+                <i class="fas fa-wallet fa-fw"></i> Wallet
+              </nuxt-link>
+            </li>
+          </ul>
+        
         </div>
-
-       
-        <p v-if="userProfile.about" class="user-description mb-4">{{ userProfile.about }}</p>
-
-        <ul class="list-unstyled stats-list mb-4">
-    
-          <li>
-            <span>HIVE Balance</span>
-            <strong>{{ authorAccountInfo.balance.replace(' HIVE', '') }}</strong>
-          </li>
-          <li>
-            <span>AFIT Balance</span>
-            <strong>{{ authorAfitBalance != null ? parseFloat(authorAfitBalance).toFixed(3) : '...' }}</strong>
-          </li>
-       
-          <li v-if="authorAccountInfo.post_count !== undefined">
-            <span>Posts</span>
-            <strong>{{ authorAccountInfo.post_count }}</strong>
-          </li>
-        </ul>
-
-      
-        <ul class="list-unstyled nav-list">
-          <li>
-            <!-- THIS ICON IS NOW AN OPEN BOOK -->
-            <nuxt-link :to="'/@' + report.author+'/blog'">
-              <i class="fas fa-book-open fa-fw"></i> Blog Posts
-            </nuxt-link>
-          </li>
-          <li>
-            <nuxt-link :to="'/@' + report.author + '/comments'">
-              <i class="far fa-comments fa-fw"></i> Comments
-            </nuxt-link>
-          </li>
-          <li>
-            <nuxt-link :to="'/@' + report.author + '/videos'">
-              <i class="fas fa-video fa-fw"></i> Videos
-            </nuxt-link>
-          </li>
-          <li>
-            <nuxt-link :to="'/activity/@' + report.author">
-              <i class="fas fa-running fa-fw"></i> Actifit Reports
-            </nuxt-link>
-          </li>
-          <li>
-            <nuxt-link :to="'/@' + report.author + '/wallet'">
-              <i class="fas fa-wallet fa-fw"></i> Wallet
-            </nuxt-link>
-          </li>
-        </ul>
-       
-      </div>
-      
-      <div v-else class="py-5 text-center">
-        <i class="fas fa-spinner fa-spin fa-3x text-brand"></i>
+        
+        <div v-else class="py-5 text-center">
+          <i class="fas fa-spinner fa-spin fa-3x text-brand"></i>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+// The <script> section remains unchanged.
 export default {
   name: 'UserSidebar',
   props: {
@@ -124,27 +129,47 @@ export default {
 </script>
 
 <style scoped>
+/* NEW STYLES FOR SCROLLING */
+.sidebar-scroll-container {
+  /* Set max height relative to the viewport minus the sticky header and some padding */
+  max-height: calc(100vh - 110px); /* 90px for sticky top + 20px bottom buffer */
+  overflow-y: auto; /* Show scrollbar only when content is taller than the container */
+  padding-right: 10px; /* Add space for the scrollbar */
+  margin-right: -10px; /* Counteract the padding to keep content aligned */
+}
+
+/* Optional: Prettier scrollbar */
+.sidebar-scroll-container::-webkit-scrollbar {
+  width: 5px;
+}
+.sidebar-scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar-scroll-container::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 20px;
+}
+/* END OF NEW STYLES */
+
 
 .align-to-content {
-  margin-top: 140px; 
+  /* This is your alignment adjustment */
+  margin-top: 138px; 
 }
 
 /* Light Mode */
 .user-sidebar {
   background: linear-gradient(to bottom, #fdddb3, #ffffff 250px);
-  margin-left: -24px; 
-  padding: 1.5rem 1.5rem 1.5rem 24px;
-  border-top: 1px solid #fbe5c5;
-  border-right: 1px solid #fbe5c5;
-  border-bottom: 1px solid #fbe5c5;
-  border-left: none;
-  border-radius: 0 12px 12px 0;
+  padding: 1.5rem;
+  border: 1px solid #fbe5c5;
+  border-right: none;
+  border-radius: 12px 0 0 12px;
   color: #555;
   transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 .user-sidebar.sticky-top {
-  top: 1.5rem;
+  top: 90px;
 }
 
 .sidebar-avatar {
@@ -153,7 +178,6 @@ export default {
   border-radius: 50%;
   border: 2px solid #ff112d;
 }
-
 
 .user-header .card-title {
   font-size: 1.25rem;
@@ -173,17 +197,17 @@ export default {
   transition: color 0.3s ease;
 }
 
-
 .user-rank-badge {
-  background-color: #d9001b;
+  background-color: #ff112d;
   color: white;
-  padding: 2px 6px;
+  padding: 2px 8px;
   font-size: 0.8rem;
   font-weight: bold;
-  border-radius: 4px;
+  border-radius: 10em;
+  border: 1px solid white;
+  box-shadow: 0 0 0 1px #ff112d;
   line-height: 1.2;
 }
-
 
 .user-description {
   font-size: 0.9rem;
@@ -191,7 +215,6 @@ export default {
   border-bottom: 1px solid #eee;
   padding-bottom: 1rem;
 }
-
 
 .stats-list li, .nav-list li a {
   display: flex;
@@ -201,7 +224,6 @@ export default {
   font-size: 0.9rem;
   transition: border-color 0.3s ease;
 }
-
 
 .stats-list li {
   justify-content: space-between;
@@ -219,15 +241,12 @@ export default {
   text-decoration: none;
   transition: color 0.2s ease-in-out;
   width: 100%;
- 
 }
 
 .nav-list a:hover,
 .nav-list a:hover i {
     color: #ff112d;
 }
-
-
 
 .nav-list .fa-fw {
   width: 25px;
@@ -237,7 +256,6 @@ export default {
 }
 
 .text-brand { color: #ff112d; }
-
 
 /*Dark Mode */
 .user-sidebar.dark-mode-active {

@@ -2,18 +2,11 @@
   <div>
     <NavbarBrand />
 
-    <div v-if="!isLoading && report && report.author" class="container pt-5 mt-5 pb-5">
+    
+    <div v-if="!isLoading && report && report.author" class="container-fluid px-md-3 pt-5 mt-5 pb-5">
       <div class="row">
-        <!-- UserSidebar  -->
-        <UserSidebar 
-          :report="report"
-          :author-account-info="authorAccountInfo"
-          :author-afit-balance="authorAfitBalance"
-          :user-rank="userRank"
-        />
-
-       
-        <div class="col-md-8">
+        
+        <div class="col-md-8 order-md-2">
           <div class="text-right">
             <ChainSelection />
           </div>
@@ -106,6 +99,14 @@
             </div>
           </client-only>
         </div>
+        
+        <!-- UserSidebar -->
+        <UserSidebar 
+          :report="report"
+          :author-account-info="authorAccountInfo"
+          :author-afit-balance="authorAfitBalance"
+          :user-rank="userRank"
+        />
       </div>
     </div>
     
@@ -124,6 +125,7 @@
 </template>
 
 <script>
+
 import hive from '@hiveio/hive-js'
 import steem from 'steem'
 import blurt from '@blurtfoundation/blurtjs'
