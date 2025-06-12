@@ -1,6 +1,7 @@
 :root {
   --primary-color: #ff112d;
   --background-color: #fff;
+  --notif-text-color: #000;
   --background-color-1: #ff112d;
   --background-color-2: #fff;
   --ab-background-color: beige;
@@ -16,6 +17,7 @@
 }
 
 .dark-mode {
+  --notif-text-color: #fff;
   --primary-color: #ffffff;
   --background-color: #212121;
   --background-color-1: #303030;
@@ -143,6 +145,43 @@ a:hover {
 .dropdown-menu a, .dropdown-menu span {
   color: var(--text-color);
 }
+
+.dropdown-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 8px 12px;
+  background-color: var(--background-color); /* this will adapt to light/dark */
+}
+
+.user-dropdown {
+  max-height: none;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.nav-item.dropdown.show .user-dropdown {
+  display: flex;
+  flex-direction: column;
+  max-height: 420px;
+  overflow: hidden;
+}
+
+.user-info-sticky {
+  position: sticky;
+  top: 0;
+  background-color: var(--background-color);
+  z-index: 10;
+  padding: 8px 12px;
+  border-bottom: 1px solid #ccc;
+}
+
+.dropdown-scrollable {
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
 
 .table {
   background-color: var(--background-color);

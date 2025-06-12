@@ -43,12 +43,13 @@
               <a href='#' class="btn btn-brand border" v-on:click="markAllRead()">{{ $t('Clear_all') }}</a>
             </div>
             <div class="row p-2 border-top" v-for="(notif, index) in activeNotifications" :key="index" :notif="notif">
+              <span class="notif-text">{{ notif.details }}</span>
               <span class="col-md-10">
                 <a :href="notif.url" v-on:click="markRead(notif)">
                   <i class="fas fa-user-plus p-1"
                     v-if="notif.type == 'friendship' || notif.type == 'friendship_request'"></i>
                   <i class="fas fa-user-friends p-1" v-else-if="notif.type == 'friendship_acceptance'"></i>
-                  <span>{{ notif.details }}</span>
+                  <span class="notif-text">{{ notif.details }}</span>
                   <span v-if="notif.action_taker" class="user-avatar user-avatar-medium mr-1 mb-3"
                     :style="'background-image: url(' + profImgUrl + '/u/' + notif.action_taker + '/avatar)'"></span>
                 </a>
@@ -80,13 +81,14 @@
       </li>
       <li class="nav-item dropdown" v-if="user">
         <a class="nav-link dropdown-toggle p-0" id="user_menu_navlink" href="#" data-toggle="dropdown">
-          <div class="user-avatar group-class"
+          <div class="user-avatar group-class"  
             :style="'background-image: url(' + profImgUrl + '/u/' + user.account.name + '/avatar)'"></div>
         </a>
-        <div class="dropdown-menu dropdown-menu-right">
-          <h6 class="dropdown-header"><a class="dropdown-item" href="#"
+        <div class="dropdown-menu dropdown-menu-right user-dropdown">
+          <div class="dropdown-header user-info-sticky"><a class="dropdown-item" href="#"
               @click.prevent="$router.push('/' + user.account.name)"><i
-                class="fa-solid fa-user text-brand"></i>&nbsp;@{{ user.account.name }}</a></h6>
+                class="fa-solid fa-user text-brand"></i>&nbsp;@{{ user.account.name }}</a></div>
+          <div class="dropdown-scrollable">
           <div class="dropdown-divider"></div>
           <a class="dropdown-item text-brand" href="#" @click.prevent="$router.push('/mods-access/')"
             v-if="isUserModerator">Moderation</a>
@@ -94,7 +96,7 @@
           <!--<a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet?action=buy_afit')">{{ $t('buy_afit_menu') }}<br/></a>-->
           <a class="dropdown-item" href="#" @click.prevent="$router.push('/market')"><i
               class="fas fa-shopping-cart text-brand"></i>&nbsp;{{ $t('spend_afit_menu') }}<br /></a>
-          <SteemStats :user="user" minView="true" class="dropdown-item" :key="reload" />
+          <SteemStats :user="user" minView="true" class="dropdown-item"      :key="reload" />
           <a class="dropdown-item" href="#" @click.prevent="$router.push('/userrank')"><i
               class="fa-solid fa-list-ol text-brand"></i>&nbsp;{{ $t('My_Rank') }} <br /><span class="text-brand pl-4">
               {{ displayCoreUserRank }} <span class="increased-rank"
@@ -142,7 +144,7 @@
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="#" @click.prevent="proceedLogout()"><i
               class="fa-solid fa-right-from-bracket text-brand"></i>&nbsp;{{ $t('Logout') }}</a>
-        </div>
+        </div></div>
       </li>
     </ul>
     <LoginModal v-if="showModal" @close="showModal = false" />
@@ -445,6 +447,21 @@ export default {
   overflow-x: hidden;
   min-width: 300px;
 }
+.notif-container .row {
+  margin-bottom: 8px;
+  padding: 10px;
+  border-radius: 6px;
+  background-color: rgba(255, 255, 255, 0.05); /* subtle background */
+}
+
+.notif-text {
+  color: var(--notif-text-color);
+  display: inline-block;
+  font-size: 16px;
+  padding-left: 9px;
+  word-break: break-word;
+}
+
 
 .option-opaque {
   opacity: 0.3;

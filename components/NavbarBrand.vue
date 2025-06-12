@@ -141,6 +141,9 @@ export default {
 .navbar-nav .nav-item a span {
   display: none;
 }
+.notification-item span {
+  color: var(--notif-text-color);
+}
 
 .navbar-collapse .navbar-nav .nav-item.btn > .nav-link {
   padding: 0.5rem 0.75rem; 
