@@ -3,7 +3,7 @@
     <!--<script src="https://www.google.com/recaptcha/api.js?onload=vueRecaptchaApiLoaded&render=explicit" async defer></script> -->
     <NavbarBrand />
 
-    <section class="intro bg-light" id="content">
+    <section class="intro" id="content">
       <div class="container pt-5 mt-5 pb-5">
 
 
@@ -398,9 +398,30 @@ export default {
         return false;
       }
     },
-    async handleUsername(val) {
+      async handleUsername(val) {
+        
       this.username_invalid = '';
       this.username_exists = '';
+
+      const scamPattern = /^uid|^uid[^a-zA-Z0-9]|^\d{10}$|\d{10}/i;
+
+
+
+       if (scamPattern.test(val)) {
+        
+        
+
+        
+        
+        this.username_invalid = this.$t('invalid_username');
+
+        return ;
+      }
+
+      
+      
+
+
 
       //to avoid disruptions on other chains while creating the username, test against all selected chains
 
