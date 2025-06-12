@@ -245,3 +245,11 @@ a:hover {
 .shadowed-view{
   box-shadow: 3px 3px 3px rgb(255 0 0 / 40%)
 }
+
+.dark-mode .black-text-hover:hover span,
+.dark-mode .black-text-hover:hover a,
+.dark-mode .black-text-hover:hover small,
+.dark-mode .black-text-hover:hover div {
+  color: #000;
+}
+
