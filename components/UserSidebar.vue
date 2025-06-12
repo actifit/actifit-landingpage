@@ -1,9 +1,7 @@
 <template>
-  <!-- Column and ordering classes are now self-contained in this component -->
   <div class="col-md-4 order-md-1">
     
     <div class="user-sidebar sticky-top" :class="[darkModeClass, 'align-to-content']">
-      <!-- This is the new scrollable wrapper -->
       <div class="sidebar-scroll-container">
         <div v-if="authorAccountInfo" class="user-sidebar-content">
           
@@ -19,7 +17,6 @@
                   <nuxt-link :to="'/@' + report.author" class="username-link">@{{ report.author }}</nuxt-link>
                 </span>
               
-                <!-- Badge style updated via CSS -->
                 <span v-if="userRank" class="user-rank-badge ml-2">{{ displayCoreUserRank }}</span>
               </div>
               <small v-if="authorAccountInfo.created" class="text-muted">Joined {{ formatDate(authorAccountInfo.created) }}</small>
@@ -54,6 +51,7 @@
               </nuxt-link>
             </li>
             <li>
+           
               <nuxt-link :to="'/@' + report.author + '/comments'">
                 <i class="far fa-comments fa-fw"></i> Comments
               </nuxt-link>
@@ -86,7 +84,7 @@
 </template>
 
 <script>
-// The <script> section remains unchanged.
+
 export default {
   name: 'UserSidebar',
   props: {
@@ -129,16 +127,14 @@ export default {
 </script>
 
 <style scoped>
-/* NEW STYLES FOR SCROLLING */
 .sidebar-scroll-container {
-  /* Set max height relative to the viewport minus the sticky header and some padding */
-  max-height: calc(100vh - 110px); /* 90px for sticky top + 20px bottom buffer */
-  overflow-y: auto; /* Show scrollbar only when content is taller than the container */
-  padding-right: 10px; /* Add space for the scrollbar */
-  margin-right: -10px; /* Counteract the padding to keep content aligned */
+  max-height: calc(100vh - 110px); 
+  overflow-y: auto; 
+  padding-right: 10px; 
+  margin-right: -10px; 
 }
 
-/* Optional: Prettier scrollbar */
+
 .sidebar-scroll-container::-webkit-scrollbar {
   width: 5px;
 }
@@ -149,12 +145,11 @@ export default {
   background-color: #ccc;
   border-radius: 20px;
 }
-/* END OF NEW STYLES */
+
 
 
 .align-to-content {
-  /* This is your alignment adjustment */
-  margin-top: 138px; 
+  
 }
 
 /* Light Mode */
@@ -202,7 +197,7 @@ export default {
   color: white;
   padding: 2px 8px;
   font-size: 0.8rem;
-  font-weight: bold;
+  font-weight: normal; 
   border-radius: 10em;
   border: 1px solid white;
   box-shadow: 0 0 0 1px #ff112d;

@@ -2,14 +2,13 @@
   <div>
     <NavbarBrand />
 
-    
     <div v-if="!isLoading && report && report.author" class="container-fluid px-md-3 pt-5 mt-5 pb-5">
       <div class="row">
-        
         <div class="col-md-8 order-md-2">
           <div class="text-right">
             <ChainSelection />
           </div>
+          
           <div class="report-head mb-3 col-md-12">
             <div v-if="report.parent_author" class="text-right">
               <UserHoverCard :username="report.parent_author" />
@@ -17,7 +16,8 @@
                 :href="buildParentLink">{{ $t('view_parent_thread') }}</a>
             </div>
             <h2>{{ report.title }}</h2>
-            <div class="main-user-info pl-4">
+        
+            <div class="main-user-info pl-4" ref="reportTarget">
               <h5 class="text-brand">
                 <UserHoverCard :username="report.author" />
               </h5>
@@ -125,12 +125,10 @@
 </template>
 
 <script>
-
 import hive from '@hiveio/hive-js'
 import steem from 'steem'
 import blurt from '@blurtfoundation/blurtjs'
 import { mapGetters } from 'vuex'
-
 import NavbarBrand from '~/components/NavbarBrand'
 import ChainSelection from '~/components/ChainSelection'
 import Footer from '~/components/Footer'
@@ -141,14 +139,12 @@ import CustomTextEditor from '~/components/CustomTextEditor'
 import Comments from '~/components/Comments'
 import SocialSharing from 'vue-social-sharing'
 import vueRemarkable from 'vue-remarkable'
-// Import usersidebar
 import UserSidebar from '~/components/UserSidebar.vue'
 
 export default {
   components: {
     NavbarBrand, ChainSelection, Footer, VoteModal, NotifyModal, UserHoverCard,
     CustomTextEditor, Comments, SocialSharing, vueRemarkable,
-    
     UserSidebar
   },
   head() { return { title: this.pageTitle } },
@@ -190,32 +186,65 @@ export default {
     formattedReportUrl() { return this.report ? `https://actifit.io/@${this.report.author}/${this.report.permlink}` : ''; },
   },
   watch: {
+    
+    report(newVal) {
+      if (newVal && process.client) {
+       
+        this.$nextTick(async () => {
+          try {
+          
+            await document.fonts.ready;
+          } catch (e) {
+            console.error('Font loading check failed:', e);
+          } finally {
+            
+            this.alignSidebar();
+          }
+        });
+      }
+    },
     '$route.path': 'fetchPageData'
   },
   methods: {
+    alignSidebar() {
+      if (process.client) { 
+        const sidebar = document.querySelector('.user-sidebar.align-to-content');
+       
+        const target = this.$refs.reportTarget;
+
+       
+        if (window.innerWidth < 768) { 
+          if (sidebar) sidebar.style.marginTop = '2rem'; 
+          return;
+        }
+        
+        if (sidebar && target) {
+          const sidebarContainer = sidebar.parentElement;
+          const targetRect = target.getBoundingClientRect();
+          const sidebarContainerRect = sidebarContainer.getBoundingClientRect();
+          const requiredMargin = targetRect.top - sidebarContainerRect.top;
+
+          // Apply the calculated margin.
+          sidebar.style.marginTop = `${requiredMargin}px`;
+        }
+      }
+    },
     async fetchPageData() {
       this.isLoading = true;
       this.resetData();
-      
       const author = this.$route.params.username.replace('@', '');
       const permlink = this.$route.params.permlink;
-      
       try {
         const cur_bchain = process.client ? localStorage.getItem('cur_bchain') || 'HIVE' : 'HIVE';
         let chainLnk = hive;
         let nodeUrl = process.env.hiveApiNode;
-
         if (cur_bchain === 'STEEM') { chainLnk = steem; nodeUrl = process.env.steemApiNode; }
         else if (cur_bchain === 'BLURT') { chainLnk = blurt; nodeUrl = process.env.blurtApiNode; }
-        
         await chainLnk.api.setOptions({ url: nodeUrl });
         const reportData = await chainLnk.api.getContentAsync(author, permlink);
-        
         if (!reportData || !reportData.author) throw new Error('Post not found');
-        
         this.report = reportData;
         this.pageTitle = `${this.report.title} by @${this.report.author}`;
-
         await this.fetchSupplementaryData();
       } catch (err) {
         this.errorDisplay = "Could not load post. It may not exist or the network is busy.";
@@ -236,7 +265,6 @@ export default {
                 this.$store.dispatch('fetchReportComments', this.report)
             ];
             const [accounts, afitData, rankData, rewardData] = await Promise.all(promises);
-            
             if (accounts && accounts.length > 0) this.authorAccountInfo = accounts[0];
             this.authorAfitBalance = afitData.tokens;
             this.userRank = rankData;
@@ -258,7 +286,6 @@ export default {
       this.pageTitle = 'Loading...';
       if (this.$store) this.$store.commit('setCommentEntries', null);
     },
-    
     userVotedThisPost() {
         if (!this.user || !this.report) return false;
         const curUser = this.user.account.name;
@@ -267,19 +294,22 @@ export default {
     votePrompt() { if (this.report) this.$store.commit('setPostToVote', this.report); },
     resetOpenComment() { this.commentBoxOpen = false; this.replyBody = ''; },
     copyContent() { navigator.clipboard.writeText(this.formattedReportUrl); },
-
   },
   mounted() {
-    
     this.$store.dispatch('steemconnect/login');
-
-    
     this.fetchPageData();
+    if (process.client) {
+      window.addEventListener('resize', this.alignSidebar);
+    }
+  },
+  beforeDestroy() {
+    if (process.client) {
+      window.removeEventListener('resize', this.alignSidebar);
+    }
   }
 }
 </script>
 <style>
-
 .text-muted { color: #adb5bd !important; }
 .mid-avatar { width: 30px !important; height: 30px !important; }
 .report-head { border-bottom: 1px solid red; }
