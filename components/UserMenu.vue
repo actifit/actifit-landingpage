@@ -412,8 +412,8 @@ export default {
 }
 
 .user-menu .nav-item .group-class:not(.notification-class) {
-  width: 50px; 
-  height: 50px;
+  width: 40px; 
+  height: 40px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -441,8 +441,8 @@ export default {
   padding: 0;      
   box-sizing: border-box;
   position: absolute;
-  top: 4px;
-  left: -5px;
+  top: -5px;
+  left: -7px;
   z-index: 10;
 }
 
