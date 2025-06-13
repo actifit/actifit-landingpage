@@ -43,6 +43,7 @@
               <a href='#' class="btn btn-brand border" v-on:click="markAllRead()">{{ $t('Clear_all') }}</a>
             </div>
             <div class="row p-2 border-top" v-for="(notif, index) in activeNotifications" :key="index" :notif="notif">
+              <span class="notif-text">{{ notif.details }}</span> 
               <span class="col-md-10">
                 <a :href="notif.url" v-on:click="markRead(notif)">
                   <i class="fas fa-user-plus p-1"
@@ -444,6 +445,21 @@ export default {
   overflow-y: auto;
   overflow-x: hidden;
   min-width: 300px;
+}
+        
+.notif-container .row {
+  margin-bottom: 8px;
+  padding: 10px;
+  border-radius: 6px;
+  background-color: rgba(255, 255, 255, 0.05); 
+}
+
+.notif-text {
+  color: var(--notif-text-color);
+  display: inline-block;
+  font-size: 16px;
+  padding-left: 9px;
+  word-break: break-word;
 }
 
 .option-opaque {
