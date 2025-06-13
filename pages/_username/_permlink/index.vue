@@ -95,7 +95,7 @@
               </div>
               <Comments v-if="commentsAvailable" :author="commentEntries.author" :body="commentEntries.body"
                 :reply_entries.sync="commentEntries.reply_entries" :main_post_author="report.author"
-                :main_post_permlink="report.permlink" />
+                :main_post_permlink="report.permlink" :main_post_cat="report.category" :depth="0" :key="reload" />
             </div>
           </client-only>
         </div>
@@ -106,6 +106,7 @@
           :author-account-info="authorAccountInfo"
           :author-afit-balance="authorAfitBalance"
           :user-rank="userRank"
+          class="align-to-content"
         />
       </div>
     </div>
@@ -162,6 +163,7 @@ export default {
       replyBody: '',
       pageTitle: 'Actifit Report',
       showTranslated: false,
+      reload: 0, 
     }
   },
   computed: {
@@ -186,32 +188,13 @@ export default {
     formattedReportUrl() { return this.report ? `https://actifit.io/@${this.report.author}/${this.report.permlink}` : ''; },
   },
   watch: {
-    
-    report(newVal) {
-      if (newVal && process.client) {
-       
-        this.$nextTick(async () => {
-          try {
-          
-            await document.fonts.ready;
-          } catch (e) {
-            console.error('Font loading check failed:', e);
-          } finally {
-            
-            this.alignSidebar();
-          }
-        });
-      }
-    },
     '$route.path': 'fetchPageData'
   },
   methods: {
     alignSidebar() {
       if (process.client) { 
         const sidebar = document.querySelector('.user-sidebar.align-to-content');
-       
         const target = this.$refs.reportTarget;
-
        
         if (window.innerWidth < 768) { 
           if (sidebar) sidebar.style.marginTop = '2rem'; 
@@ -224,7 +207,6 @@ export default {
           const sidebarContainerRect = sidebarContainer.getBoundingClientRect();
           const requiredMargin = targetRect.top - sidebarContainerRect.top;
 
-          // Apply the calculated margin.
           sidebar.style.marginTop = `${requiredMargin}px`;
         }
       }
@@ -241,15 +223,31 @@ export default {
         if (cur_bchain === 'STEEM') { chainLnk = steem; nodeUrl = process.env.steemApiNode; }
         else if (cur_bchain === 'BLURT') { chainLnk = blurt; nodeUrl = process.env.blurtApiNode; }
         await chainLnk.api.setOptions({ url: nodeUrl });
+
         const reportData = await chainLnk.api.getContentAsync(author, permlink);
         if (!reportData || !reportData.author) throw new Error('Post not found');
+
         this.report = reportData;
         this.pageTitle = `${this.report.title} by @${this.report.author}`;
+        
         await this.fetchSupplementaryData();
+
       } catch (err) {
         this.errorDisplay = "Could not load post. It may not exist or the network is busy.";
       } finally {
         this.isLoading = false;
+
+        this.$nextTick(async () => {
+          if (this.report && process.client) {
+            try {
+              await document.fonts.ready;
+            } catch (e) {
+              console.error('Font loading check failed:', e);
+            } finally {
+              this.alignSidebar();
+            }
+          }
+        });
       }
     },
     async fetchSupplementaryData() {
@@ -257,6 +255,7 @@ export default {
         const { author, url } = this.report;
         try {
             this.commentsLoading = true;
+            this.reload += 1; // Force re-render of comments component
             const promises = [
                 hive.api.getAccountsAsync([author]),
                 fetch(`${process.env.actiAppUrl}user/${author}`).then(res => res.json()),
@@ -309,6 +308,7 @@ export default {
   }
 }
 </script>
+
 <style>
 .text-muted { color: #adb5bd !important; }
 .mid-avatar { width: 30px !important; height: 30px !important; }
@@ -323,7 +323,7 @@ a:hover, a:hover, .text-brand:hover, .actifit-link-plain:hover { text-decoration
 .reply-btn { float: right; }
 .date-head { padding-left: 2px; }
 .report-reply { padding-left: 40px; padding-bottom: 40px; }
-.share-links-actifit { text-align: right; }
+.share-links-actifit { text-align: right; }    
 .share-links-actifit span { padding: 5px; cursor: pointer; }
 .report-modal-prelim-info span { /* padding: 5px; */ }
 .pointer-cur-cls { cursor: pointer; }
