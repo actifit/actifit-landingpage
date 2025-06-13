@@ -22,7 +22,7 @@
           <a :href="buildLink" class="p-1"><span class="date-head spec-btns" :title="date">{{ $getTimeDifference(report.created)
               }}</span> <i class="fas fa-link spec-btns"></i></a>
           <i :title="$t('copy_link')" class="fas fa-copy spec-btns" v-on:click="copyContent"></i>
-          <!-- MODIFIED SECTION FOR TRANSLATION -->
+        
           <i v-if="translationLoading" class="fas fa-spinner fa-spin spec-btns" :title="$t('translating_content', 'Translating...')"></i>
           <i v-else-if="!showTranslated" class="fa-solid fa-language spec-btns" v-on:click="translateContent" :title="$t('translate_content', 'Translate Content')"></i>
           <div>
@@ -207,6 +207,9 @@
 </template>
 
 <script>
+
+import { translateTextWithGemini } from '~/components/gemini-client.js';
+
 import UserHoverCard from '~/components/UserHoverCard.vue'
 import NavbarBrand from '~/components/NavbarBrand'
 import ChainSelection from '~/components/ChainSelection'
@@ -368,53 +371,15 @@ export default {
     headToComments() { VueScrollTo.scrollTo('#main-footer', 1000, { easing: 'ease-in-out', offset: 100 }); },
     cancelTranslation() { this.report.body = this.safety_post_content; this.showTranslated = false; },
     async translateContent() {
-      
-      const apiKey = process.env.geminiApiKey;
-
-      if (!apiKey) {
-        console.error("Gemini API key is missing from nuxt.config.js 'env' block. Please check your configuration and restart the server.");
-        this.$notify({
-          group: 'error',
-          text: 'Translation service is not configured correctly.',
-          position: 'top center'
-        });
-        return;
-      }
-      
       this.translationLoading = true;
+      this.safety_post_content = this.report.body;
+      
       try {
-        this.safety_post_content = this.report.body;
-        
-       
-        const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
-
-        const prompt = `Translate the following text to English. The text may contain Markdown or HTML formatting. Preserve the original formatting (like links, bolding, lists, etc.) as accurately as possible. Do not add any extra explanations, introductory phrases, or apologies. Return ONLY the translated text.\n\nText to translate:\n"""\n${this.report.body}\n"""`;
-        const requestBody = { contents: [{ parts: [{ text: prompt }] }] };
-
-        const response = await fetch(GEMINI_API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', },
-          body: JSON.stringify(requestBody),
-        });
-
-        if (!response.ok) {
-           const errorData = await response.json();
-           console.error('Google API Error:', errorData);
-           throw new Error('Failed to fetch translation from Gemini API.');
-        }
-        
-        const data = await response.json();
-        const translatedText = data && data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text;
-        
-        if (!translatedText) {
-          throw new Error('Could not parse translated text from API response.');
-        }
-
+        const translatedText = await translateTextWithGemini(this.report.body);
         this.report.body = translatedText;
         this.showTranslated = true;
-        
       } catch (error) {
-        console.error('Translation error:', error);
+        console.error('Translation process failed:', error);
         this.$notify({
           group: 'error',
           text: 'Translation service failed. Please try again later.',
@@ -644,6 +609,9 @@ export default {
 </script>
 
 <style>
+.translation-notice a {
+  color: red;
+}
 .mid-avatar { width: 30px !important; height: 30px !important; }
 .report-head { border-bottom: 1px solid red; }
 img { max-width: 100%; }
