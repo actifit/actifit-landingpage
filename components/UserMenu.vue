@@ -449,12 +449,6 @@ export default {
   z-index: 10;
 }
 
-.notification-class {
-    text-align: center;
-    font-size: 12px;
-    width: auto;
-    min-width: 20px;
-}
 .notification-bell-link .fa-bell {
   color: #FF0000 !important; 
 }
