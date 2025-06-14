@@ -434,9 +434,12 @@ export default {
   font-weight: bold;
   display: flex;
   align-items: center;
+  text-align: center;
   justify-content: center;
-  width: 20px; 
-  height: 20px;    
+  width: auto;
+  min-width: 20px; 
+  height: auto; 
+  min-height: 20px;   
   border-radius: 50%; 
   padding: 0;      
   box-sizing: border-box;
@@ -446,6 +449,12 @@ export default {
   z-index: 10;
 }
 
+.notification-class {
+    text-align: center;
+    font-size: 12px;
+    width: auto;
+    min-width: 20px;
+}
 .notification-bell-link .fa-bell {
   color: #FF0000 !important; 
 }
