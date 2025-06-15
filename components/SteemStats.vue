@@ -1,5 +1,5 @@
 <template>
-	<div class="steem-stats pt-2" v-if="getVotingPower">
+	<div class="steem-stats pt-2 black-text-hover" v-if="getVotingPower">
 		<span v-if="!minView"><span><i class="fa-solid fa-thumbs-up text-brand"></i>&nbsp;{{ $t('Your_Voting_Power') }} </span><span :style="displayProperColor">{{getVotingPower}}</span><span><small v-if="this.user"> ({{ $t('Full_In') }} {{timeToFull(this.currentVotingPower)}})</small> <a href="#" data-toggle="modal" data-target="#notifyModal"><i class="fas fa-info-circle"></i></a></span></span>
 		<span v-else><span><i class="fa-solid fa-thumbs-up text-brand"></i>&nbsp;{{ $t('My_Voting_Power') }} </span><span :style="displayProperColor">{{getVotingPower}}</span></span>
 		<div v-if="showVPInfo">{{ $t('VP_desc') }}</div>

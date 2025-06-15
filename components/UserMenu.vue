@@ -73,8 +73,8 @@
           <div class="user-avatar group-class"
             :style="'background-image: url(' + profImgUrl + '/u/' + user.account.name + '/avatar)'"></div>
         </a>
-        <div class="dropdown-menu dropdown-menu-right">
-          <h6 class="dropdown-header"><a class="dropdown-item" href="#"
+        <div class="dropdown-menu dropdown-menu-right user-dropdown">
+          <div class="dropdown-header user-info-sticky"><a class="dropdown-item" href="#"
               @click.prevent="$router.push('/' + user.account.name)"><i
                 class="fa-solid fa-user text-brand"></i> @{{ user.account.name }}</a></h6>
           <div class="dropdown-divider"></div>
