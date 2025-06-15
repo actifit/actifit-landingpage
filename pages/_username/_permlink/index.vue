@@ -50,7 +50,7 @@
         </div>
         <div v-if="showTranslated" class="translation-notice">
           <span>{{ $t('auto_translated_content') }}</span>
-          <a href="#" v-on:click="cancelTranslation">{{ $t('click_to_view_original') }}</a>
+          <a href="#" v-on:click.prevent="cancelTranslation">{{ $t('click_to_view_original') }}</a>
         </div>
       </div>
       <vue-remarkable class="col-md-12" ref="remarkableContent" :source="body"
@@ -369,17 +369,33 @@ export default {
   },
   methods: {
     headToComments() { VueScrollTo.scrollTo('#main-footer', 1000, { easing: 'ease-in-out', offset: 100 }); },
-    cancelTranslation() { this.report.body = this.safety_post_content; this.showTranslated = false; },
+    cancelTranslation() { 
+      this.report.body = this.safety_post_content; 
+      this.showTranslated = false; 
+    },
     async translateContent() {
+      
+      if (this.translatedText) {
+        this.report.body = this.translatedText;
+        this.showTranslated = true;
+        return; 
+      }
+    
       this.translationLoading = true;
+     
       this.safety_post_content = this.report.body;
       
       try {
-        const translatedText = await translateTextWithGemini(this.report.body);
-        this.report.body = translatedText;
+        const translationResult = await translateTextWithGemini(this.report.body);
+   
+        this.translatedText = translationResult;
+       
+        this.report.body = this.translatedText;
         this.showTranslated = true;
       } catch (error) {
         console.error('Translation process failed:', error);
+     
+        this.report.body = this.safety_post_content;
         this.$notify({
           group: 'error',
           text: 'Translation service failed. Please try again later.',
@@ -541,7 +557,17 @@ export default {
     insertModSignature() { if (this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator')) { this.moderatorSignature = process.env.shortModeratorSignature; this.replyBody += this.moderatorSignature; } },
     insertFullModSignature() { if (this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator')) { this.moderatorSignature = process.env.standardModeratorSignature; this.replyBody += this.moderatorSignature; } },
     votePrompt(e) { this.$store.commit('setPostToVote', this.report) },
-    fetchReportData() { if (this.report && this.report.author) { this.fetchReportKeyData(); this.fetchReportCommentData() } },
+    fetchReportData() { 
+      if (this.report && this.report.author) { 
+      
+        this.translatedText = '';
+        this.safety_post_content = '';
+        this.showTranslated = false;
+        
+        this.fetchReportKeyData(); 
+        this.fetchReportCommentData();
+      } 
+    },
     fetchReportCommentData() {
       this.commentsLoading = true;
       this.cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
