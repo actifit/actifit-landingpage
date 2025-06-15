@@ -9,7 +9,7 @@
             <ChainSelection />
           </div>
           
-          <div class="report-head mb-3 col-md-12">
+          <div class="report-head mb-3 col-md-12" ref="reportHead">
             <div v-if="report.parent_author" class="text-right">
               <UserHoverCard :username="report.parent_author" />
               <i class="fas fa-reply text-brand"></i> {{ $t('viewing_comment_note') }} <a
@@ -27,6 +27,7 @@
               <div>
                 <span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i class="text-white fas fa-reply"></i></a></span>
                 <span class="ml-1">
+                  <!-- THIS IS THE CORRECTED LINE -->
                   <a href="#" @click.prevent="votePrompt" data-toggle="modal" class="text-brand" data-target="#voteModal" v-if="user && userVotedThisPost()">
                     <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
                   </a>
@@ -163,7 +164,8 @@ export default {
       replyBody: '',
       pageTitle: 'Actifit Report',
       showTranslated: false,
-      reload: 0, 
+      reload: 0,
+      resizeObserver: null,
     }
   },
   computed: {
@@ -193,22 +195,24 @@ export default {
   methods: {
     alignSidebar() {
       if (process.client) { 
-        const sidebar = document.querySelector('.user-sidebar.align-to-content');
-        const target = this.$refs.reportTarget;
-       
-        if (window.innerWidth < 768) { 
-          if (sidebar) sidebar.style.marginTop = '2rem'; 
-          return;
-        }
+        this.$nextTick(() => {
+          const sidebar = document.querySelector('.user-sidebar.align-to-content');
+          const target = this.$refs.reportTarget;
         
-        if (sidebar && target) {
-          const sidebarContainer = sidebar.parentElement;
-          const targetRect = target.getBoundingClientRect();
-          const sidebarContainerRect = sidebarContainer.getBoundingClientRect();
-          const requiredMargin = targetRect.top - sidebarContainerRect.top;
+          if (window.innerWidth < 768) { 
+            if (sidebar) sidebar.style.marginTop = '2rem'; 
+            return;
+          }
+          
+          if (sidebar && target) {
+            const sidebarContainer = sidebar.parentElement;
+            const targetRect = target.getBoundingClientRect();
+            const sidebarContainerRect = sidebarContainer.getBoundingClientRect();
+            const requiredMargin = targetRect.top - sidebarContainerRect.top;
 
-          sidebar.style.marginTop = `${requiredMargin}px`;
-        }
+            sidebar.style.marginTop = `${requiredMargin}px`;
+          }
+        });
       }
     },
     async fetchPageData() {
@@ -236,18 +240,7 @@ export default {
         this.errorDisplay = "Could not load post. It may not exist or the network is busy.";
       } finally {
         this.isLoading = false;
-
-        this.$nextTick(async () => {
-          if (this.report && process.client) {
-            try {
-              await document.fonts.ready;
-            } catch (e) {
-              console.error('Font loading check failed:', e);
-            } finally {
-              this.alignSidebar();
-            }
-          }
-        });
+        this.alignSidebar();
       }
     },
     async fetchSupplementaryData() {
@@ -255,7 +248,7 @@ export default {
         const { author, url } = this.report;
         try {
             this.commentsLoading = true;
-            this.reload += 1; // Force re-render of comments component
+            this.reload += 1;
             const promises = [
                 hive.api.getAccountsAsync([author]),
                 fetch(`${process.env.actiAppUrl}user/${author}`).then(res => res.json()),
@@ -297,12 +290,26 @@ export default {
   mounted() {
     this.$store.dispatch('steemconnect/login');
     this.fetchPageData();
+    
     if (process.client) {
+      this.resizeObserver = new ResizeObserver(() => {
+        this.alignSidebar();
+      });
+
+      this.$nextTick(() => {
+        if (this.$refs.reportHead) {
+          this.resizeObserver.observe(this.$refs.reportHead);
+        }
+      });
+
       window.addEventListener('resize', this.alignSidebar);
     }
   },
   beforeDestroy() {
     if (process.client) {
+      if (this.resizeObserver) {
+        this.resizeObserver.disconnect();
+      }
       window.removeEventListener('resize', this.alignSidebar);
     }
   }
@@ -322,6 +329,9 @@ a:hover, a:hover, .text-brand:hover, .actifit-link-plain:hover { text-decoration
 .markdown-editor .CodeMirror, .markdown-editor .CodeMirror-scroll { min-height: 100px; }
 .reply-btn { float: right; }
 .date-head { padding-left: 2px; }
+.report-comments .date-head {
+  color: #6c757d !important;
+}
 .report-reply { padding-left: 40px; padding-bottom: 40px; }
 .share-links-actifit { text-align: right; }    
 .share-links-actifit span { padding: 5px; cursor: pointer; }
