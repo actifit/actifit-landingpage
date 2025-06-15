@@ -76,7 +76,7 @@
         <div class="dropdown-menu dropdown-menu-right user-dropdown">
           <div class="dropdown-header user-info-sticky"><a class="dropdown-item" href="#"
               @click.prevent="$router.push('/' + user.account.name)"><i
-                class="fa-solid fa-user text-brand"></i> @{{ user.account.name }}</a></h6>
+                class="fa-solid fa-user text-brand"></i> @{{ user.account.name }}</a></div>
           <div class="dropdown-divider"></div>
           <a class="dropdown-item text-brand" href="#" @click.prevent="$router.push('/mods-access/')"
             v-if="isUserModerator">Moderation</a>
@@ -519,5 +519,12 @@ export default {
   .user-menu-container .user-menu .nav-item > a:not(.dropdown-toggle) {
      font-size: 0.8rem;
   }
+  .notification-class { 
+  width: auto;
+  min-width: 10px; 
+  height: auto; 
+  min-height: 10px;   
+}
+
 }
 </style>
