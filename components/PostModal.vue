@@ -20,7 +20,7 @@
           <div class="row col-12">
 
             <div class="text-right col-12">
-              <i class="fas fa-reply text-brand"></i>&nbsp;{{ $t('viewing_comment_note') }}
+              <i class="fas fa-reply text-brand"></i> {{ $t('viewing_comment_note') }}
               <UserHoverCard :username="post.parent_author" />
             </div>
 
@@ -30,7 +30,7 @@
           <h2 class="modal-title" id="exampleModalLabel">{{ post.title }}</h2>
           <div class="text-right">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
+              <span aria-hidden="true">×</span>
             </button>
           </div>
         </div>
@@ -43,7 +43,10 @@
             <span class="date-head" :title="date">{{ $getTimeDifference(post.created) }}</span>
             <a :href="'/@' + this.post.author + '/' + this.post.permlink"><i class="fas fa-link text-brand"></i></a>
             <i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent"></i>
-            <i v-if="!showTranslated" class="fa-solid fa-language text-brand" v-on:click="translateContent"></i>
+            
+            <!-- Translation Icons Updated -->
+            <i v-if="translationLoading" class="fas fa-spinner fa-spin text-brand" :title="$t('translating_content', 'Translating...')"></i>
+            <i v-else-if="!showTranslated" class="fa-solid fa-language text-brand" v-on:click="translateContent" :title="$t('translate_content', 'Translate Content')"></i>
           </span>
           <div class="p-1 modal-top-actions">
               <span><a href="#" @click.prevent="toggleCommentBox()" :title="$t('Reply')"><i
@@ -68,7 +71,7 @@
         </div>
         <div v-if="showTranslated" class="translation-notice">
           <span>{{ $t('auto_translated_content') }}</span>
-          <a href="#" v-on:click="cancelTranslation">{{ $t('click_to_view_original') }}</a>
+          <a href="#" v-on:click.prevent="cancelTranslation">{{ $t('click_to_view_original') }}</a>
         </div>
         <vue-remarkable class="modal-body" :source="body" ref="remarkableContent"
           :options="{ 'html': true, 'breaks': true, 'typographer': true }"></vue-remarkable>
@@ -267,10 +270,7 @@
             :reply_entries.sync="commentEntries.reply_entries" :main_post_author="post.author"
             :main_post_permlink="post.permlink" :main_post_cat="post.category" :depth="0" />
         </div>
-
-
       </div>
-
     </div>
   </div>
 </template>
@@ -289,7 +289,8 @@ import SocialSharing from 'vue-social-sharing';
 
 import VueScrollTo from 'vue-scrollto'
 
-import { translateText } from '~/components/deepl-client';
+// Import the new Gemini translation client
+import { translateTextWithGemini } from '~/components/gemini-client.js';
 
 const scot_steemengine_api = process.env.steemEngineScot;
 const scot_hive_api_param = process.env.hiveEngineScotParam;
@@ -299,8 +300,11 @@ export default {
   data() {
     return {
       commentsLoading: true,
+      // Add translation state variables
+      translatedText: '',
       safety_post_content: ``,
       showTranslated: false,
+      translationLoading: false,
       translationError: '',
       afitReward: 0,
       tokenRewards: [],
@@ -407,14 +411,6 @@ export default {
         return this.post.pending_payout_value.replace('SBD', '').replace('STEEM', '').replace('HBD', '').replace('HIVE', '') + ' $'
       }
     },
-    /*getUserRank() {
-    //proper formatting issue to display circle for smaller numbers
-    if (this.userRank<10){
-      return ' '+parseFloat(this.userRank).toFixed(1);
-    }else{
-      return parseFloat(this.userRank).toFixed(1);
-    }
-    },*/
     displayCoreUserRank() {
       return (this.userRank ? parseFloat(this.userRank.rank_no_afitx).toFixed(2) : '');
     },
@@ -439,25 +435,34 @@ export default {
       localStorage.setItem('commentBoxOpen', this.commentBoxOpen);
     },
     cancelTranslation() {
-      if (this.safety_post_content != '') {
-        this.post.body = this.safety_post_content;
-      }
+      this.post.body = this.safety_post_content;
       this.showTranslated = false;
     },
     async translateContent() {
-      try {
-        this.safety_post_content = this.post.body;
-        const result = await translateText(this.post.body, 'en');
-
-        const translatedText = result.translations[0].text || "Translation failed";
-
+      if (this.translatedText) {
+        this.post.body = this.translatedText;
         this.showTranslated = true;
-
-        this.post.body = translatedText;
-
+        return; 
+      }
+    
+      this.translationLoading = true;
+      this.safety_post_content = this.post.body;
+      
+      try {
+        const translationResult = await translateTextWithGemini(this.post.body);
+        this.translatedText = translationResult;
+        this.post.body = this.translatedText;
+        this.showTranslated = true;
       } catch (error) {
-        this.translationError = 'Unable to translate content. Try again later.';
-        console.error('Translation error:', error);
+        console.error('Translation process failed:', error);
+        this.post.body = this.safety_post_content;
+        this.$notify({
+          group: 'error',
+          text: 'Translation service failed. Please try again later.',
+          position: 'top center'
+        });
+      } finally {
+        this.translationLoading = false;
       }
     },
     copyContent(event) {
@@ -481,7 +486,6 @@ export default {
 
     },
     loadNextPost(direction) {
-      this.cancelTranslation();
       if (direction < 0) {
         this.$emit('prevPost');
       } else {
@@ -831,8 +835,15 @@ export default {
     },
     fetchPostData() {
       //function handling propagating calls to grab key post data and comment info
-      this.fetchPostKeyData()
-      this.fetchPostCommentData()
+
+      // Reset translation state for the new post
+      this.translatedText = '';
+      this.safety_post_content = '';
+      this.showTranslated = false;
+      this.translationLoading = false;
+
+      this.fetchPostKeyData();
+      this.fetchPostCommentData();
     },
     fetchPostCommentData() {
       this.commentsLoading = true;
@@ -997,9 +1008,6 @@ export default {
 
     //capture key clicks
     window.addEventListener('keydown', this.handleKeyDown);
-
-
-
   }
 }
 </script>
@@ -1071,7 +1079,7 @@ export default {
 }
 
 .translation-notice a {
-  color: #007bff;
+  color: #ff0000;
   text-decoration: none;
   margin-left: 5px;
 }
