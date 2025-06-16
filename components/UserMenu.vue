@@ -13,7 +13,8 @@
           @click="showModalFunc">{{ $t('Login') }}</a>
       </li>
 
-      <li class="nav-item mr-2" @click="toggleDarkMode" :title="$t('toggle_dark_mode')" v-if="user && !hideVisualControls">
+      <li class="nav-item mr-2" @click="toggleDarkMode" :title="$t('toggle_dark_mode')"
+        v-if="user && !hideVisualControls">
         <span class="user-avatar group-class">
           <i v-if="$store.state.darkMode" class="fa-solid fa-sun text-brand"></i>
           <i v-else class="fa-solid fa-moon text-brand"></i>
@@ -22,12 +23,13 @@
       <li class="nav-item mr-2" v-if="user && !hideVisualControls">
         <StingChat :user="this.user" />
       </li>
-      
+
       <li class="nav-item mr-2 notification-item-container" v-if="user">
-        <span class="notification-class" v-if="activeNotificationsLen > 0">{{ notificationsNotice }}</span> 
-        
-        <span class="user-avatar group-class" v-if="activeNotificationsLen > 0"> 
-          <a class="nav-link dropdown-toggle p-0 notification-bell-link" id="user_menu_navlink_notif" href="#" data-toggle="dropdown" 
+        <span class="notification-class" v-if="activeNotificationsLen > 0">{{ notificationsNotice }}</span>
+
+        <span class="user-avatar group-class" v-if="activeNotificationsLen > 0">
+          <a class="nav-link dropdown-toggle p-0 notification-bell-link" id="user_menu_navlink_notif" href="#"
+            data-toggle="dropdown"
             :title="$t('Notifications_popup').replace('_count_', String(activeNotificationsLen))">
             <i class="fas fa-bell"></i>
           </a>
@@ -54,8 +56,9 @@
             </div>
           </div>
         </span>
-        <span class="user-avatar group-class" v-else> 
-          <a class="nav-link dropdown-toggle p-0 notification-bell-link" id="user_menu_navlink_notif_empty" href="#" data-toggle="dropdown">
+        <span class="user-avatar group-class" v-else>
+          <a class="nav-link dropdown-toggle p-0 notification-bell-link" id="user_menu_navlink_notif_empty" href="#"
+            data-toggle="dropdown">
             <i class="fas fa-bell"></i>
           </a>
           <div class="dropdown-menu dropdown-menu-right">
@@ -67,7 +70,7 @@
           </div>
         </span>
       </li>
-      
+
       <li class="nav-item dropdown" v-if="user">
         <a class="nav-link dropdown-toggle p-0" id="user_menu_navlink_avatar" href="#" data-toggle="dropdown">
           <div class="user-avatar group-class"
@@ -75,61 +78,63 @@
         </a>
         <div class="dropdown-menu dropdown-menu-right user-dropdown">
           <div class="dropdown-header user-info-sticky"><a class="dropdown-item" href="#"
-              @click.prevent="$router.push('/' + user.account.name)"><i
-                class="fa-solid fa-user text-brand"></i> @{{ user.account.name }}</a></div>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item text-brand" href="#" @click.prevent="$router.push('/mods-access/')"
-            v-if="isUserModerator">Moderation</a>
-          <div class="dropdown-divider" v-if="isUserModerator"></div>
-          <a class="dropdown-item" href="#" @click.prevent="$router.push('/market')"><i
-              class="fas fa-shopping-cart text-brand"></i> {{ $t('spend_afit_menu') }}<br /></a>
-          <SteemStats :user="user" minView="true" class="dropdown-item" :key="reload" />
-          <a class="dropdown-item" href="#" @click.prevent="$router.push('/userrank')"><i
-              class="fa-solid fa-list-ol text-brand"></i> {{ $t('My_Rank') }} <br /><span class="text-brand pl-4">
-              {{ displayCoreUserRank }} <span class="increased-rank"
-                v-if="userRankObj && userRankObj.afitx_rank">{{ displayIncreasedUserRank }}</span> </span></a>
-          <a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet')"><i
-              class="fa-solid fa-wallet text-brand"></i> {{ $t('My_Wallet') }} <br /><span class="text-brand pl-4">
-              {{ formattedUserTokens }}</span></a>
-          <a class="dropdown-item" href="#" @click.prevent="$router.push('/referrals')"><i
-              class="fas fa-user-friends text-brand"></i> {{ $t('Referrals') }} <br /><span
-              class="text-brand pl-4"> {{ referralCount }} </span></a>
-          <a class="dropdown-item" href="#" @click.prevent="$router.push('/activity/' + user.account.name)"><i
-              class="fas fa-running text-brand"></i> {{ $t('My_Activity') }}</a>
-          <a class="dropdown-item" href="#" @click.prevent="$router.push('/' + user.account.name + '/blog')"><i
-              class="fa-solid fa-pen-to-square text-brand"></i> {{ $t('My_Blog') }}</a>
-          <a class="dropdown-item" href="#" @click.prevent="$router.push('/blog/new')"><i
-              class="fa-solid fa-plus-square text-brand"></i> {{ $t('New_Blog') }}</a>
-          <a class="dropdown-item" href="#" @click.prevent="$router.push('/' + user.account.name + '/videos')"><i
-              class="fa-solid fa-video text-brand"></i> {{ $t('My_Videos') }}</a>
-          <a class="dropdown-item" href="#"><i class="fa-solid fa-link text-brand"></i> {{ $t('Active_chain') }}
-            <br />
-            <div class="pl-4" :class="adjustHiveClass" v-on:click="setActiveChain('HIVE')">
-              <img src="/img/HIVE.png" style="max-height: 20px;"
-                :title="(cur_bchain == 'HIVE' ? $t('running_on_chain').replace('_CHAIN_', 'HIVE') : $t('switch_to_chain').replace('_CHAIN_', 'HIVE'))">{{
-                  $t('HIVE') }}
-            </div>
-            <div v-if="isUserModerator" class="pl-4" :class="adjustSteemClass" v-on:click="setActiveChain('STEEM')">
-              <img src="/img/STEEM.png" style="max-height: 20px;"
-                :title="(cur_bchain == 'STEEM' ? $t('running_on_chain').replace('_CHAIN_', 'STEEM') : $t('switch_to_chain').replace('_CHAIN_', 'STEEM'))">{{
-                  $t('STEEM') }}
-            </div>
-            <div class="pl-4" :class="adjustBlurtClass" v-on:click="setActiveChain('BLURT')">
-              <img src="/img/BLURT.png" style="max-height: 20px;"
-                :title="(cur_bchain == 'BLURT' ? $t('running_on_chain').replace('_CHAIN_', 'BLURT') : $t('switch_to_chain').replace('_CHAIN_', 'BLURT'))">{{
-                  $t('BLURT') }}
-            </div>
-          </a>
-          <a class="dropdown-item" href="#" @click.prevent="$router.push('/password')"><i
-              class="fa-sharp fa-solid fa-key text-brand"></i> {{ $t('My_Password') }}</a>
-          <a class="dropdown-item" href="#" @click.prevent="$router.push('/settings')"><i
-              class="fa-solid fa-gear text-brand"></i> {{ $t('Settings') }}</a>
-          <div class="dropdown-divider"></div>
-          <a href="#" data-toggle="modal" data-target="#loginModal" @click="showModalFunc" class="dropdown-item"><i
-              class="fa-solid fa-user-group text-brand"></i> {{ $t('switch_user') }}</a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="#" @click.prevent="proceedLogout()"><i
-              class="fa-solid fa-right-from-bracket text-brand"></i> {{ $t('Logout') }}</a>
+              @click.prevent="$router.push('/' + user.account.name)"><i class="fa-solid fa-user text-brand"></i> @{{
+                user.account.name }}</a></div>
+          <div class="dropdown-scrollable">
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item text-brand" href="#" @click.prevent="$router.push('/mods-access/')"
+              v-if="isUserModerator">Moderation</a>
+            <div class="dropdown-divider" v-if="isUserModerator"></div>
+            <a class="dropdown-item" href="#" @click.prevent="$router.push('/market')"><i
+                class="fas fa-shopping-cart text-brand"></i> {{ $t('spend_afit_menu') }}<br /></a>
+            <SteemStats :user="user" minView="true" class="dropdown-item" :key="reload" />
+            <a class="dropdown-item" href="#" @click.prevent="$router.push('/userrank')"><i
+                class="fa-solid fa-list-ol text-brand"></i> {{ $t('My_Rank') }} <br /><span class="text-brand pl-4">
+                {{ displayCoreUserRank }} <span class="increased-rank" v-if="userRankObj && userRankObj.afitx_rank">{{
+                  displayIncreasedUserRank }}</span> </span></a>
+            <a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet')"><i
+                class="fa-solid fa-wallet text-brand"></i> {{ $t('My_Wallet') }} <br /><span class="text-brand pl-4">
+                {{ formattedUserTokens }}</span></a>
+            <a class="dropdown-item" href="#" @click.prevent="$router.push('/referrals')"><i
+                class="fas fa-user-friends text-brand"></i> {{ $t('Referrals') }} <br /><span class="text-brand pl-4">
+                {{ referralCount }} </span></a>
+            <a class="dropdown-item" href="#" @click.prevent="$router.push('/activity/' + user.account.name)"><i
+                class="fas fa-running text-brand"></i> {{ $t('My_Activity') }}</a>
+            <a class="dropdown-item" href="#" @click.prevent="$router.push('/' + user.account.name + '/blog')"><i
+                class="fa-solid fa-pen-to-square text-brand"></i> {{ $t('My_Blog') }}</a>
+            <a class="dropdown-item" href="#" @click.prevent="$router.push('/blog/new')"><i
+                class="fa-solid fa-plus-square text-brand"></i> {{ $t('New_Blog') }}</a>
+            <a class="dropdown-item" href="#" @click.prevent="$router.push('/' + user.account.name + '/videos')"><i
+                class="fa-solid fa-video text-brand"></i> {{ $t('My_Videos') }}</a>
+            <a class="dropdown-item" href="#"><i class="fa-solid fa-link text-brand"></i> {{ $t('Active_chain') }}
+              <br />
+              <div class="pl-4" :class="adjustHiveClass" v-on:click="setActiveChain('HIVE')">
+                <img src="/img/HIVE.png" style="max-height: 20px;"
+                  :title="(cur_bchain == 'HIVE' ? $t('running_on_chain').replace('_CHAIN_', 'HIVE') : $t('switch_to_chain').replace('_CHAIN_', 'HIVE'))">{{
+                    $t('HIVE') }}
+              </div>
+              <div v-if="isUserModerator" class="pl-4" :class="adjustSteemClass" v-on:click="setActiveChain('STEEM')">
+                <img src="/img/STEEM.png" style="max-height: 20px;"
+                  :title="(cur_bchain == 'STEEM' ? $t('running_on_chain').replace('_CHAIN_', 'STEEM') : $t('switch_to_chain').replace('_CHAIN_', 'STEEM'))">{{
+                    $t('STEEM') }}
+              </div>
+              <div class="pl-4" :class="adjustBlurtClass" v-on:click="setActiveChain('BLURT')">
+                <img src="/img/BLURT.png" style="max-height: 20px;"
+                  :title="(cur_bchain == 'BLURT' ? $t('running_on_chain').replace('_CHAIN_', 'BLURT') : $t('switch_to_chain').replace('_CHAIN_', 'BLURT'))">{{
+                    $t('BLURT') }}
+              </div>
+            </a>
+            <a class="dropdown-item" href="#" @click.prevent="$router.push('/password')"><i
+                class="fa-sharp fa-solid fa-key text-brand"></i> {{ $t('My_Password') }}</a>
+            <a class="dropdown-item" href="#" @click.prevent="$router.push('/settings')"><i
+                class="fa-solid fa-gear text-brand"></i> {{ $t('Settings') }}</a>
+            <div class="dropdown-divider"></div>
+            <a href="#" data-toggle="modal" data-target="#loginModal" @click="showModalFunc" class="dropdown-item"><i
+                class="fa-solid fa-user-group text-brand"></i> {{ $t('switch_user') }}</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#" @click.prevent="proceedLogout()"><i
+                class="fa-solid fa-right-from-bracket text-brand"></i> {{ $t('Logout') }}</a>
+          </div>
         </div>
       </li>
     </ul>
@@ -203,12 +208,12 @@ export default {
       return false;
     },
     notificationsNotice() {
-      const cutoff = parseInt(process.env.notificationsCutoff || '100'); 
-      
+      const cutoff = parseInt(process.env.notificationsCutoff || '100');
+
       if (this.activeNotificationsLen === 0) {
         return "0";
       }
-      
+
       if (process.client && window.innerWidth < 500) {
         if (this.activeNotificationsLen > 99) return "99+";
         return String(this.activeNotificationsLen);
@@ -268,14 +273,14 @@ export default {
     setActiveChain(chain) {
       if (this.cur_bchain === chain) return;
       if (!confirm(this.$t('confirm_chain_switch').replace('_CHAIN_', chain))) return;
-      
+
       this.cur_bchain = chain;
       this.$store.commit('setBchain', this.cur_bchain);
       localStorage.setItem('cur_bchain', this.cur_bchain);
 
-      this.profImgUrl = process.env.hiveImgUrl; 
+      this.profImgUrl = process.env.hiveImgUrl;
       if (this.cur_bchain === 'STEEM') this.profImgUrl = process.env.steemImgUrl;
-      
+
       if (this.user) this.$store.dispatch('steemconnect/refreshUser');
       this.reload += 1;
     },
@@ -327,7 +332,7 @@ export default {
 
       const accToken = localStorage.getItem('access_token');
       if (!accToken) { console.warn('No access token for markAllRead'); return; }
-      
+
       const url = new URL(`${process.env.actiAppUrl}markAllRead/?user=${this.user.account.name}`);
       const reqHeads = new Headers({ 'Content-Type': 'application/json', 'x-acti-token': `Bearer ${accToken}` });
       try {
@@ -345,7 +350,7 @@ export default {
 
     this.profImgUrl = process.env.hiveImgUrl;
     if (this.cur_bchain === 'STEEM') this.profImgUrl = process.env.steemImgUrl;
-    
+
     this.$store.dispatch('fetchModerators');
     if (this.user) {
       this.updateUserData();
@@ -399,35 +404,36 @@ export default {
 #user_menu_navlink_notif,
 #user_menu_navlink_notif_empty,
 #user_menu_navlink_avatar {
-  height: auto; 
+  height: auto;
   display: flex;
   align-items: center;
 }
 
 .user-menu .nav-item {
-  margin-right: 0.8rem; 
+  margin-right: 0.8rem;
 }
+
 .user-menu .nav-item:last-child {
-  margin-right: 0; 
+  margin-right: 0;
 }
 
 .user-menu .nav-item .group-class:not(.notification-class) {
-  width: 40px; 
+  width: 40px;
   height: 40px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0; 
-  position: relative; 
+  padding: 0;
+  position: relative;
 }
 
-.user-menu .nav-item .group-class:not(.notification-class) > i,
-.user-menu .nav-item .group-class:not(.notification-class) > a > i { 
-  font-size: 1.6em; 
-  padding: 0;        
+.user-menu .nav-item .group-class:not(.notification-class)>i,
+.user-menu .nav-item .group-class:not(.notification-class)>a>i {
+  font-size: 1.6em;
+  padding: 0;
 }
 
-.notification-class { 
+.notification-class {
   background-color: red !important;
   color: white !important;
   font-size: 10px;
@@ -437,11 +443,11 @@ export default {
   text-align: center;
   justify-content: center;
   width: auto;
-  min-width: 20px; 
-  height: auto; 
-  min-height: 20px;   
-  border-radius: 50%; 
-  padding: 0;      
+  min-width: 20px;
+  height: auto;
+  min-height: 20px;
+  border-radius: 50%;
+  padding: 0;
   box-sizing: border-box;
   position: absolute;
   top: -5px;
@@ -450,81 +456,153 @@ export default {
 }
 
 .notification-bell-link .fa-bell {
-  color: #FF0000 !important; 
-}
-.notification-bell-link:hover .fa-bell {
-  color: #FF0000 !important; 
+  color: #FF0000 !important;
 }
 
-.user-avatar-medium { 
+.notification-bell-link:hover .fa-bell {
+  color: #FF0000 !important;
+}
+
+.user-avatar-medium {
   width: 30px !important;
   height: 30px !important;
 }
+
 .notif-container {
   max-height: 300px;
   overflow-y: auto;
   overflow-x: hidden;
-  min-width: 280px; 
+  min-width: 280px;
 }
-.option-opaque { opacity: 0.3; }
-@keyframes spin { 0% { transform: rotateZ(0); } 100% { transform: rotateZ(360deg); } }
-.active-spin > img { animation: spin 5s ease-in-out infinite alternate; }
-.dropdown-header { padding-left: 0px; }
-.dropdown-menu { max-height: 420px; overflow: auto; }
-.dropdown-menu::-webkit-scrollbar { width: 8px; background-color: #f5f5f5; }
-.dropdown-menu::-webkit-scrollbar-thumb { background-color: #ff112d; border-radius: 4px; }
-.dropdown-menu::-webkit-scrollbar-thumb:hover { background-color: #e0001a !important; }
-.search-li { 
-  padding: 0 !important; 
+
+.option-opaque {
+  opacity: 0.3;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotateZ(0);
+  }
+
+  100% {
+    transform: rotateZ(360deg);
+  }
+}
+
+.active-spin>img {
+  animation: spin 5s ease-in-out infinite alternate;
+}
+
+.dropdown-header {
+  padding-left: 0px;
+}
+
+.search-li {
+  padding: 0 !important;
   display: flex;
-  align-items: center; 
+  align-items: center;
+}
+
+.dropdown-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 8px 12px;
+  background-color: var(--background-color); /* this will adapt to light/dark */
+}
+.user-dropdown {
+  max-height: none;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  /* Let Bootstrap handle display:none by default */
+}
+
+/* This is the key: Apply flex layout ONLY when the dropdown is shown */
+.nav-item.dropdown.show .user-dropdown {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-height: 420px;
+  /* Hide overflow on the main flex container */
+}
+
+/* Style for the sticky header part */
+.user-info-sticky {
+  position: sticky;
+  top: 0;
+  background-color: var(--background-color);
+  z-index: 10;
+  flex-shrink: 0;
+  padding: 8px 12px;
+  border-bottom: 1px solid #ccc;
+}
+
+/* Style for the scrollable content area */
+.dropdown-scrollable {
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.dropdown-scrollable::-webkit-scrollbar {
+  width: 8px;
+  background-color: #f5f5f5;
+}
+
+.dropdown-scrollable::-webkit-scrollbar-thumb {
+  background-color: #ff112d;
+  border-radius: 4px;
+}
+
+.dropdown-scrollable::-webkit-scrollbar-thumb:hover {
+  background-color: #e0001a !important;
 }
 
 @media only screen and (max-width: 500px) {
   .user-menu-container .user-menu .nav-item {
-    margin-right: 8px !important; 
-    padding: 0 !important;        
-    display: flex;               
-    align-items: center;         
-  }
-
-  .user-menu-container .user-menu .nav-item .user-avatar, 
-  .user-menu-container .user-menu .nav-item .group-class:not(.notification-class) { 
-    width: 40px !important;   
-    height: 40px !important;  
-  }
-
-  .user-menu-container .user-menu .nav-item .user-avatar > i,
-  .user-menu-container .user-menu .nav-item .user-avatar > a > i,
-  .user-menu-container .user-menu .nav-item .group-class:not(.notification-class) > i,
-  .user-menu-container .user-menu .nav-item > a > .group-class:not(.notification-class) > i { 
-    font-size: 1.1em !important;  
-    padding: 0 !important;        
-  }
-
-  .user-menu-container .user-menu .notification-item-container {
-    position: relative; 
-    display: inline-flex; 
+    margin-right: 8px !important;
+    padding: 0 !important;
+    display: flex;
     align-items: center;
   }
 
-  .user-menu-container .user-menu .notification-class { 
+  .user-menu-container .user-menu .nav-item .user-avatar,
+  .user-menu-container .user-menu .nav-item .group-class:not(.notification-class) {
+    width: 35px !important;
+    height: 35px !important;
+  }
+
+  .user-menu-container .user-menu .nav-item .user-avatar>i,
+  .user-menu-container .user-menu .nav-item .user-avatar>a>i,
+  .user-menu-container .user-menu .nav-item .group-class:not(.notification-class)>i,
+  .user-menu-container .user-menu .nav-item>a>.group-class:not(.notification-class)>i {
+    font-size: 1.1em !important;
+    padding: 0 !important;
+  }
+
+  .user-menu-container .user-menu .notification-item-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .user-menu-container .user-menu .notification-class {
     width: 16px !important;
     height: 16px !important;
     font-size: 8px !important;
     top: -2px !important;
     left: -2px !important;
   }
-  
-  .user-menu-container .user-menu .nav-item > a:not(.dropdown-toggle) {
-     font-size: 0.8rem;
-  }
-  .notification-class { 
-  width: auto;
-  min-width: 10px; 
-  height: auto; 
-  min-height: 10px;   
-}
 
+  .user-menu-container .user-menu .nav-item>a:not(.dropdown-toggle) {
+    font-size: 0.8rem;
+  }
+
+  .notification-class {
+    width: auto;
+    height: auto;
+    min-width: 10px;
+    min-height: 10px;
+  }
 }
 </style>
