@@ -3,7 +3,7 @@
     <!--<script src="https://www.google.com/recaptcha/api.js?onload=vueRecaptchaApiLoaded&render=explicit" async defer></script> -->
     <NavbarBrand />
 
-    <section class="intro bg-light" id="content">
+    <section class="intro" id="content">
       <div class="container pt-5 mt-5 pb-5">
 
 

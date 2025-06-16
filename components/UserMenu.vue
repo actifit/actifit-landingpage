@@ -83,11 +83,11 @@
           <div class="user-avatar group-class"
             :style="'background-image: url(' + profImgUrl + '/u/' + user.account.name + '/avatar)'"></div>
         </a>
-        <div class="dropdown-menu dropdown-menu-right">
-          <h6 class="dropdown-header"><a class="dropdown-item" href="#"
+        <div class="dropdown-menu dropdown-menu-right user-dropdown">
+          <div class="dropdown-header user-info-sticky"><a class="dropdown-item" href="#"
               @click.prevent="$router.push('/' + user.account.name)"><i
-                class="fa-solid fa-user text-brand"></i>&nbsp;@{{ user.account.name }}</a></h6>
-          <div class="dropdown-divider"></div>
+                class="fa-solid fa-user text-brand"></i>&nbsp;@{{ user.account.name }}</a></div>
+          <div class="dropdown-scrollable">
           <a class="dropdown-item text-brand" href="#" @click.prevent="$router.push('/mods-access/')"
             v-if="isUserModerator">Moderation</a>
           <div class="dropdown-divider" v-if="isUserModerator"></div>
@@ -142,7 +142,7 @@
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="#" @click.prevent="proceedLogout()"><i
               class="fa-solid fa-right-from-bracket text-brand"></i>&nbsp;{{ $t('Logout') }}</a>
-        </div>
+        </div></div>
       </li>
     </ul>
     <LoginModal v-if="showModal" @close="showModal = false" />
