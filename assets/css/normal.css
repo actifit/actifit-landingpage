@@ -6,6 +6,7 @@
   --ab-background-color: beige;
   --text-color: #000;
   --inv-text-color: #fff;
+  --notif-text-color: #000;
   --text-brand: #ff4500;
   --hover-color: #000000;
   --nav-col: rgba(255, 255, 255, 0.8);
@@ -19,6 +20,7 @@
 .dark-mode {
   --primary-color: #ffffff;
   --background-color: #212121;
+  --notif-text-color: #fff;
   --background-color-1: #303030;
   --background-color-2: #303030;
   --ab-background-color: black;
@@ -180,8 +182,6 @@ a:hover {
   overflow-y: auto;
   flex-grow: 1;
 }
-
-
 
 .table {
   background-color: var(--background-color);
