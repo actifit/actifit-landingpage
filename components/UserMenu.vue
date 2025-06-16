@@ -81,7 +81,6 @@
               @click.prevent="$router.push('/' + user.account.name)"><i class="fa-solid fa-user text-brand"></i> @{{
                 user.account.name }}</a></div>
           <div class="dropdown-scrollable">
-            <div class="dropdown-divider"></div>
             <a class="dropdown-item text-brand" href="#" @click.prevent="$router.push('/mods-access/')"
               v-if="isUserModerator">Moderation</a>
             <div class="dropdown-divider" v-if="isUserModerator"></div>
@@ -418,8 +417,8 @@ export default {
 }
 
 .user-menu .nav-item .group-class:not(.notification-class) {
-  width: 40px;
-  height: 40px;
+  width: 35px;
+  height: 35px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -429,7 +428,7 @@ export default {
 
 .user-menu .nav-item .group-class:not(.notification-class)>i,
 .user-menu .nav-item .group-class:not(.notification-class)>a>i {
-  font-size: 1.6em;
+  font-size: 1.4em;
   padding: 0;
 }
 
@@ -443,14 +442,14 @@ export default {
   text-align: center;
   justify-content: center;
   width: auto;
-  min-width: 20px;
+  min-width: 17px;
   height: auto;
-  min-height: 20px;
+  min-height: 17px;
   border-radius: 50%;
   padding: 0;
   box-sizing: border-box;
   position: absolute;
-  top: -5px;
+  top: -4px;
   left: -7px;
   z-index: 10;
 }
@@ -508,8 +507,10 @@ export default {
   top: 0;
   z-index: 100;
   padding: 8px 12px;
-  background-color: var(--background-color); /* this will adapt to light/dark */
+  background-color: var(--background-color);
+  /* this will adapt to light/dark */
 }
+
 .user-dropdown {
   max-height: none;
   display: none;
@@ -568,15 +569,15 @@ export default {
 
   .user-menu-container .user-menu .nav-item .user-avatar,
   .user-menu-container .user-menu .nav-item .group-class:not(.notification-class) {
-    width: 35px !important;
-    height: 35px !important;
+    width: 30px !important;
+    height: 30px !important;
   }
 
   .user-menu-container .user-menu .nav-item .user-avatar>i,
   .user-menu-container .user-menu .nav-item .user-avatar>a>i,
   .user-menu-container .user-menu .nav-item .group-class:not(.notification-class)>i,
   .user-menu-container .user-menu .nav-item>a>.group-class:not(.notification-class)>i {
-    font-size: 1.1em !important;
+    font-size: 1em !important;
     padding: 0 !important;
   }
 
@@ -587,22 +588,22 @@ export default {
   }
 
   .user-menu-container .user-menu .notification-class {
-    width: 16px !important;
-    height: 16px !important;
+    width: 15px !important;
+    height: 15px !important;
     font-size: 8px !important;
     top: -2px !important;
-    left: -2px !important;
-  }
-
-  .user-menu-container .user-menu .nav-item>a:not(.dropdown-toggle) {
-    font-size: 0.8rem;
+    left: -6px !important;
   }
 
   .notification-class {
     width: auto;
     height: auto;
-    min-width: 10px;
-    min-height: 10px;
+    min-width: 5px;
+    min-height: 5px;
+  }
+
+  .user-menu-container .user-menu .nav-item>a:not(.dropdown-toggle) {
+    font-size: 0.9rem;
   }
 }
 </style>
