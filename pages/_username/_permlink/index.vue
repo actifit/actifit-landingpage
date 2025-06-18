@@ -2,199 +2,191 @@
   <div>
     <NavbarBrand />
 
-    <div v-if="report && report.author" class="container pt-5 mt-5 pb-5 col-md-6">
-      <div class="text-right">
-        <ChainSelection />
-      </div>
-      <div class="report-head mb-3 col-md-12">
-       
-        <div v-if="report.parent_author" class="text-right">
-          <UserHoverCard :username="report.parent_author" />
-          <i class="fas fa-reply text-brand"></i> {{ $t('viewing_comment_note') }} <a
-            :href="buildParentLink">{{ $t('view_parent_thread') }}</a>
-        </div>
-
-        <h2>{{ report.title }}</h2>
-        <div class="main-user-info pl-4">
-          <h5 class="text-brand">
-            <UserHoverCard :username="report.author" />
-          </h5>
-          <a :href="buildLink" class="p-1"><span class="date-head spec-btns" :title="date">{{ $getTimeDifference(report.created)
-              }}</span> <i class="fas fa-link spec-btns"></i></a>
-          <i :title="$t('copy_link')" class="fas fa-copy spec-btns" v-on:click="copyContent"></i>
-        
-          <i v-if="translationLoading" class="fas fa-spinner fa-spin spec-btns" :title="$t('translating_content', 'Translating...')"></i>
-          <i v-else-if="!showTranslated" class="fa-solid fa-language spec-btns" v-on:click="translateContent" :title="$t('translate_content', 'Translate Content')"></i>
-          <div>
-            <span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i
-                  class="text-white fas fa-reply"></i></a></span>
-
-            <span class="ml-1">
-              <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand"
-                data-target="#voteModal" v-if="this.user && userVotedThisPost() == true">
-                <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
-              </a>
-              <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" data-target="#voteModal"
-                class="actifit-link-plain" v-else>
-                <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
-              </a>
-              <span class="spec-btns"><i class="far fa-comments ml-2" @click.prevent="headToComments()"></i> {{
-                report.children }}
-                <i class="far fa-share-square ml-2" @click.prevent="$reblog(user, report)"
-                  v-if="user && report.author != this.user.account.name" :title="$t('reblog')"></i></span>
-            </span>
+    <div v-if="!isLoading && report && report.author" class="container-fluid px-md-3 pt-5 mt-5 pb-5">
+      <div class="row">
+        <!-- Main Content Column -->
+        <div class="col-md-8 order-md-2">
+          <div class="text-right">
+            <ChainSelection />
           </div>
-          <div class="modal-header">
-            <div class="report-tags p-1" v-html="$fetchReportTags(report)"></div>
-          </div>
-        </div>
-        <div v-if="showTranslated" class="translation-notice">
-          <span>{{ $t('auto_translated_content') }}</span>
-          <a href="#" v-on:click.prevent="cancelTranslation">{{ $t('click_to_view_original') }}</a>
-        </div>
-      </div>
-      <vue-remarkable class="col-md-12" ref="remarkableContent" :source="body"
-        :options="{ 'html': true, 'breaks': true, 'typographer': true }"></vue-remarkable>
-      <div class="modal-footer col-md-12 main-payment-info" id="main-footer">
-        <div class="report-modal-prelim-info col-md-6">
-          <span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i
-                class="text-white fas fa-reply"></i></a></span>
+          <div class="report-head mb-3 col-md-12" ref="reportHead">
+            <div v-if="report.parent_author" class="text-right">
+              <UserHoverCard :username="report.parent_author" />
+              <i class="fas fa-reply text-brand"></i> {{ $t('viewing_comment_note') }} <a
+                :href="buildParentLink">{{ $t('view_parent_thread') }}</a>
+            </div>
 
-          <span class="ml-1">
-            <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand"
-              data-target="#voteModal" v-if="this.user && userVotedThisPost() == true">
-              <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
-            </a>
-            <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" data-target="#voteModal"
-              class="actifit-link-plain" v-else>
-              <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
-            </a>
-            <i class="far fa-comments ml-2"></i> {{ report.children }}
-            <i class="far fa-share-square ml-2" @click.prevent="$reblog(user, report)"
-              v-if="user && report.author != this.user.account.name" :title="$t('reblog')"></i>
-          </span>
-          <div>
-            <span :title="afitReward + ' ' + $t('AFIT_Token')">
-              <img src="/img/actifit_logo.png" class="mr-1 currency-logo-small">{{ afitReward }} {{ $t('AFIT_Token') }}
-            </span>
-            <span :title="postPayout">
-              <img src="/img/STEEM.png" class="mr-1 currency-logo-small" v-if="cur_bchain == 'STEEM'">
-              <img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain == 'HIVE'">
-              <img src="/img/BLURT.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain == 'BLURT'">
-              <span v-if="postPaid()">
-                <span class="m-1" :title="$t('author_payout')">
-                  <i class="fa-solid fa-user"></i>
-                  {{ paidValue() }}
+            <h2>{{ report.title }}</h2>
+            <div class="main-user-info pl-4" ref="reportTarget">
+              <h5 class="text-brand">
+                <UserHoverCard :username="report.author" />
+              </h5>
+              <a :href="buildLink" class="p-1"><span class="date-head spec-btns" :title="date">{{ $getTimeDifference(report.created) }}</span> <i class="fas fa-link spec-btns"></i></a>
+              <i :title="$t('copy_link')" class="fas fa-copy spec-btns" v-on:click="copyContent"></i>
+              <i v-if="translationLoading" class="fas fa-spinner fa-spin spec-btns" :title="$t('translating_content', 'Translating...')"></i>
+<i v-else-if="!showTranslated" class="fa-solid fa-language spec-btns" v-on:click="translateContent" :title="$t('translate_content', 'Translate Content')"></i>
+              <div>
+                <span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i
+                      class="text-white fas fa-reply"></i></a></span>
+
+                <span class="ml-1">
+                  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand"
+                    data-target="#voteModal" v-if="user && userVotedThisPost() == true">
+                    <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
+                  </a>
+                  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" data-target="#voteModal"
+                    class="actifit-link-plain" v-else>
+                    <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
+                  </a>
+                  <span class="spec-btns"><i class="far fa-comments ml-2" @click.prevent="headToComments()"></i> {{ report.children }}
+                    <i class="far fa-share-square ml-2" @click.prevent="$reblog(user, report)"
+                      v-if="user && report.author != user.account.name" :title="$t('reblog')"></i></span>
                 </span>
-                <span class="m-1" :title="$t('voters_payout')">
-                  <i class="fa-solid fa-users"></i>
-                  {{ report.curator_payout_value }}
-                </span>
-                <i class="fa-solid fa-check text-green text-bold"></i>
-              </span>
-              <span v-else>
-                <span class="text-bold">{{ report.pending_payout_value.replace('SBD', '') }}</span>
-                <i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
-              </span>
-              <span v-if="hasBeneficiaries()" :title="beneficiariesDisplay()">
-                <i class="fas fa-user-pen"><sup>{{ report.beneficiaries.length }}</sup></i>
-              </span>
-            </span>
-            <span @click.prevent="displayMorePayoutData = !displayMorePayoutData" class="text-brand pointer-cur-cls"
-              :title="$t('more_token_rewards')">
-              <i class="fas fa-chevron-circle-down" v-if="!displayMorePayoutData"></i>
-              <i class="fas fa-chevron-circle-up" v-else></i>
-            </span>
-            <transition name="fade" v-if="displayMorePayoutData">
-              <div class="m-2">
-                <small v-for="(token, index) in tokenRewards" :key="index" :title="displayTokenValue(token)">
-                  {{ displayTokenValue(token) }} |
-                </small>
               </div>
-            </transition>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <social-sharing :url="formattedReportUrl" :title="report.title" :description="socialSharingDesc"
-            :quote="socialSharingQuote" :hashtags="hashtags" twitter-user="actifit_fitness" inline-template>
-            <div class="share-links-actifit">
-              <network network="facebook"><i class="fab fa-facebook" title="facebook"></i></network>
-              <network network="twitter"><i class="fab fa-twitter" title="twitter"></i></network>
-              <network network="telegram"><i class="fab fa-telegram" title="telegram"></i></network>
-              <network network="whatsapp"><i class="fab fa-whatsapp" title="whatsapp"></i></network>
-              <network network="linkedin"><i class="fab fa-linkedin" title="linkedin"></i></network>
-              <network network="reddit"><i class="fab fa-reddit" title="reddit"></i></network>
-              <network network="skype"><i class="fab fa-skype" title="skype"></i></network>
-              <network network="sms"><i class="fas fa-comment" title="SMS"></i></network>
-              <network network="email"><i class="fa fa-envelope" title="email"></i></network>
+              <div class="modal-header">
+                <div class="report-tags p-1" v-html="$fetchReportTags(report)"></div>
+              </div>
             </div>
-          </social-sharing>
-        </div>
-      </div>
-      <div class="modal-footer col-md-12" v-if="this.meta.full_afit_pay == 'on'">
-        <div class="text-brand">
-          <i class="fas fa-star"></i><small>{{ $t('Full_AFIT_Payout_Mode') }}</small><i class="fas fa-star"></i>
-        </div>
-        <div class="text-brand" v-if="!postPaid()"><small>{{ $t('Pending_Pay') }}</small></div>
-        <div class="text-brand" v-else><small>{{ fullAFITReward }} {{ $t('AFIT_Token') }}</small></div>
-      </div>
-      <div class="modal-footer col-md-12 text-brand" v-if="this.meta.charity">
-        <i class="fas fa-dove"></i><small>{{ $t('Charity_Post') }}</small><i class="fas fa-dove"></i>
-        <small><a :href="this.meta.charity[0]" target="_blank">@{{ this.meta.charity[0] }}</a></small>
-      </div>
-      <transition name="fade">
-        <div class="report-reply col-md-12" v-if="commentBoxOpen">
-          <CustomTextEditor ref="editor" :initialContent="replyBody"></CustomTextEditor>
-          <div class="modal-footer m-2" style="display:none">
-            <div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-if="cur_bchain == 'HIVE'">
-              <input type="radio" id="hive" value="HIVE" v-model="target_bchain">
-              <img src="/img/HIVE.png" style="max-height: 50px" v-on:click="target_bchain = 'HIVE'" :class="adjustHiveClass">
-              <label for="hive">HIVE ONLY</label>
-            </div>
-            <div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-else-if="cur_bchain == 'STEEM'">
-              <input type="radio" id="steem" value="STEEM" v-model="target_bchain">
-              <img src="/img/STEEM.png" style="max-height: 50px" v-on:click="target_bchain = 'STEEM'" :class="adjustSteemClass">
-              <label for="steem">STEEM ONLY</label>
-            </div>
-            <div class="bchain-option btn col-6 p-2 row text-left  mx-auto">
-              <input type="radio" id="hive_steem" value="BOTH" v-model="target_bchain">
-              <img src="/img/HIVE.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px" :class="adjustBothClass">
-              <img src="/img/STEEM.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px" :class="adjustBothClass">
-              <label for="hive_steem">HIVE + STEEM</label>
+            <div v-if="showTranslated" class="translation-notice">
+              <span>{{ $t('auto_translated_content') }}</span>
+              <a href="#" v-on:click="cancelTranslation">{{ $t('click_to_view_original') }}</a>
             </div>
           </div>
-          <a href="#" @click.prevent="postResponse($event)" class="btn btn-brand border reply-btn w-25">
-            {{ $t('Post') }}
-            <img src="/img/HIVE.png" style="max-height: 25px" v-if="target_bchain == 'HIVE' || target_bchain == 'BOTH'">
-            <img src="/img/STEEM.png" style="max-height: 25px" v-if="target_bchain == 'STEEM' || target_bchain == 'BOTH'">
-            <i class="fas fa-spin fa-spinner" v-if="loading"></i>
-          </a>
-          <a href="#" @click.prevent="resetOpenComment()" class="btn btn-brand border reply-btn w-25">{{ $t('Cancel') }}</a>
-          <a href="#" @click.prevent="insertModSignature" class="btn btn-brand border reply-btn w-25"
-            v-if="(this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator'))">{{ $t('Short_Signature') }}</a>
-          <a href="#" @click.prevent="insertFullModSignature" class="btn btn-brand border reply-btn w-25"
-            v-if="(this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator'))">{{ $t('Full_Signature') }}</a>
+          <vue-remarkable class="col-md-12" ref="remarkableContent" :source="body"
+            :options="{ 'html': true, 'breaks': true, 'typographer': true }"></vue-remarkable>
+
+        
+          <div class="modal-footer col-md-12 main-payment-info" id="main-footer">
+            <div class="report-modal-prelim-info col-md-6">
+              <span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i
+                    class="text-white fas fa-reply"></i></a></span>
+
+              <span class="ml-1">
+                <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand"
+                  data-target="#voteModal" v-if="user && userVotedThisPost() == true">
+                  <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
+                </a>
+                <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" data-target="#voteModal"
+                  class="actifit-link-plain" v-else>
+                  <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
+                </a>
+                <i class="far fa-comments ml-2" @click.prevent="headToComments()"></i> {{ report.children }}
+                <i class="far fa-share-square ml-2" @click.prevent="$reblog(user, report)"
+                  v-if="user && report.author != user.account.name" :title="$t('reblog')"></i>
+              </span>
+              <div>
+                
+                <span :title="afitReward + ' ' + $t('AFIT_Token')">
+                  <i class="fas fa-running text-brand mr-1"></i>{{ afitReward }} {{ $t('AFIT_Token') }}
+                </span>
+                <span :title="postPayout">
+                  <img src="/img/STEEM.png" class="mr-1 currency-logo-small" v-if="cur_bchain == 'STEEM'">
+                  <img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain == 'HIVE'">
+                  <img src="/img/BLURT.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain == 'BLURT'">
+                  <span v-if="postPaid()">
+                    <span class="m-1" :title="$t('author_payout')"><i class="fa-solid fa-user"></i> {{ paidValue() }}</span>
+                    <span class="m-1" :title="$t('voters_payout')"><i class="fa-solid fa-users"></i> {{ report.curator_payout_value }}</span>
+                    <i class="fa-solid fa-check text-green text-bold"></i>
+                  </span>
+                  <span v-else>
+                    <span class="text-bold">{{ report.pending_payout_value.replace('SBD', '') }}</span>
+                    <i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
+                  </span>
+                  <span v-if="hasBeneficiaries()" :title="beneficiariesDisplay()">
+                    <i class="fas fa-user-pen"><sup>{{ report.beneficiaries.length }}</sup></i>
+                  </span>
+                </span>
+                <span @click.prevent="displayMorePayoutData = !displayMorePayoutData" class="text-brand pointer-cur-cls"
+                  :title="$t('more_token_rewards')">
+                  <i class="fas fa-chevron-circle-down" v-if="!displayMorePayoutData"></i>
+                  <i class="fas fa-chevron-circle-up" v-else></i>
+                </span>
+                <transition name="fade" v-if="displayMorePayoutData">
+                  <div class="m-2">
+                    <small v-for="(token, index) in tokenRewards" :key="index" :title="displayTokenValue(token)">
+                      {{ displayTokenValue(token) }} |
+                    </small>
+                  </div>
+                </transition>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <social-sharing :url="formattedReportUrl" :title="report.title" :description="socialSharingDesc"
+                :quote="socialSharingQuote" :hashtags="hashtags" twitter-user="actifit_fitness" inline-template>
+                <div class="share-links-actifit">
+                  <network network="facebook"><i class="fab fa-facebook" title="facebook"></i></network>
+                  <network network="twitter"><i class="fab fa-twitter" title="twitter"></i></network>
+                  <network network="telegram"><i class="fab fa-telegram" title="telegram"></i></network>
+                  <network network="whatsapp"><i class="fab fa-whatsapp" title="whatsapp"></i></network>
+                  <network network="linkedin"><i class="fab fa-linkedin" title="linkedin"></i></network>
+                  <network network="reddit"><i class="fab fa-reddit" title="reddit"></i></network>
+                  <network network="skype"><i class="fab fa-skype" title="skype"></i></network>
+                  <network network="sms"><i class="fas fa-comment" title="SMS"></i></network>
+                  <network network="email"><i class="fa fa-envelope" title="email"></i></network>
+                </div>
+              </social-sharing>
+            </div>
+          </div>
+          <div class="modal-footer col-md-12" v-if="meta.full_afit_pay == 'on'">
+            <div class="text-brand"><i class="fas fa-star"></i><small> {{ $t('Full_AFIT_Payout_Mode') }} </small><i class="fas fa-star"></i></div>
+            <div class="text-brand" v-if="!postPaid()"><small> {{ $t('Pending_Pay') }} </small></div>
+            <div class="text-brand" v-else><small> {{ fullAFITReward }} {{ $t('AFIT_Token') }} </small></div>
+          </div>
+          <div class="modal-footer col-md-12 text-brand" v-if="meta.charity">
+            <i class="fas fa-dove"></i><small> {{ $t('Charity_Post') }} </small><i class="fas fa-dove"></i>
+            <small><a :href="meta.charity[0]" target="_blank">@{{ meta.charity[0] }}</a></small>
+          </div>
+          <transition name="fade">
+            <div class="report-reply col-md-12" v-if="commentBoxOpen">
+              <CustomTextEditor ref="editor" :initialContent="replyBody"></CustomTextEditor>
+              <a href="#" @click.prevent="postResponse($event)" class="btn btn-brand border reply-btn w-25">
+                {{ $t('Post') }}
+                <i class="fas fa-spin fa-spinner" v-if="loading"></i>
+              </a>
+              <a href="#" @click.prevent="resetOpenComment()" class="btn btn-brand border reply-btn w-25">{{ $t('Cancel') }}</a>
+              <a href="#" @click.prevent="insertModSignature" class="btn btn-brand border reply-btn w-25"
+                v-if="(user && moderators.find(mod => mod.name == user.account.name && mod.title == 'moderator'))">{{ $t('Short_Signature') }}</a>
+              <a href="#" @click.prevent="insertFullModSignature" class="btn btn-brand border reply-btn w-25"
+                v-if="(user && moderators.find(mod => mod.name == user.account.name && mod.title == 'moderator'))">{{ $t('Full_Signature') }}</a>
+            </div>
+          </transition>
+          <div class="report-reply col-md-12" v-if="responsePosted">
+            <a target="_blank"><div class="comment-user-section"><UserHoverCard :username="user.account.name" /></div></a>
+            <vue-remarkable :source="responseBody" :options="{ 'html': true, 'breaks': true, 'typographer': true }"></vue-remarkable>
+          </div>
+          <div class="report-comments modal-body" v-if="report.children > 0" ref="commentsSection">
+            <div v-if="commentsLoading" class="pb-md-2 text-center">
+              <i class="fas fa-spinner fa-spin text-brand"></i>
+            </div>
+            <Comments v-if="commentsAvailable" :author="commentEntries.author" :body="commentEntries.body"
+              :reply_entries.sync="commentEntries.reply_entries" :main_post_author="report.author"
+              :main_post_permlink="report.permlink" :main_post_cat="report.category" :depth="0" :key="reload" />
+          </div>
+
         </div>
-      </transition>
-      <div class="report-reply col-md-12" v-if="responsePosted">
-        <a target="_blank"><div class="comment-user-section"><UserHoverCard :username="user.account.name" /></div></a>
-        <vue-remarkable :source="responseBody" :options="{ 'html': true, 'breaks': true, 'typographer': true }"></vue-remarkable>
-      </div>
-      <div class="report-comments modal-body" v-if="report.children > 0">
-        <div v-if="showCommentsLoader" class="pb-md-2 text-center"><i class="fas fa-spinner fa-spin text-brand"></i></div>
-        <Comments v-if="commentsAvailable" :author="commentEntries.author" :body="commentEntries.body"
-          :reply_entries.sync="commentEntries.reply_entries" :main_post_author="report.author"
-          :main_post_permlink="report.permlink" :main_post_cat="report.category" :depth="0" :key="reload" />
+        
+        <!-- UserSidebar Column -->
+        <UserSidebar 
+          :report="report"
+          :author-account-info="authorAccountInfo"
+          :author-afit-balance="authorAfitBalance"
+          :user-rank="userRank"
+          class="align-to-content"
+        />
       </div>
     </div>
-    <div v-else-if="errorDisplay" class="container pt-5 mt-5 pb-5 col-md-6" >
-      <div class="text-right"><ChainSelection /></div>
+    
+    <div v-else-if="errorDisplay" class="container pt-5 mt-5 pb-5">
       <div class="mb-3 text-center"><h4>{{ errorDisplay }}</h4></div>
     </div>
-    <div v-else class="container pt-5 mt-5 pb-5"><div class="mb-3 text-center"><i class="fas fa-spin fa-spinner text-brand"></i></div></div>
+    
+    <div v-else class="container pt-5 mt-5 pb-5">
+      <div class="mb-3 text-center"><i class="fas fa-spin fa-spinner fa-3x text-brand"></i></div>
+    </div>
+
     <VoteModal />
     <NotifyModal :modalTitle="$t('Actifit_Info')" :modalText="$t('VP_desc')" />
-    <NotifyModal id="notifyModalRC" ref="notifyModalRC" :modalTitle="$t('Actifit_Info')" :modalText="$t('RC_desc')" />
+    
     <client-only>
       <div>
         <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
@@ -207,437 +199,337 @@
 </template>
 
 <script>
-
+import hive from '@hiveio/hive-js'
+import steem from 'steem'
+import blurt from '@blurtfoundation/blurtjs'
+import { mapGetters } from 'vuex'
+import VueScrollTo from 'vue-scrollto'
 import { translateTextWithGemini } from '~/components/gemini-client.js';
 
-import UserHoverCard from '~/components/UserHoverCard.vue'
 import NavbarBrand from '~/components/NavbarBrand'
 import ChainSelection from '~/components/ChainSelection'
 import Footer from '~/components/Footer'
-import steem from 'steem'
-import { mapGetters } from 'vuex'
-import Comments from '~/components/Comments'
-import NotifyModal from '~/components/NotifyModal'
-import vueRemarkable from 'vue-remarkable';
-import CustomTextEditor from '~/components/CustomTextEditor'
-import SocialSharing from 'vue-social-sharing'
 import VoteModal from '~/components/VoteModal'
-import sanitize from 'sanitize-html'
-import hive from '@hiveio/hive-js'
-import blurt from '@blurtfoundation/blurtjs'
-import '@quochuync/remarkable-spoiler/styles.css';
-import VueScrollTo from 'vue-scrollto'
-import { mavonEditor } from 'mavon-editor'
-const md = mavonEditor.getMarkdownIt()
+import NotifyModal from '~/components/NotifyModal'
+import UserHoverCard from '~/components/UserHoverCard.vue'
+import CustomTextEditor from '~/components/CustomTextEditor'
+import Comments from '~/components/Comments'
+import SocialSharing from 'vue-social-sharing'
+import vueRemarkable from 'vue-remarkable'
+import UserSidebar from '~/components/UserSidebar.vue'
+
 const scot_steemengine_api = process.env.steemEngineScot;
 const scot_hive_api_param = process.env.hiveEngineScotParam;
 
 export default {
-  head() {
-    return {
-      title: `${this.postTitle} by ${this.username} - Actifit`,
-      meta: [
-        { hid: 'title', name: 'og:title', 'property': 'og:title', content: `${this.postTitle} by ${this.username} - Actifit` },
-        { hid: 'description', name: 'description', content: `${this.desc} by ${this.username}` },
-        { hid: 'ogdescription', name: 'og:description', 'property': 'og:description', content: `${this.desc} by ${this.username}` },
-        { hid: 'image', name: 'og:image', 'property': 'og:image', content: `${this.postImg}` }
-      ],
-      link: [ { rel: 'canonical', href: `${this.canonUrl}` } ]
-    }
+  components: {
+    NavbarBrand, ChainSelection, Footer, VoteModal, NotifyModal, UserHoverCard,
+    CustomTextEditor, Comments, SocialSharing, vueRemarkable, UserSidebar
   },
-  async asyncData({ params, app }) {
-    let chainLnk = hive;
-    await chainLnk.api.setOptions({ url: process.env.hiveApiNode });
-    let user_name = params.username.replace('@', '');
-    let result = await chainLnk.api.getContentAsync(user_name, params.permlink);
-    let is_steem = false;
-    if (!result || !result.author) {
-      chainLnk = blurt;
-      await chainLnk.api.setOptions({ url: process.env.blurtApiNode });
-      result = await chainLnk.api.getContentAsync(user_name, params.permlink);
-      is_steem = false;
-    }
-    try {
-      let post_meta = JSON.parse(result.json_metadata)
-      let imgs = post_meta.image;
-      let meta_spec = { postTitle: result.title || 'Comment' }
-      if (Array.isArray(imgs) && imgs.length > 0) { meta_spec.postImg = imgs[0]; }
-      let canonUrl = '';
-      if (post_meta.app) {
-        let src_app = post_meta.app.split('/')[0];
-        let post_cat = result.category;
-        if (!post_cat) { post_cat = post_meta.community; }
-        let appsPatterns = process.env.hiveAppsScript;
-        if (is_steem) { appsPatterns = process.env.steemAppsScript; }
-        for (let appPat in appsPatterns) {
-          if (src_app.toLowerCase() == appPat.toLowerCase()) {
-            if (appsPatterns[appPat].url_scheme) {
-              canonUrl = appsPatterns[appPat].url_scheme.replace('{username}', user_name).replace('{permlink}', params.permlink).replace('{category}', post_cat);
-            }
-            break;
-          }
-        }
-      }
-      meta_spec.canonUrl = canonUrl;
-      let desc = sanitize(result.body, { allowedTags: [] });
-      let img_links_reg = /[!]?\[[\d\w\s-\.\(\)]*\]\(((((https?:\/\/usermedia\.actifit\.io\/))|((https:\/\/ipfs\.busy\.org\/ipfs\/))|((https:\/\/steemitimages\.com\/)))[\d\w-[\:\/\.\%]+|(https?:\/\/[.\d\w-\/\:\%\(\)]*\.(?:png|jpg|jpeg|gif)))[)]/igm;
-      desc = desc.replace(img_links_reg, '');
-      img_links_reg = /(((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|((https:\/\/ipfs\.busy\.org\/ipfs\/)[\d\w-]+)|((https:\/\/steemitimages\.com\/)[\d\w-[\:\/\.]+)|(https?:\/\/[.\/\d\w-]*\.(?:png|jpg|jpeg|gif)))[\s]/igm;
-      desc = desc.replace(img_links_reg, '');
-      desc = desc.replace(/\s+/g, ' ');
-      desc = desc.replace(/\#/g, '').replace(/\*/g, '').replace(/\_/g, '');
-      if (desc.length > 140) { desc = desc.substr(0, 140) + '...'; }
-      meta_spec.desc = desc;
-      return meta_spec;
-    } catch (preerr) {
-      console.log(preerr);
-      return '';
-    }
-  },
+  head() { return { title: this.pageTitle } },
   data() {
     return {
-      commentsLoading: true,
-      translatedText: '',
-      safety_post_content: ``,
-      showTranslated: false,
-      translationLoading: false,
-      translationError: '',
-      report: '',
-      postAuthor: '',
+      isLoading: true,
+      report: null,
       errorDisplay: '',
+      // Sidebar data
+      authorAccountInfo: null,
+      authorAfitBalance: null,
+      userRank: null,
+      // Main content data
       afitReward: 0,
-      tokenRewards: [],
-      userRank: '',
       fullAFITReward: '',
-      postUpvoted: false,
-      replyBody: '',
-      moderatorSignature: '',
+      tokenRewards: [],
+      commentsLoading: true,
       commentBoxOpen: false,
-      loading: false,
+      replyBody: '',
       responsePosted: false,
       responseBody: '',
-      editorConfig: { autofocus: true, spellChecker: false, forceSync: true, promptURLs: true },
+      moderatorSignature: '',
+      loading: false,
+      pageTitle: 'Actifit Report',
+      showTranslated: false,
+      safety_post_content: '',
+	translationLoading: false, 
+    translatedText: '', 
+      reload: 0,
+      resizeObserver: null,
       displayMorePayoutData: false,
       cur_bchain: 'HIVE',
-      target_bchain: 'HIVE',
-      reload: 0,
-      profImgUrl: process.env.hiveImgUrl,
-      socialSharingTitle: process.env.socialSharingTitle,
       socialSharingDesc: process.env.socialSharingDesc,
       socialSharingQuote: process.env.socialSharingQuote,
       hashtags: process.env.socialSharingHashtags,
-      imageError: new Set(),
     }
   },
-  watch: {
-    report: 'fetchReportData',
-    postUpvoted: 'updatePostData',
-    user: 'fetchUserData',
-    bchain: async function (newBchain) {
-      this.cur_bchain = newBchain;
-      await this.$store.dispatch('steemconnect/refreshUser');
-      await this.updatePostData();
-      this.profImgUrl = process.env.hiveImgUrl;
-      if (this.cur_bchain == 'STEEM') { this.profImgUrl = process.env.steemImgUrl; }
-      this.reload += 1;
-    },
-    'report.body': { handler() { this.$nextTick(() => { this.attachImageErrorHandlers(); }); } }
-  },
-  components: { NavbarBrand, Footer, CustomTextEditor, vueRemarkable, Comments, SocialSharing, VoteModal, NotifyModal, ChainSelection, UserHoverCard, },
   computed: {
-    ...mapGetters('steemconnect', ['user']),
-    ...mapGetters('steemconnect', ['stdLogin']),
-    ...mapGetters(['newlyVotedPosts']),
-    ...mapGetters(['commentEntries'], 'commentCountToday'),
-    ...mapGetters(['moderators', 'bchain']),
-    buildParentLink() { return '/' + this.report.parent_author + '/' + this.report.parent_permlink; },
-    buildLink() { return '/' + this.report.author + '/' + this.report.permlink; },
-    adjustHiveClass() { if (this.target_bchain != 'HIVE') { return 'option-opaque'; } return ''; },
-    adjustSteemClass() { if (this.target_bchain != 'STEEM') { return 'option-opaque'; } return ''; },
-    adjustBothClass() { if (this.target_bchain != 'BOTH') { return 'option-opaque'; } return ''; },
-    username() { if (this.$route.params.username.startsWith('@')) { return this.$route.params.username.substring(1, this.$route.params.username.length); } return this.$route.params.username },
-    date() { let date = new Date(this.report.created); let minutes = date.getMinutes(); return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() + ' ' + date.getHours() + ':' + (minutes < 10 ? '0' + minutes : minutes) },
-    body() { return this.$cleanBody(this.report.body); },
-    getVoteCount() { return Array.isArray(this.report.active_votes) ? this.report.active_votes.length : 0; },
-    formattedReportUrl() { return "https://actifit.io/@" + this.report.author + '/' + this.report.permlink; },
-    meta() { return JSON.parse(this.report.json_metadata) },
-    postPayout() { if (this.postPaid()) { return ''; } else { return this.report.pending_payout_value.replace('SBD', '').replace('STEEM', '').replace('HBD', '').replace('HIVE', '') + ' $' } },
-    displayCoreUserRank() { return (this.userRank ? parseFloat(this.userRank.rank_no_afitx).toFixed(2) : ''); },
-    displayIncreasedUserRank() { return '(+' + parseFloat(this.userRank.afitx_rank).toFixed(2) + ')'; },
-    commentsAvailable() { return this.commentEntries != null && !this.commentsLoading; },
-    showCommentsLoader() { return this.report.children > 0 && this.commentsLoading; }
+    ...mapGetters('steemconnect', ['user', 'stdLogin']),
+    ...mapGetters(['commentEntries', 'newlyVotedPosts', 'bchain', 'moderators', 'commentCountToday']),
+    body() {
+      return this.report ? this.$cleanBody(this.report.body) : '';
+    },
+    commentsAvailable() {
+      return this.commentEntries != null && !this.commentsLoading;
+    },
+    date() {
+      if (!this.report) return '';
+      const date = new Date(this.report.created)
+      const minutes = date.getMinutes()
+      return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${date.getHours()}:${minutes < 10 ? '0' + minutes : minutes}`
+    },
+    meta() {
+      try {
+        if (this.report && this.report.json_metadata) {
+          return JSON.parse(this.report.json_metadata);
+        }
+      } catch (e) {}
+      return {}; 
+    },
+    buildLink() { return this.report ? `/@${this.report.author}/${this.report.permlink}` : '#'; },
+    buildParentLink() { return this.report && this.report.parent_author ? `/@${this.report.parent_author}/${this.report.parent_permlink}` : '#'; },
+    getVoteCount() { return (this.report && Array.isArray(this.report.active_votes)) ? this.report.active_votes.length : 0; },
+    formattedReportUrl() { return this.report ? `https://actifit.io/@${this.report.author}/${this.report.permlink}` : ''; },
+    postPayout() {
+      if (!this.report || this.postPaid()) return '';
+      return this.report.pending_payout_value.replace('SBD', '').replace('STEEM', '').replace('HBD', '').replace('HIVE', '') + ' $';
+    },
+  },
+  watch: {
+    '$route.path': 'fetchPageData',
+     bchain: async function (newBchain) {
+      this.cur_bchain = newBchain;
+      this.fetchPageData();
+    },
   },
   methods: {
-    headToComments() { VueScrollTo.scrollTo('#main-footer', 1000, { easing: 'ease-in-out', offset: 100 }); },
-    cancelTranslation() { 
-      this.report.body = this.safety_post_content; 
-      this.showTranslated = false; 
+    headToComments() {
+      if (this.$refs.commentsSection) {
+        VueScrollTo.scrollTo(this.$refs.commentsSection, 500, { easing: 'ease-in-out', offset: -80 });
+      }
     },
-    async translateContent() {
-      
-      if (this.translatedText) {
-        this.report.body = this.translatedText;
-        this.showTranslated = true;
-        return; 
+    handleStorageChange(event) {
+      if (event.key === 'access_token' || event.key === 'ssc_auth' || event.key === 'username') {
+        this.$store.dispatch('steemconnect/login');
+        this.fetchPageData();
       }
-    
-      this.translationLoading = true;
-     
-      this.safety_post_content = this.report.body;
-      
-      try {
-        const translationResult = await translateTextWithGemini(this.report.body);
-   
-        this.translatedText = translationResult;
-       
-        this.report.body = this.translatedText;
-        this.showTranslated = true;
-      } catch (error) {
-        console.error('Translation process failed:', error);
-     
-        this.report.body = this.safety_post_content;
-        this.$notify({
-          group: 'error',
-          text: 'Translation service failed. Please try again later.',
-          position: 'top center'
+    },
+    alignSidebar() {
+      if (process.client) { 
+        this.$nextTick(() => {
+          const sidebar = document.querySelector('.user-sidebar.align-to-content');
+          const target = this.$refs.reportTarget;
+          if (window.innerWidth < 768) { 
+            if (sidebar) sidebar.style.marginTop = '2rem'; 
+            return;
+          }
+          if (sidebar && target) {
+            const sidebarContainer = sidebar.parentElement;
+            const targetRect = target.getBoundingClientRect();
+            const sidebarContainerRect = sidebarContainer.getBoundingClientRect();
+            const requiredMargin = targetRect.top - sidebarContainerRect.top;
+            sidebar.style.marginTop = `${requiredMargin}px`;
+          }
         });
-      } finally {
-        this.translationLoading = false;
       }
+    },
+    async fetchPageData() {
+      this.isLoading = true;
+      this.resetData();
+      const author = this.$route.params.username.replace('@', '');
+      const permlink = this.$route.params.permlink;
+      try {
+        this.cur_bchain = process.client ? localStorage.getItem('cur_bchain') || 'HIVE' : 'HIVE';
+        let chainLnk = hive;
+        let nodeUrl = process.env.hiveApiNode;
+        if (this.cur_bchain === 'STEEM') { chainLnk = steem; nodeUrl = process.env.steemApiNode; }
+        else if (this.cur_bchain === 'BLURT') { chainLnk = blurt; nodeUrl = process.env.blurtApiNode; }
+        await chainLnk.api.setOptions({ url: nodeUrl });
+
+        const reportData = await chainLnk.api.getContentAsync(author, permlink);
+        if (!reportData || !reportData.author) throw new Error('Post not found');
+
+        this.report = reportData;
+        this.pageTitle = `${this.report.title} by @${this.report.author}`;
+        
+        await this.fetchSupplementaryData();
+        this.fetchReportCommentData();
+
+      } catch (err) {
+        this.errorDisplay = "Could not load post. It may not exist or the network is busy.";
+        console.error(err);
+      } finally {
+        this.isLoading = false;
+        this.alignSidebar();
+      }
+    },
+    async fetchSupplementaryData() {
+        if (!this.report) return;
+        const { author, url, permlink } = this.report;
+        
+        const [accounts, afitData, rankData] = await Promise.all([
+            hive.api.getAccountsAsync([author]),
+            fetch(`${process.env.actiAppUrl}user/${author}`).then(res => res.json()),
+            fetch(`${process.env.actiAppUrl}getRank/${author}`).then(res => res.json()),
+        ]);
+
+        if (accounts && accounts.length > 0) this.authorAccountInfo = accounts[0];
+        if (afitData) this.authorAfitBalance = afitData.tokens;
+        if (rankData) this.userRank = rankData;
+        
+        fetch(`${process.env.actiAppUrl}getPostReward?user=${author}&url=${url}`).then(res => res.json()).then(json => this.afitReward = json.token_count);
+        fetch(`${process.env.actiAppUrl}getPostFullAFITPayReward?user=${author}&url=${url}`).then(res => res.json()).then(json => this.fullAFITReward = json.token_count);
+
+        const scotApiUrl = this.cur_bchain === 'STEEM' 
+          ? `${scot_steemengine_api}@${author}/${permlink}` 
+          : `${scot_steemengine_api}@${author}/${permlink}${scot_hive_api_param}`;
+
+        fetch(scotApiUrl)
+          .then(res => res.json())
+          .then(json => { this.tokenRewards = Array.isArray(json) ? json : [] })
+          .catch(e => {
+            console.error("Scot API fetch failed:", e);
+            this.tokenRewards = [];
+          });
+    },
+    fetchReportCommentData() {
+        if (!this.report) return;
+        this.commentsLoading = true;
+        this.$store.dispatch('fetchReportComments', this.report).then(() => {
+            this.commentsLoading = false;
+        });
+    },
+    resetData() {
+      this.isLoading = true; this.report = null; this.errorDisplay = '';
+      this.authorAccountInfo = null; this.authorAfitBalance = null; this.userRank = null;
+      this.afitReward = 0; this.tokenRewards = []; this.pageTitle = 'Loading...'; this.fullAFITReward = '';
+      if (this.user) { this.moderatorSignature = ''; }
+      if (this.$store) this.$store.commit('setCommentEntries', null);
     },
     copyContent(event) {
       navigator.clipboard.writeText('https://actifit.io/@' + this.report.author + '/' + this.report.permlink)
-        .then(() => { this.$notify({ group: 'success', text: this.$t('copied_successfully'), position: 'top center' }); return; })
-        .catch((error) => { this.$notify({ group: 'error', text: this.$t('error_copying'), position: 'top center' }); return; });
-    },
-    hasBeneficiaries() { return Array.isArray(this.report.beneficiaries) && this.report.beneficiaries.length > 0; },
-    beneficiariesDisplay() {
-      let output = 'Beneficiaries:\n';
-      for (let i = 0; i < this.report.beneficiaries.length; i++) {
-        output += this.report.beneficiaries[i].account + ': ' + this.report.beneficiaries[i].weight / 100 + '% \n';
-      }
-      return output;
-    },
-    attachImageErrorHandlers() {
-      const vm = this;
-      this.$nextTick(() => {
-        const contentEl = vm.$refs.remarkableContent.$el;
-        if (!contentEl) { console.warn('VueRemarkable component not found!'); return; }
-        const images = contentEl.querySelectorAll('img');
-        images.forEach(img => {
-          img.onerror = (event) => {
-            if (!this.imageError.has(img.id)) {
-              if (!img.id) { img.id = this.$uuidv4(); }
-              this.imageError.add(img.id);
-              img.src = process.env.hiveStandardPostUrl + img.src;
-              img.onerror = null;
-            }
-          };
-        });
-      });
-    },
-    paidValue() { if (this.report.total_payout_value) return this.report.total_payout_value; if (this.report.author_payout_value) return this.report.author_payout_value; },
-    postPaid() {
-      if (this.report.is_paidout) { return true; }
-      let last_payout = new Date(this.report.last_payout);
-      let cashout_time = new Date(this.report.cashout_time);
-      if (last_payout.getTime() > cashout_time.getTime()) { return true; }
-      return false;
-    },
-    resetOpenComment() { this.replyBody = this.moderatorSignature; this.commentBoxOpen = false; },
-    async processTrxFunc(op_name, cstm_params) {
-      if (!localStorage.getItem('std_login')) {
-        let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
-        if (res.result.ref_block_num) { console.log('success'); return { success: true, trx: res.result }; } 
-        else { return { success: false, trx: null }; }
-      } else if (localStorage.getItem('acti_login_method') == 'hiveauth') {
-        return new Promise((resolve) => {
-          const auth = { username: this.user.account.name, token: localStorage.getItem('access_token'), expire: localStorage.getItem('expires'), key: localStorage.getItem('key') }
-          let operation = [ [op_name, cstm_params] ];
-          this.$HAS.broadcast(auth, 'posting', operation, (evt) => {
-            console.log(evt)
-            let msg = this.$t('verify_hiveauth_app');
-            this.$notify({ group: 'warn', text: msg, duration: -1, position: 'top center' })
+        .then(() => {
+          this.$notify({
+            group: 'success',
+            text: this.$t('copied_successfully'),
+            position: 'top center'
           })
-          .then(response => {
-            console.log(response);
-            this.$notify({ group: 'warn', clean: true })
-            if (response.cmd && response.cmd === 'sign_ack') { resolve({ success: true, trx: response.data }) } 
-            else if (response.cmd && response.cmd === 'sign_nack') { resolve({ success: false }) }
-          }) 
-          .catch(err => {
-            this.$notify({ group: 'warn', clean: true })
-            console.log(err);
-            resolve({ success: false })
+        })
+        .catch((error) => {
+          this.$notify({
+            group: 'error',
+            text: this.$t('error_copying'),
+            position: 'top center'
           })
         });
-      } else {
-        let operation = [ [op_name, cstm_params] ];
-        let accToken = localStorage.getItem('access_token')
-        let op_json = JSON.stringify(operation)
-        let url = new URL(process.env.actiAppUrl + 'performTrx/?user=' + this.user.account.name + '&operation=' + encodeURIComponent(op_json) + '&bchain=' + this.cur_bchain);
-        let reqHeads = new Headers({ 'Content-Type': 'application/json', 'x-acti-token': 'Bearer ' + accToken, });
-        let res = await fetch(url, { headers: reqHeads });
-        let outcome = await res.json();
-        if (outcome.error) {
-          console.log(outcome.error);
-          let err_msg = outcome.trx.tx.error;
-          if (err_msg.includes('missing') && err_msg.includes('authority') && this.cur_bchain == bchain_option) {
-            localStorage.removeItem('access_token');
-            this.error_msg = this.$t('session_expired_login_again');
-            this.$store.dispatch('steemconnect/logout');
-          }
-          this.$notify({ group: 'error', text: err_msg, position: 'top center' })
-          return { success: false, trx: null };
-        } else {
-          return { success: true, trx: outcome.trx };
-        }
-      }
-    },
-    commentSuccess(err, finalize, bchain) {
-      this.$notify({ group: err ? 'error' : 'success', text: err ? this.$t('Comment_Error') : this.$t('Comment_Success'), position: 'top center' })
-      if (finalize) {
-        this.loading = false
-        this.responsePosted = true;
-        this.responseBody = this.replyBody;
-        setTimeout(this.fetchReportCommentData, 10000);
-        if (this.responseBody.length >= 50) {
-          if (isNaN(this.commentCountToday)) { this.commentCountToday = 0; }
-          this.commentCountToday += 1;
-        }
-        this.$store.commit('setCommentCountToday', this.commentCountToday);
-        if (this.commentCountToday >= 3) { this.rewardUserComment(); }
-        this.resetOpenComment();
-      }
-    },
-    async postResponse(event) {
-      this.loading = true
-      let comment_perm = this.user.account.name.replace('.', '-') + '-re-' + this.report.author.replace('.', '-') + '-' + this.report.permlink + new Date().toISOString().replace(/[^a-zA-Z0-9]+/g, '').toLowerCase();
-      let meta = new Object();
-      meta.tags = ['hive-193552', 'actifit'];
-      meta.app = 'actifit/0.4.1';
-      meta.suppEdit = 'actifit.io.comment';
-      this.replyBody = this.$refs.editor.content;
-      if (!localStorage.getItem('std_login')) {
-        this.$steemconnect.comment( this.report.author, this.report.permlink, this.user.account.name, comment_perm, '', this.replyBody, meta, (err) => { this.commentSuccess(err, true, 'STEEM'); })
-      } else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) {
-        let comment_options = { author: this.user.account.name, permlink: comment_perm, max_accepted_payout: '1000000.000 HBD', percent_hbd: 10000, allow_votes: true, allow_curation_rewards: true, extensions: [] };
-        window.hive_keychain.requestPost( this.user.account.name, "", this.replyBody, this.report.permlink, this.report.author, JSON.stringify(meta), comment_perm, JSON.stringify(comment_options), (response) => {
-            if (response.success) { this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain); } 
-            else { this.commentSuccess(response.message, false, this.cur_bchain); }
-          });
-      } else {
-        let cstm_params = { "author": this.user.account.name, "title": "", "body": this.replyBody, "parent_author": this.report.author, "parent_permlink": this.report.permlink, "permlink": comment_perm, "json_metadata": JSON.stringify(meta) };
-        let res = await this.processTrxFunc('comment', cstm_params, this.cur_bchain);
-        if (res.success) { this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain); } 
-        else { this.commentSuccess('error saving', false, this.cur_bchain); }
-        let other_chain = this.cur_bchain == 'HIVE' ? 'STEEM' : 'HIVE';
-        if (this.target_bchain == 'BOTH') {
-          let res = await this.processTrxFunc('comment', cstm_params, other_chain);
-          if (res.success) { this.commentSuccess(null, true, other_chain); } 
-          else { this.commentSuccess('error saving', false, other_chain); }
-        }
-      }
-    },
-    async rewardUserComment() {
-      let url = new URL(process.env.actiAppUrl + 'rewardActifitWebComment/' + this.user.account.name);
-      let params = { web_comment_token: process.env.webCommentToken, url: this.report.url, }
-      Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
-      try {
-        let res = await fetch(url);
-        let outcome = await res.json();
-        if (outcome.rewarded) { this.$notify({ group: 'success', text: this.$t('youve_been_rewarded') + outcome.amount + this.$t('reward_for_comment'), position: 'top center' }) }
-      } catch (err) { console.error(err); }
     },
     userVotedThisPost() {
-      let curUser = this.user.account.name;
-      this.postUpvoted = this.report.active_votes.filter(voter => (voter.voter === curUser)).length > 0 || this.newlyVotedPosts.indexOf(this.report.post_id) !== -1;
-      return this.postUpvoted;
+        if (!this.user || !this.report) return false;
+        const curUser = this.user.account.name;
+        return this.report.active_votes.some(voter => voter.voter === curUser) || (this.newlyVotedPosts && this.newlyVotedPosts.includes(this.report.post_id));
     },
-    insertModSignature() { if (this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator')) { this.moderatorSignature = process.env.shortModeratorSignature; this.replyBody += this.moderatorSignature; } },
-    insertFullModSignature() { if (this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator')) { this.moderatorSignature = process.env.standardModeratorSignature; this.replyBody += this.moderatorSignature; } },
-    votePrompt(e) { this.$store.commit('setPostToVote', this.report) },
-    fetchReportData() { 
-      if (this.report && this.report.author) { 
-      
-        this.translatedText = '';
-        this.safety_post_content = '';
-        this.showTranslated = false;
-        
-        this.fetchReportKeyData(); 
-        this.fetchReportCommentData();
-      } 
+    postPaid() {
+      if (!this.report) return false;
+      if (this.report.is_paidout) return true;
+      const last_payout = new Date(this.report.last_payout);
+      const cashout_time = new Date(this.report.cashout_time);
+      return last_payout.getTime() > cashout_time.getTime();
     },
-    fetchReportCommentData() {
-      this.commentsLoading = true;
-      this.cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
-      this.target_bchain = this.cur_bchain;
-      this.$store.commit('setBchain', this.cur_bchain);
-      this.$store.dispatch('fetchReportComments', this.report).then(() => { this.commentsLoading = false; });
-      this.responsePosted = false;
-      this.responseBody = this.moderatorSignature;
+    paidValue() {
+      if (!this.report) return '0.000';
+      if (this.report.total_payout_value) return this.report.total_payout_value;
+      if (this.report.author_payout_value) return this.report.author_payout_value;
+      return '0.000';
     },
-    fetchReportKeyData() {
-      fetch(process.env.actiAppUrl + 'getPostReward?user=' + this.report.author + '&url=' + this.report.url).then(res => { res.json().then(json => this.afitReward = json.token_count) }).catch(e => reject(e))
-      fetch(process.env.actiAppUrl + 'getRank/' + this.report.author).then(res => { res.json().then(json => this.userRank = json) }).catch(e => reject(e))
-      fetch(process.env.actiAppUrl + 'getPostFullAFITPayReward?user=' + this.report.author + '&url=' + this.report.url).then(res => { res.json().then(json => this.fullAFITReward = json.token_count) }).catch(e => reject(e))
-      if (this.cur_bchain == 'STEEM') {
-        fetch(scot_steemengine_api + '@' + this.report.author + '/' + this.report.permlink).then( res => { res.json().then(json => this.setReportTokenRewards(json)).catch(e => reject(e)) }).catch(e => reject(e))
-      } else {
-        fetch(scot_steemengine_api + '@' + this.report.author + '/' + this.report.permlink + scot_hive_api_param).then( res => { res.json().then(json => this.setReportTokenRewards(json)).catch(e => reject(e)) }).catch(e => reject(e))
-      }
-      this.attachImageErrorHandlers();
+    hasBeneficiaries() {
+      return this.report && Array.isArray(this.report.beneficiaries) && this.report.beneficiaries.length > 0;
+    },
+    beneficiariesDisplay() {
+      if (!this.hasBeneficiaries()) return '';
+      return 'Beneficiaries:\n' + this.report.beneficiaries.map(b => `${b.account}: ${b.weight / 100}%`).join('\n');
     },
     displayTokenValue(token) {
-      let val;
-      if (parseFloat(token.total_payout_value) > 0) { val = parseFloat(token.total_payout_value) / Math.pow(10, token.precision); return this.numberFormat(val, token.precision) + ' ' + token.token; }
-      if (isNaN(token.pending_token)) { return ""; }
-      if (parseFloat(token.pending_token) == 0) { return this.numberFormat(val, token.precision) + ' ' + token.token; }
-      val = parseFloat(token.pending_token) / Math.pow(10, token.precision);
-      return this.numberFormat(val, token.precision) + ' ' + token.token;
+        let val;
+        if (parseFloat(token.total_payout_value) > 0) {
+            val = parseFloat(token.total_payout_value) / Math.pow(10, token.precision);
+        } else {
+            val = parseFloat(token.pending_token) / Math.pow(10, token.precision);
+        }
+        if (isNaN(val)) return '';
+        return new Intl.NumberFormat('en-EN', { maximumFractionDigits: token.precision }).format(val) + ' ' + token.token;
     },
-    fixSubModal() { if ($('#reportModal').hasClass('show')) { $('body').addClass('modal-open'); } },
-    async fetchUserData() { if (typeof this.user != 'undefined' && this.user != null) { this.$store.dispatch('fetchUserTokens'); this.$store.dispatch('fetchUserRank'); this.$store.dispatch('fetchUserReportCount'); this.$store.dispatch('fetchReferrals'); } },
-    async updatePostData() {
-      let chainLnk = hive;
-      if (this.cur_bchain == 'HIVE') { await chainLnk.api.setOptions({ url: process.env.hiveApiNode }); } 
-      else if (this.cur_bchain == 'STEEM') { chainLnk = steem; await chainLnk.api.setOptions({ url: process.env.steemApiNode }); } 
-      else if (this.cur_bchain == 'BLURT') { chainLnk = blurt; await chainLnk.api.setOptions({ url: process.env.blurtApiNode }); }
-      chainLnk.api.getContent(this.postAuthor, this.postPermLink, (err, result) => {
-        this.report = result;
-        if (this.report && this.report.author) { this.fetchReportKeyData(); } 
-        else { this.errorDisplay = this.$t('error_post_not_found'); }
-      })
-    },
-    async setReportTokenRewards(result) { this.tokenRewards = result; this.report.specTokenRewards = this.tokenRewards; },
-    numberFormat(number, precision) { return new Intl.NumberFormat('en-EN', { maximumFractionDigits: precision }).format(number) },
-  },
-  async mounted() {
-    this.$store.dispatch('steemconnect/login');
-    this.cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
-    this.$store.commit('setBchain', this.cur_bchain);
-    VueScrollTo.scrollTo = VueScrollTo.scrollTo.bind(this);
-    this.fetchUserData();
-    
-    if ((typeof this.$route.params !== 'undefined') && (typeof this.$route.params.username !== 'undefined') && (typeof this.$route.params.permlink !== 'undefined')) {
-      this.postAuthor = this.$route.params.username
-      this.postPermLink = this.$route.params.permlink
-      if (this.$route.params.username.startsWith('@')) {
-        this.postAuthor = this.$route.params.username.substring(1, this.$route.params.username.length);
-      }
-      this.updatePostData();
-    }
+    async translateContent() {
+  // Use cached translation if available
+  if (this.translatedText) {
+    this.report.body = this.translatedText;
+    this.showTranslated = true;
+    return;
+  }
 
-    this.profImgUrl = process.env.hiveImgUrl;
-    if (this.cur_bchain == 'STEEM') { this.profImgUrl = process.env.steemImgUrl; }
+  this.translationLoading = true;
+  this.safety_post_content = this.report.body; // Save original content
+
+  try {
+    const translationResult = await translateTextWithGemini(this.report.body);
+    this.translatedText = translationResult; // Cache the result
+    this.report.body = this.translatedText;
+    this.showTranslated = true;
+  } catch (error) {
+    console.error('Translation process failed:', error);
+    // Revert to original content on failure
+    this.report.body = this.safety_post_content;
+    this.$notify({
+      group: 'error',
+      text: 'Translation service failed. Please try again later.',
+      position: 'top center'
+    });
+  } finally {
+    this.translationLoading = false;
+  }
+},
+    cancelTranslation() {
+      this.report.body = this.safety_post_content;
+      this.showTranslated = false;
+    },
+    votePrompt() { if (this.report) this.$store.commit('setPostToVote', this.report); },
+    resetOpenComment() { this.commentBoxOpen = false; this.replyBody = ''; },
+    postResponse() { alert('Post response not fully implemented.'); },
+    insertModSignature() {
+      if (this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator')) {
+        this.moderatorSignature = process.env.shortModeratorSignature;
+        this.replyBody += this.moderatorSignature;
+      }
+    },
+    insertFullModSignature() {
+      if (this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator')) {
+        this.moderatorSignature = process.env.standardModeratorSignature;
+        this.replyBody += this.moderatorSignature;
+      }
+    },
+  },
+  mounted() {
+    this.$store.dispatch('steemconnect/login');
+    this.fetchPageData();
+    
+    if (process.client) {
+      window.addEventListener('storage', this.handleStorageChange);
+      this.resizeObserver = new ResizeObserver(() => this.alignSidebar());
+      this.$nextTick(() => {
+        if (this.$refs.reportHead) this.resizeObserver.observe(this.$refs.reportHead);
+      });
+      window.addEventListener('resize', this.alignSidebar);
+    }
+  },
+  beforeDestroy() {
+    if (process.client) {
+      window.removeEventListener('storage', this.handleStorageChange);
+      if (this.resizeObserver) this.resizeObserver.disconnect();
+      window.removeEventListener('resize', this.alignSidebar);
+    }
   }
 }
 </script>
 
 <style>
-.translation-notice a {
-  color: red;
-}
+.text-muted { color: #adb5bd !important; }
 .mid-avatar { width: 30px !important; height: 30px !important; }
 .report-head { border-bottom: 1px solid red; }
 img { max-width: 100%; }
@@ -645,13 +537,15 @@ img { max-width: 100%; }
 .actifit-link-plain { color: white; }
 .modal-body { word-break: break-word; }
 a:hover, a:hover, .text-brand:hover, .actifit-link-plain:hover { text-decoration: none; }
-.numberCircle { border-radius: 25%; width: 10px; line-height: 10px; padding: 4px 2px 4px 2px; margin-left: 4px; background: #fff; border: 2px solid; text-align: center; vertical-align: middle; }
-.markdown-editor .CodeMirror, .markdown-editor .CodeMirror-scroll { min-height: 100px; }
 .reply-btn { float: right; }
 .date-head { padding-left: 2px; }
+.report-comments .date-head {
+  color: #6c757d !important;
+}
 .report-reply { padding-left: 40px; padding-bottom: 40px; }
-.share-links-actifit { text-align: right; }
-.share-links-actifit span { padding: 5px; cursor: pointer; }
-.report-modal-prelim-info span { /* padding: 5px; */ }
+.share-links-actifit { text-align: right; }    
+.share-links-actifit span, .share-links-actifit a { padding: 5px; cursor: pointer; color: #fff; }
 .pointer-cur-cls { cursor: pointer; }
+.translation-notice { background-color: #fcf8e3; border: 1px solid #faebcc; padding: 10px; margin-top: 15px; border-radius: 4px; color: #8a6d3b; }
+.text-green { color: #28a745; }
 </style>
