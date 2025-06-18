@@ -23,7 +23,8 @@
               </h5>
               <a :href="buildLink" class="p-1"><span class="date-head spec-btns" :title="date">{{ $getTimeDifference(report.created) }}</span> <i class="fas fa-link spec-btns"></i></a>
               <i :title="$t('copy_link')" class="fas fa-copy spec-btns" v-on:click="copyContent"></i>
-              <i v-if="!showTranslated" class="fa-solid fa-language spec-btns" v-on:click="translateContent"></i>
+              <i v-if="translationLoading" class="fas fa-spinner fa-spin spec-btns" :title="$t('translating_content', 'Translating...')"></i>
+<i v-else-if="!showTranslated" class="fa-solid fa-language spec-btns" v-on:click="translateContent" :title="$t('translate_content', 'Translate Content')"></i>
               <div>
                 <span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i
                       class="text-white fas fa-reply"></i></a></span>
@@ -203,7 +204,7 @@ import steem from 'steem'
 import blurt from '@blurtfoundation/blurtjs'
 import { mapGetters } from 'vuex'
 import VueScrollTo from 'vue-scrollto'
-import { translateText } from '~/components/deepl-client';
+import { translateTextWithGemini } from '~/components/gemini-client.js';
 
 import NavbarBrand from '~/components/NavbarBrand'
 import ChainSelection from '~/components/ChainSelection'
@@ -249,6 +250,8 @@ export default {
       pageTitle: 'Actifit Report',
       showTranslated: false,
       safety_post_content: '',
+	translationLoading: false, 
+    translatedText: '', 
       reload: 0,
       resizeObserver: null,
       displayMorePayoutData: false,
@@ -454,13 +457,34 @@ export default {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits: token.precision }).format(val) + ' ' + token.token;
     },
     async translateContent() {
-      try {
-        this.safety_post_content = this.report.body;
-        const result = await translateText(this.report.body, 'en');
-        this.report.body = result.translations[0].text || "Translation failed";
-        this.showTranslated = true;
-      } catch (error) { console.error('Translation error:', error); }
-    },
+  // Use cached translation if available
+  if (this.translatedText) {
+    this.report.body = this.translatedText;
+    this.showTranslated = true;
+    return;
+  }
+
+  this.translationLoading = true;
+  this.safety_post_content = this.report.body; // Save original content
+
+  try {
+    const translationResult = await translateTextWithGemini(this.report.body);
+    this.translatedText = translationResult; // Cache the result
+    this.report.body = this.translatedText;
+    this.showTranslated = true;
+  } catch (error) {
+    console.error('Translation process failed:', error);
+    // Revert to original content on failure
+    this.report.body = this.safety_post_content;
+    this.$notify({
+      group: 'error',
+      text: 'Translation service failed. Please try again later.',
+      position: 'top center'
+    });
+  } finally {
+    this.translationLoading = false;
+  }
+},
     cancelTranslation() {
       this.report.body = this.safety_post_content;
       this.showTranslated = false;
