@@ -6,7 +6,6 @@
         <i class="fas fa-spin fa-spinner text-brand"></i>
       </div>
     </div>
-    <!-- This is the main container for the new profile layout -->
     <div v-else-if="errorDisplay == ''" class="container pt-5 mt-5 pb-5 col-lg-10 col-md-12">
       <div class="alert alert-danger" role="alert" v-if="badActorWarning">
         <h4 class="alert-heading">Warning!</h4>
@@ -363,7 +362,7 @@
       </div>
     </div>
     
-    <!-- MODALS AND FOOTER (unchanged) -->
+   
     <MeasureChartModal :userMeasurements="userMeasurements" />
     <ActivityChartModal :userActivity="userActivity" />
     <ProfileImageModal :username="user ? user.account.name : ''" v-if="isProfileImageModalVisible" @close="closeProfileImageModal" @image-changed="updateProfileImage" />
@@ -381,7 +380,6 @@
 </template>
 
 <script>
-// The script remains the same as it already contains all necessary logic and data.
 import UserHoverCard from '~/components/UserHoverCard'
 import LoginModal from '~/components/LoginModal'
 import NavbarBrand from '~/components/NavbarBrand'
@@ -1638,12 +1636,12 @@ export default {
 </script>
 
 <style>
-/* Added/Modified Styles for this revision are at the top */
+
 .profile-header {
     background: linear-gradient(to right, #ffaf7b, #fcae3c);
 }
 .user-info-header .username { 
-    font-size: 1.5rem; /* Corrected font size */
+    font-size: 1.5rem; 
     font-weight: bold;
     color: #dc3545; 
 }
@@ -1678,7 +1676,7 @@ export default {
     background-color: #fff9f0;
 }
 .about-tab {
-    background-color: #FFEAE4; /* New color from user image */
+    background-color: #FFEAE4; 
     border-radius: 10px;
     padding: 10px;
 }
@@ -1694,7 +1692,7 @@ export default {
 }
 
 
-/* --- Previous changes --- */
+
 .friend-actions { text-align: right; margin-left: 20px; }
 .fitness-tab-container { display: flex; flex-direction: column; gap: 15px; }
 .fitness-section-grid-activity { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
@@ -1707,7 +1705,7 @@ export default {
 }
 .quick-links-title { color: #dc3545; margin-bottom: 15px; }
 
-/* Original styles from your new layout */
+
 .token-logo { width: 20px; height: 20px; vertical-align: middle; }
 .user-avatar { background-repeat: no-repeat; background-size: cover; background-position: center; position: relative; }
 .profile-header { padding: 20px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
