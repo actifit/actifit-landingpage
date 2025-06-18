@@ -1,10 +1,11 @@
 <template>
-  <div class="user-menu-container  align-items-center"> <!--ml-auto d-flex position-absolute-->
-
+  <div class="user-menu-container align-items-center">
     <ul class="navbar-nav mr-auto user-menu flex-row">
       <li class="nav-item mr-2 btn btn-brand nav-item-border p-0 search-li">
         <div style="display:inline-flex">
-          <AutocompleteUsernameInput id="search-user" name="search-user" ref="search-user" :customClass="computedCustomClass" :inputClass="computedInputClass" :placeHolderVal="$t('search_user')" :enableRedirect="true" />
+          <AutocompleteUsernameInput id="search-user" name="search-user" ref="search-user"
+            :customClass="computedCustomClass" :inputClass="computedInputClass" :placeHolderVal="$t('search_user')"
+            :enableRedirect="true" />
         </div>
       </li>
       <li class="nav-item" v-if="!user">
@@ -12,30 +13,25 @@
           @click="showModalFunc">{{ $t('Login') }}</a>
       </li>
 
-
-      <!--<li class="nav-item mr-2" v-if="user" >
-        <span class="navbar-text py-0 text-brand" >{{ $t('Rank') }}&nbsp;<br><b>{{ displayCoreUserRank }} <span class="increased-rank" v-if="this.userRankObj && this.userRankObj.afitx_rank">{{  displayIncreasedUserRank }}</span></b></span>
-      </li>
-      <li class="nav-item mr-2" v-if="user">
-        <span class="navbar-text py-0">{{ $t('Balance') }}<br><b>{{ formattedUserTokens }}</b></span>
-      </li>-->
-      <li class="nav-item mr-2" @click="toggleDarkMode" :title="$t('toggle_dark_mode')" v-if="user && !hideComponent">
+      <li class="nav-item mr-2" @click="toggleDarkMode" :title="$t('toggle_dark_mode')"
+        v-if="user && !hideVisualControls">
         <span class="user-avatar group-class">
-          <i v-if="$store.state.darkMode" class="fa-solid fa-sun p-2 text-brand"></i>
-          <i v-else class="fa-solid fa-moon text-brand p-2"></i>
+          <i v-if="$store.state.darkMode" class="fa-solid fa-sun text-brand"></i>
+          <i v-else class="fa-solid fa-moon text-brand"></i>
         </span>
       </li>
-      <li class="nav-item mr-2" v-if="user && !hideComponent">
-        <!--<button @click="toggleWidget">Toggle Widget</button>-->
+      <li class="nav-item mr-2" v-if="user && !hideVisualControls">
         <StingChat :user="this.user" />
       </li>
-      <li class="nav-item mr-2" v-if="user">
-        <span class="user-avatar-notif-menu group-class notification-class text-brand"
-          v-if="activeNotificationsLen > 0">{{ notificationsNotice }}</span>
+
+      <li class="nav-item mr-2 notification-item-container" v-if="user">
+        <span class="notification-class" v-if="activeNotificationsLen > 0">{{ notificationsNotice }}</span>
+
         <span class="user-avatar group-class" v-if="activeNotificationsLen > 0">
-          <a class="nav-link dropdown-toggle p-0" id="user_menu_navlink" href="#" data-toggle="dropdown"
-            :title="$t('Notifications_popup').replace('_count_', notificationsNotice)">
-            <i class="fas fa-bell p-2 text-brand"></i>
+          <a class="nav-link dropdown-toggle p-0 notification-bell-link" id="user_menu_navlink_notif" href="#"
+            data-toggle="dropdown"
+            :title="$t('Notifications_popup').replace('_count_', String(activeNotificationsLen))">
+            <i class="fas fa-bell"></i>
           </a>
           <div class="dropdown-menu dropdown-menu-right notif-container">
             <div class="text-right m-2">
@@ -57,11 +53,11 @@
               </span>
             </div>
           </div>
-
         </span>
         <span class="user-avatar group-class" v-else>
-          <a class="nav-link dropdown-toggle p-0" id="user_menu_navlink" href="#" data-toggle="dropdown">
-            <i class="fas fa-bell p-2"></i>
+          <a class="nav-link dropdown-toggle p-0 notification-bell-link" id="user_menu_navlink_notif_empty" href="#"
+            data-toggle="dropdown">
+            <i class="fas fa-bell"></i>
           </a>
           <div class="dropdown-menu dropdown-menu-right">
             <div class="text-right m-2">
@@ -72,75 +68,71 @@
           </div>
         </span>
       </li>
-      <li class="nav-item mr-2" v-if="user">
-        <a href="#" @click.prevent="$router.push('/friends')" :title="$t('friends')"><span
-            class="user-avatar group-class text-brand"><i class="fas fa-user-friends p-2"></i></span></a>
-      </li>
+
       <li class="nav-item dropdown" v-if="user">
-        <a class="nav-link dropdown-toggle p-0" id="user_menu_navlink" href="#" data-toggle="dropdown">
+        <a class="nav-link dropdown-toggle p-0" id="user_menu_navlink_avatar" href="#" data-toggle="dropdown">
           <div class="user-avatar group-class"
             :style="'background-image: url(' + profImgUrl + '/u/' + user.account.name + '/avatar)'"></div>
         </a>
         <div class="dropdown-menu dropdown-menu-right user-dropdown">
           <div class="dropdown-header user-info-sticky"><a class="dropdown-item" href="#"
-              @click.prevent="$router.push('/' + user.account.name)"><i
-                class="fa-solid fa-user text-brand"></i>&nbsp;@{{ user.account.name }}</a></div>
+              @click.prevent="$router.push('/' + user.account.name)"><i class="fa-solid fa-user text-brand"></i> @{{
+                user.account.name }}</a></div>
           <div class="dropdown-scrollable">
-          <a class="dropdown-item text-brand" href="#" @click.prevent="$router.push('/mods-access/')"
-            v-if="isUserModerator">Moderation</a>
-          <div class="dropdown-divider" v-if="isUserModerator"></div>
-          <!--<a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet?action=buy_afit')">{{ $t('buy_afit_menu') }}<br/></a>-->
-          <a class="dropdown-item" href="#" @click.prevent="$router.push('/market')"><i
-              class="fas fa-shopping-cart text-brand"></i>&nbsp;{{ $t('spend_afit_menu') }}<br /></a>
-          <SteemStats :user="user" minView="true" class="dropdown-item" :key="reload" />
-          <a class="dropdown-item" href="#" @click.prevent="$router.push('/userrank')"><i
-              class="fa-solid fa-list-ol text-brand"></i>&nbsp;{{ $t('My_Rank') }} <br /><span class="text-brand pl-4">
-              {{ displayCoreUserRank }} <span class="increased-rank"
-                v-if="this.userRankObj && this.userRankObj.afitx_rank">{{ displayIncreasedUserRank }}</span> </span></a>
-          <a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet')"><i
-              class="fa-solid fa-wallet text-brand"></i>&nbsp;{{ $t('My_Wallet') }} <br /><span class="text-brand pl-4">
-              {{ formattedUserTokens }}</span></a>
-          <a class="dropdown-item" href="#" @click.prevent="$router.push('/referrals')"><i
-              class="fas fa-user-friends text-brand"></i>&nbsp;{{ $t('Referrals') }} <br /><span
-              class="text-brand pl-4"> {{ referralCount }} </span></a>
-          <a class="dropdown-item" href="#" @click.prevent="$router.push('/activity/' + user.account.name)"><i
-              class="fas fa-running text-brand"></i>&nbsp;{{ $t('My_Activity') }}</a>
-          <a class="dropdown-item" href="#" @click.prevent="$router.push('/' + user.account.name + '/blog')"><i
-              class="fa-solid fa-pen-to-square text-brand"></i>&nbsp;{{ $t('My_Blog') }}</a>
-          <a class="dropdown-item" href="#" @click.prevent="$router.push('/blog/new')"><i
-              class="fa-solid fa-plus-square text-brand"></i>&nbsp;{{ $t('New_Blog') }}</a>
-          <a class="dropdown-item" href="#" @click.prevent="$router.push('/' + user.account.name + '/videos')"><i
-              class="fa-solid fa-video text-brand"></i>&nbsp;{{ $t('My_Videos') }}</a>
-          <a class="dropdown-item" href="#"><i class="fa-solid fa-link text-brand"></i>&nbsp;{{ $t('Active_chain') }}
-            <br />
-            <div class="pl-4" :class="adjustHiveClass" v-on:click="setActiveChain('HIVE')">
-              <img src="/img/HIVE.png" style="max-height: 20px;"
-                :title="(cur_bchain == 'HIVE' ? $t('running_on_chain').replace('_CHAIN_', 'HIVE') : $t('switch_to_chain').replace('_CHAIN_', 'HIVE'))">{{ $t('HIVE') }}
-              <!--<span class="span-toggle-chain pl-2 pr-2 text-brand" :title="$t('switch_chain')">
-				<i class="fas fa-toggle-on" v-if="cur_bchain == 'STEEM'" v-on:click="setActiveChain('HIVE')"></i>
-				<i class="fas fa-toggle-off" v-else-if="cur_bchain == 'HIVE'" v-on:click="setActiveChain('STEEM')"></i>
-			</span>-->
-            </div>
-            <div v-if="isUserModerator" class="pl-4" :class="adjustSteemClass" v-on:click="setActiveChain('STEEM')">
-              <img src="/img/STEEM.png" style="max-height: 20px;"
-                :title="(cur_bchain == 'STEEM' ? $t('running_on_chain').replace('_CHAIN_', 'STEEM') : $t('switch_to_chain').replace('_CHAIN_', 'STEEM'))">{{ $t('STEEM') }}
-            </div>
-            <div class="pl-4" :class="adjustBlurtClass" v-on:click="setActiveChain('BLURT')">
-              <img src="/img/BLURT.png" style="max-height: 20px;"
-                :title="(cur_bchain == 'BLURT' ? $t('running_on_chain').replace('_CHAIN_', 'BLURT') : $t('switch_to_chain').replace('_CHAIN_', 'BLURT'))">{{ $t('BLURT') }}
-            </div>
-          </a>
-          <a class="dropdown-item" href="#" @click.prevent="$router.push('/password')"><i
-              class="fa-sharp fa-solid fa-key text-brand"></i>&nbsp;{{ $t('My_Password') }}</a>
-          <a class="dropdown-item" href="#" @click.prevent="$router.push('/settings')"><i
-              class="fa-solid fa-gear text-brand"></i>&nbsp;{{ $t('Settings') }}</a>
-          <div class="dropdown-divider"></div>
-          <a href="#" data-toggle="modal" data-target="#loginModal" @click="showModalFunc" class="dropdown-item"><i
-              class="fa-solid fa-user-group text-brand"></i>&nbsp;{{ $t('switch_user') }}</a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="#" @click.prevent="proceedLogout()"><i
-              class="fa-solid fa-right-from-bracket text-brand"></i>&nbsp;{{ $t('Logout') }}</a>
-        </div></div>
+            <a class="dropdown-item text-brand" href="#" @click.prevent="$router.push('/mods-access/')"
+              v-if="isUserModerator">Moderation</a>
+            <div class="dropdown-divider" v-if="isUserModerator"></div>
+            <a class="dropdown-item" href="#" @click.prevent="$router.push('/market')"><i
+                class="fas fa-shopping-cart text-brand"></i> {{ $t('spend_afit_menu') }}<br /></a>
+            <SteemStats :user="user" minView="true" class="dropdown-item" :key="reload" />
+            <a class="dropdown-item" href="#" @click.prevent="$router.push('/userrank')"><i
+                class="fa-solid fa-list-ol text-brand"></i> {{ $t('My_Rank') }} <br /><span class="text-brand pl-4">
+                {{ displayCoreUserRank }} <span class="increased-rank" v-if="userRankObj && userRankObj.afitx_rank">{{
+                  displayIncreasedUserRank }}</span> </span></a>
+            <a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet')"><i
+                class="fa-solid fa-wallet text-brand"></i> {{ $t('My_Wallet') }} <br /><span class="text-brand pl-4">
+                {{ formattedUserTokens }}</span></a>
+            <a class="dropdown-item" href="#" @click.prevent="$router.push('/referrals')"><i
+                class="fas fa-user-friends text-brand"></i> {{ $t('Referrals') }} <br /><span class="text-brand pl-4">
+                {{ referralCount }} </span></a>
+            <a class="dropdown-item" href="#" @click.prevent="$router.push('/activity/' + user.account.name)"><i
+                class="fas fa-running text-brand"></i> {{ $t('My_Activity') }}</a>
+            <a class="dropdown-item" href="#" @click.prevent="$router.push('/' + user.account.name + '/blog')"><i
+                class="fa-solid fa-pen-to-square text-brand"></i> {{ $t('My_Blog') }}</a>
+            <a class="dropdown-item" href="#" @click.prevent="$router.push('/blog/new')"><i
+                class="fa-solid fa-plus-square text-brand"></i> {{ $t('New_Blog') }}</a>
+            <a class="dropdown-item" href="#" @click.prevent="$router.push('/' + user.account.name + '/videos')"><i
+                class="fa-solid fa-video text-brand"></i> {{ $t('My_Videos') }}</a>
+            <a class="dropdown-item" href="#"><i class="fa-solid fa-link text-brand"></i> {{ $t('Active_chain') }}
+              <br />
+              <div class="pl-4" :class="adjustHiveClass" v-on:click="setActiveChain('HIVE')">
+                <img src="/img/HIVE.png" style="max-height: 20px;"
+                  :title="(cur_bchain == 'HIVE' ? $t('running_on_chain').replace('_CHAIN_', 'HIVE') : $t('switch_to_chain').replace('_CHAIN_', 'HIVE'))">{{
+                    $t('HIVE') }}
+              </div>
+              <div v-if="isUserModerator" class="pl-4" :class="adjustSteemClass" v-on:click="setActiveChain('STEEM')">
+                <img src="/img/STEEM.png" style="max-height: 20px;"
+                  :title="(cur_bchain == 'STEEM' ? $t('running_on_chain').replace('_CHAIN_', 'STEEM') : $t('switch_to_chain').replace('_CHAIN_', 'STEEM'))">{{
+                    $t('STEEM') }}
+              </div>
+              <div class="pl-4" :class="adjustBlurtClass" v-on:click="setActiveChain('BLURT')">
+                <img src="/img/BLURT.png" style="max-height: 20px;"
+                  :title="(cur_bchain == 'BLURT' ? $t('running_on_chain').replace('_CHAIN_', 'BLURT') : $t('switch_to_chain').replace('_CHAIN_', 'BLURT'))">{{
+                    $t('BLURT') }}
+              </div>
+            </a>
+            <a class="dropdown-item" href="#" @click.prevent="$router.push('/password')"><i
+                class="fa-sharp fa-solid fa-key text-brand"></i> {{ $t('My_Password') }}</a>
+            <a class="dropdown-item" href="#" @click.prevent="$router.push('/settings')"><i
+                class="fa-solid fa-gear text-brand"></i> {{ $t('Settings') }}</a>
+            <div class="dropdown-divider"></div>
+            <a href="#" data-toggle="modal" data-target="#loginModal" @click="showModalFunc" class="dropdown-item"><i
+                class="fa-solid fa-user-group text-brand"></i> {{ $t('switch_user') }}</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#" @click.prevent="proceedLogout()"><i
+                class="fa-solid fa-right-from-bracket text-brand"></i> {{ $t('Logout') }}</a>
+          </div>
+        </div>
       </li>
     </ul>
     <LoginModal v-if="showModal" @close="showModal = false" />
@@ -165,17 +157,20 @@ export default {
     return {
       showModal: false,
       activeNotifications: [],
-      activeNotificationsLen: 1,
+      activeNotificationsLen: 0,
       cur_bchain: 'HIVE',
       reload: 0,
       profImgUrl: process.env.hiveImgUrl,
+      notificationInterval: null,
     }
   },
   watch: {
     user: 'updateUserData',
     bchain: function (newBchain) {
       this.cur_bchain = newBchain;
-      this.$store.dispatch('steemconnect/refreshUser');
+      if (this.user) {
+        this.$store.dispatch('steemconnect/refreshUser');
+      }
       this.reload += 1;
     }
   },
@@ -183,87 +178,88 @@ export default {
     ...mapGetters('steemconnect', ['user']),
     ...mapGetters(['userTokens', 'userRank', 'userRankObj', 'referrals', 'bchain']),
     ...mapGetters(['moderators']),
-    //taking care of the search text input display
+
     computedInputClass() {
       if (process.client) {
-        // Check if the screen width is less than 768px (standard for mobile)
-        if (window.innerWidth <500) return 'form-control-sm';
+        if (window.innerWidth < 500) return 'form-control-sm search-input-condensed';
         return window.innerWidth < 768 ? '' : 'form-control-lg';
       }
       return '';
     },
-    computedCustomClass(){
+    computedCustomClass() {
       if (process.client) {
-        // Check if the screen width is less than 768px (standard for mobile)
-        if (window.innerWidth <500) return "hiddenIcon";
+        if (window.innerWidth < 500) return "hiddenIcon autocomplete-condensed";
       }
       return "";
     },
-    hideComponent() {
+    hideVisualControls() {
       if (process.client) {
-        // Check if the screen width is less than 768px (standard for mobile)
-        if (window.innerWidth <500) return true;
+        return window.innerWidth < 500;
+      }
+      return false;
+    },
+    hideFriendsIcon() {
+      if (process.client) {
+        return window.innerWidth < 500;
       }
       return false;
     },
     notificationsNotice() {
+      const cutoff = parseInt(process.env.notificationsCutoff || '100');
 
-      return this.activeNotificationsLen + (this.activeNotificationsLen >= process.env.notificationsCutoff ? '+' : '');
+      if (this.activeNotificationsLen === 0) {
+        return "0";
+      }
+
+      if (process.client && window.innerWidth < 500) {
+        if (this.activeNotificationsLen > 99) return "99+";
+        return String(this.activeNotificationsLen);
+      } else {
+        return this.activeNotificationsLen + (this.activeNotificationsLen >= cutoff ? '+' : '');
+      }
     },
     formattedUserTokens() {
-      return this.numberFormat(parseFloat(this.userTokens).toFixed(3), 3) + ' AFIT'
-    },
-    displayUserRank() {
-      return parseFloat(this.userRank).toFixed(1)
+      if (!this.userTokens && this.userTokens !== 0) return '0 AFIT';
+      return this.numberFormat(parseFloat(this.userTokens).toFixed(3), 3) + ' AFIT';
     },
     displayCoreUserRank() {
-      return (this.userRankObj ? parseFloat(this.userRankObj.rank_no_afitx).toFixed(2) : '');
+      if (this.userRankObj && typeof this.userRankObj.rank_no_afitx !== 'undefined') {
+        return parseFloat(this.userRankObj.rank_no_afitx).toFixed(2);
+      } else if (typeof this.userRank !== 'undefined' && this.userRank !== null) {
+        return parseFloat(this.userRank).toFixed(2);
+      }
+      return '';
     },
     displayIncreasedUserRank() {
-      return '(+' + parseFloat(this.userRankObj.afitx_rank).toFixed(2) + ')';
+      return (this.userRankObj && this.userRankObj.afitx_rank) ? '(+' + parseFloat(this.userRankObj.afitx_rank).toFixed(2) + ')' : '';
     },
     referralCount() {
-      return this.referrals.length;
+      return this.referrals ? this.referrals.length : 0;
     },
     isUserModerator() {
-      if (this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator')) {
-        return true;
+      if (this.user && this.user.account && this.moderators && Array.isArray(this.moderators)) {
+        return this.moderators.find(mod => mod.name === this.user.account.name && mod.title === 'moderator');
       }
       return false;
     },
     adjustHiveClass() {
-      if (this.cur_bchain != 'HIVE') {
-        return 'option-opaque';
-      }
-      return 'active-spin';
+      return this.cur_bchain !== 'HIVE' ? 'option-opaque' : 'active-spin';
     },
     adjustSteemClass() {
-      if (this.cur_bchain != 'STEEM') {
-        return 'option-opaque';
-      }
-      return 'active-spin';
+      return this.cur_bchain !== 'STEEM' ? 'option-opaque' : 'active-spin';
     },
     adjustBlurtClass() {
-      if (this.cur_bchain != 'BLURT') {
-        return 'option-opaque';
-      }
-      return 'active-spin';
+      return this.cur_bchain !== 'BLURT' ? 'option-opaque' : 'active-spin';
     }
   },
   methods: {
-    /**
-       * Formats numbers with commas and dots.
-       *
-       * @param number
-     * @param precision
-       * @returns {string}
-       */
     showModalFuncLOGIN() {
       this.proceedLogout();
       this.$emit('modal-opened', true);
     },
     numberFormat(number, precision) {
-      return new Intl.NumberFormat('en-EN', { maximumFractionDigits: precision }).format(number)
+      if (isNaN(parseFloat(number))) return String(number);
+      return new Intl.NumberFormat('en-EN', { minimumFractionDigits: precision, maximumFractionDigits: precision }).format(number);
     },
     showModalFunc() {
       this.$emit('modal-opened', true);
@@ -272,129 +268,117 @@ export default {
       this.$store.dispatch('toggleDarkMode');
     },
     setActiveChain(chain) {
-      if (this.cur_bchain == chain) {
-        //take no action if no change in chain
-        return;
-      }
-      let userConf = confirm(this.$t('confirm_chain_switch').replace('_CHAIN_', chain));
-      if (!userConf) {
-        return;
-      }
+      if (this.cur_bchain === chain) return;
+      if (!confirm(this.$t('confirm_chain_switch').replace('_CHAIN_', chain))) return;
+
       this.cur_bchain = chain;
       this.$store.commit('setBchain', this.cur_bchain);
-
       localStorage.setItem('cur_bchain', this.cur_bchain);
 
       this.profImgUrl = process.env.hiveImgUrl;
-      if (this.cur_bchain == 'STEEM') {
-        this.profImgUrl = process.env.steemImgUrl;
-      }
+      if (this.cur_bchain === 'STEEM') this.profImgUrl = process.env.steemImgUrl;
+
+      if (this.user) this.$store.dispatch('steemconnect/refreshUser');
+      this.reload += 1;
     },
     proceedLogout() {
       this.$store.commit('setStdLoginUser', false);
-      localStorage.removeItem('std_login')
+      localStorage.removeItem('std_login');
       localStorage.removeItem('std_login_name');
-      this.$store.dispatch('steemconnect/logout')
+      this.$store.dispatch('steemconnect/logout');
     },
     async updateUserData() {
-      if (this.user) {
+      if (this.user && this.user.account && this.user.account.name) {
         try {
-          let res = await fetch(process.env.actiAppUrl + 'activeNotifications/' + this.user.account.name);
-          let outcome = await res.json();
-          try {
-            this.activeNotificationsLen = outcome.length;
-            this.activeNotifications = outcome.reverse();
-          } catch (err) {
-            console.log('error fetching notifications');
+          const res = await fetch(`${process.env.actiAppUrl}activeNotifications/${this.user.account.name}`);
+          if (!res.ok) {
+            console.error(`Failed to fetch notifications: ${res.status}`);
+            this.activeNotificationsLen = 0;
+            this.activeNotifications = [];
+            return;
           }
+          const outcome = await res.json();
+          this.activeNotificationsLen = Array.isArray(outcome) ? outcome.length : 0;
+          this.activeNotifications = Array.isArray(outcome) ? outcome.reverse() : [];
         } catch (err) {
-          console.error('Error updating user data:', err);
+          console.error('Error fetching/processing notifications:', err);
+          this.activeNotificationsLen = 0;
+          this.activeNotifications = [];
         }
-        this.$forceUpdate();
+      } else {
+        this.activeNotificationsLen = 0;
+        this.activeNotifications = [];
       }
     },
     async markRead(notif) {
-      let accToken = localStorage.getItem('access_token')
+      if (!this.user || !this.user.account || !notif || !notif._id) return;
+      const accToken = localStorage.getItem('access_token');
+      if (!accToken) { console.warn('No access token for markRead'); return; }
 
-      let url = new URL(process.env.actiAppUrl + 'markRead/' + notif._id + '?user=' + this.user.account.name);
-
-      let reqHeads = new Headers({
-        'Content-Type': 'application/json',
-        'x-acti-token': 'Bearer ' + accToken,
-      });
-      let res = await fetch(url, {
-        method: 'GET',
-        headers: reqHeads,
-      });
-
-      let outcome = await res.json();
-      //console.log(outcome);
-      //console.log(outcome.status);
-      this.updateUserData()
+      const url = new URL(`${process.env.actiAppUrl}markRead/${notif._id}?user=${this.user.account.name}`);
+      const reqHeads = new Headers({ 'Content-Type': 'application/json', 'x-acti-token': `Bearer ${accToken}` });
+      try {
+        const res = await fetch(url, { method: 'GET', headers: reqHeads });
+        if (res.ok) this.updateUserData();
+        else console.error(`Failed to mark notification as read: ${res.status}`);
+      } catch (error) { console.error('Error in markRead:', error); }
     },
-
-     async handleNotificationClick(notif) {  
-      await this.markRead(notif); 
-      window.location.href = notif.url; 
-    },
-
     async markAllRead() {
-      let userConf = confirm(this.$t('Mark_all_read_confirm'));
-      if (!userConf) {
-        return;
-      }
+      if (!this.user || !this.user.account) return;
+      if (!confirm(this.$t('Mark_all_read_confirm'))) return;
 
-      let accToken = localStorage.getItem('access_token')
+      const accToken = localStorage.getItem('access_token');
+      if (!accToken) { console.warn('No access token for markAllRead'); return; }
 
-      let url = new URL(process.env.actiAppUrl + 'markAllRead/?user=' + this.user.account.name);
-
-      let reqHeads = new Headers({
-        'Content-Type': 'application/json',
-        'x-acti-token': 'Bearer ' + accToken,
-      });
-      let res = await fetch(url, {
-        method: 'GET',
-        headers: reqHeads,
-      });
-
-      let outcome = await res.json();
-      //console.log(outcome);
-      //console.log(outcome.status);
-      this.updateUserData()
+      const url = new URL(`${process.env.actiAppUrl}markAllRead/?user=${this.user.account.name}`);
+      const reqHeads = new Headers({ 'Content-Type': 'application/json', 'x-acti-token': `Bearer ${accToken}` });
+      try {
+        const res = await fetch(url, { method: 'GET', headers: reqHeads });
+        if (res.ok) this.updateUserData();
+        else console.error(`Failed to mark all notifications as read: ${res.status}`);
+      } catch (error) { console.error('Error in markAllRead:', error); }
     }
   },
   async mounted() {
-    //grab current active chain
     if (localStorage.getItem('cur_bchain')) {
-      this.cur_bchain = localStorage.getItem('cur_bchain')
+      this.cur_bchain = localStorage.getItem('cur_bchain');
+      this.$store.commit('setBchain', this.cur_bchain);
     }
 
     this.profImgUrl = process.env.hiveImgUrl;
-    if (this.cur_bchain == 'STEEM') {
-      this.profImgUrl = process.env.steemImgUrl;
+    if (this.cur_bchain === 'STEEM') this.profImgUrl = process.env.steemImgUrl;
+
+    this.$store.dispatch('fetchModerators');
+    if (this.user) {
+      this.updateUserData();
     }
-
-    //grab moderators' list
-    this.$store.dispatch('fetchModerators')
-
-    this.updateUserData()
-
-    //fetch new notifications every minute
-    setInterval(this.updateUserData, 60000);
+    this.notificationInterval = setInterval(this.updateUserData, 60000);
   },
+  beforeDestroy() {
+    if (this.notificationInterval) {
+      clearInterval(this.notificationInterval);
+    }
+  }
 }
 </script>
 
 <style lang="sass">
 .user-menu-container
   height: 54px
-  position: relative  
-  top: 0
-  right: 6px
-  .user-menu
-    .user-avatar
-      width: 40px
-      height: 40px
+  display: flex 
+  align-items: center
+
+  .user-menu 
+    display: flex 
+    align-items: center 
+    padding-left: 0 
+    margin-bottom: 0 
+    list-style: none 
+    flex-wrap: nowrap 
+
+    .user-avatar 
+      width: 50px 
+      height: 50px
       background-position: center center
       background-size: cover
       border-radius: 50%
@@ -408,40 +392,77 @@ export default {
       right: 0
       left: auto
 </style>
+
 <style>
-#user_menu_navlink {
-  height: 40px;
+.notification-item-container {
+  position: relative;
 }
 
-.group-class {
-  margin-left: 0px !important;
-  display: inline-block;
+#user_menu_navlink_notif,
+#user_menu_navlink_notif_empty,
+#user_menu_navlink_avatar {
+  height: auto;
+  display: flex;
+  align-items: center;
+}
+
+.user-menu .nav-item {
+  margin-right: 0.8rem;
+}
+
+.user-menu .nav-item:last-child {
+  margin-right: 0;
+}
+
+.user-menu .nav-item .group-class:not(.notification-class) {
+  width: 35px;
+  height: 35px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  position: relative;
+}
+
+.user-menu .nav-item .group-class:not(.notification-class)>i,
+.user-menu .nav-item .group-class:not(.notification-class)>a>i {
+  font-size: 1.4em;
+  padding: 0;
 }
 
 .notification-class {
-  background-color: red;
+  background-color: red !important;
   color: white !important;
-  display: inline-block;
+  font-size: 10px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
   text-align: center;
-  font-size: 12px;
+  justify-content: center;
   width: auto;
-  min-width: 20px;
+  min-width: 17px;
+  height: auto;
+  min-height: 17px;
+  border-radius: 50%;
+  padding: 0;
+  box-sizing: border-box;
+  position: absolute;
+  top: -4px;
+  left: -7px;
+  z-index: 10;
 }
 
-.group-class.user-avatar-notif-menu {
-  float: left;
+.notification-bell-link .fa-bell {
+  color: #FF0000 !important;
 }
 
-.user-avatar {
-  text-align: center;
+.notification-bell-link:hover .fa-bell {
+  color: #FF0000 !important;
 }
 
 .user-avatar-medium {
   width: 30px !important;
   height: 30px !important;
-  text-align: center;
-  position: absolute;
-  float: right;
 }
 
 .notif-container {
@@ -451,31 +472,8 @@ export default {
   max-height: 300px;
   overflow-y: auto;
   overflow-x: hidden;
+  min-width: 280px;
 }
-
-.notif-clickable {
-  cursor: pointer;
-  text-decoration: none;
-  color: inherit;
-  display: block;
-}
-
-
-.notif-container .row {
-  margin-bottom: 8px;
-  padding: 10px;
-  border-radius: 6px;
-  background-color: rgba(255, 255, 255, 0.05); 
-}
-
-.notif-text {
-  color: var(--notif-text-color);
-  display: inline-block;
-  font-size: 16px;
-  padding-left: 9px;
-  word-break: break-word;
-}
-
 
 .option-opaque {
   opacity: 0.3;
@@ -495,44 +493,118 @@ export default {
   animation: spin 5s ease-in-out infinite alternate;
 }
 
-.span-toggle-chain {
-  font-size: 1.2rem;
-}
-
 .dropdown-header {
   padding-left: 0px;
 }
 
-.dropdown-menu {
-   max-height: 420px;
-  overflow: auto;
-  position: absolute ;
-  top: 100% !important;
-  margin-top: 0 !important;
+.search-li {
+  padding: 0 !important;
+  display: flex;
+  align-items: center;
 }
 
-.dropdown-menu.notif-container {
-  margin-top: 0px !important;
-  top: 100% !important; 
+.dropdown-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 8px 12px;
+  background-color: var(--background-color);
+  /* this will adapt to light/dark */
 }
-/* Style for the scrollbar */
-.dropdown-menu::-webkit-scrollbar {
-  width: 10px;
+
+.user-dropdown {
+  max-height: none;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  /* Let Bootstrap handle display:none by default */
+}
+
+/* This is the key: Apply flex layout ONLY when the dropdown is shown */
+.nav-item.dropdown.show .user-dropdown {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-height: 420px;
+  /* Hide overflow on the main flex container */
+}
+
+/* Style for the sticky header part */
+.user-info-sticky {
+  position: sticky;
+  top: 0;
+  background-color: var(--background-color);
+  z-index: 10;
+  flex-shrink: 0;
+  padding: 8px 12px;
+  border-bottom: 1px solid #ccc;
+}
+
+/* Style for the scrollable content area */
+.dropdown-scrollable {
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.dropdown-scrollable::-webkit-scrollbar {
+  width: 8px;
   background-color: #f5f5f5;
 }
 
-/* Style for the thumb */
-.dropdown-menu::-webkit-scrollbar-thumb {
+.dropdown-scrollable::-webkit-scrollbar-thumb {
   background-color: #ff112d;
-  border-radius: 5px;
+  border-radius: 4px;
 }
 
-/* Style for the thumb on hover */
-.dropdown-menu::-webkit-scrollbar-thumb:hover {
-  background-color: pink !important;
+.dropdown-scrollable::-webkit-scrollbar-thumb:hover {
+  background-color: #e0001a !important;
 }
 
-.search-li{
-  height: fit-content;
+@media only screen and (max-width: 500px) {
+  .user-menu-container .user-menu .nav-item {
+    margin-right: 8px !important;
+    padding: 0 !important;
+    display: flex;
+    align-items: center;
+  }
+
+  .user-menu-container .user-menu .nav-item .user-avatar,
+  .user-menu-container .user-menu .nav-item .group-class:not(.notification-class) {
+    width: 30px !important;
+    height: 30px !important;
+  }
+
+  .user-menu-container .user-menu .nav-item .user-avatar>i,
+  .user-menu-container .user-menu .nav-item .user-avatar>a>i,
+  .user-menu-container .user-menu .nav-item .group-class:not(.notification-class)>i,
+  .user-menu-container .user-menu .nav-item>a>.group-class:not(.notification-class)>i {
+    font-size: 1em !important;
+    padding: 0 !important;
+  }
+
+  .user-menu-container .user-menu .notification-item-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .user-menu-container .user-menu .notification-class {
+    width: 15px !important;
+    height: 15px !important;
+    font-size: 8px !important;
+    top: -2px !important;
+    left: -6px !important;
+  }
+
+  .notification-class {
+    width: auto;
+    height: auto;
+    min-width: 5px;
+    min-height: 5px;
+  }
+
+  .user-menu-container .user-menu .nav-item>a:not(.dropdown-toggle) {
+    font-size: 0.9rem;
+  }
 }
 </style>
