@@ -1,3 +1,4 @@
+
 <template>
   <div class="hover-card-container">
     <!-- Display based on mode -->
