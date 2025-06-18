@@ -66,8 +66,8 @@
 
           <div class="col-12 text-center">
 
-			  <div class="text-center"><a :href="buildLink+'/posts'" class="btn btn-brand btn-lg btn-white border m-1">{{ $t('Posts') }}</a>
-				  <a v-if="user && user.account.name" href="#a" class="btn btn-brand btn-lg btn-white m-1 border" v-on:click="subscribe()">
+			  <div class="text-center"><a :href="buildLink+'/posts'" class="btn btn-brand btn-lg border m-1">{{ $t('Posts') }}</a>
+				  <a v-if="user && user.account.name" href="#a" class="btn btn-brand btn-lg m-1 border" v-on:click="subscribe()">
 					<span v-if="userSubscribed">{{ $t('Unsubscribe') }}</span>
 					<span v-else>{{ $t('Subscribe') }}</span>
 					<i class="fas fa-spin fa-spinner" v-if="loading"></i>
