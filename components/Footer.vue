@@ -278,7 +278,7 @@ div#voteModal {
 
 .column a {
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: 0px;
   text-decoration: none;
   width: fit-content;
 }
