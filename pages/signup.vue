@@ -6,12 +6,14 @@
     <section class="intro" id="content">
       <div class="container pt-5 mt-5 pb-5">
 
-
-        <h1 class="pt-5 mb-3 text-capitalize text-center headline"><span class="text-brand">{{ $t('signup.headline')
-            }}</span></h1>
-        <div class="lead mb-2 " v-html="signupProcessDetails()">
-        </div>
-
+        <!-- This is the new heading section, styled like the yield-farming page -->
+        
+        <ListHeadingSection :textualDisplay="textualTitle" />
+        
+        
+        <!-- The detailed description is now in the modal, so the old display div is removed. -->
+        <!-- The old H1 tag is also replaced by the ListHeadingSection component above. -->
+        
         <div class="row lead mb-4 p-3 w-100" v-html="''"><!-- signup.buy_text -->
 
         </div>
@@ -156,6 +158,9 @@
       </div>
 
     </section>
+    
+    <!-- Add the modal, which is triggered by the info icon in the heading -->
+    <NotifyModal :modalTitle="$t('signup.headline')" :modalText="signupProcessDetails()"/>
 
     <Footer />
   </div>
@@ -165,17 +170,17 @@
 import NavbarBrand from '~/components/NavbarBrand'
 import Footer from '~/components/Footer'
 import steem from 'steem'
-
 import hive from '@hiveio/hive-js'
-
 import blurt from '@blurtfoundation/blurtjs'
-
 //import VueRecaptcha from 'vue-recaptcha';
 import { VueReCaptcha } from 'vue-recaptcha-v3'
-
 import { mapGetters } from 'vuex'
-
 import Vue from 'vue'
+
+// Import the required components
+import ListHeadingSection from '~/components/ListHeadingSection.vue';
+import NotifyModal from '~/components/NotifyModal';
+
 Vue.use(VueReCaptcha, { siteKey: process.env.captchaV3Key })
 
 export default {
@@ -195,6 +200,9 @@ export default {
     NavbarBrand,
     Footer,
     //VueRecaptcha,
+    // Register the imported components
+    ListHeadingSection,
+    NotifyModal
   },
   data() {
     return {
@@ -237,6 +245,10 @@ export default {
     }
   },
   computed: {
+    // Add computed property to generate the title with the info icon
+    textualTitle (){
+      return this.$t('signup.headline');
+    }
   },
   async mounted() {
 
@@ -360,14 +372,15 @@ export default {
       return this.$t('usd_amount_invest') + ' ' + this.$t('min_amount').replace('_AMNT_',
         this.blurt_account ? this.minUSD * 2 : this.minUSD);
     },
+    // Restore the functionality of this method to provide content for the modal
     signupProcessDetails() {
-      return '';/*this.$t('signup.desc_part1')
+      return this.$t('signup.desc_part1')
 			+ this.$t('signup.desc_part2') + this.afitTokensToEarn()
 			+ this.$t('signup.desc_part3') + this.delegatedSteem
 			+ this.$t('signup.desc_part3_5') + this.delegatedSteem
 			+ this.$t('signup.desc_part4') + this.minUSD
 			+ this.$t('signup.desc_part5') + this.afitTokensToEarn('100')
-			+ this.$t('signup.desc_part6');*/
+			+ this.$t('signup.desc_part6');
     },
     validateUserName() {
       this.handleUsername(this.$refs['account-username'].value);
