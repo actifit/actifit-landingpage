@@ -13,7 +13,7 @@
         <div class="modal-header">
           <h2 class="modal-title" id="exampleModalLabel">{{ report.title }}</h2><br />
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
+            <span aria-hidden="true">×</span>
           </button>
         </div>
         <div class="main-user-info pl-4">
@@ -27,7 +27,10 @@
               <a :href="'/@' + this.report.author + '/' + this.report.permlink"><i
                   class="fas fa-link text-brand"></i></a>
               <i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent"></i>
-              <i v-if="!showTranslated" class="fa-solid fa-language text-brand" v-on:click="translateContent"></i>
+              <!-- Start of new/updated translation icons -->
+              <i v-if="translationLoading" class="fas fa-spinner fa-spin text-brand" :title="$t('translating_content', 'Translating...')"></i>
+              <i v-else-if="!showTranslated" class="fa-solid fa-language text-brand" v-on:click="translateContent" :title="$t('translate_content', 'Translate Content')"></i>
+              <!-- End of new/updated translation icons -->
             </div>
             <div class="p-1 modal-top-actions">
               <span><a href="#" @click.prevent="toggleCommentBox()" :title="$t('Reply')"><i
@@ -56,9 +59,9 @@
         </div>
         <div v-if="showTranslated" class="translation-notice">
           <span>{{ $t('auto_translated_content') }}</span>
-          <a href="#" v-on:click="cancelTranslation">{{ $t('click_to_view_original') }}</a>
+          <a href="#" @click.prevent="cancelTranslation">{{ $t('click_to_view_original') }}</a>
         </div>
-        <vue-remarkable class="modal-body" :source="body" ref="remarkableContent"
+        <vue-remarkable class="modal-body" :source="displayBody" ref="remarkableContent"
           :options="{ 'html': true, 'breaks': true, 'typographer': true }"></vue-remarkable>
         <div class="modal-body goog-ad-horiz-90">
           <adsbygoogle ad-slot="5716623705" />
@@ -91,10 +94,8 @@
               <img src="/img/STEEM.png" class="mr-0 currency-logo-small" v-if="cur_bchain == 'STEEM'">
               <img src="/img/HIVE.png" class="mr-0 currency-logo-small" v-else-if="cur_bchain == 'HIVE'">
               <img src="/img/BLURT.png" class="mr-0 currency-logo-small" v-else-if="cur_bchain == 'BLURT'">
-              <!--{{ postPayout }}-->
 
               <span v-if="postPaid()">
-                <!--<i class="fa-solid fa-wallet text-green"></i>-->
                 <span class="m-1" :title="$t('author_payout')">
                   <i class="fa-solid fa-user"></i>
                   {{ paidValue() }}
@@ -134,33 +135,15 @@
               quote="Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity"
               :hashtags="hashtags" twitter-user="actifit_fitness" inline-template>
               <div class="share-links-actifit">
-                <network network="facebook">
-                  <i class="fab fa-facebook" title="facebook"></i>
-                </network>
-                <network network="twitter">
-                  <i class="fab fa-x-twitter" title="X (twitter)"></i>
-                </network>
-                <network network="telegram">
-                  <i class="fab fa-telegram" title="telegram"></i>
-                </network>
-                <network network="whatsapp">
-                  <i class="fab fa-whatsapp" title="whatsapp"></i>
-                </network>
-                <network network="linkedin">
-                  <i class="fab fa-linkedin" title="linkedin"></i>
-                </network>
-                <network network="reddit">
-                  <i class="fab fa-reddit" title="reddit"></i>
-                </network>
-                <network network="skype">
-                  <i class="fab fa-skype" title="skype"></i>
-                </network>
-                <network network="sms">
-                  <i class="fas fa-comment" title="SMS"></i>
-                </network>
-                <network network="email">
-                  <i class="fa fa-envelope" title="email"></i>
-                </network>
+                <network network="facebook"><i class="fab fa-facebook" title="facebook"></i></network>
+                <network network="twitter"><i class="fab fa-x-twitter" title="X (twitter)"></i></network>
+                <network network="telegram"><i class="fab fa-telegram" title="telegram"></i></network>
+                <network network="whatsapp"><i class="fab fa-whatsapp" title="whatsapp"></i></network>
+                <network network="linkedin"><i class="fab fa-linkedin" title="linkedin"></i></network>
+                <network network="reddit"><i class="fab fa-reddit" title="reddit"></i></network>
+                <network network="skype"><i class="fab fa-skype" title="skype"></i></network>
+                <network network="sms"><i class="fas fa-comment" title="SMS"></i></network>
+                <network network="email"><i class="fa fa-envelope" title="email"></i></network>
               </div>
             </social-sharing>
           </div>
@@ -168,57 +151,28 @@
         <!-- adding section to display additional FULL Payout option -->
         <div class="modal-footer" v-if="this.meta.full_afit_pay == 'on'">
           <div class="text-brand">
-            <i class="fas fa-star"></i>
-            <small>
-              {{ $t('Full_AFIT_Payout_Mode') }}
-            </small>
-            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i><small>{{ $t('Full_AFIT_Payout_Mode') }}</small><i class="fas fa-star"></i>
           </div>
-          <div class="text-brand" v-if="!postPaid()">
-            <small>
-              {{ $t('Pending_Pay') }}
-            </small>
-          </div>
-          <div class="text-brand" v-else>
-            <small>
-              {{ fullAFITReward }} {{ $t('AFIT_Token') }}
-            </small>
-          </div>
+          <div class="text-brand" v-if="!postPaid()"><small>{{ $t('Pending_Pay') }}</small></div>
+          <div class="text-brand" v-else><small>{{ fullAFITReward }} {{ $t('AFIT_Token') }}</small></div>
         </div>
         <!-- adding section to display charity info if available -->
         <div class="modal-footer text-brand" v-if="this.meta.charity">
-          <i class="fas fa-dove"></i>
-          <small>
-            {{ $t('Charity_Post') }}
-          </small>
-          <i class="fas fa-dove"></i>
-          <small>
-            <a :href="this.meta.charity[0]" target="_blank">@{{ this.meta.charity[0] }}</a>
-          </small>
+          <i class="fas fa-dove"></i><small>{{ $t('Charity_Post') }}</small><i class="fas fa-dove"></i>
+          <small><a :href="this.meta.charity[0]" target="_blank">@{{ this.meta.charity[0] }}</a></small>
         </div>
         <transition name="fade">
           <div class="report-reply modal-body" v-if="commentBoxOpen">
             <CustomTextEditor ref="editor" :initialContent="replyBody"></CustomTextEditor>
             <div class="modal-footer m-2" style="display:none">
               <div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-if="cur_bchain == 'HIVE'">
-                <input type="radio" id="hive" value="HIVE" v-model="target_bchain">
-                <img src="/img/HIVE.png" style="max-height: 50px" v-on:click="target_bchain = 'HIVE'"
-                  :class="adjustHiveClass">
-                <label for="hive">HIVE ONLY</label>
+                <input type="radio" id="hive" value="HIVE" v-model="target_bchain"><img src="/img/HIVE.png" style="max-height: 50px" v-on:click="target_bchain = 'HIVE'" :class="adjustHiveClass"><label for="hive">HIVE ONLY</label>
               </div>
               <div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-else-if="cur_bchain == 'STEEM'">
-                <input type="radio" id="steem" value="STEEM" v-model="target_bchain">
-                <img src="/img/STEEM.png" style="max-height: 50px" v-on:click="target_bchain = 'STEEM'"
-                  :class="adjustSteemClass">
-                <label for="steem">STEEM ONLY</label>
+                <input type="radio" id="steem" value="STEEM" v-model="target_bchain"><img src="/img/STEEM.png" style="max-height: 50px" v-on:click="target_bchain = 'STEEM'" :class="adjustSteemClass"><label for="steem">STEEM ONLY</label>
               </div>
               <div class="bchain-option btn col-6 p-2 row text-left  mx-auto">
-                <input type="radio" id="hive_steem" value="BOTH" v-model="target_bchain">
-                <img src="/img/HIVE.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px"
-                  :class="adjustBothClass">
-                <img src="/img/STEEM.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px"
-                  :class="adjustBothClass">
-                <label for="hive_steem">HIVE + STEEM</label>
+                <input type="radio" id="hive_steem" value="BOTH" v-model="target_bchain"><img src="/img/HIVE.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px" :class="adjustBothClass"><img src="/img/STEEM.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px" :class="adjustBothClass"><label for="hive_steem">HIVE + STEEM</label>
               </div>
             </div>
             <a href="#" @click.prevent="postResponse($event)" class="btn btn-brand border reply-btn w-25">
@@ -229,14 +183,11 @@
                 v-if="target_bchain == 'STEEM' || target_bchain == 'BOTH'">
               <i class="fas fa-spin fa-spinner" v-if="loading"></i>
             </a>
-            <a href="#" @click.prevent="resetOpenComment()" class="btn btn-brand border reply-btn w-25">{{ $t('Cancel')
-              }}</a>
+            <a href="#" @click.prevent="resetOpenComment()" class="btn btn-brand border reply-btn w-25">{{ $t('Cancel') }}</a>
             <a href="#" @click.prevent="insertModSignature" class="btn btn-brand border reply-btn w-25"
-              v-if="(this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator'))">{{
-                $t('Short_Signature') }}</a>
+              v-if="(this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator'))">{{ $t('Short_Signature') }}</a>
             <a href="#" @click.prevent="insertFullModSignature" class="btn btn-brand border reply-btn w-25"
-              v-if="(this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator'))">{{
-                $t('Full_Signature') }}</a>
+              v-if="(this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator'))">{{ $t('Full_Signature') }}</a>
             <div class="text-brand" v-html="errPosting"></div>
           </div>
         </transition>
@@ -244,16 +195,24 @@
           <div class="comment-user-section">
             <UserHoverCard :username="user.name" />
           </div>
-          <vue-remarkable class="modal-body" :source="body"
+          <vue-remarkable class="modal-body" :source="responseBody"
             :options="{ 'html': true, 'breaks': true, 'typographer': true }"></vue-remarkable>
         </div>
         <div class="report-comments modal-body" v-if="report.children > 0">
           <div v-if="showCommentsLoader" class="pb-md-2 text-center">
             <i class="fas fa-spinner fa-spin text-brand"></i>
           </div>
-          <Comments v-if="commentsAvailable" :author="commentEntries.author" :body="commentEntries.body"
-            :reply_entries.sync="commentEntries.reply_entries" :main_post_author="report.author"
-            :main_post_permlink="report.permlink" :main_post_cat="report.category" :depth="0" />
+          <Comments v-if="commentsAvailable" 
+            :author="commentEntries.author" 
+            :body="commentEntries.body"
+            :reply_entries.sync="commentEntries.reply_entries" 
+            :main_post_author="report.author"
+            :main_post_permlink="report.permlink" 
+            :main_post_cat="report.category" 
+            :depth="0"
+            :translation-cache="translationCache"
+            @update-translation-cache="updateCommentCache" 
+          />
         </div>
 
       </div>
@@ -263,31 +222,27 @@
 
 <script>
 import UserHoverCard from './UserHoverCard.vue'
-
 import { mapGetters } from 'vuex'
 import Comments from '~/components/Comments'
 import CustomTextEditor from '~/components/CustomTextEditor'
-
 import vueRemarkable from 'vue-remarkable';
-
 import SocialSharing from 'vue-social-sharing';
-
 import VueScrollTo from 'vue-scrollto'
-import { translateText } from '~/components/deepl-client';
+import { translateTextWithGemini } from '~/components/gemini-client.js';
 
 const scot_steemengine_api = process.env.steemEngineScot;
 const scot_hive_api_param = process.env.hiveEngineScotParam;
-const tokensOfInterest = ['SPORTS', 'PAL', 'APX'];
 
 export default {
   data() {
     return {
-      originalContent: null,
-      currentReport: null,
+      translationCache: {},
       commentsLoading: true,
-      safety_post_content: ``,
+      displayBody: '',
+      translatedText: '',
+      safety_post_content: '',
       showTranslated: false,
-      translationError: '',
+      translationLoading: false,
       afitReward: 0,
       tokenRewards: [],
       userRank: '',
@@ -313,14 +268,8 @@ export default {
   },
   watch: {
     report: {
-      immediate: true,
-      handler(newReport) {
-        if (newReport) {
-          this.originalContent = newReport.body;
-          this.currentReport = { ...newReport };
-          this.fetchReportData();
-        }
-      }
+        handler: 'initializeReportState',
+        immediate: true
     },
     bchain: function (newBchain) {
       this.cur_bchain = newBchain;
@@ -328,10 +277,7 @@ export default {
     },
     'report.body': {
       handler() {
-        //Re-attach to newly rendered content
-        this.$nextTick(() => {
-          this.attachImageErrorHandlers();
-        });
+        this.$nextTick(() => { this.attachImageErrorHandlers(); });
       }
     }
   },
@@ -350,30 +296,21 @@ export default {
     ...mapGetters(['commentEntries'], 'commentCountToday'),
     ...mapGetters(['moderators', 'bchain']),
     adjustHiveClass() {
-      if (this.target_bchain != 'HIVE') {
-        return 'option-opaque';
-      }
+      if (this.target_bchain != 'HIVE') { return 'option-opaque'; }
       return '';
     },
     adjustSteemClass() {
-      if (this.target_bchain != 'STEEM') {
-        return 'option-opaque';
-      }
+      if (this.target_bchain != 'STEEM') { return 'option-opaque'; }
       return '';
     },
     adjustBothClass() {
-      if (this.target_bchain != 'BOTH') {
-        return 'option-opaque';
-      }
+      if (this.target_bchain != 'BOTH') { return 'option-opaque'; }
       return '';
     },
     date() {
       let date = new Date(this.report.created)
       let minutes = date.getMinutes()
       return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() + ' ' + date.getHours() + ':' + (minutes < 10 ? '0' + minutes : minutes)
-    },
-    body() {
-      return this.$cleanBody(this.report.body);
     },
     formattedReportUrl() {
       return "https://actifit.io/@" + this.report.author + '/' + this.report.permlink;
@@ -391,14 +328,6 @@ export default {
         return this.report.pending_payout_value.replace('SBD', '').replace('STEEM', '').replace('HBD', '').replace('HIVE', '') + ' $'
       }
     },
-    /*getUserRank() {
-    //proper formatting issue to display circle for smaller numbers
-    if (this.userRank<10){
-      return ' '+parseFloat(this.userRank).toFixed(1);
-    }else{
-      return parseFloat(this.userRank).toFixed(1);
-    }
-    },*/
     displayCoreUserRank() {
       return (this.userRank ? parseFloat(this.userRank.rank_no_afitx).toFixed(2) : '');
     },
@@ -411,10 +340,115 @@ export default {
     showCommentsLoader() {
       return this.report.children > 0 && this.commentsLoading;
     }
-
   },
 
   methods: {
+    initializeReportState(newReport) {
+      if (!newReport) return;
+      const reportId = `${newReport.author}/${newReport.permlink}`;
+      const cachedState = this.translationCache[reportId];
+      this.translationLoading = false;
+
+      if (cachedState) {
+        this.safety_post_content = cachedState.originalBody;
+        this.translatedText = cachedState.translatedBody;
+        this.showTranslated = cachedState.isShowingTranslation;
+        this.displayBody = this.showTranslated ? this.translatedText : this.safety_post_content;
+      } else {
+        this.safety_post_content = this.$cleanBody(newReport.body);
+        this.translatedText = '';
+        this.showTranslated = false;
+        this.displayBody = this.safety_post_content;
+      }
+      this.fetchReportData();
+    },
+    fetchReportData() {
+      this.fetchReportKeyData();
+      this.fetchReportCommentData();
+    },
+    fetchReportCommentData() {
+      this.commentsLoading = true;
+      this.cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
+      this.target_bchain = this.cur_bchain;
+      this.$store.commit('setBchain', this.cur_bchain);
+      this.$store.dispatch('fetchReportComments', this.report).then(() => {
+        this.commentsLoading = false;
+      });
+      this.responsePosted = false;
+      this.responseBody = this.moderatorSignature;
+    },
+    fetchReportKeyData() {
+      fetch(process.env.actiAppUrl + 'getPostReward?user=' + this.report.author + '&url=' + this.report.url).then(res => {
+        res.json().then(json => this.afitReward = json.token_count)
+      }).catch(e => console.error(e))
+      fetch(process.env.actiAppUrl + 'getRank/' + this.report.author).then(res => {
+        res.json().then(json => this.userRank = json)
+      }).catch(e => console.error(e))
+      fetch(process.env.actiAppUrl + 'getPostFullAFITPayReward?user=' + this.report.author + '&url=' + this.report.url).then(res => {
+        res.json().then(json => this.fullAFITReward = json.token_count)
+      }).catch(e => console.error(e))
+      this.$store.dispatch('fetchModerators')
+      this.profImgUrl = process.env.hiveImgUrl;
+      if (this.cur_bchain == 'STEEM') {
+        this.profImgUrl = process.env.steemImgUrl;
+        fetch(scot_steemengine_api + '@' + this.report.author + '/' + this.report.permlink).then(
+          res => {
+            res.json().then(json => this.setReportTokenRewards(json)).catch(e => console.error(e))
+          }).catch(e => console.error(e))
+      } else {
+        fetch(scot_steemengine_api + '@' + this.report.author + '/' + this.report.permlink + scot_hive_api_param).then(
+          res => {
+            res.json().then(json => this.setReportTokenRewards(json)).catch(e => console.error(e))
+          }).catch(e => console.error(e))
+      }
+      this.attachImageErrorHandlers();
+    },
+    cancelTranslation() {
+      const reportId = `${this.report.author}/${this.report.permlink}`;
+      this.displayBody = this.safety_post_content;
+      this.showTranslated = false;
+      if (this.translationCache[reportId]) {
+        this.$set(this.translationCache[reportId], 'isShowingTranslation', false);
+      }
+    },
+    async translateContent() {
+      const reportId = `${this.report.author}/${this.report.permlink}`;
+      if (this.translatedText) {
+        this.displayBody = this.translatedText;
+        this.showTranslated = true;
+        if (this.translationCache[reportId]) {
+            this.$set(this.translationCache[reportId], 'isShowingTranslation', true);
+        }
+        return;
+      }
+
+      this.translationLoading = true;
+      try {
+        const translationResult = await translateTextWithGemini(this.safety_post_content);
+        this.translatedText = translationResult;
+        this.displayBody = this.translatedText;
+        this.showTranslated = true;
+        this.$set(this.translationCache, reportId, {
+          originalBody: this.safety_post_content,
+          translatedBody: this.translatedText,
+          isShowingTranslation: true,
+        });
+      } catch (error) {
+        this.displayBody = this.safety_post_content;
+        this.showTranslated = false;
+        console.error('Translation process failed:', error);
+        this.$notify({
+          group: 'error',
+          text: 'Translation service failed. Please try again later.',
+          position: 'top center'
+        });
+      } finally {
+        this.translationLoading = false;
+      }
+    },
+    updateCommentCache(payload) {
+      this.$set(this.translationCache, payload.id, payload.data);
+    },
     headToComments(){
       const container = this.$refs.reportModal;
       VueScrollTo.scrollTo('#modal-footer', 1000, { easing: 'ease-in-out', offset: 0, container: container });
@@ -423,30 +457,6 @@ export default {
       this.commentBoxOpen = !this.commentBoxOpen;
       localStorage.setItem('commentBoxOpen', this.commentBoxOpen);
     },
-    cancelTranslation() {
-      if (this.originalContent) {
-        this.report.body = this.originalContent;
-        this.showTranslated = false;
-      }
-    },
-    async translateContent() {
-      try {
-        if (!this.originalContent) {
-          this.originalContent = this.report.body;
-        }
-
-        const result = await translateText(this.originalContent, 'en');
-        const translatedText = result.translations[0].text || "Translation failed";
-
-        this.showTranslated = true;
-        this.report.body = translatedText;
-      } catch (error) {
-        this.translationError = 'Unable to translate content. Try again later.';
-        console.error('Translation error:', error);
-      }
-    },
-
-    /* function checks if post has beneficiaries */
     hasBeneficiaries() {
       return Array.isArray(this.report.beneficiaries) && this.report.beneficiaries.length > 0;
     },
@@ -457,14 +467,11 @@ export default {
       }
       return output;
     },
-    /* function returns author payout value */
     paidValue() {
       if (this.report.total_payout_value) return this.report.total_payout_value
       if (this.report.author_payout_value) return this.report.author_payout_value
     },
-    /* function checks to see if post reached its payout period */
     postPaid() {
-      //check if last_payout is after cashout_time which means post got paid
       let last_payout = new Date(this.report.last_payout);
       let cashout_time = new Date(this.report.cashout_time);
       if (last_payout.getTime() > cashout_time.getTime()) {
@@ -472,33 +479,22 @@ export default {
       }
       return false;
     },
-    /* function handles closing open comment box and resetting data */
     resetOpenComment() {
       this.replyBody = this.moderatorSignature;
       this.commentBoxOpen = false;
       localStorage.setItem('commentBoxOpen', this.commentBoxOpen);
     },
-
     commentSuccess(err, finalize, bchain) {
-      // stop loading animation and show notification
       this.loading = false
       this.$notify({
         group: err ? 'error' : 'success',
         text: err ? this.$t('Comment_Error') : this.$t('Comment_Success_Chain').replace('_CHAIN_', bchain),
         position: 'top center'
       })
-
       if (finalize) {
-
-        //display comment placeholder till blockchain data comes through
         this.responsePosted = true;
         this.responseBody = this.replyBody;
-
-        //refetch report data anew, but only after 10 seconds to ensure data has been made available
         setTimeout(this.fetchReportCommentData, 10000);
-
-
-        //check if comment is lengthy enough, increase tracked count by 1
         if (this.responseBody.length >= 50) {
           if (isNaN(this.commentCountToday)) {
             this.commentCountToday = 0;
@@ -506,113 +502,69 @@ export default {
           this.commentCountToday += 1;
         }
         this.$store.commit('setCommentCountToday', this.commentCountToday);
-
-        //reward the user for interacting with 3 different posts via comments
         if (this.commentCountToday >= 3) {
           this.rewardUserComment();
         }
       }
-
-      //reset open comment
       this.resetOpenComment();
     },
-
     async processTrxFunc(op_name, cstm_params, bchain_option) {
       if (!localStorage.getItem('std_login')) {
-        //if (!this.stdLogin){
         let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
-        //console.log(res);
         if (res.result.ref_block_num) {
-          console.log('success');
           return { success: true, trx: res.result };
         } else {
-          //console.log(err);
           return { success: false, trx: null };
         }
       } else if (localStorage.getItem('acti_login_method') == 'hiveauth') {
         return new Promise((resolve) => {
           const auth = {
             username: this.user.account.name,
-            token: localStorage.getItem('access_token'),//should be changed in V1 (current V0.8)
+            token: localStorage.getItem('access_token'),
             expire: localStorage.getItem('expires'),
             key: localStorage.getItem('key')
           }
-          let operation = [
-            [op_name, cstm_params]
-          ];
-
+          let operation = [[op_name, cstm_params]];
           this.$HAS.broadcast(auth, 'posting', operation, (evt) => {
-            console.log(evt)    // process sign_wait message
             let msg = this.$t('verify_hiveauth_app');
             this.$notify({
               group: 'warn',
               text: msg,
-              duration: -1, //keep alive till clicked
+              duration: -1,
               position: 'top center'
             })
-          })
-            .then(response => {
-              console.log(response);
-              this.$notify({
-                group: 'warn',
-                clean: true
-              })
-              if (response.cmd && response.cmd === 'sign_ack') {
-                resolve({ success: true, trx: response.data })
-              } else if (response.cmd && response.cmd === 'sign_nack') {
-                resolve({ success: false })
-              }
-            }) // transaction approved and successfully broadcasted
-            .catch(err => {
-              this.$notify({
-                group: 'warn',
-                clean: true
-              })
-              console.log(err);
+          }).then(response => {
+            this.$notify({ group: 'warn', clean: true })
+            if (response.cmd && response.cmd === 'sign_ack') {
+              resolve({ success: true, trx: response.data })
+            } else if (response.cmd && response.cmd === 'sign_nack') {
               resolve({ success: false })
-            })
+            }
+          }).catch(err => {
+            this.$notify({ group: 'warn', clean: true })
+            console.log(err);
+            resolve({ success: false })
+          })
         });
-
       } else {
-        let operation = [
-          [op_name, cstm_params]
-        ];
-        console.log('broadcasting');
-        console.log(operation);
-
-        //console.log(this.$steemconnect.accessToken);
-        //console.log(this.$store.state.accessToken);
-        //grab token
+        let operation = [[op_name, cstm_params]];
         let accToken = localStorage.getItem('access_token')
-
         let op_json = JSON.stringify(operation)
-
         let cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
-
         if (bchain_option) {
           cur_bchain = bchain_option;
         }
-
         let url = new URL(process.env.actiAppUrl + 'performTrx/?user=' + this.user.account.name + '&operation=' + encodeURIComponent(op_json) + '&bchain=' + cur_bchain);
-
         let reqHeads = new Headers({
           'Content-Type': 'application/json',
           'x-acti-token': 'Bearer ' + accToken,
         });
-        let res = await fetch(url, {
-          headers: reqHeads
-        });
+        let res = await fetch(url, { headers: reqHeads });
         let outcome = await res.json();
-        console.log(outcome);
         if (outcome.error) {
-          console.log(outcome.error);
-          //if this is authority error, means needs to be logged out
-          //example "missing required posting authority:Missing Posting Authority"
           let err_msg = outcome.trx.tx.error;
           if (err_msg.includes('missing') && err_msg.includes('authority') && this.cur_bchain == bchain_option) {
-            //clear entry
             localStorage.removeItem('access_token');
-            //this.$store.commit('setStdLoginUser', false);
             this.error_msg = this.$t('session_expired_login_again');
             this.$store.dispatch('steemconnect/logout');
           }
@@ -622,104 +574,58 @@ export default {
             position: 'top center'
           })
           return { success: false, trx: null };
-          //this.$router.push('/login');
         } else {
           return { success: true, trx: outcome.trx };
         }
       }
     },
-
-    /* function handles sending out the comment to the blockchain */
     async postResponse(event) {
-      // proceed with saving the comment
-
       if (!this.user) {
         this.errPosting = this.$t('Need_login');
         return;
       }
-
       this.loading = true
-
-      //build the permlink
       let comment_perm = this.user.account.name.replace('.', '-') + '-re-' + this.report.author.replace('.', '-') + '-' + this.report.permlink + new Date().toISOString().replace(/[^a-zA-Z0-9]+/g, '').toLowerCase();
-
-      //prepare meta data
-      let meta = new Object();
-      meta.tags = ['hive-193552', 'actifit'];
-      meta.app = 'actifit/0.5.0';
-      meta.suppEdit = 'actifit.io.comment';
+      let meta = {
+        tags: ['hive-193552', 'actifit'],
+        app: 'actifit/0.5.0',
+        suppEdit: 'actifit.io.comment'
+      };
       this.replyBody = this.$refs.editor.content;
-      //console.log(this.stdLogin);
       if (!localStorage.getItem('std_login')) {
-        //if (!this.stdLogin){
         this.$steemconnect.comment(
-          this.report.author,
-          this.report.permlink,
-          this.user.account.name,
-          comment_perm,
-          '',
-          this.replyBody,
-          meta,
-          (err) => {
-            this.commentSuccess(err, true, 'STEEM');
-          }
+          this.report.author, this.report.permlink, this.user.account.name, comment_perm, '', this.replyBody, meta,
+          (err) => { this.commentSuccess(err, true, 'STEEM'); }
         )
       } else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) {
-
         let comment_options = {
-          author: this.user.account.name,
-          permlink: comment_perm,
-          max_accepted_payout: '1000000.000 HBD',
-          percent_hbd: 10000,
-          allow_votes: true,
-          allow_curation_rewards: true,
-          extensions: []//extensions: [[0, { 'beneficiaries': [] }]]
+          author: this.user.account.name, permlink: comment_perm, max_accepted_payout: '1000000.000 HBD',
+          percent_hbd: 10000, allow_votes: true, allow_curation_rewards: true, extensions: []
         };
-        //console.log(comment_options);
-        //this.$nuxt.refresh()
-
         window.hive_keychain.requestPost(
-          this.user.account.name,
-          "",
-          this.replyBody,
-          this.report.permlink,
-          this.report.author,
-          JSON.stringify(meta),
-          comment_perm,
-          JSON.stringify(comment_options), (response) => {
-            //console.log(response);
+          this.user.account.name, "", this.replyBody, this.report.permlink, this.report.author, JSON.stringify(meta), comment_perm, JSON.stringify(comment_options), 
+          (response) => {
             if (response.success) {
               this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain);
             } else {
               this.commentSuccess(response.message, false, this.cur_bchain);
             }
           });
-
       } else {
         let cstm_params = {
-          "author": this.user.account.name,
-          "title": '',
-          "body": this.replyBody,
-          "parent_author": this.report.author,
-          "parent_permlink": this.report.permlink,
-          "permlink": comment_perm,
-          "json_metadata": JSON.stringify(meta)
+          "author": this.user.account.name, "title": '', "body": this.replyBody, "parent_author": this.report.author,
+          "parent_permlink": this.report.permlink, "permlink": comment_perm, "json_metadata": JSON.stringify(meta)
         };
-
         let res = await this.processTrxFunc('comment', cstm_params, this.cur_bchain);
-
         if (res.success) {
           this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain);
         } else {
           this.commentSuccess('error saving', false, this.cur_bchain);
         }
-
-        //also send the same post again to the other chain
         let other_chain = this.cur_bchain == 'HIVE' ? 'STEEM' : 'HIVE';
         if (this.target_bchain == 'BOTH') {
           this.loading = true;
           let res = await this.processTrxFunc('comment', cstm_params, other_chain);
-
           if (res.success) {
             this.commentSuccess(null, true, other_chain);
           } else {
@@ -727,13 +633,9 @@ export default {
           }
         }
       }
-
     },
-    /* function handles rewarding user for comments */
     async rewardUserComment() {
-      console.log('rewarding comments');
       let url = new URL(process.env.actiAppUrl + 'rewardActifitWebComment/' + this.user.account.name);
-      //compile all needed data and send it along the request for processing
       let params = {
         web_comment_token: process.env.webCommentToken,
         url: this.report.url,
@@ -743,117 +645,43 @@ export default {
         let res = await fetch(url);
         let outcome = await res.json();
         if (outcome.rewarded) {
-          // notify the user that he received an additional reward
           this.$notify({
             group: 'success',
             text: this.$t('youve_been_rewarded') + outcome.amount + this.$t('reward_for_comment'),
             position: 'top center'
           })
         }
-        console.log(outcome);
       } catch (err) {
         console.error(err);
       }
     },
-    /* function checks if logged in user has upvoted current report */
     userVotedThisPost() {
       let curUser = this.user.account.name;
-      //check if the post contains in its original voters current user, or if it has been upvoted in current session
       this.postUpvoted = this.report.active_votes.filter(voter => (voter.voter === curUser)).length > 0 || this.newlyVotedPosts.indexOf(this.report.post_id) !== -1;
-
       return this.postUpvoted;
     },
-    /* function handles appending moderators signature */
     insertModSignature() {
       if (this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator')) {
         this.moderatorSignature = process.env.shortModeratorSignature;
         this.replyBody += this.moderatorSignature;
       }
     },
-    /* function handles appending full moderator signature */
     insertFullModSignature() {
       if (this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator')) {
         this.moderatorSignature = process.env.standardModeratorSignature;
         this.replyBody += this.moderatorSignature;
       }
     },
-    /* function handles confirming if the user had voted already to prevent issues */
     votePrompt(e) {
-
-      //proceed normally showing vote popup
       this.$store.commit('setPostToVote', this.report)
-      //}
     },
-    fetchReportData() {
-      //function handling propagating calls to grab key report data and comment info
-      this.fetchReportKeyData()
-      this.fetchReportCommentData()
-    },
-    fetchReportCommentData() {
-      this.commentsLoading = true;
-      this.cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
-      this.target_bchain = this.cur_bchain;
-      this.$store.commit('setBchain', this.cur_bchain);
-
-      this.$store.dispatch('fetchReportComments', this.report).then(() => {
-        this.commentsLoading = false;
-      });
-
-      this.responsePosted = false;
-      this.responseBody = this.moderatorSignature;
-    },
-    fetchReportKeyData() {
-      fetch(process.env.actiAppUrl + 'getPostReward?user=' + this.report.author + '&url=' + this.report.url).then(res => {
-        //grab the post's reward to display it properly
-        res.json().then(json => this.afitReward = json.token_count)
-      }).catch(e => reject(e))
-
-      //grab the author's rank
-      fetch(process.env.actiAppUrl + 'getRank/' + this.report.author).then(res => {
-        res.json().then(json => this.userRank = json)
-      }).catch(e => reject(e))
-
-      //grab post full pay if full pay mode enabled
-      fetch(process.env.actiAppUrl + 'getPostFullAFITPayReward?user=' + this.report.author + '&url=' + this.report.url).then(res => {
-        res.json().then(json => this.fullAFITReward = json.token_count)
-      }).catch(e => reject(e))
-
-      //grab moderators' list
-      this.$store.dispatch('fetchModerators')
-
-      this.profImgUrl = process.env.hiveImgUrl;
-
-      if (this.cur_bchain == 'STEEM') {
-
-        this.profImgUrl = process.env.steemImgUrl;
-
-        //grab post S-E token pay
-        fetch(scot_steemengine_api + '@' + this.report.author + '/' + this.report.permlink).then(
-          res => {
-            res.json().then(json => this.setReportTokenRewards(json)).catch(e => reject(e))
-          }).catch(e => reject(e))
-      } else {
-        //grab post H-E token pay
-        fetch(scot_steemengine_api + '@' + this.report.author + '/' + this.report.permlink + scot_hive_api_param).then(
-          res => {
-            res.json().then(json => this.setReportTokenRewards(json)).catch(e => reject(e))
-          }).catch(e => reject(e))
-      }
-
-      //attach image error handles
-      this.attachImageErrorHandlers();
-    },
-    /* function handles proper display for post token rewards */
     displayTokenValue(token) {
       let val;
-      //if already paid
       if (parseFloat(token.total_payout_value) > 0) {
         val = parseFloat(token.total_payout_value) / Math.pow(10, token.precision);
         return this.numberFormat(val, token.precision) + ' ' + token.token;
       }
-      if (isNaN(token.pending_token)) {
-        return "";
-      }
+      if (isNaN(token.pending_token)) { return ""; }
       if (parseFloat(token.pending_token) == 0) {
         return this.numberFormat(val, token.precision) + ' ' + token.token;
       }
@@ -861,8 +689,6 @@ export default {
       return this.numberFormat(val, token.precision) + ' ' + token.token;
     },
     fixSubModal() {
-      //handles fixing parent class to properly interpret existing report modal
-      //need to make sure this is subentry of a report modal, meaning report modal is showing
       if ($('#reportModal').hasClass('show')) {
         $('body').addClass('modal-open');
       }
@@ -871,13 +697,6 @@ export default {
       this.tokenRewards = result;
       this.report.specTokenRewards = this.tokenRewards;
     },
-    /**
-       * Formats numbers with commas and dots.
-       *
-       * @param number
-     * @param precision
-       * @returns {string}
-       */
     numberFormat(number, precision) {
       return new Intl.NumberFormat('en-EN', { maximumFractionDigits: precision }).format(number)
     },
@@ -885,27 +704,16 @@ export default {
       navigator.clipboard.writeText('https://actifit.io/@' + this.report.author + '/' + this.report.permlink)
         .then(() => {
           this.$notify({
-            group: 'success',
-            text: this.$t('copied_successfully'),
-            position: 'top center'
+            group: 'success', text: this.$t('copied_successfully'), position: 'top center'
           })
-          return;
         })
         .catch((error) => {
           this.$notify({
-            group: 'error',
-            text: this.$t('error_copying'),
-            position: 'top center'
+            group: 'error', text: this.$t('error_copying'), position: 'top center'
           })
-          return;
         });
-
     },
     loadNextReport(direction) {
-      this.showTranslated = false;
-      this.originalContent = null;
-      this.currentReport = null;
-
       if (direction < 0) {
         this.$emit('prevReport');
       } else {
@@ -917,43 +725,29 @@ export default {
       let commentBoxOpenTest = localStorage.getItem('commentBoxOpen') === 'true';
       if (!commentBoxOpenTest) {
         switch (event.key) {
-          case 'ArrowLeft':
-            this.loadNextReport(-1);
-            break;
-          case 'ArrowRight':
-            this.loadNextReport(1);
-            break;
+          case 'ArrowLeft': this.loadNextReport(-1); break;
+          case 'ArrowRight': this.loadNextReport(1); break;
         }
       }
     },
     attachImageErrorHandlers() {
-      //return;
-      const vm = this; // Store this to vm variable
-      // Ensure that vm.$refs.remarkableContent is accessible
-      // and its $el is mounted by the time this function is called
+      const vm = this;
       this.$nextTick(() => {
         const contentEl = vm.$refs.remarkableContent.$el;
         if (!contentEl) {
           console.warn('VueRemarkable component not found!');
           return;
         }
-
         const images = contentEl.querySelectorAll('img');
-
         images.forEach(img => {
           img.onerror = (event) => {
-            // Check if ID exists (to prevent duplicate triggers)
             if (!this.imageError.has(img.id)) {
-
-              // generate ID if its not set
               if (!img.id) {
                 img.id = this.$uuidv4();
               }
               this.imageError.add(img.id);
-
               img.src = process.env.hiveStandardPostUrl + img.src;
-              img.onerror = null; // prevent double triggers
-              //console.log('Image failed to load.  Set to fallback: ' + img.src);
+              img.onerror = null;
             }
           };
         });
@@ -962,28 +756,12 @@ export default {
   },
   beforeDestroy() {
     window.removeEventListener('keydown', this.handleKeyDown);
-    this.cancelTranslation();
-    this.originalContent = null;
-    this.currentReport = null;
   },
-  async mounted() {
-    if (this.report != null) {
-      this.fetchReportKeyData();
-    }
-
-    //associate scrolling with the modal
+  mounted() {
     VueScrollTo.scrollTo = VueScrollTo.scrollTo.bind(this);
-
-
-
-    //fix modal overlay
     $('#voteModal').on("hidden.bs.modal", this.fixSubModal)
-    //reset translation when modal closes
     $('#reportModal').on("hidden.bs.modal", this.cancelTranslation)
-
     this.cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
-
-    //capture key clicks
     window.addEventListener('keydown', this.handleKeyDown);
   }
 }
@@ -1060,7 +838,7 @@ export default {
 }
 
 .translation-notice a {
-  color: #007bff;
+  color: #ff0000;
   text-decoration: none;
   margin-left: 5px;
 }
