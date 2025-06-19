@@ -130,6 +130,10 @@ export default {
   border-radius: 3px;
 }
 
+.notification-item span{
+  color:var(--notif-text-color);
+}
+
 .navbar-nav .nav-item a span {
   display: none;
 }

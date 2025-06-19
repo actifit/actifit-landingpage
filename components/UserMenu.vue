@@ -39,16 +39,14 @@
               <a href='#' class="btn btn-brand border" v-on:click="markAllRead()">{{ $t('Clear_all') }}</a>
             </div>
             <div class="row p-2 border-top" v-for="(notif, index) in activeNotifications" :key="index" :notif="notif">
-              <span class="col-md-10">
-                <a :href="notif.url" v-on:click="markRead(notif)">
+               <div class="col-md-10 notif-clickable" @click="handleNotificationClick(notif)">
                   <i class="fas fa-user-plus p-1"
                     v-if="notif.type == 'friendship' || notif.type == 'friendship_request'"></i>
                   <i class="fas fa-user-friends p-1" v-else-if="notif.type == 'friendship_acceptance'"></i>
                   <span>{{ notif.details }}</span>
                   <span v-if="notif.action_taker" class="user-avatar user-avatar-medium mr-1 mb-3"
                     :style="'background-image: url(' + profImgUrl + '/u/' + notif.action_taker + '/avatar)'"></span>
-                </a>
-              </span>
+                </div>
               <span>
                 <a href="#" v-on:click="markRead(notif)" class="col-md-2" :title="$t('mark_as_read')"><i
                     class="fas fa-check-square"></i></a>
@@ -325,6 +323,12 @@ export default {
         else console.error(`Failed to mark notification as read: ${res.status}`);
       } catch (error) { console.error('Error in markRead:', error); }
     },
+
+    async handleNotificationClick(notif) {
+      await this.markRead(notif);
+      window.location.href = notif.url;
+    },
+
     async markAllRead() {
       if (!this.user || !this.user.account) return;
       if (!confirm(this.$t('Mark_all_read_confirm'))) return;
@@ -369,7 +373,7 @@ export default {
   height: 54px
   display: flex 
   align-items: center
-
+  
   .user-menu 
     display: flex 
     align-items: center 
@@ -468,10 +472,28 @@ export default {
 }
 
 .notif-container {
+  width: 520px;        
+  max-width: 520px;       
+  min-width: 320px;       
   max-height: 300px;
-  overflow-y: auto;
   overflow-x: hidden;
+  overflow-y: auto;
   min-width: 280px;
+}
+
+.notif-clickable {
+  word-wrap: break-word;
+  width: 100%; 
+  white-space: normal;
+  overflow: hidden; 
+}
+
+.row.p-2 {
+  padding: 5px 10px; 
+}
+
+.col-md-10 {
+  width: 100%; 
 }
 
 .option-opaque {
