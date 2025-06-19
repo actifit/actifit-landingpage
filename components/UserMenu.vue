@@ -323,6 +323,12 @@ export default {
         else console.error(`Failed to mark notification as read: ${res.status}`);
       } catch (error) { console.error('Error in markRead:', error); }
     },
+
+    async handleNotificationClick(notif) {
+      await this.markRead(notif);
+      window.location.href = notif.url;
+    },
+
     async markAllRead() {
       if (!this.user || !this.user.account) return;
       if (!confirm(this.$t('Mark_all_read_confirm'))) return;
@@ -367,7 +373,7 @@ export default {
   height: 54px
   display: flex 
   align-items: center
-
+  
   .user-menu 
     display: flex 
     align-items: center 
@@ -470,9 +476,19 @@ export default {
   max-width: 500px;       
   min-width: 320px;       
   max-height: 300px;
-  overflow-y: auto;
   overflow-x: hidden;
+  overflow-y: auto;
   min-width: 280px;
+}
+
+.notif-clickable {
+  width: 100%; 
+  white-space: nowrap;
+  overflow: hidden; 
+}
+
+.row.p-2 {
+  padding: 5px 10px; 
 }
 
 .option-opaque {
