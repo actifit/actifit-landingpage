@@ -17,7 +17,7 @@
         <div class="d-flex align-items-center flex-grow-1">
           <div class="user-avatar large-avatar"
             :style="'background-image: url(' + (userMeta && userMeta.profile && userMeta.profile.profile_image ? userMeta.profile.profile_image : profImgUrl + '/u/' + displayUser + '/avatar') + ')'">
-             <span v-if="editOn" class="avatar-edit-button">
+             <span v-if="editOn && !account_banned" class="avatar-edit-button">
                 <a href="#" class="btn btn-danger btn-sm" data-toggle="modal"
                   data-target="#profileImageModal" @click="showProfileImageModal">
                   <i class="fas fa-edit"></i>
@@ -28,32 +28,31 @@
             <div class="d-flex align-items-center">
                 <span class="username">@{{ displayUser }}</span>
                 <span class="user-rank-badge ml-2">{{ displayCoreUserRank }}</span>
+                <span v-if="user && user.account.name === displayUser && !account_banned" class="edit-profile-btn ml-2">
+                  <a class="p-2" @click="editOn ? turnEditOff() : turnEditOn()">
+                    <i :class="editOn ? 'fa-regular fa-eye' : 'fas fa-edit'"></i>
+                  </a>
+                </span>
             </div>
-            <div class="join-date">Joined on {{ pureDate(userinfo.created) }}</div>
+            <div class="join-date">{{ $t('Joined_On') }} {{ pureDate(userinfo.created) }}</div>
           </div>
         </div>
 
         <!-- Friendship action buttons -->
         <div v-if="user && !isOwnAccount() && !account_banned" class="friend-actions">
             <span :title="$t('you_are_friends_username').replace('_USERNAME_', displayUser)" v-if="isFriend()">
-                <button class="btn btn-sm btn-warning" @click="dropFriend"><i class="fas fa-user-times mr-1"></i> Unfriend</button>
+                <button class="btn btn-sm btn-warning" @click="dropFriend"><i class="fas fa-user-times mr-1"></i> {{ $t('unfriend') }}</button>
             </span>
             <span :title="$t('friendship_pending_approval')" v-else-if="isPendingFriend()">
-                <button v-if="isPendingFriend().direction == 0" class="btn btn-sm btn-secondary" @click="cancelFriendRequest">Request Sent</button>
-                <button v-else-if="isPendingFriend().direction == 1" class="btn btn-sm btn-info" @click="acceptFriend">Accept Request</button>
+                <button v-if="isPendingFriend().direction == 0" class="btn btn-sm btn-secondary" @click="cancelFriendRequest">{{ $t('request_sent') }}</button>
+                <button v-else-if="isPendingFriend().direction == 1" class="btn btn-sm btn-info" @click="acceptFriend">{{ $t('accept_request') }}</button>
             </span>
             <span :title="$t('add_username_friend').replace('_USERNAME_', displayUser)" v-else>
-                <button class="btn btn-sm btn-success" @click="addFriend"><i class="fas fa-user-plus mr-1"></i> Add Friend</button>
+                <button class="btn btn-sm btn-success" @click="addFriend"><i class="fas fa-user-plus mr-1"></i> {{ $t('add_friend') }}</button>
             </span>
             <i v-if="friendshipLoader" class="fas fa-spinner fa-spin ml-2"></i>
             <div v-if="addFriendError" v-html="addFriendError" class="text-danger small mt-1"></div>
         </div>
-
-        <span v-if="user && user.account.name === displayUser && !account_banned" class="edit-profile-btn">
-          <a class="p-2" @click="editOn ? turnEditOff() : turnEditOn()">
-            <i class="fas fa-edit"></i>
-          </a>
-        </span>
       </div>
 
       <!-- Main Body Layout -->
@@ -62,11 +61,11 @@
         <div class="main-content-tabs">
           <!-- Tab Navigation -->
           <div class="tab-nav">
-            <button @click="activeTab = 'about'" :class="{ active: activeTab === 'about' }">About</button>
-            <button @click="activeTab = 'fitness'" :class="{ active: activeTab === 'fitness' }">Fitness</button>
-            <button @click="activeTab = 'community'" :class="{ active: activeTab === 'community' }">Community</button>
-            <button @click="activeTab = 'wallet'" :class="{ active: activeTab === 'wallet' }">Wallet</button>
-            <button @click="activeTab = 'badges'" :class="{ active: activeTab === 'badges' }">Badges</button>
+            <button @click="activeTab = 'about'" :class="{ active: activeTab === 'about' }">{{ $t('About') }}</button>
+            <button @click="activeTab = 'fitness'" :class="{ active: activeTab === 'fitness' }">{{ $t('Fitness') }}</button>
+            <button @click="activeTab = 'community'" :class="{ active: activeTab === 'community' }">{{ $t('Community') }}</button>
+            <button @click="activeTab = 'wallet'" :class="{ active: activeTab === 'wallet' }">{{ $t('Wallet') }}</button>
+            <button @click="activeTab = 'badges'" :class="{ active: activeTab === 'badges' }">{{ $t('Badges') }}</button>
           </div>
 
           <!-- Tab Content -->
@@ -74,48 +73,66 @@
             <!-- About Tab -->
             <div v-if="activeTab === 'about'" class="about-tab">
                <div class="about-item">
-                  <div class="about-item-label"><i class="fas fa-user-circle mr-2"></i> Display Name</div>
+                  <div class="about-item-label"><i class="fas fa-user-circle mr-2"></i> {{ $t('DisplayName') }}</div>
                   <div class="about-item-value">
-                     <div v-if="updatingField === 'username'" class="d-flex justify-content-center align-items-center h-100"><i class="fas fa-spinner fa-spin text-brand"></i></div>
-                     <span v-else>
-                        <span v-if="!usernameEditOn">{{ textAreaUsernameValue || 'Not Set' }}</span>
-                        <span v-else><textarea v-model="textAreaUsernameValue"></textarea><a class="btn btn-sm btn-success p-1" @click="saveFunc('username')"><i class="fa-solid fa-check"></i></a><a class="btn btn-sm btn-danger p-1" @click="turnUsernameEditOff"><i class="fa-solid fa-xmark"></i></a></span>
+                     <div v-if="updatingField === 'username'" class="d-flex justify-content-end align-items-center h-100 w-100"><i class="fas fa-spinner fa-spin text-brand"></i></div>
+                     <template v-else>
+                        <span class="about-item-text" v-if="!usernameEditOn">{{ textAreaUsernameValue || $t('Not_Set') }}</span>
+                        <div class="about-item-edit" v-else>
+                          <textarea v-model="textAreaUsernameValue"></textarea>
+                          <a class="btn btn-sm btn-success p-1" @click="saveFunc('username')"><i class="fa-solid fa-check"></i></a>
+                          <a class="btn btn-sm btn-danger p-1" @click="turnUsernameEditOff"><i class="fa-solid fa-xmark"></i></a>
+                        </div>
                         <a class="btn btn-sm btn-danger p-1 ml-2" v-if="editOn && !usernameEditOn" @click="turnUsernameEditOn"><i class="fas fa-edit"></i></a>
-                     </span>
+                     </template>
                   </div>
                </div>
                <div class="about-item">
-                  <div class="about-item-label"><i class="fas fa-map-marker-alt mr-2"></i> Location</div>
+                  <div class="about-item-label"><i class="fas fa-map-marker-alt mr-2"></i> {{ $t('Location') }}</div>
                   <div class="about-item-value">
-                     <div v-if="updatingField === 'location'" class="d-flex justify-content-center align-items-center h-100"><i class="fas fa-spinner fa-spin text-brand"></i></div>
-                     <span v-else>
-                        <span v-if="!locationEditOn">{{ textAreaLocationValue || 'Not Set' }}</span>
-                        <span v-else><textarea v-model="textAreaLocationValue"></textarea><a class="btn btn-sm btn-success p-1" @click="saveFunc('location')"><i class="fa-solid fa-check"></i></a><a class="btn btn-sm btn-danger p-1" @click="turnLocationEditOff"><i class="fa-solid fa-xmark"></i></a></span>
+                     <div v-if="updatingField === 'location'" class="d-flex justify-content-end align-items-center h-100 w-100"><i class="fas fa-spinner fa-spin text-brand"></i></div>
+                     <template v-else>
+                        <span class="about-item-text" v-if="!locationEditOn">{{ textAreaLocationValue || $t('Not_Set') }}</span>
+                        <div class="about-item-edit" v-else>
+                          <textarea v-model="textAreaLocationValue"></textarea>
+                          <a class="btn btn-sm btn-success p-1" @click="saveFunc('location')"><i class="fa-solid fa-check"></i></a>
+                          <a class="btn btn-sm btn-danger p-1" @click="turnLocationEditOff"><i class="fa-solid fa-xmark"></i></a>
+                        </div>
                         <a class="btn btn-sm btn-danger p-1 ml-2" v-if="editOn && !locationEditOn" @click="turnLocationEditOn"><i class="fas fa-edit"></i></a>
-                     </span>
+                     </template>
                   </div>
                </div>
                <div class="about-item">
-                  <div class="about-item-label"><i class="fas fa-info-circle mr-2"></i> Description</div>
+                  <div class="about-item-label"><i class="fas fa-info-circle mr-2"></i> {{ $t('Description') }}</div>
                   <div class="about-item-value">
-                     <div v-if="updatingField === 'description'" class="d-flex justify-content-center align-items-center h-100"><i class="fas fa-spinner fa-spin text-brand"></i></div>
-                     <span v-else>
-                        <span v-if="!descriptionEditOn">{{ textAreaDescriptionValue || 'Not Set' }}</span>
-                        <span v-else><textarea v-model="textAreaDescriptionValue"></textarea><a class="btn btn-sm btn-success p-1" @click="saveFunc('description')"><i class="fa-solid fa-check"></i></a><a class="btn btn-sm btn-danger p-1" @click="turnDescriptionEditOff"><i class="fa-solid fa-xmark"></i></a></span>
+                     <div v-if="updatingField === 'description'" class="d-flex justify-content-end align-items-center h-100 w-100"><i class="fas fa-spinner fa-spin text-brand"></i></div>
+                      <template v-else>
+                        <span class="about-item-text" v-if="!descriptionEditOn">{{ textAreaDescriptionValue || $t('Not_Set') }}</span>
+                        <div class="about-item-edit" v-else>
+                          <textarea v-model="textAreaDescriptionValue"></textarea>
+                          <a class="btn btn-sm btn-success p-1" @click="saveFunc('description')"><i class="fa-solid fa-check"></i></a>
+                          <a class="btn btn-sm btn-danger p-1" @click="turnDescriptionEditOff"><i class="fa-solid fa-xmark"></i></a>
+                        </div>
                         <a class="btn btn-sm btn-danger p-1 ml-2" v-if="editOn && !descriptionEditOn" @click="turnDescriptionEditOn"><i class="fas fa-edit"></i></a>
-                     </span>
+                     </template>
                   </div>
                </div>
                <div class="about-item">
-                  <div class="about-item-label"><i class="fas fa-link mr-2"></i> Website</div>
+                  <div class="about-item-label"><i class="fas fa-link mr-2"></i> {{ $t('Website') }}</div>
                   <div class="about-item-value">
-                     <div v-if="updatingField === 'link'" class="d-flex justify-content-center align-items-center h-100"><i class="fas fa-spinner fa-spin text-brand"></i></div>
-                     <span v-else>
-                        <a v-if="!linkEditOn && userMeta && userMeta.profile && userMeta.profile.website" :href="userMeta.profile.website" target="_blank">{{ textAreaLinkValue }}</a>
-                        <span v-if="!linkEditOn && !(userMeta && userMeta.profile && userMeta.profile.website)">{{ textAreaLinkValue || 'Not Set' }}</span>
-                        <span v-else><textarea v-model="textAreaLinkValue"></textarea><a class="btn btn-sm btn-success p-1" @click="saveFunc('link')"><i class="fa-solid fa-check"></i></a><a class="btn btn-sm btn-danger p-1" @click="turnLinkEditOff"><i class="fa-solid fa-xmark"></i></a></span>
+                     <div v-if="updatingField === 'link'" class="d-flex justify-content-end align-items-center h-100 w-100"><i class="fas fa-spinner fa-spin text-brand"></i></div>
+                     <template v-else>
+                        <div class="about-item-text" v-if="!linkEditOn">
+                          <a v-if="userMeta && userMeta.profile && userMeta.profile.website" :href="userMeta.profile.website" target="_blank">{{ textAreaLinkValue }}</a>
+                          <span v-else>{{ textAreaLinkValue || $t('Not_Set') }}</span>
+                        </div>
+                        <div class="about-item-edit" v-else>
+                          <textarea v-model="textAreaLinkValue"></textarea>
+                          <a class="btn btn-sm btn-success p-1" @click="saveFunc('link')"><i class="fa-solid fa-check"></i></a>
+                          <a class="btn btn-sm btn-danger p-1" @click="turnLinkEditOff"><i class="fa-solid fa-xmark"></i></a>
+                        </div>
                         <a class="btn btn-sm btn-danger p-1 ml-2" v-if="editOn && !linkEditOn" @click="turnLinkEditOn"><i class="fas fa-edit"></i></a>
-                     </span>
+                     </template>
                   </div>
                </div>
             </div>
@@ -123,33 +140,33 @@
             <!-- Fitness Tab -->
             <div v-if="activeTab === 'fitness'" class="fitness-tab-container">
                 <div class="fitness-section-grid-measurements">
-                    <div class="fitness-card"><img src="https://usermedia.actifit.io/height.png"><div>Height</div><div class="value">{{ lastHeight + ' ' + heightUnit }}</div></div>
-                    <div class="fitness-card"><img src="https://usermedia.actifit.io/bodyfat.png"><div>Body Fat</div><div class="value">{{ lastBodyfat + ' % ' }}</div></div>
-                    <div class="fitness-card"><img src="https://usermedia.actifit.io/waist.png"><div>Waist</div><div class="value">{{ lastWaist + ' ' + waistUnit }}</div></div>
-                    <div class="fitness-card"><img src="https://usermedia.actifit.io/weight.png"><div>Weight</div><div class="value">{{ lastWeight + ' ' + weightUnit }}</div></div>
-                    <div class="fitness-card"><img src="https://usermedia.actifit.io/chest.png"><div>Chest</div><div class="value">{{ lastChest + ' ' + chestUnit }}</div></div>
-                    <div class="fitness-card"><img src="https://usermedia.actifit.io/thighs.png"><div>Thighs</div><div class="value">{{ lastThighs + ' ' + thighsUnit }}</div></div>
+                    <div class="fitness-card"><img src="https://usermedia.actifit.io/height.png"><div>{{ $t('Height') }}</div><div class="value">{{ lastHeight + ' ' + heightUnit }}</div></div>
+                    <div class="fitness-card"><img src="https://usermedia.actifit.io/bodyfat.png"><div>{{ $t('Body_Fat') }}</div><div class="value">{{ lastBodyfat + ' % ' }}</div></div>
+                    <div class="fitness-card"><img src="https://usermedia.actifit.io/waist.png"><div>{{ $t('Waist') }}</div><div class="value">{{ lastWaist + ' ' + waistUnit }}</div></div>
+                    <div class="fitness-card"><img src="https://usermedia.actifit.io/weight.png"><div>{{ $t('Weight') }}</div><div class="value">{{ lastWeight + ' ' + weightUnit }}</div></div>
+                    <div class="fitness-card"><img src="https://usermedia.actifit.io/chest.png"><div>{{ $t('Chest') }}</div><div class="value">{{ lastChest + ' ' + chestUnit }}</div></div>
+                    <div class="fitness-card"><img src="https://usermedia.actifit.io/thighs.png"><div>{{ $t('Thighs') }}</div><div class="value">{{ lastThighs + ' ' + thighsUnit }}</div></div>
                 </div>
                 <div class="fitness-action-btn-container">
-                    <a href="#" data-toggle="modal" class="btn btn-danger" data-target="#measureChartModal" v-if="isFriend() || isOwnAccount()">Stats Chart</a>
-                    <a href="#" class="btn btn-danger" v-on:click="displayAddFriendStats = !displayAddFriendStats" v-else-if="user">Stats Chart</a>
-                    <a href="#" class="btn btn-danger" v-on:click="displayLoginStats = !displayLoginStats" v-else>Stats Chart</a>
+                    <a href="#" data-toggle="modal" class="btn btn-danger" data-target="#measureChartModal" v-if="isFriend() || isOwnAccount()">{{ $t('Stats_chart') }}</a>
+                    <a href="#" class="btn btn-danger" v-on:click="displayAddFriendStats = !displayAddFriendStats" v-else-if="user">{{ $t('Stats_chart') }}</a>
+                    <a href="#" class="btn btn-danger" v-on:click="displayLoginStats = !displayLoginStats" v-else>{{ $t('Stats_chart') }}</a>
                 </div>
                 <div class="fitness-section-grid-activity">
                     <div class="fitness-card activity-card">
-                        <div>Latest Activity Count</div>
+                        <div>{{ $t('Latest_Activity_Count') }}</div>
                         <img src="/img/actifit_logo.png" class="activity-small-logo">
                         <div class="value">{{ lastActivityCount }}</div>
                     </div>
                     <div class="fitness-card activity-card">
-                        <div>Latest Activity Date</div>
+                        <div>{{ $t('Latest_Activity_Date') }}</div>
                         <div class="value">{{ lastActivityDate }}</div>
                     </div>
                 </div>
                 <div class="fitness-action-btn-container">
-                    <a href="#" data-toggle="modal" class="btn btn-danger" data-target="#activityChartModal" v-if="isFriend() || isOwnAccount()">Activity Chart</a>
-                    <a href="#" class="btn btn-danger" v-on:click="displayAddFriendActivity = !displayAddFriendActivity" v-else-if="user">Activity Chart</a>
-                    <a href="#" class="btn btn-danger" v-on:click="displayLoginActivity = !displayLoginActivity" v-else>Activity Chart</a>
+                    <a href="#" data-toggle="modal" class="btn btn-danger" data-target="#activityChartModal" v-if="isFriend() || isOwnAccount()">{{ $t('View_activity_chart') }}</a>
+                    <a href="#" class="btn btn-danger" v-on:click="displayAddFriendActivity = !displayAddFriendActivity" v-else-if="user">{{ $t('View_activity_chart') }}</a>
+                    <a href="#" class="btn btn-danger" v-on:click="displayLoginActivity = !displayLoginActivity" v-else>{{ $t('View_activity_chart') }}</a>
                 </div>
             </div>
 
@@ -160,7 +177,7 @@
                   <img src="/img/poshlogo.png" class="mr-3" style="width: 50px;">
                   <div class="flex-grow-1">
                     <span v-if="poshVerified">
-                      <i class="fas fa-check text-success" style="font-size:large"></i> POSH Connected: 
+                      <i class="fas fa-check text-success" style="font-size:large"></i> {{ $t('Posh_connected') }}: 
                       <a :href="poshUserData.twitter_profile" v-if="poshUserData.twitter_username">@{{ poshUserData.twitter_username }}</a>
                     </span>
                      <div v-html="$t('posh_desc_profile')"></div>
@@ -200,11 +217,16 @@
                     <a :href="'/' + displayUser + '/blog'" class="btn btn-danger m-2">{{ $t('View_blog') }}</a>
                  </div>
               </div>
-              <div class="community-item">
+                            <div class="community-item">
                 <div class="community-item-content">
-                   <i class="fa-solid fa-gamepad mr-2"></i>{{ $t('Splinterlands') }}
-                   <img src="https://d36mxiodymuqjm.cloudfront.net/website/icons/img_icon_splinterlands.svg" class="mr-2 ml-2" style="width: 20px" :alt="$t('Splinterlands')">
-                  <a href="https://splinterlands.com/" class="btn btn-danger m-2">{{ $t('Play_splinterlands') }}</a>
+                   <div class="d-flex align-items-center flex-grow-1">
+                      <i class="fa-solid fa-gamepad mr-2"></i>{{ $t('Splinterlands') }}
+                      
+                      <img src="https://d36mxiodymuqjm.cloudfront.net/website/icons/img_icon_splinterlands.svg" class="mr-2 ml-2" style="width: 30px" :alt="$t('Splinterlands')">
+                      
+                      <a href="#" data-toggle="modal" data-target="#notifyModal" class="text-danger"><i class="fas fa-info-circle" :title="$t('view_details')"></i></a>
+                   </div>
+                  <a href="https://splinterlands.com/" target="_blank" class="btn btn-danger m-2">{{ $t('Play_splinterlands') }}</a>
                 </div>
               </div>
               <div class="community-item">
@@ -222,22 +244,38 @@
               </div>
             </div>
             
-            <!-- Wallet Tab -->
+           
             <div v-if="activeTab === 'wallet'" class="wallet-tab">
-               <div class="wallet-card">
-                <div class="d-flex justify-content-between align-items-center flex-wrap">
-                  <button class="btn btn-danger m-2" v-on:click="voteWitness">{{ $t('Vote_Now_Actifit_Witness') }}</button>
-                  <a class="btn btn-danger m-2" href="/wallet" target="_blank">{{ $t('Delegate_Now_Actifit') }}</a>
-                </div>
+             
+              <div class="wallet-card">
+                 <div class="d-flex justify-content-between align-items-center flex-wrap">
+                    
+                    <div>
+                      <div v-if="userinfo.witness_votes.includes('actifit') || userinfo.proxy == 'actifit'">
+                        <i class="fas fa-check text-success mr-2"></i>{{ $t('Votes_Actifit_Witness') }} <span v-if="userinfo.proxy == 'actifit'">({{ $t('proxy') }})</span>
+                      </div>
+                      <button class="btn btn-danger m-2" @click="voteWitness">{{ $t('Vote_Now_Actifit_Witness') }}</button>
+                    </div>
+
+                  
+                    <div>
+                      <div v-if="actifitDelegator" class="text-dark">
+                        <i class="fas fa-check text-success mr-2"></i>{{ $t('Delegates_to_Actifit') }} ({{ actifitDelegator.steem_power }} {{ $t('Hive_Power') }})
+                      </div>
+                       <a class="btn btn-danger m-2" href="/wallet" target="_blank">{{ $t('Delegate_Now_Actifit') }}</a>
+                    </div>
+                 </div>
+
+                
                 <div v-if="voteWitnessDisplay" class="wallet-action-box">
                   <div v-if="!isKeychainLogin() && isStdLogin() && !isHiveauthLogin()" class="form-group">
                     <label for="p-ac-key">{{ $t('Active_Key') }} *</label>
                     <input type="password" id="p-ac-key" name="p-ac-key" ref="p-ac-key" class="form-control">
                   </div>
                   <div class="text-center">
-                    <button class="btn btn-danger m-1" v-on:click="proceedWitnessVote()">{{ $t('Vote') }}</button>
-                    <button class="btn btn-danger m-1" v-on:click="proceedWitnessVote(1)">{{ $t('Set_proxy') }}</button>
-                    <button class="btn btn-danger m-1" v-on:click="voteWitness">{{ $t('Cancel') }}</button>
+                    <button class="btn btn-danger m-1" @click="proceedWitnessVote()">{{ $t('Vote') }}</button>
+                    <button class="btn btn-danger m-1" @click="proceedWitnessVote(1)">{{ $t('Set_proxy') }}</button>
+                    <button class="btn btn-danger m-1" @click="voteWitness">{{ $t('Cancel') }}</button>
                   </div>
                   <div class="text-center mt-2"><i v-if="votingProgress" class="fas fa-spin fa-spinner"></i></div>
                   <div class="alert alert-danger text-center mt-2" v-if="error_proceeding">
@@ -245,18 +283,32 @@
                   </div>
                 </div>
               </div>
+
+              
               <div class="wallet-card">
                 <div class="d-flex justify-content-between align-items-center flex-wrap">
-                    <div>
-                      <img src="/img/actifit_logo.png" class="mr-2 token-logo">{{ numberFormat(userTokenCount, 3) }} {{ $t('AFIT_Tokens') }}<br />
-                      <img src="/img/actifit_logo.png" class="mr-2 token-logo">{{ displayAFITHEBal }} {{ $t('AFIT_HE_Tokens') }}<br />
-                      <img src="/img/actifit_logo.png" class="mr-2 token-logo">{{ displayAFITTipBal }} {{ $t('AFIT_Tip_Tokens') }}
-                      <button class="btn btn-danger mt-1" v-on:click="tipUser">{{ $t('Send_tip') }}</button>
+                    
+                    <div class="wallet-balance-col">
+                      <div><img src="/img/actifit_logo.png" class="mr-2 token-logo">{{ numberFormat(userTokenCount, 3) }} {{ $t('AFIT_Tokens') }}</div>
+                      <div><img src="/img/actifit_logo.png" class="mr-2 token-logo">{{ displayAFITHEBal }} {{ $t('AFIT_HE_Tokens') }}</div>
+                      <div class="d-flex align-items-center">
+                        <img src="/img/actifit_logo.png" class="mr-2 token-logo">{{ displayAFITTipBal }} {{ $t('AFIT_Tip_Tokens') }}
+                      
+                        <i class="fas fa-info-circle ml-2 text-danger" style="cursor: pointer;" @click="showAfitTipInfo = !showAfitTipInfo"></i>
+                      </div>
+                      <button class="btn btn-danger mt-2" v-if="user && !isOwnAccount()" @click="tipUser">{{ $t('Send_tip') }}</button>
                     </div>
-                    <div>
-                      <img src="/img/AFITX.png" class="mr-2 token-logo">{{ displayAFITXHEBal }} {{ $t('AFITX_HE_Tokens') }}
+                    
+                   
+                    <div class="wallet-balance-col text-right">
+                      <div><img src="/img/AFITX.png" class="mr-2 token-logo">{{ displayAFITXHEBal }} {{ $t('AFITX_HE_Tokens') }}</div>
                     </div>
                 </div>
+                
+               
+                <div v-if="showAfitTipInfo" class="alert alert-info mt-2 small" v-html="$t('tipping_details')" />
+
+                
                 <div v-if="proceedTip" class="wallet-action-box">
                   <div class="tip-details">
                     <div class="form-group">
@@ -280,15 +332,14 @@
 
             <!-- Badges Tab -->
             <div v-if="activeTab === 'badges'" class="badges-tab">
-               <h3 class="text-brand text-center"><i class="fas fa-trophy"></i> {{ $t('Badges') }}</h3>
                 <div class="badge-list-item">
                   <div class="badge-image-container">
                     <img class="badge-img" :class="{'badge-unclaimed': !userHasBadge(iso_badge)}" src="/img/badges/actifit_iso_badge.png">
                   </div>
                   <div class="badge-details">
                     <div class="badge-title">{{ $t('iso_badge_title') }}</div>
-                    <div v-if="userHasBadge(iso_badge)" class="badge-status-claimed"><i class="fas fa-check"></i> Claimed</div>
-                    <button v-if="badgeClaimable(iso_badge)" @click="claimBadge(iso_badge)" class="btn btn-danger btn-sm">Claim</button>
+                    <div v-if="userHasBadge(iso_badge)" class="badge-status-claimed"><i class="fas fa-check"></i> {{ $t('Claimed') }}</div>
+                    <button v-if="badgeClaimable(iso_badge)" @click="claimBadge(iso_badge)" class="btn btn-danger btn-sm">{{ $t('Claim_badge') }}</button>
                     <div v-else-if="!userHasBadge(iso_badge) && this.isoParticipant.length == 0" class="badge-status-missed">{{ $t('missed_event_notice') }}</div>
                   </div>
                 </div>
@@ -299,7 +350,7 @@
                         <div v-for="level in rewarded_posts_rules" :key="level[1]" class="m-2 text-center">
                            <div v-if="level[1] > 0 && level[1] <= maxClaimedActivityBadgeLevel()">
                               <img class="badge-img-small" :class="{'badge-unclaimed': !userHasBadge(rew_activity_badge + level[1])}" :src="'/img/badges/actifit_rew_act_lev_' + level[1] + '_badge.png'">
-                              <button v-if="badgeClaimable(rew_activity_badge + level[1])" @click="claimBadge(rew_activity_badge + level[1])" class="btn btn-danger btn-sm d-block mx-auto mt-1">Claim</button>
+                              <button v-if="badgeClaimable(rew_activity_badge + level[1])" @click="claimBadge(rew_activity_badge + level[1])" class="btn btn-danger btn-sm d-block mx-auto mt-1">{{ $t('Claim_badge') }}</button>
                            </div>
                         </div>
                       </div>
@@ -311,8 +362,8 @@
                   </div>
                   <div class="badge-details">
                     <div class="badge-title">{{ $t('doubledup_badge_title') }}</div>
-                    <div v-if="userHasBadge(doubledup_badge)" class="badge-status-claimed"><i class="fas fa-check"></i> Claimed</div>
-                    <button v-if="badgeClaimable(doubledup_badge)" @click="claimBadge(doubledup_badge)" class="btn btn-danger btn-sm">Claim</button>
+                    <div v-if="userHasBadge(doubledup_badge)" class="badge-status-claimed"><i class="fas fa-check"></i> {{ $t('Claimed') }}</div>
+                    <button v-if="badgeClaimable(doubledup_badge)" @click="claimBadge(doubledup_badge)" class="btn btn-danger btn-sm">{{ $t('Claim_badge') }}</button>
                     <div v-else-if="!userHasBadge(doubledup_badge) && this.doubledupWinner.length == 0" class="badge-status-missed">{{ $t('not_lucky_yet') }}</div>
                   </div>
                 </div>
@@ -322,16 +373,17 @@
                   </div>
                   <div class="badge-details">
                     <div class="badge-title">{{ $t('charity_badge_title') }}</div>
-                     <div v-if="userHasBadge(charity_badge)" class="badge-status-claimed"><i class="fas fa-check"></i> Claimed</div>
-                    <button v-if="badgeClaimable(charity_badge)" @click="claimBadge(charity_badge)" class="btn btn-danger btn-sm">Claim</button>
+                     <div v-if="userHasBadge(charity_badge)" class="badge-status-claimed"><i class="fas fa-check"></i> {{ $t('Claimed') }}</div>
+                    <button v-if="badgeClaimable(charity_badge)" @click="claimBadge(charity_badge)" class="btn btn-danger btn-sm">{{ $t('Claim_badge') }}</button>
                   </div>
                 </div>
             </div>
           </div>
         </div>
 
-        <!-- Right Sidebar: Quick Links -->
+       
         <div class="quick-links-sidebar">
+         
           <h4 class="quick-links-title">{{ $t('Quick_links') }}</h4>
           <a :href="'/activity/' + displayUser" class="quick-link-item">
             <img src="/img/actifit_logo.png" class="mr-2 token-logo">
@@ -349,9 +401,10 @@
             <i class="far fa-comments mr-2"></i>
             <span>{{ $t('Hive_comments') }}</span>
           </a>
+          <!-- FIX: Changed token to ensure proper capitalization -->
           <a :href="'/' + displayUser + '/wallet'" class="quick-link-item">
             <i class="fas fa-solid fa-wallet mr-2"></i>
-            <span>{{ $t('wallet.wallet') }}</span>
+            <span>{{ $t('Wallet') }}</span>
           </a>
         </div>
       </div>
@@ -1639,6 +1692,13 @@ export default {
 
 .profile-header {
     background: linear-gradient(to right, #ffaf7b, #fcae3c);
+    padding: 20px;
+    border-radius: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
 }
 .user-info-header .username { 
     font-size: 1.5rem; 
@@ -1657,12 +1717,148 @@ export default {
     line-height: 1.5;
 }
 .edit-profile-btn a { color: #dc3545 !important; }
-.tab-content {
-    background-color: #ffaf7b55;
+
+.user-avatar { 
+    background-repeat: no-repeat; 
+    background-size: cover; 
+    background-position: center; 
+    position: relative; 
 }
-.main-content-tabs {
+.large-avatar { 
+    width: 150px; 
+    height: 150px; 
+    border-radius: 50%; 
+    border: 4px solid white; 
+    flex-shrink: 0; 
+}
+.user-info-header { margin-left: 20px; }
+.edit-profile-btn { font-size: 1.5rem; cursor: pointer; }
+.avatar-edit-button {
+  position: absolute; 
+  bottom: 5px; 
+  right: 5px; 
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+}
+.avatar-edit-button .btn { padding: 0.3rem 0.5rem; line-height: 1; }
+.friend-actions { text-align: right; margin-left: auto; }
+
+.profile-body { 
+    display: flex; 
+    margin-top: 20px; 
+    gap: 20px; 
+}
+
+/* Main Content & Tabs */
+.main-content-tabs { 
+    flex-grow: 1; 
+    background-color: #f8f9fa; 
+    border-radius: 15px; 
+    overflow: hidden;
     border: 2px solid #fcae3c;
 }
+.tab-nav { 
+    display: flex; 
+    background-color: #e9ecef; 
+    flex-wrap: wrap; 
+}
+.tab-nav button { 
+    flex-grow: 1; 
+    padding: 15px; 
+    border: none; 
+    background-color: transparent; 
+    font-size: 1rem; 
+    font-weight: 600; 
+    color: #6c757d; 
+    cursor: pointer; 
+    transition: background-color 0.3s, color 0.3s; 
+}
+.tab-nav button.active { 
+    background-color: #FFEAE4; 
+    color: #d9534f; 
+}
+.tab-content {
+    background-color: #ffaf7b55;
+    padding: 15px;
+}
+
+/* About Tab Layout */
+.about-tab {
+    background-color: #FFEAE4; 
+    border-radius: 10px;
+    padding: 10px;
+}
+.about-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 10px;
+    border-bottom: 1px solid #fddace;
+    gap: 15px;
+}
+.about-item:last-child {
+    border-bottom: none;
+}
+.about-item-label { 
+    font-weight: 500; 
+    color: #333; 
+    flex-shrink: 0; 
+    white-space: nowrap; 
+}
+.about-item-label i { color: #d9534f; }
+
+.about-item-value {
+    color: #555;
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    min-width: 0; 
+    justify-content: flex-end;
+}
+.about-item-text {
+    flex: 1; 
+    min-width: 0; 
+    text-align: right;
+    
+    overflow-wrap: break-word;
+    word-break: break-all;
+}
+.about-item-edit {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: flex-end;
+}
+.about-item-edit textarea {
+    width: 100%;
+    max-width: 150px;
+    margin-right: 5px;
+}
+
+/* Fitness Tab */
+.fitness-tab-container { display: flex; flex-direction: column; gap: 15px; }
+.fitness-section-grid-activity { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+.fitness-section-grid-measurements { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
+.fitness-action-btn-container { text-align: center; }
+.fitness-card { background: linear-gradient(to top, #28a745, #ffc107); border-radius: 15px; color: white; padding: 15px; text-align: center; font-weight: bold; display: flex; flex-direction: column; justify-content: space-between; align-items: center; }
+.fitness-card img { height: 50px; margin-bottom: 10px; flex-shrink: 0; }
+.activity-small-logo { height: 25px !important; }
+.fitness-card .value { font-size: 1.2rem; margin-top: 5px; }
+
+/* Community Tab */
+.community-tab { display: flex; flex-direction: column; gap: 15px; }
+.community-item { padding: 15px; border-radius: 10px; background: linear-gradient(to right, #ffc107, #ffe086); border: 1px solid #dc3545; }
+.community-item-content { display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; }
+.community-item-content a:not(.btn) { 
+    color: #333; 
+    font-weight: 500; 
+}
+
+/* Wallet Tab */
+.wallet-tab { display: flex; flex-direction: column; gap: 15px; }
 .wallet-card {
     background: linear-gradient(to right, #ffc107, #ffe086);
     padding: 15px;
@@ -1675,68 +1871,8 @@ export default {
     border-radius: .5rem;
     background-color: #fff9f0;
 }
-.about-tab {
-    background-color: #FFEAE4; 
-    border-radius: 10px;
-    padding: 10px;
-}
-.about-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 10px;
-    border-bottom: 1px solid #fddace;
-}
-.about-item:last-child {
-    border-bottom: none;
-}
 
-
-
-.friend-actions { text-align: right; margin-left: 20px; }
-.fitness-tab-container { display: flex; flex-direction: column; gap: 15px; }
-.fitness-section-grid-activity { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-.fitness-section-grid-measurements { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
-.fitness-action-btn-container { text-align: center; }
-.wallet-tab, .community-tab { display: flex; flex-direction: column; gap: 15px; }
-.quick-links-sidebar {
-    flex: 0 0 250px; border-radius: 15px; padding: 20px;
-    background: linear-gradient(to bottom, #ffaf7b, #ffffff);
-}
-.quick-links-title { color: #dc3545; margin-bottom: 15px; }
-
-
-.token-logo { width: 20px; height: 20px; vertical-align: middle; }
-.user-avatar { background-repeat: no-repeat; background-size: cover; background-position: center; position: relative; }
-.profile-header { padding: 20px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
-.user-info-header { margin-left: 20px; }
-.large-avatar { width: 150px; height: 150px; border-radius: 50%; border: 4px solid white; }
-.edit-profile-btn { font-size: 1.5rem; cursor: pointer; }
-.avatar-edit-button {
-  position: absolute; bottom: 5px; right: 5px; background-color: rgba(0, 0, 0, 0.5);
-  border-radius: 50%; display: flex; align-items: center; justify-content: center;
-}
-.avatar-edit-button .btn { padding: 0.3rem 0.5rem; line-height: 1; }
-.profile-body { display: flex; margin-top: 20px; gap: 20px; }
-.quick-link-item { display: flex; align-items: center; background-color: white; color: #d9534f; padding: 12px 15px; border-radius: 10px; margin-bottom: 10px; font-weight: 500; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; }
-.quick-link-item:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); color: #d9534f; }
-.quick-link-item i { width: 20px; text-align: center; }
-.main-content-tabs { flex-grow: 1; background-color: #f8f9fa; border-radius: 15px; overflow: hidden; }
-.tab-nav { display: flex; background-color: #e9ecef; flex-wrap: wrap; }
-.tab-nav button { flex-grow: 1; padding: 15px; border: none; background-color: transparent; font-size: 1rem; font-weight: 600; color: #6c757d; cursor: pointer; transition: background-color 0.3s, color 0.3s; }
-.tab-nav button.active { background-color: #FFEAE4; color: #d9534f; }
-.about-item-label { font-weight: 500; color: #333; }
-.about-item-label i { color: #d9534f; }
-.about-item-value { color: #555; display: flex; align-items: center; }
-.about-item-value textarea { width: 200px; margin-right: 5px; }
-.fitness-card { background: linear-gradient(to top, #28a745, #ffc107); border-radius: 15px; color: white; padding: 15px; text-align: center; font-weight: bold; display: flex; flex-direction: column; justify-content: space-between; align-items: center; }
-.fitness-card img { height: 50px; margin-bottom: 10px; flex-shrink: 0; }
-.activity-small-logo { height: 25px !important; }
-.fitness-card .value { font-size: 1.2rem; margin-top: 5px; }
-.btn-danger { background-color: #dc3545; border-color: #dc3545; }
-.community-item { padding: 15px; border-radius: 10px; background: linear-gradient(to right, #ffc107, #ffe086); border: 1px solid #dc3545; }
-.community-item-content { display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; }
-.community-item-content a { color: #333; font-weight: 500; }
+/* Badges Tab */
 .badges-tab { display: flex; flex-direction: column; gap: 15px; }
 .badge-list-item { display: flex; align-items: center; gap: 15px; padding: 15px; border-radius: 10px; background: linear-gradient(to right, #28a745, #ffc107); color: white; }
 .badge-image-container .badge-img { width: 100px; height: 100px; }
@@ -1746,11 +1882,41 @@ export default {
 .badge-details .badge-title { font-weight: bold; font-size: 1.2rem; }
 .badge-status-claimed { color: #c3e6cb; }
 .badge-status-missed { font-style: italic; opacity: 0.8; }
+.wallet-balance-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem; 
+}
+
+
+
+.quick-links-sidebar {
+    flex: 0 0 250px; 
+    border-radius: 15px; 
+    padding: 20px;
+    background: linear-gradient(to bottom, #ffaf7b, #ffffff);
+    align-self: flex-start;
+}
+.quick-links-title { color: #dc3545; margin-bottom: 15px; }
+.quick-link-item { display: flex; align-items: center; background-color: white; color: #d9534f; padding: 12px 15px; border-radius: 10px; margin-bottom: 10px; font-weight: 500; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; }
+.quick-link-item:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); color: #d9534f; }
+.quick-link-item i { width: 20px; text-align: center; }
+
+
+/* General & Utility */
+.btn-danger { background-color: #dc3545; border-color: #dc3545; }
+.token-logo { width: 20px; height: 20px; vertical-align: middle; }
+
+
+/* Media Queries */
 @media (max-width: 992px) {
   .profile-body { flex-direction: column-reverse; }
 }
 @media (max-width: 768px) {
     .community-item-content { flex-direction: column; gap: 10px; text-align: center;}
     .community-item a.btn { width: 100%; text-align: center; }
+    .profile-header { justify-content: center; text-align: center; }
+    .user-info-header { margin-left: 0; margin-top: 15px; }
+    .user-info-header .d-flex { justify-content: center; }
 }
 </style>
