@@ -472,8 +472,8 @@ export default {
 }
 
 .notif-container {
-  width: 500px;        
-  max-width: 500px;       
+  width: 520px;        
+  max-width: 520px;       
   min-width: 320px;       
   max-height: 300px;
   overflow-x: hidden;
@@ -482,13 +482,18 @@ export default {
 }
 
 .notif-clickable {
+  word-wrap: break-word;
   width: 100%; 
-  white-space: nowrap;
+  white-space: normal;
   overflow: hidden; 
 }
 
 .row.p-2 {
   padding: 5px 10px; 
+}
+
+.col-md-10 {
+  width: 100%; 
 }
 
 .option-opaque {
