@@ -158,9 +158,6 @@
       </div>
 
     </section>
-    
-    <!-- Add the modal, which is triggered by the info icon in the heading -->
-    <NotifyModal :modalTitle="$t('signup.headline')" :modalText="signupProcessDetails()"/>
 
     <Footer />
   </div>
@@ -179,7 +176,6 @@ import Vue from 'vue'
 
 // Import the required components
 import ListHeadingSection from '~/components/ListHeadingSection.vue';
-import NotifyModal from '~/components/NotifyModal';
 
 Vue.use(VueReCaptcha, { siteKey: process.env.captchaV3Key })
 
@@ -201,8 +197,7 @@ export default {
     Footer,
     //VueRecaptcha,
     // Register the imported components
-    ListHeadingSection,
-    NotifyModal
+    ListHeadingSection
   },
   data() {
     return {
