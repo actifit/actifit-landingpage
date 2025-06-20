@@ -237,4 +237,9 @@ export default {
 .hiddenIcon .input-with-icon input {
   padding-left: 3px;
 }
+@media only screen and (max-width: 500px){
+  #username{
+    font-size: 12px;
+  }
+}
 </style>
