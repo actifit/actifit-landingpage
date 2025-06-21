@@ -6,7 +6,7 @@
         <i class="fas fa-spin fa-spinner text-brand"></i>
       </div>
     </div>
-    <div v-else-if="errorDisplay == ''" class="container pt-5 mt-5 pb-5 col-lg-10 col-md-12">
+    <div v-else-if="errorDisplay == ''" class="container pt-5 mt-5 col-lg-10 col-md-12">
       <div class="alert alert-danger" role="alert" v-if="badActorWarning">
         <h4 class="alert-heading">Warning!</h4>
         <p>There are reports that this account is a bad actor. Please exercise caution.</p>
@@ -29,7 +29,7 @@
                 <span class="username">@{{ displayUser }}</span>
                 <span class="user-rank-badge ml-2">{{ displayCoreUserRank }}</span>
                 <span v-if="user && user.account.name === displayUser && !account_banned" class="edit-profile-btn ml-2">
-                  <a class="p-2" @click="editOn ? turnEditOff() : turnEditOn()">
+                  <a @click="editOn ? turnEditOff() : turnEditOn()">
                     <i :class="editOn ? 'fa-regular fa-eye' : 'fas fa-edit'"></i>
                   </a>
                 </span>
@@ -80,10 +80,10 @@
                         <span class="about-item-text" v-if="!usernameEditOn">{{ textAreaUsernameValue || $t('Not_Set') }}</span>
                         <div class="about-item-edit" v-else>
                           <textarea v-model="textAreaUsernameValue"></textarea>
-                          <a class="btn btn-sm btn-success p-1" @click="saveFunc('username')"><i class="fa-solid fa-check"></i></a>
-                          <a class="btn btn-sm btn-danger p-1" @click="turnUsernameEditOff"><i class="fa-solid fa-xmark"></i></a>
+                          <a class="btn btn-sm btn-success p-1" @click.prevent="saveFunc('username')"><i class="fa-solid fa-check"></i></a>
+                          <a class="btn btn-sm btn-danger p-1" @click.prevent="turnUsernameEditOff"><i class="fa-solid fa-xmark"></i></a>
                         </div>
-                        <a class="btn btn-sm btn-danger p-1 ml-2" v-if="editOn && !usernameEditOn" @click="turnUsernameEditOn"><i class="fas fa-edit"></i></a>
+                        <a class="btn btn-sm btn-danger p-1 ml-2" v-if="editOn && !usernameEditOn" @click.prevent="turnUsernameEditOn"><i class="fas fa-edit"></i></a>
                      </template>
                   </div>
                </div>
@@ -95,10 +95,10 @@
                         <span class="about-item-text" v-if="!locationEditOn">{{ textAreaLocationValue || $t('Not_Set') }}</span>
                         <div class="about-item-edit" v-else>
                           <textarea v-model="textAreaLocationValue"></textarea>
-                          <a class="btn btn-sm btn-success p-1" @click="saveFunc('location')"><i class="fa-solid fa-check"></i></a>
-                          <a class="btn btn-sm btn-danger p-1" @click="turnLocationEditOff"><i class="fa-solid fa-xmark"></i></a>
+                          <a class="btn btn-sm btn-success p-1" @click.prevent="saveFunc('location')"><i class="fa-solid fa-check"></i></a>
+                          <a class="btn btn-sm btn-danger p-1" @click.prevent="turnLocationEditOff"><i class="fa-solid fa-xmark"></i></a>
                         </div>
-                        <a class="btn btn-sm btn-danger p-1 ml-2" v-if="editOn && !locationEditOn" @click="turnLocationEditOn"><i class="fas fa-edit"></i></a>
+                        <a class="btn btn-sm btn-danger p-1 ml-2" v-if="editOn && !locationEditOn" @click.prevent="turnLocationEditOn"><i class="fas fa-edit"></i></a>
                      </template>
                   </div>
                </div>
@@ -110,10 +110,10 @@
                         <span class="about-item-text" v-if="!descriptionEditOn">{{ textAreaDescriptionValue || $t('Not_Set') }}</span>
                         <div class="about-item-edit" v-else>
                           <textarea v-model="textAreaDescriptionValue"></textarea>
-                          <a class="btn btn-sm btn-success p-1" @click="saveFunc('description')"><i class="fa-solid fa-check"></i></a>
-                          <a class="btn btn-sm btn-danger p-1" @click="turnDescriptionEditOff"><i class="fa-solid fa-xmark"></i></a>
+                          <a class="btn btn-sm btn-success p-1" @click.prevent="saveFunc('description')"><i class="fa-solid fa-check"></i></a>
+                          <a class="btn btn-sm btn-danger p-1" @click.prevent="turnDescriptionEditOff"><i class="fa-solid fa-xmark"></i></a>
                         </div>
-                        <a class="btn btn-sm btn-danger p-1 ml-2" v-if="editOn && !descriptionEditOn" @click="turnDescriptionEditOn"><i class="fas fa-edit"></i></a>
+                        <a class="btn btn-sm btn-danger p-1 ml-2" v-if="editOn && !descriptionEditOn" @click.prevent="turnDescriptionEditOn"><i class="fas fa-edit"></i></a>
                      </template>
                   </div>
                </div>
@@ -128,10 +128,10 @@
                         </div>
                         <div class="about-item-edit" v-else>
                           <textarea v-model="textAreaLinkValue"></textarea>
-                          <a class="btn btn-sm btn-success p-1" @click="saveFunc('link')"><i class="fa-solid fa-check"></i></a>
-                          <a class="btn btn-sm btn-danger p-1" @click="turnLinkEditOff"><i class="fa-solid fa-xmark"></i></a>
+                          <a class="btn btn-sm btn-success p-1" @click.prevent="saveFunc('link')"><i class="fa-solid fa-check"></i></a>
+                          <a class="btn btn-sm btn-danger p-1" @click.prevent="turnLinkEditOff"><i class="fa-solid fa-xmark"></i></a>
                         </div>
-                        <a class="btn btn-sm btn-danger p-1 ml-2" v-if="editOn && !linkEditOn" @click="turnLinkEditOn"><i class="fas fa-edit"></i></a>
+                        <a class="btn btn-sm btn-danger p-1 ml-2" v-if="editOn && !linkEditOn" @click.prevent="turnLinkEditOn"><i class="fas fa-edit"></i></a>
                      </template>
                   </div>
                </div>
@@ -247,7 +247,7 @@
            
             <div v-if="activeTab === 'wallet'" class="wallet-tab">
              
-              <div class="wallet-card">
+              <div class="wallet-card" v-if="userinfo">
                  <div class="d-flex justify-content-between align-items-center flex-wrap">
                     
                     <div>
@@ -286,30 +286,46 @@
 
               
               <div class="wallet-card">
-                <div class="d-flex justify-content-between align-items-center flex-wrap">
-                    
-                    <div class="wallet-balance-col">
-                      <div><img src="/img/actifit_logo.png" class="mr-2 token-logo">{{ numberFormat(userTokenCount, 3) }} {{ $t('AFIT_Tokens') }}</div>
-                      <div><img src="/img/actifit_logo.png" class="mr-2 token-logo">{{ displayAFITHEBal }} {{ $t('AFIT_HE_Tokens') }}</div>
-                      <div class="d-flex align-items-center">
-                        <img src="/img/actifit_logo.png" class="mr-2 token-logo">{{ displayAFITTipBal }} {{ $t('AFIT_Tip_Tokens') }}
-                      
-                        <i class="fas fa-info-circle ml-2 text-danger" style="cursor: pointer;" @click="showAfitTipInfo = !showAfitTipInfo"></i>
-                      </div>
-                      <button class="btn btn-danger mt-2" v-if="user && !isOwnAccount()" @click="tipUser">{{ $t('Send_tip') }}</button>
+                <!-- FIX: Replaced the cluttered list of balances with a new grid of cards -->
+                <div class="wallet-balances-grid">
+                  <div class="balance-card">
+                    <div class="balance-card-header">
+                        <img src="/img/actifit_logo.png" class="token-logo">
+                        <span>{{ $t('AFIT_Tokens') }}</span>
                     </div>
-                    
-                   
-                    <div class="wallet-balance-col text-right">
-                      <div><img src="/img/AFITX.png" class="mr-2 token-logo">{{ displayAFITXHEBal }} {{ $t('AFITX_HE_Tokens') }}</div>
+                    <div class="balance-card-value">{{ numberFormat(userTokenCount, 3) }}</div>
+                    <div class="balance-card-subtext">Main Balance</div>
+                  </div>
+                  <div class="balance-card">
+                    <div class="balance-card-header">
+                        <img src="/img/actifit_logo.png" class="token-logo">
+                        <span>{{ $t('AFIT_HE_Tokens') }}</span>
                     </div>
+                    <div class="balance-card-value">{{ displayAFITHEBal }}</div>
+                    <div class="balance-card-subtext">Hive-Engine</div>
+                  </div>
+                  <div class="balance-card">
+                    <div class="balance-card-header">
+                        <img src="/img/AFITX.png" class="token-logo">
+                        <span>{{ $t('AFITX_HE_Tokens') }}</span>
+                    </div>
+                    <div class="balance-card-value">{{ displayAFITXHEBal }}</div>
+                    <div class="balance-card-subtext">Hive-Engine</div>
+                  </div>
+                  <div class="balance-card tip-card">
+                    <div class="balance-card-header">
+                        <img src="/img/actifit_logo.png" class="token-logo">
+                        <span>{{ $t('AFIT_Tip_Tokens') }}</span>
+                        <i class="fas fa-info-circle ml-2 text-danger" @click="showAfitTipInfo = !showAfitTipInfo"></i>
+                    </div>
+                    <div class="balance-card-value">{{ displayAFITTipBal }}</div>
+                    <button class="btn btn-sm btn-danger mt-2" v-if="user && !isOwnAccount()" @click="tipUser">{{ $t('Send_tip') }}</button>
+                  </div>
                 </div>
-                
-               
-                <div v-if="showAfitTipInfo" class="alert alert-info mt-2 small" v-html="$t('tipping_details')" />
 
+                <div v-if="showAfitTipInfo" class="alert alert-info mt-3 small" v-html="$t('tipping_details')" />
                 
-                <div v-if="proceedTip" class="wallet-action-box">
+                <div v-if="proceedTip" class="wallet-action-box mt-3">
                   <div class="tip-details">
                     <div class="form-group">
                       <label for="tip-amount">{{ $t('Tip_Amount') }}</label>
@@ -401,7 +417,6 @@
             <i class="far fa-comments mr-2"></i>
             <span>{{ $t('Hive_comments') }}</span>
           </a>
-          <!-- FIX: Changed token to ensure proper capitalization -->
           <a :href="'/' + displayUser + '/wallet'" class="quick-link-item">
             <i class="fas fa-solid fa-wallet mr-2"></i>
             <span>{{ $t('Wallet') }}</span>
@@ -431,7 +446,6 @@
     <LoginModal v-if="showModal" @close="showModal = false" />
   </div>
 </template>
-
 <script>
 import UserHoverCard from '~/components/UserHoverCard'
 import LoginModal from '~/components/LoginModal'
@@ -1638,7 +1652,7 @@ export default {
     hive.api.setOptions({ url: process.env.hiveApiNode });
     blurt.api.setOptions({ url: process.env.blurtApiNode });
     
-    await this.$store.dispatch('steemconnect/login')
+    this.$store.dispatch('steemconnect/login')
     await this.fetchUserData();
 
     if ((typeof this.$route.params !== 'undefined') && (typeof this.$route.params.username !== 'undefined')) {
@@ -1660,7 +1674,9 @@ export default {
       fetch(process.env.actiAppUrl + 'user/' + this.displayUser).then(res => res.json().then(json => this.userTokenCount = json.tokens)).catch(e => console.log(e));
       fetch(process.env.actiAppUrl + 'userBadges/' + this.displayUser).then(res => res.json().then(json => this.userBadges = json)).catch(e => reject(e));
       fetch(process.env.actiAppUrl + 'isoParticipant/' + this.displayUser).then(res => res.json().then(json => this.isoParticipant = json)).catch(e => reject(e));
+      
       fetch(process.env.actiAppUrl + 'delegation/' + this.displayUser).then(res => res.json().then(json => this.actifitDelegator = json)).catch(e => reject(e));
+
       fetch(process.env.actiAppUrl + 'luckyWinner/' + this.displayUser).then(res => res.json().then(json => this.doubledupWinner = json)).catch(e => reject(e));
       fetch(process.env.actiAppUrl + 'charityDonor/' + this.displayUser).then(res => res.json().then(json => this.charityDonor = json)).catch(e => reject(e));
       fetch(process.env.actiAppUrl + 'is_banned/' + this.displayUser).then(res => res.json().then(json => this.account_banned = json)).catch(e => reject(e));
@@ -1687,11 +1703,77 @@ export default {
   }
 }
 </script>
-
 <style>
+:root {
+  /* --- LIGHT MODE --- */
+  --brand-color: #dc3545;
+  --brand-secondary-color: #d9534f;
+  --text-color-primary: #333;
+  --text-color-secondary: #555;
+  --text-color-light: #582424;
+  --text-color-inverted: white;
+  --white-color: #fff;
+  --border-color: #fddace;
+  --header-gradient: linear-gradient(to right, #ffaf7b, #fcae3c);
+  --sidebar-gradient: linear-gradient(to bottom, #ffaf7b, #ffffff);
+  --fitness-card-gradient: linear-gradient(to top, #28a745, #ffc107);
+  --community-item-gradient: linear-gradient(to right, #ffc107, #ffe086);
+  --badge-item-gradient: linear-gradient(to right, #28a745, #ffc107);
+  --tabs-container-bg: #f8f9fa;
+  --tabs-container-border: #fcae3c;
+  --tab-nav-bg: #e9ecef;
+  --tab-nav-text: #6c757d;
+  --tab-content-bg: #ffaf7b55;
+  --tab-active-bg: #FFEAE4;
+  --about-tab-bg: #FFEAE4;
+  --wallet-action-box-bg: #fff9f0;
+  --quick-link-bg: #fff;
+  --quick-link-shadow: rgba(0,0,0,0.05);
+  --quick-link-shadow-hover: rgba(0,0,0,0.1);
+  --edit-pencil-color: white; 
+  --box-shadow-lifted: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+
+html.dark-mode {
+  /* New Gold/Ochre Palette */
+  --dark-gold-primary: #ad8a24;
+  --dark-gold-secondary: #4d4022;
+  --dark-gold-gradient-end: #3a2e1d;
+  --dark-background: #212121;
+  --dark-background-lighter: #2c2c2c;
+
+  /* Re-assigning variables using the new palette */
+  --brand-color: #dc3545;
+  --brand-secondary-color: #d9534f;
+  --text-color-primary: #e0e0e0;
+  --text-color-secondary: #bdbdbd;
+  --text-color-light: #ad8a24;
+  --text-color-inverted: #121212;
+  --white-color: #1e1e1e;
+  --border-color: var(--dark-gold-primary);
+  --header-gradient: linear-gradient(to right, var(--dark-gold-primary), var(--dark-gold-gradient-end));
+  --sidebar-gradient: linear-gradient(to bottom, var(--dark-gold-primary), var(--dark-background));
+  --fitness-card-gradient: linear-gradient(to top, #1c6b2e, var(--dark-gold-primary));
+  --community-item-gradient: var(--header-gradient);
+  --badge-item-gradient: linear-gradient(to right, #1c6b2e, var(--dark-gold-primary));
+  --tabs-container-bg: var(--dark-background);
+  --tabs-container-border: var(--dark-gold-primary);
+  --tab-nav-bg: var(--dark-background-lighter);
+  --tab-nav-text: #a0a0a0;
+  --tab-content-bg: rgba(173, 138, 36, 0.1);
+  --tab-active-bg: var(--dark-gold-secondary);
+  --about-tab-bg: var(--dark-gold-secondary);
+  --wallet-action-box-bg: #3a2e21;
+  --quick-link-bg: var(--dark-background-lighter);
+  --quick-link-shadow: rgba(255,255,255,0.05);
+  --quick-link-shadow-hover: rgba(255,255,255,0.1);
+  --edit-pencil-color: black;
+  --box-shadow-lifted: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
 
 .profile-header {
-    background: linear-gradient(to right, #ffaf7b, #fcae3c);
+    background: var(--header-gradient);
     padding: 20px;
     border-radius: 15px;
     display: flex;
@@ -1699,16 +1781,23 @@ export default {
     align-items: center;
     flex-wrap: wrap;
     gap: 15px;
+    box-shadow: var(--box-shadow-lifted);
 }
 .user-info-header .username { 
     font-size: 1.5rem; 
     font-weight: bold;
-    color: #dc3545; 
+    color: var(--brand-color); 
 }
-.user-info-header .join-date { color: #582424; }
+.user-info-header .join-date { 
+    color: var(--text-color-light); 
+}
+html.dark-mode .user-info-header .join-date {
+  color: var(--text-color-inverted);
+}
+
 .user-info-header .user-rank-badge {
-    background-color: #dc3545;
-    color: white;
+    background-color: var(--brand-color);
+    color: white; 
     padding: 4px 12px;
     border-radius: 1rem;
     font-weight: bold;
@@ -1716,7 +1805,27 @@ export default {
     vertical-align: middle;
     line-height: 1.5;
 }
-.edit-profile-btn a { color: #dc3545 !important; }
+
+.edit-profile-btn a {
+  background-color: var(--brand-color);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.edit-profile-btn a:hover {
+  opacity: 0.85;
+}
+
+.edit-profile-btn a i {
+  color: var(--edit-pencil-color);
+  font-size: 1rem;
+}
 
 .user-avatar { 
     background-repeat: no-repeat; 
@@ -1728,11 +1837,10 @@ export default {
     width: 150px; 
     height: 150px; 
     border-radius: 50%; 
-    border: 4px solid white; 
+    border: 4px solid var(--white-color); 
     flex-shrink: 0; 
 }
 .user-info-header { margin-left: 20px; }
-.edit-profile-btn { font-size: 1.5rem; cursor: pointer; }
 .avatar-edit-button {
   position: absolute; 
   bottom: 5px; 
@@ -1744,25 +1852,34 @@ export default {
   justify-content: center;
 }
 .avatar-edit-button .btn { padding: 0.3rem 0.5rem; line-height: 1; }
+
+.avatar-edit-button .fa-edit,
+.about-item-value .btn-danger .fa-edit {
+  color: var(--edit-pencil-color);
+}
+
 .friend-actions { text-align: right; margin-left: auto; }
 
 .profile-body { 
     display: flex; 
     margin-top: 20px; 
     gap: 20px; 
+    margin-bottom: 2rem;
+    align-items: flex-start;
 }
 
 /* Main Content & Tabs */
 .main-content-tabs { 
     flex-grow: 1; 
-    background-color: #f8f9fa; 
+    background-color: var(--tabs-container-bg); 
     border-radius: 15px; 
     overflow: hidden;
-    border: 2px solid #fcae3c;
+    border: 2px solid var(--tabs-container-border);
+    box-shadow: var(--box-shadow-lifted);
 }
 .tab-nav { 
     display: flex; 
-    background-color: #e9ecef; 
+    background-color: var(--tab-nav-bg); 
     flex-wrap: wrap; 
 }
 .tab-nav button { 
@@ -1772,31 +1889,32 @@ export default {
     background-color: transparent; 
     font-size: 1rem; 
     font-weight: 600; 
-    color: #6c757d; 
+    color: var(--tab-nav-text); 
     cursor: pointer; 
     transition: background-color 0.3s, color 0.3s; 
 }
 .tab-nav button.active { 
-    background-color: #FFEAE4; 
-    color: #d9534f; 
+    background-color: var(--tab-active-bg); 
+    color: var(--brand-secondary-color); 
 }
 .tab-content {
-    background-color: #ffaf7b55;
+    background-color: var(--tab-content-bg);
     padding: 15px;
 }
 
 /* About Tab Layout */
 .about-tab {
-    background-color: #FFEAE4; 
+    background-color: var(--about-tab-bg); 
     border-radius: 10px;
     padding: 10px;
+    box-shadow: var(--box-shadow-lifted);
 }
 .about-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 15px 10px;
-    border-bottom: 1px solid #fddace;
+    border-bottom: 1px solid var(--border-color);
     gap: 15px;
 }
 .about-item:last-child {
@@ -1804,14 +1922,14 @@ export default {
 }
 .about-item-label { 
     font-weight: 500; 
-    color: #333; 
+    color: var(--text-color-primary); 
     flex-shrink: 0; 
     white-space: nowrap; 
 }
-.about-item-label i { color: #d9534f; }
+.about-item-label i { color: var(--brand-secondary-color); }
 
 .about-item-value {
-    color: #555;
+    color: var(--text-color-secondary);
     display: flex;
     align-items: center;
     flex-grow: 1;
@@ -1822,7 +1940,6 @@ export default {
     flex: 1; 
     min-width: 0; 
     text-align: right;
-    
     overflow-wrap: break-word;
     word-break: break-all;
 }
@@ -1833,48 +1950,71 @@ export default {
     justify-content: flex-end;
 }
 .about-item-edit textarea {
-    width: 100%;
-    max-width: 150px;
-    margin-right: 5px;
+    flex-grow: 1;
+    margin-right: 8px;
+    background-color: var(--white-color);
+    color: var(--text-color-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 0.25rem;
+    padding: 0.375rem 0.75rem;
 }
 
 /* Fitness Tab */
 .fitness-tab-container { display: flex; flex-direction: column; gap: 15px; }
-.fitness-section-grid-activity { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+.fitness-section-grid-activity { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(200px, 300px)); 
+    justify-content: center; 
+    gap: 15px; 
+}
 .fitness-section-grid-measurements { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
 .fitness-action-btn-container { text-align: center; }
-.fitness-card { background: linear-gradient(to top, #28a745, #ffc107); border-radius: 15px; color: white; padding: 15px; text-align: center; font-weight: bold; display: flex; flex-direction: column; justify-content: space-between; align-items: center; }
+.fitness-card { 
+    background: var(--fitness-card-gradient); 
+    border-radius: 15px; 
+    color: white; 
+    padding: 15px; 
+    text-align: center; 
+    font-weight: bold; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: space-between; 
+    align-items: center; 
+}
 .fitness-card img { height: 50px; margin-bottom: 10px; flex-shrink: 0; }
 .activity-small-logo { height: 25px !important; }
 .fitness-card .value { font-size: 1.2rem; margin-top: 5px; }
 
 /* Community Tab */
 .community-tab { display: flex; flex-direction: column; gap: 15px; }
-.community-item { padding: 15px; border-radius: 10px; background: linear-gradient(to right, #ffc107, #ffe086); border: 1px solid #dc3545; }
+.community-item { padding: 15px; border-radius: 10px; background: var(--community-item-gradient); border: 1px solid var(--brand-color); color: var(--text-color-primary); }
 .community-item-content { display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; }
 .community-item-content a:not(.btn) { 
-    color: #333; 
+    color: var(--text-color-primary);
     font-weight: 500; 
 }
 
 /* Wallet Tab */
-.wallet-tab { display: flex; flex-direction: column; gap: 15px; }
+.wallet-tab { display: flex; flex-direction: column; gap: 15px; color: var(--text-color-primary); }
 .wallet-card {
-    background: linear-gradient(to right, #ffc107, #ffe086);
+    background: var(--community-item-gradient);
     padding: 15px;
     border-radius: 10px;
-    border: 1px solid #dc3545;
+    border: 1px solid var(--brand-color);
 }
 .wallet-action-box {
     margin-top: 1rem;
     padding: 1rem;
     border-radius: .5rem;
-    background-color: #fff9f0;
+    background-color: var(--wallet-action-box-bg);
+}
+html.dark-mode .text-dark {
+    color: var(--text-color-primary) !important;
 }
 
 /* Badges Tab */
 .badges-tab { display: flex; flex-direction: column; gap: 15px; }
-.badge-list-item { display: flex; align-items: center; gap: 15px; padding: 15px; border-radius: 10px; background: linear-gradient(to right, #28a745, #ffc107); color: white; }
+.badge-list-item { display: flex; align-items: center; gap: 15px; padding: 15px; border-radius: 10px; background: var(--badge-item-gradient); color: white; }
 .badge-image-container .badge-img { width: 100px; height: 100px; }
 .badge-img-small { width: 75px; height: 75px; }
 .badge-unclaimed { opacity: 0.3; filter: grayscale(1); }
@@ -1882,35 +2022,101 @@ export default {
 .badge-details .badge-title { font-weight: bold; font-size: 1.2rem; }
 .badge-status-claimed { color: #c3e6cb; }
 .badge-status-missed { font-style: italic; opacity: 0.8; }
-.wallet-balance-col {
+
+.wallet-balances-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 15px;
+}
+.balance-card {
+    background-color: var(--wallet-action-box-bg);
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     display: flex;
     flex-direction: column;
-    gap: 0.5rem; 
+    justify-content: center;
+}
+html.dark-mode .balance-card {
+    border: 1px solid var(--dark-gold-primary);
+    box-shadow: none;
+}
+.balance-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    margin-bottom: 10px;
+    color: var(--text-color-secondary);
+}
+.balance-card-header .token-logo {
+    margin-right: 8px;
+}
+.balance-card-value {
+    font-size: 1.75rem;
+    font-weight: bold;
+    color: var(--brand-color);
+    line-height: 1.2;
+    word-break: break-all;
+}
+.balance-card-subtext {
+    font-size: 0.8rem;
+    color: var(--text-color-secondary);
+    opacity: 0.7;
+    margin-top: 4px;
+}
+.tip-card .fa-info-circle {
+    cursor: pointer;
 }
 
 
-
+/* Sidebar */
 .quick-links-sidebar {
     flex: 0 0 250px; 
     border-radius: 15px; 
     padding: 20px;
-    background: linear-gradient(to bottom, #ffaf7b, #ffffff);
+    background: var(--sidebar-gradient);
     align-self: flex-start;
+    box-shadow: var(--box-shadow-lifted);
 }
-.quick-links-title { color: #dc3545; margin-bottom: 15px; }
-.quick-link-item { display: flex; align-items: center; background-color: white; color: #d9534f; padding: 12px 15px; border-radius: 10px; margin-bottom: 10px; font-weight: 500; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; }
-.quick-link-item:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); color: #d9534f; }
+.quick-links-title { color: var(--brand-color); margin-bottom: 15px; }
+.quick-link-item { 
+    display: flex; 
+    align-items: center; 
+    background-color: var(--quick-link-bg); 
+    color: var(--brand-secondary-color); 
+    padding: 12px 15px; 
+    border-radius: 10px; 
+    margin-bottom: 10px; 
+    font-weight: 500; 
+    text-decoration: none; 
+    box-shadow: 0 2px 4px var(--quick-link-shadow); 
+    transition: transform 0.2s, box-shadow 0.2s; 
+}
+.quick-link-item:hover { 
+    transform: translateY(-2px); 
+    box-shadow: 0 4px 8px var(--quick-link-shadow-hover); 
+    color: var(--brand-secondary-color); 
+}
 .quick-link-item i { width: 20px; text-align: center; }
 
 
 /* General & Utility */
-.btn-danger { background-color: #dc3545; border-color: #dc3545; }
+.btn-danger { background-color: var(--brand-color); border-color: var(--brand-color); }
 .token-logo { width: 20px; height: 20px; vertical-align: middle; }
 
 
-/* Media Queries */
+/* --- Media Queries --- */
 @media (max-width: 992px) {
-  .profile-body { flex-direction: column-reverse; }
+  .profile-body {
+    flex-direction: column; 
+  }
+  .quick-links-sidebar {
+    flex-basis: auto;
+    width: 100%;
+  }
 }
 @media (max-width: 768px) {
     .community-item-content { flex-direction: column; gap: 10px; text-align: center;}
