@@ -221,6 +221,11 @@ export default {
   color: gray;
   /* Customize icon color */
   font-size: 16px;
+  display: block !important;
+}
+#username{
+  padding-left: 30px;
+  font-size: 16px;
 }
 
 .input-with-icon input {
@@ -240,6 +245,12 @@ export default {
 @media only screen and (max-width: 500px){
   #username{
     font-size: 12px;
+    padding-left: 30px; /* This is the key fix: ensures padding is applied */
+  }
+
+  .input-with-icon .fa-search {
+    display: block !important; /* Ensures the icon is always visible on mobile */
+    font-size: 14px; /* Optional: adjust icon size for smaller screens */
   }
 }
 </style>
