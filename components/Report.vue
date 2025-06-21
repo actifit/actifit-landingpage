@@ -339,8 +339,12 @@ export default {
         this.allImages = [];
         return;
       }
-
-      const uniqueImages = [...new Set(initialImages)];
+      
+      const userImages = initialImages.filter(imgUrl => 
+        typeof imgUrl === 'string' && !imgUrl.includes('actifit_logo')&& !imgUrl.includes('ACTIVITY')&& !imgUrl.includes('https://cdn.steemitimages.com/DQmQqfpSmcQtfrHAtzfBtVccXwUL9vKNgZJ2j93m8WNjizw/l5.png')&& !imgUrl.includes('https://cdn.steemitimages.com/DQmXv9QWiAYiLCSr3sKxVzUJVrgin3ZZWM2CExEo3fd5GUS/sep3.png')&& !imgUrl.includes('https://images.hive.blog/DQmQJeGKQVsYFDFnHxgTHyNdrZxQmjLSJxz1wLB5HJDaZV3/Dise%C3%B1o_sin_t%C3%ADtulo__6_-removebg-preview.png')
+      );
+      
+      const uniqueImages = [...new Set(userImages)];
       
       let imagesToShow = [];
       if (uniqueImages.length >= 2) {
