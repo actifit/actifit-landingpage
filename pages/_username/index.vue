@@ -73,7 +73,7 @@
             <!-- About Tab -->
             <div v-if="activeTab === 'about'" class="about-tab">
                <div class="about-item">
-                  <div class="about-item-label"><i class="fas fa-user-circle mr-2"></i> {{ $t('DisplayName') }}</div>
+                  <div class="about-item-label"><i class="fas fa-user-circle fa-fw mr-2"></i> {{ $t('Display_Name') }}</div>
                   <div class="about-item-value">
                      <div v-if="updatingField === 'username'" class="d-flex justify-content-end align-items-center h-100 w-100"><i class="fas fa-spinner fa-spin text-brand"></i></div>
                      <template v-else>
@@ -88,7 +88,7 @@
                   </div>
                </div>
                <div class="about-item">
-                  <div class="about-item-label"><i class="fas fa-map-marker-alt mr-2"></i> {{ $t('Location') }}</div>
+                  <div class="about-item-label"><i class="fas fa-map-marker-alt fa-fw mr-2"></i> {{ $t('Location') }}</div>
                   <div class="about-item-value">
                      <div v-if="updatingField === 'location'" class="d-flex justify-content-end align-items-center h-100 w-100"><i class="fas fa-spinner fa-spin text-brand"></i></div>
                      <template v-else>
@@ -103,7 +103,7 @@
                   </div>
                </div>
                <div class="about-item">
-                  <div class="about-item-label"><i class="fas fa-info-circle mr-2"></i> {{ $t('Description') }}</div>
+                  <div class="about-item-label"><i class="fas fa-info-circle fa-fw mr-2"></i> {{ $t('Description') }}</div>
                   <div class="about-item-value">
                      <div v-if="updatingField === 'description'" class="d-flex justify-content-end align-items-center h-100 w-100"><i class="fas fa-spinner fa-spin text-brand"></i></div>
                       <template v-else>
@@ -118,7 +118,7 @@
                   </div>
                </div>
                <div class="about-item">
-                  <div class="about-item-label"><i class="fas fa-link mr-2"></i> {{ $t('Website') }}</div>
+                  <div class="about-item-label"><i class="fas fa-link fa-fw mr-2"></i> {{ $t('Website') }}</div>
                   <div class="about-item-value">
                      <div v-if="updatingField === 'link'" class="d-flex justify-content-end align-items-center h-100 w-100"><i class="fas fa-spinner fa-spin text-brand"></i></div>
                      <template v-else>
@@ -149,8 +149,19 @@
                 </div>
                 <div class="fitness-action-btn-container">
                     <a href="#" data-toggle="modal" class="btn btn-danger" data-target="#measureChartModal" v-if="isFriend() || isOwnAccount()">{{ $t('Stats_chart') }}</a>
-                    <a href="#" class="btn btn-danger" v-on:click="displayAddFriendStats = !displayAddFriendStats" v-else-if="user">{{ $t('Stats_chart') }}</a>
-                    <a href="#" class="btn btn-danger" v-on:click="displayLoginStats = !displayLoginStats" v-else>{{ $t('Stats_chart') }}</a>
+                    <a href="#" class="btn btn-danger" @click.prevent="displayAddFriendStats = !displayAddFriendStats" v-else-if="user">{{ $t('Stats_chart') }}</a>
+                    <a href="#" class="btn btn-danger" @click.prevent="displayLoginStats = !displayLoginStats" v-else>{{ $t('Stats_chart') }}</a>
+                </div>
+                 <div v-show="displayAddFriendStats" class="interactive-prompt mt-2">
+                    <div>{{ $t('View_chart_notice').replace('_USER', this.username) }}</div>
+                    <button class="btn btn-sm btn-success mt-2" @click="addFriend"><i class="fas fa-user-plus mr-1"></i> {{ $t('add_friend') }}</button>
+                    <div v-if="addFriendError" v-html="addFriendError" class="text-danger small mt-1"></div>
+                </div>
+                 <div v-show="displayLoginStats" class="interactive-prompt mt-2">
+                    <div>
+                        <button class="btn btn-danger" @click="showModalFunc">{{ $t('Login') }}</button>
+                        <a href="/signup" class="btn btn-danger ml-2">{{ $t('Sign_Up') }}</a>
+                    </div>
                 </div>
                 <div class="fitness-section-grid-activity">
                     <div class="fitness-card activity-card">
@@ -165,8 +176,19 @@
                 </div>
                 <div class="fitness-action-btn-container">
                     <a href="#" data-toggle="modal" class="btn btn-danger" data-target="#activityChartModal" v-if="isFriend() || isOwnAccount()">{{ $t('View_activity_chart') }}</a>
-                    <a href="#" class="btn btn-danger" v-on:click="displayAddFriendActivity = !displayAddFriendActivity" v-else-if="user">{{ $t('View_activity_chart') }}</a>
-                    <a href="#" class="btn btn-danger" v-on:click="displayLoginActivity = !displayLoginActivity" v-else>{{ $t('View_activity_chart') }}</a>
+                    <a href="#" class="btn btn-danger" @click.prevent="displayAddFriendActivity = !displayAddFriendActivity" v-else-if="user">{{ $t('View_activity_chart') }}</a>
+                    <a href="#" class="btn btn-danger" @click.prevent="displayLoginActivity = !displayLoginActivity" v-else>{{ $t('View_activity_chart') }}</a>
+                </div>
+                 <div v-show="displayAddFriendActivity" class="interactive-prompt mt-2">
+                    <div>{{ $t('View_chart_notice').replace('_USER', this.username) }}</div>
+                    <button class="btn btn-sm btn-success mt-2" @click="addFriend"><i class="fas fa-user-plus mr-1"></i> {{ $t('add_friend') }}</button>
+                    <div v-if="addFriendError" v-html="addFriendError" class="text-danger small mt-1"></div>
+                </div>
+                 <div v-show="displayLoginActivity" class="interactive-prompt mt-2">
+                     <div>
+                        <button class="btn btn-danger" @click="showModalFunc">{{ $t('Login') }}</button>
+                        <a href="/signup" class="btn btn-danger ml-2">{{ $t('Sign_Up') }}</a>
+                    </div>
                 </div>
             </div>
 
@@ -220,7 +242,7 @@
                             <div class="community-item">
                 <div class="community-item-content">
                    <div class="d-flex align-items-center flex-grow-1">
-                      <i class="fa-solid fa-gamepad mr-2"></i>{{ $t('Splinterlands') }}
+                      <i class="fa-solid fa-gamepad text-brand mr-2"></i>{{ $t('Splinterlands') }}
                       
                       <img src="https://d36mxiodymuqjm.cloudfront.net/website/icons/img_icon_splinterlands.svg" class="mr-2 ml-2" style="width: 30px" :alt="$t('Splinterlands')">
                       
@@ -248,7 +270,7 @@
             <div v-if="activeTab === 'wallet'" class="wallet-tab">
              
               <div class="wallet-card" v-if="userinfo">
-                 <div class="d-flex justify-content-between align-items-center flex-wrap">
+                 <div class="d-flex justify-content-between align-items-end flex-wrap">
                     
                     <div>
                       <div v-if="userinfo.witness_votes.includes('actifit') || userinfo.proxy == 'actifit'">
@@ -286,7 +308,6 @@
 
               
               <div class="wallet-card">
-                <!-- FIX: Replaced the cluttered list of balances with a new grid of cards -->
                 <div class="wallet-balances-grid">
                   <div class="balance-card">
                     <div class="balance-card-header">
@@ -1743,7 +1764,6 @@ html.dark-mode {
   --dark-background: #212121;
   --dark-background-lighter: #2c2c2c;
 
-  /* Re-assigning variables using the new palette */
   --brand-color: #dc3545;
   --brand-secondary-color: #d9534f;
   --text-color-primary: #e0e0e0;
@@ -2066,6 +2086,17 @@ html.dark-mode .balance-card {
     color: var(--text-color-secondary);
     opacity: 0.7;
     margin-top: 4px;
+}
+.interactive-prompt {
+  background-color: var(--wallet-action-box-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-color-primary);
+  padding: 1rem;
+  border-radius: .5rem;
+  text-align: center;
+}
+html.dark-mode .interactive-prompt {
+  border-color: var(--dark-gold-primary);
 }
 .tip-card .fa-info-circle {
     cursor: pointer;
