@@ -2252,7 +2252,7 @@ html.dark-mode .interactive-prompt {
         text-align: center;
     }
     .wallet-top-actions .btn {
-        white-space: normal; /
+        white-space: normal; 
     }
 }
 </style>
