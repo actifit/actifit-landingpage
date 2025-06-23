@@ -685,9 +685,4 @@ label {
   word-wrap: break-word;
 }
 
-@media only screen and (max-width: 500px) {
-  #account_creation img {
-    max-width: 150px;
-  }
-}
 </style>
