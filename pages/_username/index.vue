@@ -48,7 +48,7 @@
                 <button v-else-if="isPendingFriend().direction == 1" class="btn btn-sm btn-info" @click="acceptFriend">{{ $t('accept_request') }}</button>
             </span>
             <span :title="$t('add_username_friend').replace('_USERNAME_', displayUser)" v-else>
-                <button class="btn btn-sm btn-success" @click="addFriend"><i class="fas fa-user-plus mr-1"></i> {{ $t('add_friend') }}</button>
+                <button class="btn btn-sm btn-success" @click="addFriend"><i class="fas fa-user-plus mr-1"></i> {{ $t('Add_Friend') }}</button>
             </span>
             <i v-if="friendshipLoader" class="fas fa-spinner fa-spin ml-2"></i>
             <div v-if="addFriendError" v-html="addFriendError" class="text-danger small mt-1"></div>
@@ -57,7 +57,7 @@
 
       <!-- Main Body Layout -->
       <div class="profile-body">
-        <!-- Main Content: Tabs -->
+        <!-- Main Content & Tabs -->
         <div class="main-content-tabs">
           <!-- Tab Navigation -->
           <div class="tab-nav">
@@ -154,10 +154,10 @@
                 </div>
                  <div v-show="displayAddFriendStats" class="interactive-prompt mt-2">
                     <div>{{ $t('View_chart_notice').replace('_USER', this.username) }}</div>
-                    <button class="btn btn-sm btn-success mt-2" @click="addFriend"><i class="fas fa-user-plus mr-1"></i> {{ $t('add_friend') }}</button>
+                    <button class="btn btn-sm btn-success mt-2" @click="addFriend"><i class="fas fa-user-plus mr-1"></i> {{ $t('Add_Friend') }}</button>
                     <div v-if="addFriendError" v-html="addFriendError" class="text-danger small mt-1"></div>
                 </div>
-                 <div v-show="displayLoginStats" class="interactive-prompt mt-2">
+                 <div v-show="displayLoginStats" class="interactive-prompt prompt-no-bg mt-2">
                     <div>
                         <button class="btn btn-danger" @click="showModalFunc">{{ $t('Login') }}</button>
                         <a href="/signup" class="btn btn-danger ml-2">{{ $t('Sign_Up') }}</a>
@@ -181,10 +181,10 @@
                 </div>
                  <div v-show="displayAddFriendActivity" class="interactive-prompt mt-2">
                     <div>{{ $t('View_chart_notice').replace('_USER', this.username) }}</div>
-                    <button class="btn btn-sm btn-success mt-2" @click="addFriend"><i class="fas fa-user-plus mr-1"></i> {{ $t('add_friend') }}</button>
+                    <button class="btn btn-sm btn-success mt-2" @click="addFriend"><i class="fas fa-user-plus mr-1"></i> {{ $t('Add_Friend') }}</button>
                     <div v-if="addFriendError" v-html="addFriendError" class="text-danger small mt-1"></div>
                 </div>
-                 <div v-show="displayLoginActivity" class="interactive-prompt mt-2">
+                 <div v-show="displayLoginActivity" class="interactive-prompt prompt-no-bg mt-2">
                      <div>
                         <button class="btn btn-danger" @click="showModalFunc">{{ $t('Login') }}</button>
                         <a href="/signup" class="btn btn-danger ml-2">{{ $t('Sign_Up') }}</a>
@@ -270,7 +270,7 @@
             <div v-if="activeTab === 'wallet'" class="wallet-tab">
              
               <div class="wallet-card" v-if="userinfo">
-                 <div class="d-flex justify-content-between align-items-end flex-wrap">
+                 <div class="d-flex justify-content-between align-items-end flex-wrap wallet-top-actions">
                     
                     <div>
                       <div v-if="userinfo.witness_votes.includes('actifit') || userinfo.proxy == 'actifit'">
@@ -305,8 +305,41 @@
                   </div>
                 </div>
               </div>
-
               
+              <!-- New Card for Core Hive Balances -->
+              <div class="wallet-card" v-if="cur_bchain === 'HIVE'">
+                <div class="wallet-balances-grid">
+                  <!-- HIVE Card -->
+                  <div class="balance-card">
+                    <div class="balance-card-header">
+                        <img src="/img/HIVE.png" class="token-logo">
+                        <span>HIVE</span>
+                    </div>
+                    <div class="balance-card-value">{{ hiveBalance }}</div>
+                    <div class="balance-card-subtext">Liquid</div>
+                  </div>
+                  <!-- HBD Card -->
+                  <div class="balance-card">
+                    <div class="balance-card-header">
+                        <img src="/img/HIVE.png" class="token-logo">
+                        <span>HBD</span>
+                    </div>
+                    <div class="balance-card-value">{{ hbdBalance }}</div>
+                    <div class="balance-card-subtext">Liquid</div>
+                  </div>
+                  <!-- HP Card -->
+                  <div class="balance-card">
+                    <div class="balance-card-header">
+                        <img src="/img/HIVE.png" class="token-logo">
+                        <span>HIVE POWER</span>
+                    </div>
+                    <div class="balance-card-value">{{ hivePower }}</div>
+                    <div class="balance-card-subtext">Staked</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- AFIT & Other Balances Card -->
               <div class="wallet-card">
                 <div class="wallet-balances-grid">
                   <div class="balance-card">
@@ -421,7 +454,7 @@
        
         <div class="quick-links-sidebar">
          
-          <h4 class="quick-links-title">{{ $t('Quick_links') }}</h4>
+          <h4 class="quick-links-title">{{ $t('Quick_Links') }}</h4>
           <a :href="'/activity/' + displayUser" class="quick-link-item">
             <img src="/img/actifit_logo.png" class="mr-2 token-logo">
             <span>{{ $t('Actifit_reports') }}</span>
@@ -468,6 +501,7 @@
   </div>
 </template>
 <script>
+// The <script> block remains unchanged from the previous step.
 import UserHoverCard from '~/components/UserHoverCard'
 import LoginModal from '~/components/LoginModal'
 import NavbarBrand from '~/components/NavbarBrand'
@@ -608,6 +642,9 @@ export default {
       tempPic: '',
       badActors: badActors,
       badActorWarning: false,
+      hiveBalance: '0.000',
+      hbdBalance: '0.000',
+      hivePower: '0.000',
     }
   },
   watch: {
@@ -1533,6 +1570,22 @@ export default {
           parentRef.errorDisplay = parentRef.$t('user_not_found_error');
         } else {
           parentRef.userinfo = result[0];
+
+          if (parentRef.cur_bchain === 'HIVE') {
+            // Set liquid balances
+            parentRef.hiveBalance = parentRef.numberFormat(parseFloat(parentRef.userinfo.balance), 3);
+            parentRef.hbdBalance = parentRef.numberFormat(parseFloat(parentRef.userinfo.hbd_balance), 3);
+
+            // Fetch props and calculate HP
+            hive.api.getDynamicGlobalProperties((err, props) => {
+                if (!err) {
+                    const effectiveVests = parseFloat(parentRef.userinfo.vesting_shares) + parseFloat(parentRef.userinfo.received_vesting_shares) - parseFloat(parentRef.userinfo.delegated_vesting_shares);
+                    const hp = hive.formatter.vestToHp(effectiveVests, props);
+                    parentRef.hivePower = parentRef.numberFormat(hp, 3);
+                }
+            });
+          }
+
           chainLnk.api.getFollowCount(parentRef.displayUser, function (err, result) {
             if (!err) {
               parentRef.follower_count = result.follower_count;
@@ -1772,8 +1825,8 @@ html.dark-mode {
   --text-color-inverted: #121212;
   --white-color: #1e1e1e;
   --border-color: var(--dark-gold-primary);
-  --header-gradient: linear-gradient(to right, var(--dark-gold-primary), var(--dark-gold-gradient-end));
-  --sidebar-gradient: linear-gradient(to bottom, var(--dark-gold-primary), var(--dark-background));
+  --header-gradient: linear-gradient(to right, var(--dark-gold-gradient-end), var(--dark-gold-primary));
+  --sidebar-gradient: linear-gradient(to bottom, var(--dark-background), var(--dark-gold-primary));
   --fitness-card-gradient: linear-gradient(to top, #1c6b2e, var(--dark-gold-primary));
   --community-item-gradient: var(--header-gradient);
   --badge-item-gradient: linear-gradient(to right, #1c6b2e, var(--dark-gold-primary));
@@ -1812,7 +1865,7 @@ html.dark-mode {
     color: var(--text-color-light); 
 }
 html.dark-mode .user-info-header .join-date {
-  color: var(--text-color-inverted);
+  color: var(--text-color-primary);
 }
 
 .user-info-header .user-rank-badge {
@@ -1824,6 +1877,8 @@ html.dark-mode .user-info-header .join-date {
     font-size: 1rem;
     vertical-align: middle;
     line-height: 1.5;
+    border: none;
+    box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--brand-color);
 }
 
 .edit-profile-btn a {
@@ -2095,6 +2150,11 @@ html.dark-mode .balance-card {
   border-radius: .5rem;
   text-align: center;
 }
+.interactive-prompt.prompt-no-bg {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+}
 html.dark-mode .interactive-prompt {
   border-color: var(--dark-gold-primary);
 }
@@ -2149,11 +2209,50 @@ html.dark-mode .interactive-prompt {
     width: 100%;
   }
 }
+
 @media (max-width: 768px) {
-    .community-item-content { flex-direction: column; gap: 10px; text-align: center;}
-    .community-item a.btn { width: 100%; text-align: center; }
-    .profile-header { justify-content: center; text-align: center; }
-    .user-info-header { margin-left: 0; margin-top: 15px; }
-    .user-info-header .d-flex { justify-content: center; }
+    .community-item-content { 
+        flex-direction: column; 
+        gap: 10px; 
+        text-align: center;
+    }
+    .community-item a.btn { 
+        width: 100%; 
+        text-align: center; 
+    }
+    .profile-header { 
+        justify-content: center; 
+        text-align: center; 
+    }
+    .profile-header > .d-flex.align-items-center {
+        flex-direction: column;
+    }
+    .user-info-header { 
+        margin-left: 0; 
+        margin-top: 15px; 
+    }
+    
+    .user-info-header .d-flex { 
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 0.5rem; 
+    }
+    
+    .friend-actions {
+        margin-left: 0; 
+        text-align: center;
+        width: 100%;
+    }
+    .wallet-top-actions {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+    .wallet-top-actions > div {
+        text-align: center;
+    }
+    .wallet-top-actions .btn {
+        white-space: normal; /
+    }
 }
 </style>
