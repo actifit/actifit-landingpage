@@ -25,7 +25,7 @@
       </div>
 
 	  <div class="col-md-12 text-center" v-else>
-		<i class="fas fa-spinner fa-spin text-brand"></i>
+		<i class="fas fa-spinner fa-spin fa-3x text-brand"></i>
 	  </div>
 
       <!-- show load more button if there are more posts available -->

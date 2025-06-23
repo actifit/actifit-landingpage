@@ -3,7 +3,7 @@
     <NavbarBrand />
     <div v-if="loadingData" class="container pt-5 mt-5 pb-5">
       <div class="mb-3 text-center">
-        <i class="fas fa-spin fa-spinner text-brand"></i>
+        <i class="fas fa-spin fa-spinner fa-3x text-brand"></i>
       </div>
     </div>
     <div v-else-if="errorDisplay == ''" class="container pt-5 mt-5 pb-5 col-md-9">
