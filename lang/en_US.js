@@ -1154,5 +1154,8 @@ module.exports = {
   Location:'Location',
   Description:'Description',
   Website:'Website',
+  Latest_Activity_Count:'Latest_Activity_Count',
+  Latest_Activity_Date:'Latest_Activity_Date',
+
 
 }

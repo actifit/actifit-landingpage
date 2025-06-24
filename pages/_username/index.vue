@@ -2069,7 +2069,7 @@ html.dark-mode .user-info-header .join-date {
     justify-content: center; 
     gap: 15px; 
 }
-.fitness-section-grid-measurements { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
+.fitness-section-grid-measurements { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 15px; }
 .fitness-action-btn-container { text-align: center; }
 .fitness-card { 
     background: var(--fitness-card-gradient); 
@@ -2248,8 +2248,14 @@ html.dark-mode .interactive-prompt {
         text-align: center; 
     }
     .profile-header { 
+        flex-direction: column;
+        gap: 15px;
         justify-content: center; 
         text-align: center; 
+    }
+    .large-avatar {
+        width: 120px;
+        height: 120px;
     }
     .profile-header > .d-flex.align-items-center {
         flex-direction: column;
