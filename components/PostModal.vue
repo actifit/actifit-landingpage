@@ -20,7 +20,7 @@
           <div class="row col-12">
 
             <div class="text-right col-12">
-              <i class="fas fa-reply text-brand"></i>&nbsp;{{ $t('viewing_comment_note') }}
+              <i class="fas fa-reply text-brand"></i> {{ $t('viewing_comment_note') }}
               <UserHoverCard :username="post.parent_author" />
             </div>
 
@@ -30,7 +30,7 @@
           <h2 class="modal-title" id="exampleModalLabel">{{ post.title }}</h2>
           <div class="text-right">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
+              <span aria-hidden="true">×</span>
             </button>
           </div>
         </div>
@@ -43,7 +43,10 @@
             <span class="date-head" :title="date">{{ $getTimeDifference(post.created) }}</span>
             <a :href="'/@' + this.post.author + '/' + this.post.permlink"><i class="fas fa-link text-brand"></i></a>
             <i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent"></i>
-            <i v-if="!showTranslated" class="fa-solid fa-language text-brand" v-on:click="translateContent"></i>
+            
+            <!-- Translation Icons Updated -->
+            <i v-if="translationLoading" class="fas fa-spinner fa-spin text-brand" :title="$t('translating_content', 'Translating...')"></i>
+            <i v-else-if="!showTranslated" class="fa-solid fa-language text-brand" v-on:click="translateContent" :title="$t('translate_content', 'Translate Content')"></i>
           </span>
           <div class="p-1 modal-top-actions">
               <span><a href="#" @click.prevent="toggleCommentBox()" :title="$t('Reply')"><i
@@ -68,9 +71,9 @@
         </div>
         <div v-if="showTranslated" class="translation-notice">
           <span>{{ $t('auto_translated_content') }}</span>
-          <a href="#" v-on:click="cancelTranslation">{{ $t('click_to_view_original') }}</a>
+          <a href="#" v-on:click.prevent="cancelTranslation">{{ $t('click_to_view_original') }}</a>
         </div>
-        <vue-remarkable class="modal-body" :source="body" ref="remarkableContent"
+        <vue-remarkable class="modal-body" :source="displayBody" ref="remarkableContent"
           :options="{ 'html': true, 'breaks': true, 'typographer': true }"></vue-remarkable>
         <div class="modal-body goog-ad-horiz-90">
           <adsbygoogle ad-slot="5716623705" />
@@ -265,31 +268,24 @@
           </div>
           <Comments v-if="commentsAvailable" :author="commentEntries.author" :body="commentEntries.body"
             :reply_entries.sync="commentEntries.reply_entries" :main_post_author="post.author"
-            :main_post_permlink="post.permlink" :main_post_cat="post.category" :depth="0" />
+            :main_post_permlink="post.permlink" :main_post_cat="post.category" :depth="0" :translation-cache="translationCache"
+    @update-translation-cache="updateCommentCache" />
         </div>
-
-
       </div>
-
     </div>
   </div>
 </template>
 
 <script>
 import UserHoverCard from './UserHoverCard.vue'
-
 import { mapGetters } from 'vuex'
 import Comments from '~/components/Comments'
 import CustomTextEditor from '~/components/CustomTextEditor'
-
 import Vue from 'vue'
 import vueRemarkable from 'vue-remarkable';
-
 import SocialSharing from 'vue-social-sharing';
-
 import VueScrollTo from 'vue-scrollto'
-
-import { translateText } from '~/components/deepl-client';
+import { translateTextWithGemini } from '~/components/gemini-client.js';
 
 const scot_steemengine_api = process.env.steemEngineScot;
 const scot_hive_api_param = process.env.hiveEngineScotParam;
@@ -298,9 +294,16 @@ const tokensOfInterest = ['SPORTS', 'PAL', 'APX'];
 export default {
   data() {
     return {
+      // ✅ CORE FIX: Initialize the translation cache object.
+      translationCache: {}, 
+
+      // All other state variables
       commentsLoading: true,
-      safety_post_content: ``,
+      displayBody: '',
+      translatedText: '',
+      safety_post_content: '',
       showTranslated: false,
+      translationLoading: false,
       translationError: '',
       afitReward: 0,
       tokenRewards: [],
@@ -326,14 +329,15 @@ export default {
     }
   },
   watch: {
+    // This watcher correctly handles both initial load and navigation
     post: 'fetchPostData',
+
     bchain: function (newBchain) {
       this.cur_bchain = newBchain;
       this.target_bchain = newBchain;
     },
     'post.body':{
       handler(){
-        //Re-attach to newly rendered content
         this.$nextTick(() => {
               this.attachImageErrorHandlers();
           });
@@ -380,9 +384,6 @@ export default {
       let minutes = date.getMinutes()
       return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() + ' ' + date.getHours() + ':' + (minutes < 10 ? '0' + minutes : minutes)
     },
-    body() {
-      return this.$cleanBody(this.post.body);
-    },
     formattedPostUrl() {
       return "https://actifit.io/@" + this.post.author + '/' + this.post.permlink;
     },
@@ -394,7 +395,6 @@ export default {
         return (typeof this.post.json_metadata === "string")
           ? JSON.parse(this.post.json_metadata)
           : this.post.json_metadata;
-        //return JSON.parse(this.post.json_metadata)
       } catch (err) {
         console.log(err);
         return {}
@@ -407,14 +407,6 @@ export default {
         return this.post.pending_payout_value.replace('SBD', '').replace('STEEM', '').replace('HBD', '').replace('HIVE', '') + ' $'
       }
     },
-    /*getUserRank() {
-    //proper formatting issue to display circle for smaller numbers
-    if (this.userRank<10){
-      return ' '+parseFloat(this.userRank).toFixed(1);
-    }else{
-      return parseFloat(this.userRank).toFixed(1);
-    }
-    },*/
     displayCoreUserRank() {
       return (this.userRank ? parseFloat(this.userRank.rank_no_afitx).toFixed(2) : '');
     },
@@ -427,9 +419,100 @@ export default {
     showCommentsLoader() {
       return this.post.children > 0 && this.commentsLoading;
     }
-
   },
   methods: {
+    // ✅ =================================================================
+    // ✅ START OF CORRECTED METHODS - Caching logic is implemented here.
+    // ✅ =================================================================
+
+    fetchPostData() {
+      if (!this.post) return; // Guard clause to prevent errors if post is null
+      
+      const postId = `${this.post.author}/${this.post.permlink}`;
+      const cachedState = this.translationCache[postId];
+
+      this.translationLoading = false; // Always reset the spinner on new post
+
+      if (cachedState) {
+        // CACHE HIT: We've seen this post before. Restore its state.
+        this.safety_post_content = cachedState.originalBody;
+        this.translatedText = cachedState.translatedBody;
+        this.showTranslated = cachedState.isShowingTranslation;
+        this.displayBody = this.showTranslated ? this.translatedText : this.safety_post_content;
+      } else {
+        // CACHE MISS: This is a new post. Initialize its state.
+        this.safety_post_content = this.$cleanBody(this.post.body);
+        this.translatedText = '';
+        this.showTranslated = false;
+        this.displayBody = this.safety_post_content;
+      }
+
+      // These functions fetch other non-translation data and should always run
+      this.fetchPostKeyData();
+      this.fetchPostCommentData();
+    },
+    updateCommentCache(payload) {
+    // Using this.$set ensures Vue's reactivity system detects the new property.
+    this.$set(this.translationCache, payload.id, payload.data);
+},
+
+    cancelTranslation() {
+      const postId = `${this.post.author}/${this.post.permlink}`;
+      
+      // Revert the view to the original content
+      this.displayBody = this.safety_post_content;
+      this.showTranslated = false;
+      
+      // Update the cache to remember that the user wants to see the original.
+      if (this.translationCache[postId]) {
+        this.$set(this.translationCache[postId], 'isShowingTranslation', false);
+      }
+    },
+
+    async translateContent() {
+      const postId = `${this.post.author}/${this.post.permlink}`;
+      
+      // If we already have the translation (from cache), just show it.
+      if (this.translatedText) {
+        this.displayBody = this.translatedText;
+        this.showTranslated = true;
+        if (this.translationCache[postId]) {
+          this.$set(this.translationCache[postId], 'isShowingTranslation', true);
+        }
+        return;
+      }
+
+      this.translationLoading = true;
+      try {
+        const translationResult = await translateTextWithGemini(this.safety_post_content); 
+        this.translatedText = translationResult;
+        this.displayBody = this.translatedText;
+        this.showTranslated = true;
+
+        // Save the new translation and state to the cache.
+        this.$set(this.translationCache, postId, {
+          originalBody: this.safety_post_content,
+          translatedBody: this.translatedText,
+          isShowingTranslation: true,
+        });
+      } catch (error) {
+        // On failure, revert to original content
+        this.displayBody = this.safety_post_content;
+        this.showTranslated = false;
+        console.error('Translation process failed:', error);
+        this.$notify({
+          group: 'error',
+          text: 'Translation service failed. Please try again later.',
+          position: 'top center'
+        });
+      } finally {
+        this.translationLoading = false;
+      }
+    },
+    // ✅ =================================================================
+    // ✅ END OF CORRECTED METHODS
+    // ✅ =================================================================
+
     headToComments(){
       const container = this.$refs.postModal;
       VueScrollTo.scrollTo('#modal-footer', 1000, { easing: 'ease-in-out', offset: 0, container: container });
@@ -437,28 +520,6 @@ export default {
     toggleCommentBox() {
       this.commentBoxOpen = !this.commentBoxOpen;
       localStorage.setItem('commentBoxOpen', this.commentBoxOpen);
-    },
-    cancelTranslation() {
-      if (this.safety_post_content != '') {
-        this.post.body = this.safety_post_content;
-      }
-      this.showTranslated = false;
-    },
-    async translateContent() {
-      try {
-        this.safety_post_content = this.post.body;
-        const result = await translateText(this.post.body, 'en');
-
-        const translatedText = result.translations[0].text || "Translation failed";
-
-        this.showTranslated = true;
-
-        this.post.body = translatedText;
-
-      } catch (error) {
-        this.translationError = 'Unable to translate content. Try again later.';
-        console.error('Translation error:', error);
-      }
     },
     copyContent(event) {
       navigator.clipboard.writeText('https://actifit.io/@' + this.post.author + '/' + this.post.permlink)
@@ -478,17 +539,14 @@ export default {
           })
           return;
         });
-
     },
     loadNextPost(direction) {
-      this.cancelTranslation();
       if (direction < 0) {
         this.$emit('prevPost');
       } else {
         this.$emit('nextPost');
       }
     },
-    /* function checks if post has beneficiaries */
     hasBeneficiaries() {
       return Array.isArray(this.post.beneficiaries) && this.post.beneficiaries.length > 0;
     },
@@ -499,18 +557,14 @@ export default {
       }
       return output;
     },
-    /* function returns author payout value */
     paidValue() {
       if (this.post.total_payout_value) return this.post.total_payout_value
       if (this.post.author_payout_value) return this.post.author_payout_value
     },
-    /* function checks to see if post reached its payout period */
     postPaid() {
       if (this.post.is_paidout) {
-        //works for comments
         return true;
       }
-      //check if last_payout is after cashout_time which means post got paid
       let last_payout = new Date(this.post.last_payout);
       let cashout_time = new Date(this.post.cashout_time);
       if (last_payout.getTime() > cashout_time.getTime()) {
@@ -518,33 +572,22 @@ export default {
       }
       return false;
     },
-    /* function handles closing open comment box and resetting data */
     resetOpenComment() {
       this.replyBody = this.moderatorSignature;
       this.commentBoxOpen = false;
       localStorage.setItem('commentBoxOpen', this.commentBoxOpen);
     },
-
     commentSuccess(err, finalize, bchain) {
-      // stop loading animation and show notification
       this.loading = false
       this.$notify({
         group: err ? 'error' : 'success',
         text: err ? this.$t('Comment_Error') : this.$t('Comment_Success_Chain').replace('_CHAIN_', bchain),
         position: 'top center'
       })
-
       if (finalize) {
-
-        //display comment placeholder till blockchain data comes through
         this.responsePosted = true;
         this.responseBody = this.replyBody;
-
-        //refetch post data anew, but only after 10 seconds to ensure data has been made available
         setTimeout(this.fetchPostCommentData, 10000);
-
-
-        //check if comment is lengthy enough, increase tracked count by 1
         if (this.responseBody.length >= 50) {
           if (isNaN(this.commentCountToday)) {
             this.commentCountToday = 0;
@@ -552,166 +595,99 @@ export default {
           this.commentCountToday += 1;
         }
         this.$store.commit('setCommentCountToday', this.commentCountToday);
-
-        //reward the user for interacting with 3 different posts via comments
         if (this.commentCountToday >= 3) {
           this.rewardUserComment();
         }
       }
-
-      //reset open comment
       this.resetOpenComment();
     },
-
     async processTrxFunc(op_name, cstm_params, bchain_option) {
       if (!localStorage.getItem('std_login')) {
-        //if (!this.stdLogin){
         let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
-        //console.log(res);
         if (res.result.ref_block_num) {
-          console.log('success');
           return { success: true, trx: res.result };
         } else {
-          //console.log(err);
           return { success: false, trx: null };
         }
       } else if (localStorage.getItem('acti_login_method') == 'hiveauth') {
         return new Promise((resolve) => {
           const auth = {
             username: this.user.account.name,
-            token: localStorage.getItem('access_token'),//should be changed in V1 (current V0.8)
+            token: localStorage.getItem('access_token'),
             expire: localStorage.getItem('expires'),
             key: localStorage.getItem('key')
           }
-
-          let operation = [
-            [op_name, cstm_params]
-          ];
-
+          let operation = [[op_name, cstm_params]];
           this.$HAS.broadcast(auth, 'posting', operation, (evt) => {
-            console.log(evt)    // process sign_wait message
             let msg = this.$t('verify_hiveauth_app');
             this.$notify({
               group: 'warn',
               text: msg,
-              duration: -1, //keep alive till clicked
+              duration: -1,
               position: 'top center'
             })
           })
             .then(response => {
-              console.log(response);
-              this.$notify({
-                group: 'warn',
-                clean: true
-              })
+              this.$notify({ group: 'warn', clean: true })
               if (response.cmd && response.cmd === 'sign_ack') {
                 resolve({ success: true, trx: response.data });
               } else if (response.cmd && response.cmd === 'sign_nack') {
                 resolve({ success: false })
               }
-            }) // transaction approved and successfully broadcasted
+            })
             .catch(err => {
-              this.$notify({
-                group: 'warn',
-                clean: true
-              })
+              this.$notify({ group: 'warn', clean: true })
               console.log(err);
               resolve({ success: false })
             })
         })
       } else {
-        let operation = [
-          [op_name, cstm_params]
-        ];
-        console.log('broadcasting');
-        console.log(operation);
-
-        //console.log(this.$steemconnect.accessToken);
-        //console.log(this.$store.state.accessToken);
-        //grab token
+        let operation = [[op_name, cstm_params]];
         let accToken = localStorage.getItem('access_token')
-
         let op_json = JSON.stringify(operation)
-
         let cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
-
         if (bchain_option) {
           cur_bchain = bchain_option;
         }
-
         let url = new URL(process.env.actiAppUrl + 'performTrx/?user=' + this.user.account.name + '&operation=' + encodeURIComponent(op_json) + '&bchain=' + cur_bchain);
-
         let reqHeads = new Headers({
           'Content-Type': 'application/json',
           'x-acti-token': 'Bearer ' + accToken,
         });
-        let res = await fetch(url, {
-          headers: reqHeads
-        });
+        let res = await fetch(url, { headers: reqHeads });
         let outcome = await res.json();
-        console.log(outcome);
         if (outcome.error) {
-          console.log(outcome.error);
-          //if this is authority error, means needs to be logged out
-          //example "missing required posting authority:Missing Posting Authority"
           let err_msg = outcome.trx.tx.error;
           if (err_msg.includes('missing') && err_msg.includes('authority') && this.cur_bchain == bchain_option) {
-            //clear entry
             localStorage.removeItem('access_token');
-            //this.$store.commit('setStdLoginUser', false);
             this.error_msg = this.$t('session_expired_login_again');
             this.$store.dispatch('steemconnect/logout');
           }
-          this.$notify({
-            group: 'error',
-            text: err_msg,
-            position: 'top center'
-          })
+          this.$notify({ group: 'error', text: err_msg, position: 'top center' })
           return { success: false, trx: null };
-          //this.$router.push('/login');
         } else {
           return { success: true, trx: outcome.trx };
         }
       }
     },
-
-    /* function handles sending out the comment to the blockchain */
     async postResponse(event) {
-      // proceed with saving the comment
-
       if (!this.user) {
         this.errPosting = this.$t('Need_login');
         return;
       }
-
       this.loading = true
-
-      //build the permlink
       let comment_perm = this.user.account.name.replace('.', '-') + '-re-' + this.post.author.replace('.', '-') + '-' + this.post.permlink + new Date().toISOString().replace(/[^a-zA-Z0-9]+/g, '').toLowerCase();
-
-      //prepare meta data
-      let meta = new Object();
-      meta.tags = ['hive-193552', 'actifit'];
-      meta.app = 'actifit/0.5.0';
-      meta.suppEdit = 'actifit.io.comment';
+      let meta = {
+        tags: ['hive-193552', 'actifit'],
+        app: 'actifit/0.5.0',
+        suppEdit: 'actifit.io.comment'
+      };
       this.replyBody = this.$refs.editor.content;
-      //console.log(this.stdLogin);
       if (!localStorage.getItem('std_login')) {
-        //if (!this.stdLogin){
-        this.$steemconnect.comment(
-          this.post.author,
-          this.post.permlink,
-          this.user.account.name,
-          comment_perm,
-          '',
-          this.replyBody,
-          meta,
-          (err) => {
-            this.commentSuccess(err, true, 'STEEM');
-          }
-        )
+        this.$steemconnect.comment(this.post.author, this.post.permlink, this.user.account.name, comment_perm, '', this.replyBody, meta, (err) => {
+          this.commentSuccess(err, true, 'STEEM');
+        });
       } else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) {
-
         let comment_options = {
           author: this.user.account.name,
           permlink: comment_perm,
@@ -719,28 +695,15 @@ export default {
           percent_hbd: 10000,
           allow_votes: true,
           allow_curation_rewards: true,
-          extensions: []//extensions: [[0, { 'beneficiaries': [] }]]
+          extensions: []
         };
-        //console.log(comment_options);
-        //this.$nuxt.refresh()
-
-        window.hive_keychain.requestPost(
-          this.user.account.name,
-          "",
-          this.replyBody,
-          this.post.permlink,
-          this.post.author,
-          JSON.stringify(meta),
-          comment_perm,
-          JSON.stringify(comment_options), (response) => {
-            //console.log(response);
-            if (response.success) {
-              this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain);
-            } else {
-              this.commentSuccess(response.message, false, this.cur_bchain);
-            }
-          });
-
+        window.hive_keychain.requestPost(this.user.account.name, "", this.replyBody, this.post.permlink, this.post.author, JSON.stringify(meta), comment_perm, JSON.stringify(comment_options), (response) => {
+          if (response.success) {
+            this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain);
+          } else {
+            this.commentSuccess(response.message, false, this.cur_bchain);
+          }
+        });
       } else {
         let cstm_params = {
           "author": this.user.account.name,
@@ -751,21 +714,16 @@ export default {
           "permlink": comment_perm,
           "json_metadata": JSON.stringify(meta)
         };
-
         let res = await this.processTrxFunc('comment', cstm_params, this.cur_bchain);
-
         if (res.success) {
           this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain);
         } else {
           this.commentSuccess('error saving', false, this.cur_bchain);
         }
-
-        //also send the same post again to the other chain
         let other_chain = this.cur_bchain == 'HIVE' ? 'STEEM' : 'HIVE';
         if (this.target_bchain == 'BOTH') {
           this.loading = true;
           let res = await this.processTrxFunc('comment', cstm_params, other_chain);
-
           if (res.success) {
             this.commentSuccess(null, true, other_chain);
           } else {
@@ -773,12 +731,9 @@ export default {
           }
         }
       }
-
     },
-    /* function handles rewarding user for comments */
     async rewardUserComment() {
       let url = new URL(process.env.actiAppUrl + 'rewardActifitWebComment/' + this.user.account.name);
-      //compile all needed data and send it along the request for processing
       let params = {
         web_comment_token: process.env.webCommentToken,
         url: this.post.url,
@@ -788,111 +743,75 @@ export default {
         let res = await fetch(url);
         let outcome = await res.json();
         if (outcome.rewarded) {
-          // notify the user that he received an additional reward
           this.$notify({
             group: 'success',
             text: this.$t('youve_been_rewarded') + outcome.amount + this.$t('reward_for_comment'),
             position: 'top center'
           })
         }
-        console.log(outcome);
       } catch (err) {
         console.error(err);
       }
     },
-    /* function checks if logged in user has upvoted current post */
     userVotedThisPost() {
       let curUser = this.user.account.name;
-      //check if the post contains in its original voters current user, or if it has been upvoted in current session
       this.postUpvoted = this.post.active_votes.filter(voter => (voter.voter === curUser)).length > 0 || this.newlyVotedPosts.indexOf(this.post.post_id) !== -1;
-
       return this.postUpvoted;
     },
-    /* function handles appending moderators signature */
     insertModSignature() {
       if (this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator')) {
         this.moderatorSignature = process.env.shortModeratorSignature;
         this.replyBody += this.moderatorSignature;
       }
     },
-    /* function handles appending full moderator signature */
     insertFullModSignature() {
       if (this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator')) {
         this.moderatorSignature = process.env.standardModeratorSignature;
         this.replyBody += this.moderatorSignature;
       }
     },
-    /* function handles confirming if the user had voted already to prevent issues */
     votePrompt(e) {
-
-      //proceed normally showing vote popup
       this.$store.commit('setPostToVote', this.post)
-      //}
-    },
-    fetchPostData() {
-      //function handling propagating calls to grab key post data and comment info
-      this.fetchPostKeyData()
-      this.fetchPostCommentData()
     },
     fetchPostCommentData() {
       this.commentsLoading = true;
       this.cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
       this.target_bchain = this.cur_bchain;
       this.$store.commit('setBchain', this.cur_bchain);
-
-      //regrab post data to fix comments
       this.$store.dispatch('fetchPostComments', this.post).then(() => {
         this.commentsLoading = false;
       });
-      //clear the placeholder comment displayed
       this.responsePosted = false;
       this.responseBody = this.moderatorSignature;
     },
     fetchPostKeyData() {
       fetch(process.env.actiAppUrl + 'getPostReward?user=' + this.post.author + '&url=' + this.post.url).then(res => {
-        //grab the post's reward to display it properly
         res.json().then(json => this.afitReward = json.token_count)
       }).catch(e => reject(e))
-
-      //grab the author's rank
       fetch(process.env.actiAppUrl + 'getRank/' + this.post.author).then(res => {
         res.json().then(json => this.userRank = json)
       }).catch(e => reject(e))
-
-      //grab post full pay if full pay mode enabled
       fetch(process.env.actiAppUrl + 'getPostFullAFITPayReward?user=' + this.post.author + '&url=' + this.post.url).then(res => {
         res.json().then(json => this.fullAFITReward = json.token_count)
       }).catch(e => reject(e))
-
-      //grab moderators' list
       this.$store.dispatch('fetchModerators')
-
       this.profImgUrl = process.env.hiveImgUrl;
-
       if (this.cur_bchain == 'STEEM') {
-
         this.profImgUrl = process.env.steemImgUrl;
-
-        //grab post S-E token pay
         fetch(scot_steemengine_api + '@' + this.post.author + '/' + this.post.permlink).then(
           res => {
             res.json().then(json => this.setPostTokenRewards(json)).catch(e => reject(e))
           }).catch(e => reject(e))
       } else {
-        //grab post H-E token pay
         fetch(scot_steemengine_api + '@' + this.post.author + '/' + this.post.permlink + scot_hive_api_param).then(
           res => {
             res.json().then(json => this.setPostTokenRewards(json)).catch(e => reject(e))
           }).catch(e => reject(e))
       }
-
-      //attach image error handles
       this.attachImageErrorHandlers();
     },
-    /* function handles proper display for post token rewards */
     displayTokenValue(token) {
       let val;
-      //if already paid
       if (parseFloat(token.total_payout_value) > 0) {
         val = parseFloat(token.total_payout_value) / Math.pow(10, token.precision);
         return this.numberFormat(val, token.precision) + ' ' + token.token;
@@ -907,8 +826,6 @@ export default {
       return this.numberFormat(val, token.precision) + ' ' + token.token;
     },
     fixSubModal() {
-      //handles fixing parent class to properly interpret existing post modal
-      //need to make sure this is subentry of a post modal, meaning post modal is showing
       if ($('#postModal').hasClass('show')) {
         $('body').addClass('modal-open');
       }
@@ -917,18 +834,10 @@ export default {
       this.tokenRewards = result;
       this.post.specTokenRewards = this.tokenRewards;
     },
-    /**
-       * Formats numbers with commas and dots.
-       *
-       * @param number
-       * @param precision
-       * @returns {string}
-       */
     numberFormat(number, precision) {
       return new Intl.NumberFormat('en-EN', { maximumFractionDigits: precision }).format(number)
     },
     handleKeyDown(event) {
-      //only execute if postmodal is visible
       if (!$('#postModal').hasClass('show')) return;
       let commentBoxOpenTest = localStorage.getItem('commentBoxOpen') === 'true';
       if (!commentBoxOpenTest) {
@@ -943,33 +852,23 @@ export default {
       }
     },
     attachImageErrorHandlers() {
-      //return;
-      const vm = this; // Store this to vm variable
-      // Ensure that vm.$refs.remarkableContent is accessible
-      // and its $el is mounted by the time this function is called
+      const vm = this;
       this.$nextTick(() => {
         const contentEl = vm.$refs.remarkableContent.$el;
         if (!contentEl) {
             console.warn('VueRemarkable component not found!');
             return;
         }
-
         const images = contentEl.querySelectorAll('img');
-
         images.forEach(img => {
           img.onerror = (event) => {
-            // Check if ID exists (to prevent duplicate triggers)
             if (!this.imageError.has(img.id)) {
-
-              // generate ID if its not set
               if (!img.id){
                 img.id = this.$uuidv4();
               }
               this.imageError.add(img.id);
-
               img.src = process.env.hiveStandardPostUrl + img.src;
-              img.onerror = null; // prevent double triggers
-              //console.log('Image failed to load.  Set to fallback: ' + img.src);
+              img.onerror = null;
             }
           };
         });
@@ -980,11 +879,9 @@ export default {
     console.log('destroy');
     window.removeEventListener('keydown', this.handleKeyDown);
   },
-  async mounted() {
-    if (this.post != null) {
-      this.fetchPostKeyData();
-    }
-
+  mounted() {
+    // The post watcher will handle the initial data fetch, so no need for extra calls here.
+    
     //associate scrolling with the modal
     VueScrollTo.scrollTo = VueScrollTo.scrollTo.bind(this);
 
@@ -997,13 +894,9 @@ export default {
 
     //capture key clicks
     window.addEventListener('keydown', this.handleKeyDown);
-
-
-
   }
 }
 </script>
-
 <style>
 .modal-dialog {
   transform: none !important;
@@ -1071,7 +964,7 @@ export default {
 }
 
 .translation-notice a {
-  color: #007bff;
+  color: #ff0000;
   text-decoration: none;
   margin-left: 5px;
 }

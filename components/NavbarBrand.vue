@@ -12,7 +12,6 @@
           <li class="nav-item btn btn-brand m-1 nav-item-border" v-if="!home" :title="$t('Home')">
             <a class="nav-link text-white d-flex align-items-center justify-content-center w-100 h-100"
                href="#"
-               data-toggle="collapse" data-target="#navbarSupportedContent"
                @click.prevent="$router.push('/')">
               <i class="fas fa-home text-white"></i>
               <span>{{ $t('Home') }}</span>
@@ -22,7 +21,6 @@
           <li class="nav-item btn btn-brand m-1 nav-item-border" :title="$t('Activity')">
             <a class="nav-link text-white d-flex align-items-center justify-content-center w-100 h-100"
                href="#"
-               data-toggle="collapse" data-target="#navbarSupportedContent"
                @click.prevent="$router.push('/activity')">
               <i class="fas fa-running text-white"></i><span>{{ $t('Activity') }}</span>
             </a>
@@ -31,7 +29,6 @@
           <li class="nav-item btn btn-brand m-1 nav-item-border" :title="$t('Market')">
             <a class="nav-link text-white d-flex align-items-center justify-content-center w-100 h-100"
                href="#"
-               data-toggle="collapse" data-target="#navbarSupportedContent"
                @click.prevent="$router.push('/market')">
               <i class="fas fa-shopping-cart text-white"></i><span>{{ $t('Market') }}</span>
             </a>
@@ -40,7 +37,6 @@
           <li class="nav-item btn btn-brand m-1 nav-item-border" :title="$t('yield_farming')">
             <a class="nav-link text-white d-flex align-items-center justify-content-center w-100 h-100"
                href="#"
-               data-toggle="collapse" data-target="#navbarSupportedContent"
                @click.prevent="$router.push('/yieldfarming')">
               <i class="fas fa-seedling text-white"></i><span>{{ $t('yield_farming') }}</span>
             </a>
@@ -49,7 +45,6 @@
           <li class="nav-item btn btn-brand m-1 nav-item-border" v-if="home" :title="$t('News')">
             <a class="nav-link text-white d-flex align-items-center justify-content-center w-100 h-100"
                href="#"
-               data-toggle="collapse" data-target="#navbarSupportedContent"
                @click.prevent="$emit('scrollTo', '#news')">
               <i class="far fa-newspaper text-white"></i><span>{{ $t('News') }}</span>
             </a>
@@ -58,7 +53,6 @@
           <li class="nav-item btn btn-brand m-1 nav-item-border" :title="$t('Refer_A_Friend')">
             <a class="nav-link text-white d-flex align-items-center justify-content-center w-100 h-100"
                href="#"
-               data-toggle="collapse" data-target="#navbarSupportedContent"
                @click.prevent="$router.push('/referrals')">
               <i class="fas fa-user-friends text-white"></i><span>{{ $t('Refer_A_Friend') }}</span>
             </a>
@@ -67,7 +61,6 @@
           <li class="nav-item btn btn-brand m-1 nav-item-border" :title="$t('Communities')">
             <a class="nav-link text-white d-flex align-items-center justify-content-center w-100 h-100"
                href="#"
-               data-toggle="collapse" data-target="#navbarSupportedContent"
                @click.prevent="$router.push('/communities')">
               <i class="fas fa-users text-white"></i><span>{{ $t('Communities') }}</span>
             </a>
@@ -76,7 +69,6 @@
           <li class="nav-item btn btn-brand m-1 nav-item-border" :title="$t('Explore')">
             <a class="nav-link text-white d-flex align-items-center justify-content-center w-100 h-100"
                href="#"
-               data-toggle="collapse" data-target="#navbarSupportedContent"
                @click.prevent="$router.push('/explore')">
               <i class="fa-brands fa-hive text-white"></i><span>{{ $t('Explore') }}</span>
             </a>
@@ -136,6 +128,10 @@ export default {
   background-color: #ff112d;
   border: 1px solid #ff112d;
   border-radius: 3px;
+}
+
+.notification-item span{
+  color:var(--notif-text-color);
 }
 
 .navbar-nav .nav-item a span {
