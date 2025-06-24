@@ -193,8 +193,10 @@
             </div>
 
             <!-- Community Tab -->
+                         <!-- Community Tab -->
             <div v-if="activeTab === 'community'" class="community-tab">
-              <div class="community-item">
+              <!-- Key added -->
+              <div class="community-item" key="posh-item">
                 <div class="community-item-content">
                   <img src="/img/poshlogo.png" class="mr-3" style="width: 50px;">
                   <div class="flex-grow-1">
@@ -207,7 +209,8 @@
                   <a v-if="!poshVerified" class="btn btn-danger m-2" href="https://hiveposh.com/" target="_blank">{{ $t('Posh_verify') }}</a>
                 </div>
               </div>
-              <div class="community-item">
+              <!-- Key added -->
+              <div class="community-item" key="friends-item">
                 <div class="community-item-content">
                   <div>
                     <i class="fas fa-user-friends text-brand mr-2"></i> {{ this.userFriends.length }} {{ $t('friends') }}
@@ -221,7 +224,8 @@
                   <a class="btn btn-danger m-2" href="./friends">{{ $t('View_friends') }}</a>
                 </div>
               </div>
-              <div class="community-item">
+              <!-- Key added -->
+              <div class="community-item" key="rewarded-reports-item">
                 <div class="community-item-content">
                   <a :href="'/activity/' + displayUser">
                     <img src="/img/actifit_logo.png" class="mr-2 token-logo">
@@ -230,7 +234,8 @@
                   <a :href="'/activity/' + displayUser" class="btn btn-danger m-2">{{ $t('View_reports') }}</a>
                 </div>
               </div>
-               <div class="community-item">
+              <!-- Key added -->
+               <div class="community-item" key="hive-posts-item">
                  <div class="community-item-content">
                     <a :href="'/' + displayUser + '/blog'">
                       <img src="/img/HIVE.png" class="mr-2 token-logo">
@@ -239,7 +244,8 @@
                     <a :href="'/' + displayUser + '/blog'" class="btn btn-danger m-2">{{ $t('View_blog') }}</a>
                  </div>
               </div>
-                            <div class="community-item">
+              <!-- Key added -->
+              <div class="community-item" key="splinterlands-item">
                 <div class="community-item-content">
                    <div class="d-flex align-items-center flex-grow-1">
                       <i class="fa-solid fa-gamepad text-brand mr-2"></i>{{ $t('Splinterlands') }}
@@ -251,7 +257,8 @@
                   <a href="https://splinterlands.com/" target="_blank" class="btn btn-danger m-2">{{ $t('Play_splinterlands') }}</a>
                 </div>
               </div>
-              <div class="community-item">
+              <!-- Key added -->
+              <div class="community-item" key="3speak-item">
                 <div class="community-item-content">
                   <a :href="'/' + displayUser + '/videos'">
                     <img src="/img/3speak.png" class="mr-2 token-logo">
@@ -260,11 +267,13 @@
                   <a :href="'/' + displayUser + '/videos'" class="btn btn-danger m-2">{{ $t('View_videos') }}</a>
                 </div>
               </div>
-              <div class="community-item d-flex justify-content-between">
+              <!-- Key added -->
+              <div class="community-item d-flex justify-content-between" key="follow-count-item">
                   <span><i class="fas fa-angle-double-left text-brand mr-2"></i>{{ $t('Followers') }}: {{ getFollowerCount }}</span>
                   <span><i class="fas fa-angle-double-right text-brand mr-2"></i>{{ $t('Following') }}: {{ getFollowingCount }}</span>
               </div>
             </div>
+
             
            
             <div v-if="activeTab === 'wallet'" class="wallet-tab">
@@ -501,7 +510,6 @@
   </div>
 </template>
 <script>
-// The <script> block remains unchanged from the previous step.
 import UserHoverCard from '~/components/UserHoverCard'
 import LoginModal from '~/components/LoginModal'
 import NavbarBrand from '~/components/NavbarBrand'
@@ -1572,18 +1580,37 @@ export default {
           parentRef.userinfo = result[0];
 
           if (parentRef.cur_bchain === 'HIVE') {
-            // Set liquid balances
             parentRef.hiveBalance = parentRef.numberFormat(parseFloat(parentRef.userinfo.balance), 3);
             parentRef.hbdBalance = parentRef.numberFormat(parseFloat(parentRef.userinfo.hbd_balance), 3);
 
-            // Fetch props and calculate HP
-            hive.api.getDynamicGlobalProperties((err, props) => {
-                if (!err) {
-                    const effectiveVests = parseFloat(parentRef.userinfo.vesting_shares) + parseFloat(parentRef.userinfo.received_vesting_shares) - parseFloat(parentRef.userinfo.delegated_vesting_shares);
-                    const hp = hive.formatter.vestToHp(effectiveVests, props);
-                    parentRef.hivePower = parentRef.numberFormat(hp, 3);
+            const calculateHivePower = async () => {
+              try {
+                const props = await hive.api.getDynamicGlobalPropertiesAsync();
+
+                if (!props || !props.total_vesting_fund_hive || !props.total_vesting_shares) {
+                  console.error('Could not fetch valid global properties for HP calculation.');
+                  return;
                 }
-            });
+                
+                const vestingShares = parseFloat(parentRef.userinfo.vesting_shares) || 0;
+                const receivedVestingShares = parseFloat(parentRef.userinfo.received_vesting_shares) || 0;
+                const delegatedVestingShares = parseFloat(parentRef.userinfo.delegated_vesting_shares) || 0;
+                
+                const effectiveVests = vestingShares + receivedVestingShares - delegatedVestingShares;
+
+                const totalHive = parseFloat(props.total_vesting_fund_hive);
+                const totalVests = parseFloat(props.total_vesting_shares);
+
+                const hp = totalHive * (effectiveVests / totalVests);
+                
+                parentRef.hivePower = parentRef.numberFormat(hp, 3);
+                
+              } catch (e) {
+                console.error("Error during Hive Power calculation:", e);
+              }
+            };
+            
+            calculateHivePower();
           }
 
           chainLnk.api.getFollowCount(parentRef.displayUser, function (err, result) {
