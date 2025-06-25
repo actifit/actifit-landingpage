@@ -8,7 +8,7 @@
           {{ truncateString(post.title, 70) }}
           <i class="fas fa-external-link-alt"></i>
 
-          <span v-if="isPostPinned" :title="$t('pinned_post')">&nbsp;<i
+          <span v-if="isPostPinned" :title="$t('pinned_post')"> <i
               class="fas fa-thumbtack text-warning"></i></span>
         </a>
       </h6>
@@ -20,7 +20,7 @@
             <span class="d-flex justify-content-end align-items-center">
               <div class="">
                 <span v-if="isPostReblog"><i class="far fa-share-square text-brand" /></span>
-                <i class="fas fa-reply text-brand"></i>&nbsp;
+                <i class="fas fa-reply text-brand"></i> 
                 <UserHoverCard :username="post.parent_author" />
               </div>
             </span>
@@ -37,10 +37,43 @@
         </div>
         <div class="row">
           <div class="col-12">
-            <a href="#" class="text-brand" @click="post.pstId = pstId; $store.commit('setActivePost', post)"
-              data-toggle="modal" data-target="#postModal" :title="$t('read_more_small')" v-if="$postHasImage(meta)">
-              <img :src="$fetchPostImage(meta)" :alt="post.title" class="post-image" @error="handleImageError($event, meta)">
-            </a>
+            <!-- START: Carousel Functionality Merged Here -->
+            <div class="image-carousel-container">
+              <!-- Loader is absolutely positioned and shown when imageLoading is true -->
+              <div v-if="imageLoading" class="image-loader-container">
+                <i class="fas fa-spinner fa-spin text-brand"></i>
+              </div>
+              
+              <!-- Image is hidden (not removed) while loading to prevent layout jump -->
+              <a href="#" :style="{ visibility: imageLoading ? 'hidden' : 'visible' }" class="text-brand" @click="post.pstId = pstId; $store.commit('setActivePost', post)"
+                data-toggle="modal" data-target="#postModal" :title="$t('read_more_small')">
+                <!-- The :key is the critical fix for the same-image bug -->
+                <img v-if="allImages.length > 0" :key="currentImageSrc" :src="currentImageSrc" :alt="post.title" class="post-image" @load="onImageLoad" @error="onImageError">
+                <!-- Fallback to the original image display if filtering results in no images -->
+                 <img v-else-if="!imageLoading && $postHasImage(meta)" :src="$fetchPostImage(meta)" :alt="post.title" class="post-image" @load="onImageLoad" @error="handleImageError($event, meta)">
+              </a>
+
+              <!-- Arrows are visible even during load -->
+              <template v-if="allImages.length > 1">
+                <div class="carousel-arrow left" @click.prevent="prevImage">
+                  <i class="fas fa-chevron-left"></i>
+                </div>
+                <div class="carousel-arrow right" @click.prevent="nextImage">
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <!-- Counter and bullets only appear when loading is finished -->
+                <template v-if="!imageLoading">
+                    <div class="image-counter">
+                      {{ currentImageIndex + 1 }} / {{ allImages.length }}
+                    </div>
+                    <div class="carousel-bullets">
+                      <span v-for="(img, index) in allImages" :key="index" class="carousel-bullet"
+                        :class="{ 'active': index === currentImageIndex }" @click.prevent="goToImage(index)"></span>
+                    </div>
+                </template>
+              </template>
+            </div>
+            <!-- END: Carousel Functionality Merged -->
           </div>
         </div>
         <div class="row">
@@ -145,13 +178,9 @@
 
 <script>
 import UserHoverCard from './UserHoverCard.vue'
-
 import { mapGetters } from 'vuex'
-
 import steem from 'steem'
-
 import hive from '@hiveio/hive-js'
-
 import SocialSharing from 'vue-social-sharing'
 
 //import vueRemarkable from 'vue-remarkable';
@@ -160,16 +189,10 @@ export default {
   props: ['post', 'displayUsername', 'pstId', 'explorePost'],
   computed: {
     ...mapGetters('steemconnect', ['user']),
-    ...mapGetters(['postToVote']),
-    ...mapGetters(['newlyVotedPosts']),
-    ...mapGetters(['moderators']),
-    ...mapGetters(['userPosts']),
-
+    ...mapGetters(['postToVote', 'newlyVotedPosts', 'moderators', 'userPosts']),
     isOnlyPost() {
       return this.userPosts && this.userPosts.length === 1 // check if there's only one post in the store
-
     },
-
     buildParentLink() {
       return '/' + this.post.parent_author + '/' + this.post.parent_permlink;
     },
@@ -199,7 +222,6 @@ export default {
     appVersion() {
       return this.meta.app
     },
-
     meta() {
       try {
         return JSON.parse(this.post.json_metadata)
@@ -244,8 +266,13 @@ export default {
         return true;
       }
       return false;
-    }
-
+    },
+    currentImageSrc() {
+      if (this.allImages.length > 0) {
+        return this.allImages[this.currentImageIndex];
+      }
+      return this.$fetchPostImage(this.meta);
+    },
   },
   data: function () {
     return {
@@ -261,6 +288,10 @@ export default {
       hashtags: process.env.socialSharingHashtags,
       isTooltipVisible: false,
       imageError: false,
+      // Carousel-specific data
+      allImages: [],
+      currentImageIndex: 0,
+      imageLoading: true,
     }
   },
   components: {
@@ -272,6 +303,66 @@ export default {
     postUpvoted: 'updatePostData',
   },
   methods: {
+    // START: Carousel and Image Loader Methods
+    onImageLoad() {
+      this.imageLoading = false;
+    },
+    onImageError(event) {
+      this.imageLoading = false;
+      this.handleImageError(event, this.meta);
+    },
+    setupImages() {
+      const metaImages = this.meta.image;
+      let initialImages = [];
+      if (Array.isArray(metaImages)) {
+        initialImages = metaImages;
+      } else if (metaImages) {
+        initialImages = [metaImages];
+      }
+      if (initialImages.length === 0) {
+        this.allImages = [];
+        this.imageLoading = false;
+        return;
+      }
+      const userImages = initialImages.filter(url => {
+          if (typeof url !== 'string') return false;
+          
+          const isBrandingImage = /ACTIVITY|23tkbEYQioWnn3mfu8tWBh3x8n1Wz8TM9nH6SPRoghyZ46q2NNzt3aFsds2c8SjoknXRM|DQmdvc788wxsBSQHY3z21o3wSTU7hqRnyYc2JFEn2pEYSev|DQmeWzNEfmAnX91Ze89zqQU3B2uS58sn6dc2A6L74xLfAvr|DQmXi8aWq1hnxa466MiBEhhTTCHeehoMuGrohtNG7et92Ne|DQmUtuWaSFoo8AtWd9fo4Tb7AEGhLo8rRrjqKPHHz2o7Mup|DQmcngR7AdBJio52C5stkD5C7vgsQ1yDH57Lb4J96Pys4a9|DQmRDW8jdYmE37tXvM6xPxuNnzNQnUJWSDnxVYyRJEHyc9H|DQmdnh1nApZieHZ3s1fEhCALDjnzytFwo78zbAY5CLUMpoG|DQmdNAWWwv6MAJjiNUWRahmAqbFBPxrX8WLQvoKyVHHqih1|DQmPKUZ5uZpL3Uq6LUUQXgNaaqsyX7ADpNyF4wHeTScs3xD|DQmeG5Bv1gKu2rQFWA1hH3QxzLzgzDPhDwieEEpy4WPnqN4|DQmPscjCVBggXvJT2GaUp66vbtyxzdzyHuhnzc38WDp4Smg|DQmV7NRosGCmNLsyHGzmh4Vr1pQJuBPEy2rk3WvnEUDxDFA|DQmY5UUP99u5ob3D8MA9JJW23zXLjHXHSRofSH3jLGEG1Yr|DQmW1VsUNbEjTUKawau4KJQ6agf41p69teEvdGAj1TMXmuc|DQmQqfpSmcQtfrHAtzfBtVccXwUL9vKNgZJ2j93m8WNjizw|DQmbWy8KzKT1UvCvznUTaFPw6wBUcyLtBT5XL9wdbB7Hfmn|DQmNp6YwAm2qwquALZw8PdcovDorwaBSFuxQ38TrYziGT6b|DQmXv9QWiAYiLCSr3sKxVzUJVrgin3ZZWM2CExEo3fd5GUS|DQmV2hBheBVo9QWTXCxvqRqe4Fsg6kFTGggsTNGga9gTUHm|23w3F6U3PgtaT14tL5ewc1FoCwJcebdmZ3nrj2H6x2cTf4RzKWuicnQqvJGQ8tZxqX4Q5|ACTIVITYDQmeG5Bv1gKu2rQFWA1hH3QxzLzgzDPhDwieEEpy4WPnqN4|23yJg2hJAuEDUwg82kS1eC3EQqkVDzPEEyPa4rwymVHoz5mKPanjmshFa5s6tcPe3SP9c|DQmQJeGKQVsYFDFnHxgTHyNdrZxQmjLSJxz1wLB5HJDaZV3|DQmYfJ7SsTGpkR6gWoyLzo4pGrxnFopkcKzRVjgE6NRRXQL|DQmRoHaVPUiTagwviNmie8Ub5j4ZW1VcJGycZebmiH8ZdH5/i.test(url);
+          if (isBrandingImage) return false;
+          
+          const isTrustedUserMedia = url.includes('usermedia.actifit.io') || url.includes('pixabay.com') || url.includes('files.peakd.com');
+          const isStandardImageFile = /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
+          return isTrustedUserMedia || isStandardImageFile;
+      });
+      const uniqueImages = [...new Set(userImages)];
+      
+      this.allImages = uniqueImages;
+      this.currentImageIndex = 0;
+      
+      if (this.allImages.length === 0) {
+        this.imageLoading = false;
+      }
+    },
+    nextImage() {
+      if (this.allImages.length > 1) {
+        this.imageLoading = true;
+        this.currentImageIndex = (this.currentImageIndex + 1) % this.allImages.length;
+      }
+    },
+    prevImage() {
+      if (this.allImages.length > 1) {
+        this.imageLoading = true;
+        this.currentImageIndex = (this.currentImageIndex - 1 + this.allImages.length) % this.allImages.length;
+      }
+    },
+    goToImage(index) {
+      if (this.currentImageIndex !== index) {
+        this.imageLoading = true;
+        this.currentImageIndex = index;
+      }
+    },
+    // END: Carousel and Image Loader Methods
+
     handleImageError(event, meta){
       if(!this.imageError){
         const image = event.target;
@@ -414,6 +505,8 @@ export default {
     if (this.cur_bchain == 'STEEM') {
       this.profImgUrl = process.env.steemImgUrl;
     }
+
+    this.setupImages();
   },
 
 }
@@ -488,4 +581,17 @@ export default {
 .post-reblog{
   font-style:italic;
 }
+
+/* Styles for the new image carousel */
+.image-carousel-container { position: relative; overflow: hidden; height: 150px; background-color: #f0f0f0; }
+.image-loader-container { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
+.image-loader { font-size: 2em; }
+.carousel-arrow { position: absolute; top: 50%; transform: translateY(-50%); background-color: rgba(0, 0, 0, 0.5); color: white; padding: 8px; cursor: pointer; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; user-select: none; transition: background-color 0.2s; z-index: 2; }
+.carousel-arrow:hover { background-color: rgba(0, 0, 0, 0.8); }
+.carousel-arrow.left { left: 10px; }
+.carousel-arrow.right { right: 10px; }
+.image-counter { position: absolute; bottom: 8px; right: 8px; background-color: rgba(0, 0, 0, 0.7); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: bold; z-index: 2; }
+.carousel-bullets { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 2; }
+.carousel-bullet { width: 8px; height: 8px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.6); cursor: pointer; transition: background-color 0.2s; }
+.carousel-bullet.active { background-color: #fff; }
 </style>
