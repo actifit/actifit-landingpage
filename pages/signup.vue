@@ -13,10 +13,7 @@
         
         <!-- The detailed description is now in the modal, so the old display div is removed. -->
         <!-- The old H1 tag is also replaced by the ListHeadingSection component above. -->
-        
-        <div class="row lead mb-4 p-3 w-100" v-html="''"><!-- signup.buy_text -->
 
-        </div>
         <div class="form-group">
           <label for="account-username">{{ $t('Pick_Username') }}</label>
           <input class="form-control form-control-lg mb-2" ref="account-username" id="account-username"
