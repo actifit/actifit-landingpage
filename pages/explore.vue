@@ -27,7 +27,7 @@
 			</span>
 		</div>
 		<div v-else>
-			<i class="fas fa-spinner fa-spin text-brand"></i>
+			<i class="fas fa-spinner fa-spin fa-3x text-brand"></i>
 		</div>
 		<span v-if="popComms && popComms.length > 0" class="expander"><i ref="switcher" title="Show More Communities" class="fas fa-solid fa-arrow-circle-down text-brand" @click="expandComms"></i></span>
       <!-- show spinner while loading -->
