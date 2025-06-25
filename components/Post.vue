@@ -38,19 +38,17 @@
         <div class="row">
           <div class="col-12">
             <!-- START: Carousel Functionality Merged Here -->
-            <div class="image-carousel-container">
+            <div class="image-carousel-container" v-if="allImages.length > 0">
               <!-- Loader is absolutely positioned and shown when imageLoading is true -->
               <div v-if="imageLoading" class="image-loader-container">
-                <i class="fas fa-spinner fa-spin text-brand"></i>
+                <i class="fas fa-spinner fa-spin text-brand image-loader"></i>
               </div>
               
               <!-- Image is hidden (not removed) while loading to prevent layout jump -->
               <a href="#" :style="{ visibility: imageLoading ? 'hidden' : 'visible' }" class="text-brand" @click="post.pstId = pstId; $store.commit('setActivePost', post)"
                 data-toggle="modal" data-target="#postModal" :title="$t('read_more_small')">
                 <!-- The :key is the critical fix for the same-image bug -->
-                <img v-if="allImages.length > 0" :key="currentImageSrc" :src="currentImageSrc" :alt="post.title" class="post-image" @load="onImageLoad" @error="onImageError">
-                <!-- Fallback to the original image display if filtering results in no images -->
-                 <img v-else-if="!imageLoading && $postHasImage(meta)" :src="$fetchPostImage(meta)" :alt="post.title" class="post-image" @load="onImageLoad" @error="handleImageError($event, meta)">
+                <img :key="currentImageSrc" :src="currentImageSrc" :alt="post.title" class="post-image" @load="onImageLoad" @error="onImageError">
               </a>
 
               <!-- Arrows are visible even during load -->
