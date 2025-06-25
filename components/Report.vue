@@ -21,18 +21,18 @@
         </div>
         <div class="row">
           <div class="col-12">
-            <!-- MODIFICATION: This container now perfectly manages the loader and image visibility -->
-            <div class="image-carousel-container">
-              <!-- Loader is absolutely positioned and shown when imageLoading is true -->
+            <!-- START of new carousel functionality -->
+            <div class="image-carousel-container" v-if="hasImage()">
               <div v-if="imageLoading" class="image-loader-container">
                 <img src="/img/loader.gif" class="image-loader" alt="Loading..." />
               </div>
-              
-              <!-- Image is hidden (not removed) while loading to prevent layout jump -->
+
               <a href="#" :style="{ visibility: imageLoading ? 'hidden' : 'visible' }" class="text-brand" @click="report.rptId = rptId; $store.commit('setActiveReport', report)"
                 data-toggle="modal" data-target="#reportModal" :title="$t('read_more_small')">
                 <!-- The :key is the critical fix for the same-image bug -->
                 <img v-if="allImages.length > 0" :key="currentImageSrc" :src="currentImageSrc" :alt="report.title" class="report-image" @load="onImageLoad" @error="onImageError">
+                <!-- Fallback to the original image display if filtering results in no images -->
+                <img v-else-if="!imageLoading && $postHasImage(meta)" :src="$fetchPostImage(meta)" :alt="report.title" class="report-image" @load="onImageLoad" @error="handleImageError($event, meta)">
               </a>
 
               <template v-if="allImages.length > 1 && !imageLoading">
@@ -51,13 +51,16 @@
                 </div>
               </template>
             </div>
+            <!-- END of new carousel functionality -->
           </div>
         </div>
         <div class="row">
           <div class="col-12">
             <a href="#" class="" @click="report.rptId = rptId; $store.commit('setActiveReport', report)"
               data-toggle="modal" data-target="#reportModal" :title="$t('read_more_small')">
+              <!--<a :href="'/'+report.author+'/'+report.permlink" target="_blank">-->
               <div ref="report_body" id="report_body" style="display: none">
+                <!--{{ renderSnippet(report.body) }}-->
                 <vue-remarkable :source="renderSnippet(report.body)"
                   :options="{ 'html': true, 'breaks': true, 'typographer': true, 'xhtmlOut': true }"></vue-remarkable>
               </div>
@@ -129,7 +132,9 @@
           <div class="col-6 payoutCustomDisplay">
             <img src="/img/STEEM.png" class="mr-1 currency-logo-small" v-if="cur_bchain == 'STEEM'">
             <img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain == 'HIVE'">
+            <!--{{ postPayout }}-->
             <span v-if="postPaid()">
+              <!--<i class="fa-solid fa-wallet text-green"></i>-->
               <span class="m-1" :title="$t('author_payout')">
                 <i class="fa-solid fa-user"></i>
                 {{ paidValue() }}
@@ -159,6 +164,7 @@
 
           </div>
         </div>
+        <!-- adding section to display additional FULL Payout option -->
         <div class="row details mt-2 text-brand full-afit-txt" v-if="this.meta.full_afit_pay == 'on'">
           <div class="col-8">
             <i class="fas fa-star"></i>
@@ -178,6 +184,7 @@
             </small>
           </div>
         </div>
+        <!-- adding section to display charity info if available -->
         <div class="row details mt-2 text-brand full-afit-txt" v-if="this.meta.charity">
           <div class="col-6">
             <i class="fas fa-dove"></i>
@@ -224,7 +231,6 @@ import hive from '@hiveio/hive-js'
 import SocialSharing from 'vue-social-sharing'
 import vueRemarkable from 'vue-remarkable';
 import sanitize from 'sanitize-html'
-// NOTE: The separate image-load-cache.js is no longer needed with this robust internal logic.
 
 export default {
   props: ['report', 'rptId'],
@@ -232,49 +238,116 @@ export default {
     ...mapGetters('steemconnect', ['user']),
     ...mapGetters(['postToVote', 'newlyVotedPosts', 'moderators']),
     date() {
-      let date = new Date(this.report.created);
-      let minutes = date.getMinutes();
+      let date = new Date(this.report.created)
+      let minutes = date.getMinutes()
       return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() + ' ' + date.getHours() + ':' + (minutes < 10 ? '0' + minutes : minutes)
+    },
+    steps() {
+      return this.meta.step_count ? this.meta.step_count[0] : ''
+    },
+    type() {
+      return this.meta.activity_type ? this.meta.activity_type.join(', ') : ''
+    },
+    appType() {
+      return this.meta.appType
+    },
+    appVersion() {
+      return this.meta.app
+    },
+    actUserID() {
+      if (Array.isArray(this.meta.actifitUserID) && this.meta.actifitUserID.length > 0) {
+        return this.meta.actifitUserID[0]
+      }
+      return this.meta.actifitUserID
+    },
+    trackingDevice() {
+      if (Array.isArray(this.meta.dataTrackingSource) && this.meta.dataTrackingSource.length > 0) {
+        return this.meta.dataTrackingSource[0]
+      }
+      return this.meta.dataTrackingSource
     },
     meta() {
       try {
         return JSON.parse(this.report.json_metadata)
       } catch (err) {
+        console.log(err);
         return {};
       }
     },
-    steps() { return this.meta.step_count ? this.meta.step_count[0] : '' },
-    type() { return this.meta.activity_type ? this.meta.activity_type.join(', ') : '' },
-    getVoteCount() { return Array.isArray(this.report.active_votes) ? this.report.active_votes.length : 0 },
-    isUserModerator() { return this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator') },
+    postPayout() {
+      if (this.postPaid()) {
+        return this.report.total_payout_value.replace('SBD', '').replace('STEEM', '').replace('HBD', '').replace('HIVE', '') + ' $'
+      } else {
+        return this.report.pending_payout_value.replace('SBD', '').replace('STEEM', '').replace('HBD', '').replace('HIVE', '') + ' $'
+      }
+    },
+    /*getUserRank() {
+    //proper formatting issue to display circle for smaller numbers
+    if (this.userRank<10){
+      return ' '+parseFloat(this.userRank).toFixed(1);
+    }else{
+      return parseFloat(this.userRank).toFixed(1);
+    }
+    },*/
+    displayCoreUserRank() {
+      return (this.userRank ? parseFloat(this.userRank.rank_no_afitx).toFixed(2) : '');
+    },
+    displayIncreasedUserRank() {
+      return '(+' + parseFloat(this.userRank.afitx_rank).toFixed(2) + ')';
+    },
+    votedByUser() {
+      return this.postUpvoted;
+    },
+    getVoteCount() {
+      return Array.isArray(this.report.active_votes) ? this.report.active_votes.length : 0;
+    },
+    isUserModerator() {
+      if (this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator')) {
+        return true;
+      }
+      return false;
+    },
     currentImageSrc() {
       if (this.allImages.length > 0) {
         return this.allImages[this.currentImageIndex];
       }
       return '';
     },
-    // ... other computed properties
   },
   data: function () {
     return {
-      afitReward: '', userRank: '', fullAFITReward: '', postUpvoted: false, cur_bchain: 'HIVE',
-      profImgUrl: process.env.hiveImgUrl, socialSharingTitle: process.env.socialSharingTitle,
-      socialSharingDesc: process.env.socialSharingDesc, socialSharingQuote: process.env.socialSharingQuote,
-      hashtags: process.env.socialSharingHashtags, isTooltipVisible: false, imageError: false,
-      allImages: [], currentImageIndex: 0, imageLoading: true,
+      afitReward: '',
+      userRank: '',
+      fullAFITReward: '',
+      postUpvoted: false,
+      cur_bchain: 'HIVE',
+      profImgUrl: process.env.hiveImgUrl,
+      socialSharingTitle: process.env.socialSharingTitle,
+      socialSharingDesc: process.env.socialSharingDesc,
+      socialSharingQuote: process.env.socialSharingQuote,
+      hashtags: process.env.socialSharingHashtags,
+      isTooltipVisible: false,
+      imageError: false,
+      // Carousel-specific data
+      allImages: [],
+      currentImageIndex: 0,
+      imageLoading: true,
     }
   },
   components: {
-    SocialSharing, vueRemarkable, UserHoverCard
+    SocialSharing,
+    vueRemarkable,
+    UserHoverCard
   },
   watch: {
     postUpvoted: 'updatePostData',
   },
   methods: {
+    // START: Carousel and Image Loader Methods
     onImageLoad() {
       this.imageLoading = false;
     },
-    onImageError() {
+    onImageError(event) {
       this.imageLoading = false;
       this.handleImageError(event, this.meta);
     },
@@ -293,65 +366,103 @@ export default {
       }
       const userImages = initialImages.filter(url => {
           if (typeof url !== 'string') return false;
-          const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
-          if (!isImage) return false;
-          const isBrandingImage = /actifit_logo|ACTIVITY|https:\/\/cdn\.steemitimages\.com\/DQmQqfpSmcQtfrHAtzfBtVccXwUL9vKNgZJ2j93m8WNjizw\/l5\.png|https:\/\/cdn\.steemitimages\.com\/DQmXv9QWiAYiLCSr3sKxVzUJVrgin3ZZWM2CExEo3fd5GUS\/sep3\.png|https:\/\/images\.hive\.blog\/DQmQJeGKQVsYFDFnHxgTHyNdrZxQmjLSJxz1wLB5HJDaZV3\/Dise%C3%B1o_sin_t%C3%ADtulo__6_-removebg-preview\.png/i.test(url);
+          const isBrandingImage = /ACTIVITY/i.test(url);
           if (isBrandingImage) return false;
-          return true;
+          const isTrustedUserMedia = url.includes('usermedia.actifit.io');
+          const isStandardImageFile = /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
+
+          return isTrustedUserMedia || isStandardImageFile;
       });
-      // FIX: Show all unique images, do not slice the last one.
-      this.allImages = [...new Set(userImages)];
+      const uniqueImages = [...new Set(userImages)];
+      
+      // Re-implement the rule to remove the last image if count is >= 2
+      let imagesToShow = [];
+      if (uniqueImages.length >= 2) {
+          imagesToShow = uniqueImages.slice(0, -1);
+      } else {
+          imagesToShow = uniqueImages;
+      }
+      
+      this.allImages = imagesToShow;
       this.currentImageIndex = 0;
+      
       if (this.allImages.length === 0) {
         this.imageLoading = false;
       }
     },
     nextImage() {
       if (this.allImages.length > 1) {
-        this.imageLoading = true; // FIX: Show loader on navigation
+        this.imageLoading = true;
         this.currentImageIndex = (this.currentImageIndex + 1) % this.allImages.length;
       }
     },
     prevImage() {
       if (this.allImages.length > 1) {
-        this.imageLoading = true; // FIX: Show loader on navigation
+        this.imageLoading = true;
         this.currentImageIndex = (this.currentImageIndex - 1 + this.allImages.length) % this.allImages.length;
       }
     },
     goToImage(index) {
       if (this.currentImageIndex !== index) {
-        this.imageLoading = true; // FIX: Show loader on navigation
+        this.imageLoading = true;
         this.currentImageIndex = index;
       }
     },
+    // END: Carousel and Image Loader Methods
+    
     handleImageError(event, meta){
       if(!this.imageError){
         this.imageError = true;
         const image = event.target;
+        //this.imageError = true;
         let src = this.$fetchHiveFmtPostImage(meta);
         image.src = src;
         event.target.onerror = null;
       }
     },
+    /* function checks to see if post reached its payout period */
     postPaid() {
+      //check if last_payout is after cashout_time which means post got paid
       let last_payout = new Date(this.report.last_payout);
       let cashout_time = new Date(this.report.cashout_time);
-      return last_payout.getTime() > cashout_time.getTime();
+      if (last_payout.getTime() > cashout_time.getTime()) {
+        return true;
+      }
+      return false;
+    },
+    showTooltip() {
+      this.isTooltipVisible = true;
+    },
+    hideTooltip() {
+      this.isTooltipVisible = false;
+    },
+    toggleTooltip() {
+      this.isTooltipVisible = !this.isTooltipVisible;
     },
     hasImage() {
-      return this.meta && Array.isArray(this.meta.image) && this.meta.image.length > 0;
+      let metaData = this.meta;
+      if (metaData.image) {
+        if ((Array.isArray(metaData.image) && metaData.image.length > 0) || typeof metaData.image === 'string') {
+          return true;
+        }
+      }
+      return false;
     },
-    fixedContent() { return this.$refs["report_body"] ? this.$refs["report_body"].innerHTML.replace(/<[^>]+>/g, '') : "" },
-    renderSnippet(content) { return this.truncateString(this.$cleanBody(content, true), 150) },
-    truncateString(str) { return str && str.length > 70 ? str.substring(0, 67) + "..." : str },
-    userVotedThisPost() {
-      let curUser = this.user.account.name;
-      this.postUpvoted = this.report.active_votes.filter(voter => (voter.voter === curUser)).length > 0 || this.newlyVotedPosts.indexOf(this.report.post_id) !== -1;
-      return this.postUpvoted;
+    fixedContent() {
+      if (this.$refs["report_body"]) {
+        //console.log(this.$refs["report_body"].innerHTML);
+        //remove html tags from text
+        return this.$refs["report_body"].innerHTML.replace(/<[^>]+>/g, '');;
+      }
+      return "";
     },
-    votePrompt(e) {
-      this.$store.commit('setPostToVote', this.report)
+    renderSnippet(content) {
+      //remove extra content
+      let post_content = this.$cleanBody(content, true);//2nd param confirms to remove all tags
+      post_content = this.truncateString(post_content, 150);
+      return post_content;
     },
+    /* function checks if post has beneficiaries */
     hasBeneficiaries() {
       return Array.isArray(this.report.beneficiaries) && this.report.beneficiaries.length > 0;
     },
@@ -362,19 +473,92 @@ export default {
       }
       return output;
     },
+    /* function returns author payout value */
     paidValue() {
-      if (this.report.total_payout_value) return this.report.total_payout_value;
-      if (this.report.author_payout_value) return this.report.author_payout_value;
+      if (this.report.total_payout_value) return this.report.total_payout_value
+      if (this.report.author_payout_value) return this.report.author_payout_value
     },
-    // ... all other methods
+
+    //function handles displaying cut off version of text to avoid lengthy titles
+    truncateString(str) {
+      if (str && str.length > 70) {
+        return str.substring(0, 67) + "...";
+      }
+      return str;
+    },
+    /* function checks if logged in user has upvoted current report */
+    userVotedThisPost() {
+      let curUser = this.user.account.name;
+      //check if the post contains in its original voters current user, or if it has been upvoted in current session
+      this.postUpvoted = this.report.active_votes.filter(voter => (voter.voter === curUser)).length > 0 || this.newlyVotedPosts.indexOf(this.report.post_id) !== -1;
+      return this.postUpvoted;
+    },
+    /* function handles confirming if the user had voted already to prevent issues */
+    votePrompt(e) {
+      //if no user is logged in, prompt to login
+      //hasan this is responsible for not letting logged in users access it
+      /*
+      if (!this.user){
+        alert(this.$t('need_login_signup_notice_vote'));
+        e.stopPropagation();
+      }else{
+        //proceed normally showing vote popup
+        this.$store.commit('setPostToVote', this.report)
+      }
+        */
+      this.$store.commit('setPostToVote', this.report)
+    },
+    newlyVotedPostsQuery() {
+      //handles returning a list of recently manually upvoted on this current session
+      return this.newlyVotedPosts.length;
+    },
+    setProperNode() {
+      let properNode = hive;
+      if (this.cur_bchain == 'STEEM') {
+        properNode = steem;
+      }
+      return properNode;
+    },
+    async updatePostData() {
+      // try to fetch matching report
+      let chainLnk = await this.setProperNode();
+      chainLnk.api.getContent(this.report.author, this.report.permlink, (err, result) => {
+        this.report.total_payout_value = result.total_payout_value;
+        this.report.pending_payout_value = result.pending_payout_value;
+      })
+    }
   },
-  mounted() {
+  async mounted() {
+    steem.api.setOptions({ url: process.env.steemApiNode });
+    hive.api.setOptions({ url: process.env.hiveApiNode });
+    fetch(process.env.actiAppUrl + 'getPostReward?user=' + this.report.author + '&url=' + this.report.url).then(res => {
+      //grab the post's reward to display it properly
+      res.json().then(json => this.afitReward = json.token_count)
+    }).catch(e => reject(e))
+
+    //grab the author's rank
+    fetch(process.env.actiAppUrl + 'getRank/' + this.report.author).then(res => {
+      res.json().then(json => this.userRank = json)
+    }).catch(e => reject(e))
+
+    //grab post full pay if full pay mode enabled
+    fetch(process.env.actiAppUrl + 'getPostFullAFITPayReward?user=' + this.report.author + '&url=' + this.report.url).then(res => {
+      res.json().then(json => this.fullAFITReward = json.token_count)
+    }).catch(e => reject(e))
+
+    //grab moderators' list
+    this.$store.dispatch('fetchModerators')
+
     this.cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
-    this.profImgUrl = this.cur_bchain === 'STEEM' ? process.env.steemImgUrl : process.env.hiveImgUrl;
-    this.$store.dispatch('fetchModerators');
-    // ... other fetches
+
+    this.profImgUrl = process.env.hiveImgUrl;
+    if (this.cur_bchain == 'STEEM') {
+      this.profImgUrl = process.env.steemImgUrl;
+    }
+
     this.setupImages();
   },
+
 }
 </script>
 
