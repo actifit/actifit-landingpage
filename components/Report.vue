@@ -366,9 +366,9 @@ export default {
       }
       const userImages = initialImages.filter(url => {
           if (typeof url !== 'string') return false;
-          const isBrandingImage = /ACTIVITY/i.test(url);
+          const isBrandingImage = /ACTIVITY|DQmeWzNEfmAnX91Ze89zqQU3B2uS58sn6dc2A6L74xLfAvr|DQmXi8aWq1hnxa466MiBEhhTTCHeehoMuGrohtNG7et92Ne|DQmUtuWaSFoo8AtWd9fo4Tb7AEGhLo8rRrjqKPHHz2o7Mup|DQmcngR7AdBJio52C5stkD5C7vgsQ1yDH57Lb4J96Pys4a9|DQmRDW8jdYmE37tXvM6xPxuNnzNQnUJWSDnxVYyRJEHyc9H|DQmdnh1nApZieHZ3s1fEhCALDjnzytFwo78zbAY5CLUMpoG|DQmdNAWWwv6MAJjiNUWRahmAqbFBPxrX8WLQvoKyVHHqih1|DQmPKUZ5uZpL3Uq6LUUQXgNaaqsyX7ADpNyF4wHeTScs3xD|DQmeG5Bv1gKu2rQFWA1hH3QxzLzgzDPhDwieEEpy4WPnqN4|DQmPscjCVBggXvJT2GaUp66vbtyxzdzyHuhnzc38WDp4Smg|DQmV7NRosGCmNLsyHGzmh4Vr1pQJuBPEy2rk3WvnEUDxDFA|DQmY5UUP99u5ob3D8MA9JJW23zXLjHXHSRofSH3jLGEG1Yr|DQmW1VsUNbEjTUKawau4KJQ6agf41p69teEvdGAj1TMXmuc|DQmQqfpSmcQtfrHAtzfBtVccXwUL9vKNgZJ2j93m8WNjizw|DQmbWy8KzKT1UvCvznUTaFPw6wBUcyLtBT5XL9wdbB7Hfmn|DQmNp6YwAm2qwquALZw8PdcovDorwaBSFuxQ38TrYziGT6b|DQmXv9QWiAYiLCSr3sKxVzUJVrgin3ZZWM2CExEo3fd5GUS|DQmV2hBheBVo9QWTXCxvqRqe4Fsg6kFTGggsTNGga9gTUHm|23w3F6U3PgtaT14tL5ewc1FoCwJcebdmZ3nrj2H6x2cTf4RzKWuicnQqvJGQ8tZxqX4Q5|ACTIVITYDQmeG5Bv1gKu2rQFWA1hH3QxzLzgzDPhDwieEEpy4WPnqN4|23yJg2hJAuEDUwg82kS1eC3EQqkVDzPEEyPa4rwymVHoz5mKPanjmshFa5s6tcPe3SP9c|DQmQJeGKQVsYFDFnHxgTHyNdrZxQmjLSJxz1wLB5HJDaZV3|DQmYfJ7SsTGpkR6gWoyLzo4pGrxnFopkcKzRVjgE6NRRXQL|DQmRoHaVPUiTagwviNmie8Ub5j4ZW1VcJGycZebmiH8ZdH5/i.test(url);
           if (isBrandingImage) return false;
-          const isTrustedUserMedia = url.includes('usermedia.actifit.io');
+          const isTrustedUserMedia = url.includes('usermedia.actifit.io') || url.includes('pixabay.com') || url.includes('files.peakd.com');
           const isStandardImageFile = /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
 
           return isTrustedUserMedia || isStandardImageFile;
@@ -377,12 +377,12 @@ export default {
       
       // Re-implement the rule to remove the last image if count is >= 2
       let imagesToShow = [];
-      if (uniqueImages.length >= 2) {
-          imagesToShow = uniqueImages.slice(0, -1);
-      } else {
-          imagesToShow = uniqueImages;
-      }
-      
+      // if (uniqueImages.length >= 2) {
+      //     imagesToShow = uniqueImages.slice(0, -1);
+      // } else {
+      //     imagesToShow = uniqueImages;
+      // }
+      imagesToShow = uniqueImages;
       this.allImages = imagesToShow;
       this.currentImageIndex = 0;
       
