@@ -21,37 +21,43 @@
         </div>
         <div class="row">
           <div class="col-12">
-            <!-- START of new carousel functionality -->
+            <!-- START: Carousel Functionality Merged Here -->
             <div class="image-carousel-container" v-if="hasImage()">
+              <!-- Loader is absolutely positioned and shown when imageLoading is true -->
               <div v-if="imageLoading" class="image-loader-container">
-                <img src="/img/loader.gif" class="image-loader" alt="Loading..." />
+                <i class="fas fa-spinner fa-spin text-brand"></i>
               </div>
-
+              
+              <!-- Image is hidden (not removed) while loading to prevent layout jump -->
               <a href="#" :style="{ visibility: imageLoading ? 'hidden' : 'visible' }" class="text-brand" @click="report.rptId = rptId; $store.commit('setActiveReport', report)"
                 data-toggle="modal" data-target="#reportModal" :title="$t('read_more_small')">
                 <!-- The :key is the critical fix for the same-image bug -->
                 <img v-if="allImages.length > 0" :key="currentImageSrc" :src="currentImageSrc" :alt="report.title" class="report-image" @load="onImageLoad" @error="onImageError">
-                <!-- Fallback to the original image display if filtering results in no images -->
-                <img v-else-if="!imageLoading && $postHasImage(meta)" :src="$fetchPostImage(meta)" :alt="report.title" class="report-image" @load="onImageLoad" @error="handleImageError($event, meta)">
+                <!-- Fallback for posts that might not have any valid user images after filtering -->
+                 <img v-else-if="!imageLoading" :src="$fetchPostImage(meta)" :alt="report.title" class="report-image" @load="onImageLoad" @error="handleImageError($event, meta)">
               </a>
 
-              <template v-if="allImages.length > 1 && !imageLoading">
+              <!-- Arrows are now visible even during load -->
+              <template v-if="allImages.length > 1">
                 <div class="carousel-arrow left" @click.prevent="prevImage">
                   <i class="fas fa-chevron-left"></i>
                 </div>
                 <div class="carousel-arrow right" @click.prevent="nextImage">
                   <i class="fas fa-chevron-right"></i>
                 </div>
-                <div class="image-counter">
-                  {{ currentImageIndex + 1 }} / {{ allImages.length }}
-                </div>
-                <div class="carousel-bullets">
-                  <span v-for="(img, index) in allImages" :key="index" class="carousel-bullet"
-                    :class="{ 'active': index === currentImageIndex }" @click.prevent="goToImage(index)"></span>
-                </div>
+                <!-- Counter and bullets only appear when loading is finished -->
+                <template v-if="!imageLoading">
+                    <div class="image-counter">
+                      {{ currentImageIndex + 1 }} / {{ allImages.length }}
+                    </div>
+                    <div class="carousel-bullets">
+                      <span v-for="(img, index) in allImages" :key="index" class="carousel-bullet"
+                        :class="{ 'active': index === currentImageIndex }" @click.prevent="goToImage(index)"></span>
+                    </div>
+                </template>
               </template>
             </div>
-            <!-- END of new carousel functionality -->
+            <!-- END: Carousel Functionality Merged -->
           </div>
         </div>
         <div class="row">
@@ -311,7 +317,7 @@ export default {
       if (this.allImages.length > 0) {
         return this.allImages[this.currentImageIndex];
       }
-      return '';
+      return this.$fetchPostImage(this.meta); // Fallback to original method
     },
   },
   data: function () {
@@ -366,16 +372,16 @@ export default {
       }
       const userImages = initialImages.filter(url => {
           if (typeof url !== 'string') return false;
+          
           const isBrandingImage = /ACTIVITY|23tkbEYQioWnn3mfu8tWBh3x8n1Wz8TM9nH6SPRoghyZ46q2NNzt3aFsds2c8SjoknXRM|DQmdvc788wxsBSQHY3z21o3wSTU7hqRnyYc2JFEn2pEYSev|DQmeWzNEfmAnX91Ze89zqQU3B2uS58sn6dc2A6L74xLfAvr|DQmXi8aWq1hnxa466MiBEhhTTCHeehoMuGrohtNG7et92Ne|DQmUtuWaSFoo8AtWd9fo4Tb7AEGhLo8rRrjqKPHHz2o7Mup|DQmcngR7AdBJio52C5stkD5C7vgsQ1yDH57Lb4J96Pys4a9|DQmRDW8jdYmE37tXvM6xPxuNnzNQnUJWSDnxVYyRJEHyc9H|DQmdnh1nApZieHZ3s1fEhCALDjnzytFwo78zbAY5CLUMpoG|DQmdNAWWwv6MAJjiNUWRahmAqbFBPxrX8WLQvoKyVHHqih1|DQmPKUZ5uZpL3Uq6LUUQXgNaaqsyX7ADpNyF4wHeTScs3xD|DQmeG5Bv1gKu2rQFWA1hH3QxzLzgzDPhDwieEEpy4WPnqN4|DQmPscjCVBggXvJT2GaUp66vbtyxzdzyHuhnzc38WDp4Smg|DQmV7NRosGCmNLsyHGzmh4Vr1pQJuBPEy2rk3WvnEUDxDFA|DQmY5UUP99u5ob3D8MA9JJW23zXLjHXHSRofSH3jLGEG1Yr|DQmW1VsUNbEjTUKawau4KJQ6agf41p69teEvdGAj1TMXmuc|DQmQqfpSmcQtfrHAtzfBtVccXwUL9vKNgZJ2j93m8WNjizw|DQmbWy8KzKT1UvCvznUTaFPw6wBUcyLtBT5XL9wdbB7Hfmn|DQmNp6YwAm2qwquALZw8PdcovDorwaBSFuxQ38TrYziGT6b|DQmXv9QWiAYiLCSr3sKxVzUJVrgin3ZZWM2CExEo3fd5GUS|DQmV2hBheBVo9QWTXCxvqRqe4Fsg6kFTGggsTNGga9gTUHm|23w3F6U3PgtaT14tL5ewc1FoCwJcebdmZ3nrj2H6x2cTf4RzKWuicnQqvJGQ8tZxqX4Q5|ACTIVITYDQmeG5Bv1gKu2rQFWA1hH3QxzLzgzDPhDwieEEpy4WPnqN4|23yJg2hJAuEDUwg82kS1eC3EQqkVDzPEEyPa4rwymVHoz5mKPanjmshFa5s6tcPe3SP9c|DQmQJeGKQVsYFDFnHxgTHyNdrZxQmjLSJxz1wLB5HJDaZV3|DQmYfJ7SsTGpkR6gWoyLzo4pGrxnFopkcKzRVjgE6NRRXQL|DQmRoHaVPUiTagwviNmie8Ub5j4ZW1VcJGycZebmiH8ZdH5/i.test(url);
           if (isBrandingImage) return false;
-          const isTrustedUserMedia = url.includes('usermedia.actifit.io') || url.includes('pixabay.com') || url.includes('files.peakd.com');
+          
+          const isTrustedUserMedia = url.includes('usermedia.actifit.io') || url.includes('pixabay.com');
           const isStandardImageFile = /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
-
           return isTrustedUserMedia || isStandardImageFile;
       });
       const uniqueImages = [...new Set(userImages)];
       
-      // Re-implement the rule to remove the last image if count is >= 2
       let imagesToShow = [];
       // if (uniqueImages.length >= 2) {
       //     imagesToShow = uniqueImages.slice(0, -1);
@@ -441,7 +447,7 @@ export default {
     },
     hasImage() {
       let metaData = this.meta;
-      if (metaData.image) {
+      if (metaData && metaData.image) {
         if ((Array.isArray(metaData.image) && metaData.image.length > 0) || typeof metaData.image === 'string') {
           return true;
         }
@@ -478,7 +484,6 @@ export default {
       if (this.report.total_payout_value) return this.report.total_payout_value
       if (this.report.author_payout_value) return this.report.author_payout_value
     },
-
     //function handles displaying cut off version of text to avoid lengthy titles
     truncateString(str) {
       if (str && str.length > 70) {
@@ -555,7 +560,7 @@ export default {
     if (this.cur_bchain == 'STEEM') {
       this.profImgUrl = process.env.steemImgUrl;
     }
-
+    
     this.setupImages();
   },
 
@@ -596,7 +601,7 @@ export default {
 .payoutCustomDisplay { line-height: 1.5; }
 .image-carousel-container { position: relative; overflow: hidden; height: 150px; background-color: #f0f0f0; }
 .image-loader-container { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
-.image-loader { width: 40px; height: 40px; }
+.image-loader { font-size: 2em; /* Makes the Font Awesome spinner larger */ }
 .carousel-arrow { position: absolute; top: 50%; transform: translateY(-50%); background-color: rgba(0, 0, 0, 0.5); color: white; padding: 8px; cursor: pointer; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; user-select: none; transition: background-color 0.2s; z-index: 2; }
 .carousel-arrow:hover { background-color: rgba(0, 0, 0, 0.8); }
 .carousel-arrow.left { left: 10px; }
