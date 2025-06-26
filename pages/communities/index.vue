@@ -36,7 +36,7 @@
 
 	  <!-- show spinner while loading -->
       <div class="text-center" v-if="loading">
-        <i class="fas fa-spinner fa-spin text-brand"></i>
+        <i class="fas fa-spinner fa-spin fa-3x text-brand"></i>
       </div>
 
 
@@ -65,7 +65,7 @@
       <div class="text-center" v-if="moreCommunitiesAvailable">
         <a href="#" class="btn btn-brand" @click.prevent="loadMore()">
           {{ $t('load_more') }}
-          <i class="fas fa-spinner fa-spin" v-if="loadingMore"></i>
+          <i class="fas fa-spinner fa-spin fa-3x" v-if="loadingMore"></i>
         </a>
       </div>
     </div>
