@@ -41,7 +41,7 @@
             <div class="image-carousel-container" v-if="allImages.length > 0">
               <!-- Loader is absolutely positioned and shown when imageLoading is true -->
               <div v-if="imageLoading" class="image-loader-container">
-                <i class="fas fa-spinner fa-spin text-brand image-loader"></i>
+                <i class="fas fa-spinner fa-spin text-brand" style="display:flex; justify-content: center;text-align: center; margin-bottom: 3rem; margin-top: 2rem;"></i>
               </div>
               
               <!-- Image is hidden (not removed) while loading to prevent layout jump -->
@@ -353,6 +353,7 @@ export default {
         this.currentImageIndex = (this.currentImageIndex - 1 + this.allImages.length) % this.allImages.length;
       }
     },
+
     goToImage(index) {
       if (this.currentImageIndex !== index) {
         this.imageLoading = true;
