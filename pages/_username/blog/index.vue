@@ -21,18 +21,27 @@
           {{ $t('Create_post') }}
         </a>
       </div>
-      <div class="row text-right">
-        <div class="col-12 pb-2"><a :href="'/' + username + '/comments'" class="btn btn-brand border"
-            :title="$t('view_comments')"><i class="far fa-comments"></i></a>&nbsp;<a :href="'/' + username + '/videos'"
-            class="btn btn-brand border" :title="$t('view_videos')"><i class="fas fa-video"></i></a></div>
+            <div class="row">
+        <div class="col-12 pb-2 d-flex justify-content-between align-items-center">
+          <i class="fas fa-retweet p-2" 
+             style="cursor: pointer;"
+             :class="hideReblogs ? 'text-brand' : 'text-muted'"
+             :title="$t('Toggle Reblogs') || 'Toggle Reblogs'"
+             @click.prevent="hideReblogs = !hideReblogs"></i>
+          
+          <div>
+            <a :href="'/' + username + '/comments'" class="btn btn-brand border" :title="$t('view_comments')"><i class="far fa-comments"></i></a> 
+            <a :href="'/' + username + '/videos'" class="btn btn-brand border" :title="$t('view_videos')"><i class="fas fa-video"></i></a>
+          </div>
+        </div>
       </div>
 
       <!-- show listing when loaded -->
-      <div v-if="userPosts.length">
-        <div class="row" v-for="iterx in Math.ceil(userPosts.length / splitFactor)" :key="iterx">
+      <div v-if="filteredUserPosts.length">
+        <div class="row" v-for="iterx in Math.ceil(filteredUserPosts.length / splitFactor)" :key="iterx">
           <div v-for="itery in splitFactor" :key="itery" class="col-md-6 col-lg-4 mb-4">
-            <Post v-if="(iterx - 1) * splitFactor + (itery - 1) < userPosts.length"
-              :post="userPosts[(iterx - 1) * splitFactor + (itery - 1)]" :displayUsername="username"
+            <Post v-if="(iterx - 1) * splitFactor + (itery - 1) < filteredUserPosts.length"
+              :post="filteredUserPosts[(iterx - 1) * splitFactor + (itery - 1)]" :displayUsername="username"
               :pstId="(iterx - 1) * splitFactor + (itery - 1)" />
           </div>
           <!--<div class="col-md-6 col-lg-12 mb-4" v-if="(iterx - 1) < inlineAds">
@@ -44,7 +53,7 @@
       </div>
 
       <!-- or no content message when no posts found -->
-      <div class="text-center text-muted" v-if="!userPosts.length && !loading">
+      <div class="text-center text-muted" v-if="!filteredUserPosts.length && !loading">
         {{ username }} {{ $t('error_no_posts') }}
       </div>
 
@@ -112,6 +121,7 @@ export default {
       loadingMore: false, // loading state for loading more posts
       splitFactor: 9,
       inlineAds: 2,
+      hideReblogs: false,
     }
   },
   watch: {
@@ -138,6 +148,12 @@ export default {
     ...mapGetters('steemconnect', ['user']),
     ...mapGetters('steemconnect', ['stdLogin']),
     ...mapGetters(['userPosts', 'moreUserPostsAvailable', 'activePost', 'bchain']),
+    filteredUserPosts() {
+      if (!this.hideReblogs) {
+        return this.userPosts; 
+      }
+      return this.userPosts.filter(post => post.author === this.username);
+    },
 
     // get username from url
     username() {
@@ -160,14 +176,14 @@ export default {
           proceed = true;
         }
       } else {
-        if (pstId < this.userPosts.length) {
+        if (pstId < this.filteredUserPosts.length - 1) {
           pstId += 1;
           proceed = true;
         }
       }
       if (proceed) {
-        this.userPosts[pstId].pstId = pstId;
-        this.$store.commit('setActivePost', this.userPosts[pstId]);
+        this.filteredUserPosts[pstId].pstId = pstId;
+        this.$store.commit('setActivePost', this.filteredUserPosts[pstId]);
       }
     },
     initiateNewPost($event) {
