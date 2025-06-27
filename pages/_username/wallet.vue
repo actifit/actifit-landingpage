@@ -1724,7 +1724,7 @@
     <!-- show spinner while loading -->
     <div :class="smallScreenClasses" class="container mt-5 pb-5 pt-5" v-else-if="loading">
       <div class="text-center">
-        <i class="fas fa-spinner fa-spin text-brand"></i>
+        <i class="fas fa-spinner fa-3x fa-spin text-brand"></i>
       </div>
     </div>
     <div :class="smallScreenClasses" class="container mt-5 pb-5 pt-5" v-else>
