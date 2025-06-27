@@ -117,31 +117,36 @@ export default {
   },
   data() {
     return {
-      loading: true, // initial loading state
-      loadingMore: false, // loading state for loading more posts
+      loading: true, 
+      loadingMore: false, 
       splitFactor: 9,
       inlineAds: 2,
       hideReblogs: false,
+      minPostThreshold: 20, 
     }
   },
   watch: {
+    async hideReblogs(isHidingReblogs) {
+      if (isHidingReblogs) {
+        await this.ensureMinimumPosts();
+      }
+    },
     user: 'fetchUserData',
     bchain: async function (newBchain) {
       if (this.cur_bchain != newBchain && !this.loading) {
         //only update if changed
         this.cur_bchain = newBchain;
+        this.loading = true; // Set loading state
         await this.$store.dispatch('steemconnect/refreshUser');
 
-        // reset previously fetched posts to get latest
         this.$store.commit('setUserPosts', [])
 
-        // disable load more button and only show if there actually are more posts to load
         this.$store.commit('setMoreUserPostsAvailable', false)
 
-        await this.$store.dispatch('fetchUserPosts', this.username)
+        await this.fetchPostsRecursively(); 
+        
         this.loading = false
       }
-      //this.reload += 1;
     }
   },
   computed: {
@@ -150,7 +155,7 @@ export default {
     ...mapGetters(['userPosts', 'moreUserPostsAvailable', 'activePost', 'bchain']),
     filteredUserPosts() {
       if (!this.hideReblogs) {
-        return this.userPosts; 
+        return this.userPosts;
       }
       return this.userPosts.filter(post => post.author === this.username);
     },
@@ -167,6 +172,32 @@ export default {
     }
   },
   methods: {
+    
+    async fetchPostsRecursively() {
+      
+      if (this.loadingMore || !this.moreUserPostsAvailable) {
+        if (this.userPosts.length > 0) return;
+      }
+
+      this.loadingMore = true;
+
+      await this.$store.dispatch('fetchUserPosts', this.username);
+
+      
+      await this.ensureMinimumPosts();
+
+      this.loadingMore = false;
+    },
+
+
+    async ensureMinimumPosts() {
+      
+      if (this.hideReblogs && this.filteredUserPosts.length < this.minPostThreshold && this.moreUserPostsAvailable) {
+        
+        await this.fetchPostsRecursively();
+      }
+    },
+    
     nextPost(direction) {
       let pstId = this.activePost.pstId;
       let proceed = false;
@@ -193,50 +224,33 @@ export default {
       this.$store.commit('setEditPost', newPost);
     },
     async loadMore() {
-      this.loadingMore = true
-
-      let cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
-      this.$store.commit('setBchain', cur_bchain);
-
-      await this.$store.dispatch('fetchUserPosts', this.username)
-      this.loadingMore = false
+      await this.fetchPostsRecursively();
     },
     async fetchUserData() {
       if (typeof this.user != 'undefined' && this.user != null) {
 
         if (!localStorage.getItem('std_login')) {
-          //if (!this.stdLogin){
-          //update user info from blockchain
           let user_data = await this.$steemconnect.me();
           this.user.account = user_data.account;
         }
-        //ensure we fetch proper logged in user data
         this.$store.dispatch('fetchUserTokens')
         this.$store.dispatch('fetchUserRank')
       }
     },
   },
   async mounted() {
-    // login
     this.$store.dispatch('steemconnect/login')
     this.fetchUserData();
-
-    // fetch posts
 
     let cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
     this.$store.commit('setBchain', cur_bchain);
 
-    // reset previously fetched posts to get latest
     this.$store.commit('setUserPosts', [])
-
-    // disable load more button and only show if there actually are more posts to load
     this.$store.commit('setMoreUserPostsAvailable', false)
 
-    await this.$store.dispatch('fetchUserPosts', this.username)
+    // Initial fetch
+    await this.fetchPostsRecursively();
 
-    //console.log(this.userPosts);
-
-    // remove loading indicator
     this.loading = false
   }
 }
