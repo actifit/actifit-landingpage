@@ -11,7 +11,7 @@
 
       <!-- show spinner while loading -->
       <div class="text-center" v-if="loading">
-        <i class="fas fa-spinner fa-spin text-brand"></i>
+        <i class="fas fa-spinner fa-spin fa-3x text-brand"></i>
       </div>
 
       <!-- show listing when loaded -->

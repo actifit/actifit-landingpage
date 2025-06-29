@@ -101,7 +101,7 @@
 			v-if="!product.specialevent && (!currentFilter || product.type == currentFilter)"
 			@update-prod="updateProd" :afitPrice="afitPrice" @refresh-tickets="refreshTickets"/>
       </div>
-	  <div class="text-center text-brand" v-else><i class="fas fa-spin fa-spinner"></i></div>
+	  <div class="text-center text-brand" v-else><i class="fas fa-spin fa-spinner fa-3x"></i></div>
 
     </div>
 

@@ -11,7 +11,7 @@ module.exports = {
 
   // Runtime configuration
   publicRuntimeConfig: {
-    version: '1.6.9.3',
+    version: '1.7.0',
     proposalId: '337',
   },
 
@@ -41,6 +41,7 @@ module.exports = {
   env: {
     sec_img_upl: process.env.SEC_IMG_UPL_KEY,
     auth_Key: process.env.DEEPL_WEB_KEY,
+    geminiApiKey: process.env.GEMINI_API_KEY,
     swap_partner: 'actifit.swap',
     swap_to_token: 'AFIT',
     partner_fee: '1',

@@ -58,7 +58,26 @@ export default {
         const response = await axios.get(
           process.env.hiveApiNode + `/hafbe-api/input-type/${this.inputValue}%25`
         );
-        this.mentionList = response.data.input_value || [];
+        const responseData = response.data;
+        if (responseData.input_type === 'invalid_input') {
+          this.mentionList = []; // Clear list for invalid input
+          this.showMentionList = false; // Explicitly hide list for invalid input
+          this.selectedMentionIndex = 0; // Reset selection
+        } else{
+          this.mentionList = response.data.input_value || [];
+          if (this.mentionList.length > 0) {
+              // The calling handler (input/cursorMove) should have set showMentionList = true,
+              // but ensure it's true if we actually received results.
+              this.showMentionList = true;
+              this.selectedMentionIndex = 0; // Reset selection for new results
+              this.scrollDropdownIntoView(); // Scroll to the top item (index 0)
+              this.updateDropdownPosition(); // Update position (size might have changed)
+          }else {
+              this.selectedMentionIndex = 0;
+              this.updateDropdownPosition();
+          }
+        }
+
       } catch (error) {
         console.error("Error fetching mentions:", error);
       }
@@ -202,6 +221,11 @@ export default {
   color: gray;
   /* Customize icon color */
   font-size: 16px;
+  display: block !important;
+}
+#username{
+  padding-left: 30px;
+  font-size: 16px;
 }
 
 .input-with-icon input {
@@ -217,5 +241,16 @@ export default {
 
 .hiddenIcon .input-with-icon input {
   padding-left: 3px;
+}
+@media only screen and (max-width: 500px){
+  #username{
+    font-size: 12px;
+    padding-left: 30px; /* This is the key fix: ensures padding is applied */
+  }
+
+  .input-with-icon .fa-search {
+    display: block !important; /* Ensures the icon is always visible on mobile */
+    font-size: 14px; /* Optional: adjust icon size for smaller screens */
+  }
 }
 </style>
