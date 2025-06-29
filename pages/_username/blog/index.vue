@@ -23,11 +23,12 @@
       </div>
             <div class="row">
         <div class="col-12 pb-2 d-flex justify-content-between align-items-center">
-          <i class="fas fa-retweet p-2" 
-             style="cursor: pointer;"
-             :class="hideReblogs ? 'text-brand' : 'text-muted'"
-             :title="$t('Toggle Reblogs') || 'Toggle Reblogs'"
-             @click.prevent="hideReblogs = !hideReblogs"></i>
+          <a href="#" 
+             class="btn btn-brand border"
+             :title="$t(filterTooltip) || filterTooltip"
+             @click.prevent="hideReblogs = !hideReblogs">
+            <i class="fas fa-filter" :style="{ color: hideReblogs ? '#FFFFFF' : '#4CAF50' }"></i>
+          </a>
           
           <div>
             <a :href="'/' + username + '/comments'" class="btn btn-brand border" :title="$t('view_comments')"><i class="far fa-comments"></i></a> 
@@ -159,6 +160,10 @@ export default {
       }
       return this.userPosts.filter(post => post.author === this.username);
     },
+    
+    filterTooltip() {
+      return this.hideReblogs ? 'Show Reblogs' : 'Hide Reblogs';
+    },
 
     // get username from url
     username() {
@@ -255,3 +260,4 @@ export default {
   }
 }
 </script>
+
