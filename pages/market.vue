@@ -2,121 +2,137 @@
   <div>
     <NavbarBrand />
 
-    <!-- listing -->
-    <div class="container pt-5 mt-5 pb-5">
-      <ListHeadingSection :textualDisplay="$t('market_title')" />
-      <div class="text-left mb-4 text-brand market-sub">{{ $t('market_subtitle') }}</div>
-
-
-	  <!-- ticket prize section / gadgets purchase -->
-
-	  <div class="col-md-12 text-center text-primary mb-5 notice-text">
-		  <h4>{{$t('prize_tickets_buy_gadgets')}}<a href="#" data-toggle="modal" data-target="#notifyModal"><i class="fas fa-info-circle" :title="$t('view_details')"></i></a></h4>
-		  <div class="row row-sep">
-			<div class="col-md-4 row-sep-in small-pad-row acti-shadow">
-			  <h5 class="token-title pt-2 notice-text">{{$t('my_tickets_collected')}}</h5>
-			  <div v-if="user"><i class="fas fa-ticket-alt text-brand" ></i>&nbsp;{{ ticketCount }} {{$t('tickets_collected')}}</div>
-			  <div v-else >-</div>
-			</div>
-			<div class="col-md-4 row-sep-in small-pad-row acti-shadow">
-			  <h5 class="token-title pt-2 notice-text">{{$t('prize_pool')}}</h5>
-			  <div v-if="prizePoolValue!=''"><i class="fas fa-donate text-brand" ></i>&nbsp;{{ prizePoolValue }} {{$t('HIVE')}}<img src="/img/HIVE.png" class="token-logo-sm"></div>
-			  <div v-else ><i class="fas fa-spin fa-spinner text-brand"></i></div>
-			</div>
-			<div class="col-md-4 row-sep-in small-pad-row acti-shadow">
-			  <h5 class="token-title pt-2 notice-text">{{ $t('next_draw') }}&nbsp;</h5>
-			  <Countdown v-if="countDownReady && nextGadgetBuyRewardDate" :deadline="nextGadgetBuyRewardDate"></Countdown>
-			  <div v-else ><i class="fas fa-spin fa-spinner text-brand"></i></div>
-			</div>
-		  </div>
-		  <div class="row row-sep">
-			<div class="col-md-4"></div>
-			<div class="col-md-4 row-sep-in acti-shadow">
-				<h5 class="token-title pt-2 notice-text"><i class="fas text-brand fa-trophy"></i> {{ $t('Recent_draw_winner') }}</h5>
-				<div><a :href="'/'+lastDrawWinner">@{{ lastDrawWinner }}</a> {{ wonAmount }} {{ $t('HIVE') }}<img src="/img/HIVE.png" class="token-logo-sm"></div>
-			</div>
-		  </div>
-
-	  </div>
-
-
-	  <!-- allow sorting & filtering products -->
-	  <div class="row col-md-12" v-if="prodList.length">
-		<span class="col-md-5"></span>
-		<select v-model="currentSort" class="form-control col-md-3 sel-adj">
-            <option value="">-- {{$t('Sort_By')}} --</option>
-			<option :value="JSON.stringify({value: 'name', direction: 'asc'})">{{$t('Name')}}▲</option>
-			<option :value="JSON.stringify({value: 'name', direction: 'desc'})">{{$t('Name')}}▼</option>
-            <!--<option :value="JSON.stringify({value: 'type', direction: 'asc'})">{{$t('Type')}}▲</option>
-			<option :value="JSON.stringify({value: 'type', direction: 'desc'})">{{$t('Type')}}▼</option>-->
-			<option :value="JSON.stringify({value: 'level', direction: 'asc'})">{{$t('Level')}}▲</option>
-			<option :value="JSON.stringify({value: 'level', direction: 'desc'})">{{$t('Level')}}▼</option>
-			<option :value="JSON.stringify({value: 'price', direction: 'asc'})">{{$t('Price')}}▲</option>
-			<option :value="JSON.stringify({value: 'price', direction: 'desc'})">{{$t('Price')}}▼</option>
-			<option :value="JSON.stringify({value: 'reqtsFilled', direction: 'desc'})">{{$t('Ready')}}▲</option>
-			<option :value="JSON.stringify({value: 'reqtsFilled', direction: 'asc'})">{{$t('Ready')}}▼</option>
-			<option :value="JSON.stringify({value: 'bought', direction: 'asc'})">{{$t('Bought')}}▲</option>
-			<option :value="JSON.stringify({value: 'bought', direction: 'desc'})">{{$t('Bought')}}▼</option>
-        </select>
-		<!--<span class="col-md-3">{{$t('Filter_By')}}:</span>-->
-		&nbsp;
-		<select v-model="currentFilter" class="form-control col-md-3 sel-adj">
-            <option value="">-- {{$t('Filter_By')}} --</option>
-			<option value="">{{$t('All')}}</option>
-			<option value="ingame">{{$t('Game')}}</option>
-            <option value="service">{{$t('Consultation')}}</option>
-			<option value="ebook">{{$t('Ebook')}}</option>
-			<option value="real">{{$t('Physical_Products')}}</option>
-        </select>
-
-		<div class="row expansion-arrow-all">
-			<a class="arrow-icon" v-on:click="expandAllSwitchStatus" :class="expandAllStatus" :title="expandAllStatusText">
-			  <span class="left-bar"></span>
-			  <span class="right-bar"></span>
-			</a>
+<!-- listing -->
+<div class="marketplace-container pt-5" style="margin-top:25px ;">
+  <!-- Side Navigation -->
+  <div class="marketplace-sidebar">
+    <!-- User Stats Section -->
+    <div class="sidebar-card actifit-orange-bg">
+      <h4 class="sidebar-title">{{$t('prize_tickets_buy_gadgets')}}
+        <a href="#" data-toggle="modal" data-target="#notifyModal">
+          <i class="fas fa-info-circle" :title="$t('view_details')"></i>
+        </a>
+      </h4>
+      
+      <div class="stats-grid">
+        <div class="stat-item row-sep-in">
+          <h5 class="token-title">{{$t('my_tickets_collected')}}</h5>
+          <div v-if="user"><i class="fas fa-ticket-alt text-brand"></i>&nbsp;{{ ticketCount }} {{$t('tickets_collected')}}</div>
+          <div v-else>-</div>
+        </div>
+        
+        <div class="stat-item row-sep-in">
+          <h5 class="token-title">{{$t('prize_pool')}}</h5>
+          <div v-if="prizePoolValue!=''"><i class="fas fa-donate text-brand"></i>&nbsp;{{ prizePoolValue }} {{$t('HIVE')}}<img src="/img/HIVE.png" class="token-logo-sm"></div>
+          <div v-else><i class="fas fa-spin fa-spinner text-brand"></i></div>
+        </div>
+        
+        <div class="stat-item row-sep-in">
+  			<h5 class="token-title">{{ $t('next_draw') }}&nbsp;</h5>
+  			<div v-if="countDownReady && nextGadgetBuyRewardDate" class="d-inline-block">
+    			<Countdown :deadline="nextGadgetBuyRewardDate" class="countdown-inline" />
+  			</div>
+  		<div v-else class="d-inline-block"><i class="fas fa-spin fa-spinner text-brand"></i></div>
 		</div>
-	  </div>
-
-	  <!-- show listing of special event products -->
-
-
-
-	  <h5 class="text-center pt-3 market-sub text-brand">{{ $t('special_christmas_event') }}</h5>
-
-	  <div class="row" v-if="prodList.length">
-        <Product v-for="product in prodList"
-			:product="product" :key="product._id" :pros="professionals" :userrank="userRank" :gadgetStats="gadgetStats"  :realProducts="realProducts" :expandAll="expandAllStatus"
-			v-if="product.specialevent"
-			@update-prod="updateProd" :afitPrice="afitPrice" @refresh-tickets="refreshTickets"/>
+        
+        <div class="stat-item row-sep-in">
+          <h5 class="token-title"><i class="fas text-brand fa-trophy"></i> {{ $t('Recent_draw_winner') }}</h5>
+          <div><a :href="'/'+lastDrawWinner">@{{ lastDrawWinner }}</a> {{ wonAmount }} {{ $t('HIVE') }}<img src="/img/HIVE.png" class="token-logo-sm"></div>
+        </div>
       </div>
-	  <br/>
-
-
-
-
-      <!-- show listing of products -->
-      <div class="row" v-if="prodList.length">
-        <Product v-for="product in prodList"
-			:product="product" :key="product._id" :pros="professionals" :userrank="userRank" :gadgetStats="gadgetStats" :realProducts="realProducts" :expandAll="expandAllStatus"
-			v-if="!product.specialevent && (!currentFilter || product.type == currentFilter)"
-			@update-prod="updateProd" :afitPrice="afitPrice" @refresh-tickets="refreshTickets"/>
-      </div>
-	  <div class="text-center text-brand" v-else><i class="fas fa-spin fa-spinner fa-3x"></i></div>
-
     </div>
-
-	<NotifyModal :modalTitle="$t('Actifit_Info')" :modalText="$t('weekly_pay_prize_desc')"/>
-
-
-
-    <Footer />
-    <client-only>
-      <div>
-        <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
-		<notifications :group="'warn'" :position="'top center'" :classes="'vue-notification warn'" />
-        <notifications :group="'error'" :position="'top center'" :classes="'vue-notification error'" />
+    
+    <!-- Filters Section -->
+    <div class="sidebar-card">
+      <h4 class="sidebar-title"><i class="fas fa-sliders-h"></i> {{$t('Sort_Filter')}}</h4>
+      
+      <div class="filter-group">
+        <select v-model="currentSort" class="form-control sel-adj">
+          <option value="">-- {{$t('Sort_By')}} --</option>
+          <option :value="JSON.stringify({value: 'name', direction: 'asc'})">{{$t('Name')}}▲</option>
+          <option :value="JSON.stringify({value: 'name', direction: 'desc'})">{{$t('Name')}}▼</option>
+          <option :value="JSON.stringify({value: 'level', direction: 'asc'})">{{$t('Level')}}▲</option>
+          <option :value="JSON.stringify({value: 'level', direction: 'desc'})">{{$t('Level')}}▼</option>
+          <option :value="JSON.stringify({value: 'price', direction: 'asc'})">{{$t('Price')}}▲</option>
+          <option :value="JSON.stringify({value: 'price', direction: 'desc'})">{{$t('Price')}}▼</option>
+          <option :value="JSON.stringify({value: 'reqtsFilled', direction: 'desc'})">{{$t('Ready')}}▲</option>
+          <option :value="JSON.stringify({value: 'reqtsFilled', direction: 'asc'})">{{$t('Ready')}}▼</option>
+          <option :value="JSON.stringify({value: 'bought', direction: 'asc'})">{{$t('Bought')}}▲</option>
+          <option :value="JSON.stringify({value: 'bought', direction: 'desc'})">{{$t('Bought')}}▼</option>
+        </select>
       </div>
-    </client-only>
+      
+      <div class="filter-group">
+        <select v-model="currentFilter" class="form-control sel-adj">
+          <option value="">-- {{$t('Filter_By')}} --</option>
+          <option value="">{{$t('All')}}</option>
+          <option value="ingame">{{$t('Game')}}</option>
+          <option value="service">{{$t('Consultation')}}</option>
+          <option value="ebook">{{$t('Ebook')}}</option>
+          <option value="real">{{$t('Physical_Products')}}</option>
+        </select>
+      </div>
+      
+      <div class="expansion-arrow-all">
+        <a class="arrow-icon filter-arrow" v-on:click="expandAllSwitchStatus" :class="expandAllStatus" :title="expandAllStatusText">
+          <span class="left-bar"></span>
+          <span class="right-bar"></span>
+        </a>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Main Content Area -->
+  <div class="marketplace-main">
+    <div class="marketplace-header">
+      <ListHeadingSection :textualDisplay="$t('market_title')" />
+      <div class="market-sub">{{ $t('market_subtitle') }}</div>
+    </div>
+    
+    <!-- Special Event Section -->
+    <div v-if="hasSpecialEvents">
+      <h5 class="text-center pt-3 market-sub text-brand">{{ $t('special_christmas_event') }}</h5>
+      
+      <div class="row products-row">
+        <Product v-for="product in prodList"
+          :product="product" :key="product._id" :pros="professionals" 
+          :userrank="userRank" :gadgetStats="gadgetStats" :realProducts="realProducts" 
+          :expandAll="expandAllStatus"
+          v-if="product.specialevent"
+          @update-prod="updateProd" :afitPrice="afitPrice" @refresh-tickets="refreshTickets"/>
+      </div>
+      <br/>
+    </div>
+    
+    <!-- Main Products Section -->
+    <div>
+      <div class="row products-row" v-if="prodList.length">
+        <Product v-for="product in prodList"
+          :product="product" :key="product._id" :pros="professionals" 
+          :userrank="userRank" :gadgetStats="gadgetStats" :realProducts="realProducts" 
+          :expandAll="expandAllStatus"
+          v-if="!product.specialevent && (!currentFilter || product.type == currentFilter)"
+          @update-prod="updateProd" :afitPrice="afitPrice" @refresh-tickets="refreshTickets"/>
+      </div>
+      
+      <div class="text-center text-brand" v-else>
+        <i class="fas fa-spin fa-spinner fa-3x"></i>
+      </div>
+    </div>
+  </div>
+</div>
+
+<NotifyModal :modalTitle="$t('Actifit_Info')" :modalText="$t('weekly_pay_prize_desc')"/>
+<br>
+<br>
+<Footer />
+<client-only>
+  <div>
+    <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
+    <notifications :group="'warn'" :position="'top center'" :classes="'vue-notification warn'" />
+    <notifications :group="'error'" :position="'top center'" :classes="'vue-notification error'" />
+  </div>
+</client-only>
   </div>
 </template>
 
@@ -342,52 +358,232 @@
   }
 </script>
 <style>
-  .market-sub{
-	font-style: italic;
-  }
-  .selcls {
-    padding: 9px;
-    border: solid 1px #517B97;
-    outline: 0;
-    background: -webkit-gradient(linear, left top, left 25, from(#FFFFFF), color-stop(4%, #CAD9E3), to(#FFFFFF));
-    background: -moz-linear-gradient(top, #FFFFFF, #CAD9E3 1px, #FFFFFF 25px);
-    box-shadow: rgba(0,0,0, 0.1) 0px 0px 8px;
-    -moz-box-shadow: rgba(0,0,0, 0.1) 0px 0px 8px;
-    -webkit-box-shadow: rgba(0,0,0, 0.1) 0px 0px 8px;
-  }
-  .sel-adj{
-	margin-bottom: 3px;
-  }
-  .notice-text{
-    font-size: x-large;
-  }
-  .no-bullets{
-    list-style: none;
-  }
-  .text-success{
-    padding-right: 2px;
-  }
-  .row-sep-in{
-    border: 1px solid orange;
-	background: linear-gradient(20deg,orange,transparent);
-  }
-  .row-sep-in h5, .row-sep-in .token-title{
-	border-bottom: 1px dashed red;
-	height: 40px;
-  }
-  .left-bar:after, .right-bar:after{
-	animation: blink 3s infinite;/*20 alternate;*/
-  }
+.marketplace-container {
+  display: flex;
+  min-height: calc(100vh - 60px); 
+  padding-top: 60px; 
+}
 
-	@keyframes blink {
-	  0%, 50%, 100% { background-color: pink; }
-	  25%, 75% { background-color: red; }
-	}
+.marketplace-sidebar {
+  width: 300px;
+  padding: 0 15px;
+  position: sticky;
+  top: 60px; 
+  height: calc(100vh - 60px);
+  overflow-y: auto;
+}
 
-	.expansion-arrow-all{
-		display: contents;
-	}
-	.book-button {
-		box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
-	}
+.sidebar-card {
+  background: white;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.actifit-orange-bg {
+  background: linear-gradient(20deg, black, transparent);
+  border: 1px solid red;
+}
+
+.sidebar-title {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  color: red;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 15px;
+}
+
+.stat-item {
+  padding: 12px;
+  border-radius: 6px;
+}
+
+.countdown-inline {
+  display: inline-flex !important;
+  white-space: nowrap !important;
+}
+
+.countdown-inline > * {
+  display: inline-block !important;
+  white-space: nowrap !important;
+}
+
+.d-inline-block {
+  display: inline-block !important;
+}
+
+.token-title {
+  font-weight: bold;
+  margin-bottom: 8px;
+  border-bottom: 1px dashed red;
+  height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.row-sep-in {
+  border: 1px solid red;
+  background: linear-gradient(20deg, white, transparent);
+}
+
+.marketplace-main {
+  flex: 1;
+  padding: 0 20px;
+}
+
+.marketplace-header {
+  margin-bottom: 20px;
+}
+
+.market-sub {
+  font-style: italic;
+  color: red;
+  font-size: 1.1	rem;
+  margin-bottom: 15px;
+}
+
+.products-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -10px;
+}
+
+.products-row > * {
+  flex: 0 0 calc(33.333% - 20px);
+  margin: 0 10px 20px;
+}
+
+.sel-adj {
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+.expansion-arrow-all {
+  text-align: center;
+}
+
+.arrow-icon {
+  display: inline-block;
+  width: 30px;
+  height: 15px;
+  position: relative;
+  cursor: pointer;
+}
+
+.left-bar, .right-bar {
+  position: absolute;
+  background-color: red;
+  width: 15px;
+  height: 3px;
+  top: 50%;
+  left: 50%;
+}
+
+.left-bar {
+  transform: translate(-50%, -50%) rotate(45deg);
+  transform-origin: left center;
+}
+
+.right-bar {
+  transform: translate(-50%, -50%) rotate(-45deg);
+  transform-origin: right center;
+}
+
+.left-bar:after, .right-bar:after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: inherit;
+  animation: blink 3s infinite;
+}
+
+.filter-arrow {
+  width: 36px !important;      
+  height: 36px !important;      
+  position: relative;
+  display: inline-block;
+  margin: 0 auto;
+}
+
+.filter-arrow .left-bar,
+.filter-arrow .right-bar {
+  width: 18px !important;      
+  height: 4px !important;        
+  background-color: red;     
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transition: all 0.3s ease;
+}
+
+.filter-arrow .left-bar {
+  transform: translate(-50%, -50%) rotate(45deg);
+  transform-origin: left center;
+}
+.filter-arrow .right-bar {
+  transform: translate(-50%, -50%) rotate(-45deg);
+  transform-origin: right center;
+}
+
+.filter-arrow.expanded .left-bar {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+.filter-arrow.expanded .right-bar {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.filter-arrow .left-bar:after,
+.filter-arrow .right-bar:after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: inherit;
+  animation: blink 3s infinite;
+}
+
+@keyframes blink {
+  0%, 50%, 100% { background-color: pink; }
+  25%, 75% { background-color: red; }
+}
+
+@media (max-width: 1200px) {
+  .products-row > * {
+    flex: 0 0 calc(50% - 20px);
+  }
+}
+
+@media (max-width: 992px) {
+  .marketplace-container {
+    flex-direction: column;
+  }
+  
+  .marketplace-sidebar {
+    width: 100%;
+    position: static;
+    height: auto;
+    margin-bottom: 20px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .products-row > * {
+    flex: 0 0 100%;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
 </style>

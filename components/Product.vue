@@ -44,7 +44,7 @@
         </div>
       </div>
       <div class="row expansion-arrow">
-        <a class="arrow-icon" v-on:click="switchArrowStatus" :class="prodDispStatus" :title="prodDispStatusText">
+       <a class="arrow-icon enlarged-arrow" v-on:click="switchArrowStatus" :class="prodDispStatus" :title="prodDispStatusText">
           <span class="left-bar"></span>
           <span class="right-bar"></span>
         </a>
@@ -2271,7 +2271,55 @@ $duration: 0.5s;
   max-height: 40px;
 }
 
+.enlarged-arrow {
+  width: 40px;
+  height: 40px;
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  margin: 0 auto;
+}
 
+.enlarged-arrow .left-bar,
+.enlarged-arrow .right-bar {
+  position: absolute;
+  background-color: #FF6B00;
+  width: 20px;
+  height: 4px;
+  top: 50%;
+  left: 50%;
+  transition: all 0.3s ease;
+}
+
+.enlarged-arrow .left-bar {
+  transform: translate(-50%, -50%) rotate(45deg);
+  transform-origin: left center;
+}
+
+.enlarged-arrow .right-bar {
+  transform: translate(-50%, -50%) rotate(-45deg);
+  transform-origin: right center;
+}
+
+/* Maintain existing animation */
+.enlarged-arrow .left-bar:after,
+.enlarged-arrow .right-bar:after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: inherit;
+  animation: blink 3s infinite;
+}
+
+/* Keep your existing arrow state classes (prodDispStatus) working */
+.enlarged-arrow.expanded .left-bar {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.enlarged-arrow.expanded .right-bar {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
 /*
 .body-expan-enter,
 .body-expan-leave-to {
