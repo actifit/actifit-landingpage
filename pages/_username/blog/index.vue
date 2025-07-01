@@ -25,9 +25,9 @@
         <div class="col-12 pb-2 d-flex justify-content-between align-items-center">
           <a href="#" 
              class="btn btn-brand border"
-             :title="$t(filterTooltip) || filterTooltip"
+             :title="filterTooltip"
              @click.prevent="hideReblogs = !hideReblogs">
-            <i class="fas fa-filter" :style="{ color: hideReblogs ? '#FFFFFF' : '#4CAF50' }"></i>
+            <i class="fas fa-retweet" :style="{ color: hideReblogs ? '#FFFFFF' : '#4CAF50' }"></i>
           </a>
           
           <div>
@@ -162,7 +162,7 @@ export default {
     },
     
     filterTooltip() {
-      return this.hideReblogs ? 'Show Reblogs' : 'Hide Reblogs';
+      return this.hideReblogs ? this.$t('show_reblogs') : this.$t('hide_reblogs');
     },
 
     // get username from url
@@ -260,4 +260,3 @@ export default {
   }
 }
 </script>
-
