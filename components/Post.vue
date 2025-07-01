@@ -3,7 +3,6 @@
   <div>
     <div :class="[isOnlyPost ? 'card post single' : { 'card-pinned': isPostPinned, 'card post': isStandardPost }]">
       <h6 class="mb-0 text-center post-title">
-        <!--<a :href="post.url" target="_blank">-->
         <a :href="buildLink" target="_blank">
           {{ truncateString(post.title, 70) }}
           <i class="fas fa-external-link-alt"></i>
@@ -78,19 +77,13 @@
           <div class="col-12">
             <a href="#" class="" @click="post.pstId = pstId; $store.commit('setActivePost', post)" data-toggle="modal"
               data-target="#postModal" :title="$t('read_more_small')">
-
               <div>
-                <!--<span id="post_body_render" v-html="fixedContent()"></span>-->
-                <span id="post_body_render">{{ renderSnippet(post.body) }}</span>
+                <span>{{ renderSnippet(post.body, 150) }}</span>
                 <i class="fas fa-external-link-alt"></i>
               </div>
             </a>
           </div>
-
         </div>
-
-
-
       </div>
       <div class="post-footer mt-auto p-1">
           <div class="row details mt-2">
@@ -117,10 +110,6 @@
                   </network>
                 </span>
               </social-sharing>
-              <!--<a href="#" class="text-brand pr-2" @click="post.pstId = pstId; $store.commit('setActivePost', post)" data-toggle="modal"
-                  data-target="#dailyActivityChartModal" :title="$t('Activity_chart')">
-                  <i class="fas fa-chart-line"></i>
-                </a>-->
               <a href="#" class="text-brand" @click="$store.commit('setEditPost', post)" data-toggle="modal"
                 data-target="#editPostModal" v-if="user && post.author === user.account.name" :title="$t('Edit_note')">
                 <i class="fas fa-edit"></i>
@@ -136,9 +125,7 @@
 
               <img src="/img/STEEM.png" class="mr-1 currency-logo-small" v-if="cur_bchain == 'STEEM'">
               <img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain == 'HIVE'">
-              <!--{{ postPayout }}-->
               <span v-if="postPaid()">
-                <!--<i class="fa-solid fa-wallet text-green"></i>-->
                 <span class="m-1" :title="$t('author_payout')">
                   <i class="fa-solid fa-user"></i>
                   {{ paidValue() }}
@@ -177,357 +164,52 @@
 <script>
 import UserHoverCard from './UserHoverCard.vue'
 import { mapGetters } from 'vuex'
-import steem from 'steem'
-import hive from '@hiveio/hive-js'
 import SocialSharing from 'vue-social-sharing'
-
-//import vueRemarkable from 'vue-remarkable';
+import { commonCardMixin } from '~/plugins/commonCardMixin.js'
 
 export default {
+  mixins: [commonCardMixin],
   props: ['post', 'displayUsername', 'pstId', 'explorePost'],
+  components: {
+    SocialSharing,
+    UserHoverCard
+  },
   computed: {
     ...mapGetters('steemconnect', ['user']),
     ...mapGetters(['postToVote', 'newlyVotedPosts', 'moderators', 'userPosts']),
-    isOnlyPost() {
-      return this.userPosts && this.userPosts.length === 1 // check if there's only one post in the store
+    // Overrides the placeholder in the mixin
+    cardData () {
+      return this.post
     },
-    buildParentLink() {
-      return '/' + this.post.parent_author + '/' + this.post.parent_permlink;
+    // Component-specific computed properties
+    isOnlyPost () {
+      return this.userPosts && this.userPosts.length === 1
     },
-    buildLink() {
-      return '/' + this.post.author + '/' + this.post.permlink;
+    buildLink () {
+      return '/' + this.post.author + '/' + this.post.permlink
     },
-    isPostReblog(){
-      console.log('check reblog' )
-      return this.displayUsername!=this.post.author;
+    isPostReblog () {
+      return this.displayUsername !== this.post.author
     },
-    isPostPinned() {
-      let stats = this.post.stats
-      //console.log(stats);
-      return (stats ? stats.is_pinned : false);
+    isPostPinned () {
+      return this.post.stats ? this.post.stats.is_pinned : false
     },
-    isStandardPost() {
-      return !this.explorePost;
+    isStandardPost () {
+      return !this.explorePost
     },
-    date() {
-      let date = new Date(this.post.created)
-      let minutes = date.getMinutes()
+    date () {
+      const date = new Date(this.post.created)
+      const minutes = date.getMinutes()
       return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() + ' ' + date.getHours() + ':' + (minutes < 10 ? '0' + minutes : minutes)
-    },
-    appType() {
-      return this.meta.appType
-    },
-    appVersion() {
-      return this.meta.app
-    },
-    meta() {
-      try {
-        return JSON.parse(this.post.json_metadata)
-      } catch (err) {
-        //console.log(err);
-        //console.log('meta:')
-        //console.log(this.post.json_metadata);
-        return JSON.parse(JSON.stringify(this.post.json_metadata));
-        //console.log(err);
-        return {};
-      }
-    },
-    postPayout() {
-      if (this.postPaid()) {
-        return '';
-      } else {
-        return this.post.pending_payout_value.replace('SBD', '').replace('STEEM', '').replace('HBD', '').replace('HIVE', '') + ' $'
-      }
-    },
-    /*getUserRank() {
-    //proper formatting issue to display circle for smaller numbers
-    if (this.userRank<10){
-      return ' '+parseFloat(this.userRank).toFixed(1);
-    }else{
-      return parseFloat(this.userRank).toFixed(1);
-    }
-    },*/
-    displayCoreUserRank() {
-      return (this.userRank ? parseFloat(this.userRank.rank_no_afitx).toFixed(2) : '');
-    },
-    displayIncreasedUserRank() {
-      return '(+' + parseFloat(this.userRank.afitx_rank).toFixed(2) + ')';
-    },
-    votedByUser() {
-      return this.postUpvoted;
-    },
-    getVoteCount() {
-      return Array.isArray(this.post.active_votes) ? this.post.active_votes.length : 0;
-    },
-    isUserModerator() {
-      if (this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator')) {
-        return true;
-      }
-      return false;
-    },
-    currentImageSrc() {
-      if (this.allImages.length > 0) {
-        return this.allImages[this.currentImageIndex];
-      }
-      return this.$fetchPostImage(this.meta);
-    },
-  },
-  data: function () {
-    return {
-      afitReward: '',
-      userRank: '',
-      //fullAFITReward: '',
-      postUpvoted: false,
-      cur_bchain: 'HIVE',
-      profImgUrl: process.env.hiveImgUrl,
-      socialSharingTitle: process.env.socialSharingTitle,
-      socialSharingDesc: process.env.socialSharingDesc,
-      socialSharingQuote: process.env.socialSharingQuote,
-      hashtags: process.env.socialSharingHashtags,
-      isTooltipVisible: false,
-      imageError: false,
-      // Carousel-specific data
-      allImages: [],
-      currentImageIndex: 0,
-      imageLoading: true,
     }
   },
-  components: {
-    SocialSharing,
-    UserHoverCard,
-    //vueRemarkable
-  },
-  watch: {
-    postUpvoted: 'updatePostData',
-  },
-  methods: {
-    // START: Carousel and Image Loader Methods
-    onImageLoad() {
-      this.imageLoading = false;
-    },
-    onImageError(event) {
-      this.imageLoading = false;
-      this.handleImageError(event, this.meta);
-    },
-    getResizedImageUrl(url) {
-      const resizeProxy = 'https://images.hive.blog/400x0/';
-      if (typeof url !== 'string' || !url.startsWith('http')) {
-        return url;
-      }
-      if (url.includes('pixabay.com')) {
-        return url;
-      }
-      if (url.includes('images.hive.blog/')) {
-        return url;
-      }
-      return resizeProxy + url;
-    },
-    setupImages() {
-      const metaImages = this.meta.image;
-      let initialImages = [];
-      if (Array.isArray(metaImages)) {
-        initialImages = metaImages;
-      } else if (metaImages) {
-        initialImages = [metaImages];
-      }
-      if (initialImages.length === 0) {
-        this.allImages = [];
-        this.imageLoading = false;
-        return;
-      }
-      const userImages = initialImages.filter(url => {
-          if (typeof url !== 'string') return false;
-          
-          const isBrandingImage = /AJpkUkMYpoVBmYDWsVtg7vaddiSqbMufvdoJ6w3FbzbvNTbkC6fgma1R8b47CMn|AJbhBb9Ev3i1cHKtjoxtsCAaXK9njP56dzMwBRwfZVZ21WseKsCa6ZkfAbLGnbh|AJmthV3QiiU3f2pVE2wEzBrLJp6AYgFwbB9WWqWFhA7ta3ejN2BcFkpbhTLDCQb|23tkbEYQioWnn3mfu8tWBh3x8n1Wz8TM9nH6SPRoghyZ46q2NNzt3aFsds2c8SjoknXRM|DQmdvc788wxsBSQHY3z21o3wSTU7hqRnyYc2JFEn2pEYSev|DQmeWzNEfmAnX91Ze89zqQU3B2uS58sn6dc2A6L74xLfAvr|DQmXi8aWqhnxa466MiBEhhTTCHeehoMuGrohtNG7et92Ne|DQmUtuWaSFoo8AtWd9fo4Tb7AEGhLo8rRrjqKPHHz2o7Mup|DQmcngR7AdBJio52C5stkD5C7vgsQ1yDH57Lb4J96Pys4a9|DQmRDW8jdYmE37tXvM6xPxuNnzNQnUJWSDnxVYyRJEHyc9H|DQmdnh1nApZieHZ3s1fEhCALDjnzytFwo78zbAY5CLUMpoG|DQmdNAWWwv6MAJjiNUWRahmAqbFBPxrX8WLQvoKyVHHqih1|DQmPKUZ5uZpL3Uq6LUUQXgNaaqsyX7ADpNyF4wHeTScs3xD|DQmeG5Bv1gKu2rQFWA1hH3QxzLzgzDPhDwieEEpy4WPnqN4|DQmPscjCVBggXvJT2GaUp66vbtyxzdzyHuhnzc38WDp4Smg|DQmV7NRosGCmNLsyHGzmh4Vr1pQJuBPEy2rk3WvnEUDxDFA|DQmY5UUP99u5ob3D8MA9JJW23zXLjHXHSRofSH3jLGEG1Yr|DQmW1VsUNbEjTUKawau4KJQ6agf41p69teEvdGAj1TMXmuc|DQmQqfpSmcQtfrHAtzfBtVccXwUL9vKNgZJ2j93m8WNjizw|DQmbWy8KzKT1UvCvznUTaFPw6wBUcyLtBT5XL9wdbB7Hfmn|DQmNp6YwAm2qwquALZw8PdcovDorwaBSFuxQ38TrYziGT6b|DQmXv9QWiAYiLCSr3sKxVzUJVrgin3ZZWM2CExEo3fd5GUS|DQmV2hBheBVo9QWTXCxvqRqe4Fsg6kFTGggsTNGga9gTUHm|23w3F6U3PgtaT14tL5ewc1FoCwJcebdmZ3nrj2H6x2cTf4RzKWuicnQqvJGQ8tZxqX4Q5|ACTIVITYDQmeG5Bv1gKu2rQFWA1hH3QxzLzgzDPhDwieEEpy4WPnqN4|23yJg2hJAuEDUwg82kS1eC3EQqkVDzPEEyPa4rwymVHoz5mKPanjmshFa5s6tcPe3SP9c|DQmQJeGKQVsYFDFnHxgTHyNdrZxQmjLSJxz1wLB5HJDaZV3|DQmYfJ7SsTGpkR6gWoyLzo4pGrxnFopkcKzRVjgE6NRRXQL|DQmRoHaVPUiTagwviNmie8Ub5j4ZW1VcJGycZebmiH8ZdH5/i.test(url);
-          if (isBrandingImage) return false;
-          
-          // THE FIX: Added the new domains to the trusted sources list.
-          const isTrustedUserMedia = url.includes('cdn.liketu.com') || url.includes('usermedia.actifit.io') || url.includes('pixabay.com') || url.includes('files.peakd.com') || url.includes('images.d.buzz') || url.includes('img.leopedia.io') || url.includes('images.hive.blog') || url.includes('images.ecency.com');
-          const isStandardImageFile = /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
-          return isTrustedUserMedia || isStandardImageFile;
-      });
-      const uniqueImages = [...new Set(userImages)];
-      
-      const resizedImages = uniqueImages.map(url => this.getResizedImageUrl(url));
-      this.allImages = resizedImages;
-
-      this.currentImageIndex = 0;
-      
-      if (this.allImages.length === 0) {
-        this.imageLoading = false;
-      }
-    },
-    nextImage() {
-      if (this.allImages.length > 1) {
-        this.imageLoading = true;
-        this.currentImageIndex = (this.currentImageIndex + 1) % this.allImages.length;
-      }
-    },
-    prevImage() {
-      if (this.allImages.length > 1) {
-        this.imageLoading = true;
-        this.currentImageIndex = (this.currentImageIndex - 1 + this.allImages.length) % this.allImages.length;
-      }
-    },
-
-    goToImage(index) {
-      if (this.currentImageIndex !== index) {
-        this.imageLoading = true;
-        this.currentImageIndex = index;
-      }
-    },
-    // END: Carousel and Image Loader Methods
-
-    handleImageError(event, meta){
-      if(!this.imageError){
-        const image = event.target;
-        this.imageError = true;
-        let src = this.$fetchHiveFmtPostImage(meta);
-        image.src = src;
-        event.target.onerror = null;
-      }
-    },
-    showTooltip() {
-      this.isTooltipVisible = true;
-    },
-    hideTooltip() {
-      this.isTooltipVisible = false;
-    },
-    toggleTooltip() {
-      this.isTooltipVisible = !this.isTooltipVisible;
-    },
-    fixedContent() {
-      if (this.$refs["post_body"]) {
-        //console.log(this.$refs["post_body"].innerHTML);
-        //remove html tags from text
-        return this.$refs["post_body"].innerHTML.replace(/<[^>]+>/g, '');;
-      }
-      return "";
-    },
-    renderSnippet(content) {
-      let post_content = this.$cleanBody(content, true);//2nd param confirms to remove all tags
-      post_content = this.truncateString(post_content, 150);
-      return post_content.replace(/<[^>]+>/g, '');
-    },
-    /* function checks if post has beneficiaries */
-    hasBeneficiaries() {
-      return Array.isArray(this.post.beneficiaries) && this.post.beneficiaries.length > 0;
-    },
-    beneficiariesDisplay() {
-      let output = 'Beneficiaries:\n';
-      for (let i = 0; i < this.post.beneficiaries.length; i++) {
-        output += this.post.beneficiaries[i].account + ': ' + this.post.beneficiaries[i].weight / 100 + '% \n';
-      }
-      return output;
-    },
-    /* function returns author payout value */
-    paidValue() {
-      if (this.post.total_payout_value) return this.post.total_payout_value
-      if (this.post.author_payout_value) return this.post.author_payout_value
-    },
-    /* function checks to see if post reached its payout period */
-    postPaid() {
-      //console.log(this.post);
-      if (this.post.is_paidout) {
-        //works for comments
-        return true;
-      }
-      //check if last_payout is after cashout_time which means post got paid
-      let last_payout = new Date(this.post.last_payout);
-      let cashout_time = new Date(this.post.cashout_time);
-      if (last_payout.getTime() > cashout_time.getTime()) {
-        return true;
-      }
-      return false;
-    },
-    //function handles displaying cut off version of text to avoid lengthy titles
-    truncateString(str, ln) {
-      if (str.length > ln) {
-        return str.substring(0, ln - 3) + "...";
-      }
-      return str;
-    },
-    /* function checks if logged in user has upvoted current post */
-    userVotedThisPost() {
-      let curUser = this.user.account.name;
-      //check if the post contains in its original voters current user, or if it has been upvoted in current session
-      this.postUpvoted = this.post.active_votes.filter(voter => (voter.voter === curUser)).length > 0 || this.newlyVotedPosts.indexOf(this.post.post_id) !== -1;
-      return this.postUpvoted;
-    },
-    /* function handles confirming if the user had voted already to prevent issues */
-    votePrompt(e) {
-      //if no user is logged in, prompt to login
-      //hasan this is responsible for not letting not logged in users access it
-      /*
-      if (!this.user){
-        alert(this.$t('need_login_signup_notice_vote'));
-        e.stopPropagation();
-      }else{
-        //proceed normally showing vote popup
-        this.$store.commit('setPostToVote', this.post)
-      }
-      */
-      this.$store.commit('setPostToVote', this.post)
-    },
-
-    newlyVotedPostsQuery() {
-      //handles returning a list of recently manually upvoted on this current session
-      return this.newlyVotedPosts.length;
-    },
-    setProperNode() {
-      let properNode = hive;
-      if (this.cur_bchain == 'STEEM') {
-        properNode = steem;
-      }
-      return properNode;
-    },
-    async updatePostData() {
-      // try to fetch matching post
-      let chainLnk = await this.setProperNode();
-      chainLnk.api.getContent(this.post.author, this.post.permlink, (err, result) => {
-        this.post.total_payout_value = result.total_payout_value;
-        this.post.pending_payout_value = result.pending_payout_value;
-      })
-    }
-  },
-  async mounted() {
-    steem.api.setOptions({ url: process.env.steemApiNode });
-    hive.api.setOptions({ url: process.env.hiveApiNode });
-    fetch(process.env.actiAppUrl + 'getPostReward?user=' + this.post.author + '&url=' + this.post.url).then(res => {
-      //grab the post's reward to display it properly
-      res.json().then(json => this.afitReward = json.token_count)
-    }).catch(e => reject(e))
-
-    //console.log('post details');
-    //console.log(this.post);
-    //return;
-
-    //grab the author's rank
-    fetch(process.env.actiAppUrl + 'getRank/' + this.post.author).then(res => {
-      res.json().then(json => this.userRank = json)
-    }).catch(e => reject(e))
-
-    //grab post full pay if full pay mode enabled
-    //fetch(process.env.actiAppUrl+'getPostFullAFITPayReward?user=' + this.post.author+'&url='+this.post.url).then(res => {
-    //res.json().then(json => this.fullAFITReward = json.token_count)}).catch(e => reject(e))
-
-    //grab moderators' list
-    this.$store.dispatch('fetchModerators')
-
-    this.cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
-
-    this.profImgUrl = process.env.hiveImgUrl;
-    if (this.cur_bchain == 'STEEM') {
-      this.profImgUrl = process.env.steemImgUrl;
-    }
-
-    this.setupImages();
-  },
-
+  async mounted () {
+    this.initializeCard()
+  }
 }
 </script>
 
-<style lang="sass">
+<style lang="sass" scoped>
   .post
     height: 100%
     h6
@@ -550,63 +232,25 @@ export default {
       float: left
       border: solid 1px #ddd
 </style>
-<style>
-.full-afit-txt {
-  font-style: italic;
-}
-
-.check-tooltip {
-  color: white;
-}
-
-.post-title {
-  min-height: 60px;
-}
-
-.card {
-  box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
-  overflow: hidden;
-  min-height: 400px;
-}
-
-.card-pinned {
-  box-shadow: 3px 3px 3px rgba(204, 204, 0, 0.4);
-  overflow: hidden;
-}
-
-.single {
-  min-width: 17em;
-}
-
-.post-image {
-  width: 100%;
-  height: 150px;
-  object-fit: cover;
-}
-
-.post h6 a,
-#post_body_render {
-  text-wrap: balance;
-}
-
-.post {
-  vertical-align: top;
-}
-
-.post-reblog{
-  font-style:italic;
-}
-
-/* Styles for the new image carousel */
+<style scoped>
+.full-afit-txt { font-style: italic; }
+.check-tooltip { color: white; }
+.post-title { min-height: 60px; }
+.card { box-shadow: 3px 3px 3px rgb(255 0 0 / 40%); overflow: hidden; min-height: 400px; }
+.card-pinned { box-shadow: 3px 3px 3px rgba(204, 204, 0, 0.4); overflow: hidden; }
+.single { min-width: 17em; }
+.post-image { width: 100%; height: 150px; object-fit: cover; }
+.post h6 a, #post_body_render { text-wrap: balance; }
+.post { vertical-align: top; }
+.post-reblog{ font-style:italic; }
 .image-carousel-container { position: relative; overflow: hidden; height: 150px; background-color: #f0f0f0; }
 .image-loader-container { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
-.image-loader { font-size: 2em; }
-.carousel-arrow { position: absolute; top: 50%; transform: translateY(-50%); background-color: rgba(0, 0, 0, 0.5); color: white; padding: 8px; cursor: pointer; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; user-select: none; transition: background-color 0.2s; z-index: 2; }
+.carousel-arrow { position: absolute; top: 50%; transform: translateY(-50%); background-color: rgba(0, 0, 0, 0.5); color: white; padding: 8px; cursor: pointer; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; user-select: none; z-index: 2; }
 .carousel-arrow:hover { background-color: rgba(0, 0, 0, 0.8); }
 .carousel-arrow.left { left: 10px; }
 .carousel-arrow.right { right: 10px; }
 .image-counter { position: absolute; bottom: 8px; right: 8px; background-color: rgba(0, 0, 0, 0.7); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: bold; z-index: 2; }
 .carousel-bullets { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 2; }
-.carousel-bullet { width: 8px; height: 8px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.6); cursor: pointer; transition: background-color 0.2s; }
+.carousel-bullet { width: 8px; height: 8px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.6); cursor: pointer; }
 .carousel-bullet.active { background-color: #fff; }
 </style>
