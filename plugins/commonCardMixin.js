@@ -20,14 +20,17 @@ export const commonCardMixin = {
       imageError: false,
       allImages: [],
       currentImageIndex: 0,
-      imageLoading: true
+      imageLoading: true,
+      cardWidth: 0,
+      debounceTimer: null,
+      // --- New flag to ensure resize listener is only added once ---
+      resizeListenerAdded: false,
+      imageGeneration: 0
     }
   },
   computed: {
     cardData () {
-      // This is a placeholder. The component using the mixin MUST override this.
-      // e.g., in report.vue -> `cardData() { return this.report; }`
-      // e.g., in post.vue -> `cardData() { return this.post; }`
+      // Placeholder, must be overridden by component
       return {}
     },
     meta () {
@@ -58,6 +61,15 @@ export const commonCardMixin = {
   watch: {
     postUpvoted: 'updatePostData'
   },
+  // --- REMOVED mounted() hook from here. Logic is moved to initializeCard() ---
+
+  beforeDestroy () {
+    // Clean up the event listener to prevent memory leaks
+    if (this.resizeListenerAdded) {
+      window.removeEventListener('resize', this.debouncedResizeHandler)
+    }
+    clearTimeout(this.debounceTimer)
+  },
   methods: {
     onImageLoad () {
       this.imageLoading = false
@@ -66,45 +78,32 @@ export const commonCardMixin = {
       this.imageLoading = false
       this.handleImageError(event, this.meta)
     },
-    /**
-     * Intelligently resizes an image URL.
-     * It only applies the Hive proxy to URLs that are NOT from a known Hive image CDN.
-     * @param {string} url The original image URL.
-     * @param {number} [width=400] The desired maximum width.
-     * @returns {string} The potentially proxied and resized image URL.
-     */
     getResizedImageUrl (url, width = 400) {
       if (typeof url !== 'string' || !url.startsWith('http') || /\.gif$/i.test(url)) {
         return url
       }
-
-      // List of trusted CDNs that likely provide already-optimized images.
-      const trustedHosts = [
-        'images.hive.blog',
-        'usermedia.actifit.io',
-        'cdn.liketu.com',
-        'files.peakd.com',
-        'images.ecency.com',
-        'images.d.buzz',
-        'img.leopedia.io'
-      ];
-      
+      const trustedHosts = ['images.hive.blog', 'usermedia.actifit.io', 'cdn.liketu.com', 'files.peakd.com', 'images.ecency.com', 'images.d.buzz', 'img.leopedia.io'];
       try {
         const hostname = new URL(url).hostname;
-        // If the image is already on a trusted host, use the URL directly.
         if (trustedHosts.some(trustedHost => hostname.endsWith(trustedHost))) {
           return url;
         }
       } catch (e) {
-        // Invalid URL, return as-is
         return url;
       }
-
-      // For all other generic URLs, use the resizer proxy.
-      const resizeProxy = `https://images.hive.blog/${width}x0/`
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const effectiveWidth = Math.round(width * dpr);
+      const resizeProxy = `https://images.hive.blog/${effectiveWidth}x0/`
       return resizeProxy + url
     },
-    setupImages () {
+    setupImages (width) {
+      // This function relies on `this.meta`, which in turn relies on `this.cardData`.
+      // It's crucial that `cardData` is available when this is called.
+      if (!this.cardData || !this.cardData.json_metadata) {
+          this.allImages = [];
+          this.imageLoading = false;
+          return;
+      }
       const metaImages = this.meta.image
       let initialImages = []
       if (Array.isArray(metaImages)) {
@@ -118,24 +117,19 @@ export const commonCardMixin = {
         this.imageLoading = false
         return
       }
-      
+
       const brandingImagesRegex = /DQmNp6YwAm2qwquALZw8PdcovDorwaBSFuxQ38TrYziGT6b|DQmY67NW9SgDEsLo2nsAw4nYcddrTjp4aHNLyogKvGuVMMH|DQmW1VsUNbEjTUKawau4KJQ6agf41p69teEvdGAj1TMXmuc|DQmXv9QWiAYiLCSr3sKxVzUJVrgin3ZZWM2CExEo3fd5GUS|DQmdnh1nApZieHZ3s1fEhCALDjnzytFwo78zbAY5CLUMpoG|DQmZ6ZT8VaEpaDzB16qZzK8omffbWUpEpe4BkJkMXmN3xrF|DQmRgAoqi4vUVymaro8hXdRraNX6LHkXhMRBZxEo5vVWXDN|5CEvyaWxjaErqc3i7tYRQutZDwQPeZ8E6Ha3BenkA3Uc6fhKSLZ62PuSojTnM4kkLrYUdChBgBHoPxiDt|23tm6o6cmgwSRVABZSPxMC77Sfa2VNsaTtHWsjEpV1hWdQSe2s4FxvCyifsbKyESxfiPu|DQmUVjgmJHvtbYB2APdxqNxxkZeJ2KvPeXEE7v3BpxGJkbR|23tkbEYQioWnn3mfu8tWBh3x8n1Wz8TM9nH6SPRoghyZ46q2NNzt3aFsds2c8SjoknXRM|DQmdvc788wxsBSQHY3z21o3wSTU7hqRnyYc2JFEn2pEYSev|DQmeWzNEfmAnX91Ze89zqQU3B2uS58sn6dc2A6L74xLfAvr|DQmXi8aWqhnxa466MiBEhhTTCHeehoMuGrohtNG7et92Ne|DQmUtuWaSFoo8AtWd9fo4Tb7AEGhLo8rRrjqKPHHz2o7Mup|DQmcngR7AdBJio52C5stkD5C7vgsQ1yDH57Lb4J96Pys4a9|DQmRDW8jdYmE37tXvM6xPxuNnzNQnUJWSDnxVYyRJEHyc9H|DQmdNAWWwv6MAJjiNUWRahmAqbFBPxrX8WLQvoKyVHHqih1|DQmPKUZ5uZpL3Uq6LUUQXgNaaqsyX7ADpNyF4wHeTScs3xD|DQmeG5Bv1gKu2rQFWA1hH3QxzLzgzDPhDwieEEpy4WPnqN4|DQmPscjCVBggXvJT2GaUp66vbtyxzdzyHuhnzc38WDp4Smg|DQmV7NRosGCmNLsyHGzmh4Vr1pQJuBPEy2rk3WvnEUDxDFA|DQmY5UUP99u5ob3D8MA9JJW23zXLjHXHSRofSH3jLGEG1Yr|DQmQqfpSmcQtfrHAtzfBtVccXwUL9vKNgZJ2j93m8WNjizw|DQmbWy8KzKT1UvCvznUTaFPw6wBUcyLtBT5XL9wdbB7Hfmn|DQmV2hBheBVo9QWTXCxvqRqe4Fsg6kFTGggsTNGga9gTUHm|23w3F6U3PgtaT14tL5ewc1FoCwJcebdmZ3nrj2H6x2cTf4RzKWuicnQqvJGQ8tZxqX4Q5|ACTIVITYDQmeG5Bv1gKu2rQFWA1hH3QxzLzgzDPhDwieEEpy4WPnqN4|23yJg2hJAuEDUwg82kS1eC3EQqkVDzPEEyPa4rwymVHoz5mKPanjmshFa5s6tcPe3SP9c|DQmQJeGKQVsYFDFnHxgTHyNdrZxQmjLSJxz1wLB5HJDaZV3|DQmYfJ7SsTGpkR6gWoyLzo4pGrxnFopkcKzRVjgE6NRRXQL|DQmRoHaVPUiTagwviNmie8Ub5j4ZW1VcJGycZebmiH8ZdH5|AJpkUkMYpoVBmYDWsVtg7vaddiSqbMufvdoJ6w3FbzbvNTbkC6fgma1R8b47CMn|AJbhBb9Ev3i1cHKtjoxtsCAaXK9njP56dzMwBRwfZVZ21WseKsCa6ZkfAbLGnbh|AJmthV3QiiU3f2pVE2wEzBrLJp6AYgFwbB9WWqWFhA7ta3ejN2BcFkpbhTLDCQb/i;
 
       const userImages = initialImages.filter(url => {
         if (typeof url !== 'string') return false
         if (brandingImagesRegex.test(url)) return false
-        
-        // This check is simpler now, as we just need to validate it's an image link.
-        // The getResizedImageUrl function will handle the host-specific logic.
-        const isStandardImageFile = /\.(jpg|jpeg|png|gif|webp)$/i.test(url.split('?')[0]); // Check before query params
+        const isStandardImageFile = /\.(jpg|jpeg|png|gif|webp)$/i.test(url.split('?')[0]);
         const isFromTrustedHost = /usermedia\.actifit\.io|images\.hive\.blog|cdn\.liketu\.com|pixabay\.com|files\.peakd\.com|images\.d\.buzz|img\.leopedia\.io|images\.ecency\.com/.test(url);
-
         return isFromTrustedHost || isStandardImageFile;
       })
 
       const uniqueImages = [...new Set(userImages)]
-      // The resizing function is now smart and applies the proxy selectively.
-      const processedImages = uniqueImages.map(url => this.getResizedImageUrl(url, 400))
+      const processedImages = uniqueImages.map(url => this.getResizedImageUrl(url, width))
 
       this.allImages = processedImages
       this.currentImageIndex = 0
@@ -143,6 +137,26 @@ export const commonCardMixin = {
       if (this.allImages.length === 0) {
         this.imageLoading = false
       }
+    },
+    updateDimensionsAndSetupImages () {
+      if (this.$el) {
+        const newWidth = Math.round(this.$el.offsetWidth);
+        if (newWidth > 0 && newWidth !== this.cardWidth) {
+          this.cardWidth = newWidth;
+          // Set loading state to true. The @load event on the new image will reset it.
+          // This is the key part that was failing due to a race condition.
+          // The new initialization flow should make it reliable.
+          this.imageGeneration++; 
+          this.imageLoading = true;
+          this.setupImages(this.cardWidth);
+        }
+      }
+    },
+    debouncedResizeHandler () {
+      clearTimeout(this.debounceTimer);
+      this.debounceTimer = setTimeout(() => {
+        this.updateDimensionsAndSetupImages();
+      }, 250);
     },
     nextImage () {
       if (this.allImages.length > 1) {
@@ -227,7 +241,25 @@ export const commonCardMixin = {
         }
       })
     },
+    /**
+     * MODIFIED: This is now the main setup method called by components.
+     * It handles timing, dimensions, listeners, and data fetching.
+     */
     async initializeCard () {
+      // 1. Wait for the component's DOM to be ready before doing anything.
+      // This is the key fix to prevent race conditions.
+      await this.$nextTick();
+      
+      // 2. Perform the initial dimension calculation and image setup.
+      this.updateDimensionsAndSetupImages();
+
+      // 3. Add the resize listener only once.
+      if (!this.resizeListenerAdded) {
+        window.addEventListener('resize', this.debouncedResizeHandler);
+        this.resizeListenerAdded = true;
+      }
+      
+      // 4. Proceed with asynchronous data fetching.
       steem.api.setOptions({ url: process.env.steemApiNode })
       hive.api.setOptions({ url: process.env.hiveApiNode })
 
@@ -244,8 +276,6 @@ export const commonCardMixin = {
       this.$store.dispatch('fetchModerators')
       this.cur_bchain = localStorage.getItem('cur_bchain') || 'HIVE'
       this.profImgUrl = this.cur_bchain === 'STEEM' ? process.env.steemImgUrl : process.env.hiveImgUrl
-
-      this.setupImages()
     }
   }
 }

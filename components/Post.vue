@@ -37,7 +37,7 @@
         <div class="row">
           <div class="col-12">
             <!-- START: Carousel Functionality Merged Here -->
-            <div class="image-carousel-container" v-if="allImages.length > 0">
+            <div class="image-carousel-container" v-if="allImages.length > 0" :key="imageGeneration">
               <!-- Loader is absolutely positioned and shown when imageLoading is true -->
               <div v-if="imageLoading" class="image-loader-container">
                 <i class="fas fa-spinner fa-spin text-brand" style="display:flex; justify-content: center;text-align: center; margin-bottom: 3rem; margin-top: 2rem;"></i>
