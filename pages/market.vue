@@ -49,7 +49,7 @@
       <ListHeadingSection :textualDisplay="$t('market_title')" />
        <div class="info-toggle">
     	<a href="#" class="info-btn" @click.prevent="toggleInfo">
-      	<i class="fas fa-info-circle"></i> info
+      	Info <i class="fas fa-info-circle"></i> 
     	</a>
     	<div class="market-sub" v-if="showMarketSub">{{ $t('market_subtitle') }}</div>
   	</div>
