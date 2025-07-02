@@ -3,7 +3,7 @@
     <NavbarBrand />
 
 <!-- listing -->
-<div class="marketplace-container pt-5" style="margin-top:25px ;">
+<div class="marketplace-container pt-5" style="margin-top:30px ;">
   <!-- Side Navigation -->
   <div class="marketplace-sidebar">
     <!-- User Stats Section -->
@@ -41,52 +41,62 @@
         </div>
       </div>
     </div>
-    
-    <!-- Filters Section -->
-    <div class="sidebar-card">
-      <h4 class="sidebar-title"><i class="fas fa-sliders-h"></i> {{$t('Sort_Filter')}}</h4>
-      
-      <div class="filter-group">
-        <select v-model="currentSort" class="form-control sel-adj">
-          <option value="">-- {{$t('Sort_By')}} --</option>
-          <option :value="JSON.stringify({value: 'name', direction: 'asc'})">{{$t('Name')}}▲</option>
-          <option :value="JSON.stringify({value: 'name', direction: 'desc'})">{{$t('Name')}}▼</option>
-          <option :value="JSON.stringify({value: 'level', direction: 'asc'})">{{$t('Level')}}▲</option>
-          <option :value="JSON.stringify({value: 'level', direction: 'desc'})">{{$t('Level')}}▼</option>
-          <option :value="JSON.stringify({value: 'price', direction: 'asc'})">{{$t('Price')}}▲</option>
-          <option :value="JSON.stringify({value: 'price', direction: 'desc'})">{{$t('Price')}}▼</option>
-          <option :value="JSON.stringify({value: 'reqtsFilled', direction: 'desc'})">{{$t('Ready')}}▲</option>
-          <option :value="JSON.stringify({value: 'reqtsFilled', direction: 'asc'})">{{$t('Ready')}}▼</option>
-          <option :value="JSON.stringify({value: 'bought', direction: 'asc'})">{{$t('Bought')}}▲</option>
-          <option :value="JSON.stringify({value: 'bought', direction: 'desc'})">{{$t('Bought')}}▼</option>
-        </select>
-      </div>
-      
-      <div class="filter-group">
-        <select v-model="currentFilter" class="form-control sel-adj">
-          <option value="">-- {{$t('Filter_By')}} --</option>
-          <option value="">{{$t('All')}}</option>
-          <option value="ingame">{{$t('Game')}}</option>
-          <option value="service">{{$t('Consultation')}}</option>
-          <option value="ebook">{{$t('Ebook')}}</option>
-          <option value="real">{{$t('Physical_Products')}}</option>
-        </select>
-      </div>
-      
-      <div class="expansion-arrow-all">
-        <a class="arrow-icon filter-arrow" v-on:click="expandAllSwitchStatus" :class="expandAllStatus" :title="expandAllStatusText">
-          <span class="left-bar"></span>
-          <span class="right-bar"></span>
-        </a>
-      </div>
-    </div>
   </div>
   
   <!-- Main Content Area -->
   <div class="marketplace-main">
     <div class="marketplace-header">
       <ListHeadingSection :textualDisplay="$t('market_title')" />
-      <div class="market-sub">{{ $t('market_subtitle') }}</div>
+       <div class="info-toggle">
+    	<a href="#" class="info-btn" @click.prevent="toggleInfo">
+      	<i class="fas fa-info-circle"></i> info
+    	</a>
+    	<div class="market-sub" v-if="showMarketSub">{{ $t('market_subtitle') }}</div>
+  	</div>
+
+	  <!-- Add this new filtering section -->
+<div class="filters-container">
+  <div class="filters-inner">
+    <div class="filter-box">
+      <label><i class="fas fa-sort-amount-down"></i> {{$t('Sort_By')}}</label>
+      <select v-model="currentSort" class="form-control filter-select">
+        <option value="">-- {{$t('Sort_By')}} --</option>
+        <option :value="JSON.stringify({value: 'name', direction: 'asc'})">{{$t('Name')}}▲</option>
+        <option :value="JSON.stringify({value: 'name', direction: 'desc'})">{{$t('Name')}}▼</option>
+        <option :value="JSON.stringify({value: 'level', direction: 'asc'})">{{$t('Level')}}▲</option>
+        <option :value="JSON.stringify({value: 'level', direction: 'desc'})">{{$t('Level')}}▼</option>
+        <option :value="JSON.stringify({value: 'price', direction: 'asc'})">{{$t('Price')}}▲</option>
+        <option :value="JSON.stringify({value: 'price', direction: 'desc'})">{{$t('Price')}}▼</option>
+        <option :value="JSON.stringify({value: 'reqtsFilled', direction: 'desc'})">{{$t('Ready')}}▲</option>
+        <option :value="JSON.stringify({value: 'reqtsFilled', direction: 'asc'})">{{$t('Ready')}}▼</option>
+        <option :value="JSON.stringify({value: 'bought', direction: 'asc'})">{{$t('Bought')}}▲</option>
+        <option :value="JSON.stringify({value: 'bought', direction: 'desc'})">{{$t('Bought')}}▼</option>
+      </select>
+    </div>
+    
+    <div class="filter-box">
+      <label><i class="fas fa-filter"></i> {{$t('Filter_By')}}</label>
+      <select v-model="currentFilter" class="form-control filter-select">
+        <option value="">-- {{$t('Filter_By')}} --</option>
+        <option value="">{{$t('All')}}</option>
+        <option value="ingame">{{$t('Game')}}</option>
+        <option value="service">{{$t('Consultation')}}</option>
+        <option value="ebook">{{$t('Ebook')}}</option>
+        <option value="real">{{$t('Physical_Products')}}</option>
+      </select>
+    </div>
+    
+    <div class="expand-toggle">
+      <a class="expand-btn" v-on:click="expandAllSwitchStatus" :class="expandAllStatus" :title="expandAllStatusText">
+        <span class="expand-text">{{ expandAllStatusText }}</span>
+        <span class="arrow-icon">
+          <span class="left-bar"></span>
+          <span class="right-bar"></span>
+        </span>
+      </a>
+    </div>
+  </div>
+</div>
     </div>
     
     <!-- Special Event Section -->
@@ -166,6 +176,7 @@
     },
     data () {
       return {
+		showMarketSub: false,
 		currentFilter: '',
 		currentSort: JSON.stringify({value: 'price', direction: 'asc'}),
 		prodList: [],
@@ -272,6 +283,9 @@
 			this.ticketCount = 0;
 		}
 	  },
+	  toggleInfo() {
+  		this.showMarketSub = !this.showMarketSub;
+	},
 	  async fetchUserBuyTicketEntries () {
 	    //fetch user ticket entries
 		if (this.user && this.user.account){
@@ -355,6 +369,7 @@
       this.$store.dispatch('fetchPros')
 
     }
+	
   }
 </script>
 <style>
@@ -446,6 +461,12 @@
   color: red;
   font-size: 1.1	rem;
   margin-bottom: 15px;
+  background: linear-gradient(20deg, #f8f9fa, white);
+  border: 1px solid red;
+  border-radius: 8px;
+  padding: 10px 15px;
+  margin-top: 5px;
+  animation: fadeIn 0.3s ease;
 }
 
 .products-row {
@@ -549,6 +570,132 @@
   animation: blink 3s infinite;
 }
 
+/* New filter styles */
+.filters-container {
+  background: linear-gradient(20deg, #f8f9fa, white);
+  border: 1px solid red;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 25px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.filters-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: center;
+}
+
+.filter-box {
+  flex: 1;
+  min-width: 200px;
+}
+
+.filter-box label {
+  display: block;
+  margin-bottom: 5px;
+  color: red;
+  font-weight: 600;
+}
+
+.filter-select {
+  border: 1px solid red;
+  background-color: white;
+  color: #333;
+  height: 40px;
+  border-radius: 4px;
+  transition: all 0.3s;
+}
+
+.filter-select:focus {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.expand-toggle {
+  display: flex;
+  align-items: flex-end;
+  height: 100%;
+}
+
+.expand-btn {
+  display: flex;
+  align-items: center;
+  color: red;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.expand-btn:hover {
+  color: #dc3545;
+}
+
+.expand-text {
+  margin-right: 10px;
+}
+
+.arrow-icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  position: relative;
+}
+
+.arrow-icon .left-bar,
+.arrow-icon .right-bar {
+  position: absolute;
+  background-color: red;
+  width: 30px;
+  height: 2px;
+  top: 50%;
+  left: 30%;
+  transition: all 0.3s;
+}
+
+.arrow-icon .left-bar {
+  transform: translate(-50%, -50%) rotate(45deg);
+  transform-origin: left center;
+}
+
+.arrow-icon .right-bar {
+  transform: translate(-50%, -50%) rotate(-45deg);
+  transform-origin: right center;
+}
+
+.expand-btn.open .left-bar {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.expand-btn.open .right-bar {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.info-toggle {
+  position: relative;
+}
+
+.info-btn {
+  color: red;
+  font-size: 1.2rem;
+  text-decoration: none;
+  transition: all 0.3s;
+  display: inline-block;
+  margin-bottom: 10px;
+}
+
+.info-btn:hover {
+  color: #dc3545;
+  transform: scale(1.1);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @keyframes blink {
   0%, 50%, 100% { background-color: pink; }
   25%, 75% { background-color: red; }
@@ -586,4 +733,4 @@
     grid-template-columns: 1fr;
   }
 }
-</style>
+</style> 
