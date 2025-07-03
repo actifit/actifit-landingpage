@@ -1156,6 +1156,8 @@ module.exports = {
   Website:'Website',
   Latest_Activity_Count:'Latest_Activity_Count',
   Latest_Activity_Date:'Latest_Activity_Date',
+  hide_reblogs:'hide reblogs',
+  show_reblogs:'show reblogs',
 
 
 }
