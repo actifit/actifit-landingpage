@@ -2098,10 +2098,6 @@ export default {
   width: 100%;
 }
 
-.pro-card {
-  /*width: 400px;*/
-}
-
 .pro-name {
   background: radial-gradient(red, transparent);
   color: white;
@@ -2198,8 +2194,6 @@ div.basic-info {
 .info-box-green {
   background: #28a700;
 }
-
-.card-section {}
 
 .lb-item {
   height: 75px !important;
