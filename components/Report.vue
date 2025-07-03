@@ -28,7 +28,14 @@
               </div>
               <a href="#" :style="{ visibility: imageLoading ? 'hidden' : 'visible' }" class="text-brand" @click="report.rptId = rptId; $store.commit('setActiveReport', report)"
                 data-toggle="modal" data-target="#reportModal" :title="$t('read_more_small')">
-                <img :key="currentImageSrc" :src="currentImageSrc" :alt="report.title" class="report-image" @load="onImageLoad" @error="onImageError">
+                <img
+                  :src="currentImageSrc"
+                  :key="currentImageSrc"
+                  :alt="report.title"
+                  class="report-image"
+                  @load="onImageLoad"
+                  @error="onImageError"
+                />
               </a>
               <template v-if="allImages.length > 1">
                 <div class="carousel-arrow left" @click.prevent="prevImage">
