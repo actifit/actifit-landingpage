@@ -25,7 +25,8 @@ export const commonCardMixin = {
       debounceTimer: null,
       // --- New flag to ensure resize listener is only added once ---
       resizeListenerAdded: false,
-      imageGeneration: 0
+      imageGeneration: 0,
+      imageLoadFailed: false
     }
   },
   computed: {
@@ -75,8 +76,9 @@ export const commonCardMixin = {
       this.imageLoading = false
     },
     onImageError (event) {
-      this.imageLoading = false
-      this.handleImageError(event, this.meta)
+      // On error, stop the loader and set the flag to hide the image container.
+      this.imageLoading = false;
+      this.imageLoadFailed = true;
     },
     getResizedImageUrl (url, width = 400) {
       if (typeof url !== 'string' || !url.startsWith('http') || /\.gif$/i.test(url)) {
@@ -249,6 +251,10 @@ export const commonCardMixin = {
       // 1. Wait for the component's DOM to be ready before doing anything.
       // This is the key fix to prevent race conditions.
       await this.$nextTick();
+
+      // Reset image state for each new card initialization
+      this.imageLoadFailed = false;
+      this.imageError = false;
       
       // 2. Perform the initial dimension calculation and image setup.
       this.updateDimensionsAndSetupImages();

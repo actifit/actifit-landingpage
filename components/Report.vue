@@ -22,7 +22,7 @@
         <div class="row">
           <div class="col-12">
             <!-- START: Carousel Functionality -->
-            <div class="image-carousel-container" v-if="allImages.length > 0" :key="imageGeneration">
+            <div v-if="!imageLoadFailed" class="image-carousel-container" :key="imageGeneration">
               <div v-if="imageLoading" class="image-loader-container">
                 <i class="fas fa-spinner fa-spin text-brand"></i>
               </div>
