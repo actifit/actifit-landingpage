@@ -1,56 +1,99 @@
 <template>
-  <!-- single card item for approved product -->
-  <div class="card form mx-auto p-3 mt-3 mt-md-5 text-center pro-card col-sm-4" :class="productTypeBorder">
-    <div class="text-center card-header">
-      <div class="row basic-info">
-        <h3 class="pro-name col-md-12">{{ this.product.name }}<span
-            v-if="!product.specialevent && this.product.level">{{ $t('level_short') }}{{ this.product.level }}</span>
-        </h3>
-
+    <!-- single card item for approved product -->
+  <div class="card form mx-auto p-3 mt-3 mt-md-5 text-center pro-card col-sm-4" 
+       :class="productTypeBorder" 
+       style="background: rgba(30, 30, 30, 0.85); backdrop-filter: blur(5px);">
+    
+    <!-- Card Header -->
+    <div class="text-center card-header" style="border-bottom: 1px solid rgba(231, 76, 60, 0.3);">
+      <div class="row basic-info align-items-center">
+        <!-- Product Image -->
         <div v-if="this.product.type == 'ingame' || this.product.type == 'real'" class="col-md-6"
           :title="!product.specialevent ? this.product.name + ' - Level ' + this.product.level : this.product.name">
-          <div v-if="this.product.image.startsWith('http')" :class="'avatar-' + this.product.level"
-            class="avatar pro-card-av mx-auto" :style="'background-image: url(' + this.product.image + ');'"></div>
-          <div v-else :class="'avatar-' + this.product.level" class="avatar pro-card-av mx-auto"
-            :style="'background-image: url(img/gadgets/' + this.product.image + ');'"></div>
-          <span v-for="iterl in this.product.level" :key="iterl">
-            <i class="fas fa-star text-brand"></i>
-          </span>
+          <div class="avatar-container">
+            <div v-if="this.product.image.startsWith('http')" 
+                 :class="'avatar-' + this.product.level"
+                 class="avatar pro-card-av mx-auto" 
+                 :style="'background-image: url(' + this.product.image + ');'"></div>
+            <div v-else :class="'avatar-' + this.product.level" 
+                 class="avatar pro-card-av mx-auto"
+                 :style="'background-image: url(img/gadgets/' + this.product.image + ');'"></div>
+            <div class="level-stars">
+              <span v-for="iterl in this.product.level" :key="iterl">
+                <i class="fas fa-star text-brand"></i>
+              </span>
+            </div>
+          </div>
         </div>
+        
         <div v-else class="col-md-6">
           <a :href="'/' + this.product.provider">
-            <div class="avatar pro-card-av mx-auto mb-3" :style="'background-image: url(' + product_prov_pic + ');'">
-            </div>
+            <div class="avatar pro-card-av mx-auto mb-3" 
+                 :style="'background-image: url(' + product_prov_pic + ');'"></div>
           </a>
         </div>
-        <div class="col-md-6">
-          <div v-if="this.product.type == 'ingame'" class="avatar gaming-label mx-auto"
-            :style="'background-image: url(img/gadgets/gaming.png);'"></div>
-          <h4 v-else-if="this.product.type == 'ebook'"><i class="fas fa-book"></i></h4>
-          <h4 v-else-if="this.product.type == 'service'"><i class='fas fa-phone-volume'></i></h4>
-          <h3 class="product-type">{{ renderProdType }} <span
-              v-if="this.product.type != 'ingame' && this.product.type != 'real'">{{ $t('By') }}</span> <br />
-            <a v-if="this.product.type == 'service'" :href="'/consultants/?prof=' + this.product.provider_name">{{
-              this.product.provider_name}}</a>
-            <a v-else :href="'/' + this.product.provider">{{ this.product.provider_name }}</a>
-            <span v-if="this.product.type == 'real'">
-              <span v-if="this.item_price_extra > 0"><img class="token-logo-md " src="/img/HIVE.png">+</span>
-              <span><img class="token-logo-md " src="/img/actifit_logo.png"></span>
-            </span>
+        
+        <!-- Product Info -->
+        <div class="col-md-6 product-meta">
+          <div v-if="this.product.type == 'ingame'" class="gaming-badge">
+            <div class="avatar gaming-label mx-auto"
+              :style="'background-image: url(img/gadgets/gaming.png);'"></div>
+          </div>
+          <h4 v-else-if="this.product.type == 'ebook'" class="type-icon">
+            <i class="fas fa-book"></i>
+          </h4>
+          <h4 v-else-if="this.product.type == 'service'" class="type-icon">
+            <i class='fas fa-phone-volume'></i>
+          </h4>
+          
+          <h3 class="product-type">
+            {{ renderProdType }} 
+            <span v-if="this.product.type != 'ingame' && this.product.type != 'real'">{{ $t('By') }}</span> 
+            <br />
+            <a v-if="this.product.type == 'service'" 
+               :href="'/consultants/?prof=' + this.product.provider_name"
+               class="provider-link">
+              {{ this.product.provider_name}}
+            </a>
+            <a v-else :href="'/' + this.product.provider" class="provider-link">
+              {{ this.product.provider_name }}
+            </a>
           </h3>
-          <!--<div class="pb-md-2 text-left" >
-					<b>{{ $t('price')}}: </b>{{numberFormat(this.item_price, 2)}} {{this.item_currency}}<img class="token-logo" src="/img/actifit_logo.png">
-				  </div>-->
+          
+          <!-- Price Display -->
+          <div class="price-display">
+            <div v-if="this.item_price_extra > 0" class="dual-price">
+              <span class="hive-price">
+                <img class="token-logo-sm" src="/img/HIVE.png">
+                {{ numberFormat(this.item_price_extra, 2) }} HIVE
+              </span>
+              <span class="plus-sign">+</span>
+              <span class="afit-price">
+                <img class="token-logo-sm" src="/img/actifit_logo.png">
+                {{ numberFormat(this.item_price, 2) }} AFIT
+              </span>
+            </div>
+            <div v-else class="single-price">
+              <img class="token-logo-sm" src="/img/actifit_logo.png">
+              {{ numberFormat(this.item_price, 2) }} AFIT
+            </div>
+          </div>
         </div>
       </div>
-      <div class="row expansion-arrow">
-       <a class="arrow-icon enlarged-arrow" v-on:click="switchArrowStatus" :class="prodDispStatus" :title="prodDispStatusText">
+      
+      <!-- Product Name -->
+      <h3 class="pro-name">{{ this.product.name }}</h3>
+      
+      <!-- Expansion Arrow -->
+      <div class="expansion-arrow">
+        <a class="arrow-icon enlarged-arrow" v-on:click="switchArrowStatus" 
+           :class="prodDispStatus" :title="prodDispStatusText">
           <span class="left-bar"></span>
           <span class="right-bar"></span>
         </a>
       </div>
     </div>
-    <transition name="body-expan">
+    <transition name="modern-slide">
       <div class="body-container" v-if="this.prodDispStatus == 'open'">
         <div class="card-body" v-if="this.product.type == 'real'">
           <div class="row text-info pt-1">
@@ -2335,4 +2378,265 @@ $duration: 0.5s;
   transition: all 0.2s;
 }
 */
+.pro-card {
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  border: 1px solid rgba(231, 76, 60, 0.2);
+  position: relative;
+  color: #e0e0e0;
+}
+
+.pro-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #e74c3c, #c0392b);
+}
+
+.card-border {
+  border-left: 3px solid #e74c3c;
+}
+
+.card-border-real {
+  border-left: 3px solid #2ecc71;
+}
+
+/* Avatar Container */
+.avatar-container {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.pro-card-av {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 3px solid rgba(231, 76, 60, 0.7);
+  box-shadow: 0 0 20px rgba(231, 76, 60, 0.3);
+  transition: all 0.3s ease;
+  background-size: cover;
+  background-position: center;
+}
+
+.pro-card-av:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 30px rgba(231, 76, 60, 0.5);
+}
+
+/* Level Stars */
+.level-stars {
+  margin-top: 10px;
+}
+
+.level-stars .fa-star {
+  color: #f1c40f;
+  text-shadow: 0 0 5px rgba(241, 196, 15, 0.5);
+}
+
+/* Product Meta */
+.product-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.gaming-badge {
+  margin-bottom: 10px;
+}
+
+.gaming-label {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-size: contain;
+}
+
+.type-icon {
+  color: #e74c3c;
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.product-type {
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+.provider-link {
+  color: #3498db;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+
+.provider-link:hover {
+  color: #2980b9;
+  text-decoration: underline;
+}
+
+/* Price Display */
+.price-display {
+  margin-top: 10px;
+  padding: 8px 15px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 20px;
+  display: inline-block;
+}
+
+.dual-price {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hive-price, .afit-price {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.plus-sign {
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+.single-price {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.token-logo-sm {
+  width: 20px;
+  height: 20px;
+}
+
+/* Product Name */
+.pro-name {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: white;
+  margin: 15px 0;
+  padding: 0;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.enlarged-arrow {
+  width: 40px;
+  height: 40px;
+  background: rgba(231, 76, 60, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.enlarged-arrow:hover {
+  background: rgba(231, 76, 60, 0.2);
+}
+
+.left-bar, .right-bar {
+  position: absolute;
+  background-color: #e74c3c;
+  width: 20px;
+  height: 3px;
+  transition: all 0.3s ease;
+}
+
+.left-bar {
+  transform: rotate(45deg);
+  left: 10px;
+}
+
+.right-bar {
+  transform: rotate(-45deg);
+  right: 10px;
+}
+
+.enlarged-arrow.open .left-bar {
+  transform: rotate(-45deg);
+}
+
+.enlarged-arrow.open .right-bar {
+  transform: rotate(45deg);
+}
+
+/* Blinking Animation */
+@keyframes blink {
+  0%, 50%, 100% { background-color: #e74c3c; }
+  25%, 75% { background-color: #ff8c7a; }
+}
+
+.left-bar:after, 
+.right-bar:after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: inherit;
+  animation: blink 3s infinite;
+}
+  
+/* Expansion Animation */
+.modern-slide-enter-active,
+.modern-slide-leave-active {
+  transition: all 0.4s cubic-bezier(0.65, 0, 0.35, 1);
+  overflow: hidden;
+}
+
+.modern-slide-enter,
+.modern-slide-leave-to {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.modern-slide-enter-to,
+.modern-slide-leave {
+  max-height: 1000px;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Body Container */
+.body-container {
+  background: rgba(40, 40, 40, 0.7);
+  border-top: 1px solid rgba(231, 76, 60, 0.2);
+  padding: 15px;
+}
+
+/* Info Boxes */
+.info-box {
+  background: rgba(50, 50, 50, 0.6);
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-left: 3px solid #e74c3c;
+}
+
+.info-box-orangered {
+  border-left-color: #e74c3c;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .pro-card-av {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .pro-name {
+    font-size: 1.2rem;
+  }
+}
+
 </style>
