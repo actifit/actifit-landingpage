@@ -27,7 +27,7 @@
              class="btn btn-brand border"
              :title="filterTooltip"
              @click.prevent="hideReblogs = !hideReblogs">
-            <i class="fas fa-retweet" :style="{ color: hideReblogs ? '#FFFFFF' : '#4CAF50' }"></i>
+            <i class="fas fa-retweet" :style="{ color: hideReblogs ? '#FFFFFF' : '#008000' }"></i>
           </a>
           
           <div>
