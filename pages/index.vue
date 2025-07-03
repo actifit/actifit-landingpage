@@ -5,73 +5,64 @@
     <div id="navbar-container" ref="navbar-container" v-if="renderReady">
       <NavbarBrand :home="true" @scrollTo="scrollTo" />
     </div>
-    <!-- header with fullscreen background -->
-    <div class="header pt-4 pt-md-5 position-relative">
-      <div class="container py-5">
 
-        <!-- wallet/activities preview -->
+    <div class="hero-section">
+      <!-- Left Side: Content & UI Panel -->
+      <div class="hero-content">
+        <div class="hero-text">
+          <h1 class="hero-title">
+            IT PAYS TO <span class="text-brand">BE FIT</span>
+          </h1>
+          <p class="hero-subtitle">
+            Join a global community that rewards you for your daily activity. Your steps, your effort, your crypto.
+          </p>
+        </div>
 
-        <div class="card form mx-auto p-3 mt-3 mt-md-2 text-center border-0 home-card shadow rounded">
-          <div class="pb-md-2 text-center">
-            <img src="/img/actifit_logo.png" alt="Actifit" class="logo" />
-            <h1 class="mt-3 mt-sm-2 text-brand title">{{ $t('Actifit') }}</h1>
-          </div>
-
+        <!-- The main user interaction card -->
+        <div class="user-panel">
+          <!-- LOGGED-IN VIEW -->
           <div v-if="user">
-            <div class="pb-md-2 row">
-              <div class="col-sm-6">
-                <p class="lead text-muted mb-0">{{ $t('Balance') }}</p>
-                <h3><b>{{ numberFormat(formattedUserTokens, 3) }}</b><br><small>{{ $t('AFIT_Token') }}</small></h3>
-                <a href="#" @click.prevent="$router.push('/wallet')" class="btn btn-lg btn-brand w-100 acti-shadow">{{
-                  $t('My_Wallet') }}</a>
+            <div class="stats-grid">
+              <div class="stat-item">
+                <span class="label">{{ $t('Balance') }}</span>
+                <span class="value">{{ numberFormat(formattedUserTokens, 2) }} {{ $t('AFIT_Token') }}</span>
+                <a href="#" @click.prevent="$router.push('/wallet')" class="btn-panel-action">{{ $t('My_Wallet') }} <i class="fas fa-arrow-right"></i></a>
               </div>
-              <div class="col-sm-6 mt-4 mt-sm-0">
-                <p class="lead text-muted mb-0">{{ $t('Activity') }}</p>
-                <h3><b>{{ grabUserReportCount }}</b><br><small>{{ $t('Reports') }}</small></h3>
-                <a href="#" class="btn btn-lg btn-brand w-100 acti-shadow"
-                  @click.prevent="$router.push('/activity/' + user.account.name)">{{ $t('My_Activity') }}</a>
+              <div class="stat-item">
+                <span class="label">{{ $t('Activity') }}</span>
+                <span class="value">{{ grabUserReportCount }} {{ $t('Reports') }}</span>
+                <a href="#" @click.prevent="$router.push('/activity/' + user.account.name)" class="btn-panel-action">{{ $t('My_Activity') }} <i class="fas fa-arrow-right"></i></a>
               </div>
             </div>
-            <div class="pb-md-2 row text-center">
+            <div class="resource-stats">
               <SteemStats :user="user" class="col-md-12" :key="reload" />
             </div>
-            <div class="pb-md-2 pt-2 row text-center">
-              <div class="col-6 mb-3">
-                <a href="#" class="btn btn-lg btn-brand w-100 acti-shadow"
-                  @click.prevent="$router.push('/activity/')">{{ $t('activity_feed') }}</a>
-              </div>
-              <div class="col-6">
-                <a href="#" class="btn btn-lg btn-brand w-100 acti-shadow" @click.prevent="$router.push('/market')">{{
-                  $t('Market') }}</a>
-              </div>
+            <div class="main-actions">
+              <a href="#" class="btn btn-primary-hero" @click.prevent="$router.push('/activity/')">{{ $t('activity_feed') }}</a>
+              <a href="#" class="btn btn-secondary-hero" @click.prevent="$router.push('/market')">{{ $t('Market') }}</a>
             </div>
           </div>
 
-          <!-- login/register buttons -->
+          <!-- LOGGED-OUT VIEW -->
           <div v-else>
-            <div class="row">
-              <div class="col-6">
-                <a href="#" data-toggle="modal" data-target="#loginModal" @click="showModalFunc"
-                  class="btn btn-brand btn-lg w-100 acti-shadow">{{ $t('Login') }}</a>
-              </div>
-              <div class="col-6">
-                <a href="/signup" class="btn btn-brand btn-lg w-100 acti-shadow">{{ $t('Sign_Up') }}</a>
-              </div>
+            <p class="login-prompt">Get started now. It's free!</p>
+            <div class="main-actions">
+                <a href="#" data-toggle="modal" data-target="#loginModal" @click="showModalFunc" class="btn btn-primary-hero">{{ $t('Login') }}</a>
+                <a href="/signup" class="btn btn-secondary-hero">{{ $t('Sign_Up') }}</a>
             </div>
-            <div class="row pb-md-2 pt-2 ">
-              <div class="col-6">
-                <a href="#" class="btn btn-lg btn-brand w-100 acti-shadow"
-                  @click.prevent="$router.push('/activity/')">{{ $t('activity_feed') }}</a>
-              </div>
-              <div class="col-6">
-                <a href="#" class="btn btn-lg btn-brand w-100 acti-shadow" @click.prevent="$router.push('/market/')">{{
-                  $t('Market') }}</a>
-              </div>
+            <div class="main-actions-alt">
+              <a href="#" class="btn-link-hero" @click.prevent="$router.push('/activity/')">{{ $t('Explore Activity Feed') }} <i class="fas fa-arrow-right"></i></a>
             </div>
           </div>
         </div>
       </div>
 
+      <!-- Right Side: Visual Image -->
+      <div class="hero-visual">
+        <div class="hero-bg-image"></div>
+        <div class="hero-visual-overlay"></div>
+      </div>
+      
       <!-- scroll indicator -->
       <div class="text-center scroll-down position-absolute w-100">
         <a href="#" @click="scrollTo('#content')">
@@ -79,17 +70,7 @@
         </a>
       </div>
     </div>
-    <!-- intro -->
-    <section class="intro reveal" id="content">
-      <div class="container py-5">
-        <h1 class="pt-5 mb-3 text-capitalize text-center headline" v-html="$t('homepage.section1_title')"></h1>
-        <p class="lead mb-4 pb-5 text-center">
-          {{ $t('homepage.section1_desc') }}
-        </p>
-      </div>
-    </section>
 
-    <!-- RECENT ACTIVITY SECTION -->
     <section id="recent-activity" class="py-5">
       <div class="container-fluid">
         <div class="text-center mb-5">
@@ -97,19 +78,19 @@
           <p class="lead text-muted">See what our community has been up to!</p>
         </div>
         
-        <div class="activity-scroller" v-if="posts.length > 0">
-          <div class="activity-post-card" v-for="(post, index) in posts.slice(0, 10)" :key="'activity-' + index">
-            <a :href="post.url" target="_blank" class="activity-card-link">
+        <div class="activity-scroller" v-if="reports.length > 0">
+          <div class="activity-post-card" v-for="(report, index) in reports.slice(0, 10)" :key="'activity-' + index">
+            <a :href="report.url" target="_blank" class="activity-card-link">
               <div class="card-user-info">
-                <div class="avatar small" :style="'background-image: url(' + profImgUrl + '/u/' + post.author + '/avatar);'"></div>
-                <span class="username">@{{ post.author }}</span>
+                <div class="avatar small" :style="'background-image: url(' + profImgUrl + '/u/' + report.author + '/avatar);'"></div>
+                <span class="username">@{{ report.author }}</span>
               </div>
               <div class="card-post-content">
-                <h5 class="post-title">{{ post.title }}</h5>
+                <h5 class="post-title">{{ report.title }}</h5>
               </div>
-              <div class="post-stats" v-if="post.json_metadata.activity_count">
+              <div class="post-stats" v-if="report.json_metadata.activity_count">
                 <i class="fas fa-shoe-prints"></i>
-                <span>{{ numberFormat(post.json_metadata.activity_count, 0) }} Steps</span>
+                <span>{{ numberFormat(report.json_metadata.activity_count, 0) }} Steps</span>
               </div>
             </a>
           </div>
@@ -120,65 +101,81 @@
       </div>
     </section>
 
-    <!-- texts with images  -->
-    <section class="showcase-v3 reveal">
-      <!-- Section 1: Earn Tokens -->
-      <div class="showcase-item" id="showcase-earn-v3">
-        <div class="container">
-          <div class="showcase-text-content">
-            <h2 class="text-capitalize">{{ $t('homepage.section2_title') }}</h2>
-            <p class="lead mb-4">Earning crypto for your daily activity has never been easier. Follow these simple steps to start your journey with Actifit.</p>
-            <div class="app-buttons-container">
-              <a href="https://links.actifit.io/android" target="_blank">
-                <img src="/img/google-play.png" alt="Get it on Google Play">
-              </a>
-              <a href="https://links.actifit.io/ios" target="_blank">
-                <img src="/img/app-store.png" alt="Download on the App Store">
-              </a>
-            </div>
-          </div>
-          <div class="showcase-image-wrapper">
-            <img src="/img/landingimgs/healthier_you.jpeg" alt="Man and woman running" class="img-fluid" />
-          </div>
-        </div>
-      </div>
-      <!-- Section 2: AFIT Tokens -->
-      <div class="showcase-item" id="showcase-tokens-v3">
-          <div class="container">
-              <div class="showcase-image-wrapper">
-                 <img src="/img/landingimgs/actifit_gym_pay_back.jpeg" alt="Man exercising in a gym" class="img-fluid" />
-              </div>
-               <div class="showcase-text-content">
-                  <h2 class="text-capitalize">{{ $t('homepage.section3_title') }}</h2>
-                  <p class="lead" v-html="$t('homepage.section3_desc')"></p>
-                  <h4 class="mt-4 mb-3">Available for trade on:</h4>
-                  <div class="exchange-tags-container">
-                      <a href="#" class="exchange-tag"><i class="fas fa-coins mr-2"></i>Hive-Engine</a>
-                      <a href="#" class="exchange-tag"><i class="fas fa-fire-alt mr-2"></i>Actifit DeFi</a>
-                      <a href="#" class="exchange-tag"><i class="fas fa-sync-alt mr-2"></i>Pancakeswap</a>
-                      <a href="#" class="exchange-tag"><i class="fas fa-chart-line mr-2"></i>Digifinex</a>
-                      <a href="#" class="exchange-tag"><i class="fas fa-exchange-alt mr-2"></i>Dex-trade</a>
-                  </div>
-              </div>
-          </div>
-      </div>
-      <!-- Section 3: Yield Farming -->
-      <div class="showcase-item" id="showcase-yield-v3">
-          <div class="container">
-              <div class="showcase-text-content">
-                  <h2 class="text-capitalize">{{ $t('homepage.section4_title') }}</h2>
-                  <p class="lead mb-4">{{ $t('homepage.section4_desc') }}</p>
-                  <div class="cta-button-group">
-                      <a href="/yieldfarming" class="btn btn-solid-red btn-lg"><i class="fas fa-leaf mr-2"></i>{{ $t('yield_farming') }}</a>
-                      <a href="/wallet?action=delegate" class="btn btn-outline-red btn-lg"><i class="fas fa-hand-holding-usd mr-2"></i>{{ $t('Delegate') }}</a>
-                  </div>
-              </div>
-              <div class="showcase-image-wrapper">
-                 <img src="/img/landingimgs/effort_rewarded_crypto.jpeg" alt="Man and woman posing after a workout" class="img-fluid" />
-              </div>
-          </div>
+    <!-- intro -->
+    <section class="intro reveal" id="content">
+      <div class="container py-5">
+        <h1 class="pt-5 mb-3 text-capitalize text-center headline" v-html="$t('homepage.section1_title')"></h1>
+        <p class="lead mb-4 pb-5 text-center">
+          {{ $t('homepage.section1_desc') }}
+        </p>
       </div>
     </section>
+
+    <!-- texts with images  -->
+<section class="aurora-showcase">
+  
+  <!-- Showcase Item 1: Earn Tokens -->
+  <div class="showcase-card reveal">
+    <div class="card-content-grid">
+      <div class="aurora-text-content">
+        <h2 class="text-capitalize">{{ $t('homepage.section2_title') }}</h2>
+        <p class="lead mb-4">Earning crypto for your daily activity has never been easier. Follow these simple steps to start your journey with Actifit.</p>
+        <div class="app-buttons-container">
+          <a href="https://links.actifit.io/android" target="_blank">
+            <img src="/img/google-play.png" alt="Get it on Google Play">
+          </a>
+          <a href="https://links.actifit.io/ios" target="_blank">
+            <img src="/img/app-store.png" alt="Download on the App Store">
+          </a>
+        </div>
+      </div>
+      <div class="aurora-image-wrapper">
+        <img src="/img/landingimgs/healthier_you.jpeg" alt="Man and woman running" class="img-fluid" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Showcase Item 2: AFIT Tokens (Paragraph and Buttons are both present) -->
+  <div class="showcase-card reveal">
+    <div class="card-content-grid">
+       <div class="aurora-image-wrapper">
+         <img src="/img/landingimgs/actifit_gym_pay_back.jpeg" alt="Man exercising in a gym" class="img-fluid" />
+      </div>
+       <div class="aurora-text-content">
+          <h2 class="text-capitalize">{{ $t('homepage.section3_title') }}</h2>
+          <p class="lead" v-html="$t('homepage.section3_desc')"></p>
+          
+          <h4 class="mt-4 mb-3">Available for trade on:</h4>
+          <div class="exchange-tags-container">
+              <a href="#" class="exchange-tag"><i class="fas fa-coins mr-2"></i>Hive-Engine</a>
+              <a href="#" class="exchange-tag"><i class="fas fa-fire-alt mr-2"></i>Actifit DeFi</a>
+              <a href="#" class="exchange-tag"><i class="fas fa-sync-alt mr-2"></i>Pancakeswap</a>
+              <a href="#" class="exchange-tag"><i class="fas fa-chart-line mr-2"></i>Digifinex</a>
+              <a href="#" class="exchange-tag"><i class="fas fa-exchange-alt mr-2"></i>Dex-trade</a>
+          </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Showcase Item 3: Yield Farming -->
+  <div class="showcase-card reveal">
+    <div class="card-content-grid">
+      <div class="aurora-text-content">
+          <h2 class="text-capitalize">{{ $t('homepage.section4_title') }}</h2>
+          <p class="lead mb-4">{{ $t('homepage.section4_desc') }}</p>
+          <div class="cta-button-group">
+              <a href="/yieldfarming" class="btn btn-solid-red btn-lg"><i class="fas fa-leaf mr-2"></i>{{ $t('yield_farming') }}</a>
+              <a href="/wallet?action=delegate" class="btn btn-outline-red btn-lg"><i class="fas fa-hand-holding-usd mr-2"></i>{{ $t('Delegate') }}</a>
+          </div>
+      </div>
+      <div class="aurora-image-wrapper">
+         <img src="/img/landingimgs/effort_rewarded_crypto.jpeg" alt="Man and woman posing after a workout" class="img-fluid" />
+      </div>
+    </div>
+  </div>
+
+</section>
+
 
     <!-- top Delegators -->
     <section id="delegators" class="reveal py-5">
@@ -207,10 +204,10 @@
     </section>
 
     <!-- leaderboard -->
-    <section id="leaderboard" class="py-5 bg-brand text-light reveal">
+    <section id="leaderboard" class="py-5 reveal">
       <div class="container">
         <h1 class="leaderboard-title text-center">
-          Daily Leaderboarrd
+          Daily Leaderboard
         </h1>
         <div class="leaderboard-podium" v-if="leaderboard && leaderboard.length >= 3">
           <div class="podium-column">
@@ -264,9 +261,7 @@
           <p>{{ $t('Leaderboard is being updated...') }}</p>
         </div>
         <div class="full-div mt-5 text-center">
-          <nuxt-link to="/leaderboard"
-            class="text-center btn delegator-btn text-brand leader-cls-btn acti-shadow-inverse">{{
-            $t('View_leaderboard') }}</nuxt-link>
+          <nuxt-link to="/leaderboard" class="text-center btn leaderboard-cta-btn">{{ $t('View_leaderboard') }}</nuxt-link>
         </div>
       </div>
     </section>
@@ -280,58 +275,48 @@
         </h1>
         <div class="infrastructure-grid">
           <div class="infra-card" :title="$t('main_chain')">
-            <img src="/img/HIVE.png" alt="HIVE" style="max-height: 80px;">
+            <img class="logo-icon" src="/img/HIVE.png" alt="HIVE">
+            <div class="hover-image" style="background-image: url('https://placehold.co/400x400/e10707/ffffff?text=Hive');"></div>
           </div>
           <div class="infra-card" :title="$t('secondary_chains')">
-            <img src="/img/BLURT.png" alt="BLURT" style="max-height: 60px;">
+            <img class="logo-icon" src="/img/BLURT.png" alt="BLURT">
+            <div class="hover-image" style="background-image: url('https://placehold.co/400x400/333333/ffffff?text=Blurt');"></div>
           </div>
           <div class="infra-card" :title="$t('secondary_chains')">
-            <img src="/img/BNB_CHAIN.webp" alt="BNB Chain" style="max-height: 60px;">
+            <img class="logo-icon" src="/img/BNB_CHAIN.webp" alt="BNB Chain">
+            <div class="hover-image" style="background-image: url('https://placehold.co/400x400/f0b90b/000000?text=BNB+Chain');"></div>
           </div>
         </div>
       </div>
     </section>
 
     <!-- news -->
-    <section id="news" class="reveal py-5 bg-brand text-light">
-      <h1 class="text-center pb-3">
-        <i class="far fa-newspaper"></i><br>
-        {{ $t('News') }}
-      </h1>
-      <div class="news-stack-container" v-if="news.length > 0">
-        <div class="news-card-stack">
-          <div 
-            v-for="(post, index) in news" 
-            :key="index" 
-            :class="getCardClass(index)"
-            class="news-card"
-          >
-            <div class="card-body d-flex flex-column">
-              <a :href="post.url" target="_blank" class="news-card-image-link">
-                <div class="news-card-image" :style="{ backgroundImage: 'url(' + (post.json_metadata.image ? post.json_metadata.image[0] : '/img/default_news.png') + ')' }"></div>
-              </a>
-              <div class="news-card-text-content">
-                <h5 class="card-title mt-3">{{ post.title }}</h5>
-                <p class="card-text">{{ post.json_metadata.description }}</p>
-              </div>
-              <div class="news-card-footer mt-auto">
-                <small class="text-muted">{{ new Date(post.created).toDateString() }} | by @{{ post.author }}</small>
-                <div class="button-group">
-                  <a href="#" class="btn btn-sm" @click.prevent="openNewsModal(post)">{{ $t('Read_More') }}</a>
-                  <a :href="post.url" target="_blank" class="btn btn-sm">{{ $t('Full_View') }}</a>
-                </div>
-              </div>
-            </div>
-          </div>
+    <section id="news" class="reveal py-5">
+        <div class="container">
+            <h1 class="news-title text-center pb-3">
+                <i class="far fa-newspaper"></i><br>
+                {{ $t('News') }}
+            </h1>
+            <client-only>
+                <carousel :perPageCustom="[[0, 1], [768, 2], [992, 3], [1200, 4]]"
+                :paginationColor="'rgba(0, 0, 0, 0.2)'" :paginationActiveColor="'#000000'">
+                <slide v-for="(post, index) in news" :key="index">
+                  <div class="new-design-news-card">
+                    <div class="card-content">
+                      <small class="card-date">{{ new Date(post.created).toLocaleString() }}</small>
+                      <h5 class="card-title">{{ post.title }}</h5>
+                    </div>
+                    <div class="card-actions">
+                      <a href="#" class="btn-news" @click.prevent="openNewsModal(post)">{{ $t('Read_More') }}</a>
+                      <a :href="post.url" target="_blank" class="btn-news">{{ $t('Full_View') }}</a>
+                    </div>
+                  </div>
+                </slide>
+                </carousel>
+            </client-only>
         </div>
-        <button @click="prevCard" class="nav-arrow prev-arrow" aria-label="Previous News Item">
-          <i class="fas fa-chevron-left"></i>
-        </button>
-        <button @click="nextCard" class="nav-arrow next-arrow" aria-label="Next News Item">
-          <i class="fas fa-chevron-right"></i>
-        </button>
-      </div>
     </section>
+
 
     <Footer isHomePage='true' />
 
@@ -352,7 +337,6 @@
 import NavbarBrand from '~/components/NavbarBrand'
 import VueScrollTo from 'vue-scrollto'
 import Footer from '~/components/Footer'
-// import News from '~/components/News' // No longer needed
 import NewsModal from '~/components/NewsModal'
 import pendingRewardsModal from '~/components/PendingRewardsModal'
 import { mapGetters } from 'vuex'
@@ -365,7 +349,6 @@ export default {
     LoginModal,
     NavbarBrand,
     Footer,
-    // News, // Removed
     NewsModal,
     SteemStats,
     NotifyModal,
@@ -373,7 +356,6 @@ export default {
   },
   data() {
     return {
-      activeNewsIndex: 0,
       showModal: false,
       username: '',
       tweenedUserCount: 0,
@@ -388,7 +370,7 @@ export default {
   computed: {
     ...mapGetters('steemconnect', ['user']),
     ...mapGetters('steemconnect', ['stdLogin']),
-    ...mapGetters(['userTokens', 'userReportCount', 'transactions', 'userRank', 'userCount', 'topDelegators', 'moderators', 'ambassadors', 'tokensDistributed', 'rewardedActivityCount', 'leaderboard', 'news', 'activeNews', 'posts', 'bchain']),
+    ...mapGetters(['userTokens', 'userReportCount', 'transactions', 'userRank', 'userCount', 'topDelegators', 'moderators', 'ambassadors', 'tokensDistributed', 'rewardedActivityCount', 'leaderboard', 'news', 'activeNews', 'reports', 'bchain']),
     formattedUserTokens() {
       return parseFloat(this.userTokens).toFixed(3)
     },
@@ -460,23 +442,6 @@ export default {
         $('#newsModal').modal('show');
       }
     },
-    nextCard() {
-      this.activeNewsIndex = (this.activeNewsIndex + 1) % this.news.length;
-    },
-    prevCard() {
-      this.activeNewsIndex = (this.activeNewsIndex - 1 + this.news.length) % this.news.length;
-    },
-    getCardClass(index) {
-      const total = this.news.length;
-      const active = this.activeNewsIndex;
-      const next = (active + 1) % total;
-      const prev = (active - 1 + total) % total;
-
-      if (index === active) return 'is-active';
-      if (index === next) return 'is-next';
-      if (index === prev) return 'is-prev';
-      return 'is-hidden';
-    },
     fetchUserData() {
       if (typeof this.user != 'undefined' && this.user != null) {
         this.$store.dispatch('fetchUserTokens')
@@ -517,7 +482,8 @@ export default {
     this.$store.dispatch('fetchLeaderboard')
     this.$store.dispatch('fetchTopDelegators', 12)
     this.$store.dispatch('fetchNews')
-    this.$store.dispatch('fetchPosts', {bchain: this.bchain, more: false})
+    
+    this.$store.dispatch('fetchReports', {bchain: this.bchain, more: false})
     this.renderReady = true;
   },
   async beforeDestroy() {
@@ -532,14 +498,6 @@ export default {
 </script>
 
 <style lang="sass">
-  .header
-    background: url('/img/header-5.png') top no-repeat
-    background-size: cover
-    .form
-      max-width: 500px
-      box-shadow: 0 0 50px rgba(0, 0, 0, 0.2)
-  .scroll-down
-    bottom: 10px
   .showcase .showcase-text
     padding: 3rem
   .showcase .showcase-img
@@ -549,11 +507,16 @@ export default {
   .tilt
     transform: rotate(-15deg)
 
+  /* Make carousel dots visible */
   .VueCarousel-dot-container
-    padding: 15px !important
+    margin-top: 20px !important
     .VueCarousel-dot
+      background-color: rgba(0, 0, 0, 0.2) !important
       padding: 1px 5px !important
-      margin-top: 0 !important
+      &:focus
+        outline: none !important
+    .VueCarousel-dot--active
+      background-color: #000 !important
 
   .navbar
     .navbar-nav
@@ -565,20 +528,7 @@ export default {
     .showcase .showcase-text
       padding: 7rem
 
-  @media (max-width: 1200px)
-    .header
-      .form
-        .logo
-          max-width: 100px
-
   @media (max-width: 767px)
-    .header
-      .title
-        font-size: 1.7rem
-      .slogan
-        font-size: 1.3rem
-      .form-info
-        font-size: 1rem
     .intro
       .headline
         font-size: 1.7rem
@@ -593,11 +543,289 @@ export default {
         min-height: 15rem
 </style>
 <style>
+#navbar-container {
+
+  position: relative;
+  z-index: 1100; 
+}
+
+:root {
+  
+  --hero-content-bg: #f8f9fa;
+  --hero-title-color: #212529;
+  --hero-subtitle-color: #495057;
+  --panel-bg: rgba(255, 255, 255, 0.85);
+  --panel-border: rgba(0, 0, 0, 0.1);
+  --panel-text-color: #212529;
+  --panel-muted-text: #6c757d;
+  --btn-secondary-color: #343a40;
+  --btn-secondary-border: #ced4da;
+  --btn-secondary-hover-bg: #e9ecef;
+  --btn-secondary-hover-border: #adb5bd;
+}
+
+.dark-mode {
+  /* Dark Mode */
+  --hero-content-bg: #1a1a1a;
+  --hero-title-color: #f0f0f0;
+  --hero-subtitle-color: #a0a0a0;
+  --panel-bg: rgba(40, 40, 40, 0.85);
+  --panel-border: rgba(255, 255, 255, 0.15);
+  --panel-text-color: #f0f0f0;
+  --panel-muted-text: #a0a0a0;
+  --btn-secondary-color: #f0f0f0;
+  --btn-secondary-border: rgba(255, 255, 255, 0.5);
+  --btn-secondary-hover-bg: rgba(255, 255, 255, 0.1);
+  --btn-secondary-hover-border: #fff;
+}
+
+.hero-section {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background-color: #000;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-content {
+  flex-basis: 45%;
+  max-width: 600px;
+  background: var(--hero-content-bg);
+  color: var(--hero-title-color);
+  padding: 4rem 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  z-index: 2;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  color: var(--hero-title-color);
+}
+.hero-title .text-brand {
+  color: #e10707;
+}
+
+.hero-subtitle {
+  font-size: 1.1rem;
+  color: var(--hero-subtitle-color);
+  max-width: 450px;
+  margin-bottom: 2.5rem;
+}
+
+.hero-visual {
+  flex: 1; 
+  position: relative;
+}
+
+.hero-visual .hero-bg-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('/img/header-5(2).png');
+  background-size: cover;
+  background-position: left center ;
+}
+
+.hero-visual-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to right, var(--hero-content-bg) 0%, transparent 40%);
+  z-index: 1;
+}
+
+.user-panel {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-item .label {
+  font-size: 0.9rem;
+  color: var(--panel-muted-text);
+  margin-bottom: 0.25rem;
+}
+
+.stat-item .value {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--panel-text-color);
+  margin-bottom: 0.75rem;
+}
+
+.btn-panel-action {
+  color: #e10707;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+.btn-panel-action:hover {
+  color: #c10606;
+  transform: translateX(4px);
+}
+.dark-mode .btn-panel-action:hover {
+  color: #ff3d3d;
+}
+.btn-panel-action .fas {
+  margin-left: 0.25rem;
+}
+
+.resource-stats {
+  border-top: 1px solid var(--panel-border);
+  border-bottom: 1px solid var(--panel-border);
+  padding: 0.5rem 0;
+  margin: 1.5rem 0;
+}
+.resource-stats .text-white { color: var(--panel-text-color) !important; }
+.resource-stats .text-muted { color: var(--panel-muted-text) !important; }
+
+.login-prompt {
+  color: var(--panel-text-color);
+  font-size: 1.1rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+}
+.main-actions-alt {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.main-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.btn-primary-hero, .btn-secondary-hero {
+  padding: 0.85rem 1.5rem;
+  border-radius: 8px;
+  font-weight: bold;
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.btn-primary-hero {
+  background-color: #e10707;
+  color: #fff !important;
+}
+.btn-primary-hero:hover {
+  background-color: #c10606;
+  transform: translateY(-2px);
+}
+
+.btn-secondary-hero {
+  background-color: transparent;
+  color: var(--btn-secondary-color) !important;
+  border-color: var(--btn-secondary-border);
+}
+.btn-secondary-hero:hover {
+  background-color: var(--btn-secondary-hover-bg);
+  border-color: var(--btn-secondary-hover-border);
+  transform: translateY(-2px);
+}
+
+.btn-link-hero {
+  color: var(--panel-muted-text);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+.btn-link-hero:hover {
+  color: #e10707;
+}
+
+.scroll-down {
+  bottom: 20px;
+  z-index: 5;
+  left: 0; 
+}
+.scroll-down a i {
+  color: #fff;
+  opacity: 0.7;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  transition: opacity 0.3s, transform 0.3s;
+}
+.scroll-down a:hover i {
+  opacity: 1;
+  transform: translateY(5px);
+}
+
+@media (max-width: 1200px) {
+  .hero-content {
+    flex-basis: 50%;
+  }
+  .hero-visual {
+    flex-basis: 50%;
+  }
+}
+
+@media (max-width: 992px) {
+  .hero-section {
+    flex-direction: column;
+  }
+  .hero-visual {
+    order: 0; 
+    flex-basis: auto;
+    height: 40vh;
+  }
+  .hero-visual-overlay {
+    background: linear-gradient(to top, var(--hero-content-bg) 0%, transparent 50%);
+  }
+  .hero-content {
+    order: 1; 
+    flex-basis: auto;
+    max-width: 100%;
+    padding: 2rem 1.5rem;
+  }
+  .hero-title {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .hero-title {
+    font-size: 2rem;
+  }
+  .stats-grid, .main-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+
 section {
   margin-bottom: 2em;
   box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
 }
-section.showcase-v3, section#leaderboard, section#news, section#infrastructure, section#recent-activity {
+section.aurora-showcase, section#news, section#recent-activity {
   box-shadow: none !important;
 }
 .acti-shadow {
@@ -606,22 +834,152 @@ section.showcase-v3, section#leaderboard, section#news, section#infrastructure, 
 .acti-shadow-inverse {
   box-shadow: 3px 3px 3px rgb(255 255 255 / 40%);
 }
-.leader-cls-btn:hover {
-  background-color: darkred;
-  color: white;
+
+.intro {
+  background-color: #0c0c14;
+  position: relative;
+  overflow: hidden;
+  box-shadow: none !important;
 }
-.home-card {
-  opacity: 0.9;
-  box-shadow: 3px 3px 3px rgb(255 0 0 / 40%) !important;
+.intro::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 150%;
+  height: 150%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle at center, rgba(225, 7, 7, 0.3), transparent 50%);
+  animation: aurora-animation 35s linear infinite;
+  z-index: 1;
+}
+.intro .container {
+  position: relative;
+  z-index: 2;
+}
+.intro .headline {
+  font-size: 2.8rem;
+  font-weight: 800;
+  line-height: 1.3;
+  color: transparent;
+  background-image: linear-gradient(45deg, #e10707, #ff6b6b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.intro .lead {
+  color: #424242; 
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 1.1rem; 
+}
+.dark-mode .intro .lead{
+  color: #c6c4c4; 
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 1.1rem; 
+}
+@media (max-width: 767px) {
+  .intro .headline {
+    font-size: 2.2rem;
+  }
 }
 
 
-.leaderboard-title {
-    font-size: 2.8rem;
-    font-weight: bold;
-    color: white;
-    padding-bottom: 2rem;
+#leaderboard {
+  background-color: #f9fafb; 
+  position: relative;
+  overflow: hidden;
+  transition: background-color 0.4s ease;
 }
+
+.dark-mode #leaderboard {
+  background-color: #111827; 
+}
+
+#leaderboard .leaderboard-title {
+  color: #1f2937; 
+  transition: color 0.4s ease;
+  font-weight: bold;
+  font-size: 2.8rem;
+  padding-bottom: 2rem;
+}
+
+.dark-mode #leaderboard .leaderboard-title {
+  color: #f9fafb; 
+}
+
+.leaderboard-cta-btn {
+  background-color: #e10707;
+  color: white !important;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: bold;
+  padding: 0.5rem 1.25rem; 
+  font-size: 0.95rem;      
+  transition: all 0.3s ease;
+  border: 2px solid #e10707;
+}
+
+.leaderboard-cta-btn:hover {
+  background-color: #c10606;
+  border-color: #c10606;
+  transform: translateY(-2px);
+  color: white !important;
+}
+
+
+#leaderboard .podium-column .username,
+#leaderboard .podium-column .activity-count {
+  color: #374151; 
+  transition: color 0.4s ease;
+}
+#leaderboard .podium-column .username:hover,
+#leaderboard .podium-column .activity-count:hover {
+  color: #e10707; 
+}
+
+.dark-mode #leaderboard .podium-column .username,
+.dark-mode #leaderboard .podium-column .activity-count {
+  color: #d1d5db; 
+}
+.dark-mode #leaderboard .podium-column .username:hover,
+.dark-mode #leaderboard .podium-column .activity-count:hover {
+  color: #fff; 
+}
+
+.leaderboard-podium::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 110%; 
+  height: 100%;
+  transform: translate(-50%, -45%); 
+  background: radial-gradient(ellipse at center,
+    rgba(225, 7, 7, 0.4),     
+    rgba(134, 142, 150, 0.3), 
+    transparent 65%         
+  );
+  filter: blur(45px); 
+  z-index: -1;
+  opacity: 0.9; 
+  transition: all 0.4s ease;
+}
+
+.dark-mode .leaderboard-podium::after {
+  background: radial-gradient(ellipse at center,
+    rgba(255, 20, 20, 0.6),    
+    rgba(173, 181, 189, 0.4), 
+    transparent 60%
+  );
+  filter: blur(50px);
+  opacity: 1; 
+}
+
+
 .leaderboard-podium {
   display: flex;
   align-items: flex-end;
@@ -629,6 +987,7 @@ section.showcase-v3, section#leaderboard, section#news, section#infrastructure, 
   gap: 0;
   position: relative;
   min-height: 350px;
+  z-index: 1; 
 }
 .podium-column {
   flex: 1;
@@ -654,20 +1013,17 @@ section.showcase-v3, section#leaderboard, section#news, section#infrastructure, 
 }
 .podium-column .username {
   font-weight: bold;
-  color: white;
   text-decoration: none;
   font-size: 1.2rem;
   display: block;
 }
 .podium-column .activity-count {
   font-size: 0.9rem;
-  color: white;
   margin: 0;
   text-decoration: none;
 }
 .podium-column .activity-count:hover {
   text-decoration: underline;
-  color: white;
 }
 .podium-base {
   width: 100%;
@@ -827,132 +1183,6 @@ section.showcase-v3, section#leaderboard, section#news, section#infrastructure, 
   }
 }
 
-.news-stack-container {
-  position: relative;
-  max-width: 380px; 
-  margin: 2rem auto 0;
-  height: 450px; 
-}
-.news-card-stack {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-.news-card {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: white; 
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  overflow: hidden;
-  transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.5s ease;
-}
-.news-card .card-body {
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-.news-card-image {
-  height: 150px;
-  background-size: cover;
-  background-position: center;
-}
-.news-card-text-content {
-  padding: 1rem 1.25rem;
-  flex-grow: 1;
-  overflow-y: auto;
-}
-.card-title {
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin-bottom: 0.75rem;
-  color: #212529;
-}
-.card-text {
-  font-size: 0.9rem;
-  color: #6c757d;
-  line-height: 1.5;
-}
-.news-card-footer {
-  padding: 0.75rem 1.25rem;
-  margin-top: auto;
-  border-top: 1px solid #eee;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #fff;
-}
-.news-card-footer .button-group {
-  display: flex;
-  gap: 0.5rem;
-}
-.news-card-footer .btn {
-  background-color: white !important;
-  color: #e10707 !important;
-  border: 2px solid #e10707 !important;
-  border-radius: 50px !important;
-  font-weight: bold !important;
-  transition: all 0.3s ease;
-  padding: 6px 14px !important;
-  font-size: 0.8rem !important;
-}
-.news-card-footer .btn:hover {
-  background-color: #e10707 !important;
-  color: white !important;
-}
-.is-active {
-  transform: translateY(0) scale(1);
-  opacity: 1;
-  z-index: 10;
-}
-.is-next {
-  transform: translateY(20px) scale(0.9);
-  opacity: 1;
-  z-index: 9;
-  filter: brightness(0.9);
-}
-.is-prev {
-  transform: translateX(-150%) rotate(-30deg) scale(0.8);
-  opacity: 0;
-  z-index: 8;
-}
-.is-hidden {
-  transform: scale(0.8);
-  opacity: 0;
-  z-index: 7;
-}
-.nav-arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 20;
-  width: 45px;
-  height: 45px;
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 1rem;
-  color: #fff;
-  transition: all 0.3s ease;
-}
-.nav-arrow:hover {
-  background-color: #fff;
-  color: #e10707;
-  transform: translateY(-50%) scale(1.1);
-}
-.prev-arrow { left: -25px; }
-.next-arrow { right: -25px; }
-
-
 #recent-activity {
   background-color: #ffffff;
 }
@@ -1056,27 +1286,6 @@ section.showcase-v3, section#leaderboard, section#news, section#infrastructure, 
   margin-right: 0.5rem;
 }
 
-#infrastructure .infrastructure-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 30px;
-}
-#infrastructure .infra-card {
-  width: 150px;
-  height: 150px;
-  background: rgba(255,255,255,0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 15px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  transition: transform 0.3s, box-shadow 0.3s;
-}
-#infrastructure .infra-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.3);
-}
 .dark-mode #recent-activity {
   background-color: #121212;
 }
@@ -1134,27 +1343,371 @@ section.showcase-v3, section#leaderboard, section#news, section#infrastructure, 
   filter: drop-shadow(0 0 25px rgba(225, 7, 7, 0.45)); 
 }
 
-.dark-mode .news-card {
-  background-color: #000000 !important; 
-  border: 1px solid rgba(255, 255, 255, 0.2);
+
+@keyframes aurora-animation {
+  0% { transform: rotate(0deg) scale(1.5); }
+  50% { transform: rotate(180deg) scale(1.6); }
+  100% { transform: rotate(360deg) scale(1.5); }
 }
-.dark-mode .news-card .card-title,
-.dark-mode .news-card .card-text,
-.dark-mode .news-card .text-muted {
-  color: #e9ecef !important;
+
+.aurora-showcase {
+  position: relative;
+  padding: 6rem 0;
+  margin: 0;
+  background-color: #f4f4f7; 
+  overflow: hidden; 
 }
-.dark-mode .news-card-footer {
-  border-top-color: rgba(255, 255, 255, 0.15);
-  background-color: #000000;
+.dark-mode .aurora-showcase {
+  background-color: #0a0a0c; 
 }
-.dark-mode .news-card-footer .btn {
-  background-color: #e10707 !important;
-  color: white !important;
-  border: 2px solid #e10707 !important;
+
+
+.aurora-showcase::before {
+  content: '';
+  position: absolute;
+  top: -10%; right: -10%; bottom: -10%; left: -10%;
+  z-index: 1;
+  background: conic-gradient(
+    from 90deg at 40% 60%,
+    #e10707,      
+    #434654,      
+    #E0E0E0,      
+    #B0B0C0,      
+    #434654,      
+    #e10707     
+  );
+  filter: blur(80px);
+  opacity: 0.25;
+  animation: aurora-animation 25s linear infinite;
 }
-.dark-mode .news-card-footer .btn:hover {
-  background-color: #c10606 !important;
-  border-color: #c10606 !important;
+.dark-mode .aurora-showcase::before {
+  opacity: 0.3;
+}
+
+section#infrastructure {
+  background-color: #0c0c14; 
+  position: relative;
+  overflow: hidden;
+}
+
+section#infrastructure::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 150%;
+  height: 150%;
+  transform-origin: center;
+  background: radial-gradient(circle at 30% 30%, #e10707, transparent 40%),
+              radial-gradient(circle at 70% 70%, #C0C0C0, transparent 40%);
+  filter: blur(100px);
+  z-index: 1;
+  opacity: 0.4;
+  animation: aurora-animation 15s linear infinite;
+}
+
+#infrastructure .container {
+  position: relative;
+  z-index: 2; 
+}
+
+#infrastructure h1 {
+  color: #212529;
+}
+.dark-mode #infrastructure h1 {
+  color: #f0f0f0;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+#infrastructure .infrastructure-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+}
+
+#infrastructure .infra-card {
+  width: 170px;
+  height: 170px;
+  background: rgba(22, 22, 30, 0.25); 
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative; 
+  overflow: hidden; 
+}
+
+#infrastructure .infra-card:hover {
+  transform: translateY(-8px) scale(1.05);
+  box-shadow: 0 0 25px rgba(225, 7, 7, 0.5); /* Red glow on hover */
+  border-color: rgba(225, 7, 7, 0.4);
+}
+
+#infrastructure .logo-icon {
+  max-height: 80px;
+  max-width: 80%; 
+  transition: opacity 0.4s ease-in-out;
+  position: relative;
+  z-index: 3; 
+}
+
+#infrastructure .hover-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 0.4s ease-in-out;
+  z-index: 2; /* Below the logo icon */
+}
+
+#infrastructure .infra-card:hover .logo-icon {
+  opacity: 0;
+}
+
+#infrastructure .infra-card:hover .hover-image {
+  opacity: 1;
+}
+
+
+#news {
+  background-color: #f9fafb;
+  padding: 4rem 0;
+  margin-bottom: 2em;
+  position: relative;
+  overflow: hidden;
+  transition: background-color 0.4s ease;
+}
+.dark-mode #news {
+  background-color: #111827;
+}
+
+#news::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 120%;
+  height: 100%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(ellipse at center,
+    rgba(225, 7, 7, 0.4),
+    rgba(134, 142, 150, 0.3),
+    transparent 70%
+  );
+  filter: blur(60px);
+  z-index: 1;
+  opacity: 1;
+  transition: all 0.4s ease;
+}
+.dark-mode #news::before {
+  background: radial-gradient(ellipse at center,
+    rgba(255, 20, 20, 0.4),
+    rgba(173, 181, 189, 0.3),
+    transparent 65%
+  );
+  filter: blur(70px);
+}
+#news .VueCarousel-wrapper {
+  border: none !important;
+}
+#news .container {
+    position: relative;
+    z-index: 2;
+}
+#news .news-title {
+  color: #1f2937;
+  font-size: 2.8rem;
+  font-weight: normal;
+}
+.dark-mode #news .news-title {
+    color: #f9fafb;
+}
+#news .VueCarousel-slide {
+  padding: 10px;
+}
+.new-design-news-card {
+  background-color: #fff;
+  border: 1px solid #000;
+  border-radius: 12px;
+  padding: 1rem;
+  height: 190px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: left;
+  box-shadow: 0 0 15px rgba(225, 7, 7, 0.5);
+  transition: all 0.3s ease;
+}
+.new-design-news-card:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 5px 25px rgba(225, 7, 7, 0.6);
+}
+.new-design-news-card .card-content {
+  flex-grow: 1;
+}
+.new-design-news-card .card-date {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+.new-design-news-card .card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #111827;
+  line-height: 1.4;
+  margin-bottom: 1rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+.new-design-news-card .card-actions {
+  display: flex;
+  gap: 10px;
+}
+.new-design-news-card .btn-news {
+  flex: 1;
+  background-color: #e10707;
+  color: #fff;
+  border: 1px solid #e10707;
+  border-radius: 8px;
+  padding: 0.5rem;
+  text-align: center;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: all 0.2s ease-in-out;
+}
+.new-design-news-card .btn-news:hover {
+  background-color: #c10606;
+  border-color: #c10606;
+  transform: translateY(-1px);
+}
+.dark-mode #news .VueCarousel-dot {
+    background-color: rgba(255, 255, 255, 0.3) !important;
+}
+.dark-mode #news .VueCarousel-dot--active {
+    background-color: #fff !important;
+}
+
+.showcase-card {
+  position: relative;
+  z-index: 2;
+  margin: 0 auto 5rem;
+  max-width: 1140px;
+  padding: 3rem;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px); /* Safari support */
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.1);
+}
+.dark-mode .showcase-card {
+  background: rgba(22, 22, 22, 0.3);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 16px 50px rgba(0,0,0,0.25);
+}
+
+.showcase-card:last-of-type {
+  margin-bottom: 0;
+}
+
+.card-content-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 3rem;
+  align-items: center;
+}
+
+.showcase-card:nth-of-type(2) .card-content-grid .aurora-image-wrapper {
+  order: 1;
+}
+.showcase-card:nth-of-type(2) .card-content-grid .aurora-text-content {
+  order: 2;
+}
+
+.aurora-text-content h2 {
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  color: #1a202c;
+}
+.aurora-text-content .lead {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: #4a5568;
+}
+.dark-mode .aurora-text-content h2 { color: #fff; }
+.dark-mode .aurora-text-content .lead { color: #cbd5e0; }
+.dark-mode .aurora-text-content h4 { color: #e2e8f0; }
+
+/* The image styling with red glow */
+.aurora-image-wrapper img {
+  border-radius: 16px;
+  width: 100%;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  filter: drop-shadow(0px 10px 25px rgba(225, 7, 7, 0.4));
+  transition: transform 0.4s ease, filter 0.4s ease;
+}
+.aurora-image-wrapper:hover img {
+  transform: translateY(-5px) scale(1.02);
+  filter: drop-shadow(0px 15px 30px rgba(225, 7, 7, 0.5));
+}
+.dark-mode .aurora-image-wrapper img {
+  filter: drop-shadow(0px 10px 30px rgba(255, 61, 61, 0.45));
+}
+.dark-mode .aurora-image-wrapper:hover img {
+  filter: drop-shadow(0px 15px 35px rgba(255, 61, 61, 0.55));
+}
+
+
+.showcase-card.reveal .card-content-grid > div {
+  opacity: 0;
+  transform: translateY(30px) scale(0.98);
+  transition: transform 0.8s cubic-bezier(0.165, 0.84, 0.44, 1), opacity 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+.showcase-card.reveal.active .card-content-grid > div {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.showcase-card.reveal.active .aurora-image-wrapper {
+  transition-delay: 0.1s;
+}
+.showcase-card.reveal.active .aurora-text-content {
+  transition-delay: 0.25s;
+}
+
+
+@media (max-width: 991px) {
+  .card-content-grid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+  .showcase-card:nth-of-type(2) .card-content-grid .aurora-image-wrapper,
+  .showcase-card:nth-of-type(2) .card-content-grid .aurora-text-content {
+    order: unset; 
+  }
+  .aurora-text-content {
+    text-align: center;
+  }
+  .exchange-tags-container, .cta-button-group, .app-buttons-container {
+    justify-content: center;
+  }
+  .showcase-card {
+    padding: 2rem;
+  }
 }
 
 </style>
