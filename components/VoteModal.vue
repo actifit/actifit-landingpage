@@ -482,234 +482,193 @@ export default {
 				let url = new URL(process.env.actiAppUrl + 'performTrx/?user=' + this.user.account.name + '&operation=' + op_json + '&bchain=' + bchain);
 
 
-				let reqHeads = new Headers({
-					'Content-Type': 'application/json',
-					'x-acti-token': 'Bearer ' + accToken,
-				});
-				let res = await fetch(url, {
-					headers: reqHeads
-				});
-				let outcome = await res.json();
-				console.log(outcome);
-				if (outcome.error) {
-					console.log(outcome.error);
+			let reqHeads = new Headers({
+			  'Content-Type': 'application/json',
+			  'x-acti-token': 'Bearer ' + accToken,
+			});
+			let res = await fetch(url, {
+				headers: reqHeads
+			});
+			let outcome = await res.json();
+			console.log(outcome);
+			if (outcome.error){
+				console.log(outcome.error);
 
-					//if this is authority error, means needs to be logged out
-					//example "missing required posting authority:Missing Posting Authority"
-					let err_msg = outcome.trx.tx.error;
-					if (err_msg.includes('missing') && err_msg.includes('authority') && this.cur_bchain == bchain_option) {
-						//clear entry
-						localStorage.removeItem('access_token');
-						//this.$store.commit('setStdLoginUser', false);
-						this.error_msg = this.$t('session_expired_login_again');
-						this.$store.dispatch('steemconnect/logout');
-					}
-
-					this.$notify({
-						group: 'error',
-						text: err_msg,
-						position: 'top center'
-					})
-					return { success: false, trx: null };
-					//this.$router.push('/login');
-				} else {
-					return { success: true, trx: outcome.trx };
+				//if this is authority error, means needs to be logged out
+				//example "missing required posting authority:Missing Posting Authority"
+				let err_msg = outcome.trx.tx.error;
+				if (err_msg.includes('missing') && err_msg.includes('authority') && this.cur_bchain == bchain_option){
+					//clear entry
+					localStorage.removeItem('access_token');
+					//this.$store.commit('setStdLoginUser', false);
+					this.error_msg = this.$t('session_expired_login_again');
+					this.$store.dispatch('steemconnect/logout');
 				}
-			}
-		},
-        // START: MODIFIED METHOD
-		voteSuccess(err, finalize, bchain) {
-			if (err) {
-				this.loading = false
+
 				this.$notify({
-					group: 'error',
-					text: err,//this.$t('Vote_Error'),
-					position: 'top center'
-				});
+				  group: 'error',
+				  text: err_msg,
+				  position: 'top center'
+				})
+				return {success: false, trx: null};
+				//this.$router.push('/login');
+			}else{
+				return {success: true, trx: outcome.trx};
 			}
-			else {
-				if (finalize) {
-					this.loading = false
-                    
-                    // This is the optimistic UI update for the vote count.
-                    if (this.user && this.postToVote) {
-                        const voterName = this.user.account.name;
-                        const existingVoteIndex = this.postToVote.active_votes.findIndex(v => v.voter === voterName);
-
-                        // Case 1: User is un-voting (vote weight is 0)
-                        if (this.voteWeight === 0) {
-                            if (existingVoteIndex > -1) {
-                                // If their vote existed, remove it. The count will decrease.
-                                this.postToVote.active_votes.splice(existingVoteIndex, 1);
-                            }
-                        } else { // Case 2: User is casting a new vote or changing an existing one
-                            if (existingVoteIndex === -1) {
-                                // If they haven't voted before, add a new vote object.
-                                // This will cause the array length to increase by 1, updating the count.
-                                this.postToVote.active_votes.push({
-                                    voter: voterName,
-                                    percent: this.voteWeight * 100
-                                });
-                            } else {
-                                // If they are just changing their vote weight, update the existing entry.
-                                // The array length does not change, so the count remains the same.
-                                this.postToVote.active_votes[existingVoteIndex].percent = this.voteWeight * 100;
-                            }
-                        }
-                    }
-
-					//append this entry into the list of voted posts
-					if (this.newlyVotedPosts.indexOf(this.postToVote.post_id) === -1) {
-						this.newlyVotedPosts.push(this.postToVote.post_id);
-					}
-					this.$store.commit('setNewlyVotedPosts', this.newlyVotedPosts);
-					$(this.$refs.voteModal).modal('hide')
-					this.$notify({
-						group: 'success',
-						text: this.$t('Vote_Success').replace('_BCHAIN_', bchain)
-					});
-
-					//if the user votes 3 or more posts at 20%, let's give an additional reward
-					if (this.newlyVotedPosts.length >= 3 && this.voteWeight >= 20) {
-						this.rewardUserVote();
-					}
-
-					this.refreshAccountData();
+		}
+	  },
+	  voteSuccess (err, finalize, bchain) {
+		  if (err) {
+			this.loading = false
+			this.$notify({
+			  group: 'error',
+			  text: err,//this.$t('Vote_Error'),
+			  position: 'top center'
+			});
+		  }
+		  else {
+			if (finalize){
+				this.loading = false
+				//append this entry into the list of voted posts
+				if (this.newlyVotedPosts.indexOf(this.postToVote.post_id) === -1){
+					this.newlyVotedPosts.push(this.postToVote.post_id);
 				}
-			}
-		},
-        // END: MODIFIED METHOD
-		async vote(e) {
-			//if no user is logged in, prompt to login
-
-			if (!this.user || !this.user.account) {
-				//if (!this.$store.state.steemconnect.user){
-				alert(this.$t('need_login_signup_notice_vote'));
-				e.stopPropagation();
-				return;
-			}
-
-			// Check if the post has already been paid out.
-			if (this.postPaid()) {
-				// If it is paid out, show a confirmation dialog using the i18n translation.
-				// The confirm() function returns `true` for "OK" and `false` for "Cancel".
-				const userConfirmed = confirm(this.$t('paid_out_vote_confirm'));
-
-				// If the user clicks "Cancel", stop the function from proceeding.
-				if (!userConfirmed) {
-					this.loading = false; // Ensure loading spinner is turned off
-					return;
-				}
-			}
-
-
-			//if the user already voted, confirm vote change
-			//if this post is already voted by the user, we need to show a confirmation
-			if (this.userVotedThisPost()) {
-				var confirmPopup = confirm(this.$t('confirm_vote_change'));
-				if (!confirmPopup) {
-					return;
-				}
-			}
-
-			this.loading = true
-			if (!localStorage.getItem('std_login')) {
-				//if (!this.stdLogin){
-				this.$steemconnect.vote(this.user.account.name, this.postToVote.author, this.postToVote.permlink, this.voteWeight * 100, (err) => {
-					this.voteSuccess(err, true, 'STEEM');
+				this.$store.commit('setNewlyVotedPosts', this.newlyVotedPosts);
+				$(this.$refs.voteModal).modal('hide')
+				this.$notify({
+				  group: 'success',
+				  text: this.$t('Vote_Success').replace('_BCHAIN_',bchain)
 				});
-			} else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) {
-				window.hive_keychain.requestVote(this.user.account.name, this.postToVote.permlink, this.postToVote.author, this.voteWeight * 100, (response) => {
-					console.log(response);
-					if (response.success) {
-						this.voteSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain);
-					} else {
-						this.voteSuccess(response.message, false, this.cur_bchain);
-					}
-				});
-			} else {
-				let cstm_params = {
-					"voter": this.user.account.name,
-					"author": this.postToVote.author,
-					"permlink": this.postToVote.permlink,
-					"weight": this.voteWeight * 100
-				};
 
-				let res = await this.processTrxFunc('vote', cstm_params, this.cur_bchain);
+        this.$emit('vote-success', this.postToVote);
 
-				if (res.success) {
+				//if the user votes 3 or more posts at 20%, let's give an additional reward
+				if (this.newlyVotedPosts.length >= 3 && this.voteWeight >= 20){
+				  this.rewardUserVote();
+				}
+
+				this.refreshAccountData();
+			}
+		  }
+	  },
+	  async vote (e) {
+        //if no user is logged in, prompt to login
+
+		if (!this.user || !this.user.account){
+		//if (!this.$store.state.steemconnect.user){
+		  alert(this.$t('need_login_signup_notice_vote'));
+		  e.stopPropagation();
+		  return;
+		}
+
+
+		//if the user already voted, confirm vote change
+		//if this post is already voted by the user, we need to show a confirmation
+		if (this.userVotedThisPost()){
+		  var confirmPopup = confirm(this.$t('confirm_vote_change'));
+		  if (!confirmPopup){
+			return;
+		  }
+		}
+
+		this.loading = true
+		if (!localStorage.getItem('std_login')){
+		//if (!this.stdLogin){
+			this.$steemconnect.vote(this.user.account.name, this.postToVote.author, this.postToVote.permlink, this.voteWeight * 100, (err) => {
+			  this.voteSuccess(err, true, 'STEEM');
+			});
+		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){
+			window.hive_keychain.requestVote(this.user.account.name, this.postToVote.permlink, this.postToVote.author, this.voteWeight * 100, (response) => {
+				console.log(response);
+				if (response.success){
 					this.voteSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain);
-				} else {
-					this.voteSuccess('error voting', false, this.cur_bchain);
+				}else{
+					this.voteSuccess(response.message, false, this.cur_bchain);
 				}
+			});
+		}else{
+			let cstm_params = {
+			  "voter": this.user.account.name,
+			  "author": this.postToVote.author,
+			  "permlink": this.postToVote.permlink,
+			  "weight": this.voteWeight * 100
+			};
 
-				//also send the vote again to the other chain
-				let other_chain = this.cur_bchain == 'HIVE' ? 'STEEM' : 'HIVE';
-				if (this.target_bchain == 'BOTH') {
-					//this.loading = true;
-					let res = await this.processTrxFunc('vote', cstm_params, other_chain);
+			let res = await this.processTrxFunc('vote', cstm_params, this.cur_bchain);
 
-					if (res.success) {
-						this.voteSuccess(null, true, other_chain);
-					} else {
-						this.voteSuccess('error voting', false, other_chain);
-					}
+			if (res.success){
+				this.voteSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain);
+			}else{
+				this.voteSuccess('error voting', false, this.cur_bchain);
+			}
+
+			//also send the vote again to the other chain
+			let other_chain = this.cur_bchain=='HIVE'?'STEEM':'HIVE';
+			if (this.target_bchain == 'BOTH'){
+				//this.loading = true;
+				let res = await this.processTrxFunc('vote', cstm_params, other_chain);
+
+				if (res.success){
+					this.voteSuccess(null, true, other_chain);
+				}else{
+					this.voteSuccess('error voting', false, other_chain);
 				}
+			}
 
+		}
+      },
+	  //handles refreshing account data following vote
+	  async refreshAccountData () {
+		if (!localStorage.getItem('std_login')){
+		//if (!this.stdLogin){
+			let user_data = await this.$steemconnect.me();
+			this.user.account = user_data.account;
+		}else{
+			this.$store.dispatch('steemconnect/refreshUser');
+		}
+	  },
+	  async rewardUserVote () {
+		//handles rewarding the user for his votes
+		let url = new URL(process.env.actiAppUrl + 'rewardActifitWebVote/'+this.user.account.name);
+		//compile all needed data and send it along the request for processing
+		let params = {
+			web_vote_token: process.env.webVoteToken,
+			url: this.postToVote.url,
+		}
+		Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
+		try{
+			let res = await fetch(url);
+			let outcome = await res.json();
+			if (outcome.rewarded){
+				// notify the user that he received an additional reward
+				this.$notify({
+				  group: 'success',
+				  text: this.$t('youve_been_rewarded')+outcome.amount + this.$t('reward_for_upvote'),
+				  position: 'top center'
+				})
 			}
-		},
-		//handles refreshing account data following vote
-		async refreshAccountData() {
-			if (!localStorage.getItem('std_login')) {
-				//if (!this.stdLogin){
-				let user_data = await this.$steemconnect.me();
-				this.user.account = user_data.account;
-			} else {
-				this.$store.dispatch('steemconnect/refreshUser');
-			}
-		},
-		async rewardUserVote() {
-			//handles rewarding the user for his votes
-			let url = new URL(process.env.actiAppUrl + 'rewardActifitWebVote/' + this.user.account.name);
-			//compile all needed data and send it along the request for processing
-			let params = {
-				web_vote_token: process.env.webVoteToken,
-				url: this.postToVote.url,
-			}
-			Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
-			try {
-				let res = await fetch(url);
-				let outcome = await res.json();
-				if (outcome.rewarded) {
-					// notify the user that he received an additional reward
-					this.$notify({
-						group: 'success',
-						text: this.$t('youve_been_rewarded') + outcome.amount + this.$t('reward_for_upvote'),
-						position: 'top center'
-					})
-				}
-			} catch (err) {
-				console.error(err);
-			}
-		},
-		async fetchVoterData() {
-			console.log('postToVote')
-			console.log(this.postToVote)
-			if (!this.postToVote) {
-				return;
-			}
-			this.votersList = this.postToVote.active_votes;
-		},
-		setProperNode() {
-			this.cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
-			let properNode = hive;
-			if (this.cur_bchain == 'STEEM') {
-				properNode = steem;
-			}
-			console.log(this.cur_bchain);
-			return properNode;
-		},
-		async setUserSettings(result) {
+		}catch(err){
+			console.error(err);
+		}
+	  },
+	  async fetchVoterData(){
+		console.log('postToVote')
+		console.log(this.postToVote)
+		  if (!this.postToVote){
+			return;
+		  }
+		  this.votersList = this.postToVote.active_votes;
+	  },
+	  setProperNode (){
+		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
+		let properNode = hive;
+		if (this.cur_bchain == 'STEEM'){
+			properNode = steem;
+		}
+		console.log(this.cur_bchain);
+		return properNode;
+	  },
+		async setUserSettings(result){
 			console.log('fetched user settings');
 			//console.log(result)
 			if (result && result.settings) {
@@ -887,7 +846,7 @@ export default {
 				res.json().then(json => this.setHBDPrice(json['hive_dollar'].usd)).catch(e => reject(e))
 			}).catch(e => reject(e))
 
-		//in addition to the default updating of VP upon each render, we need to take into consideration leaving window open. 
+		//in addition to the default updating of VP upon each render, we need to take into consideration leaving window open.
 		//for this purpose, let's update every 30 seconds
 		setInterval(this.fetchVotingPower, 30 * 1000);
 
@@ -923,5 +882,5 @@ export default {
   .vote-controls
     margin-top: 5px
     padding: 4px 8px
-	
+
 </style>
