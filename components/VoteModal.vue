@@ -360,11 +360,11 @@
 		this.calculateVoteValue();
       },
       /* function checks if logged in user has upvoted current report */
-	  userVotedThisPost() {
-		let curUser = this.user.account.name;
-		//check if the post contains in its original voters current user, or if it has been upvoted in current session
-		return this.postToVote.active_votes.filter(voter => (voter.voter === curUser)).length > 0 || this.newlyVotedPosts.indexOf(this.postToVote.post_id)!==-1;
-	  },
+			userVotedThisPost() {
+			let curUser = this.user.account.name;
+			return this.postToVote.active_votes &&
+				this.postToVote.active_votes.some(voter => (voter.voter === curUser && voter.percent > 0));
+		},
 	  async processTrxFunc(op_name, cstm_params, bchain_option){
 		if (!localStorage.getItem('std_login')){
 		//if (!this.stdLogin){
@@ -490,37 +490,39 @@
 		}
 	  },
 	  voteSuccess (err, finalize, bchain) {
-		  if (err) {
-			this.loading = false
-			this.$notify({
-			  group: 'error',
-			  text: err,//this.$t('Vote_Error'),
-			  position: 'top center'
-			});
-		  }
-		  else {
-			if (finalize){
+			if (err) {
 				this.loading = false
-				//append this entry into the list of voted posts
-				if (this.newlyVotedPosts.indexOf(this.postToVote.post_id) === -1){
-					this.newlyVotedPosts.push(this.postToVote.post_id);
-				}
-				this.$store.commit('setNewlyVotedPosts', this.newlyVotedPosts);
-				$(this.$refs.voteModal).modal('hide')
 				this.$notify({
-				  group: 'success',
-				  text: this.$t('Vote_Success').replace('_BCHAIN_',bchain)
+					group: 'error',
+					text: err, //this.$t('Vote_Error'),
+					position: 'top center'
 				});
-				
-				//if the user votes 3 or more posts at 20%, let's give an additional reward
-				if (this.newlyVotedPosts.length >= 3 && this.voteWeight >= 20){
-				  this.rewardUserVote();
+			} else {
+				if (finalize) {
+					this.loading = false
+					// append this entry into the list of voted posts
+					if (this.newlyVotedPosts.indexOf(this.postToVote.post_id) === -1) {
+						this.newlyVotedPosts.push(this.postToVote.post_id);
+					}
+					this.$store.commit('setNewlyVotedPosts', this.newlyVotedPosts);
+					$(this.$refs.voteModal).modal('hide')
+					this.$notify({
+						group: 'success',
+						text: this.$t('Vote_Success').replace('_BCHAIN_', bchain)
+					});
+
+					// Emit event so parent can update UI immediately
+					this.$emit('vote-success', this.postToVote);
+
+					// if the user votes 3 or more posts at 20%, let's give an additional reward
+					if (this.newlyVotedPosts.length >= 3 && this.voteWeight >= 20) {
+						this.rewardUserVote();
+					}
+
+					this.refreshAccountData();
 				}
-				
-				this.refreshAccountData();
 			}
-		  }
-	  },
+		},
 	  async vote (e) {
         //if no user is logged in, prompt to login
 		
