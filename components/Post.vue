@@ -47,14 +47,7 @@
               <a href="#" :style="{ visibility: imageLoading ? 'hidden' : 'visible' }" class="text-brand" @click="post.pstId = pstId; $store.commit('setActivePost', post)"
                 data-toggle="modal" data-target="#postModal" :title="$t('read_more_small')">
                 <!-- The :key is the critical fix for the same-image bug -->
-                <img
-                  :src="currentImageSrc"
-                  :key="currentImageSrc"
-                  :alt="report.title"
-                  class="report-image"
-                  @load="onImageLoad"
-                  @error="onImageError"
-                />
+                <img :key="currentImageSrc" :src="currentImageSrc" :alt="post.title" class="post-image" @load="onImageLoad" @error="onImageError">
               </a>
 
               <!-- Arrows are visible even during load -->
