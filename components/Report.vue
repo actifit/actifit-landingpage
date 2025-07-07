@@ -26,9 +26,10 @@
               <div v-if="imageLoading" class="image-loader-container">
                 <i class="fas fa-spinner fa-spin text-brand"></i>
               </div>
-              <a href="#" :style="{ visibility: imageLoading ? 'hidden' : 'visible' }" class="text-brand" @click="report.rptId = rptId; $store.commit('setActiveReport', report)"
+              <!-- --- MODIFIED: Removed the `:style` binding for simplicity --- -->
+              <a href="#" class="text-brand" @click="report.rptId = rptId; $store.commit('setActiveReport', report)"
                 data-toggle="modal" data-target="#reportModal" :title="$t('read_more_small')">
-                <img :key="currentImageSrc" :src="currentImageSrc" :alt="report.title" class="report-image" @load="onImageLoad" @error="onImageError">
+                <img :key="currentImageSrc" :src="currentImageSrc" :alt="report.title" class="report-image" @load="onImageLoad" @error="onImageError" referrerpolicy="no-referrer">
               </a>
               <template v-if="allImages.length > 1">
                 <div class="carousel-arrow left" @click.prevent="prevImage">
@@ -213,6 +214,7 @@
 </template>
 
 <script>
+// --- SCRIPT REMAINS THE SAME ---
 import UserHoverCard from './UserHoverCard.vue'
 import { mapGetters } from 'vuex'
 import SocialSharing from 'vue-social-sharing'
@@ -273,6 +275,7 @@ export default {
 </script>
 
 <style lang="sass" scoped>
+  /* --- STYLES REMAIN THE SAME --- */
   .report
     height: 100%
     h6
@@ -298,6 +301,7 @@ export default {
       border: solid 1px #ddd
 </style>
 <style scoped>
+/* --- STYLES REMAIN THE SAME, WITH ONE ADDITION --- */
 .full-afit-txt { font-style: italic; }
 .check-tooltip { color: white; }
 .report-title { min-height: 60px; }
@@ -314,4 +318,17 @@ export default {
 .carousel-bullets { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 2; }
 .carousel-bullet { width: 8px; height: 8px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.6); cursor: pointer; }
 .carousel-bullet.active { background-color: #fff; }
+
+/* --- NEW STYLE FOR THE PLACEHOLDER --- */
+.image-load-failure-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  font-size: 0.9rem;
+}
+.image-load-failure-placeholder .fas {
+  margin-right: 8px;
+  font-size: 1.2rem;
+}
 </style>
