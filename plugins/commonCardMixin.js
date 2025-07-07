@@ -21,9 +21,10 @@ export const commonCardMixin = {
       imageLoading: true,
       cardWidth: 0,
       debounceTimer: null,
-      resizeListenerAdded: false,
       imageGeneration: 0,
-      imageLoadFailed: false
+      imageLoadFailed: false,
+      resizeObserver: null,
+      initialImageSetupComplete: false
     }
   },
   computed: {
@@ -33,9 +34,9 @@ export const commonCardMixin = {
     },
     meta () {
       try {
-        const metadata = this.cardData.json_metadata;
-        if (typeof metadata === 'string') return JSON.parse(metadata);
-        return metadata || {};
+        const metadata = this.cardData ? this.cardData.json_metadata : {}
+        if (typeof metadata === 'string') return JSON.parse(metadata)
+        return metadata || {}
       } catch (err) {
         return {}
       }
@@ -87,11 +88,17 @@ export const commonCardMixin = {
     }
   },
   watch: {
+    'cardData.permlink' (newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.initialImageSetupComplete = false
+        this.attemptInitialImageSetup()
+      }
+    },
     postUpvoted: 'updatePostData'
   },
   beforeDestroy () {
-    if (this.resizeListenerAdded) {
-      window.removeEventListener('resize', this.debouncedResizeHandler)
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect()
     }
     clearTimeout(this.debounceTimer)
   },
@@ -108,26 +115,31 @@ export const commonCardMixin = {
         this.imageLoadFailed = true
       }
     },
-    // --- MODIFIED: Simplified again, as the Pixabay exception is handled in setupImages ---
+    // --- THIS IS THE ONLY MODIFIED FUNCTION ---
     getResizedImageUrl (url, width = 400) {
       if (typeof url !== 'string' || !url.startsWith('http') || /\.gif$/i.test(url)) {
         return url
       }
-      const trustedHosts = ['images.hive.blog']
-      const dpr = Math.min(window.devicePixelRatio || 1, 2)
-      const effectiveWidth = Math.round(width * dpr)
+      
+      // --- THE FIX ---
+      // We no longer multiply by devicePixelRatio. We request an image
+      // with a width that matches the container's CSS width.
+      const effectiveWidth = Math.round(width)
+
+      // Ensure we don't request a 0-width image, which can happen during initial render.
+      if (effectiveWidth <= 0) return url;
+
       const resizeProxy = `https://images.hive.blog/${effectiveWidth}x0/`
       return resizeProxy + url
     },
-    // --- MODIFIED: Now smarter. It handles the Pixabay exception directly ---
     setupImages (width) {
-      // This function relies on `this.meta`, which in turn relies on `this.cardData`.
-      // It's crucial that `cardData` is available when this is called.
       if (!this.cardData || !this.cardData.json_metadata) {
         this.allImages = []
         this.imageLoading = false
         return
       }
+      if (width <= 0) return
+
       const metaImages = this.meta.image
       let initialImages = []
       if (Array.isArray(metaImages)) {
@@ -154,11 +166,9 @@ export const commonCardMixin = {
 
       const uniqueImages = [...new Set(userImages)]
       const processedImages = uniqueImages.map(url => {
-        // If the URL is from Pixabay, use the original URL directly to avoid proxy/referrer issues.
         if (url.includes('pixabay.com') || url.includes('leopedia.io')) {
           return url
         }
-        // For all other eligible images, use the resize proxy.
         return this.getResizedImageUrl(url, width)
       })
       this.allImages = processedImages
@@ -168,22 +178,33 @@ export const commonCardMixin = {
         this.imageLoading = false
       }
     },
-    updateDimensionsAndSetupImages () {
-      if (this.$el) {
-        const newWidth = Math.round(this.$el.offsetWidth);
-        if (newWidth > 0 && newWidth !== this.cardWidth) {
-          this.cardWidth = newWidth;
-          this.imageGeneration++;
-          this.imageLoading = true;
-          this.setupImages(this.cardWidth);
-        }
-      }
-    },
     debouncedResizeHandler () {
       clearTimeout(this.debounceTimer);
       this.debounceTimer = setTimeout(() => {
-        this.updateDimensionsAndSetupImages();
+        if (this.$el) {
+          const newWidth = Math.round(this.$el.offsetWidth);
+          if (newWidth > 0 && newWidth !== this.cardWidth) {
+            this.cardWidth = newWidth;
+            this.imageGeneration++;
+            this.imageLoading = true;
+            this.setupImages(this.cardWidth);
+          }
+        }
       }, 250);
+    },
+    attemptInitialImageSetup () {
+      if (this.initialImageSetupComplete || !this.$el || !this.cardData || !this.cardData.json_metadata) {
+        return;
+      }
+      
+      const newWidth = Math.round(this.$el.offsetWidth);
+
+      if (newWidth > 0) {
+        this.cardWidth = newWidth;
+        this.imageLoading = true;
+        this.setupImages(this.cardWidth);
+        this.initialImageSetupComplete = true;
+      }
     },
     nextImage () {
       if (this.allImages.length > 1) {
@@ -253,6 +274,7 @@ export const commonCardMixin = {
       return this.cur_bchain === 'STEEM' ? steem : hive
     },
     async updatePostData () {
+      if (!this.cardData || !this.cardData.author || !this.cardData.permlink) return;
       const chainLnk = await this.setProperNode()
       chainLnk.api.getContent(this.cardData.author, this.cardData.permlink, (err, result) => {
         if (result && this.cardData) {
@@ -263,23 +285,31 @@ export const commonCardMixin = {
     },
     async initializeCard () {
       await this.$nextTick();
+
       this.imageLoadFailed = false;
       this.imageError = false;
-      this.updateDimensionsAndSetupImages();
-      if (!this.resizeListenerAdded) {
-        window.addEventListener('resize', this.debouncedResizeHandler);
-        this.resizeListenerAdded = true;
-      }
+      
+      this.resizeObserver = new ResizeObserver(() => {
+        this.attemptInitialImageSetup();
+        this.debouncedResizeHandler();
+      });
+
+      this.resizeObserver.observe(this.$el);
+
       steem.api.setOptions({ url: process.env.steemApiNode })
       hive.api.setOptions({ url: process.env.hiveApiNode })
-      fetch(`${process.env.actiAppUrl}getPostReward?user=${this.cardData.author}&url=${this.cardData.url}`)
-        .then(res => res.json())
-        .then(json => { this.afitReward = json.token_count })
-        .catch(e => console.error('Error fetching post reward:', e))
-      fetch(`${process.env.actiAppUrl}getRank/${this.cardData.author}`)
-        .then(res => res.json())
-        .then(json => { this.userRank = json })
-        .catch(e => console.error('Error fetching user rank:', e))
+      
+      if (this.cardData && this.cardData.author) {
+        fetch(`${process.env.actiAppUrl}getPostReward?user=${this.cardData.author}&url=${this.cardData.url}`)
+          .then(res => res.json())
+          .then(json => { this.afitReward = json.token_count })
+          .catch(e => console.error('Error fetching post reward:', e))
+        fetch(`${process.env.actiAppUrl}getRank/${this.cardData.author}`)
+          .then(res => res.json())
+          .then(json => { this.userRank = json })
+          .catch(e => console.error('Error fetching user rank:', e))
+      }
+      
       this.$store.dispatch('fetchModerators')
       this.cur_bchain = localStorage.getItem('cur_bchain') || 'HIVE'
       this.profImgUrl = this.cur_bchain === 'STEEM' ? process.env.steemImgUrl : process.env.hiveImgUrl
