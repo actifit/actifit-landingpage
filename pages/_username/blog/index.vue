@@ -21,18 +21,28 @@
           {{ $t('Create_post') }}
         </a>
       </div>
-      <div class="row text-right">
-        <div class="col-12 pb-2"><a :href="'/' + username + '/comments'" class="btn btn-brand border"
-            :title="$t('view_comments')"><i class="far fa-comments"></i></a>&nbsp;<a :href="'/' + username + '/videos'"
-            class="btn btn-brand border" :title="$t('view_videos')"><i class="fas fa-video"></i></a></div>
+            <div class="row">
+        <div class="col-12 pb-2 d-flex justify-content-between align-items-center">
+          <a href="#" 
+             class="btn btn-brand border"
+             :title="filterTooltip"
+             @click.prevent="hideReblogs = !hideReblogs">
+            <i class="fas fa-retweet" :style="{ color: hideReblogs ? '#FFFFFF' : '#008000' }"></i>
+          </a>
+          
+          <div>
+            <a :href="'/' + username + '/comments'" class="btn btn-brand border" :title="$t('view_comments')"><i class="far fa-comments"></i></a> 
+            <a :href="'/' + username + '/videos'" class="btn btn-brand border" :title="$t('view_videos')"><i class="fas fa-video"></i></a>
+          </div>
+        </div>
       </div>
 
       <!-- show listing when loaded -->
-      <div v-if="userPosts.length">
-        <div class="row" v-for="iterx in Math.ceil(userPosts.length / splitFactor)" :key="iterx">
+      <div v-if="filteredUserPosts.length">
+        <div class="row" v-for="iterx in Math.ceil(filteredUserPosts.length / splitFactor)" :key="iterx">
           <div v-for="itery in splitFactor" :key="itery" class="col-md-6 col-lg-4 mb-4">
-            <Post v-if="(iterx - 1) * splitFactor + (itery - 1) < userPosts.length"
-              :post="userPosts[(iterx - 1) * splitFactor + (itery - 1)]" :displayUsername="username"
+            <Post v-if="(iterx - 1) * splitFactor + (itery - 1) < filteredUserPosts.length"
+              :post="filteredUserPosts[(iterx - 1) * splitFactor + (itery - 1)]" :displayUsername="username"
               :pstId="(iterx - 1) * splitFactor + (itery - 1)" />
           </div>
           <!--<div class="col-md-6 col-lg-12 mb-4" v-if="(iterx - 1) < inlineAds">
@@ -44,7 +54,7 @@
       </div>
 
       <!-- or no content message when no posts found -->
-      <div class="text-center text-muted" v-if="!userPosts.length && !loading">
+      <div class="text-center text-muted" v-if="!filteredUserPosts.length && !loading">
         {{ username }} {{ $t('error_no_posts') }}
       </div>
 
@@ -108,36 +118,52 @@ export default {
   },
   data() {
     return {
-      loading: true, // initial loading state
-      loadingMore: false, // loading state for loading more posts
+      loading: true, 
+      loadingMore: false, 
       splitFactor: 9,
       inlineAds: 2,
+      hideReblogs: false,
+      minPostThreshold: 20, 
     }
   },
   watch: {
+    async hideReblogs(isHidingReblogs) {
+      if (isHidingReblogs) {
+        await this.ensureMinimumPosts();
+      }
+    },
     user: 'fetchUserData',
     bchain: async function (newBchain) {
       if (this.cur_bchain != newBchain && !this.loading) {
         //only update if changed
         this.cur_bchain = newBchain;
+        this.loading = true; // Set loading state
         await this.$store.dispatch('steemconnect/refreshUser');
 
-        // reset previously fetched posts to get latest
         this.$store.commit('setUserPosts', [])
 
-        // disable load more button and only show if there actually are more posts to load
         this.$store.commit('setMoreUserPostsAvailable', false)
 
-        await this.$store.dispatch('fetchUserPosts', this.username)
+        await this.fetchPostsRecursively(); 
+        
         this.loading = false
       }
-      //this.reload += 1;
     }
   },
   computed: {
     ...mapGetters('steemconnect', ['user']),
     ...mapGetters('steemconnect', ['stdLogin']),
     ...mapGetters(['userPosts', 'moreUserPostsAvailable', 'activePost', 'bchain']),
+    filteredUserPosts() {
+      if (!this.hideReblogs) {
+        return this.userPosts;
+      }
+      return this.userPosts.filter(post => post.author === this.username);
+    },
+    
+    filterTooltip() {
+      return this.hideReblogs ? this.$t('show_reblogs') : this.$t('hide_reblogs');
+    },
 
     // get username from url
     username() {
@@ -151,6 +177,32 @@ export default {
     }
   },
   methods: {
+    
+    async fetchPostsRecursively() {
+      
+      if (this.loadingMore || !this.moreUserPostsAvailable) {
+        if (this.userPosts.length > 0) return;
+      }
+
+      this.loadingMore = true;
+
+      await this.$store.dispatch('fetchUserPosts', this.username);
+
+      
+      await this.ensureMinimumPosts();
+
+      this.loadingMore = false;
+    },
+
+
+    async ensureMinimumPosts() {
+      
+      if (this.hideReblogs && this.filteredUserPosts.length < this.minPostThreshold && this.moreUserPostsAvailable) {
+        
+        await this.fetchPostsRecursively();
+      }
+    },
+    
     nextPost(direction) {
       let pstId = this.activePost.pstId;
       let proceed = false;
@@ -160,14 +212,14 @@ export default {
           proceed = true;
         }
       } else {
-        if (pstId < this.userPosts.length) {
+        if (pstId < this.filteredUserPosts.length - 1) {
           pstId += 1;
           proceed = true;
         }
       }
       if (proceed) {
-        this.userPosts[pstId].pstId = pstId;
-        this.$store.commit('setActivePost', this.userPosts[pstId]);
+        this.filteredUserPosts[pstId].pstId = pstId;
+        this.$store.commit('setActivePost', this.filteredUserPosts[pstId]);
       }
     },
     initiateNewPost($event) {
@@ -177,50 +229,33 @@ export default {
       this.$store.commit('setEditPost', newPost);
     },
     async loadMore() {
-      this.loadingMore = true
-
-      let cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
-      this.$store.commit('setBchain', cur_bchain);
-
-      await this.$store.dispatch('fetchUserPosts', this.username)
-      this.loadingMore = false
+      await this.fetchPostsRecursively();
     },
     async fetchUserData() {
       if (typeof this.user != 'undefined' && this.user != null) {
 
         if (!localStorage.getItem('std_login')) {
-          //if (!this.stdLogin){
-          //update user info from blockchain
           let user_data = await this.$steemconnect.me();
           this.user.account = user_data.account;
         }
-        //ensure we fetch proper logged in user data
         this.$store.dispatch('fetchUserTokens')
         this.$store.dispatch('fetchUserRank')
       }
     },
   },
   async mounted() {
-    // login
     this.$store.dispatch('steemconnect/login')
     this.fetchUserData();
-
-    // fetch posts
 
     let cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
     this.$store.commit('setBchain', cur_bchain);
 
-    // reset previously fetched posts to get latest
     this.$store.commit('setUserPosts', [])
-
-    // disable load more button and only show if there actually are more posts to load
     this.$store.commit('setMoreUserPostsAvailable', false)
 
-    await this.$store.dispatch('fetchUserPosts', this.username)
+    // Initial fetch
+    await this.fetchPostsRecursively();
 
-    //console.log(this.userPosts);
-
-    // remove loading indicator
     this.loading = false
   }
 }
