@@ -261,6 +261,7 @@ module.exports = {
 	{ src: '@/plugins/vue-mavon-editor', ssr: false },
 	{ src: '~plugins/vue-custom.js'},
 	{ src: '~/plugins/dark-mode.js'},
+  { src: '~/plugins/commonCardMixin.js', mode: 'client' }
   ],
 
   /*
