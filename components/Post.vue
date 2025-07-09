@@ -8,7 +8,7 @@
           {{ truncateString(post.title, 70) }}
           <i class="fas fa-external-link-alt"></i>
 
-          <span v-if="isPostPinned" :title="$t('pinned_post')">&nbsp;<i
+          <span v-if="isPostPinned" :title="$t('pinned_post')"> <i
               class="fas fa-thumbtack text-warning"></i></span>
         </a>
       </h6>
@@ -20,7 +20,7 @@
             <span class="d-flex justify-content-end align-items-center">
               <div class="">
                 <span v-if="isPostReblog"><i class="far fa-share-square text-brand" /></span>
-                <i class="fas fa-reply text-brand"></i>&nbsp;
+                <i class="fas fa-reply text-brand"></i> 
                 <UserHoverCard :username="post.parent_author" />
               </div>
             </span>
@@ -348,7 +348,8 @@ export default {
       this.postUpvoted = this.post.active_votes.filter(voter => (voter.voter === curUser)).length > 0 || this.newlyVotedPosts.indexOf(this.post.post_id) !== -1;
       return this.postUpvoted;
     },
-    /* function handles confirming if the user had voted already to prevent issues */
+    
+    // --- MODIFIED METHOD WITH NEW FUNCTIONALITY ---
     votePrompt(e) {
       //if no user is logged in, prompt to login
       //hasan this is responsible for not letting not logged in users access it
@@ -361,6 +362,20 @@ export default {
         this.$store.commit('setPostToVote', this.post)
       }
       */
+      // First, check if the post has been paid out using the existing helper function.
+      if (this.postPaid()) {
+        // If it is paid out, show the confirmation dialog to the user.
+        // The confirm() function returns `true` if the user clicks "OK", and `false` for "Cancel".
+        const userConfirmed = confirm("You are attempting to vote on a paid out post. Are you sure you wish to proceed?");
+        
+        // If the user clicks "Cancel" (userConfirmed is false), we stop the function here.
+        if (!userConfirmed) {
+          return; // Exit the function early, preventing the vote modal from opening.
+        }
+      }
+      
+      // If the post was not paid out, OR if it was paid out and the user clicked "OK",
+      // we proceed with the original action of opening the vote modal.
       this.$store.commit('setPostToVote', this.post)
     },
 
