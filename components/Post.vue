@@ -197,93 +197,10 @@ export default {
     isStandardPost () {
       return !this.explorePost
     },
-<<<<<<< HEAD
-    /* function checks if post has beneficiaries */
-    hasBeneficiaries() {
-      return Array.isArray(this.post.beneficiaries) && this.post.beneficiaries.length > 0;
-    },
-    beneficiariesDisplay() {
-      let output = 'Beneficiaries:\n';
-      for (let i = 0; i < this.post.beneficiaries.length; i++) {
-        output += this.post.beneficiaries[i].account + ': ' + this.post.beneficiaries[i].weight / 100 + '% \n';
-      }
-      return output;
-    },
-    /* function returns author payout value */
-    paidValue() {
-      if (this.post.total_payout_value) return this.post.total_payout_value
-      if (this.post.author_payout_value) return this.post.author_payout_value
-    },
-    /* function checks to see if post reached its payout period */
-    postPaid() {
-      //console.log(this.post);
-      if (this.post.is_paidout) {
-        //works for comments
-        return true;
-      }
-      //check if last_payout is after cashout_time which means post got paid
-      let last_payout = new Date(this.post.last_payout);
-      let cashout_time = new Date(this.post.cashout_time);
-      if (last_payout.getTime() > cashout_time.getTime()) {
-        return true;
-      }
-      return false;
-    },
-    //function handles displaying cut off version of text to avoid lengthy titles
-    truncateString(str, ln) {
-      if (str.length > ln) {
-        return str.substring(0, ln - 3) + "...";
-      }
-      return str;
-    },
-    /* function checks if logged in user has upvoted current post */
-    userVotedThisPost() {
-      let curUser = this.user.account.name;
-      //check if the post contains in its original voters current user, or if it has been upvoted in current session
-      this.postUpvoted = this.post.active_votes.filter(voter => (voter.voter === curUser)).length > 0 || this.newlyVotedPosts.indexOf(this.post.post_id) !== -1;
-      return this.postUpvoted;
-    },
-
-    // --- MODIFIED METHOD TO USE i18n FOR THE CONFIRMATION MESSAGE ---
-    votePrompt(e) {
-      if (this.postPaid()) {
-        // Now uses this.$t() to get the message from your language file
-         // If it is paid out, show the confirmation dialog to the user.
-        // The confirm() function returns `true` if the user clicks "OK", and `false` for "Cancel".
-        const userConfirmed = confirm(this.$t('paid_out_vote_confirm'));
-        
-        if (!userConfirmed) {
-          return;
-        }
-      }
-      
-      this.$store.commit('setPostToVote', this.post)
-    },
-
-    newlyVotedPostsQuery() {
-      //handles returning a list of recently manually upvoted on this current session
-      return this.newlyVotedPosts.length;
-    },
-    setProperNode() {
-      let properNode = hive;
-      if (this.cur_bchain == 'STEEM') {
-        properNode = steem;
-      }
-      return properNode;
-    },
-    async updatePostData() {
-      // try to fetch matching post
-      let chainLnk = await this.setProperNode();
-      chainLnk.api.getContent(this.post.author, this.post.permlink, (err, result) => {
-        this.post.total_payout_value = result.total_payout_value;
-        this.post.pending_payout_value = result.pending_payout_value;
-      })
-=======
     date () {
       const date = new Date(this.post.created)
       const minutes = date.getMinutes()
       return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() + ' ' + date.getHours() + ':' + (minutes < 10 ? '0' + minutes : minutes)
->>>>>>> acd69a97655b0ae59dc49680b4a7f2d587e00b0e
     }
   },
   async mounted () {
@@ -317,54 +234,6 @@ export default {
       float: left
       border: solid 1px #ddd
 </style>
-<<<<<<< HEAD
-<style>
-.full-afit-txt {
-  font-style: italic;
-}
-
-.check-tooltip {
-  color: white;
-}
-
-.post-title {
-  min-height: 60px;
-}
-
-.card {
-  box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
-  overflow: hidden;
-  min-height: 400px;
-}
-
-.card-pinned {
-  box-shadow: 3px 3px 3px rgba(204, 204, 0, 0.4);
-  overflow: hidden;
-}
-
-.single {
-  min-width: 17em;
-}
-
-.post-image {
-  width: 100%;
-  height: 150px;
-  object-fit: cover;
-}
-
-.post h6 a,
-#post_body_render {
-  text-wrap: balance;
-}
-
-.post {
-  vertical-align: top;
-}
-
-.post-reblog{
-  font-style:italic;
-}
-=======
 <style scoped>
 .full-afit-txt { font-style: italic; }
 .check-tooltip { color: white; }
@@ -386,5 +255,4 @@ export default {
 .carousel-bullets { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 2; }
 .carousel-bullet { width: 8px; height: 8px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.6); cursor: pointer; }
 .carousel-bullet.active { background-color: #fff; }
->>>>>>> acd69a97655b0ae59dc49680b4a7f2d587e00b0e
 </style>

@@ -86,7 +86,6 @@ export const commonCardMixin = {
       }
       return this.$fetchPostImage(this.meta)
     },
-    // This is now clean and simple, relying on the robust `postImages` property
     originalCurrentImageSrc () {
       const images = this.postImages;
       if (images.length > this.currentImageIndex) {
@@ -132,7 +131,6 @@ export const commonCardMixin = {
       const resizeProxy = `https://images.hive.blog/${effectiveWidth}x0/`
       return resizeProxy + url
     },
-    // This is also now clean and simple, relying on the robust `postImages` property
     setupImages (width) {
       if (width <= 0) return
 
@@ -185,7 +183,6 @@ export const commonCardMixin = {
         this.initialImageSetupComplete = true;
       }
     },
-    // ... all other methods remain the same
     nextImage () {
       if (this.allImages.length > 1) {
         this.imageLoading = true
@@ -247,9 +244,27 @@ export const commonCardMixin = {
       this.postUpvoted = hasVoted || newlyVoted
       return this.postUpvoted
     },
+    
+    // START: MODIFIED METHOD
     votePrompt (e) {
+      // Check if the post has already been paid out.
+      if (this.postPaid()) {
+        // If it is paid out, show a confirmation dialog using the i18n translation.
+        // The confirm() function returns `true` for "OK" and `false` for "Cancel".
+        const userConfirmed = confirm(this.$t('paid_out_vote_confirm'));
+        
+        // If the user clicks "Cancel", stop the function from proceeding.
+        if (!userConfirmed) {
+          return;
+        }
+      }
+      
+      // If the post is not paid out, or if the user confirmed the vote on a paid-out post,
+      // commit the post to the Vuex store to open the vote modal.
       this.$store.commit('setPostToVote', this.cardData)
     },
+    // END: MODIFIED METHOD
+
     setProperNode () {
       return this.cur_bchain === 'STEEM' ? steem : hive
     },
