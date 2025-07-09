@@ -348,23 +348,20 @@ export default {
       this.postUpvoted = this.post.active_votes.filter(voter => (voter.voter === curUser)).length > 0 || this.newlyVotedPosts.indexOf(this.post.post_id) !== -1;
       return this.postUpvoted;
     },
-    
-    // --- MODIFIED METHOD WITH NEW FUNCTIONALITY ---
+
+    // --- MODIFIED METHOD TO USE i18n FOR THE CONFIRMATION MESSAGE ---
     votePrompt(e) {
-      // First, check if the post has been paid out using the existing helper function.
       if (this.postPaid()) {
-        // If it is paid out, show the confirmation dialog to the user.
+        // Now uses this.$t() to get the message from your language file
+         // If it is paid out, show the confirmation dialog to the user.
         // The confirm() function returns `true` if the user clicks "OK", and `false` for "Cancel".
-        const userConfirmed = confirm("You are currently attempting to cast a vote on a post that has already been paid out; therefore, your action will not be counted. Are you certain you wish to continue with this action?");
+        const userConfirmed = confirm(this.$t('paid_out_vote_confirm'));
         
-        // If the user clicks "Cancel" (userConfirmed is false), we stop the function here.
         if (!userConfirmed) {
-          return; // Exit the function early, preventing the vote modal from opening.
+          return;
         }
       }
       
-      // If the post was not paid out, OR if it was paid out and the user clicked "OK",
-      // we proceed with the original action of opening the vote modal.
       this.$store.commit('setPostToVote', this.post)
     },
 
