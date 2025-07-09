@@ -351,22 +351,11 @@ export default {
     
     // --- MODIFIED METHOD WITH NEW FUNCTIONALITY ---
     votePrompt(e) {
-      //if no user is logged in, prompt to login
-      //hasan this is responsible for not letting not logged in users access it
-      /*
-      if (!this.user){
-        alert(this.$t('need_login_signup_notice_vote'));
-        e.stopPropagation();
-      }else{
-        //proceed normally showing vote popup
-        this.$store.commit('setPostToVote', this.post)
-      }
-      */
       // First, check if the post has been paid out using the existing helper function.
       if (this.postPaid()) {
         // If it is paid out, show the confirmation dialog to the user.
         // The confirm() function returns `true` if the user clicks "OK", and `false` for "Cancel".
-        const userConfirmed = confirm("You are attempting to vote on a paid out post. Are you sure you wish to proceed?");
+        const userConfirmed = confirm("You are currently attempting to cast a vote on a post that has already been paid out; therefore, your action will not be counted. Are you certain you wish to continue with this action?");
         
         // If the user clicks "Cancel" (userConfirmed is false), we stop the function here.
         if (!userConfirmed) {
