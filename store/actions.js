@@ -1010,7 +1010,6 @@ const userVideosFilter = username => (post) => {
     return false;
   }
 }
-
 const newsFilter = (post) => {
   return post.author === 'actifit'
 }
