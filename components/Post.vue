@@ -3,7 +3,6 @@
   <div>
     <div :class="[isOnlyPost ? 'card post single' : { 'card-pinned': isPostPinned, 'card post': isStandardPost }]">
       <h6 class="mb-0 text-center post-title">
-        <!--<a :href="post.url" target="_blank">-->
         <a :href="buildLink" target="_blank">
           {{ truncateString(post.title, 70) }}
           <i class="fas fa-external-link-alt"></i>
@@ -37,29 +36,54 @@
         </div>
         <div class="row">
           <div class="col-12">
-            <a href="#" class="text-brand" @click="post.pstId = pstId; $store.commit('setActivePost', post)"
-              data-toggle="modal" data-target="#postModal" :title="$t('read_more_small')" v-if="$postHasImage(meta)">
-              <img :src="$fetchPostImage(meta)" :alt="post.title" class="post-image" @error="handleImageError($event, meta)">
-            </a>
+            <!-- START: Carousel Functionality Merged Here -->
+            <div v-if="!imageLoadFailed" class="image-carousel-container" :key="imageGeneration">
+              <!-- Loader is absolutely positioned and shown when imageLoading is true -->
+              <div v-if="imageLoading" class="image-loader-container">
+                <i class="fas fa-spinner fa-spin text-brand" style="display:flex; justify-content: center;text-align: center; margin-bottom: 3rem; margin-top: 2rem;"></i>
+              </div>
+              
+              <!-- Image is hidden (not removed) while loading to prevent layout jump -->
+              <a href="#" :style="{ visibility: imageLoading ? 'hidden' : 'visible' }" class="text-brand" @click="post.pstId = pstId; $store.commit('setActivePost', post)"
+                data-toggle="modal" data-target="#postModal" :title="$t('read_more_small')">
+                <!-- The :key is the critical fix for the same-image bug -->
+                <img :key="currentImageSrc" :src="currentImageSrc" :alt="post.title" class="post-image" @load="onImageLoad" @error="onImageError" referrerpolicy="no-referrer">
+              </a>
+
+              <!-- Arrows are visible even during load -->
+              <template v-if="allImages.length > 1">
+                <div class="carousel-arrow left" @click.prevent="prevImage">
+                  <i class="fas fa-chevron-left"></i>
+                </div>
+                <div class="carousel-arrow right" @click.prevent="nextImage">
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+                <!-- Counter and bullets only appear when loading is finished -->
+                <template v-if="!imageLoading">
+                    <div class="image-counter">
+                      {{ currentImageIndex + 1 }} / {{ allImages.length }}
+                    </div>
+                    <div class="carousel-bullets">
+                      <span v-for="(img, index) in allImages" :key="index" class="carousel-bullet"
+                        :class="{ 'active': index === currentImageIndex }" @click.prevent="goToImage(index)"></span>
+                    </div>
+                </template>
+              </template>
+            </div>
+            <!-- END: Carousel Functionality Merged -->
           </div>
         </div>
         <div class="row">
           <div class="col-12">
             <a href="#" class="" @click="post.pstId = pstId; $store.commit('setActivePost', post)" data-toggle="modal"
               data-target="#postModal" :title="$t('read_more_small')">
-
               <div>
-                <!--<span id="post_body_render" v-html="fixedContent()"></span>-->
-                <span id="post_body_render">{{ renderSnippet(post.body) }}</span>
+                <span>{{ renderSnippet(post.body, 150) }}</span>
                 <i class="fas fa-external-link-alt"></i>
               </div>
             </a>
           </div>
-
         </div>
-
-
-
       </div>
       <div class="post-footer mt-auto p-1">
           <div class="row details mt-2">
@@ -86,10 +110,6 @@
                   </network>
                 </span>
               </social-sharing>
-              <!--<a href="#" class="text-brand pr-2" @click="post.pstId = pstId; $store.commit('setActivePost', post)" data-toggle="modal"
-                  data-target="#dailyActivityChartModal" :title="$t('Activity_chart')">
-                  <i class="fas fa-chart-line"></i>
-                </a>-->
               <a href="#" class="text-brand" @click="$store.commit('setEditPost', post)" data-toggle="modal"
                 data-target="#editPostModal" v-if="user && post.author === user.account.name" :title="$t('Edit_note')">
                 <i class="fas fa-edit"></i>
@@ -105,9 +125,7 @@
 
               <img src="/img/STEEM.png" class="mr-1 currency-logo-small" v-if="cur_bchain == 'STEEM'">
               <img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain == 'HIVE'">
-              <!--{{ postPayout }}-->
               <span v-if="postPaid()">
-                <!--<i class="fa-solid fa-wallet text-green"></i>-->
                 <span class="m-1" :title="$t('author_payout')">
                   <i class="fa-solid fa-user"></i>
                   {{ paidValue() }}
@@ -145,164 +163,41 @@
 
 <script>
 import UserHoverCard from './UserHoverCard.vue'
-
 import { mapGetters } from 'vuex'
-
-import steem from 'steem'
-
-import hive from '@hiveio/hive-js'
-
 import SocialSharing from 'vue-social-sharing'
-
-//import vueRemarkable from 'vue-remarkable';
+import { commonCardMixin } from '~/plugins/commonCardMixin.js'
 
 export default {
+  mixins: [commonCardMixin],
   props: ['post', 'displayUsername', 'pstId', 'explorePost'],
-  computed: {
-    ...mapGetters('steemconnect', ['user']),
-    ...mapGetters(['postToVote']),
-    ...mapGetters(['newlyVotedPosts']),
-    ...mapGetters(['moderators']),
-    ...mapGetters(['userPosts']),
-
-    isOnlyPost() {
-      return this.userPosts && this.userPosts.length === 1 // check if there's only one post in the store
-
-    },
-
-    buildParentLink() {
-      return '/' + this.post.parent_author + '/' + this.post.parent_permlink;
-    },
-    buildLink() {
-      return '/' + this.post.author + '/' + this.post.permlink;
-    },
-    isPostReblog(){
-      console.log('check reblog' )
-      return this.displayUsername!=this.post.author;
-    },
-    isPostPinned() {
-      let stats = this.post.stats
-      //console.log(stats);
-      return (stats ? stats.is_pinned : false);
-    },
-    isStandardPost() {
-      return !this.explorePost;
-    },
-    date() {
-      let date = new Date(this.post.created)
-      let minutes = date.getMinutes()
-      return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() + ' ' + date.getHours() + ':' + (minutes < 10 ? '0' + minutes : minutes)
-    },
-    appType() {
-      return this.meta.appType
-    },
-    appVersion() {
-      return this.meta.app
-    },
-
-    meta() {
-      try {
-        return JSON.parse(this.post.json_metadata)
-      } catch (err) {
-        //console.log(err);
-        //console.log('meta:')
-        //console.log(this.post.json_metadata);
-        return JSON.parse(JSON.stringify(this.post.json_metadata));
-        //console.log(err);
-        return {};
-      }
-    },
-    postPayout() {
-      if (this.postPaid()) {
-        return '';
-      } else {
-        return this.post.pending_payout_value.replace('SBD', '').replace('STEEM', '').replace('HBD', '').replace('HIVE', '') + ' $'
-      }
-    },
-    /*getUserRank() {
-    //proper formatting issue to display circle for smaller numbers
-    if (this.userRank<10){
-      return ' '+parseFloat(this.userRank).toFixed(1);
-    }else{
-      return parseFloat(this.userRank).toFixed(1);
-    }
-    },*/
-    displayCoreUserRank() {
-      return (this.userRank ? parseFloat(this.userRank.rank_no_afitx).toFixed(2) : '');
-    },
-    displayIncreasedUserRank() {
-      return '(+' + parseFloat(this.userRank.afitx_rank).toFixed(2) + ')';
-    },
-    votedByUser() {
-      return this.postUpvoted;
-    },
-    getVoteCount() {
-      return Array.isArray(this.post.active_votes) ? this.post.active_votes.length : 0;
-    },
-    isUserModerator() {
-      if (this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator')) {
-        return true;
-      }
-      return false;
-    }
-
-  },
-  data: function () {
-    return {
-      afitReward: '',
-      userRank: '',
-      //fullAFITReward: '',
-      postUpvoted: false,
-      cur_bchain: 'HIVE',
-      profImgUrl: process.env.hiveImgUrl,
-      socialSharingTitle: process.env.socialSharingTitle,
-      socialSharingDesc: process.env.socialSharingDesc,
-      socialSharingQuote: process.env.socialSharingQuote,
-      hashtags: process.env.socialSharingHashtags,
-      isTooltipVisible: false,
-      imageError: false,
-    }
-  },
   components: {
     SocialSharing,
-    UserHoverCard,
-    //vueRemarkable
+    UserHoverCard
   },
-  watch: {
-    postUpvoted: 'updatePostData',
-  },
-  methods: {
-    handleImageError(event, meta){
-      if(!this.imageError){
-        const image = event.target;
-        this.imageError = true;
-        let src = this.$fetchHiveFmtPostImage(meta);
-        image.src = src;
-        event.target.onerror = null;
-      }
+  computed: {
+    ...mapGetters('steemconnect', ['user']),
+    ...mapGetters(['postToVote', 'newlyVotedPosts', 'moderators', 'userPosts']),
+    // Overrides the placeholder in the mixin
+    cardData () {
+      return this.post
     },
-    showTooltip() {
-      this.isTooltipVisible = true;
+    // Component-specific computed properties
+    isOnlyPost () {
+      return this.userPosts && this.userPosts.length === 1
     },
-    hideTooltip() {
-      this.isTooltipVisible = false;
+    buildLink () {
+      return '/' + this.post.author + '/' + this.post.permlink
     },
-    toggleTooltip() {
-      this.isTooltipVisible = !this.isTooltipVisible;
+    isPostReblog () {
+      return this.displayUsername !== this.post.author
     },
-    fixedContent() {
-      if (this.$refs["post_body"]) {
-        //console.log(this.$refs["post_body"].innerHTML);
-        //remove html tags from text
-        return this.$refs["post_body"].innerHTML.replace(/<[^>]+>/g, '');;
-      }
-      return "";
+    isPostPinned () {
+      return this.post.stats ? this.post.stats.is_pinned : false
     },
-    renderSnippet(content) {
-      let post_content = this.$cleanBody(content, true);//2nd param confirms to remove all tags
-      post_content = this.truncateString(post_content, 150);
-      return post_content.replace(/<[^>]+>/g, '');
+    isStandardPost () {
+      return !this.explorePost
     },
+<<<<<<< HEAD
     /* function checks if post has beneficiaries */
     hasBeneficiaries() {
       return Array.isArray(this.post.beneficiaries) && this.post.beneficiaries.length > 0;
@@ -383,44 +278,23 @@ export default {
         this.post.total_payout_value = result.total_payout_value;
         this.post.pending_payout_value = result.pending_payout_value;
       })
+=======
+    date () {
+      const date = new Date(this.post.created)
+      const minutes = date.getMinutes()
+      return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() + ' ' + date.getHours() + ':' + (minutes < 10 ? '0' + minutes : minutes)
+>>>>>>> acd69a97655b0ae59dc49680b4a7f2d587e00b0e
     }
   },
-  async mounted() {
-    steem.api.setOptions({ url: process.env.steemApiNode });
-    hive.api.setOptions({ url: process.env.hiveApiNode });
-    fetch(process.env.actiAppUrl + 'getPostReward?user=' + this.post.author + '&url=' + this.post.url).then(res => {
-      //grab the post's reward to display it properly
-      res.json().then(json => this.afitReward = json.token_count)
-    }).catch(e => reject(e))
-
-    //console.log('post details');
-    //console.log(this.post);
-    //return;
-
-    //grab the author's rank
-    fetch(process.env.actiAppUrl + 'getRank/' + this.post.author).then(res => {
-      res.json().then(json => this.userRank = json)
-    }).catch(e => reject(e))
-
-    //grab post full pay if full pay mode enabled
-    //fetch(process.env.actiAppUrl+'getPostFullAFITPayReward?user=' + this.post.author+'&url='+this.post.url).then(res => {
-    //res.json().then(json => this.fullAFITReward = json.token_count)}).catch(e => reject(e))
-
-    //grab moderators' list
-    this.$store.dispatch('fetchModerators')
-
-    this.cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
-
-    this.profImgUrl = process.env.hiveImgUrl;
-    if (this.cur_bchain == 'STEEM') {
-      this.profImgUrl = process.env.steemImgUrl;
-    }
-  },
-
+  async mounted () {
+    this.$nextTick(() => {
+      this.initializeCard()
+    })
+  }
 }
 </script>
 
-<style lang="sass">
+<style lang="sass" scoped>
   .post
     height: 100%
     h6
@@ -443,6 +317,7 @@ export default {
       float: left
       border: solid 1px #ddd
 </style>
+<<<<<<< HEAD
 <style>
 .full-afit-txt {
   font-style: italic;
@@ -489,4 +364,27 @@ export default {
 .post-reblog{
   font-style:italic;
 }
+=======
+<style scoped>
+.full-afit-txt { font-style: italic; }
+.check-tooltip { color: white; }
+.post-title { min-height: 60px; }
+.card { box-shadow: 3px 3px 3px rgb(255 0 0 / 40%); overflow: hidden; min-height: 400px; }
+.card-pinned { box-shadow: 3px 3px 3px rgba(204, 204, 0, 0.4); overflow: hidden; }
+.single { min-width: 17em; }
+.post-image { width: 100%; height: 150px; object-fit: cover; }
+.post h6 a, #post_body_render { text-wrap: balance; }
+.post { vertical-align: top; }
+.post-reblog{ font-style:italic; }
+.image-carousel-container { position: relative; overflow: hidden; height: 150px; background-color: #f0f0f0; }
+.image-loader-container { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
+.carousel-arrow { position: absolute; top: 50%; transform: translateY(-50%); background-color: rgba(0, 0, 0, 0.5); color: white; padding: 8px; cursor: pointer; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; user-select: none; z-index: 2; }
+.carousel-arrow:hover { background-color: rgba(0, 0, 0, 0.8); }
+.carousel-arrow.left { left: 10px; }
+.carousel-arrow.right { right: 10px; }
+.image-counter { position: absolute; bottom: 8px; right: 8px; background-color: rgba(0, 0, 0, 0.7); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: bold; z-index: 2; }
+.carousel-bullets { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 2; }
+.carousel-bullet { width: 8px; height: 8px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.6); cursor: pointer; }
+.carousel-bullet.active { background-color: #fff; }
+>>>>>>> acd69a97655b0ae59dc49680b4a7f2d587e00b0e
 </style>
