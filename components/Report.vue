@@ -25,6 +25,7 @@
         <CardBody
           :cardData="report"
           modalTarget="#reportModal"
+          :snippet="bodySnippet" 
           :imageLoadFailed="imageLoadFailed"
           :imageLoading="imageLoading"
           :imageGeneration="imageGeneration"

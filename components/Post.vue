@@ -31,6 +31,7 @@
         <CardBody
           :cardData="post"
           modalTarget="#postModal"
+          :snippet="bodySnippet" 
           :imageLoadFailed="imageLoadFailed"
           :imageLoading="imageLoading"
           :imageGeneration="imageGeneration"

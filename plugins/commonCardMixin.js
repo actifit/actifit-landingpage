@@ -41,6 +41,12 @@ export const commonCardMixin = {
         return {}
       }
     },
+    bodySnippet () {
+      if (!this.cardData || !this.cardData.body) return ''
+      // This uses the robust method from the parent's context
+      const cleaned = this.$cleanBody(this.cardData.body, true)
+      return this.truncateString(cleaned, 150)
+    },
     // --- THIS IS THE CORRECT, FEATURE-COMPLETE REUSABLE PROPERTY ---
     // It now contains all the original filtering logic.
     postImages () {
@@ -92,6 +98,12 @@ export const commonCardMixin = {
         return images[this.currentImageIndex]
       }
       return ''
+    },
+    bodySnippet () {
+      if (!this.cardData || !this.cardData.body) return ''
+      // This uses the robust method from the parent's context
+      const cleaned = this.$cleanBody(this.cardData.body, true)
+      return this.truncateString(cleaned, 150)
     }
   },
   watch: {
