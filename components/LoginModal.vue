@@ -5,7 +5,7 @@
         <div class="modal-header">
           <h5 class="modal-title">{{ $t('Login_actifit') }}</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
+            <span aria-hidden="true">×</span>
           </button>
         </div>
         <div class="modal-body">
@@ -143,22 +143,33 @@
           }
       },
       async mounted () {
-    $(this.$refs.loginModal).on('show.bs.modal', () => {
-      this.originalTitle = document.title;
-      document.title = this.$t('Login_actifit');
-    });
+        // This moves the modal's HTML to the end of the body, fixing the layout issue.
+        document.body.appendChild(this.$el);
+
+        $(this.$refs.loginModal).on('show.bs.modal', () => {
+          this.originalTitle = document.title;
+          document.title = this.$t('Login_actifit');
+        });
+
         $(this.$refs.loginModal).on('hidden.bs.modal', () => {
-      document.title = this.originalTitle;
-      this.resetForm();
-    });
-          //console.log('load recaptcha')
-          await this.$recaptchaLoaded()
-          //console.log('complete')
-          this.verifyKeychain();
+          document.title = this.originalTitle;
+          this.resetForm();
+          this.$emit('close'); // Notify parent component that modal is closed
+        });
+
+        //console.log('load recaptcha')
+        await this.$recaptchaLoaded()
+        //console.log('complete')
+        this.verifyKeychain();
       },
       beforeDestroy() {
-    $(this.$refs.loginModal).off('show.bs.modal hidden.bs.modal');
-  },
+        // This cleans up the modal from the body when the component is destroyed, preventing memory leaks.
+        if (this.$el && this.$el.parentNode) {
+            this.$el.parentNode.removeChild(this.$el);
+        }
+        // It's crucial to remove jQuery event listeners to prevent memory leaks
+        $(this.$refs.loginModal).off('show.bs.modal hidden.bs.modal');
+      },
       methods: {
         resetForm() {
           this.$refs.username.value = '';
