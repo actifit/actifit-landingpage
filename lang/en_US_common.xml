@@ -248,7 +248,9 @@
   <string name="languages">Languages</string>
   <string name="read_more">Read more</string>
   <string name="read_less">Read less</string>
-  <string name="market_title">Actifit Market</string>
+  <string name="market_title">Actifit Market <a href="#" class="info-btn" …>
+    <i class="fas fa-info-circle"></i>
+  </a></string>
   <string name="market_subtitle">Spend your AFIT tokens on health, fitness, and related products &amp; services!</string>
   <string name="By">By</string>
   <string name="With">With</string>

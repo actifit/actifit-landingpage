@@ -58,26 +58,7 @@
             <a v-else :href="'/' + this.product.provider" class="provider-link">
               {{ this.product.provider_name }}
             </a>
-          </h3>
-          
-          <!-- Price Display -->
-          <div class="price-display">
-            <div v-if="this.item_price_extra > 0" class="dual-price">
-              <span class="hive-price">
-                <img class="token-logo-sm" src="/img/HIVE.png">
-                {{ numberFormat(this.item_price_extra, 2) }} HIVE
-              </span>
-              <span class="plus-sign">+</span>
-              <span class="afit-price">
-                <img class="token-logo-sm" src="/img/actifit_logo.png">
-                {{ numberFormat(this.item_price, 2) }} AFIT
-              </span>
-            </div>
-            <div v-else class="single-price">
-              <img class="token-logo-sm" src="/img/actifit_logo.png">
-              {{ numberFormat(this.item_price, 2) }} AFIT
-            </div>
-          </div>
+          </h3> 
         </div>
       </div>
       
@@ -85,13 +66,12 @@
       <h3 class="pro-name">{{ this.product.name }}</h3>
       
       <!-- Expansion Arrow -->
-      <div class="expansion-arrow">
-        <a class="arrow-icon enlarged-arrow" v-on:click="switchArrowStatus" 
-           :class="prodDispStatus" :title="prodDispStatusText">
-          <span class="left-bar"></span>
-          <span class="right-bar"></span>
-        </a>
-      </div>
+<div class="expansion-arrow">
+  <a class="arrow-toggle" v-on:click="switchArrowStatus" 
+     :class="prodDispStatus" :title="prodDispStatusText">
+    <i class="fas" :class="prodDispStatus === 'open' ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+  </a>
+</div>
     </div>
     <transition name="modern-slide">
       <div class="body-container" v-if="this.prodDispStatus == 'open'">
@@ -665,14 +645,9 @@ export default {
       return new Intl.NumberFormat('en-EN', { maximumFractionDigits: precision }).format(number)
     },
     switchArrowStatus() {
-      if (this.prodDispStatus == '') {
-        this.prodDispStatus = 'open';
-        this.prodDispStatusText = 'Collapse';
-      } else {
-        this.prodDispStatus = '';
-        this.prodDispStatusText = 'Expand';
-      }
-    },
+    this.prodDispStatus = this.prodDispStatus === 'open' ? '' : 'open';
+    this.prodDispStatusText = this.prodDispStatus === 'open' ? 'Collapse' : 'Expand';
+  },
     showModalFunc() {
       this.$nextTick(() => {
         this.showModal = true;
@@ -2081,17 +2056,63 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
+/* Base Variables */
+:root {
+  --card-bg: #ffffff;
+  --card-text: #333333;
+  --card-border: #e0e0e0;
+  --card-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  --accent-color: #e74c3c;
+  --avatar-border: rgba(231, 76, 60, 0.7);
+  --avatar-shadow: 0 0 20px rgba(231, 76, 60, 0.3);
+  --price-bg: rgba(231, 76, 60, 0.1);
+  --info-bg: rgba(231, 76, 60, 0.05);
+  --body-bg: #f9f9f9;
+  --body-border: #eee;
+  --arrow-bg: rgba(231, 76, 60, 0.1);
+  --basic-info-border: #dc3545;
+  --color-box-afit: darkred;
+  --color-box-sports: #00f;
+  --color-box-steem: #029;
+  --color-box-rank: #092;
+  --info-box-text: white;
+  --info-box-red: red;
+  --info-box-orangered: orangered;
+  --info-box-green: #28a700;
+  --pro-name-gradient: radial-gradient(red, transparent);
+  --pro-name-text: white;
+  --blink-color1: pink;
+  --blink-color2: red;
+}
+
+/* Dark Mode Variables */
+.dark-mode {
+  --card-bg: rgba(30, 30, 30, 0.9);
+  --card-text: #e0e0e0;
+  --card-border: rgba(231, 76, 60, 0.2);
+  --card-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  --avatar-shadow: 0 0 30px rgba(231, 76, 60, 0.5);
+  --price-bg: rgba(0,0,0,0.3);
+  --info-bg: rgba(50, 50, 50, 0.6);
+  --body-bg: rgba(40, 40, 40, 0.7);
+  --body-border: rgba(231, 76, 60, 0.2);
+  --arrow-bg: rgba(231, 76, 60, 0.2);
+  --basic-info-border: #e74c3c;
+  --info-box-text: white;
+  --pro-name-gradient: radial-gradient(#a41a0b, transparent);
+  --pro-name-text: white;
+  --blink-color1: #ff8c7a;
+  --blink-color2: #e74c3c;
+}
+
+/* Card Styles */
 .card-border {
-  /*border: 2px solid #dc3545!important;
-	  border-radius: 10px;*/
-  box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
+  box-shadow: 3px 3px 3px rgba(255, 0, 0, 0.4);
 }
 
 .card-border-real {
-  /*border: 2px solid #28a745!important;
-	  border-radius: 10px;*/
-  box-shadow: 3px 3px 3px rgb(0 255 0 / 40%);
+  box-shadow: 3px 3px 3px rgba(255, 0, 0, 0.4); /* Changed from green to red */
 }
 
 .pro-img-cls {
@@ -2099,8 +2120,8 @@ export default {
 }
 
 .pro-name {
-  background: radial-gradient(red, transparent);
-  color: white;
+  background: var(--pro-name-gradient);
+  color: var(--pro-name-text);
 }
 
 .book-button {
@@ -2112,14 +2133,25 @@ export default {
 }
 
 .pro-card-av {
-  width: 90px;
-  height: 90px;
+  width: 120px;
+  height: 120px;
+  border: 3px solid var(--avatar-border);
+  box-shadow: var(--avatar-shadow);
+  background-size: contain;  background-repeat: no-repeat;
+  background-position: center;
+  image-rendering: -webkit-optimize-contrast; 
+  image-rendering: crisp-edges;
 }
 
 .gaming-label {
-  width: 45px;
-  height: 45px;
+  width: 60px; /* Increased from 45px */
+  height: 60px; /* Increased from 45px */
   border: none;
+  background-size: contain; /* For sharper icon */
+  background-repeat: no-repeat;
+  background-position: center;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
 }
 
 .token-logo-sm {
@@ -2133,12 +2165,12 @@ export default {
 }
 
 div.basic-info {
-  border-bottom: 2px solid #dc3545 !important;
+  border-bottom: 2px solid var(--basic-info-border) !important;
 }
 
 .color-box-afit {
   float: left;
-  background-color: darkred;
+  background-color: var(--color-box-afit);
   width: 20px;
   height: 20px;
   margin: 1px;
@@ -2146,7 +2178,7 @@ div.basic-info {
 
 .color-box-sports {
   float: left;
-  background-color: #00f;
+  background-color: var(--color-box-sports);
   width: 20px;
   height: 20px;
   margin: 1px;
@@ -2154,7 +2186,7 @@ div.basic-info {
 
 .color-box-steem {
   float: left;
-  background-color: #029;
+  background-color: var(--color-box-steem);
   width: 20px;
   height: 20px;
   margin: 1px;
@@ -2162,37 +2194,30 @@ div.basic-info {
 
 .color-box-rank {
   float: left;
-  background-color: #092;
+  background-color: var(--color-box-rank);
   width: 20px;
   height: 20px;
   margin: 1px;
 }
 
-.avatar-1 {}
-
-.avatar-2 {
-  border-color: orange;
-}
-
-.avatar-3 {
-  border-color: red;
-}
+.avatar-2 { border-color: #e74c3c; }
+.avatar-3 { border-color: #e74c3c; }
 
 .info-box {
-  border: 1px white solid;
-  color: white;
+  border: 1px solid white;
+  color: var(--info-box-text);
 }
 
 .info-box-red {
-  background: red;
+  background: var(--info-box-red);
 }
 
 .info-box-orangered {
-  background: orangered;
+  background: var(--info-box-orangered);
 }
 
 .info-box-green {
-  background: #28a700;
+  background: var(--info-box-green);
 }
 
 .lb-item {
@@ -2203,233 +2228,97 @@ div.basic-info {
   height: 100px !important;
 }
 
-
-.left-bar:after,
-.right-bar:after {
-  animation: blink 3s infinite;
-  /*20 alternate;*/
-}
-
-@keyframes blink {
-
-  0%,
-  50%,
-  100% {
-    background-color: pink;
-  }
-
-  25%,
-  75% {
-    background-color: red;
-  }
-}
-</style>
-
-<style lang="scss">
-$background: lightcoral;
+/* Arrow Styles */
+$background: var(--accent-color);
 $easing: cubic-bezier(.25, 1.7, .35, .8);
 $duration: 0.5s;
 
-.arrow-icon {
-  height: 2.8em;
-  width: 2.8em;
-  display: block;
-  padding: 0.5em;
-  margin: 1em auto;
-  position: relative;
+/* Arrow Styles */
+.arrow-toggle {
+  display: inline-block;
+  color: #e74c3c; 
+  font-size: 1.5rem;
+  transition: transform 0.3s ease;
   cursor: pointer;
-  border-radius: 4px;
+  background: transparent !important;
+  border: none !important;
+  padding: 0;
+  margin: 0;
 }
 
-.left-bar {
-  position: absolute;
-  background-color: transparent;
-  top: 0;
-  left: 0;
-  width: 40px;
-  height: 10px;
-  display: block;
-  transform: rotate(35deg);
-  float: right;
-  border-radius: 2px;
-
-  &:after {
-    content: "";
-    background-color: $background;
-    width: 40px;
-    height: 10px;
-    display: block;
-    float: right;
-    border-radius: 6px 10px 10px 6px;
-    transition: all $duration $easing;
-    z-index: -1;
-  }
+.arrow-toggle:hover {
+  color: #c0392b; /* Darker red on hover */
+  transform: scale(1.1);
 }
 
-.right-bar {
-  position: absolute;
-  background-color: transparent;
-  top: 0px;
-  left: 26px;
-  width: 40px;
-  height: 10px;
-  display: block;
-  transform: rotate(-35deg);
-  float: right;
-  border-radius: 2px;
-
-  &:after {
-    content: "";
-    background-color: $background;
-    width: 40px;
-    height: 10px;
-    display: block;
-    float: right;
-    border-radius: 10px 6px 6px 10px;
-    transition: all $duration $easing;
-    z-index: -1;
-  }
+.arrow-toggle.open i {
+  transform: rotate(180deg) !important;
 }
 
-.open {
-  .left-bar:after {
-    transform-origin: center center;
-    transform: rotate(-70deg);
-  }
+.arrow-toggle i {
+  transition: transform 0.3s ease;
+}
 
-  .right-bar:after {
-    transform-origin: center center;
-    transform: rotate(70deg);
-  }
-
+.arrow-toggle.open i {
+  transform: rotate(180deg);
 }
 
 .expansion-arrow {
-  max-height: 40px;
+  text-align: center;
+  padding: 10px 0;
 }
 
-.enlarged-arrow {
-  width: 40px;
-  height: 40px;
-  position: relative;
-  display: inline-block;
-  cursor: pointer;
-  margin: 0 auto;
+@keyframes blink {
+  0%, 50%, 100% { color: var(--blink-color1); }
+  25%, 75% { color: var(--blink-color2); }
 }
 
-.enlarged-arrow .left-bar,
-.enlarged-arrow .right-bar {
-  position: absolute;
-  background-color: #FF6B00;
-  width: 20px;
-  height: 4px;
-  top: 50%;
-  left: 50%;
-  transition: all 0.3s ease;
-}
-
-.enlarged-arrow .left-bar {
-  transform: translate(-50%, -50%) rotate(45deg);
-  transform-origin: left center;
-}
-
-.enlarged-arrow .right-bar {
-  transform: translate(-50%, -50%) rotate(-45deg);
-  transform-origin: right center;
-}
-
-/* Maintain existing animation */
-.enlarged-arrow .left-bar:after,
-.enlarged-arrow .right-bar:after {
-  content: '';
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background-color: inherit;
-  animation: blink 3s infinite;
-}
-
-/* Keep your existing arrow state classes (prodDispStatus) working */
-.enlarged-arrow.expanded .left-bar {
-  transform: translate(-50%, -50%) rotate(-45deg);
-}
-
-.enlarged-arrow.expanded .right-bar {
-  transform: translate(-50%, -50%) rotate(45deg);
-}
-/*
-.body-expan-enter,
-.body-expan-leave-to {
-  visibility: hidden;
-  height: 0;
-  margin: 0;
-  padding: 0;
-  opacity: 0;
-}
-
-.body-expan-enter-active,
-.body-expan-leave-active {
-  transition: all 0.2s;
-}
-*/
+/* Card Container */
 .pro-card {
   border-radius: 12px;
   overflow: hidden;
   transition: all 0.3s ease;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-  border: 1px solid rgba(231, 76, 60, 0.2);
+  box-shadow: var(--card-shadow);
+  background: var(--card-bg);
+  color: var(--card-text);
+  border: 1px solid var(--card-border);
   position: relative;
-  color: #e0e0e0;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent-color), #c0392b);
+  }
 }
 
-.pro-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #e74c3c, #c0392b);
-}
-
-.card-border {
-  border-left: 3px solid #e74c3c;
-}
-
-.card-border-real {
-  border-left: 3px solid #2ecc71;
-}
-
-/* Avatar Container */
 .avatar-container {
   position: relative;
   margin-bottom: 15px;
 }
 
 .pro-card-av {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  border: 3px solid rgba(231, 76, 60, 0.7);
-  box-shadow: 0 0 20px rgba(231, 76, 60, 0.3);
   transition: all 0.3s ease;
   background-size: cover;
   background-position: center;
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px rgba(231, 76, 60, 0.5);
+  }
 }
 
-.pro-card-av:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 30px rgba(231, 76, 60, 0.5);
-}
-
-/* Level Stars */
 .level-stars {
-  margin-top: 10px;
-}
-
-.level-stars .fa-star {
-  color: #f1c40f;
-  text-shadow: 0 0 5px rgba(241, 196, 15, 0.5);
+  margin-top: 15px;
+  
+  .fa-star {
+    color: red;
+    font-size: 1.2rem;
+    text-shadow: 0 0 5px rgba(241, 196, 15, 0.5);
+  }
 }
 
 /* Product Meta */
@@ -2444,14 +2333,11 @@ $duration: 0.5s;
 }
 
 .gaming-label {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
   background-size: contain;
 }
 
 .type-icon {
-  color: #e74c3c;
+  color: var(--accent-color);
   font-size: 2rem;
   margin-bottom: 10px;
 }
@@ -2459,25 +2345,24 @@ $duration: 0.5s;
 .product-type {
   font-size: 1.1rem;
   margin-bottom: 10px;
-  color: #fff;
 }
 
 .provider-link {
   color: #3498db;
   text-decoration: none;
   transition: all 0.3s;
-}
 
-.provider-link:hover {
-  color: #2980b9;
-  text-decoration: underline;
+  &:hover {
+    color: #2980b9;
+    text-decoration: underline;
+  }
 }
 
 /* Price Display */
 .price-display {
   margin-top: 10px;
   padding: 8px 15px;
-  background: rgba(0,0,0,0.3);
+  background: var(--price-bg);
   border-radius: 20px;
   display: inline-block;
 }
@@ -2495,7 +2380,7 @@ $duration: 0.5s;
 }
 
 .plus-sign {
-  color: #e74c3c;
+  color: var(--accent-color);
   font-weight: bold;
 }
 
@@ -2506,81 +2391,14 @@ $duration: 0.5s;
   gap: 5px;
 }
 
-.token-logo-sm {
-  width: 20px;
-  height: 20px;
+/* Body Container */
+.body-container {
+  background: var(--body-bg);
+  border-top: 1px solid var(--body-border);
+  padding: 15px;
 }
 
-/* Product Name */
-.pro-name {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: white;
-  margin: 15px 0;
-  padding: 0;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-}
-
-.enlarged-arrow {
-  width: 40px;
-  height: 40px;
-  background: rgba(231, 76, 60, 0.1);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto;
-  transition: all 0.3s;
-  cursor: pointer;
-}
-
-.enlarged-arrow:hover {
-  background: rgba(231, 76, 60, 0.2);
-}
-
-.left-bar, .right-bar {
-  position: absolute;
-  background-color: #e74c3c;
-  width: 20px;
-  height: 3px;
-  transition: all 0.3s ease;
-}
-
-.left-bar {
-  transform: rotate(45deg);
-  left: 10px;
-}
-
-.right-bar {
-  transform: rotate(-45deg);
-  right: 10px;
-}
-
-.enlarged-arrow.open .left-bar {
-  transform: rotate(-45deg);
-}
-
-.enlarged-arrow.open .right-bar {
-  transform: rotate(45deg);
-}
-
-/* Blinking Animation */
-@keyframes blink {
-  0%, 50%, 100% { background-color: #e74c3c; }
-  25%, 75% { background-color: #ff8c7a; }
-}
-
-.left-bar:after, 
-.right-bar:after {
-  content: '';
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background-color: inherit;
-  animation: blink 3s infinite;
-}
-  
-/* Expansion Animation */
+/* Modern Slide Transition */
 .modern-slide-enter-active,
 .modern-slide-leave-active {
   transition: all 0.4s cubic-bezier(0.65, 0, 0.35, 1);
@@ -2601,36 +2419,20 @@ $duration: 0.5s;
   transform: translateY(0);
 }
 
-/* Body Container */
-.body-container {
-  background: rgba(40, 40, 40, 0.7);
-  border-top: 1px solid rgba(231, 76, 60, 0.2);
-  padding: 15px;
-}
-
-/* Info Boxes */
-.info-box {
-  background: rgba(50, 50, 50, 0.6);
-  border-radius: 8px;
-  padding: 15px;
-  margin-bottom: 15px;
-  border-left: 3px solid #e74c3c;
-}
-
-.info-box-orangered {
-  border-left-color: #e74c3c;
-}
-
-/* Responsive Adjustments */
 @media (max-width: 768px) {
   .pro-card-av {
-    width: 80px;
-    height: 80px;
+    width: 100px; /* Slightly smaller on mobile */
+    height: 100px;
   }
-  
   .pro-name {
     font-size: 1.2rem;
+  }
+  
+  .gaming-label {
+    width: 50px;
+    height: 50px;
   }
 }
 
 </style>
+
