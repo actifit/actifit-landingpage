@@ -76,12 +76,11 @@
           <div class="delegator-scroller-wrapper">
               <div class="custom-scroller" ref="activityScroller">
                   <div class="custom-scroller-inner">
-                      <!-- MODIFIED CARD STRUCTURE (GRADIENT DIV REMOVED) -->
+                      <!-- MODIFIED CARD STRUCTURE FOR CLICKABILITY -->
                       <div v-for="(report, index) in fullReports" :key="'activity-' + index" class="activity-card-scroller-item">
                           <div class="activity-post-card h-100" :style="getCardBackground(report)">
-                              <a :href="report.url" target="_blank" class="activity-card-link-overlay" :title="report.title || 'View Post'"></a>
-                              <!-- Gradient is now applied via CSS pseudo-element -->
-                              <div class="activity-card-content">
+                              <!-- The content container is now the link, making the whole card clickable -->
+                              <a :href="report.url" target="_blank" class="activity-card-content" :title="report.title || 'View Post'">
                                   <div class="card-user-info">
                                       <div class="avatar small" :style="'background-image: url(' + profImgUrl + '/u/' + report.author + '/avatar);'"></div>
                                       <span class="username">@{{ report.author }}</span>
@@ -95,7 +94,7 @@
                                         <span class="post-date">{{ toRelativeTime(report.created) }}</span>
                                     </div>
                                   </div>
-                              </div>
+                              </a>
                           </div>
                       </div>
                   </div>
@@ -1094,7 +1093,7 @@ section#recent-activity, section#news {
 .dark-mode #recent-activity .section-title,.dark-mode #recent-activity .text-muted{color:#e9ecef!important}
 #recent-activity .activity-post-card{min-height:220px;background-color:rgba(255,255,255,.3);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);border-radius:20px;transition:all .3s ease-in-out;background-size:cover;background-position:center;position:relative;overflow:hidden}
 #recent-activity .activity-card-link-overlay{position:absolute;top:0;left:0;width:100%;height:100%;z-index:3}
-#recent-activity .activity-card-content{position:relative;z-index:4;display:flex;flex-direction:column;justify-content:space-between;height:100%;padding:1.25rem}
+#recent-activity .activity-card-content{position:relative;z-index:4;display:flex;flex-direction:column;justify-content:space-between;height:100%;padding:1.25rem; text-decoration: none;}
 #recent-activity .card-user-info{display:flex;align-items:center;gap:.75rem}
 #recent-activity .card-user-info .avatar{width:40px;height:40px;border:2px solid rgba(255,255,255,.8)}
 #recent-activity .card-post-content{flex-grow:0;margin-bottom:1rem}
@@ -1129,7 +1128,7 @@ section#recent-activity, section#news {
 }
 /* Light Mode (Default) Styles */
 #recent-activity .activity-post-card::before {
-  background: linear-gradient(to top, rgba(255, 255, 255, 0.95) 20%, rgba(255, 255, 255, 0.6) 60%, rgba(255, 255, 255, 0.3) 100%);
+  background: linear-gradient(to top, rgba(255, 255, 255, 0.95) 50%, rgba(255, 255, 255, 0.6) 60%, rgba(255, 255, 255, 0.3) 100%);
 }
 #recent-activity .card-user-info .username,
 #recent-activity .post-excerpt,

@@ -1,8 +1,13 @@
 <template>
 	<div class="steem-stats-container" v-if="getVotingPower">
-		<!-- Voting Power Section -->
-		<div class="stat-line">
-			<i class="fa-solid fa-thumbs-up stat-icon" :style="displayProperColor"></i>
+		<div class="stat-gauge-row">
+			<div class="gauge-wrapper">
+				<div class="gauge" :style="vpGaugeStyle">
+					<div class="gauge-center">
+						<i class="fa-solid fa-thumbs-up" :style="displayProperColor"></i>
+					</div>
+				</div>
+			</div>
 			<div class="stat-text-content">
 				<template v-if="!minView">
 					<span>{{ $t('Your_Voting_Power') }} </span>
@@ -16,13 +21,16 @@
 				</template>
 			</div>
 		</div>
-		<div class="progress">
-		  <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" :class="{'bg-success': currentVotingPower > 80, 'bg-warning': currentVotingPower <= 80 && currentVotingPower > 60, 'bg-danger': currentVotingPower <= 60}" :style="{ width: currentVotingPower + '%' }"></div>
-		</div>
 
-		<!-- Resource Credits Section -->
-		<div class="stat-line">
-			<i class="fa-sharp fa-solid fa-bolt stat-icon text-brand"></i>
+		<!-- Resource Credits Section with Circular Gauge -->
+		<div class="stat-gauge-row">
+			<div class="gauge-wrapper">
+				<div class="gauge" :style="rcGaugeStyle">
+					<div class="gauge-center">
+						<i class="fa-sharp fa-solid fa-bolt text-brand"></i>
+					</div>
+				</div>
+			</div>
 			<div class="stat-text-content">
 				<template v-if="!minView">
 					<span>{{ $t('Your_RC') }} </span>
@@ -35,9 +43,6 @@
 					<span class="text-brand">{{this.currentRCPercent}}</span>
 				</template>
 			</div>
-		</div>
-		<div class="progress">
-			<div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" :style="{ width: currentRCPercent}"></div>
 		</div>
 	</div>
 </template>
@@ -82,6 +87,29 @@
 		  return "color: #fd7e14";
 		}
 		return "color: #dc3545";
+	  },
+	  vpGaugeStyle() {
+		const percentage = this.currentVotingPower;
+		let color = '#dc3545'; // Default red
+		if (percentage > 80) {
+			color = '#28a745'; // Green
+		} else if (percentage > 60) {
+			color = '#fd7e14'; // Orange
+		}
+		return {
+		  // This variable is used by the ::before pseudo-element to create the striped mask
+		  '--mask-gradient': `conic-gradient(${color} ${percentage}%, transparent ${percentage}%)`,
+		  // This is the main background with the correct track color from CSS variables
+		  'background': `conic-gradient(${color} ${percentage}%, var(--gauge-track-bg) ${percentage}%)`
+		}
+	  },
+	  rcGaugeStyle() {
+		const percentage = this.currentRC;
+		const color = '#0d6efd'; // Bootstrap Primary Blue
+		return {
+		  '--mask-gradient': `conic-gradient(${color} ${percentage}%, transparent ${percentage}%)`,
+		  'background': `conic-gradient(${color} ${percentage}%, var(--gauge-track-bg) ${percentage}%)`
+		}
 	  }
 	},
 	methods: {
@@ -151,19 +179,80 @@
 </script>
 
 <style scoped>
+/* Define keyframes for the stripe animation */
+@keyframes progress-bar-stripes {
+  from { background-position-x: 1rem; }
+  to { background-position-x: 0; }
+}
+
 .steem-stats-container {
 	padding-top: 0.5rem;
+	/* Light mode default colors */
+	--gauge-center-bg: #fff;
+	--gauge-track-bg: #e9ecef;
 }
-.stat-line {
+
+/* Override variables in dark mode */
+.dark-mode .steem-stats-container,
+:root.dark-mode .steem-stats-container {
+	--gauge-center-bg: #212529;
+	--gauge-track-bg: #444;
+}
+
+.stat-gauge-row {
 	display: flex;
 	align-items: center;
-	margin-bottom: 0.25rem;
+	margin-bottom: 1rem;
 }
-.stat-icon {
-	width: 20px; 
-	text-align: center;
-	font-size: 1.1rem;
-	margin-right: 8px; 
+.stat-gauge-row:last-of-type {
+	margin-bottom: 0;
+}
+.gauge-wrapper {
+	flex-shrink: 0;
+	margin-right: 15px;
+}
+.gauge {
+	position: relative;
+	width: 50px;
+	height: 50px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.gauge::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	border-radius: 50%;
+	
+	/* The striped background */
+	background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
+	background-size: 1rem 1rem;
+
+	/* The animation */
+	animation: progress-bar-stripes 1s linear infinite;
+
+	mask-image: var(--mask-gradient);
+	-webkit-mask-image: var(--mask-gradient);
+}
+
+.gauge-center {
+	width: 40px;
+	height: 40px;
+	background-color: var(--gauge-center-bg); /* Use themed variable */
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1;
+}
+.gauge-center i {
+	font-size: 1.2rem;
 }
 .text-brand {
 	color: #e10707; 
@@ -171,13 +260,5 @@
 .stat-text-content {
 	flex-grow: 1; 
 	font-size: 0.9rem;
-}
-.progress {
-	height: 8px;
-	border-radius: 4px;
-	margin-bottom: 1rem;
-}
-.progress:last-of-type {
-	margin-bottom: 0;
 }
 </style>
