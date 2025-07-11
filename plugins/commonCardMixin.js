@@ -259,20 +259,6 @@ export const commonCardMixin = {
     
     // START: MODIFIED METHOD
     votePrompt (e) {
-      // Check if the post has already been paid out.
-      if (this.postPaid()) {
-        // If it is paid out, show a confirmation dialog using the i18n translation.
-        // The confirm() function returns `true` for "OK" and `false` for "Cancel".
-        const userConfirmed = confirm(this.$t('paid_out_vote_confirm'));
-        
-        // If the user clicks "Cancel", stop the function from proceeding.
-        if (!userConfirmed) {
-          return;
-        }
-      }
-      
-      // If the post is not paid out, or if the user confirmed the vote on a paid-out post,
-      // commit the post to the Vuex store to open the vote modal.
       this.$store.commit('setPostToVote', this.cardData)
     },
     // END: MODIFIED METHOD
