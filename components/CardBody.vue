@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!-- Image Carousel -->
+    <!-- Image Carousel (No changes here) -->
     <div class="row">
       <div class="col-12">
         <div v-if="!imageLoadFailed" class="image-carousel-container" :key="imageGeneration">
@@ -44,7 +44,13 @@
           :title="$t('read_more_small')"
         >
           <div>
-            <span>{{ renderSnippet(cardData.body, 150) }}</span>
+            <!--
+              THIS IS THE FIX:
+              We are now using the "snippet" prop that the parent component (post.vue)
+              has already carefully prepared for us. We are no longer calling the
+              local, incorrect renderSnippet method.
+            -->
+            <span>{{ snippet }}</span>
             <i class="fas fa-external-link-alt"></i>
           </div>
         </a>
@@ -55,10 +61,11 @@
 
 <script>
 export default {
-  // We don't need the whole mixin here, just the props and methods passed down
   props: {
     cardData: { type: Object, required: true },
     modalTarget: { type: String, required: true },
+    // This prop holds the correctly formatted snippet from the parent.
+    snippet: { type: String, default: '' },
     // Carousel specific props
     imageLoadFailed: { type: Boolean, default: false },
     imageLoading: { type: Boolean, default: true },
@@ -75,15 +82,19 @@ export default {
     nextImage() { this.$emit('next-image'); },
     prevImage() { this.$emit('prev-image'); },
     goToImage(index) { this.$emit('go-to-image', index); },
+
+    // THIS METHOD IS NOW REMOVED.
+    // It was causing the problem by overriding the correctly formatted text from the parent.
+    /*
     renderSnippet(content, length) {
       if (!content) return '';
-      // Basic clean and truncate, parent can have more complex logic
       let postContent = content.replace(/<[^>]+>/g, '').replace(/\n/g, ' ');
       if (postContent.length > length) {
         return postContent.substring(0, length - 3) + '...';
       }
       return postContent;
     }
+    */
   }
 }
 </script>

@@ -7,7 +7,6 @@ export const commonCardMixin = {
       afitReward: '',
       userRank: '',
       fullAFITReward: '',
-      postUpvoted: false,
       cur_bchain: 'HIVE',
       profImgUrl: process.env.hiveImgUrl,
       socialSharingTitle: process.env.socialSharingTitle,
@@ -23,8 +22,7 @@ export const commonCardMixin = {
       debounceTimer: null,
       imageGeneration: 0,
       imageLoadFailed: false,
-      resizeObserver: null,
-      initialImageSetupComplete: false
+      resizeObserver: null
     }
   },
   computed: {
@@ -43,12 +41,11 @@ export const commonCardMixin = {
     },
     bodySnippet () {
       if (!this.cardData || !this.cardData.body) return ''
-      // This uses the robust method from the parent's context
-      const cleaned = this.$cleanBody(this.cardData.body, true)
-      return this.truncateString(cleaned, 150)
+      let postContent = this.$cleanBody(this.cardData.body, true)
+      // This now correctly uses the truncateString function, which defaults to 150
+      postContent = this.truncateString(postContent)
+      return postContent.replace(/<[^>]+>/g, '')
     },
-    // --- THIS IS THE CORRECT, FEATURE-COMPLETE REUSABLE PROPERTY ---
-    // It now contains all the original filtering logic.
     postImages () {
       if (!this.cardData || !this.cardData.json_metadata) return []
 
@@ -66,19 +63,16 @@ export const commonCardMixin = {
 
       const userImages = initialImages.filter(url => {
         if (typeof url !== 'string') return false
-        // Restore branding image filter
         if (brandingImagesRegex.test(url)) return false
-        // Restore file type and trusted host filter
         const isStandardImageFile = /\.(jpg|jpeg|png|gif|webp)$/i.test(url.split('?')[0]);
         const isFromTrustedHost = /usermedia\.actifit\.io|images\.hive\.blog|cdn\.liketu\.com|pixabay\.com|files\.peakd\.com|images\.d\.buzz|img\.leopedia\.io|images\.ecency\.com|ipfs-3speak\.b-cdn\.net/.test(url);
         return isFromTrustedHost || isStandardImageFile;
       })
 
-      // Return the unique, fully-filtered list
       return [...new Set(userImages)]
     },
     getVoteCount () {
-      return Array.isArray(this.cardData.active_votes) ? this.cardData.active_votes.length : 0
+      return (this.cardData && Array.isArray(this.cardData.active_votes)) ? this.cardData.active_votes.length : 0
     },
     isUserModerator () {
       if (this.user && this.$store.getters.moderators.find(mod => mod.name === this.user.account.name && mod.title === 'moderator')) {
@@ -99,21 +93,26 @@ export const commonCardMixin = {
       }
       return ''
     },
-    bodySnippet () {
-      if (!this.cardData || !this.cardData.body) return ''
-      // This uses the robust method from the parent's context
-      const cleaned = this.$cleanBody(this.cardData.body, true)
-      return this.truncateString(cleaned, 150)
+    postUpvoted () {
+      if (!this.user || !this.cardData || !Array.isArray(this.cardData.active_votes)) return false
+      const curUser = this.user.account.name
+      const hasVoted = this.cardData.active_votes.some(voter => voter.voter === curUser)
+      const newlyVoted = this.$store.getters.newlyVotedPosts.includes(this.cardData.post_id)
+      return hasVoted || newlyVoted
     }
   },
   watch: {
     'cardData.permlink' (newVal, oldVal) {
       if (newVal !== oldVal) {
-        this.initialImageSetupComplete = false
-        this.attemptInitialImageSetup()
+        this.cardWidth = 0
+        this.updateAndResizeImages()
       }
     },
-    postUpvoted: 'updatePostData'
+    getVoteCount (newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.updatePostData()
+      }
+    }
   },
   beforeDestroy () {
     if (this.resizeObserver) {
@@ -167,33 +166,25 @@ export const commonCardMixin = {
         this.imageLoading = false
       }
     },
-    debouncedResizeHandler () {
-      clearTimeout(this.debounceTimer);
-      this.debounceTimer = setTimeout(() => {
-        if (this.$el) {
-          const newWidth = Math.round(this.$el.offsetWidth);
-          if (newWidth > 0 && newWidth !== this.cardWidth) {
-            this.cardWidth = newWidth;
-            this.imageGeneration++;
-            this.imageLoading = true;
-            this.setupImages(this.cardWidth);
-          }
-        }
-      }, 250);
-    },
-    attemptInitialImageSetup () {
-      if (this.initialImageSetupComplete || !this.$el || !this.cardData || !this.cardData.json_metadata) {
-        return;
+    updateAndResizeImages () {
+      if (!this.$el || !this.cardData || !this.cardData.json_metadata) {
+        return
       }
-      
-      const newWidth = Math.round(this.$el.offsetWidth);
+      const newWidth = Math.round(this.$el.offsetWidth)
 
-      if (newWidth > 0) {
-        this.cardWidth = newWidth;
-        this.imageLoading = true;
-        this.setupImages(this.cardWidth);
-        this.initialImageSetupComplete = true;
+      if (newWidth > 0 && newWidth !== this.cardWidth) {
+        this.cardWidth = newWidth
+        this.imageGeneration++
+        this.imageLoading = true
+        this.imageLoadFailed = false
+        this.setupImages(this.cardWidth)
       }
+    },
+    debouncedResizeHandler () {
+      clearTimeout(this.debounceTimer)
+      this.debounceTimer = setTimeout(() => {
+        this.updateAndResizeImages()
+      }, 250)
     },
     nextImage () {
       if (this.allImages.length > 1) {
@@ -214,6 +205,7 @@ export const commonCardMixin = {
       }
     },
     postPaid () {
+      if (!this.cardData) return false
       if (this.cardData.is_paidout) return true
       const lastPayout = new Date(this.cardData.last_payout)
       const cashoutTime = new Date(this.cardData.cashout_time)
@@ -229,9 +221,10 @@ export const commonCardMixin = {
       return postContent.replace(/<[^>]+>/g, '');
     },
     hasBeneficiaries () {
-      return Array.isArray(this.cardData.beneficiaries) && this.cardData.beneficiaries.length > 0
+      return this.cardData && Array.isArray(this.cardData.beneficiaries) && this.cardData.beneficiaries.length > 0
     },
     beneficiariesDisplay () {
+      if (!this.hasBeneficiaries()) return ''
       let output = 'Beneficiaries:\n'
       for (const bene of this.cardData.beneficiaries) {
         output += `${bene.account}: ${bene.weight / 100}%\n`
@@ -239,30 +232,23 @@ export const commonCardMixin = {
       return output
     },
     paidValue () {
+      if (!this.cardData) return ''
       return this.cardData.total_payout_value || this.cardData.author_payout_value || ''
     },
-    truncateString (str, len = 70) {
+    // START: MODIFIED METHOD
+    // Changed the default length to 150, which is what the body snippet needs.
+    // Other components (like CardHeader) pass an explicit value so they will not be affected.
+    truncateString (str, len = 150) {
       if (!str || typeof str !== 'string') return ''
       if (str.length > len) {
         return str.substring(0, len - 3) + '...'
       }
       return str
     },
-    userVotedThisPost () {
-      if (!this.user) return false
-      const curUser = this.user.account.name
-      const hasVoted = this.cardData.active_votes.some(voter => voter.voter === curUser)
-      const newlyVoted = this.$store.getters.newlyVotedPosts.includes(this.cardData.post_id)
-      this.postUpvoted = hasVoted || newlyVoted
-      return this.postUpvoted
-    },
-    
-    // START: MODIFIED METHOD
+    // END: MODIFIED METHOD
     votePrompt (e) {
       this.$store.commit('setPostToVote', this.cardData)
     },
-    // END: MODIFIED METHOD
-
     setProperNode () {
       return this.cur_bchain === 'STEEM' ? steem : hive
     },
@@ -277,14 +263,14 @@ export const commonCardMixin = {
       })
     },
     async initializeCard () {
-      await this.$nextTick();
-      this.imageLoadFailed = false;
-      this.imageError = false;
-      this.resizeObserver = new ResizeObserver(() => {
-        this.attemptInitialImageSetup();
-        this.debouncedResizeHandler();
-      });
-      this.resizeObserver.observe(this.$el);
+      await this.$nextTick()
+      this.imageLoadFailed = false
+      this.imageError = false
+      this.resizeObserver = new ResizeObserver(this.debouncedResizeHandler)
+      this.resizeObserver.observe(this.$el)
+      
+      this.updateAndResizeImages()
+
       steem.api.setOptions({ url: process.env.steemApiNode })
       hive.api.setOptions({ url: process.env.hiveApiNode })
       if (this.cardData && this.cardData.author) {

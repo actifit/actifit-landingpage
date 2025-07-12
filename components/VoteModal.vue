@@ -5,7 +5,7 @@
 				<div class="modal-header">
 					<h5 class="modal-title">{{ $t('Vote_on') }} {{ postToVote.title }}</h5>
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
+						<span aria-hidden="true">×</span>
 					</button>
 				</div>
 				<SteemStats class="modal-body" :user="user" />
@@ -517,6 +517,7 @@ export default {
 				}
 			}
 		},
+        // START: MODIFIED METHOD
 		voteSuccess(err, finalize, bchain) {
 			if (err) {
 				this.loading = false
@@ -529,6 +530,34 @@ export default {
 			else {
 				if (finalize) {
 					this.loading = false
+                    
+                    // This is the optimistic UI update for the vote count.
+                    if (this.user && this.postToVote) {
+                        const voterName = this.user.account.name;
+                        const existingVoteIndex = this.postToVote.active_votes.findIndex(v => v.voter === voterName);
+
+                        // Case 1: User is un-voting (vote weight is 0)
+                        if (this.voteWeight === 0) {
+                            if (existingVoteIndex > -1) {
+                                // If their vote existed, remove it. The count will decrease.
+                                this.postToVote.active_votes.splice(existingVoteIndex, 1);
+                            }
+                        } else { // Case 2: User is casting a new vote or changing an existing one
+                            if (existingVoteIndex === -1) {
+                                // If they haven't voted before, add a new vote object.
+                                // This will cause the array length to increase by 1, updating the count.
+                                this.postToVote.active_votes.push({
+                                    voter: voterName,
+                                    percent: this.voteWeight * 100
+                                });
+                            } else {
+                                // If they are just changing their vote weight, update the existing entry.
+                                // The array length does not change, so the count remains the same.
+                                this.postToVote.active_votes[existingVoteIndex].percent = this.voteWeight * 100;
+                            }
+                        }
+                    }
+
 					//append this entry into the list of voted posts
 					if (this.newlyVotedPosts.indexOf(this.postToVote.post_id) === -1) {
 						this.newlyVotedPosts.push(this.postToVote.post_id);
@@ -549,6 +578,7 @@ export default {
 				}
 			}
 		},
+        // END: MODIFIED METHOD
 		async vote(e) {
 			//if no user is logged in, prompt to login
 
@@ -775,8 +805,8 @@ export default {
 						this.$notify({
 							group: 'error',
 							text: this.$t('error'),
-							position: 'top center'
-						})
+								position: 'top center'
+							})
 					}
 
 				} else {

@@ -120,6 +120,17 @@ export default {
     ...mapGetters('steemconnect', ['user']),
     ...mapGetters(['moderators', 'userPosts']),
     cardData () { return this.post },
+    // START: ADDED COMPUTED PROPERTY
+    // This explicitly defines the body snippet for post.vue, overriding the mixin
+    // and ensuring the correct truncation length is used without conflict.
+    bodySnippet () {
+      if (!this.post || !this.post.body) return ''
+      // Uses the truncateString method from the mixin, which is what we want.
+      let postContent = this.$cleanBody(this.post.body, true);
+      postContent = this.truncateString(postContent, 150);
+      return postContent.replace(/<[^>]+>/g, '');
+    },
+    // END: ADDED COMPUTED PROPERTY
     isOnlyPost () { return this.userPosts && this.userPosts.length === 1 },
     buildLink () { return '/' + this.post.author + '/' + this.post.permlink },
     isPostReblog () { return this.displayUsername !== this.post.author },
