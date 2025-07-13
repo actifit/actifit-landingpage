@@ -82,19 +82,6 @@ export default {
     nextImage() { this.$emit('next-image'); },
     prevImage() { this.$emit('prev-image'); },
     goToImage(index) { this.$emit('go-to-image', index); },
-
-    // THIS METHOD IS NOW REMOVED.
-    // It was causing the problem by overriding the correctly formatted text from the parent.
-    /*
-    renderSnippet(content, length) {
-      if (!content) return '';
-      let postContent = content.replace(/<[^>]+>/g, '').replace(/\n/g, ' ');
-      if (postContent.length > length) {
-        return postContent.substring(0, length - 3) + '...';
-      }
-      return postContent;
-    }
-    */
   }
 }
 </script>

@@ -54,11 +54,13 @@
         <!-- 3. Replaced with CardActions component -->
         <CardActions
           :cardData="report"
+          modalTarget="#reportModal"
           :user="user"
           :voteCount="getVoteCount"
           :hasVoted="postUpvoted"
           @vote-prompt="votePrompt($event)"
           @reblog="$reblog(user, report)"
+          @open-modal="report.rptId = rptId; $store.commit('setActiveReport', report)"
         >
           <!-- Slot for the report-specific right-side actions -->
           <template #extra-actions>

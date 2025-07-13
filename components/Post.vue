@@ -50,11 +50,13 @@
       <div class="post-footer mt-auto p-1">
         <CardActions
           :cardData="post"
+          modalTarget="#postModal"
           :user="user"
           :voteCount="getVoteCount"
           :hasVoted="postUpvoted"
           @vote-prompt="votePrompt($event)"
           @reblog="$reblog(user, post)"
+          @open-modal="post.pstId = pstId; $store.commit('setActivePost', post)"
         >
           <template #extra-actions>
             <social-sharing :url="'https://actifit.io/@' + post.author + '/' + post.permlink" :title="post.title" :description="socialSharingDesc" :quote="socialSharingQuote" :hashtags="hashtags" twitter-user="actifit_fitness" inline-template>

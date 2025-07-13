@@ -5,7 +5,15 @@
       <a href="#" @click.prevent="$emit('vote-prompt')" data-toggle="modal" data-target="#voteModal" :class="{ 'text-brand': hasVoted }" :title="$t('votes')">
         <i class="far fa-thumbs-up"></i> {{ voteCount }}
       </a>
+      <a
+        href="#"
+        @click.prevent="$emit('open-modal')"
+        :data-toggle="modalTarget ? 'modal' : null"
+        :data-target="modalTarget"
+        :title="$t('comments')"
+      >
       <i class="far fa-comments ml-2" :title="$t('comments')"></i> {{ cardData.children }}
+      </a>
       <i class="far fa-share-square ml-2" @click.prevent="$emit('reblog')" v-if="user && cardData.author !== user.account.name" :title="$t('reblog')"></i>
     </div>
     <!-- Slot for Different Right Side Actions -->
@@ -18,12 +26,13 @@
 <script>
 export default {
   props: {
+    modalTarget: { type: String, required: true },
     cardData: { type: Object, required: true },
     user: { type: Object, default: null },
     voteCount: { type: Number, required: true },
     hasVoted: { type: Boolean, required: true }
   },
-  emits: ['vote-prompt', 'reblog']
+  emits: ['vote-prompt', 'reblog', 'open-modal']
 }
 </script>
 
