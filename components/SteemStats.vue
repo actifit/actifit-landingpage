@@ -197,7 +197,7 @@
   to { background-position-x: 0; }
 }
 
-.steem-stats-container {
+.steem-stats-container.steem-stats-container{
 	display: flex; 
 	justify-content: center;
 	gap: 4.5rem;
