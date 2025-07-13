@@ -1,46 +1,63 @@
 <template>
 	<div class="steem-stats-container" v-if="getVotingPower">
-		<div class="stat-gauge-row">
-			<div class="gauge-wrapper">
+		<!-- Gauge Container: VP -->
+		<div class="gauge-container">
+			<!-- The Gauge itself with hover tooltip -->
+			<div 
+				class="gauge-wrapper"
+				@mouseover="showVpTooltip = true"
+				@mouseleave="showVpTooltip = false"
+			>
 				<div class="gauge" :style="vpGaugeStyle">
 					<div class="gauge-center">
-						<i class="fa-solid fa-thumbs-up" :style="displayProperColor"></i>
+						<div class="gauge-value text-brand">
+							{{ parseFloat(currentVotingPower).toFixed(1) }}<small>%</small>
+						</div>
+					</div>
+				</div>
+				<div class="gauge-hover-tooltip" :class="{ visible: showVpTooltip }">
+					<div class="tooltip-content">
+						<small>{{ $t('Full_In') }}</small>
+						<span class="tooltip-time">{{timeToFull(this.currentVotingPower)}}</span>
 					</div>
 				</div>
 			</div>
-			<div class="stat-text-content">
+			<!-- Label and Info Icon Container -->
+			<div class="gauge-label-container">
+				<span class="gauge-label">{{ $t('VP') }}</span>
 				<template v-if="!minView">
-					<span>{{ $t('Your_Voting_Power') }} </span>
-					<span :style="displayProperColor">{{ getVotingPower }}</span>
-					<small class="text-muted"> ({{ $t('Full_In') }} {{timeToFull(this.currentVotingPower)}})</small>
 					<a href="#" data-toggle="modal" data-target="#notifyModal"><i class="fas fa-info-circle ml-1"></i></a>
-				</template>
-				<template v-else>
-					<span>{{ $t('My_Voting_Power') }} </span>
-					<span :style="displayProperColor">{{getVotingPower}}</span>
 				</template>
 			</div>
 		</div>
 
-		<!-- Resource Credits Section with Circular Gauge -->
-		<div class="stat-gauge-row">
-			<div class="gauge-wrapper">
+		<!-- Gauge Container: RC -->
+		<div class="gauge-container">
+			<!-- The Gauge itself with hover tooltip -->
+			<div 
+				class="gauge-wrapper"
+				@mouseover="showRcTooltip = true"
+				@mouseleave="showRcTooltip = false"
+			>
 				<div class="gauge" :style="rcGaugeStyle">
 					<div class="gauge-center">
-						<i class="fa-sharp fa-solid fa-bolt text-brand"></i>
+						<div class="gauge-value text-brand">
+							{{ parseFloat(currentRC).toFixed(1) }}<small>%</small>
+						</div>
+					</div>
+				</div>
+				<div class="gauge-hover-tooltip" :class="{ visible: showRcTooltip }">
+					<div class="tooltip-content">
+						<small>{{ $t('Full_In') }}</small>
+						<span class="tooltip-time">{{timeToFull(this.currentRC)}}</span>
 					</div>
 				</div>
 			</div>
-			<div class="stat-text-content">
+			<!-- Label and Info Icon Container -->
+			<div class="gauge-label-container">
+				<span class="gauge-label">{{ $t('RC') }}</span>
 				<template v-if="!minView">
-					<span>{{ $t('Your_RC') }} </span>
-					<span class="text-brand">{{ this.currentRCPercent }}</span>
-					<small class="text-muted"> ({{ $t('Full_In') }} {{timeToFull(this.currentRC)}})</small>
 					<a href="#" data-toggle="modal" data-target="#notifyModalRC"><i class="fas fa-info-circle ml-1"></i></a>
-				</template>
-				<template v-else>
-					<span>{{ $t('My_RC') }} </span>
-					<span class="text-brand">{{this.currentRCPercent}}</span>
 				</template>
 			</div>
 		</div>
@@ -73,20 +90,15 @@
 		showRCInfo: false,
 		showVPInfo: false,
 		cur_bchain: 'HIVE',
+        // State to control tooltips
+        showVpTooltip: false,
+        showRcTooltip: false,
 	  }
 	},
 	props: ['user', 'minView'],
 	computed: {
 	  getVotingPower () {
 		return parseFloat(this.currentVotingPower).toFixed(3) + '%';
-	  },
-	  displayProperColor () {
-		if (this.currentVotingPower > 80){
-		  return "color: #28a745";
-		}else if (this.currentVotingPower > 60){
-		  return "color: #fd7e14";
-		}
-		return "color: #dc3545";
 	  },
 	  vpGaugeStyle() {
 		const percentage = this.currentVotingPower;
@@ -107,6 +119,7 @@
 		const percentage = this.currentRC;
 		const color = '#0d6efd'; // Bootstrap Primary Blue
 		return {
+		  // Re-added for the striped effect
 		  '--mask-gradient': `conic-gradient(${color} ${percentage}%, transparent ${percentage}%)`,
 		  'background': `conic-gradient(${color} ${percentage}%, var(--gauge-track-bg) ${percentage}%)`
 		}
@@ -179,42 +192,42 @@
 </script>
 
 <style scoped>
-/* Define keyframes for the stripe animation */
 @keyframes progress-bar-stripes {
   from { background-position-x: 1rem; }
   to { background-position-x: 0; }
 }
 
 .steem-stats-container {
+	display: flex; 
+	justify-content: center;
+	gap: 4.5rem;
 	padding-top: 0.5rem;
-	/* Light mode default colors */
 	--gauge-center-bg: #fff;
 	--gauge-track-bg: #e9ecef;
 }
 
-/* Override variables in dark mode */
 .dark-mode .steem-stats-container,
 :root.dark-mode .steem-stats-container {
 	--gauge-center-bg: #212529;
 	--gauge-track-bg: #444;
 }
 
-.stat-gauge-row {
+/* NEW: Wrapper for a single gauge and its label */
+.gauge-container {
 	display: flex;
+	flex-direction: column;
 	align-items: center;
-	margin-bottom: 1rem;
 }
-.stat-gauge-row:last-of-type {
-	margin-bottom: 0;
-}
+
 .gauge-wrapper {
 	flex-shrink: 0;
-	margin-right: 15px;
+	position: relative; 
+	cursor: pointer;
 }
 .gauge {
 	position: relative;
-	width: 50px;
-	height: 50px;
+	width: 85px; 
+	height: 85px;
 	border-radius: 50%;
 	display: flex;
 	align-items: center;
@@ -229,36 +242,85 @@
 	right: 0;
 	bottom: 0;
 	border-radius: 50%;
-	
-	/* The striped background */
 	background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
 	background-size: 1rem 1rem;
-
-	/* The animation */
 	animation: progress-bar-stripes 1s linear infinite;
-
 	mask-image: var(--mask-gradient);
 	-webkit-mask-image: var(--mask-gradient);
 }
 
 .gauge-center {
-	width: 40px;
-	height: 40px;
-	background-color: var(--gauge-center-bg); /* Use themed variable */
+	width: 65px; 
+	height: 65px; 
+	background-color: var(--gauge-center-bg);
 	border-radius: 50%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	z-index: 1;
+	z-index: 1; /* Sits on top of the ::before stripes */
 }
-.gauge-center i {
-	font-size: 1.2rem;
+.gauge-value {
+    font-size: 1.4rem; 
+    font-weight: 700;
+    line-height: 1;
+}
+.gauge-value small {
+    font-size: 0.9rem;
+    font-weight: 500;
+    opacity: 0.8;
+}
+
+/* Tooltip styles */
+.gauge-hover-tooltip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(10, 25, 40, 0.9);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    z-index: 10;
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.95);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+    pointer-events: none;
+}
+.gauge-hover-tooltip.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+}
+.tooltip-content {
+    display: flex;
+    flex-direction: column;
+    color: #fff;
+}
+.tooltip-content small {
+	opacity: 0.8;
+}
+.tooltip-time {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-top: 2px;
+	color: #fff !important;
 }
 .text-brand {
 	color: #e10707; 
 }
-.stat-text-content {
-	flex-grow: 1; 
+.gauge-label-container {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-top: 0.5rem;
 	font-size: 0.9rem;
+}
+.gauge-label {
+	font-weight: 600;
 }
 </style>

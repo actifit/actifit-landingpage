@@ -1178,6 +1178,8 @@ our_top_supporters: 'Our Top Supporters',
 top_supporters_desc: 'A huge thank you to our top delegators who power the Actifit ecosystem!',
 daily_afit_earnings: 'AFIT/Day',
 HP_short: 'HP',
+RC:'RC',
+VP:'VP',
 
 Steps: 'activity count',
 
