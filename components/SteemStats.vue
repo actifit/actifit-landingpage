@@ -1,66 +1,89 @@
 <template>
-	<div class="steem-stats-container" v-if="getVotingPower">
-		<!-- Gauge Container: VP -->
-		<div class="gauge-container">
-			<!-- The Gauge itself with hover tooltip -->
-			<div 
-				class="gauge-wrapper"
-				@mouseover="showVpTooltip = true"
-				@mouseleave="showVpTooltip = false"
-			>
-				<div class="gauge" :style="vpGaugeStyle">
-					<div class="gauge-center">
-						<div class="gauge-value text-brand">
-							{{ parseFloat(currentVotingPower).toFixed(1) }}<small>%</small>
-						</div>
-					</div>
-				</div>
-				<div class="gauge-hover-tooltip" :class="{ visible: showVpTooltip }">
-					<div class="tooltip-content">
-						<small>{{ $t('Full_In') }}</small>
-						<span class="tooltip-time">{{timeToFull(this.currentVotingPower)}}</span>
-					</div>
-				</div>
-			</div>
-			<!-- Label and Info Icon Container -->
-			<div class="gauge-label-container">
-				<span class="gauge-label">{{ $t('VP') }}</span>
-				<template v-if="!minView">
-					<a href="#" data-toggle="modal" data-target="#notifyModal"><i class="fas fa-info-circle ml-1"></i></a>
-				</template>
-			</div>
-		</div>
+	<!-- Root container, only renders if we have data -->
+	<div v-if="getVotingPower">
 
-		<!-- Gauge Container: RC -->
-		<div class="gauge-container">
-			<!-- The Gauge itself with hover tooltip -->
-			<div 
-				class="gauge-wrapper"
-				@mouseover="showRcTooltip = true"
-				@mouseleave="showRcTooltip = false"
-			>
-				<div class="gauge" :style="rcGaugeStyle">
-					<div class="gauge-center">
-						<div class="gauge-value text-brand">
-							{{ parseFloat(currentRC).toFixed(1) }}<small>%</small>
+		<!-- GAUGE VIEW (for main card, when minView is false) -->
+		<template v-if="!minView">
+			<div class="steem-stats-container steem-stats-gauges">
+				<!-- Gauge Container: VP -->
+				<div class="gauge-container">
+					<div class="gauge-wrapper" @mouseover="showVpTooltip = true" @mouseleave="showVpTooltip = false">
+						<div class="gauge" :style="vpGaugeStyle">
+							<div class="gauge-center">
+								<div class="gauge-value text-brand">
+									{{ parseFloat(currentVotingPower).toFixed(1) }}<small>%</small>
+								</div>
+							</div>
+						</div>
+						<div class="gauge-hover-tooltip" :class="{ visible: showVpTooltip }">
+							<div class="tooltip-content">
+								<small>{{ $t('Full_In') }}</small>
+								<span class="tooltip-time">{{ timeToFull(this.currentVotingPower) }}</span>
+							</div>
 						</div>
 					</div>
+					<div class="gauge-label-container">
+						<span class="gauge-label">{{ $t('VP') }}</span>
+						<a href="#" data-toggle="modal" data-target="#notifyModal"><i class="fas fa-info-circle ml-1"></i></a>
+					</div>
 				</div>
-				<div class="gauge-hover-tooltip" :class="{ visible: showRcTooltip }">
-					<div class="tooltip-content">
-						<small>{{ $t('Full_In') }}</small>
-						<span class="tooltip-time">{{timeToFull(this.currentRC)}}</span>
+
+				<!-- Gauge Container: RC -->
+				<div class="gauge-container">
+					<div class="gauge-wrapper" @mouseover="showRcTooltip = true" @mouseleave="showRcTooltip = false">
+						<div class="gauge" :style="rcGaugeStyle">
+							<div class="gauge-center">
+								<div class="gauge-value text-brand">
+									{{ parseFloat(currentRC).toFixed(1) }}<small>%</small>
+								</div>
+							</div>
+						</div>
+						<div class="gauge-hover-tooltip" :class="{ visible: showRcTooltip }">
+							<div class="tooltip-content">
+								<small>{{ $t('Full_In') }}</small>
+								<span class="tooltip-time">{{ timeToFull(this.currentRC) }}</span>
+							</div>
+						</div>
+					</div>
+					<div class="gauge-label-container">
+						<span class="gauge-label">{{ $t('RC') }}</span>
+						<a href="#" data-toggle="modal" data-target="#notifyModalRC"><i class="fas fa-info-circle ml-1"></i></a>
 					</div>
 				</div>
 			</div>
-			<!-- Label and Info Icon Container -->
-			<div class="gauge-label-container">
-				<span class="gauge-label">{{ $t('RC') }}</span>
-				<template v-if="!minView">
-					<a href="#" data-toggle="modal" data-target="#notifyModalRC"><i class="fas fa-info-circle ml-1"></i></a>
-				</template>
+		</template>
+
+		<!-- PROGRESS BAR VIEW (for user menu, when minView is true) -->
+		<template v-else>
+			<div class="steem-stats-container steem-stats-progress">
+				<!-- Voting Power Section -->
+				<div class="stat-line">
+					<!-- MODIFIED: Now uses text-brand class for consistent color -->
+					<i class="fa-solid fa-thumbs-up stat-icon text-brand"></i>
+					<div class="stat-text-content">
+						<span>{{ $t('My_Voting_Power') }} </span>
+						<!-- MODIFIED: Now uses text-brand class for consistent color -->
+						<span class="text-brand">{{ getVotingPower }}</span>
+					</div>
+				</div>
+				<div class="progress">
+					<div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" :class="{'bg-success': currentVotingPower > 80, 'bg-warning': currentVotingPower <= 80 && currentVotingPower > 60, 'bg-danger': currentVotingPower <= 60}" :style="{ width: currentVotingPower + '%' }"></div>
+				</div>
+
+				<!-- Resource Credits Section -->
+				<div class="stat-line">
+					<i class="fa-sharp fa-solid fa-bolt stat-icon text-brand"></i>
+					<div class="stat-text-content">
+						<span>{{ $t('My_RC') }} </span>
+						<span class="text-brand">{{ this.currentRCPercent }}</span>
+					</div>
+				</div>
+				<div class="progress">
+					<div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" :style="{ width: currentRCPercent}"></div>
+				</div>
 			</div>
-		</div>
+		</template>
+
 	</div>
 </template>
 
@@ -90,7 +113,6 @@
 		showRCInfo: false,
 		showVPInfo: false,
 		cur_bchain: 'HIVE',
-        // State to control tooltips
         showVpTooltip: false,
         showRcTooltip: false,
 	  }
@@ -100,6 +122,7 @@
 	  getVotingPower () {
 		return parseFloat(this.currentVotingPower).toFixed(3) + '%';
 	  },
+	  // REMOVED displayProperColor as it's no longer needed for the minView
 	  vpGaugeStyle() {
 		const percentage = this.currentVotingPower;
 		let color = '#dc3545'; // Default red
@@ -109,9 +132,7 @@
 			color = '#fd7e14'; // Orange
 		}
 		return {
-		  // This variable is used by the ::before pseudo-element to create the striped mask
 		  '--mask-gradient': `conic-gradient(${color} ${percentage}%, transparent ${percentage}%)`,
-		  // This is the main background with the correct track color from CSS variables
 		  'background': `conic-gradient(${color} ${percentage}%, var(--gauge-track-bg) ${percentage}%)`
 		}
 	  },
@@ -119,7 +140,6 @@
 		const percentage = this.currentRC;
 		const color = '#0d6efd'; // Bootstrap Primary Blue
 		return {
-		  // Re-added for the striped effect
 		  '--mask-gradient': `conic-gradient(${color} ${percentage}%, transparent ${percentage}%)`,
 		  'background': `conic-gradient(${color} ${percentage}%, var(--gauge-track-bg) ${percentage}%)`
 		}
@@ -192,39 +212,52 @@
 </script>
 
 <style scoped>
+/*
+  IMPORTANT: The "scoped" attribute on this style tag ensures these styles
+  ONLY apply to this component. They WILL NOT affect your login buttons or
+  any other element outside of this file, fixing the "soft edges" issue.
+*/
+
+/* Common Styles */
+.text-brand {
+	color: #e10707; 
+}
+.steem-stats-container {
+	padding-top: 0.5rem;
+}
+
+/* --- STYLES FOR GAUGE VIEW --- */
 @keyframes progress-bar-stripes {
   from { background-position-x: 1rem; }
   to { background-position-x: 0; }
 }
 
-.steem-stats-container.steem-stats-container{
+.steem-stats-gauges {
 	display: flex; 
 	justify-content: center;
 	gap: 4.5rem;
-	padding-top: 0.5rem;
 	--gauge-center-bg: #fff;
 	--gauge-track-bg: #e9ecef;
 }
 
-.dark-mode .steem-stats-container,
-:root.dark-mode .steem-stats-container {
+.dark-mode .steem-stats-gauges,
+:root.dark-mode .steem-stats-gauges {
 	--gauge-center-bg: #212529;
 	--gauge-track-bg: #444;
 }
 
-/* NEW: Wrapper for a single gauge and its label */
-.gauge-container {
+.steem-stats-gauges .gauge-container {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 }
 
-.gauge-wrapper {
+.steem-stats-gauges .gauge-wrapper {
 	flex-shrink: 0;
 	position: relative; 
 	cursor: pointer;
 }
-.gauge {
+.steem-stats-gauges .gauge {
 	position: relative;
 	width: 85px; 
 	height: 85px;
@@ -234,7 +267,7 @@
 	justify-content: center;
 }
 
-.gauge::before {
+.steem-stats-gauges .gauge::before {
 	content: '';
 	position: absolute;
 	top: 0;
@@ -249,7 +282,7 @@
 	-webkit-mask-image: var(--mask-gradient);
 }
 
-.gauge-center {
+.steem-stats-gauges .gauge-center {
 	width: 65px; 
 	height: 65px; 
 	background-color: var(--gauge-center-bg);
@@ -257,21 +290,20 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	z-index: 1; /* Sits on top of the ::before stripes */
+	z-index: 1;
 }
-.gauge-value {
+.steem-stats-gauges .gauge-value {
     font-size: 1.4rem; 
     font-weight: 700;
     line-height: 1;
 }
-.gauge-value small {
+.steem-stats-gauges .gauge-value small {
     font-size: 0.9rem;
     font-weight: 500;
     opacity: 0.8;
 }
 
-/* Tooltip styles */
-.gauge-hover-tooltip {
+.steem-stats-gauges .gauge-hover-tooltip {
     position: absolute;
     top: 0;
     left: 0;
@@ -291,36 +323,58 @@
     transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
     pointer-events: none;
 }
-.gauge-hover-tooltip.visible {
+.steem-stats-gauges .gauge-hover-tooltip.visible {
     opacity: 1;
     visibility: visible;
     transform: scale(1);
 }
-.tooltip-content {
+.steem-stats-gauges .tooltip-content {
     display: flex;
     flex-direction: column;
     color: #fff;
 }
-.tooltip-content small {
+.steem-stats-gauges .tooltip-content small {
 	opacity: 0.8;
 }
-.tooltip-time {
+.steem-stats-gauges .tooltip-time {
     font-size: 1.2rem;
     font-weight: bold;
     margin-top: 2px;
 	color: #fff !important;
 }
-.text-brand {
-	color: #e10707; 
-}
-.gauge-label-container {
+.steem-stats-gauges .gauge-label-container {
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	margin-top: 0.5rem;
 	font-size: 0.9rem;
 }
-.gauge-label {
+.steem-stats-gauges .gauge-label {
 	font-weight: 600;
+}
+
+/* --- STYLES FOR PROGRESS BAR VIEW --- */
+.steem-stats-progress .stat-line {
+	display: flex;
+	align-items: center;
+	margin-bottom: 0.25rem;
+}
+.steem-stats-progress .stat-icon {
+	width: 20px; 
+	text-align: center;
+	font-size: 1.1rem;
+	margin-right: 8px; 
+}
+.steem-stats-progress .stat-text-content {
+	flex-grow: 1; 
+	font-size: 0.9rem;
+}
+.steem-stats-progress .progress {
+	height: 8px;
+	border-radius: 4px;
+	margin-bottom: 1rem;
+}
+.steem-stats-progress .progress:last-of-type {
+	margin-bottom: 0;
 }
 </style>

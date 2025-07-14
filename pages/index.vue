@@ -924,6 +924,20 @@ export default {
     min-height: 15rem
 </style>
 <style>
+/* --- FIX for Rounded Corners --- */
+/* This restores the soft corners for buttons and inputs across the site */
+.btn, .form-control {
+  border-radius: 0.25rem !important;
+}
+
+/* This restores the red glow when an input is selected */
+.form-control:focus {
+  border-color: #f87a7a;
+  box-shadow: 0 0 0 0.2rem rgba(225, 7, 7, 0.25);
+}
+/* --- End of Fix --- */
+
+
 body.home-page-active {
   overflow-x: hidden;
   overflow-y: scroll; 
