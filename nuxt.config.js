@@ -289,7 +289,7 @@ module.exports = {
 	'nuxt-helmet',
 	'@nuxtjs/gtm',
 	//['@nuxtjs/axios'],
-    ['nuxt-i18n', I18N],
+   '@nuxtjs/i18n',
 	['@nuxtjs/google-adsense', {
       id: 'ca-pub-2770948859841315',
 	  pageLevelAds: true
@@ -352,7 +352,7 @@ module.exports = {
         }
     },
 	//fixes issue with hive-auth-wrapper plugin integration
-	transpile: ['hive-auth-wrapper']
+	transpile: ['hive-auth-wrapper', 'htmlparser2', 'sanitize-html']
 
   }
 }
