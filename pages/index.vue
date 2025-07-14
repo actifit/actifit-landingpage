@@ -925,34 +925,44 @@ export default {
 </style>
 <style>
 /* --- FIX for Rounded Corners --- */
-/* This restores the soft corners for buttons and inputs across the site */
+/* This restores the soft corners for buttons and inputs across the site, which was accidentally removed. */
 .btn, .form-control {
   border-radius: 0.25rem !important;
-}
-
-/* This restores the red glow when an input is selected */
-.form-control:focus {
-  border-color: #f87a7a;
-  box-shadow: 0 0 0 0.2rem rgba(225, 7, 7, 0.25);
 }
 /* --- End of Fix --- */
 
 
+/* Scoped styles to prevent leaking to other pages */
 body.home-page-active {
   overflow-x: hidden;
   overflow-y: scroll; 
 }
 
-body.modal-open {
+/* Scoped modal styles to prevent breaking modals on other pages */
+body.home-page-active.modal-open {
   overflow: visible;
   padding-right: 0 !important;
+}
+
+.home-page-active .modal-backdrop {
+    z-index: 1140;
+}
+.home-page-active .modal {
+    z-index: 1150;
 }
 
 section#recent-activity, section#news {
   position: relative;
 }
 
-#navbar-container{position:relative;z-index:1100}:root{--hero-content-bg:#f8f9fa;--hero-title-color:#212529;--hero-subtitle-color:#495057;--panel-bg:rgba(255,255,255,.85);--panel-border:rgba(0,0,0,.1);--panel-text-color:#212529;--panel-muted-text:#6c757d;--btn-secondary-color:#343a40;--btn-secondary-border:#ced4da;--btn-secondary-hover-bg:#e9ecef;--btn-secondary-hover-border:#adb5bd}.dark-mode{--hero-content-bg:#1a1a1a;--hero-title-color:#f0f0f0;--hero-subtitle-color:#a0a0a0;--panel-bg:rgba(40,40,40,.85);--panel-border:rgba(255,255,255,.15);--panel-text-color:#f0f0f0;--panel-muted-text:#a0a0a0;--btn-secondary-color:#f0f0f0;--btn-secondary-border:rgba(255,255,255,.5);--btn-secondary-hover-bg:rgba(255,255,255,.1);--btn-secondary-hover-border:#fff}.hero-section{display:flex;min-height:100vh;width:100%;background-color:#000;position:relative;overflow:hidden}.hero-content{flex-basis:45%;max-width:600px;background:var(--hero-content-bg);color:var(--hero-title-color);padding:4rem 3rem;display:flex;flex-direction:column;justify-content:center;z-index:2}.hero-title{font-size:3.5rem;font-weight:800;line-height:1.2;margin-bottom:1rem;text-transform:uppercase;color:var(--hero-title-color)}.hero-title .text-brand{color:#e10707}.hero-subtitle{font-size:1.1rem;color:var(--hero-subtitle-color);max-width:450px;margin-bottom:2.5rem}.hero-visual{flex:1;position:relative}.hero-visual .hero-bg-image{position:absolute;top:0;left:0;width:100%;height:100%;background-image:url('/img/header-5(2).png');background-size:cover;background-position:left center}.hero-visual-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(to right,var(--hero-content-bg) 0,transparent 40%);z-index:1}.user-panel{background:var(--panel-bg);border:1px solid var(--panel-border);border-radius:16px;padding:1.5rem;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1rem}.stat-item{display:flex;flex-direction:column}.stat-item .label{font-size:.9rem;color:var(--panel-muted-text);margin-bottom:.25rem}.stat-item .value{font-size:1.25rem;font-weight:600;color:var(--panel-text-color);margin-bottom:.75rem}.btn-panel-action{color:#e10707;text-decoration:none;font-weight:600;transition:all .2s ease}.btn-panel-action:hover{color:#c10606;transform:translateX(4px)}.dark-mode .btn-panel-action:hover{color:#ff3d3d}.btn-panel-action .fas{margin-left:.25rem}.resource-stats{border-top:1px solid var(--panel-border);border-bottom:1px solid var(--panel-border);padding:.5rem 0;margin:1.5rem 0}.resource-stats .text-muted{color:var(--panel-muted-text)!important}.resource-stats .text-white{color:var(--panel-text-color)!important}.login-prompt{color:var(--panel-text-color);font-size:1.1rem;text-align:center;margin-bottom:1.5rem;font-weight:500}.main-actions-alt{text-align:center;margin-top:1rem}.main-actions{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.btn-primary-hero,.btn-secondary-hero{padding:.85rem 1.5rem;border-radius:8px;font-weight:700;text-align:center;text-decoration:none;transition:all .3s ease;border:2px solid transparent}.btn-primary-hero{background-color:#e10707;color:#fff!important}.btn-primary-hero:hover{background-color:#c10606;transform:translateY(-2px)}.btn-secondary-hero{background-color:transparent;color:var(--btn-secondary-color)!important;border-color:var(--btn-secondary-border)}.btn-secondary-hero:hover{background-color:var(--btn-secondary-hover-bg);border-color:var(--btn-secondary-hover-border);transform:translateY(-2px)}.btn-link-hero{color:var(--panel-muted-text);text-decoration:none;font-weight:500;transition:color .2s ease}.btn-link-hero:hover{color:#e10707}@media (max-width:1200px){.hero-content{flex-basis:50%}.hero-visual{flex-basis:50%}}@media (max-width:992px){.hero-section{flex-direction:column}.hero-visual{order:0;flex-basis:auto;height:40vh}.hero-visual .hero-bg-image{background-position:center center}.hero-visual-overlay{background:none}.hero-content{order:1;flex-basis:auto;max-width:100%;padding:2rem 1.5rem}.hero-title{font-size:2.5rem}}@media (max-width:576px){.hero-title{font-size:2rem}.main-actions,.stats-grid{grid-template-columns:1fr}}section{margin-bottom:2em;box-shadow:3px 3px 3px rgba(255,0,0,.4)}section.aurora-showcase,section#delegators,section#news,section#recent-activity,section#leaderboard,section#infrastructure{box-shadow:none!important;margin-bottom:0}.acti-shadow{box-shadow:3px 3px 3px rgba(255,0,0,.4)}.acti-shadow-inverse{box-shadow:3px 3px 3px rgba(255,255,255,.4)}
+#navbar-container{position:relative;z-index:1100}:root{--hero-content-bg:#f8f9fa;--hero-title-color:#212529;--hero-subtitle-color:#495057;--panel-bg:rgba(255,255,255,.85);--panel-border:rgba(0,0,0,.1);--panel-text-color:#212529;--panel-muted-text:#6c757d;--btn-secondary-color:#343a40;--btn-secondary-border:#ced4da;--btn-secondary-hover-bg:#e9ecef;--btn-secondary-hover-border:#adb5bd}.dark-mode{--hero-content-bg:#1a1a1a;--hero-title-color:#f0f0f0;--hero-subtitle-color:#a0a0a0;--panel-bg:rgba(40,40,40,.85);--panel-border:rgba(255,255,255,.15);--panel-text-color:#f0f0f0;--panel-muted-text:#a0a0a0;--btn-secondary-color:#f0f0f0;--btn-secondary-border:rgba(255,255,255,.5);--btn-secondary-hover-bg:rgba(255,255,255,.1);--btn-secondary-hover-border:#fff}.hero-section{display:flex;min-height:100vh;width:100%;background-color:#000;position:relative;overflow:hidden}.hero-content{flex-basis:45%;max-width:600px;background:var(--hero-content-bg);color:var(--hero-title-color);padding:4rem 3rem;display:flex;flex-direction:column;justify-content:center;z-index:2}.hero-title{font-size:3.5rem;font-weight:800;line-height:1.2;margin-bottom:1rem;text-transform:uppercase;color:var(--hero-title-color)}.hero-title .text-brand{color:#e10707}.hero-subtitle{font-size:1.1rem;color:var(--hero-subtitle-color);max-width:450px;margin-bottom:2.5rem}.hero-visual{flex:1;position:relative}.hero-visual .hero-bg-image{position:absolute;top:0;left:0;width:100%;height:100%;background-image:url('/img/header-5(2).png');background-size:cover;background-position:left center}.hero-visual-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(to right,var(--hero-content-bg) 0,transparent 40%);z-index:1}.user-panel{background:var(--panel-bg);border:1px solid var(--panel-border);border-radius:16px;padding:1.5rem;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1rem}.stat-item{display:flex;flex-direction:column}.stat-item .label{font-size:.9rem;color:var(--panel-muted-text);margin-bottom:.25rem}.stat-item .value{font-size:1.25rem;font-weight:600;color:var(--panel-text-color);margin-bottom:.75rem}.btn-panel-action{color:#e10707;text-decoration:none;font-weight:600;transition:all .2s ease}.btn-panel-action:hover{color:#c10606;transform:translateX(4px)}.dark-mode .btn-panel-action:hover{color:#ff3d3d}.btn-panel-action .fas{margin-left:.25rem}.resource-stats{border-top:1px solid var(--panel-border);border-bottom:1px solid var(--panel-border);padding:.5rem 0;margin:1.5rem 0}.resource-stats .text-muted{color:var(--panel-muted-text)!important}.resource-stats .text-white{color:var(--panel-text-color)!important}.login-prompt{color:var(--panel-text-color);font-size:1.1rem;text-align:center;margin-bottom:1.5rem;font-weight:500}.main-actions-alt{text-align:center;margin-top:1rem}.main-actions{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.btn-primary-hero,.btn-secondary-hero{padding:.85rem 1.5rem;border-radius:8px;font-weight:700;text-align:center;text-decoration:none;transition:all .3s ease;border:2px solid transparent}.btn-primary-hero{background-color:#e10707;color:#fff!important}.btn-primary-hero:hover{background-color:#c10606;transform:translateY(-2px)}.btn-secondary-hero{background-color:transparent;color:var(--btn-secondary-color)!important;border-color:var(--btn-secondary-border)}.btn-secondary-hero:hover{background-color:var(--btn-secondary-hover-bg);border-color:var(--btn-secondary-hover-border);transform:translateY(-2px)}.btn-link-hero{color:var(--panel-muted-text);text-decoration:none;font-weight:500;transition:color .2s ease}.btn-link-hero:hover{color:#e10707}@media (max-width:1200px){.hero-content{flex-basis:50%}.hero-visual{flex-basis:50%}}@media (max-width:992px){.hero-section{flex-direction:column}.hero-visual{order:0;flex-basis:auto;height:40vh}.hero-visual .hero-bg-image{background-position:center center}.hero-visual-overlay{background:none}.hero-content{order:1;flex-basis:auto;max-width:100%;padding:2rem 1.5rem}.hero-title{font-size:2.5rem}}@media (max-width:576px){.hero-title{font-size:2rem}.main-actions,.stats-grid{grid-template-columns:1fr}}
+
+/* Scoped section shadow to homepage only */
+.home-page-active section{margin-bottom:2em;box-shadow:3px 3px 3px rgba(255,0,0,.4)}
+section.aurora-showcase,section#delegators,section#news,section#recent-activity,section#leaderboard,section#infrastructure{box-shadow:none!important;margin-bottom:0}
+.home-page-active .acti-shadow{box-shadow:3px 3px 3px rgba(255,0,0,.4)}
+.home-page-active .acti-shadow-inverse{box-shadow:3px 3px 3px rgba(255,255,255,.4)}
+
 .intro {
   background-color: #0c0c14;
   position: relative;
@@ -1204,12 +1214,5 @@ section#recent-activity, section#news {
 }
 .resource-stats .col-md-12 > div:last-child {
     margin-bottom: 0;
-}
-
-.modal-backdrop {
-    z-index: 1140;
-}
-.modal {
-    z-index: 1150;
 }
 </style>

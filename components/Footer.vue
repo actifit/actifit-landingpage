@@ -46,7 +46,8 @@
             </ul>
           </div>
           <div class="footer-column">
-            <h5>Hive</h5>
+            <!-- REVERTED: Hive logo is correctly placed in the attributions below, not here. -->
+            <h5>{{ $t('Hive') }}</h5>
             <ul>
               <li><nuxt-link to="/communities">{{ $t('Communities') }}</nuxt-link></li>
               <li><nuxt-link to="/explore">{{ $t('Explore') }}</nuxt-link></li>
@@ -125,17 +126,25 @@ export default {
 }
 </script>
 
-<style>
-body.modal-open { overflow: auto !important; }
-#voteProposalModal {
-  top: unset !important; left: unset !important; transform: none !important;
+<style scoped>
+/* --- STYLES FOR THIRD-PARTY/CHILD COMPONENTS (SAFE) --- */
+::v-deep #voteProposalModal {
+  top: unset !important;
+  left: unset !important;
+  transform: none !important;
   box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
 }
-.cookie__bar__content { overflow: visible !important; }
-button.cookie__bar__buttons__button--accept { background: #ff112d !important; }
-</style>
 
-<style scoped>
+::v-deep .cookie__bar__content {
+  overflow: visible !important;
+}
+
+::v-deep button.cookie__bar__buttons__button--accept {
+  background: #ff112d !important;
+}
+
+
+/* --- FOOTER COMPONENT-SPECIFIC STYLES --- */
 .site-footer {
   background-color: #f8f9fa;
   color: #495057;
@@ -314,7 +323,6 @@ button.cookie__bar__buttons__button--accept { background: #ff112d !important; }
   border-top-color: rgba(255, 255, 255, 0.1);
 }
 .dark-mode .footer-aurora-bg {
-  /* UPDATED: More prominent aurora in dark mode */
   opacity: 1;
 }
 .dark-mode .footer-brand-column .footer-logo-link { color: #ffffff; }
