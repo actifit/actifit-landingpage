@@ -25,7 +25,7 @@
         <!-- Column 2: Actifit Links -->
         <div class="footer-column links-column">
           <h4>ACTIFIT</h4>
-          <a href="#" @click.prevent="$router.push('/activity')">{{ $t('Activity_Feed') }}</a>
+          <a href="#" @click.prevent="$router.push('/activity')">{{ $t('activity_feed') }}</a>
           <a href="#" @click.prevent="$router.push('/market')">{{ $t('Market') }}</a>
           <a href="#" @click.prevent="$router.push('/yieldfarming')">{{ $t('yield_farming') }}</a>
           <a href="#" @click.prevent="$router.push('/referrals')">{{ $t('Refer_A_Friend') }}</a>
@@ -40,10 +40,10 @@
           <a href="/explore">{{ $t('Explore') }}</a>
           <a href="https://hive.io" target="_blank">{{ $t('Hive_official') }}</a>
           <a href="https://hivescan.info" target="_blank">{{ $t('Hive_block_explorer') }}</a>
-          <a href="https://hivescan.info/witnesses" target="_blank">{{ $t('Hive_witnesses') }} (Block Producers)</a>
+          <a href="https://hivescan.info/witnesses" target="_blank">{{ $t('Hive_witnesses') }}</a>
         </div>
       </div>
-      
+
       <!-- Social Media Icons -->
       <div class="social-icons-wrapper">
         <a href="https://links.actifit.io/discord" target="_blank" class="social-icon" :title="$t('Discord')"><i class="fab fa-discord"></i></a>
@@ -82,7 +82,7 @@
 export default {
   computed: {
     currentYear() {
-      return (new Date()).getFullYear(); 
+      return (new Date()).getFullYear();
     },
   },
 }
@@ -91,7 +91,7 @@ export default {
 <style scoped>
 /* --- LIGHT MODE (DEFAULT) --- */
 .new-footer-container {
-  background-color: #FDF5F6; 
+  background-color: #FDF5F6;
   padding: 50px 0 20px 0;
   color: #333;
   font-family: sans-serif;
