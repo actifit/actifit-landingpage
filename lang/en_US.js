@@ -1,4 +1,5 @@
 module.exports = {
+  languages: 'Languages',
   afit_balance: 'AFIT Balance',
   hive_balance: 'HIVE Balance',
   view_full_profile: 'View Full Profile',
@@ -1159,6 +1160,4 @@ module.exports = {
   Latest_Activity_Date:'Latest_Activity_Date',
   hide_reblogs:'hide reblogs',
   show_reblogs:'show reblogs',
-
-
 }

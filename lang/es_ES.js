@@ -1,4 +1,5 @@
 module.exports = {
+  languages: 'Idiomas',
   afit_balance: 'Saldo de AFIT',
   hive_balance: 'Saldo de HIVE',
   view_full_profile: 'Ver Perfil Completo',
