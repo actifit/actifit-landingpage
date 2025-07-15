@@ -59,6 +59,7 @@ module.exports = {
   pending_rewards_note: 'Please note that those rewards are not final, and are subject to increase or decrease depending on actifit and blockchain community engagement. You can view your recent actifit posts and pending rewards by clicking button below.',
   pending_rewards_head_note: 'You have upcoming rewards within 7 days:',
   Check_Pending_Rewards: 'Check Pending Rewards',
+  paid_out_vote_confirm: 'You are currently attempting to cast a vote on a post that has already been paid out; therefore, your action will not be counted. Are you certain you wish to continue with this action?',
   homepage: {
     section1_title: '<span class="text-brand">Actifit:</span> The 1st Social, Cross-Chain, Multi-Reward, Move-To-Earn Gamified Project..with a DeFi Twist!',
 	section1_desc: 'Using Actifit mobile app allows you to earn token rewards via auto-tracking your everyday activity. Rewards include AFIT tokens - Actifit\'s utility and reward token, but also HIVE, BLURT, SPORTS and other token rewards via upvotes on supported blockchains and partner communities.',

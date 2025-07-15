@@ -1,5 +1,14 @@
 const pkg = require('./package')
 
+// --- STEP 1: Import the language file to access its strings ---
+const enTranslations = require('./lang/en_US.js')
+
+// --- STEP 2: Create dynamic variables from the imported translations ---
+const slogan = enTranslations.Slogan // "It Pays to be Fit"
+const mainTitle = `Actifit - ${slogan}`
+const mainDescription = `Signup to Actifit, the mobile dapp that incentivizes a healthy lifestyle. ${slogan}.`
+
+
 const { I18N } = require('./config')
 
 //load env file if present
@@ -38,6 +47,7 @@ module.exports = {
   /*router: {
     base: '/'
   },*/
+  // --- STEP 3: Update the env block to use the dynamic variables ---
   env: {
     sec_img_upl: process.env.SEC_IMG_UPL_KEY,
     auth_Key: process.env.DEEPL_WEB_KEY,
@@ -57,10 +67,12 @@ module.exports = {
     captchaV3Key: '6LchW94ZAAAAAOjLg0G_0AiRgHrlBfbP_HrReBBE',
     poshVerificationUrl: 'https://hiveposh.com/api/v0/twitter/',
     socialSharingHashtags: 'actifit,hive,move2earn,health,fitness',
-    slogan: 'It Pays to be Fit',
-    socialSharingTitle: 'Actifit - It Pays to be Fit',
-    socialSharingDesc: 'Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity ',
-    socialSharingQuote: 'Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity',
+    // --- MODIFIED ---
+    slogan: slogan,
+    socialSharingTitle: mainTitle,
+    socialSharingDesc: mainDescription,
+    socialSharingQuote: mainDescription, // Using the new consistent description
+    // --- END MODIFICATION ---
     web3Node: 'https://bsc-dataseed1.binance.org:443',
     afitTokenBSC: '0x4516bb582f59befcbc945d8c2dac63ef21fba9f6',
     afitxTokenBSC: '0x246d22ff6e0b90f80f2278613e8db93ff7a09b95',
@@ -191,20 +203,26 @@ module.exports = {
   /*
   ** Headers of the page
   */
+  // --- STEP 4: Update the head block to use the dynamic variables ---
   head: {
-    title: 'Actifit - Rewarding Your Everyday Activity',
+    // --- MODIFIED ---
+    title: mainTitle,
     meta: [
 	  { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { hid: 'description', name: 'description', 'property': 'description', content: pkg.description },
-	  { hid: 'title', name: 'og:title', 'property':'og:title', content: 'Actifit - Rewarding Your Everyday Activity'},
-	  { hid: 'ogdescription', name: 'og:description', 'property':'og:description', content: pkg.description},
+      // Now uses the new consistent description
+      { hid: 'description', name: 'description', 'property': 'description', content: mainDescription },
+      // Now uses the new consistent title
+	  { hid: 'title', name: 'og:title', 'property':'og:title', content: mainTitle},
+      // Now uses the new consistent description
+	  { hid: 'ogdescription', name: 'og:description', 'property':'og:description', content: mainDescription},
       { hid: 'url', name: 'og:url', 'property':'og:url', content: 'https://actifit.io'},
 	  { name: 'og:type', 'property':'og:type', content: 'website'},
 	  { hid: 'image', name: 'og:image', 'property':'og:image', content: 'https://actifit.io/img/actifit_logo_med.png'},
 	  { name: 'google-site-verification', content:'Dv3mVaav2x5_2FauDB6MRjixVtVVWPfjUekWwKY-Tnc' },
 	  { name: 'fb:app_id', 'property': 'fb:app_id', content: '651065985331472'},
     ],
+    // --- END MODIFICATION ---
     link: [
       { rel: 'icon', type: 'image/x-icon', href: '/img/actifit_logo.png' },
       //{ rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css' },
@@ -261,6 +279,7 @@ module.exports = {
 	{ src: '@/plugins/vue-mavon-editor', ssr: false },
 	{ src: '~plugins/vue-custom.js'},
 	{ src: '~/plugins/dark-mode.js'},
+  { src: '~/plugins/commonCardMixin.js', mode: 'client' }
   ],
 
   /*
