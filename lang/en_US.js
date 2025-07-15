@@ -1165,6 +1165,7 @@ module.exports = {
   fresh:'Fresh Off The Track',
   community:'See what our community has been up to!',
   loading_news:'Loading news...',
+  footer_slogan:' Your daily activity is valuable. Get rewarded for it.',
 
 
 

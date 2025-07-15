@@ -1035,7 +1035,7 @@ section.aurora-showcase,section#delegators,section#news,section#recent-activity,
 #leaderboard .leaderboard-title{color:#1f2937;transition:color .4s ease;font-weight:700;font-size:2.8rem;padding-bottom:2rem}
 .dark-mode #leaderboard .leaderboard-title{color:#f9fafb}
 
-.leaderboard-podium{display:flex;align-items:flex-end;justify-content:center;gap:1.5rem;position:relative;min-height:450px;z-index:1;padding-top:40px}
+.leaderboard-podium{display:flex;align-items:flex-end;justify-content:center;gap:1.5rem;position:relative;min-height:450px;z-index:1;padding-top:40px; overflow: clip;}
 
 .leaderboard-podium::after {
     content:'';
@@ -1215,4 +1215,5 @@ section.aurora-showcase,section#delegators,section#news,section#recent-activity,
 .resource-stats .col-md-12 > div:last-child {
     margin-bottom: 0;
 }
+
 </style>
