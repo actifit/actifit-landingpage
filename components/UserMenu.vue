@@ -1,6 +1,7 @@
 <template>
   <div class="user-menu-container align-items-center">
     <ul class="navbar-nav mr-auto user-menu flex-row">
+      <!-- Search Bar -->
       <li class="nav-item mr-2 btn btn-brand nav-item-border p-0 search-li">
         <div style="display:inline-flex">
           <AutocompleteUsernameInput id="search-user" name="search-user" ref="search-user"
@@ -8,11 +9,14 @@
             :enableRedirect="true" />
         </div>
       </li>
+
+      <!-- Login/Signup Links -->
       <li class="nav-item" v-if="!user">
-        <a :href="'/signup'">{{ $t('Signup_Link') }}</a> | <a href="#" data-toggle="modal" data-target="#loginModal"
+        <a :href="localePath('/signup')">{{ $t('Signup_Link') }}</a> | <a href="#" data-toggle="modal" data-target="#loginModal"
           @click="showModalFunc">{{ $t('Login') }}</a>
       </li>
 
+      <!-- Dark Mode Toggle -->
       <li class="nav-item mr-2" @click="toggleDarkMode" :title="$t('toggle_dark_mode')"
         v-if="user && !hideVisualControls">
         <span class="user-avatar group-class">
@@ -20,10 +24,43 @@
           <i v-else class="fa-solid fa-moon text-brand"></i>
         </span>
       </li>
+      
+      <!-- ======================================================= -->
+      <!-- START: NEW LANGUAGE SWITCHER IMPLEMENTATION             -->
+      <!-- ======================================================= -->
+      <li class="nav-item dropdown mr-2" v-if="user && !hideVisualControls">
+        <a class="nav-link dropdown-toggle p-0" href="#" id="language-switcher-icon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" :title="$t('languages')">
+            <span class="user-avatar group-class">
+                <i class="fas fa-language text-brand"></i>
+            </span>
+        </a>
+        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="language-switcher-icon">
+            <a v-for="locale in availableLocales" 
+               :key="locale.code" 
+               class="dropdown-item lang-item" 
+               href="#"
+               @click.prevent.stop="switchLang(locale.code)">
+                
+                <!-- Flag + Language Name -->
+                <div class="d-flex align-items-center">
+                    <span class="flag-icon-container">
+                        <img class="flag-icon" :src="getFlagUrl(locale.code)" :alt="locale.name">
+                    </span>
+                    <span class="lang-name">{{ locale.name }}</span>
+                </div>
+            </a>
+        </div>
+      </li>
+      <!-- ======================================================= -->
+      <!-- END: NEW LANGUAGE SWITCHER IMPLEMENTATION               -->
+      <!-- ======================================================= -->
+
+      <!-- StingChat -->
       <li class="nav-item mr-2" v-if="user && !hideVisualControls">
         <StingChat :user="this.user" />
       </li>
-
+      
+      <!-- Notifications -->
       <li class="nav-item mr-2 notification-item-container" v-if="user">
         <span class="notification-class" v-if="activeNotificationsLen > 0">{{ notificationsNotice }}</span>
 
@@ -35,7 +72,7 @@
           </a>
           <div class="dropdown-menu dropdown-menu-right notif-container">
             <div class="text-right m-2">
-              <a href='/notifications' class="btn btn-brand border">{{ $t('View_all') }}</a>
+              <a :href="localePath('/notifications')" class="btn btn-brand border">{{ $t('View_all') }}</a>
               <a href='#' class="btn btn-brand border" v-on:click="markAllRead()">{{ $t('Clear_all') }}</a>
             </div>
             <div class="row p-2 border-top" v-for="(notif, index) in activeNotifications" :key="index" :notif="notif">
@@ -61,14 +98,15 @@
           </a>
           <div class="dropdown-menu dropdown-menu-right">
             <div class="text-right m-2">
-              <a href='/notifications' class="btn btn-brand border">{{ $t('View_all') }}</a>
+              <a :href="localePath('/notifications')" class="btn btn-brand border">{{ $t('View_all') }}</a>
               <a href='#' class="btn btn-brand border" v-on:click="markAllRead()">{{ $t('Clear_all') }}</a>
             </div>
             <div class="p-2">{{ $t('no_notifications') }}</div>
           </div>
         </span>
       </li>
-
+      
+      <!-- User Profile Dropdown -->
       <li class="nav-item dropdown" v-if="user">
         <a class="nav-link dropdown-toggle p-0" id="user_menu_navlink_avatar" href="#" data-toggle="dropdown">
           <div class="user-avatar group-class"
@@ -76,34 +114,34 @@
         </a>
         <div class="dropdown-menu dropdown-menu-right user-dropdown">
           <div class="dropdown-header user-info-sticky"><a class="dropdown-item" href="#"
-              @click.prevent="$router.push('/' + user.account.name)"><i class="fa-solid fa-user text-brand"></i> @{{
+              @click.prevent="$router.push(localePath('/' + user.account.name))"><i class="fa-solid fa-user text-brand"></i> @{{
                 user.account.name }}</a></div>
           <div class="dropdown-scrollable">
-            <a class="dropdown-item text-brand" href="#" @click.prevent="$router.push('/mods-access/')"
+            <a class="dropdown-item text-brand" href="#" @click.prevent="$router.push(localePath('/mods-access/'))"
               v-if="isUserModerator">Moderation</a>
             <div class="dropdown-divider" v-if="isUserModerator"></div>
-            <a class="dropdown-item" href="#" @click.prevent="$router.push('/market')"><i
-                class="fas fa-shopping-cart text-brand"></i> {{ $t('spend_afit_menu') }}<br /></a>
+            <a class="dropdown-item" href="#" @click.prevent="$router.push(localePath('/market'))"><i
+                class="fas fa-shopping-cart text-brand"></i> {{ $t('spend_afit_menu') }}<br /></a>
             <SteemStats :user="user" minView="true" class="dropdown-item" :key="reload" />
-            <a class="dropdown-item" href="#" @click.prevent="$router.push('/userrank')"><i
-                class="fa-solid fa-list-ol text-brand"></i> {{ $t('My_Rank') }} <br /><span class="text-brand pl-4">
+            <a class="dropdown-item" href="#" @click.prevent="$router.push(localePath('/userrank'))"><i
+                class="fa-solid fa-list-ol text-brand"></i> {{ $t('My_Rank') }} <br /><span class="text-brand pl-4">
                 {{ displayCoreUserRank }} <span class="increased-rank" v-if="userRankObj && userRankObj.afitx_rank">{{
                   displayIncreasedUserRank }}</span> </span></a>
-            <a class="dropdown-item" href="#" @click.prevent="$router.push('/wallet')"><i
-                class="fa-solid fa-wallet text-brand"></i> {{ $t('My_Wallet') }} <br /><span class="text-brand pl-4">
+            <a class="dropdown-item" href="#" @click.prevent="$router.push(localePath('/wallet'))"><i
+                class="fa-solid fa-wallet text-brand"></i> {{ $t('My_Wallet') }} <br /><span class="text-brand pl-4">
                 {{ formattedUserTokens }}</span></a>
-            <a class="dropdown-item" href="#" @click.prevent="$router.push('/referrals')"><i
-                class="fas fa-user-friends text-brand"></i> {{ $t('Referrals') }} <br /><span class="text-brand pl-4">
+            <a class="dropdown-item" href="#" @click.prevent="$router.push(localePath('/referrals'))"><i
+                class="fas fa-user-friends text-brand"></i> {{ $t('Referrals') }} <br /><span class="text-brand pl-4">
                 {{ referralCount }} </span></a>
-            <a class="dropdown-item" href="#" @click.prevent="$router.push('/activity/' + user.account.name)"><i
-                class="fas fa-running text-brand"></i> {{ $t('My_Activity') }}</a>
-            <a class="dropdown-item" href="#" @click.prevent="$router.push('/' + user.account.name + '/blog')"><i
-                class="fa-solid fa-pen-to-square text-brand"></i> {{ $t('My_Blog') }}</a>
-            <a class="dropdown-item" href="#" @click.prevent="$router.push('/blog/new')"><i
-                class="fa-solid fa-plus-square text-brand"></i> {{ $t('New_Blog') }}</a>
-            <a class="dropdown-item" href="#" @click.prevent="$router.push('/' + user.account.name + '/videos')"><i
-                class="fa-solid fa-video text-brand"></i> {{ $t('My_Videos') }}</a>
-            <a class="dropdown-item" href="#"><i class="fa-solid fa-link text-brand"></i> {{ $t('Active_chain') }}
+            <a class="dropdown-item" href="#" @click.prevent="$router.push(localePath('/activity/' + user.account.name))"><i
+                class="fas fa-running text-brand"></i> {{ $t('My_Activity') }}</a>
+            <a class="dropdown-item" href="#" @click.prevent="$router.push(localePath('/' + user.account.name + '/blog'))"><i
+                class="fa-solid fa-pen-to-square text-brand"></i> {{ $t('My_Blog') }}</a>
+            <a class="dropdown-item" href="#" @click.prevent="$router.push(localePath('/blog/new'))"><i
+                class="fa-solid fa-plus-square text-brand"></i> {{ $t('New_Blog') }}</a>
+            <a class="dropdown-item" href="#" @click.prevent="$router.push(localePath('/' + user.account.name + '/videos'))"><i
+                class="fa-solid fa-video text-brand"></i> {{ $t('My_Videos') }}</a>
+            <a class="dropdown-item" href="#"><i class="fa-solid fa-link text-brand"></i> {{ $t('Active_chain') }}
               <br />
               <div class="pl-4" :class="adjustHiveClass" v-on:click="setActiveChain('HIVE')">
                 <img src="/img/HIVE.png" style="max-height: 20px;"
@@ -121,16 +159,17 @@
                     $t('BLURT') }}
               </div>
             </a>
-            <a class="dropdown-item" href="#" @click.prevent="$router.push('/password')"><i
-                class="fa-sharp fa-solid fa-key text-brand"></i> {{ $t('My_Password') }}</a>
-            <a class="dropdown-item" href="#" @click.prevent="$router.push('/settings')"><i
-                class="fa-solid fa-gear text-brand"></i> {{ $t('Settings') }}</a>
+            <a class="dropdown-item" href="#" @click.prevent="$router.push(localePath('/password'))"><i
+                class="fa-sharp fa-solid fa-key text-brand"></i> {{ $t('My_Password') }}</a>
+            <a class="dropdown-item" href="#" @click.prevent="$router.push(localePath('/settings'))"><i
+                class="fa-solid fa-gear text-brand"></i> {{ $t('Settings') }}</a>
+            
             <div class="dropdown-divider"></div>
             <a href="#" data-toggle="modal" data-target="#loginModal" @click="showModalFunc" class="dropdown-item"><i
-                class="fa-solid fa-user-group text-brand"></i> {{ $t('switch_user') }}</a>
+                class="fa-solid fa-user-group text-brand"></i> {{ $t('switch_user') }}</a>
             <div class="dropdown-divider"></div>
             <a class="dropdown-item" href="#" @click.prevent="proceedLogout()"><i
-                class="fa-solid fa-right-from-bracket text-brand"></i> {{ $t('Logout') }}</a>
+                class="fa-solid fa-right-from-bracket text-brand"></i> {{ $t('Logout') }}</a>
           </div>
         </div>
       </li>
@@ -140,6 +179,8 @@
 </template>
 
 <script>
+// NOTE: The <script> section remains the same as you provided.
+// Make sure the computed properties and methods for i18n are present.
 import LoginModal from '~/components/LoginModal'
 import { mapGetters } from 'vuex'
 import SteemStats from '~/components/SteemStats'
@@ -178,6 +219,14 @@ export default {
     ...mapGetters('steemconnect', ['user']),
     ...mapGetters(['userTokens', 'userRank', 'userRankObj', 'referrals', 'bchain']),
     ...mapGetters(['moderators']),
+    
+    // START: NEW COMPUTED PROPERTIES FOR I18N
+    availableLocales() {
+      if (!this.$i18n || !this.$i18n.locales) return [];
+      // Filter out the current locale to not show it in the list of choices
+      return this.$i18n.locales.filter(i => i.code !== this.$i18n.locale)
+    },
+    // END: NEW COMPUTED PROPERTIES FOR I18N
 
     computedInputClass() {
       if (process.client) {
@@ -253,6 +302,24 @@ export default {
     }
   },
   methods: {
+    // START: NEW METHODS FOR I18N
+    switchLang(locale) {
+      this.$i18n.setLocale(locale);
+    },
+    getFlagUrl(code) {
+      const flagMap = {
+        en: 'us',
+        zh: 'cn',
+        uk: 'ua',
+        ja: 'jp',
+        ko: 'kr',
+        ar: 'ae',
+        hi: 'in'
+      };
+      const flagCode = flagMap[code] || code;
+      return `/flags/${flagCode}.svg`;
+    },
+    // END: NEW METHODS FOR I18N
     showModalFuncLOGIN() {
       this.proceedLogout();
       this.$emit('modal-opened', true);
@@ -326,7 +393,12 @@ export default {
 
     async handleNotificationClick(notif) {
       await this.markRead(notif);
-      window.location.href = notif.url;
+      // Use Nuxt router for internal links if possible, otherwise fallback to window.location
+      if (notif.url.startsWith('/')) {
+        this.$router.push(this.localePath(notif.url));
+      } else {
+        window.location.href = notif.url;
+      }
     },
 
     async markAllRead() {
@@ -369,6 +441,8 @@ export default {
 </script>
 
 <style lang="sass">
+/* NOTE: The <style> section remains the same as you provided. */
+/* Your existing styles should work well with the new dropdown. */
 .user-menu-container
   height: 54px
   display: flex 
@@ -400,6 +474,39 @@ export default {
 </style>
 
 <style>
+/* ======================================================= */
+/* START: LANGUAGE SWITCHER STYLES                         */
+/* ======================================================= */
+.lang-item {
+    display: flex !important;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.flag-icon-container {
+    margin-right: 12px;
+    width: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+html[dir="rtl"] .flag-icon-container {
+    margin-right: 0;
+    margin-left: 12px;
+}
+
+.flag-icon {
+    width: 22px;
+    height: auto;
+    border: 1px solid #ddd;
+    object-fit: cover;
+    border-radius: 2px;
+}
+/* ======================================================= */
+/* END: LANGUAGE SWITCHER STYLES                           */
+/* ======================================================= */
+
 .notification-item-container {
   position: relative;
 }

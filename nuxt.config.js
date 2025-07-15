@@ -296,6 +296,47 @@ module.exports = {
     }],
   ],
 
+  i18n: {
+    // This is the directory where you will create your language files
+    langDir: '~/lang/',
+    
+    // Define all your languages here
+    locales: [
+      { code: 'en', name: 'English', file: 'en_US.js' },
+      { code: 'es', name: 'Español', file: 'es_ES.js' },
+      { code: 'de', name: 'German', file: 'de_DE.js' }, // Consolidated "Deutsche"
+      { code: 'pl', name: 'Polski', file: 'pl_PL.js' },
+      { code: 'hi', name: 'हिन्दी', file: 'hi_IN.js' },
+      { code: 'it', name: 'Italiano', file: 'it_IT.js' },
+      { code: 'fr', name: 'Français', file: 'fr_FR.js' },
+      { code: 'pt', name: 'Português', file: 'pt_PT.js' },
+      { code: 'zh', name: '中文', file: 'zh_CN.js' },
+      { code: 'tr', name: 'Türkçe', file: 'tr_TR.js' },
+      { code: 'uk', name: 'Українська', file: 'uk_UA.js' },
+      { code: 'ru', name: 'Русский', file: 'ru_RU.js' },
+      { code: 'ko', name: '한국어', file: 'ko_KR.js' },
+      { code: 'ja', name: '日本語', file: 'ja_JP.js' },
+      { code: 'ar', name: 'العربية', file: 'ar_AE.js', dir: 'rtl' } // Added dir:'rtl' for Arabic
+    ],
+
+    // The default language of your website
+    defaultLocale: 'en',
+    
+    // This tells Nuxt to use different URLs for each language, like /es/about or /de/blog
+    strategy: 'prefix_except_default',
+    
+    // Automatically detect the user's browser language
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: 'i18n_redirected',
+      redirectOn: 'root',
+    },
+
+    vueI18n: {
+      fallbackLocale: 'en',
+    },
+  },
+
   gtm: {
     id: 'G-HPZKPFM9GK', // Used as fallback if no runtime config is provided
   },

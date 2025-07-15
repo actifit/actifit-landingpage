@@ -422,6 +422,9 @@ export default {
 }
 </script>
 <style lang="sass" scoped>
+// Import the SASS color module at the top of the style block
+@use "sass:color";
+
 .hover-card-container
   display: inline-block
   position: static
@@ -525,7 +528,8 @@ export default {
   background: #ff112d !important
   color: white !important
   &:hover
-    background: darken(#ff112d, 10%) !important
+    // CORRECTED: Replaced darken() with color.adjust()
+    background: color.adjust(#ff112d, $lightness: -10%) !important
     color: white !important
 .user-avatar, .user-avatar-small
   width: 32px
