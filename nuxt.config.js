@@ -330,6 +330,7 @@ module.exports = {
       useCookie: true,
       cookieKey: 'i18n_redirected',
       redirectOn: 'root',
+      alwaysRedirect:true,
     },
 
     vueI18n: {
