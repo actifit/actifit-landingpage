@@ -248,7 +248,6 @@ Vue.prototype.$processTrxFunc = async function (op_name, cstm_params, active) {
 };
 
 Vue.prototype.$cleanBody = function (report_content, full_cleanup){
-	//sanitize content first hand
 	let img_replacement = '<img src="$1">';
 	let vid_replacement = '<iframe width="640" height="360" src="https://www.youtube.com/embed/$1"></iframe>';
 	let user_link_replacement = '$1<a href="https://actifit.io/$2">$2</a>';
@@ -258,61 +257,38 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup){
 		img_replacement = '';
 		vid_replacement = '';
 	}else{
-		report_content = sanitize(report_content, { allowedTags: ['img', 'details', 'summary', 'iframe', 'blockquote'] } );
+		report_content = sanitize(report_content, { allowedTags: ['img', 'details', 'summary', 'iframe', 'blockquote', 'a', 'br', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'strong', 'em', 'table', 'thead', 'tbody', 'tr', 'th', 'td'] } );
 	}
-	//fix for lost blockquotes
-	report_content = report_content.replaceAll('&gt;','>');
-	//console.log(report_content);
-	//console.log(report_content);
-	//return report_content;
-	/* let's find images sent as ![](), and display them properly */
-	//let img_links_reg = /^(?:(?!=").)*((https?:\/\/[./\d\w-]*\.(?:png|jpg|jpeg|gif))|((https?:\/\/usermedia\.actifit\.io\/[./\d\w-]+)))/igm;
+	report_content = report_content.replaceAll('>','>');
+
 	let img_links_reg = /!\[[\d\w\s\-.\(\)]*\]\((https?:\/\/(?:usermedia\.actifit\.io|ipfs\.busy\.org\/ipfs|steemitimages\.com)\/[\d\w\-\.\/\%\?\=\&]*|https?:\/\/[\d\w\-\.\/\%\?\=\&]*(?:png|jpg|jpeg|gif)(?:\?[^\)]*)?)\)/igm;
 	report_content = report_content.replace(img_links_reg, img_replacement);
 
-	/* let's find images sent as pure URLs, and display them as actual images, while avoiding well established images */
-	/* negative lookbehinds are not supported ?<! we need to switch to another approach */
-	//img_links_reg = /(?<!=")(?<!]\()(((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|(https?:\/\/[./\d\w-]*\.(?:png|jpg|jpeg|gif)))/igm;
-	//img_links_reg = /(((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|(https?:\/\/[./\d\w-]*\.(?:png|jpg|jpeg|gif)))(?!")/igm;
 	img_links_reg = /(((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|((https:\/\/ipfs\.busy\.org\/ipfs\/)[\d\w-]+)|((https:\/\/steemitimages\.com\/)[\d\w-[\:\/\.]+)|(https?:\/\/[.\/\d\w-]*\.(?:png|jpg|jpeg|gif)))[\s]/igm;
 	report_content = report_content.replace(img_links_reg, img_replacement);
 
-	//final catch all for images converting any left overs to proper tag:
 	img_links_reg = /^(?!<img\s+src=)([^<>\s]+\.(?:png|jpe?g|gif|bmp|ico|svg))$/igm;
 	report_content = report_content.replace(img_links_reg, img_replacement);
 
-	/* let's match youtube videos and display them in a player */
-	//let vid_reg = /^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+/gm;
-	let vid_reg = /https?:\/\/(?:[0-9A-Z-]+\.)?(?:youtu\.be\/|youtube\.com\S*[^\w\-\s])([\w\-]{11})(?=[^\w\-]|$)(?![?=&amp;+%\w]*(?:['"][^&lt;&gt;]*&gt;|&lt;\/a&gt;))[?=&amp;+%\w-]*/ig;
+	let vid_reg = /https?:\/\/(?:[0-9A-Z-]+\.)?(?:youtu\.be\/|youtube\.com\S*[^\w\-\s])([\w\-]{11})(?=[^\w\-]|$)(?![?=&+%\w]*(?:['"][^<>]*>|<\/a>))[?=&+%\w-]*/ig;
 
-	//swap into a player format, and introduce embed format for proper playing of videos
 	report_content = report_content.replace(vid_reg, vid_replacement);
 
-	//add support for 3speak videos embedded within iframe
-	//let threespk_reg = /[.*](https?:\/\/3speak\.tv\/watch\?v=([\w-]+\/[\w-]+))/i;
-	//let threespk_reg = /(?:\[!\[\]\()?https?:\/\/3speak\.tv\/watch\?v=([\w-]+\/[\w-]+)(?:\)\])?/i;
-	let threespk_reg = /(?:\[.*\]\()?https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+)(?:\))?/i;
-	report_content = report_content.replace(threespk_reg,'<iframe width="640" height="360" src="//3speak.tv/embed?v=$1&autoplay=false"></iframe>');
-	//examples:
-	//https://3speak.tv/watch?v=jongolson/vhtttbyf		//[![](https://ipfs-3speak.b-cdn.net/ipfs/bafkreiee4k3q5sax6stbqzty6yktbhmk4mi2opf6r7hckti3ypkjvigjhi/)](https://3speak.tv/watch?v=jongolson/vhtttbyf)
 
+	let threespk_embed_reg = /\[!\[[^\]]*\]\([^)]+\)\]\(https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+)\)/ig;
+	report_content = report_content.replace(threespk_embed_reg, '<iframe width="640" height="360" src="//3speak.tv/embed?v=$1&autoplay=false"></iframe>');
 
-	/* let's find links sent as [](), and display them properly */
-	//let href_lnks = /\[([\d\w\s-\.\(\)=[\:\/\.%\?&"<>]*)\]\(([\d\w-=[\:\/\.%\?&]+|(https?:\/\/[.\d\w-\/\:\%\(\)]*\.))[)]/igm;
-	//report_content = report_content.replace(href_lnks,'<a href="$2">$1</a>');
+	
+	let threespk_raw_reg = /(^|\s)(https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+))/ig;
+	report_content = report_content.replace(threespk_raw_reg, '$1<iframe width="640" height="360" src="//3speak.tv/embed?v=$3&autoplay=false"></iframe>');
 
-	//let href_lnks = /\[([\d\w-\.\@]*)\]\(([\d\w-\.\@\/\:]*)\)/igm;
-	//report_content = report_content.replace(href_lnks,'<a href="$2">$1</a>');
+	
 
-	/* regex to match @ words and convert them to steem user links. Need to skip special occurrences such as name within a link (preceded by /) */
 	if (!full_cleanup){
 		let user_name = /([^\/])(@([\d\w-.]+))/igm;
-
 		report_content = report_content.replace(user_name, user_link_replacement);
 	}
-
-	//return md.render(report_content);
-	//return sanitize(md.render(report_content) , { allowedTags: ['img', 'details', 'summary', 'iframe', 'blockquote'] })
+	
 	return report_content;
 }
 
