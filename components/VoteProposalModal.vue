@@ -1,18 +1,21 @@
 <template>
-  <div v-if="visible" id="voteProposalModal" ref="voteProposalModal" :class="{ 'visible': visible}" class="modal fade" tabindex="-1"
-    role="dialog" data-backdrop="false">
-    <div ><!-- class="modal-dialog" role="document" -- -->
+  <!-- The v-if="visible" is sufficient to control rendering -->
+  <div v-if="visible" id="voteProposalModal" class="modal fade show" tabindex="-1" role="dialog" data-backdrop="false">
+    <div><!-- class="modal-dialog" role="document" -->
       <div class="modal-content">
-        <div v-if="modalTitle" class="modal-header p-1">
-          <h5 class="modal-title">{{ modalTitle }}</h5>
+        <!-- MODIFIED: Title now uses a translation key with a dynamic year -->
+        <div class="modal-header p-1">
+          <h5 class="modal-title">{{ $t('proposal_modal_title_year', { year: currentYear }) }}</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close" @click="closeModal">
-            <span aria-hidden="true">&times;</span>
+            <span aria-hidden="true">×</span>
           </button>
         </div>
-        <p>{{ message }}</p>
+        <!-- MODIFIED: Message now uses a translation key -->
+        <p>{{ $t('proposal_modal_message') }}</p>
         <div class="text-right">
-          <button @click="voteForProposal" class="m-1 col-5">Vote</button>
-          <button @click="readMore" class="m-1 col-5">Read More</button>
+          <!-- MODIFIED: Buttons now use translation keys -->
+          <button @click="voteForProposal" class="m-1 col-5">{{ $t('vote_button_text') }}</button>
+          <button @click="readMore" class="m-1 col-5">{{ $t('read_more_button_text') }}</button>
         </div>
       </div>
     </div>
@@ -23,14 +26,7 @@
 import { mapGetters } from 'vuex'
 export default {
   props: {
-    message: {
-      type: String,
-      default: "Support Actifit's development & growth effort. Vote for our proposal❤️",
-    },
-    modalTitle: {
-      type: String,
-      default: 'Actifit Proposal 2025',
-    },
+    // MODIFIED: Removed modalTitle and message props to handle text internally.
     propUrl:{
       type: String,
       default: 'https://peakd.com/proposals/337',
@@ -48,6 +44,9 @@ export default {
     },
   },
   computed: {
+    currentYear() {
+      return new Date().getFullYear();
+    },
     ...mapGetters('steemconnect', ['user']),
     ...mapGetters(['proposalVoters']),
   },
@@ -56,39 +55,47 @@ export default {
       this.visible = false;
     },
     voteForProposal() {
-      const username = this.user && this.user.account && this.user.account.name || null;
-      const proposalId = this.$config.proposalId; // Retrieve proposal ID from nuxt.config.js
-      const approve = true; // Set to false if you want to unvote
+      const username = this.user?.account?.name || null;
+      if (!username) return; // Ensure user is logged in
+      
+      const proposalId = this.$config.proposalId;
+      const approve = true;
 
-      window.hive_keychain.requestUpdateProposalVote(
-        username,
-        [proposalId],
-        approve,
-        [],
-        (response) => {
-          if (response.success) {
-            this.visible = false; // Close modal after voting
+      // Ensure hive_keychain is available
+      if (window.hive_keychain) {
+        window.hive_keychain.requestUpdateProposalVote(
+          username,
+          [proposalId],
+          approve,
+          (response) => {
+            if (response.success) {
+              this.visible = false; // Close modal after voting
+              // Optionally, refresh voter list
+              this.$store.dispatch('fetchProposalVoters', {proposalId: this.$config.proposalId});
+            }
           }
-        }
-      );
-    },
-    readMore(){
-      window.open(this.propUrl, '_blank'); // Opens the link in a new tab
-    },
-    userVotedProposal(){
-      const username = this.user && this.user.account && this.user.account.name || null;
-      if (!username) return false;
-      if (this.proposalVoters != null && this.proposalVoters.length > 0){
-        if (this.proposalVoters.includes(username)){
-          return true;
-        }
+        );
+      } else {
+        console.error('Hive Keychain is not installed.');
+        // You could show a user-friendly error message here
       }
     },
+    readMore(){
+      window.open(this.propUrl, '_blank');
+    },
+    userVotedProposal(){
+      const username = this.user?.account?.name || null;
+      if (!username || !this.proposalVoters) return false;
+      // The includes method is case-sensitive, which is correct for usernames
+      return this.proposalVoters.includes(username);
+    },
     adjustVisibility(){
-      this.visible = !this.userVotedProposal();
+      // Show the modal only if the user exists and has NOT voted yet.
+      this.visible = this.user && !this.userVotedProposal();
     }
   },
   async mounted() {
+    // Fetch voters and then adjust visibility based on the result.
     await this.$store.dispatch('fetchProposalVoters', {proposalId: this.$config.proposalId});
     this.adjustVisibility();
   },
@@ -96,12 +103,12 @@ export default {
 </script>
 
 <style scoped>
-.modal.visible{
+/* MODIFIED: Simplified the selector for visibility */
+.modal.show {
   display: block;
   opacity: 1;
 }
 .modal {
-  /*display: block;*/
   position: fixed;
   bottom: 20px;
   right: 20px;
@@ -117,7 +124,7 @@ export default {
 }
 
 .modal-content button {
-  background-color: #28a745;
+  background-color: #ff112d; /* Using Actifit's brand color for consistency */
   color: #fff;
   border: none;
   padding: 8px 12px;
@@ -126,7 +133,16 @@ export default {
 }
 
 .modal-content button:hover {
-  background-color: #218838;
+  background-color: #e0001a; /* A darker shade for hover */
+}
+
+/* Specific styling for the second button */
+.modal-content button + button {
+  background-color: #6c757d; /* A neutral gray for the secondary action */
+}
+
+.modal-content button + button:hover {
+  background-color: #5a6268;
 }
 
 </style>

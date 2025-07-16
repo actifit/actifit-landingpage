@@ -1158,5 +1158,9 @@ module.exports = {
   Latest_Activity_Count: 'Último Conteo de Actividad',
   Latest_Activity_Date: 'Última Fecha de Actividad',
   hide_reblogs: 'ocultar reblogs',
-  show_reblogs: 'mostrar reblogs'
+  show_reblogs: 'mostrar reblogs',
+  proposal_modal_title_year: "Propuesta de Actifit {year}",
+  proposal_modal_message: "Apoya el esfuerzo de desarrollo y crecimiento de Actifit. ¡Vota por nuestra propuesta!❤️",
+  vote_button_text: "Votar",
+  read_more_button_text: "Leer más"
 }
