@@ -38,7 +38,7 @@ module.exports = {
   Actifit: 'Actifit',
   Slogan: 'Conviene Essere in Forma',
   Balance: 'Saldo',
-  AFIT_Token: 'Token AFIT',
+  AFIT_Token: 'AFIT',
   My_Wallet: 'Il Mio Portafoglio',
   My_Activity: 'La Mia Attività',
   Account_deletion: 'Cancellazione Account',

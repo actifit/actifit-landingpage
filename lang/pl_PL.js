@@ -865,6 +865,7 @@ module.exports = {
   Error_provide_recovery_account:'Brak konta odzyskiwania',
   Error_provide_owner_key:'Brak prywatnego klucza właściciela',
   Success_update_recovery_account: 'Pomyślnie zażądałeś zmiany swojego konta odzyskiwania. Pamiętaj, że faktyczna zmiana nastąpi 30 dni po Twoim żądaniu.',
+  Activity_chart: 'Wykres aktywności',
   Witness_voted_successfully: 'Pomyślnie zagłosowano na świadka Actifit. Dziękujemy!',
   Witness_proxy_set_successfully: 'Pomyślnie ustawiono Actifit jako proxy świadka. Dziękujemy!',
   proxy: '(proxy)',

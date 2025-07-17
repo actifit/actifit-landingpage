@@ -865,6 +865,7 @@ module.exports = {
   Error_provide_recovery_account:'Conta de Recuperação Ausente',
   Error_provide_owner_key:'Chave de Proprietário Privada Ausente',
   Success_update_recovery_account: 'Você solicitou com sucesso uma alteração em sua conta de recuperação. Esteja ciente de que a alteração real ocorrerá 30 dias após sua solicitação.',
+  Activity_chart: 'Gráfico de Atividades',
   Witness_voted_successfully: 'Votado com Sucesso na Testemunha Actifit. Obrigado!',
   Witness_proxy_set_successfully: 'Actifit Definido com Sucesso como Proxy de Testemunha. Obrigado!',
   proxy: '(proxy)',

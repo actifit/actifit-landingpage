@@ -38,7 +38,7 @@ module.exports = {
   Actifit: 'Actifit',
   Slogan: '건강하면 돈이 된다',
   Balance: '잔액',
-  AFIT_Token: 'AFIT 토큰',
+  AFIT_Token: 'AFIT',
   My_Wallet: '내 지갑',
   My_Activity: '내 활동',
   Account_deletion: '계정 삭제',
