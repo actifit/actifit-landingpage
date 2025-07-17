@@ -1167,6 +1167,7 @@ module.exports = {
   community:'See what our community has been up to!',
   loading_news:'Loading news...',
   footer_slogan:' Your daily activity is valuable. Get rewarded for it.',
+  recent_post:'Recent Posts',
 
 
 
