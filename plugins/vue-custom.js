@@ -260,14 +260,22 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup){
 	}else{
 		report_content = sanitize(report_content, { allowedTags: ['img', 'details', 'summary', 'iframe', 'blockquote'] } );
 	}
-	//fix for lost blockquotes by converting the > entity back to its character form
-	report_content = report_content.replaceAll('>','>');
-	
+	//fix for lost blockquotes
+	report_content = report_content.replaceAll('&gt;','>');
+	//console.log(report_content);
+	//console.log(report_content);
+	//return report_content;
+
 	/* let's find images sent as ![](), and display them properly */
+	//let img_links_reg = /^(?:(?!=").)*((https?:\/\/[./\d\w-]*\.(?:png|jpg|jpeg|gif))|((https?:\/\/usermedia\.actifit\.io\/[./\d\w-]+)))/igm;
+
 	let img_links_reg = /!\[[\d\w\s\-.\(\)]*\]\((https?:\/\/(?:usermedia\.actifit\.io|ipfs\.busy\.org\/ipfs|steemitimages\.com)\/[\d\w\-\.\/\%\?\=\&]*|https?:\/\/[\d\w\-\.\/\%\?\=\&]*(?:png|jpg|jpeg|gif)(?:\?[^\)]*)?)\)/igm;
 	report_content = report_content.replace(img_links_reg, img_replacement);
 
 	/* let's find images sent as pure URLs, and display them as actual images, while avoiding well established images */
+	/* negative lookbehinds are not supported ?<! we need to switch to another approach */
+	//img_links_reg = /(?<!=")(?<!]\()(((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|(https?:\/\/[./\d\w-]*\.(?:png|jpg|jpeg|gif)))/igm;
+	//img_links_reg = /(((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|(https?:\/\/[./\d\w-]*\.(?:png|jpg|jpeg|gif)))(?!")/igm;
 	img_links_reg = /(((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|((https:\/\/ipfs\.busy\.org\/ipfs\/)[\d\w-]+)|((https:\/\/steemitimages\.com\/)[\d\w-[\:\/\.]+)|(https?:\/\/[.\/\d\w-]*\.(?:png|jpg|jpeg|gif)))[\s]/igm;
 	report_content = report_content.replace(img_links_reg, img_replacement);
 
@@ -276,14 +284,15 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup){
 	report_content = report_content.replace(img_links_reg, img_replacement);
 
 	/* let's match youtube videos and display them in a player */
+	//let vid_reg = /^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+/gm;
+
 	let vid_reg = /https?:\/\/(?:[0-9A-Z-]+\.)?(?:youtu\.be\/|youtube\.com\S*[^\w\-\s])([\w\-]{11})(?=[^\w\-]|$)(?![?=&+%\w]*(?:['"][^<>]*>|<\/a>))[?=&+%\w-]*/ig;
 
 	//swap into a player format, and introduce embed format for proper playing of videos
 	report_content = report_content.replace(vid_reg, vid_replacement);
 
-	// >>> START OF 3SPEAK FIX <<<
-	// Add support for 3speak videos with a two-step process to avoid duplicate embeds.
-
+	// THE ONLY MODIFIED SECTION STARTS HERE
+	
 	// Step 1: Match the full markdown embed format with a thumbnail, e.g., [![](thumbnail_url)](3speak_url)
 	// This is the most common format for a primary video embed.
 	let threespk_embed_reg = /\[!\[[^\]]*\]\([^)]+\)\]\(https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+)\)/ig;
@@ -295,7 +304,7 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup){
 	let threespk_raw_reg = /(^|\s)(https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+))/ig;
 	report_content = report_content.replace(threespk_raw_reg, '$1<iframe width="640" height="360" src="//3speak.tv/embed?v=$3&autoplay=false"></iframe>');
 
-	// >>> END OF 3SPEAK FIX <<<
+	// THE ONLY MODIFIED SECTION ENDS HERE
 
 	/* regex to match @ words and convert them to steem user links. Need to skip special occurrences such as name within a link (preceded by /) */
 	if (!full_cleanup){
