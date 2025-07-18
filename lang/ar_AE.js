@@ -1162,5 +1162,60 @@ module.exports = {
   proposal_modal_title_year: "اقتراح Actifit لعام {year}",
   proposal_modal_message: "ادعم جهود تطوير ونمو Actifit. صوّت لاقتراحنا❤️",
   vote_button_text: "صوّت",
-  read_more_button_text: "اقرأ المزيد"
+  read_more_button_text: "اقرأ المزيد",
+
+  Actifit_title: 'Actifit: حيث تلتقي اللياقة بالمتعة والعملات المشفرة والمكافآت!',
+  Actifit_subtitle: 'اكسب مكافآت رمزية بسهولة مع تطبيق Actifit. تتبع نشاطك اليومي واحصل على AFIT و HIVE و BLURT و SPORTS والمزيد من خلال دعم البلوك تشين والمجتمع المتكامل.',
+  IT_PAYS_TO: 'يستحق العناء',
+  BE_FIT: 'أن تكون لائقا',
+  subtitle: 'انضم إلى مجتمع عالمي يكافئك على نشاطك اليومي. خطواتك، جهدك، عملاتك المشفرة.',
+  prompt: 'ابدأ الآن!',
+  fresh: 'حديثاً من المضمار',
+  community: 'شاهد ما كان يفعله مجتمعنا!',
+  loading_news: 'جاري تحميل الأخبار...',
+  footer_slogan: 'نشاطك اليومي له قيمة. احصل على مكافأة مقابل ذلك.',
+  Explore_Activity_Feed: 'استكشف موجز النشاط',
+  loading_activities: 'جاري تحميل الأنشطة الأخيرة...',
+  loading_supporters: 'جاري تحميل أكبر داعمينا...',
+  loading_leaderboard: 'يجري تحديث لوحة المتصدرين...',
+  view_more_activities: 'عرض المزيد من الأنشطة',
+  available_on: 'متاح للتداول على:',
+  our_top_supporters: 'أكبر داعمينا',
+  top_supporters_desc: 'شكراً جزيلاً لكبار المفوِّضين الذين يدعمون نظام Actifit البيئي!',
+  daily_afit_earnings: 'AFIT/يوم',
+  HP_short: 'HP',
+  RC: 'RC',
+  VP: 'VP',
+  Steps: 'عدد النشاط',
+
+  exchanges: {
+    hive_engine: 'Hive-Engine',
+    actifit_defi: 'Actifit DeFi',
+    pancakeswap: 'Pancakeswap',
+    digifinex: 'Digifinex',
+    dex_trade: 'Dex-trade'
+  },
+
+  aria: {
+    scroll_left: 'التمرير إلى اليسار',
+    scroll_right: 'التمرير إلى اليمين'
+  },
+
+  placeholders: {
+    hive: 'Hive',
+    blurt: 'Blurt',
+    bnb_chain: 'سلسلة BNB'
+  },
+
+  alt_texts: {
+    running_couple: 'رجل وامرأة يركضان',
+    google_play: 'احصل عليه من Google Play',
+    app_store: 'تنزيل من App Store',
+    gym_workout: 'رجل يمارس الرياضة في صالة الألعاب الرياضية',
+    post_workout_pose: 'رجل وامرأة يقفان في وضعية بعد التمرين',
+    gold_medal: 'ميدالية ذهبية',
+    hive_logo: 'HIVE',
+    blurt_logo: 'BLURT',
+    bnb_logo: 'سلسلة BNB'
+  }
 }

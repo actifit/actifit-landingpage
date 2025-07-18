@@ -326,12 +326,8 @@ module.exports = {
     strategy: 'prefix_except_default',
     
     // Automatically detect the user's browser language
-    detectBrowserLanguage: {
-      useCookie: true,
-      cookieKey: 'i18n_redirected',
-      redirectOn: 'root',
-      alwaysRedirect:true,
-    },
+    // ...inside your i18n configuration...
+    detectBrowserLanguage: false,
 
     vueI18n: {
       fallbackLocale: 'en',

@@ -1162,5 +1162,60 @@ module.exports = {
   proposal_modal_title_year: "Proposta Actifit {year}",
   proposal_modal_message: "Sostieni lo sforzo di sviluppo e crescita di Actifit. Vota per la nostra proposta❤️",
   vote_button_text: "Vota",
-  read_more_button_text: "Leggi di più"
+  read_more_button_text: "Leggi di più",
+
+  Actifit_title: 'Actifit: Dove il fitness incontra divertimento, criptovalute e ricompense!',
+  Actifit_subtitle: 'Guadagna premi in token senza sforzo con l\'app Actifit. Tieni traccia della tua attività quotidiana e ricevi AFIT, HIVE, BLURT, SPORTS e altro ancora tramite blockchain integrata e supporto della community.',
+  IT_PAYS_TO: 'CONVIENE',
+  BE_FIT: 'ESSERE IN FORMA',
+  subtitle: 'Unisciti a una community globale che ti premia per la tua attività quotidiana. I tuoi passi, il tuo impegno, le tue criptovalute.',
+  prompt: 'Inizia ora!',
+  fresh: 'Fresco di pista',
+  community: 'Guarda cosa ha fatto la nostra community!',
+  loading_news: 'Caricamento notizie...',
+  footer_slogan: 'La tua attività quotidiana ha un valore. Fatti premiare per questo.',
+  Explore_Activity_Feed: 'Esplora il feed delle attività',
+  loading_activities: 'Caricamento delle attività recenti...',
+  loading_supporters: 'Caricamento dei nostri maggiori sostenitori...',
+  loading_leaderboard: 'La classifica è in aggiornamento...',
+  view_more_activities: 'Visualizza altre attività',
+  available_on: 'Disponibile per il trading su:',
+  our_top_supporters: 'I nostri maggiori sostenitori',
+  top_supporters_desc: 'Un enorme grazie ai nostri maggiori delegatori che alimentano l\'ecosistema Actifit!',
+  daily_afit_earnings: 'AFIT/giorno',
+  HP_short: 'HP',
+  RC: 'RC',
+  VP: 'VP',
+  Steps: 'conteggio attività',
+
+  exchanges: {
+    hive_engine: 'Hive-Engine',
+    actifit_defi: 'Actifit DeFi',
+    pancakeswap: 'Pancakeswap',
+    digifinex: 'Digifinex',
+    dex_trade: 'Dex-trade'
+  },
+
+  aria: {
+    scroll_left: 'Scorri a sinistra',
+    scroll_right: 'Scorri a destra'
+  },
+
+  placeholders: {
+    hive: 'Hive',
+    blurt: 'Blurt',
+    bnb_chain: 'Catena BNB'
+  },
+
+  alt_texts: {
+    running_couple: 'Uomo e donna che corrono',
+    google_play: 'Scaricalo su Google Play',
+    app_store: 'Scarica dall\'App Store',
+    gym_workout: 'Uomo che si allena in palestra',
+    post_workout_pose: 'Uomo e donna in posa dopo un allenamento',
+    gold_medal: 'Medaglia d\'oro',
+    hive_logo: 'HIVE',
+    blurt_logo: 'BLURT',
+    bnb_logo: 'Catena BNB'
+  }
 }

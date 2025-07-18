@@ -1162,5 +1162,60 @@ module.exports = {
   proposal_modal_title_year: "Propozycja Actifit {year}",
   proposal_modal_message: "Wspieraj rozwój i wysiłki Actifit. Głosuj na naszą propozycję❤️",
   vote_button_text: "Głosuj",
-  read_more_button_text: "Czytaj więcej"
+  read_more_button_text: "Czytaj więcej",
+
+  Actifit_title: 'Actifit: Gdzie fitness spotyka się z zabawą, kryptowalutami i nagrodami!',
+  Actifit_subtitle: 'Zdobywaj nagrody w tokenach bez wysiłku dzięki aplikacji Actifit. Śledź swoją codzienną aktywność i otrzymuj AFIT, HIVE, BLURT, SPORTS i więcej dzięki zintegrowanemu wsparciu blockchain i społeczności.',
+  IT_PAYS_TO: 'OPŁACA SIĘ',
+  BE_FIT: 'BYĆ FIT',
+  subtitle: 'Dołącz do globalnej społeczności, która nagradza Cię za Twoją codzienną aktywność. Twoje kroki, Twój wysiłek, Twoje kryptowaluty.',
+  prompt: 'Zacznij teraz!',
+  fresh: 'Świeżo z trasy',
+  community: 'Zobacz, co porabia nasza społeczność!',
+  loading_news: 'Ładowanie wiadomości...',
+  footer_slogan: 'Twoja codzienna aktywność jest cenna. Zdobądź za nią nagrodę.',
+  Explore_Activity_Feed: 'Przeglądaj kanał aktywności',
+  loading_activities: 'Ładowanie ostatnich aktywności...',
+  loading_supporters: 'Ładowanie naszych najlepszych zwolenników...',
+  loading_leaderboard: 'Tablica wyników jest aktualizowana...',
+  view_more_activities: 'Zobacz więcej aktywności',
+  available_on: 'Dostępne do handlu na:',
+  our_top_supporters: 'Nasi najwięksi zwolennicy',
+  top_supporters_desc: 'Ogromne podziękowania dla naszych najlepszych delegatów, którzy napędzają ekosystem Actifit!',
+  daily_afit_earnings: 'AFIT/dzień',
+  HP_short: 'HP',
+  RC: 'RC',
+  VP: 'VP',
+  Steps: 'liczba aktywności',
+
+  exchanges: {
+    hive_engine: 'Hive-Engine',
+    actifit_defi: 'Actifit DeFi',
+    pancakeswap: 'Pancakeswap',
+    digifinex: 'Digifinex',
+    dex_trade: 'Dex-trade'
+  },
+
+  aria: {
+    scroll_left: 'Przewiń w lewo',
+    scroll_right: 'Przewiń w prawo'
+  },
+
+  placeholders: {
+    hive: 'Hive',
+    blurt: 'Blurt',
+    bnb_chain: 'Łańcuch BNB'
+  },
+
+  alt_texts: {
+    running_couple: 'Biegnący mężczyzna i kobieta',
+    google_play: 'Pobierz z Google Play',
+    app_store: 'Pobierz w App Store',
+    gym_workout: 'Mężczyzna ćwiczący na siłowni',
+    post_workout_pose: 'Mężczyzna i kobieta pozujący po treningu',
+    gold_medal: 'Złoty Medal',
+    hive_logo: 'HIVE',
+    blurt_logo: 'BLURT',
+    bnb_logo: 'Łańcuch BNB'
+  }
 }

@@ -1162,5 +1162,60 @@ module.exports = {
   proposal_modal_title_year: "Actifit 제안 {year}",
   proposal_modal_message: "Actifit의 개발 및 성장 노력을 지원해주세요. 저희 제안에 투표해주세요❤️",
   vote_button_text: "투표하기",
-  read_more_button_text: "더 보기"
+  read_more_button_text: "더 보기",
+
+  Actifit_title: 'Actifit: 피트니스와 재미, 암호화폐, 보상이 만나는 곳!',
+  Actifit_subtitle: 'Actifit 앱으로 손쉽게 토큰 보상을 받으세요. 일일 활동을 추적하고 통합 블록체인 및 커뮤니티 지원을 통해 AFIT, HIVE, BLURT, SPORTS 등을 받으세요.',
+  IT_PAYS_TO: '건강하면',
+  BE_FIT: '돈이 된다',
+  subtitle: '매일의 활동에 대해 보상하는 글로벌 커뮤니티에 참여하세요. 당신의 걸음, 당신의 노력, 당신의 암호화폐.',
+  prompt: '지금 시작하세요!',
+  fresh: '트랙에서 막 나온 신선함',
+  community: '우리 커뮤니티가 무엇을 하고 있는지 확인하세요!',
+  loading_news: '뉴스 로드 중...',
+  footer_slogan: '당신의 일상 활동은 가치가 있습니다. 그에 대한 보상을 받으세요.',
+  Explore_Activity_Feed: '활동 피드 탐색',
+  loading_activities: '최근 활동 로드 중...',
+  loading_supporters: '최고 후원자 로드 중...',
+  loading_leaderboard: '리더보드가 업데이트되고 있습니다...',
+  view_more_activities: '더 많은 활동 보기',
+  available_on: '거래 가능:',
+  our_top_supporters: '최고 후원자',
+  top_supporters_desc: 'Actifit 생태계를 지원하는 최고 위임자들께 진심으로 감사드립니다!',
+  daily_afit_earnings: 'AFIT/일',
+  HP_short: 'HP',
+  RC: 'RC',
+  VP: 'VP',
+  Steps: '활동 수',
+
+  exchanges: {
+    hive_engine: 'Hive-Engine',
+    actifit_defi: 'Actifit DeFi',
+    pancakeswap: 'Pancakeswap',
+    digifinex: 'Digifinex',
+    dex_trade: 'Dex-trade'
+  },
+
+  aria: {
+    scroll_left: '왼쪽으로 스크롤',
+    scroll_right: '오른쪽으로 스크롤'
+  },
+
+  placeholders: {
+    hive: 'Hive',
+    blurt: 'Blurt',
+    bnb_chain: 'BNB 체인'
+  },
+
+  alt_texts: {
+    running_couple: '달리는 남녀',
+    google_play: 'Google Play에서 받기',
+    app_store: 'App Store에서 다운로드',
+    gym_workout: '체육관에서 운동하는 남자',
+    post_workout_pose: '운동 후 포즈를 취하는 남녀',
+    gold_medal: '금메달',
+    hive_logo: 'HIVE',
+    blurt_logo: 'BLURT',
+    bnb_logo: 'BNB 체인'
+  }
 }

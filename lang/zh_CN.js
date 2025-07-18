@@ -1162,5 +1162,60 @@ module.exports = {
   proposal_modal_title_year: "Actifit提案{year}",
   proposal_modal_message: "支持Actifit的开发和发展。请为我们的提案投票❤️",
   vote_button_text: "投票",
-  read_more_button_text: "阅读更多"
+  read_more_button_text: "阅读更多",
+
+  Actifit_title: 'Actifit：健身与乐趣、加密货币和奖励的结合！',
+  Actifit_subtitle: '使用 Actifit 应用程序轻松赚取代币奖励。跟踪您的日常活动，通过集成的区块链和社区支持接收 AFIT、HIVE、BLURT、SPORTS 等。',
+  IT_PAYS_TO: '付出总有回报',
+  BE_FIT: '保持健康',
+  subtitle: '加入一个全球社区，奖励您的日常活动。您的步数，您的努力，您的加密货币。',
+  prompt: '立即开始！',
+  fresh: '赛道新秀',
+  community: '看看我们的社区在做什么！',
+  loading_news: '正在加载新闻...',
+  footer_slogan: '您的日常活动很有价值。为此获得奖励。',
+  Explore_Activity_Feed: '探索活动动态',
+  loading_activities: '正在加载最近的活动...',
+  loading_supporters: '正在加载我们的顶级支持者...',
+  loading_leaderboard: '排行榜正在更新...',
+  view_more_activities: '查看更多活动',
+  available_on: '可在以下平台交易：',
+  our_top_supporters: '我们的顶级支持者',
+  top_supporters_desc: '非常感谢为 Actifit 生态系统提供支持的顶级委托人！',
+  daily_afit_earnings: 'AFIT/天',
+  HP_short: 'HP',
+  RC: 'RC',
+  VP: 'VP',
+  Steps: '活动计数',
+
+  exchanges: {
+    hive_engine: 'Hive-Engine',
+    actifit_defi: 'Actifit DeFi',
+    pancakeswap: 'Pancakeswap',
+    digifinex: 'Digifinex',
+    dex_trade: 'Dex-trade'
+  },
+
+  aria: {
+    scroll_left: '向左滚动',
+    scroll_right: '向右滚动'
+  },
+
+  placeholders: {
+    hive: 'Hive',
+    blurt: 'Blurt',
+    bnb_chain: 'BNB 链'
+  },
+
+  alt_texts: {
+    running_couple: '跑步的男人和女人',
+    google_play: '在 Google Play 上获取',
+    app_store: '在 App Store 上下载',
+    gym_workout: '在健身房锻炼的男人',
+    post_workout_pose: '锻炼后摆姿势的男人和女人',
+    gold_medal: '金牌',
+    hive_logo: 'HIVE',
+    blurt_logo: 'BLURT',
+    bnb_logo: 'BNB 链'
+  }
 }

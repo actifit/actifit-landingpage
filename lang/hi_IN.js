@@ -1163,5 +1163,60 @@ module.exports = {
   proposal_modal_title_year: "एक्टिफिट प्रस्ताव {year}",
   proposal_modal_message: "एक्टिफिट के विकास और वृद्धि के प्रयासों का समर्थन करें। हमारे प्रस्ताव के लिए वोट करें❤️",
   vote_button_text: "वोट करें",
-  read_more_button_text: "और पढ़ें"
+  read_more_button_text: "और पढ़ें",
+
+  Actifit_title: 'एक्टिफिट: जहां फिटनेस, मज़ा, क्रिप्टो और पुरस्कार मिलते हैं!',
+  Actifit_subtitle: 'एक्टिफिट ऐप के साथ आसानी से टोकन पुरस्कार अर्जित करें। अपनी दैनिक गतिविधि को ट्रैक करें और एकीकृत ब्लॉकचेन और सामुदायिक समर्थन के माध्यम से AFIT, HIVE, BLURT, SPORTS, और बहुत कुछ प्राप्त करें।',
+  IT_PAYS_TO: 'यह भुगतान करता है',
+  BE_FIT: 'फिट रहने के लिए',
+  subtitle: 'एक वैश्विक समुदाय में शामिल हों जो आपकी दैनिक गतिविधि के लिए आपको पुरस्कृत करता है। आपके कदम, आपके प्रयास, आपकी क्रिप्टो।',
+  prompt: 'अभी शुरू करें!',
+  fresh: 'ट्रैक से ताज़ा',
+  community: 'देखें कि हमारा समुदाय क्या कर रहा है!',
+  loading_news: 'समाचार लोड हो रहे हैं...',
+  footer_slogan: 'आपकी दैनिक गतिविधि मूल्यवान है। इसके लिए पुरस्कृत हों।',
+  Explore_Activity_Feed: 'गतिविधि फ़ीड एक्सप्लोर करें',
+  loading_activities: 'हाल की गतिविधियाँ लोड हो रही हैं...',
+  loading_supporters: 'हमारे शीर्ष समर्थक लोड हो रहे हैं...',
+  loading_leaderboard: 'लीडरबोर्ड अपडेट किया जा रहा है...',
+  view_more_activities: 'अधिक गतिविधियाँ देखें',
+  available_on: 'ट्रेड के लिए उपलब्ध:',
+  our_top_supporters: 'हमारे शीर्ष समर्थक',
+  top_supporters_desc: 'हमारे शीर्ष प्रतिनिधियों को बहुत-बहुत धन्यवाद जो एक्टिफिट पारिस्थितिकी तंत्र को शक्ति प्रदान करते हैं!',
+  daily_afit_earnings: 'AFIT/दिन',
+  HP_short: 'एचपी',
+  RC: 'आरसी',
+  VP: 'वीपी',
+  Steps: 'गतिविधि गणना',
+
+  exchanges: {
+    hive_engine: 'हाइव-इंजन',
+    actifit_defi: 'एक्टिफिट डेफी',
+    pancakeswap: 'पैनकेकस्वैप',
+    digifinex: 'डिजिफिनेक्स',
+    dex_trade: 'डेक्स-ट्रेड'
+  },
+
+  aria: {
+    scroll_left: 'बाईं ओर स्क्रॉल करें',
+    scroll_right: 'दाईं ओर स्क्रॉल करें'
+  },
+
+  placeholders: {
+    hive: 'हाइव',
+    blurt: 'ब्लर्ट',
+    bnb_chain: 'बीएनबी चेन'
+  },
+
+  alt_texts: {
+    running_couple: 'दौड़ता हुआ आदमी और औरत',
+    google_play: 'गूगल प्ले पर प्राप्त करें',
+    app_store: 'ऐप स्टोर पर डाउनलोड करें',
+    gym_workout: 'जिम में व्यायाम करता हुआ आदमी',
+    post_workout_pose: 'वर्कआउट के बाद पोज़ देते हुए आदमी और औरत',
+    gold_medal: 'स्वर्ण पदक',
+    hive_logo: 'HIVE',
+    blurt_logo: 'BLURT',
+    bnb_logo: 'बीएनबी चेन'
+  }
 }

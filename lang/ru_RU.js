@@ -1162,5 +1162,60 @@ module.exports = {
   proposal_modal_title_year: "Предложение Actifit {year}",
   proposal_modal_message: "Поддержите усилия Actifit по разработке и росту. Проголосуйте за наше предложение❤️",
   vote_button_text: "Голосовать",
-  read_more_button_text: "Читать далее"
+  read_more_button_text: "Читать далее",
+
+  Actifit_title: 'Actifit: Где фитнес встречается с развлечениями, криптовалютой и наградами!',
+  Actifit_subtitle: 'Зарабатывайте награды в токенах без усилий с помощью приложения Actifit. Отслеживайте свою ежедневную активность и получайте AFIT, HIVE, BLURT, SPORTS и многое другое благодаря интегрированной поддержке блокчейна и сообщества.',
+  IT_PAYS_TO: 'ВЫГОДНО',
+  BE_FIT: 'БЫТЬ В ФОРМЕ',
+  subtitle: 'Присоединяйтесь к глобальному сообществу, которое вознаграждает вас за вашу ежедневную активность. Ваши шаги, ваши усилия, ваша криптовалюта.',
+  prompt: 'Начните сейчас!',
+  fresh: 'Только что с трека',
+  community: 'Посмотрите, чем занималось наше сообщество!',
+  loading_news: 'Загрузка новостей...',
+  footer_slogan: 'Ваша ежедневная активность ценна. Получайте за нее вознаграждение.',
+  Explore_Activity_Feed: 'Изучить ленту активности',
+  loading_activities: 'Загрузка последних активностей...',
+  loading_supporters: 'Загрузка наших главных сторонников...',
+  loading_leaderboard: 'Таблица лидеров обновляется...',
+  view_more_activities: 'Посмотреть больше активностей',
+  available_on: 'Доступно для торговли на:',
+  our_top_supporters: 'Наши главные сторонники',
+  top_supporters_desc: 'Огромное спасибо нашим главным делегатам, которые поддерживают экосистему Actifit!',
+  daily_afit_earnings: 'AFIT/день',
+  HP_short: 'HP',
+  RC: 'RC',
+  VP: 'VP',
+  Steps: 'количество активностей',
+
+  exchanges: {
+    hive_engine: 'Hive-Engine',
+    actifit_defi: 'Actifit DeFi',
+    pancakeswap: 'Pancakeswap',
+    digifinex: 'Digifinex',
+    dex_trade: 'Dex-trade'
+  },
+
+  aria: {
+    scroll_left: 'Прокрутить влево',
+    scroll_right: 'Прокрутить вправо'
+  },
+
+  placeholders: {
+    hive: 'Hive',
+    blurt: 'Blurt',
+    bnb_chain: 'Цепь BNB'
+  },
+
+  alt_texts: {
+    running_couple: 'Бегущие мужчина и женщина',
+    google_play: 'Загрузить в Google Play',
+    app_store: 'Загрузить в App Store',
+    gym_workout: 'Мужчина тренируется в спортзале',
+    post_workout_pose: 'Мужчина и женщина позируют после тренировки',
+    gold_medal: 'Золотая медаль',
+    hive_logo: 'HIVE',
+    blurt_logo: 'BLURT',
+    bnb_logo: 'Цепь BNB'
+  }
 }

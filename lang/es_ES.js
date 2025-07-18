@@ -1162,5 +1162,60 @@ module.exports = {
   proposal_modal_title_year: "Propuesta de Actifit {year}",
   proposal_modal_message: "Apoya el esfuerzo de desarrollo y crecimiento de Actifit. ¡Vota por nuestra propuesta!❤️",
   vote_button_text: "Votar",
-  read_more_button_text: "Leer más"
+  read_more_button_text: "Leer más",
+
+  Actifit_title: 'Actifit: ¡Donde el fitness se encuentra con la diversión, las criptomonedas y las recompensas!',
+  Actifit_subtitle: 'Gana recompensas en tokens sin esfuerzo con la aplicación Actifit. Realiza un seguimiento de tu actividad diaria y recibe AFIT, HIVE, BLURT, SPORTS y más a través de la cadena de bloques integrada y el apoyo de la comunidad.',
+  IT_PAYS_TO: 'VALE LA PENA',
+  BE_FIT: 'ESTAR EN FORMA',
+  subtitle: 'Únete a una comunidad global que te recompensa por tu actividad diaria. Tus pasos, tu esfuerzo, tus criptomonedas.',
+  prompt: '¡Empieza ahora!',
+  fresh: 'Recién Salido de la Pista',
+  community: '¡Mira lo que nuestra comunidad ha estado haciendo!',
+  loading_news: 'Cargando noticias...',
+  footer_slogan: 'Tu actividad diaria es valiosa. Obtén recompensas por ella.',
+  Explore_Activity_Feed: 'Explorar el feed de actividad',
+  loading_activities: 'Cargando actividades recientes...',
+  loading_supporters: 'Cargando a nuestros principales seguidores...',
+  loading_leaderboard: 'La tabla de clasificación se está actualizando...',
+  view_more_activities: 'Ver más actividades',
+  available_on: 'Disponible para operar en:',
+  our_top_supporters: 'Nuestros Mayores Seguidores',
+  top_supporters_desc: '¡Un enorme agradecimiento a nuestros principales delegadores que impulsan el ecosistema Actifit!',
+  daily_afit_earnings: 'AFIT/Día',
+  HP_short: 'HP',
+  RC: 'RC',
+  VP: 'VP',
+  Steps: 'conteo de actividad',
+
+  exchanges: {
+    hive_engine: 'Hive-Engine',
+    actifit_defi: 'Actifit DeFi',
+    pancakeswap: 'Pancakeswap',
+    digifinex: 'Digifinex',
+    dex_trade: 'Dex-trade'
+  },
+
+  aria: {
+    scroll_left: 'Desplazarse a la izquierda',
+    scroll_right: 'Desplazarse a la derecha'
+  },
+
+  placeholders: {
+    hive: 'Hive',
+    blurt: 'Blurt',
+    bnb_chain: 'Cadena BNB'
+  },
+
+  alt_texts: {
+    running_couple: 'Hombre y mujer corriendo',
+    google_play: 'Consíguelo en Google Play',
+    app_store: 'Descárgalo en la App Store',
+    gym_workout: 'Hombre haciendo ejercicio en un gimnasio',
+    post_workout_pose: 'Hombre y mujer posando después de un entrenamiento',
+    gold_medal: 'Medalla de Oro',
+    hive_logo: 'HIVE',
+    blurt_logo: 'BLURT',
+    bnb_logo: 'Cadena BNB'
+  }
 }

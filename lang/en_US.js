@@ -1157,9 +1157,68 @@ module.exports = {
   Description:'Description',
   Website:'Website',
   Latest_Activity_Count:'Latest_Activity_Count',
-  Latest_Activity_Date:'Latest_Activity_Date',
-  hide_reblogs:'hide reblogs',
+  Latest_Activity_Date:'Latest_Activity_Date',hide_reblogs:'hide reblogs',
   show_reblogs:'show reblogs',
+  proposal_modal_title_year: "Actifit Proposal {year}",
+  proposal_modal_message: "Support Actifit's development & growth effort. Vote for our proposal❤️",
+  vote_button_text: "Vote",
+  read_more_button_text: "Read More",
 
+  // new ones
+  Actifit_title:'Actifit: Where Fitness Meets Fun, Crypto and Rewards!',
+  Actifit_subtitle:'Earn token rewards effortlessly with the Actifit app. Track your daily activity and receive AFIT, HIVE, BLURT, SPORTS, and more through integrated blockchain and community support.',
+  IT_PAYS_TO:'IT PAYS TO',
+  BE_FIT:'BE FIT',
+  subtitle:'Join a global community that rewards you for your daily activity. Your steps, your effort, your crypto.',
+  prompt:"Get started now!",
+  fresh:'Fresh Off The Track',
+  community:'See what our community has been up to!',
+  loading_news:'Loading news...',
+  footer_slogan:' Your daily activity is valuable. Get rewarded for it.',
+  Explore_Activity_Feed: 'Explore Activity Feed',
+  loading_activities: 'Loading recent activities...',
+  loading_supporters: 'Loading our top supporters...',
+  loading_leaderboard: 'Leaderboard is being updated...',
+  view_more_activities: 'View More Activities',
+  available_on: 'Available for trade on:',
+  our_top_supporters: 'Our Top Supporters',
+  top_supporters_desc: 'A huge thank you to our top delegators who power the Actifit ecosystem!',
+  daily_afit_earnings: 'AFIT/Day',
+  HP_short: 'HP',
+  RC:'RC',
+  VP:'VP',
+  Steps: 'activity count',
 
+  exchanges: {
+    hive_engine: 'Hive-Engine',
+    actifit_defi: 'Actifit DeFi',
+    pancakeswap: 'Pancakeswap',
+    digifinex: 'Digifinex',
+    dex_trade: 'Dex-trade'
+  },
+
+  aria: {
+    scroll_left: 'Scroll Left',
+    scroll_right: 'Scroll Right',
+  },
+
+  placeholders: {
+    hive: 'Hive',
+    blurt: 'Blurt',
+    bnb_chain: 'BNB Chain'
+  },
+
+  alt_texts: {
+    running_couple: 'Man and woman running',
+    google_play: 'Get it on Google Play',
+    app_store: 'Download on the App Store',
+    gym_workout: 'Man exercising in a gym',
+    post_workout_pose: 'Man and woman posing after a workout',
+    gold_medal: 'Gold Medal',
+    hive_logo: 'HIVE',
+    blurt_logo: 'BLURT',
+    bnb_logo: 'BNB Chain'
+  }
+  // END: MERGED AND CORRECTED CODE
 }
+

@@ -294,7 +294,7 @@ export default {
   },
   methods: {
     // FIX: This method now correctly uses the router to switch languages.
-    switchLang(locale) {
+    async switchLang(locale) {
       // Prevent navigation if the language is already active
       if (locale === this.$i18n.locale) {
         return;
@@ -302,7 +302,8 @@ export default {
       // Get the path of the CURRENT page in the NEW language
       const path = this.switchLocalePath(locale);
       // Use the router to navigate to the new path
-      this.$router.push(path);
+      await this.$router.push(path);
+      this.$nuxt.refresh();
     },
 
     showModalFuncLOGIN() {

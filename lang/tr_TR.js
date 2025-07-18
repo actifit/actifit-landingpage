@@ -1162,5 +1162,60 @@ module.exports = {
   proposal_modal_title_year: "Actifit Önerisi {year}",
   proposal_modal_message: "Actifit'in gelişim ve büyüme çabasını destekleyin. Önerimiz için oy verin❤️",
   vote_button_text: "Oy Ver",
-  read_more_button_text: "Daha Fazlasını Oku"
+  read_more_button_text: "Daha Fazlasını Oku",
+
+  Actifit_title: 'Actifit: Fitness\'in Eğlence, Kripto ve Ödüllerle Buluştuğu Yer!',
+  Actifit_subtitle: 'Actifit uygulamasıyla zahmetsizce jeton ödülleri kazanın. Günlük aktivitenizi takip edin ve entegre blok zinciri ve topluluk desteğiyle AFIT, HIVE, BLURT, SPORTS ve daha fazlasını alın.',
+  IT_PAYS_TO: 'SAĞLIKLI OLMAK',
+  BE_FIT: 'KAZANDIRIR',
+  subtitle: 'Günlük aktiviteniz için sizi ödüllendiren küresel bir topluluğa katılın. Adımlarınız, çabanız, kriptonuz.',
+  prompt: 'Hemen Başla!',
+  fresh: 'Pistten Taze Çıktı',
+  community: 'Topluluğumuzun neler yaptığına bir göz atın!',
+  loading_news: 'Haberler yükleniyor...',
+  footer_slogan: 'Günlük aktiviteniz değerlidir. Bunun için ödüllendirilin.',
+  Explore_Activity_Feed: 'Aktivite Akışını Keşfet',
+  loading_activities: 'Son aktiviteler yükleniyor...',
+  loading_supporters: 'En büyük destekçilerimiz yükleniyor...',
+  loading_leaderboard: 'Liderlik tablosu güncelleniyor...',
+  view_more_activities: 'Daha Fazla Aktivite Görüntüle',
+  available_on: 'Ticaret için mevcut:',
+  our_top_supporters: 'En Büyük Destekçilerimiz',
+  top_supporters_desc: 'Actifit ekosistemine güç veren en büyük delegelerimize çok teşekkürler!',
+  daily_afit_earnings: 'AFIT/Gün',
+  HP_short: 'HP',
+  RC: 'RC',
+  VP: 'VP',
+  Steps: 'aktivite sayısı',
+
+  exchanges: {
+    hive_engine: 'Hive-Engine',
+    actifit_defi: 'Actifit DeFi',
+    pancakeswap: 'Pancakeswap',
+    digifinex: 'Digifinex',
+    dex_trade: 'Dex-trade'
+  },
+
+  aria: {
+    scroll_left: 'Sola Kaydır',
+    scroll_right: 'Sağa Kaydır'
+  },
+
+  placeholders: {
+    hive: 'Hive',
+    blurt: 'Blurt',
+    bnb_chain: 'BNB Zinciri'
+  },
+
+  alt_texts: {
+    running_couple: 'Koşan erkek ve kadın',
+    google_play: 'Google Play\'den alın',
+    app_store: 'App Store\'dan indirin',
+    gym_workout: 'Spor salonunda egzersiz yapan adam',
+    post_workout_pose: 'Antrenmandan sonra poz veren erkek ve kadın',
+    gold_medal: 'Altın Madalya',
+    hive_logo: 'HIVE',
+    blurt_logo: 'BLURT',
+    bnb_logo: 'BNB Zinciri'
+  }
 }
