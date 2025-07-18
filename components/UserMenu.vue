@@ -494,6 +494,7 @@ export default {
   pointer-events: none;
   opacity: 0.85;
   background-color: #ff112d;
+  color:white;
 }
 
 .lang-item .d-flex {
