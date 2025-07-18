@@ -18,17 +18,10 @@
 <script>
   import { mapGetters } from 'vuex'
   import steem from 'steem'
-  
   import hive from '@hiveio/hive-js'
-  
-  //import dsteem from 'dsteem'
-  
   var dsteem = require('dsteem')
-  
   var dhive = require('@hiveio/dhive')
-  
   var client;
-  
   var hiveclient;
   
   export default {
@@ -38,7 +31,7 @@
 		currentRC: 0,
 		currentRCPercent: '0%',
 		timeToFullVP: '',
-		properties: '', //handles the Steem BC properties
+		properties: '',
 		sbd_print_percentage: 1,
 		votePowerReserveRate: 1,
 		sbd_price: 1,
@@ -48,109 +41,83 @@
 		showRCInfo: false,
 		showVPInfo: false,
 		cur_bchain: 'HIVE',
+        showVpTooltip: false,
+        showRcTooltip: false,
 	  }
 	},
 	props: ['user', 'minView'],
-	components: {
-	},
 	computed: {
 	  getVotingPower () {
-		return this.currentVotingPower + '%';
+		return parseFloat(this.currentVotingPower).toFixed(3) + '%';
 	  },
-	  displayProperColor () {
-		//display proper coloring reflecting VP state
-		if (this.currentVotingPower > 80){
-		  return "color: #28a745";
-		}else if (this.currentVotingPower > 60){
-		  return "color: #fd7e14";
+	  // REMOVED displayProperColor as it's no longer needed for the minView
+	  vpGaugeStyle() {
+		const percentage = this.currentVotingPower;
+		let color = '#dc3545'; // Default red
+		if (percentage > 80) {
+			color = '#28a745'; // Green
+		} else if (percentage > 60) {
+			color = '#fd7e14'; // Orange
 		}
-		return "color: #dc3545";
+		return {
+		  '--mask-gradient': `conic-gradient(${color} ${percentage}%, transparent ${percentage}%)`,
+		  'background': `conic-gradient(${color} ${percentage}%, var(--gauge-track-bg) ${percentage}%)`
+		}
+	  },
+	  rcGaugeStyle() {
+		const percentage = this.currentRC;
+		const color = '#0d6efd'; // Bootstrap Primary Blue
+		return {
+		  '--mask-gradient': `conic-gradient(${color} ${percentage}%, transparent ${percentage}%)`,
+		  'background': `conic-gradient(${color} ${percentage}%, var(--gauge-track-bg) ${percentage}%)`
+		}
 	  }
 	},
 	methods: {
-	  //handles calculating and displaying proper voting value
-	  async calculateVoteValue () {
-		
-		if (this.properties == ''){
-		  //not loaded yet
-		  let chainLnk = await this.setProperNode();
-		  this.properties = await chainLnk.api.getDynamicGlobalPropertiesAsync();
-		  //grab reward fund data
-		  let rewardFund = await chainLnk.api.getRewardFundAsync("post");
-		  this.rewardBalance = parseFloat(rewardFund.reward_balance.replace(" STEEM", "").replace(" HIVE", ""));
-		  this.recentClaims = rewardFund.recent_claims;
-		}
-		
-		this.votePowerReserveRate = this.properties.vote_power_reserve_rate;
-		this.sbd_print_percentage = this.properties.sbd_print_rate / 10000;
-		//this.getVoteValueUSD();
-	  },
-	  //store SBD price
-	  setSBDPrice (_sbdPrice){
-		this.sbd_price = parseFloat(_sbdPrice).toFixed(3);
-	  },
-	  //store Steem price
-	  setSteemPrice (_steemPrice){
-		this.steem_price = parseFloat(_steemPrice).toFixed(3);
-	  },
-	  //handles grabbing current user's VP
 	  async fetchVotingPower() {
-		if (!this.user){
+		if (!this.user || !this.user.account){
 		  return 0;
 		}
 		let account = this.user.account;
-		if (typeof account == 'undefined' || account == null){
-		  return '';
-		}
 		const totalShares = parseFloat(account.vesting_shares) + parseFloat(account.received_vesting_shares) - parseFloat(account.delegated_vesting_shares) - parseFloat(account.vesting_withdraw_rate);
-
 		const elapsed = Math.floor(Date.now() / 1000) - account.voting_manabar.last_update_time;
 		let maxMana = totalShares * 1000000;
-		// 432000 sec = 5 days
 		let currentMana = parseFloat(account.voting_manabar.current_mana) + elapsed * maxMana / 432000;
 		if (currentMana > maxMana) {
 			currentMana = maxMana;
 		}
-		//if user has no VP, set mana as 1 to avoid division by 0
 		if (maxMana == 0){
 			maxMana = 1;
 		}
 		let currentManaPerc = currentMana * 100 / maxMana;
-		this.currentVotingPower = currentManaPerc.toFixed(3);
-		//also fetch time till full power replenishes
-		this.timeToFull(this.currentVotingPower);
-		
-		//and calculate voting power initially
-		this.calculateVoteValue();
-		
-		//this.currentRC = currentManaPerc;
+		this.currentVotingPower = currentManaPerc;
 		
 		let chainLnk = hiveclient;
 		if (this.cur_bchain == 'STEEM'){
 			chainLnk = client;
 		}
-		let rcComponent = await chainLnk.rc.getRCMana(this.user.account.name);
-		this.currentRC = rcComponent.percentage/100;
-		this.currentRCPercent = this.currentRC + '%';
-		
-		
+		try {
+			let rcComponent = await chainLnk.rc.getRCMana(this.user.account.name);
+			this.currentRC = rcComponent.percentage/100;
+			this.currentRCPercent = this.currentRC.toFixed(2) + '%';
+		} catch (e) {
+			console.log(e);
+		}
 		return currentManaPerc;
 	  },
-	  //calculates time till full power replenishes
 	  timeToFull(param){
-		let timeToFull = this.toTimer((this.STEEMIT_100_PERCENT - param * 100) * this.STEEMIT_VOTE_REGENERATION_SECONDS / this.STEEMIT_100_PERCENT);
-		
+	    if (!param) return '00h:00m';
+		let perc = parseFloat(param);
+		if (perc >= 100) return '00h:00m';
+		let timeToFull = this.toTimer((this.STEEMIT_100_PERCENT - perc * 100) * this.STEEMIT_VOTE_REGENERATION_SECONDS / this.STEEMIT_100_PERCENT);
 		return timeToFull;
 	  },
-	  //convert to proper timing render
 	  toTimer(ts) {
 	    const HOURS = 60 * 60;
 	    let h = Math.floor(ts / HOURS);
 	    let m = Math.floor((ts % HOURS) / 60);
-	    //let s = Math.floor((ts % 60));
-	    return this.padLeft(h, 2) + 'h:' + this.padLeft(m, 2) + 'm';//':' + this.padLeft(s, 2);
+	    return this.padLeft(h, 2) + 'h:' + this.padLeft(m, 2) + 'm';
 	  },
-	  //proper padding to display double digits
 	  padLeft(v, d) {
 	    let l = (v + '').length;
 	    if (l >= d) return v + '';
@@ -159,59 +126,183 @@
 		}
 	    return v;
 	  },
-	  setProperNode (){
-		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
-		let properNode = hive;
-		if (this.cur_bchain == 'STEEM'){
-			properNode = steem;
-		}
-		return properNode;
-	  },
 	},
 	async mounted () {
-	  //check which chain is active
 	  if (localStorage.getItem('cur_bchain')){
 		this.cur_bchain = localStorage.getItem('cur_bchain')
 	  }
-	  
 	  client = new dsteem.Client(process.env.steemApiNode)
 	  hiveclient = new dhive.Client(process.env.altHiveNodes)
-	  steem.api.setOptions({ url: process.env.steemApiNode });
-	  
-	  hiveclient.updateOperations(true);
-	  
-	  //hive.config.set('rebranded_api', true)
-	  //hive.broadcast.updateOperations()
-	  hive.config.set('alternative_api_endpoints', process.env.altHiveNodes);
-	  
-	  hive.api.setOptions({ url: process.env.hiveApiNode });
-	  
-	  //grab STEEM price, needed for vote value calculation
-	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem&vs_currencies=usd').then(
-		res => {res.json().then(json => this.setSteemPrice (json.steem.usd)).catch(e => console.log(e))
-	  }).catch(e => console.log(e))
-	  
-	  //grab SBD price, needed for vote value calculation
-	  fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem-dollars&vs_currencies=usd').then(
-		res => {res.json().then(json => this.setSBDPrice (json['steem-dollars'].usd)).catch(e => console.log(e))
-	  }).catch(e => console.log(e))
-	
-	  //in addition to the default updating of VP upon each render, we need to take into consideration leaving window open. 
-	  //for this purpose, let's update every 30 seconds
 	  this.fetchVotingPower();
 	  setInterval(this.fetchVotingPower, 30 * 1000);
-	  if (this.report != null){
-		this.fetchReportKeyData();
-	  }
-	    /*let properties = await client.database.getDynamicGlobalProperties()
-		console.log(properties)*/
-	  //let acct = await client.rc.findRCAccounts('mcfarhat');
-	  
 	}
   }
 </script>
-<style>
-	.fas, .steem-stats{
-	  cursor: pointer;
-    }
+
+<style scoped>
+/*
+  IMPORTANT: The "scoped" attribute on this style tag ensures these styles
+  ONLY apply to this component. They WILL NOT affect your login buttons or
+  any other element outside of this file, fixing the "soft edges" issue.
+*/
+
+/* Common Styles */
+.text-brand {
+	color: #e10707; 
+}
+.steem-stats-container {
+	padding-top: 0.5rem;
+}
+
+/* --- STYLES FOR GAUGE VIEW --- */
+@keyframes progress-bar-stripes {
+  from { background-position-x: 1rem; }
+  to { background-position-x: 0; }
+}
+
+.steem-stats-gauges {
+	display: flex; 
+	justify-content: center;
+	gap: 4.5rem;
+	--gauge-center-bg: #fff;
+	--gauge-track-bg: #e9ecef;
+}
+
+.dark-mode .steem-stats-gauges,
+:root.dark-mode .steem-stats-gauges {
+	--gauge-center-bg: #212529;
+	--gauge-track-bg: #444;
+}
+
+.steem-stats-gauges .gauge-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.steem-stats-gauges .gauge-wrapper {
+	flex-shrink: 0;
+	position: relative; 
+	cursor: pointer;
+}
+.steem-stats-gauges .gauge {
+	position: relative;
+	width: 85px; 
+	height: 85px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.steem-stats-gauges .gauge::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	border-radius: 50%;
+	background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
+	background-size: 1rem 1rem;
+	animation: progress-bar-stripes 1s linear infinite;
+	mask-image: var(--mask-gradient);
+	-webkit-mask-image: var(--mask-gradient);
+}
+
+.steem-stats-gauges .gauge-center {
+	width: 65px; 
+	height: 65px; 
+	background-color: var(--gauge-center-bg);
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1;
+}
+.steem-stats-gauges .gauge-value {
+    font-size: 1.4rem; 
+    font-weight: 700;
+    line-height: 1;
+}
+.steem-stats-gauges .gauge-value small {
+    font-size: 0.9rem;
+    font-weight: 500;
+    opacity: 0.8;
+}
+
+.steem-stats-gauges .gauge-hover-tooltip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(10, 25, 40, 0.9);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    z-index: 10;
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.95);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+    pointer-events: none;
+}
+.steem-stats-gauges .gauge-hover-tooltip.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+}
+.steem-stats-gauges .tooltip-content {
+    display: flex;
+    flex-direction: column;
+    color: #fff;
+}
+.steem-stats-gauges .tooltip-content small {
+	opacity: 0.8;
+}
+.steem-stats-gauges .tooltip-time {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-top: 2px;
+	color: #fff !important;
+}
+.steem-stats-gauges .gauge-label-container {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-top: 0.5rem;
+	font-size: 0.9rem;
+}
+.steem-stats-gauges .gauge-label {
+	font-weight: 600;
+}
+
+/* --- STYLES FOR PROGRESS BAR VIEW --- */
+.steem-stats-progress .stat-line {
+	display: flex;
+	align-items: center;
+	margin-bottom: 0.25rem;
+}
+.steem-stats-progress .stat-icon {
+	width: 20px; 
+	text-align: center;
+	font-size: 1.1rem;
+	margin-right: 8px; 
+}
+.steem-stats-progress .stat-text-content {
+	flex-grow: 1; 
+	font-size: 0.9rem;
+}
+.steem-stats-progress .progress {
+	height: 8px;
+	border-radius: 4px;
+	margin-bottom: 1rem;
+}
+.steem-stats-progress .progress:last-of-type {
+	margin-bottom: 0;
+}
 </style>
