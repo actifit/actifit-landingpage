@@ -114,7 +114,7 @@
           <div class="user-avatar group-class"
             :style="'background-image: url(' + profImgUrl + '/u/' + user.account.name + '/avatar)'"></div>
         </a>
-        <div class="dropdown-menu dropdown-menu-right user-dropdown">
+        <div class="dropdown-menu dropdown-menu-right user-dropdown" v-if="isMounted">
           <div class="dropdown-header user-info-sticky">
             <NuxtLink class="dropdown-item" :to="localePath('/' + user.account.name)"><i class="fa-solid fa-user text-brand"></i> @{{ user.account.name }}</NuxtLink>
           </div>
@@ -183,6 +183,7 @@ export default {
       reload: 0,
       profImgUrl: process.env.hiveImgUrl,
       notificationInterval: null,
+      isMounted: false
     }
   },
   watch: {
@@ -405,6 +406,7 @@ export default {
     }
   },
   async mounted() {
+    this.isMounted = true;
     if (localStorage.getItem('cur_bchain')) {
       this.cur_bchain = localStorage.getItem('cur_bchain');
       this.$store.commit('setBchain', this.cur_bchain);
@@ -471,15 +473,15 @@ export default {
 
 /* FIX: Explicitly set text color for the language name. */
 /* This ensures it is visible on a light/default background. */
-.lang-item .lang-name {
-    color: #212529 !important; /* Bootstrap's default dark text color */
+ .lang-item .lang-name {
+    color: #000 !important; 
 }
 
 /* FIX: Explicitly set text color for dark mode. 
    You may need to change 'body.dark-mode' to match your dark mode selector. */
 body.dark-mode .lang-item .lang-name {
-    color: #f8f9fa !important; /* Bootstrap's default light text color */
-}
+    color: #f8f9fa !important; 
+} 
 
 /* Style to visually indicate the active language and prevent clicking it. */
 .lang-item.is-active {
@@ -487,7 +489,11 @@ body.dark-mode .lang-item .lang-name {
     opacity: 0.7;
     background-color: #e9ecef; /* A light gray to show it's selected */
 }
-
+/* Add this to your styles to fix the visibility bug */
+.lang-item .d-flex {
+    position: relative;
+    z-index: 100; /* This forces the contents to a new layer */
+}
 body.dark-mode .lang-item.is-active {
     background-color: #343a40; /* A dark gray for dark mode */
 }
