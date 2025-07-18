@@ -495,12 +495,15 @@ export default {
 .dark-mode .lang-item .lang-name {
     color: #f8f9fa !important; 
 } 
+.dark-mode .lang-item:hover {
+  background-color: #495057 !important; /* A slightly lighter shade of the dark dropdown background */
+}
 
 /* Style to visually indicate the active language and prevent clicking it. */
 .lang-item.is-active {
     pointer-events: none;
-    opacity: 0.7;
-    background-color: #e9ecef; /* A light gray to show it's selected */
+    opacity: 0.85;
+    background-color: #ff112d ; /* A light gray to show it's selected */
 }
 /* Add this to your styles to fix the visibility bug */
 .lang-item .d-flex {
@@ -508,7 +511,7 @@ export default {
     z-index: 100; /* This forces the contents to a new layer */
 }
 body.dark-mode .lang-item.is-active {
-    background-color: #343a40; /* A dark gray for dark mode */
+  background-color: #343a40; /* A dark gray for dark mode */
 }
 
 .flag-icon-container {
