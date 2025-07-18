@@ -41,7 +41,8 @@
                class="dropdown-item lang-item"
                :class="{ 'is-active': locale.code === $i18n.locale }"
                href="#"
-               @click.prevent.stop="switchLang(locale.code)">
+               @click.prevent.stop="switchLang(locale.code)"
+               style="cursor: pointer;">
                 
                 <div class="d-flex align-items-center">
                     <span class="flag-icon-container">
@@ -465,21 +466,33 @@ export default {
 /* ======================================================= */
 /* START: FIXED LANGUAGE SWITCHER STYLES                   */
 /* ======================================================= */
+/* FOR DIAGNOSTIC PURPOSES ONLY */
 .lang-item {
     display: flex !important;
     align-items: center;
-    white-space: nowrap;
+    padding: 8px 8px !important;
 }
-
+.lang-item .flag-icon-container {
+    /* Ensure the flag container is visible and doesn't collapse */
+    flex-shrink: 0; /* Prevent the flag from shrinking */
+    margin-right: 12px;
+}
 /* FIX: Explicitly set text color for the language name. */
 /* This ensures it is visible on a light/default background. */
  .lang-item .lang-name {
-    color: #000 !important; 
+    color: #212529  !important;
+    flex-grow: 1; /* Allow the text to take up space */
+    display: block !important; /* Override any weird inline behavior */
+    width: auto !important;
+    height: auto !important;
+    position: static !important; /* Override the diagnostic 'fixed' position */
+    outline: none !important;
+    background-color: transparent !important; 
 }
 
 /* FIX: Explicitly set text color for dark mode. 
    You may need to change 'body.dark-mode' to match your dark mode selector. */
-body.dark-mode .lang-item .lang-name {
+.dark-mode .lang-item .lang-name {
     color: #f8f9fa !important; 
 } 
 
