@@ -105,21 +105,6 @@
 </div>
     </div>
     
-    <!-- Special Event Section -->
-    <div v-if="hasSpecialEvents">
-      <h5 class="text-center pt-3 market-sub text-brand">{{ $t('special_christmas_event') }}</h5>
-      
-      <div class="row products-row">
-        <Product v-for="product in prodList"
-          :product="product" :key="product._id" :pros="professionals" 
-          :userrank="userRank" :gadgetStats="gadgetStats" :realProducts="realProducts" 
-          :expandAll="expandAllStatus"
-          v-if="product.specialevent"
-          @update-prod="updateProd" :afitPrice="afitPrice" @refresh-tickets="refreshTickets"/>
-      </div>
-      <br/>
-    </div>
-    
     <!-- Main Products Section -->
     <div>
       <div class="row products-row" v-if="prodList.length">
@@ -910,7 +895,7 @@ le-text {
 .dark-mode .market-title,
 .dark-mode .info-icon,
 .dark-mode .info-icon i {
-  color: black; 
+  color: white; 
 }
 
 @keyframes fadeIn {
