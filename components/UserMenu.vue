@@ -29,17 +29,17 @@
       <!-- START: FIXED LANGUAGE SWITCHER IMPLEMENTATION           -->
       <!-- ======================================================= -->
       <li class="nav-item dropdown mr-2" v-if="user && !hideVisualControls">
-        <a class="nav-link dropdown-toggle p-0" href="#" id="language-switcher-icon" data-toggle="dropdown"
-          aria-haspopup="true" aria-expanded="false" :title="$t('languages')">
+        <a class="nav-link dropdown-toggle p-0" href="#" id="language-switcher-icon" 
+          aria-haspopup="true" aria-expanded="false" :title="$t('languages')" @click.prevent="isLanguageMenuOpen = !isLanguageMenuOpen">
           <span class="user-avatar group-class">
             <i class="fas fa-language text-brand"></i>
           </span>
         </a>
-        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="language-switcher-icon">
+        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="language-switcher-icon" :class="{ show: isLanguageMenuOpen }">
           <!-- The v-for loops through all available languages -->
           <a v-for="locale in availableLocales" :key="locale.code" class="dropdown-item lang-item"
             :class="{ 'is-active': locale.code === $i18n.locale }" href="#"
-            @click.prevent.stop="switchLang(locale.code)">
+            @click.prevent.stop="switchLang(locale.code); isLanguageMenuOpen = false;">
             <!-- We only have the language name now -->
             {{ locale.name }}
           </a>
@@ -195,7 +195,8 @@ export default {
       reload: 0,
       profImgUrl: process.env.hiveImgUrl,
       notificationInterval: null,
-      isMounted: false
+      isMounted: false,
+      isLanguageMenuOpen: false,
     }
   },
   watch: {
@@ -213,8 +214,6 @@ export default {
     ...mapGetters(['userTokens', 'userRank', 'userRankObj', 'referrals', 'bchain']),
     ...mapGetters(['moderators']),
 
-    // FIX: Return ALL locales to ensure the dropdown always has content.
-    // The active locale will be styled differently via CSS.
     availableLocales() {
       return this.$i18n.locales || [];
     },
@@ -293,18 +292,27 @@ export default {
     }
   },
   methods: {
-    // FIX: This method now correctly uses the router to switch languages.
+    // ======================================================= //
+    // START: BUG FIX FOR LANGUAGE PERSISTENCE                 //
+    // ======================================================= //
     async switchLang(locale) {
-      // Prevent navigation if the language is already active
+      // 1. Prevent action if the selected language is already active.
       if (locale === this.$i18n.locale) {
         return;
       }
-      // Get the path of the CURRENT page in the NEW language
-      const path = this.switchLocalePath(locale);
-      // Use the router to navigate to the new path
-      await this.$router.push(path);
-      this.$nuxt.refresh();
+      
+      // 2. Store the chosen language in localStorage to remember it.
+      if (process.client) {
+        localStorage.setItem('user_language', locale);
+      }
+
+      // 3. Use the i18n module's built-in setLocale function. 
+      // This correctly changes the language, updates the URL, and handles persistence.
+      await this.$i18n.setLocale(locale);
     },
+    // ======================================================= //
+    // END: BUG FIX FOR LANGUAGE PERSISTENCE                   //
+    // ======================================================= //
 
     showModalFuncLOGIN() {
       this.proceedLogout();
@@ -380,7 +388,6 @@ export default {
     async handleNotificationClick(notif) {
       await this.markRead(notif);
       if (notif.url.startsWith('/')) {
-        // This correctly uses localePath for router navigation
         this.$router.push(this.localePath(notif.url));
       } else {
         window.location.href = notif.url;
@@ -405,6 +412,22 @@ export default {
   },
   async mounted() {
     this.isMounted = true;
+
+    // ======================================================= //
+    // START: BUG FIX FOR LANGUAGE PERSISTENCE                 //
+    // ======================================================= //
+    // On component mount, check localStorage for a saved language preference.
+    if (process.client) {
+      const savedLang = localStorage.getItem('user_language');
+      // If a language was saved and it's different from the current one, apply it.
+      if (savedLang && savedLang !== this.$i18n.locale) {
+        await this.$i18n.setLocale(savedLang);
+      }
+    }
+    // ======================================================= //
+    // END: BUG FIX FOR LANGUAGE PERSISTENCE                   //
+    // ======================================================= //
+
     if (localStorage.getItem('cur_bchain')) {
       this.cur_bchain = localStorage.getItem('cur_bchain');
       this.$store.commit('setBchain', this.cur_bchain);
