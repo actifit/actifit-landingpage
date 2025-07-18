@@ -24,34 +24,25 @@
           <i v-else class="fa-solid fa-moon text-brand"></i>
         </span>
       </li>
-      
+
       <!-- ======================================================= -->
       <!-- START: FIXED LANGUAGE SWITCHER IMPLEMENTATION           -->
       <!-- ======================================================= -->
       <li class="nav-item dropdown mr-2" v-if="user && !hideVisualControls">
-        <a class="nav-link dropdown-toggle p-0" href="#" id="language-switcher-icon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" :title="$t('languages')">
-            <span class="user-avatar group-class">
-                <i class="fas fa-language text-brand"></i>
-            </span>
+        <a class="nav-link dropdown-toggle p-0" href="#" id="language-switcher-icon" data-toggle="dropdown"
+          aria-haspopup="true" aria-expanded="false" :title="$t('languages')">
+          <span class="user-avatar group-class">
+            <i class="fas fa-language text-brand"></i>
+          </span>
         </a>
         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="language-switcher-icon">
-            <!-- The v-for loops through all available languages -->
-            <a v-for="locale in availableLocales" 
-               :key="locale.code" 
-               class="dropdown-item lang-item"
-               :class="{ 'is-active': locale.code === $i18n.locale }"
-               href="#"
-               @click.prevent.stop="switchLang(locale.code)"
-               style="cursor: pointer;">
-                
-                <div class="d-flex align-items-center">
-                    <span class="flag-icon-container">
-                        <!-- Ensure your flags are in the /static/flags/ directory -->
-                        <img class="flag-icon" :src="getFlagUrl(locale.code)" :alt="locale.name">
-                    </span>
-                    <span class="lang-name">{{ locale.name }}</span>
-                </div>
-            </a>
+          <!-- The v-for loops through all available languages -->
+          <a v-for="locale in availableLocales" :key="locale.code" class="dropdown-item lang-item"
+            :class="{ 'is-active': locale.code === $i18n.locale }" href="#"
+            @click.prevent.stop="switchLang(locale.code)">
+            <!-- We only have the language name now -->
+            {{ locale.name }}
+          </a>
         </div>
       </li>
       <!-- ======================================================= -->
@@ -62,7 +53,7 @@
       <li class="nav-item mr-2" v-if="user && !hideVisualControls">
         <StingChat :user="this.user" />
       </li>
-      
+
       <!-- Notifications (FIXED: Using NuxtLink) -->
       <li class="nav-item mr-2 notification-item-container" v-if="user">
         <span class="notification-class" v-if="activeNotificationsLen > 0">{{ notificationsNotice }}</span>
@@ -79,14 +70,14 @@
               <a href='#' class="btn btn-brand border" v-on:click.prevent="markAllRead()">{{ $t('Clear_all') }}</a>
             </div>
             <div class="row p-2 border-top" v-for="(notif, index) in activeNotifications" :key="index" :notif="notif">
-               <div class="col-md-10 notif-clickable" @click="handleNotificationClick(notif)">
-                  <i class="fas fa-user-plus p-1"
-                    v-if="notif.type == 'friendship' || notif.type == 'friendship_request'"></i>
-                  <i class="fas fa-user-friends p-1" v-else-if="notif.type == 'friendship_acceptance'"></i>
-                  <span>{{ notif.details }}</span>
-                  <span v-if="notif.action_taker" class="user-avatar user-avatar-medium mr-1 mb-3"
-                    :style="'background-image: url(' + profImgUrl + '/u/' + notif.action_taker + '/avatar)'"></span>
-                </div>
+              <div class="col-md-10 notif-clickable" @click="handleNotificationClick(notif)">
+                <i class="fas fa-user-plus p-1"
+                  v-if="notif.type == 'friendship' || notif.type == 'friendship_request'"></i>
+                <i class="fas fa-user-friends p-1" v-else-if="notif.type == 'friendship_acceptance'"></i>
+                <span>{{ notif.details }}</span>
+                <span v-if="notif.action_taker" class="user-avatar user-avatar-medium mr-1 mb-3"
+                  :style="'background-image: url(' + profImgUrl + '/u/' + notif.action_taker + '/avatar)'"></span>
+              </div>
               <span>
                 <a href="#" v-on:click.prevent="markRead(notif)" class="col-md-2" :title="$t('mark_as_read')"><i
                     class="fas fa-check-square"></i></a>
@@ -108,7 +99,7 @@
           </div>
         </span>
       </li>
-      
+
       <!-- User Profile Dropdown (FIXED: All internal links converted to NuxtLink) -->
       <li class="nav-item dropdown" v-if="user">
         <a class="nav-link dropdown-toggle p-0" id="user_menu_navlink_avatar" href="#" data-toggle="dropdown">
@@ -117,42 +108,62 @@
         </a>
         <div class="dropdown-menu dropdown-menu-right user-dropdown" v-if="isMounted">
           <div class="dropdown-header user-info-sticky">
-            <NuxtLink class="dropdown-item" :to="localePath('/' + user.account.name)"><i class="fa-solid fa-user text-brand"></i> @{{ user.account.name }}</NuxtLink>
+            <NuxtLink class="dropdown-item" :to="localePath('/' + user.account.name)"><i
+                class="fa-solid fa-user text-brand"></i> @{{ user.account.name }}</NuxtLink>
           </div>
           <div class="dropdown-scrollable">
-            <NuxtLink class="dropdown-item text-brand" :to="localePath('/mods-access/')" v-if="isUserModerator">Moderation</NuxtLink>
+            <NuxtLink class="dropdown-item text-brand" :to="localePath('/mods-access/')" v-if="isUserModerator">
+              Moderation</NuxtLink>
             <div class="dropdown-divider" v-if="isUserModerator"></div>
-            <NuxtLink class="dropdown-item" :to="localePath('/market')"><i class="fas fa-shopping-cart text-brand"></i> {{ $t('spend_afit_menu') }}<br /></NuxtLink>
+            <NuxtLink class="dropdown-item" :to="localePath('/market')"><i class="fas fa-shopping-cart text-brand"></i>
+              {{ $t('spend_afit_menu') }}<br /></NuxtLink>
             <SteemStats :user="user" minView="true" class="dropdown-item" :key="reload" />
-            <NuxtLink class="dropdown-item" :to="localePath('/userrank')"><i class="fa-solid fa-list-ol text-brand"></i> {{ $t('My_Rank') }} <br /><span class="text-brand pl-4"> {{ displayCoreUserRank }} <span class="increased-rank" v-if="userRankObj && userRankObj.afitx_rank">{{ displayIncreasedUserRank }}</span> </span></NuxtLink>
-            <NuxtLink class="dropdown-item" :to="localePath('/wallet')"><i class="fa-solid fa-wallet text-brand"></i> {{ $t('My_Wallet') }} <br /><span class="text-brand pl-4"> {{ formattedUserTokens }}</span></NuxtLink>
-            <NuxtLink class="dropdown-item" :to="localePath('/referrals')"><i class="fas fa-user-friends text-brand"></i> {{ $t('Referrals') }} <br /><span class="text-brand pl-4"> {{ referralCount }} </span></NuxtLink>
-            <NuxtLink class="dropdown-item" :to="localePath('/activity/' + user.account.name)"><i class="fas fa-running text-brand"></i> {{ $t('My_Activity') }}</NuxtLink>
-            <NuxtLink class="dropdown-item" :to="localePath('/' + user.account.name + '/blog')"><i class="fa-solid fa-pen-to-square text-brand"></i> {{ $t('My_Blog') }}</NuxtLink>
-            <NuxtLink class="dropdown-item" :to="localePath('/blog/new')"><i class="fa-solid fa-plus-square text-brand"></i> {{ $t('New_Blog') }}</NuxtLink>
-            <NuxtLink class="dropdown-item" :to="localePath('/' + user.account.name + '/videos')"><i class="fa-solid fa-video text-brand"></i> {{ $t('My_Videos') }}</NuxtLink>
+            <NuxtLink class="dropdown-item" :to="localePath('/userrank')"><i class="fa-solid fa-list-ol text-brand"></i>
+              {{ $t('My_Rank') }} <br /><span class="text-brand pl-4"> {{ displayCoreUserRank }} <span
+                  class="increased-rank" v-if="userRankObj && userRankObj.afitx_rank">{{ displayIncreasedUserRank
+                  }}</span> </span></NuxtLink>
+            <NuxtLink class="dropdown-item" :to="localePath('/wallet')"><i class="fa-solid fa-wallet text-brand"></i> {{
+              $t('My_Wallet') }} <br /><span class="text-brand pl-4"> {{ formattedUserTokens }}</span></NuxtLink>
+            <NuxtLink class="dropdown-item" :to="localePath('/referrals')"><i
+                class="fas fa-user-friends text-brand"></i> {{ $t('Referrals') }} <br /><span class="text-brand pl-4">
+                {{ referralCount }} </span></NuxtLink>
+            <NuxtLink class="dropdown-item" :to="localePath('/activity/' + user.account.name)"><i
+                class="fas fa-running text-brand"></i> {{ $t('My_Activity') }}</NuxtLink>
+            <NuxtLink class="dropdown-item" :to="localePath('/' + user.account.name + '/blog')"><i
+                class="fa-solid fa-pen-to-square text-brand"></i> {{ $t('My_Blog') }}</NuxtLink>
+            <NuxtLink class="dropdown-item" :to="localePath('/blog/new')"><i
+                class="fa-solid fa-plus-square text-brand"></i> {{ $t('New_Blog') }}</NuxtLink>
+            <NuxtLink class="dropdown-item" :to="localePath('/' + user.account.name + '/videos')"><i
+                class="fa-solid fa-video text-brand"></i> {{ $t('My_Videos') }}</NuxtLink>
             <a class="dropdown-item" href="#"><i class="fa-solid fa-link text-brand"></i> {{ $t('Active_chain') }}
               <br />
               <div class="pl-4" :class="adjustHiveClass" v-on:click="setActiveChain('HIVE')">
                 <img src="/img/HIVE.png" style="max-height: 20px;"
-                  :title="(cur_bchain == 'HIVE' ? $t('running_on_chain').replace('_CHAIN_', 'HIVE') : $t('switch_to_chain').replace('_CHAIN_', 'HIVE'))">{{ $t('HIVE') }}
+                  :title="(cur_bchain == 'HIVE' ? $t('running_on_chain').replace('_CHAIN_', 'HIVE') : $t('switch_to_chain').replace('_CHAIN_', 'HIVE'))">{{
+                $t('HIVE') }}
               </div>
               <div v-if="isUserModerator" class="pl-4" :class="adjustSteemClass" v-on:click="setActiveChain('STEEM')">
                 <img src="/img/STEEM.png" style="max-height: 20px;"
-                  :title="(cur_bchain == 'STEEM' ? $t('running_on_chain').replace('_CHAIN_', 'STEEM') : $t('switch_to_chain').replace('_CHAIN_', 'STEEM'))">{{ $t('STEEM') }}
+                  :title="(cur_bchain == 'STEEM' ? $t('running_on_chain').replace('_CHAIN_', 'STEEM') : $t('switch_to_chain').replace('_CHAIN_', 'STEEM'))">{{
+                    $t('STEEM') }}
               </div>
               <div class="pl-4" :class="adjustBlurtClass" v-on:click="setActiveChain('BLURT')">
                 <img src="/img/BLURT.png" style="max-height: 20px;"
-                  :title="(cur_bchain == 'BLURT' ? $t('running_on_chain').replace('_CHAIN_', 'BLURT') : $t('switch_to_chain').replace('_CHAIN_', 'BLURT'))">{{ $t('BLURT') }}
+                  :title="(cur_bchain == 'BLURT' ? $t('running_on_chain').replace('_CHAIN_', 'BLURT') : $t('switch_to_chain').replace('_CHAIN_', 'BLURT'))">{{
+                    $t('BLURT') }}
               </div>
             </a>
-            <NuxtLink class="dropdown-item" :to="localePath('/password')"><i class="fa-sharp fa-solid fa-key text-brand"></i> {{ $t('My_Password') }}</NuxtLink>
-            <NuxtLink class="dropdown-item" :to="localePath('/settings')"><i class="fa-solid fa-gear text-brand"></i> {{ $t('Settings') }}</NuxtLink>
-            
+            <NuxtLink class="dropdown-item" :to="localePath('/password')"><i
+                class="fa-sharp fa-solid fa-key text-brand"></i> {{ $t('My_Password') }}</NuxtLink>
+            <NuxtLink class="dropdown-item" :to="localePath('/settings')"><i class="fa-solid fa-gear text-brand"></i> {{
+              $t('Settings') }}</NuxtLink>
+
             <div class="dropdown-divider"></div>
-            <a href="#" data-toggle="modal" data-target="#loginModal" @click.prevent="showModalFunc" class="dropdown-item"><i class="fa-solid fa-user-group text-brand"></i> {{ $t('switch_user') }}</a>
+            <a href="#" data-toggle="modal" data-target="#loginModal" @click.prevent="showModalFunc"
+              class="dropdown-item"><i class="fa-solid fa-user-group text-brand"></i> {{ $t('switch_user') }}</a>
             <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="#" @click.prevent="proceedLogout()"><i class="fa-solid fa-right-from-bracket text-brand"></i> {{ $t('Logout') }}</a>
+            <a class="dropdown-item" href="#" @click.prevent="proceedLogout()"><i
+                class="fa-solid fa-right-from-bracket text-brand"></i> {{ $t('Logout') }}</a>
           </div>
         </div>
       </li>
@@ -201,7 +212,7 @@ export default {
     ...mapGetters('steemconnect', ['user']),
     ...mapGetters(['userTokens', 'userRank', 'userRankObj', 'referrals', 'bchain']),
     ...mapGetters(['moderators']),
-    
+
     // FIX: Return ALL locales to ensure the dropdown always has content.
     // The active locale will be styled differently via CSS.
     availableLocales() {
@@ -294,21 +305,6 @@ export default {
       this.$router.push(path);
     },
 
-    getFlagUrl(code) {
-      const flagMap = {
-        en: 'us',
-        zh: 'cn',
-        uk: 'ua',
-        ja: 'jp',
-        ko: 'kr',
-        ar: 'ae',
-        hi: 'in'
-      };
-      const flagCode = flagMap[code] || code;
-      // This path requires your flags to be in the /static/flags/ directory.
-      return `/flags/${flagCode}.svg`;
-    },
-    
     showModalFuncLOGIN() {
       this.proceedLogout();
       this.$emit('modal-opened', true);
@@ -466,74 +462,54 @@ export default {
 /* ======================================================= */
 /* START: FIXED LANGUAGE SWITCHER STYLES                   */
 /* ======================================================= */
-/* FOR DIAGNOSTIC PURPOSES ONLY */
+
 .lang-item {
-    display: flex !important;
-    align-items: center;
-    padding: 8px 8px !important;
-}
-.lang-item .flag-icon-container {
-    /* Ensure the flag container is visible and doesn't collapse */
-    flex-shrink: 0; /* Prevent the flag from shrinking */
-    margin-right: 12px;
-}
-/* FIX: Explicitly set text color for the language name. */
-/* This ensures it is visible on a light/default background. */
- .lang-item .lang-name {
-    color: #212529  !important;
-    flex-grow: 1; /* Allow the text to take up space */
-    display: block !important; /* Override any weird inline behavior */
-    width: auto !important;
-    height: auto !important;
-    position: static !important; /* Override the diagnostic 'fixed' position */
-    outline: none !important;
-    background-color: transparent !important; 
+  display: flex !important;
+  align-items: center;
+  padding: 6px 6px !important;
 }
 
-/* FIX: Explicitly set text color for dark mode. 
-   You may need to change 'body.dark-mode' to match your dark mode selector. */
+/* FIX: Explicitly set text color for the language name. */
+/* This ensures it is visible on a light/default background. */
+.lang-item .lang-name {
+  color: #212529 !important;
+  flex-grow: 1;
+  display: block !important;
+  position: static !important;
+  outline: none !important;
+  background-color: transparent !important;
+}
+
 .dark-mode .lang-item .lang-name {
-    color: #f8f9fa !important; 
-} 
+  color: #f8f9fa !important;
+}
+
 .dark-mode .lang-item:hover {
-  background-color: #495057 !important; /* A slightly lighter shade of the dark dropdown background */
+  background-color: #495057 !important;
+  color: white !important;
 }
 
 /* Style to visually indicate the active language and prevent clicking it. */
 .lang-item.is-active {
-    pointer-events: none;
-    opacity: 0.85;
-    background-color: #ff112d ; /* A light gray to show it's selected */
-}
-/* Add this to your styles to fix the visibility bug */
-.lang-item .d-flex {
-    position: relative;
-    z-index: 100; /* This forces the contents to a new layer */
-}
-body.dark-mode .lang-item.is-active {
-  background-color: #343a40; /* A dark gray for dark mode */
+  pointer-events: none;
+  opacity: 0.85;
+  background-color: #ff112d;
 }
 
-.flag-icon-container {
-    margin-right: 12px;
-    width: 24px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+.lang-item .d-flex {
+  position: relative;
+  z-index: 100;
+}
+
+body.dark-mode .lang-item.is-active {
+  background-color: #343a40;
 }
 
 html[dir="rtl"] .flag-icon-container {
-    margin-right: 0;
-    margin-left: 12px;
+  margin-right: 0;
+  margin-left: 12px;
 }
 
-.flag-icon {
-    width: 22px;
-    height: auto;
-    border: 1px solid #ddd;
-    object-fit: cover;
-    border-radius: 2px;
-}
 /* ======================================================= */
 /* END: LANGUAGE SWITCHER STYLES                           */
 /* ======================================================= */
@@ -553,7 +529,7 @@ html[dir="rtl"] .flag-icon-container {
 
 /* This targets NuxtLink components that are styled as dropdown-items */
 .dropdown-item.nuxt-link-active {
-    font-weight: bold;
+  font-weight: bold;
 }
 
 .user-menu .nav-item {
@@ -616,9 +592,9 @@ html[dir="rtl"] .flag-icon-container {
 }
 
 .notif-container {
-  width: 520px;        
-  max-width: 520px;       
-  min-width: 320px;       
+  width: 520px;
+  max-width: 520px;
+  min-width: 320px;
   max-height: 300px;
   overflow-x: hidden;
   overflow-y: auto;
@@ -627,17 +603,17 @@ html[dir="rtl"] .flag-icon-container {
 
 .notif-clickable {
   word-wrap: break-word;
-  width: 100%; 
+  width: 100%;
   white-space: normal;
-  overflow: hidden; 
+  overflow: hidden;
 }
 
 .row.p-2 {
-  padding: 5px 10px; 
+  padding: 5px 10px;
 }
 
 .col-md-10 {
-  width: 100%; 
+  width: 100%;
 }
 
 .option-opaque {
