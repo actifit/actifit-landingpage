@@ -1,339 +1,353 @@
 <template>
   <div>
-    <NavbarBrand />
-
-    <div class="container pt-5 mt-5 pb-5">
-      <ListHeadingSection :textualDisplay="'Hive Discussions'" />
-      <div class="text-left mb-4 text-brand market-sub">
-        Latest comments from PeakD Snaps, Inleo Threads, and Ecency Waves
-      </div>
-
-      <!-- Category Filters with Logos (always visible) -->
-      <div class="category-filters mb-4">
+    <!-- Sidebar with category checkboxes (for filtering) -->
+    <div class="sidebar" v-if="!isMobile">
+      <div class="sidebar-heading">Hive Microfeeds</div>
+      <div class="category-filters-sidebar">
         <label
           v-for="cat in categories"
           :key="cat.value"
-          class="category-checkbox"
-          style="display: flex; align-items: center; gap: 8px;"
+          class="category-checkbox-sidebar"
         >
-          <input type="radio" :value="cat.value" v-model="selectedCategory" name="category" />
+          <input
+            type="checkbox"
+            :value="cat.value"
+            v-model="selectedCategories"
+          />
           <img
             v-if="categoryLogoMap[cat.value]"
             :src="categoryLogoMap[cat.value]"
             :alt="cat.label"
             class="category-logo-img"
-            style="height: 24px; width: 24px;"
           />
           {{ cat.label }}
         </label>
-        <label class="category-checkbox" style="display: flex; align-items: center; gap: 8px;">
-          <input type="radio" value="all" v-model="selectedCategory" name="category" />
-          All
-        </label>
       </div>
+    </div>
 
-      <!-- Quick Update Box (HIDE in full comment view) -->
-      <div v-if="!routeHasComment" class="quick-update-box card report mb-4">
-        <div class="quick-update-header mb-2">
-          <img
-            v-if="currentUsername"
-            :src="`https://images.hive.blog/u/${currentUsername}/avatar`"
-            class="quick-update-avatar"
-            alt="avatar"
-          />
-          <span v-else class="quick-update-avatar-placeholder"></span>
-          <div class="quick-update-radios">
-            <label v-for="cat in quickUpdateTargets" :key="cat.value" class="category-checkbox" style="margin-right: 12px;">
-              <input
-                type="radio"
-                :value="cat.value"
-                v-model="quickUpdateTarget"
-                name="quickUpdateTarget"
-              />
-              <img
-                :src="categoryLogoMap[cat.value]"
-                :alt="cat.label"
-                class="category-logo-img"
-                style="height: 22px; width: 22px;"
-              />
-              {{ cat.label }}
-            </label>
+    <!-- Main content area -->
+    <div class="main-content">
+      <NavbarBrand />
+
+      <div class="container pt-5 mt-5 pb-5">
+        <ListHeadingSection :textualDisplay="'Hive Discussions'" />
+        <div class="text-left mb-4 text-brand market-sub">
+          Latest comments from PeakD Snaps, Inleo Threads, and Ecency Waves
+        </div>
+
+        <!-- New Discussions Editor Card -->
+        <div class="discussions-editor-wrap" v-if="!routeHasComment">
+          <div class="discussions-editor-card">
+            <div class="editor-header">
+              <span class="editor-title">Discussions</span>
+              <button class="editor-close" @click="resetEditor">X</button>
+            </div>
+            <!-- Actions: image upload, category/platform (postTargets), post btn -->
+            <div class="editor-actions">
+              <label class="icon-btn">
+                <input type="file" accept="image/*" @change="onImageSelected" hidden>
+                <i class="fas fa-image action-icon"></i>
+              </label>
+              <div class="category-select">
+                <button
+                  v-for="cat in postTargets"
+                  :key="cat.value"
+                  :class="['cat-btn', { selected: postTarget === cat.value }]"
+                  @click="selectCategory(cat.value)"
+                  :title="cat.label"
+                >
+                  <img :src="cat.icon" class="cat-icon" />
+                </button>
+              </div>
+              <button class="post-btn" @click="postQuickUpdate" :disabled="!canPost">
+                POST
+              </button>
+            </div>
+            <!-- Image Preview -->
+            <div v-if="imagePreviewUrl" class="editor-image-preview">
+              <img :src="imagePreviewUrl" />
+              <button class="editor-remove-img" @click="removeImage">X</button>
+            </div>
+            <!-- Only one textbox for user input -->
+            <textarea
+              v-model="editorContent"
+              class="editor-body-input"
+              placeholder="Write your update..."
+              rows="3"
+              maxlength="500"
+            ></textarea>
+            <!-- Real-time Preview -->
+            <div class="editor-preview-card">
+              <div class="preview-header">
+                <span class="preview-user">@{{ currentUsername }}</span>
+                <span class="preview-time">{{ previewTime }}</span>
+                <img v-if="categoryLogoMap[postTarget]" :src="categoryLogoMap[postTarget]" class="cat-icon" style="margin-left:10px;" />
+              </div>
+              <div class="preview-body">
+                <div v-if="imagePreviewUrl" class="preview-image"><img :src="imagePreviewUrl" /></div>
+                <span class="preview-content">{{ editorContent }}</span>
+              </div>
+            </div>
+            <div v-if="quickUpdateError" class="reply-error mt-2">{{ quickUpdateError }}</div>
           </div>
         </div>
-        <textarea
-          class="quick-update-textarea"
-          v-model="quickUpdateText"
-          :placeholder="'Share a quick update...'"
-          rows="2"
-          maxlength="280"
-        ></textarea>
-        <div class="quick-update-actions mt-2">
-          <label class="quick-update-upload-btn">
-            <input type="file" accept="image/*" @change="onQuickUpdateImageChange" style="display:none;" />
-            <i class="fas fa-image"></i> Add Photo
-          </label>
-          <button
-            class="reply-btn"
-            :disabled="postingQuickUpdate || !quickUpdateText.trim()"
-            @click="postQuickUpdate"
-          >
-            {{ postingQuickUpdate ? 'Posting...' : 'Post' }}
-          </button>
-        </div>
-        <div v-if="quickUpdateImagePreview" class="quick-update-image-preview mt-2">
-          <img :src="quickUpdateImagePreview" alt="Preview" />
-          <button class="quick-update-remove-img" @click="removeQuickUpdateImage" title="Remove image">&times;</button>
-        </div>
-        <div v-if="quickUpdateError" class="reply-error mt-2">{{ quickUpdateError }}</div>
-      </div>
-      <!-- End Quick Update Box -->
+        <!-- End Editor -->
 
-      <!-- Single Comment View -->
-      <div v-if="routeHasComment" class="container pt-3 pb-5">
-        <div v-if="loadingSingleComment" class="loading">Loading comment...</div>
-        <div v-else-if="singleComment">
-          <!-- Main Comment Card with Reply button and inline reply box (identical logic to Comments.vue) -->
-          <div class="card report mb-4">
-            <h6 class="mb-0 text-center report-title">
-              {{ truncateString(singleComment.title || singleComment.body, 60) }}
-            </h6>
-            <div class="report-body">
-              <div class="row pb-1">
-                <div class="col-8">
-                  <UserHoverCard :username="singleComment.author" />
+        <!-- Single Comment View, Discussions List, etc. -->
+        <div v-if="routeHasComment" class="container pt-3 pb-5">
+          <div v-if="loadingSingleComment" class="loading">Loading comment...</div>
+          <div v-else-if="singleComment">
+            <div class="card report mb-4">
+              <h6 class="mb-0 text-center report-title">
+                {{ truncateString(singleComment.title || singleComment.body, 60) }}
+              </h6>
+              <div class="report-body">
+                <div class="row pb-1">
+                  <div class="col-8">
+                    <UserHoverCard :username="singleComment.author" />
+                  </div>
+                  <div class="col-4 text-right">
+                    <TimeAgo :timestamp="singleComment.created" />
+                  </div>
                 </div>
-                <div class="col-4 text-right">
-                  <TimeAgo :timestamp="singleComment.created" />
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-12">
-                  <div v-if="getCommentImages(singleComment.body)" class="comment-images mb-2">
+                <div class="row align-items-center mb-2">
+                  <div class="col-12 text-right">
                     <img
-                      v-for="(img, index) in getCommentImages(singleComment.body)"
-                      :key="index"
-                      :src="img"
-                      :alt="'Image ' + (index + 1)"
-                      class="report-image"
-                      @click="handleImageClick(img)"
+                      v-if="categoryLogoMap[singleComment.category]"
+                      :src="categoryLogoMap[singleComment.category]"
+                      :alt="singleComment.categoryLabel"
+                      class="category-logo-img"
                     />
                   </div>
                 </div>
-              </div>
-              <div class="row">
-                <div class="col-12">
-                  <div>
-                    <span v-html="singleComment.body"></span>
-                  </div>
-                </div>
-              </div>
-              <div class="row details mt-2">
-                <div class="col-6">
-                  <a
-                    href="#"
-                    @click.prevent="votePrompt(singleComment)"
-                    :class="['upvote-btn', { 'voted': isLikedByCurrentUser(singleComment) }]"
-                    :title="isLikedByCurrentUser(singleComment) ? 'Already liked' : 'Votes'"
-                    :style="{ pointerEvents: isLikedByCurrentUser(singleComment) ? 'none' : 'auto' }"
-                  >
-                    <i class="far fa-thumbs-up"></i> {{ getUpvoteCount(singleComment) }}
-                  </a>
-                  <i class="far fa-comments ml-2"></i> {{ singleComment.children || 0 }}
-                  <a href="#" @click.prevent="toggleRootReplyBox" :title="'Reply'">
-                    <i class="fas fa-reply text-brand ml-2"></i>
-                  </a>
-                </div>
-              </div>
-              <transition name="fade">
-                <div class="reply-box mb-4" v-if="showRootReplyBox">
-                  <CustomTextEditor ref="rootEditor" :initialContent="replyBody" />
-                  <div class="reply-actions">
-                    <button
-                      class="reply-btn"
-                      :disabled="postingReply"
-                      @click="postRootReply"
-                    >
-                      {{ postingReply ? 'Posting...' : 'Reply' }}
-                    </button>
-                    <button class="reply-btn" @click="toggleRootReplyBox">Cancel</button>
-                    <span v-if="!isLoggedIn" class="reply-error">You must be logged in to reply.</span>
-                    <span v-if="replyError" class="reply-error">{{ replyError }}</span>
-                    <span v-if="replySuccess" class="reply-success">Reply posted!</span>
-                  </div>
-                </div>
-              </transition>
-              <div class="comment-reply" v-if="rootResponsePosted">
-                <UserHoverCard :username="currentUsername" />
-                <vue-remarkable class="modal-body" :source="rootResponseBody" />
-              </div>
-            </div>
-          </div>
-          <div>
-            <h5>Replies</h5>
-            <div v-if="loadingReplies" class="loading">Loading replies...</div>
-            <div v-else>
-              <Comments
-                v-if="organizedReplies.length > 0"
-                :author="singleComment.author"
-                :body="singleComment.body"
-                :full_data="singleComment"
-                :reply_entries="organizedReplies"
-                :main_post_author="singleComment.author"
-                :main_post_permlink="singleComment.permlink"
-                :main_post_cat="singleComment.category"
-                :depth="0"
-                :translationCache="translationCache"
-                @update-translation-cache="handleTranslationCacheUpdate"
-                @refresh-root="fetchSingleComment"
-              />
-              <div v-else class="text-muted">No replies yet.</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- END Single Comment View -->
-
-      <!-- Discussions List -->
-      <div v-else>
-        <div v-if="loading" class="loading">Loading comments...</div>
-        <div v-else>
-          <div class="row">
-            <div
-              v-for="comment in filteredCommentsSorted"
-              :key="comment.id"
-              class="col-12 mb-4"
-            >
-              <div class="card report">
-                <h6 class="mb-0 text-center report-title" style="cursor:pointer;">
-                  <a
-                    @click.prevent="goToSingleComment(comment)"
-                    style="color:#fff; cursor:pointer;"
-                    href="#"
-                  >
-                    {{ truncateString(comment.title || comment.body, 60) }}
-                    <i class="fas fa-external-link-alt"></i>
-                  </a>
-                </h6>
-                <div class="report-body">
-                  <div class="row pb-1">
-                    <div class="col-8">
-                      <UserHoverCard :username="comment.author" />
-                    </div>
-                    <div class="col-4 text-right">
-                      <TimeAgo :timestamp="comment.created" />
-                    </div>
-                  </div>
-                  <div class="row">
-                    <div class="col-12">
-                      <div v-if="getCommentImages(comment.body)" class="comment-images mb-2">
-                        <img
-                          v-for="(img, index) in getCommentImages(comment.body)"
-                          :key="index"
-                          :src="img"
-                          :alt="'Image ' + (index + 1)"
-                          class="report-image"
-                          @click="handleImageClick(img)"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div class="row">
-                    <div class="col-12">
-                      <div>
-                        <span v-html="shorten(comment.body, 200)"></span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="row details mt-2">
-                    <div class="col-6">
-                      <a
-                        href="#"
-                        @click.prevent="votePrompt(comment)"
-                        :class="['upvote-btn', { 'voted': isLikedByCurrentUser(comment) }]"
-                        :title="isLikedByCurrentUser(comment) ? 'Already liked' : 'Votes'"
-                        :style="{ pointerEvents: isLikedByCurrentUser(comment) ? 'none' : 'auto' }"
-                      >
-                        <i class="far fa-thumbs-up"></i> {{ getUpvoteCount(comment) }}
-                      </a>
-                      <a
-                        href="#"
-                        @click.prevent="goToSingleComment(comment)"
-                        :title="'View full thread'"
-                        class="comment-btn-link"
-                      >
-                        <i class="far fa-comments ml-2"></i> {{ comment.children || 0 }}
-                      </a>
-                      <i
-                        class="far fa-share-square ml-2"
-                        @click.prevent="handleReblog(comment)"
-                        :title="'Reblog/Share'"
-                        style="cursor:pointer;"
-                      ></i>
-                    </div>
-                    <div class="col-6 text-right">
-                      <a
-                        :href="commentUrl(comment)"
-                        target="_blank"
-                        class="text-brand pr-2"
-                        :title="'View on Hive'"
-                      >
-                        <i class="fas fa-book-open"></i>
-                      </a>
-                    </div>
-                  </div>
-                  <div class="row details mt-2">
-                    <div class="col-12">
+                <div class="row">
+                  <div class="col-12">
+                    <div v-if="getCommentImages(singleComment.body)" class="comment-images mb-2">
                       <img
-                        v-if="categoryLogoMap[comment.category]"
-                        :src="categoryLogoMap[comment.category]"
-                        :alt="comment.categoryLabel"
-                        class="category-logo-img"
+                        v-for="(img, index) in getCommentImages(singleComment.body)"
+                        :key="index"
+                        :src="img"
+                        :alt="'Image ' + (index + 1)"
+                        class="report-image"
+                        @click="handleImageClick(img)"
                       />
                     </div>
                   </div>
                 </div>
+                <div class="row">
+                  <div class="col-12">
+                    <div>
+                      <span v-html="singleComment.body"></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="row details mt-2">
+                  <div class="col-6">
+                    <a
+                      href="#"
+                      @click.prevent="votePrompt(singleComment)"
+                      :class="['upvote-btn', { 'voted': isLikedByCurrentUser(singleComment) }]"
+                      :title="isLikedByCurrentUser(singleComment) ? 'Already liked' : 'Votes'"
+                      :style="{ pointerEvents: isLikedByCurrentUser(singleComment) ? 'none' : 'auto' }"
+                    >
+                      <i class="far fa-thumbs-up"></i> {{ getUpvoteCount(singleComment) }}
+                    </a>
+                    <i class="far fa-comments ml-2"></i> {{ singleComment.children || 0 }}
+                    <a href="#" @click.prevent="toggleRootReplyBox" :title="'Reply'">
+                      <i class="fas fa-reply text-brand ml-2"></i>
+                    </a>
+                  </div>
+                </div>
+                <transition name="fade">
+                  <div class="reply-box mb-4" v-if="showRootReplyBox">
+                    <CustomTextEditor ref="rootEditor" :initialContent="replyBody" />
+                    <div class="reply-actions">
+                      <button
+                        class="reply-btn"
+                        :disabled="postingReply"
+                        @click="postRootReply"
+                      >
+                        {{ postingReply ? 'Posting...' : 'Reply' }}
+                      </button>
+                      <button class="reply-btn" @click="toggleRootReplyBox">Cancel</button>
+                      <span v-if="!isLoggedIn" class="reply-error">You must be logged in to reply.</span>
+                      <span v-if="replyError" class="reply-error">{{ replyError }}</span>
+                      <span v-if="replySuccess" class="reply-success">Reply posted!</span>
+                    </div>
+                  </div>
+                </transition>
+                <div class="comment-reply" v-if="rootResponsePosted">
+                  <UserHoverCard :username="currentUsername" />
+                  <vue-remarkable class="modal-body" :source="rootResponseBody" />
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5>Replies</h5>
+              <div v-if="loadingReplies" class="loading">Loading replies...</div>
+              <div v-else>
+                <Comments
+                  v-if="organizedReplies.length > 0"
+                  :author="singleComment.author"
+                  :body="singleComment.body"
+                  :full_data="singleComment"
+                  :reply_entries="organizedReplies"
+                  :main_post_author="singleComment.author"
+                  :main_post_permlink="singleComment.permlink"
+                  :main_post_cat="singleComment.category"
+                  :depth="0"
+                  :translationCache="translationCache"
+                  @update-translation-cache="handleTranslationCacheUpdate"
+                  @refresh-root="fetchSingleComment"
+                />
+                <div v-else class="text-muted">No replies yet.</div>
               </div>
             </div>
           </div>
-          <div v-if="filteredCommentsSorted.length < allCommentsCount" class="load-more-container">
-            <button class="load-more-btn" @click="commentsToShow += 10">
-              Load More
-            </button>
+        </div>
+        <!-- END Single Comment View -->
+
+        <!-- Discussions List -->
+        <div v-else>
+          <div v-if="loading" class="loading">Loading comments...</div>
+          <div v-else>
+            <div class="row">
+              <div
+                v-for="comment in filteredCommentsSorted"
+                :key="comment.id"
+                class="col-12 mb-4"
+              >
+                <div class="card report">
+                  <h6 class="mb-0 text-center report-title" style="cursor:pointer;">
+                    <a
+                      @click.prevent="goToSingleComment(comment)"
+                      style="color:#fff; cursor:pointer;"
+                      href="#"
+                    >
+                      {{ truncateString(comment.title || comment.body, 60) }}
+                      <i class="fas fa-external-link-alt"></i>
+                    </a>
+                  </h6>
+                  <div class="report-body">
+                    <div class="row pb-1">
+                      <div class="col-8">
+                        <UserHoverCard :username="comment.author" />
+                      </div>
+                      <div class="col-4 text-right">
+                        <TimeAgo :timestamp="comment.created" />
+                      </div>
+                    </div>
+                    <div class="row align-items-center mb-2">
+                      <div class="col-12 text-right">
+                        <img
+                          v-if="categoryLogoMap[comment.category]"
+                          :src="categoryLogoMap[comment.category]"
+                          :alt="comment.categoryLabel"
+                          class="category-logo-img"
+                        />
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-12">
+                        <div v-if="getCommentImages(comment.body)" class="comment-images mb-2">
+                          <img
+                            v-for="(img, index) in getCommentImages(comment.body)"
+                            :key="index"
+                            :src="img"
+                            :alt="'Image ' + (index + 1)"
+                            class="report-image"
+                            @click="handleImageClick(img)"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-12">
+                        <div>
+                          <span v-html="shorten(comment.body, 200)"></span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row details mt-2">
+                      <div class="col-6">
+                        <a
+                          href="#"
+                          @click.prevent="votePrompt(comment)"
+                          :class="['upvote-btn', { 'voted': isLikedByCurrentUser(comment) }]"
+                          :title="isLikedByCurrentUser(comment) ? 'Already liked' : 'Votes'"
+                          :style="{ pointerEvents: isLikedByCurrentUser(comment) ? 'none' : 'auto' }"
+                        >
+                          <i class="far fa-thumbs-up"></i> {{ getUpvoteCount(comment) }}
+                        </a>
+                        <a
+                          href="#"
+                          @click.prevent="goToSingleComment(comment)"
+                          :title="'View full thread'"
+                          class="comment-btn-link"
+                        >
+                          <i class="far fa-comments ml-2"></i> {{ comment.children || 0 }}
+                        </a>
+                        <i
+                          class="far fa-share-square ml-2"
+                          @click.prevent="handleReblog(comment)"
+                          :title="'Reblog/Share'"
+                          style="cursor:pointer;"
+                        ></i>
+                      </div>
+                      <div class="col-6 text-right">
+                        <a
+                          :href="commentUrl(comment)"
+                          target="_blank"
+                          class="text-brand pr-2"
+                          :title="'View on Hive'"
+                        >
+                          <i class="fas fa-book-open"></i>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div v-if="filteredCommentsSorted.length < allCommentsCount" class="load-more-container">
+              <button class="load-more-btn" @click="commentsToShow += 10">
+                Load More
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Professional Login Modal -->
-    <div v-if="showLoginPopup" class="login-popup">
-      <div class="login-popup-content">
-        <span class="login-popup-title">Login Required</span>
-        <span class="login-popup-message">
-          You need to be logged in to like or share a comment.<br>
-          Please log in to continue.
-        </span>
-        <button class="login-popup-close" @click="showLoginPopup = false">Close</button>
+      <!-- Professional Login Modal -->
+      <div v-if="showLoginPopup" class="login-popup">
+        <div class="login-popup-content">
+          <span class="login-popup-title">Login Required</span>
+          <span class="login-popup-message">
+            You need to be logged in to like or share a comment.<br>
+            Please log in to continue.
+          </span>
+          <button class="login-popup-close" @click="showLoginPopup = false">Close</button>
+        </div>
       </div>
+
+      <!-- Voting Modal -->
+      <VoteModal @vote-success="onVoteSuccess" />
+
+      <!-- Notifications -->
+      <client-only>
+        <div>
+          <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
+          <notifications :group="'warn'" :position="'top center'" :classes="'vue-notification warn'" />
+          <notifications :group="'error'" :position="'top center'" :classes="'vue-notification error'" />
+        </div>
+      </client-only>
+
+      <Footer />
     </div>
-
-    <!-- Voting Modal -->
-    <VoteModal @vote-success="onVoteSuccess" />
-
-    <!-- Notifications -->
-    <client-only>
-      <div>
-        <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
-        <notifications :group="'warn'" :position="'top center'" :classes="'vue-notification warn'" />
-        <notifications :group="'error'" :position="'top center'" :classes="'vue-notification error'" />
-      </div>
-    </client-only>
-
-    <Footer />
   </div>
 </template>
 
 <script>
-import hive from '@hiveio/hive-js'
 import NavbarBrand from '~/components/NavbarBrand'
 import Footer from '~/components/Footer'
 import ListHeadingSection from '~/components/ListHeadingSection'
@@ -344,6 +358,7 @@ import Comments from '~/components/Comments.vue'
 import CustomTextEditor from '~/components/CustomTextEditor.vue'
 import vueRemarkable from 'vue-remarkable'
 import { mapGetters } from 'vuex'
+import hive from '@hiveio/hive-js'
 
 export default {
   name: 'DiscussionsPage',
@@ -360,24 +375,19 @@ export default {
   },
   data() {
     return {
-      loading: true,
+      // Sidebar categories for filtering (includes Inleo)
       categories: [
         { value: 'peak.snaps', label: 'PeakD Snaps' },
         { value: 'leothreads', label: 'Inleo Threads' },
         { value: 'ecency.waves', label: 'Ecency Waves' }
       ],
-      quickUpdateTargets: [
-        { value: 'peak.snaps', label: 'PeakD Snaps' },
-        { value: 'ecency.waves', label: 'Ecency Waves' }
+      loading: false,
+      // Posting targets (only PeakD and Ecency)
+      postTargets: [
+        { value: 'peak.snaps', label: 'PeakD Snaps', icon: '/img/PeakDLogo.png' },
+        { value: 'ecency.waves', label: 'Ecency Waves', icon: '/img/EcencyWavesLogo.png' }
       ],
-      quickUpdateText: '',
-      quickUpdateImage: null,
-      quickUpdateImagePreview: '',
-      quickUpdateTarget: 'peak.snaps',
-      postingQuickUpdate: false,
-      quickUpdateError: '',
-      quickUpdateSuccess: false,
-      selectedCategory: 'all',
+      selectedCategories: [],
       allComments: [],
       commentsToShow: 10,
       currentUser: null,
@@ -388,6 +398,16 @@ export default {
         'leothreads': '/img/InleoThreadsLogo.jpg',
         'ecency.waves': '/img/EcencyWavesLogo.png'
       },
+      // Editor UI
+      showEditor: false,
+      editorContent: '',
+      postTarget: '',
+      postingQuickUpdate: false,
+      quickUpdateError: '',
+      selectedImageFile: null,
+      imagePreviewUrl: '',
+      uploadedImageUrl: '',
+      // Comment details
       singleComment: null,
       singleCommentReplies: [],
       loadingSingleComment: false,
@@ -399,23 +419,25 @@ export default {
       replyError: '',
       replySuccess: false,
       rootResponsePosted: false,
-      rootResponseBody: ''
+      rootResponseBody: '',
+      tags: [],
+      isMobile: false
     }
   },
   computed: {
     ...mapGetters('steemconnect', ['user']),
     filteredCommentsSorted() {
       let comments = this.allComments;
-      if (this.selectedCategory !== 'all') {
-        comments = comments.filter(c => c.category === this.selectedCategory);
+      if (this.selectedCategories.length > 0) {
+        comments = comments.filter(c => this.selectedCategories.includes(c.category));
       }
       comments = comments.sort((a, b) => new Date(b.created) - new Date(a.created));
       return comments.slice(0, this.commentsToShow);
     },
     allCommentsCount() {
       let comments = this.allComments;
-      if (this.selectedCategory !== 'all') {
-        comments = comments.filter(c => c.category === this.selectedCategory);
+      if (this.selectedCategories.length > 0) {
+        comments = comments.filter(c => this.selectedCategories.includes(c.category));
       }
       return comments.length;
     },
@@ -455,6 +477,16 @@ export default {
         }
       });
       return roots;
+    },
+    canPost() {
+      return (
+        this.editorContent.trim().length > 0 &&
+        this.postTarget &&
+        this.isLoggedIn
+      );
+    },
+    previewTime() {
+      return 'preview';
     }
   },
   watch: {
@@ -469,137 +501,129 @@ export default {
     }
   },
   methods: {
-    // --- Quick Update Feature ---
-    onQuickUpdateImageChange(e) {
+    selectCategory(cat) {
+      this.postTarget = cat;
+    },
+    onImageSelected(e) {
       const file = e.target.files[0];
       if (!file) return;
-      this.quickUpdateImage = file;
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        this.quickUpdateImagePreview = evt.target.result;
-      };
-      reader.readAsDataURL(file);
+      this.selectedImageFile = file;
+      this.imagePreviewUrl = URL.createObjectURL(file);
     },
-    removeQuickUpdateImage() {
-      this.quickUpdateImage = null;
-      this.quickUpdateImagePreview = '';
+    async uploadImage() {
+      if (!this.selectedImageFile) return '';
+      const formData = new FormData();
+      formData.append('image', this.selectedImageFile);
+      const response = await fetch(process.env.actiAppUrl + 'uploadImage', {
+        method: 'POST',
+        body: formData,
+      });
+      const result = await response.json();
+      return result.url;
+    },
+    removeImage() {
+      this.selectedImageFile = null;
+      this.imagePreviewUrl = '';
+      this.uploadedImageUrl = '';
+    },
+    resetEditor() {
+      this.editorContent = '';
+      this.postTarget = '';
+      this.selectedImageFile = null;
+      this.imagePreviewUrl = '';
+      this.uploadedImageUrl = '';
+      this.quickUpdateError = '';
+      this.tags = [];
     },
     async postQuickUpdate() {
       this.quickUpdateError = '';
-      this.quickUpdateSuccess = false;
+      let body = this.editorContent;
+      const tags = this.tags.length ? this.tags : [this.postTarget];
+      const postTarget = this.postTarget;
+
       if (!this.isLoggedIn) {
         this.quickUpdateError = 'You must be logged in to post.';
         return;
       }
-      if (!this.quickUpdateText.trim()) {
-        this.quickUpdateError = 'Update cannot be empty.';
+      if (!body || !body.trim()) {
+        this.quickUpdateError = 'Post cannot be empty.';
         return;
       }
-      if (!['peak.snaps', 'ecency.waves'].includes(this.quickUpdateTarget)) {
-        this.quickUpdateError = 'Please select a valid target.';
+      if (!tags || tags.length < 1) {
+        this.quickUpdateError = 'At least one tag required.';
         return;
       }
-      this.postingQuickUpdate = true;
-      let imageUrl = '';
-      try {
-        // Upload image if present
-        if (this.quickUpdateImage) {
-          const formData = new FormData();
-          formData.append('file', this.quickUpdateImage);
-          const res = await fetch('https://image.ecency.com/upload', {
-            method: 'POST',
-            body: formData
-          });
-          const data = await res.json();
-          if (data.url) {
-            imageUrl = data.url;
-          } else {
-            throw new Error('Image upload failed');
+      if (!(postTarget === 'peak.snaps' || postTarget === 'ecency.waves')) {
+        this.quickUpdateError = 'Please select where to post your update.';
+        return;
+      }
+
+      // Upload image if present
+      if (this.selectedImageFile) {
+        try {
+          const imageUrl = await this.uploadImage();
+          if (imageUrl) {
+            body += `\n![image](${imageUrl})\n`;
           }
+        } catch (err) {
+          this.quickUpdateError = 'Image upload failed.';
+          return;
         }
+      }
 
-        // Prepare post body
-        let body = this.quickUpdateText.trim();
-        if (imageUrl) {
-          body += `\n\n![image](${imageUrl})`;
-        }
-
-        // Prepare permlink and meta
+      this.postingQuickUpdate = true;
+      try {
         const username = this.currentUsername;
-        const permlink =
-          username.replace(/\./g, '-') +
-          '-quickupdate-' +
-          this.quickUpdateTarget.replace(/\./g, '-') +
-          '-' +
-          new Date().toISOString().replace(/[^a-zA-Z0-9]+/g, '').toLowerCase();
+        // Hive permlink: only letters, numbers, and dashes (if you want them)
+        // No dots, spaces, underscores, or special chars
+        const safeUsername = username.replace(/[^a-z0-9]/gi, '');
+        const timestamp = new Date().toISOString().replace(/[^a-z0-9]/gi, '');
+        const permlink = `discussion-${safeUsername}-${timestamp}`.toLowerCase(); // dashes are allowed
+        console.log('Permlink:', permlink);
+
         let meta = {
-          tags: [this.quickUpdateTarget, 'actifit'],
+          tags: [postTarget, ...tags.filter(t=>t!==postTarget)],
           app: 'actifit/0.5.0'
         };
-
-        // Prepare comment_options (optional, for future-proofing)
-        let comment_options = {
-          author: username,
-          permlink: permlink,
-          max_accepted_payout: '1000000.000 HBD',
-          percent_hbd: 10000,
-          allow_votes: true,
-          allow_curation_rewards: true,
-          extensions: []
-        };
-
-        // Prepare comment operation
         let cstm_params = {
           author: username,
-          title: "",
+          title: "test-title",
           body: body,
           parent_author: "",
-          parent_permlink: this.quickUpdateTarget.replace(/\./g, '-'), // <-- fix here!
+          parent_permlink: postTarget,
           permlink: permlink,
           json_metadata: JSON.stringify(meta)
         };
-
-        // Use processTrxFunc to broadcast (with comment_options)
-        let res = await this.processTrxFunc('comment', cstm_params, 'HIVE', 'comment_options', comment_options);
-        if (res.success) {
-          this.quickUpdateSuccess = true;
-          // Build the new comment object for instant UI feedback
-          // Before building newComment
-          const catObj = this.categories.find(c => c.value === this.quickUpdateTarget);
-
+        // Only use backend posting
+        console.log('cstm_params:', cstm_params); // <--- Add here
+        let res = await this.processTrxFunc('comment', cstm_params, 'HIVE');
+        if (res && res.success) {
           const newComment = {
             author: username,
             body: body,
+            title: "",
             permlink: permlink,
-            category: this.quickUpdateTarget,
-            categoryLabel: catObj ? catObj.label : '',
+            category: postTarget,
+            categoryLabel: postTarget === 'peak.snaps' ? 'PeakD Snaps' : 'Ecency Waves',
             parentAuthor: '',
-            parentPermlink: this.quickUpdateTarget.replace(/\./g, '-'),
+            parentPermlink: postTarget,
             id: `${username}-${permlink}`,
             created: new Date().toISOString(),
             active_votes: [],
             children: 0,
-            // Add any other fields you want to show
           };
-          this.allComments.unshift(newComment); // Add to top of list
-
-          this.quickUpdateText = '';
-          this.quickUpdateImage = null;
-          this.quickUpdateImagePreview = '';
+          this.allComments.unshift(newComment);
+          this.resetEditor();
           this.$notify({
             group: 'success',
             title: 'Success',
-            text: 'Update posted!',
+            text: 'Discussion posted!',
             duration: 2500
           });
-          setTimeout(() => { this.quickUpdateSuccess = false }, 2000);
-
-          // Optionally, refresh from server after a short delay to sync with blockchain
           setTimeout(() => {
             this.fetchAllComments();
           }, 2000);
-        }
-        else {
+        } else {
           this.quickUpdateError = 'Failed to post update.';
         }
         this.postingQuickUpdate = false;
@@ -608,8 +632,28 @@ export default {
         this.postingQuickUpdate = false;
       }
     },
-    // --- End Quick Update Feature ---
-
+    async processTrxFunc(op_name, cstm_params, bchain_option, op_name2, cstm_params2) {
+      // Always use backend
+      let operation = [[op_name, cstm_params]];
+      if (op_name2 && cstm_params2) operation.push([op_name2, cstm_params2]);
+      let accToken = localStorage.getItem('access_token');
+      let op_json = JSON.stringify(operation);
+      let cur_bchain = bchain_option || 'HIVE';
+      let url = new URL(process.env.actiAppUrl + 'performTrx/?user=' + this.user.account.name + '&operation=' + encodeURIComponent(op_json) + '&bchain=' + cur_bchain);
+      let reqHeads = new Headers({
+        'Content-Type': 'application/json',
+        'x-acti-token': 'Bearer ' + accToken,
+      });
+      let res = await fetch(url, {
+        headers: reqHeads
+      });
+      let outcome = await res.json();
+      if (outcome.error) {
+        return { success: false, trx: null };
+      } else {
+        return { success: true, trx: outcome.trx };
+      }
+    },
     goToSingleComment(comment) {
       this.$router.push({
         path: this.$route.path,
@@ -784,69 +828,20 @@ export default {
         meta.tags = ['hive-193552', 'actifit'];
         meta.app = 'actifit/0.5.0';
         meta.suppEdit = 'actifit.io.comment';
-        if (!localStorage.getItem('std_login')) {
-          this.$steemconnect.comment(
-            parent_author,
-            parent_permlink,
-            username,
-            permlink,
-            '',
-            body,
-            meta,
-            (err) => {
-              this.onRootReplyResult(err, true, 'STEEM', body);
-            }
-          )
-        } else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) {
-          let comment_options = {
-            author: username,
-            permlink: permlink,
-            max_accepted_payout: '1000000.000 HBD',
-            percent_hbd: 10000,
-            allow_votes: true,
-            allow_curation_rewards: true,
-            extensions: []
-          };
-          window.hive_keychain.requestPost(
-            username,
-            "",
-            body,
-            parent_permlink,
-            parent_author,
-            JSON.stringify(meta),
-            permlink,
-            JSON.stringify(comment_options), (response) => {
-              if (response.success) {
-                this.onRootReplyResult(null, true, this.cur_bchain || 'HIVE', body);
-              } else {
-                this.onRootReplyResult(response.message, false, this.cur_bchain || 'HIVE', body);
-              }
-            });
+        let cstm_params = {
+          author: username,
+          title: "",
+          body: body,
+          parent_author: parent_author,
+          parent_permlink: parent_permlink,
+          permlink: permlink,
+          json_metadata: JSON.stringify(meta)
+        };
+        let res = await this.processTrxFunc('comment', cstm_params, 'HIVE');
+        if (res.success) {
+          this.onRootReplyResult(null, true, 'HIVE', body);
         } else {
-          let cstm_params = {
-            author: username,
-            title: "",
-            body: body,
-            parent_author: parent_author,
-            parent_permlink: parent_permlink,
-            permlink: permlink,
-            json_metadata: JSON.stringify(meta)
-          };
-          let res = await this.processTrxFunc('comment', cstm_params, this.cur_bchain || 'HIVE');
-          if (res.success) {
-            this.onRootReplyResult(null, true, this.cur_bchain || 'HIVE', body);
-          } else {
-            this.onRootReplyResult('error saving', false, this.cur_bchain || 'HIVE', body);
-          }
-          let other_chain = (this.cur_bchain || 'HIVE') == 'HIVE' ? 'STEEM' : 'HIVE';
-          if (this.target_bchain == 'BOTH') {
-            let res = await this.processTrxFunc('comment', cstm_params, other_chain);
-            if (res.success) {
-              this.onRootReplyResult(null, true, other_chain, body);
-            } else {
-              this.onRootReplyResult('error saving', false, other_chain, body);
-            }
-          }
+          this.onRootReplyResult('error saving', false, 'HIVE', body);
         }
       } catch (e) {
         this.replyError = 'Failed to post reply.';
@@ -865,7 +860,6 @@ export default {
         this.replyBody = '';
         this.showRootReplyBox = false;
 
-        // Poll for the new reply to appear (max 10 seconds)
         const parent_author = this.singleComment.author;
         const parent_permlink = this.singleComment.permlink;
         const expectedReplyCount = ((this.singleCommentReplies && this.singleCommentReplies.length) ? this.singleCommentReplies.length : 0) + 1;
@@ -873,68 +867,19 @@ export default {
         const pollReplies = async () => {
           pollCount++;
           await this.fetchSingleComment();
-          // If the new reply is visible, stop polling
           if (this.singleCommentReplies && this.singleCommentReplies.length >= expectedReplyCount) {
             this.rootResponsePosted = false;
             this.replySuccess = false;
             return;
           }
-          // Otherwise, poll again (max 10 times, 1s interval)
           if (pollCount < 10) {
             setTimeout(pollReplies, 1000);
           } else {
-            // Give up after 10 seconds
             this.rootResponsePosted = false;
             this.replySuccess = false;
           }
         };
-        setTimeout(pollReplies, 1500); // Start polling after initial delay
-      }
-    },
-    async processTrxFunc(op_name, cstm_params, bchain_option, op_name2, cstm_params2) {
-      if (!localStorage.getItem('std_login')) {
-        let ops = [[op_name, cstm_params]];
-        if (op_name2 && cstm_params2) ops.push([op_name2, cstm_params2]);
-        let res = await this.$steemconnect.broadcast(ops);
-        if (res.result && res.result.ref_block_num) {
-          return { success: true, trx: res.result };
-        } else {
-          return { success: false, trx: null };
-        }
-      } else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) {
-        let ops = [[op_name, cstm_params]];
-        if (op_name2 && cstm_params2) ops.push([op_name2, cstm_params2]);
-        await window.hive_keychain.requestBroadcast(
-          this.user.account.name,
-          ops,
-          'Active', (response) => {
-            if (op_name === 'delete_comment') {
-              // handle delete
-            }
-          });
-      } else {
-        let operation = [[op_name, cstm_params]];
-        if (op_name2 && cstm_params2) operation.push([op_name2, cstm_params2]);
-        let accToken = localStorage.getItem('access_token')
-        let op_json = JSON.stringify(operation)
-        let cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
-        if (bchain_option) {
-          cur_bchain = bchain_option;
-        }
-        let url = new URL(process.env.actiAppUrl + 'performTrx/?user=' + this.user.account.name + '&operation=' + encodeURIComponent(op_json) + '&bchain=' + cur_bchain);
-        let reqHeads = new Headers({
-          'Content-Type': 'application/json',
-          'x-acti-token': 'Bearer ' + accToken,
-        });
-        let res = await fetch(url, {
-          headers: reqHeads
-        });
-        let outcome = await res.json();
-        if (outcome.error) {
-          return { success: false, trx: null };
-        } else {
-          return { success: true, trx: outcome.trx };
-        }
+        setTimeout(pollReplies, 1500);
       }
     },
     handleTranslationCacheUpdate(payload) {
@@ -942,31 +887,92 @@ export default {
         ...this.translationCache,
         [payload.id]: payload.data
       };
+    },
+    detectMobile() {
+      // Basic mobile detection
+      this.isMobile = window.innerWidth < 768;
+      window.addEventListener('resize', () => {
+        this.isMobile = window.innerWidth < 768;
+      });
     }
   },
   async mounted() {
     await this.fetchAllComments();
+    this.detectMobile();
     this.updateInterval = setInterval(() => {
       this.$forceUpdate();
     }, 1000);
   },
   beforeDestroy() {
     if (this.updateInterval) clearInterval(this.updateInterval);
+    window.removeEventListener('resize', this.detectMobile);
   }
 }
 </script>
 
+
 <style scoped>
+.sidebar {
+  position: fixed;
+  top: 88px; /* adjust according to your Navbar height */
+  left: 0;
+  width: 220px;
+  min-width: 180px;
+  max-width: 260px;
+  background: #fff6f7;
+  border-right: 1px solid #eee;
+  padding: 24px 16px 0 16px;
+  min-height: calc(100vh - 88px); /* full height minus navbar */
+  z-index: 10;
+}
+.sidebar-heading {
+  font-size: 1.18rem;
+  font-weight: bold;
+  margin-bottom: 22px;
+  color: #ff112d;
+}
+.category-filters-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.category-checkbox-sidebar {
+  font-weight: 600;
+  color: #ff112d;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.category-checkbox-sidebar input[type="checkbox"] {
+  accent-color: #ff112d;
+  width: 18px;
+  height: 18px;
+}
+.category-logo-img {
+  height: 28px;
+  width: 28px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #eee;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+.main-content {
+  margin-left: 220px;
+  min-width: 0;
+}
+
+/* ...rest of your styles unchanged... */
 .market-sub {
   font-style: italic;
 }
-
 .category-filters {
   display: flex;
   gap: 20px;
   margin-bottom: 20px;
 }
-
 .category-checkbox {
   font-weight: 600;
   color: red;
@@ -974,7 +980,6 @@ export default {
   align-items: center;
   gap: 6px;
 }
-
 .category-checkbox input[type="radio"] {
   accent-color: red;
   width: 18px;
@@ -991,28 +996,23 @@ export default {
   margin-left: auto;
   margin-right: auto;
 }
-
 .report-title {
   background: #ff112d;
   padding: 10px 14px;
   min-height: 44px;
   font-size: 1.08rem;
 }
-
 .report-title a {
   color: #fff !important;
 }
-
 .report-body {
   padding: 10px 14px;
   font-size: 1.02rem;
 }
-
 .details {
   line-height: 1.15rem;
   font-size: 1rem;
 }
-
 .report-image {
   width: 100%;
   height: 120px;
@@ -1020,24 +1020,11 @@ export default {
   border-radius: 8px;
   margin-bottom: 6px;
 }
-
 .comment-images {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
   gap: 10px;
 }
-
-.category-logo-img {
-  height: 28px;
-  width: 28px;
-  object-fit: contain;
-  border-radius: 50%;
-  background: #fff;
-  border: 2px solid #eee;
-  margin-left: 8px;
-  vertical-align: middle;
-}
-
 .upvote-btn {
   color: #222;
   transition: color 0.2s;
@@ -1049,7 +1036,6 @@ export default {
 .upvote-btn:active {
   color: #ff112d;
 }
-
 .comment-btn-link {
   color: inherit;
   text-decoration: none;
@@ -1060,7 +1046,6 @@ export default {
   color: #ff112d;
   text-decoration: underline;
 }
-
 .login-popup {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -1106,7 +1091,6 @@ export default {
 .login-popup-close:hover {
   background: linear-gradient(90deg, orange, #ff112d);
 }
-
 .loading {
   text-align: center;
   padding: 50px 0;
@@ -1130,8 +1114,6 @@ export default {
 .load-more-btn:hover {
   background: #c8001e;
 }
-
-/* --- Replies Thread Style --- */
 .reply-box {
   background: #fff6f7;
   border-radius: 10px;
@@ -1186,8 +1168,6 @@ export default {
   color: #1bbf1b;
   font-size: 0.98rem;
 }
-
-/* --- Quick Update Styles --- */
 .quick-update-box {
   padding: 18px 20px;
   margin-bottom: 28px;
@@ -1279,4 +1259,303 @@ export default {
   cursor: pointer;
   line-height: 1;
 }
+.discussions-quickbox-wrap {
+  max-width: 650px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 28px;
+  background: #fff6f7;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(255,17,45,0.06);
+  padding: 18px 20px;
+}
+.discussions-quickbox-fake {
+  min-height: 46px;
+  border-radius: 7px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(255,17,45,0.03);
+  border: 1px solid #eee;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding-left: 18px;
+  color: #999;
+  font-size: 1.08rem;
+  font-style: italic;
+}
+.discussions-quickbox-placeholder {
+  color: #caaaaf;
+  font-size: 1.08rem;
+  font-style: italic;
+}
+.discussion-radio-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.radio-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 1.08rem;
+}
+.category-radio-logo {
+  height: 22px;
+  margin-right: 8px;
+  margin-left: 2px;
+  vertical-align: middle;
+}
+.sidebar {
+  position: fixed;
+  top: 88px;
+  left: 0;
+  width: 220px;
+  min-width: 180px;
+  max-width: 260px;
+  background: #fff6f7;
+  border-right: 1px solid #eee;
+  padding: 24px 16px 0 16px;
+  min-height: calc(100vh - 88px);
+  z-index: 10;
+}
+.sidebar-heading {
+  font-size: 1.18rem;
+  font-weight: bold;
+  margin-bottom: 22px;
+  color: #ff112d;
+}
+.category-filters-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.category-checkbox-sidebar {
+  font-weight: 600;
+  color: #ff112d;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.category-checkbox-sidebar input[type="checkbox"] {
+  accent-color: #ff112d;
+  width: 18px;
+  height: 18px;
+}
+.category-logo-img {
+  height: 28px;
+  width: 28px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #eee;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+.main-content {
+  margin-left: 220px;
+  min-width: 0;
+}
+
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .main-content { margin-left: 0; }
+}
+
+/* Discussions Editor Card */
+.discussions-editor-wrap {
+  max-width: 650px;
+  margin: 0 auto 28px auto;
+}
+.discussions-editor-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 14px rgba(255,17,45,0.12);
+  padding: 18px 20px 24px 20px;
+  margin: 0 auto;
+  position: relative;
+}
+.editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.editor-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #ff112d;
+}
+.editor-info {
+  color: #ff112d;
+  font-size: 1.18rem;
+  margin: 0 10px;
+}
+.editor-close {
+  background: #ff112d;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 14px;
+  font-size: 1.08rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+.editor-title-input {
+  width: 100%;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 1.13rem;
+  margin-bottom: 8px;
+}
+.editor-separator {
+  border: none;
+  border-top: 1px solid #ff112d;
+  margin: 8px 0 12px 0;
+}
+.editor-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.32rem;
+  color: #ff112d;
+  transition: color 0.15s;
+  display: flex;
+  align-items: center;
+}
+.icon-btn:active,
+.icon-btn:hover {
+  color: orange;
+}
+.action-icon {
+  font-size: 1.3rem;
+}
+.category-select {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 12px;
+}
+.cat-btn {
+  background: #f1f1f1;
+  border: 2px solid #f1f1f1;
+  border-radius: 50%;
+  padding: 4px;
+  cursor: pointer;
+  transition: border 0.18s;
+}
+.cat-btn.selected {
+  border: 2px solid #ff112d;
+  background: #fff6f7;
+}
+.cat-icon {
+  height: 28px;
+  width: 28px;
+  object-fit: contain;
+}
+.post-btn {
+  background: #ff112d;
+  color: #fff;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 28px;
+  font-size: 1.08rem;
+  cursor: pointer;
+  transition: background 0.18s;
+  margin-left: auto;
+}
+.post-btn:disabled {
+  background: #f1f1f1;
+  color: #aaa;
+  cursor: not-allowed;
+}
+.editor-image-preview {
+  margin-bottom: 8px;
+  position: relative;
+  display: inline-block;
+}
+.editor-image-preview img {
+  max-width: 180px;
+  max-height: 120px;
+  border-radius: 8px;
+  border: 1px solid #eee;
+}
+.editor-remove-img {
+  position: absolute;
+  top: 1px;
+  right: 2px;
+  background: #ff112d;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 1rem;
+  cursor: pointer;
+  line-height: 1;
+}
+.editor-body-input {
+  width: 100%;
+  border: 1px solid #eee;
+  border-radius: 7px;
+  padding: 8px 12px;
+  font-size: 1.09rem;
+  resize: vertical;
+  background: #fff;
+  color: #222;
+  margin-bottom: 8px;
+  outline: none;
+  transition: border 0.18s;
+}
+.editor-body-input:focus {
+  border-color: orange;
+}
+
+/* Real-time Preview Card */
+.editor-preview-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(255,17,45,0.06);
+  padding: 13px 18px 8px 18px;
+  margin: 18px 0 0 0;
+}
+.preview-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.05rem;
+  font-weight: bold;
+  color: #ff112d;
+  margin-bottom: 8px;
+}
+.preview-user { color: #ff112d; }
+.preview-time { color: #8e8e8e; font-size: 0.95rem;}
+.preview-title {
+  font-size: 1.13rem;
+  font-weight: 500;
+  margin-bottom: 6px;
+  display: block;
+}
+.preview-image img {
+  max-width: 130px;
+  max-height: 80px;
+  border-radius: 7px;
+  margin-bottom: 6px;
+}
+.preview-content {
+  color: #444;
+  font-size: 1.08rem;
+  margin-top: 4px;
+  display: block;
+}
+
 </style>
