@@ -1,7 +1,8 @@
 <template>
   <div class="col-md-4 order-md-1">
     
-    <div class="user-sidebar sticky-top" :class="[darkModeClass, 'align-to-content']">
+    <!-- The 'sticky-top' class has been removed. Stickiness is now handled in CSS. -->
+    <div class="user-sidebar" :class="[darkModeClass, 'align-to-content']">
       <div class="sidebar-scroll-container">
         <div v-if="authorAccountInfo" class="user-sidebar-content">
           
@@ -41,30 +42,20 @@
             </li>
           </ul>
 
-          <!-- Horizontal Scrolling Navigation with Arrows Underneath -->
+          <!-- Wrapping Navigation Links -->
           <div class="scrolling-nav-container">
-            <ul class="list-unstyled nav-list" ref="navListContainer" @scroll.passive="handleNavScroll">
+            <ul class="list-unstyled nav-list">
               <li><nuxt-link :to="'/@' + report.author+'/blog'"><i class="fas fa-book-open fa-fw"></i> Blog Posts</nuxt-link></li>
               <li><nuxt-link :to="'/@' + report.author + '/comments'"><i class="far fa-comments fa-fw"></i> Comments</nuxt-link></li>
               <li><nuxt-link :to="'/@' + report.author + '/videos'"><i class="fas fa-video fa-fw"></i> Videos</nuxt-link></li>
               <li><nuxt-link :to="'/activity/@' + report.author"><i class="fas fa-running fa-fw"></i> Actifit Reports</nuxt-link></li>
               <li><nuxt-link :to="'/@' + report.author + '/wallet'"><i class="fas fa-wallet fa-fw"></i> Wallet</nuxt-link></li>
             </ul>
-            
-            <!-- Arrow Controls -->
-            <div v-if="hasOverflow" class="nav-arrow-controls">
-              <button @click="scrollNav(-1)" :disabled="!canScrollLeft" class="nav-arrow prev" aria-label="Scroll Left">
-                <i class="fas fa-chevron-left"></i>
-              </button>
-              <button @click="scrollNav(1)" :disabled="!canScrollRight" class="nav-arrow next" aria-label="Scroll Right">
-                <i class="fas fa-chevron-right"></i>
-              </button>
-            </div>
           </div>
           
           <!-- RECENT POSTS CAROUSEL SECTION -->
           <div class="recent-posts-section">
-            <h4 class="section-title">{{$t('recent_post')}}</h4>
+            <h4 class="section-title">Recent Posts</h4>
             
             <div v-if="postsLoading" class="text-center py-4">
               <i class="fas fa-spinner fa-spin fa-2x text-brand"></i>
@@ -127,9 +118,6 @@ export default {
       recentPosts: [],
       postsLoading: true,
       currentPostIndex: 0,
-      hasOverflow: false,
-      canScrollLeft: false,
-      canScrollRight: false,
     }
   },
   computed: {
@@ -158,24 +146,9 @@ export default {
         this.fetchRecentPosts();
       }
     },
-    'authorAccountInfo': {
-      handler() {
-        this.$nextTick(() => { this.updateNavScrollState(); });
-      },
-      deep: true
-    }
   },
   mounted() {
     this.fetchRecentPosts();
-    if (process.client) {
-      this.$nextTick(() => { this.updateNavScrollState(); });
-      window.addEventListener('resize', this.updateNavScrollState, { passive: true });
-    }
-  },
-  beforeDestroy() {
-    if (process.client) {
-      window.removeEventListener('resize', this.updateNavScrollState);
-    }
   },
   methods: {
     formatDate(isoDate) {
@@ -218,7 +191,7 @@ export default {
       } else if (newIndex >= this.recentPosts.length) {
         this.currentPostIndex = 0;
       } else {
-        this.currentPostIndex = newIndex;
+        this.currentPostIndex = new_index;
       }
     },
     async fetchRecentPosts() {
@@ -247,114 +220,63 @@ export default {
         this.postsLoading = false;
       }
     },
-    updateNavScrollState() {
-      const el = this.$refs.navListContainer;
-      if (!el) return;
-      
-      this.hasOverflow = el.scrollWidth > el.clientWidth;
-      
-      if (!this.hasOverflow) {
-        this.canScrollLeft = false;
-        this.canScrollRight = false;
-        return;
-      }
-
-      this.canScrollLeft = el.scrollLeft > 5;
-      this.canScrollRight = el.scrollLeft < (el.scrollWidth - el.clientWidth - 5);
-    },
-    handleNavScroll() {
-      window.requestAnimationFrame(this.updateNavScrollState);
-    },
-    scrollNav(direction) {
-      const el = this.$refs.navListContainer;
-      if (!el) return;
-      const scrollAmount = el.clientWidth * 0.8 * direction;
-      el.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-    },
   }
 }
 </script>
 
 <style scoped>
-.sidebar-scroll-container {
-  max-height: calc(100vh - 110px); 
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding-right: 10px; 
-  margin-right: -10px; 
-}
-.sidebar-scroll-container::-webkit-scrollbar { width: 5px; }
-.sidebar-scroll-container::-webkit-scrollbar-track { background: transparent; }
-.sidebar-scroll-container::-webkit-scrollbar-thumb { background-color: #ccc; border-radius: 20px; }
 
-/* --- REFINED HORIZONTAL SCROLLING NAVIGATION --- */
+
+/* --- WRAPPING NAVIGATION --- */
 .scrolling-nav-container {
-  padding-top: 1rem;
-  border-top: 1px solid #eee;
   margin-bottom: 1rem;
 }
 
 .nav-list {
   display: flex;
-  flex-wrap: nowrap;
-  overflow-x: auto;
+  flex-wrap: wrap; 
+  justify-content: center;
   gap: 10px;
-  padding: 5px 0; /* Provides space for hover effect */
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-  scroll-snap-type: x mandatory;
+  padding: 5px 0;
 }
-.nav-list::-webkit-scrollbar { display: none; }
-.nav-list li { list-style: none; flex-shrink: 0; scroll-snap-align: start; }
-.nav-list li a { display: flex; align-items: center; justify-content: center; background-color: transparent; color: #555; padding: 8px 16px; border-radius: 20px; text-decoration: none; font-size: 0.9rem; font-weight: 500; white-space: nowrap; transition: all 0.2s ease; border: 2px solid #ff112d; }
-.nav-list li a:hover { background-color: #ff112d; color: white; transform: translateY(-3px); }
+.nav-list li { list-style: none; }
+.nav-list li a { 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  background-color: transparent; 
+  color: #555; 
+  padding: 8px 16px; 
+  border-radius: 20px; 
+  text-decoration: none; 
+  font-size: 0.9rem; 
+  font-weight: 500; 
+  white-space: nowrap; 
+  transition: all 0.2s ease; 
+  border: 2px solid #ff112d; 
+}
+.nav-list li a:hover { 
+  background-color: #ff112d; 
+  color: white; 
+  transform: translateY(-3px); 
+}
 .nav-list .fa-fw { margin-right: 8px; }
 
-
-/* --- Styling for Nav Arrows Underneath --- */
-.nav-arrow-controls {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin-top: 12px;
+.user-sidebar { 
+  background: linear-gradient(to bottom, #fdddb3, #ffffff 250px); 
+  padding: 1.5rem; 
+  border: 1px solid #fbe5c5; 
+  border-right: none; 
+  border-radius: 12px 0 0 12px; 
+  color: #555; 
+  transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  
+  position: -webkit-sticky; /* For Safari */
+  position: sticky;
+  top: 90px; 
 }
-
-.nav-arrow {
-  background-color: #f1f3f5;
-  border: 1px solid #dee2e6;
-  color: #495057;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  padding: 0;
-}
-
-.nav-arrow:not(:disabled):hover {
-  background-color: #ff112d;
-  border-color: #ff112d;
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.nav-arrow:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.nav-arrow .fas {
-  font-size: 14px;
-}
-
 
 /* --- General & Preserved Styles --- */
-.user-sidebar { background: linear-gradient(to bottom, #fdddb3, #ffffff 250px); padding: 1.5rem; border: 1px solid #fbe5c5; border-right: none; border-radius: 12px 0 0 12px; color: #555; transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease; }
-.user-sidebar.sticky-top { top: 90px; }
 .sidebar-avatar { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #ff112d; }
 .user-header .card-title { font-size: 1.25rem; }
 .username-link { color: #d9001b; text-decoration: none; transition: color 0.3s ease; }
@@ -362,10 +284,35 @@ export default {
 .text-muted { color: #888 !important; transition: color 0.3s ease; }
 .user-rank-badge { background-color: #ff112d; color: white; padding: 2px 8px; font-size: 0.8rem; font-weight: normal; border-radius: 10em; border: 1px solid white; box-shadow: 0 0 0 1px #ff112d; line-height: 1.2; }
 .user-description { font-size: 0.9rem; color: #666; border-bottom: 1px solid #eee; padding-bottom: 1rem; }
-.stats-list li { display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 0; border-bottom: 1px solid #eee; font-size: 0.9rem; }
-.stats-list li:last-child { border-bottom: none; }
-.stats-list li span { color: #777; transition: color 0.3s ease; }
-.stats-list li strong { font-size: 1rem; color: #333; transition: color 0.3s ease; }
+
+/* --- Uniform Stats List --- */
+.stats-list {
+  border-bottom: 1px solid #eee;
+}
+.stats-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 0;
+  font-size: 0.9rem;
+  border-top: 1px solid #eee;
+}
+.stats-list li:first-child {
+  border-top: none;
+}
+.stats-list li span {
+  color: #777;
+  transition: color 0.3s ease;
+}
+.stats-list li strong {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  transition: color 0.3s ease;
+  white-space: nowrap;
+  margin-left: 1rem;
+}
+
 .recent-posts-section { margin-top: 1rem; padding-top: 1.5rem; border-top: 1px solid #eee; }
 .section-title { font-size: 1.1rem; font-weight: 600; color: #333; margin-bottom: 1rem; }
 .mini-carousel { position: relative; }
@@ -387,17 +334,17 @@ export default {
 .user-sidebar.dark-mode-active { background: linear-gradient(to bottom, #9c651b, #202022 250px); border-color: #543810; color: #e0e0e0; }
 .dark-mode-active .username-link { color: #ff112d; }
 .dark-mode-active .text-muted { color: #b09a7a !important; }
-.dark-mode-active .user-description { color: #ccc; border-bottom-color: #543810; }
-.dark-mode-active .stats-list li,
-.dark-mode-active .scrolling-nav-container,
-.dark-mode-active .recent-posts-section { border-top-color: #543810; border-bottom-color: #543810; }
+.dark-mode-active .user-description { 
+  color: #ccc; 
+  border-bottom-color: #543810; 
+}
+.dark-mode-active .stats-list { border-bottom-color: #543810; }
+.dark-mode-active .stats-list li { border-top-color: #543810; }
+.dark-mode-active .recent-posts-section { border-top-color: #543810; }
 .dark-mode-active .stats-list li span { color: #b09a7a; }
 .dark-mode-active .stats-list li strong { color: #fff; }
 .dark-mode-active .nav-list li a { color: #e0e0e0; border-color: #ff112d; }
 .dark-mode-active .nav-list li a:hover { background-color: #ff112d; color: white; }
-.dark-mode-active .nav-arrow { background-color: #3e3e42; border-color: #555; color: #ddd; }
-.dark-mode-active .nav-arrow:not(:disabled):hover { background-color: #ff112d; border-color: #ff112d; color: white; }
-.dark-mode-active .nav-arrow:disabled { opacity: 0.5; }
 .dark-mode-active .section-title { color: #e0e0e0; }
 .dark-mode-active .post-card { background: #3e3e42; }
 .dark-mode-active .post-card-image-container { background-color: #2c2c2e; }
