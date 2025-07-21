@@ -1,17 +1,89 @@
 <template>
-	<div class="steem-stats pt-2" v-if="getVotingPower">
-		<span v-if="!minView"><span><i class="fa-solid fa-thumbs-up text-brand"></i>&nbsp;{{ $t('Your_Voting_Power') }} </span><span :style="displayProperColor">{{getVotingPower}}</span><span><small v-if="this.user"> ({{ $t('Full_In') }} {{timeToFull(this.currentVotingPower)}})</small> <a href="#" data-toggle="modal" data-target="#notifyModal"><i class="fas fa-info-circle"></i></a></span></span>
-		<span v-else><span><i class="fa-solid fa-thumbs-up text-brand"></i>&nbsp;{{ $t('My_Voting_Power') }} </span><span :style="displayProperColor">{{getVotingPower}}</span></span>
-		<div v-if="showVPInfo">{{ $t('VP_desc') }}</div>
-		<div class="progress ml-4">
-		  <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" :aria-valuenow="currentVotingPower" aria-valuemin="0" aria-valuemax="100" :style="{ width: currentVotingPower + '%' }"></div>
-		</div>
-		<span v-if="!minView"><span><i class="fa-sharp fa-solid fa-bolt text-brand"></i>&nbsp;{{ $t('Your_RC') }} </span><span :style="displayProperColor">{{this.currentRCPercent}}</span><span><small v-if="this.user"> ({{ $t('Full_In') }} {{timeToFull(this.currentRC)}})</small> <a href="#" data-toggle="modal" data-target="#notifyModalRC"><i class="fas fa-info-circle"></i></a></span></span>
-		<span v-else><span><i class="fa-sharp fa-solid fa-bolt text-brand"></i>&nbsp;{{ $t('My_RC') }} </span><span :style="displayProperColor">{{this.currentRCPercent}}</span></span>
-		<div v-if="showRCInfo">{{ $t('RC_desc') }}</div>
-		<div class="progress ml-4">
-			<div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" :aria-valuenow="currentRCPercent" aria-valuemin="0" aria-valuemax="100" :style="{ width: currentRCPercent}"></div>
-		</div>
+	<!-- Root container, only renders if we have data -->
+	<div v-if="getVotingPower">
+
+		<!-- GAUGE VIEW (for main card, when minView is false) -->
+		<template v-if="!minView">
+			<div class="steem-stats-container steem-stats-gauges">
+				<!-- Gauge Container: VP -->
+				<div class="gauge-container">
+					<div class="gauge-wrapper" @mouseover="showVpTooltip = true" @mouseleave="showVpTooltip = false">
+						<div class="gauge" :style="vpGaugeStyle">
+							<div class="gauge-center">
+								<div class="gauge-value text-brand">
+									{{ parseFloat(currentVotingPower).toFixed(1) }}<small>%</small>
+								</div>
+							</div>
+						</div>
+						<div class="gauge-hover-tooltip" :class="{ visible: showVpTooltip }">
+							<div class="tooltip-content">
+								<small>{{ $t('Full_In') }}</small>
+								<span class="tooltip-time">{{ timeToFull(this.currentVotingPower) }}</span>
+							</div>
+						</div>
+					</div>
+					<div class="gauge-label-container">
+						<span class="gauge-label">{{ $t('VP') }}</span>
+						<a href="#" data-toggle="modal" data-target="#notifyModal"><i class="fas fa-info-circle ml-1"></i></a>
+					</div>
+				</div>
+
+				<!-- Gauge Container: RC -->
+				<div class="gauge-container">
+					<div class="gauge-wrapper" @mouseover="showRcTooltip = true" @mouseleave="showRcTooltip = false">
+						<div class="gauge" :style="rcGaugeStyle">
+							<div class="gauge-center">
+								<div class="gauge-value text-brand">
+									{{ parseFloat(currentRC).toFixed(1) }}<small>%</small>
+								</div>
+							</div>
+						</div>
+						<div class="gauge-hover-tooltip" :class="{ visible: showRcTooltip }">
+							<div class="tooltip-content">
+								<small>{{ $t('Full_In') }}</small>
+								<span class="tooltip-time">{{ timeToFull(this.currentRC) }}</span>
+							</div>
+						</div>
+					</div>
+					<div class="gauge-label-container">
+						<span class="gauge-label">{{ $t('RC') }}</span>
+						<a href="#" data-toggle="modal" data-target="#notifyModalRC"><i class="fas fa-info-circle ml-1"></i></a>
+					</div>
+				</div>
+			</div>
+		</template>
+
+		<!-- PROGRESS BAR VIEW (for user menu, when minView is true) -->
+		<template v-else>
+			<div class="steem-stats-container steem-stats-progress">
+				<!-- Voting Power Section -->
+				<div class="stat-line">
+					<!-- MODIFIED: Now uses text-brand class for consistent color -->
+					<i class="fa-solid fa-thumbs-up stat-icon text-brand"></i>
+					<div class="stat-text-content">
+						<span>{{ $t('My_Voting_Power') }} </span>
+						<!-- MODIFIED: Now uses text-brand class for consistent color -->
+						<span class="text-brand">{{ getVotingPower }}</span>
+					</div>
+				</div>
+				<div class="progress">
+					<div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" :class="{'bg-success': currentVotingPower > 80, 'bg-warning': currentVotingPower <= 80 && currentVotingPower > 60, 'bg-danger': currentVotingPower <= 60}" :style="{ width: currentVotingPower + '%' }"></div>
+				</div>
+
+				<!-- Resource Credits Section -->
+				<div class="stat-line">
+					<i class="fa-sharp fa-solid fa-bolt stat-icon text-brand"></i>
+					<div class="stat-text-content">
+						<span>{{ $t('My_RC') }} </span>
+						<span class="text-brand">{{ this.currentRCPercent }}</span>
+					</div>
+				</div>
+				<div class="progress">
+					<div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" :style="{ width: currentRCPercent}"></div>
+				</div>
+			</div>
+		</template>
+
 	</div>
 </template>
 

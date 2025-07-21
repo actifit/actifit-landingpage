@@ -127,7 +127,7 @@
     <!-- INTRO SECTION - NEW ANIMATED FRAME DESIGN -->
     <section class="intro reveal" id="content">
       <div class="intro-showcase-container">
-        <img src="/img/logo.png" alt="Actifit Logo" class="intro-logo" />
+        <img src="/img/actifit_logo_200.png" alt="Actifit Logo" class="intro-logo" />
         <h1 class="headline">
           {{ $t('Actifit_title') }}
         </h1>
