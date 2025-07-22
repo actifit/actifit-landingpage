@@ -42,34 +42,47 @@ export const commonCardMixin = {
     bodySnippet () {
       if (!this.cardData || !this.cardData.body) return ''
       let postContent = this.$cleanBody(this.cardData.body, true)
-      // This now correctly uses the truncateString function, which defaults to 150
       postContent = this.truncateString(postContent)
       return postContent.replace(/<[^>]+>/g, '')
     },
     postImages () {
-      if (!this.cardData || !this.cardData.json_metadata) return []
+      if (!this.cardData) return []
 
+      let foundImages = []
+
+      // Step 1: Find images in metadata.
       const metaImages = this.meta.image
-      let initialImages = []
       if (Array.isArray(metaImages)) {
-        initialImages = metaImages
+        foundImages.push(...metaImages)
       } else if (metaImages) {
-        initialImages = [metaImages]
+        foundImages.push(metaImages)
       }
 
-      if (initialImages.length === 0) return []
+      // Step 2: Find images in the RAW post body (does not use $cleanBody).
+      if (this.cardData.body) {
+        const imageRegex = /!\[.*?\]\((.*?)\)|<img.*?src=["'](.*?)["']/g
+        let match
+        while ((match = imageRegex.exec(this.cardData.body)) !== null) {
+          const url = match[1] || match[2]
+          if (url) {
+            foundImages.push(url)
+          }
+        }
+      }
 
-      const brandingImagesRegex = /DQmNp6YwAm2qwquALZw8PdcovDorwaBSFuxQ38TrYziGT6b|DQmY67NW9SgDEsLo2nsAw4nYcddrTjp4aHNLyogKvGuVMMH|DQmW1VsUNbEjTUKawau4KJQ6agf41p69teEvdGAj1TMXmuc|DQmXv9QWiAYiLCSr3sKxVzUJVrgin3ZZWM2CExEo3fd5GUS|DQmdnh1nApZieHZ3s1fEhCALDjnzytFwo78zbAY5CLUMpoG|DQmZ6ZT8VaEpaDzB16qZzK8omffbWUpEpe4BkJkMXmN3xrF|DQmRgAoqi4vUVymaro8hXdRraNX6LHkXhMRBZxEo5vVWXDN|5CEvyaWxjaErqc3i7tYRQutZDwQPeZ8E6Ha3BenkA3Uc6fhKSLZ62PuSojTnM4kkLrYUdChBgBHoPxiDt|23tm6o6cmgwSRVABZSPxMC77Sfa2VNsaTtHWsjEpV1hWdQSe2s4FxvCyifsbKyESxfiPu|DQmUVjgmJHvtbYB2APdxqNxxkZeJ2KvPeXEE7v3BpxGJkbR|23tkbEYQioWnn3mfu8tWBh3x8n1Wz8TM9nH6SPRoghyZ46q2NNzt3aFsds2c8SjoknXRM|DQmdvc788wxsBSQHY3z21o3wSTU7hqRnyYc2JFEn2pEYSev|DQmeWzNEfmAnX91Ze89zqQU3B2uS58sn6dc2A6L74xLfAvr|DQmXi8aWqhnxa466MiBEhhTTCHeehoMuGrohtNG7et92Ne|DQmUtuWaSFoo8AtWd9fo4Tb7AEGhLo8rRrjqKPHHz2o7Mup|DQmcngR7AdBJio52C5stkD5C7vgsQ1yDH57Lb4J96Pys4a9|DQmRDW8jdYmE37tXvM6xPxuNnzNQnUJWSDnxVYyRJEHyc9H|DQmdNAWWwv6MAJjiNUWRahmAqbFBPxrX8WLQvoKyVHHqih1|DQmPKUZ5uZpL3Uq6LUUQXgNaaqsyX7ADpNyF4wHeTScs3xD|DQmeG5Bv1gKu2rQFWA1hH3QxzLzgzDPhDwieEEpy4WPnqN4|DQmPscjCVBggXvJT2GaUp66vbtyxzdzyHuhnzc38WDp4Smg|DQmV7NRosGCmNLsyHGzmh4Vr1pQJuBPEy2rk3WvnEUDxDFA|DQmY5UUP99u5ob3D8MA9JJW23zXLjHXHSRofSH3jLGEG1Yr|DQmQqfpSmcQtfrHAtzfBtVccXwUL9vKNgZJ2j93m8WNjizw|DQmbWy8KzKT1UvCvznUTaFPw6wBUcyLtBT5XL9wdbB7Hfmn|DQmV2hBheBVo9QWTXCxvqRqe4Fsg6kFTGggsTNGga9gTUHm|23w3F6U3PgtaT14tL5ewc1FoCwJcebdmZ3nrj2H6x2cTf4RzKWuicnQqvJGQ8tZxqX4Q5|ACTIVITYDQmeG5Bv1gKu2rQFWA1hH3QxzLzgzDPhDwieEEpy4WPnqN4|23yJg2hJAuEDUwg82kS1eC3EQqkVDzPEEyPa4rwymVHoz5mKPanjmshFa5s6tcPe3SP9c|DQmQJeGKQVsYFDFnHxgTHyNdrZxQmjLSJxz1wLB5HJDaZV3|DQmYfJ7SsTGpkR6gWoyLzo4pGrxnFopkcKzRVjgE6NRRXQL|DQmRoHaVPUiTagwviNmie8Ub5j4ZW1VcJGycZebmiH8ZdH5|AJpkUkMYpoVBmYDWsVtg7vaddiSqbMufvdoJ6w3FbzbvNTbkC6fgma1R8b47CMn|AJbhBb9Ev3i1cHKtjoxtsCAaXK9njP56dzMwBRwfZVZ21WseKsCa6ZkfAbLGnbh|AJmthV3QiiU3f2pVE2wEzBrLJp6AYgFwbB9WWqWFhA7ta3ejN2BcFkpbhTLDCQb/i;
-
-      const userImages = initialImages.filter(url => {
-        if (typeof url !== 'string') return false
-        if (brandingImagesRegex.test(url)) return false
-        const isStandardImageFile = /\.(jpg|jpeg|png|gif|webp)$/i.test(url.split('?')[0]);
-        const isFromTrustedHost = /usermedia\.actifit\.io|images\.hive\.blog|cdn\.liketu\.com|pixabay\.com|files\.peakd\.com|images\.d\.buzz|img\.leopedia\.io|images\.ecency\.com|ipfs-3speak\.b-cdn\.net/.test(url);
-        return isFromTrustedHost || isStandardImageFile;
+      // Step 3: Create a unique list and filter it.
+      //  uses a simple branding list to avoid complex regex issues.
+      const brandingHashes = new Set(['DQmNp6YwAm2qwquALZw8PdcovDorwaBSFuxQ38TrYziGT6b', 'DQmY67NW9SgDEsLo2nsAw4nYcddrTjp4aHNLyogKvGuVMMH', 'DQmW1VsUNbEjTUKawau4KJQ6agf41p69teEvdGAj1TMXmuc'])
+      return [...new Set(foundImages)].filter(url => {
+        if (typeof url !== 'string' || !url.startsWith('http')) {
+          return false
+        }
+        // Simple check to remove common branding images
+        for (const hash of brandingHashes) {
+          if (url.includes(hash)) return false
+        }
+        return true
       })
-
-      return [...new Set(userImages)]
     },
     getVoteCount () {
       return (this.cardData && Array.isArray(this.cardData.active_votes)) ? this.cardData.active_votes.length : 0
@@ -142,6 +155,8 @@ export const commonCardMixin = {
       const resizeProxy = `https://images.hive.blog/${effectiveWidth}x0/`
       return resizeProxy + url
     },
+
+   
     setupImages (width) {
       if (width <= 0) return
 
@@ -153,12 +168,13 @@ export const commonCardMixin = {
         return
       }
 
+      
+      // Remove the exception for Pixabay. Send ALL images (except GIFs)
+      // to the getResizedImageUrl proxy to bypass hotlink protection.
       const processedImages = uniqueImages.map(url => {
-        if (url.includes('pixabay.com') || url.includes('leopedia.io')) {
-          return url
-        }
         return this.getResizedImageUrl(url, width)
       })
+
       this.allImages = processedImages
       this.currentImageIndex = 0
 
@@ -166,6 +182,7 @@ export const commonCardMixin = {
         this.imageLoading = false
       }
     },
+
     updateAndResizeImages () {
       if (!this.$el || !this.cardData || !this.cardData.json_metadata) {
         return
@@ -235,9 +252,6 @@ export const commonCardMixin = {
       if (!this.cardData) return ''
       return this.cardData.total_payout_value || this.cardData.author_payout_value || ''
     },
-    // START: MODIFIED METHOD
-    // Changed the default length to 150, which is what the body snippet needs.
-    // Other components (like CardHeader) pass an explicit value so they will not be affected.
     truncateString (str, len = 150) {
       if (!str || typeof str !== 'string') return ''
       if (str.length > len) {
@@ -245,7 +259,6 @@ export const commonCardMixin = {
       }
       return str
     },
-    // END: MODIFIED METHOD
     votePrompt (e) {
       this.$store.commit('setPostToVote', this.cardData)
     },
