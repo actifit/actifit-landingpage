@@ -42,7 +42,6 @@ export default {
   },
   watch: {
     user: function (){
-    user: function() {
       this.adjustVisibility();
     },
   },
