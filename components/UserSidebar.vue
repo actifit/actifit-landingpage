@@ -1,12 +1,11 @@
 <template>
   <div class="col-md-4 order-md-1">
     
-    <!-- The 'sticky-top' class has been removed. Stickiness is now handled in CSS. -->
     <div class="user-sidebar" :class="[darkModeClass, 'align-to-content']">
       <div class="sidebar-scroll-container">
         <div v-if="authorAccountInfo" class="user-sidebar-content">
           
-          <!-- User Header Section -->
+          <!-- User Header Section  -->
           <div class="d-flex align-items-center mb-3 user-header">
             <nuxt-link :to="'/@' + report.author">
               <img :src="`https://images.hive.blog/u/${report.author}/avatar/large`" class="sidebar-avatar"
@@ -23,10 +22,10 @@
             </div>
           </div>
 
-          <!-- User Description -->
+          <!-- User Description  -->
           <p v-if="userProfile.about" class="user-description mb-4">{{ userProfile.about }}</p>
 
-          <!-- Stats List (HIVE, AFIT, Posts) -->
+          <!-- Stats List -->
           <ul class="list-unstyled stats-list mb-4">
             <li>
               <span>HIVE Balance</span>
@@ -42,7 +41,7 @@
             </li>
           </ul>
 
-          <!-- Wrapping Navigation Links -->
+          <!-- Wrapping Navigation Links-->
           <div class="scrolling-nav-container">
             <ul class="list-unstyled nav-list">
               <li><nuxt-link :to="'/@' + report.author+'/blog'"><i class="fas fa-book-open fa-fw"></i> Blog Posts</nuxt-link></li>
@@ -53,7 +52,7 @@
             </ul>
           </div>
           
-          <!-- RECENT POSTS CAROUSEL SECTION -->
+          <!-- RECENT POSTS SECTION -  -->
           <div class="recent-posts-section">
             <h4 class="section-title">Recent Posts</h4>
             
@@ -61,30 +60,20 @@
               <i class="fas fa-spinner fa-spin fa-2x text-brand"></i>
             </div>
 
-            <div v-else-if="recentPosts.length > 0" class="mini-carousel">
-              <div class="carousel-track-container">
-                <div class="carousel-track" :style="{ transform: 'translateX(-' + currentPostIndex * 100 + '%)' }">
-                  <div v-for="post in recentPosts" :key="post.permlink" class="carousel-slide">
-                    <nuxt-link :to="'/@' + post.author + '/' + post.permlink" class="post-card">
-                      <div class="post-card-image-container">
-                        <img :src="getPostImage(post)" class="post-card-image" @error="$event.target.src='https://actifit.io/img/user-default.png'">
-                      </div>
-                      <div class="post-card-title">
-                        {{ post.title }}
-                      </div>
-                    </nuxt-link>
+            <div v-else-if="recentPosts.length > 0" class="recent-posts-list">
+              <nuxt-link v-for="post in recentPosts" :key="post.permlink" :to="'/@' + post.author + '/' + post.permlink" class="recent-post-card">
+                <div class="post-card-background" :style="getPostCardBackground(post)"></div>
+                <div class="post-card-overlay"></div>
+                <div class="post-card-content">
+                  <h5 class="post-card-title-preview">{{ post.title }}</h5>
+                  <div class="post-card-stats">
+                    <span v-if="post.json_metadata && post.json_metadata.step_count" class="stat-item">
+                      <i class="fas fa-shoe-prints"></i> {{ formatNumber(post.json_metadata.step_count, 0) }}
+                    </span>
+                    <span class="stat-item">{{ toRelativeTime(post.created) }}</span>
                   </div>
                 </div>
-              </div>
-
-              <template v-if="recentPosts.length > 1">
-                <button @click="navigateCarousel(-1)" class="carousel-nav prev" aria-label="Previous Post">
-                  <i class="fas fa-chevron-left"></i>
-                </button>
-                <button @click="navigateCarousel(1)" class="carousel-nav next" aria-label="Next Post">
-                  <i class="fas fa-chevron-right"></i>
-                </button>
-              </template>
+              </nuxt-link>
             </div>
             
             <div v-else class="text-muted text-center py-3">
@@ -117,7 +106,6 @@ export default {
     return {
       recentPosts: [],
       postsLoading: true,
-      currentPostIndex: 0,
     }
   },
   computed: {
@@ -168,14 +156,35 @@ export default {
             ? JSON.parse(post.json_metadata) 
             : post.json_metadata;
         if (meta && meta.image && Array.isArray(meta.image) && meta.image.length > 0 && meta.image[0]) {
-          return `https://images.hive.blog/600x337/${meta.image[0]}`;
+          return `https://images.hive.blog/400x225/${meta.image[0]}`;
         }
       } catch (e) { }
       if (post.body) {
         const match = post.body.match(/https?:\/\/[^)\s]+\.(?:png|jpg|jpeg|gif|webp)/i);
-        if (match) return `https://images.hive.blog/600x337/${match[0]}`;
+        if (match) return `https://images.hive.blog/400x225/${match[0]}`;
       }
       return null;
+    },
+    getPostCardBackground(post) {
+        const imageUrl = this.getPostImage(post);
+        return { 
+            backgroundImage: imageUrl ? `url(${imageUrl})` : 'none',
+            backgroundColor: imageUrl ? '#e9ecef' : '#f0f2f5' 
+        };
+    },
+    toRelativeTime(dateString) {
+      if (!dateString) return '';
+      const date = new Date(dateString.endsWith('Z') ? dateString : dateString + 'Z');
+      const now = new Date();
+      const seconds = Math.round((now - date) / 1000);
+      const minutes = Math.round(seconds / 60);
+      const hours = Math.round(minutes / 60);
+      const days = Math.round(hours / 24);
+
+      if (seconds < 60) return 'just now';
+      if (minutes < 60) return `${minutes}m ago`;
+      if (hours < 24) return `${hours}h ago`;
+      return `${days}d ago`;
     },
     shuffleArray(array) {
       for (let i = array.length - 1; i > 0; i--) {
@@ -184,30 +193,31 @@ export default {
       }
       return array;
     },
-    navigateCarousel(direction) {
-      const newIndex = this.currentPostIndex + direction;
-      if (newIndex < 0) {
-        this.currentPostIndex = this.recentPosts.length - 1;
-      } else if (newIndex >= this.recentPosts.length) {
-        this.currentPostIndex = 0;
-      } else {
-        this.currentPostIndex = new_index;
-      }
-    },
     async fetchRecentPosts() {
       if (!this.report || !this.report.author) return;
       this.postsLoading = true;
       this.recentPosts = [];
       try {
-        const query = { sort: 'posts', account: this.report.author, limit: 20 };
+        const query = { sort: 'posts', account: this.report.author, limit: 10 };
         const userPosts = await hive.api.callAsync('bridge.get_account_posts', query);
         if (userPosts && userPosts.length > 0) {
-          let eligiblePosts = userPosts.filter(post => post.permlink !== this.report.permlink);
-          eligiblePosts = this.shuffleArray(eligiblePosts);
+          const processedPosts = userPosts.map(post => {
+            if (post && post.json_metadata && typeof post.json_metadata === 'string') {
+              try {
+                post.json_metadata = JSON.parse(post.json_metadata);
+              } catch (e) {
+                post.json_metadata = {};
+              }
+            }
+            return post;
+          });
+          
+          let eligiblePosts = processedPosts.filter(post => post.permlink !== this.report.permlink);
+          
           const finalPosts = [];
           for (const post of eligiblePosts) {
             if (finalPosts.length >= 5) break;
-            if (this.getPostImage(post) !== null) {
+            if (this.getPostImage(post)) {
               finalPosts.push(post);
             }
           }
@@ -225,58 +235,15 @@ export default {
 </script>
 
 <style scoped>
-
-
-/* --- WRAPPING NAVIGATION --- */
-.scrolling-nav-container {
-  margin-bottom: 1rem;
-}
-
-.nav-list {
-  display: flex;
-  flex-wrap: wrap; 
-  justify-content: center;
-  gap: 10px;
-  padding: 5px 0;
-}
+.scrolling-nav-container { margin-bottom: 1rem; }
+.nav-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 5px 0; }
 .nav-list li { list-style: none; }
-.nav-list li a { 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  background-color: transparent; 
-  color: #555; 
-  padding: 8px 16px; 
-  border-radius: 20px; 
-  text-decoration: none; 
-  font-size: 0.9rem; 
-  font-weight: 500; 
-  white-space: nowrap; 
-  transition: all 0.2s ease; 
-  border: 2px solid #ff112d; 
-}
-.nav-list li a:hover { 
-  background-color: #ff112d; 
-  color: white; 
-  transform: translateY(-3px); 
-}
+.nav-list li a { display: flex; align-items: center; justify-content: center; background-color: transparent; color: #555; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 0.9rem; font-weight: 700; white-space: nowrap; transition: all 0.2s ease; border: 2px solid #ff112d; }
+.nav-list li a:hover { background-color: #ff112d; color: white; transform: translateY(-3px); }
 .nav-list .fa-fw { margin-right: 8px; }
 
-.user-sidebar { 
-  background: linear-gradient(to bottom, #fdddb3, #ffffff 250px); 
-  padding: 1.5rem; 
-  border: 1px solid #fbe5c5; 
-  border-right: none; 
-  border-radius: 12px 0 0 12px; 
-  color: #555; 
-  transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-  
-  position: -webkit-sticky; /* For Safari */
-  position: sticky;
-  top: 90px; 
-}
+.user-sidebar { background: linear-gradient(to bottom, #fdddb3, #ffffff 250px); padding: 1.5rem; border: 1px solid #fbe5c5; border-right: none; border-radius: 12px 0 0 12px; color: #555; transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease; position: -webkit-sticky; position: sticky; top: 90px; }
 
-/* --- General & Preserved Styles --- */
 .sidebar-avatar { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #ff112d; }
 .user-header .card-title { font-size: 1.25rem; }
 .username-link { color: #d9001b; text-decoration: none; transition: color 0.3s ease; }
@@ -284,60 +251,53 @@ export default {
 .text-muted { color: #888 !important; transition: color 0.3s ease; }
 .user-rank-badge { background-color: #ff112d; color: white; padding: 2px 8px; font-size: 0.8rem; font-weight: normal; border-radius: 10em; border: 1px solid white; box-shadow: 0 0 0 1px #ff112d; line-height: 1.2; }
 .user-description { font-size: 0.9rem; color: #666; border-bottom: 1px solid #eee; padding-bottom: 1rem; }
-
-/* --- Uniform Stats List --- */
-.stats-list {
-  border-bottom: 1px solid #eee;
-}
-.stats-list li {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.8rem 0;
-  font-size: 0.9rem;
-  border-top: 1px solid #eee;
-}
-.stats-list li:first-child {
-  border-top: none;
-}
-.stats-list li span {
-  color: #777;
-  transition: color 0.3s ease;
-}
-.stats-list li strong {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #333;
-  transition: color 0.3s ease;
-  white-space: nowrap;
-  margin-left: 1rem;
-}
-
-.recent-posts-section { margin-top: 1rem; padding-top: 1.5rem; border-top: 1px solid #eee; }
-.section-title { font-size: 1.1rem; font-weight: 600; color: #333; margin-bottom: 1rem; }
-.mini-carousel { position: relative; }
-.carousel-track-container { overflow: hidden; border-radius: 8px; }
-.carousel-track { display: flex; transition: transform 0.4s ease-in-out; }
-.carousel-slide { flex: 0 0 100%; min-width: 100%; box-sizing: border-box; }
-.post-card { display: block; text-decoration: none; background: white; border-radius: 8px; overflow: hidden; padding: 10px; }
-.post-card-image-container { width: 100%; padding-top: 56.25%; position: relative; background-color: #f0f0f0; border-radius: 8px; overflow: hidden; }
-.post-card-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
-.post-card-title { padding: 10px 0 0 0; font-size: 0.9rem; font-weight: 600; color: #444; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
-.carousel-nav { position: absolute; top: 35%; transform: translateY(-50%); background-color: rgba(255, 255, 255, 0.9); border: 1px solid #ddd; border-radius: 50%; width: 40px; height: 40px; color: #333; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: all 0.2s ease; z-index: 10; display: flex; align-items: center; justify-content: center; }
-.carousel-nav:hover { background-color: #ff112d; color: white; border-color: #ff112d; }
-.carousel-nav .fas { font-size: 16px; }
-.carousel-nav.prev { left: 15px; } 
-.carousel-nav.next { right: 15px; }
+.stats-list { border-bottom: 1px solid #eee; }
+.stats-list li { display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 0; font-size: 0.9rem; border-top: 1px solid #eee; }
+.stats-list li:first-child { border-top: none; }
+.stats-list li span { color: #777; }
+.stats-list li strong { font-size: 1rem; font-weight: 600; color: #333; }
 .text-brand { color: #ff112d; }
 
-/* --- DARK MODE --- */
+/* --- RECENT POSTS SECTION - DUAL MODE STYLES --- */
+.recent-posts-section { margin-top: 1rem; padding-top: 1.5rem; border-top: 1px solid #eee; }
+.section-title { font-size: 1.1rem; font-weight: 600; color: #333; margin-bottom: 1rem; }
+.recent-posts-list { display: flex; flex-direction: column; gap: 1rem; }
+
+.recent-post-card { display: block; position: relative; border-radius: 12px; overflow: hidden; min-height: 110px; text-decoration: none; transition: all .3s ease-in-out; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+.recent-post-card:hover { transform: translateY(-5px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
+
+.post-card-background { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-size: cover; background-position: center; transition: transform .4s ease; }
+.recent-post-card:hover .post-card-background { transform: scale(1.05); }
+
+.post-card-overlay {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 1;
+  /* LIGHT MODE DEFAULT GRADIENT */
+  background: linear-gradient(to top, rgba(255, 255, 255, 0.98) 40%, rgba(255, 255, 255, 0.7) 70%, transparent 100%);
+}
+
+.post-card-content { position: relative; z-index: 2; padding: 1rem; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; }
+
+.post-card-title-preview {
+  font-size: 1rem; font-weight: 600; line-height: 1.3; margin-bottom: 0.75rem;
+  overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  /* LIGHT MODE DEFAULT COLOR */
+  color: #212529; text-shadow: none;
+}
+
+.post-card-stats {
+  display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; font-weight: 500;
+  padding-top: 0.5rem;
+  /* LIGHT MODE DEFAULT COLOR & BORDER */
+  color: #495057; text-shadow: none; border-top: 1px solid #e0e0e0;
+}
+.post-card-stats .stat-item { display: flex; align-items: center; }
+.post-card-stats .fas { color: #ff112d; margin-right: 0.5rem; }
+
+/* --- DARK MODE OVERRIDES --- */
 .user-sidebar.dark-mode-active { background: linear-gradient(to bottom, #9c651b, #202022 250px); border-color: #543810; color: #e0e0e0; }
 .dark-mode-active .username-link { color: #ff112d; }
 .dark-mode-active .text-muted { color: #b09a7a !important; }
-.dark-mode-active .user-description { 
-  color: #ccc; 
-  border-bottom-color: #543810; 
-}
+.dark-mode-active .user-description { color: #ccc; border-bottom-color: #543810; }
 .dark-mode-active .stats-list { border-bottom-color: #543810; }
 .dark-mode-active .stats-list li { border-top-color: #543810; }
 .dark-mode-active .recent-posts-section { border-top-color: #543810; }
@@ -346,9 +306,17 @@ export default {
 .dark-mode-active .nav-list li a { color: #e0e0e0; border-color: #ff112d; }
 .dark-mode-active .nav-list li a:hover { background-color: #ff112d; color: white; }
 .dark-mode-active .section-title { color: #e0e0e0; }
-.dark-mode-active .post-card { background: #3e3e42; }
-.dark-mode-active .post-card-image-container { background-color: #2c2c2e; }
-.dark-mode-active .post-card-title { color: #ccc; }
-.dark-mode-active .carousel-nav { background-color: #3e3e42; border-color: #555; color: #ddd; }
-.dark-mode-active .carousel-nav:hover { background-color: #ff112d; border-color: #ff112d; color: white; }
+
+.dark-mode-active .recent-post-card { box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+.dark-mode-active .recent-post-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.4); }
+
+.dark-mode-active .post-card-overlay {
+  background: linear-gradient(to top, rgba(10, 10, 10, 0.95) 40%, rgba(10, 10, 10, 0.6) 70%, transparent 100%);
+}
+.dark-mode-active .post-card-title-preview {
+  color: #f0f0f0; text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+}
+.dark-mode-active .post-card-stats {
+  color: #ccc; text-shadow: 0 1px 2px rgba(0,0,0,0.5); border-top-color: rgba(255, 255, 255, 0.2);
+}
 </style>
