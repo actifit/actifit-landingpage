@@ -28,7 +28,7 @@
       <!-- ======================================================= -->
       <!-- START: FIXED LANGUAGE SWITCHER IMPLEMENTATION           -->
       <!-- ======================================================= -->
-      <li class="nav-item dropdown mr-2" v-if="user && !hideVisualControls">
+      <li class="nav-item dropdown mr-2">
         <a class="nav-link dropdown-toggle p-0" href="#" id="language-switcher-icon" 
           aria-haspopup="true" aria-expanded="false" :title="$t('languages')" @click.prevent="isLanguageMenuOpen = !isLanguageMenuOpen">
           <span class="user-avatar group-class">
