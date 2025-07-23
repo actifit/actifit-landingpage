@@ -1,91 +1,90 @@
 <template>
   <div class="col-md-4 order-md-1">
     
-    <div class="user-sidebar" :class="[darkModeClass, 'align-to-content']">
-      <div class="sidebar-scroll-container">
-        <div v-if="authorAccountInfo" class="user-sidebar-content">
-          
-          <!-- User Header Section  -->
-          <div class="d-flex align-items-center mb-3 user-header">
-            <nuxt-link :to="'/@' + report.author">
-              <img :src="`https://images.hive.blog/u/${report.author}/avatar/large`" class="sidebar-avatar"
-                   @error="$event.target.src='https://actifit.io/img/user-default.png'">
-            </nuxt-link>
-            <div class="ml-3">
-              <div class="d-flex align-items-center">
-                <span class="card-title mb-0">
-                  <nuxt-link :to="'/@' + report.author" class="username-link">@{{ report.author }}</nuxt-link>
-                </span>
-                <span v-if="userRank" class="user-rank-badge ml-2">{{ displayCoreUserRank }}</span>
-              </div>
-              <small v-if="authorAccountInfo.created" class="text-muted">Joined {{ formatDate(authorAccountInfo.created) }}</small>
+    <!-- ref is now on the main sidebar element, which will be transformed -->
+    <div class="user-sidebar" :class="[darkModeClass, 'align-to-content']" ref="userSidebar">
+      <div v-if="authorAccountInfo" class="user-sidebar-content">
+        
+        <!-- User Header Section  -->
+        <div class="d-flex align-items-center mb-3 user-header">
+          <nuxt-link :to="'/@' + report.author">
+            <img :src="`https://images.hive.blog/u/${report.author}/avatar/large`" class="sidebar-avatar"
+                 @error="$event.target.src='https://actifit.io/img/user-default.png'">
+          </nuxt-link>
+          <div class="ml-3">
+            <div class="d-flex align-items-center">
+              <span class="card-title mb-0">
+                <nuxt-link :to="'/@' + report.author" class="username-link">@{{ report.author }}</nuxt-link>
+              </span>
+              <span v-if="userRank" class="user-rank-badge ml-2">{{ displayCoreUserRank }}</span>
             </div>
+            <small v-if="authorAccountInfo.created" class="text-muted">Joined {{ formatDate(authorAccountInfo.created) }}</small>
           </div>
+        </div>
 
-          <!-- User Description  -->
-          <p v-if="userProfile.about" class="user-description mb-4">{{ userProfile.about }}</p>
+        <!-- User Description  -->
+        <p v-if="userProfile.about" class="user-description mb-4">{{ userProfile.about }}</p>
 
-          <!-- Stats List -->
-          <ul class="list-unstyled stats-list mb-4">
-            <li>
-              <span>HIVE Balance</span>
-              <strong>{{ formatNumber(parseFloat(authorAccountInfo.balance), { minimumFractionDigits: 3, maximumFractionDigits: 3 }) }}</strong>
-            </li>
-            <li>
-              <span>AFIT Balance</span>
-              <strong>{{ authorAfitBalance != null ? formatNumber(authorAfitBalance, { minimumFractionDigits: 3, maximumFractionDigits: 3 }) : '...' }}</strong>
-            </li>
-            <li v-if="authorAccountInfo.post_count !== undefined">
-              <span>Posts</span>
-              <strong>{{ formatNumber(authorAccountInfo.post_count) }}</strong>
-            </li>
+        <!-- Stats List -->
+        <ul class="list-unstyled stats-list mb-4">
+          <li>
+            <span>HIVE Balance</span>
+            <strong>{{ formatNumber(parseFloat(authorAccountInfo.balance), { minimumFractionDigits: 3, maximumFractionDigits: 3 }) }}</strong>
+          </li>
+          <li>
+            <span>AFIT Balance</span>
+            <strong>{{ authorAfitBalance != null ? formatNumber(authorAfitBalance, { minimumFractionDigits: 3, maximumFractionDigits: 3 }) : '...' }}</strong>
+          </li>
+          <li v-if="authorAccountInfo.post_count !== undefined">
+            <span>Posts</span>
+            <strong>{{ formatNumber(authorAccountInfo.post_count) }}</strong>
+          </li>
+        </ul>
+
+        <!-- Wrapping Navigation Links-->
+        <div class="scrolling-nav-container">
+          <ul class="list-unstyled nav-list">
+            <li><nuxt-link :to="'/@' + report.author+'/blog'"><i class="fas fa-book-open fa-fw"></i> Blog Posts</nuxt-link></li>
+            <li><nuxt-link :to="'/@' + report.author + '/comments'"><i class="far fa-comments fa-fw"></i> Comments</nuxt-link></li>
+            <li><nuxt-link :to="'/@' + report.author + '/videos'"><i class="fas fa-video fa-fw"></i> Videos</nuxt-link></li>
+            <li><nuxt-link :to="'/activity/@' + report.author"><i class="fas fa-running fa-fw"></i> Actifit Reports</nuxt-link></li>
+            <li><nuxt-link :to="'/@' + report.author + '/wallet'"><i class="fas fa-wallet fa-fw"></i> Wallet</nuxt-link></li>
           </ul>
+        </div>
+        
+        <!-- RECENT POSTS SECTION -  -->
+        <div class="recent-posts-section">
+          <h4 class="section-title">Recent Posts</h4>
+          
+          <div v-if="postsLoading" class="text-center py-4">
+            <i class="fas fa-spinner fa-spin fa-2x text-brand"></i>
+          </div>
 
-          <!-- Wrapping Navigation Links-->
-          <div class="scrolling-nav-container">
-            <ul class="list-unstyled nav-list">
-              <li><nuxt-link :to="'/@' + report.author+'/blog'"><i class="fas fa-book-open fa-fw"></i> Blog Posts</nuxt-link></li>
-              <li><nuxt-link :to="'/@' + report.author + '/comments'"><i class="far fa-comments fa-fw"></i> Comments</nuxt-link></li>
-              <li><nuxt-link :to="'/@' + report.author + '/videos'"><i class="fas fa-video fa-fw"></i> Videos</nuxt-link></li>
-              <li><nuxt-link :to="'/activity/@' + report.author"><i class="fas fa-running fa-fw"></i> Actifit Reports</nuxt-link></li>
-              <li><nuxt-link :to="'/@' + report.author + '/wallet'"><i class="fas fa-wallet fa-fw"></i> Wallet</nuxt-link></li>
-            </ul>
+          <div v-else-if="recentPosts.length > 0" class="recent-posts-list">
+            <nuxt-link v-for="post in recentPosts" :key="post.permlink" :to="'/@' + post.author + '/' + post.permlink" class="recent-post-card">
+              <div class="post-card-background" :style="getPostCardBackground(post)"></div>
+              <div class="post-card-overlay"></div>
+              <div class="post-card-content">
+                <h5 class="post-card-title-preview">{{ post.title }}</h5>
+                <div class="post-card-stats">
+                  <span v-if="post.json_metadata && post.json_metadata.step_count" class="stat-item">
+                    <i class="fas fa-shoe-prints"></i> {{ formatNumber(post.json_metadata.step_count, 0) }}
+                  </span>
+                  <span class="stat-item">{{ toRelativeTime(post.created) }}</span>
+                </div>
+              </div>
+            </nuxt-link>
           </div>
           
-          <!-- RECENT POSTS SECTION -  -->
-          <div class="recent-posts-section">
-            <h4 class="section-title">Recent Posts</h4>
-            
-            <div v-if="postsLoading" class="text-center py-4">
-              <i class="fas fa-spinner fa-spin fa-2x text-brand"></i>
-            </div>
-
-            <div v-else-if="recentPosts.length > 0" class="recent-posts-list">
-              <nuxt-link v-for="post in recentPosts" :key="post.permlink" :to="'/@' + post.author + '/' + post.permlink" class="recent-post-card">
-                <div class="post-card-background" :style="getPostCardBackground(post)"></div>
-                <div class="post-card-overlay"></div>
-                <div class="post-card-content">
-                  <h5 class="post-card-title-preview">{{ post.title }}</h5>
-                  <div class="post-card-stats">
-                    <span v-if="post.json_metadata && post.json_metadata.step_count" class="stat-item">
-                      <i class="fas fa-shoe-prints"></i> {{ formatNumber(post.json_metadata.step_count, 0) }}
-                    </span>
-                    <span class="stat-item">{{ toRelativeTime(post.created) }}</span>
-                  </div>
-                </div>
-              </nuxt-link>
-            </div>
-            
-            <div v-else class="text-muted text-center py-3">
-              No other posts found.
-            </div>
+          <div v-else class="text-muted text-center py-3">
+            No other posts found.
           </div>
-        
         </div>
-        
-        <div v-else class="py-5 text-center">
-          <i class="fas fa-spinner fa-spin fa-3x text-brand"></i>
-        </div>
+      
+      </div>
+      
+      <div v-else class="py-5 text-center">
+        <i class="fas fa-spinner fa-spin fa-3x text-brand"></i>
       </div>
     </div>
   </div>
@@ -106,6 +105,7 @@ export default {
     return {
       recentPosts: [],
       postsLoading: true,
+      rafId: null, // ID for requestAnimationFrame to manage scrolling
     }
   },
   computed: {
@@ -137,8 +137,53 @@ export default {
   },
   mounted() {
     this.fetchRecentPosts();
+    window.addEventListener('scroll', this.handleScroll, { passive: true });
+    window.addEventListener('resize', this.handleScroll, { passive: true });
+  },
+  beforeDestroy() {
+    window.removeEventListener('scroll', this.handleScroll);
+    window.removeEventListener('resize', this.handleScroll);
+    if (this.rafId) {
+      window.cancelAnimationFrame(this.rafId);
+    }
   },
   methods: {
+    handleScroll() {
+      if (this.rafId) {
+        window.cancelAnimationFrame(this.rafId);
+      }
+
+      this.rafId = window.requestAnimationFrame(() => {
+        const sidebar = this.$refs.userSidebar;
+        if (!sidebar) return;
+
+        // The 'top' value from CSS for the sticky position
+        const stickyTopOffset = 90; 
+
+        // The visible height allocated for the sidebar
+        const sidebarVisibleHeight = window.innerHeight - stickyTopOffset;
+
+        // How much the sidebar's content height exceeds its visible area
+        const sidebarOverhang = sidebar.scrollHeight - sidebarVisibleHeight;
+
+        // If sidebar content fits within the visible area, do nothing.
+        if (sidebarOverhang <= 0) {
+          sidebar.style.transform = 'translateY(0px)';
+          return;
+        }
+
+        const pageScrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+        if (pageScrollableHeight <= 0) return;
+        
+        const scrollProgress = window.scrollY / pageScrollableHeight;
+        
+        // The distance to move the sidebar up. It should not exceed the total overhang.
+        const transformDistance = Math.min(scrollProgress * sidebarOverhang, sidebarOverhang);
+        
+        // Apply the transform to move the sidebar up
+        sidebar.style.transform = `translateY(-${transformDistance}px)`;
+      });
+    },
     formatDate(isoDate) {
       if (!isoDate) return 'NA';
       return new Date(isoDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -228,6 +273,9 @@ export default {
         this.recentPosts = [];
       } finally {
         this.postsLoading = false;
+        this.$nextTick(() => {
+          this.handleScroll();
+        });
       }
     },
   }
@@ -235,6 +283,8 @@ export default {
 </script>
 
 <style scoped>
+/* The .sidebar-scroll-container styles have been removed */
+
 .scrolling-nav-container { margin-bottom: 1rem; }
 .nav-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 5px 0; }
 .nav-list li { list-style: none; }
@@ -242,7 +292,19 @@ export default {
 .nav-list li a:hover { background-color: #ff112d; color: white; transform: translateY(-3px); }
 .nav-list .fa-fw { margin-right: 8px; }
 
-.user-sidebar { background: linear-gradient(to bottom, #fdddb3, #ffffff 250px); padding: 1.5rem; border: 1px solid #fbe5c5; border-right: none; border-radius: 12px 0 0 12px; color: #555; transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease; position: -webkit-sticky; position: sticky; top: 90px; }
+.user-sidebar {
+  background: linear-gradient(to bottom, #fdddb3, #ffffff 250px);
+  padding: 1.5rem;
+  border: 1px solid #fbe5c5;
+  border-right: none;
+  border-radius: 12px 0 0 12px;
+  color: #555;
+  transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  position: -webkit-sticky;
+  position: sticky;
+  top: 90px;
+  /* The element will be transformed, its height is determined by its content */
+}
 
 .sidebar-avatar { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #ff112d; }
 .user-header .card-title { font-size: 1.25rem; }
@@ -271,7 +333,6 @@ export default {
 
 .post-card-overlay {
   position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 1;
-  /* LIGHT MODE DEFAULT GRADIENT */
   background: linear-gradient(to top, rgba(255, 255, 255, 0.98) 40%, rgba(255, 255, 255, 0.7) 70%, transparent 100%);
 }
 
@@ -280,14 +341,12 @@ export default {
 .post-card-title-preview {
   font-size: 1rem; font-weight: 600; line-height: 1.3; margin-bottom: 0.75rem;
   overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-  /* LIGHT MODE DEFAULT COLOR */
   color: #212529; text-shadow: none;
 }
 
 .post-card-stats {
   display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; font-weight: 500;
   padding-top: 0.5rem;
-  /* LIGHT MODE DEFAULT COLOR & BORDER */
   color: #495057; text-shadow: none; border-top: 1px solid #e0e0e0;
 }
 .post-card-stats .stat-item { display: flex; align-items: center; }
