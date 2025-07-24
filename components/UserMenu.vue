@@ -29,17 +29,16 @@
       <!-- START: FIXED LANGUAGE SWITCHER IMPLEMENTATION           -->
       <!-- ======================================================= -->
       <li class="nav-item dropdown mr-2">
-        <a class="nav-link dropdown-toggle p-0" href="#" id="language-switcher-icon" 
-          aria-haspopup="true" aria-expanded="false" :title="$t('languages')" @click.prevent="isLanguageMenuOpen = !isLanguageMenuOpen">
+        <a class="nav-link dropdown-toggle p-0" href="#" id="language-switcher-icon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" :title="$t('languages')">
           <span class="user-avatar group-class">
             <i class="fas fa-language text-brand"></i>
           </span>
         </a>
-        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="language-switcher-icon" :class="{ show: isLanguageMenuOpen }">
+        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="language-switcher-icon">
           <!-- The v-for loops through all available languages -->
           <a v-for="locale in availableLocales" :key="locale.code" class="dropdown-item lang-item"
             :class="{ 'is-active': locale.code === $i18n.locale }" href="#"
-            @click.prevent.stop="switchLang(locale.code); isLanguageMenuOpen = false;">
+            @click.prevent.stop="switchLang(locale.code)">
             <!-- We only have the language name now -->
             {{ locale.name }}
           </a>
@@ -196,7 +195,6 @@ export default {
       profImgUrl: process.env.hiveImgUrl,
       notificationInterval: null,
       isMounted: false,
-      isLanguageMenuOpen: false,
     }
   },
   watch: {

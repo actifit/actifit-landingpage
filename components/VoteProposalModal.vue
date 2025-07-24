@@ -12,11 +12,10 @@
         </div>
         <p>{{ $t('proposal_modal_message') }}</p>
         <div class="text-right">
-          <!-- The button is now disabled during the voting process -->
-          <button @click="voteForProposal" class="btn m-1 col-5" :disabled="isVoting">
+          <button @click="voteForProposal" class="btn m-1 col-5">
             {{ isVoting ? $t('voting_button_text') : $t('vote_button_text') }}
           </button>
-          <button @click="readMore" class="btn m-1 col-5">{{ $t('read_more_button_text') }}</button>
+          <button @click="readMore" class="m-1 col-5">{{ $t('read_more_button_text') }}</button>
         </div>
       </div>
     </div>
@@ -116,7 +115,7 @@ export default {
 }
 
 .modal-content button {
-  background-color: #e10707;
+  background-color: #28a745;
   color: #fff;
   border: none;
   padding: 8px 12px;
@@ -125,6 +124,6 @@ export default {
 }
 
 .modal-content button:hover {
-  background-color: #ad0303;
+  background-color: #218838;
 }
 </style>
