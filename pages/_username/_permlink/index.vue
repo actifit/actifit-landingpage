@@ -3,12 +3,12 @@
     <NavbarBrand />
 
     <div v-if="!isLoading && report && report.author" class="container-fluid px-md-3 pt-5 mt-5 pb-5">
-      <!-- ADDED: A ref to the row for the sidebar to find its parent -->
+      
       <div class="row" ref="pageRow">
         <!-- Main Content Column -->
         <div class="col-md-8 order-md-2">
           
-          <!-- ADDED: The new scrollable container for all main content -->
+          <!-- This container now uses CSS 'sticky' to achieve the two-stage scroll -->
           <div class="main-content-scroll-container" ref="mainContentScroller">
 
             <div class="text-right">
@@ -174,6 +174,7 @@
         
         <!-- UserSidebar Column -->
         <UserSidebar 
+          ref="userSidebar"
           :report="report"
           :author-account-info="authorAccountInfo"
           :author-afit-balance="authorAfitBalance"
@@ -212,7 +213,6 @@ import blurt from '@blurtfoundation/blurtjs'
 import { mapGetters } from 'vuex'
 import VueScrollTo from 'vue-scrollto'
 import { translateTextWithGemini } from '~/components/gemini-client.js';
-
 import NavbarBrand from '~/components/NavbarBrand'
 import ChainSelection from '~/components/ChainSelection'
 import Footer from '~/components/Footer'
@@ -236,47 +236,24 @@ export default {
   head() { return { title: this.pageTitle } },
   data() {
     return {
-      isLoading: true,
-      report: null,
-      errorDisplay: '',
-      // Sidebar data
-      authorAccountInfo: null,
-      authorAfitBalance: null,
-      userRank: null,
-      // Main content data
-      afitReward: 0,
-      fullAFITReward: '',
-      tokenRewards: [],
-      commentsLoading: true,
-      commentBoxOpen: false,
-      replyBody: '',
-      responsePosted: false,
-      responseBody: '',
-      moderatorSignature: '',
-      loading: false,
-      pageTitle: 'Actifit Report',
-      showTranslated: false,
-      safety_post_content: '',
-	    translationLoading: false, 
-      translatedText: '', 
-      reload: 0,
-      resizeObserver: null,
-      displayMorePayoutData: false,
-      cur_bchain: 'HIVE',
+      isLoading: true, report: null, errorDisplay: '', authorAccountInfo: null,
+      authorAfitBalance: null, userRank: null, afitReward: 0, fullAFITReward: '',
+      tokenRewards: [], commentsLoading: true, commentBoxOpen: false, replyBody: '',
+      responsePosted: false, responseBody: '', moderatorSignature: '', loading: false,
+      pageTitle: 'Actifit Report', showTranslated: false, safety_post_content: '',
+	    translationLoading: false, translatedText: '', reload: 0, resizeObserver: null,
+      displayMorePayoutData: false, cur_bchain: 'HIVE',
       socialSharingDesc: process.env.socialSharingDesc,
       socialSharingQuote: process.env.socialSharingQuote,
       hashtags: process.env.socialSharingHashtags,
+      heightSyncObserver: null, 
     }
   },
   computed: {
     ...mapGetters('steemconnect', ['user', 'stdLogin']),
     ...mapGetters(['commentEntries', 'newlyVotedPosts', 'bchain', 'moderators', 'commentCountToday']),
-    body() {
-      return this.report ? this.$cleanBody(this.report.body) : '';
-    },
-    commentsAvailable() {
-      return this.commentEntries != null && !this.commentsLoading;
-    },
+    body() { return this.report ? this.$cleanBody(this.report.body) : ''; },
+    commentsAvailable() { return this.commentEntries != null && !this.commentsLoading; },
     date() {
       if (!this.report) return '';
       const date = new Date(this.report.created)
@@ -284,11 +261,7 @@ export default {
       return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${date.getHours()}:${minutes < 10 ? '0' + minutes : minutes}`
     },
     meta() {
-      try {
-        if (this.report && this.report.json_metadata) {
-          return JSON.parse(this.report.json_metadata);
-        }
-      } catch (e) {}
+      try { if (this.report && this.report.json_metadata) { return JSON.parse(this.report.json_metadata); } } catch (e) {}
       return {}; 
     },
     buildLink() { return this.report ? `/@${this.report.author}/${this.report.permlink}` : '#'; },
@@ -313,6 +286,25 @@ export default {
         VueScrollTo.scrollTo(this.$refs.commentsSection, 500, { easing: 'ease-in-out', offset: -80 });
       }
     },
+    syncColumnHeights() {
+    if (!this.$refs.mainContentScroller || !this.$refs.userSidebar) {
+      return;
+    }
+    
+    this.$nextTick(() => {
+      const mainContentEl = this.$refs.mainContentScroller;
+      const sidebarEl = this.$refs.userSidebar.$el;
+
+      if (!mainContentEl || !sidebarEl) return;
+
+      const sidebarHeight = sidebarEl.scrollHeight;
+      const viewportHeight = window.innerHeight - 90;
+      const finalHeight = Math.max(sidebarHeight, viewportHeight);
+
+      mainContentEl.style.height = `${finalHeight}px`;
+    });
+  },
+
     handleStorageChange(event) {
       if (event.key === 'access_token' || event.key === 'ssc_auth' || event.key === 'username') {
         this.$store.dispatch('steemconnect/login');
@@ -339,94 +331,59 @@ export default {
       }
     },
     async fetchPageData() {
-      this.isLoading = true;
-      this.resetData();
+      this.isLoading = true; this.resetData();
       const author = this.$route.params.username.replace('@', '');
       const permlink = this.$route.params.permlink;
       try {
         this.cur_bchain = process.client ? localStorage.getItem('cur_bchain') || 'HIVE' : 'HIVE';
-        let chainLnk = hive;
-        let nodeUrl = process.env.hiveApiNode;
+        let chainLnk = hive; let nodeUrl = process.env.hiveApiNode;
         if (this.cur_bchain === 'STEEM') { chainLnk = steem; nodeUrl = process.env.steemApiNode; }
         else if (this.cur_bchain === 'BLURT') { chainLnk = blurt; nodeUrl = process.env.blurtApiNode; }
         await chainLnk.api.setOptions({ url: nodeUrl });
-
         const reportData = await chainLnk.api.getContentAsync(author, permlink);
         if (!reportData || !reportData.author) throw new Error('Post not found');
-
         this.report = reportData;
         this.pageTitle = `${this.report.title} by @${this.report.author}`;
-        
         await this.fetchSupplementaryData();
         this.fetchReportCommentData();
-
       } catch (err) {
         this.errorDisplay = "Could not load post. It may not exist or the network is busy.";
         console.error(err);
       } finally {
-        this.isLoading = false;
-        this.alignSidebar();
+        this.isLoading = false; this.alignSidebar();
       }
     },
     async fetchSupplementaryData() {
         if (!this.report) return;
         const { author, url, permlink } = this.report;
-        
         const [accounts, afitData, rankData] = await Promise.all([
             hive.api.getAccountsAsync([author]),
             fetch(`${process.env.actiAppUrl}user/${author}`).then(res => res.json()),
             fetch(`${process.env.actiAppUrl}getRank/${author}`).then(res => res.json()),
         ]);
-
         if (accounts && accounts.length > 0) this.authorAccountInfo = accounts[0];
         if (afitData) this.authorAfitBalance = afitData.tokens;
         if (rankData) this.userRank = rankData;
-        
         fetch(`${process.env.actiAppUrl}getPostReward?user=${author}&url=${url}`).then(res => res.json()).then(json => this.afitReward = json.token_count);
         fetch(`${process.env.actiAppUrl}getPostFullAFITPayReward?user=${author}&url=${url}`).then(res => res.json()).then(json => this.fullAFITReward = json.token_count);
-
-        const scotApiUrl = this.cur_bchain === 'STEEM' 
-          ? `${scot_steemengine_api}@${author}/${permlink}` 
-          : `${scot_steemengine_api}@${author}/${permlink}${scot_hive_api_param}`;
-
-        fetch(scotApiUrl)
-          .then(res => res.json())
-          .then(json => { this.tokenRewards = Array.isArray(json) ? json : [] })
-          .catch(e => {
-            console.error("Scot API fetch failed:", e);
-            this.tokenRewards = [];
-          });
+        const scotApiUrl = this.cur_bchain === 'STEEM' ? `${scot_steemengine_api}@${author}/${permlink}` : `${scot_steemengine_api}@${author}/${permlink}${scot_hive_api_param}`;
+        fetch(scotApiUrl).then(res => res.json()).then(json => { this.tokenRewards = Array.isArray(json) ? json : [] }).catch(e => { console.error("Scot API fetch failed:", e); this.tokenRewards = []; });
     },
     fetchReportCommentData() {
         if (!this.report) return;
         this.commentsLoading = true;
-        this.$store.dispatch('fetchReportComments', this.report).then(() => {
-            this.commentsLoading = false;
-        });
+        this.$store.dispatch('fetchReportComments', this.report).then(() => { this.commentsLoading = false; });
     },
     resetData() {
-      this.isLoading = true; this.report = null; this.errorDisplay = '';
-      this.authorAccountInfo = null; this.authorAfitBalance = null; this.userRank = null;
-      this.afitReward = 0; this.tokenRewards = []; this.pageTitle = 'Loading...'; this.fullAFITReward = '';
+      this.isLoading = true; this.report = null; this.errorDisplay = ''; this.authorAccountInfo = null; this.authorAfitBalance = null;
+      this.userRank = null; this.afitReward = 0; this.tokenRewards = []; this.pageTitle = 'Loading...'; this.fullAFITReward = '';
       if (this.user) { this.moderatorSignature = ''; }
       if (this.$store) this.$store.commit('setCommentEntries', null);
     },
     copyContent(event) {
       navigator.clipboard.writeText('https://actifit.io/@' + this.report.author + '/' + this.report.permlink)
-        .then(() => {
-          this.$notify({
-            group: 'success',
-            text: this.$t('copied_successfully'),
-            position: 'top center'
-          })
-        })
-        .catch((error) => {
-          this.$notify({
-            group: 'error',
-            text: this.$t('error_copying'),
-            position: 'top center'
-          })
-        });
+        .then(() => { this.$notify({ group: 'success', text: this.$t('copied_successfully'), position: 'top center' }) })
+        .catch((error) => { this.$notify({ group: 'error', text: this.$t('error_copying'), position: 'top center' }) });
     },
     userVotedThisPost() {
         if (!this.user || !this.report) return false;
@@ -446,95 +403,44 @@ export default {
       if (this.report.author_payout_value) return this.report.author_payout_value;
       return '0.000';
     },
-    hasBeneficiaries() {
-      return this.report && Array.isArray(this.report.beneficiaries) && this.report.beneficiaries.length > 0;
-    },
+    hasBeneficiaries() { return this.report && Array.isArray(this.report.beneficiaries) && this.report.beneficiaries.length > 0; },
     beneficiariesDisplay() {
       if (!this.hasBeneficiaries()) return '';
       return 'Beneficiaries:\n' + this.report.beneficiaries.map(b => `${b.account}: ${b.weight / 100}%`).join('\n');
     },
     displayTokenValue(token) {
         let val;
-        if (parseFloat(token.total_payout_value) > 0) {
-            val = parseFloat(token.total_payout_value) / Math.pow(10, token.precision);
-        } else {
-            val = parseFloat(token.pending_token) / Math.pow(10, token.precision);
-        }
+        if (parseFloat(token.total_payout_value) > 0) { val = parseFloat(token.total_payout_value) / Math.pow(10, token.precision); } else { val = parseFloat(token.pending_token) / Math.pow(10, token.precision); }
         if (isNaN(val)) return '';
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits: token.precision }).format(val) + ' ' + token.token;
     },
     async translateContent() {
-      if (this.translatedText) {
-        this.report.body = this.translatedText;
-        this.showTranslated = true;
-        return;
-      }
-      this.translationLoading = true;
-      this.safety_post_content = this.report.body;
+      if (this.translatedText) { this.report.body = this.translatedText; this.showTranslated = true; return; }
+      this.translationLoading = true; this.safety_post_content = this.report.body;
       try {
         const translationResult = await translateTextWithGemini(this.report.body);
-        this.translatedText = translationResult;
-        this.report.body = this.translatedText;
-        this.showTranslated = true;
+        this.translatedText = translationResult; this.report.body = this.translatedText; this.showTranslated = true;
       } catch (error) {
-        console.error('Translation process failed:', error);
-        this.report.body = this.safety_post_content;
-        this.$notify({
-          group: 'error',
-          text: 'Translation service failed. Please try again later.',
-          position: 'top center'
-        });
-      } finally {
-        this.translationLoading = false;
-      }
+        console.error('Translation process failed:', error); this.report.body = this.safety_post_content;
+        this.$notify({ group: 'error', text: 'Translation service failed. Please try again later.', position: 'top center' });
+      } finally { this.translationLoading = false; }
     },
-    cancelTranslation() {
-      this.report.body = this.safety_post_content;
-      this.showTranslated = false;
-    },
+    cancelTranslation() { this.report.body = this.safety_post_content; this.showTranslated = false; },
     votePrompt() { if (this.report) this.$store.commit('setPostToVote', this.report); },
     resetOpenComment() { this.commentBoxOpen = false; this.replyBody = ''; },
     postResponse() { alert('Post response not fully implemented.'); },
     insertModSignature() {
       if (this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator')) {
-        this.moderatorSignature = process.env.shortModeratorSignature;
-        this.replyBody += this.moderatorSignature;
+        this.moderatorSignature = process.env.shortModeratorSignature; this.replyBody += this.moderatorSignature;
       }
     },
     insertFullModSignature() {
       if (this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator')) {
-        this.moderatorSignature = process.env.standardModeratorSignature;
-        this.replyBody += this.moderatorSignature;
+        this.moderatorSignature = process.env.standardModeratorSignature; this.replyBody += this.moderatorSignature;
       }
     },
 
-    // ADDED: The new scroll-hijacking method
-    handlePageScroll(event) {
-      const mainContent = this.$refs.mainContentScroller;
-      if (!mainContent) return;
-
-      const stickyHeaderHeight = 90; // The height of your top navbar (adjust if needed)
-      const mainContentTop = mainContent.getBoundingClientRect().top;
-      
-      const isScrollingDown = event.deltaY > 0;
-      const isScrollingUp = event.deltaY < 0;
-
-      // Check if the main content container has reached its sticky position
-      if (mainContentTop <= stickyHeaderHeight) {
-        
-        // If user scrolls DOWN while the container is stuck at the top AND the internal content is not at its end...
-        if (isScrollingDown && (mainContent.scrollTop + mainContent.clientHeight < mainContent.scrollHeight - 2)) {
-          event.preventDefault(); // Stop the main page from scrolling
-          mainContent.scrollTop += event.deltaY; // Apply scroll to the internal container
-        }
-
-        // If user scrolls UP while the internal container is not at its top...
-        if (isScrollingUp && mainContent.scrollTop > 0) {
-           event.preventDefault(); // Stop the main page from scrolling
-           mainContent.scrollTop += event.deltaY; // Apply scroll to the internal container
-        }
-      }
-    },
+    // REMOVED: The entire handlePageScroll method has been deleted as it is replaced by CSS.
   },
   mounted() {
     this.$store.dispatch('steemconnect/login');
@@ -545,27 +451,44 @@ export default {
       this.resizeObserver = new ResizeObserver(() => this.alignSidebar());
       this.$nextTick(() => {
         if (this.$refs.reportHead) this.resizeObserver.observe(this.$refs.reportHead);
+         this.heightSyncObserver = new ResizeObserver(() => {
+      this.syncColumnHeights();
+    });
+
+    this.$nextTick(() => {
+      if (this.$refs.userSidebar && this.$refs.userSidebar.$el) {
+        this.heightSyncObserver.observe(this.$refs.userSidebar.$el);
+      }
+    });
+    
+    window.addEventListener('resize', this.syncColumnHeights);
+    // --- END OF NEW CODE TO ADD ---
       });
       window.addEventListener('resize', this.alignSidebar);
 
-      // ADDED: The event listener for our two-stage scroll logic
-      window.addEventListener('wheel', this.handlePageScroll, { passive: false });
+      // REMOVED: The event listener for scroll hijacking is no longer needed.
+      // window.addEventListener('wheel', this.handlePageScroll, { passive: false });
     }
   },
   beforeDestroy() {
     if (process.client) {
       window.removeEventListener('storage', this.handleStorageChange);
       if (this.resizeObserver) this.resizeObserver.disconnect();
+      // --- START OF NEW CODE TO ADD ---
+    if (this.heightSyncObserver) this.heightSyncObserver.disconnect();
+    window.removeEventListener('resize', this.syncColumnHeights);
+    // --- END OF NEW CODE TO ADD ---
       window.removeEventListener('resize', this.alignSidebar);
 
-      // ADDED: Cleanup for our new event listener
-      window.removeEventListener('wheel', this.handlePageScroll);
+      // REMOVED: Cleanup for the scroll hijacking listener is no longer needed.
+      // window.removeEventListener('wheel', this.handlePageScroll);
     }
   }
 }
 </script>
 
 <style>
+/* All existing styles are preserved */
 .text-muted { color: #adb5bd !important; }
 .mid-avatar { width: 30px !important; height: 30px !important; }
 .report-head { border-bottom: 1px solid red; }
@@ -576,9 +499,7 @@ img { max-width: 100%; }
 a:hover, a:hover, .text-brand:hover, .actifit-link-plain:hover { text-decoration: none; }
 .reply-btn { float: right; }
 .date-head { padding-left: 2px; }
-.report-comments .date-head {
-  color: #6c757d !important;
-}
+.report-comments .date-head { color: #6c757d !important; }
 .report-reply { padding-left: 40px; padding-bottom: 40px; }
 .share-links-actifit { text-align: right; }    
 .share-links-actifit span, .share-links-actifit a { padding: 5px; cursor: pointer; color: #fff; }
@@ -586,12 +507,19 @@ a:hover, a:hover, .text-brand:hover, .actifit-link-plain:hover { text-decoration
 .translation-notice { background-color: #fcf8e3; border: 1px solid #faebcc; padding: 10px; margin-top: 15px; border-radius: 4px; color: #8a6d3b; }
 .text-green { color: #28a745; }
 
-/* ADDED: CSS for the new scrollable container */
+/* MODIFIED: CSS for the scrollable container now uses position: sticky */
 .main-content-scroll-container {
-  height: calc(100vh - 90px); /* Adjust 90px if your sticky navbar has a different height */
-  overflow-y: scroll;
+  /* This is what makes the two-stage scroll work natively */
+  position: -webkit-sticky; /* For Safari */
+  position: sticky;
+  /* This is the "docking" point, should match your navbar height */
+  top: 90px; 
   
-  /* Hides the scrollbar UI */
+  /* This sets the height of the container *after* it becomes sticky */
+  max-height: calc(100vh - 90px);
+  /* This enables internal scrolling only when the content is taller than the container */
+  overflow-y: auto;
+  
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }

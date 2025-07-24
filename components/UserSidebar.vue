@@ -1,8 +1,9 @@
 <template>
   <!-- NOTE: The parent of this div must be the <div class="row"> -->
   <div class="col-md-4 order-md-1"> 
+    <!-- This is now a simple container that grows with its content and has no special scroll/positioning logic -->
     <div class="user-sidebar" :class="[darkModeClass, 'align-to-content']" ref="userSidebar">
-      <!-- ... a a a a all of your template content remains unchanged ... -->
+      <!-- All of your template content remains unchanged -->
       <div v-if="authorAccountInfo" class="user-sidebar-content">
         
         <!-- User Header Section  -->
@@ -91,11 +92,12 @@
 </template>
 
 <script>
-// ... all your imports and other methods remain the same
+// All imports remain unchanged
 import hive from '@hiveio/hive-js'
 
 export default {
   name: 'UserSidebar',
+  // All props remain unchanged
   props: {
     report: { type: Object, required: true, },
     authorAccountInfo: { type: Object, default: null, },
@@ -106,11 +108,10 @@ export default {
     return {
       recentPosts: [],
       postsLoading: true,
-      rafId: null, // ID for requestAnimationFrame to manage scrolling
     }
   },
+  // All computed properties remain unchanged
   computed: {
-    // ... all your computed properties remain the same
     displayCoreUserRank() {
       return (this.userRank ? parseFloat(this.userRank.rank_no_afitx).toFixed(2) : 'N/A');
     },
@@ -130,72 +131,24 @@ export default {
       return {};
     },
   },
+  // All watchers remain unchanged
   watch: {
-    // ... your watchers remain the same
     'report.author': function(newAuthor, oldAuthor) {
       if (newAuthor && newAuthor !== oldAuthor) {
         this.fetchRecentPosts();
       }
     },
   },
+  // The script is now very simple: no scroll handling.
   mounted() {
     this.fetchRecentPosts();
-    // This listener now only controls the sidebar's transform
-    window.addEventListener('scroll', this.handleScroll, { passive: true });
-    window.addEventListener('resize', this.handleScroll, { passive: true });
   },
   beforeDestroy() {
-    window.removeEventListener('scroll', this.handleScroll);
-    window.removeEventListener('resize', this.handleScroll);
-    if (this.rafId) {
-      window.cancelAnimationFrame(this.rafId);
-    }
+    // Nothing to clean up
   },
   methods: {
-    // THIS IS THE ONLY METHOD THAT CHANGES
-    handleScroll() {
-      if (this.rafId) {
-        window.cancelAnimationFrame(this.rafId);
-      }
-
-      this.rafId = window.requestAnimationFrame(() => {
-        const sidebar = this.$refs.userSidebar;
-        if (!sidebar) return;
-        
-        // Find the main content container from the parent.
-        // It's in a sibling column, so we go up to the row and search down.
-        const pageRow = sidebar.parentElement.parentElement; 
-        const mainContentContainer = pageRow.querySelector('.main-content-scroll-container');
-        
-        if (!mainContentContainer) {
-            // If it can't be found on first paint, just return, it will be found on next scroll event.
-            return;
-        }
-
-        const stickyTopOffset = 90; 
-        const sidebarVisibleHeight = window.innerHeight - stickyTopOffset;
-        const sidebarOverhang = sidebar.scrollHeight - sidebarVisibleHeight;
-
-        if (sidebarOverhang <= 0) {
-          sidebar.style.transform = 'translateY(0px)';
-          return;
-        }
-
-        // Calculate the scroll distance required to "fix" the main content at the top.
-        const scrollDistanceToFix = mainContentContainer.offsetTop - stickyTopOffset;
-
-        if (scrollDistanceToFix <= 0) return; // Avoid division by zero on initial render
-
-        // Calculate progress only within that initial scroll distance (Stage 1)
-        const scrollProgress = Math.min(window.scrollY / scrollDistanceToFix, 1.0);
-        
-        const transformDistance = scrollProgress * sidebarOverhang;
-        
-        sidebar.style.transform = `translateY(-${transformDistance}px)`;
-      });
-    },
-    
-    // ... ALL OTHER METHODS (formatDate, formatNumber, etc.) remain unchanged
+    // All of your original helper methods are preserved.
+    // The handleScroll method has been removed.
     formatDate(isoDate) {
       if (!isoDate) return 'NA';
       return new Date(isoDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -285,9 +238,6 @@ export default {
         this.recentPosts = [];
       } finally {
         this.postsLoading = false;
-        this.$nextTick(() => {
-          this.handleScroll();
-        });
       }
     },
   }
@@ -295,7 +245,7 @@ export default {
 </script>
 
 <style scoped>
-/* All of your styles remain unchanged */
+/* All existing visual styles are preserved */
 .scrolling-nav-container { margin-bottom: 1rem; }
 .nav-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 5px 0; }
 .nav-list li { list-style: none; }
@@ -303,6 +253,7 @@ export default {
 .nav-list li a:hover { background-color: #ff112d; color: white; transform: translateY(-3px); }
 .nav-list .fa-fw { margin-right: 8px; }
 
+/* The only CSS change is here */
 .user-sidebar {
   background: linear-gradient(to bottom, #fdddb3, #ffffff 250px);
   padding: 1.5rem;
@@ -311,11 +262,10 @@ export default {
   border-radius: 12px 0 0 12px;
   color: #555;
   transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-  position: -webkit-sticky;
-  position: sticky;
-  top: 90px;
+  /* All position, top, max-height, and overflow properties have been removed. */
 }
 
+/* All other styles for avatar, text, links, dark-mode, etc., are preserved */
 .sidebar-avatar { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #ff112d; }
 .user-header .card-title { font-size: 1.25rem; }
 .username-link { color: #d9001b; text-decoration: none; transition: color 0.3s ease; }
@@ -329,38 +279,19 @@ export default {
 .stats-list li span { color: #777; }
 .stats-list li strong { font-size: 1rem; font-weight: 600; color: #333; }
 .text-brand { color: #ff112d; }
-
 .recent-posts-section { margin-top: 1rem; padding-top: 1.5rem; border-top: 1px solid #eee; }
 .section-title { font-size: 1.1rem; font-weight: 600; color: #333; margin-bottom: 1rem; }
 .recent-posts-list { display: flex; flex-direction: column; gap: 1rem; }
-
 .recent-post-card { display: block; position: relative; border-radius: 12px; overflow: hidden; min-height: 110px; text-decoration: none; transition: all .3s ease-in-out; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
 .recent-post-card:hover { transform: translateY(-5px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
-
 .post-card-background { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-size: cover; background-position: center; transition: transform .4s ease; }
 .recent-post-card:hover .post-card-background { transform: scale(1.05); }
-
-.post-card-overlay {
-  position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 1;
-  background: linear-gradient(to top, rgba(255, 255, 255, 0.98) 40%, rgba(255, 255, 255, 0.7) 70%, transparent 100%);
-}
-
+.post-card-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 1; background: linear-gradient(to top, rgba(255, 255, 255, 0.98) 40%, rgba(255, 255, 255, 0.7) 70%, transparent 100%); }
 .post-card-content { position: relative; z-index: 2; padding: 1rem; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; }
-
-.post-card-title-preview {
-  font-size: 1rem; font-weight: 600; line-height: 1.3; margin-bottom: 0.75rem;
-  overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-  color: #212529; text-shadow: none;
-}
-
-.post-card-stats {
-  display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; font-weight: 500;
-  padding-top: 0.5rem;
-  color: #495057; text-shadow: none; border-top: 1px solid #e0e0e0;
-}
+.post-card-title-preview { font-size: 1rem; font-weight: 600; line-height: 1.3; margin-bottom: 0.75rem; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; color: #212529; text-shadow: none; }
+.post-card-stats { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; font-weight: 500; padding-top: 0.5rem; color: #495057; text-shadow: none; border-top: 1px solid #e0e0e0; }
 .post-card-stats .stat-item { display: flex; align-items: center; }
 .post-card-stats .fas { color: #ff112d; margin-right: 0.5rem; }
-
 .user-sidebar.dark-mode-active { background: linear-gradient(to bottom, #9c651b, #202022 250px); border-color: #543810; color: #e0e0e0; }
 .dark-mode-active .username-link { color: #ff112d; }
 .dark-mode-active .text-muted { color: #b09a7a !important; }
@@ -373,17 +304,9 @@ export default {
 .dark-mode-active .nav-list li a { color: #e0e0e0; border-color: #ff112d; }
 .dark-mode-active .nav-list li a:hover { background-color: #ff112d; color: white; }
 .dark-mode-active .section-title { color: #e0e0e0; }
-
 .dark-mode-active .recent-post-card { box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
 .dark-mode-active .recent-post-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.4); }
-
-.dark-mode-active .post-card-overlay {
-  background: linear-gradient(to top, rgba(10, 10, 10, 0.95) 40%, rgba(10, 10, 10, 0.6) 70%, transparent 100%);
-}
-.dark-mode-active .post-card-title-preview {
-  color: #f0f0f0; text-shadow: 0 1px 3px rgba(0,0,0,0.6);
-}
-.dark-mode-active .post-card-stats {
-  color: #ccc; text-shadow: 0 1px 2px rgba(0,0,0,0.5); border-top-color: rgba(255, 255, 255, 0.2);
-}
+.dark-mode-active .post-card-overlay { background: linear-gradient(to top, rgba(10, 10, 10, 0.95) 40%, rgba(10, 10, 10, 0.6) 70%, transparent 100%); }
+.dark-mode-active .post-card-title-preview { color: #f0f0f0; text-shadow: 0 1px 3px rgba(0,0,0,0.6); }
+.dark-mode-active .post-card-stats { color: #ccc; text-shadow: 0 1px 2px rgba(0,0,0,0.5); border-top-color: rgba(255, 255, 255, 0.2); }
 </style>
