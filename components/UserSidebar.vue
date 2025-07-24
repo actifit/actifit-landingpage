@@ -1,8 +1,8 @@
 <template>
-  <div class="col-md-4 order-md-1">
-    
-    <!-- ref is now on the main sidebar element, which will be transformed -->
+  <!-- NOTE: The parent of this div must be the <div class="row"> -->
+  <div class="col-md-4 order-md-1"> 
     <div class="user-sidebar" :class="[darkModeClass, 'align-to-content']" ref="userSidebar">
+      <!-- ... a a a a all of your template content remains unchanged ... -->
       <div v-if="authorAccountInfo" class="user-sidebar-content">
         
         <!-- User Header Section  -->
@@ -91,6 +91,7 @@
 </template>
 
 <script>
+// ... all your imports and other methods remain the same
 import hive from '@hiveio/hive-js'
 
 export default {
@@ -109,6 +110,7 @@ export default {
     }
   },
   computed: {
+    // ... all your computed properties remain the same
     displayCoreUserRank() {
       return (this.userRank ? parseFloat(this.userRank.rank_no_afitx).toFixed(2) : 'N/A');
     },
@@ -129,6 +131,7 @@ export default {
     },
   },
   watch: {
+    // ... your watchers remain the same
     'report.author': function(newAuthor, oldAuthor) {
       if (newAuthor && newAuthor !== oldAuthor) {
         this.fetchRecentPosts();
@@ -137,6 +140,7 @@ export default {
   },
   mounted() {
     this.fetchRecentPosts();
+    // This listener now only controls the sidebar's transform
     window.addEventListener('scroll', this.handleScroll, { passive: true });
     window.addEventListener('resize', this.handleScroll, { passive: true });
   },
@@ -148,6 +152,7 @@ export default {
     }
   },
   methods: {
+    // THIS IS THE ONLY METHOD THAT CHANGES
     handleScroll() {
       if (this.rafId) {
         window.cancelAnimationFrame(this.rafId);
@@ -156,34 +161,41 @@ export default {
       this.rafId = window.requestAnimationFrame(() => {
         const sidebar = this.$refs.userSidebar;
         if (!sidebar) return;
+        
+        // Find the main content container from the parent.
+        // It's in a sibling column, so we go up to the row and search down.
+        const pageRow = sidebar.parentElement.parentElement; 
+        const mainContentContainer = pageRow.querySelector('.main-content-scroll-container');
+        
+        if (!mainContentContainer) {
+            // If it can't be found on first paint, just return, it will be found on next scroll event.
+            return;
+        }
 
-        // The 'top' value from CSS for the sticky position
         const stickyTopOffset = 90; 
-
-        // The visible height allocated for the sidebar
         const sidebarVisibleHeight = window.innerHeight - stickyTopOffset;
-
-        // How much the sidebar's content height exceeds its visible area
         const sidebarOverhang = sidebar.scrollHeight - sidebarVisibleHeight;
 
-        // If sidebar content fits within the visible area, do nothing.
         if (sidebarOverhang <= 0) {
           sidebar.style.transform = 'translateY(0px)';
           return;
         }
 
-        const pageScrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
-        if (pageScrollableHeight <= 0) return;
+        // Calculate the scroll distance required to "fix" the main content at the top.
+        const scrollDistanceToFix = mainContentContainer.offsetTop - stickyTopOffset;
+
+        if (scrollDistanceToFix <= 0) return; // Avoid division by zero on initial render
+
+        // Calculate progress only within that initial scroll distance (Stage 1)
+        const scrollProgress = Math.min(window.scrollY / scrollDistanceToFix, 1.0);
         
-        const scrollProgress = window.scrollY / pageScrollableHeight;
+        const transformDistance = scrollProgress * sidebarOverhang;
         
-        // The distance to move the sidebar up. It should not exceed the total overhang.
-        const transformDistance = Math.min(scrollProgress * sidebarOverhang, sidebarOverhang);
-        
-        // Apply the transform to move the sidebar up
         sidebar.style.transform = `translateY(-${transformDistance}px)`;
       });
     },
+    
+    // ... ALL OTHER METHODS (formatDate, formatNumber, etc.) remain unchanged
     formatDate(isoDate) {
       if (!isoDate) return 'NA';
       return new Date(isoDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -283,8 +295,7 @@ export default {
 </script>
 
 <style scoped>
-/* The .sidebar-scroll-container styles have been removed */
-
+/* All of your styles remain unchanged */
 .scrolling-nav-container { margin-bottom: 1rem; }
 .nav-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 5px 0; }
 .nav-list li { list-style: none; }
@@ -303,7 +314,6 @@ export default {
   position: -webkit-sticky;
   position: sticky;
   top: 90px;
-  /* The element will be transformed, its height is determined by its content */
 }
 
 .sidebar-avatar { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #ff112d; }
@@ -320,7 +330,6 @@ export default {
 .stats-list li strong { font-size: 1rem; font-weight: 600; color: #333; }
 .text-brand { color: #ff112d; }
 
-/* --- RECENT POSTS SECTION - DUAL MODE STYLES --- */
 .recent-posts-section { margin-top: 1rem; padding-top: 1.5rem; border-top: 1px solid #eee; }
 .section-title { font-size: 1.1rem; font-weight: 600; color: #333; margin-bottom: 1rem; }
 .recent-posts-list { display: flex; flex-direction: column; gap: 1rem; }
@@ -352,7 +361,6 @@ export default {
 .post-card-stats .stat-item { display: flex; align-items: center; }
 .post-card-stats .fas { color: #ff112d; margin-right: 0.5rem; }
 
-/* --- DARK MODE OVERRIDES --- */
 .user-sidebar.dark-mode-active { background: linear-gradient(to bottom, #9c651b, #202022 250px); border-color: #543810; color: #e0e0e0; }
 .dark-mode-active .username-link { color: #ff112d; }
 .dark-mode-active .text-muted { color: #b09a7a !important; }
