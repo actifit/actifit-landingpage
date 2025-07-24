@@ -216,9 +216,9 @@
         </div>
       </template>
     </template>
-    <!-- "user && product.type == 'ingame' && allReqtsFilled" -->
+   
     <!-- Additional actions (cart buttons) -->
-    <div class="additional-actions" v-if=true>
+    <div class="additional-actions" v-if="user && product.type == 'ingame' && allReqtsFilled">
       <button class="btn-add-cart" 
               @click.prevent="addCart()" 
               v-if="cartEntries.filter(obj => obj._id === product._id).length < 1">
