@@ -13,7 +13,7 @@
         <p>{{ $t('proposal_modal_message') }}</p>
         <div class="text-right">
           <button @click="voteForProposal" class="btn m-1 col-5">
-            {{ isVoting ? $t('voting_button_text') : $t('vote_button_text') }}
+            {{ $t('vote_button_text') }}
           </button>
           <button @click="readMore" class="m-1 col-5">{{ $t('read_more_button_text') }}</button>
         </div>
