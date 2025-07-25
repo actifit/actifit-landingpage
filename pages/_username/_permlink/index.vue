@@ -507,23 +507,45 @@ a:hover, a:hover, .text-brand:hover, .actifit-link-plain:hover { text-decoration
 .translation-notice { background-color: #fcf8e3; border: 1px solid #faebcc; padding: 10px; margin-top: 15px; border-radius: 4px; color: #8a6d3b; }
 .text-green { color: #28a745; }
 
-/* MODIFIED: CSS for the scrollable container now uses position: sticky */
 .main-content-scroll-container {
-  /* This is what makes the two-stage scroll work natively */
   position: -webkit-sticky; /* For Safari */
   position: sticky;
   /* This is the "docking" point, should match your navbar height */
-  top: 90px; 
-  
-  /* This sets the height of the container *after* it becomes sticky */
+  top: 90px;
+
   max-height: calc(100vh - 90px);
-  /* This enables internal scrolling only when the content is taller than the container */
-  overflow-y: auto;
-  
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  overflow: auto;
+
+  /* --- Scrollbar Styling for Firefox (Light Mode Default) --- */
+  scrollbar-width: auto;
+  scrollbar-color: red #f1f1f1; /* thumb color and light track color */
 }
+
+/* --- Scrollbar Styling for Webkit Browsers (Light Mode Default) --- */
 .main-content-scroll-container::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+  width: 12px;  /* for vertical scrollbar */
+  height: 12px; /* for horizontal scrollbar */
+}
+
+.main-content-scroll-container::-webkit-scrollbar-track {
+  background: #f1f1f1; /* Light grey track for light mode */
+}
+
+.main-content-scroll-container::-webkit-scrollbar-thumb {
+  background-color: red;
+  border-radius: 10px;
+}
+
+
+/* --- DARK MODE OVERRIDES --- */
+
+/* Dark Mode Override for Firefox */
+.dark-mode .main-content-scroll-container {
+  scrollbar-color: red #303030; /* thumb color and dark track color */
+}
+
+/* Dark Mode Override for Webkit */
+.dark-mode .main-content-scroll-container::-webkit-scrollbar-track {
+  background: #303030; /* Dark grey track for dark mode */
 }
 </style>
