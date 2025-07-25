@@ -1,89 +1,94 @@
+
 <template>
   <div class="modal fade" id="cartModal" tabindex="-1" ref="cartModal">
     <div class="modal-dialog" role="document">
-      <div class="modal-content cart-modal">
-        <div class="modal-header">
-          <h5 class="modal-title" style="color: rgb(231,76,60);">Checkout <i class="fas fa-shopping-bag"></i></h5>
-          <button type="button" class="close" id="closeCartMod" ref="closeCartMod" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
+      <div class="cart-modal-container">
+        <div class="cart-modal-header">
+          <h5 class="cart-modal-title">Checkout <i class="fas fa-shopping-bag"></i></h5>
+          <button type="button" class="cart-modal-close" data-dismiss="modal" aria-label="Close">
+            <i class="fas fa-times"></i>
           </button>
         </div>
         
-        <div class="modal-body" v-if="cartEntries.length > 0">
-          <div class="cart-items">
-            <div v-for="(product, index) in cartEntries" :key="index" class="cart-item">
-              <div class="item-image">
-                <div :class="'avatar-'+product.level" class="avatar pro-card-small" 
-                     :style="'background-image: url(img/gadgets/' + product.image + ');'"></div>
+        <div class="cart-modal-body" v-if="cartEntries.length > 0">
+          <div class="cart-items-list">
+            <div v-for="(product, index) in cartEntries" :key="index" class="cart-item-entry">
+              <div class="cart-item-img">
+                <div class="cart-item-avatar" 
+                     :style="product.image.startsWith('http') ? 
+                       'background-image: url(' + product.image + ')' : 
+                       'background-image: url(/img/gadgets/' + product.image + ')'"></div>
               </div>
-              <div class="item-details">
-                <h5 class="item-name">{{product.name}} - Level {{product.level}}</h5>
-                <div class="item-price">
-                  {{numberFormat(getProductPrice(product), 2)}} AFIT
-                  <span class="hive-price" v-if="afitPrice">
-                    ({{numberFormat(getProductPrice(product) * afitPrice.afitHiveLastPrice, 3)}} HIVE)
+              <div class="cart-item-info">
+                <h5 class="cart-item-name">{{product.name}} - {{ $t('Level') }} {{product.level}}</h5>
+                <div class="cart-item-price">
+                  {{numberFormat(getProductPrice(product), 2)}} <img class="token-logo-sm" src="/img/actifit_logo.png">
+                  <span class="cart-item-hive-price" v-if="afitPrice">
+                    ({{numberFormat(getProductPrice(product) * afitPrice.afitHiveLastPrice, 3)}} <img class="token-logo-sm" src="/img/HIVE.png">)
                   </span>
                 </div>
               </div>
-              <button class="item-remove" @click.prevent="removeProduct(product)">
-                <i class="fas fa-minus-square"></i>
+              <button class="cart-item-remove-btn" @click.prevent="removeProduct(product)">
+                <i class="fas fa-trash-alt"></i>
               </button>
             </div>
           </div>
           
-          <div class="cart-summary">
-            <div class="summary-row">
-              <span class="summary-label">{{ $t('Subtotal') }}:</span>
-              <span class="summary-value">{{numberFormat(this.product_price_afit, 2)}} AFIT</span>
-            </div>
-            <div class="summary-row" v-if="afitPrice">
-              <span class="summary-label">{{ $t('Subtotal') }}:</span>
-              <span class="summary-value">{{numberFormat(this.product_price_afit * this.afitPrice.afitHiveLastPrice, 3)}} HIVE</span>
-            </div>
-          </div>
-          
-          <div v-if="!purchaseSuccess" class="payment-options">
-            <div class="option-group">
-              <button class="btn-pay btn-pay-afit" @click.prevent="buyNow()">
-                <span class="pay-amount">{{numberFormat(this.product_price_afit, 2)}} AFIT</span>
-                <span class="pay-method">
-                  <img class="token-logo" src="/img/actifit_logo.png">
-                  {{ $t('Pay_with_AFIT') }}
-                </span>
-              </button>
-              
-              <button class="btn-pay btn-pay-hive" @click.prevent="buyNowHive()">
-                <span class="pay-amount">{{numberFormat(this.product_price_afit * this.afitPrice.afitHiveLastPrice, 3)}} HIVE</span>
-                <span class="pay-method">
-                  <img class="token-logo" src="/img/HIVE.png">
-                  {{ $t('Pay_with_HIVE') }}
-                </span>
-              </button>
-            </div>
-            
-            <div class="hive-key-input" v-if="buyHiveExpand && !isKeychainActive && !isHiveauthActive">
-              <label for="active-key">{{ $t('Active_Key') }} *</label>
-              <input type="password" id="active-key" name="active-key" ref="active-key" 
-                     class="form-control" v-model="userActvKey" placeholder="Enter your active key">
-            </div>
-            
-            <div class="proceed-btn" v-if="buyHiveExpand">
-              <button v-on:click="proceedBuyNowHive()" v-if="this.userTokens >= this.minAfitBuyTicket" 
-                      class="btn-proceed">
-                {{ $t('Proceed') }}
-              </button>
-              <button data-toggle="modal" v-else :data-target="'#buyOptionsModalCart'" 
-                      class="btn-proceed">
-                {{ $t('Proceed') }}
-              </button>
-            </div>
-          </div>
-          
-          <div v-else class="activation-section">
-            <div class="friend-benefic" v-if="prodHasFriendBenefic()">
+<div v-if="!purchaseSuccess" class="cart-payment-section">
+
+  <!-- For digital products (cart functionality) -->
+  <template>
+    <div class="dual-price-layout">
+      <div class="dual-price-row">
+        <div class="price-pair">
+		<div class="price-circle">
+          {{numberFormat(this.product_price_afit, 2)}} <img class="token-logo-sm" src="/img/actifit_logo.png">
+		</div>
+		<button 
+          :class="['btn-buy', { 'btn-buy-disabled': buyButtonDisabled }]"
+          :disabled="buyButtonDisabled"
+          @click.prevent="buyNow()">Buy
+        </button>
+	  </div>
+		<div class="price-pair">
+			<div class="price-circle hive">
+          {{numberFormat(this.product_price_afit * this.afitPrice.afitHiveLastPrice, 3)}} <img class="token-logo-sm" src="/img/HIVE.png">
+			</div>
+        <button 
+          :class="['btn-buy-hive','hv-btn', { 'btn-buy-disabled': buyButtonDisabled }]"
+          :disabled="buyButtonDisabled"
+          @click.prevent="buyNowHive()">
+          Buy
+        </button>
+		</div>
+    </div>
+	</div>
+</template>
+
+
+  <!-- Active key input for HIVE purchases -->
+  <div class="cart-hive-key-input" v-if="buyHiveExpand && !isKeychainActive && !isHiveauthActive">
+    <label for="active-key">{{ $t('Active_Key') }} *</label>
+    <input type="password" id="active-key" name="active-key" ref="active-key" 
+           class="form-control" v-model="userActvKey" :placeholder="$t('Enter_your_active_key')">
+  </div>
+
+  <div class="cart-proceed-section" v-if="buyHiveExpand">
+    <button v-on:click="proceedBuyNowHive()" v-if="this.userTokens >= this.minAfitBuyTicket" 
+            class="btn-buy">
+      {{ $t('Proceed') }}
+    </button>
+    <button data-toggle="modal" v-else :data-target="'#buyOptionsModalCart'" 
+            class="btn-buy">
+      {{ $t('Proceed') }}
+    </button>
+  </div>
+</div>    
+          <div v-else class="cart-activation-area">
+            <div class="cart-friend-input" v-if="prodHasFriendBenefic()">
               <label for="friend">{{$t('Benef_friend')}}:</label>
               <input type="text" name="friend" id="friend" ref="friend" 
-                     class="form-control" placeholder="Enter friend's username">
+                     class="form-control" :placeholder="$t('Enter_friends_username')">
             </div>
             
             <button class="btn-activate" @click.prevent="activateGadget()">
@@ -92,24 +97,24 @@
             </button>
           </div>
           
-          <div class="status-messages">
-            <div v-if="buyInProgress && errorProceed==''" class="loading">
+          <div class="cart-status-messages">
+            <div v-if="buyInProgress && errorProceed==''" class="cart-loading-indicator">
               <i class="fas fa-spinner fa-spin"></i>
               {{ $t('Processing') }}...
             </div>
             
-            <div v-if="errorProceed!=''" class="error-message">
+            <div v-if="errorProceed!=''" class="cart-error-message">
               <i class="fas fa-exclamation-circle"></i>
               <span v-html="errorProceed"></span>
             </div>
           </div>
         </div>
 
-        <div class="modal-body empty-cart" v-else>
-          <div class="empty-state">
+        <div class="cart-modal-body cart-empty-state" v-else>
+          <div class="cart-empty-view">
             <i class="fas fa-shopping-cart"></i>
             <p>{{ $t('Cart_empty') }}</p>
-            <router-link to="/marketplace" class="btn-browse">
+            <router-link to="/marketplace" class="btn-buy">
               {{ $t('Browse_products') }}
             </router-link>
           </div>
@@ -133,6 +138,7 @@
     <LoginModal v-if="showModal" @close="showModal = false" />
   </div>
 </template>
+
 <script>
   import LoginModal from '~/components/LoginModal'
   import { mapGetters } from 'vuex'
@@ -196,6 +202,11 @@
 	  ...mapGetters(['userTokens']),
 	  ...mapGetters(['bchain']),
 	  ...mapGetters(['purchaseSuccess']),
+	    buyButtonDisabled() {
+    if (!this.user) return true;
+    if (this.cartEntries.length === 0) return true;
+    return false;
+  },
 	  isKeychainActive (){
 		return (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain)
 	  },
@@ -221,10 +232,23 @@
 		return '';
 	  },
     },
-	beforeUpdate() {
-	  //VP data needing constant refresh upon open/close of new upvote modal
-	  
-	},
+	  hasPhysicalProducts() {
+    return this.cartEntries.some(item => item.type === 'real');
+  },
+  physicalProductPrice() {
+    const product = this.cartEntries.find(item => item.type === 'real');
+    if (!product) return { afit: 0, hive: 0 };
+    
+    let afitPrice = 0;
+    let hivePrice = 0;
+    
+    product.price.forEach(entry => {
+      if (entry.currency === 'AFIT') afitPrice = entry.price;
+      if (entry.currency === 'HIVE') hivePrice = entry.price;
+    });
+    
+    return { afit: afitPrice, hive: hivePrice };
+  },
     methods: {
 	  	  /**
        * Formats numbers with commas and dots.
@@ -233,6 +257,13 @@
 	   * @param precision
        * @returns {string}
        */
+	    buyPhysicalProduct(currency) {
+    if (currency === 'afit') {
+      this.buyNow();
+    } else {
+      this.buyNowHive();
+    }
+  },
       numberFormat (number, precision) {
         return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
       },
@@ -734,254 +765,203 @@
   }
 </script>
 <style lang="scss">
-.cart-modal {
+.cart-modal-container {
+  background: var(--color-bg);
   border-radius: 16px;
   overflow: hidden;
-  border: none;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 8px 24px var(--color-shadow);
+}
+
+.cart-modal-header {
+  background-color: var(--color-primary);
+  color: white;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--color-border);
   
-  .modal-header {
-    background-color: #e74c3c;
+  .cart-modal-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
     color: white;
-    border-bottom: none;
-    padding: 20px;
     
-    .modal-title {
-      font-weight: 600;
-      font-size: 1.25rem;
-    }
-    
-    .close {
-      color: white;
-      opacity: 0.8;
-      text-shadow: none;
-      font-size: 1.5rem;
-      
-      &:hover {
-        opacity: 1;
-      }
+    i {
+      margin-left: 8px;
     }
   }
   
-  .modal-body {
-    padding: 20px;
+  .cart-modal-close {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1.25rem;
+    opacity: 0.8;
+    cursor: pointer;
+    transition: opacity 0.2s;
     
-    &.empty-cart {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 300px;
+    &:hover {
+      opacity: 1;
     }
   }
 }
 
-.cart-items {
+.cart-modal-body {
+  padding: 20px;
+  
+  &.cart-empty-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    text-align: center;
+  }
+}
+
+.cart-items-list {
   max-height: 300px;
   overflow-y: auto;
   margin-bottom: 20px;
   padding-right: 10px;
+  
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: var(--color-bg-light);
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-primary);
+    border-radius: 3px;
+  }
 }
 
-.cart-item {
+.cart-item-entry {
   display: flex;
   align-items: center;
   padding: 12px 0;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--color-border);
   
   &:last-child {
     border-bottom: none;
   }
 }
 
-.item-image {
-  .avatar {
-    width: 50px;
-    height: 50px;
+.cart-item-img {
+  margin-right: 15px;
+  
+  .cart-item-avatar {
+    width: 60px;
+    height: 60px;
     border-radius: 8px;
     background-size: contain;
-    border: 2px solid #e74c3c;
+    background-position: center;
+    background-repeat: no-repeat;
+    border: 2px solid var(--color-primary);
+    background-color: white;
   }
 }
 
-.item-details {
+.cart-item-info {
   flex: 1;
-  padding: 0 15px;
   
-  .item-name {
+  .cart-item-name {
     font-size: 0.95rem;
     font-weight: 600;
     margin: 0 0 5px 0;
-    color: #333;
+    color: var(--color-text);
   }
   
-  .item-price {
-    font-size: 0.85rem;
-    color: #666;
-    
-    .hive-price {
-      font-size: 0.8rem;
-      color: #999;
-    }
-  }
-}
-
-.item-remove {
-  background: none;
-  border: none;
-  color: #e74c3c;
-  font-size: 1.2rem;
-  cursor: pointer;
-  padding: 5px;
-  
-  &:hover {
-    color: darken(#e74c3c, 10%);
-  }
-}
-
-.cart-summary {
-  background: #f9f9f9;
-  border-radius: 8px;
-  padding: 15px;
-  margin: 20px 0;
-  
-  .summary-row {
+  .cart-item-price {
     display: flex;
-    justify-content: space-between;
-    margin-bottom: 8px;
-    
-    &:last-child {
-      margin-bottom: 0;
-    }
-    
-    .summary-label {
-      font-weight: 600;
-      color: #666;
-    }
-    
-    .summary-value {
-      font-weight: 700;
-      color: #e74c3c;
-    }
-  }
-}
-
-.payment-options {
-  .option-group {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-    
-    @media (max-width: 576px) {
-      flex-direction: column;
-    }
-  }
-  
-  .btn-pay {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 15px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
+    gap: 4px;
+    font-size: 0.85rem;
+    color: var(--color-text-light);
     
-    .pay-amount {
-      font-size: 1.1rem;
-      font-weight: 700;
-      margin-bottom: 5px;
-    }
-    
-    .pay-method {
+    .cart-item-hive-price {
       display: flex;
       align-items: center;
-      font-size: 0.9rem;
-      font-weight: 600;
-    }
-    
-    .token-logo {
-      width: 20px;
-      height: 20px;
-      margin-right: 5px;
-    }
-    
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    }
-  }
-  
-  .btn-pay-afit {
-    background: rgba(231, 76, 60, 0.1);
-    color: #e74c3c;
-    border: 1px solid rgba(231, 76, 60, 0.3);
-
-  }
-  
-  .btn-pay-hive {
-    color: #e74c3c;
-    border: 1px solid rgba(231, 76, 60, 0.3);
-    background: rgba(231, 76, 60, 0.1);
-  }
-  
-  .hive-key-input {
-    margin-top: 20px;
-    
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-      color: #666;
-    }
-    
-    input {
-      width: 100%;
-      padding: 10px 15px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      
-      &:focus {
-        border-color: #e74c3c;
-        box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2);
-        outline: none;
-      }
-    }
-  }
-  
-  .proceed-btn {
-    margin-top: 15px;
-    
-    .btn-proceed {
-      width: 100%;
-      padding: 12px;
-      background: #e74c3c;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      
-      &:hover {
-        background: darken(#e74c3c, 10%);
-      }
-      
-      &:disabled {
-        background: #aaa;
-        cursor: not-allowed;
-      }
+      gap: 4px;
+      margin-left: 8px;
+      font-size: 0.8rem;
+      color: var(--color-text-light);
     }
   }
 }
 
-.activation-section {
+.cart-item-remove-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-danger);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 8px;
+  margin-left: 10px;
+  opacity: 0.7;
+  transition: all 0.2s;
+  
+  &:hover {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+.cart-payment-section {
+  margin-top: 20px;
+  
+  .single-price-layout,
+  .dual-price-layout {
+    margin-bottom: 15px;
+  }
+}
+
+.cart-hive-key-input {
+  margin-top: 15px;
+  
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--color-text-light);
+  }
+  
+  input {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-bg-light);
+    color: var(--color-text);
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    
+    &:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2);
+      outline: none;
+    }
+  }
+}
+
+.cart-proceed-section {
+  margin-top: 15px;
+  
+  button {
+    width: 100%;
+  }
+}
+
+.cart-activation-area {
+  margin-top: 20px;
   text-align: center;
   
-  .friend-benefic {
+  .cart-friend-input {
     margin-bottom: 20px;
     text-align: left;
     
@@ -989,117 +969,284 @@
       display: block;
       margin-bottom: 8px;
       font-weight: 600;
-      color: #666;
+      font-size: 0.9rem;
+      color: var(--color-text-light);
     }
     
     input {
       width: 100%;
       padding: 10px 15px;
-      border: 1px solid #ddd;
+      border: 1px solid var(--color-border);
       border-radius: 8px;
+      background: var(--color-bg-light);
+      color: var(--color-text);
       font-size: 0.9rem;
+      transition: all 0.3s;
       
       &:focus {
-        border-color: #e74c3c;
+        border-color: var(--color-primary);
         box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2);
         outline: none;
       }
     }
   }
-  
-  .btn-activate {
-    padding: 12px 25px;
-    background: #e74c3c;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    
-    i {
-      margin-right: 8px;
-    }
-    
-    &:hover {
-      background: darken(#e74c3c, 10%);
-    }
-  }
 }
 
-.status-messages {
+.cart-status-messages {
   margin-top: 20px;
   
-  .loading {
+  .cart-loading-indicator {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #666;
+    gap: 8px;
+    color: var(--color-primary);
     font-size: 0.9rem;
-    
-    i {
-      margin-right: 8px;
-    }
+    padding: 10px;
+    background: rgba(231, 76, 60, 0.1);
+    border-radius: 8px;
   }
   
-  .error-message {
+  .cart-error-message {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     padding: 12px;
     background: rgba(231, 76, 60, 0.1);
     border-radius: 8px;
-    color: #e74c3c;
+    color: var(--color-danger);
     font-size: 0.9rem;
-    display: flex;
-    align-items: center;
     
     i {
-      margin-right: 8px;
+      font-size: 1rem;
     }
   }
 }
 
-.empty-state {
-  text-align: center;
-  padding: 30px 0;
-  
+.cart-empty-view {
   i {
-    font-size: 3rem;
-    color: #ddd;
+    font-size: 2.5rem;
+    color: var(--color-text-light);
     margin-bottom: 15px;
+    opacity: 0.5;
   }
   
   p {
     font-size: 1rem;
-    color: #666;
+    color: var(--color-text-light);
     margin-bottom: 20px;
   }
-  
-  .btn-browse {
-    padding: 10px 20px;
-    background: #e74c3c;
-    color: white;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    
-    &:hover {
-      background: darken(#e74c3c, 10%);
-    }
-  }
-}
-
-.avatar-small {
-  border-width: 3px !important;
-}
-
-.pro-card-small {
-  width: 45px;
-  height: 45px;
 }
 
 .token-logo-sm {
   width: 16px;
   height: 16px;
+}
+
+/* Dark mode adjustments */
+.dark-mode {
+  .cart-modal-container {
+    background: var(--color-bg);
+    border-color: var(--color-border);
+  }
+  
+  .cart-item-entry {
+    border-color: var(--color-border);
+  }
+  
+  .cart-hive-key-input input,
+  .cart-friend-input input {
+    background: var(--color-bg);
+    border-color: var(--color-border);
+    color: var(--color-text);
+  }
+}
+
+
+.plus-sign {
+  margin: 0 8px;
+  font-weight: bold;
+  color: var(--color-text-light);
+}
+.physical-product-prices {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 20px;
+  
+  .price-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    
+    .price-circle {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 10px 15px;
+      background: rgba(231, 76, 60, 0.1);
+      border-radius: 8px;
+      font-weight: 600;
+      color: var(--color-primary);
+      
+      &.hive {
+        color: #d0a000;
+        background: rgba(208, 160, 0, 0.1);
+      }
+    }
+    
+    button {
+      flex: 0 0 120px;
+    }
+  }
+}
+/* Cart Price Button Layout */
+.cart-price-button-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.cart-price-button-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cart-price-afit {
+  background: rgba(231, 76, 60, 0.1);
+  color: var(--color-primary);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cart-price-hive {
+  background: rgba(208, 160, 0, 0.1);
+  color: #d0a000;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cart-buy-btn {
+  background-color: var(--color-success);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.cart-buy-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .cart-price-button-row {
+    flex-wrap: wrap;
+  }
+}
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .cart-price-button-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .cart-price-button-pair {
+    justify-content: space-between;
+  }
+}
+/* Responsive adjustments */
+@media (max-width: 767px) {
+  .physical-product-prices {
+    .price-row {
+      flex-direction: column;
+      gap: 10px;
+      
+      .price-circle {
+        width: 100%;
+      }
+      
+      button {
+        width: 100%;
+      }
+    }
+  }
+}
+
+@media (max-width: 575px) {
+  .price-buttons {
+    flex-direction: column;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 767px) {
+  .cart-modal-container {
+    margin: 10px;
+  }
+  
+  .cart-modal-header {
+    padding: 15px;
+    
+    .cart-modal-title {
+      font-size: 1.1rem;
+    }
+  }
+  
+  .cart-item-img .cart-item-avatar {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .cart-item-name {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 575px) {
+  .cart-modal-header {
+    padding: 12px;
+  }
+  
+  .cart-modal-body {
+    padding: 15px;
+  }
+  
+  .cart-item-entry {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+    padding: 15px 0;
+  }
+  
+  .cart-item-img {
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+  
+  .cart-item-info {
+    text-align: center;
+  }
+  
+  .cart-item-remove-btn {
+    margin-top: 10px;
+  }
 }
 </style>

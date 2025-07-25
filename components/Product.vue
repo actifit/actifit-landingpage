@@ -218,7 +218,7 @@
     </template>
    
     <!-- Additional actions (cart buttons) -->
-    <div class="additional-actions" v-if="user && !grabConsumableItem() && allReqtsFilled && !this.productBought">
+    <div class="additional-actions" v-if="user && !grabConsumableItem() && product.type != 'real' && allReqtsFilled && !this.productBought">
       <button class="btn-add-cart" 
               @click.prevent="addCart()" 
               v-if="cartEntries.filter(obj => obj._id === product._id).length < 1">
