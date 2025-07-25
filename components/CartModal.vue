@@ -1,91 +1,138 @@
 <template>
   <div class="modal fade" id="cartModal" tabindex="-1" ref="cartModal">
     <div class="modal-dialog" role="document">
-      <div class="modal-content border border-danger" >
+      <div class="modal-content cart-modal">
         <div class="modal-header">
-          <h5 class="modal-title">{{ $t('Checkout_title') }}</h5>
+          <h5 class="modal-title" style="color: rgb(231,76,60);">Checkout <i class="fas fa-shopping-bag"></i></h5>
           <button type="button" class="close" id="closeCartMod" ref="closeCartMod" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <div class="modal-body text-center m-3" v-if="cartEntries.length > 0">
-		  <div v-for="(product, index) in cartEntries" :key="index" style="text-align: left;">
-			<div class="row m-0 pb-1">
-				<div :class="'avatar-'+product.level" class="avatar pro-card-small avatar-small " :style="'background-image: url(img/gadgets/' + product.image + ');'"></div>
-				<h5 class="col ml-3">{{product.name}} - Level {{product.level}}</h5>
-				<div class="ml-2"><button type="button" class="close text-brand" aria-label="Remove" @click.prevent="removeProduct(product)">
-					<i class="fas fa-minus-square"></i>
-				</button></div>
-			</div>
-		  </div>
-			
-			<div v-if="!purchaseSuccess">
-				<a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNow()" style="float:left; border: 1px white solid;">{{ $t('Buy_now') }} <br/> {{numberFormat(this.product_price_afit, 2)}} {{this.item_currency}}<img class="token-logo-sm " src="/img/actifit_logo.png"></a>
-				<a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNowHive()" style="border: 1px white solid;">{{ $t('Buy_now') }} <br/> {{numberFormat(this.product_price_afit * this.afitPrice.afitHiveLastPrice, 3)}} {{this.hive_currency}}<img class="token-logo-sm " src="/img/HIVE.png"></a>
-			  
-				<div class="row m-0" v-if="buyHiveExpand && !isKeychainActive && !isHiveauthActive" >
-				  <label for="active-key" class="p-2 col-sm-3">{{ $t('Active_Key') }} *</label>
-				  <input type="password" id="active-key" name="active-key" ref="active-key" class="form-control-lg col-sm-8 p-2" v-model="userActvKey">
-				</div>
-				<div class="text-center" v-if="buyHiveExpand">
-				  <button v-on:click="proceedBuyNowHive()" v-if="this.userTokens >= this.minAfitBuyTicket" class="btn btn-brand btn-lg border">{{ $t('Proceed') }}</button>
-				  <button data-toggle="modal" v-else :data-target="'#buyOptionsModalCart'" class="btn btn-brand btn-lg border">{{ $t('Proceed') }}</button>
-				</div>
-			</div>
-			<div v-else>
-				<div v-if="prodHasFriendBenefic()" class="row m-0 p-1">
-					<span class="m-2"><b>{{$t('Benef_friend')}}: </b></span>
-					<input type="text" name="friend" id="friend" ref="friend" class="form-control p-2 w-50" >
-				</div>
-				<a class="btn btn-danger btn-lg book-button p-1" @click.prevent="activateGadget()">
-					<span>{{ $t('activate_all_gadgets') }}</span>&nbsp;
-					<i class="fas fa-check text-success"></i>
-				</a>
-			</div>
-			
-			<div class="pb-md-2 text-center" v-if="buyAttempt">			  
-              <div v-if="buyInProgress && errorProceed==''">
-				<i class="fas fa-spin fa-spinner"></i>
-			  </div>
-			  <div v-if="errorProceed!=''">
-                <span class="text-brand" v-html="this.errorProceed"></span>
+        
+        <div class="modal-body" v-if="cartEntries.length > 0">
+          <div class="cart-items">
+            <div v-for="(product, index) in cartEntries" :key="index" class="cart-item">
+              <div class="item-image">
+                <div :class="'avatar-'+product.level" class="avatar pro-card-small" 
+                     :style="'background-image: url(img/gadgets/' + product.image + ');'"></div>
               </div>
-			  <div v-if="!user">
-			    <div class="row pb-3">
-				  <div class="w-50">
-					<a href="#" data-toggle="modal" data-target="#loginModal" @click="showModalFunc" class="btn btn-brand btn-lg w-75">{{ $t('Login') }}</a>
-				  </div>
-				  <div class="w-50">
-					<a href="/signup" class="btn btn-brand btn-lg w-75">{{ $t('Sign_Up') }}</a>
-				  </div>
-				</div>
-			  </div>
-			</div>
-
+              <div class="item-details">
+                <h5 class="item-name">{{product.name}} - Level {{product.level}}</h5>
+                <div class="item-price">
+                  {{numberFormat(getProductPrice(product), 2)}} AFIT
+                  <span class="hive-price" v-if="afitPrice">
+                    ({{numberFormat(getProductPrice(product) * afitPrice.afitHiveLastPrice, 3)}} HIVE)
+                  </span>
+                </div>
+              </div>
+              <button class="item-remove" @click.prevent="removeProduct(product)">
+                <i class="fas fa-minus-square"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="cart-summary">
+            <div class="summary-row">
+              <span class="summary-label">{{ $t('Subtotal') }}:</span>
+              <span class="summary-value">{{numberFormat(this.product_price_afit, 2)}} AFIT</span>
+            </div>
+            <div class="summary-row" v-if="afitPrice">
+              <span class="summary-label">{{ $t('Subtotal') }}:</span>
+              <span class="summary-value">{{numberFormat(this.product_price_afit * this.afitPrice.afitHiveLastPrice, 3)}} HIVE</span>
+            </div>
+          </div>
+          
+          <div v-if="!purchaseSuccess" class="payment-options">
+            <div class="option-group">
+              <button class="btn-pay btn-pay-afit" @click.prevent="buyNow()">
+                <span class="pay-amount">{{numberFormat(this.product_price_afit, 2)}} AFIT</span>
+                <span class="pay-method">
+                  <img class="token-logo" src="/img/actifit_logo.png">
+                  {{ $t('Pay_with_AFIT') }}
+                </span>
+              </button>
+              
+              <button class="btn-pay btn-pay-hive" @click.prevent="buyNowHive()">
+                <span class="pay-amount">{{numberFormat(this.product_price_afit * this.afitPrice.afitHiveLastPrice, 3)}} HIVE</span>
+                <span class="pay-method">
+                  <img class="token-logo" src="/img/HIVE.png">
+                  {{ $t('Pay_with_HIVE') }}
+                </span>
+              </button>
+            </div>
+            
+            <div class="hive-key-input" v-if="buyHiveExpand && !isKeychainActive && !isHiveauthActive">
+              <label for="active-key">{{ $t('Active_Key') }} *</label>
+              <input type="password" id="active-key" name="active-key" ref="active-key" 
+                     class="form-control" v-model="userActvKey" placeholder="Enter your active key">
+            </div>
+            
+            <div class="proceed-btn" v-if="buyHiveExpand">
+              <button v-on:click="proceedBuyNowHive()" v-if="this.userTokens >= this.minAfitBuyTicket" 
+                      class="btn-proceed">
+                {{ $t('Proceed') }}
+              </button>
+              <button data-toggle="modal" v-else :data-target="'#buyOptionsModalCart'" 
+                      class="btn-proceed">
+                {{ $t('Proceed') }}
+              </button>
+            </div>
+          </div>
+          
+          <div v-else class="activation-section">
+            <div class="friend-benefic" v-if="prodHasFriendBenefic()">
+              <label for="friend">{{$t('Benef_friend')}}:</label>
+              <input type="text" name="friend" id="friend" ref="friend" 
+                     class="form-control" placeholder="Enter friend's username">
+            </div>
+            
+            <button class="btn-activate" @click.prevent="activateGadget()">
+              <i class="fas fa-check"></i>
+              {{ $t('activate_all_gadgets') }}
+            </button>
+          </div>
+          
+          <div class="status-messages">
+            <div v-if="buyInProgress && errorProceed==''" class="loading">
+              <i class="fas fa-spinner fa-spin"></i>
+              {{ $t('Processing') }}...
+            </div>
+            
+            <div v-if="errorProceed!=''" class="error-message">
+              <i class="fas fa-exclamation-circle"></i>
+              <span v-html="errorProceed"></span>
+            </div>
+          </div>
         </div>
 
-		<div class="modal-body text-center m-3" v-else>
-			{{ $t('Cart_empty') }}
-		</div>
+        <div class="modal-body empty-cart" v-else>
+          <div class="empty-state">
+            <i class="fas fa-shopping-cart"></i>
+            <p>{{ $t('Cart_empty') }}</p>
+            <router-link to="/marketplace" class="btn-browse">
+              {{ $t('Browse_products') }}
+            </router-link>
+          </div>
+        </div>
       </div>
-	  
-	  
     </div>
-	
-	
-	  <BuyOptionsModal id="buyOptionsModalCart" ref="buyOptionsModalCart" containerID="#buyOptionsModalCart" :modalTitle="$t('Buy_product')" :modalText="$t('buy_now_modal_desc').replace('_AMNT_', minAfitBuyTicket)" @proceed-purchase="proceedBuyNowHive"/>
-	
-	<client-only>
+    
+    <BuyOptionsModal id="buyOptionsModalCart" ref="buyOptionsModalCart" 
+                     containerID="#buyOptionsModalCart" :modalTitle="$t('Buy_product')" 
+                     :modalText="$t('buy_now_modal_desc').replace('_AMNT_', minAfitBuyTicket)" 
+                     @proceed-purchase="proceedBuyNowHive"/>
+    
+    <client-only>
       <div>
         <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
-		<notifications :group="'warn'" :position="'top center'" :classes="'vue-notification warn'" />
+        <notifications :group="'warn'" :position="'top center'" :classes="'vue-notification warn'" />
         <notifications :group="'error'" :position="'top center'" :classes="'vue-notification error'" />
       </div>
     </client-only>
-	<LoginModal v-if="showModal" @close="showModal = false" />
+    
+    <LoginModal v-if="showModal" @close="showModal = false" />
   </div>
 </template>
-
 <script>
   import LoginModal from '~/components/LoginModal'
   import { mapGetters } from 'vuex'
@@ -907,12 +954,373 @@
 	}
   }
 </script>
-<style>
-.avatar-small{
-	border-width: 3px!important;
+<style lang="scss">
+.cart-modal {
+  border-radius: 16px;
+  overflow: hidden;
+  border: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  
+  .modal-header {
+    background-color: #e74c3c;
+    color: white;
+    border-bottom: none;
+    padding: 20px;
+    
+    .modal-title {
+      font-weight: 600;
+      font-size: 1.25rem;
+    }
+    
+    .close {
+      color: white;
+      opacity: 0.8;
+      text-shadow: none;
+      font-size: 1.5rem;
+      
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+  
+  .modal-body {
+    padding: 20px;
+    
+    &.empty-cart {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 300px;
+    }
+  }
 }
-.pro-card-small{
-	width: 45px;
-    height: 45px;
+
+.cart-items {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 20px;
+  padding-right: 10px;
+}
+
+.cart-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.item-image {
+  .avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    background-size: contain;
+    border: 2px solid #e74c3c;
+  }
+}
+
+.item-details {
+  flex: 1;
+  padding: 0 15px;
+  
+  .item-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0 0 5px 0;
+    color: #333;
+  }
+  
+  .item-price {
+    font-size: 0.85rem;
+    color: #666;
+    
+    .hive-price {
+      font-size: 0.8rem;
+      color: #999;
+    }
+  }
+}
+
+.item-remove {
+  background: none;
+  border: none;
+  color: #e74c3c;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 5px;
+  
+  &:hover {
+    color: darken(#e74c3c, 10%);
+  }
+}
+
+.cart-summary {
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 15px;
+  margin: 20px 0;
+  
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+    
+    .summary-label {
+      font-weight: 600;
+      color: #666;
+    }
+    
+    .summary-value {
+      font-weight: 700;
+      color: #e74c3c;
+    }
+  }
+}
+
+.payment-options {
+  .option-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    
+    @media (max-width: 576px) {
+      flex-direction: column;
+    }
+  }
+  
+  .btn-pay {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    
+    .pay-amount {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+    
+    .pay-method {
+      display: flex;
+      align-items: center;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    
+    .token-logo {
+      width: 20px;
+      height: 20px;
+      margin-right: 5px;
+    }
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+  }
+  
+  .btn-pay-afit {
+    background: rgba(231, 76, 60, 0.1);
+    color: #e74c3c;
+    border: 1px solid rgba(231, 76, 60, 0.3);
+
+  }
+  
+  .btn-pay-hive {
+    color: #e74c3c;
+    border: 1px solid rgba(231, 76, 60, 0.3);
+    background: rgba(231, 76, 60, 0.1);
+  }
+  
+  .hive-key-input {
+    margin-top: 20px;
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #666;
+    }
+    
+    input {
+      width: 100%;
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      
+      &:focus {
+        border-color: #e74c3c;
+        box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2);
+        outline: none;
+      }
+    }
+  }
+  
+  .proceed-btn {
+    margin-top: 15px;
+    
+    .btn-proceed {
+      width: 100%;
+      padding: 12px;
+      background: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        background: darken(#e74c3c, 10%);
+      }
+      
+      &:disabled {
+        background: #aaa;
+        cursor: not-allowed;
+      }
+    }
+  }
+}
+
+.activation-section {
+  text-align: center;
+  
+  .friend-benefic {
+    margin-bottom: 20px;
+    text-align: left;
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #666;
+    }
+    
+    input {
+      width: 100%;
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      
+      &:focus {
+        border-color: #e74c3c;
+        box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2);
+        outline: none;
+      }
+    }
+  }
+  
+  .btn-activate {
+    padding: 12px 25px;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    
+    i {
+      margin-right: 8px;
+    }
+    
+    &:hover {
+      background: darken(#e74c3c, 10%);
+    }
+  }
+}
+
+.status-messages {
+  margin-top: 20px;
+  
+  .loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    font-size: 0.9rem;
+    
+    i {
+      margin-right: 8px;
+    }
+  }
+  
+  .error-message {
+    padding: 12px;
+    background: rgba(231, 76, 60, 0.1);
+    border-radius: 8px;
+    color: #e74c3c;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    
+    i {
+      margin-right: 8px;
+    }
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 30px 0;
+  
+  i {
+    font-size: 3rem;
+    color: #ddd;
+    margin-bottom: 15px;
+  }
+  
+  p {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 20px;
+  }
+  
+  .btn-browse {
+    padding: 10px 20px;
+    background: #e74c3c;
+    color: white;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      background: darken(#e74c3c, 10%);
+    }
+  }
+}
+
+.avatar-small {
+  border-width: 3px !important;
+}
+
+.pro-card-small {
+  width: 45px;
+  height: 45px;
+}
+
+.token-logo-sm {
+  width: 16px;
+  height: 16px;
 }
 </style>
