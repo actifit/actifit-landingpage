@@ -1159,7 +1159,7 @@ module.exports = {
   Latest_Activity_Date: 'آخر تاريخ للنشاط',
   hide_reblogs: 'إخفاء إعادة النشر',
   show_reblogs: 'إظهار إعادة النشر',
-  proposal_modal_title_year: "اقتراح Actifit لعام {year}",
+  proposal_modal_title_year: "اقتراح Actifit لعام 2025",
   proposal_modal_message: "ادعم جهود تطوير ونمو Actifit. صوّت لاقتراحنا❤️",
   vote_button_text: "صوّت",
   read_more_button_text: "اقرأ المزيد",

@@ -1159,7 +1159,7 @@ module.exports = {
   Latest_Activity_Date: '最新活动日期',
   hide_reblogs: '隐藏转发',
   show_reblogs: '显示转发',
-  proposal_modal_title_year: "Actifit提案{year}",
+  proposal_modal_title_year: "Actifit提案2025",
   proposal_modal_message: "支持Actifit的开发和发展。请为我们的提案投票❤️",
   vote_button_text: "投票",
   read_more_button_text: "阅读更多",

@@ -323,7 +323,7 @@ module.exports = {
     defaultLocale: 'en',
     
     // This tells Nuxt to use different URLs for each language, like /es/about or /de/blog
-    strategy: 'prefix',
+    strategy: 'prefix_except_default',
     
     // Automatically detect the user's browser language
     // ...inside your i18n configuration...

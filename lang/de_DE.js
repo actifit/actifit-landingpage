@@ -1159,7 +1159,7 @@ module.exports = {
     Latest_Activity_Date: 'Letztes Aktivitätsdatum',
     hide_reblogs: 'Reblogs ausblenden',
     show_reblogs: 'Reblogs anzeigen',
-    proposal_modal_title_year: "Actifit-Vorschlag {year}",
+    proposal_modal_title_year: "Actifit-Vorschlag 2025",
     proposal_modal_message: "Unterstütze die Entwicklungs- und Wachstumsbemühungen von Actifit. Stimme für unseren Vorschlag ab❤️",
     vote_button_text: "Abstimmen",
     read_more_button_text: "Mehr lesen",

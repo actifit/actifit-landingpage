@@ -1159,7 +1159,7 @@ module.exports = {
   Latest_Activity_Date:'최신 활동 날짜',
   hide_reblogs:'리블로그 숨기기',
   show_reblogs:'리블로그 표시',
-  proposal_modal_title_year: "Actifit 제안 {year}",
+  proposal_modal_title_year: "Actifit 제안 2025",
   proposal_modal_message: "Actifit의 개발 및 성장 노력을 지원해주세요. 저희 제안에 투표해주세요❤️",
   vote_button_text: "투표하기",
   read_more_button_text: "더 보기",
