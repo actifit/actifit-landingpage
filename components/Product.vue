@@ -218,7 +218,7 @@
     </template>
    
     <!-- Additional actions (cart buttons) -->
-    <div class="additional-actions" v-if="user && !grabConsumableItem() && allReqtsFilled">
+    <div class="additional-actions" v-if="user && !grabConsumableItem() && allReqtsFilled && !this.productBought">
       <button class="btn-add-cart" 
               @click.prevent="addCart()" 
               v-if="cartEntries.filter(obj => obj._id === product._id).length < 1">
@@ -464,7 +464,7 @@
   
   showActivationButtons() {
     // Show activation/deactivation if user has purchased
-    return this.grabConsumableItem();
+    return this.grabConsumableItem() && this.productBought;
   },
   
   activationButtonClass() {
@@ -796,27 +796,24 @@ closeDetailsModal() {
           this.detailsOpen = !this.detailsOpen;
         },
         setProductBought(json) {
-          if (Array.isArray(json) && json.length > 0
-            || (json.user && json.product_id)) {
-            this.productBought = true;
-          }
-          if (Array.isArray(json) && json.length > 0) {
-            let consumed_cnt = 0;
-            for (let i = 0; i < json.length; i++) {
-              if (json[i].status == 'consumed') {
-                consumed_cnt += 1;
-              }
-            }
-            this.product.bought = true;
-            this.$emit('update-prod', this.product);
-            this.consumed_count = consumed_cnt;
-            this.boughtItems = json;
-          } else {
-            /*this.product.bought = false;
-            this.$emit('update-prod', this.product);*/
-          }
-          this.$forceUpdate();
-        },
+  if (Array.isArray(json) && json.length > 0 || 
+      (json.user && json.product_id)) {
+    this.productBought = true;
+  }
+  if (Array.isArray(json) && json.length > 0) {
+    let consumed_cnt = 0;
+    for (let i = 0; i < json.length; i++) {
+      if (json[i].status == 'consumed') {
+        consumed_cnt += 1;
+      }
+    }
+    this.product.bought = true;
+    this.$emit('update-prod', this.product);
+    this.consumed_count = consumed_cnt;
+    this.boughtItems = json;
+  }
+  this.$forceUpdate();
+},
         grabConsumableItem() {
           if (Array.isArray(this.boughtItems) && this.boughtItems.length > 0) {
             //console.log(this.boughtItems);
@@ -3053,7 +3050,7 @@ button {
   font-size: 0.75rem;
   
   &.active {
-    .requirement-icon {
+    ment-icon {
       color: var(--color-success);
     }
     .requirement-text {
@@ -3077,6 +3074,12 @@ button {
   text-align: center;
 }
 
+.not-met{
+  color: rgb(231, 76, 60);
+}
+.met{
+  color: rgb(40,167,69);
+}
 .requirement-text {
   flex: 1;
   line-height: 1.2;
