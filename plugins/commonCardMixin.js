@@ -15,19 +15,21 @@ export const commonCardMixin = {
       hashtags: process.env.socialSharingHashtags,
       isTooltipVisible: false,
       imageError: false,
-      allImages: [],
+      // 'stableImages' will hold the final, non-reactive list of raw image URLs.
+      stableImages: [],
+      // 'displayImages' will hold the final, resized URLs for the template.
+      displayImages: [],
       currentImageIndex: 0,
-      imageLoading: true,
+      imageLoading: false,
       cardWidth: 0,
-      debounceTimer: null,
-      imageGeneration: 0,
       imageLoadFailed: false,
-      resizeObserver: null
+      intersectionObserver: null,
+      resizeObserver: null,
+      isInitialized: false
     }
   },
   computed: {
     cardData () {
-      // Placeholder, must be overridden by component
       return {}
     },
     meta () {
@@ -45,64 +47,22 @@ export const commonCardMixin = {
       postContent = this.truncateString(postContent)
       return postContent.replace(/<[^>]+>/g, '')
     },
-    postImages () {
-      if (!this.cardData) return []
-
-      let foundImages = []
-
-      // Step 1: Find images in metadata.
-      const metaImages = this.meta.image
-      if (Array.isArray(metaImages)) {
-        foundImages.push(...metaImages)
-      } else if (metaImages) {
-        foundImages.push(metaImages)
-      }
-
-      // Step 2: Find images in the RAW post body (does not use $cleanBody).
-      if (this.cardData.body) {
-        const imageRegex = /!\[.*?\]\((.*?)\)|<img.*?src=["'](.*?)["']/g
-        let match
-        while ((match = imageRegex.exec(this.cardData.body)) !== null) {
-          const url = match[1] || match[2]
-          if (url) {
-            foundImages.push(url)
-          }
-        }
-      }
-
-      // Step 3: Create a unique list and filter it.
-      //  uses a simple branding list to avoid complex regex issues.
-      const brandingHashes = new Set(['DQmNp6YwAm2qwquALZw8PdcovDorwaBSFuxQ38TrYziGT6b', 'DQmY67NW9SgDEsLo2nsAw4nYcddrTjp4aHNLyogKvGuVMMH', 'DQmW1VsUNbEjTUKawau4KJQ6agf41p69teEvdGAj1TMXmuc'])
-      return [...new Set(foundImages)].filter(url => {
-        if (typeof url !== 'string' || !url.startsWith('http')) {
-          return false
-        }
-        // Simple check to remove common branding images
-        for (const hash of brandingHashes) {
-          if (url.includes(hash)) return false
-        }
-        return true
-      })
-    },
     getVoteCount () {
       return (this.cardData && Array.isArray(this.cardData.active_votes)) ? this.cardData.active_votes.length : 0
     },
     isUserModerator () {
-      if (this.user && this.$store.getters.moderators.find(mod => mod.name === this.user.account.name && mod.title === 'moderator')) {
-        return true
-      }
-      return false
+      return this.user && this.$store.getters.moderators.find(mod => mod.name === this.user.account.name && mod.title === 'moderator')
     },
     currentImageSrc () {
-      if (this.allImages.length > 0) {
-        return this.allImages[this.currentImageIndex]
+      if (this.displayImages.length > 0) {
+        return this.displayImages[this.currentImageIndex]
       }
-      return this.$fetchPostImage(this.meta)
+      return ''
     },
     originalCurrentImageSrc () {
-      const images = this.postImages;
-      if (images.length > this.currentImageIndex) {
-        return images[this.currentImageIndex]
+      // The original non-resized URL for error fallback
+      if (this.stableImages.length > this.currentImageIndex) {
+        return this.stableImages[this.currentImageIndex]
       }
       return ''
     },
@@ -115,25 +75,100 @@ export const commonCardMixin = {
     }
   },
   watch: {
-    'cardData.permlink' (newVal, oldVal) {
-      if (newVal !== oldVal) {
-        this.cardWidth = 0
-        this.updateAndResizeImages()
-      }
+    // This is now the main entry point. It triggers ONCE when data arrives.
+    cardData: {
+      handler(newVal) {
+        if (newVal && newVal.permlink && !this.isInitialized) {
+          this.initializeCard()
+        }
+      },
+      deep: true,
+      immediate: true
     },
+    // This watcher is now safe because it will not affect the image list.
     getVoteCount (newVal, oldVal) {
       if (newVal !== oldVal) {
         this.updatePostData()
       }
     }
   },
+  mounted () {
+    // Fallback initializer in case cardData is already present on mount.
+    this.initializeCard();
+  },
   beforeDestroy () {
-    if (this.resizeObserver) {
-      this.resizeObserver.disconnect()
-    }
-    clearTimeout(this.debounceTimer)
+    if (this.intersectionObserver) this.intersectionObserver.disconnect()
+    if (this.resizeObserver) this.resizeObserver.disconnect()
   },
   methods: {
+    initializeCard () {
+      if (this.isInitialized || !this.cardData || !this.cardData.permlink) return;
+      this.isInitialized = true
+      
+      this.fetchApiData() // Non-critical data
+      
+      // Calculate and "freeze" the image list immediately.
+      this.stableImages = this.calculatePostImages()
+
+      // If we have images, start the process to display them.
+      if (this.stableImages.length > 0) {
+        this.$nextTick(() => {
+          if (!this.$el) return;
+          this.intersectionObserver = new IntersectionObserver(
+            (entries) => {
+              if (entries[0].isIntersecting) {
+                this.intersectionObserver.disconnect();
+                this.observeSize();
+              }
+            }, { rootMargin: '200px' }
+          );
+          this.intersectionObserver.observe(this.$el);
+        });
+      }
+    },
+    // This method contains your correct filtering logic and is only called ONCE.
+    calculatePostImages () {
+      let allFoundImages = []
+      const metaImages = this.meta.image
+      if (Array.isArray(metaImages)) { allFoundImages.push(...metaImages) } else if (metaImages) { allFoundImages.push(metaImages) }
+      if (this.cardData.body) {
+        const imageRegex = /!\[.*?\]\((.*?)\)|<img.*?src=["'](.*?)["']/g
+        let match
+        while ((match = imageRegex.exec(this.cardData.body)) !== null) {
+          const url = match[1] || match[2]
+          if (url && typeof url === 'string') { allFoundImages.push(url) }
+        }
+      }
+      allFoundImages = [...new Set(allFoundImages)].filter(url => url && url.startsWith('http'));
+      const trustedHosts = /(images\.hive\.blog|files\.peakd\.com|images\.ecency\.com|cdn\.liketu\.com|ipfs-3speak\.b-cdn\.net|img\.leopedia\.io|pixabay\.com)/i
+      const whitelistedImages = allFoundImages.filter(url => trustedHosts.test(url))
+      if (whitelistedImages.length > 0) { return whitelistedImages }
+      const junkKeywords = /usermedia\.actifit\.io|actifit|chart|banner|measurements|report|tracker|fitness\sreport|rewarding\sactivity/i
+      const brandingHashes = /DQmNp6YwAm2qwquALZw8PdcovDorwaBSFuxQ38TrYziGT6b|DQmY67NW9SgDEsLo2nsAw4nYcddrTjp4aHNLyogKvGuVMMH|DQmW1VsUNbEjTUKawau4KJQ6agf41p69teEvdGAj1TMXmuc/i
+      return allFoundImages.filter(url => !junkKeywords.test(url) && !brandingHashes.test(url));
+    },
+    observeSize() {
+      this.resizeObserver = new ResizeObserver((entries) => {
+          const entry = entries[0];
+          if (entry && entry.contentRect.width > 0) {
+              this.cardWidth = Math.round(entry.contentRect.width);
+              this.resizeObserver.disconnect();
+              this.setupDisplayImages();
+          }
+      });
+      this.resizeObserver.observe(this.$el);
+    },
+    // This is the final step that prepares the images for the template.
+    setupDisplayImages () {
+      if (this.cardWidth > 0 && this.stableImages.length > 0) {
+        this.imageLoading = true;
+        this.imageLoadFailed = false;
+        
+        // Populate the final display array with resized URLs.
+        this.displayImages = this.stableImages.map(url => this.getResizedImageUrl(url, this.cardWidth));
+        this.currentImageIndex = 0;
+      }
+    },
     onImageLoad () {
       this.imageLoading = false
     },
@@ -146,73 +181,32 @@ export const commonCardMixin = {
         this.imageLoadFailed = true
       }
     },
-    getResizedImageUrl (url, width = 400) {
-      if (typeof url !== 'string' || !url.startsWith('http') || /\.gif$/i.test(url)) {
-        return url
-      }
-      const effectiveWidth = Math.round(width)
-      if (effectiveWidth <= 0) return url;
-      const resizeProxy = `https://images.hive.blog/${effectiveWidth}x0/`
+    getResizedImageUrl (url, width) {
+      if (typeof url !== 'string' || !url.startsWith('http') || /\.gif$/i.test(url)) return url
+      const resizeProxy = `https://images.hive.blog/${Math.round(width)}x0/`
       return resizeProxy + url
     },
-
-   
-    setupImages (width) {
-      if (width <= 0) return
-
-      const uniqueImages = this.postImages
-
-      if (uniqueImages.length === 0) {
-        this.allImages = []
-        this.imageLoading = false
-        return
+    fetchApiData() {
+      steem.api.setOptions({ url: process.env.steemApiNode })
+      hive.api.setOptions({ url: process.env.hiveApiNode })
+      if (this.cardData && this.cardData.author) {
+        fetch(`${process.env.actiAppUrl}getPostReward?user=${this.cardData.author}&url=${this.cardData.url}`).then(res => res.json()).then(json => { this.afitReward = json.token_count }).catch(e => {})
+        fetch(`${process.env.actiAppUrl}getRank/${this.cardData.author}`).then(res => res.json()).then(json => { this.userRank = json }).catch(e => {})
       }
-
-      
-      // Remove the exception for Pixabay. Send ALL images (except GIFs)
-      // to the getResizedImageUrl proxy to bypass hotlink protection.
-      const processedImages = uniqueImages.map(url => {
-        return this.getResizedImageUrl(url, width)
-      })
-
-      this.allImages = processedImages
-      this.currentImageIndex = 0
-
-      if (this.allImages.length === 0) {
-        this.imageLoading = false
-      }
-    },
-
-    updateAndResizeImages () {
-      if (!this.$el || !this.cardData || !this.cardData.json_metadata) {
-        return
-      }
-      const newWidth = Math.round(this.$el.offsetWidth)
-
-      if (newWidth > 0 && newWidth !== this.cardWidth) {
-        this.cardWidth = newWidth
-        this.imageGeneration++
-        this.imageLoading = true
-        this.imageLoadFailed = false
-        this.setupImages(this.cardWidth)
-      }
-    },
-    debouncedResizeHandler () {
-      clearTimeout(this.debounceTimer)
-      this.debounceTimer = setTimeout(() => {
-        this.updateAndResizeImages()
-      }, 250)
+      this.$store.dispatch('fetchModerators')
+      this.cur_bchain = localStorage.getItem('cur_bchain') || 'HIVE'
+      this.profImgUrl = this.cur_bchain === 'STEEM' ? process.env.steemImgUrl : process.env.hiveImgUrl
     },
     nextImage () {
-      if (this.allImages.length > 1) {
+      if (this.displayImages.length > 1) {
         this.imageLoading = true
-        this.currentImageIndex = (this.currentImageIndex + 1) % this.allImages.length
+        this.currentImageIndex = (this.currentImageIndex + 1) % this.displayImages.length
       }
     },
     prevImage () {
-      if (this.allImages.length > 1) {
+      if (this.displayImages.length > 1) {
         this.imageLoading = true
-        this.currentImageIndex = (this.currentImageIndex - 1 + this.allImages.length) % this.allImages.length
+        this.currentImageIndex = (this.currentImageIndex - 1 + this.displayImages.length) % this.displayImages.length
       }
     },
     goToImage (index) {
@@ -235,7 +229,7 @@ export const commonCardMixin = {
       if (!content) return ''
       let postContent = this.$cleanBody(content, true)
       postContent = this.truncateString(postContent, length)
-      return postContent.replace(/<[^>]+>/g, '');
+      return postContent.replace(/<[^>]+>/g, '')
     },
     hasBeneficiaries () {
       return this.cardData && Array.isArray(this.cardData.beneficiaries) && this.cardData.beneficiaries.length > 0
@@ -265,6 +259,7 @@ export const commonCardMixin = {
     setProperNode () {
       return this.cur_bchain === 'STEEM' ? steem : hive
     },
+    // This update is now safe and will not cause flickering.
     async updatePostData () {
       if (!this.cardData || !this.cardData.author || !this.cardData.permlink) return;
       const chainLnk = await this.setProperNode()
@@ -274,31 +269,6 @@ export const commonCardMixin = {
             this.cardData.pending_payout_value = result.pending_payout_value;
         }
       })
-    },
-    async initializeCard () {
-      await this.$nextTick()
-      this.imageLoadFailed = false
-      this.imageError = false
-      this.resizeObserver = new ResizeObserver(this.debouncedResizeHandler)
-      this.resizeObserver.observe(this.$el)
-      
-      this.updateAndResizeImages()
-
-      steem.api.setOptions({ url: process.env.steemApiNode })
-      hive.api.setOptions({ url: process.env.hiveApiNode })
-      if (this.cardData && this.cardData.author) {
-        fetch(`${process.env.actiAppUrl}getPostReward?user=${this.cardData.author}&url=${this.cardData.url}`)
-          .then(res => res.json())
-          .then(json => { this.afitReward = json.token_count })
-          .catch(e => console.error('Error fetching post reward:', e))
-        fetch(`${process.env.actiAppUrl}getRank/${this.cardData.author}`)
-          .then(res => res.json())
-          .then(json => { this.userRank = json })
-          .catch(e => console.error('Error fetching user rank:', e))
-      }
-      this.$store.dispatch('fetchModerators')
-      this.cur_bchain = localStorage.getItem('cur_bchain') || 'HIVE'
-      this.profImgUrl = this.cur_bchain === 'STEEM' ? process.env.steemImgUrl : process.env.hiveImgUrl
     }
   }
 }
