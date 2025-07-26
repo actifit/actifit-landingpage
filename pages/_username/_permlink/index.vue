@@ -11,6 +11,7 @@
           <!-- This container now uses CSS 'sticky' to achieve the two-stage scroll -->
           <div class="main-content-scroll-container" ref="mainContentScroller">
 
+
             <div class="text-right">
               <ChainSelection />
             </div>
@@ -69,11 +70,11 @@
                 <span class="ml-1">
                   <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand"
                     data-target="#voteModal" v-if="user && userVotedThisPost() == true">
-                    <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
+                      <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
                   </a>
                   <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" data-target="#voteModal"
                     class="actifit-link-plain" v-else>
-                    <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
+                      <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
                   </a>
                   <i class="far fa-comments ml-2" @click.prevent="headToComments()"></i> {{ report.children }}
                   <i class="far fa-share-square ml-2" @click.prevent="$reblog(user, report)"
@@ -159,6 +160,7 @@
               <a target="_blank"><div class="comment-user-section"><UserHoverCard :username="user.account.name" /></div></a>
               <vue-remarkable :source="responseBody" :options="{ 'html': true, 'breaks': true, 'typographer': true }"></vue-remarkable>
             </div>
+            <!-- The 'modal-body' class  -->
             <div class="report-comments modal-body" v-if="report.children > 0" ref="commentsSection">
               <div v-if="commentsLoading" class="pb-md-2 text-center">
                 <i class="fas fa-spinner fa-spin text-brand"></i>
@@ -178,7 +180,7 @@
           :report="report"
           :author-account-info="authorAccountInfo"
           :author-afit-balance="authorAfitBalance"
-          :user-rank="userRank"
+          :user-rank="user-rank"
           class="align-to-content"
         />
       </div>
@@ -439,8 +441,6 @@ export default {
         this.moderatorSignature = process.env.standardModeratorSignature; this.replyBody += this.moderatorSignature;
       }
     },
-
-    // REMOVED: The entire handlePageScroll method has been deleted as it is replaced by CSS.
   },
   mounted() {
     this.$store.dispatch('steemconnect/login');
@@ -462,33 +462,26 @@ export default {
     });
     
     window.addEventListener('resize', this.syncColumnHeights);
-    // --- END OF NEW CODE TO ADD ---
+    
       });
       window.addEventListener('resize', this.alignSidebar);
-
-      // REMOVED: The event listener for scroll hijacking is no longer needed.
-      // window.addEventListener('wheel', this.handlePageScroll, { passive: false });
     }
   },
   beforeDestroy() {
     if (process.client) {
       window.removeEventListener('storage', this.handleStorageChange);
       if (this.resizeObserver) this.resizeObserver.disconnect();
-      // --- START OF NEW CODE TO ADD ---
+    
     if (this.heightSyncObserver) this.heightSyncObserver.disconnect();
     window.removeEventListener('resize', this.syncColumnHeights);
-    // --- END OF NEW CODE TO ADD ---
+    
       window.removeEventListener('resize', this.alignSidebar);
-
-      // REMOVED: Cleanup for the scroll hijacking listener is no longer needed.
-      // window.removeEventListener('wheel', this.handlePageScroll);
     }
   }
 }
 </script>
 
 <style>
-/* All existing styles are preserved */
 .text-muted { color: #adb5bd !important; }
 .mid-avatar { width: 30px !important; height: 30px !important; }
 .report-head { border-bottom: 1px solid red; }
@@ -510,11 +503,12 @@ a:hover, a:hover, .text-brand:hover, .actifit-link-plain:hover { text-decoration
 .main-content-scroll-container {
   position: -webkit-sticky; /* For Safari */
   position: sticky;
-  /* This is the "docking" point, should match your navbar height */
   top: 90px;
-
   max-height: calc(100vh - 90px);
-  overflow: auto;
+  
+
+  overflow-y: auto;
+  overflow-x: hidden;
 
   /* --- Scrollbar Styling for Firefox (Light Mode Default) --- */
   scrollbar-width: auto;
