@@ -11,165 +11,170 @@
           <!-- This container now uses CSS 'sticky' to achieve the two-stage scroll -->
           <div class="main-content-scroll-container" ref="mainContentScroller">
 
+            <!-- The wrapper with 'row' class solves the scrollbar issue -->
+            <div class="content-wrapper row">
 
-            <div class="text-right">
-              <ChainSelection />
-            </div>
-            <div class="report-head mb-3 col-md-12" ref="reportHead">
-              <div v-if="report.parent_author" class="text-right">
-                <UserHoverCard :username="report.parent_author" />
-                <i class="fas fa-reply text-brand"></i> {{ $t('viewing_comment_note') }} <a
-                  :href="buildParentLink">{{ $t('view_parent_thread') }}</a>
+              <!-- THE FINAL FIX: Adding col-12 restores the design -->
+              <div class="col-12 text-right">
+                <ChainSelection />
               </div>
+              <div class="report-head mb-3 col-md-12" ref="reportHead">
+                <div v-if="report.parent_author" class="text-right">
+                  <UserHoverCard :username="report.parent_author" />
+                  <i class="fas fa-reply text-brand"></i> {{ $t('viewing_comment_note') }} <a
+                    :href="buildParentLink">{{ $t('view_parent_thread') }}</a>
+                </div>
 
-              <h2>{{ report.title }}</h2>
-              <div class="main-user-info pl-4" ref="reportTarget">
-                <h5 class="text-brand">
-                  <UserHoverCard :username="report.author" />
-                </h5>
-                <a :href="buildLink" class="p-1"><span class="date-head spec-btns" :title="date">{{ $getTimeDifference(report.created) }}</span> <i class="fas fa-link spec-btns"></i></a>
-                <i :title="$t('copy_link')" class="fas fa-copy spec-btns" v-on:click="copyContent"></i>
-                <i v-if="translationLoading" class="fas fa-spinner fa-spin spec-btns" :title="$t('translating_content', 'Translating...')"></i>
-                <i v-else-if="!showTranslated" class="fa-solid fa-language spec-btns" v-on:click="translateContent" :title="$t('translate_content', 'Translate Content')"></i>
-                <div>
+                <h2>{{ report.title }}</h2>
+                <div class="main-user-info pl-4" ref="reportTarget">
+                  <h5 class="text-brand">
+                    <UserHoverCard :username="report.author" />
+                  </h5>
+                  <a :href="buildLink" class="p-1"><span class="date-head spec-btns" :title="date">{{ $getTimeDifference(report.created) }}</span> <i class="fas fa-link spec-btns"></i></a>
+                  <i :title="$t('copy_link')" class="fas fa-copy spec-btns" v-on:click="copyContent"></i>
+                  <i v-if="translationLoading" class="fas fa-spinner fa-spin spec-btns" :title="$t('translating_content', 'Translating...')"></i>
+                  <i v-else-if="!showTranslated" class="fa-solid fa-language spec-btns" v-on:click="translateContent" :title="$t('translate_content', 'Translate Content')"></i>
+                  <div>
+                    <span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i
+                          class="text-white fas fa-reply"></i></a></span>
+
+                    <span class="ml-1">
+                      <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand"
+                        data-target="#voteModal" v-if="user && userVotedThisPost() == true">
+                        <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
+                      </a>
+                      <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" data-target="#voteModal"
+                        class="actifit-link-plain" v-else>
+                        <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
+                      </a>
+                      <span class="spec-btns"><i class="far fa-comments ml-2" @click.prevent="headToComments()"></i> {{ report.children }}
+                        <i class="far fa-share-square ml-2" @click.prevent="$reblog(user, report)"
+                          v-if="user && report.author != user.account.name" :title="$t('reblog')"></i></span>
+                    </span>
+                  </div>
+                  <div class="modal-header">
+                    <div class="report-tags p-1" v-html="$fetchReportTags(report)"></div>
+                  </div>
+                </div>
+                <div v-if="showTranslated" class="translation-notice">
+                  <span>{{ $t('auto_translated_content') }}</span>
+                  <a href="#" v-on:click="cancelTranslation">{{ $t('click_to_view_original') }}</a>
+                </div>
+              </div>
+              <vue-remarkable class="col-md-12" ref="remarkableContent" :source="body"
+                :options="{ 'html': true, 'breaks': true, 'typographer': true }"></vue-remarkable>
+
+            
+              <div class="modal-footer col-md-12 main-payment-info" id="main-footer">
+                <div class="report-modal-prelim-info col-md-6">
                   <span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i
                         class="text-white fas fa-reply"></i></a></span>
 
                   <span class="ml-1">
                     <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand"
                       data-target="#voteModal" v-if="user && userVotedThisPost() == true">
-                      <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
+                        <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
                     </a>
                     <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" data-target="#voteModal"
                       class="actifit-link-plain" v-else>
-                      <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
+                        <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
                     </a>
-                    <span class="spec-btns"><i class="far fa-comments ml-2" @click.prevent="headToComments()"></i> {{ report.children }}
-                      <i class="far fa-share-square ml-2" @click.prevent="$reblog(user, report)"
-                        v-if="user && report.author != user.account.name" :title="$t('reblog')"></i></span>
+                    <i class="far fa-comments ml-2" @click.prevent="headToComments()"></i> {{ report.children }}
+                    <i class="far fa-share-square ml-2" @click.prevent="$reblog(user, report)"
+                      v-if="user && report.author != user.account.name" :title="$t('reblog')"></i>
                   </span>
-                </div>
-                <div class="modal-header">
-                  <div class="report-tags p-1" v-html="$fetchReportTags(report)"></div>
-                </div>
-              </div>
-              <div v-if="showTranslated" class="translation-notice">
-                <span>{{ $t('auto_translated_content') }}</span>
-                <a href="#" v-on:click="cancelTranslation">{{ $t('click_to_view_original') }}</a>
-              </div>
-            </div>
-            <vue-remarkable class="col-md-12" ref="remarkableContent" :source="body"
-              :options="{ 'html': true, 'breaks': true, 'typographer': true }"></vue-remarkable>
-
-          
-            <div class="modal-footer col-md-12 main-payment-info" id="main-footer">
-              <div class="report-modal-prelim-info col-md-6">
-                <span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i
-                      class="text-white fas fa-reply"></i></a></span>
-
-                <span class="ml-1">
-                  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand"
-                    data-target="#voteModal" v-if="user && userVotedThisPost() == true">
-                      <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
-                  </a>
-                  <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" data-target="#voteModal"
-                    class="actifit-link-plain" v-else>
-                      <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
-                  </a>
-                  <i class="far fa-comments ml-2" @click.prevent="headToComments()"></i> {{ report.children }}
-                  <i class="far fa-share-square ml-2" @click.prevent="$reblog(user, report)"
-                    v-if="user && report.author != user.account.name" :title="$t('reblog')"></i>
-                </span>
-                <div>
-                  
-                  <span :title="afitReward + ' ' + $t('AFIT_Token')">
-                    <i class="fas fa-running text-brand mr-1"></i>{{ afitReward }} {{ $t('AFIT_Token') }}
-                  </span>
-                  <span :title="postPayout">
-                    <img src="/img/STEEM.png" class="mr-1 currency-logo-small" v-if="cur_bchain == 'STEEM'">
-                    <img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain == 'HIVE'">
-                    <img src="/img/BLURT.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain == 'BLURT'">
-                    <span v-if="postPaid()">
-                      <span class="m-1" :title="$t('author_payout')"><i class="fa-solid fa-user"></i> {{ paidValue() }}</span>
-                      <span class="m-1" :title="$t('voters_payout')"><i class="fa-solid fa-users"></i> {{ report.curator_payout_value }}</span>
-                      <i class="fa-solid fa-check text-green text-bold"></i>
+                  <div>
+                    
+                    <span :title="afitReward + ' ' + $t('AFIT_Token')">
+                      <i class="fas fa-running text-brand mr-1"></i>{{ afitReward }} {{ $t('AFIT_Token') }}
                     </span>
-                    <span v-else>
-                      <span class="text-bold">{{ report.pending_payout_value.replace('SBD', '') }}</span>
-                      <i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
+                    <span :title="postPayout">
+                      <img src="/img/STEEM.png" class="mr-1 currency-logo-small" v-if="cur_bchain == 'STEEM'">
+                      <img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain == 'HIVE'">
+                      <img src="/img/BLURT.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain == 'BLURT'">
+                      <span v-if="postPaid()">
+                        <span class="m-1" :title="$t('author_payout')"><i class="fa-solid fa-user"></i> {{ paidValue() }}</span>
+                        <span class="m-1" :title="$t('voters_payout')"><i class="fa-solid fa-users"></i> {{ report.curator_payout_value }}</span>
+                        <i class="fa-solid fa-check text-green text-bold"></i>
+                      </span>
+                      <span v-else>
+                        <span class="text-bold">{{ report.pending_payout_value.replace('SBD', '') }}</span>
+                        <i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
+                      </span>
+                      <span v-if="hasBeneficiaries()" :title="beneficiariesDisplay()">
+                        <i class="fas fa-user-pen"><sup>{{ report.beneficiaries.length }}</sup></i>
+                      </span>
                     </span>
-                    <span v-if="hasBeneficiaries()" :title="beneficiariesDisplay()">
-                      <i class="fas fa-user-pen"><sup>{{ report.beneficiaries.length }}</sup></i>
+                    <span @click.prevent="displayMorePayoutData = !displayMorePayoutData" class="text-brand pointer-cur-cls"
+                      :title="$t('more_token_rewards')">
+                      <i class="fas fa-chevron-circle-down" v-if="!displayMorePayoutData"></i>
+                      <i class="fas fa-chevron-circle-up" v-else></i>
                     </span>
-                  </span>
-                  <span @click.prevent="displayMorePayoutData = !displayMorePayoutData" class="text-brand pointer-cur-cls"
-                    :title="$t('more_token_rewards')">
-                    <i class="fas fa-chevron-circle-down" v-if="!displayMorePayoutData"></i>
-                    <i class="fas fa-chevron-circle-up" v-else></i>
-                  </span>
-                  <transition name="fade" v-if="displayMorePayoutData">
-                    <div class="m-2">
-                      <small v-for="(token, index) in tokenRewards" :key="index" :title="displayTokenValue(token)">
-                        {{ displayTokenValue(token) }} |
-                      </small>
-                    </div>
-                  </transition>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <social-sharing :url="formattedReportUrl" :title="report.title" :description="socialSharingDesc"
-                  :quote="socialSharingQuote" :hashtags="hashtags" twitter-user="actifit_fitness" inline-template>
-                  <div class="share-links-actifit">
-                    <network network="facebook"><i class="fab fa-facebook" title="facebook"></i></network>
-                    <network network="twitter"><i class="fab fa-twitter" title="twitter"></i></network>
-                    <network network="telegram"><i class="fab fa-telegram" title="telegram"></i></network>
-                    <network network="whatsapp"><i class="fab fa-whatsapp" title="whatsapp"></i></network>
-                    <network network="linkedin"><i class="fab fa-linkedin" title="linkedin"></i></network>
-                    <network network="reddit"><i class="fab fa-reddit" title="reddit"></i></network>
-                    <network network="skype"><i class="fab fa-skype" title="skype"></i></network>
-                    <network network="sms"><i class="fas fa-comment" title="SMS"></i></network>
-                    <network network="email"><i class="fa fa-envelope" title="email"></i></network>
+                    <transition name="fade" v-if="displayMorePayoutData">
+                      <div class="m-2">
+                        <small v-for="(token, index) in tokenRewards" :key="index" :title="displayTokenValue(token)">
+                          {{ displayTokenValue(token) }} |
+                        </small>
+                      </div>
+                    </transition>
                   </div>
-                </social-sharing>
+                </div>
+                <div class="col-md-6">
+                  <social-sharing :url="formattedReportUrl" :title="report.title" :description="socialSharingDesc"
+                    :quote="socialSharingQuote" :hashtags="hashtags" twitter-user="actifit_fitness" inline-template>
+                    <div class="share-links-actifit">
+                      <network network="facebook"><i class="fab fa-facebook" title="facebook"></i></network>
+                      <network network="twitter"><i class="fab fa-twitter" title="twitter"></i></network>
+                      <network network="telegram"><i class="fab fa-telegram" title="telegram"></i></network>
+                      <network network="whatsapp"><i class="fab fa-whatsapp" title="whatsapp"></i></network>
+                      <network network="linkedin"><i class="fab fa-linkedin" title="linkedin"></i></network>
+                      <network network="reddit"><i class="fab fa-reddit" title="reddit"></i></network>
+                      <network network="skype"><i class="fab fa-skype" title="skype"></i></network>
+                      <network network="sms"><i class="fas fa-comment" title="SMS"></i></network>
+                      <network network="email"><i class="fa fa-envelope" title="email"></i></network>
+                    </div>
+                  </social-sharing>
+                </div>
               </div>
-            </div>
-            <div class="modal-footer col-md-12" v-if="meta.full_afit_pay == 'on'">
-              <div class="text-brand"><i class="fas fa-star"></i><small> {{ $t('Full_AFIT_Payout_Mode') }} </small><i class="fas fa-star"></i></div>
-              <div class="text-brand" v-if="!postPaid()"><small> {{ $t('Pending_Pay') }} </small></div>
-              <div class="text-brand" v-else><small> {{ fullAFITReward }} {{ $t('AFIT_Token') }} </small></div>
-            </div>
-            <div class="modal-footer col-md-12 text-brand" v-if="meta.charity">
-              <i class="fas fa-dove"></i><small> {{ $t('Charity_Post') }} </small><i class="fas fa-dove"></i>
-              <small><a :href="meta.charity[0]" target="_blank">@{{ meta.charity[0] }}</a></small>
-            </div>
-            <transition name="fade">
-              <div class="report-reply col-md-12" v-if="commentBoxOpen">
-                <CustomTextEditor ref="editor" :initialContent="replyBody"></CustomTextEditor>
-                <a href="#" @click.prevent="postResponse($event)" class="btn btn-brand border reply-btn w-25">
-                  {{ $t('Post') }}
-                  <i class="fas fa-spin fa-spinner" v-if="loading"></i>
-                </a>
-                <a href="#" @click.prevent="resetOpenComment()" class="btn btn-brand border reply-btn w-25">{{ $t('Cancel') }}</a>
-                <a href="#" @click.prevent="insertModSignature" class="btn btn-brand border reply-btn w-25"
-                  v-if="(user && moderators.find(mod => mod.name == user.account.name && mod.title == 'moderator'))">{{ $t('Short_Signature') }}</a>
-                <a href="#" @click.prevent="insertFullModSignature" class="btn btn-brand border reply-btn w-25"
-                  v-if="(user && moderators.find(mod => mod.name == user.account.name && mod.title == 'moderator'))">{{ $t('Full_Signature') }}</a>
+              <div class="modal-footer col-md-12" v-if="meta.full_afit_pay == 'on'">
+                <div class="text-brand"><i class="fas fa-star"></i><small> {{ $t('Full_AFIT_Payout_Mode') }} </small><i class="fas fa-star"></i></div>
+                <div class="text-brand" v-if="!postPaid()"><small> {{ $t('Pending_Pay') }} </small></div>
+                <div class="text-brand" v-else><small> {{ fullAFITReward }} {{ $t('AFIT_Token') }} </small></div>
               </div>
-            </transition>
-            <div class="report-reply col-md-12" v-if="responsePosted">
-              <a target="_blank"><div class="comment-user-section"><UserHoverCard :username="user.account.name" /></div></a>
-              <vue-remarkable :source="responseBody" :options="{ 'html': true, 'breaks': true, 'typographer': true }"></vue-remarkable>
-            </div>
-            <!-- The 'modal-body' class  -->
-            <div class="report-comments modal-body" v-if="report.children > 0" ref="commentsSection">
-              <div v-if="commentsLoading" class="pb-md-2 text-center">
-                <i class="fas fa-spinner fa-spin text-brand"></i>
+              <div class="modal-footer col-md-12 text-brand" v-if="meta.charity">
+                <i class="fas fa-dove"></i><small> {{ $t('Charity_Post') }} </small><i class="fas fa-dove"></i>
+                <small><a :href="meta.charity[0]" target="_blank">@{{ meta.charity[0] }}</a></small>
               </div>
-              <Comments v-if="commentsAvailable" :author="commentEntries.author" :body="commentEntries.body"
-                :reply_entries.sync="commentEntries.reply_entries" :main_post_author="report.author"
-                :main_post_permlink="report.permlink" :main_post_cat="report.category" :depth="0" :key="reload" />
-            </div>
-
+              <transition name="fade">
+                <div class="report-reply col-md-12" v-if="commentBoxOpen">
+                  <CustomTextEditor ref="editor" :initialContent="replyBody"></CustomTextEditor>
+                  <a href="#" @click.prevent="postResponse($event)" class="btn btn-brand border reply-btn w-25">
+                    {{ $t('Post') }}
+                    <i class="fas fa-spin fa-spinner" v-if="loading"></i>
+                  </a>
+                  <a href="#" @click.prevent="resetOpenComment()" class="btn btn-brand border reply-btn w-25">{{ $t('Cancel') }}</a>
+                  <a href="#" @click.prevent="insertModSignature" class="btn btn-brand border reply-btn w-25"
+                    v-if="(user && moderators.find(mod => mod.name == user.account.name && mod.title == 'moderator'))">{{ $t('Short_Signature') }}</a>
+                  <a href="#" @click.prevent="insertFullModSignature" class="btn btn-brand border reply-btn w-25"
+                    v-if="(user && moderators.find(mod => mod.name == user.account.name && mod.title == 'moderator'))">{{ $t('Full_Signature') }}</a>
+                </div>
+              </transition>
+              <div class="report-reply col-md-12" v-if="responsePosted">
+                <a target="_blank"><div class="comment-user-section"><UserHoverCard :username="user.account.name" /></div></a>
+                <vue-remarkable :source="responseBody" :options="{ 'html': true, 'breaks': true, 'typographer': true }"></vue-remarkable>
+              </div>
+              <!-- The 'modal-body' class  -->
+              <div class="report-comments modal-body" v-if="report.children > 0" ref="commentsSection">
+                <div v-if="commentsLoading" class="pb-md-2 text-center">
+                  <i class="fas fa-spinner fa-spin text-brand"></i>
+                </div>
+                <Comments v-if="commentsAvailable" :author="commentEntries.author" :body="commentEntries.body"
+                  :reply_entries.sync="commentEntries.reply_entries" :main_post_author="report.author"
+                  :main_post_permlink="report.permlink" :main_post_cat="report.category" :depth="0" :key="reload" />
+              </div>
+              
+            </div> <!-- END: Wrapper -->
+            
           </div> 
 
         </div> <!-- End Main Content Column -->
@@ -209,6 +214,7 @@
 </template>
 
 <script>
+// Your entire <script> block remains unchanged.
 import hive from '@hiveio/hive-js'
 import steem from 'steem'
 import blurt from '@blurtfoundation/blurtjs'
@@ -500,46 +506,64 @@ a:hover, a:hover, .text-brand:hover, .actifit-link-plain:hover { text-decoration
 .translation-notice { background-color: #fcf8e3; border: 1px solid #faebcc; padding: 10px; margin-top: 15px; border-radius: 4px; color: #8a6d3b; }
 .text-green { color: #28a745; }
 
+/* Main container handles ONLY vertical scrolling */
 .main-content-scroll-container {
-  position: -webkit-sticky; /* For Safari */
+  position: -webkit-sticky;
   position: sticky;
   top: 90px;
   max-height: calc(100vh - 90px);
   
-
   overflow-y: auto;
-  overflow-x: hidden;
-
-  /* --- Scrollbar Styling for Firefox (Light Mode Default) --- */
+  overflow-x: hidden; 
+  /* --- Vertical Scrollbar Styling --- */
   scrollbar-width: auto;
-  scrollbar-color: red #f1f1f1; /* thumb color and light track color */
+  scrollbar-color: red #f1f1f1;
 }
 
-/* --- Scrollbar Styling for Webkit Browsers (Light Mode Default) --- */
+
+.content-wrapper {
+  overflow-x: auto;
+  
+  /* --- Horizontal Scrollbar Styling --- */
+  scrollbar-width: auto;
+  scrollbar-color: red #f1f1f1;
+}
+
+
+/* --- Webkit Scrollbar Styling --- */
+/* Container's VERTICAL scrollbar */
 .main-content-scroll-container::-webkit-scrollbar {
-  width: 12px;  /* for vertical scrollbar */
-  height: 12px; /* for horizontal scrollbar */
+  width: 12px;
 }
-
 .main-content-scroll-container::-webkit-scrollbar-track {
-  background: #f1f1f1; /* Light grey track for light mode */
+  background: #f1f1f1;
+}
+.main-content-scroll-container::-webkit-scrollbar-thumb {
+  background-color: red;
+  border-radius: 10px;
 }
 
-.main-content-scroll-container::-webkit-scrollbar-thumb {
+/* Wrapper's HORIZONTAL scrollbar */
+.content-wrapper::-webkit-scrollbar {
+  height: 12px;
+}
+.content-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+.content-wrapper::-webkit-scrollbar-thumb {
   background-color: red;
   border-radius: 10px;
 }
 
 
 /* --- DARK MODE OVERRIDES --- */
-
-/* Dark Mode Override for Firefox */
-.dark-mode .main-content-scroll-container {
-  scrollbar-color: red #303030; /* thumb color and dark track color */
+.dark-mode .main-content-scroll-container,
+.dark-mode .content-wrapper {
+  scrollbar-color: red #303030;
 }
 
-/* Dark Mode Override for Webkit */
-.dark-mode .main-content-scroll-container::-webkit-scrollbar-track {
-  background: #303030; /* Dark grey track for dark mode */
+.dark-mode .main-content-scroll-container::-webkit-scrollbar-track,
+.dark-mode .content-wrapper::-webkit-scrollbar-track {
+  background: #303030;
 }
 </style>
