@@ -31,7 +31,16 @@ module.exports = {
         path: '/_username/videos/new',
         alias: '/videos/new',
         component: resolve(__dirname, 'pages/_username/videos/new.vue')
-      })
+      }),
+        routes.push({
+          path: '/_username/blog/new',
+          alias: '/blog/new',
+          component: resolve(__dirname, 'pages/_username/blog/new.vue')
+        }),
+        routes.push({
+          path: '/_username/wallet',
+          component: resolve(__dirname, 'pages/_username/wallet.vue')
+        })
     }
   },
   /*router: {
@@ -106,7 +115,7 @@ module.exports = {
     actifitMarketBuy: 'actifit.market',
     actifitEscrow: 'actifit.escrow',
     actifitVault: 'actifit.vault',
-    exchangesList:[
+    exchangesList: [
       {
         "name": "binance",
         "address": "bdhivesteem"
@@ -139,39 +148,39 @@ module.exports = {
     ],
     hiveAppsScript: {
       "hiveblog": {
-      "name": "Hive blog",
-      "homepage": "https://hive.blog",
-      "url_scheme": "https://hive.blog/{category}/@{username}/{permlink}"
+        "name": "Hive blog",
+        "homepage": "https://hive.blog",
+        "url_scheme": "https://hive.blog/{category}/@{username}/{permlink}"
       },
       "peakd": {
-      "name": "PeakD",
-      "homepage": "https://peakd.com",
-      "url_scheme": "https://peakd.com/{category}/@{username}/{permlink}"
+        "name": "PeakD",
+        "homepage": "https://peakd.com",
+        "url_scheme": "https://peakd.com/{category}/@{username}/{permlink}"
       },
       "actifit": {
-      "name": "Actifit",
-      "homepage": "https://actifit.io",
-      "url_scheme": "https://actifit.io/@{username}/{permlink}"
+        "name": "Actifit",
+        "homepage": "https://actifit.io",
+        "url_scheme": "https://actifit.io/@{username}/{permlink}"
       },
       "travelfeed": {
-      "name": "TravelFeed",
-      "homepage": "https://travelfeed.com",
-      "url_scheme": "https://travelfeed.com/@{username}/{permlink}"
+        "name": "TravelFeed",
+        "homepage": "https://travelfeed.com",
+        "url_scheme": "https://travelfeed.com/@{username}/{permlink}"
       },
       "3speak": {
-      "name": "3Speak",
-      "homepage": "https://3speak.tv",
-      "url_scheme": "https://3speak.tv/watch?v={username}/{permlink}"
+        "name": "3Speak",
+        "homepage": "https://3speak.tv",
+        "url_scheme": "https://3speak.tv/watch?v={username}/{permlink}"
       },
       "ecency": {
-      "name": "Ecency",
-      "homepage": "https://ecency.com",
-      "url_scheme": "https://ecency.com/{category}/@{username}/{permlink}"
+        "name": "Ecency",
+        "homepage": "https://ecency.com",
+        "url_scheme": "https://ecency.com/{category}/@{username}/{permlink}"
       },
       "leofinance": {
-      "name": "Leofinance",
-      "homepage": "https://leofinance.io",
-      "url_scheme": "https://leofinance.io/{category}/@{username}/{permlink}",
+        "name": "Leofinance",
+        "homepage": "https://leofinance.io",
+        "url_scheme": "https://leofinance.io/{category}/@{username}/{permlink}",
       }
     },
     steemAppsScript: {
@@ -180,14 +189,14 @@ module.exports = {
   },
 
   render: {
-		static: {
-		setHeaders(res) {
-		   res.setHeader('X-Frame-Options', 'ALLOWALL')
-		   res.setHeader('Access-Control-Allow-Origin', '*')
-		   res.setHeader('Access-Control-Allow-Methods', 'GET')
-		   res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
-		}
-	}
+    static: {
+      setHeaders(res) {
+        res.setHeader('X-Frame-Options', 'ALLOWALL')
+        res.setHeader('Access-Control-Allow-Origin', '*')
+        res.setHeader('Access-Control-Allow-Methods', 'GET')
+        res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+      }
+    }
   },
 
   /*
@@ -198,25 +207,25 @@ module.exports = {
     // --- MODIFIED ---
     title: mainTitle,
     meta: [
-	  { charset: 'utf-8' },
+      { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
       // Now uses the new consistent description
       { hid: 'description', name: 'description', 'property': 'description', content: mainDescription },
       // Now uses the new consistent title
-	  { hid: 'title', name: 'og:title', 'property':'og:title', content: mainTitle},
+      { hid: 'title', name: 'og:title', 'property': 'og:title', content: mainTitle },
       // Now uses the new consistent description
-	  { hid: 'ogdescription', name: 'og:description', 'property':'og:description', content: mainDescription},
-      { hid: 'url', name: 'og:url', 'property':'og:url', content: 'https://actifit.io'},
-	  { name: 'og:type', 'property':'og:type', content: 'website'},
-	  { hid: 'image', name: 'og:image', 'property':'og:image', content: 'https://actifit.io/img/actifit_logo_med.png'},
-	  { name: 'google-site-verification', content:'Dv3mVaav2x5_2FauDB6MRjixVtVVWPfjUekWwKY-Tnc' },
-	  { name: 'fb:app_id', 'property': 'fb:app_id', content: '651065985331472'},
+      { hid: 'ogdescription', name: 'og:description', 'property': 'og:description', content: mainDescription },
+      { hid: 'url', name: 'og:url', 'property': 'og:url', content: 'https://actifit.io' },
+      { name: 'og:type', 'property': 'og:type', content: 'website' },
+      { hid: 'image', name: 'og:image', 'property': 'og:image', content: 'https://actifit.io/img/actifit_logo_med.png' },
+      { name: 'google-site-verification', content: 'Dv3mVaav2x5_2FauDB6MRjixVtVVWPfjUekWwKY-Tnc' },
+      { name: 'fb:app_id', 'property': 'fb:app_id', content: '651065985331472' },
     ],
     // --- END MODIFICATION ---
     link: [
       { rel: 'icon', type: 'image/x-icon', href: '/img/actifit_logo.png' },
       //{ rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css' },
-	  { rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css' },
+      { rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css' },
 
       { rel: 'stylesheet', href: 'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css' },
       { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css?family=Roboto' }
@@ -226,18 +235,18 @@ module.exports = {
       { src: 'https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js' },
       { src: 'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js' },
       { src: 'https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/TweenMax.min.js' },
-	  // Google tag (gtag.js)
-	  /*{ src: 'https://www.googletagmanager.com/gtag/js?id=G-HPZKPFM9GK',
-		async:true,
-		script: { children: `
-				window.dataLayer = window.dataLayer || [];
-				function gtag(){dataLayer.push(arguments);}
-				gtag('js', new Date());
-
-				gtag('config', 'G-HPZKPFM9GK');
-			`,
-  			}
-		},*/
+      // Google tag (gtag.js)
+      /*{ src: 'https://www.googletagmanager.com/gtag/js?id=G-HPZKPFM9GK',
+      async:true,
+      script: { children: `
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+  
+          gtag('config', 'G-HPZKPFM9GK');
+        `,
+          }
+      },*/
     ]
   },
 
@@ -251,8 +260,8 @@ module.exports = {
   */
   css: [
     '~/assets/css/main.sass',
-	'~/assets/css/normal.css',
-	'~/assets/css/dark-mode.css'
+    '~/assets/css/normal.css',
+    '~/assets/css/dark-mode.css'
   ],
 
   /*
@@ -260,36 +269,36 @@ module.exports = {
   */
   plugins: [
     '~/plugins/vue-steemconnect',
-	{ src: '~plugins/ga.js', ssr: false },
+    { src: '~plugins/ga.js', ssr: false },
     { src: '~plugins/vue-carousel', ssr: false },
     { src: '~plugins/vue-notification', ssr: false },
     { src: '~plugins/vue-simplemde', ssr: false },
-	{ src: '~plugins/vue-sanitize', ssr: false },
-	{ src: '~plugins/v-lightbox', mode: 'client' },
-	{ src: '@/plugins/vue-mavon-editor', ssr: false },
-	{ src: '~plugins/vue-custom.js'},
-	{ src: '~/plugins/dark-mode.js'},
-  { src: '~/plugins/commonCardMixin.js', mode: 'client' }
+    { src: '~plugins/vue-sanitize', ssr: false },
+    { src: '~plugins/v-lightbox', mode: 'client' },
+    { src: '@/plugins/vue-mavon-editor', ssr: false },
+    { src: '~plugins/vue-custom.js' },
+    { src: '~/plugins/dark-mode.js' },
+    { src: '~/plugins/commonCardMixin.js', mode: 'client' }
   ],
 
   /*
   ** Nuxt.js modules
   */
   modules: [
-	'nuxt-helmet',
-	'@nuxtjs/gtm',
-	//['@nuxtjs/axios'],
-   '@nuxtjs/i18n',
-	['@nuxtjs/google-adsense', {
+    'nuxt-helmet',
+    '@nuxtjs/gtm',
+    //['@nuxtjs/axios'],
+    '@nuxtjs/i18n',
+    ['@nuxtjs/google-adsense', {
       id: 'ca-pub-2770948859841315',
-	  pageLevelAds: true
+      pageLevelAds: true
     }],
   ],
 
   i18n: {
     // This is the directory where you will create your language files
     langDir: '~/lang/',
-    
+
     // Define all your languages here
     locales: [
       { code: 'en', name: 'English', file: 'en_US.js' },
@@ -311,10 +320,10 @@ module.exports = {
 
     // The default language of your website
     defaultLocale: 'en',
-    
+
     // This tells Nuxt to use different URLs for each language, like /es/about or /de/blog
     strategy: 'prefix_except_default',
-    
+
     // Automatically detect the user's browser language
     // ...inside your i18n configuration...
     detectBrowserLanguage: false,
@@ -375,12 +384,12 @@ module.exports = {
         config.resolve.alias['axios'] = require.resolve('axios/dist/browser/axios.cjs');
       }*/
 
-		config.node = {
-            fs: 'empty'
-        }
+      config.node = {
+        fs: 'empty'
+      }
     },
-	//fixes issue with hive-auth-wrapper plugin integration
-	transpile: ['hive-auth-wrapper', 'htmlparser2', 'sanitize-html']
+    //fixes issue with hive-auth-wrapper plugin integration
+    transpile: ['hive-auth-wrapper', 'htmlparser2', 'sanitize-html']
 
   }
 }
