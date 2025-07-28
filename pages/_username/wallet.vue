@@ -1569,7 +1569,7 @@
                   </span>
                   <br>
                   <span><i>{{ $t('You_are_exchanging') }} {{ afit_val_exchange }} {{ $t('AFIT_Token') }} {{ $t('Tokens')
-                  }} {{ $t('for') }} {{ afit_exch_matching_perc }} % {{ $t('extra_upvote') }}
+                      }} {{ $t('for') }} {{ afit_exch_matching_perc }} % {{ $t('extra_upvote') }}
                       <!--<br/> ({{ $t('net_profit_approx') }} ${{ (afit_val_exchange * 0.036).toFixed(2) }})-->
                       <br />{{ $t('enter_funds_pass_proceed') }}</i></span>
                   <div class="row">
@@ -2068,48 +2068,26 @@ export default {
     ListHeadingSection,
     AutocompleteUsernameInput
   },
-  props: {
-    username: {
-      type: String,
-      default: null,
-    },
-  },
   computed: {
     ...mapGetters('steemconnect', ['user']),
     ...mapGetters('steemconnect', ['stdLogin']),
     ...mapGetters(['userTokens', 'transactions', 'userRank', 'bchain']),
-
-    targetUsername() {
-      // Prioritize the username passed as a prop (from the /wallet wrapper)
-      if (this.username) {
-        return this.username;
-      }
-      // Fallback to the username from the URL parameter
-      if (this.$route.params.username) {
-        let user = this.$route.params.username;
-        return user.startsWith('@') ? user.substring(1) : user;
-      }
-      // Fallback to the logged-in user from the store if no other source is found
-      if (this.user && this.user.account) {
-        return this.user.account.name;
-      }
-      return null; // Return null if no user is found
-    },
     isKeychainLogin() {
-      if (typeof window !== 'undefined') {
-        return localStorage.getItem('acti_login_method') === 'keychain' && window.hive_keychain;
+      if (process.client) {
+        return localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain;
       }
-      return false; // Default value for server-side rendering
+      // On the server, always return false
+      return false;
     },
     textualDisplayTitle() {
       return this.displayUser + ' \'s ' + this.$t('Wallet');
       //return '<div class="user-wallet-avatar group-class" :style="\'background-image: url(' + this.profImgUrl + '/u/' + this.displayUser + '/avatar)\'"></div>' + this.displayUser +' \'s ' + this.$t('Wallet');
     },
     textualTitle() {
-      if (!this.user || !this.user.account) {
-        return 'Loading Wallet...'; // Or any other default text
+      if (this.user && this.user.account) {
+        return this.user.account.name + ' \'s ' + this.$t('Wallet');
       }
-      return this.user.account.name + ' \'s ' + this.$t('Wallet');
+      return this.$t('Wallet');
       //return '<div class="user-wallet-avatar group-class" :style="\'background-image: url(' + this.profImgUrl + '/u/' + this.user.account.name + '/avatar)\'"></div>' + this.user.account.name +' \'s ' + this.$t('Wallet');
     },
     nonAuthUser() {
@@ -2135,17 +2113,19 @@ export default {
       else if (this.user.account.name) return this.user.account.name
       else return '';
     },
+    // In your computed: { ... } object
     isHiveauthLogin() {
-      if (typeof window !== 'undefined') {
-        return localStorage.getItem('acti_login_method') === 'hiveauth';
+      if (process.client) {
+        return localStorage.getItem('acti_login_method') == 'hiveauth';
       }
       return false;
     },
+    // In your computed: { ... } object
     isStdLogin() {
-      if (typeof window !== 'undefined') {
+      if (process.client) {
         return localStorage.getItem('std_login');
       }
-      return null; // or false
+      return false; // or null, depending on what you expect
     },
     afitValueUSD() {
       return this.numberFormat(parseFloat(this.userTokensWallet) * this.afitPrice, 2);
@@ -2255,13 +2235,19 @@ export default {
     transferType: 'resetTransAmount',
     'user.account': {
       immediate: true,
-      handler: async function (newVal, oldVal) {
-        if (newVal && (!oldVal || newVal.name !== oldVal.name)) {
-          await this.refreshAllWalletData();
+      handler: async function (newUser, oldUser) {
+        // First, safely check if the new user object and its account property exist.
+        if (newUser && newUser.account) {
+          // Then, check if there was no old user OR if the username has changed.
+          // This prevents the code from running unnecessarily on other data changes.
+          if (!oldUser || !oldUser.account || newUser.account.name !== oldUser.account.name) {
+            await this.refreshAllWalletData();
+          }
         }
       },
       deep: true
     },
+
 
     /*isClaimableDataAvailable(newValue) {
       this.isClaimableDataAvailableTEMP = newValue;
@@ -2328,65 +2314,6 @@ export default {
      * @returns {string}
      */
 
-    async fetchAllWalletData() {
-      // This is a GUARD CLAUSE. If there's no username yet, do nothing.
-      if (!this.targetUsername) {
-        console.log("fetchAllWalletData called without targetUsername. Waiting...");
-        return;
-      }
-
-      console.log(`>>> Starting data fetch for user: ${this.targetUsername}`);
-      this.loading = true; // Ensure loading spinner is shown
-
-      // This logic is moved from your original mounted() hook
-      this.displayUser = this.targetUsername;
-
-      // Refresh user data from the store if it's the logged-in user
-      if (this.user && this.user.account && this.user.account.name === this.targetUsername) {
-        this.$store.dispatch('steemconnect/login');
-      }
-
-      // Now call all your data fetching functions
-      await this.refreshAllWalletData(); // This is your existing powerful refresh function
-
-      this.afitTokenAddress = afitTokenAddress;
-      this.afitxTokenAddress = afitxTokenAddress;
-      this.afitBNBLPTokenAddress = afitBNBLPTokenAddress;
-      this.afitxBNBLPTokenAddress = afitxBNBLPTokenAddress;
-
-      if (process.client) {
-        if (typeof window.ethereum !== 'undefined') {
-          web3 = new Web3(window.ethereum);
-        }
-      }
-
-      const chainLnk = this.setProperNode();
-      try {
-        this.properties = await this.retryOperation(async () => {
-          return await chainLnk.api.getDynamicGlobalPropertiesAsync();
-        });
-      } catch (err) {
-        console.error('Error getting properties:', err);
-      }
-
-      // All price fetches can run in parallel for speed
-      const price_fetches = [
-        fetch(`${process.env.actiAppUrl}curAFITPrice`).then(res => res.json()).then(json => this.setAFITPrice(json.unit_price_usd)).catch(err => console.error("AFIT Price Fetch Error:", err)),
-        fetch(`${process.env.actiAppUrl}AFITBSCPrice`).then(res => res.json()).then(json => this.setAFITBSCPrice(json.price)).catch(err => console.error("AFIT BSC Price Fetch Error:", err)),
-        fetch(`${process.env.actiAppUrl}AFITXBSCPrice`).then(res => res.json()).then(json => this.setAFITXBSCPrice(json.price)).catch(err => console.error("AFITX BSC Price Fetch Error:", err)),
-        fetch('https://api.coingecko.com/api/v3/simple/price?ids=hive&vs_currencies=usd').then(res => res.json()).then(json => this.setHivePrice(json.hive.usd)).catch(err => console.error("Hive Price Fetch Error:", err)),
-        fetch('https://api.coingecko.com/api/v3/simple/price?ids=blurt&vs_currencies=usd').then(res => res.json()).then(json => this.setBlurtPrice(json.blurt.usd)).catch(err => console.error("Blurt Price Fetch Error:", err)),
-        fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem-dollars&vs_currencies=usd').then(res => res.json()).then(json => this.setSBDPrice(json['steem-dollars'].usd)).catch(err => console.error("SBD Price Fetch Error:", err)),
-        fetch('https://api.coingecko.com/api/v3/simple/price?ids=hive_dollar&vs_currencies=usd').then(res => res.json()).then(json => this.setHBDPrice(json['hive_dollar'].usd)).catch(err => console.error("HBD Price Fetch Error:", err))
-      ];
-
-      await Promise.all(price_fetches);
-
-      if (process.client) {
-        this.screenWidth = screen.width;
-      }
-      this.loading = false;
-    },
     openSwapModal(token) {
       if (!token) {
         console.error('Token object is undefined');
@@ -3531,12 +3458,13 @@ export default {
         this.userTokensWallet = await this.$store.dispatch('fetchUserTokensReturn', this.displayUser, false)
 
         // }
-        this.$store.dispatch('fetchUserTokens')
+        if (this.user && this.user.account) {
+          this.$store.dispatch('fetchUserTokens')
+          this.$store.dispatch('fetchUserRank')
+          this.$store.dispatch('fetchReferrals')
+          this.fetchUserPendingRewards(this.targetUserWallet);
+        }
         this.$store.dispatch('fetchTransactions', this.displayUser)
-        this.$store.dispatch('fetchUserRank')
-        this.$store.dispatch('fetchReferrals')
-        this.fetchUserPendingRewards(this.targetUserWallet);
-
         //calculate savings params
         try {
           this.calculateSavingsRewardsParams();
@@ -3837,14 +3765,6 @@ export default {
       }
     },
     async fetchAFITHE() {
-      // START: ADD THIS GUARD CLAUSE
-      if (!this.displayUserData || !this.displayUserData.name) {
-        console.warn('fetchAFITHE called before displayUserData was set. Aborting.');
-        return; // This is the crucial part: it stops the function from running.
-      }
-      // END: ADD THIS GUARD CLAUSE
-
-      // The rest of your code is now safe to run
       let bal = await hsc.findOne('tokens', 'balances', { account: this.displayUserData.name, symbol: 'AFIT' });
       if (bal) {
         this.afit_he_balance = bal.balance;
@@ -3869,21 +3789,18 @@ export default {
       }
     },
     fetchAFITXHE() {
-      if (!this.displayUserData || !this.displayUserData.name) {
-        console.warn('fetchAFITXHE called before displayUserData was set. Aborting.');
-        return;
-      }
-      // END: ADD THIS GUARD CLAUSE
-
       let parnt = this
       hsc.findOne('tokens', 'balances', { account: this.displayUserData.name, symbol: 'AFITX' }).then(
         function (bal) {
+
+
           if (bal) {
             parnt.afitx_he_balance = bal.balance;
           }
         }
       )
     },
+
     setAFITPrice(_afitPrice) {
       this.afitPrice = parseFloat(_afitPrice).toFixed(6);
     },
@@ -4239,19 +4156,51 @@ export default {
     },
     async fetchTokenBalance() {
       try {
-        // START: ADD THIS GUARD CLAUSE
-        if (!this.displayUserData || !this.displayUserData.name) {
-          console.warn('fetchTokenBalance called before displayUserData was set. Aborting.');
-          return;
-        }
-        // END: ADD THIS GUARD CLAUSE
-
         if (this.cur_bchain == 'HIVE') {
-          // ... rest of the function
+          try {
+            const response = await fetch(scot_steemengine_api + 'info' + scot_hive_api_param);
+            const json = await response.json();
+            if (json) {
+              this.setSETokensPrecision(json);
+            }
+          } catch (e) {
+            console.log('Error fetching token precisions:', e);
+          }
         }
 
         const tokenData = await hsc.find('tokens', 'balances', { account: this.displayUserData.name });
-        // ... rest of the function
+        const tokenExtraDetails = await hsc.find('tokens', 'tokens', {});
+
+        if (Array.isArray(tokenData)) {
+          tokenData.forEach(token => {
+            try {
+              const matchEntry = tokenExtraDetails.find(v => v.symbol == token.symbol);
+              if (matchEntry && matchEntry.metadata) {
+                try {
+                  const metadata = JSON.parse(matchEntry.metadata);
+                  token.icon = metadata.icon;
+                } catch (parseErr) {
+                  console.log('Error parsing metadata for token:', token.symbol);
+                }
+              }
+            } catch (err) {
+              console.log('Error processing token:', token.symbol);
+            }
+          });
+        }
+
+        if (tokenData) {
+          this.tokensOfInterestBal = tokenData;
+          await this.sortTokenData(this.tokenSort, true);
+        }
+
+        try {
+          this.tokenMetrics = await hsc.find('market', 'metrics', {}, 1000, 0, '', false);
+        } catch (err) {
+          console.log('Error fetching token metrics:', err);
+          this.tokenMetrics = [];
+        }
+
       } catch (err) {
         console.error('Error in fetchTokenBalance:', err);
       }
@@ -8181,18 +8130,6 @@ export default {
       this.blurtPrice = parseFloat(_blurtPrice).toFixed(3);
     }
   },
-  async mounted() {
-    // Now that the component is mounted in the browser, it's safe to call the fetching logic.
-    await this.fetchAllWalletData();
-
-    // You can also dispatch an action from a mounted hook to get data from localStorage [6]
-    if (process.client) {
-      const savedData = localStorage.getItem("userDetails");
-      if (savedData) {
-        this.$store.commit('myMutation', savedData);
-      }
-    }
-  },
   created() {
     this.runningInterval = setInterval(this.fetchUserData, 60 * 1000);
   },
@@ -8226,6 +8163,135 @@ export default {
       /***************/
     })
   },
+  async mounted() {
+    try {
+      this.fetchUserData();
+      this.afitTokenAddress = afitTokenAddress;
+      this.afitxTokenAddress = afitxTokenAddress;
+      this.afitBNBLPTokenAddress = afitBNBLPTokenAddress;
+      this.afitxBNBLPTokenAddress = afitxBNBLPTokenAddress;
+
+      if ((typeof this.$route.params !== 'undefined') && (typeof this.$route.params.username !== 'undefined')) {
+        this.displayUser = this.$route.params.username;
+        if (this.$route.params.username.startsWith('@')) {
+          this.displayUser = this.$route.params.username.substring(1);
+        }
+      }
+
+      if (this.displayUser !== '') {
+        try {
+          const account_res = await this.retryOperation(async () => {
+            return await hive.api.getAccountsAsync([this.displayUser]);
+          });
+          if (account_res && account_res.length > 0) {
+            this.displayUserData = account_res[0];
+          }
+        } catch (err) {
+          console.error('Error fetching display user:', err);
+        }
+      }
+
+      if (typeof window.ethereum !== 'undefined') {
+        web3 = new Web3(window.ethereum);
+      }
+
+      if (localStorage.getItem('cur_bchain')) {
+        this.cur_bchain = localStorage.getItem('cur_bchain');
+      }
+      this.transferType = this.cur_bchain;
+      this.transferTypePass = this.cur_bchain;
+
+      steem.api.setOptions({ url: process.env.steemApiNode });
+      if (process.env.hiveTestNetOn) {
+        hive.config.set('chain_id', '4200000000000000000000000000000000000000000000000000000000000000');
+      } else {
+        hive.config.set('alternative_api_endpoints', process.env.altHiveNodes);
+      }
+      hive.api.setOptions({ url: process.env.hiveApiNode });
+      blurt.api.setOptions({ url: process.env.blurtApiNode });
+
+      const chainLnk = this.setProperNode();
+      this.$store.dispatch('steemconnect/login');
+      await this.fetchUserData();
+
+      try {
+        this.properties = await this.retryOperation(async () => {
+          return await chainLnk.api.getDynamicGlobalPropertiesAsync();
+        });
+      } catch (err) {
+        console.error('Error getting properties:', err);
+      }
+
+      const fetchPrice = async (url, setter) => {
+        try {
+          const response = await this.retryOperation(async () => {
+            const res = await fetch(url);
+            return res.json();
+          });
+          setter(response);
+        } catch (err) {
+          console.error('Error fetching price:', err);
+        }
+      };
+
+      await Promise.all([
+        fetchPrice(`${process.env.actiAppUrl}curAFITPrice`,
+          json => this.setAFITPrice(json.unit_price_usd)),
+        fetchPrice(`${process.env.actiAppUrl}AFITBSCPrice`,
+          json => this.setAFITBSCPrice(json.price)),
+        fetchPrice(`${process.env.actiAppUrl}AFITXBSCPrice`,
+          json => this.setAFITXBSCPrice(json.price)),
+        fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=steem&vs_currencies=usd',
+          json => this.setSteemPrice(json.steem.usd)),
+        fetchPrice(`${process.env.actiAppUrl}hivePrice`,
+          json => this.setHivePrice(json.hive.usd)),
+        fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=blurt&vs_currencies=usd',
+          json => this.setBlurtPrice(json.blurt.usd)),
+        fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=steem-dollars&vs_currencies=usd',
+          json => this.setSBDPrice(json['steem-dollars'].usd)),
+        fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=hive_dollar&vs_currencies=usd',
+          json => this.setHBDPrice(json['hive_dollar'].usd))
+      ]);
+
+      this.screenWidth = screen.width;
+
+      if (this.$route.query.op && this.$route.query.status) {
+        this.$notify({
+          group: 'success',
+          text: this.$t('Your') + ' "' + this.$route.query.op + '" ' + this.$t('completed_success'),
+          position: 'top center'
+        });
+        if (history && history.pushState) {
+          history.pushState('wallet', document.title, window.location.href.split('?')[0]);
+        }
+      }
+
+      if (this.$route.query.action === 'buy_afit') {
+        this.afitActivityMode = this.BUY_AFIT_STEEM;
+      } else if (this.$route.query.action === 'set_funds_pass') {
+        this.afitActivityMode = this.EXCHANGE_AFIT_STEEM;
+      } else if (this.$route.query.action === 'delegate') {
+        this.afitActivityMode = 0;
+        this.fundActivityMode = this.DELEGATE_FUNDS;
+      } else if (this.$route.query.action === 'delegate_rc') {
+        this.afitActivityMode = 0;
+        this.fundActivityMode = this.DELEGATE_RCS;
+      } else if (this.$route.query.action === 'power_up') {
+        this.afitActivityMode = 0;
+        this.fundActivityMode = this.POWERUP_FUNDS;
+      } else if (this.$route.query.action === 'lock_afit') {
+        this.afitActivityMode = this.MOVE_AFIT_SE;
+        this.fundActivityMode = 0;
+      }
+
+      this.loading = false;
+      this.transferType = this.cur_bchain;
+
+    } catch (err) {
+      console.error('Error in mounted:', err);
+      this.loading = false;
+    }
+  }
 }
 </script>
 
@@ -8301,7 +8367,7 @@ export default {
   height: 25px;
 }
 
-.grid{
+.grid {
   background-color: var(--background-color-2) !important;
   border: 2px solid red;
   border-radius: 5px;
