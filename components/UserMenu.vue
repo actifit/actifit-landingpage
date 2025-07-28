@@ -551,9 +551,9 @@ html[dir="rtl"] .flag-icon-container {
 }
 
 /* This targets NuxtLink components that are styled as dropdown-items */
-.dropdown-item.nuxt-link-active {
+/* .dropdown-item.nuxt-link-active {
   font-weight: bold;
-}
+} */
 
 .user-menu .nav-item {
   margin-right: 0.8rem;
