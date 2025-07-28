@@ -289,12 +289,19 @@ module.exports = {
     '@nuxtjs/gtm',
     //['@nuxtjs/axios'],
     '@nuxtjs/i18n',
+    '@nuxtjs/proxy',
     ['@nuxtjs/google-adsense', {
       id: 'ca-pub-2770948859841315',
       pageLevelAds: true
     }],
   ],
-
+   proxy: {
+    '/coingecko/': {
+      target: 'https://api.coingecko.com',
+      pathRewrite: { '^/coingecko/': '' },
+      changeOrigin: true
+    }
+  },
   i18n: {
     // This is the directory where you will create your language files
     langDir: '~/lang/',

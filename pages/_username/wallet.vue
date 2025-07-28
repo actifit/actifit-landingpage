@@ -2106,6 +2106,9 @@ export default {
       //return '<div class="user-wallet-avatar group-class" :style="\'background-image: url(' + this.profImgUrl + '/u/' + this.displayUser + '/avatar)\'"></div>' + this.displayUser +' \'s ' + this.$t('Wallet');
     },
     textualTitle() {
+      if (!this.user || !this.user.account) {
+        return 'Loading Wallet...'; // Or any other default text
+      }
       return this.user.account.name + ' \'s ' + this.$t('Wallet');
       //return '<div class="user-wallet-avatar group-class" :style="\'background-image: url(' + this.profImgUrl + '/u/' + this.user.account.name + '/avatar)\'"></div>' + this.user.account.name +' \'s ' + this.$t('Wallet');
     },
@@ -8298,7 +8301,7 @@ export default {
   height: 25px;
 }
 
-.grid {
+.grid{
   background-color: var(--background-color-2) !important;
   border: 2px solid red;
   border-radius: 5px;
