@@ -1284,7 +1284,7 @@
               <h3 class="pro-name">{{ $t('MOVE_AFIT_HE_AFIT_POWER') }}</h3>
               <div class="text-center grid p-2">
                 <div v-if="cur_bchain == 'STEEM'" class="text-brand font-weight-bold">{{ $t('wallet.afit_se_to_power')
-                  }}
+                }}
                 </div>
                 <div v-else class="text-brand font-weight-bold">{{ $t('wallet.afit_he_to_power') }}</div>
                 <div class="row">
@@ -2096,7 +2096,10 @@ export default {
       return null; // Return null if no user is found
     },
     isKeychainLogin() {
-      return localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain
+      if (typeof window !== 'undefined') {
+        return localStorage.getItem('acti_login_method') === 'keychain' && window.hive_keychain;
+      }
+      return false; // Default value for server-side rendering
     },
     textualDisplayTitle() {
       return this.displayUser + ' \'s ' + this.$t('Wallet');
@@ -2130,10 +2133,16 @@ export default {
       else return '';
     },
     isHiveauthLogin() {
-      return localStorage.getItem('acti_login_method') == 'hiveauth'
+      if (typeof window !== 'undefined') {
+        return localStorage.getItem('acti_login_method') === 'hiveauth';
+      }
+      return false;
     },
     isStdLogin() {
-      return localStorage.getItem('std_login')
+      if (typeof window !== 'undefined') {
+        return localStorage.getItem('std_login');
+      }
+      return null; // or false
     },
     afitValueUSD() {
       return this.numberFormat(parseFloat(this.userTokensWallet) * this.afitPrice, 2);
@@ -2251,15 +2260,6 @@ export default {
       deep: true
     },
 
-    targetUsername: {
-      immediate: true, // This makes the watcher run immediately when the component is created
-      handler(newUsername, oldUsername) {
-        // We only trigger a full data load if the username has actually been set or has changed
-        if (newUsername && newUsername !== oldUsername) {
-          this.fetchAllWalletData();
-        }
-      }
-    },
     /*isClaimableDataAvailable(newValue) {
       this.isClaimableDataAvailableTEMP = newValue;
     },*/
@@ -2351,8 +2351,10 @@ export default {
       this.afitBNBLPTokenAddress = afitBNBLPTokenAddress;
       this.afitxBNBLPTokenAddress = afitxBNBLPTokenAddress;
 
-      if (typeof window.ethereum !== 'undefined') {
-        web3 = new Web3(window.ethereum);
+      if (process.client) {
+        if (typeof window.ethereum !== 'undefined') {
+          web3 = new Web3(window.ethereum);
+        }
       }
 
       const chainLnk = this.setProperNode();
@@ -2377,7 +2379,9 @@ export default {
 
       await Promise.all(price_fetches);
 
-      this.screenWidth = screen.width;
+      if (process.client) {
+        this.screenWidth = screen.width;
+      }
       this.loading = false;
     },
     openSwapModal(token) {
@@ -8172,6 +8176,18 @@ export default {
     },
     setBlurtPrice(_blurtPrice) {
       this.blurtPrice = parseFloat(_blurtPrice).toFixed(3);
+    }
+  },
+  async mounted() {
+    // Now that the component is mounted in the browser, it's safe to call the fetching logic.
+    await this.fetchAllWalletData();
+
+    // You can also dispatch an action from a mounted hook to get data from localStorage [6]
+    if (process.client) {
+      const savedData = localStorage.getItem("userDetails");
+      if (savedData) {
+        this.$store.commit('myMutation', savedData);
+      }
     }
   },
   created() {
