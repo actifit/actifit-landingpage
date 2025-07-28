@@ -21,7 +21,7 @@
               <div class="report-head mb-3 col-md-12" ref="reportHead">
                 <div v-if="report.parent_author" class="text-right">
                   <UserHoverCard :username="report.parent_author" />
-                  <i class="fas fa-reply text-brand"></i> {{ $t('viewing_comment_note') }} <a
+                  <i class="fas fa-reply text-brand"></i> {{ $t('viewing_comment_note') }} <a
                     :href="buildParentLink">{{ $t('view_parent_thread') }}</a>
                 </div>
 
@@ -30,7 +30,7 @@
                   <h5 class="text-brand">
                     <UserHoverCard :username="report.author" />
                   </h5>
-                  <a :href="buildLink" class="p-1"><span class="date-head spec-btns" :title="date">{{ $getTimeDifference(report.created) }}</span> <i class="fas fa-link spec-btns"></i></a>
+                  <a :href="buildLink" class="p-1"><span class="date-head spec-btns" :title="date">{{ $getTimeDifference(report.created) }}</span> <i class="fas fa-link spec-btns"></i></a>
                   <i :title="$t('copy_link')" class="fas fa-copy spec-btns" v-on:click="copyContent"></i>
                   <i v-if="translationLoading" class="fas fa-spinner fa-spin spec-btns" :title="$t('translating_content', 'Translating...')"></i>
                   <i v-else-if="!showTranslated" class="fa-solid fa-language spec-btns" v-on:click="translateContent" :title="$t('translate_content', 'Translate Content')"></i>
@@ -486,7 +486,6 @@ export default {
   }
 }
 </script>
-
 <style>
 .text-muted { color: #adb5bd !important; }
 .mid-avatar { width: 30px !important; height: 30px !important; }
@@ -506,7 +505,7 @@ a:hover, a:hover, .text-brand:hover, .actifit-link-plain:hover { text-decoration
 .translation-notice { background-color: #fcf8e3; border: 1px solid #faebcc; padding: 10px; margin-top: 15px; border-radius: 4px; color: #8a6d3b; }
 .text-green { color: #28a745; }
 
-/* Main container handles ONLY vertical scrolling */
+/* Main container handles ONLY vertical scrolling and acts as a flex parent */
 .main-content-scroll-container {
   position: -webkit-sticky;
   position: sticky;
@@ -514,23 +513,30 @@ a:hover, a:hover, .text-brand:hover, .actifit-link-plain:hover { text-decoration
   max-height: calc(100vh - 90px);
   
   overflow-y: auto;
-  overflow-x: hidden; 
-  /* --- Vertical Scrollbar Styling --- */
+  overflow-x: hidden; /* Hide horizontal scrollbar here */
+
+  /* Make it a flex container so its child can fill its height */
+  display: flex;
+
+  /* --- Vertical Scrollbar Styling (Firefox) --- */
   scrollbar-width: auto;
   scrollbar-color: red #f1f1f1;
 }
 
-
+/* The inner wrapper handles ONLY horizontal scrolling */
 .content-wrapper {
-  overflow-x: auto;
+  overflow-x: auto; /* Let this div handle the horizontal overflow */
+  width: 100%;     /* Ensure it takes up the full width */
   
-  /* --- Horizontal Scrollbar Styling --- */
+  /* --- Horizontal Scrollbar Styling (Firefox) --- */
   scrollbar-width: auto;
   scrollbar-color: red #f1f1f1;
 }
 
 
 /* --- Webkit Scrollbar Styling --- */
+/* THIS IS THE CRITICAL FIX: STYLES ARE NOW SEPARATED */
+
 /* Container's VERTICAL scrollbar */
 .main-content-scroll-container::-webkit-scrollbar {
   width: 12px;
