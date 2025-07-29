@@ -61,7 +61,12 @@
                   <a href="#" v-on:click="cancelTranslation">{{ $t('click_to_view_original') }}</a>
                 </div>
               </div>
-              <vue-remarkable class="col-md-12" ref="remarkableContent" :source="body"
+
+              <!-- 
+                vvv CHANGE 1 OF 2: THIS IS THE CORRECTED LINE vvv
+                It now uses 'proxiedBody' instead of 'body' to ensure all images are proxied.
+              -->
+              <vue-remarkable class="col-md-12" ref="remarkableContent" :source="proxiedBody"
                 :options="{ 'html': true, 'breaks': true, 'typographer': true }"></vue-remarkable>
 
             
@@ -260,6 +265,35 @@ export default {
   computed: {
     ...mapGetters('steemconnect', ['user', 'stdLogin']),
     ...mapGetters(['commentEntries', 'newlyVotedPosts', 'bchain', 'moderators', 'commentCountToday']),
+    
+    /* 
+     * vvv CHANGE 2 OF 2: THIS IS THE NEW COMPUTED PROPERTY vvv
+     * It processes the post body to proxy and repair all image URLs
+     * before they are rendered, fixing broken images.
+    */
+    proxiedBody() {
+      if (!this.report || !this.report.body) return '';
+      
+      const rawBody = this.$cleanBody(this.report.body);
+
+      return rawBody.replace(/<img[^>]+src="([^">]+)"/g, (match, url) => {
+        if (url.startsWith('https://images.hive.blog') || url.toLowerCase().endsWith('.gif')) {
+          return match;
+        }
+
+        let absoluteUrl = url;
+        if (url.startsWith('//')) {
+          absoluteUrl = 'https:' + url;
+        } else if (!url.startsWith('http')) {
+          absoluteUrl = 'https://' + url;
+        }
+        
+        const proxiedUrl = `https://images.hive.blog/0x0/${absoluteUrl}`;
+        
+        return match.replace(url, proxiedUrl);
+      });
+    },
+
     body() { return this.report ? this.$cleanBody(this.report.body) : ''; },
     commentsAvailable() { return this.commentEntries != null && !this.commentsLoading; },
     date() {
