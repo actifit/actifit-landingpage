@@ -6,7 +6,7 @@
           <button class="info-icon" @click="showDetailsModal">
             <i class="fas fa-info-circle"></i>
           </button>
-          <!-- Product Image -->
+          <!-- Product Image --> 
           <div class="product-image-container">
             <div class="product-image" :style="product && product.image ? 
                 (product.image.startsWith('http') ? 
@@ -51,27 +51,33 @@
             </div>
           </div>
           
-          <div class="detail-row boosts" 
-        v-if="product.benefits && product.benefits.boosts && product.benefits.boosts.length">{{ $t('Boosts') }}
-      <div class="detail-item boost-item" 
-          v-for="(boost, index) in product.benefits.boosts" 
-          :key="index">
-        <span class="boost-icon" :class="{'friend': boost.boost_beneficiary == 'friend'}">
-          <i class="fas" :class="boost.boost_beneficiary == 'friend' ? 'fa-user-friends' : 'fa-user'"></i>
-        </span>
-        <span class="boost-value">
-          <template v-if="boost.boost_amount">+{{ boost.boost_amount }}</template>
-          <template v-else-if="boost.boost_min_amount">
-            +{{ boost.boost_min_amount }}-{{ boost.boost_max_amount }}
-          </template>
-          <span class="boost-type">
-            {{ boost.boost_type.replace('percent_reward', '%').replace('percent', '%').replace('unit', ' ') }}
-          </span>
-          <span class="boost-unit">{{ boost.boost_unit }}</span>
-        </span>
+<div class="detail-row boosts" :class="{'multiple-boosts': hasMultipleBoosts}"
+     v-if="product.benefits && product.benefits.boosts && product.benefits.boosts.length">{{ $t('Boosts') }}
+  <div class="detail-item boost-item" 
+       v-for="(boost, index) in product.benefits.boosts" 
+       :key="index">
+    <div class="tooltip-container">
+      <span class="boost-icon" 
+            :class="{'friend': boost.boost_beneficiary == 'friend'}"
+            @mouseenter="showTooltip = index"
+            @mouseleave="showTooltip = null">
+        <i class="fas" :class="boost.boost_beneficiary == 'friend' ? 'fa-user-friends' : 'fa-user'"></i>
+      </span>
+      <div class="custom-tooltip" v-if="showTooltip === index">
+        {{ boost.boost_beneficiary == 'friend' ? $t('Boost goes to your friend') : $t('Boost goes to you') }}
       </div>
     </div>
+    <span class="boost-value">
+      <template v-if="boost.boost_amount">+{{ boost.boost_amount }}</template>
+      <template v-else-if="boost.boost_min_amount">
+        +{{ boost.boost_min_amount }}-{{ boost.boost_max_amount }}
+      </template>
+      <span class="boost-type">{{ boost.boost_type.replace('percent_reward', '%').replace('percent', '%').replace('unit', '') }}</span>
+    &nbsp;<span class="boost-unit">{{ boost.boost_unit }}</span></span>
+  </div>
+</div>
           
+
 <!-- Requirements Section - Redesigned -->
 <div class="detail-row requirements" 
     v-if="product.requirements && product.requirements.length > 0 && 
@@ -98,7 +104,8 @@
             </template>
             <template v-else
                       :title="$t('consumed_reqt').replace('_AMOUNT_', reqt.count).replace('_ITEM_', reqt.item).replace('_LEVEL_', reqt.level)">
-              <span class="highlight">{{ $t('At_Least') }} {{ reqt.count }} '{{ reqt.item }} {{ $t('level_short') }} {{ reqt.level }}'</span> {{ $t('consumed') }}
+              <span class="highlight">{{ $t('At_Least') }} {{ reqt.count }} '{{ reqt.item }} {{ $t('level_short') }} {{ reqt.level }}'</span> 
+              <span class="consumed-text">{{ $t('consumed') }}</span>
             </template>
           </span>
         </div>
@@ -218,7 +225,7 @@
     </template>
    
     <!-- Additional actions (cart buttons) -->
-    <div class="additional-actions" v-if="user && !grabConsumableItem() && product.type != 'real' && allReqtsFilled && !this.productBought">
+    <div class="additional-actions" v-if="user && !grabConsumableItem() && product.type == 'ingame' && allReqtsFilled && !this.productBought">
       <button class="btn-add-cart" 
               @click.prevent="addCart()" 
               v-if="cartEntries.filter(obj => obj._id === product._id).length < 1">
@@ -405,6 +412,14 @@
         ...mapGetters('steemconnect', ['stdLogin']),
         ...mapGetters(['userTokens']),
         ...mapGetters(['cartEntries']),
+
+  hasMultipleBoosts() {
+    // Safest version that works in all environments
+    if (!this.product || !this.product.benefits || !Array.isArray(this.product.benefits.boosts)) {
+      return false;
+    }
+    return this.product.benefits.boosts.length > 1;
+  },
         isKeychainActive() {
           return (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain)
         },
@@ -477,6 +492,7 @@
       },
       data() {
         return {
+          showTooltip: null,
           showDetails: false,
           galleryExpanded: false,
           lightboxActive: false,
@@ -2024,12 +2040,11 @@ closeDetailsModal() {
 
     }
     </script>
-      
-Here's the organized CSS with combined duplicate classes, proper ordering (variables first, then base styles, components, and finally media queries and keyframes), and no comments:
 
-```css
 <style lang="scss">
 :root {
+  --color-tooltip-text: #fff;
+  --color-tooltip: rgba(0,0,0,0.8);
   --color-primary: #e74c3c;
   --color-primary-dark: #c0392b;
   --color-secondary: rgb(13,110,253);
@@ -2046,6 +2061,8 @@ Here's the organized CSS with combined duplicate classes, proper ordering (varia
 }
 
 .dark-mode {
+  --color-tooltip: #fff;
+  --color-tooltip-text: rgba(0,0,0,0.8);
   --color-text: #f0f0f0;
   --color-text-light: #bbb;
   --color-bg: #1e1e1e;
@@ -2219,14 +2236,46 @@ Here's the organized CSS with combined duplicate classes, proper ordering (varia
     font-size: 0.85rem;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 5px;
     color: rgba(119,119, 119);
     background: rgba(231, 76, 60, 0.1);
-    padding: 8px 12px;
+    padding: 5px 12px;
     border-radius: 8px;
     margin-bottom: 15px;
+
+      .boost-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+    color: var(--color-text);
+    width: 100%;
+    
+    .boost-value {
+      display: flex;
+      align-items: center;
+      gap: 0; // Remove gap between value and type
+      white-space: nowrap; // Prevent wrapping
+      
+      .boost-type{
+        font-weight: 600;
+      }
+    }
   }
-  
+    &.multiple-boosts {
+    .boost-item {
+      display: grid;
+      grid-template-columns: 20px 1fr;
+      align-items: center;
+      
+      .boost-value {
+        display: flex;
+        align-items: center;
+        min-width: 80px; // Adjust as needed for alignment
+      }
+    }
+  }
+}
   &.requirements {
     background: rgba(231, 76, 60, 0.1);
     padding: 12px;
@@ -2273,8 +2322,40 @@ Here's the organized CSS with combined duplicate classes, proper ordering (varia
   font-weight: 500;
 }
 
+.tooltip-container {
+  position: relative;
+  display: inline-block;
+}
+
+.custom-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-25%);
+  background: var(--color-tooltip);
+  color: var(--color-tooltip-text);
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 100;
+  margin-bottom: 5px;
+  
+  &:after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 25%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: var(--color-tooltip) transparent transparent transparent;
+  }
+}
+
 .boost-icon {
   color: var(--color-primary);
+  cursor: pointer;
   
   &.friend {
     color: #e74c3c;
@@ -2316,14 +2397,16 @@ Here's the organized CSS with combined duplicate classes, proper ordering (varia
   display: flex;
   flex-direction: column;
   gap: 8px;
+  width: 100%;
 }
 
 .status-item {
   display: flex;
-  align-items: center;
   gap: 4px;
-  font-size: 0.75rem;
-  
+  font-size: 0.85rem;
+  align-items: center;
+  width: 100%;
+
   &.active {
     .status-icon {
       color: var(--color-success);
@@ -2491,6 +2574,7 @@ Here's the organized CSS with combined duplicate classes, proper ordering (varia
   align-items: center;
 }
 
+
 /* For dual pricing layout */
 .dual-pricing-row {
   display: flex;
@@ -2505,19 +2589,31 @@ Here's the organized CSS with combined duplicate classes, proper ordering (varia
 }
 
 .single-price-layout {
-  margin-left: 6px;
-  margin-right: 6px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
+  justify-content: space-between;
+  width: 100%;
   gap: 10px;
 }
 
 .single-price-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   width: 100%;
+  gap: 10px;
+  margin-right: 7px;
+}
+
+.combined-price-layout {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+  gap: 10px;
+  padding: 0 7px;
 }
 
 .dual-price-layout {
@@ -2613,17 +2709,6 @@ button {
   border: none;
   cursor: pointer;width: auto;
 }
-
-.combined-price-layout {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 55px;
-  width: auto;
-  margin-left: 6px;
-  margin-right: 6px;
-}
-
 
 .btn-buy-disabled {
   background-color: rgb(108, 117, 125) !important;
@@ -3027,7 +3112,6 @@ button {
   font-size: 0.85rem;
   color: #777;
   flex-shrink: 0;
-  padding-top: 2px;
 }
 
 .requirements-heading {
@@ -3042,49 +3126,42 @@ button {
   flex-direction: column;
   gap: 8px;
 }
-
+/* Requirements Section Styling */
 .requirement-item {
   display: flex;
   align-items: center;
   gap: 4px;
   font-size: 0.75rem;
-  
-  &.active {
-    ment-icon {
-      color: var(--color-success);
-    }
-    .requirement-text {
-      color: var(--color-success-dark);
-    }
-  }
-  
-  &.inactive {
-    .requirement-icon {
-      color: var(--color-danger);
-    }
-    .requirement-text {
-      color: var(--color-text);
-    }
-  }
 }
 
-.requirement-icon {
-  font-size: 0.9rem;
-  min-width: 18px;
-  text-align: center;
+/* Icon colors - red for not met, green for met */
+.requirement-item.not-met .requirement-icon {
+  color: rgb(231, 76, 60); /* Red for not met */
 }
 
-.not-met{
-  color: rgb(231, 76, 60);
+.requirement-item.met .requirement-icon {
+  color: rgb(40, 167, 69); 
 }
-.met{
-  color: rgb(40,167,69);
-}
+
 .requirement-text {
   flex: 1;
   line-height: 1.2;
+  color: var(--color-text);
 }
 
+.consumed-text {
+  color: var(--color-text); 
+}
+
+.dark-mode {
+  .requirement-text {
+    color: var(--color-text); 
+  }
+  
+  .consumed-text {
+    color: var(--color-primary); 
+  }
+}
 .highlight {
   font-weight: 500;
   color: var(--color-text);
@@ -3205,22 +3282,6 @@ button:focus {
     width: 100%;
   }
 
-  .combined-price-layout {
-    flex-direction: column;
-    gap: 15px;
-    align-items: center;
-  }
-
-  .dual-price-row {
-    flex-direction: column;
-    gap: 10px;
-    width: 100%;
-  }
-
-  .price-pair {
-    justify-content: center;
-  }
-
   .modal-contentt {
     width: 90%;
     margin-top: 20px;
@@ -3234,6 +3295,7 @@ button:focus {
   .gallery-grid {
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   }
+  
 }
 
 @media (max-width: 575px) {
