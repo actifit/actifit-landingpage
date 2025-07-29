@@ -37,9 +37,20 @@ module.exports = {
           alias: '/blog/new',
           component: resolve(__dirname, 'pages/_username/blog/new.vue')
         }),
+        // Route for a specific user's wallet (e.g., /mcfarhat/wallet)
+        // Corrected _username to :username for standard syntax
         routes.push({
-          path: '/_username/wallet',
+          name: 'wallet-user', // Added a unique name for clarity
+          path: '/:username/wallet',
           component: resolve(__dirname, 'pages/_username/wallet.vue')
+        }),
+
+        // ADD THIS NEW ROUTE
+        // This handles the path for the logged-in user's own wallet (e.g., /wallet)
+        routes.push({
+          name: 'wallet-self', // Added a unique name
+          path: '/wallet',
+          component: resolve(__dirname, 'pages/_username/wallet.vue') // Use the same component
         })
     }
   },
@@ -295,7 +306,7 @@ module.exports = {
       pageLevelAds: true
     }],
   ],
-   proxy: {
+  proxy: {
     '/coingecko/': {
       target: 'https://api.coingecko.com',
       pathRewrite: { '^/coingecko/': '' },
@@ -328,8 +339,6 @@ module.exports = {
     // The default language of your website
     defaultLocale: 'en',
 
-    // This tells Nuxt to use different URLs for each language, like /es/about or /de/blog
-    strategy: 'prefix_except_default',
 
     // Automatically detect the user's browser language
     // ...inside your i18n configuration...

@@ -1569,7 +1569,7 @@
                   </span>
                   <br>
                   <span><i>{{ $t('You_are_exchanging') }} {{ afit_val_exchange }} {{ $t('AFIT_Token') }} {{ $t('Tokens')
-                      }} {{ $t('for') }} {{ afit_exch_matching_perc }} % {{ $t('extra_upvote') }}
+                  }} {{ $t('for') }} {{ afit_exch_matching_perc }} % {{ $t('extra_upvote') }}
                       <!--<br/> ({{ $t('net_profit_approx') }} ${{ (afit_val_exchange * 0.036).toFixed(2) }})-->
                       <br />{{ $t('enter_funds_pass_proceed') }}</i></span>
                   <div class="row">
@@ -2073,21 +2073,14 @@ export default {
     ...mapGetters('steemconnect', ['stdLogin']),
     ...mapGetters(['userTokens', 'transactions', 'userRank', 'bchain']),
     isKeychainLogin() {
-      if (process.client) {
-        return localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain;
-      }
-      // On the server, always return false
-      return false;
+      return localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain
     },
     textualDisplayTitle() {
       return this.displayUser + ' \'s ' + this.$t('Wallet');
       //return '<div class="user-wallet-avatar group-class" :style="\'background-image: url(' + this.profImgUrl + '/u/' + this.displayUser + '/avatar)\'"></div>' + this.displayUser +' \'s ' + this.$t('Wallet');
     },
     textualTitle() {
-      if (this.user && this.user.account) {
-        return this.user.account.name + ' \'s ' + this.$t('Wallet');
-      }
-      return this.$t('Wallet');
+      return this.user.account.name + ' \'s ' + this.$t('Wallet');
       //return '<div class="user-wallet-avatar group-class" :style="\'background-image: url(' + this.profImgUrl + '/u/' + this.user.account.name + '/avatar)\'"></div>' + this.user.account.name +' \'s ' + this.$t('Wallet');
     },
     nonAuthUser() {
@@ -2109,23 +2102,19 @@ export default {
       return true;
     },
     targetUserWallet() {
-      if (this.displayUser != '') return this.displayUser;
-      else if (this.user.account.name) return this.user.account.name
-      else return '';
+      if (this.displayUser) {
+        return this.displayUser;
+      }
+      if (this.user && this.user.account && this.user.account.name) {
+        return this.user.account.name;
+      }
+      return '';
     },
-    // In your computed: { ... } object
     isHiveauthLogin() {
-      if (process.client) {
-        return localStorage.getItem('acti_login_method') == 'hiveauth';
-      }
-      return false;
+      return localStorage.getItem('acti_login_method') == 'hiveauth'
     },
-    // In your computed: { ... } object
     isStdLogin() {
-      if (process.client) {
-        return localStorage.getItem('std_login');
-      }
-      return false; // or null, depending on what you expect
+      return localStorage.getItem('std_login')
     },
     afitValueUSD() {
       return this.numberFormat(parseFloat(this.userTokensWallet) * this.afitPrice, 2);
@@ -2235,14 +2224,9 @@ export default {
     transferType: 'resetTransAmount',
     'user.account': {
       immediate: true,
-      handler: async function (newUser, oldUser) {
-        // First, safely check if the new user object and its account property exist.
-        if (newUser && newUser.account) {
-          // Then, check if there was no old user OR if the username has changed.
-          // This prevents the code from running unnecessarily on other data changes.
-          if (!oldUser || !oldUser.account || newUser.account.name !== oldUser.account.name) {
-            await this.refreshAllWalletData();
-          }
+      handler: async function (newVal, oldVal) {
+        if (newVal && (!oldVal || newVal.name !== oldVal.name)) {
+          await this.refreshAllWalletData();
         }
       },
       deep: true
@@ -3433,38 +3417,35 @@ export default {
       this.displayUserData = newUserData;
     },
     async fetchUserData() {
+      // Guard Clause: Ensure this function doesn't run if the primary user data isn't loaded yet.
+      if (!this.displayUserData) {
+        console.warn('fetchUserData called before displayUserData was ready. Aborting.');
+        return;
+      }
+
       if ((typeof this.user != 'undefined' && this.user != null) || this.displayUser != '') {
 
-        //update user info from blockchain
+        //update user info from blockchain if using steemconnect
         if (!localStorage.getItem('std_login')) {
-          //if (!this.stdLogin)
           try {
             let user_data = await this.$steemconnect.me();
             this.user.account = user_data.account;
           } catch (excp) {
-            console.log(excp);
+            // It's okay if this fails (e.g., token expired), don't log as a critical error
+            // console.log(excp);
           }
         }
 
-        //default
-        if (!this.displayUserData) {
-          this.displayUserData = this.user.account;
-        }
-        /*if (this.displayUser!=''){
-          fetch(process.env.actiAppUrl+'user/' + this.displayUser).then(res => {
-            res.json().then(json => this.userTokens = json.tokens)}).catch(e => console.log(e))
+        // This redundant assignment is now removed. The `mounted` hook handles setting `displayUserData`.
 
-        }else{*/
         this.userTokensWallet = await this.$store.dispatch('fetchUserTokensReturn', this.displayUser, false)
 
-        // }
-        if (this.user && this.user.account) {
-          this.$store.dispatch('fetchUserTokens')
-          this.$store.dispatch('fetchUserRank')
-          this.$store.dispatch('fetchReferrals')
-          this.fetchUserPendingRewards(this.targetUserWallet);
-        }
+        this.$store.dispatch('fetchUserTokens')
         this.$store.dispatch('fetchTransactions', this.displayUser)
+        this.$store.dispatch('fetchUserRank')
+        this.$store.dispatch('fetchReferrals')
+        this.fetchUserPendingRewards(this.targetUserWallet);
+
         //calculate savings params
         try {
           this.calculateSavingsRewardsParams();
@@ -3495,24 +3476,6 @@ export default {
             res.json().then(json => this.setUserTokenSwapHistory(json)).catch(e => console.log(e))
           }).catch(e => console.log(e))
 
-        //let's grab the user's steem-engine tokens too
-        //Disable: EOL for S-E
-        /*
-        this.fetchTokenBalance();
-
-        if (this.cur_bchain == 'STEEM'){
-          fetch(scot_steemengine_api+'@'+this.user.account.name).then(
-            res => {res.json().then(json => this.setUserClaimableSETokens (json) ).catch(e => console.log(e))
-          }).catch(e => console.log(e))
-
-        }else{
-          fetch(scot_steemengine_api+'@'+this.user.account.name+scot_hive_api_param).then(
-            res => {res.json().then(json => this.setUserClaimableSETokens (json) ).catch(e => console.log(e))
-          }).catch(e => console.log(e))
-
-        }
-        */
-
         //grab user settings
         fetch(process.env.actiAppUrl + 'userSettings/' + this.displayUserData.name).then(
           res => {
@@ -3522,26 +3485,16 @@ export default {
         //grab user pending withdrawals
         this.getPendingSavingsWithdrawals();
 
-        //let's grab the number of pending token swap transactions to see if we can add more
-        /*fetch(process.env.actiAppUrl+'getPendingTokenSwapTransCount').then(
-          res => {res.json().then(json => this.pendingTokenSwapTransCount = json ).catch(e => console.log(e))
-        }).catch(e => console.log(e))*/
-
         //grab SP
         this.steemPower = await this.vestsToSteemPower(this.displayUserData.vesting_shares);
-        console.log(this.steemPower);
         //grab Delegated SP
         this.delegatedSteemPower = await this.vestsToSteemPower(this.displayUserData.delegated_vesting_shares);
-        console.log(this.delegatedSteemPower);
         //grab received SP
         this.receivedSteemPower = await this.vestsToSteemPower(this.displayUserData.received_vesting_shares);
-        console.log(this.receivedSteemPower);
         //grab powerdown SP
         this.powerDownRateVal = await this.vestsToSteemPower(this.displayUserData.vesting_withdraw_rate.split(' ')[0]);
-        console.log(this.powerDownRateVal);
         //grab next power down withdrawal date
         this.powerDownWithdrawDate = this.date(this.displayUserData.next_vesting_withdrawal);
-        console.log(this.powerDownWithdrawDate);
         //effective SP
         this.effectiveSteemPower = this.steemPower + this.receivedSteemPower - this.delegatedSteemPower - this.powerDownRateVal;
 
@@ -3549,18 +3502,9 @@ export default {
         this.claimableSTEEMRewards();
 
 
-        //fetch user's AFIT S-E balance
-        //disable: EOL for S-E
-        //this.fetchAFITSE();
-
         //fetch user's AFIT H-E balance
-
         this.fetchAFITHE();
 
-
-        //fetch user's AFITX S-E balance
-        //disable: EOL for S-E
-        //this.fetchAFITXSE();
 
         //fetch user's AFITX H-E balance
         this.fetchAFITXHE();
@@ -3574,20 +3518,6 @@ export default {
 
         //fetch user's tokensOfInterest S-E balance
         let tokenData, tokenExtraDetails
-        /*if (this.cur_bchain == 'STEEM'){
-          tokenData = await ssc.find('tokens', 'balances', { account: this.user.account.name, symbol : { '$in' : tokensOfInterest } });
-
-          //grab full token data
-          tokenExtraDetails = await ssc.find('tokens', 'tokens', { symbol : { '$in' : tokensOfInterest } });
-        }else{*/
-
-        /*
-        OLD specific token listing
-        tokenData = await hsc.find('tokens', 'balances', { account: this.user.account.name, symbol : { '$in' : tokensOfInterest } });
-
-        //grab full token data
-        tokenExtraDetails = await hsc.find('tokens', 'tokens', { symbol : { '$in' : tokensOfInterest } });
-        */
 
         //new full token balance listing
         tokenData = await hsc.find('tokens', 'balances', { account: this.displayUserData.name });
@@ -3595,25 +3525,17 @@ export default {
         this.heTokenDelegations = await hsc.find('tokens', 'delegations', { from: this.displayUserData.name }, 200, 0, []);
 
         this.heTokenUnstakes = await hsc.find('tokens', 'pendingUnstakes', { account: this.displayUserData.name }, 200, 0, []);
-        //console.log('delegations')
-        console.log('unstakes');
-        console.log(this.heTokenUnstakes);
 
         //grab full token data
         tokenExtraDetails = await hsc.find('tokens', 'tokens', {});
 
-        //}
-
-        //console.log(tokenExtraDetails);
-
         //loop through tokenData and set proper icon
         for (let x = 0; x < tokenData.length; x++) {
           try {
-            //console.log(tokenData[x].symbol);
             let matchEntry = tokenExtraDetails.find(v => v.symbol == tokenData[x].symbol);
-            //console.log(matchEntry);
-            tokenData[x].icon = JSON.parse(matchEntry.metadata).icon
-            //console.log(tokenData[x].icon);
+            if (matchEntry && matchEntry.metadata) {
+              tokenData[x].icon = JSON.parse(matchEntry.metadata).icon
+            }
           } catch (parseErr) {
             console.log(parseErr);
           }
@@ -3621,42 +3543,19 @@ export default {
 
         let afitData = this.tokenMetrics.find(v => v.symbol == 'AFIT');
 
-        //console.log('tokenData')
-        //console.log(tokenData)
-
         if (tokenData) {
           this.tokensOfInterestBal = tokenData;
           await this.sortTokenData(this.tokenSort, true);
         }
 
-        //fetch tokens' data (price et al)
-        /*if (this.cur_bchain == 'STEEM'){
-          this.tokenMetrics = await ssc.find('market', 'metrics', {symbol : { '$in' : tokensOfInterest.concat(['AFIT','AFITX']) }}, 1000, 0, '', false);
-        }else{*/
-
-        //build up a list of the user's current tokenlist
-        //this.userTokenList = tokenData.map((obj) => obj.symbol);
-
-        //this.tokenMetrics = await hsc.find('market', 'metrics', {symbol : { '$in' : tokensOfInterest.concat(['AFIT','AFITX']) }}, 1000, 0, '', false);
-
         //extract prices for all user balances
         this.tokenMetrics = await hsc.find('market', 'metrics', {}, 1000, 0, '', false);
-        //}
-
-
-        //console.log('tokenMetrics');
-        //console.log(this.tokenMetrics);
 
         //let's grab the user's wallet address
         fetch(process.env.actiAppUrl + 'getUserWalletAddress?user=' + this.displayUserData.name).then(
           res => {
             res.json().then(json => this.setUserWalletAddress(json)).catch(e => console.log(e))
           }).catch(e => console.log(e))
-
-        //grab user airdrop results
-        /*fetch(process.env.actiAppUrl+'airdropResults?user='+this.displayUserData.name).then(
-          res => {res.json().then(json => this.setAirdropResults (json) ).catch(e => console.log(e))
-        }).catch(e => console.log(e))*/
 
 
         //check if user is powering down AFIT to SE
@@ -3684,13 +3583,7 @@ export default {
           }).catch(e => console.log(e))
 
         //fetch account RC
-
         this.getRCHF26();
-
-        //force refresh data
-        //this.$forceUpdate();
-
-
       }
     },
     async sortTokenData(type, keepDir) {
@@ -8165,31 +8058,45 @@ export default {
   },
   async mounted() {
     try {
-      this.fetchUserData();
+      // Step 1: Determine the target user first from the route or the logged-in state.
+      let userToFetch = null;
+      if (this.$route.params && this.$route.params.username) {
+        userToFetch = this.$route.params.username.startsWith('@')
+          ? this.$route.params.username.substring(1)
+          : this.$route.params.username;
+      } else if (this.user && this.user.account && this.user.account.name) {
+        userToFetch = this.user.account.name;
+      }
+
+      // Step 2: If there's no user to fetch (e.g., logged out and visiting /wallet), stop.
+      if (!userToFetch) {
+        this.loading = false;
+        // Optionally, you could redirect to a login page here.
+        // For example: this.$router.push('/login');
+        return;
+      }
+
+      this.displayUser = userToFetch;
+
+      // Step 3: Fetch the core account data and WAIT for it before doing anything else. This is the critical fix.
+      const account_res = await this.retryOperation(async () => {
+        return await hive.api.getAccountsAsync([this.displayUser]);
+      });
+
+      // Step 4: Handle the case where the user account does not exist.
+      if (!account_res || account_res.length === 0) {
+        console.error(`Account ${this.displayUser} not found.`);
+        this.loading = false;
+        return; // Stop execution
+      }
+
+      this.displayUserData = account_res[0];
+
+      // Step 5: Now that displayUserData is safely populated, proceed with all other initializations.
       this.afitTokenAddress = afitTokenAddress;
       this.afitxTokenAddress = afitxTokenAddress;
       this.afitBNBLPTokenAddress = afitBNBLPTokenAddress;
       this.afitxBNBLPTokenAddress = afitxBNBLPTokenAddress;
-
-      if ((typeof this.$route.params !== 'undefined') && (typeof this.$route.params.username !== 'undefined')) {
-        this.displayUser = this.$route.params.username;
-        if (this.$route.params.username.startsWith('@')) {
-          this.displayUser = this.$route.params.username.substring(1);
-        }
-      }
-
-      if (this.displayUser !== '') {
-        try {
-          const account_res = await this.retryOperation(async () => {
-            return await hive.api.getAccountsAsync([this.displayUser]);
-          });
-          if (account_res && account_res.length > 0) {
-            this.displayUserData = account_res[0];
-          }
-        } catch (err) {
-          console.error('Error fetching display user:', err);
-        }
-      }
 
       if (typeof window.ethereum !== 'undefined') {
         web3 = new Web3(window.ethereum);
@@ -8212,7 +8119,7 @@ export default {
 
       const chainLnk = this.setProperNode();
       this.$store.dispatch('steemconnect/login');
-      await this.fetchUserData();
+      await this.fetchUserData(); // This can now be called safely.
 
       try {
         this.properties = await this.retryOperation(async () => {
