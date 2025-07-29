@@ -1216,6 +1216,8 @@ module.exports = {
     gold_medal: 'Золотая медаль',
     hive_logo: 'HIVE',
     blurt_logo: 'BLURT',
-    bnb_logo: 'Цепь BNB'
+    bnb_logo: 'Цепь BNB',
+    private_active: 'ПРИВАТНЫЙ АКТИВНЫЙ КЛЮЧ',
+    operation_require: 'Эта операция требует вашего',
   }
 }

@@ -1216,6 +1216,8 @@ module.exports = {
     gold_medal: 'Altın Madalya',
     hive_logo: 'HIVE',
     blurt_logo: 'BLURT',
-    bnb_logo: 'BNB Zinciri'
+    bnb_logo: 'BNB Zinciri',
+    private_active: 'ÖZEL AKTİF ANAHTAR',
+    operation_require: 'Bu işlem sizin',
   }
 }

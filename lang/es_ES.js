@@ -843,7 +843,7 @@ module.exports = {
   Mark_all_read_confirm: '¿Marcar todas las notificaciones como leídas?',
   all: 'todo',
   read: 'leído',
-  unread:' no leído',
+  unread: ' no leído',
   rc_delegation_success: 'Operación de delegación de RC completada',
   error_performing_operation: 'Hubo un error al realizar la operación',
   error_operation_active_key: '¡Error al realizar la acción! Asegúrate de que estás usando tu clave activa',
@@ -1143,8 +1143,8 @@ module.exports = {
   filter_content_by_pop_community: 'Explorar contenido de Hive por comunidades populares',
   posh_desc_profile: 'Gana <u><a href="https://hiveposh.com/">Tokens POSH</a></u> compartiendo tus publicaciones en Twitter',
   tipping_details: 'Esta funcionalidad especial de propinas en la cadena te permite enviar propinas a los usuarios comentando en sus publicaciones, y envía AFIT directamente a su cuenta de hive-engine. Para más detalles sobre cómo funciona y cómo cargar saldo, consulta esta publicación: <a href="https://links.actifit.io/tipping-afit">https://links.actifit.io/tipping-afit</a>'
-  ,invalid_username: 'El nombre de usuario no es válido. Los nombres de usuario no pueden: comenzar con "uid" seguido de cualquier carácter especial o solo por dígitos, consistir exactamente en 10 dígitos, o contener 10 dígitos consecutivos en cualquier lugar.'
-  ,Add_Friend: 'Añadir Amigo',
+  , invalid_username: 'El nombre de usuario no es válido. Los nombres de usuario no pueden: comenzar con "uid" seguido de cualquier carácter especial o solo por dígitos, consistir exactamente en 10 dígitos, o contener 10 dígitos consecutivos en cualquier lugar.'
+  , Add_Friend: 'Añadir Amigo',
   Quick_Links: 'Enlaces Rápidos',
   Display_Name: 'Nombre para Mostrar',
   About: 'Acerca de',
@@ -1216,6 +1216,8 @@ module.exports = {
     gold_medal: 'Medalla de Oro',
     hive_logo: 'HIVE',
     blurt_logo: 'BLURT',
-    bnb_logo: 'Cadena BNB'
+    bnb_logo: 'Cadena BNB',
+    private_active: 'CLAVE ACTIVA PRIVADA',
+    operation_require: 'Esta operación requiere su',
   }
 }

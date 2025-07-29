@@ -1217,7 +1217,9 @@ module.exports = {
     gold_medal: 'Gold Medal',
     hive_logo: 'HIVE',
     blurt_logo: 'BLURT',
-    bnb_logo: 'BNB Chain'
+    bnb_logo: 'BNB Chain',
+    private_active: 'PRIVATE ACTIVE',
+    operation_require: 'This operation requires your',
   }
   // END: MERGED AND CORRECTED CODE
 }

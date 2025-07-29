@@ -1216,6 +1216,8 @@ module.exports = {
     gold_medal: 'ميدالية ذهبية',
     hive_logo: 'HIVE',
     blurt_logo: 'BLURT',
-    bnb_logo: 'سلسلة BNB'
+    bnb_logo: 'سلسلة BNB',
+    private_active: 'المفتاح النشط الخاص',
+    operation_require: 'تتطلب هذه العملية',
   }
 }

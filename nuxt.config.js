@@ -306,13 +306,6 @@ module.exports = {
       pageLevelAds: true
     }],
   ],
-  proxy: {
-    '/coingecko/': {
-      target: 'https://api.coingecko.com',
-      pathRewrite: { '^/coingecko/': '' },
-      changeOrigin: true
-    }
-  },
   i18n: {
     // This is the directory where you will create your language files
     langDir: '~/lang/',
@@ -405,7 +398,7 @@ module.exports = {
       }
     },
     //fixes issue with hive-auth-wrapper plugin integration
-    transpile: ['hive-auth-wrapper', 'htmlparser2', 'sanitize-html']
+    transpile: ['hive-auth-wrapper']
 
   }
 }
