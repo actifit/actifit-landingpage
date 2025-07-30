@@ -905,7 +905,7 @@ resetDownState() {
           return null;
         },
         
-    getPrice() {
+getPrice() {
   if (this.product && this.afitPrice) {
     let price_options = this.product.price;
     let price_options_count = price_options.length;
@@ -915,6 +915,7 @@ resetDownState() {
       this.item_currency = entry.currency;
       
       if (this.item_currency == 'USD') {
+        // Handle USD products (convert to AFIT and HIVE)
         this.orig_item_currency = this.item_currency;
         this.orig_item_price = this.item_price;
         this.item_currency = 'AFIT';
@@ -1154,147 +1155,111 @@ resetDownState() {
             }
           }
         },
-        async buyNowHive() {
-          //check if this is a game gadget and if reqts have been met
-          this.buyAttempt = true;
-          //this.buyInProgress = true;
-          this.errorProceed = '';
-
-          if (this.product.type == 'ingame') {
-            if (!this.allReqtsFilled) {
-              this.errorProceed = this.$t('cannot_buy_reqts_not_filled');
-              return;
-            }
-
-            if (this.product.count < 1) {
-              this.errorProceed = this.$t('cannot_buy_none_available');
-              return;
-            }
-          }
-          this.buyHiveExpand = !this.buyHiveExpand;
-        },
-        async proceedBuyNowHive() {
-          try {
-            //console.log(this.product.name);
-            this.buyAttempt = true;
-            this.buyInProgress = true;
-            this.errorProceed = '';
-            console.log('proceedBuyNowHive');
-            //making sure user is logged in
-            if (!this.user) {
-              this.errorProceed = this.$t('need_login_signup_notice_vote');
-              return;
-            }
-
-            //check if this is a game gadget and if reqts have been met
-            if (this.product.type == 'ingame') {
-              if (!this.allReqtsFilled) {
-                this.errorProceed = this.$t('cannot_buy_reqts_not_filled');
-                return;
-              }
-
-              if (this.product.count < 1) {
-                this.errorProceed = this.$t('cannot_buy_none_available');
-                return;
-              }
-            }
-            //check if active key was provided
-            //console.log(this.$refs);
-            if (localStorage.getItem('acti_login_method') != 'keychain' &&
-              localStorage.getItem('acti_login_method') != 'hiveauth' &&
-              this.userActvKey == '') {
-              this.errorProceed = this.$t('all_fields_required');
-              return;
-            }
-
-            //proceed with payment
-            //let chainLnk = await this.setProperNode ();
-            //transferToVesting(wif, from, to, amount)
-            let attempt = 1;
-            let payAmount = parseFloat(this.item_price * this.afitPrice.afitHiveLastPrice).toFixed(3);
-            let memo = 'buy-gadget:' + this.product._id;
-            console.log('prior to call');
-
-            let accToken = localStorage.getItem('access_token')
-
-            let cstm_params = {
-              "from": this.user.account.name,
-              "to": process.env.actifitMarketBuy,
-              "amount": payAmount + ' ' + 'HIVE',
-              "memo": memo
-            };
-
-            //let res = await this.processTrxFunc('transfer', cstm_params, this.cur_bchain);
-            let op_name = 'transfer';
-
-            let operation = [
-              [op_name, cstm_params]
-            ];
-
-            /*let res = await hive.broadcast.transferAsync(this.userActvKey, this.user.account.name, process.env.actifitMarketBuy, payAmount + ' ' + 'HIVE', memo).then(
-              res => this.confirmCompletion('transfer', payAmount, res, attempt)).catch(err=> this.errorCompletion(err));
-            console.log('after call');*/
-
-
-            if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) ||
-              localStorage.getItem('acti_login_method') == 'hiveauth') {
-
-              let bcastRes;
-              let res = await this.processTrxFunc(op_name, cstm_params, true);//last param to use Active key instead of Posting
-              console.log(res);
-              if (res.success) {
-                bcastRes = res.trx;
-                let op_json = JSON.stringify(operation)
-                this.confirmCompletion('transfer', payAmount, bcastRes, attempt, 0, op_json);
-
-              } else {
-                console.log(err);
-              }
-              /*let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
-              let url_string = process.env.actiAppUrl + 'activateMultiGadget/'
-                        + this.user.account.name + '/'
-                        + this.product._id + '/'
-                        + bcastRes.ref_block_num + '/'
-                        + bcastRes.id + '/'
-                        + cur_bchain;
-              //console.log('prodHasFriendBenefic');
-              */
-
-
-            } else {
-
-              let cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
-
-              let url = new URL(process.env.actiAppUrl + 'performTrxPost/?user=' + this.user.account.name + '&bchain=' + cur_bchain);
-
-              let reqHeads = new Headers({
-                'Content-Type': 'application/json',
-                'x-acti-token': 'Bearer ' + accToken,
-              });
-              let res = await fetch(url, {
-                method: 'POST',
-                headers: reqHeads,
-                body: JSON.stringify({ 'operation': JSON.stringify(operation), 'active': this.userActvKey })
-              });
-              let outcome = await res.json();
-
-              console.log(outcome);
-              if (outcome.success && outcome.trx) {
-
-                this.confirmCompletion('transfer', payAmount, outcome.trx.tx, attempt);
-                console.log('after call');
-                //this.$router.push('/login');
-              } else {
-                this.errorCompletion(outcome.error);
-
-              }
-
-            }
-
-          } catch (excp) {
-            console.log(excp);
-          }
-        },
+async buyNowHive() {
+  this.buyAttempt = true;
+  this.errorProceed = '';
+  
+  // Check if user is logged in
+  if (!this.user) {
+    this.errorProceed = this.$t('need_login_signup_notice_vote');
+    return;
+  }
+  
+  // Check requirements for ingame products
+  if (this.product.type == 'ingame') {
+    if (!this.allReqtsFilled) {
+      this.errorProceed = this.$t('cannot_buy_reqts_not_filled');
+      return;
+    }
+    if (this.product.count < 1) {
+      this.errorProceed = this.$t('cannot_buy_none_available');
+      return;
+    }
+  }
+  
+  // Check HIVE balance
+  if (this.user.account.balance.split(" ")[0] < this.item_price_extra) {
+    this.errorProceed = this.$t('Not_enough_hive_balance_to_buy');
+    return;
+  }
+  
+  // Show confirmation dialog
+  const confirmMessage = this.$t('purchase_confirm_part1') + this.product.name + 
+    (this.product.type == 'ingame' ? ' Level ' + this.product.level : '') + '.\n' +
+    this.$t('purchase_confirm_part2') + this.numberFormat(this.item_price_extra, 2) + ' ' + 
+    this.hive_currency + '.\n' + this.$t('Proceed') + '?';
+  
+  if (!confirm(confirmMessage)) {
+    return;
+  }
+  
+  // Proceed with purchase
+  this.buyInProgress = true;
+  await this.proceedBuyNowHive();
+},
+    async proceedBuyNowHive() {
+  try {
+    this.buyInProgress = true;
+    this.errorProceed = '';
+    
+    let payAmount = parseFloat(this.item_price_extra).toFixed(3);
+    let memo = 'buy-gadget:' + this.product._id;
+    
+    let cstm_params = {
+      "from": this.user.account.name,
+      "to": process.env.actifitMarketBuy,
+      "amount": payAmount + ' ' + 'HIVE',
+      "memo": memo
+    };
+    
+    let op_name = 'transfer';
+    let operation = [[op_name, cstm_params]];
+    
+    if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) ||
+        localStorage.getItem('acti_login_method') == 'hiveauth') {
+      
+      let res = await this.processTrxFunc(op_name, cstm_params, true);
+      if (res.success) {
+        let op_json = JSON.stringify(operation);
+        this.confirmCompletion('transfer', payAmount, res.trx, 1, 0, op_json);
+      }
+    } else {
+      // Handle manual active key entry
+      if (!this.userActvKey) {
+        this.errorProceed = this.$t('all_fields_required');
+        this.buyInProgress = false;
+        return;
+      }
+      
+      let cur_bchain = 'HIVE';
+      let url = new URL(process.env.actiAppUrl + 'performTrxPost/?user=' + 
+                   this.user.account.name + '&bchain=' + cur_bchain);
+      
+      let accToken = localStorage.getItem('access_token');
+      let reqHeads = new Headers({
+        'Content-Type': 'application/json',
+        'x-acti-token': 'Bearer ' + accToken,
+      });
+      
+      let res = await fetch(url, {
+        method: 'POST',
+        headers: reqHeads,
+        body: JSON.stringify({ 'operation': JSON.stringify(operation), 'active': this.userActvKey })
+      });
+      
+      let outcome = await res.json();
+      if (outcome.success && outcome.trx) {
+        this.confirmCompletion('transfer', payAmount, outcome.trx.tx, 1);
+      } else {
+        this.errorCompletion(outcome.error);
+      }
+    }
+  } catch (error) {
+    console.error(error);
+    this.errorProceed = this.$t('error_performing_operation');
+    this.buyInProgress = false;
+  }
+},
         async errorCompletion(res, type) {
           //console.log(res);
           let err_details = res;//JSON.parse();
@@ -1312,19 +1277,18 @@ resetDownState() {
             //this.proceedBuyAFIT = false;
           }
         },
-        async confirmCompletion(type, amount, res, attempt, afitAmnt, op_json) {
+async confirmCompletion(type, amount, res, attempt, afitAmnt, op_json) {
   if (res.ref_block_num || res.id) {
-    let cur_bchain = 'HIVE';
-    let tgtNode = attempt != 1 ? process.env.actiAppBackUrl : process.env.actiAppUrl;
     let url;
-
+    
     if (type === 'buyAFITHive') {
       url = new URL(`${process.env.actiAppUrl}buyAfitHive/${this.user.account.name}/${amount}/${afitAmnt}/${res.ref_block_num}/${res.id}/HIVE`);
     } else {
-      url = new URL(`${process.env.actiAppUrl}buyGadgetHive/${this.user.account.name}/${this.product._id}/${res.ref_block_num}/${res.id}/${cur_bchain}`);
+      // Handle regular HIVE purchase
+      url = new URL(`${process.env.actiAppUrl}buyGadgetHive/${this.user.account.name}/${this.product._id}/${res.ref_block_num}/${res.id}/HIVE`);
       
       if (this.isKeychainActive || this.isHiveauthActive) {
-        url = new URL(`${process.env.actiAppUrl}buyGadgetHiveKeychain/${this.user.account.name}/${this.product._id}/${res.id}/${cur_bchain}?operation=${op_json}`);
+        url = new URL(`${process.env.actiAppUrl}buyGadgetHiveKeychain/${this.user.account.name}/${this.product._id}/${res.id}/HIVE?operation=${op_json}`);
       }
     }
 
@@ -1334,10 +1298,10 @@ resetDownState() {
       
       if (outcome.error) {
         if (attempt === 1) {
+          // Retry once
           this.confirmCompletion(type, amount, res, attempt + 1, afitAmnt, op_json);
         } else {
-          this.errorProceed = outcome;
-          this.buyAfitInProgress = false;
+          this.errorProceed = outcome.error;
           this.$notify({
             group: 'error',
             text: this.$t('error_performing_operation'),
@@ -1345,43 +1309,35 @@ resetDownState() {
           });
         }
       } else {
-        if (type === 'buyAFITHive') {
-          this.$store.dispatch('fetchUserTokens');
-          this.$notify({
-            group: 'success',
-            text: this.$t('afit_bought').replace('_AFIT_', outcome.boughtAmnt),
-            position: 'top center'
-          });
-          this.buyAfitInProgress = false;
-          this.proceedBuyAFIT = false;
+        // Success - update UI
+        this.checkProductBought();
+        this.$store.dispatch('fetchProducts');
+        this.$store.dispatch('fetchUserTokens');
+        
+        if (this.product.type === 'ingame') {
+          this.errorProceed = this.$t('purchase_success_ingame_part1') + ' ' + this.product.name + ' ' +
+            this.$t('Level') + ' ' + this.product.level + '. ' + this.$t('purchase_success_ingame_part2') + '.<br/>';
+          this.$emit('refresh-tickets');
         } else {
-          this.checkProductBought();
-          this.$store.dispatch('fetchProducts');
-
-          const productMessages = {
-            service: `${this.$t('purchase_success_service_part1')} ${this.product.name} ${this.$t('With')} ${this.product.provider_name}.\n${this.$t('purchase_success_service_part2')}.\n`,
-            ebook: `${this.$t('purchase_success_ebook_part1')} ${this.product.name} ${this.$t('By')} ${this.product.provider_name}.<br/>`,
-            ingame: `${this.$t('purchase_success_ingame_part1')} ${this.product.name} ${this.$t('Level')} ${this.product.level}. ${this.$t('purchase_success_ingame_part2')}.<br/>`
-          };
-
-          this.errorProceed = productMessages[this.product.type];
-          
-          if (this.product.type === 'ebook') {
-            this.firstDownloadHref = `${process.env.actiAppUrl}downEbook/?user=${this.user.account.name}&product_id=${this.product._id}&access_token=${outcome.access_token}`;
-          } else if (this.product.type === 'ingame') {
-            this.$emit('refresh-tickets');
-          }
+          this.errorProceed = this.$t('purchase_success_service_part1') + this.product.name + ' ' +
+            this.$t('With') + ' ' + this.product.provider_name + '.\n' +
+            this.$t('purchase_success_service_part2') + '.\n';
         }
+        
+        this.$notify({
+          group: 'success',
+          text: this.$t('purchase_successful'),
+          position: 'top center'
+        });
       }
     } catch (err) {
+      console.error(err);
       if (attempt === 1) {
         this.confirmCompletion(type, amount, res, attempt + 1, afitAmnt, op_json);
       } else {
-        this.errorProceed = err;
+        this.errorProceed = this.$t('error_performing_operation');
       }
     }
-  } else {
-    this.errorProceed = res.error.message;
   }
   
   this.buyAttempt = false;
