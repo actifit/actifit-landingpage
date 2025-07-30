@@ -153,11 +153,19 @@
   </div>
 </div>
 </div>
-
-
 <!-- Pricing Section -->
 <div class="product-pricing">
   <div class="pricing-container">
+    <!-- Loading indicator for all product types -->
+    <div v-if="buyInProgress" class="loading-indicator">
+      <i class="fas fa-spinner fa-spin"></i> {{ $t('Processing') }}...
+    </div>
+    
+    <!-- Error message for all product types -->
+    <div v-if="errorProceed" class="error-message">
+      {{ errorProceed }}
+    </div>
+
     <!-- Physical Products with both AFIT and HIVE prices -->
     <template v-if="product.type === 'real' && item_price_extra > 0 && showBuyButtons">
       <div class="combined-price-layout">
@@ -175,6 +183,60 @@
           Buy
         </button>
       </div>
+    </template>
+
+    <!-- Ebook Products -->
+    <template v-else-if="product.type === 'ebook'">
+      <!-- Before purchase -->
+      <template v-if="!productBought">
+        <div class="single-price-layout">
+          <div class="single-price-row">
+            <div class="price-circle">
+              {{ numberFormat(item_price, 2) }} <img class="token-logo-sm" src="/img/actifit_logo.png">
+            </div>
+            <button 
+              :class="['btn-buy', { 'btn-buy-disabled': buyButtonDisabled }]"
+              :disabled="buyButtonDisabled"
+              @click="handleBuyClick">
+              Buy
+            </button>
+          </div>
+        </div>
+      </template>
+      
+      <!-- After purchase -->
+      <template v-else>
+        <div class="activation-container">
+          <button 
+            v-if="!downloadAgainReady"
+            class="btn-activate"
+            @click="requestFundsPass = true">
+            <i class="fas fa-download"></i> {{ $t('Download_again') }}
+          </button>
+          
+          <div v-if="requestFundsPass" class="funds-pass-form">
+            <label for="funds-pass">{{ $t('Funds_Password') }}</label>
+            <input type="password" id="funds-pass" ref="funds-pass" class="form-control">
+            <a href="/wallet?action=set_funds_pass" class="wallet-link">
+              {{ $t('No_funds_pass_wallet') }} <i class="fas fa-wallet"></i>
+            </a>
+            <button class="btn-activate" @click="downloadAgain">
+              {{ $t('Proceed') }}
+            </button>
+            <div v-if="errorDownloadAgain" class="error-message">
+              {{ errorDownloadAgain }}
+            </div>
+          </div>
+          
+          <button 
+            v-if="downloadAgainReady || firstDownloadHref"
+            class="btn-activate"
+            :href="downloadHref || firstDownloadHref" 
+            @click.prevent="downloadAgainReady ? handleDownloadClick() : handleFirstDownloadClick()">
+            <i class="fas fa-file-download"></i> {{ $t('purchase_success_ebook_part2') }}
+          </button>
+        </div>
+      </template>
     </template>
 
     <!-- All other products (non-physical or physical with only AFIT price) -->
@@ -223,9 +285,9 @@
         </div>
       </template>
     </template>
-   
+    
     <!-- Additional actions (cart buttons) -->
-    <div class="additional-actions" v-if="user && !grabConsumableItem() && product.type == 'ingame' && allReqtsFilled && !this.productBought">
+    <div class="additional-actions" v-if="user && !grabConsumableItem() && product.type == 'ingame' && allReqtsFilled && !productBought">
       <button class="btn-add-cart" 
               @click.prevent="addCart()" 
               v-if="cartEntries.filter(obj => obj._id === product._id).length < 1">
@@ -258,7 +320,6 @@
     </template>
   </div>
 </div>
-
     <!-- Details Modal -->
     <div v-if="showDetails" class="details-modal" @click.self="closeDetailsModal">
       <div class="modal-contentt">
@@ -464,8 +525,8 @@
         }
       },
         
+  
   buyButtonDisabled() {
-    // Disable if not logged in, requirements not met, or no items available
     if (!this.user) return true;
     if (!this.allReqtsFilled) return true;
     if (this.product.count < 1) return true;
@@ -556,18 +617,20 @@
          * @param precision
            * @returns {string}
            */
-            handleBuyClick() {
-    if (!this.user) {
-      this.showModal = true;
-      return;
-    }
-    
-    if (this.product.type === 'real') {
-      this.prepareCheckout();
-    } else {
-      this.buyNow();
-    }
-  },
+handleBuyClick() {
+  if (!this.user) {
+    this.showModal = true;
+    return;
+  }
+  
+  if (this.product.type === 'real') {
+    this.prepareCheckout();
+  } else if (this.product.type === 'ebook') {
+    this.buyNow();
+  } else {
+    this.buyNow();
+  }
+},
   
   handleActivationClick() {
     if (!this.user) {
@@ -779,35 +842,32 @@ closeDetailsModal() {
           }
           return false;
         },
-        handleDownloadClick() {
-          if (this.downloadHref){
-            window.location.href = this.downloadHref;
-            setTimeout(() => {
-              this.resetDownState();
-            }, 200);
-          }else{
-            console.warn('cannot initiate download.');
-          }
-        },
-        resetDownState() {
-          this.downloadAgainReady = false
-          this.requestFundsPass = false
-        },
-        handleFirstDownloadClick() {
-          if (this.firstDownloadHref) {
-            window.location.href = this.firstDownloadHref;
-            setTimeout(() => {
-              this.confirmBought();
-            }, 200);
-          }else{
-            console.warn('cannot initiate download.');
-          }
-        },
-        confirmBought() {
-          this.productBought = true;
-          this.errorProceed = false;
-          this.buyInProgress = false;
-        },
+ handleDownloadClick() {
+  if (this.downloadHref) {
+    window.location.href = this.downloadHref;
+    setTimeout(() => {
+      this.resetDownState();
+    }, 200);
+  }
+},
+handleFirstDownloadClick() {
+  if (this.firstDownloadHref) {
+    window.location.href = this.firstDownloadHref;
+    setTimeout(() => {
+      this.confirmBought();
+    }, 200);
+  }
+},
+
+resetDownState() {
+  this.downloadAgainReady = false;
+  this.requestFundsPass = false;
+},
+      confirmBought() {
+  this.productBought = true;
+  this.errorProceed = '';
+  this.buyInProgress = false;
+},
         switchDetails() {
           this.detailsOpen = !this.detailsOpen;
         },
@@ -844,9 +904,8 @@ closeDetailsModal() {
           }
           return null;
         },
-        // Update the getPrice() method
         
-        getPrice() {
+    getPrice() {
   if (this.product && this.afitPrice) {
     let price_options = this.product.price;
     let price_options_count = price_options.length;
@@ -870,17 +929,15 @@ closeDetailsModal() {
           .toFixed(2)
         );
         this.item_extra_currency = 'HIVE';
+      } else if (this.item_currency == 'AFIT') {
+        // Show HIVE price for both ingame and real products
+        this.item_price_extra = Number(
+          (this.item_price * this.afitPrice.afitHiveLastPrice).toFixed(2)
+        );
+        this.item_extra_currency = 'HIVE';
       } else {
-        // Only show HIVE price for ingame items, not for ebooks or services
-        if (this.product.type === 'ingame') {
-          this.item_price_extra = Number(
-            (this.item_price * this.afitPrice.afitHiveLastPrice).toFixed(2)
-          );
-          this.item_extra_currency = 'HIVE';
-        } else {
-          this.item_price_extra = 0;
-          this.item_extra_currency = '';
-        }
+        this.item_price_extra = 0;
+        this.item_extra_currency = '';
       }
     }
     this.checkProductBought();
@@ -916,32 +973,34 @@ closeDetailsModal() {
           }
         },
         async downloadAgain() {
-          this.downloadAgainRunning = true;
-          this.errorDownloadAgain = '';
-          if (this.$refs["funds-pass"].value == '') {
-            this.errorDownloadAgain = this.$t('Provide_funds_pass');
-            this.downloadAgainRunning = false;
-            return;
-          }
-          let url = new URL(process.env.actiAppUrl + 'validatePassForDownload/?user=' + this.user.account.name + '&pass=' + this.$refs['funds-pass'].value + '&product_id=' + this.product._id);
-          let res = await fetch(url);
-          let outcome = await res.json();
-          this.settingPass = false;
-          //console.log(outcome);
-          if (!outcome.error) {
-            //success
-            this.downloadAgainReady = true;
-            this.downloadHref = process.env.actiAppUrl
-              + 'downEbook/'
-              + '?user=' + this.user.account.name
-              + '&product_id=' + this.product._id
-              + '&access_token=' + outcome.access_token
-          } else {
-            //display error
-            this.errorDownloadAgain = outcome.error;
-          }
-          this.downloadAgainRunning = false;
-        },
+  this.downloadAgainRunning = true;
+  this.errorDownloadAgain = '';
+  
+  if (!this.$refs["funds-pass"].value) {
+    this.errorDownloadAgain = this.$t('Provide_funds_pass');
+    this.downloadAgainRunning = false;
+    return;
+  }
+  
+  try {
+    const url = new URL(`${process.env.actiAppUrl}validatePassForDownload/?user=${this.user.account.name}&pass=${this.$refs['funds-pass'].value}&product_id=${this.product._id}`);
+    const res = await fetch(url);
+    const outcome = await res.json();
+    
+    if (!outcome.error) {
+      this.downloadAgainReady = true;
+      this.downloadHref = `${process.env.actiAppUrl}downEbook/?user=${this.user.account.name}&product_id=${this.product._id}&access_token=${outcome.access_token}`;
+    } else {
+      this.errorDownloadAgain = outcome.error;
+    }
+  } catch (error) {
+    this.errorDownloadAgain = this.$t('download_error');
+    console.error(error);
+  }
+  
+  this.downloadAgainRunning = false;
+},
+
         async verifyTrx(result, operation) {
 
           //if success, find, verify and store trx
@@ -1254,153 +1313,80 @@ closeDetailsModal() {
           }
         },
         async confirmCompletion(type, amount, res, attempt, afitAmnt, op_json) {
-          console.log(res)
-          if (res.ref_block_num || res.id) {
-            //console.log (res);
+  if (res.ref_block_num || res.id) {
+    let cur_bchain = 'HIVE';
+    let tgtNode = attempt != 1 ? process.env.actiAppBackUrl : process.env.actiAppUrl;
+    let url;
 
+    if (type === 'buyAFITHive') {
+      url = new URL(`${process.env.actiAppUrl}buyAfitHive/${this.user.account.name}/${amount}/${afitAmnt}/${res.ref_block_num}/${res.id}/HIVE`);
+    } else {
+      url = new URL(`${process.env.actiAppUrl}buyGadgetHive/${this.user.account.name}/${this.product._id}/${res.ref_block_num}/${res.id}/${cur_bchain}`);
+      
+      if (this.isKeychainActive || this.isHiveauthActive) {
+        url = new URL(`${process.env.actiAppUrl}buyGadgetHiveKeychain/${this.user.account.name}/${this.product._id}/${res.id}/${cur_bchain}?operation=${op_json}`);
+      }
+    }
 
-            //only support HIVE
-            let cur_bchain = 'HIVE';//(localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
-            let url = '';//new URL(process.env.actiAppUrl + 'processBuyOrderHive/?user='+this.user.account.name+'&product_id='+this.product._id);
+    try {
+      let reslt = await fetch(url);
+      let outcome = await reslt.json();
+      
+      if (outcome.error) {
+        if (attempt === 1) {
+          this.confirmCompletion(type, amount, res, attempt + 1, afitAmnt, op_json);
+        } else {
+          this.errorProceed = outcome;
+          this.buyAfitInProgress = false;
+          this.$notify({
+            group: 'error',
+            text: this.$t('error_performing_operation'),
+            position: 'top center'
+          });
+        }
+      } else {
+        if (type === 'buyAFITHive') {
+          this.$store.dispatch('fetchUserTokens');
+          this.$notify({
+            group: 'success',
+            text: this.$t('afit_bought').replace('_AFIT_', outcome.boughtAmnt),
+            position: 'top center'
+          });
+          this.buyAfitInProgress = false;
+          this.proceedBuyAFIT = false;
+        } else {
+          this.checkProductBought();
+          this.$store.dispatch('fetchProducts');
 
-            let tgtNode = process.env.actiAppUrl;
-            //if (this.product.type == 'ingame'){
-            if (attempt != 1) {
-              tgtNode = process.env.actiAppBackUrl;
-            }
+          const productMessages = {
+            service: `${this.$t('purchase_success_service_part1')} ${this.product.name} ${this.$t('With')} ${this.product.provider_name}.\n${this.$t('purchase_success_service_part2')}.\n`,
+            ebook: `${this.$t('purchase_success_ebook_part1')} ${this.product.name} ${this.$t('By')} ${this.product.provider_name}.<br/>`,
+            ingame: `${this.$t('purchase_success_ingame_part1')} ${this.product.name} ${this.$t('Level')} ${this.product.level}. ${this.$t('purchase_success_ingame_part2')}.<br/>`
+          };
 
-            //if (this.product.type == 'ingame'){
-            url = new URL(process.env.actiAppUrl + 'buyGadgetHive/'
-              + this.user.account.name + '/'
-              + this.product._id + '/'
-              + res.ref_block_num + '/'
-              + res.id + '/'
-              + cur_bchain);
-
-            if (type == 'buyAFITHive') {
-              url = new URL(process.env.actiAppUrl + 'buyAfitHive/'
-                + this.user.account.name + '/'
-                + amount + '/'
-                + afitAmnt + '/'
-                + res.ref_block_num + '/'
-                + res.id + '/'
-                + 'HIVE');//for now only support HIVE
-              //:user/:amnt/:afitAmnt/:blockNo/:trxID/:bchain
-            }
-
-
-            if (this.isKeychainActive || this.isHiveauthActive) {
-              url = new URL(process.env.actiAppUrl + 'buyGadgetHiveKeychain/'
-                + this.user.account.name + '/'
-                + this.product._id + '/'
-                //+ res.ref_block_num + '/'
-                + res.id + '/'
-                + cur_bchain + '?operation=' + op_json);
-            }
-            //}
-            //console.log(url);
-            //connect with our service to process buy order
-            try {
-              let reslt = await fetch(url);
-              let outcome = await reslt.json();
-              if (outcome.error) {
-                if (attempt == 1) {
-                  //try again with another API node
-                  console.log('>>>>try again');
-                  this.confirmCompletion(type, amount, res, attempt + 1, afitAmnt, op_json);
-                } else {
-                  this.errorProceed = outcome;
-                  console.error(outcome);
-                  this.buyAfitInProgress = false;
-                  this.$notify({
-                    group: 'error',
-                    text: this.$t('error_performing_operation'),
-                    position: 'top center'
-                  })
-                }
-              } else {
-                console.log('result IN');
-                console.log(outcome);
-                if (type == 'buyAFITHive') {
-                  //update user token count
-                  this.$store.dispatch('fetchUserTokens')
-                  this.$notify({
-                    group: 'success',
-                    text: this.$t('afit_bought').replace('_AFIT_', outcome.boughtAmnt),
-                    position: 'top center'
-                  })
-                  this.buyAfitInProgress = false;
-                  this.proceedBuyAFIT = false;
-                } else {
-                  //update product status
-                  this.checkProductBought();
-
-                  this.$store.dispatch('fetchProducts')
-
-                  if (this.product.type == 'service') {
-                    //display proper success message
-                    this.errorProceed = this.$t('purchase_success_service_part1') + this.product.name + ' '
-                      + this.$t('With') + ' ' + this.product.provider_name + '.\n'
-                      + this.$t('purchase_success_service_part2') + '.\n'
-                  } else if (this.product.type == 'ebook') {
-                    //display proper success message
-                    this.errorProceed = this.$t('purchase_success_ebook_part1') + ' ' + this.product.name + ' '
-                      + this.$t('By') + ' ' + this.product.provider_name + '.<br/>';
-                    this.firstDownloadHref = process.env.actiAppUrl
-                      + 'downEbook/'
-                      + '?user=' + this.user.account.name
-                      + '&product_id=' + this.product._id
-                      + '&access_token=' + outcome.access_token;
-                  } else if (this.product.type == 'ingame') {
-                    //display proper success message
-                    this.errorProceed = this.$t('purchase_success_ingame_part1') + ' ' + this.product.name + ' '
-                      + this.$t('Level') + ' ' + this.product.level + '. ' + this.$t('purchase_success_ingame_part2') + '.<br/>';
-
-                    this.$emit('refresh-tickets');
-                  }
-                }
-              }
-              //this.checkingFunds = false;
-              //this.resultReturned = true;
-
-            } catch (err) {
-              console.error(err);
-              if (attempt == 1) {
-                //try again with another API node
-                console.log('>>>>try again');
-                this.confirmCompletion(type, amount, res, attempt + 1, afitAmnt, op_json);
-              } else {
-                this.errorProceed = outcome;
-                console.error(outcome);
-              }
-              //this.checkingFunds = false;
-            }
-
-
-
-            //also start validation and gadget lock process
-            /*let url = new URL(process.env.actiAppUrl + 'confirmPaymentGadget/'+'?bchain=' + this.cur_bchain);
-            //compile all needed data and send it along the request for processing
-            let params = {
-              from: this.user.account.name,
-
-            }
-            Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
-            try{
-              let res = await fetch(url);
-              let outcome = await res.json();
-              //update user data according to result
-              this.fetchUserData();
-            }catch(err){
-              console.error(err);
-            }*/
-
-          } else {
-            this.errorProceed = res.error.message;
+          this.errorProceed = productMessages[this.product.type];
+          
+          if (this.product.type === 'ebook') {
+            this.firstDownloadHref = `${process.env.actiAppUrl}downEbook/?user=${this.user.account.name}&product_id=${this.product._id}&access_token=${outcome.access_token}`;
+          } else if (this.product.type === 'ingame') {
+            this.$emit('refresh-tickets');
           }
-          this.buyAttempt = false;
-          this.buyInProgress = false;
-        },
+        }
+      }
+    } catch (err) {
+      if (attempt === 1) {
+        this.confirmCompletion(type, amount, res, attempt + 1, afitAmnt, op_json);
+      } else {
+        this.errorProceed = err;
+      }
+    }
+  } else {
+    this.errorProceed = res.error.message;
+  }
+  
+  this.buyAttempt = false;
+  this.buyInProgress = false;
+},
         refreshTicketsMulti() {
           //update product status
           this.checkProductBought();
@@ -3212,6 +3198,79 @@ button {
 button:focus {
   outline: none !important;
   box-shadow: none !important;
+}
+
+.ebook-download-section {
+  padding: 15px;
+  background: rgba(40, 167, 69, 0.1);
+  border-radius: 8px;
+  margin-top: 15px;
+  
+  .download-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .funds-pass-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    
+    input {
+      padding: 8px 12px;
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+    }
+    
+    .wallet-link {
+      font-size: 0.8rem;
+      color: var(--color-secondary);
+      text-decoration: none;
+      
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+  
+  .btn-download {
+    background: var(--color-success);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s;
+    
+    &:hover {
+      background: var(--color-success-dark);
+    }
+  }
+  
+  .download-ready, .first-download {
+    text-align: center;
+    
+    p {
+      margin-bottom: 10px;
+      color: var(--color-text);
+    }
+  }
+  
+  .loading-indicator {
+    text-align: center;
+    color: var(--color-primary);
+    margin-top: 10px;
+  }
+  
+  .error-message {
+    color: var(--color-danger);
+    margin-top: 10px;
+    font-size: 0.9rem;
+  }
 }
 
 @keyframes pulse {
