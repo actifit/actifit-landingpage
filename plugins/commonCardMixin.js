@@ -24,7 +24,7 @@ export const commonCardMixin = {
     }
   },
   computed: {
-    cardData () { return {} },
+    cardData () { return {} }, // Placeholder, overridden by component
     meta () {
       try {
         const metadata = this.cardData ? this.cardData.json_metadata : {}
@@ -59,10 +59,10 @@ export const commonCardMixin = {
     },
   },
   watch: {
-    cardData: {
-      handler(newVal) {},
-      deep: true,
-      immediate: true
+    'cardData.permlink'(newPermlink) {
+      if (newPermlink && !this.isInitialized) {
+        this.initializeCard();
+      }
     },
     getVoteCount (newVal, oldVal) {
       if (newVal !== oldVal) {
@@ -107,62 +107,63 @@ export const commonCardMixin = {
       }
       
       const cardWidth = this.$el.offsetWidth > 0 ? this.$el.offsetWidth : 400;
-      
       this.allImages = images.map(url => this.getResizedImageUrl(url, cardWidth));
       this.currentImageIndex = 0;
       this.imageGeneration += 1;
     },
     
-    /*
-     * vvv THIS IS THE FINAL, CORRECTED IMAGE LOGIC vvv
-     * It combines robust image finding with a complete, correct filter.
-    */
     calculatePostImages() {
-      let allFoundImages = []
-      const metaImages = this.meta.image
-      if (Array.isArray(metaImages)) { allFoundImages.push(...metaImages) } 
-      else if (metaImages) { allFoundImages.push(metaImages) }
+      let allFoundImages = [];
+      
+      const metaImages = this.meta.image;
+      if (Array.isArray(metaImages)) { allFoundImages.push(...metaImages); } 
+      else if (metaImages) { allFoundImages.push(metaImages); }
+
+      if (this.meta.thumbnail) { allFoundImages.push(this.meta.thumbnail); }
 
       if (this.cardData.body) {
-        const imageRegex = /!\[.*?\]\((.*?)\)|<img.*?src=["'](.*?)["']/g
+        const imageRegex = /!\[.*?\]\((.*?)\)|<img.*?src=["'](.*?)["']/g;
         let match;
         while ((match = imageRegex.exec(this.cardData.body)) !== null) {
           const url = match[1] || match[2];
-          if (url && typeof url === 'string') { allFoundImages.push(url) }
+          if (url && typeof url === 'string') { allFoundImages.push(url); }
         }
       }
       
       const repaired = allFoundImages.map(url => {
         if (!url || typeof url !== 'string') return null;
-        if (url.startsWith('http')) return url;
-        if (url.startsWith('//')) return 'https:' + url;
-        if (url.startsWith('/')) return null;
-        return 'https://' + url;
+        if (url.startsWith('https://') || url.startsWith('http://')) {
+          return url;
+        }
+        return null; 
       }).filter(Boolean);
 
       const uniqueImages = [...new Set(repaired)];
       
-      // --- THE ENHANCED AND CORRECTED FILTER ---
       const junkPatterns = [
-        // Rule 1: Your original branding hashes, fully preserved.
-        /DQmNp6YwAm2qwquALZw8PdcovDorwaBSFuxQ38TrYziGT6b|DQmY67NW9SgDEsLo2nsAw4nYcddrTjp4aHNLyogKvGuVMMH|DQmW1VsUNbEjTUKawau4KJQ6agf41p69teEvdGAj1TMXmuc|DQmXv9QWiAYiLCSr3sKxVzUJVrgin3ZZWM2CExEo3fd5GUS|DQmdnh1nApZieHZ3s1fEhCALDjnzytFwo78zbAY5CLUMpoG|DQmZ6ZT8VaEpaDzB16qZzK8omffbWUpEpe4BkJkMXmN3xrF|DQmRgAoqi4vUVymaro8hXdRraNX6LHkXhMRBZxEo5vVWXDN|5CEvyaWxjaErqc3i7tYRQutZDwQPeZ8E6Ha3BenkA3Uc6fhKSLZ62PuSojTnM4kkLrYUdChBgBHoPxiDt|23tm6o6cmgwSRVABZSPxMC77Sfa2VNsaTtHWsjEpV1hWdQSe2s4FxvCyifsbKyESxfiPu|DQmUVjgmJHvtbYB2APdxqNxxkZeJ2KvPeXEE7v3BpxGJkbR|23tkbEYQioWnn3mfu8tWBh3x8n1Wz8TM9nH6SPRoghyZ46q2NNzt3aFsds2c8SjoknXRM|DQmdvc788wxsBSQHY3z21o3wSTU7hqRnyYc2JFEn2pEYSev|DQmeWzNEfmAnX91Ze89zqQU3B2uS58sn6dc2A6L74xLfAvr|DQmXi8aWqhnxa466MiBEhhTTCHeehoMuGrohtNG7et92Ne|DQmUtuWaSFoo8AtWd9fo4Tb7AEGhLo8rRrjqKPHHz2o7Mup|DQmcngR7AdBJio52C5stkD5C7vgsQ1yDH57Lb4J96Pys4a9|DQmRDW8jdYmE37tXvM6xPxuNnzNQnUJWSDnxVYyRJEHyc9H|DQmdNAWWwv6MAJjiNUWRahmAqbFBPxrX8WLQvoKyVHHqih1|DQmPKUZ5uZpL3Uq6LUUQXgNaaqsyX7ADpNyF4wHeTScs3xD|DQmeG5Bv1gKu2rQFWA1hH3QxzLzgzDPhDwieEEpy4WPnqN4|DQmPscjCVBggXvJT2GaUp66vbtyxzdzyHuhnzc38WDp4Smg|DQmV7NRosGCmNLsyHGzmh4Vr1pQJuBPEy2rk3WvnEUDxDFA|DQmY5UUP99u5ob3D8MA9JJW23zXLjHXHSRofSH3jLGEG1Yr|DQmQqfpSmcQtfrHAtzfBtVccXwUL9vKNgZJ2j93m8WNjizw|DQmbWy8KzKT1UvCvznUTaFPw6wBUcyLtBT5XL9wdbB7Hfmn|DQmV2hBheBVo9QWTXCxvqRqe4Fsg6kFTGggsTNGga9gTUHm|23w3F6U3PgtaT14tL5ewc1FoCwJcebdmZ3nrj2H6x2cTf4RzKWuicnQqvJGQ8tZxqX4Q5|ACTIVITYDQmeG5Bv1gKu2rQFWA1hH3QxzLzgzDPhDwieEEpy4WPnqN4|23yJg2hJAuEDUwg82kS1eC3EQqkVDzPEEyPa4rwymVHoz5mKPanjmshFa5s6tcPe3SP9c|DQmQJeGKQVsYFDFnHxgTHyNdrZxQmjLSJxz1wLB5HJDaZV3|DQmYfJ7SsTGpkR6gWoyLzo4pGrxnFopkcKzRVjgE6NRRXQL|DQmRoHaVPUiTagwviNmie8Ub5j4ZW1VcJGycZebmiH8ZdH5|AJpkUkMYpoVBmYDWsVtg7vaddiSqbMufvdoJ6w3FbzbvNTbkC6fgma1R8b47CMn|AJbhBb9Ev3i1cHKtjoxtsCAaXK9njP56dzMwBRwfZVZ21WseKsCa6ZkfAbLGnbh|AJmthV3f2pVE2wEzBrLJp6AYgFwbB9WWqWFhA7ta3ejN2BcFkpbhTLDCQb\/i/,
-        
-        // Rule 2: New, powerful rule to catch all irrelevant report card images based on your screenshots.
-        // It looks for the specific filenames and common domains.
-        /usermedia\.actifit\.io|s3\.us-east-1\.amazonaws\.com|ACTIVITY(DATE|COUNT|TYPE)\.png|TRACKM\.png|\/h1\.png|\/w1a\.png|\/bd1\.png|\/w1\.png|\/t1\.png|\/c1\.png/i
+        /DQmNp6YwAm2qwquALZw8PdcovDorwaBSFuxQ38TrYziGT6b|DQmY67NW9SgDEsLo2nsAw4nYcddrTjp4aHNLyogKvGuVMMH|DQmW1VsUNbEjTUKawau4KJQ6agf41p69teEvdGAj1TMXmuc|DQmXv9QWiAYiLCSr3sKxVzUJVrgin3ZZWM2CExEo3fd5GUS|DQmdnh1nApZieHZ3s1fEhCALDjnzytFwo78zbAY5CLUMpoG|DQmZ6ZT8VaEpaDzB16qZzK8omffbWUpEpe4BkJkMXmN3xrF|DQmRgAoqi4vUVymaro8hXdRraNX6LHkXhMRBZxEo5vVWXDN|5CEvyaWxjaErqc3i7tYRQutZDwQPeZ8E6Ha3BenkA3Uc6fhKSLZ62PuSojTnM4kkLrYUdChBgBHoPxiDt|23tm6o6cmgwSRVABZSPxMC77Sfa2VNsaTtHWsjEpV1hWdQSe2s4FxvCyifsbKyESxfiPu|DQmUVjgmJHvtbYB2APdxqNxxkZeJ2KvPeXEE7v3BpxGJkbR|23tkbEYQioWnn3mfu8tWBh3x8n1Wz8TM9nH6SPRoghyZ46q2NNzt3aFsds2c8SjoknXRM|DQmdvc788wxsBSQHY3z21o3wSTU7hqRnyYc2JFEn2pEYSev|DQmeWzNEfmAnX91Ze89zqQU3B2uS58sn6dc2A6L74xLfAvr|DQmXi8aWqhnxa466MiBEhhTTCHeehoMuGrohtNG7et92Ne|DQmUtuWaSFoo8AtWd9fo4Tb7AEGhLo8rRrjqKPHHz2o7Mup|DQmcngR7AdBJio52C5stkD5C7vgsQy1yDH57Lb4J96Pys4a9|DQmRDW8jdYmE37tXvM6xPxuNnzNQnUJWSDnxVYyRJEHyc9H|DQmdNAWWwv6MAJjiNUWRahmAqbFBPxrX8WLQvoKyVHHqih1|DQmPKUZ5uZpL3Uq6LUUQXgNaaqsyX7ADpNyF4wHeTScs3xD|DQmeG5Bv1gKu2rQFWA1hH3QxzLzgzDPhDwieEEpy4WPnqN4|DQmPscjCVBggXvJT2GaUp66vbtyxzdzyHuhnzc38WDp4Smg|DQmV7NRosGCmNLsyHGzmh4Vr1pQJuBPEy2rk3WvnEUDxDFA|DQmY5UUP99u5ob3D8MA9JJW23zXLjHXHSRofSH3jLGEG1Yr|DQmQqfpSmcQtfrHAtzfBtVccXwUL9vKNgZJ2j93m8WNjizw|DQmbWy8KzKT1UvCvznUTaFPw6wBUcyLtBT5XL9wdbB7Hfmn|DQmV2hBheBVo9QWTXCxvqRqe4Fsg6kFTGggsTNGga9gTUHm|23w3F6U3PgtaT14tL5ewc1FoCwJcebdmZ3nrj2H6x2cTf4RzKWuicnQqvJGQ8tZxqX4Q5|ACTIVITYDQmeG5Bv1gKu2rQFWA1hH3QxzLzgzDPhDwieEEpy4WPnqN4|23yJg2hJAuEDUwg82kS1eC3EQqkVDzPEEyPa4rwymVHoz5mKPanjmshFa5s6tcPe3SP9c|DQmQJeGKQVsYFDFnHxgTHyNdrZxQmjLSJxz1wLB5HJDaZV3|DQmYfJ7SsTGpkR6gWoyLzo4pGrxnFopkcKzRVjgE6NRRXQL|DQmRoHaVPUiTagwviNmie8Ub5j4ZW1VcJGycZebmiH8ZdH5|AJpkUkMYpoVBmYDWsVtg7vaddiSqbMufvdoJ6w3FbzbvNTbkC6fgma1R8b47CMn|AJbhBb9Ev3i1cHKtjoxtsCAaXK9njP56dzMwBRwfZVZ21WseKsCa6ZkfAbLGnbh|AJmthV3f2pVE2wEzBrLJp6AYgFwbB9WWqWFhA7ta3ejN2BcFkpbhTLDCQb\/i/,
+        /s3\.us-east-1\.amazonaws\.com\/actifit\.io\.website\/|ACTIVITY(DATE|COUNT|TYPE)\.png|TRACKM\.png|\/h1\.png|\/w1a\.png|\/bd1\.png|\/w1\.png|\/t1\.png|\/c1\.png/i
       ];
 
       return uniqueImages.filter(url => {
-        // Keep an image ONLY if it does NOT match ANY of the junk patterns.
         return !junkPatterns.some(pattern => pattern.test(url));
       });
     },
 
     getResizedImageUrl (url, width) {
-      if (typeof url !== 'string' || !url.startsWith('http') || /\.gif$/i.test(url)) return url
-      const resizeProxy = `https://images.hive.blog/${Math.round(width)}x0/`
-      return resizeProxy + url
+      if (
+        typeof url !== 'string' || 
+        !url.startsWith('http') || 
+        /\.gif$/i.test(url) ||
+        url.includes('leopedia.io')
+      ) {
+        return url;
+      }
+      
+      const resizeProxy = `https://images.hive.blog/${Math.round(width)}x0/`;
+      return resizeProxy + url;
     },
+
     onImageLoad() { this.imageLoading = false; },
     onImageError(event) {
       this.imageLoadFailed = true;

@@ -1,33 +1,41 @@
 <template>
   <div>
-    <!-- Image Carousel (No changes here) -->
-    <div class="row">
-      <div class="col-12">
-        <div v-if="!imageLoadFailed" class="image-carousel-container" :key="imageGeneration">
-          <div v-if="imageLoading" class="image-loader-container">
-            <i class="fas fa-spinner fa-spin text-brand"></i>
-          </div>
-          <a
-            href="#"
-            :style="{ visibility: imageLoading ? 'hidden' : 'visible' }"
-            class="text-brand"
-            @click.prevent="$emit('open-modal')"
-            :data-toggle="modalTarget ? 'modal' : null"
-            :data-target="modalTarget"
-            :title="$t('read_more_small')"
-          >
-            <img :key="currentImageSrc" :src="currentImageSrc" :alt="cardData.title" class="card-image" @load="onImageLoad" @error="onImageError" referrerpolicy="no-referrer">
-          </a>
-          <template v-if="allImages.length > 1">
-            <div class="carousel-arrow left" @click.prevent="prevImage"><i class="fas fa-chevron-left"></i></div>
-            <div class="carousel-arrow right" @click.prevent="nextImage"><i class="fas fa-chevron-right"></i></div>
-            <template v-if="!imageLoading">
-              <div class="image-counter">{{ currentImageIndex + 1 }} / {{ allImages.length }}</div>
-              <div class="carousel-bullets">
-                <span v-for="(img, index) in allImages" :key="index" class="carousel-bullet" :class="{ 'active': index === currentImageIndex }" @click.prevent="goToImage(index)"></span>
-              </div>
+    <!--
+      THIS IS THE FIX:
+      We wrap the entire image section in a new div with a v-if directive.
+      This div will only be rendered if the 'allImages' array is not empty.
+      This prevents the grey box from appearing on posts with no images.
+    -->
+    <div v-if="allImages && allImages.length > 0">
+      <!-- Image Carousel (No changes to the inner logic) -->
+      <div class="row">
+        <div class="col-12">
+          <div v-if="!imageLoadFailed" class="image-carousel-container" :key="imageGeneration">
+            <div v-if="imageLoading" class="image-loader-container">
+              <i class="fas fa-spinner fa-spin text-brand"></i>
+            </div>
+            <a
+              href="#"
+              :style="{ visibility: imageLoading ? 'hidden' : 'visible' }"
+              class="text-brand"
+              @click.prevent="$emit('open-modal')"
+              :data-toggle="modalTarget ? 'modal' : null"
+              :data-target="modalTarget"
+              :title="$t('read_more_small')"
+            >
+              <img :key="currentImageSrc" :src="currentImageSrc" :alt="cardData.title" class="card-image" @load="onImageLoad" @error="onImageError" referrerpolicy="no-referrer">
+            </a>
+            <template v-if="allImages.length > 1">
+              <div class="carousel-arrow left" @click.prevent="prevImage"><i class="fas fa-chevron-left"></i></div>
+              <div class="carousel-arrow right" @click.prevent="nextImage"><i class="fas fa-chevron-right"></i></div>
+              <template v-if="!imageLoading">
+                <div class="image-counter">{{ currentImageIndex + 1 }} / {{ allImages.length }}</div>
+                <div class="carousel-bullets">
+                  <span v-for="(img, index) in allImages" :key="index" class="carousel-bullet" :class="{ 'active': index === currentImageIndex }" @click.prevent="goToImage(index)"></span>
+                </div>
+              </template>
             </template>
-          </template>
+          </div>
         </div>
       </div>
     </div>
@@ -44,12 +52,6 @@
           :title="$t('read_more_small')"
         >
           <div>
-            <!--
-              THIS IS THE FIX:
-              We are now using the "snippet" prop that the parent component (post.vue)
-              has already carefully prepared for us. We are no longer calling the
-              local, incorrect renderSnippet method.
-            -->
             <span>{{ snippet }}</span>
             <i class="fas fa-external-link-alt"></i>
           </div>
@@ -64,7 +66,6 @@ export default {
   props: {
     cardData: { type: Object, required: true },
     modalTarget: { type: String, required: true },
-    // This prop holds the correctly formatted snippet from the parent.
     snippet: { type: String, default: '' },
     // Carousel specific props
     imageLoadFailed: { type: Boolean, default: false },
@@ -76,7 +77,6 @@ export default {
   },
   emits: ['open-modal', 'image-load', 'image-error', 'next-image', 'prev-image', 'go-to-image'],
   methods: {
-    // We emit events for the parent to handle the logic from the mixin
     onImageLoad() { this.$emit('image-load'); },
     onImageError(event) { this.$emit('image-error', event); },
     nextImage() { this.$emit('next-image'); },
