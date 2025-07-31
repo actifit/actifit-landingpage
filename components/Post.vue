@@ -29,6 +29,7 @@
         </div>
         
         <CardBody
+        
           :cardData="post"
           modalTarget="#postModal"
           :snippet="bodySnippet" 
