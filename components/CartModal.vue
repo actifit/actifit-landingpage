@@ -1,11 +1,11 @@
-
 <template>
-  <div class="modal fade" id="cartModal" tabindex="-1" ref="cartModal">
-    <div class="modal-dialog" role="document">
-      <div class="cart-modal-container">
+  <div class="modal fade" id="cartModal" tabindex="-1" ref="cartModal" 
+     data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog" role="document">
+    <div class="cart-modal-container" @click.stop>	
         <div class="cart-modal-header">
           <h5 class="cart-modal-title">Checkout <i class="fas fa-shopping-bag"></i></h5>
-          <button type="button" class="cart-modal-close" data-dismiss="modal" aria-label="Close">
+          <button type="button" class="cart-modal-close" data-dismiss="modal" aria-label="Close" @click="closeModal">
             <i class="fas fa-times"></i>
           </button>
         </div>
@@ -34,56 +34,54 @@
             </div>
           </div>
           
-<div v-if="!purchaseSuccess" class="cart-payment-section">
+          <div v-if="!purchaseSuccess" class="cart-payment-section">
+            <!-- Digital Products Purchase Section -->
+            <div class="dual-price-layout">
+              <div class="dual-price-row">
+                <div class="price-pair">
+                  <div class="price-circle">
+                    {{numberFormat(this.product_price_afit, 2)}} <img class="token-logo-sm" src="/img/actifit_logo.png">
+                  </div>
+                  <button 
+                    :class="['btn-buy', { 'btn-buy-disabled': buyButtonDisabled }]"
+                    :disabled="buyButtonDisabled"
+                    @click.prevent="buyNow">
+                    Buy
+                  </button>
+                </div>
+                <div class="price-pair">
+                  <div class="price-circle hive">
+                    {{numberFormat(this.product_price_afit * this.afitPrice.afitHiveLastPrice, 3)}} <img class="token-logo-sm" src="/img/HIVE.png">
+                  </div>
+                  <button 
+                    :class="['btn-buy-hive', { 'btn-buy-disabled': buyButtonDisabled }]"
+                    :disabled="buyButtonDisabled"
+                    @click.prevent="buyNowHive">
+                    Buy
+                  </button>
+                </div>
+              </div>
+            </div>
 
-  <!-- For digital products (cart functionality) -->
-  <template>
-    <div class="dual-price-layout">
-      <div class="dual-price-row">
-        <div class="price-pair">
-		<div class="price-circle">
-          {{numberFormat(this.product_price_afit, 2)}} <img class="token-logo-sm" src="/img/actifit_logo.png">
-		</div>
-		<button 
-          :class="['btn-buy', { 'btn-buy-disabled': buyButtonDisabled }]"
-          :disabled="buyButtonDisabled"
-          @click.prevent="buyNow()">Buy
-        </button>
-	  </div>
-		<div class="price-pair">
-			<div class="price-circle hive">
-          {{numberFormat(this.product_price_afit * this.afitPrice.afitHiveLastPrice, 3)}} <img class="token-logo-sm" src="/img/HIVE.png">
-			</div>
-        <button 
-          :class="['btn-buy-hive','hv-btn', { 'btn-buy-disabled': buyButtonDisabled }]"
-          :disabled="buyButtonDisabled"
-          @click.prevent="buyNowHive()">
-          Buy
-        </button>
-		</div>
-    </div>
-	</div>
-</template>
+            <!-- Active key input for HIVE purchases -->
+            <div class="cart-hive-key-input" v-if="buyHiveExpand && !isKeychainActive && !isHiveauthActive">
+              <label for="active-key">{{ $t('Active_Key') }} *</label>
+              <input type="password" id="active-key" name="active-key" ref="active-key" 
+                     class="form-control" v-model="userActvKey" :placeholder="$t('Enter_your_active_key')">
+            </div>
 
-
-  <!-- Active key input for HIVE purchases -->
-  <div class="cart-hive-key-input" v-if="buyHiveExpand && !isKeychainActive && !isHiveauthActive">
-    <label for="active-key">{{ $t('Active_Key') }} *</label>
-    <input type="password" id="active-key" name="active-key" ref="active-key" 
-           class="form-control" v-model="userActvKey" :placeholder="$t('Enter_your_active_key')">
-  </div>
-
-  <div class="cart-proceed-section" v-if="buyHiveExpand">
-    <button v-on:click="proceedBuyNowHive()" v-if="this.userTokens >= this.minAfitBuyTicket" 
-            class="btn-buy">
-      {{ $t('Proceed') }}
-    </button>
-    <button data-toggle="modal" v-else :data-target="'#buyOptionsModalCart'" 
-            class="btn-buy">
-      {{ $t('Proceed') }}
-    </button>
-  </div>
-</div>    
+            <div class="cart-proceed-section" v-if="buyHiveExpand">
+              <button @click="proceedBuyNowHive()" v-if="this.userTokens >= this.minAfitBuyTicket" 
+                      class="btn-buy">
+                {{ $t('Proceed') }}
+              </button>
+              <button data-toggle="modal" v-else :data-target="'#buyOptionsModalCart'" 
+                      class="btn-buy">
+                {{ $t('Proceed') }}
+              </button>
+            </div>
+          </div>
+          
           <div v-else class="cart-activation-area">
             <div class="cart-friend-input" v-if="prodHasFriendBenefic()">
               <label for="friend">{{$t('Benef_friend')}}:</label>
@@ -91,7 +89,7 @@
                      class="form-control" :placeholder="$t('Enter_friends_username')">
             </div>
             
-            <button class="btn-activate" @click.prevent="activateGadget()">
+            <button class="btn-activate" @click.prevent="activateGadget">
               <i class="fas fa-check"></i>
               {{ $t('activate_all_gadgets') }}
             </button>
@@ -140,639 +138,500 @@
 </template>
 
 <script>
-  import LoginModal from '~/components/LoginModal'
-  import { mapGetters } from 'vuex'
-  import steem from 'steem'
-  
-  import hive from '@hiveio/hive-js'
-  
-  import BuyOptionsModal from '~/components/BuyOptionsModal'
+import LoginModal from '~/components/LoginModal'
+import { mapGetters } from 'vuex'
+import hive from '@hiveio/hive-js'
+import BuyOptionsModal from '~/components/BuyOptionsModal'
 
-  export default {
-     props: ['afitPrice'],
-	data () {
-      return {
-		showModal: false,
-        loading: false,
-		sbd_price: 1,
-		steem_price: 1,
-		hbd_price: 1,
-		hive_price: 1,
-		cur_bchain: 'HIVE',
-		target_bchain: 'HIVE',
-		product_price_afit: 0,
-		item_currency: 'AFIT',
-		hive_currency: 'HIVE',
-		buyHiveExpand: false,
-		errorProceed: '',
-		buyInProgress: false,
-		buyAttempt: false,
-		userActvKey: '',
-		minAfitBuyTicket: process.env.minAfitBuyEarnTicket,
-		//purchaseSuccess: false,
-      }
-    },
-	watch: {
-	  bchain: function(newBchain) {
-		console.log('change in chain - voter modal');
-		this.cur_bchain = newBchain;
-		this.target_bchain = newBchain;
-		this.$store.dispatch('steemconnect/refreshUser');
-		//this.reload += 1;
-	  },
-	  cartEntries: function(){
-		//reset any errors due to adding new entries
-		this.errorProceed = '';
-		
-		//update total cart price
-		this.product_price_afit = 0;
-		for (let i=0;i<this.cartEntries.length;i++){
-			this.product_price_afit += this.getProductPrice(this.cartEntries[i]);
-		}
-	  }
-	},
-	components: {
-		BuyOptionsModal,
-		LoginModal,
-	},
-    computed: {
-      ...mapGetters('steemconnect', ['user']),
-	  ...mapGetters('steemconnect', ['stdLogin']),
-      ...mapGetters(['cartEntries']),
-	  ...mapGetters(['userTokens']),
-	  ...mapGetters(['bchain']),
-	  ...mapGetters(['purchaseSuccess']),
-	    buyButtonDisabled() {
-    if (!this.user) return true;
-    if (this.cartEntries.length === 0) return true;
-    return false;
-  },
-	  isKeychainActive (){
-		return (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain)
-	  },
-	  isHiveauthActive (){
-		return (localStorage.getItem('acti_login_method') == 'hiveauth')
-	  },
-	  adjustHiveClass () {
-		if (this.target_bchain != 'HIVE'){
-			return 'option-opaque';
-		}
-		return '';
-	  },
-	  adjustSteemClass () {
-		if (this.target_bchain != 'STEEM'){
-			return 'option-opaque';
-		}
-		return '';
-	  },
-	  adjustBothClass () {
-		if (this.target_bchain != 'BOTH'){
-			return 'option-opaque';
-		}
-		return '';
-	  },
-    },
-	  hasPhysicalProducts() {
-    return this.cartEntries.some(item => item.type === 'real');
-  },
-  physicalProductPrice() {
-    const product = this.cartEntries.find(item => item.type === 'real');
-    if (!product) return { afit: 0, hive: 0 };
-    
-    let afitPrice = 0;
-    let hivePrice = 0;
-    
-    product.price.forEach(entry => {
-      if (entry.currency === 'AFIT') afitPrice = entry.price;
-      if (entry.currency === 'HIVE') hivePrice = entry.price;
-    });
-    
-    return { afit: afitPrice, hive: hivePrice };
-  },
-    methods: {
-	  	  /**
-       * Formats numbers with commas and dots.
-       *
-       * @param number
-	   * @param precision
-       * @returns {string}
-       */
-	    buyPhysicalProduct(currency) {
-    if (currency === 'afit') {
-      this.buyNow();
-    } else {
-      this.buyNowHive();
+export default {
+  props: ['afitPrice'],
+  data () {
+    return {
+      showModal: false,
+      loading: false,
+      product_price_afit: 0,
+      item_currency: 'AFIT',
+      hive_currency: 'HIVE',
+      buyHiveExpand: false,
+      errorProceed: '',
+      buyInProgress: false,
+      buyAttempt: false,
+      userActvKey: '',
+      minAfitBuyTicket: process.env.minAfitBuyEarnTicket,
     }
   },
-      numberFormat (number, precision) {
-        return new Intl.NumberFormat('en-EN', { maximumFractionDigits : precision}).format(number)
-      },
-	  showModalFunc() {
-        this.$nextTick(() => {
-          this.showModal = true;
-          if ($ && typeof $.fn.modal === 'function') {
-            $('#loginModal').modal('show');
+  watch: {
+    cartEntries: function(){
+      // Reset any errors due to adding new entries
+      this.errorProceed = '';
+      
+      // Update total cart price
+      this.product_price_afit = 0;
+      for (let i=0;i<this.cartEntries.length;i++){
+        this.product_price_afit += this.getProductPrice(this.cartEntries[i]);
+      }
+    }
+  },
+  components: {
+    BuyOptionsModal,
+    LoginModal,
+  },
+  computed: {
+    ...mapGetters('steemconnect', ['user']),
+    ...mapGetters(['cartEntries']),
+    ...mapGetters(['userTokens']),
+    ...mapGetters(['purchaseSuccess']),
+    
+    buyButtonDisabled() {
+      if (!this.user) return true;
+      if (this.cartEntries.length === 0) return true;
+      return false;
+    },
+    
+    isKeychainActive() {
+      return (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain)
+    },
+    
+    isHiveauthActive() {
+      return (localStorage.getItem('acti_login_method') == 'hiveauth')
+    }
+  },
+  methods: {
+    numberFormat(number, precision) {
+      return new Intl.NumberFormat('en-EN', { maximumFractionDigits: precision }).format(number)
+    },
+    
+    showModalFunc() {
+      this.$nextTick(() => {
+        this.showModal = true;
+        if ($ && typeof $.fn.modal === 'function') {
+          $('#loginModal').modal('show');
+        }
+      });
+    },
+    
+    closeModal() {
+      // Reset modal state when closing
+      this.buyHiveExpand = false;
+      this.errorProceed = '';
+      this.buyInProgress = false;
+      
+      // Close the modal using jQuery if available
+      if ($ && typeof $.fn.modal === 'function') {
+        $('#cartModal').modal('hide');
+      }
+    },
+    
+    getProductPrice(product) {
+      let price_options = product.price;
+      let price_options_count = price_options.length;
+      let item_price = 0;
+      for (let i=0; i < price_options_count; i++){
+        let entry = price_options[i];
+        item_price = entry.price;
+      }
+      return item_price;
+    },
+    
+    removeProduct(product) {
+      this.$store.commit('removeCartEntry', product)
+    },
+    
+    prodHasFriendBenefic() {
+      for (let i=0;i<this.cartEntries.length;i++){
+        let product = this.cartEntries[i];
+        if (Array.isArray(product.benefits.boosts) && product.benefits.boosts.length>0){
+          let maxCount = product.benefits.boosts.length;
+          for (let i=0;i<maxCount;i++){
+            if (product.benefits.boosts[i].boost_beneficiary == 'friend'){
+              return true;
+            }
           }
+        }
+      }
+      return false;
+    },
+    
+    async activateGadget() {
+      this.errorProceed = '';
+      this.buyAttempt = true;
+      this.buyInProgress = true;
+      
+      try {
+        let appendFriend = null;
+        if (this.prodHasFriendBenefic()) {
+          if (this.$refs["friend"].value == '') {
+            throw new Error(this.$t('Provide_friend_name_receive_boost'));
+          }
+          if (this.$refs["friend"].value.replace('@','') == this.user.account.name) {
+            throw new Error(this.$t('Cannot_use_same_account'));
+          }
+          appendFriend = this.$refs["friend"].value;
+        }
+
+        let prod_list_str = this.cartEntries.map(p => p._id).join('-');
+
+        let cstm_params = {
+          required_auths: [],
+          required_posting_auths: [this.user.account.name],
+          id: 'actifit',
+          json: JSON.stringify({
+            transaction: "activate-gadget",
+            gadget: prod_list_str,
+            ...(appendFriend && { benefic: appendFriend })
+          })
+        };
+
+        let res = await this.processTrxFunc('custom_json', cstm_params);
+        if (!res.success) throw new Error('Transaction failed');
+
+        let url = new URL(`${process.env.actiAppUrl}activateMultiGadget/` +
+          `${this.user.account.name}/` +
+          `${prod_list_str}/` +
+          `${res.trx.ref_block_num}/` +
+          `${res.trx.id}/` +
+          `${localStorage.getItem('cur_bchain') || 'HIVE'}` +
+          (appendFriend ? `/${appendFriend}` : ''));
+
+        if (this.isKeychainActive || this.isHiveauthActive) {
+          let op_json = JSON.stringify([['custom_json', cstm_params]]);
+          url = new URL(`${process.env.actiAppUrl}activateMultiGadgetKeychain/` +
+            `${this.user.account.name}/` +
+            `${prod_list_str}/` +
+            `${res.trx.id}/` +
+            `${localStorage.getItem('cur_bchain') || 'HIVE'}` +
+            (appendFriend ? `/${appendFriend}` : '') +
+            `?operation=${op_json}`);
+        }
+
+        let outcome = await fetch(url).then(res => res.json());
+        
+        if (outcome.error) {
+          throw new Error(outcome.error);
+        } else {
+          // Clear the cart after successful activation
+          this.$store.commit('clearCart');
+          this.$store.commit('setPurchaseSuccess', false);
+          
+          this.$emit('refresh-tickets-multi');
+          this.errorProceed = this.$t('all_gadgets_activated');
+          
+          this.$notify({
+            group: 'success',
+            text: this.$t('all_gadgets_activated'),
+            position: 'top center'
+          });
+          
+          this.closeModal();
+        }
+      } catch(err) {
+        console.error(err);
+        this.errorProceed = err.message;
+      } finally {
+        this.buyInProgress = false;
+      }
+    },
+    
+    async buyNow() {
+      this.buyAttempt = true;
+      this.buyInProgress = true;
+      this.errorProceed = '';
+
+      try {
+        if (!this.user) {
+          throw new Error(this.$t('need_login_signup_notice_vote'));
+        }
+
+        if (this.userTokens < this.product_price_afit) {
+          throw new Error(this.$t('Not_enough_balance_to_buy') + this.$t('Buy_afit_here'));
+        }
+
+        // Construct product list param
+        let prod_list_str = this.cartEntries.map(p => p._id).join('-');
+
+        // Broadcast transaction
+        let cstm_params = {
+          required_auths: [],
+          required_posting_auths: [this.user.account.name],
+          id: 'actifit',
+          json: JSON.stringify({
+            transaction: "buy-gadget",
+            gadget: prod_list_str
+          })
+        };
+        
+        let res = await this.processTrxFunc('custom_json', cstm_params);
+        if (!res.success) throw new Error('Transaction failed');
+
+        let url = new URL(`${process.env.actiAppUrl}buyMultiGadget/` +
+          `${this.user.account.name}/` +
+          `${prod_list_str}/` +
+          `${res.trx.ref_block_num}/` +
+          `${res.trx.id}/` +
+          `${localStorage.getItem('cur_bchain') || 'HIVE'}`);
+
+        if (this.isKeychainActive || this.isHiveauthActive) {
+          let op_json = JSON.stringify([['custom_json', cstm_params]]);
+          url = new URL(`${process.env.actiAppUrl}buyMultiGadgetKeychain/` +
+            `${this.user.account.name}/` +
+            `${prod_list_str}/` +
+            `${res.trx.id}/` +
+            `${localStorage.getItem('cur_bchain') || 'HIVE'}` +
+            `?operation=${op_json}`);
+        }
+
+        let outcome = await fetch(url).then(res => res.json());
+        
+        if (outcome.error) {
+          throw new Error(outcome.error);
+        } else {
+          // Clear the cart after successful purchase
+          this.$store.commit('clearCart');
+          this.$store.commit('setPurchaseSuccess', true);
+          
+          // Update user token count
+          this.$store.dispatch('fetchUserTokens');
+          
+          // Display success message
+          this.errorProceed = this.$t('purchase_success_ingame_multi');
+          
+          this.$emit('refresh-tickets-multi');
+          
+          this.$notify({
+            group: 'success',
+            text: this.$t('purchase_success_ingame_multi'),
+            position: 'top center'
+          });
+        }
+      } catch(err) {
+        console.error(err);
+        this.errorProceed = err.message || this.$t('transaction_failed');
+      } finally {
+        this.buyInProgress = false;
+      }
+    },
+    
+    buyNowHive() {
+      this.buyAttempt = true;
+      this.errorProceed = '';
+      this.buyHiveExpand = !this.buyHiveExpand;
+    },
+    
+    async proceedBuyNowHive() {
+      try {
+        this.buyAttempt = true;
+        this.buyInProgress = true;
+        this.errorProceed = '';
+        
+        if (!this.user) {
+          throw new Error(this.$t('need_login_signup_notice_vote'));
+        }
+
+        if (!this.isKeychainActive && !this.isHiveauthActive && !this.userActvKey) {
+          throw new Error(this.$t('all_fields_required'));
+        }
+
+        // Proceed with payment
+        let payAmount = parseFloat(this.product_price_afit * this.afitPrice.afitHiveLastPrice).toFixed(3);
+        let memo = 'buy-gadget:' + this.cartEntries.map(p => p._id).join('-');
+
+        let cstm_params = {
+          "from": this.user.account.name,
+          "to": process.env.actifitMarketBuy,
+          "amount": payAmount + ' ' + 'HIVE',
+          "memo": memo
+        };
+
+        let op_name = 'transfer';
+        let operation = [[op_name, cstm_params]];
+
+        let res = await this.processTrxFunc(op_name, cstm_params, true);
+        if (!res.success) throw new Error('Transaction failed');
+
+        let url = new URL(`${process.env.actiAppUrl}buyMultiGadgetHive/` +
+          `${this.user.account.name}/` +
+          `${memo.split(':')[1]}/` +
+          `${res.trx.ref_block_num}/` +
+          `${res.trx.id}/` +
+          `HIVE`);
+
+        if (this.isKeychainActive || this.isHiveauthActive) {
+          let op_json = JSON.stringify(operation);
+          url = new URL(`${process.env.actiAppUrl}buyMultiGadgetHiveKeychain/` +
+            `${this.user.account.name}/` +
+            `${memo.split(':')[1]}/` +
+            `${res.trx.id}/` +
+            `HIVE?operation=${op_json}`);
+        }
+
+        let outcome = await fetch(url).then(res => res.json());
+        
+        if (outcome.error) {
+          throw new Error(outcome.error);
+        } else {
+          // Clear the cart after successful purchase
+          this.$store.commit('clearCart');
+          this.$store.commit('setPurchaseSuccess', true);
+          
+          this.errorProceed = this.$t('purchase_success_ingame_multi');
+          this.$emit('refresh-tickets-multi');
+          
+          this.$notify({
+            group: 'success',
+            text: this.$t('purchase_success_ingame_multi'),
+            position: 'top center'
+          });
+        }
+      } catch(err) {
+        console.error(err);
+        this.errorProceed = err.message || this.$t('transaction_failed');
+      } finally {
+        this.buyInProgress = false;
+      }
+    },
+    
+    async processTrxFunc(op_name, cstm_params, forceActive = false) {
+      if (!localStorage.getItem('std_login')) {
+        let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
+        if (res.result.ref_block_num) {
+          return {success: true, trx: res.result};
+        } else {
+          return {success: false, trx: null};
+        }
+      } else if (this.isKeychainActive) {  
+        return new Promise((resolve) => {
+          window.hive_keychain.requestBroadcast(
+            this.user.account.name, 
+            [[op_name, cstm_params]], 
+            forceActive ? 'Active' : 'Posting', 
+            (response) => {
+              if (response.success) {
+                resolve({success: response.success, trx: {id: response.result.id}});
+              } else {
+                resolve({success: false, error: response.error});
+              }
+            }
+          );
         });
-      },
-	  getProductPrice (product){
-		let price_options = product.price;
-		let price_options_count = price_options.length;
-		let item_price = 0;
-		for (let i=0; i < price_options_count; i++){
-			let entry = price_options[i];
-			item_price = entry.price;
-			//item_currency = entry.currency;
-		}
-		return item_price;
-	  },
-	  removeProduct (product){
-		this.$store.commit('removeCartEntry', product)
-	  },
-	  //store SBD price
-	  setSBDPrice (_sbdPrice){
-		this.sbd_price = parseFloat(_sbdPrice).toFixed(3);
-	  },
-	  //store Steem price
-	  setSteemPrice (_steemPrice){
-		this.steem_price = parseFloat(_steemPrice).toFixed(3);
-	  },
-	  
-	  //store HBD price
-	  setHBDPrice (_hbdPrice){
-		this.hbd_price = parseFloat(_hbdPrice).toFixed(3);
-	  },
-	  //store Hive price
-	  setHivePrice (_hivePrice){
-		this.hive_price = parseFloat(_hivePrice).toFixed(3);
-	  },
-	  
-	  async processTrxFunc(op_name, cstm_params, forceActive){
-		if (!localStorage.getItem('std_login')){
-			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
-			//console.log(res);
-			if (res.result.ref_block_num) {
-				//console.log('success');
-				return {success: true, trx: res.result};
-			}else{
-				//console.log(err);
-				return {success: false, trx: null};
-			}
-		}else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain){	
-			return new Promise((resolve) => {
-				window.hive_keychain.requestBroadcast(
-					this.user.account.name, 
-					[[op_name, cstm_params]], 
-					forceActive?'Active':'Posting', async (response) => {
+      } else if (this.isHiveauthActive) {  
+        return new Promise((resolve) => {
+          const auth = {
+            username: this.user.account.name,
+            token: localStorage.getItem('access_token'),
+            expire: localStorage.getItem('expires'),
+            key: localStorage.getItem('key')
+          }
+          
+          this.$HAS.broadcast(auth, forceActive ? 'active' : 'posting', [[op_name, cstm_params]], (evt) => {
+            this.$notify({
+              group: 'warn',
+              text: this.$t('verify_hiveauth_app'),
+              duration: -1,
+              position: 'top center'
+            });
+          })
+          .then(response => {
+            this.$notify({
+              group: 'warn',
+              clean: true
+            });
+            
+            if (response.cmd && response.cmd === 'sign_ack') {
+              resolve({success: true, trx: {id: response.data}});
+            } else if (response.cmd && response.cmd === 'sign_nack') {
+              resolve({success: false});
+            }
+          })
+          .catch(err => {
+            this.$notify({
+              group: 'warn',
+              clean: true
+            });
+            console.log(err);
+            resolve({success: false});
+          });
+        });
+      } else {
+        let operation = [[op_name, cstm_params]];
+        let accToken = localStorage.getItem('access_token');
+        let cur_bchain = localStorage.getItem('cur_bchain') || 'HIVE';
+        
+        let url = new URL(`${process.env.actiAppUrl}performTrx/` +
+          `?user=${this.user.account.name}` +
+          `&operation=${JSON.stringify(operation)}` +
+          `&bchain=${cur_bchain}`);
+        
+        let reqHeads = new Headers({
+          'Content-Type': 'application/json',
+          'x-acti-token': 'Bearer ' + accToken,
+        });
+        
+        let res = await fetch(url, { headers: reqHeads });
+        let outcome = await res.json();
+        
+        if (outcome.error) {
+          console.log(outcome.error);
+          
+          // If this is authority error, means needs to be logged out
+          let err_msg = outcome.trx.tx.error;
+          if (err_msg.includes('missing') && err_msg.includes('authority')) {
+            localStorage.removeItem('access_token');
+            this.error_msg = this.$t('session_expired_login_again');
+            this.$store.dispatch('steemconnect/logout');
+          }
+          
+          this.$notify({
+            group: 'error',
+            text: err_msg,
+            position: 'top center'
+          });
+          
+          return {success: false, trx: null};
+        } else {
+          return {success: true, trx: outcome.trx.tx};
+        }
+      }
+    }
+  },
+    handleBackdropClick(e) {
+    // Only close if clicking directly on the backdrop
+    if (e.target === this.$refs.cartModal) {
+      this.closeModal();
+    }
+  },
 
-						if (response.success){
-							//await this.verifyTrx(response.result, operation);
-							resolve({success: response.success, trx:{id: response.result.id}})
-						}else{
-							reject({error: response.error});
-						}
-						
-					}
-				);
-			});
-		}else if (localStorage.getItem('acti_login_method') == 'hiveauth'){	
-			return new Promise((resolve) => {
-				const auth = {
-				  username: this.user.account.name,
-				  token: localStorage.getItem('access_token'),//should be changed in V1 (current V0.8)
-				  expire: localStorage.getItem('expires'),
-				  key: localStorage.getItem('key')
-				}
-				console.log(auth);
-				this.$HAS.broadcast(auth, forceActive?'active':'posting', [[op_name, cstm_params]], (evt)=> {
-					console.log(evt)    // process sign_wait message
-					let msg = this.$t('verify_hiveauth_app');
-					this.$notify({
-					  group: 'warn',
-					  text: msg,
-					  duration: -1, //keep alive till clicked
-					  position: 'top center'
-					})
-				})
-				.then(response => {
-					console.log(response);
-					this.$notify({
-					  group: 'warn',
-					  clean: true
-					})
-					if (response.cmd && response.cmd === 'sign_ack'){
-						resolve({success: true, trx:{id: response.data}})
-					}else if (response.cmd && response.cmd === 'sign_nack'){
-						resolve({success: false})
-					}
-				} ) // transaction approved and successfully broadcasted
-				.catch(err => {
-					this.$notify({
-					  group: 'warn',
-					  clean: true
-					})
-					console.log(err);
-					resolve({success: false})
-				} )
-			});
-			
-		}else{
-			let operation = [ 
-			   [op_name, cstm_params]
-			];
-			console.log(operation);
 
-			//grab token
-			let accToken = localStorage.getItem('access_token')
-			
-			let op_json = JSON.stringify(operation)
-			
-			
-			let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
-			//let cur_bchain = 'STEEM';
-			
-			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+op_json+'&bchain='+cur_bchain);
-			
-			let reqHeads = new Headers({
-			  'Content-Type': 'application/json',
-			  'x-acti-token': 'Bearer ' + accToken,
-			});
-			let res = await fetch(url, {
-				headers: reqHeads
-			});
-			let outcome = await res.json();
-			//console.log(outcome);
-			if (outcome.error){
-				console.log(outcome.error);
-				
-				//if this is authority error, means needs to be logged out
-				//example "missing required posting authority:Missing Posting Authority"
-				let err_msg = outcome.trx.tx.error;
-				if (err_msg.includes('missing') && err_msg.includes('authority')){
-					//clear entry
-					localStorage.removeItem('access_token');
-					//this.$store.commit('setStdLoginUser', false);
-					this.error_msg = this.$t('session_expired_login_again');
-					this.$store.dispatch('steemconnect/logout');
-				}
-				
-				this.$notify({
-				  group: 'error',
-				  text: err_msg,//this.$t('session_expired_login_again'),
-				  position: 'top center'
-				})
-				return {success: false, trx: null};
-				//this.$router.push('/login');
-			}else{
-				return {success: true, trx: outcome.trx.tx};
-			}
-		}
-	  },
-	  prodHasFriendBenefic(){
-		for (let i=0;i<this.cartEntries.length;i++){
-			let product = this.cartEntries[i];
-			//if at least one product supports beneficiary, return true
-			if (Array.isArray(product.benefits.boosts) && product.benefits.boosts.length>0){
-				let maxCount = product.benefits.boosts.length;
-				for (let i=0;i<maxCount;i++){
-					if (product.benefits.boosts[i].boost_beneficiary == 'friend'){
-						return true;
-					}
-				}
-			}
-		}
-		return false;
-	  },
-	  async activateGadget() {
-  this.errorProceed = '';
-  this.buyAttempt = true;
-  this.buyInProgress = true;
+mounted() {
+  // Add click listener to the modal element
+  if (this.$refs.cartModal) {
+    this.$refs.cartModal.addEventListener('click', this.handleBackdropClick);
+  }
   
-  try {
-    let appendFriend = null;
-    if (this.prodHasFriendBenefic()) {
-      if (this.$refs["friend"].value == '') {
-        throw new Error(this.$t('Provide_friend_name_receive_boost'));
-      }
-      if (this.$refs["friend"].value.replace('@','') == this.user.account.name) {
-        throw new Error(this.$t('Cannot_use_same_account'));
-      }
-      appendFriend = this.$refs["friend"].value;
-    }
-
-    let prod_list_str = '';
-    for (let i=0;i<this.cartEntries.length;i++){
-      prod_list_str+=this.cartEntries[i]._id;
-      if (i<this.cartEntries.length-1){
-        prod_list_str+='-';
-      }
-    }
-
-    let cstm_params = {
-      required_auths: [],
-      required_posting_auths: [this.user.account.name],
-      id: 'actifit',
-      json: "{\"transaction\": \"activate-gadget\" , \"gadget\": \""+prod_list_str+"\"}"
-    };
-    
-    if (appendFriend) {
-      cstm_params['json'] = "{\"transaction\": \"activate-gadget\" , \"gadget\": \""+prod_list_str+"\", \"benefic\": \""+appendFriend+"\"}";
-    }
-
-    let res = await this.processTrxFunc('custom_json', cstm_params);
-    if (!res.success) throw new Error('Transaction failed');
-
-    let url = new URL(process.env.actiAppUrl + 'activateMultiGadget/'
-      + this.user.account.name + '/'
-      + prod_list_str + '/'
-      + res.trx.ref_block_num + '/'
-      + res.trx.id + '/'
-      + (localStorage.getItem('cur_bchain') || 'HIVE'));
-
-    if (appendFriend) {
-      url = new URL(url + '/' + appendFriend);
-    }
-
-    if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) || 
-        (localStorage.getItem('acti_login_method') == 'hiveauth')) {
-      let op_json = JSON.stringify([['custom_json', cstm_params]]);
-      url = new URL(process.env.actiAppUrl + 'activateMultiGadgetKeychain/'
-        + this.user.account.name + '/'
-        + prod_list_str + '/'
-        + res.trx.id + '/'
-        + (localStorage.getItem('cur_bchain') || 'HIVE') + '/'
-        + (appendFriend || '') + '?operation='+op_json);
-    }
-
-    let outcome = await fetch(url).then(res => res.json());
-    
-    if (outcome.error) {
-      throw new Error(outcome.error);
-    } else {
-      // Clear the cart after successful activation
-      this.$store.commit('clearCart');
-      
-      this.$emit('refresh-tickets-multi');
-      this.errorProceed = this.$t('all_gadgets_activated');
-      
-      this.$notify({
-        group: 'success',
-        text: this.$t('all_gadgets_activated'),
-        position: 'top center'
-      });
-      
-      this.$store.commit('setPurchaseSuccess', false);
-      this.$refs['closeCartMod'].click();
-    }
-  } catch(err) {
-    console.error(err);
-    this.errorProceed = err.message;
-  } finally {
-    this.buyInProgress = false;
-  }
+  hive.config.set('alternative_api_endpoints', process.env.altHiveNodes);
+  hive.api.setOptions({ url: process.env.hiveApiNode });
 },
-	  
-	  async buyNow() {
-  this.buyAttempt = true;
-  this.buyInProgress = true;
-  this.errorProceed = '';
 
-  try {
-    // Construct product list param
-    let prod_list_str = '';
-    for (let i=0;i<this.cartEntries.length;i++){
-      prod_list_str+=this.cartEntries[i]._id;
-      if (i<this.cartEntries.length-1){
-        prod_list_str+='-';
-      }
-    }
-
-    // Broadcast transaction
-    let cstm_params = {
-      required_auths: [],
-      required_posting_auths: [this.user.account.name],
-      id: 'actifit',
-      json: "{\"transaction\": \"buy-gadget\" , \"gadget\": \""+prod_list_str+"\"}"
-    };
-    
-    let bcastRes;
-    let op_name = 'custom_json';
-    let operation = [ 
-      [op_name, cstm_params]
-    ];
-    
-    let res = await this.processTrxFunc(op_name, cstm_params);
-    if (res.success){
-      bcastRes = res.trx;
-    } else {
-      throw new Error('Transaction failed');
-    }
-
-    let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
-    let url = new URL( process.env.actiAppUrl + 'buyMultiGadget/'
-      + this.user.account.name + '/'
-      + prod_list_str + '/'
-      + bcastRes.ref_block_num + '/'
-      + bcastRes.id + '/'
-      + cur_bchain);
-
-    if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) || 
-      (localStorage.getItem('acti_login_method') == 'hiveauth')) {            
-      let op_json = JSON.stringify(operation)
-      url = new URL( process.env.actiAppUrl + 'buyMultiGadgetKeychain/'
-        + this.user.account.name + '/'
-        + prod_list_str + '/'
-        + bcastRes.id + '/'
-        + cur_bchain + '?operation='+op_json);
-    }
-
-    let reslt = await fetch(url);
-    let outcome = await reslt.json();
-    
-    if (outcome.error){
-      this.errorProceed = outcome;
-      console.error(outcome);
-    } else {
-      // Clear the cart after successful purchase
-      this.$store.commit('clearCart');
-      
-      // Update user token count
-      this.$store.dispatch('fetchUserTokens');
-      
-      // Display success message
-      this.errorProceed = this.$t('purchase_success_ingame_multi');
-      
-      this.$emit('refresh-tickets-multi');
-      
-      this.$notify({
-        group: 'success',
-        text: this.$t('purchase_success_ingame_multi'),
-        position: 'top center'
-      });
-      
-      this.$store.commit('setPurchaseSuccess', true);
-    }
-  } catch(err) {
-    console.error(err);
-    this.errorProceed = this.$t('transaction_failed');
-  } finally {
-    this.buyInProgress = false;
+beforeDestroy() {
+  // Clean up event listener
+  if (this.$refs.cartModal) {
+    this.$refs.cartModal.removeEventListener('click', this.handleBackdropClick);
   }
-},
-	  async buyNowHive () {
-		//check if this is a game gadget and if reqts have been met
-		this.buyAttempt = true;
-		//this.buyInProgress = true;
-		this.errorProceed = '';
-		
-		/*if (this.product.type == 'ingame'){
-			if (!this.allReqtsFilled){
-			  this.errorProceed = this.$t('cannot_buy_reqts_not_filled');
-			  return;
-			}
-			
-			if (this.product.count < 1){
-			  this.errorProceed = this.$t('cannot_buy_none_available');
-			  return;
-			}
-		}*/
-		this.buyHiveExpand = !this.buyHiveExpand;
-	  },
-	  async proceedBuyNowHive() {
-  try {
-    this.buyAttempt = true;
-    this.buyInProgress = true;
-    this.errorProceed = '';
-    
-    // ... existing validation code ...
-
-    // Proceed with payment
-    let payAmount = parseFloat(this.product_price_afit * this.afitPrice.afitHiveLastPrice).toFixed(3);
-    let memo = 'buy-gadget:';
-    for (let i=0;i<this.cartEntries.length;i++){
-      memo+=this.cartEntries[i]._id;
-      if (i<this.cartEntries.length-1){
-        memo+='-';
-      }
-    }
-
-    let cstm_params = {
-      "from": this.user.account.name,
-      "to": process.env.actifitMarketBuy,
-      "amount": payAmount + ' ' + 'HIVE',
-      "memo": memo
-    };
-
-    let op_name = 'transfer';
-    let operation = [ 
-      [op_name, cstm_params]
-    ];
-
-    let res = await this.processTrxFunc(op_name, cstm_params, true);
-    if (!res.success) throw new Error('Transaction failed');
-
-    let url = new URL(process.env.actiAppUrl + 'buyMultiGadgetHive/'
-      + this.user.account.name + '/'
-      + memo.split(':')[1] + '/'
-      + res.trx.ref_block_num + '/'
-      + res.trx.id + '/'
-      + 'HIVE');
-
-    if ((this.isKeychainActive || this.isHiveauthActive)) {
-      let op_json = JSON.stringify(operation)
-      url = new URL(process.env.actiAppUrl + 'buyMultiGadgetHiveKeychain/'
-        + this.user.account.name + '/'
-        + memo.split(':')[1] + '/'
-        + res.trx.id + '/'
-        + 'HIVE' + '?operation='+op_json);
-    }
-
-    let reslt = await fetch(url);
-    let outcome = await reslt.json();
-    
-    if (outcome.error) {
-      throw new Error(outcome.error);
-    } else {
-      // Clear the cart after successful purchase
-      this.$store.commit('clearCart');
-      
-      this.errorProceed = this.$t('purchase_success_ingame_multi');
-      this.$emit('refresh-tickets-multi');
-      
-      this.$notify({
-        group: 'success',
-        text: this.$t('purchase_success_ingame_multi'),
-        position: 'top center'
-      });
-      
-      this.$store.commit('setPurchaseSuccess', true);
-    }
-  } catch(err) {
-    console.error(err);
-    this.errorProceed = err.message || this.$t('transaction_failed');
-  } finally {
-    this.buyInProgress = false;
-  }
-},
-	  async errorCompletion(res){
-		//console.log(res);
-		let err_details = res;//JSON.parse();
-		this.errorProceed = err_details.cause.message;
-		//this.buyAttempt = false;
-		this.buyInProgress = false;
-	  },
-	async confirmCompletion(type, amount, res, attempt, afitAmnt, op_json) {
-  console.log(res)
-  if (res.ref_block_num || res.id) {
-    // ... existing code ...
-
-    if (type == 'buyAFITHive') {
-      // ... existing AFIT purchase handling ...
-    } else {
-      // For all other purchases (including books)
-      this.productBought = true; // Add this line
-      
-      //update product status
-      this.checkProductBought();
-      this.$store.dispatch('fetchProducts')
-
-      if (this.product.type == 'service') {
-        // ... existing service handling ...
-      } else if (this.product.type == 'ebook') {
-        //display proper success message
-        this.errorProceed = this.$t('purchase_success_ebook_part1') + ' ' + this.product.name + ' '
-          + this.$t('By') + ' ' + this.product.provider_name + '.<br/>';
-        this.firstDownloadHref = process.env.actiAppUrl
-          + 'downEbook/'
-          + '?user=' + this.user.account.name
-          + '&product_id=' + this.product._id
-          + '&access_token=' + outcome.access_token;
-      } else if (this.product.type == 'ingame') {
-        // ... existing ingame handling ...
-      }
-    }
-  }
-  // ... rest of existing code ...
-}},
-	async mounted () {	  
-		  
-	  //hive.config.set('rebranded_api', true)
-	  //hive.broadcast.updateOperations()
-	  hive.config.set('alternative_api_endpoints', process.env.altHiveNodes);
-	  
-	  hive.api.setOptions({ url: process.env.hiveApiNode });
-	}
-  }
+}
+}
 </script>
 <style lang="scss">
 .cart-modal-container {
   background: var(--color-bg);
   border-radius: 16px;
   overflow: hidden;
+  pointer-events: auto;
   border: 1px solid var(--color-border);
   box-shadow: 0 8px 24px var(--color-shadow);
 }
 
+.modal-dialog {
+  pointer-events: none;
+}
 .cart-modal-header {
   background-color: var(--color-primary);
   color: white;
