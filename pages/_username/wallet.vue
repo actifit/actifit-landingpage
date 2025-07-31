@@ -718,8 +718,8 @@
                 </div>
                 <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
                   <div class="text-center small p-2 w-25"></div>
-                  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your
-                    <b>PRIVATE ACTIVE</b> key.*
+                  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">{{ $t(operation_required)}}
+                    <b>{{ $t(private_active)}}</b> key.*
                   </div>
                 </div>
                 <div class="row">
@@ -762,8 +762,8 @@
                   </div>
                   <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
                     <div class="text-center small p-2 w-25"></div>
-                    <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your
-                      <b>PRIVATE ACTIVE</b> key.*
+                    <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">{{ $t(operation_required) }}
+                      <b>{{ $t(private_active) }}</b> key.*
                     </div>
                   </div>
                 </div>
@@ -855,8 +855,8 @@
                 </div>
                 <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
                   <div class="text-center small p-2 w-25"></div>
-                  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your
-                    <b>PRIVATE ACTIVE</b> key.*
+                  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">{{ $t(operation_required) }}
+                    <b>{{ $t(private_active) }}</b> key.*
                   </div>
                 </div>
                 <div class="text-center small p-2">
@@ -917,8 +917,8 @@
                 </div>
                 <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
                   <div class="text-center small p-2 w-25"></div>
-                  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your
-                    <b>PRIVATE ACTIVE</b> key.*
+                  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">{{ $t(operation_required) }}
+                    <b>{{ $t(private_active) }}</b> key.*
                   </div>
                 </div>
                 <div class="text-center small p-2">
@@ -961,8 +961,8 @@
                   </div>
                   <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
                     <div class="text-center small p-2 w-25"></div>
-                    <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your
-                      <b>PRIVATE ACTIVE</b> key.*
+                    <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">{{ $t(operation_required) }}
+                      <b>{{ $t(private_active) }}</b> key.*
                     </div>
                   </div>
                   <div class="row">
