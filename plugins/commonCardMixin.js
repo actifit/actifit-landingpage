@@ -112,58 +112,65 @@ export const commonCardMixin = {
       this.imageGeneration += 1;
     },
     
+    // *** FINAL PRODUCTION VERSION ***
     calculatePostImages() {
-      let allFoundImages = [];
-      
-      const metaImages = this.meta.image;
-      if (Array.isArray(metaImages)) { allFoundImages.push(...metaImages); } 
-      else if (metaImages) { allFoundImages.push(metaImages); }
+      let candidateUrls = [];
 
-      if (this.meta.thumbnail) { allFoundImages.push(this.meta.thumbnail); }
+      // Stage 1: Gather from Metadata
+      if (this.meta.image) {
+        const images = Array.isArray(this.meta.image) ? this.meta.image : [this.meta.image];
+        candidateUrls.push(...images);
+      }
+      if (this.meta.thumbnail) {
+        candidateUrls.push(this.meta.thumbnail);
+      }
 
+      // Stage 2: Gather from Body
       if (this.cardData.body) {
-        const imageRegex = /!\[.*?\]\((.*?)\)|<img.*?src=["'](.*?)["']/g;
-        let match;
-        while ((match = imageRegex.exec(this.cardData.body)) !== null) {
-          const url = match[1] || match[2];
-          if (url && typeof url === 'string') { allFoundImages.push(url); }
+        // This regex finds URLs in <img> tags, Markdown, or as raw links.
+        const imageRegex = /<img[^>]+src=["'](.*?)["']|!\[[^\]]*\]\((.*?)\)|(https?:\/\/[^\s"'<>]+)/g;
+        const bodyMatches = [...this.cardData.body.matchAll(imageRegex)];
+        for (const match of bodyMatches) {
+          const url = match[1] || match[2] || match[3];
+          if (url) {
+            candidateUrls.push(url.trim());
+          }
         }
       }
-      
-      const repaired = allFoundImages.map(url => {
-        if (!url || typeof url !== 'string') return null;
-        if (url.startsWith('https://') || url.startsWith('http://')) {
-          return url;
-        }
-        return null; 
-      }).filter(Boolean);
 
-      const uniqueImages = [...new Set(repaired)];
+      // Stage 3: Clean, Deduplicate, and VALIDATE
+      const uniqueUrls = [...new Set(candidateUrls.filter(url => typeof url === 'string' && url.length > 0))];
       
-      const junkPatterns = [
-        /DQmNp6YwAm2qwquALZw8PdcovDorwaBSFuxQ38TrYziGT6b|DQmY67NW9SgDEsLo2nsAw4nYcddrTjp4aHNLyogKvGuVMMH|DQmW1VsUNbEjTUKawau4KJQ6agf41p69teEvdGAj1TMXmuc|DQmXv9QWiAYiLCSr3sKxVzUJVrgin3ZZWM2CExEo3fd5GUS|DQmdnh1nApZieHZ3s1fEhCALDjnzytFwo78zbAY5CLUMpoG|DQmZ6ZT8VaEpaDzB16qZzK8omffbWUpEpe4BkJkMXmN3xrF|DQmRgAoqi4vUVymaro8hXdRraNX6LHkXhMRBZxEo5vVWXDN|5CEvyaWxjaErqc3i7tYRQutZDwQPeZ8E6Ha3BenkA3Uc6fhKSLZ62PuSojTnM4kkLrYUdChBgBHoPxiDt|23tm6o6cmgwSRVABZSPxMC77Sfa2VNsaTtHWsjEpV1hWdQSe2s4FxvCyifsbKyESxfiPu|DQmUVjgmJHvtbYB2APdxqNxxkZeJ2KvPeXEE7v3BpxGJkbR|23tkbEYQioWnn3mfu8tWBh3x8n1Wz8TM9nH6SPRoghyZ46q2NNzt3aFsds2c8SjoknXRM|DQmdvc788wxsBSQHY3z21o3wSTU7hqRnyYc2JFEn2pEYSev|DQmeWzNEfmAnX91Ze89zqQU3B2uS58sn6dc2A6L74xLfAvr|DQmXi8aWqhnxa466MiBEhhTTCHeehoMuGrohtNG7et92Ne|DQmUtuWaSFoo8AtWd9fo4Tb7AEGhLo8rRrjqKPHHz2o7Mup|DQmcngR7AdBJio52C5stkD5C7vgsQy1yDH57Lb4J96Pys4a9|DQmRDW8jdYmE37tXvM6xPxuNnzNQnUJWSDnxVYyRJEHyc9H|DQmdNAWWwv6MAJjiNUWRahmAqbFBPxrX8WLQvoKyVHHqih1|DQmPKUZ5uZpL3Uq6LUUQXgNaaqsyX7ADpNyF4wHeTScs3xD|DQmeG5Bv1gKu2rQFWA1hH3QxzLzgzDPhDwieEEpy4WPnqN4|DQmPscjCVBggXvJT2GaUp66vbtyxzdzyHuhnzc38WDp4Smg|DQmV7NRosGCmNLsyHGzmh4Vr1pQJuBPEy2rk3WvnEUDxDFA|DQmY5UUP99u5ob3D8MA9JJW23zXLjHXHSRofSH3jLGEG1Yr|DQmQqfpSmcQtfrHAtzfBtVccXwUL9vKNgZJ2j93m8WNjizw|DQmbWy8KzKT1UvCvznUTaFPw6wBUcyLtBT5XL9wdbB7Hfmn|DQmV2hBheBVo9QWTXCxvqRqe4Fsg6kFTGggsTNGga9gTUHm|23w3F6U3PgtaT14tL5ewc1FoCwJcebdmZ3nrj2H6x2cTf4RzKWuicnQqvJGQ8tZxqX4Q5|ACTIVITYDQmeG5Bv1gKu2rQFWA1hH3QxzLzgzDPhDwieEEpy4WPnqN4|23yJg2hJAuEDUwg82kS1eC3EQqkVDzPEEyPa4rwymVHoz5mKPanjmshFa5s6tcPe3SP9c|DQmQJeGKQVsYFDFnHxgTHyNdrZxQmjLSJxz1wLB5HJDaZV3|DQmYfJ7SsTGpkR6gWoyLzo4pGrxnFopkcKzRVjgE6NRRXQL|DQmRoHaVPUiTagwviNmie8Ub5j4ZW1VcJGycZebmiH8ZdH5|AJpkUkMYpoVBmYDWsVtg7vaddiSqbMufvdoJ6w3FbzbvNTbkC6fgma1R8b47CMn|AJbhBb9Ev3i1cHKtjoxtsCAaXK9njP56dzMwBRwfZVZ21WseKsCa6ZkfAbLGnbh|AJmthV3f2pVE2wEzBrLJp6AYgFwbB9WWqWFhA7ta3ejN2BcFkpbhTLDCQb\/i/,
-        /s3\.us-east-1\.amazonaws\.com\/actifit\.io\.website\/|ACTIVITY(DATE|COUNT|TYPE)\.png|TRACKM\.png|\/h1\.png|\/w1a\.png|\/bd1\.png|\/w1\.png|\/t1\.png|\/c1\.png/i
+      const imageExtensionRegex = /\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i;
+      const trustedHostsRegex = /images\.hive\.blog|files\.peakd\.com|usermedia\.actifit\.io|img\.inleo\.io|leopedia\.io|i\.imgur\.com|ipfs\.io|cdn\.pixabay\.com/i;
+
+      // *** THIS IS THE CORRECTED LOGIC ***
+      // A URL is valid if it's from a trusted host OR has a standard image extension.
+      let validImages = uniqueUrls.filter(url => trustedHostsRegex.test(url) || imageExtensionRegex.test(url));
+      
+      if (validImages.length === 0) {
+        return [];
+      }
+      
+      // Stage 4: Filter out known branding/UI elements
+      const excludedImagePatterns = [
+        /DQmNp6YwAm2qwquALZw8PdcovDorwaBSFuxQ38TrYziGT6b|DQmY67NW9SgDEsLo2nsAw4nYcddrTjp4aHNLyogKvGuVMMH|DQmW1VsUNbEjTUKawau4KJQ6agf41p69teEvdGAj1TMXmuc|DQmXv9QWiAYiLCSr3sKxVzUJVrgin3ZZWM2CExEo3fd5GUS|DQmdnh1nApZieHZ3s1fEhCALDjnzytFwo78zbAY5CLUMpoG|DQmZ6ZT8VaEpaDzB16qZzK8omffbWUpEpe4BkJkMXmN3xrF|DQmRgAoqi4vUVymaro8hXdRraNX6LHkXhMRBZxEo5vVWXDN|5CEvyaWxjaErqc3i7tYRQutZDwQPeZ8E6Ha3BenkA3Uc6fhKSLZ62PuSojTnM4kkLrYUdChBgBHoPxiDt|23tm6o6cmgwSRVABZSPxMC77Sfa2VNsaTtHWsjEpV1hWdQSe2s4FxvCyifsbKyESxfiPu|DQmUVjgmJHvtbYB2APdxqNxxkZeJ2KvPeXEE7v3BpxGJkbR|23tkbEYQioWnn3mfu8tWBh3x8n1Wz8TM9nH6SPRoghyZ46q2NNzt3aFsds2c8SjoknXRM|DQmdvc788wxsBSQHY3z21o3wSTU7hqRnyYc2JFEn2pEYSev|DQmeWzNEfmAnX91Ze89zqQU3B2uS58sn6dc2A6L74xLfAvr|DQmXi8aWqhnxa466MiBEhhTTCHeehoMuGrohtNG7et92Ne|DQmUtuWaSFoo8AtWd9fo4Tb7AEGhLo8rRrjqKPHHz2o7Mup|DQmcngR7AdBJio52C5stkD5C7vgsQyDH57Lb4J96Pys4a9|DQmRDW8jdYmE37tXvM6xPxuNnzNQnUJWSDnxVYyRJEHyc9H|DQmdNAWWwv6MAJjiNUWRahmAqbFBPxrX8WLQvoKyVHHqih1|DQmPKUZ5uZpL3Uq6LUUQXgNaaqsyX7ADpNyF4wHeTScs3xD|DQmeG5Bv1gKu2rQFWA1hH3QxzLzgzDPhDwieEEpy4WPnqN4|DQmPscjCVBggXvJT2GaUp66vbtyxzdzyHuhnzc38WDp4Smg|DQmV7NRosGCmNLsyHGzmh4Vr1pQJuBPEy2rk3WvnEUDxDFA|DQmY5UUP99u5ob3D8MA9JJW23zXLjHXHSRofSH3jLGEG1Yr|DQmQqfpSmcQtfrHAtzfBtVccXwUL9vKNgZJ2j93m8WNjizw|DQmbWy8KzKT1UvCvznUTaFPw6wBUcyLtBT5XL9wdbB7Hfmn|DQmV2hBheBVo9QWTXCxvqRqe4Fsg6kFTGggsTNGga9gTUHm|23w3F6U3PgtaT14tL5ewc1FoCwJcebdmZ3nrj2H6x2cTf4RzKWuicnQqvJGQ8tZxqX4Q5|ACTIVITYDQmeG5Bv1gKu2rQFWA1hH3QxzLzgzDPhDwieEEpy4WPnqN4|23yJg2hJAuEDUwg82kS1eC3EQqkVDzPEEyPa4rwymVHoz5mKPanjmshFa5s6tcPe3SP9c|DQmQJeGKQVsYFDFnHxgTHyNdrZxQmjLSJxz1wLB5HJDaZV3|DQmYfJ7SsTGpkR6gWoyLzo4pGrxnFopkcKzRVjgE6NRRXQL|DQmRoHaVPUiTagwviNmie8Ub5j4ZW1VcJGycZebmiH8ZdH5|AJpkUkMYpoVBmYDWsVtg7vaddiSqbMufvdoJ6w3FbzbvNTbkC6fgma1R8b47CMn|AJbhBb9Ev3i1cHKtjoxtsCAaXK9njP56dzMwBRwfZVZ21WseKsCa6ZkfAbLGnbh|AJmthV3QiiU3f2pVE2wEzBrLJp6AYgFwbB9WWqWFhA7ta3ejN2BcFkpbhTLDCQb\/i/,
+        /s3\.us-east-1\.amazonaws\.com\/actifit\.io\.website\/|ACTIVITY(DATE|COUNT|TYPE)\.png|TRACKM\.png|\/h1\.png|\/w1a\.png|\/bd1\.png|\/w1\.png|\/t1\.png|\/c1\.png/i,
+        /\/actifit-/,
       ];
-
-      return uniqueImages.filter(url => {
-        return !junkPatterns.some(pattern => pattern.test(url));
+      
+      return validImages.filter(url => {
+        return !excludedImagePatterns.some(pattern => pattern.test(url));
       });
     },
 
     getResizedImageUrl (url, width) {
-      if (
-        typeof url !== 'string' || 
-        !url.startsWith('http') || 
-        /\.gif$/i.test(url) ||
-        url.includes('leopedia.io')
-      ) {
+      if (typeof url !== 'string' || !url.startsWith('http') || /\.gif$/i.test(url) || url.includes('leopedia.io')) {
         return url;
       }
-      
       const resizeProxy = `https://images.hive.blog/${Math.round(width)}x0/`;
       return resizeProxy + url;
     },
-
     onImageLoad() { this.imageLoading = false; },
     onImageError(event) {
       this.imageLoadFailed = true;
