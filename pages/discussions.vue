@@ -35,18 +35,17 @@
           Latest comments from PeakD Snaps, Inleo Threads, and Ecency Waves
         </div>
 
-        <!-- New Discussions Editor Card -->
+        <!-- SELF-CONTAINED EDITOR -->
         <div class="discussions-editor-wrap" v-if="!routeHasComment">
           <div class="discussions-editor-card">
             <div class="editor-header">
               <span class="editor-title">Discussions</span>
               <button class="editor-close" @click="resetEditor">X</button>
             </div>
-            <!-- Actions: image upload, category/platform (postTargets), post btn -->
             <div class="editor-actions">
               <label class="icon-btn">
                 <input type="file" accept="image/*" @change="onImageSelected" hidden>
-                <i class="fas fa-image action-icon"></i>
+                <i class="fas fa-image action-icon" title="Add Image"></i>
               </label>
               <div class="category-select">
                 <button
@@ -59,16 +58,16 @@
                   <img :src="cat.icon" class="cat-icon" />
                 </button>
               </div>
-              <button class="post-btn" @click="postQuickUpdate" :disabled="!canPost">
-                POST
+              <button class="post-btn" @click="postQuickUpdate" :disabled="!canPost || isPermlinkLoading || postingQuickUpdate">
+                <span v-if="isPermlinkLoading">LOADING...</span>
+                <span v-else-if="postingQuickUpdate">POSTING...</span>
+                <span v-else>POST</span>
               </button>
             </div>
-            <!-- Image Preview -->
             <div v-if="imagePreviewUrl" class="editor-image-preview">
               <img :src="imagePreviewUrl" />
               <button class="editor-remove-img" @click="removeImage">X</button>
             </div>
-            <!-- Only one textbox for user input -->
             <textarea
               v-model="editorContent"
               class="editor-body-input"
@@ -76,69 +75,42 @@
               rows="3"
               maxlength="500"
             ></textarea>
-            <!-- Real-time Preview -->
-            <div class="editor-preview-card">
-              <div class="preview-header">
-                <span class="preview-user">@{{ currentUsername }}</span>
-                <span class="preview-time">{{ previewTime }}</span>
-                <img v-if="categoryLogoMap[postTarget]" :src="categoryLogoMap[postTarget]" class="cat-icon" style="margin-left:10px;" />
-              </div>
-              <div class="preview-body">
-                <div v-if="imagePreviewUrl" class="preview-image"><img :src="imagePreviewUrl" /></div>
-                <span class="preview-content">{{ editorContent }}</span>
-              </div>
-            </div>
             <div v-if="quickUpdateError" class="reply-error mt-2">{{ quickUpdateError }}</div>
           </div>
         </div>
         <!-- End Editor -->
 
-        <!-- Single Comment View, Discussions List, etc. -->
+
+        <!-- Single Comment View -->
         <div v-if="routeHasComment" class="container pt-3 pb-5">
           <div v-if="loadingSingleComment" class="loading">Loading comment...</div>
           <div v-else-if="singleComment">
             <div class="card report mb-4">
               <h6 class="mb-0 text-center report-title">
-                {{ truncateString(singleComment.title || singleComment.body, 60) }}
+                {{ truncateString(stripMarkdown(singleComment.title || singleComment.body), 60) }}
               </h6>
               <div class="report-body">
                 <div class="row pb-1">
                   <div class="col-8">
                     <UserHoverCard :username="singleComment.author" />
                   </div>
-                  <div class="col-4 text-right">
-                    <TimeAgo :timestamp="singleComment.created" />
-                  </div>
-                </div>
-                <div class="row align-items-center mb-2">
-                  <div class="col-12 text-right">
-                    <img
-                      v-if="categoryLogoMap[singleComment.category]"
-                      :src="categoryLogoMap[singleComment.category]"
-                      :alt="singleComment.categoryLabel"
-                      class="category-logo-img"
-                    />
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col-12">
-                    <div v-if="getCommentImages(singleComment.body)" class="comment-images mb-2">
+                  <div class="col-4 text-right position-relative">
+                    <span>
+                      <TimeAgo :timestamp="singleComment.created" />
+                    </span>
+                    <span class="category-logo-topright">
                       <img
-                        v-for="(img, index) in getCommentImages(singleComment.body)"
-                        :key="index"
-                        :src="img"
-                        :alt="'Image ' + (index + 1)"
-                        class="report-image"
-                        @click="handleImageClick(img)"
+                        v-if="categoryLogoMap[singleComment.category]"
+                        :src="categoryLogoMap[singleComment.category]"
+                        :alt="singleComment.categoryLabel"
+                        class="category-logo-inline"
                       />
-                    </div>
+                    </span>
                   </div>
                 </div>
                 <div class="row">
                   <div class="col-12">
-                    <div>
-                      <span v-html="singleComment.body"></span>
-                    </div>
+                    <vue-remarkable class="comment-body" :source="singleComment.body.trim()" />
                   </div>
                 </div>
                 <div class="row details mt-2">
@@ -160,7 +132,7 @@
                 </div>
                 <transition name="fade">
                   <div class="reply-box mb-4" v-if="showRootReplyBox">
-                    <CustomTextEditor ref="rootEditor" :initialContent="replyBody" />
+                    <CustomTextEditor v-if="isLoggedIn" ref="rootEditor" :initialContent="replyBody" />
                     <div class="reply-actions">
                       <button
                         class="reply-btn"
@@ -224,7 +196,7 @@
                       style="color:#fff; cursor:pointer;"
                       href="#"
                     >
-                      {{ truncateString(comment.title || comment.body, 60) }}
+                      {{ truncateString(stripMarkdown(comment.title || comment.body), 60) }}
                       <i class="fas fa-external-link-alt"></i>
                     </a>
                   </h6>
@@ -233,39 +205,23 @@
                       <div class="col-8">
                         <UserHoverCard :username="comment.author" />
                       </div>
-                      <div class="col-4 text-right">
-                        <TimeAgo :timestamp="comment.created" />
-                      </div>
-                    </div>
-                    <div class="row align-items-center mb-2">
-                      <div class="col-12 text-right">
-                        <img
-                          v-if="categoryLogoMap[comment.category]"
-                          :src="categoryLogoMap[comment.category]"
-                          :alt="comment.categoryLabel"
-                          class="category-logo-img"
-                        />
-                      </div>
-                    </div>
-                    <div class="row">
-                      <div class="col-12">
-                        <div v-if="getCommentImages(comment.body)" class="comment-images mb-2">
+                      <div class="col-4 text-right position-relative">
+                        <span>
+                          <TimeAgo :timestamp="comment.created" />
+                        </span>
+                        <span class="category-logo-topright">
                           <img
-                            v-for="(img, index) in getCommentImages(comment.body)"
-                            :key="index"
-                            :src="img"
-                            :alt="'Image ' + (index + 1)"
-                            class="report-image"
-                            @click="handleImageClick(img)"
+                            v-if="categoryLogoMap[comment.category]"
+                            :src="categoryLogoMap[comment.category]"
+                            :alt="comment.categoryLabel"
+                            class="category-logo-inline"
                           />
-                        </div>
+                        </span>
                       </div>
                     </div>
                     <div class="row">
                       <div class="col-12">
-                        <div>
-                          <span v-html="shorten(comment.body, 200)"></span>
-                        </div>
+                        <vue-remarkable class="comment-body" :source="comment.body.trim()" />
                       </div>
                     </div>
                     <div class="row details mt-2">
@@ -355,10 +311,11 @@ import UserHoverCard from '~/components/UserHoverCard.vue'
 import TimeAgo from '~/components/TimeAgo.vue'
 import VoteModal from '~/components/VoteModal.vue'
 import Comments from '~/components/Comments.vue'
-import CustomTextEditor from '~/components/CustomTextEditor.vue'
+import CustomTextEditor from '~/components/CustomTextEditor.vue' // Still needed for replies
 import vueRemarkable from 'vue-remarkable'
 import { mapGetters } from 'vuex'
 import hive from '@hiveio/hive-js'
+import axios from "axios";
 
 export default {
   name: 'DiscussionsPage',
@@ -375,14 +332,12 @@ export default {
   },
   data() {
     return {
-      // Sidebar categories for filtering (includes Inleo)
       categories: [
         { value: 'peak.snaps', label: 'PeakD Snaps' },
         { value: 'leothreads', label: 'Inleo Threads' },
         { value: 'ecency.waves', label: 'Ecency Waves' }
       ],
       loading: false,
-      // Posting targets (only PeakD and Ecency)
       postTargets: [
         { value: 'peak.snaps', label: 'PeakD Snaps', icon: '/img/PeakDLogo.png' },
         { value: 'ecency.waves', label: 'Ecency Waves', icon: '/img/EcencyWavesLogo.png' }
@@ -398,16 +353,12 @@ export default {
         'leothreads': '/img/InleoThreadsLogo.jpg',
         'ecency.waves': '/img/EcencyWavesLogo.png'
       },
-      // Editor UI
-      showEditor: false,
       editorContent: '',
       postTarget: '',
       postingQuickUpdate: false,
       quickUpdateError: '',
       selectedImageFile: null,
       imagePreviewUrl: '',
-      uploadedImageUrl: '',
-      // Comment details
       singleComment: null,
       singleCommentReplies: [],
       loadingSingleComment: false,
@@ -420,8 +371,9 @@ export default {
       replySuccess: false,
       rootResponsePosted: false,
       rootResponseBody: '',
-      tags: [],
-      isMobile: false
+      isMobile: false,
+      latestContainerPermlinks: {},
+      isPermlinkLoading: true,
     }
   },
   computed: {
@@ -464,10 +416,7 @@ export default {
         map[`${reply.author}/${reply.permlink}`] = reply;
       });
       this.singleCommentReplies.forEach(reply => {
-        if (
-          reply.parent_author === this.singleComment.author &&
-          reply.parent_permlink === this.singleComment.permlink
-        ) {
+        if (reply.parent_author === this.singleComment.author && reply.parent_permlink === this.singleComment.permlink) {
           roots.push(reply);
         } else {
           const parentKey = `${reply.parent_author}/${reply.parent_permlink}`;
@@ -479,15 +428,13 @@ export default {
       return roots;
     },
     canPost() {
+      const hasContent = this.editorContent.trim().length > 0 || this.selectedImageFile;
       return (
-        this.editorContent.trim().length > 0 &&
+        hasContent &&
         this.postTarget &&
         this.isLoggedIn
       );
     },
-    previewTime() {
-      return 'preview';
-    }
   },
   watch: {
     '$route.query': {
@@ -501,6 +448,52 @@ export default {
     }
   },
   methods: {
+    stripMarkdown(str) {
+      if (!str) return '';
+      str = str.replace(/!\[.*?\]\(.*?\)/g, '');
+      str = str.replace(/[#*_`]/g, '');
+      return str.trim();
+    },
+    async fetchLatestContainerPermlinks() {
+      this.isPermlinkLoading = true;
+      try {
+        const permlinks = {};
+        for (const target of this.postTargets) {
+          const author = target.value;
+          const latestPosts = await new Promise((resolve, reject) => {
+            hive.api.getDiscussionsByBlog({ tag: author, limit: 1 }, (err, result) => {
+              if (err) return reject(err);
+              resolve(result);
+            });
+          });
+          if (latestPosts && latestPosts.length > 0) {
+            permlinks[author] = latestPosts[0].permlink;
+          } else {
+            console.warn(`Could not find a container post for ${author}.`);
+          }
+        }
+        this.latestContainerPermlinks = permlinks;
+      } catch (error) {
+        console.error('Failed to fetch container permlinks:', error);
+        this.quickUpdateError = 'Could not load posting data. Please refresh.';
+      } finally {
+        this.isPermlinkLoading = false;
+      }
+    },
+    makeCommentImagesClickable() {
+      this.$nextTick(() => {
+        document.querySelectorAll('.comment-body img').forEach(img => {
+            if (!img.closest('a')) {
+              const link = document.createElement('a');
+              link.href = img.src;
+              link.target = '_blank';
+              link.rel = 'noopener noreferrer';
+              img.parentNode.insertBefore(link, img);
+              link.appendChild(img);
+            }
+          });
+      });
+    },
     selectCategory(cat) {
       this.postTarget = cat;
     },
@@ -510,198 +503,122 @@ export default {
       this.selectedImageFile = file;
       this.imagePreviewUrl = URL.createObjectURL(file);
     },
-    async uploadImage() {
-      if (!this.selectedImageFile) return '';
-      const formData = new FormData();
-      formData.append('image', this.selectedImageFile);
-      const response = await fetch(process.env.actiAppUrl + 'uploadImage', {
-        method: 'POST',
-        body: formData,
-      });
-      const result = await response.json();
-      return result.url;
-    },
     removeImage() {
       this.selectedImageFile = null;
       this.imagePreviewUrl = '';
-      this.uploadedImageUrl = '';
+    },
+    async uploadImage() {
+      if (!this.selectedImageFile) return '';
+      
+      this.quickUpdateError = '';
+
+      // Create a new, clean Axios instance to bypass global interceptors.
+      const uploadAxios = axios.create();
+
+      const key = (Date.now().toString(36) + Math.random().toString(36).substr(2, 11) + Math.random().toString(36).substr(2, 11)).toUpperCase();
+      const renamedFile = new File([this.selectedImageFile], key, { type: this.selectedImageFile.type });
+      const formData = new FormData();
+      formData.append('image', renamedFile);
+
+      try {
+        await uploadAxios.post('https://usermedia.actifit.io/upload', formData, {
+          headers: {
+            'Authorization': process.env.sec_img_upl,
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        return 'https://usermedia.actifit.io/' + key;
+      } catch (error) {
+        console.error('Image Upload Error:', error);
+        if (error.response && error.response.data) {
+          throw new Error('Image upload failed: ' + error.response.data);
+        }
+        throw new Error('Image upload failed. Please try again.');
+      }
     },
     resetEditor() {
       this.editorContent = '';
       this.postTarget = '';
-      this.selectedImageFile = null;
-      this.imagePreviewUrl = '';
-      this.uploadedImageUrl = '';
       this.quickUpdateError = '';
-      this.tags = [];
+      this.removeImage();
     },
     async postQuickUpdate() {
       this.quickUpdateError = '';
-      let body = this.editorContent;
-      const tags = this.tags.length ? this.tags : [this.postTarget];
-      const postTarget = this.postTarget;
+      let body = this.editorContent.trim();
 
-      if (!this.isLoggedIn) {
-        this.quickUpdateError = 'You must be logged in to post.';
-        return;
-      }
-      if (!body || !body.trim()) {
-        this.quickUpdateError = 'Post cannot be empty.';
-        return;
-      }
-      if (!tags || tags.length < 1) {
-        this.quickUpdateError = 'At least one tag required.';
-        return;
-      }
-      if (!(postTarget === 'peak.snaps' || postTarget === 'ecency.waves')) {
-        this.quickUpdateError = 'Please select where to post your update.';
-        return;
-      }
+      if (!this.isLoggedIn) { this.quickUpdateError = 'You must be logged in to post.'; return; }
+      if (!body && !this.selectedImageFile) { this.quickUpdateError = 'Post cannot be empty.'; return; }
+      
+      const parent_author = this.postTarget;
+      const parent_permlink = this.latestContainerPermlinks[parent_author];
 
-      // Upload image if present
-      if (this.selectedImageFile) {
-        try {
-          const imageUrl = await this.uploadImage();
-          if (imageUrl) {
-            body += `\n![image](${imageUrl})\n`;
-          }
-        } catch (err) {
-          this.quickUpdateError = 'Image upload failed.';
-          return;
-        }
-      }
+      if (!parent_permlink) { this.quickUpdateError = `Error: Could not find a container post for ${parent_author}.`; return; }
 
       this.postingQuickUpdate = true;
-      try {
-        const username = this.currentUsername;
-        // Hive permlink: only letters, numbers, and dashes (if you want them)
-        // No dots, spaces, underscores, or special chars
-        const safeUsername = username.replace(/[^a-z0-9]/gi, '');
-        const timestamp = new Date().toISOString().replace(/[^a-z0-9]/gi, '');
-        const permlink = `discussion-${safeUsername}-${timestamp}`.toLowerCase(); // dashes are allowed
-        console.log('Permlink:', permlink);
 
-        let meta = {
-          tags: [postTarget, ...tags.filter(t=>t!==postTarget)],
-          app: 'actifit/0.5.0'
-        };
-        let cstm_params = {
-          author: username,
-          title: "test-title",
-          body: body,
-          parent_author: "",
-          parent_permlink: postTarget,
-          permlink: permlink,
-          json_metadata: JSON.stringify(meta)
-        };
-        // Only use backend posting
-        console.log('cstm_params:', cstm_params); // <--- Add here
-        let res = await this.processTrxFunc('comment', cstm_params, 'HIVE');
-        if (res && res.success) {
-          const newComment = {
-            author: username,
-            body: body,
-            title: "",
-            permlink: permlink,
-            category: postTarget,
-            categoryLabel: postTarget === 'peak.snaps' ? 'PeakD Snaps' : 'Ecency Waves',
-            parentAuthor: '',
-            parentPermlink: postTarget,
-            id: `${username}-${permlink}`,
-            created: new Date().toISOString(),
-            active_votes: [],
-            children: 0,
-          };
-          this.allComments.unshift(newComment);
-          this.resetEditor();
-          this.$notify({
-            group: 'success',
-            title: 'Success',
-            text: 'Discussion posted!',
-            duration: 2500
-          });
-          setTimeout(() => {
-            this.fetchAllComments();
-          }, 2000);
-        } else {
-          this.quickUpdateError = 'Failed to post update.';
+      try {
+        if (this.selectedImageFile) {
+          const imageUrl = await this.uploadImage();
+          body += `\n\n![image](${imageUrl})\n`;
         }
-        this.postingQuickUpdate = false;
+        
+        const username = this.currentUsername;
+        const permlink = `re-${username.replace(/\./g, '-')}-${new Date().toISOString().replace(/[^a-z0-9]/gi, '').toLowerCase()}`;
+        const meta = { tags: [this.postTarget], app: 'actifit/0.5.0', format: 'markdown' };
+        const cstm_params = { author: username, title: "", body, parent_author, parent_permlink, permlink, json_metadata: JSON.stringify(meta) };
+        const res = await this.processTrxFunc('comment', cstm_params, 'HIVE');
+        
+        const errorMessage = res && res.trx && res.trx.tx && res.trx.tx.error;
+
+        if (res && res.success) {
+          this.$notify({ group: 'success', title: 'Success', text: 'Discussion posted!' });
+          this.resetEditor();
+          setTimeout(() => this.fetchAllComments(), 3000);
+        } else {
+          this.quickUpdateError = 'Error: ' + (errorMessage || 'Failed to post update.');
+        }
       } catch (e) {
-        this.quickUpdateError = e.message || 'Failed to post update.';
+        this.quickUpdateError = e.message || 'An unknown error occurred.';
+      } finally {
         this.postingQuickUpdate = false;
       }
     },
     async processTrxFunc(op_name, cstm_params, bchain_option, op_name2, cstm_params2) {
-      // Always use backend
       let operation = [[op_name, cstm_params]];
       if (op_name2 && cstm_params2) operation.push([op_name2, cstm_params2]);
-      let accToken = localStorage.getItem('access_token');
-      let op_json = JSON.stringify(operation);
-      let cur_bchain = bchain_option || 'HIVE';
-      let url = new URL(process.env.actiAppUrl + 'performTrx/?user=' + this.user.account.name + '&operation=' + encodeURIComponent(op_json) + '&bchain=' + cur_bchain);
-      let reqHeads = new Headers({
-        'Content-Type': 'application/json',
-        'x-acti-token': 'Bearer ' + accToken,
-      });
-      let res = await fetch(url, {
-        headers: reqHeads
-      });
-      let outcome = await res.json();
-      if (outcome.error) {
+
+      const accToken = localStorage.getItem('access_token');
+      const url = new URL(`${process.env.actiAppUrl}performTrxPost/?user=${this.user.account.name}&bchain=${bchain_option || 'HIVE'}`);
+      
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-acti-token': `Bearer ${accToken}` },
+          body: JSON.stringify({ 'operation': JSON.stringify(operation) })
+        });
+        const outcome = await res.json();
+        return { success: !outcome.error, trx: outcome.trx || null };
+      } catch (error) {
+        console.error('Fetch failed in processTrxFunc:', error);
         return { success: false, trx: null };
-      } else {
-        return { success: true, trx: outcome.trx };
       }
     },
     goToSingleComment(comment) {
-      this.$router.push({
-        path: this.$route.path,
-        query: { author: comment.author, permlink: comment.permlink }
-      });
+      this.$router.push({ path: this.$route.path, query: { author: comment.author, permlink: comment.permlink } });
     },
     async fetchSingleComment() {
       this.loadingSingleComment = true;
       this.loadingReplies = true;
       const { author, permlink } = this.$route.query;
-      this.singleComment = await new Promise((resolve, reject) => {
-        hive.api.getContent(author, permlink, (err, result) => err ? reject(err) : resolve(result));
-      });
-      this.loadingSingleComment = false;
-      this.singleCommentReplies = await new Promise((resolve, reject) => {
-        hive.api.getContentReplies(author, permlink, (err, result) => err ? reject(err) : resolve(result));
-      });
-      this.loadingReplies = false;
-    },
-    getCommentImages(body) {
-      if (!body) return [];
-      const patterns = [
-        /https?:\/\/[^\s]+?\.(?:png|jpe?g|gif|webp)/gi,
-        /!\[.*?\]\((https?:\/\/[^\s]+?\.(?:png|jpe?g|gif|webp))\)/gi
-      ];
-      let images = [];
-      const directUrls = body.match(patterns[0]) || [];
-      images = images.concat(directUrls);
-
-      const markdownMatches = [...body.matchAll(patterns[1])];
-      const markdownUrls = markdownMatches
-        .map(match => match[1])
-        .filter(url => !!url);
-
-      images = images.concat(markdownUrls);
-
-      return [...new Set(images)];
-    },
-    handleImageClick(imgUrl) {
-      window.open(imgUrl, '_blank');
-    },
-    shorten(text, max = 200) {
-      if (!text) return ''
-      const plain = text
-        .replace(/(http|https):\/\/[^\s]+/g, '')
-        .replace(/\n/g, ' ')
-        .trim()
-      return plain.length > max ? plain.substring(0, max) + '...' : plain
+      try {
+        this.singleComment = await new Promise((resolve, reject) => hive.api.getContent(author, permlink, (err, result) => err ? reject(err) : resolve(result)));
+        this.singleCommentReplies = await new Promise((resolve, reject) => hive.api.getContentReplies(author, permlink, (err, result) => err ? reject(err) : resolve(result)));
+      } catch (e) {
+        console.error(e);
+      } finally {
+        this.loadingSingleComment = false;
+        this.loadingReplies = false;
+      }
     },
     truncateString(str, len = 60) {
       if (!str) return '';
@@ -711,10 +628,7 @@ export default {
       return `https://hive.blog/@${comment.parentAuthor}/${comment.parentPermlink}#@${comment.author}/${comment.permlink}`;
     },
     handleReblog(comment) {
-      if (!this.currentUsername) {
-        this.showLoginPopup = true;
-        return;
-      }
+      if (!this.currentUsername) { this.showLoginPopup = true; return; }
       this.$reblog(this.user, comment);
     },
     getUpvoteCount(comment) {
@@ -723,15 +637,10 @@ export default {
     isLikedByCurrentUser(comment) {
       const username = this.currentUsername;
       if (!username || !comment.active_votes) return false;
-      return comment.active_votes.some(
-        v => v.voter && v.voter.toLowerCase() === username.toLowerCase() && v.percent > 0
-      );
+      return comment.active_votes.some(v => v.voter && v.voter.toLowerCase() === username.toLowerCase() && v.percent > 0);
     },
     votePrompt(comment) {
-      if (!this.currentUsername) {
-        this.showLoginPopup = true;
-        return;
-      }
+      if (!this.currentUsername) { this.showLoginPopup = true; return; }
       this.$store.commit('setPostToVote', comment);
       if (window.$) {
         window.$('#voteModal').modal('show');
@@ -739,55 +648,28 @@ export default {
     },
     onVoteSuccess(voted) {
       if (!voted) return;
-      const idx = this.allComments.findIndex(
-        c => c.author === voted.author && c.permlink === voted.permlink
-      );
-      if (idx !== -1) {
-        if (!this.allComments[idx].active_votes) this.$set(this.allComments[idx], 'active_votes', []);
-        const username = this.currentUsername;
-        if (!this.allComments[idx].active_votes.some(v => v.voter && v.voter.toLowerCase() === username.toLowerCase())) {
-          this.allComments[idx].active_votes.push({ voter: username, percent: 10000 });
+      const updateVotes = (item) => {
+        if (item && item.author === voted.author && item.permlink === voted.permlink) {
+          if (!item.active_votes) this.$set(item, 'active_votes', []);
+          if (!this.isLikedByCurrentUser(item)) {
+            item.active_votes.push({ voter: this.currentUsername, percent: 10000 });
+          }
         }
-      }
-      if (this.singleComment && this.singleComment.author === voted.author && this.singleComment.permlink === voted.permlink) {
-        if (!this.singleComment.active_votes) this.$set(this.singleComment, 'active_votes', []);
-        const username = this.currentUsername;
-        if (!this.singleComment.active_votes.some(v => v.voter && v.voter.toLowerCase() === username.toLowerCase())) {
-          this.singleComment.active_votes.push({ voter: username, percent: 10000 });
-        }
-      }
+      };
+      this.allComments.forEach(updateVotes);
+      updateVotes(this.singleComment);
     },
     async fetchAllComments() {
       this.loading = true;
       let allComments = [];
       for (const cat of this.categories) {
-        const posts = await new Promise((resolve, reject) => {
-          hive.api.getDiscussionsByAuthorBeforeDate(
-            cat.value,
-            '',
-            new Date().toISOString().slice(0, 19),
-            5,
-            (err, result) => err ? reject(err) : resolve(result)
-          );
-        });
-        for (const post of posts) {
-          const comments = await new Promise((resolve, reject) => {
-            hive.api.getContentReplies(post.author, post.permlink, (err, result) => err ? reject(err) : resolve(result));
-          });
-          allComments = allComments.concat(
-            comments
-              .filter(c => c.body && c.body.trim().length > 0)
-              .map(c => ({
-                ...c,
-                id: `${c.author}-${c.permlink}`,
-                category: cat.value,
-                categoryLabel: cat.label,
-                parentAuthor: post.author,
-                parentPermlink: post.permlink,
-                permlink: typeof c.permlink === 'string' ? c.permlink : String(c.permlink)
-              }))
-          );
-        }
+        try {
+          const posts = await new Promise((resolve, reject) => hive.api.getDiscussionsByAuthorBeforeDate(cat.value, '', new Date().toISOString().slice(0, 19), 5, (err, res) => err ? reject(err) : resolve(res)));
+          for (const post of posts) {
+            const comments = await new Promise((resolve, reject) => hive.api.getContentReplies(post.author, post.permlink, (err, res) => err ? reject(err) : resolve(res)));
+            allComments.push(...comments.filter(c => c.body && c.body.trim().length > 0).map(c => ({...c, id: `${c.author}-${c.permlink}`, category: cat.value, categoryLabel: cat.label, parentAuthor: post.author, parentPermlink: post.permlink })));
+          }
+        } catch(e) { console.error(e) }
       }
       this.allComments = allComments;
       this.loading = false;
@@ -803,54 +685,28 @@ export default {
     async postRootReply() {
       this.replyError = '';
       this.replySuccess = false;
-      if (!this.isLoggedIn) {
-        this.replyError = 'You must be logged in to reply.';
-        return;
-      }
-      const body = this.$refs.rootEditor ? this.$refs.rootEditor.content : this.replyBody;
-      if (!body || !body.trim()) {
-        this.replyError = 'Reply cannot be empty.';
-        return;
-      }
+      if (!this.isLoggedIn) { this.replyError = 'You must be logged in to reply.'; return; }
+      
+      const body = this.$refs.rootEditor ? this.$refs.rootEditor.content : '';
+      if (!body.trim()) { this.replyError = 'Reply cannot be empty.'; return; }
+
       this.postingReply = true;
       try {
-        const username = this.currentUsername;
-        const parent_author = this.singleComment.author;
-        const parent_permlink = this.singleComment.permlink;
-        const permlink =
-          username.replace('.', '-') +
-          '-re-' +
-          parent_author.replace('.', '-') +
-          '-' +
-          parent_permlink +
-          new Date().toISOString().replace(/[^a-zA-Z0-9]+/g, '').toLowerCase();
-        let meta = [];
-        meta.tags = ['hive-193552', 'actifit'];
-        meta.app = 'actifit/0.5.0';
-        meta.suppEdit = 'actifit.io.comment';
-        let cstm_params = {
-          author: username,
-          title: "",
-          body: body,
-          parent_author: parent_author,
-          parent_permlink: parent_permlink,
-          permlink: permlink,
-          json_metadata: JSON.stringify(meta)
-        };
-        let res = await this.processTrxFunc('comment', cstm_params, 'HIVE');
-        if (res.success) {
-          this.onRootReplyResult(null, true, 'HIVE', body);
-        } else {
-          this.onRootReplyResult('error saving', false, 'HIVE', body);
-        }
+        const { author: parent_author, permlink: parent_permlink } = this.singleComment;
+        const permlink = `${this.currentUsername.replace(/\./g, '-')}-re-${parent_author.replace(/\./g, '-')}-${parent_permlink}-${new Date().toISOString().replace(/[^a-zA-Z0-9]+/g, '').toLowerCase()}`;
+        const meta = { tags: ['hive-193552', 'actifit'], app: 'actifit/0.5.0', suppEdit: 'actifit.io.comment' };
+        const cstm_params = { author: this.currentUsername, title: "", body: body, parent_author, parent_permlink, permlink, json_metadata: JSON.stringify(meta) };
+        const res = await this.processTrxFunc('comment', cstm_params, 'HIVE');
+        this.onRootReplyResult(res.success ? null : 'Error posting reply', res.success, 'HIVE', body);
       } catch (e) {
         this.replyError = 'Failed to post reply.';
+      } finally {
+        this.postingReply = false;
       }
-      this.postingReply = false;
     },
     onRootReplyResult(err, finalize, bchain, body) {
       if (err) {
-        this.replyError = typeof err === 'string' ? err : (err && err.message ? err.message : 'Error posting reply');
+        this.replyError = (err && err.message) ? err.message : 'Error posting reply';
         this.replySuccess = false;
       } else {
         this.replySuccess = true;
@@ -860,58 +716,44 @@ export default {
         this.replyBody = '';
         this.showRootReplyBox = false;
 
-        const parent_author = this.singleComment.author;
-        const parent_permlink = this.singleComment.permlink;
-        const expectedReplyCount = ((this.singleCommentReplies && this.singleCommentReplies.length) ? this.singleCommentReplies.length : 0) + 1;
         let pollCount = 0;
         const pollReplies = async () => {
           pollCount++;
+          const initialReplyCount = (this.singleCommentReplies && this.singleCommentReplies.length) || 0;
           await this.fetchSingleComment();
-          if (this.singleCommentReplies && this.singleCommentReplies.length >= expectedReplyCount) {
+          const newReplyCount = (this.singleCommentReplies && this.singleCommentReplies.length) || 0;
+
+          if (newReplyCount > initialReplyCount || pollCount >= 10) {
             this.rootResponsePosted = false;
             this.replySuccess = false;
-            return;
-          }
-          if (pollCount < 10) {
-            setTimeout(pollReplies, 1000);
           } else {
-            this.rootResponsePosted = false;
-            this.replySuccess = false;
+            setTimeout(pollReplies, 1500);
           }
         };
         setTimeout(pollReplies, 1500);
       }
     },
     handleTranslationCacheUpdate(payload) {
-      this.translationCache = {
-        ...this.translationCache,
-        [payload.id]: payload.data
-      };
+      this.$set(this.translationCache, payload.id, payload.data);
     },
     detectMobile() {
-      // Basic mobile detection
-      this.isMobile = window.innerWidth < 768;
-      window.addEventListener('resize', () => {
-        this.isMobile = window.innerWidth < 768;
-      });
+      const check = () => this.isMobile = window.innerWidth < 768;
+      check();
+      window.addEventListener('resize', check);
+      this.$once('hook:beforeDestroy', () => window.removeEventListener('resize', check));
     }
   },
   async mounted() {
-    await this.fetchAllComments();
     this.detectMobile();
-    this.updateInterval = setInterval(() => {
-      this.$forceUpdate();
-    }, 1000);
-  },
-  beforeDestroy() {
-    if (this.updateInterval) clearInterval(this.updateInterval);
-    window.removeEventListener('resize', this.detectMobile);
+    await this.fetchAllComments();
+    await this.fetchLatestContainerPermlinks();
+    this.makeCommentImagesClickable();
   }
 }
 </script>
 
-
-<style scoped>
+<style>
+/* All your existing styles are unchanged... */
 .sidebar {
   position: fixed;
   top: 88px; /* adjust according to your Navbar height */
@@ -963,8 +805,6 @@ export default {
   margin-left: 220px;
   min-width: 0;
 }
-
-/* ...rest of your styles unchanged... */
 .market-sub {
   font-style: italic;
 }
@@ -1557,5 +1397,57 @@ export default {
   margin-top: 4px;
   display: block;
 }
+.comment-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 0.2em;
+  margin-bottom: 0.2em;
+}
 
+.category-logo-inline {
+  height: 22px;
+  width: 22px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #eee;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.comment-body {
+  margin: 0;
+  padding: 0;
+  font-size: 1.09rem;
+  font-weight: 400;
+  line-height: 1.6;
+  color: #222;
+  white-space: normal;
+  word-break: break-word;
+  display: inline;
+}
+
+@media (max-width: 768px) {
+  .comment-line {
+    gap: 6px;
+  }
+  .category-logo-inline {
+    height: 18px;
+    width: 18px;
+  }
+}
+.report-body .comment-body img,
+.comment-body img,
+.vue-remarkable img {
+  max-width: 160px !important;
+  max-height: 120px !important;
+  width: auto !important;
+  height: auto !important;
+  display: block;
+  margin: 10px 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  object-fit: cover;
+}
 </style>
