@@ -1175,19 +1175,23 @@ module.exports = {
   community:'See what our community has been up to!',
   loading_news:'Loading news...',
   footer_slogan:' Your daily activity is valuable. Get rewarded for it.',
-  Explore_Activity_Feed: 'Explore Activity Feed',
-  loading_activities: 'Loading recent activities...',
-  loading_supporters: 'Loading our top supporters...',
-  loading_leaderboard: 'Leaderboard is being updated...',
-  view_more_activities: 'View More Activities',
-  available_on: 'Available for trade on:',
-  our_top_supporters: 'Our Top Supporters',
-  top_supporters_desc: 'A huge thank you to our top delegators who power the Actifit ecosystem!',
-  daily_afit_earnings: 'AFIT/Day',
-  HP_short: 'HP',
-  RC:'RC',
-  VP:'VP',
-  Steps: 'activity count',
+
+
+
+Explore_Activity_Feed: 'Explore Activity Feed',
+loading_activities: 'Loading recent activities...',
+loading_supporters: 'Loading our top supporters...',
+loading_leaderboard: 'Leaderboard is being updated...',
+view_more_activities: 'View More Activities',
+available_on: 'Available for trade on:',
+our_top_supporters: 'Our Top Supporters',
+top_supporters_desc: 'A huge thank you to our top delegators who power the Actifit ecosystem!',
+daily_afit_earnings: 'AFIT/Day',
+HP_short: 'HP',
+RC:'RC',
+VP:'VP',
+
+Steps: 'activity count',
 
   exchanges: {
     hive_engine: 'Hive-Engine',
