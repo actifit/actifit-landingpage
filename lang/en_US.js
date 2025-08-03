@@ -1192,7 +1192,7 @@ RC:'RC',
 VP:'VP',
 
 Steps: 'activity count',
-
+recent_post:'Recent Posts',
   exchanges: {
     hive_engine: 'Hive-Engine',
     actifit_defi: 'Actifit DeFi',

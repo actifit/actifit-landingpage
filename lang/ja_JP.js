@@ -1186,7 +1186,7 @@ module.exports = {
   RC: 'RC',
   VP: 'VP',
   Steps: 'アクティビティ数',
-
+  recent_post: '最近の投稿',
   exchanges: {
     hive_engine: 'Hive-Engine',
     actifit_defi: 'Actifit DeFi',

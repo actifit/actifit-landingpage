@@ -398,7 +398,7 @@ module.exports = {
       }
     },
     //fixes issue with hive-auth-wrapper plugin integration
-    transpile: ['hive-auth-wrapper']
+    transpile: ['hive-auth-wrapper', 'sanitize-html']
 
   }
 }

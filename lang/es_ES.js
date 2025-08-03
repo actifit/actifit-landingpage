@@ -1187,7 +1187,7 @@ module.exports = {
   RC: 'RC',
   VP: 'VP',
   Steps: 'conteo de actividad',
-
+  recent_post: 'Publicaciones Recientes',
   exchanges: {
     hive_engine: 'Hive-Engine',
     actifit_defi: 'Actifit DeFi',

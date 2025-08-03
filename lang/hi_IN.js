@@ -1188,7 +1188,7 @@ module.exports = {
   RC: 'आरसी',
   VP: 'वीपी',
   Steps: 'गतिविधि गणना',
-
+  recent_post: 'हालिया पोस्ट',
   exchanges: {
     hive_engine: 'हाइव-इंजन',
     actifit_defi: 'एक्टिफिट डेफी',
