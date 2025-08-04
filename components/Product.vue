@@ -156,15 +156,10 @@
 <!-- Pricing Section -->
 <div class="product-pricing">
   <div class="pricing-container">
-    <!-- Loading indicator for all product types -->
-    <div v-if="buyInProgress" class="loading-indicator">
-      <i class="fas fa-spinner fa-spin"></i> {{ $t('Processing') }}...
-    </div>
+
     
     <!-- Error message for all product types -->
-    <div v-if="errorProceed" class="error-message">
-      {{ errorProceed }}
-    </div>
+   <div v-if="errorProceed" class="error-message" v-html="errorProceed"></div>
 
     <!-- Physical Products with both AFIT and HIVE prices -->
     <template v-if="product.type === 'real' && item_price_extra > 0 && showBuyButtons">
@@ -258,32 +253,49 @@
       </template>
 
       <!-- Dual Price Layout (AFIT + HIVE) -->
-      <template v-else>
-        <div class="dual-price-layout">
-          <div class="dual-price-row">
-            <div class="price-pair">
-              <div class="price-circle">
-                {{ numberFormat(item_price, 2) }} <img class="token-logo-sm" src="/img/actifit_logo.png">
-              </div>
-              <button 
-                :class="['btn-buy', { 'btn-buy-disabled': buyButtonDisabled }]"
-                :disabled="buyButtonDisabled"
-                @click="handleBuyClick">Buy
-              </button>
-            </div>
-            <div class="price-pair">
-              <div class="price-circle hive">
-                {{ numberFormat(item_price_extra, 2) }} <img class="token-logo-sm" src="/img/HIVE.png">
-              </div>
-              <button 
-                :class="['btn-buy-hive', { 'btn-buy-disabled': buyButtonDisabled }]"
-                :disabled="buyButtonDisabled"
-                @click="buyNowHive">Buy
-              </button>
-            </div>
-          </div>
+<template v-else>
+  <div class="dual-price-layout">
+    <div class="dual-price-row">
+      <div class="price-pair">
+        <div class="price-circle">
+          {{ numberFormat(item_price, 2) }} <img class="token-logo-sm" src="/img/actifit_logo.png">
         </div>
-      </template>
+        <button 
+          :class="['btn-buy', { 'btn-buy-disabled': buyButtonDisabled }]"
+          :disabled="buyButtonDisabled"
+          @click="handleBuyClick">Buy
+        </button>
+      </div>
+      <div class="price-pair">
+        <div class="price-circle hive">
+          {{ numberFormat(item_price_extra, 2) }} <img class="token-logo-sm" src="/img/HIVE.png">
+        </div>
+        <button 
+          :class="['btn-buy-hive', { 'btn-buy-disabled': buyButtonDisabled }]"
+          :disabled="buyButtonDisabled"
+          @click="buyNowHive">Buy
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- ADD THIS NEW SECTION FOR ACTIVE KEY INPUT -->
+  <div class="hive-purchase-flow" v-if="buyHiveExpand && !isKeychainActive && !isHiveauthActive">
+    <div class="hive-key-input">
+      <label for="active-key">{{ $t('Active_Key') }} *</label>
+      <input type="password" id="active-key" name="active-key" 
+             v-model="userActvKey" :placeholder="$t('Enter_your_active_key')">
+    </div>
+    
+    <div class="proceed-section">
+      <button class="btn-proceed" @click="proceedBuyNowHive" 
+              :disabled="!userActvKey || buyInProgress">
+        {{ $t('Proceed') }}
+        <i v-if="buyInProgress" class="fas fa-spinner fa-spin"></i>
+      </button>
+    </div>
+  </div>
+</template>
     </template>
     
     <!-- Additional actions (cart buttons) -->
@@ -1027,145 +1039,109 @@ getPrice() {
           console.log(outcome);
 
         },
-
-        async processTrxFunc(op_name, cstm_params, forceActive) {
-          if (!localStorage.getItem('std_login')) {
-            let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
-            //console.log(res);
-            if (res.result.ref_block_num) {
-              //console.log('success');
-              return { success: true, trx: res.result };
-            } else {
-              //console.log(err);
-              return { success: false, trx: null };
-            }
-          } else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) {
-            return new Promise((resolve) => {
-              window.hive_keychain.requestBroadcast(
-                this.user.account.name,
-                [[op_name, cstm_params]],
-                forceActive ? 'Active' : 'Posting', async (response) => {
-                  //console.log(response);
-                  //resolve(response);
-
-                  if (response.success) {
-                    //await this.verifyTrx(response.result, operation);
-                    resolve({ success: response.success, trx: { id: response.result.id } })
-                  } else {
-                    reject({ error: response.error });
-                  }
-
-                }
-              );
+async processTrxFunc(op_name, cstm_params, forceActive = false) {
+  if (!localStorage.getItem('std_login')) {
+    let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
+    return { success: !!res.result.ref_block_num, trx: res.result };
+  } 
+  else if (this.isKeychainActive) {
+    return new Promise((resolve) => {
+      if (op_name === 'transfer') {
+        window.hive_keychain.requestTransfer(
+          cstm_params.from,
+          cstm_params.to,
+          cstm_params.amount,
+          cstm_params.memo,
+          (response) => {
+            resolve({
+              success: response.success,
+              trx: response.success ? { id: response.result.id } : null,
+              error: response.message
             });
-          } else if (localStorage.getItem('acti_login_method') == 'hiveauth') {
-            return new Promise((resolve) => {
-              const auth = {
-                username: this.user.account.name,
-                token: localStorage.getItem('access_token'),//should be changed in V1 (current V0.8)
-                expire: localStorage.getItem('expires'),
-                key: localStorage.getItem('key')
-              }
-              let operation = [
-                [op_name, cstm_params]
-              ];
-
-              this.$HAS.broadcast(auth, forceActive ? 'active' : 'posting', operation, (evt) => {
-                console.log(evt)    // process sign_wait message
-                let msg = this.$t('verify_hiveauth_app');
-                this.$notify({
-                  group: 'warn',
-                  text: msg,
-                  duration: -1, //keep alive till clicked
-                  position: 'top center'
-                })
-              })
-                .then(response => {
-                  console.log(response);
-                  this.$notify({
-                    group: 'warn',
-                    clean: true
-                  })
-                  if (response.cmd && response.cmd === 'sign_ack') {
-                    resolve({ success: true, trx: { id: response.data } })
-                  } else if (response.cmd && response.cmd === 'sign_nack') {
-                    resolve({ success: false })
-                  }
-                }) // transaction approved and successfully broadcasted
-                .catch(err => {
-                  this.$notify({
-                    group: 'warn',
-                    clean: true
-                  })
-                  console.log(err);
-                  resolve({ success: false })
-                })
-            });
-          } else {
-            let operation = [
-              [op_name, cstm_params]
-            ];
-            //console.log('broadcasting');
-            //console.log(operation);
-
-            //console.log(this.$steemconnect.accessToken);
-            //console.log(this.$store.state.accessToken);
-            //grab token
-            let accToken = localStorage.getItem('access_token')
-
-            let op_json = JSON.stringify(operation)
-
-            let cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
-            //let cur_bchain = 'STEEM';
-
-            let url = new URL(process.env.actiAppUrl + 'performTrx/?user=' + this.user.account.name + '&operation=' + op_json + '&bchain=' + cur_bchain);
-
-            let reqHeads = new Headers({
-              'Content-Type': 'application/json',
-              'x-acti-token': 'Bearer ' + accToken,
-            });
-            let reslt = await fetch(url, {
-              headers: reqHeads
-            });
-            let outcome = await reslt.json();
-            //console.log(outcome);
-            if (outcome.error) {
-              console.log(outcome.error);
-
-              //if this is authority error, means needs to be logged out
-              //example "missing required posting authority:Missing Posting Authority"
-              let err_msg = outcome.trx.tx.error;
-              if (err_msg.includes('missing') && err_msg.includes('authority')) {
-                //clear entry
-                localStorage.removeItem('access_token');
-                //this.$store.commit('setStdLoginUser', false);
-                this.error_msg = this.$t('session_expired_login_again');
-                this.$store.dispatch('steemconnect/logout');
-              }
-
-              this.$notify({
-                group: 'error',
-                text: err_msg,//this.$t('session_expired_login_again'),
-                position: 'top center'
-              })
-              return { success: false, trx: null };
-              //this.$router.push('/login');
-            } else {
-              return { success: true, trx: outcome.trx.tx };
-            }
           }
+        );
+      } else {
+        window.hive_keychain.requestBroadcast(
+          this.user.account.name,
+          [[op_name, cstm_params]],
+          forceActive ? 'Active' : 'Posting',
+          (response) => {
+            resolve({
+              success: response.success,
+              trx: response.success ? { id: response.result.id } : null,
+              error: response.error
+            });
+          }
+        );
+      }
+    });
+  }
+  else if (this.isHiveauthActive) {
+    return new Promise((resolve) => {
+      const auth = {
+        username: this.user.account.name,
+        token: localStorage.getItem('access_token'),
+        expire: localStorage.getItem('expires'),
+        key: localStorage.getItem('key')
+      };
+      
+      this.$HAS.broadcast(auth, forceActive ? 'active' : 'posting', [[op_name, cstm_params]], () => {})
+        .then(response => {
+          if (response.cmd === 'sign_ack') {
+            resolve({ success: true, trx: { id: response.data } });
+          } else {
+            resolve({ success: false });
+          }
+        })
+        .catch(() => resolve({ success: false }));
+    });
+  }
+  else {
+    let operation = [[op_name, cstm_params]];
+    let accToken = localStorage.getItem('access_token');
+    let cur_bchain = localStorage.getItem('cur_bchain') || 'HIVE';
+    
+    let url = `${process.env.actiAppUrl}performTrx/?user=${this.user.account.name}&operation=${JSON.stringify(operation)}&bchain=${cur_bchain}`;
+    
+    if (forceActive && this.userActvKey) {
+      url = `${process.env.actiAppUrl}performTrxPost/?user=${this.user.account.name}&bchain=${cur_bchain}`;
+      let res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-acti-token': 'Bearer ' + accToken,
         },
+        body: JSON.stringify({
+          operation: JSON.stringify(operation),
+          active: this.userActvKey
+        })
+      });
+      return await res.json();
+    } else {
+      let res = await fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          'x-acti-token': 'Bearer ' + accToken,
+        }
+      });
+      let outcome = await res.json();
+      return { 
+        success: !outcome.error, 
+        trx: (outcome.trx && outcome.trx.tx) || outcome.trx,
+        error: outcome.error
+      };
+    }
+  }
+},
 async buyNowHive() {
   this.buyAttempt = true;
   this.errorProceed = '';
   
-  // Check if user is logged in
   if (!this.user) {
     this.errorProceed = this.$t('need_login_signup_notice_vote');
     return;
   }
   
-  // Check requirements for ingame products
   if (this.product.type == 'ingame') {
     if (!this.allReqtsFilled) {
       this.errorProceed = this.$t('cannot_buy_reqts_not_filled');
@@ -1177,86 +1153,92 @@ async buyNowHive() {
     }
   }
   
-  // Check HIVE balance
   if (this.user.account.balance.split(" ")[0] < this.item_price_extra) {
     this.errorProceed = this.$t('Not_enough_hive_balance_to_buy');
     return;
   }
   
-  // Show confirmation dialog
-  const confirmMessage = this.$t('purchase_confirm_part1') + this.product.name + 
-    (this.product.type == 'ingame' ? ' Level ' + this.product.level : '') + '.\n' +
-    this.$t('purchase_confirm_part2') + this.numberFormat(this.item_price_extra, 2) + ' ' + 
-    this.hive_currency + '.\n' + this.$t('Proceed') + '?';
-  
-  if (!confirm(confirmMessage)) {
+  // For Keychain/HiveAuth, proceed directly
+  if (this.isKeychainActive || this.isHiveauthActive) {
+    const confirmMessage = this.$t('purchase_confirm_part1') + this.product.name + 
+      (this.product.type == 'ingame' ? ' Level ' + this.product.level : '') + '.\n' +
+      this.$t('purchase_confirm_part2') + this.numberFormat(this.item_price_extra, 2) + ' ' + 
+      this.hive_currency + '.\n' + this.$t('Proceed') + '?';
+    
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+    
+    this.buyInProgress = true;
+    await this.proceedBuyNowHive();
     return;
   }
   
-  // Proceed with purchase
-  this.buyInProgress = true;
-  await this.proceedBuyNowHive();
+  // For manual active key, show input field
+  this.buyHiveExpand = true;
 },
-    async proceedBuyNowHive() {
+async proceedBuyNowHive() {
   try {
     this.buyInProgress = true;
     this.errorProceed = '';
     
+    if (!this.user) {
+      throw new Error('Please login first');
+    }
+
+    if (!this.isKeychainActive && !this.isHiveauthActive && !this.userActvKey) {
+      throw new Error('Active key is required for HIVE transfers');
+    }
+
     let payAmount = parseFloat(this.item_price_extra).toFixed(3);
     let memo = 'buy-gadget:' + this.product._id;
-    
-    let cstm_params = {
-      "from": this.user.account.name,
-      "to": process.env.actifitMarketBuy,
-      "amount": payAmount + ' ' + 'HIVE',
-      "memo": memo
-    };
-    
-    let op_name = 'transfer';
-    let operation = [[op_name, cstm_params]];
-    
-    if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) ||
-        localStorage.getItem('acti_login_method') == 'hiveauth') {
-      
-      let res = await this.processTrxFunc(op_name, cstm_params, true);
-      if (res.success) {
-        let op_json = JSON.stringify(operation);
-        this.confirmCompletion('transfer', payAmount, res.trx, 1, 0, op_json);
-      }
+
+    let res;
+    if (this.isKeychainActive) {
+      res = await new Promise((resolve) => {
+        window.hive_keychain.requestTransfer(
+          this.user.account.name,
+          process.env.actifitMarketBuy,
+          payAmount + ' HIVE',
+          memo,
+          (response) => {
+            resolve({
+              success: response.success,
+              trx: response.success ? { id: response.result.id } : null,
+              error: response.error
+            });
+          }
+        );
+      });
     } else {
-      // Handle manual active key entry
-      if (!this.userActvKey) {
-        this.errorProceed = this.$t('all_fields_required');
-        this.buyInProgress = false;
-        return;
-      }
-      
-      let cur_bchain = 'HIVE';
-      let url = new URL(process.env.actiAppUrl + 'performTrxPost/?user=' + 
-                   this.user.account.name + '&bchain=' + cur_bchain);
-      
-      let accToken = localStorage.getItem('access_token');
-      let reqHeads = new Headers({
-        'Content-Type': 'application/json',
-        'x-acti-token': 'Bearer ' + accToken,
-      });
-      
-      let res = await fetch(url, {
-        method: 'POST',
-        headers: reqHeads,
-        body: JSON.stringify({ 'operation': JSON.stringify(operation), 'active': this.userActvKey })
-      });
-      
-      let outcome = await res.json();
-      if (outcome.success && outcome.trx) {
-        this.confirmCompletion('transfer', payAmount, outcome.trx.tx, 1);
-      } else {
-        this.errorCompletion(outcome.error);
-      }
+      let transfer_params = {
+        "from": this.user.account.name,
+        "to": process.env.actifitMarketBuy,
+        "amount": payAmount + ' HIVE',
+        "memo": memo
+      };
+      res = await this.processTrxFunc('transfer', transfer_params, true);
     }
-  } catch (error) {
-    console.error(error);
-    this.errorProceed = this.$t('error_performing_operation');
+
+    if (!res.success) {
+      throw new Error(res.error || 'Transaction failed');
+    }
+
+    let url = `${process.env.actiAppUrl}buyGadgetHive/${this.user.account.name}/${this.product._id}/${res.trx.id}/${payAmount}`;
+    let outcome = await fetch(url).then(res => res.json());
+    
+    if (outcome.error) {
+      throw new Error(outcome.error);
+    } else {
+      this.checkProductBought();
+      this.$store.dispatch('fetchProducts');
+      this.$store.dispatch('fetchUserTokens');
+      this.errorProceed = 'Purchase successful!';
+    }
+  } catch(err) {
+    console.error(err);
+    this.errorProceed = err.message || 'Transaction failed';
+  } finally {
     this.buyInProgress = false;
   }
 },
@@ -1316,7 +1298,7 @@ async confirmCompletion(type, amount, res, attempt, afitAmnt, op_json) {
         
         if (this.product.type === 'ingame') {
           this.errorProceed = this.$t('purchase_success_ingame_part1') + ' ' + this.product.name + ' ' +
-            this.$t('Level') + ' ' + this.product.level + '. ' + this.$t('purchase_success_ingame_part2') + '.<br/>';
+            this.$t('Level') + ' ' + this.product.level + '. ' + this.$t('purchase_success_ingame_part2') + '.<br>';
           this.$emit('refresh-tickets');
         } else {
           this.errorProceed = this.$t('purchase_success_service_part1') + this.product.name + ' ' +
@@ -1760,109 +1742,92 @@ async confirmCompletion(type, amount, res, attempt, afitAmnt, op_json) {
             }
           }
         },
-        async activateGadget() {
+      async activateGadget() {
+  // Clear error
+  this.errorProceed = '';
 
-          //clear error
-          this.errorProceed = '';
+  let appendFriend = null;
+  // Need to make sure we have a target friend set in special boost types
+  if (this.prodHasFriendBenefic()) {
+    if (this.$refs["friend"].value == '') {
+      this.errorProceed = this.$t('Provide_friend_name_receive_boost');
+      return;
+    }
+    if (this.$refs["friend"].value.replace('@', '') == this.user.account.name) {
+      this.errorProceed = this.$t('Cannot_use_same_account');
+      return;
+    }
+    appendFriend = this.$refs["friend"].value;
+  }
 
-          this.buyAttempt = true;
-          this.buyInProgress = true;
-          let appendFriend = null;
-          //need to make sure we have a target friend set in special boost types
-          if (this.prodHasFriendBenefic()) {
-            if (this.$refs["friend"].value == '') {
-              this.errorProceed = this.$t('Provide_friend_name_receive_boost');
-              return;
-            }
-            if (this.$refs["friend"].value.replace('@', '') == this.user.account.name) {
-              this.errorProceed = this.$t('Cannot_use_same_account');
-              return;
-            }
-            appendFriend = this.$refs["friend"].value;
-          }
+  let cstm_params = {
+    required_auths: [],
+    required_posting_auths: [this.user.account.name],
+    id: 'actifit',
+    json: "{\"transaction\": \"activate-gadget\" , \"gadget\": \"" + this.product._id + "\"}"
+  };
+  if (appendFriend) {
+    cstm_params['json'] = "{\"transaction\": \"activate-gadget\" , \"gadget\": \"" + this.product._id + "\", \"benefic\": \"" + appendFriend + "\"}";
+  }
+  
+  let bcastRes;
+  let op_name = 'custom_json';
+  let operation = [
+    [op_name, cstm_params]
+  ];
 
-          let cstm_params = {
-            required_auths: [],
-            required_posting_auths: [this.user.account.name],
-            id: 'actifit',
-            json: "{\"transaction\": \"activate-gadget\" , \"gadget\": \"" + this.product._id + "\"}"
-          };
-          if (appendFriend) {
-            cstm_params['json'] = "{\"transaction\": \"activate-gadget\" , \"gadget\": \"" + this.product._id + "\", \"benefic\": \"" + appendFriend + "\"}";
-          }
-          let bcastRes;
-          let op_name = 'custom_json';
-          let operation = [
-            [op_name, cstm_params]
-          ];
+  let res = await this.processTrxFunc(op_name, cstm_params);
+  if (res.success) {
+    bcastRes = res.trx;
+  } else {
+    console.log(err);
+  }
+  
+  let cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
+  let url_string = process.env.actiAppUrl + 'activateMultiGadget/'
+    + this.user.account.name + '/'
+    + this.product._id + '/'
+    + bcastRes.ref_block_num + '/'
+    + bcastRes.id + '/'
+    + cur_bchain;
 
-          let res = await this.processTrxFunc(op_name, cstm_params);
-          //console.log(res);
-          if (res.success) {
-            bcastRes = res.trx;
-          } else {
-            console.log(err);
-          }
-          let cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
-          let url_string = process.env.actiAppUrl + 'activateMultiGadget/'
-            + this.user.account.name + '/'
-            + this.product._id + '/'
-            + bcastRes.ref_block_num + '/'
-            + bcastRes.id + '/'
-            + cur_bchain;
-          //console.log('prodHasFriendBenefic');
+  if (appendFriend) {
+    url_string += '/' + appendFriend;
+  }
 
-          if (appendFriend) {
-            //console.log(this.$refs["friend"].value);
-            url_string += '/' + appendFriend;
-          }
+  if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) {
+    let op_json = JSON.stringify(operation)
+    url_string = new URL(process.env.actiAppUrl + 'activateMultiGadgetKeychain/'
+      + this.user.account.name + '/'
+      + this.product._id + '/'
+      + bcastRes.id + '/'
+      + cur_bchain + '/'
+      + (appendFriend ? (appendFriend) : '')
+      + '?operation=' + op_json);
+  }
 
-          if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) {
+  let url = new URL(url_string);
 
-            let op_json = JSON.stringify(operation)
-            url_string = new URL(process.env.actiAppUrl + 'activateMultiGadgetKeychain/'
-              + this.user.account.name + '/'
-              + this.product._id + '/'
-              //+ bcastRes.ref_block_num + '/'
-              + bcastRes.id + '/'
-              + cur_bchain + '/'
-              + (appendFriend ? (appendFriend) : '')
-              + '?operation=' + op_json);
-          }
+  try {
+    let res = await fetch(url);
+    let outcome = await res.json();
 
-          console.log(url_string)
-          let url = new URL(url_string);
+    if (outcome.error) {
+      this.errorProceed = outcome;
+      console.error(outcome);
+    } else {
+      // Update product status
+      this.checkProductBought();
+      this.$store.dispatch('fetchProducts');
 
-          //console.log(url);
-          //connect with our service to process buy order
-          try {
-            let res = await fetch(url);
-            let outcome = await res.json();
-
-            if (outcome.error) {
-              this.errorProceed = outcome;
-              console.error(outcome);
-            } else {
-              //update product status
-              this.checkProductBought();
-              //notify parent to refresh products
-              //this.$emit('refresh-prods');
-              this.$store.dispatch('fetchProducts')
-
-              //display proper success message
-              this.errorProceed = this.$t('gadget_activated').replace('_GADGET_', this.product.name + ' '
-                + this.$t('Level') + ' ' + this.product.level) + '.<br/>';
-            }
-            //this.checkingFunds = false;
-            //this.resultReturned = true;
-
-          } catch (err) {
-            console.error(err);
-            //this.checkingFunds = false;
-          }
-          this.buyAttempt = false;
-          this.buyInProgress = false;
-        },
+      // Display proper success message
+      this.errorProceed = this.$t('gadget_activated').replace('_GADGET_', this.product.name + ' '
+        + this.$t('Level') + ' ' + this.product.level) + '.<br/>';
+    }
+  } catch (err) {
+    console.error(err);
+  }
+},
         async deactivateGadget() {
 
           //clear error
@@ -1929,7 +1894,7 @@ async confirmCompletion(type, amount, res, attempt, afitAmnt, op_json) {
 
               //display proper success message
               this.errorProceed = this.$t('gadget_deactivated').replace('_GADGET_', this.product.name + ' '
-                + this.$t('Level') + ' ' + this.product.level) + '.<br/>';
+                + this.$t('Level') + ' ' + this.product.level) + '.<br>';
             }
             //this.checkingFunds = false;
             //this.resultReturned = true;
@@ -2882,6 +2847,73 @@ button {
   }
 }
 
+/* Add these styles */
+.hive-purchase-flow {
+  margin-top: 15px;
+  padding: 15px;
+  background: rgba(231, 76, 60, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(231, 76, 60, 0.2);
+}
+
+.hive-key-input {
+  margin-bottom: 15px;
+  
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--color-text-light);
+  }
+  
+  input {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-bg-light);
+    color: var(--color-text);
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    
+    &:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2);
+      outline: none;
+    }
+  }
+}
+
+.proceed-section {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-proceed {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  
+  &:hover {
+    background-color: var(--color-primary-dark);
+  }
+  
+  &:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  i {
+    margin-left: 8px;
+  }
+}
+
 .image-counter {
   position: absolute;
   bottom: -40px;
@@ -3073,7 +3105,7 @@ button {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 0.75rem;
+  font-size: 0.85rem;
 }
 
 /* Icon colors - red for not met, green for met */
