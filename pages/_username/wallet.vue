@@ -214,12 +214,14 @@
                     <div class="col-4">Completion Date </div>
                   </div>
                   <div v-for="(entry, index) in pendingSavingsWithdrawals" :key="index" :entry="entry"
-                    v-if="entry.amount.includes('HIVE')" class="col-12 row">
-                    <div class="col-4">{{ entry.amount }} </div>
-                    <div class="col-4"> {{ entry.complete }}</div>
-                    <div class="col-4"><button class="btn btn-brand"
-                        v-on:click="cancelSavingsWithdrawal(entry.request_id)"><i class="fas fa-times-circle"
-                          :title="$t('cancel_savings_withdrawal')"></i></button></div>
+                     class="col-12 row">
+                    <div v-if="entry.amount.includes('HIVE')">
+                      <div class="col-4">{{ entry.amount }} </div>
+                      <div class="col-4"> {{ entry.complete }}</div>
+                      <div class="col-4"><button class="btn btn-brand"
+                          v-on:click="cancelSavingsWithdrawal(entry.request_id)"><i class="fas fa-times-circle"
+                            :title="$t('cancel_savings_withdrawal')"></i></button></div>
+                    </div>
                   </div>
                   <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
                     <label for="cancel-withdraw-act-key" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
@@ -4338,8 +4340,8 @@ export default {
 
       this.error_proceeding = false;
       this.error_msg = '';
-      const recipient = this.$refs["transfer-recipient"].$refs['input'].value.trim().toLowerCase();
-      if (!localStorage.getItem('std_login')) {
+      //const recipient = this.$refs["transfer-recipient"].$refs['input'].value.trim().toLowerCase();
+      /*if (!localStorage.getItem('std_login')) {
 
         //https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
         var link = this.$steemconnect.sign('transfer', {
@@ -4351,7 +4353,8 @@ export default {
         }, window.location.origin + '/wallet?op=transfer&status=success');
         //launch the SC window
         window.open(link);
-      } else if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) ||
+      } else*/
+      if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) ||
         (localStorage.getItem('acti_login_method') == 'hiveauth')) {
         console.log(this.transferType);
         console.log('>>pop')
@@ -4417,7 +4420,7 @@ export default {
         }
       }
 
-      const recipient = this.$refs["transfer-recipient"].$refs['input'].value.trim().toLowerCase();
+      /*const recipient = this.$refs["transfer-recipient"].$refs['input'].value.trim().toLowerCase();
 
       if (!localStorage.getItem('std_login')) {
 
@@ -4431,7 +4434,8 @@ export default {
         }, window.location.origin + '/wallet?op=transfer&status=success');
         //launch the SC window
         window.open(link);
-      } else if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) ||
+      } else*/
+      if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) ||
         (localStorage.getItem('acti_login_method') == 'hiveauth')) {
         console.log(this.transferType);
         console.log('>>pop')
