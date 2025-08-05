@@ -61,11 +61,7 @@
                   <a href="#" v-on:click="cancelTranslation">{{ $t('click_to_view_original') }}</a>
                 </div>
               </div>
-
-              <!-- 
-                vvv CHANGE 1 OF 2: THIS IS THE CORRECTED LINE vvv
-                It now uses 'proxiedBody' instead of 'body' to ensure all images are proxied.
-              -->
+              
               <vue-remarkable class="col-md-12" ref="remarkableContent" :source="proxiedBody"
                 :options="{ 'html': true, 'breaks': true, 'typographer': true }"></vue-remarkable>
 
@@ -168,7 +164,7 @@
                 <a target="_blank"><div class="comment-user-section"><UserHoverCard :username="user.account.name" /></div></a>
                 <vue-remarkable :source="responseBody" :options="{ 'html': true, 'breaks': true, 'typographer': true }"></vue-remarkable>
               </div>
-              <!-- The 'modal-body' class  -->
+              
               <div class="report-comments modal-body" v-if="report.children > 0" ref="commentsSection">
                 <div v-if="commentsLoading" class="pb-md-2 text-center">
                   <i class="fas fa-spinner fa-spin text-brand"></i>
@@ -178,13 +174,12 @@
                   :main_post_permlink="report.permlink" :main_post_cat="report.category" :depth="0" :key="reload" />
               </div>
               
-            </div> <!-- END: Wrapper -->
+            </div>
             
           </div> 
 
-        </div> <!-- End Main Content Column -->
+        </div>
         
-        <!-- UserSidebar Column -->
         <UserSidebar 
           ref="userSidebar"
           :report="report"
@@ -219,7 +214,6 @@
 </template>
 
 <script>
-// Your entire <script> block remains unchanged.
 import hive from '@hiveio/hive-js'
 import steem from 'steem'
 import blurt from '@blurtfoundation/blurtjs'
@@ -266,11 +260,6 @@ export default {
     ...mapGetters('steemconnect', ['user', 'stdLogin']),
     ...mapGetters(['commentEntries', 'newlyVotedPosts', 'bchain', 'moderators', 'commentCountToday']),
     
-    /* 
-     * vvv CHANGE 2 OF 2: THIS IS THE NEW COMPUTED PROPERTY vvv
-     * It processes the post body to proxy and repair all image URLs
-     * before they are rendered, fixing broken images.
-    */
     proxiedBody() {
       if (!this.report || !this.report.body) return '';
       
@@ -329,23 +318,23 @@ export default {
       }
     },
     syncColumnHeights() {
-    if (!this.$refs.mainContentScroller || !this.$refs.userSidebar) {
-      return;
-    }
-    
-    this.$nextTick(() => {
-      const mainContentEl = this.$refs.mainContentScroller;
-      const sidebarEl = this.$refs.userSidebar.$el;
+		if (!this.$refs.mainContentScroller || !this.$refs.userSidebar) {
+		  return;
+		}
+		
+		this.$nextTick(() => {
+		  const mainContentEl = this.$refs.mainContentScroller;
+		  const sidebarEl = this.$refs.userSidebar.$el;
 
-      if (!mainContentEl || !sidebarEl) return;
+		  if (!mainContentEl || !sidebarEl) return;
 
-      const sidebarHeight = sidebarEl.scrollHeight;
-      const viewportHeight = window.innerHeight - 90;
-      const finalHeight = Math.max(sidebarHeight, viewportHeight);
+		  const sidebarHeight = sidebarEl.scrollHeight;
+		  const viewportHeight = window.innerHeight - 90; // Top offset
+		  const finalHeight = Math.max(sidebarHeight, viewportHeight);
 
-      mainContentEl.style.height = `${finalHeight}px`;
-    });
-  },
+		  mainContentEl.style.height = `${finalHeight}px`;
+		});
+	  },
 
     handleStorageChange(event) {
       if (event.key === 'access_token' || event.key === 'ssc_auth' || event.key === 'username') {
@@ -412,9 +401,18 @@ export default {
         fetch(scotApiUrl).then(res => res.json()).then(json => { this.tokenRewards = Array.isArray(json) ? json : [] }).catch(e => { console.error("Scot API fetch failed:", e); this.tokenRewards = []; });
     },
     fetchReportCommentData() {
-        if (!this.report) return;
-        this.commentsLoading = true;
-        this.$store.dispatch('fetchReportComments', this.report).then(() => { this.commentsLoading = false; });
+      if (!this.report) return;
+      this.commentsLoading = true;
+      this.$store.dispatch('fetchReportComments', this.report)
+        .catch(err => {
+          console.error("Failed to refresh comments:", err);
+          this.$notify({ group: 'error', text: 'Comment posted, but could not refresh the list.', position: 'top center' });
+        })
+        .finally(() => {
+          this.commentsLoading = false;
+          this.responsePosted = false;
+          this.responseBody = '';
+        });
     },
     resetData() {
       this.isLoading = true; this.report = null; this.errorDisplay = ''; this.authorAccountInfo = null; this.authorAfitBalance = null;
@@ -470,7 +468,159 @@ export default {
     cancelTranslation() { this.report.body = this.safety_post_content; this.showTranslated = false; },
     votePrompt() { if (this.report) this.$store.commit('setPostToVote', this.report); },
     resetOpenComment() { this.commentBoxOpen = false; this.replyBody = ''; },
-    postResponse() { alert('Post response not fully implemented.'); },
+    
+    async postResponse(event) {
+      this.loading = true
+      const comment_perm = this.user.account.name.replace('.', '-') + '-re-' + this.report.author.replace('.', '-') + '-' + this.report.permlink + new Date().toISOString().replace(/[^a-zA-Z0-9]+/g, '').toLowerCase();
+      const meta = {
+        tags: ['hive-193552', 'actifit'],
+        app: 'actifit/0.4.1',
+        suppEdit: 'actifit.io.comment'
+      };
+      this.replyBody = this.$refs.editor.content;
+
+      if (!localStorage.getItem('std_login')) {
+        this.$steemconnect.comment(
+          this.report.author,
+          this.report.permlink,
+          this.user.account.name,
+          comment_perm,
+          '',
+          this.replyBody,
+          meta,
+          (err) => {
+            this.commentSuccess(err, true, 'STEEM');
+          }
+        )
+      } else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) {
+        let comment_options = {
+          author: this.user.account.name,
+          permlink: comment_perm,
+          max_accepted_payout: '1000000.000 HBD',
+          percent_hbd: 10000,
+          allow_votes: true,
+          allow_curation_rewards: true,
+          extensions: []
+        };
+        window.hive_keychain.requestPost(
+          this.user.account.name, "", this.replyBody, this.report.permlink,
+          this.report.author, JSON.stringify(meta), comment_perm,
+          JSON.stringify(comment_options), (response) => {
+            if (response.success) {
+              this.commentSuccess(null, true, this.cur_bchain);
+            } else {
+              this.commentSuccess(response.message, false, this.cur_bchain);
+            }
+          });
+      } else {
+        let cstm_params = {
+          "author": this.user.account.name, "title": "", "body": this.replyBody,
+          "parent_author": this.report.author, "parent_permlink": this.report.permlink,
+          "permlink": comment_perm, "json_metadata": JSON.stringify(meta)
+        };
+        let res = await this.processTrxFunc('comment', cstm_params);
+        if (res.success) {
+          this.commentSuccess(null, true, this.cur_bchain);
+        } else {
+          this.commentSuccess('error saving', false, this.cur_bchain);
+        }
+      }
+    },
+    commentSuccess(err, finalize, bchain) {
+      this.$notify({
+        group: err ? 'error' : 'success',
+        text: err ? this.$t('Comment_Error') : this.$t('Comment_Success'),
+        position: 'top center'
+      })
+      if (finalize) {
+        this.loading = false
+        this.responsePosted = true;
+        this.responseBody = this.replyBody;
+        setTimeout(this.fetchReportCommentData, 10000);
+        if (this.responseBody.length >= 50) {
+          if (isNaN(this.commentCountToday)) {
+            this.$store.commit('setCommentCountToday', 0);
+          }
+          this.$store.commit('setCommentCountToday', this.commentCountToday + 1);
+        }
+        if (this.commentCountToday >= 3) {
+          this.rewardUserComment();
+        }
+        this.resetOpenComment();
+      }
+    },
+    async processTrxFunc(op_name, cstm_params) {
+      if (!localStorage.getItem('std_login')) {
+        let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
+        if (res.result.ref_block_num) {
+          return { success: true, trx: res.result };
+        } else {
+          return { success: false, trx: null };
+        }
+      } else if (localStorage.getItem('acti_login_method') == 'hiveauth') {
+        return new Promise((resolve) => {
+          const auth = {
+            username: this.user.account.name,
+            token: localStorage.getItem('access_token'),
+            expire: localStorage.getItem('expires'),
+            key: localStorage.getItem('key')
+          }
+          let operation = [[op_name, cstm_params]];
+          this.$HAS.broadcast(auth, 'posting', operation, (evt) => {
+            let msg = this.$t('verify_hiveauth_app');
+            this.$notify({ group: 'warn', text: msg, duration: -1, position: 'top center' })
+          })
+            .then(response => {
+              this.$notify({ group: 'warn', clean: true })
+              if (response.cmd && response.cmd === 'sign_ack') {
+                resolve({ success: true, trx: response.data })
+              } else if (response.cmd && response.cmd === 'sign_nack') {
+                resolve({ success: false })
+              }
+            })
+            .catch(err => {
+              this.$notify({ group: 'warn', clean: true })
+              resolve({ success: false })
+            })
+        });
+      } else {
+        let accToken = localStorage.getItem('access_token')
+        let op_json = JSON.stringify([[op_name, cstm_params]])
+        let url = new URL(process.env.actiAppUrl + 'performTrx/?user=' + this.user.account.name + '&operation=' + encodeURIComponent(op_json) + '&bchain=' + this.cur_bchain);
+        let reqHeads = new Headers({ 'Content-Type': 'application/json', 'x-acti-token': 'Bearer ' + accToken, });
+        let res = await fetch(url, { headers: reqHeads });
+        let outcome = await res.json();
+        if (outcome.error) {
+          let err_msg = outcome.trx.tx.error;
+          if (err_msg.includes('missing') && err_msg.includes('authority')) {
+            localStorage.removeItem('access_token');
+            this.$store.dispatch('steemconnect/logout');
+          }
+          this.$notify({ group: 'error', text: err_msg, position: 'top center' })
+          return { success: false, trx: null };
+        } else {
+          return { success: true, trx: outcome.trx };
+        }
+      }
+    },
+    async rewardUserComment() {
+      let url = new URL(process.env.actiAppUrl + 'rewardActifitWebComment/' + this.user.account.name);
+      let params = { web_comment_token: process.env.webCommentToken, url: this.report.url, }
+      Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
+      try {
+        let res = await fetch(url);
+        let outcome = await res.json();
+        if (outcome.rewarded) {
+          this.$notify({
+            group: 'success',
+            text: this.$t('youve_been_rewarded') + outcome.amount + this.$t('reward_for_comment'),
+            position: 'top center'
+          })
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    },
     insertModSignature() {
       if (this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator')) {
         this.moderatorSignature = process.env.shortModeratorSignature; this.replyBody += this.moderatorSignature;
@@ -492,16 +642,16 @@ export default {
       this.$nextTick(() => {
         if (this.$refs.reportHead) this.resizeObserver.observe(this.$refs.reportHead);
          this.heightSyncObserver = new ResizeObserver(() => {
-      this.syncColumnHeights();
-    });
+			this.syncColumnHeights();
+		});
 
-    this.$nextTick(() => {
-      if (this.$refs.userSidebar && this.$refs.userSidebar.$el) {
-        this.heightSyncObserver.observe(this.$refs.userSidebar.$el);
-      }
-    });
-    
-    window.addEventListener('resize', this.syncColumnHeights);
+		this.$nextTick(() => {
+		  if (this.$refs.userSidebar && this.$refs.userSidebar.$el) {
+			this.heightSyncObserver.observe(this.$refs.userSidebar.$el);
+		  }
+		});
+		
+		window.addEventListener('resize', this.syncColumnHeights);
     
       });
       window.addEventListener('resize', this.alignSidebar);
@@ -512,8 +662,8 @@ export default {
       window.removeEventListener('storage', this.handleStorageChange);
       if (this.resizeObserver) this.resizeObserver.disconnect();
     
-    if (this.heightSyncObserver) this.heightSyncObserver.disconnect();
-    window.removeEventListener('resize', this.syncColumnHeights);
+		if (this.heightSyncObserver) this.heightSyncObserver.disconnect();
+		window.removeEventListener('resize', this.syncColumnHeights);
     
       window.removeEventListener('resize', this.alignSidebar);
     }
