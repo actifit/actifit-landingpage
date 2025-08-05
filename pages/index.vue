@@ -99,17 +99,17 @@
                       </div>
                   </div>
               </div>
-              <button 
-                  class="scroller-nav scroller-nav-left" 
+              <button
+                  class="scroller-nav scroller-nav-left"
                   :class="{ 'disabled': !activityCanScrollLeft }"
-                  @click="scrollActivity(-1)" 
+                  @click="scrollActivity(-1)"
                   :aria-label="$t('aria.scroll_left')">
                   <i class="fas fa-chevron-left"></i>
               </button>
-              <button 
-                  class="scroller-nav scroller-nav-right" 
+              <button
+                  class="scroller-nav scroller-nav-right"
                   :class="{ 'disabled': !activityCanScrollRight }"
-                  @click="scrollActivity(1)" 
+                  @click="scrollActivity(1)"
                   :aria-label="$t('aria.scroll_right')">
                   <i class="fas fa-chevron-right"></i>
               </button>
@@ -123,11 +123,11 @@
         </div>
       </div>
     </section>
-    
+
     <!-- INTRO SECTION - NEW ANIMATED FRAME DESIGN -->
     <section class="intro reveal" id="content">
       <div class="intro-showcase-container">
-        <img src="/img/logo.png" alt="Actifit Logo" class="intro-logo" />
+        <img src="/img/actifit_logo_200.png" alt="Actifit Logo" class="intro-logo" />
         <h1 class="headline">
           {{ $t('Actifit_title') }}
         </h1>
@@ -139,7 +139,7 @@
 
     <!-- texts with images  -->
     <section class="aurora-showcase">
-  
+
       <!-- Showcase Item 1: Earn Tokens -->
       <div class="showcase-card reveal">
         <div class="card-content-grid">
@@ -170,7 +170,7 @@
            <div class="aurora-text-content">
               <h2 class="text-capitalize">{{ $t('homepage.section3_title') }}</h2>
               <p class="lead" v-html="$t('homepage.section3_desc')"></p>
-              
+
               <h4 class="mt-4 mb-3">{{ $t('available_on') }}</h4>
               <div class="exchange-tags-container">
                   <a href="#" class="exchange-tag"><i class="fas fa-coins mr-2"></i>{{ $t('exchanges.hive_engine') }}</a>
@@ -237,17 +237,17 @@
                 </div>
               </div>
             </div>
-            <button 
-              class="scroller-nav scroller-nav-left" 
+            <button
+              class="scroller-nav scroller-nav-left"
               :class="{ 'disabled': !canScrollLeft }"
-              @click="scrollDelegators(-1)" 
+              @click="scrollDelegators(-1)"
               :aria-label="$t('aria.scroll_left')">
               <i class="fas fa-chevron-left"></i>
             </button>
-            <button 
-              class="scroller-nav scroller-nav-right" 
+            <button
+              class="scroller-nav scroller-nav-right"
               :class="{ 'disabled': !canScrollRight }"
-              @click="scrollDelegators(1)" 
+              @click="scrollDelegators(1)"
               :aria-label="$t('aria.scroll_right')">
               <i class="fas fa-chevron-right"></i>
             </button>
@@ -269,7 +269,7 @@
           {{ $t('Daily_Leaderboard') }}
         </h1>
         <div class="leaderboard-podium" v-if="leaderboard && leaderboard.length >= 3 && leaderboardPosts.length >= 3">
-          
+
           <!-- 1st Place Column (now first in HTML) -->
           <div class="podium-column is-first">
             <img src="/img/1st_place_medal.svg" class="medal-icon" :alt="$t('alt_texts.gold_medal')">
@@ -292,7 +292,7 @@
               <span class="rank-number">1</span>
             </div>
           </div>
-          
+
           <!-- 2nd Place Column (now second in HTML) -->
           <div class="podium-column is-second">
             <a v-if="leaderboardPosts[1] && leaderboardPosts[1].imageUrl" :href="leaderboardPosts[1].postUrl" target="_blank" class="podium-post-link">
@@ -314,7 +314,7 @@
               <span class="rank-number">2</span>
             </div>
           </div>
-          
+
           <!-- 3rd Place Column (now third in HTML) -->
           <div class="podium-column is-third">
             <a v-if="leaderboardPosts[2] && leaderboardPosts[2].imageUrl" :href="leaderboardPosts[2].postUrl" target="_blank" class="podium-post-link">
@@ -403,17 +403,17 @@
                             </div>
                         </div>
                     </div>
-                    <button 
-                        class="scroller-nav scroller-nav-left" 
+                    <button
+                        class="scroller-nav scroller-nav-left"
                         :class="{ 'disabled': !newsCanScrollLeft }"
-                        @click="scrollNews(-1)" 
+                        @click="scrollNews(-1)"
                         :aria-label="$t('aria.scroll_left')">
                         <i class="fas fa-chevron-left"></i>
                     </button>
-                    <button 
-                        class="scroller-nav scroller-nav-right" 
+                    <button
+                        class="scroller-nav scroller-nav-right"
                         :class="{ 'disabled': !newsCanScrollRight }"
-                        @click="scrollNews(1)" 
+                        @click="scrollNews(1)"
                         :aria-label="$t('aria.scroll_right')">
                         <i class="fas fa-chevron-right"></i>
                     </button>
@@ -477,7 +477,7 @@ export default {
       isLoadingReports: true,
       enrichedDelegators: [],
       isLoadingDelegators: true,
-      canScrollLeft: false, 
+      canScrollLeft: false,
       canScrollRight: true,
       newsCanScrollLeft: false,
       newsCanScrollRight: true,
@@ -568,8 +568,8 @@ export default {
     getCardBackground(report) {
         const imageUrl = this.extractPostImage(report);
         if (imageUrl) {
-            return { 
-                backgroundImage: `url(${imageUrl})` 
+            return {
+                backgroundImage: `url(${imageUrl})`
             };
         }
         return {}; // Use default CSS background if no image
@@ -653,13 +653,13 @@ export default {
       if (!leaderboard || leaderboard.length < 3) return;
 
       const top3Users = leaderboard.slice(0, 3);
-      
+
       const postPromises = top3Users.map(async (user) => {
         const username = user.username.replace('@', '');
         try {
           // Fetch the user's most recent post
           const userPosts = await hive.api.callAsync('bridge.get_account_posts', { sort: 'posts', account: username, limit: 1 });
-          
+
           if (userPosts && userPosts.length > 0) {
             const post = userPosts[0];
             const imageUrl = this.extractPostImage(post);
@@ -669,7 +669,7 @@ export default {
           return null; // No post found
         } catch (error) {
           console.error(`Failed to fetch post for ${username}`, error);
-          return null; 
+          return null;
         }
       });
 
@@ -678,21 +678,21 @@ export default {
     extractPostImage(post) {
         if (!post) return null;
         try {
-            const meta = typeof post.json_metadata === 'string' 
-                ? JSON.parse(post.json_metadata) 
+            const meta = typeof post.json_metadata === 'string'
+                ? JSON.parse(post.json_metadata)
                 : post.json_metadata;
-            
+
             if (meta && meta.image && Array.isArray(meta.image) && meta.image.length > 0 && meta.image[0]) {
                 return meta.image[0];
             }
         } catch (e) { /* Ignore metadata parsing errors */ }
-        
+
         if (post.body) {
           const match = post.body.match(/https?:\/\/[^)\s]+\.(?:png|jpg|jpeg|gif|webp)/i);
           if (match) return match[0];
         }
-        
-        return null; 
+
+        return null;
     },
     scrollDelegators(direction) {
       if ((direction === -1 && !this.canScrollLeft) || (direction === 1 && !this.canScrollRight)) {
@@ -839,14 +839,14 @@ export default {
         window.addEventListener('resize', this.updateDelegatorScrollState);
         this.updateDelegatorScrollState();
     }
-    
+
     const newsScroller = this.$refs.newsScroller;
     if (newsScroller) {
         newsScroller.addEventListener('scroll', this.updateNewsScrollState);
         window.addEventListener('resize', this.updateNewsScrollState);
         this.updateNewsScrollState();
     }
-    
+
     const activityScroller = this.$refs.activityScroller;
     if (activityScroller) {
         activityScroller.addEventListener('scroll', this.updateActivityScrollState);
@@ -863,7 +863,7 @@ export default {
     if (this.observer) {
       this.observer.disconnect();
     }
-    
+
     const delegatorScroller = this.$refs.delegatorScroller;
     if (delegatorScroller) {
         delegatorScroller.removeEventListener('scroll', this.updateDelegatorScrollState);
@@ -935,7 +935,7 @@ export default {
 /* Scoped styles to prevent leaking to other pages */
 body.home-page-active {
   overflow-x: hidden;
-  overflow-y: scroll; 
+  overflow-y: scroll;
 }
 
 /* Scoped modal styles to prevent breaking modals on other pages */
@@ -979,11 +979,11 @@ section.aurora-showcase,section#delegators,section#news,section#recent-activity,
   height: 180%;
   z-index: 1;
   background: conic-gradient(
-    from 90deg at 50% 50%, 
-    rgba(108, 117, 125, 0.1) 0%, 
-    rgba(108, 117, 125, 0.1) 35%, 
-    transparent 50%, 
-    rgba(225, 7, 7, 0.1) 65%, 
+    from 90deg at 50% 50%,
+    rgba(108, 117, 125, 0.1) 0%,
+    rgba(108, 117, 125, 0.1) 35%,
+    transparent 50%,
+    rgba(225, 7, 7, 0.1) 65%,
     rgba(225, 7, 7, 0.1) 100%
   );
   animation: aurora-animation 25s linear infinite;
@@ -1102,7 +1102,7 @@ section.aurora-showcase,section#delegators,section#news,section#recent-activity,
   .podium-column,
   .podium-column.is-first {
     transform:none!important;
-    order: initial; 
+    order: initial;
   }
 }
 
@@ -1122,8 +1122,8 @@ section.aurora-showcase,section#delegators,section#news,section#recent-activity,
 #recent-activity .card-user-info .avatar{width:40px;height:40px;border:2px solid rgba(255,255,255,.8)}
 #recent-activity .card-post-content{flex-grow:0;margin-bottom:1rem}
 #recent-activity .activity-post-card {
-  border: none; 
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15); 
+  border: none;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
 }
 #recent-activity .activity-post-card:hover {
   transform: translateY(-10px) scale(1.02);
