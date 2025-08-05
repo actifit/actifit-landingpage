@@ -1,3 +1,8 @@
+// assets/css/main.sass
+
+// Import the SASS color module at the top
+@use "sass:color";
+
 $brand-color: #ff112d
 
 body,
@@ -26,7 +31,8 @@ a,
 .btn-link
   color: $brand-color
   &:hover
-    color: darken($brand-color, 10)
+    // CORRECTED: Replaced darken() with color.adjust()
+    color: color.adjust($brand-color, $lightness: -10%)
 .bg-brand
   a
     color: #f8f9fa
@@ -36,7 +42,8 @@ a,
   color: #fff
   &:hover,
   &:focus
-    background: darken($brand-color, 10)
+    // CORRECTED: Replaced darken() with color.adjust()
+    background: color.adjust($brand-color, $lightness: -10%)
     color: #fff
     box-shadow: none
 
@@ -124,8 +131,10 @@ a,
 body // to have stronger specificy
   .vue-input-tag-wrapper
     .input-tag
-      background-color: lighten($brand-color, 40)
-      border-color: lighten($brand-color, 30)
+      // CORRECTED: Replaced lighten() with color.adjust()
+      background-color: color.adjust($brand-color, $lightness: 40%)
+      // CORRECTED: Replaced lighten() with color.adjust()
+      border-color: color.adjust($brand-color, $lightness: 30%)
       color: $brand-color
       padding: 4px 10px
       .remove

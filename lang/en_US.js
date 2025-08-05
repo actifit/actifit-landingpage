@@ -1,4 +1,5 @@
 module.exports = {
+  languages: 'Languages',
   afit_balance: 'AFIT Balance',
   hive_balance: 'HIVE Balance',
   view_full_profile: 'View Full Profile',
@@ -1156,7 +1157,14 @@ module.exports = {
   Description:'Description',
   Website:'Website',
   Latest_Activity_Count:'Latest_Activity_Count',
-  Latest_Activity_Date:'Latest_Activity_Date',
+  Latest_Activity_Date:'Latest_Activity_Date',hide_reblogs:'hide reblogs',
+  show_reblogs:'show reblogs',
+  proposal_modal_title_year: "Actifit Proposal 2025",
+  proposal_modal_message: "Support Actifit's development & growth effort. Vote for our proposal❤️",
+  vote_button_text: "Vote",
+  read_more_button_text: "Read More",
+
+  // new ones
   Actifit_title:'Actifit: Where Fitness Meets Fun, Crypto and Rewards!',
   Actifit_subtitle:'Earn token rewards effortlessly with the Actifit app. Track your daily activity and receive AFIT, HIVE, BLURT, SPORTS, and more through integrated blockchain and community support.',
   IT_PAYS_TO:'IT PAYS TO',
@@ -1167,7 +1175,6 @@ module.exports = {
   community:'See what our community has been up to!',
   loading_news:'Loading news...',
   footer_slogan:' Your daily activity is valuable. Get rewarded for it.',
-  recent_post:'Recent Posts',
 
 
 
@@ -1185,38 +1192,39 @@ RC:'RC',
 VP:'VP',
 
 Steps: 'activity count',
+recent_post:'Recent Posts',
+  exchanges: {
+    hive_engine: 'Hive-Engine',
+    actifit_defi: 'Actifit DeFi',
+    pancakeswap: 'Pancakeswap',
+    digifinex: 'Digifinex',
+    dex_trade: 'Dex-trade'
+  },
 
-exchanges: {
-  hive_engine: 'Hive-Engine',
-  actifit_defi: 'Actifit DeFi',
-  pancakeswap: 'Pancakeswap',
-  digifinex: 'Digifinex',
-  dex_trade: 'Dex-trade'
-},
+  aria: {
+    scroll_left: 'Scroll Left',
+    scroll_right: 'Scroll Right',
+  },
 
-aria: {
-  scroll_left: 'Scroll Left',
-  scroll_right: 'Scroll Right',
-},
+  placeholders: {
+    hive: 'Hive',
+    blurt: 'Blurt',
+    bnb_chain: 'BNB Chain'
+  },
 
-placeholders: {
-  hive: 'Hive',
-  blurt: 'Blurt',
-  bnb_chain: 'BNB Chain'
-},
-
-alt_texts: {
-  running_couple: 'Man and woman running',
-  google_play: 'Get it on Google Play',
-  app_store: 'Download on the App Store',
-  gym_workout: 'Man exercising in a gym',
-  post_workout_pose: 'Man and woman posing after a workout',
-  gold_medal: 'Gold Medal',
-  hive_logo: 'HIVE',
-  blurt_logo: 'BLURT',
-  bnb_logo: 'BNB Chain'
+  alt_texts: {
+    running_couple: 'Man and woman running',
+    google_play: 'Get it on Google Play',
+    app_store: 'Download on the App Store',
+    gym_workout: 'Man exercising in a gym',
+    post_workout_pose: 'Man and woman posing after a workout',
+    gold_medal: 'Gold Medal',
+    hive_logo: 'HIVE',
+    blurt_logo: 'BLURT',
+    bnb_logo: 'BNB Chain',
+    private_active: 'PRIVATE ACTIVE',
+    operation_require: 'This operation requires your',
+  }
+  // END: MERGED AND CORRECTED CODE
 }
 
-
-
-}
