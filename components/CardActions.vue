@@ -12,7 +12,7 @@
         :data-target="modalTarget"
         :title="$t('comments')"
       >
-      <i class="far fa-comments ml-2" :title="$t('comments')"></i> {{ cardData.children }}
+      <i class="far fa-comments ml-2" :title="$t('comments')" @click.prevent="$emit('showComments')"></i> {{ cardData.children }}
       </a>
       <i class="far fa-share-square ml-2" @click.prevent="$emit('reblog')" v-if="user && cardData.author !== user.account.name" :title="$t('reblog')"></i>
     </div>
@@ -30,7 +30,7 @@ export default {
     cardData: { type: Object, required: true },
     user: { type: Object, default: null },
     voteCount: { type: Number, required: true },
-    hasVoted: { type: Boolean, required: true }
+    hasVoted: { type: Boolean, required: true },
   },
   emits: ['vote-prompt', 'reblog', 'open-modal']
 }

@@ -1,11 +1,5 @@
 <template>
   <div>
-    <!--
-      THIS IS THE FIX:
-      We wrap the entire image section in a new div with a v-if directive.
-      This div will only be rendered if the 'allImages' array is not empty.
-      This prevents the grey box from appearing on posts with no images.
-    -->
     <div v-if="allImages && allImages.length > 0">
       <!-- Image Carousel (No changes to the inner logic) -->
       <div class="row">

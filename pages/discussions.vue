@@ -30,8 +30,8 @@
       <NavbarBrand />
 
       <div class="container pt-5 mt-5 pb-5">
-        <ListHeadingSection :textualDisplay="'Hive Discussions'" />
-        <div class="text-left mb-4 text-brand market-sub">
+        <ListHeadingSection :textualDisplay=textualTitle @click.native="switchDetails"/>
+        <div class="text-left mb-4 text-brand market-sub" v-if="showDetails">
           Latest comments from PeakD Snaps, Inleo Threads, and Ecency Waves
         </div>
 
@@ -40,7 +40,6 @@
           <div class="discussions-editor-card">
             <div class="editor-header">
               <span class="editor-title">Discussions</span>
-              <button class="editor-close" @click="resetEditor">X</button>
             </div>
             <div class="editor-actions">
               <label class="icon-btn">
@@ -59,8 +58,8 @@
                 </button>
               </div>
               <button class="post-btn" @click="postQuickUpdate" :disabled="!canPost || isPermlinkLoading || postingQuickUpdate">
-                <span v-if="isPermlinkLoading">LOADING...</span>
-                <span v-else-if="postingQuickUpdate">POSTING...</span>
+                <span v-if="isPermlinkLoading"><i class="fas fa-spinner fa-spin text-brand"></i></span>
+                <span v-else-if="postingQuickUpdate"><i class="fas fa-spinner fa-spin text-brand"></i></span>
                 <span v-else>POST</span>
               </button>
             </div>
@@ -83,7 +82,7 @@
 
         <!-- Single Comment View -->
         <div v-if="routeHasComment" class="container pt-3 pb-5">
-          <div v-if="loadingSingleComment" class="loading">Loading comment...</div>
+          <div v-if="loadingSingleComment" ><i class="fas fa-spinner fa-spin text-brand"></i></div>
           <div v-else-if="singleComment">
             <div class="card report mb-4">
               <h6 class="mb-0 text-center report-title">
@@ -156,7 +155,7 @@
             </div>
             <div>
               <h5>Replies</h5>
-              <div v-if="loadingReplies" class="loading">Loading replies...</div>
+              <div v-if="loadingReplies" class="loading"><i class="fas fa-spinner fa-spin text-brand"></i></div>
               <div v-else>
                 <Comments
                   v-if="organizedReplies.length > 0"
@@ -181,14 +180,17 @@
 
         <!-- Discussions List -->
         <div v-else>
-          <div v-if="loading" class="loading">Loading comments...</div>
+          <div v-if="loading" class="loading"><i class="fas fa-spinner fa-spin text-brand"></i></div>
           <div v-else>
             <div class="row">
               <div
-                v-for="comment in filteredCommentsSorted"
-                :key="comment.id"
+                v-for="(comment,index) in filteredCommentsSorted"
+                :key="index"
                 class="col-12 mb-4"
-              >
+              > <!--:key="comment.id"-->
+                <Post :key="index" :post="comment" :displayUsername="comment.author" :pstId="index" class="card report" explorePost="false" :commentsEnabled="true" /> <!--card post col-md-4 p-1 m-1 -->
+
+                <!--
                 <div class="card report">
                   <h6 class="mb-0 text-center report-title" style="cursor:pointer;">
                     <a
@@ -262,7 +264,7 @@
                       </div>
                     </div>
                   </div>
-                </div>
+                </div>-->
               </div>
             </div>
             <div v-if="filteredCommentsSorted.length < allCommentsCount" class="load-more-container">
@@ -316,11 +318,13 @@ import vueRemarkable from 'vue-remarkable'
 import { mapGetters } from 'vuex'
 import hive from '@hiveio/hive-js'
 import axios from "axios";
+import Post from "~/components/Post";
 
 export default {
   name: 'DiscussionsPage',
   components: {
     NavbarBrand,
+    Post,
     Footer,
     ListHeadingSection,
     UserHoverCard,
@@ -338,6 +342,7 @@ export default {
         { value: 'ecency.waves', label: 'Ecency Waves' }
       ],
       loading: false,
+      showDetails: false,
       postTargets: [
         { value: 'peak.snaps', label: 'PeakD Snaps', icon: '/img/PeakDLogo.png' },
         { value: 'ecency.waves', label: 'Ecency Waves', icon: '/img/EcencyWavesLogo.png' }
@@ -378,6 +383,10 @@ export default {
   },
   computed: {
     ...mapGetters('steemconnect', ['user']),
+    textualTitle() {
+      return this.$t('Hive_Discussions') +
+        '&nbsp;<i class="fas fa-info-circle"></i>';
+    },
     filteredCommentsSorted() {
       let comments = this.allComments;
       if (this.selectedCategories.length > 0) {
@@ -448,6 +457,9 @@ export default {
     }
   },
   methods: {
+    switchDetails(){
+      this.showDetails = !this.showDetails;
+    },
     stripMarkdown(str) {
       if (!str) return '';
       str = str.replace(/!\[.*?\]\(.*?\)/g, '');
@@ -509,7 +521,7 @@ export default {
     },
     async uploadImage() {
       if (!this.selectedImageFile) return '';
-      
+
       this.quickUpdateError = '';
 
       // Create a new, clean Axios instance to bypass global interceptors.
@@ -548,7 +560,7 @@ export default {
 
       if (!this.isLoggedIn) { this.quickUpdateError = 'You must be logged in to post.'; return; }
       if (!body && !this.selectedImageFile) { this.quickUpdateError = 'Post cannot be empty.'; return; }
-      
+
       const parent_author = this.postTarget;
       const parent_permlink = this.latestContainerPermlinks[parent_author];
 
@@ -561,13 +573,13 @@ export default {
           const imageUrl = await this.uploadImage();
           body += `\n\n![image](${imageUrl})\n`;
         }
-        
+
         const username = this.currentUsername;
         const permlink = `re-${username.replace(/\./g, '-')}-${new Date().toISOString().replace(/[^a-z0-9]/gi, '').toLowerCase()}`;
         const meta = { tags: [this.postTarget], app: 'actifit/0.5.0', format: 'markdown' };
         const cstm_params = { author: username, title: "", body, parent_author, parent_permlink, permlink, json_metadata: JSON.stringify(meta) };
         const res = await this.processTrxFunc('comment', cstm_params, 'HIVE');
-        
+
         const errorMessage = res && res.trx && res.trx.tx && res.trx.tx.error;
 
         if (res && res.success) {
@@ -589,7 +601,7 @@ export default {
 
       const accToken = localStorage.getItem('access_token');
       const url = new URL(`${process.env.actiAppUrl}performTrxPost/?user=${this.user.account.name}&bchain=${bchain_option || 'HIVE'}`);
-      
+
       try {
         const res = await fetch(url, {
           method: 'POST',
@@ -686,7 +698,7 @@ export default {
       this.replyError = '';
       this.replySuccess = false;
       if (!this.isLoggedIn) { this.replyError = 'You must be logged in to reply.'; return; }
-      
+
       const body = this.$refs.rootEditor ? this.$refs.rootEditor.content : '';
       if (!body.trim()) { this.replyError = 'Reply cannot be empty.'; return; }
 

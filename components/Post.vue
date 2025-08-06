@@ -27,12 +27,12 @@
             <small class="text-muted d-block" :title="date">{{ $getTimeDifference(this.post.created) }}</small>
           </div>
         </div>
-        
+
         <CardBody
-        
+
           :cardData="post"
           modalTarget="#postModal"
-          :snippet="bodySnippet" 
+          :snippet="bodySnippet"
           :imageLoadFailed="imageLoadFailed"
           :imageLoading="imageLoading"
           :imageGeneration="imageGeneration"
@@ -55,6 +55,7 @@
           :user="user"
           :voteCount="getVoteCount"
           :hasVoted="postUpvoted"
+          @showComments="showComments($event)"
           @vote-prompt="votePrompt($event)"
           @reblog="$reblog(user, post)"
           @open-modal="post.pstId = pstId; $store.commit('setActivePost', post)"
@@ -94,15 +95,39 @@
           </div>
         </div>
       </div>
+
+      <div class="post-comments modal-body" v-if="commentsEnabled && post.children > 0 && commentsExpanded">
+        <div v-if="showCommentsLoader" class="pb-md-2 text-center">
+          <i class="fas fa-spinner fa-spin text-brand"></i>
+        </div>
+        <Comments
+          v-if="!showCommentsLoader && organizedReplies.length > 0"
+          :reply_entries="organizedReplies"
+          :author="post.author"
+          :body="post.body"
+          :main_post_author="post.author"
+          :main_post_permlink="post.permlink"
+          :main_post_cat="post.category"
+          :depth="0"
+          :translation-cache="translationCache"
+          @update-translation-cache="updateCommentCache"
+        />
+        <div v-if="!showCommentsLoader && organizedReplies.length === 0" class="text-muted text-center p-2">
+          No replies yet.
+        </div>
+      </div>
+
     </div>
   </div>
 </template>
 
 <script>
+import hive from '@hiveio/hive-js'
 import UserHoverCard from './UserHoverCard.vue'
 import { mapGetters } from 'vuex'
 import SocialSharing from 'vue-social-sharing'
 import { commonCardMixin } from '~/plugins/commonCardMixin.js'
+import Comments from '~/components/Comments.vue';
 
 // Import new components
 import CardHeader from './CardHeader.vue'
@@ -111,29 +136,79 @@ import CardActions from './CardActions.vue'
 
 export default {
   mixins: [commonCardMixin],
-  props: ['post', 'displayUsername', 'pstId', 'explorePost'],
+  props: {
+    post: {
+      type: Object, // Or the specific type you expect, e.g., String, Number
+      required: true
+    },
+    displayUsername: {
+      type: String,
+      required: true
+    },
+    pstId: {
+      type: [String, Number], // Use an array if it can be multiple types
+      required: true
+    },
+    explorePost: {
+      type: [String, Boolean],
+      required: false,
+      default: true
+    },
+    commentsEnabled: {
+      type: Boolean,
+      required: false,
+      default: false
+    }
+  },
   components: {
     SocialSharing,
     UserHoverCard,
     CardHeader,
     CardBody,
-    CardActions
+    CardActions,
+    Comments
+  },
+  data(){
+     return {
+      showCommentsLoader: false,
+      commentsExpanded: false,
+      replies: [],
+      translationCache: {},
+     }
   },
   computed: {
     ...mapGetters('steemconnect', ['user']),
     ...mapGetters(['moderators', 'userPosts']),
     cardData () { return this.post },
-    // START: ADDED COMPUTED PROPERTY
-    // This explicitly defines the body snippet for post.vue, overriding the mixin
-    // and ensuring the correct truncation length is used without conflict.
     bodySnippet () {
       if (!this.post || !this.post.body) return ''
-      // Uses the truncateString method from the mixin, which is what we want.
       let postContent = this.$cleanBody(this.post.body, true);
       postContent = this.truncateString(postContent, 150);
       return postContent.replace(/<[^>]+>/g, '');
     },
-    // END: ADDED COMPUTED PROPERTY
+    organizedReplies() {
+      if (!this.replies || !this.post) return [];
+      const map = {};
+      const roots = [];
+      this.replies.forEach(reply => {
+        reply.reply_entries = [];
+        map[`${reply.author}/${reply.permlink}`] = reply;
+      });
+      this.replies.forEach(reply => {
+        if (reply.parent_author === this.post.author && reply.parent_permlink === this.post.permlink) {
+          roots.push(reply);
+        } else {
+          const parentKey = `${reply.parent_author}/${reply.parent_permlink}`;
+          if (map[parentKey]) {
+            if (!map[parentKey].reply_entries) {
+                map[parentKey].reply_entries = [];
+            }
+            map[parentKey].reply_entries.push(reply);
+          }
+        }
+      });
+      return roots;
+    },
     isOnlyPost () { return this.userPosts && this.userPosts.length === 1 },
     buildLink () { return '/' + this.post.author + '/' + this.post.permlink },
     isPostReblog () { return this.displayUsername !== this.post.author },
@@ -144,6 +219,33 @@ export default {
       const minutes = date.getMinutes()
       return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() + ' ' + date.getHours() + ':' + (minutes < 10 ? '0' + minutes : minutes)
     }
+  },
+  methods:{
+    async showComments(e) {
+      if (!this.commentsEnabled) return;
+
+      this.commentsExpanded = !this.commentsExpanded;
+
+      if (this.commentsExpanded && this.replies.length === 0 && this.post.children > 0) {
+        this.showCommentsLoader = true;
+        try {
+          this.replies = await new Promise((resolve, reject) => {
+            hive.api.getContentReplies(this.post.author, this.post.permlink, (err, result) => {
+              if (err) return reject(err);
+              resolve(result);
+            });
+          });
+        } catch (error) {
+          console.error("Failed to fetch replies:", error);
+          this.commentsExpanded = false; // Close on error
+        } finally {
+          this.showCommentsLoader = false;
+        }
+      }
+    },
+    updateCommentCache(payload) {
+      this.$set(this.translationCache, payload.id, payload.data);
+    },
   },
   mounted () {
     this.$nextTick(() => { this.initializeCard() })
