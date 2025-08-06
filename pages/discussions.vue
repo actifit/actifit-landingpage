@@ -83,6 +83,7 @@
         <!-- Single Comment View -->
         <div v-if="routeHasComment" class="container pt-3 pb-5">
           <div v-if="loadingSingleComment" ><i class="fas fa-spinner fa-spin text-brand"></i></div>
+
           <div v-else-if="singleComment">
             <div class="card report mb-4">
               <h6 class="mb-0 text-center report-title">
@@ -155,7 +156,10 @@
             </div>
             <div>
               <h5>Replies</h5>
+
               <div v-if="loadingReplies" class="loading"><i class="fas fa-spinner fa-spin text-brand"></i></div>
+
+
               <div v-else>
                 <Comments
                   v-if="organizedReplies.length > 0"
@@ -191,6 +195,7 @@
                 <Post :key="index" :post="comment" :displayUsername="comment.author" :pstId="index" class="card report" explorePost="false" :commentsEnabled="true" /> <!--card post col-md-4 p-1 m-1 -->
 
                 <!--
+
                 <div class="card report">
                   <h6 class="mb-0 text-center report-title" style="cursor:pointer;">
                     <a
@@ -521,7 +526,6 @@ export default {
     },
     async uploadImage() {
       if (!this.selectedImageFile) return '';
-
       this.quickUpdateError = '';
 
       // Create a new, clean Axios instance to bypass global interceptors.
@@ -560,7 +564,6 @@ export default {
 
       if (!this.isLoggedIn) { this.quickUpdateError = 'You must be logged in to post.'; return; }
       if (!body && !this.selectedImageFile) { this.quickUpdateError = 'Post cannot be empty.'; return; }
-
       const parent_author = this.postTarget;
       const parent_permlink = this.latestContainerPermlinks[parent_author];
 
@@ -573,13 +576,11 @@ export default {
           const imageUrl = await this.uploadImage();
           body += `\n\n![image](${imageUrl})\n`;
         }
-
         const username = this.currentUsername;
         const permlink = `re-${username.replace(/\./g, '-')}-${new Date().toISOString().replace(/[^a-z0-9]/gi, '').toLowerCase()}`;
         const meta = { tags: [this.postTarget], app: 'actifit/0.5.0', format: 'markdown' };
         const cstm_params = { author: username, title: "", body, parent_author, parent_permlink, permlink, json_metadata: JSON.stringify(meta) };
         const res = await this.processTrxFunc('comment', cstm_params, 'HIVE');
-
         const errorMessage = res && res.trx && res.trx.tx && res.trx.tx.error;
 
         if (res && res.success) {
@@ -601,7 +602,6 @@ export default {
 
       const accToken = localStorage.getItem('access_token');
       const url = new URL(`${process.env.actiAppUrl}performTrxPost/?user=${this.user.account.name}&bchain=${bchain_option || 'HIVE'}`);
-
       try {
         const res = await fetch(url, {
           method: 'POST',
@@ -698,7 +698,6 @@ export default {
       this.replyError = '';
       this.replySuccess = false;
       if (!this.isLoggedIn) { this.replyError = 'You must be logged in to reply.'; return; }
-
       const body = this.$refs.rootEditor ? this.$refs.rootEditor.content : '';
       if (!body.trim()) { this.replyError = 'Reply cannot be empty.'; return; }
 

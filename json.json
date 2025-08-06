@@ -1,0 +1,1 @@
+{"lastBlockNumber":49464063,"lastBlockRefHiveBlockNumber":96467810,"lastHash":"cebfbcca187f2761a3817874f434c173e34df4045d8c0aaa7ed4167172ce41bd","lastParsedHiveBlockNumber":96467813,"SSCnodeVersion":"ivm-1.1.0","domain":"","chainId":"mainnet-hive","disabledMethods":{"blockchain":["getBlockRangeInfo"],"contracts":[]},"lightNode":false,"lastVerifiedBlockNumber":49464057}

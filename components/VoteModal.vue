@@ -206,6 +206,7 @@ export default {
 		//handles calculating and displaying proper voting value
 		async calculateVoteValue() {
 
+
 			if (this.properties == '') {
 				//not loaded yet
 				let chainLnk = await this.setProperNode();
@@ -214,6 +215,7 @@ export default {
 				let rewardFund = await chainLnk.api.getRewardFundAsync("post");
 				this.rewardBalance = parseFloat(rewardFund.reward_balance.replace(" STEEM", "").replace(" HIVE", ""));
 				this.recentClaims = rewardFund.recent_claims;
+
 			}
 
 
@@ -518,39 +520,39 @@ export default {
 		}
 	  },
 	  voteSuccess (err, finalize, bchain) {
-		  if (err) {
-			this.loading = false
-			this.$notify({
-			  group: 'error',
-			  text: err,//this.$t('Vote_Error'),
-			  position: 'top center'
-			});
-		  }
-		  else {
-			if (finalize){
+			if (err) {
 				this.loading = false
-				//append this entry into the list of voted posts
-				if (this.newlyVotedPosts.indexOf(this.postToVote.post_id) === -1){
-					this.newlyVotedPosts.push(this.postToVote.post_id);
-				}
-				this.$store.commit('setNewlyVotedPosts', this.newlyVotedPosts);
-				$(this.$refs.voteModal).modal('hide')
 				this.$notify({
-				  group: 'success',
-				  text: this.$t('Vote_Success').replace('_BCHAIN_',bchain)
+					group: 'error',
+					text: err, //this.$t('Vote_Error'),
+					position: 'top center'
 				});
+			} else {
+				if (finalize) {
+					this.loading = false
+					// append this entry into the list of voted posts
+					if (this.newlyVotedPosts.indexOf(this.postToVote.post_id) === -1) {
+						this.newlyVotedPosts.push(this.postToVote.post_id);
+					}
+					this.$store.commit('setNewlyVotedPosts', this.newlyVotedPosts);
+					$(this.$refs.voteModal).modal('hide')
+					this.$notify({
+						group: 'success',
+						text: this.$t('Vote_Success').replace('_BCHAIN_', bchain)
+					});
 
-        this.$emit('vote-success', this.postToVote);
+					// Emit event so parent can update UI immediately
+					this.$emit('vote-success', this.postToVote);
 
-				//if the user votes 3 or more posts at 20%, let's give an additional reward
-				if (this.newlyVotedPosts.length >= 3 && this.voteWeight >= 20){
-				  this.rewardUserVote();
+					// if the user votes 3 or more posts at 20%, let's give an additional reward
+					if (this.newlyVotedPosts.length >= 3 && this.voteWeight >= 20) {
+						this.rewardUserVote();
+					}
+
+					this.refreshAccountData();
 				}
-
-				this.refreshAccountData();
 			}
-		  }
-	  },
+		},
 	  async vote (e) {
         //if no user is logged in, prompt to login
 
