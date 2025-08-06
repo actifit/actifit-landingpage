@@ -298,13 +298,13 @@ export default {
       if (locale === this.$i18n.locale) {
         return;
       }
-      
+
       // 2. Store the chosen language in localStorage to remember it.
       if (process.client) {
         localStorage.setItem('user_language', locale);
       }
 
-      // 3. Use the i18n module's built-in setLocale function. 
+      // 3. Use the i18n module's built-in setLocale function.
       // This correctly changes the language, updates the URL, and handles persistence.
       await this.$i18n.setLocale(locale);
     },
@@ -452,19 +452,19 @@ export default {
 // This section contains your original SASS styles, which are preserved.
 .user-menu-container
   height: 54px
-  display: flex 
+  display: flex
   align-items: center
-  
-  .user-menu 
-    display: flex 
-    align-items: center 
-    padding-left: 0 
-    margin-bottom: 0 
-    list-style: none 
-    flex-wrap: nowrap 
 
-    .user-avatar 
-      width: 50px 
+  .user-menu
+    display: flex
+    align-items: center
+    padding-left: 0
+    margin-bottom: 0
+    list-style: none
+    flex-wrap: nowrap
+
+    .user-avatar
+      width: 50px
       height: 50px
       background-position: center center
       background-size: cover
@@ -592,8 +592,8 @@ html[dir="rtl"] .flag-icon-container {
   min-width: 17px;
   height: auto;
   min-height: 17px;
-  border-radius: 50%;
-  padding: 0;
+  border-radius: 45%;
+  padding: 2px;
   box-sizing: border-box;
   position: absolute;
   top: -4px;
