@@ -388,6 +388,8 @@ export default {
   },
   computed: {
     ...mapGetters('steemconnect', ['user']),
+	  ...mapGetters('steemconnect', ['stdLogin']),
+
     textualTitle() {
       return this.$t('Hive_Discussions') +
         '&nbsp;<i class="fas fa-info-circle"></i>';
@@ -755,6 +757,7 @@ export default {
     }
   },
   async mounted() {
+    this.$store.dispatch('steemconnect/login')
     this.detectMobile();
     await this.fetchAllComments();
     await this.fetchLatestContainerPermlinks();
