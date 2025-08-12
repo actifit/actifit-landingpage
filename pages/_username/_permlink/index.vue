@@ -3,11 +3,11 @@
     <NavbarBrand />
 
     <div v-if="!isLoading && report && report.author" class="container-fluid px-md-3 pt-5 mt-5 pb-5">
-      
+
       <div class="row" ref="pageRow">
         <!-- Main Content Column -->
         <div class="col-md-8 order-md-2">
-          
+
           <!-- This container now uses CSS 'sticky' to achieve the two-stage scroll -->
           <div class="main-content-scroll-container" ref="mainContentScroller">
 
@@ -61,11 +61,11 @@
                   <a href="#" v-on:click="cancelTranslation">{{ $t('click_to_view_original') }}</a>
                 </div>
               </div>
-              
+
               <vue-remarkable class="col-md-12" ref="remarkableContent" :source="proxiedBody"
                 :options="{ 'html': true, 'breaks': true, 'typographer': true }"></vue-remarkable>
 
-            
+
               <div class="modal-footer col-md-12 main-payment-info" id="main-footer">
                 <div class="report-modal-prelim-info col-md-6">
                   <span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i
@@ -85,7 +85,7 @@
                       v-if="user && report.author != user.account.name" :title="$t('reblog')"></i>
                   </span>
                   <div>
-                    
+
                     <span :title="afitReward + ' ' + $t('AFIT_Token')">
                       <i class="fas fa-running text-brand mr-1"></i>{{ afitReward }} {{ $t('AFIT_Token') }}
                     </span>
@@ -164,7 +164,7 @@
                 <a target="_blank"><div class="comment-user-section"><UserHoverCard :username="user.account.name" /></div></a>
                 <vue-remarkable :source="responseBody" :options="{ 'html': true, 'breaks': true, 'typographer': true }"></vue-remarkable>
               </div>
-              
+
               <div class="report-comments modal-body" v-if="report.children > 0" ref="commentsSection">
                 <div v-if="commentsLoading" class="pb-md-2 text-center">
                   <i class="fas fa-spinner fa-spin text-brand"></i>
@@ -173,14 +173,14 @@
                   :reply_entries.sync="commentEntries.reply_entries" :main_post_author="report.author"
                   :main_post_permlink="report.permlink" :main_post_cat="report.category" :depth="0" :key="reload" />
               </div>
-              
+
             </div>
-            
-          </div> 
+
+          </div>
 
         </div>
-        
-        <UserSidebar 
+
+        <UserSidebar
           ref="userSidebar"
           :report="report"
           :author-account-info="authorAccountInfo"
@@ -190,18 +190,18 @@
         />
       </div>
     </div>
-    
+
     <div v-else-if="errorDisplay" class="container pt-5 mt-5 pb-5">
       <div class="mb-3 text-center"><h4>{{ errorDisplay }}</h4></div>
     </div>
-    
+
     <div v-else class="container pt-5 mt-5 pb-5">
       <div class="mb-3 text-center"><i class="fas fa-spin fa-spinner fa-3x text-brand"></i></div>
     </div>
 
     <VoteModal />
     <NotifyModal :modalTitle="$t('Actifit_Info')" :modalText="$t('VP_desc')" />
-    
+
     <client-only>
       <div>
         <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
@@ -231,6 +231,7 @@ import Comments from '~/components/Comments'
 import SocialSharing from 'vue-social-sharing'
 import vueRemarkable from 'vue-remarkable'
 import UserSidebar from '~/components/UserSidebar.vue'
+import sanitize from 'sanitize-html'
 
 const scot_steemengine_api = process.env.steemEngineScot;
 const scot_hive_api_param = process.env.hiveEngineScotParam;
@@ -240,7 +241,129 @@ export default {
     NavbarBrand, ChainSelection, Footer, VoteModal, NotifyModal, UserHoverCard,
     CustomTextEditor, Comments, SocialSharing, vueRemarkable, UserSidebar
   },
-  head() { return { title: this.pageTitle } },
+  head() {
+    return {
+      title: `${this.pageTitle}`,
+      meta: [
+        { hid: 'title', name: 'og:title', 'property': 'og:title', content: `${this.pageTitle} - Actifit` },
+        { hid: 'description', name: 'description', content: `${this.desc} by ${this.username}` },
+        { hid: 'ogdescription', name: 'og:description', 'property': 'og:description', content: `${this.desc} by ${this.username}` },
+        { hid: 'image', name: 'og:image', 'property': 'og:image', content: `${this.postImg}` }
+      ],
+      link: [
+        { rel: 'canonical', href: `${this.canonUrl}` }
+      ]
+    }
+  },
+  async asyncData({ params, app }) {
+    //let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE')
+    //if (cur_bchain == 'HIVE'){
+    //set HIVE as default chain, since we cannot use localstorage in here
+    let chainLnk = hive;
+    await chainLnk.api.setOptions({ url: process.env.hiveApiNode });
+    /*}else{
+      await steem.api.setOptions({ url: process.env.steemApiNode });
+    }	  */
+    //console.log('connect node');
+    let user_name = params.username.replace('@', '');
+    let result = await chainLnk.api.getContentAsync(user_name, params.permlink);
+    let is_steem = false;
+    if (!result || !result.author) {
+      //switch to Steem chain
+      /*chainLnk = steem
+      await chainLnk.api.setOptions({ url: process.env.steemApiNode });
+      result = await chainLnk.api.getContentAsync(user_name, params.permlink);
+      is_steem = true;
+
+      if (!result || !result.author){*/
+      //if no result, switch to Blurt
+      chainLnk = blurt;
+      await chainLnk.api.setOptions({ url: process.env.blurtApiNode });
+      result = await chainLnk.api.getContentAsync(user_name, params.permlink);
+      is_steem = false;
+      //}
+    }
+    //console.log('pre-flight');
+    //console.log(result);
+    try {
+      let post_meta = JSON.parse(result.json_metadata)
+      let imgs = post_meta.image;
+      let meta_spec = {
+        pageTitle: (result.title || 'Comment')+' by @'+result.author, //since $t is not accessible at this point
+      }
+      if (Array.isArray(imgs) && imgs.length > 0) {
+        meta_spec.postImg = imgs[0];
+      }
+
+      //let's set proper canonical url based of app
+      let canonUrl = '';
+
+      if (post_meta.app) {
+        let src_app = post_meta.app.split('/')[0];
+        //fetch post original category
+        let post_cat = result.category;
+
+        //fallback
+        if (!post_cat) {
+          post_cat = post_meta.community;
+        }
+
+        //list of current apps applying proper formal scripting. Default as hive
+        let appsPatterns = process.env.hiveAppsScript;
+
+        //fallback to steem
+        if (is_steem) {
+          appsPatterns = process.env.steemAppsScript;
+        }
+
+        for (let appPat in appsPatterns) {
+          if (src_app.toLowerCase() == appPat.toLowerCase()) {
+            //found, grab pattern
+            if (appsPatterns[appPat].url_scheme) {
+              //some might not have a pattern, skip them
+              canonUrl = appsPatterns[appPat].url_scheme.replace('{username}', user_name)
+                .replace('{permlink}', params.permlink)
+                .replace('{category}', post_cat);
+            }
+            break;
+          }
+        }
+      }
+      meta_spec.canonUrl = canonUrl;
+      //console.log(result);
+      //console.log(result.body);
+
+      //remove all tags from text
+      let desc = sanitize(result.body, { allowedTags: [] });
+
+      //remove all links/image links
+      let img_links_reg = /[!]?\[[\d\w\s-\.\(\)]*\]\(((((https?:\/\/usermedia\.actifit\.io\/))|((https:\/\/ipfs\.busy\.org\/ipfs\/))|((https:\/\/steemitimages\.com\/)))[\d\w-[\:\/\.\%]+|(https?:\/\/[.\d\w-\/\:\%\(\)]*\.(?:png|jpg|jpeg|gif)))[)]/igm;
+      desc = desc.replace(img_links_reg, '');
+
+      /* let's find images sent as pure URLs */
+      img_links_reg = /(((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|((https:\/\/ipfs\.busy\.org\/ipfs\/)[\d\w-]+)|((https:\/\/steemitimages\.com\/)[\d\w-[\:\/\.]+)|(https?:\/\/[.\/\d\w-]*\.(?:png|jpg|jpeg|gif)))[\s]/igm;
+      desc = desc.replace(img_links_reg, '');
+
+      /* replace spaces with single separating space */
+      desc = desc.replace(/\s+/g, ' ');
+
+      /* cleanup some markdown known syntax */
+      desc = desc.replace(/\#/g, '')
+        .replace(/\*/g, '')
+        .replace(/\_/g, '');
+
+      //make sure we don't over consume desc size
+      if (desc.length > 140) {
+        desc = desc.substr(0, 140) + '...';
+      }
+      //console.log(desc);
+      meta_spec.desc = desc;
+      return meta_spec;
+    } catch (preerr) {
+      console.log(preerr);
+      return '';
+    }
+  },
   data() {
     return {
       isLoading: true, report: null, errorDisplay: '', authorAccountInfo: null,
@@ -253,16 +376,16 @@ export default {
       socialSharingDesc: process.env.socialSharingDesc,
       socialSharingQuote: process.env.socialSharingQuote,
       hashtags: process.env.socialSharingHashtags,
-      heightSyncObserver: null, 
+      heightSyncObserver: null,
     }
   },
   computed: {
     ...mapGetters('steemconnect', ['user', 'stdLogin']),
     ...mapGetters(['commentEntries', 'newlyVotedPosts', 'bchain', 'moderators', 'commentCountToday']),
-    
+
     proxiedBody() {
       if (!this.report || !this.report.body) return '';
-      
+
       const rawBody = this.$cleanBody(this.report.body);
 
       return rawBody.replace(/<img[^>]+src="([^">]+)"/g, (match, url) => {
@@ -276,9 +399,9 @@ export default {
         } else if (!url.startsWith('http')) {
           absoluteUrl = 'https://' + url;
         }
-        
+
         const proxiedUrl = `https://images.hive.blog/0x0/${absoluteUrl}`;
-        
+
         return match.replace(url, proxiedUrl);
       });
     },
@@ -293,7 +416,7 @@ export default {
     },
     meta() {
       try { if (this.report && this.report.json_metadata) { return JSON.parse(this.report.json_metadata); } } catch (e) {}
-      return {}; 
+      return {};
     },
     buildLink() { return this.report ? `/@${this.report.author}/${this.report.permlink}` : '#'; },
     buildParentLink() { return this.report && this.report.parent_author ? `/@${this.report.parent_author}/${this.report.parent_permlink}` : '#'; },
@@ -321,7 +444,7 @@ export default {
 		if (!this.$refs.mainContentScroller || !this.$refs.userSidebar) {
 		  return;
 		}
-		
+
 		this.$nextTick(() => {
 		  const mainContentEl = this.$refs.mainContentScroller;
 		  const sidebarEl = this.$refs.userSidebar.$el;
@@ -343,12 +466,12 @@ export default {
       }
     },
     alignSidebar() {
-      if (process.client) { 
+      if (process.client) {
         this.$nextTick(() => {
           const sidebar = document.querySelector('.user-sidebar.align-to-content');
           const target = this.$refs.reportTarget;
-          if (window.innerWidth < 768) { 
-            if (sidebar) sidebar.style.marginTop = '2rem'; 
+          if (window.innerWidth < 768) {
+            if (sidebar) sidebar.style.marginTop = '2rem';
             return;
           }
           if (sidebar && target) {
@@ -374,7 +497,7 @@ export default {
         const reportData = await chainLnk.api.getContentAsync(author, permlink);
         if (!reportData || !reportData.author) throw new Error('Post not found');
         this.report = reportData;
-        this.pageTitle = `${this.report.title} by @${this.report.author}`;
+        this.pageTitle = this.report.title || 'Comment' + ` by @${this.report.author}`;
         await this.fetchSupplementaryData();
         this.fetchReportCommentData();
       } catch (err) {
@@ -468,7 +591,7 @@ export default {
     cancelTranslation() { this.report.body = this.safety_post_content; this.showTranslated = false; },
     votePrompt() { if (this.report) this.$store.commit('setPostToVote', this.report); },
     resetOpenComment() { this.commentBoxOpen = false; this.replyBody = ''; },
-    
+
     async postResponse(event) {
       this.loading = true
       const comment_perm = this.user.account.name.replace('.', '-') + '-re-' + this.report.author.replace('.', '-') + '-' + this.report.permlink + new Date().toISOString().replace(/[^a-zA-Z0-9]+/g, '').toLowerCase();
@@ -635,7 +758,7 @@ export default {
   mounted() {
     this.$store.dispatch('steemconnect/login');
     this.fetchPageData();
-    
+
     if (process.client) {
       window.addEventListener('storage', this.handleStorageChange);
       this.resizeObserver = new ResizeObserver(() => this.alignSidebar());
@@ -650,9 +773,9 @@ export default {
 			this.heightSyncObserver.observe(this.$refs.userSidebar.$el);
 		  }
 		});
-		
+
 		window.addEventListener('resize', this.syncColumnHeights);
-    
+
       });
       window.addEventListener('resize', this.alignSidebar);
     }
@@ -661,10 +784,10 @@ export default {
     if (process.client) {
       window.removeEventListener('storage', this.handleStorageChange);
       if (this.resizeObserver) this.resizeObserver.disconnect();
-    
+
 		if (this.heightSyncObserver) this.heightSyncObserver.disconnect();
 		window.removeEventListener('resize', this.syncColumnHeights);
-    
+
       window.removeEventListener('resize', this.alignSidebar);
     }
   }
@@ -683,7 +806,7 @@ a:hover, a:hover, .text-brand:hover, .actifit-link-plain:hover { text-decoration
 .date-head { padding-left: 2px; }
 .report-comments .date-head { color: #6c757d !important; }
 .report-reply { padding-left: 40px; padding-bottom: 40px; }
-.share-links-actifit { text-align: right; }    
+.share-links-actifit { text-align: right; }
 .share-links-actifit span, .share-links-actifit a { padding: 5px; cursor: pointer; color: #fff; }
 .pointer-cur-cls { cursor: pointer; }
 .translation-notice { background-color: #fcf8e3; border: 1px solid #faebcc; padding: 10px; margin-top: 15px; border-radius: 4px; color: #8a6d3b; }
@@ -695,7 +818,7 @@ a:hover, a:hover, .text-brand:hover, .actifit-link-plain:hover { text-decoration
   position: sticky;
   top: 90px;
   max-height: calc(100vh - 90px);
-  
+
   overflow-y: auto;
   overflow-x: hidden; /* Hide horizontal scrollbar here */
 
@@ -711,7 +834,7 @@ a:hover, a:hover, .text-brand:hover, .actifit-link-plain:hover { text-decoration
 .content-wrapper {
   overflow-x: auto; /* Let this div handle the horizontal overflow */
   width: 100%;     /* Ensure it takes up the full width */
-  
+
   /* --- Horizontal Scrollbar Styling (Firefox) --- */
   scrollbar-width: auto;
   scrollbar-color: red #f1f1f1;
