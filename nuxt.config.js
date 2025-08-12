@@ -20,7 +20,7 @@ module.exports = {
 
   // Runtime configuration
   publicRuntimeConfig: {
-    version: '1.7.0',
+    version: '1.8.0',
     proposalId: '337',
   },
 
@@ -253,7 +253,7 @@ module.exports = {
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
-  
+
           gtag('config', 'G-HPZKPFM9GK');
         `,
           }
