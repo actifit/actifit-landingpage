@@ -26,13 +26,15 @@
             </span>
 
             <span class="btn btn-brand mb-1"
-              :title="hide_small_balances ? $t('show_all_tokens') : $t('hide_small_balances')" v-on:click="switchHideSmall">
+              :title="hide_small_balances ? $t('show_all_tokens') : $t('hide_small_balances')"
+              v-on:click="switchHideSmall">
               <i class="fas fa-solid fa-battery-empty" :style="hide_small_balances ? 'color:green' : 'color:white'"></i>
             </span>
 
             <span class="btn btn-brand mb-1" :title="$t('save_filter_default_settings')" v-if="!nonAuthUser"
-              v-on:click="saveSettings"><i class="fa-gear fas" :style="settings_set ? 'color:green' : 'color:white'"></i><i
-                class="fas fa-spin fa-spinner text-white" v-if="save_progress"></i></span>
+              v-on:click="saveSettings"><i class="fa-gear fas"
+                :style="settings_set ? 'color:green' : 'color:white'"></i><i class="fas fa-spin fa-spinner text-white"
+                v-if="save_progress"></i></span>
 
             <span class="pl-2">{{ $t('account_est_val') }} ${{ this.totalAccountValue }}</span>
           </div>
@@ -149,14 +151,15 @@
               <div class="p-2 col-md-6" id="ttip-area">
                 <small><i>{{ $t('STEEM_POWER_BREAKDOWN') }}: {{ this.renderSteemPower(1) }} ({{ $t('Owned_SP') }}) +
                     {{ this.renderSteemPower(3) }} ({{ $t('Received_SP') }}) - {{ this.renderSteemPower(4) }} ({{
-                      $t('Delegated_SP') }}) - {{ this.renderSteemPower(5) }} ({{ $t('Powering_Down_Amount') }})</i></small>
+                      $t('Delegated_SP') }}) - {{ this.renderSteemPower(5) }} ({{ $t('Powering_Down_Amount')
+                    }})</i></small>
               </div>
             </div>
             <div class="col-2 text-right">{{ this.renderSteemPower(2) }} {{ this.cur_bchain }} {{ $t('POWER') }}
               <i v-if="!showPowerBreakdown['HIVE']" class="fas fa-solid fa-arrow-circle-down text-brand"
                 v-on:click="showPowerBreakdown['HIVE'] = true" :title="$t('STEEM_POWER_BREAKDOWN')"></i>
-              <i v-else class="fas fa-solid fa-arrow-circle-up text-brand" v-on:click="showPowerBreakdown['HIVE'] = false"
-                :title="$t('STEEM_POWER_BREAKDOWN')"></i>
+              <i v-else class="fas fa-solid fa-arrow-circle-up text-brand"
+                v-on:click="showPowerBreakdown['HIVE'] = false" :title="$t('STEEM_POWER_BREAKDOWN')"></i>
 
               <span v-if="showPowerBreakdown['HIVE']">
                 <li>{{ this.renderSteemPower(1) }} ({{ $t('Owned_SP') }})</li>
@@ -214,12 +217,14 @@
                     <div class="col-4">Completion Date </div>
                   </div>
                   <div v-for="(entry, index) in pendingSavingsWithdrawals" :key="index" :entry="entry"
-                    v-if="entry.amount.includes('HIVE')" class="col-12 row">
-                    <div class="col-4">{{ entry.amount }} </div>
-                    <div class="col-4"> {{ entry.complete }}</div>
-                    <div class="col-4"><button class="btn btn-brand"
-                        v-on:click="cancelSavingsWithdrawal(entry.request_id)"><i class="fas fa-times-circle"
-                          :title="$t('cancel_savings_withdrawal')"></i></button></div>
+                     class="col-12 row">
+                    <div v-if="entry.amount.includes('HIVE')">
+                      <div class="col-4">{{ entry.amount }} </div>
+                      <div class="col-4"> {{ entry.complete }}</div>
+                      <div class="col-4"><button class="btn btn-brand"
+                          v-on:click="cancelSavingsWithdrawal(entry.request_id)"><i class="fas fa-times-circle"
+                            :title="$t('cancel_savings_withdrawal')"></i></button></div>
+                    </div>
                   </div>
                   <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
                     <label for="cancel-withdraw-act-key" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
@@ -300,8 +305,8 @@
                     <div class="text-brand text-center" v-if="error_proceeding">
                       {{ this.error_msg }}
                     </div>
-                    <button class="btn btn-brand" v-on:click="claimSavingsRewards()"
-                      v-if="!nonAuthUser">{{ $t('claim_rewards') }}</button>
+                    <button class="btn btn-brand" v-on:click="claimSavingsRewards()" v-if="!nonAuthUser">{{
+                      $t('claim_rewards') }}</button>
                   </div>
                 </div>
               </div>
@@ -513,7 +518,8 @@
                   <span class="p-1">@</span>
                   <!--<input type="text" id="token-target-account" name="token-target-account"
                     ref="token-target-account" class="form-control-lg p-2">-->
-                    <AutocompleteUsernameInput id="token-target-account" name="token-target-account" ref="token-target-account" customClass="w-50" inputClass="form-control-lg w-100 pl-2"/>
+                  <AutocompleteUsernameInput id="token-target-account" name="token-target-account"
+                    ref="token-target-account" customClass="w-50" inputClass="form-control-lg w-100 pl-2" />
                 </div>
 
                 <div class="row" v-if="tokenActions && curTokenAction == TRANSFER_BSC">
@@ -526,7 +532,7 @@
                     class="form-control-lg w-50 p-2" @input="calculateHBDAmount">
                   <span class="p-2" v-on:click="fillTokenTransAmount()" :title="$t('select_full_balance')"><img
                       :src="selTokenUp.icon" class="mr-1 mini-token-logo"><u>{{ showMaxBal(selTokenUp) }} {{
-                      selTokenUp.symbol }}</u></span>
+                        selTokenUp.symbol }}</u></span>
                 </div>
 
                 <div class="row" v-if="tokenActions && curTokenAction == DELEGATE_FUNDS">
@@ -632,7 +638,8 @@
                   <label for="transfer-recipient" class="w-25 p-2">{{ $t('To') }} *</label>
                   <!--<input type="text" id="transfer-recipient" name="transfer-recipient" ref="transfer-recipient"
                     class="form-control-lg w-50 p-2">-->
-                    <AutocompleteUsernameInput id="transfer-recipient" name="transfer-recipient" ref="transfer-recipient" customClass="w-50" inputClass="form-control-lg w-100 pl-2" />
+                  <AutocompleteUsernameInput id="transfer-recipient" name="transfer-recipient" ref="transfer-recipient"
+                    customClass="w-50" inputClass="form-control-lg w-100 pl-2" />
                 </div>
                 <div class="row">
                   <label for="transfer-type" class="w-25 p-2">{{ $t('Type') }} *</label>
@@ -646,7 +653,8 @@
                       <span v-if="cur_bchain == 'STEEM'">{{ $t('SBD') }}</span>
                       <span v-if="cur_bchain == 'HIVE'">{{ $t('HBD') }}</span>
                     </option>
-                    <option value="BLURT" v-if="cur_bchain == 'BLURT'" :selected="transferType == 'BLURT'">{{ $t('BLURT') }}
+                    <option value="BLURT" v-if="cur_bchain == 'BLURT'" :selected="transferType == 'BLURT'">{{
+                      $t('BLURT') }}
                     </option>
                   </select>
                 </div>
@@ -670,8 +678,9 @@
                 </div>
                 <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
                   <div class="text-center small p-2 w-25"></div>
-                  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your
-                    <b>PRIVATE ACTIVE</b> key.*</div>
+                  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50"> {{ $t('operation_require') }}
+                    <b>{{ $t('private_active') }}</b> key.*
+                  </div>
                 </div>
                 <div class="text-center small p-2">
                   <i>{{ $t('wallet_memo_notice') }}</i>
@@ -682,7 +691,7 @@
                 <div class="row">
                   <div class="w-25"></div>
                   <button v-on:click="proceedTransfer" class="btn btn-brand btn-lg w-50 border">{{ $t('Send')
-                    }}</button>
+                  }}</button>
                 </div>
                 <div v-if="transferProcess">
                   <i class="fas fa-spin fa-spinner"></i>
@@ -711,8 +720,9 @@
                 </div>
                 <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
                   <div class="text-center small p-2 w-25"></div>
-                  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your
-                    <b>PRIVATE ACTIVE</b> key.*</div>
+                  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">{{ $t(operation_required)}}
+                    <b>{{ $t(private_active)}}</b> key.*
+                  </div>
                 </div>
                 <div class="row">
                   <div class="text-center small p-2 w-25"></div>
@@ -729,7 +739,7 @@
                 <div class="row">
                   <div class="w-25"></div>
                   <button v-on:click="proceedPowerUp" class="btn btn-brand btn-lg w-50 border">{{ $t('Power_Up')
-                    }}</button>
+                  }}</button>
                 </div>
                 <div v-if="powerUpProcess">
                   <i class="fas fa-spin fa-spinner"></i>
@@ -754,8 +764,9 @@
                   </div>
                   <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
                     <div class="text-center small p-2 w-25"></div>
-                    <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your
-                      <b>PRIVATE ACTIVE</b> key.*</div>
+                    <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">{{ $t(operation_required) }}
+                      <b>{{ $t(private_active) }}</b> key.*
+                    </div>
                   </div>
                 </div>
                 <div class="row" v-if="isPoweringDown">
@@ -770,7 +781,8 @@
                   <div v-if="cur_bchain == 'STEEM'" :class="smallScreenBtnClasses" class="text-center small p-2 w-50"
                     v-html="$t('power_down_notice').replaceAll('_CUR_', 'STEEM').replaceAll('_TIME_', '4')">
                   </div>
-                  <div v-else-if="cur_bchain == 'HIVE'" :class="smallScreenBtnClasses" class="text-center small p-2 w-50"
+                  <div v-else-if="cur_bchain == 'HIVE'" :class="smallScreenBtnClasses"
+                    class="text-center small p-2 w-50"
                     v-html="$t('power_down_notice').replaceAll('_CUR_', 'HIVE').replaceAll('_TIME_', '13')">
                   </div>
                 </div>
@@ -780,7 +792,7 @@
                 <div class="row" v-if="isPoweringDown">
                   <div class="text-center small p-2 w-25"></div>
                   <button v-on:click="proceedPowerDown" class="btn btn-brand btn-lg w-25 border">{{ $t('Power_Down')
-                    }}</button>
+                  }}</button>
                   <button v-on:click="cancelPowerDown" class="btn btn-brand btn-lg w-25 border">{{
                     $t('Cancel_Power_Down') }}</button>
                   <div v-if="powerDownProcess">
@@ -790,7 +802,7 @@
                 <div class="row" v-else>
                   <div class="text-center small p-2 w-25"></div>
                   <button v-on:click="proceedPowerDown" class="btn btn-brand btn-lg w-50 border">{{ $t('Power_Down')
-                    }}</button>
+                  }}</button>
                   <div v-if="powerDownProcess">
                     <i class="fas fa-spin fa-spinner"></i>
                   </div>
@@ -805,7 +817,8 @@
                   <label for="transfer-recipient" class="w-25 p-2">{{ $t('To') }} *</label>
                   <!--<input type="text" id="transfer-recipient" name="transfer-recipient" ref="transfer-recipient"
                     class="form-control-lg w-50 p-2" :value="user.account.name">-->
-                    <AutocompleteUsernameInput id="transfer-recipient" name="transfer-recipient" ref="transfer-recipient" customClass="w-50" inputClass="form-control-lg w-100 pl-2" :passedValue="user.account.name" />
+                  <AutocompleteUsernameInput id="transfer-recipient" name="transfer-recipient" ref="transfer-recipient"
+                    customClass="w-50" inputClass="form-control-lg w-100 pl-2" :passedValue="user.account.name" />
                 </div>
                 <div class="row">
                   <label for="transfer-type" class="w-25 p-2">{{ $t('Type') }} *</label>
@@ -819,7 +832,8 @@
                       <span v-if="cur_bchain == 'STEEM'">{{ $t('SBD') }}</span>
                       <span v-if="cur_bchain == 'HIVE'">{{ $t('HBD') }}</span>
                     </option>
-                    <option value="BLURT" v-if="cur_bchain == 'BLURT'" :selected="transferType == 'BLURT'">{{ $t('BLURT') }}
+                    <option value="BLURT" v-if="cur_bchain == 'BLURT'" :selected="transferType == 'BLURT'">{{
+                      $t('BLURT') }}
                     </option>
                   </select>
                 </div>
@@ -843,8 +857,9 @@
                 </div>
                 <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
                   <div class="text-center small p-2 w-25"></div>
-                  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your
-                    <b>PRIVATE ACTIVE</b> key.*</div>
+                  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">{{ $t(operation_required) }}
+                    <b>{{ $t(private_active) }}</b> key.*
+                  </div>
                 </div>
                 <div class="text-center small p-2">
                   <i>{{ $t('wallet_memo_notice') }}</i>
@@ -855,7 +870,7 @@
                 <div class="row">
                   <div class="w-25"></div>
                   <button v-on:click="proceedTransferSavings" class="btn btn-brand btn-lg w-50 border">{{ $t('Send')
-                    }}</button>
+                  }}</button>
                 </div>
                 <div v-if="transferProcess">
                   <i class="fas fa-spin fa-spinner"></i>
@@ -879,7 +894,8 @@
                       <span v-if="cur_bchain == 'STEEM'">{{ $t('SBD') }}</span>
                       <span v-if="cur_bchain == 'HIVE'">{{ $t('HBD') }}</span>
                     </option>
-                    <option value="BLURT" v-if="cur_bchain == 'BLURT'" :selected="transferType == 'BLURT'">{{ $t('BLURT') }}
+                    <option value="BLURT" v-if="cur_bchain == 'BLURT'" :selected="transferType == 'BLURT'">{{
+                      $t('BLURT') }}
                     </option>
                   </select>
                 </div>
@@ -903,8 +919,9 @@
                 </div>
                 <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
                   <div class="text-center small p-2 w-25"></div>
-                  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your
-                    <b>PRIVATE ACTIVE</b> key.*</div>
+                  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">{{ $t(operation_required) }}
+                    <b>{{ $t(private_active) }}</b> key.*
+                  </div>
                 </div>
                 <div class="text-center small p-2">
                   <i>{{ $t('wallet_memo_notice') }}</i>
@@ -915,7 +932,7 @@
                 <div class="row">
                   <div class="w-25"></div>
                   <button v-on:click="proceedRemoveSavings" class="btn btn-brand btn-lg w-50 border">{{ $t('Send')
-                    }}</button>
+                  }}</button>
                 </div>
                 <div v-if="transferProcess">
                   <i class="fas fa-spin fa-spinner"></i>
@@ -946,8 +963,9 @@
                   </div>
                   <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
                     <div class="text-center small p-2 w-25"></div>
-                    <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">This operation requires your
-                      <b>PRIVATE ACTIVE</b> key.*</div>
+                    <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">{{ $t(operation_required) }}
+                      <b>{{ $t(private_active) }}</b> key.*
+                    </div>
                   </div>
                   <div class="row">
                     <div class="text-center small p-2 w-25"></div>
@@ -963,7 +981,7 @@
                   <div class="row">
                     <div class="w-25"></div>
                     <button v-on:click="proceedDelegation" class="btn btn-brand btn-lg w-50 border">{{ $t('Delegate')
-                      }}</button>
+                    }}</button>
                   </div>
                   <div v-if="delegateProcess">
                     <i class="fas fa-spin fa-spinner"></i>
@@ -1087,7 +1105,7 @@
               <div v-if="fundActivityMode == SHOW_CLAIMABLE_REW && isClaimableDataAvailable && cur_bchain == 'STEEM'"
                 class="action-box">
                 <h5 class="pro-name"><img src="/img/STEEM.png" class="mr-2 token-logo">{{ $t('Claimable_Steem_Rewards')
-                  }}</h5>
+                }}</h5>
                 <div class="mb-4 font-weight-bold">
                   <span class="p-2">{{ this.claimSP }} | {{ this.claimSTEEM }} | {{ this.claimSBD }}</span>
                   <div class="p-2"><button v-on:click="claimRewards" class="btn btn-brand btn-lg w-20">{{
@@ -1115,7 +1133,7 @@
                 v-else-if="fundActivityMode == SHOW_CLAIMABLE_REW && isClaimableDataAvailable && cur_bchain == 'BLURT'"
                 class="col-md-6 row-sep-in">
                 <h5 class="pro-name"><img src="/img/BLURT.png" class="mr-2 token-logo">{{ $t('Claimable_Blurt_Rewards')
-                  }}</h5>
+                }}</h5>
                 <div class="mb-4 font-weight-bold">
                   <span class="p-2">{{ this.claimSP }} | {{ this.claimSTEEM }}</span>
                   <div class="p-2" v-if="!nonAuthUser"><button v-on:click="claimRewards"
@@ -1223,7 +1241,7 @@
                   <div v-if="error_wallet != ''" class="text-brand text-center">{{ error_wallet }}</div>
                   <button v-if="!nonAuthUser" v-on:click="updateWalletAddress"
                     class="btn btn-brand btn-lg w-50 border"><span v-if="this.bsc_wallet_address">{{ $t('Save')
-                      }}</span><span v-else>{{ $t('Save') }}</span></button>
+                    }}</span><span v-else>{{ $t('Save') }}</span></button>
                   <button v-if="!nonAuthUser" v-on:click="deleteWalletAddress"
                     class="btn btn-brand btn-lg w-50 border">{{ $t('Reset') }}</button>
                 </div>
@@ -1267,7 +1285,8 @@
             <div v-if="afitActivityMode == MOVE_AFIT_SE" class="action-box">
               <h3 class="pro-name">{{ $t('MOVE_AFIT_HE_AFIT_POWER') }}</h3>
               <div class="text-center grid p-2">
-                <div v-if="cur_bchain == 'STEEM'" class="text-brand font-weight-bold">{{ $t('wallet.afit_se_to_power') }}
+                <div v-if="cur_bchain == 'STEEM'" class="text-brand font-weight-bold">{{ $t('wallet.afit_se_to_power')
+                }}
                 </div>
                 <div v-else class="text-brand font-weight-bold">{{ $t('wallet.afit_he_to_power') }}</div>
                 <div class="row">
@@ -1286,7 +1305,7 @@
                 <div class="row">
                   <div class="w-25"></div>
                   <button v-on:click="proceedMoveSEPower" class="btn btn-brand btn-lg w-50 border">{{ $t('Proceed')
-                    }}</button>
+                  }}</button>
                 </div>
                 <div class="row">
                   <div class="w-25"></div>
@@ -1329,7 +1348,7 @@
                   <div class="row">
                     <div class="col-2"></div>
                     <div class="col-8"><button v-on:click="proceedTipActivity" class="btn btn-brand w-50 border m-3">{{
-                        $t('Proceed') }}</button>
+                      $t('Proceed') }}</button>
                       <i class="fas fa-spin fa-spinner" v-if="tipInProgress"></i>
                     </div>
                   </div>
@@ -1369,14 +1388,14 @@
                   <div class="row" v-if="userPDAfit.user">
                     <div class="w-25"></div>
                     <button v-on:click="proceedMoveToSE" class="btn btn-brand border btn-lg w-25">{{ $t('adjust_amount')
-                      }}</button>
+                    }}</button>
                     <button v-on:click="cancelMoveToSE" class="btn btn-brand border btn-lg w-25">{{
                       $t('Cancel_Transfer') }}</button>
                   </div>
                   <div class="row" v-else>
                     <div class="w-25"></div>
                     <button v-on:click="proceedMoveToSE" class="btn btn-brand border btn-lg w-50">{{ $t('Proceed')
-                      }}</button>
+                    }}</button>
                   </div>
                   <div class="row">
                     <div class="w-25"></div>
@@ -1411,7 +1430,7 @@
                 <div class="row">
                   <div class="w-25"></div>
                   <button v-on:click="proceedBuyAFIT" class="btn btn-brand btn-lg w-50 border">{{ $t('Proceed')
-                    }}</button>
+                  }}</button>
                 </div>
                 <div class="row">
                   <div class="w-25"></div>
@@ -1451,7 +1470,7 @@
                   <div class="row">
                     <div class="w-25"></div>
                     <button v-on:click="setFundsPass" class="btn btn-brand btn-lg w-50 border">{{ $t('Set_Password')
-                      }}</button>
+                    }}</button>
                   </div>
                   <div v-if="settingPass" class="row">
                     <div class="w-25"></div>
@@ -1495,12 +1514,12 @@
                   <div class="row">
                     <div class="w-25"></div>
                     <button v-on:click="proceedVerifyPass" class="btn btn-brand btn-lg w-50 border">{{ $t('Send_Verify')
-                      }}</button>
+                    }}</button>
                   </div>
                   <div class="row">
                     <div class="w-25"></div>
                     <button v-on:click="resetFundsPass" class="btn btn-brand btn-lg w-50 border">{{ $t('Reset_password')
-                      }}</button>
+                    }}</button>
                   </div>
                   <div class="row">
                     <div class="w-25"></div>
@@ -1552,7 +1571,7 @@
                   </span>
                   <br>
                   <span><i>{{ $t('You_are_exchanging') }} {{ afit_val_exchange }} {{ $t('AFIT_Token') }} {{ $t('Tokens')
-                      }} {{ $t('for') }} {{ afit_exch_matching_perc }} % {{ $t('extra_upvote') }}
+                  }} {{ $t('for') }} {{ afit_exch_matching_perc }} % {{ $t('extra_upvote') }}
                       <!--<br/> ({{ $t('net_profit_approx') }} ${{ (afit_val_exchange * 0.036).toFixed(2) }})-->
                       <br />{{ $t('enter_funds_pass_proceed') }}</i></span>
                   <div class="row">
@@ -1560,7 +1579,7 @@
                     <input type="password" id="funds-pass-entry" name="funds-pass-entry" ref="funds-pass-entry"
                       class="form-control-lg w-50 p-2">
                     <button v-on:click="resetFundsPass" class="btn btn-brand btn-lg border">{{ $t('Reset_password')
-                      }}</button>
+                    }}</button>
                   </div>
                   <div class="row" v-if="error_swap != ''">
                     <div class="w-25"></div>
@@ -1579,7 +1598,7 @@
                   <div class="row">
                     <div class="w-25"></div>
                     <button v-on:click="exchangeTokensUpvote" class="btn btn-brand btn-lg w-50 border">{{ $t('Exchange')
-                      }}</button>
+                    }}</button>
                   </div>
                   <div class="row" v-if="performingSwap">
                     <div class="w-25"></div>
@@ -2058,12 +2077,12 @@ export default {
     isKeychainLogin() {
       return localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain
     },
-    textualDisplayTitle(){
-      return this.displayUser +' \'s ' + this.$t('Wallet');
+    textualDisplayTitle() {
+      return this.displayUser + ' \'s ' + this.$t('Wallet');
       //return '<div class="user-wallet-avatar group-class" :style="\'background-image: url(' + this.profImgUrl + '/u/' + this.displayUser + '/avatar)\'"></div>' + this.displayUser +' \'s ' + this.$t('Wallet');
     },
-    textualTitle(){
-      return this.user.account.name +' \'s ' + this.$t('Wallet');
+    textualTitle() {
+      return this.user.account.name + ' \'s ' + this.$t('Wallet');
       //return '<div class="user-wallet-avatar group-class" :style="\'background-image: url(' + this.profImgUrl + '/u/' + this.user.account.name + '/avatar)\'"></div>' + this.user.account.name +' \'s ' + this.$t('Wallet');
     },
     nonAuthUser() {
@@ -2085,9 +2104,13 @@ export default {
       return true;
     },
     targetUserWallet() {
-      if (this.displayUser != '') return this.displayUser;
-      else if (this.user.account.name) return this.user.account.name
-      else return '';
+      if (this.displayUser) {
+        return this.displayUser;
+      }
+      if (this.user && this.user.account && this.user.account.name) {
+        return this.user.account.name;
+      }
+      return '';
     },
     isHiveauthLogin() {
       return localStorage.getItem('acti_login_method') == 'hiveauth'
@@ -2685,34 +2708,34 @@ export default {
             required_auths: [],
             required_posting_auths: [this.user.account.name],
             id: 'actifit-bsc-wallet',
-            json: JSON.stringify({'wallet': walletBSC })
-            };
+            json: JSON.stringify({ 'wallet': walletBSC })
+          };
 
           let res = await this.processTrxFunc('custom_json', cstm_params);
           console.log('post call');
           console.log(res);
 
-          if (res.success){
+          if (res.success) {
             //console.log(res.txID);
-            let url = new URL(process.env.actiAppUrl + 'verifySignBSCAddKeychain/'+res.txID+'/?user=' + this.user.account.name+'&wallet='+walletBSC+'&operation='+JSON.stringify([['custom_json',cstm_params]]) + '&sign=' + sign + '&nonce=' + nonce);
+            let url = new URL(process.env.actiAppUrl + 'verifySignBSCAddKeychain/' + res.txID + '/?user=' + this.user.account.name + '&wallet=' + walletBSC + '&operation=' + JSON.stringify([['custom_json', cstm_params]]) + '&sign=' + sign + '&nonce=' + nonce);
 
             let res2 = await fetch(url);
             let outcome = await res2.json();
             console.log(outcome);
-            if (outcome.status=='success'){
+            if (outcome.status == 'success') {
               this.$notify({
                 group: 'success',
                 text: this.$t('successfully_updated_settings'),
                 position: 'top center'
               })
-            }else{
+            } else {
               this.$notify({
                 group: 'error',
                 text: this.$t('error'),
                 position: 'top center'
               })
             }
-          }else{
+          } else {
             this.$notify({
               group: 'error',
               text: this.$t('error'),
@@ -2720,7 +2743,7 @@ export default {
             })
           }
 
-        }else{
+        } else {
           let url = new URL(process.env.actiAppUrl + 'verifySignBSCAdd/?user=' + this.user.account.name + '&wallet=' + this.$refs['bsc-wallet-address'].value + '&sign=' + sign + '&nonce=' + nonce);
 
           let reqHeads = new Headers({
@@ -3392,35 +3415,33 @@ export default {
         console.error('Error in completeUserDataRefresh:', err);
       }
     },
-    fixUserData(newUserData){
+    fixUserData(newUserData) {
       this.displayUserData = newUserData;
     },
     async fetchUserData() {
+      // Guard Clause: Ensure this function doesn't run if the primary user data isn't loaded yet.
+      if (!this.displayUserData) {
+        console.warn('fetchUserData called before displayUserData was ready. Aborting.');
+        return;
+      }
+
       if ((typeof this.user != 'undefined' && this.user != null) || this.displayUser != '') {
 
-        //update user info from blockchain
+        //update user info from blockchain if using steemconnect
         if (!localStorage.getItem('std_login')) {
-          //if (!this.stdLogin)
           try {
             let user_data = await this.$steemconnect.me();
             this.user.account = user_data.account;
           } catch (excp) {
-            console.log(excp);
+            // It's okay if this fails (e.g., token expired), don't log as a critical error
+            // console.log(excp);
           }
         }
 
-        //default
-        if (!this.displayUserData) {
-          this.displayUserData = this.user.account;
-        }
-        /*if (this.displayUser!=''){
-          fetch(process.env.actiAppUrl+'user/' + this.displayUser).then(res => {
-            res.json().then(json => this.userTokens = json.tokens)}).catch(e => console.log(e))
+        // This redundant assignment is now removed. The `mounted` hook handles setting `displayUserData`.
 
-        }else{*/
         this.userTokensWallet = await this.$store.dispatch('fetchUserTokensReturn', this.displayUser, false)
 
-        // }
         this.$store.dispatch('fetchUserTokens')
         this.$store.dispatch('fetchTransactions', this.displayUser)
         this.$store.dispatch('fetchUserRank')
@@ -3457,24 +3478,6 @@ export default {
             res.json().then(json => this.setUserTokenSwapHistory(json)).catch(e => console.log(e))
           }).catch(e => console.log(e))
 
-        //let's grab the user's steem-engine tokens too
-        //Disable: EOL for S-E
-        /*
-        this.fetchTokenBalance();
-
-        if (this.cur_bchain == 'STEEM'){
-          fetch(scot_steemengine_api+'@'+this.user.account.name).then(
-            res => {res.json().then(json => this.setUserClaimableSETokens (json) ).catch(e => console.log(e))
-          }).catch(e => console.log(e))
-
-        }else{
-          fetch(scot_steemengine_api+'@'+this.user.account.name+scot_hive_api_param).then(
-            res => {res.json().then(json => this.setUserClaimableSETokens (json) ).catch(e => console.log(e))
-          }).catch(e => console.log(e))
-
-        }
-        */
-
         //grab user settings
         fetch(process.env.actiAppUrl + 'userSettings/' + this.displayUserData.name).then(
           res => {
@@ -3484,26 +3487,16 @@ export default {
         //grab user pending withdrawals
         this.getPendingSavingsWithdrawals();
 
-        //let's grab the number of pending token swap transactions to see if we can add more
-        /*fetch(process.env.actiAppUrl+'getPendingTokenSwapTransCount').then(
-          res => {res.json().then(json => this.pendingTokenSwapTransCount = json ).catch(e => console.log(e))
-        }).catch(e => console.log(e))*/
-
         //grab SP
         this.steemPower = await this.vestsToSteemPower(this.displayUserData.vesting_shares);
-        console.log(this.steemPower);
         //grab Delegated SP
         this.delegatedSteemPower = await this.vestsToSteemPower(this.displayUserData.delegated_vesting_shares);
-        console.log(this.delegatedSteemPower);
         //grab received SP
         this.receivedSteemPower = await this.vestsToSteemPower(this.displayUserData.received_vesting_shares);
-        console.log(this.receivedSteemPower);
         //grab powerdown SP
         this.powerDownRateVal = await this.vestsToSteemPower(this.displayUserData.vesting_withdraw_rate.split(' ')[0]);
-        console.log(this.powerDownRateVal);
         //grab next power down withdrawal date
         this.powerDownWithdrawDate = this.date(this.displayUserData.next_vesting_withdrawal);
-        console.log(this.powerDownWithdrawDate);
         //effective SP
         this.effectiveSteemPower = this.steemPower + this.receivedSteemPower - this.delegatedSteemPower - this.powerDownRateVal;
 
@@ -3511,18 +3504,9 @@ export default {
         this.claimableSTEEMRewards();
 
 
-        //fetch user's AFIT S-E balance
-        //disable: EOL for S-E
-        //this.fetchAFITSE();
-
         //fetch user's AFIT H-E balance
-
         this.fetchAFITHE();
 
-
-        //fetch user's AFITX S-E balance
-        //disable: EOL for S-E
-        //this.fetchAFITXSE();
 
         //fetch user's AFITX H-E balance
         this.fetchAFITXHE();
@@ -3536,20 +3520,6 @@ export default {
 
         //fetch user's tokensOfInterest S-E balance
         let tokenData, tokenExtraDetails
-        /*if (this.cur_bchain == 'STEEM'){
-          tokenData = await ssc.find('tokens', 'balances', { account: this.user.account.name, symbol : { '$in' : tokensOfInterest } });
-
-          //grab full token data
-          tokenExtraDetails = await ssc.find('tokens', 'tokens', { symbol : { '$in' : tokensOfInterest } });
-        }else{*/
-
-        /*
-        OLD specific token listing
-        tokenData = await hsc.find('tokens', 'balances', { account: this.user.account.name, symbol : { '$in' : tokensOfInterest } });
-
-        //grab full token data
-        tokenExtraDetails = await hsc.find('tokens', 'tokens', { symbol : { '$in' : tokensOfInterest } });
-        */
 
         //new full token balance listing
         tokenData = await hsc.find('tokens', 'balances', { account: this.displayUserData.name });
@@ -3557,25 +3527,17 @@ export default {
         this.heTokenDelegations = await hsc.find('tokens', 'delegations', { from: this.displayUserData.name }, 200, 0, []);
 
         this.heTokenUnstakes = await hsc.find('tokens', 'pendingUnstakes', { account: this.displayUserData.name }, 200, 0, []);
-        //console.log('delegations')
-        console.log('unstakes');
-        console.log(this.heTokenUnstakes);
 
         //grab full token data
         tokenExtraDetails = await hsc.find('tokens', 'tokens', {});
 
-        //}
-
-        //console.log(tokenExtraDetails);
-
         //loop through tokenData and set proper icon
         for (let x = 0; x < tokenData.length; x++) {
           try {
-            //console.log(tokenData[x].symbol);
             let matchEntry = tokenExtraDetails.find(v => v.symbol == tokenData[x].symbol);
-            //console.log(matchEntry);
-            tokenData[x].icon = JSON.parse(matchEntry.metadata).icon
-            //console.log(tokenData[x].icon);
+            if (matchEntry && matchEntry.metadata) {
+              tokenData[x].icon = JSON.parse(matchEntry.metadata).icon
+            }
           } catch (parseErr) {
             console.log(parseErr);
           }
@@ -3583,42 +3545,19 @@ export default {
 
         let afitData = this.tokenMetrics.find(v => v.symbol == 'AFIT');
 
-        //console.log('tokenData')
-        //console.log(tokenData)
-
         if (tokenData) {
           this.tokensOfInterestBal = tokenData;
           await this.sortTokenData(this.tokenSort, true);
         }
 
-        //fetch tokens' data (price et al)
-        /*if (this.cur_bchain == 'STEEM'){
-          this.tokenMetrics = await ssc.find('market', 'metrics', {symbol : { '$in' : tokensOfInterest.concat(['AFIT','AFITX']) }}, 1000, 0, '', false);
-        }else{*/
-
-        //build up a list of the user's current tokenlist
-        //this.userTokenList = tokenData.map((obj) => obj.symbol);
-
-        //this.tokenMetrics = await hsc.find('market', 'metrics', {symbol : { '$in' : tokensOfInterest.concat(['AFIT','AFITX']) }}, 1000, 0, '', false);
-
         //extract prices for all user balances
         this.tokenMetrics = await hsc.find('market', 'metrics', {}, 1000, 0, '', false);
-        //}
-
-
-        //console.log('tokenMetrics');
-        //console.log(this.tokenMetrics);
 
         //let's grab the user's wallet address
         fetch(process.env.actiAppUrl + 'getUserWalletAddress?user=' + this.displayUserData.name).then(
           res => {
             res.json().then(json => this.setUserWalletAddress(json)).catch(e => console.log(e))
           }).catch(e => console.log(e))
-
-        //grab user airdrop results
-        /*fetch(process.env.actiAppUrl+'airdropResults?user='+this.displayUserData.name).then(
-          res => {res.json().then(json => this.setAirdropResults (json) ).catch(e => console.log(e))
-        }).catch(e => console.log(e))*/
 
 
         //check if user is powering down AFIT to SE
@@ -3646,13 +3585,7 @@ export default {
           }).catch(e => console.log(e))
 
         //fetch account RC
-
         this.getRCHF26();
-
-        //force refresh data
-        //this.$forceUpdate();
-
-
       }
     },
     async sortTokenData(type, keepDir) {
@@ -4338,8 +4271,8 @@ export default {
 
       this.error_proceeding = false;
       this.error_msg = '';
-      const recipient = this.$refs["transfer-recipient"].$refs['input'].value.trim().toLowerCase();
-      if (!localStorage.getItem('std_login')) {
+      //const recipient = this.$refs["transfer-recipient"].$refs['input'].value.trim().toLowerCase();
+      /*if (!localStorage.getItem('std_login')) {
 
         //https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
         var link = this.$steemconnect.sign('transfer', {
@@ -4351,7 +4284,8 @@ export default {
         }, window.location.origin + '/wallet?op=transfer&status=success');
         //launch the SC window
         window.open(link);
-      } else if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) ||
+      } else*/
+      if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) ||
         (localStorage.getItem('acti_login_method') == 'hiveauth')) {
         console.log(this.transferType);
         console.log('>>pop')
@@ -4417,7 +4351,7 @@ export default {
         }
       }
 
-      const recipient = this.$refs["transfer-recipient"].$refs['input'].value.trim().toLowerCase();
+      /*const recipient = this.$refs["transfer-recipient"].$refs['input'].value.trim().toLowerCase();
 
       if (!localStorage.getItem('std_login')) {
 
@@ -4431,7 +4365,8 @@ export default {
         }, window.location.origin + '/wallet?op=transfer&status=success');
         //launch the SC window
         window.open(link);
-      } else if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) ||
+      } else*/
+      if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) ||
         (localStorage.getItem('acti_login_method') == 'hiveauth')) {
         console.log(this.transferType);
         console.log('>>pop')
@@ -4505,7 +4440,7 @@ export default {
       }
 
       //make sure user is fine sending to this recipient
-      if (badActors.includes(recipient)){
+      if (badActors.includes(recipient)) {
         let confirmPopup = confirm(this.$t('confirm_bad_actor_transfer'));
         if (!confirmPopup) {
           return;
@@ -4573,7 +4508,7 @@ export default {
       const memo = this.$refs["transfer-memo"].value.trim();
 
       //make sure user is fine sending to this recipient
-      if (badActors.includes(recipient)){
+      if (badActors.includes(recipient)) {
         let confirmPopup = confirm(this.$t('confirm_bad_actor_transfer'));
         if (!confirmPopup) {
           return;
@@ -4583,28 +4518,28 @@ export default {
       //check if user is sending funds to an exchange
       // Case-insensitive check
       const matchExch = process.env.exchangesList.find(exchange => exchange.address.toLowerCase() === recipient);
-      if (matchExch){
+      if (matchExch) {
         //exchanges don't support HBD, if he is trying to send HBD, bail out
-        if (this.transferType == 'HBD'){
+        if (this.transferType == 'HBD') {
           this.error_proceeding = true;
           this.error_msg = this.$t('exchange_do_not_allow_hbd');
           this.$notify({
-                group: 'error',
-                text: this.$t('exchange_do_not_allow_hbd'),
-                position: 'top center'
-              })
+            group: 'error',
+            text: this.$t('exchange_do_not_allow_hbd'),
+            position: 'top center'
+          })
           return;
         }
         //also check for memo
-        if (memo == ""){
+        if (memo == "") {
           this.error_proceeding = true;
           this.error_msg = this.$t('exchange_requires_memo');
           this.$refs["transfer-memo"].focus();
           this.$notify({
-                group: 'error',
-                text: this.$t('exchange_requires_memo'),
-                position: 'top center'
-              })
+            group: 'error',
+            text: this.$t('exchange_requires_memo'),
+            position: 'top center'
+          })
           return;
         }
       }
@@ -7178,7 +7113,7 @@ export default {
       }
 
       //make sure user is fine sending to this recipient
-      if (badActors.includes(target_account)){
+      if (badActors.includes(target_account)) {
         let confirmPopup = confirm(this.$t('confirm_bad_actor_transfer'));
         if (!confirmPopup) {
           return;
@@ -8127,31 +8062,45 @@ export default {
   },
   async mounted() {
     try {
-      this.fetchUserData();
+      // Step 1: Determine the target user first from the route or the logged-in state.
+      let userToFetch = null;
+      if (this.$route.params && this.$route.params.username) {
+        userToFetch = this.$route.params.username.startsWith('@')
+          ? this.$route.params.username.substring(1)
+          : this.$route.params.username;
+      } else if (this.user && this.user.account && this.user.account.name) {
+        userToFetch = this.user.account.name;
+      }
+
+      // Step 2: If there's no user to fetch (e.g., logged out and visiting /wallet), stop.
+      if (!userToFetch) {
+        this.loading = false;
+        // Optionally, you could redirect to a login page here.
+        // For example: this.$router.push('/login');
+        return;
+      }
+
+      this.displayUser = userToFetch;
+
+      // Step 3: Fetch the core account data and WAIT for it before doing anything else. This is the critical fix.
+      const account_res = await this.retryOperation(async () => {
+        return await hive.api.getAccountsAsync([this.displayUser]);
+      });
+
+      // Step 4: Handle the case where the user account does not exist.
+      if (!account_res || account_res.length === 0) {
+        console.error(`Account ${this.displayUser} not found.`);
+        this.loading = false;
+        return; // Stop execution
+      }
+
+      this.displayUserData = account_res[0];
+
+      // Step 5: Now that displayUserData is safely populated, proceed with all other initializations.
       this.afitTokenAddress = afitTokenAddress;
       this.afitxTokenAddress = afitxTokenAddress;
       this.afitBNBLPTokenAddress = afitBNBLPTokenAddress;
       this.afitxBNBLPTokenAddress = afitxBNBLPTokenAddress;
-
-      if ((typeof this.$route.params !== 'undefined') && (typeof this.$route.params.username !== 'undefined')) {
-        this.displayUser = this.$route.params.username;
-        if (this.$route.params.username.startsWith('@')) {
-          this.displayUser = this.$route.params.username.substring(1);
-        }
-      }
-
-      if (this.displayUser !== '') {
-        try {
-          const account_res = await this.retryOperation(async () => {
-            return await hive.api.getAccountsAsync([this.displayUser]);
-          });
-          if (account_res && account_res.length > 0) {
-            this.displayUserData = account_res[0];
-          }
-        } catch (err) {
-          console.error('Error fetching display user:', err);
-        }
-      }
 
       if (typeof window.ethereum !== 'undefined') {
         web3 = new Web3(window.ethereum);
@@ -8174,7 +8123,7 @@ export default {
 
       const chainLnk = this.setProperNode();
       this.$store.dispatch('steemconnect/login');
-      await this.fetchUserData();
+      await this.fetchUserData(); // This can now be called safely.
 
       try {
         this.properties = await this.retryOperation(async () => {
@@ -8329,7 +8278,7 @@ export default {
   height: 25px;
 }
 
-.grid{
+.grid {
   background-color: var(--background-color-2) !important;
   border: 2px solid red;
   border-radius: 5px;

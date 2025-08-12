@@ -1,77 +1,26 @@
 <template>
-  <!-- Footer used on all pages -->
-  <div class="footer bg-light">
-    <div class="container">
+  <div>
+    
+    <NewFooterDesign />
+    
+    
+    <VoteProposalModal />
+    
+    <vue-cookie-accept-decline 
+      :ref="'myPanel1'" 
+      :elementId="'myPanel1'" 
+      :debug="false" 
+      :position="'bottom'"
+      :type="'bar'" 
+      :disableDecline="true" 
+      :transitionName="'slideFromBottom'" 
+      :showPostponeButton="false">
 
-      <div class="columns">
-        <div class="column">
-          <img src="/img/actifit_logo_50.png" class="ml-3" style="max-height: 30px">{{ $t('Actifit') }}
-          <a class="nav-link " href="#" @click.prevent="$router.push('/activity')">{{ $t('Activity') }}</a>
-          <a class="nav-link " href="#" @click.prevent="$router.push('/market')">{{ $t('Market') }}</a>
-          <a class="nav-link " href="#" @click.prevent="$router.push('/yieldfarming')">{{ $t('yield_farming') }}</a>
-          <a class="nav-link " href="#" @click.prevent="$router.push('/referrals')">{{ $t('Refer_A_Friend') }}</a>
-          <a class="nav-link " href="/whitepaper/Actifit_White_Paper.pdf">{{ $t('Whitepaper') }}</a>
-          <a class="nav-link " href="/faq">{{ $t('FAQ') }}</a>
-        </div>
-        <div class="column">
-          <img src="/img/HIVE.png" class="ml-3" style="max-height: 30px">{{ $t('Hive') }}
-          <a class="nav-link " href="/communities">{{ $t('Communities') }}</a>
-          <a class="nav-link " href="/explore">{{ $t('Explore') }}</a>
-          <a class="nav-link " target="_blank" href="https://hive.io">{{ $t('Hive_official') }}</a>
-          <a class="nav-link " target="_blank" href="https://hivescan.info">{{ $t('Hive_block_explorer') }}</a>
-          <a class="nav-link " target="_blank" href="https://hivescan.info/witnesses">{{ $t('Hive_witnesses') }}</a>
-        </div>
-      </div>
-
-      <div class="text-center social-links mb-4">
-        <a href="https://links.actifit.io/discord " target="_blank" class="d-inline-block mx-3 mt-3"
-          :title="$t('Discord')"><i class="fab fa-2x fa-discord"></i></a>
-        <a href="https://www.facebook.com/Actifit.fitness/" target="_blank" class="d-inline-block mx-3 mt-3"
-          :title="$t('Facebook')"><i class="fab fa-2x fa-facebook"></i></a>
-        <a href="https://www.x.com/Actifit_fitness" target="_blank" class="d-inline-block mx-3 mt-3"
-          :title="$t('X_twitter')"><i class="fa-brands fa-2x fa-square-x-twitter"></i></a>
-        <a href="https://www.instagram.com/actifit.fitness/" target="_blank" class="d-inline-block mx-3 mt-3"
-          :title="$t('Instagram')"><i class="fab fa-2x fa-instagram"></i></a>
-        <a href="https://t.me/actifit" target="_blank" class="d-inline-block mx-3 mt-3" :title="$t('Telegram')"><i
-            class="fab fa-2x fa-telegram"></i></a>
-        <a href="https://medium.com/@actifit.fitness" target="_blank" class="d-inline-block mx-3 mt-3"
-          :title="$t('Medium')"><i class="fab fa-2x fa-medium"></i></a>
-        <a href="https://www.youtube.com/channel/UCNHxAGO79rXI7Hdiikwnqtw" target="_blank"
-          class="d-inline-block mx-3 mt-3" :title="$t('Youtube')"><i class="fab fa-2x fa-youtube"></i></a>
-        <a href="https://www.linkedin.com/company/actifit-io" target="_blank" class="d-inline-block mx-3 mt-3"
-          :title="$t('LinkedIn')"><i class="fab fa-2x fa-linkedin"></i></a>
-      </div>
-
-      <div class="row">
-        <div class="col text-center">
-          <i>{{ $t('powered_by') }}<img src="/img/HIVE.png" style="max-height: 30px;"></i>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col text-center"><small>{{ $t('price_data_sentence') }}<a href="https://coingecko.com">{{
-          $t('CoinGecko') }}</a></small></div>
-      </div>
-      <div class="row">
-        <div class="col text-center">
-          <small class="text-muted">&copy; {{ $t('Copyright_Actifit') }} {{ currentYear }} | {{ $config.version }}</small>
-          |
-          <small class="text-muted"><nuxt-link to="/privacy-policy">{{ $t('Privacy_Policy') }}</nuxt-link></small> |
-          <small class="text-muted"><nuxt-link to="/terms-conditions">{{ $t('Terms_Conditions') }}</nuxt-link></small>
-        </div>
-      </div>
-      <VoteProposalModal />
-    </div>
-    <vue-cookie-accept-decline :ref="'myPanel1'" :elementId="'myPanel1'" :debug="false" :position="'bottom'"
-      :type="'bar'" :disableDecline="true" :transitionName="'slideFromBottom'" :showPostponeButton="false">
-
-
-      <!-- Optional -->
       <div slot="message">
         {{ $t('cookies_notice') }}
         <router-link to="privacy-policy">{{ $t('More_Info') }}</router-link>
       </div>
 
-      <!-- Optional -->
       <div slot="acceptContent">
         {{ $t('Accept_Cookie') }}
       </div>
@@ -80,23 +29,30 @@
 </template>
 
 <script>
-import VueCookieAcceptDecline from 'vue-cookie-accept-decline'
+import NewFooterDesign from './NewFooterDesign.vue';
+
+import VueCookieAcceptDecline from 'vue-cookie-accept-decline';
 import "vue-cookie-accept-decline/dist/vue-cookie-accept-decline.css";
-import VoteProposalModal from "~/components/VoteProposalModal"
+import VoteProposalModal from "~/components/VoteProposalModal";
+
 export default {
   props: ['isHomePage'],
-  computed: {
-    currentYear() {
-      return (new Date()).getFullYear()
-    },
-  },
+
   components: {
+    NewFooterDesign,
     VueCookieAcceptDecline,
     VoteProposalModal
   },
+
+  computed: {
+    currentYear() {
+      return (new Date()).getFullYear();
+    },
+  },
+
   async mounted() {
     if (process.client) {
-      $("#voteProposalModal").modal({ backdrop: false, focus: false, keyboard: true });//("show");
+      $("#voteProposalModal").modal({ backdrop: false, focus: false, keyboard: true });
       $('#voteProposalModal').on('shown.bs.modal', function () {
         $("body").css("overflow", "auto"); // Allow scrolling on the page
         $("body").removeClass("modal-open");
@@ -105,11 +61,12 @@ export default {
   }
 }
 </script>
+
 <style>
 
-/* Make sure the body can still scroll */
+
 body.modal-open {
-  overflow: auto !important; /* Override Bootstrap's hidden overflow */
+  overflow: auto !important; 
 }
 
 #voteProposalModal {
@@ -118,7 +75,6 @@ body.modal-open {
   transform: none !important; /* Remove Bootstrap's centering transform */
   box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
 }
-
 
 .footer{
   position: relative;
@@ -246,28 +202,6 @@ div#voteModal {
   /* fix for proper voting popup placement */
 }
 
-/*.custom-tooltip {
-	  position: absolute;
-	  top: 100%;
-	  left: 50%;
-	  transform: translateX(-50%);
-	  padding: 8px;
-	  background-color: #000;
-	  color: #fff;
-	  border-radius: 4px;
-	  font-size: 14px;
-	  white-space: nowrap;
-	  opacity: 0;
-	  visibility: hidden;
-	  transition: opacity 0.3s, visibility 0.3s;
-	}
-
-	.tooltip + .custom-tooltip,
-	.custom-tooltip:hover {
-	  opacity: 1;
-	  visibility: visible;
-	}*/
-
 .columns {
   display: flex;
 }
@@ -285,9 +219,7 @@ div#voteModal {
 
 .social-links img {
   width: 40px;
-  /* Adjust width as needed */
   height: 40px;
-  /* Adjust height as needed */
   margin-top: -15px;
 }
 </style>

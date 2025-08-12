@@ -151,4 +151,14 @@ export default {
 .navbar-collapse .navbar-nav .nav-item.btn > .nav-link i {
   font-size: 1.2em; 
 }
+
+/*
+  FIX: Add pointer cursor to UserMenu icons.
+  This selector targets the last direct child of the .navbar (which is the UserMenu component),
+  and then applies the cursor style to all of ITS direct children (the icon wrappers).
+  This is specific and robust.
+*/
+.navbar > :last-child > * {
+    cursor: pointer;
+}
 </style>

@@ -1,18 +1,21 @@
 <template>
-  <div v-if="visible" id="voteProposalModal" ref="voteProposalModal" :class="{ 'visible': visible}" class="modal fade" tabindex="-1"
-    role="dialog" data-backdrop="false">
-    <div ><!-- class="modal-dialog" role="document" -- -->
+  <div v-if="visible" id="voteProposalModal" ref="voteProposalModal" :class="{ 'visible': visible }"
+    class="modal fade show" tabindex="-1" role="dialog" data-backdrop="false">
+    <div><!-- class="modal-dialog" role="document" -->
       <div class="modal-content">
-        <div v-if="modalTitle" class="modal-header p-1">
-          <h5 class="modal-title">{{ modalTitle }}</h5>
+        <div class="modal-header p-1">
+          <!-- Using the dynamic year from the computed property -->
+          <h5 class="modal-title">{{ $t('proposal_modal_title_year') }}</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close" @click="closeModal">
-            <span aria-hidden="true">&times;</span>
+            <span aria-hidden="true">×</span>
           </button>
         </div>
-        <p>{{ message }}</p>
+        <p>{{ $t('proposal_modal_message') }}</p>
         <div class="text-right">
-          <button @click="voteForProposal" class="m-1 col-5">Vote</button>
-          <button @click="readMore" class="m-1 col-5">Read More</button>
+          <button @click="voteForProposal" class="btn m-1 col-5">
+            {{ $t('vote_button_text') }}
+          </button>
+          <button @click="readMore" class="m-1 col-5">{{ $t('read_more_button_text') }}</button>
         </div>
       </div>
     </div>
@@ -20,17 +23,11 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters } from 'vuex';
+
 export default {
   props: {
-    message: {
-      type: String,
-      default: "Support Actifit's development & growth effort. Vote for our proposal❤️",
-    },
-    modalTitle: {
-      type: String,
-      default: 'Actifit Proposal 2025',
-    },
+    // MODIFIED: Removed modalTitle and message props to handle text internally.
     propUrl:{
       type: String,
       default: 'https://peakd.com/proposals/337',
@@ -52,14 +49,13 @@ export default {
     ...mapGetters(['proposalVoters']),
   },
   methods: {
-    closeModal(){
+    closeModal() {
       this.visible = false;
     },
     voteForProposal() {
       const username = this.user && this.user.account && this.user.account.name || null;
       const proposalId = this.$config.proposalId; // Retrieve proposal ID from nuxt.config.js
       const approve = true; // Set to false if you want to unvote
-
       window.hive_keychain.requestUpdateProposalVote(
         username,
         [proposalId],
@@ -89,6 +85,7 @@ export default {
     }
   },
   async mounted() {
+    // Fetch voters and then adjust visibility based on the result.
     await this.$store.dispatch('fetchProposalVoters', {proposalId: this.$config.proposalId});
     this.adjustVisibility();
   },
@@ -96,10 +93,11 @@ export default {
 </script>
 
 <style scoped>
-.modal.visible{
+.modal.visible {
   display: block;
   opacity: 1;
 }
+
 .modal {
   /*display: block;*/
   position: fixed;
@@ -128,5 +126,4 @@ export default {
 .modal-content button:hover {
   background-color: #218838;
 }
-
 </style>

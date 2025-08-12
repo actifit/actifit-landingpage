@@ -1,4 +1,5 @@
 module.exports = {
+  languages: 'Languages',
   afit_balance: 'AFIT Balance',
   hive_balance: 'HIVE Balance',
   view_full_profile: 'View Full Profile',
@@ -59,13 +60,14 @@ module.exports = {
   pending_rewards_note: 'Please note that those rewards are not final, and are subject to increase or decrease depending on actifit and blockchain community engagement. You can view your recent actifit posts and pending rewards by clicking button below.',
   pending_rewards_head_note: 'You have upcoming rewards within 7 days:',
   Check_Pending_Rewards: 'Check Pending Rewards',
+  paid_out_vote_confirm: 'You are currently attempting to cast a vote on a post that has already been paid out; therefore, your action will not be counted. Are you certain you wish to continue with this action?',
   homepage: {
     section1_title: '<span class="text-brand">Actifit:</span> The 1st Social, Cross-Chain, Multi-Reward, Move-To-Earn Gamified Project..with a DeFi Twist!',
 	section1_desc: 'Using Actifit mobile app allows you to earn token rewards via auto-tracking your everyday activity. Rewards include AFIT tokens - Actifit\'s utility and reward token, but also HIVE, BLURT, SPORTS and other token rewards via upvotes on supported blockchains and partner communities.',
 	section2_title: 'Earn tokens as simple as one two three',
 	section2_desc: '1. Download the Actifit mobile app.<br/>2. Go for a jog, walk your dog, mow your lawn, go to the gym, move around your office,... with an aim to reach a minimum of 5,000 activity count.<br/>3. Post a report via the app, and get rewarded!',
 	section3_title: 'AFIT tokens',
-	section3_desc: 'AFIT tokens can be exchanged on Actifit Market to signup for fitness or nutrition related consultation sessions, buying ebooks, boosting your rewards via purchasing actifit based booster gadgets, or earning extra HIVE rewards! <br/>You can buy AFIT tokens on:<li> <a href="https://hive-engine.com/?p=market&t=AFIT">Hive-Engine.com(Hive Version)</a> </li><li><a href="https://defi.actifit.io">Actifit DeFi (BSC Version)</a></li><li><a href="https://pancakeswap.finance/swap?inputCurrency=BNB&outputCurrency=0x4516bb582f59befcbc945d8c2dac63ef21fba9f6">Pancakeswap(BSC Version)</a></li><li><a href="https://www.digifinex.com/en-ww/trade/USDT/AFIT">Digifinex (BSC Version)</a></li><li><a href="https://dex-trade.com/spot/trading/AFITUSDT">Dex-trade (BSC Version)</a></li>',
+	section3_desc: 'AFIT tokens can be exchanged on Actifit Market to signup for fitness or nutrition related consultation sessions, buying ebooks, boosting your rewards via purchasing actifit based booster gadgets, or earning extra HIVE rewards! <br/></li>',
 	section4_title: 'Yield Farming with Actifit',
 	section4_desc: 'You can yield farm AFIT tokens if you are a token holder on Hive blockchain. Stake/Power Up to Hive Power , delegate to Actifit and earn your share of AFIT tokens pool distributed per day to our delegators, as well as a weekly share of the 5% beneficiary reward of actifit posts.',
   },
@@ -1155,7 +1157,74 @@ module.exports = {
   Description:'Description',
   Website:'Website',
   Latest_Activity_Count:'Latest_Activity_Count',
-  Latest_Activity_Date:'Latest_Activity_Date',
+  Latest_Activity_Date:'Latest_Activity_Date',hide_reblogs:'hide reblogs',
+  show_reblogs:'show reblogs',
+  proposal_modal_title_year: "Actifit Proposal 2025",
+  proposal_modal_message: "Support Actifit's development & growth effort. Vote for our proposal❤️",
+  vote_button_text: "Vote",
+  read_more_button_text: "Read More",
+
+  // new ones
+  Actifit_title:'Actifit: Where Fitness Meets Fun, Crypto and Rewards!',
+  Actifit_subtitle:'Earn token rewards effortlessly with the Actifit app. Track your daily activity and receive AFIT, HIVE, BLURT, SPORTS, and more through integrated blockchain and community support.',
+  IT_PAYS_TO:'IT PAYS TO',
+  BE_FIT:'BE FIT',
+  subtitle:'Join a global community that rewards you for your daily activity. Your steps, your effort, your crypto.',
+  prompt:"Get started now!",
+  fresh:'Fresh Off The Track',
+  community:'See what our community has been up to!',
+  loading_news:'Loading news...',
+  footer_slogan:' Your daily activity is valuable. Get rewarded for it.',
 
 
+
+Explore_Activity_Feed: 'Explore Activity Feed',
+loading_activities: 'Loading recent activities...',
+loading_supporters: 'Loading our top supporters...',
+loading_leaderboard: 'Leaderboard is being updated...',
+view_more_activities: 'View More Activities',
+available_on: 'Available for trade on:',
+our_top_supporters: 'Our Top Supporters',
+top_supporters_desc: 'A huge thank you to our top delegators who power the Actifit ecosystem!',
+daily_afit_earnings: 'AFIT/Day',
+HP_short: 'HP',
+RC:'RC',
+VP:'VP',
+
+Steps: 'activity count',
+recent_post:'Recent Posts',
+  exchanges: {
+    hive_engine: 'Hive-Engine',
+    actifit_defi: 'Actifit DeFi',
+    pancakeswap: 'Pancakeswap',
+    digifinex: 'Digifinex',
+    dex_trade: 'Dex-trade'
+  },
+
+  aria: {
+    scroll_left: 'Scroll Left',
+    scroll_right: 'Scroll Right',
+  },
+
+  placeholders: {
+    hive: 'Hive',
+    blurt: 'Blurt',
+    bnb_chain: 'BNB Chain'
+  },
+
+  alt_texts: {
+    running_couple: 'Man and woman running',
+    google_play: 'Get it on Google Play',
+    app_store: 'Download on the App Store',
+    gym_workout: 'Man exercising in a gym',
+    post_workout_pose: 'Man and woman posing after a workout',
+    gold_medal: 'Gold Medal',
+    hive_logo: 'HIVE',
+    blurt_logo: 'BLURT',
+    bnb_logo: 'BNB Chain',
+    private_active: 'PRIVATE ACTIVE',
+    operation_require: 'This operation requires your',
+  }
+  // END: MERGED AND CORRECTED CODE
 }
+
