@@ -3,7 +3,7 @@
     <ul class="navbar-nav mr-auto user-menu flex-row">
       <!-- Search Bar -->
       <li class="nav-item mr-2 btn btn-brand nav-item-border p-0 search-li">
-        <div style="display:inline-flex">
+        <div class="autocomp-container">
           <AutocompleteUsernameInput id="search-user" name="search-user" ref="search-user"
             :customClass="computedCustomClass" :inputClass="computedInputClass" :placeHolderVal="$t('search_user')"
             :enableRedirect="true" />
@@ -481,9 +481,6 @@ export default {
 </style>
 
 <style>
-/* ======================================================= */
-/* START: FIXED LANGUAGE SWITCHER STYLES                   */
-/* ======================================================= */
 
 .lang-item {
   display: flex !important;
@@ -491,8 +488,6 @@ export default {
   padding: 6px 6px !important;
 }
 
-/* FIX: Explicitly set text color for the language name. */
-/* This ensures it is visible on a light/default background. */
 .lang-item .lang-name {
   color: #212529 !important;
   flex-grow: 1;
@@ -533,11 +528,7 @@ html[dir="rtl"] .flag-icon-container {
   margin-left: 12px;
 }
 
-/* ======================================================= */
-/* END: LANGUAGE SWITCHER STYLES                           */
-/* ======================================================= */
 
-/* The rest of this file contains your original global styles, which are preserved. */
 .notification-item-container {
   position: relative;
 }
@@ -730,6 +721,7 @@ html[dir="rtl"] .flag-icon-container {
     padding: 0 !important;
     display: flex;
     align-items: center;
+    min-height: auto;
   }
 
   .user-menu-container .user-menu .nav-item .user-avatar,
@@ -771,4 +763,41 @@ html[dir="rtl"] .flag-icon-container {
     font-size: 0.9rem;
   }
 }
+
+@media (max-width: 375px) {
+
+  /* .navbar {
+
+    flex-wrap: nowrap;
+
+  }*/
+  .user-menu .search-li {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    max-width: 110px;
+    margin-right: 5px !important;
+  }
+
+  .autocomp-container {
+    display:inline-flex;
+    width: 100%;
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+  }
+
+  .autocomplete-input.autocomplete-condensed {
+    width: 100%;
+  }
+
+  .search-input-condensed {
+    width: 100%;
+    min-width: 40px;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.3rem 0.2rem 25px;
+    box-sizing: border-box; /* Ensures padding and border are included in the element's total width */
+  }
+}
+
 </style>
