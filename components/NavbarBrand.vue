@@ -6,6 +6,7 @@
         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
+
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
 
@@ -139,26 +140,22 @@ export default {
 }
 
 .navbar-collapse .navbar-nav .nav-item.btn > .nav-link {
-  padding: 0.5rem 0.75rem; 
-  width: 100%; 
-  height: 100%; 
+  padding: 0.5rem 0.75rem;
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
-  justify-content: center; 
+  justify-content: center;
   text-decoration: none !important; /* Added !important just in case, but better to resolve specificity */
 }
 
 .navbar-collapse .navbar-nav .nav-item.btn > .nav-link i {
-  font-size: 1.2em; 
+  font-size: 1.2em;
 }
 
-/*
-  FIX: Add pointer cursor to UserMenu icons.
-  This selector targets the last direct child of the .navbar (which is the UserMenu component),
-  and then applies the cursor style to all of ITS direct children (the icon wrappers).
-  This is specific and robust.
-*/
+
 .navbar > :last-child > * {
     cursor: pointer;
 }
+
 </style>

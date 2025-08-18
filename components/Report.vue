@@ -2,14 +2,7 @@
   <!-- single report item for activity pages -->
   <div>
     <div class="card report">
-      <!-- 1. Replaced with CardHeader component -->
-      <CardHeader :title="report.title" :link="report.url">
-        <!-- Slot for the "rewarded" checkmark icon -->
-        <span v-if="this.afitReward" :title="$t('Rewarded_report')" class="check-tooltip">
-          <i class="fas fa-check p-2"></i>
-        </span>
-      </CardHeader>
-
+      <CardHeader :title="report.title" :link="report.url" :showRewardedCheck="this.afitReward > 0" />
       <div class="report-body p-2">
         <!-- Author/Date row (remains here) -->
         <div class="row pb-1">
@@ -21,11 +14,10 @@
           </div>
         </div>
 
-        <!-- 2. Replaced Image Carousel and Body Snippet with CardBody component -->
         <CardBody
           :cardData="report"
           modalTarget="#reportModal"
-          :snippet="bodySnippet" 
+          :snippet="bodySnippet"
           :imageLoadFailed="imageLoadFailed"
           :imageLoading="imageLoading"
           :imageGeneration="imageGeneration"

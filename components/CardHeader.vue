@@ -3,8 +3,10 @@
     <a :href="link" target="_blank">
       {{ truncateString(title, 70) }}
       <i class="fas fa-external-link-alt"></i>
-      <!-- Slot for component-specific icons like pinned/rewarded -->
-      <slot></slot>
+      <!-- "rewarded" checkmark icon -->
+      <span v-if="showRewardedCheck" :title="$t('Rewarded_report')" class="check-tooltip">
+        <i class="fas fa-check p-2"></i>
+      </span>
     </a>
   </h6>
 </template>
@@ -22,6 +24,10 @@ export default {
     link: {
       type: String,
       required: true
+    },
+    showRewardedCheck: {
+      type: Boolean,
+      default: false
     }
   }
 }
