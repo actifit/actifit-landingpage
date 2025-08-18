@@ -173,11 +173,11 @@
 
               <h4 class="mt-4 mb-3">{{ $t('available_on') }}</h4>
               <div class="exchange-tags-container">
-                  <a href="#" class="exchange-tag"><i class="fas fa-coins mr-2"></i>{{ $t('exchanges.hive_engine') }}</a>
-                  <a href="#" class="exchange-tag"><i class="fas fa-fire-alt mr-2"></i>{{ $t('exchanges.actifit_defi') }}</a>
-                  <a href="#" class="exchange-tag"><i class="fas fa-sync-alt mr-2"></i>{{ $t('exchanges.pancakeswap') }}</a>
-                  <a href="#" class="exchange-tag"><i class="fas fa-chart-line mr-2"></i>{{ $t('exchanges.digifinex') }}</a>
-                  <a href="#" class="exchange-tag"><i class="fas fa-exchange-alt mr-2"></i>{{ $t('exchanges.dex_trade') }}</a>
+                  <a href="https://tribaldex.com/trade/AFIT" class="exchange-tag" target="_blank"><i class="fas fa-coins mr-2"></i>{{ $t('exchanges.hive_engine') }}</a>
+                  <a href="https://defi.actifit.io/swap?outputCurrency=0x4516bb582f59befcbc945d8c2dac63ef21fba9f6" target="_blank" class="exchange-tag"><i class="fas fa-fire-alt mr-2"></i>{{ $t('exchanges.actifit_defi') }}</a>
+                  <a href="https://pancakeswap.finance/swap?outputCurrency=0x4516bb582f59befcbc945d8c2dac63ef21fba9f6" target="_blank" class="exchange-tag"><i class="fas fa-sync-alt mr-2"></i>{{ $t('exchanges.pancakeswap') }}</a>
+                  <a href="https://www.digifinex.com/en-ww/trade/USDT/AFIT" target="_blank" class="exchange-tag"><i class="fas fa-chart-line mr-2"></i>{{ $t('exchanges.digifinex') }}</a>
+                  <a href="https://dex-trade.com/spot/trading/AFITUSDT" target="_blank" class="exchange-tag"><i class="fas fa-exchange-alt mr-2"></i>{{ $t('exchanges.dex_trade') }}</a>
               </div>
           </div>
         </div>
