@@ -1122,6 +1122,7 @@ module.exports = {
   Hive_official: 'Официальный Hive',
   Hive_block_explorer: 'Обозреватель блоков Hive',
   Hive_witnesses: 'Свидетели Hive (Производители блоков)',
+  DHF: 'Децентрализованный фонд Hives',
   Explore: 'Изучить',
   main_chain: 'Основная сеть',
   secondary_chains: 'Второстепенные сети',
