@@ -1122,6 +1122,7 @@ module.exports = {
   Hive_official: 'Hive الرسمي',
   Hive_block_explorer: 'مستكشف كتل Hive',
   Hive_witnesses: 'شهود Hive (منتجو الكتل)',
+  DHF: 'الصندوق اللامركزي Hive',
   Explore: 'استكشاف',
   main_chain: 'السلسلة الرئيسية',
   secondary_chains: 'السلاسل الثانوية',

@@ -1123,6 +1123,7 @@ module.exports = {
   Hive_official: 'हाइव आधिकारिक',
   Hive_block_explorer: 'हाइव ब्लॉक एक्सप्लोरर',
   Hive_witnesses: 'हाइव विटनेस (ब्लॉक प्रोड्यूसर्स)',
+  DHF: 'विकेन्द्रीकृत Hive निधि',
   Explore: 'अन्वेषण करना',
   main_chain: 'प्राथमिक श्रृंखला',
   secondary_chains: 'माध्यमिक श्रृंखलाएं',

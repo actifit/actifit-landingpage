@@ -679,7 +679,7 @@
                 <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
                   <div class="text-center small p-2 w-25"></div>
                   <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50"> {{ $t('operation_require') }}
-                    <b>{{ $t('private_active') }}</b> key.*
+                    <b>{{ $t('private_active') }}</b>
                   </div>
                 </div>
                 <div class="text-center small p-2">
@@ -721,7 +721,7 @@
                 <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
                   <div class="text-center small p-2 w-25"></div>
                   <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">{{ $t(operation_required)}}
-                    <b>{{ $t(private_active)}}</b> key.*
+                    <b>{{ $t(private_active)}}</b>
                   </div>
                 </div>
                 <div class="row">
@@ -765,7 +765,7 @@
                   <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
                     <div class="text-center small p-2 w-25"></div>
                     <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">{{ $t(operation_required) }}
-                      <b>{{ $t(private_active) }}</b> key.*
+                      <b>{{ $t(private_active) }}</b>
                     </div>
                   </div>
                 </div>
@@ -858,7 +858,7 @@
                 <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
                   <div class="text-center small p-2 w-25"></div>
                   <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">{{ $t(operation_required) }}
-                    <b>{{ $t(private_active) }}</b> key.*
+                    <b>{{ $t(private_active) }}</b>
                   </div>
                 </div>
                 <div class="text-center small p-2">
@@ -920,7 +920,7 @@
                 <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
                   <div class="text-center small p-2 w-25"></div>
                   <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">{{ $t(operation_required) }}
-                    <b>{{ $t(private_active) }}</b> key.*
+                    <b>{{ $t(private_active) }}</b>
                   </div>
                 </div>
                 <div class="text-center small p-2">
@@ -964,7 +964,7 @@
                   <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
                     <div class="text-center small p-2 w-25"></div>
                     <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">{{ $t(operation_required) }}
-                      <b>{{ $t(private_active) }}</b> key.*
+                      <b>{{ $t(private_active) }}</b>
                     </div>
                   </div>
                   <div class="row">
@@ -3629,58 +3629,10 @@ export default {
           res.json().then(json => this.setPendingRewards(json)).catch(e => console.log(e))
         }).catch(e => console.log(e))
     },
-    async fetchAFITSE() {
-      try {
-        let bal = await ssc.findOne('tokens', 'balances', { account: this.displayUserData.name, symbol: 'AFIT' });
-
-        if (bal) {
-          this.afit_se_balance = bal.balance;
-
-          //if this operation relates to powering up AFIT from S-E, need to also initiate call to adjust AFIT token count
-          if (this.$route.query.confirm_trans == 1) {
-
-            let url = new URL(process.env.actiAppUrl + 'confirmAFITSEReceipt/?user=' + this.user.name + '&bchain=' + this.cur_bchain);
-            //connect with our service to confirm AFIT received to proper wallet
-            try {
-
-              fetch(url).then(
-                res => {
-                  res.json().then(json => this.setUserAddedTokens(json)).catch(e => console.log(e))
-                }).catch(e => console.log(e))
-
-
-            } catch (err) {
-              console.error(err);
-              //this.checkingFunds = false;
-            }
-          }
-        }
-      } catch (outErr) {
-        console.log(outErr);
-      }
-    },
     async fetchAFITHE() {
       let bal = await hsc.findOne('tokens', 'balances', { account: this.displayUserData.name, symbol: 'AFIT' });
       if (bal) {
         this.afit_he_balance = bal.balance;
-      }
-    },
-    fetchAFITXSE() {
-      try {
-        console.log('fetch AFITX SE');
-        let parnt = this
-        ssc.findOne('tokens', 'balances', { account: this.displayUserData.name, symbol: 'AFITX' }).then(
-          function (bal) {
-            console.log('>>bal')
-            console.log(bal);
-
-            if (bal) {
-              parnt.afitx_se_balance = bal.balance;
-            }
-          }
-        )
-      } catch (outErr) {
-        console.log(outErr);
       }
     },
     fetchAFITXHE() {
@@ -5617,28 +5569,17 @@ export default {
 
       try {
         //check if the user has enough AFITX S-E amount allowing him the transfers daily
-        let bal;
-        try {
-
-          bal = await ssc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' });
-          console.log(bal);
-        } catch (outErr) {
-          console.log(outErr);
-        }
         let bal_he = await hsc.findOne('tokens', 'balances', { account: this.user.account.name, symbol: 'AFITX' });
 
         this.afitx_se_balance = 0;
         this.afitx_he_balance = 0;
-        if (bal) {
-          this.afitx_se_balance = parseFloat(bal.balance);
-        }
         if (bal_he) {
           this.afitx_he_balance = parseFloat(bal_he.balance);
         }
         let free_movable_afit_day = 500;
         let afitx_afit_move_ratio = 100;
         if (amount_to_powerdown > free_movable_afit_day) {
-          if (bal || bal_he) {
+          if (bal_he) {
 
             let tot_afitx_bal = this.afitx_se_balance + this.afitx_he_balance;
             //console.log('AFITX balance: '+this.afitx_se_balance);

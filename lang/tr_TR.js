@@ -1122,6 +1122,7 @@ module.exports = {
   Hive_official: 'Hive Resmi',
   Hive_block_explorer: 'Hive Blok Gezgini',
   Hive_witnesses: 'Hive Tanıkları (Blok Üreticileri)',
+  DHF: 'Merkeziyetsiz Hive Fon',
   Explore: 'Keşfet',
   main_chain: 'Ana Zincir',
   secondary_chains: 'İkincil Zincirler',

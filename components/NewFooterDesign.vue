@@ -41,6 +41,7 @@
           <a href="https://hive.io" target="_blank">{{ $t('Hive_official') }}</a>
           <a href="https://hivescan.info" target="_blank">{{ $t('Hive_block_explorer') }}</a>
           <a href="https://hivescan.info/witnesses" target="_blank">{{ $t('Hive_witnesses') }}</a>
+          <a href="https://hivescan.info/proposals" target="_blank">{{ $t('DHF') }}</a>
         </div>
       </div>
 

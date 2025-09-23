@@ -284,7 +284,6 @@ module.exports = {
     { src: '~plugins/vue-carousel', ssr: false },
     { src: '~plugins/vue-notification', ssr: false },
     { src: '~plugins/vue-simplemde', ssr: false },
-    { src: '~plugins/vue-sanitize', ssr: false },
     { src: '~plugins/v-lightbox', mode: 'client' },
     { src: '@/plugins/vue-mavon-editor', ssr: false },
     { src: '~plugins/vue-custom.js' },
@@ -314,7 +313,7 @@ module.exports = {
     locales: [
       { code: 'en', name: 'English', file: 'en_US.js' },
       { code: 'es', name: 'Español', file: 'es_ES.js' },
-      { code: 'de', name: 'German', file: 'de_DE.js' }, // Consolidated "Deutsche"
+      { code: 'de', name: 'German', file: 'de_DE.js' },
       { code: 'pl', name: 'Polski', file: 'pl_PL.js' },
       { code: 'hi', name: 'हिन्दी', file: 'hi_IN.js' },
       { code: 'it', name: 'Italiano', file: 'it_IT.js' },
@@ -324,9 +323,8 @@ module.exports = {
       { code: 'tr', name: 'Türkçe', file: 'tr_TR.js' },
       { code: 'uk', name: 'Українська', file: 'uk_UA.js' },
       { code: 'ru', name: 'Русский', file: 'ru_RU.js' },
-      { code: 'ko', name: '한국어', file: 'ko_KR.js' },
       { code: 'ja', name: '日本語', file: 'ja_JP.js' },
-      { code: 'ar', name: 'العربية', file: 'ar_AE.js', dir: 'rtl' } // Added dir:'rtl' for Arabic
+      { code: 'ar', name: 'العربية', file: 'ar_AE.js', dir: 'rtl' }
     ],
 
     // The default language of your website

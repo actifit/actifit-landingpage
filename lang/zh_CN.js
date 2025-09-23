@@ -1123,6 +1123,7 @@ module.exports = {
   Hive_official: 'Hive官方',
   Hive_block_explorer: 'Hive区块浏览器',
   Hive_witnesses: 'Hive见证人（区块生产者）',
+  DHF: '去中心化 Hive 基金',
   Explore: '探索',
   main_chain: '主链',
   secondary_chains: '次级链',

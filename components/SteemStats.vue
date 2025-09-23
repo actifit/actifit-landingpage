@@ -95,7 +95,7 @@
   var dhive = require('@hiveio/dhive')
   var client;
   var hiveclient;
-  
+
   export default {
     data () {
       return {
@@ -163,7 +163,7 @@
 		}
 		let currentManaPerc = currentMana * 100 / maxMana;
 		this.currentVotingPower = currentManaPerc;
-		
+
 		let chainLnk = hiveclient;
 		if (this.cur_bchain == 'STEEM'){
 			chainLnk = client;
@@ -220,7 +220,7 @@
 
 /* Common Styles */
 .text-brand {
-	color: #e10707; 
+	color: #e10707;
 }
 .steem-stats-container {
 	padding-top: 0.5rem;
@@ -233,7 +233,7 @@
 }
 
 .steem-stats-gauges {
-	display: flex; 
+	display: flex;
 	justify-content: center;
 	gap: 4.5rem;
 	--gauge-center-bg: #fff;
@@ -254,12 +254,12 @@
 
 .steem-stats-gauges .gauge-wrapper {
 	flex-shrink: 0;
-	position: relative; 
+	position: relative;
 	cursor: pointer;
 }
 .steem-stats-gauges .gauge {
 	position: relative;
-	width: 85px; 
+	width: 85px;
 	height: 85px;
 	border-radius: 50%;
 	display: flex;
@@ -283,8 +283,8 @@
 }
 
 .steem-stats-gauges .gauge-center {
-	width: 65px; 
-	height: 65px; 
+	width: 65px;
+	height: 65px;
 	background-color: var(--gauge-center-bg);
 	border-radius: 50%;
 	display: flex;
@@ -293,7 +293,7 @@
 	z-index: 1;
 }
 .steem-stats-gauges .gauge-value {
-    font-size: 1.4rem; 
+    font-size: 1.3rem;
     font-weight: 700;
     line-height: 1;
 }
@@ -360,13 +360,13 @@
 	margin-bottom: 0.25rem;
 }
 .steem-stats-progress .stat-icon {
-	width: 20px; 
+	width: 20px;
 	text-align: center;
 	font-size: 1.1rem;
-	margin-right: 8px; 
+	margin-right: 8px;
 }
 .steem-stats-progress .stat-text-content {
-	flex-grow: 1; 
+	flex-grow: 1;
 	font-size: 0.9rem;
 }
 .steem-stats-progress .progress {

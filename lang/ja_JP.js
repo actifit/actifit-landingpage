@@ -1121,6 +1121,7 @@ module.exports = {
   Hive_official: 'Hiveオフィシャル',
   Hive_block_explorer: 'Hiveブロックエクスプローラー',
   Hive_witnesses: 'Hiveウィットネス（ブロックプロデューサー）',
+  DHF: '分散型Hive基金',
   Explore: '探索',
   main_chain: 'プライマリチェーン',
   secondary_chains: 'セカンダリチェーン',
