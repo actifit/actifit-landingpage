@@ -158,7 +158,7 @@
 
             if (!isNaN(processedValue) && this.divisor) {
                 if (this.balanceType === 'hp_vests') {
-                    processedValue /= 1_000_000;
+                    processedValue /= 1000000;
                     // For HP (VESTS), we MULTIPLY by the hivePerVestsRatio
                     processedValue *= this.divisor;
                 } else if (this.divisor !== 1) {
