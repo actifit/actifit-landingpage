@@ -1225,7 +1225,9 @@ recent_post:'Recent Posts',
     bnb_logo: 'BNB Chain',
     private_active: 'PRIVATE ACTIVE',
     operation_require: 'This operation requires your',
-  }
-  // END: MERGED AND CORRECTED CODE
+  },
+  top_hive_holders_title: "Top HIVE Holders",
+  top_hbd_holders_title: "Top HBD Holders",
+  top_hp_holders_title: "Top HP Holders",
 }
 

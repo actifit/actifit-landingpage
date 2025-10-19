@@ -202,6 +202,32 @@
                 :title="$t('TRANSFER_FUNDS_SAVINGS')"><i class="fas fa-piggy-bank"></i></span>
               <span class="btn btn-brand p-1" v-on:click="transferFromSavings(cur_bchain)"
                 :title="$t('REMOVE_FUNDS_SAVINGS')"><i class="fas fa-box-open"></i></span>
+              <span class="btn btn-brand p-1">
+                <a href="#" data-toggle="modal" data-target="#topHiveHoldersModal"
+                  :title="$t('top_hive_holders_title')">
+                  <i class="fas fa-list-ol"></i>
+                </a>
+              </span>
+              <span class="btn btn-brand p-1">
+                <a href="#" data-toggle="modal" data-target="#topHpHoldersModal"
+                  :title="$t('top_hp_holders_title')">
+                  <i class="fas fa-dice-d6"></i> <!-- Using dice icon, choose an appropriate one -->
+                </a>
+              </span>
+            </div>
+            <div class="col-lg-2 col-1 token_actions" v-else>
+              <span class="btn btn-brand p-1">
+                <a href="#" data-toggle="modal" data-target="#topHiveHoldersModal"
+                  :title="$t('top_hive_holders_title')">
+                  <i class="fas fa-list-ol"></i>
+                </a>
+              </span>
+              <span class="btn btn-brand p-1">
+                <a href="#" data-toggle="modal" data-target="#topHpHoldersModal"
+                  :title="$t('top_hp_holders_title')">
+                  <i class="fas fa-dice-d6"></i> <!-- Using dice icon, choose an appropriate one -->
+                </a>
+              </span>
             </div>
           </div>
 
@@ -281,7 +307,20 @@
                 :title="$t('TRANSFER_FUNDS_SAVINGS')"><i class="fas fa-piggy-bank"></i></span>
               <span class="btn btn-brand p-1" v-on:click="transferFromSavings('HBD')"
                 :title="$t('REMOVE_FUNDS_SAVINGS')"><i class="fas fa-box-open"></i></span>
-
+              <span class="btn btn-brand p-1">
+                <a href="#" data-toggle="modal" data-target="#topHbdHoldersModal"
+                  :title="$t('top_hbd_holders_title')">
+                  <i class="fas fa-list-ol"></i>
+                </a>
+              </span>
+            </div>
+            <div class="col-lg-2 col-1 token_actions" v-else>
+               <span class="btn btn-brand p-1">
+                <a href="#" data-toggle="modal" data-target="#topHbdHoldersModal"
+                  :title="$t('top_hbd_holders_title')">
+                  <i class="fas fa-list-ol"></i>
+                </a>
+              </span>
             </div>
           </div>
 
@@ -1736,6 +1775,49 @@
       </div>
       <TopHolders :user="targetUserWallet" :holdersList="afitHoldersList" />
       <TopHoldersX :user="targetUserWallet" :holdersList="afitxHoldersList" />
+
+      <!-- New HIVE Top Holders Modal -->
+      <GenericTopHoldersModal
+      modal-id="topHiveHoldersModal"
+      coin-type="HIVE"
+      balance-type="balance"
+      :user="targetUserWallet"
+      modal-title-key="top_hive_holders_title"
+      token-logo-path="/img/HIVE.png"
+      balance-display-key="Hive_Bal"
+      coin-symbol-key="HIVE"
+      :divisor="1000"
+      :precision="3"
+    />
+
+    <!-- New HBD Top Holders Modal -->
+    <GenericTopHoldersModal
+      modal-id="topHbdHoldersModal"
+      coin-type="HBD"
+      balance-type="balance"
+      :user="targetUserWallet"
+      modal-title-key="top_hbd_holders_title"
+      token-logo-path="/img/HIVE.png"
+      balance-display-key="HBD_Bal"
+      coin-symbol-key="HBD"
+      :divisor="1000"
+      :precision="3"
+    />
+
+    <!-- New HP (Vests) Top Holders Modal -->
+     <GenericTopHoldersModal
+      modal-id="topHpHoldersModal"
+      coin-type="VESTS"
+      balance-type="hp_vests"
+      :user="targetUserWallet"
+      modal-title-key="top_hp_holders_title"
+      token-logo-path="/img/HIVE.png"
+      :divisor="hivePerVestsRatio"
+      :precision="3"
+      balance-display-key="HP_Bal"
+      coin-symbol-key="HP"
+    />
+
       <SwapTokenModal :swapWidgetUrl="swapWidgetUrl" />
 
     </div>
@@ -1804,6 +1886,8 @@ import ListHeadingSection from '~/components/ListHeadingSection'
 import pendingRewardsModal from '~/components/PendingRewardsModal'
 
 import VueScrollTo from 'vue-scrollto' // for smooth scrolling
+
+import GenericTopHoldersModal from '@/components/GenericTopHoldersModal.vue';
 
 //Disable: EOL for S-E
 //const ssc = new SSC(process.env.steemEngineRpc);
@@ -2068,12 +2152,27 @@ export default {
     SwapTokenModal,
     pendingRewardsModal,
     ListHeadingSection,
-    AutocompleteUsernameInput
+    AutocompleteUsernameInput,
+    GenericTopHoldersModal
   },
   computed: {
     ...mapGetters('steemconnect', ['user']),
     ...mapGetters('steemconnect', ['stdLogin']),
     ...mapGetters(['userTokens', 'transactions', 'userRank', 'bchain']),
+    //convert VESTS to HIVE
+    hivePerVestsRatio() {
+      if (this.properties && this.cur_bchain === 'HIVE' &&
+          this.properties.total_vesting_fund_hive &&
+          this.properties.total_vesting_shares) {
+        const totalVestingFundHive = Number(this.properties.total_vesting_fund_hive.split(' ')[0]);
+        const totalVestingShares = Number(this.properties.total_vesting_shares.split(' ')[0]);
+        if (totalVestingShares > 0) {
+          //console.log('hivepervests:'+(totalVestingFundHive / totalVestingShares))
+          return totalVestingFundHive / totalVestingShares;
+        }
+      }
+      return 1; // Default to 1 if properties aren't loaded or chain is not HIVE, or division by zero
+    },
     isKeychainLogin() {
       return localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain
     },
@@ -7966,10 +8065,21 @@ export default {
     },
     setBlurtPrice(_blurtPrice) {
       this.blurtPrice = parseFloat(_blurtPrice).toFixed(3);
-    }
+    },
+    async loadGlobalProperties() {
+      try {
+        let chainLnk = this.setProperNode();
+        this.properties = await chainLnk.api.getDynamicGlobalPropertiesAsync();
+        console.log('Global properties loaded:', this.properties); // For debugging
+      } catch (error) {
+        console.error("Error loading global properties:", error);
+        // Handle error, e.g., set a default or show a message
+      }
+    },
   },
   created() {
     this.runningInterval = setInterval(this.fetchUserData, 60 * 1000);
+
   },
   destroyed() {
     clearInterval(this.runningInterval);
@@ -8003,6 +8113,9 @@ export default {
   },
   async mounted() {
     try {
+
+      this.loadGlobalProperties();
+
       // Step 1: Determine the target user first from the route or the logged-in state.
       let userToFetch = null;
       if (this.$route.params && this.$route.params.username) {
