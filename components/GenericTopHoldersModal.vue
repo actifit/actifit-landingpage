@@ -4,6 +4,14 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">{{ modalTitle }} <img :src="tokenLogo" class="mr-2 token-logo" @error="handleImageError"></h5>
+
+          <div v-if="canShowBalanceTypeDropdown" class="ml-auto mr-3">
+            <select v-model="selectedBalanceOption" @change="fetchTopHolders" class="form-control form-control-sm">
+              <option value="balance">{{ $t('Balance') }}</option>
+              <option value="savings_balance">{{ $t('Savings') }}</option>
+            </select>
+          </div>
+
           <button type="button" class="close" data-dismiss="modal" aria-label="Close" @click="clearData">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -101,6 +109,7 @@
         loading: false,
         error: null,
         localTokenLogoPath: this.tokenLogoPath,
+        selectedBalanceOption: 'balance',
       };
     },
     computed: {
@@ -118,6 +127,26 @@
           return this.$t('HP');
         }
         return this.$t(this.coinType.toUpperCase());
+      },
+      canShowBalanceTypeDropdown() {
+        // Show dropdown for HIVE and HBD *if* the modal's primary balanceType prop is 'balance'
+        // This hides it for AFIT and HP modals, where savings_balance is not applicable or always 'balance'.
+        return (this.coinType === 'HIVE' || this.coinType === 'HBD') && this.balanceType === 'balance';
+      },
+      apiBalanceType() {
+        if (this.balanceType === 'hp_vests') {
+          // HP (vests) always uses 'balance' for the API's balance-type parameter
+          return 'balance';
+        }
+        // For other coinTypes (HIVE/HBD balance), use the selected dropdown option
+        return this.selectedBalanceOption;
+      },
+      apiCoinType() {
+        if (this.balanceType === 'hp_vests') {
+          // HP (vests) always maps to coin-type 'HIVE' in the API
+          return 'HIVE';
+        }
+        return this.coinType; // For other coins, use the prop value
       }
     },
     mounted() {
@@ -147,8 +176,8 @@
 
           const response = await axios.get('https://api.syncad.com/balance-api/top-holders', {
             params: {
-              'coin-type': actualCoinType,
-              'balance-type': actualBalanceType,
+              'coin-type': this.apiCoinType,    // Use computed property
+              'balance-type': this.apiBalanceType, // Use computed property
               page: 1,
             },
           });

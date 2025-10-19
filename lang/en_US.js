@@ -1229,5 +1229,7 @@ recent_post:'Recent Posts',
   top_hive_holders_title: "Top HIVE Holders",
   top_hbd_holders_title: "Top HBD Holders",
   top_hp_holders_title: "Top HP Holders",
+  "Balance": "Balance",
+  "Savings": "Savings",
 }
 
