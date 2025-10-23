@@ -61,7 +61,7 @@
 					<!-- MODIFIED: Now uses text-brand class for consistent color -->
 					<i class="fa-solid fa-thumbs-up stat-icon text-brand"></i>
 					<div class="stat-text-content">
-						<span>{{ $t('My_Voting_Power') }} </span>
+						<span class="text-content">{{ $t('My_Voting_Power') }} </span>
 						<!-- MODIFIED: Now uses text-brand class for consistent color -->
 						<span class="text-brand">{{ getVotingPower }}</span>
 					</div>
@@ -74,7 +74,7 @@
 				<div class="stat-line">
 					<i class="fa-sharp fa-solid fa-bolt stat-icon text-brand"></i>
 					<div class="stat-text-content">
-						<span>{{ $t('My_RC') }} </span>
+						<span class="text-content">{{ $t('My_RC') }} </span>
 						<span class="text-brand">{{ this.currentRCPercent }}</span>
 					</div>
 				</div>
@@ -376,5 +376,8 @@
 }
 .steem-stats-progress .progress:last-of-type {
 	margin-bottom: 0;
+}
+.dropdown-item:hover .text-content {
+    color: black;
 }
 </style>
