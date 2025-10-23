@@ -8199,24 +8199,24 @@ export default {
         }
       };
 
-      await Promise.all([
+      //await Promise.all([
         fetchPrice(`${process.env.actiAppUrl}curAFITPrice`,
-          json => this.setAFITPrice(json.unit_price_usd)),
+          json => this.setAFITPrice(json.unit_price_usd));
         fetchPrice(`${process.env.actiAppUrl}AFITBSCPrice`,
-          json => this.setAFITBSCPrice(json.price)),
+          json => this.setAFITBSCPrice(json.price));
         fetchPrice(`${process.env.actiAppUrl}AFITXBSCPrice`,
-          json => this.setAFITXBSCPrice(json.price)),
+          json => this.setAFITXBSCPrice(json.price));
         fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=steem&vs_currencies=usd',
-          json => this.setSteemPrice(json.steem.usd)),
+          json => this.setSteemPrice(json.steem.usd));
         fetchPrice(`${process.env.actiAppUrl}hivePrice`,
-          json => this.setHivePrice(json.hive.usd)),
+          json => this.setHivePrice(json.hive.usd));
         fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=blurt&vs_currencies=usd',
-          json => this.setBlurtPrice(json.blurt.usd)),
+          json => this.setBlurtPrice(json.blurt.usd));
         fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=steem-dollars&vs_currencies=usd',
-          json => this.setSBDPrice(json['steem-dollars'].usd)),
+          json => this.setSBDPrice(json['steem-dollars'].usd));
         fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=hive_dollar&vs_currencies=usd',
-          json => this.setHBDPrice(json['hive_dollar'].usd))
-      ]);
+          json => this.setHBDPrice(json['hive_dollar'].usd));
+      //]);
 
       this.screenWidth = screen.width;
 
