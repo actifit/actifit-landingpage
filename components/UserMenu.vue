@@ -3,11 +3,20 @@
     <ul class="navbar-nav mr-auto user-menu flex-row">
       <!-- Search Bar -->
       <li class="nav-item mr-2 btn btn-brand nav-item-border p-0 search-li">
-        <div class="autocomp-container">
-          <AutocompleteUsernameInput id="search-user" name="search-user" ref="search-user"
-            :customClass="computedCustomClass" :inputClass="computedInputClass" :placeHolderVal="$t('search_user')"
-            :enableRedirect="true" />
-        </div>
+        <form @submit.prevent="performSearch" class="d-flex">
+          <div class="input-group">
+            <select v-model="searchMode" class="custom-select">
+              <option value="user">{{ $t('User') }}</option>
+              <option value="keyword">{{ $t('Keyword') }}</option>
+              <option value="ai">{{ $t('AI') }}</option>
+            </select>
+            <AutocompleteUsernameInput v-if="searchMode === 'user'" v-model="searchQuery" :enableRedirect="true" :inputClass="computedInputClass" :customClass="computedCustomClass" :placeHolderVal="searchPlaceholder" @select="performSearch" />
+            <input v-else type="text" v-model="searchQuery" class="form-control" :placeholder="searchPlaceholder">
+            <div class="input-group-append">
+              <button type="submit" class="btn btn-brand"><i class="fas fa-search"></i></button>
+            </div>
+          </div>
+        </form>
       </li>
 
       <!-- Login/Signup Links (FIXED: Using NuxtLink) -->
@@ -195,6 +204,8 @@ export default {
       profImgUrl: process.env.hiveImgUrl,
       notificationInterval: null,
       isMounted: false,
+      searchQuery: '',
+      searchMode: 'user', // 'user', 'keyword', or 'ai'
     }
   },
   watch: {
@@ -205,6 +216,13 @@ export default {
         this.$store.dispatch('steemconnect/refreshUser');
       }
       this.reload += 1;
+    },
+    '$route.query': {
+      handler(query) {
+        this.searchQuery = query.q || '';
+        this.searchMode = query.mode || 'user';
+      },
+      immediate: true,
     }
   },
   computed: {
@@ -287,9 +305,36 @@ export default {
     },
     adjustBlurtClass() {
       return this.cur_bchain !== 'BLURT' ? 'option-opaque' : 'active-spin';
+    },
+    searchPlaceholder() {
+      switch (this.searchMode) {
+        case 'user':
+          return this.$t('Search_user');
+        case 'keyword':
+          return this.$t('Search_keyword');
+        case 'ai':
+          return this.$t('Search_AI');
+        default:
+          return this.$t('Search');
+      }
     }
   },
   methods: {
+    performSearch(username) {
+      if (this.searchMode === 'user') {
+        if (username) {
+          this.$router.push(this.localePath('/' + username));
+        }
+        return;
+      }
+
+      if (!this.searchQuery.trim()) return;
+
+      this.$router.push({
+        path: this.localePath('/search'),
+        query: { q: this.searchQuery.trim(), mode: this.searchMode },
+      });
+    },
     // ======================================================= //
     // START: BUG FIX FOR LANGUAGE PERSISTENCE                 //
     // ======================================================= //
