@@ -4,7 +4,7 @@
       <!-- Search Bar -->
       <li class="nav-item mr-2 btn btn-brand nav-item-border p-0 search-li">
         <form @submit.prevent="performSearch" class="d-flex align-items-center">
-          <div class="input-group-prepend d-lg-none pr-1">
+          <div class="input-group-prepend d-xl-none pr-1">
               <b-dropdown variant="brand" right>
                   <template #button-content>
                       <i :class="currentSearchIcon"></i>
@@ -15,7 +15,7 @@
               </b-dropdown>
           </div>
           <div class="input-group">
-            <div class="input-group-prepend d-none d-lg-flex">
+            <div class="input-group-prepend d-none d-xl-flex">
               <div class="btn-group btn-group-toggle" data-toggle="buttons">
                 <label class="btn btn-brand" :class="{ active: searchMode === 'user' }" @click="searchMode = 'user'" :title="$t('User')">
                   <input type="radio" name="options" id="option1" autocomplete="off" :checked="searchMode === 'user'"> <i class="fas fa-user"></i>
