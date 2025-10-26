@@ -3,13 +3,31 @@
     <ul class="navbar-nav mr-auto user-menu flex-row">
       <!-- Search Bar -->
       <li class="nav-item mr-2 btn btn-brand nav-item-border p-0 search-li">
-        <form @submit.prevent="performSearch" class="d-flex">
+        <form @submit.prevent="performSearch" class="d-flex align-items-center">
+          <div class="input-group-prepend d-lg-none pr-1">
+              <b-dropdown variant="brand" right>
+                  <template #button-content>
+                      <i :class="currentSearchIcon"></i>
+                  </template>
+                  <b-dropdown-item @click="setSearchMode('user')"><i class="fas fa-user"></i> {{ $t('User') }}</b-dropdown-item>
+                  <b-dropdown-item @click="setSearchMode('keyword')"><i class="fas fa-keyboard"></i> {{ $t('Keyword') }}</b-dropdown-item>
+                  <b-dropdown-item @click="setSearchMode('ai')"><i class="fas fa-robot"></i> {{ $t('AI') }}</b-dropdown-item>
+              </b-dropdown>
+          </div>
           <div class="input-group">
-            <select v-model="searchMode" class="custom-select">
-              <option value="user">{{ $t('User') }}</option>
-              <option value="keyword">{{ $t('Keyword') }}</option>
-              <option value="ai">{{ $t('AI') }}</option>
-            </select>
+            <div class="input-group-prepend d-none d-lg-flex">
+              <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                <label class="btn btn-brand" :class="{ active: searchMode === 'user' }" @click="searchMode = 'user'" :title="$t('User')">
+                  <input type="radio" name="options" id="option1" autocomplete="off" :checked="searchMode === 'user'"> <i class="fas fa-user"></i>
+                </label>
+                <label class="btn btn-brand" :class="{ active: searchMode === 'keyword' }" @click="searchMode = 'keyword'" :title="$t('Keyword')">
+                  <input type="radio" name="options" id="option2" autocomplete="off" :checked="searchMode === 'keyword'"> <i class="fas fa-keyboard"></i>
+                </label>
+                <label class="btn btn-brand" :class="{ active: searchMode === 'ai' }" @click="searchMode = 'ai'" :title="$t('AI')">
+                  <input type="radio" name="options" id="option3" autocomplete="off" :checked="searchMode === 'ai'"> <i class="fas fa-robot"></i>
+                </label>
+              </div>
+            </div>
             <AutocompleteUsernameInput v-if="searchMode === 'user'" v-model="searchQuery" :enableRedirect="true" :inputClass="computedInputClass" :customClass="computedCustomClass" :placeHolderVal="searchPlaceholder" @select="performSearch" />
             <input v-else type="text" v-model="searchQuery" class="form-control" :placeholder="searchPlaceholder">
             <div class="input-group-append">
@@ -317,9 +335,30 @@ export default {
         default:
           return this.$t('Search');
       }
+    },
+    currentSearchIcon() {
+      switch (this.searchMode) {
+        case 'user':
+          return 'fas fa-user';
+        case 'keyword':
+          return 'fas fa-keyboard';
+        case 'ai':
+          return 'fas fa-robot';
+        default:
+          return 'fas fa-search';
+      }
     }
   },
   methods: {
+    setSearchMode(mode) {
+      this.searchMode = mode;
+    },
+    cycleSearchMode() {
+      const modes = ['user', 'keyword', 'ai'];
+      const currentIndex = modes.indexOf(this.searchMode);
+      const nextIndex = (currentIndex + 1) % modes.length;
+      this.searchMode = modes[nextIndex];
+    },
     performSearch(username) {
       if (this.searchMode === 'user') {
         if (username) {
