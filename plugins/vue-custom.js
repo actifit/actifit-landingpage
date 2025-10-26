@@ -292,17 +292,29 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup){
 	report_content = report_content.replace(vid_reg, vid_replacement);
 
 	// THE ONLY MODIFIED SECTION STARTS HERE
-	
+
 	// Step 1: Match the full markdown embed format with a thumbnail, e.g., [![](thumbnail_url)](3speak_url)
 	// This is the most common format for a primary video embed.
 	let threespk_embed_reg = /\[!\[[^\]]*\]\([^)]+\)\]\(https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+)\)/ig;
 	report_content = report_content.replace(threespk_embed_reg, '<iframe width="640" height="360" src="//3speak.tv/embed?v=$1&autoplay=false"></iframe>');
-	
+
 	// Step 2: Match standalone/raw 3speak URLs that are not already part of other markdown.
 	// We check for a space before the URL or if it's at the start of the line to ensure it's a raw link.
 	// Example: https://3speak.tv/watch?v=user/permlink
 	let threespk_raw_reg = /(^|\s)(https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+))/ig;
 	report_content = report_content.replace(threespk_raw_reg, '$1<iframe width="640" height="360" src="//3speak.tv/embed?v=$3&autoplay=false"></iframe>');
+
+	// Detect and link markdown patterns like [text](url)
+	// This should run BEFORE the generic URL detection.
+	let markdown_link_reg = /\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/g;
+	report_content = report_content.replace(markdown_link_reg, '<a href="$2">$1</a>');
+
+	// Detect and link generic URLs, carefully avoiding those already within HTML attributes or processed markdown links.
+	// This uses a negative lookbehind assertion to ensure the URL is not preceded by an equals sign or a quote,
+	// which typically indicates it's part of an HTML attribute like src="..." or href='...'.
+	// It also ensures it doesn't try to link parts of an already formed <a> tag.
+	let url_reg = /(?<!["'=])(https?:\/\/[^\s<>"]+)/g;
+	report_content = report_content.replace(url_reg, '<a href="$1">$1</a>');
 
 	// THE ONLY MODIFIED SECTION ENDS HERE
 
