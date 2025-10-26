@@ -12,6 +12,7 @@
           <div v-for="itery in splitFactor" :key="itery" class="col-md-6 col-lg-4 mb-4">
             <Post v-if="(iterx - 1) * splitFactor + (itery - 1) < posts.length"
               :post="posts[(iterx - 1) * splitFactor + (itery - 1)]"
+              :displayUsername="posts[(iterx - 1) * splitFactor + (itery - 1)].author"
               :pstId="(iterx - 1) * splitFactor + (itery - 1)" />
           </div>
         </div>
