@@ -140,7 +140,7 @@ export default {
 }
 
 .navbar-collapse .navbar-nav .nav-item.btn > .nav-link {
-  padding: 0.5rem 0.75rem;
+  padding: 0.5rem 0.4rem;
   width: 100%;
   height: 100%;
   display: flex;

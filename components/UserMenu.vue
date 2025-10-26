@@ -55,7 +55,7 @@
       <!-- ======================================================= -->
       <!-- START: FIXED LANGUAGE SWITCHER IMPLEMENTATION           -->
       <!-- ======================================================= -->
-      <li class="nav-item dropdown mr-2">
+      <li class="nav-item dropdown mr-2" v-if="!hideLangToggle">
         <a class="nav-link dropdown-toggle p-0" href="#" id="language-switcher-icon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" :title="$t('languages')">
           <span class="user-avatar group-class">
             <i class="fas fa-language text-brand"></i>
@@ -224,6 +224,7 @@ export default {
       isMounted: false,
       searchQuery: '',
       searchMode: 'user', // 'user', 'keyword', or 'ai'
+      windowWidth: 0, // for reactive screen width
     }
   },
   watch: {
@@ -253,29 +254,21 @@ export default {
     },
 
     computedInputClass() {
-      if (process.client) {
-        if (window.innerWidth < 500) return 'form-control-sm search-input-condensed';
-        return window.innerWidth < 768 ? '' : 'form-control-lg';
-      }
-      return '';
+      if (this.windowWidth < 500) return 'form-control-sm search-input-condensed';
+      return this.windowWidth < 768 ? '' : 'form-control-lg';
     },
     computedCustomClass() {
-      if (process.client) {
-        if (window.innerWidth < 500) return "hiddenIcon autocomplete-condensed";
-      }
+      if (this.windowWidth < 500) return "hiddenIcon autocomplete-condensed";
       return "";
     },
     hideVisualControls() {
-      if (process.client) {
-        return window.innerWidth < 500;
-      }
-      return false;
+      return this.windowWidth < 500;
     },
     hideFriendsIcon() {
-      if (process.client) {
-        return window.innerWidth < 500;
-      }
-      return false;
+      return this.windowWidth < 500;
+    },
+    hideLangToggle() {
+      return this.windowWidth < 490;
     },
     notificationsNotice() {
       const cutoff = parseInt(process.env.notificationsCutoff || '100');
@@ -284,7 +277,7 @@ export default {
         return "0";
       }
 
-      if (process.client && window.innerWidth < 500) {
+      if (this.windowWidth < 500) {
         if (this.activeNotificationsLen > 99) return "99+";
         return String(this.activeNotificationsLen);
       } else {
@@ -350,6 +343,9 @@ export default {
     }
   },
   methods: {
+    handleResize() {
+      this.windowWidth = window.innerWidth;
+    },
     setSearchMode(mode) {
       this.searchMode = mode;
     },
@@ -495,6 +491,11 @@ export default {
   async mounted() {
     this.isMounted = true;
 
+    if (process.client) {
+      window.addEventListener('resize', this.handleResize);
+      this.handleResize();
+    }
+
     // ======================================================= //
     // START: BUG FIX FOR LANGUAGE PERSISTENCE                 //
     // ======================================================= //
@@ -525,6 +526,9 @@ export default {
     this.notificationInterval = setInterval(this.updateUserData, 60000);
   },
   beforeDestroy() {
+    if (process.client) {
+      window.removeEventListener('resize', this.handleResize);
+    }
     if (this.notificationInterval) {
       clearInterval(this.notificationInterval);
     }
@@ -799,7 +803,7 @@ html[dir="rtl"] .flag-icon-container {
   background-color: #e0001a !important;
 }
 
-@media only screen and (max-width: 500px) {
+@media only screen and (max-width: 520px) {
   .user-menu-container .user-menu .nav-item {
     margin-right: 8px !important;
     padding: 0 !important;
@@ -848,7 +852,7 @@ html[dir="rtl"] .flag-icon-container {
   }
 }
 
-@media (max-width: 375px) {
+@media (max-width: 460px) {
 
   /* .navbar {
 
@@ -859,7 +863,6 @@ html[dir="rtl"] .flag-icon-container {
     flex-grow: 1;
     flex-shrink: 1;
     min-width: 0;
-    max-width: 110px;
     margin-right: 5px !important;
   }
 
