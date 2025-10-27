@@ -736,6 +736,7 @@ module.exports = {
   consumed_count: 'कुल खपत',
   Benef_friend: 'लाभार्थी मित्र',
   special_christmas_event: 'एक्टिफिट विशेष क्रिसमस कार्यक्रम!',
+  special_halloween_event: 'हैलोवीन संस्करण!',
   AFIT_Tokens: 'AFIT टोकन',
   AFITX_Tokens: 'AFITX SE टोकन',
   AFITX_HE_Tokens: 'AFITX H-E टोकन',

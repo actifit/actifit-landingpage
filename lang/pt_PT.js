@@ -735,6 +735,7 @@ module.exports = {
   consumed_count: 'Total Consumido',
   Benef_friend: 'Amigo Beneficiário',
   special_christmas_event: 'Evento Especial de Natal da Actifit!',
+  special_halloween_event: 'Edição de Halloween!',
   AFIT_Tokens: 'Tokens AFIT',
   AFITX_Tokens: 'Tokens AFITX SE',
   AFITX_HE_Tokens: 'Tokens AFITX H-E',

@@ -736,6 +736,7 @@ module.exports = {
   consumed_count: 'إجمالي المستهلكات',
   Benef_friend: 'صديق مستفيد',
   special_christmas_event: 'حدث عيد الميلاد الخاص بأكتيفيت!',
+  special_halloween_event: 'إصدار الهالوين!',
   AFIT_Tokens: 'عملات AFIT',
   AFITX_Tokens: 'عملات AFITX SE',
   AFITX_HE_Tokens: 'عملات AFITX H-E',

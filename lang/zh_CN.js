@@ -735,6 +735,7 @@ module.exports = {
   consumed_count: '总消耗量',
   Benef_friend: '受益人朋友',
   special_christmas_event: 'Actifit特别圣诞活动！',
+  special_halloween_event: '萬聖節版！',
   AFIT_Tokens: 'AFIT代币',
   AFITX_Tokens: 'AFITX SE代币',
   AFITX_HE_Tokens: 'AFITX H-E代币',

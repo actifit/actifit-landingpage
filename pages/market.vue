@@ -81,12 +81,12 @@
 
 
 
-	  <h5 class="text-center pt-3 market-sub text-brand">{{ $t('special_christmas_event') }}</h5>
+	  <h5 class="text-center pt-3 market-sub text-brand">{{ $t('special_halloween_event') }}</h5>
 
 	  <div class="row" v-if="prodList.length">
         <Product v-for="product in prodList"
 			:product="product" :key="product._id" :pros="professionals" :userrank="userRank" :gadgetStats="gadgetStats"  :realProducts="realProducts" :expandAll="expandAllStatus"
-			v-if="product.specialevent"
+			v-if="product.specialevent && product.event == 'Halloween'"
 			@update-prod="updateProd" :afitPrice="afitPrice" @refresh-tickets="refreshTickets"/>
       </div>
 	  <br/>

@@ -735,6 +735,7 @@ module.exports = {
   consumed_count: '消費総数',
   Benef_friend: '受益者の友達',
   special_christmas_event: 'Actifit特別クリスマスイベント！',
+  special_halloween_event: 'ハロウィン版！',
   AFIT_Tokens: 'AFITトークン',
   AFITX_Tokens: 'AFITX SEトークン',
   AFITX_HE_Tokens: 'AFITX H-Eトークン',

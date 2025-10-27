@@ -736,6 +736,7 @@ module.exports = {
   consumed_count: 'Toplam Tüketilen',
   Benef_friend: 'Faydalanıcı Arkadaş',
   special_christmas_event: 'Actifit Özel Noel Etkinliği!',
+  special_halloween_event: 'Cadılar Bayramı Özel Versiyonu!',
   AFIT_Tokens: 'AFIT Tokenleri',
   AFITX_Tokens: 'AFITX SE Tokenleri',
   AFITX_HE_Tokens: 'AFITX H-E Tokenleri',
