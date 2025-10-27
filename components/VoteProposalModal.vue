@@ -112,6 +112,7 @@ export default {
   pointer-events: auto;
   max-width: 330px;
   max-height: 230px;
+  height: auto;
 }
 
 .modal-content button {
