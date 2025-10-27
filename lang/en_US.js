@@ -1231,5 +1231,10 @@ recent_post:'Recent Posts',
   top_hp_holders_title: "Top HP Holders",
   "Balance": "Balance",
   "Savings": "Savings",
+  "Keyword": "Keyword",
+  "AI": "AI",
+  "Search_keyword": "Search Keyword",
+  "Search_AI": "Search AI",
+  "Moderation": "Moderation"
 }
 

@@ -139,7 +139,7 @@
           </div>
           <div class="dropdown-scrollable">
             <NuxtLink class="dropdown-item text-brand" :to="localePath('/mods-access/')" v-if="isUserModerator">
-              Moderation</NuxtLink>
+              {{ $t('Moderation') }}</NuxtLink>
             <div class="dropdown-divider" v-if="isUserModerator"></div>
             <NuxtLink class="dropdown-item" :to="localePath('/market')"><i class="fas fa-shopping-cart text-brand"></i>
               {{ $t('spend_afit_menu') }}<br /></NuxtLink>
@@ -320,7 +320,7 @@ export default {
     searchPlaceholder() {
       switch (this.searchMode) {
         case 'user':
-          return this.$t('Search_user');
+          return this.$t('search_user');
         case 'keyword':
           return this.$t('Search_keyword');
         case 'ai':

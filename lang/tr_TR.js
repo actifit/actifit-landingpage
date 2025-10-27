@@ -1220,5 +1220,10 @@ module.exports = {
     bnb_logo: 'BNB Zinciri',
     private_active: 'ÖZEL AKTİF ANAHTAR',
     operation_require: 'Bu işlem sizin',
-  }
+  },
+  "Keyword": "Anahtar kelime",
+  "AI": "Yapay Zeka",
+  "Search_keyword": "Anahtar kelime ara",
+  "Search_AI": "Yapay Zeka arama",
+  "Moderation": "Moderasyon"
 }

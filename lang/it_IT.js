@@ -1220,5 +1220,10 @@ module.exports = {
     bnb_logo: 'Catena BNB',
     private_active: 'CHIAVE ATTIVA PRIVATA',
     operation_require: 'Questa operazione richiede la tua',
-  }
+  },
+  "Keyword": "Parola chiave",
+  "AI": "IA",
+  "Search_keyword": "Cerca Parola Chiave",
+  "Search_AI": "Ricerca AI",
+  "Moderation": "Moderazione"
 }

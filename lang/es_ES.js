@@ -1220,5 +1220,10 @@ module.exports = {
     bnb_logo: 'Cadena BNB',
     private_active: 'CLAVE ACTIVA PRIVADA',
     operation_require: 'Esta operación requiere su',
-  }
+  },
+  "Keyword": "Palabra clave",
+  "AI": "IA",
+  "Search_keyword": "Buscar Palabra Clave",
+  "Search_AI": "Búsqueda IA",
+  "Moderation": "Moderación"
 }
