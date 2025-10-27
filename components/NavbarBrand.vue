@@ -158,4 +158,10 @@ export default {
     cursor: pointer;
 }
 
+@media (max-width: 415px) {
+  .navbar {
+    flex-wrap: nowrap;
+  }
+}
+
 </style>

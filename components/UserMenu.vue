@@ -14,7 +14,7 @@
                   <b-dropdown-item @click="setSearchMode('ai')"><i class="fas fa-robot"></i> {{ $t('AI') }}</b-dropdown-item>
               </b-dropdown>
           </div>
-          <div class="input-group">
+          <div class="input-group search-cont-cls">
             <div class="input-group-prepend d-none d-xl-flex">
               <div class="btn-group btn-group-toggle" data-toggle="buttons">
                 <label class="btn btn-brand" :class="{ active: searchMode === 'user' }" @click="searchMode = 'user'" :title="$t('User')">
@@ -262,10 +262,10 @@ export default {
       return "";
     },
     hideVisualControls() {
-      return this.windowWidth < 500;
+      return this.windowWidth < 572;
     },
     hideFriendsIcon() {
-      return this.windowWidth < 500;
+      return this.windowWidth < 570;
     },
     hideLangToggle() {
       return this.windowWidth < 490;
@@ -868,15 +868,14 @@ html[dir="rtl"] .flag-icon-container {
 
   .autocomp-container {
     display:inline-flex;
-    width: 100%;
     flex-grow: 1;
     flex-shrink: 1;
     min-width: 0;
   }
 
-  .autocomplete-input.autocomplete-condensed {
+  /*.autocomplete-input.autocomplete-condensed {
     width: 100%;
-  }
+  }*/
 
   .search-input-condensed {
     width: 100%;
@@ -884,6 +883,20 @@ html[dir="rtl"] .flag-icon-container {
     font-size: 0.75rem;
     padding: 0.2rem 0.3rem 0.2rem 25px;
     box-sizing: border-box; /* Ensures padding and border are included in the element's total width */
+  }
+
+  .search-cont-cls{
+    flex-wrap: nowrap;
+  }
+}
+
+@media (max-width: 415px) {
+  .user-menu .search-li {
+    min-width: 30px;
+  }
+  .search-input-condensed {
+    font-size: 0.7rem;
+    padding-left: 22px;
   }
 }
 
