@@ -735,6 +735,7 @@ module.exports = {
   consumed_count: '消費総数',
   Benef_friend: '受益者の友達',
   special_christmas_event: 'Actifit特別クリスマスイベント！',
+  special_halloween_event: 'ハロウィン版！',
   AFIT_Tokens: 'AFITトークン',
   AFITX_Tokens: 'AFITX SEトークン',
   AFITX_HE_Tokens: 'AFITX H-Eトークン',
@@ -1209,15 +1210,20 @@ module.exports = {
 
   alt_texts: {
     running_couple: '走っている男女',
-    google_play: 'Google Playで手に入れよう',
+    google_play: 'Google Playで入手',
     app_store: 'App Storeでダウンロード',
     gym_workout: 'ジムで運動する男性',
-    post_workout_pose: 'ワークアウト後にポーズをとる男女',
+    post_workout_pose: 'トレーニング後にポーズをとる男女',
     gold_medal: '金メダル',
     hive_logo: 'HIVE',
     blurt_logo: 'BLURT',
     bnb_logo: 'BNBチェーン',
-    private_active: 'プライベートアクティブキー',
+    private_active: 'プライベートアクティブ',
     operation_require: 'この操作にはあなたの',
-  }
+  },
+  "Keyword": "キーワード",
+  "AI": "AI",
+  "Search_keyword": "キーワード検索",
+  "Search_AI": "AI検索",
+  "Moderation": "モデレーション"
 }

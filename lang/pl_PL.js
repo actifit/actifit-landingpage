@@ -735,6 +735,7 @@ module.exports = {
   consumed_count: 'Całkowita liczba zużytych',
   Benef_friend: 'Znajomy beneficjent',
   special_christmas_event: 'Specjalne wydarzenie świąteczne Actifit!',
+  special_halloween_event: 'Edycja Halloween!',
   AFIT_Tokens: 'Tokeny AFIT',
   AFITX_Tokens: 'Tokeny AFITX SE',
   AFITX_HE_Tokens: 'Tokeny AFITX H-E',
@@ -1211,14 +1212,19 @@ module.exports = {
   alt_texts: {
     running_couple: 'Biegnący mężczyzna i kobieta',
     google_play: 'Pobierz z Google Play',
-    app_store: 'Pobierz w App Store',
+    app_store: 'Pobierz z App Store',
     gym_workout: 'Mężczyzna ćwiczący na siłowni',
     post_workout_pose: 'Mężczyzna i kobieta pozujący po treningu',
-    gold_medal: 'Złoty Medal',
+    gold_medal: 'Złoty medal',
     hive_logo: 'HIVE',
     blurt_logo: 'BLURT',
     bnb_logo: 'Łańcuch BNB',
     private_active: 'PRYWATNY KLUCZ AKTYWNY',
     operation_require: 'Ta operacja wymaga Twojego',
-  }
+  },
+  "Keyword": "Słowo kluczowe",
+  "AI": "SI",
+  "Search_keyword": "Szukaj słowa kluczowego",
+  "Search_AI": "Wyszukiwanie SI",
+  "Moderation": "Moderacja"
 }

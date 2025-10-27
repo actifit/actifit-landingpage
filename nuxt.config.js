@@ -20,7 +20,7 @@ module.exports = {
 
   // Runtime configuration
   publicRuntimeConfig: {
-    version: '1.8.1.2',
+    version: '1.8.2',
     proposalId: '337',
   },
 
@@ -238,7 +238,6 @@ module.exports = {
       //{ rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css' },
       { rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css' },
 
-      { rel: 'stylesheet', href: 'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css' },
       { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css?family=Roboto' }
     ],
     script: [
@@ -270,6 +269,8 @@ module.exports = {
   ** Global CSS
   */
   css: [
+    'bootstrap/dist/css/bootstrap.css',
+    'bootstrap-vue/dist/bootstrap-vue.css',
     '~/assets/css/main.sass',
     '~/assets/css/normal.css',
     '~/assets/css/dark-mode.css'
@@ -295,6 +296,7 @@ module.exports = {
   ** Nuxt.js modules
   */
   modules: [
+    'bootstrap-vue/nuxt',
     'nuxt-helmet',
     '@nuxtjs/gtm',
     //['@nuxtjs/axios'],

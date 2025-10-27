@@ -736,6 +736,7 @@ module.exports = {
   consumed_count: 'Total Consumed',
   Benef_friend: 'Beneficiary Friend',
   special_christmas_event: 'Actifit Special Christmas Event!',
+  special_halloween_event: 'Halloween Edition!',
   AFIT_Tokens: 'AFIT Tokens',
   AFITX_Tokens: 'AFITX SE Tokens',
   AFITX_HE_Tokens: 'AFITX H-E Tokens',
@@ -1231,5 +1232,10 @@ recent_post:'Recent Posts',
   top_hp_holders_title: "Top HP Holders",
   "Balance": "Balance",
   "Savings": "Savings",
+  "Keyword": "Keyword",
+  "AI": "AI",
+  "Search_keyword": "Search Keyword",
+  "Search_AI": "Search AI",
+  "Moderation": "Moderation"
 }
 

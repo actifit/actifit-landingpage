@@ -27,12 +27,12 @@
             <small class="text-muted d-block" :title="date">{{ $getTimeDifference(this.post.created) }}</small>
           </div>
         </div>
-        
+
         <CardBody
-        
+
           :cardData="post"
           modalTarget="#postModal"
-          :snippet="bodySnippet" 
+          :snippet="bodySnippet"
           :imageLoadFailed="imageLoadFailed"
           :imageLoading="imageLoading"
           :imageGeneration="imageGeneration"
@@ -146,6 +146,7 @@ export default {
     }
   },
   mounted () {
+    console.log('display user:',this.displayUsername);
     this.$nextTick(() => { this.initializeCard() })
   }
 }

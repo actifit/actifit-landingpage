@@ -736,6 +736,7 @@ module.exports = {
   consumed_count: 'Totale Consumati',
   Benef_friend: 'Amico Beneficiario',
   special_christmas_event: 'Evento Speciale di Natale di Actifit!',
+  special_halloween_event: 'Edizione di Halloween!',
   AFIT_Tokens: 'Token AFIT',
   AFITX_Tokens: 'Token AFITX SE',
   AFITX_HE_Tokens: 'Token AFITX H-E',
@@ -1220,5 +1221,10 @@ module.exports = {
     bnb_logo: 'Catena BNB',
     private_active: 'CHIAVE ATTIVA PRIVATA',
     operation_require: 'Questa operazione richiede la tua',
-  }
+  },
+  "Keyword": "Parola chiave",
+  "AI": "IA",
+  "Search_keyword": "Cerca Parola Chiave",
+  "Search_AI": "Ricerca AI",
+  "Moderation": "Moderazione"
 }

@@ -59,9 +59,9 @@ export const commonCardMixin = {
     },
   },
   watch: {
-    'cardData.permlink'(newPermlink) {
-      if (newPermlink && !this.isInitialized) {
-        this.initializeCard();
+    'cardData.permlink': function(newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.reInitializeCard();
       }
     },
     getVoteCount (newVal, oldVal) {
@@ -77,6 +77,28 @@ export const commonCardMixin = {
     if (this.intersectionObserver) this.intersectionObserver.disconnect()
   },
   methods: {
+    reInitializeCard() {
+      // Disconnect the old observer if it exists
+      if (this.intersectionObserver) {
+        this.intersectionObserver.disconnect();
+        this.intersectionObserver = null;
+      }
+
+      // Reset all the relevant data properties
+      this.afitReward = '';
+      this.userRank = '';
+      this.fullAFITReward = '';
+      this.isTooltipVisible = false;
+      this.allImages = [];
+      this.currentImageIndex = 0;
+      this.imageLoading = true;
+      this.imageLoadFailed = false;
+      this.imageGeneration = 0;
+      this.isInitialized = false;
+
+      // Re-initialize the card
+      this.initializeCard();
+    },
     initializeCard () {
       if (this.isInitialized || !this.cardData || !this.cardData.permlink) return;
       this.isInitialized = true

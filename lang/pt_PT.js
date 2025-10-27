@@ -735,6 +735,7 @@ module.exports = {
   consumed_count: 'Total Consumido',
   Benef_friend: 'Amigo Beneficiário',
   special_christmas_event: 'Evento Especial de Natal da Actifit!',
+  special_halloween_event: 'Edição de Halloween!',
   AFIT_Tokens: 'Tokens AFIT',
   AFITX_Tokens: 'Tokens AFITX SE',
   AFITX_HE_Tokens: 'Tokens AFITX H-E',
@@ -1211,14 +1212,19 @@ module.exports = {
   alt_texts: {
     running_couple: 'Homem e mulher a correr',
     google_play: 'Obtenha no Google Play',
-    app_store: 'Baixe na App Store',
-    gym_workout: 'Homem a exercitar-se num ginásio',
+    app_store: 'Descarregue na App Store',
+    gym_workout: 'Homem a fazer exercício num ginásio',
     post_workout_pose: 'Homem e mulher a posar depois de um treino',
-    gold_medal: 'Medalha de Ouro',
+    gold_medal: 'Medalla de Ouro',
     hive_logo: 'HIVE',
     blurt_logo: 'BLURT',
     bnb_logo: 'Cadeia BNB',
     private_active: 'CHAVE ATIVA PRIVADA',
-    operation_require: 'Esta operação requer sua',
-  }
+    operation_require: 'Esta operação requer a sua',
+  },
+  "Keyword": "Palavra-chave",
+  "AI": "IA",
+  "Search_keyword": "Pesquisar Palavra-chave",
+  "Search_AI": "Pesquisa de IA",
+  "Moderation": "Moderação"
 }
