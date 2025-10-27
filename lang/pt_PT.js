@@ -1211,14 +1211,19 @@ module.exports = {
   alt_texts: {
     running_couple: 'Homem e mulher a correr',
     google_play: 'Obtenha no Google Play',
-    app_store: 'Baixe na App Store',
-    gym_workout: 'Homem a exercitar-se num ginásio',
+    app_store: 'Descarregue na App Store',
+    gym_workout: 'Homem a fazer exercício num ginásio',
     post_workout_pose: 'Homem e mulher a posar depois de um treino',
-    gold_medal: 'Medalha de Ouro',
+    gold_medal: 'Medalla de Ouro',
     hive_logo: 'HIVE',
     blurt_logo: 'BLURT',
     bnb_logo: 'Cadeia BNB',
     private_active: 'CHAVE ATIVA PRIVADA',
-    operation_require: 'Esta operação requer sua',
-  }
+    operation_require: 'Esta operação requer a sua',
+  },
+  "Keyword": "Palavra-chave",
+  "AI": "IA",
+  "Search_keyword": "Pesquisar Palavra-chave",
+  "Search_AI": "Pesquisa de IA",
+  "Moderation": "Moderação"
 }

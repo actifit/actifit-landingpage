@@ -1221,5 +1221,10 @@ module.exports = {
     bnb_logo: 'बीएनबी चेन',
     private_active: 'निजी सक्रिय कुंजी',
     operation_require: 'इस ऑपरेशन के लिए आपका',
-  }
+  },
+  "Keyword": "कीवर्ड",
+  "AI": "एआई",
+  "Search_keyword": "कीवर्ड खोजें",
+  "Search_AI": "एआई खोजें",
+  "Moderation": "मॉडरेशन"
 }

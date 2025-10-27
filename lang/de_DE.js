@@ -1220,5 +1220,10 @@ module.exports = {
     bnb_logo: 'BNB-Chain',
     private_active: 'PRIVATER AKTIVSCHLÜSSEL',
     operation_require: 'Diese Operation erfordert Ihren',
-  }
+  },
+  "Keyword": "Stichwort",
+  "AI": "KI",
+  "Search_keyword": "Stichwortsuche",
+  "Search_AI": "KI-Suche",
+  "Moderation": "Moderation"
 }

@@ -1220,5 +1220,10 @@ module.exports = {
     bnb_logo: 'Ланцюг BNB',
     private_active: 'ПРИВАТНИЙ АКТИВНИЙ КЛЮЧ',
     operation_require: 'Ця операція вимагає вашого',
-  }
+  },
+  "Keyword": "Ключове слово",
+  "AI": "ШІ",
+  "Search_keyword": "Пошук за ключовим словом",
+  "Search_AI": "Пошук ШІ",
+  "Moderation": "Модерація"
 }

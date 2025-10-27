@@ -1220,5 +1220,10 @@ module.exports = {
     bnb_logo: 'BNB 链',
     private_active: '私有活动密钥',
     operation_require: '此操作需要您的',
-  }
+  },
+  "Keyword": "關鍵字",
+  "AI": "人工智慧",
+  "Search_keyword": "搜尋關鍵字",
+  "Search_AI": "搜尋人工智慧",
+  "Moderation": "審核"
 }

@@ -1220,5 +1220,10 @@ module.exports = {
     bnb_logo: 'Цепь BNB',
     private_active: 'ПРИВАТНЫЙ АКТИВНЫЙ КЛЮЧ',
     operation_require: 'Эта операция требует вашего',
-  }
+  },
+  "Keyword": "Ключевое слово",
+  "AI": "ИИ",
+  "Search_keyword": "Поиск по ключевому слову",
+  "Search_AI": "Поиск с помощью ИИ",
+  "Moderation": "Модерация"
 }

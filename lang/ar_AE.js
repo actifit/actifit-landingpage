@@ -1220,5 +1220,10 @@ module.exports = {
     bnb_logo: 'سلسلة BNB',
     private_active: 'المفتاح النشط الخاص',
     operation_require: 'تتطلب هذه العملية',
-  }
+  },
+  "Keyword": "كلمة رئيسية",
+  "AI": "ذكاء اصطناعي",
+  "Search_keyword": "ابحث عن كلمة رئيسية",
+  "Search_AI": "ابحث بالذكاء الاصطناعي",
+  "Moderation": "الإشراف"
 }

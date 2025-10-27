@@ -3,11 +3,38 @@
     <ul class="navbar-nav mr-auto user-menu flex-row">
       <!-- Search Bar -->
       <li class="nav-item mr-2 btn btn-brand nav-item-border p-0 search-li">
-        <div class="autocomp-container">
-          <AutocompleteUsernameInput id="search-user" name="search-user" ref="search-user"
-            :customClass="computedCustomClass" :inputClass="computedInputClass" :placeHolderVal="$t('search_user')"
-            :enableRedirect="true" />
-        </div>
+        <form @submit.prevent="performSearch" class="d-flex align-items-center">
+          <div class="input-group-prepend d-xl-none pr-1">
+              <b-dropdown variant="brand" right>
+                  <template #button-content>
+                      <i :class="currentSearchIcon"></i>
+                  </template>
+                  <b-dropdown-item @click="setSearchMode('user')"><i class="fas fa-user"></i> {{ $t('User') }}</b-dropdown-item>
+                  <b-dropdown-item @click="setSearchMode('keyword')"><i class="fas fa-keyboard"></i> {{ $t('Keyword') }}</b-dropdown-item>
+                  <b-dropdown-item @click="setSearchMode('ai')"><i class="fas fa-robot"></i> {{ $t('AI') }}</b-dropdown-item>
+              </b-dropdown>
+          </div>
+          <div class="input-group search-cont-cls">
+            <div class="input-group-prepend d-none d-xl-flex">
+              <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                <label class="btn btn-brand" :class="{ active: searchMode === 'user' }" @click="searchMode = 'user'" :title="$t('User')">
+                  <input type="radio" name="options" id="option1" autocomplete="off" :checked="searchMode === 'user'"> <i class="fas fa-user"></i>
+                </label>
+                <label class="btn btn-brand" :class="{ active: searchMode === 'keyword' }" @click="searchMode = 'keyword'" :title="$t('Keyword')">
+                  <input type="radio" name="options" id="option2" autocomplete="off" :checked="searchMode === 'keyword'"> <i class="fas fa-keyboard"></i>
+                </label>
+                <label class="btn btn-brand" :class="{ active: searchMode === 'ai' }" @click="searchMode = 'ai'" :title="$t('AI')">
+                  <input type="radio" name="options" id="option3" autocomplete="off" :checked="searchMode === 'ai'"> <i class="fas fa-robot"></i>
+                </label>
+              </div>
+            </div>
+            <AutocompleteUsernameInput v-if="searchMode === 'user'" v-model="searchQuery" :enableRedirect="true" :inputClass="computedInputClass" :customClass="computedCustomClass" :placeHolderVal="searchPlaceholder" @select="performSearch" />
+            <input v-else type="text" v-model="searchQuery" class="form-control" :placeholder="searchPlaceholder">
+            <div class="input-group-append">
+              <button type="submit" class="btn btn-brand"><i class="fas fa-search"></i></button>
+            </div>
+          </div>
+        </form>
       </li>
 
       <!-- Login/Signup Links (FIXED: Using NuxtLink) -->
@@ -28,7 +55,7 @@
       <!-- ======================================================= -->
       <!-- START: FIXED LANGUAGE SWITCHER IMPLEMENTATION           -->
       <!-- ======================================================= -->
-      <li class="nav-item dropdown mr-2">
+      <li class="nav-item dropdown mr-2" v-if="!hideLangToggle">
         <a class="nav-link dropdown-toggle p-0" href="#" id="language-switcher-icon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" :title="$t('languages')">
           <span class="user-avatar group-class">
             <i class="fas fa-language text-brand"></i>
@@ -112,7 +139,7 @@
           </div>
           <div class="dropdown-scrollable">
             <NuxtLink class="dropdown-item text-brand" :to="localePath('/mods-access/')" v-if="isUserModerator">
-              Moderation</NuxtLink>
+              {{ $t('Moderation') }}</NuxtLink>
             <div class="dropdown-divider" v-if="isUserModerator"></div>
             <NuxtLink class="dropdown-item" :to="localePath('/market')"><i class="fas fa-shopping-cart text-brand"></i>
               {{ $t('spend_afit_menu') }}<br /></NuxtLink>
@@ -195,6 +222,9 @@ export default {
       profImgUrl: process.env.hiveImgUrl,
       notificationInterval: null,
       isMounted: false,
+      searchQuery: '',
+      searchMode: 'user', // 'user', 'keyword', or 'ai'
+      windowWidth: 0, // for reactive screen width
     }
   },
   watch: {
@@ -205,6 +235,13 @@ export default {
         this.$store.dispatch('steemconnect/refreshUser');
       }
       this.reload += 1;
+    },
+    '$route.query': {
+      handler(query) {
+        this.searchQuery = query.q || '';
+        this.searchMode = query.mode || 'user';
+      },
+      immediate: true,
     }
   },
   computed: {
@@ -217,29 +254,21 @@ export default {
     },
 
     computedInputClass() {
-      if (process.client) {
-        if (window.innerWidth < 500) return 'form-control-sm search-input-condensed';
-        return window.innerWidth < 768 ? '' : 'form-control-lg';
-      }
-      return '';
+      if (this.windowWidth < 500) return 'form-control-sm search-input-condensed';
+      return this.windowWidth < 768 ? '' : 'form-control-lg';
     },
     computedCustomClass() {
-      if (process.client) {
-        if (window.innerWidth < 500) return "hiddenIcon autocomplete-condensed";
-      }
+      if (this.windowWidth < 500) return "hiddenIcon autocomplete-condensed";
       return "";
     },
     hideVisualControls() {
-      if (process.client) {
-        return window.innerWidth < 500;
-      }
-      return false;
+      return this.windowWidth < 572;
     },
     hideFriendsIcon() {
-      if (process.client) {
-        return window.innerWidth < 500;
-      }
-      return false;
+      return this.windowWidth < 570;
+    },
+    hideLangToggle() {
+      return this.windowWidth < 490;
     },
     notificationsNotice() {
       const cutoff = parseInt(process.env.notificationsCutoff || '100');
@@ -248,7 +277,7 @@ export default {
         return "0";
       }
 
-      if (process.client && window.innerWidth < 500) {
+      if (this.windowWidth < 500) {
         if (this.activeNotificationsLen > 99) return "99+";
         return String(this.activeNotificationsLen);
       } else {
@@ -287,9 +316,60 @@ export default {
     },
     adjustBlurtClass() {
       return this.cur_bchain !== 'BLURT' ? 'option-opaque' : 'active-spin';
+    },
+    searchPlaceholder() {
+      switch (this.searchMode) {
+        case 'user':
+          return this.$t('search_user');
+        case 'keyword':
+          return this.$t('Search_keyword');
+        case 'ai':
+          return this.$t('Search_AI');
+        default:
+          return this.$t('Search');
+      }
+    },
+    currentSearchIcon() {
+      switch (this.searchMode) {
+        case 'user':
+          return 'fas fa-user';
+        case 'keyword':
+          return 'fas fa-keyboard';
+        case 'ai':
+          return 'fas fa-robot';
+        default:
+          return 'fas fa-search';
+      }
     }
   },
   methods: {
+    handleResize() {
+      this.windowWidth = window.innerWidth;
+    },
+    setSearchMode(mode) {
+      this.searchMode = mode;
+    },
+    cycleSearchMode() {
+      const modes = ['user', 'keyword', 'ai'];
+      const currentIndex = modes.indexOf(this.searchMode);
+      const nextIndex = (currentIndex + 1) % modes.length;
+      this.searchMode = modes[nextIndex];
+    },
+    performSearch(username) {
+      if (this.searchMode === 'user') {
+        if (username) {
+          this.$router.push(this.localePath('/' + username));
+        }
+        return;
+      }
+
+      if (!this.searchQuery.trim()) return;
+
+      this.$router.push({
+        path: this.localePath('/search'),
+        query: { q: this.searchQuery.trim(), mode: this.searchMode },
+      });
+    },
     // ======================================================= //
     // START: BUG FIX FOR LANGUAGE PERSISTENCE                 //
     // ======================================================= //
@@ -411,6 +491,11 @@ export default {
   async mounted() {
     this.isMounted = true;
 
+    if (process.client) {
+      window.addEventListener('resize', this.handleResize);
+      this.handleResize();
+    }
+
     // ======================================================= //
     // START: BUG FIX FOR LANGUAGE PERSISTENCE                 //
     // ======================================================= //
@@ -441,6 +526,9 @@ export default {
     this.notificationInterval = setInterval(this.updateUserData, 60000);
   },
   beforeDestroy() {
+    if (process.client) {
+      window.removeEventListener('resize', this.handleResize);
+    }
     if (this.notificationInterval) {
       clearInterval(this.notificationInterval);
     }
@@ -715,7 +803,7 @@ html[dir="rtl"] .flag-icon-container {
   background-color: #e0001a !important;
 }
 
-@media only screen and (max-width: 500px) {
+@media only screen and (max-width: 520px) {
   .user-menu-container .user-menu .nav-item {
     margin-right: 8px !important;
     padding: 0 !important;
@@ -764,7 +852,7 @@ html[dir="rtl"] .flag-icon-container {
   }
 }
 
-@media (max-width: 375px) {
+@media (max-width: 460px) {
 
   /* .navbar {
 
@@ -775,21 +863,19 @@ html[dir="rtl"] .flag-icon-container {
     flex-grow: 1;
     flex-shrink: 1;
     min-width: 0;
-    max-width: 110px;
     margin-right: 5px !important;
   }
 
   .autocomp-container {
     display:inline-flex;
-    width: 100%;
     flex-grow: 1;
     flex-shrink: 1;
     min-width: 0;
   }
 
-  .autocomplete-input.autocomplete-condensed {
+  /*.autocomplete-input.autocomplete-condensed {
     width: 100%;
-  }
+  }*/
 
   .search-input-condensed {
     width: 100%;
@@ -797,6 +883,20 @@ html[dir="rtl"] .flag-icon-container {
     font-size: 0.75rem;
     padding: 0.2rem 0.3rem 0.2rem 25px;
     box-sizing: border-box; /* Ensures padding and border are included in the element's total width */
+  }
+
+  .search-cont-cls{
+    flex-wrap: nowrap;
+  }
+}
+
+@media (max-width: 415px) {
+  .user-menu .search-li {
+    min-width: 30px;
+  }
+  .search-input-condensed {
+    font-size: 0.7rem;
+    padding-left: 22px;
   }
 }
 
