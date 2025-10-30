@@ -34,32 +34,34 @@
 			<i class="fas fa-spin fa-spinner" v-if="imgUploading"></i>
 		  </div>-->
         <div class="form-group">
-          <!--<label for="post-tags" style="display: none">{{ $t('Tags') }}</label>
-            <input class="form-control form-control-lg acti-shadow" :placeholder="$t('Tags')"/>-->
-          <TagInput id="tagItem" ref="tagItem" :initialItems="tags" class="form-control form-control-lg acti-shadow" />
+          <!-- No more 'form-control' or 'form-control-lg' classes needed here -->
+          <TagInput id="tagItem" ref="tagItem" :initialItems="tags" />
         </div>
 
-        <div class="form-group acti-shadow extra-container form-control form-control-lg">
-          <Beneficiary ref="beneficiaryList" :initialEntries="benef_list" :viewOnly="!editPost.isNewPost"
-            class="float-left" />
+        <div class="acti-shadow extra-container d-flex align-items-center justify-content-between p-2">
+
+          <!-- The float-left class has been removed from your component -->
+          <Beneficiary ref="beneficiaryList" :initialEntries="benef_list" :viewOnly="!editPost.isNewPost" />
 
           <!-- also select community to post to -->
-          <div class="form-group d-flex align-items-center p-1">
-            <select id="targetCommunity" ref="targetCommunity" class="form-control targetCommunity">
-              <option value="_blog_">--Select Community--</option>
-              <option v-for="com in communitySubs" :value="com[0]" :key="com[0]">{{ com[1] }}</option>
-            </select>
+          <!-- Added mb-0 to remove default form-group margin -->
+          <div class="form-group d-flex align-items-center p-1 mb-0">
+              <select id="targetCommunity" ref="targetCommunity" class="form-control targetCommunity">
+                  <option value="_blog_">--Select Community--</option>
+                  <option v-for="com in communitySubs" :value="com[0]" :key="com[0]">{{ com[1] }}</option>
+              </select>
           </div>
 
-          <div class="form-group d-flex align-items-center p-1" style="min-height: 70px;">
-            <label for="paymentApproach" class="mr-2 label-payment">{{ $t('payment_approach') }}</label>
-            <select id="paymentApproach" ref="paymentApproach" class="form-control paymentApproach">
-              <option value="split">50/50 Split</option>
-              <option value="hp">Full HP</option>
-              <option value="decline">Decline</option>
-            </select>
+          <!-- Added mb-0 to remove default form-group margin and removed the min-height style -->
+          <div class="form-group d-flex align-items-center p-1 mb-0">
+              <label for="paymentApproach" class="mr-2 label-payment mb-0">{{ $t('payment_approach') }}</label>
+              <select id="paymentApproach" ref="paymentApproach" class="form-control paymentApproach">
+                  <option value="split">50/50 Split</option>
+                  <option value="hp">Full HP</option>
+                  <option value="decline">Decline</option>
+              </select>
           </div>
-        </div>
+      </div>
 
       </div>
       <div class="modal-footer m-2" style="display: none">
