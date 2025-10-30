@@ -1,0 +1,72 @@
+
+.halloween-event {
+  background: linear-gradient(to bottom, #1a1a1a, #3a2a4a);
+  padding: 40px 20px;
+  border-radius: 15px;
+  margin-bottom: 40px;
+  text-align: center;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2), 0 6px 6px rgba(0, 0, 0, 0.23);
+  position: relative;
+  overflow: hidden;
+}
+
+.halloween-event::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 165, 0, 0.1), transparent 70%);
+  transform: rotate(0deg);
+  animation: rotate 20s linear infinite;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.event-header {
+  margin-bottom: 30px;
+}
+
+.event-title {
+  font-family: 'Creepster', cursive; /* A spooky font, needs to be imported */
+  font-size: 4rem;
+  color: #ff9900;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  margin: 0;
+}
+
+.event-subtitle {
+  font-size: 1.2rem;
+  color: #f0f0f0;
+  margin-top: 10px;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  justify-items: center;
+}
+
+.halloween-product {
+  width: 100%;
+}
+
+.halloween-product .pro-card {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #ff9900;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.halloween-product .pro-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 25px rgba(255, 153, 0, 0.2);
+}
