@@ -34,7 +34,6 @@
 			<i class="fas fa-spin fa-spinner" v-if="imgUploading"></i>
 		  </div>-->
         <div class="form-group">
-          <!-- No more 'form-control' or 'form-control-lg' classes needed here -->
           <TagInput id="tagItem" ref="tagItem" :initialItems="tags" />
         </div>
 

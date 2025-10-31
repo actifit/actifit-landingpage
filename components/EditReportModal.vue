@@ -19,18 +19,18 @@
 		  </div>
 		  <div class="form-group">
 			<CustomTextEditor ref="editor" :initialContent="body" ></CustomTextEditor>
-			
+
           </div>
 		  <div class="form-group">
 		   <!--<div class="form-group">
 			<label for="image-upload">{{ $t('Upload_Images') }}</label><br/>
-			<input id="image-upload" type="file" v-on:change="fileChange($event.target.files)" /> 
+			<input id="image-upload" type="file" v-on:change="fileChange($event.target.files)" />
 			<i class="fas fa-spin fa-spinner" v-if="imgUploading"></i>
 		  </div>
           <div class="form-group">
             <label for="report-tags">{{ $t('Tags') }}</label>
             <input id="report-tags" v-model="tags" :addTagOnBlur="true" />-->
-            <TagInput id="tagItem" ref="tagItem" :initialItems="tags" class="form-control form-control-lg acti-shadow"/>
+            <TagInput id="tagItem" ref="tagItem" :initialItems="tags" class="acti-shadow"/>
             <small class="form-text text-muted">{{ $t('Tag_Edit_Note') }}</small>
           </div>
         </div>
@@ -94,7 +94,7 @@
 		}
 	});
 	/* end */
-   
+
 
   export default {
     components: {
@@ -109,7 +109,7 @@
         loading: false, // loading animation in submit button
 		cur_bchain: 'HIVE', //bchain used to edit/save
 		target_bchain: 'HIVE', //bchain to which edits will go
-		
+
       }
     },
     computed: {
@@ -134,7 +134,7 @@
 		}
 		return '';
 	  },
-	  
+
     },
     watch: {
 	  bchain: async function(newBchain) {
@@ -158,7 +158,7 @@
       }
     },
     methods: {
-		
+
 	  async processTrxFunc(op_name, cstm_params, bchain_option){
 		if (!localStorage.getItem('std_login')){
 		//if (!this.stdLogin){
@@ -172,27 +172,27 @@
 				return {success: false, trx: null};
 			}
 		}else{
-			let operation = [ 
+			let operation = [
 			   [op_name, cstm_params]
 			];
 			console.log('broadcasting');
 			console.log(operation);
-			
+
 			//console.log(this.$steemconnect.accessToken);
 			//console.log(this.$store.state.accessToken);
 			//grab token
 			let accToken = localStorage.getItem('access_token')
-			
+
 			let op_json = JSON.stringify(operation)
-			
+
 			let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
-			
+
 			if (bchain_option){
 				cur_bchain = bchain_option;
 			}
-			
+
 			let url = new URL(process.env.actiAppUrl + 'performTrxPost/?user='+this.user.account.name+'&bchain='+cur_bchain);
-			
+
 			let reqHeads = new Headers({
 			  'Content-Type': 'application/json',
 			  'x-acti-token': 'Bearer ' + accToken,
@@ -206,7 +206,7 @@
 			console.log(outcome);
 			if (outcome.error){
 				console.log(outcome.error);
-				
+
 				//if this is authority error, means needs to be logged out
 				//example "missing required posting authority:Missing Posting Authority"
 				let err_msg = outcome.trx.tx.error;
@@ -217,7 +217,7 @@
 					this.error_msg = this.$t('session_expired_login_again');
 					this.$store.dispatch('steemconnect/logout');
 				}
-				
+
 				this.$notify({
 				  group: 'error',
 				  text: err_msg,
@@ -231,17 +231,17 @@
 		}
 	  },
 	  commentSuccess (err, finalize, bchain) {
-		
+
 		this.$notify({
 		  group: err ? 'error' : 'success',
 		  text: err ? this.$t('Save_Error') : this.$t('Save_Success_Chain').replace('_CHAIN_', bchain),
 		  position: 'top center'
 		})
-		
+
 		//let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		//this.$store.commit('setBchain', cur_bchain);
-		
-		
+
+
 		//reward the user for a new edit
 		if (finalize){
 			// stop loading animation and show notification
@@ -252,7 +252,7 @@
 			  author: this.editReport.author,
 			  permlink: this.editReport.permlink
 			})
-			
+
 		}
 	  },
       async save () {
@@ -277,7 +277,7 @@
             .filter(String) // remove empty values
             .map(tag => tag.trim()) // trim leading and trailing whitespaces from tags
         ]
-		
+
 		//cleanup images to remove any ones which could have been removed
 		for (let i = 0;i < meta.image.length;i++){
 			if (!this.body.includes(meta.image[i])){
@@ -286,26 +286,26 @@
 				i--;
 			}
 		}
-		
+
 		//fetch any new images to add them as proper thumbnails
-		
-		//matching our image markdown pattern 
+
+		//matching our image markdown pattern
 		const regex = /!\[(.*?)\]\((.*?)\)/g;
-		
+
 		let markdown_imgs = this.body.match(regex);
-		
+
 		if (markdown_imgs != null){
 			for (let mimgct = markdown_imgs.length - 1;mimgct >= 0;mimgct--){
 				//grab url only
 				let img_src_url = markdown_imgs[mimgct].substring(markdown_imgs[mimgct].indexOf('(')+1,markdown_imgs[mimgct].indexOf(')'));
-				
+
 				//append at the start if not already part of meta
 				if (!meta.image.includes(img_src_url)){
 					meta.image.unshift(img_src_url);
 				}
 			}
 		}
-		
+
 		//ensure that the app info is actifit specific, for example edited by a different editor
 		if (!meta.app.includes('actifit')){
 			meta.app = 'actifit/0.5.0';
@@ -315,7 +315,7 @@
         // save changes
 		if (!localStorage.getItem('std_login')){
 		//if (!this.stdLogin){
-		
+
 			this.$steemconnect.comment(
 			  this.editReport.parent_author,
 			  this.editReport.parent_permlink,
@@ -338,21 +338,21 @@
 			  "permlink": this.editReport.permlink,
 			  "json_metadata": JSON.stringify(meta)
 			};
-			
+
 			let res = await this.processTrxFunc('comment', cstm_params, this.cur_bchain);
-			
+
 			if (res.success){
 				this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain);
 			}else{
 				this.commentSuccess('error saving', false, this.cur_bchain);
 			}
-			
+
 			//also send the same post again to the other chain
 			let other_chain = this.cur_bchain=='HIVE'?'STEEM':'HIVE';
 			if (this.target_bchain == 'BOTH'){
 				this.loading = true;
 				let res = await this.processTrxFunc('comment', cstm_params, other_chain);
-			
+
 				if (res.success){
 					this.commentSuccess(null, true, other_chain);
 				}else{
