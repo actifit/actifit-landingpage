@@ -98,7 +98,6 @@ export default {
 </script>
 
 <style scoped>
-/* This CSS is new and necessary to make the template render correctly. */
 .tag-input-wrapper {
   display: flex;
   flex-wrap: wrap;
@@ -108,7 +107,9 @@ export default {
   padding: 0.5rem 0.25rem;
   background-color: white;
   cursor: text;
-  min-height: calc(1.5em + 1rem + 2px); /* Mimics 'form-control-lg' height */
+  min-height: calc(1.5em + 1rem + 2px);
+  max-height: 85px;
+  overflow-y: auto;
 }
 
 .tag-list {
@@ -130,7 +131,7 @@ export default {
   margin-bottom: 0.5rem;
   padding: 0.25rem 0.5rem;
   white-space: nowrap;
-  font-size: 0.9em;
+  font-size: 0.9rem;
 }
 
 .remove-btn {
@@ -156,6 +157,8 @@ export default {
   padding: 0.25rem 0.5rem;
   min-width: 150px;
   margin-bottom: 0.5rem;
+  font-size: 1rem;
+  line-height: 1.5;
   height: 100%;
 }
 </style>

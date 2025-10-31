@@ -125,7 +125,7 @@
         <div class="form-group">
           <!--<label for="post-tags" style="display: none">{{ $t('Tags') }}</label>
             <input class="form-control form-control-lg acti-shadow" :placeholder="$t('Tags')"/>-->
-          <TagInput id="tagItem" ref="tagItem" :initialItems="tags" class="form-control form-control-lg acti-shadow" />
+          <TagInput id="tagItem" ref="tagItem" :initialItems="tags" class="acti-shadow" />
         </div>
 
         <div class="form-group acti-shadow extra-container">
