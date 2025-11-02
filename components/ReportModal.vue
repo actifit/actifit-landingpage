@@ -202,16 +202,16 @@
           <div v-if="showCommentsLoader" class="pb-md-2 text-center">
             <i class="fas fa-spinner fa-spin text-brand"></i>
           </div>
-          <Comments v-if="commentsAvailable" 
-            :author="commentEntries.author" 
+          <Comments v-if="commentsAvailable"
+            :author="commentEntries.author"
             :body="commentEntries.body"
-            :reply_entries.sync="commentEntries.reply_entries" 
+            :reply_entries.sync="commentEntries.reply_entries"
             :main_post_author="report.author"
-            :main_post_permlink="report.permlink" 
-            :main_post_cat="report.category" 
+            :main_post_permlink="report.permlink"
+            :main_post_cat="report.category"
             :depth="0"
             :translation-cache="translationCache"
-            @update-translation-cache="updateCommentCache" 
+            @update-translation-cache="updateCommentCache"
           />
         </div>
 
@@ -603,7 +603,7 @@ export default {
           percent_hbd: 10000, allow_votes: true, allow_curation_rewards: true, extensions: []
         };
         window.hive_keychain.requestPost(
-          this.user.account.name, "", this.replyBody, this.report.permlink, this.report.author, JSON.stringify(meta), comment_perm, JSON.stringify(comment_options), 
+          this.user.account.name, "", this.replyBody, this.report.permlink, this.report.author, JSON.stringify(meta), comment_perm, JSON.stringify(comment_options),
           (response) => {
             if (response.success) {
               this.commentSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain);
@@ -821,16 +821,12 @@ export default {
   cursor: pointer;
 }
 
-.report-modal-prelim-info span {
-  /* padding: 5px; */
-}
-
 .pointer-cur-cls {
   cursor: pointer;
 }
 
 .translation-notice {
-  background-color: #f8f9fa;
+  background-color: #181d22;
   border: 1px solid #e9ecef;
   padding: 10px;
   margin-bottom: 15px;
