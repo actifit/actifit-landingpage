@@ -385,25 +385,8 @@ export default {
 
     proxiedBody() {
       if (!this.report || !this.report.body) return '';
-
-      const rawBody = this.$cleanBody(this.report.body);
-
-      return rawBody.replace(/<img[^>]+src="([^">]+)"/g, (match, url) => {
-        if (url.startsWith('https://images.hive.blog') || url.toLowerCase().endsWith('.gif')) {
-          return match;
-        }
-
-        let absoluteUrl = url;
-        if (url.startsWith('//')) {
-          absoluteUrl = 'https:' + url;
-        } else if (!url.startsWith('http')) {
-          absoluteUrl = 'https://' + url;
-        }
-
-        const proxiedUrl = `https://images.hive.blog/0x0/${absoluteUrl}`;
-
-        return match.replace(url, proxiedUrl);
-      });
+      // All the complex logic is now handled inside $cleanBody
+      return this.$cleanBody(this.report.body);
     },
 
     body() { return this.report ? this.$cleanBody(this.report.body) : ''; },

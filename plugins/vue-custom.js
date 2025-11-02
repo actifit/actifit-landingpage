@@ -248,84 +248,104 @@ Vue.prototype.$processTrxFunc = async function (op_name, cstm_params, active) {
 };
 
 Vue.prototype.$cleanBody = function (report_content, full_cleanup){
-	//sanitize content first hand
-	let img_replacement = '<img src="$1">';
+	// Define all replacements and regex first
 	let vid_replacement = '<iframe width="640" height="360" src="https://www.youtube.com/embed/$1"></iframe>';
 	let user_link_replacement = '$1<a href="https://actifit.io/$2">$2</a>';
 
-	if (full_cleanup){
-		report_content = sanitize(report_content, { allowedTags: []});
-		img_replacement = '';
-		vid_replacement = '';
-	}else{
-		report_content = sanitize(report_content, { allowedTags: ['img', 'details', 'summary', 'iframe', 'blockquote'] } );
-	}
-	//fix for lost blockquotes
-	report_content = report_content.replaceAll('&gt;','>');
-	//console.log(report_content);
-	//console.log(report_content);
-	//return report_content;
+	// =========================================================================
+	// ===== STEP 1: ISOLATE AND PROCESS IMAGES USING PLACEHOLDERS =============
+	// =========================================================================
 
-	/* let's find images sent as ![](), and display them properly */
-	//let img_links_reg = /^(?:(?!=").)*((https?:\/\/[./\d\w-]*\.(?:png|jpg|jpeg|gif))|((https?:\/\/usermedia\.actifit\.io\/[./\d\w-]+)))/igm;
+	const placeholders = {};
+	let counter = 0;
 
-	let img_links_reg = /!\[[\d\w\s\-.\(\)]*\]\((https?:\/\/(?:usermedia\.actifit\.io|ipfs\.busy\.org\/ipfs|steemitimages\.com)\/[\d\w\-\.\/\%\?\=\&]*|https?:\/\/[\d\w\-\.\/\%\?\=\&]*(?:png|jpg|jpeg|gif)(?:\?[^\)]*)?)\)/igm;
-	report_content = report_content.replace(img_links_reg, img_replacement);
+	// Helper function to create the final <img> tag
+	const createProxiedImageTag = (url) => {
+		if (!url || typeof url !== 'string') return '';
+		url = url.trim();
+		if (!url.startsWith('http')) return '';
+		if (url.startsWith('https://images.hive.blog') || url.toLowerCase().endsWith('.gif')) {
+			return `<img src="${url}">`;
+		}
+		const proxiedUrl = `https://images.hive.blog/0x0/${url}`;
+		return `<img src="${proxiedUrl}">`;
+	};
 
-	/* let's find images sent as pure URLs, and display them as actual images, while avoiding well established images */
-	/* negative lookbehinds are not supported ?<! we need to switch to another approach */
-	//img_links_reg = /(?<!=")(?<!]\()(((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|(https?:\/\/[./\d\w-]*\.(?:png|jpg|jpeg|gif)))/igm;
-	//img_links_reg = /(((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|(https?:\/\/[./\d\w-]*\.(?:png|jpg|jpeg|gif)))(?!")/igm;
-	img_links_reg = /(((https?:\/\/usermedia\.actifit\.io\/)[\d\w-]+)|((https:\/\/ipfs\.busy\.org\/ipfs\/)[\d\w-]+)|((https:\/\/steemitimages\.com\/)[\d\w-[\:\/\.]+)|(https?:\/\/[.\/\d\w-]*\.(?:png|jpg|jpeg|gif)))[\s]/igm;
-	report_content = report_content.replace(img_links_reg, img_replacement);
+	// Stash function that generates a placeholder and stores the real HTML
+	const stashImage = (url) => {
+		const placeholder = `__IMAGE_PLACEHOLDER_${counter++}__`;
+		placeholders[placeholder] = createProxiedImageTag(url);
+		return placeholder;
+	};
 
-	//final catch all for images converting any left overs to proper tag:
-	img_links_reg = /^(?!<img\s+src=)([^<>\s]+\.(?:png|jpe?g|gif|bmp|ico|svg))$/igm;
-	report_content = report_content.replace(img_links_reg, img_replacement);
+	// REGEX 1: Find markdown images, replace with placeholders
+	const markdownImgRegex = /!\[[^\]]*\]\s*\(([^)]+)\)/g;
+	report_content = report_content.replace(markdownImgRegex, (match, url) => {
+		return stashImage(url);
+	});
 
-	/* let's match youtube videos and display them in a player */
-	//let vid_reg = /^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+/gm;
+	// REGEX 2: Find raw image URLs, replace with placeholders
+	const rawImgRegex = /(^|\s)(https?:\/\/[^\s"'<>]*\.(?:png|jpg|jpeg|gif|webp))/g;
+	report_content = report_content.replace(rawImgRegex, (match, prefix, url) => {
+		return prefix + stashImage(url);
+	});
 
+
+	// =========================================================================
+	// ===== STEP 2: PROCESS ALL OTHER CONTENT (LINKS, VIDEOS, ETC.) =========
+	// =========================================================================
+
+	// Handle Youtube and 3speak videos
 	let vid_reg = /https?:\/\/(?:[0-9A-Z-]+\.)?(?:youtu\.be\/|youtube\.com\S*[^\w\-\s])([\w\-]{11})(?=[^\w\-]|$)(?![?=&+%\w]*(?:['"][^<>]*>|<\/a>))[?=&+%\w-]*/ig;
-
-	//swap into a player format, and introduce embed format for proper playing of videos
 	report_content = report_content.replace(vid_reg, vid_replacement);
 
-	// THE ONLY MODIFIED SECTION STARTS HERE
-
-	// Step 1: Match the full markdown embed format with a thumbnail, e.g., [![](thumbnail_url)](3speak_url)
-	// This is the most common format for a primary video embed.
 	let threespk_embed_reg = /\[!\[[^\]]*\]\([^)]+\)\]\(https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+)\)/ig;
 	report_content = report_content.replace(threespk_embed_reg, '<iframe width="640" height="360" src="//3speak.tv/embed?v=$1&autoplay=false"></iframe>');
-
-	// Step 2: Match standalone/raw 3speak URLs that are not already part of other markdown.
-	// We check for a space before the URL or if it's at the start of the line to ensure it's a raw link.
-	// Example: https://3speak.tv/watch?v=user/permlink
 	let threespk_raw_reg = /(^|\s)(https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+))/ig;
 	report_content = report_content.replace(threespk_raw_reg, '$1<iframe width="640" height="360" src="//3speak.tv/embed?v=$3&autoplay=false"></iframe>');
 
-	// Detect and link markdown patterns like [text](url)
-	// This should run BEFORE the generic URL detection.
+	// Handle markdown links and generic URLs (this can no longer break the images)
 	let markdown_link_reg = /\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/g;
 	report_content = report_content.replace(markdown_link_reg, '<a href="$2">$1</a>');
 
-	// Detect and link generic URLs, carefully avoiding those already within HTML attributes or processed markdown links.
-	// This uses a negative lookbehind assertion to ensure the URL is not preceded by an equals sign or a quote,
-	// which typically indicates it's part of an HTML attribute like src="..." or href='...'.
-	// It also ensures it doesn't try to link parts of an already formed <a> tag.
 	let url_reg = /(?<!["'=])(https?:\/\/[^\s<>"]+)/g;
 	report_content = report_content.replace(url_reg, '<a href="$1">$1</a>');
 
-	// THE ONLY MODIFIED SECTION ENDS HERE
-
-	/* regex to match @ words and convert them to steem user links. Need to skip special occurrences such as name within a link (preceded by /) */
+	// Handle usernames
 	if (!full_cleanup){
 		let user_name = /([^\/])(@([\d\w-.]+))/igm;
-
 		report_content = report_content.replace(user_name, user_link_replacement);
 	}
 
-	return report_content;
+	// =========================================================================
+	// ===== STEP 3: RESTORE IMAGES AND SANITIZE THE FINAL HTML ==============
+	// =========================================================================
+
+	// Restore the images from the placeholders
+	for (const placeholder in placeholders) {
+		report_content = report_content.replace(placeholder, placeholders[placeholder]);
+	}
+
+	let sanitizeOptions = {
+		allowedTags: sanitize.defaults.allowedTags.concat([ 'img', 'iframe', 'details', 'summary' ]),
+		allowedAttributes: {
+			'img': [ 'src' ],
+			'iframe': [ 'width', 'height', 'src' ],
+			'a': [ 'href' ]
+		}
+	};
+
+	if (full_cleanup){
+		sanitizeOptions.allowedTags = [];
+		sanitizeOptions.allowedAttributes = {};
+	}
+
+	let sanitized_content = sanitize(report_content, sanitizeOptions);
+
+	//fix for lost blockquotes
+	sanitized_content = sanitized_content.replaceAll('&gt;','>');
+
+	return sanitized_content;
 }
 
 Vue.prototype.$clearDraft = function (username, type){
