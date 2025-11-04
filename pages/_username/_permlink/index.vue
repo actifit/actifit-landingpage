@@ -420,7 +420,11 @@ export default {
   methods: {
     headToComments() {
       if (this.$refs.commentsSection) {
-        VueScrollTo.scrollTo(this.$refs.commentsSection, 500, { easing: 'ease-in-out', offset: -80 });
+        VueScrollTo.scrollTo(this.$refs.commentsSection, 500, {
+          easing: 'ease-in-out',
+          offset: -20,
+          container: this.$refs.commentsSection.parentElement  // ✅ KEY FIX
+        });
       }
     },
     syncColumnHeights() {
