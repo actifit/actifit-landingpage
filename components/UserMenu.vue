@@ -45,7 +45,7 @@
 
       <!-- Dark Mode Toggle -->
       <li class="nav-item mr-2" @click="toggleDarkMode" :title="$t('toggle_dark_mode')"
-        v-if="user && !hideVisualControls">
+        v-if="!hideVisualControls">
         <span class="user-avatar group-class">
           <i v-if="$store.state.darkMode" class="fa-solid fa-sun text-brand"></i>
           <i v-else class="fa-solid fa-moon text-brand"></i>
