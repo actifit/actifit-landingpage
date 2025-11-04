@@ -66,8 +66,8 @@
                 :options="{ 'html': true, 'breaks': true, 'typographer': true }"></vue-remarkable>
 
 
-              <div class="modal-footer col-md-12 main-payment-info" id="main-footer">
-                <div class="report-modal-prelim-info col-md-6">
+              <div class="col-md-12 main-payment-info" id="main-footer">
+                <div class="report-modal-prelim-info">
                   <span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i
                         class="text-white fas fa-reply"></i></a></span>
 
@@ -120,7 +120,7 @@
                     </transition>
                   </div>
                 </div>
-                <div class="col-md-6">
+                <div>
                   <social-sharing :url="formattedReportUrl" :title="report.title" :description="socialSharingDesc"
                     :quote="socialSharingQuote" :hashtags="hashtags" twitter-user="actifit_fitness" inline-template>
                     <div class="share-links-actifit">

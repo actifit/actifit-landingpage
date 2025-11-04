@@ -91,7 +91,7 @@
                 $t('Full_Signature') }}</a>
           </div>
         </transition>
-        <div class="modal-footer main-payment-info p-2">
+        <div class="main-payment-info col-12 p-2">
           <div v-if="this.user && this.user.account.name == this.full_data.author"><a href="#"
               @click.prevent="editBoxOpen = !editBoxOpen" :title="$t('Edit_note')"><i
                 class="fas fa-edit text-white"></i></a></div>

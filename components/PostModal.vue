@@ -78,8 +78,8 @@
         <div class="modal-body goog-ad-horiz-90">
           <adsbygoogle ad-slot="5716623705" />
         </div>
-        <div class="main-payment-info modal-footer" id="modal-footer">
-          <div class="col-md-6">
+        <div class="main-payment-info col-12" id="modal-footer">
+          <div >
             <span><a href="#" @click.prevent="toggleCommentBox()" :title="$t('Reply')"><i
                   class="text-white fas fa-reply"></i></a></span>
             <span class="ml-2">
@@ -141,7 +141,7 @@
               </transition>
             </div>
           </div>
-          <div class="col-md-6">
+          <div>
             <social-sharing :url="formattedPostUrl" :title="post.title"
               description="Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity "
               quote="Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity"
