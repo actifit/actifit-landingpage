@@ -386,6 +386,7 @@ export default {
     proxiedBody() {
       if (!this.report || !this.report.body) return '';
       // All the complex logic is now handled inside $cleanBody
+      console.log('before clean',this.report.body);
       return this.$cleanBody(this.report.body);
     },
 
