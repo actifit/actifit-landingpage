@@ -36,24 +36,24 @@
                 class="date-head text-muted" :title="date">{{ $getTimeDifference(full_data.created) }}</span> <i
                 class="fas fa-link"></i></a>
             <i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent"></i>
-            
+
             <!-- ✅ CORE CHANGE: Translation icons are now driven by the new state -->
             <i v-if="translationLoading" class="fas fa-spinner fa-spin text-brand ml-2" :title="$t('translating_content', 'Translating...')"></i>
             <i v-else-if="!showTranslated" class="fa-solid fa-language text-brand ml-2" v-on:click="translateContent" :title="$t('translate_content', 'Translate Content')"></i>
           </div>
         </div>
-        
+
         <!-- ✅ CORE CHANGE: Translation notice is now controlled by new state -->
         <div v-if="showTranslated" class="translation-notice" :style="{ marginLeft: depth * indentFactor + 'px' }">
           <span>{{ $t('auto_translated_content') }}</span>
           <a href="#" v-on:click.prevent="cancelTranslation">{{ $t('click_to_view_original') }}</a>
         </div>
-        
+
         <!-- ✅ CORE CHANGE: Source is now a computed property that shows original or translated text -->
         <vue-remarkable class="modal-body pb-0" v-if="!editBoxOpen" :source="displayContent"
           :style="{ paddingLeft: depth * indentFactor + 'px' }"
           :options="{ 'html': true, 'breaks': true, 'typographer': true }"></vue-remarkable>
-        
+
         <transition name="fade">
           <div class="comment-reply" v-if="editBoxOpen">
             <CustomTextEditor ref="editor" :initialContent="full_data.body"></CustomTextEditor>
@@ -91,7 +91,7 @@
                 $t('Full_Signature') }}</a>
           </div>
         </transition>
-        <div class="modal-footer main-payment-info p-2">
+        <div class="main-payment-info col-12 p-2">
           <div v-if="this.user && this.user.account.name == this.full_data.author"><a href="#"
               @click.prevent="editBoxOpen = !editBoxOpen" :title="$t('Edit_note')"><i
                 class="fas fa-edit text-white"></i></a></div>
@@ -214,7 +214,7 @@ export default {
       showTranslated: false,
       translationLoading: false,
       translatedText: '',
-      
+
       // Original state
       currentSort: JSON.stringify({ value: 'created', direction: 'desc' }),
       postUpvoted: false,
@@ -260,12 +260,12 @@ export default {
     ...mapGetters('steemconnect', ['stdLogin']),
     ...mapGetters(['moderators']),
     ...mapGetters(['newlyVotedPosts', 'bchain']),
-    
+
     commentId() {
         if (!this.full_data) return null;
         return `${this.full_data.author}/${this.full_data.permlink}`;
     },
- 
+
     displayContent() {
       if (this.showTranslated && this.translatedText) {
         return this.translatedText;
@@ -343,7 +343,7 @@ export default {
     initializeTranslationState() {
       if (!this.commentId || !this.translationCache) return;
       const cachedState = this.translationCache[this.commentId];
-      this.translationLoading = false; 
+      this.translationLoading = false;
 
       if (cachedState) {
         this.translatedText = cachedState.translatedBody;
@@ -388,9 +388,9 @@ export default {
     updateCache(data) {
         if (!this.commentId) return;
         const existingData = this.translationCache[this.commentId] || {};
-        const payload = { 
+        const payload = {
             id: this.commentId,
-            data: { ...existingData, ...data } 
+            data: { ...existingData, ...data }
         };
         this.$emit('update-translation-cache', payload);
     },
@@ -515,7 +515,7 @@ export default {
               } else if (response.cmd && response.cmd === 'sign_nack') {
                 resolve({ success: false })
               }
-            }) 
+            })
             .catch(err => {
               this.$notify({
                 group: 'warn',

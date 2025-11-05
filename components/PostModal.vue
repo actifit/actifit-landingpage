@@ -43,7 +43,7 @@
             <span class="date-head" :title="date">{{ $getTimeDifference(post.created) }}</span>
             <a :href="'/@' + this.post.author + '/' + this.post.permlink"><i class="fas fa-link text-brand"></i></a>
             <i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent"></i>
-            
+
             <!-- Translation Icons Updated -->
             <i v-if="translationLoading" class="fas fa-spinner fa-spin text-brand" :title="$t('translating_content', 'Translating...')"></i>
             <i v-else-if="!showTranslated" class="fa-solid fa-language text-brand" v-on:click="translateContent" :title="$t('translate_content', 'Translate Content')"></i>
@@ -78,8 +78,8 @@
         <div class="modal-body goog-ad-horiz-90">
           <adsbygoogle ad-slot="5716623705" />
         </div>
-        <div class="main-payment-info modal-footer" id="modal-footer">
-          <div class="col-md-6">
+        <div class="main-payment-info col-12" id="modal-footer">
+          <div >
             <span><a href="#" @click.prevent="toggleCommentBox()" :title="$t('Reply')"><i
                   class="text-white fas fa-reply"></i></a></span>
             <span class="ml-2">
@@ -141,7 +141,7 @@
               </transition>
             </div>
           </div>
-          <div class="col-md-6">
+          <div>
             <social-sharing :url="formattedPostUrl" :title="post.title"
               description="Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity "
               quote="Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity"
@@ -295,7 +295,7 @@ export default {
   data() {
     return {
       // ✅ CORE FIX: Initialize the translation cache object.
-      translationCache: {}, 
+      translationCache: {},
 
       // All other state variables
       commentsLoading: true,
@@ -427,7 +427,7 @@ export default {
 
     fetchPostData() {
       if (!this.post) return; // Guard clause to prevent errors if post is null
-      
+
       const postId = `${this.post.author}/${this.post.permlink}`;
       const cachedState = this.translationCache[postId];
 
@@ -458,11 +458,11 @@ export default {
 
     cancelTranslation() {
       const postId = `${this.post.author}/${this.post.permlink}`;
-      
+
       // Revert the view to the original content
       this.displayBody = this.safety_post_content;
       this.showTranslated = false;
-      
+
       // Update the cache to remember that the user wants to see the original.
       if (this.translationCache[postId]) {
         this.$set(this.translationCache[postId], 'isShowingTranslation', false);
@@ -471,7 +471,7 @@ export default {
 
     async translateContent() {
       const postId = `${this.post.author}/${this.post.permlink}`;
-      
+
       // If we already have the translation (from cache), just show it.
       if (this.translatedText) {
         this.displayBody = this.translatedText;
@@ -484,7 +484,7 @@ export default {
 
       this.translationLoading = true;
       try {
-        const translationResult = await translateTextWithGemini(this.safety_post_content); 
+        const translationResult = await translateTextWithGemini(this.safety_post_content);
         this.translatedText = translationResult;
         this.displayBody = this.translatedText;
         this.showTranslated = true;
@@ -881,7 +881,7 @@ export default {
   },
   mounted() {
     // The post watcher will handle the initial data fetch, so no need for extra calls here.
-    
+
     //associate scrolling with the modal
     VueScrollTo.scrollTo = VueScrollTo.scrollTo.bind(this);
 
