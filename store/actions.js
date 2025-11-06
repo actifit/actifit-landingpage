@@ -693,47 +693,48 @@ export default {
   fetchReportComments({ state, commit, dispatch }, report) {
     // handles grabbing comments for currently opened post
     return new Promise((resolve, reject) => {
-      let report_param = report.category + '/@' + report.author + '/' + report.permlink;
+      let author = report.author;
+      let permlink = report.permlink;
       let cur_ref = this;
 
       //set proper blockchain selection
-
-      //set proper blockchain selection
-      //particularly for the getstate, we need a node supporting getstate, so we will use specifically
       let chainLnk = hive;
-      hive.api.setOptions({ url: process.env.hiveStateApiNode });
+      hive.api.setOptions({ url: process.env.hiveApiNode }); // Using a general API node is sufficient
       if (state.bchain == 'STEEM') {
         chainLnk = steem;
       } else if (state.bchain == 'BLURT') {
         chainLnk = blurt;
       }
 
-      //using getState to fetch all level comments
-      chainLnk.api.getState(report_param, function (err, result) {
-        //sort results by depth so as we display entries properly
-        let comments_found = Object.values(result.content).sort(function (comment_a, comment_b) {
-          return comment_a.depth < comment_b.depth ? -1 : 1;
-        });
-        //go through sorted items, set them up in a suitable tree chart for proper display
+      //using getContentReplies to fetch all level comments
+      chainLnk.api.getContentReplies(author, permlink, function (err, result) {
+        if (err) {
+          return reject(err);
+        }
 
-        //loop through all entries starting at the very bottom
-        for (let i = comments_found.length - 1; i > 0; --i) {
-          //try to match the parent of each entry to build a proper tree
-          for (let j = i - 1; j >= 0; --j) {
-            if (comments_found[i].parent_author == comments_found[j].author
-              && comments_found[i].parent_permlink == comments_found[j].permlink) {
-              if (comments_found[j].reply_entries == null) {
-                comments_found[j].reply_entries = [];
-              }
-              comments_found[j].reply_entries.push(comments_found[i]);
+        // The result is an array of comments. We need to add the main post to the beginning.
+        let all_content = [report, ...result];
+
+        // Build a map of comments for easy lookup
+        let comment_map = {};
+        for (const comment of all_content) {
+          comment.reply_entries = [];
+          comment_map[comment.author + '/' + comment.permlink] = comment;
+        }
+
+        // Loop through all entries to build the tree
+        for (const comment of all_content) {
+          if (comment.parent_author && comment.parent_permlink) {
+            const parent_id = comment.parent_author + '/' + comment.parent_permlink;
+            if (comment_map[parent_id]) {
+              comment_map[parent_id].reply_entries.push(comment);
             }
           }
         }
-        //the proper tree now lies in entry 0 with all subsequent comments, let's set it to our comment rendering var
 
-        commit('setCommentEntries', comments_found.slice(0, 1)[0]) // if posts were found, show load more button
-        resolve()
-
+        // The proper tree now lies in the report object, which is the first element
+        commit('setCommentEntries', all_content[0]);
+        resolve();
       });
     })
   },
@@ -741,47 +742,52 @@ export default {
   fetchPostComments({ state, commit, dispatch }, post) {
     // handles grabbing comments for currently opened post
     return new Promise((resolve, reject) => {
-      let post_param = post.category + '/@' + post.author + '/' + post.permlink;
-      let cur_ref = this;
+      const author = post.author;
+      const permlink = post.permlink;
 
-      //set proper blockchain selection
-
-      //set proper blockchain selection
-      //particularly for the getstate, we need a node supporting getstate, so we will use specifically
+      // Set proper blockchain selection
       let chainLnk = hive;
-      hive.api.setOptions({ url: process.env.hiveStateApiNode });
+      // Use a standard API node; a specific state node is not required for this call
+      hive.api.setOptions({ url: process.env.hiveApiNode });
       if (state.bchain == 'STEEM') {
         chainLnk = steem;
       } else if (state.bchain == 'BLURT') {
         chainLnk = blurt;
       }
 
-      //using getState to fetch all level comments
-      chainLnk.api.getState(post_param, function (err, result) {
-        //sort results by depth so as we display entries properly
-        let comments_found = Object.values(result.content).sort(function (comment_a, comment_b) {
-          return comment_a.depth < comment_b.depth ? -1 : 1;
-        });
-        //go through sorted items, set them up in a suitable tree chart for proper display
+      // Use getContentReplies to fetch all comments for the post
+      chainLnk.api.getContentReplies(author, permlink, function (err, comments) {
+        if (err) {
+          console.error('Error fetching comments:', err);
+          return reject(err);
+        }
 
-        //loop through all entries starting at the very bottom
-        for (let i = comments_found.length - 1; i > 0; --i) {
-          //try to match the parent of each entry to build a proper tree
-          for (let j = i - 1; j >= 0; --j) {
-            if (comments_found[i].parent_author == comments_found[j].author
-              && comments_found[i].parent_permlink == comments_found[j].permlink) {
-              if (comments_found[j].reply_entries == null) {
-                comments_found[j].reply_entries = [];
-              }
-              comments_found[j].reply_entries.push(comments_found[i]);
+        // Combine the parent post with its comments to build the tree
+        const all_content = [post, ...comments];
+
+        // Create a map for efficient lookup of any post or comment by its unique ID
+        const content_map = {};
+        for (const item of all_content) {
+          item.reply_entries = []; // Ensure reply_entries array exists
+          content_map[item.author + '/' + item.permlink] = item;
+        }
+
+        // Link comments to their parents to build the nested tree structure
+        for (const item of all_content) {
+          if (item.parent_author && item.parent_permlink) {
+            const parent_id = item.parent_author + '/' + item.parent_permlink;
+            const parent = content_map[parent_id];
+            if (parent) {
+              parent.reply_entries.push(item);
             }
           }
         }
-        //the proper tree now lies in entry 0 with all subsequent comments, let's set it to our comment rendering var
 
-        commit('setCommentEntries', comments_found.slice(0, 1)[0]) // if posts were found, show load more button
-        resolve()
+        // The full tree is now attached to the original post object
+        const commentTree = all_content[0];
 
+        commit('setCommentEntries', commentTree);
+        resolve();
       });
     })
   },
