@@ -373,7 +373,7 @@ export default {
       this.$store.commit('setBchain', this.cur_bchain);
       this.$store.dispatch('fetchReportComments', this.report).then(() => {
         this.commentsLoading = false;
-      });
+      }).catch(()=>{this.commentsLoading = false;});
       this.responsePosted = false;
       this.responseBody = this.moderatorSignature;
     },
