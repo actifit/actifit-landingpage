@@ -691,105 +691,153 @@ export default {
 
 
   fetchReportComments({ state, commit, dispatch }, report) {
-    // handles grabbing comments for currently opened post
-    return new Promise((resolve, reject) => {
-      let author = report.author;
-      let permlink = report.permlink;
-      let cur_ref = this;
+    // Return a new promise to fit the Vuex action pattern
+    return new Promise(async (resolve, reject) => {
+      const reportAuthor = report.author;
+      const reportPermlink = report.permlink;
 
-      //set proper blockchain selection
-      let chainLnk = hive;
-      hive.api.setOptions({ url: process.env.hiveApiNode }); // Using a general API node is sufficient
-      if (state.bchain == 'STEEM') {
-        chainLnk = steem;
-      } else if (state.bchain == 'BLURT') {
-        chainLnk = blurt;
-      }
-
-      //using getContentReplies to fetch all level comments
-      chainLnk.api.getContentReplies(author, permlink, function (err, result) {
-        if (err) {
-          return reject(err);
-        }
-
-        // The result is an array of comments. We need to add the main post to the beginning.
-        let all_content = [report, ...result];
-
-        // Build a map of comments for easy lookup
-        let comment_map = {};
-        for (const comment of all_content) {
-          comment.reply_entries = [];
-          comment_map[comment.author + '/' + comment.permlink] = comment;
-        }
-
-        // Loop through all entries to build the tree
-        for (const comment of all_content) {
-          if (comment.parent_author && comment.parent_permlink) {
-            const parent_id = comment.parent_author + '/' + comment.parent_permlink;
-            if (comment_map[parent_id]) {
-              comment_map[parent_id].reply_entries.push(comment);
-            }
-          }
-        }
-
-        // The proper tree now lies in the report object, which is the first element
-        commit('setCommentEntries', all_content[0]);
-        resolve();
-      });
-    })
-  },
-
-  fetchPostComments({ state, commit, dispatch }, post) {
-    // handles grabbing comments for currently opened post
-    return new Promise((resolve, reject) => {
-      const author = post.author;
-      const permlink = post.permlink;
-
-      // Set proper blockchain selection
+      // 1. Set up the blockchain client
       let chainLnk = hive;
       // Use a standard API node; a specific state node is not required for this call
       hive.api.setOptions({ url: process.env.hiveApiNode });
-      if (state.bchain == 'STEEM') {
+      if (state.bchain === 'STEEM') {
         chainLnk = steem;
-      } else if (state.bchain == 'BLURT') {
+      } else if (state.bchain === 'BLURT') {
         chainLnk = blurt;
       }
 
-      // Use getContentReplies to fetch all comments for the post
-      chainLnk.api.getContentReplies(author, permlink, function (err, comments) {
-        if (err) {
-          console.error('Error fetching comments:', err);
-          return reject(err);
+      /**
+       * A recursive async function to fetch all nested replies for a given piece of content.
+       * @param {string} author - The author of the parent content.
+       * @param {string} permlink - The permlink of the parent content.
+       * @returns {Promise<Array>} - A promise that resolves to an array of comment objects,
+       *                            each with its own 'reply_entries' property populated.
+       */
+      const fetchAllReplies = async (author, permlink) => {
+        // Use the promise-based 'Async' version of the API call for clean async/await syntax
+        const replies = await chainLnk.api.getContentRepliesAsync(author, permlink);
+
+        // Base case: If there are no more replies, we stop the recursion for this branch.
+        if (!replies || replies.length === 0) {
+          return [];
         }
 
-        // Combine the parent post with its comments to build the tree
-        const all_content = [post, ...comments];
-
-        // Create a map for efficient lookup of any post or comment by its unique ID
-        const content_map = {};
-        for (const item of all_content) {
-          item.reply_entries = []; // Ensure reply_entries array exists
-          content_map[item.author + '/' + item.permlink] = item;
-        }
-
-        // Link comments to their parents to build the nested tree structure
-        for (const item of all_content) {
-          if (item.parent_author && item.parent_permlink) {
-            const parent_id = item.parent_author + '/' + item.parent_permlink;
-            const parent = content_map[parent_id];
-            if (parent) {
-              parent.reply_entries.push(item);
-            }
+        // Process each reply to find its own children.
+        // Using a for...of loop with await is clear and effective for sequential async operations.
+        for (const comment of replies) {
+          // If the comment itself has replies, recursively fetch them.
+          if (comment.children > 0) {
+            comment.reply_entries = await fetchAllReplies(comment.author, comment.permlink);
+          } else {
+            // CRITICAL: Ensure the 'reply_entries' array exists, even if empty.
+            // This prevents rendering errors in UI components that expect the array.
+            comment.reply_entries = [];
           }
         }
 
-        // The full tree is now attached to the original post object
-        const commentTree = all_content[0];
+        return replies;
+      };
 
-        commit('setCommentEntries', commentTree);
-        resolve();
-      });
-    })
+      try {
+        console.log(`Starting comment fetch for report: ${reportAuthor}/${reportPermlink}`);
+
+        // 2. Begin the recursive fetch starting with the main report.
+        const commentTree = await fetchAllReplies(reportAuthor, reportPermlink);
+
+        console.log('Successfully fetched comment tree for report:', commentTree);
+
+        // 3. Combine the original report object with its fully populated comment tree.
+        const reportWithFullCommentTree = {
+          ...report,
+          reply_entries: commentTree, // Use 'reply_entries' to match the expected data structure.
+        };
+
+        // 4. Commit the final, complete object to the Vuex store.
+        commit('setCommentEntries', reportWithFullCommentTree);
+        resolve(reportWithFullCommentTree); // Resolve the promise with the final data.
+
+      } catch (err) {
+        console.error('An error occurred during the recursive fetch of report comments:', err);
+        // On failure, commit the original report with an empty comments array to avoid crashing the UI.
+        commit('setCommentEntries', { ...report, reply_entries: [] });
+        reject(err); // Reject the promise to signal that the action failed.
+      }
+    });
+  },
+
+  fetchPostComments({ state, commit, dispatch }, post) {
+    // Use a new promise to handle the async logic within the action
+    return new Promise(async (resolve, reject) => {
+      const postAuthor = post.author;
+      const postPermlink = post.permlink;
+
+      // 1. Set up the blockchain client
+      let chainLnk = hive;
+      // It's good practice to re-set the options for each call if the node can change
+      hive.api.setOptions({ url: process.env.hiveApiNode });
+      if (state.bchain === 'STEEM') {
+        chainLnk = steem;
+      } else if (state.bchain === 'BLURT') {
+        chainLnk = blurt;
+      }
+
+      /**
+       * A recursive async function to fetch all nested replies for a given piece of content.
+       * @param {string} author - The author of the parent content.
+       * @param {string} permlink - The permlink of the parent content.
+       * @returns {Promise<Array>} - A promise that resolves to an array of comment objects,
+       *                            each with its own 'reply_entries' property populated.
+       */
+      const fetchAllReplies = async (author, permlink) => {
+        // Use the promise-based 'Async' version of the API call
+        const replies = await chainLnk.api.getContentRepliesAsync(author, permlink);
+
+        if (!replies || replies.length === 0) {
+          // Base case: No more replies, return an empty array.
+          return [];
+        }
+
+        // Use Promise.all to fetch nested replies for all comments on the current level in parallel
+        for (const comment of replies) {
+          // If the comment has children, recursively fetch them.
+          if (comment.children > 0) {
+            comment.reply_entries = await fetchAllReplies(comment.author, comment.permlink);
+          } else {
+            // IMPORTANT: Always ensure the 'reply_entries' array exists, even if empty.
+            // This prevents rendering errors in the frontend component.
+            comment.reply_entries = [];
+          }
+        }
+
+        return replies;
+      };
+
+      try {
+        console.log(`Starting comment fetch for: ${postAuthor}/${postPermlink}`);
+
+        // 2. Start the recursive fetch from the top-level post
+        const commentTree = await fetchAllReplies(postAuthor, postPermlink);
+
+        console.log('Successfully fetched comment tree:', commentTree);
+
+        // 3. Create the final object to be committed to the Vuex store
+        // We are creating a new object from the original 'post' and adding the fetched comments to it.
+        const postWithFullCommentTree = {
+          ...post,
+          reply_entries: commentTree, // Use 'reply_entries' to match your original data structure
+        };
+
+        // 4. Commit the final, complete object to the state
+        commit('setCommentEntries', postWithFullCommentTree);
+        resolve(postWithFullCommentTree); // Resolve the promise with the final data
+
+      } catch (err) {
+        console.error('An error occurred during the recursive fetch of comments:', err);
+        // In case of an error, you might want to commit an empty state or handle it gracefully
+        commit('setCommentEntries', { ...post, reply_entries: [] });
+        reject(err); // Reject the promise
+      }
+    });
   },
 
   updateReport({ state, commit }, options) {

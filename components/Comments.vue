@@ -38,8 +38,10 @@
             <i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent"></i>
 
             <!-- ✅ CORE CHANGE: Translation icons are now driven by the new state -->
-            <i v-if="translationLoading" class="fas fa-spinner fa-spin text-brand ml-2" :title="$t('translating_content', 'Translating...')"></i>
-            <i v-else-if="!showTranslated" class="fa-solid fa-language text-brand ml-2" v-on:click="translateContent" :title="$t('translate_content', 'Translate Content')"></i>
+            <i v-if="translationLoading" class="fas fa-spinner fa-spin text-brand ml-2"
+              :title="$t('translating_content', 'Translating...')"></i>
+            <i v-else-if="!showTranslated" class="fa-solid fa-language text-brand ml-2" v-on:click="translateContent"
+              :title="$t('translate_content', 'Translate Content')"></i>
           </div>
         </div>
 
@@ -92,43 +94,46 @@
           </div>
         </transition>
         <div class="main-payment-info col-12 p-2">
-          <div v-if="this.user && this.user.account.name == this.full_data.author"><a href="#"
-              @click.prevent="editBoxOpen = !editBoxOpen" :title="$t('Edit_note')"><i
-                class="fas fa-edit text-white"></i></a></div>
-          <div v-if="commentDeletable()"><a href="#" @click.prevent="deleteComment" :title="$t('Delete_note')"><i
-                class="fas fa-trash-alt text-white"></i><i class="fas fa-spin fa-spinner" v-if="deleting"></i></a></div>
-          <div><a href="#" @click.prevent="toggleCommentBox()" :title="$t('Reply')"><i
-                class="fas fa-reply  text-white"></i></a></div>
-          <div>
-            <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand"
-              data-target="#voteModal" v-if="this.user && userVotedThisPost() == true">
-              <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
-            </a>
-            <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" data-target="#voteModal"
-              class="actifit-link-plain" v-else>
-              <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
-            </a>
-            <i class="far fa-comments ml-2"></i> {{ full_data.children }}
-          </div>
-          <div>
-            <span v-if="postPaid()">
-              <span class="m-1" :title="$t('author_payout')">
-                <i class="fa-solid fa-user"></i>
-                {{ paidValue() }}
+          <div :style="{ paddingLeft: (depth) * indentFactor + 'px' }">
+            <div v-if="this.user && this.user.account.name == this.full_data.author"><a href="#"
+                @click.prevent="editBoxOpen = !editBoxOpen" :title="$t('Edit_note')"><i
+                  class="fas fa-edit text-white"></i></a></div>
+            <div v-if="commentDeletable()"><a href="#" @click.prevent="deleteComment" :title="$t('Delete_note')"><i
+                  class="fas fa-trash-alt text-white"></i><i class="fas fa-spin fa-spinner" v-if="deleting"></i></a>
+            </div>
+            <div><a href="#" @click.prevent="toggleCommentBox()" :title="$t('Reply')"><i
+                  class="fas fa-reply  text-white"></i></a></div>
+            <div>
+              <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand"
+                data-target="#voteModal" v-if="this.user && userVotedThisPost() == true">
+                <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
+              </a>
+              <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" data-target="#voteModal"
+                class="actifit-link-plain" v-else>
+                <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
+              </a>
+              <i class="far fa-comments ml-2"></i> {{ full_data.children }}
+            </div>
+            <div>
+              <span v-if="postPaid()">
+                <span class="m-1" :title="$t('author_payout')">
+                  <i class="fa-solid fa-user"></i>
+                  {{ paidValue() }}
+                </span>
+                <span class="m-1" :title="$t('voters_payout')">
+                  <i class="fa-solid fa-users"></i>
+                  {{ full_data.curator_payout_value }}
+                </span>
+                <i class="fa-solid fa-check text-green text-bold"></i>
               </span>
-              <span class="m-1" :title="$t('voters_payout')">
-                <i class="fa-solid fa-users"></i>
-                {{ full_data.curator_payout_value }}
+              <span v-else>
+                <span class="text-bold">{{ full_data.pending_payout_value.replace('SBD', '') }}</span>
+                <i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
               </span>
-              <i class="fa-solid fa-check text-green text-bold"></i>
-            </span>
-            <span v-else>
-              <span class="text-bold">{{ full_data.pending_payout_value.replace('SBD', '') }}</span>
-              <i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
-            </span>
-            <span v-if="hasBeneficiaries()" :title="beneficiariesDisplay()">
-              <i class="fas fa-user-pen"><sup>{{ full_data.beneficiaries.length }}</sup></i>
-            </span>
+              <span v-if="hasBeneficiaries()" :title="beneficiariesDisplay()">
+                <i class="fas fa-user-pen"><sup>{{ full_data.beneficiaries.length }}</sup></i>
+              </span>
+            </div>
           </div>
         </div>
         <transition name="fade">
@@ -158,8 +163,10 @@
             </div>
             <a href="#" @click.prevent="postResponse($event)" class="btn btn-brand border reply-btn w-25">
               {{ $t('Post') }}
-              <img src="/img/HIVE.png" style="max-height: 25px" v-if="target_bchain == 'HIVE' || target_bchain == 'BOTH'">
-              <img src="/img/STEEM.png" style="max-height: 25px" v-if="target_bchain == 'STEEM' || target_bchain == 'BOTH'">
+              <img src="/img/HIVE.png" style="max-height: 25px"
+                v-if="target_bchain == 'HIVE' || target_bchain == 'BOTH'">
+              <img src="/img/STEEM.png" style="max-height: 25px"
+                v-if="target_bchain == 'STEEM' || target_bchain == 'BOTH'">
               <i class="fas fa-spin fa-spinner" v-if="loading"></i>
             </a>
             <a href="#" @click.prevent="resetOpenComment()" class="btn btn-brand border reply-btn w-25">{{ $t('Cancel')
@@ -262,8 +269,8 @@ export default {
     ...mapGetters(['newlyVotedPosts', 'bchain']),
 
     commentId() {
-        if (!this.full_data) return null;
-        return `${this.full_data.author}/${this.full_data.permlink}`;
+      if (!this.full_data) return null;
+      return `${this.full_data.author}/${this.full_data.permlink}`;
     },
 
     displayContent() {
@@ -325,10 +332,10 @@ export default {
   methods: {
     // ✅ CORE FIX: This new handler function calls both initialization methods.
     onFullDataChange() {
-        if (this.full_data) {
-            this.fetchReportData();
-            this.initializeTranslationState();
-        }
+      if (this.full_data) {
+        this.fetchReportData();
+        this.initializeTranslationState();
+      }
     },
 
     // ✅ CORE FIX: Restore the original `fetchReportData` method.
@@ -366,9 +373,9 @@ export default {
         this.translatedText = translationResult;
         this.showTranslated = true;
         this.updateCache({
-            originalBody: originalContent,
-            translatedBody: this.translatedText,
-            isShowingTranslation: true,
+          originalBody: originalContent,
+          translatedBody: this.translatedText,
+          isShowingTranslation: true,
         });
       } catch (error) {
         console.error('Translation error:', error);
@@ -386,16 +393,16 @@ export default {
       this.updateCache({ isShowingTranslation: false });
     },
     updateCache(data) {
-        if (!this.commentId) return;
-        const existingData = this.translationCache[this.commentId] || {};
-        const payload = {
-            id: this.commentId,
-            data: { ...existingData, ...data }
-        };
-        this.$emit('update-translation-cache', payload);
+      if (!this.commentId) return;
+      const existingData = this.translationCache[this.commentId] || {};
+      const payload = {
+        id: this.commentId,
+        data: { ...existingData, ...data }
+      };
+      this.$emit('update-translation-cache', payload);
     },
     bubbleCacheUpdate(payload) {
-        this.$emit('update-translation-cache', payload);
+      this.$emit('update-translation-cache', payload);
     },
 
     // All other original methods
@@ -854,15 +861,18 @@ export default {
   margin-bottom: 15px;
   border-radius: 4px;
 }
+
 .translation-notice a {
   color: red;
   text-decoration: none;
   margin-left: 5px;
 }
+
 .translation-notice a:hover {
   text-decoration: underline;
 }
+
 .ml-2 {
-  margin-left: .5rem!important;
+  margin-left: .5rem !important;
 }
 </style>
