@@ -187,7 +187,7 @@
         </div>
       </div>
       <!-- ✅ CORE CHANGE: Pass down the cache and listen for updates from child comments -->
-      <Comments v-for="comment in reply_entries" :key="comment.id" :reply_entries="comment.reply_entries"
+      <Comments v-for="comment in sorted_reply_entries" :key="comment.id" :reply_entries="comment.reply_entries"
         :author="comment.author" :body="comment.body" :full_data="comment" :main_post_author="main_post_author"
         :main_post_permlink="main_post_permlink" :main_post_cat="main_post_cat" :depth="depth + 1"
         :translation-cache="translationCache" @update-translation-cache="bubbleCacheUpdate">
@@ -251,7 +251,6 @@ export default {
       handler: 'onFullDataChange',
       immediate: true
     },
-    currentSort: 'reorderComments',
     bchain: function (newBchain) {
       this.cur_bchain = newBchain;
       this.target_bchain = newBchain;
@@ -327,6 +326,26 @@ export default {
     },
     displayIncreasedUserRank() {
       return '(+' + parseFloat(this.userRank.afitx_rank).toFixed(2) + ')';
+    },
+    sorted_reply_entries() {
+      if (!this.reply_entries) {
+        return [];
+      }
+      try {
+        const sortApproach = JSON.parse(this.currentSort);
+        if (sortApproach.value) {
+          if (sortApproach.value === 'payout') {
+            return Lodash.orderBy(this.reply_entries, (e) => {
+              const val = parseFloat(e.pending_payout_value);
+              return val > 0 ? val : parseFloat(e.total_payout_value);
+            }, [sortApproach.direction]);
+          }
+          return Lodash.orderBy(this.reply_entries, [sortApproach.value], [sortApproach.direction]);
+        }
+      } catch (err) {
+        console.error('Error parsing sort option:', err);
+      }
+      return this.reply_entries;
     },
   },
   methods: {
@@ -409,25 +428,6 @@ export default {
     toggleCommentBox() {
       this.commentBoxOpen = !this.commentBoxOpen;
       localStorage.setItem('commentBoxOpen', this.commentBoxOpen);
-    },
-    reorderComments() {
-      try {
-        let sortApproach = JSON.parse(this.currentSort);
-        if (sortApproach.value) {
-          if (sortApproach.value == 'payout') {
-            this.reply_entries = _.orderBy(this.reply_entries, function (e) {
-              let val = parseFloat(e.pending_payout_value)
-              if (val > 0) return val;
-              else return parseFloat(e.total_payout_value)
-            }, [sortApproach.direction]);
-          } else {
-            this.reply_entries = _.orderBy(this.reply_entries, [sortApproach.value], [sortApproach.direction]);
-          }
-          this.$forceUpdate();
-        }
-      } catch (err) {
-        console.log(err);
-      }
     },
     copyContent(event) {
       navigator.clipboard.writeText('https://actifit.io/@' + this.full_data.author + '/' + this.full_data.permlink)
