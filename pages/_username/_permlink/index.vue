@@ -538,7 +538,7 @@ export default {
     userVotedThisPost() {
         if (!this.user || !this.report) return false;
         const curUser = this.user.account.name;
-        return this.report.active_votes.some(voter => voter.voter === curUser) || (this.newlyVotedPosts && this.newlyVotedPosts.includes(this.report.post_id));
+        return this.report.active_votes.some(voter => voter.voter === curUser);
     },
     postPaid() {
       if (!this.report) return false;

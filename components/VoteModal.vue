@@ -132,6 +132,7 @@ export default {
 			user_settings: {},
 			settings_set: false,
 			save_progress: false,
+			postsVotedInSession: 0, // New property to track successful votes in session
 		}
 	},
 	watch: {
@@ -154,8 +155,7 @@ export default {
 	computed: {
 		...mapGetters('steemconnect', ['user']),
 		...mapGetters('steemconnect', ['stdLogin']),
-		...mapGetters(['postToVote']),
-		...mapGetters(['newlyVotedPosts', 'bchain']),
+		...mapGetters(['postToVote', 'bchain']),
 		cardData() {
 			return this.postToVote
 		},
@@ -390,8 +390,8 @@ export default {
 		/* function checks if logged in user has upvoted current report */
 		userVotedThisPost() {
 			let curUser = this.user.account.name;
-			//check if the post contains in its original voters current user, or if it has been upvoted in current session
-			return this.postToVote.active_votes.filter(voter => (voter.voter === curUser)).length > 0 || this.newlyVotedPosts.indexOf(this.postToVote.post_id) !== -1;
+			//check if the post contains in its original voters current user
+			return this.postToVote.active_votes.filter(voter => (voter.voter === curUser)).length > 0;
 		},
 		async processTrxFunc(op_name, cstm_params, bchain_option) {
 			if (!localStorage.getItem('std_login')) {
@@ -559,18 +559,33 @@ export default {
                     }
 
 					//append this entry into the list of voted posts
-					if (this.newlyVotedPosts.indexOf(this.postToVote.post_id) === -1) {
-						this.newlyVotedPosts.push(this.postToVote.post_id);
-					}
-					this.$store.commit('setNewlyVotedPosts', this.newlyVotedPosts);
+					//if (this.newlyVotedPosts.indexOf(this.postToVote.post_id) === -1) {
+					//	this.newlyVotedPosts.push(this.postToVote.post_id);
+					//}
+					//this.$store.commit('setNewlyVotedPosts', this.newlyVotedPosts);
 					$(this.$refs.voteModal).modal('hide')
 					this.$notify({
 						group: 'success',
 						text: this.$t('Vote_Success').replace('_BCHAIN_', bchain)
 					});
 
+					// Emit an event to notify other components about the successful vote
+					this.$root.$emit('vote-success', {
+						author: this.postToVote.author,
+						permlink: this.postToVote.permlink
+					});
+
+					// Dispatch action to refetch post data.
+					// No delay is needed now as the action will handle retries.
+					this.$store.dispatch('refetchPostData', {
+						author: this.postToVote.author,
+						permlink: this.postToVote.permlink,
+						voter: this.user.account.name
+					});
+
 					//if the user votes 3 or more posts at 20%, let's give an additional reward
-					if (this.newlyVotedPosts.length >= 3 && this.voteWeight >= 20) {
+					this.postsVotedInSession++;
+					if (this.postsVotedInSession >= 3 && this.voteWeight >= 20) {
 						this.rewardUserVote();
 					}
 

@@ -870,6 +870,56 @@ export default {
       }
     })
   },
+  async refetchPostData({ state, commit }, { author, permlink, voter }) {
+    const maxRetries = 5;
+    const retryDelay = 3000; // 3 seconds
+
+    let chainLnk = hive;
+    if (state.bchain === 'STEEM') {
+      chainLnk = steem;
+    } else if (state.bchain === 'BLURT') {
+      chainLnk = blurt;
+    }
+
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        const updatedPost = await chainLnk.api.getContentAsync(author, permlink);
+
+        if (updatedPost && updatedPost.author) {
+          // If a voter is provided, check if their vote is present.
+          if (voter) {
+            const vote = updatedPost.active_votes.find(v => v.voter === voter);
+            if (vote) {
+              // Vote found, commit and exit loop.
+              commit('updatePost', updatedPost);
+              return;
+            }
+          } else {
+            // No voter provided, just commit the update.
+            commit('updatePost', updatedPost);
+            return;
+          }
+        }
+
+        // If vote not found, wait before retrying.
+        if (i < maxRetries - 1) {
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
+        } else {
+          // Last attempt, commit whatever was fetched.
+          if (updatedPost && updatedPost.author) {
+            commit('updatePost', updatedPost);
+          }
+        }
+
+      } catch (error) {
+        console.error(`Error refetching post data (attempt ${i + 1}/${maxRetries}):`, error);
+        // If an error occurs, wait before the next retry.
+        if (i < maxRetries - 1) {
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
+        }
+      }
+    }
+  },
   checkIfMoreUserReportsAvailable({ state, commit }, username) {
     return new Promise((resolve, reject) => {
       let lastReport = state.userReports.length ? state.userReports[state.userReports.length - 1] : null

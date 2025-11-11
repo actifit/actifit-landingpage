@@ -201,7 +201,7 @@
                   <img src="/img/poshlogo.png" class="mr-3" style="width: 50px;">
                   <div class="flex-grow-1">
                     <span v-if="poshVerified">
-                      <i class="fas fa-check text-success" style="font-size:large"></i> {{ $t('Posh_connected') }}: 
+                      <i class="fas fa-check text-success" style="font-size:large"></i> {{ $t('Posh_connected') }}:
                       <a :href="poshUserData.twitter_profile" v-if="poshUserData.twitter_username">@{{ poshUserData.twitter_username }}</a>
                     </span>
                      <div v-html="$t('posh_desc_profile')"></div>
@@ -249,9 +249,9 @@
                 <div class="community-item-content">
                    <div class="d-flex align-items-center flex-grow-1">
                       <i class="fa-solid fa-gamepad text-brand mr-2"></i>{{ $t('Splinterlands') }}
-                      
+
                       <img src="https://d36mxiodymuqjm.cloudfront.net/website/icons/img_icon_splinterlands.svg" class="mr-2 ml-2" style="width: 30px" :alt="$t('Splinterlands')">
-                      
+
                       <a href="#" data-toggle="modal" data-target="#notifyModal" class="text-danger"><i class="fas fa-info-circle" :title="$t('view_details')"></i></a>
                    </div>
                   <a href="https://splinterlands.com/" target="_blank" class="btn btn-danger m-2">{{ $t('Play_splinterlands') }}</a>
@@ -274,13 +274,13 @@
               </div>
             </div>
 
-            
-           
+
+
             <div v-if="activeTab === 'wallet'" class="wallet-tab">
-             
+
               <div class="wallet-card" v-if="userinfo">
                  <div class="d-flex justify-content-between align-items-end flex-wrap wallet-top-actions">
-                    
+
                     <div>
                       <div v-if="userinfo.witness_votes.includes('actifit') || userinfo.proxy == 'actifit'">
                         <i class="fas fa-check text-success mr-2"></i>{{ $t('Votes_Actifit_Witness') }} <span v-if="userinfo.proxy == 'actifit'">({{ $t('proxy') }})</span>
@@ -288,7 +288,7 @@
                       <button class="btn btn-danger m-2" @click="voteWitness">{{ $t('Vote_Now_Actifit_Witness') }}</button>
                     </div>
 
-                  
+
                     <div>
                       <div v-if="actifitDelegator" class="text-dark">
                         <i class="fas fa-check text-success mr-2"></i>{{ $t('Delegates_to_Actifit') }} ({{ actifitDelegator.steem_power }} {{ $t('Hive_Power') }})
@@ -297,7 +297,7 @@
                     </div>
                  </div>
 
-                
+
                 <div v-if="voteWitnessDisplay" class="wallet-action-box">
                   <div v-if="!isKeychainLogin() && isStdLogin() && !isHiveauthLogin()" class="form-group">
                     <label for="p-ac-key">{{ $t('Active_Key') }} *</label>
@@ -314,7 +314,7 @@
                   </div>
                 </div>
               </div>
-              
+
               <!-- New Card for Core Hive Balances -->
               <div class="wallet-card" v-if="cur_bchain === 'HIVE'">
                 <div class="wallet-balances-grid">
@@ -387,7 +387,7 @@
                 </div>
 
                 <div v-if="showAfitTipInfo" class="alert alert-info mt-3 small" v-html="$t('tipping_details')" />
-                
+
                 <div v-if="proceedTip" class="wallet-action-box mt-3">
                   <div class="tip-details">
                     <div class="form-group">
@@ -460,9 +460,9 @@
           </div>
         </div>
 
-       
+
         <div class="quick-links-sidebar">
-         
+
           <h4 class="quick-links-title">{{ $t('Quick_Links') }}</h4>
           <a :href="'/activity/' + displayUser" class="quick-link-item">
             <img src="/img/actifit_logo.png" class="mr-2 token-logo">
@@ -492,8 +492,8 @@
         <h4>{{ errorDisplay }}</h4>
       </div>
     </div>
-    
-   
+
+
     <MeasureChartModal :userMeasurements="userMeasurements" />
     <ActivityChartModal :userActivity="userActivity" />
     <ProfileImageModal :username="user ? user.account.name : ''" v-if="isProfileImageModalVisible" @close="closeProfileImageModal" @image-changed="updateProfileImage" />
@@ -689,7 +689,7 @@ export default {
   computed: {
     ...mapGetters('steemconnect', ['user']),
     ...mapGetters('steemconnect', ['stdLogin']),
-    ...mapGetters(['newlyVotedPosts', 'bchain']),
+    //...mapGetters(['newlyVotedPosts', 'bchain']),
     ...mapGetters(['userTokens'], ['commentEntries'], 'commentCountToday'),
     displayUsersNames() {
       return this.getUsersName();
@@ -1591,25 +1591,25 @@ export default {
                   console.error('Could not fetch valid global properties for HP calculation.');
                   return;
                 }
-                
+
                 const vestingShares = parseFloat(parentRef.userinfo.vesting_shares) || 0;
                 const receivedVestingShares = parseFloat(parentRef.userinfo.received_vesting_shares) || 0;
                 const delegatedVestingShares = parseFloat(parentRef.userinfo.delegated_vesting_shares) || 0;
-                
+
                 const effectiveVests = vestingShares + receivedVestingShares - delegatedVestingShares;
 
                 const totalHive = parseFloat(props.total_vesting_fund_hive);
                 const totalVests = parseFloat(props.total_vesting_shares);
 
                 const hp = totalHive * (effectiveVests / totalVests);
-                
+
                 parentRef.hivePower = parentRef.numberFormat(hp, 3);
-                
+
               } catch (e) {
                 console.error("Error during Hive Power calculation:", e);
               }
             };
-            
+
             calculateHivePower();
           }
 
@@ -1752,7 +1752,7 @@ export default {
     hive.config.set('alternative_api_endpoints', process.env.altHiveNodes);
     hive.api.setOptions({ url: process.env.hiveApiNode });
     blurt.api.setOptions({ url: process.env.blurtApiNode });
-    
+
     this.$store.dispatch('steemconnect/login')
     await this.fetchUserData();
 
@@ -1775,7 +1775,7 @@ export default {
       fetch(process.env.actiAppUrl + 'user/' + this.displayUser).then(res => res.json().then(json => this.userTokenCount = json.tokens)).catch(e => console.log(e));
       fetch(process.env.actiAppUrl + 'userBadges/' + this.displayUser).then(res => res.json().then(json => this.userBadges = json)).catch(e => reject(e));
       fetch(process.env.actiAppUrl + 'isoParticipant/' + this.displayUser).then(res => res.json().then(json => this.isoParticipant = json)).catch(e => reject(e));
-      
+
       fetch(process.env.actiAppUrl + 'delegation/' + this.displayUser).then(res => res.json().then(json => this.actifitDelegator = json)).catch(e => reject(e));
 
       fetch(process.env.actiAppUrl + 'luckyWinner/' + this.displayUser).then(res => res.json().then(json => this.doubledupWinner = json)).catch(e => reject(e));
@@ -1831,7 +1831,7 @@ export default {
   --quick-link-bg: #fff;
   --quick-link-shadow: rgba(0,0,0,0.05);
   --quick-link-shadow-hover: rgba(0,0,0,0.1);
-  --edit-pencil-color: white; 
+  --edit-pencil-color: white;
   --box-shadow-lifted: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
@@ -1883,13 +1883,13 @@ html.dark-mode {
     gap: 15px;
     box-shadow: var(--box-shadow-lifted);
 }
-.user-info-header .username { 
-    font-size: 1.5rem; 
+.user-info-header .username {
+    font-size: 1.5rem;
     font-weight: bold;
-    color: var(--brand-color); 
+    color: var(--brand-color);
 }
-.user-info-header .join-date { 
-    color: var(--text-color-light); 
+.user-info-header .join-date {
+    color: var(--text-color-light);
 }
 html.dark-mode .user-info-header .join-date {
   color: var(--text-color-primary);
@@ -1897,7 +1897,7 @@ html.dark-mode .user-info-header .join-date {
 
 .user-info-header .user-rank-badge {
     background-color: var(--brand-color);
-    color: white; 
+    color: white;
     padding: 4px 12px;
     border-radius: 1rem;
     font-weight: bold;
@@ -1929,28 +1929,28 @@ html.dark-mode .user-info-header .join-date {
   font-size: 1rem;
 }
 
-.user-avatar { 
-    background-repeat: no-repeat; 
-    background-size: cover; 
-    background-position: center; 
-    position: relative; 
+.user-avatar {
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    position: relative;
 }
-.large-avatar { 
-    width: 150px; 
-    height: 150px; 
-    border-radius: 50%; 
-    border: 4px solid var(--white-color); 
-    flex-shrink: 0; 
+.large-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 4px solid var(--white-color);
+    flex-shrink: 0;
 }
 .user-info-header { margin-left: 20px; }
 .avatar-edit-button {
-  position: absolute; 
-  bottom: 5px; 
-  right: 5px; 
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
   background-color: rgba(0, 0, 0, 0.5);
-  border-radius: 50%; 
-  display: flex; 
-  align-items: center; 
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
   justify-content: center;
 }
 .avatar-edit-button .btn { padding: 0.3rem 0.5rem; line-height: 1; }
@@ -1962,42 +1962,42 @@ html.dark-mode .user-info-header .join-date {
 
 .friend-actions { text-align: right; margin-left: auto; }
 
-.profile-body { 
-    display: flex; 
-    margin-top: 20px; 
-    gap: 20px; 
+.profile-body {
+    display: flex;
+    margin-top: 20px;
+    gap: 20px;
     margin-bottom: 2rem;
     align-items: flex-start;
 }
 
 /* Main Content & Tabs */
-.main-content-tabs { 
-    flex-grow: 1; 
-    background-color: var(--tabs-container-bg); 
-    border-radius: 15px; 
+.main-content-tabs {
+    flex-grow: 1;
+    background-color: var(--tabs-container-bg);
+    border-radius: 15px;
     overflow: hidden;
     border: 2px solid var(--tabs-container-border);
     box-shadow: var(--box-shadow-lifted);
 }
-.tab-nav { 
-    display: flex; 
-    background-color: var(--tab-nav-bg); 
-    flex-wrap: wrap; 
+.tab-nav {
+    display: flex;
+    background-color: var(--tab-nav-bg);
+    flex-wrap: wrap;
 }
-.tab-nav button { 
-    flex-grow: 1; 
-    padding: 15px; 
-    border: none; 
-    background-color: transparent; 
-    font-size: 1rem; 
-    font-weight: 600; 
-    color: var(--tab-nav-text); 
-    cursor: pointer; 
-    transition: background-color 0.3s, color 0.3s; 
+.tab-nav button {
+    flex-grow: 1;
+    padding: 15px;
+    border: none;
+    background-color: transparent;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--tab-nav-text);
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
 }
-.tab-nav button.active { 
-    background-color: var(--tab-active-bg); 
-    color: var(--brand-secondary-color); 
+.tab-nav button.active {
+    background-color: var(--tab-active-bg);
+    color: var(--brand-secondary-color);
 }
 .tab-content {
     background-color: var(--tab-content-bg);
@@ -2006,7 +2006,7 @@ html.dark-mode .user-info-header .join-date {
 
 /* About Tab Layout */
 .about-tab {
-    background-color: var(--about-tab-bg); 
+    background-color: var(--about-tab-bg);
     border-radius: 10px;
     padding: 10px;
     box-shadow: var(--box-shadow-lifted);
@@ -2022,11 +2022,11 @@ html.dark-mode .user-info-header .join-date {
 .about-item:last-child {
     border-bottom: none;
 }
-.about-item-label { 
-    font-weight: 500; 
-    color: var(--text-color-primary); 
-    flex-shrink: 0; 
-    white-space: nowrap; 
+.about-item-label {
+    font-weight: 500;
+    color: var(--text-color-primary);
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 .about-item-label i { color: var(--brand-secondary-color); }
 
@@ -2035,12 +2035,12 @@ html.dark-mode .user-info-header .join-date {
     display: flex;
     align-items: center;
     flex-grow: 1;
-    min-width: 0; 
+    min-width: 0;
     justify-content: flex-end;
 }
 .about-item-text {
-    flex: 1; 
-    min-width: 0; 
+    flex: 1;
+    min-width: 0;
     text-align: right;
     overflow-wrap: break-word;
     word-break: break-all;
@@ -2063,25 +2063,25 @@ html.dark-mode .user-info-header .join-date {
 
 /* Fitness Tab */
 .fitness-tab-container { display: flex; flex-direction: column; gap: 15px; }
-.fitness-section-grid-activity { 
-    display: grid; 
-    grid-template-columns: repeat(auto-fit, minmax(200px, 300px)); 
-    justify-content: center; 
-    gap: 15px; 
+.fitness-section-grid-activity {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 300px));
+    justify-content: center;
+    gap: 15px;
 }
 .fitness-section-grid-measurements { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 15px; }
 .fitness-action-btn-container { text-align: center; }
-.fitness-card { 
-    background: var(--fitness-card-gradient); 
-    border-radius: 15px; 
-    color: white; 
-    padding: 15px; 
-    text-align: center; 
-    font-weight: bold; 
-    display: flex; 
-    flex-direction: column; 
-    justify-content: space-between; 
-    align-items: center; 
+.fitness-card {
+    background: var(--fitness-card-gradient);
+    border-radius: 15px;
+    color: white;
+    padding: 15px;
+    text-align: center;
+    font-weight: bold;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
 }
 .fitness-card img { height: 50px; margin-bottom: 10px; flex-shrink: 0; }
 .activity-small-logo { height: 25px !important; }
@@ -2091,9 +2091,9 @@ html.dark-mode .user-info-header .join-date {
 .community-tab { display: flex; flex-direction: column; gap: 15px; }
 .community-item { padding: 15px; border-radius: 10px; background: var(--community-item-gradient); border: 1px solid var(--brand-color); color: var(--text-color-primary); }
 .community-item-content { display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; }
-.community-item-content a:not(.btn) { 
+.community-item-content a:not(.btn) {
     color: var(--text-color-primary);
-    font-weight: 500; 
+    font-weight: 500;
 }
 
 /* Wallet Tab */
@@ -2192,31 +2192,31 @@ html.dark-mode .interactive-prompt {
 
 /* Sidebar */
 .quick-links-sidebar {
-    flex: 0 0 250px; 
-    border-radius: 15px; 
+    flex: 0 0 250px;
+    border-radius: 15px;
     padding: 20px;
     background: var(--sidebar-gradient);
     align-self: flex-start;
     box-shadow: var(--box-shadow-lifted);
 }
 .quick-links-title { color: var(--brand-color); margin-bottom: 15px; }
-.quick-link-item { 
-    display: flex; 
-    align-items: center; 
-    background-color: var(--quick-link-bg); 
-    color: var(--brand-secondary-color); 
-    padding: 12px 15px; 
-    border-radius: 10px; 
-    margin-bottom: 10px; 
-    font-weight: 500; 
-    text-decoration: none; 
-    box-shadow: 0 2px 4px var(--quick-link-shadow); 
-    transition: transform 0.2s, box-shadow 0.2s; 
+.quick-link-item {
+    display: flex;
+    align-items: center;
+    background-color: var(--quick-link-bg);
+    color: var(--brand-secondary-color);
+    padding: 12px 15px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    font-weight: 500;
+    text-decoration: none;
+    box-shadow: 0 2px 4px var(--quick-link-shadow);
+    transition: transform 0.2s, box-shadow 0.2s;
 }
-.quick-link-item:hover { 
-    transform: translateY(-2px); 
-    box-shadow: 0 4px 8px var(--quick-link-shadow-hover); 
-    color: var(--brand-secondary-color); 
+.quick-link-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px var(--quick-link-shadow-hover);
+    color: var(--brand-secondary-color);
 }
 .quick-link-item i { width: 20px; text-align: center; }
 
@@ -2229,7 +2229,7 @@ html.dark-mode .interactive-prompt {
 /* --- Media Queries --- */
 @media (max-width: 992px) {
   .profile-body {
-    flex-direction: column; 
+    flex-direction: column;
   }
   .quick-links-sidebar {
     flex-basis: auto;
@@ -2238,20 +2238,20 @@ html.dark-mode .interactive-prompt {
 }
 
 @media (max-width: 768px) {
-    .community-item-content { 
-        flex-direction: column; 
-        gap: 10px; 
+    .community-item-content {
+        flex-direction: column;
+        gap: 10px;
         text-align: center;
     }
-    .community-item a.btn { 
-        width: 100%; 
-        text-align: center; 
+    .community-item a.btn {
+        width: 100%;
+        text-align: center;
     }
-    .profile-header { 
+    .profile-header {
         flex-direction: column;
         gap: 15px;
-        justify-content: center; 
-        text-align: center; 
+        justify-content: center;
+        text-align: center;
     }
     .large-avatar {
         width: 120px;
@@ -2260,19 +2260,19 @@ html.dark-mode .interactive-prompt {
     .profile-header > .d-flex.align-items-center {
         flex-direction: column;
     }
-    .user-info-header { 
-        margin-left: 0; 
-        margin-top: 15px; 
+    .user-info-header {
+        margin-left: 0;
+        margin-top: 15px;
     }
-    
-    .user-info-header .d-flex { 
+
+    .user-info-header .d-flex {
         justify-content: center;
         flex-wrap: wrap;
-        gap: 0.5rem; 
+        gap: 0.5rem;
     }
-    
+
     .friend-actions {
-        margin-left: 0; 
+        margin-left: 0;
         text-align: center;
         width: 100%;
     }
@@ -2285,7 +2285,7 @@ html.dark-mode .interactive-prompt {
         text-align: center;
     }
     .wallet-top-actions .btn {
-        white-space: normal; 
+        white-space: normal;
     }
 }
 </style>

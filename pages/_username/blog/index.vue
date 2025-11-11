@@ -43,7 +43,8 @@
           <div v-for="itery in splitFactor" :key="itery" class="col-md-6 col-lg-4 mb-4">
             <Post v-if="(iterx - 1) * splitFactor + (itery - 1) < filteredUserPosts.length"
               :post="filteredUserPosts[(iterx - 1) * splitFactor + (itery - 1)]" :displayUsername="username"
-              :pstId="(iterx - 1) * splitFactor + (itery - 1)" />
+              :pstId="(iterx - 1) * splitFactor + (itery - 1)"
+			  :key="filteredUserPosts[(iterx - 1) * splitFactor + (itery - 1)].author + '-' + filteredUserPosts[(iterx - 1) * splitFactor + (itery - 1)].permlink" />
           </div>
           <!--<div class="col-md-6 col-lg-12 mb-4" v-if="(iterx - 1) < inlineAds">
 				<client-only>

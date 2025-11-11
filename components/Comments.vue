@@ -265,7 +265,7 @@ export default {
     ...mapGetters('steemconnect', ['user']),
     ...mapGetters('steemconnect', ['stdLogin']),
     ...mapGetters(['moderators']),
-    ...mapGetters(['newlyVotedPosts', 'bchain']),
+    ...mapGetters(['moderators', 'bchain']),
 
     commentId() {
       if (!this.full_data) return null;
@@ -304,9 +304,6 @@ export default {
     },
     getVoteCount() {
       let totcnt = Array.isArray(this.full_data.active_votes) ? this.full_data.active_votes.length : 0;
-      if (this.newlyVotedPosts.indexOf(this.full_data.post_id) != -1) {
-        totcnt += 1;
-      }
       return totcnt;
     },
     postPayout() {
@@ -790,7 +787,7 @@ export default {
         this.postUpvoted = false;
         return this.postUpvoted;
       }
-      this.postUpvoted = this.full_data.active_votes.filter(voter => (voter.voter === curUser)).length > 0 || this.newlyVotedPosts.indexOf(this.full_data.post_id) !== -1;
+      this.postUpvoted = this.full_data.active_votes.filter(voter => (voter.voter === curUser)).length > 0;
       return this.postUpvoted;
     },
     commentDeletable() {

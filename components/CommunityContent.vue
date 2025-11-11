@@ -19,7 +19,7 @@
 	  </div>
 	  <div class="cmm-container content" :id="community" v-if="communityPosts.length">
 
-		<Post v-for="iterx in communityPosts.length" :key="iterx" :post="communityPosts[(iterx - 1)]" :displayUsername="username" :pstId="(iterx - 1)" class="card post col-md-4 p-1 m-1 " explorePost="false"/>
+		<Post v-for="(post, iterx) in communityPosts" :key="post.author + '-' + post.permlink" :post="post" :displayUsername="username" :pstId="iterx" class="card post col-md-4 p-1 m-1 " explorePost="false"/>
 
 			<!-- show load more button if there are more posts available -->
 		<div class="text-center pt-5 moreblock pr-4" v-if="moreCommunityPostsAvailable">
@@ -119,6 +119,12 @@
 
     },
     methods: {
+	  handleVoteSuccess(post) {
+		const postInCommunity = this.communityPosts.find(p => p.author === post.author && p.permlink === post.permlink);
+		if (postInCommunity) {
+		  this.reFetchCommunityPosts();
+		}
+	  },
 	  nextPost (direction){
 		let pstId = this.activePost.pstId;
 		console.log(pstId);
@@ -193,7 +199,13 @@
 	  this.$store.commit('setBchain', cur_bchain);
 	  //this.$store.dispatch('steemconnect/login')
       this.reFetchCommunityPosts();
-    }
+    },
+	created() {
+	  this.$root.$on('vote-success', this.handleVoteSuccess);
+	},
+	beforeDestroy() {
+	  this.$root.$off('vote-success', this.handleVoteSuccess);
+	},
   }
 </script>
 <style>
