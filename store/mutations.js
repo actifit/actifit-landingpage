@@ -1,3 +1,5 @@
+import Vue from 'vue'
+
 export default {
   setUserTokens (state, userTokens) {
     state.userTokens = userTokens
@@ -144,9 +146,6 @@ export default {
   setPostToVote (state, post) {
     state.postToVote = post
   },
-  setNewlyVotedPosts (state, newlyVotedPosts) {
-    state.newlyVotedPosts = newlyVotedPosts
-  },
   setCommentEntries (state, commentEntries) {
     state.commentEntries = commentEntries
   },
@@ -179,5 +178,19 @@ export default {
   },
   setPurchaseSuccess (state, _purchaseSuccess) {
 	state.purchaseSuccess = _purchaseSuccess;
-  }
+  },
+  updatePost (state, updatedPost) {
+    const updateArray = (arrName) => {
+      const index = state[arrName].findIndex(post => post.author === updatedPost.author && post.permlink === updatedPost.permlink);
+      if (index !== -1) {
+        Vue.set(state[arrName], index, updatedPost);
+      }
+    };
+
+    updateArray('reports');
+    updateArray('userReports');
+    updateArray('posts');
+    updateArray('userPosts');
+    updateArray('communityPosts');
+  },
 }

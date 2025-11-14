@@ -137,9 +137,6 @@ export default {
   postToVote (state) {
     return state.postToVote
   },
-  newlyVotedPosts (state) {
-	return state.newlyVotedPosts
-  },
   commentEntries (state) {
 	return state.commentEntries
   },

@@ -292,7 +292,6 @@ export default {
   computed: {
     ...mapGetters('steemconnect', ['user']),
     ...mapGetters('steemconnect', ['stdLogin']),
-    ...mapGetters(['newlyVotedPosts']),
     ...mapGetters(['commentEntries'], 'commentCountToday'),
     ...mapGetters(['moderators', 'bchain']),
     adjustHiveClass() {
@@ -657,7 +656,7 @@ export default {
     },
     userVotedThisPost() {
       let curUser = this.user.account.name;
-      this.postUpvoted = this.report.active_votes.filter(voter => (voter.voter === curUser)).length > 0 || this.newlyVotedPosts.indexOf(this.report.post_id) !== -1;
+      this.postUpvoted = this.report.active_votes.filter(voter => (voter.voter === curUser)).length > 0;
       return this.postUpvoted;
     },
     insertModSignature() {

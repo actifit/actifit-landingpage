@@ -48,8 +48,8 @@ export const commonCardMixin = {
       if (!this.user || !this.cardData || !Array.isArray(this.cardData.active_votes)) return false
       const curUser = this.user.account.name
       const hasVoted = this.cardData.active_votes.some(voter => voter.voter === curUser)
-      const newlyVoted = this.$store.getters.newlyVotedPosts.includes(this.cardData.post_id)
-      return hasVoted || newlyVoted
+      //const newlyVoted = this.$store.getters.newlyVotedPosts.includes(this.cardData.post_id)
+      return hasVoted;// || newlyVoted
     },
     currentImageSrc () {
       if (this.allImages.length > 0) {
@@ -102,9 +102,9 @@ export const commonCardMixin = {
     initializeCard () {
       if (this.isInitialized || !this.cardData || !this.cardData.permlink) return;
       this.isInitialized = true
-      
+
       this.fetchApiData();
-      
+
       this.$nextTick(() => {
         if (!this.$el) return;
         this.intersectionObserver = new IntersectionObserver(
@@ -121,19 +121,19 @@ export const commonCardMixin = {
 
     loadImagesForVisibleCard() {
       const images = this.calculatePostImages();
-      
+
       if (images.length === 0) {
         this.imageLoading = false;
         this.allImages = [];
         return;
       }
-      
+
       const cardWidth = this.$el.offsetWidth > 0 ? this.$el.offsetWidth : 400;
       this.allImages = images.map(url => this.getResizedImageUrl(url, cardWidth));
       this.currentImageIndex = 0;
       this.imageGeneration += 1;
     },
-    
+
     // *** FINAL CORRECTED VERSION ***
     calculatePostImages() {
       // Stages 1-3: Gather and validate all potential image URLs
@@ -154,7 +154,7 @@ export const commonCardMixin = {
       const imageExtensionRegex = /\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i;
       const trustedHostsRegex = /images\.hive\.blog|files\.peakd\.com|usermedia\.actifit\.io|img\.inleo\.io|leopedia\.io|i\.imgur\.com|ipfs\.io|cdn\.pixabay\.com|cdn\.steemitimages\.com|img\.3speak\.tv|ipfs-3speak\.b-cdn\.net/i;
       let validImages = uniqueUrls.filter(url => trustedHostsRegex.test(url) || imageExtensionRegex.test(url));
-      
+
       // Stage 4: Filter out known branding/UI elements using a blocklist
       const excludedImagePatterns = [
         // *** CHANGE 1: The hash for A-5.png IS ADDED BACK to the blocklist. ***
@@ -163,20 +163,20 @@ export const commonCardMixin = {
         /s3\.us-east-1\.amazonaws\.com\/actifit\.io\.website\/|ACTIVITY(DATE|COUNT|TYPE)\.png|TRACKM\.png|\/h1\.png|\/w1a\.png|\/bd1\.png|\/w1\.png|\/t1\.png|\/c1\.png/i,
         /\/actifit-/,
       ];
-      
+
       const finalImages = validImages.filter(url => {
         return !excludedImagePatterns.some(pattern => pattern.test(url));
       });
-      
+
       // *** CHANGE 2: Add fallback ONLY if no other images exist AND it's a report card. ***
       // We identify a report card by checking for `step_count` in the metadata.
       const isActifitReport = this.meta && this.meta.step_count > 0;
-      
+
       if (finalImages.length === 0 && isActifitReport) {
         const fallbackImageUrl = 'https://cdn.steemitimages.com/DQmW1VsUNbEjTUKawau4KJQ6agf41p69teEvdGAj1TMXmuc/A-5.png';
         return [fallbackImageUrl];
       }
-      
+
       // For all other cases, return the filtered list of real images (or an empty array for non-reports).
       return finalImages;
     },
