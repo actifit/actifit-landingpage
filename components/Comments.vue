@@ -82,7 +82,7 @@
               </div>
             </div>
             <a href="#" @click.prevent="editResponse($event)" class="btn btn-brand border reply-btn w-25">{{ $t('Post')
-              }}<i class="fas fa-spin fa-spinner" v-if="loading"></i></a>
+            }}<i class="fas fa-spin fa-spinner" v-if="loading"></i></a>
             <a href="#" @click.prevent="editBoxOpen = !editBoxOpen" class="btn btn-brand border reply-btn w-25">{{
               $t('Cancel') }}</a>
             <a href="#" @click.prevent="insertModSignature" class="btn btn-brand border reply-btn w-25"
@@ -95,14 +95,15 @@
         </transition>
         <div class="main-payment-info col-12 p-2">
           <div :style="{ paddingLeft: (depth) * indentFactor + 'px' }">
-            <div v-if="this.user && this.user.account.name == this.full_data.author"><a href="#"
-                @click.prevent="editBoxOpen = !editBoxOpen" :title="$t('Edit_note')"><i
-                  class="fas fa-edit text-white"></i></a></div>
-            <div v-if="commentDeletable()"><a href="#" @click.prevent="deleteComment" :title="$t('Delete_note')"><i
-                  class="fas fa-trash-alt text-white"></i><i class="fas fa-spin fa-spinner" v-if="deleting"></i></a>
+            <div v-if="this.user && this.user.account.name == this.full_data.author">
+              <span><a href="#" @click.prevent="editBoxOpen = !editBoxOpen" :title="$t('Edit_note')"><i
+                    class="fas fa-edit text-white"></i></a></span>
+              <span v-if="commentDeletable()"><a href="#" @click.prevent="deleteComment" :title="$t('Delete_note')"><i
+                    class="fas fa-trash-alt text-white"></i><i class="fas fa-spin fa-spinner" v-if="deleting"></i></a>
+              </span>
+              <span><a href="#" @click.prevent="toggleCommentBox()" :title="$t('Reply')"><i
+                    class="fas fa-reply  text-white"></i></a></span>
             </div>
-            <div><a href="#" @click.prevent="toggleCommentBox()" :title="$t('Reply')"><i
-                  class="fas fa-reply  text-white"></i></a></div>
             <div>
               <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand"
                 data-target="#voteModal" v-if="this.user && userVotedThisPost() == true">
@@ -116,7 +117,7 @@
             </div>
             <div>
               <span v-if="postPaid()">
-                <span class="m-1" :title="$t('author_payout')">
+                <span :title="$t('author_payout')">
                   <i class="fa-solid fa-user"></i>
                   {{ paidValue() }}
                 </span>
@@ -170,7 +171,7 @@
               <i class="fas fa-spin fa-spinner" v-if="loading"></i>
             </a>
             <a href="#" @click.prevent="resetOpenComment()" class="btn btn-brand border reply-btn w-25">{{ $t('Cancel')
-              }}</a>
+            }}</a>
             <a href="#" @click.prevent="insertModSignature" class="btn btn-brand border reply-btn w-25"
               v-if="(this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator'))">{{
                 $t('Short_Signature') }}</a>
