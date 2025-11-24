@@ -1,7 +1,7 @@
 <template>
   <!-- single post item for activity pages -->
   <div>
-    <div :class="[isOnlyPost ? 'card post single' : { 'card-pinned': isPostPinned, 'card post': isStandardPost }]">
+    <div :class="[isOnlyPost ? 'card post single' : { 'card-pinned': isPostPinned, 'card post': isStandardPost }, { 'is-comment': post.parent_author }]">
       <CardHeader :title="post.title" :link="buildLink">
         <span v-if="isPostPinned" :title="$t('pinned_post')"> <i class="fas fa-thumbtack text-warning"></i></span>
       </CardHeader>
@@ -172,7 +172,10 @@ export default {
 <style scoped>
 /* Scoped CSS for elements remaining in Post.vue */
 .post-title { min-height: 60px; } /* Kept for backward compatibility, but CardHeader has its own */
-.card { box-shadow: 3px 3px 3px rgb(255 0 0 / 40%); overflow: hidden; min-height: 400px; }
+.card { box-shadow: 3px 3px 3px rgb(255 0 0 / 40%); overflow: hidden; }
+.card { min-height: 400px; }
+/* When rendering a comment (post.parent_author present) don't force the large min-height */
+.card.is-comment { min-height: auto; }
 .card-pinned { box-shadow: 3px 3px 3px rgba(204, 204, 0, 0.4); overflow: hidden; }
 .single { min-width: 17em; }
 .post { vertical-align: top; }
