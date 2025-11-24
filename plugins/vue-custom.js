@@ -468,3 +468,17 @@ Vue.prototype.$findCardCountByRarity = async function (userCards, rarityParam){
 		return 0;
 	}
 };
+
+Vue.prototype.$parseJsonMetadata = async function parseJsonMetadata(value) {
+		if (!value) return {};
+		if (typeof value === 'object') return value;
+		if (typeof value === 'string') {
+			const trimmed = value.trim();
+			if (trimmed === '[object Object]') return {};
+			if ((trimmed.startsWith('{') && trimmed.endsWith('}')) || (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+				try { return JSON.parse(trimmed); } catch (e) { console.warn('Invalid json_metadata', e); return {}; }
+			}
+			try { return JSON.parse(trimmed); } catch (e) { return {}; }
+		}
+		return {};
+	};
