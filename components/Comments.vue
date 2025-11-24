@@ -872,4 +872,11 @@ export default {
 .ml-2 {
   margin-left: .5rem !important;
 }
+
+/* Ensure reply/save buttons inside inline comments are visible and not floated away */
+.comment-reply .reply-btn {
+  float: none;
+  display: inline-block;
+  margin-right: 8px;
+}
 </style>
