@@ -399,8 +399,8 @@ export default {
       //console.log(this.benef_list);
       this.tags = [];
       if (this.editPost && !this.editPost.isNewPost) {
-        const meta = JSON.parse(this.editPost.json_metadata)
-        this.tags = meta.hasOwnProperty('tags') ? meta.tags : [] // actifit as default tag, if no tags are present (for some reason)
+        const meta = this.$parseJsonMetadata(this.editPost.json_metadata)
+        this.tags = meta && meta.hasOwnProperty('tags') ? meta.tags : [] // actifit as default tag, if no tags are present (for some reason)
         this.max_accepted_payout = this.editPost.max_accepted_payout;
         this.percent_hbd = this.editPost.percent_hbd;
       }
@@ -419,6 +419,7 @@ export default {
     }
   },
   methods: {
+
     textualContent(){
       return this.editPost.isNewPost
       ?this.$t('Create_new_vid')+'&nbsp<img src="/img/3speak.png" class="mr-2 token-logo-md">'
@@ -824,7 +825,7 @@ export default {
         }
       }
       // prepare tags
-      let meta = (!this.editPost.isNewPost && this.editPost.json_metadata ? JSON.parse(this.editPost.json_metadata) : {});
+      let meta = (!this.editPost.isNewPost && this.editPost.json_metadata ? this.$parseJsonMetadata(this.editPost.json_metadata) : {});
       meta.tags = [
         //'actifit',
         ...this.tags
@@ -957,7 +958,7 @@ export default {
       //video specific requirements
 
 
-      let benef = this.benef_list.concat(JSON.parse(vid.beneficiaries));
+      let benef = this.benef_list.concat(this.$parseJsonMetadata(vid.beneficiaries));
 
       //if list does not include required account, append it
       /*let sagarRecord = benef.find(record => record.account === 'sagarkothari88');

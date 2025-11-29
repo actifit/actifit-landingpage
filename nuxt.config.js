@@ -20,7 +20,7 @@ module.exports = {
 
   // Runtime configuration
   publicRuntimeConfig: {
-    version: '1.8.2.6',
+    version: '1.8.2.7',
     proposalId: '337',
   },
 
