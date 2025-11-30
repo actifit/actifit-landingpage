@@ -469,7 +469,7 @@ Vue.prototype.$findCardCountByRarity = async function (userCards, rarityParam){
 	}
 };
 
-Vue.prototype.$parseJsonMetadata = async function parseJsonMetadata(value) {
+Vue.prototype.$parseJsonMetadata = function parseJsonMetadata(value) {
 		if (!value) return {};
 		if (typeof value === 'object') return value;
 		if (typeof value === 'string') {
