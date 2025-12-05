@@ -80,28 +80,29 @@
 	  <!-- show listing of special event products -->
 
 
-    <!--
-	  <h5 class="text-center pt-3 market-sub text-brand">{{ $t('special_halloween_event') }}</h5>
+
+	  <h5 class="text-center pt-3 market-sub text-brand">{{ $t('special_christmas_event') }}</h5>
 
 	  <div class="row" v-if="prodList.length">
-        <Product v-for="product in prodList"
-			:product="product" :key="product._id" :pros="professionals" :userrank="userRank" :gadgetStats="gadgetStats"  :realProducts="realProducts" :expandAll="expandAllStatus"
-			v-if="product.specialevent && product.event == 'Halloween'"
-			@update-prod="updateProd" :afitPrice="afitPrice" @refresh-tickets="refreshTickets"/>
-      </div>
+        <Product v-for="product in prodList" :key="product._id"
+        :product="product" :pros="professionals" :userrank="userRank" :gadgetStats="gadgetStats"  :realProducts="realProducts" :expandAll="expandAllStatus"
+        v-if="product.specialevent && product.event == 'Christmas'"
+        @update-prod="updateProd" :afitPrice="afitPrice" @refresh-tickets="refreshTickets"/>
+    </div>
 	  <br/>
 
-    -->
+
 
 
       <!-- show listing of products -->
       <div class="row" v-if="prodList.length">
-        <Product v-for="product in prodList"
-			:product="product" :key="product._id" :pros="professionals" :userrank="userRank" :gadgetStats="gadgetStats" :realProducts="realProducts" :expandAll="expandAllStatus"
-			v-if="!product.specialevent && (!currentFilter || product.type == currentFilter)"
-			@update-prod="updateProd" :afitPrice="afitPrice" @refresh-tickets="refreshTickets"/>
+          <Product v-for="product in prodList" :key="product._id"
+          :product="product" :pros="professionals" :userrank="userRank" :gadgetStats="gadgetStats" :realProducts="realProducts" :expandAll="expandAllStatus"
+          v-if="!product.specialevent && (!currentFilter || product.type == currentFilter)"
+          @update-prod="updateProd" :afitPrice="afitPrice" @refresh-tickets="refreshTickets"/>
+
       </div>
-	  <div class="text-center text-brand" v-else><i class="fas fa-spin fa-spinner fa-3x"></i></div>
+      <div class="text-center text-brand" v-else><i class="fas fa-spin fa-spinner fa-3x"></i></div>
 
     </div>
 
