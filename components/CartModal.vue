@@ -461,6 +461,8 @@
 
 				//this.$store.dispatch('fetchProducts')
 
+				this.$store.dispatch('fetchProducts');
+
 				this.$emit('refresh-tickets-multi');
 				
 				//display proper success message
@@ -614,6 +616,8 @@
 			}else{
 				//update user token count
 				this.$store.dispatch('fetchUserTokens')
+				
+				this.$store.dispatch('fetchProducts');
 				
 				//display proper success message
 				this.errorProceed = this.$t('purchase_success_ingame_multi');
@@ -838,6 +842,8 @@
 					//display proper success message
 					this.errorProceed = this.$t('purchase_success_ingame_multi');
 										
+					this.$store.dispatch('fetchProducts');
+
 					this.$emit('refresh-tickets-multi');
 					
 					this.$notify({
