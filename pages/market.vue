@@ -27,40 +27,67 @@
 
 
 			<!-- ticket prize section / gadgets purchase -->
-
-			<div class="col-md-12 text-center text-primary mb-5 notice-text">
-				<h4>{{ $t('prize_tickets_buy_gadgets') }}<a href="#" data-toggle="modal" data-target="#notifyModal"><i
-							class="fas fa-info-circle" :title="$t('view_details')"></i></a></h4>
-				<div class="row row-sep">
-					<div class="col-md-4 row-sep-in small-pad-row acti-shadow">
-						<h5 class="token-title pt-2 notice-text">{{ $t('my_tickets_collected') }}</h5>
-						<div v-if="user"><i class="fas fa-ticket-alt text-brand"></i>&nbsp;{{ ticketCount }}
-							{{ $t('tickets_collected') }}</div>
-						<div v-else>-</div>
+			<div class="prize-draw-section my-5">
+				<div class="container">
+					<div class="text-center mb-4">
+						<h2 class="prize-draw-title">{{ $t('prize_tickets_buy_gadgets') }}</h2>
+						<a href="#" data-toggle="modal" data-target="#notifyModal" class="prize-draw-details-link">
+							<i class="fas fa-info-circle"></i> {{ $t('view_details') }}
+						</a>
 					</div>
-					<div class="col-md-4 row-sep-in small-pad-row acti-shadow">
-						<h5 class="token-title pt-2 notice-text">{{ $t('prize_pool') }}</h5>
-						<div v-if="prizePoolValue != ''"><i class="fas fa-donate text-brand"></i>&nbsp;{{ prizePoolValue
-						}} {{ $t('HIVE') }}<img src="/img/HIVE.png" class="token-logo-sm"></div>
-						<div v-else><i class="fas fa-spin fa-spinner text-brand"></i></div>
-					</div>
-					<div class="col-md-4 row-sep-in small-pad-row acti-shadow">
-						<h5 class="token-title pt-2 notice-text">{{ $t('next_draw') }}&nbsp;</h5>
-						<Countdown v-if="countDownReady && nextGadgetBuyRewardDate" :deadline="nextGadgetBuyRewardDate">
-						</Countdown>
-						<div v-else><i class="fas fa-spin fa-spinner text-brand"></i></div>
+					<div class="row">
+						<div class="col-lg-3 col-md-6 mb-4">
+							<div class="prize-draw-card h-100">
+								<div class="prize-draw-card-header">
+									<i class="fas fa-ticket-alt prize-draw-icon"></i>
+									<h5 class="prize-draw-card-title">{{ $t('my_tickets_collected') }}</h5>
+								</div>
+								<div class="prize-draw-card-body">
+									<p class="prize-draw-card-text" v-if="user">{{ ticketCount }} {{ $t('tickets_collected') }}</p>
+									<p class="prize-draw-card-text" v-else>-</p>
+								</div>
+							</div>
+						</div>
+						<div class="col-lg-3 col-md-6 mb-4">
+							<div class="prize-draw-card h-100">
+								<div class="prize-draw-card-header">
+									<i class="fas fa-donate prize-draw-icon"></i>
+									<h5 class="prize-draw-card-title">{{ $t('prize_pool') }}</h5>
+								</div>
+								<div class="prize-draw-card-body">
+									<p class="prize-draw-card-text" v-if="prizePoolValue != ''">
+										{{ prizePoolValue }} {{ $t('HIVE') }} <img src="/img/HIVE.png" class="token-logo-sm">
+									</p>
+									<p class="prize-draw-card-text" v-else><i class="fas fa-spin fa-spinner"></i></p>
+								</div>
+							</div>
+						</div>
+						<div class="col-lg-3 col-md-6 mb-4">
+							<div class="prize-draw-card h-100">
+								<div class="prize-draw-card-header">
+									<i class="far fa-clock prize-draw-icon"></i>
+									<h5 class="prize-draw-card-title">{{ $t('next_draw') }}</h5>
+								</div>
+								<div class="prize-draw-card-body">
+									<Countdown v-if="countDownReady && nextGadgetBuyRewardDate" :deadline="nextGadgetBuyRewardDate" class="prize-draw-countdown"></Countdown>
+									<p class="prize-draw-card-text" v-else><i class="fas fa-spin fa-spinner"></i></p>
+								</div>
+							</div>
+						</div>
+						<div class="col-lg-3 col-md-6 mb-4">
+							<div class="prize-draw-card h-100">
+								<div class="prize-draw-card-header">
+									<i class="fas fa-trophy prize-draw-icon"></i>
+									<h5 class="prize-draw-card-title">{{ $t('Recent_draw_winner') }}</h5>
+								</div>
+								<div class="prize-draw-card-body">
+									<a :href="'/' + lastDrawWinner" class="prize-draw-winner-link">@{{ lastDrawWinner }}</a>
+									<p class="prize-draw-card-text">{{ wonAmount }} {{ $t('HIVE') }} <img src="/img/HIVE.png" class="token-logo-sm"></p>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
-				<div class="row row-sep">
-					<div class="col-md-4"></div>
-					<div class="col-md-4 row-sep-in acti-shadow">
-						<h5 class="token-title pt-2 notice-text"><i class="fas text-brand fa-trophy"></i> {{
-							$t('Recent_draw_winner') }}</h5>
-						<div><a :href="'/' + lastDrawWinner">@{{ lastDrawWinner }}</a> {{ wonAmount }} {{ $t('HIVE')
-						}}<img src="/img/HIVE.png" class="token-logo-sm"></div>
-					</div>
-				</div>
-
 			</div>
 
 
@@ -569,5 +596,99 @@ export default {
 	50% {
 		transform: translateX(80px)
 	}
+}
+/* Prize Draw Section */
+.prize-draw-section {
+	background: linear-gradient(135deg, #ff9a00 0%, #ff5a00 100%);
+	border-radius: 15px;
+	padding: 40px 0;
+	color: white;
+	box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.prize-draw-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-bottom: 10px;
+	color: white;
+}
+
+.prize-draw-details-link {
+	color: white;
+	text-decoration: none;
+	font-size: 1.1rem;
+	transition: all 0.3s ease;
+}
+
+.prize-draw-details-link:hover {
+	text-decoration: underline;
+	color: #eee;
+}
+
+.prize-draw-card {
+	background-color: rgba(255, 255, 255, 0.1);
+	border: none;
+	border-radius: 10px;
+	text-align: center;
+	padding: 20px;
+	transition: all 0.3s ease;
+}
+
+.prize-draw-card:hover {
+	transform: translateY(-5px);
+	background-color: rgba(255, 255, 255, 0.2);
+}
+
+.prize-draw-card-header {
+	border-bottom: 1px solid rgba(255,255,255,0.2);
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+}
+
+.prize-draw-icon {
+	font-size: 2.5rem;
+	margin-bottom: 15px;
+	display: block;
+	color: white;
+}
+
+.prize-draw-card-title {
+	font-size: 1.2rem;
+	font-weight: 600;
+	margin-bottom: 0;
+	color: white;
+}
+
+.prize-draw-card-body .prize-draw-card-text {
+	font-size: 1.2rem;
+	font-weight: 500;
+	margin-bottom: 0;
+	color: white;
+}
+
+.prize-draw-card-body .token-logo-sm {
+	height: 20px;
+	vertical-align: middle;
+	margin-left: 5px;
+}
+
+.prize-draw-countdown {
+	font-size: 1.2rem;
+	font-weight: 500;
+	color: white;
+}
+
+.prize-draw-winner-link {
+	display: block;
+	font-size: 1.2rem;
+	font-weight: 600;
+	color: white;
+	margin-bottom: 5px;
+	text-decoration: none;
+}
+
+.prize-draw-winner-link:hover {
+	text-decoration: underline;
+	color: #eee;
 }
 </style>
