@@ -1,6 +1,7 @@
 <template>
   <!-- single card item for approved product -->
-  <div class="card form mx-auto p-3 mt-3 mt-md-5 text-center pro-card col-sm-4" :class="productTypeBorder">
+  <div class="card form mx-auto p-3 mt-3 mt-md-5 text-center pro-card col-sm-4"
+    :class="[productTypeBorder, { 'christmas-card': product.specialevent && product.event == 'Christmas' }]">
     <div class="text-center card-header">
       <div class="row basic-info">
         <h3 class="pro-name col-md-12">{{ this.product.name }}<span
@@ -31,7 +32,7 @@
           <h3 class="product-type">{{ renderProdType }} <span
               v-if="this.product.type != 'ingame' && this.product.type != 'real'">{{ $t('By') }}</span> <br />
             <a v-if="this.product.type == 'service'" :href="'/consultants/?prof=' + this.product.provider_name">{{
-              this.product.provider_name}}</a>
+              this.product.provider_name }}</a>
             <a v-else :href="'/' + this.product.provider">{{ this.product.provider_name }}</a>
             <span v-if="this.product.type == 'real'">
               <span v-if="this.item_price_extra > 0"><img class="token-logo-md " src="/img/HIVE.png">+</span>
@@ -63,7 +64,8 @@
               <b>{{ $t('Requirements') }}</b>
               <div
                 v-if="product.requirements == null || product.requirements.length == 0 || product.requirements.length == 1 && product.requirements[0].item == null">
-                <span>{{ $t('none') }}</span></div>
+                <span>{{ $t('none') }}</span>
+              </div>
               <div v-else v-for="(reqt, index) in product.requirements" :key="index" class="text-left">
                 <div>
                   <span v-if="user" class="pr-1">
@@ -72,15 +74,18 @@
                     <!--<i class="fas fa-times text-brand" :title="$t('reqt_not_met')" v-else></i>-->
                   </span>
                   <span v-if="reqt.item && reqt.item.toLowerCase() == 'User Rank'.toLowerCase()"
-                    :title="$t('user_rank_reqt').replace('_VAL_', reqt.level)">{{ reqt.item }} &gt; {{ reqt.level }}</span>
+                    :title="$t('user_rank_reqt').replace('_VAL_', reqt.level)">{{ reqt.item }} &gt; {{ reqt.level
+                    }}</span>
                   <span v-else-if="reqt.item && reqt.item.toLowerCase() == 'AFIT'.toLowerCase()"
                     :title="$t('afit_reqt').replace('_VAL_', reqt.count)">{{ $t('user_afit_balace') }} &gt;=
                     {{ reqt.count }} {{ reqt.item }}
 
                   </span>
                   <span v-else
-                    :title="$t('consumed_reqt').replace('_AMOUNT_', reqt.count).replace('_ITEM_', reqt.item).replace('_LEVEL_', reqt.level)">{{ $t('At_Least') }}
-                    {{ reqt.count }} '{{ reqt.item }} {{ $t('level_short') }} {{ reqt.level }}' {{ $t('consumed') }}</span>
+                    :title="$t('consumed_reqt').replace('_AMOUNT_', reqt.count).replace('_ITEM_', reqt.item).replace('_LEVEL_', reqt.level)">{{
+                      $t('At_Least') }}
+                    {{ reqt.count }} '{{ reqt.item }} {{ $t('level_short') }} {{ reqt.level }}' {{ $t('consumed')
+                    }}</span>
                 </div>
                 <!--<div v-if="user && reqt.item && reqt.item.toLowerCase() == 'AFIT'.toLowerCase()" >
 							<div v-if="!proceedBuyAFIT" class="text-right p-2">
@@ -136,7 +141,8 @@
             </div>
             <div class="pb-md-2 pt-md-2 text-center col-md-6 info-box info-box-orangered">
               <div>
-                <b>{{ $t('Validity') }}</b><br />{{ this.product.benefits.time_span }} {{ this.product.benefits.time_unit }}
+                <b>{{ $t('Validity') }}</b><br />{{ this.product.benefits.time_span }} {{
+                  this.product.benefits.time_unit }}
               </div>
             </div>
           </div>
@@ -157,14 +163,18 @@
                       <span class="color-box-rank" v-else-if="boost.boost_unit == 'User Rank'"></span>
                     </span>
                     <br v-if="product.specialevent" /><br v-if="product.specialevent" />
-                    <span>&nbsp;+{{ boost.boost_amount }}</span><span>{{ boost.boost_type.replace('percent_reward', '%').replace('percent', '%').replace('unit', ' ')}}</span>&nbsp;<span>{{ boost.boost_unit }} {{ $t('rewards') }} {{ $t('per_report') }}</span>&nbsp;
+                    <span>&nbsp;+{{ boost.boost_amount }}</span><span>{{ boost.boost_type.replace('percent_reward',
+                      '%').replace('percent', '%').replace('unit', ' ') }}</span>&nbsp;<span>{{ boost.boost_unit }} {{
+                        $t('rewards') }} {{ $t('per_report') }}</span>&nbsp;
                   </span>
                   <span v-else-if="boost.boost_min_amount">
                     <span v-for="iterx in Math.ceil(boost.boost_max_amount / 5)" :key="iterx">
                       <span class="color-box-afit" v-if="boost.boost_unit == 'AFIT'"></span>
                     </span>
                     <br v-if="product.specialevent" /><br v-if="product.specialevent" />
-                    <span>+&nbsp;</span><span>{{ boost.boost_type.replace('percent_reward', '%').replace('percent', '%').replace('unit', ' ')}}</span>&nbsp;{{ boost.boost_min_amount }}&nbsp;-&nbsp;{{ boost.boost_max_amount }}<span>&nbsp;{{ boost.boost_unit }}
+                    <span>+&nbsp;</span><span>{{ boost.boost_type.replace('percent_reward', '%').replace('percent',
+                      '%').replace('unit', ' ') }}</span>&nbsp;{{ boost.boost_min_amount }}&nbsp;-&nbsp;{{
+                        boost.boost_max_amount }}<span>&nbsp;{{ boost.boost_unit }}
                       {{ $t('rewards') }} {{ $t('per_report') }}</span>&nbsp;
                   </span>
                   <span v-if="boost.boost_beneficiary == 'friend'">{{ $t('to_a_friend') }}</span>
@@ -179,7 +189,8 @@
               <b>{{ $t('Requirements') }}</b>
               <div
                 v-if="product.requirements == null || product.requirements.length == 0 || product.requirements.length == 1 && product.requirements[0].item == null">
-                <span>{{ $t('none') }}</span></div>
+                <span>{{ $t('none') }}</span>
+              </div>
               <div v-else v-for="(reqt, index) in product.requirements" :key="index" class="text-left">
                 <span v-if="user" class="pr-1">
                   <i class="fas fa-check text-success" :title="$t('reqt_met')" v-if="reqt.met"></i>
@@ -187,10 +198,13 @@
                   <!--<i class="fas fa-times text-brand" :title="$t('reqt_not_met')" v-else></i>-->
                 </span>
                 <span class="" v-if="reqt.item && reqt.item.toLowerCase() == 'User Rank'.toLowerCase()"
-                  :title="$t('user_rank_reqt').replace('_VAL_', reqt.level)">{{ reqt.item }} &gt; {{ reqt.level }}</span>
+                  :title="$t('user_rank_reqt').replace('_VAL_', reqt.level)">{{ reqt.item }} &gt; {{ reqt.level
+                  }}</span>
                 <span v-else
-                  :title="$t('consumed_reqt').replace('_AMOUNT_', reqt.count).replace('_ITEM_', reqt.item).replace('_LEVEL_', reqt.level)">{{ $t('At_Least') }}
-                  {{ reqt.count }} '{{ reqt.item }} {{ $t('level_short') }} {{ reqt.level }}' {{ $t('consumed') }}</span>
+                  :title="$t('consumed_reqt').replace('_AMOUNT_', reqt.count).replace('_ITEM_', reqt.item).replace('_LEVEL_', reqt.level)">{{
+                    $t('At_Least') }}
+                  {{ reqt.count }} '{{ reqt.item }} {{ $t('level_short') }} {{ reqt.level }}' {{ $t('consumed')
+                  }}</span>
               </div>
             </div>
           </div>
@@ -282,11 +296,12 @@
         </a>
         <div v-else>
           <a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNow()" :class="productBuyColor"
-            style="float:left; border: 1px white solid;">{{ $t('Buy_now') }} <br /> {{ numberFormat(this.item_price, 2) }}
+            style="float:left; border: 1px white solid;">{{ $t('Buy_now') }} <br /> {{ numberFormat(this.item_price, 2)
+            }}
             {{ this.item_currency }}<img class="token-logo-sm " src="/img/actifit_logo.png"></a>
           <a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNowHive()" :class="productBuyColor"
             style="border: 1px white solid;">{{ $t('Buy_now') }} <br /> {{ numberFormat(this.item_price *
-              this.afitPrice.afitHiveLastPrice, 3)}} {{ this.hive_currency }}<img class="token-logo-sm "
+              this.afitPrice.afitHiveLastPrice, 3) }} {{ this.hive_currency }}<img class="token-logo-sm "
               src="/img/HIVE.png"></a>
           <div class="row" v-if="buyHiveExpand && !isKeychainActive && !isHiveauthActive">
             <label for="active-key" class="p-2">{{ $t('Active_Key') }} *</label>
@@ -333,7 +348,8 @@
         </div>
         <div v-if="this.downloadAgainReady">
           <div class="text-brand">{{ $t('download_ready_again_text') }}</div>
-          <a class="btn btn-brand btn-lg w-100 book-button" :href="this.downloadHref" @click.prevent="handleDownloadClick">
+          <a class="btn btn-brand btn-lg w-100 book-button" :href="this.downloadHref"
+            @click.prevent="handleDownloadClick">
             {{ $t('purchase_success_ebook_part2') }}
           </a>
         </div>
@@ -371,12 +387,8 @@
       </div>
       <div v-if="errorProceed != ''">
         <span class="text-brand" v-html="this.errorProceed"></span>
-        <a
-          class="btn btn-brand"
-          :href="this.firstDownloadHref"
-          v-if="this.firstDownloadHref"
-          @click.prevent="handleFirstDownloadClick"
-        >
+        <a class="btn btn-brand" :href="this.firstDownloadHref" v-if="this.firstDownloadHref"
+          @click.prevent="handleFirstDownloadClick">
           {{ $t('purchase_success_ebook_part2') }}
         </a>
       </div>
@@ -429,9 +441,9 @@
       </div>
     </div>
 
-    <BuyOptionsModal :id="'buyOptionsModal' + _uid" :ref="'buyOptionsModal' + _uid" :containerID="'#buyOptionsModal' + _uid"
-      :modalTitle="$t('Buy_product')" :modalText="$t('buy_now_modal_desc').replace('_AMNT_', minAfitBuyTicket)"
-      @proceed-purchase="proceedBuyNowHive" />
+    <BuyOptionsModal :id="'buyOptionsModal' + _uid" :ref="'buyOptionsModal' + _uid"
+      :containerID="'#buyOptionsModal' + _uid" :modalTitle="$t('Buy_product')"
+      :modalText="$t('buy_now_modal_desc').replace('_AMNT_', minAfitBuyTicket)" @proceed-purchase="proceedBuyNowHive" />
 
     <CartModal id="cartModal" ref="cartModal" :afitPrice="afitPrice" @refresh-tickets-multi="refreshTicketsMulti" />
 
@@ -448,6 +460,35 @@
   </div>
 
 </template>
+
+<style scoped>
+.pro-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.pro-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.christmas-card {
+  border: 2px solid #c41e3a !important;
+  background: linear-gradient(to bottom, #fff, #f0fff4);
+  position: relative;
+  overflow: hidden;
+}
+
+.christmas-card::before {
+  content: '🎄';
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  font-size: 1.5rem;
+  opacity: 0.8;
+}
+</style>
 
 <script>
 import LoginModal from '~/components/LoginModal'
@@ -503,13 +544,8 @@ export default {
       if (!this.allReqtsFilled) {
         return 'bg-secondary';
       }
-      if (this.product.type == 'ingame' && this.product.count < 1) {
-        return 'bg-warning';
-      }
-      return '';
-
-    },
-    boughtCount() {
+      if (this.product.type == 'ingame' && this.product.count < 1) { return 'bg-warning'; } return '';
+    }, boughtCount() {
       if (this.user && this.product.type == 'ingame' && Array.isArray(this.gadgetStats) && this.gadgetStats.length > 0) {
         return this.consumedCount + this.activeCount;
       }
@@ -517,7 +553,8 @@ export default {
     },
     consumedCount() {
       if (this.user && this.product.type == 'ingame' && Array.isArray(this.gadgetStats) && this.gadgetStats.length > 0) {
-        let entry = this.gadgetStats.find(entry => (entry._id.gadget === this.product._id && entry._id.status == 'consumed'));
+        let entry = this.gadgetStats.find(entry => (entry._id.gadget === this.product._id && entry._id.status ==
+          'consumed'));
         if (entry) {
           return entry.count;
         }
@@ -526,7 +563,8 @@ export default {
     },
     activeCount() {
       if (this.user && this.product.type == 'ingame' && Array.isArray(this.gadgetStats) && this.gadgetStats.length > 0) {
-        let entry = this.gadgetStats.find(entry => (entry._id.gadget === this.product._id && entry._id.status == 'active'));
+        let entry = this.gadgetStats.find(entry => (entry._id.gadget === this.product._id && entry._id.status ==
+          'active'));
         if (entry) {
           return entry.count;
         }
@@ -612,12 +650,12 @@ export default {
   },
   methods: {
     /**
-       * Formats numbers with commas and dots.
-       *
-       * @param number
-     * @param precision
-       * @returns {string}
-       */
+    * Formats numbers with commas and dots.
+    *
+    * @param number
+    * @param precision
+    * @returns {string}
+    */
     numberFormat(number, precision) {
       return new Intl.NumberFormat('en-EN', { maximumFractionDigits: precision }).format(number)
     },
@@ -648,19 +686,10 @@ export default {
         this.afit_buy_err_msg = this.$t('need_login_signup_notice_vote');
         return;
       }
-      if (this.afitBuyAmount < 0) {
-        this.afit_buy_err_msg = this.$t('amount_positive_int');
-        return;
-      }
-      if (this.getMatchingHIVE() < 0) {
-        this.afit_buy_err_msg = this.$t('amount_positive_int');
-        return;
-      }
-      if (this.userActvKeyHv == '') {
-        this.afit_buy_err_msg = this.$t('all_fields_required');
-        return;
-      }
-      if (this.user.account.balance.split(" ")[0] < this.getMatchingHIVE()) {
+      if (this.afitBuyAmount < 0) { this.afit_buy_err_msg = this.$t('amount_positive_int'); return; } if
+        (this.getMatchingHIVE() < 0) { this.afit_buy_err_msg = this.$t('amount_positive_int'); return; } if
+        (this.userActvKeyHv == '') { this.afit_buy_err_msg = this.$t('all_fields_required'); return; } if
+        (this.user.account.balance.split(" ")[0] < this.getMatchingHIVE()) {
         this.afit_buy_err_msg = this.$t('Not_enough_hive_balance_to_buy');
         //console.log(this.errorProceed );
         return;
@@ -781,12 +810,12 @@ export default {
       return false;
     },
     handleDownloadClick() {
-      if (this.downloadHref){
+      if (this.downloadHref) {
         window.location.href = this.downloadHref;
         setTimeout(() => {
           this.resetDownState();
         }, 200);
-      }else{
+      } else {
         console.warn('cannot initiate download.');
       }
     },
@@ -800,7 +829,7 @@ export default {
         setTimeout(() => {
           this.confirmBought();
         }, 200);
-      }else{
+      } else {
         console.warn('cannot initiate download.');
       }
     },
@@ -841,45 +870,40 @@ export default {
         let count = this.boughtItems.length;
         for (let i = 0; i < count; i++) {
           let entry = this.boughtItems[i];
-          if (entry.status != "consumed" && parseInt(entry.consumed) < parseInt(entry.span)) {
-            return entry;
-          }
+          if (entry.status != " consumed" && parseInt(entry.consumed) < parseInt(entry.span)) { return entry; }
         }
       }
       return null;
-    },
-    getPrice() {
+    }, getPrice() {
       if (this.product && this.afitPrice) {
-        let price_options = this.product.price;
-        let price_options_count = price_options.length;
-        for (let i = 0; i < price_options_count; i++) {
-          let entry = price_options[i];
-          this.item_price = entry.price * this.order_quantity;
-          this.item_currency = entry.currency;
-          if (this.item_currency == 'USD') {
-            console.log('>>>USD Product');
-            //console.log(entry.percent_afit);
-            //keep track of original price
-            this.orig_item_currency = this.item_currency;
-            this.orig_item_price = this.item_price;
-            this.item_currency = 'AFIT';
-            //this being a USD product, convert to matching AFIT/HIVE amounts
-            /*if (parseInt(entry.percent_afit) == 100){
+        let price_options = this.product.price; let
+          price_options_count = price_options.length; for (let i = 0; i < price_options_count; i++) {
+            let
+              entry = price_options[i]; this.item_price = entry.price * this.order_quantity; this.item_currency = entry.currency; if
+              (this.item_currency == 'USD') {
+              console.log('>>>USD Product');
+              //console.log(entry.percent_afit);
+              //keep track of original price
+              this.orig_item_currency = this.item_currency;
+              this.orig_item_price = this.item_price;
+              this.item_currency = 'AFIT';
+              //this being a USD product, convert to matching AFIT/HIVE amounts
+              /*if (parseInt(entry.percent_afit) == 100){
               //convert price to matching AFIT val
               console.log(this.afitPrice.afitHiveLastUsdPrice);
               this.item_price = this.orig_item_price / this.afitPrice.afitHiveLastUsdPrice * entry.percent_afit / 100;
-            }else{*/
-            this.item_price = this.orig_item_price * entry.percent_afit / 100 / this.afitPrice.afitHiveLastUsdPrice;
-            this.item_price = Number(this.item_price.toFixed(2));
-            let calcHiveUsdPrice = this.afitPrice.afitHiveLastUsdPrice / this.afitPrice.afitHiveLastPrice;
-            //console.log('HIVE price:'+calcHiveUsdPrice);
-            this.item_price_extra = this.orig_item_price * entry.percent_hive / 100 / calcHiveUsdPrice;
-            this.item_price_extra = Number(this.item_price_extra.toFixed(2));
-            //console.log('HIVE extra cost:'+this.item_price_extra);
-            this.item_extra_currency = 'HIVE';
-            //}
+              }else{*/
+              this.item_price = this.orig_item_price * entry.percent_afit / 100 / this.afitPrice.afitHiveLastUsdPrice;
+              this.item_price = Number(this.item_price.toFixed(2));
+              let calcHiveUsdPrice = this.afitPrice.afitHiveLastUsdPrice / this.afitPrice.afitHiveLastPrice;
+              //console.log('HIVE price:'+calcHiveUsdPrice);
+              this.item_price_extra = this.orig_item_price * entry.percent_hive / 100 / calcHiveUsdPrice;
+              this.item_price_extra = Number(this.item_price_extra.toFixed(2));
+              //console.log('HIVE extra cost:'+this.item_price_extra);
+              this.item_extra_currency = 'HIVE';
+              //}
+            }
           }
-        }
         this.checkProductBought();
       }
       if (this.user) {
@@ -920,7 +944,8 @@ export default {
         this.downloadAgainRunning = false;
         return;
       }
-      let url = new URL(process.env.actiAppUrl + 'validatePassForDownload/?user=' + this.user.account.name + '&pass=' + this.$refs['funds-pass'].value + '&product_id=' + this.product._id);
+      let url = new URL(process.env.actiAppUrl + 'validatePassForDownload/?user=' + this.user.account.name + '&pass='
+        + this.$refs['funds-pass'].value + '&product_id=' + this.product._id);
       let res = await fetch(url);
       let outcome = await res.json();
       this.settingPass = false;
@@ -950,16 +975,17 @@ export default {
       let cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
       //let cur_bchain = 'STEEM';
 
-      let url = new URL(process.env.actiAppUrl + 'findVerifyTrx/?user=' + this.user.account.name + '&txid=' + result.id + '&operation=' + op_json + '&bchain=' + cur_bchain);
+      let url = new URL(process.env.actiAppUrl + 'findVerifyTrx/?user=' + this.user.account.name + '&txid=' +
+        result.id + '&operation=' + op_json + '&bchain=' + cur_bchain);
 
       /*
       let reqHeads = new Headers({
-        'Content-Type': 'application/json',
-        'x-acti-token': 'Bearer ' + accToken,
+      'Content-Type': 'application/json',
+      'x-acti-token': 'Bearer ' + accToken,
       });*/
       let reslt = await fetch(url); /*, {
-				headers: reqHeads
-			});*/
+        headers: reqHeads
+        });*/
       let outcome = await reslt.json();
       console.log(outcome);
 
@@ -1008,7 +1034,7 @@ export default {
           ];
 
           this.$HAS.broadcast(auth, forceActive ? 'active' : 'posting', operation, (evt) => {
-            console.log(evt)    // process sign_wait message
+            console.log(evt) // process sign_wait message
             let msg = this.$t('verify_hiveauth_app');
             this.$notify({
               group: 'warn',
@@ -1055,7 +1081,8 @@ export default {
         let cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
         //let cur_bchain = 'STEEM';
 
-        let url = new URL(process.env.actiAppUrl + 'performTrx/?user=' + this.user.account.name + '&operation=' + op_json + '&bchain=' + cur_bchain);
+        let url = new URL(process.env.actiAppUrl + 'performTrx/?user=' + this.user.account.name + '&operation=' +
+          op_json + '&bchain=' + cur_bchain);
 
         let reqHeads = new Headers({
           'Content-Type': 'application/json',
@@ -1104,20 +1131,12 @@ export default {
           return;
         }
 
-        if (this.product.count < 1) {
-          this.errorProceed = this.$t('cannot_buy_none_available');
-          return;
-        }
+        if (this.product.count < 1) { this.errorProceed = this.$t('cannot_buy_none_available'); return; }
       }
       this.buyHiveExpand = !this.buyHiveExpand;
-    },
-    async proceedBuyNowHive() {
-      try {
-        //console.log(this.product.name);
-        this.buyAttempt = true;
-        this.buyInProgress = true;
-        this.errorProceed = '';
-        console.log('proceedBuyNowHive');
+    }, async proceedBuyNowHive() {
+      try { //console.log(this.product.name);
+        this.buyAttempt = true; this.buyInProgress = true; this.errorProceed = ''; console.log('proceedBuyNowHive');
         //making sure user is logged in
         if (!this.user) {
           this.errorProceed = this.$t('need_login_signup_notice_vote');
@@ -1130,48 +1149,35 @@ export default {
             this.errorProceed = this.$t('cannot_buy_reqts_not_filled');
             return;
           }
-
           if (this.product.count < 1) {
             this.errorProceed = this.$t('cannot_buy_none_available');
             return;
           }
         }
-        //check if active key was provided
+        //active key was provided
         //console.log(this.$refs);
-        if (localStorage.getItem('acti_login_method') != 'keychain' &&
-          localStorage.getItem('acti_login_method') != 'hiveauth' &&
-          this.userActvKey == '') {
+        if (localStorage.getItem('acti_login_method') != 'keychain'
+          && localStorage.getItem('acti_login_method') != 'hiveauth'
+          && this.userActvKey == '') {
           this.errorProceed = this.$t('all_fields_required');
           return;
         }
 
         //proceed with payment
-        //let chainLnk = await this.setProperNode ();
-        //transferToVesting(wif, from, to, amount)
+        this.setProperNode();
         let attempt = 1;
         let payAmount = parseFloat(this.item_price * this.afitPrice.afitHiveLastPrice).toFixed(3);
         let memo = 'buy-gadget:' + this.product._id;
         console.log('prior to call');
-
-        let accToken = localStorage.getItem('access_token')
-
+        let accToken = localStorage.getItem('access_token');
         let cstm_params = {
           "from": this.user.account.name,
           "to": process.env.actifitMarketBuy,
           "amount": payAmount + ' ' + 'HIVE',
           "memo": memo
         };
-
-        //let res = await this.processTrxFunc('transfer', cstm_params, this.cur_bchain);
         let op_name = 'transfer';
-
-        let operation = [
-          [op_name, cstm_params]
-        ];
-
-        /*let res = await hive.broadcast.transferAsync(this.userActvKey, this.user.account.name, process.env.actifitMarketBuy, payAmount + ' ' + 'HIVE', memo).then(
-          res => this.confirmCompletion('transfer', payAmount, res, attempt)).catch(err=> this.errorCompletion(err));
-        console.log('after call');*/
+        let operation = [[op_name, cstm_params]];
 
 
         if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) ||
@@ -1190,11 +1196,11 @@ export default {
           }
           /*let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
           let url_string = process.env.actiAppUrl + 'activateMultiGadget/'
-                    + this.user.account.name + '/'
-                    + this.product._id + '/'
-                    + bcastRes.ref_block_num + '/'
-                    + bcastRes.id + '/'
-                    + cur_bchain;
+          + this.user.account.name + '/'
+          + this.product._id + '/'
+          + bcastRes.ref_block_num + '/'
+          + bcastRes.id + '/'
+          + cur_bchain;
           //console.log('prodHasFriendBenefic');
           */
 
@@ -1203,7 +1209,8 @@ export default {
 
           let cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
 
-          let url = new URL(process.env.actiAppUrl + 'performTrxPost/?user=' + this.user.account.name + '&bchain=' + cur_bchain);
+          let url = new URL(process.env.actiAppUrl + 'performTrxPost/?user=' + this.user.account.name + '&bchain=' +
+            cur_bchain);
 
           let reqHeads = new Headers({
             'Content-Type': 'application/json',
@@ -1258,7 +1265,8 @@ export default {
 
         //only support HIVE
         let cur_bchain = 'HIVE';//(localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
-        let url = '';//new URL(process.env.actiAppUrl + 'processBuyOrderHive/?user='+this.user.account.name+'&product_id='+this.product._id);
+        let url = '';//new URL(process.env.actiAppUrl +
+        //'processBuyOrderHive/?user=' + this.user.account.name + '&product_id=' + this.product._id);
 
         let tgtNode = process.env.actiAppUrl;
         //if (this.product.type == 'ingame'){
@@ -1342,7 +1350,7 @@ export default {
               } else if (this.product.type == 'ebook') {
                 //display proper success message
                 this.errorProceed = this.$t('purchase_success_ebook_part1') + ' ' + this.product.name + ' '
-                  + this.$t('By') + ' ' + this.product.provider_name + '.<br/>';
+                  + this.$t('By') + ' ' + this.product.provider_name + '.<br />';
                 this.firstDownloadHref = process.env.actiAppUrl
                   + 'downEbook/'
                   + '?user=' + this.user.account.name
@@ -1351,7 +1359,7 @@ export default {
               } else if (this.product.type == 'ingame') {
                 //display proper success message
                 this.errorProceed = this.$t('purchase_success_ingame_part1') + ' ' + this.product.name + ' '
-                  + this.$t('Level') + ' ' + this.product.level + '. ' + this.$t('purchase_success_ingame_part2') + '.<br/>';
+                  + this.$t('Level') + ' ' + this.product.level + '. ' + this.$t('purchase_success_ingame_part2') + '.<br />';
 
                 this.$emit('refresh-tickets');
               }
@@ -1379,17 +1387,17 @@ export default {
         /*let url = new URL(process.env.actiAppUrl + 'confirmPaymentGadget/'+'?bchain=' + this.cur_bchain);
         //compile all needed data and send it along the request for processing
         let params = {
-          from: this.user.account.name,
+        from: this.user.account.name,
 
         }
         Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
         try{
-          let res = await fetch(url);
-          let outcome = await res.json();
-          //update user data according to result
-          this.fetchUserData();
+        let res = await fetch(url);
+        let outcome = await res.json();
+        //update user data according to result
+        this.fetchUserData();
         }catch(err){
-          console.error(err);
+        console.error(err);
         }*/
 
       } else {
@@ -1433,16 +1441,10 @@ export default {
         return;
       }
       //verify and display checkout details
-      if (this.product.count < 1) {
-        this.errorProceed = this.$t('cannot_buy_none_available');
-        return;
-      }
-      if (this.userTokens < this.item_price) {
-        this.errorProceed = this.$t('Not_enough_balance_to_buy') + this.$t('Buy_afit_here');
-        //console.log(this.errorProceed );
-        return;
-      }
-      if (this.user.account.balance.split(" ")[0] < this.item_price_extra) {
+      if (this.product.count < 1) { this.errorProceed = this.$t('cannot_buy_none_available'); return; } if
+        (this.userTokens < this.item_price) {
+        this.errorProceed = this.$t('Not_enough_balance_to_buy') +
+          this.$t('Buy_afit_here'); //console.log(this.errorProceed ); return; } if (this.user.account.balance.split(" ")[0] < this.item_price_extra) {
         this.errorProceed = this.$t('Not_enough_hive_balance_to_buy');
         this.buyInProgress = false;
         //console.log(this.errorProceed );
@@ -1563,37 +1565,28 @@ export default {
         console.log(outcome.error);
 
         //if this is authority error, means needs to be logged out
-        //example "missing required posting authority:Missing Posting Authority"
+        //example " missing required posting authority:Missing Posting Authority"
         let err_msg = outcome.error;
-
-
-        this.$notify({
-          group: 'error',
-          text: err_msg,
-          position: 'top center'
-        })
+        this.$notify({ group: 'error', text: err_msg, position: 'top center' });
         this.errorProceed = err_msg;
         this.buyInProgress = false;
         return { success: false, trx: null };
         //this.$router.push('/login');
       } else {
-        this.$store.dispatch('fetchUserTokens')
+        this.$store.dispatch('fetchUserTokens');
         this.$notify({
           group: 'success',
           text: this.$t('product_bought').replace('_PRODUCT_', this.product.name),
           position: 'top center'
-        })
-
+        });
         this.errorProceed = this.$t('product_bought').replace('_PRODUCT_', this.product.name);
         this.buyInProgress = false;
         this.buyAttempt = false;
         this.checkout_product = false;
-        let accToken = localStorage.getItem('access_token')
+        let accToken = localStorage.getItem('access_token');
         this.$store.dispatch('fetchUserBoughtRealProducts', accToken);
-
         return { success: true, trx: outcome.trx };
       }
-
     },
     async buyNow() {
       this.buyAttempt = true;
@@ -1605,24 +1598,23 @@ export default {
         this.errorProceed = this.$t('need_login_signup_notice_vote');
         return;
       }
-
-      //check if this is a game gadget and if reqts have been met
+      //check if this is a game gadget and
+      //if reqts have been met
       if (this.product.type == 'ingame') {
         if (!this.allReqtsFilled) {
           this.errorProceed = this.$t('cannot_buy_reqts_not_filled');
           return;
         }
-
         if (this.product.count < 1) {
           this.errorProceed = this.$t('cannot_buy_none_available');
           return;
         }
       } else if (this.product.type == 'real') {
         if (this.product.count < 1) {
-          this.errorProceed = this.$t('cannot_buy_none_available');
-          return;
+          this.errorProceed = this.$t('cannot_buy_none_available'); return;
+
         }
-      }
+      } //first
       //first check if user has enough AFIT
       if (this.user) {
         if (this.userTokens < this.item_price) {
@@ -1631,74 +1623,50 @@ export default {
           return;
         }
       }
-      //show user confirm for purchasing product/service
-      let user_prmpt = this.$t('purchase_confirm_part1') + this.product.name + ' ' + this.product.type + '.\n'
-        + this.$t('purchase_confirm_part2') + this.numberFormat(this.item_price, 2) + ' ' + this.item_currency + '.\n'
-        + this.$t('Proceed') + '?';
-      if (this.product.type == 'ingame') {
-        user_prmpt = this.$t('purchase_confirm_part1') + this.product.name + ' Level ' + this.product.level + ' ' + this.product.type + ' virtual gadget' + '.\n'
-          + this.$t('purchase_confirm_part2') + this.numberFormat(this.item_price, 2) + ' ' + this.item_currency + '.\n'
-          + this.$t('Proceed') + '?';
-      }
+      //show user confirm for purchasing product/service let
+      let user_prmpt = this.$t('purchase_confirm_part1') + this.product.name + ' ' + this.product.type + '.\n' +
+        this.$t('purchase_confirm_part2') + this.numberFormat(this.item_price, 2) + ' ' + this.item_currency + '.\n'
+        + this.$t('Proceed') + '?'; if (this.product.type == 'ingame') {
+          user_prmpt = this.$t('purchase_confirm_part1') + this.product.name + ' Level ' + this.product.level + ' ' +
+            this.product.type + ' virtual gadget' + '.\n' + this.$t('purchase_confirm_part2') +
+            this.numberFormat(this.item_price, 2) + ' ' + this.item_currency + '.\n' + this.$t('Proceed') + '?';
+        }
       let decis = confirm(user_prmpt);
-      if (!decis) {
-        this.buyInProgress = false;
-        return;
-      }
-
-      //broadcast trx to blockchain
+      if (!decis) { this.buyInProgress = false; return; } //broadcast trx to blockchain
       let cstm_params = {
         required_auths: [],
         required_posting_auths: [this.user.account.name],
         id: 'actifit',
-        json: "{ \"buy_product\": \"" + this.product._id + "\"}"
+        json: "{\"buy_product\": \"" + this.product._id + "\"}"
       };
-
       if (this.product.type == 'ingame') {
         //different tx
         cstm_params = {
           required_auths: [],
           required_posting_auths: [this.user.account.name],
           id: 'actifit',
-          json: "{\"transaction\": \"buy-gadget\" , \"gadget\": \"" + this.product._id + "\"}"
+          json: "{\"transaction\": \"buy-gadget\", \"gadget\": \"" + this.product._id + "\"}"
         };
       }
       let bcastRes;
       let op_name = 'custom_json';
-      let operation = [
-        [op_name, cstm_params]
-      ];
+      let operation = [[op_name, cstm_params]];
+      let res = await this.processTrxFunc(op_name, cstm_params); console.log('custom complete'); console.log(res);
 
-
-      let res = await this.processTrxFunc(op_name, cstm_params);
-      console.log('custom complete');
-      console.log(res);
-      if (res.success) {
-        bcastRes = res.trx;
-      } else {
-        console.log(err);
-      }
-
+      if (res.success) { bcastRes = res.trx; } else { console.log(err); }
       let cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
-      let url = new URL(process.env.actiAppUrl + 'processBuyOrder/?user=' + this.user.account.name + '&product_id=' + this.product._id);
-
+      let url = new URL(process.env.actiAppUrl + 'processBuyOrder/?user=' + this.user.account.name + '&product_id=' +
+        this.product._id);
       if (this.product.type == 'ingame') {
-        url = new URL(process.env.actiAppUrl + 'buyGadget/'
-          + this.user.account.name + '/'
-          + this.product._id + '/'
-          + bcastRes.ref_block_num + '/'
-          + bcastRes.id + '/'
-          + cur_bchain);
-
+        url = new URL(process.env.actiAppUrl + 'buyGadget/' +
+          this.user.account.name + '/' + this.product._id + '/' + bcastRes.ref_block_num + '/' + bcastRes.id + '/' +
+          cur_bchain);
         if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) {
-
-          let op_json = JSON.stringify(operation)
-          url = new URL(process.env.actiAppUrl + 'buyGadgetKeychain/'
-            + this.user.account.name + '/'
-            + this.product._id + '/'
-            //+ bcastRes.ref_block_num + '/'
-            + bcastRes.id + '/'
-            + cur_bchain + '?operation=' + op_json);
+          let op_json = JSON.stringify(operation);
+          url = new URL(process.env.actiAppUrl + 'buyGadgetKeychain/' +
+            this.user.account.name + '/' + this.product._id + '/'
+            + bcastRes.id + '/' +
+            cur_bchain + '?operation=' + op_json);
         }
       }
       //console.log(url);
@@ -1709,15 +1677,10 @@ export default {
         if (outcome.error) {
           this.errorProceed = outcome;
           console.error(outcome);
-        } else {
-          //update user token count
-          this.$store.dispatch('fetchUserTokens')
-
-          //update product status
+        } else { //update user token count
+          this.$store.dispatch('fetchUserTokens') //update product status
           this.checkProductBought();
-
           this.$store.dispatch('fetchProducts')
-
           if (this.product.type == 'service') {
             //display proper success message
             this.errorProceed = this.$t('purchase_success_service_part1') + this.product.name + ' '
@@ -1725,31 +1688,25 @@ export default {
               + this.$t('purchase_success_service_part2') + '.\n'
           } else if (this.product.type == 'ebook') {
             //display proper success message
-            this.errorProceed = this.$t('purchase_success_ebook_part1') + ' ' + this.product.name + ' '
-              + this.$t('By') + ' ' + this.product.provider_name + '.<br/>';
-            this.firstDownloadHref = process.env.actiAppUrl
-              + 'downEbook/'
-              + '?user=' + this.user.account.name
-              + '&product_id=' + this.product._id
-              + '&access_token=' + outcome.access_token;
+            this.errorProceed = this.$t('purchase_success_ebook_part1') + ' ' + this.product.name + ' ' + this.$t('By')
+              + ' ' + this.product.provider_name + '.<br/>'; this.firstDownloadHref = process.env.actiAppUrl + 'downEbook/'
+                + '?user=' + this.user.account.name + '&product_id=' + this.product._id + '&access_token=' +
+                outcome.access_token;
           } else if (this.product.type == 'ingame') {
             //display proper success message
-            this.errorProceed = this.$t('purchase_success_ingame_part1') + ' ' + this.product.name + ' '
-              + this.$t('Level') + ' ' + this.product.level + '. ' + this.$t('purchase_success_ingame_part2') + '.<br/>';
+            this.errorProceed = this.$t('purchase_success_ingame_part1') + ' ' + this.product.name + ' ' +
+              this.$t('Level') + ' ' + this.product.level + '. ' + this.$t('purchase_success_ingame_part2') + '.<br/>';
           }
-        }
-        //this.checkingFunds = false;
-        //this.resultReturned = true;
-
+        } //this.checkingFunds=false; //this.resultReturned=true;
       } catch (err) {
         console.error(err);
-        //this.checkingFunds = false;
       }
+      //this.checkingFunds=false; }
     },
-    prodHasFriendBenefic() {
-      //console.log('prodHasFriendBenefic');
+    prodHasFriendBenefic() { //console.log('prodHasFriendBenefic');
       //console.log(this.product.benefits.boosts);
-      if (Array.isArray(this.product.benefits.boosts) && this.product.benefits.boosts.length > 0) {
+      if (Array.isArray(this.product.benefits.boosts) &&
+        this.product.benefits.boosts.length > 0) {
         let maxCount = this.product.benefits.boosts.length;
         for (let i = 0; i < maxCount; i++) {
           if (this.product.benefits.boosts[i].boost_beneficiary == 'friend') {
@@ -1792,7 +1749,8 @@ export default {
             //notify success confirming receipt
             this.$notify({
               group: 'success',
-              text: this.$t('success_receipt_set').replace('_PROD_', this.product.name),//this.$t('session_expired_login_again'),
+              text: this.$t('success_receipt_set').replace('_PROD_',
+                this.product.name),//this.$t('session_expired_login_again'),
               position: 'top center'
             })
 
@@ -1804,7 +1762,8 @@ export default {
             this.$store.dispatch('fetchUserBoughtRealProducts', accToken);
 
             //display proper success message
-            this.errorProceed = this.$t('success_receipt_set').replace('_PROD_', this.product.name + '-L' + this.product.level) + '.<br/>';
+            this.errorProceed = this.$t('success_receipt_set').replace('_PROD_', this.product.name + '-L' +
+              this.product.level) + '.<br />';
           }
           //this.checkingFunds = false;
           //this.resultReturned = true;
@@ -1906,7 +1865,7 @@ export default {
 
           //display proper success message
           this.errorProceed = this.$t('gadget_activated').replace('_GADGET_', this.product.name + ' '
-            + this.$t('Level') + ' ' + this.product.level) + '.<br/>';
+            + this.$t('Level') + ' ' + this.product.level) + '.<br />';
         }
         //this.checkingFunds = false;
         //this.resultReturned = true;
@@ -1984,7 +1943,7 @@ export default {
 
           //display proper success message
           this.errorProceed = this.$t('gadget_deactivated').replace('_GADGET_', this.product.name + ' '
-            + this.$t('Level') + ' ' + this.product.level) + '.<br/>';
+            + this.$t('Level') + ' ' + this.product.level) + '.<br />';
         }
         //this.checkingFunds = false;
         //this.resultReturned = true;
@@ -2005,37 +1964,35 @@ export default {
           break;
         }
       }
-      if (this.product_prov_pic == '') {
-        //still no pic, grab steemit default one
-        this.profImgUrl = process.env.hiveImgUrl;
-        let cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
-        if (cur_bchain == 'STEEM') {
-          this.profImgUrl = process.env.steemImgUrl;
+        if (this.product_prov_pic == '') {
+          //still no pic, grab steemit default one
+          this.profImgUrl = process.env.hiveImgUrl;
+          let cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
+          if (cur_bchain == 'STEEM') {
+            this.profImgUrl = process.env.steemImgUrl;
+          }
+          this.product_prov_pic = this.profImgUrl + '/u/' + this.product.provider + '/avatar';
         }
-        this.product_prov_pic = this.profImgUrl + '/u/' + this.product.provider + '/avatar';
-      }
+      },
     },
-  },
-  async mounted() {
-    this.getPrice();
-    this.updateProPic();
+    async mounted() {
+      this.getPrice();
+      this.updateProPic(); //fix sorting of countries and color options
+      if (Array.isArray(this.product.colorOptions) && this.product.colorOptions.length > 0) {
+        this.product.colorOptions.sort();
+      }
 
-    //fix sorting of countries and color options
-    if (Array.isArray(this.product.colorOptions) && this.product.colorOptions.length > 0) {
-      this.product.colorOptions.sort();
-    }
+      if (Array.isArray(this.product.countries) && this.product.countries.length > 0) {
+        this.product.countries.sort();
+      }
 
-    if (Array.isArray(this.product.countries) && this.product.countries.length > 0) {
-      this.product.countries.sort();
-    }
+      //hive.config.set('rebranded_api', true)
+      //hive.broadcast.updateOperations()
+      hive.config.set('alternative_api_endpoints', process.env.altHiveNodes);
+      hive.api.setOptions({ url: process.env.hiveApiNode });
+    },
 
-    //hive.config.set('rebranded_api', true)
-    //hive.broadcast.updateOperations()
-    hive.config.set('alternative_api_endpoints', process.env.altHiveNodes);
-    hive.api.setOptions({ url: process.env.hiveApiNode });
-  },
-
-}
+  }
 </script>
 
 <style>
@@ -2053,10 +2010,6 @@ export default {
 
 .pro-img-cls {
   width: 100%;
-}
-
-.pro-card {
-  /*width: 400px;*/
 }
 
 .pro-name {
