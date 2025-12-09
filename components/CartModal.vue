@@ -195,15 +195,17 @@
         });
       },
 	  getProductPrice (product){
-		let price_options = product.price;
-		let price_options_count = price_options.length;
-		let item_price = 0;
-		for (let i=0; i < price_options_count; i++){
-			let entry = price_options[i];
-			item_price = entry.price;
-			//item_currency = entry.currency;
+		if (product && product.price) {
+			let price_options = product.price;
+			let price_options_count = price_options.length;
+			let item_price = 0;
+			for (let i=0; i < price_options_count; i++){
+				let entry = price_options[i];
+				item_price = parseFloat(entry.price);
+			}
+			return item_price;
 		}
-		return item_price;
+		return 0;
 	  },
 	  removeProduct (product){
 		this.$store.commit('removeCartEntry', product)
