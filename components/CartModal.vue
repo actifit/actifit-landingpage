@@ -107,7 +107,6 @@
 		hive_price: 1,
 		cur_bchain: 'HIVE',
 		target_bchain: 'HIVE',
-		product_price_afit: 0,
 		item_currency: 'AFIT',
 		hive_currency: 'HIVE',
 		buyHiveExpand: false,
@@ -127,28 +126,26 @@
 		this.$store.dispatch('steemconnect/refreshUser');
 		//this.reload += 1;
 	  },
-	  cartEntries: function(){
-		//reset any errors due to adding new entries
-		this.errorProceed = '';
-		
-		//update total cart price
-		this.product_price_afit = 0;
-		for (let i=0;i<this.cartEntries.length;i++){
-			this.product_price_afit += this.getProductPrice(this.cartEntries[i]);
-		}
-	  }
 	},
 	components: {
 		BuyOptionsModal,
 		LoginModal,
 	},
     computed: {
-      ...mapGetters('steemconnect', ['user']),
+	  ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters('steemconnect', ['stdLogin']),
       ...mapGetters(['cartEntries']),
 	  ...mapGetters(['userTokens']),
 	  ...mapGetters(['bchain']),
 	  ...mapGetters(['purchaseSuccess']),
+	  product_price_afit() {
+		//update total cart price
+		let total_price = 0;
+		for (let i=0;i<this.cartEntries.length;i++){
+			total_price += this.getProductPrice(this.cartEntries[i]);
+		}
+		return total_price;
+	  },
 	  isKeychainActive (){
 		return (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain)
 	  },

@@ -142,6 +142,7 @@
 
 
 
+		<CartModal id="cartModal" ref="cartModal" :afitPrice="afitPrice" @refresh-tickets-multi="refreshTickets" />
 		<Footer />
 		<client-only>
 			<div>
@@ -161,6 +162,7 @@ import { mapGetters } from 'vuex'
 import hive from '@hiveio/hive-js'
 import Countdown from 'vuejs-countdown'
 import NotifyModal from '~/components/NotifyModal'
+import CartModal from '~/components/CartModal'
 import ListHeadingSection from '~/components/ListHeadingSection.vue'
 
 export default {
@@ -179,6 +181,7 @@ export default {
 		Footer,
 		Countdown,
 		NotifyModal,
+		CartModal,
 		ListHeadingSection
 	},
 	data() {

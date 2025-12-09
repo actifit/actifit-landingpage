@@ -445,7 +445,7 @@
       :containerID="'#buyOptionsModal' + _uid" :modalTitle="$t('Buy_product')"
       :modalText="$t('buy_now_modal_desc').replace('_AMNT_', minAfitBuyTicket)" @proceed-purchase="proceedBuyNowHive" />
 
-    <CartModal id="cartModal" ref="cartModal" :afitPrice="afitPrice" @refresh-tickets-multi="refreshTicketsMulti" />
+    
 
     <client-only>
       <div>
@@ -499,7 +499,7 @@ import steem from 'steem'
 import hive from '@hiveio/hive-js'
 
 import BuyOptionsModal from '~/components/BuyOptionsModal'
-import CartModal from '~/components/CartModal'
+
 
 //import VueLazyLoad from 'vue-lazyload'
 //import LightBox from 'vue-image-lightbox'
@@ -512,7 +512,7 @@ export default {
   props: ['product', 'pros', 'userrank', 'gadgetStats', 'afitPrice', 'realProducts', 'expandAll'],
   components: {
     BuyOptionsModal,
-    CartModal,
+    
 
     //LightBox,
     //VueLazyLoad
