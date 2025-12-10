@@ -599,11 +599,12 @@ export default {
 }
 /* Prize Draw Section */
 .prize-draw-section {
-	background: linear-gradient(135deg, #ff9a00 0%, #ff5a00 100%);
+	background: linear-gradient(135deg, #ff112d 0%, #d6001a 100%);
 	border-radius: 15px;
 	padding: 40px 0;
 	color: white;
 	box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+	transition: background 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 }
 
 .prize-draw-title {
@@ -690,5 +691,39 @@ export default {
 .prize-draw-winner-link:hover {
 	text-decoration: underline;
 	color: #eee;
+}
+
+/* Dark Mode styles for Prize Draw Section */
+.dark-mode .prize-draw-section {
+	background: linear-gradient(135deg, #2b0005 0%, #4e0009 100%);
+	box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+.dark-mode .prize-draw-card {
+	background-color: rgba(0, 0, 0, 0.2);
+	border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .prize-draw-card:hover {
+	background-color: rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .prize-draw-card-header {
+	border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.dark-mode .prize-draw-title,
+.dark-mode .prize-draw-details-link,
+.dark-mode .prize-draw-icon,
+.dark-mode .prize-draw-card-title,
+.dark-mode .prize-draw-card-body .prize-draw-card-text,
+.dark-mode .prize-draw-countdown,
+.dark-mode .prize-draw-winner-link {
+	color: #f8f9fa;
+}
+
+.dark-mode .prize-draw-details-link:hover,
+.dark-mode .prize-draw-winner-link:hover {
+	color: #ccc;
 }
 </style>
