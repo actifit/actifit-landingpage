@@ -136,7 +136,7 @@ export default {
     // END: ADDED COMPUTED PROPERTY
     isOnlyPost () { return this.userPosts && this.userPosts.length === 1 },
     buildLink () { return '/' + this.post.author + '/' + this.post.permlink },
-    isPostReblog () { return this.displayUsername !== this.post.author },
+    isPostReblog () { return this.displayUsername && this.displayUsername !== this.post.author },
     isPostPinned () { return this.post.stats ? this.post.stats.is_pinned : false },
     isStandardPost () { return !this.explorePost },
     date () {

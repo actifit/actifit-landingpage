@@ -101,10 +101,10 @@
               <span v-if="commentDeletable()"><a href="#" @click.prevent="deleteComment" :title="$t('Delete_note')"><i
                     class="fas fa-trash-alt text-white"></i><i class="fas fa-spin fa-spinner" v-if="deleting"></i></a>
               </span>
-              <span><a href="#" @click.prevent="toggleCommentBox()" :title="$t('Reply')"><i
-                    class="fas fa-reply  text-white"></i></a></span>
             </div>
             <div>
+              <span v-if="this.user"><a href="#" @click.prevent="toggleCommentBox()" :title="$t('Reply')"><i
+                    class="fas fa-reply text-white"></i></a></span>
               <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand"
                 data-target="#voteModal" v-if="this.user && userVotedThisPost() == true">
                 <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
