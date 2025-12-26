@@ -47,8 +47,8 @@
           <div v-else>
             <p class="login-prompt">{{ $t('prompt') }}</p>
             <div class="main-actions">
-                <a href="#" data-toggle="modal" data-target="#loginModal" @click="showModalFunc" class="btn btn-primary-hero">{{ $t('Login') }}</a>
-                <a href="/signup" class="btn btn-secondary-hero">{{ $t('Sign_Up') }}</a>
+                <a href="/signup" class="btn btn-primary-hero">{{ $t('Sign_Up') }}</a>
+                <a href="#" data-toggle="modal" data-target="#loginModal" @click="showModalFunc" class="btn btn-secondary-hero">{{ $t('Login') }}</a>
             </div>
             <div class="main-actions-alt">
               <a href="#" class="btn-link-hero" @click.prevent="$router.push('/activity/')">{{ $t('Explore_Activity_Feed') }} <i class="fas fa-arrow-right"></i></a>
