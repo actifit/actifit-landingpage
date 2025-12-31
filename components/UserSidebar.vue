@@ -266,7 +266,8 @@ export default {
 }
 
 /* All other styles for avatar, text, links, dark-mode, etc., are preserved */
-.sidebar-avatar { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #ff112d; }
+.user-header > a { display: block; line-height: 0; width: 40%; max-width: 60px; min-width: 30px; }
+.sidebar-avatar { display: block; width: 100%; aspect-ratio: 1 / 1; border-radius: 50%; border: 2px solid #ff112d; object-fit: cover; }
 .user-header .card-title { font-size: 1.25rem; }
 .username-link { color: #d9001b; text-decoration: none; transition: color 0.3s ease; }
 .username-link:hover { color: #ff112d; }
