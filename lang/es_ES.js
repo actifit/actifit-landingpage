@@ -1080,6 +1080,7 @@ module.exports = {
   post_link: 'Enlace a la Publicación',
   hide_comment: 'Ocultar Hilo de Comentarios',
   show_comment: 'Mostrar Hilo de Comentarios',
+  hidden_low_reputation: 'Comentario oculto debido a baja reputación',
   Comment: 'Comentario',
   Posts: 'Publicaciones',
   admins: 'Administradores',

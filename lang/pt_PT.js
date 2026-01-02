@@ -1080,6 +1080,7 @@ module.exports = {
   post_link: 'Link para a Postagem',
   hide_comment: 'Ocultar Fio de Comentários',
   show_comment: 'Mostrar Fio de Comentários',
+  hidden_low_reputation: 'Comentário oculto devido a baixa reputação',
   Comment: 'Comentário',
   Posts: 'Postagens',
   admins: 'Administradores',

@@ -1081,6 +1081,7 @@ module.exports = {
   post_link: 'पोस्ट का लिंक',
   hide_comment: 'टिप्पणी धागा छिपाएं',
   show_comment: 'टिप्पणी धागा दिखाएं',
+  hidden_low_reputation: 'कम प्रतिष्ठा के कारण टिप्पणी छिपी हुई',
   Comment: 'टिप्पणी',
   Posts: 'पोस्ट',
   admins: 'व्यवस्थापक',

@@ -1080,6 +1080,7 @@ module.exports = {
   post_link: 'Посилання на допис',
   hide_comment: 'Сховати гілку коментарів',
   show_comment: 'Показати гілку коментарів',
+  hidden_low_reputation: 'Коментар приховано через низьку репутацію',
   Comment: 'Коментар',
   Posts: 'Дописи',
   admins: 'Адміни',

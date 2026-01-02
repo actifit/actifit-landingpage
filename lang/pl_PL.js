@@ -1080,6 +1080,7 @@ module.exports = {
   post_link: 'Link do posta',
   hide_comment: 'Ukryj wątek komentarzy',
   show_comment: 'Pokaż wątek komentarzy',
+  hidden_low_reputation: 'Komentarz ukryty z powodu niskiej reputacji',
   Comment: 'Komentarz',
   Posts: 'Posty',
   admins: 'Administratorzy',

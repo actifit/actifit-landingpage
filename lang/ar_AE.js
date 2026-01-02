@@ -1080,6 +1080,7 @@ module.exports = {
   post_link: 'رابط المنشور',
   hide_comment: 'إخفاء سلسلة التعليقات',
   show_comment: 'إظهار سلسلة التعليقات',
+  hidden_low_reputation: 'تعليق مخفي بسبب السمعة المنخفضة',
   Comment: 'تعليق',
   Posts: 'المنشورات',
   admins: 'المسؤولون',

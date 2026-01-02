@@ -1081,6 +1081,7 @@ module.exports = {
   post_link: '帖子链接',
   hide_comment: '隐藏评论串',
   show_comment: '显示评论串',
+  hidden_low_reputation: '评论因声誉过低而隐藏',
   Comment: '评论',
   Posts: '帖子',
   admins: '管理员',

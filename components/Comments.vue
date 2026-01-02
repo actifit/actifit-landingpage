@@ -195,7 +195,12 @@
       </Comments>
     </div>
     <div class="comments mb-2" v-else-if="!commentDeleted && commentMinimized">
-      <div class="col-12 text-right">
+      <div class="col-12 d-flex justify-content-between align-items-center" :style="{ paddingLeft: depth * indentFactor + 'px' }">
+        <span v-if="hiddenDueToLowRep" class="text-secondary small">
+          <i class="fas fa-eye-slash mr-1"></i>
+          {{ $t('hidden_low_reputation') }}
+        </span>
+        <span v-else></span>
         <i class="fa-solid fa-circle-plus text-brand" v-on:click="commentMinimized = !commentMinimized"
           :title="$t('show_comment')" style="cursor: pointer"></i>
       </div>
@@ -207,6 +212,7 @@ import UserHoverCard from './UserHoverCard.vue'
 import { translateTextWithGemini } from '~/components/gemini-client.js';
 import vueRemarkable from 'vue-remarkable';
 import steem from 'steem'
+import hive from '@hiveio/hive-js'
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
 import sanitize from 'sanitize-html'
@@ -228,6 +234,8 @@ export default {
       postUpvoted: false,
       commentDeleted: false,
       commentMinimized: false,
+      hiddenDueToLowRep: false,
+      authorReputation: null,
       userRank: 0,
       commentBoxOpen: false,
       editBoxOpen: false,
@@ -361,6 +369,28 @@ export default {
         res.json().then(json => this.userRank = json)
       }).catch(e => console.error(e));
       this.$store.dispatch('fetchModerators')
+
+      // Fetch Hive reputation for the comment author
+      this.fetchAuthorReputation();
+    },
+
+    // Fetch author's Hive reputation and auto-hide if low
+    async fetchAuthorReputation() {
+      if (!this.author || this.depth === 0) return; // Skip for root level (not a comment)
+
+      hive.api.setOptions({ url: process.env.hiveApiNode });
+      const result = await hive.api.getAccountReputationsAsync(this.author, 1);
+
+      if (result && result.length > 0) {
+        const rawReputation = result[0].reputation;
+        this.authorReputation = hive.formatter.reputation(rawReputation);
+
+        // Auto-hide comments from users with reputation <= 10
+        if (this.authorReputation <= 10) {
+          this.commentMinimized = true;
+          this.hiddenDueToLowRep = true;
+        }
+      }
     },
 
     // Translation Cache Methods
