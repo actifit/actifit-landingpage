@@ -66,6 +66,7 @@ module.exports = {
 	section1_desc: 'Using Actifit mobile app allows you to earn token rewards via auto-tracking your everyday activity. Rewards include AFIT tokens - Actifit\'s utility and reward token, but also HIVE, BLURT, SPORTS and other token rewards via upvotes on supported blockchains and partner communities.',
 	section2_title: 'Earn tokens as simple as one two three',
 	section2_desc: '1. Download the Actifit mobile app.<br/>2. Go for a jog, walk your dog, mow your lawn, go to the gym, move around your office,... with an aim to reach a minimum of 5,000 activity count.<br/>3. Post a report via the app, and get rewarded!',
+	download_bonus: 'Download now and get a 100 AFIT welcome bonus!',
 	section3_title: 'AFIT tokens',
 	section3_desc: 'AFIT tokens can be exchanged on Actifit Market to signup for fitness or nutrition related consultation sessions, buying ebooks, boosting your rewards via purchasing actifit based booster gadgets, or earning extra HIVE rewards! <br/></li>',
 	section4_title: 'Yield Farming with Actifit',
