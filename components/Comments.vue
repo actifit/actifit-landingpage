@@ -481,7 +481,7 @@ export default {
         await window.hive_keychain.requestBroadcast(
           this.user.account.name,
           [[op_name, cstm_params]],
-          'Active', (response) => {
+          'Posting', (response) => {
             console.log(response);
             if (op_name == 'delete_comment') {
               this.deleteSuccess();
