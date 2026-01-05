@@ -198,7 +198,7 @@
       <div class="col-12 d-flex justify-content-between align-items-center" :style="{ paddingLeft: depth * indentFactor + 'px' }">
         <span v-if="hiddenDueToLowRep" class="text-secondary small">
           <i class="fas fa-eye-slash mr-1"></i>
-          {{ $t('hidden_low_reputation') }}
+          {{ $t('hidden_low_reputation', [author]) }}
         </span>
         <span v-else></span>
         <i class="fa-solid fa-circle-plus text-brand" v-on:click="commentMinimized = !commentMinimized"

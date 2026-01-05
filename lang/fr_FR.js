@@ -1081,7 +1081,7 @@ module.exports = {
   post_link: 'Lien vers la publication',
   hide_comment: 'Masquer le fil de discussion',
   show_comment: 'Afficher le fil de discussion',
-  hidden_low_reputation: 'Commentaire masqué en raison d\'une faible réputation',
+  hidden_low_reputation: 'Commentaire de {0} masqué en raison d\'une faible réputation',
   Comment: 'Commentaire',
   Posts: 'Publications',
   admins: 'Admins',

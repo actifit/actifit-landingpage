@@ -1081,7 +1081,7 @@ module.exports = {
   post_link: 'Link to Post',
   hide_comment: 'Hide Comment Thread',
   show_comment: 'Show Comment Thread',
-  hidden_low_reputation: 'Comment hidden due to low reputation',
+  hidden_low_reputation: 'Comment by {0} hidden due to low reputation',
   Comment: 'Comment',
   Posts: 'Posts',
   admins: 'Admins',

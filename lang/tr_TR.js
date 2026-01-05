@@ -1080,7 +1080,7 @@ module.exports = {
   post_link: 'Gönderi Bağlantısı',
   hide_comment: 'Yorum Konusunu Gizle',
   show_comment: 'Yorum Konusunu Göster',
-  hidden_low_reputation: 'Düşük itibar nedeniyle yorum gizlendi',
+  hidden_low_reputation: '{0} kullanıcısının yorumu düşük itibar nedeniyle gizlendi',
   Comment: 'Yorum',
   Posts: 'Gönderiler',
   admins: 'Yöneticiler',
