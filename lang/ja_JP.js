@@ -66,6 +66,7 @@ module.exports = {
     section1_desc: 'Actifitモバイルアプリを使用すると、日常の活動を自動追跡することでトークン報酬を獲得できます。報酬には、Actifitのユーティリティおよび報酬トークンであるAFITトークンだけでなく、サポートされているブロックチェーンやパートナーコミュニティでのアップボートを通じてHIVE、BLURT、SPORTSなどのトークン報酬も含まれます。',
     section2_title: 'トークンを簡単に入手',
     section2_desc: '1. Actifitモバイルアプリをダウンロード。<br/>2. ジョギング、犬の散歩、芝刈り、ジム通い、オフィスでの移動などを行い、最低5,000アクティビティカウントを目指します。<br/>3. アプリ経由でレポートを投稿し、報酬をゲット！',
+    download_bonus: '今すぐダウンロードして100 AFITウェルカムボーナスをゲット！',
     section3_title: 'AFITトークン',
     section3_desc: 'AFITトークンは、Actifitマーケットでフィットネスや栄養関連のコンサルテーションセッションに登録したり、電子書籍を購入したり、Actifitベースのブースターガジェットを購入して報酬を増やしたり、追加のHIVE報酬を獲得するために交換できます！<br/>AFITトークンは以下で購入できます：<li> <a href="https://hive-engine.com/?p=market&t=AFIT">Hive-Engine.com（Hive版）</a> </li><li><a href="https://defi.actifit.io">Actifit DeFi（BSC版）</a></li><li><a href="https://pancakeswap.finance/swap?inputCurrency=BNB&outputCurrency=0x4516bb582f59befcbc945d8c2dac63ef21fba9f6">Pancakeswap（BSC版）</a></li><li><a href="https://www.digifinex.com/en-ww/trade/USDT/AFIT">Digifinex（BSC版）</a></li><li><a href="https://dex-trade.com/spot/trading/AFITUSDT">Dex-trade（BSC版）</a></li>',
     section4_title: 'Actifitでのイールドファーミング',
