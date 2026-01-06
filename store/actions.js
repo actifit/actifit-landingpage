@@ -585,9 +585,15 @@ export default {
         if (err) reject(err)
         else {
           //console.log(comments)
+          // Preemptive check: if fewer posts returned than limit, no more exist
+          // When paginating, first post is duplicate, so effective count is posts.length - 1
+          const limit = process.env.maxPostCount || 20;
+          const effectiveCount = appendMode ? posts.length - 1 : posts.length;
+          const hasMore = effectiveCount >= limit;
+
           if (params.returnData) {
             //console.log(posts);
-            resolve({ posts: posts, morePostsAvailable: !!posts.length });
+            resolve({ posts: posts, morePostsAvailable: hasMore });
           } else {
             if (appendMode) {
               commit('appendCommunityPosts', posts)
@@ -595,30 +601,8 @@ export default {
               commit('setCommunityPosts', [...state.communityPosts, ...posts])
             }
             //console.log(posts);
-            // After loading posts, check if there are more available by peeking at the next batch
-            if (posts.length > 0) {
-              const lastPost = posts[posts.length - 1];
-              // Peek ahead to see if more posts exist
-              chainLnk.api.callAsync('bridge.get_ranked_posts', {
-                sort: params.type,
-                tag: params.community,
-                start_author: lastPost.author,
-                start_permlink: lastPost.permlink
-              }).then(nextPosts => {
-                // Next batch includes the last post as first item, so check if there's more than 1
-                const hasMorePosts = nextPosts && nextPosts.length > 1;
-                commit('setMoreCommunityPostsAvailable', hasMorePosts);
-                resolve();
-              }).catch(() => {
-                // On error, hide the button to be safe
-                commit('setMoreCommunityPostsAvailable', false);
-                resolve();
-              });
-            } else {
-              // No posts returned, definitely no more available
-              commit('setMoreCommunityPostsAvailable', false);
-              resolve();
-            }
+            commit('setMoreCommunityPostsAvailable', hasMore)
+            resolve()
           }
         }
       })
