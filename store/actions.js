@@ -595,9 +595,30 @@ export default {
               commit('setCommunityPosts', [...state.communityPosts, ...posts])
             }
             //console.log(posts);
-            //dispatch('checkIfMoreUserCommentsAvailable', username)
-            commit('setMoreCommunityPostsAvailable', !!posts.length) // if posts were found, show load more button
-            resolve()
+            // After loading posts, check if there are more available by peeking at the next batch
+            if (posts.length > 0) {
+              const lastPost = posts[posts.length - 1];
+              // Peek ahead to see if more posts exist
+              chainLnk.api.callAsync('bridge.get_ranked_posts', {
+                sort: params.type,
+                tag: params.community,
+                start_author: lastPost.author,
+                start_permlink: lastPost.permlink
+              }).then(nextPosts => {
+                // Next batch includes the last post as first item, so check if there's more than 1
+                const hasMorePosts = nextPosts && nextPosts.length > 1;
+                commit('setMoreCommunityPostsAvailable', hasMorePosts);
+                resolve();
+              }).catch(() => {
+                // On error, hide the button to be safe
+                commit('setMoreCommunityPostsAvailable', false);
+                resolve();
+              });
+            } else {
+              // No posts returned, definitely no more available
+              commit('setMoreCommunityPostsAvailable', false);
+              resolve();
+            }
           }
         }
       })
