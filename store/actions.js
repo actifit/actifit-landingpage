@@ -585,9 +585,15 @@ export default {
         if (err) reject(err)
         else {
           //console.log(comments)
+          // Preemptive check: if fewer posts returned than limit, no more exist
+          // When paginating, first post is duplicate, so effective count is posts.length - 1
+          const limit = process.env.maxPostCount || 20;
+          const effectiveCount = appendMode ? posts.length - 1 : posts.length;
+          const hasMore = effectiveCount >= limit;
+
           if (params.returnData) {
             //console.log(posts);
-            resolve({ posts: posts, morePostsAvailable: !!posts.length });
+            resolve({ posts: posts, morePostsAvailable: hasMore });
           } else {
             if (appendMode) {
               commit('appendCommunityPosts', posts)
@@ -595,8 +601,7 @@ export default {
               commit('setCommunityPosts', [...state.communityPosts, ...posts])
             }
             //console.log(posts);
-            //dispatch('checkIfMoreUserCommentsAvailable', username)
-            commit('setMoreCommunityPostsAvailable', !!posts.length) // if posts were found, show load more button
+            commit('setMoreCommunityPostsAvailable', hasMore)
             resolve()
           }
         }

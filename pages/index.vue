@@ -146,6 +146,7 @@
           <div class="aurora-text-content">
             <h2 class="text-capitalize">{{ $t('homepage.section2_title') }}</h2>
             <p class="lead mb-4" v-html="$t('homepage.section2_desc')"></p>
+            <p class="download-bonus-text">{{ $t('homepage.download_bonus') }}</p>
             <div class="app-buttons-container">
               <a href="https://links.actifit.io/android" target="_blank">
                 <img src="/img/google-play.png" :alt="$t('alt_texts.google_play')">
@@ -931,6 +932,21 @@ export default {
 }
 /* --- End of Fix --- */
 
+/* Download bonus urgency text */
+.download-bonus-text {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #e10707;
+  margin-bottom: 1rem;
+  padding: 0.5rem 1rem;
+  background: rgba(225, 7, 7, 0.1);
+  border-radius: 8px;
+  display: inline-block;
+}
+.dark-mode .download-bonus-text {
+  background: rgba(225, 7, 7, 0.2);
+  color: #ff6b6b;
+}
 
 /* Scoped styles to prevent leaking to other pages */
 body.home-page-active {
