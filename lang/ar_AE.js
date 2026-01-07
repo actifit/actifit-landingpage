@@ -66,6 +66,7 @@ module.exports = {
     section1_desc: 'استخدام تطبيق أكتيفيت للجوال يسمح لك بكسب مكافآت من العملات المشفرة عبر تتبع نشاطك اليومي تلقائيًا. تشمل المكافآت عملات AFIT - عملة أكتيفيت للمنفعة والمكافأة، بالإضافة إلى HIVE و BLURT و SPORTS وغيرها من العملات عبر التصويت الإيجابي على السلاسل المدعومة والمجتمعات الشريكة.',
     section2_title: 'اربح العملات ببساطة مثل واحد اثنين ثلاثة',
     section2_desc: '1. قم بتنزيل تطبيق أكتيفيت للجوال.<br/>2. اذهب للركض، امشِ مع كلبك، جز العشب، اذهب إلى صالة الألعاب الرياضية، تحرك في مكتبك، ... بهدف الوصول إلى 5,000 نشاط على الأقل.<br/>3. انشر تقريرًا عبر التطبيق واحصل على مكافأة!',
+    download_bonus: 'حمّل الآن واحصل على مكافأة ترحيبية بقيمة 100 AFIT!',
     section3_title: 'عملات AFIT',
     section3_desc: 'يمكن استبدال عملات AFIT في سوق أكتيفيت للتسجيل في جلسات استشارية متعلقة باللياقة البدنية أو التغذية، وشراء الكتب الإلكترونية، وتعزيز مكافآتك عبر شراء أدوات تعزيز قائمة على أكتيفيت، أو كسب مكافآت إضافية من HIVE! <br/>يمكنك شراء عملات AFIT من:<li> <a href="https://hive-engine.com/?p=market&t=AFIT">Hive-Engine.com (إصدار Hive)</a> </li><li><a href="https://defi.actifit.io">Actifit DeFi (إصدار BSC)</a></li><li><a href="https://pancakeswap.finance/swap?inputCurrency=BNB&outputCurrency=0x4516bb582f59befcbc945d8c2dac63ef21fba9f6">Pancakeswap (إصدار BSC)</a></li><li><a href="https://www.digifinex.com/en-ww/trade/USDT/AFIT">Digifinex (إصدار BSC)</a></li><li><a href="https://dex-trade.com/spot/trading/AFITUSDT">Dex-trade (إصدار BSC)</a></li>',
     section4_title: 'زراعة العائدات مع أكتيفيت',
