@@ -1081,6 +1081,7 @@ module.exports = {
   post_link: 'Ссылка на пост',
   hide_comment: 'Скрыть ветку комментариев',
   show_comment: 'Показать ветку комментариев',
+  hidden_low_reputation: 'Комментарий от {0} скрыт из-за низкой репутации',
   Comment: 'Комментарий',
   Posts: 'Посты',
   admins: 'Админы',

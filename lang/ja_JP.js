@@ -1080,6 +1080,7 @@ module.exports = {
   post_link: '投稿へのリンク',
   hide_comment: 'コメントスレッドを非表示',
   show_comment: 'コメントスレッドを表示',
+  hidden_low_reputation: '{0}のコメントは低い評判のため非表示',
   Comment: 'コメント',
   Posts: '投稿',
   admins: '管理者',
