@@ -34,10 +34,17 @@
                   <i :title="$t('copy_link')" class="fas fa-copy spec-btns" v-on:click="copyContent"></i>
                   <i v-if="translationLoading" class="fas fa-spinner fa-spin spec-btns" :title="$t('translating_content', 'Translating...')"></i>
                   <i v-else-if="!showTranslated" class="fa-solid fa-language spec-btns" v-on:click="translateContent" :title="$t('translate_content', 'Translate Content')"></i>
+                  <!-- Edit/Delete buttons for post author -->
+                  <div v-if="user && user.account.name === report.author">
+                    <span><a href="#" @click.prevent="$store.commit('setEditPost', report)" data-toggle="modal" data-target="#editPostModal" :title="$t('Edit_note')">
+                          <i class="fas fa-edit text-white"></i></a></span>
+                    <span v-if="postDeletable()"><a href="#" @click.prevent="deletePost" :title="$t('Delete_note')">
+                          <i class="fas fa-trash-alt text-white"></i><i class="fas fa-spin fa-spinner" v-if="deleting"></i></a>
+                    </span>
+                  </div>
                   <div>
-                    <span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i
+                    <span v-if="user"><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i
                           class="text-white fas fa-reply"></i></a></span>
-
                     <span class="ml-1">
                       <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand"
                         data-target="#voteModal" v-if="user && userVotedThisPost() == true">
@@ -200,6 +207,7 @@
     </div>
 
     <VoteModal />
+    <EditPostModal />
     <NotifyModal :modalTitle="$t('Actifit_Info')" :modalText="$t('VP_desc')" />
 
     <client-only>
@@ -231,6 +239,7 @@ import Comments from '~/components/Comments'
 import SocialSharing from 'vue-social-sharing'
 import vueRemarkable from 'vue-remarkable'
 import UserSidebar from '~/components/UserSidebar.vue'
+import EditPostModal from '~/components/EditPostModal'
 import sanitize from 'sanitize-html'
 
 const scot_steemengine_api = process.env.steemEngineScot;
@@ -239,7 +248,7 @@ const scot_hive_api_param = process.env.hiveEngineScotParam;
 export default {
   components: {
     NavbarBrand, ChainSelection, Footer, VoteModal, NotifyModal, UserHoverCard,
-    CustomTextEditor, Comments, SocialSharing, vueRemarkable, UserSidebar
+    CustomTextEditor, Comments, SocialSharing, vueRemarkable, UserSidebar, EditPostModal
   },
   head() {
     return {
@@ -377,6 +386,7 @@ export default {
       socialSharingQuote: process.env.socialSharingQuote,
       hashtags: process.env.socialSharingHashtags,
       heightSyncObserver: null,
+      deleting: false,
     }
   },
   computed: {
@@ -578,6 +588,61 @@ export default {
     cancelTranslation() { this.report.body = this.safety_post_content; this.showTranslated = false; },
     votePrompt() { if (this.report) this.$store.commit('setPostToVote', this.report); },
     resetOpenComment() { this.commentBoxOpen = false; this.replyBody = ''; },
+    postDeletable() {
+      if (!this.report) return false;
+      return (parseInt(this.report.children) == 0
+        && this.user && this.user.account.name == this.report.author
+        && parseInt(this.report.pending_payout_value.replace('SBD', '').replace('STEEM', '')) == 0
+        && parseInt(this.report.total_payout_value.replace('SBD', '').replace('STEEM', '')) == 0
+        && parseInt(this.report.curator_payout_value.replace('SBD', '').replace('STEEM', '')) == 0)
+    },
+    async deletePost() {
+      var confirmPopup = confirm(this.$t('confirm_delete_comment'));
+      if (!confirmPopup) {
+        return;
+      }
+      this.deleting = true;
+      if (!localStorage.getItem('std_login')) {
+        this.$steemconnect.deleteComment(
+          this.report.author,
+          this.report.permlink,
+          (err) => {
+            this.deleteSuccess(err);
+          }
+        );
+      } else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) {
+        let cstm_params = {
+          "author": this.report.author,
+          "permlink": this.report.permlink
+        };
+        let res = await this.processTrxFunc('delete_comment', cstm_params);
+      } else {
+        let cstm_params = {
+          "author": this.report.author,
+          "permlink": this.report.permlink
+        };
+        let res = await this.processTrxFunc('delete_comment', cstm_params);
+        if (res.success) {
+          this.deleteSuccess();
+        }
+      }
+    },
+    deleteSuccess(err) {
+      this.deleting = false;
+      this.$notify({
+        group: err ? 'error' : 'success',
+        text: err ? this.$t('Delete_Error') : this.$t('Delete_Success'),
+        position: 'top center'
+      });
+      if (!err) {
+        // If it's a comment, go to parent; if root post, go to profile
+        if (this.report.parent_author) {
+          this.$router.push('/@' + this.report.parent_author + '/' + this.report.parent_permlink);
+        } else {
+          this.$router.push('/' + this.report.author);
+        }
+      }
+    },
 
     async postResponse(event) {
       this.loading = true
@@ -667,11 +732,21 @@ export default {
         } else {
           return { success: false, trx: null };
         }
+      } else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) {
+        await window.hive_keychain.requestBroadcast(
+          this.user.account.name,
+          [[op_name, cstm_params]],
+          'Posting', (response) => {
+            console.log(response);
+            if (op_name == 'delete_comment') {
+              this.deleteSuccess();
+            }
+          });
       } else if (localStorage.getItem('acti_login_method') == 'hiveauth') {
         return new Promise((resolve) => {
           const auth = {
             username: this.user.account.name,
-            token: localStorage.getItem('access_token'),
+            token: localStorage.getItem('access_token'),//should be changed in V1 (current V0.8)
             expire: localStorage.getItem('expires'),
             key: localStorage.getItem('key')
           }
@@ -683,13 +758,17 @@ export default {
             .then(response => {
               this.$notify({ group: 'warn', clean: true })
               if (response.cmd && response.cmd === 'sign_ack') {
-                resolve({ success: true, trx: response.data })
+                resolve({ success: true, trx: { id: response.data } })
+                if (op_name == 'delete_comment') {
+                  this.deleteSuccess();
+                }
               } else if (response.cmd && response.cmd === 'sign_nack') {
                 resolve({ success: false })
               }
             })
             .catch(err => {
               this.$notify({ group: 'warn', clean: true })
+              console.log(err);
               resolve({ success: false })
             })
         });
