@@ -2363,12 +2363,26 @@ export default {
       this.transferType = newBchain;
       this.$store.dispatch('steemconnect/refreshUser');
 
-      let chainLnk = this.setProperNode();
+      // Pass newBchain to setProperNode to ensure we use the new chain
+      // (localStorage may not be updated yet when this watcher fires)
+      let chainLnk = this.setProperNode(newBchain);
       this.properties = await chainLnk.api.getDynamicGlobalPropertiesAsync();
+
+      // Fetch fresh account data from the new chain
+      if (this.displayUser) {
+        try {
+          let accounts = await chainLnk.api.getAccountsAsync([this.displayUser]);
+          if (accounts && accounts.length > 0) {
+            this.displayUserData = accounts[0];
+          }
+        } catch (err) {
+          console.error('Error fetching account data on chain switch:', err);
+        }
+      }
 
       await this.fetchUserData();
       await this.fetchTokenBalance();
-      if (this.cur_bchain == 'HIVE') {
+      if (newBchain == 'HIVE') {
         await this.fetchAFITHE();
       }
       this.formattedTotAccountVal();
@@ -2430,7 +2444,8 @@ export default {
         this.heTokenUnstakes = [];
 
         if (this.displayUser) {
-          let account_res = await hive.api.getAccountsAsync([this.displayUser]);
+          let chainLnk = this.setProperNode();
+          let account_res = await chainLnk.api.getAccountsAsync([this.displayUser]);
           if (account_res && account_res.length > 0) {
             this.displayUserData = account_res[0];
           }
