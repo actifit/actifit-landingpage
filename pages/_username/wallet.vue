@@ -2023,7 +2023,7 @@ export default {
       screenWidth: 1200,
       afit_val_exchange: 50,
       afit_exch_matching_perc: 10,
-      afitPrice: 0.036,
+      afitPrice: 0.00002,
       afitBSCPrice: 0.01,
       afitxBSCPrice: 1,
       pendingTokenSwap: '',
@@ -2052,7 +2052,7 @@ export default {
       sbdPrice: 0.1,
       hivePrice: 0.1,
       hbdPrice: 0.1,
-      blurtPrice: 0.01,
+      blurtPrice: 0.001,
       defaultAfit: 100,
       afit_buy_error_proceeding: false,
       afit_buy_err_msg: '',
@@ -8200,8 +8200,8 @@ export default {
       };
 
       //await Promise.all([
-        fetchPrice(`${process.env.actiAppUrl}curAFITPrice`,
-          json => this.setAFITPrice(json.unit_price_usd));
+        fetchPrice(`${process.env.actiAppUrl}exchangeAFITPrice`,
+          json => this.setAFITPrice(json.afitHiveLastUsdPrice));
         fetchPrice(`${process.env.actiAppUrl}AFITBSCPrice`,
           json => this.setAFITBSCPrice(json.price));
         fetchPrice(`${process.env.actiAppUrl}AFITXBSCPrice`,
