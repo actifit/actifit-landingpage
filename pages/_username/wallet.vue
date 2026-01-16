@@ -2378,6 +2378,15 @@ export default {
         } catch (err) {
           console.error('Error fetching account data on chain switch:', err);
         }
+      } else if (this.user && this.user.account) {
+        try {
+          let accounts = await chainLnk.api.getAccountsAsync([this.user.account.name]);
+          if (accounts && accounts.length > 0) {
+            this.displayUserData = accounts[0];
+          }
+        } catch (err) {
+          console.error('Error fetching account data on chain switch:', err);
+        }
       }
 
       await this.fetchUserData();
@@ -3891,28 +3900,32 @@ export default {
     },
     async vestsToSteemPower(vests) {
       //function handles converting Vests to SP
-      let chainLnk = this.setProperNode();
-      if (this.properties == '') {
-        //not loaded yet
-        this.properties = await chainLnk.api.getDynamicGlobalPropertiesAsync();
+      try {
+        let chainLnk = this.setProperNode();
+        if (this.properties == '') {
+          //not loaded yet
+          this.properties = await chainLnk.api.getDynamicGlobalPropertiesAsync();
+        }
+        if (this.cur_bchain == 'STEEM') {
+          let totalSteem = Number(this.properties.total_vesting_fund_steem.split(' ')[0]);
+          let totalVests = Number(this.properties.total_vesting_shares.split(' ')[0]);
+          vests = Number(vests.split(' ')[0]);
+          return (totalSteem * (vests / totalVests));
+        } else if (this.cur_bchain == 'BLURT') {
+          let totalSteem = Number(this.properties.total_vesting_fund_blurt.split(' ')[0]);
+          let totalVests = Number(this.properties.total_vesting_shares.split(' ')[0]);
+          vests = Number(vests.split(' ')[0]);
+          return (totalSteem * (vests / totalVests));
+        } else {
+          let totalSteem = Number(this.properties.total_vesting_fund_hive.split(' ')[0]);
+          let totalVests = Number(this.properties.total_vesting_shares.split(' ')[0]);
+          vests = Number(vests.split(' ')[0]);
+          return (totalSteem * (vests / totalVests));
+        }
+      } catch (err) {
+        console.error('vestsToSteemPower error:', err);
+        return 0;
       }
-      if (this.cur_bchain == 'STEEM') {
-        let totalSteem = Number(this.properties.total_vesting_fund_steem.split(' ')[0]);
-        let totalVests = Number(this.properties.total_vesting_shares.split(' ')[0]);
-        vests = Number(vests.split(' ')[0]);
-        return (totalSteem * (vests / totalVests));
-      } else if (this.cur_bchain == 'BLURT') {
-        let totalSteem = Number(this.properties.total_vesting_fund_blurt.split(' ')[0]);
-        let totalVests = Number(this.properties.total_vesting_shares.split(' ')[0]);
-        vests = Number(vests.split(' ')[0]);
-        return (totalSteem * (vests / totalVests));
-      } else {
-        let totalSteem = Number(this.properties.total_vesting_fund_hive.split(' ')[0]);
-        let totalVests = Number(this.properties.total_vesting_shares.split(' ')[0]);
-        vests = Number(vests.split(' ')[0]);
-        return (totalSteem * (vests / totalVests));
-      }
-
     },
     async steemPowerToVests(steemPower) {
       //function handles conversting SP to Vests
@@ -3938,24 +3951,28 @@ export default {
     claimableSTEEMRewards() {
       //function handles preparing claimable STEEM rewards
       if ((typeof this.user != 'undefined' && this.user != null) || this.displayUserData != '') {
-
-        this.claimVests = this.displayUserData.reward_vesting_balance;
-        if (this.cur_bchain == 'HIVE') {
-          this.claimSTEEM = this.displayUserData.reward_hive_balance;
-          this.claimSP = this.displayUserData.reward_vesting_hive + " POWER";
-          this.claimSTEEM = this.claimSTEEM.replace('STEEM', 'HIVE');
-          this.claimSBD = this.displayUserData.reward_hbd_balance;
-        } else if (this.cur_bchain == 'STEEM') {
-          this.claimSTEEM = this.displayUserData.reward_steem_balance;
-          this.claimSP = this.displayUserData.reward_vesting_steem + " POWER";
-          this.claimSBD = this.displayUserData.reward_sbd_balance;
-        } else if (this.cur_bchain == 'BLURT') {
-          this.claimSTEEM = this.displayUserData.reward_blurt_balance;
-          this.claimSP = this.displayUserData.reward_vesting_blurt + " POWER";
-          this.claimSBD = 0;
+        try {
+          this.claimVests = this.displayUserData.reward_vesting_balance;
+          if (this.cur_bchain == 'HIVE') {
+            this.claimSTEEM = this.displayUserData.reward_hive_balance;
+            this.claimSP = this.displayUserData.reward_vesting_hive + " POWER";
+            this.claimSTEEM = this.claimSTEEM.replace('STEEM', 'HIVE');
+            this.claimSBD = this.displayUserData.reward_hbd_balance;
+          } else if (this.cur_bchain == 'STEEM') {
+            this.claimSTEEM = this.displayUserData.reward_steem_balance;
+            this.claimSP = this.displayUserData.reward_vesting_steem + " POWER";
+            this.claimSBD = this.displayUserData.reward_sbd_balance;
+          } else if (this.cur_bchain == 'BLURT') {
+            this.claimSTEEM = this.displayUserData.reward_blurt_balance;
+            this.claimSP = this.displayUserData.reward_vesting_blurt + " POWER";
+            this.claimSBD = 0;
+          }
+          console.log('claimable rewards' + (this.claimSP + this.claimSTEEM + this.claimSBD));
+          return this.claimSP + this.claimSTEEM + this.claimSBD;
+        } catch (err) {
+          console.error('claimableSTEEMRewards error:', err);
+          return '';
         }
-        console.log('claimable rewards' + (this.claimSP + this.claimSTEEM + this.claimSBD));
-        return this.claimSP + this.claimSTEEM + this.claimSBD;
       }
       return '';
     },
