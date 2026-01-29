@@ -793,13 +793,13 @@
                     <label for="powerdown-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
                     <input type="number" id="powerdown-amount" name="powerdown-amount" ref="powerdown-amount"
                       class="form-control-lg w-50 p-2">
+                    <span v-on:click="fillPowerdownAmount()" :title="$t('select_full_balance')"><img src="/img/HIVE.png"
+                        class="mr-1 mini-token-logo"><u>{{ this.renderSteemPower(1) }}</u></span>
                   </div>
                   <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
                     <label for="powerdown-amount" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
                     <input type="password" id="p-ac-key" name="p-ac-key" ref="p-ac-key"
                       class="form-control-lg w-50 p-2">
-                    <span v-on:click="fillPowerdownAmount()" :title="$t('select_full_balance')"><img src="/img/HIVE.png"
-                        class="mr-1 mini-token-logo"><u>{{ this.renderSteemPower(1) }}</u></span>
                   </div>
                   <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
                     <div class="text-center small p-2 w-25"></div>
