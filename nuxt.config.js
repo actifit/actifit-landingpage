@@ -99,9 +99,9 @@ module.exports = {
     altHiveNodes: ["https://api.hive.blog", "https://api.deathwing.me", "https://api.openhive.network", "https://hiveapi.actifit.io", "https://hived.privex.io", "https://api.deathwing.me", "https://rpc.ausbit.dev", "https://hive-api.arcange.eu", "https://hive.roelandp.nl", "https://anyx.io",],
     actiAppUrl: process.env.ACTI_API_URL || 'http://localhost:3120/',
     actiAppBackUrl: process.env.ACTI_API_BACK_URL || 'http://localhost:3120/',
-    steemEngineRpc: 'https://api.steem-engine.net/rpc',
+    steemEngineRpc: process.env.NODE_ENV === 'development' ? '/steem-api/rpc' : 'https://api.steem-engine.net/rpc',
     hiveEngineRpc: process.env.HIVE_ENG_RPC_NODE, //'https://api.hive-engine.com/rpc/', //https://herpc.actifit.io', //'https://mirrorengine.rishipanthee.com', //'https://engine.rishipanthee.com/',
-    steemEngineScot: 'https://scot-api.steem-engine.net/',
+    steemEngineScot: process.env.NODE_ENV === 'development' ? '/steem-scot/' : 'https://scot-api.steem-engine.net/',
     hiveEngineChainId: 'ssc-mainnet-hive', //'ssc-testnet-hive', //
     hiveTestNetOn: false,
     bscBridgeAccount: 'actifit.bridge',
@@ -307,6 +307,21 @@ module.exports = {
       pageLevelAds: true
     }],
   ],
+
+  // Proxy configuration to bypass CORS during local development
+  proxy: {
+    '/steem-api/': {
+      target: 'https://api.steem-engine.net',
+      pathRewrite: { '^/steem-api/': '/' },
+      changeOrigin: true
+    },
+    '/steem-scot/': {
+      target: 'https://scot-api.steem-engine.net',
+      pathRewrite: { '^/steem-scot/': '/' },
+      changeOrigin: true
+    }
+  },
+
   i18n: {
     // This is the directory where you will create your language files
     langDir: '~/lang/',
