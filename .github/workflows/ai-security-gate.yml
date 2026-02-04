@@ -1,0 +1,39 @@
+name: "AI Security & Secret Gate"
+
+on:
+  pull_request:
+    branches: [ "develop" ] # Triggers when OpenClaw targets your develop branch
+
+jobs:
+  security-scan:
+    name: Security & Secret Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write # Allows posting results to the Security tab
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history is required for effective secret scanning
+
+      # --- Step 1: Scan for Secret Leaks (API Keys, Tokens) ---
+      - name: gitleaks-action
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # This step will fail the build if a secret is found in the code
+
+      # --- Step 2: CodeQL Vulnerability Scanning ---
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: 'javascript' # Scans your Vue/JS environment
+          queries: security-extended 
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
