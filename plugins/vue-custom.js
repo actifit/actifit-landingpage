@@ -279,6 +279,11 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup){
 		return placeholder;
 	};
 
+	let threespk_embed_reg = /\[!\[[^\]]*\]\([^)]+\)\]\(https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+)\)/ig;
+	report_content = report_content.replace(threespk_embed_reg, '<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;"><iframe style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;" src="https://play.3speak.tv/watch?v=$1&mode=iframe&autoplay=false&layout=desktop" scrolling="no" frameborder="0" allowfullscreen></iframe></div>');
+	let threespk_raw_reg = /(^|\s)(https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+))/ig;
+	report_content = report_content.replace(threespk_raw_reg, '$1<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;"><iframe style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;" src="https://play.3speak.tv/watch?v=$3&mode=iframe&autoplay=false&layout=desktop" scrolling="no" frameborder="0" allowfullscreen></iframe></div>');
+
 	// REGEX 1: Find and replace pre-existing HTML <img> tags first.
 	// This is the crucial new step.
 	const existingImgRegex = /<img\s+[^>]*?src\s*=\s*['"]([^'"]+)['"][^>]*?>/gi;
@@ -306,11 +311,6 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup){
 	let vid_reg = /https?:\/\/(?:[0-9A-Z-]+\.)?(?:youtu\.be\/|youtube\.com\S*[^\w\-\s])([\w\-]{11})(?=[^\w\-]|$)(?![?=&+%\w]*(?:['"][^<>]*>|<\/a>))[?=&+%\w-]*/ig;
 	report_content = report_content.replace(vid_reg, vid_replacement);
 
-	let threespk_embed_reg = /\[!\[[^\]]*\]\([^)]+\)\]\(https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+)\)/ig;
-	report_content = report_content.replace(threespk_embed_reg, '<iframe width="640" height="360" src="//3speak.tv/embed?v=$1&autoplay=false"></iframe>');
-	let threespk_raw_reg = /(^|\s)(https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+))/ig;
-	report_content = report_content.replace(threespk_raw_reg, '$1<iframe width="640" height="360" src="//3speak.tv/embed?v=$3&autoplay=false"></iframe>');
-
 	let markdown_link_reg = /\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/g;
 	report_content = report_content.replace(markdown_link_reg, '<a href="$2">$1</a>');
 
@@ -332,13 +332,14 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup){
 
 	let sanitizeOptions = {
 		// Expanded whitelist to preserve common HTML layouts
-		allowedTags: sanitize.defaults.allowedTags.concat([ 'img', 'iframe', 'details', 'summary', 'table', 'tr', 'td', 'th', 'thead', 'tbody', 'sub', 'sup' ]),
+		allowedTags: sanitize.defaults.allowedTags.concat([ 'img', 'iframe', 'details', 'summary', 'table', 'tr', 'td', 'th', 'thead', 'tbody', 'sub', 'sup', 'div' ]),
 		allowedAttributes: {
-			'img': [ 'src' ],
-			'iframe': [ 'width', 'height', 'src' ],
-			'a': [ 'href' ],
-			'td': [ 'colspan', 'rowspan', 'style' ],
-            'th': [ 'colspan', 'rowspan', 'style' ]
+			'img': [ 'src', 'style', 'class' ],
+			'iframe': [ 'width', 'height', 'src', 'style', 'frameborder', 'allowfullscreen', 'class' ],
+			'div': [ 'style', 'class' ],
+			'a': [ 'href', 'target', 'style', 'class' ],
+			'td': [ 'colspan', 'rowspan', 'style', 'class' ],
+            'th': [ 'colspan', 'rowspan', 'style', 'class' ]
 		}
 	};
 
