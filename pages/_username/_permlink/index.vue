@@ -295,7 +295,16 @@ export default {
     //console.log('pre-flight');
     //console.log(result);
     try {
-      let post_meta = JSON.parse(result.json_metadata)
+      let post_meta = {};
+      if (result.json_metadata && typeof result.json_metadata === 'string') {
+        try {
+          post_meta = JSON.parse(result.json_metadata);
+        } catch (e) {
+          console.warn('Failed to parse json_metadata:', e);
+          // Fallback to empty object if parsing fails
+        }
+      }
+
       let imgs = post_meta.image;
       let meta_spec = {
         pageTitle: (result.title || 'Comment')+' by @'+result.author, //since $t is not accessible at this point
