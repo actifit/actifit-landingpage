@@ -3,9 +3,8 @@
 		<NavbarBrand />
 
 		<!-- listing -->
-		<!-- listing -->
 		<div class="container pt-5 mt-5 pb-5">
-			<div class="christmas-banner mb-5 text-center">
+			<!--<div class="christmas-banner mb-5 text-center">
 				<img src="/img/actifit-christmas-event.jpg" class="img-fluid rounded shadow-lg"
 					alt="Actifit Christmas Event">
 				<div class="snowflakes" aria-hidden="true">
@@ -20,7 +19,7 @@
 					<div class="snowflake">❅</div>
 					<div class="snowflake">❆</div>
 				</div>
-			</div>
+			</div>-->
 
 			<ListHeadingSection :textualDisplay="$t('market_title')" />
 			<div class="text-left mb-4 text-brand market-sub">{{ $t('market_subtitle') }}</div>
@@ -132,9 +131,7 @@
 			</div>
 
 			<!-- show listing of special event products -->
-
-
-
+      <!--
 
 			<div class="christmas-section p-4 my-5 rounded">
 				<h5 class="text-center pt-3 market-sub christmas-title mb-4">🎄 {{ $t('special_christmas_event') }} 🎁
@@ -148,7 +145,7 @@
 				</div>
 			</div>
 			<br />
-
+      -->
 
 
 
@@ -627,7 +624,7 @@ export default {
 }
 
 .prize-draw-card {
-	background-color: rgba(255, 255, 255, 0.1);
+	background-color: rgba(255, 255, 255, 0.4);
 	border: none;
 	border-radius: 10px;
 	text-align: center;
