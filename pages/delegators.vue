@@ -19,16 +19,6 @@
 			<img src="/img/HIVE.png" style="max-height: 20px;"><a :href="delegator._id" target="_blank">{{ numberFormat(delegator.steem_power, 0) }} {{ $t('Hive_Power') }}</a>
           </div>
       </div>
-	  <h3 class="text-center text-primary mb-5"><img src="/img/STEEM.png" style="max-height: 50px;">{{ $t('Steem_Power_Delegators') }}</h3>
-	  <div class="row" v-if="topDelegators.steem && topDelegators.steem.length">
-          <div class="col-6 col-sm-4 col-md-3 text-center mb-4" v-for="(delegator, index) in topDelegators.steem" :key="index" :delegator="delegator">
-            <a :href="delegator._id" target="_blank">
-              <div class="avatar small mx-auto mb-3" :style="'background-image: url('+profImgUrl+'/u/' + delegator._id + '/avatar);'"></div>
-            </a>
-            <a :href="delegator._id" target="_blank">@{{ delegator._id }}</a><br/>
-			<img src="/img/STEEM.png" style="max-height: 20px;"><a :href="delegator._id" target="_blank">{{ numberFormat(delegator.steem_power, 0) }} {{ $t('Steem_Power') }}</a>
-          </div>
-      </div>
     </div>
 
     <Footer />
@@ -82,7 +72,7 @@
 
       // fetch full delegators list
       this.$store.dispatch('fetchTopDelegators')
-	  
+
 		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		this.profImgUrl = process.env.hiveImgUrl;
 		if (cur_bchain == 'STEEM'){
