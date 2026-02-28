@@ -87,7 +87,7 @@ export default {
       this.loading = true;
       this.error = null;
       try {
-        const response = await axios.get('https://api.syncad.com/hivesense-api/posts/search', {
+        const response = await axios.get('https://api.hive.blog/hivesense-api/posts/search', {
           params: {
             q: this.searchQuery,
           },
