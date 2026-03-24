@@ -20,7 +20,7 @@ module.exports = {
 
   // Runtime configuration
   publicRuntimeConfig: {
-    version: '1.8.3.1',
+    version: '1.8.4',
     proposalId: '337',
   },
 
@@ -296,6 +296,7 @@ module.exports = {
     { src: '@/plugins/vue-mavon-editor', ssr: false },
     { src: '~plugins/vue-custom.js' },
     { src: '~/plugins/dark-mode.js' },
+    { src: '~/plugins/sanitize.js', mode: 'client' },
     { src: '~/plugins/commonCardMixin.js', mode: 'client' }
   ],
 

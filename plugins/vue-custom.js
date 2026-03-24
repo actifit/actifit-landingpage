@@ -55,8 +55,13 @@ Vue.prototype.$fetchReportTags = function(report){
 
     for (let i in meta_data.tags) {
       //skip empty tags
-      if (meta_data.tags[i].trim() != ''){
-        tagDisplay += '<span class="single-tag p-1">' + meta_data.tags[i] + '</span> ';
+      if (meta_data.tags[i] && meta_data.tags[i].trim() != ''){
+        // Sanitize the tag to strip all HTML before rendering
+        const sanitizedTag = sanitize(meta_data.tags[i], {
+          allowedTags: [],
+          allowedAttributes: {},
+        });
+        tagDisplay += '<span class="single-tag p-1">' + sanitizedTag + '</span> ';
       }
       if (i > process.env.maxTagDisplay - 1) break;
     };
@@ -248,109 +253,92 @@ Vue.prototype.$processTrxFunc = async function (op_name, cstm_params, active) {
 };
 
 Vue.prototype.$cleanBody = function (report_content, full_cleanup){
-	// Define all replacements and regex first
-	let vid_replacement = '<iframe width="640" height="360" src="https://www.youtube.com/embed/$1"></iframe>';
-	let user_link_replacement = '$1<a href="https://actifit.io/$2">$2</a>';
+  if (!report_content) return '';
 
-	// =========================================================================
-	// ===== STEP 1: UNIFIED IMAGE PROCESSING WITH PLACEHOLDERS ==============
-	// =========================================================================
+	// If a full cleanup is requested, strip all HTML.
+	if (full_cleanup) {
+		return sanitize(report_content, {
+			allowedTags: [],
+			allowedAttributes: {},
+		});
+	}
 
-	const placeholders = {};
-	let counter = 0;
-
-	// Helper function to create the final, proxied <img> tag
-	const createProxiedImageTag = (url) => {
-		if (!url || typeof url !== 'string') return '';
-		url = url.trim();
-		if (!url.startsWith('http')) return ''; // Don't process relative/invalid URLs
-		// If it's a GIF or already a Hive proxy URL, use it directly.
-		if (url.startsWith('https://images.hive.blog') || url.toLowerCase().endsWith('.gif')) {
-			return `<img src="${url}">`;
-		}
-		const proxiedUrl = `https://images.hive.blog/0x0/${url}`;
-		return `<img src="${proxiedUrl}">`;
-	};
-
-	// Stash function that generates a placeholder and stores the real HTML
-	const stashImage = (url) => {
-		const placeholder = `__IMAGE_PLACEHOLDER_${counter++}__`;
-		placeholders[placeholder] = createProxiedImageTag(url);
-		return placeholder;
-	};
-
+	// 1. Basic video embeds (YouTube, 3Speak)
+	// Replace 3Speak links with their iframe embed
 	let threespk_embed_reg = /\[!\[[^\]]*\]\([^)]+\)\]\(https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+)\)/ig;
-	report_content = report_content.replace(threespk_embed_reg, '<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;"><iframe style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;" src="https://play.3speak.tv/watch?v=$1&mode=iframe&autoplay=false&layout=desktop" scrolling="no" frameborder="0" allowfullscreen></iframe></div>');
+	report_content = report_content.replace(threespk_embed_reg, '<iframe src="https://play.3speak.tv/watch?v=$1&mode=iframe&autoplay=false&layout=desktop"></iframe>');
 	let threespk_raw_reg = /(^|\s)(https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+))/ig;
-	report_content = report_content.replace(threespk_raw_reg, '$1<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;"><iframe style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;" src="https://play.3speak.tv/watch?v=$3&mode=iframe&autoplay=false&layout=desktop" scrolling="no" frameborder="0" allowfullscreen></iframe></div>');
-
-	// REGEX 1: Find and replace pre-existing HTML <img> tags first.
-	// This is the crucial new step.
-	const existingImgRegex = /<img\s+[^>]*?src\s*=\s*['"]([^'"]+)['"][^>]*?>/gi;
-	report_content = report_content.replace(existingImgRegex, (match, url) => {
-		return stashImage(url);
-	});
-
-	// REGEX 2: Find and replace markdown images.
-	const markdownImgRegex = /!\[[^\]]*\]\s*\(([^)]+)\)/g;
-	report_content = report_content.replace(markdownImgRegex, (match, url) => {
-		return stashImage(url);
-	});
-
-	// REGEX 3: Find and replace raw image URLs.
-	const rawImgRegex = /(^|\s)(https?:\/\/[^\s"'<>]*\.(?:png|jpg|jpeg|gif|webp))/g;
-	report_content = report_content.replace(rawImgRegex, (match, prefix, url) => {
-		return prefix + stashImage(url);
-	});
-
-
-	// =========================================================================
-	// ===== STEP 2: PROCESS ALL OTHER CONTENT (LINKS, VIDEOS, ETC.) =========
-	// =========================================================================
-
+	report_content = report_content.replace(threespk_raw_reg, '$1<iframe src="https://play.3speak.tv/watch?v=$3&mode=iframe&autoplay=false&layout=desktop"></iframe>');
+	
+	// Replace YouTube links with their iframe embed
 	let vid_reg = /https?:\/\/(?:[0-9A-Z-]+\.)?(?:youtu\.be\/|youtube\.com\S*[^\w\-\s])([\w\-]{11})(?=[^\w\-]|$)(?![?=&+%\w]*(?:['"][^<>]*>|<\/a>))[?=&+%\w-]*/ig;
-	report_content = report_content.replace(vid_reg, vid_replacement);
+	report_content = report_content.replace(vid_reg, '<iframe src="https://www.youtube.com/embed/$1"></iframe>');
 
-	let markdown_link_reg = /\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/g;
-	report_content = report_content.replace(markdown_link_reg, '<a href="$2">$1</a>');
 
-	let url_reg = /(?<!["'=])(https?:\/\/[^\s<>"]+)/g;
-	report_content = report_content.replace(url_reg, '<a href="$1">$1</a>');
-
-	if (!full_cleanup){
-		let user_name = /([^\/])(@([\d\w-.]+))/igm;
-		report_content = report_content.replace(user_name, user_link_replacement);
-	}
-
-	// =========================================================================
-	// ===== STEP 3: RESTORE IMAGES AND SANITIZE THE FINAL HTML ==============
-	// =========================================================================
-
-	for (const placeholder in placeholders) {
-		report_content = report_content.replace(placeholder, placeholders[placeholder]);
-	}
-
-	let sanitizeOptions = {
-		// Expanded whitelist to preserve common HTML layouts
-		allowedTags: sanitize.defaults.allowedTags.concat([ 'img', 'iframe', 'details', 'summary', 'table', 'tr', 'td', 'th', 'thead', 'tbody', 'sub', 'sup', 'div' ]),
+	// 2. Define secure sanitization options
+	const sanitizeOptions = {
+		allowedTags: sanitize.defaults.allowedTags.concat([ 'img', 'iframe', 'div', 'span', 'a' ]),
 		allowedAttributes: {
-			'img': [ 'src', 'style', 'class' ],
-			'iframe': [ 'width', 'height', 'src', 'style', 'frameborder', 'allowfullscreen', 'class' ],
-			'div': [ 'style', 'class' ],
-			'a': [ 'href', 'target', 'style', 'class' ],
-			'td': [ 'colspan', 'rowspan', 'style', 'class' ],
-            'th': [ 'colspan', 'rowspan', 'style', 'class' ]
-		}
+			a: ['href', 'rel'], // Only allow href and rel
+			img: ['src', 'alt'], // Only allow src and alt
+			iframe: ['src', 'width', 'height', 'frameborder', 'allowfullscreen'],
+			div: ['class'],
+			span: ['class']
+		},
+		allowedSchemes: ['http', 'https', 'mailto', 'tel'],
+		// Enforce noopener and ugc on all links for security and SEO
+		transformTags: {
+			'a': function(tagName, attribs) {
+				if (attribs.href) {
+					// Add actifit.io link for mentions
+					if (attribs.href.startsWith('@')) {
+						return {
+							tagName: 'a',
+							attribs: {
+								href: 'https://actifit.io/' + attribs.href.substring(1),
+								rel: 'noopener ugc'
+							}
+						};
+					}
+					return {
+						tagName: 'a',
+						attribs: {
+							href: attribs.href,
+							rel: 'noopener ugc'
+						}
+					};
+				}
+				return { tagName, attribs };
+			},
+			'img': function(tagName, attribs) {
+				if (attribs.src) {
+					const url = attribs.src.trim();
+					if (url.startsWith('http')) {
+						// Use Hive image proxy for all images except GIFs
+						const proxiedUrl = (url.startsWith('https://images.hive.blog') || url.toLowerCase().endsWith('.gif'))
+							? url
+							: `https://images.hive.blog/0x0/${url}`;
+						return {
+							tagName: 'img',
+							attribs: {
+								src: proxiedUrl,
+								alt: attribs.alt || ''
+							}
+						};
+					}
+				}
+				// If src is invalid or missing, remove the tag
+				return { tagName: 'span', text: '' };
+			}
+		},
+		// Ensure only safe iframe sources are allowed
+		allowedIframeHostnames: ['www.youtube.com', 'play.3speak.tv']
 	};
 
-	if (full_cleanup){
-		sanitizeOptions.allowedTags = [];
-		sanitizeOptions.allowedAttributes = {};
-	}
-
+	// 3. Sanitize the content
 	let sanitized_content = sanitize(report_content, sanitizeOptions);
 
-	sanitized_content = sanitized_content.replaceAll('&gt;','>');
+	// The dangerous replaceAll is removed. All sanitization is handled above.
 
 	return sanitized_content;
 }
