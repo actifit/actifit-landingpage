@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import { marked } from 'marked';
 
 //Hive auth services
 import HAS from 'hive-auth-wrapper';
@@ -6,6 +7,7 @@ Vue.prototype.$HAS = HAS;
 
 //sanitization
 import sanitize from 'sanitize-html'
+import { marked } from 'marked';
 
 import moment from "moment";
 
@@ -255,92 +257,68 @@ Vue.prototype.$processTrxFunc = async function (op_name, cstm_params, active) {
 Vue.prototype.$cleanBody = function (report_content, full_cleanup){
   if (!report_content) return '';
 
-	// If a full cleanup is requested, strip all HTML.
-	if (full_cleanup) {
-		return sanitize(report_content, {
-			allowedTags: [],
-			allowedAttributes: {},
-		});
-	}
+  // If a full cleanup is requested, strip all HTML.
+  if (full_cleanup) {
+    const text = marked.parse(report_content, { breaks: true, gfm: true });
+    return sanitize(text, {
+      allowedTags: [],
+      allowedAttributes: {},
+    });
+  }
 
-	// 1. Basic video embeds (YouTube, 3Speak)
-	// Replace 3Speak links with their iframe embed
-	let threespk_embed_reg = /\[!\[[^\]]*\]\([^)]+\)\]\(https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+)\)/ig;
-	report_content = report_content.replace(threespk_embed_reg, '<iframe src="https://play.3speak.tv/watch?v=$1&mode=iframe&autoplay=false&layout=desktop"></iframe>');
-	let threespk_raw_reg = /(^|\s)(https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+))/ig;
-	report_content = report_content.replace(threespk_raw_reg, '$1<iframe src="https://play.3speak.tv/watch?v=$3&mode=iframe&autoplay=false&layout=desktop"></iframe>');
-	
-	// Replace YouTube links with their iframe embed
-	let vid_reg = /https?:\/\/(?:[0-9A-Z-]+\.)?(?:youtu\.be\/|youtube\.com\S*[^\w\-\s])([\w\-]{11})(?=[^\w\-]|$)(?![?=&+%\w]*(?:['"][^<>]*>|<\/a>))[?=&+%\w-]*/ig;
-	report_content = report_content.replace(vid_reg, '<iframe src="https://www.youtube.com/embed/$1"></iframe>');
+  // 1. First, convert special video links to iframes
+  let contentWithVideos = report_content;
+  const threespk_embed_reg = /\[!\[[^\]]*\]\([^)]+\)\]\(https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+)\)/ig;
+	contentWithVideos = contentWithVideos.replace(threespk_embed_reg, '<iframe src="https://play.3speak.tv/watch?v=$1&mode=iframe&autoplay=false&layout=desktop"></iframe>');
+	const threespk_raw_reg = /(^|\s)(https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+))/ig;
+	contentWithVideos = contentWithVideos.replace(threespk_raw_reg, '$1<iframe src="https://play.3speak.tv/watch?v=$3&mode=iframe&autoplay=false&layout=desktop"></iframe>');
+  const vid_reg = /https?:\/\/(?:[0-9A-Z-]+\.)?(?:youtu\.be\/|youtube\.com\S*[^\w\-\s])([\w\-]{11})(?=[^\w\-]|$)(?![?=&+%\w]*(?:['"][^<>]*>|<\/a>))[?=&+%\w-]*/ig;
+  contentWithVideos = contentWithVideos.replace(vid_reg, '<iframe src="https://www.youtube.com/embed/$1"></iframe>');
 
+  // 2. Convert the entire body from Markdown to HTML
+  const rawHtml = marked.parse(contentWithVideos, { breaks: true, gfm: true });
 
-	// 2. Define secure sanitization options
-	const sanitizeOptions = {
-		allowedTags: sanitize.defaults.allowedTags.concat([ 'img', 'iframe', 'div', 'span', 'a' ]),
-		allowedAttributes: {
-			a: ['href', 'rel'], // Only allow href and rel
-			img: ['src', 'alt'], // Only allow src and alt
-			iframe: ['src', 'width', 'height', 'frameborder', 'allowfullscreen'],
-			div: ['class'],
-			span: ['class']
-		},
-		allowedSchemes: ['http', 'https', 'mailto', 'tel'],
-		// Enforce noopener and ugc on all links for security and SEO
-		transformTags: {
-			'a': function(tagName, attribs) {
-				if (attribs.href) {
-					// Add actifit.io link for mentions
-					if (attribs.href.startsWith('@')) {
-						return {
-							tagName: 'a',
-							attribs: {
-								href: 'https://actifit.io/' + attribs.href.substring(1),
-								rel: 'noopener ugc'
-							}
-						};
-					}
-					return {
-						tagName: 'a',
-						attribs: {
-							href: attribs.href,
-							rel: 'noopener ugc'
-						}
-					};
-				}
-				return { tagName, attribs };
-			},
-			'img': function(tagName, attribs) {
-				if (attribs.src) {
-					const url = attribs.src.trim();
-					if (url.startsWith('http')) {
-						// Use Hive image proxy for all images except GIFs
-						const proxiedUrl = (url.startsWith('https://images.hive.blog') || url.toLowerCase().endsWith('.gif'))
-							? url
-							: `https://images.hive.blog/0x0/${url}`;
-						return {
-							tagName: 'img',
-							attribs: {
-								src: proxiedUrl,
-								alt: attribs.alt || ''
-							}
-						};
-					}
-				}
-				// If src is invalid or missing, remove the tag
-				return { tagName: 'span', text: '' };
-			}
-		},
-		// Ensure only safe iframe sources are allowed
-		allowedIframeHostnames: ['www.youtube.com', 'play.3speak.tv']
-	};
+  // 3. Define secure sanitization options
+  const sanitizeOptions = {
+    allowedTags: sanitize.defaults.allowedTags.concat([ 'img', 'iframe', 'div', 'span', 'a', 'h1', 'h2', 'h3', 'table', 'tr', 'td', 'th', 'thead', 'tbody', 'details', 'summary', 'sup', 'sub' ]),
+    allowedAttributes: {
+      a: ['href', 'rel'],
+      img: ['src', 'alt'],
+      iframe: ['src', 'frameborder', 'allowfullscreen', 'width', 'height'],
+      div: ['class'],
+      span: ['class'],
+      td: ['style'], // Allow style for table cell alignment as it is low risk
+      th: ['style'],
+    },
+    allowedSchemes: ['http', 'https', 'mailto', 'tel'],
+    transformTags: {
+      'img': function(tagName, attribs) {
+        if (attribs.src) {
+          const url = attribs.src.trim();
+          if (url.startsWith('http')) {
+            const proxiedUrl = (url.startsWith('https://images.hive.blog') || url.toLowerCase().endsWith('.gif'))
+              ? url
+              : `https://images.hive.blog/0x0/${url}`;
+            return { tagName: 'img', attribs: { src: proxiedUrl, alt: attribs.alt || '' } };
+          }
+        }
+        return { tagName: 'span', text: '' }; // Remove img tags with invalid src
+      },
+      'a': function(tagName, attribs) {
+          if (attribs.href) {
+            // Ensure all external links open in a new tab and are secure
+            return { tagName: 'a', attribs: { href: attribs.href, rel: 'noopener ugc', target: '_blank' } };
+          }
+          return { tagName, attribs };
+      }
+    },
+    allowedIframeHostnames: ['www.youtube.com', 'play.3speak.tv']
+  };
 
-	// 3. Sanitize the content
-	let sanitized_content = sanitize(report_content, sanitizeOptions);
+  // 4. Sanitize the generated HTML
+  const sanitized_content = sanitize(rawHtml, sanitizeOptions);
 
-	// The dangerous replaceAll is removed. All sanitization is handled above.
-
-	return sanitized_content;
+  return sanitized_content;
 }
 
 Vue.prototype.$clearDraft = function (username, type){
