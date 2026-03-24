@@ -722,11 +722,9 @@ export default {
       formData.append('image', renamedFile);
 
       try {
-        //const axios = await import('axios');
-        //const response = await axios.default.post('https://usermedia.actifit.io/upload', formData, {
-        const response = await axios.post('https://usermedia.actifit.io/upload', formData, {
+        // Use local proxy endpoint
+        const response = await axios.post('/api/proxy/upload', formData, {
           headers: {
-            'Authorization': process.env.sec_img_upl,
             'Content-Type': 'multipart/form-data'
           }
         });

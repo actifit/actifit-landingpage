@@ -732,9 +732,9 @@ export default {
       }
     },
     async rewardUserComment() {
-      let url = new URL(process.env.actiAppUrl + 'rewardActifitWebComment/' + this.user.account.name);
+      let url = new URL('/api/proxy/reward-comment', window.location.origin);
       let params = {
-        web_comment_token: process.env.webCommentToken,
+        user: this.user.account.name,
         url: this.post.url,
       }
       Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))

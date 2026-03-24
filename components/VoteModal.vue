@@ -685,10 +685,10 @@ export default {
 		},
 		async rewardUserVote() {
 			//handles rewarding the user for his votes
-			let url = new URL(process.env.actiAppUrl + 'rewardActifitWebVote/' + this.user.account.name);
+			let url = new URL('/api/proxy/reward-vote', window.location.origin);
 			//compile all needed data and send it along the request for processing
 			let params = {
-				web_vote_token: process.env.webVoteToken,
+				user: this.user.account.name,
 				url: this.postToVote.url,
 			}
 			Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))

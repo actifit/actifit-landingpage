@@ -1694,10 +1694,10 @@ export default {
 
 
     async RewardUserEdit() {
-      let url = new URL(process.env.actiAppUrl + 'rewardActifitWebEdit/' + this.editPost.author);
+      let url = new URL('/api/proxy/reward-edit', window.location.origin);
       //compile all needed data and send it along the request for processing
       let params = {
-        web_edit_token: process.env.webEditToken,
+        user: this.editPost.author,
         url: this.editPost.url,
       }
       Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
