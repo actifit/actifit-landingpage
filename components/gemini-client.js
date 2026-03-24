@@ -6,13 +6,6 @@
  */
 export async function translateTextWithGemini(textToTranslate) {
 
-  const apiKey = process.env.geminiApiKey;
-
-  if (!apiKey) {
-    console.error("Gemini API key is not configured.");
-    throw new Error("Configuration error: Gemini API key is missing.");
-  }
-
   // UPDATED LIST based on your 'Available Models' screenshot:
   const modelsToTry = [
     'gemini-2.5-flash',       // Priority 1: Newest (Retry this, the 503 error was temporary)
@@ -32,11 +25,12 @@ export async function translateTextWithGemini(textToTranslate) {
   // Loop through the models
   for (const model of modelsToTry) {
     try {
-      console.log(`Attempting translation with model: ${model}...`);
+      console.log(`Attempting translation with model: ${model} via proxy...`);
 
-      const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      // Call local proxy endpoint instead of direct API
+      const GEMINI_PROXY_URL = `/api/proxy/gemini?model=${model}`;
 
-      const response = await fetch(GEMINI_API_URL, {
+      const response = await fetch(GEMINI_PROXY_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
@@ -47,10 +41,10 @@ export async function translateTextWithGemini(textToTranslate) {
         const translatedText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
         if (!translatedText) {
-          throw new Error(`Parsed empty result from ${model}`);
+          throw new Error(`Parsed empty result from proxy for ${model}`);
         }
 
-        console.log(`Success with ${model}`);
+        console.log(`Success with ${model} via proxy`);
         return translatedText;
       }
 

@@ -24,6 +24,23 @@ module.exports = {
     proposalId: '337',
   },
 
+  privateRuntimeConfig: {
+    SEC_IMG_UPL_KEY: process.env.SEC_IMG_UPL_KEY,
+    DEEPL_WEB_KEY: process.env.DEEPL_WEB_KEY,
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+    CREATE_ACCOUNT_API_KEY: process.env.CREATE_ACCOUNT_API_KEY,
+    REWARD_REFERRAL_API_KEY: process.env.REWARD_REFERRAL_API_KEY,
+    DELEGATE_ACCOUNT_API_KEY: process.env.DELEGATE_ACCOUNT_API_KEY,
+    CONFIRM_PAYMENT_API_KEY: process.env.CONFIRM_PAYMENT_API_KEY,
+    WEB_EDIT_REWARD_KEY: process.env.WEB_EDIT_REWARD_KEY,
+    WEB_VOTE_REWARD_KEY: process.env.WEB_VOTE_REWARD_KEY,
+    WEB_COMMENT_REWARD_KEY: process.env.WEB_COMMENT_REWARD_KEY,
+  },
+
+  serverMiddleware: [
+    { path: '/api/proxy', handler: '~/api/proxy.js' }
+  ],
+
 
   router: {
     extendRoutes(routes, resolve) {
@@ -59,20 +76,10 @@ module.exports = {
   },*/
   // --- STEP 3: Update the env block to use the dynamic variables ---
   env: {
-    sec_img_upl: process.env.SEC_IMG_UPL_KEY,
-    auth_Key: process.env.DEEPL_WEB_KEY,
-    geminiApiKey: process.env.GEMINI_API_KEY,
     swap_partner: 'actifit.swap',
     swap_to_token: 'AFIT',
     partner_fee: '1',
     scRedirectUrl: process.env.SC_REDIRECT_URL || 'http://localhost:3000/auth',
-    CREATE_ACCOUNT_API_KEY: process.env.CREATE_ACCOUNT_API_KEY,
-    REWARD_REFERRAL_API_KEY: process.env.REWARD_REFERRAL_API_KEY,
-    DELEGATE_ACCOUNT_API_KEY: process.env.DELEGATE_ACCOUNT_API_KEY,
-    confirmPaymentToken: process.env.CONFIRM_PAYMENT_API_KEY,
-    webEditToken: process.env.WEB_EDIT_REWARD_KEY,
-    webVoteToken: process.env.WEB_VOTE_REWARD_KEY,
-    webCommentToken: process.env.WEB_COMMENT_REWARD_KEY,
     maxTagDisplay: 10,
     captchaV3Key: '6LchW94ZAAAAAOjLg0G_0AiRgHrlBfbP_HrReBBE',
     poshVerificationUrl: 'https://hiveposh.com/api/v0/twitter/',
