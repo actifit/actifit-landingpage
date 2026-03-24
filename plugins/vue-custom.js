@@ -1,5 +1,4 @@
 import Vue from 'vue'
-import { marked } from 'marked';
 
 //Hive auth services
 import HAS from 'hive-auth-wrapper';
@@ -7,7 +6,6 @@ Vue.prototype.$HAS = HAS;
 
 //sanitization
 import sanitize from 'sanitize-html'
-import { marked } from 'marked';
 
 import moment from "moment";
 
@@ -63,7 +61,10 @@ Vue.prototype.$fetchReportTags = function(report){
           allowedTags: [],
           allowedAttributes: {},
         });
-        tagDisplay += '<span class="single-tag p-1">' + sanitizedTag + '</span> ';
+        // Only add the tag if it's not empty after sanitization
+        if (sanitizedTag.trim() !== '') {
+          tagDisplay += '<span class="single-tag p-1">' + sanitizedTag + '</span> ';
+        }
       }
       if (i > process.env.maxTagDisplay - 1) break;
     };
@@ -255,70 +256,111 @@ Vue.prototype.$processTrxFunc = async function (op_name, cstm_params, active) {
 };
 
 Vue.prototype.$cleanBody = function (report_content, full_cleanup){
-  if (!report_content) return '';
+	// Define all replacements and regex first
+	let vid_replacement = '<iframe width="640" height="360" src="https://www.youtube.com/embed/$1"></iframe>';
+	let user_link_replacement = '$1<a href="https://actifit.io/$2">$2</a>';
 
-  // If a full cleanup is requested, strip all HTML.
-  if (full_cleanup) {
-    const text = marked.parse(report_content, { breaks: true, gfm: true });
-    return sanitize(text, {
-      allowedTags: [],
-      allowedAttributes: {},
-    });
-  }
+	// =========================================================================
+	// ===== STEP 1: UNIFIED IMAGE PROCESSING WITH PLACEHOLDERS ==============
+	// =========================================================================
 
-  // 1. First, convert special video links to iframes
-  let contentWithVideos = report_content;
-  const threespk_embed_reg = /\[!\[[^\]]*\]\([^)]+\)\]\(https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+)\)/ig;
-	contentWithVideos = contentWithVideos.replace(threespk_embed_reg, '<iframe src="https://play.3speak.tv/watch?v=$1&mode=iframe&autoplay=false&layout=desktop"></iframe>');
-	const threespk_raw_reg = /(^|\s)(https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+))/ig;
-	contentWithVideos = contentWithVideos.replace(threespk_raw_reg, '$1<iframe src="https://play.3speak.tv/watch?v=$3&mode=iframe&autoplay=false&layout=desktop"></iframe>');
-  const vid_reg = /https?:\/\/(?:[0-9A-Z-]+\.)?(?:youtu\.be\/|youtube\.com\S*[^\w\-\s])([\w\-]{11})(?=[^\w\-]|$)(?![?=&+%\w]*(?:['"][^<>]*>|<\/a>))[?=&+%\w-]*/ig;
-  contentWithVideos = contentWithVideos.replace(vid_reg, '<iframe src="https://www.youtube.com/embed/$1"></iframe>');
+	const placeholders = {};
+	let counter = 0;
 
-  // 2. Convert the entire body from Markdown to HTML
-  const rawHtml = marked.parse(contentWithVideos, { breaks: true, gfm: true });
+	// Helper function to create the final, proxied <img> tag
+	const createProxiedImageTag = (url) => {
+		if (!url || typeof url !== 'string') return '';
+		url = url.trim();
+		if (!url.startsWith('http')) return ''; // Don't process relative/invalid URLs
+		// If it's a GIF or already a Hive proxy URL, use it directly.
+		if (url.startsWith('https://images.hive.blog') || url.toLowerCase().endsWith('.gif')) {
+			return `<img src="${url}">`;
+		}
+		const proxiedUrl = `https://images.hive.blog/0x0/${url}`;
+		return `<img src="${proxiedUrl}">`;
+	};
 
-  // 3. Define secure sanitization options
-  const sanitizeOptions = {
-    allowedTags: sanitize.defaults.allowedTags.concat([ 'img', 'iframe', 'div', 'span', 'a', 'h1', 'h2', 'h3', 'table', 'tr', 'td', 'th', 'thead', 'tbody', 'details', 'summary', 'sup', 'sub' ]),
-    allowedAttributes: {
-      a: ['href', 'rel'],
-      img: ['src', 'alt'],
-      iframe: ['src', 'frameborder', 'allowfullscreen', 'width', 'height'],
-      div: ['class'],
-      span: ['class'],
-      td: ['style'], // Allow style for table cell alignment as it is low risk
-      th: ['style'],
-    },
-    allowedSchemes: ['http', 'https', 'mailto', 'tel'],
-    transformTags: {
-      'img': function(tagName, attribs) {
-        if (attribs.src) {
-          const url = attribs.src.trim();
-          if (url.startsWith('http')) {
-            const proxiedUrl = (url.startsWith('https://images.hive.blog') || url.toLowerCase().endsWith('.gif'))
-              ? url
-              : `https://images.hive.blog/0x0/${url}`;
-            return { tagName: 'img', attribs: { src: proxiedUrl, alt: attribs.alt || '' } };
-          }
-        }
-        return { tagName: 'span', text: '' }; // Remove img tags with invalid src
-      },
-      'a': function(tagName, attribs) {
-          if (attribs.href) {
-            // Ensure all external links open in a new tab and are secure
-            return { tagName: 'a', attribs: { href: attribs.href, rel: 'noopener ugc', target: '_blank' } };
-          }
-          return { tagName, attribs };
-      }
-    },
-    allowedIframeHostnames: ['www.youtube.com', 'play.3speak.tv']
-  };
+	// Stash function that generates a placeholder and stores the real HTML
+	const stashImage = (url) => {
+		const placeholder = `__IMAGE_PLACEHOLDER_${counter++}__`;
+		placeholders[placeholder] = createProxiedImageTag(url);
+		return placeholder;
+	};
 
-  // 4. Sanitize the generated HTML
-  const sanitized_content = sanitize(rawHtml, sanitizeOptions);
+	let threespk_embed_reg = /\[!\[[^\]]*\]\([^)]+\)\]\(https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+)\)/ig;
+	report_content = report_content.replace(threespk_embed_reg, '<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;"><iframe style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;" src="https://play.3speak.tv/watch?v=$1&mode=iframe&autoplay=false&layout=desktop" scrolling="no" frameborder="0" allowfullscreen></iframe></div>');
+	let threespk_raw_reg = /(^|\s)(https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+))/ig;
+	report_content = report_content.replace(threespk_raw_reg, '$1<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;"><iframe style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;" src="https://play.3speak.tv/watch?v=$3&mode=iframe&autoplay=false&layout=desktop" scrolling="no" frameborder="0" allowfullscreen></iframe></div>');
 
-  return sanitized_content;
+	// REGEX 1: Find and replace pre-existing HTML <img> tags first.
+	// This is the crucial new step.
+	const existingImgRegex = /<img\s+[^>]*?src\s*=\s*['"]([^'"]+)['"][^>]*?>/gi;
+	report_content = report_content.replace(existingImgRegex, (match, url) => {
+		return stashImage(url);
+	});
+
+	// REGEX 2: Find and replace markdown images.
+	const markdownImgRegex = /!\[[^\]]*\]\s*\(([^)]+)\)/g;
+	report_content = report_content.replace(markdownImgRegex, (match, url) => {
+		return stashImage(url);
+	});
+
+	// REGEX 3: Find and replace raw image URLs.
+	const rawImgRegex = /(^|\s)(https?:\/\/[^\s"'<>]*\.(?:png|jpg|jpeg|gif|webp))/g;
+	report_content = report_content.replace(rawImgRegex, (match, prefix, url) => {
+		return prefix + stashImage(url);
+	});
+
+
+	// =========================================================================
+	// ===== STEP 2: PROCESS ALL OTHER CONTENT (LINKS, VIDEOS, ETC.) =========
+	// =========================================================================
+
+	let vid_reg = /https?:\/\/(?:[0-9A-Z-]+\.)?(?:youtu\.be\/|youtube\.com\S*[^\w\-\s])([\w\-]{11})(?=[^\w\-]|$)(?![?=&+%\w]*(?:['"][^<>]*>|<\/a>))[?=&+%\w-]*/ig;
+	report_content = report_content.replace(vid_reg, vid_replacement);
+
+	let markdown_link_reg = /\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/g;
+	report_content = report_content.replace(markdown_link_reg, '<a href="$2">$1</a>');
+
+	let url_reg = /(?<!["'=])(https?:\/\/[^\s<>"]+)/g;
+	report_content = report_content.replace(url_reg, '<a href="$1">$1</a>');
+
+	if (!full_cleanup){
+		let user_name = /([^\/])(@([\d\w-.]+))/igm;
+		report_content = report_content.replace(user_name, user_link_replacement);
+	}
+
+	// =========================================================================
+	// ===== STEP 3: RESTORE IMAGES AND SANITIZE THE FINAL HTML ==============
+	// =========================================================================
+
+	for (const placeholder in placeholders) {
+		report_content = report_content.replace(placeholder, placeholders[placeholder]);
+	}
+
+	let sanitizeOptions = {
+		// Expanded whitelist to preserve common HTML layouts
+		allowedTags: sanitize.defaults.allowedTags.concat([ 'img', 'iframe', 'details', 'summary', 'table', 'tr', 'td', 'th', 'thead', 'tbody', 'sub', 'sup', 'div' ]),
+		allowedAttributes: {
+			'img': [ 'src', 'style', 'class' ],
+			'iframe': [ 'width', 'height', 'src', 'style', 'frameborder', 'allowfullscreen', 'class' ],
+			'div': [ 'style', 'class' ],
+			'a': [ 'href', 'target', 'style', 'class' ],
+			'td': [ 'colspan', 'rowspan', 'style', 'class' ],
+            'th': [ 'colspan', 'rowspan', 'style', 'class' ]
+		}
+	};
+
+	if (full_cleanup){
+		sanitizeOptions.allowedTags = [];
+		sanitizeOptions.allowedAttributes = {};
+	}
+
+	let sanitized_content = sanitize(report_content, sanitizeOptions);
+
+	sanitized_content = sanitized_content.replaceAll('&gt;','>');
+
+	return sanitized_content;
 }
 
 Vue.prototype.$clearDraft = function (username, type){
