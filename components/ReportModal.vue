@@ -24,7 +24,7 @@
 
             <div class="modal-top-actions">
               <span class="date-head" :title="date">{{ $getTimeDifference(report.created) }}</span>
-              <a :href="'/@' + this.report.author + '/' + this.report.permlink"><i
+              <a :href="$safeUrl('/@' + this.report.author + '/' + this.report.permlink)"><i
                   class="fas fa-link text-brand"></i></a>
               <i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent"></i>
               <!-- Start of new/updated translation icons -->
@@ -637,7 +637,7 @@ export default {
       const url = new URL('/api/proxy/reward-comment', window.location.origin);
       const params = {
         user: this.user.account.name,
-        url: this.report.url,
+        url: this.$safeUrl(this.report.url),
       }
       Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
       try {

@@ -366,7 +366,7 @@
 		//compile all needed data and send it along the request for processing
 		let params = {
 			user: this.editReport.author,
-			url: this.editReport.url,
+			url: this.$safeUrl(this.editReport.url),
 		}
 		Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
 		try{

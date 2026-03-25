@@ -80,7 +80,7 @@
                       <div v-for="(report, index) in fullReports" :key="'activity-' + index" class="activity-card-scroller-item">
                           <div class="activity-post-card h-100" :style="getCardBackground(report)">
                               <!-- The content container is now the link, making the whole card clickable -->
-                              <a :href="report.url" target="_blank" class="activity-card-content" :title="report.title || 'View Post'">
+                              <a :href="$safeUrl(report.url)" target="_blank" class="activity-card-content" :title="report.title || 'View Post'">
                                   <div class="card-user-info">
                                       <div class="avatar small" :style="'background-image: url(' + profImgUrl + '/u/' + report.author + '/avatar);'"></div>
                                       <span class="username">@{{ report.author }}</span>

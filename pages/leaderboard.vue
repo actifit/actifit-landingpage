@@ -19,7 +19,7 @@
               </a>
               <a :href="curEntry.author" target="_blank" class="col-md-3 mt-3"><span>@{{ curEntry.author }}</span></a><br/>
 			  <a :href="curEntry.author" target="_blank" class="col-md-3 mt-3"><span>{{ numberFormat(curEntry.activityCount[0], 0) }} {{$t('Recorded_Activity')}}</span></a>
-			  <div><a :href="curEntry.url" target="_blank" class="btn btn-lg btn-brand btn-group-vertical">{{ $t('View_post_details') }}</a></div>
+			  <div><a :href="$safeUrl(curEntry.url)" target="_blank" class="btn btn-lg btn-brand btn-group-vertical">{{ $t('View_post_details') }}</a></div>
           </div>
         </div>
       </div>

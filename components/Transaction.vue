@@ -14,8 +14,8 @@
       </div>
     </div>
     <div class="text-center">
-      <a :href="'/@' + transaction.user + '/' + transaction.url" target="_blank" v-if="transaction.reward_activity == 'Full AFIT Payout'">{{ $t('Activity_Details') }}</a>
-      <a :href="transaction.url" target="_blank" v-else-if="transaction.url">{{ $t('Activity_Details') }}</a>
+      <a :href="$safeUrl('/@' + transaction.user + '/' + transaction.url)" target="_blank" v-if="transaction.reward_activity == 'Full AFIT Payout'">{{ $t('Activity_Details') }}</a>
+      <a :href="$safeUrl(transaction.url)" target="_blank" v-else-if="transaction.url">{{ $t('Activity_Details') }}</a>
     </div>
     <p class="font-italic mb-0 mt-2 text-center" v-if="transaction.note">{{ transaction.note }}</p>
   </div>
