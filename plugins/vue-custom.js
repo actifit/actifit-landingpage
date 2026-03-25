@@ -55,8 +55,16 @@ Vue.prototype.$fetchReportTags = function(report){
 
     for (let i in meta_data.tags) {
       //skip empty tags
-      if (meta_data.tags[i].trim() != ''){
-        tagDisplay += '<span class="single-tag p-1">' + meta_data.tags[i] + '</span> ';
+      if (meta_data.tags[i] && meta_data.tags[i].trim() != ''){
+        // Sanitize the tag to strip all HTML before rendering
+        const sanitizedTag = sanitize(meta_data.tags[i], {
+          allowedTags: [],
+          allowedAttributes: {},
+        });
+        // Only add the tag if it's not empty after sanitization
+        if (sanitizedTag.trim() !== '') {
+          tagDisplay += '<span class="single-tag p-1">' + sanitizedTag + '</span> ';
+        }
       }
       if (i > process.env.maxTagDisplay - 1) break;
     };
