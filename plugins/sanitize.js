@@ -62,4 +62,32 @@ export default ({ app }, inject) => {
   inject('sanitize', (dirty) => {
     return sanitizeHtml(dirty, sanitizeOptions);
   });
+
+  inject('safeUrl', (url) => {
+    if (!url || typeof url !== 'string') return '#';
+    const trimmedUrl = url.trim().toLowerCase();
+    if (trimmedUrl.startsWith('javascript:')) {
+      return '#';
+    }
+    // Basic validation to ensure it's a valid URL or relative path
+    if (trimmedUrl.startsWith('http://') || 
+        trimmedUrl.startsWith('https://') || 
+        trimmedUrl.startsWith('/') || 
+        trimmedUrl.startsWith('./') || 
+        trimmedUrl.startsWith('../') ||
+        trimmedUrl.startsWith('mailto:') ||
+        trimmedUrl.startsWith('tel:')) {
+      return url;
+    }
+    
+    // If it's a hive/steem permlink without a leading slash (like 'author/permlink')
+    // and doesn't contain dangerous patterns, we can allow it as a relative path
+    // but a safer approach is to check for common dangerous schemes
+    const dangerousSchemes = ['javascript:', 'data:', 'vbscript:'];
+    if (dangerousSchemes.some(scheme => trimmedUrl.startsWith(scheme))) {
+      return '#';
+    }
+    
+    return url;
+  });
 };

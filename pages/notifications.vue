@@ -17,10 +17,10 @@
 
 		<div class="row p-2 border border-bottom-0" v-for="(notif, index) in notifications" :key="index" :notif="notif" v-if="renderNotif(notif)">
 			<span class="col-md-2">
-			  <a :href="notif.url" v-on:click="markRead(notif)" >{{ date(notif.date) }}</a>
+			  <a :href="$safeUrl(notif.url)" v-on:click="markRead(notif)" >{{ date(notif.date) }}</a>
 			</span>
 			<span class="col-md-8">
-				<a :href="notif.url" v-on:click="markRead(notif)">
+				<a :href="$safeUrl(notif.url)" v-on:click="markRead(notif)">
 					<i class="fas fa-user-plus p-1" v-if="notif.type == 'friendship' || notif.type == 'friendship_request'"></i>
 					<i class="fas fa-user-friends p-1" v-else-if="notif.type == 'friendship_acceptance'"></i>
 					<span>{{ notif.details }}</span>

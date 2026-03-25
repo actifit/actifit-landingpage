@@ -123,7 +123,7 @@
                      <div v-if="updatingField === 'link'" class="d-flex justify-content-end align-items-center h-100 w-100"><i class="fas fa-spinner fa-spin text-brand"></i></div>
                      <template v-else>
                         <div class="about-item-text" v-if="!linkEditOn">
-                          <a v-if="userMeta && userMeta.profile && userMeta.profile.website" :href="userMeta.profile.website" target="_blank">{{ textAreaLinkValue }}</a>
+                          <a v-if="userMeta && userMeta.profile && userMeta.profile.website" :href="$safeUrl(userMeta.profile.website)" target="_blank">{{ textAreaLinkValue }}</a>
                           <span v-else>{{ textAreaLinkValue || $t('Not_Set') }}</span>
                         </div>
                         <div class="about-item-edit" v-else>
