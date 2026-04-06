@@ -612,10 +612,8 @@ export default {
       const afit_reward = this.getMatchingAFIT();
       this.checkingFunds = true;
       this.processStarted = true;
-      let url = new URL(process.env.actiAppUrl + 'confirmPayment');
       //compile all needed data and send it along the request for processing
       let params = {
-        confirm_payment_token: process.env.confirmPaymentToken,
         new_account: this.$refs["account-username"].value.toLowerCase(),
         new_pass: this.$refs["account-password"].value,
         usd_invest: invested_usd,
@@ -639,10 +637,11 @@ export default {
         params['cur_bchain'] += 'BLURT';
       }
 
-      Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
-      console.log(url);
+      const queryString = new URLSearchParams(params).toString();
+      const requestUrl = '/api/proxy/confirmPayment?' + queryString;
+      console.log(requestUrl);
       try {
-        let res = await fetch(url);
+        let res = await fetch(requestUrl);
         let outcome = await res.json();
         this.checkingFunds = false;
         this.accountCreated = outcome.accountCreated;

@@ -96,7 +96,7 @@ module.exports = async function (req, res, next) {
 
       const baseApiUrl = process.env.ACTI_API_URL || 'https://api2.actifit.io/';
       const targetUrl = `${baseApiUrl}${endpoint}/${user}`;
-      
+
       try {
         const response = await axios.get(targetUrl, {
             params: {
@@ -126,7 +126,7 @@ module.exports = async function (req, res, next) {
       }
 
       const targetUrl = 'https://usermedia.actifit.io/upload';
-      
+
       const headers = {
         'Authorization': apiKey,
         'Content-Type': req.headers['content-type'],
@@ -137,7 +137,7 @@ module.exports = async function (req, res, next) {
         const response = await axios({
           method: 'post',
           url: targetUrl,
-          data: req, 
+          data: req,
           headers: headers,
           maxBodyLength: Infinity,
           maxContentLength: Infinity
@@ -155,6 +155,33 @@ module.exports = async function (req, res, next) {
             res.statusCode = 500;
             res.end(JSON.stringify({ error: 'Upload failed', details: error.message }));
          }
+      }
+      return;
+    }
+
+    // 5. Confirm Payment Proxy
+    if (path === '/confirmPayment') {
+      if (req.method !== 'GET') {
+        res.statusCode = 405;
+        return res.end(JSON.stringify({ error: 'Method Not Allowed' }));
+      }
+
+      const apiKey = process.env.CONFIRM_PAYMENT_API_KEY;
+      if (!apiKey) {
+        res.statusCode = 500;
+        return res.end(JSON.stringify({ error: 'Confirm Payment API key not configured on server' }));
+      }
+
+      const baseApiUrl = process.env.ACTI_API_URL || 'http://localhost:3120/';
+      const targetUrl = `${baseApiUrl}confirmPayment`;
+
+      try {
+        const params = { ...parsedUrl.query, confirm_payment_token: apiKey };
+        const response = await axios.get(targetUrl, { params });
+        res.end(JSON.stringify(response.data));
+      } catch (error) {
+        res.statusCode = error.response ? error.response.status : 500;
+        res.end(JSON.stringify(error.response ? error.response.data : { error: error.message }));
       }
       return;
     }
