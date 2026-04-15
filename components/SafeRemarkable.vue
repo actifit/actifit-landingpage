@@ -19,7 +19,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="closeModal">{{ $t('cancel') || 'Cancel' }}</button>
-            <button type="button" class="btn btn-primary" @click="openExternalLink">{{ $t('continue') || 'Continue' }}</button>
+            <button type="button" class="btn btn-brand" @click="openExternalLink">{{ $t('continue') || 'Continue' }}</button>
           </div>
           </div>
           </div>
