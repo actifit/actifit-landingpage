@@ -282,12 +282,12 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup){
 	// Process 3Speak
 	let threespk_embed_reg = /\[!\[[^\]]*\]\([^)]+\)\]\(https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+)\)/ig;
 	report_content = report_content.replace(threespk_embed_reg, (match, v) => {
-		return stashResult(`<div class="video-container" style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;"><iframe style="position:absolute;top:0;left:0;width:100%;height:100%;" src="https://play.3speak.tv/watch?v=${v}&mode=iframe&autoplay=false&layout=desktop" scrolling="no" frameborder="0" allowfullscreen></iframe></div>`);
+		return stashResult(`<div class="video-container"><iframe src="https://play.3speak.tv/watch?v=${v}&mode=iframe&autoplay=false&layout=desktop" scrolling="no" frameborder="0" allowfullscreen></iframe></div>`);
 	});
 
 	let threespk_raw_reg = /(^|\s)(https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+))/ig;
 	report_content = report_content.replace(threespk_raw_reg, (match, prefix, url, v) => {
-		return prefix + stashResult(`<div class="video-container" style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;"><iframe style="position:absolute;top:0;left:0;width:100%;height:100%;" src="https://play.3speak.tv/watch?v=${v}&mode=iframe&autoplay=false&layout=desktop" scrolling="no" frameborder="0" allowfullscreen></iframe></div>`);
+		return prefix + stashResult(`<div class="video-container"><iframe src="https://play.3speak.tv/watch?v=${v}&mode=iframe&autoplay=false&layout=desktop" scrolling="no" frameborder="0" allowfullscreen></iframe></div>`);
 	});
 
 	// Process YouTube
@@ -333,11 +333,6 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup){
 	// =========================================================================
 	// ===== STEP 3: RESTORE PLACEHOLDERS AND SANITIZE ========================
 	// =========================================================================
-
-    // Correctly restore placeholders BEFORE passing to DOMPurify/sanitize-html
-	for (const placeholder in placeholders) {
-		html_content = html_content.replace(placeholder, placeholders[placeholder]);
-	}
 
 	let sanitizeOptions = {
 		ALLOWED_TAGS: [ 'img', 'iframe', 'details', 'summary', 'table', 'tr', 'td', 'th', 'thead', 'tbody', 'sub', 'sup', 'div', 'a', 'p', 'br', 'strong', 'em', 'u', 's', 'blockquote', 'code', 'pre', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span' ],
