@@ -334,6 +334,7 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup){
 	// ===== STEP 3: RESTORE PLACEHOLDERS AND SANITIZE ========================
 	// =========================================================================
 
+    // Correctly restore placeholders BEFORE passing to DOMPurify/sanitize-html
 	for (const placeholder in placeholders) {
 		html_content = html_content.replace(placeholder, placeholders[placeholder]);
 	}
