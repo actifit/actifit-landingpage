@@ -93,7 +93,6 @@
 
   //import vueRemarkable from 'vue-remarkable';
 
-  import sanitize from 'sanitize-html'
 import UserHoverCard from '~/components/UserHoverCard.vue';
 
   export default {

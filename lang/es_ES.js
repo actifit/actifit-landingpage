@@ -1228,5 +1228,13 @@ module.exports = {
   "AI": "IA",
   "Search_keyword": "Buscar Palabra Clave",
   "Search_AI": "Búsqueda IA",
-  "Moderation": "Moderación"
+  "Moderation": "Moderación",
+  top_hive_holders_title: "Principales Poseedores de HIVE",
+  top_hbd_holders_title: "Principales Poseedores de HBD",
+  top_hp_holders_title: "Principales Poseedores de HP",
+  external_link_warning: 'Advertencia de Enlace Externo',
+  external_link_message: 'Estás a punto de visitar un sitio web externo:',
+  continue_to_external: '¿Deseas continuar?',
+  cancel: 'Cancelar',
+  continue: 'Continuar',
 }

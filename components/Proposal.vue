@@ -109,8 +109,6 @@
 
   //import vueRemarkable from 'vue-remarkable';
 
-  import sanitize from 'sanitize-html'
-
   export default {
     props: ['proposal'],
     computed: {

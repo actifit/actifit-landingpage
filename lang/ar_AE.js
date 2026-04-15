@@ -1224,9 +1224,15 @@ module.exports = {
     private_active: 'المفتاح النشط الخاص',
     operation_require: 'تتطلب هذه العملية',
   },
-  "Keyword": "كلمة رئيسية",
-  "AI": "ذكاء اصطناعي",
-  "Search_keyword": "ابحث عن كلمة رئيسية",
-  "Search_AI": "ابحث بالذكاء الاصطناعي",
-  "Moderation": "الإشراف"
-}
+  "Keyword": "الكلمة الرئيسية",
+  "AI": "الذكاء الاصطناعي",
+  "Search_keyword": "بحث بالكلمة الرئيسية",
+  "Search_AI": "بحث بالذكاء الاصطناعي",
+  "Moderation": "الإشراف",
+  external_link_warning: 'تحذير رابط خارجي',
+  external_link_message: 'أنت على وشك زيارة موقع خارجي:',
+  continue_to_external: 'هل ترغب في الاستمرار؟',
+  cancel: 'إلغاء',
+  continue: 'استمرار',
+  }
+

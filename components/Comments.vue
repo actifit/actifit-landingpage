@@ -52,9 +52,9 @@
         </div>
 
         <!-- ✅ CORE CHANGE: Source is now a computed property that shows original or translated text -->
-        <vue-remarkable class="modal-body pb-0" v-if="!editBoxOpen" :source="displayContent"
+        <SafeRemarkable class="modal-body pb-0" v-if="!editBoxOpen" :source="displayContent"
           :style="{ paddingLeft: depth * indentFactor + 'px' }"
-          :options="{ 'html': true, 'breaks': true, 'typographer': true }"></vue-remarkable>
+          :options="{ 'html': true, 'breaks': true, 'typographer': true }"></SafeRemarkable>
 
         <transition name="fade">
           <div class="comment-reply" v-if="editBoxOpen">
@@ -183,8 +183,8 @@
         </transition>
         <div class="comment-reply" v-if="responsePosted">
           <UserHoverCard :username="user.name" />
-          <vue-remarkable class="modal-body" :source="getContent"
-            :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }"></vue-remarkable>
+          <SafeRemarkable class="modal-body" :source="getContent"
+            :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }"></SafeRemarkable>
         </div>
       </div>
       <!-- ✅ CORE CHANGE: Pass down the cache and listen for updates from child comments -->
@@ -210,12 +210,12 @@
 <script>
 import UserHoverCard from './UserHoverCard.vue'
 import { translateTextWithGemini } from '~/components/gemini-client.js';
-import vueRemarkable from 'vue-remarkable';
+import SafeRemarkable from '~/components/SafeRemarkable.vue';
 import steem from 'steem'
 import hive from '@hiveio/hive-js'
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
-import sanitize from 'sanitize-html'
+import DOMPurify from 'dompurify'
 import CustomTextEditor from '~/components/CustomTextEditor'
 import Lodash from 'lodash'
 
@@ -267,7 +267,7 @@ export default {
   },
   components: {
     CustomTextEditor,
-    vueRemarkable,
+    SafeRemarkable,
     UserHoverCard
   },
   computed: {
@@ -480,7 +480,16 @@ export default {
     commentBody() {
       if (!this.full_data || !this.full_data.body) return '';
       // Use the global clean function if available, otherwise fallback to basic sanitize
-      return this.$cleanBody ? this.$cleanBody(this.full_data.body) : sanitize(this.full_data.body);
+      if (this.$cleanBody) {
+        return this.$cleanBody(this.full_data.body);
+      }
+      
+      if (process.client) {
+        return DOMPurify.sanitize(this.full_data.body);
+      }
+      
+      // Server-side fallback: strip tags using regex
+      return this.full_data.body.replace(/<[^>]*>?/gm, '');
     },
     meta() {
       return JSON.parse(this.full_data.json_metadata)
@@ -866,8 +875,7 @@ export default {
       }
     },
     votePrompt(e) {
-      this.$store.commit('setPostToVote', this.full_data)
-    },
+      this.$store.commit('setPostToVote', this.full_data)    },
   },
   // ✅ CORE FIX: The mounted hook is now simpler because the immediate watcher handles initialization.
   mounted() {

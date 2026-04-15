@@ -69,8 +69,8 @@
                 </div>
               </div>
 
-              <vue-remarkable class="col-md-12" ref="remarkableContent" :source="proxiedBody"
-                :options="{ 'html': true, 'breaks': true, 'typographer': true }"></vue-remarkable>
+              <SafeRemarkable class="col-md-12" ref="remarkableContent" :source="proxiedBody"
+                :options="{ 'html': true, 'breaks': true, 'typographer': true }"></SafeRemarkable>
 
 
               <div class="col-md-12 main-payment-info" id="main-footer">
@@ -169,7 +169,7 @@
               </transition>
               <div class="report-reply col-md-12" v-if="responsePosted">
                 <a target="_blank"><div class="comment-user-section"><UserHoverCard :username="user.account.name" /></div></a>
-                <vue-remarkable :source="responseBody" :options="{ 'html': true, 'breaks': true, 'typographer': true }"></vue-remarkable>
+                <SafeRemarkable :source="responseBody" :options="{ 'html': true, 'breaks': true, 'typographer': true }"></SafeRemarkable>
               </div>
 
               <div class="report-comments modal-body" v-if="report.children > 0" ref="commentsSection">
@@ -219,6 +219,7 @@
     </client-only>
     <Footer />
   </div>
+
 </template>
 
 <script>
@@ -237,10 +238,10 @@ import UserHoverCard from '~/components/UserHoverCard.vue'
 import CustomTextEditor from '~/components/CustomTextEditor'
 import Comments from '~/components/Comments'
 import SocialSharing from 'vue-social-sharing'
-import vueRemarkable from 'vue-remarkable'
+import SafeRemarkable from '~/components/SafeRemarkable.vue'
 import UserSidebar from '~/components/UserSidebar.vue'
 import EditPostModal from '~/components/EditPostModal'
-import sanitize from 'sanitize-html'
+import DOMPurify from 'dompurify'
 
 const scot_steemengine_api = process.env.steemEngineScot;
 const scot_hive_api_param = process.env.hiveEngineScotParam;
@@ -248,7 +249,7 @@ const scot_hive_api_param = process.env.hiveEngineScotParam;
 export default {
   components: {
     NavbarBrand, ChainSelection, Footer, VoteModal, NotifyModal, UserHoverCard,
-    CustomTextEditor, Comments, SocialSharing, vueRemarkable, UserSidebar, EditPostModal
+    CustomTextEditor, Comments, SocialSharing, SafeRemarkable, UserSidebar, EditPostModal
   },
   head() {
     return {
@@ -352,7 +353,13 @@ export default {
       //console.log(result.body);
 
       //remove all tags from text
-      let desc = sanitize(result.body, { allowedTags: [] });
+      let desc = result.body;
+      if (process.client) {
+        desc = DOMPurify.sanitize(result.body, { ALLOWED_TAGS: [] });
+      } else {
+        // Fallback for server-side execution where DOMPurify lacks a DOM
+        desc = result.body.replace(/<[^>]*>?/gm, '');
+      }
 
       //remove all links/image links
       let img_links_reg = /[!]?\[[\d\w\s-\.\(\)]*\]\(((((https?:\/\/usermedia\.actifit\.io\/))|((https:\/\/ipfs\.busy\.org\/ipfs\/))|((https:\/\/steemitimages\.com\/)))[\d\w-[\:\/\.\%]+|(https?:\/\/[.\d\w-\/\:\%\(\)]*\.(?:png|jpg|jpeg|gif)))[)]/igm;
