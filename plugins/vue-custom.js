@@ -274,7 +274,7 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup){
 
 	// Stash function that generates a placeholder
 	const stashResult = (html) => {
-		const placeholder = `__HTML_PLACEHOLDER_${counter++}__`;
+		const placeholder = `HTML_PLACEHOLDER_${counter++}`;
 		placeholders[placeholder] = html;
 		return placeholder;
 	};
