@@ -393,6 +393,11 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup){
         });
     }
 
+    // RESTORE PLACEHOLDERS AFTER SANITIZATION
+    for (const placeholder in placeholders) {
+        sanitized_html = sanitized_html.replace(placeholder, placeholders[placeholder]);
+    }
+
 	// =========================================================================
 	// ===== STEP 4: POST-PROCESS LINKS (WHITELIST & EXTERNAL) ================
 	// =========================================================================
