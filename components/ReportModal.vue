@@ -61,8 +61,8 @@
           <span>{{ $t('auto_translated_content') }}</span>
           <a href="#" @click.prevent="cancelTranslation">{{ $t('click_to_view_original') }}</a>
         </div>
-        <vue-remarkable class="modal-body" :source="displayBody" ref="remarkableContent"
-          :options="{ 'html': true, 'breaks': true, 'typographer': true }"></vue-remarkable>
+        <SafeRemarkable class="modal-body" :source="displayBody" ref="remarkableContent"
+          :options="{ 'html': true, 'breaks': true, 'typographer': true }"></SafeRemarkable>
         <div class="modal-body goog-ad-horiz-90">
           <adsbygoogle ad-slot="5716623705" />
         </div>
@@ -195,8 +195,8 @@
           <div class="comment-user-section">
             <UserHoverCard :username="user.name" />
           </div>
-          <vue-remarkable class="modal-body" :source="responseBody"
-            :options="{ 'html': true, 'breaks': true, 'typographer': true }"></vue-remarkable>
+          <SafeRemarkable class="modal-body" :source="responseBody"
+            :options="{ 'html': true, 'breaks': true, 'typographer': true }"></SafeRemarkable>
         </div>
         <div class="report-comments modal-body" v-if="report.children > 0">
           <div v-if="showCommentsLoader" class="pb-md-2 text-center">
@@ -225,7 +225,7 @@ import UserHoverCard from './UserHoverCard.vue'
 import { mapGetters } from 'vuex'
 import Comments from '~/components/Comments'
 import CustomTextEditor from '~/components/CustomTextEditor'
-import vueRemarkable from 'vue-remarkable';
+import SafeRemarkable from '~/components/SafeRemarkable.vue'
 import SocialSharing from 'vue-social-sharing';
 import VueScrollTo from 'vue-scrollto'
 import { translateTextWithGemini } from '~/components/gemini-client.js';
@@ -286,7 +286,7 @@ export default {
     Comments,
     CustomTextEditor,
     SocialSharing,
-    vueRemarkable,
+    SafeRemarkable,
     UserHoverCard
   },
   computed: {

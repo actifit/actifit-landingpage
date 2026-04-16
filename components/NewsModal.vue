@@ -8,7 +8,7 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-		<vue-remarkable class="modal-body" :source="body" :options="{'html': true, 'breaks': true, 'typographer': true}"></vue-remarkable>
+		<SafeRemarkable class="modal-body" :source="body" :options="{'html': true, 'breaks': true, 'typographer': true}"></SafeRemarkable>
       </div>
     </div>
   </div>
@@ -16,13 +16,12 @@
 
 <script>
   import Vue from 'vue'
-  import vueRemarkable from 'vue-remarkable';
-  import sanitize from 'sanitize-html'
+  import SafeRemarkable from '~/components/SafeRemarkable.vue';
 
   export default {
     props: ['news'],
 	components: {
-	  vueRemarkable
+	  SafeRemarkable
 	},
     computed: {
       body () {

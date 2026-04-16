@@ -1229,5 +1229,10 @@ module.exports = {
   "AI": "IA",
   "Search_keyword": "Rechercher par mot-clé",
   "Search_AI": "Recherche IA",
-  "Moderation": "Modération"
+  "Moderation": "Modération",
+  external_link_warning: 'External Link Warning',
+  external_link_message: 'You are about to visit an external website:',
+  continue_to_external: 'Do you want to continue?',
+  cancel: 'Cancel',
+  continue: 'Continue',
 }

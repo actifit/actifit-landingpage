@@ -1228,5 +1228,10 @@ module.exports = {
   "AI": "KI",
   "Search_keyword": "Stichwortsuche",
   "Search_AI": "KI-Suche",
-  "Moderation": "Moderation"
+  "Moderation": "Moderation",
+  external_link_warning: 'External Link Warning',
+  external_link_message: 'You are about to visit an external website:',
+  continue_to_external: 'Do you want to continue?',
+  cancel: 'Cancel',
+  continue: 'Continue',
 }

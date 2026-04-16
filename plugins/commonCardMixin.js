@@ -34,9 +34,10 @@ export const commonCardMixin = {
     },
     bodySnippet () {
       if (!this.cardData || !this.cardData.body) return ''
-      let postContent = this.$cleanBody(this.cardData.body, true)
-      postContent = this.truncateString(postContent)
-      return postContent.replace(/<[^>]+>/g, '')
+      let postContent = this.$cleanBody(this.cardData.body, true, true)
+      // Strip tags FIRST so truncation applies to clean text
+      postContent = postContent.replace(/<[^>]+>/g, '')
+      return this.truncateString(postContent, 150)
     },
     getVoteCount () {
       return (this.cardData && Array.isArray(this.cardData.active_votes)) ? this.cardData.active_votes.length : 0
@@ -229,9 +230,10 @@ export const commonCardMixin = {
     toggleTooltip () { this.isTooltipVisible = !this.isTooltipVisible },
     renderSnippet (content, length = 150) {
       if (!content) return ''
-      let postContent = this.$cleanBody(content, true)
-      postContent = this.truncateString(postContent, length)
-      return postContent.replace(/<[^>]+>/g, '')
+      let postContent = this.$cleanBody(content, true, true)
+      // Strip tags FIRST so truncation applies to clean text
+      postContent = postContent.replace(/<[^>]+>/g, '')
+      return this.truncateString(postContent, length)
     },
     hasBeneficiaries () {
       return this.cardData && Array.isArray(this.cardData.beneficiaries) && this.cardData.beneficiaries.length > 0

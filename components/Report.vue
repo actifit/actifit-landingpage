@@ -152,7 +152,6 @@ export default {
   computed: {
     ...mapGetters('steemconnect', ['user']),
     ...mapGetters(['moderators']),
-    // Override the placeholder in the mixin
     cardData () {
       return this.report
     },

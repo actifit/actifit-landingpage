@@ -73,8 +73,7 @@
           <span>{{ $t('auto_translated_content') }}</span>
           <a href="#" v-on:click.prevent="cancelTranslation">{{ $t('click_to_view_original') }}</a>
         </div>
-        <vue-remarkable class="modal-body" :source="displayBody" ref="remarkableContent"
-          :options="{ 'html': true, 'breaks': true, 'typographer': true }"></vue-remarkable>
+        <SafeRemarkable class="modal-body" :source="displayBody" :options="{ 'html': true, 'breaks': true, 'typographer': true }" ref="remarkableContent"></SafeRemarkable>
         <div class="modal-body goog-ad-horiz-90">
           <adsbygoogle ad-slot="5716623705" />
         </div>
@@ -257,8 +256,8 @@
           <div class="comment-user-section">
             <UserHoverCard :username="user.name" />
           </div>
-          <vue-remarkable class="modal-body" :source="body"
-            :options="{ 'html': true, 'breaks': true, 'typographer': true }"></vue-remarkable>
+          <SafeRemarkable class="modal-body" :source="body"
+            :options="{ 'html': true, 'breaks': true, 'typographer': true }"></SafeRemarkable>
         </div>
         <div class="post-comments modal-body" v-if="post.children > 0">
           <div v-if="showCommentsLoader" class="comments-loader">
@@ -282,7 +281,7 @@ import { mapGetters } from 'vuex'
 import Comments from '~/components/Comments'
 import CustomTextEditor from '~/components/CustomTextEditor'
 import Vue from 'vue'
-import vueRemarkable from 'vue-remarkable';
+import SafeRemarkable from '~/components/SafeRemarkable.vue'
 import SocialSharing from 'vue-social-sharing';
 import VueScrollTo from 'vue-scrollto'
 import { translateTextWithGemini } from '~/components/gemini-client.js';
@@ -305,6 +304,8 @@ export default {
       showTranslated: false,
       translationLoading: false,
       translationError: '',
+      showExternalLinkModal: false,
+      externalLinkUrl: '',
       afitReward: 0,
       tokenRewards: [],
       userRank: '',
@@ -349,7 +350,7 @@ export default {
     Comments,
     CustomTextEditor,
     SocialSharing,
-    vueRemarkable,
+    SafeRemarkable,
     UserHoverCard
   },
   computed: {
@@ -853,9 +854,9 @@ export default {
     attachImageErrorHandlers() {
       const vm = this;
       this.$nextTick(() => {
-        const contentEl = vm.$refs.remarkableContent.$el;
+        const contentEl = vm.$refs.remarkableContent.el;
         if (!contentEl) {
-            console.warn('VueRemarkable component not found!');
+            console.warn('SafeRemarkable component not found!');
             return;
         }
         const images = contentEl.querySelectorAll('img');
@@ -893,7 +894,7 @@ export default {
 
     //capture key clicks
     window.addEventListener('keydown', this.handleKeyDown);
-  }
+  },
 }
 </script>
 <style>

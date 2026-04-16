@@ -5,7 +5,8 @@ import HAS from 'hive-auth-wrapper';
 Vue.prototype.$HAS = HAS;
 
 //sanitization
-import sanitize from 'sanitize-html'
+import DOMPurify from 'dompurify'
+import { marked } from 'marked';
 
 import moment from "moment";
 
@@ -57,10 +58,13 @@ Vue.prototype.$fetchReportTags = function(report){
       //skip empty tags
       if (meta_data.tags[i] && meta_data.tags[i].trim() != ''){
         // Sanitize the tag to strip all HTML before rendering
-        const sanitizedTag = sanitize(meta_data.tags[i], {
-          allowedTags: [],
-          allowedAttributes: {},
-        });
+        let sanitizedTag = '';
+        if (process.client) {
+          sanitizedTag = DOMPurify.sanitize(meta_data.tags[i], { ALLOWED_TAGS: [] });
+        } else {
+          // Server-side fallback: strip tags using regex
+          sanitizedTag = meta_data.tags[i].replace(/<[^>]*>?/gm, '');
+        }
         // Only add the tag if it's not empty after sanitization
         if (sanitizedTag.trim() !== '') {
           tagDisplay += '<span class="single-tag p-1">' + sanitizedTag + '</span> ';
@@ -255,112 +259,192 @@ Vue.prototype.$processTrxFunc = async function (op_name, cstm_params, active) {
   }
 };
 
-Vue.prototype.$cleanBody = function (report_content, full_cleanup){
+Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
+	if (!report_content) return '';
+
 	// Define all replacements and regex first
-	let vid_replacement = '<iframe width="640" height="360" src="https://www.youtube.com/embed/$1"></iframe>';
-	let user_link_replacement = '$1<a href="https://actifit.io/$2">$2</a>';
+	let vid_replacement = '<div class="video-container"><iframe width="640" height="360" src="https://www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe></div>';
 
 	// =========================================================================
-	// ===== STEP 1: UNIFIED IMAGE PROCESSING WITH PLACEHOLDERS ==============
+	// ===== STEP 1: PRE-PROCESS VIDEOS AND IMAGES INTO PLACEHOLDERS =========
 	// =========================================================================
 
 	const placeholders = {};
 	let counter = 0;
 
-	// Helper function to create the final, proxied <img> tag
-	const createProxiedImageTag = (url) => {
-		if (!url || typeof url !== 'string') return '';
-		url = url.trim();
-		if (!url.startsWith('http')) return ''; // Don't process relative/invalid URLs
-		// If it's a GIF or already a Hive proxy URL, use it directly.
-		if (url.startsWith('https://images.hive.blog') || url.toLowerCase().endsWith('.gif')) {
-			return `<img src="${url}">`;
-		}
-		const proxiedUrl = `https://images.hive.blog/0x0/${url}`;
-		return `<img src="${proxiedUrl}">`;
-	};
-
-	// Stash function that generates a placeholder and stores the real HTML
-	const stashImage = (url) => {
-		const placeholder = `__IMAGE_PLACEHOLDER_${counter++}__`;
-		placeholders[placeholder] = createProxiedImageTag(url);
+	// Stash function that generates a placeholder
+	const stashResult = (html) => {
+		if (no_media) return '';
+		const placeholder = `HTML_PLACEHOLDER_${counter++}`;
+		placeholders[placeholder] = html;
 		return placeholder;
 	};
 
+	// Process 3Speak
 	let threespk_embed_reg = /\[!\[[^\]]*\]\([^)]+\)\]\(https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+)\)/ig;
-	report_content = report_content.replace(threespk_embed_reg, '<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;"><iframe style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;" src="https://play.3speak.tv/watch?v=$1&mode=iframe&autoplay=false&layout=desktop" scrolling="no" frameborder="0" allowfullscreen></iframe></div>');
+	report_content = report_content.replace(threespk_embed_reg, (match, v) => {
+		return stashResult(`<div class="video-container"><iframe src="https://play.3speak.tv/watch?v=${v}&mode=iframe&autoplay=false&layout=desktop" scrolling="no" frameborder="0" allowfullscreen></iframe></div>`);
+	});
+
 	let threespk_raw_reg = /(^|\s)(https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+))/ig;
-	report_content = report_content.replace(threespk_raw_reg, '$1<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;"><iframe style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;" src="https://play.3speak.tv/watch?v=$3&mode=iframe&autoplay=false&layout=desktop" scrolling="no" frameborder="0" allowfullscreen></iframe></div>');
-
-	// REGEX 1: Find and replace pre-existing HTML <img> tags first.
-	// This is the crucial new step.
-	const existingImgRegex = /<img\s+[^>]*?src\s*=\s*['"]([^'"]+)['"][^>]*?>/gi;
-	report_content = report_content.replace(existingImgRegex, (match, url) => {
-		return stashImage(url);
+	report_content = report_content.replace(threespk_raw_reg, (match, prefix, url, v) => {
+		return prefix + stashResult(`<div class="video-container"><iframe src="https://play.3speak.tv/watch?v=${v}&mode=iframe&autoplay=false&layout=desktop" scrolling="no" frameborder="0" allowfullscreen></iframe></div>`);
 	});
 
-	// REGEX 2: Find and replace markdown images.
-	const markdownImgRegex = /!\[[^\]]*\]\s*\(([^)]+)\)/g;
-	report_content = report_content.replace(markdownImgRegex, (match, url) => {
-		return stashImage(url);
-	});
-
-	// REGEX 3: Find and replace raw image URLs.
-	const rawImgRegex = /(^|\s)(https?:\/\/[^\s"'<>]*\.(?:png|jpg|jpeg|gif|webp))/g;
-	report_content = report_content.replace(rawImgRegex, (match, prefix, url) => {
-		return prefix + stashImage(url);
-	});
-
-
-	// =========================================================================
-	// ===== STEP 2: PROCESS ALL OTHER CONTENT (LINKS, VIDEOS, ETC.) =========
-	// =========================================================================
-
+	// Process YouTube
 	let vid_reg = /https?:\/\/(?:[0-9A-Z-]+\.)?(?:youtu\.be\/|youtube\.com\S*[^\w\-\s])([\w\-]{11})(?=[^\w\-]|$)(?![?=&+%\w]*(?:['"][^<>]*>|<\/a>))[?=&+%\w-]*/ig;
-	report_content = report_content.replace(vid_reg, vid_replacement);
+	report_content = report_content.replace(vid_reg, (match, v) => {
+		return stashResult(`<div class="video-container"><iframe width="640" height="360" src="https://www.youtube.com/embed/${v}" frameborder="0" allowfullscreen></iframe></div>`);
+	});
 
-	let markdown_link_reg = /\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/g;
-	report_content = report_content.replace(markdown_link_reg, '<a href="$2">$1</a>');
-
-	let url_reg = /(?<!["'=])(https?:\/\/[^\s<>"]+)/g;
-	report_content = report_content.replace(url_reg, '<a href="$1">$1</a>');
-
-	if (!full_cleanup){
-		let user_name = /([^\/])(@([\d\w-.]+))/igm;
-		report_content = report_content.replace(user_name, user_link_replacement);
-	}
-
-	// =========================================================================
-	// ===== STEP 3: RESTORE IMAGES AND SANITIZE THE FINAL HTML ==============
-	// =========================================================================
-
-	for (const placeholder in placeholders) {
-		report_content = report_content.replace(placeholder, placeholders[placeholder]);
-	}
-
-	let sanitizeOptions = {
-		// Expanded whitelist to preserve common HTML layouts
-		allowedTags: sanitize.defaults.allowedTags.concat([ 'img', 'iframe', 'details', 'summary', 'table', 'tr', 'td', 'th', 'thead', 'tbody', 'sub', 'sup', 'div' ]),
-		allowedAttributes: {
-			'img': [ 'src', 'style', 'class' ],
-			'iframe': [ 'width', 'height', 'src', 'style', 'frameborder', 'allowfullscreen', 'class' ],
-			'div': [ 'style', 'class' ],
-			'a': [ 'href', 'target', 'style', 'class' ],
-			'td': [ 'colspan', 'rowspan', 'style', 'class' ],
-            'th': [ 'colspan', 'rowspan', 'style', 'class' ]
-		}
+	// Process Images (unified approach)
+	const createProxiedImageTag = (url) => {
+		if (!url || typeof url !== 'string') return '';
+		url = url.trim();
+		if (!url.startsWith('http')) return '';
+		const proxiedUrl = (url.startsWith('https://images.hive.blog') || url.toLowerCase().endsWith('.gif'))
+			? url
+			: `https://images.hive.blog/0x0/${url}`;
+		return `<img src="${proxiedUrl}">`;
 	};
 
-	if (full_cleanup){
-		sanitizeOptions.allowedTags = [];
-		sanitizeOptions.allowedAttributes = {};
+	const existingImgRegex = /<img\s+[^>]*?src\s*=\s*['"]([^'"]+)['"][^>]*?>/gi;
+	report_content = report_content.replace(existingImgRegex, (match, url) => stashResult(createProxiedImageTag(url)));
+
+	const markdownImgRegex = /!\[[^\]]*\]\s*\(([^)]+)\)/g;
+	report_content = report_content.replace(markdownImgRegex, (match, url) => stashResult(createProxiedImageTag(url)));
+
+	const rawImgRegex = /(^|\s)(https?:\/\/[^\s"'<>]*\.(?:png|jpg|jpeg|gif|webp))/g;
+	report_content = report_content.replace(rawImgRegex, (match, prefix, url) => prefix + stashResult(createProxiedImageTag(url)));
+
+    // Mentions
+    if (!full_cleanup){
+		let user_name_regex = /([^\/])(@([\d\w-.]+))/igm;
+		report_content = report_content.replace(user_name_regex, (match, prefix, full_user, username) => {
+            return prefix + stashResult(`<a href="https://actifit.io/@${username}">@${username}</a>`);
+        });
 	}
 
-	let sanitized_content = sanitize(report_content, sanitizeOptions);
+	// =========================================================================
+	// ===== STEP 2: CONVERT MARKDOWN TO HTML =================================
+	// =========================================================================
 
-	sanitized_content = sanitized_content.replaceAll('&gt;','>');
+	let html_content = marked.parse(report_content, { breaks: true, gfm: true });
 
-	return sanitized_content;
+	// =========================================================================
+	// ===== STEP 3: RESTORE PLACEHOLDERS AND SANITIZE ========================
+	// =========================================================================
+
+	let sanitizeOptions = {
+		ALLOWED_TAGS: [ 'img', 'iframe', 'details', 'summary', 'table', 'tr', 'td', 'th', 'thead', 'tbody', 'sub', 'sup', 'div', 'a', 'p', 'br', 'strong', 'em', 'u', 's', 'blockquote', 'code', 'pre', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span' ],
+		ALLOWED_ATTR: [ 'src', 'style', 'class', 'alt', 'title', 'width', 'height', 'frameborder', 'allowfullscreen', 'href', 'target', 'rel', 'colspan', 'rowspan', 'data-external-href' ],
+		ALLOWED_URI_REGEXP: /.*/,
+		SAFE_FOR_TEMPLATES: true,
+		ALLOW_UNKNOWN_PROTOCOLS: true,
+        // Block dangerous CSS properties that allow UI hijacking (phishing popups)
+        FORBID_ATTR: ['id', 'onclick', 'onerror', 'onload'],
+        FORBID_TAGS: ['style', 'script'],
+	};
+
+    let sanitized_html = '';
+
+    if (process.client) {
+        // Custom hook to strip dangerous CSS from style attributes
+        DOMPurify.addHook('afterSanitizeAttributes', function(node) {
+            if (node.hasAttribute('style')) {
+                let style = node.getAttribute('style');
+                // Remove properties that allow positioning elements outside their container
+                const dangerousProps = ['position', 'z-index', 'top', 'left', 'bottom', 'right', 'margin-top', 'margin-left'];
+                dangerousProps.forEach(prop => {
+                    const regex = new RegExp(prop + '\\s*:\\s*[^;]+;?', 'gi');
+                    style = style.replace(regex, '');
+                });
+                node.setAttribute('style', style);
+            }
+        });
+
+        sanitized_html = DOMPurify.sanitize(html_content, sanitizeOptions);
+
+        // Remove the hook after use to prevent affecting other sanitization tasks if any
+        DOMPurify.removeHook('afterSanitizeAttributes');
+    } else {
+        // Server-side sanitization using sanitize-html
+        const sanitizeHtml = require('sanitize-html');
+        sanitized_html = sanitizeHtml(html_content, {
+            allowedTags: sanitizeOptions.ALLOWED_TAGS,
+            allowedAttributes: {
+                '*': sanitizeOptions.ALLOWED_ATTR
+            },
+            allowedStyles: {
+                '*': {
+                    // Match the dangerousProps logic from DOMPurify hook
+                    'position': [/^((?!fixed|absolute|relative).)*$/],
+                    'z-index': [/^((?!.*).)*$/], // Disallow all z-index on server for safety
+                    'top': [/^((?!.*).)*$/],
+                    'left': [/^((?!.*).)*$/],
+                    'bottom': [/^((?!.*).)*$/],
+                    'right': [/^((?!.*).)*$/],
+                }
+            }
+        });
+    }
+
+    // RESTORE PLACEHOLDERS AFTER SANITIZATION
+    for (const placeholder in placeholders) {
+        sanitized_html = sanitized_html.replace(placeholder, placeholders[placeholder]);
+    }
+
+	// =========================================================================
+	// ===== STEP 4: POST-PROCESS LINKS (WHITELIST & EXTERNAL) ================
+	// =========================================================================
+
+    const processLinks = (href, addClass, setAttr) => {
+        if (!href) return;
+
+		// Whitelist check
+		const isWhitelisted = /^(?:\/|#|https?:\/\/(?:[\w-]+\.)*(?:actifit\.io|peakd\.com|ecency\.com|hive\.blog|leofinance\.io|travelfeed\.com|3speak\.tv|steemit\.com|hivesigner\.com|vimm\.tv|d\.tube|bit\.ly|youtube\.com|youtu\.be|facebook\.com|twitter\.com|x\.com|instagram\.com|discord\.gg|discord\.com|telegram\.me|t\.me))/i.test(href);
+
+		if (!isWhitelisted) {
+			addClass('external-link');
+            // We use the data-external-href to keep the modal informed
+            // even if the href is still on the tag for browser rendering.
+            setAttr('data-external-href', href);
+		}
+
+		// Standard link attributes for whitelisted/internal
+		if (!href.startsWith('/') && !href.startsWith('#')) {
+			setAttr('target', '_blank');
+			setAttr('rel', 'noopener ugc');
+		}
+    };
+
+    if (process.client) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(sanitized_html, 'text/html');
+        const links = doc.querySelectorAll('a[href]');
+
+        links.forEach(a => {
+            processLinks(
+                a.getAttribute('href'),
+                (cls) => a.classList.add(cls),
+                (name, val) => a.setAttribute(name, val)
+            );
+        });
+        return doc.body.innerHTML;
+    } else {
+        // Server-side link processing using cheerio
+        const cheerio = require('cheerio');
+        const $ = cheerio.load(sanitized_html);
+        $('a[href]').each((i, el) => {
+            const $el = $(el);
+            processLinks(
+                $el.attr('href'),
+                (cls) => $el.addClass(cls),
+                (name, val) => $el.attr(name, val)
+            );
+        });
+        return $('body').html();
+    }
 }
 
 Vue.prototype.$clearDraft = function (username, type){
