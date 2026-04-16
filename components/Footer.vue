@@ -1,19 +1,19 @@
 <template>
   <div>
-    
+
     <NewFooterDesign />
-    
-    
-    <VoteProposalModal />
-    
-    <vue-cookie-accept-decline 
-      :ref="'myPanel1'" 
-      :elementId="'myPanel1'" 
-      :debug="false" 
+
+
+    <!--<VoteProposalModal />-->
+
+    <vue-cookie-accept-decline
+      :ref="'myPanel1'"
+      :elementId="'myPanel1'"
+      :debug="false"
       :position="'bottom'"
-      :type="'bar'" 
-      :disableDecline="true" 
-      :transitionName="'slideFromBottom'" 
+      :type="'bar'"
+      :disableDecline="true"
+      :transitionName="'slideFromBottom'"
       :showPostponeButton="false">
 
       <div slot="message">
@@ -33,7 +33,7 @@ import NewFooterDesign from './NewFooterDesign.vue';
 
 import VueCookieAcceptDecline from 'vue-cookie-accept-decline';
 import "vue-cookie-accept-decline/dist/vue-cookie-accept-decline.css";
-import VoteProposalModal from "~/components/VoteProposalModal";
+//import VoteProposalModal from "~/components/VoteProposalModal";
 
 export default {
   props: ['isHomePage'],
@@ -41,7 +41,7 @@ export default {
   components: {
     NewFooterDesign,
     VueCookieAcceptDecline,
-    VoteProposalModal
+    //VoteProposalModal
   },
 
   computed: {
@@ -66,7 +66,7 @@ export default {
 
 
 body.modal-open {
-  overflow: auto !important; 
+  overflow: auto !important;
 }
 
 #voteProposalModal {
