@@ -259,7 +259,7 @@ Vue.prototype.$processTrxFunc = async function (op_name, cstm_params, active) {
   }
 };
 
-Vue.prototype.$cleanBody = function (report_content, full_cleanup){
+Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
 	if (!report_content) return '';
 
 	// Define all replacements and regex first
@@ -274,6 +274,7 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup){
 
 	// Stash function that generates a placeholder
 	const stashResult = (html) => {
+		if (no_media) return '';
 		const placeholder = `HTML_PLACEHOLDER_${counter++}`;
 		placeholders[placeholder] = html;
 		return placeholder;

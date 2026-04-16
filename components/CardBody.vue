@@ -52,7 +52,7 @@
           :title="$t('read_more_small')"
         >
           <div>
-            <span>{{ snippet }}</span>
+            <span v-html="snippet"></span>
             <i class="fas fa-external-link-alt"></i>
           </div>
         </a>
