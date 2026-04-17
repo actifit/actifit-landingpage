@@ -4,7 +4,7 @@
     <NewFooterDesign />
 
 
-    <!--<VoteProposalModal />-->
+    <VoteProposalModal />
 
     <vue-cookie-accept-decline
       :ref="'myPanel1'"
@@ -33,7 +33,7 @@ import NewFooterDesign from './NewFooterDesign.vue';
 
 import VueCookieAcceptDecline from 'vue-cookie-accept-decline';
 import "vue-cookie-accept-decline/dist/vue-cookie-accept-decline.css";
-//import VoteProposalModal from "~/components/VoteProposalModal";
+import VoteProposalModal from "~/components/VoteProposalModal";
 
 export default {
   props: ['isHomePage'],
@@ -41,7 +41,7 @@ export default {
   components: {
     NewFooterDesign,
     VueCookieAcceptDecline,
-    //VoteProposalModal
+    VoteProposalModal
   },
 
   computed: {

@@ -56,7 +56,7 @@ export default {
       const username = this.user && this.user.account && this.user.account.name || null;
       const proposalId = this.$config.proposalId; // Retrieve proposal ID from nuxt.config.js
       const approve = true; // Set to false if you want to unvote
-      window.hive_keychain.requestUpdateProposalVote(
+      window.hive_keychain?.requestUpdateProposalVote(
         username,
         [proposalId],
         approve,
