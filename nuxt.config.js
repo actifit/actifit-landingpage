@@ -21,7 +21,7 @@ module.exports = {
   // Runtime configuration
   publicRuntimeConfig: {
     version: '1.8.5',
-    proposalId: '337',
+    proposalId: '360',
   },
 
   privateRuntimeConfig: {
@@ -100,7 +100,7 @@ module.exports = {
     hiveImgUrl: 'https://images.hive.blog',
     steemApiNode: 'https://api.steemit.com/',
     hiveApiNode: 'https://api.hive.blog',//'https://hiveapi.actifit.io',//'https://anyx.io', 'https://hiveapi.actifit.io', //https://api.hive.blog
-    blurtApiNode: 'https://rpc.blurt.world', //'https://blurtrpc.actifit.io', //'https://blurt-rpc.saboin.com', //'http://164.68.116.86/', //'https://blurt-rpc.saboin.com/', //
+    blurtApiNode: 'https://rpc.blurt.blog', //'https://blurtrpc.actifit.io', //'https://blurt-rpc.saboin.com', //'http://164.68.116.86/', //'https://blurt-rpc.saboin.com/', //
     hiveStateApiNode: 'https://api.deathwing.me',
     hiveTestNode: 'https://testnet.openhive.network', //'https://api.fake.openhive.network',
     altHiveNodes: ["https://api.hive.blog", "https://api.deathwing.me", "https://api.openhive.network", "https://hiveapi.actifit.io", "https://hived.privex.io", "https://api.deathwing.me", "https://rpc.ausbit.dev", "https://hive-api.arcange.eu", "https://hive.roelandp.nl", "https://anyx.io",],
