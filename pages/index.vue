@@ -398,7 +398,7 @@
                                     </div>
                                     <div class="card-actions">
                                         <a href="#" class="btn-news" @click.prevent="openNewsModal(post)">{{ $t('Read_more') }}</a>
-                                        <a href="#" class="btn-news" @click.prevent="$router.push(post.url)">{{ $t('Full_view') }}</a>
+                                        <a :href="post.url" class="btn-news" @click.prevent="$router.push(post.url)">{{ $t('Full_view') }}</a>
                                     </div>
                                 </div>
                             </div>
