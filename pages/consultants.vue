@@ -5,7 +5,7 @@
       <ul class="navbar-nav">
         <li class="nav-item">
           <!-- home link -->
-          <a class="nav-link" href="#" @click.prevent="$router.push('/')">
+          <a class="nav-link" href="/" @click.prevent="$router.push('/')">
             <i class="fas fa-arrow-left text-brand navbar-back"></i>
           </a>
         </li>

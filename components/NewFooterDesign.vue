@@ -25,10 +25,10 @@
         <!-- Column 2: Actifit Links -->
         <div class="footer-column links-column">
           <h4>ACTIFIT</h4>
-          <a href="#" @click.prevent="$router.push('/activity')">{{ $t('activity_feed') }}</a>
-          <a href="#" @click.prevent="$router.push('/market')">{{ $t('Market') }}</a>
-          <a href="#" @click.prevent="$router.push('/yieldfarming')">{{ $t('yield_farming') }}</a>
-          <a href="#" @click.prevent="$router.push('/referrals')">{{ $t('Refer_A_Friend') }}</a>
+          <a href="/activity" @click.prevent="$router.push('/activity')">{{ $t('activity_feed') }}</a>
+          <a href="/market" @click.prevent="$router.push('/market')">{{ $t('Market') }}</a>
+          <a href="/yieldfarming" @click.prevent="$router.push('/yieldfarming')">{{ $t('yield_farming') }}</a>
+          <a href="/referrals" @click.prevent="$router.push('/referrals')">{{ $t('Refer_A_Friend') }}</a>
           <a href="/whitepaper/Actifit_White_Paper.pdf" target="_blank">{{ $t('Whitepaper') }}</a>
           <a href="/faq">{{ $t('FAQ') }}</a>
         </div>

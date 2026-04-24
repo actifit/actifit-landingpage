@@ -26,20 +26,20 @@
               <div class="stat-item">
                 <span class="label">{{ $t('Balance') }}</span>
                 <span class="value">{{ numberFormat(formattedUserTokens, 2) }} {{ $t('AFIT_Token') }}</span>
-                <a href="#" @click.prevent="$router.push('/wallet')" class="btn-panel-action">{{ $t('My_Wallet') }} <i class="fas fa-arrow-right"></i></a>
+                <a href="/wallet" @click.prevent="$router.push('/wallet')" class="btn-panel-action">{{ $t('My_Wallet') }} <i class="fas fa-arrow-right"></i></a>
               </div>
               <div class="stat-item">
                 <span class="label">{{ $t('Activity') }}</span>
                 <span class="value">{{ grabUserReportCount }} {{ $t('Reports') }}</span>
-                <a href="#" @click.prevent="$router.push('/activity/' + user.account.name)" class="btn-panel-action">{{ $t('My_Activity') }} <i class="fas fa-arrow-right"></i></a>
+                <a :href="'/activity/' + user.account.name" @click.prevent="$router.push('/activity/' + user.account.name)" class="btn-panel-action">{{ $t('My_Activity') }} <i class="fas fa-arrow-right"></i></a>
               </div>
             </div>
             <div class="resource-stats">
               <SteemStats :user="user" class="col-md-12" :key="reload" />
             </div>
             <div class="main-actions">
-              <a href="#" class="btn btn-primary-hero" @click.prevent="$router.push('/activity/')">{{ $t('activity_feed') }}</a>
-              <a href="#" class="btn btn-secondary-hero" @click.prevent="$router.push('/market')">{{ $t('Market') }}</a>
+              <a href="/activity/" class="btn btn-primary-hero" @click.prevent="$router.push('/activity/')">{{ $t('activity_feed') }}</a>
+              <a href="/market" class="btn btn-secondary-hero" @click.prevent="$router.push('/market')">{{ $t('Market') }}</a>
             </div>
           </div>
 
@@ -51,7 +51,7 @@
                 <a href="#" data-toggle="modal" data-target="#loginModal" @click="showModalFunc" class="btn btn-secondary-hero">{{ $t('Login') }}</a>
             </div>
             <div class="main-actions-alt">
-              <a href="#" class="btn-link-hero" @click.prevent="$router.push('/activity/')">{{ $t('Explore_Activity_Feed') }} <i class="fas fa-arrow-right"></i></a>
+              <a href="/activity/" class="btn-link-hero" @click.prevent="$router.push('/activity/')">{{ $t('Explore_Activity_Feed') }} <i class="fas fa-arrow-right"></i></a>
             </div>
           </div>
         </div>
