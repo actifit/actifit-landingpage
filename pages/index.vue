@@ -68,7 +68,7 @@
     <section id="recent-activity" class="py-5">
       <div class="container-fluid">
         <div class="text-center mb-5">
-          <h1 class="section-title">{{ $t('fresh') }}</h1>
+          <h2 class="section-title">{{ $t('fresh') }}</h2>
           <p class="lead text-muted">{{ $t('community') }}</p>
         </div>
 
@@ -128,9 +128,9 @@
     <section class="intro reveal" id="content">
       <div class="intro-showcase-container">
         <img src="/img/actifit_logo_200.png" alt="Actifit Logo" class="intro-logo" />
-        <h1 class="headline">
+        <h2 class="headline">
           {{ $t('Actifit_title') }}
-        </h1>
+        </h2>
         <p class="lead">
           {{ $t('Actifit_subtitle') }}
         </p>
@@ -207,10 +207,10 @@
     <section id="delegators" class="py-5 delegator-aurora-bg reveal">
       <div class="container-fluid">
         <div class="text-center mb-5">
-          <h1 class="section-title">
+          <h2 class="section-title">
             <i class="fas fa-heart text-brand"></i><br>
             {{ $t('our_top_supporters') }}
-          </h1>
+          </h2>
           <p class="lead text-muted">{{ $t('top_supporters_desc') }}</p>
         </div>
         <div v-if="!isLoadingDelegators && enrichedDelegators.length > 0">
@@ -266,9 +266,9 @@
     <!-- leaderboard -->
     <section id="leaderboard" class="py-5 reveal">
       <div class="container">
-        <h1 class="leaderboard-title text-center">
+        <h2 class="leaderboard-title text-center">
           {{ $t('Daily_Leaderboard') }}
-        </h1>
+        </h2>
         <div class="leaderboard-podium" v-if="leaderboard && leaderboard.length >= 3 && leaderboardPosts.length >= 3">
 
           <!-- 1st Place Column (now first in HTML) -->
@@ -351,10 +351,10 @@
     <section id="infrastructure" class="py-5">
       <div class="container">
         <div class="text-center mb-5">
-          <h1 class="section-title">
+          <h2 class="section-title">
             <i class="fas fa-cubes text-brand"></i><br>
             {{ $t('Infrastructure') }}
-          </h1>
+          </h2>
         </div>
         <div class="infrastructure-grid">
           <div class="priority-line">
@@ -381,10 +381,10 @@
     <section id="news" class="reveal py-5">
         <div class="container-fluid">
             <div class="text-center mb-5">
-                <h1 class="section-title">
+                <h2 class="section-title">
                     <i class="far fa-newspaper text-brand"></i><br>
                     {{ $t('News') }}
-                </h1>
+                </h2>
             </div>
             <div v-if="news && news.length > 0">
                 <div class="delegator-scroller-wrapper">

@@ -2,7 +2,7 @@
   <!-- single card item for approved professional -->	
         <div class="card form mx-auto p-3 mt-3 mt-md-5 text-center card-border pro-card col-sm-4">
 		  <div class="pb-md-2 text-center">
-			  <h1 class="pro-name">{{ this.professional.name}}</h1>
+			  <h2 class="pro-name">{{ this.professional.name}}</h2>
 			  <h2><a :href="'/' + this.professional.username">@{{ this.professional.username}}</a></h2>
 			  <h3>{{ this.professional.type}}</h3>
 			  <h4>{{ this.professional.location}}</h4>
