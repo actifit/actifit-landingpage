@@ -245,7 +245,8 @@ module.exports = {
       //{ rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css' },
       { rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css' },
 
-      { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css?family=Roboto' }
+      { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css?family=Roboto' },
+      { rel: 'canonical', href: 'https://actifit.io' }
     ],
     script: [
       { src: 'https://code.jquery.com/jquery-3.2.1.slim.min.js' },
@@ -297,7 +298,8 @@ module.exports = {
     { src: '@/plugins/vue-mavon-editor', ssr: false },
     { src: '~plugins/vue-custom.js' },
     { src: '~/plugins/dark-mode.js' },
-    { src: '~/plugins/commonCardMixin.js', mode: 'client' }
+    { src: '~/plugins/commonCardMixin.js', mode: 'client' },
+    { src: '~/plugins/canonical.js', mode: 'client' }
   ],
 
   /*
