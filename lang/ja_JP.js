@@ -984,6 +984,7 @@ module.exports = {
   Blurt_Power: 'Blurt Power',
   LinkedIn: 'LinkedIn',
   FAQ: 'FAQ',
+  TikTok: 'TikTok',
   Youtube: 'Youtube',
   Medium: 'Medium',
   Reset_password: 'パスワードをリセット',

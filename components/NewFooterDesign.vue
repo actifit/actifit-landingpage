@@ -55,6 +55,7 @@
         <a href="https://medium.com/@actifit.fitness" target="_blank" class="social-icon" :title="$t('Medium')"><i class="fab fa-medium-m"></i></a>
         <a href="https://www.youtube.com/channel/UCNHxAGO79rXI7Hdiikwnqtw" target="_blank" class="social-icon" :title="$t('Youtube')"><i class="fab fa-youtube"></i></a>
         <a href="https://www.linkedin.com/company/actifit-io" target="_blank" class="social-icon" :title="$t('LinkedIn')"><i class="fab fa-linkedin-in"></i></a>
+        <a href="https://www.tiktok.com/@actifit" target="_blank" class="social-icon" :title="$t('TikTok')"><i class="fab fa-tiktok"></i></a>
       </div>
 
       <hr class="footer-divider">

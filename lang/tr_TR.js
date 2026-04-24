@@ -985,6 +985,7 @@ module.exports = {
   Blurt_Power: 'Blurt Gücü',
   LinkedIn: 'LinkedIn',
   FAQ: 'SSS',
+  TikTok: 'TikTok',
   Youtube: 'Youtube',
   Medium: 'Medium',
   Reset_password: 'Şifreyi Sıfırla',
