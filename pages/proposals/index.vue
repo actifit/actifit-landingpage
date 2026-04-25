@@ -58,10 +58,11 @@
   export default {
     head () {
 		return {
-		  title: `Listing of Hive proposals - Actifit.io`,
+		  title: `Hive Proposals - Actifit.io`,
 		  meta: [
-			{ hid: 'description', name: 'description', content: `Listing of Hive proposals` },
-			{ hid: 'ogdescription', name: 'og:description', content: `Listing of Hive proposals` }
+			{ hid: 'description', name: 'description', content: `Browse and vote on Hive blockchain proposals. Support decentralized funding for projects on the Hive ecosystem.` },
+			{ hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Browse and vote on Hive blockchain proposals on Actifit.` },
+			{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Hive Proposals - Actifit.io' }
 		  ]
 		}
 	},

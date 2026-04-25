@@ -32,3 +32,18 @@
     
   </div>
 </template>
+
+<script>
+export default {
+  head() {
+    return {
+      title: 'Ownership - Actifit.io',
+      meta: [
+        { hid: 'description', name: 'description', content: 'Actifit ownership and project information — about the team behind the move-to-earn fitness platform.' },
+        { hid: 'ogdescription', name: 'og:description', property: 'og:description', content: 'Actifit ownership and project information — about the team behind the move-to-earn fitness platform.' },
+        { hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Ownership - Actifit.io' }
+      ]
+    }
+  }
+}
+</script>

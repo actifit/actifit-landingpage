@@ -72,10 +72,11 @@
   export default {
     head () {
 		return {
-		  title: `Listing of Activity Reports - Actifit.io`,
+		  title: `Activity Reports - Actifit.io`,
 		  meta: [
-			{ hid: 'description', name: 'description', content: `Listing of Actifit-based Activity Reports` },
-			{ hid: 'ogdescription', name: 'og:description', content: `Listing of Actifit-based Activity Reports` }
+			{ hid: 'description', name: 'description', content: `Browse fitness activity reports from the Actifit community. See how members earn crypto rewards for walking, running, and daily exercise.` },
+			{ hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Browse fitness activity reports from the Actifit move-to-earn community.` },
+			{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Activity Reports - Actifit.io' }
 		  ]
 		}
 	},

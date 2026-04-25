@@ -120,8 +120,9 @@
 		return {
 		  title: `Actifit Daily Yield Farming - Actifit.io`,
 		  meta: [
-			{ hid: 'description', name: 'description', content: `Daily Yield Farming Rewards` },
-			{ hid: 'ogdescription', name: 'og:description', content: `Daily Yield Farming Rewards` }
+			{ hid: 'description', name: 'description', content: `Earn daily AFIT token rewards by delegating Hive Power to Actifit. Yield farm crypto while supporting the move-to-earn fitness community.` },
+			{ hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Earn daily AFIT token rewards by delegating Hive Power to Actifit yield farming.` },
+			{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Actifit Daily Yield Farming - Actifit.io' }
 		  ]
 		}
 	},

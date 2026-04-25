@@ -454,6 +454,17 @@ import NotifyModal from '~/components/NotifyModal'
 import LoginModal from '~/components/LoginModal'
 
 export default {
+  head() {
+    return {
+      title: 'Actifit - It Pays to be Fit',
+      meta: [
+        { hid: 'description', name: 'description', content: 'Track your daily activity and earn crypto rewards. Actifit is the original move-to-earn app — walk, run, or hit the gym and get paid in AFIT tokens on Hive blockchain.' },
+        { hid: 'ogdescription', name: 'og:description', property: 'og:description', content: 'Track your daily activity and earn crypto rewards. Actifit is the original move-to-earn app — walk, run, or hit the gym and get paid in AFIT tokens on Hive blockchain.' },
+        { hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Actifit - It Pays to be Fit' },
+        { hid: 'image', name: 'og:image', property: 'og:image', content: 'https://actifit.io/img/actifit_logo_med.png' }
+      ]
+    }
+  },
   components: {
     LoginModal,
     NavbarBrand,

@@ -250,7 +250,13 @@
   export default {
 	head () {
 		return {
-		  title: `Actifit Moderator Access - Actifit`,
+		  title: `Actifit Moderator Access - Actifit.io`,
+		  meta: [
+			{ hid: 'description', name: 'description', content: `Actifit moderator access and content management tools for community curators.` },
+			{ hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Actifit moderator access and content management tools.` },
+			{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Actifit Moderator Access - Actifit.io' },
+			{ name: 'robots', content: 'noindex, nofollow' }
+		  ]
 		}
 	},
     components: {

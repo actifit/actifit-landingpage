@@ -6,7 +6,7 @@ const enTranslations = require('./lang/en_US.js')
 // --- STEP 2: Create dynamic variables from the imported translations ---
 const slogan = enTranslations.Slogan // "It Pays to be Fit"
 const mainTitle = `Actifit - ${slogan}`
-const mainDescription = `Signup to Actifit, the mobile dapp that incentivizes a healthy lifestyle. ${slogan}.`
+const mainDescription = `Track your daily activity and earn crypto rewards. Actifit is the original move-to-earn app — walk, run, or hit the gym and get paid in AFIT tokens on Hive blockchain.`
 
 
 const { I18N } = require('./config')

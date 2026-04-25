@@ -49,8 +49,9 @@
 		return {
 		  title: `Actifit Consultants - Actifit.io`,
 		  meta: [
-			{ hid: 'description', name: 'description', content: `Actifit verified consultants are fitness and nutrition professionals who provide services via Actifit market` },
-			{ hid: 'ogdescription', name: 'og:description', content: `Actifit verified consultants are fitness and nutrition professionals who provide services via Actifit market` }
+			{ hid: 'description', name: 'description', content: `Book fitness and nutrition consultations with verified professionals on Actifit Market. Pay with AFIT tokens for expert health and wellness advice.` },
+			{ hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Book fitness and nutrition consultations with verified professionals on Actifit Market.` },
+			{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Actifit Consultants - Actifit.io' }
 		  ]
 		}
 	},

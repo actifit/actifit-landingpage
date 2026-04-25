@@ -182,6 +182,17 @@
   import blurt from '@blurtfoundation/blurtjs'
   
   export default {
+	head () {
+		return {
+		  title: 'Settings - Actifit.io',
+		  meta: [
+			{ hid: 'description', name: 'description', content: 'Actifit user settings' },
+			{ hid: 'ogdescription', name: 'og:description', content: 'Actifit user settings' },
+			{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Settings - Actifit.io' },
+			{ name: 'robots', content: 'noindex, nofollow' }
+		  ]
+		}
+	},
 	components: {
 	  NavbarBrand,
 	  Footer,

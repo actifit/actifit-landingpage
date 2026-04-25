@@ -256,7 +256,7 @@ export default {
       title: `${this.pageTitle}`,
       meta: [
         { hid: 'title', name: 'og:title', 'property': 'og:title', content: `${this.pageTitle} - Actifit` },
-        { hid: 'description', name: 'description', content: `${this.desc} by ${this.username}` },
+        { hid: 'description', name: 'description', content: `${this.desc} by ${this.username} on Actifit — a move-to-earn fitness activity report rewarded with AFIT tokens.` },
         { hid: 'ogdescription', name: 'og:description', 'property': 'og:description', content: `${this.desc} by ${this.username}` },
         { hid: 'image', name: 'og:image', 'property': 'og:image', content: `${this.postImg}` }
       ],

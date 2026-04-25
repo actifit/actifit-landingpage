@@ -53,6 +53,9 @@ export default {
   head() {
     return {
       title: `Search Results for ${this.searchQuery} - Actifit.io`,
+      meta: [
+        { name: 'robots', content: 'noindex, nofollow' }
+      ]
     };
   },
   components: {

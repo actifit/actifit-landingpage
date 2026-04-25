@@ -78,8 +78,9 @@
 		return {
 		  title: `Actifit activity reports by ${this.username} - Actifit.io`,
 		  meta: [
-			{ hid: 'description', name: 'description', content: `Listing of activity reports by ${this.username}` },
-			{ hid: 'ogdescription', name: 'og:description', content: `Listing of activity reports by ${this.username}` }
+			{ hid: 'description', name: 'description', content: `Activity reports by ${this.username} on Actifit — daily fitness tracking and crypto rewards for staying active.` },
+			{ hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Activity reports by ${this.username} on Actifit.` },
+			{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: `Actifit activity reports by ${this.username} - Actifit.io` }
 		  ]
 		}
 	},

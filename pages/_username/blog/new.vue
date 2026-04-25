@@ -153,7 +153,9 @@ export default {
       title: `New Blog Post via Actifit`,
       meta: [
         { hid: 'description', name: 'description', content: `New blog post via Actifit` },
-        { hid: 'ogdescription', name: 'og:description', content: `New blog post via Actifit` }
+        { hid: 'ogdescription', name: 'og:description', content: `New blog post via Actifit` },
+        { hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'New Blog Post via Actifit' },
+        { name: 'robots', content: 'noindex, nofollow' }
       ]
     }
   },
