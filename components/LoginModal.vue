@@ -153,17 +153,95 @@
         this.is_logged_in = json.success; if (json.success && json.token){ const recaptcha = this.$recaptchaInstance; recaptcha.hideBadge(); localStorage.setItem('actiToken', json.token); let userSC = new Object(); userSC.account = json.userdata; this.$store.commit('setStdLoginUser', true); localStorage.setItem('access_token', json.token); localStorage.setItem('std_login', true); localStorage.setItem('std_login_name', userSC.account.name); localStorage.setItem('acti_login_method', ''); this.$store.commit('steemconnect/login', userSC); this.closeModal(); this.resetForm(); this.$store.dispatch('steemconnect/refreshUser'); this.$store.dispatch('fetchModerators'); this.$emit('login-successful'); }else{ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('login_error'); }
       },
       verifyHiveauth (challenge, data){ const sig = Signature.fromHex(data.challenge); const buf = hash.sha256(challenge, null, 0); return sig.verifyHash(buf, PublicKey.fromString(data.pubkey)); },
-      async loginHiveauth (){
-        if (this.$refs["username"].value == ''){ this.error_proceeding = true; this.error_msg = this.$t('login_error'); return; } this.login_in_progress = true; let account = this.$refs["username"].value.trim().toLowerCase(); const APP_META = { name:"actifit", description: process.env.socialSharingTitle, icon:"https://actifit.io/img/actifit_logo.png" }; const auth = { username: account, expire: undefined, key: undefined, }; const status = this.$HAS.status(); let challenge_data = { key_type: "posting", challenge: JSON.stringify({ login: account, ts: Date.now(), }) }; let mainRef = this; this.$HAS.authenticate(auth, APP_META, challenge_data, (message) => { if (message.cmd && message.cmd === 'auth_wait'){ this.hiveauth_wait = true; this.$nextTick(() => { const authPayload = { uuid: message.uuid, account: account, key: message.key, host: 'wss://hive-auth.arcange.eu' }; this.hiveauth_key = message.key; const authUri = `has://auth_req/${btoa(JSON.stringify(authPayload))}`; const qrLinkElement = mainRef.$refs['hiveauth-qr-link']; const qrElement = mainRef.$refs['hiveauth-qr']; const QR = new QRious({ element: qrElement, background: 'white', backgroundAlpha: 0.8, foreground: 'black', size: 200, }); QR.value = authUri; qrLinkElement.href = authUri; }); } }).then(message => { if (message.cmd && message.cmd === 'auth_ack'){ const { data } = message; const { expire, token } = data; const success = this.verifyHiveauth(challenge_data.challenge, data.challenge); this.hiveauth_wait = false; this.hiveauth_expire = expire; this.hiveauth_token = token; if (success){ const recaptcha = this.$recaptchaInstance; recaptcha.hideBadge(); this.login_in_progress = false; fetch(process.env.actiAppUrl+'getAccountData?user='+account+'&bchain=HIVE').then( res => { res.json().then(json => { this.setHiveauthLoginStatus (json) }).catch(e => reject(e)) } ).catch(e => reject(e)) }else{ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('login_error'); return; } }else if (message.cmd && message.cmd === 'auth_nack'){ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('auth_rejected_by_user'); return; } }).catch(err => { console.error(err); this.error_proceeding = true; this.error_msg = err; this.hiveauth_wait = false; this.login_in_progress = false; })
+async loginHiveauth (){
+        if (this.$refs["username"].value == ''){ this.error_proceeding = true; this.error_msg = this.$t('login_error'); return; } this.login_in_progress = true; let account = this.$refs["username"].value.trim().toLowerCase(); const APP_META = { name:"actifit", description: process.env.socialSharingTitle, icon:"https://actifit.io/img/actifit_logo.png" }; const auth = { username: account, expire: undefined, key: undefined, }; const status = this.$HAS.status(); let challenge_data = { key_type: "posting", challenge: JSON.stringify({ login: account, ts: Date.now(), }) }; let mainRef = this; this.$HAS.authenticate(auth, APP_META, challenge_data, (message) => { if (message.cmd && message.cmd === 'auth_wait'){ this.hiveauth_wait = true; this.$nextTick(() => { const authPayload = { uuid: message.uuid, account: account, key: message.key, host: 'wss://hive-auth.arcange.eu' }; this.hiveauth_key = message.key; const authUri = `has://auth_req/${btoa(JSON.stringify(authPayload))}`; const qrLinkElement = mainRef.$refs['hiveauth-qr-link']; const qrElement = mainRef.$refs['hiveauth-qr']; const QR = new QRious({ element: qrElement, background: 'white', backgroundAlpha: 0.8, foreground: 'black', size: 200, }); QR.value = authUri; qrLinkElement.href = authUri; }); } }).then(async (message) => { if (message.cmd && message.cmd === 'auth_ack'){ const { data } = message; const { expire, token } = data; const success = this.verifyHiveauth(challenge_data.challenge, data.challenge); this.hiveauth_wait = false; this.hiveauth_expire = expire; this.hiveauth_token = token; if (success){ const recaptcha = this.$recaptchaInstance; recaptcha.hideBadge(); this.login_in_progress = false; try { const acctController = new AbortController(); const acctTimeoutId = setTimeout(() => acctController.abort(), 20000); const acctRes = await fetch(process.env.actiAppUrl+'getAccountData?user='+account+'&bchain=HIVE', { signal: acctController.signal }); clearTimeout(acctTimeoutId); const acctJson = await acctRes.json(); this.setHiveauthLoginStatus(acctJson); } catch (e) { console.error('HiveAuth account data error:', e); this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('login_error'); } }else{ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('login_error'); return; } }else if (message.cmd && message.cmd === 'auth_nack'){ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('auth_rejected_by_user'); return; } }).catch(err => { console.error(err); this.error_proceeding = true; this.error_msg = this.$t('login_error'); this.hiveauth_wait = false; this.login_in_progress = false; });
       },
       async verifyKeychain () {
         return new Promise((resolve) => { if (window.hive_keychain) { this.keychain = window.hive_keychain; this.keychain.requestHandshake(() => { this.keychain_available = true; resolve(); }); } })
       },
       async loginKeychain () {
-        await this.verifyKeychain(); if (!this.keychain_available){ return; } if (this.$refs["username"].value == ''){ this.error_proceeding = true; this.error_msg = this.$t('login_error'); return; } this.$store.commit('setBchain', this.bchain_val); localStorage.setItem('cur_bchain', this.bchain_val); let account_name = this.$refs["username"].value.trim().toLowerCase(); let user_info = { 'username': account_name, 'bchain': this.bchain_val }; let outc = await fetch(process.env.actiAppUrl+'loginKeychain',{ method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(user_info) }); let contt = await outc.json(); if (contt.message){ window.hive_keychain.requestVerifyKey(account_name, contt.message, 'Posting', (response) => { if (response.success === true) { fetch(process.env.actiAppUrl+'getAccountData?user='+account_name+'&bchain=HIVE').then( res => { res.json().then(json => { this.setKeychainLoginStatus (json) }).catch(e => reject(e)) } ).catch(e => reject(e)) } }); }
+        await this.verifyKeychain();
+        if (!this.keychain_available){ return; }
+        if (this.$refs["username"].value == ''){ this.error_proceeding = true; this.error_msg = this.$t('login_error'); return; }
+        this.$store.commit('setBchain', this.bchain_val);
+        localStorage.setItem('cur_bchain', this.bchain_val);
+        let account_name = this.$refs["username"].value.trim().toLowerCase();
+        let user_info = { 'username': account_name, 'bchain': this.bchain_val };
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 20000);
+          let outc = await fetch(process.env.actiAppUrl+'loginKeychain',{
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(user_info),
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+          let contt = await outc.json();
+          if (contt.message){
+            window.hive_keychain.requestVerifyKey(account_name, contt.message, 'Posting', async (response) => {
+              if (response.success === true) {
+                try {
+                  const acctController = new AbortController();
+                  const acctTimeoutId = setTimeout(() => acctController.abort(), 20000);
+                  const acctRes = await fetch(process.env.actiAppUrl+'getAccountData?user='+account_name+'&bchain=HIVE', {
+                    signal: acctController.signal
+                  });
+                  clearTimeout(acctTimeoutId);
+                  const acctJson = await acctRes.json();
+                  this.setKeychainLoginStatus(acctJson);
+                } catch (e) {
+                  console.error('Keychain account data error:', e);
+                  this.error_proceeding = true;
+                  this.login_in_progress = false;
+                  this.error_msg = this.$t('login_error');
+                }
+              }
+            });
+          } else {
+            this.error_proceeding = true;
+            this.login_in_progress = false;
+            this.error_msg = this.$t('login_error');
+          }
+        } catch (e) {
+          console.error('Keychain login error:', e);
+          this.error_proceeding = true;
+          this.login_in_progress = false;
+          this.error_msg = this.$t('login_error');
+        }
       },
       async proceedLogin () {
-        this.captcha_invalid = ''; this.error_proceeding = false; this.error_msg = ''; if (this.$refs["username"].value == '' || this.$refs["ppkey"].value == ''){ this.error_proceeding = true; this.error_msg = this.$t('login_error'); return; } const token = await this.$recaptcha('login'); let outc = await fetch(process.env.actiAppUrl+'verifyLoginCaptcha?token='+token); if (outc.error){ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('login_error'); return; } this.$store.commit('setBchain', this.bchain_val); localStorage.setItem('cur_bchain', this.bchain_val); this.login_in_progress = true; let account_name = this.$refs["username"].value.trim().toLowerCase(); let priv_pkey = this.$refs["ppkey"].value; let user_info = { 'username': account_name, 'ppkey': priv_pkey, 'bchain': this.bchain_val, 'keeploggedin': this.keep_loggedin_val }; fetch(process.env.actiAppUrl+'loginAuth',{ method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(user_info) }).then( res => {res.json().then(json => this.setUserLoginStatus (json)).catch(e => reject(e)) }).catch(e => reject(e))
+        this.captcha_invalid = '';
+        this.error_proceeding = false;
+        this.error_msg = '';
+        if (this.$refs["username"].value == '' || this.$refs["ppkey"].value == ''){ this.error_proceeding = true; this.error_msg = this.$t('login_error'); return; }
+        const token = await this.$recaptcha('login');
+        let outc = await fetch(process.env.actiAppUrl+'verifyLoginCaptcha?token='+token);
+        if (outc.error){ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('login_error'); return; }
+        this.$store.commit('setBchain', this.bchain_val);
+        localStorage.setItem('cur_bchain', this.bchain_val);
+        this.login_in_progress = true;
+        let account_name = this.$refs["username"].value.trim().toLowerCase();
+        let priv_pkey = this.$refs["ppkey"].value;
+        let user_info = { 'username': account_name, 'ppkey': priv_pkey, 'bchain': this.bchain_val, 'keeploggedin': this.keep_loggedin_val };
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 20000);
+          const res = await fetch(process.env.actiAppUrl+'loginAuth',{
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(user_info),
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+          const json = await res.json();
+          this.setUserLoginStatus(json);
+        } catch (e) {
+          console.error('Login error:', e);
+          this.error_proceeding = true;
+          this.login_in_progress = false;
+          this.error_msg = this.$t('login_error');
+        }
       },
     }
   }

@@ -1,4 +1,4 @@
-export default function (app) {
+export default ({ app }) => {
   if (process.client) {
     app.router.afterEach((to) => {
       const canonicalUrl = 'https://actifit.io' + to.path.replace(/\/+$/, '')
