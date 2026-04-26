@@ -1,0 +1,2158 @@
+diff --git a/node_modules/mavon-editor/dist/css/index.css b/node_modules/mavon-editor/dist/css/index.css
+index d581aa8..00d11eb 100644
+--- a/node_modules/mavon-editor/dist/css/index.css
++++ b/node_modules/mavon-editor/dist/css/index.css
+@@ -1 +1 @@
+-@font-face{font-family:fontello;src:url(../font/fontello.eot);src:url(../font/fontello.eot#iefix) format("embedded-opentype"),url(../font/fontello.woff2) format("woff2"),url(../font/fontello.woff) format("woff"),url(../font/fontello.ttf) format("truetype"),url(../font/fontello.svg#fontello) format("svg");font-weight:400;font-style:normal}[class*=" fa-mavon-"]:before,[class^=fa-mavon-]:before{font-family:fontello;font-style:normal;font-weight:400;speak:none;display:inline-block;text-decoration:inherit;width:1em;margin-right:.2em;text-align:center;font-variant:normal;text-transform:none;line-height:1em;margin-left:.2em;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.fa-mavon-bold:before{content:"\E800"}.fa-mavon-italic:before{content:"\E801"}.fa-mavon-thumb-tack:before{content:"\E802"}.fa-mavon-link:before{content:"\E803"}.fa-mavon-picture-o:before{content:"\E804"}.fa-mavon-repeat:before{content:"\E805"}.fa-mavon-undo:before{content:"\E806"}.fa-mavon-trash-o:before{content:"\E807"}.fa-mavon-floppy-o:before{content:"\E808"}.fa-mavon-compress:before{content:"\E809"}.fa-mavon-eye:before{content:"\E80A"}.fa-mavon-eye-slash:before{content:"\E80B"}.fa-mavon-question-circle:before{content:"\E80C"}.fa-mavon-times:before{content:"\E80D"}.fa-mavon-align-left:before{content:"\E80F"}.fa-mavon-align-center:before{content:"\E810"}.fa-mavon-align-right:before{content:"\E811"}.fa-mavon-arrows-alt:before{content:"\F0B2"}.fa-mavon-bars:before{content:"\F0C9"}.fa-mavon-list-ul:before{content:"\F0CA"}.fa-mavon-list-ol:before{content:"\F0CB"}.fa-mavon-strikethrough:before{content:"\F0CC"}.fa-mavon-underline:before{content:"\F0CD"}.fa-mavon-table:before{content:"\F0CE"}.fa-mavon-columns:before{content:"\F0DB"}.fa-mavon-quote-left:before{content:"\F10D"}.fa-mavon-code:before{content:"\F121"}.fa-mavon-superscript:before{content:"\F12B"}.fa-mavon-subscript:before{content:"\F12C"}.fa-mavon-header:before{content:"\F1DC"}.fa-mavon-window-maximize:before{content:"\F2D0"}.markdown-body strong{font-weight:bolder}.markdown-body .hljs-center{text-align:center}.markdown-body .hljs-right{text-align:right}.markdown-body .hljs-left{text-align:left}.markdown-body .hljs{overflow:auto}
+\ No newline at end of file
++@font-face{font-family:fontello;src:url(../font/fontello.eot);src:url(../font/fontello.eot#iefix) format("embedded-opentype"),url(../font/fontello.ttf) format("truetype"),url(../font/fontello.svg#fontello) format("svg");font-weight:400;font-style:normal}[class*=" fa-mavon-"]:before,[class^=fa-mavon-]:before{font-family:fontello;font-style:normal;font-weight:400;speak:none;display:inline-block;text-decoration:inherit;width:1em;margin-right:.2em;text-align:center;font-variant:normal;text-transform:none;line-height:1em;margin-left:.2em;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.fa-mavon-bold:before{content:"\E800"}.fa-mavon-italic:before{content:"\E801"}.fa-mavon-thumb-tack:before{content:"\E802"}.fa-mavon-link:before{content:"\E803"}.fa-mavon-picture-o:before{content:"\E804"}.fa-mavon-repeat:before{content:"\E805"}.fa-mavon-undo:before{content:"\E806"}.fa-mavon-trash-o:before{content:"\E807"}.fa-mavon-floppy-o:before{content:"\E808"}.fa-mavon-compress:before{content:"\E809"}.fa-mavon-eye:before{content:"\E80A"}.fa-mavon-eye-slash:before{content:"\E80B"}.fa-mavon-question-circle:before{content:"\E80C"}.fa-mavon-times:before{content:"\E80D"}.fa-mavon-align-left:before{content:"\E80F"}.fa-mavon-align-center:before{content:"\E810"}.fa-mavon-align-right:before{content:"\E811"}.fa-mavon-arrows-alt:before{content:"\F0B2"}.fa-mavon-bars:before{content:"\F0C9"}.fa-mavon-list-ul:before{content:"\F0CA"}.fa-mavon-list-ol:before{content:"\F0CB"}.fa-mavon-strikethrough:before{content:"\F0CC"}.fa-mavon-underline:before{content:"\F0CD"}.fa-mavon-table:before{content:"\F0CE"}.fa-mavon-columns:before{content:"\F0DB"}.fa-mavon-quote-left:before{content:"\F10D"}.fa-mavon-code:before{content:"\F121"}.fa-mavon-superscript:before{content:"\F12B"}.fa-mavon-subscript:before{content:"\F12C"}.fa-mavon-header:before{content:"\F1DC"}.fa-mavon-window-maximize:before{content:"\F2D0"}.markdown-body strong{font-weight:bolder}.markdown-body .hljs-center{text-align:center}.markdown-body .hljs-right{text-align:right}.markdown-body .hljs-left{text-align:left}.markdown-body .hljs{overflow:auto}
+\ No newline at end of file
+diff --git a/node_modules/mavon-editor/dist/font/fontello.woff b/node_modules/mavon-editor/dist/font/fontello.woff
+deleted file mode 100644
+index 9844453..0000000
+Binary files a/node_modules/mavon-editor/dist/font/fontello.woff and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/font/fontello.woff2 b/node_modules/mavon-editor/dist/font/fontello.woff2
+deleted file mode 100644
+index 957d053..0000000
+Binary files a/node_modules/mavon-editor/dist/font/fontello.woff2 and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_AMS-Regular.woff b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_AMS-Regular.woff
+deleted file mode 100644
+index 4f57515..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_AMS-Regular.woff and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_AMS-Regular.woff2 b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_AMS-Regular.woff2
+deleted file mode 100644
+index b982d6e..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_AMS-Regular.woff2 and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Caligraphic-Bold.woff b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Caligraphic-Bold.woff
+deleted file mode 100644
+index ab56ab7..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Caligraphic-Bold.woff and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Caligraphic-Bold.woff2 b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Caligraphic-Bold.woff2
+deleted file mode 100644
+index 710c261..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Caligraphic-Bold.woff2 and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Caligraphic-Regular.woff b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Caligraphic-Regular.woff
+deleted file mode 100644
+index aec8a33..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Caligraphic-Regular.woff and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Caligraphic-Regular.woff2 b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Caligraphic-Regular.woff2
+deleted file mode 100644
+index ee5193d..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Caligraphic-Regular.woff2 and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Fraktur-Bold.ttf b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Fraktur-Bold.ttf
+index 483a7cd..5bbe278 100644
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Fraktur-Bold.ttf and b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Fraktur-Bold.ttf differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Fraktur-Bold.woff b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Fraktur-Bold.woff
+deleted file mode 100644
+index 189fea5..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Fraktur-Bold.woff and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Fraktur-Bold.woff2 b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Fraktur-Bold.woff2
+deleted file mode 100644
+index dc3bd4c..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Fraktur-Bold.woff2 and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Fraktur-Regular.ttf b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Fraktur-Regular.ttf
+deleted file mode 100644
+index 9aa5f67..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Fraktur-Regular.ttf and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Fraktur-Regular.woff b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Fraktur-Regular.woff
+deleted file mode 100644
+index d01450e..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Fraktur-Regular.woff and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Fraktur-Regular.woff2 b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Fraktur-Regular.woff2
+deleted file mode 100644
+index 7eeba37..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Fraktur-Regular.woff2 and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-Bold.ttf b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-Bold.ttf
+deleted file mode 100644
+index dc0185a..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-Bold.ttf and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-Bold.woff b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-Bold.woff
+deleted file mode 100644
+index acf48e6..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-Bold.woff and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-Bold.woff2 b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-Bold.woff2
+deleted file mode 100644
+index cf5abab..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-Bold.woff2 and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-BoldItalic.ttf b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-BoldItalic.ttf
+deleted file mode 100644
+index 4346f17..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-BoldItalic.ttf and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-BoldItalic.woff b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-BoldItalic.woff
+deleted file mode 100644
+index d2cfe4e..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-BoldItalic.woff and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-BoldItalic.woff2 b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-BoldItalic.woff2
+deleted file mode 100644
+index d0178f4..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-BoldItalic.woff2 and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-Italic.ttf b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-Italic.ttf
+deleted file mode 100644
+index f2c3eba..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-Italic.ttf and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-Italic.woff b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-Italic.woff
+deleted file mode 100644
+index 1184295..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-Italic.woff and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-Italic.woff2 b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-Italic.woff2
+deleted file mode 100644
+index aa05e14..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-Italic.woff2 and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-Regular.ttf b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-Regular.ttf
+deleted file mode 100644
+index 8acb365..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-Regular.ttf and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-Regular.woff b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-Regular.woff
+deleted file mode 100644
+index 9f8228f..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-Regular.woff and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-Regular.woff2 b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-Regular.woff2
+deleted file mode 100644
+index e3f71eb..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Main-Regular.woff2 and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Math-BoldItalic.ttf b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Math-BoldItalic.ttf
+deleted file mode 100644
+index a645df6..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Math-BoldItalic.ttf and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Math-BoldItalic.woff b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Math-BoldItalic.woff
+deleted file mode 100644
+index 87d4f22..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Math-BoldItalic.woff and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Math-BoldItalic.woff2 b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Math-BoldItalic.woff2
+deleted file mode 100644
+index 83b4996..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Math-BoldItalic.woff2 and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Math-Italic.ttf b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Math-Italic.ttf
+deleted file mode 100644
+index 9c38359..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Math-Italic.ttf and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Math-Italic.woff b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Math-Italic.woff
+deleted file mode 100644
+index 959746e..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Math-Italic.woff and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Math-Italic.woff2 b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Math-Italic.woff2
+deleted file mode 100644
+index e3ea522..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Math-Italic.woff2 and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_SansSerif-Bold.ttf b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_SansSerif-Bold.ttf
+deleted file mode 100644
+index ff10851..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_SansSerif-Bold.ttf and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_SansSerif-Bold.woff b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_SansSerif-Bold.woff
+deleted file mode 100644
+index f0d6ea7..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_SansSerif-Bold.woff and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_SansSerif-Bold.woff2 b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_SansSerif-Bold.woff2
+deleted file mode 100644
+index 4cf8f14..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_SansSerif-Bold.woff2 and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_SansSerif-Italic.ttf b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_SansSerif-Italic.ttf
+deleted file mode 100644
+index 3dd7671..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_SansSerif-Italic.ttf and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_SansSerif-Italic.woff b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_SansSerif-Italic.woff
+deleted file mode 100644
+index 9da0dfe..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_SansSerif-Italic.woff and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_SansSerif-Italic.woff2 b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_SansSerif-Italic.woff2
+deleted file mode 100644
+index ce19ae0..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_SansSerif-Italic.woff2 and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_SansSerif-Regular.ttf b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_SansSerif-Regular.ttf
+deleted file mode 100644
+index f117cd6..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_SansSerif-Regular.ttf and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_SansSerif-Regular.woff b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_SansSerif-Regular.woff
+deleted file mode 100644
+index 6ed9878..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_SansSerif-Regular.woff and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_SansSerif-Regular.woff2 b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_SansSerif-Regular.woff2
+deleted file mode 100644
+index 2761149..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_SansSerif-Regular.woff2 and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Script-Regular.ttf b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Script-Regular.ttf
+deleted file mode 100644
+index e6f3454..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Script-Regular.ttf and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Script-Regular.woff b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Script-Regular.woff
+deleted file mode 100644
+index 4a48e65..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Script-Regular.woff and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Script-Regular.woff2 b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Script-Regular.woff2
+deleted file mode 100644
+index b0aed19..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Script-Regular.woff2 and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size1-Regular.ttf b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size1-Regular.ttf
+deleted file mode 100644
+index 37faa0f..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size1-Regular.ttf and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size1-Regular.woff b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size1-Regular.woff
+deleted file mode 100644
+index 0832f7a..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size1-Regular.woff and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size1-Regular.woff2 b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size1-Regular.woff2
+deleted file mode 100644
+index 483e7b6..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size1-Regular.woff2 and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size2-Regular.ttf b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size2-Regular.ttf
+deleted file mode 100644
+index cf32623..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size2-Regular.ttf and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size2-Regular.woff b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size2-Regular.woff
+deleted file mode 100644
+index 14f6485..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size2-Regular.woff and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size2-Regular.woff2 b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size2-Regular.woff2
+deleted file mode 100644
+index 5ff7060..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size2-Regular.woff2 and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size3-Regular.ttf b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size3-Regular.ttf
+deleted file mode 100644
+index ff7e2b9..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size3-Regular.ttf and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size3-Regular.woff b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size3-Regular.woff
+deleted file mode 100644
+index d3626ce..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size3-Regular.woff and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size3-Regular.woff2 b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size3-Regular.woff2
+deleted file mode 100644
+index e45ca49..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size3-Regular.woff2 and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size4-Regular.ttf b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size4-Regular.ttf
+deleted file mode 100644
+index 3034091..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size4-Regular.ttf and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size4-Regular.woff b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size4-Regular.woff
+deleted file mode 100644
+index 93c57a6..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size4-Regular.woff and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size4-Regular.woff2 b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size4-Regular.woff2
+deleted file mode 100644
+index 53b65af..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Size4-Regular.woff2 and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Typewriter-Regular.ttf b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Typewriter-Regular.ttf
+deleted file mode 100644
+index 2fd8529..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Typewriter-Regular.ttf and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Typewriter-Regular.woff b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Typewriter-Regular.woff
+deleted file mode 100644
+index e90fa2b..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Typewriter-Regular.woff and /dev/null differ
+diff --git a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Typewriter-Regular.woff2 b/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Typewriter-Regular.woff2
+deleted file mode 100644
+index e40ab15..0000000
+Binary files a/node_modules/mavon-editor/dist/katex/fonts/KaTeX_Typewriter-Regular.woff2 and /dev/null differ
+diff --git a/node_modules/mavon-editor/src/components/md-toolbar-left.vue b/node_modules/mavon-editor/src/components/md-toolbar-left.vue
+deleted file mode 100644
+index 01a7972..0000000
+--- a/node_modules/mavon-editor/src/components/md-toolbar-left.vue
++++ /dev/null
+@@ -1,489 +0,0 @@
+-<template>
+-    <div class="v-left-item">
+-        <slot name="left-toolbar-before" />
+-        <button :disabled="!editable" type="button" v-if="toolbars.bold" @click="$clicks('bold')"
+-                class="op-icon fa fa-mavon-bold" aria-hidden="true"
+-                :title="`${d_words.tl_bold} (ctrl+b)`"></button>
+-        <button :disabled="!editable" type="button" v-if="toolbars.italic" @click="$clicks('italic')"
+-                class="op-icon fa fa-mavon-italic" aria-hidden="true"
+-                :title="`${d_words.tl_italic} (ctrl+i)`"></button>
+-        <div :class="{'selected': s_header_dropdown_open}" :disabled="!editable" type="button" v-if="toolbars.header" @mouseleave="$mouseleave_header_dropdown" @mouseenter="$mouseenter_header_dropdown"
+-                class="op-icon fa fa-mavon-header dropdown dropdown-wrapper" aria-hidden="true"
+-                :title="`${d_words.tl_header} (ctrl+h)`">
+-            <transition name="fade">
+-                <div class="op-header popup-dropdown" :class="{'transition': transition}" v-show="s_header_dropdown_open" @mouseenter="$mouseenter_header_dropdown" @mouseleave="$mouseleave_header_dropdown">
+-                    <div title="#"  class="dropdown-item" @click.stop="$click_header('header1')"><span>{{d_words.tl_header_one}}</span></div>
+-                    <div title="## " class="dropdown-item" @click.stop="$click_header('header2')"><span>{{d_words.tl_header_two}}</span></div>
+-                    <div title="### " class="dropdown-item" @click.stop="$click_header('header3')"><span>{{d_words.tl_header_three}}</span></div>
+-                    <div title="#### " class="dropdown-item" @click.stop="$click_header('header4')"><span>{{d_words.tl_header_four}}</span></div>
+-                    <div title="##### " class="dropdown-item" @click.stop="$click_header('header5')"><span>{{d_words.tl_header_five}}</span></div>
+-                    <div title="###### " class="dropdown-item" @click.stop="$click_header('header6')"><span>{{d_words.tl_header_six}}</span></div>
+-                </div>
+-            </transition>
+-        </div>
+-        <span v-if="toolbars.header || toolbars.italic || toolbars.bold" class="op-icon-divider"></span>
+-        <button :disabled="!editable" type="button" v-if="toolbars.underline" @click="$clicks('underline')"
+-                class="op-icon fa fa-mavon-underline"
+-                :title="`${d_words.tl_underline} (ctrl+u)`" aria-hidden="true"></button>
+-        <button :disabled="!editable" type="button" v-if="toolbars.strikethrough" @click="$clicks('strikethrough')"
+-                class="op-icon fa fa-mavon-strikethrough"
+-                :title="`${d_words.tl_strikethrough} (ctrl+shift+d)`" aria-hidden="true"></button>
+-        <button :disabled="!editable" type="button" v-if="toolbars.mark" @click="$clicks('mark')"
+-                class="op-icon fa fa-mavon-thumb-tack" :title="`${d_words.tl_mark} (ctrl+m)`"
+-                aria-hidden="true"></button>
+-        <button :disabled="!editable" type="button" v-if="toolbars.superscript" @click="$clicks('superscript')"
+-                class="op-icon fa fa-mavon-superscript"
+-                aria-hidden="true" :title="`${d_words.tl_superscript} (ctrl+alt+s)`"></button>
+-        <button :disabled="!editable" type="button" v-if="toolbars.subscript" @click="$clicks('subscript')"
+-                class="op-icon fa fa-mavon-subscript"
+-                aria-hidden="true" :title="`${d_words.tl_subscript} (ctrl+shift+s)`"></button>
+-        <button :disabled="!editable" type="button" v-if="toolbars.alignleft" @click="$clicks('alignleft')"
+-                class="op-icon fa fa-mavon-align-left"
+-                aria-hidden="true" :title="`${d_words.tl_alignleft} (ctrl+l)`">
+-        </button>
+-        <button :disabled="!editable" type="button" v-if="toolbars.aligncenter" @click="$clicks('aligncenter')"
+-                class="op-icon fa fa-mavon-align-center"
+-                aria-hidden="true" :title="`${d_words.tl_aligncenter} (ctrl+e)`"></button>
+-        <button :disabled="!editable" type="button" v-if="toolbars.alignright" @click="$clicks('alignright')"
+-                class="op-icon fa fa-mavon-align-right"
+-                aria-hidden="true" :title="`${d_words.tl_alignright} (ctrl+r)`"></button>
+-        <span
+-                v-if="toolbars.superscript || toolbars.subscript || toolbars.underline || toolbars.strikethrough || toolbars.mark"
+-                class="op-icon-divider"></span>
+-        <button :disabled="!editable" type="button" v-if="toolbars.quote" @click="$clicks('quote')"
+-                class="op-icon fa fa-mavon-quote-left" aria-hidden="true"
+-                :title="`${d_words.tl_quote} (ctrl+q)`"></button>
+-        <button :disabled="!editable" type="button" v-if="toolbars.ol" @click="$clicks('ol')"
+-                class="op-icon fa fa-mavon-list-ol" aria-hidden="true"
+-                :title="`${d_words.tl_ol} (ctrl+o)`"></button>
+-        <button :disabled="!editable" type="button" v-if="toolbars.ul" @click="$clicks('ul')"
+-                class="op-icon fa fa-mavon-list-ul" aria-hidden="true"
+-                :title="`${d_words.tl_ul} (ctrl+alt+u)`"></button>
+-        <span v-if="toolbars.ul || toolbars.ol || toolbars.quote" class="op-icon-divider"></span>
+-        <button :disabled="!editable" type="button" v-if="toolbars.link" @click.stop="$toggle_imgLinkAdd('link')"
+-                class="op-icon fa fa-mavon-link" aria-hidden="true"
+-                :title="`${d_words.tl_link} (ctrl+l)`"></button>
+-        <div :disabled="!editable" :class="{'selected': s_img_dropdown_open}" type="button" v-if="toolbars.imagelink" @mouseleave="$mouseleave_img_dropdown" @mouseenter="$mouseenter_img_dropdown"
+-                class="op-icon fa fa-mavon-picture-o dropdown dropdown-wrapper"
+-                aria-hidden="true">
+-            <transition name="fade">
+-                <div  class="op-image popup-dropdown" :class="{'transition': transition}" v-show="s_img_dropdown_open" @mouseleave="$mouseleave_img_dropdown" @mouseenter="$mouseenter_img_dropdown">
+-                    <div  class="dropdown-item" @click.stop="$toggle_imgLinkAdd('imagelink')"><span>{{d_words.tl_image}}</span></div>
+-                    <div class="dropdown-item" style="overflow: hidden">
+-                        <input type="file" accept="image/gif,image/jpeg,image/jpg,image/png,image/svg" @change="$imgAdd($event)" multiple="multiple"/>{{d_words.tl_upload}}
+-                    </div>
+-
+-                    <div
+-                        v-for="(item, index) in img_file"
+-                        v-if="item && item[1]"
+-                        class="dropdown-item dropdown-images"
+-                        :title="item[1].name"
+-                        :key="index"
+-                        @click.stop="$imgFileListClick(index)"
+-                    >
+-                        <span>{{item[1].name}}</span>
+-                        <button slot="right" type="button" @click.stop="$imgDel(index)"
+-                                class="op-icon fa fa-mavon-times" aria-hidden="true"
+-                                :title="d_words.tl_upload_remove"></button>
+-                        <!-- 缩略图展示 -->
+-                        <img class = "image-show" :class="{'transition': transition}" :src="item[1].miniurl" alt="none">
+-                    </div>
+-                </div>
+-            </transition>
+-        </div>
+-        <button :disabled="!editable" type="button" v-if="toolbars.code" @click="$clicks('code')"
+-                class="op-icon fa fa-mavon-code" aria-hidden="true"
+-                :title="`${d_words.tl_code} (ctrl+alt+c)`"></button>
+-        <button :disabled="!editable" type="button" v-if="toolbars.table" @click="$clicks('table')"
+-                class="op-icon fa fa-mavon-table" aria-hidden="true"
+-                :title="`${d_words.tl_table} (ctrl+alt+t)`"></button>
+-        <span v-if="toolbars.link || toolbars.imagelink || toolbars.code || toolbars.table"
+-              class="op-icon-divider"></span>
+-        <button type="button" v-if="toolbars.undo" @click="$clicks('undo')" class="op-icon fa fa-mavon-undo"
+-                aria-hidden="true" :title="`${d_words.tl_undo} (ctrl+z)`"></button>
+-        <button type="button" v-if="toolbars.redo" @click="$clicks('redo')" class="op-icon fa fa-mavon-repeat"
+-                aria-hidden="true"
+-                :title="`${d_words.tl_redo} (ctrl+y)`"></button>
+-        <button type="button" v-if="toolbars.trash" @click="$clicks('trash')" class="op-icon fa fa-mavon-trash-o"
+-                aria-hidden="true"
+-                :title="`${d_words.tl_trash} (ctrl+breakspace)`"></button>
+-        <button type="button" v-if="toolbars.save" @click="$clicks('save')" class="op-icon fa fa-mavon-floppy-o"
+-                aria-hidden="true"
+-                :title="`${d_words.tl_save} (ctrl+s)`"></button>
+-        <slot name="left-toolbar-after" />
+-
+-        <!-- 添加image链接 -->
+-        <transition name="fade">
+-            <div class="add-image-link-wrapper"  v-if="s_img_link_open">
+-                <div class="add-image-link">
+-                    <i @click.stop.prevent="s_img_link_open = false" class="fa fa-mavon-times"
+-                       aria-hidden="true"></i>
+-                    <h3 class="title">{{link_type == 'link' ? d_words.tl_popup_link_title : d_words.tl_popup_img_link_title}}</h3>
+-                    <div class="link-text input-wrapper">
+-                        <input ref="linkTextInput" type="text" v-model="link_text" :placeholder="link_type == 'link' ? d_words.tl_popup_link_text : d_words.tl_popup_img_link_text">
+-                    </div>
+-                    <div class="link-addr input-wrapper">
+-                        <input type="text" v-model="link_addr" :placeholder="link_type == 'link' ? d_words.tl_popup_link_addr : d_words.tl_popup_img_link_addr">
+-                    </div>
+-                    <div class="op-btn cancel" @click.stop="s_img_link_open = false">{{d_words.tl_popup_link_cancel}}</div>
+-                    <div class="op-btn sure" @click.stop="$imgLinkAdd()">{{d_words.tl_popup_link_sure}}</div>
+-                </div>
+-            </div>
+-        </transition>
+-    </div>
+-</template>
+-<script type="text/ecmascript-6">
+-    export default {
+-        name: 's-md-toolbar-left',
+-        props: {
+-            editable: { // 是否开启编辑
+-                type: Boolean,
+-                default: true
+-            },
+-            transition: { // TODO: 是否开启动画过渡
+-                type: Boolean,
+-                default: true
+-            },
+-            toolbars: { // 工具栏
+-                type: Object,
+-                required: true
+-            },
+-            d_words: {
+-                type: Object,
+-                required: true
+-            },
+-            image_filter: {
+-                type: Function,
+-                default: null
+-            }
+-        },
+-        data() {
+-            return {
+-                // [index, file]
+-                img_file: [[0, null]],
+-                img_timer: null,
+-                header_timer: null,
+-                s_img_dropdown_open: false,
+-                s_header_dropdown_open: false,
+-                s_img_link_open: false,
+-                trigger: null,
+-                num: 0,
+-                link_text: '',
+-                link_addr: '',
+-                link_type: 'link'
+-            }
+-        },
+-        methods: {
+-            $imgLinkAdd() {
+-                this.$emit('toolbar_left_addlink', this.link_type, this.link_text, this.link_addr);
+-                this.s_img_link_open = false;
+-            },
+-            $toggle_imgLinkAdd(type) {
+-                this.link_type = type;
+-                this.link_text = this.link_addr = '';
+-                this.s_img_link_open = true;
+-                this.$nextTick(() => {
+-                    this.$refs.linkTextInput.focus()
+-                })
+-                this.s_img_dropdown_open = false;
+-            },
+-            $imgFileListClick(pos) {
+-                this.$emit('imgTouch', this.img_file[pos]);
+-            },
+-            $changeUrl(index,url) {
+-                this.img_file[index][0] = url;
+-            },
+-            $imgFileAdd($file) {
+-                // this.img_file[0][0] = this.num;
+-                // this.img_file[0][1] = $file;
+-                // this.img_file.unshift([(this.num + 1), null]);
+-                // this.num = this.num + 1;
+-                this.img_file.push([++this.num, $file])
+-                this.$emit('imgAdd', this.num, $file);
+-                this.s_img_dropdown_open = false;
+-            },
+-            $imgFilesAdd($files) {
+-                // valid means if the image_filter exist.
+-                let valid = (typeof this.image_filter === 'function');
+-                for (let i = 0; i < $files.length; i++) {
+-                    if (valid && this.image_filter($files[i]) === true) {
+-                        this.$imgFileAdd($files[i]);
+-                    } else if (!valid && $files[i].type.match(/^image\//i)) {
+-                        this.$imgFileAdd($files[i]);
+-                    }
+-                }
+-            },
+-            $imgAdd($e) {
+-                this.$imgFilesAdd($e.target.files);
+-                $e.target.value = ''; // 初始化
+-            },
+-            $imgDel(pos) {
+-                this.$emit('imgDel', this.img_file[pos]);
+-               this.img_file.splice(pos, 1);
+-               this.num--;
+-
+-                this.s_img_dropdown_open = false;
+-            },
+-            isEqualName(filename, pos) {
+-                if (this.img_file[pos][1]) {
+-                    if (this.img_file[pos][1].name === filename || this.img_file[pos][1]._name === filename) {
+-                        return true
+-                    }
+-                }
+-                return false
+-            },
+-            $imgDelByFilename(filename) {
+-                var pos = 0;
+-                while (this.img_file.length > pos) {
+-                    if (this.img_file[pos][1] === filename || this.isEqualName(filename, pos)) {
+-                        this.$imgDel(pos);
+-                        return true;
+-                    }
+-                    pos += 1;
+-                }
+-                return false;
+-            },
+-            $imgAddByFilename(filename, $file) {
+-                for (var i = 0; i < this.img_file.length; i++)
+-                    { if (this.img_file[i][0] === filename) return false; }
+-                this.img_file[0][0] = filename;
+-                this.img_file[0][1] = $file;
+-                this.img_file[0][2] = filename;
+-                this.img_file.unshift(['./' + (this.num), null])
+-                this.$emit('imgAdd', this.img_file[1][0], $file, false);
+-                return true;
+-            },
+-            $imgAddByUrl(filename, $url) {
+-                for (var i = 0; i < this.img_file.length; i++)
+-                    { if (this.img_file[i][0] === filename) return false; }
+-                this.img_file[0][0] = filename;
+-                this.img_file[0][1] = $url;
+-                this.img_file.unshift(['./' + (this.num), null])
+-                return true;
+-            },
+-            $imgUpdateByFilename(filename, $file) {
+-                for (var i = 0; i < this.img_file.length; i++) {
+-                    if (this.img_file[i][0] === filename || this.isEqualName(filename, i)) {
+-                        this.img_file[i][1] = $file;
+-                        this.$emit('imgAdd', filename, $file, false);
+-                        return true;
+-                    }
+-                }
+-                return false;
+-            },
+-            // 工具栏功能图标click-----------------
+-            $mouseenter_img_dropdown() {
+-                if (this.editable) {
+-                    clearTimeout(this.img_timer)
+-                    this.s_img_dropdown_open = true
+-                }
+-            },
+-            $mouseleave_img_dropdown() {
+-                let vm = this
+-                this.img_timer = setTimeout(function() {
+-                    vm.s_img_dropdown_open = false
+-                },200)
+-            },
+-            $mouseenter_header_dropdown() {
+-                if (this.editable) {
+-                    clearTimeout(this.header_timer)
+-                    this.s_header_dropdown_open = true
+-                }
+-            },
+-            $mouseleave_header_dropdown() {
+-                let vm = this
+-                this.header_timer = setTimeout(function() {
+-                    vm.s_header_dropdown_open = false
+-                },200)
+-            },
+-            $clicks(_type) {
+-                // 让父节点来绑定事件并
+-                if (this.editable) {
+-                    this.$emit('toolbar_left_click', _type);
+-                }
+-            },
+-            $click_header(_type) {
+-                // 让父节点来绑定事件并
+-                this.$emit('toolbar_left_click', _type);
+-                this.s_header_dropdown_open = false
+-            },
+-            handleClose(e) {
+-                this.s_img_dropdown_open = false;
+-            }
+-        },
+-        watch:{
+-            s_img_link_open(newVlaue) {
+-              // fix issue #644
+-              this.$parent.$el.style.zIndex = newVlaue ? 1501 : 1500;
+-            }
+-        }
+-    }
+-</script>
+-<style lang="stylus" scoped>
+-    .op-icon.dropdown-wrapper.dropdown
+-        position relative
+-        &[type=button]
+-            -webkit-appearance unset
+-        .popup-dropdown
+-            position absolute
+-            display block
+-            background #fff
+-            top 32px
+-            left -45px
+-            min-width 130px
+-            z-index 1600
+-            border 1px solid #ebeef5
+-            border-radius 4px
+-            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1)
+-            .dropdown-item:first-child
+-                border-top-left-radius 3px
+-                border-top-right-radius 3px
+-            .dropdown-item:last-child
+-                border-bottom-left-radius 3px
+-                border-bottom-right-radius 3px
+-            &.op-header
+-                left -30px
+-                min-width 90px
+-            &.fade-enter-active, &.fade-leave-active
+-                opacity 1
+-            &.fade-enter, &.fade-leave-active
+-                opacity 0
+-            &.transition
+-              &, .dropdown-item
+-                transition all 0.2s linear 0s
+-        .dropdown-item
+-            height 40px
+-            line-height @height
+-            font-size 14px
+-            color #606266
+-            position relative
+-            &:hover
+-                color #303133
+-                background-color #e9e9eb
+-            input
+-                position absolute
+-                font-size 100px
+-                right 0
+-                top 0
+-                opacity 0
+-                cursor pointer
+-        .dropdown-images
+-            box-sizing border-box
+-            button
+-                position absolute
+-                top -1px
+-                right 5px
+-                font-size: 14px
+-                &:hover
+-                    color #F56C6C
+-                    background-color: transparent
+-            span
+-                display inline-block
+-                width 80px
+-                white-space nowrap
+-                overflow hidden
+-                text-overflow ellipsis
+-            &:hover
+-                .image-show
+-                    display block !important
+-            .image-show
+-                display none
+-                position absolute
+-                left -128px
+-                top 0
+-                width 120px
+-                height 90px
+-                object-fit contain
+-                border 1px solid #F2F6FC
+-                &.transition
+-                    transition all 0.2s linear 0s
+-            &.transition
+-                transition all 0.2s linear 0s
+-.add-image-link-wrapper
+-    position fixed
+-    left 0
+-    right 0
+-    top 0
+-    bottom 0
+-    background rgba(0, 0, 0, 0.7)
+-    z-index 1600
+-    transition all 0.1s linear 0s
+-    &.fade-enter-active, &.fade-leave-active
+-        opacity 1
+-    &.fade-enter, &.fade-leave-active
+-        opacity 0
+-    .add-image-link
+-        position fixed
+-        box-sizing border-box
+-        text-align center
+-        width 24%
+-        left 38%
+-        @media only screen and (max-width 1500px)
+-            width 34%
+-            left 33%
+-        @media only screen and (max-width 1000px)
+-            width 50%
+-            left 25%
+-        @media only screen and (max-width 600px)
+-            width 80%
+-            left 10%
+-        height auto
+-        padding 40px
+-        top 25%
+-        transition all 0.1s linear 0s
+-        z-index 3
+-        background #fff
+-        border-radius 2px
+-
+-        i
+-            font-size 24px
+-            position absolute
+-            right 8px
+-            top 6px
+-            color rgba(0, 0, 0, 0.7)
+-            cursor pointer
+-        .title
+-            font-size 20px
+-            margin-bottom 30px
+-            margin-top 10px
+-            font-weight 500 !important
+-        .input-wrapper
+-            margin-top 10px
+-            width 80%
+-            border  1px solid #eeece8
+-            text-align left
+-            margin-left 10%
+-            height 35px
+-            input
+-                height 32px
+-                line-height 32px
+-                font-size 15px
+-                width 90%
+-                margin-left 8px
+-                border none
+-                outline none
+-        .op-btn
+-            width 100px
+-            height 35px
+-            display inline-block
+-            margin-top 30px
+-            cursor pointer
+-            text-align center
+-            line-height @height
+-            opacity 0.9
+-            border-radius 2px
+-            letter-spacing 1px
+-            font-size 15px
+-        .op-btn.sure
+-            background #2185d0
+-            color #fff
+-            margin-left 5%
+-            &:hover
+-                opacity 1
+-        .op-btn.cancel
+-            border 1px solid #bcbcbc
+-            color #bcbcbc
+-            &:hover
+-                color #000
+-
+-</style>
+diff --git a/node_modules/mavon-editor/src/components/md-toolbar-right.vue b/node_modules/mavon-editor/src/components/md-toolbar-right.vue
+deleted file mode 100644
+index 24f999b..0000000
+--- a/node_modules/mavon-editor/src/components/md-toolbar-right.vue
++++ /dev/null
+@@ -1,68 +0,0 @@
+-<template>
+-      <div class="v-right-item">
+-        <slot name="right-toolbar-before" />
+-        <button type="button" v-if="toolbars.navigation" @click="$clicks('navigation')" v-show="!s_navigation"
+-                class="op-icon fa fa-mavon-bars"
+-                aria-hidden="true" :title="`${d_words.tl_navigation_on} (F8)`"></button>
+-        <button type="button" v-if="toolbars.navigation" @click="$clicks('navigation')" v-show="s_navigation"
+-                class="op-icon fa fa-mavon-bars selected"
+-                aria-hidden="true" :title="`${d_words.tl_navigation_off} (F8)`"></button>
+-        <button type="button" v-if="toolbars.preview" @click="$clicks('preview')" v-show="s_preview_switch"
+-                class="op-icon fa fa-mavon-eye-slash selected"
+-                aria-hidden="true" :title="`${d_words.tl_edit} (F9)`"></button>
+-        <button type="button" v-if="toolbars.preview" @click="$clicks('preview')" v-show="!s_preview_switch"
+-                class="op-icon fa fa-mavon-eye"
+-                aria-hidden="true" :title="`${d_words.tl_preview} (F9)`"></button>
+-        <button type="button" v-if="toolbars.fullscreen" @click="$clicks('fullscreen')" v-show="!s_fullScreen"
+-                class="op-icon fa fa-mavon-arrows-alt"
+-                :title="`${d_words.tl_fullscreen_on} (F10)`" aria-hidden="true"></button>
+-        <button type="button" v-if="toolbars.fullscreen" @click="$clicks('fullscreen')" v-show="s_fullScreen"
+-                class="op-icon fa fa-mavon-compress selected"
+-                :title="`${d_words.tl_fullscreen_off} (F10)`" aria-hidden="true"></button>
+-        <button type="button" v-if="toolbars.readmodel" @click="$clicks('read')" class="op-icon fa fa-mavon-window-maximize" aria-hidden="true"
+-                :title="`${d_words.tl_read} (F11)`"></button>
+-        <button type="button" v-if="toolbars.subfield" @click="$clicks('subfield')" class="op-icon fa fa-mavon-columns" aria-hidden="true"
+-                :class = "{'selected': s_subfield}" :title="`${s_subfield ? d_words.tl_single_column : d_words.tl_double_column} (F12)`"></button>
+-        <span
+-                v-if=" toolbars.help && toolbars.htmlcode && toolbars.readmodel && toolbars.fullscreen && toolbars.subfield && toolbars.navigation"
+-                class="op-icon-divider"></span>
+-        <button type="button" v-if="toolbars.htmlcode" @click="$clicks('html')" v-show="!s_html_code" class="op-icon fa fa-mavon-code"
+-                :title="d_words.tl_html_on"
+-                aria-hidden="true"></button>
+-        <button type="button" v-if="toolbars.htmlcode" @click="$clicks('html')" v-show="s_html_code"
+-                class="op-icon fa fa-mavon-code selected"
+-                :title="d_words.tl_html_off" aria-hidden="true"></button>
+-        <button type="button"  v-if="toolbars.help" @click="$clicks('help')" class="op-icon fa fa-mavon-question-circle"
+-                 style="font-size: 17px;padding: 5px 6px 5px 3px"
+-                 :title="d_words.tl_help" aria-hidden="true"></button>
+-        <slot name="right-toolbar-after" />
+-      </div>
+-</template>
+-<script type="text/ecmascript-6">
+-export default {
+-    name: 's-md-toolbar-right',
+-    props: {
+-        // 工具栏
+-        s_subfield: {
+-            type: Boolean ,
+-            required: true
+-        },
+-        toolbars: { type: Object, required: true },
+-        s_preview_switch: { type: Boolean, required: true },
+-        s_fullScreen: { type: Boolean, required: true },
+-        s_html_code: { type: Boolean, required: true },
+-        s_navigation: { type: Boolean, required: true },
+-        d_words: {
+-            type: Object,
+-            required: true
+-        }
+-    },
+-    methods: {
+-        // 工具栏功能图标click-----------------
+-        $clicks(_type) {
+-            // 让父节点来绑定事件并
+-            this.$emit('toolbar_right_click', _type);
+-        }
+-    }
+-}
+-</script>
+diff --git a/node_modules/mavon-editor/src/dev/app.vue b/node_modules/mavon-editor/src/dev/app.vue
+deleted file mode 100644
+index 0760932..0000000
+--- a/node_modules/mavon-editor/src/dev/app.vue
++++ /dev/null
+@@ -1,374 +0,0 @@
+-<template>
+-    <div id="app">
+-        <select @change="opchange" class="page-lang">
+-            <option value="zh-CN">简体中文</option>
+-            <option value="zh-TW">正體中文</option>
+-            <option value="en">English</option>
+-            <option value="fr">Français</option>
+-            <option value="de">Deutsch</option>
+-            <option value="ja">日本語 </option>
+-            <option value="pt-BR">Português</option>
+-            <option value="ru">Русский</option>
+-        </select>
+-        <section class="page-header">
+-            <h1 class="project-name">mavonEditor</h1>
+-            <h3 class="project-tagline">{{d_words.sub_title}}</h3>
+-            <a href="https://github.com/hinesboy/mavonEditor" class="btn">View on GitHub</a>
+-            <a href="https://github.com/hinesboy/mavonEditor/zipball/master" class="btn">Download .zip</a>
+-            <a href="https://github.com/hinesboy/mavonEditor/master" class="btn">Download .tar.gz</a>
+-        </section>
+-        <div v-if="!screen_phone" class="item">
+-            <h2 class="item-header">
+-                {{d_words.default_setting}}
+-            </h2>
+-            <div class="item-button">
+-              <button @click="clearCache">clear cache</button>
+-              <button @click="uploadimg">upload</button>
+-              <button @click="imgreplace">imgreplace</button>
+-              <input type="text" v-model="imgName" />
+-              <button @click="imgdelete">delete</button>
+-              <div class="switch-code-style">
+-                <span>code style:</span>
+-                <select v-model="codeStyle">
+-                  <option v-for="(val, key) in styles" :value="key">{{ key }}</option>
+-                </select>
+-              </div>
+-            </div>
+-            <mavon-editor ref=md :subfield="subfield" :toolbarsFlag="toolbarsFlag" :editable="editable"
+-                          :language="d_language" @change="change" @save="saveone" :ishljs="true" class="item-editor" v-model="help1"
+-                          :autofocus="autofocus"
+-                          :shortCut="true"
+-                          :externalLink="external_link"
+-                          @imgAdd="$imgAdd" @imgDel="$imgDel" @subfieldtoggle="$subfieldtoggle" @previewtoggle="$previewtoggle"
+-                          :imageFilter="image_filter"
+-                          :boxShadow="true"
+-                          :scrollStyle="true"
+-                          :transition="true"
+-                          :codeStyle="codeStyle"
+-                          box-shadow-style="0 2px 12px 0 rgba(0, 0, 0, 0.1)"
+-                          toolbars-background="#ffffff"
+-                          preview-background="#fbfbfb">
+-                <!-- <template slot="left-toolbar-before">
+-                    左工具栏前
+-                </template>
+-                <template slot="left-toolbar-after">
+-                    左工具栏后
+-                </template>
+-
+-                <template slot="right-toolbar-before">
+-                    右工具栏前
+-                </template>
+-                <template slot="right-toolbar-after">
+-                    右工具栏后
+-                </template> -->          
+-            </mavon-editor>
+-            <button ref="diy" type="button" @click="$click('selftest')" class="op-icon fa fa-mavon-align-left"
+-                aria-hidden="true" title="自定义"></button>
+-        </div>
+-        <!--自定义-->
+-        <div v-if="screen_phone" class="item">
+-            <h2 class="item-header">
+-                {{d_words.customize_setting}}
+-            </h2>
+-            <mavon-editor :language="d_language" @save="savetwo" :toolbars="toolbars" class="item-editor"
+-                          v-model="help2"></mavon-editor>
+-        </div>
+-        <div class="item">
+-      <span style="display: block;margin: 30px 0 15px 0;color: #1e6bb8" class="">
+-        {{d_words.mark}}
+-      </span>
+-        </div>
+-        <div class="item">
+-            <h2 class="item-header">
+-                {{d_words.detail}}<a href="https://github.com/hinesboy/mavonEditor">GitHub</a>
+-            </h2>
+-        </div>
+-    </div>
+-</template>
+-
+-<script type="text/ecmascript-6">
+-    import styles from '../lib/core/hljs/lang.hljs.css.js'
+-    import {CONFIG} from '../lib/config.js'
+-    export default {
+-        name: 'app',
+-        data () {
+-            return {
+-                d_language: 'zh-CN',
+-                help1: '',
+-                help2: '',
+-                d_words: {},
+-                screen_phone: false,
+-                toolbars: {
+-                    underline: true, // 下划线
+-                    strikethrough: true, // 中划线
+-                    alignCenter: true, // 中划线
+-                    undo: true,
+-                    save: true,
+-                    fullscreen: true, // 全屏编辑
+-                    navigation: true,
+-                    preview: true,
+-                    subfield: false
+-                },
+-                autofocus: true,
+-                subfield: true,
+-                editable: true,
+-                toolbarsFlag: true,
+-                img_file: {},
+-                external_link: {
+-                    markdown_css: function() {
+-                        return '/markdown/github-markdown.min.css';
+-                    },
+-                    hljs_js: function() {
+-                        return '/highlightjs/highlight.min.js';
+-                    },
+-                    hljs_css: function(css) {
+-                        return '/highlightjs/styles/' + css + '.min.css';
+-                    },
+-                    hljs_lang: function(lang) {
+-                        return '/highlightjs/languages/' + lang + '.min.js';
+-                    },
+-                    katex_css: function() {
+-                        return '/katex/katex.min.css';
+-                    },
+-                    katex_js: function() {
+-                        return '/katex/katex.min.js';
+-                    }
+-                },
+-                toolbar_settings: {
+-                    undo: true, // 上一步
+-                    redo: true, // 下一步
+-                    bold: true, // 粗体
+-                    italic: true, // 斜体
+-                    header: true, // 标题
+-                    underline: true, // 下划线
+-                    strikethrough: true, // 中划线
+-                    quote: true, // 引用
+-                    ol: true, // 有序列表
+-                    ul: true, // 无序列表
+-                    link: true, // 链接
+-                    code: true, // code
+-                    readmodel: true, // 沉浸式阅读
+-                    htmlcode: true, // 展示html源码
+-                    /* 2.1.8 */
+-                    alignleft: true, // 左对齐
+-                    aligncenter: true, // 居中
+-                    alignright: true, // 右对齐
+-                    /* 2.2.1 */
+-                    subfield: true, // 单双栏模式
+-                    preview: true, // 预览
+-                    /* 1.4.2 */
+-                    navigation: true // 导航目录
+-                },
+-                image_filter: function($files) {
+-                    console.log('image_filter files:', $files);
+-                    // console.log('here for you', $files);
+-                    return true;
+-                },
+-                imageClick: function (file) {
+-                    console.log(file);
+-                },
+-                imgName: '',
+-                codeStyle: "github",
+-                styles
+-            }
+-        },
+-        created () {
+-            var $vm = this;
+-            this.initLanguage();
+-            this.sizeToStatus()
+-            window.addEventListener('resize', function() {
+-                // 媒介查询
+-                $vm.sizeToStatus()
+-            })
+-        },
+-        mounted() {
+-            var md = this.$refs.md;
+-            var toolbar_left = md.$refs.toolbar_left;
+-            var diy = this.$refs.diy;
+-            toolbar_left.$el.append(diy)
+-            // toolbar_left.$el.append(diy.$el)
+-            // console.log(toolbar_left)
+-        },
+-        methods: {
+-            clearCache() {
+-                this.$refs.md.$emptyHistory()
+-            },
+-            $click(val) {
+-                console.log(val);
+-            },
+-            imgreplace($e) {
+-                console.log('here');
+-                this.$refs.md.$imglst2Url([
+-                    [0, 'https://raw.githubusercontent.com/hinesboy/mavonEditor/master/img/cn/cn-common.png'],
+-                    [1, 'https://raw.githubusercontent.com/hinesboy/mavonEditor/master/img/cn/cn-common.png']
+-                ]);
+-            },
+-            uploadimg($e) {
+-                console.log(this.img_file);
+-                for (var _img in this.img_file) {
+-                    this.$refs.md.$img2Url(_img, 'https://raw.githubusercontent.com/hinesboy/mavonEditor/master/img/cn/cn-common.png')
+-                }
+-                /* var formdata = new FormData();
+-                for (var _img in this.img_file) {
+-                    formdata.append(_img, this.img_file[_img]);
+-                    // _imglst.push([_img, this.img_file[_img]]);
+-                }
+-                axios({
+-                    url: 'http://127.0.0.1/index.php',
+-                    method: 'post',
+-                    data: formdata,
+-                    headers: {'Content-Type': 'multipart/form-data'},
+-                }).then((res) => {
+-                    console.log(res);
+-                }) */
+-            },
+-            $imgAdd(pos, $file) {
+-                console.log('imgAdd', pos, $file);
+-                this.img_file[pos] = $file;
+-                // console.log(this.$refs.md.$refs.toolbar_left.$imgDelByFilename(pos));
+-                // console.log(this.$refs.md.$refs.toolbar_left.$imgAddByFilename('./test', $file))
+-                // console.log(this.$refs.md.$refs.toolbar_left.$imgUpdateByFilename('./test', $file))
+-                // console.log(this.$refs.md.$refs.toolbar_left.$imgAddByFilename('./test', $file))
+-                // console.log(this.$refs.md);
+-                // this.$refs.md.$imgUpdateByUrl(pos, 'http://pic.58pic.com/58pic/13/46/50/61758PICWZY_1024.jpg');
+-            },
+-            $imgDel(pos) {
+-                console.log('imgDel', pos);
+-                delete this.img_file[pos];
+-            },
+-            sizeToStatus () {
+-                if (window.matchMedia('(min-width:768px)').matches) {
+-                    // > 768
+-                    this.screen_phone = false
+-                } else {
+-                    // <  768
+-                    this.screen_phone = true
+-                }
+-            },
+-            saveone (val, render) {
+-                alert('save one')
+-            },
+-            savetwo (val, render) {
+-                alert('save two')
+-            },
+-            change (val, render) {
+-                console.log(val)
+-            },
+-            opchange (event) {
+-                this.d_language = event.target.value;
+-            },
+-            initLanguage() {
+-                this.d_words = CONFIG[`words_${this.d_language}`]
+-                this.help1 = CONFIG[`help_${this.d_language}`]
+-                this.help2 = CONFIG[`help_${this.d_language}`]
+-            },
+-            $subfieldtoggle(flag , value) {
+-                console.log('sufield toggle' + flag)
+-            },
+-            $previewtoggle(flag , value) {
+-                console.log('preview toggle' + flag)
+-            },
+-            imgdelete() {
+-                var md = this.$refs.md;
+-                var toolbar_left = md.$refs.toolbar_left;
+-                toolbar_left.$imgDelByFilename(this.imgName);
+-            }
+-        },
+-        watch: {
+-            d_language: function () {
+-                this.initLanguage();
+-            }
+-        }
+-    }
+-</script>
+-
+-<style lang="stylus" rel="stylesheet/stylus">
+-    body
+-        margin 0
+-        padding 0
+-        padding-bottom 50px
+-    .switch-code-style
+-        display inline
+-        margin-left 8px
+-    .page-lang
+-        position absolute
+-        top 15px
+-        right 2%
+-    .page-header
+-        box-sizing border-box
+-        padding 90px 15px
+-        width 100%
+-        height 380px
+-        color #fff
+-        text-align center
+-        background-color #159957
+-        background-image linear-gradient(120deg, #155799, #159957)
+-        @media only screen and (max-width 958px)
+-            height 300px
+-            padding 60px 15px
+-        @media only screen and (max-width 768px)
+-            height 370px
+-            padding 50px 15px
+-        .project-name
+-            margin-top 0
+-            margin-bottom 0.1rem
+-            font-size 2.25rem
+-            @media only screen and (max-width 768px)
+-                font-size 25px
+-        .project-tagline
+-            margin-bottom 2rem
+-            font-weight normal
+-            opacity 0.7
+-            @media only screen and (max-width 768px)
+-                font-size 16px
+-        .btn
+-            padding: 0.6rem 0.9rem
+-            font-size: 0.9rem
+-            display: inline-block
+-            margin-bottom: 1rem
+-            color: rgba(255, 255, 255, 0.7)
+-            background-color: rgba(255, 255, 255, 0.08)
+-            border-color: rgba(255, 255, 255, 0.2)
+-            border-style: solid
+-            border-width: 1px
+-            border-radius: 0.3rem
+-            transition: color 0.2s, background-color 0.2s, border-color 0.2s
+-            text-decoration: none
+-            margin-left 20px
+-            box-sizing border-box
+-            &:hover
+-                color: rgba(255, 255, 255, 0.8)
+-                text-decoration: none
+-                background-color: rgba(255, 255, 255, 0.2)
+-                border-color: rgba(255, 255, 255, 0.3)
+-            @media only screen and (max-width 768px)
+-                display: block
+-                width: 90%
+-                padding: 0.75rem
+-                font-size: 0.9rem
+-                margin-left 5%
+-    .item
+-        width 75%
+-        margin-left 12.5%
+-        @media only screen and (max-width 1100px)
+-            width 85%
+-            margin-left 7.5%
+-        @media only screen and (max-width 768px)
+-            width 92%
+-            margin-left 4%
+-        .item-header
+-            margin-top: 3.5rem
+-            margin-bottom: 2rem
+-            font-weight: normal
+-            color: #159957
+-            @media only screen and (max-width 768px)
+-                margin-top: 2rem
+-                margin-bottom: 1rem
+-        .item-button
+-            margin-bottom: 4rem
+-        .item-editor
+-            width 100%
+-            height 700px
+-            @media only screen and (max-width 1600px)
+-                height 550px
+-</style>
+diff --git a/node_modules/mavon-editor/src/dev/demo.vue b/node_modules/mavon-editor/src/dev/demo.vue
+deleted file mode 100644
+index fa5e046..0000000
+--- a/node_modules/mavon-editor/src/dev/demo.vue
++++ /dev/null
+@@ -1,46 +0,0 @@
+-<template>
+-  <div>
+-    <div class="navigate">
+-      <span @click="viewIndex = 1">Full demo</span>
+-      <span @click="viewIndex = 2">Simple demo</span>
+-    </div>
+-    <div>
+-      <App v-if="viewIndex == 1"></App>
+-      <Editor v-else-if="viewIndex == 2"></Editor>
+-    </div>
+-  </div>
+-</template>
+-
+-<script>
+-import app from './app.vue';
+-import editor from './editor.vue';
+-
+-export default {
+-  name: 'demo',
+-  components: {
+-    App: app,
+-    Editor: editor
+-  },
+-  data() {
+-    return {
+-      viewIndex: 1
+-    };
+-  }
+-};
+-</script>
+-<style>
+-.navigate {
+-  text-align: center;
+-  font-size: 18px;
+-  color: blue;
+-}
+-
+-.navigate span {
+-  margin-right: 5px;
+-}
+-
+-.navigate span:hover {
+-  cursor: pointer;
+-  font-weight: bolder;
+-}
+-</style>
+diff --git a/node_modules/mavon-editor/src/dev/editor.vue b/node_modules/mavon-editor/src/dev/editor.vue
+deleted file mode 100644
+index 57391f8..0000000
+--- a/node_modules/mavon-editor/src/dev/editor.vue
++++ /dev/null
+@@ -1,63 +0,0 @@
+-<template>
+-    <div class="container">
+-        <div id="editor">
+-            <mavon-editor style="height: 100%" v-model="code" :codeStyle="codeStyle" :xssOptions="xssOptions"></mavon-editor>
+-        </div>
+-        <div class="switch-code-style">
+-            <span>code style:</span>
+-            <select v-model="codeStyle">
+-                <option v-for="(val, key) in styles" :value="key">{{ key }}</option>
+-            </select>
+-        </div>
+-    </div>
+-</template>
+-<script>
+-import styles from '../lib/core/hljs/lang.hljs.css.js'
+-
+-const code = `java
+-/**
+- * @author John Smith <john.smith@example.com>
+-*/
+-package l2f.gameserver.model;
+-
+-public abstract strictfp class L2Char extends L2Object {
+-  public static final Short ERROR = 0x0001;
+-
+-  public void moveTo(int x, int y, int z) {
+-    _ai = null;
+-    log("Should not be called");
+-    if (1 > 5) { // wtf!?
+-      return;
+-    }
+-  }
+-}`;
+-
+-module.exports = {
+-    name: 'editor',
+-    data: function () {
+-        return {
+-            codeStyle: "github",
+-            styles,
+-            code: '<span style="color:red;font-size:36px;">A</span> \n```' + code + '\n```',
+-            xssOptions:{
+-                whiteList: {
+-                    span: ['style']
+-                }
+-            }
+-        };
+-    }
+-}
+-</script>
+-<style>
+-.container {
+-    margin: auto;
+-    width: 80%;
+-}
+-#editor {
+-    height: 580px;
+-}
+-.switch-code-style {
+-    margin-top: 10px;
+-    font-size: 16px;
+-}
+-</style>
+diff --git a/node_modules/mavon-editor/src/lib/font/LICENSE.txt b/node_modules/mavon-editor/src/lib/font/LICENSE.txt
+deleted file mode 100644
+index 8fa3da3..0000000
+--- a/node_modules/mavon-editor/src/lib/font/LICENSE.txt
++++ /dev/null
+@@ -1,12 +0,0 @@
+-Font license info
+-
+-
+-## Font Awesome
+-
+-   Copyright (C) 2016 by Dave Gandy
+-
+-   Author:    Dave Gandy
+-   License:   SIL ()
+-   Homepage:  http://fortawesome.github.com/Font-Awesome/
+-
+-
+diff --git a/node_modules/mavon-editor/src/lib/font/README.txt b/node_modules/mavon-editor/src/lib/font/README.txt
+deleted file mode 100644
+index beaab33..0000000
+--- a/node_modules/mavon-editor/src/lib/font/README.txt
++++ /dev/null
+@@ -1,75 +0,0 @@
+-This webfont is generated by http://fontello.com open source project.
+-
+-
+-================================================================================
+-Please, note, that you should obey original font licenses, used to make this
+-webfont pack. Details available in LICENSE.txt file.
+-
+-- Usually, it's enough to publish content of LICENSE.txt file somewhere on your
+-  site in "About" section.
+-
+-- If your project is open-source, usually, it will be ok to make LICENSE.txt
+-  file publicly available in your repository.
+-
+-- Fonts, used in Fontello, don't require a clickable link on your site.
+-  But any kind of additional authors crediting is welcome.
+-================================================================================
+-
+-
+-Comments on archive content
+----------------------------
+-
+-- /font/* - fonts in different formats
+-
+-- /css/*  - different kinds of css, for all situations. Should be ok with 
+-  twitter bootstrap. Also, you can skip <i> style and assign icon classes
+-  directly to text elements, if you don't mind about IE7.
+-
+-- demo.html - demo file, to show your webfont content
+-
+-- LICENSE.txt - license info about source fonts, used to build your one.
+-
+-- config.json - keeps your settings. You can import it back into fontello
+-  anytime, to continue your work
+-
+-
+-Why so many CSS files ?
+------------------------
+-
+-Because we like to fit all your needs :)
+-
+-- basic file, <your_font_name>.css - is usually enough, it contains @font-face
+-  and character code definitions
+-
+-- *-ie7.css - if you need IE7 support, but still don't wish to put char codes
+-  directly into html
+-
+-- *-codes.css and *-ie7-codes.css - if you like to use your own @font-face
+-  rules, but still wish to benefit from css generation. That can be very
+-  convenient for automated asset build systems. When you need to update font -
+-  no need to manually edit files, just override old version with archive
+-  content. See fontello source code for examples.
+-
+-- *-embedded.css - basic css file, but with embedded WOFF font, to avoid
+-  CORS issues in Firefox and IE9+, when fonts are hosted on the separate domain.
+-  We strongly recommend to resolve this issue by `Access-Control-Allow-Origin`
+-  server headers. But if you ok with dirty hack - this file is for you. Note,
+-  that data url moved to separate @font-face to avoid problems with <IE9, when
+-  string is too long.
+-
+-- animate.css - use it to get ideas about spinner rotation animation.
+-
+-
+-Attention for server setup
+---------------------------
+-
+-You MUST setup server to reply with proper `mime-types` for font files -
+-otherwise some browsers will fail to show fonts.
+-
+-Usually, `apache` already has necessary settings, but `nginx` and other
+-webservers should be tuned. Here is list of mime types for our file extensions:
+-
+-- `application/vnd.ms-fontobject` - eot
+-- `application/x-font-woff` - woff
+-- `application/x-font-ttf` - ttf
+-- `image/svg+xml` - svg
+diff --git a/node_modules/mavon-editor/src/lib/font/font/fontello.woff b/node_modules/mavon-editor/src/lib/font/font/fontello.woff
+deleted file mode 100644
+index 9844453..0000000
+Binary files a/node_modules/mavon-editor/src/lib/font/font/fontello.woff and /dev/null differ
+diff --git a/node_modules/mavon-editor/src/lib/font/font/fontello.woff2 b/node_modules/mavon-editor/src/lib/font/font/fontello.woff2
+deleted file mode 100644
+index 957d053..0000000
+Binary files a/node_modules/mavon-editor/src/lib/font/font/fontello.woff2 and /dev/null differ
+diff --git a/node_modules/mavon-editor/src/mavon-editor.vue b/node_modules/mavon-editor/src/mavon-editor.vue
+deleted file mode 100644
+index 9d4a92c..0000000
+--- a/node_modules/mavon-editor/src/mavon-editor.vue
++++ /dev/null
+@@ -1,731 +0,0 @@
+-<template>
+-    <div :class="[{ 'fullscreen': s_fullScreen, 'shadow': boxShadow }]" class="v-note-wrapper markdown-body" :style="{'box-shadow': boxShadow ? boxShadowStyle : ''}">
+-        <!--工具栏-->
+-        <div class="v-note-op" v-show="toolbarsFlag" :style="{'background': toolbarsBackground}">
+-            <v-md-toolbar-left ref="toolbar_left" :editable="editable" :transition="transition" :d_words="d_words"
+-                               @toolbar_left_click="toolbar_left_click" @toolbar_left_addlink="toolbar_left_addlink" :toolbars="toolbars"
+-                               @imgAdd="$imgAdd" @imgDel="$imgDel" @imgTouch="$imgTouch" :image_filter="imageFilter"
+-                               :class="{'transition': transition}">
+-                <slot name="left-toolbar-before" slot="left-toolbar-before" />
+-                <slot name="left-toolbar-after" slot="left-toolbar-after" />
+-            </v-md-toolbar-left>
+-            <v-md-toolbar-right ref="toolbar_right" :d_words="d_words" @toolbar_right_click="toolbar_right_click"
+-                                :toolbars="toolbars"
+-                                :s_subfield="s_subfield"
+-                                :s_preview_switch="s_preview_switch" :s_fullScreen="s_fullScreen"
+-                                :s_html_code="s_html_code"
+-                                :s_navigation="s_navigation"
+-                                :class="{'transition': transition}">
+-                <slot name="right-toolbar-before" slot="right-toolbar-before" />
+-                <slot name="right-toolbar-after" slot="right-toolbar-after" />
+-            </v-md-toolbar-right>
+-        </div>
+-        <!--编辑展示区域-->
+-        <div class="v-note-panel">
+-            <!--编辑区-->
+-            <div ref="vNoteEdit" @scroll="$v_edit_scroll" class="v-note-edit divarea-wrapper"
+-                 :class="{'scroll-style': s_scrollStyle, 'scroll-style-border-radius': s_scrollStyle && !s_preview_switch && !s_html_code, 'single-edit': !s_preview_switch && !s_html_code, 'single-show': (!s_subfield && s_preview_switch) || (!s_subfield && s_html_code), 'transition': transition}"
+-                 @click="textAreaFocus">
+-                <div class="content-input-wrapper" :style="{'background-color': editorBackground}">
+-                    <!-- 双栏 -->
+-                    <v-autoTextarea ref="vNoteTextarea" :placeholder="placeholder ? placeholder : d_words.start_editor"
+-                                    class="content-input" :fontSize="fontSize"
+-                                    lineHeight="1.5" v-model="d_value" fullHeight
+-                                    :style="{'background-color': editorBackground}"></v-autoTextarea>
+-                </div>
+-            </div>
+-            <!--展示区-->
+-            <div :class="{'single-show': (!s_subfield && s_preview_switch) || (!s_subfield && s_html_code)}"
+-                 v-show="s_preview_switch || s_html_code" class="v-note-show">
+-                <div ref="vShowContent" v-html="d_render" v-show="!s_html_code"
+-                     :class="{'scroll-style': s_scrollStyle, 'scroll-style-border-radius': s_scrollStyle}" class="v-show-content"
+-                     :style="{'background-color': previewBackground}">
+-                </div>
+-                <div v-show="s_html_code" :class="{'scroll-style': s_scrollStyle, 'scroll-style-border-radius': s_scrollStyle}" class="v-show-content-html"
+-                  :style="{'background-color': previewBackground}">
+-                    {{d_render}}
+-                </div>
+-            </div>
+-
+-            <!--标题导航-->
+-            <transition name="slideTop">
+-                <div v-show="s_navigation" class="v-note-navigation-wrapper" :class="{'transition': transition}">
+-                    <div class="v-note-navigation-title">
+-                        {{d_words.navigation_title}}<i @click="toolbar_right_click('navigation')"
+-                                                       class="fa fa-mavon-times v-note-navigation-close"
+-                                                       aria-hidden="true"></i>
+-                    </div>
+-                    <div ref="navigationContent" class="v-note-navigation-content" :class="{'scroll-style': s_scrollStyle}">
+-                    </div>
+-                </div>
+-            </transition>
+-
+-        </div>
+-        <!--帮助文档-->
+-        <transition name="fade">
+-            <div ref="help">
+-                <div @click.self="toolbar_right_click('help')" class="v-note-help-wrapper" v-if="s_help">
+-                    <div class="v-note-help-content markdown-body" :class="{'shadow': boxShadow}">
+-                        <i @click.stop.prevent="toolbar_right_click('help')" class="fa fa-mavon-times"
+-                           aria-hidden="true"></i>
+-                        <div class="scroll-style v-note-help-show" v-html="d_help"></div>
+-                    </div>
+-                </div>
+-            </div>
+-        </transition>
+-        <!-- 预览图片 -->
+-        <transition name="fade">
+-            <div @click="d_preview_imgsrc=null" class="v-note-img-wrapper" v-if="d_preview_imgsrc">
+-                <img :src="d_preview_imgsrc" alt="none">
+-            </div>
+-        </transition>
+-        <!--阅读模式-->
+-        <div :class="{'show': s_readmodel}" class="v-note-read-model scroll-style" ref="vReadModel">
+-            <div ref="vNoteReadContent" class="v-note-read-content" v-html="d_render">
+-            </div>
+-        </div>
+-    </div>
+-</template>
+-
+-<script>
+-// import tomarkdown from './lib/core/to-markdown.js'
+-import {autoTextarea} from 'auto-textarea'
+-import {keydownListen} from './lib/core/keydown-listen.js'
+-import hljsCss from './lib/core/hljs/lang.hljs.css.js'
+-import {
+-    fullscreenchange,
+-   /* windowResize, */
+-    scrollLink,
+-    insertTextAtCaret,
+-    getNavigation,
+-    insertTab,
+-    unInsertTab,
+-    insertOl,
+-    insertUl,
+-    insertEnter,
+-    removeLine,
+-    insertCodeBlock,
+-    loadLink,
+-    loadScript,
+-    ImagePreviewListener
+-} from './lib/core/extra-function.js'
+-import {stopEvent} from './lib/util.js'
+-import {toolbar_left_click, toolbar_left_addlink} from './lib/toolbar_left_click.js'
+-import {toolbar_right_click} from './lib/toolbar_right_click.js'
+-import {CONFIG} from './lib/config.js'
+-import markdown, {initMarkdown} from './lib/mixins/markdown.js'
+-import md_toolbar_left from './components/md-toolbar-left.vue'
+-import md_toolbar_right from './components/md-toolbar-right.vue'
+-import "./lib/font/css/fontello.css"
+-import './lib/css/md.css'
+-
+-export default {
+-    mixins: [markdown],
+-    props: {
+-        scrollStyle: {  // 是否渲染滚动条样式(webkit)
+-            type: Boolean,
+-            default: true
+-        },
+-        boxShadow: { // 是否添加阴影
+-            type: Boolean,
+-            default: true
+-        },
+-        transition: { // 是否开启动画过渡
+-            type: Boolean,
+-            default: true
+-        },
+-        autofocus: { // 是否自动获取焦点
+-            type: Boolean,
+-            default: true
+-        },
+-        fontSize: { // 字体大小
+-            type: String,
+-            default: '14px'
+-        },
+-        toolbarsBackground: { // 工具栏背景色
+-            type: String,
+-            default: '#ffffff'
+-        },
+-        editorBackground: { // TODO: 编辑栏背景色
+-            type: String,
+-            default: '#ffffff'
+-        },
+-        previewBackground: { // 预览栏背景色
+-            type: String,
+-            default: '#fbfbfb'
+-        },
+-        boxShadowStyle: { // 阴影样式
+-            type: String,
+-            default: '0 2px 12px 0 rgba(0, 0, 0, 0.1)'
+-        },
+-        help: {
+-            type: String,
+-            default: null
+-        },
+-        value: { // 初始 value
+-            type: String,
+-            default: ''
+-        },
+-        language: {  // 初始语言
+-            type: String,
+-            default: 'zh-CN'
+-        },
+-        subfield: {
+-            type: Boolean,
+-            default: true
+-        },
+-        navigation: {
+-            type: Boolean,
+-            default: false
+-        },
+-        defaultOpen: {
+-            type: String,
+-            default: null
+-        },
+-        editable: { // 是否开启编辑
+-            type: Boolean,
+-            default: true
+-        },
+-        toolbarsFlag: { // 是否开启工具栏
+-            type: Boolean,
+-            default: true
+-        },
+-        toolbars: { // 工具栏
+-            type: Object,
+-            default() {
+-                return CONFIG.toolbars
+-            }
+-        },
+-        html: {// Enable HTML tags in source
+-            type: Boolean,
+-            default: true
+-        },
+-        xssOptions: { // XSS 选项
+-            type: [Object, Boolean],
+-            default() {
+-                return {}
+-            }
+-        },
+-        codeStyle: { // <code></code> 样式
+-            type: String,
+-            default() {
+-                return 'github';
+-            }
+-        },
+-        placeholder: { // 编辑器默认内容
+-            type: String,
+-            default: null
+-        },
+-        ishljs: {
+-            type: Boolean,
+-            default: true
+-        },
+-        externalLink: {
+-            type: [Object, Boolean],
+-            default: true
+-        },
+-        imageFilter: {
+-            type: Function,
+-            default: null
+-        },
+-        imageClick: {
+-            type: Function,
+-            default: null
+-        },
+-        tabSize: {
+-            type: Number,
+-            default: 0
+-        },
+-        shortCut:{
+-            type: Boolean,
+-            default: true
+-        }
+-    },
+-    data() {
+-        return {
+-            s_right_click_menu_show: false,
+-            right_click_menu_top: 0,
+-            right_click_menu_left: 0,
+-            s_subfield: (() => {
+-                return this.subfield;
+-            })(),
+-            s_autofocus: true,
+-            // 标题导航
+-            s_navigation: (() => {
+-                return this.navigation;
+-            })(),
+-            s_scrollStyle: (() => {
+-                return this.scrollStyle
+-            })(),// props 是否渲染滚动条样式
+-            d_value: '',// props 文本内容
+-            d_render: '',// props 文本内容render
+-            s_preview_switch: (() => {
+-                let default_open_ = this.defaultOpen;
+-                if (!default_open_) {
+-                    default_open_ = this.subfield ? 'preview' : 'edit';
+-                }
+-                return default_open_ === 'preview' ? true : false;
+-            })(), // props true 展示编辑 false展示预览
+-            s_fullScreen: false,// 全屏编辑标志
+-            s_help: false,// markdown帮助
+-            s_html_code: false,// 分栏情况下查看html
+-            d_help: null,
+-            d_words: null,
+-            edit_scroll_height: -1,
+-            s_readmodel: false,
+-            s_table_enter: false, // 回车事件是否在表格中执行
+-            d_history: (() => {
+-                let temp_array = []
+-                temp_array.push(this.value)
+-                return temp_array;
+-            })(), // 编辑记录
+-            d_history_index: 0, // 编辑记录索引
+-            currentTimeout: '',
+-            d_image_file: [],
+-            d_preview_imgsrc: null, // 图片预览地址
+-            s_external_link: {
+-                markdown_css: function() {
+-                    return 'https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/2.9.0/github-markdown.min.css';
+-                },
+-                hljs_js: function() {
+-                    return 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js';
+-                },
+-                hljs_lang: function(lang) {
+-                    return 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/languages/' + lang + '.min.js';
+-                },
+-                hljs_css: function(css) {
+-                    if (hljsCss[css]) {
+-                        return 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/' + css + '.min.css';
+-                    }
+-                    return '';
+-                },
+-                katex_js: function() {
+-                    return 'https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.8.3/katex.min.js';
+-                },
+-                katex_css: function() {
+-                    return 'https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.8.3/katex.min.css';
+-                }
+-            },
+-            p_external_link: {},
+-            textarea_selectionEnd: 0,
+-            textarea_selectionEnds: [0],
+-            _xssHandler: null
+-        };
+-    },
+-    created() {
+-        var $vm = this;
+-        // 初始化语言
+-        this.initLanguage();
+-        this.initExternalFuc();
+-        this.$nextTick(() => {
+-            // 初始化Textarea编辑开关
+-            $vm.editableTextarea();
+-        })
+-    },
+-    mounted() {
+-        var $vm = this;
+-        this.$el.addEventListener('paste', function (e) {
+-            $vm.$paste(e);
+-        })
+-        this.$el.addEventListener('drop', function (e) {
+-            $vm.$drag(e);
+-        })
+-        // 浏览器siz大小
+-       /* windowResize(this); */
+-        keydownListen(this);
+-        // 图片预览事件监听
+-        ImagePreviewListener(this);
+-        // 设置默认焦点
+-        if (this.autofocus) {
+-            this.getTextareaDom().focus();
+-        }
+-        // fullscreen事件
+-        fullscreenchange(this);
+-        this.d_value = this.value || "";
+-        // 将help添加到末尾
+-        document.body.appendChild(this.$refs.help);
+-        this.loadExternalLink('markdown_css', 'css');
+-        this.loadExternalLink('katex_css', 'css')
+-        this.loadExternalLink('katex_js', 'js', function() {
+-            $vm.iRender(true);
+-        })
+-        this.loadExternalLink('hljs_js', 'js', function() {
+-            $vm.iRender(true);
+-        })
+-
+-        $vm.codeStyleChange($vm.codeStyle, true)
+-    },
+-    beforeDestroy() {
+-        document.body.removeChild(this.$refs.help);
+-    },
+-    getMarkdownIt() {
+-        let mdIt = this.mixins[0].data().markdownIt;
+-        if (!mdIt) {
+-            mdIt = initMarkdown();
+-        }
+-        return mdIt
+-    },
+-    methods: {
+-        loadExternalLink(name, type, callback) {
+-            if (typeof this.p_external_link[name] !== 'function') {
+-                if (this.p_external_link[name] !== false) {
+-                    console.error('external_link.' + name, 'is not a function, if you want to disabled this error log, set external_link.' + name, 'to function or false');
+-                }
+-                return;
+-            }
+-            var _obj = {
+-                'css': loadLink,
+-                'js': loadScript
+-            };
+-            if (_obj.hasOwnProperty(type)) {
+-                _obj[type](this.p_external_link[name](), callback);
+-            }
+-        },
+-        initExternalFuc() {
+-            var $vm = this;
+-            var _external_ = ['markdown_css', 'hljs_js', 'hljs_css', 'hljs_lang', 'katex_js', 'katex_css'];
+-            var _type_ = typeof $vm.externalLink;
+-            var _is_object = (_type_ === 'object');
+-            var _is_boolean = (_type_ === 'boolean');
+-            for (var i = 0; i < _external_.length; i++) {
+-                if ((_is_boolean && !$vm.externalLink) || (_is_object && $vm.externalLink[_external_[i]] === false)) {
+-                    $vm.p_external_link[_external_[i]] = false;
+-                } else if (_is_object && typeof $vm.externalLink[_external_[i]] === 'function') {
+-                    $vm.p_external_link[_external_[i]] = $vm.externalLink[_external_[i]];
+-                } else {
+-                    $vm.p_external_link[_external_[i]] = $vm.s_external_link[_external_[i]];
+-                }
+-            }
+-        },
+-        textAreaFocus() {
+-            this.$refs.vNoteTextarea.$refs.vTextarea.focus();
+-        },
+-        $drag($e) {
+-            var dataTransfer = $e.dataTransfer;
+-            if (dataTransfer) {
+-                var files = dataTransfer.files;
+-                if (files.length > 0) {
+-                    $e.preventDefault();
+-                    this.$refs.toolbar_left.$imgFilesAdd(files);
+-                }
+-            }
+-        },
+-        $paste($e) {
+-            var clipboardData = $e.clipboardData;
+-            if (clipboardData) {
+-                var items = clipboardData.items;
+-                if (!items) return;
+-                var types = clipboardData.types || [];
+-                var item = null;
+-                for (var i = 0; i < types.length; i++) {
+-                    if (types[i] === 'Files') {
+-                        item = items[i];
+-                        break;
+-                    }
+-                }
+-                if (item && item.kind === 'file') {
+-                    // prevent filename being pasted parallel along
+-                    // with the image pasting process
+-                    stopEvent($e)
+-                    var oFile = item.getAsFile();
+-                    this.$refs.toolbar_left.$imgFilesAdd([oFile]);
+-                }
+-            }
+-        },
+-        $imgTouch(file) {
+-            var $vm = this;
+-            // TODO 跳转到图片位置
+-        },
+-        $imgDel(file) {
+-            this.markdownIt.image_del(file[1]);
+-            // 删除所有markdown中的图片
+-            let fileReg = file[0]
+-            let reg = new RegExp(`\\!\\[${file[1]._name}\\]\\(${fileReg}\\)`, "g")
+-
+-            this.d_value = this.d_value.replace(reg, '');
+-            this.iRender();
+-            this.$emit('imgDel', file);
+-        },
+-        $imgAdd(pos, $file, isinsert) {
+-            if (isinsert === undefined) isinsert = true;
+-            var $vm = this;
+-            if (this.__rFilter == null) {
+-                // this.__rFilter = /^(?:image\/bmp|image\/cis\-cod|image\/gif|image\/ief|image\/jpeg|image\/jpeg|image\/jpeg|image\/pipeg|image\/png|image\/svg\+xml|image\/tiff|image\/x\-cmu\-raster|image\/x\-cmx|image\/x\-icon|image\/x\-portable\-anymap|image\/x\-portable\-bitmap|image\/x\-portable\-graymap|image\/x\-portable\-pixmap|image\/x\-rgb|image\/x\-xbitmap|image\/x\-xpixmap|image\/x\-xwindowdump)$/i;
+-                this.__rFilter = /^image\//i;
+-            }
+-            this.__oFReader = new FileReader();
+-            this.__oFReader.onload = function (oFREvent) {
+-                $vm.markdownIt.image_add(pos, oFREvent.target.result);
+-                $file.miniurl = oFREvent.target.result;
+-                if (isinsert === true) {
+-                    // 去除特殊字符
+-                    $file._name = $file.name.replace(/[\[\]\(\)\+\{\}&\|\\\*^%$#@\-]/g, '');
+-
+-                    $vm.insertText($vm.getTextareaDom(),
+-                        {
+-                            prefix: '![' + $file._name + '](' + pos + ')',
+-                            subfix: '',
+-                            str: ''
+-                        });
+-                    $vm.$nextTick(function () {
+-                        $vm.$emit('imgAdd', pos, $file);
+-                    })
+-                }
+-            }
+-            if ($file) {
+-                var oFile = $file;
+-                if (this.__rFilter.test(oFile.type)) {
+-                    this.__oFReader.readAsDataURL(oFile);
+-                }
+-            }
+-        },
+-        $imgUpdateByUrl(pos, url) {
+-            var $vm = this;
+-            this.markdownIt.image_add(pos, url);
+-            this.$nextTick(function () {
+-                $vm.d_render = this.markdownIt.render(this.d_value);
+-            })
+-        },
+-        $imgAddByUrl(pos, url) {
+-            if (this.$refs.toolbar_left.$imgAddByUrl(pos, url)) {
+-                this.$imgUpdateByUrl(pos, url);
+-                return true;
+-            }
+-            return false;
+-        },
+-        $img2Url(fileIndex, url) {
+-            // x.replace(/(\[[^\[]*?\](?=\())\(\s*(\.\/2)\s*\)/g, "$1(http://path/to/png.png)")
+-            var reg_str = "/(!\\[\[^\\[\]*?\\]\(?=\\(\)\)\\(\\s*\(" + fileIndex + "\)\\s*\\)/g"
+-            var reg = eval(reg_str);
+-            this.d_value = this.d_value.replace(reg, "$1(" + url + ")")
+-            this.$refs.toolbar_left.$changeUrl(fileIndex, url)
+-            this.iRender()
+-        },
+-        $imglst2Url(imglst) {
+-            if (imglst instanceof Array) {
+-                for (var i = 0; i < imglst.length; i++) {
+-                    this.$img2Url(imglst[i][0], imglst[i][1]);
+-                }
+-            }
+-        },
+-        toolbar_left_click(_type) {
+-            toolbar_left_click(_type, this);
+-        },
+-        toolbar_left_addlink(_type, text, link) {
+-            toolbar_left_addlink(_type, text, link, this);
+-        },
+-        toolbar_right_click(_type) {
+-            toolbar_right_click(_type, this);
+-        },
+-        getNavigation($vm, full) {
+-            return getNavigation($vm, full);
+-        },
+-        // @event
+-        // 修改数据触发 （val ， val_render）
+-        change(val, render) {
+-            this.$emit('change', val, render)
+-        },
+-        // 切换全屏触发 （status , val）
+-        fullscreen(status, val) {
+-            this.$emit('fullScreen', status, val)
+-        },
+-        // 打开阅读模式触发（status , val）
+-        readmodel(status, val) {
+-            this.$emit('readModel', status, val)
+-        },
+-        // 切换阅读编辑触发 （status , val）
+-        previewtoggle(status, val) {
+-            this.$emit('previewToggle', status, val)
+-        },
+-        // 切换分栏触发 （status , val）
+-        subfieldtoggle(status, val) {
+-            this.$emit('subfieldToggle', status, val)
+-        },
+-        // 切换htmlcode触发 （status , val）
+-        htmlcode(status, val) {
+-            this.$emit('htmlCode', status, val)
+-        },
+-        // 打开 , 关闭 help触发 （status , val）
+-        helptoggle(status, val) {
+-            this.$emit('helpToggle', status, val)
+-        },
+-        // 监听ctrl + s
+-        save(val, render) {
+-            this.$emit('save', val, render)
+-        },
+-        // 导航栏切换
+-        navigationtoggle(status, val) {
+-            this.$emit('navigationToggle', status, val)
+-        },
+-        $toolbar_right_read_change_status() {
+-            this.s_readmodel = !this.s_readmodel
+-            if (this.readmodel) {
+-                this.readmodel(this.s_readmodel, this.d_value)
+-            }
+-            if (this.s_readmodel && this.toolbars.navigation) {
+-                this.getNavigation(this, true)
+-            }
+-        },
+-        // ---------------------------------------
+-        // 滚动条联动
+-        $v_edit_scroll($event) {
+-            scrollLink($event, this);
+-        },
+-        // 获取textarea dom节点
+-        getTextareaDom() {
+-            return this.$refs.vNoteTextarea.$refs.vTextarea;
+-        },
+-        // 工具栏插入内容
+-        insertText(obj, {prefix, subfix, str, type}) {
+-            // if (this.s_preview_switch) {
+-
+-            insertTextAtCaret(obj, {prefix, subfix, str, type}, this);
+-        },
+-        insertTab() {
+-            insertTab(this, this.tabSize)
+-        },
+-        insertOl() {
+-            insertOl(this)
+-        },
+-        removeLine() {
+-            removeLine(this)
+-        },
+-        insertUl() {
+-            insertUl(this)
+-        },
+-        unInsertTab() {
+-            unInsertTab(this, this.tabSize)
+-        },
+-        insertCodeBlock() {
+-            insertCodeBlock(this);
+-        },
+-        insertEnter(event) {
+-            insertEnter(this, event)
+-        },
+-        saveHistory() {
+-            this.d_history.splice(this.d_history_index + 1, this.d_history.length)
+-            this.d_history.push(this.d_value)
+-            this.textarea_selectionEnds.splice(this.d_history_index + 1, this.textarea_selectionEnds.length)
+-            this.textarea_selectionEnds.push(this.textarea_selectionEnd)
+-            this.d_history_index = this.d_history.length - 1
+-        },
+-        saveSelectionEndsHistory() {
+-            const textarea = this.$refs.vNoteTextarea && this.$refs.vNoteTextarea.$el.querySelector('textarea');
+-            this.textarea_selectionEnd = textarea ? textarea.selectionEnd : this.textarea_selectionEnd;
+-        },
+-        initLanguage() {
+-            let lang = CONFIG.langList.indexOf(this.language) >= 0 ? this.language : 'zh-CN';
+-            var $vm = this;
+-            $vm.$render(CONFIG[`help_${lang}`], function(res) {
+-                $vm.d_help = res;
+-            })
+-            this.d_words = CONFIG[`words_${lang}`];
+-        },
+-        // 编辑开关
+-        editableTextarea() {
+-            let text_dom = this.$refs.vNoteTextarea.$refs.vTextarea;
+-            if (this.editable) {
+-                text_dom.removeAttribute('disabled');
+-            } else {
+-                text_dom.setAttribute('disabled', 'disabled');
+-            }
+-        },
+-        codeStyleChange(val, isInit) {
+-            isInit = isInit ? isInit : false;
+-            if (typeof this.p_external_link.hljs_css !== 'function') {
+-                if (this.p_external_link.hljs_css !== false)
+-                { console.error('external_link.hljs_css is not a function, if you want to disabled this error log, set external_link.hljs_css to function or false'); }
+-                return;
+-            }
+-            var url = this.p_external_link.hljs_css(val);
+-            if (url.length === 0 && isInit) {
+-                console.warn('hljs color scheme', val, 'do not exist, loading default github');
+-                url = this.p_external_link.hljs_css('github')
+-            }
+-            if (url.length > 0) {
+-                loadLink(url,null,"md-code-style");
+-            } else {
+-                console.warn('hljs color scheme', val, 'do not exist, hljs color scheme will not change');
+-            }
+-        },
+-        iRender(toggleChange) {
+-            var $vm = this;
+-            this.$render($vm.d_value, function(res) {
+-                $vm.d_render = res;
+-                // change回调  toggleChange == false 时候触发change回调
+-                if (!toggleChange)
+-                {
+-                    if ($vm.change) $vm.change($vm.d_value, $vm.d_render);
+-                }
+-                // 改变标题导航
+-                if ($vm.s_navigation) getNavigation($vm, false);
+-                // v-model 语法糖
+-                $vm.$emit('input', $vm.d_value)
+-                // 塞入编辑记录数组
+-                if ($vm.d_value === $vm.d_history[$vm.d_history_index]) return
+-                window.clearTimeout($vm.currentTimeout)
+-                $vm.currentTimeout = setTimeout(() => {
+-                    $vm.saveHistory();
+-                }, 500);
+-            })
+-        },
+-        // 清空上一步 下一步缓存
+-        $emptyHistory() {
+-            this.d_history = [this.d_value] // 编辑记录
+-            this.d_history_index = 0 // 编辑记录索引
+-        }
+-    },
+-    watch: {
+-        d_value: function (val, oldVal) {
+-            this.saveSelectionEndsHistory();
+-            this.iRender();
+-        },
+-        value: function (val, oldVal) {
+-            if (val !== this.d_value) {
+-                this.d_value = val
+-            }
+-        },
+-        subfield: function (val, oldVal) {
+-            this.s_subfield = val
+-        },
+-        d_history_index() {
+-            if (this.d_history_index > 20) {
+-                this.d_history.shift()
+-                this.d_history_index = this.d_history_index - 1
+-            }
+-            this.d_value = this.d_history[this.d_history_index]
+-        },
+-        language: function (val) {
+-            this.initLanguage();
+-        },
+-        editable: function () {
+-            this.editableTextarea();
+-        },
+-        defaultOpen: function (val) {
+-            let default_open_ = val;
+-            if (!default_open_) {
+-                default_open_ = this.subfield ? 'preview' : 'edit';
+-            }
+-            this.s_preview_switch = default_open_ === 'preview' ? true : false;
+-            return this.s_preview_switch;
+-        },
+-        codeStyle: function (val) {
+-            this.codeStyleChange(val)
+-        }
+-    },
+-    components: {
+-        'v-autoTextarea': autoTextarea,
+-        'v-md-toolbar-left': md_toolbar_left,
+-        'v-md-toolbar-right': md_toolbar_right
+-    }
+-};
+-</script>
+-<style lang="stylus" rel="stylesheet/stylus">
+-    @import "lib/css/scroll.styl"
+-    @import "lib/css/mavon-editor.styl"
+-</style>
+-<style lang="css" scoped>
+-    .auto-textarea-wrapper {
+-        height: 100%;
+-    }
+-</style>
