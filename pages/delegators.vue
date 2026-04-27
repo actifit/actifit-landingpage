@@ -36,8 +36,9 @@
 		return {
 		  title: `Actifit Delegators - Actifit.io`,
 		  meta: [
-			{ hid: 'description', name: 'description', content: `Listing of Actifit delegators / supporters` },
-			{ hid: 'ogdescription', name: 'og:description', content: `Listing of Actifit delegators / supporters` }
+			{ hid: 'description', name: 'description', content: `Meet Actifit's top Hive delegators powering the move-to-earn ecosystem. Delegate Hive Power and earn AFIT tokens daily.` },
+			{ hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Delegate Hive Power to Actifit and earn daily AFIT token rewards.` },
+			{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Actifit Delegators - Actifit.io' }
 		  ]
 		}
 	},

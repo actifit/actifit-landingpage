@@ -276,7 +276,7 @@ module.exports = {
     q38: 'Actifitアプリに投稿キーでログインした場合、私の資金は安全ですか？',
     a38: 'はい、あなたの資金は100％安全です。Actifitモバイルアプリを使用するために必要なキーは投稿キーのみです。Actifitモバイルアプリに投稿キーを使用してログインすると、レポートをブロックチェーンに公開するためのアクセス権を当社に付与したことになります。投稿キーはあなたの資金にアクセスするために使用することはできません。',
     q39: 'ここに質問の答えがない場合、どうやって連絡すればよいですか？',
-    a39: 'いつでも以下のいずれかでご連絡いただけます<br/><li>Facebook: <a href="https://www.facebook.com/Actifit.fitness/">https://www.facebook.com/Actifit.fitness/</a> </li><li>Instagram: <a href="https://www.instagram.com/actifit.fitness/">https://www.instagram.com/actifit.fitness/</a> </li><li>Twitter: <a href="https://www.twitter.com/Actifit_fitness">https://www.twitter.com/Actifit_fitness</a> </li><li>Telegram: <a href="https://t.me/actifit">https://t.me/actifit</a> </li><li>Discord: <a href="https://links.actifit.io/discord">https://links.actifit.io/discord</a> </li><li>Youtube:  <a href="https://www.youtube.com/channel/UCNHxAGO79rXI7Hdiikwnqtw">https://www.youtube.com/channel/UCNHxAGO79rXI7Hdiikwnqtw</a> </li><li>Medium: <a href="https://medium.com/@actifit.fitness">https://medium.com/@actifit.fitness</a> </li>',
+    a39: 'いつでも以下のいずれかでご連絡いただけます<br/><li>Facebook: <a href="https://www.facebook.com/Actifit.fitness/">https://www.facebook.com/Actifit.fitness/</a> </li><li>Instagram: <a href="https://www.instagram.com/actifit.fitness/">https://www.instagram.com/actifit.fitness/</a> </li><li>Twitter: <a href="https://www.twitter.com/Actifit_fitness">https://www.twitter.com/Actifit_fitness</a> </li><li>Telegram: <a href="https://t.me/actifit">https://t.me/actifit</a> </li><li>Discord: <a href="https://links.actifit.io/discord">https://links.actifit.io/discord</a> </li><li>Youtube:  <a href="https://www.youtube.com/Actifitfitness">https://www.youtube.com/Actifitfitness</a> </li><li>Medium: <a href="https://medium.com/@actifit.fitness">https://medium.com/@actifit.fitness</a> </li>',
   },
   signup: {
     headline: 'Actifitアカウントを作成',
@@ -984,6 +984,7 @@ module.exports = {
   Blurt_Power: 'Blurt Power',
   LinkedIn: 'LinkedIn',
   FAQ: 'FAQ',
+  TikTok: 'TikTok',
   Youtube: 'Youtube',
   Medium: 'Medium',
   Reset_password: 'パスワードをリセット',

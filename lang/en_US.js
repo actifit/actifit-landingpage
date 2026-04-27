@@ -276,7 +276,7 @@ module.exports = {
 	q38: 'Are my funds safe if I log in with my posting key on the Actifit App?',
 	a38: 'Yes, your funds are 100% safe. The only key required to use the Actifit mobile App is your posting key. By using your posting key to log into the Actifit Mobile App, you grant us access to publish your reports to the blockchain. Posting keys cannot be used to access your funds.',
 	q39: 'How do I contact you if my question isn’t answered here?',
-	a39: 'You can always contact us on one of the following<br/><li>Facebook: <a href="https://www.facebook.com/Actifit.fitness/">https://www.facebook.com/Actifit.fitness/</a> </li><li>Instagram: <a href="https://www.instagram.com/actifit.fitness/">https://www.instagram.com/actifit.fitness/</a> </li><li>Twitter: <a href="https://www.twitter.com/Actifit_fitness">https://www.twitter.com/Actifit_fitness</a> </li><li>Telegram: <a href="https://t.me/actifit">https://t.me/actifit</a> </li><li>Discord: <a href="https://links.actifit.io/discord">https://links.actifit.io/discord</a> </li><li>Youtube:  <a href="https://www.youtube.com/channel/UCNHxAGO79rXI7Hdiikwnqtw">https://www.youtube.com/channel/UCNHxAGO79rXI7Hdiikwnqtw</a> </li><li>Medium: <a href="https://medium.com/@actifit.fitness">https://medium.com/@actifit.fitness</a> </li>',
+	a39: 'You can always contact us on one of the following<br/><li>Facebook: <a href="https://www.facebook.com/Actifit.fitness/">https://www.facebook.com/Actifit.fitness/</a> </li><li>Instagram: <a href="https://www.instagram.com/actifit.fitness/">https://www.instagram.com/actifit.fitness/</a> </li><li>Twitter: <a href="https://www.twitter.com/Actifit_fitness">https://www.twitter.com/Actifit_fitness</a> </li><li>Telegram: <a href="https://t.me/actifit">https://t.me/actifit</a> </li><li>Discord: <a href="https://links.actifit.io/discord">https://links.actifit.io/discord</a> </li><li>Youtube:  <a href="https://www.youtube.com/Actifitfitness">https://www.youtube.com/Actifitfitness</a> </li><li>Medium: <a href="https://medium.com/@actifit.fitness">https://medium.com/@actifit.fitness</a> </li>',
   },
   signup: {
 	headline: 'Create your Actifit account',
@@ -986,6 +986,7 @@ module.exports = {
   Blurt_Power: 'Blurt Power',
   LinkedIn: 'LinkedIn',
   FAQ: 'FAQ',
+  TikTok: 'TikTok',
   Youtube: 'Youtube',
   Medium: 'Medium',
   Reset_password: 'Reset Password',

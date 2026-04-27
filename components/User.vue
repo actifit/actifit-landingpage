@@ -2,7 +2,7 @@
   <!-- single card item for user -->	
         <div class="card form mx-auto p-3 mt-3 mt-md-5 text-center card-border pro-card col-sm-4">
 		  <div class="pb-md-2 text-center">
-			  <h1 class="pro-name">{{ this.singleuser.name}}</h1>
+			  <h2 class="pro-name">{{ this.singleuser.name}}</h2>
 			  <h2><a :href="'/' + this.singleuser.username">@{{ this.singleuser.username}}</a></h2>
 			  <h3>{{ this.singleuser.type}}</h3>
 			  <h4>{{ this.singleuser.location}}</h4>

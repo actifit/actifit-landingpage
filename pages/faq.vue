@@ -31,10 +31,11 @@
   export default {
 	head () {
 		return {
-		  title: `FAQ Page - Actifit.io`,
+		  title: `FAQ - Actifit.io`,
 		  meta: [
-			{ hid: 'description', name: 'description', content: `Actifit FAQ Page` },
-			{ hid: 'ogdescription', name: 'og:description', content: `Actifit FAQ Page` }
+			{ hid: 'description', name: 'description', content: `Frequently asked questions about Actifit — how to earn AFIT tokens, track steps, use the market, and get rewarded for your daily activity on Hive blockchain.` },
+			{ hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Frequently asked questions about Actifit — how to earn AFIT tokens, track steps, and get rewarded for daily activity.` },
+			{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'FAQ - Actifit.io' }
 		  ]
 		}
 	},

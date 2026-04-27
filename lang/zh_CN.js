@@ -276,7 +276,7 @@ module.exports = {
     q38: '如果我使用发帖密钥登录Actifit应用，我的资金安全吗？',
     a38: '是的，您的资金100%安全。使用Actifit移动应用所需的唯一密钥是您的发帖密钥。通过使用您的发帖密钥登录Actifit移动应用，您授予我们向区块链发布您的报告的权限。发帖密钥不能用于访问您的资金。',
     q39: '如果我的问题在这里没有得到解答，我如何联系您？',
-    a39: '您随时可以通过以下方式之一联系我们<br/><li>Facebook: <a href="https://www.facebook.com/Actifit.fitness/">https://www.facebook.com/Actifit.fitness/</a> </li><li>Instagram: <a href="https://www.instagram.com/actifit.fitness/">https://www.instagram.com/actifit.fitness/</a> </li><li>Twitter: <a href="https://www.twitter.com/Actifit_fitness">https://www.twitter.com/Actifit_fitness</a> </li><li>Telegram: <a href="https://t.me/actifit">https://t.me/actifit</a> </li><li>Discord: <a href="https://links.actifit.io/discord">https://links.actifit.io/discord</a> </li><li>Youtube:  <a href="https://www.youtube.com/channel/UCNHxAGO79rXI7Hdiikwnqtw">https://www.youtube.com/channel/UCNHxAGO79rXI7Hdiikwnqtw</a> </li><li>Medium: <a href="https://medium.com/@actifit.fitness">https://medium.com/@actifit.fitness</a> </li>',
+    a39: '您随时可以通过以下方式之一联系我们<br/><li>Facebook: <a href="https://www.facebook.com/Actifit.fitness/">https://www.facebook.com/Actifit.fitness/</a> </li><li>Instagram: <a href="https://www.instagram.com/actifit.fitness/">https://www.instagram.com/actifit.fitness/</a> </li><li>Twitter: <a href="https://www.twitter.com/Actifit_fitness">https://www.twitter.com/Actifit_fitness</a> </li><li>Telegram: <a href="https://t.me/actifit">https://t.me/actifit</a> </li><li>Discord: <a href="https://links.actifit.io/discord">https://links.actifit.io/discord</a> </li><li>Youtube:  <a href="https://www.youtube.com/Actifitfitness">https://www.youtube.com/Actifitfitness</a> </li><li>Medium: <a href="https://medium.com/@actifit.fitness">https://medium.com/@actifit.fitness</a> </li>',
   },
   signup: {
     headline: '创建您的Actifit账户',
@@ -985,6 +985,7 @@ module.exports = {
   Blurt_Power: 'Blurt Power',
   LinkedIn: '领英',
   FAQ: '常见问题',
+  TikTok: 'TikTok',
   Youtube: 'YouTube',
   Medium: 'Medium',
   Reset_password: '重置密码',

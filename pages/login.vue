@@ -108,8 +108,10 @@
 		return {
 		  title: `Login Page - Actifit.io`,
 		  meta: [
-			{ hid: 'description', name: 'description', content: `Login to your actifit.io account` },
-			{ hid: 'ogdescription', name: 'og:description', content: `Login to your actifit.io account` }
+			{ hid: 'description', name: 'description', content: `Login to your Actifit account` },
+			{ hid: 'ogdescription', name: 'og:description', content: `Login to your Actifit account` },
+			{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Login Page - Actifit.io' },
+			{ name: 'robots', content: 'noindex, nofollow' }
 		  ]
 		}
 	},
@@ -351,7 +353,7 @@
 				});
 
 			}
-		}).then(message => {
+		}).then(async (message) => {
 			//resolve(res)
 			console.log(message);
 			if (message.cmd && message.cmd === 'auth_ack'){
@@ -382,14 +384,21 @@
 					recaptcha.hideBadge();
 					this.login_in_progress = false;
 
-					fetch(process.env.actiAppUrl+'getAccountData?user='+account+'&bchain=HIVE').then(
-					res => {
-						res.json().then(json =>
-							{
-								this.setHiveauthLoginStatus (json)
-							}
-						).catch(e => reject(e))
-					}).catch(e => reject(e))
+					try {
+						const acctController = new AbortController();
+						const acctTimeoutId = setTimeout(() => acctController.abort(), 20000);
+						const acctRes = await fetch(process.env.actiAppUrl+'getAccountData?user='+account+'&bchain=HIVE', {
+							signal: acctController.signal
+						});
+						clearTimeout(acctTimeoutId);
+						const acctJson = await acctRes.json();
+						this.setHiveauthLoginStatus(acctJson);
+					} catch (e) {
+						console.error('HiveAuth account data error:', e);
+						this.error_proceeding = true;
+						this.login_in_progress = false;
+						this.error_msg = this.$t('login_error');
+					}
 				}else{
 					//display error message
 					this.error_proceeding = true;
@@ -409,7 +418,7 @@
 		.catch(err => {
 			console.error(err)
 			this.error_proceeding = true;
-			this.error_msg = err;
+			this.error_msg = this.$t('login_error');
 			this.hiveauth_wait = false;
 			this.login_in_progress = false;
 		})
@@ -455,33 +464,54 @@
 					}
 		console.log('loginkeychain attempt')
 		console.log(process.env.actiAppUrl);
-		let outc = await fetch(process.env.actiAppUrl+'loginKeychain',{
-				method: 'POST',
-				headers: {
-				  'Content-Type': 'application/json'
-				},
-				body: JSON.stringify(user_info)
-			})
-		let contt = await outc.json();
-		//console.log(contt)
+		try {
+			const controller = new AbortController();
+			const timeoutId = setTimeout(() => controller.abort(), 20000);
+			let outc = await fetch(process.env.actiAppUrl+'loginKeychain',{
+					method: 'POST',
+					headers: {
+					  'Content-Type': 'application/json'
+					},
+					body: JSON.stringify(user_info),
+					signal: controller.signal
+				});
+			clearTimeout(timeoutId);
+			let contt = await outc.json();
+			//console.log(contt)
 
-		if (contt.message){
-			window.hive_keychain.requestVerifyKey(account_name, contt.message, 'Posting', (response) => {
-			  //console.log(response);
-			  if (response.success === true) {
-				//successfully verified user
+			if (contt.message){
+				window.hive_keychain.requestVerifyKey(account_name, contt.message, 'Posting', async (response) => {
+				  //console.log(response);
+				  if (response.success === true) {
+					//successfully verified user
+					try {
+						const acctController = new AbortController();
+						const acctTimeoutId = setTimeout(() => acctController.abort(), 20000);
+						const acctRes = await fetch(process.env.actiAppUrl+'getAccountData?user='+account_name+'&bchain=HIVE', {
+							signal: acctController.signal
+						});
+						clearTimeout(acctTimeoutId);
+						const acctJson = await acctRes.json();
+						this.setKeychainLoginStatus(acctJson);
+					} catch (e) {
+						console.error('Keychain account data error:', e);
+						this.error_proceeding = true;
+						this.login_in_progress = false;
+						this.error_msg = this.$t('login_error');
+					}
+				  }
+				});
 
-				fetch(process.env.actiAppUrl+'getAccountData?user='+account_name+'&bchain=HIVE').then(
-					res => {
-						res.json().then(json =>
-							{
-								this.setKeychainLoginStatus (json)
-							}
-						).catch(e => reject(e))
-					}).catch(e => reject(e))
-			  }
-			});
-
+			} else {
+				this.error_proceeding = true;
+				this.login_in_progress = false;
+				this.error_msg = this.$t('login_error');
+			}
+		} catch (e) {
+			console.error('Keychain login error:', e);
+			this.error_proceeding = true;
+			this.login_in_progress = false;
+			this.error_msg = this.$t('login_error');
 		}
 
 	  },
@@ -529,23 +559,32 @@
 		this.login_in_progress = true;
 		let account_name = this.$refs["username"].value.trim().toLowerCase();
 		let priv_pkey = this.$refs["ppkey"].value;
-		let vue_ctnr = this;
 		let user_info = {
 						'username': account_name,
 						'ppkey': priv_pkey,
 						'bchain': this.bchain_val,
 						'keeploggedin': this.keep_loggedin_val
 					}
-		fetch(process.env.actiAppUrl+'loginAuth',{
+		try {
+			const controller = new AbortController();
+			const timeoutId = setTimeout(() => controller.abort(), 20000);
+			const res = await fetch(process.env.actiAppUrl+'loginAuth',{
 				method: 'POST',
 				headers: {
 				  'Content-Type': 'application/json'
-				  // 'Content-Type': 'application/x-www-form-urlencoded',
 				},
-				body: JSON.stringify(user_info)
-			}).then(
-			res => {res.json().then(json => this.setUserLoginStatus (json)).catch(e => reject(e))
-		}).catch(e => reject(e))
+				body: JSON.stringify(user_info),
+				signal: controller.signal
+			});
+			clearTimeout(timeoutId);
+			const json = await res.json();
+			this.setUserLoginStatus(json);
+		} catch (e) {
+			console.error('Login error:', e);
+			this.error_proceeding = true;
+			this.login_in_progress = false;
+			this.error_msg = this.$t('login_error');
+		}
 
 	  },
 	}

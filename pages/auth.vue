@@ -18,6 +18,14 @@
 
 <script>
   export default {
+    head () {
+      return {
+        title: 'Auth - Actifit.io',
+        meta: [
+          { name: 'robots', content: 'noindex, nofollow' }
+        ]
+      }
+    },
     async mounted () {
       let accessToken = this.$route.query['access_token']
       if (accessToken) {

@@ -276,7 +276,7 @@ module.exports = {
     q38: 'Meus fundos estão seguros se eu fizer login com minha chave de postagem no Aplicativo Actifit?',
     a38: 'Sim, seus fundos estão 100% seguros. A única chave necessária para usar o aplicativo móvel Actifit é sua chave de postagem. Ao usar sua chave de postagem para fazer login no Aplicativo Móvel Actifit, você nos concede acesso para publicar seus relatórios na blockchain. As chaves de postagem não podem ser usadas para acessar seus fundos.',
     q39: 'Como entro em contato com vocês se minha pergunta não for respondida aqui?',
-    a39: 'Você sempre pode entrar em contato conosco em um dos seguintes canais<br/><li>Facebook: <a href="https://www.facebook.com/Actifit.fitness/">https://www.facebook.com/Actifit.fitness/</a> </li><li>Instagram: <a href="https://www.instagram.com/actifit.fitness/">https://www.instagram.com/actifit.fitness/</a> </li><li>Twitter: <a href="https://www.twitter.com/Actifit_fitness">https://www.twitter.com/Actifit_fitness</a> </li><li>Telegram: <a href="https://t.me/actifit">https://t.me/actifit</a> </li><li>Discord: <a href="https://links.actifit.io/discord">https://links.actifit.io/discord</a> </li><li>Youtube:  <a href="https://www.youtube.com/channel/UCNHxAGO79rXI7Hdiikwnqtw">https://www.youtube.com/channel/UCNHxAGO79rXI7Hdiikwnqtw</a> </li><li>Medium: <a href="https://medium.com/@actifit.fitness">https://medium.com/@actifit.fitness</a> </li>',
+    a39: 'Você sempre pode entrar em contato conosco em um dos seguintes canais<br/><li>Facebook: <a href="https://www.facebook.com/Actifit.fitness/">https://www.facebook.com/Actifit.fitness/</a> </li><li>Instagram: <a href="https://www.instagram.com/actifit.fitness/">https://www.instagram.com/actifit.fitness/</a> </li><li>Twitter: <a href="https://www.twitter.com/Actifit_fitness">https://www.twitter.com/Actifit_fitness</a> </li><li>Telegram: <a href="https://t.me/actifit">https://t.me/actifit</a> </li><li>Discord: <a href="https://links.actifit.io/discord">https://links.actifit.io/discord</a> </li><li>Youtube:  <a href="https://www.youtube.com/Actifitfitness">https://www.youtube.com/Actifitfitness</a> </li><li>Medium: <a href="https://medium.com/@actifit.fitness">https://medium.com/@actifit.fitness</a> </li>',
   },
   signup: {
     headline: 'Crie sua conta Actifit',
@@ -985,6 +985,7 @@ module.exports = {
   Blurt_Power: 'Blurt Power',
   LinkedIn: 'LinkedIn',
   FAQ: 'FAQ',
+  TikTok: 'TikTok',
   Youtube: 'Youtube',
   Medium: 'Medium',
   Reset_password: 'Redefinir Senha',

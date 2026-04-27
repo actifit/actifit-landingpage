@@ -101,8 +101,9 @@ export default {
     return {
       title: `Blog Posts by ${this.username} - Actifit.io`,
       meta: [
-        { hid: 'description', name: 'description', content: `Listing of blog posts by ${this.username}` },
-        { hid: 'ogdescription', name: 'og:description', content: `Listing of blog posts by ${this.username}` }
+        { hid: 'description', name: 'description', content: `Blog posts by ${this.username} on Actifit — fitness stories, crypto earnings, and community insights on Hive blockchain.` },
+        { hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Blog posts by ${this.username} on Actifit.` },
+        { hid: 'ogtitle', name: 'og:title', property: 'og:title', content: `Blog Posts by ${this.username} - Actifit.io` }
       ]
     }
   },

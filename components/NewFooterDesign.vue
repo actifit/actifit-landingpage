@@ -25,10 +25,10 @@
         <!-- Column 2: Actifit Links -->
         <div class="footer-column links-column">
           <h4>ACTIFIT</h4>
-          <a href="#" @click.prevent="$router.push('/activity')">{{ $t('activity_feed') }}</a>
-          <a href="#" @click.prevent="$router.push('/market')">{{ $t('Market') }}</a>
-          <a href="#" @click.prevent="$router.push('/yieldfarming')">{{ $t('yield_farming') }}</a>
-          <a href="#" @click.prevent="$router.push('/referrals')">{{ $t('Refer_A_Friend') }}</a>
+          <a href="/activity" @click.prevent="$router.push('/activity')">{{ $t('activity_feed') }}</a>
+          <a href="/market" @click.prevent="$router.push('/market')">{{ $t('Market') }}</a>
+          <a href="/yieldfarming" @click.prevent="$router.push('/yieldfarming')">{{ $t('yield_farming') }}</a>
+          <a href="/referrals" @click.prevent="$router.push('/referrals')">{{ $t('Refer_A_Friend') }}</a>
           <a href="/whitepaper/Actifit_White_Paper.pdf" target="_blank">{{ $t('Whitepaper') }}</a>
           <a href="/faq">{{ $t('FAQ') }}</a>
         </div>
@@ -53,8 +53,9 @@
         <a href="https://www.instagram.com/actifit.fitness/" target="_blank" class="social-icon" :title="$t('Instagram')"><i class="fab fa-instagram"></i></a>
         <a href="https://t.me/actifit" target="_blank" class="social-icon" :title="$t('Telegram')"><i class="fab fa-telegram-plane"></i></a>
         <a href="https://medium.com/@actifit.fitness" target="_blank" class="social-icon" :title="$t('Medium')"><i class="fab fa-medium-m"></i></a>
-        <a href="https://www.youtube.com/channel/UCNHxAGO79rXI7Hdiikwnqtw" target="_blank" class="social-icon" :title="$t('Youtube')"><i class="fab fa-youtube"></i></a>
+        <a href="https://www.youtube.com/Actifitfitness" target="_blank" class="social-icon" :title="$t('Youtube')"><i class="fab fa-youtube"></i></a>
         <a href="https://www.linkedin.com/company/actifit-io" target="_blank" class="social-icon" :title="$t('LinkedIn')"><i class="fab fa-linkedin-in"></i></a>
+        <a href="https://www.tiktok.com/@actifit" target="_blank" class="social-icon" :title="$t('TikTok')"><i class="fab fa-tiktok"></i></a>
       </div>
 
       <hr class="footer-divider">

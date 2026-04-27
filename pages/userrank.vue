@@ -91,8 +91,9 @@
 		return {
 		  title: `Actifit User Rank - Actifit.io`,
 		  meta: [
-			{ hid: 'description', name: 'description', content: `Actifit User Rank Page` },
-			{ hid: 'ogdescription', name: 'og:description', content: `Actifit User Rank Page` }
+			{ hid: 'description', name: 'description', content: `Check your Actifit user rank based on activity, engagement, and fitness achievements. Climb the ranks and earn more AFIT token rewards.` },
+			{ hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Check your Actifit user rank and earn more AFIT token rewards.` },
+			{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Actifit User Rank - Actifit.io' }
 		  ]
 		}
 	},

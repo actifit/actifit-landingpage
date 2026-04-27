@@ -1,5 +1,5 @@
 <template>
-  <div v-if="visible" id="voteProposalModal" ref="voteProposalModal" :class="{ 'visible': visible }"
+  <div v-if="visible && $route.path !== '/signup'" id="voteProposalModal" ref="voteProposalModal" :class="{ 'visible': visible }"
     class="modal fade show" tabindex="-1" role="dialog" data-backdrop="false">
     <div><!-- class="modal-dialog" role="document" -->
       <div class="modal-content">

@@ -97,8 +97,9 @@
 		return {
 		  title: `Hive Communities - Actifit.io`,
 		  meta: [
-			{ hid: 'description', name: 'description', content: `Listing of Hive Communities` },
-			{ hid: 'ogdescription', name: 'og:description', content: `Listing of Hive Communities` }
+			{ hid: 'description', name: 'description', content: `Explore Hive blockchain communities on Actifit — discover fitness groups, crypto enthusiasts, and healthy lifestyle discussions.` },
+			{ hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Explore Hive blockchain communities on Actifit.` },
+			{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Hive Communities - Actifit.io' }
 		  ]
 		}
 	},

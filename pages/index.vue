@@ -26,20 +26,20 @@
               <div class="stat-item">
                 <span class="label">{{ $t('Balance') }}</span>
                 <span class="value">{{ numberFormat(formattedUserTokens, 2) }} {{ $t('AFIT_Token') }}</span>
-                <a href="#" @click.prevent="$router.push('/wallet')" class="btn-panel-action">{{ $t('My_Wallet') }} <i class="fas fa-arrow-right"></i></a>
+                <a href="/wallet" @click.prevent="$router.push('/wallet')" class="btn-panel-action">{{ $t('My_Wallet') }} <i class="fas fa-arrow-right"></i></a>
               </div>
               <div class="stat-item">
                 <span class="label">{{ $t('Activity') }}</span>
                 <span class="value">{{ grabUserReportCount }} {{ $t('Reports') }}</span>
-                <a href="#" @click.prevent="$router.push('/activity/' + user.account.name)" class="btn-panel-action">{{ $t('My_Activity') }} <i class="fas fa-arrow-right"></i></a>
+                <a :href="'/activity/' + user.account.name" @click.prevent="$router.push('/activity/' + user.account.name)" class="btn-panel-action">{{ $t('My_Activity') }} <i class="fas fa-arrow-right"></i></a>
               </div>
             </div>
             <div class="resource-stats">
               <SteemStats :user="user" class="col-md-12" :key="reload" />
             </div>
             <div class="main-actions">
-              <a href="#" class="btn btn-primary-hero" @click.prevent="$router.push('/activity/')">{{ $t('activity_feed') }}</a>
-              <a href="#" class="btn btn-secondary-hero" @click.prevent="$router.push('/market')">{{ $t('Market') }}</a>
+              <a href="/activity/" class="btn btn-primary-hero" @click.prevent="$router.push('/activity/')">{{ $t('activity_feed') }}</a>
+              <a href="/market" class="btn btn-secondary-hero" @click.prevent="$router.push('/market')">{{ $t('Market') }}</a>
             </div>
           </div>
 
@@ -51,7 +51,7 @@
                 <a href="#" data-toggle="modal" data-target="#loginModal" @click="showModalFunc" class="btn btn-secondary-hero">{{ $t('Login') }}</a>
             </div>
             <div class="main-actions-alt">
-              <a href="#" class="btn-link-hero" @click.prevent="$router.push('/activity/')">{{ $t('Explore_Activity_Feed') }} <i class="fas fa-arrow-right"></i></a>
+              <a href="/activity/" class="btn-link-hero" @click.prevent="$router.push('/activity/')">{{ $t('Explore_Activity_Feed') }} <i class="fas fa-arrow-right"></i></a>
             </div>
           </div>
         </div>
@@ -68,7 +68,7 @@
     <section id="recent-activity" class="py-5">
       <div class="container-fluid">
         <div class="text-center mb-5">
-          <h1 class="section-title">{{ $t('fresh') }}</h1>
+          <h2 class="section-title">{{ $t('fresh') }}</h2>
           <p class="lead text-muted">{{ $t('community') }}</p>
         </div>
 
@@ -128,9 +128,9 @@
     <section class="intro reveal" id="content">
       <div class="intro-showcase-container">
         <img src="/img/actifit_logo_200.png" alt="Actifit Logo" class="intro-logo" />
-        <h1 class="headline">
+        <h2 class="headline">
           {{ $t('Actifit_title') }}
-        </h1>
+        </h2>
         <p class="lead">
           {{ $t('Actifit_subtitle') }}
         </p>
@@ -207,10 +207,10 @@
     <section id="delegators" class="py-5 delegator-aurora-bg reveal">
       <div class="container-fluid">
         <div class="text-center mb-5">
-          <h1 class="section-title">
+          <h2 class="section-title">
             <i class="fas fa-heart text-brand"></i><br>
             {{ $t('our_top_supporters') }}
-          </h1>
+          </h2>
           <p class="lead text-muted">{{ $t('top_supporters_desc') }}</p>
         </div>
         <div v-if="!isLoadingDelegators && enrichedDelegators.length > 0">
@@ -266,9 +266,9 @@
     <!-- leaderboard -->
     <section id="leaderboard" class="py-5 reveal">
       <div class="container">
-        <h1 class="leaderboard-title text-center">
+        <h2 class="leaderboard-title text-center">
           {{ $t('Daily_Leaderboard') }}
-        </h1>
+        </h2>
         <div class="leaderboard-podium" v-if="leaderboard && leaderboard.length >= 3 && leaderboardPosts.length >= 3">
 
           <!-- 1st Place Column (now first in HTML) -->
@@ -351,10 +351,10 @@
     <section id="infrastructure" class="py-5">
       <div class="container">
         <div class="text-center mb-5">
-          <h1 class="section-title">
+          <h2 class="section-title">
             <i class="fas fa-cubes text-brand"></i><br>
             {{ $t('Infrastructure') }}
-          </h1>
+          </h2>
         </div>
         <div class="infrastructure-grid">
           <div class="priority-line">
@@ -381,10 +381,10 @@
     <section id="news" class="reveal py-5">
         <div class="container-fluid">
             <div class="text-center mb-5">
-                <h1 class="section-title">
+                <h2 class="section-title">
                     <i class="far fa-newspaper text-brand"></i><br>
                     {{ $t('News') }}
-                </h1>
+                </h2>
             </div>
             <div v-if="news && news.length > 0">
                 <div class="delegator-scroller-wrapper">
@@ -398,7 +398,7 @@
                                     </div>
                                     <div class="card-actions">
                                         <a href="#" class="btn-news" @click.prevent="openNewsModal(post)">{{ $t('Read_more') }}</a>
-                                        <a href="#" class="btn-news" @click.prevent="$router.push(post.url)">{{ $t('Full_view') }}</a>
+                                        <a :href="post.url" class="btn-news" @click.prevent="$router.push(post.url)">{{ $t('Full_view') }}</a>
                                     </div>
                                 </div>
                             </div>
@@ -454,6 +454,17 @@ import NotifyModal from '~/components/NotifyModal'
 import LoginModal from '~/components/LoginModal'
 
 export default {
+  head() {
+    return {
+      title: 'Actifit - It Pays to be Fit',
+      meta: [
+        { hid: 'description', name: 'description', content: 'Track your daily activity and earn crypto rewards. Actifit is the original move-to-earn app — walk, run, or hit the gym and get paid in AFIT tokens on Hive blockchain.' },
+        { hid: 'ogdescription', name: 'og:description', property: 'og:description', content: 'Track your daily activity and earn crypto rewards. Actifit is the original move-to-earn app — walk, run, or hit the gym and get paid in AFIT tokens on Hive blockchain.' },
+        { hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Actifit - It Pays to be Fit' },
+        { hid: 'image', name: 'og:image', property: 'og:image', content: 'https://actifit.io/img/actifit_logo_med.png' }
+      ]
+    }
+  },
   components: {
     LoginModal,
     NavbarBrand,

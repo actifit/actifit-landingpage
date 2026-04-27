@@ -276,7 +276,7 @@ module.exports = {
     q38: 'Actifit Uygulamasında gönderi anahtarımla giriş yaparsam fonlarım güvende mi?',
     a38: 'Evet, fonlarınız %100 güvendedir. Actifit mobil Uygulamasını kullanmak için gereken tek anahtar, gönderi anahtarınızdır. Actifit Mobil Uygulamasına giriş yapmak için gönderi anahtarınızı kullanarak, raporlarınızı blok zincirinde yayınlamamız için bize erişim izni vermiş olursunuz. Gönderi anahtarları fonlarınıza erişmek için kullanılamaz.',
     q39: 'Sorum burada yanıtlanmadıysa sizinle nasıl iletişim kurabilirim?',
-    a39: 'Bize her zaman aşağıdakilerden biriyle ulaşabilirsiniz<br/><li>Facebook: <a href="https://www.facebook.com/Actifit.fitness/">https://www.facebook.com/Actifit.fitness/</a> </li><li>Instagram: <a href="https://www.instagram.com/actifit.fitness/">https://www.instagram.com/actifit.fitness/</a> </li><li>Twitter: <a href="https://www.twitter.com/Actifit_fitness">https://www.twitter.com/Actifit_fitness</a> </li><li>Telegram: <a href="https://t.me/actifit">https://t.me/actifit</a> </li><li>Discord: <a href="https://links.actifit.io/discord">https://links.actifit.io/discord</a> </li><li>Youtube:  <a href="https://www.youtube.com/channel/UCNHxAGO79rXI7Hdiikwnqtw">https://www.youtube.com/channel/UCNHxAGO79rXI7Hdiikwnqtw</a> </li><li>Medium: <a href="https://medium.com/@actifit.fitness">https://medium.com/@actifit.fitness</a> </li>'
+    a39: 'Bize her zaman aşağıdakilerden biriyle ulaşabilirsiniz<br/><li>Facebook: <a href="https://www.facebook.com/Actifit.fitness/">https://www.facebook.com/Actifit.fitness/</a> </li><li>Instagram: <a href="https://www.instagram.com/actifit.fitness/">https://www.instagram.com/actifit.fitness/</a> </li><li>Twitter: <a href="https://www.twitter.com/Actifit_fitness">https://www.twitter.com/Actifit_fitness</a> </li><li>Telegram: <a href="https://t.me/actifit">https://t.me/actifit</a> </li><li>Discord: <a href="https://links.actifit.io/discord">https://links.actifit.io/discord</a> </li><li>Youtube:  <a href="https://www.youtube.com/Actifitfitness">https://www.youtube.com/Actifitfitness</a> </li><li>Medium: <a href="https://medium.com/@actifit.fitness">https://medium.com/@actifit.fitness</a> </li>'
   },
   signup: {
     headline: 'Actifit hesabınızı oluşturun',
@@ -985,6 +985,7 @@ module.exports = {
   Blurt_Power: 'Blurt Gücü',
   LinkedIn: 'LinkedIn',
   FAQ: 'SSS',
+  TikTok: 'TikTok',
   Youtube: 'Youtube',
   Medium: 'Medium',
   Reset_password: 'Şifreyi Sıfırla',

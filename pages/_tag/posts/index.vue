@@ -93,8 +93,9 @@ export default {
     return {
       title: `${this.communityData.title} Community Posts - Actifit.io`,
       meta: [
-        { hid: 'description', name: 'description', content: `${this.communityData.title} Community Posts` },
-        { hid: 'ogdescription', name: 'og:description', content: `${this.communityData.title} Community Posts` }
+        { hid: 'description', name: 'description', content: `Browse posts from the ${this.communityData.title} community on Actifit — fitness discussions and move-to-earn activity on Hive blockchain.` },
+        { hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Browse posts from the ${this.communityData.title} community on Actifit.` },
+        { hid: 'ogtitle', name: 'og:title', property: 'og:title', content: `${this.communityData.title} Community Posts - Actifit.io` }
       ]
     }
   },

@@ -92,8 +92,9 @@
 		return {
 		  title: `Comments by ${this.username} - Actifit.io`,
 		  meta: [
-			{ hid: 'description', name: 'description', content: `Comments by ${this.username}` },
-			{ hid: 'ogdescription', name: 'og:description', content: `Comments by ${this.username}` }
+			{ hid: 'description', name: 'description', content: `Comments by ${this.username} on Actifit — community discussions and fitness engagement on Hive blockchain.` },
+			{ hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Comments by ${this.username} on Actifit.` },
+			{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: `Comments by ${this.username} - Actifit.io` }
 		  ]
 		}
 	},

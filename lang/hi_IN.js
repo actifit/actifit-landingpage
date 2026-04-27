@@ -276,7 +276,7 @@ module.exports = {
     q38: 'यदि मैं एक्टिफिट ऐप पर अपनी पोस्टिंग कुंजी से लॉग इन करता हूं तो क्या मेरे फंड सुरक्षित हैं?',
     a38: 'हाँ, आपके फंड 100% सुरक्षित हैं। एक्टिफिट मोबाइल ऐप का उपयोग करने के लिए आवश्यक एकमात्र कुंजी आपकी पोस्टिंग कुंजी है। एक्टिफिट मोबाइल ऐप में लॉग इन करने के लिए अपनी पोस्टिंग कुंजी का उपयोग करके, आप हमें ब्लॉकचेन पर अपनी रिपोर्ट प्रकाशित करने की पहुंच प्रदान करते हैं। पोस्टिंग कुंजियों का उपयोग आपके फंड तक पहुंचने के लिए नहीं किया जा सकता है।',
     q39: 'यदि मेरे प्रश्न का उत्तर यहां नहीं दिया गया है तो मैं आपसे कैसे संपर्क कर सकता हूं?',
-    a39: 'आप हमेशा निम्नलिखित में से किसी एक पर हमसे संपर्क कर सकते हैं<br/><li>फेसबुक: <a href="https://www.facebook.com/Actifit.fitness/">https://www.facebook.com/Actifit.fitness/</a> </li><li>इंस्टाग्राम: <a href="https://www.instagram.com/actifit.fitness/">https://www.instagram.com/actifit.fitness/</a> </li><li>ट्विटर: <a href="https://www.twitter.com/Actifit_fitness">https://www.twitter.com/Actifit_fitness</a> </li><li>टेलीग्राम: <a href="https://t.me/actifit">https://t.me/actifit</a> </li><li>डिस्कॉर्ड: <a href="https://links.actifit.io/discord">https://links.actifit.io/discord</a> </li><li>यूट्यूब:  <a href="https://www.youtube.com/channel/UCNHxAGO79rXI7Hdiikwnqtw">https://www.youtube.com/channel/UCNHxAGO79rXI7Hdiikwnqtw</a> </li><li>मीडियम: <a href="https://medium.com/@actifit.fitness">https://medium.com/@actifit.fitness</a> </li>',
+    a39: 'आप हमेशा निम्नलिखित में से किसी एक पर हमसे संपर्क कर सकते हैं<br/><li>फेसबुक: <a href="https://www.facebook.com/Actifit.fitness/">https://www.facebook.com/Actifit.fitness/</a> </li><li>इंस्टाग्राम: <a href="https://www.instagram.com/actifit.fitness/">https://www.instagram.com/actifit.fitness/</a> </li><li>ट्विटर: <a href="https://www.twitter.com/Actifit_fitness">https://www.twitter.com/Actifit_fitness</a> </li><li>टेलीग्राम: <a href="https://t.me/actifit">https://t.me/actifit</a> </li><li>डिस्कॉर्ड: <a href="https://links.actifit.io/discord">https://links.actifit.io/discord</a> </li><li>यूट्यूब:  <a href="https://www.youtube.com/Actifitfitness">https://www.youtube.com/Actifitfitness</a> </li><li>मीडियम: <a href="https://medium.com/@actifit.fitness">https://medium.com/@actifit.fitness</a> </li>',
   },
   signup: {
     headline: 'अपना एक्टिफिट खाता बनाएं',
@@ -986,6 +986,7 @@ module.exports = {
   Blurt_Power: 'ब्लर्ट पावर',
   LinkedIn: 'लिंक्डइन',
   FAQ: 'सामान्य प्रश्न',
+  TikTok: 'TikTok',
   Youtube: 'यूट्यूब',
   Medium: 'मध्यम',
   Reset_password: 'पासवर्ड रीसेट',

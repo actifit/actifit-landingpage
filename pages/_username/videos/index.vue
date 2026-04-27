@@ -82,8 +82,9 @@
 		return {
 		  title: `3Speak Videos by ${this.username} - Actifit.io`,
 		  meta: [
-			{ hid: 'description', name: 'description', content: `Listing of Videos by ${this.username}` },
-			{ hid: 'ogdescription', name: 'og:description', content: `Listing of Videos by ${this.username}` }
+			{ hid: 'description', name: 'description', content: `Videos by ${this.username} on Actifit — fitness content and community videos on Hive blockchain via 3Speak.` },
+			{ hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Videos by ${this.username} on Actifit.` },
+			{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: `3Speak Videos by ${this.username} - Actifit.io` }
 		  ]
 		}
 	},
