@@ -1,0 +1,195 @@
+diff --git a/node_modules/webpack/lib/BannerPlugin.js b/node_modules/webpack/lib/BannerPlugin.js
+index 322d854..f96ebac 100644
+--- a/node_modules/webpack/lib/BannerPlugin.js
++++ b/node_modules/webpack/lib/BannerPlugin.js
+@@ -9,7 +9,7 @@ const { ConcatSource } = require("webpack-sources");
+ const ModuleFilenameHelpers = require("./ModuleFilenameHelpers");
+ const Template = require("./Template");
+ 
+-const validateOptions = require("schema-utils");
++var _schemaUtils = require("schema-utils"); var validateOptions = typeof _schemaUtils === "function" ? _schemaUtils : _schemaUtils.validate;
+ const schema = require("../schemas/plugins/BannerPlugin.json");
+ 
+ /** @typedef {import("../declarations/plugins/BannerPlugin").BannerPluginArgument} BannerPluginArgument */
+diff --git a/node_modules/webpack/lib/DllPlugin.js b/node_modules/webpack/lib/DllPlugin.js
+index ffd62cf..48f1942 100644
+--- a/node_modules/webpack/lib/DllPlugin.js
++++ b/node_modules/webpack/lib/DllPlugin.js
+@@ -8,7 +8,7 @@ const DllEntryPlugin = require("./DllEntryPlugin");
+ const FlagAllModulesAsUsedPlugin = require("./FlagAllModulesAsUsedPlugin");
+ const LibManifestPlugin = require("./LibManifestPlugin");
+ 
+-const validateOptions = require("schema-utils");
++var _schemaUtils = require("schema-utils"); var validateOptions = typeof _schemaUtils === "function" ? _schemaUtils : _schemaUtils.validate;
+ const schema = require("../schemas/plugins/DllPlugin.json");
+ 
+ /** @typedef {import("../declarations/plugins/DllPlugin").DllPluginOptions} DllPluginOptions */
+diff --git a/node_modules/webpack/lib/DllReferencePlugin.js b/node_modules/webpack/lib/DllReferencePlugin.js
+index 62e26d8..5379932 100644
+--- a/node_modules/webpack/lib/DllReferencePlugin.js
++++ b/node_modules/webpack/lib/DllReferencePlugin.js
+@@ -13,7 +13,7 @@ const NullFactory = require("./NullFactory");
+ const makePathsRelative = require("./util/identifier").makePathsRelative;
+ const WebpackError = require("./WebpackError");
+ 
+-const validateOptions = require("schema-utils");
++var _schemaUtils = require("schema-utils"); var validateOptions = typeof _schemaUtils === "function" ? _schemaUtils : _schemaUtils.validate;
+ const schema = require("../schemas/plugins/DllReferencePlugin.json");
+ 
+ /** @typedef {import("../declarations/plugins/DllReferencePlugin").DllReferencePluginOptions} DllReferencePluginOptions */
+diff --git a/node_modules/webpack/lib/HashedModuleIdsPlugin.js b/node_modules/webpack/lib/HashedModuleIdsPlugin.js
+index 7a860f7..e3beec8 100644
+--- a/node_modules/webpack/lib/HashedModuleIdsPlugin.js
++++ b/node_modules/webpack/lib/HashedModuleIdsPlugin.js
+@@ -5,7 +5,7 @@
+ "use strict";
+ const createHash = require("./util/createHash");
+ 
+-const validateOptions = require("schema-utils");
++var _schemaUtils = require("schema-utils"); var validateOptions = typeof _schemaUtils === "function" ? _schemaUtils : _schemaUtils.validate;
+ const schema = require("../schemas/plugins/HashedModuleIdsPlugin.json");
+ 
+ /** @typedef {import("../declarations/plugins/HashedModuleIdsPlugin").HashedModuleIdsPluginOptions} HashedModuleIdsPluginOptions */
+diff --git a/node_modules/webpack/lib/IgnorePlugin.js b/node_modules/webpack/lib/IgnorePlugin.js
+index cd824db..5814a43 100644
+--- a/node_modules/webpack/lib/IgnorePlugin.js
++++ b/node_modules/webpack/lib/IgnorePlugin.js
+@@ -4,7 +4,7 @@
+ */
+ "use strict";
+ 
+-const validateOptions = require("schema-utils");
++var _schemaUtils = require("schema-utils"); var validateOptions = typeof _schemaUtils === "function" ? _schemaUtils : _schemaUtils.validate;
+ const schema = require("../schemas/plugins/IgnorePlugin.json");
+ 
+ /** @typedef {import("../declarations/plugins/IgnorePlugin").IgnorePluginOptions} IgnorePluginOptions */
+diff --git a/node_modules/webpack/lib/LoaderOptionsPlugin.js b/node_modules/webpack/lib/LoaderOptionsPlugin.js
+index 651987b..dd88dd8 100644
+--- a/node_modules/webpack/lib/LoaderOptionsPlugin.js
++++ b/node_modules/webpack/lib/LoaderOptionsPlugin.js
+@@ -6,7 +6,7 @@
+ 
+ const ModuleFilenameHelpers = require("./ModuleFilenameHelpers");
+ 
+-const validateOptions = require("schema-utils");
++var _schemaUtils = require("schema-utils"); var validateOptions = typeof _schemaUtils === "function" ? _schemaUtils : _schemaUtils.validate;
+ const schema = require("../schemas/plugins/LoaderOptionsPlugin.json");
+ 
+ /** @typedef {import("../declarations/plugins/LoaderOptionsPlugin").LoaderOptionsPluginOptions} LoaderOptionsPluginOptions */
+diff --git a/node_modules/webpack/lib/ProgressPlugin.js b/node_modules/webpack/lib/ProgressPlugin.js
+index 93a5830..d6c54a8 100644
+--- a/node_modules/webpack/lib/ProgressPlugin.js
++++ b/node_modules/webpack/lib/ProgressPlugin.js
+@@ -4,7 +4,7 @@
+ */
+ "use strict";
+ 
+-const validateOptions = require("schema-utils");
++var _schemaUtils = require("schema-utils"); var validateOptions = typeof _schemaUtils === "function" ? _schemaUtils : _schemaUtils.validate;
+ const schema = require("../schemas/plugins/ProgressPlugin.json");
+ 
+ /** @typedef {import("../declarations/plugins/ProgressPlugin").ProgressPluginArgument} ProgressPluginArgument */
+diff --git a/node_modules/webpack/lib/SourceMapDevToolPlugin.js b/node_modules/webpack/lib/SourceMapDevToolPlugin.js
+index 3018eb2..6cd5608 100644
+--- a/node_modules/webpack/lib/SourceMapDevToolPlugin.js
++++ b/node_modules/webpack/lib/SourceMapDevToolPlugin.js
+@@ -11,7 +11,7 @@ const SourceMapDevToolModuleOptionsPlugin = require("./SourceMapDevToolModuleOpt
+ const createHash = require("./util/createHash");
+ const { absolutify } = require("./util/identifier");
+ 
+-const validateOptions = require("schema-utils");
++var _schemaUtils = require("schema-utils"); var validateOptions = typeof _schemaUtils === "function" ? _schemaUtils : _schemaUtils.validate;
+ const schema = require("../schemas/plugins/SourceMapDevToolPlugin.json");
+ 
+ /** @typedef {import("../declarations/plugins/SourceMapDevToolPlugin").SourceMapDevToolPluginOptions} SourceMapDevToolPluginOptions */
+diff --git a/node_modules/webpack/lib/WatchIgnorePlugin.js b/node_modules/webpack/lib/WatchIgnorePlugin.js
+index 5ba9cd0..e75c3a7 100644
+--- a/node_modules/webpack/lib/WatchIgnorePlugin.js
++++ b/node_modules/webpack/lib/WatchIgnorePlugin.js
+@@ -4,7 +4,7 @@
+ */
+ "use strict";
+ 
+-const validateOptions = require("schema-utils");
++var _schemaUtils = require("schema-utils"); var validateOptions = typeof _schemaUtils === "function" ? _schemaUtils : _schemaUtils.validate;
+ const schema = require("../schemas/plugins/WatchIgnorePlugin.json");
+ 
+ /** @typedef {import("../declarations/plugins/WatchIgnorePlugin").WatchIgnorePluginOptions} WatchIgnorePluginOptions */
+diff --git a/node_modules/webpack/lib/debug/ProfilingPlugin.js b/node_modules/webpack/lib/debug/ProfilingPlugin.js
+index 0ba10ae..ba08eee 100644
+--- a/node_modules/webpack/lib/debug/ProfilingPlugin.js
++++ b/node_modules/webpack/lib/debug/ProfilingPlugin.js
+@@ -2,7 +2,7 @@ const fs = require("fs");
+ const path = require("path");
+ const mkdirp = require("mkdirp");
+ const { Tracer } = require("chrome-trace-event");
+-const validateOptions = require("schema-utils");
++var _schemaUtils = require("schema-utils"); var validateOptions = typeof _schemaUtils === "function" ? _schemaUtils : _schemaUtils.validate;
+ const schema = require("../../schemas/plugins/debug/ProfilingPlugin.json");
+ 
+ /** @typedef {import("../../declarations/plugins/debug/ProfilingPlugin").ProfilingPluginOptions} ProfilingPluginOptions */
+diff --git a/node_modules/webpack/lib/optimize/AggressiveSplittingPlugin.js b/node_modules/webpack/lib/optimize/AggressiveSplittingPlugin.js
+index 3843878..3860f9b 100644
+--- a/node_modules/webpack/lib/optimize/AggressiveSplittingPlugin.js
++++ b/node_modules/webpack/lib/optimize/AggressiveSplittingPlugin.js
+@@ -6,7 +6,7 @@
+ 
+ const identifierUtils = require("../util/identifier");
+ const { intersect } = require("../util/SetHelpers");
+-const validateOptions = require("schema-utils");
++var _schemaUtils = require("schema-utils"); var validateOptions = typeof _schemaUtils === "function" ? _schemaUtils : _schemaUtils.validate;
+ const schema = require("../../schemas/plugins/optimize/AggressiveSplittingPlugin.json");
+ 
+ /** @typedef {import("../../declarations/plugins/optimize/AggressiveSplittingPlugin").AggressiveSplittingPluginOptions} AggressiveSplittingPluginOptions */
+diff --git a/node_modules/webpack/lib/optimize/LimitChunkCountPlugin.js b/node_modules/webpack/lib/optimize/LimitChunkCountPlugin.js
+index 87f2849..acf4cc4 100644
+--- a/node_modules/webpack/lib/optimize/LimitChunkCountPlugin.js
++++ b/node_modules/webpack/lib/optimize/LimitChunkCountPlugin.js
+@@ -4,7 +4,7 @@
+ */
+ "use strict";
+ 
+-const validateOptions = require("schema-utils");
++var _schemaUtils = require("schema-utils"); var validateOptions = typeof _schemaUtils === "function" ? _schemaUtils : _schemaUtils.validate;
+ const schema = require("../../schemas/plugins/optimize/LimitChunkCountPlugin.json");
+ const LazyBucketSortedSet = require("../util/LazyBucketSortedSet");
+ 
+diff --git a/node_modules/webpack/lib/optimize/MinChunkSizePlugin.js b/node_modules/webpack/lib/optimize/MinChunkSizePlugin.js
+index 144af27..be538c4 100644
+--- a/node_modules/webpack/lib/optimize/MinChunkSizePlugin.js
++++ b/node_modules/webpack/lib/optimize/MinChunkSizePlugin.js
+@@ -4,7 +4,7 @@
+ */
+ "use strict";
+ 
+-const validateOptions = require("schema-utils");
++var _schemaUtils = require("schema-utils"); var validateOptions = typeof _schemaUtils === "function" ? _schemaUtils : _schemaUtils.validate;
+ const schema = require("../../schemas/plugins/optimize/MinChunkSizePlugin.json");
+ 
+ /** @typedef {import("../../declarations/plugins/optimize/MinChunkSizePlugin").MinChunkSizePluginOptions} MinChunkSizePluginOptions */
+diff --git a/node_modules/webpack/lib/optimize/OccurrenceChunkOrderPlugin.js b/node_modules/webpack/lib/optimize/OccurrenceChunkOrderPlugin.js
+index 4f7ec9a..d152613 100644
+--- a/node_modules/webpack/lib/optimize/OccurrenceChunkOrderPlugin.js
++++ b/node_modules/webpack/lib/optimize/OccurrenceChunkOrderPlugin.js
+@@ -4,7 +4,7 @@
+ */
+ "use strict";
+ 
+-const validateOptions = require("schema-utils");
++var _schemaUtils = require("schema-utils"); var validateOptions = typeof _schemaUtils === "function" ? _schemaUtils : _schemaUtils.validate;
+ const schema = require("../../schemas/plugins/optimize/OccurrenceOrderChunkIdsPlugin.json");
+ 
+ /** @typedef {import("../../declarations/plugins/optimize/OccurrenceOrderChunkIdsPlugin").OccurrenceOrderChunkIdsPluginOptions} OccurrenceOrderChunkIdsPluginOptions */
+diff --git a/node_modules/webpack/lib/optimize/OccurrenceModuleOrderPlugin.js b/node_modules/webpack/lib/optimize/OccurrenceModuleOrderPlugin.js
+index cb9a3e8..a815c7e 100644
+--- a/node_modules/webpack/lib/optimize/OccurrenceModuleOrderPlugin.js
++++ b/node_modules/webpack/lib/optimize/OccurrenceModuleOrderPlugin.js
+@@ -4,7 +4,7 @@
+ */
+ "use strict";
+ 
+-const validateOptions = require("schema-utils");
++var _schemaUtils = require("schema-utils"); var validateOptions = typeof _schemaUtils === "function" ? _schemaUtils : _schemaUtils.validate;
+ const schema = require("../../schemas/plugins/optimize/OccurrenceOrderModuleIdsPlugin.json");
+ 
+ /** @typedef {import("../../declarations/plugins/optimize/OccurrenceOrderModuleIdsPlugin").OccurrenceOrderModuleIdsPluginOptions} OccurrenceOrderModuleIdsPluginOptions */

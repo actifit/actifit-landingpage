@@ -414,6 +414,10 @@ module.exports = {
         })
       }
 
+      loaders: {
+        sass: { sassOptions: { quietDeps: true } }
+      }
+
       /*if (ctx.isClient){
         config.resolve.alias['axios'] = require.resolve('axios/dist/browser/axios.cjs');
       }*/
