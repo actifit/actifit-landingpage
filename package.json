@@ -5,8 +5,8 @@
   "author": "mktcode",
   "private": true,
   "engines": {
-    "node": "=16.13.0",
-    "npm": "<=8.4.0 >6.0.0"
+    "node": "=16.20.2",
+    "npm": ">=8.3.0"
   },
   "scripts": {
     "dev": "nuxt",
@@ -118,6 +118,7 @@
     "js-yaml": "^3.14.2",
     "flatted": "^3.4.2",
     "ajv": "^6.12.6",
+    "schema-utils": "3.3.0",
     "bn.js": "^5.2.3",
     "defu": "^6.1.4",
     "immutable": "^5.1.5",
