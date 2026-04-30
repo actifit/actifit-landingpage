@@ -345,6 +345,16 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
 		return placeholder;
 	};
 
+	// Protect markdown links [text](url) from being corrupted by
+	// video/image/mention regexes that match URLs inside them.
+	const markdownLinks = [];
+	const markdownLinkRegex = /\[([^\]]*)\]\(([^)]+)\)/g;
+	report_content = report_content.replace(markdownLinkRegex, (match) => {
+		const linkPlaceholder = `MDLINK_PH_${markdownLinks.length}`;
+		markdownLinks.push(match);
+		return linkPlaceholder;
+	});
+
 	// Process 3Speak
 	let threespk_embed_reg = /\[!\[[^\]]*\]\([^)]+\)\]\(https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+)\)/ig;
 	report_content = report_content.replace(threespk_embed_reg, (match, v) => {
@@ -388,6 +398,11 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
 		report_content = report_content.replace(user_name_regex, (match, prefix, full_user, username) => {
             return prefix + stashResult(`<a href="https://actifit.io/@${username}">@${username}</a>`);
         });
+	}
+
+	// Restore markdown links that were protected from pre-processing
+	for (let i = markdownLinks.length - 1; i >= 0; i--) {
+		report_content = report_content.replace(`MDLINK_PH_${i}`, markdownLinks[i]);
 	}
 
 	// =========================================================================
