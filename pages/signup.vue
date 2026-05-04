@@ -1,161 +1,362 @@
 <template>
   <div>
-    <!--<script src="https://www.google.com/recaptcha/api.js?onload=vueRecaptchaApiLoaded&render=explicit" async defer></script> -->
     <NavbarBrand />
 
     <section class="intro" id="content">
       <div class="container pt-5 mt-5 pb-5">
 
-        <!-- This is the new heading section, styled like the yield-farming page -->
-        
-        <ListHeadingSection :textualDisplay="textualTitle" />
-        
-        
-        <!-- The detailed description is now in the modal, so the old display div is removed. -->
-        <!-- The old H1 tag is also replaced by the ListHeadingSection component above. -->
-        <!-- signup.buy_text -->
-        <!-- <div class="row lead mb-4 p-3 w-100" v-html="''">
-        </div> -->
-        <div class="form-group">
-          <label for="account-username">{{ $t('Pick_Username') }}</label>
-          <input class="form-control form-control-lg mb-2" ref="account-username" id="account-username"
-            @input="handleUsername($event.target.value.toLowerCase())" />
-          <p class="text-brand" v-if="username_invalid">
-            <b>{{ username_invalid }}</b>
-          </p>
-          <p class="text-brand" v-if="username_exists">
-            <b>{{ username_exists }}</b>
-          </p>
-          <div class="target-bchain">
-            <label for="blockchain">{{ $t('target_bchain') }}</label>
-            <p class="text-brand"><i>{{ $t('leave_default_recommend') }}</i></p>
-            <div class="pl-2 mb-2">
-              <input type="checkbox" id="hive-account" v-model="hive_account" v-on:change="validateUserName">
-              <label for="checkbox" class="font-weight-normal">{{ $t('hive_account_text') }}</label>
+        <!-- Hero -->
+        <div class="signup-hero text-center mb-4">
+          <h1 class="signup-headline">{{ $t('signup.headline') }}</h1>
+          <p class="signup-sub">{{ $t('signup.hero_sub') }}</p>
+          <p class="signup-social-proof"><i class="fas fa-users text-brand mr-1"></i>{{ $t('signup.social_proof') }}</p>
+        </div>
+
+        <!-- Step indicator -->
+        <div class="signup-step-indicator mb-5">
+          <div class="signup-step" :class="{ active: currentStep === 1, done: currentStep > 1 }">
+            <div class="signup-step-circle">
+              <i v-if="currentStep > 1" class="fas fa-check"></i>
+              <span v-else>1</span>
             </div>
-            <div class="pl-2 mb-2" style="display:none">
-              <input type="checkbox" id="steem-account" v-model="steem_account" v-on:change="validateUserName">
-              <label for="checkbox" class="font-weight-normal">{{ $t('steem_account_text') }}</label>
+            <small class="mt-1">{{ $t('signup.step1') }}</small>
+          </div>
+          <div class="signup-step-line"></div>
+          <div class="signup-step" :class="{ active: currentStep === 2, done: currentStep > 2 }">
+            <div class="signup-step-circle">
+              <i v-if="currentStep > 2" class="fas fa-check"></i>
+              <span v-else>2</span>
             </div>
-            <div class="pl-2 mb-2" v-if="blurt_active">
-              <input type="checkbox" id="blurt-account" v-model="blurt_account" v-on:change="validateUserName">
-              <label for="checkbox" class="font-weight-normal">{{ $t('blurt_account_text') }}</label>
+            <small class="mt-1">{{ $t('signup.step2') }}</small>
+          </div>
+          <div class="signup-step-line"></div>
+          <div class="signup-step" :class="{ active: currentStep === 3 }">
+            <div class="signup-step-circle">
+              <span>3</span>
             </div>
+            <small class="mt-1">{{ $t('signup.step3') }}</small>
           </div>
-          <label for="account-password">{{ $t('Your_Password') }}</label><br />
-          <!-- we used change event, while we could have used input event, but that slows user experience slightly -->
-          <input class="form-control form-control-lg" id="account-password" ref="account-password"
-            v-on:change="genPrivKey" />
-          <div class="text-brand"><i>{{ $t('lost_password_precaution') }}</i></div>
-          <button v-on:click="setPasswordVal" class="btn btn-brand btn-lg w-20">{{ $t('Regenerate') }}</button>
+        </div>
 
-          <button v-on:click="copyContent" data-targetEl="account-password" class="btn btn-brand btn-lg w-20 m-2">{{
-            $t('Copy_Password') }}</button><br /><br />
+        <div class="row">
 
-          <label for="account-password-confirm">{{ $t('confirm_password_copy') }}</label><br />
-          <input class="form-control form-control-lg" id="account-password-confirm" ref="account-password-confirm" />
+          <!-- Main form column -->
+          <div class="col-12 col-md-7">
 
-          <label for="account-password">{{ $t('your_posting_key') }}</label><br />
-          <input class="form-control form-control-lg" id="posting-key" readonly ref="posting-key"
-            :value="privatePostKey" />
-          <p class="text-brand"><i>{{ $t('posting_key_precaution') }}</i></p>
-          <button v-on:click="copyContent" data-targetEl="posting-key" class="btn btn-brand btn-lg w-20">{{
-            $t('Copy_Posting_Key') }}</button><br /><br />
-
-          <label for="account-email">{{ $t('email_optional') }}</label><br />
-          <input class="form-control form-control-lg mb-2" id="account-email" ref="account-email" v-model="email" />
-
-          <div class="mb-2">
-            <input type="checkbox" id="promo-code-chkbx" v-model="promo_code_chkbx">
-            <label for="checkbox" class="p-2">{{ $t('promo_code') }}</label>
-          </div>
-          <div v-if="promo_code_chkbx">
-            <label for="promo-code-val">{{ $t('promo_code') }}</label>
-            <input type="text" class="form-control form-control-lg mb-2" id="promo-code-val" ref="promo-code-val"
-              v-model="promo_code_val" />
-          </div>
-          <div v-else>
-            <label for="invested-usd" v-html="dispAmountInvest()"></label><br />
-            <input type="number" class="form-control form-control-lg mb-2" id="invested-usd" ref="invested-usd"
-              v-model="userInputUSDAmount" />
-            <label for="matching-afit">{{ $t('matching_rew_afit') }}</label><br />
-            <input type="number" class="form-control form-control-lg mb-2" id="matching-afit" ref="matching-afit"
-              readonly :value="getMatchingAFIT()" />
-            <label for="invested-amount">{{ $t('choose_cryto') }}</label><br />
-            <span class="row m-0">
-              <input type="number" class="form-control form-control-lg w-50" id="invested-amount" ref="invested-amount"
-                readonly :value="getMatchingAmount()" />
-              <select @change="adjustCurrency" id="invested-crypto" name="invested-crypto" ref="invested-crypto"
-                text="$t('choose_cryto')" class="form-control form-control-lg w-50">
-
-                <!--<option value="SBD">{{ $t('SBD') }}</option>-->
-                <option value="HIVE">{{ $t('HIVE') }}</option>
-                <!--<option value="STEEM">{{ $t('STEEM') }}</option>-->
-                <option value="HBD">{{ $t('HBD') }}</option>
-              </select>
-            </span>
-            <button v-on:click="copyContent" data-targetEl="invested-amount" class="btn btn-brand btn-lg w-20 mt-2">{{
-              $t('copy_amount') }}</button><br /><br />
-            <p class="lead mb-4">
-              {{ $t('notice_send_amount').replace('_CUR_', this.transferType) }}
-            </p>
-
-            <label for="actifit-address">{{ $t('Address') }}</label><br />
-            <input class="form-control form-control-lg w-80" id="actifit-address" ref="actifit-address" readonly
-              :value="getTargetAccount()" />
-            <button v-on:click="copyContent" data-targetEl="actifit-address" class="btn btn-brand btn-lg w-20 mt-2">{{
-              $t('Copy_Address') }}</button><br /><br />
-            <label for="actifit-memo">{{ $t('Memo') }}</label><br />
-            <input class="form-control form-control-lg w-80" id="actifit-memo" ref="actifit-memo" readonly />
-            <button v-on:click="setMemoValue" class="btn btn-brand btn-lg w-20 ">{{ $t('Regenerate') }}</button>
-            <button v-on:click="copyContent" data-targetEl="actifit-memo" class="btn btn-brand btn-lg w-20 m-2">{{
-              $t('Copy_Memo') }}</button>
-          </div>
-          <p class="text-brand" v-if="captcha_invalid">
-            <b>{{ captcha_invalid }}</b>
-          </p>
-          <p class="lead mb-4 pb-1" v-html="$t('send_process_verf')" v-if="!promo_code_chkbx"></p>
-          <p class="lead mb-4 pb-1" v-html="$t('send_process_promo_verf')" v-else></p>
-          <div class="text-brand text-center" v-if="error_proceeding">
-            {{ this.error_msg }}
-          </div>
-          <div class="text-center pb-2" id="create_action_container">
-            <button v-on:click="checkFunds" class="btn btn-brand btn-lg w-20" v-if="!promo_code_chkbx">{{
-              $t('Steem_sent').replace('_CUR_', this.transferType) }}</button>
-            <button v-on:click="checkFunds" class="btn btn-brand btn-lg w-20" v-else>{{ $t('create_account') }}</button>
-          </div>
-          <div v-if="processStarted" class="text-center text-brand">
-            <div id="checking_funds">
-              <i class="fas fa-spin fa-spinner" v-if="checkingFunds"></i><i class="fas fa-check"
-                v-if="!promo_code_chkbx && !checkingFunds"></i><span v-if="!promo_code_chkbx"> {{
-                  $t('Check_Steem_Transfer') }}</span>
-            </div>
-            <div id="account_creation" v-if="resultReturned">
-              <div v-if="accountCreated">
-                <i class="fas fa-check"></i><span> {{ $t('account_created_success') }} <br /><br /> {{
-                  $t('post_account_creation_notice') }}</span>
-                <div>{{ $t('posting_key_notice') }}<br /> <b>{{ this.privatePostKey }}</b><br />{{
-                  $t('copy_safe_location') }} <br />{{ $t('delegation_received') }}<br /><br /></div>
-
-
-                <button class="btn btn-brand btn-lg w-20"
-                  @click="generateAndDownloadFile">{{ $t('signup.download_keys_backup') }}</button>
-
-                <div v-html="$t('signup.signup_completion')"></div>
-
-
+            <!-- Step 1: Account Details card -->
+            <div class="card signup-section-card mb-4">
+              <div class="card-header signup-card-header">
+                <span class="signup-step-badge mr-2">1</span>
+                <strong>{{ $t('signup.step1') }}</strong>
               </div>
-              <div v-else v-html="$t('error_account_creation')">
+              <div class="card-body">
+
+                <div class="form-group mb-3">
+                  <label for="account-username">{{ $t('Pick_Username') }}</label>
+                  <input class="form-control form-control-lg" ref="account-username" id="account-username"
+                    @input="handleUsername($event.target.value.toLowerCase())" />
+                  <p class="text-brand mt-1 mb-0" v-if="username_invalid"><b>{{ username_invalid }}</b></p>
+                  <p class="text-brand mt-1 mb-0" v-if="username_exists"><b>{{ username_exists }}</b></p>
+                </div>
+
+                <div class="form-group mb-3">
+                  <label>{{ $t('target_bchain') }}</label>
+                  <p class="signup-muted mb-1"><i>{{ $t('leave_default_recommend') }}</i></p>
+                  <div class="pl-2 mb-1">
+                    <input type="checkbox" id="hive-account" v-model="hive_account" v-on:change="validateUserName">
+                    <label for="hive-account" class="font-weight-normal ml-1">{{ $t('hive_account_text') }}</label>
+                  </div>
+                  <div class="pl-2 mb-1" style="display:none">
+                    <input type="checkbox" id="steem-account" v-model="steem_account" v-on:change="validateUserName">
+                    <label for="steem-account" class="font-weight-normal ml-1">{{ $t('steem_account_text') }}</label>
+                  </div>
+                  <div class="pl-2 mb-1" v-if="blurt_active">
+                    <input type="checkbox" id="blurt-account" v-model="blurt_account" v-on:change="validateUserName">
+                    <label for="blurt-account" class="font-weight-normal ml-1">{{ $t('blurt_account_text') }}</label>
+                  </div>
+                </div>
+
+                <div class="form-group mb-3">
+                  <label for="account-password">{{ $t('Your_Password') }}</label>
+                  <input class="form-control form-control-lg" id="account-password" ref="account-password"
+                    v-on:change="genPrivKey" />
+                  <p class="signup-muted mt-1 mb-1">
+                    <i class="fas fa-exclamation-triangle text-warning mr-1"></i>{{ $t('signup.keys_warning') }}
+                  </p>
+                  <button v-on:click="setPasswordVal" class="btn btn-brand btn-sm mr-2">{{ $t('Regenerate') }}</button>
+                  <button v-on:click="copyContent" data-targetEl="account-password" class="btn btn-brand btn-sm">{{ $t('Copy_Password') }}</button>
+                </div>
+
+                <div class="form-group mb-3">
+                  <label for="account-password-confirm">{{ $t('confirm_password_copy') }}</label>
+                  <input class="form-control form-control-lg" id="account-password-confirm" ref="account-password-confirm" />
+                </div>
+
+                <div class="form-group mb-3">
+                  <label for="posting-key">{{ $t('your_posting_key') }}</label>
+                  <div class="input-group">
+                    <input class="form-control form-control-lg" id="posting-key" readonly ref="posting-key" :value="privatePostKey" />
+                    <div class="input-group-append">
+                      <button v-on:click="copyContent" data-targetEl="posting-key" class="btn btn-brand">{{ $t('Copy_Posting_Key') }}</button>
+                    </div>
+                  </div>
+                  <p class="signup-muted mt-1 mb-0"><i>{{ $t('posting_key_precaution') }}</i></p>
+                </div>
+
+                <div class="form-group mb-0">
+                  <label for="account-email">{{ $t('email_optional') }}</label>
+                  <input class="form-control form-control-lg" id="account-email" ref="account-email" v-model="email" />
+                </div>
 
               </div>
             </div>
 
+            <!-- Step 2: Activate card -->
+            <div class="card signup-section-card mb-4">
+              <div class="card-header signup-card-header">
+                <span class="signup-step-badge mr-2">2</span>
+                <strong>{{ $t('signup.step2') }}</strong>
+              </div>
+              <div class="card-body">
+
+                <!-- Fee explanation micro-card -->
+                <div class="card signup-fee-card mb-3">
+                  <div class="card-body py-3">
+                    <h6 class="card-title mb-2 text-brand">{{ $t('signup.fee_card_title') }}</h6>
+                    <ul class="mb-2 pl-4">
+                      <li>{{ $t('signup.fee_card_item1') }}</li>
+                      <li>{{ $t('signup.fee_card_item2') }}</li>
+                      <li>{{ $t('signup.fee_card_item3') }}</li>
+                    </ul>
+                    <p class="signup-muted mb-2">{{ $t('signup.fee_card_footer') }}</p>
+                    <a class="signup-collapse-toggle" data-toggle="collapse" href="#whyFeeCollapse" role="button"
+                      aria-expanded="false" aria-controls="whyFeeCollapse">
+                      <i class="fas fa-question-circle mr-1"></i>{{ $t('signup.why_fee_toggle') }}
+                    </a>
+                    <div class="collapse mt-2" id="whyFeeCollapse">
+                      <div class="signup-why-fee-content py-2 px-3">
+                        <strong class="d-block mb-1">{{ $t('signup.why_fee_title') }}</strong>
+                        <p class="signup-muted mb-0">{{ $t('signup.why_fee_body') }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Promo code toggle -->
+                <div class="form-group mb-3">
+                  <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" id="promo-code-chkbx" v-model="promo_code_chkbx">
+                    <label class="custom-control-label font-weight-normal" for="promo-code-chkbx">{{ $t('promo_code') }}</label>
+                  </div>
+                </div>
+
+                <div v-if="promo_code_chkbx" class="form-group mb-3">
+                  <label for="promo-code-val">{{ $t('promo_code') }}</label>
+                  <input type="text" class="form-control form-control-lg" id="promo-code-val" ref="promo-code-val"
+                    v-model="promo_code_val" />
+                </div>
+
+                <div v-else>
+                  <div class="form-group mb-3">
+                    <label for="matching-afit">{{ $t('matching_rew_afit') }}</label>
+                    <input type="number" class="form-control form-control-lg" id="matching-afit" ref="matching-afit"
+                      readonly :value="getMatchingAFIT()" />
+                  </div>
+
+                  <div class="form-group mb-3">
+                    <label for="invested-amount">{{ $t('choose_cryto') }}</label>
+                    <div class="input-group">
+                      <input type="number" class="form-control form-control-lg" id="invested-amount" ref="invested-amount"
+                        readonly :value="getMatchingAmount()" />
+                      <select @change="adjustCurrency" id="invested-crypto" name="invested-crypto" ref="invested-crypto"
+                        class="form-control form-control-lg" style="max-width:120px">
+                        <option value="HIVE">{{ $t('HIVE') }}</option>
+                        <option value="HBD">{{ $t('HBD') }}</option>
+                      </select>
+                      <div class="input-group-append">
+                        <button v-on:click="copyContent" data-targetEl="invested-amount" class="btn btn-brand">{{ $t('copy_amount') }}</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p class="mb-3">{{ $t('notice_send_amount').replace('_CUR_', this.transferType) }}</p>
+
+                  <div class="form-group mb-3">
+                    <label for="actifit-address">{{ $t('Address') }}</label>
+                    <div class="input-group">
+                      <input class="form-control form-control-lg" id="actifit-address" ref="actifit-address" readonly
+                        :value="getTargetAccount()" />
+                      <div class="input-group-append">
+                        <button v-on:click="copyContent" data-targetEl="actifit-address" class="btn btn-brand">{{ $t('Copy_Address') }}</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-group mb-3">
+                    <label for="actifit-memo">{{ $t('Memo') }}</label>
+                    <div class="input-group">
+                      <input class="form-control form-control-lg" id="actifit-memo" ref="actifit-memo" readonly />
+                      <div class="input-group-append">
+                        <button v-on:click="setMemoValue" class="btn btn-outline-secondary">{{ $t('Regenerate') }}</button>
+                        <button v-on:click="copyContent" data-targetEl="actifit-memo" class="btn btn-brand">{{ $t('Copy_Memo') }}</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <p class="signup-muted mb-3" v-if="!promo_code_chkbx">{{ $t('send_process_verf') }}</p>
+                <p class="signup-muted mb-3" v-else>{{ $t('send_process_promo_verf') }}</p>
+
+                <div class="alert alert-danger py-2" v-if="captcha_invalid">{{ captcha_invalid }}</div>
+                <div class="alert alert-danger py-2" v-if="error_proceeding">{{ error_msg }}</div>
+
+                <div class="text-center">
+                  <button v-on:click="checkFunds" class="btn btn-brand btn-lg w-100" v-if="!promo_code_chkbx">
+                    {{ $t('Steem_sent').replace('_CUR_', this.transferType) }}
+                  </button>
+                  <button v-on:click="checkFunds" class="btn btn-brand btn-lg w-100" v-else>
+                    {{ $t('create_account') }}
+                  </button>
+                </div>
+
+                <!-- Process status -->
+                <div v-if="processStarted" class="text-center text-brand mt-3">
+                  <div id="checking_funds">
+                    <i class="fas fa-spin fa-spinner" v-if="checkingFunds"></i>
+                    <i class="fas fa-check" v-if="!promo_code_chkbx && !checkingFunds"></i>
+                    <span v-if="!promo_code_chkbx"> {{ $t('Check_Steem_Transfer') }}</span>
+                  </div>
+                  <div id="account_creation" v-if="resultReturned">
+                    <div v-if="accountCreated" class="text-left mt-3">
+                      <div class="alert alert-success">
+                        <i class="fas fa-check-circle mr-1"></i><strong>{{ $t('account_created_success') }}</strong>
+                        {{ $t('post_account_creation_notice') }}
+                      </div>
+                      <p class="mb-1">{{ $t('posting_key_notice') }}</p>
+                      <div class="alert alert-warning small">
+                        <strong class="d-block">{{ privatePostKey }}</strong>
+                      </div>
+                      <p class="signup-muted">{{ $t('copy_safe_location') }}</p>
+                      <p class="signup-muted">{{ $t('delegation_received') }}</p>
+                      <button class="btn btn-brand btn-lg w-100 mb-3" @click="generateAndDownloadFile">
+                        <i class="fas fa-download mr-1"></i>{{ $t('signup.download_keys_backup') }}
+                      </button>
+                      <div v-html="$t('signup.signup_completion')" class="text-center"></div>
+                    </div>
+                    <div v-else>
+                      <div class="alert alert-danger mt-3 text-left" v-html="$t('error_account_creation')"></div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Login CTA -->
+            <div class="signup-login-cta mb-4">
+              <a href="/login" class="signup-login-link">{{ $t('signup.login_cta') }} &rarr;</a>
+            </div>
+
+          </div>
+
+          <!-- Sidebar column -->
+          <div class="col-12 col-md-5 d-none d-md-block">
+            <div class="signup-sidebar pl-3">
+
+              <!-- Hive education card -->
+              <div class="card signup-section-card mb-4">
+                <div class="card-body">
+                  <a class="signup-collapse-toggle d-flex align-items-center" data-toggle="collapse"
+                    href="#hiveEducationCollapse" role="button" aria-expanded="false" aria-controls="hiveEducationCollapse">
+                    <i class="fas fa-info-circle text-brand mr-2"></i>
+                    <span>{{ $t('signup.hive_toggle') }}</span>
+                  </a>
+                  <div class="collapse mt-3" id="hiveEducationCollapse">
+                    <h6 class="text-brand">{{ $t('signup.hive_title') }}</h6>
+                    <p class="small mb-0">{{ $t('signup.hive_body') }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- FAQ accordion -->
+              <div class="card signup-section-card mb-4">
+                <div class="card-body pb-2">
+                  <h6 class="text-brand mb-3">{{ $t('signup.faq_title') }}</h6>
+
+                  <div class="mb-2">
+                    <a class="signup-faq-toggle d-block" data-toggle="collapse" href="#faqItem1" role="button"
+                      aria-expanded="false">
+                      {{ $t('signup.faq_q1') }}
+                    </a>
+                    <div class="collapse" id="faqItem1">
+                      <p class="signup-faq-answer mt-1 mb-2">{{ $t('signup.faq_a1') }}</p>
+                    </div>
+                  </div>
+
+                  <div class="mb-2">
+                    <a class="signup-faq-toggle d-block" data-toggle="collapse" href="#faqItem2" role="button"
+                      aria-expanded="false">
+                      {{ $t('signup.faq_q2') }}
+                    </a>
+                    <div class="collapse" id="faqItem2">
+                      <p class="signup-faq-answer mt-1 mb-2">{{ $t('signup.faq_a2') }}</p>
+                    </div>
+                  </div>
+
+                  <div class="mb-2">
+                    <a class="signup-faq-toggle d-block" data-toggle="collapse" href="#faqItem3" role="button"
+                      aria-expanded="false">
+                      {{ $t('signup.faq_q3') }}
+                    </a>
+                    <div class="collapse" id="faqItem3">
+                      <p class="signup-faq-answer mt-1 mb-2">{{ $t('signup.faq_a3') }}</p>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+            </div>
           </div>
 
         </div>
 
-      </div>
+        <!-- Mobile: Hive education + FAQ below the form -->
+        <div class="d-block d-md-none">
+          <div class="card signup-section-card mb-4">
+            <div class="card-body">
+              <a class="signup-collapse-toggle d-flex align-items-center" data-toggle="collapse"
+                href="#hiveEducationCollapseMobile" role="button" aria-expanded="false">
+                <i class="fas fa-info-circle text-brand mr-2"></i>
+                <span>{{ $t('signup.hive_toggle') }}</span>
+              </a>
+              <div class="collapse mt-3" id="hiveEducationCollapseMobile">
+                <h6 class="text-brand">{{ $t('signup.hive_title') }}</h6>
+                <p class="small mb-0">{{ $t('signup.hive_body') }}</p>
+              </div>
+            </div>
+          </div>
 
+          <div class="card signup-section-card mb-4">
+            <div class="card-body pb-2">
+              <h6 class="text-brand mb-3">{{ $t('signup.faq_title') }}</h6>
+              <div class="mb-2">
+                <a class="signup-faq-toggle d-block" data-toggle="collapse" href="#faqItem1Mobile" role="button">{{ $t('signup.faq_q1') }}</a>
+                <div class="collapse" id="faqItem1Mobile"><p class="signup-faq-answer mt-1 mb-2">{{ $t('signup.faq_a1') }}</p></div>
+              </div>
+              <div class="mb-2">
+                <a class="signup-faq-toggle d-block" data-toggle="collapse" href="#faqItem2Mobile" role="button">{{ $t('signup.faq_q2') }}</a>
+                <div class="collapse" id="faqItem2Mobile"><p class="signup-faq-answer mt-1 mb-2">{{ $t('signup.faq_a2') }}</p></div>
+              </div>
+              <div class="mb-2">
+                <a class="signup-faq-toggle d-block" data-toggle="collapse" href="#faqItem3Mobile" role="button">{{ $t('signup.faq_q3') }}</a>
+                <div class="collapse" id="faqItem3Mobile"><p class="signup-faq-answer mt-1 mb-2">{{ $t('signup.faq_a3') }}</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </section>
 
     <Footer />
@@ -172,9 +373,6 @@ import blurt from '@blurtfoundation/blurtjs'
 import { VueReCaptcha } from 'vue-recaptcha-v3'
 import { mapGetters } from 'vuex'
 import Vue from 'vue'
-
-// Import the required components
-import ListHeadingSection from '~/components/ListHeadingSection.vue';
 
 Vue.use(VueReCaptcha, { siteKey: process.env.captchaV3Key })
 
@@ -196,8 +394,6 @@ export default {
     NavbarBrand,
     Footer,
     //VueRecaptcha,
-    // Register the imported components
-    ListHeadingSection
   },
   data() {
     return {
@@ -236,13 +432,18 @@ export default {
       steem_account: false,
       blurt_account: false,
       blurt_active: true,
-      reg: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/
+      reg: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/,
+      usernameCheckTimer: null
     }
   },
   computed: {
-    // Add computed property to generate the title with the info icon
-    textualTitle (){
+    textualTitle() {
       return this.$t('signup.headline');
+    },
+    currentStep() {
+      if (this.accountCreated) return 3;
+      if (this.processStarted) return 2;
+      return 1;
     }
   },
   async mounted() {
@@ -363,10 +564,6 @@ export default {
 
       }
     },
-    dispAmountInvest() {
-      return this.$t('usd_amount_invest') + ' ' + this.$t('min_amount').replace('_AMNT_',
-        this.blurt_account ? this.minUSD * 2 : this.minUSD);
-    },
     // Restore the functionality of this method to provide content for the modal
     signupProcessDetails() {
       return this.$t('signup.desc_part1')
@@ -406,54 +603,47 @@ export default {
         return false;
       }
     },
-      async handleUsername(val) {
-        
+    handleUsername(val) {
       this.username_invalid = '';
       this.username_exists = '';
 
+      // Immediate: scam pattern (no network, runs on every keystroke)
       const scamPattern = /^uid|^uid[^a-zA-Z0-9]|^\d{10}$|\d{10}/i;
-
-
-
-       if (scamPattern.test(val)) {
-        
-        
-
-        
-        
+      if (scamPattern.test(val)) {
         this.username_invalid = this.$t('invalid_username');
-
-        return ;
+        clearTimeout(this.usernameCheckTimer);
+        return;
       }
 
-      
-      
-
-
-
-      //to avoid disruptions on other chains while creating the username, test against all selected chains
-
-      //validate format first
-      let chnLnk = hive;
-      let usAv = true;
-      if (this.hive_account) {
-        //test against default, hive
-        chnLnk.name = 'Hive';
-        usAv = await this.checkUserNameAv(chnLnk, val);
+      // Immediate: format check via Hive validator (synchronous, no network)
+      if (val.length > 0) {
+        const formatError = hive.utils.validateAccountName(val);
+        if (formatError !== null) {
+          this.username_invalid = formatError;
+          clearTimeout(this.usernameCheckTimer);
+          return;
+        }
       }
 
-      if (usAv && this.steem_account) {
-        chnLnk = steem;
-        chnLnk.name = 'Steem';
-        usAv = await this.checkUserNameAv(chnLnk, val);
-      }
-      if (usAv && this.blurt_account) {
-        chnLnk = blurt;
-        chnLnk.name = 'Blurt';
-        usAv = await this.checkUserNameAv(chnLnk, val);
-      }
-      this.genPrivKey();
-
+      // Debounce: availability check (network) + key derivation (CPU)
+      clearTimeout(this.usernameCheckTimer);
+      if (!val) return;
+      this.usernameCheckTimer = setTimeout(async () => {
+        let usAv = true;
+        if (this.hive_account) {
+          hive.name = 'Hive';
+          usAv = await this.checkUserNameAv(hive, val);
+        }
+        if (usAv && this.steem_account) {
+          steem.name = 'Steem';
+          usAv = await this.checkUserNameAv(steem, val);
+        }
+        if (usAv && this.blurt_account) {
+          blurt.name = 'Blurt';
+          usAv = await this.checkUserNameAv(blurt, val);
+        }
+        this.genPrivKey();
+      }, 500);
     },
     /*setSteemPrice (_steemPrice){
     this.steemPrice = parseFloat(_steemPrice).toFixed(3);
@@ -556,7 +746,7 @@ export default {
 
       let invested_usd = 0;
       if (!this.promo_code_chkbx) {
-        invested_usd = this.$refs["invested-usd"].value;
+        invested_usd = this.userInputUSDAmount;
       }
       /*if (!this.captchaValid){
         this.captcha_invalid = this.$t('solve_captcha');
@@ -565,11 +755,6 @@ export default {
       if (this.username_exists || this.username_invalid || this.$refs["account-username"].value == '') {
         this.error_proceeding = true;
         this.error_msg = this.$t('choose_proper_username');
-        return;
-      }
-      if (!this.promo_code_chkbx && parseFloat(this.$refs["invested-usd"].value) < parseFloat(this.blurt_account ? this.minUSD * 2 : this.minUSD)) {
-        this.error_proceeding = true;
-        this.error_msg = this.$t('amount_too_low') + (this.blurt_account ? this.minUSD * 2 : this.minUSD);
         return;
       }
       if (this.isEmailValid() != '') {
@@ -665,23 +850,205 @@ export default {
 }
 </script>
 
-<style>
-.afit-tokens-earned,
-label {
-  font-weight: bold;
+<style scoped>
+/* Hero */
+.signup-headline {
+  font-size: 2rem;
+  font-weight: 700;
+}
+.signup-sub {
+  font-size: 1.05rem;
+  color: var(--text-color);
+  opacity: 0.75;
+}
+.signup-social-proof {
+  font-size: 0.9rem;
+  color: var(--text-color);
+  opacity: 0.65;
 }
 
-.acti-hover,
-.acti-hover:hover {
-  color: white;
+/* Step indicator */
+.signup-step-indicator {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+.signup-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 80px;
+}
+.signup-step-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid rgba(128,128,128,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: var(--text-color);
+  background: var(--background-color);
+  opacity: 0.6;
+  transition: all 0.2s;
+}
+.signup-step.active .signup-step-circle,
+.signup-step.done .signup-step-circle {
+  opacity: 1;
+}
+.signup-step.active .signup-step-circle {
+  background: #ff112d;
+  border-color: #ff112d;
+  color: #fff;
+}
+.signup-step.done .signup-step-circle {
+  background: #28a745;
+  border-color: #28a745;
+  color: #fff;
+}
+.signup-step small {
+  font-size: 0.75rem;
+  color: var(--text-color);
+  opacity: 0.65;
+  margin-top: 4px;
+  text-align: center;
+}
+.signup-step.active small {
+  color: #ff112d;
+  opacity: 1;
+  font-weight: 600;
+}
+.signup-step.done small {
+  opacity: 1;
+}
+.signup-step-line {
+  flex: 1;
+  height: 2px;
+  background: rgba(128,128,128,0.3);
+  margin-top: 19px;
+  max-width: 80px;
 }
 
+/* Cards */
+.signup-section-card {
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+}
+.signup-card-header {
+  background: var(--background-color-2);
+  color: var(--text-color);
+  border-bottom: 1px solid rgba(128,128,128,0.2);
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+}
+.signup-step-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ff112d;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* Fee card */
+.signup-fee-card {
+  border-left: 4px solid #ff112d;
+}
+.signup-fee-card .card-body {
+  padding: 1rem 1.25rem;
+}
+
+/* Why-fee collapse content */
+.signup-why-fee-content {
+  background: var(--background-color-2);
+  border: 1px solid rgba(128,128,128,0.2);
+  border-radius: 4px;
+  color: var(--text-color);
+}
+
+/* Muted text helper (replaces text-muted which is hardcoded gray) */
+.signup-muted {
+  font-size: 0.875rem;
+  color: var(--text-color);
+  opacity: 0.65;
+}
+
+/* Collapse toggles */
+.signup-collapse-toggle {
+  color: #ff112d;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-decoration: none;
+}
+.signup-collapse-toggle:hover {
+  text-decoration: underline;
+  color: #c9000f;
+}
+
+/* FAQ */
+.signup-faq-toggle {
+  color: var(--text-color);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(128,128,128,0.4);
+  padding-bottom: 4px;
+  display: block;
+}
+.signup-faq-toggle:hover {
+  color: #ff112d;
+  text-decoration: none;
+}
+.signup-faq-answer {
+  font-size: 0.875rem;
+  color: var(--text-color);
+  opacity: 0.75;
+}
+
+/* Login CTA */
+.signup-login-cta {
+  text-align: center;
+}
+.signup-login-link {
+  color: var(--text-color);
+  opacity: 0.65;
+  text-decoration: none;
+}
+.signup-login-link:hover {
+  color: #ff112d;
+  opacity: 1;
+  text-decoration: underline;
+}
+
+/* Form inputs — adapt to dark mode */
+.form-control {
+  background-color: var(--background-color-2);
+  color: var(--text-color);
+  border-color: rgba(128,128,128,0.35);
+}
+.form-control:focus {
+  background-color: var(--background-color-2);
+  color: var(--text-color);
+  border-color: #ff112d;
+  box-shadow: 0 0 0 0.2rem rgba(255,17,45,0.2);
+}
+.form-control[readonly] {
+  background-color: var(--background-color-1);
+  opacity: 0.85;
+}
+
+/* ID-level overrides */
 #account-username {
   text-transform: lowercase;
 }
-
 #account_creation {
   word-wrap: break-word;
 }
-
 </style>
