@@ -16,7 +16,7 @@
       <div class="profile-header">
         <div class="d-flex align-items-center flex-grow-1">
           <div class="user-avatar large-avatar"
-            :style="'background-image: url(' + (userMeta && userMeta.profile && userMeta.profile.profile_image ? userMeta.profile.profile_image : profImgUrl + '/u/' + displayUser + '/avatar') + ')'">
+            :style="safeAvatarStyle">
              <span v-if="editOn && !account_banned" class="avatar-edit-button">
                 <a href="#" class="btn btn-danger btn-sm" data-toggle="modal"
                   data-target="#profileImageModal" @click="showProfileImageModal">
@@ -692,6 +692,14 @@ export default {
     ...mapGetters('steemconnect', ['stdLogin']),
     //...mapGetters(['newlyVotedPosts', 'bchain']),
     ...mapGetters(['userTokens'], ['commentEntries'], 'commentCountToday'),
+    safeAvatarStyle() {
+      const url = this.userMeta && this.userMeta.profile && this.userMeta.profile.profile_image;
+      if (url && /^https?:\/\//i.test(url)) {
+        const safe = url.replace(/['"\\)\s]/g, encodeURIComponent);
+        return `background-image: url('${safe}')`;
+      }
+      return `background-image: url('${this.profImgUrl}/u/${this.displayUser}/avatar')`;
+    },
     displayUsersNames() {
       return this.getUsersName();
     },

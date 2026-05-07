@@ -418,9 +418,7 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
 	let sanitizeOptions = {
 		ALLOWED_TAGS: [ 'img', 'iframe', 'details', 'summary', 'table', 'tr', 'td', 'th', 'thead', 'tbody', 'sub', 'sup', 'div', 'a', 'p', 'br', 'strong', 'em', 'u', 's', 'blockquote', 'code', 'pre', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span' ],
 		ALLOWED_ATTR: [ 'src', 'style', 'class', 'alt', 'title', 'width', 'height', 'frameborder', 'allowfullscreen', 'href', 'target', 'rel', 'colspan', 'rowspan', 'data-external-href' ],
-		ALLOWED_URI_REGEXP: /.*/,
 		SAFE_FOR_TEMPLATES: true,
-		ALLOW_UNKNOWN_PROTOCOLS: true,
         // Block dangerous CSS properties that allow UI hijacking (phishing popups)
         FORBID_ATTR: ['id', 'onclick', 'onerror', 'onload'],
         FORBID_TAGS: ['style', 'script'],
@@ -434,7 +432,7 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
             if (node.hasAttribute('style')) {
                 let style = node.getAttribute('style');
                 // Remove properties that allow positioning elements outside their container
-                const dangerousProps = ['position', 'z-index', 'top', 'left', 'bottom', 'right', 'margin-top', 'margin-left'];
+                const dangerousProps = ['position', 'z-index', 'top', 'left', 'bottom', 'right', 'inset', 'margin-top', 'margin-left', 'margin-right', 'margin-bottom', 'pointer-events', 'opacity'];
                 dangerousProps.forEach(prop => {
                     const regex = new RegExp(prop + '\\s*:\\s*[^;]+;?', 'gi');
                     style = style.replace(regex, '');
