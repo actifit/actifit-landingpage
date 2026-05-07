@@ -823,11 +823,13 @@ export default {
         params['cur_bchain'] += 'BLURT';
       }
 
-      const queryString = new URLSearchParams(params).toString();
-      const requestUrl = '/api/proxy/confirmPayment?' + queryString;
-      console.log(requestUrl);
+      const requestUrl = '/api/proxy/confirmPayment';
       try {
-        let res = await fetch(requestUrl);
+        let res = await fetch(requestUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(params),
+        });
         let outcome = await res.json();
         this.checkingFunds = false;
         this.accountCreated = outcome.accountCreated;

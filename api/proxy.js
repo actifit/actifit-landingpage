@@ -161,7 +161,7 @@ module.exports = async function (req, res, next) {
 
     // 5. Confirm Payment Proxy
     if (path === '/confirmPayment') {
-      if (req.method !== 'GET') {
+      if (req.method !== 'POST') {
         res.statusCode = 405;
         return res.end(JSON.stringify({ error: 'Method Not Allowed' }));
       }
@@ -175,14 +175,18 @@ module.exports = async function (req, res, next) {
       const baseApiUrl = process.env.ACTI_API_URL || 'http://localhost:3120/';
       const targetUrl = `${baseApiUrl}confirmPayment`;
 
-      try {
-        const params = { ...parsedUrl.query, confirm_payment_token: apiKey };
-        const response = await axios.get(targetUrl, { params });
-        res.end(JSON.stringify(response.data));
-      } catch (error) {
-        res.statusCode = error.response ? error.response.status : 500;
-        res.end(JSON.stringify(error.response ? error.response.data : { error: error.message }));
-      }
+      let body = '';
+      req.on('data', chunk => { body += chunk; });
+      req.on('end', async () => {
+        try {
+          const params = { ...JSON.parse(body), confirm_payment_token: apiKey };
+          const response = await axios.post(targetUrl, params);
+          res.end(JSON.stringify(response.data));
+        } catch (error) {
+          res.statusCode = error.response ? error.response.status : 500;
+          res.end(JSON.stringify(error.response ? error.response.data : { error: error.message }));
+        }
+      });
       return;
     }
 
