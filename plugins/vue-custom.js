@@ -426,8 +426,16 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
 
     let sanitized_html = '';
 
+    const TRUSTED_IFRAME_HOSTS = [
+        'youtube.com', 'youtu.be',
+        '3speak.tv', '3speak.online',
+        'vimm.tv', 'd.tube', 'dtube.video',
+        'rumble.com', 'odysee.com', 'vimeo.com',
+        'leofinance.io', 'facebook.com',
+    ];
+
     if (process.client) {
-        // Custom hook to strip dangerous CSS from style attributes
+        // Custom hook to strip dangerous CSS from style attributes and restrict iframe src
         DOMPurify.addHook('afterSanitizeAttributes', function(node) {
             if (node.hasAttribute('style')) {
                 let style = node.getAttribute('style');
@@ -439,6 +447,16 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
                 });
                 node.setAttribute('style', style);
             }
+            // Restrict iframe src to trusted media hosts — blocks javascript: and arbitrary https embeds
+            if (node.tagName === 'IFRAME' && node.hasAttribute('src')) {
+                const src = node.getAttribute('src');
+                let allowed = false;
+                try {
+                    const hostname = new URL(src).hostname;
+                    allowed = TRUSTED_IFRAME_HOSTS.some(h => hostname === h || hostname.endsWith('.' + h));
+                } catch {}
+                if (!allowed) node.removeAttribute('src');
+            }
         });
 
         sanitized_html = DOMPurify.sanitize(html_content, sanitizeOptions);
@@ -448,11 +466,17 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
     } else {
         // Server-side sanitization using sanitize-html
         const sanitizeHtml = require('sanitize-html');
+        const trustedIframeRe = new RegExp(
+            '^https?:\\/\\/([\\w-]+\\.)*(' +
+            TRUSTED_IFRAME_HOSTS.map(h => h.replace('.', '\\.')).join('|') +
+            ')(\\/|$)', 'i'
+        );
         sanitized_html = sanitizeHtml(html_content, {
             allowedTags: sanitizeOptions.ALLOWED_TAGS,
             allowedAttributes: {
                 '*': sanitizeOptions.ALLOWED_ATTR
             },
+            allowedIframeHostnames: TRUSTED_IFRAME_HOSTS,
             allowedStyles: {
                 '*': {
                     // Match the dangerousProps logic from DOMPurify hook
