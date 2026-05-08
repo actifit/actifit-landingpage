@@ -429,9 +429,9 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
     const TRUSTED_IFRAME_HOSTS = [
         'youtube.com', 'youtu.be',
         '3speak.tv', '3speak.online',
-        'vimm.tv', 'd.tube', 'dtube.video',
-        'rumble.com', 'odysee.com', 'vimeo.com',
-        'leofinance.io', 'facebook.com',
+        'vimm.tv', 'd.tube',
+        'rumble.com', 'vimeo.com',
+        'facebook.com',
     ];
 
     if (process.client) {
