@@ -734,13 +734,17 @@ export default {
     },
     async rewardUserComment() {
       let url = new URL('/api/proxy/reward-comment', window.location.origin);
+      let postUrl = this.post.url;
+      if (!postUrl || !postUrl.startsWith('http')) {
+        postUrl = 'https://actifit.io' + (postUrl || '');
+      }
       let params = {
         user: this.user.account.name,
-        url: this.post.url,
+        url: postUrl,
       }
       Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
       try {
-        let res = await fetch(url);
+        let res = await fetch(url, { headers: { 'x-acti-token': localStorage.getItem('access_token') || '' } });
         let outcome = await res.json();
         if (outcome.rewarded) {
           this.$notify({

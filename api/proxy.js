@@ -127,6 +127,12 @@ module.exports = async function (req, res, next) {
         return res.end(JSON.stringify({ error: 'Invalid or disallowed URL' }));
       }
 
+      const userToken = req.headers['x-acti-token'] || '';
+      if (!userToken) {
+        res.statusCode = 401;
+        return res.end(JSON.stringify({ error: 'Authentication required' }));
+      }
+
       const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
       if (isRateLimited(`${ip}:${path}`, 10, 60000) || isRateLimited(`${ip}:${user}:${path}`, 5, 60000)) {
         res.statusCode = 429;
@@ -138,10 +144,8 @@ module.exports = async function (req, res, next) {
 
       try {
         const response = await axios.get(targetUrl, {
-            params: {
-            [param]: key,
-            url: postUrl
-            }
+            params: { [param]: key, url: postUrl },
+            headers: { 'x-acti-token': userToken },
         });
         return res.end(JSON.stringify(response.data));
       } catch (error) {

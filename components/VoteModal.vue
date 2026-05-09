@@ -393,10 +393,11 @@ export default {
 			//check if the post contains in its original voters current user
 			return this.postToVote.active_votes.filter(voter => (voter.voter === curUser)).length > 0;
 		},
-		async processTrxFunc(op_name, cstm_params, bchain_option) {
+		async processTrxFunc(op_name, cstm_params, bchain_option, extra_ops) {
+			extra_ops = extra_ops || [];
 			if (!localStorage.getItem('std_login')) {
 				//if (!this.stdLogin){
-				let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
+				let res = await this.$steemconnect.broadcast([[op_name, cstm_params], ...extra_ops]);
 				//console.log(res);
 				if (res.result.ref_block_num) {
 					console.log('success');
@@ -409,7 +410,7 @@ export default {
 				return new Promise((resolve) => {
 					window.hive_keychain.requestBroadcast(
 						this.user.account.name,
-						[[op_name, cstm_params]],
+						[[op_name, cstm_params], ...extra_ops],
 						'Posting', (response) => {
 							console.log(response);
 							//resolve(response);
@@ -424,9 +425,7 @@ export default {
 						expire: localStorage.getItem('expires'),
 						key: localStorage.getItem('key')
 					}
-					let operation = [
-						[op_name, cstm_params]
-					];
+					let operation = [[op_name, cstm_params], ...extra_ops];
 
 					this.$HAS.broadcast(auth, 'posting', operation, (evt) => {
 						console.log(evt)    // process sign_wait message
@@ -460,9 +459,7 @@ export default {
 						})
 				});
 			} else {
-				let operation = [
-					[op_name, cstm_params]
-				];
+				let operation = [[op_name, cstm_params], ...extra_ops];
 				console.log('broadcasting');
 				console.log(operation);
 
@@ -627,14 +624,34 @@ export default {
 				}
 			}
 
-			this.loading = true
+			this.loading = true;
+
+			const voter = this.user.account.name;
+			const author = this.postToVote.author;
+			const permlink = this.postToVote.permlink;
+			const weight = this.voteWeight * 100;
+
+			const voteOp = ['vote', { voter, author, permlink, weight }];
+			const customJsonOp = ['custom_json', {
+				required_auths: [],
+				required_posting_auths: [voter],
+				id: 'actifit_vote',
+				json: JSON.stringify({ app: 'actifit.io', action: 'vote', author, permlink })
+			}];
+
 			if (!localStorage.getItem('std_login')) {
-				//if (!this.stdLogin){
-				this.$steemconnect.vote(this.user.account.name, this.postToVote.author, this.postToVote.permlink, this.voteWeight * 100, (err) => {
-					this.voteSuccess(err, true, 'STEEM');
-				});
+				try {
+					let res = await this.$steemconnect.broadcast([voteOp, customJsonOp]);
+					if (res && res.result && res.result.ref_block_num) {
+						this.voteSuccess(null, true, 'STEEM');
+					} else {
+						this.voteSuccess('error voting', false, 'STEEM');
+					}
+				} catch (err) {
+					this.voteSuccess(err.message || 'error voting', false, 'STEEM');
+				}
 			} else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) {
-				window.hive_keychain.requestVote(this.user.account.name, this.postToVote.permlink, this.postToVote.author, this.voteWeight * 100, (response) => {
+				window.hive_keychain.requestBroadcast(voter, [voteOp, customJsonOp], 'Posting', (response) => {
 					console.log(response);
 					if (response.success) {
 						this.voteSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain);
@@ -643,14 +660,9 @@ export default {
 					}
 				});
 			} else {
-				let cstm_params = {
-					"voter": this.user.account.name,
-					"author": this.postToVote.author,
-					"permlink": this.postToVote.permlink,
-					"weight": this.voteWeight * 100
-				};
+				let cstm_params = { voter, author, permlink, weight };
 
-				let res = await this.processTrxFunc('vote', cstm_params, this.cur_bchain);
+				let res = await this.processTrxFunc('vote', cstm_params, this.cur_bchain, [customJsonOp]);
 
 				if (res.success) {
 					this.voteSuccess(null, (this.target_bchain != 'BOTH'), this.cur_bchain);
@@ -661,16 +673,14 @@ export default {
 				//also send the vote again to the other chain
 				let other_chain = this.cur_bchain == 'HIVE' ? 'STEEM' : 'HIVE';
 				if (this.target_bchain == 'BOTH') {
-					//this.loading = true;
-					let res = await this.processTrxFunc('vote', cstm_params, other_chain);
+					let res2 = await this.processTrxFunc('vote', cstm_params, other_chain, [customJsonOp]);
 
-					if (res.success) {
+					if (res2.success) {
 						this.voteSuccess(null, true, other_chain);
 					} else {
 						this.voteSuccess('error voting', false, other_chain);
 					}
 				}
-
 			}
 		},
 		//handles refreshing account data following vote
@@ -687,13 +697,17 @@ export default {
 			//handles rewarding the user for his votes
 			let url = new URL('/api/proxy/reward-vote', window.location.origin);
 			//compile all needed data and send it along the request for processing
+			let postUrl = this.postToVote.url;
+			if (postUrl && !postUrl.startsWith('http')) {
+				postUrl = 'https://actifit.io' + postUrl;
+			}
 			let params = {
 				user: this.user.account.name,
-				url: this.postToVote.url,
+				url: postUrl,
 			}
 			Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
 			try {
-				let res = await fetch(url);
+				let res = await fetch(url, { headers: { 'x-acti-token': localStorage.getItem('access_token') || '' } });
 				let outcome = await res.json();
 				if (outcome.rewarded) {
 					// notify the user that he received an additional reward
