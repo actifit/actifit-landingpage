@@ -281,7 +281,9 @@ module.exports = {
     'bootstrap-vue/dist/bootstrap-vue.css',
     '~/assets/css/main.sass',
     '~/assets/css/normal.css',
-    '~/assets/css/dark-mode.css'
+    '~/assets/css/dark-mode.css',
+    '~/assets/css/hljs-light.css',
+    '~/assets/css/hljs-dark.css'
   ],
 
   /*

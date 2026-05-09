@@ -27,11 +27,28 @@
       }
     },
     async mounted () {
-      let accessToken = this.$route.query['access_token']
-      if (accessToken) {
+      const accessToken = this.$route.query['access_token']
+      if (!accessToken) {
+        this.$router.push('/login')
+        return
+      }
+      // Validate the token against the SC API before persisting it.
+      // This prevents arbitrary tokens supplied via URL from being written
+      // to localStorage (session fixation / phishing vector).
+      this.$steemconnect.setAccessToken(accessToken)
+      try {
+        await new Promise((resolve, reject) => {
+          this.$steemconnect.me((err, user) => {
+            if (err) reject(err)
+            else resolve(user)
+          })
+        })
         localStorage.setItem('access_token', accessToken)
         await this.$store.dispatch('steemconnect/login')
         this.$router.push('/')
+      } catch (err) {
+        this.$steemconnect.setAccessToken(null)
+        this.$router.push('/login')
       }
     }
   }

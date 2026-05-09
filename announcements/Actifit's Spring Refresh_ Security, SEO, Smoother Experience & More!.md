@@ -2,7 +2,7 @@
 
 Hey Actifitters! 🌸 Our team has been on a serious sprint this spring, and we're thrilled to share a massive wave of improvements across the entire Actifit ecosystem — from the landing page you see first, to the bots that power notifications and rewards behind the scenes. Grab a seat, and let's dive into everything we've been cooking up!
 
-![image.png](https://usermedia.actifit.io/MLJHUF9BPCVNUQCW0EAVKXVG7ZR0W)
+![image.png](https://usermedia.actifit.io/MOHF6SIL7NPYYK77S2SOCE6N3DQX5L)
 
 Here's what's been happening across Actifit:
 

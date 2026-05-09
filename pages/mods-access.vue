@@ -454,7 +454,7 @@
 			}else if (outcome.ok){
 				display = 'success';
 			}
-			this.$refs[targetAction+'result'].innerHTML = display;
+			this.$refs[targetAction+'result'].textContent = String(display);
 			//update user data according to result
 
 		}catch(err){

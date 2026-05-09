@@ -466,7 +466,9 @@ export default {
         if (newPost) {
           $(this.$refs.editPostModal).modal('hide')
         }
-        this.RewardUserEdit();
+        const _rewardUser = this.editPost.author;
+        const _rewardUrl = `https://actifit.io/@${this.editPost.author}/${this.editPost.permlink}`;
+        setTimeout(() => this.RewardUserEdit(_rewardUser, _rewardUrl), 10000);
         // update post in store
         this.$store.dispatch('updatePost', {
           author: this.editPost.author,
@@ -763,16 +765,20 @@ export default {
         }
       }
     },
-    async RewardUserEdit() {
+    async RewardUserEdit(user, postUrl) {
       let url = new URL('/api/proxy/reward-edit', window.location.origin);
-      //compile all needed data and send it along the request for processing
+      if (!postUrl || !postUrl.startsWith('http')) {
+        const raw = this.editPost && this.editPost.url;
+        postUrl = (raw && raw.startsWith('http')) ? raw : `https://actifit.io/@${this.editPost.author}/${this.editPost.permlink}`;
+      }
+      if (!user) user = this.editPost.author;
       let params = {
-        user: this.editPost.author,
-        url: this.editPost.url,
+        user,
+        url: postUrl,
       }
       Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
       try {
-        let res = await fetch(url);
+        let res = await fetch(url, { headers: { 'x-acti-token': localStorage.getItem('access_token') || '' } });
         let outcome = await res.json();
         if (outcome.rewarded) {
           // notify the user that he received an additional reward

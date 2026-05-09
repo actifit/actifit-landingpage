@@ -1,6 +1,29 @@
 const axios = require('axios');
 const url = require('url');
 
+const VALID_USER_RE = /^[a-z][a-z0-9.-]{2,15}$/;
+const ALLOWED_URL_HOSTS = ['actifit.io', 'peakd.com', 'ecency.com', 'hive.blog'];
+
+function isAllowedPostUrl(rawUrl) {
+  try {
+    const { hostname } = new URL(rawUrl);
+    return ALLOWED_URL_HOSTS.some(h => hostname === h || hostname.endsWith('.' + h));
+  } catch {
+    return false;
+  }
+}
+
+// Simple in-memory sliding-window rate limiter
+const _rateMap = new Map();
+function isRateLimited(key, maxPerWindow = 10, windowMs = 60000) {
+  const now = Date.now();
+  const entry = _rateMap.get(key) || { count: 0, resetAt: now + windowMs };
+  if (now > entry.resetAt) { entry.count = 0; entry.resetAt = now + windowMs; }
+  entry.count++;
+  _rateMap.set(key, entry);
+  return entry.count > maxPerWindow;
+}
+
 module.exports = async function (req, res, next) {
   const parsedUrl = url.parse(req.url, true);
   const path = parsedUrl.pathname;
@@ -94,15 +117,35 @@ module.exports = async function (req, res, next) {
         return res.end(JSON.stringify({ error: `${path} token not configured on server` }));
       }
 
+      if (!user || !VALID_USER_RE.test(user)) {
+        res.statusCode = 400;
+        return res.end(JSON.stringify({ error: 'Invalid username' }));
+      }
+
+      if (!postUrl || !isAllowedPostUrl(postUrl)) {
+        res.statusCode = 400;
+        return res.end(JSON.stringify({ error: 'Invalid or disallowed URL' }));
+      }
+
+      const userToken = req.headers['x-acti-token'] || '';
+      if (!userToken) {
+        res.statusCode = 401;
+        return res.end(JSON.stringify({ error: 'Authentication required' }));
+      }
+
+      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+      if (isRateLimited(`${ip}:${path}`, 10, 60000) || isRateLimited(`${ip}:${user}:${path}`, 5, 60000)) {
+        res.statusCode = 429;
+        return res.end(JSON.stringify({ error: 'Too many requests' }));
+      }
+
       const baseApiUrl = process.env.ACTI_API_URL || 'https://api2.actifit.io/';
       const targetUrl = `${baseApiUrl}${endpoint}/${user}`;
 
       try {
         const response = await axios.get(targetUrl, {
-            params: {
-            [param]: key,
-            url: postUrl
-            }
+            params: { [param]: key, url: postUrl },
+            headers: { 'x-acti-token': userToken },
         });
         return res.end(JSON.stringify(response.data));
       } catch (error) {
@@ -161,7 +204,7 @@ module.exports = async function (req, res, next) {
 
     // 5. Confirm Payment Proxy
     if (path === '/confirmPayment') {
-      if (req.method !== 'GET') {
+      if (req.method !== 'POST') {
         res.statusCode = 405;
         return res.end(JSON.stringify({ error: 'Method Not Allowed' }));
       }
@@ -175,14 +218,18 @@ module.exports = async function (req, res, next) {
       const baseApiUrl = process.env.ACTI_API_URL || 'http://localhost:3120/';
       const targetUrl = `${baseApiUrl}confirmPayment`;
 
-      try {
-        const params = { ...parsedUrl.query, confirm_payment_token: apiKey };
-        const response = await axios.get(targetUrl, { params });
-        res.end(JSON.stringify(response.data));
-      } catch (error) {
-        res.statusCode = error.response ? error.response.status : 500;
-        res.end(JSON.stringify(error.response ? error.response.data : { error: error.message }));
-      }
+      let body = '';
+      req.on('data', chunk => { body += chunk; });
+      req.on('end', async () => {
+        try {
+          const params = { ...JSON.parse(body), confirm_payment_token: apiKey };
+          const response = await axios.post(targetUrl, params);
+          res.end(JSON.stringify(response.data));
+        } catch (error) {
+          res.statusCode = error.response ? error.response.status : 500;
+          res.end(JSON.stringify(error.response ? error.response.data : { error: error.message }));
+        }
+      });
       return;
     }
 

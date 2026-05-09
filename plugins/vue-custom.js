@@ -7,6 +7,71 @@ Vue.prototype.$HAS = HAS;
 //sanitization
 import DOMPurify from 'dompurify'
 import { marked } from 'marked';
+import { markedHighlight } from 'marked-highlight';
+import hljs from 'highlight.js/lib/core';
+import javascript from 'highlight.js/lib/languages/javascript';
+import typescript from 'highlight.js/lib/languages/typescript';
+import python from 'highlight.js/lib/languages/python';
+import java from 'highlight.js/lib/languages/java';
+import cpp from 'highlight.js/lib/languages/cpp';
+import c from 'highlight.js/lib/languages/c';
+import csharp from 'highlight.js/lib/languages/csharp';
+import go from 'highlight.js/lib/languages/go';
+import rust from 'highlight.js/lib/languages/rust';
+import ruby from 'highlight.js/lib/languages/ruby';
+import php from 'highlight.js/lib/languages/php';
+import bash from 'highlight.js/lib/languages/bash';
+import json from 'highlight.js/lib/languages/json';
+import xml from 'highlight.js/lib/languages/xml';
+import css from 'highlight.js/lib/languages/css';
+import sql from 'highlight.js/lib/languages/sql';
+import yaml from 'highlight.js/lib/languages/yaml';
+import markdown from 'highlight.js/lib/languages/markdown';
+import diff from 'highlight.js/lib/languages/diff';
+
+hljs.registerLanguage('javascript', javascript);
+hljs.registerLanguage('js', javascript);
+hljs.registerLanguage('typescript', typescript);
+hljs.registerLanguage('ts', typescript);
+hljs.registerLanguage('python', python);
+hljs.registerLanguage('py', python);
+hljs.registerLanguage('java', java);
+hljs.registerLanguage('cpp', cpp);
+hljs.registerLanguage('c', c);
+hljs.registerLanguage('csharp', csharp);
+hljs.registerLanguage('cs', csharp);
+hljs.registerLanguage('go', go);
+hljs.registerLanguage('rust', rust);
+hljs.registerLanguage('ruby', ruby);
+hljs.registerLanguage('rb', ruby);
+hljs.registerLanguage('php', php);
+hljs.registerLanguage('bash', bash);
+hljs.registerLanguage('shell', bash);
+hljs.registerLanguage('json', json);
+hljs.registerLanguage('xml', xml);
+hljs.registerLanguage('html', xml);
+hljs.registerLanguage('css', css);
+hljs.registerLanguage('sql', sql);
+hljs.registerLanguage('yaml', yaml);
+hljs.registerLanguage('yml', yaml);
+hljs.registerLanguage('markdown', markdown);
+hljs.registerLanguage('md', markdown);
+hljs.registerLanguage('diff', diff);
+
+marked.use(markedHighlight({
+  langPrefix: 'hljs language-',
+  highlight(code, lang) {
+    if (lang && hljs.getLanguage(lang)) {
+      try {
+        return hljs.highlight(code, { language: lang }).value;
+      } catch (_) {}
+    }
+    try {
+      return hljs.highlightAuto(code).value;
+    } catch (_) {}
+    return '';
+  }
+}));
 
 import moment from "moment";
 
@@ -280,6 +345,16 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
 		return placeholder;
 	};
 
+	// Protect markdown links [text](url) from being corrupted by
+	// video/image/mention regexes that match URLs inside them.
+	const markdownLinks = [];
+	const markdownLinkRegex = /\[([^\]]*)\]\(([^)]+)\)/g;
+	report_content = report_content.replace(markdownLinkRegex, (match) => {
+		const linkPlaceholder = `MDLINK_PH_${markdownLinks.length}`;
+		markdownLinks.push(match);
+		return linkPlaceholder;
+	});
+
 	// Process 3Speak
 	let threespk_embed_reg = /\[!\[[^\]]*\]\([^)]+\)\]\(https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+)\)/ig;
 	report_content = report_content.replace(threespk_embed_reg, (match, v) => {
@@ -325,6 +400,11 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
         });
 	}
 
+	// Restore markdown links that were protected from pre-processing
+	for (let i = markdownLinks.length - 1; i >= 0; i--) {
+		report_content = report_content.replace(`MDLINK_PH_${i}`, markdownLinks[i]);
+	}
+
 	// =========================================================================
 	// ===== STEP 2: CONVERT MARKDOWN TO HTML =================================
 	// =========================================================================
@@ -338,9 +418,7 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
 	let sanitizeOptions = {
 		ALLOWED_TAGS: [ 'img', 'iframe', 'details', 'summary', 'table', 'tr', 'td', 'th', 'thead', 'tbody', 'sub', 'sup', 'div', 'a', 'p', 'br', 'strong', 'em', 'u', 's', 'blockquote', 'code', 'pre', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span' ],
 		ALLOWED_ATTR: [ 'src', 'style', 'class', 'alt', 'title', 'width', 'height', 'frameborder', 'allowfullscreen', 'href', 'target', 'rel', 'colspan', 'rowspan', 'data-external-href' ],
-		ALLOWED_URI_REGEXP: /.*/,
 		SAFE_FOR_TEMPLATES: true,
-		ALLOW_UNKNOWN_PROTOCOLS: true,
         // Block dangerous CSS properties that allow UI hijacking (phishing popups)
         FORBID_ATTR: ['id', 'onclick', 'onerror', 'onload'],
         FORBID_TAGS: ['style', 'script'],
@@ -348,18 +426,36 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
 
     let sanitized_html = '';
 
+    const TRUSTED_IFRAME_HOSTS = [
+        'youtube.com', 'youtu.be',
+        '3speak.tv', '3speak.online',
+        'vimm.tv', 'd.tube',
+        'rumble.com', 'vimeo.com',
+        'facebook.com',
+    ];
+
     if (process.client) {
-        // Custom hook to strip dangerous CSS from style attributes
+        // Custom hook to strip dangerous CSS from style attributes and restrict iframe src
         DOMPurify.addHook('afterSanitizeAttributes', function(node) {
             if (node.hasAttribute('style')) {
                 let style = node.getAttribute('style');
                 // Remove properties that allow positioning elements outside their container
-                const dangerousProps = ['position', 'z-index', 'top', 'left', 'bottom', 'right', 'margin-top', 'margin-left'];
+                const dangerousProps = ['position', 'z-index', 'top', 'left', 'bottom', 'right', 'inset', 'margin-top', 'margin-left', 'margin-right', 'margin-bottom', 'pointer-events', 'opacity'];
                 dangerousProps.forEach(prop => {
                     const regex = new RegExp(prop + '\\s*:\\s*[^;]+;?', 'gi');
                     style = style.replace(regex, '');
                 });
                 node.setAttribute('style', style);
+            }
+            // Restrict iframe src to trusted media hosts — blocks javascript: and arbitrary https embeds
+            if (node.tagName === 'IFRAME' && node.hasAttribute('src')) {
+                const src = node.getAttribute('src');
+                let allowed = false;
+                try {
+                    const hostname = new URL(src).hostname;
+                    allowed = TRUSTED_IFRAME_HOSTS.some(h => hostname === h || hostname.endsWith('.' + h));
+                } catch {}
+                if (!allowed) node.removeAttribute('src');
             }
         });
 
@@ -370,11 +466,17 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
     } else {
         // Server-side sanitization using sanitize-html
         const sanitizeHtml = require('sanitize-html');
+        const trustedIframeRe = new RegExp(
+            '^https?:\\/\\/([\\w-]+\\.)*(' +
+            TRUSTED_IFRAME_HOSTS.map(h => h.replace('.', '\\.')).join('|') +
+            ')(\\/|$)', 'i'
+        );
         sanitized_html = sanitizeHtml(html_content, {
             allowedTags: sanitizeOptions.ALLOWED_TAGS,
             allowedAttributes: {
                 '*': sanitizeOptions.ALLOWED_ATTR
             },
+            allowedIframeHostnames: TRUSTED_IFRAME_HOSTS,
             allowedStyles: {
                 '*': {
                     // Match the dangerousProps logic from DOMPurify hook
