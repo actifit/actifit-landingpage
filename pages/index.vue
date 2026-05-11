@@ -788,7 +788,7 @@ export default {
     },
     async setPendingRewards(json) {
       this.pendingRewards = json;
-      if (this.pendingRewards.pendingRewards.HIVE.amount || this.pendingRewards.pendingRewards.STEEM.amount || this.pendingRewards.pendingRewards.BLURT.amount) {
+      if (this.pendingRewards.pendingRewards?.HIVE?.amount || this.pendingRewards.pendingRewards?.STEEM?.amount || this.pendingRewards.pendingRewards?.BLURT?.amount) {
         if (!localStorage.getItem('preventRewardsPop')) {
           this.$refs['pendingRewardsKicker'].click();
         }

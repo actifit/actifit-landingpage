@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 70">
+  <defs>
+    <linearGradient id="ribbon" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#e53935"/>
+      <stop offset="50%" style="stop-color:#ff8f00"/>
+      <stop offset="100%" style="stop-color:#e53935"/>
+    </linearGradient>
+    <linearGradient id="medalGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffe066"/>
+      <stop offset="50%" style="stop-color:#d4af37"/>
+      <stop offset="100%" style="stop-color:#a07800"/>
+    </linearGradient>
+  </defs>
+  <!-- Ribbon left -->
+  <rect x="18" y="0" width="10" height="28" rx="3" fill="url(#ribbon)" transform="rotate(-8 23 14)"/>
+  <!-- Ribbon right -->
+  <rect x="32" y="0" width="10" height="28" rx="3" fill="url(#ribbon)" transform="rotate(8 37 14)"/>
+  <!-- Medal circle -->
+  <circle cx="30" cy="46" r="22" fill="url(#medalGrad)" stroke="#a07800" stroke-width="1.5"/>
+  <circle cx="30" cy="46" r="18" fill="none" stroke="#ffe066" stroke-width="1" opacity="0.6"/>
+  <!-- "1" text -->
+  <text x="30" y="53" font-family="Arial,sans-serif" font-size="22" font-weight="bold" fill="#fff" text-anchor="middle" filter="drop-shadow(0 1px 2px rgba(0,0,0,0.4))">1</text>
+</svg>

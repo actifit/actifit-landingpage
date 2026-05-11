@@ -59,7 +59,7 @@ export default {
 	  console.log('initwidget');
 	  console.log(window.widget)
 	  if(window.widget != null) return;
-      this.widget = new StWidget('https://chat.peakd.com/t/hive-193552/0');	  
+      this.widget = new StWidget('https://chat.peakd.com/t/hive-193552/0');
 	  this.widget.properties = {
 		"requireLogin": false,
 		"showSidebar": true,
@@ -87,13 +87,13 @@ export default {
 		"--appMessageFontFamily": "''New Heterodox Mono',monospace'",
 		"--appMessageFontSize": "16px"
 		};
-		
+
 		//set user
 		  if (this.user && this.user.account.name){
 			console.log('setting user'+this.user.account.name)
 			this.widget.setUser(this.user.account.name);
 		  }
-	  
+
       // If you would like to not let the widget use keychain passthrough, you can disable it with:
       // stwidget.enableKeychainPassthrough = false;
 	  console.log('init status:'+this.init)
@@ -106,16 +106,16 @@ export default {
 		  this.widget.cleanup();
 		  if (hasChildNodes) return;
 		  console.log('post return');
-		  
+
 		  //check screen dimensions and adjust accordingly if needed
 		  let defaultWidth = 450;
 		  if (screen.width < 750){
 			defaultWidth = screen.width - 40;
 		  }
-		  
+
 		  var element = this.widget.createElement(defaultWidth+'px', '556px', true /* overlay */, true /* resizable */);
 		  this.widget.setStyle({ direction: 'rtl', top: '76px', right: '0px' }); //add custom styles
-		  // Add direction: 'rtl' if you would like the widget to be expandable by dragging the 
+		  // Add direction: 'rtl' if you would like the widget to be expandable by dragging the
 		  // bottom-left corner instead of bottom-right corner
 
 		  //var widgetElement = this.$refs.widget;
@@ -124,11 +124,11 @@ export default {
 			var widgetContainer = this.$refs.widgetContainer;
 			widgetContainer.appendChild(element);
 			widgetContainer.hidden = true;//initialize as hidden
-		  console.log(widgetContainer);
+		  //console.log(widgetContainer);
 		  this.init = false;
 		  //this.widget.pause(true);
-		  
-		  
+
+
 	  }
 
     },
