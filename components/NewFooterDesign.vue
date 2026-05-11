@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <!-- The `dark-mode` class on a parent will activate the dark theme styles -->
   <footer class="new-footer-container">
     <div class="container">
@@ -13,10 +13,10 @@
            {{ $t('footer_slogan') }}
           </p>
           <div class="app-store-buttons">
-            <a href="https://links.actifit.io/android" target="_blank">
+            <a href="https://links.actifit.io/android" target="_blank" rel="noopener noreferrer">
               <img src="/img/google-play.png" alt="Get it on Google Play">
             </a>
-            <a href="https://links.actifit.io/ios" target="_blank">
+            <a href="https://links.actifit.io/ios" target="_blank" rel="noopener noreferrer">
               <img src="/img/app-store.png" alt="Download on the App Store">
             </a>
           </div>
@@ -29,7 +29,7 @@
           <a href="/market" @click.prevent="$router.push('/market')">{{ $t('Market') }}</a>
           <a href="/yieldfarming" @click.prevent="$router.push('/yieldfarming')">{{ $t('yield_farming') }}</a>
           <a href="/referrals" @click.prevent="$router.push('/referrals')">{{ $t('Refer_A_Friend') }}</a>
-          <a href="/whitepaper/Actifit_White_Paper.pdf" target="_blank">{{ $t('Whitepaper') }}</a>
+          <a href="/whitepaper/Actifit_White_Paper.pdf" target="_blank" rel="noopener noreferrer">{{ $t('Whitepaper') }}</a>
           <a href="/faq">{{ $t('FAQ') }}</a>
         </div>
 
@@ -38,24 +38,24 @@
           <h4>HIVE</h4>
           <a href="/communities">{{ $t('Communities') }}</a>
           <a href="/explore">{{ $t('Explore') }}</a>
-          <a href="https://hive.io" target="_blank">{{ $t('Hive_official') }}</a>
-          <a href="https://hivescan.info" target="_blank">{{ $t('Hive_block_explorer') }}</a>
-          <a href="https://hivescan.info/witnesses" target="_blank">{{ $t('Hive_witnesses') }}</a>
-          <a href="https://hivescan.info/proposals" target="_blank">{{ $t('DHF') }}</a>
+          <a href="https://hive.io" target="_blank" rel="noopener noreferrer">{{ $t('Hive_official') }}</a>
+          <a href="https://hivescan.info" target="_blank" rel="noopener noreferrer">{{ $t('Hive_block_explorer') }}</a>
+          <a href="https://hivescan.info/witnesses" target="_blank" rel="noopener noreferrer">{{ $t('Hive_witnesses') }}</a>
+          <a href="https://hivescan.info/proposals" target="_blank" rel="noopener noreferrer">{{ $t('DHF') }}</a>
         </div>
       </div>
 
       <!-- Social Media Icons -->
       <div class="social-icons-wrapper">
-        <a href="https://links.actifit.io/discord" target="_blank" class="social-icon" :title="$t('Discord')"><i class="fab fa-discord"></i></a>
-        <a href="https://www.facebook.com/Actifit.fitness/" target="_blank" class="social-icon" :title="$t('Facebook')"><i class="fab fa-facebook-f"></i></a>
-        <a href="https://www.x.com/Actifit_fitness" target="_blank" class="social-icon" :title="$t('X_twitter')"><i class="fa-brands fa-square-x-twitter"></i></a>
-        <a href="https://www.instagram.com/actifit.fitness/" target="_blank" class="social-icon" :title="$t('Instagram')"><i class="fab fa-instagram"></i></a>
-        <a href="https://t.me/actifit" target="_blank" class="social-icon" :title="$t('Telegram')"><i class="fab fa-telegram-plane"></i></a>
-        <a href="https://medium.com/@actifit.fitness" target="_blank" class="social-icon" :title="$t('Medium')"><i class="fab fa-medium-m"></i></a>
-        <a href="https://www.youtube.com/Actifitfitness" target="_blank" class="social-icon" :title="$t('Youtube')"><i class="fab fa-youtube"></i></a>
-        <a href="https://www.linkedin.com/company/actifit-io" target="_blank" class="social-icon" :title="$t('LinkedIn')"><i class="fab fa-linkedin-in"></i></a>
-        <a href="https://www.tiktok.com/@actifit" target="_blank" class="social-icon" :title="$t('TikTok')"><i class="fab fa-tiktok"></i></a>
+        <a href="https://links.actifit.io/discord" target="_blank" rel="noopener noreferrer" class="social-icon" :title="$t('Discord')"><i class="fab fa-discord"></i></a>
+        <a href="https://www.facebook.com/Actifit.fitness/" target="_blank" rel="noopener noreferrer" class="social-icon" :title="$t('Facebook')"><i class="fab fa-facebook-f"></i></a>
+        <a href="https://www.x.com/Actifit_fitness" target="_blank" rel="noopener noreferrer" class="social-icon" :title="$t('X_twitter')"><i class="fa-brands fa-square-x-twitter"></i></a>
+        <a href="https://www.instagram.com/actifit.fitness/" target="_blank" rel="noopener noreferrer" class="social-icon" :title="$t('Instagram')"><i class="fab fa-instagram"></i></a>
+        <a href="https://t.me/actifit" target="_blank" rel="noopener noreferrer" class="social-icon" :title="$t('Telegram')"><i class="fab fa-telegram-plane"></i></a>
+        <a href="https://medium.com/@actifit.fitness" target="_blank" rel="noopener noreferrer" class="social-icon" :title="$t('Medium')"><i class="fab fa-medium-m"></i></a>
+        <a href="https://www.youtube.com/Actifitfitness" target="_blank" rel="noopener noreferrer" class="social-icon" :title="$t('Youtube')"><i class="fab fa-youtube"></i></a>
+        <a href="https://www.linkedin.com/company/actifit-io" target="_blank" rel="noopener noreferrer" class="social-icon" :title="$t('LinkedIn')"><i class="fab fa-linkedin-in"></i></a>
+        <a href="https://www.tiktok.com/@actifit" target="_blank" rel="noopener noreferrer" class="social-icon" :title="$t('TikTok')"><i class="fab fa-tiktok"></i></a>
       </div>
 
       <hr class="footer-divider">
@@ -67,7 +67,7 @@
                 Powered By HIVE <img src="/img/HIVE.png" class="hive-logo-bottom">
             </div>
             <div class="bottom-bar-item">
-                Price Data provided By <a href="https://coingecko.com" target="_blank">CoinGecko</a>
+                Price Data provided By <a href="https://coingecko.com" target="_blank" rel="noopener noreferrer">CoinGecko</a>
             </div>
         </div>
         <div class="bottom-row">

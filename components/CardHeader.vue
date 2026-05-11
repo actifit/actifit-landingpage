@@ -1,6 +1,6 @@
-<template>
+﻿<template>
   <h6 class="mb-0 text-center card-title">
-    <a :href="link" target="_blank">
+    <a :href="link" target="_blank" rel="noopener noreferrer">
       {{ truncateString(title, 70) }}
       <i class="fas fa-external-link-alt"></i>
       <!-- "rewarded" checkmark icon -->

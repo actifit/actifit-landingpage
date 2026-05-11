@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <!-- single transaction item for wallet page -->
   <div class="acti-shadow card p-3 my-2">
     <div class="d-flex flex-row justify-content-between">
@@ -14,8 +14,8 @@
       </div>
     </div>
     <div class="text-center">
-      <a :href="$safeUrl('/@' + transaction.user + '/' + transaction.url)" target="_blank" v-if="transaction.reward_activity == 'Full AFIT Payout'">{{ $t('Activity_Details') }}</a>
-      <a :href="$safeUrl(transaction.url)" target="_blank" v-else-if="transaction.url">{{ $t('Activity_Details') }}</a>
+      <a :href="$safeUrl('/@' + transaction.user + '/' + transaction.url)" target="_blank" rel="noopener noreferrer" v-if="transaction.reward_activity == 'Full AFIT Payout'">{{ $t('Activity_Details') }}</a>
+      <a :href="$safeUrl(transaction.url)" target="_blank" rel="noopener noreferrer" v-else-if="transaction.url">{{ $t('Activity_Details') }}</a>
     </div>
     <p class="font-italic mb-0 mt-2 text-center" v-if="transaction.note">{{ transaction.note }}</p>
   </div>

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div :id="modalId" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
@@ -39,7 +39,7 @@
                 <td>{{ topHolder.rank }}</td>
                 <td>
                   <!-- Check if account is truthy AND not the string 'null' before rendering link -->
-                  <a v-if="topHolder.account && topHolder.account !== 'null'" :href="`https://actifit.io/@${topHolder.account}`" target="_blank" :class="{'text-white': user === topHolder.account}">
+                  <a v-if="topHolder.account && topHolder.account !== 'null'" :href="`https://actifit.io/@${topHolder.account}`" target="_blank" rel="noopener noreferrer" :class="{'text-white': user === topHolder.account}">
                     @{{ topHolder.account }}
                   </a>
                   <!-- If account is null (or the string 'null'), display 'null' -->

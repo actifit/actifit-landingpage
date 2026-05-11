@@ -1,4 +1,4 @@
-
+﻿
 <template>
   <div class="hover-card-container">
     <!-- Display based on mode -->
@@ -15,7 +15,7 @@
 
     <template v-else-if="displayMode === 'no-rank'">
       <span class="user-display d-inline-flex align-items-center"
-         target="_blank"
+         target="_blank" rel="noopener noreferrer"
          @mouseenter="handleMouseEnter"
          @mouseleave="handleMouseLeave">
 				  <div class="user-avatar mr-1" :style="'background-image: url('+profImgUrl+'/u/' + username + '/avatar);'"></div>
@@ -27,7 +27,7 @@
 
     <template v-else-if="displayMode==='username-only'">
       <span class="user-display align-items-center"
-         target="_blank"
+         target="_blank" rel="noopener noreferrer"
          @mouseenter="handleMouseEnter"
          @mouseleave="handleMouseLeave">
 
@@ -40,7 +40,7 @@
 
     <template v-else>
       <span class="user-display d-inline-flex align-items-center"
-         target="_blank"
+         target="_blank" rel="noopener noreferrer"
          @mouseenter="handleMouseEnter"
          @mouseleave="handleMouseLeave">
         <div class="user-avatar mr-1"

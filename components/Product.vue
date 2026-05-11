@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <!-- single card item for approved product -->
   <div class="card form mx-auto p-3 mt-3 mt-md-5 text-center pro-card col-sm-4"
     :class="[productTypeBorder, { 'christmas-card': product.specialevent && product.event == 'Christmas' }]">
@@ -366,7 +366,7 @@
       <div v-if="prodHasFriendBenefic()">
         <b>{{ $t('Benef_friend') }}:</b>
         <span v-if="grabConsumableItem().status == 'active'"><i class="fas fa-user-friends pl-2"></i>&nbsp;<a
-            :href="'/' + grabConsumableItem().benefic" target="_blank">{{ grabConsumableItem().benefic }}</a></span>
+            :href="'/' + grabConsumableItem().benefic" target="_blank" rel="noopener noreferrer">{{ grabConsumableItem().benefic }}</a></span>
         <input type="text" name="friend" id="friend" ref="friend" class="form-control p-2" v-else
           :value="grabConsumableItem().benefic">
       </div>

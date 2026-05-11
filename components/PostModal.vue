@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="modal fade" id="postModal" ref="postModal" tabindex="-1">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content" v-if="post">
@@ -205,7 +205,7 @@
           </small>
           <i class="fas fa-dove"></i>
           <small>
-            <a :href="this.meta.charity[0]" target="_blank">@{{ this.meta.charity[0] }}</a>
+            <a :href="this.meta.charity[0]" target="_blank" rel="noopener noreferrer">@{{ this.meta.charity[0] }}</a>
           </small>
         </div>
         <transition name="fade">

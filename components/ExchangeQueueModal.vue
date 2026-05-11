@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="modal fade" id="exchangeQueueModal" ref="exchangeQueueModal" tabindex="-1">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
@@ -26,7 +26,7 @@
 				<tr v-for="(topHolder, key) in topAFITXList" :key="key" :class="{'bg-danger': user === topHolder.account, 'text-white': user === topHolder.account}" v-if="exchangeRequestSet(topHolder.account)">
 				  <td>{{ key + 1 }}</td>
 				  <td>
-					<a :href="topHolder.account" target="_blank" :class="{'text-white': user === topHolder.account}">
+					<a :href="topHolder.account" target="_blank" rel="noopener noreferrer" :class="{'text-white': user === topHolder.account}">
 						@{{ topHolder.account }}
 					</a>
 				  </td>
@@ -52,7 +52,7 @@
 				<tr v-for="(pendingTrans, key) in transList" :key="pendingTrans._id" :class="{'bg-danger': user === pendingTrans.user, 'text-white': user === pendingTrans.user}" v-if="!isTopHolder(pendingTrans.user)">
 				  <th scope="row">{{ key + 1 }}</th>
 				  <td>
-					<a :href="pendingTrans.user" target="_blank" :class="{'text-white': user === pendingTrans.user}">
+					<a :href="pendingTrans.user" target="_blank" rel="noopener noreferrer" :class="{'text-white': user === pendingTrans.user}">
 						@{{ pendingTrans.user }}
 					</a>
 				  </td>

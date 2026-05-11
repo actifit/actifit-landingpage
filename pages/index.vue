@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="home" ref="homePage">
     <!-- top anchor -->
     <a id="top"></a>
@@ -80,7 +80,7 @@
                       <div v-for="(report, index) in fullReports" :key="'activity-' + index" class="activity-card-scroller-item">
                           <div class="activity-post-card h-100" :style="getCardBackground(report)">
                               <!-- The content container is now the link, making the whole card clickable -->
-                              <a :href="$safeUrl(report.url)" target="_blank" class="activity-card-content" :title="report.title || 'View Post'">
+                              <a :href="$safeUrl(report.url)" target="_blank" rel="noopener noreferrer" class="activity-card-content" :title="report.title || 'View Post'">
                                   <div class="card-user-info">
                                       <div class="avatar small" :style="'background-image: url(' + profImgUrl + '/u/' + report.author + '/avatar);'"></div>
                                       <span class="username">@{{ report.author }}</span>
@@ -148,10 +148,10 @@
             <p class="lead mb-4" v-html="$t('homepage.section2_desc')"></p>
             <p class="download-bonus-text">{{ $t('homepage.download_bonus') }}</p>
             <div class="app-buttons-container">
-              <a href="https://links.actifit.io/android" target="_blank">
+              <a href="https://links.actifit.io/android" target="_blank" rel="noopener noreferrer">
                 <img src="/img/google-play.png" :alt="$t('alt_texts.google_play')">
               </a>
-              <a href="https://links.actifit.io/ios" target="_blank">
+              <a href="https://links.actifit.io/ios" target="_blank" rel="noopener noreferrer">
                 <img src="/img/app-store.png" :alt="$t('alt_texts.app_store')">
               </a>
             </div>
@@ -174,11 +174,11 @@
 
               <h4 class="mt-4 mb-3">{{ $t('available_on') }}</h4>
               <div class="exchange-tags-container">
-                  <a href="https://tribaldex.com/trade/AFIT" class="exchange-tag" target="_blank"><i class="fas fa-coins mr-2"></i>{{ $t('exchanges.hive_engine') }}</a>
-                  <a href="https://defi.actifit.io/swap?outputCurrency=0x4516bb582f59befcbc945d8c2dac63ef21fba9f6" target="_blank" class="exchange-tag"><i class="fas fa-fire-alt mr-2"></i>{{ $t('exchanges.actifit_defi') }}</a>
-                  <a href="https://pancakeswap.finance/swap?outputCurrency=0x4516bb582f59befcbc945d8c2dac63ef21fba9f6" target="_blank" class="exchange-tag"><i class="fas fa-sync-alt mr-2"></i>{{ $t('exchanges.pancakeswap') }}</a>
-                  <a href="https://www.digifinex.com/en-ww/trade/USDT/AFIT" target="_blank" class="exchange-tag"><i class="fas fa-chart-line mr-2"></i>{{ $t('exchanges.digifinex') }}</a>
-                  <a href="https://dex-trade.com/spot/trading/AFITUSDT" target="_blank" class="exchange-tag"><i class="fas fa-exchange-alt mr-2"></i>{{ $t('exchanges.dex_trade') }}</a>
+                  <a href="https://tribaldex.com/trade/AFIT" class="exchange-tag" target="_blank" rel="noopener noreferrer"><i class="fas fa-coins mr-2"></i>{{ $t('exchanges.hive_engine') }}</a>
+                  <a href="https://defi.actifit.io/swap?outputCurrency=0x4516bb582f59befcbc945d8c2dac63ef21fba9f6" target="_blank" rel="noopener noreferrer" class="exchange-tag"><i class="fas fa-fire-alt mr-2"></i>{{ $t('exchanges.actifit_defi') }}</a>
+                  <a href="https://pancakeswap.finance/swap?outputCurrency=0x4516bb582f59befcbc945d8c2dac63ef21fba9f6" target="_blank" rel="noopener noreferrer" class="exchange-tag"><i class="fas fa-sync-alt mr-2"></i>{{ $t('exchanges.pancakeswap') }}</a>
+                  <a href="https://www.digifinex.com/en-ww/trade/USDT/AFIT" target="_blank" rel="noopener noreferrer" class="exchange-tag"><i class="fas fa-chart-line mr-2"></i>{{ $t('exchanges.digifinex') }}</a>
+                  <a href="https://dex-trade.com/spot/trading/AFITUSDT" target="_blank" rel="noopener noreferrer" class="exchange-tag"><i class="fas fa-exchange-alt mr-2"></i>{{ $t('exchanges.dex_trade') }}</a>
               </div>
           </div>
         </div>
@@ -219,14 +219,14 @@
               <div class="custom-scroller-inner">
                 <div v-for="(delegator, index) in enrichedDelegators" :key="'hive' + index" class="delegator-card">
                     <div class="card-header">
-                      <a :href="'https://ecency.com/@' + delegator._id" target="_blank" class="delegator-avatar-link">
+                      <a :href="'https://ecency.com/@' + delegator._id" target="_blank" rel="noopener noreferrer" class="delegator-avatar-link">
                           <div class="avatar-glow"></div>
                           <div class="avatar large" :style="'background-image: url(' + profImgUrl + '/u/' + delegator._id + '/avatar);'"></div>
                       </a>
-                      <a :href="'https://ecency.com/@' + delegator._id" target="_blank" class="username">@{{ delegator._id }}</a>
+                      <a :href="'https://ecency.com/@' + delegator._id" target="_blank" rel="noopener noreferrer" class="username">@{{ delegator._id }}</a>
                     </div>
                     <div class="card-body">
-                        <a :href="'https://ecency.com/@' + delegator._id + '/wallet'" target="_blank" class="stat-row">
+                        <a :href="'https://ecency.com/@' + delegator._id + '/wallet'" target="_blank" rel="noopener noreferrer" class="stat-row">
                             <i class="fas fa-power-off text-brand"></i>
                             <span>{{ numberFormat(delegator.steem_power, 0) }} {{ $t('HP_short') }}</span>
                         </a>
@@ -274,20 +274,20 @@
           <!-- 1st Place Column (now first in HTML) -->
           <div class="podium-column is-first">
             <img src="/img/1st_place_medal.svg" class="medal-icon" :alt="$t('alt_texts.gold_medal')">
-            <a v-if="leaderboardPosts[0] && leaderboardPosts[0].imageUrl" :href="leaderboardPosts[0].postUrl" target="_blank" class="podium-post-link">
+            <a v-if="leaderboardPosts[0] && leaderboardPosts[0].imageUrl" :href="leaderboardPosts[0].postUrl" target="_blank" rel="noopener noreferrer" class="podium-post-link">
               <div class="podium-post-image" :style="{ backgroundImage: 'url(' + leaderboardPosts[0].imageUrl + ')' }"></div>
             </a>
             <div v-else class="podium-post-image-placeholder"></div>
 
             <div class="user-details">
-              <a :href="'/activity/' + leaderboard[0].username.replace('@', '')" target="_blank">
+              <a :href="'/activity/' + leaderboard[0].username.replace('@', '')" target="_blank" rel="noopener noreferrer">
                 <div class="avatar"
                   :style="'background-image: url(' + profImgUrl + '/u/' + leaderboard[0].username.replace('@', '') + '/avatar);'">
                 </div>
               </a>
-              <a class="username" :href="'/activity/' + leaderboard[0].username.replace('@', '')" target="_blank">{{
+              <a class="username" :href="'/activity/' + leaderboard[0].username.replace('@', '')" target="_blank" rel="noopener noreferrer">{{
                 leaderboard[0].username.replace('@','') }}</a>
-              <a :href="leaderboardPosts[0] ? leaderboardPosts[0].postUrl : '#'" target="_blank" class="activity-count">{{ leaderboard[0].activity_count }} {{ $t('Recorded_Activity') }}</a>
+              <a :href="leaderboardPosts[0] ? leaderboardPosts[0].postUrl : '#'" target="_blank" rel="noopener noreferrer" class="activity-count">{{ leaderboard[0].activity_count }} {{ $t('Recorded_Activity') }}</a>
             </div>
             <div class="podium-base gold">
               <span class="rank-number">1</span>
@@ -296,20 +296,20 @@
 
           <!-- 2nd Place Column (now second in HTML) -->
           <div class="podium-column is-second">
-            <a v-if="leaderboardPosts[1] && leaderboardPosts[1].imageUrl" :href="leaderboardPosts[1].postUrl" target="_blank" class="podium-post-link">
+            <a v-if="leaderboardPosts[1] && leaderboardPosts[1].imageUrl" :href="leaderboardPosts[1].postUrl" target="_blank" rel="noopener noreferrer" class="podium-post-link">
               <div class="podium-post-image" :style="{ backgroundImage: 'url(' + leaderboardPosts[1].imageUrl + ')' }"></div>
             </a>
             <div v-else class="podium-post-image-placeholder"></div>
 
             <div class="user-details">
-              <a :href="'/activity/' + leaderboard[1].username.replace('@', '')" target="_blank">
+              <a :href="'/activity/' + leaderboard[1].username.replace('@', '')" target="_blank" rel="noopener noreferrer">
                 <div class="avatar"
                   :style="'background-image: url(' + profImgUrl + '/u/' + leaderboard[1].username.replace('@', '') + '/avatar);'">
                 </div>
               </a>
-              <a class="username" :href="'/activity/' + leaderboard[1].username.replace('@', '')" target="_blank">{{
+              <a class="username" :href="'/activity/' + leaderboard[1].username.replace('@', '')" target="_blank" rel="noopener noreferrer">{{
                 leaderboard[1].username.replace('@','') }}</a>
-              <a :href="leaderboardPosts[1] ? leaderboardPosts[1].postUrl : '#'" target="_blank" class="activity-count">{{ leaderboard[1].activity_count }} {{ $t('Recorded_Activity') }}</a>
+              <a :href="leaderboardPosts[1] ? leaderboardPosts[1].postUrl : '#'" target="_blank" rel="noopener noreferrer" class="activity-count">{{ leaderboard[1].activity_count }} {{ $t('Recorded_Activity') }}</a>
             </div>
             <div class="podium-base silver">
               <span class="rank-number">2</span>
@@ -318,20 +318,20 @@
 
           <!-- 3rd Place Column (now third in HTML) -->
           <div class="podium-column is-third">
-            <a v-if="leaderboardPosts[2] && leaderboardPosts[2].imageUrl" :href="leaderboardPosts[2].postUrl" target="_blank" class="podium-post-link">
+            <a v-if="leaderboardPosts[2] && leaderboardPosts[2].imageUrl" :href="leaderboardPosts[2].postUrl" target="_blank" rel="noopener noreferrer" class="podium-post-link">
               <div class="podium-post-image" :style="{ backgroundImage: 'url(' + leaderboardPosts[2].imageUrl + ')' }"></div>
             </a>
             <div v-else class="podium-post-image-placeholder"></div>
 
             <div class="user-details">
-              <a :href="'/activity/' + leaderboard[2].username.replace('@', '')" target="_blank">
+              <a :href="'/activity/' + leaderboard[2].username.replace('@', '')" target="_blank" rel="noopener noreferrer">
                 <div class="avatar"
                   :style="'background-image: url(' + profImgUrl + '/u/' + leaderboard[2].username.replace('@', '') + '/avatar);'">
                 </div>
               </a>
-              <a class="username" :href="'/activity/' + leaderboard[2].username.replace('@', '')" target="_blank">{{
+              <a class="username" :href="'/activity/' + leaderboard[2].username.replace('@', '')" target="_blank" rel="noopener noreferrer">{{
                 leaderboard[2].username.replace('@','') }}</a>
-              <a :href="leaderboardPosts[2] ? leaderboardPosts[2].postUrl : '#'" target="_blank" class="activity-count">{{ leaderboard[2].activity_count }} {{ $t('Recorded_Activity') }}</a>
+              <a :href="leaderboardPosts[2] ? leaderboardPosts[2].postUrl : '#'" target="_blank" rel="noopener noreferrer" class="activity-count">{{ leaderboard[2].activity_count }} {{ $t('Recorded_Activity') }}</a>
             </div>
             <div class="podium-base bronze">
               <span class="rank-number">3</span>

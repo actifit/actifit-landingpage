@@ -440,11 +440,14 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
             if (node.hasAttribute('style')) {
                 let style = node.getAttribute('style');
                 // Remove properties that allow positioning elements outside their container
-                const dangerousProps = ['position', 'z-index', 'top', 'left', 'bottom', 'right', 'inset', 'margin-top', 'margin-left', 'margin-right', 'margin-bottom', 'pointer-events', 'opacity'];
+                // or that can carry javascript:/expression() payloads
+                const dangerousProps = ['position', 'z-index', 'top', 'left', 'bottom', 'right', 'inset', 'margin-top', 'margin-left', 'margin-right', 'margin-bottom', 'pointer-events', 'opacity', 'background-image', 'background'];
                 dangerousProps.forEach(prop => {
                     const regex = new RegExp(prop + '\\s*:\\s*[^;]+;?', 'gi');
                     style = style.replace(regex, '');
                 });
+                // Defence-in-depth: drop any remaining rule whose value contains a dangerous token
+                style = style.replace(/[^:;]+:\s*[^;]*(javascript:|expression\(|url\s*\(javascript)[^;]*;?/gi, '');
                 node.setAttribute('style', style);
             }
             // Restrict iframe src to trusted media hosts — blocks javascript: and arbitrary https embeds

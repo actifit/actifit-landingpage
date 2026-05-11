@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div :class="classContxt" id="buyOptionsModal" ref="buyOptionsModal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -19,7 +19,7 @@
 					<a href="https://hive-engine.com/?p=market&t=AFIT" class="btn btn-brand btn-lg border" target="_blank" rel="noopener noreferrer">{{ $t('buy_afit_he') }}</a>
 					</div>
 					<div class="row">
-					<a href="/wallet" class="btn btn-brand btn-lg border" target="_blank" >{{ $t('Move_AFIT_to_Wallet') }}</a>
+					<a href="/wallet" class="btn btn-brand btn-lg border" target="_blank" rel="noopener noreferrer" >{{ $t('Move_AFIT_to_Wallet') }}</a>
 					</div>
 				</div>
 				<div class="col-sm-12 col-md-6">
