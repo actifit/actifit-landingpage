@@ -465,10 +465,13 @@ export default {
 
     async handleNotificationClick(notif) {
       await this.markRead(notif);
-      if (notif.url.startsWith('/')) {
-        this.$router.push(this.localePath(notif.url));
+      const url = notif.url;
+      if (url && url.startsWith('/')) {
+        this.$router.push(this.localePath(url));
+      } else if (url && /^https?:\/\//i.test(url)) {
+        window.location.href = url;
       } else {
-        window.location.href = notif.url;
+        this.$router.push(this.localePath('/notifications'));
       }
     },
 

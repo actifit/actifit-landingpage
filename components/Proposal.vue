@@ -1,14 +1,14 @@
-<template>
+﻿<template>
   <!-- single post item for activity pages -->
   <div >
     <div class="card post" :class="{'card-subscribed':userSubscribed}">
       <!--<h6 class="mb-0 text-center post-title">
 
-		<a :href="buildLink+'/posts'" target="_blank">
+		<a :href="buildLink+'/posts'" target="_blank" rel="noopener noreferrer">
           {{ truncateString(proposal.title, 70) }}
 		  <i class="fas fa-external-link-alt"></i>
         </a>
-      </h6>--><!--<a :href="proposal.url" target="_blank">-->
+      </h6>--><!--<a :href="proposal.url" target="_blank" rel="noopener noreferrer">-->
 
       <div class="post-body" v-if="proposal">
         <div class="row">
@@ -27,7 +27,7 @@
 				</a>
 				</div>
 			</div>
-			<div class="col-4"><a :href="buildLink" target="_blank" class="text-brand">{{proposal.subject}}</a></div>
+			<div class="col-4"><a :href="buildLink" target="_blank" rel="noopener noreferrer" class="text-brand">{{proposal.subject}}</a></div>
 
 		</div>
 		<div class="row">

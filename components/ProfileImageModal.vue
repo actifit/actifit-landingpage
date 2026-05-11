@@ -170,20 +170,12 @@ export default {
         formData.append('image', renamedFile);
 
         try {
-          const response = await axios.post('https://usermedia.actifit.io/upload', formData, {
-            headers: {
-              'Authorization': process.env.sec_img_upl,
-              'Content-Type': 'multipart/form-data'
-            }
-          });
-          
-          console.log('Upload Success:', response.data);
+          const response = await axios.post('/api/proxy/upload', formData);
           const imageUrl = 'https://usermedia.actifit.io/' + key;
-          console.log(`meow imageurl: ${imageUrl}`)
           return imageUrl;
           
         } catch (error) {
-          console.log('meow Upload Error:', error);
+          console.error('Upload error:', error);
           throw error;
         }
       },

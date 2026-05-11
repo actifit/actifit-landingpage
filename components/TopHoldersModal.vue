@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="modal fade" id="topHoldersModal" ref="topHoldersModal" tabindex="-1">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
@@ -21,7 +21,7 @@
 				<tr v-for="(topHolder, key) in holdersList" :key="key" :class="{'bg-danger': user === topHolder.user, 'text-white': user === topHolder.user}">
 				  <td>{{ key + 1 }}</td>
 				  <td>
-					<a :href="topHolder.user" target="_blank" :class="{'text-white': user === topHolder.user}">
+					<a :href="topHolder.user" target="_blank" rel="noopener noreferrer" :class="{'text-white': user === topHolder.user}">
 						@{{ topHolder.user }}
 					</a>
 				  </td>

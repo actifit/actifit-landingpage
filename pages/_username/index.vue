@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div>
     <NavbarBrand />
     <div v-if="loadingData" class="container pt-5 mt-5 pb-5">
@@ -123,7 +123,7 @@
                      <div v-if="updatingField === 'link'" class="d-flex justify-content-end align-items-center h-100 w-100"><i class="fas fa-spinner fa-spin text-brand"></i></div>
                      <template v-else>
                         <div class="about-item-text" v-if="!linkEditOn">
-                          <a v-if="userMeta && userMeta.profile && userMeta.profile.website" :href="$safeUrl(userMeta.profile.website)" target="_blank">{{ textAreaLinkValue }}</a>
+                          <a v-if="userMeta && userMeta.profile && userMeta.profile.website" :href="$safeUrl(userMeta.profile.website)" target="_blank" rel="noopener noreferrer">{{ textAreaLinkValue }}</a>
                           <span v-else>{{ textAreaLinkValue || $t('Not_Set') }}</span>
                         </div>
                         <div class="about-item-edit" v-else>
@@ -206,7 +206,7 @@
                     </span>
                      <div v-html="$t('posh_desc_profile')"></div>
                   </div>
-                  <a v-if="!poshVerified" class="btn btn-danger m-2" href="https://hiveposh.com/" target="_blank">{{ $t('Posh_verify') }}</a>
+                  <a v-if="!poshVerified" class="btn btn-danger m-2" href="https://hiveposh.com/" target="_blank" rel="noopener noreferrer">{{ $t('Posh_verify') }}</a>
                 </div>
               </div>
               <!-- Key added -->
@@ -254,7 +254,7 @@
 
                       <a href="#" data-toggle="modal" data-target="#notifyModal" class="text-danger"><i class="fas fa-info-circle" :title="$t('view_details')"></i></a>
                    </div>
-                  <a href="https://splinterlands.com/" target="_blank" class="btn btn-danger m-2">{{ $t('Play_splinterlands') }}</a>
+                  <a href="https://splinterlands.com/" target="_blank" rel="noopener noreferrer" class="btn btn-danger m-2">{{ $t('Play_splinterlands') }}</a>
                 </div>
               </div>
               <!-- Key added -->
@@ -293,7 +293,7 @@
                       <div v-if="actifitDelegator" class="text-dark">
                         <i class="fas fa-check text-success mr-2"></i>{{ $t('Delegates_to_Actifit') }} ({{ actifitDelegator.steem_power }} {{ $t('Hive_Power') }})
                       </div>
-                       <a class="btn btn-danger m-2" href="/wallet" target="_blank">{{ $t('Delegate_Now_Actifit') }}</a>
+                       <a class="btn btn-danger m-2" href="/wallet" target="_blank" rel="noopener noreferrer">{{ $t('Delegate_Now_Actifit') }}</a>
                     </div>
                  </div>
 
@@ -397,7 +397,7 @@
                     <div class="form-group">
                       <label for="funds-pass">{{ $t('Funds_Password') }}</label>
                       <input type="password" id="funds-pass" name="funds-pass" ref="funds-pass" class="form-control">
-                      <small><a href="/wallet?action=set_funds_pass" target="_blank">{{ $t('create_pass_short') }}</a></small>
+                      <small><a href="/wallet?action=set_funds_pass" target="_blank" rel="noopener noreferrer">{{ $t('create_pass_short') }}</a></small>
                     </div>
                     <div v-if="tipError" v-html="tipError" class="alert alert-danger"></div>
                     <div>

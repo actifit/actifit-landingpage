@@ -1,12 +1,12 @@
-<template>
+﻿<template>
   <div class="search-result card">
     <div class="card-body">
       <h5 class="card-title">
-        <a :href="postLink" target="_blank">{{ post.title }}</a>
+        <a :href="postLink" target="_blank" rel="noopener noreferrer">{{ post.title }}</a>
       </h5>
       <h6 class="card-subtitle mb-2 text-muted">@{{ post.author }}</h6>
       <p class="card-text">{{ truncatedBody }}</p>
-      <a :href="postLink" target="_blank" class="card-link">Read more</a>
+      <a :href="postLink" target="_blank" rel="noopener noreferrer" class="card-link">Read more</a>
     </div>
   </div>
 </template>

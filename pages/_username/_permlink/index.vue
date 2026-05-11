@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div>
     <NavbarBrand />
 
@@ -151,7 +151,7 @@
               </div>
               <div class="modal-footer col-md-12 text-brand" v-if="meta.charity">
                 <i class="fas fa-dove"></i><small> {{ $t('Charity_Post') }} </small><i class="fas fa-dove"></i>
-                <small><a :href="meta.charity[0]" target="_blank">@{{ meta.charity[0] }}</a></small>
+                <small><a :href="meta.charity[0]" target="_blank" rel="noopener noreferrer">@{{ meta.charity[0] }}</a></small>
               </div>
               <transition name="fade">
                 <div class="report-reply col-md-12" v-if="commentBoxOpen">
@@ -168,7 +168,7 @@
                 </div>
               </transition>
               <div class="report-reply col-md-12" v-if="responsePosted">
-                <a target="_blank"><div class="comment-user-section"><UserHoverCard :username="user.account.name" /></div></a>
+                <a target="_blank" rel="noopener noreferrer"><div class="comment-user-section"><UserHoverCard :username="user.account.name" /></div></a>
                 <SafeRemarkable :source="responseBody" :options="{ 'html': true, 'breaks': true, 'typographer': true }"></SafeRemarkable>
               </div>
 

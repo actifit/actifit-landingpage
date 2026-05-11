@@ -17,3 +17,6 @@ dist
 .env
 .vscode/launch.json
 .vscode/settings.json
+
+# Security audit reports
+AUDIT-*.md

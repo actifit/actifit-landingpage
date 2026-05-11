@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div>
     <NavbarBrand @user-switched="refreshAllWalletData" />
 
@@ -123,8 +123,7 @@
               <a v-if="cur_bchain == 'STEEM'" href="https://steem-engine.net/?p=market&t=AFIT"
                 :class="smallScreenBtnClasses" target="_blank" rel="noopener noreferrer" :text="$t('buy_afit_se')"><span
                   class="btn btn-brand p-1" :title="$t('buy_afit_he')">$</span></a>
-              <a v-else href="https://hive-engine.com/?p=market&t=AFIT" :class="smallScreenBtnClasses" target="_blank"
-                rel="noopener noreferrer"><span class="btn btn-brand p-1" :title="$t('buy_afit_he')">$</span></a>
+              <a v-else href="https://hive-engine.com/?p=market&t=AFIT" :class="smallScreenBtnClasses" target="_blank" rel="noopener noreferrer"><span class="btn btn-brand p-1" :title="$t('buy_afit_he')">$</span></a>
 
               <span class="btn btn-brand p-1" :title="$t('EXCHANGE_AFIT_FOR_STEEM')" v-on:click="exchangeAFITforSTEEM">
                 <i class="fas fa-solid fa-thumbs-up"></i>
@@ -393,11 +392,11 @@
             <div class="col-1 col-lg-2 text-right break-val">{{ formattedUserAfitBSCVal }}</div>
             <div class="col-lg-2 col-1 token_actions">
               <span class="btn btn-brand p-1" :title="$t('smart_contract')">
-                <a target="_blank" :href="'https://bscscan.com/address/' + afitTokenAddress"><i
+                <a target="_blank" rel="noopener noreferrer" :href="'https://bscscan.com/address/' + afitTokenAddress"><i
                     class="fas fa-file-contract"></i></a>
               </span>
               <a href="https://defi.actifit.io/swap?outputCurrency=0x4516bb582f59befcbc945d8c2dac63ef21fba9f6"
-                :class="smallScreenBtnClasses" target="_blank"><span class="btn btn-brand p-1"
+                :class="smallScreenBtnClasses" target="_blank" rel="noopener noreferrer"><span class="btn btn-brand p-1"
                   :title="$t('buy_afit_bsc')">
                   $
                 </span></a>
@@ -413,7 +412,7 @@
             <div class="col-1 col-lg-2 text-right">-</div>
             <div class="col-lg-2 col-1 token_actions">
               <span class="btn btn-brand p-1" :title="$t('smart_contract')">
-                <a target="_blank" :href="'https://bscscan.com/address/' + afitBNBLPTokenAddress"><i
+                <a target="_blank" rel="noopener noreferrer" :href="'https://bscscan.com/address/' + afitBNBLPTokenAddress"><i
                     class="fas fa-file-contract"></i></a>
               </span>
             </div>
@@ -429,11 +428,11 @@
             <div class="col-1 col-lg-2 text-right break-val">{{ formattedUserAfitxBSCVal }}</div>
             <div class="col-lg-2 col-1 token_actions">
               <span class="btn btn-brand p-1" :title="$t('smart_contract')">
-                <a target="_blank" :href="'https://bscscan.com/address/' + afitxTokenAddress"><i
+                <a target="_blank" rel="noopener noreferrer" :href="'https://bscscan.com/address/' + afitxTokenAddress"><i
                     class="fas fa-file-contract"></i></a>
               </span>
               <a href="https://defi.actifit.io/swap?outputCurrency=0x246d22ff6e0b90f80f2278613e8db93ff7a09b95"
-                :class="smallScreenBtnClasses" target="_blank"><span class="btn btn-brand p-1"
+                :class="smallScreenBtnClasses" target="_blank" rel="noopener noreferrer"><span class="btn btn-brand p-1"
                   :title="$t('buy_afitx_bsc')">
                   $
                 </span></a>
@@ -449,7 +448,7 @@
             <div class="col-1 col-lg-2 text-right">-</div>
             <div class="col-lg-2 col-1 token_actions">
               <span class="btn btn-brand p-1" :title="$t('smart_contract')">
-                <a target="_blank" :href="'https://bscscan.com/address/' + afitxBNBLPTokenAddress"><i
+                <a target="_blank" rel="noopener noreferrer" :href="'https://bscscan.com/address/' + afitxBNBLPTokenAddress"><i
                     class="fas fa-file-contract"></i></a>
               </span>
             </div>
@@ -494,8 +493,7 @@
 
                 <span v-if="token.symbol == 'AFITX'" class="btn btn-brand p-1">
                   <a v-if="cur_bchain == 'STEEM'" :title="$t('buy_afitx_se')"
-                    href="https://steem-engine.net/?p=market&t=AFITX" class="" target="_blank"
-                    rel="noopener noreferrer">$</a>
+                    href="https://steem-engine.net/?p=market&t=AFITX" class="" target="_blank" rel="noopener noreferrer">$</a>
                   <a v-else :title="$t('buy_afitx_he')" href="https://hive-engine.com/?p=market&t=AFITX" class=""
                     target="_blank" rel="noopener noreferrer">$</a>
                 </span>
@@ -509,8 +507,8 @@
 
 
                 <span v-if="token.symbol == 'AFIT'" class="btn btn-brand p-1" :title="$t('buy_afit_he')">
-                  <a v-if="cur_bchain == 'STEEM'" href="https://steem-engine.net/?p=market&t=AFIT" target="_blank"
-                    rel="noopener noreferrer" :text="$t('buy_afit_se')">$</a>
+                  <a v-if="cur_bchain == 'STEEM'" href="https://steem-engine.net/?p=market&t=AFIT" target="_blank" rel="noopener noreferrer"
+                    :text="$t('buy_afit_se')">$</a>
                   <a v-else href="https://hive-engine.com/?p=market&t=AFIT" target="_blank" rel="noopener noreferrer"
                     :text="$t('buy_afit_he')">$</a>
                 </span>
@@ -1373,7 +1371,7 @@
                     <label for="funds-pass" class="w-25 p-2">{{ $t('Funds_Password') }}</label>
                     <input type="password" id="funds-pass" name="funds-pass" ref="funds-pass"
                       class="form-control-lg w-50 p-2">
-                    <a href="/wallet?action=set_funds_pass" target="_blank" class="btn btn-brand border m-1">{{
+                    <a href="/wallet?action=set_funds_pass" target="_blank" rel="noopener noreferrer" class="btn btn-brand border m-1">{{
                       $t('create_pass_short') }}</a>
                   </div>
                   <div class="row">
@@ -1418,7 +1416,7 @@
                     <label for="move-funds-pass" class="w-25 p-2 text-right">{{ $t('Funds_Password') }}</label>
                     <input type="password" id="move-funds-pass" name="move-funds-pass" ref="move-funds-pass"
                       class="form-control-lg w-50 p-2">
-                    <a href="/wallet?action=set_funds_pass" target="_blank" class="btn btn-brand border m-1">{{
+                    <a href="/wallet?action=set_funds_pass" target="_blank" rel="noopener noreferrer" class="btn btn-brand border m-1">{{
                       $t('create_pass_short') }}</a>
                   </div>
                   <div class="text-brand text-center" v-if="afit_se_move_error_proceeding"
@@ -1889,12 +1887,7 @@ import VueScrollTo from 'vue-scrollto' // for smooth scrolling
 
 import GenericTopHoldersModal from '@/components/GenericTopHoldersModal.vue';
 
-//Disable: EOL for S-E
-//const ssc = new SSC(process.env.steemEngineRpc);
-const scot_steemengine_api = process.env.steemEngineScot;
-
 const hsc = new SSC(process.env.hiveEngineRpc);
-const scot_hive_api_param = process.env.hiveEngineScotParam;
 
 const tokensNonStakable = ['AFITX', 'AFIT', 'SWAP.HIVE', 'SWAP.BLURT'];
 const tokensOfInterest = ['SPORTS', 'PAL', 'APX', 'BEE', 'POSH', 'LEO'].concat(tokensNonStakable);
@@ -3774,14 +3767,16 @@ export default {
     },
 
     setAFITPrice(_afitPrice) {
-      this.afitPrice = parseFloat(_afitPrice).toFixed(6);
+      const p = parseFloat(_afitPrice);
+      if (!isNaN(p)) this.afitPrice = p;
     },
     setAFITBSCPrice(_afitPrice) {
-      this.afitBSCPrice = parseFloat(_afitPrice).toFixed(6);
-      console.log('afitBSCPrice' + this.afitBSCPrice);
+      const p = parseFloat(_afitPrice);
+      if (!isNaN(p)) this.afitBSCPrice = p;
     },
     setAFITXBSCPrice(_afitxPrice) {
-      this.afitxBSCPrice = parseFloat(_afitxPrice).toFixed(6);
+      const p = parseFloat(_afitxPrice);
+      if (!isNaN(p)) this.afitxBSCPrice = p;
       console.log('afitxBSCPrice' + this.afitxBSCPrice);
     },
     setUserPassStatus(result) {
@@ -3853,22 +3848,6 @@ export default {
         let prec = this.tokenOfInterestPrecision[symbol];
         return this.numberFormat(amount / Math.pow(10, prec), prec)
       }
-    },
-    setSETokensPrecision(result) {
-      let par = this;
-      this.tokenOfInterestPrecision = [];
-      //console.log(result);
-      //loop through our tokens of interest to fetch them and allow users to claim their rewards
-      tokensOfInterest.forEach(function (item, index) {
-        try {
-          let tokenDetails = result[item];
-          if (tokenDetails) {
-            par.tokenOfInterestPrecision[item] = tokenDetails.precision;
-          }
-        } catch (e) {
-          console.error(e);
-        }
-      });
     },
     setUserSettings(result) {
       //console.log('fetched user settings');
@@ -4136,20 +4115,18 @@ export default {
     },
     async fetchTokenBalance() {
       try {
-        if (this.cur_bchain == 'HIVE') {
-          try {
-            const response = await fetch(scot_steemengine_api + 'info' + scot_hive_api_param);
-            const json = await response.json();
-            if (json) {
-              this.setSETokensPrecision(json);
-            }
-          } catch (e) {
-            console.log('Error fetching token precisions:', e);
-          }
-        }
-
         const tokenData = await hsc.find('tokens', 'balances', { account: this.displayUserData.name });
         const tokenExtraDetails = await hsc.find('tokens', 'tokens', {});
+
+        if (this.cur_bchain == 'HIVE' && Array.isArray(tokenExtraDetails)) {
+          this.tokenOfInterestPrecision = [];
+          tokensOfInterest.forEach(symbol => {
+            const entry = tokenExtraDetails.find(v => v.symbol === symbol);
+            if (entry && entry.precision != null) {
+              this.tokenOfInterestPrecision[symbol] = entry.precision;
+            }
+          });
+        }
 
         if (Array.isArray(tokenData)) {
           tokenData.forEach(token => {
@@ -8085,20 +8062,24 @@ export default {
       return parseFloat(this.afitBuyAmount * this.afitPrice / this.steemPrice).toFixed(3);
     },
     setSteemPrice(_steemPrice) {
-
-      this.steemPrice = parseFloat(_steemPrice).toFixed(3);
+      const p = parseFloat(_steemPrice);
+      if (!isNaN(p)) this.steemPrice = p;
     },
     setSBDPrice(_sbdPrice) {
-      this.sbdPrice = parseFloat(_sbdPrice).toFixed(3);
+      const p = parseFloat(_sbdPrice);
+      if (!isNaN(p)) this.sbdPrice = p;
     },
     setHivePrice(_hivePrice) {
-      this.hivePrice = parseFloat(_hivePrice).toFixed(3);
+      const p = parseFloat(_hivePrice);
+      if (!isNaN(p)) this.hivePrice = p;
     },
     setHBDPrice(_hbdPrice) {
-      this.hbdPrice = parseFloat(_hbdPrice).toFixed(3);
+      const p = parseFloat(_hbdPrice);
+      if (!isNaN(p)) this.hbdPrice = p;
     },
     setBlurtPrice(_blurtPrice) {
-      this.blurtPrice = parseFloat(_blurtPrice).toFixed(3);
+      const p = parseFloat(_blurtPrice);
+      if (!isNaN(p)) this.blurtPrice = p;
     },
     async loadGlobalProperties() {
       try {

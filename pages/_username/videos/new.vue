@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div>
     <NavbarBrand />
     <div class="container pt-5 mt-5 pb-5">
@@ -81,7 +81,7 @@
             class="btn btn-white border text-red acti-shadow" @click="video = markVideoPublished(video)">Mark published
             <i v-if="marking == video._id" class="fas fa-spin fa-spinner text-brand"></i></button>
           <a v-else class="btn btn-white border text-red acti-shadow float-right"
-            :href="'/' + video.owner + '/' + video.permlink" target="_blank">View Post</a>
+            :href="'/' + video.owner + '/' + video.permlink" target="_blank" rel="noopener noreferrer">View Post</a>
           <!--<div v-if="selVid == video">Selected</div>-->
         </div>
       </div>

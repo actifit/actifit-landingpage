@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="modal fade" id="reportModal" ref="reportModal" tabindex="-1">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content" v-if="report">
@@ -159,7 +159,7 @@
         <!-- adding section to display charity info if available -->
         <div class="modal-footer text-brand" v-if="this.meta.charity">
           <i class="fas fa-dove"></i><small>{{ $t('Charity_Post') }}</small><i class="fas fa-dove"></i>
-          <small><a :href="this.meta.charity[0]" target="_blank">@{{ this.meta.charity[0] }}</a></small>
+          <small><a :href="this.meta.charity[0]" target="_blank" rel="noopener noreferrer">@{{ this.meta.charity[0] }}</a></small>
         </div>
         <transition name="fade">
           <div class="report-reply modal-body" v-if="commentBoxOpen">

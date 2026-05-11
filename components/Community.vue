@@ -1,10 +1,10 @@
-<template>
+﻿<template>
   <!-- single post item for activity pages -->
   <div >
     <div class="card post" :class="{'card-subscribed':userSubscribed}">
       <h6 class="mb-0 text-center post-title">
-        <!--<a :href="community.url" target="_blank">-->
-		<a :href="buildLink+'/posts'" target="_blank">
+        <!--<a :href="community.url" target="_blank" rel="noopener noreferrer">-->
+		<a :href="buildLink+'/posts'" target="_blank" rel="noopener noreferrer">
           {{ truncateString(community.title, 70) }}
 		  <i class="fas fa-external-link-alt"></i>
         </a>
@@ -19,10 +19,10 @@
 		  </div>
           <div class="col-6">
 			<!--<small class="text-muted d-block" :title="date">Created {{ $getTimeDifference(this.community.created_at) }}</small>-->
-			<div ><a :href="buildLink" target="_blank" class="text-brand">#{{community.name}}</a></div>
+			<div ><a :href="buildLink" target="_blank" rel="noopener noreferrer" class="text-brand">#{{community.name}}</a></div>
 			<div>{{community.about}}</div>
 			<small class="text-right curs-point" :title="'Created '+date"><i class="fas fa-calendar"></i>&nbsp;Since {{date}}</small>
-            <!--<a :href="'/'+community.author" target="_blank">
+            <!--<a :href="'/'+community.author" target="_blank" rel="noopener noreferrer">
 
               <div class="user-avatar mr-1"
                    :style="'background-image: url('+profImgUrl+'/u/' + community.author + '/avatar)'"></div>

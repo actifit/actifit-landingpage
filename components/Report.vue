@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <!-- single report item for activity pages -->
   <div>
     <div class="card report">
@@ -107,7 +107,7 @@
           <div class="col-6">
             <i class="fas fa-dove"></i><small> {{ $t('Charity_Post') }} </small><i class="fas fa-dove"></i>
           </div>
-          <div class="col-6 text-right"><small><a :href="this.meta.charity[0]" target="_blank">@{{ this.meta.charity[0] }}</a></small></div>
+          <div class="col-6 text-right"><small><a :href="this.meta.charity[0]" target="_blank" rel="noopener noreferrer">@{{ this.meta.charity[0] }}</a></small></div>
         </div>
         <div class="row details mt-2 text-brand full-afit-txt" v-if="isUserModerator">
           <div class="col-6 text-brand">

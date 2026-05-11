@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <!-- delegators listing -->
   <div>
     <NavbarBrand />
@@ -12,11 +12,11 @@
 	  <h3 class="text-center text-brand mb-5"><img src="/img/HIVE.png" style="max-height: 50px;">{{ $t('Hive_Power_Delegators') }}</h3>
       <div class="row" v-if="topDelegators.hive && topDelegators.hive.length">
           <div class="col-6 col-sm-4 col-md-3 text-center mb-4" v-for="(delegator, index) in topDelegators.hive" :key="index" :delegator="delegator">
-            <a :href="delegator._id" target="_blank">
+            <a :href="delegator._id" target="_blank" rel="noopener noreferrer">
               <div class="avatar small mx-auto mb-3" :style="'background-image: url('+profImgUrl+'/u/' + delegator._id + '/avatar);'"></div>
             </a>
-            <a :href="delegator._id" target="_blank">@{{ delegator._id }}</a><br/>
-			<img src="/img/HIVE.png" style="max-height: 20px;"><a :href="delegator._id" target="_blank">{{ numberFormat(delegator.steem_power, 0) }} {{ $t('Hive_Power') }}</a>
+            <a :href="delegator._id" target="_blank" rel="noopener noreferrer">@{{ delegator._id }}</a><br/>
+			<img src="/img/HIVE.png" style="max-height: 20px;"><a :href="delegator._id" target="_blank" rel="noopener noreferrer">{{ numberFormat(delegator.steem_power, 0) }} {{ $t('Hive_Power') }}</a>
           </div>
       </div>
     </div>

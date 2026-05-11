@@ -20,7 +20,7 @@ module.exports = {
 
   // Runtime configuration
   publicRuntimeConfig: {
-    version: '1.10.0',
+    version: pkg.version,
     proposalId: '360',
   },
 
@@ -381,22 +381,19 @@ module.exports = {
     "defaults"
   },*/
 
-  /*helmet: {
-
-    dnsPrefetchControl: false,
-    expectCt: false,
-    featurePolicy: false,
+  helmet: {
+    // frameguard disabled — X-Frame-Options: ALLOWALL is set explicitly in render.static
     frameguard: false,
-    hidePoweredBy: false,
-    hsts: false,
-    ieNoOpen: false,
-    noCache: false,
-    noSniff: false,
+    dnsPrefetchControl: { allow: false },
+    hidePoweredBy: true,
+    hsts: { maxAge: 15552000, includeSubDomains: true, preload: false },
+    ieNoOpen: true,
+    noSniff: true,
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+    xssFilter: true,
+    expectCt: false,
     permittedCrossDomainPolicies: false,
-    referrerPolicy: false,
-    xssFilter: false,
-
- },*/
+  },
   /*
   ** Build configuration
   */
@@ -429,7 +426,15 @@ module.exports = {
       }
     },
     //fixes issue with hive-auth-wrapper plugin integration
-    transpile: ['hive-auth-wrapper', 'dompurify']
+    transpile: ['hive-auth-wrapper', 'dompurify'],
+
+    terser: {
+      terserOptions: {
+        compress: {
+          drop_console: true
+        }
+      }
+    }
 
   }
 }

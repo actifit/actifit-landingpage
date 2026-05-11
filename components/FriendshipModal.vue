@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div :class="outserSmallScreenClasses" class="position-fixed text-brand mx-auto w-100 acti-notify-comp" v-if="innerShowModal || showCompDetails" id="friendshipModal" tabindex="-1">
 	<div :class="smallScreenClasses" class="text-center mx-auto acti-notify-comp-inner-friend border-2 rounded" role="document">
 	  <div :class="titleClass" class="row max-acti-width text-white mx-auto px-2">
@@ -23,13 +23,13 @@
 		<div v-if="suggFriendsLoader"><i class="fas fa-spin fa-spinner"></i></div>
 		<div v-else v-for="(suggestion, index) in suggestedFriends" :key="index" :suggestion="suggestion" :class="suggEntryClass">
 			<div class="col-md-4">
-				<a :href="formattedProfileUrl(suggestion.author)" target="_blank">
+				<a :href="formattedProfileUrl(suggestion.author)" target="_blank" rel="noopener noreferrer">
 					<div class="user-avatar large-avatar mr-1"
 					   :style="'background-image: url('+profImgUrl+'/u/' + suggestion.author + '/avatar)'"></div>
 				</a>
 			</div>
 			<div class="col-md-7 mini-user-card text-left">
-				<span><a :href="formattedProfileUrl(suggestion.author)" target="_blank">@{{ suggestion.author }}</a></span>
+				<span><a :href="formattedProfileUrl(suggestion.author)" target="_blank" rel="noopener noreferrer">@{{ suggestion.author }}</a></span>
 				<span v-if="suggestion.rank != null" class="text-brand numberCircle d-none d-md-inline " >{{ displayCoreUserRank(suggestion.rank) }} <span class="increased-rank">{{ displayIncreasedUserRank(suggestion.rank) }}</span></span>
 				<span v-else><i class="fas fa-spin fa-spinner"></i></span>
 				
