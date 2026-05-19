@@ -61,6 +61,8 @@ const createStore = () => {
       cartEntries: [], //contains current items being bought via market
       purchaseSuccess: false, //references latest purchase transaction using cart
       darkMode: false, //controls whether dark mode is active for this user's display
+      memePosts: [], // meme posts from decentmemes tag on Hive
+      moreMemesAvailable: false, // indicator if more meme posts can be loaded
     },
     getters,
     mutations,

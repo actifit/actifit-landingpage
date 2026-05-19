@@ -1254,5 +1254,12 @@ module.exports = {
   "AI": "IA",
   "Search_keyword": "Cerca Parola Chiave",
   "Search_AI": "Ricerca AI",
-  "Moderation": "Moderazione"
+  "Moderation": "Moderazione",
+  browse_memes: 'Sfoglia meme',
+  create_meme: 'Crea meme',
+  fitness_memes: 'Decent Memes',
+  create_meme_cta: 'Crea un meme su DecentMemes',
+  memes: 'Meme',
+  no_memes_found: 'Nessun meme trovato',
+  insert: 'Inserisci',
 }

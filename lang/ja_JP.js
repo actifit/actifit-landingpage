@@ -1253,5 +1253,12 @@ module.exports = {
   "AI": "AI",
   "Search_keyword": "キーワード検索",
   "Search_AI": "AI検索",
-  "Moderation": "モデレーション"
+  "Moderation": "モデレーション",
+  browse_memes: 'ミームを見る',
+  create_meme: 'ミームを作成',
+  fitness_memes: 'Decent Memes',
+  create_meme_cta: 'DecentMemesでミームを作成',
+  memes: 'ミーム',
+  no_memes_found: 'ミームが見つかりません',
+  insert: '挿入',
 }

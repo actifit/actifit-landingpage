@@ -1255,5 +1255,12 @@ module.exports = {
   "AI": "एआई",
   "Search_keyword": "कीवर्ड खोजें",
   "Search_AI": "एआई खोजें",
-  "Moderation": "मॉडरेशन"
+  "Moderation": "मॉडरेशन",
+  browse_memes: 'मीम्स ब्राउज़ करें',
+  create_meme: 'मीम बनाएं',
+  fitness_memes: 'Decent Memes',
+  create_meme_cta: 'DecentMemes पर मीम बनाएं',
+  memes: 'मीम्स',
+  no_memes_found: 'कोई मीम नहीं मिला',
+  insert: 'डालें',
 }

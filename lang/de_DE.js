@@ -1260,4 +1260,11 @@ module.exports = {
   continue_to_external: 'Do you want to continue?',
   cancel: 'Cancel',
   continue: 'Continue',
+  browse_memes: 'Memes durchsuchen',
+  create_meme: 'Meme erstellen',
+  fitness_memes: 'Decent Memes',
+  create_meme_cta: 'Meme auf DecentMemes erstellen',
+  memes: 'Memes',
+  no_memes_found: 'Keine Memes gefunden',
+  insert: 'Einfügen',
 }

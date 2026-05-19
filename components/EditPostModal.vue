@@ -43,6 +43,18 @@
               class="acti-shadow" />
           </div>
 
+          <div class="form-group text-right">
+            <button
+              class="btn btn-outline-secondary btn-sm"
+              data-toggle="modal"
+              data-target="#memePickerModal"
+              type="button"
+            >
+              <i class="far fa-grin-squint-tears"></i> {{ $t('browse_memes') }}
+            </button>
+          </div>
+          <MemePickerModal @insert-meme="insertMemeIntoEditor" />
+
           <div class="form-group acti-shadow extra-container">
             <Beneficiary ref="beneficiaryList" :initialEntries="benef_list" :viewOnly="!editPost.isNewPost"
               class="float-left" />
@@ -111,6 +123,7 @@ import { mapGetters } from 'vuex'
 import CustomTextEditor from '~/components/CustomTextEditor';
 import TagInput from '~/components/TagInput';
 import Beneficiary from '~/components/Beneficiary';
+import MemePickerModal from '~/components/MemePickerModal';
 
 import hive from '@hiveio/hive-js'
 
@@ -145,7 +158,8 @@ export default {
   components: {
     CustomTextEditor,
     TagInput,
-    Beneficiary
+    Beneficiary,
+    MemePickerModal
   },
   data() {
     return {
@@ -226,6 +240,11 @@ export default {
     }
   },
   methods: {
+    insertMemeIntoEditor (imgUrl) {
+      if (this.$refs.editor) {
+        this.$refs.editor.content += '\n\n![](' + imgUrl + ')'
+      }
+    },
     async fetchCommunities() {
       if (this.user) {
         this.communitySubs = await this.$store.dispatch('fetchUserCommunitySubs');

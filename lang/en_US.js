@@ -1270,5 +1270,12 @@ recent_post:'Recent Posts',
   continue_to_external: 'Do you want to continue?',
   cancel: 'Cancel',
   continue: 'Continue',
+  browse_memes: 'Browse Memes',
+  create_meme: 'Create Meme',
+  fitness_memes: 'Decent Memes',
+  create_meme_cta: 'Create a Meme on DecentMemes',
+  memes: 'Memes',
+  no_memes_found: 'No memes found',
+  insert: 'Insert',
 }
 

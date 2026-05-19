@@ -1254,5 +1254,12 @@ module.exports = {
   "AI": "ШІ",
   "Search_keyword": "Пошук за ключовим словом",
   "Search_AI": "Пошук ШІ",
-  "Moderation": "Модерація"
+  "Moderation": "Модерація",
+  browse_memes: 'Переглянути меми',
+  create_meme: 'Створити мем',
+  fitness_memes: 'Decent Memes',
+  create_meme_cta: 'Створити мем на DecentMemes',
+  memes: 'Меми',
+  no_memes_found: 'Меми не знайдено',
+  insert: 'Вставити',
 }

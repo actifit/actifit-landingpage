@@ -1254,5 +1254,12 @@ module.exports = {
   "AI": "Yapay Zeka",
   "Search_keyword": "Anahtar kelime ara",
   "Search_AI": "Yapay Zeka arama",
-  "Moderation": "Moderasyon"
+  "Moderation": "Moderasyon",
+  browse_memes: 'Memlere göz at',
+  create_meme: 'Mem oluştur',
+  fitness_memes: 'Decent Memes',
+  create_meme_cta: "DecentMemes'te mem oluştur",
+  memes: 'Memler',
+  no_memes_found: 'Mem bulunamadı',
+  insert: 'Ekle',
 }

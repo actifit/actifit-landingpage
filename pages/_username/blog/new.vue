@@ -37,6 +37,18 @@
           <TagInput id="tagItem" ref="tagItem" :initialItems="tags" />
         </div>
 
+        <div class="form-group text-right">
+          <button
+            class="btn btn-outline-secondary btn-sm"
+            data-toggle="modal"
+            data-target="#memePickerModal"
+            type="button"
+          >
+            <i class="far fa-grin-squint-tears"></i> {{ $t('browse_memes') }}
+          </button>
+        </div>
+        <MemePickerModal @insert-meme="insertMemeIntoEditor" />
+
         <div class="acti-shadow extra-container d-flex align-items-center justify-content-between p-2">
 
           <!-- The float-left class has been removed from your component -->
@@ -113,6 +125,7 @@ import { mapGetters } from 'vuex'
 import CustomTextEditor from '~/components/CustomTextEditor';
 import TagInput from '~/components/TagInput';
 import Beneficiary from '~/components/Beneficiary';
+import MemePickerModal from '~/components/MemePickerModal';
 
 import hive from '@hiveio/hive-js'
 
@@ -165,7 +178,8 @@ export default {
     ListHeadingSection,
     CustomTextEditor,
     TagInput,
-    Beneficiary
+    Beneficiary,
+    MemePickerModal
   },
   data() {
     return {
@@ -255,6 +269,11 @@ export default {
     }
   },
   methods: {
+    insertMemeIntoEditor (imgUrl) {
+      if (this.$refs.editor) {
+        this.$refs.editor.content += '\n\n![](' + imgUrl + ')'
+      }
+    },
     textualContent() {
       return this.editPost.isNewPost
         ? this.$t('Create_post')

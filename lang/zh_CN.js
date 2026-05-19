@@ -1254,5 +1254,12 @@ module.exports = {
   "AI": "人工智慧",
   "Search_keyword": "搜尋關鍵字",
   "Search_AI": "搜尋人工智慧",
-  "Moderation": "審核"
+  "Moderation": "審核",
+  browse_memes: '浏览表情包',
+  create_meme: '创建表情包',
+  fitness_memes: 'Decent Memes',
+  create_meme_cta: '在DecentMemes上创建表情包',
+  memes: '表情包',
+  no_memes_found: '未找到表情包',
+  insert: '插入',
 }

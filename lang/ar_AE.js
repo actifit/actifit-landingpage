@@ -1260,5 +1260,12 @@ module.exports = {
   continue_to_external: 'هل ترغب في الاستمرار؟',
   cancel: 'إلغاء',
   continue: 'استمرار',
+  browse_memes: 'تصفح الميمز',
+  create_meme: 'إنشاء ميم',
+  fitness_memes: 'Decent Memes',
+  create_meme_cta: 'أنشئ ميماً على DecentMemes',
+  memes: 'الميمز',
+  no_memes_found: 'لم يتم العثور على ميمز',
+  insert: 'إدراج',
   }
 

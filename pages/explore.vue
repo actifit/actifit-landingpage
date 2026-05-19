@@ -14,8 +14,12 @@
 				<option value="trending">{{$t('Trending')}}</option>
 				<option value="hot">{{$t('Hot')}}</option>
 				<option value="created">{{$t('New')}}</option>
+				<option value="memes">{{$t('memes')}}</option>
 			</select>
 	  </div>
+		<MemesFeed v-if="type === 'memes'" />
+
+		<div v-if="type !== 'memes'">
 		<h3>{{$t('filter_content_by_pop_community')}}</h3>
 		<div v-if="popComms && popComms.length > 0" class="row comm-container col-12" ref="comm-container">
 			<span v-for="(selComm) in popComms" :key="selComm[0]+'chk'" class="comm-selector col-3">
@@ -67,6 +71,7 @@
           <i class="fas fa-spinner fa-spin" v-if="loadingMore"></i>
         </a>
       </div>
+		</div>
     </div>
 
     <Footer />
@@ -92,6 +97,7 @@
   import VoteModal from '~/components/VoteModal'
   import CommunityContent from '~/components/CommunityContent'
   import ListHeadingSection from '~/components/ListHeadingSection';
+  import MemesFeed from '~/components/MemesFeed';
   import { mapGetters } from 'vuex'
 
   //import ChainSelection from '~/components/ChainSelection'
@@ -115,7 +121,8 @@
       EditPostModal,
       VoteModal,
 	    CommunityContent,
-      ListHeadingSection
+      ListHeadingSection,
+      MemesFeed
 
 	  //DailyActivityChartModal //,
 	  //ChainSelection

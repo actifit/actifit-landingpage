@@ -1263,4 +1263,11 @@ module.exports = {
   continue_to_external: '¿Deseas continuar?',
   cancel: 'Cancelar',
   continue: 'Continuar',
+  browse_memes: 'Explorar memes',
+  create_meme: 'Crear meme',
+  fitness_memes: 'Decent Memes',
+  create_meme_cta: 'Crea un meme en DecentMemes',
+  memes: 'Memes',
+  no_memes_found: 'No se encontraron memes',
+  insert: 'Insertar',
 }
