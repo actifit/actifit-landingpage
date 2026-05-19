@@ -436,14 +436,17 @@
 						break;
 						
 			case 'freesignup':
-						params.username = this.$refs['signusername'].value.trim();
+						params.signusername = this.$refs['signusername'].value.trim();
 						params.txlink = this.$refs['txlink'].value.trim();
 						break;
 		}
 		
-		Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
 		try{
-			let res = await fetch(url);
+			let res = await fetch(url, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(params),
+			});
 			let outcome = await res.json();
 			console.log(outcome);
 			let display = outcome;

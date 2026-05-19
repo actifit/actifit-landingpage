@@ -1664,7 +1664,11 @@ export default {
       if (this.badgeClaimable(badgeType)) {
         this.claimingBadge = badgeType;
         try {
-          let res = await fetch(process.env.actiAppUrl + 'claimBadge/?user=' + this.displayUser + '&badge=' + badgeType);
+          if (this.displayUser !== this.user.account.name) { return; }
+          const accToken = localStorage.getItem('access_token');
+          let res = await fetch(process.env.actiAppUrl + 'claimBadge/?user=' + this.displayUser + '&badge=' + badgeType, {
+            headers: { 'x-acti-token': 'Bearer ' + accToken },
+          });
           let outcome = await res.json();
           if (outcome.status == 'success') {
             let cstm_params = {

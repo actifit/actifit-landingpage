@@ -5378,8 +5378,13 @@ export default {
         this.settingPass = false;
         return;
       }
-      let url = new URL(process.env.actiAppUrl + 'setUserFundsPass/' + this.user.account.name + '/' + this.$refs['funds-pass'].value);
-      let res = await fetch(url);
+      const accToken = localStorage.getItem('access_token');
+      const url = new URL(process.env.actiAppUrl + 'setUserFundsPass?user=' + this.user.account.name);
+      let res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-acti-token': 'Bearer ' + accToken },
+        body: JSON.stringify({ pass: this.$refs['funds-pass'].value }),
+      });
       let outcome = await res.json();
       this.settingPass = false;
       if (!outcome.error) {
@@ -6009,7 +6014,10 @@ export default {
     async refreshBalance() {
       this.refreshinBal = true;
       let pntr = this;
-      fetch(process.env.actiAppUrl + 'recalculateUserTokens?user=' + this.user.account.name).then(
+      const accToken = localStorage.getItem('access_token');
+      fetch(process.env.actiAppUrl + 'recalculateUserTokens?user=' + this.user.account.name, {
+        headers: { 'x-acti-token': 'Bearer ' + accToken },
+      }).then(
         res => {
           res.json().then(json => { this.fetchUserData(); }).catch(e => console.log(e))
         }).catch(e => console.log(e))
