@@ -139,7 +139,7 @@ module.exports = async function (req, res, next) {
         return res.end(JSON.stringify({ error: 'Too many requests' }));
       }
 
-      const baseApiUrl = process.env.ACTI_API_URL || 'https://api2.actifit.io/';
+      const baseApiUrl = (process.env.ACTI_API_URL || 'https://api2.actifit.io').replace(/\/?$/, '/');
       const targetUrl = `${baseApiUrl}${endpoint}/${user}`;
 
       try {
@@ -215,7 +215,7 @@ module.exports = async function (req, res, next) {
         return res.end(JSON.stringify({ error: 'Confirm Payment API key not configured on server' }));
       }
 
-      const baseApiUrl = process.env.ACTI_API_URL || 'http://localhost:3120/';
+      const baseApiUrl = (process.env.ACTI_API_URL || 'http://localhost:3120').replace(/\/?$/, '/');
       const targetUrl = `${baseApiUrl}confirmPayment`;
 
       let body = '';

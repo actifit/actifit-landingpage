@@ -2176,6 +2176,7 @@ export default {
       //return '<div class="user-wallet-avatar group-class" :style="\'background-image: url(' + this.profImgUrl + '/u/' + this.displayUser + '/avatar)\'"></div>' + this.displayUser +' \'s ' + this.$t('Wallet');
     },
     textualTitle() {
+      if (!this.user || !this.user.account) return this.$t('Wallet');
       return this.user.account.name + ' \'s ' + this.$t('Wallet');
       //return '<div class="user-wallet-avatar group-class" :style="\'background-image: url(' + this.profImgUrl + '/u/' + this.user.account.name + '/avatar)\'"></div>' + this.user.account.name +' \'s ' + this.$t('Wallet');
     },
@@ -2222,9 +2223,11 @@ export default {
       return parseFloat(this.afitxBalanceBSC) * this.afitxBSCPrice;
     },
     hbdValueUSD() {
+      if (!this.displayUserData) return '0.00';
       return this.numberFormat(parseFloat(this.displayUserData.hbd_balance) * this.hbdPrice, 2)
     },
     hiveValueUSD() {
+      if (!this.displayUserData) return '0.00';
       return this.numberFormat((parseFloat(this.displayUserData.balance) + parseFloat(this.steemPower)) * this.hivePrice, 2);
     },
     totalBalanceUSD() {
@@ -2287,7 +2290,7 @@ export default {
     },
     isPoweringDown() {
       //returns whether user is powering down
-      if (typeof this.user != 'undefined' && this.user != null) {
+      if (typeof this.user != 'undefined' && this.user != null && this.displayUserData) {
         if (this.displayUserData.vesting_withdraw_rate.split(' ')[0] > 0) {
           return true;
         }
@@ -2460,6 +2463,7 @@ export default {
         await this.fetchUserData();
 
         try {
+          if (!this.displayUserData) throw new Error('displayUserData not ready');
           const tokenData = await hsc.find('tokens', 'balances', { account: this.displayUserData.name });
           const tokenExtraDetails = await hsc.find('tokens', 'tokens', {});
 
@@ -3748,12 +3752,14 @@ export default {
         }).catch(e => console.log(e))
     },
     async fetchAFITHE() {
+      if (!this.displayUserData) return;
       let bal = await hsc.findOne('tokens', 'balances', { account: this.displayUserData.name, symbol: 'AFIT' });
       if (bal) {
         this.afit_he_balance = bal.balance;
       }
     },
     fetchAFITXHE() {
+      if (!this.displayUserData) return;
       let parnt = this
       hsc.findOne('tokens', 'balances', { account: this.displayUserData.name, symbol: 'AFITX' }).then(
         function (bal) {
@@ -4114,6 +4120,10 @@ export default {
       this.claimingTokens = false;
     },
     async fetchTokenBalance() {
+      if (!this.displayUserData) {
+        console.warn('fetchTokenBalance called before displayUserData was ready. Aborting.');
+        return;
+      }
       try {
         const tokenData = await hsc.find('tokens', 'balances', { account: this.displayUserData.name });
         const tokenExtraDetails = await hsc.find('tokens', 'tokens', {});
