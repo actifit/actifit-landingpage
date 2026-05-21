@@ -5618,10 +5618,11 @@ export default {
       }
       this.tipInProgress = true;
       //proceed with tipping
+      const accToken = localStorage.getItem('access_token');
       let res = await fetch(process.env.actiAppUrl + 'tipAccount/', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user: this.user.account.name, targetUser: this.$refs['tip-recipient'].value, amount: this.$refs["tip-amount"].value, fundsPass: this.$refs["funds-pass"].value })
+        headers: { 'Content-Type': 'application/json', 'x-acti-token': 'Bearer ' + accToken },
+        body: JSON.stringify({ targetUser: this.$refs['tip-recipient'].value, amount: this.$refs["tip-amount"].value, fundsPass: this.$refs["funds-pass"].value })
       });
       let outcome = await res.json();
       if (outcome.status == 'Success') {
@@ -5743,10 +5744,11 @@ export default {
 
 
       //proceed with tipping
+      const moveAccToken = localStorage.getItem('access_token');
       let res = await fetch(process.env.actiAppUrl + 'initiateAFITMoveSE/', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user: this.user.account.name, amount: amount_to_powerdown, fundsPass: this.$refs["move-funds-pass"].value })
+        headers: { 'Content-Type': 'application/json', 'x-acti-token': 'Bearer ' + moveAccToken },
+        body: JSON.stringify({ amount: amount_to_powerdown, fundsPass: this.$refs["move-funds-pass"].value })
       });
       let outcome = await res.json();
       if (outcome.status == 'Success') {

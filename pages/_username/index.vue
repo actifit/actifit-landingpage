@@ -1473,10 +1473,11 @@ export default {
         return;
       }
       this.tipInProgress = true;
+      const accToken = localStorage.getItem('access_token');
       let res = await fetch(process.env.actiAppUrl + 'tipAccount/', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user: this.user.account.name, targetUser: this.displayUser, amount: this.$refs["tip-amount"].value, fundsPass: this.$refs["funds-pass"].value })
+        headers: { 'Content-Type': 'application/json', 'x-acti-token': 'Bearer ' + accToken },
+        body: JSON.stringify({ targetUser: this.displayUser, amount: this.$refs["tip-amount"].value, fundsPass: this.$refs["funds-pass"].value })
       });
       let outcome = await res.json();
       if (outcome.status == 'Success') {
