@@ -426,12 +426,6 @@
         </div>
     </section>
 
-    <section id="memes-section" class="py-5">
-      <div class="container">
-        <MemesFeed />
-      </div>
-    </section>
-
     <Footer isHomePage='true' />
 
     <NewsModal :news="activeNews" />
@@ -458,7 +452,6 @@ import { mapGetters } from 'vuex'
 import SteemStats from '~/components/SteemStats'
 import NotifyModal from '~/components/NotifyModal'
 import LoginModal from '~/components/LoginModal'
-import MemesFeed from '~/components/MemesFeed'
 
 export default {
   head() {
@@ -480,7 +473,6 @@ export default {
     SteemStats,
     NotifyModal,
     pendingRewardsModal,
-    MemesFeed,
   },
   data() {
     return {
