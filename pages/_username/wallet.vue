@@ -5552,10 +5552,11 @@ export default {
       this.initiateInProgress = true;
 
       //proceed with tipping
-      let res = await fetch(process.env.actiAppUrl + 'cancelAFITMoveSE/'
-        + '?user=' + this.user.account.name
-        + '&fundsPass=' + this.$refs["move-funds-pass"].value
-      );
+      let res = await fetch(process.env.actiAppUrl + 'cancelAFITMoveSE/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user: this.user.account.name, fundsPass: this.$refs["move-funds-pass"].value })
+      });
       let outcome = await res.json();
       if (outcome.status == 'Success') {
         let afitCancPDTransaction = { action: 'Cancel AFIT To S-E Power Down' };
@@ -5617,11 +5618,11 @@ export default {
       }
       this.tipInProgress = true;
       //proceed with tipping
-      let res = await fetch(process.env.actiAppUrl + 'tipAccount/'
-        + '?user=' + this.user.account.name
-        + '&targetUser=' + this.$refs['tip-recipient'].value
-        + '&amount=' + this.$refs["tip-amount"].value
-        + '&fundsPass=' + this.$refs["funds-pass"].value);
+      let res = await fetch(process.env.actiAppUrl + 'tipAccount/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user: this.user.account.name, targetUser: this.$refs['tip-recipient'].value, amount: this.$refs["tip-amount"].value, fundsPass: this.$refs["funds-pass"].value })
+      });
       let outcome = await res.json();
       if (outcome.status == 'Success') {
         let tipTransaction = { action: 'Tip', amount: outcome.tipAmount, recipient: this.displayUser };
@@ -5742,10 +5743,11 @@ export default {
 
 
       //proceed with tipping
-      let res = await fetch(process.env.actiAppUrl + 'initiateAFITMoveSE/'
-        + '?user=' + this.user.account.name
-        + '&amount=' + amount_to_powerdown
-        + '&fundsPass=' + this.$refs["move-funds-pass"].value);
+      let res = await fetch(process.env.actiAppUrl + 'initiateAFITMoveSE/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user: this.user.account.name, amount: amount_to_powerdown, fundsPass: this.$refs["move-funds-pass"].value })
+      });
       let outcome = await res.json();
       if (outcome.status == 'Success') {
         let afitPDTransaction = { action: 'AFIT To S-E Power Down', amount: amount_to_powerdown };
@@ -5863,7 +5865,7 @@ export default {
               let url = new URL(process.env.actiAppUrl + 'confirmAFITSEReceipt/?user=' + this.user.account.name + '&bchain=' + this.cur_bchain);
               //connect with our service to confirm AFIT received to proper wallet
               try {
-                fetch(url).then(
+                fetch(url, { headers: { 'x-acti-token': 'Bearer ' + localStorage.getItem('access_token') } }).then(
                   res => {
                     res.json().then(json => { this.setUserAddedTokens(json); this.movingFunds = false; }).catch(e => { console.log(e); this.movingFunds = false; })
                   }).catch(e => console.log(e))
@@ -5927,7 +5929,7 @@ export default {
           let url = new URL(process.env.actiAppUrl + 'confirmAFITSEReceipt/?user=' + this.user.account.name + '&bchain=' + this.cur_bchain);
           //connect with our service to confirm AFIT received to proper wallet
           try {
-            fetch(url).then(
+            fetch(url, { headers: { 'x-acti-token': 'Bearer ' + localStorage.getItem('access_token') } }).then(
               res => {
                 res.json().then(json => { this.setUserAddedTokens(json); this.movingFunds = false; }).catch(e => { console.log(e); this.movingFunds = false; })
               }).catch(e => console.log(e))
@@ -5999,7 +6001,7 @@ export default {
           //connect with our service to confirm AFIT received to proper wallet
           try {
 
-            fetch(url).then(
+            fetch(url, { headers: { 'x-acti-token': 'Bearer ' + localStorage.getItem('access_token') } }).then(
               res => {
                 res.json().then(json => { this.setUserAddedTokens(json); this.movingFunds = false; }).catch(e => { console.log(e); this.movingFunds = false; })
               }).catch(e => console.log(e))
@@ -7986,12 +7988,13 @@ export default {
       //compile all needed data and send it along the request for processing
       let params = {
         from: this.user.account.name,
+        user: this.user.account.name,
         afit_amount: afit_amount_to_buy,
         steem_amount: this.getMatchingSTEEM(),
       }
       Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
       try {
-        let res = await fetch(url);
+        let res = await fetch(url, { headers: { 'x-acti-token': 'Bearer ' + localStorage.getItem('access_token') } });
         let outcome = await res.json();
 
         if (outcome.paymentReceivedTx != '') {
@@ -8027,16 +8030,12 @@ export default {
       }
 
       //proceed with storing the swap and decreasing user AFIT tokens count
-      let url = new URL(process.env.actiAppUrl + 'performAfitSteemExchange');
-      //compile all needed data and send it along the request for processing
-      let params = {
-        user: this.user.account.name,
-        pass: this.$refs['funds-pass-entry'].value,
-        tokens: this.afit_val_exchange,
-      }
-      Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
       try {
-        let res = await fetch(url);
+        let res = await fetch(process.env.actiAppUrl + 'performAfitSteemExchange', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user: this.user.account.name, pass: this.$refs['funds-pass-entry'].value, tokens: this.afit_val_exchange })
+        });
         let outcome = await res.json();
         if (outcome.status == 'Success') {
           //map exchange amount to exchange category

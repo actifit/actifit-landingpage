@@ -1473,11 +1473,11 @@ export default {
         return;
       }
       this.tipInProgress = true;
-      let res = await fetch(process.env.actiAppUrl + 'tipAccount/'
-        + '?user=' + this.user.account.name
-        + '&targetUser=' + this.displayUser
-        + '&amount=' + this.$refs["tip-amount"].value
-        + '&fundsPass=' + this.$refs["funds-pass"].value);
+      let res = await fetch(process.env.actiAppUrl + 'tipAccount/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user: this.user.account.name, targetUser: this.displayUser, amount: this.$refs["tip-amount"].value, fundsPass: this.$refs["funds-pass"].value })
+      });
       let outcome = await res.json();
       if (outcome.status == 'Success') {
         let tipTransaction = { action: 'Tip', amount: outcome.tipAmount, recipient: this.displayUser };
