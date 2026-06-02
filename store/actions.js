@@ -369,25 +369,6 @@ export default {
     })
   },
 
-  fetchMemePosts ({ state, commit }) {
-    return new Promise((resolve, reject) => {
-      let lastPost = state.memePosts.length ? state.memePosts[state.memePosts.length - 1] : null
-      let start_author = lastPost ? lastPost.author : null
-      let start_permlink = lastPost ? lastPost.permlink : null
-
-      hive.api.getDiscussionsByCreated(
-        { tag: 'decentmemes', limit: 20, start_author, start_permlink },
-        (err, posts) => {
-          if (err) return reject(err)
-          if (start_author) posts.shift()
-          commit('setMemePosts', [...state.memePosts, ...posts])
-          commit('setMoreMemesAvailable', posts.length === 20)
-          resolve()
-        }
-      )
-    })
-  },
-
   fetchPosts({ state, commit, dispatch }) {
     // fetches initial posts or more posts if invoked again
 
