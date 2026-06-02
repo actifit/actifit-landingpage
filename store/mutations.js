@@ -179,12 +179,6 @@ export default {
   setPurchaseSuccess (state, _purchaseSuccess) {
 	state.purchaseSuccess = _purchaseSuccess;
   },
-  setMemePosts (state, posts) {
-    state.memePosts = posts
-  },
-  setMoreMemesAvailable (state, val) {
-    state.moreMemesAvailable = val
-  },
   updatePost (state, updatedPost) {
     const updateArray = (arrName) => {
       const index = state[arrName].findIndex(post => post.author === updatedPost.author && post.permlink === updatedPost.permlink);

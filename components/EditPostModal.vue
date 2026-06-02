@@ -170,6 +170,8 @@ export default {
       cur_bchain: 'HIVE', //bchain used to edit/save
       target_bchain: 'HIVE', //bchain to which edits will go
       benef_list: [],
+      memeBeneficiaries: [], // beneficiaries collected from inserted DecentMemes
+      memeTemplateIds: [], // template ids of inserted DecentMemes
       percent_hbd: 10000,
       max_accepted_payout: '1000000.000 HBD',
       communitySubs: [],
@@ -240,10 +242,73 @@ export default {
     }
   },
   methods: {
-    insertMemeIntoEditor (imgUrl) {
+    insertMemeIntoEditor (payload) {
+      // payload may be a plain url (legacy) or the enriched object from the widget
+      const imageUrl = typeof payload === 'string' ? payload : (payload && payload.imageUrl)
+      if (!imageUrl) return
       if (this.$refs.editor) {
-        this.$refs.editor.content += '\n\n![](' + imgUrl + ')'
+        this.$refs.editor.content += '\n\n![meme](' + imageUrl + ')\n\n*' + this.$t('made_with_decentmemes') + '*\n'
       }
+      if (payload && typeof payload === 'object') {
+        if (Array.isArray(payload.beneficiaries)) {
+          this.memeBeneficiaries.push(...payload.beneficiaries)
+        }
+        if (payload.templateId) {
+          this.memeTemplateIds.push(payload.templateId)
+        }
+      }
+    },
+    // Merge DecentMemes beneficiaries into the user/actifit beneficiary list.
+    // Per the integration spec the DecentMemes share is capped at 10% (1000) on
+    // posts. Existing (actifit + user) beneficiaries are protected: if Hive's
+    // limits (max 8 entries, total weight 10000) leave no room, the meme share
+    // is trimmed rather than the base list.
+    buildMemeBeneficiaries (baseList) {
+      const MAX_TOTAL = 10000
+      const MAX_ENTRIES = 8
+      const MEME_CAP = 1000 // 10% post cap
+
+      let result = (Array.isArray(baseList) ? baseList : [])
+        .map(b => ({ account: b.account, weight: parseInt(b.weight, 10) || 0 }))
+
+      if (!this.memeBeneficiaries.length) return result
+
+      // aggregate meme beneficiaries by account, summing same-account weights
+      const memeMap = {}
+      this.memeBeneficiaries.forEach(b => {
+        if (!b || !b.account) return
+        memeMap[b.account] = (memeMap[b.account] || 0) + (parseInt(b.weight, 10) || 0)
+      })
+
+      // cap total meme share at 10%, scaling proportionally if exceeded
+      let memeAccounts = Object.keys(memeMap)
+      let memeTotal = memeAccounts.reduce((s, a) => s + memeMap[a], 0)
+      if (memeTotal > MEME_CAP && memeTotal > 0) {
+        const scale = MEME_CAP / memeTotal
+        memeAccounts.forEach(a => { memeMap[a] = Math.floor(memeMap[a] * scale) })
+      }
+
+      // fit meme beneficiaries into whatever room is left, protecting baseList
+      let remaining = MAX_TOTAL - result.reduce((s, b) => s + b.weight, 0)
+      for (const acct of memeAccounts) {
+        let w = memeMap[acct]
+        if (w <= 0 || remaining <= 0) break
+        const existing = result.find(b => b.account === acct)
+        if (existing) {
+          const add = Math.min(w, remaining)
+          existing.weight += add
+          remaining -= add
+        } else {
+          if (result.length >= MAX_ENTRIES) break // no slot left, keep base intact
+          const add = Math.min(w, remaining)
+          result.push({ account: acct, weight: add })
+          remaining -= add
+        }
+      }
+
+      // Hive requires beneficiaries sorted alphabetically by account
+      result.sort((a, b) => (a.account < b.account ? -1 : (a.account > b.account ? 1 : 0)))
+      return result
     },
     async fetchCommunities() {
       if (this.user) {
@@ -565,6 +630,14 @@ export default {
       if (this.$refs['targetCommunity'].value != '_blog_') {
         meta.tags.unshift(this.$refs['targetCommunity'].value)
       }
+
+      //record DecentMemes attribution when memes were inserted
+      if (this.memeTemplateIds.length > 0) {
+        meta.decentmemes = { schema: 'v2', templateIds: [...new Set(this.memeTemplateIds)] }
+        if (!meta.tags.includes('decentmemes')) {
+          meta.tags.push('decentmemes')
+        }
+      }
       //console.log(meta.tags);
       //return;
 
@@ -684,9 +757,10 @@ export default {
         allow_curation_rewards: true,
         extensions: []//extensions: [[0, { 'beneficiaries': [] }]]
       };
-      if (Array.isArray(this.benef_list) && this.benef_list.length > 0) {
+      let final_benef = this.buildMemeBeneficiaries(this.benef_list);
+      if (Array.isArray(final_benef) && final_benef.length > 0) {
 
-        comment_options.extensions = [[0, { 'beneficiaries': this.benef_list }]];
+        comment_options.extensions = [[0, { 'beneficiaries': final_benef }]];
         //[{"account":"yabapmatt","weight":1000},{"account":"steemplus-pay","weight":500}
       }
 
