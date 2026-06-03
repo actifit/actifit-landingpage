@@ -27,6 +27,11 @@ module.exports = {
           'vue/no-mutating-props': 'off', //Disable rule only for vue files
           'vue/comment-directive': 'off',
          }
-     }
+     },
+    {
+      // Jest test files use test globals (describe/it/expect/jest...)
+      files: ['test/**/*.js', '**/*.spec.js', '**/*.test.js'],
+      env: { jest: true }
+    }
  ]
 }

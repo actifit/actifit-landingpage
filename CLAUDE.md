@@ -11,9 +11,28 @@ npm run build        # production build
 npm run start        # start production server
 npm run generate     # static site generation
 npm run lint         # ESLint on .js/.vue files
+npm test             # Jest: unit + store + component tests
+npm run test:watch   # Jest in watch mode
+npm run test:coverage # Jest with coverage report
+npm run test:e2e     # Playwright E2E (needs `npx playwright install chromium` first)
 ```
 
-No test runner is configured.
+## Testing
+
+Layered strategy — see `test/README.md` for full details.
+
+- **Jest** (`jest@27` + `@vue/vue2-jest@27` + `@vue/test-utils@1`) for unit, Vuex
+  store, and Vue 2 component tests. Test files: `test/**/*.spec.js`.
+- **Playwright** (`@playwright/test@1.40`) for browser E2E in `e2e/**`, driving the
+  real dev server on login-free critical paths.
+- `babel.config.js` only fills an `env.test` block, so it is a **no-op for the
+  Nuxt production build** (Nuxt never uses envName `test`). Do not add top-level
+  presets/plugins there.
+- Jest mock factories must prefix referenced vars with `mock` (Jest hoisting rule).
+- Many store actions never call `resolve()` but `commit` asynchronously — tests
+  fire the action and flush the microtask queue rather than awaiting it.
+- **Prod/deploy:** set `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1` in the DigitalOcean app
+  env so `npm ci` does not download browser binaries on every deploy.
 
 ## Node.js Version
 
