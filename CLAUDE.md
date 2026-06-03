@@ -51,7 +51,7 @@ Language files live in `lang/` (14 locales, default `en_US.js`). `config/index.j
 
 ## Deployment
 
-No CI pipeline. Deployment is via Heroku: `heroku-postbuild` runs `npm run build`. `.env` is gitignored; required env vars are consumed via `privateRuntimeConfig` and `env` blocks in `nuxt.config.js`.
+No CI pipeline. Production is hosted on **DigitalOcean App Platform** (served behind Cloudflare — live responses carry `x-do-app-origin` headers), which **auto-deploys on push to `master`**. The build runs **`npm ci`** under **Node 16.20.2 / npm 8.19.4**, so `package.json` and `package-lock.json` must stay perfectly in sync or the build fails at install with `EUSAGE`. DigitalOcean uses Heroku-compatible buildpacks, so the `heroku-postbuild` script (`npm run build`) is likely still the build step the buildpack invokes — do not assume it is dead and remove it. `.env` is gitignored; required env vars are configured in the DigitalOcean app and consumed via `privateRuntimeConfig` and `env` blocks in `nuxt.config.js`.
 
 ## Conventions
 
