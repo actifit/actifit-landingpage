@@ -1491,8 +1491,12 @@
                   </div>
                   <div class="row">
                     <label for="funds-pass" class="w-25 p-2">{{ $t('Funds_Password') }}</label>
-                    <input type="text" id="funds-pass" name="funds-pass" ref="funds-pass"
+                    <input :type="showFundsPass ? 'text' : 'password'" id="funds-pass" name="funds-pass" ref="funds-pass"
                       class="form-control-lg w-50 p-2">
+                    <button type="button" v-on:click="showFundsPass = !showFundsPass" class="btn btn-brand"
+                      :aria-label="showFundsPass ? 'Hide password' : 'Show password'">
+                      <i :class="showFundsPass ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                    </button>
                     <button v-on:click="setPasswordVal" class="btn btn-brand">{{ $t('Generate_Password') }}</button>
                   </div>
                   <div class="row">
@@ -1501,7 +1505,7 @@
                   </div>
                   <div class="row">
                     <label for="confirm-funds-pass" class="w-25 p-2">{{ $t('Confirm_Password') }}</label>
-                    <input type="text" id="confirm-funds-pass" name="confirm-funds-pass" ref="confirm-funds-pass"
+                    <input :type="showFundsPass ? 'text' : 'password'" id="confirm-funds-pass" name="confirm-funds-pass" ref="confirm-funds-pass"
                       class="form-control-lg w-50 p-2">
                   </div>
                   <div class="row">
@@ -2012,6 +2016,7 @@ export default {
       properties: '', //handles the Steem BC properties
       userHasFundsPass: false, //holds value if user has proper funds pass or not yet
       userFundsPassVerified: false, //holds value if user has verified funds pass or not yet
+      showFundsPass: false, //toggles plain/masked display of the funds password while setting it
       settingPass: false,
       verifyingPass: false,
       errorSettingPass: '',
@@ -3577,7 +3582,8 @@ export default {
           console.log(error);
         }
         //let's check if user already has a funds pass set
-        fetch(process.env.actiAppUrl + 'userHasFundsPassSet/' + this.displayUserData.name).then(
+        //cache:'no-store' so a just-completed verification isn't masked by a stale cached response
+        fetch(process.env.actiAppUrl + 'userHasFundsPassSet/' + this.displayUserData.name, { cache: 'no-store' }).then(
           res => {
             res.json().then(json => this.setUserPassStatus(json)).catch(e => console.log(e))
           }).catch(e => console.log(e))
@@ -3787,11 +3793,37 @@ export default {
     },
     setUserPassStatus(result) {
       //handles setting funds password status
-      //set proper value for funds pass confirmation
-      this.userHasFundsPass = result.hasFundsPass;
+      const verified = !!(result && result.passVerified);
+      const hasPass = !!(result && result.hasFundsPass);
 
       //set proper value for verified funds pass status
-      this.userFundsPassVerified = result.passVerified;
+      this.userFundsPassVerified = verified;
+
+      if (verified) {
+        //fully set up & verified -> move to step 3 and drop the pending marker
+        this.userHasFundsPass = true;
+        this.clearFundsPassPending();
+      } else {
+        //keep the user on step 2 while a set is pending verification, even if a
+        //background refresh (60s interval / user watcher) momentarily reports no
+        //record yet. Only an explicit reset returns them to step 1.
+        this.userHasFundsPass = hasPass || this.isFundsPassPending();
+      }
+    },
+    //pending marker is scoped to the logged-in account so it survives page reloads
+    fundsPassPendingKey() {
+      const name = (this.user && this.user.account && this.user.account.name)
+        || localStorage.getItem('std_login_name') || '';
+      return 'funds_pass_pending_' + name;
+    },
+    isFundsPassPending() {
+      try { return localStorage.getItem(this.fundsPassPendingKey()) === 'true'; } catch (e) { return false; }
+    },
+    markFundsPassPending() {
+      try { localStorage.setItem(this.fundsPassPendingKey(), 'true'); } catch (e) { /* ignore */ }
+    },
+    clearFundsPassPending() {
+      try { localStorage.removeItem(this.fundsPassPendingKey()); } catch (e) { /* ignore */ }
     },
     setUserTokenSwapStatus(result) {
       //handles setting user token swap status
@@ -5130,6 +5162,13 @@ export default {
         try {
           let res = await fetch(url);
           let outcome = await res.json();
+          //if the payment was confirmed, advance to step 3 directly instead of
+          //relying on a follow-up status read that can race or be cache-stale
+          if (outcome && outcome.statusUpdated) {
+            this.userFundsPassVerified = true;
+            this.userHasFundsPass = true;
+            this.clearFundsPassPending();
+          }
           //update user data according to result
           this.fetchUserData();
         } catch (err) {
@@ -5388,21 +5427,97 @@ export default {
         this.settingPass = false;
         return;
       }
+      let passVal = this.$refs['funds-pass'].value;
+      let outcome = await this.postSetFundsPass(passVal);
+      //if the session token was rejected (e.g. an expired keychain session), silently
+      //refresh it via the keychain handshake and retry once before surfacing an error
+      if (this.isAuthFailure(outcome)) {
+        let refreshed = await this.ensureKeychainToken();
+        if (refreshed) {
+          outcome = await this.postSetFundsPass(passVal);
+        }
+      }
+      this.settingPass = false;
+      //only advance when the API actually persisted the record (status === 'Success').
+      //any other shape (e.g. {error}, or an auth rejection {success:false, message})
+      //must surface as an error instead of silently moving to step 2 with nothing saved.
+      if (outcome && outcome.status === 'Success') {
+        this.userHasFundsPass = true;
+        //remember the user is awaiting verification so background refreshes /
+        //page reloads keep them on step 2 instead of bouncing back to step 1
+        this.markFundsPassPending();
+      } else if (this.isAuthFailure(outcome)) {
+        //token was rejected and a silent keychain refresh didn't recover it -> ask to re-login
+        this.errorSettingPass = this.$t('session_expired_login_again');
+        console.error('setUserFundsPass failed (auth):', outcome);
+      } else {
+        //display whatever the API reported so the real cause is visible
+        this.errorSettingPass = (outcome && (outcome.error || outcome.message))
+          || this.$t('error_performing_operation');
+        console.error('setUserFundsPass failed:', outcome);
+      }
+    },
+    //posts the funds password with the current session token; returns the parsed API response
+    async postSetFundsPass(passVal) {
       const accToken = localStorage.getItem('access_token');
       const url = new URL(process.env.actiAppUrl + 'setUserFundsPass?user=' + this.user.account.name);
-      let res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-acti-token': 'Bearer ' + accToken },
-        body: JSON.stringify({ pass: this.$refs['funds-pass'].value }),
-      });
-      let outcome = await res.json();
-      this.settingPass = false;
-      if (!outcome.error) {
-        //success
-        this.userHasFundsPass = true;
-      } else {
-        //display error
-        this.errorSettingPass = outcome.error;
+      try {
+        let res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-acti-token': 'Bearer ' + accToken },
+          body: JSON.stringify({ pass: passVal }),
+        });
+        return await res.json();
+      } catch (e) {
+        console.error('setUserFundsPass request error:', e);
+        return { error: this.$t('error_performing_operation') };
+      }
+    },
+    //true when the API response indicates the session token was missing/expired/invalid
+    isAuthFailure(outcome) {
+      if (!outcome) return false;
+      return outcome.success === false
+        || (typeof outcome.message === 'string' && /token|auth/i.test(outcome.message))
+        || (typeof outcome.error === 'string' && /authentication|token/i.test(outcome.error));
+    },
+    //silently re-mint a server session token via the keychain challenge-response.
+    //used to transparently refresh an expired/invalid token for checkHdrs actions,
+    //so keychain users are never bounced to a re-login for these actions.
+    async ensureKeychainToken() {
+      if (!(localStorage.getItem('acti_login_method') === 'keychain' && window.hive_keychain)) {
+        return null;
+      }
+      const username = this.user.account.name;
+      const bchain = this.cur_bchain || 'HIVE';
+      try {
+        let chRes = await fetch(process.env.actiAppUrl + 'loginKeychain', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: username, bchain: bchain })
+        });
+        let chJson = await chRes.json();
+        if (!chJson || !chJson.message) return null;
+        //ask keychain to decrypt the challenge (proves the user holds the posting key)
+        const decrypted = await new Promise((resolve) => {
+          window.hive_keychain.requestVerifyKey(username, chJson.message, 'Posting', (response) => {
+            resolve(response && response.success ? response.result : null);
+          });
+        });
+        if (!decrypted) return null;
+        let vRes = await fetch(process.env.actiAppUrl + 'loginKeychainVerify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: username, decrypted: decrypted, bchain: bchain })
+        });
+        let vJson = await vRes.json();
+        if (vJson && vJson.success && vJson.token) {
+          localStorage.setItem('access_token', vJson.token);
+          return vJson.token;
+        }
+        return null;
+      } catch (e) {
+        console.error('keychain token refresh failed:', e);
+        return null;
       }
     },
     async processTrxFunc(op_name, cstm_params, active, op2, params2) {
@@ -7786,19 +7901,17 @@ export default {
       }
     },
     async speedUpVerify() {
+      //show the loader while we wait on the verification request to complete
+      this.checkingFunds = true;
       let url = new URL(process.env.actiAppUrl + 'confirmPaymentPasswordVerify?from=' + this.user.account.name + '&bchain=' + this.cur_bchain);
       let res = await fetch(url);
       let outcome = await res.json();
       console.log(outcome);
       if (outcome.statusUpdated == true) {
-        /*this.$notify({
-        group: 'success',
-        text: this.$t(''),
-        position: 'top center'
-        })
-        console.log(outcome.error);*/
-        this.fetchUserData();
-
+        //payment confirmed -> advance to step 3 directly
+        this.userFundsPassVerified = true;
+        this.userHasFundsPass = true;
+        this.clearFundsPassPending();
       }/*else{
 				  this.$notify({
 					group: 'error',
@@ -7806,6 +7919,8 @@ export default {
 					position: 'top center'
 				  })
 			  }*/
+      //always refresh authoritative state (covers the already-verified case too)
+      this.fetchUserData();
       this.checkingFunds = false;
     },
     async resetFundsPass() {
@@ -7827,6 +7942,10 @@ export default {
       let outcome = await res.json();
       console.log(outcome);
       if (outcome.status == 'success') {
+        //explicit reset -> drop the pending marker and return to step 1
+        this.clearFundsPassPending();
+        this.userHasFundsPass = false;
+        this.userFundsPassVerified = false;
         this.$notify({
           group: 'success',
           text: this.$t('pass_reset_successfully'),
@@ -8211,6 +8330,11 @@ export default {
 
       const chainLnk = this.setProperNode();
       this.$store.dispatch('steemconnect/login');
+      //restore the step-2 wizard state before the first fetch so a page reload
+      //while awaiting verification doesn't flash/reset back to step 1
+      if (this.isFundsPassPending()) {
+        this.userHasFundsPass = true;
+      }
       await this.fetchUserData(); // This can now be called safely.
 
       try {

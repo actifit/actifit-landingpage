@@ -147,7 +147,7 @@
         let acct_data = json.HIVE; let userSC = new Object(); userSC.account = acct_data; this.is_logged_in = true; this.$store.commit('setStdLoginUser', true); localStorage.setItem('acti_login_method', 'hiveauth'); localStorage.setItem('access_token', this.hiveauth_token); localStorage.setItem('expires', this.hiveauth_expire); localStorage.setItem('key', this.hiveauth_key); localStorage.setItem('std_login', true); localStorage.setItem('std_login_name', userSC.account.name); this.$store.commit('steemconnect/login', userSC); this.closeModal(); this.resetForm(); this.$store.dispatch('steemconnect/refreshUser'); this.$store.dispatch('fetchModerators');
       },
       setKeychainLoginStatus (json){
-        if (json && json.HIVE){ const recaptcha = this.$recaptchaInstance; recaptcha.hideBadge(); let acct_data = json.HIVE; let userSC = new Object(); userSC.account = acct_data; this.is_logged_in = true; this.$store.commit('setStdLoginUser', true); localStorage.setItem('access_token', this.generateToken(2)); localStorage.setItem('std_login', true); localStorage.setItem('std_login_name', userSC.account.name); localStorage.setItem('acti_login_method', 'keychain'); this.$store.commit('steemconnect/login', userSC); this.closeModal(); this.resetForm(); this.$store.dispatch('steemconnect/refreshUser'); this.$store.dispatch('fetchModerators'); }else{ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('login_error'); return; }
+        if (json && json.success && json.token && json.userdata){ const recaptcha = this.$recaptchaInstance; recaptcha.hideBadge(); let acct_data = json.userdata; let userSC = new Object(); userSC.account = acct_data; this.is_logged_in = true; this.$store.commit('setStdLoginUser', true); localStorage.setItem('access_token', json.token); localStorage.setItem('std_login', true); localStorage.setItem('std_login_name', userSC.account.name); localStorage.setItem('acti_login_method', 'keychain'); this.$store.commit('steemconnect/login', userSC); this.closeModal(); this.resetForm(); this.$store.dispatch('steemconnect/refreshUser'); this.$store.dispatch('fetchModerators'); }else{ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('login_error'); return; }
       },
       setUserLoginStatus (json) {
         this.is_logged_in = json.success; if (json.success && json.token){ const recaptcha = this.$recaptchaInstance; recaptcha.hideBadge(); localStorage.setItem('actiToken', json.token); let userSC = new Object(); userSC.account = json.userdata; this.$store.commit('setStdLoginUser', true); localStorage.setItem('access_token', json.token); localStorage.setItem('std_login', true); localStorage.setItem('std_login_name', userSC.account.name); localStorage.setItem('acti_login_method', ''); this.$store.commit('steemconnect/login', userSC); this.closeModal(); this.resetForm(); this.$store.dispatch('steemconnect/refreshUser'); this.$store.dispatch('fetchModerators'); this.$emit('login-successful'); }else{ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('login_error'); }
@@ -182,20 +182,28 @@ async loginHiveauth (){
             window.hive_keychain.requestVerifyKey(account_name, contt.message, 'Posting', async (response) => {
               if (response.success === true) {
                 try {
-                  const acctController = new AbortController();
-                  const acctTimeoutId = setTimeout(() => acctController.abort(), 20000);
-                  const acctRes = await fetch(process.env.actiAppUrl+'getAccountData?user='+account_name+'&bchain=HIVE', {
-                    signal: acctController.signal
+                  //send the keychain-decrypted proof back to mint a real session token (JWT)
+                  const verController = new AbortController();
+                  const verTimeoutId = setTimeout(() => verController.abort(), 20000);
+                  const verRes = await fetch(process.env.actiAppUrl+'loginKeychainVerify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: account_name, decrypted: response.result, bchain: this.bchain_val }),
+                    signal: verController.signal
                   });
-                  clearTimeout(acctTimeoutId);
-                  const acctJson = await acctRes.json();
-                  this.setKeychainLoginStatus(acctJson);
+                  clearTimeout(verTimeoutId);
+                  const verJson = await verRes.json();
+                  this.setKeychainLoginStatus(verJson);
                 } catch (e) {
-                  console.error('Keychain account data error:', e);
+                  console.error('Keychain verify error:', e);
                   this.error_proceeding = true;
                   this.login_in_progress = false;
                   this.error_msg = this.$t('login_error');
                 }
+              } else {
+                this.error_proceeding = true;
+                this.login_in_progress = false;
+                this.error_msg = this.$t('login_error');
               }
             });
           } else {

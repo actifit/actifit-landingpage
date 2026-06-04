@@ -11,9 +11,28 @@ npm run build        # production build
 npm run start        # start production server
 npm run generate     # static site generation
 npm run lint         # ESLint on .js/.vue files
+npm test             # Jest: unit + store + component tests
+npm run test:watch   # Jest in watch mode
+npm run test:coverage # Jest with coverage report
+npm run test:e2e     # Playwright E2E (needs `npx playwright install chromium` first)
 ```
 
-No test runner is configured.
+## Testing
+
+Layered strategy — see `test/README.md` for full details.
+
+- **Jest** (`jest@27` + `@vue/vue2-jest@27` + `@vue/test-utils@1`) for unit, Vuex
+  store, and Vue 2 component tests. Test files: `test/**/*.spec.js`.
+- **Playwright** (`@playwright/test@1.40`) for browser E2E in `e2e/**`, driving the
+  real dev server on login-free critical paths.
+- `babel.config.js` only fills an `env.test` block, so it is a **no-op for the
+  Nuxt production build** (Nuxt never uses envName `test`). Do not add top-level
+  presets/plugins there.
+- Jest mock factories must prefix referenced vars with `mock` (Jest hoisting rule).
+- Many store actions never call `resolve()` but `commit` asynchronously — tests
+  fire the action and flush the microtask queue rather than awaiting it.
+- **Prod/deploy:** set `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1` in the DigitalOcean app
+  env so `npm ci` does not download browser binaries on every deploy.
 
 ## Node.js Version
 
@@ -51,7 +70,7 @@ Language files live in `lang/` (14 locales, default `en_US.js`). `config/index.j
 
 ## Deployment
 
-No CI pipeline. Deployment is via Heroku: `heroku-postbuild` runs `npm run build`. `.env` is gitignored; required env vars are consumed via `privateRuntimeConfig` and `env` blocks in `nuxt.config.js`.
+No CI pipeline. Production is hosted on **DigitalOcean App Platform** (served behind Cloudflare — live responses carry `x-do-app-origin` headers), which **auto-deploys on push to `master`**. The build runs **`npm ci`** under **Node 16.20.2 / npm 8.19.4**, so `package.json` and `package-lock.json` must stay perfectly in sync or the build fails at install with `EUSAGE`. DigitalOcean uses Heroku-compatible buildpacks, so the `heroku-postbuild` script (`npm run build`) is likely still the build step the buildpack invokes — do not assume it is dead and remove it. `.env` is gitignored; required env vars are configured in the DigitalOcean app and consumed via `privateRuntimeConfig` and `env` blocks in `nuxt.config.js`.
 
 ## Conventions
 
