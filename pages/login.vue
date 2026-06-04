@@ -214,7 +214,7 @@
 	  setKeychainLoginStatus (json){
 		console.log('keychain login');
 		console.log(json);
-		if (json && json.HIVE){
+		if (json && json.success && json.token && json.HIVE){
 
 			//hide captcha as well
 			const recaptcha = this.$recaptchaInstance
@@ -229,7 +229,7 @@
 			//append proper login data for SC, while making sure this is recognized as a normal login
 			this.is_logged_in = true;
 			this.$store.commit('setStdLoginUser', true);
-			localStorage.setItem('access_token', this.generateToken(2));
+			localStorage.setItem('access_token', json.token);
 			localStorage.setItem('std_login', true)
 			localStorage.setItem('std_login_name', userSC.account.name)
 			localStorage.setItem('acti_login_method', 'keychain');
@@ -485,14 +485,18 @@
 				  if (response.success === true) {
 					//successfully verified user
 					try {
-						const acctController = new AbortController();
-						const acctTimeoutId = setTimeout(() => acctController.abort(), 20000);
-						const acctRes = await fetch(process.env.actiAppUrl+'getAccountData?user='+account_name+'&bchain=HIVE', {
-							signal: acctController.signal
+						//send the keychain-decrypted proof back to mint a real session token (JWT)
+						const verController = new AbortController();
+						const verTimeoutId = setTimeout(() => verController.abort(), 20000);
+						const verRes = await fetch(process.env.actiAppUrl+'loginKeychainVerify', {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({ username: account_name, decrypted: response.result, bchain: this.bchain_val }),
+							signal: verController.signal
 						});
-						clearTimeout(acctTimeoutId);
-						const acctJson = await acctRes.json();
-						this.setKeychainLoginStatus(acctJson);
+						clearTimeout(verTimeoutId);
+						const verJson = await verRes.json();
+						this.setKeychainLoginStatus(verJson);
 					} catch (e) {
 						console.error('Keychain account data error:', e);
 						this.error_proceeding = true;
