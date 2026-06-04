@@ -5428,15 +5428,9 @@ export default {
         return;
       }
       let passVal = this.$refs['funds-pass'].value;
-      let outcome = await this.postSetFundsPass(passVal);
-      //if the session token was rejected (e.g. an expired keychain session), silently
-      //refresh it via the keychain handshake and retry once before surfacing an error
-      if (this.isAuthFailure(outcome)) {
-        let refreshed = await this.ensureKeychainToken();
-        if (refreshed) {
-          outcome = await this.postSetFundsPass(passVal);
-        }
-      }
+      let setUrl = process.env.actiAppUrl + 'setUserFundsPass?user=' + this.user.account.name;
+      //silently refresh an expired keychain token and retry once if the token is rejected
+      let outcome = await this.withAuthRetry(() => this.postAuthed(setUrl, JSON.stringify({ pass: passVal })));
       this.settingPass = false;
       //only advance when the API actually persisted the record (status === 'Success').
       //any other shape (e.g. {error}, or an auth rejection {success:false, message})
@@ -5457,21 +5451,44 @@ export default {
         console.error('setUserFundsPass failed:', outcome);
       }
     },
-    //posts the funds password with the current session token; returns the parsed API response
-    async postSetFundsPass(passVal) {
-      const accToken = localStorage.getItem('access_token');
-      const url = new URL(process.env.actiAppUrl + 'setUserFundsPass?user=' + this.user.account.name);
+    //POST a JSON body to an authenticated (checkHdrs) endpoint using the current session token
+    async postAuthed(url, body) {
       try {
         let res = await fetch(url, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'x-acti-token': 'Bearer ' + accToken },
-          body: JSON.stringify({ pass: passVal }),
+          headers: { 'Content-Type': 'application/json', 'x-acti-token': 'Bearer ' + localStorage.getItem('access_token') },
+          body: body,
         });
         return await res.json();
       } catch (e) {
-        console.error('setUserFundsPass request error:', e);
+        console.error('authed POST failed:', url, e);
         return { error: this.$t('error_performing_operation') };
       }
+    },
+    //GET an authenticated (checkHdrs) endpoint using the current session token
+    async getAuthed(url) {
+      try {
+        let res = await fetch(url, {
+          headers: { 'Content-Type': 'application/json', 'x-acti-token': 'Bearer ' + localStorage.getItem('access_token') },
+        });
+        return await res.json();
+      } catch (e) {
+        console.error('authed GET failed:', url, e);
+        return { error: this.$t('error_performing_operation') };
+      }
+    },
+    //runs an authenticated request (fn must return the parsed API response); if the token
+    //was rejected, silently refresh it via keychain once and retry, so keychain users
+    //aren't bounced to a re-login mid-action
+    async withAuthRetry(fn) {
+      let outcome = await fn();
+      if (this.isAuthFailure(outcome)) {
+        let refreshed = await this.ensureKeychainToken();
+        if (refreshed) {
+          outcome = await fn();
+        }
+      }
+      return outcome;
     },
     //true when the API response indicates the session token was missing/expired/invalid
     isAuthFailure(outcome) {
@@ -5732,14 +5749,9 @@ export default {
         return;
       }
       this.tipInProgress = true;
-      //proceed with tipping
-      const accToken = localStorage.getItem('access_token');
-      let res = await fetch(process.env.actiAppUrl + 'tipAccount/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-acti-token': 'Bearer ' + accToken },
-        body: JSON.stringify({ targetUser: this.$refs['tip-recipient'].value, amount: this.$refs["tip-amount"].value, fundsPass: this.$refs["funds-pass"].value })
-      });
-      let outcome = await res.json();
+      //proceed with tipping (silently refresh + retry if the keychain token expired)
+      let tipBody = JSON.stringify({ targetUser: this.$refs['tip-recipient'].value, amount: this.$refs["tip-amount"].value, fundsPass: this.$refs["funds-pass"].value });
+      let outcome = await this.withAuthRetry(() => this.postAuthed(process.env.actiAppUrl + 'tipAccount/', tipBody));
       if (outcome.status == 'Success') {
         let tipTransaction = { action: 'Tip', amount: outcome.tipAmount, recipient: this.displayUser };
         //store the transaction to Steem BC
@@ -5772,6 +5784,8 @@ export default {
         }
 
         this.proceedTip = false;
+      } else if (this.isAuthFailure(outcome)) {
+        this.tipError = this.$t('session_expired_login_again');
       } else {
         this.tipError = outcome.error;
       }
@@ -5858,14 +5872,9 @@ export default {
       //otherwise we're good, let's register the move
 
 
-      //proceed with tipping
-      const moveAccToken = localStorage.getItem('access_token');
-      let res = await fetch(process.env.actiAppUrl + 'initiateAFITMoveSE/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-acti-token': 'Bearer ' + moveAccToken },
-        body: JSON.stringify({ amount: amount_to_powerdown, fundsPass: this.$refs["move-funds-pass"].value })
-      });
-      let outcome = await res.json();
+      //register the move (silently refresh + retry if the keychain token expired)
+      let moveBody = JSON.stringify({ amount: amount_to_powerdown, fundsPass: this.$refs["move-funds-pass"].value });
+      let outcome = await this.withAuthRetry(() => this.postAuthed(process.env.actiAppUrl + 'initiateAFITMoveSE/', moveBody));
       if (outcome.status == 'Success') {
         let afitPDTransaction = { action: 'AFIT To S-E Power Down', amount: amount_to_powerdown };
         //store the transaction to Steem BC
@@ -5894,7 +5903,7 @@ export default {
 
       } else {
         this.afit_se_move_error_proceeding = true;
-        this.afit_se_move_err_msg = outcome.error;
+        this.afit_se_move_err_msg = this.isAuthFailure(outcome) ? this.$t('session_expired_login_again') : outcome.error;
       }
       this.initiateInProgress = false;
 
@@ -7928,18 +7937,9 @@ export default {
       if (!confirmPopup) {
         return;
       }
-      let accToken = localStorage.getItem('access_token')
-
       let url = new URL(process.env.actiAppUrl + 'resetFundsPass/?user=' + this.user.account.name);
-
-      let reqHeads = new Headers({
-        'Content-Type': 'application/json',
-        'x-acti-token': 'Bearer ' + accToken,
-      });
-      let res = await fetch(url, {
-        headers: reqHeads
-      });
-      let outcome = await res.json();
+      //silently refresh + retry if the keychain token expired
+      let outcome = await this.withAuthRetry(() => this.getAuthed(url));
       console.log(outcome);
       if (outcome.status == 'success') {
         //explicit reset -> drop the pending marker and return to step 1
@@ -7956,7 +7956,7 @@ export default {
       } else {
         this.$notify({
           group: 'error',
-          text: this.$t('problem_reset_pass'),
+          text: this.isAuthFailure(outcome) ? this.$t('session_expired_login_again') : this.$t('problem_reset_pass'),
           position: 'top center'
         })
       }
