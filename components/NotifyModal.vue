@@ -29,4 +29,25 @@ export default {
   }
 }
 </script>
-<style></style>
+<style>
+#notifyModal {
+  background-color: black !important;
+}
+
+#notifyModal .modal-dialog {
+  margin-top: 0;
+}
+
+#notifyModal .modal-content {
+  border: 1px solid black !important;
+  box-shadow: none !important;
+  background-color: black !important;
+  color: white !important;
+}
+
+#notifyModal .modal-header,
+#notifyModal .modal-body {
+  border: none !important;
+  background-color: black !important;
+}
+</style>
