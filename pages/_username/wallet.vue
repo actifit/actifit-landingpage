@@ -1371,15 +1371,17 @@
                     <label for="funds-pass" class="w-25 p-2">{{ $t('Funds_Password') }}</label>
                     <input type="password" id="funds-pass" name="funds-pass" ref="funds-pass"
                       class="form-control-lg w-50 p-2">
-                    <a href="/wallet?action=set_funds_pass" target="_blank" rel="noopener noreferrer" class="btn btn-brand border m-1">{{
-                      $t('create_pass_short') }}</a>
+                    <button type="button" v-if="!userHasFundsPass" v-on:click="exchangeAFITforSTEEM" class="btn btn-brand border m-1">{{
+                      $t('create_pass_short') }}</button>
+                    <button type="button" v-else v-on:click="resetFundsPass" class="btn btn-brand border m-1">{{
+                      $t('Reset_password') }}</button>
                   </div>
                   <div class="row">
                     <div class="col-2"></div>
                     <div class="col-8">{{ $t('tip_note') }}</div>
                   </div>
                   <div class="row">
-                    <div v-if="tipError" v-html="tipError" class="m-3"></div>
+                    <div v-if="tipError" v-html="tipError" class="m-3" @click="handleSetFundsPassLink"></div>
                   </div>
 
                   <div class="row">
@@ -1416,11 +1418,13 @@
                     <label for="move-funds-pass" class="w-25 p-2 text-right">{{ $t('Funds_Password') }}</label>
                     <input type="password" id="move-funds-pass" name="move-funds-pass" ref="move-funds-pass"
                       class="form-control-lg w-50 p-2">
-                    <a href="/wallet?action=set_funds_pass" target="_blank" rel="noopener noreferrer" class="btn btn-brand border m-1">{{
-                      $t('create_pass_short') }}</a>
+                    <button type="button" v-if="!userHasFundsPass" v-on:click="exchangeAFITforSTEEM" class="btn btn-brand border m-1">{{
+                      $t('create_pass_short') }}</button>
+                    <button type="button" v-else v-on:click="resetFundsPass" class="btn btn-brand border m-1">{{
+                      $t('Reset_password') }}</button>
                   </div>
                   <div class="text-brand text-center" v-if="afit_se_move_error_proceeding"
-                    v-html="afit_se_move_err_msg">
+                    v-html="afit_se_move_err_msg" @click="handleSetFundsPassLink">
                   </div>
                   <div class="row" v-if="userPDAfit.user">
                     <div class="w-25"></div>
@@ -5299,6 +5303,17 @@ export default {
       this.curTokenAction = 0;
       this.scrollAction();
     },
+    handleSetFundsPassLink(event) {
+      //error-hint messages are rendered via v-html, so their links can't use
+      //Vue directives. Delegate clicks here: if the "create password" hint link
+      //was clicked, open the funds-pass wizard in-page instead of navigating.
+      const link = event.target.closest('.set-funds-pass-link');
+      if (!link) {
+        return;
+      }
+      event.preventDefault();
+      this.exchangeAFITforSTEEM();
+    },
     moveAFITXseHE() {
       //set proper AFIT Activity Mode controlling the display
       /*if (this.afitActivityMode == this.MOVE_AFITX_SE_HE ){
@@ -5677,7 +5692,7 @@ export default {
       //ensure user provided funds-pass
       if (this.$refs["move-funds-pass"].value == '') {
         this.afit_se_move_error_proceeding = true;
-        this.afit_se_move_err_msg = this.$t('error_missing_funds_pass') + ' <u><a href="/wallet?action=set_funds_pass">' + this.$t('create_funds_pass') + '</a></u>';
+        this.afit_se_move_err_msg = this.$t('error_missing_funds_pass') + ' <u><a href="#" class="set-funds-pass-link">' + this.$t('create_funds_pass') + '</a></u>';
         return;
       }
 
@@ -5736,7 +5751,7 @@ export default {
         return false;
       }
       if (this.$refs["funds-pass"].value == '') {
-        this.tipError = this.$t('error_missing_funds_pass') + ' <u><a href="/wallet?action=set_funds_pass">' + this.$t('create_funds_pass') + '</a></u>';
+        this.tipError = this.$t('error_missing_funds_pass') + ' <u><a href="#" class="set-funds-pass-link">' + this.$t('create_funds_pass') + '</a></u>';
         return;
       }
       if (this.$refs["tip-amount"].value == '') {
@@ -5801,7 +5816,7 @@ export default {
       //ensure user provided funds-pass
       if (this.$refs["move-funds-pass"].value == '') {
         this.afit_se_move_error_proceeding = true;
-        this.afit_se_move_err_msg = this.$t('error_missing_funds_pass') + ' <u><a href="/wallet?action=set_funds_pass">' + this.$t('create_funds_pass') + '</a></u>';
+        this.afit_se_move_err_msg = this.$t('error_missing_funds_pass') + ' <u><a href="#" class="set-funds-pass-link">' + this.$t('create_funds_pass') + '</a></u>';
         return;
       }
       //ensure we have proper values
