@@ -65,9 +65,6 @@
 
 <script>
   // YOUR CURRENT, IMPROVED SCRIPT IS PRESERVED
-  import { VueReCaptcha } from 'vue-recaptcha-v3'
-  import Vue from 'vue'
-  Vue.use(VueReCaptcha, { siteKey: process.env.captchaV3Key })
   import QRious from 'qrious';
   import { PublicKey, Signature, hash } from '@hiveio/hive-js/lib/auth/ecc';
 

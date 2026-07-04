@@ -104,8 +104,8 @@ module.exports = {
     hiveStateApiNode: 'https://api.deathwing.me',
     hiveTestNode: 'https://testnet.openhive.network', //'https://api.fake.openhive.network',
     altHiveNodes: ["https://api.hive.blog", "https://api.deathwing.me", "https://api.openhive.network", "https://hiveapi.actifit.io", "https://hived.privex.io", "https://api.deathwing.me", "https://rpc.ausbit.dev", "https://hive-api.arcange.eu", "https://hive.roelandp.nl", "https://anyx.io",],
-    actiAppUrl: (process.env.ACTI_API_URL || 'http://localhost:3120/').replace(/\/?$/, '/'),
-    actiAppBackUrl: (process.env.ACTI_API_BACK_URL || 'http://localhost:3120/').replace(/\/?$/, '/'),
+    actiAppUrl: (process.env.ACTI_API_URL || 'https://api2.actifit.io/').replace(/\/?$/, '/'),
+    actiAppBackUrl: (process.env.ACTI_APP_BACK_URL || 'https://api2.actifit.io/').replace(/\/?$/, '/'),
     steemEngineRpc: process.env.NODE_ENV === 'development' ? '/steem-api/rpc' : 'https://api.steem-engine.net/rpc',
     hiveEngineRpc: process.env.HIVE_ENG_RPC_NODE, //'https://api.hive-engine.com/rpc/', //https://herpc.actifit.io', //'https://mirrorengine.rishipanthee.com', //'https://engine.rishipanthee.com/',
     steemEngineScot: process.env.NODE_ENV === 'development' ? '/steem-scot/' : 'https://scot-api.steem-engine.net/',
@@ -291,6 +291,7 @@ module.exports = {
   */
   plugins: [
     '~/plugins/vue-steemconnect',
+    { src: '~/plugins/vue-recaptcha.js', mode: 'client' },
     '~/plugins/sanitize.js',
     { src: '~plugins/ga.js', ssr: false },
     { src: '~plugins/vue-carousel', ssr: false },

@@ -370,11 +370,7 @@ import steem from 'steem'
 import hive from '@hiveio/hive-js'
 import blurt from '@blurtfoundation/blurtjs'
 //import VueRecaptcha from 'vue-recaptcha';
-import { VueReCaptcha } from 'vue-recaptcha-v3'
 import { mapGetters } from 'vuex'
-import Vue from 'vue'
-
-Vue.use(VueReCaptcha, { siteKey: process.env.captchaV3Key })
 
 export default {
   head() {

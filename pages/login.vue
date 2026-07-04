@@ -75,7 +75,7 @@
 
   //import VueRecaptcha from 'vue-recaptcha';
 
-  import { VueReCaptcha } from 'vue-recaptcha-v3'
+  //import { VueReCaptcha } from 'vue-recaptcha-v3'
 
 
   //import { VueReCaptchaV3 } from 'vue-recaptcha-v3';
@@ -87,9 +87,6 @@
   //import blurt from '@blurtfoundation/blurtjs'
 
   //import {keychain, isKeychainInstalled, hasKeychainBeenUsed} from '@hiveio/keychain'
-
-  import Vue from 'vue'
-  Vue.use(VueReCaptcha, { siteKey: process.env.captchaV3Key })
 
   //QR display for hive auth
   import QRious from 'qrious';
