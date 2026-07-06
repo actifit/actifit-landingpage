@@ -44,7 +44,7 @@
 	  </div>
 
 		<div v-for="(community, index) in selCommunities" :key="index" :community="community">
-			<CommunityContent :community='community[0]' :type="type" />
+			<CommunityContent ref="communityContents" :community='community[0]' :type="type" />
 		</div>
 
       <!-- show listing when loaded -->
@@ -207,18 +207,18 @@
 		  return arr1.length === arr2.length && arr1.every((val, index) => val === arr2[index]);
 		},
 		nextPost (direction){
-		let pstId = this.activePost && this.activePost.pstId;
-		// On /explore the posts are rendered by <CommunityContent> children, each
-		// owning its own posts array, so this page's communityPosts stays empty.
-		// Bounds-check the target and bail cleanly rather than indexing an empty /
-		// out-of-range array and crashing ("Cannot set properties of undefined").
-		if (typeof pstId !== 'number') return;
-		const target = direction < 0 ? pstId - 1 : pstId + 1;
-		if (target < 0 || target >= this.communityPosts.length) return;
-		const post = this.communityPosts[target];
-		if (!post) return;
-		post.pstId = target;
-		this.$store.commit('setActivePost', post);
+		// Posts on /explore live in the per-community <CommunityContent> children,
+		// not in this page's (empty) communityPosts. Delegate to whichever child
+		// owns the active post so Previous/Next navigates within that community's
+		// list. The first child that owns the post handles it (and stops the probe).
+		const active = this.activePost;
+		if (!active) return;
+		const children = [].concat(this.$refs.communityContents || []);
+		for (const child of children) {
+			if (child && typeof child.navigateFrom === 'function' && child.navigateFrom(active, direction)) {
+				return;
+			}
+		}
 	  },
 	  initiateNewPost($event) {
 		$event.preventDefault();

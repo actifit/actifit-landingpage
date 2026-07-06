@@ -125,6 +125,25 @@
 		  this.reFetchCommunityPosts();
 		}
 	  },
+	  // Modal Previous/Next navigation for the shared post modal on /explore.
+	  // The active post is located in THIS community's list by author+permlink
+	  // (pstId can't be trusted across the multiple community lists on the page).
+	  // Returns true when this community owns the post — including at a list
+	  // boundary — so the caller stops probing other communities; false means
+	  // "not mine, keep looking".
+	  navigateFrom(activePost, direction) {
+		if (!activePost) return false;
+		const idx = this.communityPosts.findIndex(
+		  p => p.author === activePost.author && p.permlink === activePost.permlink
+		);
+		if (idx === -1) return false;
+		const target = idx + (direction < 0 ? -1 : 1);
+		if (target < 0 || target >= this.communityPosts.length) return true; // owned, but at edge
+		const post = this.communityPosts[target];
+		post.pstId = target;
+		this.$store.commit('setActivePost', post);
+		return true;
+	  },
 	  nextPost (direction){
 		let pstId = this.activePost.pstId;
 		console.log(pstId);
