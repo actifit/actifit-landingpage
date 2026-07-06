@@ -117,10 +117,18 @@ describe('plugins/vue-custom global helpers', () => {
       expect(html).toContain('youtube.com/embed/dQw4w9WgXcQ')
     })
 
-    it('still renders a 3Speak embed as a trusted iframe', () => {
+    it('still renders a 3Speak watch URL as a trusted iframe', () => {
       const html = clean('https://3speak.tv/watch?v=user/abcdefg')
       expect(html).toContain('<iframe')
       expect(html).toContain('3speak.tv/watch?v=user/abcdefg')
+    })
+
+    it('renders the play.3speak.tv/embed?v= URL form as an embedded player', () => {
+      const html = clean('https://play.3speak.tv/embed?v=dmann/g8uv7nzq')
+      expect(html).toContain('<iframe')
+      // normalised to the canonical iframe player URL (& may be entity-encoded as &amp;)
+      expect(html).toMatch(/play\.3speak\.tv\/watch\?v=dmann\/g8uv7nzq&(?:amp;)?mode=iframe/)
+      expect(html).not.toMatch(/<a[^>]*play\.3speak\.tv\/embed/)
     })
 
     it('still renders @mentions as actifit links', () => {
