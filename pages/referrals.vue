@@ -362,6 +362,17 @@
 	  font-size: 22px;
 	  padding: 5px;
 	}
+	.share-links-actifit i {
+	  transition: transform 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+	  cursor: pointer;
+	  padding: 8px;
+	  border-radius: 50%;
+	}
+	.share-links-actifit i:hover {
+	  transform: scale(1.1);
+	  color: #ff112d;
+	  background-color: rgba(255, 17, 45, 0.12);
+	}
 	.share-txt {
 	  font-size: 20px;
 	}

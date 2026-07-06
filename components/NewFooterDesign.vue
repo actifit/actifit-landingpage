@@ -148,8 +148,8 @@ export default {
 .links-column a:hover { color: #ff112d; }
 
 .social-icons-wrapper { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 30px; margin-left: 15px; }
-.social-icon { width: 40px; height: 40px; border-radius: 50%; background-color: #E8E8E8; display: flex; align-items: center; justify-content: center; color: #333; font-size: 20px; text-decoration: none; transition: background-color 0.2s, color 0.2s; }
-.social-icon:hover { background-color: #ff112d; color: white; }
+.social-icon { width: 40px; height: 40px; border-radius: 50%; background-color: #E8E8E8; display: flex; align-items: center; justify-content: center; color: #333; font-size: 20px; text-decoration: none; transition: background-color 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s; }
+.social-icon:hover { background-color: #ff112d; color: white; transform: scale(1.1); box-shadow: 0 6px 15px rgba(255, 17, 45, 0.25); }
 
 .footer-divider { border: 0; border-top: 1px solid #ddd; margin: 40px 0 20px 0; transition: border-color 0.3s ease; }
 
