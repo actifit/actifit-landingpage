@@ -30,23 +30,23 @@ export default {
 }
 </script>
 <style>
-#notifyModal {
+.dark-mode #notifyModal {
   background-color: black !important;
 }
 
-#notifyModal .modal-dialog {
+.dark-mode #notifyModal .modal-dialog {
   margin-top: 0;
 }
 
-#notifyModal .modal-content {
+.dark-mode #notifyModal .modal-content {
   border: 1px solid black !important;
   box-shadow: none !important;
   background-color: black !important;
   color: white !important;
 }
 
-#notifyModal .modal-header,
-#notifyModal .modal-body {
+.dark-mode #notifyModal .modal-header,
+.dark-mode #notifyModal .modal-body {
   border: none !important;
   background-color: black !important;
 }
