@@ -207,26 +207,18 @@
 		  return arr1.length === arr2.length && arr1.every((val, index) => val === arr2[index]);
 		},
 		nextPost (direction){
-		let pstId = this.activePost.pstId;
-		// console.log(pstId);
-		let proceed = false;
-		if (direction < 0){
-			// console.log('move back');
-			if (pstId >= 1){
-				pstId -= 1;
-				proceed = true;
-			}
-		}else{
-			// console.log('move front');
-			if (pstId < this.communityPosts.length){
-				pstId += 1;
-				proceed = true;
-			}
-		}
-		if (proceed){
-			this.communityPosts[pstId].pstId = pstId;
-			this.$store.commit('setActivePost', this.communityPosts[pstId]);
-		}
+		let pstId = this.activePost && this.activePost.pstId;
+		// On /explore the posts are rendered by <CommunityContent> children, each
+		// owning its own posts array, so this page's communityPosts stays empty.
+		// Bounds-check the target and bail cleanly rather than indexing an empty /
+		// out-of-range array and crashing ("Cannot set properties of undefined").
+		if (typeof pstId !== 'number') return;
+		const target = direction < 0 ? pstId - 1 : pstId + 1;
+		if (target < 0 || target >= this.communityPosts.length) return;
+		const post = this.communityPosts[target];
+		if (!post) return;
+		post.pstId = target;
+		this.$store.commit('setActivePost', post);
 	  },
 	  initiateNewPost($event) {
 		$event.preventDefault();
