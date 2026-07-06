@@ -55,6 +55,80 @@ describe('plugins/vue-custom global helpers', () => {
     })
   })
 
+  describe('$cleanBody (client sanitize path)', () => {
+    // The reported stored-XSS fired in the browser (DOMPurify) path, so exercise it.
+    beforeAll(() => { process.client = true })
+    afterAll(() => { delete process.client })
+
+    const clean = (body) => Vue.prototype.$cleanBody(body, false, false)
+
+    // Parse the returned HTML the way the browser will and assert the real
+    // security property: no element carries an on* event-handler attribute
+    // (a "onerror" substring surviving as inert text content is harmless).
+    const eventHandlerAttrs = (html) => {
+      const root = document.createElement('div')
+      root.innerHTML = html
+      return Array.from(root.querySelectorAll('*'))
+        .flatMap(el => Array.from(el.attributes).map(a => a.name))
+        .filter(name => /^on/i.test(name))
+    }
+
+    // --- Security: the reported payloads must be neutralised ---
+    it('neutralises the markdown-image src breakout XSS (adjacent form)', () => {
+      const html = clean('![x](https://z.gif" onerror="alert(document.domain))')
+      expect(eventHandlerAttrs(html)).toEqual([])
+      expect(html).not.toContain('<script')
+    })
+
+    it('neutralises the whitespace-variant that dodged the link pass', () => {
+      const html = clean('![x] (https://z.gif" onerror="alert(document.domain))')
+      expect(eventHandlerAttrs(html)).toEqual([])
+      expect(html).not.toContain('<script')
+    })
+
+    it('escapes a quote in an image URL instead of breaking out of src', () => {
+      const html = clean('foo https://evil.com/a.png" onerror="alert(1) bar')
+      expect(eventHandlerAttrs(html)).toEqual([])
+      // the img that IS produced must carry only a clean, single-URL src
+      const root = document.createElement('div')
+      root.innerHTML = html
+      root.querySelectorAll('img').forEach(img => {
+        expect(img.getAttribute('src')).not.toMatch(/["\s]/)
+      })
+    })
+
+    // --- Functionality: media/mentions must still render ---
+    it('still proxies a bare image URL through images.hive.blog', () => {
+      const html = clean('https://example.com/pic.png')
+      expect(html).toContain('<img')
+      expect(html).toContain('images.hive.blog/0x0/https://example.com/pic.png')
+    })
+
+    it('passes .gif URLs through without proxying', () => {
+      const html = clean('https://example.com/a.gif')
+      expect(html).toContain('<img')
+      expect(html).toContain('https://example.com/a.gif')
+      expect(html).not.toContain('images.hive.blog/0x0/')
+    })
+
+    it('still renders a YouTube embed as a trusted iframe', () => {
+      const html = clean('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
+      expect(html).toContain('<iframe')
+      expect(html).toContain('youtube.com/embed/dQw4w9WgXcQ')
+    })
+
+    it('still renders a 3Speak embed as a trusted iframe', () => {
+      const html = clean('https://3speak.tv/watch?v=user/abcdefg')
+      expect(html).toContain('<iframe')
+      expect(html).toContain('3speak.tv/watch?v=user/abcdefg')
+    })
+
+    it('still renders @mentions as actifit links', () => {
+      const html = clean('hello @cr0w how are you')
+      expect(html).toContain('href="https://actifit.io/@cr0w"')
+    })
+  })
+
   describe('$fetchReportTags', () => {
     beforeAll(() => { process.client = false }) // exercise the SSR regex-strip path
     afterAll(() => { delete process.client })
