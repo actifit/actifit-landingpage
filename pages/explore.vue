@@ -44,7 +44,7 @@
 	  </div>
 
 		<div v-for="(community, index) in selCommunities" :key="index" :community="community">
-			<CommunityContent :community='community[0]' :type="type" />
+			<CommunityContent ref="communityContents" :community='community[0]' :type="type" />
 		</div>
 
       <!-- show listing when loaded -->
@@ -207,25 +207,17 @@
 		  return arr1.length === arr2.length && arr1.every((val, index) => val === arr2[index]);
 		},
 		nextPost (direction){
-		let pstId = this.activePost.pstId;
-		// console.log(pstId);
-		let proceed = false;
-		if (direction < 0){
-			// console.log('move back');
-			if (pstId >= 1){
-				pstId -= 1;
-				proceed = true;
+		// Posts on /explore live in the per-community <CommunityContent> children,
+		// not in this page's (empty) communityPosts. Delegate to whichever child
+		// owns the active post so Previous/Next navigates within that community's
+		// list. The first child that owns the post handles it (and stops the probe).
+		const active = this.activePost;
+		if (!active) return;
+		const children = [].concat(this.$refs.communityContents || []);
+		for (const child of children) {
+			if (child && typeof child.navigateFrom === 'function' && child.navigateFrom(active, direction)) {
+				return;
 			}
-		}else{
-			// console.log('move front');
-			if (pstId < this.communityPosts.length){
-				pstId += 1;
-				proceed = true;
-			}
-		}
-		if (proceed){
-			this.communityPosts[pstId].pstId = pstId;
-			this.$store.commit('setActivePost', this.communityPosts[pstId]);
 		}
 	  },
 	  initiateNewPost($event) {

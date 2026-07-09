@@ -356,12 +356,14 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
 	});
 
 	// Process 3Speak
-	let threespk_embed_reg = /\[!\[[^\]]*\]\([^)]+\)\]\(https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+)\)/ig;
+	// Accept both URL shapes — 3speak.tv/watch?v= and play.3speak.tv/embed?v=
+	// (the latter is what some clients paste) — with or without the play. subdomain.
+	let threespk_embed_reg = /\[!\[[^\]]*\]\([^)]+\)\]\(https?:\/\/(?:play\.)?3speak\.tv\/(?:watch|embed)\?v=([\w.-]+\/[\w.-]+)\)/ig;
 	report_content = report_content.replace(threespk_embed_reg, (match, v) => {
 		return stashResult(`<div class="video-container"><iframe src="https://play.3speak.tv/watch?v=${v}&mode=iframe&autoplay=false&layout=desktop" scrolling="no" frameborder="0" allowfullscreen></iframe></div>`);
 	});
 
-	let threespk_raw_reg = /(^|\s)(https?:\/\/3speak\.tv\/watch\?v=([\w.-]+\/[\w.-]+))/ig;
+	let threespk_raw_reg = /(^|\s)(https?:\/\/(?:play\.)?3speak\.tv\/(?:watch|embed)\?v=([\w.-]+\/[\w.-]+))/ig;
 	report_content = report_content.replace(threespk_raw_reg, (match, prefix, url, v) => {
 		return prefix + stashResult(`<div class="video-container"><iframe src="https://play.3speak.tv/watch?v=${v}&mode=iframe&autoplay=false&layout=desktop" scrolling="no" frameborder="0" allowfullscreen></iframe></div>`);
 	});
@@ -372,6 +374,16 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
 		return stashResult(`<div class="video-container"><iframe width="640" height="360" src="https://www.youtube.com/embed/${v}" frameborder="0" allowfullscreen></iframe></div>`);
 	});
 
+	// Escape characters that are significant inside an HTML attribute value so a
+	// crafted URL cannot terminate the src="" attribute and inject new attributes
+	// (e.g. onerror=). Defence against stored XSS via image/media URLs.
+	const escapeHtmlAttr = (str) => String(str)
+		.replace(/&/g, '&amp;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&#39;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;');
+
 	// Process Images (unified approach)
 	const createProxiedImageTag = (url) => {
 		if (!url || typeof url !== 'string') return '';
@@ -380,13 +392,16 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
 		const proxiedUrl = (url.startsWith('https://images.hive.blog') || url.toLowerCase().endsWith('.gif'))
 			? url
 			: `https://images.hive.blog/0x0/${url}`;
-		return `<img src="${proxiedUrl}">`;
+		return `<img src="${escapeHtmlAttr(proxiedUrl)}">`;
 	};
 
 	const existingImgRegex = /<img\s+[^>]*?src\s*=\s*['"]([^'"]+)['"][^>]*?>/gi;
 	report_content = report_content.replace(existingImgRegex, (match, url) => stashResult(createProxiedImageTag(url)));
 
-	const markdownImgRegex = /!\[[^\]]*\]\s*\(([^)]+)\)/g;
+	// URL capture rejects quotes, whitespace and angle brackets so it cannot carry
+	// an attribute-breakout payload, and requires ']( ' adjacency (matching the
+	// markdownLinkRegex protective pass) so no crafted-whitespace variant slips through.
+	const markdownImgRegex = /!\[[^\]]*\]\(([^\s"'<>)]+)\)/g;
 	report_content = report_content.replace(markdownImgRegex, (match, url) => stashResult(createProxiedImageTag(url)));
 
 	const rawImgRegex = /(^|\s)(https?:\/\/[^\s"'<>]*\.(?:png|jpg|jpeg|gif|webp))/g;
@@ -412,8 +427,17 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
 	let html_content = marked.parse(report_content, { breaks: true, gfm: true });
 
 	// =========================================================================
-	// ===== STEP 3: RESTORE PLACEHOLDERS AND SANITIZE ========================
+	// ===== STEP 3: RESTORE PLACEHOLDERS, THEN SANITIZE ======================
 	// =========================================================================
+
+	// Restore stashed media/mention HTML BEFORE sanitizing so it passes through
+	// DOMPurify / sanitize-html too. Restoring after sanitization (the previous
+	// behaviour) re-injected raw, attacker-influenced markup that the sanitizer
+	// never saw — a stored-XSS hole. This also makes the iframe host allow-list
+	// and link whitelist actually apply to stashed content.
+	for (const placeholder in placeholders) {
+		html_content = html_content.replace(placeholder, placeholders[placeholder]);
+	}
 
 	let sanitizeOptions = {
 		ALLOWED_TAGS: [ 'img', 'iframe', 'details', 'summary', 'table', 'tr', 'td', 'th', 'thead', 'tbody', 'sub', 'sup', 'div', 'a', 'p', 'br', 'strong', 'em', 'u', 's', 'blockquote', 'code', 'pre', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span' ],
@@ -492,11 +516,6 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
                 }
             }
         });
-    }
-
-    // RESTORE PLACEHOLDERS AFTER SANITIZATION
-    for (const placeholder in placeholders) {
-        sanitized_html = sanitized_html.replace(placeholder, placeholders[placeholder]);
     }
 
 	// =========================================================================
