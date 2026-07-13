@@ -5522,7 +5522,7 @@ export default {
       const username = this.user.account.name;
       const bchain = this.cur_bchain || 'HIVE';
       try {
-        let chRes = await fetch(process.env.actiAppUrl + 'loginKeychain', {
+        let chRes = await fetch('/api/proxy/loginKeychain', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username: username, bchain: bchain })
@@ -5536,7 +5536,7 @@ export default {
           });
         });
         if (!decrypted) return null;
-        let vRes = await fetch(process.env.actiAppUrl + 'loginKeychainVerify', {
+        let vRes = await fetch('/api/proxy/loginKeychainVerify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username: username, decrypted: decrypted, bchain: bchain })

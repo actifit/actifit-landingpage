@@ -24,6 +24,15 @@ function isRateLimited(key, maxPerWindow = 10, windowMs = 60000) {
   return entry.count > maxPerWindow;
 }
 
+function readRequestBody(req) {
+  return new Promise((resolve, reject) => {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', () => resolve(body));
+    req.on('error', reject);
+  });
+}
+
 module.exports = async function (req, res, next) {
   const parsedUrl = url.parse(req.url, true);
   const path = parsedUrl.pathname;
@@ -231,6 +240,82 @@ module.exports = async function (req, res, next) {
         }
       });
       return;
+    }
+
+    // 6. Login proxies
+    const loginPostEndpoints = ['/loginAuth', '/loginKeychain', '/loginKeychainVerify'];
+    if (loginPostEndpoints.includes(path)) {
+      if (req.method !== 'POST') {
+        res.statusCode = 405;
+        return res.end(JSON.stringify({ error: 'Method Not Allowed' }));
+      }
+
+      const baseApiUrl = (process.env.ACTI_API_URL || 'https://api.actifit.io').replace(/\/?$/, '/');
+      const targetUrl = `${baseApiUrl}${path.slice(1)}`;
+
+      try {
+        const body = await readRequestBody(req);
+        const response = await axios.post(targetUrl, body ? JSON.parse(body) : {}, {
+          headers: { 'Content-Type': 'application/json' }
+        });
+        return res.end(JSON.stringify(response.data));
+      } catch (error) {
+        res.statusCode = error.response ? error.response.status : 500;
+        return res.end(JSON.stringify(error.response ? error.response.data : { error: error.message }));
+      }
+    }
+
+    if (path === '/verifyLoginCaptcha') {
+      if (req.method !== 'GET') {
+        res.statusCode = 405;
+        return res.end(JSON.stringify({ error: 'Method Not Allowed' }));
+      }
+
+      const token = parsedUrl.query.token;
+      if (!token || typeof token !== 'string') {
+        res.statusCode = 400;
+        return res.end(JSON.stringify({ error: 'Missing captcha token' }));
+      }
+
+      const baseApiUrl = (process.env.ACTI_API_URL || 'https://api.actifit.io').replace(/\/?$/, '/');
+      try {
+        const response = await axios.get(`${baseApiUrl}verifyLoginCaptcha`, {
+          params: { token }
+        });
+        return res.end(JSON.stringify(response.data));
+      } catch (error) {
+        res.statusCode = error.response ? error.response.status : 500;
+        return res.end(JSON.stringify(error.response ? error.response.data : { error: error.message }));
+      }
+    }
+
+    if (path === '/getAccountData') {
+      if (req.method !== 'GET') {
+        res.statusCode = 405;
+        return res.end(JSON.stringify({ error: 'Method Not Allowed' }));
+      }
+
+      const user = parsedUrl.query.user;
+      const bchain = parsedUrl.query.bchain;
+      if (!user || !VALID_USER_RE.test(user)) {
+        res.statusCode = 400;
+        return res.end(JSON.stringify({ error: 'Invalid username' }));
+      }
+      if (!['HIVE', 'STEEM', 'BLURT'].includes(bchain)) {
+        res.statusCode = 400;
+        return res.end(JSON.stringify({ error: 'Invalid blockchain' }));
+      }
+
+      const baseApiUrl = (process.env.ACTI_API_URL || 'https://api.actifit.io').replace(/\/?$/, '/');
+      try {
+        const response = await axios.get(`${baseApiUrl}getAccountData`, {
+          params: { user, bchain }
+        });
+        return res.end(JSON.stringify(response.data));
+      } catch (error) {
+        res.statusCode = error.response ? error.response.status : 500;
+        return res.end(JSON.stringify(error.response ? error.response.data : { error: error.message }));
+      }
     }
 
     // Default: Not Found
