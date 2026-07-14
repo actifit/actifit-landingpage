@@ -221,7 +221,7 @@
                         </span>
                     </div>
                   </div>
-                  <a class="btn btn-danger m-2" href="./friends">{{ $t('View_friends') }}</a>
+                  <a class="btn btn-danger m-2" :href="'/friends?username=' + encodeURIComponent(displayUser)">{{ $t('View_friends') }}</a>
                 </div>
               </div>
               <!-- Key added -->

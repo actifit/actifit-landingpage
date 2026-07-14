@@ -4,7 +4,7 @@
 
 	<div class="container pt-5 mt-5 pb-5" v-if="user">
 
-		<h4 class="text-brand user-name">@{{ `${user.account.name}\'s`}} {{ $t('Friendships') }}</h4>
+		<h4 class="text-brand user-name">@{{ `${displayUser}\'s`}} {{ $t('Friendships') }}</h4>
 		<h5>{{ $t('Active_Friendships') }}</h5>
 		<div class="row pb-3">
 			<div v-if="userFriends && Array.isArray(userFriends) && userFriends.length>0" v-for="(curFriend, index) in userFriends" :key="index" class="col-md-3">
@@ -16,8 +16,8 @@
 			</div>
 		</div>
 
-		<h5>{{ $t('Pending_Friendships') }}</h5>
-		<div class="row pb-3">
+		<h5 v-if="isOwnAccount">{{ $t('Pending_Friendships') }}</h5>
+		<div v-if="isOwnAccount" class="row pb-3">
 			<div v-if="friendRequests && Array.isArray(friendRequests.sent_pending) && friendRequests.sent_pending.length>0" v-for="pendFriend in friendRequests.sent_pending" :key="pendFriend.target" class="col-md-3  text-brand">
 				<a :href="'/'+pendFriend.target"><div class="avatar mr-1" :style="'background-image: url(\''+profImgUrl+'/u/' + pendFriend.target + '/avatar\')'"></div>
 				<span class="friend-name text-center">@{{pendFriend.target}}</span></a>
@@ -35,7 +35,7 @@
 			</div>
 		</div>
 
-		<div class="row pb-3">
+		<div v-if="isOwnAccount" class="row pb-3">
 			<a href="#" class="btn btn-brand" @click.prevent="$refs.friendMod.displayMod()">{{ $t('Suggested_friends') }}</a>
 		</div>
 		<!--<span v-if="!account_banned && !isOwnAccount()" class="text-brand">
@@ -158,6 +158,13 @@
 	  ...mapGetters('steemconnect', ['user']),
 	  ...mapGetters('steemconnect', ['stdLogin']),
 	  ...mapGetters(['userTokens']),
+	  displayUser() {
+		let username = this.$route.query.username || (this.user && this.user.account.name) || ''
+		return String(username).replace('@', '')
+	  },
+	  isOwnAccount() {
+		return this.user && this.displayUser === this.user.account.name
+	  },
 	  isKeychainActive(){
 		return (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain)
 	  },
@@ -576,15 +583,17 @@
 	  },
 	  async refreshFriendStatus() {
 		//grab user friends list
-		let res = await fetch(process.env.actiAppUrl+'userFriends/'+this.user.account.name);
+		let res = await fetch(process.env.actiAppUrl+'userFriends/'+encodeURIComponent(this.displayUser));
 		let outcome = await res.json();
 		this.userFriends = outcome;
 		//console.log(outcome);
 		//console.log(this.userFriends);
 
 		//grab pending user friend requests (sent and received)
-		let quer = await fetch(process.env.actiAppUrl+'userFriendRequests/'+this.user.account.name);
-		this.friendRequests = await quer.json();
+		if (this.isOwnAccount) {
+		  let quer = await fetch(process.env.actiAppUrl+'userFriendRequests/'+this.user.account.name);
+		  this.friendRequests = await quer.json();
+		}
 		//console.log('friendRequests');
 		//console.log(this.friendRequests);
 	  },
