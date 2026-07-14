@@ -18,9 +18,9 @@
           <div class="user-avatar large-avatar"
             :style="safeAvatarStyle">
              <span v-if="editOn && !account_banned" class="avatar-edit-button">
-                <a href="#" class="btn btn-danger btn-sm" data-toggle="modal"
+                <a href="#" class="btn btn-danger" data-toggle="modal"
                   data-target="#profileImageModal" @click="showProfileImageModal">
-                  <i class="fas fa-edit"></i>
+                  <i class="fas fa-edit fa-lg"></i>
                 </a>
               </span>
           </div>
@@ -221,7 +221,7 @@
                         </span>
                     </div>
                   </div>
-                  <a class="btn btn-danger m-2" href="./friends">{{ $t('View_friends') }}</a>
+                  <a class="btn btn-danger m-2" :href="'/friends?username=' + encodeURIComponent(displayUser)">{{ $t('View_friends') }}</a>
                 </div>
               </div>
               <!-- Key added -->
@@ -875,32 +875,50 @@ export default {
       this.linkEditOn = false;
       this.usernameEditOn = false;
       this.descriptionEditOn = false;
-      this.locationeditOn = false;
+      this.locationEditOn = false;
+      this.profilePicEditon = false;
       return;
     },
-    async broadcastUpdate(updateData, field) {
-      if (this.user.account.posting_json_metadata === '') {
-        let pre_pst = {
-          profile: {
-            profile_image: '', location: '', about: '', website: '', name: '', version: 2
-          }
-        };
-        let pre_transaction = {
-          account: this.user.account.name, json_metadata: '', posting_json_metadata: JSON.stringify(pre_pst), extensions: []
-        };
-        await this.$processTrxFunc('account_update2', pre_transaction);
+    getProfileMetadata() {
+      try {
+        if (this.userinfo && this.userinfo.posting_json_metadata) {
+          const metadata = JSON.parse(this.userinfo.posting_json_metadata);
+          return metadata || {};
+        }
+      } catch (err) {
+        console.error('Unable to parse profile metadata', err);
       }
-      let parsedData = JSON.parse(this.user.account.posting_json_metadata);
-      parsedData.profile.location = this.textAreaLocationValue;
-      parsedData.profile.about = this.textAreaDescriptionValue;
-      parsedData.profile.website = this.textAreaLinkValue;
-      parsedData.profile.name = this.textAreaUsernameValue;
+
+      return {};
+    },
+    syncAboutFieldsFromProfile(profile = {}) {
+      this.textAreaLocationValue = profile.location || '';
+      this.textAreaDescriptionValue = profile.about || '';
+      this.textAreaLinkValue = profile.website || '';
+      this.textAreaUsernameValue = profile.name || '';
+    },
+    async broadcastUpdate(updateData, field) {
+      const parsedData = this.getProfileMetadata();
+      const currentProfile = parsedData.profile || {};
+      const nextProfile = {
+        ...currentProfile,
+        location: this.textAreaLocationValue,
+        about: this.textAreaDescriptionValue,
+        website: this.textAreaLinkValue,
+        name: this.textAreaUsernameValue,
+        version: 2
+      };
       if (field === 'profile_image') {
-        parsedData.profile.profile_image = updateData;
+        nextProfile.profile_image = updateData;
       }
       let pst = {
         profile: {
-          profile_image: parsedData.profile.profile_image, location: parsedData.profile.location, about: parsedData.profile.about, website: parsedData.profile.website, name: parsedData.profile.name, version: 2
+          profile_image: nextProfile.profile_image || '',
+          location: nextProfile.location || '',
+          about: nextProfile.about || '',
+          website: nextProfile.website || '',
+          name: nextProfile.name || '',
+          version: 2
         }
       }
       let transaction = {
@@ -926,17 +944,26 @@ export default {
     async saveFunc(field) {
       this.updatingField = field;
       try {
-        await this.broadcastUpdate(null, field);
+        const outcome = await this.broadcastUpdate(null, field);
+        if (!outcome || !outcome.success) {
+          return;
+        }
+
+        if (this.$store && this.$store.dispatch) {
+          await this.$store.dispatch('steemconnect/refreshUser');
+        }
+
+        await this.getAccountData();
+
+        const refreshedProfile = this.userMeta && this.userMeta.profile ? this.userMeta.profile : {};
+        this.syncAboutFieldsFromProfile(refreshedProfile);
+
         this.$nextTick(() => {
           if (field === 'username') this.usernameEditOn = false;
           else if (field === 'description') this.descriptionEditOn = false;
           else if (field === 'link') this.linkEditOn = false;
           else if (field === 'location') this.locationEditOn = false;
         });
-        setTimeout(() => {
-            this.fetchUserData();
-            this.getAccountData();
-        }, 3000);
 
       } finally {
         this.updatingField = null;
@@ -1581,58 +1608,66 @@ export default {
       if (this.cur_bchain == 'STEEM') {
         this.profImgUrl = process.env.steemImgUrl;
       }
-      chainLnk.api.getAccounts([this.displayUser], function (err, result) {
-        parentRef.loadingData = false;
-        if (err || result.length == 0) {
-          parentRef.noUserFound = true;
-          parentRef.errorDisplay = parentRef.$t('user_not_found_error');
-        } else {
-          parentRef.userinfo = result[0];
 
-          if (parentRef.cur_bchain === 'HIVE') {
-            parentRef.hiveBalance = parentRef.numberFormat(parseFloat(parentRef.userinfo.balance), 3);
-            parentRef.hbdBalance = parentRef.numberFormat(parseFloat(parentRef.userinfo.hbd_balance), 3);
+      return new Promise((resolve) => {
+        chainLnk.api.getAccounts([this.displayUser], function (err, result) {
+          parentRef.loadingData = false;
+          if (err || result.length == 0) {
+            parentRef.noUserFound = true;
+            parentRef.errorDisplay = parentRef.$t('user_not_found_error');
+            resolve(null);
+          } else {
+            parentRef.userinfo = result[0];
+            parentRef.syncAboutFieldsFromProfile(parentRef.userMeta && parentRef.userMeta.profile ? parentRef.userMeta.profile : {});
 
-            const calculateHivePower = async () => {
-              try {
-                const props = await hive.api.getDynamicGlobalPropertiesAsync();
+            if (parentRef.cur_bchain === 'HIVE') {
+              parentRef.hiveBalance = parentRef.numberFormat(parseFloat(parentRef.userinfo.balance), 3);
+              parentRef.hbdBalance = parentRef.numberFormat(parseFloat(parentRef.userinfo.hbd_balance), 3);
 
-                if (!props || !props.total_vesting_fund_hive || !props.total_vesting_shares) {
-                  console.error('Could not fetch valid global properties for HP calculation.');
-                  return;
+              const calculateHivePower = async () => {
+                try {
+                  const props = await hive.api.getDynamicGlobalPropertiesAsync();
+
+                  if (!props || !props.total_vesting_fund_hive || !props.total_vesting_shares) {
+                    console.error('Could not fetch valid global properties for HP calculation.');
+                    return;
+                  }
+
+                  const vestingShares = parseFloat(parentRef.userinfo.vesting_shares) || 0;
+                  const receivedVestingShares = parseFloat(parentRef.userinfo.received_vesting_shares) || 0;
+                  const delegatedVestingShares = parseFloat(parentRef.userinfo.delegated_vesting_shares) || 0;
+
+                  const effectiveVests = vestingShares + receivedVestingShares - delegatedVestingShares;
+
+                  const totalHive = parseFloat(props.total_vesting_fund_hive);
+                  const totalVests = parseFloat(props.total_vesting_shares);
+
+                  const hp = totalHive * (effectiveVests / totalVests);
+
+                  parentRef.hivePower = parentRef.numberFormat(hp, 3);
+
+                } catch (e) {
+                  console.error("Error during Hive Power calculation:", e);
                 }
+              };
 
-                const vestingShares = parseFloat(parentRef.userinfo.vesting_shares) || 0;
-                const receivedVestingShares = parseFloat(parentRef.userinfo.received_vesting_shares) || 0;
-                const delegatedVestingShares = parseFloat(parentRef.userinfo.delegated_vesting_shares) || 0;
-
-                const effectiveVests = vestingShares + receivedVestingShares - delegatedVestingShares;
-
-                const totalHive = parseFloat(props.total_vesting_fund_hive);
-                const totalVests = parseFloat(props.total_vesting_shares);
-
-                const hp = totalHive * (effectiveVests / totalVests);
-
-                parentRef.hivePower = parentRef.numberFormat(hp, 3);
-
-              } catch (e) {
-                console.error("Error during Hive Power calculation:", e);
-              }
-            };
-
-            calculateHivePower();
-          }
-
-          chainLnk.api.getFollowCount(parentRef.displayUser, function (err, result) {
-            if (!err) {
-              parentRef.follower_count = result.follower_count;
-              parentRef.following_count = result.following_count;
-              parentRef.$forceUpdate()
+              calculateHivePower();
             }
-          });
-        }
+
+            chainLnk.api.getFollowCount(parentRef.displayUser, function (err, result) {
+              if (!err) {
+                parentRef.follower_count = result.follower_count;
+                parentRef.following_count = result.following_count;
+                parentRef.$forceUpdate()
+              }
+            });
+
+            resolve(result[0]);
+          }
+        });
+      }).finally(() => {
+        this.refreshFriendStatus();
       });
-      this.refreshFriendStatus();
     },
     isFriend() {
       if (this.user) {
@@ -1774,11 +1809,8 @@ export default {
       this.displayUser = this.$route.params.username.replace('@', '');
 
       this.$watch('userMeta', (newVal) => {
-        if(newVal && newVal.profile) {
-          this.textAreaLocationValue = newVal.profile.location || '';
-          this.textAreaDescriptionValue = newVal.profile.about || '';
-          this.textAreaLinkValue = newVal.profile.website || '';
-          this.textAreaUsernameValue = newVal.profile.name || '';
+        if (newVal && newVal.profile) {
+          this.syncAboutFieldsFromProfile(newVal.profile);
         }
       }, { immediate: true });
 
