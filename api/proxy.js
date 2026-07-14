@@ -24,10 +24,21 @@ function isRateLimited(key, maxPerWindow = 10, windowMs = 60000) {
   return entry.count > maxPerWindow;
 }
 
-function readRequestBody(req) {
+function readRequestBody(req, maxBytes = 1024 * 1024) {
   return new Promise((resolve, reject) => {
     let body = '';
-    req.on('data', chunk => { body += chunk; });
+    let bodySize = 0;
+    req.on('data', chunk => {
+      bodySize += Buffer.byteLength(chunk);
+      if (bodySize > maxBytes) {
+        const error = new Error('Request body too large');
+        error.statusCode = 413;
+        reject(error);
+        req.destroy();
+        return;
+      }
+      body += chunk;
+    });
     req.on('end', () => resolve(body));
     req.on('error', reject);
   });
@@ -250,6 +261,12 @@ module.exports = async function (req, res, next) {
         return res.end(JSON.stringify({ error: 'Method Not Allowed' }));
       }
 
+      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+      if (isRateLimited(`${ip}:${path}`, 10, 60000)) {
+        res.statusCode = 429;
+        return res.end(JSON.stringify({ error: 'Too many requests' }));
+      }
+
       const baseApiUrl = (process.env.ACTI_API_URL || 'https://api.actifit.io').replace(/\/?$/, '/');
       const targetUrl = `${baseApiUrl}${path.slice(1)}`;
 
@@ -260,7 +277,7 @@ module.exports = async function (req, res, next) {
         });
         return res.end(JSON.stringify(response.data));
       } catch (error) {
-        res.statusCode = error.response ? error.response.status : 500;
+        res.statusCode = error.response ? error.response.status : (error.statusCode || 500);
         return res.end(JSON.stringify(error.response ? error.response.data : { error: error.message }));
       }
     }
@@ -269,6 +286,12 @@ module.exports = async function (req, res, next) {
       if (req.method !== 'GET') {
         res.statusCode = 405;
         return res.end(JSON.stringify({ error: 'Method Not Allowed' }));
+      }
+
+      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+      if (isRateLimited(`${ip}:${path}`, 10, 60000)) {
+        res.statusCode = 429;
+        return res.end(JSON.stringify({ error: 'Too many requests' }));
       }
 
       const token = parsedUrl.query.token;
@@ -293,6 +316,12 @@ module.exports = async function (req, res, next) {
       if (req.method !== 'GET') {
         res.statusCode = 405;
         return res.end(JSON.stringify({ error: 'Method Not Allowed' }));
+      }
+
+      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+      if (isRateLimited(`${ip}:${path}`, 10, 60000)) {
+        res.statusCode = 429;
+        return res.end(JSON.stringify({ error: 'Too many requests' }));
       }
 
       const user = parsedUrl.query.user;
