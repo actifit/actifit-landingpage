@@ -159,7 +159,7 @@
 	  ...mapGetters('steemconnect', ['stdLogin']),
 	  ...mapGetters(['userTokens']),
 	  displayUser() {
-		let username = this.$route.query.username || (this.user && this.user.account.name) || ''
+		let username = this.$route.params.username || (this.user && this.user.account.name) || ''
 		return String(username).replace('@', '')
 	  },
 	  isOwnAccount() {
