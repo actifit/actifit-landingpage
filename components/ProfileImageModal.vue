@@ -13,15 +13,44 @@
             {{ $t('profile_image_disclaimer') }}
           </div>
           <div class="image-preview">
+            <canvas
+              v-show="sourceImage && !imgUploading"
+              ref="cropCanvas"
+              class="crop-canvas"
+              width="300"
+              height="300"
+              @pointerdown="startDragging"
+              @pointermove="dragImage"
+              @pointerup="stopDragging"
+              @pointercancel="stopDragging"
+            ></canvas>
             <img 
+              v-show="!sourceImage && !imgUploading"
               :src="imagePreviewUrl" 
               alt="Profile Image" 
               width="150" 
               height="150"
               @load="handleImageLoadSuccess"
-              @error="handleImageLoadError"
-              v-show="!imgUploading"/>
+              @error="handleImageLoadError"/>
             <div v-show="imgUploading" class="loader"></div>
+          </div>
+          <div v-if="sourceImage" class="crop-controls">
+            <button type="button" class="btn btn-outline-secondary" aria-label="Rotate left" @click="rotateImage(-90)">
+              <i class="fas fa-undo"></i>
+            </button>
+            <input
+              v-model.number="zoom"
+              class="zoom-control"
+              type="range"
+              min="1"
+              max="3"
+              step="0.01"
+              aria-label="Zoom"
+              @input="drawCropPreview"
+            />
+            <button type="button" class="btn btn-outline-secondary" aria-label="Rotate right" @click="rotateImage(90)">
+              <i class="fas fa-redo"></i>
+            </button>
           </div>
           <div class="form-group">
             <label for="imageUpload">{{ $t('upload_image') }}</label>
@@ -64,6 +93,14 @@ export default {
       profImgUrl: process.env.hiveImgUrl,
       isSaving: false,
       allowedTypes : ['image/bmp', 'image/png', 'image/gif', 'image/jpeg', 'image/jpg'],
+      sourceImage: null,
+      zoom: 1,
+      rotation: 0,
+      offsetX: 0,
+      offsetY: 0,
+      isDragging: false,
+      dragStartX: 0,
+      dragStartY: 0,
     };
   },
   methods: {
@@ -83,23 +120,144 @@ export default {
         this.imgUploading = true;
         this.uploadedImage = file;
         this.imageUrl = '';
-        console.log(`meow uploadedImage: ${this.uploadedImage}`)
-        this.uploadImage(file)
-          .then((url) => {
-            this.imagePreviewUrl = url;
-            console.log(`meow url: ${this.imagePreviewUrl}`)
-            this.imgUploading = false;
-          })
+        this.loadImageForCropping(file)
           .catch((error) => {
-            console.error('Image upload failed:', error);
+            console.error('Image preview failed:', error);
+            this.uploadedImage = null;
             this.imgUploading = false;
           });
       }
     },
-    handleUrlUpload() {
+    loadImageForCropping(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = reject;
+        reader.onload = () => {
+          const image = new Image();
+          image.onerror = reject;
+          image.onload = () => {
+            this.prepareCropImage(image).then(resolve);
+          };
+          image.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    },
+    prepareCropImage(image) {
+      this.sourceImage = image;
+      this.zoom = 1;
+      this.rotation = 0;
+      this.offsetX = 0;
+      this.offsetY = 0;
+      this.imgUploading = false;
+      return this.$nextTick().then(() => {
+        this.drawCropPreview();
+      });
+    },
+    loadUrlForCropping(url) {
+      return new Promise((resolve, reject) => {
+        let parsedUrl;
+        try {
+          parsedUrl = new URL(url);
+        } catch (error) {
+          reject(error);
+          return;
+        }
+        if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+          reject(new Error('Invalid image URL'));
+          return;
+        }
+        const image = new Image();
+        image.crossOrigin = 'anonymous';
+        image.onerror = reject;
+        image.onload = () => {
+          this.prepareCropImage(image).then(resolve);
+        };
+        image.src = parsedUrl.href;
+      });
+    },
+    imageScale() {
+      if (!this.sourceImage) return 1;
+      const canvasSize = this.$refs.cropCanvas ? this.$refs.cropCanvas.width : 300;
+      const isSideways = Math.abs(this.rotation % 180) === 90;
+      const imageWidth = isSideways ? this.sourceImage.height : this.sourceImage.width;
+      const imageHeight = isSideways ? this.sourceImage.width : this.sourceImage.height;
+      return Math.max(canvasSize / imageWidth, canvasSize / imageHeight) * this.zoom;
+    },
+    clampOffsets() {
+      if (!this.sourceImage) return;
+      const canvasSize = this.$refs.cropCanvas ? this.$refs.cropCanvas.width : 300;
+      const isSideways = Math.abs(this.rotation % 180) === 90;
+      const scale = this.imageScale();
+      const displayedWidth = (isSideways ? this.sourceImage.height : this.sourceImage.width) * scale;
+      const displayedHeight = (isSideways ? this.sourceImage.width : this.sourceImage.height) * scale;
+      const maxX = Math.max(0, (displayedWidth - canvasSize) / 2);
+      const maxY = Math.max(0, (displayedHeight - canvasSize) / 2);
+      this.offsetX = Math.max(-maxX, Math.min(maxX, this.offsetX));
+      this.offsetY = Math.max(-maxY, Math.min(maxY, this.offsetY));
+    },
+    drawCropPreview() {
+      const canvas = this.$refs.cropCanvas;
+      if (!canvas || !this.sourceImage) return;
+      this.clampOffsets();
+      const context = canvas.getContext('2d');
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.save();
+      context.translate(canvas.width / 2 + this.offsetX, canvas.height / 2 + this.offsetY);
+      context.rotate(this.rotation * Math.PI / 180);
+      const scale = this.imageScale();
+      context.scale(scale, scale);
+      context.drawImage(this.sourceImage, -this.sourceImage.width / 2, -this.sourceImage.height / 2);
+      context.restore();
+    },
+    startDragging(event) {
+      this.isDragging = true;
+      this.dragStartX = event.clientX;
+      this.dragStartY = event.clientY;
+      event.currentTarget.setPointerCapture(event.pointerId);
+    },
+    dragImage(event) {
+      if (!this.isDragging) return;
+      const canvas = this.$refs.cropCanvas;
+      const bounds = canvas.getBoundingClientRect();
+      this.offsetX += (event.clientX - this.dragStartX) * canvas.width / bounds.width;
+      this.offsetY += (event.clientY - this.dragStartY) * canvas.height / bounds.height;
+      this.dragStartX = event.clientX;
+      this.dragStartY = event.clientY;
+      this.drawCropPreview();
+    },
+    stopDragging() {
+      this.isDragging = false;
+    },
+    rotateImage(degrees) {
+      this.rotation = (this.rotation + degrees) % 360;
+      this.offsetX = 0;
+      this.offsetY = 0;
+      this.drawCropPreview();
+    },
+    croppedImageFile() {
+      this.drawCropPreview();
+      return new Promise((resolve, reject) => {
+        this.$refs.cropCanvas.toBlob((blob) => {
+          if (!blob) {
+            reject(new Error('Unable to crop image'));
+            return;
+          }
+          resolve(new File([blob], 'profile-image.png', { type: 'image/png' }));
+        }, 'image/png');
+      });
+    },
+    async handleUrlUpload() {
       if (this.imageUrl) {
         this.imgUploading = true;
-        this.imagePreviewUrl = this.imageUrl;
+        this.uploadedImage = null;
+        this.sourceImage = null;
+        try {
+          await this.loadUrlForCropping(this.imageUrl);
+        } catch (error) {
+          console.error('Image URL could not be loaded for cropping:', error);
+          this.handleInvalidImage();
+        }
       }
     },
     handleImageLoadSuccess() {
@@ -126,8 +284,9 @@ export default {
       let imageUrl = this.imageUrl;
 
       try {
-        if (this.uploadedImage) {
-          imageUrl = await this.uploadImage(this.uploadedImage);
+        if (this.sourceImage) {
+          const croppedImage = await this.croppedImageFile();
+          imageUrl = await this.uploadImage(croppedImage);
         } else if (this.imageUrl) {
           await new Promise((resolve, reject) => {
             const img = new Image();
@@ -155,6 +314,12 @@ export default {
     reset() {
       this.imageUrl = '';
       this.uploadedImage = null;
+      this.sourceImage = null;
+      this.zoom = 1;
+      this.rotation = 0;
+      this.offsetX = 0;
+      this.offsetY = 0;
+      this.isDragging = false;
       this.imagePreviewUrl = `${this.profImgUrl}/u/${this.username}/avatar`;
     },
     async uploadImage(file) {
@@ -201,6 +366,35 @@ export default {
   text-align: center;
   margin-bottom: 15px;
   position: relative;
+}
+
+.crop-canvas {
+  display: block;
+  width: 300px;
+  max-width: 100%;
+  height: auto;
+  margin: auto;
+  border: 3px solid #ffffff;
+  border-radius: 50%;
+  cursor: grab;
+  touch-action: none;
+}
+
+.crop-canvas:active {
+  cursor: grabbing;
+}
+
+.crop-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.zoom-control {
+  flex: 1;
+  max-width: 250px;
+  margin: 0 15px;
 }
 
 .loader {
