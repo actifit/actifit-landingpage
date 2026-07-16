@@ -146,6 +146,24 @@ export default {
 };
 </script>
 <style>
+	#widgetContainer > div {
+		max-height: calc(100vh - 92px) !important;
+		overflow-x: hidden !important;
+	}
+
+	#widgetContainer * {
+		box-sizing: border-box;
+		min-width: 0;
+	}
+
+	#widgetContainer textarea,
+	#widgetContainer [contenteditable="true"] {
+		max-width: 100%;
+		margin-bottom: 12px;
+		overflow-x: hidden;
+		scroll-margin-bottom: 72px;
+	}
+
 	.h-screen.flex.flex-col.appbg0.appfg0.border-r-1.sidebar{
 		background-color: #ff112d !important;
 	}
