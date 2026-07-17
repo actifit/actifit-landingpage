@@ -101,6 +101,7 @@ export default {
       isDragging: false,
       dragStartX: 0,
       dragStartY: 0,
+      sourceImageType: 'image/jpeg',
     };
   },
   methods: {
@@ -136,15 +137,16 @@ export default {
           const image = new Image();
           image.onerror = reject;
           image.onload = () => {
-            this.prepareCropImage(image).then(resolve);
+            this.prepareCropImage(image, file.type).then(resolve);
           };
           image.src = reader.result;
         };
         reader.readAsDataURL(file);
       });
     },
-    prepareCropImage(image) {
+    prepareCropImage(image, imageType = 'image/jpeg') {
       this.sourceImage = image;
+      this.sourceImageType = ['image/png', 'image/gif'].includes(imageType) ? 'image/png' : 'image/jpeg';
       this.zoom = 1;
       this.rotation = 0;
       this.offsetX = 0;
@@ -169,9 +171,14 @@ export default {
         }
         const image = new Image();
         image.crossOrigin = 'anonymous';
-        image.onerror = reject;
+        image.onerror = () => {
+          const error = new Error('This image host does not allow cropping from another website.');
+          error.code = 'IMAGE_URL_CORS';
+          reject(error);
+        };
         image.onload = () => {
-          this.prepareCropImage(image).then(resolve);
+          const imageType = /\.(png|gif)$/i.test(parsedUrl.pathname) ? 'image/png' : 'image/jpeg';
+          this.prepareCropImage(image, imageType).then(resolve);
         };
         image.src = parsedUrl.href;
       });
@@ -238,13 +245,44 @@ export default {
     croppedImageFile() {
       this.drawCropPreview();
       return new Promise((resolve, reject) => {
-        this.$refs.cropCanvas.toBlob((blob) => {
-          if (!blob) {
-            reject(new Error('Unable to crop image'));
-            return;
-          }
-          resolve(new File([blob], 'profile-image.png', { type: 'image/png' }));
-        }, 'image/png');
+        const exportSize = 1024;
+        const previewCanvas = this.$refs.cropCanvas;
+        const exportCanvas = document.createElement('canvas');
+        exportCanvas.width = exportSize;
+        exportCanvas.height = exportSize;
+        const context = exportCanvas.getContext('2d');
+        const exportRatio = exportSize / previewCanvas.width;
+
+        if (this.sourceImageType === 'image/jpeg') {
+          context.fillStyle = '#ffffff';
+          context.fillRect(0, 0, exportSize, exportSize);
+        }
+
+        context.save();
+        context.translate(
+          exportSize / 2 + this.offsetX * exportRatio,
+          exportSize / 2 + this.offsetY * exportRatio
+        );
+        context.rotate(this.rotation * Math.PI / 180);
+        const scale = this.imageScale() * exportRatio;
+        context.scale(scale, scale);
+        context.drawImage(this.sourceImage, -this.sourceImage.width / 2, -this.sourceImage.height / 2);
+        context.restore();
+
+        try {
+          exportCanvas.toBlob((blob) => {
+            if (!blob) {
+              reject(new Error('Unable to export the cropped image.'));
+              return;
+            }
+            const extension = this.sourceImageType === 'image/jpeg' ? 'jpg' : 'png';
+            resolve(new File([blob], `profile-image.${extension}`, { type: this.sourceImageType }));
+          }, this.sourceImageType, 0.9);
+        } catch (error) {
+          const cropError = new Error('This image host blocks cropping. Save the original URL or upload the image as a file instead.');
+          cropError.code = 'TAINTED_CANVAS';
+          reject(cropError);
+        }
       });
     },
     async handleUrlUpload() {
@@ -256,20 +294,25 @@ export default {
           await this.loadUrlForCropping(this.imageUrl);
         } catch (error) {
           console.error('Image URL could not be loaded for cropping:', error);
-          this.handleInvalidImage();
+          if (error.code === 'IMAGE_URL_CORS') {
+            this.sourceImage = null;
+            this.imagePreviewUrl = this.imageUrl;
+            this.imgUploading = false;
+            alert('This image host does not allow cropping. You can save the original URL without adjustments, or download the image and upload it as a file to crop it.');
+          } else {
+            this.handleInvalidImage();
+          }
         }
       }
     },
     handleImageLoadSuccess() {
-      console.log('Image loaded successfully');
       this.imgUploading = false;
     },
     handleImageLoadError() {
-      console.error('meow Image failed to load');
       this.handleInvalidImage();
     },
     handleInvalidImage() {
-      alert('meow Invalid image URL. Please provide a valid image URL.');
+      alert('Invalid image URL. Please provide a valid image URL.');
       this.imageUrl = '';
       this.imagePreviewUrl = `${this.profImgUrl}/u/${this.username}/avatar`;
       this.imgUploading = false;
@@ -307,6 +350,9 @@ export default {
         $('.modal-backdrop').remove();
       } catch (error) {
         console.error('Image update failed:', error);
+        if (error.code === 'TAINTED_CANVAS' || error.name === 'SecurityError') {
+          alert('This image host blocks cropping. Save the original URL or upload the image as a file instead.');
+        }
       } finally {
         this.isSaving = false;
       }
@@ -320,6 +366,7 @@ export default {
       this.offsetX = 0;
       this.offsetY = 0;
       this.isDragging = false;
+      this.sourceImageType = 'image/jpeg';
       this.imagePreviewUrl = `${this.profImgUrl}/u/${this.username}/avatar`;
     },
     async uploadImage(file) {
