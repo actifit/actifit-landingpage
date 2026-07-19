@@ -147,6 +147,8 @@ module.exports = {
   next_withdraw_on: '次の引き出しは',
   Power_Down: 'パワーダウン',
   sting_chat: 'Stingチャット',
+  sting_chat_unavailable: 'チャットは一時的に利用できません。もう一度お試しください。',
+  sting_chat_key_expired: 'チャットキーの有効期限が切れました。ログアウトし、投稿キーでもう一度ログインしてください。',
   toggle_dark_mode: 'ダークモード切り替え',
   Cancel_Power_Down: 'パワーダウンをキャンセル',
   Claimable_Steem_Rewards: '請求可能なSTEEM報酬',

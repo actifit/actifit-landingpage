@@ -147,6 +147,8 @@ module.exports = {
   next_withdraw_on: 'Tu próximo retiro ocurre el',
   Power_Down: 'Power Down',
   sting_chat: 'Chat de Sting',
+  sting_chat_unavailable: 'El chat no está disponible temporalmente. Inténtalo de nuevo.',
+  sting_chat_key_expired: 'La clave del chat ha caducado. Cierra sesión y vuelve a iniciarla con tu clave de publicación.',
   toggle_dark_mode: 'Alternar Modo Oscuro',
   Cancel_Power_Down: 'Cancelar Power Down',
   Claimable_Steem_Rewards: 'Recompensas de STEEM Reclamables',

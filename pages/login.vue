@@ -243,7 +243,7 @@
 			return;
 		}
 	  },
-	  setUserLoginStatus (json) {
+	  setUserLoginStatus (json, postingKey) {
 		this.is_logged_in = json.success;
 
 		//console.log(json);
@@ -261,6 +261,7 @@
 			userSC.account = json.userdata;
 			//append proper login data for SC, while making sure this is recognized as a normal login
 			this.$store.commit('setStdLoginUser', true);
+			this.$store.commit('setChatPostingKey', postingKey);
 			localStorage.setItem('access_token', json.token)
 			localStorage.setItem('std_login', true)
 			localStorage.setItem('std_login_name', userSC.account.name)
@@ -582,7 +583,7 @@
 			});
 			clearTimeout(timeoutId);
 			const json = await res.json();
-			this.setUserLoginStatus(json);
+			this.setUserLoginStatus(json, priv_pkey);
 		} catch (e) {
 			console.error('Login error:', e);
 			this.error_proceeding = true;

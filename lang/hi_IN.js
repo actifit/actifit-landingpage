@@ -147,6 +147,8 @@ module.exports = {
   next_withdraw_on: 'आपकी अगली निकासी चालू है',
   Power_Down: 'पावर डाउन',
   sting_chat: 'स्टिंग चैट',
+  sting_chat_unavailable: 'चैट अस्थायी रूप से उपलब्ध नहीं है। कृपया फिर से प्रयास करें।',
+  sting_chat_key_expired: 'चैट कुंजी की समय-सीमा समाप्त हो गई है। लॉग आउट करें और अपनी पोस्टिंग कुंजी से फिर लॉग इन करें।',
   toggle_dark_mode: 'डार्क मोड टॉगल करें',
   Cancel_Power_Down: 'पावर डाउन रद्द करें',
   Claimable_Steem_Rewards: 'दावा करने योग्य स्टीम पुरस्कार',

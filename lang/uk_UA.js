@@ -147,6 +147,8 @@ module.exports = {
   next_withdraw_on: 'Ваше наступне виведення коштів відбудеться',
   Power_Down: 'Зменшити потужність',
   sting_chat: 'Sting Chat',
+  sting_chat_unavailable: 'Чат тимчасово недоступний. Спробуйте ще раз.',
+  sting_chat_key_expired: 'Термін дії ключа чату минув. Вийдіть і знову увійдіть за допомогою posting-ключа.',
   toggle_dark_mode: 'Переключити темний режим',
   Cancel_Power_Down: 'Скасувати зменшення потужності',
   Claimable_Steem_Rewards: 'Доступні до отримання винагороди STEEM',

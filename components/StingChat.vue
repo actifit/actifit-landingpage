@@ -13,6 +13,7 @@
 
 <script>
 import hive from '@hiveio/hive-js'
+import { PrivateKey, cryptoUtils } from '@hiveio/dhive'
 
 const WIDGET_SCRIPT_URL = 'https://chat.peakd.com/stwidget.js'
 let widgetScriptPromise = null
@@ -25,12 +26,27 @@ export default {
       widgetError: ''
     }
   },
+  computed: {
+    chatPostingKey () {
+      return this.$store.state.chatPostingKey
+    }
+  },
+  watch: {
+    chatPostingKey (postingKey) {
+      const username = this.user && this.user.account && this.user.account.name
+      if (!postingKey || !username || !this.widget) return
+
+      // Login and widget initialization can complete in either order. If the
+      // validated key arrives after Sting mounts, attach it and reload the user.
+      this.configurePostingKey(username, postingKey)
+    }
+  },
   mounted () {
     this.loadWidgetScript()
       .then(() => this.initWidget())
       .catch((error) => {
         console.error('Unable to load Sting chat:', error)
-        this.widgetError = 'Chat is temporarily unavailable. Please try again.'
+        this.widgetError = this.$t('sting_chat_unavailable')
       })
   },
   beforeDestroy () {
@@ -72,22 +88,15 @@ export default {
       this.widget = new StWidget('https://chat.peakd.com/t/hive-193552/0')
 
       const username = this.user && this.user.account && this.user.account.name
-      // Keychain can safely serve chat even when Actifit's session was created
-      // with another login method: every encryption/sign request still names the
-      // logged-in Hive account and must be approved by that account's wallet.
+      const loginMethod = localStorage.getItem('acti_login_method') || 'posting-key'
       const hasKeychain = window.hive_keychain != null
       const hasPeakVault = window.peakvault != null
-      const localPostingKey = this.$store.state.chatPostingKey
-
-      console.info('[StingChat] wallet availability', {
-        loginMethod: localStorage.getItem('acti_login_method') || 'posting-key',
-        keychain: hasKeychain,
-        peakVault: hasPeakVault,
-        sessionPostingKey: Boolean(localPostingKey)
-      })
+      const localPostingKey = this.chatPostingKey
 
       this.widget.setProperties({
-        requireLogin: !username || (!hasKeychain && !hasPeakVault && !localPostingKey),
+        // Keep Sting's own login UI available when Actifit cannot supply a
+        // signer for the current browser-memory session.
+        requireLogin: false,
         showSidebar: true,
         sidebar: 2,
         sidebar2enableSharedView: false,
@@ -124,22 +133,25 @@ export default {
         '--appMessageFontSize': '16px'
       })
 
-      if (username && hasKeychain) {
+      if (username && localPostingKey) {
+        this.configurePostingKey(username, localPostingKey)
+      } else if (username && loginMethod === 'keychain' && hasKeychain) {
         // Keep Sting on its Keychain login path. Direct-message requests contain
         // both the recipient username and preferred public posting key; treating
         // this as a generic wallet request loses the username and breaks encoding.
         this.configureKeychainPassthrough()
         this.widget.setUser(username, 'keychain')
-      } else if (username && hasPeakVault) {
+      } else if (username && loginMethod !== 'hiveauth' && hasPeakVault) {
         this.widget.setUser(username, 'peakvault')
-      } else if (username && localPostingKey) {
-        // The key stays in this Vuex/browser-memory session. StWidget performs
-        // encryption and signing locally and never receives it in iframe data.
-        this.widget.setPostingKey(localPostingKey, hive)
-        this.widget.setUser(username, 'keychain')
       } else if (username) {
-        this.configureUnavailableWalletMessage()
-        this.widgetError = 'Private messages require Hive Keychain or PeakVault.'
+        // Do not let an installed Keychain override a non-Keychain Actifit
+        // session. Sting can present its own login UI if another session method
+        // is needed after the in-memory posting key has expired.
+        this.widget.enableKeychainPassthrough = false
+        this.widget.enablePeakVaultPassthrough = false
+        if (loginMethod === 'posting-key') {
+          this.widgetError = this.$t('sting_chat_key_expired')
+        }
       }
 
       // Keep Sting below its 640px internal breakpoint and disable drag-resizing.
@@ -157,17 +169,86 @@ export default {
       this.$refs.widgetContainer.appendChild(element)
       this.$refs.widgetContainer.hidden = true
     },
+    configurePostingKey (username, postingKey) {
+      // The validated key remains in Vuex/browser memory only. This path must
+      // take precedence over wallet extensions installed in the same browser.
+      this.widget.enableKeychainPassthrough = false
+      this.widget.enablePeakVaultPassthrough = false
+      this.widget.setPostingKey(postingKey, hive)
+      this.configurePostingKeyPassthrough(postingKey)
+      this.widget.setUser(username)
+      this.widgetError = ''
+    },
+    configurePostingKeyPassthrough (postingKey) {
+      const widget = this.widget
+
+      // Sting's stock HiveJS path looks the recipient up through api.hive.blog
+      // and returns raw error objects. The iframe already supplies the verified
+      // public posting key in args[4], so signing can remain entirely local.
+      widget.handleWithHivejs = (event, messageId, request, args) => {
+        let operation
+
+        try {
+          if (request === 'requestBroadcast' && widget.isAllowedOperation(args[1]) && args[2] === 'Posting') {
+            operation = new Promise((resolve) => {
+              hive.broadcast.send({ extensions: [], operations: args[1] }, postingKey, (error, result) => {
+                resolve(error ? { success: false, error } : { success: true, error: null, result })
+              })
+            })
+          } else if (request === 'requestCustomJson' && widget.allowedCustomJson.indexOf(args[1]) !== -1 && args[2] === 'Posting') {
+            operation = new Promise((resolve) => {
+              hive.broadcast.customJson(postingKey, [], [args[0]], args[1], args[3], (error, result) => {
+                resolve(error ? { success: false, error } : { success: true, error: null, result })
+              })
+            })
+          } else if (request === 'requestVerifyKey' && args[2] === 'Posting') {
+            let decoded = hive.memo.decode(postingKey, args[1])
+            if (decoded.startsWith('#')) decoded = decoded.substring(1)
+            operation = Promise.resolve({ success: true, error: null, result: decoded })
+          } else if (request === 'requestSignBuffer' && args[2] === 'Posting') {
+            operation = Promise.resolve({
+              success: true,
+              error: null,
+              // Match Sting uploader's Upload.signWithKey implementation:
+              // compact-sign the SHA-256 digest of the upload challenge.
+              result: PrivateKey.fromString(postingKey)
+                .sign(cryptoUtils.sha256(args[1]))
+                .toString('hex')
+            })
+          } else if (request === 'requestEncodeMessage' && args[3] === 'Posting') {
+            const recipientPublicKey = args[0] === args[1]
+              ? hive.auth.wifToPublic(postingKey)
+              : args[4]
+
+            if (!recipientPublicKey) throw new Error('The recipient does not have a usable public posting key.')
+
+            operation = Promise.resolve({
+              success: true,
+              error: null,
+              result: hive.memo.encode(postingKey, recipientPublicKey, args[2])
+            })
+          }
+        } catch (error) {
+          operation = Promise.resolve({ success: false, error })
+        }
+
+        if (!operation) {
+          operation = Promise.resolve({
+            success: false,
+            error: `Unsupported chat signing request: ${request}`
+          })
+        }
+
+        operation
+          .catch((error) => ({ success: false, error }))
+          .then((response) => this.postWalletResponse(widget, event, messageId, response))
+      }
+    },
     configureKeychainPassthrough () {
       const widget = this.widget
 
       widget.handleWithKeychain = (event, messageId, request, args) => {
         let keychainCall = null
-
-        console.info('[StingChat] wallet request', {
-          request,
-          account: args[0],
-          recipient: request === 'requestEncodeMessage' ? args[1] : undefined
-        })
 
         if (request === 'requestBroadcast' && widget.isAllowedOperation(args[1]) && args[2] === 'Posting') {
           keychainCall = this.callKeychain(request, [args[0], args[1], 'Posting'])
@@ -192,53 +273,22 @@ export default {
           })
         }
 
-        keychainCall.then((response) => {
-          // Sting rejects the entire failed wallet response. Passing an object
-          // makes its modal coerce the error to "[object Object]", so failures
-          // must cross the iframe boundary as their readable string.
-          const result = response && response.success
-            ? response
-            : this.readableError(response && (response.error || response.message || response))
-
-          console.info('[StingChat] wallet response', {
-            request,
-            success: Boolean(response && response.success),
-            error: response && response.success ? null : result
-          })
-
-          event.source.postMessage([
-            widget.messageName,
-            messageId,
-            JSON.stringify(result)
-          ], event.origin)
-        })
+        keychainCall.then((response) => this.postWalletResponse(widget, event, messageId, response))
       }
     },
-    configureUnavailableWalletMessage () {
-      const widget = this.widget
-      const originalOnMessage = widget.onMessage.bind(widget)
-      const walletRequests = [
-        'requestBroadcast',
-        'requestCustomJson',
-        'requestVerifyKey',
-        'requestSignBuffer',
-        'requestEncodeMessage'
-      ]
+    postWalletResponse (widget, event, messageId, response) {
+      // Sting rejects the entire failed wallet response. Passing an object
+      // makes its modal coerce the error to "[object Object]", so failures
+      // must cross the iframe boundary as their readable string.
+      const result = response && response.success
+        ? response
+        : this.readableError(response && (response.error || response.message || response))
 
-      widget.onMessage = (event, messageId, request, args) => {
-        if (walletRequests.indexOf(request) === -1) {
-          originalOnMessage(event, messageId, request, args)
-          return
-        }
-
-        const error = 'Private messages require Hive Keychain or PeakVault. Install and unlock a wallet containing this account\'s posting key, then reload Actifit.'
-        console.warn('[StingChat] wallet request blocked:', error)
-        event.source.postMessage([
-          widget.messageName,
-          messageId,
-          JSON.stringify(error)
-        ], event.origin)
-      }
+      event.source.postMessage([
+        widget.messageName,
+        messageId,
+        JSON.stringify(result)
+      ], event.origin)
     },
     callKeychain (method, args) {
       return new Promise((resolve) => {

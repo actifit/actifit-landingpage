@@ -147,6 +147,8 @@ module.exports = {
   next_withdraw_on: 'يتم السحب التالي في',
   Power_Down: 'سحب تدريجي',
   sting_chat: 'محادثة Sting',
+  sting_chat_unavailable: 'الدردشة غير متاحة مؤقتًا. يرجى المحاولة مرة أخرى.',
+  sting_chat_key_expired: 'انتهت صلاحية مفتاح الدردشة. سجّل الخروج ثم سجّل الدخول مجددًا باستخدام مفتاح النشر.',
   toggle_dark_mode: 'تبديل الوضع الداكن',
   Cancel_Power_Down: 'إلغاء السحب التدريجي',
   Claimable_Steem_Rewards: 'مكافآت STEEM القابلة للمطالبة',

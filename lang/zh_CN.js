@@ -147,6 +147,8 @@ module.exports = {
   next_withdraw_on: '您的下一次提款将在',
   Power_Down: '降低能量',
   sting_chat: 'Sting聊天',
+  sting_chat_unavailable: '聊天暂时不可用，请重试。',
+  sting_chat_key_expired: '聊天密钥已过期。请退出并使用发帖密钥重新登录。',
   toggle_dark_mode: '切换深色模式',
   Cancel_Power_Down: '取消降低能量',
   Claimable_Steem_Rewards: '可领取的STEEM奖励',

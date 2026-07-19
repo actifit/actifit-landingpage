@@ -147,6 +147,8 @@ module.exports = {
   next_withdraw_on: 'Bir sonraki para çekme işleminiz şu tarihte gerçekleşecek:',
   Power_Down: 'Gücü Azalt',
   sting_chat: 'Sting Sohbeti',
+  sting_chat_unavailable: 'Sohbet geçici olarak kullanılamıyor. Lütfen tekrar deneyin.',
+  sting_chat_key_expired: 'Sohbet anahtarının süresi doldu. Çıkış yapıp gönderi anahtarınızla tekrar giriş yapın.',
   toggle_dark_mode: 'Karanlık Modu Değiştir',
   Cancel_Power_Down: 'Güç Azaltmayı İptal Et',
   Claimable_Steem_Rewards: 'Talep Edilebilir STEEM Ödülleri',
