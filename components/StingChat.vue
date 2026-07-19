@@ -8,6 +8,48 @@
         @click="toggleWidget"
       ></i>
     </span>
+    <div
+      v-if="showPostingKeyPrompt"
+      class="sting-posting-key-backdrop"
+      role="presentation"
+      @click.self="closePostingKeyPrompt"
+    >
+      <div
+        class="sting-posting-key-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="sting-posting-key-title"
+      >
+        <form @submit.prevent="submitPostingKey">
+          <h5 id="sting-posting-key-title">
+            {{ $t('sting_chat_posting_key_title') }}
+          </h5>
+          <p>{{ $t('sting_chat_posting_key_help') }}</p>
+          <label for="sting-posting-key-input">{{ $t('Ppkey') }}</label>
+          <input
+            id="sting-posting-key-input"
+            ref="postingKeyInput"
+            v-model="postingKeyInput"
+            type="password"
+            class="form-control"
+            autocomplete="off"
+            autocapitalize="none"
+            spellcheck="false"
+          >
+          <div v-if="postingKeyError" class="text-danger mt-2" role="alert">
+            {{ postingKeyError }}
+          </div>
+          <div class="sting-posting-key-actions">
+            <button type="button" class="btn btn-secondary" @click="closePostingKeyPrompt">
+              {{ $t('Cancel') }}
+            </button>
+            <button type="submit" class="btn btn-brand">
+              {{ $t('sting_chat_connect') }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -23,7 +65,10 @@ export default {
   data () {
     return {
       widget: null,
-      widgetError: ''
+      widgetError: '',
+      showPostingKeyPrompt: false,
+      postingKeyInput: '',
+      postingKeyError: ''
     }
   },
   computed: {
@@ -150,7 +195,7 @@ export default {
         this.widget.enableKeychainPassthrough = false
         this.widget.enablePeakVaultPassthrough = false
         if (loginMethod === 'posting-key') {
-          this.widgetError = this.$t('sting_chat_key_expired')
+          this.widgetError = this.$t('sting_chat_key_required')
         }
       }
 
@@ -337,7 +382,51 @@ export default {
         return 'The wallet could not sign the message. Please try again.'
       }
     },
+    openPostingKeyPrompt () {
+      this.postingKeyError = ''
+      this.showPostingKeyPrompt = true
+      this.$nextTick(() => {
+        if (this.$refs.postingKeyInput) this.$refs.postingKeyInput.focus()
+      })
+    },
+    closePostingKeyPrompt () {
+      this.showPostingKeyPrompt = false
+      this.postingKeyInput = ''
+      this.postingKeyError = ''
+    },
+    isValidPostingKey (postingKey) {
+      const account = this.user && this.user.account
+      const keyAuths = account && account.posting && account.posting.key_auths
+      if (!postingKey || !Array.isArray(keyAuths)) return false
+
+      try {
+        return keyAuths.some(([publicKey]) => hive.auth.wifIsValid(postingKey, publicKey))
+      } catch (error) {
+        return false
+      }
+    },
+    submitPostingKey () {
+      const postingKey = this.postingKeyInput.trim()
+      if (!this.isValidPostingKey(postingKey)) {
+        this.postingKeyError = this.$t('sting_chat_invalid_posting_key')
+        return
+      }
+
+      this.$store.commit('setChatPostingKey', postingKey)
+      this.closePostingKeyPrompt()
+      this.$nextTick(() => {
+        const container = this.$refs.widgetContainer
+        if (container) container.hidden = false
+      })
+    },
     toggleWidget () {
+      const username = this.user && this.user.account && this.user.account.name
+      const loginMethod = localStorage.getItem('acti_login_method') || 'posting-key'
+      if (username && loginMethod === 'posting-key' && !this.chatPostingKey) {
+        this.openPostingKeyPrompt()
+        return
+      }
+
       const container = this.$refs.widgetContainer
       if (container) container.hidden = !container.hidden
     }
@@ -366,5 +455,33 @@ export default {
 
   .h-screen.flex.flex-col.appbg0.appfg0.border-r-1.sidebar {
     background-color: #ff112d !important;
+  }
+
+  .sting-posting-key-backdrop {
+    position: fixed;
+    z-index: 2000;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.55);
+  }
+
+  .sting-posting-key-dialog {
+    width: 100%;
+    max-width: 440px;
+    padding: 24px;
+    color: #212529;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.3);
+  }
+
+  .sting-posting-key-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 20px;
   }
 </style>

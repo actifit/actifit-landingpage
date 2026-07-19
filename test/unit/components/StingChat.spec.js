@@ -160,4 +160,74 @@ describe('components/StingChat.vue', () => {
     expect(widget.setUser).toHaveBeenCalledWith('alice')
     expect(vm.widgetError).toBe('')
   })
+
+  it('prompts a posting-key user instead of opening chat when the memory key is missing', () => {
+    localStorage.setItem('acti_login_method', '')
+    const container = { hidden: true }
+    const vm = {
+      user: { account: { name: 'alice' } },
+      chatPostingKey: null,
+      $refs: { widgetContainer: container },
+      openPostingKeyPrompt: jest.fn()
+    }
+
+    StingChat.methods.toggleWidget.call(vm)
+
+    expect(vm.openPostingKeyPrompt).toHaveBeenCalledTimes(1)
+    expect(container.hidden).toBe(true)
+  })
+
+  it('validates and attaches a prompted posting key without persisting it', () => {
+    const postingKey = hive.auth.toWif('alice', 'posting-key-test', 'posting')
+    const publicKey = hive.auth.wifToPublic(postingKey)
+    const container = { hidden: true }
+    const store = { commit: jest.fn() }
+    const vm = {
+      postingKeyInput: postingKey,
+      postingKeyError: '',
+      showPostingKeyPrompt: true,
+      user: {
+        account: {
+          posting: { key_auths: [[publicKey, 1]] }
+        }
+      },
+      $store: store,
+      $refs: { widgetContainer: container },
+      $t: (key) => key,
+      $nextTick: (callback) => callback()
+    }
+    vm.isValidPostingKey = (key) => StingChat.methods.isValidPostingKey.call(vm, key)
+    vm.closePostingKeyPrompt = () => StingChat.methods.closePostingKeyPrompt.call(vm)
+
+    StingChat.methods.submitPostingKey.call(vm)
+
+    expect(store.commit).toHaveBeenCalledWith('setChatPostingKey', postingKey)
+    expect(localStorage.getItem('chatPostingKey')).toBeNull()
+    expect(vm.postingKeyInput).toBe('')
+    expect(vm.showPostingKeyPrompt).toBe(false)
+    expect(container.hidden).toBe(false)
+  })
+
+  it('rejects a posting key that does not belong to the logged-in account', () => {
+    const accountKey = hive.auth.toWif('alice', 'posting-key-test', 'posting')
+    const differentKey = hive.auth.toWif('bob', 'posting-key-test', 'posting')
+    const store = { commit: jest.fn() }
+    const vm = {
+      postingKeyInput: differentKey,
+      postingKeyError: '',
+      user: {
+        account: {
+          posting: { key_auths: [[hive.auth.wifToPublic(accountKey), 1]] }
+        }
+      },
+      $store: store,
+      $t: (key) => key
+    }
+    vm.isValidPostingKey = (key) => StingChat.methods.isValidPostingKey.call(vm, key)
+
+    StingChat.methods.submitPostingKey.call(vm)
+
+    expect(store.commit).not.toHaveBeenCalled()
+    expect(vm.postingKeyError).toBe('sting_chat_invalid_posting_key')
+  })
 })
