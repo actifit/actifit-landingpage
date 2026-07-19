@@ -11,17 +11,25 @@
       </h6>
 
       <div class="post-body">
-        <div class="row col-12">
-			<div class="col-6">
+		<div class="community-summary-row">
+			<div class="community-logo-wrap">
 			<a :href="community.name" class="text-brand" >
 				<img :src="$getCommunityLogo(community.name)" :alt="community.title" class="community-image" >
 			</a>
 		  </div>
-          <div class="col-6">
+          <div class="community-summary-copy">
 			<!--<small class="text-muted d-block" :title="date">Created {{ $getTimeDifference(this.community.created_at) }}</small>-->
 			<div ><a :href="buildLink" target="_blank" rel="noopener noreferrer" class="text-brand">#{{community.name}}</a></div>
-			<div>{{community.about}}</div>
-			<small class="text-right curs-point" :title="'Created '+date"><i class="fas fa-calendar"></i>&nbsp;Since {{date}}</small>
+			<div ref="communityDescription" class="community-description" :class="{'community-description-expanded': descriptionExpanded}">{{community.about}}</div>
+			<button
+				v-if="hasLongDescription"
+				type="button"
+				class="community-description-toggle"
+				:aria-expanded="descriptionExpanded ? 'true' : 'false'"
+				@click="descriptionExpanded = !descriptionExpanded">
+				{{ descriptionExpanded ? $t('read_less') : $t('read_more') }}
+			</button>
+			<small class="community-since curs-point" :title="'Created '+date"><i class="fas fa-calendar"></i>&nbsp;Since {{date}}</small>
             <!--<a :href="'/'+community.author" target="_blank" rel="noopener noreferrer">
 
               <div class="user-avatar mr-1"
@@ -56,10 +64,29 @@
 		<div class="details m-2 text-center">
 			<div class="text-center text-brand col-12">{{$t('admins')}}</div>
 		</div>
-			<div class="row col-12">
-				<div v-for="(admin, index) in community.admins" :key="index" :admin="admin" >
-					<UserHoverCard :username="admin" displayMode="no-rank"/>
+			<div class="community-admins-row">
+				<div
+					ref="communityAdmins"
+					class="community-admins"
+					:class="{'community-admins-expanded': adminsExpanded}">
+					<div
+						v-for="(admin, index) in community.admins"
+						v-show="adminsExpanded || index < 2"
+						:key="index"
+						:admin="admin"
+						class="community-admin-item">
+						<UserHoverCard :username="admin" displayMode="no-rank"/>
+					</div>
 				</div>
+				<button
+					v-if="community.admins && community.admins.length > 2"
+					type="button"
+					class="community-admins-toggle"
+					:aria-label="adminsExpanded ? 'Show fewer admins' : 'Show more admins'"
+					:aria-expanded="adminsExpanded ? 'true' : 'false'"
+					@click="adminsExpanded = !adminsExpanded">
+					{{ adminsExpanded ? '−' : '+' }}
+				</button>
 			</div>
 
         <div class="row details mt-2">
@@ -146,6 +173,9 @@ import UserHoverCard from '~/components/UserHoverCard.vue';
 			cur_bchain: 'HIVE',
 			profImgUrl: process.env.hiveImgUrl,
 			loading: false,
+			descriptionExpanded: false,
+			hasLongDescription: false,
+			adminsExpanded: false,
 			//socialSharingTitle: process.env.socialSharingTitle,
 			//socialSharingDesc: process.env.socialSharingDesc,
 			//socialSharingQuote: process.env.socialSharingQuote,
@@ -161,6 +191,11 @@ import UserHoverCard from '~/components/UserHoverCard.vue';
 	  postUpvoted: 'updatePostData',
 	},
 	methods: {
+	  measureDescriptionOverflow(){
+		if (this.descriptionExpanded || !this.$refs.communityDescription) return;
+		const description = this.$refs.communityDescription;
+		this.hasLongDescription = description.scrollHeight > description.clientHeight + 1;
+	  },
 	  async subscribe(){
 		let cstm_params;
 		if (this.userSubscribed){
@@ -255,6 +290,8 @@ import UserHoverCard from '~/components/UserHoverCard.vue';
 
 		//grab moderators' list
 		this.$store.dispatch('fetchModerators')
+		this.$nextTick(this.measureDescriptionOverflow)
+		window.addEventListener('resize', this.measureDescriptionOverflow)
 
 		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 
@@ -262,6 +299,9 @@ import UserHoverCard from '~/components/UserHoverCard.vue';
 		if (this.cur_bchain == 'STEEM'){
 			this.profImgUrl = process.env.steemImgUrl;
 		}
+	},
+	beforeDestroy () {
+		window.removeEventListener('resize', this.measureDescriptionOverflow)
 	},
 
   }
@@ -300,7 +340,18 @@ import UserHoverCard from '~/components/UserHoverCard.vue';
 	  color: white;
 	}
 	.post-title{
-		min-height: 60px;
+		min-height: 48px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-weight: 700;
+	}
+	.post-title a{
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 6px;
+		line-height: 1.2;
 	}
 	.card{
 		box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
@@ -311,9 +362,93 @@ import UserHoverCard from '~/components/UserHoverCard.vue';
 		overflow: hidden;
 	}
 	.community-image{
-		width: 150px;
-		height: 150px;
+		width: 120px;
+		height: 140px;
 		object-fit: scale-down;
+	}
+	.community-summary-row{
+		min-height: 150px;
+		display: flex;
+		align-items: flex-start;
+		gap: 10px;
+	}
+	.community-logo-wrap{
+		flex: 0 0 120px;
+	}
+	.community-summary-copy{
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		min-width: 0;
+		flex: 1 1 auto;
+	}
+	.community-description{
+		display: -webkit-box;
+		overflow: hidden;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 3;
+	}
+	.community-description-expanded{
+		display: block;
+		overflow: visible;
+		-webkit-box-orient: initial;
+		-webkit-line-clamp: unset;
+	}
+	.community-description-toggle{
+		padding: 0;
+		border: 0;
+		background: transparent;
+		color: #ff112d;
+		font: inherit;
+		font-size: 0.85rem;
+		font-weight: 700;
+		cursor: pointer;
+	}
+	.community-description-toggle:hover,
+	.community-description-toggle:focus{
+		text-decoration: underline;
+	}
+	.community-since{
+		text-align: left;
+	}
+	.community-admins-row{
+		display: flex;
+		align-items: flex-start;
+		gap: 6px;
+		min-width: 0;
+		min-height: 32px;
+	}
+	.community-admins{
+		display: flex;
+		flex: 1 1 auto;
+		flex-wrap: nowrap;
+		align-items: center;
+		gap: 6px;
+		overflow: hidden;
+		min-width: 0;
+		white-space: nowrap;
+	}
+	.community-admins-expanded{
+		flex-wrap: wrap;
+		overflow: visible;
+		white-space: normal;
+	}
+	.community-admin-item{
+		flex: 0 0 auto;
+	}
+	.community-admins-toggle{
+		flex: 0 0 24px;
+		width: 24px;
+		height: 24px;
+		padding: 0;
+		border: 1px solid #ff112d;
+		border-radius: 50%;
+		background: transparent;
+		color: #ff112d;
+		font-size: 1.15rem;
+		font-weight: 700;
+		line-height: 20px;
+		cursor: pointer;
 	}
 	.curs-point{
 		cursor: pointer;
