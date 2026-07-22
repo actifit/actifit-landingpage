@@ -43,7 +43,24 @@
     <!-- Body Snippet -->
     <div class="row">
       <div class="col-12">
+        <div v-if="expandableSnippet" class="report-snippet-section">
+          <div
+            ref="snippetContent"
+            class="report-snippet"
+            v-html="snippet">
+          </div>
+          <button
+            v-if="hasSnippetOverflow"
+            type="button"
+            class="report-snippet-toggle"
+            :data-toggle="modalTarget ? 'modal' : null"
+            :data-target="modalTarget"
+            @click="$emit('open-modal')">
+            {{ $t('read_more') }}
+          </button>
+        </div>
         <a
+          v-else
           href="#"
           class=""
           @click.prevent="$emit('open-modal')"
@@ -67,6 +84,7 @@ export default {
     cardData: { type: Object, required: true },
     modalTarget: { type: String, required: true },
     snippet: { type: String, default: '' },
+    expandableSnippet: { type: Boolean, default: false },
     // Carousel specific props
     imageLoadFailed: { type: Boolean, default: false },
     imageLoading: { type: Boolean, default: true },
@@ -76,7 +94,29 @@ export default {
     currentImageIndex: { type: Number, default: 0 }
   },
   emits: ['open-modal', 'image-load', 'image-error', 'next-image', 'prev-image', 'go-to-image'],
+  data() {
+    return {
+      hasSnippetOverflow: false
+    }
+  },
+  watch: {
+    snippet() {
+      this.$nextTick(this.measureSnippetOverflow)
+    }
+  },
+  mounted() {
+    this.$nextTick(this.measureSnippetOverflow)
+    window.addEventListener('resize', this.measureSnippetOverflow)
+  },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.measureSnippetOverflow)
+  },
   methods: {
+    measureSnippetOverflow() {
+      if (!this.expandableSnippet || !this.$refs.snippetContent) return
+      const snippet = this.$refs.snippetContent
+      this.hasSnippetOverflow = snippet.scrollHeight > snippet.clientHeight + 1
+    },
     onImageLoad() { this.$emit('image-load'); },
     onImageError(event) { this.$emit('image-error', event); },
     nextImage() { this.$emit('next-image'); },
@@ -103,6 +143,32 @@ a:hover {
   overflow: hidden;
   height: 150px;
   background-color: #f0f0f0;
+}
+.report-snippet-section {
+  min-height: 82px;
+  padding-top: 4px;
+}
+.report-snippet {
+  height: 60px;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-height: 20px;
+}
+.report-snippet-toggle {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #ff112d;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.report-snippet-toggle:hover,
+.report-snippet-toggle:focus {
+  text-decoration: underline;
 }
 .image-loader-container {
   display: flex;

@@ -2,7 +2,7 @@
   <!-- single report item for activity pages -->
   <div>
     <div class="card report">
-      <CardHeader :title="report.title" :link="report.url" :showRewardedCheck="this.afitReward > 0" />
+      <CardHeader :title="report.title" :link="report.url" :showRewardedCheck="this.afitReward > 0" :showExternalLink="false" accent />
       <div class="report-body p-2">
         <!-- Author/Date row (remains here) -->
         <div class="row pb-1">
@@ -17,7 +17,8 @@
         <CardBody
           :cardData="report"
           modalTarget="#reportModal"
-          :snippet="bodySnippet"
+          :snippet="reportDescription"
+          expandableSnippet
           :imageLoadFailed="imageLoadFailed"
           :imageLoading="imageLoading"
           :imageGeneration="imageGeneration"
@@ -67,7 +68,7 @@
             <a href="#" class="text-brand" @click="$store.commit('setEditPost', report)" data-toggle="modal" data-target="#editPostModal" v-if="user && report.author === user.account.name" :title="$t('Edit_note')">
               <i class="fas fa-edit p-2"></i>
             </a>
-            <a href="#" class="text-brand" @click="report.rptId = rptId; $store.commit('setActiveReport', report)" data-toggle="modal" data-target="#reportModal" :title="$t('read_more_small')">
+            <a :href="report.url" target="_blank" rel="noopener noreferrer" class="text-brand" :title="$t('read_more_small')">
               <i class="fas fa-book-open"></i>
             </a>
           </template>
@@ -154,6 +155,10 @@ export default {
     ...mapGetters(['moderators']),
     cardData () {
       return this.report
+    },
+    reportDescription () {
+      if (!this.report || !this.report.body) return ''
+      return this.$cleanBody(this.report.body, true, true).replace(/<[^>]+>/g, '')
     },
     // Component-specific computed properties
     date () {
