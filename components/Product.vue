@@ -1,203 +1,236 @@
-﻿<template>
+<template>
   <!-- single card item for approved product -->
-  <div class="card form mx-auto p-3 mt-3 mt-md-5 text-center pro-card col-sm-4"
+  <div class="card form mx-auto p-3 mt-3 mt-md-5 text-center pro-card product-card col-sm-4"
     :class="[productTypeBorder, { 'christmas-card': product.specialevent && product.event == 'Christmas' }]">
-    <div class="text-center card-header">
-      <div class="row basic-info">
-        <h3 class="pro-name col-md-12">{{ this.product.name }}<span
-            v-if="!product.specialevent && this.product.level">{{ $t('level_short') }}{{ this.product.level }}</span>
-        </h3>
 
-        <div v-if="this.product.type == 'ingame' || this.product.type == 'real'" class="col-md-6"
+    <!-- header: title, level, media, type -->
+    <div class="text-center ">
+      <div class="card-title-row">
+        <h3 class="pro-name mb-0">
+          {{ this.product.name }}
+          <span class="level-badge" v-if="!product.specialevent && this.product.level">{{ $t('level_short') }}{{ this.product.level }}</span>
+        </h3>
+      </div>
+
+      <div class="card-media-row">
+        <div class="card-media-col"
+          v-if="this.product.type == 'ingame' || this.product.type == 'real'"
           :title="!product.specialevent ? this.product.name + ' - Level ' + this.product.level : this.product.name">
           <div v-if="this.product.image.startsWith('http')" :class="'avatar-' + this.product.level"
             class="avatar pro-card-av mx-auto" :style="'background-image: url(' + this.product.image + ');'"></div>
           <div v-else :class="'avatar-' + this.product.level" class="avatar pro-card-av mx-auto"
             :style="'background-image: url(img/gadgets/' + this.product.image + ');'"></div>
-          <span v-for="iterl in this.product.level" :key="iterl">
-            <i class="fas fa-star text-brand"></i>
-          </span>
+          <div class="level-stars">
+            <span v-for="iterl in this.product.level" :key="iterl">
+              <i class="fas fa-star text-brand"></i>
+            </span>
+          </div>
         </div>
-        <div v-else class="col-md-6">
+        <div class="card-media-col" v-else>
           <a :href="'/' + this.product.provider">
-            <div class="avatar pro-card-av mx-auto mb-3" :style="'background-image: url(' + product_prov_pic + ');'">
+            <div class="avatar pro-card-av mx-auto mb-1" :style="'background-image: url(' + product_prov_pic + ');'">
             </div>
           </a>
         </div>
-        <div class="col-md-6">
-          <div v-if="this.product.type == 'ingame'" class="avatar gaming-label mx-auto"
-            :style="'background-image: url(img/gadgets/gaming.png);'"></div>
-          <h4 v-else-if="this.product.type == 'ebook'"><i class="fas fa-book"></i></h4>
-          <h4 v-else-if="this.product.type == 'service'"><i class='fas fa-phone-volume'></i></h4>
-          <h3 class="product-type">{{ renderProdType }} <span
-              v-if="this.product.type != 'ingame' && this.product.type != 'real'">{{ $t('By') }}</span> <br />
+
+        <div class="card-type-col" :class="{ 'card-type-col-ingame': this.product.type == 'ingame' }">
+          <div v-if="this.product.type == 'ingame'" class="ingame-type-stack">
+            <div class="avatar gaming-label mx-auto"
+              :style="'background-image: url(img/gadgets/gaming.png);'"></div>
+            <h3 class="product-type mb-1">{{ renderProdType }}</h3>
+          </div>
+          <h4 class="type-icon" v-else-if="this.product.type == 'ebook'"><i class="fas fa-book"></i></h4>
+          <h4 class="type-icon" v-else-if="this.product.type == 'service'"><i class='fas fa-phone-volume'></i></h4>
+          <h3 v-else class="product-type mb-1">{{ renderProdType }}
+            <span v-if="this.product.type != 'ingame' && this.product.type != 'real'">{{ $t('By') }}</span>
+          </h3>
+          <div class="provider-link">
             <a v-if="this.product.type == 'service'" :href="'/consultants/?prof=' + this.product.provider_name">{{
               this.product.provider_name }}</a>
             <a v-else :href="'/' + this.product.provider">{{ this.product.provider_name }}</a>
-            <span v-if="this.product.type == 'real'">
-              <span v-if="this.item_price_extra > 0"><img class="token-logo-md " src="/img/HIVE.png">+</span>
-              <span><img class="token-logo-md " src="/img/actifit_logo.png"></span>
+            <span v-if="this.product.type == 'real'" class="real-currency-badges">
+              <span v-if="this.item_price_extra > 0"><img class="token-logo-sm" src="/img/HIVE.png">+</span>
+              <span><img class="token-logo-sm" src="/img/actifit_logo.png"></span>
             </span>
-          </h3>
-          <!--<div class="pb-md-2 text-left" >
-					<b>{{ $t('price')}}: </b>{{numberFormat(this.item_price, 2)}} {{this.item_currency}}<img class="token-logo" src="/img/actifit_logo.png">
-				  </div>-->
+          </div>
         </div>
       </div>
-      <div class="row expansion-arrow">
-        <a class="arrow-icon" v-on:click="switchArrowStatus" :class="prodDispStatus" :title="prodDispStatusText">
-          <span class="left-bar"></span>
-          <span class="right-bar"></span>
-        </a>
-      </div>
+
+      <button type="button" class="expand-toggle-btn" v-on:click="switchArrowStatus" :class="prodDispStatus"
+        :title="prodDispStatusText">
+        <i class="fas" :class="prodDispStatus === 'open' ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+        {{ prodDispStatusText }}
+      </button>
     </div>
+
     <transition name="body-expan">
       <div class="body-container" v-if="this.prodDispStatus == 'open'">
-        <div class="card-body" v-if="this.product.type == 'real'">
-          <div class="row text-info pt-1">
-            <div class="pb-md-2 pt-md-2 col-12 text-center info-box info-box-orangered">
-              <b>{{ $t('Available') }}</b><br />{{ this.product.count }} {{ $t('units') }}
+
+        <!-- REAL PRODUCT BODY -->
+        <div class="card-body product-details-stack" v-if="this.product.type == 'real'">
+          <div class="card-section product-gallery-section">
+
+            <div class="card-section-title">{{ $t('product_images') }}</div>
+            <div class="">
+              <button v-if="galleryImages.length > 1" class="slider-btn prev" @click.prevent="prevGalleryImage">
+                <i class="fas fa-chevron-left"></i>
+              </button>
+              <img :src="galleryCurrentImage" :alt="product.name" class="gallery-main-image" />
+              <button v-if="galleryImages.length > 1" class="slider-btn next" @click.prevent="nextGalleryImage">
+                <i class="fas fa-chevron-right"></i>
+              </button>
+            </div>
+            <div class="image-indicators" v-if="galleryImages.length > 1">
+              <span
+                v-for="(img, index) in galleryImages"
+                :key="index"
+                class="image-indicator"
+                :class="{ active: galleryIndex === index }"
+                @click.prevent="galleryIndex = index">
+              </span>
             </div>
           </div>
-          <div class="row">
-            <div class="col-md-12 pb-md-2 pt-md-2 info-box info-box-orangered">
-              <b>{{ $t('Requirements') }}</b>
-              <div
-                v-if="product.requirements == null || product.requirements.length == 0 || product.requirements.length == 1 && product.requirements[0].item == null">
-                <span>{{ $t('none') }}</span>
-              </div>
-              <div v-else v-for="(reqt, index) in product.requirements" :key="index" class="text-left">
-                <div>
-                  <span v-if="user" class="pr-1">
-                    <i class="fas fa-check text-success" :title="$t('reqt_met')" v-if="reqt.met"></i>
-                    <i class="fas fa-times-circle text-dark" :title="$t('reqt_not_met')" v-else></i>
-                    <!--<i class="fas fa-times text-brand" :title="$t('reqt_not_met')" v-else></i>-->
-                  </span>
-                  <span v-if="reqt.item && reqt.item.toLowerCase() == 'User Rank'.toLowerCase()"
-                    :title="$t('user_rank_reqt').replace('_VAL_', reqt.level)">{{ reqt.item }} &gt; {{ reqt.level
-                    }}</span>
-                  <span v-else-if="reqt.item && reqt.item.toLowerCase() == 'AFIT'.toLowerCase()"
-                    :title="$t('afit_reqt').replace('_VAL_', reqt.count)">{{ $t('user_afit_balace') }} &gt;=
-                    {{ reqt.count }} {{ reqt.item }}
+          <div class="details-grid card-section">
 
-                  </span>
-                  <span v-else
-                    :title="$t('consumed_reqt').replace('_AMOUNT_', reqt.count).replace('_ITEM_', reqt.item).replace('_LEVEL_', reqt.level)">{{
-                      $t('At_Least') }}
-                    {{ reqt.count }} '{{ reqt.item }} {{ $t('level_short') }} {{ reqt.level }}' {{ $t('consumed')
-                    }}</span>
-                </div>
-                <!--<div v-if="user && reqt.item && reqt.item.toLowerCase() == 'AFIT'.toLowerCase()" >
-							<div v-if="!proceedBuyAFIT" class="text-right p-2">
-								<button v-on:click="proceedBuyAFIT=true" class="btn btn-brand btn-lg border">{{ $t('Buy_afit_now') }}</button>
-							</div>
-							<div v-else class="bg-light text-brand text-center w-100 p-2 rounded-top"><h4>{{ $t('buy_afit_title') }}</h4><small>{{ $t('afit_buy_notice') }}</small></div>
-						</div>-->
-                <div v-if="proceedBuyAFIT" class="bg-light text-brand rounded-bottom p-1">
-                  <div class="row">
-                    <div class="w-25 m-1 text-right" :value="reqt.count">{{ $t('AFIT_Amount') }}</div>
-                    <input type="number" id="afit-amount-buy" name="afit-amount-buy" ref="afit-amount-buy"
-                      class="form-control-lg w-50 m-1" v-model="afitBuyAmount"><img src="/img/actifit_logo.png"
-                      class="mr-1 token-logo-md">
-                  </div>
-                  <div class="row">
-                    <div class="w-25 m-1 text-right">{{ $t('HIVE_Amount') }}</div>
-                    <input type="number" id="hive-amount-pay" name="hive-amount-pay" ref="hive-amount-pay"
-                      class="form-control-lg w-50 m-1" readonly="readonly" :value="getMatchingHIVE()">
-                    <img src="/img/HIVE.png" class="mr-2 token-logo-md">
-                  </div>
-                  <div class="row" v-if="!isKeychainActive && !isHiveauthActive">
-                    <div class="w-25 m-1 text-right">{{ $t('Active_Key') }}</div>
-                    <input type="password" id="active-key" name="active-key" ref="active-key"
-                      class="form-control-lg w-50 m-1" v-model="userActvKeyHv">
-                  </div>
-                  <div class="text-center">
-                    <button v-on:click="buyAFITNow" class="btn btn-brand btn-lg p-2 border">{{ $t('Proceed') }}</button>
-                    <button v-on:click="proceedBuyAFIT = false" class="btn btn-brand btn-lg p-2 border">{{ $t('Cancel')
-                      }}</button>
-                  </div>
-                  <div class="row">
-                    <div class="w-25"></div>
-                    <div v-if="buyAfitInProgress" class="w-50 text-brand">
-                      <i class="fas fa-spin fa-spinner"></i>{{ $t('confirming_buy_transaction') }}
-                    </div>
-                    <div v-else-if="afit_buy_err_msg" class="w-75 text-brand">
-                      {{ afit_buy_err_msg }}
-                    </div>
-                  </div>
+            <!-- Available -->
+            <div class="detail-card">
+              <div class="detail-card-title">
+                <i class="fas fa-box-open"></i>
+                {{ $t('Available') }}
+              </div>
+
+              <div class="detail-card-content">
+                <div class="detail-pill detail-pill-neutral">
+                  {{ product.count }} {{ $t('units') }}
                 </div>
               </div>
+            </div>
+
+            <!-- Requirements -->
+            <div class="detail-card">
+              <div class="detail-card-title">
+                <span v-if="user" class="reqt-icon">
+                  <i
+                    class="fas"
+                    :class="realRequirementsMet ? 'fa-check-circle text-success' : 'fa-times-circle text-red'"
+                    :title="realRequirementsMet ? $t('reqt_met') : 'Requirements not met'"
+                  ></i>
+                </span>
+                <i v-else class="fas fa-check-circle"></i>
+                {{ $t('Requirements') }}
+              </div>
+
+              <div
+                class="detail-card-content detail-pill-list"
+                v-if="product.requirements &&
+                      !(product.requirements.length==1 &&
+                        product.requirements[0].item==null)"
+              >
+                <div
+                  v-for="(req,index) in product.requirements"
+                  :key="index"
+                  class="detail-pill req-chip"
+                  :class="{met:user && req.met, notmet:user && !req.met}"
+                >
+                  <template v-if="req.item.toLowerCase()=='user rank'">
+                    {{ req.item }} > {{ req.level }}
+                  </template>
+
+                  <template v-else-if="req.item.toLowerCase()=='afit'">
+                    {{ req.count }} AFIT
+                  </template>
+
+                  <template v-else>
+                    {{ req.count }} × {{ req.item }} L{{ req.level }}
+                  </template>
+
+                </div>
+              </div>
+
+              <div
+                v-else
+                class="detail-pill detail-pill-neutral"
+              >
+                {{ $t('None') }}
+              </div>
+
 
             </div>
+          </div>
+
+          <div class="card-section">
+            <div class="card-section-title">{{ $t('details') }}</div>
+            <p class="detail-text">{{ this.product.description }}</p>
           </div>
         </div>
 
-
-
-        <div class="card-body" v-if="this.product.type == 'ingame'">
-          <div class="row text-info pt-1">
-            <div class="pb-md-2 pt-md-2 text-center col-md-6 info-box info-box-orangered">
-              <b>{{ $t('Available') }}</b><br />{{ this.product.count }} {{ $t('units') }}
-            </div>
-            <div class="pb-md-2 pt-md-2 text-center col-md-6 info-box info-box-orangered">
-              <div>
-                <b>{{ $t('Validity') }}</b><br />{{ this.product.benefits.time_span }} {{
-                  this.product.benefits.time_unit }}
+        <!-- INGAME PRODUCT BODY -->
+        <div class="card-body product-details-stack" v-if="this.product.type == 'ingame'">
+          <div class="card-section product-summary-section">
+            <div class="info-grid">
+              <div class="info-tile">
+                <span class="info-tile-label">{{ $t('Available') }}</span>
+                <span class="info-tile-value">{{ this.product.count }} {{ $t('units') }}</span>
               </div>
+              <div class="info-tile">
+                <span class="info-tile-label">{{ $t('Validity') }}</span>
+                <span class="info-tile-value">{{ this.product.benefits.time_span }} {{
+                  this.product.benefits.time_unit }}</span>
+              </div>
+
             </div>
           </div>
 
-          <div class="row">
-            <div class="col-md-12 pb-md-2 pt-md-2 info-box info-box-orangered">
-              <b>{{ $t('Boosts') }}</b>
-              <div v-for="(boost, index) in product.benefits.boosts" :key="index" style="text-align: left;">
-                <div>
-                  <span v-if="boost.boost_beneficiary == 'friend'" :title="$t('Boost') + ' ' + $t('to_a_friend')"><i
-                      class="fas fa-user-friends pl-2"></i></span>
-                  <span v-else :title="$t('Boost') + ' ' + $t('to_you')"><i class="fas fa-user pl-2"></i></span>
-                  <span v-if="boost.boost_amount">
+          <div class="card-section">
+            <div class="card-section-title">{{ $t('Boosts') }}</div>
+            <ul class="boost-list">
+              <li v-for="(boost, index) in product.benefits.boosts" :key="index" class="boost-item">
+                <span v-if="boost.boost_beneficiary == 'friend'" :title="$t('Boost') + ' ' + $t('to_a_friend')"><i
+                    class="fas fa-user-friends"></i></span>
+                <span v-else :title="$t('Boost') + ' ' + $t('to_you')"><i class="fas fa-user"></i></span>
+
+                <span v-if="boost.boost_amount" class="boost-detail">
+                  <span class="color-dots">
                     <span v-for="iterx in Math.ceil(boost.boost_amount / 5)" :key="iterx">
                       <span class="color-box-afit" v-if="boost.boost_unit == 'AFIT'"></span>
                       <span class="color-box-sports" v-else-if="boost.boost_unit == 'SPORTS'"></span>
                       <span class="color-box-steem" v-else-if="boost.boost_unit == 'SP'"></span>
                       <span class="color-box-rank" v-else-if="boost.boost_unit == 'User Rank'"></span>
                     </span>
-                    <br v-if="product.specialevent" /><br v-if="product.specialevent" />
-                    <span>&nbsp;+{{ boost.boost_amount }}</span><span>{{ boost.boost_type.replace('percent_reward',
-                      '%').replace('percent', '%').replace('unit', ' ') }}</span>&nbsp;<span>{{ boost.boost_unit }} {{
-                        $t('rewards') }} {{ $t('per_report') }}</span>&nbsp;
                   </span>
-                  <span v-else-if="boost.boost_min_amount">
+                  <span class="boost-text">+{{ boost.boost_amount }}{{ boost.boost_type.replace('percent_reward',
+                    '%').replace('percent', '%').replace('unit', ' ') }} {{ boost.boost_unit }} {{
+                      $t('rewards') }} {{ $t('per_report') }}</span>
+                </span>
+                <span v-else-if="boost.boost_min_amount" class="boost-detail">
+                  <span class="color-dots">
                     <span v-for="iterx in Math.ceil(boost.boost_max_amount / 5)" :key="iterx">
                       <span class="color-box-afit" v-if="boost.boost_unit == 'AFIT'"></span>
                     </span>
-                    <br v-if="product.specialevent" /><br v-if="product.specialevent" />
-                    <span>+&nbsp;</span><span>{{ boost.boost_type.replace('percent_reward', '%').replace('percent',
-                      '%').replace('unit', ' ') }}</span>&nbsp;{{ boost.boost_min_amount }}&nbsp;-&nbsp;{{
-                        boost.boost_max_amount }}<span>&nbsp;{{ boost.boost_unit }}
-                      {{ $t('rewards') }} {{ $t('per_report') }}</span>&nbsp;
                   </span>
-                  <span v-if="boost.boost_beneficiary == 'friend'">{{ $t('to_a_friend') }}</span>
-                  <span v-else>{{ $t('to_you') }}</span>
-                </div>
-              </div>
-            </div>
+                  <span class="boost-text">+{{ boost.boost_type.replace('percent_reward', '%').replace('percent',
+                    '%').replace('unit', ' ') }} {{ boost.boost_min_amount }}-{{
+                      boost.boost_max_amount }} {{ boost.boost_unit }} {{ $t('rewards') }} {{ $t('per_report') }}</span>
+                </span>
+                <span class="boost-target" v-if="boost.boost_beneficiary == 'friend'">{{ $t('to_a_friend') }}</span>
+                <span class="boost-target" v-else>{{ $t('to_you') }}</span>
+              </li>
+            </ul>
           </div>
 
-          <div class="row">
-            <div class="col-md-12 pb-md-2 pt-md-2 info-box info-box-orangered">
-              <b>{{ $t('Requirements') }}</b>
-              <div
-                v-if="product.requirements == null || product.requirements.length == 0 || product.requirements.length == 1 && product.requirements[0].item == null">
-                <span>{{ $t('none') }}</span>
-              </div>
-              <div v-else v-for="(reqt, index) in product.requirements" :key="index" class="text-left">
-                <span v-if="user" class="pr-1">
+          <div class="card-section">
+            <div class="card-section-title">{{ $t('Requirements') }}</div>
+            <div
+              v-if="product.requirements == null || product.requirements.length == 0 || product.requirements.length == 1 && product.requirements[0].item == null">
+              <span class="text-muted">{{ $t('none') }}</span>
+            </div>
+            <ul class="requirement-list" v-else>
+              <li v-for="(reqt, index) in product.requirements" :key="index" class="requirement-item">
+                <span v-if="user" class="reqt-icon">
                   <i class="fas fa-check text-success" :title="$t('reqt_met')" v-if="reqt.met"></i>
-                  <i class="fas fa-times-circle text-dark" :title="$t('reqt_not_met')" v-else></i>
-                  <!--<i class="fas fa-times text-brand" :title="$t('reqt_not_met')" v-else></i>-->
+                  <i class="fas fa-times-circle text-red" :title="$t('reqt_not_met')"  v-else></i>
                 </span>
-                <span class="" v-if="reqt.item && reqt.item.toLowerCase() == 'User Rank'.toLowerCase()"
+                <span v-if="reqt.item && reqt.item.toLowerCase() == 'User Rank'.toLowerCase()"
                   :title="$t('user_rank_reqt').replace('_VAL_', reqt.level)">{{ reqt.item }} &gt; {{ reqt.level
                   }}</span>
                 <span v-else
@@ -205,131 +238,178 @@
                     $t('At_Least') }}
                   {{ reqt.count }} '{{ reqt.item }} {{ $t('level_short') }} {{ reqt.level }}' {{ $t('consumed')
                   }}</span>
-              </div>
-            </div>
+              </li>
+            </ul>
           </div>
 
-          <div class="row">
-            <div class="col-md-12 pb-md-2 pt-md-2 text-left">
-              <b>{{ $t('details') }}: </b>{{ this.product.description }}
-            </div>
+          <div class="card-section">
+            <div class="card-section-title">{{ $t('details') }}</div>
+            <p class="detail-text">{{ this.product.description }}</p>
           </div>
-
         </div>
 
-        <div v-else class="card-body pb-md-2 text-left">
-          <b>{{ $t('details') }}: </b>{{ this.product.description }}
-        </div>
+        <!-- EBOOK / SERVICE BODY -->
+        <div v-else-if="this.product.type == 'ebook' || this.product.type == 'service'" class="card-body product-details-stack">
 
-        <div v-if="product.type == 'real'" class="card-body pb-md-2 text-left">
-          <!--<b>{{ $t('Delivery')}}: </b>{{this.product.delivery}}-->
-
-          <!--<LightBox :media="media" ></LightBox>-->
-          <div class="lbox-container mb-2">
-            <div>
-              <b>{{ $t('product_images') }}</b>
-              <br />
-            </div>
-            <div class="col-9">
-              <lightbox css="h-200 h-lg-250 w-200" :cells="2" :items="product.prodImages"></lightbox>
-            </div>
+          <div class="card-section">
+            <div class="card-section-title">{{ $t('details') }}</div>
+            <p class="detail-text">{{ this.product.description }}</p>
           </div>
         </div>
 
         <div v-if="user && product.type == 'real' && !checkout_product && realProdBuyStatus"
-          class="card-body pb-md-2 text-left">
-          <b>{{ $t('order_quantity') }} </b>
-          <select v-model="order_quantity" class="col-6 form-control sel-adj">
-            <option value="1" selected>1</option>
-            <option v-if="product.allowedQuantity && quant < product.allowedQuantity"
-              v-for="quant in product.allowedQuantity" :value="quant + 1" :key="quant + 1">{{ quant + 1 }}</option>
-          </select>
+          class="card-body">
+          <div class="card-section form-field-row">
+            <label class="field-label">{{ $t('quantity') }}</label>
+            <select v-model="order_quantity" class="form-control sel-adj">
+              <option value="1" selected>1</option>
+              <option v-if="product.allowedQuantity && quant < product.allowedQuantity"
+                v-for="quant in product.allowedQuantity" :value="quant + 1" :key="quant + 1">{{ quant + 1 }}</option>
+            </select>
+          </div>
         </div>
 
         <div v-if="user && product.type == 'real' && !checkout_product && realProdBuyStatus && product.colorOptions"
-          class="card-body pb-md-2 text-left">
-          <b>{{ $t('color_choice') }} </b>
-          <select v-model="color_choice" class="col-6 form-control sel-adj">
-            <option v-if="Array.isArray(product.colorOptions) && product.colorOptions.length > 0"
-              v-for="colr in product.colorOptions" :value="colr" :key="colr">{{ colr }}</option>
-          </select>
+          class="card-body">
+          <div class="card-section form-field-row">
+            <label class="field-label">{{ $t('color_choice') }}</label>
+            <select v-model="color_choice" class="form-control sel-adj">
+              <option v-if="Array.isArray(product.colorOptions) && product.colorOptions.length > 0"
+                v-for="colr in product.colorOptions" :value="colr" :key="colr">{{ colr }}</option>
+            </select>
+          </div>
         </div>
 
       </div> <!-- body-container -->
     </transition>
-    <div class="card-footer pb-md-2 text-center">
+
+    <div class="card-footer product-card-footer">
       <div v-if="product.type == 'real'">
-        <a v-if="!checkout_product && realProdBuyStatus" class="btn btn-success btn-lg book-button"
-          @click.prevent="prepareCheckout()" :class="productBuyColor" style="float:left; border: 1px white solid;">{{
-            $t('Buy_now') }} <br />
-          <span v-if="this.item_price_extra > 0">{{ numberFormat(this.item_price_extra, 2) }}
-            {{ this.item_extra_currency }}<img class="token-logo-sm " src="/img/HIVE.png">+</span>
-          {{ numberFormat(this.item_price, 2) }} {{ this.item_currency }}<img class="token-logo-sm "
-            src="/img/actifit_logo.png">
-        </a>
-        <span v-else-if="!checkout_product">
-          <span style='color:green'>{{ $t('pending_real_order_notification') }}</span>
-          <div v-for="(entry, index) in pendingOrders" :key="index" :entry="entry">
-            <span style='color:green'><i class="fas fa-check text-success"></i>{{ $t('item_bought') }}
-              {{ showDate(entry.date_bought) }} {{ $t('with_status') }} {{ entry.status }}</span>
+        <div class="buy-actions-block" v-if="!checkout_product && realProdBuyStatus">
+          <a class="btn btn-success book-button buy-cta" @click.prevent="prepareCheckout()"
+            :class="productBuyColor">
+            <span class="buy-cta-label">{{ $t('Buy_now') }}</span>
+            <span class="buy-cta-price">
+              <span v-if="this.item_price_extra > 0">{{ numberFormat(this.item_price_extra, 2) }}
+                {{ this.item_extra_currency }}<img class="token-logo-sm" src="/img/HIVE.png">+</span>
+              {{ numberFormat(this.item_price, 2) }} {{ this.item_currency }}<img class="token-logo-sm"
+                src="/img/actifit_logo.png">
+            </span>
+          </a>
+        </div>
+        <div v-else-if="!checkout_product" class="pending-order-block">
+          <span class="pending-order-text">{{ $t('pending_real_order_notification') }}</span>
+          <div v-for="(entry, index) in pendingOrders" :key="index" :entry="entry" class="pending-order-entry">
+            <i class="fas fa-check text-success"></i> {{ $t('item_bought') }}
+            {{ showDate(entry.date_bought) }} {{ $t('with_status') }} {{ entry.status }}
           </div>
-          <!-- confirm order button -->
-          <textarea rows="4" cols="30" class="text-brand" ref="prodFeedback" id="prodFeedback"
+          <textarea rows="4" cols="30" class="form-control text-brand mt-2" ref="prodFeedback" id="prodFeedback"
             :placeholder="$t('your_feedback')">
 					</textarea>
-
-          <a class="btn btn-success btn-lg book-button" @click.prevent="confirmReceipt()">{{ $t('confirm_receipt')
+          <a class="btn btn-success btn-lg book-button mt-2" @click.prevent="confirmReceipt()">{{ $t('confirm_receipt')
             }}</a>
-
-        </span>
+        </div>
       </div>
+
       <div v-else-if="product.type == 'ingame'">
-        <a class="btn btn-danger btn-lg w-100 book-button" @click.prevent="activateGadget()" :class="productBuyColor"
-          v-if="grabConsumableItem() && grabConsumableItem().status == 'bought'">
-          <span>{{ $t('activate_gadget') }}</span>&nbsp;
-          <i class="fas fa-check text-success"></i>
-        </a>
-        <a class="btn btn-success btn-lg w-100 book-button" @click.prevent="deactivateGadget()" :class="productBuyColor"
-          v-else-if="grabConsumableItem() && grabConsumableItem().status == 'active'">
-          <span>{{ $t('deactivate_gadget') }}</span>&nbsp;
-          <i class="fas fa-times text-brand"></i>
-        </a>
+        <div v-if="grabConsumableItem()" class="ingame-status-panel">
+          <a
+            class="btn btn-lg w-100 book-button ingame-action-btn"
+            @click.prevent="grabConsumableItem().status == 'active' ? deactivateGadget() : activateGadget()"
+            :class="grabConsumableItem().status == 'active' ? 'btn-success' : 'btn-danger'"
+          >
+            <span>{{ grabConsumableItem().status == 'active' ? $t('deactivate_gadget') : $t('activate_gadget') }}</span>
+            <i
+              class="fas ml-2"
+              :class="grabConsumableItem().status == 'active' ? 'fa-times' : 'fa-check'"
+            ></i>
+          </a>
+
+          <div class="count-summary-grid ingame-status-grid">
+            <div class="count-summary-item">
+              <span class="count-summary-label">{{ $t('Status') }}</span>
+              <span
+                class="ingame-status-badge"
+                :class="grabConsumableItem().status == 'active' ? 'status-active' : 'status-inactive'"
+                @click.prevent="grabConsumableItem().status == 'active' ? deactivateGadget() : activateGadget()"
+              >
+                <i class="fas" :class="grabConsumableItem().status == 'active' ? 'fa-toggle-on' : 'fa-toggle-off'"></i>
+                {{ grabConsumableItem().status == 'active' ? $t('Active') : $t('Inactive') }}
+              </span>
+            </div>
+
+            <div class="count-summary-item">
+              <span class="count-summary-label">{{ $t('Remaining_boost') }}</span>
+              <span class="count-summary-value">
+                {{ grabConsumableItem().span - grabConsumableItem().consumed }}
+                <small class="ingame-summary-small">{{ $t('Activity_Reports') }}</small>
+              </span>
+            </div>
+
+            <div class="count-summary-item" v-if="prodHasFriendBenefic()">
+              <span class="count-summary-label">{{ $t('Benef_friend') }}</span>
+              <span v-if="grabConsumableItem().status == 'active'" class="ingame-status-value">
+                <i class="fas fa-user-friends"></i>
+                <a :href="'/' + grabConsumableItem().benefic" target="_blank" rel="noopener noreferrer">
+                  {{ grabConsumableItem().benefic }}
+                </a>
+              </span>
+              <input
+                v-else
+                type="text"
+                name="friend"
+                id="friend"
+                ref="friend"
+                class="form-control ingame-friend-input"
+                :value="grabConsumableItem().benefic"
+              >
+            </div>
+          </div>
+        </div>
         <div v-else>
-          <a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNow()" :class="productBuyColor"
-            style="float:left; border: 1px white solid;">{{ $t('Buy_now') }} <br /> {{ numberFormat(this.item_price, 2)
-            }}
-            {{ this.item_currency }}<img class="token-logo-sm " src="/img/actifit_logo.png"></a>
-          <a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNowHive()" :class="productBuyColor"
-            style="border: 1px white solid;">{{ $t('Buy_now') }} <br /> {{ numberFormat(this.item_price *
-              this.afitPrice.afitHiveLastPrice, 3) }} {{ this.hive_currency }}<img class="token-logo-sm "
-              src="/img/HIVE.png"></a>
-          <div class="row" v-if="buyHiveExpand && !isKeychainActive && !isHiveauthActive">
-            <label for="active-key" class="p-2">{{ $t('Active_Key') }} *</label>
-            <input type="password" id="active-key" name="active-key" ref="active-key" class="form-control-lg w-50 p-2"
+          <div class="action-grid">
+            <a class="btn btn-success book-button buy-cta" @click.prevent="buyNow()" :class="productBuyColor">
+              <span class="buy-cta-label">{{ $t('Buy_now') }}</span>
+              <span class="buy-cta-price">{{ numberFormat(this.item_price, 2) }} {{ this.item_currency }}<img
+                  class="token-logo-xs" src="/img/actifit_logo.png"></span>
+            </a>
+            <a class="btn btn-success book-button buy-cta" @click.prevent="buyNowHive()"
+              :class="productBuyColor">
+              <span class="buy-cta-label">{{ $t('Buy_now') }}</span>
+              <span class="buy-cta-price">{{ numberFormat(this.item_price *
+                this.afitPrice.afitHiveLastPrice, 3) }} {{ this.hive_currency }}<img class="token-logo-xs"
+                  src="/img/HIVE.png"></span>
+            </a>
+          </div>
+          <div class="buy-panel" v-if="buyHiveExpand && !isKeychainActive && !isHiveauthActive">
+            <label for="active-key" class="field-label">{{ $t('Active_Key') }} *</label>
+            <input type="password" id="active-key" name="active-key" ref="active-key" class="form-control"
               v-model="userActvKey">
           </div>
-          <div class="text-center" v-if="buyHiveExpand">
+          <div class="buy-actions" v-if="buyHiveExpand">
             <button v-on:click="proceedBuyNowHive()" v-if="this.userTokens >= this.minAfitBuyTicket"
-              class="btn btn-brand btn-lg border">{{ $t('Proceed') }}</button>
+              class="btn btn-brand buy-btn">{{ $t('Proceed') }}</button>
             <button data-toggle="modal" v-else :data-target="'#buyOptionsModal' + _uid"
-              class="btn btn-brand btn-lg border">{{ $t('Proceed') }}</button>
+              class="btn btn-brand buy-btn">{{ $t('Proceed') }}</button>
           </div>
-          <div v-if="user && this.allReqtsFilled">
-            <a class="btn btn-success btn-lg w-50 book-button" @click.prevent="addCart()"
-              style="float:left; border: 1px white solid;"
+          <div class="action-grid action-grid-secondary" v-if="user && this.allReqtsFilled">
+            <a class="btn btn-success book-button mini-action" @click.prevent="addCart()"
               v-if="this.cartEntries.filter(obj => obj._id === this.product._id).length < 1"><span
                 v-html="$t('Add_Cart')"></span></a>
-            <a class="btn btn-success btn-lg w-50 book-button" @click.prevent="removeCart()"
-              style="float:left; border: 1px white solid;" v-else><span v-html="$t('Remove_Cart')"></span></a>
-            <a class="btn btn-success btn-lg w-50 book-button" data-toggle="modal" data-target="#cartModal"
-              style="float:left; border: 1px white solid;"><span v-html="$t('Checkout')"></span> </a>
+            <a class="btn btn-success book-button mini-action" @click.prevent="removeCart()"
+              v-else><span v-html="$t('Remove_Cart')"></span></a>
+            <a class="btn btn-success book-button mini-action" data-toggle="modal" data-target="#cartModal"><span
+                v-html="$t('Checkout')"></span> </a>
           </div>
         </div>
       </div>
+
       <div v-else-if="!productBought && !this.errorProceed">
-        <a class="btn btn-brand btn-lg w-50 book-button" @click.prevent="buyNow()"
-          style="float:left; border: 1px white solid;">{{ $t('Buy_now') }} <br /> {{ numberFormat(this.item_price, 2) }}
-          {{ this.item_currency }}<img class="token-logo-sm " src="/img/actifit_logo.png"></a>
+        <a class="btn btn-brand book-button buy-cta w-100" @click.prevent="buyNow()">
+          <span class="buy-cta-label">{{ $t('Buy_now') }}</span>
+          <span class="buy-cta-price">{{ numberFormat(this.item_price, 2) }}
+            {{ this.item_currency }}<img class="token-logo-sm" src="/img/actifit_logo.png"></span>
+        </a>
       </div>
       <div v-else>
         <div v-if="!this.downloadAgainReady">
@@ -337,9 +417,9 @@
             $t('Download_again') }}</a>
         </div>
         <div v-if="this.requestFundsPass && !this.downloadAgainReady" class="pt-2">
-          <label for="funds-pass" class="w-100">{{ $t('Funds_Password') }}</label>
-          <input type="text" id="funds-pass" name="funds-pass" ref="funds-pass" class="form-control-lg w-100">
-          <a href="/wallet?action=set_funds_pass">{{ $t('No_funds_pass_wallet') }}&nbsp;
+          <label for="funds-pass" class="w-100 field-label">{{ $t('Funds_Password') }}</label>
+          <input type="text" id="funds-pass" name="funds-pass" ref="funds-pass" class="form-control w-100">
+          <a href="/wallet?action=set_funds_pass" class="funds-pass-link">{{ $t('No_funds_pass_wallet') }}&nbsp;
             <i class="fas fa-solid fa-wallet"></i></a>
           <div class="pt-2">
             <a class="btn btn-brand btn-lg w-100 book-button" @click.prevent="downloadAgain()">{{ $t('Proceed') }}</a>
@@ -355,33 +435,21 @@
         </div>
       </div>
     </div>
-    <div v-if="grabConsumableItem()" class="card-footer pb-md-2 text-left">
-      <div>
-        <b>{{ $t('Status') }}:</b>
-        <span v-if="grabConsumableItem().status == 'active'" class="col-md-12 text-success"
-          @click.prevent="deactivateGadget()"><i class="fas fa-toggle-on"></i>&nbsp;{{ $t('Active') }}</span>
-        <span v-else class="col-md-12 text-danger"><i class="fas fa-toggle-off"
-            @click.prevent="activateGadget()"></i>&nbsp;{{ $t('Inactive') }}</span>
-      </div>
-      <div v-if="prodHasFriendBenefic()">
-        <b>{{ $t('Benef_friend') }}:</b>
-        <span v-if="grabConsumableItem().status == 'active'"><i class="fas fa-user-friends pl-2"></i>&nbsp;<a
-            :href="'/' + grabConsumableItem().benefic" target="_blank" rel="noopener noreferrer">{{ grabConsumableItem().benefic }}</a></span>
-        <input type="text" name="friend" id="friend" ref="friend" class="form-control p-2" v-else
-          :value="grabConsumableItem().benefic">
-      </div>
-      <b>{{ $t('Remaining_boost') }}:</b> {{ grabConsumableItem().span - grabConsumableItem().consumed }}
-      {{ $t('Activity_Reports') }}
-    </div>
-    <div v-if="product.type == 'ingame' && this.boughtCount > 0" class="card-footer">
-      <div>
-        <b>{{ $t('bought_count') }}:</b> {{ this.boughtCount }}
-      </div>
-      <div>
-        <b>{{ $t('consumed_count') }}:</b> {{ this.consumedCount }}
+
+    <div v-if="product.type == 'ingame' && this.boughtCount > 0" class="card-footer count-footer">
+      <div class="count-summary-grid">
+        <div class="count-summary-item">
+          <span class="count-summary-label">{{ $t('bought_count') }}</span>
+          <span class="count-summary-value">{{ this.boughtCount }}</span>
+        </div>
+        <div class="count-summary-item">
+          <span class="count-summary-label">{{ $t('consumed_count') }}</span>
+          <span class="count-summary-value">{{ this.consumedCount }}</span>
+        </div>
       </div>
     </div>
-    <div class="pb-md-2 text-center" v-if="buyAttempt">
+
+    <div class="pb-md-2 text-center attempt-panel" v-if="buyAttempt">
       <div v-if="buyInProgress && errorProceed == ''">
         <i class="fas fa-spin fa-spinner"></i>
       </div>
@@ -392,47 +460,46 @@
           {{ $t('purchase_success_ebook_part2') }}
         </a>
       </div>
-      <div v-if="!user">
-        <div class="row pb-3">
-          <div class="w-50">
-            <a href="#" data-toggle="modal" data-target="#loginModal" @click="showModalFunc"
-              class="btn btn-brand btn-lg w-75">{{ $t('Login') }}</a>
-          </div>
-          <div class="w-50">
-            <a href="/signup" class="btn btn-brand btn-lg w-75">{{ $t('Sign_Up') }}</a>
-          </div>
-        </div>
+      <div v-if="!user" class="auth-prompt">
+        <a href="#" data-toggle="modal" data-target="#loginModal" @click="showModalFunc"
+          class="btn btn-brand btn-lg auth-btn">{{ $t('Login') }}</a>
+        <a href="/signup" class="btn btn-brand btn-lg auth-btn">{{ $t('Sign_Up') }}</a>
       </div>
     </div>
-    <div v-if="checkout_product">
-      <div v-if="item_price_extra > 0 && !isKeychainActive && !isHiveauthActive">
-        <label for="active-key" class="p-2">{{ $t('Active_Key') }} *</label>
+
+    <div v-if="checkout_product" class="checkout-form">
+      <div class="buy-row" v-if="item_price_extra > 0 && !isKeychainActive && !isHiveauthActive">
+        <label for="rl-active-key" class="field-label">{{ $t('Active_Key') }} *</label>
         <input type="password" id="rl-active-key" name="rl-active-key" ref="rl-active-key"
-          class="form-control-lg w-50 p-2" v-model="userRlActvKey">
+          class="form-control" v-model="userRlActvKey">
       </div>
-      <div class="col-12">{{ $t('shipping_details') }}</div>
-      <input type="text" name="buyer_name" id="buyer_name" ref="buyer_name" :placeholder="$t('buyer_name')"
-        class="form-control p-2">
-      <input type="text" name="buyer_phone" id="buyer_phone" ref="buyer_phone" :placeholder="$t('buyer_phone')"
-        class="form-control p-2">
-      <input type="text" name="buyer_address" id="buyer_address" ref="buyer_address" :placeholder="$t('buyer_address')"
-        class="form-control p-2">
-      <input type="text" name="buyer_address2" id="buyer_address2" ref="buyer_address2"
-        :placeholder="$t('buyer_address2')" class="form-control p-2">
-      <select v-model="buyer_country" class="form-control sel-adj">
-        <option value="" disabled selected>{{ $t('buyer_country') }}</option>
-        <option v-for="country_inst in this.product.countries" :value="country_inst" :key="country_inst">
-          {{ country_inst }}</option>
-      </select>
-      <input type="text" name="buyer_state" id="buyer_state" ref="buyer_state" class="form-control p-2"
-        :placeholder="$t('buyer_state')">
-      <input type="text" name="buyer_city" id="buyer_city" ref="buyer_city" class="form-control p-2"
-        :placeholder="$t('buyer_city')">
-      <input type="text" name="buyer_zip" id="buyer_zip" ref="buyer_zip" class="form-control p-2"
-        :placeholder="$t('buyer_zip')">
-      <div v-html="$t('real_prod_notice')" style='color:green'></div>
-      <button v-on:click="checkout_product = false" class="btn btn-brand btn-lg border pt-2">{{ $t('Cancel') }}</button>
-      <button v-on:click="proceedBuyReal()" class="btn btn-brand btn-lg border pt-2">{{ $t('Proceed') }}</button>
+      <div class="card-section-title">{{ $t('shipping_details') }}</div>
+      <div class="form-grid">
+        <input type="text" name="buyer_name" id="buyer_name" ref="buyer_name" :placeholder="$t('buyer_name')"
+          class="form-control">
+        <input type="text" name="buyer_phone" id="buyer_phone" ref="buyer_phone" :placeholder="$t('buyer_phone')"
+          class="form-control">
+        <input type="text" name="buyer_address" id="buyer_address" ref="buyer_address"
+          :placeholder="$t('buyer_address')" class="form-control form-grid-full">
+        <input type="text" name="buyer_address2" id="buyer_address2" ref="buyer_address2"
+          :placeholder="$t('buyer_address2')" class="form-control form-grid-full">
+        <select v-model="buyer_country" class="form-control sel-adj">
+          <option value="" disabled selected>{{ $t('buyer_country') }}</option>
+          <option v-for="country_inst in this.product.countries" :value="country_inst" :key="country_inst">
+            {{ country_inst }}</option>
+        </select>
+        <input type="text" name="buyer_state" id="buyer_state" ref="buyer_state" class="form-control"
+          :placeholder="$t('buyer_state')">
+        <input type="text" name="buyer_city" id="buyer_city" ref="buyer_city" class="form-control"
+          :placeholder="$t('buyer_city')">
+        <input type="text" name="buyer_zip" id="buyer_zip" ref="buyer_zip" class="form-control"
+          :placeholder="$t('buyer_zip')">
+      </div>
+      <div class="shipping-notice" v-html="$t('real_prod_notice')"></div>
+      <div class="buy-actions">
+        <button v-on:click="checkout_product = false" class="btn btn-outline-secondary buy-btn">{{ $t('Cancel') }}</button>
+        <button v-on:click="proceedBuyReal()" class="btn btn-brand buy-btn">{{ $t('Proceed') }}</button>
+      </div>
       <div v-if="buyInProgress && errorProceed == ''">
         <i class="fas fa-spin fa-spinner"></i>
       </div>
@@ -445,7 +512,7 @@
       :containerID="'#buyOptionsModal' + _uid" :modalTitle="$t('Buy_product')"
       :modalText="$t('buy_now_modal_desc').replace('_AMNT_', minAfitBuyTicket)" @proceed-purchase="proceedBuyNowHive" />
 
-    
+
 
     <client-only>
       <div>
@@ -464,14 +531,29 @@
 <style scoped>
 .pro-card {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border-radius: 15px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  background: #fff;
+  box-sizing: border-box;
 }
 
 .pro-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.14);
 }
+
+@media (max-width: 575px) {
+  .pro-card {
+    margin: 4px 4px 12px;
+  }
+}
+@media (min-width: 576px) {
+  .pro-card.col-sm-4 {
+    flex: 0 0 calc(33.333333% - 12px);
+    max-width: calc(33.333333% - 12px);
+  }
+}
+
 
 .christmas-card {
   border: 2px solid #c41e3a !important;
@@ -487,6 +569,827 @@
   right: 5px;
   font-size: 1.5rem;
   opacity: 0.8;
+}
+
+/* header */
+.product-card-header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-bottom: 2px solid #dc3545;
+  padding-bottom: 12px;
+}
+
+.card-title-row {
+  min-height: 30px;
+}
+
+.level-badge {
+  display: inline-block;
+  margin-left: 6px;
+  background: #dc3545;
+  color: #fff;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  vertical-align: middle;
+}
+
+.card-media-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  text-align: left;
+}
+
+.card-media-col {
+  flex: 0 0 auto;
+  text-align: center;
+}
+
+.level-stars {
+  margin-top: 4px;
+}
+
+.card-type-col {
+  flex: 1 1 auto;
+  text-align: left;
+}
+
+.card-type-col-ingame {
+  text-align: center;
+}
+
+.ingame-type-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.provider-link {
+  font-size: 0.95rem;
+}
+
+.real-currency-badges {
+  margin-left: 4px;
+}
+
+.expand-toggle-btn {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #dc3545;
+  background: #fff;
+  color: #dc3545;
+  border-radius: 999px;
+  padding: 4px 16px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.expand-toggle-btn:hover {
+  background: #dc3545;
+  color: #fff;
+}
+
+.expand-toggle-btn.open {
+  background: #dc3545;
+  color: #fff;
+}
+
+/* sections */
+.card-section {
+  text-align: left;
+  padding: 14px 16px;
+  border: 1px solid rgba(220, 53, 69, 0.12);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255, 247, 248, 0.96) 0%, rgba(255, 255, 255, 0.99) 100%);
+  box-shadow: 0 8px 20px rgba(220, 53, 69, 0.06);
+}
+
+.card-section:last-child {
+  border-bottom: none;
+}
+
+.product-summary-section {
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(220, 53, 69, 0.05);
+  border: 1px solid rgba(220, 53, 69, 0.12);
+}
+
+.product-summary-section .info-grid {
+  gap: 12px;
+}
+
+.info-tile {
+  min-height: 72px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.info-tile-value {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #9b1c29;
+}
+
+.product-gallery-section {
+  position: relative;
+}
+
+.gallery-frame {
+  background: linear-gradient(180deg, rgba(255, 244, 246, 0.95) 0%, rgba(255, 255, 255, 1) 100%);
+  border: 1px solid rgba(220, 53, 69, 0.12);
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 4px 12px rgba(220, 53, 69, 0.05);
+}
+
+.section-note {
+  margin: 0 0 10px;
+  font-size: 0.82rem;
+  color: #a94442;
+  opacity: 0.9;
+}
+
+.detail-text {
+  font-size: 0.95rem;
+  line-height: 1.65;
+  margin-bottom: 0;
+  padding: 14px;
+  background: #fff;
+  border: 1px solid rgba(220, 53, 69, 0.12);
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(220, 53, 69, 0.05);
+}
+
+.card-section-title {
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #dc3545;
+  margin-bottom: 6px;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.product-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 14px;
+  align-items: start;
+  margin-bottom: 14px;
+}
+
+.info-tile {
+  background: linear-gradient(180deg, rgba(255, 241, 243, 1) 0%, rgba(255, 255, 255, 1) 100%);
+  border: 1px solid rgba(220, 53, 69, 0.14);
+  border-radius: 12px;
+  padding: 14px 12px;
+  text-align: center;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.info-tile-available {
+  min-height: 120px;
+}
+
+.info-tile-wide {
+  grid-column: 1 / -1;
+}
+
+.info-tile-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #a94442;
+  text-transform: uppercase;
+}
+
+.requirement-panel {
+  background: linear-gradient(180deg, rgba(255, 241, 243, 1) 0%, rgba(255, 255, 255, 1) 100%);
+  border: 1px solid rgba(220, 53, 69, 0.14);
+  border-radius: 12px;
+  padding: 14px 12px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.requirement-panel .card-section-title {
+  margin-bottom: 10px;
+}
+
+.requirement-panel .requirements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px;
+}
+
+.requirement-panel .req-chip {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid rgba(220, 53, 69, 0.12);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.requirement-panel .req-chip .fas {
+  flex-shrink: 0;
+}
+
+@media (max-width: 767px) {
+  .product-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.info-tile-value {
+  display: block;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.ingame-status-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ingame-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  border-radius: 14px;
+  padding: 14px 18px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  box-shadow: 0 8px 18px rgba(46, 125, 50, 0.18);
+}
+
+.ingame-status-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.ingame-status-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #222;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.ingame-status-value small {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #666;
+}
+
+.ingame-summary-small {
+  display: inline-block;
+  margin-left: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #666;
+}
+
+.ingame-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-left: 20px;
+  cursor: pointer;
+}
+
+.status-active {
+  background: #eaf8ee;
+  color: #1f8f43;
+}
+
+.status-inactive {
+  background: #fdecef;
+  color: #c62828;
+}
+
+.ingame-friend-input {
+  margin-top: 2px;
+  border-radius: 10px;
+}
+
+.count-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.count-summary-item {
+  background: linear-gradient(180deg, rgba(255, 244, 246, 1) 0%, rgba(255, 255, 255, 1) 100%);
+  border: 1px solid rgba(220, 53, 69, 0.12);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.count-summary-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #7f7f7f;
+  font-weight: 700;
+}
+
+.count-summary-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #9b1c29;
+}
+
+.requirement-list,
+.boost-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.requirement-item,
+.boost-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 12px;
+  font-size: 0.92rem;
+  background: #fff;
+  border: 1px solid rgba(220, 53, 69, 0.12);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.05);
+}
+
+.reqt-icon {
+  flex: 0 0 auto;
+}
+
+.reqt-icon i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(220, 53, 69, 0.08);
+}
+
+.boost-detail {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.color-dots {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.boost-text,
+.boost-target {
+  font-size: 0.88rem;
+}
+
+.detail-text {
+  font-size: 0.94rem;
+  line-height: 1.7;
+  margin-bottom: 0;
+  padding: 12px 14px;
+  background: #fff;
+  border: 1px solid rgba(220, 53, 69, 0.12);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.05);
+}
+
+.product-details-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.product-details-stack .card-section + .card-section {
+  margin-top: 0;
+}
+
+.form-field-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.field-label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-bottom: 0;
+  white-space: nowrap;
+}
+
+/* buy panel / actions */
+.buy-panel {
+
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 8px;
+}
+
+.buy-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.buy-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.buy-btn {
+  flex: 1 1 auto;
+  min-width: 100px;
+}
+
+.buy-status-row {
+  text-align: center;
+  margin-top: 6px;
+}
+
+.product-gallery-section {
+  overflow: hidden;
+}
+
+.section-note {
+  margin: -2px 0 10px;
+  font-size: 0.8rem;
+  color: #a94442;
+  opacity: 0.85;
+}
+
+.gallery-frame {
+  background: linear-gradient(180deg, rgba(255, 244, 246, 0.95) 0%, rgba(255, 255, 255, 1) 100%);
+  border: 1px solid rgba(220, 53, 69, 0.12);
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 4px 12px rgba(220, 53, 69, 0.05);
+}
+
+.buy-actions-block {
+  width: 100%;
+  display: flex;
+}
+
+.buy-actions-block .buy-cta {
+  width: 100%;
+}
+
+.buy-actions-block .buy-cta .buy-cta-price {
+  justify-content: center;
+}
+
+.action-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.action-grid-secondary {
+  margin-top: 8px;
+}
+
+.buy-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+
+  border-radius: 8px;
+  padding: 9px 6px;
+  min-height: 50px;
+  line-height: 1.2;
+}
+
+.buy-cta-label {
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.buy-cta-price {
+  font-size: 0.72rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
+}
+
+.token-logo-xs {
+  width: 14px;
+  height: 14px;
+  vertical-align: middle;
+}
+
+.mini-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-radius: 8px;
+  padding: 8px 6px;
+  min-height: 46px;
+  font-size: 0.8rem;
+  line-height: 1.2;
+}
+
+.pending-order-block {
+  text-align: left;
+}
+
+.pending-order-text {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.pending-order-entry {
+  color: #28a745;
+  font-size: 0.9rem;
+}
+
+.status-footer,
+.count-footer {
+  text-align: left;
+  padding-top: 0.75rem;
+}
+
+.product-card-footer {
+  background-color:#ffffff;
+  border-radius: 10px;
+}
+.card-footer{
+  border-top:none;
+  background-color:#ffffff;
+
+}
+.status-row {
+  padding: 4px 0;
+}
+
+.status-value {
+  cursor: pointer;
+}
+
+html.dark-mode .product-card {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  color: #edf2f7;
+  box-shadow: 0 22px 52px rgba(0, 0, 0, 0.46);
+}
+
+html.dark-mode .product-card:hover {
+  box-shadow: 0 28px 64px rgba(0, 0, 0, 0.54);
+}
+
+html.dark-mode .product-card .pro-name,
+html.dark-mode .product-card .product-type,
+html.dark-mode .product-card .type-icon {
+  color: #f8fafc;
+}
+
+html.dark-mode .product-card .provider-link,
+html.dark-mode .product-card .provider-link a,
+html.dark-mode .product-card .funds-pass-link {
+  color: #ffffff;
+}
+
+html.dark-mode .product-card .provider-link a:hover,
+html.dark-mode .product-card .funds-pass-link:hover {
+  color: #f4f4f4;
+}
+
+html.dark-mode .product-card .level-badge {
+  background: linear-gradient(135deg, #ff112d 0%, #d6001a 100%);
+  box-shadow: 0 8px 16px rgba(255, 17, 45, 0.24);
+}
+
+html.dark-mode .product-card .card-footer,
+html.dark-mode .product-card-footer {
+  background: transparent;
+}
+
+html.dark-mode .card-section,
+html.dark-mode .product-summary-section,
+html.dark-mode .gallery-frame,
+html.dark-mode .detail-text,
+html.dark-mode .requirement-panel,
+html.dark-mode .detail-card,
+html.dark-mode .count-summary-item,
+html.dark-mode .ingame-status-card,
+html.dark-mode .buy-panel,
+html.dark-mode .checkout-form {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.065) 0%, rgba(255, 255, 255, 0.028) 100%);
+  border-color: rgba(255, 255, 255, 0.095);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.055), 0 14px 30px rgba(0, 0, 0, 0.28);
+}
+
+html.dark-mode .card-section-title,
+html.dark-mode .detail-card-title,
+html.dark-mode .info-tile-label,
+html.dark-mode .count-summary-label,
+html.dark-mode .ingame-status-label,
+html.dark-mode .section-note,
+html.dark-mode .field-label {
+  color: #ff112d ;
+}
+
+html.dark-mode .detail-text,
+html.dark-mode .boost-item,
+html.dark-mode .requirement-item,
+html.dark-mode .detail-pill,
+html.dark-mode .pending-order-entry,
+html.dark-mode .count-summary-value,
+html.dark-mode .ingame-status-value {
+  color: #edf2f7;
+}
+
+html.dark-mode .info-tile,
+html.dark-mode .requirement-panel .req-chip,
+html.dark-mode .boost-item,
+html.dark-mode .requirement-item,
+html.dark-mode .detail-pill {
+  background: rgba(255, 255, 255, 0.055);
+  border-color: rgba(255, 255, 255, 0.09);
+  box-shadow: none;
+}
+
+html.dark-mode .info-tile-value,
+html.dark-mode .detail-pill-neutral {
+  color: #ffffff;
+}
+
+html.dark-mode .detail-pill.met {
+  background: rgba(40, 167, 69, 0.16);
+  color: #8be3a9;
+}
+
+html.dark-mode .detail-pill.notmet {
+  background: rgba(198, 40, 40, 0.18);
+  color: #ffffff;
+}
+
+html.dark-mode .count-summary-item {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+html.dark-mode .ingame-status-badge.status-active {
+  background: rgba(40, 167, 69, 0.18);
+  color: #8be3a9;
+  box-shadow: 0 0 0 1px rgba(139, 227, 169, 0.14);
+}
+
+html.dark-mode .ingame-status-badge.status-inactive {
+  background: rgba(198, 40, 40, 0.18);
+  color: #ffffff;
+  box-shadow: 0 0 0 1px rgba(255, 154, 167, 0.14);
+}
+
+html.dark-mode .expand-toggle-btn {
+  background: rgba(255, 255, 255, 0.055);
+  color: #ffffff;
+  border-color: #fff;
+}
+
+html.dark-mode .expand-toggle-btn:hover,
+html.dark-mode .expand-toggle-btn.open {
+  background: #4e0009;
+  border-color: #fff;
+  color: #fff;
+  box-shadow: 0 10px 22px rgba(255, 17, 45, 0.24);
+}
+
+html.dark-mode .product-card .form-control {
+  background-color: #10151e;
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #edf2f7;
+  box-shadow: none;
+}
+
+html.dark-mode .product-card .form-control::placeholder {
+  color: #8793a1;
+}
+
+html.dark-mode .product-card .form-control:focus,
+html.dark-mode .expand-toggle-btn:focus {
+  border-color: #4e0009;
+  box-shadow: 0 0 0 0.2rem rgba(255, 17, 45, 0.22);
+  outline: 0;
+}
+
+html.dark-mode .product-card .text-muted,
+html.dark-mode .ingame-status-value small,
+html.dark-mode .ingame-summary-small {
+  color: #aeb9c7 !important;
+}
+
+html.dark-mode .pending-order-text,
+html.dark-mode .shipping-notice {
+  color: #8be3a9;
+}
+
+html.dark-mode .product-gallery-section .image-indicator {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+html.dark-mode .product-gallery-section .image-indicator.active {
+  background: #4e0009;
+  box-shadow: 0 0 12px rgba(255, 154, 167, 0.32);
+}
+
+@media (max-width: 767px) {
+  .ingame-status-grid,
+  .count-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.attempt-panel {
+  padding-top: 10px;
+}
+
+.auth-prompt {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  padding-top: 8px;
+}
+
+.auth-btn {
+  flex: 1 1 auto;
+  max-width: 160px;
+}
+
+.funds-pass-link {
+  display: inline-block;
+  margin-top: 6px;
+}
+
+/* checkout form */
+.checkout-form {
+  text-align: left;
+  padding-top: 10px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.form-grid-full {
+  grid-column: 1 / -1;
+}
+
+.shipping-notice {
+  color: #28a745;
+  font-size: 0.88rem;
+  margin-bottom: 8px;
 }
 </style>
 
@@ -512,7 +1415,7 @@ export default {
   props: ['product', 'pros', 'userrank', 'gadgetStats', 'afitPrice', 'realProducts', 'expandAll'],
   components: {
     BuyOptionsModal,
-    
+
 
     //LightBox,
     //VueLazyLoad
@@ -545,7 +1448,35 @@ export default {
         return 'bg-secondary';
       }
       if (this.product.type == 'ingame' && this.product.count < 1) { return 'bg-warning'; } return '';
-    }, boughtCount() {
+    },
+    realRequirementsMet() {
+      if (!this.product || !Array.isArray(this.product.requirements)) {
+        return false;
+      }
+
+      const meaningfulReqs = this.product.requirements.filter(req => req && req.item);
+      if (meaningfulReqs.length === 0) {
+        return true;
+      }
+
+      return meaningfulReqs.every(req => req.met);
+    },
+    galleryImages() {
+      if (this.product && Array.isArray(this.product.prodImages) && this.product.prodImages.length > 0) {
+        return this.product.prodImages;
+      }
+      return [this.product.image || ''];
+    },
+    galleryCurrentImage() {
+      if (!this.galleryImages.length) {
+        return this.product.image || '';
+      }
+      if (this.galleryIndex >= this.galleryImages.length) {
+        return this.galleryImages[0];
+      }
+      return this.galleryImages[this.galleryIndex];
+    },
+    boughtCount() {
       if (this.user && this.product.type == 'ingame' && Array.isArray(this.gadgetStats) && this.gadgetStats.length > 0) {
         return this.consumedCount + this.activeCount;
       }
@@ -635,11 +1566,15 @@ export default {
       buyAfitConfirmed: false,
       prodDispStatus: '',
       prodDispStatusText: 'Expand',
+      galleryIndex: 0,
 
     }
   },
   watch: {
-    product: 'getPrice',
+    product(newProduct) {
+      this.galleryIndex = 0;
+      this.getPrice();
+    },
     pros: 'updateProPic',
     user: 'allReqtsMet',
     userrank: 'allReqtsMet',
@@ -731,6 +1666,18 @@ export default {
       let date = new Date(dt)
       //let minutes = date.getMinutes()
       return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear();// + ' ' + date.getHours() + ':' + (minutes < 10 ? '0' + minutes : minutes)
+    },
+    prevGalleryImage() {
+      if (this.galleryImages.length <= 1) {
+        return;
+      }
+      this.galleryIndex = (this.galleryIndex + this.galleryImages.length - 1) % this.galleryImages.length;
+    },
+    nextGalleryImage() {
+      if (this.galleryImages.length <= 1) {
+        return;
+      }
+      this.galleryIndex = (this.galleryIndex + 1) % this.galleryImages.length;
     },
     async addCart() {
       let res = await this.$store.commit('addCartEntry', this.product)
@@ -1997,14 +2944,10 @@ export default {
 
 <style>
 .card-border {
-  /*border: 2px solid #dc3545!important;
-	  border-radius: 10px;*/
   box-shadow: 3px 3px 3px rgb(255 0 0 / 40%);
 }
 
 .card-border-real {
-  /*border: 2px solid #28a745!important;
-	  border-radius: 10px;*/
   box-shadow: 3px 3px 3px rgb(0 255 0 / 40%);
 }
 
@@ -2015,6 +2958,8 @@ export default {
 .pro-name {
   background: radial-gradient(red, transparent);
   color: white;
+  padding: 6px 4px;
+  border-radius: 8px;
 }
 
 .book-button {
@@ -2023,11 +2968,13 @@ export default {
 
 .product-type {
   text-transform: capitalize;
+  font-size: 1.1rem;
 }
 
 .pro-card-av {
   width: 90px;
   height: 90px;
+  margin-top:6px;
 }
 
 .gaming-label {
@@ -2046,43 +2993,41 @@ export default {
   height: 40px;
 }
 
-div.basic-info {
-  border-bottom: 2px solid #dc3545 !important;
-}
-
 .color-box-afit {
   float: left;
   background-color: darkred;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   margin: 1px;
+  border-radius: 4px;
 }
 
 .color-box-sports {
   float: left;
   background-color: #00f;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   margin: 1px;
+  border-radius: 4px;
 }
 
 .color-box-steem {
   float: left;
   background-color: #029;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   margin: 1px;
+  border-radius: 4px;
 }
 
 .color-box-rank {
   float: left;
   background-color: #092;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   margin: 1px;
+  border-radius: 4px;
 }
-
-.avatar-1 {}
 
 .avatar-2 {
   border-color: orange;
@@ -2109,23 +3054,194 @@ div.basic-info {
   background: #28a700;
 }
 
-.card-section {}
-
 .lb-item {
   height: 75px !important;
 }
 
 .lbox-container {
-  height: 100px !important;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+  gap: 10px;
+  height: auto !important;
+  align-items: stretch;
 }
 
+.lbox-container .lb-item {
+  width: 100% !important;
+  height: 132px !important;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.08);
+}
+
+@media (max-width: 575px) {
+  .lbox-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.product-lightbox {
+  width: 100%;
+}
+
+.product-gallery-section .gallery-frame {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #f7f7f7;
+}
+
+.product-gallery-section .gallery-main-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 260px;
+  object-fit: cover;
+  border-radius: 16px;
+}
+
+.product-gallery-section .slider-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.product-gallery-section .slider-btn:hover {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.product-gallery-section .slider-btn.prev {
+  left: 12px;
+}
+
+.product-gallery-section .slider-btn.next {
+  right: 12px;
+}
+
+.product-gallery-section .image-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 0 0;
+}
+
+.product-gallery-section .image-indicator {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #d8d8d8;
+  cursor: pointer;
+}
+
+.product-gallery-section .image-indicator.active {
+  background: #d20b4f;
+}
+
+.product-gallery-section .section-note {
+  margin-bottom: 0.8rem;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
 
 .left-bar:after,
 .right-bar:after {
   animation: blink 3s infinite;
   /*20 alternate;*/
 }
+.details-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:12px;
+    margin-bottom:14px;
+}
 
+.detail-card{
+    background:#fff;
+    border:1px solid #ececec;
+    border-radius:12px;
+    padding:6px 6px;
+    display:flex;
+    flex-direction:column;
+    min-height:70px;
+    height:70%;
+}
+
+.detail-card-title{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-weight:700;
+    font-size:14px;
+    color:#d32f2f;
+    margin-bottom:4px;
+    line-height:1.2;
+}
+
+.detail-card-content{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;
+    min-width:0;
+}
+
+.detail-pill-list{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    align-content:flex-start;
+    justify-content:flex-start;
+    align-items:flex-start;
+    padding-top:2px;
+}
+
+.detail-pill{
+    padding:6px 10px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:600;
+    background:#f5f5f5;
+    line-height:1.15;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    width: fit-content;
+    min-width:0;
+}
+
+.detail-pill-neutral{
+    background:#f5f5f5;
+    color:#c62828;
+}
+
+.detail-pill.met{
+    background:#e8f5e9;
+    color:#2e7d32;
+}
+
+.detail-pill.notmet{
+    background:#ffebee;
+    color:#c62828;
+}
+
+@media (max-width:768px){
+    .details-grid{
+        grid-template-columns:1fr;
+    }
+}
 @keyframes blink {
 
   0%,
@@ -2223,7 +3339,6 @@ $duration: 0.5s;
 .expansion-arrow {
   max-height: 40px;
 }
-
 
 /*
 .body-expan-enter,
