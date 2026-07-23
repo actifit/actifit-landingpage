@@ -44,11 +44,20 @@
     <div class="row">
       <div class="col-12">
         <div v-if="expandableSnippet" class="report-snippet-section">
-          <div
-            ref="snippetContent"
-            class="report-snippet"
-            v-html="snippet">
-          </div>
+          <a
+            href="#"
+            class="report-snippet-link"
+            @click.prevent="$emit('open-modal')"
+            :data-toggle="modalTarget ? 'modal' : null"
+            :data-target="modalTarget"
+            :title="$t('read_more_small')"
+          >
+            <div
+              ref="snippetContent"
+              class="report-snippet"
+              v-html="snippet">
+            </div>
+          </a>
           <button
             v-if="hasSnippetOverflow"
             type="button"
@@ -147,6 +156,10 @@ a:hover {
 .report-snippet-section {
   min-height: 82px;
   padding-top: 4px;
+}
+.report-snippet-link {
+  display: block;
+  color: inherit;
 }
 .report-snippet {
   height: 60px;
