@@ -856,6 +856,7 @@ module.exports = {
   switch_chain: '切换链',
   switch_to_chain: '切换到_CHAIN_',
   Measurements_chart: '测量图表',
+  Edit_measurements: '编辑测量数据',
   View_chart: '查看图表',
   Stats_chart: '统计图表',
   Activity_chart: '活动图表',

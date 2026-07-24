@@ -857,6 +857,7 @@ module.exports = {
   switch_chain: 'Zincir Değiştir',
   switch_to_chain: '_CHAIN_\'e Geç',
   Measurements_chart: 'Ölçüm Grafiği',
+  Edit_measurements: 'Ölçümleri düzenle',
   View_chart: 'Grafiği Görüntüle',
   Stats_chart: 'İstatistik Grafiği',
   Activity_chart: 'Aktivite Grafiği',

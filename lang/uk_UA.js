@@ -857,6 +857,7 @@ module.exports = {
   switch_chain: 'Змінити мережу',
   switch_to_chain: 'Переключитися на _CHAIN_',
   Measurements_chart: 'Графік вимірювань',
+  Edit_measurements: 'Редагувати вимірювання',
   View_chart: 'Переглянути графік',
   Stats_chart: 'Графік статистики',
   View_activity_chart: 'Графік активності',
