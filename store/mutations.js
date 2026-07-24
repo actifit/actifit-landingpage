@@ -155,6 +155,9 @@ export default {
   setStdLoginUser (state, stdLoginUser){
 	state.stdLoginUser = stdLoginUser;
   },
+  setChatPostingKey (state, postingKey) {
+	state.chatPostingKey = postingKey;
+  },
   setBchain (state, bchain) {
 	state.bchain = bchain;
   },
