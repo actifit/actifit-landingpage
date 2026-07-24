@@ -68,22 +68,43 @@ export default {
       widgetError: '',
       showPostingKeyPrompt: false,
       postingKeyInput: '',
-      postingKeyError: ''
+      postingKeyError: '',
+      postingKeyUsername: null,
+      widgetSessionVersion: 0,
+      isBeingDestroyed: false
     }
   },
   computed: {
     chatPostingKey () {
       return this.$store.state.chatPostingKey
+    },
+    activeUsername () {
+      return this.user && this.user.account && this.user.account.name
     }
   },
   watch: {
     chatPostingKey (postingKey) {
-      const username = this.user && this.user.account && this.user.account.name
-      if (!postingKey || !username || !this.widget) return
+      if (!postingKey) {
+        this.postingKeyUsername = null
+        this.restartWidgetSession()
+        return
+      }
+
+      const username = this.activeUsername
+      if (!username) return
+      this.postingKeyUsername = username
+      if (!this.widget) return
 
       // Login and widget initialization can complete in either order. If the
       // validated key arrives after Sting mounts, attach it and reload the user.
       this.configurePostingKey(username, postingKey)
+    },
+    activeUsername (username, previousUsername) {
+      if (username === previousUsername) return
+
+      // Invalidate the current signer synchronously. Recreate on the next tick
+      // after the login/logout mutations (including key clearing) have settled.
+      this.restartWidgetSession()
     }
   },
   mounted () {
@@ -95,10 +116,9 @@ export default {
       })
   },
   beforeDestroy () {
-    if (this.widget) {
-      this.widget.cleanup()
-      this.widget = null
-    }
+    this.isBeingDestroyed = true
+    this.widgetSessionVersion += 1
+    this.teardownWidget()
   },
   methods: {
     loadWidgetScript () {
@@ -127,6 +147,41 @@ export default {
 
       return widgetScriptPromise
     },
+    teardownWidget () {
+      const widget = this.widget
+      this.widget = null
+      if (!widget) return
+
+      // A posting-key handler closes over the secret. Remove every custom
+      // signer before cleanup so it cannot survive a logout or account switch.
+      widget.handleWithHivejs = null
+      widget.handleWithKeychain = null
+      widget.enableKeychainPassthrough = true
+      widget.enablePeakVaultPassthrough = true
+      if (typeof widget.cleanup === 'function') widget.cleanup()
+
+      const container = this.$refs.widgetContainer
+      if (container) container.textContent = ''
+    },
+    restartWidgetSession () {
+      const sessionVersion = ++this.widgetSessionVersion
+      this.teardownWidget()
+
+      this.$nextTick(() => {
+        if (this.isBeingDestroyed || sessionVersion !== this.widgetSessionVersion) return
+
+        this.loadWidgetScript()
+          .then(() => {
+            if (!this.isBeingDestroyed && sessionVersion === this.widgetSessionVersion) {
+              this.initWidget()
+            }
+          })
+          .catch((error) => {
+            console.error('Unable to reload Sting chat:', error)
+            this.widgetError = this.$t('sting_chat_unavailable')
+          })
+      })
+    },
     initWidget () {
       if (this.widget || !this.$refs.widgetContainer) return
 
@@ -137,6 +192,7 @@ export default {
       const hasKeychain = window.hive_keychain != null
       const hasPeakVault = window.peakvault != null
       const localPostingKey = this.chatPostingKey
+      const postingKeyMatchesUser = !this.postingKeyUsername || this.postingKeyUsername === username
 
       this.widget.setProperties({
         // Keep Sting's own login UI available when Actifit cannot supply a
@@ -178,7 +234,7 @@ export default {
         '--appMessageFontSize': '16px'
       })
 
-      if (username && localPostingKey) {
+      if (username && localPostingKey && postingKeyMatchesUser) {
         this.configurePostingKey(username, localPostingKey)
       } else if (username && loginMethod === 'keychain' && hasKeychain) {
         // Keep Sting on its Keychain login path. Direct-message requests contain
@@ -219,6 +275,7 @@ export default {
       // take precedence over wallet extensions installed in the same browser.
       this.widget.enableKeychainPassthrough = false
       this.widget.enablePeakVaultPassthrough = false
+      this.postingKeyUsername = username
       this.widget.setPostingKey(postingKey, hive)
       this.configurePostingKeyPassthrough(postingKey)
       this.widget.setUser(username)
@@ -291,6 +348,12 @@ export default {
     },
     configureKeychainPassthrough () {
       const widget = this.widget
+
+      // Do not rely on constructor state: a fresh Keychain session must route
+      // every supported signing request to the extension and never HiveJS.
+      widget.handleWithHivejs = null
+      widget.enableKeychainPassthrough = true
+      widget.enablePeakVaultPassthrough = false
 
       widget.handleWithKeychain = (event, messageId, request, args) => {
         let keychainCall = null

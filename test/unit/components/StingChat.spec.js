@@ -50,6 +50,147 @@ describe('components/StingChat.vue', () => {
     expect(widget.enablePeakVaultPassthrough).toBe(false)
   })
 
+  it('routes a fresh Keychain session through the Keychain extension', async () => {
+    localStorage.setItem('acti_login_method', 'keychain')
+    const postMessage = jest.fn()
+    window.hive_keychain = {
+      requestCustomJson: jest.fn((...args) => {
+        args[args.length - 1]({ success: true, result: { id: 'signed' } })
+      })
+    }
+
+    const widget = {
+      messageName: 'stlib0',
+      allowedCustomJson: ['sting-chat'],
+      setProperties: jest.fn(),
+      setUser: jest.fn(),
+      createElement: jest.fn(() => document.createElement('div')),
+      setStyle: jest.fn()
+    }
+    global.StWidget = jest.fn(() => widget)
+
+    const vm = {
+      widget: null,
+      widgetError: '',
+      chatPostingKey: null,
+      user: { account: { name: 'alice' } },
+      $refs: { widgetContainer: document.createElement('div') }
+    }
+    vm.configureKeychainPassthrough = () => StingChat.methods.configureKeychainPassthrough.call(vm)
+    vm.callKeychain = (...args) => StingChat.methods.callKeychain.call(vm, ...args)
+    vm.normalizeWalletResponse = (response) => StingChat.methods.normalizeWalletResponse.call(vm, response)
+    vm.postWalletResponse = (...args) => StingChat.methods.postWalletResponse.call(vm, ...args)
+    vm.readableError = (error) => StingChat.methods.readableError.call(vm, error)
+
+    StingChat.methods.initWidget.call(vm)
+
+    expect(widget.enableKeychainPassthrough).toBe(true)
+    expect(widget.enablePeakVaultPassthrough).toBe(false)
+    expect(widget.handleWithHivejs).toBeNull()
+    expect(widget.handleWithKeychain).toEqual(expect.any(Function))
+    expect(widget.setUser).toHaveBeenCalledWith('alice', 'keychain')
+
+    widget.handleWithKeychain(
+      { source: { postMessage }, origin: 'https://chat.peakd.com' },
+      'message-1',
+      'requestCustomJson',
+      ['alice', 'sting-chat', 'Posting', '{}', 'Sting chat']
+    )
+    await Promise.resolve()
+    await Promise.resolve()
+
+    expect(window.hive_keychain.requestCustomJson).toHaveBeenCalledWith(
+      'alice',
+      'sting-chat',
+      'Posting',
+      '{}',
+      'Sting chat',
+      expect.any(Function)
+    )
+    expect(postMessage).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not reuse a posting key that was bound to another account', () => {
+    localStorage.setItem('acti_login_method', 'keychain')
+    window.hive_keychain = { requestHandshake: jest.fn() }
+    const widget = {
+      allowedCustomJson: [],
+      setProperties: jest.fn(),
+      setPostingKey: jest.fn(),
+      setUser: jest.fn(),
+      createElement: jest.fn(() => document.createElement('div')),
+      setStyle: jest.fn()
+    }
+    global.StWidget = jest.fn(() => widget)
+
+    const vm = {
+      widget: null,
+      widgetError: '',
+      chatPostingKey: '5KalicePostingKey',
+      postingKeyUsername: 'alice',
+      user: { account: { name: 'bob' } },
+      $refs: { widgetContainer: document.createElement('div') }
+    }
+    vm.configurePostingKey = jest.fn()
+    vm.configureKeychainPassthrough = () => StingChat.methods.configureKeychainPassthrough.call(vm)
+
+    StingChat.methods.initWidget.call(vm)
+
+    expect(vm.configurePostingKey).not.toHaveBeenCalled()
+    expect(widget.setPostingKey).not.toHaveBeenCalled()
+    expect(widget.setUser).toHaveBeenCalledWith('bob', 'keychain')
+    expect(widget.enableKeychainPassthrough).toBe(true)
+  })
+
+  it('removes the old signer immediately when the posting key is cleared', async () => {
+    const oldHiveSigner = jest.fn()
+    const oldKeychainSigner = jest.fn()
+    const widget = {
+      handleWithHivejs: oldHiveSigner,
+      handleWithKeychain: oldKeychainSigner,
+      enableKeychainPassthrough: false,
+      enablePeakVaultPassthrough: false,
+      cleanup: jest.fn()
+    }
+    const container = document.createElement('div')
+    container.appendChild(document.createElement('div'))
+    const vm = {
+      widget,
+      widgetSessionVersion: 0,
+      isBeingDestroyed: false,
+      widgetError: '',
+      $refs: { widgetContainer: container },
+      $nextTick: (callback) => callback(),
+      loadWidgetScript: jest.fn(() => Promise.resolve()),
+      initWidget: jest.fn(),
+      $t: (key) => key
+    }
+    vm.teardownWidget = () => StingChat.methods.teardownWidget.call(vm)
+    vm.restartWidgetSession = () => StingChat.methods.restartWidgetSession.call(vm)
+
+    StingChat.watch.chatPostingKey.call(vm, null)
+
+    expect(vm.widget).toBeNull()
+    expect(widget.handleWithHivejs).toBeNull()
+    expect(widget.handleWithKeychain).toBeNull()
+    expect(widget.enableKeychainPassthrough).toBe(true)
+    expect(widget.enablePeakVaultPassthrough).toBe(true)
+    expect(widget.cleanup).toHaveBeenCalledTimes(1)
+    expect(container.childElementCount).toBe(0)
+
+    await Promise.resolve()
+    await Promise.resolve()
+    expect(vm.initWidget).toHaveBeenCalledTimes(1)
+  })
+
+  it('restarts the widget session when the active account changes', () => {
+    const vm = { restartWidgetSession: jest.fn() }
+
+    StingChat.watch.activeUsername.call(vm, 'bob', 'alice')
+
+    expect(vm.restartWidgetSession).toHaveBeenCalledTimes(1)
+  })
+
   it('encodes a direct message locally with the supplied recipient key', async () => {
     const senderKey = hive.auth.toWif('alice', 'posting-key-test', 'posting')
     const recipientKey = hive.auth.toWif('bob', 'posting-key-test', 'posting')
@@ -142,6 +283,7 @@ describe('components/StingChat.vue', () => {
       widget,
       widgetError: 'Chat key expired.',
       user: { account: { name: 'alice' } },
+      activeUsername: 'alice',
       configurePostingKey: (username, postingKey) => {
         StingChat.methods.configurePostingKey.call(vm, username, postingKey)
       },
