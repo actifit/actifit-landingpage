@@ -147,10 +147,39 @@
                     <div class="fitness-card"><img src="https://usermedia.actifit.io/chest.png"><div>{{ $t('Chest') }}</div><div class="value">{{ lastChest + ' ' + chestUnit }}</div></div>
                     <div class="fitness-card"><img src="https://usermedia.actifit.io/thighs.png"><div>{{ $t('Thighs') }}</div><div class="value">{{ lastThighs + ' ' + thighsUnit }}</div></div>
                 </div>
-                <div class="fitness-action-btn-container">
-                    <a href="#" data-toggle="modal" class="btn btn-danger" data-target="#measureChartModal" v-if="isFriend() || isOwnAccount()">{{ $t('Stats_chart') }}</a>
-                    <a href="#" class="btn btn-danger" @click.prevent="displayAddFriendStats = !displayAddFriendStats" v-else-if="user">{{ $t('Stats_chart') }}</a>
-                    <a href="#" class="btn btn-danger" @click.prevent="displayLoginStats = !displayLoginStats" v-else>{{ $t('Stats_chart') }}</a>
+                <div class="fitness-measurements-editor">
+                    <div class="fitness-measurements-toolbar">
+                    <button v-if="canEditMeasurements && !measurementsEditOn" class="btn btn-danger" @click="turnMeasurementsEditOn">
+                        <i class="fas fa-edit mr-1"></i> {{ $t('Edit_measurements') }}
+                    </button>
+                        <a href="#" data-toggle="modal" class="btn btn-danger" data-target="#measureChartModal" v-if="isFriend() || isOwnAccount()"><i class="fas fa-chart-line mr-1"></i> {{ $t('Stats_chart') }}</a>
+                        <a href="#" class="btn btn-danger" @click.prevent="displayAddFriendStats = !displayAddFriendStats" v-else-if="user"><i class="fas fa-chart-line mr-1"></i> {{ $t('Stats_chart') }}</a>
+                        <a href="#" class="btn btn-danger" @click.prevent="displayLoginStats = !displayLoginStats" v-else><i class="fas fa-chart-line mr-1"></i> {{ $t('Stats_chart') }}</a>
+                    </div>
+                    <form v-if="canEditMeasurements && measurementsEditOn" class="measurement-form" @submit.prevent="saveMeasurements">
+                        <div class="measurement-form-grid">
+                            <label v-for="field in measurementFields" :key="field.key" class="measurement-field">
+                                <span>{{ $t(field.label) }}</span>
+                                <span class="measurement-input-group">
+                                    <input v-model.trim="measurementDraft[field.key]" type="number" min="0" step="any" inputmode="decimal">
+                                    <select v-if="field.unitKey" class="measurement-unit" :value="measurementDraft[field.unitKey]" @change="changeMeasurementUnit(field.key, $event.target.value)">
+                                        <option v-for="unit in measurementUnitOptions[field.key]" :key="unit" :value="unit">{{ unit }}</option>
+                                    </select>
+                                    <span v-else class="measurement-unit-label">%</span>
+                                </span>
+                            </label>
+                        </div>
+                        <div v-if="measurementSaveError" class="text-danger small mb-2">{{ measurementSaveError }}</div>
+                        <div class="measurement-form-actions">
+                            <button class="btn btn-success" type="submit" :disabled="savingMeasurements">
+                                <i v-if="savingMeasurements" class="fas fa-spinner fa-spin mr-1"></i>{{ $t('Save') }}
+                            </button>
+                            <button class="btn btn-secondary" type="button" :disabled="savingMeasurements" @click="turnMeasurementsEditOff">{{ $t('Cancel') }}</button>
+                        </div>
+                    </form>
+                    <div v-if="lastUpdated && lastUpdated !== '-'" class="measurement-updated small">
+                        {{ $t('Measurements_updated') }}: {{ pureDate(lastUpdated) }}
+                    </div>
                 </div>
                  <div v-show="displayAddFriendStats" class="interactive-prompt mt-2">
                     <div>{{ $t('View_chart_notice').replace('_USER', this.username) }}</div>
@@ -529,6 +558,7 @@ import SSC from 'sscjs'
 const hsc = new SSC(process.env.hiveEngineRpc);
 import NotifyModal from '~/components/NotifyModal'
 import Lodash from 'lodash';
+import { buildMeasurementsMetadata, convertMeasurementValue, MEASUREMENT_KEYS, MEASUREMENT_UNIT_OPTIONS, mergeMeasurementSources, normalizeMeasurements, normalizeMeasurementUnit, selectLatestMeasurements } from '~/utils/measurements'
 
 export default {
   head() {
@@ -606,7 +636,12 @@ export default {
       thighsUnit: '',
       lastBodyfat: '-',
       lastUpdated: '-',
+      reportMeasurements: [],
       userMeasurements: [],
+      measurementsEditOn: false,
+      savingMeasurements: false,
+      measurementSaveError: '',
+      measurementDraft: {},
       userActivity: [],
       lastActivityCount: '-',
       lastActivityDate: '-',
@@ -798,6 +833,22 @@ export default {
         return this.$route.params.username.substring(1, this.$route.params.username.length);
       }
       return this.$route.params.username
+    },
+    measurementFields() {
+      return [
+        { key: 'height', unitKey: 'heightUnit', label: 'Height' },
+        { key: 'bodyfat', unitKey: null, label: 'Body_Fat' },
+        { key: 'waist', unitKey: 'waistUnit', label: 'Waist' },
+        { key: 'weight', unitKey: 'weightUnit', label: 'Weight' },
+        { key: 'chest', unitKey: 'chestUnit', label: 'Chest' },
+        { key: 'thighs', unitKey: 'thighsUnit', label: 'Thighs' }
+      ]
+    },
+    measurementUnitOptions() {
+      return MEASUREMENT_UNIT_OPTIONS;
+    },
+    canEditMeasurements() {
+      return this.cur_bchain === 'HIVE' && this.isOwnAccount();
     }
   },
   methods: {
@@ -891,6 +942,96 @@ export default {
 
       return {};
     },
+    getProfileMeasurements() {
+      const metadata = this.getProfileMetadata();
+      return normalizeMeasurements(metadata.profile && metadata.profile.actifit_measurements);
+    },
+    currentDisplayedMeasurements() {
+      return {
+        height: this.lastHeight === '-' ? '' : this.lastHeight,
+        heightUnit: normalizeMeasurementUnit('height', this.heightUnit),
+        weight: this.lastWeight === '-' ? '' : this.lastWeight,
+        weightUnit: normalizeMeasurementUnit('weight', this.weightUnit),
+        chest: this.lastChest === '-' ? '' : this.lastChest,
+        chestUnit: normalizeMeasurementUnit('chest', this.chestUnit),
+        waist: this.lastWaist === '-' ? '' : this.lastWaist,
+        waistUnit: normalizeMeasurementUnit('waist', this.waistUnit),
+        thighs: this.lastThighs === '-' ? '' : this.lastThighs,
+        thighsUnit: normalizeMeasurementUnit('thighs', this.thighsUnit),
+        bodyfat: this.lastBodyfat === '-' ? '' : this.lastBodyfat
+      };
+    },
+    changeMeasurementUnit(key, nextUnit) {
+      const unitKey = `${key}Unit`;
+      const previousUnit = normalizeMeasurementUnit(key, this.measurementDraft[unitKey]);
+      const normalizedNextUnit = normalizeMeasurementUnit(key, nextUnit);
+      const convertedValue = convertMeasurementValue(
+        key,
+        this.measurementDraft[key],
+        previousUnit,
+        normalizedNextUnit
+      );
+      this.$set(this.measurementDraft, key, convertedValue);
+      this.$set(this.measurementDraft, unitKey, normalizedNextUnit);
+    },
+    turnMeasurementsEditOn() {
+      this.measurementDraft = this.currentDisplayedMeasurements();
+      this.measurementSaveError = '';
+      this.measurementsEditOn = true;
+    },
+    turnMeasurementsEditOff() {
+      this.measurementsEditOn = false;
+      this.measurementSaveError = '';
+      this.measurementDraft = {};
+    },
+    async saveMeasurements() {
+      const values = {};
+      this.measurementSaveError = '';
+      MEASUREMENT_KEYS.forEach((key) => {
+        const rawValue = this.measurementDraft[key];
+        if (rawValue !== '' && rawValue !== null && typeof rawValue !== 'undefined') {
+          const numericValue = Number(rawValue);
+          if (!Number.isFinite(numericValue) || numericValue <= 0) {
+            this.measurementSaveError = this.$t('Measurements_positive_values');
+            return;
+          }
+          values[key] = numericValue;
+        }
+        const unitKey = `${key}Unit`;
+        if (key !== 'bodyfat' && this.measurementDraft[unitKey]) values[unitKey] = this.measurementDraft[unitKey];
+      });
+      if (this.measurementSaveError) return;
+      if (!MEASUREMENT_KEYS.some(key => Object.prototype.hasOwnProperty.call(values, key))) {
+        this.measurementSaveError = this.$t('Measurements_one_required');
+        return;
+      }
+
+      this.savingMeasurements = true;
+      this.measurementSaveError = '';
+      try {
+        const measurements = normalizeMeasurements({ ...values, updated_at: new Date().toISOString() });
+        const parsedData = this.getProfileMetadata();
+        const postingMetadata = buildMeasurementsMetadata(parsedData, measurements);
+        const jsonMetadata = await this.getLiveAccountJsonMetadata();
+        const transaction = {
+          account: this.user.account.name,
+          json_metadata: jsonMetadata,
+          posting_json_metadata: JSON.stringify(postingMetadata),
+          extensions: []
+        };
+        const outcome = await this.$processTrxFunc('account_update2', transaction);
+        if (!outcome || !outcome.success) throw new Error(this.$t('Save_Error'));
+
+        this.userinfo = { ...this.userinfo, posting_json_metadata: transaction.posting_json_metadata };
+        this.applyMeasurementSources();
+        this.turnMeasurementsEditOff();
+        this.$notify({ group: 'success', text: this.$t('Measurements_saved'), position: 'top center' });
+      } catch (error) {
+        this.measurementSaveError = error && error.message ? error.message : this.$t('Save_Error');
+      } finally {
+        this.savingMeasurements = false;
+      }
+    },
     syncAboutFieldsFromProfile(profile = {}) {
       this.textAreaLocationValue = profile.location || '';
       this.textAreaDescriptionValue = profile.about || '';
@@ -912,17 +1053,12 @@ export default {
         nextProfile.profile_image = updateData;
       }
       let pst = {
-        profile: {
-          profile_image: nextProfile.profile_image || '',
-          location: nextProfile.location || '',
-          about: nextProfile.about || '',
-          website: nextProfile.website || '',
-          name: nextProfile.name || '',
-          version: 2
-        }
+        ...parsedData,
+        profile: nextProfile
       }
+      const jsonMetadata = await this.getLiveAccountJsonMetadata();
       let transaction = {
-        account: this.user.account.name, json_metadata: '', posting_json_metadata: JSON.stringify(pst), extensions: []
+        account: this.user.account.name, json_metadata: jsonMetadata, posting_json_metadata: JSON.stringify(pst), extensions: []
       };
       return await this.$processTrxFunc('account_update2', transaction);
     },
@@ -1601,6 +1737,22 @@ export default {
       }
       return properNode;
     },
+    async getLiveAccountJsonMetadata() {
+      const accountName = this.user && this.user.account && this.user.account.name;
+      if (!accountName) throw new Error('Unable to refresh account metadata');
+
+      const chainLnk = this.setProperNode();
+      return new Promise((resolve, reject) => {
+        chainLnk.api.getAccounts([accountName], (err, result) => {
+          const account = Array.isArray(result) ? result[0] : null;
+          if (err || !account || typeof account.json_metadata !== 'string') {
+            reject(err || new Error('Unable to refresh account metadata'));
+            return;
+          }
+          resolve(account.json_metadata);
+        });
+      });
+    },
     async getAccountData() {
       let parentRef = this;
       let chainLnk = await this.setProperNode();
@@ -1619,6 +1771,7 @@ export default {
           } else {
             parentRef.userinfo = result[0];
             parentRef.syncAboutFieldsFromProfile(parentRef.userMeta && parentRef.userMeta.profile ? parentRef.userMeta.profile : {});
+            parentRef.applyMeasurementSources();
 
             if (parentRef.cur_bchain === 'HIVE') {
               parentRef.hiveBalance = parentRef.numberFormat(parseFloat(parentRef.userinfo.balance), 3);
@@ -1728,22 +1881,26 @@ export default {
       }
     },
     async setUserMeasurements(json) {
-      this.userMeasurements = json;
-      if (Array.isArray(json) && json.length > 0) {
-        let latest = json[0].json_metadata;
-        this.lastHeight = latest.height || '-';
-        this.heightUnit = latest.heightUnit || '';
-        this.lastWeight = latest.weight || '-';
-        this.weightUnit = latest.weightUnit || '';
-        this.lastChest = latest.chest || '-';
-        this.chestUnit = latest.chestUnit || '';
-        this.lastWaist = latest.waist || '-';
-        this.waistUnit = latest.waistUnit || '';
-        this.lastThighs = latest.thighs || '-';
-        this.thighsUnit = latest.thighsUnit || '';
-        this.lastBodyfat = latest.bodyfat || '-';
-        this.lastUpdated = json[0].date || '-';
-      }
+      this.reportMeasurements = Array.isArray(json) ? json : [];
+      this.applyMeasurementSources();
+    },
+    applyMeasurementSources() {
+      const profileMeasurements = this.getProfileMeasurements();
+      this.userMeasurements = mergeMeasurementSources(this.reportMeasurements, profileMeasurements);
+      const latestSnapshot = selectLatestMeasurements(this.userMeasurements);
+      const latest = latestSnapshot.measurements;
+      this.lastHeight = latest.height || '-';
+      this.heightUnit = latest.heightUnit || '';
+      this.lastWeight = latest.weight || '-';
+      this.weightUnit = latest.weightUnit || '';
+      this.lastChest = latest.chest || '-';
+      this.chestUnit = latest.chestUnit || '';
+      this.lastWaist = latest.waist || '-';
+      this.waistUnit = latest.waistUnit || '';
+      this.lastThighs = latest.thighs || '-';
+      this.thighsUnit = latest.thighsUnit || '';
+      this.lastBodyfat = latest.bodyfat || '-';
+      this.lastUpdated = latestSnapshot.updatedAt;
     },
     async setUserActivity(json) {
       this.userActivity = json;
@@ -2116,6 +2273,33 @@ html.dark-mode .user-info-header .join-date {
     gap: 15px;
 }
 .fitness-section-grid-measurements { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 15px; }
+.fitness-measurements-editor { display: flex; flex-direction: column; align-items: stretch; gap: 10px; }
+.fitness-measurements-toolbar { display: flex; justify-content: center; align-items: stretch; flex-wrap: nowrap; gap: 10px; }
+.fitness-measurements-toolbar .btn { flex: 0 1 220px; min-width: 0; margin: 0; display: flex; justify-content: center; align-items: center; }
+.measurement-form {
+    background: var(--wallet-action-box-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 15px;
+    text-align: left;
+}
+.measurement-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.measurement-field { color: var(--text-color-primary); font-weight: 600; margin: 0; }
+.measurement-input-group { display: flex; margin-top: 5px; }
+.measurement-input-group input,
+.measurement-input-group select {
+    min-width: 0;
+    width: 100%;
+    border: 1px solid var(--border-color);
+    background: var(--white-color);
+    color: var(--text-color-primary);
+    border-radius: 4px;
+    padding: 7px 9px;
+}
+.measurement-input-group .measurement-unit { flex: 0 0 65px; margin-left: 5px; }
+.measurement-unit-label { padding: 8px; color: var(--text-color-secondary); }
+.measurement-form-actions { display: flex; justify-content: center; gap: 8px; margin-top: 15px; }
+.measurement-updated { color: var(--text-color-secondary); text-align: center; }
 .fitness-action-btn-container { text-align: center; }
 .fitness-card {
     background: var(--fitness-card-gradient);

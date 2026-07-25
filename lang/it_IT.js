@@ -863,6 +863,7 @@ module.exports = {
   switch_chain: 'Cambia Chain',
   switch_to_chain: 'Passa a _CHAIN_',
   Measurements_chart: 'Grafico Misure',
+  Edit_measurements: 'Modifica misure',
   View_chart: 'Visualizza Grafico',
   Stats_chart: 'Grafico Statistiche',
   Activity_chart: 'Grafico Attività',

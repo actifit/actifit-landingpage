@@ -863,6 +863,7 @@ module.exports = {
   switch_chain: 'تبديل السلسلة',
   switch_to_chain: 'التبديل إلى _CHAIN_',
   Measurements_chart: 'مخطط القياسات',
+  Edit_measurements: 'تحرير القياسات',
   View_chart: 'عرض المخطط',
   Stats_chart: 'مخطط الإحصائيات',
   Activity_chart: 'مخطط النشاط',

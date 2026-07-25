@@ -863,6 +863,7 @@ module.exports = {
   switch_chain: 'श्रृंखला बदलें',
   switch_to_chain: '_CHAIN_ पर स्विच करें',
   Measurements_chart: 'माप चार्ट',
+  Edit_measurements: 'माप संपादित करें',
   View_chart: 'चार्ट देखें',
   Stats_chart: 'आँकड़े चार्ट',
   Activity_chart: 'गतिविधि चार्ट',

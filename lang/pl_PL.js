@@ -862,6 +862,7 @@ module.exports = {
   switch_chain: 'Przełącz łańcuch',
   switch_to_chain: 'Przełącz na _CHAIN_',
   Measurements_chart: 'Wykres pomiarów',
+  Edit_measurements: 'Edytuj pomiary',
   View_chart: 'Zobacz wykres',
   Stats_chart: 'Wykres statystyk',
   Activity_chart: 'Wykres aktywności',

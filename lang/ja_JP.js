@@ -862,6 +862,7 @@ module.exports = {
   switch_chain: 'チェーンを切り替え',
   switch_to_chain: '_CHAIN_に切り替え',
   Measurements_chart: '測定チャート',
+  Edit_measurements: '測定値を編集',
   View_chart: 'チャートを表示',
   Stats_chart: '統計チャート',
   Activity_chart: 'アクティビティチャート',
