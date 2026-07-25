@@ -14,6 +14,15 @@ describe('store/mutations', () => {
       expect(state.voteWeight).toBe(75)
     })
 
+    it('setChatPostingKey keeps and clears the in-memory chat key', () => {
+      const state = { chatPostingKey: null }
+      mutations.setChatPostingKey(state, 'posting-key')
+      expect(state.chatPostingKey).toBe('posting-key')
+
+      mutations.setChatPostingKey(state, null)
+      expect(state.chatPostingKey).toBeNull()
+    })
+
     it('setUserRank stores the full object and pulls out user_rank', () => {
       const state = { userRank: 0, userRankObj: '' }
       const rankObj = { user_rank: 7, score: 1234 }
