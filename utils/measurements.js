@@ -34,6 +34,9 @@ export function convertMeasurementValue (key, value, fromUnit, toUnit) {
   const numericValue = Number(value)
   if (!Number.isFinite(numericValue) || fromUnit === toUnit) return value
 
+  const supportedUnits = MEASUREMENT_UNIT_OPTIONS[key]
+  if (!supportedUnits || !supportedUnits.includes(fromUnit) || !supportedUnits.includes(toUnit)) return value
+
   let convertedValue = numericValue
   if (fromUnit === 'cm' && toUnit === 'in') convertedValue = numericValue / 2.54
   else if (fromUnit === 'in' && toUnit === 'cm') convertedValue = numericValue * 2.54
@@ -82,6 +85,33 @@ export function mergeMeasurementSources (reports = [], profileMeasurements) {
   return [profileEntry, ...reportEntries].sort((left, right) => {
     return new Date(right.date || 0).getTime() - new Date(left.date || 0).getTime()
   })
+}
+
+export function selectLatestMeasurements (entries = []) {
+  const measurements = {}
+  let updatedAt = '-'
+
+  entries.forEach((entry) => {
+    const source = entry && entry.json_metadata
+    if (!source || typeof source !== 'object') return
+
+    const sourceKeys = MEASUREMENT_KEYS.filter((key) => {
+      const value = source[key]
+      return value !== '' && value !== null && typeof value !== 'undefined' && Number.isFinite(Number(value))
+    })
+    if (!sourceKeys.length) return
+
+    if (updatedAt === '-') updatedAt = entry.date || source.updated_at || '-'
+    sourceKeys.forEach((key) => {
+      if (Object.prototype.hasOwnProperty.call(measurements, key)) return
+
+      measurements[key] = source[key]
+      const unitKey = `${key}Unit`
+      if (key !== 'bodyfat' && source[unitKey]) measurements[unitKey] = source[unitKey]
+    })
+  })
+
+  return { measurements, updatedAt }
 }
 
 export function buildMeasurementsMetadata (existingMetadata = {}, measurements) {

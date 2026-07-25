@@ -558,7 +558,7 @@ import SSC from 'sscjs'
 const hsc = new SSC(process.env.hiveEngineRpc);
 import NotifyModal from '~/components/NotifyModal'
 import Lodash from 'lodash';
-import { buildMeasurementsMetadata, convertMeasurementValue, MEASUREMENT_KEYS, MEASUREMENT_UNIT_OPTIONS, mergeMeasurementSources, normalizeMeasurements, normalizeMeasurementUnit } from '~/utils/measurements'
+import { buildMeasurementsMetadata, convertMeasurementValue, MEASUREMENT_KEYS, MEASUREMENT_UNIT_OPTIONS, mergeMeasurementSources, normalizeMeasurements, normalizeMeasurementUnit, selectLatestMeasurements } from '~/utils/measurements'
 
 export default {
   head() {
@@ -1012,9 +1012,10 @@ export default {
         const measurements = normalizeMeasurements({ ...values, updated_at: new Date().toISOString() });
         const parsedData = this.getProfileMetadata();
         const postingMetadata = buildMeasurementsMetadata(parsedData, measurements);
+        const jsonMetadata = await this.getLiveAccountJsonMetadata();
         const transaction = {
           account: this.user.account.name,
-          json_metadata: this.userinfo.json_metadata || '',
+          json_metadata: jsonMetadata,
           posting_json_metadata: JSON.stringify(postingMetadata),
           extensions: []
         };
@@ -1055,8 +1056,9 @@ export default {
         ...parsedData,
         profile: nextProfile
       }
+      const jsonMetadata = await this.getLiveAccountJsonMetadata();
       let transaction = {
-        account: this.user.account.name, json_metadata: this.userinfo.json_metadata || '', posting_json_metadata: JSON.stringify(pst), extensions: []
+        account: this.user.account.name, json_metadata: jsonMetadata, posting_json_metadata: JSON.stringify(pst), extensions: []
       };
       return await this.$processTrxFunc('account_update2', transaction);
     },
@@ -1735,6 +1737,22 @@ export default {
       }
       return properNode;
     },
+    async getLiveAccountJsonMetadata() {
+      const accountName = this.user && this.user.account && this.user.account.name;
+      if (!accountName) throw new Error('Unable to refresh account metadata');
+
+      const chainLnk = this.setProperNode();
+      return new Promise((resolve, reject) => {
+        chainLnk.api.getAccounts([accountName], (err, result) => {
+          const account = Array.isArray(result) ? result[0] : null;
+          if (err || !account || typeof account.json_metadata !== 'string') {
+            reject(err || new Error('Unable to refresh account metadata'));
+            return;
+          }
+          resolve(account.json_metadata);
+        });
+      });
+    },
     async getAccountData() {
       let parentRef = this;
       let chainLnk = await this.setProperNode();
@@ -1869,8 +1887,8 @@ export default {
     applyMeasurementSources() {
       const profileMeasurements = this.getProfileMeasurements();
       this.userMeasurements = mergeMeasurementSources(this.reportMeasurements, profileMeasurements);
-      const reportLatest = this.reportMeasurements.length ? this.reportMeasurements[0].json_metadata || {} : {};
-      const latest = { ...reportLatest, ...(profileMeasurements || {}) };
+      const latestSnapshot = selectLatestMeasurements(this.userMeasurements);
+      const latest = latestSnapshot.measurements;
       this.lastHeight = latest.height || '-';
       this.heightUnit = latest.heightUnit || '';
       this.lastWeight = latest.weight || '-';
@@ -1882,8 +1900,7 @@ export default {
       this.lastThighs = latest.thighs || '-';
       this.thighsUnit = latest.thighsUnit || '';
       this.lastBodyfat = latest.bodyfat || '-';
-      this.lastUpdated = (profileMeasurements && profileMeasurements.updated_at) ||
-        (this.reportMeasurements.length ? this.reportMeasurements[0].date : '-');
+      this.lastUpdated = latestSnapshot.updatedAt;
     },
     async setUserActivity(json) {
       this.userActivity = json;

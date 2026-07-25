@@ -1,4 +1,4 @@
-import { buildMeasurementsMetadata, convertMeasurementValue, mergeMeasurementSources, normalizeMeasurements, normalizeMeasurementUnit } from '~/utils/measurements'
+import { buildMeasurementsMetadata, convertMeasurementValue, mergeMeasurementSources, normalizeMeasurements, normalizeMeasurementUnit, selectLatestMeasurements } from '~/utils/measurements'
 
 describe('measurement profile helpers', () => {
   it('normalizes numeric values, units and the update date', () => {
@@ -28,6 +28,12 @@ describe('measurement profile helpers', () => {
     expect(convertMeasurementValue('weight', 154.32, 'lb', 'kg')).toBe(70)
   })
 
+  it('does not convert units that do not belong to the measurement field', () => {
+    expect(convertMeasurementValue('weight', 70, 'cm', 'in')).toBe(70)
+    expect(convertMeasurementValue('height', 180, 'kg', 'lb')).toBe(180)
+    expect(convertMeasurementValue('bodyfat', 18, 'cm', 'in')).toBe(18)
+  })
+
   it('adds profile measurements to report history in date order', () => {
     const reports = [{ date: '2026-07-01T00:00:00Z', json_metadata: { weight: 75 } }]
     const result = mergeMeasurementSources(reports, {
@@ -43,6 +49,52 @@ describe('measurement profile helpers', () => {
   it('keeps report data unchanged when profile measurements are absent', () => {
     const reports = [{ date: '2026-07-01T00:00:00Z', json_metadata: { height: 180 } }]
     expect(mergeMeasurementSources(reports, null)).toEqual(reports)
+  })
+
+  it('uses a newer report over profile values while filling report gaps', () => {
+    const entries = mergeMeasurementSources([{
+      date: '2026-07-23T10:00:00Z',
+      json_metadata: { weight: 70, weightUnit: 'kg', height: 181, heightUnit: 'cm' }
+    }], {
+      weight: 72,
+      weightUnit: 'kg',
+      chest: 95,
+      chestUnit: 'cm',
+      updated_at: '2026-07-22T10:00:00Z'
+    })
+
+    expect(selectLatestMeasurements(entries)).toEqual({
+      measurements: {
+        weight: 70,
+        weightUnit: 'kg',
+        height: 181,
+        heightUnit: 'cm',
+        chest: 95,
+        chestUnit: 'cm'
+      },
+      updatedAt: '2026-07-23T10:00:00Z'
+    })
+  })
+
+  it('uses a newer profile over report values while filling profile gaps', () => {
+    const entries = mergeMeasurementSources([{
+      date: '2026-07-22T10:00:00Z',
+      json_metadata: { weight: 72, weightUnit: 'kg', height: 181, heightUnit: 'cm' }
+    }], {
+      weight: 70,
+      weightUnit: 'kg',
+      updated_at: '2026-07-23T10:00:00Z'
+    })
+
+    expect(selectLatestMeasurements(entries)).toEqual({
+      measurements: {
+        weight: 70,
+        weightUnit: 'kg',
+        height: 181,
+        heightUnit: 'cm'
+      },
+      updatedAt: '2026-07-23T10:00:00.000Z'
+    })
   })
 
   it('preserves unrelated posting metadata and profile fields', () => {
