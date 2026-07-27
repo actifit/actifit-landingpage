@@ -63,7 +63,7 @@
     "moment": "^2.24.0",
     "node-fetch": "^2.7.0",
     "node-fetch-cookies": "^2.0.4",
-    "nuxt": "^2.17.0",
+    "nuxt": "^4.5.0",
     "nuxt-helmet": "^1.2.3",
     "qrious": "^4.0.2",
     "remarkable": "^2.0.1",
@@ -113,7 +113,7 @@
     "eslint-plugin-vue": "^7.1.0",
     "jest": "^27.5.1",
     "jest-environment-jsdom": "^27.5.1",
-    "patch-package": "^6.2.1"
+    "patch-package": "^8.0.1"
   },
   "overrides": {
     "ws": "^5.2.4",
