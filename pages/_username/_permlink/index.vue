@@ -25,7 +25,7 @@
                     :href="buildParentLink">{{ $t('view_parent_thread') }}</a>
                 </div>
 
-                <h2>{{ report.title }}</h2>
+                <h1>{{ report.title }}</h1>
                 <div class="main-user-info pl-4" ref="reportTarget">
                   <h5 class="text-brand">
                     <UserHoverCard :username="report.author" />

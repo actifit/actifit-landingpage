@@ -5,11 +5,11 @@
 
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-5">
-      <h2 class="text-center mb-5">{{ $t('Actifit_Delegators') }}</h2>
+      <h1 class="text-center mb-5 h2">{{ $t('Actifit_Delegators') }}</h1>
 
 
       <!-- show listing when loaded -->
-	  <h3 class="text-center text-brand mb-5"><img src="/img/HIVE.png" style="max-height: 50px;">{{ $t('Hive_Power_Delegators') }}</h3>
+	  <h2 class="text-center text-brand mb-5 h3"><img src="/img/HIVE.png" style="max-height: 50px;">{{ $t('Hive_Power_Delegators') }}</h2>
       <div class="row" v-if="topDelegators.hive && topDelegators.hive.length">
           <div class="col-6 col-sm-4 col-md-3 text-center mb-4" v-for="(delegator, index) in topDelegators.hive" :key="index" :delegator="delegator">
             <a :href="delegator._id" target="_blank" rel="noopener noreferrer">

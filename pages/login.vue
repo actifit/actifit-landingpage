@@ -5,7 +5,7 @@
 
     <div class="container pt-5 mt-5 pb-5">
 		<div class="border-0 card form home-card mt-3 mt-md-2 mx-auto p-3 col-md-6">
-			<h3 class="p-3">{{ $t('Login_actifit') }}</h3>
+			<h1 class="p-3 h3">{{ $t('Login_actifit') }}</h1>
 			<!--<h5 class="col-md-6"><img src="/img/STEEM.png" class="token-logo-sm">Standard Login</h5>-->
 			<div class="form-group">
 

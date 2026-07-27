@@ -4,7 +4,7 @@
 
     <div class="container pt-5 mt-5 pb-5" v-if="isUserModerator">
 		<div class="text-center">
-			<h2>Moderator Interface</h2>
+			<h1 class="h2">Moderator Interface</h1>
 		</div>
 		
 		<div class="col-md-12 row-sep m-2">

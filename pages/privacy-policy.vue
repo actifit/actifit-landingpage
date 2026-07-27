@@ -5,7 +5,7 @@
 
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-5">
-      <h2 class="text-center mb-5">Privacy Policy</h2>
+      <h1 class="text-center mb-5 h2">Privacy Policy</h1>
 		<p>Effective date: November 26, 2018</p>
 
 

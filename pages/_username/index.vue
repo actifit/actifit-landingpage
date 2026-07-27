@@ -26,7 +26,7 @@
           </div>
           <div class="user-info-header">
             <div class="d-flex align-items-center">
-                <span class="username">@{{ displayUser }}</span>
+                <h1 class="username mb-0">@{{ displayUser }}</h1>
                 <span class="user-rank-badge ml-2">{{ displayCoreUserRank }}</span>
                 <span v-if="user && user.account.name === displayUser && !account_banned" class="edit-profile-btn ml-2">
                   <a @click="editOn ? turnEditOff() : turnEditOn()">

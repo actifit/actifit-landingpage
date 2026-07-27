@@ -6,7 +6,6 @@
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-5">
       <ListHeadingSection :textualDisplay="textualTitle" />
-      <h2 class="text-center mb-5"></h2>
 	  <!--<ChainSelection />-->
 
 

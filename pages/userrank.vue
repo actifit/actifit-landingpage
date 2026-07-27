@@ -5,7 +5,7 @@
     <div class="container pt-5 mt-5 pb-5" v-if="user">
       
       <div class="text-left">
-        <h3 class="mb-4" v-if="user">{{ $t('Hey') }} {{ user.account.name }}!</h3>
+        <h1 class="mb-4 h3" v-if="user">{{ $t('Hey') }} {{ user.account.name }}!</h1>
 		<div class="lead">{{ $t('Current_rank') }} {{ this.userRankObj.user_rank }} . {{ $t('Rank_details') }}</div>
 		<div></div>
 		

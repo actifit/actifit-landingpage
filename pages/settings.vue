@@ -4,7 +4,7 @@
 	
 	<div class="container pt-5 mt-5 pb-5" v-if="user">
 	
-		<h4 class="text-brand user-name">{{$t('Actifit')}} {{ $t('Settings') }}</h4>
+		<h1 class="text-brand user-name h4">{{$t('Actifit')}} {{ $t('Settings') }}</h1>
 		<h5 class="p-3 acti-headr">{{ $t('Posting_settings') }}</h5>
 		<div class=" pb-3">
 			{{ $t('Actifit_post_target') }}

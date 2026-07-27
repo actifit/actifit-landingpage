@@ -3,7 +3,7 @@
     <!-- header -->
     <div class="pb-md-4 text-center">
       <img src="/img/icon.png" alt="Actifit" />
-      <h3 class="mt-3 text-brand title">Actifit</h3>
+      <h1 class="mt-3 text-brand title h3">Actifit</h1>
       <h5 class="font-italic text-brand slogan">It Pays to be Fit</h5>
     </div>
 

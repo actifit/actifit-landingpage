@@ -4,7 +4,7 @@
 	
 	<div class="container pt-5 mt-5 pb-5">
 		
-		<h5 class="p-3 acti-headr">{{ $t('Password_management') }}</h5>
+		<h1 class="p-3 acti-headr h5">{{ $t('Password_management') }}</h1>
 		<div class=" pb-3">
 			<div class="row" v-if="!user">
 				<label for="username" class="font-weight-bold col-3">{{ $t('Your_Username') }}</label>
