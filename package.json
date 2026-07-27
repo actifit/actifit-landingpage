@@ -94,7 +94,7 @@
     "vue-social-sharing": "^2.3.3",
     "vue-steemconnect": "^0.3.1",
     "vuejs-countdown": "^0.2.1",
-    "web3": "^1.10.4",
+    "web3": "^4.16.0",
     "web3-core-requestmanager": "^1.10.3",
     "whatwg-fetch": "^2.0.4"
   },
@@ -109,8 +109,8 @@
     "eslint": "^7.5.0",
     "eslint-loader": "^4.0.2",
     "eslint-plugin-vue": "^7.1.0",
-    "jest": "^27.5.1",
-    "jest-environment-jsdom": "^27.5.1",
+    "jest": "^30.4.2",
+    "jest-environment-jsdom": "^30.4.1",
     "patch-package": "^6.2.1"
   },
   "overrides": {
