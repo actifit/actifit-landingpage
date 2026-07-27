@@ -17,7 +17,7 @@
 	  <div class="col-md-8 pr-0 friends-img-wrapper">
 		<div class="friends-title">
 		</div>
-		<img class="friends-img" :src="'/img/fitness-friends-' + this.randImg+ '.jpg'">
+		<img class="friends-img" :src="'/img/fitness-friends-' + this.randImg+ '.jpg'" alt="Friends exercising together">
 	  </div>
 	  
 	  <div class="col-md-4 pl-0 suggested-friends-wrapper">
@@ -35,7 +35,7 @@
 					<span class="suggested-friend-name"><a :href="formattedProfileUrl(suggestion.author)" target="_blank">@{{ suggestion.author }}</a></span>
 					<div v-if="suggestion.activityCount != null" class="suggested-friend-stat"><a :href="'/activity/'+suggestion.author" ><i class="fab fa-angellist mr-2"></i>{{ numberFormat(suggestion.activityCount, 0) }} {{ $t('Reports') }}</a></div>
 					<div v-else class="suggested-friend-stat"><i class="fas fa-spin fa-spinner"></i></div>
-					<div v-if="suggestion.afitCount != null" class="suggested-friend-stat"><img src="/img/actifit_logo.png" class="mr-2 token-logo"><a :href="formattedProfileUrl(suggestion.author)" >{{ numberFormat(suggestion.afitCount, 0) }} AFIT</a></div>
+					<div v-if="suggestion.afitCount != null" class="suggested-friend-stat"><img src="/img/actifit_logo.png" class="mr-2 token-logo" alt=""><a :href="formattedProfileUrl(suggestion.author)" >{{ numberFormat(suggestion.afitCount, 0) }} AFIT</a></div>
 					<div v-else class="suggested-friend-stat"><i class="fas fa-spin fa-spinner"></i></div>
 					<div v-if="suggestion.mutualFriendsCount == null" class="suggested-friend-stat"><i class="fas fa-spin fa-spinner"></i></div>
 					<div v-else-if="suggestion.mutualFriendsCount > 0" class="suggested-friend-stat"><i class="fas fa-user-friends mr-2"></i>{{ numberFormat(suggestion.mutualFriendsCount, 0) }} Mutual Friends</div>

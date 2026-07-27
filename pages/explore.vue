@@ -175,7 +175,7 @@
 			}
 		  },
       textualTitle(){
-        return this.$t('Explore_hive')+ '<img src="/img/HIVE.png" class="mr-2 token-logo-md">';
+        return this.$t('Explore_hive')+ '<img src="/img/HIVE.png" class="mr-2 token-logo-md" alt="">';
       }
 
     },

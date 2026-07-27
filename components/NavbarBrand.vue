@@ -27,6 +27,22 @@
             </a>
           </li>
 
+          <li class="nav-item btn btn-brand m-1 nav-item-border" :title="$t('New_Blog')">
+            <a class="nav-link text-white d-flex align-items-center justify-content-center w-100 h-100"
+               href="/blog/new"
+               @click.prevent="$router.push('/blog/new'); closeMenu()">
+              <i class="fas fa-pen-to-square text-white"></i><span>{{ $t('New_Blog') }}</span>
+            </a>
+          </li>
+
+          <li class="nav-item btn btn-brand m-1 nav-item-border" :title="$t('Create_new_vid')">
+            <a class="nav-link text-white d-flex align-items-center justify-content-center w-100 h-100"
+               href="/videos/new"
+               @click.prevent="$router.push('/videos/new'); closeMenu()">
+              <i class="fas fa-video text-white"></i><span>{{ $t('Create_new_vid') }}</span>
+            </a>
+          </li>
+
           <li class="nav-item btn btn-brand m-1 nav-item-border" :title="$t('Market')">
             <a class="nav-link text-white d-flex align-items-center justify-content-center w-100 h-100"
                href="/market"
@@ -56,6 +72,14 @@ href="#news"
                href="/referrals"
                @click.prevent="$router.push('/referrals'); closeMenu()">
               <i class="fas fa-user-friends text-white"></i><span>{{ $t('Refer_A_Friend') }}</span>
+            </a>
+          </li>
+
+          <li class="nav-item btn btn-brand m-1 nav-item-border" :title="$t('professionals_title')">
+            <a class="nav-link text-white d-flex align-items-center justify-content-center w-100 h-100"
+               href="/consultants"
+               @click.prevent="$router.push('/consultants'); closeMenu()">
+              <i class="fas fa-user-md text-white"></i><span>{{ $t('professionals_title') }}</span>
             </a>
           </li>
 

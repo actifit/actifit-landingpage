@@ -55,7 +55,7 @@
 								</div>
 								<div class="prize-draw-card-body">
 									<p class="prize-draw-card-text" v-if="prizePoolValue != ''">
-										{{ prizePoolValue }} {{ $t('HIVE') }} <img src="/img/HIVE.png" class="token-logo-sm">
+										{{ prizePoolValue }} {{ $t('HIVE') }} <img src="/img/HIVE.png" class="token-logo-sm" alt="">
 									</p>
 									<p class="prize-draw-card-text" v-else><i class="fas fa-spin fa-spinner"></i></p>
 								</div>
@@ -81,7 +81,7 @@
 								</div>
 								<div class="prize-draw-card-body">
 									<a :href="'/' + lastDrawWinner" class="prize-draw-winner-link">@{{ lastDrawWinner }}</a>
-									<p class="prize-draw-card-text">{{ wonAmount }} {{ $t('HIVE') }} <img src="/img/HIVE.png" class="token-logo-sm"></p>
+									<p class="prize-draw-card-text">{{ wonAmount }} {{ $t('HIVE') }} <img src="/img/HIVE.png" class="token-logo-sm" alt=""></p>
 								</div>
 							</div>
 						</div>

@@ -3,7 +3,7 @@
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">{{ $t('top_afit_holders_title') }} <img src="/img/actifit_logo.png" class="mr-2 token-logo"></h5>
+          <h5 class="modal-title" id="exampleModalLabel">{{ $t('top_afit_holders_title') }} <img src="/img/actifit_logo.png" class="mr-2 token-logo" alt=""></h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>

@@ -6,7 +6,7 @@
     <div class="container pt-5 mt-5 pb-5">
 		<div class="border-0 card form home-card mt-3 mt-md-2 mx-auto p-3 col-md-6">
 			<h1 class="p-3 h3">{{ $t('Login_actifit') }}</h1>
-			<!--<h5 class="col-md-6"><img src="/img/STEEM.png" class="token-logo-sm">Standard Login</h5>-->
+			<!--<h5 class="col-md-6"><img src="/img/STEEM.png" class="token-logo-sm" alt="">Standard Login</h5>-->
 			<div class="form-group">
 
 				<div class="row col-12"><!--form-control-lg -->
@@ -41,17 +41,17 @@
 				<span class="row mb-1 form-control-lg " style="display: none">
 				  <div class="bchain-option p-1 m-1 btn" :class="adjustHiveClass">
 					<input type="radio" id="hive_bchain" value="HIVE" v-model="bchain_val">
-					<img src="/img/HIVE.png" style="max-height: 50px;" v-on:click="bchain_val = 'HIVE'">
+					<img src="/img/HIVE.png" style="max-height: 50px;" v-on:click="bchain_val = 'HIVE'" alt="Select Hive blockchain">
 					<label for="hive_bchain">HIVE</label>
 				  </div>
 				  <div class="bchain-option p-1 m-1 btn m-auto" :class="adjustSteemClass" style="display:none">
 					<input type="radio" id="steem_bchain" value="STEEM" v-model="bchain_val">
-					<img src="/img/STEEM.png" style="max-height: 50px;" v-on:click="bchain_val = 'STEEM'" >
+					<img src="/img/STEEM.png" style="max-height: 50px;" v-on:click="bchain_val = 'STEEM'" alt="Select Steem blockchain" >
 					<label for="steem_bchain">STEEM</label>
 				  </div>
 				  <div class="bchain-option p-1 m-1 btn" :class="adjustBlurtClass">
 					<input type="radio" id="blurt_bchain" value="BLURT" v-model="bchain_val">
-					<img src="/img/BLURT.png" style="max-height: 50px;" v-on:click="bchain_val = 'BLURT'" >
+					<img src="/img/BLURT.png" style="max-height: 50px;" v-on:click="bchain_val = 'BLURT'" alt="Select Blurt blockchain" >
 					<label for="blurt_bchain">BLURT</label>
 				  </div>
 				</span>

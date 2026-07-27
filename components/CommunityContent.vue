@@ -5,7 +5,7 @@
 
     <!-- listing -->
     <div class="mb-2 pb-2 scroll-container">
-      <!--<h2 class="text-center mb-5">{{ community }} <img src="/img/HIVE.png" class="mr-2 token-logo-md"></h2>-->
+      <!--<h2 class="text-center mb-5">{{ community }} <img src="/img/HIVE.png" class="mr-2 token-logo-md" alt=""></h2>-->
 	  <!--<ChainSelection />-->
 
       <!-- show spinner while loading -->

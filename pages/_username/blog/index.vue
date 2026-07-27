@@ -175,7 +175,7 @@ export default {
       return this.$route.params.username
     },
     textualTitle() {
-      return this.username + "'s " + this.$t('Blog') + " <img src='/img/HIVE.png' class='mr-2 token-logo-md'>";
+      return this.username + "'s " + this.$t('Blog') + " <img src='/img/HIVE.png' class='mr-2 token-logo-md' alt=''>";
     }
   },
   methods: {

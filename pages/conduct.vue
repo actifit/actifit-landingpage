@@ -44,7 +44,14 @@
 </template>
 
 <script>
+import NavbarBrand from '~/components/NavbarBrand'
+import Footer from '~/components/Footer'
+
 export default {
+  components: {
+    NavbarBrand,
+    Footer
+  },
   head() {
     return {
       title: 'Code of Conduct - Actifit.io',

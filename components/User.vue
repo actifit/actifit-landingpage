@@ -6,7 +6,7 @@
 			  <h2><a :href="'/' + this.singleuser.username">@{{ this.singleuser.username}}</a></h2>
 			  <h3>{{ this.singleuser.type}}</h3>
 			  <h4>{{ this.singleuser.location}}</h4>
-			  <img :src="this.singleuser.pic" class="pro-img-cls">
+			  <img :src="this.singleuser.pic" class="pro-img-cls" :alt="`${this.singleuser.name} profile picture`">
 		  </div>
 		  <div class="pb-md-2 text-left">
 			<b>{{ $t('brief')}}: </b>{{this.singleuser.brief}}

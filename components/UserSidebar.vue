@@ -10,6 +10,7 @@
         <div class="d-flex align-items-center mb-3 user-header">
           <nuxt-link :to="'/@' + report.author">
             <img :src="`https://images.hive.blog/u/${report.author}/avatar/large`" class="sidebar-avatar"
+                 :alt="`Profile picture of @${report.author}`"
                  @error="$event.target.src='https://actifit.io/img/user-default.png'">
           </nuxt-link>
           <div class="ml-3">

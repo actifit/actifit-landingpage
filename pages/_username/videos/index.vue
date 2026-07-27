@@ -146,7 +146,7 @@
         return this.$route.params.username
       },
       textualTitle (){
-        return this.username+"'s "+this.$t('Videos') + " <img src='/img/3speak.png' class='mr-2 token-logo-md'>";
+        return this.username+"'s "+this.$t('Videos') + " <img src='/img/3speak.png' class='mr-2 token-logo-md' alt=''>";
       }
     },
     methods: {

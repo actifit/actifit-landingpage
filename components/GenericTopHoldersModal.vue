@@ -3,7 +3,7 @@
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">{{ modalTitle }} <img :src="tokenLogo" class="mr-2 token-logo" @error="handleImageError"></h5>
+          <h5 class="modal-title">{{ modalTitle }} <img :src="tokenLogo" class="mr-2 token-logo" @error="handleImageError" alt=""></h5>
 
           <div v-if="canShowBalanceTypeDropdown" class="ml-auto mr-3">
             <select v-model="selectedBalanceOption" @change="fetchTopHolders" class="form-control form-control-sm">

@@ -64,7 +64,7 @@
       <div class="footer-bottom-bar">
         <div class="bottom-row top-row">
             <div class="bottom-bar-item">
-                Powered By HIVE <img src="/img/HIVE.png" class="hive-logo-bottom">
+                Powered By HIVE <img src="/img/HIVE.png" class="hive-logo-bottom" alt="">
             </div>
             <div class="bottom-bar-item">
                 Price Data provided By <a href="https://coingecko.com" target="_blank" rel="noopener noreferrer">CoinGecko</a>
@@ -72,7 +72,7 @@
         </div>
         <div class="bottom-row">
             <div class="bottom-bar-item copyright-section">
-                © {{ currentYear }} Copyright Actifit | {{ $config.version }} | <nuxt-link to="/privacy-policy">Privacy Policy</nuxt-link> | <nuxt-link to="/terms-conditions">Terms & Conditions</nuxt-link>
+                © {{ currentYear }} Copyright Actifit | {{ $config.version }} | <nuxt-link to="/privacy-policy">Privacy Policy</nuxt-link> | <nuxt-link to="/terms-conditions">Terms & Conditions</nuxt-link> | <nuxt-link to="/conduct">Code of Conduct</nuxt-link>
             </div>
         </div>
       </div>

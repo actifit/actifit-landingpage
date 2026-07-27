@@ -65,7 +65,7 @@
             </span>
 
             <span class="btn btn-brand mb-1" :title="$t('bsc_wallet')" v-on:click="showBSCAddress()">
-              <img src="/img/binance-logo.png" width="18px" height="18px">
+              <img src="/img/binance-logo.png" width="18px" height="18px" alt="">
             </span>
 
             <span v-if="loadingDeleg">
@@ -100,7 +100,7 @@
             <div class="col-lg-2 col-1"><i class="fa-solid fa-wave-square" :title="$t('Actions')"></i></div>
           </div>
           <div class="token-entry row main-token">
-            <div class="col-2 text-left"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo">AFIT</div>
+            <div class="col-2 text-left"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo" alt="">AFIT</div>
             <div class="col-2 col-lg-1">{{ $t('actifit_wallet') }}</div>
             <div class="col-2 text-right">{{ formattedUserAfit }}</div>
             <div class="col-2 text-right">-</div>
@@ -137,11 +137,11 @@
           </div>
           <div class="token-entry row main-token">
             <div class="col-2 text-left">
-              <span v-if="cur_bchain == 'HIVE'"><img src="/img/HIVE.png" class="mr-1 mini-token-logo">HIVE</span>
+              <span v-if="cur_bchain == 'HIVE'"><img src="/img/HIVE.png" class="mr-1 mini-token-logo" alt="">HIVE</span>
               <span v-else-if="cur_bchain == 'STEEM'"><img src="/img/STEEM.png"
-                  class="mr-1 mini-token-logo">STEEM</span>
+                  class="mr-1 mini-token-logo" alt="">STEEM</span>
               <span v-else-if="cur_bchain == 'BLURT'"><img src="/img/BLURT.png"
-                  class="mr-1 mini-token-logo">BLURT</span>
+                  class="mr-1 mini-token-logo" alt="">BLURT</span>
             </div>
             <div class="col-2 col-lg-1">{{ this.cur_bchain }}</div>
             <div class="col-2 text-right">{{ this.renderBalance(this.cur_bchain) }}</div>
@@ -268,8 +268,8 @@
 
           <div class="token-entry row main-token" v-if="cur_bchain != 'BLURT'">
             <div class="col-2 text-left">
-              <span v-if="cur_bchain == 'HIVE'"><img src="/img/HIVE.png" class="mr-1 mini-token-logo">HBD</span>
-              <span v-else-if="cur_bchain == 'STEEM'"><img src="/img/STEEM.png" class="mr-1 mini-token-logo">SBD</span>
+              <span v-if="cur_bchain == 'HIVE'"><img src="/img/HIVE.png" class="mr-1 mini-token-logo" alt="">HBD</span>
+              <span v-else-if="cur_bchain == 'STEEM'"><img src="/img/STEEM.png" class="mr-1 mini-token-logo" alt="">SBD</span>
             </div>
             <div class="col-2 col-lg-1">{{ this.cur_bchain }}</div>
             <div class="col-2 text-right">{{ this.renderSBDBalance(this.cur_bchain) }}</div>
@@ -384,7 +384,7 @@
           </transition>
 
           <div class="token-entry row main-token">
-            <div class="col-2 text-left"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo">AFIT</div>
+            <div class="col-2 text-left"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo" alt="">AFIT</div>
             <div class="col-2 col-lg-1">{{ $t('BSC') }}</div>
             <div class="col-2 text-right">{{ formattedUserAfitBSC }}</div>
             <div class="col-2"></div>
@@ -404,7 +404,7 @@
           </div>
 
           <div class="token-entry row main-token">
-            <div class="col-2 text-left"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo">AFIT-BNB LP</div>
+            <div class="col-2 text-left"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo" alt="">AFIT-BNB LP</div>
             <div class="col-2 col-lg-1">{{ $t('BSC') }}</div>
             <div class="col-2 text-right">{{ formattedUserAfitBNBLPBSC }}</div>
             <div class="col-2"></div>
@@ -420,7 +420,7 @@
 
 
           <div class="token-entry row main-token">
-            <div class="col-2 text-left"><img src="/img/AFITX.png" class="mr-1 mini-token-logo">AFITX</div>
+            <div class="col-2 text-left"><img src="/img/AFITX.png" class="mr-1 mini-token-logo" alt="">AFITX</div>
             <div class="col-2 col-lg-1">{{ $t('BSC') }}</div>
             <div class="col-2 text-right">{{ formattedUserAFITXBSC }}</div>
             <div class="col-2"></div>
@@ -440,7 +440,7 @@
           </div>
 
           <div class="token-entry row main-token">
-            <div class="col-2 text-left"><img src="/img/AFITX.png" class="mr-1 mini-token-logo">AFITX-BNB LP</div>
+            <div class="col-2 text-left"><img src="/img/AFITX.png" class="mr-1 mini-token-logo" alt="">AFITX-BNB LP</div>
             <div class="col-2 col-lg-1">{{ $t('BSC') }}</div>
             <div class="col-2 text-right">{{ formattedUserAFITXBNBLPBSC }}</div>
             <div class="col-2"></div>
@@ -461,7 +461,7 @@
             <div v-if="tokensOfInterestBal.length > 0 && renderToken(token)" class="token-entry row"
               v-for="(token, index) in tokensOfInterestBal" :key="index" :token="token">
               <!--<div v-if=" ">-->
-              <div class="col-2 text-left"><img :src="token.icon" class="mr-1 mini-token-logo">{{ token.symbol }}</div>
+              <div class="col-2 text-left"><img :src="token.icon" class="mr-1 mini-token-logo" alt="">{{ token.symbol }}</div>
               <div class="col-2 col-lg-1">{{ $t('hive_engine') }}</div>
               <div class="col-2 text-right">{{ renderBal(token) }} {{ token.symbol }}</div>
               <div class="col-2 text-right">
@@ -568,7 +568,7 @@
                   <input type="number" id="token-powerup-amount" name="token-powerup-amount" ref="token-powerup-amount"
                     class="form-control-lg w-50 p-2" @input="calculateHBDAmount">
                   <span class="p-2" v-on:click="fillTokenTransAmount()" :title="$t('select_full_balance')"><img
-                      :src="selTokenUp.icon" class="mr-1 mini-token-logo"><u>{{ showMaxBal(selTokenUp) }} {{
+                      :src="selTokenUp.icon" class="mr-1 mini-token-logo" alt=""><u>{{ showMaxBal(selTokenUp) }} {{
                         selTokenUp.symbol }}</u></span>
                 </div>
 
@@ -700,7 +700,7 @@
                   <input type="number" id="transfer-amount" name="transfer-amount" ref="transfer-amount"
                     class="form-control-lg w-50 p-2">
                   <span class="w-25 p-1 text-left text-brand" v-on:click="fillTransAmount()"
-                    :title="$t('select_full_balance')"><img src="/img/HIVE.png" class="mr-1 mini-token-logo"><u>{{
+                    :title="$t('select_full_balance')"><img src="/img/HIVE.png" class="mr-1 mini-token-logo" alt=""><u>{{
                       this.renderTransAmount() }}</u></span>
                 </div>
                 <div class="row">
@@ -748,7 +748,7 @@
                   <input type="number" id="powerup-amount" name="powerup-amount" ref="powerup-amount"
                     class="form-control-lg w-50 p-2">
                   <span v-on:click="fillPowerupAmount()" :title="$t('select_full_balance')"><img src="/img/HIVE.png"
-                      class="mr-1 mini-token-logo"><u>{{ this.renderBalance(this.cur_bchain, true) }}</u></span>
+                      class="mr-1 mini-token-logo" alt=""><u>{{ this.renderBalance(this.cur_bchain, true) }}</u></span>
                 </div>
                 <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
                   <label for="powerup-amount" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
@@ -792,7 +792,7 @@
                     <input type="number" id="powerdown-amount" name="powerdown-amount" ref="powerdown-amount"
                       class="form-control-lg w-50 p-2">
                     <span v-on:click="fillPowerdownAmount()" :title="$t('select_full_balance')"><img src="/img/HIVE.png"
-                        class="mr-1 mini-token-logo"><u>{{ this.renderSteemPower(1) }}</u></span>
+                        class="mr-1 mini-token-logo" alt=""><u>{{ this.renderSteemPower(1) }}</u></span>
                   </div>
                   <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
                     <label for="powerdown-amount" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
@@ -879,7 +879,7 @@
                   <input type="number" id="transfer-amount" name="transfer-amount" ref="transfer-amount"
                     class="form-control-lg w-50 p-2">
                   <span class="w-25 p-1 text-left text-brand" v-on:click="fillTransAmount()"
-                    :title="$t('select_full_balance')"><img src="/img/HIVE.png" class="mr-1 mini-token-logo"><u>{{
+                    :title="$t('select_full_balance')"><img src="/img/HIVE.png" class="mr-1 mini-token-logo" alt=""><u>{{
                       this.renderTransAmount() }}</u></span>
                 </div>
                 <div class="row">
@@ -941,7 +941,7 @@
                   <input type="number" id="transfer-amount" name="transfer-amount" ref="transfer-amount"
                     class="form-control-lg w-50 p-2">
                   <span class="w-25 p-1 text-left text-brand" v-on:click="fillSavingsAmount()"
-                    :title="$t('select_full_balance')"><img src="/img/HIVE.png" class="mr-1 mini-token-logo"><u>{{
+                    :title="$t('select_full_balance')"><img src="/img/HIVE.png" class="mr-1 mini-token-logo" alt=""><u>{{
                       this.renderSavingsAmount() }}</u></span>
                 </div>
                 <div class="row">
@@ -991,7 +991,7 @@
                     <input type="number" id="delegate-amount" name="delegate-amount" ref="delegate-amount"
                       class="form-control-lg w-50 p-2">
                     <span v-on:click="fillDelegateAmount()" :title="$t('select_full_balance')"><img src="/img/HIVE.png"
-                        class="mr-1 mini-token-logo"><u>{{ this.renderSteemPower(1) }}</u></span>
+                        class="mr-1 mini-token-logo" alt=""><u>{{ this.renderSteemPower(1) }}</u></span>
                   </div>
                   <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
                     <label for="delegate-amount" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
@@ -1141,7 +1141,7 @@
             <transition name="fade">
               <div v-if="fundActivityMode == SHOW_CLAIMABLE_REW && isClaimableDataAvailable && cur_bchain == 'STEEM'"
                 class="action-box">
-                <h5 class="pro-name"><img src="/img/STEEM.png" class="mr-2 token-logo">{{ $t('Claimable_Steem_Rewards')
+                <h5 class="pro-name"><img src="/img/STEEM.png" class="mr-2 token-logo" alt="">{{ $t('Claimable_Steem_Rewards')
                 }}</h5>
                 <div class="mb-4 font-weight-bold">
                   <span class="p-2">{{ this.claimSP }} | {{ this.claimSTEEM }} | {{ this.claimSBD }}</span>
@@ -1155,7 +1155,7 @@
               <div
                 v-else-if="fundActivityMode == SHOW_CLAIMABLE_REW && isClaimableDataAvailable && cur_bchain == 'HIVE'"
                 class="col-md-6 row-sep-in">
-                <h5 class="pro-name"><img src="/img/HIVE.png" class="mr-2 token-logo">{{ $t('Claimable_Hive_Rewards') }}
+                <h5 class="pro-name"><img src="/img/HIVE.png" class="mr-2 token-logo" alt="">{{ $t('Claimable_Hive_Rewards') }}
                 </h5>
                 <div class="mb-4 font-weight-bold">
                   <span class="p-2">{{ this.claimSP }} | {{ this.claimSTEEM }} | {{ this.claimSBD }}</span>
@@ -1169,7 +1169,7 @@
               <div
                 v-else-if="fundActivityMode == SHOW_CLAIMABLE_REW && isClaimableDataAvailable && cur_bchain == 'BLURT'"
                 class="col-md-6 row-sep-in">
-                <h5 class="pro-name"><img src="/img/BLURT.png" class="mr-2 token-logo">{{ $t('Claimable_Blurt_Rewards')
+                <h5 class="pro-name"><img src="/img/BLURT.png" class="mr-2 token-logo" alt="">{{ $t('Claimable_Blurt_Rewards')
                 }}</h5>
                 <div class="mb-4 font-weight-bold">
                   <span class="p-2">{{ this.claimSP }} | {{ this.claimSTEEM }}</span>
@@ -1296,11 +1296,11 @@
                 v-on:click="showDetailedCalc = !showDetailedCalc"></i></h5>
             <div class="pb-2">{{ $t('in_usd') }}: ${{ totalAccountValue }}</div>
             <div class="pb-2" v-if="this.cur_bchain == 'STEEM'">{{ $t('in_steem') }}: <img src="/img/STEEM.png"
-                class="token-logo-sm">{{ formattedSteemTotVal }}</div>
+                class="token-logo-sm" alt="">{{ formattedSteemTotVal }}</div>
             <div class="pb-2" v-else-if="this.cur_bchain == 'HIVE'">{{ $t('in_hive') }}: <img src="/img/HIVE.png"
-                class="token-logo-sm">{{ formattedSteemTotVal }}</div>
+                class="token-logo-sm" alt="">{{ formattedSteemTotVal }}</div>
             <div class="pb-2" v-else-if="this.cur_bchain == 'BLURT'">{{ $t('in_blurt') }}: <img src="/img/BLURT.png"
-                class="token-logo-sm">{{ formattedSteemTotVal }}</div>
+                class="token-logo-sm" alt="">{{ formattedSteemTotVal }}</div>
           </div>
 
         </div>
@@ -1702,7 +1702,7 @@
 
         <div class="row text-center row-sep" v-if="false">
           <div class="col-md-6 row-sep-in" v-if="cur_bchain == 'STEEM'">
-            <h5 class="token-title"><img src="/img/STEEM.png" class="mr-2 token-logo">{{ $t('Your_Steem_Balance') }}
+            <h5 class="token-title"><img src="/img/STEEM.png" class="mr-2 token-logo" alt="">{{ $t('Your_Steem_Balance') }}
             </h5>
             <div class="mb-4 font-weight-bold">
               <div class="p-2">{{ this.renderSteemPower(2) }} {{ $t('STEEM_POWER_CAPS') }} | {{
@@ -1724,7 +1724,7 @@
             </div>
           </div>
           <div class="col-md-6 row-sep-in" v-else-if="cur_bchain == 'HIVE'">
-            <h5 class="token-title"><img src="/img/HIVE.png" class="mr-2 token-logo">{{ $t('Your_Hive_Balance') }}</h5>
+            <h5 class="token-title"><img src="/img/HIVE.png" class="mr-2 token-logo" alt="">{{ $t('Your_Hive_Balance') }}</h5>
             <div class="mb-4 font-weight-bold">
               <div class="p-2">{{ this.renderSteemPower(2) }} {{ $t('HIVE_POWER_CAPS') }} | {{
                 this.renderBalance(this.cur_bchain) }} | {{ this.renderSBDBalance(this.cur_bchain) }}</div>
@@ -1745,7 +1745,7 @@
             </div>
           </div>
           <div class="col-md-6 row-sep-in" v-else-if="cur_bchain == 'BLURT'">
-            <h5 class="token-title"><img src="/img/BLURT.png" class="mr-2 token-logo">{{ $t('Your_Blurt_Balance') }}
+            <h5 class="token-title"><img src="/img/BLURT.png" class="mr-2 token-logo" alt="">{{ $t('Your_Blurt_Balance') }}
             </h5>
             <div class="mb-4 font-weight-bold">
               <div class="p-2">{{ this.renderSteemPower(2) }} {{ $t('BLURT_POWER_CAPS') }} | {{
