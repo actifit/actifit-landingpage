@@ -17,6 +17,10 @@ updates:
       # 0.4.x only re-does the sc2-sdk->steemconnect migration we already
       # patched in, breaks the pinned patch, and drops our stdLogin change.
       - dependency-name: "vue-steemconnect"
+      # Nuxt 2 -> 3/4 is a full framework rewrite, not a Dependabot-mergeable
+      # bump. Ignore MAJOR nuxt updates (minor/patch on Nuxt 2 still flow).
+      - dependency-name: "nuxt"
+        update-types: ["version-update:semver-major"]
     groups:
       production-minor-patch:
         dependency-type: "production"
