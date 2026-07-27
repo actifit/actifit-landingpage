@@ -558,7 +558,7 @@ import SSC from 'sscjs'
 const hsc = new SSC(process.env.hiveEngineRpc);
 import NotifyModal from '~/components/NotifyModal'
 import Lodash from 'lodash';
-import { buildMeasurementsMetadata, convertMeasurementValue, MEASUREMENT_KEYS, MEASUREMENT_UNIT_OPTIONS, mergeMeasurementSources, normalizeMeasurements, normalizeMeasurementUnit, selectLatestMeasurements } from '~/utils/measurements'
+import { buildMeasurementsMetadata, convertMeasurementValue, MEASUREMENT_KEYS, MEASUREMENT_UNIT_OPTIONS, mergeMeasurementSources, normalizeMeasurements, normalizeMeasurementUnit, selectLatestMeasurements, waitForMeasurementSave } from '~/utils/measurements'
 
 export default {
   head() {
@@ -1010,17 +1010,28 @@ export default {
       this.measurementSaveError = '';
       try {
         const measurements = normalizeMeasurements({ ...values, updated_at: new Date().toISOString() });
-        const parsedData = this.getProfileMetadata();
+        const timeoutError = this.$t('error_performing_operation');
+        const metadataOutcome = await waitForMeasurementSave(
+          this.getLiveProfileMetadata().then(metadata => ({ success: true, metadata })),
+          timeoutError
+        );
+        if (!metadataOutcome.success) throw new Error(metadataOutcome.error || this.$t('Save_Error'));
+
+        const parsedData = metadataOutcome.metadata;
         const postingMetadata = buildMeasurementsMetadata(parsedData, measurements);
-        const jsonMetadata = await this.getLiveAccountJsonMetadata();
         const transaction = {
           account: this.user.account.name,
-          json_metadata: jsonMetadata,
+          // Empty is account_update2's no-change sentinel for legacy metadata.
+          // A non-empty value would require the active key instead of posting.
+          json_metadata: '',
           posting_json_metadata: JSON.stringify(postingMetadata),
           extensions: []
         };
-        const outcome = await this.$processTrxFunc('account_update2', transaction);
-        if (!outcome || !outcome.success) throw new Error(this.$t('Save_Error'));
+        const outcome = await waitForMeasurementSave(
+          this.$processTrxFunc('account_update2', transaction, false),
+          timeoutError
+        );
+        if (!outcome || !outcome.success) throw new Error((outcome && outcome.error) || this.$t('Save_Error'));
 
         this.userinfo = { ...this.userinfo, posting_json_metadata: transaction.posting_json_metadata };
         this.applyMeasurementSources();
@@ -1056,11 +1067,11 @@ export default {
         ...parsedData,
         profile: nextProfile
       }
-      const jsonMetadata = await this.getLiveAccountJsonMetadata();
       let transaction = {
-        account: this.user.account.name, json_metadata: jsonMetadata, posting_json_metadata: JSON.stringify(pst), extensions: []
+        // Empty preserves legacy metadata while keeping this a posting-authority update.
+        account: this.user.account.name, json_metadata: '', posting_json_metadata: JSON.stringify(pst), extensions: []
       };
-      return await this.$processTrxFunc('account_update2', transaction);
+      return await this.$processTrxFunc('account_update2', transaction, false);
     },
     async updateProfileImage(imageUrl) {
         this.updatingField = 'profile_image';
@@ -1737,19 +1748,25 @@ export default {
       }
       return properNode;
     },
-    async getLiveAccountJsonMetadata() {
+    async getLiveProfileMetadata() {
       const accountName = this.user && this.user.account && this.user.account.name;
-      if (!accountName) throw new Error('Unable to refresh account metadata');
+      if (!accountName) throw new Error(this.$t('Save_Error'));
 
       const chainLnk = this.setProperNode();
       return new Promise((resolve, reject) => {
         chainLnk.api.getAccounts([accountName], (err, result) => {
           const account = Array.isArray(result) ? result[0] : null;
-          if (err || !account || typeof account.json_metadata !== 'string') {
-            reject(err || new Error('Unable to refresh account metadata'));
+          if (err || !account || typeof account.posting_json_metadata !== 'string') {
+            reject(err || new Error(this.$t('Save_Error')));
             return;
           }
-          resolve(account.json_metadata);
+
+          try {
+            resolve(account.posting_json_metadata ? JSON.parse(account.posting_json_metadata) || {} : {});
+          } catch (parseError) {
+            console.error('Unable to parse live profile metadata', parseError);
+            resolve({});
+          }
         });
       });
     },

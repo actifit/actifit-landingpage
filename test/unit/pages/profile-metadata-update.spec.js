@@ -1,9 +1,44 @@
 import ProfilePage from '~/pages/_username/index.vue'
 
-const { broadcastUpdate, saveMeasurements } = ProfilePage.methods
+const { broadcastUpdate, getLiveProfileMetadata, saveMeasurements } = ProfilePage.methods
 
 describe('profile metadata updates', () => {
-  it('preserves freshly fetched json_metadata when updating profile fields', async () => {
+  it('reads freshly fetched posting metadata before saving', async () => {
+    const context = {
+      user: { account: { name: 'alice' } },
+      setProperNode: () => ({
+        api: {
+          getAccounts: (accounts, callback) => callback(null, [{
+            posting_json_metadata: '{"app":"peakd/2.0","profile":{"name":"Alice"}}'
+          }])
+        }
+      }),
+      $t: key => key
+    }
+
+    await expect(getLiveProfileMetadata.call(context)).resolves.toEqual({
+      app: 'peakd/2.0',
+      profile: { name: 'Alice' }
+    })
+  })
+
+  it('handles malformed freshly fetched posting metadata safely', async () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {})
+    const context = {
+      user: { account: { name: 'alice' } },
+      setProperNode: () => ({
+        api: {
+          getAccounts: (accounts, callback) => callback(null, [{ posting_json_metadata: '{bad-json' }])
+        }
+      }),
+      $t: key => key
+    }
+
+    await expect(getLiveProfileMetadata.call(context)).resolves.toEqual({})
+    consoleError.mockRestore()
+  })
+
+  it('uses posting authority without changing legacy metadata when updating profile fields', async () => {
     const processTrx = jest.fn().mockResolvedValue({ success: true })
     const context = {
       user: { account: { name: 'alice' } },
@@ -12,18 +47,19 @@ describe('profile metadata updates', () => {
       textAreaLinkValue: 'https://example.com',
       textAreaUsernameValue: 'Alice',
       getProfileMetadata: () => ({ profile: { cover_image: 'cover.jpg' } }),
-      getLiveAccountJsonMetadata: jest.fn().mockResolvedValue('{"legacy":"keep-me"}'),
       $processTrxFunc: processTrx
     }
 
     await broadcastUpdate.call(context, null, 'description')
 
-    expect(processTrx).toHaveBeenCalledWith('account_update2', expect.objectContaining({
-      json_metadata: '{"legacy":"keep-me"}'
-    }))
+    expect(processTrx).toHaveBeenCalledWith(
+      'account_update2',
+      expect.objectContaining({ json_metadata: '' }),
+      false
+    )
   })
 
-  it('preserves freshly fetched json_metadata when saving measurements', async () => {
+  it('uses posting authority without changing legacy metadata when saving measurements', async () => {
     const processTrx = jest.fn().mockResolvedValue({ success: true })
     const context = {
       user: { account: { name: 'alice' } },
@@ -31,8 +67,10 @@ describe('profile metadata updates', () => {
       measurementDraft: { weight: '70', weightUnit: 'kg' },
       measurementSaveError: '',
       savingMeasurements: false,
-      getProfileMetadata: () => ({ profile: { name: 'Alice' } }),
-      getLiveAccountJsonMetadata: jest.fn().mockResolvedValue('{"legacy":"keep-me"}'),
+      getLiveProfileMetadata: jest.fn().mockResolvedValue({
+        app: 'peakd/2.0',
+        profile: { name: 'Alice', cover_image: 'cover.jpg' }
+      }),
       $processTrxFunc: processTrx,
       applyMeasurementSources: jest.fn(),
       turnMeasurementsEditOff: jest.fn(),
@@ -42,8 +80,37 @@ describe('profile metadata updates', () => {
 
     await saveMeasurements.call(context)
 
-    expect(processTrx).toHaveBeenCalledWith('account_update2', expect.objectContaining({
-      json_metadata: '{"legacy":"keep-me"}'
-    }))
+    expect(processTrx).toHaveBeenCalledWith(
+      'account_update2',
+      expect.objectContaining({ json_metadata: '' }),
+      false
+    )
+    const transaction = processTrx.mock.calls[0][1]
+    expect(JSON.parse(transaction.posting_json_metadata)).toMatchObject({
+      app: 'peakd/2.0',
+      profile: { name: 'Alice', cover_image: 'cover.jpg', actifit_measurements: { weight: 70 } }
+    })
+  })
+
+  it('shows the backend transaction error when saving measurements fails', async () => {
+    const context = {
+      user: { account: { name: 'alice' } },
+      userinfo: {},
+      measurementDraft: { weight: '70', weightUnit: 'kg' },
+      measurementSaveError: '',
+      savingMeasurements: false,
+      getLiveProfileMetadata: jest.fn().mockResolvedValue({ profile: {} }),
+      $processTrxFunc: jest.fn().mockResolvedValue({ success: false, error: 'missing required posting authority' }),
+      applyMeasurementSources: jest.fn(),
+      turnMeasurementsEditOff: jest.fn(),
+      $notify: jest.fn(),
+      $t: key => key
+    }
+
+    await saveMeasurements.call(context)
+
+    expect(context.measurementSaveError).toBe('missing required posting authority')
+    expect(context.applyMeasurementSources).not.toHaveBeenCalled()
+    expect(context.savingMeasurements).toBe(false)
   })
 })

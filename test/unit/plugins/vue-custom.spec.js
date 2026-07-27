@@ -3,9 +3,152 @@
 jest.mock('hive-auth-wrapper', () => ({ broadcast: jest.fn(), authenticate: jest.fn() }))
 
 import Vue from 'vue'
-import '@/plugins/vue-custom'
+import { getTransactionErrorMessage } from '@/plugins/vue-custom'
 
 describe('plugins/vue-custom global helpers', () => {
+  describe('getTransactionErrorMessage', () => {
+    it('reads the legacy nested transaction error', () => {
+      expect(getTransactionErrorMessage({
+        error: true,
+        trx: { tx: { error: 'missing required posting authority' } }
+      })).toBe('missing required posting authority')
+    })
+
+    it('reads a top-level error when trx is null', () => {
+      expect(getTransactionErrorMessage({
+        error: 'broadcast failed',
+        trx: null
+      })).toBe('broadcast failed')
+    })
+
+    it('reads an error object when trx is absent', () => {
+      expect(getTransactionErrorMessage({
+        error: { message: 'invalid operation' }
+      })).toBe('invalid operation')
+    })
+  })
+
+  describe('$processTrxFunc standard login errors', () => {
+    const originalActiAppUrl = process.env.actiAppUrl
+    const originalFetch = global.fetch
+
+    beforeEach(() => {
+      localStorage.clear()
+      localStorage.setItem('std_login', 'true')
+      localStorage.setItem('acti_login_method', 'standard')
+      localStorage.setItem('access_token', 'token')
+      process.env.actiAppUrl = 'https://api.example/'
+    })
+
+    afterEach(() => {
+      global.fetch = originalFetch
+      process.env.actiAppUrl = originalActiAppUrl
+      localStorage.clear()
+    })
+
+    it('surfaces a top-level backend error when trx is null', async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        json: jest.fn().mockResolvedValue({ error: 'broadcast failed', trx: null })
+      })
+      const context = {
+        user: { account: { name: 'alice' } },
+        $notify: jest.fn(),
+        $t: key => key,
+        $store: { dispatch: jest.fn() }
+      }
+
+      const result = await Vue.prototype.$processTrxFunc.call(context, 'account_update2', {}, false)
+
+      expect(result).toEqual({ success: false, trx: null, error: 'broadcast failed' })
+      expect(context.$notify).toHaveBeenCalledWith(expect.objectContaining({ text: 'broadcast failed' }))
+    })
+
+    it('rejects a malformed success response with no transaction', async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        json: jest.fn().mockResolvedValue({ success: true, trx: null })
+      })
+      const context = {
+        user: { account: { name: 'alice' } },
+        $notify: jest.fn(),
+        $t: key => key,
+        $store: { dispatch: jest.fn() }
+      }
+
+      const result = await Vue.prototype.$processTrxFunc.call(context, 'account_update2', {}, false)
+
+      expect(result).toEqual({ success: false, trx: null, error: 'error_performing_operation' })
+    })
+
+  })
+
+  describe('$processTrxFunc Keychain cancellation', () => {
+    beforeEach(() => {
+      localStorage.clear()
+      localStorage.setItem('std_login', 'true')
+      localStorage.setItem('acti_login_method', 'keychain')
+    })
+
+    afterEach(() => {
+      delete window.hive_keychain
+      localStorage.clear()
+    })
+
+    it('settles cleanly when Keychain returns a null result', async () => {
+      window.hive_keychain = {
+        requestBroadcast: jest.fn((account, operations, authority, callback) => {
+          callback({ success: false, result: null, message: 'User cancelled' })
+        })
+      }
+      const context = { user: { account: { name: 'alice' } } }
+
+      const result = await Vue.prototype.$processTrxFunc.call(context, 'account_update2', {}, false)
+
+      expect(result).toEqual({
+        success: false,
+        txID: null,
+        trx: null,
+        error: 'User cancelled'
+      })
+      expect(window.hive_keychain.requestBroadcast).toHaveBeenCalledWith(
+        'alice',
+        [['account_update2', {}]],
+        'Posting',
+        expect.any(Function)
+      )
+    })
+
+    it('returns the transaction id after a successful broadcast', async () => {
+      window.hive_keychain = {
+        requestBroadcast: jest.fn((account, operations, authority, callback) => {
+          callback({ success: true, result: { id: 'trx-123' } })
+        })
+      }
+      const context = { user: { account: { name: 'alice' } } }
+
+      const result = await Vue.prototype.$processTrxFunc.call(context, 'account_update2', {}, false)
+
+      expect(result).toEqual({
+        success: true,
+        txID: 'trx-123',
+        trx: { tx: { id: 'trx-123' } }
+      })
+    })
+
+    it('does not report success without a transaction id', async () => {
+      window.hive_keychain = {
+        requestBroadcast: jest.fn((account, operations, authority, callback) => {
+          callback({ success: true, result: null })
+        })
+      }
+      const context = { user: { account: { name: 'alice' } } }
+
+      const result = await Vue.prototype.$processTrxFunc.call(context, 'account_update2', {}, false)
+
+      expect(result).toEqual({ success: false, txID: null, trx: null })
+    })
+
+  })
+
   describe('$numberFormat', () => {
     it('formats integers with thousands separators', () => {
       expect(Vue.prototype.$numberFormat(1234567, 0)).toBe('1,234,567')
