@@ -38,6 +38,18 @@
           </div>
         </div>
 
+        <!-- Account actions (only shown on the signed-in user's profile) -->
+        <div v-if="user && isOwnAccount()" class="profile-account-actions">
+          <button type="button" class="btn profile-action-btn" @click="showModalFunc">
+            <i class="fas fa-user-group" aria-hidden="true"></i>
+            <span>{{ $t('switch_user') }}</span>
+          </button>
+          <button type="button" class="btn profile-action-btn" @click="proceedLogout">
+            <i class="fas fa-right-from-bracket" aria-hidden="true"></i>
+            <span>{{ $t('Logout') }}</span>
+          </button>
+        </div>
+
         <!-- Friendship action buttons -->
         <div v-if="user && !isOwnAccount() && !account_banned" class="friend-actions">
             <span :title="$t('you_are_friends_username').replace('_USERNAME_', displayUser)" v-if="isFriend()">
@@ -852,9 +864,17 @@ export default {
     }
   },
   methods: {
+    proceedLogout() {
+      this.$store.commit('setStdLoginUser', false);
+      if (process.client) {
+        localStorage.removeItem('std_login');
+        localStorage.removeItem('std_login_name');
+      }
+      this.$store.dispatch('steemconnect/logout');
+    },
     showModalFunc() {
+      this.showModal = true;
       this.$nextTick(() => {
-        this.showModal = true;
         if ($ && typeof $.fn.modal === 'function') {
           $('#loginModal').modal('show');
         }
@@ -2146,6 +2166,33 @@ html.dark-mode .user-info-header .join-date {
     flex-shrink: 0;
 }
 .user-info-header { margin-left: 20px; }
+.profile-account-actions {
+  width: 150px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.profile-action-btn {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #fff;
+  background-color: var(--brand-color);
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  border-radius: 10px;
+  font-weight: 600;
+  box-shadow: var(--box-shadow-lifted);
+  transition: transform 0.2s, opacity 0.2s;
+}
+.profile-action-btn:hover,
+.profile-action-btn:focus {
+  color: #fff;
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
 .avatar-edit-button {
   position: absolute;
   bottom: 5px;
@@ -2505,6 +2552,14 @@ html.dark-mode .interactive-prompt {
         margin-left: 0;
         text-align: center;
         width: 100%;
+    }
+    .profile-account-actions {
+        width: 100%;
+        max-width: 320px;
+        flex-direction: row;
+    }
+    .profile-action-btn {
+        flex: 1;
     }
     .wallet-top-actions {
         flex-direction: column;
