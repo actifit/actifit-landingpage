@@ -119,7 +119,7 @@
 		<h2>Contact Us</h2>
 		<p>If you have any questions about this Privacy Policy, please contact us:</p>
 		<ul>
-			<li>By email: <a href="mailto:actifit.io@gmail.com">actifit.io@gmail.com</a></li>
+			<li>By email: <a href="mailto:hello@actifit.io">hello@actifit.io</a></li>
             <li>By visiting our group on discord: <a href="https://discord.gg/aHtcA6r">https://discord.gg/aHtcA6r</a></li>
       
         </ul>
@@ -133,6 +133,7 @@
 
 <script>
 export default {
+  middleware: 'disable-email-obfuscation',
   head() {
     return {
       title: 'Privacy Policy - Actifit.io',

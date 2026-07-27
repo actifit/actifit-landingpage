@@ -221,7 +221,7 @@ We reserve the right, at our sole discretion, to update, change or replace any p
 
 <h4>SECTION 21 - CONTACT INFORMATION</h4>
 
-Questions about the Terms of Service should be sent to us at <a href="mailto:info@actifit.io">info@actifit.io</a>.
+Questions about the Terms of Service should be sent to us at <a href="mailto:hello@actifit.io">hello@actifit.io</a>.
 
 </div>
 
@@ -234,6 +234,7 @@ Questions about the Terms of Service should be sent to us at <a href="mailto:inf
 
 <script>
 export default {
+  middleware: 'disable-email-obfuscation',
   head() {
     return {
       title: 'Terms and Conditions - Actifit.io',
