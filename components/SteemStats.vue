@@ -115,10 +115,25 @@
 		cur_bchain: 'HIVE',
         showVpTooltip: false,
         showRcTooltip: false,
+		refreshInterval: null,
+		rcRequestId: 0,
 	  }
 	},
 	props: ['user', 'minView'],
+	watch: {
+	  username(newUsername, oldUsername) {
+		if (newUsername === oldUsername) return;
+		this.rcRequestId += 1;
+		this.currentVotingPower = 0;
+		this.currentRC = 0;
+		this.currentRCPercent = '0%';
+		if (newUsername) this.fetchVotingPower();
+	  }
+	},
 	computed: {
+	  username() {
+		return this.user && this.user.account ? this.user.account.name : '';
+	  },
 	  getVotingPower () {
 		return parseFloat(this.currentVotingPower).toFixed(3) + '%';
 	  },
@@ -147,10 +162,14 @@
 	},
 	methods: {
 	  async fetchVotingPower() {
+		const requestId = ++this.rcRequestId;
 		if (!this.user || !this.user.account){
 		  return 0;
 		}
+		const selectedChain = localStorage.getItem('cur_bchain');
+		if (selectedChain === 'HIVE' || selectedChain === 'STEEM') this.cur_bchain = selectedChain;
 		let account = this.user.account;
+		const username = account.name;
 		const totalShares = parseFloat(account.vesting_shares) + parseFloat(account.received_vesting_shares) - parseFloat(account.delegated_vesting_shares) - parseFloat(account.vesting_withdraw_rate);
 		const elapsed = Math.floor(Date.now() / 1000) - account.voting_manabar.last_update_time;
 		let maxMana = totalShares * 1000000;
@@ -169,7 +188,8 @@
 			chainLnk = client;
 		}
 		try {
-			let rcComponent = await chainLnk.rc.getRCMana(this.user.account.name);
+			let rcComponent = await chainLnk.rc.getRCMana(username);
+			if (requestId !== this.rcRequestId || this.username !== username) return currentManaPerc;
 			this.currentRC = rcComponent.percentage/100;
 			this.currentRCPercent = this.currentRC.toFixed(2) + '%';
 		} catch (e) {
@@ -206,7 +226,11 @@
 	  client = new dsteem.Client(process.env.steemApiNode)
 	  hiveclient = new dhive.Client(process.env.altHiveNodes)
 	  this.fetchVotingPower();
-	  setInterval(this.fetchVotingPower, 30 * 1000);
+	  this.refreshInterval = setInterval(this.fetchVotingPower, 30 * 1000);
+	},
+	beforeDestroy () {
+	  this.rcRequestId += 1;
+	  if (this.refreshInterval) clearInterval(this.refreshInterval);
 	}
   }
 </script>
