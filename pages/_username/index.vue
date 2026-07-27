@@ -580,9 +580,6 @@ export default {
         { hid: 'description', name: 'description', content: `View ${this.username}'s activity reports, fitness achievements, and earnings on Actifit — the move-to-earn platform that rewards your healthy lifestyle.` },
         { hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `View ${this.username}'s activity reports and earnings on Actifit.` },
         { hid: 'ogtitle', name: 'og:title', property: 'og:title', content: `${this.username} on Actifit` }
-      ],
-      link: [
-        { rel: 'canonical', href: `https://actifit.io/${this.username}` }
       ]
     }
   },
