@@ -57,6 +57,9 @@ const createStore = () => {
       commentEntries: [], //contains a reference to the current comments on open modal post
       commentCountToday: 0, //contains the count of comments done by a user on a single day
       stdLoginUser: null,
+      // Posting keys are kept in memory only so Sting can sign chat operations.
+      // They are never serialized to localStorage or runtime config.
+      chatPostingKey: null,
       bchain: '',//current active blockchain
       cartEntries: [], //contains current items being bought via market
       purchaseSuccess: false, //references latest purchase transaction using cart
@@ -76,6 +79,8 @@ const createStore = () => {
       store.dispatch('fetchUserTokens')
       store.dispatch('fetchUserReportCount')
       store.dispatch('fetchUserRank')
+    } else if (mutation.type === 'steemconnect/logout') {
+      store.commit('setChatPostingKey', null)
     }
   })
 
