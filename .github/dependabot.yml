@@ -1,0 +1,33 @@
+# Dependabot configuration
+# Groups related dependency updates into a few combined PRs (instead of one PR
+# per package) and caps how many are open at once, so the lockfile churn and PR
+# flood stay under control. Major-version bumps are intentionally left ungrouped
+# so they get their own PR and a careful review.
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    ignore:
+      # Heavily customized locally via a patch-package patch pinned to 0.3.1
+      # (adds the stdLogin login-type flag the app depends on). Upgrading to
+      # 0.4.x only re-does the sc2-sdk->steemconnect migration we already
+      # patched in, breaks the pinned patch, and drops our stdLogin change.
+      - dependency-name: "vue-steemconnect"
+    groups:
+      production-minor-patch:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
+      development-minor-patch:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(dev-deps)"

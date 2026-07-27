@@ -127,4 +127,35 @@ export default {
 .modal-content button:hover {
   background-color: #218838;
 }
+
+  .dark-mode #voteProposalModal {
+    background-color: #000 !important;
+  }
+
+  .dark-mode #voteProposalModal .modal {
+    background-color: #000 !important;
+    border-color: #000 !important;
+  }
+
+  .dark-mode #voteProposalModal .modal-content {
+    background-color: #000 !important;
+    color: #fff !important;
+    border: 1px solid #000 !important;
+  }
+
+  .dark-mode #voteProposalModal .modal-header {
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border-bottom: 1px solid rgba(233, 220, 220, 0.15) !important;
+  }
+
+  .dark-mode #voteProposalModal .modal-content p,
+  .dark-mode #voteProposalModal .modal-content h5,
+  .dark-mode #voteProposalModal .modal-header .close span {
+    color: #fff !important;
+  }
+
+  .dark-mode #voteProposalModal .modal-header .close span {
+    color: #fff !important;
+  }
 </style>

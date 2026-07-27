@@ -243,7 +243,7 @@
 			return;
 		}
 	  },
-	  setUserLoginStatus (json) {
+	  setUserLoginStatus (json, postingKey) {
 		this.is_logged_in = json.success;
 
 		//console.log(json);
@@ -261,6 +261,7 @@
 			userSC.account = json.userdata;
 			//append proper login data for SC, while making sure this is recognized as a normal login
 			this.$store.commit('setStdLoginUser', true);
+			this.$store.commit('setChatPostingKey', postingKey);
 			localStorage.setItem('access_token', json.token)
 			localStorage.setItem('std_login', true)
 			localStorage.setItem('std_login_name', userSC.account.name)
@@ -387,7 +388,7 @@
 					try {
 						const acctController = new AbortController();
 						const acctTimeoutId = setTimeout(() => acctController.abort(), 20000);
-						const acctRes = await fetch(process.env.actiAppUrl+'getAccountData?user='+account+'&bchain=HIVE', {
+						const acctRes = await fetch('/api/proxy/getAccountData?user='+encodeURIComponent(account)+'&bchain=HIVE', {
 							signal: acctController.signal
 						});
 						clearTimeout(acctTimeoutId);
@@ -467,7 +468,7 @@
 		try {
 			const controller = new AbortController();
 			const timeoutId = setTimeout(() => controller.abort(), 20000);
-			let outc = await fetch(process.env.actiAppUrl+'loginKeychain',{
+			let outc = await fetch('/api/proxy/loginKeychain',{
 					method: 'POST',
 					headers: {
 					  'Content-Type': 'application/json'
@@ -488,7 +489,7 @@
 						//send the keychain-decrypted proof back to mint a real session token (JWT)
 						const verController = new AbortController();
 						const verTimeoutId = setTimeout(() => verController.abort(), 20000);
-						const verRes = await fetch(process.env.actiAppUrl+'loginKeychainVerify', {
+						const verRes = await fetch('/api/proxy/loginKeychainVerify', {
 							method: 'POST',
 							headers: { 'Content-Type': 'application/json' },
 							body: JSON.stringify({ username: account_name, decrypted: response.result, bchain: this.bchain_val }),
@@ -541,11 +542,11 @@
 
 		//verify recaptcha-v3
 
-		let outc = await fetch(process.env.actiAppUrl+'verifyLoginCaptcha?token='+token);
+		let outc = await fetch('/api/proxy/verifyLoginCaptcha?token='+encodeURIComponent(token));
 		console.log(outc);
-		//let outc = await outc.json();
+		let captchaJson = await outc.json();
 
-		if (outc.error){
+		if (!outc.ok || captchaJson.error){
 			this.error_proceeding = true;
 			this.login_in_progress = false;
 			this.error_msg = this.$t('login_error');
@@ -572,7 +573,7 @@
 		try {
 			const controller = new AbortController();
 			const timeoutId = setTimeout(() => controller.abort(), 20000);
-			const res = await fetch(process.env.actiAppUrl+'loginAuth',{
+			const res = await fetch('/api/proxy/loginAuth',{
 				method: 'POST',
 				headers: {
 				  'Content-Type': 'application/json'
@@ -582,7 +583,7 @@
 			});
 			clearTimeout(timeoutId);
 			const json = await res.json();
-			this.setUserLoginStatus(json);
+			this.setUserLoginStatus(json, priv_pkey);
 		} catch (e) {
 			console.error('Login error:', e);
 			this.error_proceeding = true;

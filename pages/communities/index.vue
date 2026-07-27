@@ -10,26 +10,25 @@
 	  <!--<ChainSelection />-->
 
 
-	  <div class="col-12 row p-2 m-2">
+	  <div class="row mb-3 align-items-center communities-controls">
 
-		  <div v-if="user" class="col-3">
-			<input type="checkbox" id="showOnlySubscribed" v-model="showOnlySubscribed" >
-			<label for="showOnlySubscribed" class="ml-2">{{$t('Show_only_subscribed')}}</label>
-		  </div>
-
-		  <div class="pr-2 pl-2 row col-6">
-			<input type="text" id="search" name="search" :placeholder="$t('Search')" ref="search" class="form-control acti-shadow search-term col-6">
+		  <div class="col-12 col-lg-4 mb-2 mb-lg-0 d-flex communities-search">
+			<input type="text" id="search" name="search" :placeholder="$t('Search')" ref="search" class="form-control acti-shadow search-term flex-grow-1">
 			<input type="button" id="go" name="go" value="Go" class="btn btn-brand btn-white border ml-2" v-on:click="performSearch" >
-
 		  </div>
 
-		  <div class="pl-2">
+		  <div class="col-12 col-lg-4 mb-2 mb-lg-0">
 			  <select @change="reFetchCommunities" v-model="sortOrder" class="form-control sel-adj">
 					<option disabled>-- {{$t('Sort_By')}} --</option>
 					<option value="subs">{{$t('Subscribers')}}</option>
 					<option value="rank">{{$t('Rank')}}</option>
 					<option value="new">{{$t('New')}}</option>
 			  </select>
+		  </div>
+
+		  <div v-if="user" class="col-12 col-lg-4 subscribed-filter">
+			<input type="checkbox" id="showOnlySubscribed" v-model="showOnlySubscribed" >
+			<label for="showOnlySubscribed" class="ml-2">{{$t('Show_only_subscribed')}}</label>
 		  </div>
 
 	  </div>

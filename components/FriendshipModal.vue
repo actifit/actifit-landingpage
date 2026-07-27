@@ -1,9 +1,11 @@
-﻿<template>
+<template>
   <div :class="outserSmallScreenClasses" class="position-fixed text-brand mx-auto w-100 acti-notify-comp" v-if="innerShowModal || showCompDetails" id="friendshipModal" tabindex="-1">
 	<div :class="smallScreenClasses" class="text-center mx-auto acti-notify-comp-inner-friend border-2 rounded" role="document">
 	  <div :class="titleClass" class="row max-acti-width text-white mx-auto px-2">
-		<div :class="mainTitleClass"><span>{{ $t('friendship_hook_title') }}</span>
-		<span class="d-none d-md-inline-block font-italic"><br/>{{ $t('friendship_subtitle') }}</span></div>
+		<div :class="mainTitleClass">
+			<span>{{ $t('friendship_hook_title') }}</span>
+			<div class="friendship-title-sub d-none d-md-block font-italic">{{ $t('friendship_subtitle') }}</div>
+		</div>
 		<div :class="closeBtnClass">
 			<a href="#" @click.prevent="adjustVisibility" class="close expand-comp-notice text-white">
 				<span>x</span>
@@ -11,51 +13,52 @@
 		</div>
 	  </div>
 	  
-	<div class="row max-acti-width">
-	  <div class="col-md-8 pr-0">
+	<div class="row max-acti-width mx-auto friendship-body-row">
+	  <div class="col-md-8 pr-0 friends-img-wrapper">
 		<div class="friends-title">
 		</div>
 		<img class="friends-img" :src="'/img/fitness-friends-' + this.randImg+ '.jpg'">
 	  </div>
 	  
-	  <div :class="scrollClasses">
-		<div class="d-none d-md-block">{{ $t('suggested_friends') }}</div>
-		<div v-if="suggFriendsLoader"><i class="fas fa-spin fa-spinner"></i></div>
-		<div v-else v-for="(suggestion, index) in suggestedFriends" :key="index" :suggestion="suggestion" :class="suggEntryClass">
-			<div class="col-md-4">
-				<a :href="formattedProfileUrl(suggestion.author)" target="_blank" rel="noopener noreferrer">
-					<div class="user-avatar large-avatar mr-1"
-					   :style="'background-image: url('+profImgUrl+'/u/' + suggestion.author + '/avatar)'"></div>
-				</a>
+	  <div class="col-md-4 pl-0 suggested-friends-wrapper">
+		<div :class="scrollClasses">
+			<div class="suggested-friends-title d-none d-md-block">{{ $t('suggested_friends') }}</div>
+			<div v-if="suggFriendsLoader"><i class="fas fa-spin fa-spinner"></i></div>
+			<div v-else v-for="(suggestion, index) in suggestedFriends" :key="index" :suggestion="suggestion" :class="suggEntryClass">
+				<div class="suggested-friend-avatar-wrap">
+					<a :href="formattedProfileUrl(suggestion.author)" target="_blank">
+						<div class="user-avatar suggested-friend-avatar"
+						   :style="'background-image: url('+profImgUrl+'/u/' + suggestion.author + '/avatar)'"></div>
+					</a>
+				</div>
+				<div class="suggested-friend-details text-left">
+					<span class="suggested-friend-name"><a :href="formattedProfileUrl(suggestion.author)" target="_blank">@{{ suggestion.author }}</a></span>
+					<div v-if="suggestion.activityCount != null" class="suggested-friend-stat"><a :href="'/activity/'+suggestion.author" ><i class="fab fa-angellist mr-2"></i>{{ numberFormat(suggestion.activityCount, 0) }} {{ $t('Reports') }}</a></div>
+					<div v-else class="suggested-friend-stat"><i class="fas fa-spin fa-spinner"></i></div>
+					<div v-if="suggestion.afitCount != null" class="suggested-friend-stat"><img src="/img/actifit_logo.png" class="mr-2 token-logo"><a :href="formattedProfileUrl(suggestion.author)" >{{ numberFormat(suggestion.afitCount, 0) }} AFIT</a></div>
+					<div v-else class="suggested-friend-stat"><i class="fas fa-spin fa-spinner"></i></div>
+					<div v-if="suggestion.mutualFriendsCount == null" class="suggested-friend-stat"><i class="fas fa-spin fa-spinner"></i></div>
+					<div v-else-if="suggestion.mutualFriendsCount > 0" class="suggested-friend-stat"><i class="fas fa-user-friends mr-2"></i>{{ numberFormat(suggestion.mutualFriendsCount, 0) }} Mutual Friends</div>
+				</div>
+				<div class="suggested-friend-action">
+					<span :title="$t('you_are_friends_username').replace('_USERNAME_', displayUser)" v-if="isFriend(suggestion.author)" >
+						<a href="#" class="btn btn-brand border friend-action-btn"><i class="fas fa-user-friends" ></i></a>
+					</span>
+					<span :title="$t('friendship_pending_approval')" v-else-if="isPendingFriend(suggestion.author)">
+						<a href="#" class="btn btn-brand border friend-action-btn"><i class="fas fa-user-clock"></i></a>
+					</span>
+					<span :title="$t('add_username_friend').replace('_USERNAME_', suggestion.author)" v-else
+						v-on:click="addFriend(suggestion.author)">
+						<!--<i class="fas fa-user-plus  p-2"></i>
+						<div v-if="addFriendError" v-html="addFriendError"></div>-->
+						<a href="#" class="btn btn-brand border friend-action-btn"><i class="fas fa-user-plus"></i></a>
+						<i class="fas fa-spin fa-spinner" v-if="friendshipLoader == suggestion.author"></i>
+						<div v-if="addFriendError" v-html="addFriendError"></div>
+					</span>
+				</div>
 			</div>
-			<div class="col-md-7 mini-user-card text-left">
-				<span><a :href="formattedProfileUrl(suggestion.author)" target="_blank" rel="noopener noreferrer">@{{ suggestion.author }}</a></span>
-				<span v-if="suggestion.rank != null" class="text-brand numberCircle d-none d-md-inline " >{{ displayCoreUserRank(suggestion.rank) }} <span class="increased-rank">{{ displayIncreasedUserRank(suggestion.rank) }}</span></span>
-				<span v-else><i class="fas fa-spin fa-spinner"></i></span>
-				
-				<div v-if="suggestion.activityCount != null"><a :href="'/activity/'+suggestion.author" ><i class="fab fa-angellist mr-2 d-none d-md-inline"></i>{{ numberFormat(suggestion.activityCount, 0) }} {{ $t('Reports') }}</a></div>
-				<div v-else><i class="fas fa-spin fa-spinner"></i></div>
-				
-				<div v-if="suggestion.afitCount != null"><img src="/img/actifit_logo.png" class="mr-2 token-logo"><a :href="formattedProfileUrl(suggestion.author)" >{{ numberFormat(suggestion.afitCount, 3) }} AFIT Tokens</a></div>
-				<div v-else><i class="fas fa-spin fa-spinner"></i></div>
-				
-				<span :title="$t('you_are_friends_username').replace('_USERNAME_', displayUser)" v-if="isFriend(suggestion.author)" >
-					<a href="#" class="btn btn-brand btn-block border"><i class="fas fa-user-friends  p-2" ></i></a>
-				</span>
-				<span :title="$t('friendship_pending_approval')" v-else-if="isPendingFriend(suggestion.author)">
-					<a href="#" class="btn btn-brand btn-block border"><i class="fas fa-user-clock  p-2"></i></a>
-				</span>
-				<span :title="$t('add_username_friend').replace('_USERNAME_', suggestion.author)" v-else
-					v-on:click="addFriend(suggestion.author)">
-					<!--<i class="fas fa-user-plus  p-2"></i>
-					<div v-if="addFriendError" v-html="addFriendError"></div>-->
-					<a href="#" class="btn btn-brand btn-block border"><i class="fas fa-user-plus  p-2"></i></a>
-					<i class="fas fa-spin fa-spinner" v-if="friendshipLoader == suggestion.author"></i>
-					<div v-if="addFriendError" v-html="addFriendError"></div>
-				</span>
-			</div>
+			<div v-if="!suggFriendsLoader && moreSuggLoader"><i class="fas fa-spin fa-spinner"></i></div>
 		</div>
-		<div v-if="!suggFriendsLoader && moreSuggLoader"><i class="fas fa-spin fa-spinner"></i></div>
 	  </div>
 	</div>
 	</div>
@@ -96,12 +99,6 @@
 	},
     computed: {
 	  ...mapGetters('steemconnect', ['user']),
-	  isKeychainActive(){
-		return (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain)
-	  },
-	  isHiveauthActive(){
-		return (localStorage.getItem('acti_login_method') == 'hiveauth')
-	  },
 	  smallScreenClasses () {
 		//use proper classes for neat display
 		let clsString = "";//modal-dialog modal-lg
@@ -124,7 +121,7 @@
 		return clsString;
 	  },
 	  scrollClasses () {
-		let defClasses = "col-md-4 "
+		let defClasses = ""
 		if (this.screenWidth < 768){
 		  defClasses += "sugg-container-horiz scrollbar-horiz scrollbar-danger-horiz ml-3";
 		}else{
@@ -152,9 +149,9 @@
 	  },
 	  suggEntryClass () {
 		if (this.screenWidth < 768){
-		  return "suggestion-entry border-right p-2";
+		  return "suggestion-entry suggestion-entry-mobile";
 		}
-		return "row suggestion-entry border-left border-top border-danger pb-1 pt-1";
+		return "suggestion-entry";
 	  }
     },
 	methods: {
@@ -194,6 +191,169 @@
 	  },
 	  formattedProfileUrl (targetFriend) {
 		return '/' + targetFriend;
+	  },
+	  loggedInUsername () {
+		if (this.user && this.user.account && this.user.account.name){
+			return this.user.account.name;
+		}
+		return '';
+	  },
+	  apiBaseUrls () {
+		let urls = [];
+		if (process.env.actiAppUrl){
+			urls.push(process.env.actiAppUrl);
+		}
+		urls.push('https://api.actifit.io/');
+		urls.push('https://api2.actifit.io/');
+		return [...new Set(urls.map(url => url.replace(/\/?$/, '/')))];
+	  },
+	  async fetchWithTimeout (url, options = {}, timeout = 8000) {
+		let controller = new AbortController();
+		let timeoutId = setTimeout(() => controller.abort(), timeout);
+		try{
+			return await fetch(url, {
+				...options,
+				signal: controller.signal
+			});
+		}finally{
+			clearTimeout(timeoutId);
+		}
+	  },
+	  async fetchActifitJson (path) {
+		let lastError = null;
+		for (let i = 0; i < this.apiBaseUrls().length; i++){
+			let baseUrl = this.apiBaseUrls()[i];
+			try{
+				let res = await this.fetchWithTimeout(baseUrl + path);
+				if (!res.ok){
+					throw new Error('Request failed with status ' + res.status);
+				}
+				return await res.json();
+			}catch(err){
+				lastError = err;
+				console.log('Actifit API request failed', baseUrl + path, err);
+			}
+		}
+		throw lastError;
+	  },
+	  async fetchHiveSuggestedAuthors () {
+		let username = this.loggedInUsername();
+		let res = await this.fetchWithTimeout(process.env.hiveApiNode, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				jsonrpc: '2.0',
+				method: 'condenser_api.get_discussions_by_created',
+				params: [{
+					tag: 'actifit',
+					limit: 20
+				}],
+				id: 1
+			})
+		});
+		if (!res.ok){
+			throw new Error('Hive request failed with status ' + res.status);
+		}
+		let json = await res.json();
+		let posts = Array.isArray(json.result) ? json.result : [];
+		let authors = [];
+		posts.forEach(post => {
+			if (post && post.author && post.author !== username && !authors.includes(post.author)){
+				authors.push(post.author);
+			}
+		});
+		return authors.map(author => ({_id: author}));
+	  },
+	  async loadSuggestedFriends () {
+		this.suggFriendsLoader = true;
+		this.moreSuggLoader = true;
+		this.suggestedFriends = [];
+		
+		try{
+			let tgtPath = 'recentVerifiedPosts/?maxCount=20';
+			let username = this.loggedInUsername();
+			if (username){
+				tgtPath += '&exclude=' + encodeURIComponent(username);
+			}
+			
+			let outcome = [];
+			try{
+				outcome = await this.fetchActifitJson(tgtPath);
+			}catch(err){
+				console.log('Falling back to Hive suggested friends', err);
+				outcome = await this.fetchHiveSuggestedAuthors();
+			}
+			console.log('recentVerifiedPosts');
+			console.log(outcome);
+			
+			if (!Array.isArray(outcome)){
+				outcome = [];
+			}
+			
+			this.suggestedFriends = outcome
+				.filter(entry => entry && entry._id)
+				.map(entry => ({author: entry._id}));
+			this.suggFriendsLoader = false;
+			
+			await Promise.all(this.suggestedFriends.map(async (suggestion, index) => {
+				try{
+					let author = encodeURIComponent(suggestion.author);
+					let [rankRes, activityCount, userAFIT, targetFriends] = await Promise.all([
+						this.fetchActifitJson('getRank/' + author),
+						this.fetchActifitJson('userRewardedPostCount/' + author),
+						this.fetchActifitJson('user/' + author),
+						this.fetchActifitJson('userFriends/' + author).catch(() => [])
+					]);
+					
+					this.$set(this.suggestedFriends, index, {
+						author: suggestion.author,
+						rank: rankRes,
+						activityCount: activityCount.rewarded_post_count,
+						afitCount: userAFIT.tokens,
+						mutualFriendsCount: this.mutualFriendsCount(targetFriends)
+					});
+				}catch(err){
+					console.log('Unable to load suggested friend details', suggestion.author, err);
+					this.$set(this.suggestedFriends, index, {
+						author: suggestion.author,
+						rank: false,
+						activityCount: 0,
+						afitCount: 0,
+						mutualFriendsCount: 0
+					});
+				}
+			}));
+		}catch(err){
+			console.log('Unable to load suggested friends', err);
+		}finally{
+			this.suggFriendsLoader = false;
+			this.moreSuggLoader = false;
+		}
+	  },
+	  friendNameFromEntry (entry) {
+		if (typeof entry === 'string'){
+			return entry;
+		}
+		if (entry && entry.friend){
+			return entry.friend;
+		}
+		if (entry && entry.target){
+			return entry.target;
+		}
+		if (entry && entry.initiator){
+			return entry.initiator;
+		}
+		return '';
+	  },
+	  mutualFriendsCount (targetFriends) {
+		if (!Array.isArray(this.userFriends) || !Array.isArray(targetFriends)){
+			return 0;
+		}
+		let loggedInFriends = this.userFriends.map(this.friendNameFromEntry).filter(Boolean);
+		let targetFriendNames = targetFriends.map(this.friendNameFromEntry).filter(Boolean);
+		return targetFriendNames.filter(friend => loggedInFriends.includes(friend)).length;
 	  },
 	  isFriend(targetFriend){
 		if (this.user){
@@ -336,18 +496,6 @@
 			+ targetFriend + '/'
 			+ res.ref_block_num + '/'
 			+ res.id + '/' + this.cur_bchain);
-		if (this.isKeychainActive || this.isHiveauthActive){
-			
-			let op_json = JSON.stringify(operation)
-			url = new URL( process.env.actiAppUrl + 'addFriendHiveKeychain/'
-						+ this.user.account.name + '/'
-						+ targetFriend + '/'
-						+ res.ref_block_num + '/'
-						+ res.id + '/'
-						+ this.cur_bchain + '?operation='+op_json);
-		}
-		
-		let req_res = await fetch(url);	
 		let outcome = await req_res.json();
 		if (outcome.status=='success'){
 			console.log('friend request sent');
@@ -414,61 +562,28 @@
 		this.showCompDetails = true;
 	  }
 	  this.$store.dispatch('steemconnect/login')
-	  this.populateFriends();
-	  
-	  //grab recent verified posts to find suggested actifitters
-	  let tgtUrl = process.env.actiAppUrl + 'recentVerifiedPosts/?maxCount=20';
-	  if (this.user.account.name){
-		tgtUrl += '&exclude='+this.user.account.name;
-	  }
-	  let res = await fetch(tgtUrl);
-	  let outcome = await res.json();
-	  console.log('recentVerifiedPosts');
-	  console.log(outcome);
-	  
-	  this.suggFriendsLoader = false;
-	  
-	  for (let i=0;i < outcome.length;i++){
-		this.suggestedFriends.push({'author': outcome[i]._id});
-	  }
-	  
-	  //grab additional user data
-	  for (let i=0;i < outcome.length;i++){
-		//fetch rank
-		try{
-			let rankEntry = await fetch(process.env.actiAppUrl + 'getRank/' + outcome[i]._id);
-			let rankRes = await rankEntry.json();
-			
-			let activityCountEntry = await fetch(process.env.actiAppUrl+'userRewardedPostCount/' + outcome[i]._id);
-			let activityCount = await activityCountEntry.json();
-			
-			//grab AFIT count
-			let afitTokenCount = await fetch(process.env.actiAppUrl+'user/' + outcome[i]._id)
-			let userAFIT = await afitTokenCount.json();
-			//console.log('>>>>>>>>userAFIT');
-			//console.log(userAFIT);
-			this.suggestedFriends[i] = {'author': outcome[i]._id, 'rank': rankRes, 'activityCount': activityCount.rewarded_post_count, 'afitCount': userAFIT.tokens};
-			//we either need to use splice on the array, or forceupdate, or change a key item in the array after setting one (index)
-			this.$forceUpdate();
-		}catch(err){
-			console.log(err);
-		}
-	  }
-	  this.moreSuggLoader = false;
+	  await this.populateFriends();
+	  await this.loadSuggestedFriends();
 	  
 	}
   }
 </script>
 <style>
 	.acti-notify-comp{
-	  top:80px; 
-	  z-index:1; 
+	  top:40px; 
+	  z-index:100000 !important; 
+	  position: fixed !important;
+	  left: 0;
+	  right: 0;
+	  bottom: auto;
 	  font-size: 20px;
 	  vertical-align: top;
 	  opacity: 1;
 	}
 	.acti-notify-comp-inner-friend{
 	  background-color: darkred; 
+	  max-height: calc(100vh - 70px);
+	  overflow: hidden;
 	}
 	.vuejs-countdown .digit{
 	  font-size: 20px !important;
@@ -494,15 +609,86 @@
 	.img-container{
 	  
 	}
-	.mini-user-card div, .mini-user-card span{
-		padding-top: 2px;
-		padding-bottom: 2px;
-		font-size: 16px;
-	}
 	.sugg-container{
-		max-height: 540px;
+		height: 100%;
+		width: 100%;
+		box-sizing: border-box;
 		overflow-y: auto;
 		overflow-x: hidden;
+		border-radius: 0;
+		padding: 1rem 1.25rem 0;
+		background: #fff;
+	}
+	.suggested-friends-title{
+		font-size: 28px;
+		line-height: 1.2;
+		margin-bottom: 6px;
+	}
+	.suggestion-entry{
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		margin-left: 0;
+		margin-right: 0;
+		padding: 12px 0;
+		border-bottom: 3px solid #ff112d;
+	}
+	.suggestion-entry-mobile{
+		flex: 0 0 285px;
+		border-right: 3px solid #ff112d;
+		border-bottom: 0;
+	}
+	.suggested-friend-avatar-wrap{
+		flex: 0 0 66px;
+	}
+	.suggested-friend-avatar{
+		width: 62px;
+		height: 62px;
+		border-radius: 50%;
+		border: 2px solid #f1d7d7;
+	}
+	.suggested-friend-details{
+		flex: 1 1 auto;
+		min-width: 0;
+		line-height: 1.2;
+	}
+	.suggested-friend-details div,
+	.suggested-friend-details span{
+		font-size: 11px;
+	}
+	.suggested-friend-name{
+		display: block;
+		font-weight: 700;
+		margin-bottom: 5px;
+		overflow-wrap: anywhere;
+	}
+	.suggested-friend-name a{
+		font-size: 13px;
+	}
+	.suggested-friend-stat{
+		margin-top: 3px;
+		color: #7a6164;
+		overflow-wrap: anywhere;
+	}
+	.suggested-friend-name a{
+		color: #ff112d;
+	}
+	.suggested-friend-stat a,
+	.suggested-friend-stat i{
+		color: inherit;
+	}
+	.suggested-friend-action{
+		flex: 0 0 46px;
+		text-align: right;
+	}
+	.friend-action-btn{
+		width: 44px;
+		height: 44px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0;
+		font-size: 18px;
 	}
 	.scrollbar {
 		float: left;
@@ -510,6 +696,11 @@
 		background: #fff;
 		overflow-y: scroll;
 		margin-bottom: 25px;
+	}
+
+	.sugg-container.scrollbar{
+		background: #fff;
+		width: 100%;
 	}
 	
 	.force-overflow {
@@ -550,15 +741,12 @@
 	}
 		
 	@media screen and (max-width: 768px){
-		.large-avatar{
-			width: 96px;
-			height: 96px;
+		.suggested-friend-avatar-wrap{
+			flex-basis: 58px;
 		}
-	}
-	@media screen and (min-width: 769px){
-		.large-avatar{
-			width: 128px;
-			height: 128px;
+		.suggested-friend-avatar{
+			width: 54px;
+			height: 54px;
 		}
 	}
 	
@@ -566,9 +754,13 @@
 		display: flex;
         flex-wrap: nowrap;
         max-height: 275px;
-        overflow-x: auto;
-        width: auto;
+		overflow-x: auto;
+        width: 100%;
 		overflow-y: hidden;
+		box-sizing: border-box;
+		border-radius: 0;
+		padding: 0 12px;
+		background: #fff;
 	}
 	
 	.scrollbar-horiz {
@@ -576,6 +768,11 @@
 		background: #fff;
 		overflow-x: scroll;
 		margin-bottom: 25px;
+	}
+
+	.sugg-container-horiz.scrollbar-horiz{
+		background: #fff;
+		width: 100%;
 	}
 	
 	.scrollbar-danger-horiz::-webkit-scrollbar-track {
@@ -598,8 +795,73 @@
 	.max-acti-width{
 		width: 100%;
 	}
+	.friendship-body-row{
+		align-items: stretch;
+	}
+	.suggested-friends-wrapper{
+		height: calc(100vh - 200px);
+		max-height: 510px;
+		min-height: 320px;
+		box-sizing: border-box;
+		padding-right: 15px;
+		padding-bottom: 15px;
+		background-color: darkred;
+		position: relative;
+		overflow: hidden;
+	}
+	.suggested-friends-wrapper::after{
+		content: "";
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		height: 15px;
+		background-color: darkred;
+		pointer-events: none;
+		z-index: 3;
+	}
+	.friends-img-wrapper{
+		overflow: hidden;
+		position: relative;
+		height: calc(100vh - 200px);
+		max-height: 510px;
+		min-height: 320px;
+		box-sizing: border-box;
+		padding-bottom: 15px;
+		background-color: darkred;
+	}
 	.friends-img{
 		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		object-position: left top;
+		display: block;
+		margin: 0;
+	}
+	@media screen and (min-width: 769px){
+		.friends-img-wrapper{
+			height: calc(100vh - 200px);
+		}
+	}
+	@media screen and (max-width: 768px){
+		.suggested-friends-wrapper{
+			height: auto;
+			max-height: none;
+			padding-right: 10px;
+			padding-bottom: 10px;
+		}
+		.suggested-friends-wrapper::after{
+			height: 10px;
+		}
+		.friends-img-wrapper{
+			height: 320px;
+			max-height: 320px;
+			padding-bottom: 10px;
+		}
+		.friends-img{
+			width: 100%;
+			height: calc(100% + 18px);
+		}
 	}
 	
 	a:hover, a:hover, .text-brand:hover, .actifit-link-plain:hover{
@@ -607,8 +869,8 @@
 	}
 	
 	.token-logo{
-	  width: 20px;
-	  height: 20px;
+	  width: 14px;
+	  height: 14px;
     }
 	
 	/*#friendshipModal{

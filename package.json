@@ -1,6 +1,6 @@
 {
   "name": "actifit-landingpage",
-  "version": "1.10.8",
+  "version": "1.11.0",
   "description": "Actifit is an innovative dapp that aims to incentivize fitness and healthy lifestyle via rewarding daily activity.",
   "author": "mktcode",
   "private": true,
@@ -24,8 +24,6 @@
   },
   "dependencies": {
     "@blurtfoundation/blurtjs": "^1.0.0",
-    "@ffmpeg/core": "^0.10.0",
-    "@ffmpeg/ffmpeg": "^0.10.1",
     "@google/generative-ai": "^0.24.1",
     "@hiveio/dhive": "^0.14.1",
     "@hiveio/hive-js": "^2.0.1",

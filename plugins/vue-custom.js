@@ -217,6 +217,25 @@ Vue.prototype.$reblog = async function (user, post){
 }
 
 /** global function to process API calls to blockchain **/
+export function getTransactionErrorMessage(outcome) {
+  const stringifyError = (error) => {
+	if (!error || typeof error === 'boolean') return '';
+	if (typeof error === 'string') return error;
+	if (error.message) return stringifyError(error.message);
+	if (error.error) return stringifyError(error.error);
+	if (error.details) return stringifyError(error.details);
+	try {
+	  return JSON.stringify(error);
+	} catch (e) {
+	  return '';
+	}
+  };
+
+  if (!outcome) return '';
+  const trxError = outcome.trx && outcome.trx.tx && outcome.trx.tx.error;
+  return stringifyError(trxError) || stringifyError(outcome.error) || stringifyError(outcome.message);
+}
+
 Vue.prototype.$processTrxFunc = async function (op_name, cstm_params, active) {
   if (!localStorage.getItem('std_login')) {
 	let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
@@ -234,7 +253,15 @@ Vue.prototype.$processTrxFunc = async function (op_name, cstm_params, active) {
 		active ? 'Active' : 'Posting',
 		(response) => {
 		  console.log(response);
-		  resolve({ success: response.success, txID: response.result.id, trx: {tx: {id:response.result.id}} });
+		  const txID = response && response.result ? response.result.id : null;
+		  const success = Boolean(response && response.success && txID);
+		  const error = success ? '' : getTransactionErrorMessage(response);
+		  resolve({
+			success,
+			txID,
+			trx: txID ? { tx: { id: txID } } : null,
+			...(error ? { error } : {})
+		  });
 		}
 	  );
 	});
@@ -301,10 +328,10 @@ Vue.prototype.$processTrxFunc = async function (op_name, cstm_params, active) {
 	let outcome = await res.json();
 	console.log(outcome);
 
-	if (outcome.error) {
-	  console.log(outcome.error);
+	if (!outcome || outcome.error || !outcome.trx) {
+	  console.log(outcome && outcome.error);
 
-	  let err_msg = outcome.trx.tx.error;
+	  let err_msg = getTransactionErrorMessage(outcome) || this.$t('error_performing_operation');
 	  if (err_msg.includes('missing') && err_msg.includes('authority')) {
 		localStorage.removeItem('access_token');
 		this.error_msg = this.$t('session_expired_login_again');
@@ -317,7 +344,7 @@ Vue.prototype.$processTrxFunc = async function (op_name, cstm_params, active) {
 		position: 'top center'
 	  });
 
-	  return { success: false, trx: null };
+	  return { success: false, trx: null, error: err_msg };
 	} else {
 	  return { success: true, trx: outcome.trx };
 	}

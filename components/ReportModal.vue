@@ -2,7 +2,7 @@
   <div class="modal fade" id="reportModal" ref="reportModal" tabindex="-1">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content" v-if="report">
-        <div class="modal-header">
+        <div class="modal-header report-navigation">
           <div class="col-12">
             <button type="button" class="btn btn-link float-left" @click="loadNextReport(-1)"><i
                 class="fas fa-chevron-left"></i> Previous Report</button>
@@ -10,13 +10,13 @@
                 class="fas fa-chevron-right"></i></button>
           </div>
         </div>
-        <div class="modal-header">
+        <div class="modal-header report-title-header">
           <h2 class="modal-title" id="exampleModalLabel">{{ report.title }}</h2><br />
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">×</span>
           </button>
         </div>
-        <div class="main-user-info pl-4">
+        <div class="main-user-info pl-4 report-user-section">
 
           <div>
 
@@ -777,6 +777,56 @@ export default {
 
 .modal-content {
   transform: none !important;
+}
+
+#reportModal .report-navigation {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+#reportModal .report-title-header {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+#reportModal .report-title-header .modal-title {
+  margin-bottom: 0;
+}
+
+#reportModal .report-user-section {
+  padding-top: 14px;
+}
+
+#reportModal .modal-body img[src*="ACTIVITYDATE"] + .text-center,
+#reportModal .modal-body img[src*="ACTIVITYCOUNT"] + .text-center,
+#reportModal .modal-body img[src*="ACTIVITYTYPE"] + .text-center {
+  height: 44px;
+  margin: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff !important;
+  text-align: center;
+}
+
+#reportModal .modal-body img[src*="ACTIVITYCOUNT"] {
+  margin-top: 10px;
+}
+
+#reportModal .modal-body img[src*="ACTIVITYDATE"] + .text-center *,
+#reportModal .modal-body img[src*="ACTIVITYCOUNT"] + .text-center *,
+#reportModal .modal-body img[src*="ACTIVITYTYPE"] + .text-center * {
+  color: #fff !important;
+}
+
+#reportModal .modal-body img[src*="ACTIVITYTYPE"] + .text-center pre {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fff !important;
+  text-align: center;
 }
 
 .modal-author {

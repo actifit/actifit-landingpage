@@ -15,9 +15,6 @@
       <i class="far fa-comments ml-2" :title="$t('comments')"></i> {{ cardData.children }}
       </a>
       <i class="far fa-share-square ml-2" @click.prevent="$emit('reblog')" v-if="user && cardData.author !== user.account.name" :title="$t('reblog')"></i>
-      <a href="https://decentmemes.com/" target="_blank" rel="noopener noreferrer" :title="$t('create_meme')">
-        <i class="far fa-grin-squint-tears ml-2"></i>
-      </a>
     </div>
     <!-- Slot for Different Right Side Actions -->
     <div class="col-6 text-right">

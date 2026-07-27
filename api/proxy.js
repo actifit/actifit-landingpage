@@ -24,6 +24,26 @@ function isRateLimited(key, maxPerWindow = 10, windowMs = 60000) {
   return entry.count > maxPerWindow;
 }
 
+function readRequestBody(req, maxBytes = 1024 * 1024) {
+  return new Promise((resolve, reject) => {
+    let body = '';
+    let bodySize = 0;
+    req.on('data', chunk => {
+      bodySize += Buffer.byteLength(chunk);
+      if (bodySize > maxBytes) {
+        const error = new Error('Request body too large');
+        error.statusCode = 413;
+        reject(error);
+        req.destroy();
+        return;
+      }
+      body += chunk;
+    });
+    req.on('end', () => resolve(body));
+    req.on('error', reject);
+  });
+}
+
 module.exports = async function (req, res, next) {
   const parsedUrl = url.parse(req.url, true);
   const path = parsedUrl.pathname;
@@ -231,6 +251,100 @@ module.exports = async function (req, res, next) {
         }
       });
       return;
+    }
+
+    // 6. Login proxies
+    const loginPostEndpoints = ['/loginAuth', '/loginKeychain', '/loginKeychainVerify'];
+    if (loginPostEndpoints.includes(path)) {
+      if (req.method !== 'POST') {
+        res.statusCode = 405;
+        return res.end(JSON.stringify({ error: 'Method Not Allowed' }));
+      }
+
+      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+      if (isRateLimited(`${ip}:${path}`, 10, 60000)) {
+        res.statusCode = 429;
+        return res.end(JSON.stringify({ error: 'Too many requests' }));
+      }
+
+      const baseApiUrl = (process.env.ACTI_API_URL || 'https://api.actifit.io').replace(/\/?$/, '/');
+      const targetUrl = `${baseApiUrl}${path.slice(1)}`;
+
+      try {
+        const body = await readRequestBody(req);
+        const response = await axios.post(targetUrl, body ? JSON.parse(body) : {}, {
+          headers: { 'Content-Type': 'application/json' }
+        });
+        return res.end(JSON.stringify(response.data));
+      } catch (error) {
+        res.statusCode = error.response ? error.response.status : (error.statusCode || 500);
+        return res.end(JSON.stringify(error.response ? error.response.data : { error: error.message }));
+      }
+    }
+
+    if (path === '/verifyLoginCaptcha') {
+      if (req.method !== 'GET') {
+        res.statusCode = 405;
+        return res.end(JSON.stringify({ error: 'Method Not Allowed' }));
+      }
+
+      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+      if (isRateLimited(`${ip}:${path}`, 10, 60000)) {
+        res.statusCode = 429;
+        return res.end(JSON.stringify({ error: 'Too many requests' }));
+      }
+
+      const token = parsedUrl.query.token;
+      if (!token || typeof token !== 'string') {
+        res.statusCode = 400;
+        return res.end(JSON.stringify({ error: 'Missing captcha token' }));
+      }
+
+      const baseApiUrl = (process.env.ACTI_API_URL || 'https://api.actifit.io').replace(/\/?$/, '/');
+      try {
+        const response = await axios.get(`${baseApiUrl}verifyLoginCaptcha`, {
+          params: { token }
+        });
+        return res.end(JSON.stringify(response.data));
+      } catch (error) {
+        res.statusCode = error.response ? error.response.status : 500;
+        return res.end(JSON.stringify(error.response ? error.response.data : { error: error.message }));
+      }
+    }
+
+    if (path === '/getAccountData') {
+      if (req.method !== 'GET') {
+        res.statusCode = 405;
+        return res.end(JSON.stringify({ error: 'Method Not Allowed' }));
+      }
+
+      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+      if (isRateLimited(`${ip}:${path}`, 10, 60000)) {
+        res.statusCode = 429;
+        return res.end(JSON.stringify({ error: 'Too many requests' }));
+      }
+
+      const user = parsedUrl.query.user;
+      const bchain = parsedUrl.query.bchain;
+      if (!user || !VALID_USER_RE.test(user)) {
+        res.statusCode = 400;
+        return res.end(JSON.stringify({ error: 'Invalid username' }));
+      }
+      if (!['HIVE', 'STEEM', 'BLURT'].includes(bchain)) {
+        res.statusCode = 400;
+        return res.end(JSON.stringify({ error: 'Invalid blockchain' }));
+      }
+
+      const baseApiUrl = (process.env.ACTI_API_URL || 'https://api.actifit.io').replace(/\/?$/, '/');
+      try {
+        const response = await axios.get(`${baseApiUrl}getAccountData`, {
+          params: { user, bchain }
+        });
+        return res.end(JSON.stringify(response.data));
+      } catch (error) {
+        res.statusCode = error.response ? error.response.status : 500;
+        return res.end(JSON.stringify(error.response ? error.response.data : { error: error.message }));
+      }
     }
 
     // Default: Not Found
