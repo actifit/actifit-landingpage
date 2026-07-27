@@ -71,7 +71,7 @@
     "sscjs": "^0.0.9",
     "steem": "^0.7.4",
     "steemconnect": "^2.0.1",
-    "tough-cookie": "^4.1.4",
+    "tough-cookie": "^5.0.0",
     "tus-js-client": "^3.0.1",
     "url": "^0.11.0",
     "vue-carousel": "^0.18.0",
