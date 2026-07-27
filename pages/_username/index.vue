@@ -1012,15 +1012,16 @@ export default {
         const measurements = normalizeMeasurements({ ...values, updated_at: new Date().toISOString() });
         const parsedData = this.getProfileMetadata();
         const postingMetadata = buildMeasurementsMetadata(parsedData, measurements);
-        const jsonMetadata = await this.getLiveAccountJsonMetadata();
         const transaction = {
           account: this.user.account.name,
-          json_metadata: jsonMetadata,
+          // Empty is account_update2's no-change sentinel for legacy metadata.
+          // A non-empty value would require the active key instead of posting.
+          json_metadata: '',
           posting_json_metadata: JSON.stringify(postingMetadata),
           extensions: []
         };
-        const outcome = await this.$processTrxFunc('account_update2', transaction);
-        if (!outcome || !outcome.success) throw new Error(this.$t('Save_Error'));
+        const outcome = await this.$processTrxFunc('account_update2', transaction, false);
+        if (!outcome || !outcome.success) throw new Error((outcome && outcome.error) || this.$t('Save_Error'));
 
         this.userinfo = { ...this.userinfo, posting_json_metadata: transaction.posting_json_metadata };
         this.applyMeasurementSources();
@@ -1056,11 +1057,11 @@ export default {
         ...parsedData,
         profile: nextProfile
       }
-      const jsonMetadata = await this.getLiveAccountJsonMetadata();
       let transaction = {
-        account: this.user.account.name, json_metadata: jsonMetadata, posting_json_metadata: JSON.stringify(pst), extensions: []
+        // Empty preserves legacy metadata while keeping this a posting-authority update.
+        account: this.user.account.name, json_metadata: '', posting_json_metadata: JSON.stringify(pst), extensions: []
       };
-      return await this.$processTrxFunc('account_update2', transaction);
+      return await this.$processTrxFunc('account_update2', transaction, false);
     },
     async updateProfileImage(imageUrl) {
         this.updatingField = 'profile_image';
@@ -1736,22 +1737,6 @@ export default {
         properNode = blurt;
       }
       return properNode;
-    },
-    async getLiveAccountJsonMetadata() {
-      const accountName = this.user && this.user.account && this.user.account.name;
-      if (!accountName) throw new Error('Unable to refresh account metadata');
-
-      const chainLnk = this.setProperNode();
-      return new Promise((resolve, reject) => {
-        chainLnk.api.getAccounts([accountName], (err, result) => {
-          const account = Array.isArray(result) ? result[0] : null;
-          if (err || !account || typeof account.json_metadata !== 'string') {
-            reject(err || new Error('Unable to refresh account metadata'));
-            return;
-          }
-          resolve(account.json_metadata);
-        });
-      });
     },
     async getAccountData() {
       let parentRef = this;
