@@ -63,6 +63,22 @@ describe('plugins/vue-custom global helpers', () => {
       expect(context.$notify).toHaveBeenCalledWith(expect.objectContaining({ text: 'broadcast failed' }))
     })
 
+    it('rejects a malformed success response with no transaction', async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        json: jest.fn().mockResolvedValue({ success: true, trx: null })
+      })
+      const context = {
+        user: { account: { name: 'alice' } },
+        $notify: jest.fn(),
+        $t: key => key,
+        $store: { dispatch: jest.fn() }
+      }
+
+      const result = await Vue.prototype.$processTrxFunc.call(context, 'account_update2', {}, false)
+
+      expect(result).toEqual({ success: false, trx: null, error: 'error_performing_operation' })
+    })
+
   })
 
   describe('$processTrxFunc Keychain cancellation', () => {
@@ -99,6 +115,36 @@ describe('plugins/vue-custom global helpers', () => {
         'Posting',
         expect.any(Function)
       )
+    })
+
+    it('returns the transaction id after a successful broadcast', async () => {
+      window.hive_keychain = {
+        requestBroadcast: jest.fn((account, operations, authority, callback) => {
+          callback({ success: true, result: { id: 'trx-123' } })
+        })
+      }
+      const context = { user: { account: { name: 'alice' } } }
+
+      const result = await Vue.prototype.$processTrxFunc.call(context, 'account_update2', {}, false)
+
+      expect(result).toEqual({
+        success: true,
+        txID: 'trx-123',
+        trx: { tx: { id: 'trx-123' } }
+      })
+    })
+
+    it('does not report success without a transaction id', async () => {
+      window.hive_keychain = {
+        requestBroadcast: jest.fn((account, operations, authority, callback) => {
+          callback({ success: true, result: null })
+        })
+      }
+      const context = { user: { account: { name: 'alice' } } }
+
+      const result = await Vue.prototype.$processTrxFunc.call(context, 'account_update2', {}, false)
+
+      expect(result).toEqual({ success: false, txID: null, trx: null })
     })
 
   })

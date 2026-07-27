@@ -1,4 +1,5 @@
 const MEASUREMENT_KEYS = ['height', 'weight', 'chest', 'waist', 'thighs', 'bodyfat']
+const MEASUREMENT_SAVE_TIMEOUT_MS = 120000
 const MEASUREMENT_UNIT_OPTIONS = {
   height: ['cm', 'in'],
   weight: ['kg', 'lb'],
@@ -124,4 +125,13 @@ export function buildMeasurementsMetadata (existingMetadata = {}, measurements) 
   }
 }
 
-export { MEASUREMENT_KEYS, MEASUREMENT_UNIT_OPTIONS }
+export function waitForMeasurementSave (transactionPromise, timeoutError, timeoutMs = MEASUREMENT_SAVE_TIMEOUT_MS) {
+  let timeoutId
+  const timeoutResult = new Promise((resolve) => {
+    timeoutId = setTimeout(() => resolve({ success: false, error: timeoutError }), timeoutMs)
+  })
+
+  return Promise.race([transactionPromise, timeoutResult]).finally(() => clearTimeout(timeoutId))
+}
+
+export { MEASUREMENT_KEYS, MEASUREMENT_SAVE_TIMEOUT_MS, MEASUREMENT_UNIT_OPTIONS }

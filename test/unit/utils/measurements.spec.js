@@ -1,4 +1,4 @@
-import { buildMeasurementsMetadata, convertMeasurementValue, mergeMeasurementSources, normalizeMeasurements, normalizeMeasurementUnit, selectLatestMeasurements } from '~/utils/measurements'
+import { buildMeasurementsMetadata, convertMeasurementValue, mergeMeasurementSources, normalizeMeasurements, normalizeMeasurementUnit, selectLatestMeasurements, waitForMeasurementSave } from '~/utils/measurements'
 
 describe('measurement profile helpers', () => {
   it('normalizes numeric values, units and the update date', () => {
@@ -112,5 +112,16 @@ describe('measurement profile helpers', () => {
         actifit_measurements: measurements
       }
     })
+  })
+
+  it('settles a measurement save that exceeds its timeout', async () => {
+    jest.useFakeTimers()
+    const pendingTransaction = new Promise(() => {})
+    const resultPromise = waitForMeasurementSave(pendingTransaction, 'timed out', 1000)
+
+    jest.advanceTimersByTime(1000)
+
+    await expect(resultPromise).resolves.toEqual({ success: false, error: 'timed out' })
+    jest.useRealTimers()
   })
 })

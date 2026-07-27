@@ -254,7 +254,7 @@ Vue.prototype.$processTrxFunc = async function (op_name, cstm_params, active) {
 		(response) => {
 		  console.log(response);
 		  const txID = response && response.result ? response.result.id : null;
-		  const success = Boolean(response && response.success);
+		  const success = Boolean(response && response.success && txID);
 		  const error = success ? '' : getTransactionErrorMessage(response);
 		  resolve({
 			success,
@@ -328,8 +328,8 @@ Vue.prototype.$processTrxFunc = async function (op_name, cstm_params, active) {
 	let outcome = await res.json();
 	console.log(outcome);
 
-	if (outcome.error) {
-	  console.log(outcome.error);
+	if (!outcome || outcome.error || !outcome.trx) {
+	  console.log(outcome && outcome.error);
 
 	  let err_msg = getTransactionErrorMessage(outcome) || this.$t('error_performing_operation');
 	  if (err_msg.includes('missing') && err_msg.includes('authority')) {

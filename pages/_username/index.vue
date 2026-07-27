@@ -558,7 +558,7 @@ import SSC from 'sscjs'
 const hsc = new SSC(process.env.hiveEngineRpc);
 import NotifyModal from '~/components/NotifyModal'
 import Lodash from 'lodash';
-import { buildMeasurementsMetadata, convertMeasurementValue, MEASUREMENT_KEYS, MEASUREMENT_UNIT_OPTIONS, mergeMeasurementSources, normalizeMeasurements, normalizeMeasurementUnit, selectLatestMeasurements } from '~/utils/measurements'
+import { buildMeasurementsMetadata, convertMeasurementValue, MEASUREMENT_KEYS, MEASUREMENT_UNIT_OPTIONS, mergeMeasurementSources, normalizeMeasurements, normalizeMeasurementUnit, selectLatestMeasurements, waitForMeasurementSave } from '~/utils/measurements'
 
 export default {
   head() {
@@ -1010,7 +1010,14 @@ export default {
       this.measurementSaveError = '';
       try {
         const measurements = normalizeMeasurements({ ...values, updated_at: new Date().toISOString() });
-        const parsedData = this.getProfileMetadata();
+        const timeoutError = this.$t('error_performing_operation');
+        const metadataOutcome = await waitForMeasurementSave(
+          this.getLiveProfileMetadata().then(metadata => ({ success: true, metadata })),
+          timeoutError
+        );
+        if (!metadataOutcome.success) throw new Error(metadataOutcome.error || this.$t('Save_Error'));
+
+        const parsedData = metadataOutcome.metadata;
         const postingMetadata = buildMeasurementsMetadata(parsedData, measurements);
         const transaction = {
           account: this.user.account.name,
@@ -1020,7 +1027,10 @@ export default {
           posting_json_metadata: JSON.stringify(postingMetadata),
           extensions: []
         };
-        const outcome = await this.$processTrxFunc('account_update2', transaction, false);
+        const outcome = await waitForMeasurementSave(
+          this.$processTrxFunc('account_update2', transaction, false),
+          timeoutError
+        );
         if (!outcome || !outcome.success) throw new Error((outcome && outcome.error) || this.$t('Save_Error'));
 
         this.userinfo = { ...this.userinfo, posting_json_metadata: transaction.posting_json_metadata };
@@ -1737,6 +1747,28 @@ export default {
         properNode = blurt;
       }
       return properNode;
+    },
+    async getLiveProfileMetadata() {
+      const accountName = this.user && this.user.account && this.user.account.name;
+      if (!accountName) throw new Error(this.$t('Save_Error'));
+
+      const chainLnk = this.setProperNode();
+      return new Promise((resolve, reject) => {
+        chainLnk.api.getAccounts([accountName], (err, result) => {
+          const account = Array.isArray(result) ? result[0] : null;
+          if (err || !account || typeof account.posting_json_metadata !== 'string') {
+            reject(err || new Error(this.$t('Save_Error')));
+            return;
+          }
+
+          try {
+            resolve(account.posting_json_metadata ? JSON.parse(account.posting_json_metadata) || {} : {});
+          } catch (parseError) {
+            console.error('Unable to parse live profile metadata', parseError);
+            resolve({});
+          }
+        });
+      });
     },
     async getAccountData() {
       let parentRef = this;
