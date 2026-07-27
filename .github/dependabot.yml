@@ -11,6 +11,12 @@ updates:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 5
+    ignore:
+      # Heavily customized locally via a patch-package patch pinned to 0.3.1
+      # (adds the stdLogin login-type flag the app depends on). Upgrading to
+      # 0.4.x only re-does the sc2-sdk->steemconnect migration we already
+      # patched in, breaks the pinned patch, and drops our stdLogin change.
+      - dependency-name: "vue-steemconnect"
     groups:
       production-minor-patch:
         dependency-type: "production"
