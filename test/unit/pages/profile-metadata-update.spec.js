@@ -1,9 +1,6 @@
 import ProfilePage from '~/pages/_username/index.vue'
 
-<<<<<<< Updated upstream
-const { broadcastUpdate, getLiveProfileMetadata, saveMeasurements } = ProfilePage.methods
-=======
-const { broadcastUpdate, proceedLogout, saveMeasurements } = ProfilePage.methods
+const { broadcastUpdate, getLiveProfileMetadata, proceedLogout, saveMeasurements } = ProfilePage.methods
 
 describe('profile account actions', () => {
   it('clears the standard login state and dispatches logout', () => {
@@ -32,7 +29,6 @@ describe('profile account actions', () => {
     }
   })
 })
->>>>>>> Stashed changes
 
 describe('profile metadata updates', () => {
   it('reads freshly fetched posting metadata before saving', async () => {
