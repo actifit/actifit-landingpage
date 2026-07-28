@@ -141,4 +141,28 @@ describe('profile metadata updates', () => {
     expect(context.applyMeasurementSources).not.toHaveBeenCalled()
     expect(context.savingMeasurements).toBe(false)
   })
+
+  it('silently stops saving measurements when the user cancels Keychain', async () => {
+    const context = {
+      user: { account: { name: 'alice' } },
+      userinfo: {},
+      measurementDraft: { weight: '70', weightUnit: 'kg' },
+      measurementSaveError: '',
+      savingMeasurements: false,
+      getLiveProfileMetadata: jest.fn().mockResolvedValue({ profile: {} }),
+      $processTrxFunc: jest.fn().mockResolvedValue({ success: false, error: 'user_cancel' }),
+      applyMeasurementSources: jest.fn(),
+      turnMeasurementsEditOff: jest.fn(),
+      $notify: jest.fn(),
+      $t: key => key
+    }
+
+    await saveMeasurements.call(context)
+
+    expect(context.measurementSaveError).toBe('')
+    expect(context.applyMeasurementSources).not.toHaveBeenCalled()
+    expect(context.turnMeasurementsEditOff).not.toHaveBeenCalled()
+    expect(context.$notify).not.toHaveBeenCalled()
+    expect(context.savingMeasurements).toBe(false)
+  })
 })
