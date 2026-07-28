@@ -1031,6 +1031,7 @@ export default {
           this.$processTrxFunc('account_update2', transaction, false),
           timeoutError
         );
+        if (outcome && outcome.error === 'user_cancel') return;
         if (!outcome || !outcome.success) throw new Error((outcome && outcome.error) || this.$t('Save_Error'));
 
         this.userinfo = { ...this.userinfo, posting_json_metadata: transaction.posting_json_metadata };
