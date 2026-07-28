@@ -2210,6 +2210,10 @@ html.dark-mode .user-info-header .join-date {
   opacity: 0.9;
   transform: translateY(-1px);
 }
+html.dark-mode .profile-action-btn {
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: none;
+}
 .avatar-edit-button {
   position: absolute;
   bottom: 5px;
