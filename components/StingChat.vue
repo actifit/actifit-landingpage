@@ -71,7 +71,8 @@ export default {
       postingKeyError: '',
       postingKeyUsername: null,
       widgetSessionVersion: 0,
-      isBeingDestroyed: false
+      isBeingDestroyed: false,
+      widgetRequested: false
     }
   },
   computed: {
@@ -108,12 +109,10 @@ export default {
     }
   },
   mounted () {
-    this.loadWidgetScript()
-      .then(() => this.initWidget())
-      .catch((error) => {
-        console.error('Unable to load Sting chat:', error)
-        this.widgetError = this.$t('sting_chat_unavailable')
-      })
+    // The Sting chat widget (chat.peakd.com embed — socket.io, uploader, and
+    // other third-party resources) is heavy and gets intercepted by ad/privacy
+    // blockers. Load it lazily on the first chat-open (see toggleWidget) instead
+    // of on every page mount.
   },
   beforeDestroy () {
     this.isBeingDestroyed = true
@@ -167,6 +166,10 @@ export default {
       const sessionVersion = ++this.widgetSessionVersion
       this.teardownWidget()
 
+      // Only rebuild if the user has actually opened chat; otherwise leave the
+      // widget unloaded so it stays off every page's initial load.
+      if (!this.widgetRequested) return
+
       this.$nextTick(() => {
         if (this.isBeingDestroyed || sessionVersion !== this.widgetSessionVersion) return
 
@@ -181,6 +184,22 @@ export default {
             this.widgetError = this.$t('sting_chat_unavailable')
           })
       })
+    },
+    // Loads the Sting script and creates the widget on demand. Idempotent, so
+    // it is safe to call from every entry point (toggle, posting-key submit,
+    // session restart).
+    ensureWidget () {
+      if (this.widget) return Promise.resolve()
+      const sessionVersion = this.widgetSessionVersion
+      return this.loadWidgetScript()
+        .then(() => {
+          if (this.isBeingDestroyed || sessionVersion !== this.widgetSessionVersion) return
+          this.initWidget()
+        })
+        .catch((error) => {
+          console.error('Unable to load Sting chat:', error)
+          this.widgetError = this.$t('sting_chat_unavailable')
+        })
     },
     initWidget () {
       if (this.widget || !this.$refs.widgetContainer) return
@@ -477,7 +496,9 @@ export default {
 
       this.$store.commit('setChatPostingKey', postingKey)
       this.closePostingKeyPrompt()
-      this.$nextTick(() => {
+      this.widgetRequested = true
+      // Load the widget now (initWidget reads the just-set posting key) and show it.
+      this.ensureWidget().then(() => {
         const container = this.$refs.widgetContainer
         if (container) container.hidden = false
       })
@@ -487,6 +508,17 @@ export default {
       const loginMethod = localStorage.getItem('acti_login_method') || 'posting-key'
       if (username && loginMethod === 'posting-key' && !this.chatPostingKey) {
         this.openPostingKeyPrompt()
+        return
+      }
+
+      this.widgetRequested = true
+
+      // First open: load + initialize the widget on demand, then reveal it.
+      if (!this.widget) {
+        this.ensureWidget().then(() => {
+          const container = this.$refs.widgetContainer
+          if (container) container.hidden = false
+        })
         return
       }
 

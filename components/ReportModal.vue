@@ -63,9 +63,6 @@
         </div>
         <SafeRemarkable class="modal-body" :source="displayBody" ref="remarkableContent"
           :options="{ 'html': true, 'breaks': true, 'typographer': true }"></SafeRemarkable>
-        <div class="modal-body goog-ad-horiz-90">
-          <adsbygoogle ad-slot="5716623705" />
-        </div>
         <div class="col-12 main-payment-info" id="modal-footer">
           <div class="report-modal-prelim-info">
             <span><a href="#" @click.prevent="toggleCommentBox()" :title="$t('Reply')"><i

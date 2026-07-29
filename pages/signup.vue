@@ -374,7 +374,8 @@ import { VueReCaptcha } from 'vue-recaptcha-v3'
 import { mapGetters } from 'vuex'
 import Vue from 'vue'
 
-Vue.use(VueReCaptcha, { siteKey: process.env.captchaV3Key })
+// reCAPTCHA is installed lazily in mounted() so this module has no import-time
+// side effect (a module-level Vue.use loaded reCAPTCHA on other pages too).
 
 export default {
   head() {
@@ -519,6 +520,7 @@ export default {
     this.$store.dispatch('fetchUserRank')
     this.$store.dispatch('fetchReferrals')
 
+    Vue.use(VueReCaptcha, { siteKey: process.env.captchaV3Key })
     await this.$recaptchaLoaded()
 
   },
