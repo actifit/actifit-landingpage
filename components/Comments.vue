@@ -132,7 +132,7 @@
             </span>
             <span v-else class="cmt-payout">
               <span class="cmt-payout__pending"
-                :class="{ 'cmt-payout__pending--zero': parseFloat(full_data.pending_payout_value) <= 0 }">
+                :class="{ 'cmt-payout__pending--zero': parseFloat(full_data.pending_payout_value) <= 0, 'declined-payout': parseFloat(full_data.max_accepted_payout) === 0 }">
                 {{ full_data.pending_payout_value.replace('SBD', '') }}
               </span>
               <i class="fa-solid fa-hourglass-half cmt-payout__wait" :title="$t('hive_payouts_wait')"></i>
