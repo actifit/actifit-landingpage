@@ -1,4 +1,5 @@
 import { getCanonicalUrl } from '~/utils/seo'
+import fs from 'fs'
 
 describe('SEO helpers', () => {
   it.each([
@@ -15,5 +16,13 @@ describe('SEO helpers', () => {
   it('handles missing and relative route paths', () => {
     expect(getCanonicalUrl()).toBe('https://actifit.io')
     expect(getCanonicalUrl('signup')).toBe('https://actifit.io/signup')
+  })
+
+  it('wires the route path into the SSR layout canonical and og:url', () => {
+    const layout = fs.readFileSync('layouts/default.vue', 'utf8')
+
+    expect(layout).toContain('getCanonicalUrl(this.$route.path)')
+    expect(layout).toContain("hid: 'canonical'")
+    expect(layout).toContain("property: 'og:url'")
   })
 })

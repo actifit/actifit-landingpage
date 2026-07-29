@@ -2,9 +2,7 @@
   <div>
     <NavbarBrand />
     <div class="container pt-5 mt-5 pb-5">
-      <div v-if="user">
-        <ListHeadingSection :username="user.account.name" :textualDisplay="textualContent()"/>
-      </div>
+      <ListHeadingSection :username="user ? user.account.name : ''" :textualDisplay="textualContent()"/>
       <div class="row text-right" v-if="user">
         <div class="col-12 pb-2"><a href="#" class="btn btn-brand border"
             @click.prevent="$router.push('/\@' + user.account.name + '/blog')" :title="$t('view_blog')"><i

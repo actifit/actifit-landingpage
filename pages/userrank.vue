@@ -56,6 +56,7 @@
 	<div :class="smallScreenClasses" class="container mt-5 pb-5 pt-5" v-else>
       <!-- account balance -->
       <div class="text-center p-5">
+		<h1 class="mb-4 h3">{{ $t('User_rank_details') }}</h1>
 		<div class="row pb-3">
 		  <div class="text-center text-brand w-100 lead">
 		    {{ $t('login_required') }}

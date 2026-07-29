@@ -4,8 +4,8 @@
     <div class="container pt-5 mt-5 pb-5">
       <a href="#a" data-toggle="modal" id="modenabler" name="modenabler" ref="modenabler"
         data-target="#notifyModal"></a>
-      <div class="text-center font-weight" v-if="user">
-        <ListHeadingSection :username="user.account.name" :textualDisplay="textualContent()"/>
+      <div class="text-center font-weight">
+        <ListHeadingSection :username="user ? user.account.name : ''" :textualDisplay="textualContent()"/>
       </div>
 
       <div class="vid-container" v-if="xcstkn != ''">

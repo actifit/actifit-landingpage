@@ -6,13 +6,13 @@
 
       <!-- account balance -->
       <div class="text-center">
-        <h3 class="mb-4" v-if="displayUser">
+        <div class="mb-4" v-if="displayUser">
           <ListHeadingSection :username="displayUser" :textualDisplay="textualDisplayTitle" />
-        </h3>
-        <h3 class="mb-4" v-else-if="user">
+        </div>
+        <div class="mb-4" v-else-if="user">
           <ListHeadingSection :username="user.account.name" :textualDisplay="textualTitle" />
 
-        </h3>
+        </div>
         <!--<div>
 			  <a href="/walletV1"><i>New Wallet Layout. Click to switch back to old version</i></a>
 		  </div>-->
@@ -1831,12 +1831,14 @@
     <!-- show spinner while loading -->
     <div :class="smallScreenClasses" class="container mt-5 pb-5 pt-5" v-else-if="loading">
       <div class="text-center">
+        <h1 class="mb-4 h3">{{ $t('Wallet') }}</h1>
         <i class="fas fa-spinner fa-3x fa-spin text-brand"></i>
       </div>
     </div>
     <div :class="smallScreenClasses" class="container mt-5 pb-5 pt-5" v-else>
       <!-- account balance -->
       <div class="text-center p-5">
+        <h1 class="mb-4 h3">{{ $t('Wallet') }}</h1>
         <div class="row pb-3">
           <div class="text-center text-brand w-100 lead">
             {{ $t('login_required_wallet') }}
