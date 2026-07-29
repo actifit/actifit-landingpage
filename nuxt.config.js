@@ -314,10 +314,6 @@ module.exports = {
     //['@nuxtjs/axios'],
     '@nuxtjs/i18n',
     '@nuxtjs/proxy',
-    ['@nuxtjs/google-adsense', {
-      id: 'ca-pub-2770948859841315',
-      pageLevelAds: true
-    }],
   ],
 
   // Proxy configuration to bypass CORS during local development

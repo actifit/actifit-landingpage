@@ -74,9 +74,6 @@
           <a href="#" v-on:click.prevent="cancelTranslation">{{ $t('click_to_view_original') }}</a>
         </div>
         <SafeRemarkable class="modal-body" :source="displayBody" :options="{ 'html': true, 'breaks': true, 'typographer': true }" ref="remarkableContent"></SafeRemarkable>
-        <div class="modal-body goog-ad-horiz-90">
-          <adsbygoogle ad-slot="5716623705" />
-        </div>
         <div class="main-payment-info col-12" id="modal-footer">
           <div >
             <span><a href="#" @click.prevent="toggleCommentBox()" :title="$t('Reply')"><i
