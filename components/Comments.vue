@@ -128,7 +128,7 @@
                 <i class="fa-solid fa-check text-green text-bold"></i>
               </span>
               <span v-else>
-                <span class="text-bold">{{ full_data.pending_payout_value.replace('SBD', '') }}</span>
+                <span class="text-bold" :class="{ 'declined-payout': parseFloat(full_data.max_accepted_payout) === 0 }">{{ full_data.pending_payout_value.replace('SBD', '') }}</span>
                 <i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
               </span>
               <span v-if="hasBeneficiaries()" :title="beneficiariesDisplay()">
