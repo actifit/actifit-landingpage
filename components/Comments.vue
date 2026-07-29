@@ -1,10 +1,9 @@
 <template>
   <transition name="fade">
-    <div class="comments mb-2" v-if="!commentDeleted && !commentMinimized">
+    <div class="cmt-thread mb-2" v-if="!commentDeleted && !commentMinimized">
 
-      <div class="col-12 row" v-if="depth == 0">
-        <div class="col-md-9"></div>
-        <select v-model="currentSort" class="form-control col-md-2 sel-adj float-right">
+      <div class="cmt-toolbar" v-if="depth == 0">
+        <select v-model="currentSort" class="cmt-sort">
           <option value="">-- {{ $t('Sort_By') }} --</option>
           <option :value="JSON.stringify({ value: 'author', direction: 'asc' })">{{ $t('Name') }}▲</option>
           <option :value="JSON.stringify({ value: 'author', direction: 'desc' })">{{ $t('Name') }}▼</option>
@@ -18,48 +17,46 @@
           <option :value="JSON.stringify({ value: 'created', direction: 'desc' })">{{ $t('Date') }}▼</option>
         </select>
 
-        <span class="p-2 col-md-1"><i class="fa-solid fa-circle-minus text-brand"
-            v-on:click="commentMinimized = !commentMinimized" :title="$t('hide_comment')"
-            style="cursor: pointer"></i></span>
       </div>
-      <div v-else class="col-12 text-right">
-        <i class="fa-solid fa-circle-minus text-brand" v-on:click="commentMinimized = !commentMinimized"
-          :title="$t('hide_comment')" style="cursor: pointer"></i>
-      </div>
-      <div class="modal-body comment-info acti-shadow mb-2" v-if="depth > 0">
-        <div class="main-user-info pt-2">
-          <div class="comment-user-section" :style="{ paddingLeft: depth * indentFactor + 'px' }">
+
+      <!-- Each opened reply thread is rendered inside its parent card below. -->
+      <div class="cmt-card" v-if="depth > 0">
+
+        <div class="cmt-card__header">
+          <div class="cmt-card__author">
             <UserHoverCard :username="author" />
           </div>
-          <div class="comment-user-section pt-2" :style="{ paddingLeft: depth * indentFactor + 'px' }">
-            <a :title="$t('comment_link')" class="p-1" :href="buildLink" id="comment-link" ref="comment-link"><span
-                class="date-head text-muted" :title="date">{{ $getTimeDifference(full_data.created) }}</span> <i
-                class="fas fa-link"></i></a>
-            <i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent"></i>
+          <div class="cmt-card__meta">
+            <a :title="$t('comment_link')" class="cmt-meta-link" :href="buildLink" id="comment-link"
+              ref="comment-link">
+              <span class="cmt-date" :title="date">{{ $getTimeDifference(full_data.created) }}</span>
+              <i class="fas fa-link"></i>
+            </a>
+            <i :title="$t('copy_link')" class="fas fa-copy cmt-meta-icon" v-on:click="copyContent"></i>
 
-            <!-- ✅ CORE CHANGE: Translation icons are now driven by the new state -->
-            <i v-if="translationLoading" class="fas fa-spinner fa-spin text-brand ml-2"
+            <i v-if="translationLoading" class="fas fa-spinner fa-spin cmt-meta-icon"
               :title="$t('translating_content', 'Translating...')"></i>
-            <i v-else-if="!showTranslated" class="fa-solid fa-language text-brand ml-2" v-on:click="translateContent"
+            <i v-else-if="!showTranslated" class="fa-solid fa-language cmt-meta-icon" v-on:click="translateContent"
               :title="$t('translate_content', 'Translate Content')"></i>
+            <button v-if="depth === 1" type="button" class="cmt-icon-btn"
+              :title="$t('hide_comment')" @click="commentMinimized = true">
+              <i class="fa-solid fa-circle-minus"></i>
+            </button>
           </div>
         </div>
 
-        <!-- ✅ CORE CHANGE: Translation notice is now controlled by new state -->
-        <div v-if="showTranslated" class="translation-notice" :style="{ marginLeft: depth * indentFactor + 'px' }">
+        <div v-if="showTranslated" class="cmt-translation-notice">
           <span>{{ $t('auto_translated_content') }}</span>
           <a href="#" v-on:click.prevent="cancelTranslation">{{ $t('click_to_view_original') }}</a>
         </div>
 
-        <!-- ✅ CORE CHANGE: Source is now a computed property that shows original or translated text -->
-        <SafeRemarkable class="modal-body pb-0" v-if="!editBoxOpen" :source="displayContent"
-          :style="{ paddingLeft: depth * indentFactor + 'px' }"
+        <SafeRemarkable class="cmt-body" v-if="!editBoxOpen" :source="displayContent"
           :options="{ 'html': true, 'breaks': true, 'typographer': true }"></SafeRemarkable>
 
         <transition name="fade">
-          <div class="comment-reply" v-if="editBoxOpen">
+          <div class="cmt-editor" v-if="editBoxOpen">
             <CustomTextEditor ref="editor" :initialContent="full_data.body"></CustomTextEditor>
-            <div class="modal-footer m-2" style="display: none">
+            <div class="cmt-bchain-picker" style="display: none">
               <div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-if="cur_bchain == 'HIVE'">
                 <input type="radio" id="hive" value="HIVE" v-model="target_bchain">
                 <img src="/img/HIVE.png" style="max-height: 50px" v-on:click="target_bchain = 'HIVE'"
@@ -81,66 +78,75 @@
                 <label for="hive_steem">HIVE + STEEM</label>
               </div>
             </div>
-            <a href="#" @click.prevent="editResponse($event)" class="btn btn-brand border reply-btn w-25">{{ $t('Post')
-            }}<i class="fas fa-spin fa-spinner" v-if="loading"></i></a>
-            <a href="#" @click.prevent="editBoxOpen = !editBoxOpen" class="btn btn-brand border reply-btn w-25">{{
-              $t('Cancel') }}</a>
-            <a href="#" @click.prevent="insertModSignature" class="btn btn-brand border reply-btn w-25"
-              v-if="(this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator'))">{{
-                $t('Short_Signature') }}</a>
-            <a href="#" @click.prevent="insertFullModSignature" class="btn btn-brand border reply-btn w-25"
-              v-if="(this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator'))">{{
-                $t('Full_Signature') }}</a>
+            <div class="cmt-editor-actions">
+              <a href="#" @click.prevent="editResponse($event)" class="cmt-btn cmt-btn--primary">{{ $t('Post') }}<i
+                  class="fas fa-spin fa-spinner" v-if="loading"></i></a>
+              <a href="#" @click.prevent="editBoxOpen = !editBoxOpen" class="cmt-btn">{{ $t('Cancel') }}</a>
+              <a href="#" @click.prevent="insertModSignature" class="cmt-btn"
+                v-if="(this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator'))">{{
+                  $t('Short_Signature') }}</a>
+              <a href="#" @click.prevent="insertFullModSignature" class="cmt-btn"
+                v-if="(this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator'))">{{
+                  $t('Full_Signature') }}</a>
+            </div>
           </div>
         </transition>
-        <div class="main-payment-info col-12 p-2">
-          <div :style="{ paddingLeft: (depth) * indentFactor + 'px' }">
-            <div v-if="this.user && this.user.account.name == this.full_data.author">
-              <span><a href="#" @click.prevent="editBoxOpen = !editBoxOpen" :title="$t('Edit_note')"><i
-                    class="fas fa-edit text-white"></i></a></span>
-              <span v-if="commentDeletable()"><a href="#" @click.prevent="deleteComment" :title="$t('Delete_note')"><i
-                    class="fas fa-trash-alt text-white"></i><i class="fas fa-spin fa-spinner" v-if="deleting"></i></a>
+
+        <div class="cmt-footer">
+          <div class="cmt-footer__actions">
+            <a href="#" class="cmt-action" v-if="this.user && this.user.account.name == this.full_data.author"
+              @click.prevent="editBoxOpen = !editBoxOpen" :title="$t('Edit_note')">
+              <i class="fas fa-edit"></i>
+            </a>
+            <a href="#" class="cmt-action" v-if="this.user && this.user.account.name == this.full_data.author && commentDeletable()"
+              @click.prevent="deleteComment" :title="$t('Delete_note')">
+              <i class="fas fa-trash-alt"></i><i class="fas fa-spin fa-spinner" v-if="deleting"></i>
+            </a>
+            <a href="#" class="cmt-action" v-if="this.user" @click.prevent="toggleCommentBox()" :title="$t('Reply')">
+              <i class="fas fa-reply"></i>
+            </a>
+            <a href="#" class="cmt-action" :class="{ 'cmt-action--active': this.user && userVotedThisPost() == true }"
+              @click.prevent="votePrompt($event)" data-toggle="modal" data-target="#voteModal">
+              <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
+            </a>
+            <button v-if="full_data.children > 0" type="button" class="cmt-action cmt-replies-toggle"
+              :class="{ 'cmt-action--active': nestedRepliesOpen }"
+              :aria-expanded="nestedRepliesOpen ? 'true' : 'false'" :title="$t('Replies')"
+              @click="nestedRepliesOpen = !nestedRepliesOpen">
+              <i class="far fa-comments"></i> {{ full_data.children }}
+            </button>
+            <span v-else class="cmt-action cmt-action--static">
+              <i class="far fa-comments"></i> 0
+            </span>
+          </div>
+
+          <div class="cmt-footer__payout">
+            <span v-if="postPaid()" class="cmt-payout">
+              <span class="cmt-payout__item" :title="$t('author_payout')">
+                <i class="fa-solid fa-user"></i> {{ paidValue() }}
               </span>
-            </div>
-            <div>
-              <span v-if="this.user"><a href="#" @click.prevent="toggleCommentBox()" :title="$t('Reply')"><i
-                    class="fas fa-reply text-white"></i></a></span>
-              <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand"
-                data-target="#voteModal" v-if="this.user && userVotedThisPost() == true">
-                <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
-              </a>
-              <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" data-target="#voteModal"
-                class="actifit-link-plain" v-else>
-                <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
-              </a>
-              <i class="far fa-comments ml-2"></i> {{ full_data.children }}
-            </div>
-            <div>
-              <span v-if="postPaid()">
-                <span :title="$t('author_payout')">
-                  <i class="fa-solid fa-user"></i>
-                  {{ paidValue() }}
-                </span>
-                <span class="m-1" :title="$t('voters_payout')">
-                  <i class="fa-solid fa-users"></i>
-                  {{ full_data.curator_payout_value }}
-                </span>
-                <i class="fa-solid fa-check text-green text-bold"></i>
+              <span class="cmt-payout__item" :title="$t('voters_payout')">
+                <i class="fa-solid fa-users"></i> {{ full_data.curator_payout_value }}
               </span>
-              <span v-else>
-                <span class="text-bold" :class="{ 'declined-payout': parseFloat(full_data.max_accepted_payout) === 0 }">{{ full_data.pending_payout_value.replace('SBD', '') }}</span>
-                <i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
+              <i class="fa-solid fa-check cmt-payout__paid"></i>
+            </span>
+            <span v-else class="cmt-payout">
+              <span class="cmt-payout__pending"
+                :class="{ 'cmt-payout__pending--zero': parseFloat(full_data.pending_payout_value) <= 0, 'declined-payout': parseFloat(full_data.max_accepted_payout) === 0 }">
+                {{ full_data.pending_payout_value.replace('SBD', '') }}
               </span>
-              <span v-if="hasBeneficiaries()" :title="beneficiariesDisplay()">
-                <i class="fas fa-user-pen"><sup>{{ full_data.beneficiaries.length }}</sup></i>
-              </span>
-            </div>
+              <i class="fa-solid fa-hourglass-half cmt-payout__wait" :title="$t('hive_payouts_wait')"></i>
+            </span>
+            <span v-if="hasBeneficiaries()" class="cmt-beneficiaries" :title="beneficiariesDisplay()">
+              <i class="fas fa-user-pen"><sup>{{ full_data.beneficiaries.length }}</sup></i>
+            </span>
           </div>
         </div>
+
         <transition name="fade">
-          <div class="comment-reply" v-if="commentBoxOpen">
+          <div class="cmt-editor" v-if="commentBoxOpen">
             <CustomTextEditor ref="editor" :initialContent="replyBody"></CustomTextEditor>
-            <div class="modal-footer m-2" style="display:none">
+            <div class="cmt-bchain-picker" style="display:none">
               <div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-if="cur_bchain == 'HIVE'">
                 <input type="radio" id="hive" value="HIVE" v-model="target_bchain">
                 <img src="/img/HIVE.png" style="max-height: 50px" v-on:click="target_bchain = 'HIVE'"
@@ -162,47 +168,61 @@
                 <label for="hive_steem">HIVE + STEEM</label>
               </div>
             </div>
-            <a href="#" @click.prevent="postResponse($event)" class="btn btn-brand border reply-btn w-25">
-              {{ $t('Post') }}
-              <img src="/img/HIVE.png" style="max-height: 25px"
-                v-if="target_bchain == 'HIVE' || target_bchain == 'BOTH'">
-              <img src="/img/STEEM.png" style="max-height: 25px"
-                v-if="target_bchain == 'STEEM' || target_bchain == 'BOTH'">
-              <i class="fas fa-spin fa-spinner" v-if="loading"></i>
-            </a>
-            <a href="#" @click.prevent="resetOpenComment()" class="btn btn-brand border reply-btn w-25">{{ $t('Cancel')
-            }}</a>
-            <a href="#" @click.prevent="insertModSignature" class="btn btn-brand border reply-btn w-25"
-              v-if="(this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator'))">{{
-                $t('Short_Signature') }}</a>
-            <a href="#" @click.prevent="insertFullModSignature" class="btn btn-brand border reply-btn w-25"
-              v-if="(this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator'))">{{
-                $t('Full_Signature') }}</a>
-            <div class="text-brand" v-html="errPosting"></div>
+            <div class="cmt-editor-actions">
+              <a href="#" @click.prevent="postResponse($event)" class="cmt-btn cmt-btn--primary">
+                {{ $t('Post') }}
+                <img src="/img/HIVE.png" style="max-height: 20px"
+                  v-if="target_bchain == 'HIVE' || target_bchain == 'BOTH'" alt="">
+                <img src="/img/STEEM.png" style="max-height: 20px"
+                  v-if="target_bchain == 'STEEM' || target_bchain == 'BOTH'" alt="">
+                <i class="fas fa-spin fa-spinner" v-if="loading"></i>
+              </a>
+              <a href="#" @click.prevent="resetOpenComment()" class="cmt-btn">{{ $t('Cancel') }}</a>
+              <a href="#" @click.prevent="insertModSignature" class="cmt-btn"
+                v-if="(this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator'))">{{
+                  $t('Short_Signature') }}</a>
+              <a href="#" @click.prevent="insertFullModSignature" class="cmt-btn"
+                v-if="(this.user && this.moderators.find(mod => mod.name == this.user.account.name && mod.title == 'moderator'))">{{
+                  $t('Full_Signature') }}</a>
+            </div>
+            <div class="cmt-error" v-html="errPosting"></div>
           </div>
         </transition>
-        <div class="comment-reply" v-if="responsePosted">
+
+        <div class="cmt-posted-reply" v-if="responsePosted">
           <UserHoverCard :username="user.name" />
-          <SafeRemarkable class="modal-body" :source="getContent"
-            :style="{ paddingLeft: (depth + 1) * indentFactor + 'px' }"></SafeRemarkable>
+          <SafeRemarkable class="cmt-body" :source="getContent"></SafeRemarkable>
+        </div>
+
+        <div v-if="nestedRepliesOpen" class="cmt-nested-replies">
+          <Comments v-for="comment in sorted_reply_entries" :key="comment.id" :reply_entries="comment.reply_entries"
+            :author="comment.author" :body="comment.body" :full_data="comment" :main_post_author="main_post_author"
+            :main_post_permlink="main_post_permlink" :main_post_cat="main_post_cat" :depth="depth + 1"
+            :translation-cache="translationCache" @update-translation-cache="bubbleCacheUpdate">
+          </Comments>
         </div>
       </div>
-      <!-- ✅ CORE CHANGE: Pass down the cache and listen for updates from child comments -->
-      <Comments v-for="comment in sorted_reply_entries" :key="comment.id" :reply_entries="comment.reply_entries"
-        :author="comment.author" :body="comment.body" :full_data="comment" :main_post_author="main_post_author"
-        :main_post_permlink="main_post_permlink" :main_post_cat="main_post_cat" :depth="depth + 1"
-        :translation-cache="translationCache" @update-translation-cache="bubbleCacheUpdate">
-      </Comments>
+
+      <!-- ✅ Pass down the cache and listen for updates from child comments -->
+      <template v-if="depth === 0">
+        <Comments v-for="comment in sorted_reply_entries" :key="comment.id" :reply_entries="comment.reply_entries"
+          :author="comment.author" :body="comment.body" :full_data="comment" :main_post_author="main_post_author"
+          :main_post_permlink="main_post_permlink" :main_post_cat="main_post_cat" :depth="depth + 1"
+          :translation-cache="translationCache" @update-translation-cache="bubbleCacheUpdate">
+        </Comments>
+      </template>
     </div>
-    <div class="comments mb-2" v-else-if="!commentDeleted && commentMinimized">
-      <div class="col-12 d-flex justify-content-between align-items-center" :style="{ paddingLeft: depth * indentFactor + 'px' }">
-        <span v-if="hiddenDueToLowRep" class="text-secondary small">
-          <i class="fas fa-eye-slash mr-1"></i>
+    <div class="cmt-thread mb-2" v-else-if="!commentDeleted && commentMinimized">
+      <div class="cmt-minimized">
+        <span v-if="hiddenDueToLowRep" class="cmt-minimized__reason">
+          <i class="fas fa-eye-slash"></i>
           {{ $t('hidden_low_reputation', [author]) }}
         </span>
-        <span v-else></span>
-        <i class="fa-solid fa-circle-plus text-brand" v-on:click="commentMinimized = !commentMinimized"
-          :title="$t('show_comment')" style="cursor: pointer"></i>
+        <span v-else class="cmt-minimized__author">@{{ author }}</span>
+        <button type="button" class="cmt-icon-btn" :title="$t('show_comment')"
+          @click="commentMinimized = false">
+          <i class="fa-solid fa-circle-plus"></i>
+        </button>
       </div>
     </div>
   </transition>
@@ -236,6 +256,8 @@ export default {
       commentMinimized: false,
       hiddenDueToLowRep: false,
       authorReputation: null,
+      // Show direct replies to main comments; keep deeper threads compact.
+      nestedRepliesOpen: this.depth === 1,
       userRank: 0,
       commentBoxOpen: false,
       editBoxOpen: false,
@@ -246,16 +268,13 @@ export default {
       responsePosted: false,
       errPosting: '',
       responseBody: '',
-      indentFactor: 30,
       cur_bchain: 'HIVE',
       target_bchain: 'HIVE',
       profImgUrl: process.env.hiveImgUrl,
     }
   },
   watch: {
-    // ✅ CORE FIX: Use an object watcher with an immediate handler.
-    // This runs on component creation AND every time `full_data` changes,
-    // replacing the need for separate logic in `mounted`.
+    // Runs on component creation AND every time `full_data` changes.
     full_data: {
       handler: 'onFullDataChange',
       immediate: true
@@ -355,7 +374,6 @@ export default {
     },
   },
   methods: {
-    // ✅ CORE FIX: This new handler function calls both initialization methods.
     onFullDataChange() {
       if (this.full_data) {
         this.fetchReportData();
@@ -363,33 +381,31 @@ export default {
       }
     },
 
-    // ✅ CORE FIX: Restore the original `fetchReportData` method.
     fetchReportData() {
       fetch(process.env.actiAppUrl + 'getRank/' + this.author).then(res => {
         res.json().then(json => this.userRank = json)
       }).catch(e => console.error(e));
       this.$store.dispatch('fetchModerators')
-
-      // Fetch Hive reputation for the comment author
       this.fetchAuthorReputation();
     },
 
-    // Fetch author's Hive reputation and auto-hide if low
     async fetchAuthorReputation() {
-      if (!this.author || this.depth === 0) return; // Skip for root level (not a comment)
+      if (!this.author || this.depth === 0) return;
 
-      hive.api.setOptions({ url: process.env.hiveApiNode });
-      const result = await hive.api.getAccountReputationsAsync(this.author, 1);
+      try {
+        hive.api.setOptions({ url: process.env.hiveApiNode });
+        const result = await hive.api.getAccountReputationsAsync(this.author, 1);
 
-      if (result && result.length > 0) {
-        const rawReputation = result[0].reputation;
-        this.authorReputation = hive.formatter.reputation(rawReputation);
+        if (result && result.length > 0) {
+          this.authorReputation = hive.formatter.reputation(result[0].reputation);
 
-        // Auto-hide comments from users with reputation <= 10
-        if (this.authorReputation <= 10) {
-          this.commentMinimized = true;
-          this.hiddenDueToLowRep = true;
+          if (this.authorReputation <= 10) {
+            this.commentMinimized = true;
+            this.hiddenDueToLowRep = true;
+          }
         }
+      } catch (error) {
+        console.error('Error fetching comment author reputation:', error);
       }
     },
 
@@ -483,11 +499,11 @@ export default {
       if (this.$cleanBody) {
         return this.$cleanBody(this.full_data.body);
       }
-      
+
       if (process.client) {
         return DOMPurify.sanitize(this.full_data.body);
       }
-      
+
       // Server-side fallback: strip tags using regex
       return this.full_data.body.replace(/<[^>]*>?/gm, '');
     },
@@ -875,9 +891,9 @@ export default {
       }
     },
     votePrompt(e) {
-      this.$store.commit('setPostToVote', this.full_data)    },
+      this.$store.commit('setPostToVote', this.full_data)
+    },
   },
-  // ✅ CORE FIX: The mounted hook is now simpler because the immediate watcher handles initialization.
   mounted() {
     this.profImgUrl = process.env.hiveImgUrl;
     this.cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
@@ -888,34 +904,417 @@ export default {
 }
 </script>
 <style>
-/* ... existing styles ... */
-.translation-notice {
-  background-color: #f8f9fa;
-  border: 1px solid #e9ecef;
-  padding: 10px;
-  margin-top: 10px;
-  margin-bottom: 15px;
-  border-radius: 4px;
+/* ============================================================
+   Actifit comments — neutral surface, brand color used only
+   as a small accent (hover states, active vote, translate link).
+   Brand red per main.sass: #FF112D
+   ============================================================ */
+.cmt-thread {
+  --cmt-brand: #FF112D;
+  --cmt-brand-dark: #D40E24;
+  --cmt-brand-tint: #FFF0F1;
+  --cmt-surface: #FFFFFF;
+  --cmt-border: #E6E8EB;
+  --cmt-text: #1F2328;
+  --cmt-muted: #6B7280;
+  --cmt-muted-soft: #9AA0A6;
+  --cmt-hover-bg: #FAFAFB;
+  --cmt-green: #1E8E5A;
+  --cmt-surface-subtle: #F7F8F9;
+  --cmt-border-hover: #D8DBE0;
+  --cmt-thread-rail: #DDE1E6;
+  --cmt-card-shadow: rgba(20, 20, 25, .05);
 }
 
-.translation-notice a {
-  color: red;
+.dark-mode .cmt-thread {
+  --cmt-brand: #FF5266;
+  --cmt-brand-dark: #FF7181;
+  --cmt-brand-tint: rgba(255, 82, 102, .16);
+  --cmt-surface: var(--background-color);
+  --cmt-border: rgba(255, 255, 255, .14);
+  --cmt-text: var(--text-color);
+  --cmt-muted: #ADB5BD;
+  --cmt-muted-soft: #8F969D;
+  --cmt-hover-bg: var(--background-color-1);
+  --cmt-green: #62C995;
+  --cmt-surface-subtle: var(--background-color-1);
+  --cmt-border-hover: rgba(255, 255, 255, .24);
+  --cmt-thread-rail: rgba(255, 255, 255, .22);
+  --cmt-card-shadow: rgba(0, 0, 0, .28);
+}
+
+.cmt-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 4px 0 10px;
+}
+
+.cmt-sort {
+  margin-right: auto;
+  max-width: 240px;
+  border: 1px solid var(--cmt-border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 13px;
+  color: var(--cmt-text);
+  background: var(--cmt-surface);
+}
+
+.cmt-sort:focus {
+  outline: none;
+  border-color: var(--cmt-brand);
+  box-shadow: 0 0 0 3px var(--cmt-brand-tint);
+}
+
+.cmt-icon-btn {
+  border: 0;
+  padding: 4px;
+  background: transparent;
+  color: var(--cmt-muted-soft);
+  line-height: 1;
+  cursor: pointer;
+  transition: color .15s ease;
+}
+
+.cmt-icon-btn:hover,
+.cmt-icon-btn:focus-visible {
+  color: var(--cmt-brand);
+}
+
+/* Card */
+.cmt-card {
+  background: var(--cmt-surface);
+  border: 1px solid var(--cmt-border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.cmt-card:hover {
+  border-color: var(--cmt-border-hover);
+  box-shadow: 0 2px 8px var(--cmt-card-shadow);
+}
+
+.cmt-nested-replies {
+  margin-top: 14px;
+  padding-top: 14px;
+  padding-left: 24px;
+  border-top: 1px solid var(--cmt-border);
+  border-left: 2px solid var(--cmt-thread-rail);
+}
+
+.cmt-nested-replies > .cmt-thread:last-child {
+  margin-bottom: 0 !important;
+}
+
+.cmt-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.cmt-card__author {
+  min-width: 0;
+}
+
+.cmt-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--cmt-muted);
+  flex: none;
+}
+
+.cmt-meta-link {
+  color: var(--cmt-muted);
   text-decoration: none;
-  margin-left: 5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 
-.translation-notice a:hover {
+.cmt-meta-link:hover {
+  color: var(--cmt-brand);
+}
+
+.cmt-date {
+  color: inherit;
+}
+
+.cmt-meta-icon {
+  color: var(--cmt-muted-soft);
+  cursor: pointer;
+  transition: color .15s ease;
+}
+
+.cmt-meta-icon:hover {
+  color: var(--cmt-brand);
+}
+
+.cmt-translation-notice {
+  background: var(--cmt-surface-subtle);
+  border: 1px solid var(--cmt-border);
+  color: var(--cmt-muted);
+  font-size: 12.5px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  margin-top: 10px;
+}
+
+.cmt-translation-notice a {
+  color: var(--cmt-brand);
+  font-weight: 600;
+  text-decoration: none;
+  margin-left: 6px;
+}
+
+.cmt-translation-notice a:hover {
   text-decoration: underline;
 }
 
-.ml-2 {
-  margin-left: .5rem !important;
+.cmt-body {
+  margin-top: 10px;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--cmt-text);
+  padding: 0 !important; /* SafeRemarkable default padding overridden; spacing handled by .cmt-card */
 }
 
-/* Ensure reply/save buttons inside inline comments are visible and not floated away */
-.comment-reply .reply-btn {
-  float: none;
-  display: inline-block;
-  margin-right: 8px;
+.cmt-editor {
+  margin-top: 12px;
 }
+
+.cmt-editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.cmt-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--cmt-border);
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 13px;
+  color: var(--cmt-text);
+  background: var(--cmt-surface);
+  text-decoration: none;
+  transition: border-color .15s ease, background .15s ease, color .15s ease;
+}
+
+.cmt-btn:hover {
+  border-color: var(--cmt-brand);
+  color: var(--cmt-brand-dark);
+  text-decoration: none;
+}
+
+.cmt-btn--primary {
+  background: var(--cmt-brand);
+  border-color: var(--cmt-brand);
+  color: #fff;
+}
+
+.cmt-btn--primary:hover {
+  background: var(--cmt-brand-dark);
+  border-color: var(--cmt-brand-dark);
+  color: #fff;
+}
+
+.cmt-error {
+  color: var(--cmt-brand);
+  font-size: 12.5px;
+  margin-top: 6px;
+}
+
+.cmt-footer {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--cmt-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 12.5px;
+}
+
+.cmt-footer__actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.cmt-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--cmt-muted);
+  text-decoration: none;
+  transition: color .15s ease;
+}
+
+.cmt-action:hover {
+  color: var(--cmt-brand);
+  text-decoration: none;
+}
+
+.cmt-action--active {
+  color: var(--cmt-brand);
+}
+
+.cmt-action--static {
+  cursor: default;
+}
+
+.cmt-replies-toggle {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.cmt-replies-toggle:focus-visible {
+  outline: 2px solid var(--cmt-brand);
+  outline-offset: 3px;
+}
+
+.cmt-footer__payout {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--cmt-muted);
+}
+
+.cmt-payout {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cmt-payout__item i {
+  margin-right: 4px;
+  color: var(--cmt-muted-soft);
+}
+
+.cmt-payout__item,
+.cmt-payout__pending {
+  font-weight: 700;
+  color: var(--cmt-brand-dark);
+}
+
+.cmt-payout__pending--zero {
+  color: var(--cmt-muted);
+}
+
+.cmt-payout__wait {
+  color: var(--cmt-muted-soft);
+}
+
+.cmt-payout__paid {
+  color: var(--cmt-green);
+}
+
+.cmt-beneficiaries {
+  color: var(--cmt-muted-soft);
+}
+
+.cmt-posted-reply {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--cmt-border);
+}
+
+.cmt-minimized {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border: 1px solid var(--cmt-border);
+  border-radius: 10px;
+  background: var(--cmt-surface);
+}
+
+.cmt-minimized__author {
+  color: var(--cmt-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.cmt-minimized__reason {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--cmt-muted);
+  font-size: 13px;
+}
+
+/* Rendered comment content */
+.dark-mode .cmt-body a {
+  color: var(--cmt-brand);
+}
+
+.dark-mode .cmt-body blockquote {
+  color: var(--cmt-muted);
+  border-left-color: var(--cmt-border);
+}
+
+.dark-mode .cmt-body hr,
+.dark-mode .cmt-body th,
+.dark-mode .cmt-body td {
+  border-color: var(--cmt-border);
+}
+
+/* Inline reply/edit composer */
+.dark-mode .cmt-editor .v-note-wrapper,
+.dark-mode .cmt-editor .v-note-op,
+.dark-mode .cmt-editor .v-note-panel,
+.dark-mode .cmt-editor .v-note-edit,
+.dark-mode .cmt-editor .v-show-content,
+.dark-mode .cmt-editor textarea {
+  background: var(--cmt-surface) !important;
+  color: var(--cmt-text) !important;
+  border-color: var(--cmt-border) !important;
+}
+
+.dark-mode .cmt-editor .v-note-op,
+.dark-mode .cmt-editor .v-note-navigation-wrapper,
+.dark-mode .cmt-editor .v-note-help-wrapper {
+  border-color: var(--cmt-border) !important;
+}
+
+.dark-mode .cmt-editor .op-icon,
+.dark-mode .cmt-editor .v-note-op button {
+  color: var(--cmt-muted) !important;
+}
+
+.dark-mode .cmt-editor .emoji-picker,
+.dark-mode .cmt-editor .emoji-picker__search input,
+.dark-mode .cmt-editor .mention-dropdown {
+  background: var(--cmt-hover-bg);
+  color: var(--cmt-text);
+  border-color: var(--cmt-border);
+}
+
+.dark-mode .cmt-editor .emoji-picker .emojis span:hover,
+.dark-mode .cmt-editor .mention-dropdown li.selected,
+.dark-mode .cmt-editor .mention-dropdown li:hover {
+  background: var(--cmt-border);
+}
+
+@media (max-width: 576px) {
+  .cmt-nested-replies {
+    padding-left: 12px;
+  }
+}
+
 </style>
