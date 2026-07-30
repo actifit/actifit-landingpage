@@ -122,10 +122,10 @@
 
           <div class="cmt-footer__payout">
             <span v-if="postPaid()" class="cmt-payout">
-              <span class="cmt-payout__item" :title="$t('author_payout')">
+              <span class="cmt-payout__item" :class="{ 'declined-payout': parseFloat(full_data.max_accepted_payout) === 0 }" :title="$t('author_payout')">
                 <i class="fa-solid fa-user"></i> {{ paidValue() }}
               </span>
-              <span class="cmt-payout__item" :title="$t('voters_payout')">
+              <span class="cmt-payout__item" :class="{ 'declined-payout': parseFloat(full_data.max_accepted_payout) === 0 }" :title="$t('voters_payout')">
                 <i class="fa-solid fa-users"></i> {{ full_data.curator_payout_value }}
               </span>
               <i class="fa-solid fa-check cmt-payout__paid"></i>

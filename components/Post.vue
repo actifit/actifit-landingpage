@@ -76,8 +76,8 @@
             <img src="/img/STEEM.png" class="mr-1 currency-logo-small" v-if="cur_bchain == 'STEEM'" alt="">
             <img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain == 'HIVE'" alt="">
             <span v-if="postPaid()">
-              <span class="m-1" :title="$t('author_payout')"><i class="fa-solid fa-user"></i> {{ paidValue() }}</span>
-              <span class="m-1" :title="$t('voters_payout')"><i class="fa-solid fa-users"></i> {{ post.curator_payout_value }}</span>
+              <span class="m-1" :class="{ 'declined-payout': parseFloat(post.max_accepted_payout) === 0 }" :title="$t('author_payout')"><i class="fa-solid fa-user"></i> {{ paidValue() }}</span>
+              <span class="m-1" :class="{ 'declined-payout': parseFloat(post.max_accepted_payout) === 0 }" :title="$t('voters_payout')"><i class="fa-solid fa-users"></i> {{ post.curator_payout_value }}</span>
               <i class="fa-solid fa-check text-green text-bold"></i>
             </span>
             <span v-else>

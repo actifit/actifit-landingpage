@@ -101,8 +101,8 @@
                       <img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain == 'HIVE'" alt="">
                       <img src="/img/BLURT.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain == 'BLURT'" alt="">
                       <span v-if="postPaid()">
-                        <span class="m-1" :title="$t('author_payout')"><i class="fa-solid fa-user"></i> {{ paidValue() }}</span>
-                        <span class="m-1" :title="$t('voters_payout')"><i class="fa-solid fa-users"></i> {{ report.curator_payout_value }}</span>
+                        <span class="m-1" :class="{ 'declined-payout': parseFloat(report.max_accepted_payout) === 0 }" :title="$t('author_payout')"><i class="fa-solid fa-user"></i> {{ paidValue() }}</span>
+                        <span class="m-1" :class="{ 'declined-payout': parseFloat(report.max_accepted_payout) === 0 }" :title="$t('voters_payout')"><i class="fa-solid fa-users"></i> {{ report.curator_payout_value }}</span>
                         <i class="fa-solid fa-check text-green text-bold"></i>
                       </span>
                       <span v-else>
