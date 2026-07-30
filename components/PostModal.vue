@@ -105,11 +105,11 @@
 
               <span v-if="postPaid()">
                 <!--<i class="fa-solid fa-wallet text-green"></i>-->
-                <span class="m-1" :title="$t('author_payout')">
+                <span class="m-1" :class="{ 'declined-payout': parseFloat(post.max_accepted_payout) === 0 }" :title="$t('author_payout')">
                   <i class="fa-solid fa-user"></i>
                   {{ paidValue() }}
                 </span>
-                <span class="m-1" :title="$t('voters_payout')">
+                <span class="m-1" :class="{ 'declined-payout': parseFloat(post.max_accepted_payout) === 0 }" :title="$t('voters_payout')">
                   <i class="fa-solid fa-users"></i>
                   {{ post.curator_payout_value }}
                 </span>
