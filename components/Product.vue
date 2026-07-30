@@ -35,12 +35,12 @@
               this.product.provider_name }}</a>
             <a v-else :href="'/' + this.product.provider">{{ this.product.provider_name }}</a>
             <span v-if="this.product.type == 'real'">
-              <span v-if="this.item_price_extra > 0"><img class="token-logo-md " src="/img/HIVE.png">+</span>
-              <span><img class="token-logo-md " src="/img/actifit_logo.png"></span>
+              <span v-if="this.item_price_extra > 0"><img class="token-logo-md " src="/img/HIVE.png" alt="">+</span>
+              <span><img class="token-logo-md " src="/img/actifit_logo.png" alt=""></span>
             </span>
           </h3>
           <!--<div class="pb-md-2 text-left" >
-					<b>{{ $t('price')}}: </b>{{numberFormat(this.item_price, 2)}} {{this.item_currency}}<img class="token-logo" src="/img/actifit_logo.png">
+					<b>{{ $t('price')}}: </b>{{numberFormat(this.item_price, 2)}} {{this.item_currency}}<img class="token-logo" src="/img/actifit_logo.png" alt="">
 				  </div>-->
         </div>
       </div>
@@ -98,13 +98,13 @@
                     <div class="w-25 m-1 text-right" :value="reqt.count">{{ $t('AFIT_Amount') }}</div>
                     <input type="number" id="afit-amount-buy" name="afit-amount-buy" ref="afit-amount-buy"
                       class="form-control-lg w-50 m-1" v-model="afitBuyAmount"><img src="/img/actifit_logo.png"
-                      class="mr-1 token-logo-md">
+                      class="mr-1 token-logo-md" alt="">
                   </div>
                   <div class="row">
                     <div class="w-25 m-1 text-right">{{ $t('HIVE_Amount') }}</div>
                     <input type="number" id="hive-amount-pay" name="hive-amount-pay" ref="hive-amount-pay"
                       class="form-control-lg w-50 m-1" readonly="readonly" :value="getMatchingHIVE()">
-                    <img src="/img/HIVE.png" class="mr-2 token-logo-md">
+                    <img src="/img/HIVE.png" class="mr-2 token-logo-md" alt="">
                   </div>
                   <div class="row" v-if="!isKeychainActive && !isHiveauthActive">
                     <div class="w-25 m-1 text-right">{{ $t('Active_Key') }}</div>
@@ -263,9 +263,9 @@
           @click.prevent="prepareCheckout()" :class="productBuyColor" style="float:left; border: 1px white solid;">{{
             $t('Buy_now') }} <br />
           <span v-if="this.item_price_extra > 0">{{ numberFormat(this.item_price_extra, 2) }}
-            {{ this.item_extra_currency }}<img class="token-logo-sm " src="/img/HIVE.png">+</span>
+            {{ this.item_extra_currency }}<img class="token-logo-sm " src="/img/HIVE.png" alt="">+</span>
           {{ numberFormat(this.item_price, 2) }} {{ this.item_currency }}<img class="token-logo-sm "
-            src="/img/actifit_logo.png">
+            src="/img/actifit_logo.png" alt="">
         </a>
         <span v-else-if="!checkout_product">
           <span style='color:green'>{{ $t('pending_real_order_notification') }}</span>
@@ -298,11 +298,11 @@
           <a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNow()" :class="productBuyColor"
             style="float:left; border: 1px white solid;">{{ $t('Buy_now') }} <br /> {{ numberFormat(this.item_price, 2)
             }}
-            {{ this.item_currency }}<img class="token-logo-sm " src="/img/actifit_logo.png"></a>
+            {{ this.item_currency }}<img class="token-logo-sm " src="/img/actifit_logo.png" alt=""></a>
           <a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNowHive()" :class="productBuyColor"
             style="border: 1px white solid;">{{ $t('Buy_now') }} <br /> {{ numberFormat(this.item_price *
               this.afitPrice.afitHiveLastPrice, 3) }} {{ this.hive_currency }}<img class="token-logo-sm "
-              src="/img/HIVE.png"></a>
+              src="/img/HIVE.png" alt=""></a>
           <div class="row" v-if="buyHiveExpand && !isKeychainActive && !isHiveauthActive">
             <label for="active-key" class="p-2">{{ $t('Active_Key') }} *</label>
             <input type="password" id="active-key" name="active-key" ref="active-key" class="form-control-lg w-50 p-2"
@@ -329,7 +329,7 @@
       <div v-else-if="!productBought && !this.errorProceed">
         <a class="btn btn-brand btn-lg w-50 book-button" @click.prevent="buyNow()"
           style="float:left; border: 1px white solid;">{{ $t('Buy_now') }} <br /> {{ numberFormat(this.item_price, 2) }}
-          {{ this.item_currency }}<img class="token-logo-sm " src="/img/actifit_logo.png"></a>
+          {{ this.item_currency }}<img class="token-logo-sm " src="/img/actifit_logo.png" alt=""></a>
       </div>
       <div v-else>
         <div v-if="!this.downloadAgainReady">

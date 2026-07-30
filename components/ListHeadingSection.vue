@@ -4,7 +4,7 @@
       :style="'background-image: url('+this.profImgUrl+'/u/' + this.username + '/avatar)'">
     </div>
 
-    <h2 class="font-weight-semibold text-white text-left h4" v-html="textualDisplay"></h2>
+    <h1 class="font-weight-semibold text-white text-left h4" v-html="textualDisplay"></h1>
 
   </div>
 </template>

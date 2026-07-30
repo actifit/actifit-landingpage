@@ -33,17 +33,17 @@
                 <span class="mb-1 form-control-lg " style="display: none">
                   <div class="bchain-option p-1 m-1 btn" :class="adjustHiveClass">
                     <input type="radio" id="hive_bchain" value="HIVE" v-model="bchain_val">
-                    <img src="/img/HIVE.png" style="max-height: 50px;" v-on:click="bchain_val = 'HIVE'">
+                    <img src="/img/HIVE.png" style="max-height: 50px;" v-on:click="bchain_val = 'HIVE'" alt="Select Hive blockchain">
                     <label for="hive_bchain">{{ $t('HIVE') }}</label>
                   </div>
                   <div class="bchain-option p-1 m-1 btn m-auto" :class="adjustSteemClass" style="display:none">
                     <input type="radio" id="steem_bchain" value="STEEM" v-model="bchain_val">
-                    <img src="/img/STEEM.png" style="max-height: 50px;" v-on:click="bchain_val = 'STEEM'" >
+                    <img src="/img/STEEM.png" style="max-height: 50px;" v-on:click="bchain_val = 'STEEM'" alt="Select Steem blockchain" >
                     <label for="steem_bchain">{{ $t('STEEM') }}</label>
                   </div>
                   <div class="bchain-option p-1 m-1 btn" :class="adjustBlurtClass">
                     <input type="radio" id="blurt_bchain" value="BLURT" v-model="bchain_val">
-                    <img src="/img/BLURT.png" style="max-height: 50px;" v-on:click="bchain_val = 'BLURT'" >
+                    <img src="/img/BLURT.png" style="max-height: 50px;" v-on:click="bchain_val = 'BLURT'" alt="Select Blurt blockchain" >
                     <label for="blurt_bchain">{{ $t('BLURT') }}</label>
                   </div>
                 </span>

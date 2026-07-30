@@ -12,7 +12,7 @@
 			<!--<iframe v-if="screenWidth < 768" src="http://www.youtube.com/embed/kS6AXH1kY74" width="320" height="180" frameborder="0" class="mx-auto" allowfullscreen></iframe>
 			<iframe v-else src="https://www.youtube.com/embed/kS6AXH1kY74" width="640" height="360" frameborder="0" class="mx-auto" allowfullscreen></iframe>-->
 			<!--<iframe width="640" height="360" src="https://www.youtube.com/embed/kS6AXH1kY74"></iframe>-->
-			<img class="announce-img" src="/img/dhf_image_2.png" >
+			<img class="announce-img" src="/img/dhf_image_2.png" alt="Actifit growth and development proposal">
 		  </div>
 		  <div class="p-2">
 			  <!--<a href="https://actifit.io/@actifit/we-have-winners-public-token-sale-kicks-off-today-t-7-hours" class="btn btn-brand m-2" target="_blank" rel="noopener noreferrer">Event Details</a>

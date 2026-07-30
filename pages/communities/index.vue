@@ -6,7 +6,6 @@
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-5">
       <ListHeadingSection :textualDisplay="textualTitle" />
-      <h2 class="text-center mb-5"></h2>
 	  <!--<ChainSelection />-->
 
 
@@ -164,7 +163,7 @@
 	    ...mapGetters('steemconnect', ['stdLogin']),
       ...mapGetters(['communitiesList', 'bchain']),
       textualTitle(){
-        return this.$t('Hive_communities')+'<img src="/img/HIVE.png" class="mr-2 token-logo-md">';
+        return this.$t('Hive_communities')+'<img src="/img/HIVE.png" class="mr-2 token-logo-md" alt="">';
       }
 
 

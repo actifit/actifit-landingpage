@@ -4,8 +4,8 @@
     <div class="container pt-5 mt-5 pb-5">
       <a href="#a" data-toggle="modal" id="modenabler" name="modenabler" ref="modenabler"
         data-target="#notifyModal"></a>
-      <div class="text-center font-weight" v-if="user">
-        <ListHeadingSection :username="user.account.name" :textualDisplay="textualContent()"/>
+      <div class="text-center font-weight">
+        <ListHeadingSection :username="user ? user.account.name : ''" :textualDisplay="textualContent()"/>
       </div>
 
       <div class="vid-container" v-if="xcstkn != ''">
@@ -55,7 +55,7 @@
             <video ref="video" id="video" style="display:none">
             </video>
             <canvas ref="canvas" id="canvas" style="display: none" />
-            <img id="thumb" :src="thumbnail" class="max-img" />
+            <img id="thumb" :src="thumbnail" class="max-img" alt="Generated video thumbnail" />
             <div>
               <i class="fas fa-spin fa-spinner text-brand" v-if="processing"></i>
             </div>
@@ -67,7 +67,7 @@
         </div>
         <div class="card post p-4 m-4" :class="smallScreenCheck" v-if="userVidList.length > 0"
           v-for="(video, index) in userVidList" :key="index" :video="video">
-          <img :src="video.thumbUrl" class="max-img">
+          <img :src="video.thumbUrl" class="max-img" :alt="video.title || 'Video thumbnail'">
           <div class="vid-title">{{ video.title }}</div>
           <div>{{ video.duration.toFixed(2) }} sec | {{ (video.size / 1024 / 1024).toFixed(2) }} MB</div>
           <!--<div>{{video.permlink}}</div>-->
@@ -156,21 +156,21 @@
         <div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-if="cur_bchain == 'HIVE'">
           <input type="radio" id="hive" value="HIVE" v-model="target_bchain">
           <img src="/img/HIVE.png" style="max-height: 50px" v-on:click="target_bchain = 'HIVE'"
-            :class="adjustHiveClass">
+            :class="adjustHiveClass" alt="Select Hive blockchain">
           <label for="hive">HIVE ONLY</label>
         </div>
         <div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-else-if="cur_bchain == 'STEEM'">
           <input type="radio" id="steem" value="STEEM" v-model="target_bchain">
           <img src="/img/STEEM.png" style="max-height: 50px" v-on:click="target_bchain = 'STEEM'"
-            :class="adjustSteemClass">
+            :class="adjustSteemClass" alt="Select Steem blockchain">
           <label for="steem">STEEM ONLY</label>
         </div>
         <div class="bchain-option btn col-6 p-2 row text-left  mx-auto">
           <input type="radio" id="hive_steem" value="BOTH" v-model="target_bchain">
           <img src="/img/HIVE.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px"
-            :class="adjustBothClass">
+            :class="adjustBothClass" alt="Select multiple blockchains">
           <img src="/img/STEEM.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px"
-            :class="adjustBothClass">
+            :class="adjustBothClass" alt="Select multiple blockchains">
           <label for="hive_steem">HIVE + STEEM</label>
         </div>
       </div>
@@ -181,8 +181,8 @@
           <i class="fas fa-paper-plane" v-else></i>
           <span>{{ $t('Publish') }}</span>
           <!--<span v-if="editPost.isNewPost">{{ $t('Publish') }}</span><span v-else>{{ $t('Save') }}</span>-->
-          <img src="/img/HIVE.png" style="max-height: 25px" v-if="target_bchain == 'HIVE' || target_bchain == 'BOTH'">
-          <img src="/img/STEEM.png" style="max-height: 25px" v-if="target_bchain == 'STEEM' || target_bchain == 'BOTH'">
+          <img src="/img/HIVE.png" style="max-height: 25px" v-if="target_bchain == 'HIVE' || target_bchain == 'BOTH'" alt="">
+          <img src="/img/STEEM.png" style="max-height: 25px" v-if="target_bchain == 'STEEM' || target_bchain == 'BOTH'" alt="">
         </button>
       </div>
       <div class="modal-footer border-0 p-0">
@@ -424,7 +424,7 @@ export default {
 
     textualContent(){
       return this.editPost.isNewPost
-      ?this.$t('Create_new_vid')+'&nbsp<img src="/img/3speak.png" class="mr-2 token-logo-md">'
+      ?this.$t('Create_new_vid')+'&nbsp<img src="/img/3speak.png" class="mr-2 token-logo-md" alt="">'
       :this.$t('Editing') + '<a :href="'/'' + this.editPost.author + '/' + this.editPost.permlink + '">' + this.title + '</a>';
     },
     dispStatusWording(video) {

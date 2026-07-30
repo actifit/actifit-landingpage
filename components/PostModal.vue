@@ -94,12 +94,12 @@
             </span>
             <div>
               <!--<small :title="afitReward +' ' + $t('AFIT_Token')">
-					<img src="/img/actifit_logo.png" class="mr-1 currency-logo-small">{{ afitReward }} {{ $t('AFIT_Token') }}
+					<img src="/img/actifit_logo.png" class="mr-1 currency-logo-small" alt="">{{ afitReward }} {{ $t('AFIT_Token') }}
 				</small>-->
               <span :title="postPayout" class="p-0 m-0">
-                <img src="/img/STEEM.png" class="currency-logo-small" v-if="cur_bchain == 'STEEM'">
-                <img src="/img/HIVE.png" class="currency-logo-small" v-else-if="cur_bchain == 'HIVE'">
-                <img src="/img/BLURT.png" class="currency-logo-small" v-else-if="cur_bchain == 'BLURT'">
+                <img src="/img/STEEM.png" class="currency-logo-small" v-if="cur_bchain == 'STEEM'" alt="">
+                <img src="/img/HIVE.png" class="currency-logo-small" v-else-if="cur_bchain == 'HIVE'" alt="">
+                <img src="/img/BLURT.png" class="currency-logo-small" v-else-if="cur_bchain == 'BLURT'" alt="">
                 <!--{{ postPayout }}-->
               </span>
 
@@ -212,30 +212,30 @@
               <div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-if="cur_bchain == 'HIVE'">
                 <input type="radio" id="hive" value="HIVE" v-model="target_bchain">
                 <img src="/img/HIVE.png" style="max-height: 50px" v-on:click="target_bchain = 'HIVE'"
-                  :class="adjustHiveClass">
+                  :class="adjustHiveClass" alt="Select Hive blockchain">
                 <label for="hive">HIVE ONLY</label>
               </div>
               <div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-else-if="cur_bchain == 'STEEM'">
                 <input type="radio" id="steem" value="STEEM" v-model="target_bchain">
                 <img src="/img/STEEM.png" style="max-height: 50px" v-on:click="target_bchain = 'STEEM'"
-                  :class="adjustSteemClass">
+                  :class="adjustSteemClass" alt="Select Steem blockchain">
                 <label for="steem">STEEM ONLY</label>
               </div>
               <div class="bchain-option btn col-6 p-2 row text-left  mx-auto">
                 <input type="radio" id="hive_steem" value="BOTH" v-model="target_bchain">
                 <img src="/img/HIVE.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px"
-                  :class="adjustBothClass">
+                  :class="adjustBothClass" alt="Select multiple blockchains">
                 <img src="/img/STEEM.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px"
-                  :class="adjustBothClass">
+                  :class="adjustBothClass" alt="Select multiple blockchains">
                 <label for="hive_steem">HIVE + STEEM</label>
               </div>
             </div>
             <a href="#" @click.prevent="postResponse($event)" class="btn btn-brand border reply-btn w-25">
               {{ $t('Post') }}
               <img src="/img/HIVE.png" style="max-height: 25px"
-                v-if="target_bchain == 'HIVE' || target_bchain == 'BOTH'">
+                v-if="target_bchain == 'HIVE' || target_bchain == 'BOTH'" alt="">
               <img src="/img/STEEM.png" style="max-height: 25px"
-                v-if="target_bchain == 'STEEM' || target_bchain == 'BOTH'">
+                v-if="target_bchain == 'STEEM' || target_bchain == 'BOTH'" alt="">
               <i class="fas fa-spin fa-spinner" v-if="loading"></i>
             </a>
             <a href="#" @click.prevent="resetOpenComment()" class="btn btn-brand border reply-btn w-25">{{ $t('Cancel')

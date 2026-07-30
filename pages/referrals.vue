@@ -127,6 +127,7 @@
 	<div :class="smallScreenClasses" class="container mt-5 pb-5 pt-5" v-else>
       <!-- account balance -->
       <div class="text-center p-5">
+		<ListHeadingSection :textualDisplay="$t('Referrals')" />
 		<div class="row pb-3">
 		  <div class="text-center text-brand w-100 lead">
 		    {{ $t('login_required_referrals') }}

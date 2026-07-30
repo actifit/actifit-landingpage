@@ -4,8 +4,8 @@
 
 	<div class="container pt-5 mt-5 pb-5" v-if="user">
 
-		<h4 class="text-brand user-name">@{{ `${displayUser}\'s`}} {{ $t('Friendships') }}</h4>
-		<h5>{{ $t('Active_Friendships') }}</h5>
+		<h1 class="text-brand user-name h4">@{{ `${displayUser}\'s`}} {{ $t('Friendships') }}</h1>
+		<h2 class="h5">{{ $t('Active_Friendships') }}</h2>
 		<div class="row pb-3">
 			<div v-if="userFriends && Array.isArray(userFriends) && userFriends.length>0" v-for="(curFriend, index) in userFriends" :key="index" class="col-md-3">
 				<a :href="'/'+curFriend.friend"><div class="avatar mr-1" :style="'background-image: url(\''+profImgUrl+'/u/' + curFriend.friend + '/avatar\')'"></div>
@@ -16,7 +16,7 @@
 			</div>
 		</div>
 
-		<h5 v-if="isOwnAccount">{{ $t('Pending_Friendships') }}</h5>
+		<h2 class="h5" v-if="isOwnAccount">{{ $t('Pending_Friendships') }}</h2>
 		<div v-if="isOwnAccount" class="row pb-3">
 			<div v-if="friendRequests && Array.isArray(friendRequests.sent_pending) && friendRequests.sent_pending.length>0" v-for="pendFriend in friendRequests.sent_pending" :key="pendFriend.target" class="col-md-3  text-brand">
 				<a :href="'/'+pendFriend.target"><div class="avatar mr-1" :style="'background-image: url(\''+profImgUrl+'/u/' + pendFriend.target + '/avatar\')'"></div>

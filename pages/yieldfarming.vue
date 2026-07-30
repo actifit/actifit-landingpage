@@ -11,20 +11,20 @@
 
 		  <div class="text-left">
 			<span v-if="afitPrice">
-				<img class="token-logo-sm " src="/img/actifit_logo.png">&nbsp;{{ $t('AFIT_Token')}} {{ $t('price')}}: $ {{ numberFormat(afitPrice.afitHiveLastUsdPrice, 5) }} |
+				<img class="token-logo-sm " src="/img/actifit_logo.png" alt="">&nbsp;{{ $t('AFIT_Token')}} {{ $t('price')}}: $ {{ numberFormat(afitPrice.afitHiveLastUsdPrice, 5) }} |
 			</span>
 			<span v-if="hivePrice">
-				<img src="/img/HIVE.png" style="max-height: 20px;">&nbsp;{{ $t('HIVE')}} {{ $t('price')}}: $ {{ hivePrice }}
+				<img src="/img/HIVE.png" style="max-height: 20px;" alt="">&nbsp;{{ $t('HIVE')}} {{ $t('price')}}: $ {{ hivePrice }}
 			</span>
 		  </div>
 		  <div class="row-sep">
 			<div class="col-md-12 row-sep-in small-pad-row yf-main-notif p-2 text-left shadowed-view">
 				<span v-if="topDelegators.hive">
-					<h4 class="text-center">{{ $t('Daily_pool') }} - {{$t('Hive_delegators')}} <img src="/img/HIVE.png" style="max-height: 20px;"> </h4>
+					<h4 class="text-center">{{ $t('Daily_pool') }} - {{$t('Hive_delegators')}} <img src="/img/HIVE.png" style="max-height: 20px;" alt=""> </h4>
 
 					<h5>
 						{{ $t('daily_amount') }}: {{ dailyHivePool }} {{ $t('AFIT_Token') }}
-						<img class="token-logo-sm " src="/img/actifit_logo.png">
+						<img class="token-logo-sm " src="/img/actifit_logo.png" alt="">
 					</h5>
 
 					<h5>{{$t('total_delegations')}}: {{numberFormat(topDelegators.hive.length,0)}}</h5>
@@ -41,11 +41,11 @@
 			</div>
 			<!--<div class="col-md-6 row-sep-in small-pad-row p-2 text-left">
 				<span v-if="topDelegators.steem">
-					<h4 class="text-center">{{ $t('Daily_pool') }} - {{$t('Steem_delegators')}} <img src="/img/STEEM.png" style="max-height: 20px;"> </h4>
+					<h4 class="text-center">{{ $t('Daily_pool') }} - {{$t('Steem_delegators')}} <img src="/img/STEEM.png" style="max-height: 20px;" alt=""> </h4>
 
 					<h5>
 						{{ $t('daily_amount') }}: {{ dailySteemPool }} {{ $t('AFIT_Token') }}
-						<img class="token-logo-sm " src="/img/actifit_logo.png">
+						<img class="token-logo-sm " src="/img/actifit_logo.png" alt="">
 					</h5>
 					<h5>{{$t('total_delegations')}}: {{numberFormat(topDelegators.steem.length,0)}}</h5>
 					<h5>{{$t('total_amount_locked')}}: {{numberFormat(delegatedSteemAmount,0)}} {{$t('STEEM')}} ( $ {{numberFormat(delegatedSteemAmount * steemPrice,2)}} )</h5>
@@ -85,7 +85,7 @@
 			</span>
 			<!-- amount delegated -->
 			<span class="col-3 p-1">
-				<img :src="'/img/'+trx.chain+'.png'" style="max-height: 20px;">
+				<img :src="'/img/'+trx.chain+'.png'" style="max-height: 20px;" alt="">
 				<span v-if="trx.chain == 'HIVE' && topDelegators.hive && topDelegators.hive.length" class="p-1">{{ getDelegatedAmount(trx, 'hive', true) }} {{ $t('Hive_Power') }}
 					<span v-if="randomAfitTrxHive == ''">{{setHiveTrx(trx, getDelegatedAmount(trx, 'hive', false))}}</span>
 				</span>
@@ -93,7 +93,7 @@
 					<span v-if="randomAfitTrxSteem == ''">{{setSteemTrx(trx, getDelegatedAmount(trx, 'steem', false))}}</span>
 				</span>
 			</span>
-			<span class="col-3 p-1"><img class="token-logo-sm " src="/img/actifit_logo.png"> {{ getRewardedAmount(trx) }} {{ $t('AFIT_Token') }}  {{ $t('per_day') }}</span>
+			<span class="col-3 p-1"><img class="token-logo-sm " src="/img/actifit_logo.png" alt=""> {{ getRewardedAmount(trx) }} {{ $t('AFIT_Token') }}  {{ $t('per_day') }}</span>
 		  </div>
 	  </div>
 	  <div class="row text-center" v-else>

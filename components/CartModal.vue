@@ -20,8 +20,8 @@
 		  </div>
 			
 			<div v-if="!purchaseSuccess">
-				<a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNow()" style="float:left; border: 1px white solid;">{{ $t('Buy_now') }} <br/> {{numberFormat(this.product_price_afit, 2)}} {{this.item_currency}}<img class="token-logo-sm " src="/img/actifit_logo.png"></a>
-				<a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNowHive()" style="border: 1px white solid;">{{ $t('Buy_now') }} <br/> {{numberFormat(this.product_price_afit * this.afitPrice.afitHiveLastPrice, 3)}} {{this.hive_currency}}<img class="token-logo-sm " src="/img/HIVE.png"></a>
+				<a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNow()" style="float:left; border: 1px white solid;">{{ $t('Buy_now') }} <br/> {{numberFormat(this.product_price_afit, 2)}} {{this.item_currency}}<img class="token-logo-sm " src="/img/actifit_logo.png" alt=""></a>
+				<a class="btn btn-success btn-lg w-50 book-button" @click.prevent="buyNowHive()" style="border: 1px white solid;">{{ $t('Buy_now') }} <br/> {{numberFormat(this.product_price_afit * this.afitPrice.afitHiveLastPrice, 3)}} {{this.hive_currency}}<img class="token-logo-sm " src="/img/HIVE.png" alt=""></a>
 			  
 				<div class="row m-0" v-if="buyHiveExpand && !isKeychainActive && !isHiveauthActive" >
 				  <label for="active-key" class="p-2 col-sm-3">{{ $t('Active_Key') }} *</label>

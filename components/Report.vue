@@ -77,8 +77,8 @@
         <!-- Unique Payout/Charity/Moderator sections (remain here) -->
         <div class="row details mt-2">
           <div class="col-6 payoutCustomDisplay">
-            <img src="/img/STEEM.png" class="mr-1 currency-logo-small" v-if="cur_bchain == 'STEEM'">
-            <img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain == 'HIVE'">
+            <img src="/img/STEEM.png" class="mr-1 currency-logo-small" v-if="cur_bchain == 'STEEM'" alt="">
+            <img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain == 'HIVE'" alt="">
             <span v-if="postPaid()">
               <span class="m-1" :title="$t('author_payout')"><i class="fa-solid fa-user"></i> {{ paidValue() }}</span>
               <span class="m-1" :title="$t('voters_payout')"><i class="fa-solid fa-users"></i> {{ report.curator_payout_value }}</span>
@@ -94,7 +94,7 @@
             </span>
           </div>
           <div class="col-6 text-right">
-            <img src="/img/actifit_logo.png" class="mr-1 currency-logo-small" :title="$t('afit_payout')">{{ afitReward }} {{ $t('AFIT_Token') }}
+            <img src="/img/actifit_logo.png" class="mr-1 currency-logo-small" :title="$t('afit_payout')" alt="">{{ afitReward }} {{ $t('AFIT_Token') }}
           </div>
         </div>
         <div class="row details mt-2 text-brand full-afit-txt" v-if="this.meta.full_afit_pay == 'on'">
@@ -117,8 +117,8 @@
             <div class="mt-2">App: {{ appVersion }}</div>
           </div>
           <div class="col-6" style="text-align: right">
-            <span v-if="trackingDevice == 'Fitbit Tracking'"><img src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Fitbit_logo.svg" width="60px"><div class="mt-2">{{ trackingDevice }}</div></span>
-            <span v-else-if="trackingDevice == 'healthapp'"><img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Health_icon_iOS_12.png" width="60px"><div class="mt-2">{{ $t('healthapp') }}</div></span>
+            <span v-if="trackingDevice == 'Fitbit Tracking'"><img src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Fitbit_logo.svg" width="60px" alt=""><div class="mt-2">{{ trackingDevice }}</div></span>
+            <span v-else-if="trackingDevice == 'healthapp'"><img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Health_icon_iOS_12.png" width="60px" alt=""><div class="mt-2">{{ $t('healthapp') }}</div></span>
             <div v-else>{{ trackingDevice }}</div>
           </div>
           <div class="col-12 text-brand mt-2">UserID: {{ actUserID }}</div>

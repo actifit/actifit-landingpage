@@ -4,20 +4,20 @@
 	
 	<div class="container pt-5 mt-5 pb-5" v-if="user">
 	
-		<h4 class="text-brand user-name">{{$t('Actifit')}} {{ $t('Settings') }}</h4>
+		<h1 class="text-brand user-name h4">{{$t('Actifit')}} {{ $t('Settings') }}</h1>
 		<h5 class="p-3 acti-headr">{{ $t('Posting_settings') }}</h5>
 		<div class=" pb-3">
 			{{ $t('Actifit_post_target') }}
 			  <!--<div class="bchain-option btn col-12 m-2 p-2 row text-left">
 				<input type="radio" id="hive_steem" value="BOTH" v-model="target_bchain">
-				<img src="/img/HIVE.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px;"  :class="adjustBothClass">
-				<img src="/img/STEEM.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px;"  :class="adjustBothClass">
-				<img src="/img/BLURT.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px;"  :class="adjustBothClass">
+				<img src="/img/HIVE.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px;"  :class="adjustBothClass" alt="Select multiple blockchains">
+				<img src="/img/STEEM.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px;"  :class="adjustBothClass" alt="Select multiple blockchains">
+				<img src="/img/BLURT.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px;"  :class="adjustBothClass" alt="Select multiple blockchains">
 				<label for="hive_steem">HIVE + STEEM + BLURT</label>
 			  </div>
 			  <div class="bchain-option btn col-12 m-2 p-2 row text-left">
 				<input type="radio" id="hive" value="HIVE" v-model="target_bchain">
-				<img src="/img/HIVE.png" style="max-height: 50px;"  v-on:click="target_bchain = 'HIVE'" :class="adjustHiveClass">
+				<img src="/img/HIVE.png" style="max-height: 50px;"  v-on:click="target_bchain = 'HIVE'" :class="adjustHiveClass" alt="Select Hive blockchain">
 				<label for="hive">HIVE ONLY</label>
 			  </div>-->
 			  <div class="bchain-option btn col-12 m-2 p-2 row text-left">
@@ -55,7 +55,7 @@
 			  <div style="display:none">
 				<span><i class="fas fa-check text-success m-lg-3" v-if="this.posting_auth['steem']==true"></i>
 				<i class="fas fa-times text-danger m-lg-3" v-else></i>
-				<span class="font-weight-bold">{{$t('steem_posting_auth')}}</span><img src="/img/STEEM.png" style="max-height: 50px;"/></span>
+				<span class="font-weight-bold">{{$t('steem_posting_auth')}}</span><img src="/img/STEEM.png" style="max-height: 50px;" alt=""/></span>
 				<div>
 					<label for="steemActiveKey">{{$t('steem_active_key')}}</label>
 					<input class="form-control form-control-lg mb-2 col-7" type="text" ref="steemActiveKey" id="steemActiveKey">
@@ -66,7 +66,7 @@
 			  <div>
 				<span><i class="fas fa-check text-success m-lg-3" v-if="this.posting_auth['blurt']"></i>
 				<i class="fas fa-times text-danger m-lg-3" v-else></i>
-				<span class="font-weight-bold">{{$t('blurt_posting_auth')}}</span><img src="/img/BLURT.png" style="max-height: 50px;"/></span>
+				<span class="font-weight-bold">{{$t('blurt_posting_auth')}}</span><img src="/img/BLURT.png" style="max-height: 50px;" alt=""/></span>
 				<div>
 					<label for="blurtActiveKey">{{$t('blurt_active_key')}}</label>
 					<input class="form-control form-control-lg mb-2 col-7" type="text" ref="blurtActiveKey" id="blurtActiveKey">

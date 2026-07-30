@@ -4,14 +4,14 @@
 	
 	<div class="container pt-5 mt-5 pb-5">
 		
-		<h5 class="p-3 acti-headr">{{ $t('Password_management') }}</h5>
+		<h1 class="p-3 acti-headr h5">{{ $t('Password_management') }}</h1>
 		<div class=" pb-3">
 			<div class="row" v-if="!user">
 				<label for="username" class="font-weight-bold col-3">{{ $t('Your_Username') }}</label>
 				<input class="form-control form-control-lg mb-2 col-7" type="text" ref="username" id="username">
 			</div>
 			<div class="row">
-				<label for="passfetchdata" class="font-weight-bold col-3">{{ $t('Your_pass') }} {{ cur_bchain}} <img :src="'/img/'+cur_bchain+'.png'" style="max-height: 50px;"></label>
+				<label for="passfetchdata" class="font-weight-bold col-3">{{ $t('Your_pass') }} {{ cur_bchain}} <img :src="'/img/'+cur_bchain+'.png'" style="max-height: 50px;" alt=""></label>
 				<input type="password" class="form-control form-control-lg mb-2 col-7" ref="passfetchdata" id="passfetchdata" />
 			</div>
 			<vue-recaptcha ref="recaptcha" @verify="onVerifyCaptcha" @render="captchaReady=true" @expired="onExpiredCaptcha" :loadRecaptchaScript="true" sitekey="6LdpcoMUAAAAAPGTqlvhKEK6Ayw5NqLDZz5Sjudq" v-if="!user">
@@ -86,24 +86,24 @@
 					<div class="font-weight-bold pb-3 col-3">{{ $t('Apply_pass_change_to') }}</div>
 					<div class="bchain-option btn ml-2 p-2 row text-left">
 						<input type="radio" id="hive_steem" value="BOTH" v-model="target_bchain">
-						<img src="/img/HIVE.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px;" :class="adjustBothClass">
-						<img src="/img/STEEM.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px;" :class="adjustBothClass">
-						<img src="/img/BLURT.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px;" :class="adjustBothClass">
+						<img src="/img/HIVE.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px;" :class="adjustBothClass" alt="Select multiple blockchains">
+						<img src="/img/STEEM.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px;" :class="adjustBothClass" alt="Select multiple blockchains">
+						<img src="/img/BLURT.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px;" :class="adjustBothClass" alt="Select multiple blockchains">
 						<label for="hive_steem">HIVE + STEEM + BLURT</label>
 					</div>
 					<div class="bchain-option btn ml-2 p-2 row text-left" v-if="cur_bchain=='HIVE'">
 						<input type="radio" id="hive" value="HIVE" v-model="target_bchain">
-						<img src="/img/HIVE.png" style="max-height: 50px;"  v-on:click="target_bchain = 'HIVE'" :class="adjustHiveClass">
+						<img src="/img/HIVE.png" style="max-height: 50px;"  v-on:click="target_bchain = 'HIVE'" :class="adjustHiveClass" alt="Select Hive blockchain">
 						<label for="hive">HIVE ONLY</label>
 					</div>
 					<div class="bchain-option btn ml-2 p-2 row text-left" v-else-if="cur_bchain=='STEEM'">
 						<input type="radio" id="steem" value="STEEM" v-model="target_bchain">
-						<img src="/img/STEEM.png" style="max-height: 50px;"  v-on:click="target_bchain = 'STEEM'" :class="adjustSteemClass">
+						<img src="/img/STEEM.png" style="max-height: 50px;"  v-on:click="target_bchain = 'STEEM'" :class="adjustSteemClass" alt="Select Steem blockchain">
 						<label for="steem">STEEM ONLY</label>
 					</div>
 				</div>
 				<div class="row">
-					<label for="passchangedata" class="font-weight-bold col-3">{{ $t('Your_current_pass') }} {{ cur_bchain}} <img :src="'/img/'+cur_bchain+'.png'" style="max-height: 50px;"></label>
+					<label for="passchangedata" class="font-weight-bold col-3">{{ $t('Your_current_pass') }} {{ cur_bchain}} <img :src="'/img/'+cur_bchain+'.png'" style="max-height: 50px;" alt=""></label>
 					<input class="form-control form-control-lg mb-2 col-7" ref="passchangedata" id="passchangedata" />
 					<button v-on:click="verifyPassByChain($refs['passchangedata'].value, cur_bchain, 1)" data-targetEl="newAcctPwdField" class="btn btn-brand btn-lg w-20 mb-2 ml-1">{{ $t('Verify') }}</button>
 					<div><i class="fas fa-spin fa-spinner text-brand m-lg-3" v-if="validatingA"></i>
@@ -113,7 +113,7 @@
 				</div>
 				
 				<div class="row" v-if="target_bchain == 'BOTH'">
-					<label for="passchangedataother" class="font-weight-bold col-3">{{ $t('Your_current_pass') }} {{ (cur_bchain=='HIVE'?'STEEM':'HIVE')}} <img :src="'/img/'+(cur_bchain=='HIVE'?'STEEM':'HIVE')+'.png'" style="max-height: 50px;"></label>
+					<label for="passchangedataother" class="font-weight-bold col-3">{{ $t('Your_current_pass') }} {{ (cur_bchain=='HIVE'?'STEEM':'HIVE')}} <img :src="'/img/'+(cur_bchain=='HIVE'?'STEEM':'HIVE')+'.png'" style="max-height: 50px;" alt=""></label>
 					<input class="form-control form-control-lg mb-2 col-7" ref="passchangedataother" id="passchangedataother" />
 					<button v-on:click="verifyPassByChain($refs['passchangedataother'].value, (cur_bchain=='HIVE'?'STEEM':'HIVE'), 2)" data-targetEl="newAcctPwdField" class="btn btn-brand btn-lg w-20 mb-2 ml-1">{{ $t('Verify') }}</button>
 					<div><i class="fas fa-spin fa-spinner text-brand m-lg-3" v-if="validatingB"></i>
@@ -123,7 +123,7 @@
 				</div>
 				
 				<div class="row" v-if="target_bchain == 'BOTH'">
-					<label for="passchangedataother2" class="font-weight-bold col-3">{{ $t('Your_current_pass') }} BLURT <img :src="'/img/BLURT.png'" style="max-height: 50px;"></label>
+					<label for="passchangedataother2" class="font-weight-bold col-3">{{ $t('Your_current_pass') }} BLURT <img :src="'/img/BLURT.png'" style="max-height: 50px;" alt=""></label>
 					<input class="form-control form-control-lg mb-2 col-7" ref="passchangedataother2" id="passchangedataother2" />
 					<button v-on:click="verifyPassByChain($refs['passchangedataother2'].value, 'BLURT', 3)" data-targetEl="newAcctPwdField" class="btn btn-brand btn-lg w-20 mb-2 ml-1">{{ $t('Verify') }}</button>
 					<div><i class="fas fa-spin fa-spinner text-brand m-lg-3" v-if="validatingC"></i>
