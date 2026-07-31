@@ -101,12 +101,12 @@
                       <img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain == 'HIVE'" alt="">
                       <img src="/img/BLURT.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain == 'BLURT'" alt="">
                       <span v-if="postPaid()">
-                        <span class="m-1" :class="{ 'declined-payout': parseFloat(report.max_accepted_payout) === 0 }" :title="$t('author_payout')"><i class="fa-solid fa-user"></i> {{ paidValue() }}</span>
-                        <span class="m-1" :class="{ 'declined-payout': parseFloat(report.max_accepted_payout) === 0 }" :title="$t('voters_payout')"><i class="fa-solid fa-users"></i> {{ report.curator_payout_value }}</span>
+                        <span class="m-1" :class="{ 'declined-payout': isDeclined }" :title="$t('author_payout')"><i class="fa-solid fa-user"></i> {{ paidValue() }}</span>
+                        <span class="m-1" :class="{ 'declined-payout': isDeclined }" :title="$t('voters_payout')"><i class="fa-solid fa-users"></i> {{ report.curator_payout_value }}</span>
                         <i class="fa-solid fa-check text-green text-bold"></i>
                       </span>
                       <span v-else>
-                        <span class="text-bold" :class="{ 'declined-payout': parseFloat(report.max_accepted_payout) === 0 }">{{ report.pending_payout_value.replace('SBD', '') }}</span>
+                        <span class="text-bold" :class="{ 'declined-payout': isDeclined }">{{ report.pending_payout_value.replace('SBD', '') }}</span>
                         <i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
                       </span>
                       <span v-if="hasBeneficiaries()" :title="beneficiariesDisplay()">
@@ -242,11 +242,13 @@ import SafeRemarkable from '~/components/SafeRemarkable.vue'
 import UserSidebar from '~/components/UserSidebar.vue'
 import EditPostModal from '~/components/EditPostModal'
 import DOMPurify from 'dompurify'
+import { declinedPayoutMixin } from '~/plugins/commonCardMixin.js'
 
 const scot_steemengine_api = process.env.steemEngineScot;
 const scot_hive_api_param = process.env.hiveEngineScotParam;
 
 export default {
+  mixins: [declinedPayoutMixin],
   components: {
     NavbarBrand, ChainSelection, Footer, VoteModal, NotifyModal, UserHoverCard,
     CustomTextEditor, Comments, SocialSharing, SafeRemarkable, UserSidebar, EditPostModal
@@ -366,6 +368,7 @@ export default {
     }
   },
   computed: {
+    cardData() { return this.report },
     ...mapGetters('steemconnect', ['user', 'stdLogin']),
     ...mapGetters(['commentEntries', 'newlyVotedPosts', 'bchain', 'moderators', 'commentCountToday']),
 

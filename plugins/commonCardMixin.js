@@ -1,7 +1,16 @@
 import steem from 'steem'
 import hive from '@hiveio/hive-js'
 
+export const declinedPayoutMixin = {
+  computed: {
+    isDeclined () {
+      return parseFloat(this.cardData && this.cardData.max_accepted_payout) === 0
+    }
+  }
+}
+
 export const commonCardMixin = {
+  mixins: [declinedPayoutMixin],
   data () {
     return {
       afitReward: '',
