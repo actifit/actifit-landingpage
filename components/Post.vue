@@ -76,12 +76,12 @@
             <img src="/img/STEEM.png" class="mr-1 currency-logo-small" v-if="cur_bchain == 'STEEM'" alt="">
             <img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain == 'HIVE'" alt="">
             <span v-if="postPaid()">
-              <span class="m-1" :class="{ 'declined-payout': parseFloat(post.max_accepted_payout) === 0 }" :title="$t('author_payout')"><i class="fa-solid fa-user"></i> {{ paidValue() }}</span>
-              <span class="m-1" :class="{ 'declined-payout': parseFloat(post.max_accepted_payout) === 0 }" :title="$t('voters_payout')"><i class="fa-solid fa-users"></i> {{ post.curator_payout_value }}</span>
+              <span class="m-1" :class="{ 'declined-payout': isDeclined }" :title="$t('author_payout')"><i class="fa-solid fa-user"></i> {{ paidValue() }}</span>
+              <span class="m-1" :class="{ 'declined-payout': isDeclined }" :title="$t('voters_payout')"><i class="fa-solid fa-users"></i> {{ post.curator_payout_value }}</span>
               <i class="fa-solid fa-check text-green text-bold"></i>
             </span>
             <span v-else>
-              <span class="text-brand text-bold" :class="{ 'declined-payout': parseFloat(post.max_accepted_payout) === 0 }">{{ post.pending_payout_value.replace('SBD', '') }}</span>
+              <span class="text-brand text-bold" :class="{ 'declined-payout': isDeclined }">{{ post.pending_payout_value.replace('SBD', '') }}</span>
               <i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
             </span>
             <span v-if="hasBeneficiaries()" :title="beneficiariesDisplay()" @click="toggleTooltip()" @mouseenter="showTooltip()" @mouseleave="hideTooltip()" @touchstart="showTooltip()" @touchend="hideTooltip()">

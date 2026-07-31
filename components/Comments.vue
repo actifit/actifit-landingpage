@@ -122,17 +122,17 @@
 
           <div class="cmt-footer__payout">
             <span v-if="postPaid()" class="cmt-payout">
-              <span class="cmt-payout__item" :class="{ 'declined-payout': parseFloat(full_data.max_accepted_payout) === 0 }" :title="$t('author_payout')">
+              <span class="cmt-payout__item" :class="{ 'declined-payout': isDeclined }" :title="$t('author_payout')">
                 <i class="fa-solid fa-user"></i> {{ paidValue() }}
               </span>
-              <span class="cmt-payout__item" :class="{ 'declined-payout': parseFloat(full_data.max_accepted_payout) === 0 }" :title="$t('voters_payout')">
+              <span class="cmt-payout__item" :class="{ 'declined-payout': isDeclined }" :title="$t('voters_payout')">
                 <i class="fa-solid fa-users"></i> {{ full_data.curator_payout_value }}
               </span>
               <i class="fa-solid fa-check cmt-payout__paid"></i>
             </span>
             <span v-else class="cmt-payout">
               <span class="cmt-payout__pending"
-                :class="{ 'cmt-payout__pending--zero': parseFloat(full_data.pending_payout_value) <= 0, 'declined-payout': parseFloat(full_data.max_accepted_payout) === 0 }">
+                :class="{ 'cmt-payout__pending--zero': parseFloat(full_data.pending_payout_value) <= 0, 'declined-payout': isDeclined }">
                 {{ full_data.pending_payout_value.replace('SBD', '') }}
               </span>
               <i class="fa-solid fa-hourglass-half cmt-payout__wait" :title="$t('hive_payouts_wait')"></i>
@@ -238,8 +238,10 @@ import { mapGetters } from 'vuex'
 import DOMPurify from 'dompurify'
 import CustomTextEditor from '~/components/CustomTextEditor'
 import Lodash from 'lodash'
+import { declinedPayoutMixin } from '~/plugins/commonCardMixin.js'
 
 export default {
+  mixins: [declinedPayoutMixin],
   props: ['author', 'reply_entries', 'depth', 'body', 'full_data', 'main_post_author', 'main_post_permlink', 'main_post_cat', 'translationCache'],
   name: 'Comments',
   data() {
@@ -290,6 +292,7 @@ export default {
     UserHoverCard
   },
   computed: {
+    cardData() { return this.full_data },
     ...mapGetters('steemconnect', ['user']),
     ...mapGetters('steemconnect', ['stdLogin']),
     ...mapGetters(['moderators']),
