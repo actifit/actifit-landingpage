@@ -19,7 +19,7 @@
 			<p class="text-brand" v-if="!user && captcha_invalid">
 				  <b>{{ captcha_invalid }}</b>
 				</p>
-			<button v-on:click="fetchKeys" class="btn btn-brand btn-lg">{{ $t('Fetch_keys') }}<i class="fas fa-spin fa-spinner text-white" v-if="fetchingPass"></i></button>
+			<button v-on:click="fetchKeys" class="btn btn-brand btn-lg" :disabled="fetchingPass">{{ $t('Fetch_keys') }}<i class="fas fa-spin fa-spinner text-white" v-if="fetchingPass"></i></button>
 			<div class="text-brand" v-if="errorFetch">{{ errorFetch }}</div>
 			<div class="form-group">
 			  <div class="font-italic mb-2">{{ $t('Posting_key_desc') }}</div>
@@ -202,6 +202,8 @@
   import VueRecaptcha from 'vue-recaptcha';
   
   import QRious from 'qrious';
+
+  const ACCOUNT_LOOKUP_TIMEOUT_MS = 10000;
   
   export default {
 	head () {
@@ -427,6 +429,65 @@
 		this.assignQRCode(this.$refs['ownkey-qr'], privateKeys.owner);
 		this.assignQRCode(this.$refs['memokey-qr'], privateKeys.memo);
 	  },
+	  getAccountApiNode() {
+		const curBchain = localStorage.getItem('cur_bchain') || 'HIVE';
+		if (curBchain == 'STEEM') {
+		  return process.env.steemApiNode;
+		}
+		if (curBchain == 'BLURT') {
+		  return process.env.blurtApiNode;
+		}
+		return process.env.hiveApiNode;
+	  },
+	  cancelAccountLookup() {
+		if (this._accountLookupController) {
+		  this._accountLookupController.abort();
+		  this._accountLookupController = null;
+		}
+	  },
+	  async getAccountsWithTimeout(username) {
+		this.cancelAccountLookup();
+		const controller = new AbortController();
+		this._accountLookupController = controller;
+		let timedOut = false;
+		const timeoutId = setTimeout(() => {
+		  timedOut = true;
+		  controller.abort();
+		}, ACCOUNT_LOOKUP_TIMEOUT_MS);
+		try {
+		  const response = await fetch(this.getAccountApiNode(), {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+			  jsonrpc: '2.0',
+			  method: 'condenser_api.get_accounts',
+			  params: [[username]],
+			  id: 1
+			}),
+			signal: controller.signal
+		  });
+		  if (!response.ok) {
+			throw new Error(`Account lookup failed with status ${response.status}`);
+		  }
+		  const result = await response.json();
+		  if (result.error) {
+			throw new Error(result.error.message || 'Account lookup failed');
+		  }
+		  return Array.isArray(result.result) ? result.result : [];
+		} catch (error) {
+		  if (error.name === 'AbortError') {
+			const abortError = new Error(timedOut ? 'Account lookup timed out' : 'Account lookup cancelled');
+			abortError.code = timedOut ? 'ACCOUNT_LOOKUP_TIMEOUT' : 'ACCOUNT_LOOKUP_CANCELLED';
+			throw abortError;
+		  }
+		  throw error;
+		} finally {
+		  clearTimeout(timeoutId);
+		  if (this._accountLookupController === controller) {
+			this._accountLookupController = null;
+		  }
+		}
+	  },
 	  async fetchKeys () {
 		this.captcha_invalid = '';
 		if (!this.user && !this.captchaValid){
@@ -436,68 +497,79 @@
 		//ensure we have proper password to fetch keys
 		this.fetchingPass = true;
 		this.errorFetch = '';
-		let chainLnk = await this.setProperNode();
-		if (this.user){
-			let auths = {
-				posting: this.user.account.posting.key_auths,
-				active: this.user.account.active.key_auths,
-				owner: this.user.account.owner.key_auths,
+		this.resetKeys();
+
+		try {
+		  const chainLnk = this.setProperNode();
+		  const password = this.$refs['passfetchdata'].value;
+
+		  if (this.user){
+			const auths = {
+			  posting: this.user.account.posting.key_auths,
+			  active: this.user.account.active.key_auths,
+			  owner: this.user.account.owner.key_auths,
 			};
-			if (this.$refs["passfetchdata"].value == '' || ! await this.verifyPass(this.$refs["passfetchdata"].value, auths)){
+			if (password == '' || !await this.verifyPass(password, auths)){
 			  this.errorFetch = this.$t('Error_provide_password');
-			  this.fetchingPass = false;
-			  this.resetKeys();
 			  return;
 			}
-			
-			let privateKeys = await chainLnk.auth.getPrivateKeys(this.user.account.name, this.$refs["passfetchdata"].value);
-			//console.log(privateKeys);
+
+			const privateKeys = await chainLnk.auth.getPrivateKeys(this.user.account.name, password);
 			this.privatePostKey = privateKeys.posting;
 			this.privateActKey = privateKeys.active;
 			this.privateOwnKey = privateKeys.owner;
 			this.privateMemoKey = privateKeys.memo;
-			
-			//also generate proper QR codes
 			this.genQRCodes(privateKeys);
-		}else{
-			if (this.$refs["username"].value == ''){// || ! await this.verifyPass(this.$refs["passfetchdata"].value, auths)
-			  this.errorFetch = this.$t('Error_provide_password');
-			  this.fetchingPass = false;
-			  this.resetKeys();
-			  return;
-			}
-			//grab account info
-			let acctInfo = await chainLnk.api.getAccountsAsync([this.$refs["username"].value]);
-			//console.log(acctInfo[0]);
-			if (Array.isArray(acctInfo) && acctInfo.length > 0){
-				let auths = {
-					posting: acctInfo[0].posting.key_auths,
-					active: acctInfo[0].active.key_auths,
-					owner: acctInfo[0].owner.key_auths,
-				};
-				if (this.$refs["passfetchdata"].value == '' || ! await this.verifyUserPass(this.$refs["passfetchdata"].value, auths, this.$refs["username"].value)){
-				  this.errorFetch = this.$t('Error_provide_password');
-				  this.fetchingPass = false;
-				  this.resetKeys();
-				  return;
-				}
-				let privateKeys = await chainLnk.auth.getPrivateKeys(this.$refs['username'].value, this.$refs["passfetchdata"].value);
-				//console.log(privateKeys);
-				this.privatePostKey = privateKeys.posting;
-				this.privateActKey = privateKeys.active;
-				this.privateOwnKey = privateKeys.owner;
-				this.privateMemoKey = privateKeys.memo;
-				
-				//also generate proper QR codes
-				this.genQRCodes(privateKeys);
-			}else{
-				this.errorFetch = this.$t('Error_provide_password');
-				this.fetchingPass = false;
-				this.resetKeys();
-				return;
-			}
+			return;
+		  }
+
+		  const username = this.$refs['username'].value.trim().toLowerCase();
+		  if (!username){
+			this.errorFetch = this.$t('user_not_found_error');
+			return;
+		  }
+		  if (!password){
+			this.errorFetch = this.$t('Error_provide_password');
+			return;
+		  }
+
+		  const formatError = chainLnk.utils.validateAccountName(username);
+		  if (formatError !== null){
+			this.errorFetch = this.$t('invalid_account_name');
+			return;
+		  }
+
+		  const acctInfo = await this.getAccountsWithTimeout(username);
+		  if (!Array.isArray(acctInfo) || acctInfo.length === 0){
+			this.errorFetch = this.$t('user_not_found_error');
+			return;
+		  }
+
+		  const auths = {
+			posting: acctInfo[0].posting.key_auths,
+			active: acctInfo[0].active.key_auths,
+			owner: acctInfo[0].owner.key_auths,
+		  };
+		  if (!await this.verifyUserPass(password, auths, username)){
+			this.errorFetch = this.$t('Error_provide_password');
+			return;
+		  }
+
+		  const privateKeys = await chainLnk.auth.getPrivateKeys(username, password);
+		  this.privatePostKey = privateKeys.posting;
+		  this.privateActKey = privateKeys.active;
+		  this.privateOwnKey = privateKeys.owner;
+		  this.privateMemoKey = privateKeys.memo;
+		  this.genQRCodes(privateKeys);
+		} catch (error) {
+		  if (error.code === 'ACCOUNT_LOOKUP_CANCELLED') {
+			return;
+		  }
+		  console.error('Unable to fetch account keys:', error);
+		  this.errorFetch = this.$t('account_lookup_failed');
+		} finally {
+		  this.fetchingPass = false;
 		}
-		this.fetchingPass = false;
 		
 	  },
 	  setPasswordVal(){
@@ -757,6 +829,9 @@
 		blurt.api.setOptions({ url: process.env.blurtApiNode });
 		await this.setProperNode();
 		this.$store.dispatch('steemconnect/login')
+	},
+	beforeDestroy () {
+	  this.cancelAccountLookup();
 	}
   }
 </script>

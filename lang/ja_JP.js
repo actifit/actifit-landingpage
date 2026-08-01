@@ -395,6 +395,8 @@ module.exports = {
   confirm_vote_change: 'この投稿にはすでに投票しています。投票を変更してもよろしいですか？',
   confirm_delete_comment: 'コメントを削除してもよろしいですか？',
   user_not_found_error: 'エラー：ユーザーが見つかりません',
+  invalid_account_name: '有効なアカウント名を入力してください。',
+  account_lookup_failed: 'アカウントを確認できませんでした。もう一度お試しください。',
   need_login_signup_notice_vote: 'まずログインまたはサインアップする必要があります',
   Reply: '返信',
   Full_AFIT_Payout_Mode: '全AFIT支払いモード',
