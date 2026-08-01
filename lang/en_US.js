@@ -395,6 +395,8 @@ module.exports = {
   confirm_vote_change: 'You already had voted before on this post. Are you sure you want to change your vote?',
   confirm_delete_comment: 'Are you sure you want to delete your comment?',
   user_not_found_error: 'Error: User Not Found',
+  invalid_account_name: 'Please enter a valid account username.',
+  account_lookup_failed: 'Unable to verify the account. Please try again.',
   need_login_signup_notice_vote: 'You need to login or signup first',
   Reply: 'Reply',
   Full_AFIT_Payout_Mode: 'Full AFIT Payout Mode',
