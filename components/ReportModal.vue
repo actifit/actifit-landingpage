@@ -93,18 +93,18 @@
               <img src="/img/BLURT.png" class="mr-0 currency-logo-small" v-else-if="cur_bchain == 'BLURT'" alt="">
 
               <span v-if="postPaid()">
-                <span class="m-1" :title="$t('author_payout')">
+                <span class="m-1" :class="{ 'declined-payout': isDeclined }" :title="$t('author_payout')">
                   <i class="fa-solid fa-user"></i>
                   {{ paidValue() }}
                 </span>
-                <span class="m-1" :title="$t('voters_payout')">
+                <span class="m-1" :class="{ 'declined-payout': isDeclined }" :title="$t('voters_payout')">
                   <i class="fa-solid fa-users"></i>
                   {{ report.curator_payout_value }}
                 </span>
                 <i class="fa-solid fa-check text-green text-bold"></i>
               </span>
               <span v-else>
-                <span class="text-bold" :class="{ 'declined-payout': parseFloat(report.max_accepted_payout) === 0 }">{{ report.pending_payout_value.replace('SBD', '') }}</span>
+                <span class="text-bold" :class="{ 'declined-payout': isDeclined }">{{ report.pending_payout_value.replace('SBD', '') }}</span>
                 <i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
               </span>
               <span v-if="hasBeneficiaries()" :title="beneficiariesDisplay()">
@@ -226,11 +226,13 @@ import SafeRemarkable from '~/components/SafeRemarkable.vue'
 import SocialSharing from 'vue-social-sharing';
 import VueScrollTo from 'vue-scrollto'
 import { translateTextWithGemini } from '~/components/gemini-client.js';
+import { declinedPayoutMixin } from '~/plugins/commonCardMixin.js'
 
 const scot_steemengine_api = process.env.steemEngineScot;
 const scot_hive_api_param = process.env.hiveEngineScotParam;
 
 export default {
+  mixins: [declinedPayoutMixin],
   data() {
     return {
       translationCache: {},
@@ -287,6 +289,7 @@ export default {
     UserHoverCard
   },
   computed: {
+    cardData() { return this.report },
     ...mapGetters('steemconnect', ['user']),
     ...mapGetters('steemconnect', ['stdLogin']),
     ...mapGetters(['commentEntries'], 'commentCountToday'),
