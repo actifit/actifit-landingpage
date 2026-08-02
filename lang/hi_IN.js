@@ -395,6 +395,8 @@ module.exports = {
   confirm_vote_change: 'आपने इस पोस्ट पर पहले ही वोट कर दिया था। क्या आप वाकई अपना वोट बदलना चाहते हैं?',
   confirm_delete_comment: 'क्या आप वाकई अपनी टिप्पणी हटाना चाहते हैं?',
   user_not_found_error: 'त्रुटि: उपयोगकर्ता नहीं मिला',
+  invalid_account_name: 'कृपया एक मान्य खाता उपयोगकर्ता नाम दर्ज करें।',
+  account_lookup_failed: 'खाते की पुष्टि नहीं की जा सकी। कृपया पुनः प्रयास करें।',
   need_login_signup_notice_vote: 'आपको पहले लॉग इन या साइन अप करना होगा',
   Reply: 'जवाब',
   Full_AFIT_Payout_Mode: 'पूर्ण AFIT भुगतान मोड',

@@ -395,6 +395,8 @@ module.exports = {
   confirm_vote_change: 'Bu gönderiye daha önce oy vermiştiniz. Oyunuzu değiştirmek istediğinizden emin misiniz?',
   confirm_delete_comment: 'Yorumunuzu silmek istediğinizden emin misiniz?',
   user_not_found_error: 'Hata: Kullanıcı Bulunamadı',
+  invalid_account_name: 'Lütfen geçerli bir hesap kullanıcı adı girin.',
+  account_lookup_failed: 'Hesap doğrulanamadı. Lütfen tekrar deneyin.',
   need_login_signup_notice_vote: 'Önce giriş yapmanız veya kaydolmanız gerekir',
   Reply: 'Yanıtla',
   Full_AFIT_Payout_Mode: 'Tam AFIT Ödeme Modu',
