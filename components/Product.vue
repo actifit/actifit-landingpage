@@ -47,11 +47,13 @@
         <h3 class="pro-name">{{ this.product.name }}</h3>
 
         <div class="provider-link">
-          <span class="provider-prefix">{{ $t('By') }}</span>
-          <a v-if="this.product.type == 'service'" :href="'/consultants/?prof=' + this.product.provider_name">
-            {{ this.product.provider_name }}
-          </a>
-          <a v-else :href="'/' + this.product.provider">{{ this.product.provider_name }}</a>
+          <template v-if="hasProviderName">
+            <span class="provider-prefix">{{ $t('By') }}</span>
+            <a v-if="this.product.type == 'service'" :href="'/consultants/?prof=' + providerName">
+              {{ providerName }}
+            </a>
+            <a v-else :href="'/' + this.product.provider">{{ providerName }}</a>
+          </template>
           <span class="purchase-currency-list" :aria-label="$t('purchase_currency')">
             <span v-for="currency in purchaseCurrencies" :key="currency"
               class="purchase-currency-badge" :class="'currency-' + currency.toLowerCase()">
@@ -622,10 +624,12 @@
 .level-badge {
   display: inline-flex;
   align-items: center;
-  padding: 5px 8px;
-  border-radius: 7px;
-  background: #fff0f2;
-  color: #d6001a;
+  flex: 0 0 auto;
+  padding: 3px 7px;
+  border: 1px solid #dbe1e6;
+  border-radius: 999px;
+  background: #eef1f4;
+  color: #52606d;
   font-size: 0.7rem;
   font-weight: 700;
   line-height: 1;
@@ -1119,14 +1123,14 @@
   background: linear-gradient(180deg, rgba(255, 244, 246, 1) 0%, rgba(255, 255, 255, 1) 100%);
   border: 1px solid rgba(255, 17, 45, 0.12);
   border-radius: 14px;
-  padding: 12px 14px;
+  padding: 8px 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 108px;
+  min-height: 76px;
   text-align: center;
-  gap: 4px;
+  gap: 2px;
 }
 
 .count-summary-label {
@@ -1185,10 +1189,11 @@
 .buy-actions-block {
   width: 100%;
   display: flex;
+  justify-content: center;
 }
 
 .buy-actions-block .buy-cta {
-  width: 100%;
+  width: min(100%, 440px);
 }
 
 .buy-actions-block .buy-cta .buy-cta-price {
@@ -1199,6 +1204,9 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
+  max-width: 680px;
+  margin-right: auto;
+  margin-left: auto;
 }
 
 .action-grid-secondary {
@@ -1210,10 +1218,10 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  border-radius: 12px;
-  padding: 11px 10px;
-  min-height: 72px;
+  gap: 3px;
+  border-radius: 10px;
+  padding: 7px 10px;
+  min-height: 56px;
   line-height: 1.2;
 }
 
@@ -1230,9 +1238,8 @@
   justify-content: center;
   flex-wrap: wrap;
   gap: 4px;
-  padding: 6px 10px;
-  border-radius: 9px;
-  font-size: clamp(1rem, 1.6vw, 1.2rem);
+  padding: 0;
+  font-size: clamp(0.9rem, 1.4vw, 1.05rem);
   font-weight: 800;
   line-height: 1.1;
   white-space: nowrap;
@@ -1241,8 +1248,8 @@
 
 .buy-cta-price .token-logo-sm,
 .buy-cta-price .token-logo-xs {
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
   margin-left: 2px;
 }
 
@@ -1257,10 +1264,10 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  border-radius: 12px;
-  padding: 11px 10px;
-  min-height: 72px;
-  font-size: 0.9rem;
+  border-radius: 10px;
+  padding: 8px 10px;
+  min-height: 44px;
+  font-size: 0.82rem;
   font-weight: 700;
   line-height: 1.2;
 }
@@ -1284,10 +1291,14 @@
   font-size: 0.9rem;
 }
 
-.status-footer,
-.count-footer {
+.status-footer {
   text-align: center;
   padding-top: 0.75rem;
+}
+
+.count-footer {
+  text-align: center;
+  padding-top: 2px;
 }
 
 .product-card-footer {
@@ -1380,8 +1391,15 @@ html.dark-mode .product-type-badge {
 }
 
 html.dark-mode .product-card .level-badge {
-  background: rgba(255, 17, 45, 0.16);
-  color: #ff9aa7;
+  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  color: #d8dde4;
+}
+
+@media (max-width: 575px) {
+  .buy-cta-price {
+    font-size: 0.9rem;
+  }
 }
 
 html.dark-mode .provider-prefix {
@@ -1617,6 +1635,12 @@ export default {
         return this.$t('real_prod_name');
       }
       return this.product.type;
+    },
+    providerName() {
+      return typeof this.product.provider_name === 'string' ? this.product.provider_name.trim() : '';
+    },
+    hasProviderName() {
+      return this.providerName.length > 0;
     },
     purchaseCurrencies() {
       return getProductPurchaseCurrencies(this.product);

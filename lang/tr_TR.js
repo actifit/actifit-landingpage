@@ -717,7 +717,7 @@ module.exports = {
   Suggested_friends: 'Önerilen Arkadaşlar',
   Notifications_popup: '_count_ bildiriminiz var',
   rewards: 'ödüller',
-  level_short: ' - Sv',
+  level_short: 'Sv',
   Min: 'Min',
   At_Least: 'En Az',
   consumed: 'tüketildi',

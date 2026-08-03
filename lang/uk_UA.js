@@ -717,7 +717,7 @@ module.exports = {
   Suggested_friends: 'Пропоновані друзі',
   Notifications_popup: 'У вас _count_ сповіщень',
   rewards: 'винагороди',
-  level_short: ' - Рв.',
+  level_short: 'Рв.',
   Min: 'Мін.',
   At_Least: 'Щонайменше',
   consumed: 'витрачено',

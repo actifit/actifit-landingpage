@@ -717,7 +717,7 @@ module.exports = {
   Suggested_friends: 'सुझाए गए मित्र',
   Notifications_popup: 'आपके पास _count_ सूचनाएं हैं',
   rewards: 'पुरस्कार',
-  level_short: ' - एल',
+  level_short: 'एल',
   Min: 'न्यूनतम',
   At_Least: 'कम से कम',
   consumed: 'खपत',

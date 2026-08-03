@@ -716,7 +716,7 @@ module.exports = {
   Suggested_friends: 'Amigos Sugeridos',
   Notifications_popup: 'Você tem _count_ notificações',
   rewards: 'recompensas',
-  level_short: ' - N',
+  level_short: 'N',
   Min: 'Mín',
   At_Least: 'Pelo Menos',
   consumed: 'consumido',

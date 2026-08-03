@@ -716,7 +716,7 @@ module.exports = {
   Suggested_friends: '推荐好友',
   Notifications_popup: '您有_count_条通知',
   rewards: '奖励',
-  level_short: ' - L',
+  level_short: 'L',
   Min: '最小',
   At_Least: '至少',
   consumed: '已消耗',

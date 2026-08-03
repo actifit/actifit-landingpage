@@ -717,7 +717,7 @@ module.exports = {
   Suggested_friends: 'أصدقاء مقترحون',
   Notifications_popup: 'لديك _count_ إشعارات',
   rewards: 'مكافآت',
-  level_short: ' - L',
+  level_short: 'L',
   Min: 'الحد الأدنى',
   At_Least: 'على الأقل',
   consumed: 'مستهلك',

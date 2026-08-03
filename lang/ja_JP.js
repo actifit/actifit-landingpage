@@ -716,7 +716,7 @@ module.exports = {
   Suggested_friends: 'おすすめの友達',
   Notifications_popup: 'あなたには_count_件の通知があります',
   rewards: '報酬',
-  level_short: ' - L',
+  level_short: 'L',
   Min: '最小',
   At_Least: '少なくとも',
   consumed: '消費済み',
