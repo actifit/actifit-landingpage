@@ -31,8 +31,8 @@ Layered strategy — see `test/README.md` for full details.
 - Jest mock factories must prefix referenced vars with `mock` (Jest hoisting rule).
 - Many store actions never call `resolve()` but `commit` asynchronously — tests
   fire the action and flush the microtask queue rather than awaiting it.
-- **Prod/deploy:** set `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1` in the DigitalOcean app
-  env so `npm ci` does not download browser binaries on every deploy.
+- **Prod/deploy:** set `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1` in the deploy
+  environment so `npm ci` does not download browser binaries on every deploy.
 
 ## Node.js Version
 
@@ -52,13 +52,7 @@ Node.js **v16** is required (pinned in `.nvmrc` as v16.20.2). The project uses `
 
 ## Security Architecture (Critical)
 
-**Never put secrets in the `env` block of `nuxt.config.js`** — that block leaks into the client bundle. Secrets belong in `privateRuntimeConfig` (reads from `process.env` at runtime, server-side only).
-
-Client-side code that needs secrets must call the server-side proxy at `api/proxy.js`:
-- `/api/proxy/gemini` — Google Gemini AI
-- `/api/proxy/deepl` — DeepL translation
-- `/api/proxy/reward-comment`, `/api/proxy/reward-vote`, `/api/proxy/reward-edit` — reward system
-- `/api/proxy/upload` — image upload to `usermedia.actifit.io`
+**Never put secrets in the `env` block of `nuxt.config.js`** — that block leaks into the client bundle. Secrets belong in `privateRuntimeConfig` (reads from `process.env` at runtime, server-side only). Client-side code that needs a secret must route through the server-side proxy in `api/proxy.js` instead of embedding the key — never expose keys client-side.
 
 ## i18n Coupling
 
@@ -70,7 +64,7 @@ Language files live in `lang/` (14 locales, default `en_US.js`). `config/index.j
 
 ## Deployment
 
-No CI pipeline. Production is hosted on **DigitalOcean App Platform** (served behind Cloudflare — live responses carry `x-do-app-origin` headers), which **auto-deploys on push to `master`**. The build runs **`npm ci`** under **Node 16.20.2 / npm 8.19.4**, so `package.json` and `package-lock.json` must stay perfectly in sync or the build fails at install with `EUSAGE`. DigitalOcean uses Heroku-compatible buildpacks, so the `heroku-postbuild` script (`npm run build`) is likely still the build step the buildpack invokes — do not assume it is dead and remove it. `.env` is gitignored; required env vars are configured in the DigitalOcean app and consumed via `privateRuntimeConfig` and `env` blocks in `nuxt.config.js`.
+Production auto-builds from `master` via **`npm ci`**, so `package.json` and `package-lock.json` must stay perfectly in sync or the build fails at install with `EUSAGE` (see the README "Releasing" section for the pre-flight check). The `heroku-postbuild` script (`npm run build`) is the build step — do not assume it is dead and remove it. `.env` is gitignored; runtime secrets are provided via the host env and read through `privateRuntimeConfig`.
 
 ## Conventions
 
