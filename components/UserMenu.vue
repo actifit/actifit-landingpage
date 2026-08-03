@@ -165,17 +165,17 @@
               <br />
               <div class="pl-4" :class="adjustHiveClass" v-on:click="setActiveChain('HIVE')">
                 <img src="/img/HIVE.png" style="max-height: 20px;"
-                  :title="(cur_bchain == 'HIVE' ? $t('running_on_chain').replace('_CHAIN_', 'HIVE') : $t('switch_to_chain').replace('_CHAIN_', 'HIVE'))">{{
+                  :title="(cur_bchain == 'HIVE' ? $t('running_on_chain').replace('_CHAIN_', 'HIVE') : $t('switch_to_chain').replace('_CHAIN_', 'HIVE'))" alt="">{{
                 $t('HIVE') }}
               </div>
               <div v-if="isUserModerator" class="pl-4" :class="adjustSteemClass" v-on:click="setActiveChain('STEEM')">
                 <img src="/img/STEEM.png" style="max-height: 20px;"
-                  :title="(cur_bchain == 'STEEM' ? $t('running_on_chain').replace('_CHAIN_', 'STEEM') : $t('switch_to_chain').replace('_CHAIN_', 'STEEM'))">{{
+                  :title="(cur_bchain == 'STEEM' ? $t('running_on_chain').replace('_CHAIN_', 'STEEM') : $t('switch_to_chain').replace('_CHAIN_', 'STEEM'))" alt="">{{
                     $t('STEEM') }}
               </div>
               <div class="pl-4" :class="adjustBlurtClass" v-on:click="setActiveChain('BLURT')">
                 <img src="/img/BLURT.png" style="max-height: 20px;"
-                  :title="(cur_bchain == 'BLURT' ? $t('running_on_chain').replace('_CHAIN_', 'BLURT') : $t('switch_to_chain').replace('_CHAIN_', 'BLURT'))">{{
+                  :title="(cur_bchain == 'BLURT' ? $t('running_on_chain').replace('_CHAIN_', 'BLURT') : $t('switch_to_chain').replace('_CHAIN_', 'BLURT'))" alt="">{{
                     $t('BLURT') }}
               </div>
             </a>

@@ -49,14 +49,21 @@ export default {
       showDropdownList: false,
       mentionList: [],
       highlightedIndex: -1,
+      debounceTimer: null,
+      abortController: null,
     };
   },
   methods: {
     async fetchMentions() {
       if (!this.inputValue) return;
+      // Cancel any in-flight request so rapid typing doesn't stack requests
+      // (each request also makes ad/privacy extensions re-run filter checks).
+      if (this.abortController) this.abortController.abort();
+      this.abortController = new AbortController();
       try {
         const response = await axios.get(
-          process.env.hiveApiNode + `/hafbe-api/input-type/${this.inputValue}%25`
+          process.env.hiveApiNode + `/hafbe-api/input-type/${this.inputValue}%25`,
+          { signal: this.abortController.signal }
         );
         const responseData = response.data;
         if (responseData.input_type === 'invalid_input') {
@@ -79,14 +86,23 @@ export default {
         }
 
       } catch (error) {
+        // Ignore aborted (superseded) requests.
+        if (axios.isCancel && axios.isCancel(error)) return;
+        if (error && (error.name === 'CanceledError' || error.name === 'AbortError')) return;
         console.error("Error fetching mentions:", error);
       }
     },
     onInput() {
       if (this.inputValue) {
-        this.fetchMentions(); // Fetch suggestions dynamically
         this.showDropdownList = true;
+        // Debounce so we fire ~1 request after the user pauses typing, not one
+        // per keystroke. Un-debounced, a burst of requests each triggered an
+        // ad/privacy extension's synchronous filter-match against Easylist,
+        // congesting the main thread and freezing the search field for seconds.
+        clearTimeout(this.debounceTimer);
+        this.debounceTimer = setTimeout(() => this.fetchMentions(), 300);
       } else {
+        clearTimeout(this.debounceTimer);
         this.showDropdownList = false;
         this.mentionList = [];
       }
@@ -166,6 +182,10 @@ export default {
   mounted() {
     // Forward the ref to make it accessible via the parent component
     this.$refs.input = this.$refs.inputElement;
+  },
+  beforeDestroy() {
+    clearTimeout(this.debounceTimer);
+    if (this.abortController) this.abortController.abort();
   },
 };
 </script>

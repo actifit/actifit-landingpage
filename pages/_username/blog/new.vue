@@ -2,9 +2,7 @@
   <div>
     <NavbarBrand />
     <div class="container pt-5 mt-5 pb-5">
-      <div v-if="user">
-        <ListHeadingSection :username="user.account.name" :textualDisplay="textualContent()"/>
-      </div>
+      <ListHeadingSection :username="user ? user.account.name : ''" :textualDisplay="textualContent()"/>
       <div class="row text-right" v-if="user">
         <div class="col-12 pb-2"><a href="#" class="btn btn-brand border"
             @click.prevent="$router.push('/\@' + user.account.name + '/blog')" :title="$t('view_blog')"><i
@@ -79,21 +77,21 @@
         <div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-if="cur_bchain == 'HIVE'">
           <input type="radio" id="hive" value="HIVE" v-model="target_bchain">
           <img src="/img/HIVE.png" style="max-height: 50px" v-on:click="target_bchain = 'HIVE'"
-            :class="adjustHiveClass">
+            :class="adjustHiveClass" alt="Select Hive blockchain">
           <label for="hive">HIVE ONLY</label>
         </div>
         <div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-else-if="cur_bchain == 'STEEM'">
           <input type="radio" id="steem" value="STEEM" v-model="target_bchain">
           <img src="/img/STEEM.png" style="max-height: 50px" v-on:click="target_bchain = 'STEEM'"
-            :class="adjustSteemClass">
+            :class="adjustSteemClass" alt="Select Steem blockchain">
           <label for="steem">STEEM ONLY</label>
         </div>
         <div class="bchain-option btn col-6 p-2 row text-left  mx-auto">
           <input type="radio" id="hive_steem" value="BOTH" v-model="target_bchain">
           <img src="/img/HIVE.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px"
-            :class="adjustBothClass">
+            :class="adjustBothClass" alt="Select multiple blockchains">
           <img src="/img/STEEM.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px"
-            :class="adjustBothClass">
+            :class="adjustBothClass" alt="Select multiple blockchains">
           <label for="hive_steem">HIVE + STEEM</label>
         </div>
       </div>
@@ -102,8 +100,8 @@
           <i class="fas fa-spin fa-spinner" v-if="loading"></i>
           <i class="fas fa-paper-plane" v-else></i>
           <span v-if="editPost.isNewPost">{{ $t('Publish') }}</span><span v-else>{{ $t('Save') }}</span>
-          <img src="/img/HIVE.png" style="max-height: 25px" v-if="target_bchain == 'HIVE' || target_bchain == 'BOTH'">
-          <img src="/img/STEEM.png" style="max-height: 25px" v-if="target_bchain == 'STEEM' || target_bchain == 'BOTH'">
+          <img src="/img/HIVE.png" style="max-height: 25px" v-if="target_bchain == 'HIVE' || target_bchain == 'BOTH'" alt="">
+          <img src="/img/STEEM.png" style="max-height: 25px" v-if="target_bchain == 'STEEM' || target_bchain == 'BOTH'" alt="">
         </button>
       </div>
     </div>

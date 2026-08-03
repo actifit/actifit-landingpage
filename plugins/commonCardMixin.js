@@ -1,7 +1,16 @@
 import steem from 'steem'
 import hive from '@hiveio/hive-js'
 
+export const declinedPayoutMixin = {
+  computed: {
+    isDeclined () {
+      return parseFloat(this.cardData && this.cardData.max_accepted_payout) === 0
+    }
+  }
+}
+
 export const commonCardMixin = {
+  mixins: [declinedPayoutMixin],
   data () {
     return {
       afitReward: '',
@@ -183,7 +192,9 @@ export const commonCardMixin = {
     },
 
     getResizedImageUrl (url, width) {
-      if (typeof url !== 'string' || !url.startsWith('http') || /\.gif$/i.test(url) || url.includes('leopedia.io')) {
+      // usermedia.actifit.io (Actifit's own upload host) is not served by the
+      // Hive image proxy (returns 403), so — like gif/leopedia — use it directly.
+      if (typeof url !== 'string' || !url.startsWith('http') || /\.gif$/i.test(url) || url.includes('leopedia.io') || url.includes('usermedia.actifit.io')) {
         return url;
       }
       const resizeProxy = `https://images.hive.blog/${Math.round(width)}x0/`;

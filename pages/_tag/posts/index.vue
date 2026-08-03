@@ -5,8 +5,8 @@
 
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-5" v-if="communityData.title">
-      <h2 class="text-center mb-5">{{ communityData.title }} {{ $t('comm_posts') }} <img src="/img/HIVE.png"
-          class="mr-2 token-logo-md"></h2>
+      <h1 class="text-center mb-5 h2">{{ communityData.title }} {{ $t('comm_posts') }} <img src="/img/HIVE.png"
+          class="mr-2 token-logo-md" alt=""></h1>
       <!--<ChainSelection />-->
 
       <div class="text-right col-12 row pb-2">
@@ -41,9 +41,6 @@
               :pstId="(iterx - 1) * splitFactor + (itery - 1)" />
           </div>
           <!--<div class="col-md-6 col-lg-12 mb-4" v-if="(iterx - 1) < inlineAds">
-				<client-only>
-				<adsbygoogle ad-slot="7038919015" ad-format="fluid" ad-layout-key="-fb+5w+4e-db+86"/>
-				</client-only>
 			</div>-->
         </div>
       </div>

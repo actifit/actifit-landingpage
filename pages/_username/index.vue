@@ -26,7 +26,7 @@
           </div>
           <div class="user-info-header">
             <div class="d-flex align-items-center">
-                <span class="username">@{{ displayUser }}</span>
+                <h1 class="username mb-0">@{{ displayUser }}</h1>
                 <span class="user-rank-badge ml-2">{{ displayCoreUserRank }}</span>
                 <span v-if="user && user.account.name === displayUser && !account_banned" class="edit-profile-btn ml-2">
                   <a @click="editOn ? turnEditOff() : turnEditOn()">
@@ -152,12 +152,12 @@
             <!-- Fitness Tab -->
             <div v-if="activeTab === 'fitness'" class="fitness-tab-container">
                 <div class="fitness-section-grid-measurements">
-                    <div class="fitness-card"><img src="https://usermedia.actifit.io/height.png"><div>{{ $t('Height') }}</div><div class="value">{{ lastHeight + ' ' + heightUnit }}</div></div>
-                    <div class="fitness-card"><img src="https://usermedia.actifit.io/bodyfat.png"><div>{{ $t('Body_Fat') }}</div><div class="value">{{ lastBodyfat + ' % ' }}</div></div>
-                    <div class="fitness-card"><img src="https://usermedia.actifit.io/waist.png"><div>{{ $t('Waist') }}</div><div class="value">{{ lastWaist + ' ' + waistUnit }}</div></div>
-                    <div class="fitness-card"><img src="https://usermedia.actifit.io/weight.png"><div>{{ $t('Weight') }}</div><div class="value">{{ lastWeight + ' ' + weightUnit }}</div></div>
-                    <div class="fitness-card"><img src="https://usermedia.actifit.io/chest.png"><div>{{ $t('Chest') }}</div><div class="value">{{ lastChest + ' ' + chestUnit }}</div></div>
-                    <div class="fitness-card"><img src="https://usermedia.actifit.io/thighs.png"><div>{{ $t('Thighs') }}</div><div class="value">{{ lastThighs + ' ' + thighsUnit }}</div></div>
+                    <div class="fitness-card"><img src="https://usermedia.actifit.io/height.png" alt=""><div>{{ $t('Height') }}</div><div class="value">{{ lastHeight + ' ' + heightUnit }}</div></div>
+                    <div class="fitness-card"><img src="https://usermedia.actifit.io/bodyfat.png" alt=""><div>{{ $t('Body_Fat') }}</div><div class="value">{{ lastBodyfat + ' % ' }}</div></div>
+                    <div class="fitness-card"><img src="https://usermedia.actifit.io/waist.png" alt=""><div>{{ $t('Waist') }}</div><div class="value">{{ lastWaist + ' ' + waistUnit }}</div></div>
+                    <div class="fitness-card"><img src="https://usermedia.actifit.io/weight.png" alt=""><div>{{ $t('Weight') }}</div><div class="value">{{ lastWeight + ' ' + weightUnit }}</div></div>
+                    <div class="fitness-card"><img src="https://usermedia.actifit.io/chest.png" alt=""><div>{{ $t('Chest') }}</div><div class="value">{{ lastChest + ' ' + chestUnit }}</div></div>
+                    <div class="fitness-card"><img src="https://usermedia.actifit.io/thighs.png" alt=""><div>{{ $t('Thighs') }}</div><div class="value">{{ lastThighs + ' ' + thighsUnit }}</div></div>
                 </div>
                 <div class="fitness-measurements-editor">
                     <div class="fitness-measurements-toolbar">
@@ -207,7 +207,7 @@
                 <div class="fitness-section-grid-activity">
                     <div class="fitness-card activity-card">
                         <div>{{ $t('Latest_Activity_Count') }}</div>
-                        <img src="/img/actifit_logo.png" class="activity-small-logo">
+                        <img src="/img/actifit_logo.png" class="activity-small-logo" alt="">
                         <div class="value">{{ lastActivityCount }}</div>
                     </div>
                     <div class="fitness-card activity-card">
@@ -239,7 +239,7 @@
               <!-- Key added -->
               <div class="community-item" key="posh-item">
                 <div class="community-item-content">
-                  <img src="/img/poshlogo.png" class="mr-3" style="width: 50px;">
+                  <img src="/img/poshlogo.png" class="mr-3" style="width: 50px;" alt="">
                   <div class="flex-grow-1">
                     <span v-if="poshVerified">
                       <i class="fas fa-check text-success" style="font-size:large"></i> {{ $t('Posh_connected') }}:
@@ -269,7 +269,7 @@
               <div class="community-item" key="rewarded-reports-item">
                 <div class="community-item-content">
                   <a :href="'/activity/' + displayUser">
-                    <img src="/img/actifit_logo.png" class="mr-2 token-logo">
+                    <img src="/img/actifit_logo.png" class="mr-2 token-logo" alt="">
                     {{ numberFormat(rewardedPostCount, 0) }} {{ $t('Activity_Reports_Rewarded') }}
                   </a>
                   <a :href="'/activity/' + displayUser" class="btn btn-danger m-2">{{ $t('View_reports') }}</a>
@@ -279,7 +279,7 @@
                <div class="community-item" key="hive-posts-item">
                  <div class="community-item-content">
                     <a :href="'/' + displayUser + '/blog'">
-                      <img src="/img/HIVE.png" class="mr-2 token-logo">
+                      <img src="/img/HIVE.png" class="mr-2 token-logo" alt="">
                       {{ userinfo.post_count ? numberFormat(userinfo.post_count, 0) : '0' }} {{ $t('Steem_posts_comments') }}
                     </a>
                     <a :href="'/' + displayUser + '/blog'" class="btn btn-danger m-2">{{ $t('View_blog') }}</a>
@@ -302,7 +302,7 @@
               <div class="community-item" key="3speak-item">
                 <div class="community-item-content">
                   <a :href="'/' + displayUser + '/videos'">
-                    <img src="/img/3speak.png" class="mr-2 token-logo">
+                    <img src="/img/3speak.png" class="mr-2 token-logo" alt="">
                     {{ numberFormat(video_count_3s, 0) }} {{ $t('Videos_3speak') }}
                   </a>
                   <a :href="'/' + displayUser + '/videos'" class="btn btn-danger m-2">{{ $t('View_videos') }}</a>
@@ -362,7 +362,7 @@
                   <!-- HIVE Card -->
                   <div class="balance-card">
                     <div class="balance-card-header">
-                        <img src="/img/HIVE.png" class="token-logo">
+                        <img src="/img/HIVE.png" class="token-logo" alt="">
                         <span>HIVE</span>
                     </div>
                     <div class="balance-card-value">{{ hiveBalance }}</div>
@@ -371,7 +371,7 @@
                   <!-- HBD Card -->
                   <div class="balance-card">
                     <div class="balance-card-header">
-                        <img src="/img/HIVE.png" class="token-logo">
+                        <img src="/img/HIVE.png" class="token-logo" alt="">
                         <span>HBD</span>
                     </div>
                     <div class="balance-card-value">{{ hbdBalance }}</div>
@@ -380,7 +380,7 @@
                   <!-- HP Card -->
                   <div class="balance-card">
                     <div class="balance-card-header">
-                        <img src="/img/HIVE.png" class="token-logo">
+                        <img src="/img/HIVE.png" class="token-logo" alt="">
                         <span>HIVE POWER</span>
                     </div>
                     <div class="balance-card-value">{{ hivePower }}</div>
@@ -394,7 +394,7 @@
                 <div class="wallet-balances-grid">
                   <div class="balance-card">
                     <div class="balance-card-header">
-                        <img src="/img/actifit_logo.png" class="token-logo">
+                        <img src="/img/actifit_logo.png" class="token-logo" alt="">
                         <span>{{ $t('AFIT_Tokens') }}</span>
                     </div>
                     <div class="balance-card-value">{{ numberFormat(userTokenCount, 3) }}</div>
@@ -402,7 +402,7 @@
                   </div>
                   <div class="balance-card">
                     <div class="balance-card-header">
-                        <img src="/img/actifit_logo.png" class="token-logo">
+                        <img src="/img/actifit_logo.png" class="token-logo" alt="">
                         <span>{{ $t('AFIT_HE_Tokens') }}</span>
                     </div>
                     <div class="balance-card-value">{{ displayAFITHEBal }}</div>
@@ -410,7 +410,7 @@
                   </div>
                   <div class="balance-card">
                     <div class="balance-card-header">
-                        <img src="/img/AFITX.png" class="token-logo">
+                        <img src="/img/AFITX.png" class="token-logo" alt="">
                         <span>{{ $t('AFITX_HE_Tokens') }}</span>
                     </div>
                     <div class="balance-card-value">{{ displayAFITXHEBal }}</div>
@@ -418,7 +418,7 @@
                   </div>
                   <div class="balance-card tip-card">
                     <div class="balance-card-header">
-                        <img src="/img/actifit_logo.png" class="token-logo">
+                        <img src="/img/actifit_logo.png" class="token-logo" alt="">
                         <span>{{ $t('AFIT_Tip_Tokens') }}</span>
                         <i class="fas fa-info-circle ml-2 text-danger" @click="showAfitTipInfo = !showAfitTipInfo"></i>
                     </div>
@@ -454,7 +454,7 @@
             <div v-if="activeTab === 'badges'" class="badges-tab">
                 <div class="badge-list-item">
                   <div class="badge-image-container">
-                    <img class="badge-img" :class="{'badge-unclaimed': !userHasBadge(iso_badge)}" src="/img/badges/actifit_iso_badge.png">
+                    <img class="badge-img" :class="{'badge-unclaimed': !userHasBadge(iso_badge)}" src="/img/badges/actifit_iso_badge.png" alt="Actifit ISO badge">
                   </div>
                   <div class="badge-details">
                     <div class="badge-title">{{ $t('iso_badge_title') }}</div>
@@ -469,7 +469,7 @@
                       <div class="d-flex flex-wrap">
                         <div v-for="level in rewarded_posts_rules" :key="level[1]" class="m-2 text-center">
                            <div v-if="level[1] > 0 && level[1] <= maxClaimedActivityBadgeLevel()">
-                              <img class="badge-img-small" :class="{'badge-unclaimed': !userHasBadge(rew_activity_badge + level[1])}" :src="'/img/badges/actifit_rew_act_lev_' + level[1] + '_badge.png'">
+                              <img class="badge-img-small" :class="{'badge-unclaimed': !userHasBadge(rew_activity_badge + level[1])}" :src="'/img/badges/actifit_rew_act_lev_' + level[1] + '_badge.png'" :alt="`Actifit activity reward level ${level[1]} badge`">
                               <button v-if="badgeClaimable(rew_activity_badge + level[1])" @click="claimBadge(rew_activity_badge + level[1])" class="btn btn-danger btn-sm d-block mx-auto mt-1">{{ $t('Claim_badge') }}</button>
                            </div>
                         </div>
@@ -478,7 +478,7 @@
                 </div>
                 <div class="badge-list-item">
                   <div class="badge-image-container">
-                    <img class="badge-img" :class="{'badge-unclaimed': !userHasBadge(doubledup_badge)}" src="/img/badges/actifit_doubled_up_badge.png">
+                    <img class="badge-img" :class="{'badge-unclaimed': !userHasBadge(doubledup_badge)}" src="/img/badges/actifit_doubled_up_badge.png" alt="Actifit doubled-up badge">
                   </div>
                   <div class="badge-details">
                     <div class="badge-title">{{ $t('doubledup_badge_title') }}</div>
@@ -489,7 +489,7 @@
                 </div>
                  <div class="badge-list-item">
                   <div class="badge-image-container">
-                    <img class="badge-img" :class="{'badge-unclaimed': !userHasBadge(charity_badge)}" src="/img/badges/actifit_charity_badge.png">
+                    <img class="badge-img" :class="{'badge-unclaimed': !userHasBadge(charity_badge)}" src="/img/badges/actifit_charity_badge.png" alt="Actifit charity badge">
                   </div>
                   <div class="badge-details">
                     <div class="badge-title">{{ $t('charity_badge_title') }}</div>
@@ -506,15 +506,15 @@
 
           <h4 class="quick-links-title">{{ $t('Quick_Links') }}</h4>
           <a :href="'/activity/' + displayUser" class="quick-link-item">
-            <img src="/img/actifit_logo.png" class="mr-2 token-logo">
+            <img src="/img/actifit_logo.png" class="mr-2 token-logo" alt="">
             <span>{{ $t('Actifit_reports') }}</span>
           </a>
           <a :href="'/' + displayUser + '/blog'" class="quick-link-item">
-            <img src="/img/HIVE.png" class="mr-2 token-logo">
+            <img src="/img/HIVE.png" class="mr-2 token-logo" alt="">
             <span>{{ $t('Hive_blog') }}</span>
           </a>
           <a :href="'/' + displayUser + '/videos'" class="quick-link-item">
-            <img src="/img/3speak.png" class="mr-2 token-logo">
+            <img src="/img/3speak.png" class="mr-2 token-logo" alt="">
             <span>{{ $t('Threespeak_videos') }}</span>
           </a>
           <a :href="'/' + displayUser + '/comments'" class="quick-link-item">
@@ -580,9 +580,6 @@ export default {
         { hid: 'description', name: 'description', content: `View ${this.username}'s activity reports, fitness achievements, and earnings on Actifit — the move-to-earn platform that rewards your healthy lifestyle.` },
         { hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `View ${this.username}'s activity reports and earnings on Actifit.` },
         { hid: 'ogtitle', name: 'og:title', property: 'og:title', content: `${this.username} on Actifit` }
-      ],
-      link: [
-        { rel: 'canonical', href: `https://actifit.io/${this.username}` }
       ]
     }
   },
@@ -1051,6 +1048,7 @@ export default {
           this.$processTrxFunc('account_update2', transaction, false),
           timeoutError
         );
+        if (outcome && outcome.error === 'user_cancel') return;
         if (!outcome || !outcome.success) throw new Error((outcome && outcome.error) || this.$t('Save_Error'));
 
         this.userinfo = { ...this.userinfo, posting_json_metadata: transaction.posting_json_metadata };
@@ -2209,6 +2207,10 @@ html.dark-mode .user-info-header .join-date {
   color: #fff;
   opacity: 0.9;
   transform: translateY(-1px);
+}
+html.dark-mode .profile-action-btn {
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: none;
 }
 .avatar-edit-button {
   position: absolute;

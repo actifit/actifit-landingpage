@@ -74,9 +74,6 @@
           <a href="#" v-on:click.prevent="cancelTranslation">{{ $t('click_to_view_original') }}</a>
         </div>
         <SafeRemarkable class="modal-body" :source="displayBody" :options="{ 'html': true, 'breaks': true, 'typographer': true }" ref="remarkableContent"></SafeRemarkable>
-        <div class="modal-body goog-ad-horiz-90">
-          <adsbygoogle ad-slot="5716623705" />
-        </div>
         <div class="main-payment-info col-12" id="modal-footer">
           <div >
             <span><a href="#" @click.prevent="toggleCommentBox()" :title="$t('Reply')"><i
@@ -97,29 +94,29 @@
             </span>
             <div>
               <!--<small :title="afitReward +' ' + $t('AFIT_Token')">
-					<img src="/img/actifit_logo.png" class="mr-1 currency-logo-small">{{ afitReward }} {{ $t('AFIT_Token') }}
+					<img src="/img/actifit_logo.png" class="mr-1 currency-logo-small" alt="">{{ afitReward }} {{ $t('AFIT_Token') }}
 				</small>-->
               <span :title="postPayout" class="p-0 m-0">
-                <img src="/img/STEEM.png" class="currency-logo-small" v-if="cur_bchain == 'STEEM'">
-                <img src="/img/HIVE.png" class="currency-logo-small" v-else-if="cur_bchain == 'HIVE'">
-                <img src="/img/BLURT.png" class="currency-logo-small" v-else-if="cur_bchain == 'BLURT'">
+                <img src="/img/STEEM.png" class="currency-logo-small" v-if="cur_bchain == 'STEEM'" alt="">
+                <img src="/img/HIVE.png" class="currency-logo-small" v-else-if="cur_bchain == 'HIVE'" alt="">
+                <img src="/img/BLURT.png" class="currency-logo-small" v-else-if="cur_bchain == 'BLURT'" alt="">
                 <!--{{ postPayout }}-->
               </span>
 
               <span v-if="postPaid()">
                 <!--<i class="fa-solid fa-wallet text-green"></i>-->
-                <span class="m-1" :title="$t('author_payout')">
+                <span class="m-1" :class="{ 'declined-payout': isDeclined }" :title="$t('author_payout')">
                   <i class="fa-solid fa-user"></i>
                   {{ paidValue() }}
                 </span>
-                <span class="m-1" :title="$t('voters_payout')">
+                <span class="m-1" :class="{ 'declined-payout': isDeclined }" :title="$t('voters_payout')">
                   <i class="fa-solid fa-users"></i>
                   {{ post.curator_payout_value }}
                 </span>
                 <i class="fa-solid fa-check text-green text-bold"></i>
               </span>
               <span v-else>
-                <span class="text-bold">{{ post.pending_payout_value }}</span>
+                <span class="text-bold" :class="{ 'declined-payout': isDeclined }">{{ post.pending_payout_value }}</span>
                 <i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
               </span>
               <span v-if="hasBeneficiaries()" :title="beneficiariesDisplay()">
@@ -215,30 +212,30 @@
               <div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-if="cur_bchain == 'HIVE'">
                 <input type="radio" id="hive" value="HIVE" v-model="target_bchain">
                 <img src="/img/HIVE.png" style="max-height: 50px" v-on:click="target_bchain = 'HIVE'"
-                  :class="adjustHiveClass">
+                  :class="adjustHiveClass" alt="Select Hive blockchain">
                 <label for="hive">HIVE ONLY</label>
               </div>
               <div class="bchain-option btn col-6 p-2 row text-left mx-auto" v-else-if="cur_bchain == 'STEEM'">
                 <input type="radio" id="steem" value="STEEM" v-model="target_bchain">
                 <img src="/img/STEEM.png" style="max-height: 50px" v-on:click="target_bchain = 'STEEM'"
-                  :class="adjustSteemClass">
+                  :class="adjustSteemClass" alt="Select Steem blockchain">
                 <label for="steem">STEEM ONLY</label>
               </div>
               <div class="bchain-option btn col-6 p-2 row text-left  mx-auto">
                 <input type="radio" id="hive_steem" value="BOTH" v-model="target_bchain">
                 <img src="/img/HIVE.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px"
-                  :class="adjustBothClass">
+                  :class="adjustBothClass" alt="Select multiple blockchains">
                 <img src="/img/STEEM.png" v-on:click="target_bchain = 'BOTH'" style="max-height: 50px"
-                  :class="adjustBothClass">
+                  :class="adjustBothClass" alt="Select multiple blockchains">
                 <label for="hive_steem">HIVE + STEEM</label>
               </div>
             </div>
             <a href="#" @click.prevent="postResponse($event)" class="btn btn-brand border reply-btn w-25">
               {{ $t('Post') }}
               <img src="/img/HIVE.png" style="max-height: 25px"
-                v-if="target_bchain == 'HIVE' || target_bchain == 'BOTH'">
+                v-if="target_bchain == 'HIVE' || target_bchain == 'BOTH'" alt="">
               <img src="/img/STEEM.png" style="max-height: 25px"
-                v-if="target_bchain == 'STEEM' || target_bchain == 'BOTH'">
+                v-if="target_bchain == 'STEEM' || target_bchain == 'BOTH'" alt="">
               <i class="fas fa-spin fa-spinner" v-if="loading"></i>
             </a>
             <a href="#" @click.prevent="resetOpenComment()" class="btn btn-brand border reply-btn w-25">{{ $t('Cancel')
@@ -285,12 +282,14 @@ import SafeRemarkable from '~/components/SafeRemarkable.vue'
 import SocialSharing from 'vue-social-sharing';
 import VueScrollTo from 'vue-scrollto'
 import { translateTextWithGemini } from '~/components/gemini-client.js';
+import { declinedPayoutMixin } from '~/plugins/commonCardMixin.js'
 
 const scot_steemengine_api = process.env.steemEngineScot;
 const scot_hive_api_param = process.env.hiveEngineScotParam;
 const tokensOfInterest = ['SPORTS', 'PAL', 'APX'];
 
 export default {
+  mixins: [declinedPayoutMixin],
   data() {
     return {
       // ✅ CORE FIX: Initialize the translation cache object.
@@ -354,6 +353,7 @@ export default {
     UserHoverCard
   },
   computed: {
+    cardData() { return this.post },
     ...mapGetters('steemconnect', ['user']),
     ...mapGetters('steemconnect', ['stdLogin']),
     ...mapGetters(['commentEntries'], 'commentCountToday'),

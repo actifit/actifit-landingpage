@@ -25,7 +25,7 @@
                     :href="buildParentLink">{{ $t('view_parent_thread') }}</a>
                 </div>
 
-                <h2>{{ report.title }}</h2>
+                <h1>{{ report.title }}</h1>
                 <div class="main-user-info pl-4" ref="reportTarget">
                   <h5 class="text-brand">
                     <UserHoverCard :username="report.author" />
@@ -97,16 +97,16 @@
                       <i class="fas fa-running text-brand mr-1"></i>{{ afitReward }} {{ $t('AFIT_Token') }}
                     </span>
                     <span :title="postPayout">
-                      <img src="/img/STEEM.png" class="mr-1 currency-logo-small" v-if="cur_bchain == 'STEEM'">
-                      <img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain == 'HIVE'">
-                      <img src="/img/BLURT.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain == 'BLURT'">
+                      <img src="/img/STEEM.png" class="mr-1 currency-logo-small" v-if="cur_bchain == 'STEEM'" alt="">
+                      <img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain == 'HIVE'" alt="">
+                      <img src="/img/BLURT.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain == 'BLURT'" alt="">
                       <span v-if="postPaid()">
-                        <span class="m-1" :title="$t('author_payout')"><i class="fa-solid fa-user"></i> {{ paidValue() }}</span>
-                        <span class="m-1" :title="$t('voters_payout')"><i class="fa-solid fa-users"></i> {{ report.curator_payout_value }}</span>
+                        <span class="m-1" :class="{ 'declined-payout': isDeclined }" :title="$t('author_payout')"><i class="fa-solid fa-user"></i> {{ paidValue() }}</span>
+                        <span class="m-1" :class="{ 'declined-payout': isDeclined }" :title="$t('voters_payout')"><i class="fa-solid fa-users"></i> {{ report.curator_payout_value }}</span>
                         <i class="fa-solid fa-check text-green text-bold"></i>
                       </span>
                       <span v-else>
-                        <span class="text-bold">{{ report.pending_payout_value.replace('SBD', '') }}</span>
+                        <span class="text-bold" :class="{ 'declined-payout': isDeclined }">{{ report.pending_payout_value.replace('SBD', '') }}</span>
                         <i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
                       </span>
                       <span v-if="hasBeneficiaries()" :title="beneficiariesDisplay()">
@@ -242,11 +242,13 @@ import SafeRemarkable from '~/components/SafeRemarkable.vue'
 import UserSidebar from '~/components/UserSidebar.vue'
 import EditPostModal from '~/components/EditPostModal'
 import DOMPurify from 'dompurify'
+import { declinedPayoutMixin } from '~/plugins/commonCardMixin.js'
 
 const scot_steemengine_api = process.env.steemEngineScot;
 const scot_hive_api_param = process.env.hiveEngineScotParam;
 
 export default {
+  mixins: [declinedPayoutMixin],
   components: {
     NavbarBrand, ChainSelection, Footer, VoteModal, NotifyModal, UserHoverCard,
     CustomTextEditor, Comments, SocialSharing, SafeRemarkable, UserSidebar, EditPostModal
@@ -259,9 +261,6 @@ export default {
         { hid: 'description', name: 'description', content: `${this.desc} by ${this.username} on Actifit — a move-to-earn fitness activity report rewarded with AFIT tokens.` },
         { hid: 'ogdescription', name: 'og:description', 'property': 'og:description', content: `${this.desc} by ${this.username}` },
         { hid: 'image', name: 'og:image', 'property': 'og:image', content: `${this.postImg}` }
-      ],
-      link: [
-        { rel: 'canonical', href: `${this.canonUrl}` }
       ]
     }
   },
@@ -277,7 +276,6 @@ export default {
     //console.log('connect node');
     let user_name = params.username.replace('@', '');
     let result = await chainLnk.api.getContentAsync(user_name, params.permlink);
-    let is_steem = false;
     if (!result || !result.author) {
       //switch to Steem chain
       /*chainLnk = steem
@@ -290,7 +288,6 @@ export default {
       chainLnk = blurt;
       await chainLnk.api.setOptions({ url: process.env.blurtApiNode });
       result = await chainLnk.api.getContentAsync(user_name, params.permlink);
-      is_steem = false;
       //}
     }
     //console.log('pre-flight');
@@ -314,41 +311,6 @@ export default {
         meta_spec.postImg = imgs[0];
       }
 
-      //let's set proper canonical url based of app
-      let canonUrl = '';
-
-      if (post_meta.app) {
-        let src_app = post_meta.app.split('/')[0];
-        //fetch post original category
-        let post_cat = result.category;
-
-        //fallback
-        if (!post_cat) {
-          post_cat = post_meta.community;
-        }
-
-        //list of current apps applying proper formal scripting. Default as hive
-        let appsPatterns = process.env.hiveAppsScript;
-
-        //fallback to steem
-        if (is_steem) {
-          appsPatterns = process.env.steemAppsScript;
-        }
-
-        for (let appPat in appsPatterns) {
-          if (src_app.toLowerCase() == appPat.toLowerCase()) {
-            //found, grab pattern
-            if (appsPatterns[appPat].url_scheme) {
-              //some might not have a pattern, skip them
-              canonUrl = appsPatterns[appPat].url_scheme.replace('{username}', user_name)
-                .replace('{permlink}', params.permlink)
-                .replace('{category}', post_cat);
-            }
-            break;
-          }
-        }
-      }
-      meta_spec.canonUrl = canonUrl;
       //console.log(result);
       //console.log(result.body);
 
@@ -406,6 +368,7 @@ export default {
     }
   },
   computed: {
+    cardData() { return this.report },
     ...mapGetters('steemconnect', ['user', 'stdLogin']),
     ...mapGetters(['commentEntries', 'newlyVotedPosts', 'bchain', 'moderators', 'commentCountToday']),
 

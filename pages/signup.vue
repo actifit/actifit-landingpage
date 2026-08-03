@@ -374,7 +374,8 @@ import { VueReCaptcha } from 'vue-recaptcha-v3'
 import { mapGetters } from 'vuex'
 import Vue from 'vue'
 
-Vue.use(VueReCaptcha, { siteKey: process.env.captchaV3Key })
+// reCAPTCHA is installed lazily in mounted() so this module has no import-time
+// side effect (a module-level Vue.use loaded reCAPTCHA on other pages too).
 
 export default {
   head() {
@@ -384,9 +385,6 @@ export default {
         { hid: 'description', name: 'description', content: `Create your Actifit account and start earning crypto for staying active. Sign up in seconds and get a 100 AFIT welcome bonus.` },
         { hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Create your Actifit account and start earning crypto for staying active. Sign up in seconds and get a 100 AFIT welcome bonus.` },
         { hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Signup Page - Actifit.io' }
-      ],
-      link: [
-        { rel: 'canonical', href: `https://actifit.io/signup` }
       ]
     }
   },
@@ -519,6 +517,7 @@ export default {
     this.$store.dispatch('fetchUserRank')
     this.$store.dispatch('fetchReferrals')
 
+    Vue.use(VueReCaptcha, { siteKey: process.env.captchaV3Key })
     await this.$recaptchaLoaded()
 
   },

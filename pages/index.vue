@@ -2,7 +2,7 @@
   <div class="home" ref="homePage">
     <!-- top anchor -->
     <a id="top"></a>
-    <div id="navbar-container" ref="navbar-container" v-if="renderReady">
+    <div id="navbar-container" ref="navbar-container">
       <NavbarBrand :home="true" @scrollTo="scrollTo" />
     </div>
 

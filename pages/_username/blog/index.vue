@@ -47,9 +47,6 @@
 			  :key="filteredUserPosts[(iterx - 1) * splitFactor + (itery - 1)].author + '-' + filteredUserPosts[(iterx - 1) * splitFactor + (itery - 1)].permlink" />
           </div>
           <!--<div class="col-md-6 col-lg-12 mb-4" v-if="(iterx - 1) < inlineAds">
-				<client-only>
-				<adsbygoogle ad-slot="7038919015" ad-format="fluid" ad-layout-key="-fb+5w+4e-db+86"/>
-				</client-only>
 			</div>-->
         </div>
       </div>
@@ -175,7 +172,7 @@ export default {
       return this.$route.params.username
     },
     textualTitle() {
-      return this.username + "'s " + this.$t('Blog') + " <img src='/img/HIVE.png' class='mr-2 token-logo-md'>";
+      return this.username + "'s " + this.$t('Blog') + " <img src='/img/HIVE.png' class='mr-2 token-logo-md' alt=''>";
     }
   },
   methods: {

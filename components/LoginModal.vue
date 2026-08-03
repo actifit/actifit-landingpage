@@ -33,17 +33,17 @@
                 <span class="mb-1 form-control-lg " style="display: none">
                   <div class="bchain-option p-1 m-1 btn" :class="adjustHiveClass">
                     <input type="radio" id="hive_bchain" value="HIVE" v-model="bchain_val">
-                    <img src="/img/HIVE.png" style="max-height: 50px;" v-on:click="bchain_val = 'HIVE'">
+                    <img src="/img/HIVE.png" style="max-height: 50px;" v-on:click="bchain_val = 'HIVE'" alt="Select Hive blockchain">
                     <label for="hive_bchain">{{ $t('HIVE') }}</label>
                   </div>
                   <div class="bchain-option p-1 m-1 btn m-auto" :class="adjustSteemClass" style="display:none">
                     <input type="radio" id="steem_bchain" value="STEEM" v-model="bchain_val">
-                    <img src="/img/STEEM.png" style="max-height: 50px;" v-on:click="bchain_val = 'STEEM'" >
+                    <img src="/img/STEEM.png" style="max-height: 50px;" v-on:click="bchain_val = 'STEEM'" alt="Select Steem blockchain" >
                     <label for="steem_bchain">{{ $t('STEEM') }}</label>
                   </div>
                   <div class="bchain-option p-1 m-1 btn" :class="adjustBlurtClass">
                     <input type="radio" id="blurt_bchain" value="BLURT" v-model="bchain_val">
-                    <img src="/img/BLURT.png" style="max-height: 50px;" v-on:click="bchain_val = 'BLURT'" >
+                    <img src="/img/BLURT.png" style="max-height: 50px;" v-on:click="bchain_val = 'BLURT'" alt="Select Blurt blockchain" >
                     <label for="blurt_bchain">{{ $t('BLURT') }}</label>
                   </div>
                 </span>
@@ -67,7 +67,10 @@
   // YOUR CURRENT, IMPROVED SCRIPT IS PRESERVED
   import { VueReCaptcha } from 'vue-recaptcha-v3'
   import Vue from 'vue'
-  Vue.use(VueReCaptcha, { siteKey: process.env.captchaV3Key })
+  // reCAPTCHA is installed lazily (see ensureRecaptcha) when the login modal is
+  // opened — NOT at import time. This component is imported by the always-present
+  // navbar, so a module-level Vue.use() loaded the Google reCAPTCHA script on
+  // every page (including the homepage) and blocked the main thread on load.
   import QRious from 'qrious';
   import { PublicKey, Signature, hash } from '@hiveio/hive-js/lib/auth/ecc';
 
@@ -117,13 +120,14 @@
       $(this.$refs.loginModal).on('show.bs.modal', () => {
         this.originalTitle = document.title;
         document.title = this.$t('Login_actifit');
+        // Load reCAPTCHA only once the user actually opens the login modal.
+        this.ensureRecaptcha();
       });
       $(this.$refs.loginModal).on('hidden.bs.modal', () => {
         document.title = this.originalTitle;
         this.resetForm();
         this.$emit('close');
       });
-      await this.$recaptchaLoaded();
       this.verifyKeychain();
     },
     beforeDestroy() {
@@ -147,14 +151,14 @@
         let acct_data = json.HIVE; let userSC = new Object(); userSC.account = acct_data; this.is_logged_in = true; this.$store.commit('setStdLoginUser', true); localStorage.setItem('acti_login_method', 'hiveauth'); localStorage.setItem('access_token', this.hiveauth_token); localStorage.setItem('expires', this.hiveauth_expire); localStorage.setItem('key', this.hiveauth_key); localStorage.setItem('std_login', true); localStorage.setItem('std_login_name', userSC.account.name); this.$store.commit('steemconnect/login', userSC); this.closeModal(); this.resetForm(); this.$store.dispatch('steemconnect/refreshUser'); this.$store.dispatch('fetchModerators');
       },
       setKeychainLoginStatus (json){
-        if (json && json.success && json.token && json.userdata){ const recaptcha = this.$recaptchaInstance; recaptcha.hideBadge(); let acct_data = json.userdata; let userSC = new Object(); userSC.account = acct_data; this.is_logged_in = true; this.$store.commit('setStdLoginUser', true); localStorage.setItem('access_token', json.token); localStorage.setItem('std_login', true); localStorage.setItem('std_login_name', userSC.account.name); localStorage.setItem('acti_login_method', 'keychain'); this.$store.commit('steemconnect/login', userSC); this.closeModal(); this.resetForm(); this.$store.dispatch('steemconnect/refreshUser'); this.$store.dispatch('fetchModerators'); }else{ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('login_error'); return; }
+        if (json && json.success && json.token && json.userdata){ const recaptcha = this.$recaptchaInstance; if (recaptcha) recaptcha.hideBadge(); let acct_data = json.userdata; let userSC = new Object(); userSC.account = acct_data; this.is_logged_in = true; this.$store.commit('setStdLoginUser', true); localStorage.setItem('access_token', json.token); localStorage.setItem('std_login', true); localStorage.setItem('std_login_name', userSC.account.name); localStorage.setItem('acti_login_method', 'keychain'); this.$store.commit('steemconnect/login', userSC); this.closeModal(); this.resetForm(); this.$store.dispatch('steemconnect/refreshUser'); this.$store.dispatch('fetchModerators'); }else{ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('login_error'); return; }
       },
       setUserLoginStatus (json, postingKey) {
-        this.is_logged_in = json.success; if (json.success && json.token){ const recaptcha = this.$recaptchaInstance; recaptcha.hideBadge(); localStorage.setItem('actiToken', json.token); let userSC = new Object(); userSC.account = json.userdata; this.$store.commit('setStdLoginUser', true); this.$store.commit('setChatPostingKey', postingKey); localStorage.setItem('access_token', json.token); localStorage.setItem('std_login', true); localStorage.setItem('std_login_name', userSC.account.name); localStorage.setItem('acti_login_method', ''); this.$store.commit('steemconnect/login', userSC); this.closeModal(); this.resetForm(); this.$store.dispatch('steemconnect/refreshUser'); this.$store.dispatch('fetchModerators'); this.$emit('login-successful'); }else{ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('login_error'); }
+        this.is_logged_in = json.success; if (json.success && json.token){ const recaptcha = this.$recaptchaInstance; if (recaptcha) recaptcha.hideBadge(); localStorage.setItem('actiToken', json.token); let userSC = new Object(); userSC.account = json.userdata; this.$store.commit('setStdLoginUser', true); this.$store.commit('setChatPostingKey', postingKey); localStorage.setItem('access_token', json.token); localStorage.setItem('std_login', true); localStorage.setItem('std_login_name', userSC.account.name); localStorage.setItem('acti_login_method', ''); this.$store.commit('steemconnect/login', userSC); this.closeModal(); this.resetForm(); this.$store.dispatch('steemconnect/refreshUser'); this.$store.dispatch('fetchModerators'); this.$emit('login-successful'); }else{ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('login_error'); }
       },
       verifyHiveauth (challenge, data){ const sig = Signature.fromHex(data.challenge); const buf = hash.sha256(challenge, null, 0); return sig.verifyHash(buf, PublicKey.fromString(data.pubkey)); },
 async loginHiveauth (){
-        if (this.$refs["username"].value == ''){ this.error_proceeding = true; this.error_msg = this.$t('login_error'); return; } this.login_in_progress = true; let account = this.$refs["username"].value.trim().toLowerCase(); const APP_META = { name:"actifit", description: process.env.socialSharingTitle, icon:"https://actifit.io/img/actifit_logo.png" }; const auth = { username: account, expire: undefined, key: undefined, }; const status = this.$HAS.status(); let challenge_data = { key_type: "posting", challenge: JSON.stringify({ login: account, ts: Date.now(), }) }; let mainRef = this; this.$HAS.authenticate(auth, APP_META, challenge_data, (message) => { if (message.cmd && message.cmd === 'auth_wait'){ this.hiveauth_wait = true; this.$nextTick(() => { const authPayload = { uuid: message.uuid, account: account, key: message.key, host: 'wss://hive-auth.arcange.eu' }; this.hiveauth_key = message.key; const authUri = `has://auth_req/${btoa(JSON.stringify(authPayload))}`; const qrLinkElement = mainRef.$refs['hiveauth-qr-link']; const qrElement = mainRef.$refs['hiveauth-qr']; const QR = new QRious({ element: qrElement, background: 'white', backgroundAlpha: 0.8, foreground: 'black', size: 200, }); QR.value = authUri; qrLinkElement.href = authUri; }); } }).then(async (message) => { if (message.cmd && message.cmd === 'auth_ack'){ const { data } = message; const { expire, token } = data; const success = this.verifyHiveauth(challenge_data.challenge, data.challenge); this.hiveauth_wait = false; this.hiveauth_expire = expire; this.hiveauth_token = token; if (success){ const recaptcha = this.$recaptchaInstance; recaptcha.hideBadge(); this.login_in_progress = false; try { const acctController = new AbortController(); const acctTimeoutId = setTimeout(() => acctController.abort(), 20000); const acctRes = await fetch('/api/proxy/getAccountData?user='+encodeURIComponent(account)+'&bchain=HIVE', { signal: acctController.signal }); clearTimeout(acctTimeoutId); const acctJson = await acctRes.json(); this.setHiveauthLoginStatus(acctJson); } catch (e) { console.error('HiveAuth account data error:', e); this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('login_error'); } }else{ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('login_error'); return; } }else if (message.cmd && message.cmd === 'auth_nack'){ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('auth_rejected_by_user'); return; } }).catch(err => { console.error(err); this.error_proceeding = true; this.error_msg = this.$t('login_error'); this.hiveauth_wait = false; this.login_in_progress = false; });
+        if (this.$refs["username"].value == ''){ this.error_proceeding = true; this.error_msg = this.$t('login_error'); return; } this.login_in_progress = true; let account = this.$refs["username"].value.trim().toLowerCase(); const APP_META = { name:"actifit", description: process.env.socialSharingTitle, icon:"https://actifit.io/img/actifit_logo.png" }; const auth = { username: account, expire: undefined, key: undefined, }; const status = this.$HAS.status(); let challenge_data = { key_type: "posting", challenge: JSON.stringify({ login: account, ts: Date.now(), }) }; let mainRef = this; this.$HAS.authenticate(auth, APP_META, challenge_data, (message) => { if (message.cmd && message.cmd === 'auth_wait'){ this.hiveauth_wait = true; this.$nextTick(() => { const authPayload = { uuid: message.uuid, account: account, key: message.key, host: 'wss://hive-auth.arcange.eu' }; this.hiveauth_key = message.key; const authUri = `has://auth_req/${btoa(JSON.stringify(authPayload))}`; const qrLinkElement = mainRef.$refs['hiveauth-qr-link']; const qrElement = mainRef.$refs['hiveauth-qr']; const QR = new QRious({ element: qrElement, background: 'white', backgroundAlpha: 0.8, foreground: 'black', size: 200, }); QR.value = authUri; qrLinkElement.href = authUri; }); } }).then(async (message) => { if (message.cmd && message.cmd === 'auth_ack'){ const { data } = message; const { expire, token } = data; const success = this.verifyHiveauth(challenge_data.challenge, data.challenge); this.hiveauth_wait = false; this.hiveauth_expire = expire; this.hiveauth_token = token; if (success){ const recaptcha = this.$recaptchaInstance; if (recaptcha) recaptcha.hideBadge(); this.login_in_progress = false; try { const acctController = new AbortController(); const acctTimeoutId = setTimeout(() => acctController.abort(), 20000); const acctRes = await fetch('/api/proxy/getAccountData?user='+encodeURIComponent(account)+'&bchain=HIVE', { signal: acctController.signal }); clearTimeout(acctTimeoutId); const acctJson = await acctRes.json(); this.setHiveauthLoginStatus(acctJson); } catch (e) { console.error('HiveAuth account data error:', e); this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('login_error'); } }else{ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('login_error'); return; } }else if (message.cmd && message.cmd === 'auth_nack'){ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('auth_rejected_by_user'); return; } }).catch(err => { console.error(err); this.error_proceeding = true; this.error_msg = this.$t('login_error'); this.hiveauth_wait = false; this.login_in_progress = false; });
       },
       async verifyKeychain () {
         return new Promise((resolve) => { if (window.hive_keychain) { this.keychain = window.hive_keychain; this.keychain.requestHandshake(() => { this.keychain_available = true; resolve(); }); } })
@@ -218,11 +222,18 @@ async loginHiveauth (){
           this.error_msg = this.$t('login_error');
         }
       },
+      // Installs vue-recaptcha-v3 (and loads the Google script) on first use.
+      // Vue.use is idempotent, so calling this repeatedly is safe.
+      ensureRecaptcha () {
+        Vue.use(VueReCaptcha, { siteKey: process.env.captchaV3Key });
+        return this.$recaptchaLoaded();
+      },
       async proceedLogin () {
         this.captcha_invalid = '';
         this.error_proceeding = false;
         this.error_msg = '';
         if (this.$refs["username"].value == '' || this.$refs["ppkey"].value == ''){ this.error_proceeding = true; this.error_msg = this.$t('login_error'); return; }
+        await this.ensureRecaptcha();
         const token = await this.$recaptcha('login');
         let outc = await fetch('/api/proxy/verifyLoginCaptcha?token='+encodeURIComponent(token));
         let captchaJson = await outc.json();

@@ -1,6 +1,34 @@
 import ProfilePage from '~/pages/_username/index.vue'
 
-const { broadcastUpdate, getLiveProfileMetadata, saveMeasurements } = ProfilePage.methods
+const { broadcastUpdate, getLiveProfileMetadata, proceedLogout, saveMeasurements } = ProfilePage.methods
+
+describe('profile account actions', () => {
+  it('clears the standard login state and dispatches logout', () => {
+    const originalProcessClient = process.client
+    process.client = true
+    localStorage.setItem('std_login', 'true')
+    localStorage.setItem('std_login_name', 'alice')
+
+    const context = {
+      $store: {
+        commit: jest.fn(),
+        dispatch: jest.fn()
+      }
+    }
+
+    try {
+      proceedLogout.call(context)
+
+      expect(context.$store.commit).toHaveBeenCalledWith('setStdLoginUser', false)
+      expect(localStorage.getItem('std_login')).toBeNull()
+      expect(localStorage.getItem('std_login_name')).toBeNull()
+      expect(context.$store.dispatch).toHaveBeenCalledWith('steemconnect/logout')
+    } finally {
+      process.client = originalProcessClient
+      localStorage.clear()
+    }
+  })
+})
 
 describe('profile metadata updates', () => {
   it('reads freshly fetched posting metadata before saving', async () => {
@@ -111,6 +139,30 @@ describe('profile metadata updates', () => {
 
     expect(context.measurementSaveError).toBe('missing required posting authority')
     expect(context.applyMeasurementSources).not.toHaveBeenCalled()
+    expect(context.savingMeasurements).toBe(false)
+  })
+
+  it('silently stops saving measurements when the user cancels Keychain', async () => {
+    const context = {
+      user: { account: { name: 'alice' } },
+      userinfo: {},
+      measurementDraft: { weight: '70', weightUnit: 'kg' },
+      measurementSaveError: '',
+      savingMeasurements: false,
+      getLiveProfileMetadata: jest.fn().mockResolvedValue({ profile: {} }),
+      $processTrxFunc: jest.fn().mockResolvedValue({ success: false, error: 'user_cancel' }),
+      applyMeasurementSources: jest.fn(),
+      turnMeasurementsEditOff: jest.fn(),
+      $notify: jest.fn(),
+      $t: key => key
+    }
+
+    await saveMeasurements.call(context)
+
+    expect(context.measurementSaveError).toBe('')
+    expect(context.applyMeasurementSources).not.toHaveBeenCalled()
+    expect(context.turnMeasurementsEditOff).not.toHaveBeenCalled()
+    expect(context.$notify).not.toHaveBeenCalled()
     expect(context.savingMeasurements).toBe(false)
   })
 })

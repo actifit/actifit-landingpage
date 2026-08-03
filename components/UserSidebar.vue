@@ -10,6 +10,7 @@
         <div class="d-flex align-items-center mb-3 user-header">
           <nuxt-link :to="'/@' + report.author">
             <img :src="`https://images.hive.blog/u/${report.author}/avatar/large`" class="sidebar-avatar"
+                 :alt="`Profile picture of @${report.author}`"
                  @error="$event.target.src='https://actifit.io/img/user-default.png'">
           </nuxt-link>
           <div class="ml-3">
@@ -166,14 +167,20 @@ export default {
             ? JSON.parse(post.json_metadata) 
             : post.json_metadata;
         if (meta && meta.image && Array.isArray(meta.image) && meta.image.length > 0 && meta.image[0]) {
-          return `https://images.hive.blog/400x225/${meta.image[0]}`;
+          return this.hiveResized(meta.image[0], '400x225');
         }
       } catch (e) { }
       if (post.body) {
         const match = post.body.match(/https?:\/\/[^)\s]+\.(?:png|jpg|jpeg|gif|webp)/i);
-        if (match) return `https://images.hive.blog/400x225/${match[0]}`;
+        if (match) return this.hiveResized(match[0], '400x225');
       }
       return null;
+    },
+    hiveResized(url, size) {
+      // usermedia.actifit.io / already-hive-hosted images aren't served by the
+      // Hive resize proxy (403) — use them directly.
+      if (url.startsWith('https://images.hive.blog') || url.startsWith('https://usermedia.actifit.io')) return url;
+      return `https://images.hive.blog/${size}/${url}`;
     },
     getPostCardBackground(post) {
         const imageUrl = this.getPostImage(post);

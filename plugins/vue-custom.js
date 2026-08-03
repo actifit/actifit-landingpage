@@ -416,7 +416,9 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
 		if (!url || typeof url !== 'string') return '';
 		url = url.trim();
 		if (!url.startsWith('http')) return '';
-		const proxiedUrl = (url.startsWith('https://images.hive.blog') || url.toLowerCase().endsWith('.gif'))
+		// usermedia.actifit.io (Actifit's own upload host) is not served by the
+		// Hive image proxy (403), so serve it directly like already-hive-hosted / gif images.
+		const proxiedUrl = (url.startsWith('https://images.hive.blog') || url.startsWith('https://usermedia.actifit.io') || url.toLowerCase().endsWith('.gif'))
 			? url
 			: `https://images.hive.blog/0x0/${url}`;
 		return `<img src="${escapeHtmlAttr(proxiedUrl)}">`;
@@ -672,13 +674,19 @@ Vue.prototype.$uuidv4 = function(){
 
 Vue.prototype.$fetchHiveFmtPostImage = function (metaData){
 	if (this.$postHasImage(metaData)){
+		let imgUrl;
 		try{
 			//find first occurrence that is url
-			return 'https://images.hive.blog/0x0/' + metaData.image.find(element => /^(http|https):\/\//.test(element));
+			imgUrl = metaData.image.find(element => /^(http|https):\/\//.test(element));
 		}catch(err){
 			//alt image case
-			return 'https://images.hive.blog/0x0/' + metaData.images.find(element => /^(http|https):\/\//.test(element));
+			imgUrl = metaData.images.find(element => /^(http|https):\/\//.test(element));
 		}
+		if (!imgUrl) return "";
+		// usermedia.actifit.io / already-hive-hosted images are not served by the
+		// Hive image proxy (403) — return them directly instead of a broken proxy URL.
+		if (imgUrl.startsWith('https://images.hive.blog') || imgUrl.startsWith('https://usermedia.actifit.io')) return imgUrl;
+		return 'https://images.hive.blog/0x0/' + imgUrl;
 	}
 	return "";
 };

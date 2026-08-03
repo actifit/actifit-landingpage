@@ -6,7 +6,7 @@
 			  <h2><a :href="'/' + this.professional.username">@{{ this.professional.username}}</a></h2>
 			  <h3>{{ this.professional.type}}</h3>
 			  <h4>{{ this.professional.location}}</h4>
-			  <img :src="this.professional.pic" class="pro-img-cls">
+			  <img :src="this.professional.pic" class="pro-img-cls" :alt="`${this.professional.name} profile picture`">
 		  </div>
 		  <div class="pb-md-2 text-left">
 			<b>{{ $t('brief')}}: </b>{{this.professional.brief}}

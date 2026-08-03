@@ -395,6 +395,8 @@ module.exports = {
   confirm_vote_change: 'Sie haben bereits für diesen Beitrag gestimmt. Sind Sie sicher, dass Sie Ihre Stimme ändern möchten?',
   confirm_delete_comment: 'Sind Sie sicher, dass Sie Ihren Kommentar löschen möchten?',
   user_not_found_error: 'Fehler: Benutzer nicht gefunden',
+  invalid_account_name: 'Bitte geben Sie einen gültigen Kontonamen ein.',
+  account_lookup_failed: 'Das Konto konnte nicht überprüft werden. Bitte versuchen Sie es erneut.',
   need_login_signup_notice_vote: 'Sie müssen sich zuerst anmelden oder registrieren',
   Reply: 'Antworten',
   Full_AFIT_Payout_Mode: 'Vollständiger AFIT-Auszahlungsmodus',

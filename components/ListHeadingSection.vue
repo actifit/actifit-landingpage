@@ -1,11 +1,11 @@
 <template>
   <div class="bg-gradient rounded mb-3 p-2">
-    <div v-if="username" class="user-avatar mr-1 mb-3 col-12 col-md-12 float-left"
-      :style="'background-image: url('+this.profImgUrl+'/u/' + this.username + '/avatar)'">
+    <div class="list-heading-content">
+      <img v-if="username" class="list-heading-avatar" :src="avatarSrc" alt="" width="30" height="30"
+        aria-hidden="true" @error="useFallbackAvatar">
+
+      <h1 class="font-weight-semibold text-white text-left h4 mb-0" v-html="textualDisplay"></h1>
     </div>
-
-    <h2 class="font-weight-semibold text-white text-left h4" v-html="textualDisplay"></h2>
-
   </div>
 </template>
 <script>
@@ -25,18 +25,55 @@ export default {
   data (){
     return {
       profImgUrl: process.env.hiveImgUrl,
+      avatarLoadFailed: false,
+    }
+  },
+  computed: {
+    avatarSrc () {
+      if (this.avatarLoadFailed) {
+        return '/img/actifit_logo_32.png'
+      }
+      return `${this.profImgUrl}/u/${encodeURIComponent(this.username)}/avatar`
+    }
+  },
+  watch: {
+    username () {
+      this.avatarLoadFailed = false
+    }
+  },
+  methods: {
+    useFallbackAvatar () {
+      this.avatarLoadFailed = true
     }
   }
 }
 </script>
-<style>
-.user-avatar {
+<style scoped>
+.list-heading-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.list-heading-avatar {
+  flex: 0 0 30px;
   width: 30px;
   height: 30px;
-  background-position: center center;
-  background-size: cover;
+  min-width: 30px;
+  min-height: 30px;
+  max-width: 30px;
+  max-height: 30px;
+  padding: 0;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  display: block;
+  object-fit: cover;
   border-radius: 50%;
-  float: left;
   border: solid 1px #ddd;
+}
+
+.list-heading-content h1 {
+  min-width: 0;
 }
 </style>

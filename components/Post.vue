@@ -73,15 +73,15 @@
         <!-- Payout info remains here as it is unique -->
         <div class="row details mt-2">
           <div class="col-12">
-            <img src="/img/STEEM.png" class="mr-1 currency-logo-small" v-if="cur_bchain == 'STEEM'">
-            <img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain == 'HIVE'">
+            <img src="/img/STEEM.png" class="mr-1 currency-logo-small" v-if="cur_bchain == 'STEEM'" alt="">
+            <img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain == 'HIVE'" alt="">
             <span v-if="postPaid()">
-              <span class="m-1" :title="$t('author_payout')"><i class="fa-solid fa-user"></i> {{ paidValue() }}</span>
-              <span class="m-1" :title="$t('voters_payout')"><i class="fa-solid fa-users"></i> {{ post.curator_payout_value }}</span>
+              <span class="m-1" :class="{ 'declined-payout': isDeclined }" :title="$t('author_payout')"><i class="fa-solid fa-user"></i> {{ paidValue() }}</span>
+              <span class="m-1" :class="{ 'declined-payout': isDeclined }" :title="$t('voters_payout')"><i class="fa-solid fa-users"></i> {{ post.curator_payout_value }}</span>
               <i class="fa-solid fa-check text-green text-bold"></i>
             </span>
             <span v-else>
-              <span class="text-brand text-bold">{{ post.pending_payout_value.replace('SBD', '') }}</span>
+              <span class="text-brand text-bold" :class="{ 'declined-payout': isDeclined }">{{ post.pending_payout_value.replace('SBD', '') }}</span>
               <i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
             </span>
             <span v-if="hasBeneficiaries()" :title="beneficiariesDisplay()" @click="toggleTooltip()" @mouseenter="showTooltip()" @mouseleave="hideTooltip()" @touchstart="showTooltip()" @touchend="hideTooltip()">
@@ -90,7 +90,7 @@
             </span>
           </div>
           <div class="col-6 text-right" v-if="afitReward != ''">
-            <small><img src="/img/actifit_logo.png" class="mr-1 currency-logo-small">{{ afitReward }} {{ $t('AFIT_Token') }}</small>
+            <small><img src="/img/actifit_logo.png" class="mr-1 currency-logo-small" alt="">{{ afitReward }} {{ $t('AFIT_Token') }}</small>
           </div>
         </div>
       </div>

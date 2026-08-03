@@ -6,7 +6,6 @@
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-5">
       <ListHeadingSection :textualDisplay="textualTitle" />
-      <h2 class="text-center mb-5"></h2>
 	  <!--<ChainSelection />-->
 
 
@@ -47,9 +46,6 @@
 				@update-community="updateCommunity"/>
 			</div>
 			<!--<div class="col-md-6 col-lg-12 mb-4" v-if="(iterx - 1) < inlineAds">
-				<client-only>
-				<adsbygoogle ad-slot="7038919015" ad-format="fluid" ad-layout-key="-fb+5w+4e-db+86"/>
-				</client-only>
 			</div>
 		</div>-->
       </div>
@@ -167,7 +163,7 @@
 	    ...mapGetters('steemconnect', ['stdLogin']),
       ...mapGetters(['communitiesList', 'bchain']),
       textualTitle(){
-        return this.$t('Hive_communities')+'<img src="/img/HIVE.png" class="mr-2 token-logo-md">';
+        return this.$t('Hive_communities')+'<img src="/img/HIVE.png" class="mr-2 token-logo-md" alt="">';
       }
 
 
