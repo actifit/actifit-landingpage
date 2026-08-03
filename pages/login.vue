@@ -89,9 +89,7 @@
   //import {keychain, isKeychainInstalled, hasKeychainBeenUsed} from '@hiveio/keychain'
 
   import Vue from 'vue'
-  // reCAPTCHA is installed lazily in mounted() so this page's module has no
-  // import-time side effect (a module-level Vue.use loaded reCAPTCHA on other
-  // pages, e.g. the homepage, blocking the main thread).
+  Vue.use(VueReCaptcha, { siteKey: process.env.captchaV3Key })
 
   //QR display for hive auth
   import QRious from 'qrious';
@@ -175,8 +173,9 @@
 		} catch (e) {
 		  console.log(e);
 		}*/
-		Vue.use(VueReCaptcha, { siteKey: process.env.captchaV3Key })
+		console.log('load recaptcha')
 		await this.$recaptchaLoaded()
+		console.log('complete')
 		this.verifyKeychain();
 	},
 	methods: {
