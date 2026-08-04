@@ -75,14 +75,6 @@ href="#news"
             </a>
           </li>
 
-          <li class="nav-item btn btn-brand m-1 nav-item-border" :title="$t('professionals_title')">
-            <a class="nav-link text-white d-flex align-items-center justify-content-center w-100 h-100"
-               href="/consultants"
-               @click.prevent="$router.push('/consultants'); closeMenu()">
-              <i class="fas fa-user-md text-white"></i><span>{{ $t('professionals_title') }}</span>
-            </a>
-          </li>
-
           <li class="nav-item btn btn-brand m-1 nav-item-border" :title="$t('Communities')">
             <a class="nav-link text-white d-flex align-items-center justify-content-center w-100 h-100"
                href="/communities"
