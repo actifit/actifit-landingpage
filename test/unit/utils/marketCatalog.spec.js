@@ -1,7 +1,9 @@
 import {
   filterMarketProducts,
   getGadgetOwnership,
-  getOwnedGadgetProducts
+  getOwnedGadgetProducts,
+  getProductMarketState,
+  isProductBuyable
 } from '~/utils/marketCatalog'
 
 const products = [
@@ -26,7 +28,7 @@ describe('market catalog filtering', () => {
     expect(filterMarketProducts(null, '')).toEqual([])
   })
 
-  it('filters active and inactive ownership independently', () => {
+  it('separates activated products from bought-but-inactive products', () => {
     const stats = [
       { _id: { gadget: 'regular', status: 'active' }, count: 1 },
       { _id: { gadget: 'regular', status: 'bought' }, count: 2 },
@@ -34,10 +36,7 @@ describe('market catalog filtering', () => {
     ]
 
     expect(filterMarketProducts(products, '', 'active', stats).map(product => product._id)).toEqual(['regular'])
-    expect(filterMarketProducts(products, '', 'inactive', stats).map(product => product._id)).toEqual([
-      'regular',
-      'seasonal'
-    ])
+    expect(filterMarketProducts(products, '', 'inactive', stats).map(product => product._id)).toEqual(['seasonal'])
   })
 
   it('shows only in-stock, currently unowned products as available', () => {
@@ -49,6 +48,42 @@ describe('market catalog filtering', () => {
       'seasonal',
       'physical'
     ])
+  })
+
+  it('does not mark in-stock products as available when user requirements fail', () => {
+    const restricted = {
+      _id: 'restricted',
+      type: 'ingame',
+      count: 1,
+      requirements: [{ item: 'User Rank', level: 10 }]
+    }
+
+    expect(isProductBuyable(restricted, { userRank: 5 })).toBe(false)
+    expect(isProductBuyable(restricted, { userRank: 10 })).toBe(true)
+    expect(filterMarketProducts(
+      [restricted], '', 'available', [], '', '', { userRank: 5 }
+    )).toEqual([])
+  })
+
+  it('only applies stock availability to inventory-managed products', () => {
+    expect(isProductBuyable({ type: 'ingame', count: 0 })).toBe(false)
+    expect(isProductBuyable({ type: 'real', count: 0 })).toBe(false)
+    expect(isProductBuyable({ type: 'ebook' })).toBe(true)
+    expect(isProductBuyable({ type: 'ebook', count: 0 })).toBe(true)
+    expect(isProductBuyable({ type: 'service', count: 0 })).toBe(true)
+  })
+
+  it('assigns each product a single prioritized market state', () => {
+    const product = { _id: 'regular', type: 'ingame', count: 1 }
+
+    expect(getProductMarketState(product, {
+      gadgetStats: [{ _id: { gadget: 'regular', status: 'active' }, count: 1 }]
+    })).toBe('activated')
+    expect(getProductMarketState(product, {
+      gadgetStats: [{ _id: { gadget: 'regular', status: 'bought' }, count: 1 }]
+    })).toBe('bought')
+    expect(getProductMarketState(product)).toBe('available')
+    expect(getProductMarketState({ ...product, count: 0 })).toBe('unavailable')
   })
 
   it('combines category and ownership-status filters', () => {

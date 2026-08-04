@@ -756,6 +756,8 @@ module.exports = {
   product_bought: '_PRODUCT_ Başarıyla Satın Alındı',
   Remaining_boost: 'Kalan Artış',
   Active: 'Aktif',
+  market_state_activated: 'Etkinleştirildi',
+  market_state_unavailable: 'Kullanılamıyor',
   Inactive: 'Pasif',
   to_a_friend: 'bir arkadaşa',
   to_you: 'sana',

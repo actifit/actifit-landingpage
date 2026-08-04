@@ -756,6 +756,8 @@ module.exports = {
   product_bought: '_PRODUCT_ Acquistato con Successo',
   Remaining_boost: 'Potenziamento Rimanente',
   Active: 'Attivo',
+  market_state_activated: 'Attivato',
+  market_state_unavailable: 'Non disponibile',
   Inactive: 'Inattivo',
   to_a_friend: 'a un amico',
   to_you: 'a te',

@@ -756,6 +756,8 @@ module.exports = {
   product_bought: 'تم شراء _PRODUCT_ بنجاح',
   Remaining_boost: 'التعزيز المتبقي',
   Active: 'نشط',
+  market_state_activated: 'مفعّلة',
+  market_state_unavailable: 'غير متاح',
   Inactive: 'غير نشط',
   to_a_friend: 'لصديق',
   to_you: 'لك',

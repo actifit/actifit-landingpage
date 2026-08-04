@@ -53,37 +53,98 @@
 				</div>
 			</section>
 
-			<!-- toolbar: category filter (left), sort (right) -->
+			<!-- compact market toolbar: search (left), sort and filter drawer trigger (right) -->
 			<div class="market-toolbar mb-4" v-if="prodList.length">
 				<div class="market-toolbar-row">
-					<div class="filter-pills" role="group" :aria-label="$t('Filter_By')">
-						<button type="button" class="filter-pill" v-for="opt in filterOptions" :key="opt.value"
-							:class="{ active: currentFilter === opt.value }" @click="currentFilter = opt.value">
-							{{ $t(opt.labelKey) }}
+					<div class="toolbar-search-group">
+						<div class="market-search">
+							<label class="sr-only" for="marketSearch">{{ $t('Search') }} {{ $t('Products') }}</label>
+							<i class="fas fa-search"></i>
+							<input id="marketSearch" v-model.trim="searchQuery" type="search" class="form-control"
+								:placeholder="$t('Search') + ' ' + $t('Products')">
+							<button v-if="searchQuery" type="button" class="search-clear" :aria-label="$t('Close')"
+								@click.prevent="searchQuery = ''"><i class="fas fa-times"></i></button>
+						</div>
+						<span class="market-results-count">{{ filteredProducts.length }} {{ $t('Products') }}</span>
+					</div>
+					<div class="toolbar-controls">
+						<div class="toolbar-control sort-control">
+							<label class="sort-label" for="marketSort">{{ $t('Sort_By') }}</label>
+							<select id="marketSort" v-model="currentSort" class="form-control sort-select">
+								<option :value="JSON.stringify({ value: 'name', direction: 'asc' })">{{ $t('Name') }}▲</option>
+								<option :value="JSON.stringify({ value: 'name', direction: 'desc' })">{{ $t('Name') }}▼</option>
+								<option :value="JSON.stringify({ value: 'level', direction: 'asc' })">{{ $t('Level') }}▲</option>
+								<option :value="JSON.stringify({ value: 'level', direction: 'desc' })">{{ $t('Level') }}▼</option>
+								<option :value="JSON.stringify({ value: 'price', direction: 'asc' })">{{ $t('Price') }}▲</option>
+								<option :value="JSON.stringify({ value: 'price', direction: 'desc' })">{{ $t('Price') }}▼</option>
+								<option :value="JSON.stringify({ value: 'reqtsFilled', direction: 'desc' })">{{ $t('Ready') }}▲</option>
+								<option :value="JSON.stringify({ value: 'reqtsFilled', direction: 'asc' })">{{ $t('Ready') }}▼</option>
+								<option :value="JSON.stringify({ value: 'bought', direction: 'asc' })">{{ $t('Bought') }}▲</option>
+								<option :value="JSON.stringify({ value: 'bought', direction: 'desc' })">{{ $t('Bought') }}▼</option>
+							</select>
+						</div>
+						<button type="button" class="cart-trigger" data-toggle="modal" data-target="#cartModal"
+							:aria-label="$t('Checkout_title')">
+							<i class="fas fa-shopping-cart"></i>
+							<span class="toolbar-action-label">{{ $t('Checkout_title') }}</span>
+							<span v-if="cartEntries.length" class="cart-count">{{ cartEntries.length }}</span>
+						</button>
+						<button type="button" class="filter-trigger" :aria-label="$t('Filter_By')"
+							@click="filterDrawerOpen = true">
+							<i class="fas fa-sliders-h"></i>
+							<span class="toolbar-action-label">{{ $t('Filter_By') }}</span>
+							<span v-if="activeFilterCount" class="filter-count">{{ activeFilterCount }}</span>
 						</button>
 					</div>
-
-					<div class="toolbar-controls">
-						<label class="sort-label" for="marketSort">{{ $t('Sort_By') }}</label>
-						<select id="marketSort" v-model="currentSort" class="form-control sort-select">
-							<option :value="JSON.stringify({ value: 'name', direction: 'asc' })">{{ $t('Name') }}▲</option>
-							<option :value="JSON.stringify({ value: 'name', direction: 'desc' })">{{ $t('Name') }}▼</option>
-							<option :value="JSON.stringify({ value: 'level', direction: 'asc' })">{{ $t('Level') }}▲</option>
-							<option :value="JSON.stringify({ value: 'level', direction: 'desc' })">{{ $t('Level') }}▼</option>
-							<option :value="JSON.stringify({ value: 'price', direction: 'asc' })">{{ $t('Price') }}▲</option>
-							<option :value="JSON.stringify({ value: 'price', direction: 'desc' })">{{ $t('Price') }}▼</option>
-							<option :value="JSON.stringify({ value: 'reqtsFilled', direction: 'desc' })">{{ $t('Ready') }}▲</option>
-							<option :value="JSON.stringify({ value: 'reqtsFilled', direction: 'asc' })">{{ $t('Ready') }}▼</option>
-							<option :value="JSON.stringify({ value: 'bought', direction: 'asc' })">{{ $t('Bought') }}▲</option>
-							<option :value="JSON.stringify({ value: 'bought', direction: 'desc' })">{{ $t('Bought') }}▼</option>
-						</select>
-					</div>
-				</div>
-
-				<div class="market-results-count">
-					{{ filteredProducts.length }} {{ $t('Products') }}
 				</div>
 			</div>
+
+			<transition name="filter-drawer">
+				<div v-if="filterDrawerOpen" class="filter-drawer-overlay" @click.self="filterDrawerOpen = false">
+					<aside class="filter-drawer" role="dialog" aria-modal="true" :aria-label="$t('Filter_By')">
+						<header class="filter-drawer-header">
+							<h3><i class="fas fa-sliders-h"></i> {{ $t('Filter_By') }}</h3>
+							<button type="button" class="filter-drawer-close" :aria-label="$t('Close')"
+								@click="filterDrawerOpen = false"><i class="fas fa-times"></i></button>
+						</header>
+
+						<div class="filter-drawer-body">
+							<fieldset class="filter-section">
+								<legend>{{ $t('Products') }}</legend>
+								<button type="button" v-for="opt in availableFilterOptions" :key="opt.value" class="drawer-filter-option"
+									:class="{ active: currentFilter === opt.value }" @click="currentFilter = opt.value">
+									{{ $t(opt.labelKey) }} <i v-if="currentFilter === opt.value" class="fas fa-check"></i>
+								</button>
+							</fieldset>
+
+							<fieldset class="filter-section">
+								<legend>{{ $t('purchase_currency') }}</legend>
+								<button type="button" v-for="opt in currencyOptions" :key="opt.value" class="drawer-filter-option"
+									:class="{ active: currentCurrency === opt.value }" @click="currentCurrency = opt.value">
+									{{ opt.value || $t(opt.labelKey) }} <i v-if="currentCurrency === opt.value" class="fas fa-check"></i>
+								</button>
+							</fieldset>
+
+							<fieldset v-if="user" class="filter-section">
+								<legend>{{ $t('Status') }}</legend>
+								<button type="button" v-for="opt in statusOptions" :key="opt.value" class="drawer-filter-option"
+									:class="{ active: currentStatus === opt.value }" @click="currentStatus = opt.value">
+									{{ $t(opt.labelKey) }} <i v-if="currentStatus === opt.value" class="fas fa-check"></i>
+								</button>
+							</fieldset>
+						</div>
+
+						<footer class="filter-drawer-footer">
+							<button type="button" class="btn clear-filters-btn" :disabled="!activeFilterCount" @click="resetFilters">
+								{{ $t('clear_filters') }}
+							</button>
+							<button type="button" class="btn btn-brand" @click="filterDrawerOpen = false">
+								{{ filteredProducts.length }} {{ $t('Products') }}
+							</button>
+						</footer>
+					</aside>
+				</div>
+			</transition>
 
 			<!-- show listing of special event products -->
 			<!--
@@ -94,7 +155,7 @@
 				<div class="row justify-content-center" v-if="prodList.length">
 					<Product v-for="product in prodList" :key="product._id" :product="product" :pros="professionals"
 						:userrank="userRank" :gadgetStats="gadgetStats" :realProducts="realProducts"
-						:expandAll="expandAllStatus" v-if="product.specialevent && product.event == 'Christmas'"
+						v-if="product.specialevent && product.event == 'Christmas'"
 						@update-prod="updateProd" :afitPrice="afitPrice" @refresh-tickets="refreshTickets" />
 				</div>
 			</div>
@@ -105,9 +166,17 @@
 			<div class="market-layout" v-if="filteredProducts.length">
 
 				<!-- LEFT: browsable product list, grouped by category -->
-				<aside class="market-sidebar" :class="{ 'mobile-hidden': mobileShowDetail }">
+				<aside class="market-sidebar" :class="{ 'mobile-hidden': mobileShowDetail }"
+					:style="sidebarHeight ? { height: sidebarHeight + 'px' } : null">
 					<div class="sidebar-scroll">
-						<div class="sidebar-group" v-for="group in groupedProducts" :key="group.type">
+						<div class="sidebar-group" :class="{
+							'sidebar-group-owned': group.type === 'bought' || group.type === 'activated',
+							'sidebar-group-saved': group.type === 'saved',
+							'sidebar-group-state': ['bought', 'activated', 'available', 'unavailable'].includes(group.type),
+							'sidebar-group-available': group.type === 'available',
+							'sidebar-group-unavailable': group.type === 'unavailable'
+						}"
+							v-for="group in groupedProducts" :key="group.type">
 							<div class="sidebar-group-title">{{ $t(group.labelKey) }}</div>
 
 							<button type="button" class="sidebar-row" v-for="product in group.items" :key="product._id"
@@ -115,21 +184,41 @@
 								<span class="sidebar-row-thumb" :style="'background-image:url(' + rowImage(product) + ');'"></span>
 
 								<span class="sidebar-row-main">
-									<span class="sidebar-row-name">{{ product.name }}</span>
-									<span class="sidebar-row-level" v-if="product.level">{{ $t('level_short') }}{{ product.level }}</span>
+									<span class="sidebar-row-title">
+										<span class="sidebar-row-name">{{ product.name }}</span>
+										<span class="sidebar-row-level" v-if="product.level">{{ $t('level_short') }}{{ product.level }}</span>
+									</span>
+									<span class="sidebar-row-event" v-if="product.specialevent && product.event">{{ product.event }}</span>
+									<span class="sidebar-row-currencies" :aria-label="$t('purchase_currency')">
+										<span v-for="currency in purchaseCurrencies(product)" :key="currency"
+											class="sidebar-currency-badge" :class="'currency-' + currency.toLowerCase()">
+											<img :src="currency === 'HIVE' ? '/img/HIVE.png' : '/img/actifit_logo.png'" alt="">
+											{{ currency }}
+										</span>
+									</span>
 								</span>
 
 								<span class="sidebar-row-side">
-									<span class="sidebar-row-price">
-										<span class="sidebar-row-price-afit">{{ numberFormat(rowAfitPrice(product), 2) }}</span>
-										<span class="sidebar-row-price-afit-unit">AFIT</span>
-										<span class="sidebar-row-price-hive" v-if="rowHivePrice(product) !== null">
-											≈{{ numberFormat(rowHivePrice(product), 3) }} {{ $t('HIVE') }}
+									<span class="sidebar-row-owned"
+										v-if="(group.type === 'bought' || group.type === 'activated') && product.type === 'ingame'">
+										<span>{{ ownedGadgetCount(product) }} {{ $t('units') }}</span>
+										<span class="sidebar-row-owned-active" v-if="activeGadgetCount(product) > 0">
+											{{ activeGadgetCount(product) }} {{ $t('Active') }}
+										</span>
+									</span>
+									<span class="sidebar-row-price" v-else>
+										<template v-if="purchaseCurrencies(product).includes('AFIT') && rowAfitPrice(product) !== null">
+											<span class="sidebar-row-price-afit">{{ numberFormat(rowAfitPrice(product), 2) }}</span>
+											<span class="sidebar-row-price-afit-unit">AFIT</span>
+										</template>
+										<span v-else class="sidebar-row-price-afit">&mdash;</span>
+										<span class="sidebar-row-price-hive" v-if="purchaseCurrencies(product).includes('HIVE') && rowHivePrice(product) !== null">
+											{{ numberFormat(rowHivePrice(product), 3) }} {{ $t('HIVE') }}
 											<img src="/img/HIVE.png" class="token-logo-xs" alt="">
 										</span>
 									</span>
-									<span class="sidebar-row-status" :class="'status-dot-' + (statusDot(product) || 'none')"
-										:title="statusLabel(product)"></span>
+					<span v-if="statusDot(product)" class="sidebar-row-status" :class="'status-dot-' + statusDot(product)"
+						:title="statusLabel(product)"></span>
 								</span>
 							</button>
 						</div>
@@ -143,10 +232,11 @@
 						<i class="fas fa-arrow-left"></i> {{ $t('All') }}
 					</button>
 
-					<div class="detail-panel-inner" v-if="selectedProduct">
+					<div class="detail-panel-inner" ref="detailPanel" v-if="selectedProduct">
 						<Product :key="selectedProduct._id" :product="selectedProduct" :pros="professionals"
 							:userrank="userRank" :gadgetStats="gadgetStats" :realProducts="realProducts"
-							:expandAll="expandAllStatus" @update-prod="updateProd" :afitPrice="afitPrice"
+							@update-prod="updateProd" :afitPrice="afitPrice" :isSaved="isProductSaved(selectedProduct)"
+							@toggle-save="toggleSavedProduct"
 							@refresh-tickets="refreshTickets" />
 					</div>
 					<div class="detail-empty text-center" v-else>
@@ -165,7 +255,7 @@
 			<div class="market-empty text-center" v-else>
 				<i class="fas fa-box-open market-empty-icon"></i>
 				<p class="market-empty-text">{{ $t('no_products_found') }}</p>
-				<button type="button" class="btn btn-brand" @click="currentFilter = ''">{{ $t('All') }}</button>
+				<button type="button" class="btn btn-brand" @click="resetMarketView">{{ $t('All') }}</button>
 			</div>
 
 		</div>
@@ -194,6 +284,10 @@ import Countdown from 'vuejs-countdown'
 import NotifyModal from '~/components/NotifyModal'
 import CartModal from '~/components/CartModal'
 import ListHeadingSection from '~/components/ListHeadingSection.vue'
+import Lodash from 'lodash'
+import { getProductAfitPrice, getProductHivePrice, getProductPurchaseCurrencies, getProductUsdValue } from '~/utils/marketPricing'
+import { filterMarketProducts, getGadgetOwnership, getProductMarketState } from '~/utils/marketCatalog'
+import { loadSavedProductIds, storeSavedProductIds, toggleSavedProductId } from '~/utils/marketSavedProducts'
 
 export default {
 	head() {
@@ -218,6 +312,11 @@ export default {
 	data() {
 		return {
 			currentFilter: '',
+			currentStatus: '',
+			currentCurrency: '',
+			searchQuery: '',
+			filterDrawerOpen: false,
+			savedProductIds: [],
 			currentSort: JSON.stringify({ value: 'price', direction: 'asc' }),
 			prodList: [],
 			afitPrice: 0,
@@ -228,12 +327,9 @@ export default {
 			nextGadgetBuyRewardDate: '',//'2020-10-15',//"August 18, 2020 00:00 GMT",
 			lastDrawWinner: '',
 			wonAmount: 0,
-			// used to drive the single Product detail panel open automatically
-			// whenever a new item is selected from the list (re-uses Product.vue's
-			// existing expandAll watcher, no changes needed there)
-			expandAllStatus: '',
 			selectedProductId: null,
 			mobileShowDetail: false,
+			sidebarHeight: null,
 			filterOptions: [
 				{ value: '', labelKey: 'All' },
 				{ value: 'ingame', labelKey: 'Game' },
@@ -241,13 +337,51 @@ export default {
 				{ value: 'ebook', labelKey: 'Ebook' },
 				{ value: 'real', labelKey: 'Physical_Products' }
 			],
+			statusOptions: [
+				{ value: '', labelKey: 'All' },
+				{ value: 'bought', labelKey: 'Bought' },
+				{ value: 'activated', labelKey: 'market_state_activated' },
+				{ value: 'available', labelKey: 'Available' },
+				{ value: 'unavailable', labelKey: 'market_state_unavailable' }
+			],
+			currencyOptions: [
+				{ value: '', labelKey: 'All' },
+				{ value: 'AFIT', labelKey: 'AFIT' },
+				{ value: 'HIVE', labelKey: 'HIVE' }
+			],
 		}
 	},
 	computed: {
 		...mapGetters('steemconnect', ['user']),
-		...mapGetters(['userTokens', 'products', 'professionals', 'userRank', 'gadgetStats', 'realProducts']),
+		...mapGetters(['userTokens', 'products', 'professionals', 'userRank', 'gadgetStats', 'realProducts', 'cartEntries']),
 		filteredProducts() {
-			return this.prodList.filter(product => !product.specialevent && (!this.currentFilter || product.type == this.currentFilter));
+			const statusFilter = this.user ? this.currentStatus : '';
+			return filterMarketProducts(
+				this.prodList,
+				this.currentFilter,
+				statusFilter,
+				this.gadgetStats,
+				this.currentCurrency,
+				this.searchQuery,
+				{
+					userRank: this.userRank,
+					userTokens: this.userTokens,
+					products: this.prodList,
+					gadgetStats: this.gadgetStats,
+					realProducts: this.realProducts
+				}
+			);
+		},
+		activeFilterCount() {
+			return [this.currentFilter, this.currentCurrency, this.user ? this.currentStatus : ''].filter(Boolean).length;
+		},
+		availableFilterOptions() {
+			const products = Array.isArray(this.prodList)
+				? this.prodList.filter(product => product && !product.specialevent)
+				: [];
+			return this.filterOptions.filter(option => (
+				!option.value || products.some(product => product.type === option.value)
+			));
 		},
 		/* groups the currently filtered products by type, in a fixed order, for the
 		   left-hand sidebar list (mirrors the categories used in filterOptions) */
@@ -258,9 +392,38 @@ export default {
 				{ type: 'ebook', labelKey: 'Ebook' },
 				{ type: 'real', labelKey: 'Physical_Products' }
 			];
-			return groupDefs
+			const catalogGroups = groupDefs
 				.map(def => ({ type: def.type, labelKey: def.labelKey, items: this.filteredProducts.filter(p => p.type === def.type) }))
 				.filter(group => group.items.length > 0);
+			const savedIds = Array.isArray(this.savedProductIds) ? this.savedProductIds : [];
+			const savedProducts = this.filteredProducts.filter(product => savedIds.includes(String(product._id)));
+			const personalGroups = [];
+			if (savedProducts.length > 0) {
+				personalGroups.push({ type: 'saved', labelKey: 'saved_products', items: savedProducts });
+			}
+			if (this.user) {
+				const stateDefs = [
+					{ type: 'bought', labelKey: 'Bought' },
+					{ type: 'activated', labelKey: 'market_state_activated' },
+					{ type: 'available', labelKey: 'Available' },
+					{ type: 'unavailable', labelKey: 'market_state_unavailable' }
+				];
+				const stateContext = {
+					userRank: this.userRank,
+					userTokens: this.userTokens,
+					products: this.prodList,
+					gadgetStats: this.gadgetStats,
+					realProducts: this.realProducts
+				};
+				const stateGroups = stateDefs
+					.map(def => ({
+						...def,
+						items: this.filteredProducts.filter(product => getProductMarketState(product, stateContext) === def.type)
+					}))
+					.filter(group => group.items.length > 0);
+				return personalGroups.concat(stateGroups);
+			}
+			return personalGroups.concat(catalogGroups);
 		},
 		selectedProduct() {
 			if (!this.selectedProductId) {
@@ -274,17 +437,12 @@ export default {
 		currentSort: 'reorderProducts',
 		products: 'setProducts',
 		currentFilter: 'ensureSelection',
-		selectedProductId(newVal) {
-			if (!newVal) {
-				return;
-			}
-			// force Product.vue's own expandAll watcher to fire so the freshly
-			// selected item's details are always shown open in the detail panel
-			this.expandAllStatus = '';
-			this.$nextTick(() => {
-				this.expandAllStatus = 'open';
-			});
-		}
+		currentStatus: 'ensureSelection',
+		currentCurrency: 'ensureSelection',
+		searchQuery: 'ensureSelection',
+		selectedProduct() {
+			this.$nextTick(this.observeDetailPanel);
+		},
 	},
 	methods: {
 		/**
@@ -321,9 +479,16 @@ export default {
 				if (sortApproach.value) {
 					console.log(sortApproach.value);
 					if (sortApproach.value == 'price') {
-						this.prodList = _.orderBy(this.prodList, function (e) { return e.price[0].price }, [sortApproach.direction]);
+						const comparablePrices = this.prodList.map(product => getProductUsdValue(product, this.afitPrice));
+						if (!comparablePrices.some(price => price === null)) {
+							this.prodList = Lodash.orderBy(
+								this.prodList,
+								product => getProductUsdValue(product, this.afitPrice),
+								[sortApproach.direction]
+							);
+						}
 					} else {
-						this.prodList = _.orderBy(this.prodList, [sortApproach.value], [sortApproach.direction]);
+						this.prodList = Lodash.orderBy(this.prodList, [sortApproach.value], [sortApproach.direction]);
 					}
 					this.$forceUpdate();
 				}
@@ -346,6 +511,7 @@ export default {
 		setAFITPrice(_afitPrice) {
 			this.afitPrice = _afitPrice;
 			console.log(this.afitPrice);
+			this.reorderProducts();
 		},
 		async fetchAfitPrice() {
 			//fetch AFIT price
@@ -426,6 +592,33 @@ export default {
 			this.mobileShowDetail = false;
 		},
 
+		/** Keeps the scrollable product list exactly as tall as the detail card. */
+		observeDetailPanel() {
+			if (this._detailResizeObserver) {
+				this._detailResizeObserver.disconnect();
+				this._detailResizeObserver = null;
+			}
+
+			const detailPanel = this.$refs.detailPanel;
+			if (!detailPanel) {
+				this.sidebarHeight = null;
+				return;
+			}
+
+			const syncSidebarHeight = () => {
+				this.sidebarHeight = window.innerWidth > 900
+					? Math.ceil(detailPanel.getBoundingClientRect().height)
+					: null;
+			};
+
+			if (typeof ResizeObserver !== 'undefined') {
+				this._detailResizeObserver = new ResizeObserver(syncSidebarHeight);
+				this._detailResizeObserver.observe(detailPanel);
+			}
+
+			syncSidebarHeight();
+		},
+
 		/** keeps the selection valid whenever the filtered list changes
 		 *  (e.g. category filter switches, or the previously selected item
 		 *  no longer matches) - defaults to the first item in the new list */
@@ -440,20 +633,57 @@ export default {
 			}
 		},
 
-		/** AFIT list price, same value used for sorting by price */
+		/** AFIT amount shown by the Product card for the current payment split */
 		rowAfitPrice(product) {
-			if (product && Array.isArray(product.price) && product.price.length) {
-				return product.price[0].price;
-			}
-			return 0;
+			return getProductAfitPrice(product, this.afitPrice);
 		},
 
 		/** equivalent HIVE price, same conversion Product.vue uses for its Buy-with-HIVE button */
 		rowHivePrice(product) {
-			if (this.afitPrice && this.afitPrice.afitHiveLastPrice) {
-				return this.rowAfitPrice(product) * this.afitPrice.afitHiveLastPrice;
+			return getProductHivePrice(product, this.afitPrice);
+		},
+
+		purchaseCurrencies(product) {
+			return getProductPurchaseCurrencies(product);
+		},
+
+		isProductSaved(product) {
+			return Boolean(product && this.savedProductIds.includes(String(product._id)));
+		},
+
+		toggleSavedProduct(product) {
+			if (!product || product._id == null || typeof localStorage === 'undefined') {
+				return;
 			}
-			return null;
+			this.savedProductIds = storeSavedProductIds(
+				localStorage,
+				toggleSavedProductId(this.savedProductIds, product._id)
+			);
+		},
+
+		resetFilters() {
+			this.currentFilter = '';
+			this.currentStatus = '';
+			this.currentCurrency = '';
+		},
+
+		resetMarketView() {
+			this.resetFilters();
+			this.searchQuery = '';
+		},
+
+		handleFilterDrawerKeydown(event) {
+			if (event.key === 'Escape') {
+				this.filterDrawerOpen = false;
+			}
+		},
+
+		ownedGadgetCount(product) {
+			return getGadgetOwnership(this.gadgetStats, product && product._id).total;
+		},
+
+		activeGadgetCount(product) {
+			return getGadgetOwnership(this.gadgetStats, product && product._id).active;
 		},
 
 		/** thumbnail for a sidebar row: gadget/real product image, or provider avatar for
@@ -484,23 +714,18 @@ export default {
 			if (!this.user) {
 				return '';
 			}
-			if (product.type == 'ingame' && Array.isArray(this.gadgetStats)) {
-				const active = this.gadgetStats.find(entry => (entry._id.gadget === product._id && entry._id.status == 'active'));
-				if (active && active.count > 0) {
-					return 'active';
-				}
-				const consumed = this.gadgetStats.find(entry => (entry._id.gadget === product._id && entry._id.status == 'consumed'));
-				if (consumed && consumed.count > 0) {
-					return 'owned';
-				}
-			}
-			if (product.type == 'real' && Array.isArray(this.realProducts)) {
-				const owned = this.realProducts.find(entry => entry.gadget === product._id);
-				if (owned) {
-					return 'owned';
-				}
-			}
-			return '';
+			const state = getProductMarketState(product, {
+				userRank: this.userRank,
+				userTokens: this.userTokens,
+				products: this.prodList,
+				gadgetStats: this.gadgetStats,
+				realProducts: this.realProducts
+			});
+			return {
+				activated: 'active',
+				bought: 'owned',
+				available: 'available'
+			}[state] || '';
 		},
 
 		statusLabel(product) {
@@ -511,12 +736,16 @@ export default {
 			if (status == 'owned') {
 				return this.$t('Bought');
 			}
-			return this.$t('Available');
+			if (status == 'available') {
+				return this.$t('Available');
+			}
+			return '';
 		}
 
 	},
 
 	async mounted() {
+		this.savedProductIds = loadSavedProductIds(localStorage);
 		this.countDownReady = true;
 
 		this.$store.dispatch('steemconnect/login')
@@ -546,6 +775,18 @@ export default {
 		// fetch professionals
 		this.$store.dispatch('fetchPros')
 
+		window.addEventListener('resize', this.observeDetailPanel);
+		window.addEventListener('keydown', this.handleFilterDrawerKeydown);
+		this.$nextTick(this.observeDetailPanel);
+
+	},
+	beforeDestroy() {
+		window.removeEventListener('resize', this.observeDetailPanel);
+		window.removeEventListener('keydown', this.handleFilterDrawerKeydown);
+		if (this._detailResizeObserver) {
+			this._detailResizeObserver.disconnect();
+			this._detailResizeObserver = null;
+		}
 	}
 }
 </script>
@@ -817,45 +1058,52 @@ export default {
 	gap: 16px;
 }
 
-.filter-pills {
-	display: flex;
-	flex-wrap: wrap;
+.filter-trigger,
+.cart-trigger {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
 	gap: 8px;
-}
-
-.filter-pill {
+	min-height: 44px;
+	padding: 8px 15px;
 	border: 1px solid #d6dde3;
+	border-radius: 10px;
 	background: #fff;
-	color: #45525c;
-	border-radius: 999px;
-	padding: 7px 16px;
-	font-size: 0.9rem;
-	font-weight: 500;
+	color: #263138;
+	font-weight: 700;
 	cursor: pointer;
-	transition: all 0.2s ease;
 }
 
-.filter-pill:hover {
+.filter-trigger:hover,
+.cart-trigger:hover {
 	border-color: #ff112d;
-	color: #ff112d;
+	color: #d6001a;
 }
 
-.filter-pill.active {
+.filter-count {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 21px;
+	height: 21px;
+	padding: 0 6px;
+	border-radius: 999px;
 	background: #ff112d;
-	border-color: #ff112d;
 	color: #fff;
+	font-size: 0.72rem;
 }
 
-.dark-mode .filter-pill {
-	background: transparent;
-	border-color: #4a4a4a;
-	color: #ddd;
-}
-
-.dark-mode .filter-pill.active {
+.cart-count {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 21px;
+	height: 21px;
+	padding: 0 6px;
+	border-radius: 999px;
 	background: #ff112d;
-	border-color: #ff112d;
 	color: #fff;
+	font-size: 0.72rem;
 }
 
 .toolbar-controls {
@@ -863,6 +1111,59 @@ export default {
 	align-items: center;
 	gap: 10px;
 	flex-wrap: wrap;
+	margin-left: auto;
+}
+
+.toolbar-search-group {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	min-width: 0;
+}
+
+.market-search {
+	position: relative;
+	display: flex;
+	align-items: center;
+	width: min(300px, 30vw);
+	margin: 0;
+}
+
+.market-search > .fas {
+	position: absolute;
+	left: 13px;
+	z-index: 1;
+	color: #98a4ad;
+}
+
+.market-search .form-control {
+	height: 44px;
+	padding-left: 38px;
+	padding-right: 38px;
+	border-color: #d6dde3;
+	border-radius: 10px;
+}
+
+.search-clear {
+	position: absolute;
+	right: 7px;
+	width: 30px;
+	height: 30px;
+	border: 0;
+	border-radius: 50%;
+	background: transparent;
+	color: #75818b;
+}
+
+.search-clear:hover {
+	background: #f1f3f5;
+	color: #d6001a;
+}
+
+.toolbar-control {
+	display: flex;
+	align-items: center;
+	gap: 7px;
 }
 
 .sort-label {
@@ -876,9 +1177,150 @@ export default {
 	min-width: 170px;
 }
 
+.sort-control .sort-select {
+	height: 44px;
+	border-radius: 10px;
+}
+
 .market-results-count {
 	font-size: 0.85rem;
 	opacity: .7;
+}
+
+.filter-drawer-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 3000;
+	background: rgba(18, 24, 29, 0.48);
+	backdrop-filter: blur(2px);
+}
+
+.filter-drawer {
+	display: flex;
+	flex-direction: column;
+	width: min(380px, 92vw);
+	height: 100%;
+	margin-left: auto;
+	background: #fff;
+	box-shadow: -18px 0 48px rgba(0, 0, 0, 0.2);
+}
+
+.filter-drawer-header,
+.filter-drawer-footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 18px 20px;
+	border-bottom: 1px solid #e8ecef;
+}
+
+.filter-drawer-header h3 {
+	margin: 0;
+	font-size: 1.15rem;
+	font-weight: 800;
+}
+
+.filter-drawer-close {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 38px;
+	height: 38px;
+	border: 0;
+	border-radius: 50%;
+	background: #f3f5f6;
+	color: #45525c;
+}
+
+.filter-drawer-body {
+	flex: 1 1 auto;
+	overflow-y: auto;
+	padding: 8px 20px 24px;
+}
+
+.filter-section {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 8px;
+	min-width: 0;
+	margin: 0;
+	padding: 22px 0;
+	border: 0;
+	border-bottom: 1px solid #edf0f2;
+}
+
+.filter-section legend {
+	grid-column: 1 / -1;
+	width: 100%;
+	margin: 0 0 4px;
+	color: #59656f;
+	font-size: 0.76rem;
+	font-weight: 800;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.drawer-filter-option {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	min-height: 42px;
+	padding: 8px 11px;
+	border: 1px solid #dce2e7;
+	border-radius: 9px;
+	background: #fff;
+	color: #34414a;
+	text-align: left;
+}
+
+.drawer-filter-option:hover,
+.drawer-filter-option.active {
+	border-color: #ff112d;
+	background: #fff1f3;
+	color: #c60019;
+}
+
+.filter-drawer-footer {
+	border-top: 1px solid #e8ecef;
+	border-bottom: 0;
+}
+
+.filter-drawer-footer .btn {
+	flex: 1 1 0;
+	min-height: 44px;
+	border-radius: 9px;
+}
+
+.clear-filters-btn {
+	border: 1px solid #d6dde3;
+	background: #fff;
+	color: #45525c;
+}
+
+.clear-filters-btn:disabled {
+	opacity: 0.45;
+}
+
+.filter-drawer-enter-active,
+.filter-drawer-leave-active {
+	transition: opacity 0.2s ease;
+}
+
+.filter-drawer-enter-active .filter-drawer,
+.filter-drawer-leave-active .filter-drawer {
+	transition: transform 0.24s ease;
+}
+
+.filter-drawer-enter,
+.filter-drawer-leave-to {
+	opacity: 0;
+}
+
+.filter-drawer-enter .filter-drawer,
+.filter-drawer-leave-to .filter-drawer {
+	transform: translateX(100%);
 }
 
 .market-loading,
@@ -917,25 +1359,32 @@ export default {
 .market-layout {
 	display: grid;
 	grid-template-columns: 340px 1fr;
-	gap: 20px;
+	gap: 28px;
 	align-items: start;
-	background: #fff;
-	border: 1px solid #e3e8ec;
-	border-radius: 14px;
-	overflow: hidden;
-	box-shadow: 0 6px 24px rgba(23, 30, 38, 0.06);
+	background: transparent;
+	border: 0;
+	border-radius: 0;
+	overflow: visible;
+	box-shadow: none;
 }
 
 /* -- left: sidebar list -- */
 .market-sidebar {
-	border-right: 1px solid #e3e8ec;
-	max-height: 78vh;
+	position: sticky;
+	top: 88px;
+	align-self: start;
 	overflow: hidden;
+	background: #fff;
+	border: 1px solid #e3e8ec;
+	border-radius: 14px;
+	box-shadow: 0 5px 18px rgba(23, 30, 38, 0.05);
 }
 
 .sidebar-scroll {
-	max-height: 78vh;
+	height: 100%;
+	overflow-x: hidden;
 	overflow-y: auto;
+	overscroll-behavior: contain;
 	padding: 8px 0 16px;
 }
 
@@ -991,6 +1440,8 @@ export default {
 }
 
 .sidebar-row-name {
+	flex: 0 1 auto;
+	min-width: 0;
 	font-size: 0.92rem;
 	font-weight: 600;
 	color: #263138;
@@ -999,11 +1450,55 @@ export default {
 	text-overflow: ellipsis;
 }
 
+.sidebar-row-title {
+	display: flex;
+	align-items: baseline;
+	gap: 6px;
+	min-width: 0;
+}
+
 .sidebar-row-level {
+	flex: 0 0 auto;
 	font-size: 0.72rem;
 	font-weight: 600;
 	color: #ff112d;
 	width: fit-content;
+}
+
+.sidebar-row-event {
+	width: fit-content;
+	padding: 1px 6px;
+	border-radius: 999px;
+	background: #fff3cd;
+	color: #765600;
+	font-size: 0.68rem;
+	font-weight: 700;
+}
+
+.sidebar-row-currencies {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	margin-top: 2px;
+}
+
+.sidebar-currency-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 3px;
+	padding: 2px 6px;
+	border-radius: 999px;
+	background: #fff0f2;
+	color: #b80018;
+	font-size: 0.58rem;
+	font-weight: 800;
+	letter-spacing: 0.04em;
+}
+
+.sidebar-currency-badge img {
+	width: 11px;
+	height: 11px;
+	object-fit: contain;
 }
 
 .sidebar-row-side {
@@ -1018,6 +1513,52 @@ export default {
 	flex-direction: column;
 	align-items: flex-end;
 	line-height: 1.15;
+}
+
+.sidebar-row-owned {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	color: #263138;
+	font-size: 0.78rem;
+	font-weight: 700;
+	line-height: 1.2;
+}
+
+.sidebar-row-owned-active {
+	color: #179447;
+	font-size: 0.68rem;
+}
+
+.sidebar-group-owned {
+	margin-bottom: 8px;
+	padding-bottom: 8px;
+	border-bottom: 1px solid #e9ecef;
+}
+
+.sidebar-group-saved {
+	margin-bottom: 8px;
+	padding-bottom: 8px;
+	border-bottom: 1px solid #e9ecef;
+}
+
+.sidebar-group-state {
+	margin-bottom: 8px;
+	padding-bottom: 8px;
+	border-bottom: 1px solid #e9ecef;
+}
+
+.sidebar-group-owned .sidebar-group-title,
+.sidebar-group-saved .sidebar-group-title {
+	color: #ff112d;
+}
+
+.sidebar-group-available .sidebar-group-title {
+	color: #179447;
+}
+
+.sidebar-group-unavailable .sidebar-group-title {
+	color: #8a9198;
 }
 
 .sidebar-row-price-afit {
@@ -1063,15 +1604,15 @@ export default {
 	background: #263138;
 }
 
-.sidebar-row-status.status-dot-none {
+.sidebar-row-status.status-dot-available {
 	background: #d8dee3;
 }
 
 /* -- right: detail panel, reusing Product.vue's own card -- */
 .market-detail-panel {
-	padding: 20px 22px 28px;
-	max-height: 78vh;
-	overflow-y: auto;
+	padding: 0 0 40px;
+	max-height: none;
+	overflow: visible;
 }
 
 .detail-back-btn {
@@ -1115,13 +1656,52 @@ export default {
 }
 
 @media (max-width: 900px) {
+	.market-toolbar-row {
+		align-items: stretch;
+	}
+
+	.toolbar-controls {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto auto;
+		width: 100%;
+		margin-left: 0;
+	}
+
+	.toolbar-search-group {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		align-items: center;
+		flex: 1 1 100%;
+		width: 100%;
+	}
+
+	.market-search {
+		width: 100%;
+	}
+
+	.sort-control {
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr);
+		min-width: 0;
+	}
+
+	.sort-control .sort-select {
+		width: 100%;
+		min-width: 0;
+	}
+
+	.filter-trigger,
+	.cart-trigger {
+		white-space: nowrap;
+	}
+
 	.market-layout {
 		grid-template-columns: 1fr;
 	}
 
 	.market-sidebar {
-		border-right: none;
-		border-bottom: 1px solid #e3e8ec;
+		position: static;
+		top: auto;
 	}
 
 	.market-sidebar.mobile-hidden,
@@ -1136,7 +1716,29 @@ export default {
 	.sidebar-scroll,
 	.market-sidebar,
 	.market-detail-panel {
+		height: auto !important;
 		max-height: none;
+	}
+}
+
+@media (max-width: 575px) {
+	.filter-trigger,
+	.cart-trigger {
+		justify-content: center;
+		width: 44px;
+		padding-right: 0;
+		padding-left: 0;
+	}
+
+	.toolbar-action-label {
+		display: none;
+	}
+
+	.filter-count,
+	.cart-count {
+		position: absolute;
+		margin-top: -28px;
+		margin-left: 28px;
 	}
 }
 
@@ -1234,20 +1836,43 @@ html.dark-mode .market-results-count {
 	opacity: 1;
 }
 
-html.dark-mode .filter-pill {
-	background: rgba(255, 255, 255, 0.055);
+html.dark-mode .filter-trigger,
+html.dark-mode .cart-trigger,
+html.dark-mode .filter-drawer,
+html.dark-mode .drawer-filter-option,
+html.dark-mode .clear-filters-btn {
+	background: #10151e;
+	border-color: rgba(255, 255, 255, 0.13);
+	color: #edf2f7;
+}
+
+html.dark-mode .filter-drawer-header,
+html.dark-mode .filter-drawer-footer,
+html.dark-mode .filter-section {
 	border-color: rgba(255, 255, 255, 0.1);
-	color: #dce4ee;
 }
 
-html.dark-mode .filter-pill:hover {
-	background: rgba(255, 17, 45, 0.12);
-
+html.dark-mode .filter-drawer-close,
+html.dark-mode .search-clear:hover {
+	background: rgba(255, 255, 255, 0.08);
+	color: #ff9aa7;
 }
 
-html.dark-mode .filter-pill.active {
-	background: #4e0009;
-  	border-color: rgba(255, 255, 255, 0.1);
+html.dark-mode .filter-section legend {
+	color: #aeb9c7;
+}
+
+html.dark-mode .drawer-filter-option:hover,
+html.dark-mode .drawer-filter-option.active {
+	border-color: #ff6074;
+	background: rgba(255, 17, 45, 0.16);
+	color: #ff9aa7;
+}
+
+html.dark-mode .market-search .form-control {
+	background: #10151e;
+	border-color: rgba(255, 255, 255, 0.14);
+	color: #edf2f7;
 }
 
 html.dark-mode .sort-label {
@@ -1266,7 +1891,10 @@ html.dark-mode .sort-select option {
 	color: #edf2f7;
 }
 
-html.dark-mode .filter-pill:focus,
+html.dark-mode .filter-trigger:focus,
+html.dark-mode .cart-trigger:focus,
+html.dark-mode .drawer-filter-option:focus,
+html.dark-mode .market-search .form-control:focus,
 html.dark-mode .sort-select:focus,
 html.dark-mode .market-empty .btn-brand:focus {
 	border-color: #ff9aa7;
@@ -1302,13 +1930,15 @@ html.dark-mode .market-empty .btn-brand:hover {
 
 /* dark-mode: two-panel layout */
 html.dark-mode .market-layout {
-	background: var(--background-color);
-	border: 1px solid rgba(255, 255, 255, 0.1);
-	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+	background: transparent;
+	border: 0;
+	box-shadow: none;
 }
 
 html.dark-mode .market-sidebar {
-	border-right: 1px solid rgba(255, 255, 255, 0.08);
+	background: var(--background-color);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	box-shadow: 0 12px 28px rgba(0, 0, 0, 0.24);
 }
 
 html.dark-mode .sidebar-group-title {
@@ -1337,8 +1967,40 @@ html.dark-mode .sidebar-row-level {
 	color: #ff9aa7;
 }
 
+html.dark-mode .sidebar-row-event {
+	background: rgba(255, 193, 7, 0.16);
+	color: #ffd76a;
+}
+
+html.dark-mode .sidebar-row-owned {
+	color: #edf2f7;
+}
+
+html.dark-mode .sidebar-row-owned-active {
+	color: #63d98a;
+}
+
+html.dark-mode .sidebar-group-owned,
+html.dark-mode .sidebar-group-saved,
+html.dark-mode .sidebar-group-state {
+	border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+html.dark-mode .sidebar-group-available .sidebar-group-title {
+	color: #63d98a;
+}
+
+html.dark-mode .sidebar-group-unavailable .sidebar-group-title {
+	color: #9ca6b2;
+}
+
 html.dark-mode .sidebar-row-price-afit {
 	color: #edf2f7;
+}
+
+html.dark-mode .sidebar-currency-badge {
+	background: rgba(255, 17, 45, 0.16);
+	color: #ff9aa7;
 }
 
 html.dark-mode .sidebar-row-price-afit-unit,

@@ -12,6 +12,22 @@ const gadgetStats = [
 ]
 
 describe('market owned-gadgets section', () => {
+  it('hides category filters that have no matching catalog products', () => {
+    const filterOptions = [
+      { value: '', labelKey: 'All' },
+      { value: 'ingame', labelKey: 'Game' },
+      { value: 'service', labelKey: 'Consultation' },
+      { value: 'real', labelKey: 'Physical_Products' }
+    ]
+
+    const options = MarketPage.computed.availableFilterOptions.call({
+      filterOptions,
+      prodList: products
+    })
+
+    expect(options).toEqual([filterOptions[0], filterOptions[1], filterOptions[3]])
+  })
+
   it('places browser-saved products in their own leading group', () => {
     const groups = MarketPage.computed.groupedProducts.call({
       filteredProducts: products,
@@ -27,7 +43,7 @@ describe('market owned-gadgets section', () => {
     })
   })
 
-  it('places owned gadgets first for a logged-in user', () => {
+  it('places activated gadgets in the active state group', () => {
     const groups = MarketPage.computed.groupedProducts.call({
       filteredProducts: products,
       gadgetStats,
@@ -35,8 +51,25 @@ describe('market owned-gadgets section', () => {
     })
 
     expect(groups[0]).toEqual({
-      type: 'owned',
-      labelKey: 'my_gadgets',
+      type: 'activated',
+      labelKey: 'market_state_activated',
+      items: [products[0]]
+    })
+  })
+
+  it('places bought-but-inactive gadgets in the bought state group', () => {
+    const groups = MarketPage.computed.groupedProducts.call({
+      filteredProducts: products,
+      prodList: products,
+      savedProductIds: [],
+      gadgetStats: [{ _id: { gadget: 'owned-gadget', status: 'bought' }, count: 2 }],
+      realProducts: [],
+      user: { account: { name: 'alice' } }
+    })
+
+    expect(groups[0]).toEqual({
+      type: 'bought',
+      labelKey: 'Bought',
       items: [products[0]]
     })
   })
@@ -48,7 +81,7 @@ describe('market owned-gadgets section', () => {
       user: null
     })
 
-    expect(groups.some(group => group.type === 'owned')).toBe(false)
+    expect(groups.some(group => group.type === 'bought' || group.type === 'activated')).toBe(false)
   })
 
   it('reports total and active ownership counts', () => {

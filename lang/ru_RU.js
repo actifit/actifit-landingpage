@@ -756,6 +756,8 @@ module.exports = {
   product_bought: '_PRODUCT_ успешно куплен',
   Remaining_boost: 'Оставшееся усиление',
   Active: 'Активен',
+  market_state_activated: 'Активирован',
+  market_state_unavailable: 'Недоступен',
   Inactive: 'Неактивен',
   to_a_friend: 'другу',
   to_you: 'вам',

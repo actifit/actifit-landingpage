@@ -755,6 +755,8 @@ module.exports = {
   product_bought: '_PRODUCT_が正常に購入されました',
   Remaining_boost: '残りのブースト',
   Active: 'アクティブ',
+  market_state_activated: '有効化済み',
+  market_state_unavailable: '利用不可',
   Inactive: '非アクティブ',
   to_a_friend: '友達へ',
   to_you: 'あなたへ',
