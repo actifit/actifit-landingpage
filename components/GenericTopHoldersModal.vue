@@ -26,7 +26,7 @@
           <div v-else-if="!holdersList || holdersList.length === 0" class="text-center text-info">
             <p>{{ $t('No_data_found_for_top_holders') }}</p>
           </div>
-          <table v-else class="table table-hover">
+          <table v-else class="table table-hover holders-table">
             <thead class="text-brand">
               <tr>
                 <th scope="col">{{ $t('Rank') }}</th>
@@ -232,10 +232,14 @@
   }
 </script>
 
-<style scoped>
+<style>
   .token-logo{
     width: 40px;
     height: 40px;
+  }
+  .dark-mode .holders-table tbody tr:not(.bg-danger) td:first-child,
+  .dark-mode .holders-table tbody tr:not(.bg-danger) td:last-child {
+    color: #8fe3b0;
   }
   @media screen and (max-width: 600px){
     .table td, .table th{
