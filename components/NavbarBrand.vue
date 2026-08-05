@@ -27,7 +27,7 @@
             </a>
           </li>
 
-          <li class="nav-item btn btn-brand m-1 nav-item-border" v-if="!home" :title="$t('New_Blog')">
+          <li class="nav-item btn btn-brand m-1 nav-item-border" :title="$t('New_Blog')">
             <a class="nav-link text-white d-flex align-items-center justify-content-center w-100 h-100"
                href="/blog/new"
                @click.prevent="$router.push('/blog/new'); closeMenu()">
@@ -35,7 +35,7 @@
             </a>
           </li>
 
-          <li class="nav-item btn btn-brand m-1 nav-item-border" v-if="!home" :title="$t('Create_new_vid')">
+          <li class="nav-item btn btn-brand m-1 nav-item-border" :title="$t('Create_new_vid')">
             <a class="nav-link text-white d-flex align-items-center justify-content-center w-100 h-100"
                href="/videos/new"
                @click.prevent="$router.push('/videos/new'); closeMenu()">
