@@ -743,6 +743,8 @@ module.exports = {
   saved_products: 'Збережені товари',
   purchase_currency: 'Валюта покупки',
   clear_filters: 'Очистити фільтри',
+  no_products_found: 'Товарів не знайдено',
+  Event: 'Подія',
   Consultation: 'Консультація',
   Ebook: 'Електронна книга',
   Name: 'Ім\'я',

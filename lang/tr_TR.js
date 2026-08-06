@@ -743,6 +743,8 @@ module.exports = {
   saved_products: 'Kaydedilen ürünler',
   purchase_currency: 'Satın alma para birimi',
   clear_filters: 'Filtreleri temizle',
+  no_products_found: 'Ürün bulunamadı',
+  Event: 'Etkinlik',
   Consultation: 'Danışmanlık',
   Ebook: 'E-kitap',
   Name: 'İsim',

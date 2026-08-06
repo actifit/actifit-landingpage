@@ -33,7 +33,8 @@
             <i v-else class="fas fa-phone-volume"></i>
             {{ renderProdType }}
           </span>
-          <span class="level-badge" v-if="!product.specialevent && this.product.level">
+          <span class="level-badge" :class="gadgetLevelClass(product.level)"
+            v-if="!product.specialevent && this.product.level">
             {{ $t('level_short') }}{{ this.product.level }}
           </span>
           <button type="button" class="save-product-btn" :class="{ saved: isSaved }"
@@ -635,6 +636,18 @@
   line-height: 1;
 }
 
+.level-badge.gadget-level-2 {
+  border-color: #f0a23b;
+  background: #fff6e8;
+  color: #9a5700;
+}
+
+.level-badge.gadget-level-3 {
+  border-color: #ff112d;
+  background: #fff0f2;
+  color: #c60019;
+}
+
 .pro-name {
   overflow-wrap: anywhere;
   margin: 0 0 5px;
@@ -719,6 +732,63 @@
   margin-top: 7px;
   color: #f2b01e;
   font-size: 0.72rem;
+}
+
+@media (max-width: 575px) {
+  .product-card-header {
+    display: grid;
+    grid-template-columns: 68px minmax(0, 1fr);
+    align-items: start;
+    column-gap: 12px;
+    row-gap: 5px;
+  }
+
+  .product-header-copy {
+    display: contents;
+  }
+
+  .product-meta-row {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    flex-wrap: nowrap;
+    width: 100%;
+    margin-bottom: 7px;
+  }
+
+  .product-type-badge {
+    min-width: 0;
+  }
+
+  .save-product-btn {
+    flex: 0 0 auto;
+  }
+
+  .product-header-media {
+    grid-column: 1;
+    grid-row: 2 / span 3;
+  }
+
+  .product-card .pro-card-av {
+    width: 68px;
+    height: 68px;
+  }
+
+  .pro-name {
+    grid-column: 2;
+    grid-row: 2;
+    margin-bottom: 0;
+  }
+
+  .provider-link {
+    grid-column: 2;
+    grid-row: 3;
+  }
+
+  .level-stars {
+    grid-column: 2;
+    grid-row: 4;
+    margin-top: 1px;
+  }
 }
 
 /* ---------- body layout ---------- */
@@ -1152,7 +1222,7 @@
   color: #d6001a;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 340px) {
   .ingame-status-grid,
   .count-summary-grid {
     grid-template-columns: 1fr;
@@ -1391,9 +1461,21 @@ html.dark-mode .product-type-badge {
 }
 
 html.dark-mode .product-card .level-badge {
-  border-color: rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.08);
-  color: #d8dde4;
+	border-color: rgba(255, 255, 255, 0.14);
+	background: rgba(255, 255, 255, 0.08);
+	color: #d8dde4;
+}
+
+html.dark-mode .product-card .level-badge.gadget-level-2 {
+  border-color: #f0a23b;
+  background: rgba(240, 162, 59, 0.16);
+  color: #ffd08a;
+}
+
+html.dark-mode .product-card .level-badge.gadget-level-3 {
+  border-color: #ff6074;
+  background: rgba(255, 17, 45, 0.16);
+  color: #ff9aa7;
 }
 
 @media (max-width: 575px) {
@@ -1601,6 +1683,7 @@ import hive from '@hiveio/hive-js'
 
 import BuyOptionsModal from '~/components/BuyOptionsModal'
 import { getProductPurchaseCurrencies } from '~/utils/marketPricing'
+import { getGadgetLevelClass } from '~/utils/marketCatalog'
 
 
 //import VueLazyLoad from 'vue-lazyload'
@@ -1820,6 +1903,9 @@ export default {
     */
     numberFormat(number, precision) {
       return new Intl.NumberFormat('en-EN', { maximumFractionDigits: precision }).format(number)
+    },
+    gadgetLevelClass(level) {
+      return getGadgetLevelClass(level);
     },
     showModalFunc() {
       this.$nextTick(() => {

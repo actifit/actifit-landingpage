@@ -743,6 +743,8 @@ module.exports = {
   saved_products: 'المنتجات المحفوظة',
   purchase_currency: 'عملة الشراء',
   clear_filters: 'مسح عوامل التصفية',
+  no_products_found: 'لم يتم العثور على منتجات',
+  Event: 'الفعاليات',
   Consultation: 'استشارة',
   Ebook: 'كتاب إلكتروني',
   Name: 'الاسم',

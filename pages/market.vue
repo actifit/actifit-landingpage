@@ -186,7 +186,7 @@
 								<span class="sidebar-row-main">
 									<span class="sidebar-row-title">
 										<span class="sidebar-row-name">{{ product.name }}</span>
-										<span class="sidebar-row-level" v-if="product.level">{{ $t('level_short') }}{{ product.level }}</span>
+										<span class="sidebar-row-level" :class="gadgetLevelClass(product.level)" v-if="product.level">{{ $t('level_short') }}{{ product.level }}</span>
 									</span>
 									<span class="sidebar-row-event" v-if="product.specialevent && product.event">{{ product.event }}</span>
 									<span class="sidebar-row-currencies" :aria-label="$t('purchase_currency')">
@@ -286,7 +286,7 @@ import CartModal from '~/components/CartModal'
 import ListHeadingSection from '~/components/ListHeadingSection.vue'
 import Lodash from 'lodash'
 import { getProductAfitPrice, getProductHivePrice, getProductPurchaseCurrencies, getProductUsdValue } from '~/utils/marketPricing'
-import { filterMarketProducts, getGadgetOwnership, getProductMarketState } from '~/utils/marketCatalog'
+import { filterMarketProducts, getGadgetLevelClass, getGadgetOwnership, getProductMarketState } from '~/utils/marketCatalog'
 import { loadSavedProductIds, storeSavedProductIds, toggleSavedProductId } from '~/utils/marketSavedProducts'
 
 export default {
@@ -386,6 +386,11 @@ export default {
 		/* groups the currently filtered products by type, in a fixed order, for the
 		   left-hand sidebar list (mirrors the categories used in filterOptions) */
 		groupedProducts() {
+			const eventProducts = this.filteredProducts.filter(product => product.specialevent);
+			const regularProducts = this.filteredProducts.filter(product => !product.specialevent);
+			const eventGroups = eventProducts.length > 0
+				? [{ type: 'event', labelKey: 'Event', items: eventProducts }]
+				: [];
 			const groupDefs = [
 				{ type: 'ingame', labelKey: 'Game' },
 				{ type: 'service', labelKey: 'Consultation' },
@@ -393,10 +398,10 @@ export default {
 				{ type: 'real', labelKey: 'Physical_Products' }
 			];
 			const catalogGroups = groupDefs
-				.map(def => ({ type: def.type, labelKey: def.labelKey, items: this.filteredProducts.filter(p => p.type === def.type) }))
+				.map(def => ({ type: def.type, labelKey: def.labelKey, items: regularProducts.filter(p => p.type === def.type) }))
 				.filter(group => group.items.length > 0);
 			const savedIds = Array.isArray(this.savedProductIds) ? this.savedProductIds : [];
-			const savedProducts = this.filteredProducts.filter(product => savedIds.includes(String(product._id)));
+			const savedProducts = regularProducts.filter(product => savedIds.includes(String(product._id)));
 			const personalGroups = [];
 			if (savedProducts.length > 0) {
 				personalGroups.push({ type: 'saved', labelKey: 'saved_products', items: savedProducts });
@@ -418,12 +423,12 @@ export default {
 				const stateGroups = stateDefs
 					.map(def => ({
 						...def,
-						items: this.filteredProducts.filter(product => getProductMarketState(product, stateContext) === def.type)
+						items: regularProducts.filter(product => getProductMarketState(product, stateContext) === def.type)
 					}))
 					.filter(group => group.items.length > 0);
-				return personalGroups.concat(stateGroups);
+				return eventGroups.concat(personalGroups, stateGroups);
 			}
-			return personalGroups.concat(catalogGroups);
+			return eventGroups.concat(personalGroups, catalogGroups);
 		},
 		selectedProduct() {
 			if (!this.selectedProductId) {
@@ -454,6 +459,9 @@ export default {
 		 */
 		numberFormat(number, precision) {
 			return new Intl.NumberFormat('en-EN', { maximumFractionDigits: precision }).format(number)
+		},
+		gadgetLevelClass(level) {
+			return getGadgetLevelClass(level);
 		},
 		refreshTickets() {
 			//console.log('>>>>refreshing');
@@ -957,8 +965,55 @@ export default {
 }
 
 @media (max-width: 575px) {
+	.prize-draw-section {
+		padding: 28px 12px;
+	}
+
+	.prize-draw-section > .container {
+		padding-right: 0;
+		padding-left: 0;
+	}
+
 	.prize-draw-grid {
-		grid-template-columns: 1fr;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 10px;
+	}
+
+	.prize-draw-grid > .prize-draw-card {
+		min-width: 0;
+		padding: 16px 8px;
+	}
+
+	.prize-draw-card .prize-draw-icon {
+		margin-bottom: 8px;
+		font-size: 1.6rem;
+	}
+
+	.prize-draw-card .prize-draw-card-title {
+		font-size: 0.9rem;
+		line-height: 1.2;
+	}
+
+	.prize-draw-card .prize-draw-card-text,
+	.prize-draw-card .prize-draw-winner-link {
+		font-size: 0.95rem;
+	}
+
+	.prize-draw-card .vuejs-countdown li {
+		margin: 0 3px;
+	}
+
+	.prize-draw-card .vuejs-countdown li::after {
+		right: -6px;
+		font-size: 20px;
+	}
+
+	.prize-draw-card .vuejs-countdown .digit {
+		font-size: 20px;
+	}
+
+	.prize-draw-card .vuejs-countdown .text {
+		font-size: 8px;
 	}
 }
 
@@ -1275,11 +1330,18 @@ export default {
 	text-align: left;
 }
 
-.drawer-filter-option:hover,
 .drawer-filter-option.active {
 	border-color: #ff112d;
 	background: #fff1f3;
 	color: #c60019;
+}
+
+@media (hover: hover) and (pointer: fine) {
+	.drawer-filter-option:hover {
+		border-color: #ff112d;
+		background: #fff1f3;
+		color: #c60019;
+	}
 }
 
 .filter-drawer-footer {
@@ -1458,11 +1520,30 @@ export default {
 }
 
 .sidebar-row-level {
+	display: inline-flex;
+	align-items: center;
 	flex: 0 0 auto;
-	font-size: 0.72rem;
-	font-weight: 600;
-	color: #ff112d;
+	padding: 3px 7px;
+	border: 1px solid #dbe1e6;
+	border-radius: 999px;
+	background: #eef1f4;
+	color: #52606d;
+	font-size: 0.7rem;
+	font-weight: 700;
+	line-height: 1;
 	width: fit-content;
+}
+
+.sidebar-row-level.gadget-level-2 {
+	border-color: #f0a23b;
+	background: #fff6e8;
+	color: #9a5700;
+}
+
+.sidebar-row-level.gadget-level-3 {
+	border-color: #ff112d;
+	background: #fff0f2;
+	color: #c60019;
 }
 
 .sidebar-row-event {
@@ -1702,6 +1783,12 @@ export default {
 	.market-sidebar {
 		position: static;
 		top: auto;
+		overflow: visible;
+	}
+
+	.sidebar-scroll {
+		overflow: visible;
+		overscroll-behavior: auto;
 	}
 
 	.market-sidebar.mobile-hidden,
@@ -1862,11 +1949,18 @@ html.dark-mode .filter-section legend {
 	color: #aeb9c7;
 }
 
-html.dark-mode .drawer-filter-option:hover,
 html.dark-mode .drawer-filter-option.active {
 	border-color: #ff6074;
 	background: rgba(255, 17, 45, 0.16);
 	color: #ff9aa7;
+}
+
+@media (hover: hover) and (pointer: fine) {
+	html.dark-mode .drawer-filter-option:hover {
+		border-color: #ff6074;
+		background: rgba(255, 17, 45, 0.16);
+		color: #ff9aa7;
+	}
 }
 
 html.dark-mode .market-search .form-control {
@@ -1964,6 +2058,20 @@ html.dark-mode .sidebar-row-name {
 }
 
 html.dark-mode .sidebar-row-level {
+	border-color: rgba(255, 255, 255, 0.14);
+	background: rgba(255, 255, 255, 0.08);
+	color: #d8dde4;
+}
+
+html.dark-mode .sidebar-row-level.gadget-level-2 {
+	border-color: #f0a23b;
+	background: rgba(240, 162, 59, 0.16);
+	color: #ffd08a;
+}
+
+html.dark-mode .sidebar-row-level.gadget-level-3 {
+	border-color: #ff6074;
+	background: rgba(255, 17, 45, 0.16);
 	color: #ff9aa7;
 }
 

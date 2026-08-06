@@ -1,5 +1,6 @@
 import {
   filterMarketProducts,
+  getGadgetLevelClass,
   getGadgetOwnership,
   getOwnedGadgetProducts,
   getProductMarketState,
@@ -13,15 +14,26 @@ const products = [
 ]
 
 describe('market catalog filtering', () => {
-  it('includes regular and seasonal products in the complete catalog', () => {
-    expect(filterMarketProducts(products, '')).toEqual(products)
+  it('maps supported gadget levels to stable styling classes', () => {
+    expect(getGadgetLevelClass(1)).toBe('gadget-level-1')
+    expect(getGadgetLevelClass('2')).toBe('gadget-level-2')
+    expect(getGadgetLevelClass(3)).toBe('gadget-level-3')
+    expect(getGadgetLevelClass(4)).toBe('')
+    expect(getGadgetLevelClass(null)).toBe('')
   })
 
-  it('keeps seasonal gadgets in their API-defined category', () => {
-    expect(filterMarketProducts(products, 'ingame').map(product => product._id)).toEqual([
-      'regular',
-      'seasonal'
+  it('hides inactive seasonal products from the complete catalog', () => {
+    expect(filterMarketProducts(products, '')).toEqual([products[0], products[2]])
+  })
+
+  it('shows seasonal gadgets only while they are active', () => {
+    const activeStats = [{ _id: { gadget: 'seasonal', status: 'active' }, count: 1 }]
+    const inactiveStats = [{ _id: { gadget: 'seasonal', status: 'bought' }, count: 1 }]
+
+    expect(filterMarketProducts(products, 'ingame', '', activeStats).map(product => product._id)).toEqual([
+      'regular', 'seasonal'
     ])
+    expect(filterMarketProducts(products, 'ingame', '', inactiveStats).map(product => product._id)).toEqual(['regular'])
   })
 
   it('returns an empty catalog for invalid product data', () => {
@@ -36,7 +48,7 @@ describe('market catalog filtering', () => {
     ]
 
     expect(filterMarketProducts(products, '', 'active', stats).map(product => product._id)).toEqual(['regular'])
-    expect(filterMarketProducts(products, '', 'inactive', stats).map(product => product._id)).toEqual(['seasonal'])
+    expect(filterMarketProducts(products, '', 'inactive', stats)).toEqual([])
   })
 
   it('shows only in-stock, currently unowned products as available', () => {
@@ -45,7 +57,6 @@ describe('market catalog filtering', () => {
     const stats = [{ _id: { gadget: 'regular', status: 'bought' }, count: 1 }]
 
     expect(filterMarketProducts(catalog, '', 'available', stats).map(product => product._id)).toEqual([
-      'seasonal',
       'physical'
     ])
   })

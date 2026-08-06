@@ -742,6 +742,8 @@ module.exports = {
   saved_products: '保存した商品',
   purchase_currency: '購入通貨',
   clear_filters: 'フィルターをクリア',
+  no_products_found: '商品が見つかりません',
+  Event: 'イベント',
   Consultation: 'コンサルテーション',
   Ebook: '電子書籍',
   Name: '名前',

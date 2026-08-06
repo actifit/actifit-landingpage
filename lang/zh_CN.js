@@ -742,6 +742,8 @@ module.exports = {
   saved_products: '已保存的商品',
   purchase_currency: '购买货币',
   clear_filters: '清除筛选条件',
+  no_products_found: '未找到商品',
+  Event: '活动',
   Consultation: '咨询',
   Ebook: '电子书',
   Name: '名称',

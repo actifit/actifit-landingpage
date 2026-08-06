@@ -1,6 +1,11 @@
 import Product from '~/components/Product.vue'
 
 describe('Product owned gadget counts', () => {
+  it('exposes gadget level styling as a callable template method', () => {
+    expect(Product.computed.gadgetLevelClass).toBeUndefined()
+    expect(Product.methods.gadgetLevelClass(2)).toBe('gadget-level-2')
+  })
+
   it('only exposes provider attribution when a provider name exists', () => {
     expect(Product.computed.providerName.call({ product: { provider_name: '  Alice  ' } })).toBe('Alice')
     expect(Product.computed.providerName.call({ product: { provider_name: '   ' } })).toBe('')

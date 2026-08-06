@@ -1,6 +1,6 @@
 <template>
   <div v-if="visible && $route.path !== '/signup'" id="voteProposalModal" ref="voteProposalModal" :class="{ 'visible': visible }"
-    class="modal fade show" tabindex="-1" role="dialog" data-backdrop="false">
+    class="modal fade show" :style="{ bottom: bottomOffset + 'px' }" tabindex="-1" role="dialog" data-backdrop="false">
     <div><!-- class="modal-dialog" role="document" -->
       <div class="modal-content">
         <div class="modal-header p-1">
@@ -31,6 +31,10 @@ export default {
     propUrl:{
       type: String,
       default: 'https://peakd.com/proposals/337',
+    },
+    bottomOffset: {
+      type: Number,
+      default: 20,
     }
   },
   data() {
@@ -101,6 +105,8 @@ export default {
 .modal {
   /*display: block;*/
   position: fixed;
+  top: auto !important;
+  left: auto !important;
   bottom: 20px;
   right: 20px;
   background-color: #fff;
@@ -110,9 +116,19 @@ export default {
   border-radius: 8px;
   z-index: 1000;
   pointer-events: auto;
+  width: min(330px, calc(100vw - 40px));
   max-width: 330px;
   max-height: 230px;
   height: auto;
+}
+
+@media (max-width: 575px) {
+  .modal {
+    right: 10px;
+    width: calc(100vw - 20px);
+    max-height: min(230px, 40vh);
+    padding: 12px;
+  }
 }
 
 .modal-content button {

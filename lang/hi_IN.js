@@ -743,6 +743,8 @@ module.exports = {
   saved_products: 'सहेजे गए उत्पाद',
   purchase_currency: 'खरीद मुद्रा',
   clear_filters: 'फ़िल्टर हटाएँ',
+  no_products_found: 'कोई उत्पाद नहीं मिला',
+  Event: 'इवेंट',
   Consultation: 'परामर्श',
   Ebook: 'ईबुक',
   Name: 'नाम',

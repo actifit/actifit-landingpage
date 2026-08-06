@@ -35,4 +35,15 @@ describe('market translations', () => {
     expect(typeof messages.clear_filters).toBe('string')
     expect(messages.clear_filters.trim()).not.toBe('')
   })
+
+  it.each(Object.entries(locales))('%s provides the no-products-found label', (locale, messages) => {
+    expect(typeof messages.no_products_found).toBe('string')
+    expect(messages.no_products_found.trim()).not.toBe('')
+    expect(messages.no_products_found).not.toBe('no_products_found')
+  })
+
+  it.each(Object.entries(locales))('%s provides the Event section label', (locale, messages) => {
+    expect(typeof messages.Event).toBe('string')
+    expect(messages.Event.trim()).not.toBe('')
+  })
 })

@@ -1,5 +1,10 @@
 import { getProductPurchaseCurrencies } from './marketPricing'
 
+export function getGadgetLevelClass(level) {
+  const normalizedLevel = Number(level)
+  return [1, 2, 3].includes(normalizedLevel) ? `gadget-level-${normalizedLevel}` : ''
+}
+
 export function filterMarketProducts(products, currentFilter, currentStatus, gadgetStats, currentCurrency, searchQuery, buyabilityContext) {
   if (!Array.isArray(products)) {
     return []
@@ -9,6 +14,9 @@ export function filterMarketProducts(products, currentFilter, currentStatus, gad
 
   return products.filter(product => {
     if (!product || (currentFilter && product.type !== currentFilter)) {
+      return false
+    }
+    if (product.specialevent && getGadgetOwnership(gadgetStats, product._id).active <= 0) {
       return false
     }
     if (currentCurrency && !getProductPurchaseCurrencies(product).includes(currentCurrency)) {

@@ -1,5 +1,9 @@
 import MarketPage from '~/pages/market.vue'
 
+const fs = require('fs')
+
+const marketPageSource = fs.readFileSync('pages/market.vue', 'utf8')
+
 const products = [
   { _id: 'owned-gadget', name: 'Water Bottle', type: 'ingame' },
   { _id: 'available-gadget', name: 'Sports Hat', type: 'ingame' },
@@ -57,6 +61,32 @@ describe('market owned-gadgets section', () => {
     })
   })
 
+  it('places active special-event gadgets only in a separate Event group', () => {
+    const eventProduct = {
+      _id: 'seasonal',
+      name: "Santa's Gift",
+      type: 'ingame',
+      specialevent: true,
+      event: 'Christmas'
+    }
+    const groups = MarketPage.computed.groupedProducts.call({
+      filteredProducts: products.concat(eventProduct),
+      savedProductIds: ['seasonal'],
+      gadgetStats: [{ _id: { gadget: 'seasonal', status: 'active' }, count: 1 }],
+      prodList: products.concat(eventProduct),
+      realProducts: [],
+      userRank: 0,
+      userTokens: 0,
+      user: { account: { name: 'alice' } }
+    })
+
+    expect(groups.filter(group => group.items.includes(eventProduct))).toEqual([{
+      type: 'event',
+      labelKey: 'Event',
+      items: [eventProduct]
+    }])
+  })
+
   it('places bought-but-inactive gadgets in the bought state group', () => {
     const groups = MarketPage.computed.groupedProducts.call({
       filteredProducts: products,
@@ -89,6 +119,13 @@ describe('market owned-gadgets section', () => {
 
     expect(MarketPage.methods.ownedGadgetCount.call(context, products[0])).toBe(3)
     expect(MarketPage.methods.activeGadgetCount.call(context, products[0])).toBe(1)
+  })
+
+  it('matches the product-detail level badge colors in sidebar rows', () => {
+    expect(marketPageSource).toContain('background: #eef1f4;')
+    expect(marketPageSource).toContain('color: #52606d;')
+    expect(marketPageSource).toContain('background: rgba(255, 255, 255, 0.08);')
+    expect(marketPageSource).toContain('color: #d8dde4;')
   })
 
   it('marks bought-but-inactive gadgets as owned', () => {

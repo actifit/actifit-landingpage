@@ -743,6 +743,8 @@ module.exports = {
   saved_products: 'Saved Products',
   purchase_currency: 'Purchase currency',
   clear_filters: 'Clear filters',
+  no_products_found: 'No products found',
+  Event: 'Event',
   Consultation: 'Consultation',
   Ebook: 'Ebook',
   Name: 'Name',
