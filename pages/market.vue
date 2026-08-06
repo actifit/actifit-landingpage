@@ -227,7 +227,7 @@
 
 				<!-- RIGHT: full product detail, reusing the existing Product component so all
 					 buy / bought / activate functionality stays 100% intact -->
-				<section class="market-detail-panel" :class="{ 'mobile-hidden': !mobileShowDetail }">
+				<section class="market-detail-panel" ref="detailPanelSection" :class="{ 'mobile-hidden': !mobileShowDetail }">
 					<button type="button" class="detail-back-btn" @click="backToList">
 						<i class="fas fa-arrow-left"></i> {{ $t('All') }}
 					</button>
@@ -329,6 +329,7 @@ export default {
 			wonAmount: 0,
 			selectedProductId: null,
 			mobileShowDetail: false,
+			mobileListScrollY: 0,
 			sidebarHeight: null,
 			filterOptions: [
 				{ value: '', labelKey: 'All' },
@@ -591,13 +592,44 @@ export default {
 
 		/** picks a product to show in the right-hand detail panel */
 		selectProduct(product) {
+			const isMobile = this.isMobileMarketView();
+			if (isMobile) {
+				this.mobileListScrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+			}
 			this.selectedProductId = product._id;
 			this.mobileShowDetail = true;
+			if (isMobile) {
+				this.$nextTick(this.scrollToDetailPanel);
+			}
 		},
 
 		/** mobile-only: return from the detail panel to the browsable list */
 		backToList() {
+			const shouldRestoreScroll = this.isMobileMarketView();
 			this.mobileShowDetail = false;
+			if (shouldRestoreScroll) {
+				this.$nextTick(() => {
+					window.scrollTo({ top: this.mobileListScrollY, behavior: 'auto' });
+				});
+			}
+		},
+
+		isMobileMarketView() {
+			return typeof window !== 'undefined' && window.innerWidth <= 900;
+		},
+
+		/** Places newly opened mobile details below the fixed site header. */
+		scrollToDetailPanel() {
+			if (typeof window === 'undefined') {
+				return;
+			}
+			const detailPanel = this.$refs.detailPanelSection;
+			if (!detailPanel) {
+				return;
+			}
+			const fixedHeaderOffset = 88;
+			const detailTop = detailPanel.getBoundingClientRect().top + window.pageYOffset - fixedHeaderOffset;
+			window.scrollTo({ top: Math.max(0, detailTop), behavior: 'auto' });
 		},
 
 		/** Keeps the scrollable product list exactly as tall as the detail card. */
@@ -1777,18 +1809,41 @@ export default {
 	}
 
 	.market-layout {
-		grid-template-columns: 1fr;
+		grid-template-columns: minmax(0, 1fr);
 	}
 
 	.market-sidebar {
 		position: static;
 		top: auto;
+		min-width: 0;
 		overflow: visible;
 	}
 
 	.sidebar-scroll {
+		min-width: 0;
 		overflow: visible;
 		overscroll-behavior: auto;
+	}
+
+	.sidebar-row {
+		min-width: 0;
+	}
+
+	.sidebar-row-side {
+		flex: 0 1 auto;
+		min-width: 0;
+		gap: 6px;
+	}
+
+	.sidebar-row-price {
+		min-width: 0;
+		max-width: 100%;
+	}
+
+	.sidebar-row-price-afit,
+	.sidebar-row-price-hive {
+		max-width: 100%;
+		overflow-wrap: anywhere;
 	}
 
 	.market-sidebar.mobile-hidden,
@@ -1826,6 +1881,19 @@ export default {
 		position: absolute;
 		margin-top: -28px;
 		margin-left: 28px;
+	}
+}
+
+@media (max-width: 360px) {
+	.sidebar-row {
+		gap: 8px;
+		padding-right: 10px;
+		padding-left: 10px;
+	}
+
+	.sidebar-group-title {
+		padding-right: 10px;
+		padding-left: 10px;
 	}
 }
 

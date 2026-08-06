@@ -128,6 +128,65 @@ describe('market owned-gadgets section', () => {
     expect(marketPageSource).toContain('color: #d8dde4;')
   })
 
+  it('allows the market sidebar and price column to shrink at phone widths', () => {
+    expect(marketPageSource).toContain('grid-template-columns: minmax(0, 1fr);')
+    expect(marketPageSource).toMatch(/\.market-sidebar\s*\{[\s\S]*?min-width: 0;[\s\S]*?overflow: visible;/)
+    expect(marketPageSource).toMatch(/\.sidebar-row-side\s*\{[\s\S]*?flex: 0 1 auto;[\s\S]*?min-width: 0;/)
+    expect(marketPageSource).toContain('overflow-wrap: anywhere;')
+    expect(marketPageSource).toContain('@media (max-width: 360px)')
+  })
+
+  it('opens mobile product details at the panel and restores the list position on back', () => {
+    const originalPageYOffset = window.pageYOffset
+    const originalScrollTo = window.scrollTo
+    Object.defineProperty(window, 'pageYOffset', { configurable: true, value: 640 })
+    window.scrollTo = jest.fn()
+
+    const context = {
+      selectedProductId: null,
+      mobileShowDetail: false,
+      mobileListScrollY: 0,
+      isMobileMarketView: () => true,
+      scrollToDetailPanel: jest.fn(),
+      $nextTick: callback => callback()
+    }
+
+    MarketPage.methods.selectProduct.call(context, { _id: 'available-gadget' })
+
+    expect(context.selectedProductId).toBe('available-gadget')
+    expect(context.mobileShowDetail).toBe(true)
+    expect(context.mobileListScrollY).toBe(640)
+    expect(context.scrollToDetailPanel).toHaveBeenCalledTimes(1)
+
+    MarketPage.methods.backToList.call(context)
+
+    expect(context.mobileShowDetail).toBe(false)
+    expect(window.scrollTo).toHaveBeenCalledWith({ top: 640, behavior: 'auto' })
+
+    window.scrollTo = originalScrollTo
+    Object.defineProperty(window, 'pageYOffset', { configurable: true, value: originalPageYOffset })
+  })
+
+  it('positions mobile product details below the fixed header', () => {
+    const originalPageYOffset = window.pageYOffset
+    const originalScrollTo = window.scrollTo
+    Object.defineProperty(window, 'pageYOffset', { configurable: true, value: 300 })
+    window.scrollTo = jest.fn()
+
+    MarketPage.methods.scrollToDetailPanel.call({
+      $refs: {
+        detailPanelSection: {
+          getBoundingClientRect: () => ({ top: 500 })
+        }
+      }
+    })
+
+    expect(window.scrollTo).toHaveBeenCalledWith({ top: 712, behavior: 'auto' })
+
+    window.scrollTo = originalScrollTo
+    Object.defineProperty(window, 'pageYOffset', { configurable: true, value: originalPageYOffset })
+  })
+
   it('marks bought-but-inactive gadgets as owned', () => {
     const context = {
       user: { account: { name: 'alice' } },
