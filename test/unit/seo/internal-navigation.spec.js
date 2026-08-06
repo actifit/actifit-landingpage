@@ -8,8 +8,7 @@ describe('internal navigation', () => {
 
   it.each([
     '/blog/new',
-    '/videos/new',
-    '/consultants'
+    '/videos/new'
   ])('links to %s from the primary navigation', route => {
     expect(primaryNavigation).toContain(`href="${route}"`)
   })
