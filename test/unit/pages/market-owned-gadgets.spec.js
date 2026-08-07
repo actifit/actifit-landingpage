@@ -47,6 +47,30 @@ describe('market owned-gadgets section', () => {
     })
   })
 
+  it('does not repeat saved products in the catalog groups', () => {
+    const groups = MarketPage.computed.groupedProducts.call({
+      filteredProducts: products,
+      savedProductIds: ['available-gadget'],
+      gadgetStats: [],
+      user: null
+    })
+
+    expect(groups.find(group => group.type === 'saved').items).toEqual([products[1]])
+    expect(groups.some(group => group.items.includes(products[1]) && group.type !== 'saved')).toBe(false)
+  })
+
+  it('keeps saved products visible even when filteredProducts excludes them', () => {
+    const groups = MarketPage.computed.groupedProducts.call({
+      filteredProducts: [products[0]],
+      prodList: products,
+      savedProductIds: ['physical'],
+      gadgetStats: [],
+      user: null
+    })
+
+    expect(groups.find(group => group.type === 'saved').items).toEqual([products[2]])
+  })
+
   it('places activated gadgets in the active state group', () => {
     const groups = MarketPage.computed.groupedProducts.call({
       filteredProducts: products,
@@ -81,8 +105,8 @@ describe('market owned-gadgets section', () => {
     })
 
     expect(groups.filter(group => group.items.includes(eventProduct))).toEqual([{
-      type: 'event',
-      labelKey: 'Event',
+      type: 'saved',
+      labelKey: 'saved_products',
       items: [eventProduct]
     }])
   })
@@ -102,6 +126,39 @@ describe('market owned-gadgets section', () => {
       labelKey: 'Bought',
       items: [products[0]]
     })
+  })
+
+  it('sorts price with null-valued products last', () => {
+    const pricedLow = {
+      _id: 'priced-low',
+      name: 'Low Price',
+      type: 'real',
+      price: [{ currency: 'USD', price: 10, percent_afit: 0, percent_hive: 100 }]
+    }
+    const pricedHigh = {
+      _id: 'priced-high',
+      name: 'High Price',
+      type: 'real',
+      price: [{ currency: 'USD', price: 20, percent_afit: 0, percent_hive: 100 }]
+    }
+    const noUsdValue = {
+      _id: 'no-usd',
+      name: 'No USD Value',
+      type: 'real',
+      price: [{ currency: 'BTC', price: 1000 }]
+    }
+
+    const context = {
+      prodList: [noUsdValue, pricedLow, pricedHigh],
+      afitPrice: { afitHiveLastUsdPrice: 1, afitHiveLastPrice: 1 },
+      currentSort: JSON.stringify({ value: 'price', direction: 'desc' }),
+      ensureSelection: jest.fn(),
+      $forceUpdate: jest.fn()
+    }
+
+    MarketPage.methods.reorderProducts.call(context)
+
+    expect(context.prodList).toEqual([pricedHigh, pricedLow, noUsdValue])
   })
 
   it('does not show the ownership section while logged out', () => {

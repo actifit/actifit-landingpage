@@ -1,10 +1,10 @@
 <template>
-  <div class="site-footer-shell">
+  <div>
 
     <NewFooterDesign />
 
 
-    <VoteProposalModal :bottomOffset="proposalBottomOffset" />
+    <VoteProposalModal />
 
     <vue-cookie-accept-decline
       :ref="'myPanel1'"
@@ -14,9 +14,7 @@
       :type="'bar'"
       :disableDecline="true"
       :transitionName="'slideFromBottom'"
-      :showPostponeButton="false"
-      @status="handleCookieStatus"
-      @clicked-accept="handleCookieAccepted">
+      :showPostponeButton="false">
 
       <div slot="message">
         {{ $t('cookies_notice') }}
@@ -40,13 +38,6 @@ import VoteProposalModal from "~/components/VoteProposalModal";
 export default {
   props: ['isHomePage'],
 
-  data() {
-    return {
-      cookieBannerVisible: false,
-      cookieBannerHeight: 0,
-    };
-  },
-
   components: {
     NewFooterDesign,
     VueCookieAcceptDecline,
@@ -57,32 +48,6 @@ export default {
     currentYear() {
       return (new Date()).getFullYear();
     },
-    proposalBottomOffset() {
-      return 20 + this.cookieBannerHeight;
-    },
-  },
-
-  methods: {
-    handleCookieStatus(status) {
-      this.cookieBannerVisible = !status;
-      this.$nextTick(this.syncCookieOverlaySpacing);
-    },
-    handleCookieAccepted() {
-      this.cookieBannerVisible = false;
-      this.$nextTick(this.syncCookieOverlaySpacing);
-    },
-    syncCookieOverlaySpacing() {
-      if (!process.client) return;
-
-      const cookiePanel = this.$refs.myPanel1;
-      const cookieBar = cookiePanel && cookiePanel.$el;
-      this.cookieBannerHeight = this.cookieBannerVisible && cookieBar instanceof Element
-        ? Math.ceil(cookieBar.getBoundingClientRect().height)
-        : 0;
-
-      document.documentElement.style.setProperty('--cookie-consent-offset', `${this.cookieBannerHeight}px`);
-      document.body.classList.toggle('cookie-consent-visible', this.cookieBannerHeight > 0);
-    },
   },
 
   async mounted() {
@@ -92,29 +57,6 @@ export default {
         $("body").css("overflow", "auto"); // Allow scrolling on the page
         $("body").removeClass("modal-open");
       });
-
-      this.$nextTick(() => {
-        const cookiePanel = this.$refs.myPanel1;
-        const cookieBar = cookiePanel && cookiePanel.$el;
-        this.cookieBannerVisible = Boolean(cookiePanel && cookiePanel.isOpen);
-        this.syncCookieOverlaySpacing();
-
-        if (cookieBar instanceof Element && typeof ResizeObserver !== 'undefined') {
-          this._cookieResizeObserver = new ResizeObserver(this.syncCookieOverlaySpacing);
-          this._cookieResizeObserver.observe(cookieBar);
-        }
-      });
-    }
-  },
-
-  beforeDestroy() {
-    if (this._cookieResizeObserver) {
-      this._cookieResizeObserver.disconnect();
-      this._cookieResizeObserver = null;
-    }
-    if (process.client) {
-      document.documentElement.style.removeProperty('--cookie-consent-offset');
-      document.body.classList.remove('cookie-consent-visible');
     }
   }
 }
@@ -125,10 +67,6 @@ export default {
 
 body.modal-open {
   overflow: auto !important;
-}
-
-body.cookie-consent-visible {
-  padding-bottom: var(--cookie-consent-offset, 0px);
 }
 
 #voteProposalModal {

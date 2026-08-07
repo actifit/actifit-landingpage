@@ -71,16 +71,16 @@
 						<div class="toolbar-control sort-control">
 							<label class="sort-label" for="marketSort">{{ $t('Sort_By') }}</label>
 							<select id="marketSort" v-model="currentSort" class="form-control sort-select">
-								<option :value="JSON.stringify({ value: 'name', direction: 'asc' })">{{ $t('Name') }}▲</option>
-								<option :value="JSON.stringify({ value: 'name', direction: 'desc' })">{{ $t('Name') }}▼</option>
-								<option :value="JSON.stringify({ value: 'level', direction: 'asc' })">{{ $t('Level') }}▲</option>
-								<option :value="JSON.stringify({ value: 'level', direction: 'desc' })">{{ $t('Level') }}▼</option>
-								<option :value="JSON.stringify({ value: 'price', direction: 'asc' })">{{ $t('Price') }}▲</option>
-								<option :value="JSON.stringify({ value: 'price', direction: 'desc' })">{{ $t('Price') }}▼</option>
-								<option :value="JSON.stringify({ value: 'reqtsFilled', direction: 'desc' })">{{ $t('Ready') }}▲</option>
-								<option :value="JSON.stringify({ value: 'reqtsFilled', direction: 'asc' })">{{ $t('Ready') }}▼</option>
-								<option :value="JSON.stringify({ value: 'bought', direction: 'asc' })">{{ $t('Bought') }}▲</option>
-								<option :value="JSON.stringify({ value: 'bought', direction: 'desc' })">{{ $t('Bought') }}▼</option>
+								<option :value="JSON.stringify({ value: 'name', direction: 'asc' })">{{ $t('Name') }}â–²</option>
+								<option :value="JSON.stringify({ value: 'name', direction: 'desc' })">{{ $t('Name') }}â–¼</option>
+								<option :value="JSON.stringify({ value: 'level', direction: 'asc' })">{{ $t('Level') }}â–²</option>
+								<option :value="JSON.stringify({ value: 'level', direction: 'desc' })">{{ $t('Level') }}â–¼</option>
+								<option :value="JSON.stringify({ value: 'price', direction: 'asc' })">{{ $t('Price') }}â–²</option>
+								<option :value="JSON.stringify({ value: 'price', direction: 'desc' })">{{ $t('Price') }}â–¼</option>
+								<option :value="JSON.stringify({ value: 'reqtsFilled', direction: 'desc' })">{{ $t('Ready') }}â–²</option>
+								<option :value="JSON.stringify({ value: 'reqtsFilled', direction: 'asc' })">{{ $t('Ready') }}â–¼</option>
+								<option :value="JSON.stringify({ value: 'bought', direction: 'asc' })">{{ $t('Bought') }}â–²</option>
+								<option :value="JSON.stringify({ value: 'bought', direction: 'desc' })">{{ $t('Bought') }}â–¼</option>
 							</select>
 						</div>
 						<button type="button" class="cart-trigger" data-toggle="modal" data-target="#cartModal"
@@ -149,7 +149,7 @@
 			<!-- show listing of special event products -->
 			<!--
 			<div class="christmas-section p-4 my-5 rounded">
-				<h5 class="text-center pt-3 market-sub christmas-title mb-4">🎄 {{ $t('special_christmas_event') }} 🎁
+				<h5 class="text-center pt-3 market-sub christmas-title mb-4">ðŸŽ„ {{ $t('special_christmas_event') }} ðŸŽ
 				</h5>
 
 				<div class="row justify-content-center" v-if="prodList.length">
@@ -294,8 +294,8 @@ export default {
 		return {
 			title: `Actifit Market - Actifit.io`,
 			meta: [
-				{ hid: 'description', name: 'description', content: `Browse the Actifit Market — spend AFIT tokens on fitness consultations, ebooks, supplements, and booster gadgets. Health products powered by blockchain rewards.` },
-				{ hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Browse the Actifit Market — spend AFIT tokens on fitness consultations, ebooks, supplements, and booster gadgets.` },
+				{ hid: 'description', name: 'description', content: `Browse the Actifit Market â€” spend AFIT tokens on fitness consultations, ebooks, supplements, and booster gadgets. Health products powered by blockchain rewards.` },
+				{ hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Browse the Actifit Market â€” spend AFIT tokens on fitness consultations, ebooks, supplements, and booster gadgets.` },
 				{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Actifit Market - Actifit.io' }
 			]
 		}
@@ -387,8 +387,14 @@ export default {
 		/* groups the currently filtered products by type, in a fixed order, for the
 		   left-hand sidebar list (mirrors the categories used in filterOptions) */
 		groupedProducts() {
-			const eventProducts = this.filteredProducts.filter(product => product.specialevent);
-			const regularProducts = this.filteredProducts.filter(product => !product.specialevent);
+			const sourceProducts = Array.isArray(this.prodList) ? this.prodList : (Array.isArray(this.filteredProducts) ? this.filteredProducts : []);
+			const filteredProducts = Array.isArray(this.filteredProducts) ? this.filteredProducts : [];
+			const savedIds = Array.isArray(this.savedProductIds) ? this.savedProductIds : [];
+			const savedIdSet = new Set(savedIds.map(String));
+			const savedProducts = sourceProducts.filter(product => savedIdSet.has(String(product._id)));
+			const visibleProducts = filteredProducts.filter(product => !savedIdSet.has(String(product._id)));
+			const eventProducts = visibleProducts.filter(product => product.specialevent);
+			const regularProducts = visibleProducts.filter(product => !product.specialevent);
 			const eventGroups = eventProducts.length > 0
 				? [{ type: 'event', labelKey: 'Event', items: eventProducts }]
 				: [];
@@ -398,11 +404,6 @@ export default {
 				{ type: 'ebook', labelKey: 'Ebook' },
 				{ type: 'real', labelKey: 'Physical_Products' }
 			];
-			const catalogGroups = groupDefs
-				.map(def => ({ type: def.type, labelKey: def.labelKey, items: regularProducts.filter(p => p.type === def.type) }))
-				.filter(group => group.items.length > 0);
-			const savedIds = Array.isArray(this.savedProductIds) ? this.savedProductIds : [];
-			const savedProducts = regularProducts.filter(product => savedIds.includes(String(product._id)));
 			const personalGroups = [];
 			if (savedProducts.length > 0) {
 				personalGroups.push({ type: 'saved', labelKey: 'saved_products', items: savedProducts });
@@ -417,9 +418,9 @@ export default {
 				const stateContext = {
 					userRank: this.userRank,
 					userTokens: this.userTokens,
-					products: this.prodList,
-					gadgetStats: this.gadgetStats,
-					realProducts: this.realProducts
+					products: sourceProducts,
+					gadgetStats: Array.isArray(this.gadgetStats) ? this.gadgetStats : [],
+					realProducts: Array.isArray(this.realProducts) ? this.realProducts : []
 				};
 				const stateGroups = stateDefs
 					.map(def => ({
@@ -429,7 +430,12 @@ export default {
 					.filter(group => group.items.length > 0);
 				return eventGroups.concat(personalGroups, stateGroups);
 			}
-			return eventGroups.concat(personalGroups, catalogGroups);
+			return eventGroups.concat(
+				personalGroups,
+				groupDefs
+					.map(def => ({ type: def.type, labelKey: def.labelKey, items: regularProducts.filter(p => p.type === def.type) }))
+					.filter(group => group.items.length > 0)
+			);
 		},
 		selectedProduct() {
 			if (!this.selectedProductId) {
@@ -465,7 +471,6 @@ export default {
 			return getGadgetLevelClass(level);
 		},
 		refreshTickets() {
-			//console.log('>>>>refreshing');
 			this.fetchUserBuyTicketEntries();
 			this.fetchPrizePool();
 		},
@@ -481,28 +486,27 @@ export default {
 			}
 		},
 		reorderProducts() {
+			const defaultSortApproach = { value: 'price', direction: 'asc' };
+			let sortApproach = defaultSortApproach;
 			try {
-				//console.log(this.currentSort);
-				let sortApproach = JSON.parse(this.currentSort);
-				//console.log(sortApproach.value);
-				if (sortApproach.value) {
-					console.log(sortApproach.value);
-					if (sortApproach.value == 'price') {
-						const comparablePrices = this.prodList.map(product => getProductUsdValue(product, this.afitPrice));
-						if (!comparablePrices.some(price => price === null)) {
-							this.prodList = Lodash.orderBy(
-								this.prodList,
-								product => getProductUsdValue(product, this.afitPrice),
-								[sortApproach.direction]
-							);
-						}
-					} else {
-						this.prodList = Lodash.orderBy(this.prodList, [sortApproach.value], [sortApproach.direction]);
-					}
-					this.$forceUpdate();
-				}
+				sortApproach = JSON.parse(this.currentSort) || defaultSortApproach;
 			} catch (err) {
-				console.log(err);
+				console.error(err);
+			}
+			if (sortApproach.value) {
+				if (sortApproach.value == 'price') {
+					this.prodList = Lodash.orderBy(
+						this.prodList,
+						[
+							product => getProductUsdValue(product, this.afitPrice) === null,
+							product => getProductUsdValue(product, this.afitPrice) || 0
+						],
+						['asc', sortApproach.direction]
+					);
+				} else {
+					this.prodList = Lodash.orderBy(this.prodList, [sortApproach.value], [sortApproach.direction]);
+				}
+				this.$forceUpdate();
 			}
 			this.ensureSelection();
 		},
@@ -511,15 +515,15 @@ export default {
 			this.reorderProducts();
 		},
 		updateProd(prod) {
-			let ind = this.prodList.findIndex(product => (product._id === prod._id));
-			this.prodList[ind] = prod;
+			const ind = this.prodList.findIndex(product => (product._id === prod._id));
+			if (ind === -1) {
+				return;
+			}
+			this.$set(this.prodList, ind, prod);
 			this.$forceUpdate();
-			//console.log('updateProd');
-			//console.log(this.prodList[ind]);
 		},
 		setAFITPrice(_afitPrice) {
 			this.afitPrice = _afitPrice;
-			console.log(this.afitPrice);
 			this.reorderProducts();
 		},
 		async fetchAfitPrice() {
@@ -548,7 +552,6 @@ export default {
 		async fetchPrizePool() {
 			let _parent = this;
 			hive.api.getAccounts([process.env.actifitMarketBuy], function (err, response) {
-				//console.log(err, response);
 				if (!err) {
 					_parent.prizePool = response[0].balance;
 					_parent.prizePoolValue = _parent.numberFormat(parseFloat(_parent.prizePool.split(' ')[0]) / 2, 3);
@@ -564,16 +567,12 @@ export default {
 		},
 
 		setNextPrizeDate(json) {
-			console.log('setNextPrizeDate');
-			console.log(json);
 			let targetDate = new Date(json.nextDrawDate);
 			let mnth = targetDate.getMonth() + 1;
 			if (mnth < 10) {
 				mnth = '0' + mnth;
 			}
 			this.nextGadgetBuyRewardDate = targetDate.getFullYear() + '-' + mnth + '-' + targetDate.getDate() + ' 00:00 GMT';
-			console.log('nextGadgetBuyRewardDate');
-			console.log(this.nextGadgetBuyRewardDate);
 
 			//also set last draw winner display
 			this.lastDrawWinner = json.winner[0].name;
@@ -1898,7 +1897,7 @@ export default {
 }
 
 /* =========================================================
-   Dark mode — aligned to the site's existing red/black brand palette
+   Dark mode â€” aligned to the site's existing red/black brand palette
    ========================================================= */
 html.dark-mode .market-hero {
   background:var(--background-color);

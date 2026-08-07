@@ -1,3 +1,6 @@
+const fs = require('fs')
+const path = require('path')
+
 const locales = {
   ar: require('~/lang/ar_AE.js'),
   de: require('~/lang/de_DE.js'),
@@ -15,35 +18,33 @@ const locales = {
   zh: require('~/lang/zh_CN.js')
 }
 
+function extractTranslationKeys(filePath) {
+  const source = fs.readFileSync(filePath, 'utf8')
+  const keys = new Set()
+  const pattern = /\$t\(\s*(['"`])([^'"`]+)\1\s*\)/g
+  let match = pattern.exec(source)
+
+  while (match) {
+    keys.add(match[2])
+    match = pattern.exec(source)
+  }
+
+  return keys
+}
+
+const sourceFiles = [
+  path.resolve(__dirname, '../../../pages/market.vue'),
+  path.resolve(__dirname, '../../../components/Product.vue')
+]
+
+const marketTranslationKeys = [...sourceFiles.flatMap(filePath => [...extractTranslationKeys(filePath)])]
+const uniqueMarketTranslationKeys = [...new Set(marketTranslationKeys)]
+
 describe('market translations', () => {
-  it.each(Object.entries(locales))('%s provides the My Gadgets label', (locale, messages) => {
-    expect(typeof messages.my_gadgets).toBe('string')
-    expect(messages.my_gadgets.trim()).not.toBe('')
-  })
-
-  it.each(Object.entries(locales))('%s provides the Saved Products label', (locale, messages) => {
-    expect(typeof messages.saved_products).toBe('string')
-    expect(messages.saved_products.trim()).not.toBe('')
-  })
-
-  it.each(Object.entries(locales))('%s provides the purchase-currency label', (locale, messages) => {
-    expect(typeof messages.purchase_currency).toBe('string')
-    expect(messages.purchase_currency.trim()).not.toBe('')
-  })
-
-  it.each(Object.entries(locales))('%s provides the clear-filters label', (locale, messages) => {
-    expect(typeof messages.clear_filters).toBe('string')
-    expect(messages.clear_filters.trim()).not.toBe('')
-  })
-
-  it.each(Object.entries(locales))('%s provides the no-products-found label', (locale, messages) => {
-    expect(typeof messages.no_products_found).toBe('string')
-    expect(messages.no_products_found.trim()).not.toBe('')
-    expect(messages.no_products_found).not.toBe('no_products_found')
-  })
-
-  it.each(Object.entries(locales))('%s provides the Event section label', (locale, messages) => {
-    expect(typeof messages.Event).toBe('string')
-    expect(messages.Event.trim()).not.toBe('')
+  it.each(Object.entries(locales))('%s provides every market label', (locale, messages) => {
+    uniqueMarketTranslationKeys.forEach(key => {
+      expect(typeof messages[key]).toBe('string')
+      expect(messages[key].trim()).not.toBe('')
+    })
   })
 })
