@@ -149,7 +149,7 @@
 			<!-- show listing of special event products -->
 			<!--
 			<div class="christmas-section p-4 my-5 rounded">
-				<h5 class="text-center pt-3 market-sub christmas-title mb-4">ðŸŽ„ {{ $t('special_christmas_event') }} ðŸŽ
+				<h5 class="text-center pt-3 market-sub christmas-title mb-4">🎁 {{ $t('special_christmas_event') }} 🎄
 				</h5>
 
 				<div class="row justify-content-center" v-if="prodList.length">
@@ -294,8 +294,8 @@ export default {
 		return {
 			title: `Actifit Market - Actifit.io`,
 			meta: [
-				{ hid: 'description', name: 'description', content: `Browse the Actifit Market â€” spend AFIT tokens on fitness consultations, ebooks, supplements, and booster gadgets. Health products powered by blockchain rewards.` },
-				{ hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Browse the Actifit Market â€” spend AFIT tokens on fitness consultations, ebooks, supplements, and booster gadgets.` },
+				{ hid: 'description', name: 'description', content: `Browse the Actifit Market — spend AFIT tokens on fitness consultations, ebooks, supplements, and booster gadgets. Health products powered by blockchain rewards.` },
+				{ hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Browse the Actifit Market — spend AFIT tokens on fitness consultations, ebooks, supplements, and booster gadgets.` },
 				{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Actifit Market - Actifit.io' }
 			]
 		}
@@ -387,11 +387,11 @@ export default {
 		/* groups the currently filtered products by type, in a fixed order, for the
 		   left-hand sidebar list (mirrors the categories used in filterOptions) */
 		groupedProducts() {
-			const sourceProducts = Array.isArray(this.prodList) ? this.prodList : (Array.isArray(this.filteredProducts) ? this.filteredProducts : []);
 			const filteredProducts = Array.isArray(this.filteredProducts) ? this.filteredProducts : [];
+			const sourceProducts = Array.isArray(this.prodList) ? this.prodList : filteredProducts;
 			const savedIds = Array.isArray(this.savedProductIds) ? this.savedProductIds : [];
 			const savedIdSet = new Set(savedIds.map(String));
-			const savedProducts = sourceProducts.filter(product => savedIdSet.has(String(product._id)));
+			const savedProducts = filteredProducts.filter(product => savedIdSet.has(String(product._id)));
 			const visibleProducts = filteredProducts.filter(product => !savedIdSet.has(String(product._id)));
 			const eventProducts = visibleProducts.filter(product => product.specialevent);
 			const regularProducts = visibleProducts.filter(product => !product.specialevent);
@@ -1897,7 +1897,7 @@ export default {
 }
 
 /* =========================================================
-   Dark mode â€” aligned to the site's existing red/black brand palette
+   Dark mode — aligned to the site's existing red/black brand palette
    ========================================================= */
 html.dark-mode .market-hero {
   background:var(--background-color);

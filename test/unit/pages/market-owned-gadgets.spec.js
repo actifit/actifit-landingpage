@@ -59,7 +59,7 @@ describe('market owned-gadgets section', () => {
     expect(groups.some(group => group.items.includes(products[1]) && group.type !== 'saved')).toBe(false)
   })
 
-  it('keeps saved products visible even when filteredProducts excludes them', () => {
+  it('does not surface saved products that are filtered out', () => {
     const groups = MarketPage.computed.groupedProducts.call({
       filteredProducts: [products[0]],
       prodList: products,
@@ -68,7 +68,7 @@ describe('market owned-gadgets section', () => {
       user: null
     })
 
-    expect(groups.find(group => group.type === 'saved').items).toEqual([products[2]])
+    expect(groups.some(group => group.type === 'saved')).toBe(false)
   })
 
   it('places activated gadgets in the active state group', () => {

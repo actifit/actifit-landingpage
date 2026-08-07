@@ -7,7 +7,7 @@
           <!-- Using the dynamic year from the computed property -->
           <h5 class="modal-title">{{ $t('proposal_modal_title_year') }}</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close" @click="closeModal">
-            <span aria-hidden="true">Ã—</span>
+            <span aria-hidden="true">×</span>
           </button>
         </div>
         <p>{{ $t('proposal_modal_message') }}</p>
