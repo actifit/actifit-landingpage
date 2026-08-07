@@ -1,6 +1,6 @@
 ﻿<template>
   <div>
-    <NavbarBrand class="wallet-compact-navbar" @user-switched="refreshAllWalletData" />
+    <NavbarBrand @user-switched="refreshAllWalletData" />
 
     <div class="container wallet-page wallet-shell pt-5 mt-5 pb-5" v-if="user || displayUser">
 
@@ -20,19 +20,9 @@
         <section class="wallet-hero text-left">
           <div class="wallet-hero-main">
             <span class="wallet-eyebrow">{{ $t('account_est_val') }}</span>
-            <div class="wallet-total"><small>$</small>{{ totalAccountValue }}</div>
-            <p class="wallet-hero-copy">{{ displayUser || (user && user.account ? user.account.name : '') }} · {{ cur_bchain }}</p>
-            <div class="wallet-allocation" aria-hidden="true">
-              <span class="wallet-allocation-afit"></span>
-              <span class="wallet-allocation-chain"></span>
-              <span class="wallet-allocation-stable"></span>
-              <span class="wallet-allocation-other"></span>
-            </div>
-            <div class="wallet-legend">
-              <span><i class="afit"></i>AFIT</span>
-              <span><i class="chain"></i>{{ cur_bchain }}</span>
-              <span v-if="cur_bchain != 'BLURT'"><i class="stable"></i>{{ cur_bchain == 'HIVE' ? 'HBD' : 'SBD' }}</span>
-              <span><i class="other"></i>{{ $t('Tokens') }}</span>
+            <div class="wallet-total" v-if="!loading && !walletDataRefreshing"><small>$</small>{{ totalAccountValue }}</div>
+            <div class="wallet-total wallet-total-loading" v-else aria-label="Loading account value">
+              <i class="fas fa-spin fa-spinner"></i>
             </div>
           </div>
           <div class="wallet-hero-side">
@@ -124,6 +114,19 @@
             </span>
           </div>
         </div>
+        <div class="wallet-sort-bar" v-if="userTokensWallet >= 0">
+          <label for="wallet-token-sort">{{ $t('Sort_By') }}</label>
+          <select id="wallet-token-sort" v-model="tokenSort" v-on:change="sortTokenData(tokenSort, true)">
+            <option value="symbol">Token</option>
+            <option value="balance">{{ $t('Available') }}</option>
+            <option value="usdval">USD</option>
+          </select>
+          <button type="button" class="wallet-sort-direction" v-on:click="sortTokenData(tokenSort)"
+            :title="tsortDir === 1 ? 'Ascending' : 'Descending'"
+            :aria-label="tsortDir === 1 ? 'Sort descending' : 'Sort ascending'">
+            <i class="fas" :class="tsortDir === 1 ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+          </button>
+        </div>
         <div class="wallet-container" v-if="userTokensWallet >= 0">
           <div class="row font-weight-bold token-entry thick-bottom head-title">
             <div class="col-2 clickable" v-on:click="sortTokenData('symbol')">Token
@@ -150,14 +153,15 @@
               </span></div>
             <div class="col-lg-2 col-1"><i class="fa-solid fa-wave-square" :title="$t('Actions')"></i></div>
           </div>
+          <h2 class="wallet-asset-group-heading">{{ $t('main_chain') }}</h2>
           <div class="token-entry row main-token">
-            <div class="col-2 text-left"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo" alt="">AFIT</div>
-            <div class="col-2 col-lg-1">{{ $t('actifit_wallet') }}</div>
-            <div class="col-2 text-right">{{ formattedUserAfit }}</div>
-            <div class="col-2 text-right">-</div>
-            <div class="col-lg-1 col-2 text-right">-</div>
-            <div class="col-1 col-lg-2 text-right break-val">${{ this.afitValueUSD }}</div>
-            <div class="col-lg-2 col-1 token_actions" v-if="!nonAuthUser">
+            <div class="col-2 text-left wallet-token-name"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo" alt="">AFIT</div>
+            <div class="col-2 col-lg-1 wallet-token-location">{{ $t('actifit_wallet') }}</div>
+            <div class="col-2 text-right wallet-token-balance" :data-label="$t('Available')">{{ formattedUserAfit }}</div>
+            <div class="col-2 text-right wallet-token-staked" :data-label="$t('Staked')">-</div>
+            <div class="col-lg-1 col-2 text-right wallet-token-savings" :data-label="$t('Savings')">-</div>
+            <div class="col-1 col-lg-2 text-right break-val wallet-token-usd" :data-label="$t('in_usd')">${{ this.afitValueUSD }}</div>
+            <div class="col-lg-2 col-1 token_actions wallet-token-actions" v-if="!nonAuthUser">
               <span class="btn btn-brand p-1" v-on:click="refreshBalance()">
                 <i class="fas fa-solid fa-history" :title="$t('Refresh_balance')" />
                 <span v-if="refreshinBal">
@@ -187,15 +191,15 @@
             </div>
           </div>
           <div class="token-entry row main-token">
-            <div class="col-2 text-left">
+            <div class="col-2 text-left wallet-token-name">
               <span v-if="cur_bchain == 'HIVE'"><img src="/img/HIVE.png" class="mr-1 mini-token-logo" alt="">HIVE</span>
               <span v-else-if="cur_bchain == 'STEEM'"><img src="/img/STEEM.png"
                   class="mr-1 mini-token-logo" alt="">STEEM</span>
               <span v-else-if="cur_bchain == 'BLURT'"><img src="/img/BLURT.png"
                   class="mr-1 mini-token-logo" alt="">BLURT</span>
             </div>
-            <div class="col-2 col-lg-1">{{ this.cur_bchain }}</div>
-            <div class="col-2 text-right">{{ this.renderBalance(this.cur_bchain) }}</div>
+            <div class="col-2 col-lg-1 wallet-token-location">{{ this.cur_bchain }}</div>
+            <div class="col-2 text-right wallet-token-balance" :data-label="$t('Available')">{{ this.renderBalance(this.cur_bchain) }}</div>
 
             <div class="row" style="display:none">
               <div class="p-2 col-md-6" id="ttip-area">
@@ -205,7 +209,7 @@
                     }})</i></small>
               </div>
             </div>
-            <div class="col-2 text-right">{{ this.renderSteemPower(2) }} {{ this.cur_bchain }} {{ $t('POWER') }}
+            <div class="col-2 text-right wallet-token-staked" :data-label="$t('Staked')">{{ this.renderSteemPower(2) }} {{ this.cur_bchain }} {{ $t('POWER') }}
               <i v-if="!showPowerBreakdown['HIVE']" class="fas fa-solid fa-arrow-circle-down text-brand"
                 v-on:click="showPowerBreakdown['HIVE'] = true" :title="$t('STEEM_POWER_BREAKDOWN')"></i>
               <i v-else class="fas fa-solid fa-arrow-circle-up text-brand"
@@ -219,7 +223,7 @@
               </span>
 
             </div>
-            <div class="col-lg-1 col-2 text-right">
+            <div class="col-lg-1 col-2 text-right wallet-token-savings" :data-label="$t('Savings')">
               {{ this.renderSavings(this.cur_bchain) }}
 
               {{ this.pendingSavingsWithdrawVal('HIVE') }}
@@ -238,8 +242,8 @@
 
 
             </div>
-            <div class="col-1 col-lg-2 text-right break-val">${{ this.hiveValueUSD }}</div>
-            <div class="col-lg-2 col-1 token_actions" v-if="!nonAuthUser">
+            <div class="col-1 col-lg-2 text-right break-val wallet-token-usd" :data-label="$t('in_usd')">${{ this.hiveValueUSD }}</div>
+            <div class="col-lg-2 col-1 token_actions wallet-token-actions" v-if="!nonAuthUser">
               <span class="btn btn-brand p-1" v-on:click="powerUpFunds"><i class="fas fa-arrow-circle-up p-1"
                   :title="$t('POWERUP_ACTION_TEXT')"></i></span>
               <span class="btn btn-brand p-1" v-on:click="powerDownFunds"><i class="fas fa-arrow-circle-down "
@@ -265,7 +269,7 @@
                 </a>
               </span>
             </div>
-            <div class="col-lg-2 col-1 token_actions" v-else>
+            <div class="col-lg-2 col-1 token_actions wallet-token-actions" v-else>
               <span class="btn btn-brand p-1">
                 <a href="#" data-toggle="modal" data-target="#topHiveHoldersModal"
                   :title="$t('top_hive_holders_title')">
@@ -283,7 +287,7 @@
 
           <!-- special row for HBD savings -->
           <transition name="fade">
-            <div class="token-entry row main-token" v-if="showHiveWithdrawalDetails">
+            <div class="token-entry row main-token wallet-token-detail-panel" v-if="showHiveWithdrawalDetails">
               <div class="col-6"></div>
               <div class="col-6">
 
@@ -318,14 +322,14 @@
 
 
           <div class="token-entry row main-token" v-if="cur_bchain != 'BLURT'">
-            <div class="col-2 text-left">
+            <div class="col-2 text-left wallet-token-name">
               <span v-if="cur_bchain == 'HIVE'"><img src="/img/HIVE.png" class="mr-1 mini-token-logo" alt="">HBD</span>
               <span v-else-if="cur_bchain == 'STEEM'"><img src="/img/STEEM.png" class="mr-1 mini-token-logo" alt="">SBD</span>
             </div>
-            <div class="col-2 col-lg-1">{{ this.cur_bchain }}</div>
-            <div class="col-2 text-right">{{ this.renderSBDBalance(this.cur_bchain) }}</div>
-            <div class="col-2"></div>
-            <div class="col-lg-1 col-2 text-right">
+            <div class="col-2 col-lg-1 wallet-token-location">{{ this.cur_bchain }}</div>
+            <div class="col-2 text-right wallet-token-balance" :data-label="$t('Available')">{{ this.renderSBDBalance(this.cur_bchain) }}</div>
+            <div class="col-2 wallet-token-staked" :data-label="$t('Staked')"></div>
+            <div class="col-lg-1 col-2 text-right wallet-token-savings" :data-label="$t('Savings')">
               {{ this.renderSBDSavings(this.cur_bchain) }}
 
               {{ this.pendingSavingsWithdrawVal('HBD') }}
@@ -349,8 +353,8 @@
               </span>
 
             </div>
-            <div class="col-1 col-lg-2 text-right break-val">${{ this.hbdValueUSD }}</div>
-            <div class="col-lg-2 col-1 token_actions" v-if="!nonAuthUser">
+            <div class="col-1 col-lg-2 text-right break-val wallet-token-usd" :data-label="$t('in_usd')">${{ this.hbdValueUSD }}</div>
+            <div class="col-lg-2 col-1 token_actions wallet-token-actions" v-if="!nonAuthUser">
               <span class="btn btn-brand p-1" v-on:click="transferFunds('HBD')"><i class="fas fa-share-square "
                   :title="$t('TRANSFER_FUNDS_ACTION_TEXT')"></i></span>
               <span class="btn btn-brand p-1" v-on:click="transferToSavings('HBD')"
@@ -364,7 +368,7 @@
                 </a>
               </span>
             </div>
-            <div class="col-lg-2 col-1 token_actions" v-else>
+            <div class="col-lg-2 col-1 token_actions wallet-token-actions" v-else>
                <span class="btn btn-brand p-1">
                 <a href="#" data-toggle="modal" data-target="#topHbdHoldersModal"
                   :title="$t('top_hbd_holders_title')">
@@ -376,7 +380,7 @@
 
           <!-- special row for HBD savings rewards -->
           <transition name="fade">
-            <div class="token-entry row main-token" v-if="showHBDSavingsDetails">
+            <div class="token-entry row main-token wallet-token-detail-panel" v-if="showHBDSavingsDetails">
               <div class="col-6"></div>
               <div class="col-6">
                 <div class="savings-rewards" v-if="parseFloat(estimatedInterest) > parseFloat(0.001)">
@@ -404,7 +408,7 @@
 
           <!-- special row for HBD savings -->
           <transition name="fade">
-            <div class="token-entry row main-token" v-if="showHBDWithdrawalDetails">
+            <div class="token-entry row main-token wallet-token-detail-panel" v-if="showHBDWithdrawalDetails">
               <div class="col-6"></div>
               <div class="col-6">
 
@@ -434,14 +438,15 @@
             </div>
           </transition>
 
+          <h2 class="wallet-asset-group-heading">{{ $t('BSC') }}</h2>
           <div class="token-entry row main-token">
-            <div class="col-2 text-left"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo" alt="">AFIT</div>
-            <div class="col-2 col-lg-1">{{ $t('BSC') }}</div>
-            <div class="col-2 text-right">{{ formattedUserAfitBSC }}</div>
-            <div class="col-2"></div>
-            <div class="col-lg-1 col-2 text-right"></div>
-            <div class="col-1 col-lg-2 text-right break-val">{{ formattedUserAfitBSCVal }}</div>
-            <div class="col-lg-2 col-1 token_actions">
+            <div class="col-2 text-left wallet-token-name"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo" alt="">AFIT</div>
+            <div class="col-2 col-lg-1 wallet-token-location">{{ $t('BSC') }}</div>
+            <div class="col-2 text-right wallet-token-balance" :data-label="$t('Available')">{{ formattedUserAfitBSC }}</div>
+            <div class="col-2 wallet-token-staked" :data-label="$t('Staked')"></div>
+            <div class="col-lg-1 col-2 text-right wallet-token-savings" :data-label="$t('Savings')"></div>
+            <div class="col-1 col-lg-2 text-right break-val wallet-token-usd" :data-label="$t('in_usd')">{{ formattedUserAfitBSCVal }}</div>
+            <div class="col-lg-2 col-1 token_actions wallet-token-actions">
               <span class="btn btn-brand p-1" :title="$t('smart_contract')">
                 <a target="_blank" rel="noopener noreferrer" :href="'https://bscscan.com/address/' + afitTokenAddress"><i
                     class="fas fa-file-contract"></i></a>
@@ -455,13 +460,13 @@
           </div>
 
           <div class="token-entry row main-token">
-            <div class="col-2 text-left"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo" alt="">AFIT-BNB LP</div>
-            <div class="col-2 col-lg-1">{{ $t('BSC') }}</div>
-            <div class="col-2 text-right">{{ formattedUserAfitBNBLPBSC }}</div>
-            <div class="col-2"></div>
-            <div class="col-lg-1 col-2 text-right"></div>
-            <div class="col-1 col-lg-2 text-right">-</div>
-            <div class="col-lg-2 col-1 token_actions">
+            <div class="col-2 text-left wallet-token-name"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo" alt="">AFIT-BNB LP</div>
+            <div class="col-2 col-lg-1 wallet-token-location">{{ $t('BSC') }}</div>
+            <div class="col-2 text-right wallet-token-balance" :data-label="$t('Available')">{{ formattedUserAfitBNBLPBSC }}</div>
+            <div class="col-2 wallet-token-staked" :data-label="$t('Staked')"></div>
+            <div class="col-lg-1 col-2 text-right wallet-token-savings" :data-label="$t('Savings')"></div>
+            <div class="col-1 col-lg-2 text-right wallet-token-usd" :data-label="$t('in_usd')">-</div>
+            <div class="col-lg-2 col-1 token_actions wallet-token-actions">
               <span class="btn btn-brand p-1" :title="$t('smart_contract')">
                 <a target="_blank" rel="noopener noreferrer" :href="'https://bscscan.com/address/' + afitBNBLPTokenAddress"><i
                     class="fas fa-file-contract"></i></a>
@@ -471,13 +476,13 @@
 
 
           <div class="token-entry row main-token">
-            <div class="col-2 text-left"><img src="/img/AFITX.png" class="mr-1 mini-token-logo" alt="">AFITX</div>
-            <div class="col-2 col-lg-1">{{ $t('BSC') }}</div>
-            <div class="col-2 text-right">{{ formattedUserAFITXBSC }}</div>
-            <div class="col-2"></div>
-            <div class="col-lg-1 col-2 text-right"></div>
-            <div class="col-1 col-lg-2 text-right break-val">{{ formattedUserAfitxBSCVal }}</div>
-            <div class="col-lg-2 col-1 token_actions">
+            <div class="col-2 text-left wallet-token-name"><img src="/img/AFITX.png" class="mr-1 mini-token-logo" alt="">AFITX</div>
+            <div class="col-2 col-lg-1 wallet-token-location">{{ $t('BSC') }}</div>
+            <div class="col-2 text-right wallet-token-balance" :data-label="$t('Available')">{{ formattedUserAFITXBSC }}</div>
+            <div class="col-2 wallet-token-staked" :data-label="$t('Staked')"></div>
+            <div class="col-lg-1 col-2 text-right wallet-token-savings" :data-label="$t('Savings')"></div>
+            <div class="col-1 col-lg-2 text-right break-val wallet-token-usd" :data-label="$t('in_usd')">{{ formattedUserAfitxBSCVal }}</div>
+            <div class="col-lg-2 col-1 token_actions wallet-token-actions">
               <span class="btn btn-brand p-1" :title="$t('smart_contract')">
                 <a target="_blank" rel="noopener noreferrer" :href="'https://bscscan.com/address/' + afitxTokenAddress"><i
                     class="fas fa-file-contract"></i></a>
@@ -491,13 +496,13 @@
           </div>
 
           <div class="token-entry row main-token">
-            <div class="col-2 text-left"><img src="/img/AFITX.png" class="mr-1 mini-token-logo" alt="">AFITX-BNB LP</div>
-            <div class="col-2 col-lg-1">{{ $t('BSC') }}</div>
-            <div class="col-2 text-right">{{ formattedUserAFITXBNBLPBSC }}</div>
-            <div class="col-2"></div>
-            <div class="col-lg-1 col-2 text-right"></div>
-            <div class="col-1 col-lg-2 text-right">-</div>
-            <div class="col-lg-2 col-1 token_actions">
+            <div class="col-2 text-left wallet-token-name"><img src="/img/AFITX.png" class="mr-1 mini-token-logo" alt="">AFITX-BNB LP</div>
+            <div class="col-2 col-lg-1 wallet-token-location">{{ $t('BSC') }}</div>
+            <div class="col-2 text-right wallet-token-balance" :data-label="$t('Available')">{{ formattedUserAFITXBNBLPBSC }}</div>
+            <div class="col-2 wallet-token-staked" :data-label="$t('Staked')"></div>
+            <div class="col-lg-1 col-2 text-right wallet-token-savings" :data-label="$t('Savings')"></div>
+            <div class="col-1 col-lg-2 text-right wallet-token-usd" :data-label="$t('in_usd')">-</div>
+            <div class="col-lg-2 col-1 token_actions wallet-token-actions">
               <span class="btn btn-brand p-1" :title="$t('smart_contract')">
                 <a target="_blank" rel="noopener noreferrer" :href="'https://bscscan.com/address/' + afitxBNBLPTokenAddress"><i
                     class="fas fa-file-contract"></i></a>
@@ -506,16 +511,17 @@
           </div>
 
 
-          <div class="engine-token-section" v-if="(Array.isArray(tokenMetrics) && tokenMetrics.length > 0) || (Array.isArray(tokensOfInterestBal) && tokensOfInterestBal.length > 0)">
+          <div class="engine-token-section" v-if="!loading && !walletDataRefreshing && ((Array.isArray(tokenMetrics) && tokenMetrics.length > 0) || (Array.isArray(tokensOfInterestBal) && tokensOfInterestBal.length > 0))">
+            <h2 class="wallet-asset-group-heading">{{ cur_bchain == 'STEEM' ? $t('Your_Token_Balance') : $t('Your_HE_Token_Balance') }}</h2>
             <!--<h5 class="token-title" v-if="cur_bchain == 'STEEM'">{{ $t('Your_Token_Balance') }}</h5>
 				  <h5 class="token-title" v-else>{{ $t('Your_HE_Token_Balance') }}<span v-if="cur_bchain=='BLURT'"><i class="fas fa-info-circle" v-on:click="notifySwitchChain()"></i></span></h5>-->
             <div v-if="Array.isArray(tokensOfInterestBal) && tokensOfInterestBal.length > 0 && renderToken(token)" class="token-entry row main-token"
               v-for="(token, index) in tokensOfInterestBal" :key="index" :token="token">
               <!--<div v-if=" ">-->
-              <div class="col-2 text-left"><img :src="token.icon" class="mr-1 mini-token-logo" alt="">{{ token.symbol }}</div>
-              <div class="col-2 col-lg-1">{{ $t('hive_engine') }}</div>
-              <div class="col-2 text-right">{{ renderBal(token) }} {{ token.symbol }}</div>
-              <div class="col-2 text-right">
+              <div class="col-2 text-left wallet-token-name"><img :src="token.icon" class="mr-1 mini-token-logo" alt="">{{ token.symbol }}</div>
+              <div class="col-2 col-lg-1 wallet-token-location">{{ $t('hive_engine') }}</div>
+              <div class="col-2 text-right wallet-token-balance" :data-label="$t('Available')">{{ renderBal(token) }} {{ token.symbol }}</div>
+              <div class="col-2 text-right wallet-token-staked" :data-label="$t('Staked')">
 
                 {{ renderStake(token) }} {{ token.symbol }}
                 <i v-if="!powerDisplayOn(token)" class="fas fa-solid fa-arrow-circle-down text-brand"
@@ -531,10 +537,10 @@
                   <li> ( {{ renderStake(token, 3) }} ({{ $t('Total_unstaking') }}))</li>
                 </span>
               </div>
-              <div class="col-lg-1 col-2"></div>
-              <div class="col-1 col-lg-2 text-right break-val">${{ usdVal(token) }}</div>
+              <div class="col-lg-1 col-2 wallet-token-savings" :data-label="$t('Savings')"></div>
+              <div class="col-1 col-lg-2 text-right break-val wallet-token-usd" :data-label="$t('in_usd')">${{ usdVal(token) }}</div>
               <!--<span v-if="parseFloat(delegStake(token)) > 0">( + {{ delegStake(token)}} {{ token.symbol }} {{ $t('Delegated') }}) </span>-->
-              <div class="token_actions col-lg-2 col-1" v-if="cur_bchain != 'BLURT' && !nonAuthUser">
+              <div class="token_actions col-lg-2 col-1 wallet-token-actions" v-if="cur_bchain != 'BLURT' && !nonAuthUser">
                 <span v-if="token.symbol == 'AFITX'" class="btn btn-brand p-1">
                   <a href="#" data-toggle="modal" class="" data-target="#topHoldersXModal"
                     :title="$t('top_100_afitx_holders')">
@@ -713,9 +719,14 @@
 
           </div>
 
+          <div v-else-if="loading || walletDataRefreshing" class="wallet-empty-engine" role="status">
+            <i class="fas fa-spin fa-spinner"></i>
+            <span>{{ $t('loading_hive_engine_balances') }}</span>
+          </div>
+
           <div v-else class="wallet-empty-engine">
             <i class="fas fa-coins"></i>
-            <span>No Hive-Engine token balances available.</span>
+            <span>{{ $t('no_hive_engine_balances') }}</span>
           </div>
 
 
@@ -2144,6 +2155,7 @@ export default {
       afit_se_power_error_proceeding: false,
       afit_se_power_err_msg: '',
       loading: true,
+      walletDataRefreshing: false,
       acti_goog_ad_horiz_slim: { display: 'inline-block', width: '728px', height: '90px' },
       powerDownProcess: false,
       powerUpProcess: false,
@@ -2503,6 +2515,7 @@ export default {
       $('#swapTokenModal').modal('show');
     },
     async refreshAllWalletData() {
+      this.walletDataRefreshing = true;
       try {
         // reset states
         this.tokensOfInterestBal = [];
@@ -2564,6 +2577,8 @@ export default {
         this.$forceUpdate();
       } catch (err) {
         console.error('Error refreshing wallet data:', err);
+      } finally {
+        this.walletDataRefreshing = false;
       }
     },
 
@@ -3596,6 +3611,7 @@ export default {
       }
     },
     async completeUserDataRefresh() {
+      this.walletDataRefreshing = true;
       try {
         this.userTokensWallet = -1;
         this.tokensOfInterestBal = [];
@@ -3609,6 +3625,8 @@ export default {
 
       } catch (err) {
         console.error('Error in completeUserDataRefresh:', err);
+      } finally {
+        this.walletDataRefreshing = false;
       }
     },
     fixUserData(newUserData) {
@@ -8687,13 +8705,6 @@ export default {
   border: solid 1px #ddd;
 }
 
-/* Wallet redesign */
-.wallet-compact-navbar .navbar-nav.mr-auto > li:nth-child(3),
-.wallet-compact-navbar .navbar-nav.mr-auto > li:nth-child(4),
-.wallet-compact-navbar .navbar-nav.mr-auto > li:nth-child(8) {
-  display: none;
-}
-
 .wallet-page {
   --wallet-bg: #f7f5f5;
   --wallet-surface: #ffffff;
@@ -8727,7 +8738,7 @@ export default {
   --wallet-faint: #796f6f;
 }
 
-.wallet-page .wallet-shell {
+.wallet-page.wallet-shell {
   max-width: 1280px;
   font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
@@ -8741,7 +8752,7 @@ export default {
 
 .wallet-hero {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(260px, .65fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
   margin: 8px 0 20px;
 }
@@ -8754,7 +8765,7 @@ export default {
 }
 
 .wallet-hero-main {
-  padding: 28px 30px;
+  padding: 22px 24px;
   position: relative;
   overflow: hidden;
 }
@@ -8774,7 +8785,7 @@ export default {
 .wallet-eyebrow,
 .wallet-stat-card > span {
   color: var(--wallet-faint);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: .08em;
   text-transform: uppercase;
@@ -8784,59 +8795,28 @@ export default {
   align-items: baseline;
   display: flex;
   font-family: "Courier New", monospace;
-  font-size: clamp(36px, 5vw, 52px);
+  font-size: 28px;
   font-weight: 700;
-  letter-spacing: -.05em;
   line-height: 1.1;
-  margin-top: 8px;
+  margin-top: 7px;
 }
 
 .wallet-total small {
-  color: var(--wallet-faint);
-  font-size: .42em;
-  margin-right: 5px;
+  color: var(--wallet-text);
+  font-size: 1em;
+  margin-right: 3px;
 }
 
-.wallet-hero-copy {
+.wallet-total-loading {
+  align-items: center;
   color: var(--wallet-muted);
-  font-size: 13px;
-  margin-top: 8px;
+  font-size: 28px;
+  min-height: 57px;
 }
 
-.wallet-allocation {
-  background: var(--wallet-surface-3);
-  border-radius: 999px;
-  display: flex;
-  height: 9px;
-  margin-top: 25px;
-  overflow: hidden;
-}
-
-.wallet-allocation span { display: block; }
-.wallet-allocation-afit { background: #ed1c24; width: 42%; }
-.wallet-allocation-chain { background: var(--wallet-blue); width: 28%; }
-.wallet-allocation-stable { background: var(--wallet-green); width: 18%; }
-.wallet-allocation-other { background: var(--wallet-amber); width: 12%; }
-
-.wallet-legend {
-  color: var(--wallet-muted);
-  display: flex;
-  flex-wrap: wrap;
-  font-size: 12px;
-  gap: 12px 20px;
-  margin-top: 13px;
-}
-
-.wallet-legend span { align-items: center; display: flex; gap: 7px; }
-.wallet-legend i { border-radius: 3px; display: inline-block; height: 8px; width: 8px; }
-.wallet-legend .afit { background: #ed1c24; }
-.wallet-legend .chain { background: var(--wallet-blue); }
-.wallet-legend .stable { background: var(--wallet-green); }
-.wallet-legend .other { background: var(--wallet-amber); }
-
-.wallet-hero-side { display: grid; gap: 14px; }
+.wallet-hero-side { display: contents; }
 .wallet-stat-card { display: flex; flex-direction: column; justify-content: center; padding: 19px 21px; }
-.wallet-stat-card strong { color: var(--wallet-text); font-family: "Courier New", monospace; font-size: 20px; margin-top: 7px; }
+.wallet-stat-card strong { color: var(--wallet-text); font-family: "Courier New", monospace; font-size: 28px; line-height: 1.1; margin-top: 7px; }
 .wallet-stat-card small { color: var(--wallet-muted); margin-top: 4px; }
 
 .wallet-quick-actions {
@@ -8926,6 +8906,63 @@ export default {
   display: none;
 }
 
+.wallet-page .wallet-asset-group-heading {
+  border-bottom: 1px solid var(--wallet-border-soft);
+  color: var(--wallet-text);
+  font-size: 14px;
+  font-weight: 700;
+  grid-column: 1 / -1;
+  letter-spacing: .03em;
+  margin: 6px 2px 0;
+  padding: 0 2px 9px;
+  text-align: left;
+}
+
+.wallet-page .wallet-sort-bar {
+  align-items: center;
+  background: var(--wallet-grid-bg);
+  border: 1px solid var(--wallet-border);
+  border-radius: 12px;
+  color: var(--wallet-muted);
+  display: flex;
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.wallet-page .wallet-sort-bar label {
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.wallet-page .wallet-sort-bar select,
+.wallet-page .wallet-sort-direction {
+  background: var(--wallet-surface-2);
+  border: 1px solid var(--wallet-border);
+  border-radius: 8px;
+  color: var(--wallet-text);
+  min-height: 38px;
+}
+
+.wallet-page .wallet-sort-bar select {
+  min-width: 150px;
+  padding: 6px 32px 6px 10px;
+}
+
+.wallet-page .wallet-sort-direction {
+  align-items: center;
+  cursor: pointer;
+  display: inline-flex;
+  justify-content: center;
+  width: 40px;
+}
+
+.wallet-page .wallet-sort-direction:hover {
+  border-color: #ed1c24;
+}
+
 .wallet-page .token-entry {
   align-items: center;
   border-bottom: 1px solid var(--wallet-border-soft);
@@ -8933,7 +8970,7 @@ export default {
   padding: 8px 4px;
 }
 
-.wallet-page .wallet-container .token-entry.row.main-token {
+.wallet-page .wallet-container .token-entry.row.main-token:not(.wallet-token-detail-panel) {
   align-content: start;
   background: var(--wallet-surface);
   border: 1px solid var(--wallet-border);
@@ -8947,14 +8984,14 @@ export default {
   transition: border-color .15s, transform .15s, box-shadow .15s;
 }
 
-.wallet-page .wallet-container .token-entry.row.main-token:hover {
+.wallet-page .wallet-container .token-entry.row.main-token:not(.wallet-token-detail-panel):hover {
   background: var(--wallet-surface);
   border-color: rgba(237, 28, 36, .55);
   box-shadow: 0 12px 30px -22px rgba(100, 0, 0, .55);
   transform: translateY(-2px);
 }
 
-.wallet-page .wallet-container .token-entry.row.main-token > div {
+.wallet-page .wallet-container .token-entry.row.main-token:not(.wallet-token-detail-panel) > div {
   flex: none;
   font-family: inherit;
   max-width: none;
@@ -8963,7 +9000,7 @@ export default {
   width: auto;
 }
 
-.wallet-page .wallet-container .token-entry.row.main-token > div:nth-child(1) {
+.wallet-page .wallet-container .wallet-token-name {
   align-items: center;
   display: flex;
   font-size: 16px;
@@ -8971,7 +9008,7 @@ export default {
   grid-column: span 3;
 }
 
-.wallet-page .wallet-container .token-entry.row.main-token > div:nth-child(2) {
+.wallet-page .wallet-container .token-entry.row.main-token:not(.wallet-token-detail-panel) > .wallet-token-location {
   align-self: center;
   background: var(--wallet-surface-2);
   border: 1px solid var(--wallet-border);
@@ -8980,11 +9017,15 @@ export default {
   font-size: 10px;
   font-weight: 700;
   justify-self: end;
-  padding: 3px 8px;
+  padding: 5px 10px;
   text-transform: uppercase;
 }
 
-.wallet-page .wallet-container .token-entry.row.main-token > div:nth-child(n+3):nth-child(-n+6)::before {
+.wallet-page .wallet-container .wallet-token-balance::before,
+.wallet-page .wallet-container .wallet-token-staked::before,
+.wallet-page .wallet-container .wallet-token-savings::before,
+.wallet-page .wallet-container .wallet-token-usd::before {
+  content: attr(data-label);
   color: var(--wallet-faint);
   display: block;
   font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -8995,26 +9036,33 @@ export default {
   text-transform: uppercase;
 }
 
-.wallet-page .wallet-container .token-entry.row.main-token > div:nth-child(3)::before { content: "Balance"; }
-.wallet-page .wallet-container .token-entry.row.main-token > div:nth-child(4)::before { content: "Staked"; }
-.wallet-page .wallet-container .token-entry.row.main-token > div:nth-child(5)::before { content: "Savings"; }
-.wallet-page .wallet-container .token-entry.row.main-token > div:nth-child(6)::before { content: "USD value"; }
-
-.wallet-page .wallet-container .token-entry.row.main-token > div:nth-child(n+3):nth-child(-n+6) {
+.wallet-page .wallet-container .wallet-token-balance,
+.wallet-page .wallet-container .wallet-token-staked,
+.wallet-page .wallet-container .wallet-token-savings,
+.wallet-page .wallet-container .wallet-token-usd {
   color: var(--wallet-text);
   font-family: "Courier New", monospace;
   font-size: 13px;
   min-width: 0;
 }
 
-.wallet-page .wallet-container .token-entry.row.main-token > .token_actions,
-.wallet-page .wallet-container .token-entry.row.main-token > div:nth-child(7) {
+.wallet-page .wallet-container .wallet-token-balance {
+  font-weight: 700;
+}
+
+.wallet-page .wallet-container .wallet-token-actions {
   border-top: 1px solid var(--wallet-border-soft);
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
   grid-column: 1 / -1;
   padding-top: 12px;
+}
+
+.wallet-page .wallet-container .wallet-token-detail-panel {
+  grid-column: 1 / -1;
+  margin: 0;
+  width: 100%;
 }
 
 .wallet-page .engine-token-section {
@@ -9046,7 +9094,7 @@ export default {
 .wallet-page .token_actions .btn:hover i,
 .wallet-page .token_actions a:hover .btn,
 .wallet-page .token_actions a:hover .btn i {
-  color: var(--wallet-muted) !important;
+  color: #ed1c24 !important;
 }
 .wallet-page .break-val,
 .wallet-page .token-entry .text-right { font-family: "Courier New", monospace; }
@@ -9082,21 +9130,21 @@ export default {
 }
 
 .dark-mode .wallet-page input.wallet-delegate-recipient {
-  background: #ffffff !important;
-  color: #20242b !important;
-  -webkit-text-fill-color: #20242b;
+  background: var(--wallet-surface-2) !important;
+  color: var(--wallet-text) !important;
+  -webkit-text-fill-color: var(--wallet-text);
 }
 
 .dark-mode .wallet-page .wallet-savings-form input,
 .dark-mode .wallet-page .wallet-savings-form select {
-  background: #ffffff !important;
-  color: #20242b !important;
-  -webkit-text-fill-color: #20242b;
+  background: var(--wallet-surface-2) !important;
+  color: var(--wallet-text) !important;
+  -webkit-text-fill-color: var(--wallet-text);
 }
 
 .dark-mode .wallet-page .wallet-savings-form select option {
-  background: #ffffff;
-  color: #20242b;
+  background: var(--wallet-surface-2);
+  color: var(--wallet-text);
 }
 
 .wallet-page .acti-shadow.card {
@@ -9123,14 +9171,12 @@ export default {
 }
 
 .wallet-page .wallet-transaction-grid .acti-shadow.card {
-  aspect-ratio: 1.15 / 1;
   background-color: #fae6e9 !important;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   margin: 0 !important;
   min-height: 210px;
-  overflow: hidden;
   padding: 20px !important;
 }
 
@@ -9144,25 +9190,24 @@ export default {
 
 @media (max-width: 991px) {
   .wallet-hero { grid-template-columns: 1fr; }
-  .wallet-hero-side { grid-template-columns: 1fr 1fr; }
+  .wallet-hero-side { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; }
   .wallet-page .wallet-container { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 600px) {
-  .wallet-page .wallet-shell { padding-left: 14px; padding-right: 14px; }
+  .wallet-page.wallet-shell { padding-left: 14px; padding-right: 14px; }
   .wallet-hero-main { padding: 22px 20px; }
   .wallet-hero-side { grid-template-columns: 1fr; }
   .wallet-stat-card { border-radius: 14px; }
-  .wallet-legend { gap: 8px 13px; }
   .wallet-page .top-action-container > div { flex: 0 0 100%; max-width: 100%; text-align: left !important; }
   .wallet-page .top-action-container > div + div { margin-top: 7px; }
-  .wallet-page .wallet-container .token-entry.row.main-token {
+  .wallet-page .wallet-container .token-entry.row.main-token:not(.wallet-token-detail-panel) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .wallet-page .wallet-container .token-entry.row.main-token > div:nth-child(1) { grid-column: span 1; }
-  .wallet-page .wallet-container .token-entry.row.main-token > div:nth-child(2) { grid-column: span 1; }
+  .wallet-page .wallet-container .wallet-token-name { grid-column: span 1; }
+  .wallet-page .wallet-container .wallet-token-location { grid-column: span 1; }
   .wallet-transaction-grid { grid-template-columns: 1fr 1fr; }
-  .wallet-page .wallet-transaction-grid .acti-shadow.card { aspect-ratio: auto; min-height: 180px; }
+  .wallet-page .wallet-transaction-grid .acti-shadow.card { min-height: 180px; }
 }
 
 @media (max-width: 430px) {

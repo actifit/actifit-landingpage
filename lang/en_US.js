@@ -733,6 +733,8 @@ module.exports = {
   user_rank_reqt: 'Your user rank needs to be at least _VAL_ to be eligible',
   consumed_reqt: 'You need to have bought and consumed at least _AMOUNT_ units of _ITEM_ level _LEVEL_ to be eligible',
   Available: 'Available',
+  loading_hive_engine_balances: 'Loading Hive-Engine token balances...',
+  no_hive_engine_balances: 'No Hive-Engine token balances available.',
   Requirements: 'Requirements',
   Boosts: 'Boosts',
   Boost: 'Boost',

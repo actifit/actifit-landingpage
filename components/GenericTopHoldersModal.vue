@@ -232,18 +232,21 @@
   }
 </script>
 
-<style>
+<style scoped>
   .token-logo{
     width: 40px;
     height: 40px;
-  }
-  .dark-mode .holders-table tbody tr:not(.bg-danger) td:first-child,
-  .dark-mode .holders-table tbody tr:not(.bg-danger) td:last-child {
-    color: #8fe3b0;
   }
   @media screen and (max-width: 600px){
     .table td, .table th{
       padding: .3rem;
     }
+  }
+</style>
+
+<style>
+  .dark-mode .holders-table tbody tr:not(.bg-danger) td:first-child,
+  .dark-mode .holders-table tbody tr:not(.bg-danger) td:last-child {
+    color: #8fe3b0;
   }
 </style>
