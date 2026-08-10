@@ -1,23 +1,21 @@
 <template>
-  <div class="row details mt-2">
-    <!-- Common Left Side Actions -->
-    <div class="col-6">
-      <a href="#" @click.prevent="$emit('vote-prompt')" data-toggle="modal" data-target="#voteModal" :class="{ 'text-brand': hasVoted }" :title="$t('votes')">
+  <div class="card-actions">
+    <div class="post-detail-footer__actions">
+      <a href="#" class="post-detail-action" v-if="showReply" @click.prevent="$emit('reply')" :title="$t('Reply')">
+        <i class="fas fa-reply"></i>
+      </a>
+      <a href="#" class="post-detail-action" :class="{ 'post-detail-action--active': hasVoted }" @click.prevent="$emit('vote-prompt')" :data-toggle="modalTarget ? 'modal' : null" :data-target="modalTarget" :title="$t('votes')">
         <i class="far fa-thumbs-up"></i> {{ voteCount }}
       </a>
-      <a
-        href="#"
-        @click.prevent="$emit('open-modal')"
-        :data-toggle="modalTarget ? 'modal' : null"
-        :data-target="modalTarget"
-        :title="$t('comments')"
-      >
-      <i class="far fa-comments ml-2" :title="$t('comments')"></i> {{ cardData.children }}
+      <a href="#" class="post-detail-action" @click.prevent="$emit('open-modal')" :data-toggle="modalTarget ? 'modal' : null" :data-target="modalTarget" :title="$t('comments')">
+        <i class="far fa-comments"></i> {{ cardData.children }}
       </a>
-      <i class="far fa-share-square ml-2" @click.prevent="$emit('reblog')" v-if="user && cardData.author !== user.account.name" :title="$t('reblog')"></i>
+      <a href="#" class="post-detail-action" @click.prevent="$emit('reblog')" v-if="showReblog && user && cardData.author !== user.account.name" :title="$t('reblog')">
+        <i class="far fa-share-square"></i>
+      </a>
     </div>
-    <!-- Slot for Different Right Side Actions -->
-    <div class="col-6 text-right">
+
+    <div class="post-detail-footer__extra-actions">
       <slot name="extra-actions"></slot>
     </div>
   </div>
@@ -26,27 +24,57 @@
 <script>
 export default {
   props: {
-    modalTarget: { type: String, required: true },
+    modalTarget: { type: String, default: null },
     cardData: { type: Object, required: true },
     user: { type: Object, default: null },
     voteCount: { type: Number, required: true },
-    hasVoted: { type: Boolean, required: true }
+    hasVoted: { type: Boolean, required: true },
+    showReply: { type: Boolean, default: false },
+    showReblog: { type: Boolean, default: true }
   },
-  emits: ['vote-prompt', 'reblog', 'open-modal']
+  emits: ['vote-prompt', 'reblog', 'open-modal', 'reply']
 }
 </script>
 
 <style scoped>
-.details {
-  line-height: 1rem;
+.card-actions {
+  flex: 1 1 auto;
+  min-width: 0;
 }
-a {
+.post-detail-footer__actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.post-detail-footer__extra-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-left: auto;
+}
+.post-detail-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   color: #333;
-}
-a:hover {
   text-decoration: none;
+  transition: color .15s ease;
 }
-.text-brand {
-  color: #ff112d !important;
+.post-detail-action:hover,
+.post-detail-action--active {
+  color: #ff112d;
+}
+@media (max-width: 767px) {
+  .post-detail-footer__actions,
+  .post-detail-footer__extra-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .post-detail-footer__extra-actions {
+    margin-top: 10px;
+  }
 }
 </style>
