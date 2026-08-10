@@ -1,0 +1,32 @@
+name: Lockfile sync
+
+# Guards against the silent production-deploy failure where package-lock.json is
+# out of sync with package.json: DigitalOcean builds via `npm ci`, which hard-fails
+# with EUSAGE ("Missing: <pkg> from lock file") and the deploy never ships (live
+# silently stays on the old build). This has happened twice (1.12.0, 1.12.2) when a
+# release skipped the local pre-flight. This job reproduces the DO install so a
+# desync shows a red X on the PR before merge, regardless of who cuts the release.
+
+on:
+  pull_request:
+    branches: [develop, master]
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+  workflow_dispatch:
+
+jobs:
+  npm-ci:
+    name: npm ci (package-lock.json in sync)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc' # v16.20.2, matching the DigitalOcean build
+      - name: npm ci (mirrors the DigitalOcean production build)
+        # Any package.json <-> package-lock.json desync fails here with EUSAGE,
+        # exactly as the deploy would — catching it before it reaches master.
+        run: npm ci
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
