@@ -757,7 +757,7 @@ module.exports = {
   Remaining_boost: 'Impulso Restante',
   Active: 'Ativo',
   market_state_activated: 'Ativado',
-  market_state_unavailable: 'Indisponível',
+  market_state_unavailable: 'Bloqueado',
   Inactive: 'Inativo',
   to_a_friend: 'para um amigo',
   to_you: 'para você',

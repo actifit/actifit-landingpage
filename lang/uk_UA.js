@@ -758,7 +758,7 @@ module.exports = {
   Remaining_boost: 'Залишкове підсилення',
   Active: 'Активний',
   market_state_activated: 'Активовано',
-  market_state_unavailable: 'Недоступно',
+  market_state_unavailable: 'Заблоковано',
   Inactive: 'Неактивний',
   to_a_friend: 'другу',
   to_you: 'вам',

@@ -758,7 +758,7 @@ module.exports = {
   Remaining_boost: 'Potenciador Restante',
   Active: 'Activo',
   market_state_activated: 'Activado',
-  market_state_unavailable: 'No disponible',
+  market_state_unavailable: 'Bloqueado',
   Inactive: 'Inactivo',
   to_a_friend: 'a un amigo',
   to_you: 'a ti',

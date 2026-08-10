@@ -757,7 +757,7 @@ module.exports = {
   Remaining_boost: '残りのブースト',
   Active: 'アクティブ',
   market_state_activated: '有効化済み',
-  market_state_unavailable: '利用不可',
+  market_state_unavailable: 'ロック済み',
   Inactive: '非アクティブ',
   to_a_friend: '友達へ',
   to_you: 'あなたへ',

@@ -758,7 +758,7 @@ module.exports = {
   Remaining_boost: 'Remaining Boost',
   Active: 'Active',
   market_state_activated: 'Activated',
-  market_state_unavailable: 'Unavailable',
+  market_state_unavailable: 'Locked',
   Inactive: 'Inactive',
   to_a_friend: 'to a friend',
   to_you: 'to you',

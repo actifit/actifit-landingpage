@@ -60,7 +60,17 @@
 						<div class="market-search">
 							<label class="sr-only" for="marketSearch">{{ $t('Search') }} {{ $t('Products') }}</label>
 							<i class="fas fa-search"></i>
-							<input id="marketSearch" v-model.trim="searchQuery" type="search" class="form-control"
+							<input
+								id="marketSearch"
+								name="marketSearch"
+								autocomplete="new-password"
+								autocapitalize="off"
+								autocorrect="off"
+								spellcheck="false"
+								data-form-type="other"
+								v-model.trim="searchQuery"
+								type="search"
+								class="form-control"
 								:placeholder="$t('Search') + ' ' + $t('Products')">
 							<button v-if="searchQuery" type="button" class="search-clear" :aria-label="$t('Close')"
 								@click.prevent="searchQuery = ''"><i class="fas fa-times"></i></button>
@@ -71,16 +81,16 @@
 						<div class="toolbar-control sort-control">
 							<label class="sort-label" for="marketSort">{{ $t('Sort_By') }}</label>
 							<select id="marketSort" v-model="currentSort" class="form-control sort-select">
-								<option :value="JSON.stringify({ value: 'name', direction: 'asc' })">{{ $t('Name') }}â–²</option>
-								<option :value="JSON.stringify({ value: 'name', direction: 'desc' })">{{ $t('Name') }}â–¼</option>
-								<option :value="JSON.stringify({ value: 'level', direction: 'asc' })">{{ $t('Level') }}â–²</option>
-								<option :value="JSON.stringify({ value: 'level', direction: 'desc' })">{{ $t('Level') }}â–¼</option>
-								<option :value="JSON.stringify({ value: 'price', direction: 'asc' })">{{ $t('Price') }}â–²</option>
-								<option :value="JSON.stringify({ value: 'price', direction: 'desc' })">{{ $t('Price') }}â–¼</option>
-								<option :value="JSON.stringify({ value: 'reqtsFilled', direction: 'desc' })">{{ $t('Ready') }}â–²</option>
-								<option :value="JSON.stringify({ value: 'reqtsFilled', direction: 'asc' })">{{ $t('Ready') }}â–¼</option>
-								<option :value="JSON.stringify({ value: 'bought', direction: 'asc' })">{{ $t('Bought') }}â–²</option>
-								<option :value="JSON.stringify({ value: 'bought', direction: 'desc' })">{{ $t('Bought') }}â–¼</option>
+								<option :value="JSON.stringify({ value: 'name', direction: 'asc' })">{{ $t('Name') }}&#9650;</option>
+								<option :value="JSON.stringify({ value: 'name', direction: 'desc' })">{{ $t('Name') }}&#9660;</option>
+								<option :value="JSON.stringify({ value: 'level', direction: 'asc' })">{{ $t('Level') }}&#9650;</option>
+								<option :value="JSON.stringify({ value: 'level', direction: 'desc' })">{{ $t('Level') }}&#9660;</option>
+								<option :value="JSON.stringify({ value: 'price', direction: 'asc' })">{{ $t('Price') }}&#9650;</option>
+								<option :value="JSON.stringify({ value: 'price', direction: 'desc' })">{{ $t('Price') }}&#9660;</option>
+								<option :value="JSON.stringify({ value: 'reqtsFilled', direction: 'desc' })">{{ $t('Ready') }}&#9650;</option>
+								<option :value="JSON.stringify({ value: 'reqtsFilled', direction: 'asc' })">{{ $t('Ready') }}&#9660;</option>
+								<option :value="JSON.stringify({ value: 'bought', direction: 'asc' })">{{ $t('Bought') }}&#9650;</option>
+								<option :value="JSON.stringify({ value: 'bought', direction: 'desc' })">{{ $t('Bought') }}&#9660;</option>
 							</select>
 						</div>
 						<button type="button" class="cart-trigger" data-toggle="modal" data-target="#cartModal"
@@ -2209,3 +2219,4 @@ html.dark-mode .detail-empty {
 	color: #7c8894;
 }
 </style>
+

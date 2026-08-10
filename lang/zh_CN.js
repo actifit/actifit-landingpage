@@ -757,7 +757,7 @@ module.exports = {
   Remaining_boost: '剩余增益',
   Active: '活跃',
   market_state_activated: '已激活',
-  market_state_unavailable: '不可用',
+  market_state_unavailable: '已锁定',
   Inactive: '不活跃',
   to_a_friend: '给朋友',
   to_you: '给您',

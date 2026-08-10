@@ -687,6 +687,7 @@
 .save-product-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
   margin-left: auto;
   padding: 5px 9px;
@@ -702,7 +703,7 @@
 .save-product-btn:hover,
 .save-product-btn.saved {
   border-color: #ff112d;
-  background: #fff0f2;
+  background: #fff;
   color: #d6001a;
 }
 

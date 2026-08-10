@@ -758,7 +758,7 @@ module.exports = {
   Remaining_boost: 'التعزيز المتبقي',
   Active: 'نشط',
   market_state_activated: 'مفعل',
-  market_state_unavailable: 'غير متوفر',
+  market_state_unavailable: 'مقفل',
   Inactive: 'غير نشط',
   to_a_friend: 'لصديق',
   to_you: 'لك',

@@ -758,7 +758,7 @@ module.exports = {
   Remaining_boost: 'Оставшееся усиление',
   Active: 'Активен',
   market_state_activated: 'Активировано',
-  market_state_unavailable: 'Недоступно',
+  market_state_unavailable: 'Заблокировано',
   Inactive: 'Неактивен',
   to_a_friend: 'другу',
   to_you: 'вам',

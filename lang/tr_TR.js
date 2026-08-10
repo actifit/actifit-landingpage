@@ -758,7 +758,7 @@ module.exports = {
   Remaining_boost: 'Kalan Artış',
   Active: 'Aktif',
   market_state_activated: 'Etkinleştirildi',
-  market_state_unavailable: 'Kullanılamaz',
+  market_state_unavailable: 'Kilitli',
   Inactive: 'Pasif',
   to_a_friend: 'bir arkadaşa',
   to_you: 'sana',

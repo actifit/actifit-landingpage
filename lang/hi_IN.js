@@ -758,7 +758,7 @@ module.exports = {
   Remaining_boost: 'शेष बढ़ावा',
   Active: 'सक्रिय',
   market_state_activated: 'सक्रिय किया गया',
-  market_state_unavailable: 'उपलब्ध नहीं',
+  market_state_unavailable: 'लॉक्ड',
   Inactive: 'निष्क्रिय',
   to_a_friend: 'एक दोस्त को',
   to_you: 'आपको',
