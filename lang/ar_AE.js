@@ -395,6 +395,8 @@ module.exports = {
   confirm_vote_change: 'لقد قمت بالتصويت بالفعل على هذا المنشور. هل أنت متأكد أنك تريد تغيير تصويتك؟',
   confirm_delete_comment: 'هل أنت متأكد أنك تريد حذف تعليقك؟',
   user_not_found_error: 'خطأ: لم يتم العثور على المستخدم',
+  invalid_account_name: 'يرجى إدخال اسم مستخدم صالح للحساب.',
+  account_lookup_failed: 'تعذر التحقق من الحساب. يرجى المحاولة مرة أخرى.',
   need_login_signup_notice_vote: 'تحتاج إلى تسجيل الدخول أو التسجيل أولاً',
   Reply: 'الرد',
   Full_AFIT_Payout_Mode: 'وضع الدفع الكامل لـ AFIT',
