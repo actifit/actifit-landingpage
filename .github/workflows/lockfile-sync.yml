@@ -6,13 +6,15 @@ name: Lockfile sync
 # silently stays on the old build). This has happened twice (1.12.0, 1.12.2) when a
 # release skipped the local pre-flight. This job reproduces the DO install so a
 # desync shows a red X on the PR before merge, regardless of who cuts the release.
+#
+# NOTE: no `paths:` filter — this check is *required* in branch protection, and a
+# required check that gets path-skipped stays "pending" forever and blocks every
+# PR that doesn't touch package files (GitHub gotcha). Running on all PRs to
+# develop/master guarantees it always reports a status. npm ci is ~2-3 min.
 
 on:
   pull_request:
     branches: [develop, master]
-    paths:
-      - 'package.json'
-      - 'package-lock.json'
   workflow_dispatch:
 
 jobs:
