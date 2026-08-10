@@ -85,6 +85,12 @@
 		<h2>Security Of Data</h2>
 		<p>The security of your data is important to us, but remember that no method of transmission over the Internet, or method of electronic storage is 100% secure. While we strive to use commercially acceptable means to protect your Personal Data, we cannot guarantee its absolute security.</p>
 
+		<h2>Data Retention</h2>
+		<p>We retain your Personal Data only for as long as is necessary for the purposes set out in this Privacy Policy. We keep your account information and associated activity data for as long as your Actifit account remains active, so that we can provide the Service and calculate your rewards. Activity and health data (such as steps, distance and active calories) read from your device or from connected services such as Health Connect and Fitbit are processed on your device and are not retained on our servers except to the extent necessary to deliver the Service and your rewards. We will also retain and use your Personal Data to the extent necessary to comply with our legal obligations, resolve disputes, and enforce our agreements. As noted above, any reports or posts you choose to submit to the Hive blockchain are public and permanent due to the immutable nature of the blockchain, and cannot be deleted.</p>
+
+		<h2>Data Deletion</h2>
+		<p>You have the right to request deletion of the Personal Data we hold about you. You can submit a data deletion request at any time by emailing us at <a href="mailto:info@actifit.io">info@actifit.io</a> with the subject "Data Deletion Request", or by using the contact options in the "Contact Us" section below. After we verify your request, we will delete or anonymise the personal data under our control — such as your account details, email address, and any activity data stored off-chain — within 30 days, except where we are required to retain certain information to comply with a legal obligation. Please note that data you have already published to the public Hive blockchain cannot be removed by Actifit due to the immutable nature of blockchain records.</p>
+
 		<h2>Service Providers</h2>
 		<p>We may employ third party companies and individuals to facilitate our Service ("Service Providers"), to provide the Service on our behalf, to perform Service-related services or to assist us in analyzing how our Service is used.</p>
 		<p>These third parties have access to your Personal Data only to perform these tasks on our behalf and are obligated not to disclose or use it for any other purpose.</p>
@@ -119,7 +125,7 @@
 		<h2>Contact Us</h2>
 		<p>If you have any questions about this Privacy Policy, please contact us:</p>
 		<ul>
-			<li>By email: <a href="mailto:hello@actifit.io">hello@actifit.io</a></li>
+			<li>By email: <a href="mailto:info@actifit.io">info@actifit.io</a></li>
             <li>By visiting our group on discord: <a href="https://discord.gg/aHtcA6r">https://discord.gg/aHtcA6r</a></li>
       
         </ul>
