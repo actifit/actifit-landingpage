@@ -759,7 +759,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff !important;
+  color: var(--text-color) !important;
   text-align: center;
 }
 
@@ -770,7 +770,7 @@ export default {
 #reportModal .modal-body img[src*="ACTIVITYDATE"] + .text-center *,
 #reportModal .modal-body img[src*="ACTIVITYCOUNT"] + .text-center *,
 #reportModal .modal-body img[src*="ACTIVITYTYPE"] + .text-center * {
-  color: #fff !important;
+  color: var(--text-color) !important;
 }
 
 #reportModal .modal-body img[src*="ACTIVITYTYPE"] + .text-center pre {
@@ -779,8 +779,15 @@ export default {
   padding: 0;
   border: 0;
   background: transparent;
-  color: #fff !important;
+  color: var(--text-color) !important;
   text-align: center;
+}
+
+html:not(.dark-mode) #reportModal .modal-body img[src*="ACTIVITYCOUNT"] + .text-center,
+html:not(.dark-mode) #reportModal .modal-body img[src*="ACTIVITYCOUNT"] + .text-center *,
+html:not(.dark-mode) #reportModal .modal-body img[src*="ACTIVITYTYPE"] + .text-center,
+html:not(.dark-mode) #reportModal .modal-body img[src*="ACTIVITYTYPE"] + .text-center * {
+  color: #000 !important;
 }
 
 .modal-author {
