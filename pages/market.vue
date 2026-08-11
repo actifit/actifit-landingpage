@@ -187,50 +187,66 @@
 							'sidebar-group-unavailable': group.type === 'unavailable'
 						}"
 							v-for="group in groupedProducts" :key="group.type">
-							<div class="sidebar-group-title">{{ $t(group.labelKey) }}</div>
-
-							<button type="button" class="sidebar-row" v-for="product in group.items" :key="product._id"
-								:class="{ active: selectedProductId === product._id }" @click="selectProduct(product)">
-								<span class="sidebar-row-thumb" :style="'background-image:url(' + rowImage(product) + ');'"></span>
-
-								<span class="sidebar-row-main">
-									<span class="sidebar-row-title">
-										<span class="sidebar-row-name">{{ product.name }}</span>
-										<span class="sidebar-row-level" :class="gadgetLevelClass(product.level)" v-if="product.level">{{ $t('level_short') }}{{ product.level }}</span>
-									</span>
-									<span class="sidebar-row-event" v-if="product.specialevent && product.event">{{ product.event }}</span>
-									<span class="sidebar-row-currencies" :aria-label="$t('purchase_currency')">
-										<span v-for="currency in purchaseCurrencies(product)" :key="currency"
-											class="sidebar-currency-badge" :class="'currency-' + currency.toLowerCase()">
-											<img :src="currency === 'HIVE' ? '/img/HIVE.png' : '/img/actifit_logo.png'" alt="">
-											{{ currency }}
-										</span>
-									</span>
+							<button
+								type="button"
+								class="sidebar-group-toggle"
+								:aria-expanded="isSidebarGroupOpen(group.type) ? 'true' : 'false'"
+								@click="toggleSidebarGroup(group.type)"
+							>
+								<span class="sidebar-group-title">
+									<i v-if="group.type === 'unavailable'" class="fas fa-lock sidebar-group-lock" aria-hidden="true"></i>
+									<span>{{ $t(group.labelKey) }}</span>
 								</span>
-
-								<span class="sidebar-row-side">
-									<span class="sidebar-row-owned"
-										v-if="(group.type === 'bought' || group.type === 'activated') && product.type === 'ingame'">
-										<span>{{ ownedGadgetCount(product) }} {{ $t('units') }}</span>
-										<span class="sidebar-row-owned-active" v-if="activeGadgetCount(product) > 0">
-											{{ activeGadgetCount(product) }} {{ $t('Active') }}
-										</span>
-									</span>
-									<span class="sidebar-row-price" v-else>
-										<template v-if="purchaseCurrencies(product).includes('AFIT') && rowAfitPrice(product) !== null">
-											<span class="sidebar-row-price-afit">{{ numberFormat(rowAfitPrice(product), 2) }}</span>
-											<span class="sidebar-row-price-afit-unit">AFIT</span>
-										</template>
-										<span v-else class="sidebar-row-price-afit">&mdash;</span>
-										<span class="sidebar-row-price-hive" v-if="purchaseCurrencies(product).includes('HIVE') && rowHivePrice(product) !== null">
-											{{ numberFormat(rowHivePrice(product), 3) }} {{ $t('HIVE') }}
-											<img src="/img/HIVE.png" class="token-logo-xs" alt="">
-										</span>
-									</span>
-					<span v-if="statusDot(product)" class="sidebar-row-status" :class="'status-dot-' + statusDot(product)"
-						:title="statusLabel(product)"></span>
-								</span>
+								<span class="sidebar-group-count">{{ group.items.length }}</span>
+								<i class="fas sidebar-group-chevron" :class="isSidebarGroupOpen(group.type) ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
 							</button>
+
+							<transition name="sidebar-collapse">
+								<div v-if="isSidebarGroupOpen(group.type)" class="sidebar-group-body">
+									<button type="button" class="sidebar-row" v-for="product in group.items" :key="product._id"
+										:class="{ active: selectedProductId === product._id }" @click="selectProduct(product)">
+										<span class="sidebar-row-thumb" :style="'background-image:url(' + rowImage(product) + ');'"></span>
+
+										<span class="sidebar-row-main">
+											<span class="sidebar-row-title">
+												<span class="sidebar-row-name">{{ product.name }}</span>
+												<span class="sidebar-row-level" :class="gadgetLevelClass(product.level)" v-if="product.level">{{ $t('level_short') }}{{ product.level }}</span>
+											</span>
+											<span class="sidebar-row-event" v-if="product.specialevent && product.event">{{ product.event }}</span>
+											<span class="sidebar-row-currencies" :aria-label="$t('purchase_currency')">
+												<span v-for="currency in purchaseCurrencies(product)" :key="currency"
+													class="sidebar-currency-badge" :class="'currency-' + currency.toLowerCase()">
+													<img :src="currency === 'HIVE' ? '/img/HIVE.png' : '/img/actifit_logo.png'" alt="">
+													{{ currency }}
+												</span>
+											</span>
+										</span>
+
+										<span class="sidebar-row-side">
+											<span class="sidebar-row-owned"
+												v-if="(group.type === 'bought' || group.type === 'activated') && product.type === 'ingame'">
+												<span>{{ ownedGadgetCount(product) }} {{ $t('units') }}</span>
+												<span class="sidebar-row-owned-active" v-if="activeGadgetCount(product) > 0">
+													{{ activeGadgetCount(product) }} {{ $t('Active') }}
+												</span>
+											</span>
+											<span class="sidebar-row-price" v-else>
+												<template v-if="purchaseCurrencies(product).includes('AFIT') && rowAfitPrice(product) !== null">
+													<span class="sidebar-row-price-afit">{{ numberFormat(rowAfitPrice(product), 2) }}</span>
+													<span class="sidebar-row-price-afit-unit">AFIT</span>
+												</template>
+												<span v-else class="sidebar-row-price-afit">&mdash;</span>
+												<span class="sidebar-row-price-hive" v-if="purchaseCurrencies(product).includes('HIVE') && rowHivePrice(product) !== null">
+													{{ numberFormat(rowHivePrice(product), 3) }} {{ $t('HIVE') }}
+													<img src="/img/HIVE.png" class="token-logo-xs" alt="">
+												</span>
+											</span>
+											<span v-if="statusDot(product)" class="sidebar-row-status" :class="'status-dot-' + statusDot(product)"
+												:title="statusLabel(product)"></span>
+										</span>
+									</button>
+								</div>
+							</transition>
 						</div>
 					</div>
 				</aside>
@@ -341,6 +357,7 @@ export default {
 			mobileShowDetail: false,
 			mobileListScrollY: 0,
 			sidebarHeight: null,
+			sidebarGroupState: {},
 			filterOptions: [
 				{ value: '', labelKey: 'All' },
 				{ value: 'ingame', labelKey: 'Game' },
@@ -385,6 +402,9 @@ export default {
 		},
 		activeFilterCount() {
 			return [this.currentFilter, this.currentCurrency, this.user ? this.currentStatus : ''].filter(Boolean).length;
+		},
+		sidebarGroupKeys() {
+			return (Array.isArray(this.groupedProducts) ? this.groupedProducts : []).map(group => group.type);
 		},
 		availableFilterOptions() {
 			const products = Array.isArray(this.prodList)
@@ -462,6 +482,10 @@ export default {
 		currentStatus: 'ensureSelection',
 		currentCurrency: 'ensureSelection',
 		searchQuery: 'ensureSelection',
+		groupedProducts: {
+			handler: 'syncSidebarGroups',
+			immediate: true
+		},
 		selectedProduct() {
 			this.$nextTick(this.observeDetailPanel);
 		},
@@ -682,6 +706,27 @@ export default {
 			}
 		},
 
+		isSidebarGroupOpen(groupType) {
+			if (typeof this.sidebarGroupState[groupType] === 'undefined') {
+				return true;
+			}
+			return this.sidebarGroupState[groupType];
+		},
+
+		toggleSidebarGroup(groupType) {
+			const nextState = !this.isSidebarGroupOpen(groupType);
+			this.$set(this.sidebarGroupState, groupType, nextState);
+		},
+
+		syncSidebarGroups() {
+			const groupKeys = this.sidebarGroupKeys;
+			groupKeys.forEach(groupType => {
+				if (typeof this.sidebarGroupState[groupType] === 'undefined') {
+					this.$set(this.sidebarGroupState, groupType, true);
+				}
+			});
+		},
+
 		/** AFIT amount shown by the Product card for the current payment split */
 		rowAfitPrice(product) {
 			return getProductAfitPrice(product, this.afitPrice);
@@ -826,6 +871,7 @@ export default {
 
 		window.addEventListener('resize', this.observeDetailPanel);
 		window.addEventListener('keydown', this.handleFilterDrawerKeydown);
+		this.syncSidebarGroups();
 		this.$nextTick(this.observeDetailPanel);
 
 	},
@@ -1492,12 +1538,93 @@ export default {
 }
 
 .sidebar-group-title {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
 	font-size: 0.72rem;
 	font-weight: 700;
 	letter-spacing: 0.06em;
 	text-transform: uppercase;
 	color: #98a4ad;
-	padding: 16px 18px 8px;
+	padding: 0;
+}
+
+.sidebar-group-lock {
+	color: #ff112d;
+	font-size: 0.82rem;
+	line-height: 1;
+}
+
+.sidebar-group-toggle {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto auto;
+	align-items: center;
+	width: 100%;
+	column-gap: 12px;
+	padding: 16px 18px 10px;
+	border: none;
+	background: transparent;
+	text-align: left;
+	cursor: pointer;
+}
+
+.sidebar-group-toggle:focus {
+	outline: none;
+}
+
+.sidebar-group-toggle:focus-visible {
+	box-shadow: inset 0 0 0 2px rgba(255, 17, 45, 0.22);
+	border-radius: 10px;
+}
+
+.sidebar-group-count {
+	justify-self: center;
+	flex: 0 0 auto;
+	min-width: 24px;
+	padding: 2px 7px;
+	border-radius: 999px;
+	background: rgba(255, 17, 45, 0.08);
+	color: #ff112d;
+	font-size: 0.68rem;
+	font-weight: 800;
+	line-height: 1.2;
+	text-align: center;
+}
+
+.sidebar-group-chevron {
+	justify-self: end;
+	flex: 0 0 auto;
+	color: #c5cdd4;
+	font-size: 0.8rem;
+	transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.sidebar-group-toggle:hover .sidebar-group-chevron {
+	color: #ff112d;
+}
+
+.sidebar-group-body {
+	padding-bottom: 8px;
+}
+
+.sidebar-collapse-enter-active,
+.sidebar-collapse-leave-active {
+	overflow: hidden;
+	transition: max-height 0.28s ease, opacity 0.2s ease, transform 0.2s ease;
+}
+
+.sidebar-collapse-enter,
+.sidebar-collapse-leave-to {
+	max-height: 0;
+	opacity: 0;
+	transform: translateY(-4px);
+}
+
+.sidebar-collapse-enter-to,
+.sidebar-collapse-leave {
+	max-height: 1400px;
+	opacity: 1;
+	transform: translateY(0);
 }
 
 .sidebar-row {
@@ -2113,6 +2240,27 @@ html.dark-mode .market-sidebar {
 }
 
 html.dark-mode .sidebar-group-title {
+	color: #7c8894;
+}
+
+html.dark-mode .sidebar-group-lock {
+	color: #ff9aa7;
+}
+
+html.dark-mode .sidebar-group-toggle:hover .sidebar-group-chevron {
+	color: #ff9aa7;
+}
+
+html.dark-mode .sidebar-group-toggle:focus-visible {
+	box-shadow: inset 0 0 0 2px rgba(255, 154, 167, 0.22);
+}
+
+html.dark-mode .sidebar-group-count {
+	background: rgba(255, 17, 45, 0.18);
+	color: #ff9aa7;
+}
+
+html.dark-mode .sidebar-group-chevron {
 	color: #7c8894;
 }
 
