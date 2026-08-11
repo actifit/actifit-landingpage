@@ -14,7 +14,7 @@
             <div class="form home-card mx-auto p-3">
               <!-- The .acti-shadow class in the template will now work correctly -->
               <div class="form-group login-form-centered">
-                <input type="text" id="username" name="username" :placeholder="$t('Username')" ref="username" class="form-control form-control-lg m-1 col-md-8 acti-shadow">
+                <input type="text" id="username" name="username" autocomplete="username" :placeholder="$t('Username')" ref="username" class="form-control form-control-lg m-1 col-md-8 acti-shadow">
                 <button v-on:click="loginKeychain" class="btn btn-brand keychain-btn login-stdd-btn m-1"></button>
                 <button v-on:click="loginHiveauth" class="btn hiveauth-btn acti-shadow login-stdd-btn m-1"></button>
                 <transition name="fade">
@@ -25,7 +25,7 @@
                     </a>
                   </div>
                 </transition>
-                <input type="password" id="ppkey" name="ppkey" ref="ppkey" :placeholder="$t('Ppkey')"  class="form-control form-control-lg m-1 col-md-8 acti-shadow">
+                <input type="password" id="ppkey" name="ppkey" autocomplete="current-password" ref="ppkey" :placeholder="$t('Ppkey')"  class="form-control form-control-lg m-1 col-md-8 acti-shadow">
                 <button v-on:click="proceedLogin" class="btn btn-brand login-stdd-btn m-1"><b>{{ $t('Login') }}</b><i class="fas fa-spin fa-spinner text-white" v-if="login_in_progress"></i></button>
                 <div class="form-control-lg ml-0 mt-2">
                   <a href="/password" class="small">{{ $t('forgot_my_posting_key') }}</a>
