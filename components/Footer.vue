@@ -105,10 +105,9 @@ export default {
       if (!process.client) return;
 
       this.$nextTick(() => {
-        const banner = this.$refs.cookieBanner;
-        const bannerEl = banner && banner.$el ? banner.$el : null;
+        const bannerEl = document.getElementById('myPanel1');
 
-        if (!bannerEl) {
+        if (!bannerEl || typeof bannerEl.getBoundingClientRect !== 'function') {
           this.updateCookieBannerBodyState(this.cookieBannerVisible, 0);
           return;
         }
@@ -123,8 +122,13 @@ export default {
 
         if (this.cookieBannerVisible && typeof ResizeObserver !== 'undefined') {
           this.cookieBannerObserver = new ResizeObserver(() => {
+            const observedBannerEl = document.getElementById('myPanel1');
+            if (!observedBannerEl || typeof observedBannerEl.getBoundingClientRect !== 'function') {
+              return;
+            }
+
             const nextHeight = Math.ceil(
-              bannerEl.getBoundingClientRect().height || bannerEl.offsetHeight || 0
+              observedBannerEl.getBoundingClientRect().height || observedBannerEl.offsetHeight || 0
             );
 
             if (nextHeight !== this.cookieBannerHeight) {
