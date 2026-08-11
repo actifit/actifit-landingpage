@@ -190,6 +190,9 @@
 							<button
 								type="button"
 								class="sidebar-group-toggle"
+								:id="'sidebar-group-toggle-' + group.type"
+								:ref="'sidebarGroupToggle-' + group.type"
+								:aria-controls="'sidebar-group-panel-' + group.type"
 								:aria-expanded="isSidebarGroupOpen(group.type) ? 'true' : 'false'"
 								@click="toggleSidebarGroup(group.type)"
 							>
@@ -202,7 +205,20 @@
 							</button>
 
 							<transition name="sidebar-collapse">
-								<div v-if="isSidebarGroupOpen(group.type)" class="sidebar-group-body">
+								<div
+									v-if="isSidebarGroupOpen(group.type)"
+									class="sidebar-group-body"
+									:id="'sidebar-group-panel-' + group.type"
+									role="region"
+									:aria-labelledby="'sidebar-group-toggle-' + group.type"
+									:ref="'sidebarGroupBody-' + group.type"
+									@before-enter="prepareSidebarGroupExpand"
+									@enter="expandSidebarGroupBody"
+									@after-enter="resetSidebarGroupBodyHeight"
+									@before-leave="prepareSidebarGroupCollapse"
+									@leave="collapseSidebarGroupBody"
+									@after-leave="resetSidebarGroupBodyHeight"
+								>
 									<button type="button" class="sidebar-row" v-for="product in group.items" :key="product._id"
 										:class="{ active: selectedProductId === product._id }" @click="selectProduct(product)">
 										<span class="sidebar-row-thumb" :style="'background-image:url(' + rowImage(product) + ');'"></span>
@@ -402,6 +418,9 @@ export default {
 		},
 		activeFilterCount() {
 			return [this.currentFilter, this.currentCurrency, this.user ? this.currentStatus : ''].filter(Boolean).length;
+		},
+		shouldAutoExpandSidebarGroups() {
+			return Boolean((this.searchQuery || '').trim()) || this.activeFilterCount > 0;
 		},
 		sidebarGroupKeys() {
 			return (Array.isArray(this.groupedProducts) ? this.groupedProducts : []).map(group => group.type);
@@ -696,6 +715,10 @@ export default {
 		 *  (e.g. category filter switches, or the previously selected item
 		 *  no longer matches) - defaults to the first item in the new list */
 		ensureSelection() {
+			if (this.isMobileMarketView() && this.shouldAutoExpandSidebarGroups) {
+				this.mobileShowDetail = false;
+			}
+
 			if (!this.filteredProducts.length) {
 				this.selectedProductId = null;
 				return;
@@ -707,6 +730,9 @@ export default {
 		},
 
 		isSidebarGroupOpen(groupType) {
+			if (this.shouldAutoExpandSidebarGroups) {
+				return true;
+			}
 			if (typeof this.sidebarGroupState[groupType] === 'undefined') {
 				return true;
 			}
@@ -714,8 +740,68 @@ export default {
 		},
 
 		toggleSidebarGroup(groupType) {
-			const nextState = !this.isSidebarGroupOpen(groupType);
+			const isOpen = this.isSidebarGroupOpen(groupType);
+			const nextState = !isOpen;
+			const toggleEl = this.$refs[`sidebarGroupToggle-${groupType}`];
+			const bodyEl = this.$refs[`sidebarGroupBody-${groupType}`];
+			const shouldCompensate = Boolean(
+				isOpen &&
+				typeof window !== 'undefined' &&
+				toggleEl &&
+				typeof toggleEl.getBoundingClientRect === 'function' &&
+				toggleEl.getBoundingClientRect().bottom < 0 &&
+				bodyEl &&
+				typeof bodyEl.getBoundingClientRect === 'function'
+			);
+			const scrollDelta = shouldCompensate ? Math.ceil(bodyEl.getBoundingClientRect().height) : 0;
+
 			this.$set(this.sidebarGroupState, groupType, nextState);
+
+			if (shouldCompensate && scrollDelta > 0) {
+				this.$nextTick(() => {
+					window.scrollBy({ top: -scrollDelta, left: 0, behavior: 'auto' });
+				});
+			}
+		},
+
+		prepareSidebarGroupExpand(el) {
+			el.style.height = '0px';
+			el.style.overflow = 'hidden';
+			el.style.opacity = '0';
+			el.style.transform = 'translateY(-4px)';
+		},
+
+		expandSidebarGroupBody(el, done) {
+			void el.offsetHeight;
+			el.style.transition = 'height 0.28s ease, opacity 0.2s ease, transform 0.2s ease';
+			el.style.height = `${el.scrollHeight}px`;
+			el.style.opacity = '1';
+			el.style.transform = 'translateY(0)';
+			setTimeout(done, 280);
+		},
+
+		prepareSidebarGroupCollapse(el) {
+			el.style.height = `${el.scrollHeight}px`;
+			el.style.overflow = 'hidden';
+			el.style.opacity = '1';
+			el.style.transform = 'translateY(0)';
+		},
+
+		collapseSidebarGroupBody(el, done) {
+			void el.offsetHeight;
+			el.style.transition = 'height 0.28s ease, opacity 0.2s ease, transform 0.2s ease';
+			el.style.height = '0px';
+			el.style.opacity = '0';
+			el.style.transform = 'translateY(-4px)';
+			setTimeout(done, 280);
+		},
+
+		resetSidebarGroupBodyHeight(el) {
+			el.style.height = '';
+			el.style.overflow = '';
+			el.style.transition = '';
+			el.style.opacity = '';
+			el.style.transform = '';
 		},
 
 		syncSidebarGroups() {
@@ -1527,6 +1613,7 @@ export default {
 	border: 1px solid #e3e8ec;
 	border-radius: 14px;
 	box-shadow: 0 5px 18px rgba(23, 30, 38, 0.05);
+	overflow-anchor: none;
 }
 
 .sidebar-scroll {
@@ -1535,6 +1622,7 @@ export default {
 	overflow-y: auto;
 	overscroll-behavior: contain;
 	padding: 8px 0 16px;
+	overflow-anchor: none;
 }
 
 .sidebar-group-title {
@@ -1605,26 +1693,13 @@ export default {
 
 .sidebar-group-body {
 	padding-bottom: 8px;
+	overflow-anchor: none;
+	overflow: hidden;
 }
 
 .sidebar-collapse-enter-active,
 .sidebar-collapse-leave-active {
 	overflow: hidden;
-	transition: max-height 0.28s ease, opacity 0.2s ease, transform 0.2s ease;
-}
-
-.sidebar-collapse-enter,
-.sidebar-collapse-leave-to {
-	max-height: 0;
-	opacity: 0;
-	transform: translateY(-4px);
-}
-
-.sidebar-collapse-enter-to,
-.sidebar-collapse-leave {
-	max-height: 1400px;
-	opacity: 1;
-	transform: translateY(0);
 }
 
 .sidebar-row {
