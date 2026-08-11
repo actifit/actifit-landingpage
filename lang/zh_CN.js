@@ -395,6 +395,8 @@ module.exports = {
   confirm_vote_change: '您之前已经对这篇帖子投过票了。您确定要更改您的投票吗？',
   confirm_delete_comment: '您确定要删除您的评论吗？',
   user_not_found_error: '错误：用户未找到',
+  invalid_account_name: '请输入有效的账户用户名。',
+  account_lookup_failed: '无法验证账户，请重试。',
   need_login_signup_notice_vote: '您需要先登录或注册',
   Reply: '回复',
   Full_AFIT_Payout_Mode: '全AFIT支付模式',
