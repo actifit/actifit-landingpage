@@ -911,16 +911,11 @@ export default {
   word-break: break-word;
 }
 
-.modal-body a:hover,
+#postModal .modal-body ::v-deep a:hover,
 .modal-header a:hover,
 .text-brand:hover,
 .actifit-link-plain:hover {
   text-decoration: none;
-}
-
-.markdown-editor .CodeMirror,
-.markdown-editor .CodeMirror-scroll {
-  min-height: 100px;
 }
 
 .reply-btn {
@@ -1009,18 +1004,11 @@ export default {
   gap: 10px 20px;
 }
 
-#modal-footer .post-detail-footer__actions,
 #modal-footer .post-detail-footer__payout,
 #modal-footer .post-detail-payout,
 #modal-footer .post-detail-payout > span {
   display: flex;
   align-items: center;
-}
-
-#modal-footer .post-detail-footer__actions {
-  gap: 16px;
-  flex: 1 1 auto;
-  min-width: 0;
 }
 
 #modal-footer .post-detail-footer__payout {
@@ -1029,20 +1017,6 @@ export default {
   gap: 12px;
   flex: 0 0 auto;
   margin-left: auto;
-}
-
-#modal-footer .post-detail-action {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  color: var(--post-footer-muted);
-  text-decoration: none;
-  transition: color .15s ease;
-}
-
-#modal-footer .post-detail-action:hover,
-#modal-footer .post-detail-action--active {
-  color: var(--post-footer-brand);
 }
 
 #modal-footer.post-detail-footer .post-detail-payout {

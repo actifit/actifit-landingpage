@@ -4,7 +4,7 @@
       <a href="#" class="post-detail-action" v-if="showReply" @click.prevent="$emit('reply')" :title="$t('Reply')">
         <i class="fas fa-reply"></i>
       </a>
-      <a href="#" class="post-detail-action" :class="{ 'post-detail-action--active': hasVoted }" @click.prevent="$emit('vote-prompt')" :data-toggle="modalTarget ? 'modal' : null" :data-target="modalTarget" :title="$t('votes')">
+      <a href="#" class="post-detail-action" :class="{ 'post-detail-action--active': hasVoted }" @click.prevent="$emit('vote-prompt')" :data-toggle="voteModalTarget ? 'modal' : null" :data-target="voteModalTarget" :title="$t('votes')">
         <i class="far fa-thumbs-up"></i> {{ voteCount }}
       </a>
       <a href="#" class="post-detail-action" @click.prevent="$emit('open-modal')" :data-toggle="modalTarget ? 'modal' : null" :data-target="modalTarget" :title="$t('comments')">
@@ -25,6 +25,7 @@
 export default {
   props: {
     modalTarget: { type: String, default: null },
+    voteModalTarget: { type: String, default: '#voteModal' },
     cardData: { type: Object, required: true },
     user: { type: Object, default: null },
     voteCount: { type: Number, required: true },
@@ -59,13 +60,13 @@ export default {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  color: #333;
+  color: var(--post-footer-muted, #333);
   text-decoration: none;
   transition: color .15s ease;
 }
 .post-detail-action:hover,
 .post-detail-action--active {
-  color: #ff112d;
+  color: var(--post-footer-brand, #ff112d);
 }
 @media (max-width: 767px) {
   .post-detail-footer__actions,

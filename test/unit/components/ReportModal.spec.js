@@ -1,6 +1,6 @@
 import { mount, createLocalVue } from '@vue/test-utils'
 import Vuex from 'vuex'
-import PostModal from '@/components/PostModal.vue'
+import ReportModal from '@/components/ReportModal.vue'
 import CardActions from '@/components/CardActions.vue'
 
 const SocialSharingStub = {
@@ -11,18 +11,25 @@ const NetworkStub = {
   template: '<span class="network-stub"><slot /></span>'
 }
 
-function buildPost(overrides = {}) {
+const SafeRemarkableStub = {
+  template: '<div class="safe-remarkable-stub"></div>'
+}
+
+function buildReport(overrides = {}) {
   return {
     author: 'bob',
-    permlink: 'sample-post',
+    permlink: 'sample-report',
+    title: 'Sample report',
     created: '2026-08-01T12:34:00Z',
     active_votes: [{ voter: 'alice' }],
     json_metadata: '{}',
     pending_payout_value: '12.345 HBD',
-    children: 7,
+    total_payout_value: '0.000 HBD',
+    curator_payout_value: '0.000 HBD',
+    children: 0,
     category: 'hive-123',
     body: '<p>Hello world</p>',
-    url: 'https://actifit.io/@bob/sample-post',
+    url: 'https://actifit.io/@bob/sample-report',
     beneficiaries: [],
     is_paidout: false,
     last_payout: '2026-08-01T00:00:00Z',
@@ -31,13 +38,13 @@ function buildPost(overrides = {}) {
   }
 }
 
-function mountPostModal(postOverrides = {}) {
+function mountReportModal(reportOverrides = {}, user = null) {
   const localVue = createLocalVue()
   localVue.use(Vuex)
 
   const store = new Vuex.Store({
     state: {
-      commentEntries: { author: 'bob', body: 'Nice post', reply_entries: [] },
+      commentEntries: null,
       commentCountToday: 0,
       moderators: [],
       bchain: 'HIVE'
@@ -49,30 +56,32 @@ function mountPostModal(postOverrides = {}) {
       bchain: (state) => state.bchain
     },
     actions: {
-      fetchPostComments: jest.fn(() => Promise.resolve()),
+      fetchReportComments: jest.fn(() => Promise.resolve()),
       fetchModerators: jest.fn(() => Promise.resolve())
+    },
+    mutations: {
+      setBchain: jest.fn()
     },
     modules: {
       steemconnect: {
         namespaced: true,
         state: {},
         getters: {
-          user: () => ({ account: { name: 'alice' } }),
+          user: () => user,
           stdLogin: () => true
         }
       }
     }
   })
 
-  return mount(PostModal, {
+  return mount(ReportModal, {
     localVue,
     store,
-    propsData: { post: buildPost(postOverrides) },
+    propsData: { report: buildReport(reportOverrides) },
     mocks: {
       $t: (key) => key,
       $cleanBody: (value) => value,
       $getTimeDifference: () => '1 hour ago',
-      $router: { push: jest.fn() },
       $fetchReportTags: jest.fn(() => ''),
       $reblog: jest.fn(),
       $notify: jest.fn(),
@@ -81,7 +90,7 @@ function mountPostModal(postOverrides = {}) {
     stubs: {
       Comments: true,
       CustomTextEditor: true,
-      SafeRemarkable: true,
+      SafeRemarkable: SafeRemarkableStub,
       UserHoverCard: true,
       'social-sharing': SocialSharingStub,
       network: NetworkStub,
@@ -90,51 +99,35 @@ function mountPostModal(postOverrides = {}) {
   })
 }
 
-describe('PostModal footer layout', () => {
+describe('ReportModal vote wiring and logged-out guard', () => {
   beforeEach(() => {
-    global.$ = jest.fn(() => ({ on: jest.fn(), modal: jest.fn() }))
+    global.$ = jest.fn(() => ({ on: jest.fn(), modal: jest.fn(), hasClass: jest.fn(() => false) }))
     global.fetch = jest.fn(() => Promise.resolve({
       json: () => Promise.resolve({ token_count: 0 })
     }))
+    localStorage.setItem('cur_bchain', 'HIVE')
   })
 
   afterEach(() => {
     delete global.$
     delete global.fetch
+    localStorage.removeItem('cur_bchain')
   })
 
-  it('renders the consolidated footer actions in the new layout', () => {
-    const wrapper = mountPostModal()
+  it('mounts safely for logged-out visitors and keeps the vote button on #voteModal', async () => {
+    const wrapper = mountReportModal({}, null)
 
-    expect(wrapper.find('#modal-footer .post-detail-footer__actions').exists()).toBe(true)
-    expect(wrapper.find('#modal-footer .post-detail-footer__payout').exists()).toBe(true)
-    expect(wrapper.find('#modal-footer .post-detail-footer__sharing').exists()).toBe(true)
-    expect(wrapper.find('#modal-footer .post-detail-payout-toggle').exists()).toBe(true)
-    expect(wrapper.findAll('#modal-footer .post-detail-footer__actions .post-detail-action').length).toBe(4)
-
-    wrapper.destroy()
-  })
-
-  it('keeps the sharing row inside the same footer block', () => {
-    const wrapper = mountPostModal()
-
-    const footer = wrapper.find('#modal-footer.post-detail-footer')
-
-    expect(footer.exists()).toBe(true)
-    expect(footer.find('.post-detail-footer__payout').exists()).toBe(true)
-    expect(footer.find('.post-detail-footer__sharing').exists()).toBe(true)
-
-    wrapper.destroy()
-  })
-
-  it('keeps the vote button wired to the shared vote modal target', () => {
-    const wrapper = mountPostModal()
+    await wrapper.vm.$nextTick()
+    await wrapper.vm.$nextTick()
 
     const cardActions = wrapper.findComponent(CardActions)
 
     expect(cardActions.exists()).toBe(true)
+    expect(cardActions.props('hasVoted')).toBe(false)
     expect(cardActions.props('voteModalTarget')).toBe('#voteModal')
     expect(cardActions.props('modalTarget')).toBe(null)
+    expect(() => wrapper.vm.userVotedThisPost()).not.toThrow()
+    expect(wrapper.vm.userVotedThisPost()).toBe(false)
 
     wrapper.destroy()
   })

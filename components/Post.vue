@@ -52,6 +52,7 @@
         <CardActions
           :cardData="post"
           modalTarget="#postModal"
+          voteModalTarget="#voteModal"
           :user="user"
           :voteCount="getVoteCount"
           :hasVoted="postUpvoted"

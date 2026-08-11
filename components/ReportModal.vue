@@ -17,6 +17,27 @@
           </button>
         </div>
         <div class="main-user-info pl-4 report-user-section">
+          <div>
+            <UserHoverCard :username="report.author" />
+          </div>
+          <span class="modal-top-actions">
+            <span class="date-head" :title="date">{{ $getTimeDifference(report.created) }}</span>
+            <a :href="'/@' + this.report.author + '/' + this.report.permlink">
+              <i class="fas fa-link text-brand"></i>
+            </a>
+            <i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent"></i>
+            <i
+              v-if="translationLoading"
+              class="fas fa-spinner fa-spin text-brand"
+              :title="$t('translating_content', 'Translating...')"
+            ></i>
+            <i
+              v-else-if="!showTranslated"
+              class="fa-solid fa-language text-brand"
+              v-on:click="translateContent"
+              :title="$t('translate_content', 'Translate Content')"
+            ></i>
+          </span>
           <div class="modal-header">
             <div class="report-tags p-1" v-html="$fetchReportTags(report)"></div>
           </div>
@@ -33,7 +54,7 @@
               :cardData="report"
               :user="user"
               :voteCount="getVoteCount"
-              :hasVoted="userVotedThisPost()"
+              :hasVoted="user ? userVotedThisPost() : false"
               :showReply="true"
               @reply="toggleCommentBox"
               @vote-prompt="votePrompt($event)"
@@ -613,6 +634,9 @@ export default {
       }
     },
     userVotedThisPost() {
+      if (!this.user || !this.report) {
+        return false;
+      }
       let curUser = this.user.account.name;
       this.postUpvoted = this.report.active_votes.filter(voter => (voter.voter === curUser)).length > 0;
       return this.postUpvoted;
@@ -690,11 +714,12 @@ export default {
     attachImageErrorHandlers() {
       const vm = this;
       this.$nextTick(() => {
-        const contentEl = vm.$refs.remarkableContent.$el;
-        if (!contentEl) {
+        const contentRef = vm.$refs.remarkableContent;
+        if (!contentRef || !contentRef.$el) {
           console.warn('VueRemarkable component not found!');
           return;
         }
+        const contentEl = contentRef.$el;
         const images = contentEl.querySelectorAll('img');
         images.forEach(img => {
           img.onerror = (event) => {
@@ -751,9 +776,9 @@ export default {
   padding-top: 14px;
 }
 
-#reportModal .modal-body img[src*="ACTIVITYDATE"] + .text-center,
-#reportModal .modal-body img[src*="ACTIVITYCOUNT"] + .text-center,
-#reportModal .modal-body img[src*="ACTIVITYTYPE"] + .text-center {
+#reportModal .modal-body ::v-deep img[src*="ACTIVITYDATE"] + .text-center,
+#reportModal .modal-body ::v-deep img[src*="ACTIVITYCOUNT"] + .text-center,
+#reportModal .modal-body ::v-deep img[src*="ACTIVITYTYPE"] + .text-center {
   height: 44px;
   margin: 0 !important;
   display: flex;
@@ -763,17 +788,17 @@ export default {
   text-align: center;
 }
 
-#reportModal .modal-body img[src*="ACTIVITYCOUNT"] {
+#reportModal .modal-body ::v-deep img[src*="ACTIVITYCOUNT"] {
   margin-top: 10px;
 }
 
-#reportModal .modal-body img[src*="ACTIVITYDATE"] + .text-center *,
-#reportModal .modal-body img[src*="ACTIVITYCOUNT"] + .text-center *,
-#reportModal .modal-body img[src*="ACTIVITYTYPE"] + .text-center * {
+#reportModal .modal-body ::v-deep img[src*="ACTIVITYDATE"] + .text-center *,
+#reportModal .modal-body ::v-deep img[src*="ACTIVITYCOUNT"] + .text-center *,
+#reportModal .modal-body ::v-deep img[src*="ACTIVITYTYPE"] + .text-center * {
   color: #fff !important;
 }
 
-#reportModal .modal-body img[src*="ACTIVITYTYPE"] + .text-center pre {
+#reportModal .modal-body ::v-deep img[src*="ACTIVITYTYPE"] + .text-center pre {
   width: 100%;
   margin: 0;
   padding: 0;
@@ -795,16 +820,11 @@ export default {
   word-break: break-word;
 }
 
-.modal-body a:hover,
+#reportModal .modal-body ::v-deep a:hover,
 .modal-header a:hover,
 .text-brand:hover,
 .actifit-link-plain:hover {
   text-decoration: none;
-}
-
-.markdown-editor .CodeMirror,
-.markdown-editor .CodeMirror-scroll {
-  min-height: 100px;
 }
 
 .reply-btn {
@@ -843,18 +863,11 @@ export default {
   gap: 10px 20px;
 }
 
-#reportModal #modal-footer .post-detail-footer__actions,
 #reportModal #modal-footer .post-detail-footer__payout,
 #reportModal #modal-footer .post-detail-payout,
 #reportModal #modal-footer .post-detail-payout > span {
   display: flex;
   align-items: center;
-}
-
-#reportModal #modal-footer .post-detail-footer__actions {
-  gap: 16px;
-  flex: 1 1 auto;
-  min-width: 0;
 }
 
 #reportModal #modal-footer .post-detail-footer__payout {
@@ -863,20 +876,6 @@ export default {
   gap: 12px;
   flex: 0 0 auto;
   margin-left: auto;
-}
-
-#reportModal #modal-footer .post-detail-action {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  color: var(--post-footer-muted);
-  text-decoration: none;
-  transition: color .15s ease;
-}
-
-#reportModal #modal-footer .post-detail-action:hover,
-#reportModal #modal-footer .post-detail-action--active {
-  color: var(--post-footer-brand);
 }
 
 #reportModal #modal-footer .post-detail-payout {

@@ -854,7 +854,7 @@ a:hover, a:hover, .text-brand:hover, .actifit-link-plain:hover { text-decoration
 .date-head { padding-left: 2px; }
 .report-comments .date-head { color: #6c757d !important; }
 .report-reply { padding-left: 40px; padding-bottom: 40px; }
-#reportTarget .legacy-post-actions {
+.report-head .legacy-post-actions {
   display: none;
 }
 
