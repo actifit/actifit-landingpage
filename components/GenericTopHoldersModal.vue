@@ -43,7 +43,7 @@
                     @{{ topHolder.account }}
                   </a>
                   <!-- If account is null (or the string 'null'), display 'null' -->
-                  <span v-else>null</span>
+                  <span v-else class="null-account">null</span>
                 </td>
                 <td>{{ formatBalance(topHolder.value) }} {{ displayCoinSymbol }}</td>
               </tr>
@@ -182,7 +182,7 @@
             },
           });
 
-          this.holdersList = response.data.map(holder => {
+          this.holdersList = (response.data.holders_result || []).map(holder => {
             let processedValue = parseFloat(holder.value);
 
             if (!isNaN(processedValue) && this.divisor) {
@@ -236,6 +236,9 @@
   .token-logo{
     width: 40px;
     height: 40px;
+  }
+  .null-account {
+    color: #adb5bd;
   }
   @media screen and (max-width: 600px){
     .table td, .table th{

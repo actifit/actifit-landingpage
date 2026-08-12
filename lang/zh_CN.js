@@ -1178,6 +1178,7 @@ module.exports = {
   DHF: '去中心化 Hive 基金',
   Explore: '探索',
   main_chain: '主链',
+  off_chain: '链下',
   secondary_chains: '次级链',
   need_hive_account: '您需要至少选择上面的Hive链。',
   Hive_proposals: 'Hive提案',

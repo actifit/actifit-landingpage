@@ -1177,6 +1177,7 @@ module.exports = {
   DHF: 'Децентрализованный фонд Hives',
   Explore: 'Изучить',
   main_chain: 'Основная сеть',
+  off_chain: 'Вне сети',
   secondary_chains: 'Второстепенные сети',
   need_hive_account: 'Вам нужно выбрать как минимум сеть Hive выше.',
   Hive_proposals: 'Предложения Hive',

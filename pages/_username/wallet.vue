@@ -33,8 +33,8 @@
             </div>
             <div class="wallet-stat-card">
               <span>{{ cur_bchain }} {{ $t('POWER') }}</span>
-              <strong>{{ renderSteemPower(2) }}</strong>
-              <small>{{ $t('account_est_val') }} ${{ hiveValueUSD }}</small>
+              <strong>{{ renderSteemPower(2) }} HP</strong>
+              <small>${{ hiveValueUSD }}</small>
             </div>
           </div>
         </section>
@@ -49,7 +49,7 @@
           <button class="wallet-pill" type="button" v-on:click="fetchDelegations(false)">
             <i class="fas fa-donate"></i>{{ $t('FETCH_MY_DELEGATIONS') }}
           </button>
-          <button class="wallet-pill" type="button" v-on:click="scrollAction()">
+          <button class="wallet-pill" type="button" v-on:click="scrollToTransactionHistory">
             <i class="fas fa-file-invoice"></i>{{ $t('AFIT_Transaction_History') }}
           </button>
           <button class="wallet-pill" type="button" v-on:click="showBSCAddress()">
@@ -73,7 +73,7 @@
             </span>
 
             <span class="btn btn-brand mb-1" :title="$t('save_filter_default_settings')" v-if="!nonAuthUser"
-              v-on:click="saveSettings"><i class="fa-gear fas"
+              v-on:click="saveSettings"><i class="fa-solid fa-floppy-disk"
                 :style="settings_set ? 'color:green' : 'color:white'"></i><i class="fas fa-spin fa-spinner text-white"
                 v-if="save_progress"></i></span>
 
@@ -101,7 +101,7 @@
               <i class="fas fa-bolt"></i>
             </span>
 
-            <span class="btn btn-brand mb-1" :title="$t('AFIT_Transaction_History')" v-on:click="scrollAction()">
+            <span class="btn btn-brand mb-1" :title="$t('AFIT_Transaction_History')" v-on:click="scrollToTransactionHistory">
               <i class="fas fa-file-invoice"></i>
             </span>
 
@@ -153,7 +153,7 @@
               </span></div>
             <div class="col-lg-2 col-1"><i class="fa-solid fa-wave-square" :title="$t('Actions')"></i></div>
           </div>
-          <h2 class="wallet-asset-group-heading">{{ $t('main_chain') }}</h2>
+          <h2 class="wallet-asset-group-heading">{{ $t('off_chain') }}</h2>
           <div class="token-entry row main-token">
             <div class="col-2 text-left wallet-token-name"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo" alt="">AFIT</div>
             <div class="col-2 col-lg-1 wallet-token-location">{{ $t('actifit_wallet') }}</div>
@@ -190,6 +190,8 @@
                   :title="$t('TIP_AFIT')"></i></span>
             </div>
           </div>
+          <div ref="afitActionAnchor" class="wallet-core-action-anchor" aria-hidden="true"></div>
+          <h2 class="wallet-asset-group-heading">{{ $t('main_chain') }}</h2>
           <div class="token-entry row main-token">
             <div class="col-2 text-left wallet-token-name">
               <span v-if="cur_bchain == 'HIVE'"><img src="/img/HIVE.png" class="mr-1 mini-token-logo" alt="">HIVE</span>
@@ -215,13 +217,6 @@
               <i v-else class="fas fa-solid fa-arrow-circle-up text-brand"
                 v-on:click="showPowerBreakdown['HIVE'] = false" :title="$t('STEEM_POWER_BREAKDOWN')"></i>
 
-              <span v-if="showPowerBreakdown['HIVE']">
-                <li>{{ this.renderSteemPower(1) }} ({{ $t('Owned_SP') }})</li>
-                <li> + {{ this.renderSteemPower(3) }} ({{ $t('Received_SP') }})</li>
-                <li> - {{ this.renderSteemPower(4) }} ({{ $t('Delegated_SP') }})</li>
-                <li> - {{ this.renderSteemPower(5) }} ({{ $t('Powering_Down_Amount') }})</li>
-              </span>
-
             </div>
             <div class="col-lg-1 col-2 text-right wallet-token-savings" :data-label="$t('Savings')">
               {{ this.renderSavings(this.cur_bchain) }}
@@ -243,6 +238,15 @@
 
             </div>
             <div class="col-1 col-lg-2 text-right break-val wallet-token-usd" :data-label="$t('in_usd')">${{ this.hiveValueUSD }}</div>
+            <transition name="fade">
+              <div v-if="showPowerBreakdown['HIVE']" class="wallet-power-breakdown">
+                <strong>{{ $t('POWER_BREAKDOWN') }}</strong>
+                <span>{{ this.renderSteemPower(1) }} <small>{{ $t('Owned_SP') }}</small></span>
+                <span>+ {{ this.renderSteemPower(3) }} <small>{{ $t('Received_SP') }}</small></span>
+                <span>- {{ this.renderSteemPower(4) }} <small>{{ $t('Delegated_SP') }}</small></span>
+                <span>- {{ this.renderSteemPower(5) }} <small>{{ $t('Powering_Down_Amount') }}</small></span>
+              </div>
+            </transition>
             <div class="col-lg-2 col-1 token_actions wallet-token-actions" v-if="!nonAuthUser">
               <span class="btn btn-brand p-1" v-on:click="powerUpFunds"><i class="fas fa-arrow-circle-up p-1"
                   :title="$t('POWERUP_ACTION_TEXT')"></i></span>
@@ -328,7 +332,7 @@
             </div>
             <div class="col-2 col-lg-1 wallet-token-location">{{ this.cur_bchain }}</div>
             <div class="col-2 text-right wallet-token-balance" :data-label="$t('Available')">{{ this.renderSBDBalance(this.cur_bchain) }}</div>
-            <div class="col-2 wallet-token-staked" :data-label="$t('Staked')"></div>
+            <div class="col-2 wallet-token-staked" :data-label="$t('Staked')">-</div>
             <div class="col-lg-1 col-2 text-right wallet-token-savings" :data-label="$t('Savings')">
               {{ this.renderSBDSavings(this.cur_bchain) }}
 
@@ -438,13 +442,14 @@
             </div>
           </transition>
 
+          <div ref="coreActionAnchor" class="wallet-core-action-anchor" aria-hidden="true"></div>
           <h2 class="wallet-asset-group-heading">{{ $t('BSC') }}</h2>
           <div class="token-entry row main-token">
             <div class="col-2 text-left wallet-token-name"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo" alt="">AFIT</div>
             <div class="col-2 col-lg-1 wallet-token-location">{{ $t('BSC') }}</div>
             <div class="col-2 text-right wallet-token-balance" :data-label="$t('Available')">{{ formattedUserAfitBSC }}</div>
-            <div class="col-2 wallet-token-staked" :data-label="$t('Staked')"></div>
-            <div class="col-lg-1 col-2 text-right wallet-token-savings" :data-label="$t('Savings')"></div>
+            <div class="col-2 wallet-token-staked" :data-label="$t('Staked')">-</div>
+            <div class="col-lg-1 col-2 text-right wallet-token-savings" :data-label="$t('Savings')">-</div>
             <div class="col-1 col-lg-2 text-right break-val wallet-token-usd" :data-label="$t('in_usd')">{{ formattedUserAfitBSCVal }}</div>
             <div class="col-lg-2 col-1 token_actions wallet-token-actions">
               <span class="btn btn-brand p-1" :title="$t('smart_contract')">
@@ -463,8 +468,8 @@
             <div class="col-2 text-left wallet-token-name"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo" alt="">AFIT-BNB LP</div>
             <div class="col-2 col-lg-1 wallet-token-location">{{ $t('BSC') }}</div>
             <div class="col-2 text-right wallet-token-balance" :data-label="$t('Available')">{{ formattedUserAfitBNBLPBSC }}</div>
-            <div class="col-2 wallet-token-staked" :data-label="$t('Staked')"></div>
-            <div class="col-lg-1 col-2 text-right wallet-token-savings" :data-label="$t('Savings')"></div>
+            <div class="col-2 wallet-token-staked" :data-label="$t('Staked')">-</div>
+            <div class="col-lg-1 col-2 text-right wallet-token-savings" :data-label="$t('Savings')">-</div>
             <div class="col-1 col-lg-2 text-right wallet-token-usd" :data-label="$t('in_usd')">-</div>
             <div class="col-lg-2 col-1 token_actions wallet-token-actions">
               <span class="btn btn-brand p-1" :title="$t('smart_contract')">
@@ -479,8 +484,8 @@
             <div class="col-2 text-left wallet-token-name"><img src="/img/AFITX.png" class="mr-1 mini-token-logo" alt="">AFITX</div>
             <div class="col-2 col-lg-1 wallet-token-location">{{ $t('BSC') }}</div>
             <div class="col-2 text-right wallet-token-balance" :data-label="$t('Available')">{{ formattedUserAFITXBSC }}</div>
-            <div class="col-2 wallet-token-staked" :data-label="$t('Staked')"></div>
-            <div class="col-lg-1 col-2 text-right wallet-token-savings" :data-label="$t('Savings')"></div>
+            <div class="col-2 wallet-token-staked" :data-label="$t('Staked')">-</div>
+            <div class="col-lg-1 col-2 text-right wallet-token-savings" :data-label="$t('Savings')">-</div>
             <div class="col-1 col-lg-2 text-right break-val wallet-token-usd" :data-label="$t('in_usd')">{{ formattedUserAfitxBSCVal }}</div>
             <div class="col-lg-2 col-1 token_actions wallet-token-actions">
               <span class="btn btn-brand p-1" :title="$t('smart_contract')">
@@ -499,8 +504,8 @@
             <div class="col-2 text-left wallet-token-name"><img src="/img/AFITX.png" class="mr-1 mini-token-logo" alt="">AFITX-BNB LP</div>
             <div class="col-2 col-lg-1 wallet-token-location">{{ $t('BSC') }}</div>
             <div class="col-2 text-right wallet-token-balance" :data-label="$t('Available')">{{ formattedUserAFITXBNBLPBSC }}</div>
-            <div class="col-2 wallet-token-staked" :data-label="$t('Staked')"></div>
-            <div class="col-lg-1 col-2 text-right wallet-token-savings" :data-label="$t('Savings')"></div>
+            <div class="col-2 wallet-token-staked" :data-label="$t('Staked')">-</div>
+            <div class="col-lg-1 col-2 text-right wallet-token-savings" :data-label="$t('Savings')">-</div>
             <div class="col-1 col-lg-2 text-right wallet-token-usd" :data-label="$t('in_usd')">-</div>
             <div class="col-lg-2 col-1 token_actions wallet-token-actions">
               <span class="btn btn-brand p-1" :title="$t('smart_contract')">
@@ -530,15 +535,18 @@
                 <i v-else class="fas fa-solid fa-arrow-circle-up text-brand"
                   v-on:click="adjustPowerDisplay(token, false)" :title="$t('POWER_BREAKDOWN')"></i>
 
-                <span v-if="powerDisplayOn(token)">
-                  <li>{{ renderStake(token, 1) }} ({{ $t('Owned') }})</li>
-                  <li> + {{ renderStake(token, 2) }} ({{ $t('Received_Power') }})</li>
-                  <li> - {{ renderStake(token, 4) }} ({{ $t('Delegated_Power') }})</li>
-                  <li> ( {{ renderStake(token, 3) }} ({{ $t('Total_unstaking') }}))</li>
-                </span>
               </div>
-              <div class="col-lg-1 col-2 wallet-token-savings" :data-label="$t('Savings')"></div>
-              <div class="col-1 col-lg-2 text-right break-val wallet-token-usd" :data-label="$t('in_usd')">${{ usdVal(token) }}</div>
+              <div class="col-lg-1 col-2 wallet-token-savings" :data-label="$t('Savings')">-</div>
+              <div class="col-1 col-lg-2 text-right break-val wallet-token-usd" :data-label="$t('in_usd')">{{ displayTokenUsd(token) }}</div>
+              <transition name="fade">
+                <div v-if="powerDisplayOn(token)" class="wallet-power-breakdown">
+                  <strong>{{ $t('POWER_BREAKDOWN') }}</strong>
+                  <span>{{ renderStake(token, 1) }} <small>{{ $t('Owned') }}</small></span>
+                  <span>+ {{ renderStake(token, 2) }} <small>{{ $t('Received_Power') }}</small></span>
+                  <span>- {{ renderStake(token, 4) }} <small>{{ $t('Delegated_Power') }}</small></span>
+                  <span>{{ renderStake(token, 3) }} <small>{{ $t('Total_unstaking') }}</small></span>
+                </div>
+              </transition>
               <!--<span v-if="parseFloat(delegStake(token)) > 0">( + {{ delegStake(token)}} {{ token.symbol }} {{ $t('Delegated') }}) </span>-->
               <div class="token_actions col-lg-2 col-1 wallet-token-actions" v-if="cur_bchain != 'BLURT' && !nonAuthUser">
                 <span v-if="token.symbol == 'AFITX'" class="btn btn-brand p-1">
@@ -596,7 +604,7 @@
               <!--</div>-->
             </div>
 
-            <div class="action-box" v-if="!nonAuthUser">
+            <div id="engineActionPanel" ref="engineActionPanel" class="action-box" v-if="!nonAuthUser && tokenActions && curTokenAction">
 
               <h3 class="pro-name">
                 <span v-if="curTokenAction == TRANSFER_FUNDS">{{ $t('transfer_tokens') }}</span>
@@ -732,7 +740,7 @@
 
 
           <div id="detailsArea" ref="detailsArea"></div>
-          <div class="text-center">
+          <div id="coreActionPanel" ref="coreActionPanel" class="text-center wallet-core-action-panel">
             <transition name="fade">
               <div v-if="fundActivityMode == 1" class="text-center grid col-md-12">
                 <h3 class="pro-name">{{ $t('TRANSFER_FUNDS_ACTION_TEXT') }}</h3>
@@ -1205,7 +1213,7 @@
 
             <transition name="fade">
               <div v-if="fundActivityMode == SHOW_CLAIMABLE_REW && isClaimableDataAvailable && cur_bchain == 'STEEM'"
-                class="action-box">
+                class="action-box wallet-rewards-box">
                 <h5 class="pro-name"><img src="/img/STEEM.png" class="mr-2 token-logo" alt="">{{ $t('Claimable_Steem_Rewards')
                 }}</h5>
                 <div class="mb-4 font-weight-bold">
@@ -1219,7 +1227,7 @@
               </div>
               <div
                 v-else-if="fundActivityMode == SHOW_CLAIMABLE_REW && isClaimableDataAvailable && cur_bchain == 'HIVE'"
-                class="col-md-6 row-sep-in">
+                class="action-box wallet-rewards-box">
                 <h5 class="pro-name"><img src="/img/HIVE.png" class="mr-2 token-logo" alt="">{{ $t('Claimable_Hive_Rewards') }}
                 </h5>
                 <div class="mb-4 font-weight-bold">
@@ -1233,7 +1241,7 @@
               </div>
               <div
                 v-else-if="fundActivityMode == SHOW_CLAIMABLE_REW && isClaimableDataAvailable && cur_bchain == 'BLURT'"
-                class="col-md-6 row-sep-in">
+                class="action-box wallet-rewards-box">
                 <h5 class="pro-name"><img src="/img/BLURT.png" class="mr-2 token-logo" alt="">{{ $t('Claimable_Blurt_Rewards')
                 }}</h5>
                 <div class="mb-4 font-weight-bold">
@@ -1380,7 +1388,7 @@
           </div>
         </div>
 
-        <div class="font-weight-bold">
+        <div id="afitActionPanel" ref="afitActionPanel" class="font-weight-bold wallet-afit-action-panel">
           <!--<button v-on:click="buyAFITwithSTEEM" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('BUY_AFIT_WITH_STEEM') }}</button>-->
 
           <transition name="fade">
@@ -1838,13 +1846,68 @@
 
 
       <!-- transaction history -->
-      <div class="history mx-auto">
-        <h3 class="text-center mt-5">{{ $t('AFIT_Transaction_History') }}</h3>
-        <div class="wallet-transaction-grid">
-          <Transaction v-for="(transaction, index) in (transactions || [])" :key="index" :transaction="transaction" />
+      <div id="transactionHistory" class="history mx-auto">
+        <div class="wallet-history-header">
+          <h3>{{ $t('Transaction_History') }}</h3>
+          <button class="btn btn-brand wallet-history-sort" type="button" @click="historyNewestFirst = !historyNewestFirst">
+            <i class="fas fa-sort-amount-down" :class="{ 'fa-flip-vertical': !historyNewestFirst }"></i>
+            {{ historyNewestFirst ? $t('Newest_first') : $t('Oldest_first') }}
+          </button>
         </div>
-        <div class="text-center"><small class="text-muted" v-if="!transactions || transactions.length === 0">{{
-          $t('No_transactions_notice') }}</small></div>
+
+        <div class="wallet-history-columns">
+          <section class="wallet-history-column">
+            <h4>{{ $t('AFIT_Transaction_History') }}</h4>
+            <div class="wallet-transaction-list">
+              <Transaction v-for="transaction in visibleAfitTransactions" :key="transaction._id || transaction.id || transaction.date + '-' + transaction.token_count" :transaction="transaction" />
+            </div>
+            <div class="text-center">
+              <small class="text-muted" v-if="sortedAfitTransactions.length === 0">{{ $t('No_transactions_notice') }}</small>
+              <template v-else>
+                <button v-if="afitHistoryLimit < sortedAfitTransactions.length" class="btn btn-brand wallet-show-more" type="button" @click="afitHistoryLimit += 50">
+                  {{ $t('Show_more') }}
+                </button>
+                <button v-if="afitHistoryLimit > 50" class="btn btn-brand wallet-show-more" type="button" @click="afitHistoryLimit = 50">
+                  {{ $t('Show_less') }}
+                </button>
+              </template>
+            </div>
+          </section>
+
+          <section class="wallet-history-column">
+            <h4>{{ $t('HIVE_Transaction_History') }}</h4>
+            <div v-if="hiveHistoryLoading" class="text-center wallet-history-status">
+              <i class="fas fa-spin fa-spinner text-brand"></i>
+            </div>
+            <div v-else class="wallet-transaction-list">
+              <article v-for="transaction in visibleHiveTransactions" :key="transaction.id" class="acti-shadow card p-3 my-2 hive-transaction-card">
+                <div class="d-flex justify-content-between align-items-start">
+                  <div>
+                    <h4 class="mb-0" :class="transaction.direction">{{ transaction.amount }}</h4>
+                    <small class="text-muted">{{ $t('Type') }}: {{ transaction.label }}</small>
+                  </div>
+                  <small class="text-muted text-right" :title="formatHistoryDate(transaction.date)">{{ $getTimeDifference(transaction.date) }}</small>
+                </div>
+                <div v-if="transaction.counterparty" class="mt-2">
+                  <small class="text-muted">{{ transaction.counterpartyLabel }}: </small>
+                  <span>@{{ transaction.counterparty }}</span>
+                </div>
+                <p v-if="transaction.memo" class="font-italic mb-0 mt-2 text-center">{{ transaction.memo }}</p>
+              </article>
+            </div>
+            <div class="text-center">
+              <small class="text-muted" v-if="!hiveHistoryLoading && sortedHiveTransactions.length === 0">{{ $t('No_transactions_notice') }}</small>
+              <template v-else>
+                <button v-if="hiveHistoryLimit < sortedHiveTransactions.length" class="btn btn-brand wallet-show-more" type="button" @click="hiveHistoryLimit += 50">
+                  {{ $t('Show_more') }}
+                </button>
+                <button v-if="hiveHistoryLimit > 50" class="btn btn-brand wallet-show-more" type="button" @click="hiveHistoryLimit = 50">
+                  {{ $t('Show_less') }}
+                </button>
+              </template>
+            </div>
+          </section>
+        </div>
       </div>
       <TopHolders :user="targetUserWallet" :holdersList="afitHoldersList" />
       <TopHoldersX :user="targetUserWallet" :holdersList="afitxHoldersList" />
@@ -2211,6 +2274,11 @@ export default {
       userTokensWallet: -1,
       badActors: badActors,
       badActorWarning: false,
+      hiveTransactions: [],
+      hiveHistoryLoading: false,
+      historyNewestFirst: true,
+      afitHistoryLimit: 50,
+      hiveHistoryLimit: 50,
     }
   },
   components: {
@@ -2233,6 +2301,18 @@ export default {
     ...mapGetters('steemconnect', ['user']),
     ...mapGetters('steemconnect', ['stdLogin']),
     ...mapGetters(['userTokens', 'transactions', 'userRank', 'bchain']),
+    sortedAfitTransactions() {
+      return this.sortHistoryEntries(this.transactions || []);
+    },
+    visibleAfitTransactions() {
+      return this.sortedAfitTransactions.slice(0, this.afitHistoryLimit);
+    },
+    sortedHiveTransactions() {
+      return this.sortHistoryEntries(this.hiveTransactions);
+    },
+    visibleHiveTransactions() {
+      return this.sortedHiveTransactions.slice(0, this.hiveHistoryLimit);
+    },
     //convert VESTS to HIVE
     hivePerVestsRatio() {
       if (this.properties && this.cur_bchain === 'HIVE' &&
@@ -2649,7 +2729,7 @@ export default {
 
     renderToken(token) {
       //check small balances flag
-      if (this.hide_small_balances && this.usdVal(token) < 1) {
+      if (this.hide_small_balances && this.usdVal(token, true) < 1) {
         return false;
       }
       //check show only tokens of interest flag
@@ -2759,6 +2839,112 @@ export default {
       this.save_progress = false;
     },
 
+    sortHistoryEntries(entries) {
+      const direction = this.historyNewestFirst ? -1 : 1;
+      return [...entries].sort((a, b) => {
+        return (this.historyTimestamp(a.date) - this.historyTimestamp(b.date)) * direction;
+      });
+    },
+    historyTimestamp(value) {
+      if (!value) return 0;
+      const normalizedValue = typeof value === 'string' && !value.endsWith('Z') && !value.includes('+')
+        ? value + 'Z'
+        : value;
+      const timestamp = new Date(normalizedValue).getTime();
+      return Number.isNaN(timestamp) ? 0 : timestamp;
+    },
+    formatHistoryDate(value) {
+      const timestamp = this.historyTimestamp(value);
+      if (!timestamp) return '';
+      return new Date(timestamp).toLocaleString();
+    },
+    scrollToTransactionHistory() {
+      this.$nextTick(() => {
+        VueScrollTo.scrollTo('#transactionHistory', 1000, { easing: 'ease-in-out', offset: -70 })
+      });
+    },
+    async fetchHiveFinancialHistory() {
+      if (!this.displayUserData || !this.displayUserData.name) return;
+
+      this.hiveHistoryLoading = true;
+      try {
+        const accountName = this.displayUserData.name.toLowerCase();
+        const history = await hive.api.getAccountHistoryAsync(accountName, -1, 500);
+        const financialOperations = [
+          'transfer',
+          'transfer_to_savings',
+          'transfer_from_savings',
+          'transfer_to_vesting',
+          'fill_vesting_withdraw',
+          'interest',
+          'claim_reward_balance',
+          'author_reward',
+          'curation_reward',
+          'producer_reward',
+          'fill_convert_request',
+          'fill_order'
+        ];
+
+        this.hiveTransactions = (Array.isArray(history) ? history : []).map(entry => {
+          const historyIndex = entry[0];
+          const transaction = entry[1] || {};
+          const operation = transaction.op || [];
+          const operationType = operation[0];
+          const operationData = operation[1] || {};
+
+          if (!financialOperations.includes(operationType)) return null;
+          return this.normalizeHiveTransaction(historyIndex, transaction, operationType, operationData, accountName);
+        }).filter(Boolean);
+      } catch (error) {
+        console.error('Error fetching HIVE financial history:', error);
+        this.hiveTransactions = [];
+      } finally {
+        this.hiveHistoryLoading = false;
+      }
+    },
+    normalizeHiveTransaction(historyIndex, transaction, operationType, operationData, accountName) {
+      const amountFields = {
+        transfer: ['amount'],
+        transfer_to_savings: ['amount'],
+        transfer_from_savings: ['amount'],
+        transfer_to_vesting: ['amount'],
+        fill_vesting_withdraw: ['deposited'],
+        interest: ['interest'],
+        claim_reward_balance: ['reward_hive', 'reward_hbd', 'reward_vests'],
+        author_reward: ['hive_payout', 'hbd_payout', 'vesting_payout'],
+        curation_reward: ['reward'],
+        producer_reward: ['vesting_shares'],
+        fill_convert_request: ['amount_out'],
+        fill_order: ['current_pays', 'open_pays']
+      };
+      const amounts = (amountFields[operationType] || [])
+        .map(field => operationData[field])
+        .filter(amount => amount && parseFloat(amount) !== 0);
+      const isOutgoing = operationData.from === accountName;
+      const isIncoming = operationData.to === accountName;
+      let counterparty = '';
+      let counterpartyLabel = '';
+
+      if (isOutgoing && operationData.to) {
+        counterparty = operationData.to;
+        counterpartyLabel = this.$t('To');
+      } else if (isIncoming && operationData.from) {
+        counterparty = operationData.from;
+        counterpartyLabel = this.$t('From');
+      }
+
+      return {
+        id: `${transaction.trx_id || transaction.block || 'hive'}-${historyIndex}`,
+        date: transaction.timestamp,
+        label: operationType.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+        amount: amounts.join(' + ') || 'HIVE transaction',
+        direction: isOutgoing ? 'negative' : (isIncoming || operationType.includes('reward') || operationType === 'interest' ? 'positive' : ''),
+        counterparty,
+        counterpartyLabel,
+        memo: operationData.memo || ''
+      };
+    },
+
     /**
      * Scrolls down to content area.
      */
@@ -2766,7 +2952,34 @@ export default {
       // Wait until the selected activity form is rendered before scrolling.
       // Otherwise the visibility observer can incorrectly suppress the first click.
       this.$nextTick(() => {
-        VueScrollTo.scrollTo('#detailsArea', 1000, { easing: 'ease-in-out', offset: -50 })
+        const anchor = this.$refs.coreActionAnchor;
+        const detailsArea = this.$refs.detailsArea;
+        const actionPanel = this.$refs.coreActionPanel;
+
+        if (anchor && anchor.parentNode && detailsArea && actionPanel) {
+          anchor.parentNode.insertBefore(detailsArea, anchor.nextSibling);
+          anchor.parentNode.insertBefore(actionPanel, detailsArea.nextSibling);
+        }
+
+        VueScrollTo.scrollTo('#coreActionPanel', 500, { easing: 'ease-in-out', offset: -70 })
+      })
+    },
+    scrollTokenAction() {
+      this.$nextTick(() => {
+        if (this.tokenActions && this.$refs.engineActionPanel) {
+          VueScrollTo.scrollTo('#engineActionPanel', 500, { easing: 'ease-in-out', offset: -70 })
+        }
+      })
+    },
+    scrollAfitAction() {
+      this.$nextTick(() => {
+        const anchor = this.$refs.afitActionAnchor;
+        const actionPanel = this.$refs.afitActionPanel;
+
+        if (anchor && anchor.parentNode && actionPanel) {
+          anchor.parentNode.insertBefore(actionPanel, anchor.nextSibling);
+          VueScrollTo.scrollTo('#afitActionPanel', 500, { easing: 'ease-in-out', offset: -70 })
+        }
       })
     },
 
@@ -3238,7 +3451,7 @@ export default {
       this.curTokenAction = this.POWERUP_FUNDS;
       this.selTokenUp = token;
       this.afitActivityMode = 0;
-      this.scrollAction();
+      this.scrollTokenAction();
     },
     initiateUnStaking(token) {
       //only adjust open/close is same button is clicked, otherwise adjust token being unstaked
@@ -3251,7 +3464,7 @@ export default {
       this.curTokenAction = this.POWERDOWN_FUNDS;
       this.selTokenUp = token;
       this.afitActivityMode = 0;
-      this.scrollAction();
+      this.scrollTokenAction();
     },
     initiateDelegation(token) {
       //only adjust open/close is same button is clicked, otherwise adjust token being unstaked
@@ -3264,7 +3477,7 @@ export default {
       this.curTokenAction = this.DELEGATE_FUNDS;
       this.selTokenUp = token;
       this.afitActivityMode = 0;
-      this.scrollAction();
+      this.scrollTokenAction();
     },
     initiateTransfer(token) {
       //only adjust open/close is same button is clicked, otherwise adjust token being unstaked
@@ -3277,7 +3490,7 @@ export default {
       this.curTokenAction = this.TRANSFER_FUNDS;
       this.selTokenUp = token;
       this.afitActivityMode = 0;
-      this.scrollAction();
+      this.scrollTokenAction();
     },
     initiateBSCTransfer(token) {
       //only adjust open/close is same button is clicked, otherwise adjust token being unstaked
@@ -3290,7 +3503,7 @@ export default {
       this.curTokenAction = this.TRANSFER_BSC;
       this.selTokenUp = token;
       this.afitActivityMode = 0;
-      this.scrollAction();
+      this.scrollTokenAction();
     },
     initiateWithdraw(token) {
       //only adjust open/close is same button is clicked, otherwise adjust token being unstaked
@@ -3303,7 +3516,7 @@ export default {
       this.curTokenAction = this.WITHDRAW_FUNDS;
       this.selTokenUp = token;
       this.afitActivityMode = 0;
-      this.scrollAction();
+      this.scrollTokenAction();
     },
     notifySwitchChain() {
       let notice = this.$t('notify_Switch_Chain_HE_Tokens');
@@ -3524,6 +3737,10 @@ export default {
       }
       return '';
     },
+    displayTokenUsd(token) {
+      const value = this.usdVal(token);
+      return value === '' ? '-' : `$${value}`;
+    },
     renderBalance(type, nofrmt) {
       //handle case when balance is not yet available
       if (!this.displayUserData || !this.displayUserData.balance) {
@@ -3658,6 +3875,7 @@ export default {
 
         this.$store.dispatch('fetchUserTokens')
         this.$store.dispatch('fetchTransactions', this.displayUser)
+        this.fetchHiveFinancialHistory()
         this.$store.dispatch('fetchUserRank')
         this.$store.dispatch('fetchReferrals')
         this.fetchUserPendingRewards(this.targetUserWallet);
@@ -5397,7 +5615,7 @@ export default {
       //hide lower section for STEEM actions
       this.fundActivityMode = 0;
       this.curTokenAction = 0;
-      this.scrollAction();
+      this.scrollAfitAction();
     },
     handleSetFundsPassLink(event) {
       //error-hint messages are rendered via v-html, so their links can't use
@@ -5420,7 +5638,7 @@ export default {
       //hide lower section for STEEM actions
       this.fundActivityMode = 0;
       this.curTokenAction = 0;
-      this.scrollAction();
+      this.scrollAfitAction();
     },
     moveAFITXheSE() {
       //set proper AFIT Activity Mode controlling the display
@@ -5432,7 +5650,7 @@ export default {
       //hide lower section for STEEM actions
       this.fundActivityMode = 0;
       this.curTokenAction = 0;
-      this.scrollAction();
+      this.scrollAfitAction();
     },
     moveAFITseHE() {
       //set proper AFIT Activity Mode controlling the display
@@ -5444,7 +5662,7 @@ export default {
       //hide lower section for STEEM actions
       this.fundActivityMode = 0;
       this.curTokenAction = 0;
-      this.scrollAction();
+      this.scrollAfitAction();
     },
     moveAFITheSE() {
       //set proper AFIT Activity Mode controlling the display
@@ -5456,7 +5674,7 @@ export default {
       //hide lower section for STEEM actions
       this.fundActivityMode = 0;
       this.curTokenAction = 0;
-      this.scrollAction();
+      this.scrollAfitAction();
     },
     buyAFITwithSTEEM() {
       //function handles opening/closing exchanging AFIT tokens for STEEM upvotes  section
@@ -5469,6 +5687,8 @@ export default {
       }
       //hide lower section for STEEM actions
       this.fundActivityMode = 0;
+      this.curTokenAction = 0;
+      this.scrollAfitAction();
     },
     moveAFITSEtoAFITPOWER() {
       //function handles opening/closing exchanging AFIT tokens for STEEM upvotes  section
@@ -5482,7 +5702,7 @@ export default {
       //hide lower section for STEEM actions
       this.fundActivityMode = 0;
       this.curTokenAction = 0;
-      this.scrollAction();
+      this.scrollAfitAction();
     },
     initiateAFITtoSE() {
       //function handles opening/closing moving AFIT to SE
@@ -5496,14 +5716,14 @@ export default {
       //hide lower section for STEEM actions
       this.fundActivityMode = 0;
       this.curTokenAction = 0;
-      this.scrollAction();
+      this.scrollAfitAction();
     },
     initiateTipUser() {
       this.afitActivityMode = this.INIT_AFIT_TIP;
       //hide lower section for other actions
       this.fundActivityMode = 0;
       this.curTokenAction = 0;
-      this.scrollAction();
+      this.scrollAfitAction();
     },
     passTransferTypeChange(e) {
       //handles the drop down select option to ensure we have proper value
@@ -8856,7 +9076,7 @@ export default {
 }
 
 .wallet-page .top-action-container .pl-2 { display: none; }
-.wallet-page .top-action-container .btn-brand i:not(.fa-gear):not(.fa-spinner):not(.fa-battery-empty),
+.wallet-page .top-action-container .btn-brand i:not(.fa-floppy-disk):not(.fa-spinner):not(.fa-battery-empty),
 .wallet-page .top-action-container .btn-brand a,
 .wallet-page .top-action-container .btn-brand a i {
   color: var(--wallet-muted) !important;
@@ -8904,6 +9124,19 @@ export default {
 
 .wallet-page .wallet-container > .head-title {
   display: none;
+}
+
+.wallet-page .wallet-core-action-anchor,
+.wallet-page #detailsArea,
+.wallet-page .wallet-core-action-panel,
+.wallet-page .wallet-afit-action-panel {
+  grid-column: 1 / -1;
+  min-width: 0;
+  width: 100%;
+}
+
+.wallet-page .wallet-core-action-anchor {
+  height: 0;
 }
 
 .wallet-page .wallet-asset-group-heading {
@@ -9040,6 +9273,7 @@ export default {
 .wallet-page .wallet-container .wallet-token-staked,
 .wallet-page .wallet-container .wallet-token-savings,
 .wallet-page .wallet-container .wallet-token-usd {
+  align-self: start;
   color: var(--wallet-text);
   font-family: "Courier New", monospace;
   font-size: 13px;
@@ -9048,6 +9282,41 @@ export default {
 
 .wallet-page .wallet-container .wallet-token-balance {
   font-weight: 700;
+}
+
+.wallet-page .wallet-container .wallet-power-breakdown {
+  align-items: center;
+  background: var(--wallet-surface-2);
+  border: 1px solid var(--wallet-border-soft);
+  border-radius: 10px;
+  display: grid;
+  gap: 8px 14px;
+  grid-column: 1 / -1;
+  grid-template-columns: auto repeat(4, minmax(0, 1fr));
+  padding: 12px !important;
+  width: 100% !important;
+}
+
+.wallet-page .wallet-container .wallet-power-breakdown strong {
+  color: var(--wallet-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.wallet-page .wallet-container .wallet-power-breakdown span {
+  color: var(--wallet-text);
+  font-family: "Courier New", monospace;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.wallet-page .wallet-container .wallet-power-breakdown small {
+  color: var(--wallet-muted);
+  display: block;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 10px;
+  margin-top: 2px;
+  white-space: normal;
 }
 
 .wallet-page .wallet-container .wallet-token-actions {
@@ -9120,6 +9389,118 @@ export default {
   color: var(--wallet-text);
 }
 
+.wallet-page #detailsArea + .text-center > .grid,
+.wallet-page #detailsArea + .text-center > .action-box,
+.wallet-page #detailsArea + .text-center > .row-sep-in,
+.wallet-page .engine-token-section > .action-box {
+  margin: 18px auto 0;
+  max-width: 880px;
+  overflow: hidden;
+  padding: 24px;
+  text-align: left !important;
+  width: 100%;
+}
+
+.wallet-page .action-box .pro-name,
+.wallet-page #detailsArea + .text-center .pro-name {
+  align-items: center;
+  background: transparent;
+  border-bottom: 1px solid var(--wallet-border-soft);
+  color: var(--wallet-text);
+  display: flex;
+  font-size: 19px;
+  font-weight: 700;
+  justify-content: center;
+  margin: -4px 0 22px;
+  padding: 0 0 15px;
+  text-align: center;
+}
+
+.wallet-page .action-box .pro-name .token-logo,
+.wallet-page #detailsArea + .text-center .pro-name .token-logo {
+  height: 34px;
+  object-fit: contain;
+  width: 34px;
+}
+
+.wallet-page #detailsArea + .text-center .grid > .row,
+.wallet-page .engine-token-section > .action-box .row {
+  align-items: center;
+  margin: 0 auto 14px;
+  max-width: 760px;
+  text-align: left;
+}
+
+.wallet-page #detailsArea + .text-center .grid > .row > label,
+.wallet-page .engine-token-section > .action-box .row > label {
+  color: var(--wallet-muted);
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.wallet-page #detailsArea + .text-center .grid > .row > input,
+.wallet-page #detailsArea + .text-center .grid > .row > select,
+.wallet-page .engine-token-section > .action-box .row > input,
+.wallet-page .engine-token-section > .action-box .row > select {
+  min-height: 46px;
+}
+
+.wallet-page #detailsArea + .text-center .grid > .row > .btn,
+.wallet-page .engine-token-section > .action-box .row > .btn,
+.wallet-page .wallet-rewards-box .btn {
+  min-height: 44px;
+}
+
+.wallet-page .action-box h5:not(.pro-name),
+.wallet-page #detailsArea + .text-center .grid h5:not(.pro-name) {
+  color: var(--wallet-muted);
+  font-size: 14px;
+  margin: 22px 0 12px;
+}
+
+.wallet-page .action-box .table-responsive,
+.wallet-page .action-box table,
+.wallet-page #detailsArea + .text-center table {
+  border: 1px solid var(--wallet-border-soft);
+  border-radius: 10px;
+  margin-bottom: 0;
+}
+
+.wallet-page .action-box table,
+.wallet-page #detailsArea + .text-center table {
+  width: 100%;
+}
+
+.wallet-page .action-box table th,
+.wallet-page .action-box table td,
+.wallet-page #detailsArea + .text-center table th,
+.wallet-page #detailsArea + .text-center table td {
+  border-color: var(--wallet-border-soft);
+  padding: 11px 12px;
+  vertical-align: middle;
+}
+
+.wallet-page .wallet-rewards-box {
+  text-align: center !important;
+}
+
+.wallet-page .wallet-rewards-box > .font-weight-bold {
+  background: var(--wallet-surface-2);
+  border: 1px solid var(--wallet-border-soft);
+  border-radius: 12px;
+  margin: 0 !important;
+  padding: 18px;
+}
+
+.wallet-page .wallet-rewards-box > .font-weight-bold > span {
+  color: var(--wallet-text);
+  display: block;
+  font-family: "Courier New", monospace;
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
 .wallet-page input,
 .wallet-page select,
 .wallet-page textarea,
@@ -9130,9 +9511,9 @@ export default {
 }
 
 .dark-mode .wallet-page input.wallet-delegate-recipient {
-  background: var(--wallet-surface-2) !important;
-  color: var(--wallet-text) !important;
-  -webkit-text-fill-color: var(--wallet-text);
+  background: #fff !important;
+  color: #1b1b1b !important;
+  -webkit-text-fill-color: #1b1b1b;
 }
 
 .dark-mode .wallet-page .wallet-savings-form input,
@@ -9145,6 +9526,50 @@ export default {
 .dark-mode .wallet-page .wallet-savings-form select option {
   background: var(--wallet-surface-2);
   color: var(--wallet-text);
+}
+
+.dark-mode .wallet-page .action-box input,
+.dark-mode .wallet-page .action-box select,
+.dark-mode .wallet-page .action-box textarea,
+.dark-mode .wallet-page .grid input,
+.dark-mode .wallet-page .grid select,
+.dark-mode .wallet-page .grid textarea {
+  background: #fff !important;
+  color: #1b1b1b !important;
+  -webkit-text-fill-color: #1b1b1b;
+}
+
+.dark-mode .wallet-page .action-box select option,
+.dark-mode .wallet-page .grid select option {
+  background: #fff;
+  color: #1b1b1b;
+}
+
+.dark-mode .wallet-page input:not([type="radio"]):not([type="checkbox"]),
+.dark-mode .wallet-page select,
+.dark-mode .wallet-page textarea,
+.dark-mode .wallet-page .form-control {
+  background-color: #fff !important;
+  color: #1b1b1b !important;
+  -webkit-text-fill-color: #1b1b1b;
+}
+
+.dark-mode .wallet-page input:not([type="radio"]):not([type="checkbox"])::placeholder,
+.dark-mode .wallet-page textarea::placeholder {
+  color: #6c757d !important;
+  -webkit-text-fill-color: #6c757d;
+}
+
+.dark-mode .wallet-page select option {
+  background: #fff;
+  color: #1b1b1b;
+}
+
+.dark-mode .wallet-page input:-webkit-autofill,
+.dark-mode .wallet-page input:-webkit-autofill:hover,
+.dark-mode .wallet-page input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #fff inset !important;
+  -webkit-text-fill-color: #1b1b1b !important;
 }
 
 .wallet-page .acti-shadow.card {
@@ -9163,30 +9588,81 @@ export default {
   width: 100%;
 }
 
-.wallet-transaction-grid {
+.wallet-history-header {
+  align-items: center;
   display: grid;
-  gap: 14px;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: 1fr auto 1fr;
+  margin-top: 3rem;
+}
+
+.wallet-history-header h3 {
+  grid-column: 2;
+  text-align: center;
+}
+
+.wallet-history-header .wallet-history-sort {
+  grid-column: 3;
+  justify-self: end;
+}
+
+.wallet-history-column h4 {
+  margin: 0;
+}
+
+.wallet-history-sort,
+.wallet-show-more {
+  padding: 8px 14px;
+}
+
+.wallet-history-columns {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   margin-top: 16px;
 }
 
-.wallet-page .wallet-transaction-grid .acti-shadow.card {
+.wallet-history-column {
+  min-width: 0;
+}
+
+.wallet-history-column > h4 {
+  color: var(--wallet-muted);
+  font-size: 1.1rem;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.wallet-transaction-list {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr;
+}
+
+.wallet-page .wallet-transaction-list .acti-shadow.card {
   background-color: #fae6e9 !important;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   margin: 0 !important;
-  min-height: 210px;
-  padding: 20px !important;
+  min-height: 130px;
+  padding: 16px !important;
 }
 
-.dark-mode .wallet-page .wallet-transaction-grid .acti-shadow.card {
+.wallet-page .wallet-show-more {
+  margin-top: 12px;
+}
+
+.wallet-history-status {
+  padding: 30px 0;
+}
+
+.dark-mode .wallet-page .wallet-transaction-list .acti-shadow.card {
   background-color: var(--wallet-surface) !important;
 }
 
-.wallet-page .wallet-transaction-grid .positive { color: #159a68; }
-.wallet-page .wallet-transaction-grid .negative { color: #ed1c24; }
-.dark-mode .wallet-page .wallet-transaction-grid .positive { color: var(--wallet-green); }
+.wallet-page .wallet-transaction-list .positive { color: #159a68; }
+.wallet-page .wallet-transaction-list .negative { color: #ed1c24; }
+.dark-mode .wallet-page .wallet-transaction-list .positive { color: var(--wallet-green); }
 
 @media (max-width: 991px) {
   .wallet-hero { grid-template-columns: 1fr; }
@@ -9206,11 +9682,32 @@ export default {
   }
   .wallet-page .wallet-container .wallet-token-name { grid-column: span 1; }
   .wallet-page .wallet-container .wallet-token-location { grid-column: span 1; }
-  .wallet-transaction-grid { grid-template-columns: 1fr 1fr; }
-  .wallet-page .wallet-transaction-grid .acti-shadow.card { min-height: 180px; }
+  .wallet-page .wallet-container .wallet-power-breakdown { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .wallet-page .wallet-container .wallet-power-breakdown strong { grid-column: 1 / -1; }
+  .wallet-page #detailsArea + .text-center > .grid,
+  .wallet-page #detailsArea + .text-center > .action-box,
+  .wallet-page #detailsArea + .text-center > .row-sep-in,
+  .wallet-page .engine-token-section > .action-box { overflow-x: auto; padding: 18px 14px; }
+  .wallet-page #detailsArea + .text-center .grid > .row,
+  .wallet-page .engine-token-section > .action-box .row { margin-left: 0; margin-right: 0; }
+  .wallet-page #detailsArea + .text-center .grid > .row > label,
+  .wallet-page #detailsArea + .text-center .grid > .row > input,
+  .wallet-page #detailsArea + .text-center .grid > .row > select,
+  .wallet-page .engine-token-section > .action-box .row > label,
+  .wallet-page .engine-token-section > .action-box .row > input,
+  .wallet-page .engine-token-section > .action-box .row > select {
+    flex: 0 0 100%;
+    max-width: 100%;
+    width: 100% !important;
+  }
+  .wallet-page #detailsArea + .text-center .grid > .row > label,
+  .wallet-page .engine-token-section > .action-box .row > label { padding: 0 0 6px !important; }
+  .wallet-history-columns { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 430px) {
-  .wallet-transaction-grid { grid-template-columns: 1fr; }
+  .wallet-history-header { grid-template-columns: 1fr; gap: 10px; }
+  .wallet-history-header h3,
+  .wallet-history-header .wallet-history-sort { grid-column: 1; justify-self: center; }
 }
 </style>

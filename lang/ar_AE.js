@@ -1177,6 +1177,7 @@ module.exports = {
   DHF: 'الصندوق اللامركزي Hive',
   Explore: 'استكشاف',
   main_chain: 'السلسلة الرئيسية',
+  off_chain: 'خارج السلسلة',
   secondary_chains: 'السلاسل الثانوية',
   need_hive_account: 'تحتاج إلى تحديد سلسلة Hive على الأقل أعلاه.',
   Hive_proposals: 'مقترحات Hive',

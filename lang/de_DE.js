@@ -1177,6 +1177,7 @@ module.exports = {
   DHF: 'Dezentraler Hive Fonds',
   Explore: 'Erkunden',
   main_chain: 'Primäre Kette',
+  off_chain: 'Off-Chain',
   secondary_chains: 'Sekundäre Ketten',
   need_hive_account: 'Sie müssen mindestens die Hive-Kette oben auswählen.',
   Hive_proposals: 'Hive-Vorschläge',

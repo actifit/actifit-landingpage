@@ -1178,6 +1178,7 @@ module.exports = {
   DHF: 'Fonds Hive Décentralisé',
   Explore: 'Explorer',
   main_chain: 'Chaîne principale',
+  off_chain: 'Hors chaîne',
   secondary_chains: 'Chaînes secondaires',
   need_hive_account: 'Vous devez sélectionner au moins la chaîne Hive ci-dessus.',
   Hive_proposals: 'Propositions Hive',
