@@ -113,6 +113,7 @@
       </div>
     </div>
     <Footer />
+    <LoginModal v-if="showLoginModal" @close="handleLoginClosed" @login-successful="handleLoginSuccessful" />
     <client-only>
       <div>
         <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
@@ -137,6 +138,7 @@ import hive from '@hiveio/hive-js'
 import NavbarBrand from '~/components/NavbarBrand';
 import Footer from '~/components/Footer';
 import ListHeadingSection from '~/components/ListHeadingSection';
+import LoginModal from '~/components/LoginModal';
 
 /* handles outside clicks for the picker */
 /* begin */
@@ -184,7 +186,8 @@ export default {
     CustomTextEditor,
     TagInput,
     Beneficiary,
-    MemePickerModal
+    MemePickerModal,
+    LoginModal
   },
   data() {
     return {
@@ -201,6 +204,9 @@ export default {
       percent_hbd: 10000,
       max_accepted_payout: '1000000.000 HBD',
       communitySubs: [],
+      showLoginModal: false,
+      loginRequestedByPublish: false,
+      draftSaveInterval: null,
       editPost: {
         isNewPost: true,
       }
@@ -238,12 +244,17 @@ export default {
       await this.$store.dispatch('steemconnect/refreshUser');
       //this.reload += 1;
     },
-    user() {
+    user(newUser) {
+      if (!newUser) return;
       this.fetchCommunities();
+      if (this.loginRequestedByPublish) {
+        this.loginRequestedByPublish = false;
+        return;
+      }
       //load saved draft
       this.runDraftLoader();
       //save draft in intervals
-      setInterval(this.runDraftSaver, 20000);
+      this.startDraftSaver();
     },
     editPost() {
       //enforce new post till and if we implement full screen edit
@@ -279,6 +290,27 @@ export default {
     }
   },
   methods: {
+    requestLogin() {
+      this.loginRequestedByPublish = true;
+      this.showLoginModal = true;
+      this.$nextTick(() => {
+        $('#loginModal').modal('show');
+      });
+    },
+    handleLoginClosed() {
+      this.showLoginModal = false;
+    },
+    handleLoginSuccessful() {
+      this.showLoginModal = false;
+      this.loginRequestedByPublish = false;
+      this.fetchCommunities();
+      this.startDraftSaver();
+    },
+    startDraftSaver() {
+      if (!this.draftSaveInterval) {
+        this.draftSaveInterval = setInterval(this.runDraftSaver, 20000);
+      }
+    },
     insertMemeIntoEditor (payload) {
       // payload may be a plain url (legacy) or the enriched object from the widget
       const imageUrl = typeof payload === 'string' ? payload : (payload && payload.imageUrl)
@@ -613,6 +645,10 @@ export default {
       }
     },
     async save() {
+      if (!this.user || !this.user.account || !this.user.account.name) {
+        this.requestLogin();
+        return;
+      }
       this.loading = true // start loading animation
       //only convert to array if not already array
       this.tags = this.$refs.tagItem.items;
@@ -980,7 +1016,12 @@ export default {
       //load saved draft
       this.runDraftLoader();
       //save draft in intervals
-      setInterval(this.runDraftSaver, 20000);
+      this.startDraftSaver();
+    }
+  },
+  beforeDestroy() {
+    if (this.draftSaveInterval) {
+      clearInterval(this.draftSaveInterval);
     }
   }
 }
