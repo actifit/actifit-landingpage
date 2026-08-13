@@ -205,7 +205,6 @@ export default {
       max_accepted_payout: '1000000.000 HBD',
       communitySubs: [],
       showLoginModal: false,
-      loginRequestedByPublish: false,
       draftSaveInterval: null,
       editPost: {
         isNewPost: true,
@@ -247,10 +246,6 @@ export default {
     user(newUser) {
       if (!newUser) return;
       this.fetchCommunities();
-      if (this.loginRequestedByPublish) {
-        this.loginRequestedByPublish = false;
-        return;
-      }
       //load saved draft
       this.runDraftLoader();
       //save draft in intervals
@@ -291,10 +286,11 @@ export default {
   },
   methods: {
     requestLogin() {
-      this.loginRequestedByPublish = true;
       this.showLoginModal = true;
       this.$nextTick(() => {
-        $('#loginModal').modal('show');
+        if (typeof $ !== 'undefined' && $.fn && typeof $.fn.modal === 'function') {
+          $('#loginModal').modal('show');
+        }
       });
     },
     handleLoginClosed() {
@@ -302,7 +298,6 @@ export default {
     },
     handleLoginSuccessful() {
       this.showLoginModal = false;
-      this.loginRequestedByPublish = false;
       this.fetchCommunities();
       this.startDraftSaver();
     },
@@ -978,15 +973,33 @@ export default {
       if (!this.user || !this.user.account) return; // the `user` watcher fires on logout too — don't deref a null user
       console.log('load stored draft');
       let data = this.$loadDraft(this.user.account.name, 'blog');
-      let jsonRes = JSON.parse(data);
+      let jsonRes = null;
+      try {
+        jsonRes = data ? JSON.parse(data) : null;
+      } catch (err) {
+        console.error('Unable to parse stored blog draft:', err);
+        return;
+      }
       console.log(jsonRes);
       if (jsonRes) {
-        this.title = jsonRes.title;
-        this.description = jsonRes.description || '';
-        this.body = jsonRes.body;
-        this.tags = jsonRes.tags;
-        this.benef_list = jsonRes.beneficiaries;
-        this.$refs['targetCommunity'].value = jsonRes.targetCommunity;
+        const editorIsEmpty = !this.$refs.editor || !this.$refs.editor.content;
+        const tagsAreEmpty = !this.$refs.tagItem || !Array.isArray(this.$refs.tagItem.items) || this.$refs.tagItem.items.length === 0;
+        const beneficiariesAreEmpty = !this.$refs.beneficiaryList || !Array.isArray(this.$refs.beneficiaryList.entries) || this.$refs.beneficiaryList.entries.length === 0;
+
+        if (!this.title && jsonRes.title) this.title = jsonRes.title;
+        if (!this.description && jsonRes.description) this.description = jsonRes.description;
+        if (!this.body && editorIsEmpty && jsonRes.body) {
+          this.body = jsonRes.body;
+        }
+        if (tagsAreEmpty && Array.isArray(jsonRes.tags)) {
+          this.tags = jsonRes.tags;
+        }
+        if (beneficiariesAreEmpty && Array.isArray(jsonRes.beneficiaries)) {
+          this.benef_list = jsonRes.beneficiaries;
+        }
+        if (this.$refs.targetCommunity && this.$refs.targetCommunity.value === '_blog_' && jsonRes.targetCommunity) {
+          this.$refs.targetCommunity.value = jsonRes.targetCommunity;
+        }
         console.log('data loaded');
       }
     },
