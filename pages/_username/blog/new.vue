@@ -939,6 +939,7 @@ export default {
       }
     },
     runDraftLoader() {
+      if (!this.user || !this.user.account) return; // the `user` watcher fires on logout too — don't deref a null user
       console.log('load stored draft');
       let data = this.$loadDraft(this.user.account.name, 'blog');
       let jsonRes = JSON.parse(data);
@@ -954,6 +955,7 @@ export default {
       }
     },
     runDraftSaver() {
+      if (!this.user || !this.user.account) return; // guard the 20s interval firing after logout
       console.log('runDraftSaver');
       //if we have any user input content, save to draft
       if (this.title != '' || this.body != '' && this.editPost.isNewPost) {
