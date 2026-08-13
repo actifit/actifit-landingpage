@@ -1,4 +1,7 @@
 module.exports = {
+  Short_preview_description: 'Descrição breve de pré-visualização',
+  preview_description_help: 'Isto aparece como o trecho abaixo do teu link no Google e nos cartões sociais.',
+  characters_used: 'caracteres usados',
   languages: 'Idiomas',
   afit_balance: 'Saldo AFIT',
   hive_balance: 'Saldo HIVE',

@@ -1,4 +1,7 @@
 module.exports = {
+  Short_preview_description: 'وصف معاينة قصير',
+  preview_description_help: 'يظهر هذا كمقتطف أسفل رابطك في Google وعلى بطاقات التواصل الاجتماعي.',
+  characters_used: 'حرفًا مستخدمًا',
   languages: 'اللغات',
   afit_balance: 'رصيد AFIT',
   hive_balance: 'رصيد HIVE',
