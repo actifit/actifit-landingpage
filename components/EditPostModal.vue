@@ -233,7 +233,7 @@ export default {
       if (this.editPost && !this.editPost.isNewPost) {
         const meta = this.$parseJsonMetadata(this.editPost.json_metadata)
         this.tags = meta && meta.hasOwnProperty('tags') ? meta.tags : [] // actifit as default tag, if no tags are present (for some reason)
-        this.description = (meta && typeof meta.description === 'string' ? meta.description : '').slice(0, 160) // preload existing description (string-only, capped) so editing can't wipe or corrupt it
+        this.description = (meta && typeof meta.description === 'string' ? meta.description : '') // preload existing description as-is (string-only) — never truncate; other apps (e.g. Ecency) write >160 and edits must preserve it
         this.max_accepted_payout = this.editPost.max_accepted_payout;
         this.percent_hbd = this.editPost.percent_hbd;
       }
@@ -693,7 +693,7 @@ export default {
       }
       meta.suppEdit = 'actifit.io';
       const desc = (this.description || '').trim()
-      if (desc) meta.description = desc.slice(0, 160)
+      if (desc) meta.description = desc
       else delete meta.description // don't publish an empty description key
 
       //append post specific data for new posts
