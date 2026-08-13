@@ -17,7 +17,7 @@
 			  <a href="/walletV1"><i>New Wallet Layout. Click to switch back to old version</i></a>
 		  </div>-->
 
-        <section class="wallet-hero text-left">
+        <section v-if="userTokensWallet >= 0" class="wallet-hero text-left">
           <div class="wallet-hero-main">
             <span class="wallet-eyebrow">{{ $t('account_est_val') }}</span>
             <div class="wallet-total" v-if="!loading && !walletDataRefreshing"><small>$</small>{{ totalAccountValue }}</div>
@@ -39,7 +39,7 @@
           </div>
         </section>
 
-        <nav class="wallet-quick-actions" aria-label="Wallet quick actions">
+        <nav v-if="!nonAuthUser" class="wallet-quick-actions" aria-label="Wallet quick actions">
           <button class="wallet-pill primary" type="button" v-on:click="transferFunds(cur_bchain)">
             <i class="fas fa-paper-plane"></i>{{ $t('TRANSFER_FUNDS_ACTION_TEXT') }}
           </button>

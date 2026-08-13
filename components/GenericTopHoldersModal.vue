@@ -142,11 +142,7 @@
         return this.selectedBalanceOption;
       },
       apiCoinType() {
-        if (this.balanceType === 'hp_vests') {
-          // HP (vests) always maps to coin-type 'HIVE' in the API
-          return 'HIVE';
-        }
-        return this.coinType; // For other coins, use the prop value
+        return this.coinType;
       }
     },
     mounted() {
