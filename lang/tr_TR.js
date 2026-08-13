@@ -1180,6 +1180,7 @@ module.exports = {
   DHF: 'Merkeziyetsiz Hive Fon',
   Explore: 'Keşfet',
   main_chain: 'Ana Zincir',
+  off_chain: 'Zincir dışı',
   secondary_chains: 'İkincil Zincirler',
   need_hive_account: 'Yukarıdaki en az Hive zincirini seçmeniz gerekir.',
   Hive_proposals: 'Hive Önerileri',

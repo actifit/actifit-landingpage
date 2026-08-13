@@ -1179,6 +1179,7 @@ module.exports = {
   DHF: '分散型Hive基金',
   Explore: '探索',
   main_chain: 'プライマリチェーン',
+  off_chain: 'オフチェーン',
   secondary_chains: 'セカンダリチェーン',
   need_hive_account: '少なくとも上記のHiveチェーンを選択する必要があります。',
   Hive_proposals: 'Hiveプロポーザル',
