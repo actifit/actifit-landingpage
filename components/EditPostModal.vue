@@ -233,7 +233,7 @@ export default {
       if (this.editPost && !this.editPost.isNewPost) {
         const meta = this.$parseJsonMetadata(this.editPost.json_metadata)
         this.tags = meta && meta.hasOwnProperty('tags') ? meta.tags : [] // actifit as default tag, if no tags are present (for some reason)
-        this.description = meta && meta.description ? meta.description : '' // preload existing preview description so editing doesn't wipe it
+        this.description = (meta && typeof meta.description === 'string' ? meta.description : '').slice(0, 160) // preload existing description (string-only, capped) so editing can't wipe or corrupt it
         this.max_accepted_payout = this.editPost.max_accepted_payout;
         this.percent_hbd = this.editPost.percent_hbd;
       }

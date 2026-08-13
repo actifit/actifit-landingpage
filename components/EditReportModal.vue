@@ -158,7 +158,7 @@
 
         const meta = JSON.parse(this.editReport.json_metadata)
         this.tags = meta.hasOwnProperty('tags') ? meta.tags.filter(tag => tag !== 'actifit') : [] // actifit as default tag, if no tags are present (for some reason)
-        this.description = meta && meta.description ? meta.description : '' // preload existing preview description so editing doesn't wipe it
+        this.description = (meta && typeof meta.description === 'string' ? meta.description : '').slice(0, 160) // preload existing description (string-only, capped) so editing can't wipe or corrupt it
 
         // refresh editor
         /*setTimeout(() => {
