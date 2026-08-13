@@ -117,6 +117,13 @@
           <CustomTextEditor ref="editor" :initialContent="body"></CustomTextEditor>
 
         </div>
+        <!-- preview description -> json_metadata.description (Google / social-card snippet) -->
+        <div class="form-group">
+          <label for="video-description" style="display: none">{{ $t('Short_preview_description') }}</label>
+          <input class="form-control acti-shadow" id="video-description" v-model="description" maxlength="160"
+            :placeholder="$t('Short_preview_description')" />
+          <small class="form-text text-muted">{{ description.length }}/160 {{ $t('characters_used') }} — {{ $t('preview_description_help') }}</small>
+        </div>
         <!--<div class="form-group">
 			<label for="image-upload">{{ $t('Upload_Images') }}</label><br/>
 			<input id="image-upload" type="file" v-on:change="uploadImage($event.target.files)" />
@@ -301,6 +308,7 @@ export default {
       title: '', // post title
       body: '', // post body
       tags: [], // post tags
+      description: '', // post preview description -> json_metadata.description
       loading: false, // loading animation in submit button
       loadingxcstkn: false,
       cur_bchain: 'HIVE', //bchain used to edit/save
@@ -400,9 +408,11 @@ export default {
       this.benef_list = (this.editPost ? this.editPost.beneficiaries : []);
       //console.log(this.benef_list);
       this.tags = [];
+      this.description = '';
       if (this.editPost && !this.editPost.isNewPost) {
         const meta = this.$parseJsonMetadata(this.editPost.json_metadata)
         this.tags = meta && meta.hasOwnProperty('tags') ? meta.tags : [] // actifit as default tag, if no tags are present (for some reason)
+        this.description = meta && meta.description ? meta.description : '' // preload existing preview description so editing doesn't wipe it
         this.max_accepted_payout = this.editPost.max_accepted_payout;
         this.percent_hbd = this.editPost.percent_hbd;
       }
@@ -887,6 +897,9 @@ export default {
         meta.app = 'actifit/0.5.0';
       }
       meta.suppEdit = 'actifit.io';
+      const desc = (this.description || '').trim()
+      if (desc) meta.description = desc.slice(0, 160)
+      else delete meta.description // don't publish an empty description key
 
       if (!vid) {
         vid = this.selVid;
