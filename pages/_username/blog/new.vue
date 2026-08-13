@@ -26,6 +26,13 @@
           <CustomTextEditor ref="editor" :initialContent="body"></CustomTextEditor>
 
         </div>
+        <!-- preview description -> json_metadata.description (Google / social-card snippet) -->
+        <div class="form-group">
+          <label for="post-description" style="display: none">{{ $t('Short_preview_description') }}</label>
+          <input class="form-control acti-shadow" id="post-description" v-model="description" maxlength="160"
+            :placeholder="$t('Short_preview_description')" />
+          <small class="form-text text-muted">{{ description.length }}/160 {{ $t('characters_used') }} — {{ $t('preview_description_help') }}</small>
+        </div>
         <!--<div class="form-group">
 			<label for="image-upload">{{ $t('Upload_Images') }}</label><br/>
 			<input id="image-upload" type="file" v-on:change="uploadImage($event.target.files)" />
@@ -184,6 +191,7 @@ export default {
       title: '', // post title
       body: '', // post body
       tags: [], // post tags
+      description: '', // post preview description -> json_metadata.description
       loading: false, // loading animation in submit button
       cur_bchain: 'HIVE', //bchain used to edit/save
       target_bchain: 'HIVE', //bchain to which edits will go
@@ -248,9 +256,11 @@ export default {
       this.benef_list = (this.editPost ? this.editPost.beneficiaries : []);
       //console.log(this.benef_list);
       this.tags = [];
+      this.description = '';
       if (this.editPost && !this.editPost.isNewPost) {
         const meta = this.$parseJsonMetadata(this.editPost.json_metadata)
         this.tags = meta.hasOwnProperty('tags') ? meta.tags : [] // actifit as default tag, if no tags are present (for some reason)
+        this.description = (meta && typeof meta.description === 'string' ? meta.description : '') // preload existing description as-is (string-only) — never truncate; other apps (e.g. Ecency) write >160 and edits must preserve it
         this.max_accepted_payout = this.editPost.max_accepted_payout;
         this.percent_hbd = this.editPost.percent_hbd;
       }
@@ -722,6 +732,9 @@ export default {
         meta.app = 'actifit/0.5.0';
       }
       meta.suppEdit = 'actifit.io';
+      const desc = (this.description || '').trim()
+      if (desc) meta.description = desc
+      else delete meta.description // don't publish an empty description key
 
       //append post specific data for new posts
       if (this.editPost.isNewPost) {
@@ -926,12 +939,14 @@ export default {
       }
     },
     runDraftLoader() {
+      if (!this.user || !this.user.account) return; // the `user` watcher fires on logout too — don't deref a null user
       console.log('load stored draft');
       let data = this.$loadDraft(this.user.account.name, 'blog');
       let jsonRes = JSON.parse(data);
       console.log(jsonRes);
       if (jsonRes) {
         this.title = jsonRes.title;
+        this.description = jsonRes.description || '';
         this.body = jsonRes.body;
         this.tags = jsonRes.tags;
         this.benef_list = jsonRes.beneficiaries;
@@ -940,11 +955,13 @@ export default {
       }
     },
     runDraftSaver() {
+      if (!this.user || !this.user.account) return; // guard the 20s interval firing after logout
       console.log('runDraftSaver');
       //if we have any user input content, save to draft
       if (this.title != '' || this.body != '' && this.editPost.isNewPost) {
         let data = {
           title: this.title,
+          description: this.description,
           body: this.$refs.editor.content,
           tags: this.$refs.tagItem.items,
           beneficiaries: this.$refs['beneficiaryList'].formattedEntries,

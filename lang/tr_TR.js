@@ -1,4 +1,7 @@
 module.exports = {
+  Short_preview_description: 'Kısa önizleme açıklaması',
+  preview_description_help: 'Bu, Google\'da ve sosyal kartlarda bağlantınızın altındaki snippet olarak görünür.',
+  characters_used: 'karakter kullanıldı',
   languages: 'Diller',
   afit_balance: 'AFIT Bakiyesi',
   hive_balance: 'HIVE Bakiyesi',

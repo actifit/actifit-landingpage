@@ -1,4 +1,7 @@
 module.exports = {
+  Short_preview_description: 'Courte description d\'aperçu',
+  preview_description_help: 'Ceci apparaît comme l\'extrait sous votre lien dans Google et sur les cartes des réseaux sociaux.',
+  characters_used: 'caractères utilisés',
   languages: 'Langues',
   afit_balance: 'Solde AFIT',
   hive_balance: 'Solde HIVE',

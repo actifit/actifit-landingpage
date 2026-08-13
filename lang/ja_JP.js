@@ -1,4 +1,7 @@
 module.exports = {
+  Short_preview_description: '短いプレビューの説明',
+  preview_description_help: 'これはGoogleの検索結果やソーシャルカードでリンクの下に表示されるスニペットになります。',
+  characters_used: '文字使用',
   languages: '言語',
   afit_balance: 'AFIT残高',
   hive_balance: 'HIVE残高',

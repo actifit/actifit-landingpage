@@ -1,4 +1,7 @@
 module.exports = {
+  Short_preview_description: 'Krótki opis podglądu',
+  preview_description_help: 'To pojawia się jako fragment pod Twoim linkiem w Google i na kartach społecznościowych.',
+  characters_used: 'użytych znaków',
   languages: 'Języki',
   afit_balance: 'Saldo AFIT',
   hive_balance: 'Saldo HIVE',

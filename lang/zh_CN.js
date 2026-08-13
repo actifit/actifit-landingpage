@@ -1,4 +1,7 @@
 module.exports = {
+  Short_preview_description: '简短预览描述',
+  preview_description_help: '这将显示为您的链接在 Google 和社交卡片下方的摘要。',
+  characters_used: '个字符已使用',
   languages: '语言',
   afit_balance: 'AFIT 余额',
   hive_balance: 'HIVE 余额',

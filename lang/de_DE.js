@@ -1,4 +1,7 @@
 module.exports = {
+  Short_preview_description: 'Kurze Vorschaubeschreibung',
+  preview_description_help: 'Dies erscheint als Snippet unter deinem Link bei Google und auf Social-Media-Karten.',
+  characters_used: 'Zeichen verwendet',
   languages: 'Sprachen',
   afit_balance: 'AFIT-Guthaben',
   hive_balance: 'HIVE-Guthaben',

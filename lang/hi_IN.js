@@ -1,4 +1,7 @@
 module.exports = {
+  Short_preview_description: 'संक्षिप्त पूर्वावलोकन विवरण',
+  preview_description_help: 'यह Google में आपके लिंक के नीचे और सोशल कार्ड पर स्निपेट के रूप में दिखता है।',
+  characters_used: 'वर्ण उपयोग किए गए',
   languages: 'भाषाएँ',
   afit_balance: 'AFIT बैलेंस',
   hive_balance: 'HIVE बैलेंस',

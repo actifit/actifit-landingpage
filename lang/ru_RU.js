@@ -1,4 +1,7 @@
 module.exports = {
+  Short_preview_description: 'Краткое описание для превью',
+  preview_description_help: 'Это отображается как фрагмент под вашей ссылкой в Google и на карточках соцсетей.',
+  characters_used: 'символов использовано',
   languages: 'Языки',
   afit_balance: 'Баланс AFIT',
   hive_balance: 'Баланс HIVE',
