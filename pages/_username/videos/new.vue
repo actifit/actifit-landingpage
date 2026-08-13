@@ -197,6 +197,7 @@
       </div>
     </div>
     <Footer />
+    <LoginModal v-if="showLoginModal" @close="handleLoginClosed" @login-successful="handleLoginSuccessful" />
     <client-only>
       <div>
         <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
@@ -225,6 +226,7 @@ import hive from '@hiveio/hive-js'
 import NavbarBrand from '~/components/NavbarBrand';
 import Footer from '~/components/Footer';
 import ListHeadingSection from '../../../components/ListHeadingSection.vue';
+import LoginModal from '~/components/LoginModal';
 
 //needed to fix incorrect duration when recording video
 import fixWebmDuration from 'fix-webm-duration';
@@ -286,7 +288,8 @@ export default {
     TagInput,
     Beneficiary,
     NotifyModal,
-    ListHeadingSection
+    ListHeadingSection,
+    LoginModal
   },
   data() {
     return {
@@ -317,6 +320,7 @@ export default {
       percent_hbd: 10000,
       max_accepted_payout: '1000000.000 HBD',
       communitySubs: [],
+      showLoginModal: false,
       editPost: {
         isNewPost: true,
       },
@@ -393,7 +397,8 @@ export default {
       await this.$store.dispatch('steemconnect/refreshUser');
       //this.reload += 1;
     },
-    user() {
+    user(newUser) {
+      if (!newUser) return;
       this.fetchCommunities();
       this.connectSession3S();
     },
@@ -431,6 +436,20 @@ export default {
     }
   },
   methods: {
+    requestLogin() {
+      this.showLoginModal = true;
+      this.$nextTick(() => {
+        if (typeof $ !== 'undefined' && $.fn && typeof $.fn.modal === 'function') {
+          $('#loginModal').modal('show');
+        }
+      });
+    },
+    handleLoginClosed() {
+      this.showLoginModal = false;
+    },
+    handleLoginSuccessful() {
+      this.showLoginModal = false;
+    },
 
     textualContent(){
       return this.editPost.isNewPost
@@ -786,6 +805,10 @@ export default {
       }
     },
     async save(vid) {
+      if (!this.user || !this.user.account || !this.user.account.name) {
+        this.requestLogin();
+        return;
+      }
       this.loading = true // start loading animation
       //only convert to array if not already array
       this.tags = this.$refs.tagItem.items;
