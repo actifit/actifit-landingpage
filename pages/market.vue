@@ -178,7 +178,7 @@
 				<!-- LEFT: browsable product list, grouped by category -->
 				<aside class="market-sidebar" :class="{ 'mobile-hidden': mobileShowDetail }"
 					:style="sidebarHeight ? { height: sidebarHeight + 'px' } : null">
-					<div class="sidebar-scroll">
+					<div class="sidebar-scroll" ref="sidebarScroll">
 						<div class="sidebar-group" :class="{
 							'sidebar-group-owned': group.type === 'bought' || group.type === 'activated',
 							'sidebar-group-saved': group.type === 'saved',
@@ -204,20 +204,22 @@
 								<i class="fas sidebar-group-chevron" :class="isSidebarGroupOpen(group.type) ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
 							</button>
 
-							<transition name="sidebar-collapse">
+							<transition
+								name="sidebar-collapse"
+								@before-enter="prepareSidebarGroupExpand"
+								@enter="expandSidebarGroupBody"
+								@after-enter="resetSidebarGroupBodyHeight"
+								@before-leave="prepareSidebarGroupCollapse"
+								@leave="collapseSidebarGroupBody"
+								@after-leave="resetSidebarGroupBodyHeight"
+							>
 								<div
-									v-if="isSidebarGroupOpen(group.type)"
+									v-show="isSidebarGroupOpen(group.type)"
 									class="sidebar-group-body"
 									:id="'sidebar-group-panel-' + group.type"
 									role="region"
 									:aria-labelledby="'sidebar-group-toggle-' + group.type"
 									:ref="'sidebarGroupBody-' + group.type"
-									@before-enter="prepareSidebarGroupExpand"
-									@enter="expandSidebarGroupBody"
-									@after-enter="resetSidebarGroupBodyHeight"
-									@before-leave="prepareSidebarGroupCollapse"
-									@leave="collapseSidebarGroupBody"
-									@after-leave="resetSidebarGroupBodyHeight"
 								>
 									<button type="button" class="sidebar-row" v-for="product in group.items" :key="product._id"
 										:class="{ active: selectedProductId === product._id }" @click="selectProduct(product)">
@@ -740,28 +742,59 @@ export default {
 		},
 
 		toggleSidebarGroup(groupType) {
-			const isOpen = this.isSidebarGroupOpen(groupType);
+			const isOpen = typeof this.sidebarGroupState[groupType] === 'undefined' ? true : this.sidebarGroupState[groupType];
 			const nextState = !isOpen;
-			const toggleEl = this.$refs[`sidebarGroupToggle-${groupType}`];
-			const bodyEl = this.$refs[`sidebarGroupBody-${groupType}`];
-			const shouldCompensate = Boolean(
-				isOpen &&
-				typeof window !== 'undefined' &&
-				toggleEl &&
-				typeof toggleEl.getBoundingClientRect === 'function' &&
-				toggleEl.getBoundingClientRect().bottom < 0 &&
-				bodyEl &&
-				typeof bodyEl.getBoundingClientRect === 'function'
-			);
+			const toggleEl = this.getVueRefElement(this.$refs[`sidebarGroupToggle-${groupType}`]);
+			const bodyEl = this.getVueRefElement(this.$refs[`sidebarGroupBody-${groupType}`]);
+			const scrollOwner = this.getSidebarScrollOwner();
+			const shouldCompensate = this.shouldCompensateSidebarCollapse(isOpen, toggleEl, bodyEl, scrollOwner);
 			const scrollDelta = shouldCompensate ? Math.ceil(bodyEl.getBoundingClientRect().height) : 0;
 
 			this.$set(this.sidebarGroupState, groupType, nextState);
 
 			if (shouldCompensate && scrollDelta > 0) {
 				this.$nextTick(() => {
+					if (scrollOwner && scrollOwner.el) {
+						scrollOwner.el.scrollTop = Math.max(0, scrollOwner.el.scrollTop - scrollDelta);
+						return;
+					}
 					window.scrollBy({ top: -scrollDelta, left: 0, behavior: 'auto' });
 				});
 			}
+		},
+
+		getVueRefElement(refValue) {
+			return Array.isArray(refValue) ? refValue[0] : refValue;
+		},
+
+		getSidebarScrollOwner() {
+			const scrollEl = this.getVueRefElement(this.$refs.sidebarScroll);
+			if (
+				scrollEl &&
+				typeof scrollEl.getBoundingClientRect === 'function' &&
+				scrollEl.scrollHeight > scrollEl.clientHeight
+			) {
+				return {
+					el: scrollEl,
+					top: scrollEl.getBoundingClientRect().top
+				};
+			}
+			return {
+				el: null,
+				top: 0
+			};
+		},
+
+		shouldCompensateSidebarCollapse(isOpen, toggleEl, bodyEl, scrollOwner) {
+			return Boolean(
+				isOpen &&
+				typeof window !== 'undefined' &&
+				toggleEl &&
+				typeof toggleEl.getBoundingClientRect === 'function' &&
+				bodyEl &&
+				typeof bodyEl.getBoundingClientRect === 'function' &&
+				toggleEl.getBoundingClientRect().bottom < scrollOwner.top
+			);
 		},
 
 		prepareSidebarGroupExpand(el) {
@@ -1613,7 +1646,6 @@ export default {
 	border: 1px solid #e3e8ec;
 	border-radius: 14px;
 	box-shadow: 0 5px 18px rgba(23, 30, 38, 0.05);
-	overflow-anchor: none;
 }
 
 .sidebar-scroll {
@@ -1622,7 +1654,6 @@ export default {
 	overflow-y: auto;
 	overscroll-behavior: contain;
 	padding: 8px 0 16px;
-	overflow-anchor: none;
 }
 
 .sidebar-group-title {
@@ -1693,7 +1724,6 @@ export default {
 
 .sidebar-group-body {
 	padding-bottom: 8px;
-	overflow-anchor: none;
 	overflow: hidden;
 }
 
