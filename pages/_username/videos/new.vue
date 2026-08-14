@@ -1567,6 +1567,10 @@ export default {
     },
 
     async connectSession3S() {
+      if (!this.user || !this.user.account || !this.user.account.name) {
+        this.requestLogin();
+        return;
+      }
       try {
         if (this.loadingxcstkn) {
           //do nothing, already loading
