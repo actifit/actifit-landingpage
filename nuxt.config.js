@@ -107,7 +107,7 @@ module.exports = {
     actiAppUrl: (process.env.ACTI_API_URL || 'http://localhost:3120/').replace(/\/?$/, '/'),
     actiAppBackUrl: (process.env.ACTI_API_BACK_URL || 'http://localhost:3120/').replace(/\/?$/, '/'),
     steemEngineRpc: process.env.NODE_ENV === 'development' ? '/steem-api/rpc' : 'https://api.steem-engine.net/rpc',
-    hiveEngineRpc: process.env.HIVE_ENG_RPC_NODE, //'https://api.hive-engine.com/rpc/', //https://herpc.actifit.io', //'https://mirrorengine.rishipanthee.com', //'https://engine.rishipanthee.com/',
+    hiveEngineRpc: process.env.HIVE_ENG_RPC_NODE || 'https://api.hive-engine.com/rpc/', //https://herpc.actifit.io', //'https://mirrorengine.rishipanthee.com', //'https://engine.rishipanthee.com/',
     steemEngineScot: process.env.NODE_ENV === 'development' ? '/steem-scot/' : 'https://scot-api.steem-engine.net/',
     hiveEngineChainId: 'ssc-mainnet-hive', //'ssc-testnet-hive', //
     hiveTestNetOn: false,

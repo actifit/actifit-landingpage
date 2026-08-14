@@ -1,4 +1,7 @@
 module.exports = {
+  Short_preview_description: 'Короткий опис для перегляду',
+  preview_description_help: 'Це відображається як фрагмент під вашим посиланням у Google та на картках соцмереж.',
+  characters_used: 'символів використано',
   languages: "Мови",
   afit_balance: "Баланс AFIT",
   hive_balance: "Баланс HIVE",
@@ -1177,6 +1180,7 @@ module.exports = {
   DHF: 'Децентралізований фонд Hive',
   Explore: 'Дослідити',
   main_chain: 'Основна мережа',
+  off_chain: 'Поза мережею',
   secondary_chains: 'Вторинні мережі',
   need_hive_account: 'Вам потрібно вибрати щонайменше мережу Hive вище.',
   Hive_proposals: 'Пропозиції Hive',

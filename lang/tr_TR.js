@@ -1,4 +1,7 @@
 module.exports = {
+  Short_preview_description: 'Kısa önizleme açıklaması',
+  preview_description_help: 'Bu, Google\'da ve sosyal kartlarda bağlantınızın altındaki snippet olarak görünür.',
+  characters_used: 'karakter kullanıldı',
   languages: 'Diller',
   afit_balance: 'AFIT Bakiyesi',
   hive_balance: 'HIVE Bakiyesi',
@@ -1177,6 +1180,7 @@ module.exports = {
   DHF: 'Merkeziyetsiz Hive Fon',
   Explore: 'Keşfet',
   main_chain: 'Ana Zincir',
+  off_chain: 'Zincir dışı',
   secondary_chains: 'İkincil Zincirler',
   need_hive_account: 'Yukarıdaki en az Hive zincirini seçmeniz gerekir.',
   Hive_proposals: 'Hive Önerileri',

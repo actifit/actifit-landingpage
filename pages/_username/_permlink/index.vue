@@ -344,7 +344,9 @@ export default {
         desc = desc.substr(0, 140) + '...';
       }
       //console.log(desc);
-      meta_spec.desc = desc;
+      //prefer the author's on-chain preview description (json_metadata.description); fall back to the body-derived snippet
+      const onchainDesc = (post_meta && typeof post_meta.description === 'string') ? post_meta.description.trim() : '';
+      meta_spec.desc = onchainDesc || desc;
       return meta_spec;
     } catch (preerr) {
       console.log(preerr);
