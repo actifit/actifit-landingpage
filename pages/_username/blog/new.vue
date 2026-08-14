@@ -113,6 +113,7 @@
       </div>
     </div>
     <Footer />
+    <LoginModal v-if="showLoginModal" @close="handleLoginClosed" @login-successful="handleLoginSuccessful" />
     <client-only>
       <div>
         <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
@@ -137,6 +138,7 @@ import hive from '@hiveio/hive-js'
 import NavbarBrand from '~/components/NavbarBrand';
 import Footer from '~/components/Footer';
 import ListHeadingSection from '~/components/ListHeadingSection';
+import LoginModal from '~/components/LoginModal';
 
 /* handles outside clicks for the picker */
 /* begin */
@@ -184,7 +186,8 @@ export default {
     CustomTextEditor,
     TagInput,
     Beneficiary,
-    MemePickerModal
+    MemePickerModal,
+    LoginModal
   },
   data() {
     return {
@@ -201,6 +204,8 @@ export default {
       percent_hbd: 10000,
       max_accepted_payout: '1000000.000 HBD',
       communitySubs: [],
+      showLoginModal: false,
+      draftSaveInterval: null,
       editPost: {
         isNewPost: true,
       }
@@ -238,12 +243,13 @@ export default {
       await this.$store.dispatch('steemconnect/refreshUser');
       //this.reload += 1;
     },
-    user() {
+    user(newUser) {
+      if (!newUser) return;
       this.fetchCommunities();
       //load saved draft
       this.runDraftLoader();
       //save draft in intervals
-      setInterval(this.runDraftSaver, 20000);
+      this.startDraftSaver();
     },
     editPost() {
       //enforce new post till and if we implement full screen edit
@@ -279,6 +285,27 @@ export default {
     }
   },
   methods: {
+    requestLogin() {
+      this.showLoginModal = true;
+      this.$nextTick(() => {
+        if (typeof $ !== 'undefined' && $.fn && typeof $.fn.modal === 'function') {
+          $('#loginModal').modal('show');
+        }
+      });
+    },
+    handleLoginClosed() {
+      this.showLoginModal = false;
+    },
+    handleLoginSuccessful() {
+      this.showLoginModal = false;
+      this.fetchCommunities();
+      this.startDraftSaver();
+    },
+    startDraftSaver() {
+      if (!this.draftSaveInterval) {
+        this.draftSaveInterval = setInterval(this.runDraftSaver, 20000);
+      }
+    },
     insertMemeIntoEditor (payload) {
       // payload may be a plain url (legacy) or the enriched object from the widget
       const imageUrl = typeof payload === 'string' ? payload : (payload && payload.imageUrl)
@@ -613,6 +640,10 @@ export default {
       }
     },
     async save() {
+      if (!this.user || !this.user.account || !this.user.account.name) {
+        this.requestLogin();
+        return;
+      }
       this.loading = true // start loading animation
       //only convert to array if not already array
       this.tags = this.$refs.tagItem.items;
@@ -942,15 +973,33 @@ export default {
       if (!this.user || !this.user.account) return; // the `user` watcher fires on logout too — don't deref a null user
       console.log('load stored draft');
       let data = this.$loadDraft(this.user.account.name, 'blog');
-      let jsonRes = JSON.parse(data);
+      let jsonRes = null;
+      try {
+        jsonRes = data ? JSON.parse(data) : null;
+      } catch (err) {
+        console.error('Unable to parse stored blog draft:', err);
+        return;
+      }
       console.log(jsonRes);
       if (jsonRes) {
-        this.title = jsonRes.title;
-        this.description = jsonRes.description || '';
-        this.body = jsonRes.body;
-        this.tags = jsonRes.tags;
-        this.benef_list = jsonRes.beneficiaries;
-        this.$refs['targetCommunity'].value = jsonRes.targetCommunity;
+        const editorIsEmpty = !this.$refs.editor || !this.$refs.editor.content;
+        const tagsAreEmpty = !this.$refs.tagItem || !Array.isArray(this.$refs.tagItem.items) || this.$refs.tagItem.items.length === 0;
+        const beneficiariesAreEmpty = !this.$refs.beneficiaryList || !Array.isArray(this.$refs.beneficiaryList.entries) || this.$refs.beneficiaryList.entries.length === 0;
+
+        if (!this.title && jsonRes.title) this.title = jsonRes.title;
+        if (!this.description && jsonRes.description) this.description = jsonRes.description;
+        if (!this.body && editorIsEmpty && jsonRes.body) {
+          this.body = jsonRes.body;
+        }
+        if (tagsAreEmpty && Array.isArray(jsonRes.tags)) {
+          this.tags = jsonRes.tags;
+        }
+        if (beneficiariesAreEmpty && Array.isArray(jsonRes.beneficiaries)) {
+          this.benef_list = jsonRes.beneficiaries;
+        }
+        if (this.$refs.targetCommunity && this.$refs.targetCommunity.value === '_blog_' && jsonRes.targetCommunity) {
+          this.$refs.targetCommunity.value = jsonRes.targetCommunity;
+        }
         console.log('data loaded');
       }
     },
@@ -980,7 +1029,12 @@ export default {
       //load saved draft
       this.runDraftLoader();
       //save draft in intervals
-      setInterval(this.runDraftSaver, 20000);
+      this.startDraftSaver();
+    }
+  },
+  beforeDestroy() {
+    if (this.draftSaveInterval) {
+      clearInterval(this.draftSaveInterval);
     }
   }
 }
