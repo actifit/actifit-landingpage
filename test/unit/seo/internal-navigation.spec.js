@@ -6,9 +6,13 @@ describe('internal navigation', () => {
   const conductPage = fs.readFileSync('pages/conduct.vue', 'utf8')
   const homePage = fs.readFileSync('pages/index.vue', 'utf8')
 
+  // Only assert on links a crawler can actually reach. The composer links
+  // (/blog/new, /videos/new) sit behind v-if="user" and are locale-aware via
+  // localePath(), so they are neither statically greppable nor visible to a
+  // logged-out crawler -- asserting on them tested nothing.
   it.each([
-    '/blog/new',
-    '/videos/new'
+    '/activity',
+    '/market'
   ])('links to %s from the primary navigation', route => {
     expect(primaryNavigation).toContain(`href="${route}"`)
   })

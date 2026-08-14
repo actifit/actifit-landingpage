@@ -1,4 +1,7 @@
 module.exports = {
+  Short_preview_description: 'Krótki opis podglądu',
+  preview_description_help: 'To pojawia się jako fragment pod Twoim linkiem w Google i na kartach społecznościowych.',
+  characters_used: 'użytych znaków',
   languages: 'Języki',
   afit_balance: 'Saldo AFIT',
   hive_balance: 'Saldo HIVE',
@@ -1177,6 +1180,7 @@ module.exports = {
   DHF: 'Zdecentralizowany Fundusz Hive',
   Explore: 'Odkrywaj',
   main_chain: 'Główny łańcuch',
+  off_chain: 'Poza łańcuchem',
   secondary_chains: 'Poboczne łańcuchy',
   need_hive_account: 'Musisz wybrać co najmniej łańcuch Hive powyżej.',
   Hive_proposals: 'Propozycje Hive',
