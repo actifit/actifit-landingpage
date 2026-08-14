@@ -29,7 +29,8 @@ export default {
   },
   created () {
 	if ((typeof this.$route.params !== 'undefined') && (typeof this.$route.params.tag !== 'undefined') &&(typeof this.$route.params.username !== 'undefined') && (typeof this.$route.params.permlink !== 'undefined') ) {
-	  this.$router.push({ path: "/"+this.$route.params.username+"/"+this.$route.params.permlink })
+	  // localePath keeps the active locale prefix (e.g. /de) — a raw path drops it and forces English
+	  this.$router.push(this.localePath("/"+this.$route.params.username+"/"+this.$route.params.permlink))
 	}else{
 		this.errorDisplay = this.$t('error_post_not_found');
 	}

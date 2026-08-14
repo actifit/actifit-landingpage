@@ -1,6 +1,15 @@
 <template>
-  <div v-if="visible && $route.path !== '/signup'" id="voteProposalModal" ref="voteProposalModal" :class="{ 'visible': visible }"
-    class="modal fade show" tabindex="-1" role="dialog" data-backdrop="false">
+  <div
+    v-if="visible && $route.path !== '/signup'"
+    id="voteProposalModal"
+    ref="voteProposalModal"
+    :class="{ 'visible': visible }"
+    :style="modalStyle"
+    class="modal fade show"
+    tabindex="-1"
+    role="dialog"
+    data-backdrop="false"
+  >
     <div><!-- class="modal-dialog" role="document" -->
       <div class="modal-content">
         <div class="modal-header p-1">
@@ -31,6 +40,10 @@ export default {
     propUrl:{
       type: String,
       default: 'https://peakd.com/proposals/337',
+    },
+    bottomOffset: {
+      type: Number,
+      default: 20,
     }
   },
   data() {
@@ -47,6 +60,12 @@ export default {
   computed: {
     ...mapGetters('steemconnect', ['user']),
     ...mapGetters(['proposalVoters']),
+
+    modalStyle() {
+      return {
+        bottom: `${this.bottomOffset}px`,
+      };
+    },
   },
   methods: {
     closeModal() {
@@ -101,7 +120,6 @@ export default {
 .modal {
   /*display: block;*/
   position: fixed;
-  bottom: 20px;
   right: 20px;
   background-color: #fff;
   border: 1px solid #ccc;
@@ -113,6 +131,29 @@ export default {
   max-width: 330px;
   max-height: 230px;
   height: auto;
+}
+
+@media (max-width: 576px) {
+  .modal {
+    left: 12px;
+    right: 12px;
+    width: auto;
+    max-width: none;
+    max-height: calc(100vh - 220px);
+    padding: 12px;
+  }
+
+  .modal-content .text-right {
+    display: flex;
+    gap: 8px;
+  }
+
+  .modal-content .text-right .btn,
+  .modal-content .text-right button {
+    flex: 1 1 0;
+    width: auto;
+    margin: 0 !important;
+  }
 }
 
 .modal-content button {

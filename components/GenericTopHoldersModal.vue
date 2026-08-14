@@ -26,7 +26,7 @@
           <div v-else-if="!holdersList || holdersList.length === 0" class="text-center text-info">
             <p>{{ $t('No_data_found_for_top_holders') }}</p>
           </div>
-          <table v-else class="table table-hover">
+          <table v-else class="table table-hover holders-table">
             <thead class="text-brand">
               <tr>
                 <th scope="col">{{ $t('Rank') }}</th>
@@ -43,7 +43,7 @@
                     @{{ topHolder.account }}
                   </a>
                   <!-- If account is null (or the string 'null'), display 'null' -->
-                  <span v-else>null</span>
+                  <span v-else class="null-account">null</span>
                 </td>
                 <td>{{ formatBalance(topHolder.value) }} {{ displayCoinSymbol }}</td>
               </tr>
@@ -142,11 +142,7 @@
         return this.selectedBalanceOption;
       },
       apiCoinType() {
-        if (this.balanceType === 'hp_vests') {
-          // HP (vests) always maps to coin-type 'HIVE' in the API
-          return 'HIVE';
-        }
-        return this.coinType; // For other coins, use the prop value
+        return this.coinType;
       }
     },
     mounted() {
@@ -182,7 +178,7 @@
             },
           });
 
-          this.holdersList = response.data.map(holder => {
+          this.holdersList = (response.data.holders_result || []).map(holder => {
             let processedValue = parseFloat(holder.value);
 
             if (!isNaN(processedValue) && this.divisor) {
@@ -237,9 +233,19 @@
     width: 40px;
     height: 40px;
   }
+  .null-account {
+    color: #adb5bd;
+  }
   @media screen and (max-width: 600px){
     .table td, .table th{
       padding: .3rem;
     }
+  }
+</style>
+
+<style>
+  .dark-mode .holders-table tbody tr:not(.bg-danger) td:first-child,
+  .dark-mode .holders-table tbody tr:not(.bg-danger) td:last-child {
+    color: #8fe3b0;
   }
 </style>

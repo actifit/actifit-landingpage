@@ -157,7 +157,7 @@
                 class="fas fa-running text-brand"></i> {{ $t('My_Activity') }}</NuxtLink>
             <NuxtLink class="dropdown-item" :to="localePath('/' + user.account.name + '/blog')"><i
                 class="fa-solid fa-pen-to-square text-brand"></i> {{ $t('My_Blog') }}</NuxtLink>
-            <NuxtLink class="dropdown-item" :to="localePath('/blog/new')"><i
+            <NuxtLink class="dropdown-item" :to="localePath('/' + user.account.name + '/blog/new')"><i
                 class="fa-solid fa-plus-square text-brand"></i> {{ $t('New_Blog') }}</NuxtLink>
             <NuxtLink class="dropdown-item" :to="localePath('/' + user.account.name + '/videos')"><i
                 class="fa-solid fa-video text-brand"></i> {{ $t('My_Videos') }}</NuxtLink>
