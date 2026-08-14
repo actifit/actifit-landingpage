@@ -422,7 +422,7 @@ export default {
 			return [this.currentFilter, this.currentCurrency, this.user ? this.currentStatus : ''].filter(Boolean).length;
 		},
 		shouldAutoExpandSidebarGroups() {
-			return Boolean((this.searchQuery || '').trim()) || this.activeFilterCount > 0;
+			return Boolean((this.searchQuery || '').trim());
 		},
 		sidebarGroupKeys() {
 			return (Array.isArray(this.groupedProducts) ? this.groupedProducts : []).map(group => group.type);
