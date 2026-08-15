@@ -27,18 +27,18 @@
             </a>
           </li>
 
-          <li class="nav-item btn btn-brand m-1 nav-item-border" :title="$t('New_Blog')">
+          <li class="nav-item btn btn-brand m-1 nav-item-border" :title="$t('New_Blog')" v-if="user">
             <a class="nav-link text-white d-flex align-items-center justify-content-center w-100 h-100"
-               href="/blog/new"
-               @click.prevent="$router.push('/blog/new'); closeMenu()">
+               :href="localePath('/@' + user.account.name + '/blog/new')"
+               @click.prevent="$router.push(localePath('/@' + user.account.name + '/blog/new')); closeMenu()">
               <i class="fas fa-pen-to-square text-white"></i><span>{{ $t('New_Blog') }}</span>
             </a>
           </li>
 
-          <li class="nav-item btn btn-brand m-1 nav-item-border" :title="$t('Create_new_vid')">
+          <li class="nav-item btn btn-brand m-1 nav-item-border" :title="$t('Create_new_vid')" v-if="user">
             <a class="nav-link text-white d-flex align-items-center justify-content-center w-100 h-100"
-               href="/videos/new"
-               @click.prevent="$router.push('/videos/new'); closeMenu()">
+               :href="localePath('/@' + user.account.name + '/videos/new')"
+               @click.prevent="$router.push(localePath('/@' + user.account.name + '/videos/new')); closeMenu()">
               <i class="fas fa-video text-white"></i><span>{{ $t('Create_new_vid') }}</span>
             </a>
           </li>
@@ -103,8 +103,12 @@ href="#news"
 // ... (your script remains the same) ...
 import UserMenu from '~/components/UserMenu';
 import LoginModal from '~/components/LoginModal';
+import { mapGetters } from 'vuex';
 
 export default {
+  computed: {
+    ...mapGetters('steemconnect', ['user']),
+  },
   data() {
     return {
       isModalOpen: false,

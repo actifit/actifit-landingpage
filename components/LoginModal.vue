@@ -14,7 +14,7 @@
             <div class="form home-card mx-auto p-3">
               <!-- The .acti-shadow class in the template will now work correctly -->
               <div class="form-group login-form-centered">
-                <input type="text" id="username" name="username" :placeholder="$t('Username')" ref="username" class="form-control form-control-lg m-1 col-md-8 acti-shadow">
+                <input type="text" id="username" name="username" autocomplete="username" :placeholder="$t('Username')" ref="username" class="form-control form-control-lg m-1 col-md-8 acti-shadow">
                 <button v-on:click="loginKeychain" class="btn btn-brand keychain-btn login-stdd-btn m-1"></button>
                 <button v-on:click="loginHiveauth" class="btn hiveauth-btn acti-shadow login-stdd-btn m-1"></button>
                 <transition name="fade">
@@ -25,7 +25,7 @@
                     </a>
                   </div>
                 </transition>
-                <input type="password" id="ppkey" name="ppkey" ref="ppkey" :placeholder="$t('Ppkey')"  class="form-control form-control-lg m-1 col-md-8 acti-shadow">
+                <input type="password" id="ppkey" name="ppkey" autocomplete="current-password" ref="ppkey" :placeholder="$t('Ppkey')"  class="form-control form-control-lg m-1 col-md-8 acti-shadow">
                 <button v-on:click="proceedLogin" class="btn btn-brand login-stdd-btn m-1"><b>{{ $t('Login') }}</b><i class="fas fa-spin fa-spinner text-white" v-if="login_in_progress"></i></button>
                 <div class="form-control-lg ml-0 mt-2">
                   <a href="/password" class="small">{{ $t('forgot_my_posting_key') }}</a>
@@ -144,10 +144,10 @@
       generateToken (multip) { let passString = ''; for (let i=0;i<multip;i++){ passString += Math.random().toString(36).substr(2, 13); } return passString; },
       onExpiredCaptcha () { this.captchaValid = false; },
       setHiveauthLoginStatus (json){
-        let acct_data = json.HIVE; let userSC = new Object(); userSC.account = acct_data; this.is_logged_in = true; this.$store.commit('setStdLoginUser', true); localStorage.setItem('acti_login_method', 'hiveauth'); localStorage.setItem('access_token', this.hiveauth_token); localStorage.setItem('expires', this.hiveauth_expire); localStorage.setItem('key', this.hiveauth_key); localStorage.setItem('std_login', true); localStorage.setItem('std_login_name', userSC.account.name); this.$store.commit('steemconnect/login', userSC); this.closeModal(); this.resetForm(); this.$store.dispatch('steemconnect/refreshUser'); this.$store.dispatch('fetchModerators');
+        let acct_data = json.HIVE; let userSC = new Object(); userSC.account = acct_data; this.is_logged_in = true; this.$store.commit('setStdLoginUser', true); localStorage.setItem('acti_login_method', 'hiveauth'); localStorage.setItem('access_token', this.hiveauth_token); localStorage.setItem('expires', this.hiveauth_expire); localStorage.setItem('key', this.hiveauth_key); localStorage.setItem('std_login', true); localStorage.setItem('std_login_name', userSC.account.name); this.$store.commit('steemconnect/login', userSC); this.closeModal(); this.resetForm(); this.$store.dispatch('steemconnect/refreshUser'); this.$store.dispatch('fetchModerators'); this.$emit('login-successful');
       },
       setKeychainLoginStatus (json){
-        if (json && json.success && json.token && json.userdata){ const recaptcha = this.$recaptchaInstance; recaptcha.hideBadge(); let acct_data = json.userdata; let userSC = new Object(); userSC.account = acct_data; this.is_logged_in = true; this.$store.commit('setStdLoginUser', true); localStorage.setItem('access_token', json.token); localStorage.setItem('std_login', true); localStorage.setItem('std_login_name', userSC.account.name); localStorage.setItem('acti_login_method', 'keychain'); this.$store.commit('steemconnect/login', userSC); this.closeModal(); this.resetForm(); this.$store.dispatch('steemconnect/refreshUser'); this.$store.dispatch('fetchModerators'); }else{ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('login_error'); return; }
+        if (json && json.success && json.token && json.userdata){ const recaptcha = this.$recaptchaInstance; recaptcha.hideBadge(); let acct_data = json.userdata; let userSC = new Object(); userSC.account = acct_data; this.is_logged_in = true; this.$store.commit('setStdLoginUser', true); localStorage.setItem('access_token', json.token); localStorage.setItem('std_login', true); localStorage.setItem('std_login_name', userSC.account.name); localStorage.setItem('acti_login_method', 'keychain'); this.$store.commit('steemconnect/login', userSC); this.closeModal(); this.resetForm(); this.$store.dispatch('steemconnect/refreshUser'); this.$store.dispatch('fetchModerators'); this.$emit('login-successful'); }else{ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('login_error'); return; }
       },
       setUserLoginStatus (json, postingKey) {
         this.is_logged_in = json.success; if (json.success && json.token){ const recaptcha = this.$recaptchaInstance; recaptcha.hideBadge(); localStorage.setItem('actiToken', json.token); let userSC = new Object(); userSC.account = json.userdata; this.$store.commit('setStdLoginUser', true); this.$store.commit('setChatPostingKey', postingKey); localStorage.setItem('access_token', json.token); localStorage.setItem('std_login', true); localStorage.setItem('std_login_name', userSC.account.name); localStorage.setItem('acti_login_method', ''); this.$store.commit('steemconnect/login', userSC); this.closeModal(); this.resetForm(); this.$store.dispatch('steemconnect/refreshUser'); this.$store.dispatch('fetchModerators'); this.$emit('login-successful'); }else{ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('login_error'); }
