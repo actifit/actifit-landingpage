@@ -376,6 +376,8 @@ export default {
 			mobileListScrollY: 0,
 			sidebarHeight: null,
 			sidebarGroupState: {},
+			sidebarGroupStateSnapshot: null,
+			sidebarGroupUserToggles: {},
 			filterOptions: [
 				{ value: '', labelKey: 'All' },
 				{ value: 'ingame', labelKey: 'Game' },
@@ -422,7 +424,7 @@ export default {
 			return [this.currentFilter, this.currentCurrency, this.user ? this.currentStatus : ''].filter(Boolean).length;
 		},
 		shouldAutoExpandSidebarGroups() {
-			return Boolean((this.searchQuery || '').trim());
+			return Boolean((this.searchQuery || '').trim()) || this.activeFilterCount > 0;
 		},
 		sidebarGroupKeys() {
 			return (Array.isArray(this.groupedProducts) ? this.groupedProducts : []).map(group => group.type);
@@ -503,6 +505,19 @@ export default {
 		currentStatus: 'ensureSelection',
 		currentCurrency: 'ensureSelection',
 		searchQuery: 'ensureSelection',
+		shouldAutoExpandSidebarGroups: {
+			handler(shouldExpand) {
+				if (shouldExpand) {
+					this.sidebarGroupStateSnapshot = { ...this.sidebarGroupState };
+					this.sidebarGroupUserToggles = {};
+					this.sidebarGroupKeys.forEach(groupType => this.$set(this.sidebarGroupState, groupType, true));
+				} else if (this.sidebarGroupStateSnapshot) {
+					this.sidebarGroupState = { ...this.sidebarGroupStateSnapshot };
+					this.sidebarGroupStateSnapshot = null;
+					this.sidebarGroupUserToggles = {};
+				}
+			}
+		},
 		groupedProducts: {
 			handler: 'syncSidebarGroups',
 			immediate: true
@@ -732,9 +747,6 @@ export default {
 		},
 
 		isSidebarGroupOpen(groupType) {
-			if (this.shouldAutoExpandSidebarGroups) {
-				return true;
-			}
 			if (typeof this.sidebarGroupState[groupType] === 'undefined') {
 				return true;
 			}
@@ -744,21 +756,23 @@ export default {
 		toggleSidebarGroup(groupType) {
 			const isOpen = typeof this.sidebarGroupState[groupType] === 'undefined' ? true : this.sidebarGroupState[groupType];
 			const nextState = !isOpen;
+			if (this.shouldAutoExpandSidebarGroups) {
+				this.$set(this.sidebarGroupUserToggles, groupType, true);
+			}
 			const toggleEl = this.getVueRefElement(this.$refs[`sidebarGroupToggle-${groupType}`]);
 			const bodyEl = this.getVueRefElement(this.$refs[`sidebarGroupBody-${groupType}`]);
 			const scrollOwner = this.getSidebarScrollOwner();
 			const shouldCompensate = this.shouldCompensateSidebarCollapse(isOpen, toggleEl, bodyEl, scrollOwner);
-			const scrollDelta = shouldCompensate ? Math.ceil(bodyEl.getBoundingClientRect().height) : 0;
+			const initialHeight = shouldCompensate ? bodyEl.getBoundingClientRect().height : 0;
+			const initialScrollTop = shouldCompensate
+				? (scrollOwner && scrollOwner.el ? scrollOwner.el.scrollTop : window.pageYOffset)
+				: 0;
 
 			this.$set(this.sidebarGroupState, groupType, nextState);
 
-			if (shouldCompensate && scrollDelta > 0) {
+			if (shouldCompensate) {
 				this.$nextTick(() => {
-					if (scrollOwner && scrollOwner.el) {
-						scrollOwner.el.scrollTop = Math.max(0, scrollOwner.el.scrollTop - scrollDelta);
-						return;
-					}
-					window.scrollBy({ top: -scrollDelta, left: 0, behavior: 'auto' });
+					this.compensateSidebarCollapse(bodyEl, scrollOwner, initialHeight, initialScrollTop);
 				});
 			}
 		},
@@ -795,6 +809,24 @@ export default {
 				typeof bodyEl.getBoundingClientRect === 'function' &&
 				toggleEl.getBoundingClientRect().bottom < scrollOwner.top
 			);
+		},
+
+		compensateSidebarCollapse(bodyEl, scrollOwner, initialHeight, initialScrollTop) {
+			const adjustScroll = () => {
+				const currentHeight = bodyEl.getBoundingClientRect().height;
+				const scrollDelta = Math.max(0, initialHeight - currentHeight);
+				if (scrollOwner && scrollOwner.el) {
+					scrollOwner.el.scrollTop = Math.max(0, initialScrollTop - scrollDelta);
+				} else {
+					window.scrollTo({ top: Math.max(0, initialScrollTop - scrollDelta), behavior: 'auto' });
+				}
+
+				if (currentHeight > 0) {
+					requestAnimationFrame(adjustScroll);
+				}
+			};
+
+			requestAnimationFrame(adjustScroll);
 		},
 
 		prepareSidebarGroupExpand(el) {
@@ -840,7 +872,7 @@ export default {
 		syncSidebarGroups() {
 			const groupKeys = this.sidebarGroupKeys;
 			groupKeys.forEach(groupType => {
-				if (typeof this.sidebarGroupState[groupType] === 'undefined') {
+				if ((this.shouldAutoExpandSidebarGroups && !this.sidebarGroupUserToggles[groupType]) || typeof this.sidebarGroupState[groupType] === 'undefined') {
 					this.$set(this.sidebarGroupState, groupType, true);
 				}
 			});
@@ -1652,6 +1684,8 @@ export default {
 	height: 100%;
 	overflow-x: hidden;
 	overflow-y: auto;
+	/* Manual collapse compensation owns scroll position while group heights animate. */
+	overflow-anchor: none;
 	overscroll-behavior: contain;
 	padding: 8px 0 16px;
 }
