@@ -1085,6 +1085,11 @@ export default {
   padding: 0 !important; /* SafeRemarkable default padding overridden; spacing handled by .cmt-card */
 }
 
+.cmt-body img {
+  max-width: 100%;
+  height: auto;
+}
+
 .cmt-editor {
   margin-top: 12px;
 }

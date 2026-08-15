@@ -13,9 +13,9 @@
       <a href="#" class="post-detail-action" :class="{ 'post-detail-action--active': hasVoted }" @click.prevent="$emit('vote-prompt')" :data-toggle="voteModalTarget ? 'modal' : null" :data-target="voteModalTarget" :title="$t('votes')">
         <i class="far fa-thumbs-up"></i> {{ voteCount }}
       </a>
-      <a href="#" class="post-detail-action" v-if="showComments && !commentsDisabled" :class="{ 'post-detail-action--active': commentsActive }" @click.prevent="$emit('open-modal')" :data-toggle="modalTarget ? 'modal' : null" :data-target="modalTarget" :aria-expanded="commentsActive ? 'true' : 'false'" :title="commentsTitle || $t('comments')">
+      <button type="button" class="post-detail-action" v-if="showComments && !commentsDisabled" :class="{ 'post-detail-action--active': commentsActive }" @click="$emit('open-modal')" :data-toggle="modalTarget ? 'modal' : null" :data-target="modalTarget" :aria-expanded="commentsActive ? 'true' : 'false'" :title="commentsTitle || $t('comments')">
         <i class="far fa-comments"></i> {{ commentsCount !== null ? commentsCount : cardData.children }}
-      </a>
+      </button>
       <span v-else-if="showComments" class="post-detail-action post-detail-action--static">
         <i class="far fa-comments"></i> {{ commentsCount !== null ? commentsCount : cardData.children }}
       </span>
@@ -80,6 +80,9 @@ export default {
   display: inline-flex;
   align-items: center;
   gap: 5px;
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: var(--post-footer-muted, #333);
   text-decoration: none;
   transition: color .15s ease;
@@ -93,6 +96,10 @@ export default {
 }
 .post-detail-action--static:hover {
   color: inherit;
+}
+.post-detail-action:focus-visible {
+  outline: 2px solid var(--post-footer-brand, #ff112d);
+  outline-offset: 3px;
 }
 @media (max-width: 767px) {
   .post-detail-footer__actions,
