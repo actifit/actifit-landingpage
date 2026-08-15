@@ -83,6 +83,7 @@ function mountReportModal(reportOverrides = {}, user = null) {
       $cleanBody: (value) => value,
       $getTimeDifference: () => '1 hour ago',
       $fetchReportTags: jest.fn(() => ''),
+      $safeUrl: (value) => value,
       $reblog: jest.fn(),
       $notify: jest.fn(),
       $uuidv4: jest.fn(() => 'uuid-1')

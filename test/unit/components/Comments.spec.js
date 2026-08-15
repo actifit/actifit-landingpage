@@ -5,10 +5,11 @@ describe('Comments nested replies', () => {
 
   it('keeps top-level comments visible and nests opened replies inside their parent card', () => {
     expect(component).toContain('nestedRepliesOpen: this.depth === 1')
-    expect(component).toContain('@click="nestedRepliesOpen = !nestedRepliesOpen"')
+    expect(component).toContain('<CardActions')
+    expect(component).toContain('@open-modal="nestedRepliesOpen = !nestedRepliesOpen"')
     expect(component).toContain('v-if="nestedRepliesOpen" class="cmt-nested-replies"')
     expect(component).toContain('v-if="depth === 0"')
-    expect(component).toContain(':aria-expanded="nestedRepliesOpen ? \'true\' : \'false\'"')
+    expect(component).toContain(':comments-active="nestedRepliesOpen"')
     expect(component).toContain('border-left: 2px solid var(--cmt-thread-rail);')
   })
 

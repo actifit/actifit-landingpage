@@ -69,8 +69,10 @@
                 </div>
               </div>
 
-              <SafeRemarkable class="col-md-12" ref="remarkableContent" :source="proxiedBody"
-                :options="{ 'html': true, 'breaks': true, 'typographer': true }"></SafeRemarkable>
+              <div class="post-body col-md-12">
+                <SafeRemarkable ref="remarkableContent" :source="proxiedBody"
+                  :options="{ 'html': true, 'breaks': true, 'typographer': true }"></SafeRemarkable>
+              </div>
 
 
               <div class="col-md-12 post-detail-footer" id="main-footer">
@@ -89,6 +91,9 @@
 
                   <div class="post-detail-footer__payout">
                     <span class="post-detail-payout" :title="postPayout">
+                      <span :title="afitReward + ' ' + $t('AFIT_Token')">
+                        <i class="fas fa-running text-brand mr-1"></i>{{ afitReward }} {{ $t('AFIT_Token') }}
+                      </span>
                       <img src="/img/STEEM.png" class="currency-logo-small" v-if="cur_bchain == 'STEEM'" alt="">
                       <img src="/img/HIVE.png" class="currency-logo-small" v-else-if="cur_bchain == 'HIVE'" alt="">
                       <img src="/img/BLURT.png" class="currency-logo-small" v-else-if="cur_bchain == 'BLURT'" alt="">
@@ -406,6 +411,9 @@ export default {
     },
   },
   methods: {
+    toggleCommentBox() {
+      this.commentBoxOpen = !this.commentBoxOpen;
+    },
     headToComments() {
       if (this.$refs.commentsSection) {
         VueScrollTo.scrollTo(this.$refs.commentsSection, 500, {
@@ -846,6 +854,7 @@ export default {
 .mid-avatar { width: 30px !important; height: 30px !important; }
 .report-head { border-bottom: 1px solid red; }
 img { max-width: 100%; }
+.post-body ::v-deep img { max-width: 100%; height: auto; }
 .modal-author { margin-left: 10px !important; }
 .actifit-link-plain { color: white; }
 .modal-body { word-break: break-word; }

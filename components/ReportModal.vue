@@ -22,7 +22,7 @@
           </div>
           <span class="modal-top-actions">
             <span class="date-head" :title="date">{{ $getTimeDifference(report.created) }}</span>
-            <a :href="'/@' + this.report.author + '/' + this.report.permlink">
+            <a :href="$safeUrl('/@' + this.report.author + '/' + this.report.permlink)">
               <i class="fas fa-link text-brand"></i>
             </a>
             <i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent"></i>
@@ -64,6 +64,9 @@
 
             <div class="post-detail-footer__payout">
               <span class="post-detail-payout" :title="postPayout">
+                <span :title="afitReward + ' ' + $t('AFIT_Token')">
+                  <img src="/img/actifit_logo.png" class="mr-1 currency-logo-small" alt="">{{ afitReward }} {{ $t('AFIT_Token') }}
+                </span>
                 <img src="/img/STEEM.png" class="currency-logo-small" v-if="cur_bchain == 'STEEM'" alt="">
                 <img src="/img/HIVE.png" class="currency-logo-small" v-else-if="cur_bchain == 'HIVE'" alt="">
                 <img src="/img/BLURT.png" class="currency-logo-small" v-else-if="cur_bchain == 'BLURT'" alt="">
@@ -808,10 +811,10 @@ export default {
   text-align: center;
 }
 
-html:not(.dark-mode) #reportModal .modal-body img[src*="ACTIVITYCOUNT"] + .text-center,
-html:not(.dark-mode) #reportModal .modal-body img[src*="ACTIVITYCOUNT"] + .text-center *,
-html:not(.dark-mode) #reportModal .modal-body img[src*="ACTIVITYTYPE"] + .text-center,
-html:not(.dark-mode) #reportModal .modal-body img[src*="ACTIVITYTYPE"] + .text-center * {
+html:not(.dark-mode) #reportModal .modal-body ::v-deep img[src*="ACTIVITYCOUNT"] + .text-center,
+html:not(.dark-mode) #reportModal .modal-body ::v-deep img[src*="ACTIVITYCOUNT"] + .text-center *,
+html:not(.dark-mode) #reportModal .modal-body ::v-deep img[src*="ACTIVITYTYPE"] + .text-center,
+html:not(.dark-mode) #reportModal .modal-body ::v-deep img[src*="ACTIVITYTYPE"] + .text-center * {
   color: #000 !important;
 }
 

@@ -342,6 +342,13 @@
 
 					const qrLinkElement = mainRef.$refs['hiveauth-qr-link'];
 					const qrElement = mainRef.$refs['hiveauth-qr'];
+					if (!qrLinkElement || !qrElement) {
+						console.error('HiveAuth QR elements are unavailable.')
+						mainRef.hiveauth_wait = false
+						mainRef.error_proceeding = true
+						mainRef.error_msg = mainRef.$t('login_error')
+						return
+					}
 					const QR = new QRious({
 							element: qrElement,
 							background: 'white',

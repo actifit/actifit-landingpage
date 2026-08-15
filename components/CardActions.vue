@@ -1,15 +1,24 @@
 <template>
   <div class="card-actions">
     <div class="post-detail-footer__actions">
+      <a href="#" class="post-detail-action" v-if="showEdit" @click.prevent="$emit('edit')" :title="$t('Edit_note')">
+        <i class="fas fa-edit"></i>
+      </a>
+      <a href="#" class="post-detail-action" v-if="showDelete" @click.prevent="$emit('delete')" :title="$t('Delete_note')">
+        <i class="fas fa-trash-alt"></i><i class="fas fa-spin fa-spinner" v-if="deleting"></i>
+      </a>
       <a href="#" class="post-detail-action" v-if="showReply" @click.prevent="$emit('reply')" :title="$t('Reply')">
         <i class="fas fa-reply"></i>
       </a>
       <a href="#" class="post-detail-action" :class="{ 'post-detail-action--active': hasVoted }" @click.prevent="$emit('vote-prompt')" :data-toggle="voteModalTarget ? 'modal' : null" :data-target="voteModalTarget" :title="$t('votes')">
         <i class="far fa-thumbs-up"></i> {{ voteCount }}
       </a>
-      <a href="#" class="post-detail-action" @click.prevent="$emit('open-modal')" :data-toggle="modalTarget ? 'modal' : null" :data-target="modalTarget" :title="$t('comments')">
-        <i class="far fa-comments"></i> {{ cardData.children }}
+      <a href="#" class="post-detail-action" v-if="showComments && !commentsDisabled" :class="{ 'post-detail-action--active': commentsActive }" @click.prevent="$emit('open-modal')" :data-toggle="modalTarget ? 'modal' : null" :data-target="modalTarget" :aria-expanded="commentsActive ? 'true' : 'false'" :title="commentsTitle || $t('comments')">
+        <i class="far fa-comments"></i> {{ commentsCount !== null ? commentsCount : cardData.children }}
       </a>
+      <span v-else-if="showComments" class="post-detail-action post-detail-action--static">
+        <i class="far fa-comments"></i> {{ commentsCount !== null ? commentsCount : cardData.children }}
+      </span>
       <a href="#" class="post-detail-action" @click.prevent="$emit('reblog')" v-if="showReblog && user && cardData.author !== user.account.name" :title="$t('reblog')">
         <i class="far fa-share-square"></i>
       </a>
@@ -31,14 +40,25 @@ export default {
     voteCount: { type: Number, required: true },
     hasVoted: { type: Boolean, required: true },
     showReply: { type: Boolean, default: false },
-    showReblog: { type: Boolean, default: true }
+    showReblog: { type: Boolean, default: true },
+    showEdit: { type: Boolean, default: false },
+    showDelete: { type: Boolean, default: false },
+    deleting: { type: Boolean, default: false },
+    showComments: { type: Boolean, default: true },
+    commentsCount: { type: Number, default: null },
+    commentsActive: { type: Boolean, default: false },
+    commentsDisabled: { type: Boolean, default: false },
+    commentsTitle: { type: String, default: '' }
   },
-  emits: ['vote-prompt', 'reblog', 'open-modal', 'reply']
+  emits: ['vote-prompt', 'reblog', 'open-modal', 'reply', 'edit', 'delete']
 }
 </script>
 
 <style scoped>
 .card-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   flex: 1 1 auto;
   min-width: 0;
 }
@@ -67,6 +87,12 @@ export default {
 .post-detail-action:hover,
 .post-detail-action--active {
   color: var(--post-footer-brand, #ff112d);
+}
+.post-detail-action--static {
+  cursor: default;
+}
+.post-detail-action--static:hover {
+  color: inherit;
 }
 @media (max-width: 767px) {
   .post-detail-footer__actions,

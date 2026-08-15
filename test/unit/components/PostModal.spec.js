@@ -31,7 +31,7 @@ function buildPost(overrides = {}) {
   }
 }
 
-function mountPostModal(postOverrides = {}) {
+function mountPostModal(postOverrides = {}, user = { account: { name: 'alice' } }) {
   const localVue = createLocalVue()
   localVue.use(Vuex)
 
@@ -57,7 +57,7 @@ function mountPostModal(postOverrides = {}) {
         namespaced: true,
         state: {},
         getters: {
-          user: () => ({ account: { name: 'alice' } }),
+          user: () => user,
           stdLogin: () => true
         }
       }
@@ -135,6 +135,15 @@ describe('PostModal footer layout', () => {
     expect(cardActions.exists()).toBe(true)
     expect(cardActions.props('voteModalTarget')).toBe('#voteModal')
     expect(cardActions.props('modalTarget')).toBe(null)
+
+    wrapper.destroy()
+  })
+
+  it('passes a Boolean hasVoted prop when logged out', () => {
+    const wrapper = mountPostModal({}, null)
+    const cardActions = wrapper.findComponent(CardActions)
+
+    expect(cardActions.props('hasVoted')).toBe(false)
 
     wrapper.destroy()
   })

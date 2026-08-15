@@ -157,12 +157,10 @@ function mountReportPage(reportOverrides = {}, user = { account: { name: 'alice'
 describe('permlink page vote wiring and legacy-strip selector', () => {
   beforeEach(() => {
     jest.spyOn(ReportPage.methods, 'fetchPageData').mockImplementation(jest.fn())
-    ReportPage.methods.toggleCommentBox = jest.fn()
   })
 
   afterEach(() => {
     jest.restoreAllMocks()
-    delete ReportPage.methods.toggleCommentBox
   })
 
   it('keeps the footer vote button on the shared vote modal target', () => {
@@ -172,6 +170,17 @@ describe('permlink page vote wiring and legacy-strip selector', () => {
     expect(cardActions.exists()).toBe(true)
     expect(cardActions.props('voteModalTarget')).toBe('#voteModal')
     expect(cardActions.props('modalTarget')).toBe(null)
+
+    wrapper.destroy()
+  })
+
+  it('toggles the reply editor through the page method', async () => {
+    const wrapper = mountReportPage()
+    const replyButton = wrapper.findComponent(CardActions).find('.post-detail-action')
+
+    expect(wrapper.vm.commentBoxOpen).toBe(false)
+    await replyButton.trigger('click')
+    expect(wrapper.vm.commentBoxOpen).toBe(true)
 
     wrapper.destroy()
   })

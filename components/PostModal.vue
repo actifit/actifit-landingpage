@@ -80,7 +80,7 @@
           :cardData="post"
           :user="user"
           :voteCount="getVoteCount"
-          :hasVoted="user && userVotedThisPost() == true"
+          :hasVoted="!!(user && userVotedThisPost() == true)"
           :showReply="true"
           @reply="toggleCommentBox"
           @vote-prompt="votePrompt($event)"
