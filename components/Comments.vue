@@ -93,32 +93,26 @@
         </transition>
 
         <div class="cmt-footer">
-          <div class="cmt-footer__actions">
-            <a href="#" class="cmt-action" v-if="this.user && this.user.account.name == this.full_data.author"
-              @click.prevent="editBoxOpen = !editBoxOpen" :title="$t('Edit_note')">
-              <i class="fas fa-edit"></i>
-            </a>
-            <a href="#" class="cmt-action" v-if="this.user && this.user.account.name == this.full_data.author && commentDeletable()"
-              @click.prevent="deleteComment" :title="$t('Delete_note')">
-              <i class="fas fa-trash-alt"></i><i class="fas fa-spin fa-spinner" v-if="deleting"></i>
-            </a>
-            <a href="#" class="cmt-action" v-if="this.user" @click.prevent="toggleCommentBox()" :title="$t('Reply')">
-              <i class="fas fa-reply"></i>
-            </a>
-            <a href="#" class="cmt-action" :class="{ 'cmt-action--active': this.user && userVotedThisPost() == true }"
-              @click.prevent="votePrompt($event)" data-toggle="modal" data-target="#voteModal">
-              <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
-            </a>
-            <button v-if="full_data.children > 0" type="button" class="cmt-action cmt-replies-toggle"
-              :class="{ 'cmt-action--active': nestedRepliesOpen }"
-              :aria-expanded="nestedRepliesOpen ? 'true' : 'false'" :title="$t('Replies')"
-              @click="nestedRepliesOpen = !nestedRepliesOpen">
-              <i class="far fa-comments"></i> {{ full_data.children }}
-            </button>
-            <span v-else class="cmt-action cmt-action--static">
-              <i class="far fa-comments"></i> 0
-            </span>
-          </div>
+          <CardActions
+            :card-data="full_data"
+            :user="user"
+            :vote-count="getVoteCount"
+            :has-voted="!!user && userVotedThisPost() == true"
+            :show-reply="!!user"
+            :show-reblog="false"
+            :show-edit="!!user && user.account.name == full_data.author"
+            :show-delete="!!user && user.account.name == full_data.author && commentDeletable()"
+            :deleting="deleting"
+            :comments-count="full_data.children"
+            :comments-active="nestedRepliesOpen"
+            :comments-disabled="full_data.children <= 0"
+            :comments-title="$t('Replies')"
+            @reply="toggleCommentBox"
+            @vote-prompt="votePrompt($event)"
+            @open-modal="nestedRepliesOpen = !nestedRepliesOpen"
+            @edit="editBoxOpen = !editBoxOpen"
+            @delete="deleteComment"
+          />
 
           <div class="cmt-footer__payout">
             <span v-if="postPaid()" class="cmt-payout">
@@ -239,6 +233,7 @@ import DOMPurify from 'dompurify'
 import CustomTextEditor from '~/components/CustomTextEditor'
 import Lodash from 'lodash'
 import { declinedPayoutMixin } from '~/plugins/commonCardMixin.js'
+import CardActions from './CardActions.vue'
 
 export default {
   mixins: [declinedPayoutMixin],
@@ -288,6 +283,7 @@ export default {
   },
   components: {
     CustomTextEditor,
+    CardActions,
     SafeRemarkable,
     UserHoverCard
   },
@@ -1139,6 +1135,8 @@ export default {
 }
 
 .cmt-footer {
+  --post-footer-muted: var(--cmt-muted);
+  --post-footer-brand: var(--cmt-brand);
   margin-top: 12px;
   padding-top: 10px;
   border-top: 1px solid var(--cmt-border);
@@ -1148,47 +1146,6 @@ export default {
   flex-wrap: wrap;
   gap: 10px;
   font-size: 12.5px;
-}
-
-.cmt-footer__actions {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.cmt-action {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  color: var(--cmt-muted);
-  text-decoration: none;
-  transition: color .15s ease;
-}
-
-.cmt-action:hover {
-  color: var(--cmt-brand);
-  text-decoration: none;
-}
-
-.cmt-action--active {
-  color: var(--cmt-brand);
-}
-
-.cmt-action--static {
-  cursor: default;
-}
-
-.cmt-replies-toggle {
-  border: 0;
-  padding: 0;
-  background: transparent;
-  font: inherit;
-  cursor: pointer;
-}
-
-.cmt-replies-toggle:focus-visible {
-  outline: 2px solid var(--cmt-brand);
-  outline-offset: 3px;
 }
 
 .cmt-footer__payout {

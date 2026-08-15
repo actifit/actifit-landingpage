@@ -48,6 +48,7 @@
         <CardActions
           :cardData="report"
           modalTarget="#reportModal"
+          voteModalTarget="#voteModal"
           :user="user"
           :voteCount="getVoteCount"
           :hasVoted="postUpvoted"
