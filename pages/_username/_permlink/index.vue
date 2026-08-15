@@ -893,18 +893,11 @@ a:hover, a:hover, .text-brand:hover, .actifit-link-plain:hover { text-decoration
   gap: 10px 20px;
 }
 
-#main-footer .post-detail-footer__actions,
 #main-footer .post-detail-footer__payout,
 #main-footer .post-detail-payout,
 #main-footer .post-detail-payout > span {
   display: flex;
   align-items: center;
-}
-
-#main-footer .post-detail-footer__actions {
-  gap: 16px;
-  flex: 1 1 auto;
-  min-width: 0;
 }
 
 #main-footer .post-detail-footer__payout {
@@ -913,20 +906,6 @@ a:hover, a:hover, .text-brand:hover, .actifit-link-plain:hover { text-decoration
   gap: 12px;
   flex: 0 0 auto;
   margin-left: auto;
-}
-
-#main-footer .post-detail-action {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  color: var(--post-footer-muted);
-  text-decoration: none;
-  transition: color .15s ease;
-}
-
-#main-footer .post-detail-action:hover,
-#main-footer .post-detail-action--active {
-  color: var(--post-footer-brand);
 }
 
 #main-footer .post-detail-payout {

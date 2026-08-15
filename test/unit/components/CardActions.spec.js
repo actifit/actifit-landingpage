@@ -1,5 +1,8 @@
 import { shallowMount } from '@vue/test-utils'
 import CardActions from '@/components/CardActions.vue'
+const fs = require('fs')
+
+const componentSource = fs.readFileSync('components/CardActions.vue', 'utf8')
 
 function mountCardActions(props = {}) {
   return shallowMount(CardActions, {
@@ -32,7 +35,18 @@ describe('components/CardActions.vue', () => {
   it('keeps the comments action on the provided modal target', () => {
     const wrapper = mountCardActions({ modalTarget: '#postModal' })
 
-    expect(wrapper.find('a[data-target="#postModal"]').exists()).toBe(true)
+    expect(wrapper.find('button[data-target="#postModal"]').exists()).toBe(true)
+
+    wrapper.destroy()
+  })
+
+  it('uses a button with an accessible focus indicator for the comments toggle', () => {
+    const wrapper = mountCardActions({ commentsActive: true })
+    const commentsToggle = wrapper.find('button.post-detail-action')
+
+    expect(commentsToggle.attributes('type')).toBe('button')
+    expect(commentsToggle.attributes('aria-expanded')).toBe('true')
+    expect(componentSource).toContain('.post-detail-action:focus-visible')
 
     wrapper.destroy()
   })
