@@ -77,7 +77,6 @@
                 :style="settings_set ? 'color:green' : 'color:white'"></i><i class="fas fa-spin fa-spinner text-white"
                 v-if="save_progress"></i></span>
 
-            <span class="pl-2">{{ $t('account_est_val') }} ${{ this.totalAccountValue }}</span>
             <div class="wallet-sort-bar" v-if="userTokensWallet >= 0">
               <label for="wallet-token-sort">{{ $t('Sort_By') }}</label>
               <select id="wallet-token-sort" v-model="tokenSort" v-on:change="sortTokenData(tokenSort, true)">
@@ -726,7 +725,7 @@
 
           <div id="detailsArea" ref="detailsArea"></div>
           <div id="coreActionPanel" ref="coreActionPanel" class="text-center wallet-core-action-panel">
-            <div v-if="fundActivityMode !== CLOSED_MODE || (isCoreAfitActionOpen && afitActivityMode !== showBSCDetails)" class="wallet-action-dismiss">
+            <div v-if="isCoreFundActionOpen || (isCoreAfitActionOpen && afitActivityMode !== showBSCDetails)" class="wallet-action-dismiss">
               <button type="button" class="wallet-action-close" v-on:click="closeAllWalletActions">{{ $t('Close') }}</button>
             </div>
             <transition name="fade">
@@ -1915,7 +1914,7 @@
       :user="targetUserWallet"
       modal-title-key="top_hive_holders_title"
       token-logo-path="/img/HIVE.png"
-      balance-display-key="Hive_Bal"
+      balance-display-name-key="Hive_Bal"
       coin-symbol-key="HIVE"
       :divisor="1000"
       :precision="3"
@@ -1929,7 +1928,7 @@
       :user="targetUserWallet"
       modal-title-key="top_hbd_holders_title"
       token-logo-path="/img/HIVE.png"
-      balance-display-key="HBD_Bal"
+      balance-display-name-key="HBD_Bal"
       coin-symbol-key="HBD"
       :divisor="1000"
       :precision="3"
@@ -1945,7 +1944,7 @@
       token-logo-path="/img/HIVE.png"
       :divisor="hivePerVestsRatio"
       :precision="3"
-      balance-display-key="HP_Bal"
+      balance-display-name-key="HP_Bal"
       coin-symbol-key="HP"
     />
 
@@ -2124,8 +2123,8 @@ export default {
       claimVests: '',
       claimSBD: 0,
       claimWindow: '',
-      fundActivityMode: this.CLOSED_MODE,
-      afitActivityMode: this.CLOSED_MODE,
+      fundActivityMode: 0,
+      afitActivityMode: 0,
       transferType: 'HIVE',
       transferTypePass: 'HIVE',
       error_proceeding: '',
@@ -2304,6 +2303,20 @@ export default {
         this.MOVE_AFIT_HE_SE,
         this.showBSCDetails
       ].includes(this.afitActivityMode);
+    },
+    isCoreFundActionOpen() {
+      return [
+        this.TRANSFER_FUNDS,
+        this.POWERUP_FUNDS,
+        this.POWERDOWN_FUNDS,
+        this.WITHDRAW_FUNDS,
+        this.DELEGATE_FUNDS,
+        this.DELEGATE_RCS,
+        this.TRANSFER_BSC,
+        this.SHOW_CLAIMABLE_REW,
+        this.TRANSFER_FUNDS_SAVINGS,
+        this.REMOVE_FUNDS_SAVINGS
+      ].includes(this.fundActivityMode);
     },
     isAfitActionOpen() {
       return [
@@ -2932,7 +2945,8 @@ export default {
       };
       const amounts = (amountFields[operationType] || [])
         .map(field => operationData[field])
-        .filter(amount => amount && parseFloat(amount) !== 0);
+        .filter(amount => amount && parseFloat(amount) !== 0)
+        .map(amount => this.formatHiveHistoryAmount(amount));
       const isOutgoing = operationData.from === accountName;
       const isIncoming = operationData.to === accountName;
       let counterparty = '';
@@ -2956,6 +2970,13 @@ export default {
         counterpartyLabel,
         memo: operationData.memo || ''
       };
+    },
+    formatHiveHistoryAmount(amount) {
+      const [value, symbol] = amount.trim().split(' ');
+      if (symbol !== 'VESTS') return amount;
+
+      const hp = parseFloat(value) * this.hivePerVestsRatio;
+      return Number(hp.toFixed(3)) + ' HP';
     },
     closeAllWalletActions() {
       this.fundActivityMode = this.CLOSED_MODE;

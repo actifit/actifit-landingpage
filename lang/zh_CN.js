@@ -41,6 +41,7 @@ module.exports = {
   Actifit: 'Actifit',
   Slogan: '运动即收益',
   Balance: '余额',
+  No_data_found_for_top_holders: '未找到主要持有者的数据。',
   AFIT_Token: 'AFIT',
   My_Wallet: '我的钱包',
   My_Activity: '我的活动',

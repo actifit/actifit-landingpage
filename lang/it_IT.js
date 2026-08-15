@@ -41,6 +41,7 @@ module.exports = {
   Actifit: 'Actifit',
   Slogan: 'Conviene Essere in Forma',
   Balance: 'Saldo',
+  No_data_found_for_top_holders: 'Nessun dato trovato per i principali detentori.',
   AFIT_Token: 'AFIT',
   My_Wallet: 'Il Mio Portafoglio',
   My_Activity: 'La Mia Attività',
