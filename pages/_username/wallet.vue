@@ -58,7 +58,7 @@
         </nav>
 
         <div class="row top-action-container text-right">
-          <div class="col-6 text-left">
+          <div class="col-auto text-left wallet-toolbar-left">
             <span class="btn btn-brand mb-1"
               :title="show_only_tokens_interest ? $t('show_all_tokens') : $t('show_core_tokens')"
               v-on:click="switchTokenDisplay">
@@ -78,22 +78,25 @@
                 v-if="save_progress"></i></span>
 
             <span class="pl-2">{{ $t('account_est_val') }} ${{ this.totalAccountValue }}</span>
+            <div class="wallet-sort-bar" v-if="userTokensWallet >= 0">
+              <label for="wallet-token-sort">{{ $t('Sort_By') }}</label>
+              <select id="wallet-token-sort" v-model="tokenSort" v-on:change="sortTokenData(tokenSort, true)">
+                <option value="symbol">Token</option>
+                <option value="balance">{{ $t('Available') }}</option>
+                <option value="usdval">USD</option>
+              </select>
+              <button type="button" class="wallet-sort-direction" v-on:click="sortTokenData(tokenSort)"
+                :title="tsortDir === 1 ? 'Ascending' : 'Descending'"
+                :aria-label="tsortDir === 1 ? 'Sort descending' : 'Sort ascending'">
+                <i class="fas" :class="tsortDir === 1 ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+              </button>
+            </div>
           </div>
-          <div class="col-6 text-right">
-
-            <span class="btn btn-brand mb-1" :title="$t('Check_Claimable_Rewards')" v-on:click="showClaimableRewards()">
-              <i class="fas fa-solid fa-wallet"></i>
-            </span>
-
-
+          <div class="col-auto ml-auto text-right wallet-toolbar-right">
 
             <span class="btn btn-brand mb-1" :title="$t('Check_Pending_Rewards')">
               <a href="#" id="pendingRewardsKicker" name="pendingRewardsKicker" ref="pendingRewardsKicker" class=""
                 data-toggle="modal" data-target="#pendingRewardsModal"><i class="far fa-solid fa-hourglass"></i></a>
-            </span>
-
-            <span class="btn btn-brand mb-1" :title="$t('FETCH_MY_DELEGATIONS')" v-on:click="fetchDelegations(false)">
-              <i class="fas fa-donate"></i>
             </span>
 
             <span class="btn btn-brand mb-1" :title="$t('FETCH_MY_RC_DELEGATIONS')"
@@ -101,31 +104,10 @@
               <i class="fas fa-bolt"></i>
             </span>
 
-            <span class="btn btn-brand mb-1" :title="$t('AFIT_Transaction_History')" v-on:click="scrollToTransactionHistory">
-              <i class="fas fa-file-invoice"></i>
-            </span>
-
-            <span class="btn btn-brand mb-1" :title="$t('bsc_wallet')" v-on:click="showBSCAddress()">
-              <img src="/img/binance-logo.png" width="18px" height="18px" alt="">
-            </span>
-
             <span v-if="loadingDeleg">
               <i class="fas fa-spin fa-spinner"></i>
             </span>
           </div>
-        </div>
-        <div class="wallet-sort-bar" v-if="userTokensWallet >= 0">
-          <label for="wallet-token-sort">{{ $t('Sort_By') }}</label>
-          <select id="wallet-token-sort" v-model="tokenSort" v-on:change="sortTokenData(tokenSort, true)">
-            <option value="symbol">Token</option>
-            <option value="balance">{{ $t('Available') }}</option>
-            <option value="usdval">USD</option>
-          </select>
-          <button type="button" class="wallet-sort-direction" v-on:click="sortTokenData(tokenSort)"
-            :title="tsortDir === 1 ? 'Ascending' : 'Descending'"
-            :aria-label="tsortDir === 1 ? 'Sort descending' : 'Sort ascending'">
-            <i class="fas" :class="tsortDir === 1 ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
-          </button>
         </div>
         <div class="wallet-container" v-if="userTokensWallet >= 0">
           <div class="row font-weight-bold token-entry thick-bottom head-title">
@@ -604,16 +586,19 @@
               <!--</div>-->
             </div>
 
-            <div id="engineActionPanel" ref="engineActionPanel" class="action-box" v-if="!nonAuthUser && tokenActions && curTokenAction">
+          <div id="engineActionPanel" ref="engineActionPanel" class="action-box" v-if="!nonAuthUser && tokenActions && curTokenAction">
 
-              <h3 class="pro-name">
-                <span v-if="curTokenAction == TRANSFER_FUNDS">{{ $t('transfer_tokens') }}</span>
-                <span v-else-if="curTokenAction == TRANSFER_BSC">{{ $t('move_to_bsc') }}</span>
-                <span v-else-if="curTokenAction == POWERUP_FUNDS">{{ $t('stake_tokens') }}</span>
-                <span v-else-if="curTokenAction == POWERDOWN_FUNDS">{{ $t('unstake_tokens') }}</span>
-                <span v-else-if="curTokenAction == WITHDRAW_FUNDS">{{ $t('withdraw_tokens') }}</span>
-                <span v-else-if="curTokenAction == DELEGATE_FUNDS">{{ $t('delegate_tokens') }}</span>
-              </h3>
+              <div class="wallet-action-title">
+                <h3 class="pro-name">
+                  <span v-if="curTokenAction == TRANSFER_FUNDS">{{ $t('transfer_tokens') }}</span>
+                  <span v-else-if="curTokenAction == TRANSFER_BSC">{{ $t('move_to_bsc') }}</span>
+                  <span v-else-if="curTokenAction == POWERUP_FUNDS">{{ $t('stake_tokens') }}</span>
+                  <span v-else-if="curTokenAction == POWERDOWN_FUNDS">{{ $t('unstake_tokens') }}</span>
+                  <span v-else-if="curTokenAction == WITHDRAW_FUNDS">{{ $t('withdraw_tokens') }}</span>
+                  <span v-else-if="curTokenAction == DELEGATE_FUNDS">{{ $t('delegate_tokens') }}</span>
+                </h3>
+                <button type="button" class="wallet-action-close" v-on:click="closeAllWalletActions">{{ $t('Close') }}</button>
+              </div>
               <div v-if="tokenActions && curTokenAction">
                 <div class="row" v-if="tokenActions && curTokenAction == TRANSFER_FUNDS">
                   <label for="token-target-account" class="w-25 p-2">{{ $t('Account') }} *</label>
@@ -741,6 +726,9 @@
 
           <div id="detailsArea" ref="detailsArea"></div>
           <div id="coreActionPanel" ref="coreActionPanel" class="text-center wallet-core-action-panel">
+            <div v-if="fundActivityMode !== CLOSED_MODE || (isCoreAfitActionOpen && afitActivityMode !== showBSCDetails)" class="wallet-action-dismiss">
+              <button type="button" class="wallet-action-close" v-on:click="closeAllWalletActions">{{ $t('Close') }}</button>
+            </div>
             <transition name="fade">
               <div v-if="fundActivityMode == 1" class="text-center grid col-md-12">
                 <h3 class="pro-name">{{ $t('TRANSFER_FUNDS_ACTION_TEXT') }}</h3>
@@ -1341,7 +1329,12 @@
 
             <transition name="fade">
               <div v-if="afitActivityMode == showBSCDetails">
-                <h3 class="pro-name">{{ $t('bsc_wallet') }}</h3>
+                <div class="wallet-action-title">
+                  <h3 class="pro-name">{{ $t('bsc_wallet') }}</h3>
+                  <button type="button" class="btn btn-brand wallet-action-close" @click="closeAllWalletActions">
+                    {{ $t('Close') }}
+                  </button>
+                </div>
                 <span class="font-brand">{{ $t('bsc_details_notice') }}</span>
 
                 <div>
@@ -1350,10 +1343,10 @@
                     class="form-control-lg w-50 p-2" :value="this.getWalletAddress()" placeholder="0x......">
                   <div v-if="error_wallet != ''" class="text-brand text-center">{{ error_wallet }}</div>
                   <button v-if="!nonAuthUser" v-on:click="updateWalletAddress"
-                    class="btn btn-brand btn-lg w-50 border"><span v-if="this.bsc_wallet_address">{{ $t('Save')
+                    class="btn btn-brand border wallet-action-proceed m-1"><span v-if="this.bsc_wallet_address">{{ $t('Save')
                     }}</span><span v-else>{{ $t('Save') }}</span></button>
                   <button v-if="!nonAuthUser" v-on:click="deleteWalletAddress"
-                    class="btn btn-brand btn-lg w-50 border">{{ $t('Reset') }}</button>
+                    class="btn btn-brand border wallet-action-proceed m-1">{{ $t('Reset') }}</button>
                 </div>
               </div>
             </transition>
@@ -1389,6 +1382,9 @@
         </div>
 
         <div id="afitActionPanel" ref="afitActionPanel" class="font-weight-bold wallet-afit-action-panel">
+          <div v-if="isAfitActionOpen" class="wallet-action-dismiss">
+            <button type="button" class="wallet-action-close" v-on:click="closeAllWalletActions">{{ $t('Close') }}</button>
+          </div>
           <!--<button v-on:click="buyAFITwithSTEEM" :class="smallScreenBtnClasses" class="btn btn-brand btn-lg border w-25">{{ $t('BUY_AFIT_WITH_STEEM') }}</button>-->
 
           <transition name="fade">
@@ -1471,7 +1467,6 @@
             <div v-else-if="afitActivityMode == INIT_AFIT_TO_SE" class="action-box">
               <h3 class="pro-name">{{ $t('INITIATE_AFIT_TO_HE') }}</h3>
               <div class="text-center grid p-2">
-                <h5 class="text-brand font-weight-bold">{{ $t('wallet.initiate_afit_to_he') }}</h5>
                 <div v-if="userPDAfit.user">
                   <span class="end-string">{{ afitPowerDownText }}</span>
                   <Countdown v-if="countDownReady" :deadline="nextAfitPDTarget"></Countdown>
@@ -1501,14 +1496,14 @@
                   </div>
                   <div class="row" v-if="userPDAfit.user">
                     <div class="w-25"></div>
-                    <button v-on:click="proceedMoveToSE" class="btn btn-brand border btn-lg w-25">{{ $t('adjust_amount')
+                    <button v-on:click="proceedMoveToSE" class="btn btn-brand border wallet-action-proceed">{{ $t('adjust_amount')
                     }}</button>
-                    <button v-on:click="cancelMoveToSE" class="btn btn-brand border btn-lg w-25">{{
+                    <button v-on:click="cancelMoveToSE" class="btn btn-brand border wallet-action-proceed">{{
                       $t('Cancel_Transfer') }}</button>
                   </div>
                   <div class="row" v-else>
                     <div class="w-25"></div>
-                    <button v-on:click="proceedMoveToSE" class="btn btn-brand border btn-lg w-50">{{ $t('Proceed')
+                    <button v-on:click="proceedMoveToSE" class="btn btn-brand border wallet-action-proceed">{{ $t('Proceed')
                     }}</button>
                   </div>
                   <div class="row">
@@ -2301,6 +2296,24 @@ export default {
     ...mapGetters('steemconnect', ['user']),
     ...mapGetters('steemconnect', ['stdLogin']),
     ...mapGetters(['userTokens', 'transactions', 'userRank', 'bchain']),
+    isCoreAfitActionOpen() {
+      return [
+        this.MOVE_AFITX_SE_HE,
+        this.MOVE_AFITX_HE_SE,
+        this.MOVE_AFIT_SE_HE,
+        this.MOVE_AFIT_HE_SE,
+        this.showBSCDetails
+      ].includes(this.afitActivityMode);
+    },
+    isAfitActionOpen() {
+      return [
+        this.MOVE_AFIT_SE,
+        this.INIT_AFIT_TIP,
+        this.INIT_AFIT_TO_SE,
+        this.BUY_AFIT_STEEM,
+        this.EXCHANGE_AFIT_STEEM
+      ].includes(this.afitActivityMode);
+    },
     sortedAfitTransactions() {
       return this.sortHistoryEntries(this.transactions || []);
     },
@@ -2943,6 +2956,13 @@ export default {
         counterpartyLabel,
         memo: operationData.memo || ''
       };
+    },
+    closeAllWalletActions() {
+      this.fundActivityMode = this.CLOSED_MODE;
+      this.afitActivityMode = this.CLOSED_MODE;
+      this.tokenActions = false;
+      this.curTokenAction = '';
+      this.selTokenUp = '';
     },
 
     /**
@@ -8588,8 +8608,6 @@ export default {
           observer.observe(this.$refs['detailsArea']);
           console.log('observer set')
           this.observerSet = true;
-        } else {
-          console.error("Element not found.");
         }
       }
       /***************/
@@ -9076,6 +9094,13 @@ export default {
 }
 
 .wallet-page .top-action-container .pl-2 { display: none; }
+.wallet-page .wallet-toolbar-left {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.wallet-page .wallet-toolbar-right { white-space: nowrap; }
 .wallet-page .top-action-container .btn-brand i:not(.fa-floppy-disk):not(.fa-spinner):not(.fa-battery-empty),
 .wallet-page .top-action-container .btn-brand a,
 .wallet-page .top-action-container .btn-brand a i {
@@ -9135,6 +9160,11 @@ export default {
   width: 100%;
 }
 
+.wallet-page .wallet-core-action-panel,
+.wallet-page .wallet-afit-action-panel {
+  position: relative;
+}
+
 .wallet-page .wallet-core-action-anchor {
   height: 0;
 }
@@ -9153,14 +9183,14 @@ export default {
 
 .wallet-page .wallet-sort-bar {
   align-items: center;
-  background: var(--wallet-grid-bg);
-  border: 1px solid var(--wallet-border);
-  border-radius: 12px;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
   color: var(--wallet-muted);
   display: flex;
   gap: 10px;
-  margin: 0 0 14px;
-  padding: 10px 12px;
+  margin: 0 0 0 8px;
+  padding: 0;
   text-align: left;
 }
 
@@ -9389,6 +9419,13 @@ export default {
   color: var(--wallet-text);
 }
 
+.wallet-page .action-box > .grid {
+  background: transparent !important;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
 .wallet-page #detailsArea + .text-center > .grid,
 .wallet-page #detailsArea + .text-center > .action-box,
 .wallet-page #detailsArea + .text-center > .row-sep-in,
@@ -9405,15 +9442,51 @@ export default {
 .wallet-page #detailsArea + .text-center .pro-name {
   align-items: center;
   background: transparent;
-  border-bottom: 1px solid var(--wallet-border-soft);
+  border-bottom: 0;
   color: var(--wallet-text);
   display: flex;
   font-size: 19px;
   font-weight: 700;
   justify-content: center;
-  margin: -4px 0 22px;
-  padding: 0 0 15px;
+  margin: 12px 0;
+  padding: 0;
   text-align: center;
+}
+
+.wallet-page .wallet-action-title {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+}
+
+.wallet-page .wallet-action-title .pro-name { flex: 1; }
+
+.wallet-page .wallet-action-dismiss {
+  position: absolute;
+  right: 24px;
+  top: 28px;
+  z-index: 1;
+}
+
+.wallet-page .wallet-action-close {
+  background: var(--wallet-surface-2);
+  border: 1px solid var(--wallet-border);
+  border-radius: 8px;
+  color: var(--wallet-muted);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 7px 12px;
+}
+
+.wallet-page .wallet-action-close:hover {
+  border-color: #ed1c24;
+  color: var(--wallet-text);
+}
+
+.wallet-page .wallet-action-proceed {
+  border: 1px solid var(--wallet-border) !important;
+  min-width: 140px;
+  padding: 10px 24px;
 }
 
 .wallet-page .action-box .pro-name .token-logo,
@@ -9677,6 +9750,7 @@ export default {
   .wallet-stat-card { border-radius: 14px; }
   .wallet-page .top-action-container > div { flex: 0 0 100%; max-width: 100%; text-align: left !important; }
   .wallet-page .top-action-container > div + div { margin-top: 7px; }
+  .wallet-page .wallet-sort-bar { margin-left: 0; }
   .wallet-page .wallet-container .token-entry.row.main-token:not(.wallet-token-detail-panel) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
