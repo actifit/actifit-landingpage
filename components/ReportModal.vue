@@ -17,42 +17,27 @@
           </button>
         </div>
         <div class="main-user-info pl-4 report-user-section">
-
           <div>
-
             <UserHoverCard :username="report.author" />
-
-            <div class="modal-top-actions">
-              <span class="date-head" :title="date">{{ $getTimeDifference(report.created) }}</span>
-              <a :href="$safeUrl('/@' + this.report.author + '/' + this.report.permlink)"><i
-                  class="fas fa-link text-brand"></i></a>
-              <i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent"></i>
-              <!-- Start of new/updated translation icons -->
-              <i v-if="translationLoading" class="fas fa-spinner fa-spin text-brand" :title="$t('translating_content', 'Translating...')"></i>
-              <i v-else-if="!showTranslated" class="fa-solid fa-language text-brand" v-on:click="translateContent" :title="$t('translate_content', 'Translate Content')"></i>
-              <!-- End of new/updated translation icons -->
-            </div>
-            <div class="p-1 modal-top-actions">
-              <span><a href="#" @click.prevent="toggleCommentBox()" :title="$t('Reply')"><i
-                    class="text-white fas fa-reply"></i></a></span>
-              <span>
-
-                <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand"
-                  data-target="#voteModal" v-if="this.$parent.user && userVotedThisPost() == true">
-                  <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
-                </a>
-                <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" data-target="#voteModal"
-                  class="actifit-link-plain" v-else>
-                  <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
-                </a>
-                <i class="far fa-comments ml-2" @click.prevent="headToComments()"></i> {{ report.children }}
-                <i class="far fa-share-square ml-2" @click.prevent="$reblog(user, report)"
-                  v-if="user && report.author != this.user.account.name" :title="$t('reblog')"></i>
-
-              </span>
-            </div>
           </div>
-
+          <span class="modal-top-actions">
+            <span class="date-head" :title="date">{{ $getTimeDifference(report.created) }}</span>
+            <a :href="$safeUrl('/@' + this.report.author + '/' + this.report.permlink)">
+              <i class="fas fa-link text-brand"></i>
+            </a>
+            <i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent"></i>
+            <i
+              v-if="translationLoading"
+              class="fas fa-spinner fa-spin text-brand"
+              :title="$t('translating_content', 'Translating...')"
+            ></i>
+            <i
+              v-else-if="!showTranslated"
+              class="fa-solid fa-language text-brand"
+              v-on:click="translateContent"
+              :title="$t('translate_content', 'Translate Content')"
+            ></i>
+          </span>
           <div class="modal-header">
             <div class="report-tags p-1" v-html="$fetchReportTags(report)"></div>
           </div>
@@ -63,71 +48,62 @@
         </div>
         <SafeRemarkable class="modal-body" :source="displayBody" ref="remarkableContent"
           :options="{ 'html': true, 'breaks': true, 'typographer': true }"></SafeRemarkable>
-        <div class="col-12 main-payment-info" id="modal-footer">
-          <div class="report-modal-prelim-info">
-            <span><a href="#" @click.prevent="toggleCommentBox()" :title="$t('Reply')"><i
-                  class="text-white fas fa-reply"></i></a></span>
-            <span>
+        <div class="col-12 post-detail-footer" id="modal-footer">
+          <div class="post-detail-footer__summary">
+            <CardActions
+              :cardData="report"
+              :user="user"
+              :voteCount="getVoteCount"
+              :hasVoted="user ? userVotedThisPost() : false"
+              :showReply="true"
+              @reply="toggleCommentBox"
+              @vote-prompt="votePrompt($event)"
+              @open-modal="headToComments"
+              @reblog="$reblog(user, report)"
+            />
 
-              <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand"
-                data-target="#voteModal" v-if="this.$parent.user && userVotedThisPost() == true">
-                <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
-              </a>
-              <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" data-target="#voteModal"
-                class="actifit-link-plain" v-else>
-                <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
-              </a>
-              <i class="far fa-comments ml-2" @click.prevent="headToComments()"></i> {{ report.children }}
-              <i class="far fa-share-square ml-2" @click.prevent="$reblog(user, report)"
-                v-if="user && report.author != this.user.account.name" :title="$t('reblog')"></i>
-
-            </span>
-            <div>
-              <span :title="afitReward + ' ' + $t('AFIT_Token')">
-                <img src="/img/actifit_logo.png" class="mr-1 currency-logo-small" alt="">{{ afitReward }} {{ $t('AFIT_Token')
-                }}
-              </span>
-
-              <img src="/img/STEEM.png" class="mr-0 currency-logo-small" v-if="cur_bchain == 'STEEM'" alt="">
-              <img src="/img/HIVE.png" class="mr-0 currency-logo-small" v-else-if="cur_bchain == 'HIVE'" alt="">
-              <img src="/img/BLURT.png" class="mr-0 currency-logo-small" v-else-if="cur_bchain == 'BLURT'" alt="">
-
-              <span v-if="postPaid()">
-                <span class="m-1" :class="{ 'declined-payout': isDeclined }" :title="$t('author_payout')">
-                  <i class="fa-solid fa-user"></i>
-                  {{ paidValue() }}
+            <div class="post-detail-footer__payout">
+              <span class="post-detail-payout" :title="postPayout">
+                <span :title="afitReward + ' ' + $t('AFIT_Token')">
+                  <img src="/img/actifit_logo.png" class="mr-1 currency-logo-small" alt="">{{ afitReward }} {{ $t('AFIT_Token') }}
                 </span>
-                <span class="m-1" :class="{ 'declined-payout': isDeclined }" :title="$t('voters_payout')">
-                  <i class="fa-solid fa-users"></i>
-                  {{ report.curator_payout_value }}
+                <img src="/img/STEEM.png" class="currency-logo-small" v-if="cur_bchain == 'STEEM'" alt="">
+                <img src="/img/HIVE.png" class="currency-logo-small" v-else-if="cur_bchain == 'HIVE'" alt="">
+                <img src="/img/BLURT.png" class="currency-logo-small" v-else-if="cur_bchain == 'BLURT'" alt="">
+                <span v-if="postPaid()">
+                  <span :class="{ 'declined-payout': isDeclined }" :title="$t('author_payout')">
+                    <i class="fa-solid fa-user"></i> {{ paidValue() }}
+                  </span>
+                  <span :class="{ 'declined-payout': isDeclined }" :title="$t('voters_payout')">
+                    <i class="fa-solid fa-users"></i> {{ report.curator_payout_value }}
+                  </span>
+                  <i class="fa-solid fa-check post-detail-payout__paid"></i>
                 </span>
-                <i class="fa-solid fa-check text-green text-bold"></i>
+                <span v-else>
+                  <span :class="{ 'declined-payout': isDeclined }">{{ report.pending_payout_value.replace('SBD', '') }}</span>
+                  <i class="fa-solid fa-hourglass-half post-detail-payout__wait" :title="$t('hive_payouts_wait')"></i>
+                </span>
+                <span v-if="hasBeneficiaries()" class="post-detail-payout__muted" :title="beneficiariesDisplay()">
+                  <i class="fas fa-user-pen"><sup>{{ report.beneficiaries.length }}</sup></i>
+                </span>
               </span>
-              <span v-else>
-                <span class="text-bold" :class="{ 'declined-payout': isDeclined }">{{ report.pending_payout_value.replace('SBD', '') }}</span>
-                <i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
-              </span>
-              <span v-if="hasBeneficiaries()" :title="beneficiariesDisplay()">
-                <i class="fas fa-user-pen"><sup>{{ report.beneficiaries.length }}</sup></i>
-              </span>
-
-
-              <span @click.prevent="displayMorePayoutData = !displayMorePayoutData" class="text-brand pointer-cur-cls"
-                :title="$t('more_token_rewards')">
+              <button type="button" class="post-detail-payout-toggle"
+                @click="displayMorePayoutData = !displayMorePayoutData" :title="$t('more_token_rewards')"
+                :aria-expanded="displayMorePayoutData ? 'true' : 'false'">
                 <i class="fas fa-chevron-circle-down" v-if="!displayMorePayoutData"></i>
                 <i class="fas fa-chevron-circle-up" v-else></i>
-              </span>
-              <transition name="fade" v-if="displayMorePayoutData">
-                <div class="m-2">
-                  <small v-for="(token, index) in tokenRewards" :key="index" :title="displayTokenValue(token)">
-                    {{ displayTokenValue(token) }} |
-                  </small>
-                </div>
-              </transition>
+              </button>
             </div>
           </div>
-          <div>
-            <social-sharing :url="formattedReportUrl" :title="report.title"
+
+          <div class="post-detail-footer__tokens" v-if="displayMorePayoutData">
+            <small v-for="(token, index) in tokenRewards" :key="index" :title="displayTokenValue(token)">
+              {{ displayTokenValue(token) }} |
+            </small>
+          </div>
+
+          <div class="post-detail-footer__sharing">
+            <social-sharing :url="formattedReportUrl" :title="report.title" network-tag="a"
               description="Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity "
               quote="Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity"
               :hashtags="hashtags" twitter-user="actifit_fitness" inline-template>
@@ -227,6 +203,7 @@ import SocialSharing from 'vue-social-sharing';
 import VueScrollTo from 'vue-scrollto'
 import { translateTextWithGemini } from '~/components/gemini-client.js';
 import { declinedPayoutMixin } from '~/plugins/commonCardMixin.js'
+import CardActions from '~/components/CardActions.vue'
 
 const scot_steemengine_api = process.env.steemEngineScot;
 const scot_hive_api_param = process.env.hiveEngineScotParam;
@@ -286,7 +263,8 @@ export default {
     CustomTextEditor,
     SocialSharing,
     SafeRemarkable,
-    UserHoverCard
+    UserHoverCard,
+    CardActions
   },
   computed: {
     cardData() { return this.report },
@@ -659,6 +637,9 @@ export default {
       }
     },
     userVotedThisPost() {
+      if (!this.user || !this.report) {
+        return false;
+      }
       let curUser = this.user.account.name;
       this.postUpvoted = this.report.active_votes.filter(voter => (voter.voter === curUser)).length > 0;
       return this.postUpvoted;
@@ -736,11 +717,12 @@ export default {
     attachImageErrorHandlers() {
       const vm = this;
       this.$nextTick(() => {
-        const contentEl = vm.$refs.remarkableContent.$el;
-        if (!contentEl) {
+        const contentRef = vm.$refs.remarkableContent;
+        if (!contentRef || !contentRef.$el) {
           console.warn('VueRemarkable component not found!');
           return;
         }
+        const contentEl = contentRef.$el;
         const images = contentEl.querySelectorAll('img');
         images.forEach(img => {
           img.onerror = (event) => {
@@ -770,7 +752,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .modal-dialog {
   transform: none !important;
 }
@@ -797,9 +779,9 @@ export default {
   padding-top: 14px;
 }
 
-#reportModal .modal-body img[src*="ACTIVITYDATE"] + .text-center,
-#reportModal .modal-body img[src*="ACTIVITYCOUNT"] + .text-center,
-#reportModal .modal-body img[src*="ACTIVITYTYPE"] + .text-center {
+#reportModal .modal-body ::v-deep img[src*="ACTIVITYDATE"] + .text-center,
+#reportModal .modal-body ::v-deep img[src*="ACTIVITYCOUNT"] + .text-center,
+#reportModal .modal-body ::v-deep img[src*="ACTIVITYTYPE"] + .text-center {
   height: 44px;
   margin: 0 !important;
   display: flex;
@@ -809,17 +791,17 @@ export default {
   text-align: center;
 }
 
-#reportModal .modal-body img[src*="ACTIVITYCOUNT"] {
+#reportModal .modal-body ::v-deep img[src*="ACTIVITYCOUNT"] {
   margin-top: 10px;
 }
 
-#reportModal .modal-body img[src*="ACTIVITYDATE"] + .text-center *,
-#reportModal .modal-body img[src*="ACTIVITYCOUNT"] + .text-center *,
-#reportModal .modal-body img[src*="ACTIVITYTYPE"] + .text-center * {
+#reportModal .modal-body ::v-deep img[src*="ACTIVITYDATE"] + .text-center *,
+#reportModal .modal-body ::v-deep img[src*="ACTIVITYCOUNT"] + .text-center *,
+#reportModal .modal-body ::v-deep img[src*="ACTIVITYTYPE"] + .text-center * {
   color: var(--text-color) !important;
 }
 
-#reportModal .modal-body img[src*="ACTIVITYTYPE"] + .text-center pre {
+#reportModal .modal-body ::v-deep img[src*="ACTIVITYTYPE"] + .text-center pre {
   width: 100%;
   margin: 0;
   padding: 0;
@@ -829,10 +811,10 @@ export default {
   text-align: center;
 }
 
-html:not(.dark-mode) #reportModal .modal-body img[src*="ACTIVITYCOUNT"] + .text-center,
-html:not(.dark-mode) #reportModal .modal-body img[src*="ACTIVITYCOUNT"] + .text-center *,
-html:not(.dark-mode) #reportModal .modal-body img[src*="ACTIVITYTYPE"] + .text-center,
-html:not(.dark-mode) #reportModal .modal-body img[src*="ACTIVITYTYPE"] + .text-center * {
+html:not(.dark-mode) #reportModal .modal-body ::v-deep img[src*="ACTIVITYCOUNT"] + .text-center,
+html:not(.dark-mode) #reportModal .modal-body ::v-deep img[src*="ACTIVITYCOUNT"] + .text-center *,
+html:not(.dark-mode) #reportModal .modal-body ::v-deep img[src*="ACTIVITYTYPE"] + .text-center,
+html:not(.dark-mode) #reportModal .modal-body ::v-deep img[src*="ACTIVITYTYPE"] + .text-center * {
   color: #000 !important;
 }
 
@@ -848,16 +830,11 @@ html:not(.dark-mode) #reportModal .modal-body img[src*="ACTIVITYTYPE"] + .text-c
   word-break: break-word;
 }
 
-.modal-body a:hover,
+#reportModal .modal-body ::v-deep a:hover,
 .modal-header a:hover,
 .text-brand:hover,
 .actifit-link-plain:hover {
   text-decoration: none;
-}
-
-.markdown-editor .CodeMirror,
-.markdown-editor .CodeMirror-scroll {
-  min-height: 100px;
 }
 
 .reply-btn {
@@ -872,13 +849,179 @@ html:not(.dark-mode) #reportModal .modal-body img[src*="ACTIVITYTYPE"] + .text-c
   padding-left: 40px;
 }
 
-.share-links-actifit {
+#reportModal #modal-footer.post-detail-footer {
+  --post-footer-brand: #FF112D;
+  --post-footer-brand-dark: #D40E24;
+  --post-footer-border: #E6E8EB;
+  --post-footer-muted: #6B7280;
+  --post-footer-muted-soft: #9AA0A6;
+  --post-footer-green: #1E8E5A;
+  margin-top: 12px;
+  padding: 14px 15px 9px;
+  border-top: 1px solid var(--post-footer-border);
+  border-bottom: 1px solid var(--post-footer-border);
+  background: transparent !important;
+  color: var(--post-footer-muted) !important;
+  font-size: 12.5px;
+}
+
+#reportModal #modal-footer .post-detail-footer__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+}
+
+#reportModal #modal-footer .post-detail-footer__payout,
+#reportModal #modal-footer .post-detail-payout,
+#reportModal #modal-footer .post-detail-payout > span {
+  display: flex;
+  align-items: center;
+}
+
+#reportModal #modal-footer .post-detail-footer__payout {
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+#reportModal #modal-footer .post-detail-payout {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--post-footer-brand-dark);
+  font-weight: 700;
+}
+
+#reportModal #modal-footer .post-detail-payout > span {
+  gap: 8px;
+}
+
+#reportModal #modal-footer .post-detail-payout i:not(.post-detail-payout__paid),
+#reportModal #modal-footer .post-detail-payout__wait,
+#reportModal #modal-footer .post-detail-payout__muted {
+  color: var(--post-footer-muted-soft);
+}
+
+#reportModal #modal-footer.post-detail-footer .post-detail-payout__paid {
+  color: var(--post-footer-green);
+}
+
+#reportModal #modal-footer.post-detail-footer .post-detail-payout-toggle {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--post-footer-muted-soft);
+  cursor: pointer;
+}
+
+#reportModal #modal-footer.post-detail-footer .post-detail-payout-toggle:hover {
+  color: var(--post-footer-brand);
+}
+
+#reportModal #modal-footer.post-detail-footer .post-detail-payout-toggle:focus-visible {
+  outline: 2px solid var(--post-footer-brand);
+  outline-offset: 3px;
+}
+
+#reportModal #modal-footer.post-detail-footer .post-detail-footer__tokens {
+  margin-top: 10px;
+  color: var(--post-footer-muted);
   text-align: right;
 }
 
-.share-links-actifit span {
-  padding: 5px;
-  cursor: pointer;
+#reportModal #modal-footer.post-detail-footer .post-detail-footer__sharing {
+  flex: 0 0 100%;
+  margin-top: 6px;
+  text-align: right;
+}
+
+#reportModal #modal-footer.post-detail-footer .share-links-actifit {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  width: 100%;
+  gap: 4px;
+  text-align: right;
+}
+
+/* Ensure all interactive elements in share links have cursor pointer */
+#reportModal #modal-footer.post-detail-footer .share-links-actifit span,
+#reportModal #modal-footer.post-detail-footer .share-links-actifit network,
+#reportModal #modal-footer.post-detail-footer .share-links-actifit i,
+#reportModal #modal-footer.post-detail-footer .share-links-actifit ::v-deep a,
+#reportModal #modal-footer.post-detail-footer .share-links-actifit ::v-deep button,
+#reportModal #modal-footer.post-detail-footer .share-links-actifit ::v-deep [role="link"] {
+  cursor: pointer !important;
+}
+
+/* Style the span and anchor links */
+#reportModal #modal-footer.post-detail-footer .share-links-actifit span,
+#reportModal #modal-footer.post-detail-footer .share-links-actifit ::v-deep a,
+#reportModal #modal-footer.post-detail-footer .share-links-actifit ::v-deep button {
+  padding: 2px 4px;
+  color: var(--post-footer-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color .15s ease, background .15s ease;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* Hover states for all share link elements */
+#reportModal #modal-footer.post-detail-footer .share-links-actifit span:hover,
+#reportModal #modal-footer.post-detail-footer .share-links-actifit network:hover,
+#reportModal #modal-footer.post-detail-footer .share-links-actifit i:hover,
+#reportModal #modal-footer.post-detail-footer .share-links-actifit ::v-deep a:hover,
+#reportModal #modal-footer.post-detail-footer .share-links-actifit ::v-deep button:hover,
+#reportModal #modal-footer.post-detail-footer .share-links-actifit ::v-deep a:hover i,
+#reportModal #modal-footer.post-detail-footer .share-links-actifit ::v-deep button:hover i {
+  color: var(--post-footer-brand) !important;
+}
+
+.dark-mode #reportModal #modal-footer.post-detail-footer {
+  --post-footer-brand: #FF5266;
+  --post-footer-brand-dark: #FF7181;
+  --post-footer-border: rgba(255, 255, 255, .14);
+  --post-footer-muted: #ADB5BD;
+  --post-footer-muted-soft: #8F969D;
+  --post-footer-green: #62C995;
+}
+
+@media (max-width: 767px) {
+  #reportModal #modal-footer.post-detail-footer .post-detail-footer__summary,
+  #reportModal #modal-footer.post-detail-footer .post-detail-footer__payout {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  #reportModal #modal-footer.post-detail-footer .post-detail-footer__payout {
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+  }
+
+  #reportModal #modal-footer.post-detail-footer .post-detail-payout {
+    flex: 1 1 auto;
+    justify-content: flex-start;
+    text-align: left;
+    margin-left: 0;
+  }
+
+  #reportModal #modal-footer.post-detail-footer .post-detail-footer__tokens,
+  #reportModal #modal-footer.post-detail-footer .post-detail-footer__sharing,
+  #reportModal #modal-footer.post-detail-footer .share-links-actifit {
+    margin-left: auto;
+    text-align: right;
+  }
 }
 
 .pointer-cur-cls {

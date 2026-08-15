@@ -1,23 +1,30 @@
 <template>
-  <div class="row details mt-2">
-    <!-- Common Left Side Actions -->
-    <div class="col-6">
-      <a href="#" @click.prevent="$emit('vote-prompt')" data-toggle="modal" data-target="#voteModal" :class="{ 'text-brand': hasVoted }" :title="$t('votes')">
+  <div class="card-actions">
+    <div class="post-detail-footer__actions">
+      <a href="#" class="post-detail-action" v-if="showEdit" @click.prevent="$emit('edit')" :title="$t('Edit_note')">
+        <i class="fas fa-edit"></i>
+      </a>
+      <a href="#" class="post-detail-action" v-if="showDelete" @click.prevent="$emit('delete')" :title="$t('Delete_note')">
+        <i class="fas fa-trash-alt"></i><i class="fas fa-spin fa-spinner" v-if="deleting"></i>
+      </a>
+      <a href="#" class="post-detail-action" v-if="showReply" @click.prevent="$emit('reply')" :title="$t('Reply')">
+        <i class="fas fa-reply"></i>
+      </a>
+      <a href="#" class="post-detail-action" :class="{ 'post-detail-action--active': hasVoted }" @click.prevent="$emit('vote-prompt')" :data-toggle="voteModalTarget ? 'modal' : null" :data-target="voteModalTarget" :title="$t('votes')">
         <i class="far fa-thumbs-up"></i> {{ voteCount }}
       </a>
-      <a
-        href="#"
-        @click.prevent="$emit('open-modal')"
-        :data-toggle="modalTarget ? 'modal' : null"
-        :data-target="modalTarget"
-        :title="$t('comments')"
-      >
-      <i class="far fa-comments ml-2" :title="$t('comments')"></i> {{ cardData.children }}
+      <a href="#" class="post-detail-action" v-if="showComments && !commentsDisabled" :class="{ 'post-detail-action--active': commentsActive }" @click.prevent="$emit('open-modal')" :data-toggle="modalTarget ? 'modal' : null" :data-target="modalTarget" :aria-expanded="commentsActive ? 'true' : 'false'" :title="commentsTitle || $t('comments')">
+        <i class="far fa-comments"></i> {{ commentsCount !== null ? commentsCount : cardData.children }}
       </a>
-      <i class="far fa-share-square ml-2" @click.prevent="$emit('reblog')" v-if="user && cardData.author !== user.account.name" :title="$t('reblog')"></i>
+      <span v-else-if="showComments" class="post-detail-action post-detail-action--static">
+        <i class="far fa-comments"></i> {{ commentsCount !== null ? commentsCount : cardData.children }}
+      </span>
+      <a href="#" class="post-detail-action" @click.prevent="$emit('reblog')" v-if="showReblog && user && cardData.author !== user.account.name" :title="$t('reblog')">
+        <i class="far fa-share-square"></i>
+      </a>
     </div>
-    <!-- Slot for Different Right Side Actions -->
-    <div class="col-6 text-right">
+
+    <div class="post-detail-footer__extra-actions">
       <slot name="extra-actions"></slot>
     </div>
   </div>
@@ -26,27 +33,75 @@
 <script>
 export default {
   props: {
-    modalTarget: { type: String, required: true },
+    modalTarget: { type: String, default: null },
+    voteModalTarget: { type: String, default: '#voteModal' },
     cardData: { type: Object, required: true },
     user: { type: Object, default: null },
     voteCount: { type: Number, required: true },
-    hasVoted: { type: Boolean, required: true }
+    hasVoted: { type: Boolean, required: true },
+    showReply: { type: Boolean, default: false },
+    showReblog: { type: Boolean, default: true },
+    showEdit: { type: Boolean, default: false },
+    showDelete: { type: Boolean, default: false },
+    deleting: { type: Boolean, default: false },
+    showComments: { type: Boolean, default: true },
+    commentsCount: { type: Number, default: null },
+    commentsActive: { type: Boolean, default: false },
+    commentsDisabled: { type: Boolean, default: false },
+    commentsTitle: { type: String, default: '' }
   },
-  emits: ['vote-prompt', 'reblog', 'open-modal']
+  emits: ['vote-prompt', 'reblog', 'open-modal', 'reply', 'edit', 'delete']
 }
 </script>
 
 <style scoped>
-.details {
-  line-height: 1rem;
+.card-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  flex: 1 1 auto;
+  min-width: 0;
 }
-a {
-  color: #333;
+.post-detail-footer__actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
 }
-a:hover {
+.post-detail-footer__extra-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-left: auto;
+}
+.post-detail-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--post-footer-muted, #333);
   text-decoration: none;
+  transition: color .15s ease;
 }
-.text-brand {
-  color: #ff112d !important;
+.post-detail-action:hover,
+.post-detail-action--active {
+  color: var(--post-footer-brand, #ff112d);
+}
+.post-detail-action--static {
+  cursor: default;
+}
+.post-detail-action--static:hover {
+  color: inherit;
+}
+@media (max-width: 767px) {
+  .post-detail-footer__actions,
+  .post-detail-footer__extra-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .post-detail-footer__extra-actions {
+    margin-top: 10px;
+  }
 }
 </style>

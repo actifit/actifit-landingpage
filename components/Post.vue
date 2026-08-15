@@ -52,6 +52,7 @@
         <CardActions
           :cardData="post"
           modalTarget="#postModal"
+          voteModalTarget="#voteModal"
           :user="user"
           :voteCount="getVoteCount"
           :hasVoted="postUpvoted"
@@ -60,7 +61,7 @@
           @open-modal="post.pstId = pstId; $store.commit('setActivePost', post)"
         >
           <template #extra-actions>
-            <social-sharing :url="'https://actifit.io/@' + post.author + '/' + post.permlink" :title="post.title" :description="socialSharingDesc" :quote="socialSharingQuote" :hashtags="hashtags" twitter-user="actifit_fitness" inline-template>
+            <social-sharing :url="'https://actifit.io/@' + post.author + '/' + post.permlink" :title="post.title" :description="socialSharingDesc" :quote="socialSharingQuote" :hashtags="hashtags" twitter-user="actifit_fitness" network-tag="a" inline-template>
               <span class="share-links-actifit">
                 <network network="twitter"><i class="fab fa-x-twitter text-brand" title="twitter"></i></network>
               </span>
@@ -170,4 +171,30 @@ export default {
 .single { min-width: 17em; }
 .post { vertical-align: top; }
 .post-reblog { font-style:italic; }
+
+.share-links-actifit {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.share-links-actifit ::v-deep a,
+.share-links-actifit ::v-deep button {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 4px;
+  line-height: 1;
+  color: inherit;
+  text-decoration: none;
+  transition: color .15s ease;
+}
+
+.share-links-actifit ::v-deep a:hover,
+.share-links-actifit ::v-deep button:hover,
+.share-links-actifit ::v-deep a:hover i,
+.share-links-actifit ::v-deep button:hover i {
+  color: #ff112d !important;
+}
 </style>
