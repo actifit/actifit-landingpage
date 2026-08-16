@@ -41,6 +41,7 @@ module.exports = {
   Actifit: 'أكتيفيت',
   Slogan: 'اللياقة البدنية مربحة',
   Balance: 'الرصيد',
+  No_data_found_for_top_holders: 'لم يتم العثور على بيانات لأكبر الحائزين.',
   AFIT_Token: 'AFIT',
   My_Wallet: 'محفظتي',
   My_Activity: 'نشاطي',

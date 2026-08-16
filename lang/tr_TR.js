@@ -41,6 +41,7 @@ module.exports = {
   Actifit: 'Actifit',
   Slogan: 'Fit Olmak Kazandırır',
   Balance: 'Bakiye',
+  No_data_found_for_top_holders: 'En büyük sahipler için veri bulunamadı.',
   AFIT_Token: 'AFIT',
   My_Wallet: 'Cüzdanım',
   My_Activity: 'Aktivitem',

@@ -41,6 +41,7 @@ module.exports = {
   Actifit: 'Actifit',
   Slogan: '健康は報われる',
   Balance: '残高',
+  No_data_found_for_top_holders: '上位保有者のデータが見つかりません。',
   AFIT_Token: 'AFIT',
   My_Wallet: 'マイウォレット',
   My_Activity: 'マイアクティビティ',

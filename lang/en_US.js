@@ -38,6 +38,7 @@ module.exports = {
   Actifit: 'Actifit',
   Slogan: 'It Pays to be Fit',
   Balance: 'Balance',
+  No_data_found_for_top_holders: 'No data found for top holders.',
   AFIT_Token: 'AFIT',
   My_Wallet: 'My Wallet',
   My_Activity: 'My Activity',
