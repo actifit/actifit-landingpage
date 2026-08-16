@@ -2894,6 +2894,10 @@ export default {
 
       this.hiveHistoryLoading = true;
       try {
+        if (!this.hasHivePerVestsRatio()) {
+          await this.loadGlobalProperties();
+        }
+
         const accountName = this.displayUserData.name.toLowerCase();
         const history = await hive.api.getAccountHistoryAsync(accountName, -1, 500);
         const financialOperations = [
@@ -2974,9 +2978,19 @@ export default {
     formatHiveHistoryAmount(amount) {
       const [value, symbol] = amount.trim().split(' ');
       if (symbol !== 'VESTS') return amount;
+      if (!this.hasHivePerVestsRatio()) return amount;
 
       const hp = parseFloat(value) * this.hivePerVestsRatio;
-      return Number(hp.toFixed(3)) + ' HP';
+      return hp.toFixed(3) + ' HP';
+    },
+    hasHivePerVestsRatio() {
+      return Boolean(
+        this.properties &&
+        this.cur_bchain === 'HIVE' &&
+        this.properties.total_vesting_fund_hive &&
+        this.properties.total_vesting_shares &&
+        Number(this.properties.total_vesting_shares.split(' ')[0]) > 0
+      );
     },
     closeAllWalletActions() {
       this.fundActivityMode = this.CLOSED_MODE;
