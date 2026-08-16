@@ -16,6 +16,62 @@ const gadgetStats = [
 ]
 
 describe('market owned-gadgets section', () => {
+  it('auto-expands for searches and active filters', () => {
+    const shouldExpand = MarketPage.computed.shouldAutoExpandSidebarGroups
+
+    expect(shouldExpand.call({ searchQuery: '', activeFilterCount: 0 })).toBe(false)
+    expect(shouldExpand.call({ searchQuery: '', activeFilterCount: 1 })).toBe(true)
+    expect(shouldExpand.call({ searchQuery: 'gadget', activeFilterCount: 0 })).toBe(true)
+  })
+
+  it('restores collapsed groups after automatic expansion ends', () => {
+    const vm = {
+      sidebarGroupState: { ingame: false, real: true },
+      sidebarGroupStateSnapshot: null,
+      sidebarGroupKeys: ['ingame', 'real'],
+      $set: (target, key, value) => { target[key] = value }
+    }
+    const watcher = MarketPage.watch.shouldAutoExpandSidebarGroups.handler
+
+    watcher.call(vm, true, false)
+    expect(vm.sidebarGroupState).toEqual({ ingame: true, real: true })
+    expect(vm.sidebarGroupStateSnapshot).toEqual({ ingame: false, real: true })
+
+    watcher.call(vm, false, true)
+    expect(vm.sidebarGroupState).toEqual({ ingame: false, real: true })
+    expect(vm.sidebarGroupStateSnapshot).toBeNull()
+  })
+
+  it('toggles the persisted group state repeatedly while filters are active', () => {
+    const vm = {
+      sidebarGroupState: { ingame: true },
+      sidebarGroupUserToggles: {},
+      $refs: {},
+      $set: (target, key, value) => { target[key] = value },
+      getVueRefElement: (value) => value,
+      getSidebarScrollOwner: () => ({ el: null, top: 0 }),
+      shouldCompensateSidebarCollapse: () => false
+    }
+
+    MarketPage.methods.toggleSidebarGroup.call(vm, 'ingame')
+    expect(vm.sidebarGroupState.ingame).toBe(false)
+    MarketPage.methods.toggleSidebarGroup.call(vm, 'ingame')
+
+    expect(vm.sidebarGroupState.ingame).toBe(true)
+  })
+
+  it('keeps scroll compensation reachable for an offscreen open group', () => {
+    const hasScrolledPastToggle = MarketPage.methods.shouldCompensateSidebarCollapse.call(
+      {},
+      true,
+      { getBoundingClientRect: () => ({ bottom: -1 }) },
+      { getBoundingClientRect: () => ({ height: 100 }) },
+      { top: 0 }
+    )
+
+    expect(hasScrolledPastToggle).toBe(true)
+  })
+
   it('hides category filters that have no matching catalog products', () => {
     const filterOptions = [
       { value: '', labelKey: 'All' },
@@ -193,6 +249,14 @@ describe('market owned-gadgets section', () => {
     expect(marketPageSource).toContain('@media (max-width: 360px)')
   })
 
+  it('disables browser scroll anchoring during sidebar collapse compensation', () => {
+    expect(marketPageSource).toContain('overflow-anchor: none;')
+  })
+
+  it('keeps collapsed group rows mounted for stable layout measurement', () => {
+    expect(marketPageSource).toContain('v-show="isSidebarGroupOpen(group.type)"')
+  })
+
   it('opens mobile product details at the panel and restores the list position on back', () => {
     const originalPageYOffset = window.pageYOffset
     const originalScrollTo = window.scrollTo
@@ -222,6 +286,20 @@ describe('market owned-gadgets section', () => {
 
     window.scrollTo = originalScrollTo
     Object.defineProperty(window, 'pageYOffset', { configurable: true, value: originalPageYOffset })
+  })
+
+  it('returns mobile users to the list when a filter becomes active', () => {
+    const context = {
+      mobileShowDetail: true,
+      selectedProductId: 'available-gadget',
+      filteredProducts: [{ _id: 'available-gadget' }],
+      isMobileMarketView: () => true,
+      shouldAutoExpandSidebarGroups: true
+    }
+
+    MarketPage.methods.ensureSelection.call(context)
+
+    expect(context.mobileShowDetail).toBe(false)
   })
 
   it('positions mobile product details below the fixed header', () => {

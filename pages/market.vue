@@ -178,7 +178,7 @@
 				<!-- LEFT: browsable product list, grouped by category -->
 				<aside class="market-sidebar" :class="{ 'mobile-hidden': mobileShowDetail }"
 					:style="sidebarHeight ? { height: sidebarHeight + 'px' } : null">
-					<div class="sidebar-scroll">
+					<div class="sidebar-scroll" ref="sidebarScroll">
 						<div class="sidebar-group" :class="{
 							'sidebar-group-owned': group.type === 'bought' || group.type === 'activated',
 							'sidebar-group-saved': group.type === 'saved',
@@ -187,50 +187,84 @@
 							'sidebar-group-unavailable': group.type === 'unavailable'
 						}"
 							v-for="group in groupedProducts" :key="group.type">
-							<div class="sidebar-group-title">{{ $t(group.labelKey) }}</div>
-
-							<button type="button" class="sidebar-row" v-for="product in group.items" :key="product._id"
-								:class="{ active: selectedProductId === product._id }" @click="selectProduct(product)">
-								<span class="sidebar-row-thumb" :style="'background-image:url(' + rowImage(product) + ');'"></span>
-
-								<span class="sidebar-row-main">
-									<span class="sidebar-row-title">
-										<span class="sidebar-row-name">{{ product.name }}</span>
-										<span class="sidebar-row-level" :class="gadgetLevelClass(product.level)" v-if="product.level">{{ $t('level_short') }}{{ product.level }}</span>
-									</span>
-									<span class="sidebar-row-event" v-if="product.specialevent && product.event">{{ product.event }}</span>
-									<span class="sidebar-row-currencies" :aria-label="$t('purchase_currency')">
-										<span v-for="currency in purchaseCurrencies(product)" :key="currency"
-											class="sidebar-currency-badge" :class="'currency-' + currency.toLowerCase()">
-											<img :src="currency === 'HIVE' ? '/img/HIVE.png' : '/img/actifit_logo.png'" alt="">
-											{{ currency }}
-										</span>
-									</span>
+							<button
+								type="button"
+								class="sidebar-group-toggle"
+								:id="'sidebar-group-toggle-' + group.type"
+								:ref="'sidebarGroupToggle-' + group.type"
+								:aria-controls="'sidebar-group-panel-' + group.type"
+								:aria-expanded="isSidebarGroupOpen(group.type) ? 'true' : 'false'"
+								@click="toggleSidebarGroup(group.type)"
+							>
+								<span class="sidebar-group-title">
+									<i v-if="group.type === 'unavailable'" class="fas fa-lock sidebar-group-lock" aria-hidden="true"></i>
+									<span>{{ $t(group.labelKey) }}</span>
 								</span>
-
-								<span class="sidebar-row-side">
-									<span class="sidebar-row-owned"
-										v-if="(group.type === 'bought' || group.type === 'activated') && product.type === 'ingame'">
-										<span>{{ ownedGadgetCount(product) }} {{ $t('units') }}</span>
-										<span class="sidebar-row-owned-active" v-if="activeGadgetCount(product) > 0">
-											{{ activeGadgetCount(product) }} {{ $t('Active') }}
-										</span>
-									</span>
-									<span class="sidebar-row-price" v-else>
-										<template v-if="purchaseCurrencies(product).includes('AFIT') && rowAfitPrice(product) !== null">
-											<span class="sidebar-row-price-afit">{{ numberFormat(rowAfitPrice(product), 2) }}</span>
-											<span class="sidebar-row-price-afit-unit">AFIT</span>
-										</template>
-										<span v-else class="sidebar-row-price-afit">&mdash;</span>
-										<span class="sidebar-row-price-hive" v-if="purchaseCurrencies(product).includes('HIVE') && rowHivePrice(product) !== null">
-											{{ numberFormat(rowHivePrice(product), 3) }} {{ $t('HIVE') }}
-											<img src="/img/HIVE.png" class="token-logo-xs" alt="">
-										</span>
-									</span>
-					<span v-if="statusDot(product)" class="sidebar-row-status" :class="'status-dot-' + statusDot(product)"
-						:title="statusLabel(product)"></span>
-								</span>
+								<span class="sidebar-group-count">{{ group.items.length }}</span>
+								<i class="fas sidebar-group-chevron" :class="isSidebarGroupOpen(group.type) ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
 							</button>
+
+							<transition
+								name="sidebar-collapse"
+								@before-enter="prepareSidebarGroupExpand"
+								@enter="expandSidebarGroupBody"
+								@after-enter="resetSidebarGroupBodyHeight"
+								@before-leave="prepareSidebarGroupCollapse"
+								@leave="collapseSidebarGroupBody"
+								@after-leave="resetSidebarGroupBodyHeight"
+							>
+								<div
+									v-show="isSidebarGroupOpen(group.type)"
+									class="sidebar-group-body"
+									:id="'sidebar-group-panel-' + group.type"
+									role="region"
+									:aria-labelledby="'sidebar-group-toggle-' + group.type"
+									:ref="'sidebarGroupBody-' + group.type"
+								>
+									<button type="button" class="sidebar-row" v-for="product in group.items" :key="product._id"
+										:class="{ active: selectedProductId === product._id }" @click="selectProduct(product)">
+										<span class="sidebar-row-thumb" :style="'background-image:url(' + rowImage(product) + ');'"></span>
+
+										<span class="sidebar-row-main">
+											<span class="sidebar-row-title">
+												<span class="sidebar-row-name">{{ product.name }}</span>
+												<span class="sidebar-row-level" :class="gadgetLevelClass(product.level)" v-if="product.level">{{ $t('level_short') }}{{ product.level }}</span>
+											</span>
+											<span class="sidebar-row-event" v-if="product.specialevent && product.event">{{ product.event }}</span>
+											<span class="sidebar-row-currencies" :aria-label="$t('purchase_currency')">
+												<span v-for="currency in purchaseCurrencies(product)" :key="currency"
+													class="sidebar-currency-badge" :class="'currency-' + currency.toLowerCase()">
+													<img :src="currency === 'HIVE' ? '/img/HIVE.png' : '/img/actifit_logo.png'" alt="">
+													{{ currency }}
+												</span>
+											</span>
+										</span>
+
+										<span class="sidebar-row-side">
+											<span class="sidebar-row-owned"
+												v-if="(group.type === 'bought' || group.type === 'activated') && product.type === 'ingame'">
+												<span>{{ ownedGadgetCount(product) }} {{ $t('units') }}</span>
+												<span class="sidebar-row-owned-active" v-if="activeGadgetCount(product) > 0">
+													{{ activeGadgetCount(product) }} {{ $t('Active') }}
+												</span>
+											</span>
+											<span class="sidebar-row-price" v-else>
+												<template v-if="purchaseCurrencies(product).includes('AFIT') && rowAfitPrice(product) !== null">
+													<span class="sidebar-row-price-afit">{{ numberFormat(rowAfitPrice(product), 2) }}</span>
+													<span class="sidebar-row-price-afit-unit">AFIT</span>
+												</template>
+												<span v-else class="sidebar-row-price-afit">&mdash;</span>
+												<span class="sidebar-row-price-hive" v-if="purchaseCurrencies(product).includes('HIVE') && rowHivePrice(product) !== null">
+													{{ numberFormat(rowHivePrice(product), 3) }} {{ $t('HIVE') }}
+													<img src="/img/HIVE.png" class="token-logo-xs" alt="">
+												</span>
+											</span>
+											<span v-if="statusDot(product)" class="sidebar-row-status" :class="'status-dot-' + statusDot(product)"
+												:title="statusLabel(product)"></span>
+										</span>
+									</button>
+								</div>
+							</transition>
 						</div>
 					</div>
 				</aside>
@@ -341,6 +375,9 @@ export default {
 			mobileShowDetail: false,
 			mobileListScrollY: 0,
 			sidebarHeight: null,
+			sidebarGroupState: {},
+			sidebarGroupStateSnapshot: null,
+			sidebarGroupUserToggles: {},
 			filterOptions: [
 				{ value: '', labelKey: 'All' },
 				{ value: 'ingame', labelKey: 'Game' },
@@ -385,6 +422,12 @@ export default {
 		},
 		activeFilterCount() {
 			return [this.currentFilter, this.currentCurrency, this.user ? this.currentStatus : ''].filter(Boolean).length;
+		},
+		shouldAutoExpandSidebarGroups() {
+			return Boolean((this.searchQuery || '').trim()) || this.activeFilterCount > 0;
+		},
+		sidebarGroupKeys() {
+			return (Array.isArray(this.groupedProducts) ? this.groupedProducts : []).map(group => group.type);
 		},
 		availableFilterOptions() {
 			const products = Array.isArray(this.prodList)
@@ -462,6 +505,23 @@ export default {
 		currentStatus: 'ensureSelection',
 		currentCurrency: 'ensureSelection',
 		searchQuery: 'ensureSelection',
+		shouldAutoExpandSidebarGroups: {
+			handler(shouldExpand) {
+				if (shouldExpand) {
+					this.sidebarGroupStateSnapshot = { ...this.sidebarGroupState };
+					this.sidebarGroupUserToggles = {};
+					this.sidebarGroupKeys.forEach(groupType => this.$set(this.sidebarGroupState, groupType, true));
+				} else if (this.sidebarGroupStateSnapshot) {
+					this.sidebarGroupState = { ...this.sidebarGroupStateSnapshot };
+					this.sidebarGroupStateSnapshot = null;
+					this.sidebarGroupUserToggles = {};
+				}
+			}
+		},
+		groupedProducts: {
+			handler: 'syncSidebarGroups',
+			immediate: true
+		},
 		selectedProduct() {
 			this.$nextTick(this.observeDetailPanel);
 		},
@@ -672,6 +732,10 @@ export default {
 		 *  (e.g. category filter switches, or the previously selected item
 		 *  no longer matches) - defaults to the first item in the new list */
 		ensureSelection() {
+			if (this.isMobileMarketView() && this.shouldAutoExpandSidebarGroups) {
+				this.mobileShowDetail = false;
+			}
+
 			if (!this.filteredProducts.length) {
 				this.selectedProductId = null;
 				return;
@@ -680,6 +744,138 @@ export default {
 			if (!stillVisible) {
 				this.selectedProductId = this.filteredProducts[0]._id;
 			}
+		},
+
+		isSidebarGroupOpen(groupType) {
+			if (typeof this.sidebarGroupState[groupType] === 'undefined') {
+				return true;
+			}
+			return this.sidebarGroupState[groupType];
+		},
+
+		toggleSidebarGroup(groupType) {
+			const isOpen = typeof this.sidebarGroupState[groupType] === 'undefined' ? true : this.sidebarGroupState[groupType];
+			const nextState = !isOpen;
+			if (this.shouldAutoExpandSidebarGroups) {
+				this.$set(this.sidebarGroupUserToggles, groupType, true);
+			}
+			const toggleEl = this.getVueRefElement(this.$refs[`sidebarGroupToggle-${groupType}`]);
+			const bodyEl = this.getVueRefElement(this.$refs[`sidebarGroupBody-${groupType}`]);
+			const scrollOwner = this.getSidebarScrollOwner();
+			const shouldCompensate = this.shouldCompensateSidebarCollapse(isOpen, toggleEl, bodyEl, scrollOwner);
+			const initialHeight = shouldCompensate ? bodyEl.getBoundingClientRect().height : 0;
+			const initialScrollTop = shouldCompensate
+				? (scrollOwner && scrollOwner.el ? scrollOwner.el.scrollTop : window.pageYOffset)
+				: 0;
+
+			this.$set(this.sidebarGroupState, groupType, nextState);
+
+			if (shouldCompensate) {
+				this.$nextTick(() => {
+					this.compensateSidebarCollapse(bodyEl, scrollOwner, initialHeight, initialScrollTop);
+				});
+			}
+		},
+
+		getVueRefElement(refValue) {
+			return Array.isArray(refValue) ? refValue[0] : refValue;
+		},
+
+		getSidebarScrollOwner() {
+			const scrollEl = this.getVueRefElement(this.$refs.sidebarScroll);
+			if (
+				scrollEl &&
+				typeof scrollEl.getBoundingClientRect === 'function' &&
+				scrollEl.scrollHeight > scrollEl.clientHeight
+			) {
+				return {
+					el: scrollEl,
+					top: scrollEl.getBoundingClientRect().top
+				};
+			}
+			return {
+				el: null,
+				top: 0
+			};
+		},
+
+		shouldCompensateSidebarCollapse(isOpen, toggleEl, bodyEl, scrollOwner) {
+			return Boolean(
+				isOpen &&
+				typeof window !== 'undefined' &&
+				toggleEl &&
+				typeof toggleEl.getBoundingClientRect === 'function' &&
+				bodyEl &&
+				typeof bodyEl.getBoundingClientRect === 'function' &&
+				toggleEl.getBoundingClientRect().bottom < scrollOwner.top
+			);
+		},
+
+		compensateSidebarCollapse(bodyEl, scrollOwner, initialHeight, initialScrollTop) {
+			const adjustScroll = () => {
+				const currentHeight = bodyEl.getBoundingClientRect().height;
+				const scrollDelta = Math.max(0, initialHeight - currentHeight);
+				if (scrollOwner && scrollOwner.el) {
+					scrollOwner.el.scrollTop = Math.max(0, initialScrollTop - scrollDelta);
+				} else {
+					window.scrollTo({ top: Math.max(0, initialScrollTop - scrollDelta), behavior: 'auto' });
+				}
+
+				if (currentHeight > 0) {
+					requestAnimationFrame(adjustScroll);
+				}
+			};
+
+			requestAnimationFrame(adjustScroll);
+		},
+
+		prepareSidebarGroupExpand(el) {
+			el.style.height = '0px';
+			el.style.overflow = 'hidden';
+			el.style.opacity = '0';
+			el.style.transform = 'translateY(-4px)';
+		},
+
+		expandSidebarGroupBody(el, done) {
+			void el.offsetHeight;
+			el.style.transition = 'height 0.28s ease, opacity 0.2s ease, transform 0.2s ease';
+			el.style.height = `${el.scrollHeight}px`;
+			el.style.opacity = '1';
+			el.style.transform = 'translateY(0)';
+			setTimeout(done, 280);
+		},
+
+		prepareSidebarGroupCollapse(el) {
+			el.style.height = `${el.scrollHeight}px`;
+			el.style.overflow = 'hidden';
+			el.style.opacity = '1';
+			el.style.transform = 'translateY(0)';
+		},
+
+		collapseSidebarGroupBody(el, done) {
+			void el.offsetHeight;
+			el.style.transition = 'height 0.28s ease, opacity 0.2s ease, transform 0.2s ease';
+			el.style.height = '0px';
+			el.style.opacity = '0';
+			el.style.transform = 'translateY(-4px)';
+			setTimeout(done, 280);
+		},
+
+		resetSidebarGroupBodyHeight(el) {
+			el.style.height = '';
+			el.style.overflow = '';
+			el.style.transition = '';
+			el.style.opacity = '';
+			el.style.transform = '';
+		},
+
+		syncSidebarGroups() {
+			const groupKeys = this.sidebarGroupKeys;
+			groupKeys.forEach(groupType => {
+				if ((this.shouldAutoExpandSidebarGroups && !this.sidebarGroupUserToggles[groupType]) || typeof this.sidebarGroupState[groupType] === 'undefined') {
+					this.$set(this.sidebarGroupState, groupType, true);
+				}
+			});
 		},
 
 		/** AFIT amount shown by the Product card for the current payment split */
@@ -826,6 +1022,7 @@ export default {
 
 		window.addEventListener('resize', this.observeDetailPanel);
 		window.addEventListener('keydown', this.handleFilterDrawerKeydown);
+		this.syncSidebarGroups();
 		this.$nextTick(this.observeDetailPanel);
 
 	},
@@ -1487,17 +1684,86 @@ export default {
 	height: 100%;
 	overflow-x: hidden;
 	overflow-y: auto;
+	/* Manual collapse compensation owns scroll position while group heights animate. */
+	overflow-anchor: none;
 	overscroll-behavior: contain;
 	padding: 8px 0 16px;
 }
 
 .sidebar-group-title {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
 	font-size: 0.72rem;
 	font-weight: 700;
 	letter-spacing: 0.06em;
 	text-transform: uppercase;
 	color: #98a4ad;
-	padding: 16px 18px 8px;
+	padding: 0;
+}
+
+.sidebar-group-lock {
+	color: #ff112d;
+	font-size: 0.82rem;
+	line-height: 1;
+}
+
+.sidebar-group-toggle {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto auto;
+	align-items: center;
+	width: 100%;
+	column-gap: 12px;
+	padding: 16px 18px 10px;
+	border: none;
+	background: transparent;
+	text-align: left;
+	cursor: pointer;
+}
+
+.sidebar-group-toggle:focus {
+	outline: none;
+}
+
+.sidebar-group-toggle:focus-visible {
+	box-shadow: inset 0 0 0 2px rgba(255, 17, 45, 0.22);
+	border-radius: 10px;
+}
+
+.sidebar-group-count {
+	justify-self: center;
+	flex: 0 0 auto;
+	min-width: 24px;
+	padding: 2px 7px;
+	border-radius: 999px;
+	background: rgba(255, 17, 45, 0.08);
+	color: #ff112d;
+	font-size: 0.68rem;
+	font-weight: 800;
+	line-height: 1.2;
+	text-align: center;
+}
+
+.sidebar-group-chevron {
+	justify-self: end;
+	flex: 0 0 auto;
+	color: #c5cdd4;
+	font-size: 0.8rem;
+	transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.sidebar-group-toggle:hover .sidebar-group-chevron {
+	color: #ff112d;
+}
+
+.sidebar-group-body {
+	padding-bottom: 8px;
+	overflow: hidden;
+}
+
+.sidebar-collapse-enter-active,
+.sidebar-collapse-leave-active {
+	overflow: hidden;
 }
 
 .sidebar-row {
@@ -2113,6 +2379,27 @@ html.dark-mode .market-sidebar {
 }
 
 html.dark-mode .sidebar-group-title {
+	color: #7c8894;
+}
+
+html.dark-mode .sidebar-group-lock {
+	color: #ff9aa7;
+}
+
+html.dark-mode .sidebar-group-toggle:hover .sidebar-group-chevron {
+	color: #ff9aa7;
+}
+
+html.dark-mode .sidebar-group-toggle:focus-visible {
+	box-shadow: inset 0 0 0 2px rgba(255, 154, 167, 0.22);
+}
+
+html.dark-mode .sidebar-group-count {
+	background: rgba(255, 17, 45, 0.18);
+	color: #ff9aa7;
+}
+
+html.dark-mode .sidebar-group-chevron {
 	color: #7c8894;
 }
 

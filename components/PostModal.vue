@@ -48,7 +48,7 @@
             <i v-if="translationLoading" class="fas fa-spinner fa-spin text-brand" :title="$t('translating_content', 'Translating...')"></i>
             <i v-else-if="!showTranslated" class="fa-solid fa-language text-brand" v-on:click="translateContent" :title="$t('translate_content', 'Translate Content')"></i>
           </span>
-          <div class="p-1 modal-top-actions">
+          <div class="p-1 modal-top-actions legacy-post-actions">
               <span><a href="#" @click.prevent="toggleCommentBox()" :title="$t('Reply')"><i
                     class="text-white fas fa-reply"></i></a></span>
               <span>
@@ -76,23 +76,17 @@
         <SafeRemarkable class="modal-body" :source="displayBody" :options="{ 'html': true, 'breaks': true, 'typographer': true }" ref="remarkableContent"></SafeRemarkable>
         <div class="main-payment-info col-12 post-detail-footer" id="modal-footer">
           <div class="post-detail-footer__summary">
-            <div class="post-detail-footer__actions">
-              <a href="#" class="post-detail-action" @click.prevent="toggleCommentBox()" :title="$t('Reply')">
-                <i class="fas fa-reply"></i>
-              </a>
-              <a href="#" class="post-detail-action"
-                :class="{ 'post-detail-action--active': user && userVotedThisPost() == true }"
-                @click.prevent="votePrompt($event)" data-toggle="modal" data-target="#voteModal">
-                <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
-              </a>
-              <a href="#" class="post-detail-action" @click.prevent="headToComments()" :title="$t('comments')">
-                <i class="far fa-comments"></i> {{ post.children }}
-              </a>
-              <a href="#" class="post-detail-action" @click.prevent="$reblog(user, post)"
-                v-if="user && post.author != this.user.account.name" :title="$t('reblog')">
-                <i class="far fa-share-square"></i>
-              </a>
-            </div>
+            <CardActions
+          :cardData="post"
+          :user="user"
+          :voteCount="getVoteCount"
+          :hasVoted="!!(user && userVotedThisPost() == true)"
+          :showReply="true"
+          @reply="toggleCommentBox"
+          @vote-prompt="votePrompt($event)"
+          @open-modal="headToComments"
+          @reblog="$reblog(user, post)"
+        />
 
             <div class="post-detail-footer__payout">
               <span class="post-detail-payout" :title="postPayout">
@@ -125,7 +119,7 @@
             </div>
 
             <div class="post-detail-footer__sharing">
-              <social-sharing :url="formattedPostUrl" :title="post.title"
+              <social-sharing :url="formattedPostUrl" :title="post.title" network-tag="a"
                 description="Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity "
                 quote="Signup to Actifit, the mobile dapp that incentivizes healthy lifestyle and rewards your everyday activity"
                 :hashtags="hashtags" twitter-user="actifit_fitness" inline-template>
@@ -280,6 +274,7 @@ import SocialSharing from 'vue-social-sharing';
 import VueScrollTo from 'vue-scrollto'
 import { translateTextWithGemini } from '~/components/gemini-client.js';
 import { declinedPayoutMixin } from '~/plugins/commonCardMixin.js'
+import CardActions from '~/components/CardActions.vue'
 
 const scot_steemengine_api = process.env.steemEngineScot;
 const scot_hive_api_param = process.env.hiveEngineScotParam;
@@ -347,7 +342,8 @@ export default {
     CustomTextEditor,
     SocialSharing,
     SafeRemarkable,
-    UserHoverCard
+    UserHoverCard,
+    CardActions
   },
   computed: {
     cardData() { return this.post },
@@ -898,7 +894,7 @@ export default {
   },
 }
 </script>
-<style>
+<style scoped>
 .modal-dialog {
   transform: none !important;
 }
@@ -915,16 +911,11 @@ export default {
   word-break: break-word;
 }
 
-.modal-body a:hover,
+#postModal .modal-body ::v-deep a:hover,
 .modal-header a:hover,
 .text-brand:hover,
 .actifit-link-plain:hover {
   text-decoration: none;
-}
-
-.markdown-editor .CodeMirror,
-.markdown-editor .CodeMirror-scroll {
-  min-height: 100px;
 }
 
 .reply-btn {
@@ -939,13 +930,53 @@ export default {
   padding-left: 40px;
 }
 
+.legacy-post-actions {
+  display: none;
+}
+
 .share-links-actifit {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px;
   text-align: right;
 }
 
-.share-links-actifit span {
-  padding: 5px;
-  cursor: pointer;
+/* Ensure all interactive elements in share links have cursor pointer */
+.share-links-actifit span,
+.share-links-actifit network,
+.share-links-actifit i,
+.share-links-actifit ::v-deep a,
+.share-links-actifit ::v-deep button,
+.share-links-actifit ::v-deep [role="link"] {
+  cursor: pointer !important;
+}
+
+/* Style the span and anchor links */
+.share-links-actifit span,
+.share-links-actifit ::v-deep a,
+.share-links-actifit ::v-deep button {
+  padding: 2px 4px;
+  color: var(--post-footer-muted, #6B7280);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color .15s ease, background .15s ease;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* Hover states for all share link elements */
+.share-links-actifit span:hover,
+.share-links-actifit network:hover,
+.share-links-actifit i:hover,
+.share-links-actifit ::v-deep a:hover,
+.share-links-actifit ::v-deep button:hover,
+.share-links-actifit ::v-deep a:hover i,
+.share-links-actifit ::v-deep button:hover i {
+  color: var(--post-footer-brand, #FF112D) !important;
 }
 
 /* Match the neutral, compact action row used by revamped comments. */
@@ -973,7 +1004,6 @@ export default {
   gap: 10px 20px;
 }
 
-#modal-footer .post-detail-footer__actions,
 #modal-footer .post-detail-footer__payout,
 #modal-footer .post-detail-payout,
 #modal-footer .post-detail-payout > span {
@@ -981,51 +1011,37 @@ export default {
   align-items: center;
 }
 
-#modal-footer .post-detail-footer__actions {
-  gap: 16px;
-}
-
 #modal-footer .post-detail-footer__payout {
   justify-content: flex-end;
   flex-wrap: wrap;
   gap: 12px;
+  flex: 0 0 auto;
+  margin-left: auto;
 }
 
-#modal-footer .post-detail-action {
-  display: inline-flex;
+#modal-footer.post-detail-footer .post-detail-payout {
+  display: flex;
   align-items: center;
-  gap: 5px;
-  color: var(--post-footer-muted);
-  text-decoration: none;
-  transition: color .15s ease;
-}
-
-#modal-footer .post-detail-action:hover,
-#modal-footer .post-detail-action--active {
-  color: var(--post-footer-brand);
-}
-
-#modal-footer .post-detail-payout {
   gap: 6px;
   color: var(--post-footer-brand-dark);
   font-weight: 700;
 }
 
-#modal-footer .post-detail-payout > span {
+#modal-footer.post-detail-footer .post-detail-payout > span {
   gap: 8px;
 }
 
-#modal-footer .post-detail-payout i:not(.post-detail-payout__paid),
-#modal-footer .post-detail-payout__wait,
-#modal-footer .post-detail-payout__muted {
+#modal-footer.post-detail-footer .post-detail-payout i:not(.post-detail-payout__paid),
+#modal-footer.post-detail-footer .post-detail-payout__wait,
+#modal-footer.post-detail-footer .post-detail-payout__muted {
   color: var(--post-footer-muted-soft);
 }
 
-#modal-footer .post-detail-payout__paid {
+#modal-footer.post-detail-footer .post-detail-payout__paid {
   color: var(--post-footer-green);
 }
 
-#modal-footer .post-detail-payout-toggle {
+#modal-footer.post-detail-footer .post-detail-payout-toggle {
   padding: 0;
   border: 0;
   background: transparent;
@@ -1033,34 +1049,34 @@ export default {
   cursor: pointer;
 }
 
-#modal-footer .post-detail-payout-toggle:hover {
+#modal-footer.post-detail-footer .post-detail-payout-toggle:hover {
   color: var(--post-footer-brand);
 }
 
-#modal-footer .post-detail-payout-toggle:focus-visible {
+#modal-footer.post-detail-footer .post-detail-payout-toggle:focus-visible {
   outline: 2px solid var(--post-footer-brand);
   outline-offset: 3px;
 }
 
-#modal-footer .post-detail-footer__tokens {
+#modal-footer.post-detail-footer .post-detail-footer__tokens {
   margin-top: 10px;
   color: var(--post-footer-muted);
   text-align: right;
 }
 
-#modal-footer .post-detail-footer__sharing {
+#modal-footer.post-detail-footer .post-detail-footer__sharing {
   flex: 0 0 100%;
   margin-top: 6px;
   text-align: right;
 }
 
-#modal-footer .share-links-actifit span {
+#modal-footer.post-detail-footer .share-links-actifit span {
   padding: 2px 3px;
   color: var(--post-footer-muted);
   transition: color .15s ease;
 }
 
-#modal-footer .share-links-actifit span:hover {
+#modal-footer.post-detail-footer .share-links-actifit span:hover {
   color: var(--post-footer-brand);
 }
 
@@ -1074,21 +1090,32 @@ export default {
 }
 
 @media (max-width: 767px) {
-  #modal-footer .post-detail-footer__summary,
-  #modal-footer .post-detail-footer__payout {
+  #modal-footer.post-detail-footer .post-detail-footer__summary,
+  #modal-footer.post-detail-footer .post-detail-footer__payout {
     align-items: flex-start;
     flex-direction: column;
   }
 
-  #modal-footer .post-detail-footer__payout {
+  #modal-footer.post-detail-footer .post-detail-footer__payout {
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-between;
     gap: 8px;
+    width: 100%;
   }
 
-  #modal-footer .post-detail-footer__tokens,
-  #modal-footer .post-detail-footer__sharing,
-  #modal-footer .share-links-actifit {
-    margin-left: 0;
+  #modal-footer.post-detail-footer .post-detail-payout {
+    flex: 1 1 auto;
+    justify-content: flex-start;
     text-align: left;
+    margin-left: 0;
+  }
+
+  #modal-footer.post-detail-footer .post-detail-footer__tokens,
+  #modal-footer.post-detail-footer .post-detail-footer__sharing,
+  #modal-footer.post-detail-footer .share-links-actifit {
+    margin-left: auto;
+    text-align: right;
   }
 }
 
