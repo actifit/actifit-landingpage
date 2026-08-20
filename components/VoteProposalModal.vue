@@ -100,7 +100,9 @@ export default {
       }
     },
     adjustVisibility(){
-      this.visible = !this.userVotedProposal();
+      // Popup disabled for now — re-enable for Actifit's next DHF proposal by restoring:
+      //   this.visible = !this.userVotedProposal();
+      this.visible = false;
     }
   },
   async mounted() {
