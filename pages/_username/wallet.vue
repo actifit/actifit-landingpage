@@ -39,25 +39,31 @@
           </div>
         </section>
 
-        <nav v-if="!nonAuthUser" class="wallet-quick-actions" aria-label="Wallet quick actions">
-          <button class="wallet-pill primary" type="button" v-on:click="transferFunds(cur_bchain)">
-            <i class="fas fa-paper-plane"></i>{{ $t('TRANSFER_FUNDS_ACTION_TEXT') }}
+        <nav v-if="!nonAuthUser" class="wallet-quick-actions" ref="quickActions" aria-label="Wallet quick actions">
+          <button class="wallet-pill primary" type="button" :title="$t('TRANSFER_FUNDS_ACTION_TEXT')"
+            v-on:click="transferFunds(cur_bchain)">
+            <i class="fas fa-paper-plane"></i>{{ $t('wa_transfer') }}
           </button>
-          <button class="wallet-pill" type="button" v-on:click="showClaimableRewards()">
-            <i class="fas fa-gift"></i>{{ $t('Check_Claimable_Rewards') }}
+          <button v-for="(act, i) in walletQuickActions" :key="act.id" v-show="i < visibleActionCount" data-qa-pill
+            class="wallet-pill" type="button" :title="act.full" v-on:click="act.run()">
+            <img v-if="act.img" :src="act.img" width="16" height="16" alt=""><i v-else :class="act.icon"></i>{{ act.short }}
           </button>
-          <button class="wallet-pill" type="button" v-on:click="fetchDelegations(false)">
-            <i class="fas fa-donate"></i>{{ $t('FETCH_MY_DELEGATIONS') }}
-          </button>
-          <button class="wallet-pill" type="button" v-on:click="scrollToTransactionHistory">
-            <i class="fas fa-file-invoice"></i>{{ $t('AFIT_Transaction_History') }}
-          </button>
-          <button class="wallet-pill" type="button" v-on:click="showBSCAddress()">
-            <img src="/img/binance-logo.png" width="16" height="16" alt="">{{ $t('bsc_wallet') }}
-          </button>
+          <div class="wallet-more" v-show="overflowActions.length">
+            <button type="button" class="wallet-pill wallet-more-btn" :aria-expanded="moreOpen ? 'true' : 'false'"
+              aria-haspopup="true" v-on:click.stop="moreOpen = !moreOpen">
+              <i class="fas fa-ellipsis-h"></i>{{ $t('wallet_more') }}<i class="fas fa-chevron-down wallet-more-caret"></i>
+            </button>
+            <div class="wallet-more-menu" v-show="moreOpen" role="menu">
+              <button v-for="act in overflowActions" :key="'m-' + act.id" type="button" class="wallet-more-item"
+                role="menuitem" v-on:click="act.run(); moreOpen = false">
+                <img v-if="act.img" :src="act.img" width="16" height="16" alt=""><i v-else :class="act.icon"></i>{{ act.full }}
+              </button>
+            </div>
+          </div>
+          <span v-if="loadingDeleg" class="wallet-qa-spin"><i class="fas fa-spin fa-spinner"></i></span>
         </nav>
 
-        <div class="row top-action-container text-right">
+        <div class="row top-action-container">
           <div class="col-auto text-left wallet-toolbar-left">
             <span class="btn btn-brand mb-1"
               :title="show_only_tokens_interest ? $t('show_all_tokens') : $t('show_core_tokens')"
@@ -91,23 +97,16 @@
               </button>
             </div>
           </div>
-          <div class="col-auto ml-auto text-right wallet-toolbar-right">
-
-            <span class="btn btn-brand mb-1" :title="$t('Check_Pending_Rewards')">
-              <a href="#" id="pendingRewardsKicker" name="pendingRewardsKicker" ref="pendingRewardsKicker" class=""
-                data-toggle="modal" data-target="#pendingRewardsModal"><i class="far fa-solid fa-hourglass"></i></a>
-            </span>
-
-            <span class="btn btn-brand mb-1" :title="$t('FETCH_MY_RC_DELEGATIONS')"
-              v-on:click="fetchRCDelegations(false)">
-              <i class="fas fa-bolt"></i>
-            </span>
-
-            <span v-if="loadingDeleg">
-              <i class="fas fa-spin fa-spinner"></i>
-            </span>
+          <div class="col wallet-toolbar-search" v-if="userTokensWallet >= 0">
+            <i class="fas fa-search wallet-search-icon"></i>
+            <input type="text" v-model="tokenSearch" class="wallet-search-input"
+              :placeholder="$t('search_tokens_ph')" :aria-label="$t('search_tokens_ph')">
+            <button v-if="tokenSearch" type="button" class="wallet-search-clear" v-on:click="tokenSearch = ''"
+              aria-label="Clear search"><i class="fas fa-times"></i></button>
           </div>
         </div>
+        <a href="#" id="pendingRewardsKicker" name="pendingRewardsKicker" ref="pendingRewardsKicker" class="d-none"
+          data-toggle="modal" data-target="#pendingRewardsModal" aria-hidden="true"></a>
         <div class="wallet-container" v-if="userTokensWallet >= 0">
           <div class="row font-weight-bold token-entry thick-bottom head-title">
             <div class="col-2 clickable" v-on:click="sortTokenData('symbol')">Token
@@ -134,8 +133,9 @@
               </span></div>
             <div class="col-lg-2 col-1"><i class="fa-solid fa-wave-square" :title="$t('Actions')"></i></div>
           </div>
-          <h2 class="wallet-asset-group-heading">{{ $t('off_chain') }}</h2>
-          <div class="token-entry row main-token">
+          <div v-if="noSearchMatches" class="wallet-no-match">{{ $t('no_tokens_match') }}</div>
+          <h2 class="wallet-asset-group-heading" v-if="matchesTokenSearch('AFIT')">{{ $t('off_chain') }}</h2>
+          <div class="token-entry row main-token" v-if="matchesTokenSearch('AFIT')">
             <div class="col-2 text-left wallet-token-name"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo" alt="">AFIT</div>
             <div class="col-2 col-lg-1 wallet-token-location">{{ $t('actifit_wallet') }}</div>
             <div class="col-2 text-right wallet-token-balance" :data-label="$t('Available')">{{ formattedUserAfit }}</div>
@@ -172,8 +172,8 @@
             </div>
           </div>
           <div ref="afitActionAnchor" class="wallet-core-action-anchor" aria-hidden="true"></div>
-          <h2 class="wallet-asset-group-heading">{{ $t('main_chain') }}</h2>
-          <div class="token-entry row main-token">
+          <h2 class="wallet-asset-group-heading" v-if="groupMatchesSearch([nativeSymbol, 'HP', nativeStable])">{{ $t('main_chain') }}</h2>
+          <div class="token-entry row main-token" v-if="groupMatchesSearch([nativeSymbol, 'HP'])">
             <div class="col-2 text-left wallet-token-name">
               <span v-if="cur_bchain == 'HIVE'"><img src="/img/HIVE.png" class="mr-1 mini-token-logo" alt="">HIVE</span>
               <span v-else-if="cur_bchain == 'STEEM'"><img src="/img/STEEM.png"
@@ -306,7 +306,7 @@
 
 
 
-          <div class="token-entry row main-token" v-if="cur_bchain != 'BLURT'">
+          <div class="token-entry row main-token" v-if="cur_bchain != 'BLURT' && matchesTokenSearch(nativeStable)">
             <div class="col-2 text-left wallet-token-name">
               <span v-if="cur_bchain == 'HIVE'"><img src="/img/HIVE.png" class="mr-1 mini-token-logo" alt="">HBD</span>
               <span v-else-if="cur_bchain == 'STEEM'"><img src="/img/STEEM.png" class="mr-1 mini-token-logo" alt="">SBD</span>
@@ -424,8 +424,8 @@
           </transition>
 
           <div ref="coreActionAnchor" class="wallet-core-action-anchor" aria-hidden="true"></div>
-          <h2 class="wallet-asset-group-heading">{{ $t('BSC') }}</h2>
-          <div class="token-entry row main-token">
+          <h2 class="wallet-asset-group-heading" v-if="groupMatchesSearch(['AFIT', 'AFITX', 'BNB', 'LP'])">{{ $t('BSC') }}</h2>
+          <div class="token-entry row main-token" v-if="matchesTokenSearch('AFIT')">
             <div class="col-2 text-left wallet-token-name"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo" alt="">AFIT</div>
             <div class="col-2 col-lg-1 wallet-token-location">{{ $t('BSC') }}</div>
             <div class="col-2 text-right wallet-token-balance" :data-label="$t('Available')">{{ formattedUserAfitBSC }}</div>
@@ -445,7 +445,7 @@
             </div>
           </div>
 
-          <div class="token-entry row main-token">
+          <div class="token-entry row main-token" v-if="matchesTokenSearch('AFIT-BNB LP')">
             <div class="col-2 text-left wallet-token-name"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo" alt="">AFIT-BNB LP</div>
             <div class="col-2 col-lg-1 wallet-token-location">{{ $t('BSC') }}</div>
             <div class="col-2 text-right wallet-token-balance" :data-label="$t('Available')">{{ formattedUserAfitBNBLPBSC }}</div>
@@ -461,7 +461,7 @@
           </div>
 
 
-          <div class="token-entry row main-token">
+          <div class="token-entry row main-token" v-if="matchesTokenSearch('AFITX')">
             <div class="col-2 text-left wallet-token-name"><img src="/img/AFITX.png" class="mr-1 mini-token-logo" alt="">AFITX</div>
             <div class="col-2 col-lg-1 wallet-token-location">{{ $t('BSC') }}</div>
             <div class="col-2 text-right wallet-token-balance" :data-label="$t('Available')">{{ formattedUserAFITXBSC }}</div>
@@ -481,7 +481,7 @@
             </div>
           </div>
 
-          <div class="token-entry row main-token">
+          <div class="token-entry row main-token" v-if="matchesTokenSearch('AFITX-BNB LP')">
             <div class="col-2 text-left wallet-token-name"><img src="/img/AFITX.png" class="mr-1 mini-token-logo" alt="">AFITX-BNB LP</div>
             <div class="col-2 col-lg-1 wallet-token-location">{{ $t('BSC') }}</div>
             <div class="col-2 text-right wallet-token-balance" :data-label="$t('Available')">{{ formattedUserAFITXBNBLPBSC }}</div>
@@ -498,7 +498,7 @@
 
 
           <div class="engine-token-section" v-if="!loading && !walletDataRefreshing && ((Array.isArray(tokenMetrics) && tokenMetrics.length > 0) || (Array.isArray(tokensOfInterestBal) && tokensOfInterestBal.length > 0))">
-            <h2 class="wallet-asset-group-heading">{{ cur_bchain == 'STEEM' ? $t('Your_Token_Balance') : $t('Your_HE_Token_Balance') }}</h2>
+            <h2 class="wallet-asset-group-heading" v-if="engineHasSearchMatch()">{{ cur_bchain == 'STEEM' ? $t('Your_Token_Balance') : $t('Your_HE_Token_Balance') }}</h2>
             <!--<h5 class="token-title" v-if="cur_bchain == 'STEEM'">{{ $t('Your_Token_Balance') }}</h5>
 				  <h5 class="token-title" v-else>{{ $t('Your_HE_Token_Balance') }}<span v-if="cur_bchain=='BLURT'"><i class="fas fa-info-circle" v-on:click="notifySwitchChain()"></i></span></h5>-->
             <div v-if="Array.isArray(tokensOfInterestBal) && tokensOfInterestBal.length > 0 && renderToken(token)" class="token-entry row main-token"
@@ -2251,6 +2251,10 @@ export default {
       rcDelgArray: [],
       show_only_tokens_interest: true,
       hide_small_balances: false,
+      tokenSearch: '', // free-text token filter for the list toolbar
+      visibleActionCount: 99, // how many secondary action pills fit before the "More" menu (set by measureQuickActions)
+      moreOpen: false, // "More" overflow menu open state
+      actionPillWidths: [], // cached widths of the secondary pills, measured once
       settings_set: false,
       user_settings: {},
       save_progress: false,
@@ -2295,6 +2299,36 @@ export default {
     ...mapGetters('steemconnect', ['user']),
     ...mapGetters('steemconnect', ['stdLogin']),
     ...mapGetters(['userTokens', 'transactions', 'userRank', 'bchain']),
+    // Secondary wallet actions (Transfer is the always-visible primary, rendered separately).
+    // `short` shows in the pill, `full` is the tooltip and the label used inside the More menu.
+    walletQuickActions() {
+      return [
+        { id: 'claimable', icon: 'fas fa-gift', short: this.$t('wa_claimable'), full: this.$t('Check_Claimable_Rewards'), run: () => this.showClaimableRewards() },
+        { id: 'pending', icon: 'far fa-solid fa-hourglass', short: this.$t('wa_pending'), full: this.$t('Check_Pending_Rewards'), run: () => this.openPendingRewards() },
+        { id: 'hp', icon: 'fas fa-donate', short: this.$t('wa_hp_deleg'), full: this.$t('FETCH_MY_DELEGATIONS'), run: () => this.fetchDelegations(false) },
+        { id: 'rc', icon: 'fas fa-bolt', short: this.$t('wa_rc_deleg'), full: this.$t('FETCH_MY_RC_DELEGATIONS'), run: () => this.fetchRCDelegations(false) },
+        { id: 'history', icon: 'fas fa-file-invoice', short: this.$t('wa_history'), full: this.$t('AFIT_Transaction_History'), run: () => this.scrollToTransactionHistory() },
+        { id: 'bsc', img: '/img/binance-logo.png', short: this.$t('wa_bsc'), full: this.$t('bsc_wallet'), run: () => this.showBSCAddress() },
+      ];
+    },
+    overflowActions() {
+      return this.walletQuickActions.slice(this.visibleActionCount);
+    },
+    // native chain symbols, used so the search box can match the core main-chain rows
+    nativeSymbol() {
+      return this.cur_bchain === 'STEEM' ? 'STEEM' : (this.cur_bchain === 'BLURT' ? 'BLURT' : 'HIVE');
+    },
+    nativeStable() {
+      return this.cur_bchain === 'STEEM' ? 'SBD' : 'HBD';
+    },
+    // true when a search is active but nothing (static or engine) matches — drives the empty state
+    noSearchMatches() {
+      if (!(this.tokenSearch || '').trim()) return false;
+      return !this.matchesTokenSearch('AFIT')
+        && !this.groupMatchesSearch([this.nativeSymbol, 'HP', this.nativeStable])
+        && !this.groupMatchesSearch(['AFIT', 'AFITX', 'BNB', 'LP'])
+        && !this.engineHasSearchMatch();
+    },
     isCoreAfitActionOpen() {
       return [
         this.MOVE_AFITX_SE_HE,
@@ -2499,6 +2533,15 @@ export default {
   },
   watch: {
     user: 'fetchUserData',
+    nonAuthUser(v) {
+      // nav is v-if="!nonAuthUser" — once the visitor is authed it appears, so (re)wire overflow
+      if (!v) this.$nextTick(this.setupQuickActionsOverflow);
+    },
+    '$i18n.locale'() {
+      // translated labels change pill widths — re-measure from scratch
+      this.actionPillWidths = [];
+      this.$nextTick(this.measureQuickActions);
+    },
     tokenMetrics: 'formattedTotAccountVal',
     steemPrice: 'formattedTotAccountVal',
     afitBSCPrice: 'formattedTotAccountVal',
@@ -2754,6 +2797,8 @@ export default {
     },
 
     renderToken(token) {
+      //free-text search filter (empty search matches everything)
+      if (!this.matchesTokenSearch(token && token.symbol)) return false;
       //check small balances flag
       if (this.hide_small_balances && this.usdVal(token, true) < 1) {
         return false;
@@ -2761,6 +2806,83 @@ export default {
       //check show only tokens of interest flag
       if (!this.show_only_tokens_interest) return true;
       return this.show_only_tokens_interest && tokensOfInterest.includes(token.symbol)
+    },
+    // true when the symbol matches the current token-search box (empty search matches everything)
+    matchesTokenSearch(symbol) {
+      const q = (this.tokenSearch || '').trim().toLowerCase();
+      if (!q) return true;
+      return String(symbol || '').toLowerCase().indexOf(q) !== -1;
+    },
+    // true when ANY of the given symbols matches — used to show/hide a whole asset group heading
+    groupMatchesSearch(symbols) {
+      const q = (this.tokenSearch || '').trim().toLowerCase();
+      if (!q) return true;
+      return symbols.some((s) => String(s || '').toLowerCase().indexOf(q) !== -1);
+    },
+    // true when at least one engine token still passes the current filters (incl. search)
+    engineHasSearchMatch() {
+      if (!(this.tokenSearch || '').trim()) return true;
+      return Array.isArray(this.tokensOfInterestBal) && this.tokensOfInterestBal.some((t) => this.renderToken(t));
+    },
+    openPendingRewards() {
+      if (this.$refs.pendingRewardsKicker) this.$refs.pendingRewardsKicker.click();
+    },
+    closeMoreMenu() {
+      this.moreOpen = false;
+    },
+    // Priority overflow: keep as many secondary pills visible as fit on one line; the rest
+    // fold into the "More" menu. Pill widths are measured once (they don't change); only the
+    // container width varies on resize.
+    measureQuickActions() {
+      const nav = this.$refs.quickActions;
+      if (!nav) return;
+      const pills = Array.prototype.slice.call(nav.querySelectorAll('[data-qa-pill]'));
+      if (!pills.length) { this.visibleActionCount = 0; return; }
+      // Cache pill widths the first time they're all rendered.
+      if (this.actionPillWidths.length !== pills.length) {
+        if (this.visibleActionCount < pills.length) { this.visibleActionCount = pills.length; this.$nextTick(this.measureQuickActions); return; }
+        this.actionPillWidths = pills.map(function (p) { return p.getBoundingClientRect().width; });
+      }
+      const cs = window.getComputedStyle(nav);
+      const gap = parseFloat(cs.columnGap || cs.gap) || 10;
+      const primary = nav.querySelector('.wallet-pill.primary');
+      const primaryW = primary ? primary.getBoundingClientRect().width : 0;
+      const spin = nav.querySelector('.wallet-qa-spin');
+      const spinW = spin ? spin.getBoundingClientRect().width + gap : 0;
+      const total = nav.clientWidth - spinW;
+      const widths = this.actionPillWidths;
+      // Does everything fit without a More button?
+      let sumAll = primaryW;
+      for (let i = 0; i < widths.length; i++) sumAll += gap + widths[i];
+      if (sumAll <= total) { this.visibleActionCount = widths.length; return; }
+      // Otherwise reserve room for the More button.
+      const moreReserve = 116;
+      const avail = total - primaryW - gap - moreReserve;
+      let used = 0, count = 0;
+      for (let i = 0; i < widths.length; i++) {
+        if (used + widths[i] + gap <= avail) { used += widths[i] + gap; count++; } else break;
+      }
+      this.visibleActionCount = count;
+    },
+    // Wire the action-bar overflow: measure now, then keep it in sync on resize; close the
+    // More menu on an outside click. Safe to call more than once (guards against re-binding).
+    setupQuickActionsOverflow() {
+      if (!this.$refs.quickActions) return;
+      this.measureQuickActions();
+      if (!this._qaRO && typeof ResizeObserver !== 'undefined') {
+        this._qaRO = new ResizeObserver(() => this.measureQuickActions());
+        this._qaRO.observe(this.$refs.quickActions);
+      }
+      if (!this._qaBound) {
+        this._qaClickHandler = (e) => {
+          const wrap = this.$refs.quickActions && this.$refs.quickActions.querySelector('.wallet-more');
+          if (this.moreOpen && wrap && !wrap.contains(e.target)) this.moreOpen = false;
+        };
+        this._qaResizeHandler = () => this.measureQuickActions();
+        document.addEventListener('click', this._qaClickHandler);
+        window.addEventListener('resize', this._qaResizeHandler);
+        this._qaBound = true;
+      }
     },
 
     switchTokenDisplay() {
@@ -8622,6 +8744,9 @@ export default {
   },
   destroyed() {
     clearInterval(this.runningInterval);
+    if (this._qaRO) { this._qaRO.disconnect(); this._qaRO = null; }
+    if (this._qaClickHandler) document.removeEventListener('click', this._qaClickHandler);
+    if (this._qaResizeHandler) window.removeEventListener('resize', this._qaResizeHandler);
   },
   updated: function () {
     this.$nextTick(function () {
@@ -8798,6 +8923,7 @@ export default {
       console.error('Error in mounted:', err);
       this.loading = false;
     }
+    this.$nextTick(this.setupQuickActionsOverflow);
   }
 }
 </script>
@@ -9093,10 +9219,11 @@ export default {
 .wallet-stat-card small { color: var(--wallet-muted); margin-top: 4px; }
 
 .wallet-quick-actions {
+  align-items: center;
   display: flex;
+  flex-wrap: nowrap;
   gap: 10px;
   margin-bottom: 22px;
-  overflow-x: auto;
   padding: 1px 1px 5px;
 }
 
@@ -9118,6 +9245,90 @@ export default {
 
 .wallet-pill:hover { border-color: #ed1c24; color: #ff5258; transform: translateY(-1px); }
 .wallet-pill.primary { background: #ed1c24; border-color: #ed1c24; color: #fff; }
+.wallet-pill.primary:hover { color: #fff; }
+.wallet-pill { cursor: pointer; white-space: nowrap; }
+
+/* action-bar overflow ("More") menu */
+.wallet-more { position: relative; flex: 0 0 auto; }
+.wallet-more-btn { cursor: pointer; }
+.wallet-more-caret { font-size: 10px; margin-left: 2px; }
+.wallet-more-menu {
+  background: var(--wallet-surface);
+  border: 1px solid var(--wallet-border);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .18);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  left: 0;
+  min-width: 230px;
+  padding: 6px;
+  position: absolute;
+  top: calc(100% + 8px);
+  z-index: 30;
+}
+.wallet-more-item {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  color: var(--wallet-text);
+  cursor: pointer;
+  display: flex;
+  font-size: 13px;
+  font-weight: 600;
+  gap: 10px;
+  padding: 9px 11px;
+  text-align: left;
+  white-space: nowrap;
+  width: 100%;
+}
+.wallet-more-item:hover { background: var(--wallet-surface-2); color: #ff5258; }
+.wallet-more-item i, .wallet-more-item img { width: 16px; text-align: center; }
+.wallet-qa-spin { flex: 0 0 auto; color: var(--wallet-muted); }
+
+/* token search in the list toolbar */
+.wallet-toolbar-search {
+  align-items: center;
+  background: var(--wallet-surface);
+  border: 1px solid var(--wallet-border);
+  border-radius: 9px;
+  display: flex;
+  gap: 8px;
+  margin: 0 0 1px auto;
+  max-width: 340px;
+  min-width: 0;
+  padding: 0 12px;
+}
+.wallet-search-icon { color: var(--wallet-muted); font-size: 13px; flex: 0 0 auto; }
+.wallet-search-input {
+  background: transparent;
+  border: 0;
+  color: var(--wallet-text);
+  flex: 1 1 auto;
+  font-size: 13px;
+  min-width: 0;
+  outline: none;
+  padding: 9px 0;
+}
+.wallet-search-input::placeholder { color: var(--wallet-muted); }
+.wallet-toolbar-search:focus-within { border-color: #ed1c24; }
+.wallet-search-clear {
+  background: transparent;
+  border: 0;
+  color: var(--wallet-muted);
+  cursor: pointer;
+  flex: 0 0 auto;
+  font-size: 13px;
+  padding: 0;
+}
+.wallet-search-clear:hover { color: #ff5258; }
+.wallet-no-match {
+  color: var(--wallet-muted);
+  grid-column: 1 / -1;
+  padding: 26px 12px;
+  text-align: center;
+}
 
 .wallet-page .top-action-container {
   align-items: center;
