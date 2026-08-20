@@ -865,14 +865,15 @@ a:hover, a:hover, .text-brand:hover, .actifit-link-plain:hover { text-decoration
 
 /* Header action strip reuses CardActions, which reads --post-footer-* vars; define them here
    (they're otherwise scoped to the footer). The header sits on the brand-colored report head,
-   so — unlike the muted footer strip — its icons are brand red to match the live/master look
-   (also legible in dark mode). The footer strip is intentionally left as its muted styling. */
+   so its icons are WHITE by default (like master); the vote turns brand-red only when the
+   logged-in user has voted, via CardActions' --active state (--post-footer-brand). The footer
+   strip keeps its own muted styling and is intentionally left untouched. */
 .header-post-actions {
   --post-footer-brand: #FF112D;
   --post-footer-brand-dark: #D40E24;
   --post-footer-border: #E6E8EB;
-  --post-footer-muted: #FF112D;
-  --post-footer-muted-soft: #FF112D;
+  --post-footer-muted: #FFFFFF;
+  --post-footer-muted-soft: #FFFFFF;
   --post-footer-green: #1E8E5A;
 }
 
