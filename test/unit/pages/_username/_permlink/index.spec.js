@@ -185,10 +185,11 @@ describe('permlink page vote wiring and legacy-strip selector', () => {
     wrapper.destroy()
   })
 
-  it('hides the old top action strip with a real selector, not a ref selector', () => {
+  it('renders the action strip in the post header (not the removed legacy strip)', () => {
     const source = fs.readFileSync('pages/_username/_permlink/index.vue', 'utf8')
 
-    expect(source).toContain('.report-head .legacy-post-actions')
-    expect(source).not.toContain('#reportTarget .legacy-post-actions')
+    // The old hidden legacy strip was replaced by a CardActions in the header (top + bottom).
+    expect(source).toContain('header-post-actions')
+    expect(source).not.toContain('legacy-post-actions')
   })
 })

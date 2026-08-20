@@ -48,7 +48,7 @@
                       :user="user"
                       :voteCount="getVoteCount"
                       :hasVoted="userVotedThisPost()"
-                      :showReply="true"
+                      :showReply="!!user"
                       @reply="toggleCommentBox"
                       @vote-prompt="votePrompt($event)"
                       @open-modal="headToComments"
@@ -78,7 +78,7 @@
                     :user="user"
                     :voteCount="getVoteCount"
                     :hasVoted="userVotedThisPost()"
-                    :showReply="true"
+                    :showReply="!!user"
                     @reply="toggleCommentBox"
                     @vote-prompt="votePrompt($event)"
                     @open-modal="headToComments"
@@ -629,6 +629,7 @@ export default {
     },
 
     async postResponse(event) {
+      if (!this.user || !this.user.account) return; // reply needs a logged-in user; button is hidden when logged out, but guard defensively
       this.loading = true
       const comment_perm = this.user.account.name.replace('.', '-') + '-re-' + this.report.author.replace('.', '-') + '-' + this.report.permlink + new Date().toISOString().replace(/[^a-zA-Z0-9]+/g, '').toLowerCase();
       const meta = {
@@ -861,6 +862,18 @@ a:hover, a:hover, .text-brand:hover, .actifit-link-plain:hover { text-decoration
 .date-head { padding-left: 2px; }
 .report-comments .date-head { color: #6c757d !important; }
 .report-reply { padding-left: 40px; padding-bottom: 40px; }
+
+/* Header action strip reuses CardActions, which reads --post-footer-* vars; define them here
+   too (they're otherwise scoped to the footer) so the header icons aren't the illegible #333
+   fallback — matters in dark mode. */
+.header-post-actions {
+  --post-footer-brand: #FF112D;
+  --post-footer-brand-dark: #D40E24;
+  --post-footer-border: #E6E8EB;
+  --post-footer-muted: #6B7280;
+  --post-footer-muted-soft: #9AA0A6;
+  --post-footer-green: #1E8E5A;
+}
 
 #main-footer.post-detail-footer {
   --post-footer-brand: #FF112D;
