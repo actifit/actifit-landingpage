@@ -2319,7 +2319,8 @@ export default {
       return this.cur_bchain === 'STEEM' ? 'STEEM' : (this.cur_bchain === 'BLURT' ? 'BLURT' : 'HIVE');
     },
     nativeStable() {
-      return this.cur_bchain === 'STEEM' ? 'SBD' : 'HBD';
+      // BLURT has no stable row, so it must not contribute a searchable symbol to the group
+      return this.cur_bchain === 'STEEM' ? 'SBD' : (this.cur_bchain === 'BLURT' ? '' : 'HBD');
     },
     // true when a search is active but nothing (static or engine) matches — drives the empty state
     noSearchMatches() {
