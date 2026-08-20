@@ -68,7 +68,7 @@
             <span class="btn btn-brand mb-1"
               :title="show_only_tokens_interest ? $t('show_all_tokens') : $t('show_core_tokens')"
               v-on:click="switchTokenDisplay">
-              <i class="fas fa-solid fa-filter" :style="show_only_tokens_interest ? 'color:green' : 'color:white'"></i>
+              <i class="fas fa-solid fa-filter" :class="{ 'wallet-filter-active': show_only_tokens_interest }"></i>
             </span>
 
             <span class="btn btn-brand mb-1"
@@ -9370,7 +9370,7 @@ export default {
   gap: 6px;
 }
 .wallet-page .wallet-toolbar-right { white-space: nowrap; }
-.wallet-page .top-action-container .btn-brand i:not(.fa-floppy-disk):not(.fa-spinner):not(.fa-battery-empty),
+.wallet-page .top-action-container .btn-brand i:not(.fa-floppy-disk):not(.fa-spinner):not(.fa-battery-empty):not(.fa-filter),
 .wallet-page .top-action-container .btn-brand a,
 .wallet-page .top-action-container .btn-brand a i {
   color: var(--wallet-muted) !important;
@@ -9379,6 +9379,12 @@ export default {
   color: var(--wallet-muted) !important;
 }
 .wallet-page .top-action-container .fa-battery-empty.wallet-battery-active {
+  color: green !important;
+}
+.wallet-page .top-action-container .fa-filter {
+  color: var(--wallet-muted) !important;
+}
+.wallet-page .top-action-container .fa-filter.wallet-filter-active {
   color: green !important;
 }
 .wallet-page .btn-brand {
