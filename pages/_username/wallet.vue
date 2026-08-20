@@ -2264,6 +2264,8 @@ export default {
       estimatedInterest: 0,
       displayUser: '',
       displayUserData: null,
+      walletInitialized: false, // true once initWallet() has run (guards double-init)
+      mountedDone: false, // true after mounted() finishes — lets the user watcher tell a post-mount login from the initial load
       profImgUrl: process.env.hiveImgUrl,
       userTokensWallet: -1,
       badActors: badActors,
@@ -2510,6 +2512,12 @@ export default {
       immediate: true,
       handler: async function (newVal, oldVal) {
         if (newVal && (!oldVal || newVal.name !== oldVal.name)) {
+          // If the page mounted while logged out (self /wallet), its init never
+          // ran — run it now that the visitor has logged in, before refreshing.
+          if (this.mountedDone && !this.walletInitialized
+              && !(this.$route.params && this.$route.params.username)) {
+            await this.initWallet(newVal.name);
+          }
           await this.refreshAllWalletData();
         }
       },
@@ -8615,6 +8623,140 @@ export default {
         // Handle error, e.g., set a default or show a message
       }
     },
+    async initWallet(userToFetch) {
+      if (this.walletInitialized) return; // already set up (guards double-init)
+      this.walletInitialized = true;
+      try {
+
+        this.displayUser = userToFetch;
+
+        // Step 3: Fetch the core account data and WAIT for it before doing anything else. This is the critical fix.
+        const account_res = await this.retryOperation(async () => {
+          return await hive.api.getAccountsAsync([this.displayUser]);
+        });
+
+        // Step 4: Handle the case where the user account does not exist.
+        if (!account_res || account_res.length === 0) {
+          console.error(`Account ${this.displayUser} not found.`);
+          this.loading = false;
+          return; // Stop execution
+        }
+
+        this.displayUserData = account_res[0];
+
+        // Step 5: Now that displayUserData is safely populated, proceed with all other initializations.
+        this.afitTokenAddress = afitTokenAddress;
+        this.afitxTokenAddress = afitxTokenAddress;
+        this.afitBNBLPTokenAddress = afitBNBLPTokenAddress;
+        this.afitxBNBLPTokenAddress = afitxBNBLPTokenAddress;
+
+        if (typeof window.ethereum !== 'undefined') {
+          web3 = new Web3(window.ethereum);
+        }
+
+        if (localStorage.getItem('cur_bchain')) {
+          this.cur_bchain = localStorage.getItem('cur_bchain');
+        }
+        this.transferType = this.cur_bchain;
+        this.transferTypePass = this.cur_bchain;
+
+        steem.api.setOptions({ url: process.env.steemApiNode });
+        if (process.env.hiveTestNetOn) {
+          hive.config.set('chain_id', '4200000000000000000000000000000000000000000000000000000000000000');
+        } else {
+          hive.config.set('alternative_api_endpoints', process.env.altHiveNodes);
+        }
+        hive.api.setOptions({ url: process.env.hiveApiNode });
+        blurt.api.setOptions({ url: process.env.blurtApiNode });
+
+        const chainLnk = this.setProperNode();
+        this.$store.dispatch('steemconnect/login');
+        //restore the step-2 wizard state before the first fetch so a page reload
+        //while awaiting verification doesn't flash/reset back to step 1
+        if (this.isFundsPassPending()) {
+          this.userHasFundsPass = true;
+        }
+        await this.fetchUserData(); // This can now be called safely.
+
+        try {
+          this.properties = await this.retryOperation(async () => {
+            return await chainLnk.api.getDynamicGlobalPropertiesAsync();
+          });
+        } catch (err) {
+          console.error('Error getting properties:', err);
+        }
+
+        const fetchPrice = async (url, setter) => {
+          try {
+            const response = await this.retryOperation(async () => {
+              const res = await fetch(url);
+              return res.json();
+            });
+            setter(response);
+          } catch (err) {
+            console.error('Error fetching price:', err);
+          }
+        };
+
+        //await Promise.all([
+          fetchPrice(`${process.env.actiAppUrl}curAFITPrice`,
+            json => this.setAFITPrice(json.unit_price_usd));
+          fetchPrice(`${process.env.actiAppUrl}AFITBSCPrice`,
+            json => this.setAFITBSCPrice(json.price));
+          fetchPrice(`${process.env.actiAppUrl}AFITXBSCPrice`,
+            json => this.setAFITXBSCPrice(json.price));
+          fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=steem&vs_currencies=usd',
+            json => this.setSteemPrice(json.steem.usd));
+          fetchPrice(`${process.env.actiAppUrl}hivePrice`,
+            json => this.setHivePrice(json.hive.usd));
+          fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=blurt&vs_currencies=usd',
+            json => this.setBlurtPrice(json.blurt.usd));
+          fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=steem-dollars&vs_currencies=usd',
+            json => this.setSBDPrice(json['steem-dollars'].usd));
+          fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=hive_dollar&vs_currencies=usd',
+            json => this.setHBDPrice(json['hive_dollar'].usd));
+        //]);
+
+        this.screenWidth = screen.width;
+
+        if (this.$route.query.op && this.$route.query.status) {
+          this.$notify({
+            group: 'success',
+            text: this.$t('Your') + ' "' + this.$route.query.op + '" ' + this.$t('completed_success'),
+            position: 'top center'
+          });
+          if (history && history.pushState) {
+            history.pushState('wallet', document.title, window.location.href.split('?')[0]);
+          }
+        }
+
+        if (this.$route.query.action === 'buy_afit') {
+          this.afitActivityMode = this.BUY_AFIT_STEEM;
+        } else if (this.$route.query.action === 'set_funds_pass') {
+          this.afitActivityMode = this.EXCHANGE_AFIT_STEEM;
+        } else if (this.$route.query.action === 'delegate') {
+          this.afitActivityMode = 0;
+          this.fundActivityMode = this.DELEGATE_FUNDS;
+        } else if (this.$route.query.action === 'delegate_rc') {
+          this.afitActivityMode = 0;
+          this.fundActivityMode = this.DELEGATE_RCS;
+        } else if (this.$route.query.action === 'power_up') {
+          this.afitActivityMode = 0;
+          this.fundActivityMode = this.POWERUP_FUNDS;
+        } else if (this.$route.query.action === 'lock_afit') {
+          this.afitActivityMode = this.MOVE_AFIT_SE;
+          this.fundActivityMode = 0;
+        }
+
+        this.loading = false;
+        this.transferType = this.cur_bchain;
+
+      } catch (err) {
+        console.error('Error initializing wallet:', err);
+        this.walletInitialized = false; // allow a retry (e.g. on next user/chain change)
+        this.loading = false;
+      }
+    },
   },
   created() {
     this.runningInterval = setInterval(this.fetchUserData, 60 * 1000);
@@ -8649,156 +8791,31 @@ export default {
     })
   },
   async mounted() {
-    try {
+    this.loadGlobalProperties();
 
-      this.loadGlobalProperties();
-
-      // Step 1: Determine the target user first from the route or the logged-in state.
-      let userToFetch = null;
-      if (this.$route.params && this.$route.params.username) {
-        userToFetch = this.$route.params.username.startsWith('@')
-          ? this.$route.params.username.substring(1)
-          : this.$route.params.username;
-      } else if (this.user && this.user.account && this.user.account.name) {
-        userToFetch = this.user.account.name;
-      }
-
-      // Step 2: If there's no user to fetch (e.g., logged out and visiting /wallet), stop.
-      if (!userToFetch) {
-        this.loading = false;
-        // Optionally, you could redirect to a login page here.
-        // For example: this.$router.push('/login');
-        return;
-      }
-
-      this.displayUser = userToFetch;
-
-      // Step 3: Fetch the core account data and WAIT for it before doing anything else. This is the critical fix.
-      const account_res = await this.retryOperation(async () => {
-        return await hive.api.getAccountsAsync([this.displayUser]);
-      });
-
-      // Step 4: Handle the case where the user account does not exist.
-      if (!account_res || account_res.length === 0) {
-        console.error(`Account ${this.displayUser} not found.`);
-        this.loading = false;
-        return; // Stop execution
-      }
-
-      this.displayUserData = account_res[0];
-
-      // Step 5: Now that displayUserData is safely populated, proceed with all other initializations.
-      this.afitTokenAddress = afitTokenAddress;
-      this.afitxTokenAddress = afitxTokenAddress;
-      this.afitBNBLPTokenAddress = afitBNBLPTokenAddress;
-      this.afitxBNBLPTokenAddress = afitxBNBLPTokenAddress;
-
-      if (typeof window.ethereum !== 'undefined') {
-        web3 = new Web3(window.ethereum);
-      }
-
-      if (localStorage.getItem('cur_bchain')) {
-        this.cur_bchain = localStorage.getItem('cur_bchain');
-      }
-      this.transferType = this.cur_bchain;
-      this.transferTypePass = this.cur_bchain;
-
-      steem.api.setOptions({ url: process.env.steemApiNode });
-      if (process.env.hiveTestNetOn) {
-        hive.config.set('chain_id', '4200000000000000000000000000000000000000000000000000000000000000');
-      } else {
-        hive.config.set('alternative_api_endpoints', process.env.altHiveNodes);
-      }
-      hive.api.setOptions({ url: process.env.hiveApiNode });
-      blurt.api.setOptions({ url: process.env.blurtApiNode });
-
-      const chainLnk = this.setProperNode();
-      this.$store.dispatch('steemconnect/login');
-      //restore the step-2 wizard state before the first fetch so a page reload
-      //while awaiting verification doesn't flash/reset back to step 1
-      if (this.isFundsPassPending()) {
-        this.userHasFundsPass = true;
-      }
-      await this.fetchUserData(); // This can now be called safely.
-
-      try {
-        this.properties = await this.retryOperation(async () => {
-          return await chainLnk.api.getDynamicGlobalPropertiesAsync();
-        });
-      } catch (err) {
-        console.error('Error getting properties:', err);
-      }
-
-      const fetchPrice = async (url, setter) => {
-        try {
-          const response = await this.retryOperation(async () => {
-            const res = await fetch(url);
-            return res.json();
-          });
-          setter(response);
-        } catch (err) {
-          console.error('Error fetching price:', err);
-        }
-      };
-
-      //await Promise.all([
-        fetchPrice(`${process.env.actiAppUrl}curAFITPrice`,
-          json => this.setAFITPrice(json.unit_price_usd));
-        fetchPrice(`${process.env.actiAppUrl}AFITBSCPrice`,
-          json => this.setAFITBSCPrice(json.price));
-        fetchPrice(`${process.env.actiAppUrl}AFITXBSCPrice`,
-          json => this.setAFITXBSCPrice(json.price));
-        fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=steem&vs_currencies=usd',
-          json => this.setSteemPrice(json.steem.usd));
-        fetchPrice(`${process.env.actiAppUrl}hivePrice`,
-          json => this.setHivePrice(json.hive.usd));
-        fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=blurt&vs_currencies=usd',
-          json => this.setBlurtPrice(json.blurt.usd));
-        fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=steem-dollars&vs_currencies=usd',
-          json => this.setSBDPrice(json['steem-dollars'].usd));
-        fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=hive_dollar&vs_currencies=usd',
-          json => this.setHBDPrice(json['hive_dollar'].usd));
-      //]);
-
-      this.screenWidth = screen.width;
-
-      if (this.$route.query.op && this.$route.query.status) {
-        this.$notify({
-          group: 'success',
-          text: this.$t('Your') + ' "' + this.$route.query.op + '" ' + this.$t('completed_success'),
-          position: 'top center'
-        });
-        if (history && history.pushState) {
-          history.pushState('wallet', document.title, window.location.href.split('?')[0]);
-        }
-      }
-
-      if (this.$route.query.action === 'buy_afit') {
-        this.afitActivityMode = this.BUY_AFIT_STEEM;
-      } else if (this.$route.query.action === 'set_funds_pass') {
-        this.afitActivityMode = this.EXCHANGE_AFIT_STEEM;
-      } else if (this.$route.query.action === 'delegate') {
-        this.afitActivityMode = 0;
-        this.fundActivityMode = this.DELEGATE_FUNDS;
-      } else if (this.$route.query.action === 'delegate_rc') {
-        this.afitActivityMode = 0;
-        this.fundActivityMode = this.DELEGATE_RCS;
-      } else if (this.$route.query.action === 'power_up') {
-        this.afitActivityMode = 0;
-        this.fundActivityMode = this.POWERUP_FUNDS;
-      } else if (this.$route.query.action === 'lock_afit') {
-        this.afitActivityMode = this.MOVE_AFIT_SE;
-        this.fundActivityMode = 0;
-      }
-
-      this.loading = false;
-      this.transferType = this.cur_bchain;
-
-    } catch (err) {
-      console.error('Error in mounted:', err);
-      this.loading = false;
+    // Determine the target user from the route or the logged-in state.
+    let userToFetch = null;
+    if (this.$route.params && this.$route.params.username) {
+      userToFetch = this.$route.params.username.startsWith('@')
+        ? this.$route.params.username.substring(1)
+        : this.$route.params.username;
+    } else if (this.user && this.user.account && this.user.account.name) {
+      userToFetch = this.user.account.name;
     }
-  }
+
+    // Logged out and visiting /wallet: don't initialize now. The user.account
+    // watcher runs initWallet() once the visitor logs in — otherwise the login
+    // watchers fire against an uninitialized page (properties/displayUserData
+    // never set) and the screen errors out.
+    if (!userToFetch) {
+      this.loading = false;
+      this.mountedDone = true;
+      return;
+    }
+
+    await this.initWallet(userToFetch);
+    this.mountedDone = true;
+  },
 }
 </script>
 
