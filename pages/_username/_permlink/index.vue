@@ -864,14 +864,15 @@ a:hover, a:hover, .text-brand:hover, .actifit-link-plain:hover { text-decoration
 .report-reply { padding-left: 40px; padding-bottom: 40px; }
 
 /* Header action strip reuses CardActions, which reads --post-footer-* vars; define them here
-   too (they're otherwise scoped to the footer) so the header icons aren't the illegible #333
-   fallback — matters in dark mode. */
+   (they're otherwise scoped to the footer). The header sits on the brand-colored report head,
+   so — unlike the muted footer strip — its icons are brand red to match the live/master look
+   (also legible in dark mode). The footer strip is intentionally left as its muted styling. */
 .header-post-actions {
   --post-footer-brand: #FF112D;
   --post-footer-brand-dark: #D40E24;
   --post-footer-border: #E6E8EB;
-  --post-footer-muted: #6B7280;
-  --post-footer-muted-soft: #9AA0A6;
+  --post-footer-muted: #FF112D;
+  --post-footer-muted-soft: #FF112D;
   --post-footer-green: #1E8E5A;
 }
 
