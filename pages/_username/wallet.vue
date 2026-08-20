@@ -9261,8 +9261,12 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  left: 0;
+  /* anchor to the button's right edge so it opens leftward and never spills past the viewport on mobile */
+  right: 0;
+  left: auto;
+  max-width: calc(100vw - 24px);
   min-width: 230px;
+  overflow: hidden;
   padding: 6px;
   position: absolute;
   top: calc(100% + 8px);
