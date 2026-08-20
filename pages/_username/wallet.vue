@@ -8638,6 +8638,7 @@ export default {
         // Step 4: Handle the case where the user account does not exist.
         if (!account_res || account_res.length === 0) {
           console.error(`Account ${this.displayUser} not found.`);
+          this.walletInitialized = false; // let a later user change retry (e.g. transient node miss)
           this.loading = false;
           return; // Stop execution
         }
