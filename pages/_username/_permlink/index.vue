@@ -42,22 +42,18 @@
                           <i class="fas fa-trash-alt text-white"></i><i class="fas fa-spin fa-spinner" v-if="deleting"></i></a>
                     </span>
                   </div>
-                  <div class="legacy-post-actions">
-                    <span v-if="user"><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i
-                          class="text-white fas fa-reply"></i></a></span>
-                    <span class="ml-1">
-                      <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand"
-                        data-target="#voteModal" v-if="user && userVotedThisPost() == true">
-                        <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
-                      </a>
-                      <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" data-target="#voteModal"
-                        class="actifit-link-plain" v-else>
-                        <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
-                      </a>
-                      <span class="spec-btns"><i class="far fa-comments ml-2" @click.prevent="headToComments()"></i> {{ report.children }}
-                        <i class="far fa-share-square ml-2" @click.prevent="$reblog(user, report)"
-                          v-if="user && report.author != user.account.name" :title="$t('reblog')"></i></span>
-                    </span>
+                  <div class="header-post-actions">
+                    <CardActions
+                      :cardData="report"
+                      :user="user"
+                      :voteCount="getVoteCount"
+                      :hasVoted="userVotedThisPost()"
+                      :showReply="true"
+                      @reply="toggleCommentBox"
+                      @vote-prompt="votePrompt($event)"
+                      @open-modal="headToComments"
+                      @reblog="$reblog(user, report)"
+                    />
                   </div>
                   <div class="modal-header">
                     <div class="report-tags p-1" v-html="$fetchReportTags(report)"></div>
@@ -865,9 +861,6 @@ a:hover, a:hover, .text-brand:hover, .actifit-link-plain:hover { text-decoration
 .date-head { padding-left: 2px; }
 .report-comments .date-head { color: #6c757d !important; }
 .report-reply { padding-left: 40px; padding-bottom: 40px; }
-.report-head .legacy-post-actions {
-  display: none;
-}
 
 #main-footer.post-detail-footer {
   --post-footer-brand: #FF112D;
