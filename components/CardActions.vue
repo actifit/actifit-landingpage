@@ -112,3 +112,15 @@ export default {
   }
 }
 </style>
+
+<style>
+/* Non-scoped fallback for the action colors. The scoped rules above match via CardActions'
+   data-v attribute, but on some render paths (notably the blog-listing cards) that attribute
+   is dropped from the <a class="post-detail-action"> element, so its scoped color rule never
+   applies and the vote icon stays black even when the user has voted. Re-declare the colors by
+   class (unscoped) so they land regardless. Values still resolve from the --post-footer-* vars
+   (or their fallbacks), so the header/footer strips keep their own colors. */
+.card-actions .post-detail-action { color: var(--post-footer-muted, #6b7280) !important; }
+.card-actions .post-detail-action:hover,
+.card-actions .post-detail-action--active { color: var(--post-footer-brand, #ff112d) !important; }
+</style>
