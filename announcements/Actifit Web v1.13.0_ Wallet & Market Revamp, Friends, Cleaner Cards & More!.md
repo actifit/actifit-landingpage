@@ -2,7 +2,9 @@
 
 Hey Actifitters! 💪 It's been a busy few months since our last web update, and **Actifit Web v1.13.0** brings all of it together in one big drop! From a **complete Wallet & Market makeover**, to a revamped **Friends** experience, cleaner post & activity cards, richer editing, and another solid round of **security, privacy and performance** work — there's a lot to love here. Let's dive in! 👇
 
-<!-- BANNER: create announcements/actifit-v1.13.0-banner.png, upload to usermedia.actifit.io, and paste the ![image.png](URL) here before posting -->
+![Actifit Web v1.13.0](actifit-v1.13.0-banner.png)
+
+<!-- BEFORE POSTING TO HIVE: upload announcements/actifit-v1.13.0-banner.png to usermedia.actifit.io and replace the line above with ![image.png](<usermedia-url>) -->
 
 ---
 
