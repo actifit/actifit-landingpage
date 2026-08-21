@@ -33,6 +33,7 @@
           :cardData="post"
           modalTarget="#postModal"
           :snippet="bodySnippet"
+          :readMoreUrl="buildLink"
           :imageLoadFailed="imageLoadFailed"
           :imageLoading="imageLoading"
           :imageGeneration="imageGeneration"
@@ -67,7 +68,7 @@
               </span>
             </social-sharing>
             <a href="#" class="text-brand" @click="$store.commit('setEditPost', post)" data-toggle="modal" data-target="#editPostModal" v-if="user && post.author === user.account.name" :title="$t('Edit_note')"><i class="fas fa-edit"></i></a>
-            <a href="#" class="text-brand" @click="post.pstId = pstId; $store.commit('setActivePost', post)" data-toggle="modal" data-target="#postModal" :title="$t('read_more_small')"><i class="fas fa-book-open"></i></a>
+            <a :href="buildLink" target="_blank" rel="noopener noreferrer" class="text-brand" :title="$t('read_more_small')"><i class="fas fa-book-open"></i></a>
           </template>
         </CardActions>
 
@@ -126,7 +127,7 @@ export default {
     cardData () { return this.post },
     // END: ADDED COMPUTED PROPERTY
     isOnlyPost () { return this.userPosts && this.userPosts.length === 1 },
-    buildLink () { return '/' + this.post.author + '/' + this.post.permlink },
+    buildLink () { return this.post.url || ('/' + this.post.author + '/' + this.post.permlink) },
     isPostReblog () { return this.displayUsername && this.displayUsername !== this.post.author },
     isPostPinned () { return this.post.stats ? this.post.stats.is_pinned : false },
     isStandardPost () { return !this.explorePost },
