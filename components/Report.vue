@@ -168,7 +168,10 @@ export default {
       return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() + ' ' + date.getHours() + ':' + (minutes < 10 ? '0' + minutes : minutes)
     },
     steps () {
-      return this.meta.step_count ? this.meta.step_count[0] : ''
+      const raw = this.meta.step_count ? this.meta.step_count[0] : ''
+      const n = Number(raw)
+      // thousand separator for the activity count, e.g. 6495 -> 6,495
+      return (raw !== '' && !isNaN(n)) ? n.toLocaleString('en-US') : raw
     },
     type () {
       return this.meta.activity_type ? this.meta.activity_type.join(', ') : ''

@@ -2,7 +2,7 @@
   <!-- single post item for activity pages -->
   <div>
     <div :class="[isOnlyPost ? 'card post single' : { 'card-pinned': isPostPinned, 'card post': isStandardPost }, { 'is-comment': post.parent_author }]">
-      <CardHeader :title="post.title" :link="buildLink">
+      <CardHeader :title="post.title" :link="buildLink" :showExternalLink="false">
         <span v-if="isPostPinned" :title="$t('pinned_post')"> <i class="fas fa-thumbtack text-warning"></i></span>
       </CardHeader>
 
