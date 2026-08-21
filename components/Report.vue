@@ -18,6 +18,7 @@
           :cardData="report"
           modalTarget="#reportModal"
           :snippet="reportDescription"
+          :readMoreUrl="report.url"
           expandableSnippet
           :imageLoadFailed="imageLoadFailed"
           :imageLoading="imageLoading"
@@ -48,6 +49,7 @@
         <CardActions
           :cardData="report"
           modalTarget="#reportModal"
+          voteModalTarget="#voteModal"
           :user="user"
           :voteCount="getVoteCount"
           :hasVoted="postUpvoted"
@@ -57,7 +59,7 @@
         >
           <!-- Slot for the report-specific right-side actions -->
           <template #extra-actions>
-            <social-sharing :url="'https://actifit.io/@' + report.author + '/' + report.permlink" :title="report.title" :description="socialSharingDesc" :quote="socialSharingQuote" :hashtags="hashtags" twitter-user="actifit_fitness" inline-template>
+            <social-sharing :url="'https://actifit.io/@' + report.author + '/' + report.permlink" :title="report.title" :description="socialSharingDesc" :quote="socialSharingQuote" :hashtags="hashtags" twitter-user="actifit_fitness" network-tag="a" inline-template>
               <span class="share-links-actifit">
                 <network network="twitter"><i class="fab fa-x-twitter text-brand" title="X (twitter)"></i></network>
               </span>
@@ -167,7 +169,10 @@ export default {
       return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() + ' ' + date.getHours() + ':' + (minutes < 10 ? '0' + minutes : minutes)
     },
     steps () {
-      return this.meta.step_count ? this.meta.step_count[0] : ''
+      const raw = this.meta.step_count ? this.meta.step_count[0] : ''
+      const n = Number(raw)
+      // thousand separator for the activity count, e.g. 6495 -> 6,495
+      return (raw !== '' && !isNaN(n)) ? n.toLocaleString('en-US') : raw
     },
     type () {
       return this.meta.activity_type ? this.meta.activity_type.join(', ') : ''
@@ -227,4 +232,29 @@ export default {
 .check-tooltip { color: white; }
 .card { box-shadow: 3px 3px 3px rgb(255 0 0 / 40%); }
 .payoutCustomDisplay { line-height: 1.5; }
+
+/* Normalize the share (X) button to match the blog card — same size / spacing as its siblings */
+.share-links-actifit {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.share-links-actifit ::v-deep a,
+.share-links-actifit ::v-deep button {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 4px;
+  line-height: 1;
+  color: inherit;
+  text-decoration: none;
+  transition: color .15s ease;
+}
+.share-links-actifit ::v-deep a:hover,
+.share-links-actifit ::v-deep button:hover,
+.share-links-actifit ::v-deep a:hover i,
+.share-links-actifit ::v-deep button:hover i {
+  color: #ff112d !important;
+}
 </style>

@@ -2,7 +2,7 @@
   <!-- single post item for activity pages -->
   <div>
     <div :class="[isOnlyPost ? 'card post single' : { 'card-pinned': isPostPinned, 'card post': isStandardPost }, { 'is-comment': post.parent_author }]">
-      <CardHeader :title="post.title" :link="buildLink">
+      <CardHeader :title="post.title" :link="buildLink" :showExternalLink="false">
         <span v-if="isPostPinned" :title="$t('pinned_post')"> <i class="fas fa-thumbtack text-warning"></i></span>
       </CardHeader>
 
@@ -32,7 +32,9 @@
 
           :cardData="post"
           modalTarget="#postModal"
-          :snippet="bodySnippet"
+          :snippet="postDescription"
+          :readMoreUrl="buildLink"
+          expandableSnippet
           :imageLoadFailed="imageLoadFailed"
           :imageLoading="imageLoading"
           :imageGeneration="imageGeneration"
@@ -52,6 +54,7 @@
         <CardActions
           :cardData="post"
           modalTarget="#postModal"
+          voteModalTarget="#voteModal"
           :user="user"
           :voteCount="getVoteCount"
           :hasVoted="postUpvoted"
@@ -60,13 +63,13 @@
           @open-modal="post.pstId = pstId; $store.commit('setActivePost', post)"
         >
           <template #extra-actions>
-            <social-sharing :url="'https://actifit.io/@' + post.author + '/' + post.permlink" :title="post.title" :description="socialSharingDesc" :quote="socialSharingQuote" :hashtags="hashtags" twitter-user="actifit_fitness" inline-template>
+            <social-sharing :url="'https://actifit.io/@' + post.author + '/' + post.permlink" :title="post.title" :description="socialSharingDesc" :quote="socialSharingQuote" :hashtags="hashtags" twitter-user="actifit_fitness" network-tag="a" inline-template>
               <span class="share-links-actifit">
                 <network network="twitter"><i class="fab fa-x-twitter text-brand" title="twitter"></i></network>
               </span>
             </social-sharing>
             <a href="#" class="text-brand" @click="$store.commit('setEditPost', post)" data-toggle="modal" data-target="#editPostModal" v-if="user && post.author === user.account.name" :title="$t('Edit_note')"><i class="fas fa-edit"></i></a>
-            <a href="#" class="text-brand" @click="post.pstId = pstId; $store.commit('setActivePost', post)" data-toggle="modal" data-target="#postModal" :title="$t('read_more_small')"><i class="fas fa-book-open"></i></a>
+            <a :href="buildLink" target="_blank" rel="noopener noreferrer" class="text-brand" :title="$t('read_more_small')"><i class="fas fa-book-open"></i></a>
           </template>
         </CardActions>
 
@@ -125,7 +128,13 @@ export default {
     cardData () { return this.post },
     // END: ADDED COMPUTED PROPERTY
     isOnlyPost () { return this.userPosts && this.userPosts.length === 1 },
-    buildLink () { return '/' + this.post.author + '/' + this.post.permlink },
+    buildLink () { return this.post.url || ('/' + this.post.author + '/' + this.post.permlink) },
+    // full cleaned body (like Report.vue's reportDescription) so CardBody clamps it and shows
+    // "Read more" on overflow — bodySnippet is pre-truncated to 150 and never overflows
+    postDescription () {
+      if (!this.post || !this.post.body) return ''
+      return this.$cleanBody(this.post.body, true, true).replace(/<[^>]+>/g, '')
+    },
     isPostReblog () { return this.displayUsername && this.displayUsername !== this.post.author },
     isPostPinned () { return this.post.stats ? this.post.stats.is_pinned : false },
     isStandardPost () { return !this.explorePost },
@@ -170,4 +179,30 @@ export default {
 .single { min-width: 17em; }
 .post { vertical-align: top; }
 .post-reblog { font-style:italic; }
+
+.share-links-actifit {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.share-links-actifit ::v-deep a,
+.share-links-actifit ::v-deep button {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 4px;
+  line-height: 1;
+  color: inherit;
+  text-decoration: none;
+  transition: color .15s ease;
+}
+
+.share-links-actifit ::v-deep a:hover,
+.share-links-actifit ::v-deep button:hover,
+.share-links-actifit ::v-deep a:hover i,
+.share-links-actifit ::v-deep button:hover i {
+  color: #ff112d !important;
+}
 </style>

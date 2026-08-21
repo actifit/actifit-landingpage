@@ -58,23 +58,20 @@
               v-html="snippet">
             </div>
           </a>
-          <button
+          <a
             v-if="hasSnippetOverflow"
-            type="button"
-            class="report-snippet-toggle"
-            :data-toggle="modalTarget ? 'modal' : null"
-            :data-target="modalTarget"
-            @click="$emit('open-modal')">
+            :href="readMoreUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="report-snippet-toggle">
             {{ $t('read_more') }}
-          </button>
+          </a>
         </div>
         <a
           v-else
-          href="#"
-          class=""
-          @click.prevent="$emit('open-modal')"
-          :data-toggle="modalTarget ? 'modal' : null"
-          :data-target="modalTarget"
+          :href="readMoreUrl"
+          target="_blank"
+          rel="noopener noreferrer"
           :title="$t('read_more_small')"
         >
           <div>
@@ -100,7 +97,8 @@ export default {
     imageGeneration: { type: Number, default: 0 },
     currentImageSrc: { type: String, default: '' },
     allImages: { type: Array, default: () => [] },
-    currentImageIndex: { type: Number, default: 0 }
+    currentImageIndex: { type: Number, default: 0 },
+    readMoreUrl: { type: String, default: '' }
   },
   emits: ['open-modal', 'image-load', 'image-error', 'next-image', 'prev-image', 'go-to-image'],
   data() {

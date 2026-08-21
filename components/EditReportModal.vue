@@ -21,6 +21,13 @@
 			<CustomTextEditor ref="editor" :initialContent="body" ></CustomTextEditor>
 
           </div>
+		  <!-- preview description -> json_metadata.description (Google / social-card snippet) -->
+		  <div class="form-group">
+			<label for="report-description" style="display: none">{{ $t('Short_preview_description') }}</label>
+			<input class="form-control acti-shadow" id="report-description" v-model="description" maxlength="160"
+			  :placeholder="$t('Short_preview_description')" />
+			<small class="form-text text-muted">{{ description.length }}/160 {{ $t('characters_used') }} — {{ $t('preview_description_help') }}</small>
+		  </div>
 		  <div class="form-group">
 		   <!--<div class="form-group">
 			<label for="image-upload">{{ $t('Upload_Images') }}</label><br/>
@@ -106,6 +113,7 @@
         title: '', // post title
         body: '', // post body
         tags: [], // post tags
+        description: '', // post preview description -> json_metadata.description
         loading: false, // loading animation in submit button
 		cur_bchain: 'HIVE', //bchain used to edit/save
 		target_bchain: 'HIVE', //bchain to which edits will go
@@ -150,6 +158,7 @@
 
         const meta = JSON.parse(this.editReport.json_metadata)
         this.tags = meta.hasOwnProperty('tags') ? meta.tags.filter(tag => tag !== 'actifit') : [] // actifit as default tag, if no tags are present (for some reason)
+        this.description = (meta && typeof meta.description === 'string' ? meta.description : '') // preload existing description as-is (string-only) — never truncate; other apps (e.g. Ecency) write >160 and edits must preserve it
 
         // refresh editor
         /*setTimeout(() => {
@@ -313,6 +322,9 @@
 			meta.app = 'actifit/0.5.0';
 		}
 		meta.suppEdit = 'actifit.io';
+		const desc = (this.description || '').trim()
+		if (desc) meta.description = desc
+		else delete meta.description // don't publish an empty description key
 		console.log(this.stdLogin);
         // save changes
 		if (!localStorage.getItem('std_login')){

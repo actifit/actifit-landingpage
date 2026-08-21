@@ -42,22 +42,18 @@
                           <i class="fas fa-trash-alt text-white"></i><i class="fas fa-spin fa-spinner" v-if="deleting"></i></a>
                     </span>
                   </div>
-                  <div>
-                    <span v-if="user"><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i
-                          class="text-white fas fa-reply"></i></a></span>
-                    <span class="ml-1">
-                      <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand"
-                        data-target="#voteModal" v-if="user && userVotedThisPost() == true">
-                        <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
-                      </a>
-                      <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" data-target="#voteModal"
-                        class="actifit-link-plain" v-else>
-                        <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
-                      </a>
-                      <span class="spec-btns"><i class="far fa-comments ml-2" @click.prevent="headToComments()"></i> {{ report.children }}
-                        <i class="far fa-share-square ml-2" @click.prevent="$reblog(user, report)"
-                          v-if="user && report.author != user.account.name" :title="$t('reblog')"></i></span>
-                    </span>
+                  <div class="header-post-actions">
+                    <CardActions
+                      :cardData="report"
+                      :user="user"
+                      :voteCount="getVoteCount"
+                      :hasVoted="userVotedThisPost()"
+                      :showReply="!!user"
+                      @reply="toggleCommentBox"
+                      @vote-prompt="votePrompt($event)"
+                      @open-modal="headToComments"
+                      @reblog="$reblog(user, report)"
+                    />
                   </div>
                   <div class="modal-header">
                     <div class="report-tags p-1" v-html="$fetchReportTags(report)"></div>
@@ -69,66 +65,68 @@
                 </div>
               </div>
 
-              <SafeRemarkable class="col-md-12" ref="remarkableContent" :source="proxiedBody"
-                :options="{ 'html': true, 'breaks': true, 'typographer': true }"></SafeRemarkable>
+              <div class="post-body col-md-12">
+                <SafeRemarkable ref="remarkableContent" :source="proxiedBody"
+                  :options="{ 'html': true, 'breaks': true, 'typographer': true }"></SafeRemarkable>
+              </div>
 
 
-              <div class="col-md-12 main-payment-info" id="main-footer">
-                <div class="report-modal-prelim-info">
-                  <span><a href="#" @click.prevent="commentBoxOpen = !commentBoxOpen" :title="$t('Reply')"><i
-                        class="text-white fas fa-reply"></i></a></span>
+              <div class="col-md-12 post-detail-footer" id="main-footer">
+                <div class="post-detail-footer__summary">
+                  <CardActions
+                    :cardData="report"
+                    :user="user"
+                    :voteCount="getVoteCount"
+                    :hasVoted="userVotedThisPost()"
+                    :showReply="!!user"
+                    @reply="toggleCommentBox"
+                    @vote-prompt="votePrompt($event)"
+                    @open-modal="headToComments"
+                    @reblog="$reblog(user, report)"
+                  />
 
-                  <span class="ml-1">
-                    <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand"
-                      data-target="#voteModal" v-if="user && userVotedThisPost() == true">
-                        <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
-                    </a>
-                    <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" data-target="#voteModal"
-                      class="actifit-link-plain" v-else>
-                        <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
-                    </a>
-                    <i class="far fa-comments ml-2" @click.prevent="headToComments()"></i> {{ report.children }}
-                    <i class="far fa-share-square ml-2" @click.prevent="$reblog(user, report)"
-                      v-if="user && report.author != user.account.name" :title="$t('reblog')"></i>
-                  </span>
-                  <div>
-
-                    <span :title="afitReward + ' ' + $t('AFIT_Token')">
-                      <i class="fas fa-running text-brand mr-1"></i>{{ afitReward }} {{ $t('AFIT_Token') }}
-                    </span>
-                    <span :title="postPayout">
-                      <img src="/img/STEEM.png" class="mr-1 currency-logo-small" v-if="cur_bchain == 'STEEM'" alt="">
-                      <img src="/img/HIVE.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain == 'HIVE'" alt="">
-                      <img src="/img/BLURT.png" class="mr-1 currency-logo-small" v-else-if="cur_bchain == 'BLURT'" alt="">
+                  <div class="post-detail-footer__payout">
+                    <span class="post-detail-payout" :title="postPayout">
+                      <span :title="afitReward + ' ' + $t('AFIT_Token')">
+                        <i class="fas fa-running text-brand mr-1"></i>{{ afitReward }} {{ $t('AFIT_Token') }}
+                      </span>
+                      <img src="/img/STEEM.png" class="currency-logo-small" v-if="cur_bchain == 'STEEM'" alt="">
+                      <img src="/img/HIVE.png" class="currency-logo-small" v-else-if="cur_bchain == 'HIVE'" alt="">
+                      <img src="/img/BLURT.png" class="currency-logo-small" v-else-if="cur_bchain == 'BLURT'" alt="">
                       <span v-if="postPaid()">
-                        <span class="m-1" :class="{ 'declined-payout': isDeclined }" :title="$t('author_payout')"><i class="fa-solid fa-user"></i> {{ paidValue() }}</span>
-                        <span class="m-1" :class="{ 'declined-payout': isDeclined }" :title="$t('voters_payout')"><i class="fa-solid fa-users"></i> {{ report.curator_payout_value }}</span>
-                        <i class="fa-solid fa-check text-green text-bold"></i>
+                        <span :class="{ 'declined-payout': isDeclined }" :title="$t('author_payout')">
+                          <i class="fa-solid fa-user"></i> {{ paidValue() }}
+                        </span>
+                        <span :class="{ 'declined-payout': isDeclined }" :title="$t('voters_payout')">
+                          <i class="fa-solid fa-users"></i> {{ report.curator_payout_value }}
+                        </span>
+                        <i class="fa-solid fa-check post-detail-payout__paid"></i>
                       </span>
                       <span v-else>
-                        <span class="text-bold" :class="{ 'declined-payout': isDeclined }">{{ report.pending_payout_value.replace('SBD', '') }}</span>
-                        <i class="fa-solid fa-hourglass-half text-brand m-1" :title="$t('hive_payouts_wait')"></i>
+                        <span :class="{ 'declined-payout': isDeclined }">{{ report.pending_payout_value.replace('SBD', '') }}</span>
+                        <i class="fa-solid fa-hourglass-half post-detail-payout__wait" :title="$t('hive_payouts_wait')"></i>
                       </span>
-                      <span v-if="hasBeneficiaries()" :title="beneficiariesDisplay()">
+                      <span v-if="hasBeneficiaries()" class="post-detail-payout__muted" :title="beneficiariesDisplay()">
                         <i class="fas fa-user-pen"><sup>{{ report.beneficiaries.length }}</sup></i>
                       </span>
                     </span>
-                    <span @click.prevent="displayMorePayoutData = !displayMorePayoutData" class="text-brand pointer-cur-cls"
-                      :title="$t('more_token_rewards')">
+                    <button type="button" class="post-detail-payout-toggle"
+                      @click="displayMorePayoutData = !displayMorePayoutData" :title="$t('more_token_rewards')"
+                      :aria-expanded="displayMorePayoutData ? 'true' : 'false'">
                       <i class="fas fa-chevron-circle-down" v-if="!displayMorePayoutData"></i>
                       <i class="fas fa-chevron-circle-up" v-else></i>
-                    </span>
-                    <transition name="fade" v-if="displayMorePayoutData">
-                      <div class="m-2">
-                        <small v-for="(token, index) in tokenRewards" :key="index" :title="displayTokenValue(token)">
-                          {{ displayTokenValue(token) }} |
-                        </small>
-                      </div>
-                    </transition>
+                    </button>
                   </div>
                 </div>
-                <div>
-                  <social-sharing :url="formattedReportUrl" :title="report.title" :description="socialSharingDesc"
+
+                <div class="post-detail-footer__tokens" v-if="displayMorePayoutData">
+                  <small v-for="(token, index) in tokenRewards" :key="index" :title="displayTokenValue(token)">
+                    {{ displayTokenValue(token) }} |
+                  </small>
+                </div>
+
+                <div class="post-detail-footer__sharing">
+                  <social-sharing :url="formattedReportUrl" :title="report.title" :description="socialSharingDesc" network-tag="a"
                     :quote="socialSharingQuote" :hashtags="hashtags" twitter-user="actifit_fitness" inline-template>
                     <div class="share-links-actifit">
                       <network network="facebook"><i class="fab fa-facebook" title="facebook"></i></network>
@@ -243,6 +241,7 @@ import UserSidebar from '~/components/UserSidebar.vue'
 import EditPostModal from '~/components/EditPostModal'
 import DOMPurify from 'dompurify'
 import { declinedPayoutMixin } from '~/plugins/commonCardMixin.js'
+import CardActions from '~/components/CardActions.vue'
 
 const scot_steemengine_api = process.env.steemEngineScot;
 const scot_hive_api_param = process.env.hiveEngineScotParam;
@@ -251,7 +250,8 @@ export default {
   mixins: [declinedPayoutMixin],
   components: {
     NavbarBrand, ChainSelection, Footer, VoteModal, NotifyModal, UserHoverCard,
-    CustomTextEditor, Comments, SocialSharing, SafeRemarkable, UserSidebar, EditPostModal
+    CustomTextEditor, Comments, SocialSharing, SafeRemarkable, UserSidebar, EditPostModal,
+    CardActions
   },
   head() {
     return {
@@ -344,7 +344,9 @@ export default {
         desc = desc.substr(0, 140) + '...';
       }
       //console.log(desc);
-      meta_spec.desc = desc;
+      //prefer the author's on-chain preview description (json_metadata.description); fall back to the body-derived snippet
+      const onchainDesc = (post_meta && typeof post_meta.description === 'string') ? post_meta.description.trim() : '';
+      meta_spec.desc = onchainDesc || desc;
       return meta_spec;
     } catch (preerr) {
       console.log(preerr);
@@ -407,6 +409,9 @@ export default {
     },
   },
   methods: {
+    toggleCommentBox() {
+      this.commentBoxOpen = !this.commentBoxOpen;
+    },
     headToComments() {
       if (this.$refs.commentsSection) {
         VueScrollTo.scrollTo(this.$refs.commentsSection, 500, {
@@ -624,6 +629,7 @@ export default {
     },
 
     async postResponse(event) {
+      if (!this.user || !this.user.account) return; // reply needs a logged-in user; button is hidden when logged out, but guard defensively
       this.loading = true
       const comment_perm = this.user.account.name.replace('.', '-') + '-re-' + this.report.author.replace('.', '-') + '-' + this.report.permlink + new Date().toISOString().replace(/[^a-zA-Z0-9]+/g, '').toLowerCase();
       const meta = {
@@ -842,11 +848,12 @@ export default {
   }
 }
 </script>
-<style>
+<style scoped>
 .text-muted { color: #adb5bd !important; }
 .mid-avatar { width: 30px !important; height: 30px !important; }
 .report-head { border-bottom: 1px solid red; }
 img { max-width: 100%; }
+.post-body ::v-deep img { max-width: 100%; height: auto; }
 .modal-author { margin-left: 10px !important; }
 .actifit-link-plain { color: white; }
 .modal-body { word-break: break-word; }
@@ -855,8 +862,181 @@ a:hover, a:hover, .text-brand:hover, .actifit-link-plain:hover { text-decoration
 .date-head { padding-left: 2px; }
 .report-comments .date-head { color: #6c757d !important; }
 .report-reply { padding-left: 40px; padding-bottom: 40px; }
-.share-links-actifit { text-align: right; }
-.share-links-actifit span, .share-links-actifit a { padding: 5px; cursor: pointer; color: #fff; }
+
+/* Header action strip reuses CardActions, which reads --post-footer-* vars; define them here
+   (they're otherwise scoped to the footer). The header sits on the brand-colored report head,
+   so its icons are WHITE by default (like master); the vote turns brand-red only when the
+   logged-in user has voted, via CardActions' --active state (--post-footer-brand). The footer
+   strip keeps its own muted styling and is intentionally left untouched. */
+.header-post-actions {
+  --post-footer-brand: #FF112D;
+  --post-footer-brand-dark: #D40E24;
+  --post-footer-border: #E6E8EB;
+  --post-footer-muted: #FFFFFF;
+  --post-footer-muted-soft: #FFFFFF;
+  --post-footer-green: #1E8E5A;
+}
+
+#main-footer.post-detail-footer {
+  --post-footer-brand: #FF112D;
+  --post-footer-brand-dark: #D40E24;
+  --post-footer-border: #E6E8EB;
+  --post-footer-muted: #6B7280;
+  --post-footer-muted-soft: #9AA0A6;
+  --post-footer-green: #1E8E5A;
+  margin-top: 12px;
+  padding: 14px 15px 9px;
+  border-top: 1px solid var(--post-footer-border);
+  border-bottom: 1px solid var(--post-footer-border);
+  background: transparent !important;
+  color: var(--post-footer-muted) !important;
+  font-size: 12.5px;
+}
+
+#main-footer .post-detail-footer__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+}
+
+#main-footer .post-detail-footer__payout,
+#main-footer .post-detail-payout,
+#main-footer .post-detail-payout > span {
+  display: flex;
+  align-items: center;
+}
+
+#main-footer .post-detail-footer__payout {
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+#main-footer .post-detail-payout {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--post-footer-brand-dark);
+  font-weight: 700;
+}
+
+#main-footer .post-detail-payout > span {
+  gap: 8px;
+}
+
+#main-footer .post-detail-payout i:not(.post-detail-payout__paid),
+#main-footer .post-detail-payout__wait,
+#main-footer .post-detail-payout__muted {
+  color: var(--post-footer-muted-soft);
+}
+
+#main-footer .post-detail-payout__paid {
+  color: var(--post-footer-green);
+}
+
+#main-footer .post-detail-payout-toggle {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--post-footer-muted-soft);
+  cursor: pointer;
+}
+
+#main-footer .post-detail-payout-toggle:hover {
+  color: var(--post-footer-brand);
+}
+
+#main-footer .post-detail-payout-toggle:focus-visible {
+  outline: 2px solid var(--post-footer-brand);
+  outline-offset: 3px;
+}
+
+#main-footer .post-detail-footer__tokens {
+  margin-top: 10px;
+  color: var(--post-footer-muted);
+  text-align: right;
+}
+
+#main-footer .post-detail-footer__sharing {
+  flex: 0 0 100%;
+  margin-top: 6px;
+  text-align: right;
+}
+
+#main-footer.post-detail-footer .share-links-actifit {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+#main-footer.post-detail-footer .share-links-actifit span,
+#main-footer.post-detail-footer .share-links-actifit network,
+#main-footer.post-detail-footer .share-links-actifit i,
+#main-footer.post-detail-footer .share-links-actifit ::v-deep a {
+  cursor: pointer;
+}
+
+#main-footer.post-detail-footer .share-links-actifit span,
+#main-footer.post-detail-footer .share-links-actifit ::v-deep a {
+  padding: 2px 4px;
+  color: var(--post-footer-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color .15s ease, background .15s ease;
+}
+
+#main-footer.post-detail-footer .share-links-actifit span:hover,
+#main-footer.post-detail-footer .share-links-actifit network:hover,
+#main-footer.post-detail-footer .share-links-actifit i:hover,
+#main-footer.post-detail-footer .share-links-actifit ::v-deep a:hover,
+#main-footer.post-detail-footer .share-links-actifit ::v-deep a:hover i {
+  color: var(--post-footer-brand) !important;
+}
+
+.dark-mode #main-footer.post-detail-footer {
+  --post-footer-brand: #FF5266;
+  --post-footer-brand-dark: #FF7181;
+  --post-footer-border: rgba(255, 255, 255, .14);
+  --post-footer-muted: #ADB5BD;
+  --post-footer-muted-soft: #8F969D;
+  --post-footer-green: #62C995;
+}
+
+@media (max-width: 767px) {
+  #main-footer .post-detail-footer__summary,
+  #main-footer .post-detail-footer__payout {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  #main-footer .post-detail-footer__payout {
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+  }
+
+  #main-footer .post-detail-payout {
+    flex: 1 1 auto;
+    justify-content: flex-start;
+    text-align: left;
+    margin-left: 0;
+  }
+
+  #main-footer.post-detail-footer .post-detail-footer__tokens,
+  #main-footer.post-detail-footer .post-detail-footer__sharing,
+  #main-footer.post-detail-footer .share-links-actifit {
+    margin-left: auto;
+    text-align: right;
+  }
+}
 .pointer-cur-cls { cursor: pointer; }
 .translation-notice { background-color: #fcf8e3; border: 1px solid #faebcc; padding: 10px; margin-top: 15px; border-radius: 4px; color: #8a6d3b; }
 .text-green { color: #28a745; }

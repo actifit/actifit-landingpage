@@ -117,6 +117,13 @@
           <CustomTextEditor ref="editor" :initialContent="body"></CustomTextEditor>
 
         </div>
+        <!-- preview description -> json_metadata.description (Google / social-card snippet) -->
+        <div class="form-group">
+          <label for="video-description" style="display: none">{{ $t('Short_preview_description') }}</label>
+          <input class="form-control acti-shadow" id="video-description" v-model="description" maxlength="160"
+            :placeholder="$t('Short_preview_description')" />
+          <small class="form-text text-muted">{{ description.length }}/160 {{ $t('characters_used') }} — {{ $t('preview_description_help') }}</small>
+        </div>
         <!--<div class="form-group">
 			<label for="image-upload">{{ $t('Upload_Images') }}</label><br/>
 			<input id="image-upload" type="file" v-on:change="uploadImage($event.target.files)" />
@@ -190,6 +197,7 @@
       </div>
     </div>
     <Footer />
+    <LoginModal v-if="showLoginModal" @close="handleLoginClosed" @login-successful="handleLoginSuccessful" />
     <client-only>
       <div>
         <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
@@ -218,6 +226,7 @@ import hive from '@hiveio/hive-js'
 import NavbarBrand from '~/components/NavbarBrand';
 import Footer from '~/components/Footer';
 import ListHeadingSection from '../../../components/ListHeadingSection.vue';
+import LoginModal from '~/components/LoginModal';
 
 //needed to fix incorrect duration when recording video
 import fixWebmDuration from 'fix-webm-duration';
@@ -279,7 +288,8 @@ export default {
     TagInput,
     Beneficiary,
     NotifyModal,
-    ListHeadingSection
+    ListHeadingSection,
+    LoginModal
   },
   data() {
     return {
@@ -301,6 +311,7 @@ export default {
       title: '', // post title
       body: '', // post body
       tags: [], // post tags
+      description: '', // post preview description -> json_metadata.description
       loading: false, // loading animation in submit button
       loadingxcstkn: false,
       cur_bchain: 'HIVE', //bchain used to edit/save
@@ -309,6 +320,7 @@ export default {
       percent_hbd: 10000,
       max_accepted_payout: '1000000.000 HBD',
       communitySubs: [],
+      showLoginModal: false,
       editPost: {
         isNewPost: true,
       },
@@ -385,7 +397,8 @@ export default {
       await this.$store.dispatch('steemconnect/refreshUser');
       //this.reload += 1;
     },
-    user() {
+    user(newUser) {
+      if (!newUser) return;
       this.fetchCommunities();
       this.connectSession3S();
     },
@@ -400,9 +413,11 @@ export default {
       this.benef_list = (this.editPost ? this.editPost.beneficiaries : []);
       //console.log(this.benef_list);
       this.tags = [];
+      this.description = '';
       if (this.editPost && !this.editPost.isNewPost) {
         const meta = this.$parseJsonMetadata(this.editPost.json_metadata)
         this.tags = meta && meta.hasOwnProperty('tags') ? meta.tags : [] // actifit as default tag, if no tags are present (for some reason)
+        this.description = (meta && typeof meta.description === 'string' ? meta.description : '') // preload existing description as-is (string-only) — never truncate; other apps (e.g. Ecency) write >160 and edits must preserve it
         this.max_accepted_payout = this.editPost.max_accepted_payout;
         this.percent_hbd = this.editPost.percent_hbd;
       }
@@ -421,6 +436,20 @@ export default {
     }
   },
   methods: {
+    requestLogin() {
+      this.showLoginModal = true;
+      this.$nextTick(() => {
+        if (typeof $ !== 'undefined' && $.fn && typeof $.fn.modal === 'function') {
+          $('#loginModal').modal('show');
+        }
+      });
+    },
+    handleLoginClosed() {
+      this.showLoginModal = false;
+    },
+    handleLoginSuccessful() {
+      this.showLoginModal = false;
+    },
 
     textualContent(){
       return this.editPost.isNewPost
@@ -776,6 +805,10 @@ export default {
       }
     },
     async save(vid) {
+      if (!this.user || !this.user.account || !this.user.account.name) {
+        this.requestLogin();
+        return;
+      }
       this.loading = true // start loading animation
       //only convert to array if not already array
       this.tags = this.$refs.tagItem.items;
@@ -887,6 +920,9 @@ export default {
         meta.app = 'actifit/0.5.0';
       }
       meta.suppEdit = 'actifit.io';
+      const desc = (this.description || '').trim()
+      if (desc) meta.description = desc
+      else delete meta.description // don't publish an empty description key
 
       if (!vid) {
         vid = this.selVid;
@@ -1531,6 +1567,10 @@ export default {
     },
 
     async connectSession3S() {
+      if (!this.user || !this.user.account || !this.user.account.name) {
+        this.requestLogin();
+        return;
+      }
       try {
         if (this.loadingxcstkn) {
           //do nothing, already loading
