@@ -46,6 +46,7 @@ export default {
   background: #ff112d;
   padding: 8px 10px;
   min-height: 60px;
+  font-weight: 600; /* dial back the heavy <h6>/accent bold; consistent across blog + activity cards */
 }
 .card-title a {
   color: #fff;
@@ -61,7 +62,7 @@ export default {
   align-items: center;
   justify-content: center;
   background: #ff112d !important;
-  font-weight: 700;
+  font-weight: 600;
 }
 .card-title-accent a {
   display: block;
