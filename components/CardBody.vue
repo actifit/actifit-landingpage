@@ -45,10 +45,11 @@
       <div class="col-12">
         <div v-if="expandableSnippet" class="report-snippet-section">
           <a
-            :href="readMoreUrl"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="#"
             class="report-snippet-link"
+            @click.prevent="$emit('open-modal')"
+            :data-toggle="modalTarget ? 'modal' : null"
+            :data-target="modalTarget"
             :title="$t('read_more_small')"
           >
             <div

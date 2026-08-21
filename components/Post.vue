@@ -32,8 +32,9 @@
 
           :cardData="post"
           modalTarget="#postModal"
-          :snippet="bodySnippet"
+          :snippet="postDescription"
           :readMoreUrl="buildLink"
+          expandableSnippet
           :imageLoadFailed="imageLoadFailed"
           :imageLoading="imageLoading"
           :imageGeneration="imageGeneration"
@@ -128,6 +129,12 @@ export default {
     // END: ADDED COMPUTED PROPERTY
     isOnlyPost () { return this.userPosts && this.userPosts.length === 1 },
     buildLink () { return this.post.url || ('/' + this.post.author + '/' + this.post.permlink) },
+    // full cleaned body (like Report.vue's reportDescription) so CardBody clamps it and shows
+    // "Read more" on overflow — bodySnippet is pre-truncated to 150 and never overflows
+    postDescription () {
+      if (!this.post || !this.post.body) return ''
+      return this.$cleanBody(this.post.body, true, true).replace(/<[^>]+>/g, '')
+    },
     isPostReblog () { return this.displayUsername && this.displayUsername !== this.post.author },
     isPostPinned () { return this.post.stats ? this.post.stats.is_pinned : false },
     isStandardPost () { return !this.explorePost },
