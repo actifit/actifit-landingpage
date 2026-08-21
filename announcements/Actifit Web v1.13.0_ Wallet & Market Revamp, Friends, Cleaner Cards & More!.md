@@ -1,10 +1,24 @@
-# Actifit Web v1.13.0: Wallet & Market Revamp, Friends, Cleaner Cards & More!
+# Actifit Web v1.13.0: New Wallet, Market & Friends [Update]
 
-Hey Actifitters! 💪 It's been a busy few months since our last web update, and **Actifit Web v1.13.0** brings all of it together in one big drop! From a **complete Wallet & Market makeover**, to a revamped **Friends** experience, cleaner post & activity cards, richer editing, and another solid round of **security, privacy and performance** work — there's a lot to love here. Let's dive in! 👇
+<!--
+POSTING METADATA (HivePulse-optimized — SEO 98 / GEO 100 / combined 99):
+  Title (put in editor's TITLE field, NOT as an H1 in the body):
+    Actifit Web v1.13.0: New Wallet, Market & Friends [Update]
+  Preview description (paste into the editor's Preview Description field):
+    Actifit Web v1.13.0 is here: a full Wallet & Market revamp, a new Friends system, profile image cropping, cleaner activity cards, and stronger security.
+  Focus keyword: actifit
+  Tags (3–5 content tags): actifit, hive, fitness, development, news
+When posting, delete the leading "# ..." H1 line above — the frontend renders the title as the H1 already.
+-->
 
-![Actifit Web v1.13.0](actifit-v1.13.0-banner.png)
 
-<!-- BEFORE POSTING TO HIVE: upload announcements/actifit-v1.13.0-banner.png to usermedia.actifit.io and replace the line above with ![image.png](<usermedia-url>) -->
+Hey Actifitters! 💪
+
+**Actifit Web v1.13.0 is here** — a full Wallet & Market revamp, a brand-new Friends system, in-browser profile-photo cropping, cleaner activity cards, and another big round of security, privacy, and performance work.
+
+It's been a busy few months since our last web update, and this release brings all of it together in one big drop. Because so much landed at once, we've grouped it below by area — for example, wallet, social, editor, and security — so you can jump straight to what matters to you. Let's dive in! 👇
+
+![Actifit Web v1.13.0 update banner — Wallet & Market revamp, Friends, cleaner cards](https://usermedia.actifit.io/MT2VPLU3PK41OTQLZG5JJ8MCCXXCL)
 
 ---
 
@@ -96,8 +110,8 @@ The Actifit Team
 
 Do you love the Actifit updates and the dedication we put into making your fitness journey more rewarding? Then show us some love! Your support means the world to us and helps us keep building awesome features and improving the platform.
 
-#### Support our witness @actifit on Hive, vote for us or set us as proxy on [actifit profile](https://actifit.io/actifit), or via [peakd](https://peakd.com/witnesses), [hive blog](https://wallet.hive.blog/~witnesses) or [hive-signer](https://hivesigner.com/sign/account-witness-vote?witness=actifit&approve=true).
-#### Support our witness @actifit-he on Hive-engine, vote for us on [Tribaldex](https://tribaldex.com/witnesses).
+### Support our witness @actifit on Hive, vote for us or set us as proxy on [actifit profile](https://actifit.io/actifit), or via [peakd](https://peakd.com/witnesses), [hive blog](https://wallet.hive.blog/~witnesses) or [hive-signer](https://hivesigner.com/sign/account-witness-vote?witness=actifit&approve=true).
+### Support our witness @actifit-he on Hive-engine, vote for us on [Tribaldex](https://tribaldex.com/witnesses).
 
 ---
 
