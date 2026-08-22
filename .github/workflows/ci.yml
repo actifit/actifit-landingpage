@@ -1,0 +1,36 @@
+name: CI
+
+# Fast PR gate: run ESLint + Jest on every pull request so lint errors, broken
+# Vue 2 reactivity, unscoped CSS leaks, missing $t() keys and failing tests are
+# caught before review instead of in a review round (or in production).
+#
+# NOTE: no `paths:` filter. Once this is a *required* check in branch protection,
+# a path-skipped required check stays "pending" forever and blocks every PR that
+# doesn't touch matching files (GitHub gotcha — same reason lockfile-sync.yml has
+# none). Running on all PRs guarantees it always reports a status. The whole job
+# is ~2-3 min, dominated by `npm ci`.
+
+on:
+  pull_request:
+    branches: [develop, master]
+  workflow_dispatch:
+
+jobs:
+  lint-and-test:
+    name: eslint + jest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc' # v16.20.2, matching the DigitalOcean build
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+        env:
+          # skip the ~100MB Playwright browser download — jest unit tests don't need it
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+      - name: Lint (eslint)
+        run: npm run lint
+      - name: Unit tests (jest)
+        run: npm test
