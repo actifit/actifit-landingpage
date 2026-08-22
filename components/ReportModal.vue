@@ -38,6 +38,19 @@
               :title="$t('translate_content', 'Translate Content')"
             ></i>
           </span>
+          <div class="header-post-actions">
+            <CardActions
+              :cardData="report"
+              :user="user"
+              :voteCount="getVoteCount"
+              :hasVoted="user ? userVotedThisPost() : false"
+              :showReply="true"
+              @reply="toggleCommentBox"
+              @vote-prompt="votePrompt($event)"
+              @open-modal="headToComments"
+              @reblog="$reblog(user, report)"
+            />
+          </div>
           <div class="modal-header">
             <div class="report-tags p-1" v-html="$fetchReportTags(report)"></div>
           </div>
@@ -755,6 +768,26 @@ export default {
 <style scoped>
 .modal-dialog {
   transform: none !important;
+}
+
+/* Top action strip in the modal header — mirrors the single-post view's header strip,
+   on the white modal background so it uses the muted (grey) palette. Vote turns brand-red
+   via CardActions' --active state when the user has voted. */
+.header-post-actions {
+  --post-footer-brand: #FF112D;
+  --post-footer-brand-dark: #D40E24;
+  --post-footer-border: #E6E8EB;
+  --post-footer-muted: #6B7280;
+  --post-footer-muted-soft: #9AA0A6;
+  --post-footer-green: #1E8E5A;
+  padding: 4px 0 2px;
+}
+.dark-mode .header-post-actions {
+  --post-footer-brand: #FF5266;
+  --post-footer-brand-dark: #FF7181;
+  --post-footer-muted: #ADB5BD;
+  --post-footer-muted-soft: #8F969D;
+  --post-footer-green: #62C995;
 }
 
 .modal-content {

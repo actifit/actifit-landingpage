@@ -34,14 +34,6 @@
                   <i :title="$t('copy_link')" class="fas fa-copy spec-btns" v-on:click="copyContent"></i>
                   <i v-if="translationLoading" class="fas fa-spinner fa-spin spec-btns" :title="$t('translating_content', 'Translating...')"></i>
                   <i v-else-if="!showTranslated" class="fa-solid fa-language spec-btns" v-on:click="translateContent" :title="$t('translate_content', 'Translate Content')"></i>
-                  <!-- Edit/Delete buttons for post author -->
-                  <div v-if="user && user.account.name === report.author">
-                    <span><a href="#" @click.prevent="$store.commit('setEditPost', report)" data-toggle="modal" data-target="#editPostModal" :title="$t('Edit_note')">
-                          <i class="fas fa-edit text-white"></i></a></span>
-                    <span v-if="postDeletable()"><a href="#" @click.prevent="deletePost" :title="$t('Delete_note')">
-                          <i class="fas fa-trash-alt text-white"></i><i class="fas fa-spin fa-spinner" v-if="deleting"></i></a>
-                    </span>
-                  </div>
                   <div class="header-post-actions">
                     <CardActions
                       :cardData="report"
@@ -53,7 +45,17 @@
                       @vote-prompt="votePrompt($event)"
                       @open-modal="headToComments"
                       @reblog="$reblog(user, report)"
-                    />
+                    >
+                      <!-- Edit/Delete for the post author, inline in the same strip -->
+                      <template #extra-actions>
+                        <a href="#" class="post-detail-action" v-if="user && user.account.name === report.author" @click.prevent="$store.commit('setEditPost', report)" data-toggle="modal" data-target="#editPostModal" :title="$t('Edit_note')">
+                          <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="#" class="post-detail-action" v-if="user && user.account.name === report.author && postDeletable()" @click.prevent="deletePost" :title="$t('Delete_note')">
+                          <i class="fas fa-trash-alt"></i><i class="fas fa-spin fa-spinner" v-if="deleting"></i>
+                        </a>
+                      </template>
+                    </CardActions>
                   </div>
                   <div class="modal-header">
                     <div class="report-tags p-1" v-html="$fetchReportTags(report)"></div>
