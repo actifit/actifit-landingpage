@@ -55,18 +55,13 @@
               :voteCount="getVoteCount"
               :hasVoted="!!(user && userVotedThisPost() == true)"
               :showReply="true"
+              :showEdit="!!(user && post.author === user.account.name)"
               @reply="toggleCommentBox"
               @vote-prompt="votePrompt($event)"
               @open-modal="headToComments"
               @reblog="$reblog(user, post)"
-            >
-              <!-- Edit for the post author, inline in the strip -->
-              <template #extra-actions>
-                <a href="#" class="post-detail-action" v-if="user && post.author === user.account.name" @click.prevent="$store.commit('setEditPost', post)" data-toggle="modal" data-target="#editPostModal" :title="$t('Edit_note')">
-                  <i class="fas fa-edit"></i>
-                </a>
-              </template>
-            </CardActions>
+              @edit="editThisPost"
+            />
           </div>
           <div class="modal-header">
             <div class="post-tags p-1" v-html="$fetchReportTags(post)"></div>
@@ -772,6 +767,10 @@ export default {
     },
     votePrompt(e) {
       this.$store.commit('setPostToVote', this.post)
+    },
+    editThisPost() {
+      this.$store.commit('setEditPost', this.post)
+      this.$nextTick(() => { try { window.$('#editPostModal').modal('show') } catch (e) { /* jQuery/bootstrap not ready */ } })
     },
     fetchPostCommentData() {
       this.commentsLoading = true;

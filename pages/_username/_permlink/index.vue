@@ -41,21 +41,16 @@
                       :voteCount="getVoteCount"
                       :hasVoted="userVotedThisPost()"
                       :showReply="!!user"
+                      :showEdit="!!(user && user.account.name === report.author)"
+                      :showDelete="!!(user && user.account.name === report.author && postDeletable())"
+                      :deleting="deleting"
                       @reply="toggleCommentBox"
                       @vote-prompt="votePrompt($event)"
                       @open-modal="headToComments"
                       @reblog="$reblog(user, report)"
-                    >
-                      <!-- Edit/Delete for the post author, inline in the same strip -->
-                      <template #extra-actions>
-                        <a href="#" class="post-detail-action" v-if="user && user.account.name === report.author" @click.prevent="$store.commit('setEditPost', report)" data-toggle="modal" data-target="#editPostModal" :title="$t('Edit_note')">
-                          <i class="fas fa-edit"></i>
-                        </a>
-                        <a href="#" class="post-detail-action" v-if="user && user.account.name === report.author && postDeletable()" @click.prevent="deletePost" :title="$t('Delete_note')">
-                          <i class="fas fa-trash-alt"></i><i class="fas fa-spin fa-spinner" v-if="deleting"></i>
-                        </a>
-                      </template>
-                    </CardActions>
+                      @edit="editThisPost"
+                      @delete="deletePost"
+                    />
                   </div>
                   <div class="modal-header">
                     <div class="report-tags p-1" v-html="$fetchReportTags(report)"></div>
@@ -573,6 +568,10 @@ export default {
     },
     cancelTranslation() { this.report.body = this.safety_post_content; this.showTranslated = false; },
     votePrompt() { if (this.report) this.$store.commit('setPostToVote', this.report); },
+    editThisPost() {
+      this.$store.commit('setEditPost', this.report);
+      this.$nextTick(() => { try { window.$('#editPostModal').modal('show'); } catch (e) { /* jQuery/bootstrap not ready */ } });
+    },
     resetOpenComment() { this.commentBoxOpen = false; this.replyBody = ''; },
     postDeletable() {
       if (!this.report) return false;

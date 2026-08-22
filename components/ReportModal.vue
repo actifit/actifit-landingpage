@@ -45,18 +45,13 @@
               :voteCount="getVoteCount"
               :hasVoted="user ? userVotedThisPost() : false"
               :showReply="true"
+              :showEdit="!!(user && report.author === user.account.name)"
               @reply="toggleCommentBox"
               @vote-prompt="votePrompt($event)"
               @open-modal="headToComments"
               @reblog="$reblog(user, report)"
-            >
-              <!-- Edit for the post author, inline in the strip -->
-              <template #extra-actions>
-                <a href="#" class="post-detail-action" v-if="user && report.author === user.account.name" @click.prevent="$store.commit('setEditPost', report)" data-toggle="modal" data-target="#editPostModal" :title="$t('Edit_note')">
-                  <i class="fas fa-edit"></i>
-                </a>
-              </template>
-            </CardActions>
+              @edit="editThisPost"
+            />
           </div>
           <div class="modal-header">
             <div class="report-tags p-1" v-html="$fetchReportTags(report)"></div>
@@ -678,6 +673,10 @@ export default {
     },
     votePrompt(e) {
       this.$store.commit('setPostToVote', this.report)
+    },
+    editThisPost() {
+      this.$store.commit('setEditPost', this.report)
+      this.$nextTick(() => { try { window.$('#editPostModal').modal('show') } catch (e) { /* jQuery/bootstrap not ready */ } })
     },
     displayTokenValue(token) {
       let val;
