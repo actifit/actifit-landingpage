@@ -59,7 +59,14 @@
               @vote-prompt="votePrompt($event)"
               @open-modal="headToComments"
               @reblog="$reblog(user, post)"
-            />
+            >
+              <!-- Edit for the post author, inline in the strip -->
+              <template #extra-actions>
+                <a href="#" class="post-detail-action" v-if="user && post.author === user.account.name" @click.prevent="$store.commit('setEditPost', post)" data-toggle="modal" data-target="#editPostModal" :title="$t('Edit_note')">
+                  <i class="fas fa-edit"></i>
+                </a>
+              </template>
+            </CardActions>
           </div>
           <div class="modal-header">
             <div class="post-tags p-1" v-html="$fetchReportTags(post)"></div>

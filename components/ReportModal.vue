@@ -49,7 +49,14 @@
               @vote-prompt="votePrompt($event)"
               @open-modal="headToComments"
               @reblog="$reblog(user, report)"
-            />
+            >
+              <!-- Edit for the post author, inline in the strip -->
+              <template #extra-actions>
+                <a href="#" class="post-detail-action" v-if="user && report.author === user.account.name" @click.prevent="$store.commit('setEditPost', report)" data-toggle="modal" data-target="#editPostModal" :title="$t('Edit_note')">
+                  <i class="fas fa-edit"></i>
+                </a>
+              </template>
+            </CardActions>
           </div>
           <div class="modal-header">
             <div class="report-tags p-1" v-html="$fetchReportTags(report)"></div>

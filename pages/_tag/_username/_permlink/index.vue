@@ -16,7 +16,7 @@
 <script>
 import NavbarBrand from '~/components/NavbarBrand'
 import Footer from '~/components/Footer'
-  
+
 export default {
   data () {
 		return {
@@ -27,11 +27,20 @@ export default {
 	  NavbarBrand,
 	  Footer
   },
-  created () {
-	if ((typeof this.$route.params !== 'undefined') && (typeof this.$route.params.tag !== 'undefined') &&(typeof this.$route.params.username !== 'undefined') && (typeof this.$route.params.permlink !== 'undefined') ) {
+  // Redirect the community-prefixed post URL (/{tag}/@user/permlink) to the canonical
+  // /@user/permlink. Doing it in asyncData means Nuxt issues a real 302 on SSR and a proper
+  // client-side redirect on SPA navigation. The previous created()+$router.push pattern could
+  // hang on "Redirecting..." — SSR only rendered the placeholder, and the follow-up client push
+  // sometimes aborted (redundant/duplicated navigation), leaving the page stuck.
+  asyncData ({ params, redirect, app }) {
+	if (params.tag && params.username && params.permlink) {
 	  // localePath keeps the active locale prefix (e.g. /de) — a raw path drops it and forces English
-	  this.$router.push(this.localePath("/"+this.$route.params.username+"/"+this.$route.params.permlink))
-	}else{
+	  redirect(app.localePath('/' + params.username + '/' + params.permlink))
+	}
+  },
+  created () {
+	// Only reached when a param is missing (asyncData did not redirect).
+	if (!(this.$route.params.tag && this.$route.params.username && this.$route.params.permlink)) {
 		this.errorDisplay = this.$t('error_post_not_found');
 	}
   }
