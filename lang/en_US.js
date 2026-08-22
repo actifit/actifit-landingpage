@@ -1,5 +1,7 @@
 module.exports = {
   languages: 'Languages',
+  operation_require: 'This operation requires your',
+  private_active: 'private Active key',
   afit_balance: 'AFIT Balance',
   hive_balance: 'HIVE Balance',
   view_full_profile: 'View Full Profile',
