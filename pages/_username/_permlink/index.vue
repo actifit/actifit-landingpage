@@ -34,14 +34,6 @@
                   <i :title="$t('copy_link')" class="fas fa-copy spec-btns" v-on:click="copyContent"></i>
                   <i v-if="translationLoading" class="fas fa-spinner fa-spin spec-btns" :title="$t('translating_content', 'Translating...')"></i>
                   <i v-else-if="!showTranslated" class="fa-solid fa-language spec-btns" v-on:click="translateContent" :title="$t('translate_content', 'Translate Content')"></i>
-                  <!-- Edit/Delete buttons for post author -->
-                  <div v-if="user && user.account.name === report.author">
-                    <span><a href="#" @click.prevent="$store.commit('setEditPost', report)" data-toggle="modal" data-target="#editPostModal" :title="$t('Edit_note')">
-                          <i class="fas fa-edit text-white"></i></a></span>
-                    <span v-if="postDeletable()"><a href="#" @click.prevent="deletePost" :title="$t('Delete_note')">
-                          <i class="fas fa-trash-alt text-white"></i><i class="fas fa-spin fa-spinner" v-if="deleting"></i></a>
-                    </span>
-                  </div>
                   <div class="header-post-actions">
                     <CardActions
                       :cardData="report"
@@ -49,10 +41,15 @@
                       :voteCount="getVoteCount"
                       :hasVoted="userVotedThisPost()"
                       :showReply="!!user"
+                      :showEdit="!!(user && user.account.name === report.author)"
+                      :showDelete="!!(user && user.account.name === report.author && postDeletable())"
+                      :deleting="deleting"
                       @reply="toggleCommentBox"
                       @vote-prompt="votePrompt($event)"
                       @open-modal="headToComments"
                       @reblog="$reblog(user, report)"
+                      @edit="editThisPost"
+                      @delete="deletePost"
                     />
                   </div>
                   <div class="modal-header">
@@ -571,6 +568,10 @@ export default {
     },
     cancelTranslation() { this.report.body = this.safety_post_content; this.showTranslated = false; },
     votePrompt() { if (this.report) this.$store.commit('setPostToVote', this.report); },
+    editThisPost() {
+      this.$store.commit('setEditPost', this.report);
+      this.$nextTick(() => { try { window.$('#editPostModal').modal('show'); } catch (e) { /* jQuery/bootstrap not ready */ } });
+    },
     resetOpenComment() { this.commentBoxOpen = false; this.replyBody = ''; },
     postDeletable() {
       if (!this.report) return false;

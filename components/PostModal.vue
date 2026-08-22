@@ -48,23 +48,21 @@
             <i v-if="translationLoading" class="fas fa-spinner fa-spin text-brand" :title="$t('translating_content', 'Translating...')"></i>
             <i v-else-if="!showTranslated" class="fa-solid fa-language text-brand" v-on:click="translateContent" :title="$t('translate_content', 'Translate Content')"></i>
           </span>
-          <div class="p-1 modal-top-actions legacy-post-actions">
-              <span><a href="#" @click.prevent="toggleCommentBox()" :title="$t('Reply')"><i
-                    class="text-white fas fa-reply"></i></a></span>
-              <span>
-                <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" class="text-brand"
-                  data-target="#voteModal" v-if="user && userVotedThisPost() == true">
-                  <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
-                </a>
-                <a href="#" @click.prevent="votePrompt($event)" data-toggle="modal" data-target="#voteModal"
-                  class="actifit-link-plain" v-else>
-                  <i class="far fa-thumbs-up"></i> {{ getVoteCount }}
-                </a>
-                <i class="far fa-comments ml-2" @click.prevent="headToComments()"></i> {{ post.children }}
-                <i class="far fa-share-square ml-2" @click.prevent="$reblog(user, post)"
-                  v-if="user && post.author != this.user.account.name" :title="$t('reblog')"></i>
-              </span>
-            </div>
+          <div class="header-post-actions">
+            <CardActions
+              :cardData="post"
+              :user="user"
+              :voteCount="getVoteCount"
+              :hasVoted="!!(user && userVotedThisPost() == true)"
+              :showReply="true"
+              :showEdit="!!(user && post.author === user.account.name)"
+              @reply="toggleCommentBox"
+              @vote-prompt="votePrompt($event)"
+              @open-modal="headToComments"
+              @reblog="$reblog(user, post)"
+              @edit="editThisPost"
+            />
+          </div>
           <div class="modal-header">
             <div class="post-tags p-1" v-html="$fetchReportTags(post)"></div>
           </div>
@@ -770,6 +768,10 @@ export default {
     votePrompt(e) {
       this.$store.commit('setPostToVote', this.post)
     },
+    editThisPost() {
+      this.$store.commit('setEditPost', this.post)
+      this.$nextTick(() => { try { window.$('#editPostModal').modal('show') } catch (e) { /* jQuery/bootstrap not ready */ } })
+    },
     fetchPostCommentData() {
       this.commentsLoading = true;
       this.cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
@@ -930,8 +932,24 @@ export default {
   padding-left: 40px;
 }
 
-.legacy-post-actions {
-  display: none;
+/* Top action strip in the modal header — mirrors the single-post view's header strip,
+   but sits on the white modal background so it uses the muted (grey) palette, not white.
+   Vote turns brand-red via CardActions' --active state when the user has voted. */
+.header-post-actions {
+  --post-footer-brand: #FF112D;
+  --post-footer-brand-dark: #D40E24;
+  --post-footer-border: #E6E8EB;
+  --post-footer-muted: #6B7280;
+  --post-footer-muted-soft: #9AA0A6;
+  --post-footer-green: #1E8E5A;
+  padding: 4px 0 2px;
+}
+.dark-mode .header-post-actions {
+  --post-footer-brand: #FF5266;
+  --post-footer-brand-dark: #FF7181;
+  --post-footer-muted: #ADB5BD;
+  --post-footer-muted-soft: #8F969D;
+  --post-footer-green: #62C995;
 }
 
 .share-links-actifit {
