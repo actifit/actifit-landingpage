@@ -9,11 +9,10 @@
  * as raw text across all 14 locales.
  *
  * Scope notes:
- * - Only en_US is enforced here. The other 13 locales are professionally
- *   translated and any gap there falls back to English gracefully; enforcing
- *   "exists in all 14" would force English placeholders that defeat the
- *   fallback and pollute real translations. A separate, non-blocking parity
- *   report logs those gaps for the translation backlog.
+ * - Enforced against ALL 14 locales: every used key must exist in en_US AND in
+ *   each of the other 13 lang/*.js files, or the build fails. This prevents the
+ *   translation drift that accumulated the wallet-key backlog (#167). A new key
+ *   must therefore be added (translated) to every locale on the same PR.
  * - Only LITERAL keys are checked. Dynamic keys (`$t(someVar)`,
  *   `$t('prefix' + x)`) are intentionally skipped — the regex only accepts a
  *   single fully-quoted first argument terminated by `,` or `)`.
@@ -95,18 +94,22 @@ describe('i18n key coverage', () => {
   // Non-blocking visibility: list used keys missing from the other 13 locales so
   // the translation backlog is visible in CI logs without failing the build
   // (those gaps fall back to English at runtime).
-  it('reports used keys missing from non-default locales (informational only)', () => {
+  it('every $t() key used in pages/ + components/ exists in ALL locales (no translation drift)', () => {
     const localeFiles = fs.readdirSync(LANG_DIR).filter((f) => /^[a-z]{2}_[A-Z]{2}\.js$/.test(f) && f !== DEFAULT_LOCALE)
     const gaps = []
     for (const file of localeFiles) {
       const locale = loadLocale(file)
-      const missing = [...used.keys()].filter((k) => hasKey(en, k) && !hasKey(locale, k))
-      if (missing.length) gaps.push(`  ${file}: ${missing.length} used key(s) untranslated`)
+      const missing = [...used.keys()]
+        .filter((k) => hasKey(en, k) && !hasKey(locale, k))
+        .sort((a, b) => a.localeCompare(b))
+      if (missing.length) gaps.push(`  ${file}: ${missing.length} missing — ${missing.slice(0, 12).join(', ')}${missing.length > 12 ? ', …' : ''}`)
     }
-    if (gaps.length) {
-      // eslint-disable-next-line no-console
-      console.warn(`\n[i18n] used keys awaiting translation (non-blocking):\n${gaps.join('\n')}\n`)
-    }
-    expect(true).toBe(true)
+
+    const report = gaps.length
+      ? `\nUsed $t() key(s) missing from these locale file(s). Every used key must exist in all 14 ` +
+        `lang/*.js files — add (translate) the missing keys so translations don't drift:\n${gaps.join('\n')}\n`
+      : ''
+
+    expect(report).toBe('')
   })
 })
