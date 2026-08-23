@@ -10,9 +10,13 @@ activity posts with modals, communities, proposals, live chat (Sting), referrals
 boards, measurement charts, 14 locales and dark mode. So most of this list is **enhancement and
 depth** on existing surfaces, not greenfield. Where a real backend build is required it is marked.
 
-**Companion doc:** the Actifit **Android** backlog (`actifit/android/tasks/feature-backlog.md`)
-covers the native app and the shared endpoint map; several items here are the web side of the
-same feature.
+**Companion doc:** the Actifit **Android** roadmap (`actifit/android/tasks/feature-vision.md`
++ `suggested_features.md`). Challenges (§2.1) is the **web side of the same shared feature** —
+keep the two docs in sync.
+
+**House rule (non-negotiable):** no wagering / betting / games-of-chance-for-money anywhere in
+the product. Competition is **skill- and goal-based**; rewards come from **sponsor / DHF /
+Actifit-funded prize pools**, never from pooling participants' own AFIT and redistributing it.
 
 **Status legend:** 🔨 In progress · 🔌 Backend endpoint ready · 🧱 Needs new/changed backend ·
 🎨 Client-only (frontend) · ♻️ Enhances an existing surface
@@ -28,13 +32,16 @@ communities, proposals + DHF vote, **Sting live chat**, referrals (`Referral.vue
 boards, measurement charts (`MeasureChartModal`), notifications, 14 locales, dark mode, and the
 new **CI + i18n guards**.
 
+**Out of scope on web:** SEO/GEO post optimization stays **HivePulse's** domain (its `score-post`
+engine + extension). We deliberately do **not** duplicate it into the Actifit editor.
+
 ---
 
 ## 1. Current Trello backlog (for context)
 
 | # | Item | Type |
 | :-- | :-- | :-- |
-| 162 | 🐛 Arabic pages never set the **RTL** direction attribute | Bug (feeds §6.1) |
+| 162 | 🐛 Arabic pages never set the **RTL** direction attribute | Bug (feeds §5.3) |
 | 163 | 🐛 `market.vue` calls `reject()` outside any Promise → `ReferenceError` | Bug |
 | 164 | 🐛 i18n `$t(key, 'fallback')` passes a **locale**, not a fallback | Bug (feeds §5.2) |
 | 110 | ✨ "Actifitter of the month" section | Feature (§2.3) |
@@ -44,25 +51,42 @@ new **CI + i18n guards**.
 
 ## 2. Engagement & Community — the biggest retention upside
 
-### 2.1 🧱♻️ Challenges / Duels / Teams
-Today `CompetitionAnnounce.vue` is a **static banner**. Turn it into a real challenges hub:
-step/activity goals, 1v1 duels, and group/team challenges, with AFIT stakes/escrow and a
-results feed. Ties directly into **Friends** and the activity feed.
-- **Backend:** 🧱 must be built (challenge lifecycle, escrow, resolution) — only internal
-  `team`/`team_transactions` collections exist today; scope early. **Impact:** Very High · **Effort:** High.
-- ⚠️ Keep it **skill/goal**-based, never wagering/games-of-chance (see house rule).
+### 2.1 🧱♻️ Challenges / Duels / Teams — "The Arena" (marquee, cross-platform)
+Today `CompetitionAnnounce.vue` is a **static banner**. The Android roadmap treats this as its
+flagship greenfield bet ("The Arena": live 1v1 duels, team raids / boss battles, City-vs-City,
+tournaments). **It is the same feature on both platforms** — and the central design fact is that
+it is a **backend service consumed by every client**, not a per-client build.
 
-### 2.2 🧱 Activity leaderboards (friends + global)
-Rank users by steps/activity for a day/week — a natural home-page and profile module.
+**Optimal path — one shared backend, two specialized front-ends:**
+
+| Layer | Owner | Rationale |
+| :-- | :-- | :-- |
+| **Challenge engine** — lifecycle, join, step aggregation + **verification** (from `verified_posts` / `trackedActivity`), resolution, payout, standings/leaderboard endpoints, notifications | **Backend — build once** 🧱 | Single source of truth + anti-cheat; web, Android, and iOS all reuse it. The long pole — **scope first.** Only internal `team`/`team_transactions` collections exist today. |
+| **The "playing" surface** — create/accept a duel, **live** real-time progress, in-walk push, GPS, AI trash-talk | **App leads** | Mobile is where you move *with the phone*: real-time, background sensor, and push are native strengths. |
+| **The "arena" surface** — discover/browse challenges, **create & manage team / city / tournament** events (organizer tools), standings & brackets, spectating, sharing/embedding results into Hive posts, history | **Web leads** (this repo) | Big-screen dashboards, community/city boards, organizer/admin, and spectating are far better on web. Web is the **lobby, management, and spectator layer**; the app is the live-competition layer. |
+
+**Reward model (house-rule compliant):** free/low-friction entry; win by **hitting a goal or
+out-stepping on effort** (skill, not chance). AFIT comes from **sponsor / DHF / Actifit-funded
+prize pools**, plus badges, league standing and status — **never** user-staked escrow or pooled
+wagers. Sponsors funding the fun is also a cleaner growth story.
+
+**Sequencing:** design the challenge + verification schema → build the engine → app ships live
+1v1 duels → web ships the arena hub + team/city organizer tools on the *same* endpoints.
+**Impact:** Very High · **Effort:** High (backend-led).
+
+### 2.2 🧱 Activity leaderboards (friends + global, "leagues")
+Rank users by steps/activity for a day/week — a natural home-page and profile module, and the
+web complement to the app's "Leagues, Rivals & Ghosts" idea. Web is ideal for the standings/city
+boards; the app for the personal live race.
 - **Backend:** 🧱 no generic **activity**-leaderboard endpoint exists (only token/holder boards:
   `/topAFITHolders`, `/topDelegators`, per-user `/getRank/:user`). A friends-only board can be
-  built client-side from `/userFriends/:user` + `/trackedActivity/:user`; a global board needs a
-  new endpoint. **Impact:** High · **Effort:** Medium.
+  built client-side from `/userFriends/:user` + `/trackedActivity/:user`; a global/league board
+  needs a new endpoint (share it with 2.1). **Impact:** High · **Effort:** Medium.
 
 ### 2.3 🔌♻️ "Actifitter of the Month" (Trello #110)
 A recognition module on the home/community page — spotlight a top mover with stats + a badge.
 - **Backend:** 🔌 likely composable from `/getRank`, `/trackedActivity`, badges; a small
-  "featured user" config or endpoint keeps it editorial. **Impact:** Medium · **Effort:** Low-Medium.
+  "featured user" config keeps it editorial. **Impact:** Medium · **Effort:** Low-Medium.
 
 ### 2.4 🔌♻️ Badges & streaks on the profile
 Android surfaces a streak strip; web has the data but no prominent badges/streak module on
@@ -76,26 +100,22 @@ a followed-communities view for a reason to return daily. **Impact:** High · **
 
 ---
 
-## 3. Content creation — lean into the SEO/GEO edge
+## 3. Content creation
 
-### 3.1 🎨♻️ In-editor SEO/GEO optimizer (flagship)
-The team already runs **HivePulse** and its `score-post` engine. Bake a **live post score + fix
-list** into `CustomTextEditor` / `blog/new.vue` — title length, focus keyword, preview
-description, headings, alt text, and GEO "answerability" — so authors optimize *before*
-publishing (exactly what lifted the v1.13.0 announcement to 99/100).
-- **Backend:** 🎨 port the scoring engine to a client util (or a small proxy endpoint). Uniquely
-  on-brand; improves every post's reach. **Impact:** High · **Effort:** Medium.
+> SEO/GEO post optimization is intentionally **left to HivePulse** (see §0). The items here are
+> about reducing posting friction and enriching content, not scoring it.
 
-### 3.2 🧱 Post scheduling & draft manager
+### 3.1 🧱 Post scheduling & draft manager
 `blog/new.vue` publishes immediately and keeps only local drafts. Add a **draft library** and
 **scheduled publishing** to help users hit the daily cadence.
 - **Backend:** 🧱 server-side scheduling; local drafts can ship first (🎨). **Impact:** Medium · **Effort:** Medium.
 
-### 3.3 🎨♻️ AI compose assist
-In-app AI is translation-only today. Add optional **draft/summarize/title-suggest** in the editor
-(Gemini, as the app already uses for translation). **Impact:** Medium · **Effort:** Medium · **Backend:** 🎨 (Gemini via proxy).
+### 3.2 🎨♻️ AI compose assist
+In-app AI is translation-only today. Add optional **draft / summarize / title-suggest** in the
+editor (Gemini, as the app already uses for translation) — helps users clear the daily post's
+word-count/quality bar. **Impact:** Medium · **Effort:** Medium · **Backend:** 🎨 (Gemini via proxy).
 
-### 3.4 🎨♻️ Route maps for GPS activities
+### 3.3 🎨♻️ Route maps for GPS activities
 Web only *displays* activity tags; workout/route data rides inside the post JSON. Render a
 **map + splits** for posts that carry a GPS route. **Impact:** Medium · **Effort:** Medium · **Backend:** none.
 
@@ -109,7 +129,7 @@ Surface expected/pending AFIT before and after posting, plus an earnings-over-ti
 
 ### 4.2 🔌♻️ Wallet portfolio analytics
 Build on the revamped wallet: balance-history charts, AFIT/AFITX/HIVE/HP trends, and a simple
-P&L/inflow view (reuse `MeasureLineChart`). **Impact:** Medium · **Effort:** Medium · **Backend:** 🔌 mostly (history from balances/txns).
+inflow/holdings view (reuse `MeasureLineChart`). **Impact:** Medium · **Effort:** Medium · **Backend:** 🔌 mostly.
 
 ### 4.3 🔌♻️ Referral program surface
 `Referral.vue` exists but isn't a first-class destination. Add a referral dashboard: personal
@@ -125,9 +145,28 @@ wallet) to convert signups into active users. **Impact:** Medium-High · **Effor
 
 ## 5. Platform, i18n & PWA
 
-### 5.1 🎨 Installable PWA + Web Push
-Make the web app installable and add **web push** for upvotes, friend requests, and rewards —
-a big retention lever that meets users off-app. **Impact:** High · **Effort:** Medium-High · **Backend:** 🧱 push registration (FCM web).
+### 5.1 🎨🧱 Installable PWA + Web Push — highest-leverage web retention item
+Two paired capabilities that close the gap between "a website you visit" and "an app that pulls
+you back" — for the large share of users who are on mobile **web**, not the Android app.
+
+**PWA (Progressive Web App)** — make `actifit.io` behave like an installed app:
+- **Installable** — "Add to Home Screen" on phone/desktop; launches full-screen with the Actifit
+  icon, no browser chrome. A persistent home-screen icon is itself a big retention nudge.
+- **Instant shell / offline resilience** — a service worker caches the app shell so it opens fast
+  and survives flaky mobile connections.
+- **Effort:** low-medium — Nuxt 2 has `@nuxtjs/pwa` (manifest + service worker) built for this.
+  **Backend:** none.
+
+**Web Push** — browser notifications even when the tab/site is **closed** (like native push):
+- **Moments that pull people back:** upvotes, friend requests, rewards paid, a duel challenge
+  (§2.1), "you're about to lose your streak," reward-cycle reminders — today web users get
+  **none** of these off-site.
+- **Rails largely exist:** Android already uses **FCM**, and FCM does **web push** too, so the
+  send side is mostly there; the new piece is a **subscription-registration endpoint** + service
+  worker.
+- **Caveats:** must request notification permission **contextually** (not on first load), and
+  **iOS Safari only supports web push for *installed* PWAs** (iOS 16.4+) — which is why PWA + push
+  are done together. **Effort:** medium · **Backend:** 🧱 thin (push registration, reuses FCM).
 
 ### 5.2 🎨 i18n hardening (builds on the new guard)
 Fix the `$t(key, 'fallback')` anti-pattern (#164 — 2nd arg is a *locale*, not a fallback), then
@@ -162,17 +201,18 @@ Keyboard nav, focus states, color-contrast, and aria labels across the revamped 
 1. Bugs #162/#163/#164/#125 (§6) — cheap, some ship the same day
 2. **Rewards estimator (4.1)** + **Badges/streaks on profile (2.4)** — endpoints ready, high perceived value
 3. **Friends feed filter (2.5)** + **Onboarding checklist (4.4)** — client-only retention levers
-4. **In-editor SEO/GEO optimizer (3.1)** — flagship, on-brand, reuses HivePulse scoring
+4. **PWA shell (5.1, part 1)** — installable app, no backend; sets up web push next
 
 **Cycle 2 — depth + growth (endpoints mostly ready):**
-5. **Referral dashboard (4.3)**, **Wallet portfolio analytics (4.2)**
-6. **Actifitter of the Month (2.3)**, **Route maps (3.4)**, **AI compose assist (3.3)**
-7. **PWA + web push (5.1)** — bigger, but a major retention step
+5. **Web Push (5.1, part 2)** — the retention step; thin push-registration endpoint
+6. **Referral dashboard (4.3)**, **Wallet portfolio analytics (4.2)**
+7. **Actifitter of the Month (2.3)**, **Route maps (3.3)**, **AI compose assist (3.2)**
 8. **RTL (5.3)** + **Accessibility (5.4)** polish
 
-**Cycle 3 — bigger bets (need backend build):**
-9. **Challenges / Duels / Teams (2.1)** 🧱 — highest engagement upside, most backend work
-10. **Activity leaderboards (2.2)** 🧱, **Post scheduling (3.2)** 🧱
+**Cycle 3 — the marquee bet (backend-led, cross-platform):**
+9. **Challenges / "The Arena" (2.1)** 🧱 — scope the shared backend *early* (it gates the app's
+   flagship too); web builds the arena/organizer/spectator layer on those endpoints.
+10. **Activity leaderboards / leagues (2.2)** 🧱 — shares the 2.1 backend · **Post scheduling (3.1)** 🧱
 
 ---
 
@@ -180,14 +220,14 @@ Keyboard nav, focus states, color-contrast, and aria labels across the revamped 
 
 | Ready now (endpoints live) 🔌 | Needs new/changed backend 🧱 |
 | :--- | :--- |
-| Rewards estimator (`/getEstimatedReward`, `/pendingRewards`, `/getPostReward`) | Challenges / duels / teams (no API; internal collections only) |
-| Badges (`/userBadges`, `/allUserBadges`, `/claimBadge`) | Global **activity** leaderboard (no activity-leaderboard endpoint) |
+| Rewards estimator (`/getEstimatedReward`, `/pendingRewards`, `/getPostReward`) | **Challenges / Arena engine** (lifecycle, verify, resolve, payout, standings) — no API; internal collections only |
+| Badges (`/userBadges`, `/allUserBadges`, `/claimBadge`) | **Activity / league leaderboard** (no activity-leaderboard endpoint) — shared with Arena |
 | Referrals (`/referrals`, `/signups`, `/activeRefReward`, free-signup links) | Server-side post scheduling |
-| Friends (`/userFriends`, `/addFriend`, `/acceptFriend`, `/dropFriendship`, `/userFriendRequests`) | Web push registration (FCM web) |
+| Friends (`/userFriends`, `/addFriend`, `/acceptFriend`, `/dropFriendship`, `/userFriendRequests`) | **Web-push subscription registration** (FCM-web; send side reuses existing FCM) |
 | Ranks/holders (`/getRank`, `/topAFITHolders`, `/topDelegators`) | "Featured user" editorial config (Actifitter of the Month, if not composable) |
-| Measurements/activity (`/trackedActivity`, `/trackedMeasurements`) | — |
-| Client-only 🎨: SEO/GEO optimizer, local drafts, AI assist, route maps, onboarding checklist, PWA shell, RTL, a11y, i18n hardening, friends feed filter | — |
+| Measurements/activity (`/trackedActivity`, `/trackedMeasurements`) | Sponsor prize-pool funding/escrow rails for challenges (Actifit/DHF-funded, **not** user-staked) |
+| Client-only 🎨: PWA shell, local drafts, AI assist, route maps, onboarding checklist, RTL, a11y, i18n hardening, friends feed filter | — |
 
-> Note: this doc is a living plan — pair each item with a Trello card on the **"Web 1 - Actifit
-> Web"** board when it enters a cycle, and keep the two in sync.
+> This doc is a living plan — pair each item with a Trello card on the **"Web 1 - Actifit Web"**
+> board when it enters a cycle, and keep the web ↔ Android roadmaps in sync (esp. Challenges).
 </content>
