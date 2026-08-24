@@ -29,8 +29,10 @@ Wallet + Market (revamped, v1.13.0), **Friends** (`friends.vue`, `FriendshipModa
 request system, not Hive follow), blog/video/activity posts + `PostModal`/`ReportModal`,
 `CustomTextEditor` with preview-description + DecentMemes picker, profile (`_username/index.vue`),
 communities, proposals + DHF vote, **Sting live chat**, referrals (`Referral.vue`), top-holder
-boards, measurement charts (`MeasureChartModal`), notifications, 14 locales, dark mode, and the
-new **CI + i18n guards**.
+boards, measurement charts (`MeasureChartModal`), a **Daily Leaderboard** (`pages/leaderboard.vue`
+— ranks users by daily recorded activity, fed by `actifit-pst-cr3at0r` `topP0stsV2`), a per-user
+rank breakdown (`pages/userrank.vue`), notifications, 14 locales, dark mode, and the new
+**CI + i18n guards**.
 
 **Out of scope on web:** SEO/GEO post optimization stays **HivePulse's** domain (its `score-post`
 engine + extension). We deliberately do **not** duplicate it into the Actifit editor.
@@ -74,14 +76,140 @@ wagers. Sponsors funding the fun is also a cleaner growth story.
 1v1 duels → web ships the arena hub + team/city organizer tools on the *same* endpoints.
 **Impact:** Very High · **Effort:** High (backend-led).
 
-### 2.2 🧱 Activity leaderboards (friends + global, "leagues")
-Rank users by steps/activity for a day/week — a natural home-page and profile module, and the
-web complement to the app's "Leagues, Rivals & Ghosts" idea. Web is ideal for the standings/city
-boards; the app for the personal live race.
-- **Backend:** 🧱 no generic **activity**-leaderboard endpoint exists (only token/holder boards:
-  `/topAFITHolders`, `/topDelegators`, per-user `/getRank/:user`). A friends-only board can be
-  built client-side from `/userFriends/:user` + `/trackedActivity/:user`; a global/league board
-  needs a new endpoint (share it with 2.1). **Impact:** High · **Effort:** Medium.
+**Expanded by research (2026-08-24)** — surveyed the fitness contests already run on Hive (the
+Actifit community), Splinterlands' competitive systems, and modern mobile-game clan/challenge
+loops. Two verticals turn "The Arena" from a duels feature into a full engagement system — both
+purely skill/goal-based.
+
+#### 2.1.a Vertical — Leagues & Seasons (the solo ladder)
+The individual progression spine, and the **highest-proven retention lever** (Duolingo's weekly
+leagues drove a step-change in D7 retention; Splinterlands' whole economy hangs off league +
+season rewards).
+
+**Real proof on Hive — POLIAC:** Actifit already has a **24-season**, community-run
+football-style league — **POLIAC ("Polish League Actifit"**, community `hive-124594`, run by
+@poliac). Members are placed in named **divisions** (Golden League, …) and play **daily 1v1
+fixtures** (a round-robin scheduler pairs everyone each "round" — the higher Actifit activity that
+day wins), a full **~5-week season** with weekly schedules posted in advance and daily results,
+and season-to-season **promotion/relegation**. Vertical A is essentially **POLIAC made native,
+automated, and multi-language.** (POLIAC = round-robin *league*; the MAcFiT "World Cup" = knockout
+*cup* — the classic league-vs-cup pair, both already running on Actifit data.)
+
+- **Weekly step leagues** — 30-user cohorts *matched by activity level*; each week the top ~7
+  promote and the bottom relegate, across tiers Bronze → Champion. A small, winnable leaderboard
+  that resets weekly (Duolingo) — the automated cousin of POLIAC's division ladder. Rating = a
+  rolling verified-activity score (the Splinterlands ELO analogue, but on steps/workouts). The
+  raw daily ranking already exists (§2.2, `pages/leaderboard.vue` / `topP0stsV2`); the net-new
+  work is the **division ladder, weekly/season windows, and promotion/relegation** on top of it.
+- **Seasons (~2 weeks)** — ratings reset; end-of-season **reward chests scaled by peak tier**
+  (Splinterlands seasons), funded from a sponsor/DHF/treasury pool — chests hold AFIT / badges /
+  boosts, never a paid random pull.
+- **Daily Focus goal** — a rotating auto-verified target ("10k steps", "cardio day") unlocking
+  escalating chest thresholds (Splinterlands daily focus). This would **revive natively** the idea
+  behind Hive's *now-defunct* **"AutomaticWin"** beat-the-clock contest (hit the goal before a
+  cutoff → fixed AFIT reward) — automated, so it doesn't depend on one organizer keeping it alive.
+- **Weekly Top-N leaderboard** with a sponsor-pool prize split by rank/tier — the native version
+  of the community **"Top 250"** leaderboard (currently hand-run weekly by an Actifit team member);
+  making it native removes that manual burden.
+
+#### 2.1.b Vertical — Squads & Brawls (the team / social layer)
+The belonging + team-vs-team spine (Clash clans; Splinterlands guilds + Brawls; the community-run
+**MAcFiT "World Cup"** — a knockout bracket already built on Actifit activity counts).
+- **Squads** (10–50 users) — roles (a Captain sets weekly goals), a shared squad step feed + chat,
+  and cumulative **squad milestones** that unlock squad badge tiers.
+- **Co-op squad goals / boss battles** — the squad pools steps to "climb a mountain" / cross a
+  virtual route; a **completion-gated** shared reward drops for every active contributor (mobile
+  co-op raids — goal-gated, not random).
+- **Squad Wars / Brawls** — scheduled weekly team-vs-team where each member fills a **"fray slot"**
+  = a personal step/workout target; unfilled slots forfeit (Splinterlands brawl mechanic). Team
+  placement funds a shared sponsor pool and earns **squad currency** spendable in a squad store on
+  cosmetics/perks. Matchmaking by squad-average activity keeps it winnable — the native, team-based
+  evolution of the MAcFiT bracket.
+
+#### 2.1.c Cross-cutting mechanics (apply to both verticals)
+- **Streaks + a "Rest Day" freeze** — the strongest daily-return hook; the freeze forgives one
+  missed day (Duolingo). A *fixed* item, never gambled. (Partly native to Actifit already.)
+- **Seasonal "Fitness Pass"** — a free reward track earned via activity, with an optional premium
+  track. ⚠️ premium must sell a **fixed-content** track / cosmetics / AFIT boosts — **never** a
+  paid random crate.
+- **Live-ops events** — monthly themed limited-time challenges ("October 1M-Steps City Walk",
+  Ramadan / New-Year events, conference step contests) with sponsor prize pools (Monopoly-GO-style
+  live-ops; mirrors Hive's in-person "Actifit Challenge" events).
+- **Content contests** — a lightweight in-app contest type (submit a photo/video/flyer; community
+  or organizer judging) mirroring Hive's `#actifitcontest`.
+
+#### 2.1.d Compliance primitive (why this stays non-gambling)
+The research converges on one clean pattern that keeps all of the above on the right side of the
+house rule:
+1. **An earned-only, non-transferable in-app currency** (*Merits* / *Actipoints*) for season
+   tracks and the squad store — **earned through activity, never bought or wagered** (Splinterlands'
+   Glint/Merits primitive).
+2. **All prize pools sponsor / DHF / treasury-funded**, with **free or activity-gated entry** —
+   never an entry-fee pot or user-staked wager (validated by both the Hive contests and
+   Splinterlands' sponsor/DAO-funded tournaments).
+
+These verticals share the *same* challenge engine + verification + pool-payout backend as the duels
+above — build it once, then layer **Leagues** (solo) and **Squads** (team) as configurations of it.
+
+#### 2.1.e Summary tables
+
+All items are **skill/goal-based**; AFIT prizes are **sponsor/DHF/treasury-funded**; spendable
+currency is **earned-only & non-transferable** (no wagering, no paid random crates).
+
+**Foundation — the shared challenge engine (build once; web + Android + iOS consume):**
+
+| Piece | What it does | Status |
+| :-- | :-- | :-- |
+| Challenge engine | Lifecycle, join, step **verification** (`verified_posts`/`trackedActivity`), resolution, pool payout, standings, notifications | 🧱 net-new — **scope first** |
+| Daily activity ranking | Ranks users by daily recorded activity | ✅ **exists** — `leaderboard.vue` / `topP0stsV2` |
+| Weekly/season aggregation | Standings table, points, promotion/relegation windows | 🧱 net-new (daily feed is today-only) |
+| Earned-only currency ("Merits") + rewards shop | Anti-gambling spend primitive | 🧱 net-new |
+
+**Vertical A — Leagues & Seasons (solo ladder · retention spine):**
+
+| Feature | What it is | Basis | Impact · Effort |
+| :-- | :-- | :-- | :-- |
+| Weekly step leagues | Cohorts by activity level; promote/relegate; Bronze→Champion | POLIAC · Duolingo | ⭐⭐⭐ · Med |
+| Seasons + reward chests | ~2-wk cycles; chests scaled by peak tier (pool-funded) | Splinterlands | ⭐⭐⭐ · Med |
+| Daily Focus goal | Rotating auto-verified target unlocking chest thresholds | Splinterlands · (revives defunct AutomaticWin) | ⭐⭐ · Low-Med |
+| Weekly Top-N + prizes | Sponsor-pool split by rank | Community Top-250 (hand-run today) | ⭐⭐ · Low |
+
+**Vertical B — Squads & Brawls (team / social · belonging):**
+
+| Feature | What it is | Basis | Impact · Effort |
+| :-- | :-- | :-- | :-- |
+| Squads | 10–50 users, Captain roles, shared feed/chat, milestones | Clash clans · Splinterlands guilds | ⭐⭐⭐ · Med |
+| Co-op squad goals / boss battles | Pool steps to a shared goal → completion-gated reward for all | Mobile co-op raids | ⭐⭐ · Med |
+| Squad Wars / Brawls | Weekly team-vs-team; members fill "fray slots"; squad currency → store | Splinterlands Brawls · MAcFiT | ⭐⭐⭐ · Med-High |
+
+**Cross-cutting (both verticals):**
+
+| Feature | What it is | Basis | Impact · Effort |
+| :-- | :-- | :-- | :-- |
+| Streaks + "Rest Day" freeze | Daily habit hook; one forgiven miss (fixed item) | Duolingo | ⭐⭐⭐ · Low |
+| Seasonal "Fitness Pass" | Free track + optional fixed-content premium | Battle-pass games | ⭐⭐ · Med |
+| Live-ops events | Monthly themed limited-time challenges w/ sponsor pools | Monopoly GO · Hive events | ⭐⭐ · Med |
+| Content contests | Submit photo/video/flyer; community/organizer judging | Hive `#actifitcontest` | ⭐ · Low |
+
+**Suggested build order:**
+
+| Phase | Ships |
+| :-- | :-- |
+| 1 | **Challenge engine + verification + earned-only currency** (foundation) |
+| 2 | **Leagues & Seasons** (A) — reuses the existing daily leaderboard + POLIAC format |
+| 3 | **Squads & Brawls** (B) + cross-cutting (streaks, live-ops, Fitness Pass, contests) |
+
+### 2.2 ♻️ Activity leaderboards — extend the existing Daily Leaderboard
+**Already shipped:** a global **Daily Leaderboard** (`pages/leaderboard.vue`) ranks users by daily
+recorded activity (data from `actifit-pst-cr3at0r` `topP0stsV2`; a simpler `top5p0sts` also exists).
+So the *raw daily ranking is not greenfield* — the gaps are scope, time-window, and gamification:
+- 🎨 **Friends / community-scoped** views (filter the same data by `/userFriends/:user` or a
+  community) — low effort.
+- 🧱 **Weekly / season windows** and a **standings table** (points, promotion/relegation) — the
+  ranking layer §2.1.a needs; requires a weekly/season aggregation endpoint (the daily feed is
+  today-only).
+- The gamified **leagues/divisions** live in §2.1.a and build directly on this data.
+- **Impact:** High · **Effort:** Low (friends filter) → Medium (weekly/season aggregation).
 
 ### 2.3 🔌♻️ "Actifitter of the Month" (Trello #110)
 A recognition module on the home/community page — spotlight a top mover with stats + a badge.
