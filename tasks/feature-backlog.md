@@ -74,6 +74,67 @@ wagers. Sponsors funding the fun is also a cleaner growth story.
 1v1 duels → web ships the arena hub + team/city organizer tools on the *same* endpoints.
 **Impact:** Very High · **Effort:** High (backend-led).
 
+**Expanded by research (2026-08-24)** — surveyed the fitness contests already run on Hive (the
+Actifit community), Splinterlands' competitive systems, and modern mobile-game clan/challenge
+loops. Two verticals turn "The Arena" from a duels feature into a full engagement system — both
+purely skill/goal-based.
+
+#### 2.1.a Vertical — Leagues & Seasons (the solo ladder)
+The individual progression spine, and the **highest-proven retention lever** (Duolingo's weekly
+leagues drove a step-change in D7 retention; Splinterlands' whole economy hangs off league +
+season rewards).
+- **Weekly step leagues** — 30-user cohorts *matched by activity level*; each week the top ~7
+  promote and the bottom relegate, across tiers Bronze → Champion. A small, winnable leaderboard
+  that resets weekly (Duolingo). Rating = a rolling verified-activity score (the Splinterlands ELO
+  analogue, but on steps/workouts).
+- **Seasons (~2 weeks)** — ratings reset; end-of-season **reward chests scaled by peak tier**
+  (Splinterlands seasons), funded from a sponsor/DHF/treasury pool — chests hold AFIT / badges /
+  boosts, never a paid random pull.
+- **Daily Focus goal** — a rotating auto-verified target ("10k steps", "cardio day") unlocking
+  escalating chest thresholds (Splinterlands daily focus). This natively automates Hive's
+  **"AutomaticWin"** beat-the-clock contest (hit the goal before a cutoff → fixed AFIT reward).
+- **Weekly Top-N leaderboard** with a sponsor-pool prize split by rank/tier — the native version
+  of Hive's community "Top 250" leaderboards.
+
+#### 2.1.b Vertical — Squads & Brawls (the team / social layer)
+The belonging + team-vs-team spine (Clash clans; Splinterlands guilds + Brawls; the community-run
+**MAcFiT "World Cup"** — a knockout bracket already built on Actifit activity counts).
+- **Squads** (10–50 users) — roles (a Captain sets weekly goals), a shared squad step feed + chat,
+  and cumulative **squad milestones** that unlock squad badge tiers.
+- **Co-op squad goals / boss battles** — the squad pools steps to "climb a mountain" / cross a
+  virtual route; a **completion-gated** shared reward drops for every active contributor (mobile
+  co-op raids — goal-gated, not random).
+- **Squad Wars / Brawls** — scheduled weekly team-vs-team where each member fills a **"fray slot"**
+  = a personal step/workout target; unfilled slots forfeit (Splinterlands brawl mechanic). Team
+  placement funds a shared sponsor pool and earns **squad currency** spendable in a squad store on
+  cosmetics/perks. Matchmaking by squad-average activity keeps it winnable — the native, team-based
+  evolution of the MAcFiT bracket.
+
+#### 2.1.c Cross-cutting mechanics (apply to both verticals)
+- **Streaks + a "Rest Day" freeze** — the strongest daily-return hook; the freeze forgives one
+  missed day (Duolingo). A *fixed* item, never gambled. (Partly native to Actifit already.)
+- **Seasonal "Fitness Pass"** — a free reward track earned via activity, with an optional premium
+  track. ⚠️ premium must sell a **fixed-content** track / cosmetics / AFIT boosts — **never** a
+  paid random crate.
+- **Live-ops events** — monthly themed limited-time challenges ("October 1M-Steps City Walk",
+  Ramadan / New-Year events, conference step contests) with sponsor prize pools (Monopoly-GO-style
+  live-ops; mirrors Hive's in-person "Actifit Challenge" events).
+- **Content contests** — a lightweight in-app contest type (submit a photo/video/flyer; community
+  or organizer judging) mirroring Hive's `#actifitcontest`.
+
+#### 2.1.d Compliance primitive (why this stays non-gambling)
+The research converges on one clean pattern that keeps all of the above on the right side of the
+house rule:
+1. **An earned-only, non-transferable in-app currency** (*Merits* / *Actipoints*) for season
+   tracks and the squad store — **earned through activity, never bought or wagered** (Splinterlands'
+   Glint/Merits primitive).
+2. **All prize pools sponsor / DHF / treasury-funded**, with **free or activity-gated entry** —
+   never an entry-fee pot or user-staked wager (validated by both the Hive contests and
+   Splinterlands' sponsor/DAO-funded tournaments).
+
+These verticals share the *same* challenge engine + verification + pool-payout backend as the duels
+above — build it once, then layer **Leagues** (solo) and **Squads** (team) as configurations of it.
+
 ### 2.2 🧱 Activity leaderboards (friends + global, "leagues")
 Rank users by steps/activity for a day/week — a natural home-page and profile module, and the
 web complement to the app's "Leagues, Rivals & Ghosts" idea. Web is ideal for the standings/city
