@@ -54,6 +54,10 @@ engine + extension). We deliberately do **not** duplicate it into the Actifit ed
 ## 2. Engagement & Community — the biggest retention upside
 
 ### 2.1 🧱♻️ Challenges / Duels / Teams — "The Arena" (marquee, cross-platform)
+> 📐 **Foundation engine is now scoped** — see [`challenge-engine-spec.md`](./challenge-engine-spec.md)
+> (Trello #171): data model, verification/anti-cheat, aggregation, Merits currency, API surface,
+> compliance invariants, and a phased F0–F6 build order. Read that before starting Vertical A/B.
+
 Today `CompetitionAnnounce.vue` is a **static banner**. The Android roadmap treats this as its
 flagship greenfield bet ("The Arena": live 1v1 duels, team raids / boss battles, City-vs-City,
 tournaments). **It is the same feature on both platforms** — and the central design fact is that
