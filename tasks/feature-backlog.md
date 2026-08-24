@@ -151,6 +151,54 @@ house rule:
 These verticals share the *same* challenge engine + verification + pool-payout backend as the duels
 above — build it once, then layer **Leagues** (solo) and **Squads** (team) as configurations of it.
 
+#### 2.1.e Summary tables
+
+All items are **skill/goal-based**; AFIT prizes are **sponsor/DHF/treasury-funded**; spendable
+currency is **earned-only & non-transferable** (no wagering, no paid random crates).
+
+**Foundation — the shared challenge engine (build once; web + Android + iOS consume):**
+
+| Piece | What it does | Status |
+| :-- | :-- | :-- |
+| Challenge engine | Lifecycle, join, step **verification** (`verified_posts`/`trackedActivity`), resolution, pool payout, standings, notifications | 🧱 net-new — **scope first** |
+| Daily activity ranking | Ranks users by daily recorded activity | ✅ **exists** — `leaderboard.vue` / `topP0stsV2` |
+| Weekly/season aggregation | Standings table, points, promotion/relegation windows | 🧱 net-new (daily feed is today-only) |
+| Earned-only currency ("Merits") + rewards shop | Anti-gambling spend primitive | 🧱 net-new |
+
+**Vertical A — Leagues & Seasons (solo ladder · retention spine):**
+
+| Feature | What it is | Basis | Impact · Effort |
+| :-- | :-- | :-- | :-- |
+| Weekly step leagues | Cohorts by activity level; promote/relegate; Bronze→Champion | POLIAC · Duolingo | ⭐⭐⭐ · Med |
+| Seasons + reward chests | ~2-wk cycles; chests scaled by peak tier (pool-funded) | Splinterlands | ⭐⭐⭐ · Med |
+| Daily Focus goal | Rotating auto-verified target unlocking chest thresholds | Splinterlands · (revives defunct AutomaticWin) | ⭐⭐ · Low-Med |
+| Weekly Top-N + prizes | Sponsor-pool split by rank | Community Top-250 (hand-run today) | ⭐⭐ · Low |
+
+**Vertical B — Squads & Brawls (team / social · belonging):**
+
+| Feature | What it is | Basis | Impact · Effort |
+| :-- | :-- | :-- | :-- |
+| Squads | 10–50 users, Captain roles, shared feed/chat, milestones | Clash clans · Splinterlands guilds | ⭐⭐⭐ · Med |
+| Co-op squad goals / boss battles | Pool steps to a shared goal → completion-gated reward for all | Mobile co-op raids | ⭐⭐ · Med |
+| Squad Wars / Brawls | Weekly team-vs-team; members fill "fray slots"; squad currency → store | Splinterlands Brawls · MAcFiT | ⭐⭐⭐ · Med-High |
+
+**Cross-cutting (both verticals):**
+
+| Feature | What it is | Basis | Impact · Effort |
+| :-- | :-- | :-- | :-- |
+| Streaks + "Rest Day" freeze | Daily habit hook; one forgiven miss (fixed item) | Duolingo | ⭐⭐⭐ · Low |
+| Seasonal "Fitness Pass" | Free track + optional fixed-content premium | Battle-pass games | ⭐⭐ · Med |
+| Live-ops events | Monthly themed limited-time challenges w/ sponsor pools | Monopoly GO · Hive events | ⭐⭐ · Med |
+| Content contests | Submit photo/video/flyer; community/organizer judging | Hive `#actifitcontest` | ⭐ · Low |
+
+**Suggested build order:**
+
+| Phase | Ships |
+| :-- | :-- |
+| 1 | **Challenge engine + verification + earned-only currency** (foundation) |
+| 2 | **Leagues & Seasons** (A) — reuses the existing daily leaderboard + POLIAC format |
+| 3 | **Squads & Brawls** (B) + cross-cutting (streaks, live-ops, Fitness Pass, contests) |
+
 ### 2.2 ♻️ Activity leaderboards — extend the existing Daily Leaderboard
 **Already shipped:** a global **Daily Leaderboard** (`pages/leaderboard.vue`) ranks users by daily
 recorded activity (data from `actifit-pst-cr3at0r` `topP0stsV2`; a simpler `top5p0sts` also exists).
