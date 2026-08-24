@@ -2556,11 +2556,22 @@ export default {
       immediate: true,
       handler: async function (newVal, oldVal) {
         if (newVal && (!oldVal || newVal.name !== oldVal.name)) {
-          // If the page mounted while logged out (self /wallet), its init never
-          // ran — run it now that the visitor has logged in, before refreshing.
-          if (this.mountedDone && !this.walletInitialized
-              && !(this.$route.params && this.$route.params.username)) {
-            await this.initWallet(newVal.name);
+          // Only the self /wallet (no :username in the route) tracks the logged-in user.
+          if (this.mountedDone && !(this.$route.params && this.$route.params.username)) {
+            const switchedUser = oldVal && newVal.name !== oldVal.name;
+            if (switchedUser) {
+              // Switch User: clear the init guard so we re-point the wallet at the
+              // newly active account. Without this, displayUser/displayUserData stay
+              // on the old user and every balance/profile refresh below refetches the
+              // WRONG account. initWallet() re-sets displayUser + displayUserData for
+              // the new user (it keeps the old data until the fresh fetch resolves, so
+              // no null-deref flash).
+              this.walletInitialized = false;
+            }
+            // First login after a logged-out mount, or a just-cleared switch: (re)init.
+            if (!this.walletInitialized) {
+              await this.initWallet(newVal.name);
+            }
           }
           await this.refreshAllWalletData();
         }
