@@ -29,8 +29,10 @@ Wallet + Market (revamped, v1.13.0), **Friends** (`friends.vue`, `FriendshipModa
 request system, not Hive follow), blog/video/activity posts + `PostModal`/`ReportModal`,
 `CustomTextEditor` with preview-description + DecentMemes picker, profile (`_username/index.vue`),
 communities, proposals + DHF vote, **Sting live chat**, referrals (`Referral.vue`), top-holder
-boards, measurement charts (`MeasureChartModal`), notifications, 14 locales, dark mode, and the
-new **CI + i18n guards**.
+boards, measurement charts (`MeasureChartModal`), a **Daily Leaderboard** (`pages/leaderboard.vue`
+— ranks users by daily recorded activity, fed by `actifit-pst-cr3at0r` `topP0stsV2`), a per-user
+rank breakdown (`pages/userrank.vue`), notifications, 14 locales, dark mode, and the new
+**CI + i18n guards**.
 
 **Out of scope on web:** SEO/GEO post optimization stays **HivePulse's** domain (its `score-post`
 engine + extension). We deliberately do **not** duplicate it into the Actifit editor.
@@ -96,7 +98,9 @@ automated, and multi-language.** (POLIAC = round-robin *league*; the MAcFiT "Wor
 - **Weekly step leagues** — 30-user cohorts *matched by activity level*; each week the top ~7
   promote and the bottom relegate, across tiers Bronze → Champion. A small, winnable leaderboard
   that resets weekly (Duolingo) — the automated cousin of POLIAC's division ladder. Rating = a
-  rolling verified-activity score (the Splinterlands ELO analogue, but on steps/workouts).
+  rolling verified-activity score (the Splinterlands ELO analogue, but on steps/workouts). The
+  raw daily ranking already exists (§2.2, `pages/leaderboard.vue` / `topP0stsV2`); the net-new
+  work is the **division ladder, weekly/season windows, and promotion/relegation** on top of it.
 - **Seasons (~2 weeks)** — ratings reset; end-of-season **reward chests scaled by peak tier**
   (Splinterlands seasons), funded from a sponsor/DHF/treasury pool — chests hold AFIT / badges /
   boosts, never a paid random pull.
@@ -147,14 +151,17 @@ house rule:
 These verticals share the *same* challenge engine + verification + pool-payout backend as the duels
 above — build it once, then layer **Leagues** (solo) and **Squads** (team) as configurations of it.
 
-### 2.2 🧱 Activity leaderboards (friends + global, "leagues")
-Rank users by steps/activity for a day/week — a natural home-page and profile module, and the
-web complement to the app's "Leagues, Rivals & Ghosts" idea. Web is ideal for the standings/city
-boards; the app for the personal live race.
-- **Backend:** 🧱 no generic **activity**-leaderboard endpoint exists (only token/holder boards:
-  `/topAFITHolders`, `/topDelegators`, per-user `/getRank/:user`). A friends-only board can be
-  built client-side from `/userFriends/:user` + `/trackedActivity/:user`; a global/league board
-  needs a new endpoint (share it with 2.1). **Impact:** High · **Effort:** Medium.
+### 2.2 ♻️ Activity leaderboards — extend the existing Daily Leaderboard
+**Already shipped:** a global **Daily Leaderboard** (`pages/leaderboard.vue`) ranks users by daily
+recorded activity (data from `actifit-pst-cr3at0r` `topP0stsV2`; a simpler `top5p0sts` also exists).
+So the *raw daily ranking is not greenfield* — the gaps are scope, time-window, and gamification:
+- 🎨 **Friends / community-scoped** views (filter the same data by `/userFriends/:user` or a
+  community) — low effort.
+- 🧱 **Weekly / season windows** and a **standings table** (points, promotion/relegation) — the
+  ranking layer §2.1.a needs; requires a weekly/season aggregation endpoint (the daily feed is
+  today-only).
+- The gamified **leagues/divisions** live in §2.1.a and build directly on this data.
+- **Impact:** High · **Effort:** Low (friends filter) → Medium (weekly/season aggregation).
 
 ### 2.3 🔌♻️ "Actifitter of the Month" (Trello #110)
 A recognition module on the home/community page — spotlight a top mover with stats + a badge.
