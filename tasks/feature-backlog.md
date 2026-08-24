@@ -83,18 +83,30 @@ purely skill/goal-based.
 The individual progression spine, and the **highest-proven retention lever** (Duolingo's weekly
 leagues drove a step-change in D7 retention; Splinterlands' whole economy hangs off league +
 season rewards).
+
+**Real proof on Hive — POLIAC:** Actifit already has a **24-season**, community-run
+football-style league — **POLIAC ("Polish League Actifit"**, community `hive-124594`, run by
+@poliac). Members are placed in named **divisions** (Golden League, …) and play **daily 1v1
+fixtures** (a round-robin scheduler pairs everyone each "round" — the higher Actifit activity that
+day wins), a full **~5-week season** with weekly schedules posted in advance and daily results,
+and season-to-season **promotion/relegation**. Vertical A is essentially **POLIAC made native,
+automated, and multi-language.** (POLIAC = round-robin *league*; the MAcFiT "World Cup" = knockout
+*cup* — the classic league-vs-cup pair, both already running on Actifit data.)
+
 - **Weekly step leagues** — 30-user cohorts *matched by activity level*; each week the top ~7
   promote and the bottom relegate, across tiers Bronze → Champion. A small, winnable leaderboard
-  that resets weekly (Duolingo). Rating = a rolling verified-activity score (the Splinterlands ELO
-  analogue, but on steps/workouts).
+  that resets weekly (Duolingo) — the automated cousin of POLIAC's division ladder. Rating = a
+  rolling verified-activity score (the Splinterlands ELO analogue, but on steps/workouts).
 - **Seasons (~2 weeks)** — ratings reset; end-of-season **reward chests scaled by peak tier**
   (Splinterlands seasons), funded from a sponsor/DHF/treasury pool — chests hold AFIT / badges /
   boosts, never a paid random pull.
 - **Daily Focus goal** — a rotating auto-verified target ("10k steps", "cardio day") unlocking
-  escalating chest thresholds (Splinterlands daily focus). This natively automates Hive's
-  **"AutomaticWin"** beat-the-clock contest (hit the goal before a cutoff → fixed AFIT reward).
+  escalating chest thresholds (Splinterlands daily focus). This would **revive natively** the idea
+  behind Hive's *now-defunct* **"AutomaticWin"** beat-the-clock contest (hit the goal before a
+  cutoff → fixed AFIT reward) — automated, so it doesn't depend on one organizer keeping it alive.
 - **Weekly Top-N leaderboard** with a sponsor-pool prize split by rank/tier — the native version
-  of Hive's community "Top 250" leaderboards.
+  of the community **"Top 250"** leaderboard (currently hand-run weekly by an Actifit team member);
+  making it native removes that manual burden.
 
 #### 2.1.b Vertical — Squads & Brawls (the team / social layer)
 The belonging + team-vs-team spine (Clash clans; Splinterlands guilds + Brawls; the community-run
