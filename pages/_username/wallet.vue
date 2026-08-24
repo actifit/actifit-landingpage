@@ -4719,6 +4719,44 @@ export default {
         console.error('Error in fetchTokenBalance:', err);
       }
     },
+    zeroClaimableDisplay() {
+      // Reflect a just-succeeded claim immediately. The claimable section is driven
+      // by these values, and node propagation lags the tx, so without an optimistic
+      // clear the just-claimed pending balance intermittently keeps showing.
+      this.claimVests = '0.000000 VESTS';
+      this.claimSP = '0.000 POWER';
+      this.claimSBD = (this.cur_bchain === 'STEEM') ? '0.000 SBD' : '0.000 HBD';
+      this.claimSTEEM = (this.cur_bchain === 'BLURT') ? '0.000 BLURT'
+        : (this.cur_bchain === 'STEEM') ? '0.000 STEEM' : '0.000 HIVE';
+    },
+    rewardBalancesCleared(acct) {
+      // true once the chain shows no unclaimed reward balances on the account
+      const num = v => parseFloat((v || '0').toString().split(' ')[0]) || 0;
+      return num(acct.reward_vesting_balance) === 0
+        && num(acct.reward_hive_balance || acct.reward_steem_balance || acct.reward_blurt_balance) === 0
+        && num(acct.reward_hbd_balance || acct.reward_sbd_balance) === 0;
+    },
+    async pollClaimableUntilCleared(attempts = 5, delayMs = 3000) {
+      // A single fixed-delay refetch is unreliable — the node may not have applied
+      // the claim yet, so the pending balance reappears (the reported intermittent
+      // bug). Poll until the chain confirms the reward balances are zero, then sync
+      // displayUserData and re-derive the claimable values.
+      const chainLnk = this.setProperNode();
+      for (let i = 0; i < attempts; i++) {
+        await new Promise(r => setTimeout(r, delayMs));
+        try {
+          const res = await chainLnk.api.getAccountsAsync([this.displayUser]);
+          if (res && res.length && this.rewardBalancesCleared(res[0])) {
+            this.displayUserData = res[0];
+            this.claimableSTEEMRewards();
+            break;
+          }
+        } catch (e) {
+          console.error('pollClaimableUntilCleared error:', e);
+        }
+      }
+      this.fetchUserData();
+    },
     async claimRewards() {
       //function handles claiming STEEM rewards
       if (!localStorage.getItem('std_login')) {
@@ -4732,7 +4770,9 @@ export default {
         }, window.location.origin + '/wallet?op=claim rewards&status=success');
 
         window.open(link);
-        setTimeout(() => this.fetchUserData(), 3000);
+        // The claim is signed in the SC popup; we don't get a success callback here,
+        // so poll the chain and only clear the section once it confirms zero rewards.
+        this.pollClaimableUntilCleared();
 
         //Below would have been preferred approach, but claimRewardBalance keeps failing as it requires more authority. Keeping here for future further exploration
         /*
@@ -4773,8 +4813,11 @@ export default {
         console.log(res.success);
         if (res.success) {
           this.confirmCompletion('claimrewards', 0, res);
-          //this.isClaimableDataAvailableTEMP = false;
-          setTimeout(() => this.fetchUserData(), 3000);
+          this.claimRewardsProcess = false;
+          // Broadcast confirmed: clear the section immediately, then reconcile with
+          // the chain (rides out node-propagation lag instead of one fixed 3s guess).
+          this.zeroClaimableDisplay();
+          this.pollClaimableUntilCleared();
         }
         /*steem.broadcast.claimRewardBalanceAsync(this.user.account.name,this.claimSTEEM, this.claimSBD, this.claimSP).then(
           res => ).catch(err=>console.log(err));*/
