@@ -3,10 +3,13 @@
 > **Trello #171** (EPIC · backend-led · *scope-first*). Gates Vertical A (Leagues & Seasons, #172)
 > and Vertical B (Squads & Brawls, #173). Roadmap context: `tasks/feature-backlog.md` §2.1 + §2.1.e.
 >
-> **Status:** DRAFT for review — this is the "scope first" deliverable the epic asks for. It defines
-> the data model, verification approach, API surface, currency primitive, and phasing so the two
-> vertical epics can be broken into buildable sub-tasks against a settled contract. No client code
-> ships from this card; it produces the contract every client will build against.
+> **Status:** DRAFT — first review incorporated (2026-08-25): on-chain/off-chain persistence boundary
+> (§3.9), correct backend repo (`actifit-bot`, §1.1), and challenge origination — project-sponsored
+> **and** user-initiated — plus the minimum default contest set (§7.4–§7.5). This is the "scope first"
+> deliverable the epic asks for: it defines the data model, verification, API surface, currency
+> primitive, persistence boundary, origination model, and phasing so the two vertical epics can be
+> broken into buildable sub-tasks against a settled contract. No client code ships from this card; it
+> produces the contract every client will build against.
 
 ---
 
@@ -36,6 +39,11 @@ The engine is part of the **Actifit backend** — the same service already reach
 (see `store/actions.js:112`). It is **not** new infrastructure in this repo. This repo (web) is a
 **consumer**: it calls the new endpoints and renders the arena surface. Android/iOS consume the same
 endpoints.
+
+**Backend repo:** the endpoints are built in **`actifit/actifit-bot`** (the Actifit backend behind
+`api.actifit.io`) — *that* repo owns the Challenge Engine code, schemas, jobs, and API. This repo
+only consumes it. Note the daily activity feed (`topP0stsV2` / `top5p0sts`) is a **separate** small
+service (`actifit-pst-cr3at0r`), read as an input — not where the engine lives.
 
 **Today's reality (baseline):**
 - The only competition-adjacent collections that exist are internal `team` / `team_transactions`.
@@ -214,6 +222,25 @@ Append-only, double-entry, **non-transferable** — see §6.
 - **Badges** → existing `userBadges/:user`, `allUserBadges`, `claimBadge` — Merits/chests can grant
   existing badge types; no parallel badge system.
 
+### 3.9 Persistence: on-chain vs off-chain
+
+The engine writes **almost nothing net-new on-chain** — because the thing that must be trustworthy
+(the activity itself) is *already* on Hive. The boundary:
+
+| Data | Persistence | Why |
+| :-- | :-- | :-- |
+| **Raw activity** (the verified input) | **Hive L1 — already there** (`verified_posts` = Actifit posts / `custom_json`) | The engine *reads* it; it never re-writes it. This is what lets verification be trusted with **zero** new on-chain writes. |
+| **AFIT prize payout** | **Hive-Engine (L2)** — real HE token transfer | Transparent, auditable real-token settlement. Winner payout = an on-chain HE transfer. |
+| **Sponsor pool custody** | **On-chain** — funds held in an Actifit-controlled pool account | Real AFIT sits on-chain; the `pools` doc tracks commitments/accounting off-chain against it. |
+| **Challenges / participants / standings / seasons / matchmaking** | **Off-chain (backend DB)** | High-frequency, mutable, query-heavy — on-chain would be unworkable on cost + speed. |
+| **Merits + rewards shop** | **Off-chain (DB only) — *by design*** | Putting Merits on Hive-Engine would make them a **tradeable token** and break the non-transferable / earned-only guarantee (I3/I4). Off-chain is precisely what *enforces* compliance. |
+| **Settled result anchor** *(optional)* | **Hive `custom_json`** (opt-in per challenge) | A provably-fair, tamper-proof record of final standings + which posts counted — and it doubles as the native "share results into a Hive post" loop. Not required for the engine to run. |
+
+**Rule of thumb:** *money and proof* touch chain (AFIT payout on HE, activity proof already on L1,
+optional result anchor); *everything operational and the Merits economy* stays in the backend DB.
+This resolves open decision §12.5 — **Merits are internal, off-chain, and un-tradeable by
+construction.**
+
 ---
 
 ## 4. Verification & anti-cheat (the core value)
@@ -289,6 +316,60 @@ that is sponsor/DHF/treasury-funded, never user-staked). Merits are the "safe" i
 - A pool cannot pay beyond `budget`; over-subscription splits by rule (rank-weighted), never by
   taking from users.
 
+### 7.4 Challenge origination — project-sponsored **and** user-initiated
+
+The engine serves **both** official contests and challenges users create themselves, on the *same*
+lifecycle. What differs is a **permission + funding tier** that keeps user-created challenges
+compliant and abuse-resistant. `challenges.created_by` + a new `origin_tier` field drive this.
+
+| Tier | Who may create | Challenge types | Reward source | Guardrail |
+| :-- | :-- | :-- | :-- | :-- |
+| **Friendly** | any authenticated user | duel, small group / step-goal (invite friends), bragging-rights | **badge + system-capped Merits only — NO AFIT** | rate-limited per user; **Merit emission capped per challenge** (see anti-abuse below) |
+| **Community** | verified / community leaders above a rank threshold (`getRank`) | community-scoped leagues, group events | optional **self-sponsored** or external-sponsor AFIT pool | funder is a **non-participant sponsor** (I7); light moderation/report |
+| **Official** | Actifit / admin role | the default set (§7.5) + live-ops | **DHF / treasury / sponsor** pools | featured; the always-on spine |
+
+**Creation flow (web arena surface leads):** a creation wizard → pick **type** → set
+**window / metric / cohort / invitees / visibility** → choose **reward tier**
+(badge-only ▸ Merits ▸ self-sponsored pool) → `POST challenges`. The engine validates the payload
+against **both** the compliance invariants (I1–I6) **and** the creator's `origin_tier` (e.g. a
+Friendly-tier user cannot attach an AFIT pool). Verification + anti-cheat (§4) apply identically to
+every tier — a user-made challenge is scored from the same trusted activity feed, so it can't be
+gamed any more easily than an official one.
+
+**User self-funding is sponsorship, not a wager.** A user who puts up AFIT for a challenge they
+created is recorded as a **`sponsor`** funding a prize, and is made **ineligible to win their own
+funded pool** — so there is no path where a user stakes money into a pot they can win back. This is
+the line that keeps user-funded challenges on the right side of the house rule, and it becomes a new
+enforced invariant:
+
+> **I7 — a pool's funder cannot be a paid participant of a challenge that pool rewards.**
+
+**Anti-abuse (Merit farming via alts).** Because Friendly-tier challenges mint system Merits, a
+sybil could spawn fake challenges among alt accounts to farm Merits. Mitigations, all engine-side:
+per-user **daily cap on system-funded Merit emission**, Merits only for challenges with ≥N *distinct
+verified* participants, reuse of the §4 sybil/duplicate-signer checks, and min account-age/rank to
+create funded challenges. Farmed Merits are also low-value by construction (non-transferable,
+fixed-content sinks only).
+
+### 7.5 Minimum default contest set (launch spine)
+
+The always-on, project-sponsored contests the engine should ship with — the industry-standard
+minimum, each mapping to a proven mechanic and to Vertical A + cross-cutting in the roadmap. All are
+skill/goal-based and pool-funded (house-rule compliant):
+
+| # | Default contest | Cadence | Basis | Funding | Engine type |
+| :-- | :-- | :-- | :-- | :-- | :-- |
+| 1 | **Weekly Step League** — 30-user cohorts by activity level; promote/relegate Bronze→Champion | weekly | Duolingo leagues · POLIAC | treasury / sponsor | `league_fixture` under a `season` |
+| 2 | **Daily Focus Goal** — rotating auto-verified target (10k steps / cardio day) → chest threshold | daily | Splinterlands daily focus · revives *AutomaticWin* | treasury | `daily_focus` |
+| 3 | **Season ladder + reward chests** — chests scaled by peak tier | ~2 weeks | Splinterlands seasons | DHF / treasury | `season` wrapper |
+| 4 | **Weekly Global Top-N** — sponsor pool split by rank | weekly | native *"Top 250"* (hand-run today) | sponsor | `liveops` (global) |
+| 5 | **Monthly live-ops themed event** — e.g. "1M-Steps City Walk", Ramadan / New-Year | monthly | Monopoly GO · in-person Actifit Challenge | sponsor | `liveops` |
+
+These 5 are all **solo / global** — the launch spine (Vertical A #172 + cross-cutting). **Squad
+Wars / Brawls** (Vertical B #173) is the natural **6th** default once squads exist, but it depends
+on the team layer so it is not in the day-one set. Shipping #1–#5 makes The Arena feel alive from
+launch without waiting on the team features.
+
 ---
 
 ## 8. API surface (what clients consume)
@@ -307,15 +388,21 @@ writes are organizer/engine-authenticated. (Method/paths indicative — finalize
 **Participation (clients write):**
 - `POST challenges/:id/join` — enroll user/squad (entry-gate checked server-side).
 - `POST challenges/:id/leave`.
-- `POST challenges` — organizer creates (web organizer tools); type+config validated.
+- `POST challenges` — **create** (both official organizer tools *and* the user creation wizard, §7.4);
+  the engine derives the caller's `origin_tier` from their role/rank and validates type + config +
+  reward tier against it (a Friendly-tier user cannot attach an AFIT pool).
+- `POST challenges/:id/sponsor` — attach/commit funding to a pool (Community-tier self-sponsor or an
+  external sponsor); records the funder as a **non-participant** sponsor (invariant I7).
 - `POST challenges/:id/score` — *app live path*: submit progress; **advisory only**, the engine
   re-verifies against the activity feed before it counts.
 
-**Engine-internal (not client-exposed):** daily rollup, weekly/season aggregation, resolution,
-payout, anti-cheat sweep — scheduled jobs.
+**Engine-internal (not client-exposed):** **seed/refresh the default contest set (§7.5)**, daily
+rollup, weekly/season aggregation, resolution, payout, anti-cheat sweep, Merit-emission cap
+enforcement — scheduled jobs.
 
 **Auth:** reads mostly public (standings are spectator content); joins require the user's Hive auth
-(reuse the app's existing auth); organizer/admin actions gated to a role; engine jobs internal.
+(reuse the app's existing auth); **create is tiered** (any user → Friendly; rank-gated → Community;
+role-gated → Official); engine jobs internal.
 
 ---
 
@@ -341,9 +428,11 @@ the whole system stays on the right side of the house rule:
 | I4 | Merits are non-transferable | no user→user transfer endpoint exists |
 | I5 | No shop item is random | `rewards_shop.random === false` invariant |
 | I6 | Outcomes decided by verified effort/goal, never chance | `scoring.rule ∈ {max,threshold,head_to_head}` |
+| I7 | A pool's funder is not a paid participant of a challenge it rewards | resolution excludes funder from that pool's payout (§7.4) |
 
-A conformance test suite asserting I1–I6 against the schemas is part of the Foundation deliverable —
-it's what lets every future challenge type ship without re-litigating compliance.
+A conformance test suite asserting I1–I7 against the schemas is part of the Foundation deliverable —
+it's what lets every future challenge type (official **or** user-created) ship without re-litigating
+compliance.
 
 ---
 
@@ -373,9 +462,17 @@ Nothing here is built under #171; #171 delivers the contract these consume.
    (Leaning: fixtures = head-to-head points for POLIAC parity; a separate rating for matchmaking.)
 3. **Real-time vs polling for duels** — v1 polling contract; live transport a later app-led add.
 4. **Squad identity** — reuse/extend the internal `team` collection or a new `squads` collection?
-5. **Merits ↔ AFIT boundary** — confirm Merits are purely internal (no on-chain representation), to
-   keep them un-tradeable by construction.
-6. **Scheduler ownership** — engine-internal cron vs an existing Actifit job runner.
+5. ~~**Merits ↔ AFIT boundary**~~ — **RESOLVED** (§3.9): Merits are purely internal / off-chain /
+   non-transferable by construction; AFIT payouts ride existing Hive-Engine.
+6. **Scheduler ownership** — engine-internal cron vs an existing Actifit job runner. (Note: engine
+   lives in `actifit/actifit-bot`, which already runs scheduled jobs + deploys via its own pipeline.)
+7. **User self-funded pools — allow at Community tier?** The one product/compliance call for you.
+   Recommended: **yes**, guarded by invariant I7 (funder = non-participant sponsor). If we'd rather
+   keep *all* AFIT pools Actifit/sponsor-sourced at launch, user-created challenges stay
+   badge/Merit-only (Friendly tier) and self-funding is deferred — lower compliance surface, less
+   community-driven prize variety.
+8. **Result anchoring on-chain** — ship the optional `custom_json` result anchor (§3.9) at launch for
+   provably-fair outcomes, or defer as a nice-to-have?
 
 ---
 
@@ -383,20 +480,25 @@ Nothing here is built under #171; #171 delivers the contract these consume.
 
 Ordered so each phase unblocks the next; Phase 1 is the minimum that lets Vertical A start.
 
+Ordered so each phase unblocks the next; Phase 1 is the minimum that lets Vertical A start. Built in
+**`actifit/actifit-bot`** (backend); the web sub-tasks (§11) follow on merge.
+
 | Phase | Deliverable | Unblocks |
 | :- | :- | :- |
-| **F0** | This spec reviewed + open decisions (§12) settled with backend owner | everything |
-| **F1** | Schema + `challenges`/`participants` collections + lifecycle state machine | join/resolve |
-| **F2** | **Verification** service (window score from activity feed + anti-cheat flags) §4 | trust |
+| **F0** | This spec reviewed + open decisions (§12) settled — incl. the two product calls (§12.7 user self-funding, §12.8 result anchor) | everything |
+| **F1** | Schema (incl. `origin_tier`) + `challenges`/`participants` collections + lifecycle state machine | join/resolve |
+| **F2** | **Verification** service (window score from activity feed + anti-cheat/anti-sybil flags) §4 | trust |
 | **F3** | **Aggregation** — daily rollup + weekly/season `standings` §5 | Vertical A (#172) |
-| **F4** | **Merits ledger** + rewards shop + compliance invariant tests (I1–I6) §6, §10 | spend loop |
-| **F5** | **Pools + resolution/payout** §7 | prizes |
-| **F6** | **Read API** (discovery/standings/merits) + **notifications** stream §8, §9 | all clients |
+| **F4** | **Merits ledger** + rewards shop + Merit-emission caps + compliance invariant tests (I1–I7) §6, §10 | spend loop |
+| **F5** | **Pools + resolution/payout** (AFIT on Hive-Engine) + **tiered creation & sponsor** endpoints §7 | prizes + user-created |
+| **F6** | **Read API** (discovery/standings/merits) + **notifications** stream + **seed the §7.5 default contest set** §8, §9 | all clients + live launch |
 
 **Definition of done for #171:** F0–F6 contracts published (schemas + endpoint list + invariant
-tests green), so #172 and #173 can each be broken into client-side sub-tasks against a frozen API.
+tests I1–I7 green), the §7.5 default contests seeded, so #172 and #173 can each be broken into
+client-side sub-tasks against a frozen API.
 
 ---
 
-*Owner: web + backend. This doc is the scope-first artifact for #171 — review, settle §12, then the
-phase rows become sub-cards.*
+*Owner: backend (`actifit/actifit-bot`) + web (this repo, consumer). This doc is the scope-first
+artifact for #171 — review, settle §12 (two product calls remain: §12.7 user self-funding, §12.8
+result anchor), then the phase rows become sub-cards.*
