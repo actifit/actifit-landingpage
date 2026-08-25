@@ -558,6 +558,9 @@ Ordered so each phase unblocks the next; F1–F3 are the minimum that lets Verti
 list + invariant tests I1–I7 green), the §7.5 default contests seeded, so #172 and #173 can each be
 broken into client-side sub-tasks against a frozen API.
 
+**Sub-cards (created 2026-08-25, Backlog):** F1 → Trello #175 · F2 → #176 · F3 → #177 · F4 → #178 ·
+F5 → #179 · F6 → #180. Dependency chain: F1 → {F2, F4}; F2 → F3; {F2,F4} → F5; {F3,F5} → F6.
+
 ---
 
 *Owner: backend (`actifit/actifit-bot`) + web (this repo, consumer). This doc is the scope-first
