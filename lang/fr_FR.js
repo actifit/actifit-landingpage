@@ -1,4 +1,8 @@
 module.exports = {
+  Arena_Title: "L'Arène",
+  Arena_Subtitle: 'Découvre des défis fitness, des ligues et des saisons — gagne des récompenses en restant actif.',
+  Arena_No_Challenges: 'Aucun défi actif pour le moment — reviens bientôt.',
+  Arena_Ends: 'Se termine',
   Savings: "Épargne",
   top_hive_holders_title: "Top détenteurs de HIVE",
   top_hp_holders_title: "Top détenteurs de HP",

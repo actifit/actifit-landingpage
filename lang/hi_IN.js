@@ -1,4 +1,8 @@
 module.exports = {
+  Arena_Title: 'द एरिना',
+  Arena_Subtitle: 'फिटनेस चुनौतियाँ, लीग और सीज़न खोजें — सक्रिय रहने पर पुरस्कार अर्जित करें।',
+  Arena_No_Challenges: 'अभी कोई सक्रिय चुनौती नहीं — जल्द ही फिर देखें।',
+  Arena_Ends: 'समाप्त',
   Savings: "बचत",
   top_hive_holders_title: "शीर्ष HIVE धारक",
   top_hp_holders_title: "शीर्ष HP धारक",

@@ -53,6 +53,9 @@ export default {
   setExtendedLeaderboard (state, leaderboard) {
     state.extLeaderboard = leaderboard
   },
+  setArenaChallenges (state, challenges) {
+    state.arenaChallenges = Array.isArray(challenges) ? challenges : []
+  },
   setReports (state, reports) {
     state.reports = reports
   },

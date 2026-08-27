@@ -1,4 +1,8 @@
 module.exports = {
+  Arena_Title: 'La Arena',
+  Arena_Subtitle: 'Descubre retos de fitness, ligas y temporadas: gana recompensas por mantenerte activo.',
+  Arena_No_Challenges: 'No hay retos activos ahora mismo: vuelve pronto.',
+  Arena_Ends: 'Termina',
   Savings: "Ahorros",
   loading_hive_engine_balances: "Cargando saldos de tokens de Hive-Engine...",
   no_hive_engine_balances: "No hay saldos de tokens de Hive-Engine disponibles.",

@@ -1,4 +1,8 @@
 module.exports = {
+  Arena_Title: '竞技场',
+  Arena_Subtitle: '探索健身挑战、联赛和赛季——保持活跃即可赢取奖励。',
+  Arena_No_Challenges: '目前没有进行中的挑战——请稍后再来。',
+  Arena_Ends: '结束',
   Savings: "储蓄",
   top_hive_holders_title: "HIVE 持仓榜",
   top_hp_holders_title: "HP 持仓榜",

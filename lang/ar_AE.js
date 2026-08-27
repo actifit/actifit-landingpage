@@ -1,4 +1,8 @@
 module.exports = {
+  Arena_Title: 'الساحة',
+  Arena_Subtitle: 'اكتشف تحديات اللياقة والدوريات والمواسم — واكسب مكافآت مقابل نشاطك.',
+  Arena_No_Challenges: 'لا توجد تحديات نشطة حاليًا — عد قريبًا.',
+  Arena_Ends: 'ينتهي',
   Savings: "التوفير",
   top_hive_holders_title: "أبرز مالكي HIVE",
   top_hp_holders_title: "أبرز مالكي HP",

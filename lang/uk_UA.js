@@ -1,4 +1,8 @@
 module.exports = {
+  Arena_Title: 'Арена',
+  Arena_Subtitle: 'Відкривайте фітнес-виклики, ліги та сезони — отримуйте нагороди за активність.',
+  Arena_No_Challenges: 'Наразі немає активних викликів — завітайте згодом.',
+  Arena_Ends: 'Завершується',
   Savings: "Накопичення",
   top_hive_holders_title: "Топ власників HIVE",
   top_hp_holders_title: "Топ власників HP",

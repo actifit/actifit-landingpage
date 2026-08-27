@@ -24,6 +24,7 @@ const createStore = () => {
       rewardedActivityCount: 0, // total amount of activity posts
       leaderboard: [], // top users
       extLeaderboard: [], //top users extended
+      arenaChallenges: [], //Challenge Engine — active/open challenges (The Arena)
       reports: [], // all activity reports/posts
       posts: [], // all posts
       videos: [], // all video posts

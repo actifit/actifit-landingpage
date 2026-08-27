@@ -1,4 +1,8 @@
 module.exports = {
+  Arena_Title: 'The Arena',
+  Arena_Subtitle: 'Discover fitness challenges, leagues and seasons — earn rewards for staying active.',
+  Arena_No_Challenges: 'No active challenges right now — check back soon.',
+  Arena_Ends: 'Ends',
   languages: 'Languages',
   operation_require: 'This operation requires your',
   private_active: 'private Active key',

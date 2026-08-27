@@ -1,4 +1,8 @@
 module.exports = {
+  Arena_Title: 'アリーナ',
+  Arena_Subtitle: 'フィットネスチャレンジ、リーグ、シーズンを見つけよう — アクティブに過ごして報酬を獲得。',
+  Arena_No_Challenges: '現在アクティブなチャレンジはありません — またお越しください。',
+  Arena_Ends: '終了',
   Savings: "セービング",
   top_hive_holders_title: "HIVE保有者ランキング",
   top_hp_holders_title: "HP保有者ランキング",

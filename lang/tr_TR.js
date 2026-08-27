@@ -1,4 +1,8 @@
 module.exports = {
+  Arena_Title: 'Arena',
+  Arena_Subtitle: 'Fitness meydan okumalarını, ligleri ve sezonları keşfet — aktif kalarak ödüller kazan.',
+  Arena_No_Challenges: 'Şu anda aktif meydan okuma yok — yakında tekrar bak.',
+  Arena_Ends: 'Bitiş',
   Savings: "Birikimler",
   top_hive_holders_title: "En İyi HIVE Sahipleri",
   top_hp_holders_title: "En İyi HP Sahipleri",

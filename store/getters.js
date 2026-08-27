@@ -44,6 +44,9 @@ export default {
   leaderboard (state) {
     return state.leaderboard
   },
+  arenaChallenges (state) {
+    return state.arenaChallenges
+  },
   extLeaderboard (state) {
     return state.extLeaderboard
   },
