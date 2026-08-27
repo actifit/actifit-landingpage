@@ -122,6 +122,12 @@ describe('store/actions', () => {
 
       expect(global.fetch).toHaveBeenCalledWith(API + 'arena/challenges')
     })
+
+    it('fetchArenaChallenges rejects (no commit) when fetch fails — page falls through to empty state', async () => {
+      global.fetch.mockReturnValue(Promise.reject(new Error('network down')))
+      await expect(actions.fetchArenaChallenges({ commit })).rejects.toThrow('network down')
+      expect(commit).not.toHaveBeenCalled()
+    })
   })
 
   describe('fetchTopDelegators query handling', () => {

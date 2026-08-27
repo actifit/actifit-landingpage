@@ -6,7 +6,7 @@
       <ListHeadingSection :textualDisplay="$t('Arena_Title')" />
       <p class="text-center text-muted mb-4">{{ $t('Arena_Subtitle') }}</p>
 
-      <div v-if="loading" class="col-12 text-center"><i class="fas fa-spin fa-spinner text-brand"></i></div>
+      <div v-if="loading" class="col-12 text-center" role="status" aria-label="Loading challenges"><i class="fas fa-spin fa-spinner text-brand" aria-hidden="true"></i></div>
 
       <div v-else-if="!arenaChallenges.length" class="col-12 text-center text-muted py-5">
         {{ $t('Arena_No_Challenges') }}
@@ -17,8 +17,8 @@
           <div class="card border-actifit h-100">
             <div class="card-body">
               <div class="mb-2">
-                <span class="badge badge-brand text-uppercase">{{ ch.type }}</span>
-                <span class="badge badge-light ml-1 text-uppercase">{{ ch.state }}</span>
+                <span class="badge badge-brand text-uppercase">{{ humanize(ch.type) }}</span>
+                <span class="badge badge-light ml-1 text-uppercase">{{ humanize(ch.state) }}</span>
               </div>
               <h5 class="card-title">{{ ch.title || ch.id }}</h5>
               <p v-if="ch.window && ch.window.end" class="small text-muted mb-0">
@@ -74,8 +74,13 @@
       }
     },
     methods: {
+      // Machine enum → readable label (league_fixture → LEAGUE FIXTURE via CSS uppercase).
+      humanize (s) {
+        return typeof s === 'string' ? s.replace(/_/g, ' ') : s
+      },
       formatDate (iso) {
-        try { return new Date(iso).toLocaleDateString() } catch (e) { return '' }
+        const d = new Date(iso)
+        return isNaN(d.getTime()) ? '' : d.toLocaleDateString()
       }
     }
   }

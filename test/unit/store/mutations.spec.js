@@ -14,6 +14,16 @@ describe('store/mutations', () => {
       expect(state.voteWeight).toBe(75)
     })
 
+    it('setArenaChallenges stores an array and coerces a non-array payload to []', () => {
+      const state = { arenaChallenges: [] }
+      mutations.setArenaChallenges(state, [{ id: 'ch1' }])
+      expect(state.arenaChallenges).toEqual([{ id: 'ch1' }])
+      mutations.setArenaChallenges(state, { error: 'boom' })
+      expect(state.arenaChallenges).toEqual([])
+      mutations.setArenaChallenges(state, null)
+      expect(state.arenaChallenges).toEqual([])
+    })
+
     it('setChatPostingKey keeps and clears the in-memory chat key', () => {
       const state = { chatPostingKey: null }
       mutations.setChatPostingKey(state, 'posting-key')
