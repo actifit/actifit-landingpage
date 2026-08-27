@@ -6,11 +6,11 @@
       <ListHeadingSection :textualDisplay="$t('Arena_Title')" />
       <p class="text-center text-muted mb-5 arena-subtitle">{{ $t('Arena_Subtitle') }}</p>
 
-      <div v-if="loading" class="col-12 text-center py-5" role="status" aria-label="Loading challenges">
+      <div v-if="loading" class="text-center py-5" role="status" aria-label="Loading challenges">
         <i class="fas fa-spin fa-spinner fa-2x text-brand" aria-hidden="true"></i>
       </div>
 
-      <div v-else-if="!arenaChallenges.length" class="col-12 text-center text-muted py-5">
+      <div v-else-if="!arenaChallenges.length" class="text-center text-muted py-5">
         <i class="fas fa-trophy fa-2x mb-3 d-block text-muted" aria-hidden="true"></i>
         {{ $t('Arena_No_Challenges') }}
       </div>
@@ -25,7 +25,7 @@
             </div>
 
             <div class="arena-card__body">
-              <h3 class="arena-card__title">{{ ch.title || ch.id }}</h3>
+              <h2 class="arena-card__title">{{ ch.title || ch.id }}</h2>
               <p class="arena-card__tagline">{{ cat(ch).tagline }}</p>
 
               <ul class="arena-card__meta">

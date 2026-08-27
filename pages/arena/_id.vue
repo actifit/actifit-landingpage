@@ -7,11 +7,7 @@
         <i class="fas fa-arrow-left" aria-hidden="true"></i> {{ $t('Arena_Back') }}
       </nuxt-link>
 
-      <div v-if="loading" class="col-12 text-center py-5" role="status" aria-label="Loading challenge">
-        <i class="fas fa-spin fa-spinner fa-2x text-brand" aria-hidden="true"></i>
-      </div>
-
-      <div v-else-if="notFound || !ch" class="col-12 text-center text-muted py-5">
+      <div v-if="notFound || !ch" class="text-center text-muted py-5">
         <i class="fas fa-trophy fa-2x mb-3 d-block text-muted" aria-hidden="true"></i>
         {{ $t('Arena_Not_Found') }}
       </div>
@@ -101,9 +97,9 @@
             <div class="arena-participate">
               <h2 class="arena-participate__h">{{ $t('Arena_Participate') }}</h2>
               <p class="arena-participate__p">{{ cat.howItWorks }}</p>
-              <a href="/signup" class="arena-participate__cta">
+              <nuxt-link :to="`/signup?redirect=/arena/${ch.id}`" class="arena-participate__cta">
                 {{ $t('Arena_Participate') }} <i class="fas fa-arrow-right" aria-hidden="true"></i>
-              </a>
+              </nuxt-link>
               <p class="arena-participate__note"><i class="fas fa-shield-alt" aria-hidden="true"></i> {{ $t('Arena_Fair_Play') }}</p>
             </div>
           </div>
@@ -140,9 +136,31 @@
       NavbarBrand,
       Footer
     },
+    // Fetch server-side so head() emits per-challenge title/description/og:image
+    // for crawlers and social shares, and so navigating between challenges always
+    // refetches (asyncData re-runs on route change; mounted would not). Standings
+    // are reset first so a fetch error can never leak the previous challenge's board.
+    async asyncData ({ store, params }) {
+      store.commit('setArenaStandings', null)
+      let notFound = false
+      try {
+        await store.dispatch('fetchArenaChallenge', params.id)
+      } catch (e) {
+        store.commit('setArenaChallenge', null)
+        notFound = true
+      }
+      if (!notFound) {
+        // standings are optional — absence is a normal (empty) state
+        try {
+          await store.dispatch('fetchArenaStandings', params.id)
+        } catch (e) {
+          store.commit('setArenaStandings', null)
+        }
+      }
+      return { notFound }
+    },
     data () {
       return {
-        loading: true,
         notFound: false
       }
     },
@@ -170,23 +188,6 @@
         return scoredByLabel(this.ch)
       }
     },
-    async mounted () {
-      const id = this.$route.params.id
-      try {
-        await this.$store.dispatch('fetchArenaChallenge', id)
-      } catch (e) {
-        this.notFound = true
-        this.loading = false
-        return
-      }
-      // standings are optional — absence is a normal (empty) state
-      try {
-        await this.$store.dispatch('fetchArenaStandings', id)
-      } catch (e) {
-        // ignore — renders the "no standings yet" empty state
-      }
-      this.loading = false
-    },
     methods: {
       artUrl,
       humanize
@@ -202,7 +203,13 @@
     color: #e31337;
     text-decoration: none;
   }
-  .arena-back:hover { text-decoration: underline; }
+  .arena-back:hover,
+  .arena-back:focus-visible { text-decoration: underline; }
+  .arena-back:focus-visible,
+  .arena-participate__cta:focus-visible {
+    outline: 2px solid #e31337;
+    outline-offset: 2px;
+  }
 
   /* Hero */
   .arena-hero {

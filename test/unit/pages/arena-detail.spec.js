@@ -31,39 +31,36 @@ describe('pages/arena/_id (detail)', () => {
     })
   })
 
-  describe('mounted', () => {
-    const makeCtx = (dispatch) => ({
-      loading: true,
-      notFound: false,
-      $route: { params: { id: 'def_weekly_step_league' } },
-      $store: { dispatch }
-    })
+  describe('asyncData (server-side fetch)', () => {
+    const makeStore = (dispatch) => ({ dispatch, commit: jest.fn() })
+    const params = { id: 'def_weekly_step_league' }
 
-    it('fetches the challenge then the standings and clears loading', async () => {
+    it('resets standings, fetches the challenge then the standings, notFound=false', async () => {
       const dispatch = jest.fn(() => Promise.resolve())
-      const ctx = makeCtx(dispatch)
-      await DetailPage.mounted.call(ctx)
-      expect(dispatch).toHaveBeenNthCalledWith(1, 'fetchArenaChallenge', 'def_weekly_step_league')
-      expect(dispatch).toHaveBeenNthCalledWith(2, 'fetchArenaStandings', 'def_weekly_step_league')
-      expect(ctx.loading).toBe(false)
-      expect(ctx.notFound).toBe(false)
+      const store = makeStore(dispatch)
+      const result = await DetailPage.asyncData({ store, params })
+      expect(store.commit).toHaveBeenCalledWith('setArenaStandings', null) // reset first — no stale-board leak
+      expect(dispatch).toHaveBeenNthCalledWith(1, 'fetchArenaChallenge', params.id)
+      expect(dispatch).toHaveBeenNthCalledWith(2, 'fetchArenaStandings', params.id)
+      expect(result).toEqual({ notFound: false })
     })
 
-    it('sets notFound and stops when the challenge fetch fails (never calls standings)', async () => {
+    it('sets notFound and never fetches standings when the challenge fetch fails', async () => {
       const dispatch = jest.fn((action) => action === 'fetchArenaChallenge' ? Promise.reject(new Error('404')) : Promise.resolve())
-      const ctx = makeCtx(dispatch)
-      await DetailPage.mounted.call(ctx)
-      expect(ctx.notFound).toBe(true)
-      expect(ctx.loading).toBe(false)
+      const store = makeStore(dispatch)
+      const result = await DetailPage.asyncData({ store, params })
+      expect(result).toEqual({ notFound: true })
+      expect(store.commit).toHaveBeenCalledWith('setArenaChallenge', null)
       expect(dispatch).toHaveBeenCalledTimes(1)
     })
 
-    it('tolerates a standings failure (challenge still renders)', async () => {
+    it('tolerates a standings failure and clears standings (challenge still renders)', async () => {
       const dispatch = jest.fn((action) => action === 'fetchArenaStandings' ? Promise.reject(new Error('boom')) : Promise.resolve())
-      const ctx = makeCtx(dispatch)
-      await DetailPage.mounted.call(ctx)
-      expect(ctx.notFound).toBe(false)
-      expect(ctx.loading).toBe(false)
+      const store = makeStore(dispatch)
+      const result = await DetailPage.asyncData({ store, params })
+      expect(result).toEqual({ notFound: false })
+      // committed null once at the start and again in the catch
+      expect(store.commit.mock.calls.filter(c => c[0] === 'setArenaStandings' && c[1] === null).length).toBe(2)
     })
   })
 })
