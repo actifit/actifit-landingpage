@@ -56,6 +56,12 @@ export default {
   setArenaChallenges (state, challenges) {
     state.arenaChallenges = Array.isArray(challenges) ? challenges : []
   },
+  setArenaChallenge (state, payload) {
+    state.arenaChallenge = payload || null
+  },
+  setArenaStandings (state, standings) {
+    state.arenaStandings = standings || null
+  },
   setReports (state, reports) {
     state.reports = reports
   },

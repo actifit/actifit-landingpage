@@ -245,6 +245,30 @@ export default {
       }).catch(e => reject(e))
     })
   },
+  // Single challenge (with participants) for the Arena detail page. Rejects on
+  // 404 / non-ok so the page can render its "not found" state.
+  fetchArenaChallenge({ commit }, id) {
+    return new Promise((resolve, reject) => {
+      fetch(process.env.actiAppUrl + 'arena/challenges/' + encodeURIComponent(id)).then(res => {
+        if (!res.ok) { reject(new Error('HTTP Error: ' + res.status)); return }
+        res.json().then(json => {
+          commit('setArenaChallenge', json)
+          resolve(json)
+        }).catch(e => reject(e))
+      }).catch(e => reject(e))
+    })
+  },
+  // Materialized standings for one challenge (null when none computed yet).
+  fetchArenaStandings({ commit }, id) {
+    return new Promise((resolve, reject) => {
+      fetch(process.env.actiAppUrl + 'arena/standings?id=' + encodeURIComponent(id)).then(res => {
+        res.json().then(json => {
+          commit('setArenaStandings', json)
+          resolve(json)
+        }).catch(e => reject(e))
+      }).catch(e => reject(e))
+    })
+  },
   fetchUserCommunitySubs({ state, commit }) {
     return new Promise((resolve, reject) => {
       let outc = hive.api.call('bridge.list_all_subscriptions', { account: state.steemconnect.user.account.name.toLowerCase() }, (err, result) => {

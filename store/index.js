@@ -25,6 +25,8 @@ const createStore = () => {
       leaderboard: [], // top users
       extLeaderboard: [], //top users extended
       arenaChallenges: [], //Challenge Engine — active/open challenges (The Arena)
+      arenaChallenge: null, //Challenge Engine — single challenge (+participants) for the detail page
+      arenaStandings: null, //Challenge Engine — materialized standings for the detail page
       reports: [], // all activity reports/posts
       posts: [], // all posts
       videos: [], // all video posts

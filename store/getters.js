@@ -47,6 +47,12 @@ export default {
   arenaChallenges (state) {
     return state.arenaChallenges
   },
+  arenaChallenge (state) {
+    return state.arenaChallenge
+  },
+  arenaStandings (state) {
+    return state.arenaStandings
+  },
   extLeaderboard (state) {
     return state.extLeaderboard
   },
