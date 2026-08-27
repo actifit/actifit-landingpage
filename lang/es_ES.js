@@ -1,4 +1,11 @@
 module.exports = {
+  Actifitter_Month_Title: "Actifitter del Mes",
+  Actifitter_Month_Rank: "Posición",
+  Actifitter_Month_Activity: "Actividad",
+  Actifitter_Month_AFIT: "AFIT ganados",
+  Actifitter_Month_Months_Active: "Meses activo",
+  Actifitter_Month_View_Profile: "Ver perfil",
+  Actifitter_Month_CTA: "¡Sé nuestra próxima historia de éxito — únete a Actifit!",
   Savings: "Ahorros",
   loading_hive_engine_balances: "Cargando saldos de tokens de Hive-Engine...",
   no_hive_engine_balances: "No hay saldos de tokens de Hive-Engine disponibles.",

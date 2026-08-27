@@ -1,4 +1,11 @@
 module.exports = {
+  Actifitter_Month_Title: "महीने का एक्टिफिटर",
+  Actifitter_Month_Rank: "रैंक",
+  Actifitter_Month_Activity: "गतिविधि",
+  Actifitter_Month_AFIT: "अर्जित AFIT",
+  Actifitter_Month_Months_Active: "सक्रिय महीने",
+  Actifitter_Month_View_Profile: "प्रोफ़ाइल देखें",
+  Actifitter_Month_CTA: "बनें हमारी अगली सफलता की कहानी — Actifit से जुड़ें!",
   Savings: "बचत",
   top_hive_holders_title: "शीर्ष HIVE धारक",
   top_hp_holders_title: "शीर्ष HP धारक",

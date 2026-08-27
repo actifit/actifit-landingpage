@@ -1,4 +1,11 @@
 module.exports = {
+  Actifitter_Month_Title: "Actifitter du Mois",
+  Actifitter_Month_Rank: "Rang",
+  Actifitter_Month_Activity: "Activité",
+  Actifitter_Month_AFIT: "AFIT gagnés",
+  Actifitter_Month_Months_Active: "Mois actifs",
+  Actifitter_Month_View_Profile: "Voir le profil",
+  Actifitter_Month_CTA: "Devenez notre prochaine réussite — rejoignez Actifit !",
   Savings: "Épargne",
   top_hive_holders_title: "Top détenteurs de HIVE",
   top_hp_holders_title: "Top détenteurs de HP",

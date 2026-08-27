@@ -64,6 +64,9 @@
       </div>
     </div>
 
+    <!-- ACTIFITTER OF THE MONTH (Trello #110) — self-fetches, hidden when unset -->
+    <ActifitterOfMonth class="py-4" />
+
     <!-- RECENT ACTIVITY SECTION -->
     <section id="recent-activity" class="py-5">
       <div class="container-fluid">
@@ -452,6 +455,7 @@ import { mapGetters } from 'vuex'
 import SteemStats from '~/components/SteemStats'
 import NotifyModal from '~/components/NotifyModal'
 import LoginModal from '~/components/LoginModal'
+import ActifitterOfMonth from '~/components/ActifitterOfMonth'
 
 export default {
   head() {
@@ -472,6 +476,7 @@ export default {
     NewsModal,
     SteemStats,
     NotifyModal,
+    ActifitterOfMonth,
     pendingRewardsModal,
   },
   data() {

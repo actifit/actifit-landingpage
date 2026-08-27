@@ -1,4 +1,11 @@
 module.exports = {
+  Actifitter_Month_Title: "Актифиттер месяца",
+  Actifitter_Month_Rank: "Ранг",
+  Actifitter_Month_Activity: "Активность",
+  Actifitter_Month_AFIT: "Заработано AFIT",
+  Actifitter_Month_Months_Active: "Активных месяцев",
+  Actifitter_Month_View_Profile: "Посмотреть профиль",
+  Actifitter_Month_CTA: "Станьте нашей следующей историей успеха — присоединяйтесь к Actifit!",
   Savings: "Сбережения",
   top_hive_holders_title: "Топ держателей HIVE",
   top_hp_holders_title: "Топ держателей HP",

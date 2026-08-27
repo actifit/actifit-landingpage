@@ -47,6 +47,9 @@ export default {
   extLeaderboard (state) {
     return state.extLeaderboard
   },
+  featuredActifitter (state) {
+    return state.featuredActifitter
+  },
   reports (state) {
     return state.reports
   },

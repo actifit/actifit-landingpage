@@ -1,4 +1,11 @@
 module.exports = {
+  Actifitter_Month_Title: "本月Actifitter",
+  Actifitter_Month_Rank: "排名",
+  Actifitter_Month_Activity: "活动",
+  Actifitter_Month_AFIT: "获得的AFIT",
+  Actifitter_Month_Months_Active: "活跃月数",
+  Actifitter_Month_View_Profile: "查看个人资料",
+  Actifitter_Month_CTA: "成为我们下一个成功故事 — 加入Actifit！",
   Savings: "储蓄",
   top_hive_holders_title: "HIVE 持仓榜",
   top_hp_holders_title: "HP 持仓榜",

@@ -64,6 +64,7 @@ const createStore = () => {
       cartEntries: [], //contains current items being bought via market
       purchaseSuccess: false, //references latest purchase transaction using cart
       darkMode: false, //controls whether dark mode is active for this user's display
+      featuredActifitter: null, //Actifitter of the Month spotlight (Trello #110), null = hidden
     },
     getters,
     mutations,

@@ -1,4 +1,11 @@
 module.exports = {
+  Actifitter_Month_Title: "أكتيفيتر الشهر",
+  Actifitter_Month_Rank: "الترتيب",
+  Actifitter_Month_Activity: "النشاط",
+  Actifitter_Month_AFIT: "AFIT المكتسبة",
+  Actifitter_Month_Months_Active: "أشهر النشاط",
+  Actifitter_Month_View_Profile: "عرض الملف الشخصي",
+  Actifitter_Month_CTA: "كن قصة نجاحنا القادمة — انضم إلى Actifit!",
   Savings: "التوفير",
   top_hive_holders_title: "أبرز مالكي HIVE",
   top_hp_holders_title: "أبرز مالكي HP",

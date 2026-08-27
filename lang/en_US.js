@@ -1,4 +1,11 @@
 module.exports = {
+  Actifitter_Month_Title: 'Actifitter of the Month',
+  Actifitter_Month_Rank: 'Rank',
+  Actifitter_Month_Activity: 'Activity',
+  Actifitter_Month_AFIT: 'AFIT earned',
+  Actifitter_Month_Months_Active: 'Months active',
+  Actifitter_Month_View_Profile: 'View profile',
+  Actifitter_Month_CTA: 'Be our next success story — join Actifit!',
   languages: 'Languages',
   operation_require: 'This operation requires your',
   private_active: 'private Active key',

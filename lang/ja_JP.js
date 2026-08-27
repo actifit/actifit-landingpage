@@ -1,4 +1,11 @@
 module.exports = {
+  Actifitter_Month_Title: "今月のActifitter",
+  Actifitter_Month_Rank: "ランク",
+  Actifitter_Month_Activity: "アクティビティ",
+  Actifitter_Month_AFIT: "獲得したAFIT",
+  Actifitter_Month_Months_Active: "アクティブな月数",
+  Actifitter_Month_View_Profile: "プロフィールを見る",
+  Actifitter_Month_CTA: "次の成功事例はあなたです — Actifitに参加しよう！",
   Savings: "セービング",
   top_hive_holders_title: "HIVE保有者ランキング",
   top_hp_holders_title: "HP保有者ランキング",

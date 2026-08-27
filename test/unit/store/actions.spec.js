@@ -105,6 +105,22 @@ describe('store/actions', () => {
       expect(global.fetch).toHaveBeenCalledWith(API + 'moderators')
       expect(commit).toHaveBeenCalledWith('setModerators', [{ name: 'mod1' }])
     })
+
+    it('fetchFeaturedActifitter hits /featuredActifitter and commits the doc', async () => {
+      const doc = { username: 'jane', display_name: 'Jane Doe' }
+      global.fetch.mockReturnValue(jsonResponse(doc))
+      const result = await actions.fetchFeaturedActifitter({ commit })
+      expect(global.fetch).toHaveBeenCalledWith(API + 'featuredActifitter')
+      expect(commit).toHaveBeenCalledWith('setFeaturedActifitter', doc)
+      expect(result).toEqual(doc)
+    })
+
+    it('fetchFeaturedActifitter commits null and resolves (never rejects) when the fetch fails', async () => {
+      global.fetch.mockReturnValue(Promise.reject(new Error('api down')))
+      const result = await actions.fetchFeaturedActifitter({ commit })
+      expect(commit).toHaveBeenCalledWith('setFeaturedActifitter', null)
+      expect(result).toBeNull()
+    })
   })
 
   describe('fetchTopDelegators query handling', () => {
