@@ -1,9 +1,9 @@
 <template>
-  <section v-if="featuredActifitter" class="aom container">
+  <section v-if="featuredActifitter" class="aom container" aria-labelledby="aom-title">
     <div class="aom__card">
       <div class="aom__media">
         <img :src="photo" :alt="displayName" class="aom__photo" @error="onImgError" />
-        <span class="aom__ribbon">{{ $t('Actifitter_Month_Title') }}</span>
+        <span id="aom-title" class="aom__ribbon">{{ $t('Actifitter_Month_Title') }}</span>
       </div>
 
       <div class="aom__body">
@@ -11,7 +11,7 @@
           <h2 class="aom__name">{{ displayName }}</h2>
           <span v-if="featuredActifitter.month" class="aom__month">{{ monthLabel }}</span>
         </div>
-        <nuxt-link :to="`/${featuredActifitter.username}`" class="aom__handle">@{{ featuredActifitter.username }}</nuxt-link>
+        <nuxt-link :to="`/@${featuredActifitter.username}`" class="aom__handle">@{{ featuredActifitter.username }}</nuxt-link>
 
         <p v-if="featuredActifitter.testimonial" class="aom__quote">“{{ featuredActifitter.testimonial }}”</p>
 
@@ -23,7 +23,7 @@
         </ul>
 
         <div class="aom__actions">
-          <nuxt-link :to="`/${featuredActifitter.username}`" class="aom__profile">{{ $t('Actifitter_Month_View_Profile') }}</nuxt-link>
+          <nuxt-link :to="`/@${featuredActifitter.username}`" class="aom__profile">{{ $t('Actifitter_Month_View_Profile') }}</nuxt-link>
           <a href="/signup" class="aom__cta">{{ ctaText }} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
         </div>
       </div>

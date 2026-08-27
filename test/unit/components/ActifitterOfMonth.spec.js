@@ -57,6 +57,19 @@ describe('components/ActifitterOfMonth', () => {
     })
   })
 
+  describe('onImgError', () => {
+    it('falls back to the Hive avatar once, then is a no-op (no loop)', () => {
+      const c = ctx({ featuredActifitter: { username: 'jane' } })
+      const e = { target: { dataset: {}, src: 'https://x/broken.jpg' } }
+      Comp.methods.onImgError.call(c, e)
+      expect(e.target.src).toBe('https://images.hive.blog/u/jane/avatar')
+      expect(e.target.dataset.fallback).toBe('1')
+      const after = e.target.src
+      Comp.methods.onImgError.call(c, e) // e.g. the avatar itself 404s
+      expect(e.target.src).toBe(after) // guarded — not re-set
+    })
+  })
+
   describe('mounted', () => {
     it('dispatches fetchFeaturedActifitter', () => {
       const dispatch = jest.fn()
