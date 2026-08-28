@@ -14,6 +14,34 @@ describe('store/mutations', () => {
       expect(state.voteWeight).toBe(75)
     })
 
+    it('setArenaChallenges stores an array and coerces a non-array payload to []', () => {
+      const state = { arenaChallenges: [] }
+      mutations.setArenaChallenges(state, [{ id: 'ch1' }])
+      expect(state.arenaChallenges).toEqual([{ id: 'ch1' }])
+      mutations.setArenaChallenges(state, { error: 'boom' })
+      expect(state.arenaChallenges).toEqual([])
+      mutations.setArenaChallenges(state, null)
+      expect(state.arenaChallenges).toEqual([])
+    })
+
+    it('setArenaChallenge stores the payload and null-coalesces falsy input', () => {
+      const state = { arenaChallenge: null }
+      const payload = { challenge: { id: 'ch1' }, participants: [] }
+      mutations.setArenaChallenge(state, payload)
+      expect(state.arenaChallenge).toBe(payload)
+      mutations.setArenaChallenge(state, undefined)
+      expect(state.arenaChallenge).toBeNull()
+    })
+
+    it('setArenaStandings stores the standings doc and null-coalesces falsy input', () => {
+      const state = { arenaStandings: null }
+      const doc = { id: 'ch1', rows: [] }
+      mutations.setArenaStandings(state, doc)
+      expect(state.arenaStandings).toBe(doc)
+      mutations.setArenaStandings(state, null)
+      expect(state.arenaStandings).toBeNull()
+    })
+
     it('setChatPostingKey keeps and clears the in-memory chat key', () => {
       const state = { chatPostingKey: null }
       mutations.setChatPostingKey(state, 'posting-key')
