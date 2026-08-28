@@ -241,6 +241,46 @@ export default {
       }).catch(() => { commit('setFeaturedActifitter', null); resolve(null) })
     })
   },
+  // Challenge Engine (The Arena) — discover open/active challenges from the
+  // backend read API (actifit-bot GET /arena/challenges). Public, read-only.
+  fetchArenaChallenges({ commit }, params = {}) {
+    return new Promise((resolve, reject) => {
+      const qs = Object.entries(params)
+        .filter(([, v]) => v !== undefined && v !== null && v !== '')
+        .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+        .join('&')
+      fetch(process.env.actiAppUrl + 'arena/challenges' + (qs ? '?' + qs : '')).then(res => {
+        res.json().then(json => {
+          commit('setArenaChallenges', json)
+          resolve(json)
+        }).catch(e => reject(e))
+      }).catch(e => reject(e))
+    })
+  },
+  // Single challenge (with participants) for the Arena detail page. Rejects on
+  // 404 / non-ok so the page can render its "not found" state.
+  fetchArenaChallenge({ commit }, id) {
+    return new Promise((resolve, reject) => {
+      fetch(process.env.actiAppUrl + 'arena/challenges/' + encodeURIComponent(id)).then(res => {
+        if (!res.ok) { reject(new Error('HTTP Error: ' + res.status)); return }
+        res.json().then(json => {
+          commit('setArenaChallenge', json)
+          resolve(json)
+        }).catch(e => reject(e))
+      }).catch(e => reject(e))
+    })
+  },
+  // Materialized standings for one challenge (null when none computed yet).
+  fetchArenaStandings({ commit }, id) {
+    return new Promise((resolve, reject) => {
+      fetch(process.env.actiAppUrl + 'arena/standings?id=' + encodeURIComponent(id)).then(res => {
+        res.json().then(json => {
+          commit('setArenaStandings', json)
+          resolve(json)
+        }).catch(e => reject(e))
+      }).catch(e => reject(e))
+    })
+  },
   fetchUserCommunitySubs({ state, commit }) {
     return new Promise((resolve, reject) => {
       let outc = hive.api.call('bridge.list_all_subscriptions', { account: state.steemconnect.user.account.name.toLowerCase() }, (err, result) => {
