@@ -1,4 +1,11 @@
 module.exports = {
+  Actifitter_Month_Title: "Актіфіттер місяця",
+  Actifitter_Month_Rank: "Ранг",
+  Actifitter_Month_Activity: "Активність",
+  Actifitter_Month_AFIT: "Зароблено AFIT",
+  Actifitter_Month_Months_Active: "Активних місяців",
+  Actifitter_Month_View_Profile: "Переглянути профіль",
+  Actifitter_Month_CTA: "Стань нашою наступною історією успіху — приєднуйся до Actifit!",
   Arena_Title: 'Арена',
   Arena_Subtitle: 'Відкривайте фітнес-виклики, ліги та сезони — отримуйте нагороди за активність.',
   Arena_No_Challenges: 'Наразі немає активних викликів — завітайте згодом.',

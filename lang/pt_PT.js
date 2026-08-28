@@ -1,4 +1,11 @@
 module.exports = {
+  Actifitter_Month_Title: "Actifitter do Mês",
+  Actifitter_Month_Rank: "Classificação",
+  Actifitter_Month_Activity: "Atividade",
+  Actifitter_Month_AFIT: "AFIT ganhos",
+  Actifitter_Month_Months_Active: "Meses ativo",
+  Actifitter_Month_View_Profile: "Ver perfil",
+  Actifitter_Month_CTA: "Seja a nossa próxima história de sucesso — junte-se ao Actifit!",
   Arena_Title: 'A Arena',
   Arena_Subtitle: 'Descobre desafios de fitness, ligas e temporadas — ganha recompensas por te manteres ativo.',
   Arena_No_Challenges: 'Sem desafios ativos de momento — volta em breve.',

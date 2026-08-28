@@ -229,6 +229,18 @@ export default {
       }).catch(e => reject(e))
     })
   },
+  // Actifitter of the Month spotlight (Trello #110). Commits the editorial doc,
+  // or null when unset/on error, so the home section simply hides itself.
+  fetchFeaturedActifitter({ commit }) {
+    return new Promise((resolve) => {
+      fetch(process.env.actiAppUrl + 'featuredActifitter').then(res => {
+        res.json().then(json => {
+          commit('setFeaturedActifitter', json)
+          resolve(json)
+        }).catch(() => { commit('setFeaturedActifitter', null); resolve(null) })
+      }).catch(() => { commit('setFeaturedActifitter', null); resolve(null) })
+    })
+  },
   // Challenge Engine (The Arena) — discover open/active challenges from the
   // backend read API (actifit-bot GET /arena/challenges). Public, read-only.
   fetchArenaChallenges({ commit }, params = {}) {

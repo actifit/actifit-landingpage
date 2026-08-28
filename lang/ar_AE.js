@@ -1,4 +1,11 @@
 module.exports = {
+  Actifitter_Month_Title: "أكتيفيتر الشهر",
+  Actifitter_Month_Rank: "الترتيب",
+  Actifitter_Month_Activity: "النشاط",
+  Actifitter_Month_AFIT: "AFIT المكتسبة",
+  Actifitter_Month_Months_Active: "أشهر النشاط",
+  Actifitter_Month_View_Profile: "عرض الملف الشخصي",
+  Actifitter_Month_CTA: "كن قصة نجاحنا القادمة — انضم إلى Actifit!",
   Arena_Title: 'الساحة',
   Arena_Subtitle: 'اكتشف تحديات اللياقة والدوريات والمواسم — واكسب مكافآت مقابل نشاطك.',
   Arena_No_Challenges: 'لا توجد تحديات نشطة حاليًا — عد قريبًا.',

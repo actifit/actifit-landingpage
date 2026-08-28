@@ -1,4 +1,11 @@
 module.exports = {
+  Actifitter_Month_Title: "महीने का एक्टिफिटर",
+  Actifitter_Month_Rank: "रैंक",
+  Actifitter_Month_Activity: "गतिविधि",
+  Actifitter_Month_AFIT: "अर्जित AFIT",
+  Actifitter_Month_Months_Active: "सक्रिय महीने",
+  Actifitter_Month_View_Profile: "प्रोफ़ाइल देखें",
+  Actifitter_Month_CTA: "बनें हमारी अगली सफलता की कहानी — Actifit से जुड़ें!",
   Arena_Title: 'द एरिना',
   Arena_Subtitle: 'फिटनेस चुनौतियाँ, लीग और सीज़न खोजें — सक्रिय रहने पर पुरस्कार अर्जित करें।',
   Arena_No_Challenges: 'अभी कोई सक्रिय चुनौती नहीं — जल्द ही फिर देखें।',

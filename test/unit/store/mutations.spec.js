@@ -51,6 +51,17 @@ describe('store/mutations', () => {
       expect(state.chatPostingKey).toBeNull()
     })
 
+    it('setFeaturedActifitter stores a valid spotlight and nulls invalid/user-less payloads', () => {
+      const state = { featuredActifitter: null }
+      const doc = { username: 'jane', display_name: 'Jane' }
+      mutations.setFeaturedActifitter(state, doc)
+      expect(state.featuredActifitter).toBe(doc)
+      mutations.setFeaturedActifitter(state, { display_name: 'no user' }) // missing username
+      expect(state.featuredActifitter).toBeNull()
+      mutations.setFeaturedActifitter(state, null)
+      expect(state.featuredActifitter).toBeNull()
+    })
+
     it('setUserRank stores the full object and pulls out user_rank', () => {
       const state = { userRank: 0, userRankObj: '' }
       const rankObj = { user_rank: 7, score: 1234 }

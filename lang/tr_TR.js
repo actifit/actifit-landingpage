@@ -1,4 +1,11 @@
 module.exports = {
+  Actifitter_Month_Title: "Ayın Actifitter'ı",
+  Actifitter_Month_Rank: "Sıralama",
+  Actifitter_Month_Activity: "Aktivite",
+  Actifitter_Month_AFIT: "Kazanılan AFIT",
+  Actifitter_Month_Months_Active: "Aktif aylar",
+  Actifitter_Month_View_Profile: "Profili görüntüle",
+  Actifitter_Month_CTA: "Bir sonraki başarı hikayemiz sen ol — Actifit'e katıl!",
   Arena_Title: 'Arena',
   Arena_Subtitle: 'Fitness meydan okumalarını, ligleri ve sezonları keşfet — aktif kalarak ödüller kazan.',
   Arena_No_Challenges: 'Şu anda aktif meydan okuma yok — yakında tekrar bak.',

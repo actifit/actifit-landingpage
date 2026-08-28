@@ -53,6 +53,10 @@ export default {
   setExtendedLeaderboard (state, leaderboard) {
     state.extLeaderboard = leaderboard
   },
+  setFeaturedActifitter (state, featured) {
+    // null / non-object payloads hide the section; a valid spotlight must name a user
+    state.featuredActifitter = (featured && typeof featured === 'object' && featured.username) ? featured : null
+  },
   setArenaChallenges (state, challenges) {
     state.arenaChallenges = Array.isArray(challenges) ? challenges : []
   },

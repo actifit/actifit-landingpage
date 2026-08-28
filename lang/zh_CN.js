@@ -1,4 +1,11 @@
 module.exports = {
+  Actifitter_Month_Title: "本月Actifitter",
+  Actifitter_Month_Rank: "排名",
+  Actifitter_Month_Activity: "活动",
+  Actifitter_Month_AFIT: "获得的AFIT",
+  Actifitter_Month_Months_Active: "活跃月数",
+  Actifitter_Month_View_Profile: "查看个人资料",
+  Actifitter_Month_CTA: "成为我们下一个成功故事 — 加入Actifit！",
   Arena_Title: '竞技场',
   Arena_Subtitle: '探索健身挑战、联赛和赛季——保持活跃即可赢取奖励。',
   Arena_No_Challenges: '目前没有进行中的挑战——请稍后再来。',

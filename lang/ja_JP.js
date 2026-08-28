@@ -1,4 +1,11 @@
 module.exports = {
+  Actifitter_Month_Title: "今月のActifitter",
+  Actifitter_Month_Rank: "ランク",
+  Actifitter_Month_Activity: "アクティビティ",
+  Actifitter_Month_AFIT: "獲得したAFIT",
+  Actifitter_Month_Months_Active: "アクティブな月数",
+  Actifitter_Month_View_Profile: "プロフィールを見る",
+  Actifitter_Month_CTA: "次の成功事例はあなたです — Actifitに参加しよう！",
   Arena_Title: 'アリーナ',
   Arena_Subtitle: 'フィットネスチャレンジ、リーグ、シーズンを見つけよう — アクティブに過ごして報酬を獲得。',
   Arena_No_Challenges: '現在アクティブなチャレンジはありません — またお越しください。',
