@@ -3,12 +3,12 @@
     <div class="aom__card">
       <div class="aom__media">
         <img :src="photo" :alt="displayName" class="aom__photo" @error="onImgError" />
-        <span id="aom-title" class="aom__ribbon">{{ $t('Actifitter_Month_Title') }}</span>
+        <h2 id="aom-title" class="aom__ribbon">{{ $t('Actifitter_Month_Title') }}</h2>
       </div>
 
       <div class="aom__body">
         <div class="aom__headrow">
-          <h2 class="aom__name">{{ displayName }}</h2>
+          <h3 class="aom__name">{{ displayName }}</h3>
           <span v-if="featuredActifitter.month" class="aom__month">{{ monthLabel }}</span>
         </div>
         <nuxt-link :to="`/@${featuredActifitter.username}`" class="aom__handle">@{{ featuredActifitter.username }}</nuxt-link>
@@ -114,6 +114,7 @@
     position: absolute;
     top: 14px;
     left: 0;
+    margin: 0; /* reset h2 default margins — this is the section heading */
     background: #e31337;
     color: #fff;
     font-size: 0.7rem;
@@ -148,6 +149,24 @@
   .aom__cta:hover { background: #c00f2d; color: #fff; text-decoration: none; }
   .aom__cta i { margin-left: 4px; }
   .aom__cta:focus-visible, .aom__handle:focus-visible, .aom__profile:focus-visible { outline: 2px solid #e31337; outline-offset: 2px; }
+
+  /* Dark mode — mirrors the site's `.dark-mode` ancestor + CSS-var convention. */
+  .dark-mode .aom__card {
+    background: var(--background-color, #1c1f26);
+    border-color: rgba(255, 255, 255, 0.14);
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35);
+  }
+  .dark-mode .aom__media { background: #2a2f3a; }
+  .dark-mode .aom__name { color: var(--text-color, #f2f3f5); }
+  .dark-mode .aom__quote { color: #cfd3da; }
+  .dark-mode .aom__month,
+  .dark-mode .aom__stat-label { color: #adb5bd; }
+  .dark-mode .aom__profile { color: #cfd3da; }
+  .dark-mode .aom__ribbon { background: #ff5266; }
+  .dark-mode .aom__stat-val,
+  .dark-mode .aom__handle { color: #ff7181; }
+  .dark-mode .aom__cta { background: #ff5266; }
+  .dark-mode .aom__cta:hover { background: #ff7181; }
 
   @media (max-width: 767px) {
     .aom__card { flex-direction: column; }
