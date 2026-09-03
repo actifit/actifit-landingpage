@@ -99,7 +99,7 @@ export function catalogFor (ch) {
   const base = (ch && (BY_ID[ch.id] || BY_TYPE[ch.type])) || DEFAULT_CATALOG
   if (!ch) return { ...base }
   return {
-    art: base.art,
+    art: ch.art || base.art,
     recurrence: ch.recurrence || base.recurrence,
     tagline: ch.tagline || ch.description || base.tagline,
     howItWorks: ch.how_it_works || ch.description || base.howItWorks,
@@ -108,8 +108,10 @@ export function catalogFor (ch) {
 }
 
 export function artUrl (ch) {
-  const c = (ch && (BY_ID[ch.id] || BY_TYPE[ch.type])) || DEFAULT_CATALOG
-  return IMG_BASE + c.art + '.webp'
+  // Prefer the challenge's own art key (now carried on the doc — Trello #182);
+  // fall back to the local id/type catalog, then the default.
+  const art = (ch && ch.art) || ((ch && (BY_ID[ch.id] || BY_TYPE[ch.type])) || DEFAULT_CATALOG).art
+  return IMG_BASE + art + '.webp'
 }
 
 // What the challenge is scored on — human label for scoring.metric.
