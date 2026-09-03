@@ -69,6 +69,18 @@ describe('components/FriendshipModal propagateFriendReq', () => {
     expect(fetchMock.mock.calls[0][0].toString()).toContain('addFriendHiveKeychain')
   })
 
+  it('clears the loader and surfaces an error when fetch rejects', async () => {
+    global.fetch = jest.fn().mockRejectedValue(new Error('network down'))
+    const c = ctx()
+
+    const result = await Comp.methods.propagateFriendReq.call(c, txStub, 'bob', [['custom_json', {}]])
+
+    expect(result).toBe(false)
+    expect(c.addFriendError).toBe('unknown_error')
+    expect(c.friendshipLoader).toBe(false)
+    expect(c.populateFriends).not.toHaveBeenCalled()
+  })
+
   it('surfaces an error and clears the loader when the DB reports non-success', async () => {
     global.fetch = jest.fn().mockResolvedValue({ json: async () => ({ status: 'fail' }) })
     const c = ctx()

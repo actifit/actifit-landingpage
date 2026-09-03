@@ -447,8 +447,17 @@
 						+ this.cur_bchain + '?operation='+op_json);
 		}
 
-		let req_res = await fetch(url);
-		let outcome = await req_res.json();
+		let outcome;
+		try{
+			let req_res = await fetch(url);
+			outcome = await req_res.json();
+		}catch(err){
+			//network / parse failure — never leave the row spinner stuck
+			console.log('error sending friend request', err);
+			this.addFriendError = this.$t('unknown_error');
+			this.friendshipLoader = false;
+			return false;
+		}
 		if (outcome.status=='success'){
 			console.log('friend request sent');
 			this.friendshipLoader = false;
