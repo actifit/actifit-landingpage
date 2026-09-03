@@ -152,6 +152,12 @@
 		  return "suggestion-entry suggestion-entry-mobile";
 		}
 		return "suggestion-entry";
+	  },
+	  isKeychainActive (){
+		return (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain)
+	  },
+	  isHiveauthActive (){
+		return (localStorage.getItem('acti_login_method') == 'hiveauth')
 	  }
     },
 	methods: {
@@ -381,71 +387,6 @@
 		}
 		return false;
 	  },
-	  async processTrxFunc(op_name, cstm_params){
-		if (!localStorage.getItem('std_login')){
-		//if (!this.stdLogin){
-			let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
-			//console.log(res);
-			if (res.result.ref_block_num) {
-				console.log('success');
-				return {success: true, trx: res.result};
-			}else{
-				//console.log(err);
-				return {success: false, trx: null};
-			}
-		}else{
-			let operation = [ 
-			   [op_name, cstm_params]
-			];
-			console.log('broadcasting');
-			console.log(operation);
-			
-			//console.log(this.$steemconnect.accessToken);
-			//console.log(this.$store.state.accessToken);
-			//grab token
-			let accToken = localStorage.getItem('access_token')
-			
-			let op_json = JSON.stringify(operation)
-			
-			let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
-			
-			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+op_json+'&bchain='+cur_bchain);
-
-			let reqHeads = new Headers({
-			  'Content-Type': 'application/json',
-			  'x-acti-token': 'Bearer ' + accToken,
-			});
-			let res = await fetch(url, {
-				headers: reqHeads
-			});
-			let outcome = await res.json();
-			console.log(outcome);
-			if (outcome.error){
-				console.log(outcome.error);
-				
-				//if this is authority error, means needs to be logged out
-				//example "missing required posting authority:Missing Posting Authority"
-				let err_msg = outcome.trx.tx.error;
-				if (err_msg.includes('missing') && err_msg.includes('authority')){
-					//clear entry
-					localStorage.removeItem('access_token');
-					//this.$store.commit('setStdLoginUser', false);
-					this.error_msg = this.$t('session_expired_login_again');
-					this.$store.dispatch('steemconnect/logout');
-				}
-				
-				this.$notify({
-				  group: 'error',
-				  text: err_msg,
-				  position: 'top center'
-				})
-				return {success: false, trx: null};
-				//this.$router.push('/login');
-			}else{
-				return {success: true, trx: outcome.trx};
-			}
-		}
-	  },
 	  //handles sending add friend request
 	  async addFriend(targetFriend) {
 		this.addFriendError = '';
@@ -496,6 +437,17 @@
 			+ targetFriend + '/'
 			+ res.ref_block_num + '/'
 			+ res.id + '/' + this.cur_bchain);
+		if (this.isKeychainActive || this.isHiveauthActive){
+			let op_json = JSON.stringify(operation)
+			url = new URL( process.env.actiAppUrl + 'addFriendHiveKeychain/'
+						+ this.user.account.name + '/'
+						+ targetFriend + '/'
+						+ res.ref_block_num + '/'
+						+ res.id + '/'
+						+ this.cur_bchain + '?operation='+op_json);
+		}
+
+		let req_res = await fetch(url);
 		let outcome = await req_res.json();
 		if (outcome.status=='success'){
 			console.log('friend request sent');
