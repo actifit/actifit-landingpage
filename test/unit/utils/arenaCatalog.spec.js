@@ -37,6 +37,9 @@ describe('utils/arenaCatalog', () => {
       expect(artUrl({ id: 'def_global? ' })).toBe('/img/arena/step-league.webp') // unknown -> default
       expect(artUrl({ id: 'def_weekly_top_n', type: 'liveops' })).toBe('/img/arena/global-top.webp')
     })
+    it('prefers the challenge\'s own art key when present (#182)', () => {
+      expect(artUrl({ id: 'anything', type: 'league_fixture', art: 'monthly-event' })).toBe('/img/arena/monthly-event.webp')
+    })
   })
 
   describe('formatDuration', () => {
