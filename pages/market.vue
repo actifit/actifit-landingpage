@@ -598,10 +598,12 @@ export default {
 		},
 		async fetchAfitPrice() {
 			//fetch AFIT price
-			fetch(process.env.actiAppUrl + 'exchangeAFITPrice').then(
-				res => {
-					res.json().then(json => this.setAFITPrice(json)).catch(e => reject(e))
-				}).catch(e => reject(e))
+			try {
+				const res = await fetch(process.env.actiAppUrl + 'exchangeAFITPrice')
+				this.setAFITPrice(await res.json())
+			} catch (e) {
+				console.error('fetchAfitPrice failed', e)
+			}
 		},
 		setTicketCount(result) {
 			if (Array.isArray(result) && result.length > 0) {
@@ -613,10 +615,12 @@ export default {
 		async fetchUserBuyTicketEntries() {
 			//fetch user ticket entries
 			if (this.user && this.user.account) {
-				fetch(process.env.actiAppUrl + 'userActiveGadgetBuyTickets/' + this.user.account.name).then(
-					res => {
-						res.json().then(json => this.setTicketCount(json)).catch(e => reject(e))
-					}).catch(e => reject(e))
+				try {
+					const res = await fetch(process.env.actiAppUrl + 'userActiveGadgetBuyTickets/' + this.user.account.name)
+					this.setTicketCount(await res.json())
+				} catch (e) {
+					console.error('fetchUserBuyTicketEntries failed', e)
+				}
 			}
 		},
 		async fetchPrizePool() {
@@ -650,11 +654,12 @@ export default {
 		},
 
 		async fetchGadgetPrizeCycle() {
-			fetch(process.env.actiAppUrl + 'recentGadgetBuyPrizeCycle/').then(
-				res => {
-					res.json().then(json => this.setNextPrizeDate(json)).catch(e => reject(e))
-				}).catch(e => reject(e))
-
+			try {
+				const res = await fetch(process.env.actiAppUrl + 'recentGadgetBuyPrizeCycle/')
+				this.setNextPrizeDate(await res.json())
+			} catch (e) {
+				console.error('fetchGadgetPrizeCycle failed', e)
+			}
 		},
 
 		/* ---- two-panel layout helpers ---- */

@@ -10,7 +10,7 @@
         :title="this.product.name"
       >
         <div
-          v-if="this.product.image.startsWith('http')"
+          v-if="this.product.image && this.product.image.startsWith('http')"
           class="avatar pro-card-av"
           :style="'background-image: url(' + this.product.image + ');'"
         ></div>

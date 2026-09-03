@@ -45,8 +45,8 @@
             <i :title="$t('copy_link')" class="fas fa-copy text-brand" v-on:click="copyContent"></i>
 
             <!-- Translation Icons Updated -->
-            <i v-if="translationLoading" class="fas fa-spinner fa-spin text-brand" :title="$t('translating_content', 'Translating...')"></i>
-            <i v-else-if="!showTranslated" class="fa-solid fa-language text-brand" v-on:click="translateContent" :title="$t('translate_content', 'Translate Content')"></i>
+            <i v-if="translationLoading" class="fas fa-spinner fa-spin text-brand" :title="$t('translating_content')"></i>
+            <i v-else-if="!showTranslated" class="fa-solid fa-language text-brand" v-on:click="translateContent" :title="$t('translate_content')"></i>
           </span>
           <div class="header-post-actions">
             <CardActions
