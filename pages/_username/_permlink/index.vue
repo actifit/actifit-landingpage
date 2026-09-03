@@ -32,8 +32,8 @@
                   </h5>
                   <a :href="buildLink" class="p-1"><span class="date-head spec-btns" :title="date">{{ $getTimeDifference(report.created) }}</span> <i class="fas fa-link spec-btns"></i></a>
                   <i :title="$t('copy_link')" class="fas fa-copy spec-btns" v-on:click="copyContent"></i>
-                  <i v-if="translationLoading" class="fas fa-spinner fa-spin spec-btns" :title="$t('translating_content', 'Translating...')"></i>
-                  <i v-else-if="!showTranslated" class="fa-solid fa-language spec-btns" v-on:click="translateContent" :title="$t('translate_content', 'Translate Content')"></i>
+                  <i v-if="translationLoading" class="fas fa-spinner fa-spin spec-btns" :title="$t('translating_content')"></i>
+                  <i v-else-if="!showTranslated" class="fa-solid fa-language spec-btns" v-on:click="translateContent" :title="$t('translate_content')"></i>
                   <div class="header-post-actions">
                     <CardActions
                       :cardData="report"

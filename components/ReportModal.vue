@@ -29,13 +29,13 @@
             <i
               v-if="translationLoading"
               class="fas fa-spinner fa-spin text-brand"
-              :title="$t('translating_content', 'Translating...')"
+              :title="$t('translating_content')"
             ></i>
             <i
               v-else-if="!showTranslated"
               class="fa-solid fa-language text-brand"
               v-on:click="translateContent"
-              :title="$t('translate_content', 'Translate Content')"
+              :title="$t('translate_content')"
             ></i>
           </span>
           <div class="header-post-actions">
