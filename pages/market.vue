@@ -1722,7 +1722,7 @@ export default {
 	padding: 16px 18px 10px;
 	border: none;
 	background: transparent;
-	text-align: left;
+	text-align: start; /* logical — follows dir so it mirrors under RTL (Trello #162) */
 	cursor: pointer;
 }
 
