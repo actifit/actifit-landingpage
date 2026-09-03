@@ -361,4 +361,20 @@ describe('market async fetch error handling (#163 — no reject-is-not-defined)'
     await MarketPage.methods.fetchUserBuyTicketEntries.call({ user: null })
     expect(global.fetch).not.toHaveBeenCalled()
   })
+
+  it('fetchUserBuyTicketEntries sets the ticket count for a logged-in user', async () => {
+    global.fetch = jest.fn(() => Promise.resolve({ json: () => Promise.resolve([{ tickets_collected: 3 }]) }))
+    const setTicketCount = jest.fn()
+    await MarketPage.methods.fetchUserBuyTicketEntries.call({ user: { account: { name: 'alice' } }, setTicketCount })
+    expect(global.fetch).toHaveBeenCalled()
+    expect(setTicketCount).toHaveBeenCalledWith([{ tickets_collected: 3 }])
+  })
+
+  it('fetchGadgetPrizeCycle sets the next prize date on a good response', async () => {
+    const json = { nextDrawDate: '2026-09-01', winner: [{ name: 'bob', reward: 5 }] }
+    global.fetch = jest.fn(() => Promise.resolve({ json: () => Promise.resolve(json) }))
+    const setNextPrizeDate = jest.fn()
+    await MarketPage.methods.fetchGadgetPrizeCycle.call({ setNextPrizeDate })
+    expect(setNextPrizeDate).toHaveBeenCalledWith(json)
+  })
 })
