@@ -21,8 +21,9 @@ describe('layouts/default head() writing direction', () => {
     expect(h.htmlAttrs.dir).toBe('ltr')
   })
 
-  it('is safe when i18n is unavailable (SSR edge)', () => {
+  it('is safe when i18n is unavailable (SSR edge) — defaults dir=ltr, lang=en', () => {
     const h = Layout.head.call({ $route: { path: '/' } })
     expect(h.htmlAttrs.dir).toBe('ltr')
+    expect(h.htmlAttrs.lang).toBe('en')
   })
 })
