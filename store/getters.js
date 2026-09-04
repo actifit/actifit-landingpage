@@ -50,6 +50,9 @@ export default {
   arenaChallenge (state) {
     return state.arenaChallenge
   },
+  arenaMerits (state) {
+    return state.arenaMerits
+  },
   arenaStandings (state) {
     return state.arenaStandings
   },

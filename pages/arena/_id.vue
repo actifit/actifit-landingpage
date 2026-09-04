@@ -97,9 +97,37 @@
             <div class="arena-participate">
               <h2 class="arena-participate__h">{{ $t('Arena_Participate') }}</h2>
               <p class="arena-participate__p">{{ cat.howItWorks }}</p>
-              <nuxt-link :to="`/signup?redirect=/arena/${ch.id}`" class="arena-participate__cta">
-                {{ $t('Arena_Participate') }} <i class="fas fa-arrow-right" aria-hidden="true"></i>
-              </nuxt-link>
+
+              <!-- Logged out: send to login (keeping the challenge as redirect), plus a signup path -->
+              <template v-if="!isLoggedIn">
+                <a :href="`/login?redirect=/arena/${ch.id}`" class="arena-participate__cta">
+                  {{ $t('Arena_Login_To_Join') }} <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                </a>
+                <nuxt-link :to="`/signup?redirect=/arena/${ch.id}`" class="arena-participate__signup">{{ $t('Arena_Participate') }}</nuxt-link>
+              </template>
+
+              <!-- Logged in + already a participant -->
+              <template v-else-if="joined">
+                <p class="arena-participate__joined"><i class="fas fa-check-circle" aria-hidden="true"></i> {{ $t('Arena_Joined') }}</p>
+                <button type="button" class="arena-participate__leave" :disabled="acting" @click="leaveChallenge">{{ $t('Arena_Leave') }}</button>
+              </template>
+
+              <!-- Logged in + joinable -->
+              <template v-else-if="joinable">
+                <button type="button" class="arena-participate__cta arena-participate__btn" :disabled="acting" @click="joinChallenge">
+                  <i class="fas fa-bolt" aria-hidden="true"></i>
+                  {{ acting ? $t('Arena_Join') + '…' : $t('Arena_Join') }}
+                </button>
+              </template>
+
+              <p v-if="actionMsg" class="arena-participate__msg" role="status">{{ actionMsg }}</p>
+
+              <!-- Merit balance for the logged-in athlete -->
+              <div v-if="isLoggedIn" class="arena-merits">
+                <span class="arena-merits__label">{{ $t('Arena_Your_Merits') }}</span>
+                <span class="arena-merits__value">{{ meritBalance }}</span>
+              </div>
+
               <p class="arena-participate__note"><i class="fas fa-shield-alt" aria-hidden="true"></i> {{ $t('Arena_Fair_Play') }}</p>
             </div>
           </div>
@@ -161,13 +189,40 @@
     },
     data () {
       return {
-        notFound: false
+        notFound: false,
+        acting: false,        // a join/leave broadcast is in flight
+        actionMsg: '',        // status line under the CTA
+        localJoined: null     // optimistic override after a join/leave (null = use server state)
       }
     },
     computed: {
-      ...mapGetters(['arenaChallenge', 'arenaStandings']),
+      ...mapGetters(['arenaChallenge', 'arenaStandings', 'arenaMerits']),
+      ...mapGetters('steemconnect', ['user']),
       ch () {
         return this.arenaChallenge && this.arenaChallenge.challenge
+      },
+      isLoggedIn () {
+        return !!(this.user && this.user.account && this.user.account.name)
+      },
+      myUsername () {
+        return this.isLoggedIn ? this.user.account.name : null
+      },
+      participants () {
+        return (this.arenaChallenge && Array.isArray(this.arenaChallenge.participants)) ? this.arenaChallenge.participants : []
+      },
+      // Server-observed membership: a participant row for me that isn't 'left'.
+      serverJoined () {
+        if (!this.myUsername) return false
+        return this.participants.some(p => p.entity === this.myUsername && p.state !== 'left')
+      },
+      joined () {
+        return this.localJoined === null ? this.serverJoined : this.localJoined
+      },
+      joinable () {
+        return !!(this.ch && ['open', 'active'].includes(this.ch.state))
+      },
+      meritBalance () {
+        return (this.arenaMerits && Number.isFinite(this.arenaMerits.balance)) ? this.arenaMerits.balance : 0
       },
       cat () {
         return catalogFor(this.ch)
@@ -188,9 +243,51 @@
         return scoredByLabel(this.ch)
       }
     },
+    mounted () {
+      // Merit balance is per-logged-in-user, so fetch it client-side (login state
+      // lives in localStorage and isn't known during SSR asyncData).
+      if (this.isLoggedIn) this.$store.dispatch('fetchArenaMerits', this.myUsername)
+    },
     methods: {
       artUrl,
-      humanize
+      humanize,
+      // Chain-first: the client signs + broadcasts the actifit_arena op; the bot's
+      // tailer indexes it. We optimistically flip the UI and note that indexing
+      // takes a few blocks (a later visit reflects the on-chain truth).
+      arenaOp (op) {
+        return {
+          required_auths: [],
+          required_posting_auths: [this.myUsername],
+          id: 'actifit_arena',
+          json: JSON.stringify({ op, v: 1, challenge_id: this.ch.id })
+        }
+      },
+      async broadcastArenaOp (op) {
+        this.acting = true
+        this.actionMsg = ''
+        try {
+          const res = await this.$processTrxFunc('custom_json', this.arenaOp(op), false)
+          if (res && res.success) {
+            this.actionMsg = this.$t('Arena_Join_Pending')
+            return true
+          }
+          this.actionMsg = this.$t('Arena_Action_Failed')
+          return false
+        } catch (e) {
+          this.actionMsg = this.$t('Arena_Action_Failed')
+          return false
+        } finally {
+          this.acting = false
+        }
+      },
+      async joinChallenge () {
+        if (!this.isLoggedIn || this.acting) return
+        if (await this.broadcastArenaOp('join')) this.localJoined = true
+      },
+      async leaveChallenge () {
+        if (!this.isLoggedIn || this.acting) return
+        if (await this.broadcastArenaOp('leave')) this.localJoined = false
+      }
     }
   }
 </script>
@@ -384,6 +481,63 @@
   }
   .arena-participate__cta:hover { background: #c00f2d; color: #fff; text-decoration: none; }
   .arena-participate__cta i { margin-left: 4px; }
+  /* Join button reuses the CTA look but is a real <button>. */
+  .arena-participate__btn {
+    width: 100%;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+  .arena-participate__btn:disabled { opacity: 0.6; cursor: default; }
+  .arena-participate__btn i { margin: 0 6px 0 0; }
+  .arena-participate__signup {
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #e31337;
+    text-decoration: none;
+  }
+  .arena-participate__signup:hover { text-decoration: underline; }
+  .arena-participate__joined {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    color: #1a8f4c;
+    margin: 0 0 10px;
+  }
+  .arena-participate__leave {
+    display: block;
+    width: 100%;
+    background: transparent;
+    border: 1px solid #d1d5db;
+    color: #6b7280;
+    font-weight: 600;
+    padding: 9px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 0.16s ease, color 0.16s ease;
+  }
+  .arena-participate__leave:hover { border-color: #e31337; color: #e31337; }
+  .arena-participate__leave:disabled { opacity: 0.6; cursor: default; }
+  .arena-participate__msg {
+    font-size: 0.8rem;
+    color: #4b5563;
+    margin: 12px 0 0;
+    line-height: 1.45;
+  }
+  .arena-merits {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid #eef0f3;
+  }
+  .arena-merits__label { font-size: 0.85rem; color: #6b7280; font-weight: 600; }
+  .arena-merits__value { font-size: 1.35rem; font-weight: 800; color: #111827; font-variant-numeric: tabular-nums; }
   .arena-participate__note {
     font-size: 0.78rem;
     color: #6b7280;

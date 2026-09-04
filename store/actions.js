@@ -270,15 +270,34 @@ export default {
       }).catch(e => reject(e))
     })
   },
-  // Materialized standings for one challenge (null when none computed yet).
+  // Materialized standings for one challenge (null when none computed yet). The
+  // backend sends `null` (empty body) before the first aggregation run, so treat
+  // an empty/invalid body as a normal empty board rather than an error.
   fetchArenaStandings({ commit }, id) {
     return new Promise((resolve, reject) => {
       fetch(process.env.actiAppUrl + 'arena/standings?id=' + encodeURIComponent(id)).then(res => {
-        res.json().then(json => {
+        if (!res.ok) { commit('setArenaStandings', null); resolve(null); return }
+        res.text().then(txt => {
+          let json = null
+          try { json = txt ? JSON.parse(txt) : null } catch (e) { json = null }
           commit('setArenaStandings', json)
           resolve(json)
         }).catch(e => reject(e))
       }).catch(e => reject(e))
+    })
+  },
+  // Logged-in user's Merit balance + recent ledger (actifit-bot GET
+  // /arena/merits/:user). Public read; commit null on any failure.
+  fetchArenaMerits({ commit }, user) {
+    return new Promise((resolve) => {
+      if (!user) { commit('setArenaMerits', null); resolve(null); return }
+      fetch(process.env.actiAppUrl + 'arena/merits/' + encodeURIComponent(user)).then(res => {
+        if (!res.ok) { commit('setArenaMerits', null); resolve(null); return }
+        res.json().then(json => {
+          commit('setArenaMerits', json)
+          resolve(json)
+        }).catch(() => { commit('setArenaMerits', null); resolve(null) })
+      }).catch(() => { commit('setArenaMerits', null); resolve(null) })
     })
   },
   fetchUserCommunitySubs({ state, commit }) {

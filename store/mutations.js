@@ -66,6 +66,9 @@ export default {
   setArenaStandings (state, standings) {
     state.arenaStandings = standings || null
   },
+  setArenaMerits (state, merits) {
+    state.arenaMerits = merits || null
+  },
   setReports (state, reports) {
     state.reports = reports
   },
