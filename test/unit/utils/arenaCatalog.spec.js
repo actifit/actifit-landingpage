@@ -65,6 +65,27 @@ describe('utils/arenaCatalog', () => {
     })
   })
 
+  describe('recurrence instances (parent_id)', () => {
+    it('resolves catalog copy + art by parent_id for a rolled instance', () => {
+      const rolled = { id: 'def_weekly_step_league@2026-09-11', parent_id: 'def_weekly_step_league', type: 'league_fixture' }
+      const c = catalogFor(rolled)
+      expect(c.recurrence).toBe('Weekly')
+      expect(c.tagline).toMatch(/weekly leaderboard/i)
+      expect(artUrl(rolled)).toBe('/img/arena/step-league.webp')
+    })
+    it('honors an on-chain art field over the catalog default', () => {
+      const c = catalogFor({ id: 'ch_x', type: 'league_fixture', art: 'weekend-warrior' })
+      expect(c.art).toBe('weekend-warrior')
+      expect(artUrl({ id: 'ch_x', type: 'league_fixture', art: 'weekend-warrior' })).toBe('/img/arena/weekend-warrior.webp')
+    })
+    it('prefers on-chain presentation copy when present', () => {
+      const c = catalogFor({ id: 'def_daily_focus', tagline: 'Custom tagline', how_it_works: 'Custom HIW', prize_summary: 'Custom prizes' })
+      expect(c.tagline).toBe('Custom tagline')
+      expect(c.howItWorks).toBe('Custom HIW')
+      expect(c.prizes).toBe('Custom prizes')
+    })
+  })
+
   describe('humanize / formatDate', () => {
     it('humanize swaps underscores and passes non-strings through', () => {
       expect(humanize('league_fixture')).toBe('league fixture')

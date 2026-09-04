@@ -63,4 +63,77 @@ describe('pages/arena/_id (detail)', () => {
       expect(store.commit.mock.calls.filter(c => c[0] === 'setArenaStandings' && c[1] === null).length).toBe(2)
     })
   })
+
+  describe('participation (#181)', () => {
+    const loggedIn = { account: { name: 'alice' } }
+
+    it('isLoggedIn / myUsername reflect the steemconnect user', () => {
+      expect(DetailPage.computed.isLoggedIn.call({ user: loggedIn })).toBe(true)
+      expect(DetailPage.computed.isLoggedIn.call({ user: null })).toBe(false)
+      expect(DetailPage.computed.myUsername.call({ user: loggedIn, isLoggedIn: true })).toBe('alice')
+    })
+
+    it('serverJoined is true only for a non-left participant row of mine', () => {
+      const base = { myUsername: 'alice' }
+      expect(DetailPage.computed.serverJoined.call({ ...base, participants: [{ entity: 'alice', state: 'enrolled' }] })).toBe(true)
+      expect(DetailPage.computed.serverJoined.call({ ...base, participants: [{ entity: 'alice', state: 'left' }] })).toBe(false)
+      expect(DetailPage.computed.serverJoined.call({ ...base, participants: [{ entity: 'bob', state: 'enrolled' }] })).toBe(false)
+    })
+
+    it('joined prefers the optimistic localJoined override', () => {
+      expect(DetailPage.computed.joined.call({ localJoined: null, serverJoined: true })).toBe(true)
+      expect(DetailPage.computed.joined.call({ localJoined: false, serverJoined: true })).toBe(false)
+      expect(DetailPage.computed.joined.call({ localJoined: true, serverJoined: false })).toBe(true)
+    })
+
+    it('joinable only for open/active challenges', () => {
+      expect(DetailPage.computed.joinable.call({ ch: { state: 'open' } })).toBe(true)
+      expect(DetailPage.computed.joinable.call({ ch: { state: 'active' } })).toBe(true)
+      expect(DetailPage.computed.joinable.call({ ch: { state: 'settled' } })).toBe(false)
+    })
+
+    it('meritBalance reads the fetched balance, defaults to 0', () => {
+      expect(DetailPage.computed.meritBalance.call({ arenaMerits: { balance: 240 } })).toBe(240)
+      expect(DetailPage.computed.meritBalance.call({ arenaMerits: null })).toBe(0)
+    })
+
+    it('arenaOp builds a signed actifit_arena custom_json for the challenge', () => {
+      const op = DetailPage.methods.arenaOp.call({ myUsername: 'alice', ch: challenge }, 'join')
+      expect(op.id).toBe('actifit_arena')
+      expect(op.required_posting_auths).toEqual(['alice'])
+      expect(op.required_auths).toEqual([])
+      expect(JSON.parse(op.json)).toEqual({ op: 'join', v: 1, challenge_id: 'def_weekly_step_league' })
+    })
+
+    it('joinChallenge broadcasts and optimistically marks joined on success', async () => {
+      const $processTrxFunc = jest.fn().mockResolvedValue({ success: true })
+      const ctx = { isLoggedIn: true, acting: false, ch: challenge, myUsername: 'alice', localJoined: null, actionMsg: '', $t: (k) => k, $processTrxFunc }
+      ctx.arenaOp = DetailPage.methods.arenaOp.bind(ctx)
+      ctx.broadcastArenaOp = DetailPage.methods.broadcastArenaOp.bind(ctx)
+      await DetailPage.methods.joinChallenge.call(ctx)
+      expect($processTrxFunc).toHaveBeenCalledWith('custom_json', expect.objectContaining({ id: 'actifit_arena' }), false)
+      expect(ctx.localJoined).toBe(true)
+      expect(ctx.actionMsg).toBe('Arena_Join_Pending')
+    })
+
+    it('joinChallenge surfaces an error and does not mark joined on failure', async () => {
+      const $processTrxFunc = jest.fn().mockResolvedValue({ success: false })
+      const ctx = { isLoggedIn: true, acting: false, ch: challenge, myUsername: 'alice', localJoined: null, actionMsg: '', $t: (k) => k, $processTrxFunc }
+      ctx.arenaOp = DetailPage.methods.arenaOp.bind(ctx)
+      ctx.broadcastArenaOp = DetailPage.methods.broadcastArenaOp.bind(ctx)
+      await DetailPage.methods.joinChallenge.call(ctx)
+      expect(ctx.localJoined).toBe(null)
+      expect(ctx.actionMsg).toBe('Arena_Action_Failed')
+    })
+
+    it('leaveChallenge optimistically marks left on success', async () => {
+      const $processTrxFunc = jest.fn().mockResolvedValue({ success: true })
+      const ctx = { isLoggedIn: true, acting: false, ch: challenge, myUsername: 'alice', localJoined: true, actionMsg: '', $t: (k) => k, $processTrxFunc }
+      ctx.arenaOp = DetailPage.methods.arenaOp.bind(ctx)
+      ctx.broadcastArenaOp = DetailPage.methods.broadcastArenaOp.bind(ctx)
+      await DetailPage.methods.leaveChallenge.call(ctx)
+      expect(JSON.parse($processTrxFunc.mock.calls[0][1].json).op).toBe('leave')
+      expect(ctx.localJoined).toBe(false)
+    })
+  })
 })
