@@ -168,6 +168,27 @@ describe('store/actions', () => {
       expect(global.fetch).toHaveBeenCalledWith(API + 'arena/standings?id=ch1')
       expect(commit).toHaveBeenCalledWith('setArenaStandings', standings)
     })
+
+    it('fetchArenaStandings commits null (empty board) on an empty/invalid body, without rejecting', async () => {
+      global.fetch.mockReturnValue(Promise.resolve({ ok: true, status: 200, json: () => Promise.reject(new Error('Unexpected end of JSON input')) }))
+      await expect(actions.fetchArenaStandings({ commit }, 'ch1')).resolves.toBeNull()
+      expect(commit).toHaveBeenCalledWith('setArenaStandings', null)
+    })
+
+    it('fetchArenaMerits hits the merits endpoint and commits setArenaMerits', async () => {
+      const merits = { user: 'alice', balance: 240, ledger: [] }
+      global.fetch.mockReturnValue(jsonResponse(merits))
+      await actions.fetchArenaMerits({ commit }, 'alice')
+      await flush()
+      expect(global.fetch).toHaveBeenCalledWith(API + 'arena/merits/alice')
+      expect(commit).toHaveBeenCalledWith('setArenaMerits', merits)
+    })
+
+    it('fetchArenaMerits commits null and resolves when no user is given', async () => {
+      await expect(actions.fetchArenaMerits({ commit }, null)).resolves.toBeNull()
+      expect(commit).toHaveBeenCalledWith('setArenaMerits', null)
+      expect(global.fetch).not.toHaveBeenCalled()
+    })
   })
 
   describe('fetchTopDelegators query handling', () => {

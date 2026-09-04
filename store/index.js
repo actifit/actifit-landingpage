@@ -27,6 +27,7 @@ const createStore = () => {
       arenaChallenges: [], //Challenge Engine — active/open challenges (The Arena)
       arenaChallenge: null, //Challenge Engine — single challenge (+participants) for the detail page
       arenaStandings: null, //Challenge Engine — materialized standings for the detail page
+      arenaMerits: null, //Challenge Engine — logged-in user's Merit balance + ledger
       reports: [], // all activity reports/posts
       posts: [], // all posts
       videos: [], // all video posts

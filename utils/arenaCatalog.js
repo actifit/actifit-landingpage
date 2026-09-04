@@ -93,13 +93,21 @@ const DEFAULT_CATALOG = {
   prizes: 'Earn Actifit Merits for taking part.'
 }
 
+// A recurring default rolls forward under a NEW id (e.g. def_weekly_step_league@
+// 2026-09-11) that chains to the original via parent_id — so resolve the catalog
+// by parent_id first, then id, then type.
+function baseEntry (ch) {
+  return (ch && (BY_ID[ch.id] || BY_ID[ch.parent_id] || BY_TYPE[ch.type])) || DEFAULT_CATALOG
+}
+
 // Merge the catalog entry with any real fields present on the challenge doc
-// (real fields win, so a future backend that carries this copy takes over).
+// (real fields win, so the backend that now carries this copy — #182, and rolled
+// recurrence instances that copy it forward — takes over).
 export function catalogFor (ch) {
-  const base = (ch && (BY_ID[ch.id] || BY_TYPE[ch.type])) || DEFAULT_CATALOG
+  const base = baseEntry(ch)
   if (!ch) return { ...base }
   return {
-    art: base.art,
+    art: ch.art || base.art,
     recurrence: ch.recurrence || base.recurrence,
     tagline: ch.tagline || ch.description || base.tagline,
     howItWorks: ch.how_it_works || ch.description || base.howItWorks,
@@ -108,8 +116,8 @@ export function catalogFor (ch) {
 }
 
 export function artUrl (ch) {
-  const c = (ch && (BY_ID[ch.id] || BY_TYPE[ch.type])) || DEFAULT_CATALOG
-  return IMG_BASE + c.art + '.webp'
+  const c = baseEntry(ch)
+  return IMG_BASE + ((ch && ch.art) || c.art) + '.webp'
 }
 
 // What the challenge is scored on — human label for scoring.metric.
