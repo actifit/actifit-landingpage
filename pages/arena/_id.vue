@@ -98,27 +98,26 @@
               <h2 class="arena-participate__h">{{ $t('Arena_Participate') }}</h2>
               <p class="arena-participate__p">{{ cat.howItWorks }}</p>
 
-              <!-- Logged out: send to login (keeping the challenge as redirect), plus a signup path -->
-              <template v-if="!isLoggedIn">
-                <a :href="`/login?redirect=/arena/${ch.id}`" class="arena-participate__cta">
-                  {{ $t('Arena_Login_To_Join') }} <i class="fas fa-arrow-right" aria-hidden="true"></i>
-                </a>
-                <nuxt-link :to="`/signup?redirect=/arena/${ch.id}`" class="arena-participate__signup">{{ $t('Arena_Participate') }}</nuxt-link>
-              </template>
-
-              <!-- Logged in + already a participant -->
-              <template v-else-if="joined">
+              <!-- Already a participant (show even after close; Leave only while joinable) -->
+              <template v-if="joined">
                 <p class="arena-participate__joined"><i class="fas fa-check-circle" aria-hidden="true"></i> {{ $t('Arena_Joined') }}</p>
-                <button type="button" class="arena-participate__leave" :disabled="acting" @click="leaveChallenge">{{ $t('Arena_Leave') }}</button>
+                <button v-if="joinable" type="button" class="arena-participate__leave" :disabled="acting" @click="leaveChallenge">{{ $t('Arena_Leave') }}</button>
               </template>
 
-              <!-- Logged in + joinable -->
+              <!-- Not joined, and the challenge is still open/active -->
               <template v-else-if="joinable">
-                <button type="button" class="arena-participate__cta arena-participate__btn" :disabled="acting" @click="joinChallenge">
+                <button v-if="isLoggedIn" type="button" class="arena-participate__cta arena-participate__btn" :disabled="acting" @click="joinChallenge">
                   <i class="fas fa-bolt" aria-hidden="true"></i>
                   {{ acting ? $t('Arena_Join') + '…' : $t('Arena_Join') }}
                 </button>
+                <template v-else>
+                  <a :href="`/login?redirect=/arena/${ch.id}`" class="arena-participate__cta">
+                    {{ $t('Arena_Login_To_Join') }} <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                  </a>
+                  <nuxt-link :to="`/signup?redirect=/arena/${ch.id}`" class="arena-participate__signup">{{ $t('Arena_Participate') }}</nuxt-link>
+                </template>
               </template>
+              <!-- else: closed & not joined → no CTA -->
 
               <p v-if="actionMsg" class="arena-participate__msg" role="status">{{ actionMsg }}</p>
 
@@ -243,9 +242,20 @@
         return scoredByLabel(this.ch)
       }
     },
-    mounted () {
-      // Merit balance is per-logged-in-user, so fetch it client-side (login state
-      // lives in localStorage and isn't known during SSR asyncData).
+    watch: {
+      // Same-component nav (/arena/A → /arena/B) re-runs asyncData but not data(),
+      // so clear the optimistic membership + status so B never shows A's state.
+      '$route.params.id' () {
+        this.localJoined = null
+        this.actionMsg = ''
+      }
+    },
+    async mounted () {
+      // Rehydrate the session from localStorage FIRST — this page is a primary
+      // deep-link / social-share entry point, so on a fresh load the steemconnect
+      // user isn't restored yet (other pages do this in their own mounted). Without
+      // it a logged-in visitor would see the logged-out UI. Then fetch their Merits.
+      try { await this.$store.dispatch('steemconnect/login') } catch (e) { /* not logged in */ }
       if (this.isLoggedIn) this.$store.dispatch('fetchArenaMerits', this.myUsername)
     },
     methods: {

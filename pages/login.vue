@@ -209,7 +209,18 @@
 		localStorage.setItem('std_login', true)
 		localStorage.setItem('std_login_name', userSC.account.name)
 		this.$store.commit('steemconnect/login', userSC);
-		this.$router.push('/');
+		this.postLoginRedirect();
+	  },
+	  postLoginRedirect () {
+		// Honor a same-origin RELATIVE ?redirect (e.g. "Log in to join" from /arena),
+		// otherwise go home. Reject absolute/protocol-relative URLs to avoid an
+		// open-redirect (must start with a single '/').
+		const r = this.$route && this.$route.query && this.$route.query.redirect;
+		if (typeof r === 'string' && r.charAt(0) === '/' && r.charAt(1) !== '/') {
+			this.$router.push(r);
+		} else {
+			this.$router.push('/');
+		}
 	  },
 	  setKeychainLoginStatus (json){
 		console.log('keychain login');
@@ -234,7 +245,7 @@
 			localStorage.setItem('std_login_name', userSC.account.name)
 			localStorage.setItem('acti_login_method', 'keychain');
 			this.$store.commit('steemconnect/login', userSC);
-			this.$router.push('/');
+			this.postLoginRedirect();
 		}else{
 			//display error message
 			this.error_proceeding = true;
@@ -271,7 +282,7 @@
 			//this.$steemconnect.login(this.$store.state, json.userdata);
 			//console.log(this.$store.state.stdLoginUser);
 			//await
-			this.$router.push('/');
+			this.postLoginRedirect();
 		}else{
 			//display error message
 			this.error_proceeding = true;
