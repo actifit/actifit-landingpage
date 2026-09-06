@@ -27,6 +27,14 @@
             </a>
           </li>
 
+          <li class="nav-item btn btn-brand m-1 nav-item-border" :title="$t('Arena_Title')">
+            <a class="nav-link text-white d-flex align-items-center justify-content-center w-100 h-100"
+               href="/arena"
+               @click.prevent="$router.push('/arena'); closeMenu()">
+              <i class="fas fa-trophy text-white"></i><span>{{ $t('Arena_Title') }}</span>
+            </a>
+          </li>
+
           <li class="nav-item btn btn-brand m-1 nav-item-border" :title="$t('New_Blog')" v-if="user">
             <a class="nav-link text-white d-flex align-items-center justify-content-center w-100 h-100"
                :href="localePath('/@' + user.account.name + '/blog/new')"
