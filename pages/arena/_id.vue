@@ -111,7 +111,7 @@
                   {{ acting ? $t('Arena_Join') + '…' : $t('Arena_Join') }}
                 </button>
                 <template v-else>
-                  <a :href="`/login?redirect=/arena/${ch.id}`" class="arena-participate__cta">
+                  <a href="#" @click.prevent="openLogin" class="arena-participate__cta">
                     {{ $t('Arena_Login_To_Join') }} <i class="fas fa-arrow-right" aria-hidden="true"></i>
                   </a>
                   <nuxt-link :to="`/signup?redirect=/arena/${ch.id}`" class="arena-participate__signup">{{ $t('Arena_Participate') }}</nuxt-link>
@@ -134,6 +134,8 @@
       </div>
     </div>
 
+    <LoginModal v-if="showLoginModal" @close="showLoginModal = false" @login-successful="onLoggedIn" />
+
     <Footer />
   </div>
 </template>
@@ -142,6 +144,7 @@
   import { mapGetters } from 'vuex'
   import NavbarBrand from '~/components/NavbarBrand'
   import Footer from '~/components/Footer'
+  import LoginModal from '~/components/LoginModal'
   import { catalogFor, artUrl, formatDuration, formatDate, scoredByLabel, humanize } from '~/utils/arenaCatalog'
 
   export default {
@@ -161,7 +164,8 @@
     },
     components: {
       NavbarBrand,
-      Footer
+      Footer,
+      LoginModal
     },
     // Fetch server-side so head() emits per-challenge title/description/og:image
     // for crawlers and social shares, and so navigating between challenges always
@@ -191,7 +195,8 @@
         notFound: false,
         acting: false,        // a join/leave broadcast is in flight
         actionMsg: '',        // status line under the CTA
-        localJoined: null     // optimistic override after a join/leave (null = use server state)
+        localJoined: null,    // optimistic override after a join/leave (null = use server state)
+        showLoginModal: false // in-place login modal (opened from the join CTA)
       }
     },
     computed: {
@@ -261,6 +266,23 @@
     methods: {
       artUrl,
       humanize,
+      // Open the shared login modal in place (no navigation), so the user lands
+      // right back on this challenge logged in — matching how the rest of the app
+      // gates login (mirrors the referrals/settings pages' Bootstrap-modal pattern).
+      openLogin () {
+        this.$nextTick(() => {
+          this.showLoginModal = true
+          if (typeof $ !== 'undefined' && $ && typeof $.fn.modal === 'function') {
+            $('#loginModal').modal('show')
+          }
+        })
+      },
+      // Fired by LoginModal on a successful login (SPA — no reload): isLoggedIn
+      // flips reactively so the CTA becomes the Join button; also pull the balance.
+      onLoggedIn () {
+        this.showLoginModal = false
+        if (this.isLoggedIn) this.$store.dispatch('fetchArenaMerits', this.myUsername)
+      },
       // Chain-first: the client signs + broadcasts the actifit_arena op; the bot's
       // tailer indexes it. We optimistically flip the UI and note that indexing
       // takes a few blocks (a later visit reflects the on-chain truth).
