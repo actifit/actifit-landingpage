@@ -56,6 +56,18 @@ describe('pages/arena/create (wizard)', () => {
       expect(CreatePage.computed.stepValid.call(badWindow)).toBe(false)
     })
 
+    it('step 0 allows a same-day window (one-day event)', () => {
+      const sameDay = { step: 0, form: { ...baseForm(), start: '2026-10-01', end: '2026-10-01' } }
+      expect(CreatePage.computed.stepValid.call(sameDay)).toBe(true)
+    })
+
+    it('step 2 (review) is always valid — publish is gated by canPublish', () => {
+      expect(CreatePage.computed.stepValid.call({ step: 2, form: baseForm() })).toBe(true)
+      // canPublish additionally requires a logged-in user
+      expect(CreatePage.computed.canPublish.call({ stepValid: true, isLoggedIn: true, myUsername: 'alice' })).toBe(true)
+      expect(CreatePage.computed.canPublish.call({ stepValid: true, isLoggedIn: false, myUsername: null })).toBe(false)
+    })
+
     it('step 0 requires a positive threshold when the rule is threshold', () => {
       const ctx = { step: 0, form: { ...baseForm(), rule: 'threshold', threshold: 0 } }
       expect(CreatePage.computed.stepValid.call(ctx)).toBe(false)
@@ -113,6 +125,38 @@ describe('pages/arena/create (wizard)', () => {
       const op = CreatePage.methods.buildOp.call({ form }, 'ch_alice_3')
       expect(op.entry).toEqual({ mode: 'activity_gated', gate: { min_activity: 25 } })
       expect(op.scoring).toEqual({ metric: 'activity_count', rule: 'threshold', threshold: 8000 })
+    })
+
+    it('the activity-gated entry NEVER carries a monetary key (invariant I1)', () => {
+      const form = { ...baseForm(), entryMode: 'activity_gated', minActivity: 10 }
+      const op = CreatePage.methods.buildOp.call({ form }, 'ch_alice_4')
+      // the gate is a fixed literal — only min_activity is ever present
+      expect(Object.keys(op.entry.gate)).toEqual(['min_activity'])
+      for (const k of ['fee', 'entry_fee', 'stake', 'buy_in', 'buyin', 'wager', 'ante', 'pot']) {
+        expect(op.entry[k]).toBeUndefined()
+        expect(op.entry.gate[k]).toBeUndefined()
+      }
+    })
+
+    it('blank numeric fields never emit NaN in the op', () => {
+      // v-model.number yields '' for a blank input → Number('') === 0, not NaN
+      const form = { ...baseForm(), rule: 'threshold', threshold: '', entryMode: 'activity_gated', minActivity: '', rewardType: 'afit', prize: '' }
+      const op = CreatePage.methods.buildOp.call({ form }, 'ch_alice_5')
+      expect(Number.isNaN(op.scoring.threshold)).toBe(false)
+      expect(Number.isNaN(op.entry.gate.min_activity)).toBe(false)
+      expect(Number.isNaN(op.rewards.afit)).toBe(false)
+    })
+  })
+
+  describe('rule/type coupling', () => {
+    const $ti = (k) => k // label passthrough
+    it('head_to_head is offered only for a duel', () => {
+      const duel = CreatePage.computed.rules.call({ $t: $ti, form: { type: 'duel' } })
+      expect(duel.some(r => r.value === 'head_to_head')).toBe(true)
+      const league = CreatePage.computed.rules.call({ $t: $ti, form: { type: 'league_fixture' } })
+      expect(league.some(r => r.value === 'head_to_head')).toBe(false)
+      // max + threshold always present
+      expect(league.map(r => r.value)).toEqual(['max', 'threshold'])
     })
   })
 

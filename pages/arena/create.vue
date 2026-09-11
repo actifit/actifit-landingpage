@@ -9,9 +9,9 @@
       <!-- Logged-out gate -->
       <div v-if="!isLoggedIn" class="text-center py-5">
         <i class="fas fa-user-lock fa-2x mb-3 d-block text-muted" aria-hidden="true"></i>
-        <a href="#" class="arena-create__loginlink" @click.prevent="openLogin">
+        <button type="button" class="arena-create__loginlink" @click="openLogin">
           {{ $t('Arena_Create_Login') }} <i class="fas fa-arrow-right" aria-hidden="true"></i>
-        </a>
+        </button>
       </div>
 
       <!-- Published confirmation -->
@@ -24,7 +24,7 @@
       <div v-else class="arena-create__wizard">
         <!-- Stepper -->
         <ol class="arena-steps" aria-label="Progress">
-          <li v-for="(label, i) in stepLabels" :key="i" :class="{ 'is-active': step === i, 'is-done': step > i }">
+          <li v-for="(label, i) in stepLabels" :key="i" :class="{ 'is-active': step === i, 'is-done': step > i }" :aria-current="step === i ? 'step' : null">
             <span class="arena-steps__num">{{ i + 1 }}</span>
             <span class="arena-steps__label">{{ label }}</span>
           </li>
@@ -89,8 +89,8 @@
 
           <label class="arena-lbl" for="ch-vis">{{ $t('Arena_Field_Visibility') }}</label>
           <select id="ch-vis" v-model="form.visibility" class="arena-inp">
-            <option value="public">Public</option>
-            <option value="private">Private (invite / link only)</option>
+            <option value="public">{{ $t('Arena_Vis_Public') }}</option>
+            <option value="private">{{ $t('Arena_Vis_Private') }}</option>
           </select>
         </section>
 
@@ -106,12 +106,14 @@
             </span>
           </label>
 
-          <label class="arena-choice" :class="{ 'is-picked': form.rewardType === 'afit', 'is-disabled': !canFund }">
-            <input type="radio" value="afit" v-model="form.rewardType" :disabled="!canFund" />
+          <label class="arena-choice" :class="{ 'is-picked': form.rewardType === 'afit', 'is-disabled': !canFund || balanceLoading }">
+            <input type="radio" value="afit" v-model="form.rewardType" :disabled="!canFund || balanceLoading" />
             <span class="arena-choice__body">
               <span class="arena-choice__title"><i class="fas fa-coins" aria-hidden="true"></i> {{ $t('Arena_Reward_Afit') }}</span>
               <span class="arena-choice__desc">{{ $t('Arena_Reward_Afit_Desc') }}</span>
-              <span v-if="!canFund" class="arena-choice__gate"><i class="fas fa-lock" aria-hidden="true"></i> {{ fundedGateMsg }}</span>
+              <span v-if="balanceLoading" class="arena-choice__gate"><i class="fas fa-spinner fa-spin" aria-hidden="true"></i> {{ $t('Arena_Balance_Loading') }}</span>
+              <span v-else-if="balanceError" class="arena-choice__gate"><i class="fas fa-exclamation-triangle" aria-hidden="true"></i> {{ $t('Arena_Balance_Error') }}</span>
+              <span v-else-if="!canFund" class="arena-choice__gate"><i class="fas fa-lock" aria-hidden="true"></i> {{ fundedGateMsg }}</span>
             </span>
           </label>
 
@@ -149,7 +151,7 @@
             <div><dt>{{ $t('Arena_Field_Entry') }}</dt><dd>{{ form.entryMode === 'activity_gated' ? $t('Arena_Entry_Gated') + ' (' + form.minActivity + ')' : $t('Arena_Entry_Free') }}</dd></div>
             <div><dt>{{ $t('Arena_Review_Reward') }}</dt>
               <dd v-if="form.rewardType === 'badge'"><i class="fas fa-medal" aria-hidden="true"></i> {{ form.badge }}</dd>
-              <dd v-else><i class="fas fa-coins" aria-hidden="true"></i> {{ fmt(form.prize) }} AFIT ({{ fmt(totalDebit) }} AFIT deducted)</dd>
+              <dd v-else><i class="fas fa-coins" aria-hidden="true"></i> {{ fmt(form.prize) }} AFIT ({{ fmt(totalDebit) }} AFIT {{ $t('Arena_Deducted') }})</dd>
             </div>
           </dl>
           <p class="arena-note"><i class="fas fa-balance-scale" aria-hidden="true"></i> {{ $t('Arena_Fair_Play_Skill') }}</p>
@@ -219,6 +221,8 @@
         actionMsg: '',
         showLoginModal: false,
         afitBalance: 0,
+        balanceLoading: false,
+        balanceError: false,
         form: {
           title: '',
           type: 'league_fixture',
@@ -255,27 +259,31 @@
       // User-creatable challenge types (squad kinds excluded — they need squads).
       types () {
         return [
-          { value: 'league_fixture', label: 'Leaderboard' },
-          { value: 'daily_focus', label: 'Daily goal' },
-          { value: 'liveops', label: 'Timed event' },
-          { value: 'duel', label: 'Duel (1-v-1)' },
-          { value: 'brawl', label: 'Free-for-all' }
+          { value: 'league_fixture', label: this.$t('Arena_Type_League') },
+          { value: 'daily_focus', label: this.$t('Arena_Type_Daily') },
+          { value: 'liveops', label: this.$t('Arena_Type_Event') },
+          { value: 'duel', label: this.$t('Arena_Type_Duel') },
+          { value: 'brawl', label: this.$t('Arena_Type_Brawl') }
         ]
       },
       metrics () {
         return [
-          { value: 'activity_count', label: 'Total activity' },
-          { value: 'steps', label: 'Step count' },
-          { value: 'distance', label: 'Distance' },
-          { value: 'goal_hit', label: 'Daily goal hits' }
+          { value: 'activity_count', label: this.$t('Arena_Metric_Activity') },
+          { value: 'steps', label: this.$t('Arena_Metric_Steps') },
+          { value: 'distance', label: this.$t('Arena_Metric_Distance') },
+          { value: 'goal_hit', label: this.$t('Arena_Metric_Goal') }
         ]
       },
+      // head_to_head decides ONE-v-ONE outcomes, so it is offered only for a duel
+      // (an open, many-entrant challenge can't be scored head to head) — keeping the
+      // rule coherent with the type rather than emitting a combo that breaks at settle.
       rules () {
-        return [
-          { value: 'max', label: 'Highest total wins' },
-          { value: 'threshold', label: 'Reach a target' },
-          { value: 'head_to_head', label: 'Head to head' }
+        const base = [
+          { value: 'max', label: this.$t('Arena_Rule_Max') },
+          { value: 'threshold', label: this.$t('Arena_Rule_Threshold') }
         ]
+        if (this.form.type === 'duel') base.push({ value: 'head_to_head', label: this.$t('Arena_Rule_H2H') })
+        return base
       },
       typeLabel () {
         const t = this.types.find(x => x.value === this.form.type)
@@ -315,7 +323,9 @@
       stepValid () {
         if (this.step === 0) {
           if (!this.form.title || !this.form.start || !this.form.end) return false
-          if (new Date(this.form.start) >= new Date(this.form.end)) return false
+          // A same-day window is legitimate (a one-day event): buildOp emits
+          // 00:00:00 → 23:59:59, so require start > end to reject, not >=.
+          if (new Date(this.form.start) > new Date(this.form.end)) return false
           if (this.form.rule === 'threshold' && !(Number(this.form.threshold) > 0)) return false
           if (this.form.entryMode === 'activity_gated' && !(Number(this.form.minActivity) > 0)) return false
           return true
@@ -334,9 +344,19 @@
     watch: {
       isLoggedIn (v) {
         if (v) this.loadBalance()
+      },
+      // head_to_head is only offered for a duel; if the type moves away from duel
+      // while it is selected, fall back to the default so no orphaned rule is sent.
+      'form.type' (t) {
+        if (t !== 'duel' && this.form.rule === 'head_to_head') this.form.rule = 'max'
       }
     },
     mounted () {
+      // Seed the window from the CLIENT clock (data() runs on the server too; the
+      // login gate keeps the wizard off the SSR render, but this closes any residual
+      // server/client date drift for an authenticated hard-load).
+      this.form.start = isoDay(Date.now())
+      this.form.end = isoDay(Date.now() + 7 * 86400000)
       if (this.isLoggedIn) this.loadBalance()
     },
     methods: {
@@ -352,11 +372,18 @@
         if (this.isLoggedIn) this.loadBalance()
       },
       async loadBalance () {
+        this.balanceLoading = true
+        this.balanceError = false
         try {
           const tokens = await this.$store.dispatch('fetchUserTokensReturn', this.myUsername)
           this.afitBalance = Number(tokens) || 0
         } catch (e) {
+          // Distinguish "couldn't check" from "checked, ineligible" — otherwise a
+          // failed fetch would tell a qualified funder they don't hold enough AFIT.
           this.afitBalance = 0
+          this.balanceError = true
+        } finally {
+          this.balanceLoading = false
         }
       },
       next () {
@@ -365,9 +392,11 @@
       prev () {
         if (this.step > 0) this.step -= 1
       },
-      // The unique on-chain challenge id (never the reserved def_* namespace).
+      // The unique on-chain challenge id (never the reserved def_* namespace). A
+      // random suffix avoids a collision if the same user creates two in one ms.
       makeId () {
-        return 'ch_' + String(this.myUsername).toLowerCase() + '_' + Date.now().toString(36)
+        const rand = Math.random().toString(36).slice(2, 6)
+        return 'ch_' + String(this.myUsername).toLowerCase() + '_' + Date.now().toString(36) + rand
       },
       // Build the actifit_arena challenge_create payload. origin_tier selects the
       // reward model: friendly = badge only, community = self-funded AFIT prize
@@ -445,8 +474,19 @@
     font-size: 1.05rem;
     color: #e31337;
     text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 6px;
   }
   .arena-create__loginlink:hover { text-decoration: underline; }
+  .arena-create__loginlink:focus-visible,
+  .arena-choice:focus-within,
+  .arena-create__btn:focus-visible {
+    outline: 2px solid #e31337;
+    outline-offset: 2px;
+  }
 
   /* Stepper */
   .arena-steps {
