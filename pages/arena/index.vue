@@ -4,7 +4,12 @@
 
     <div class="container pt-5 mt-5 pb-5">
       <ListHeadingSection :textualDisplay="$t('Arena_Title')" />
-      <p class="text-center text-muted mb-5 arena-subtitle">{{ $t('Arena_Subtitle') }}</p>
+      <p class="text-center text-muted mb-4 arena-subtitle">{{ $t('Arena_Subtitle') }}</p>
+      <p class="text-center mb-5">
+        <nuxt-link to="/arena/create" class="arena-create-cta">
+          <i class="fas fa-plus-circle" aria-hidden="true"></i> {{ $t('Arena_Create_CTA') }}
+        </nuxt-link>
+      </p>
 
       <div v-if="loading" class="text-center py-5" role="status" aria-label="Loading challenges">
         <i class="fas fa-spin fa-spinner fa-2x text-brand" aria-hidden="true"></i>
@@ -111,6 +116,26 @@
     margin-right: auto;
     font-size: 1.05rem;
   }
+
+  .arena-create-cta {
+    display: inline-block;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #e31337;
+    border: 1px solid #f4c2cc;
+    background: #fdf1f3;
+    border-radius: 10px;
+    padding: 9px 18px;
+    text-decoration: none;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .arena-create-cta:hover,
+  .arena-create-cta:focus-visible {
+    background: #fbe3e8;
+    border-color: #e31337;
+    text-decoration: none;
+  }
+  .arena-create-cta i { margin-right: 6px; }
 
   .arena-card {
     display: flex;
