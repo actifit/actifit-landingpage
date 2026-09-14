@@ -251,13 +251,35 @@ export default {
     CardActions
   },
   head() {
+    const title = `${this.pageTitle} - Actifit`;
+    const description = `${this.desc} by ${this.username}`;
+    // Twitter/Facebook require an https image; normalize protocol-relative and
+    // legacy http (Steem-era) URLs, and fall back to the Actifit logo when a report
+    // carries no usable image — so a preview never emits a dropped or
+    // `content="undefined"` image.
+    let image = this.postImg || '';
+    if (image.indexOf('//') === 0) image = 'https:' + image;
+    else if (image.indexOf('http://') === 0) image = 'https://' + image.slice(7);
+    if (!/^https:\/\//i.test(image)) image = 'https://actifit.io/img/actifit_logo_med.png';
+    const url = this.canonicalUrl;
     return {
       title: `${this.pageTitle}`,
       meta: [
-        { hid: 'title', name: 'og:title', 'property': 'og:title', content: `${this.pageTitle} - Actifit` },
+        { hid: 'title', name: 'og:title', 'property': 'og:title', content: title },
         { hid: 'description', name: 'description', content: `${this.desc} by ${this.username} on Actifit — a move-to-earn fitness activity report rewarded with AFIT tokens.` },
-        { hid: 'ogdescription', name: 'og:description', 'property': 'og:description', content: `${this.desc} by ${this.username}` },
-        { hid: 'image', name: 'og:image', 'property': 'og:image', content: `${this.postImg}` }
+        { hid: 'ogdescription', name: 'og:description', 'property': 'og:description', content: description },
+        { hid: 'image', name: 'og:image', 'property': 'og:image', content: image },
+        { hid: 'url', name: 'og:url', 'property': 'og:url', content: url },
+        { hid: 'ogtype', name: 'og:type', 'property': 'og:type', content: 'article' },
+        // Twitter falls back to og:* but an explicit large-image card makes the post
+        // image render prominently instead of a small thumbnail.
+        { hid: 'twitter:card', name: 'twitter:card', content: 'summary_large_image' },
+        { hid: 'twitter:title', name: 'twitter:title', content: title },
+        { hid: 'twitter:description', name: 'twitter:description', content: description },
+        { hid: 'twitter:image', name: 'twitter:image', content: image }
+      ],
+      link: [
+        { hid: 'canonical', rel: 'canonical', href: url }
       ]
     }
   },
@@ -347,7 +369,9 @@ export default {
       return meta_spec;
     } catch (preerr) {
       console.log(preerr);
-      return '';
+      // Return an object (not '') with safe meta defaults so head() never emits
+      // "undefined …" when the post can't be loaded; pageTitle keeps its data() value.
+      return { desc: '', postImg: '' };
     }
   },
   data() {
@@ -356,7 +380,7 @@ export default {
       authorAfitBalance: null, userRank: null, afitReward: 0, fullAFITReward: '',
       tokenRewards: [], commentsLoading: true, commentBoxOpen: false, replyBody: '',
       responsePosted: false, responseBody: '', moderatorSignature: '', loading: false,
-      pageTitle: 'Actifit Report', showTranslated: false, safety_post_content: '',
+      pageTitle: 'Actifit Report', desc: '', postImg: '', showTranslated: false, safety_post_content: '',
 	    translationLoading: false, translatedText: '', reload: 0, resizeObserver: null,
       displayMorePayoutData: false, cur_bchain: 'HIVE',
       socialSharingDesc: process.env.socialSharingDesc,
@@ -388,6 +412,27 @@ export default {
     meta() {
       try { if (this.report && this.report.json_metadata) { return JSON.parse(this.report.json_metadata); } } catch (e) {}
       return {};
+    },
+    // Author handle usable at SSR (head() reads it for the OG/Twitter description).
+    // `report` is client-only, so during the server render fall back to the route
+    // param — which carries the '@author' — otherwise the description said
+    // "… by undefined" for every post.
+    username() {
+      if (this.report && this.report.author) return this.report.author;
+      const p = this.$route && this.$route.params && this.$route.params.username;
+      return p ? p.replace('@', '') : '';
+    },
+    // Canonical post URL usable at SSR. `report` is populated client-side only, so
+    // during the server render (when head() emits og:url/canonical for crawlers) it
+    // is null — fall back to the route params, which ARE present server-side.
+    canonicalUrl() {
+      if (this.report) return `https://actifit.io/@${this.report.author}/${this.report.permlink}`;
+      const p = this.$route && this.$route.params;
+      if (p && p.username && p.permlink) {
+        const author = p.username.charAt(0) === '@' ? p.username : '@' + p.username;
+        return `https://actifit.io/${author}/${p.permlink}`;
+      }
+      return 'https://actifit.io';
     },
     buildLink() { return this.report ? `/@${this.report.author}/${this.report.permlink}` : '#'; },
     buildParentLink() { return this.report && this.report.parent_author ? `/@${this.report.parent_author}/${this.report.parent_permlink}` : '#'; },
