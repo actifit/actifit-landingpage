@@ -2342,6 +2342,14 @@ export default {
       ].includes(this.afitActivityMode);
     },
     isCoreFundActionOpen() {
+      // The claimable-rewards panel is only "open" while there is data to show. A
+      // successful claim zeroes the amounts (isClaimableDataAvailable → false),
+      // collapsing the reward content; gate the shared Close button on the SAME
+      // condition so it disappears WITH the content instead of lingering as an
+      // orphaned button once the section has emptied.
+      if (this.fundActivityMode === this.SHOW_CLAIMABLE_REW) {
+        return this.isClaimableDataAvailable;
+      }
       return [
         this.TRANSFER_FUNDS,
         this.POWERUP_FUNDS,
@@ -2350,7 +2358,6 @@ export default {
         this.DELEGATE_FUNDS,
         this.DELEGATE_RCS,
         this.TRANSFER_BSC,
-        this.SHOW_CLAIMABLE_REW,
         this.TRANSFER_FUNDS_SAVINGS,
         this.REMOVE_FUNDS_SAVINGS
       ].includes(this.fundActivityMode);
