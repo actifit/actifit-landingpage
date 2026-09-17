@@ -64,6 +64,13 @@
             <section class="arena-block">
               <h2 class="arena-block__h">{{ $t('Arena_Prizes') }}</h2>
               <p class="arena-prizes"><i class="fas fa-trophy" aria-hidden="true"></i> {{ cat.prizes }}</p>
+              <!-- Collectible badge(s) this challenge awards -->
+              <div v-if="offeredBadges.length" class="arena-badge-offer">
+                <span class="arena-badge-offer__label">{{ $t('Arena_Badge_Award') }}</span>
+                <span v-for="b in offeredBadges" :key="b" class="arena-badge">
+                  <i class="fas fa-medal" aria-hidden="true"></i> {{ b }}
+                </span>
+              </div>
               <p class="arena-fairplay"><i class="fas fa-shield-alt" aria-hidden="true"></i> {{ $t('Arena_Fair_Play') }}</p>
             </section>
 
@@ -82,7 +89,12 @@
                   <tbody>
                     <tr v-for="r in rows" :key="r.entity" :class="{ 'is-top': r.rank <= 3 }">
                       <td class="c-rank">{{ r.rank }}</td>
-                      <td>{{ r.entity }}</td>
+                      <td>
+                        {{ r.entity }}
+                        <span v-for="b in earnedBadgesFor(r.entity)" :key="b" class="arena-badge arena-badge--sm" :title="$t('Arena_Badge_Earned')">
+                          <i class="fas fa-medal" aria-hidden="true"></i> {{ b }}
+                        </span>
+                      </td>
                       <td class="c-score">{{ r.score }}</td>
                     </tr>
                   </tbody>
@@ -245,6 +257,12 @@
       },
       scoredBy () {
         return scoredByLabel(this.ch)
+      },
+      // Collectible badge(s) this challenge awards its winners, from the challenge's
+      // own rewards (a friendly/badge-only challenge carries rewards.badges).
+      offeredBadges () {
+        const r = this.ch && this.ch.rewards
+        return (r && Array.isArray(r.badges)) ? r.badges.filter(b => typeof b === 'string' && b.trim()) : []
       }
     },
     watch: {
@@ -266,6 +284,13 @@
     methods: {
       artUrl,
       humanize,
+      // Badges a finisher actually earned, recorded on their participant result at
+      // settlement (result.reward.badges). Empty until the challenge is settled.
+      earnedBadgesFor (entity) {
+        const p = this.participants.find(x => x.entity === entity)
+        const badges = p && p.result && p.result.reward && p.result.reward.badges
+        return Array.isArray(badges) ? badges.filter(b => typeof b === 'string' && b.trim()) : []
+      },
       // Open the shared login modal in place (no navigation), so the user lands
       // right back on this challenge logged in — matching how the rest of the app
       // gates login (mirrors the referrals/settings pages' Bootstrap-modal pattern).
@@ -453,6 +478,39 @@
     margin-top: 8px;
   }
   .arena-fairplay i { color: #1a8f4c; margin-right: 5px; }
+
+  /* Collectible badges */
+  .arena-badge-offer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .arena-badge-offer__label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #6b7280;
+  }
+  .arena-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #8a6d00;
+    background: linear-gradient(135deg, #fff5d6, #ffe9a8);
+    border: 1px solid #f0d47a;
+    border-radius: 999px;
+    padding: 4px 11px;
+  }
+  .arena-badge i { color: #e0a100; }
+  .arena-badge--sm {
+    font-size: 0.72rem;
+    padding: 2px 8px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
 
   /* Standings */
   .arena-standings-wrap { overflow-x: auto; }
