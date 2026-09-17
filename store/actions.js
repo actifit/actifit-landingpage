@@ -1135,14 +1135,26 @@ export default {
   fetchNews({ state, commit }) {
     return new Promise((resolve, reject) => {
 
-      //set proper blockchain selection
-      let chainLnk = hive;
-      if (state.bchain == 'STEEM') {
-        chainLnk = steem;
-      } else if (state.bchain == 'BLURT') {
-        chainLnk = blurt;
+      // On HIVE, fetch @actifit's OWN posts via the bridge API (sort:'posts'),
+      // which excludes reblogs. The account's blog feed is now mostly reblogged
+      // community activity (~18 of the top 20), so the old getDiscussionsByBlog +
+      // author filter surfaced only the 1-2 genuine announcements that happened to
+      // fall inside the fetch window. bridge.get_account_posts returns the real
+      // announcements directly (no reblogs), so the news carousel fills again.
+      if (state.bchain != 'STEEM' && state.bchain != 'BLURT') {
+        hive.api.call('bridge.get_account_posts', { sort: 'posts', account: 'actifit', limit: process.env.maxPostCount }, (err, posts) => {
+          if (err) reject(err)
+          else {
+            commit('setNews', Array.isArray(posts) ? posts : [])
+            resolve()
+          }
+        })
+        return
       }
 
+      // Legacy STEEM/BLURT: those nodes have no bridge API, so keep the blog feed
+      // filtered to actifit-authored posts.
+      let chainLnk = (state.bchain == 'STEEM') ? steem : blurt;
       chainLnk.api.getDiscussionsByBlog({ tag: 'actifit', limit: process.env.maxPostCount }, (err, posts) => {
         if (err) reject(err)
         else {
