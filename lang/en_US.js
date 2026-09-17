@@ -30,6 +30,8 @@ module.exports = {
   Arena_Joined: 'You are in!',
   Arena_Login_To_Join: 'Log in to join this challenge',
   Arena_Your_Merits: 'Your Merits',
+  Arena_Badge_Award: 'Winners earn the badge:',
+  Arena_Badge_Earned: 'Badge earned',
   Arena_Join_Pending: 'Recording on-chain — it may take a few blocks to appear.',
   Arena_Action_Failed: 'Something went wrong. Please try again.',
   Arena_Create: 'Create a challenge',
