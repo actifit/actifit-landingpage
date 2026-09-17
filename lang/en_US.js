@@ -649,6 +649,7 @@ module.exports = {
   create_account: 'Create Account',
   doubledup_badge_title: 'Lucky Doubled UP Badge',
   charity_badge_title: 'Charity Donor',
+  arena_badges_title: 'Arena Challenge Badges',
   not_lucky_yet: 'Luck Hasn\'t Hit Yet!',
   BUY_AFIT_WITH_STEEM: 'Buy AFIT',
   AFIT_Amount_To_Buy: 'AFIT Amount to Buy',

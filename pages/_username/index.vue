@@ -497,6 +497,19 @@
                     <button v-if="badgeClaimable(charity_badge)" @click="claimBadge(charity_badge)" class="btn btn-danger btn-sm">{{ $t('Claim_badge') }}</button>
                   </div>
                 </div>
+                <!-- Arena challenge badges — earned by winning Arena challenges -->
+                <div v-if="arenaBadges.length" class="badge-list-item arena-badges-block">
+                  <div class="badge-details w-100">
+                    <div class="badge-title"><i class="fas fa-trophy" aria-hidden="true"></i> {{ $t('arena_badges_title') }}</div>
+                    <div class="arena-badge-grid">
+                      <a v-for="(b, i) in arenaBadges" :key="'ab-' + i" :href="'/arena/' + b.challenge_id" class="arena-badge-earned">
+                        <span class="arena-badge-earned__medal"><i class="fas fa-medal" aria-hidden="true"></i></span>
+                        <span class="arena-badge-earned__name">{{ b.badge }}</span>
+                        <span class="arena-badge-earned__meta">{{ b.title }}<template v-if="b.rank"> · #{{ b.rank }}</template></span>
+                      </a>
+                    </div>
+                  </div>
+                </div>
             </div>
           </div>
         </div>
@@ -586,6 +599,7 @@ export default {
   data() {
     return {
       activeTab: 'about',
+      arenaBadges: [], // collectible badges earned in The Arena (GET /arena/badges/:user)
       showModal: false,
       report: '',
       displayUser: '',
@@ -2019,6 +2033,7 @@ export default {
       fetch(process.env.actiAppUrl + 'luckyWinner/' + this.displayUser).then(res => res.json().then(json => this.doubledupWinner = json)).catch(e => reject(e));
       fetch(process.env.actiAppUrl + 'charityDonor/' + this.displayUser).then(res => res.json().then(json => this.charityDonor = json)).catch(e => reject(e));
       fetch(process.env.actiAppUrl + 'is_banned/' + this.displayUser).then(res => res.json().then(json => this.account_banned = json)).catch(e => reject(e));
+      fetch(process.env.actiAppUrl + 'arena/badges/' + this.displayUser).then(res => res.json().then(json => { this.arenaBadges = (json && Array.isArray(json.badges)) ? json.badges : []; })).catch(e => console.log(e));
       fetch(process.env.actiAppUrl + 'availableTipBalance?user=' + this.displayUser).then(res => res.json().then(json => this.setTipBalance(json))).catch(e => reject(e));
       fetch(process.env.poshVerificationUrl + this.displayUser).then(res => res.json().then(json => this.setPoshVerifStatus(json))).catch(e => reject(e));
       fetch(process.env.threeSpeakApiVidCount.replace('_USERNAME_', this.displayUser)).then(res => res.json().then(json => this.set3SVideoCount(json))).catch(e => reject(e));
@@ -2420,6 +2435,30 @@ html.dark-mode .text-dark {
 .badge-details .badge-title { font-weight: bold; font-size: 1.2rem; }
 .badge-status-claimed { color: #c3e6cb; }
 .badge-status-missed { font-style: italic; opacity: 0.8; }
+
+/* Arena challenge badges (earned in The Arena) */
+.arena-badges-block { align-items: flex-start; }
+.arena-badge-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+.arena-badge-earned {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    min-width: 120px;
+    max-width: 170px;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 12px;
+    color: #fff;
+    text-decoration: none;
+    transition: transform 0.18s ease, background 0.18s ease;
+}
+.arena-badge-earned:hover,
+.arena-badge-earned:focus { transform: translateY(-3px); background: rgba(255, 255, 255, 0.28); color: #fff; text-decoration: none; }
+.arena-badge-earned__medal { font-size: 1.7rem; color: #ffd54a; margin-bottom: 6px; }
+.arena-badge-earned__name { font-weight: 700; font-size: 0.95rem; line-height: 1.2; }
+.arena-badge-earned__meta { font-size: 0.75rem; opacity: 0.85; margin-top: 4px; }
 
 .wallet-balances-grid {
     display: grid;
