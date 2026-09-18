@@ -654,6 +654,8 @@ module.exports = {
   doubledup_badge_title: 'Lucky Doubled UP Badge',
   charity_badge_title: 'Charity Donor',
   arena_badges_title: 'Arena Challenge Badges',
+  Arena_Badge_Community: 'Community',
+  Arena_Badge_Community_Note: 'A community-created challenge badge — not an official Actifit badge.',
   not_lucky_yet: 'Luck Hasn\'t Hit Yet!',
   BUY_AFIT_WITH_STEEM: 'Buy AFIT',
   AFIT_Amount_To_Buy: 'AFIT Amount to Buy',
