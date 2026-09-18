@@ -506,6 +506,7 @@
                         <span class="arena-badge-earned__medal"><i class="fas fa-medal" aria-hidden="true"></i></span>
                         <span class="arena-badge-earned__name">{{ b.badge }}</span>
                         <span class="arena-badge-earned__meta">{{ b.title }}<template v-if="b.rank"> · #{{ b.rank }}</template></span>
+                        <span v-if="b.origin_tier !== 'official'" class="arena-badge-earned__tag" :title="$t('Arena_Badge_Community_Note')">{{ $t('Arena_Badge_Community') }}</span>
                       </a>
                     </div>
                   </div>
@@ -2459,6 +2460,17 @@ html.dark-mode .text-dark {
 .arena-badge-earned__medal { font-size: 1.7rem; color: #ffd54a; margin-bottom: 6px; }
 .arena-badge-earned__name { font-weight: 700; font-size: 0.95rem; line-height: 1.2; }
 .arena-badge-earned__meta { font-size: 0.75rem; opacity: 0.85; margin-top: 4px; }
+.arena-badge-earned__tag {
+    margin-top: 6px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+}
 
 .wallet-balances-grid {
     display: grid;
