@@ -121,6 +121,12 @@
           <div v-if="form.rewardType === 'badge'" class="arena-subform">
             <label class="arena-lbl" for="ch-badge">{{ $t('Arena_Field_Badge') }}</label>
             <input id="ch-badge" v-model.trim="form.badge" type="text" class="arena-inp" maxlength="40" :placeholder="$t('Arena_Field_Badge_PH')" />
+            <label class="arena-lbl" for="ch-badge-rule">{{ $t('Arena_Field_Badge_Who') }}</label>
+            <select id="ch-badge-rule" v-model="form.badgeRule" class="arena-inp">
+              <option value="winner">{{ $t('Arena_Badge_Who_Winner') }}</option>
+              <option value="top3">{{ $t('Arena_Badge_Who_Top3') }}</option>
+              <option value="all">{{ $t('Arena_Badge_Who_All') }}</option>
+            </select>
           </div>
 
           <!-- AFIT prize details -->
@@ -150,7 +156,7 @@
             <div><dt>{{ $t('Arena_Field_Start') }} → {{ $t('Arena_Field_End') }}</dt><dd>{{ form.start }} → {{ form.end }}</dd></div>
             <div><dt>{{ $t('Arena_Field_Entry') }}</dt><dd>{{ form.entryMode === 'activity_gated' ? $t('Arena_Entry_Gated') + ' (' + form.minActivity + ')' : $t('Arena_Entry_Free') }}</dd></div>
             <div><dt>{{ $t('Arena_Review_Reward') }}</dt>
-              <dd v-if="form.rewardType === 'badge'"><i class="fas fa-medal" aria-hidden="true"></i> {{ form.badge }}</dd>
+              <dd v-if="form.rewardType === 'badge'"><i class="fas fa-medal" aria-hidden="true"></i> {{ form.badge }} · {{ badgeRuleLabel }}</dd>
               <dd v-else><i class="fas fa-coins" aria-hidden="true"></i> {{ fmt(form.prize) }} AFIT ({{ fmt(totalDebit) }} AFIT {{ $t('Arena_Deducted') }})</dd>
             </div>
           </dl>
@@ -238,6 +244,7 @@
           visibility: 'public',
           rewardType: 'badge',
           badge: '',
+          badgeRule: 'winner',
           prize: MIN_POOL
         }
       }
@@ -296,6 +303,10 @@
       ruleLabel () {
         const r = this.rules.find(x => x.value === this.form.rule)
         return r ? r.label : this.form.rule
+      },
+      badgeRuleLabel () {
+        const m = { winner: 'Arena_Badge_Who_Winner', top3: 'Arena_Badge_Who_Top3', all: 'Arena_Badge_Who_All' }
+        return this.$t(m[this.form.badgeRule] || 'Arena_Badge_Who_Winner')
       },
       // ≥ 20k AFIT holdings unlock the self-funded prize option (advisory; the
       // server re-derives the funder's tier from their real balance at ingest).
@@ -427,6 +438,8 @@
         }
         if (this.form.tagline) op.tagline = this.form.tagline
         if (this.form.howItWorks) op.how_it_works = this.form.howItWorks
+        // Badge-only contests carry the award rule (who earns the badge at settlement).
+        if (this.form.rewardType === 'badge') op.badge_rule = this.form.badgeRule
         return op
       },
       async publish () {

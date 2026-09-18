@@ -18,6 +18,7 @@ describe('pages/arena/create (wizard)', () => {
     visibility: 'public',
     rewardType: 'badge',
     badge: 'Sprinter',
+    badgeRule: 'top3',
     prize: 50
   })
   const $t = (k, p) => (p ? k + ':' + JSON.stringify(p) : k)
@@ -101,6 +102,7 @@ describe('pages/arena/create (wizard)', () => {
       expect(op.op).toBe('challenge_create')
       expect(op.origin_tier).toBe('friendly')
       expect(op.rewards).toEqual({ badges: ['Sprinter'] })
+      expect(op.badge_rule).toBe('top3') // who earns the badge at settlement
       expect(op.entry).toEqual({ mode: 'free' })
       expect(op.scoring).toEqual({ metric: 'activity_count', rule: 'max' })
       expect(op.participants_kind).toBe('user')
@@ -115,6 +117,7 @@ describe('pages/arena/create (wizard)', () => {
       const op = CreatePage.methods.buildOp.call({ form }, 'ch_alice_2')
       expect(op.origin_tier).toBe('community')
       expect(op.rewards).toEqual({ afit: 400 })
+      expect(op.badge_rule).toBeUndefined() // a funded contest carries no badge rule
       // no forbidden monetary entry field is ever emitted (invariant I1)
       expect(op.entry.fee).toBeUndefined()
       expect(op.entry.stake).toBeUndefined()
