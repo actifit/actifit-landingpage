@@ -1,5 +1,6 @@
 // House-rule guard (no gambling / pay-to-win / purchase-to-win): the Arena's
-// user-facing reward copy must read as earned Merits, sponsor-funded. This test
+// user-facing reward copy must read as earned AFIT (the #77 pivot retired
+// Merits), never as anything bought or wagered. This test
 // pins that so a well-meaning copy edit can't quietly reintroduce wagering
 // language. See the compliance invariants in actifit-bot.
 const en = require('@/lang/en_US')
@@ -8,8 +9,8 @@ import { catalogFor } from '@/utils/arenaCatalog'
 const FORBIDDEN = /\b(buy|purchase|deposit|wager|bet|betting|stake|gamble|gambling|pay-to-win|pay to win|jackpot|raffle|lottery)\b/i
 
 describe('arena compliance (no gambling / pay-to-win)', () => {
-  it('fair-play copy names earned Merits and rules out pay-to-win', () => {
-    expect(en.Arena_Fair_Play).toMatch(/Merits/)
+  it('fair-play copy names earned AFIT and rules out pay-to-win', () => {
+    expect(en.Arena_Fair_Play).toMatch(/AFIT/)
     expect(en.Arena_Fair_Play).toMatch(/pay-to-win/i)
   })
 
