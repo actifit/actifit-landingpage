@@ -6,7 +6,7 @@ describe('utils/arenaCatalog', () => {
       const c = catalogFor({ id: 'def_weekly_step_league', type: 'league_fixture' })
       expect(c.recurrence).toBe('Weekly')
       expect(c.tagline).toMatch(/weekly leaderboard/i)
-      expect(c.prizes).toMatch(/Merits/)
+      expect(c.prizes).toMatch(/AFIT/)
     })
 
     it('falls back to type copy for an unknown id', () => {
@@ -18,7 +18,7 @@ describe('utils/arenaCatalog', () => {
     it('falls back to a safe default for an unknown type', () => {
       const c = catalogFor({ id: 'x', type: 'something_new' })
       expect(c.tagline).toBeTruthy()
-      expect(c.prizes).toMatch(/Merits/)
+      expect(c.prizes).toMatch(/AFIT/)
     })
 
     it('prefers real fields on the challenge over catalog copy', () => {

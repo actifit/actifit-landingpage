@@ -16,7 +16,7 @@ describe('pages/arena (discovery)', () => {
       const c = ArenaPage.methods.cat(ch)
       expect(c.recurrence).toBe('Weekly')
       expect(c.tagline).toBeTruthy()
-      expect(c.prizes).toMatch(/Merits/)
+      expect(c.prizes).toMatch(/AFIT/)
     })
     it('duration derives a humanized window length', () => {
       expect(ArenaPage.methods.duration(ch)).toBe('7 days')
