@@ -19,10 +19,10 @@ describe('arena compliance (no gambling / pay-to-win)', () => {
   ]
   const TYPES = ['league_fixture', 'daily_focus', 'liveops', 'something_unknown']
 
-  it('every default contest advertises Merits and no purchase/wager language', () => {
+  it('every default contest advertises AFIT and no purchase/wager language', () => {
     for (const id of DEFAULT_IDS) {
       const c = catalogFor({ id })
-      expect(c.prizes).toMatch(/Merits/)
+      expect(c.prizes).toMatch(/AFIT/)
       expect(c.prizes).not.toMatch(FORBIDDEN)
       expect(c.tagline).not.toMatch(FORBIDDEN)
       expect(c.howItWorks).not.toMatch(FORBIDDEN)

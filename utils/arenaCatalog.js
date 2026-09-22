@@ -21,42 +21,42 @@ const BY_ID = {
     recurrence: 'Weekly',
     tagline: 'Climb the weekly leaderboard by staying active every day.',
     howItWorks: 'Every activity you log during the week counts toward your score. The most active members rise to the top of the league table.',
-    prizes: 'Earn Actifit Merits and a featured spot on the weekly leaderboard.'
+    prizes: 'Earn AFIT and a featured spot on the weekly leaderboard.'
   },
   def_daily_focus: {
     art: 'daily-focus',
     recurrence: 'Daily',
     tagline: 'Hit your daily step goal and keep your streak alive.',
     howItWorks: 'Reach the daily target to clear the challenge. It resets every day, so consistency is everything.',
-    prizes: 'Collect Actifit Merits for every day you reach your goal.'
+    prizes: 'Collect AFIT for every day you reach your goal.'
   },
   def_season_ladder: {
     art: 'season-ladder',
     recurrence: 'Seasonal',
     tagline: 'A two-week climb to the top of the ladder.',
     howItWorks: 'Your verified activity accumulates across the whole season. Finish high on the ladder to reach the podium.',
-    prizes: 'Season Merits plus podium recognition for the top finishers.'
+    prizes: 'Season AFIT rewards plus podium recognition for the top finishers.'
   },
   def_weekly_top_n: {
     art: 'global-top',
     recurrence: 'Weekly',
     tagline: 'Compete with the whole community to finish in the global Top-N.',
     howItWorks: 'Everyone competes on one global board. Finish among the top ranks by the end of the week.',
-    prizes: 'Top finishers earn bonus Actifit Merits.'
+    prizes: 'Top finishers earn bonus AFIT.'
   },
   def_weekend_warrior: {
     art: 'weekend-warrior',
     recurrence: 'Weekly',
     tagline: 'A 48-hour weekend blitz — go all out.',
     howItWorks: 'A short, high-energy sprint across the weekend. Pack in as much activity as you can before it closes.',
-    prizes: 'Weekend Merits for the most active warriors.'
+    prizes: 'Weekend AFIT rewards for the most active warriors.'
   },
   def_monthly_liveops: {
     art: 'monthly-event',
     recurrence: 'Monthly',
     tagline: 'A month-long event with milestones all the way to the finish.',
     howItWorks: 'Hit milestones through the month and finish strong — a marathon, not a sprint.',
-    prizes: 'Milestone Merits plus a special monthly reward.'
+    prizes: 'Milestone AFIT rewards plus a special monthly reward.'
   }
 }
 
@@ -67,21 +67,21 @@ const BY_TYPE = {
     recurrence: 'League',
     tagline: 'Compete on the leaderboard and climb the table.',
     howItWorks: 'Your verified activity is ranked against everyone else in the league.',
-    prizes: 'Earn Actifit Merits based on where you finish.'
+    prizes: 'Earn AFIT based on where you finish.'
   },
   daily_focus: {
     art: 'daily-focus',
     recurrence: 'Daily',
     tagline: 'Hit the daily goal and keep your streak going.',
     howItWorks: 'Reach the target each day to clear the challenge.',
-    prizes: 'Earn Actifit Merits for every goal you reach.'
+    prizes: 'Earn AFIT for every goal you reach.'
   },
   liveops: {
     art: 'monthly-event',
     recurrence: 'Event',
     tagline: 'A limited-time event — join before it ends.',
     howItWorks: 'A special event with its own goal and window. Take part before it closes.',
-    prizes: 'Earn Actifit Merits and event rewards.'
+    prizes: 'Earn AFIT and event rewards.'
   }
 }
 
@@ -90,7 +90,7 @@ const DEFAULT_CATALOG = {
   recurrence: 'Event',
   tagline: 'Join the challenge and stay active.',
   howItWorks: 'Take part by logging your activity before the challenge window closes.',
-  prizes: 'Earn Actifit Merits for taking part.'
+  prizes: 'Earn AFIT for taking part.'
 }
 
 // A recurring default rolls forward under a NEW id (e.g. def_weekly_step_league@
