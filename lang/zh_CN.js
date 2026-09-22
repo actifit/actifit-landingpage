@@ -102,7 +102,7 @@ module.exports = {
   Arena_No_Standings: '暂无排名——加入并成为榜单第一人。',
   Arena_Starts: '开始',
   Arena_Scored_By: '计分方式',
-  Arena_Fair_Play: '奖励是赚取的 Actifit Merits，由赞助商提供——绝非付费获胜。',
+  Arena_Fair_Play: '奖励是赚取的 AFIT 和可收藏徽章 — 免费参加，结果由已验证的活动决定，绝非付费获胜。',
   Arena_Not_Found: '未找到挑战。',
   Arena_Join: '加入挑战',
   Arena_Leave: '退出',

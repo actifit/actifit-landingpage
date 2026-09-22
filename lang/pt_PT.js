@@ -102,7 +102,7 @@ module.exports = {
   Arena_No_Standings: 'Ainda sem classificação — junta-te e sê o primeiro na tabela.',
   Arena_Starts: 'Começa',
   Arena_Scored_By: 'Pontuado por',
-  Arena_Fair_Play: 'As recompensas são Actifit Merits ganhos e financiados por patrocinadores — nunca pagar para ganhar.',
+  Arena_Fair_Play: 'As recompensas são AFIT ganhos e emblemas colecionáveis — entrada gratuita, decidido pela atividade verificada, nunca pagar para ganhar.',
   Arena_Not_Found: 'Desafio não encontrado.',
   Arena_Join: 'Entrar no desafio',
   Arena_Leave: 'Sair',

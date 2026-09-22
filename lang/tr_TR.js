@@ -102,7 +102,7 @@ module.exports = {
   Arena_No_Standings: 'Henüz sıralama yok — katıl ve tabloda ilk sen ol.',
   Arena_Starts: 'Başlıyor',
   Arena_Scored_By: 'Puanlama ölçütü',
-  Arena_Fair_Play: 'Ödüller kazanılmış Actifit Merits olup sponsorlar tarafından finanse edilir — asla kazanmak için ödeme yoktur.',
+  Arena_Fair_Play: 'Ödüller kazanılmış AFIT ve koleksiyonluk rozetlerdir — katılım ücretsiz, sonuç doğrulanmış aktiviteyle belirlenir, asla parayla kazanma yoktur.',
   Arena_Not_Found: 'Meydan okuma bulunamadı.',
   Arena_Join: 'Meydan okumaya katıl',
   Arena_Leave: 'Ayrıl',

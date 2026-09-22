@@ -133,10 +133,12 @@
 
               <p v-if="actionMsg" class="arena-participate__msg" role="status">{{ actionMsg }}</p>
 
-              <!-- Merit balance for the logged-in athlete -->
-              <div v-if="isLoggedIn" class="arena-merits">
-                <span class="arena-merits__label">{{ $t('Arena_Your_Merits') }}</span>
-                <span class="arena-merits__value">{{ meritBalance }}</span>
+              <!-- Off-chain AFIT balance for the logged-in athlete. Hidden (not
+                   shown as 0) when the lookup fails, so a failed fetch never
+                   tells an athlete they hold nothing. -->
+              <div v-if="isLoggedIn && afitBalance !== null" class="arena-merits">
+                <span class="arena-merits__label">{{ $t('Arena_Your_Afit') }}</span>
+                <span class="arena-merits__value">{{ afitBalance }}</span>
               </div>
 
               <p class="arena-participate__note"><i class="fas fa-shield-alt" aria-hidden="true"></i> {{ $t('Arena_Fair_Play') }}</p>
@@ -208,11 +210,13 @@
         acting: false,        // a join/leave broadcast is in flight
         actionMsg: '',        // status line under the CTA
         localJoined: null,    // optimistic override after a join/leave (null = use server state)
-        showLoginModal: false // in-place login modal (opened from the join CTA)
+        showLoginModal: false, // in-place login modal (opened from the join CTA)
+        afitBalance: null     // off-chain AFIT balance; null = unknown/not fetched
+
       }
     },
     computed: {
-      ...mapGetters(['arenaChallenge', 'arenaStandings', 'arenaMerits']),
+      ...mapGetters(['arenaChallenge', 'arenaStandings']),
       ...mapGetters('steemconnect', ['user']),
       ch () {
         return this.arenaChallenge && this.arenaChallenge.challenge
@@ -236,9 +240,6 @@
       },
       joinable () {
         return !!(this.ch && ['open', 'active'].includes(this.ch.state))
-      },
-      meritBalance () {
-        return (this.arenaMerits && Number.isFinite(this.arenaMerits.balance)) ? this.arenaMerits.balance : 0
       },
       cat () {
         return catalogFor(this.ch)
@@ -277,13 +278,24 @@
       // Rehydrate the session from localStorage FIRST — this page is a primary
       // deep-link / social-share entry point, so on a fresh load the steemconnect
       // user isn't restored yet (other pages do this in their own mounted). Without
-      // it a logged-in visitor would see the logged-out UI. Then fetch their Merits.
+      // it a logged-in visitor would see the logged-out UI. Then fetch their AFIT.
       try { await this.$store.dispatch('steemconnect/login') } catch (e) { /* not logged in */ }
-      if (this.isLoggedIn) this.$store.dispatch('fetchArenaMerits', this.myUsername)
+      if (this.isLoggedIn) this.loadAfitBalance()
     },
     methods: {
       artUrl,
       humanize,
+      // Off-chain AFIT balance — the same source the create wizard funds from
+      // (token_transactions/user_tokens), NOT the retired Merit ledger. On failure
+      // we leave it null so the pill hides rather than claiming a balance of 0.
+      async loadAfitBalance () {
+        try {
+          const tokens = await this.$store.dispatch('fetchUserTokensReturn', this.myUsername)
+          this.afitBalance = Number.isFinite(Number(tokens)) ? Number(tokens) : null
+        } catch (e) {
+          this.afitBalance = null
+        }
+      },
       // Badges a finisher actually earned, recorded on their participant result at
       // settlement (result.reward.badges). Empty until the challenge is settled.
       earnedBadgesFor (entity) {
@@ -306,7 +318,7 @@
       // flips reactively so the CTA becomes the Join button; also pull the balance.
       onLoggedIn () {
         this.showLoginModal = false
-        if (this.isLoggedIn) this.$store.dispatch('fetchArenaMerits', this.myUsername)
+        if (this.isLoggedIn) this.loadAfitBalance()
       },
       // Chain-first: the client signs + broadcasts the actifit_arena op; the bot's
       // tailer indexes it. We optimistically flip the UI and note that indexing

@@ -102,7 +102,7 @@ module.exports = {
   Arena_No_Standings: 'まだ順位はありません — 参加して最初のランクインを目指そう。',
   Arena_Starts: '開始',
   Arena_Scored_By: '採点基準',
-  Arena_Fair_Play: '報酬は獲得した Actifit Merits で、スポンサーが提供します — 決して課金で勝てるものではありません。',
+  Arena_Fair_Play: '報酬は獲得した AFIT とコレクション用バッジです — 参加は無料、結果は検証済みの活動で決まり、課金で勝てる仕組みではありません。',
   Arena_Not_Found: 'チャレンジが見つかりません。',
   Arena_Join: 'チャレンジに参加',
   Arena_Leave: '退出',
