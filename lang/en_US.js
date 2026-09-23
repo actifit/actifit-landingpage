@@ -23,7 +23,7 @@ module.exports = {
   Arena_No_Standings: 'No standings yet — join and be the first on the board.',
   Arena_Starts: 'Starts',
   Arena_Scored_By: 'Scored by',
-  Arena_Fair_Play: 'Rewards are earned Actifit Merits and sponsor-funded — never pay-to-win.',
+  Arena_Fair_Play: 'Rewards are earned AFIT and collectible badges — free to enter, decided by verified activity, never pay-to-win.',
   Arena_Not_Found: 'Challenge not found.',
   Arena_Join: 'Join Challenge',
   Arena_Leave: 'Leave',

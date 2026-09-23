@@ -92,9 +92,29 @@ describe('pages/arena/_id (detail)', () => {
       expect(DetailPage.computed.joinable.call({ ch: { state: 'settled' } })).toBe(false)
     })
 
-    it('meritBalance reads the fetched balance, defaults to 0', () => {
-      expect(DetailPage.computed.meritBalance.call({ arenaMerits: { balance: 240 } })).toBe(240)
-      expect(DetailPage.computed.meritBalance.call({ arenaMerits: null })).toBe(0)
+    it('loadAfitBalance reads the off-chain AFIT balance (not the retired Merit ledger)', async () => {
+      const ctx = {
+        myUsername: 'alice',
+        afitBalance: null,
+        $store: { dispatch: jest.fn().mockResolvedValue(240) }
+      }
+      await DetailPage.methods.loadAfitBalance.call(ctx)
+      expect(ctx.$store.dispatch).toHaveBeenCalledWith('fetchUserTokensReturn', 'alice')
+      expect(ctx.afitBalance).toBe(240)
+    })
+
+    it('loadAfitBalance leaves the balance null on failure so the pill hides instead of showing 0', async () => {
+      const ctx = {
+        myUsername: 'alice',
+        afitBalance: null,
+        $store: { dispatch: jest.fn().mockRejectedValue(new Error('offline')) }
+      }
+      await DetailPage.methods.loadAfitBalance.call(ctx)
+      expect(ctx.afitBalance).toBeNull()
+      // a non-numeric payload is treated the same way
+      const ctx2 = { myUsername: 'alice', afitBalance: null, $store: { dispatch: jest.fn().mockResolvedValue(undefined) } }
+      await DetailPage.methods.loadAfitBalance.call(ctx2)
+      expect(ctx2.afitBalance).toBeNull()
     })
 
     it('arenaOp builds a signed actifit_arena custom_json for the challenge', () => {
