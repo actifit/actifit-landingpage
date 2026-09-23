@@ -229,6 +229,75 @@ export default {
       }).catch(e => reject(e))
     })
   },
+  // Actifitter of the Month spotlight (Trello #110). Commits the editorial doc,
+  // or null when unset/on error, so the home section simply hides itself.
+  fetchFeaturedActifitter({ commit }) {
+    return new Promise((resolve) => {
+      fetch(process.env.actiAppUrl + 'featuredActifitter').then(res => {
+        res.json().then(json => {
+          commit('setFeaturedActifitter', json)
+          resolve(json)
+        }).catch(() => { commit('setFeaturedActifitter', null); resolve(null) })
+      }).catch(() => { commit('setFeaturedActifitter', null); resolve(null) })
+    })
+  },
+  // Challenge Engine (The Arena) — discover open/active challenges from the
+  // backend read API (actifit-bot GET /arena/challenges). Public, read-only.
+  fetchArenaChallenges({ commit }, params = {}) {
+    return new Promise((resolve, reject) => {
+      const qs = Object.entries(params)
+        .filter(([, v]) => v !== undefined && v !== null && v !== '')
+        .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+        .join('&')
+      fetch(process.env.actiAppUrl + 'arena/challenges' + (qs ? '?' + qs : '')).then(res => {
+        res.json().then(json => {
+          commit('setArenaChallenges', json)
+          resolve(json)
+        }).catch(e => reject(e))
+      }).catch(e => reject(e))
+    })
+  },
+  // Single challenge (with participants) for the Arena detail page. Rejects on
+  // 404 / non-ok so the page can render its "not found" state.
+  fetchArenaChallenge({ commit }, id) {
+    return new Promise((resolve, reject) => {
+      fetch(process.env.actiAppUrl + 'arena/challenges/' + encodeURIComponent(id)).then(res => {
+        if (!res.ok) { reject(new Error('HTTP Error: ' + res.status)); return }
+        res.json().then(json => {
+          commit('setArenaChallenge', json)
+          resolve(json)
+        }).catch(e => reject(e))
+      }).catch(e => reject(e))
+    })
+  },
+  // Materialized standings for one challenge (null when none computed yet). The
+  // backend sends `null` (empty body) before the first aggregation run, so treat
+  // an empty/invalid body as a normal empty board rather than an error.
+  fetchArenaStandings({ commit }, id) {
+    return new Promise((resolve) => {
+      fetch(process.env.actiAppUrl + 'arena/standings?id=' + encodeURIComponent(id)).then(res => {
+        if (!res.ok) { commit('setArenaStandings', null); resolve(null); return }
+        res.json().then(json => {
+          commit('setArenaStandings', json)
+          resolve(json)
+        }).catch(() => { commit('setArenaStandings', null); resolve(null) }) // empty body (no board yet) → empty state, not an error
+      }).catch(() => { commit('setArenaStandings', null); resolve(null) })
+    })
+  },
+  // Logged-in user's Merit balance + recent ledger (actifit-bot GET
+  // /arena/merits/:user). Public read; commit null on any failure.
+  fetchArenaMerits({ commit }, user) {
+    return new Promise((resolve) => {
+      if (!user) { commit('setArenaMerits', null); resolve(null); return }
+      fetch(process.env.actiAppUrl + 'arena/merits/' + encodeURIComponent(user)).then(res => {
+        if (!res.ok) { commit('setArenaMerits', null); resolve(null); return }
+        res.json().then(json => {
+          commit('setArenaMerits', json)
+          resolve(json)
+        }).catch(() => { commit('setArenaMerits', null); resolve(null) })
+      }).catch(() => { commit('setArenaMerits', null); resolve(null) })
+    })
+  },
   fetchUserCommunitySubs({ state, commit }) {
     return new Promise((resolve, reject) => {
       let outc = hive.api.call('bridge.list_all_subscriptions', { account: state.steemconnect.user.account.name.toLowerCase() }, (err, result) => {
@@ -1066,14 +1135,26 @@ export default {
   fetchNews({ state, commit }) {
     return new Promise((resolve, reject) => {
 
-      //set proper blockchain selection
-      let chainLnk = hive;
-      if (state.bchain == 'STEEM') {
-        chainLnk = steem;
-      } else if (state.bchain == 'BLURT') {
-        chainLnk = blurt;
+      // On HIVE, fetch @actifit's OWN posts via the bridge API (sort:'posts'),
+      // which excludes reblogs. The account's blog feed is now mostly reblogged
+      // community activity (~18 of the top 20), so the old getDiscussionsByBlog +
+      // author filter surfaced only the 1-2 genuine announcements that happened to
+      // fall inside the fetch window. bridge.get_account_posts returns the real
+      // announcements directly (no reblogs), so the news carousel fills again.
+      if (state.bchain != 'STEEM' && state.bchain != 'BLURT') {
+        hive.api.call('bridge.get_account_posts', { sort: 'posts', account: 'actifit', limit: process.env.maxPostCount }, (err, posts) => {
+          if (err) reject(err)
+          else {
+            commit('setNews', Array.isArray(posts) ? posts : [])
+            resolve()
+          }
+        })
+        return
       }
 
+      // Legacy STEEM/BLURT: those nodes have no bridge API, so keep the blog feed
+      // filtered to actifit-authored posts.
+      let chainLnk = (state.bchain == 'STEEM') ? steem : blurt;
       chainLnk.api.getDiscussionsByBlog({ tag: 'actifit', limit: process.env.maxPostCount }, (err, posts) => {
         if (err) reject(err)
         else {

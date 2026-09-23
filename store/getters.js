@@ -44,8 +44,23 @@ export default {
   leaderboard (state) {
     return state.leaderboard
   },
+  arenaChallenges (state) {
+    return state.arenaChallenges
+  },
+  arenaChallenge (state) {
+    return state.arenaChallenge
+  },
+  arenaMerits (state) {
+    return state.arenaMerits
+  },
+  arenaStandings (state) {
+    return state.arenaStandings
+  },
   extLeaderboard (state) {
     return state.extLeaderboard
+  },
+  featuredActifitter (state) {
+    return state.featuredActifitter
   },
   reports (state) {
     return state.reports

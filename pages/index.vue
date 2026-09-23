@@ -64,6 +64,30 @@
       </div>
     </div>
 
+    <!-- THE ARENA (challenges) — flagship promo band -->
+    <section id="arena-promo" class="arena-promo">
+      <div class="container">
+        <div class="arena-promo-card">
+          <div class="arena-promo-text">
+            <span class="arena-promo-eyebrow"><i class="fas fa-trophy" aria-hidden="true"></i> {{ $t('home_arena_eyebrow') }}</span>
+            <h2 class="arena-promo-title">{{ $t('home_arena_title') }}</h2>
+            <p class="arena-promo-lead">{{ $t('home_arena_desc') }}</p>
+            <div class="arena-promo-ctas">
+              <nuxt-link to="/arena" class="arena-promo-btn arena-promo-btn--light"><i class="fas fa-bolt mr-2" aria-hidden="true"></i>{{ $t('home_arena_cta') }}</nuxt-link>
+              <nuxt-link to="/arena/create" class="arena-promo-btn arena-promo-btn--ghost"><i class="fas fa-plus-circle mr-2" aria-hidden="true"></i>{{ $t('home_arena_cta2') }}</nuxt-link>
+            </div>
+          </div>
+          <div class="arena-promo-visual" aria-hidden="true">
+            <img src="/img/arena/global-top.webp" :alt="$t('home_arena_title')" loading="lazy" class="arena-promo-img arena-promo-img--back" />
+            <img src="/img/arena/step-league.webp" :alt="$t('home_arena_title')" loading="lazy" class="arena-promo-img arena-promo-img--front" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ACTIFITTER OF THE MONTH (Trello #110) — self-fetches, hidden when unset -->
+    <ActifitterOfMonth class="py-4" />
+
     <!-- RECENT ACTIVITY SECTION -->
     <section id="recent-activity" class="py-5">
       <div class="container-fluid">
@@ -452,6 +476,7 @@ import { mapGetters } from 'vuex'
 import SteemStats from '~/components/SteemStats'
 import NotifyModal from '~/components/NotifyModal'
 import LoginModal from '~/components/LoginModal'
+import ActifitterOfMonth from '~/components/ActifitterOfMonth'
 
 export default {
   head() {
@@ -472,6 +497,7 @@ export default {
     NewsModal,
     SteemStats,
     NotifyModal,
+    ActifitterOfMonth,
     pendingRewardsModal,
   },
   data() {
@@ -1241,6 +1267,104 @@ section.aurora-showcase,section#delegators,section#news,section#recent-activity,
 }
 .resource-stats .col-md-12 > div:last-child {
     margin-bottom: 0;
+}
+
+/* THE ARENA — homepage promo band */
+.arena-promo { padding: 3.5rem 0 1rem; }
+.arena-promo-card {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 2.5rem;
+    align-items: center;
+    padding: 3rem 3.25rem;
+    border-radius: 24px;
+    overflow: hidden;
+    background: linear-gradient(120deg, #e10707 0%, #a80713 100%);
+    box-shadow: 0 18px 45px rgba(225, 7, 7, 0.28);
+    color: #fff;
+}
+/* soft glow accents so the band reads as its own surface, not a flat block */
+.arena-promo-card::before {
+    content: '';
+    position: absolute;
+    top: -40%; right: -10%;
+    width: 55%; height: 180%;
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.18), transparent 60%);
+    pointer-events: none;
+}
+.arena-promo-text { position: relative; z-index: 2; }
+.arena-promo-eyebrow {
+    display: inline-block;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.35rem 0.75rem;
+    margin-bottom: 1rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+}
+.arena-promo-eyebrow i { margin-right: 0.4rem; color: #ffd54a; }
+.arena-promo-title {
+    font-size: 2.6rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin: 0 0 0.9rem;
+    color: #fff;
+    text-wrap: balance;
+}
+.arena-promo-lead {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin: 0 0 1.6rem;
+    color: rgba(255, 255, 255, 0.92);
+    max-width: 34rem;
+}
+.arena-promo-ctas { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.arena-promo-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.8rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+    border: 2px solid transparent;
+}
+.arena-promo-btn--light { background: #fff; color: #c10606 !important; }
+.arena-promo-btn--light:hover { transform: translateY(-3px); box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22); color: #a80713 !important; }
+.arena-promo-btn--ghost { background: transparent; color: #fff !important; border-color: rgba(255, 255, 255, 0.75); }
+.arena-promo-btn--ghost:hover { transform: translateY(-3px); background: rgba(255, 255, 255, 0.16); }
+.arena-promo-btn:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+/* fanned pair of challenge cards as the visual */
+.arena-promo-visual { position: relative; z-index: 2; min-height: 220px; }
+.arena-promo-img {
+    position: absolute;
+    width: 74%;
+    border-radius: 14px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+    border: 3px solid rgba(255, 255, 255, 0.9);
+}
+.arena-promo-img--back {
+    top: 6%; right: 2%;
+    transform: rotate(6deg);
+    opacity: 0.92;
+}
+.arena-promo-img--front {
+    bottom: 4%; left: 2%;
+    transform: rotate(-5deg);
+    transition: transform 0.35s ease;
+}
+.arena-promo-card:hover .arena-promo-img--front { transform: rotate(-5deg) translateY(-6px); }
+.dark-mode .arena-promo-card { box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45); }
+@media (max-width: 991px) {
+    .arena-promo-card { grid-template-columns: 1fr; gap: 2rem; padding: 2.25rem; text-align: center; }
+    .arena-promo-lead { margin-left: auto; margin-right: auto; }
+    .arena-promo-ctas { justify-content: center; }
+    .arena-promo-visual { min-height: 200px; order: -1; }
+    .arena-promo-title { font-size: 2.1rem; }
 }
 
 </style>

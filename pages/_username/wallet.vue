@@ -817,8 +817,8 @@
                 </div>
                 <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
                   <div class="text-center small p-2 w-25"></div>
-                  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">{{ $t(operation_required)}}
-                    <b>{{ $t(private_active)}}</b>
+                  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">{{ $t('operation_require')}}
+                    <b>{{ $t('private_active')}}</b>
                   </div>
                 </div>
                 <div class="row">
@@ -861,8 +861,8 @@
                   </div>
                   <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
                     <div class="text-center small p-2 w-25"></div>
-                    <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">{{ $t(operation_required) }}
-                      <b>{{ $t(private_active) }}</b>
+                    <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">{{ $t('operation_require') }}
+                      <b>{{ $t('private_active') }}</b>
                     </div>
                   </div>
                 </div>
@@ -954,8 +954,8 @@
                 </div>
                 <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
                   <div class="text-center small p-2 w-25"></div>
-                  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">{{ $t(operation_required) }}
-                    <b>{{ $t(private_active) }}</b>
+                  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">{{ $t('operation_require') }}
+                    <b>{{ $t('private_active') }}</b>
                   </div>
                 </div>
                 <div class="text-center small p-2">
@@ -1016,8 +1016,8 @@
                 </div>
                 <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
                   <div class="text-center small p-2 w-25"></div>
-                  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">{{ $t(operation_required) }}
-                    <b>{{ $t(private_active) }}</b>
+                  <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">{{ $t('operation_require') }}
+                    <b>{{ $t('private_active') }}</b>
                   </div>
                 </div>
                 <div class="text-center small p-2">
@@ -1060,8 +1060,8 @@
                   </div>
                   <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
                     <div class="text-center small p-2 w-25"></div>
-                    <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">{{ $t(operation_required) }}
-                      <b>{{ $t(private_active) }}</b>
+                    <div :class="smallScreenBtnClasses" class="text-center small p-2 w-50">{{ $t('operation_require') }}
+                      <b>{{ $t('private_active') }}</b>
                     </div>
                   </div>
                   <div class="row">
@@ -2342,6 +2342,14 @@ export default {
       ].includes(this.afitActivityMode);
     },
     isCoreFundActionOpen() {
+      // The claimable-rewards panel is only "open" while there is data to show. A
+      // successful claim zeroes the amounts (isClaimableDataAvailable → false),
+      // collapsing the reward content; gate the shared Close button on the SAME
+      // condition so it disappears WITH the content instead of lingering as an
+      // orphaned button once the section has emptied.
+      if (this.fundActivityMode === this.SHOW_CLAIMABLE_REW) {
+        return this.isClaimableDataAvailable;
+      }
       return [
         this.TRANSFER_FUNDS,
         this.POWERUP_FUNDS,
@@ -2350,7 +2358,6 @@ export default {
         this.DELEGATE_FUNDS,
         this.DELEGATE_RCS,
         this.TRANSFER_BSC,
-        this.SHOW_CLAIMABLE_REW,
         this.TRANSFER_FUNDS_SAVINGS,
         this.REMOVE_FUNDS_SAVINGS
       ].includes(this.fundActivityMode);
@@ -2556,11 +2563,22 @@ export default {
       immediate: true,
       handler: async function (newVal, oldVal) {
         if (newVal && (!oldVal || newVal.name !== oldVal.name)) {
-          // If the page mounted while logged out (self /wallet), its init never
-          // ran — run it now that the visitor has logged in, before refreshing.
-          if (this.mountedDone && !this.walletInitialized
-              && !(this.$route.params && this.$route.params.username)) {
-            await this.initWallet(newVal.name);
+          // Only the self /wallet (no :username in the route) tracks the logged-in user.
+          if (this.mountedDone && !(this.$route.params && this.$route.params.username)) {
+            const switchedUser = oldVal && newVal.name !== oldVal.name;
+            if (switchedUser) {
+              // Switch User: clear the init guard so we re-point the wallet at the
+              // newly active account. Without this, displayUser/displayUserData stay
+              // on the old user and every balance/profile refresh below refetches the
+              // WRONG account. initWallet() re-sets displayUser + displayUserData for
+              // the new user (it keeps the old data until the fresh fetch resolves, so
+              // no null-deref flash).
+              this.walletInitialized = false;
+            }
+            // First login after a logged-out mount, or a just-cleared switch: (re)init.
+            if (!this.walletInitialized) {
+              await this.initWallet(newVal.name);
+            }
           }
           await this.refreshAllWalletData();
         }
@@ -4708,6 +4726,44 @@ export default {
         console.error('Error in fetchTokenBalance:', err);
       }
     },
+    zeroClaimableDisplay() {
+      // Reflect a just-succeeded claim immediately. The claimable section is driven
+      // by these values, and node propagation lags the tx, so without an optimistic
+      // clear the just-claimed pending balance intermittently keeps showing.
+      this.claimVests = '0.000000 VESTS';
+      this.claimSP = '0.000 POWER';
+      this.claimSBD = (this.cur_bchain === 'STEEM') ? '0.000 SBD' : '0.000 HBD';
+      this.claimSTEEM = (this.cur_bchain === 'BLURT') ? '0.000 BLURT'
+        : (this.cur_bchain === 'STEEM') ? '0.000 STEEM' : '0.000 HIVE';
+    },
+    rewardBalancesCleared(acct) {
+      // true once the chain shows no unclaimed reward balances on the account
+      const num = v => parseFloat((v || '0').toString().split(' ')[0]) || 0;
+      return num(acct.reward_vesting_balance) === 0
+        && num(acct.reward_hive_balance || acct.reward_steem_balance || acct.reward_blurt_balance) === 0
+        && num(acct.reward_hbd_balance || acct.reward_sbd_balance) === 0;
+    },
+    async pollClaimableUntilCleared(attempts = 5, delayMs = 3000) {
+      // A single fixed-delay refetch is unreliable — the node may not have applied
+      // the claim yet, so the pending balance reappears (the reported intermittent
+      // bug). Poll until the chain confirms the reward balances are zero, then sync
+      // displayUserData and re-derive the claimable values.
+      const chainLnk = this.setProperNode();
+      for (let i = 0; i < attempts; i++) {
+        await new Promise(r => setTimeout(r, delayMs));
+        try {
+          const res = await chainLnk.api.getAccountsAsync([this.displayUser]);
+          if (res && res.length && this.rewardBalancesCleared(res[0])) {
+            this.displayUserData = res[0];
+            this.claimableSTEEMRewards();
+            break;
+          }
+        } catch (e) {
+          console.error('pollClaimableUntilCleared error:', e);
+        }
+      }
+      this.fetchUserData();
+    },
     async claimRewards() {
       //function handles claiming STEEM rewards
       if (!localStorage.getItem('std_login')) {
@@ -4721,7 +4777,9 @@ export default {
         }, window.location.origin + '/wallet?op=claim rewards&status=success');
 
         window.open(link);
-        setTimeout(() => this.fetchUserData(), 3000);
+        // The claim is signed in the SC popup; we don't get a success callback here,
+        // so poll the chain and only clear the section once it confirms zero rewards.
+        this.pollClaimableUntilCleared();
 
         //Below would have been preferred approach, but claimRewardBalance keeps failing as it requires more authority. Keeping here for future further exploration
         /*
@@ -4762,8 +4820,11 @@ export default {
         console.log(res.success);
         if (res.success) {
           this.confirmCompletion('claimrewards', 0, res);
-          //this.isClaimableDataAvailableTEMP = false;
-          setTimeout(() => this.fetchUserData(), 3000);
+          this.claimRewardsProcess = false;
+          // Broadcast confirmed: clear the section immediately, then reconcile with
+          // the chain (rides out node-propagation lag instead of one fixed 3s guess).
+          this.zeroClaimableDisplay();
+          this.pollClaimableUntilCleared();
         }
         /*steem.broadcast.claimRewardBalanceAsync(this.user.account.name,this.claimSTEEM, this.claimSBD, this.claimSP).then(
           res => ).catch(err=>console.log(err));*/

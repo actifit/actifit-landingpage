@@ -1,0 +1,161 @@
+/**
+ * Presentation catalog for Arena challenges.
+ *
+ * The challenge documents returned by the engine API are intentionally lean
+ * (type, title, window, scoring, entry). Rich promotional copy — tagline,
+ * how-it-works, prize summary, recurrence and the hero image — lives here on
+ * the web side for now. This is deliberate tech debt: the canonical copy should
+ * later move onto the challenge document so Android/iOS share it (tracked in
+ * actifit-bot CLAUDE.md). Until then, everything renders through catalogFor(),
+ * which prefers real fields on the challenge and falls back to this catalog.
+ *
+ * Hero images are generated banners under static/img/arena/<art>.webp.
+ */
+
+const IMG_BASE = '/img/arena/'
+
+// Per-id copy for the six official default contests.
+const BY_ID = {
+  def_weekly_step_league: {
+    art: 'step-league',
+    recurrence: 'Weekly',
+    tagline: 'Climb the weekly leaderboard by staying active every day.',
+    howItWorks: 'Every activity you log during the week counts toward your score. The most active members rise to the top of the league table.',
+    prizes: 'Earn AFIT and a featured spot on the weekly leaderboard.'
+  },
+  def_daily_focus: {
+    art: 'daily-focus',
+    recurrence: 'Daily',
+    tagline: 'Hit your daily step goal and keep your streak alive.',
+    howItWorks: 'Reach the daily target to clear the challenge. It resets every day, so consistency is everything.',
+    prizes: 'Collect AFIT for every day you reach your goal.'
+  },
+  def_season_ladder: {
+    art: 'season-ladder',
+    recurrence: 'Seasonal',
+    tagline: 'A two-week climb to the top of the ladder.',
+    howItWorks: 'Your verified activity accumulates across the whole season. Finish high on the ladder to reach the podium.',
+    prizes: 'Season AFIT rewards plus podium recognition for the top finishers.'
+  },
+  def_weekly_top_n: {
+    art: 'global-top',
+    recurrence: 'Weekly',
+    tagline: 'Compete with the whole community to finish in the global Top-N.',
+    howItWorks: 'Everyone competes on one global board. Finish among the top ranks by the end of the week.',
+    prizes: 'Top finishers earn bonus AFIT.'
+  },
+  def_weekend_warrior: {
+    art: 'weekend-warrior',
+    recurrence: 'Weekly',
+    tagline: 'A 48-hour weekend blitz — go all out.',
+    howItWorks: 'A short, high-energy sprint across the weekend. Pack in as much activity as you can before it closes.',
+    prizes: 'Weekend AFIT rewards for the most active warriors.'
+  },
+  def_monthly_liveops: {
+    art: 'monthly-event',
+    recurrence: 'Monthly',
+    tagline: 'A month-long event with milestones all the way to the finish.',
+    howItWorks: 'Hit milestones through the month and finish strong — a marathon, not a sprint.',
+    prizes: 'Milestone AFIT rewards plus a special monthly reward.'
+  }
+}
+
+// Fallback copy keyed by challenge type (user-created / unknown ids).
+const BY_TYPE = {
+  league_fixture: {
+    art: 'step-league',
+    recurrence: 'League',
+    tagline: 'Compete on the leaderboard and climb the table.',
+    howItWorks: 'Your verified activity is ranked against everyone else in the league.',
+    prizes: 'Earn AFIT based on where you finish.'
+  },
+  daily_focus: {
+    art: 'daily-focus',
+    recurrence: 'Daily',
+    tagline: 'Hit the daily goal and keep your streak going.',
+    howItWorks: 'Reach the target each day to clear the challenge.',
+    prizes: 'Earn AFIT for every goal you reach.'
+  },
+  liveops: {
+    art: 'monthly-event',
+    recurrence: 'Event',
+    tagline: 'A limited-time event — join before it ends.',
+    howItWorks: 'A special event with its own goal and window. Take part before it closes.',
+    prizes: 'Earn AFIT and event rewards.'
+  }
+}
+
+const DEFAULT_CATALOG = {
+  art: 'step-league',
+  recurrence: 'Event',
+  tagline: 'Join the challenge and stay active.',
+  howItWorks: 'Take part by logging your activity before the challenge window closes.',
+  prizes: 'Earn AFIT for taking part.'
+}
+
+// A recurring default rolls forward under a NEW id (e.g. def_weekly_step_league@
+// 2026-09-11) that chains to the original via parent_id — so resolve the catalog
+// by parent_id first, then id, then type.
+function baseEntry (ch) {
+  return (ch && (BY_ID[ch.id] || BY_ID[ch.parent_id] || BY_TYPE[ch.type])) || DEFAULT_CATALOG
+}
+
+// Merge the catalog entry with any real fields present on the challenge doc
+// (real fields win, so the backend that now carries this copy — #182, and rolled
+// recurrence instances that copy it forward — takes over).
+export function catalogFor (ch) {
+  const base = baseEntry(ch)
+  if (!ch) return { ...base }
+  return {
+    art: ch.art || base.art,
+    recurrence: ch.recurrence || base.recurrence,
+    tagline: ch.tagline || ch.description || base.tagline,
+    howItWorks: ch.how_it_works || ch.description || base.howItWorks,
+    prizes: (ch.rewards && ch.rewards.summary) || ch.prize_summary || base.prizes
+  }
+}
+
+export function artUrl (ch) {
+  const c = baseEntry(ch)
+  return IMG_BASE + ((ch && ch.art) || c.art) + '.webp'
+}
+
+// What the challenge is scored on — human label for scoring.metric.
+const METRIC_LABELS = {
+  activity_count: 'total activity',
+  goal_hit: 'daily goal hits',
+  steps: 'step count',
+  distance: 'distance'
+}
+export function scoredByLabel (ch) {
+  const m = ch && ch.scoring && ch.scoring.metric
+  if (!m) return 'activity'
+  return METRIC_LABELS[m] || String(m).replace(/_/g, ' ')
+}
+
+// Humanized window length, e.g. "1 day", "7 days", "2 weeks", "1 month".
+export function formatDuration (win) {
+  if (!win || !win.start || !win.end) return ''
+  const ms = new Date(win.end).getTime() - new Date(win.start).getTime()
+  if (!isFinite(ms) || ms <= 0) return ''
+  const days = Math.round(ms / 86400000)
+  if (days <= 1) return '1 day'
+  if (days < 14) return days + ' days'
+  if (days < 28) {
+    const weeks = Math.round(days / 7)
+    return weeks + (weeks === 1 ? ' week' : ' weeks')
+  }
+  const months = Math.round(days / 30)
+  return months + (months === 1 ? ' month' : ' months')
+}
+
+// Machine enum → readable label (league_fixture → "league fixture").
+export function humanize (s) {
+  return typeof s === 'string' ? s.replace(/_/g, ' ') : s
+}
+
+// Locale date (guards "Invalid Date").
+export function formatDate (iso) {
+  const d = new Date(iso)
+  return isNaN(d.getTime()) ? '' : d.toLocaleDateString()
+}

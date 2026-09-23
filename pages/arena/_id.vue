@@ -1,0 +1,655 @@
+<template>
+  <div>
+    <NavbarBrand />
+
+    <div class="container pt-5 mt-5 pb-5">
+      <nuxt-link to="/arena" class="arena-back">
+        <i class="fas fa-arrow-left" aria-hidden="true"></i> {{ $t('Arena_Back') }}
+      </nuxt-link>
+
+      <div v-if="notFound || !ch" class="text-center text-muted py-5">
+        <i class="fas fa-trophy fa-2x mb-3 d-block text-muted" aria-hidden="true"></i>
+        {{ $t('Arena_Not_Found') }}
+      </div>
+
+      <div v-else class="arena-detail">
+        <!-- Hero -->
+        <div class="arena-hero">
+          <img :src="artUrl(ch)" :alt="ch.title || humanize(ch.type)" class="arena-hero__img" />
+          <div class="arena-hero__overlay">
+            <div class="arena-hero__badges">
+              <span class="badge-pill is-type">{{ humanize(ch.type) }}</span>
+              <span class="badge-pill is-recur">{{ cat.recurrence }}</span>
+              <span class="badge-pill is-state" :class="'state-' + ch.state">{{ humanize(ch.state) }}</span>
+            </div>
+            <h1 class="arena-hero__title">{{ ch.title || ch.id }}</h1>
+            <p class="arena-hero__tagline">{{ cat.tagline }}</p>
+          </div>
+        </div>
+
+        <div class="row mt-4">
+          <!-- Main column -->
+          <div class="col-lg-8">
+            <!-- Key facts -->
+            <ul class="arena-facts">
+              <li>
+                <span class="arena-facts__k"><i class="fas fa-sync-alt" aria-hidden="true"></i> {{ $t('Arena_Recurrence') }}</span>
+                <span class="arena-facts__v">{{ cat.recurrence }}</span>
+              </li>
+              <li v-if="duration">
+                <span class="arena-facts__k"><i class="fas fa-hourglass-half" aria-hidden="true"></i> {{ $t('Arena_Length') }}</span>
+                <span class="arena-facts__v">{{ duration }}</span>
+              </li>
+              <li v-if="starts">
+                <span class="arena-facts__k"><i class="fas fa-play" aria-hidden="true"></i> {{ $t('Arena_Starts') }}</span>
+                <span class="arena-facts__v">{{ starts }}</span>
+              </li>
+              <li v-if="ends">
+                <span class="arena-facts__k"><i class="fas fa-flag-checkered" aria-hidden="true"></i> {{ $t('Arena_Ends') }}</span>
+                <span class="arena-facts__v">{{ ends }}</span>
+              </li>
+              <li>
+                <span class="arena-facts__k"><i class="fas fa-bullseye" aria-hidden="true"></i> {{ $t('Arena_Scored_By') }}</span>
+                <span class="arena-facts__v">{{ scoredBy }}</span>
+              </li>
+            </ul>
+
+            <!-- How it works -->
+            <section class="arena-block">
+              <h2 class="arena-block__h">{{ $t('Arena_How_It_Works') }}</h2>
+              <p>{{ cat.howItWorks }}</p>
+            </section>
+
+            <!-- Prizes -->
+            <section class="arena-block">
+              <h2 class="arena-block__h">{{ $t('Arena_Prizes') }}</h2>
+              <p class="arena-prizes"><i class="fas fa-trophy" aria-hidden="true"></i> {{ cat.prizes }}</p>
+              <!-- Collectible badge(s) this challenge awards -->
+              <div v-if="offeredBadges.length" class="arena-badge-offer">
+                <span class="arena-badge-offer__label">{{ $t('Arena_Badge_Award') }}</span>
+                <span v-for="b in offeredBadges" :key="b" class="arena-badge">
+                  <i class="fas fa-medal" aria-hidden="true"></i> {{ b }}
+                </span>
+              </div>
+              <p class="arena-fairplay"><i class="fas fa-shield-alt" aria-hidden="true"></i> {{ $t('Arena_Fair_Play') }}</p>
+            </section>
+
+            <!-- Standings -->
+            <section class="arena-block">
+              <h2 class="arena-block__h">{{ $t('Arena_Standings') }}</h2>
+              <div v-if="rows.length" class="arena-standings-wrap">
+                <table class="arena-standings">
+                  <thead>
+                    <tr>
+                      <th class="c-rank">{{ $t('Arena_Rank') }}</th>
+                      <th>{{ $t('Arena_Athlete') }}</th>
+                      <th class="c-score">{{ $t('Arena_Score') }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="r in rows" :key="r.entity" :class="{ 'is-top': r.rank <= 3 }">
+                      <td class="c-rank">{{ r.rank }}</td>
+                      <td>
+                        {{ r.entity }}
+                        <span v-for="b in earnedBadgesFor(r.entity)" :key="b" class="arena-badge arena-badge--sm" :title="$t('Arena_Badge_Earned')">
+                          <i class="fas fa-medal" aria-hidden="true"></i> {{ b }}
+                        </span>
+                      </td>
+                      <td class="c-score">{{ r.score }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p v-else class="text-muted">{{ $t('Arena_No_Standings') }}</p>
+            </section>
+          </div>
+
+          <!-- Sidebar: participate -->
+          <div class="col-lg-4">
+            <div class="arena-participate">
+              <h2 class="arena-participate__h">{{ $t('Arena_Participate') }}</h2>
+              <p class="arena-participate__p">{{ cat.howItWorks }}</p>
+
+              <!-- Already a participant (show even after close; Leave only while joinable) -->
+              <template v-if="joined">
+                <p class="arena-participate__joined"><i class="fas fa-check-circle" aria-hidden="true"></i> {{ $t('Arena_Joined') }}</p>
+                <button v-if="joinable" type="button" class="arena-participate__leave" :disabled="acting" @click="leaveChallenge">{{ $t('Arena_Leave') }}</button>
+              </template>
+
+              <!-- Not joined, and the challenge is still open/active -->
+              <template v-else-if="joinable">
+                <button v-if="isLoggedIn" type="button" class="arena-participate__cta arena-participate__btn" :disabled="acting" @click="joinChallenge">
+                  <i class="fas fa-bolt" aria-hidden="true"></i>
+                  {{ acting ? $t('Arena_Join') + '…' : $t('Arena_Join') }}
+                </button>
+                <template v-else>
+                  <a href="#" @click.prevent="openLogin" class="arena-participate__cta">
+                    {{ $t('Arena_Login_To_Join') }} <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                  </a>
+                  <nuxt-link :to="`/signup?redirect=/arena/${ch.id}`" class="arena-participate__signup">{{ $t('Arena_Participate') }}</nuxt-link>
+                </template>
+              </template>
+              <!-- else: closed & not joined → no CTA -->
+
+              <p v-if="actionMsg" class="arena-participate__msg" role="status">{{ actionMsg }}</p>
+
+              <!-- Off-chain AFIT balance for the logged-in athlete. Hidden (not
+                   shown as 0) when the lookup fails, so a failed fetch never
+                   tells an athlete they hold nothing. -->
+              <div v-if="isLoggedIn && afitBalance !== null" class="arena-merits">
+                <span class="arena-merits__label">{{ $t('Arena_Your_Afit') }}</span>
+                <span class="arena-merits__value">{{ afitBalance }}</span>
+              </div>
+
+              <p class="arena-participate__note"><i class="fas fa-shield-alt" aria-hidden="true"></i> {{ $t('Arena_Fair_Play') }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <LoginModal v-if="showLoginModal" @close="showLoginModal = false" @login-successful="onLoggedIn" />
+
+    <Footer />
+  </div>
+</template>
+
+<script>
+  import { mapGetters } from 'vuex'
+  import NavbarBrand from '~/components/NavbarBrand'
+  import Footer from '~/components/Footer'
+  import LoginModal from '~/components/LoginModal'
+  import { catalogFor, artUrl, formatDuration, formatDate, scoredByLabel, humanize } from '~/utils/arenaCatalog'
+
+  export default {
+    head () {
+      const ch = this.ch
+      const title = ch ? `${ch.title || ch.id} — The Arena | Actifit.io` : 'The Arena | Actifit.io'
+      const desc = ch ? this.cat.tagline : 'A fitness challenge on Actifit.'
+      return {
+        title,
+        meta: [
+          { hid: 'description', name: 'description', content: desc },
+          { hid: 'ogtitle', name: 'og:title', property: 'og:title', content: ch ? (ch.title || ch.id) : 'The Arena' },
+          { hid: 'ogdescription', name: 'og:description', content: desc },
+          { hid: 'ogimage', name: 'og:image', property: 'og:image', content: 'https://actifit.io' + artUrl(ch) }
+        ]
+      }
+    },
+    components: {
+      NavbarBrand,
+      Footer,
+      LoginModal
+    },
+    // Fetch server-side so head() emits per-challenge title/description/og:image
+    // for crawlers and social shares, and so navigating between challenges always
+    // refetches (asyncData re-runs on route change; mounted would not). Standings
+    // are reset first so a fetch error can never leak the previous challenge's board.
+    async asyncData ({ store, params }) {
+      store.commit('setArenaStandings', null)
+      let notFound = false
+      try {
+        await store.dispatch('fetchArenaChallenge', params.id)
+      } catch (e) {
+        store.commit('setArenaChallenge', null)
+        notFound = true
+      }
+      if (!notFound) {
+        // standings are optional — absence is a normal (empty) state
+        try {
+          await store.dispatch('fetchArenaStandings', params.id)
+        } catch (e) {
+          store.commit('setArenaStandings', null)
+        }
+      }
+      return { notFound }
+    },
+    data () {
+      return {
+        notFound: false,
+        acting: false,        // a join/leave broadcast is in flight
+        actionMsg: '',        // status line under the CTA
+        localJoined: null,    // optimistic override after a join/leave (null = use server state)
+        showLoginModal: false, // in-place login modal (opened from the join CTA)
+        afitBalance: null     // off-chain AFIT balance; null = unknown/not fetched
+
+      }
+    },
+    computed: {
+      ...mapGetters(['arenaChallenge', 'arenaStandings']),
+      ...mapGetters('steemconnect', ['user']),
+      ch () {
+        return this.arenaChallenge && this.arenaChallenge.challenge
+      },
+      isLoggedIn () {
+        return !!(this.user && this.user.account && this.user.account.name)
+      },
+      myUsername () {
+        return this.isLoggedIn ? this.user.account.name : null
+      },
+      participants () {
+        return (this.arenaChallenge && Array.isArray(this.arenaChallenge.participants)) ? this.arenaChallenge.participants : []
+      },
+      // Server-observed membership: a participant row for me that isn't 'left'.
+      serverJoined () {
+        if (!this.myUsername) return false
+        return this.participants.some(p => p.entity === this.myUsername && p.state !== 'left')
+      },
+      joined () {
+        return this.localJoined === null ? this.serverJoined : this.localJoined
+      },
+      joinable () {
+        return !!(this.ch && ['open', 'active'].includes(this.ch.state))
+      },
+      cat () {
+        return catalogFor(this.ch)
+      },
+      rows () {
+        return (this.arenaStandings && Array.isArray(this.arenaStandings.rows)) ? this.arenaStandings.rows : []
+      },
+      duration () {
+        return formatDuration(this.ch && this.ch.window)
+      },
+      starts () {
+        return formatDate(this.ch && this.ch.window && this.ch.window.start)
+      },
+      ends () {
+        return formatDate(this.ch && this.ch.window && this.ch.window.end)
+      },
+      scoredBy () {
+        return scoredByLabel(this.ch)
+      },
+      // Collectible badge(s) this challenge awards its winners, from the challenge's
+      // own rewards (a friendly/badge-only challenge carries rewards.badges).
+      offeredBadges () {
+        const r = this.ch && this.ch.rewards
+        return (r && Array.isArray(r.badges)) ? r.badges.filter(b => typeof b === 'string' && b.trim()) : []
+      }
+    },
+    watch: {
+      // Same-component nav (/arena/A → /arena/B) re-runs asyncData but not data(),
+      // so clear the optimistic membership + status so B never shows A's state.
+      '$route.params.id' () {
+        this.localJoined = null
+        this.actionMsg = ''
+      }
+    },
+    async mounted () {
+      // Rehydrate the session from localStorage FIRST — this page is a primary
+      // deep-link / social-share entry point, so on a fresh load the steemconnect
+      // user isn't restored yet (other pages do this in their own mounted). Without
+      // it a logged-in visitor would see the logged-out UI. Then fetch their AFIT.
+      try { await this.$store.dispatch('steemconnect/login') } catch (e) { /* not logged in */ }
+      if (this.isLoggedIn) this.loadAfitBalance()
+    },
+    methods: {
+      artUrl,
+      humanize,
+      // Off-chain AFIT balance — the same source the create wizard funds from
+      // (token_transactions/user_tokens), NOT the retired Merit ledger. On failure
+      // we leave it null so the pill hides rather than claiming a balance of 0.
+      async loadAfitBalance () {
+        try {
+          const tokens = await this.$store.dispatch('fetchUserTokensReturn', this.myUsername)
+          this.afitBalance = Number.isFinite(Number(tokens)) ? Number(tokens) : null
+        } catch (e) {
+          this.afitBalance = null
+        }
+      },
+      // Badges a finisher actually earned, recorded on their participant result at
+      // settlement (result.reward.badges). Empty until the challenge is settled.
+      earnedBadgesFor (entity) {
+        const p = this.participants.find(x => x.entity === entity)
+        const badges = p && p.result && p.result.reward && p.result.reward.badges
+        return Array.isArray(badges) ? badges.filter(b => typeof b === 'string' && b.trim()) : []
+      },
+      // Open the shared login modal in place (no navigation), so the user lands
+      // right back on this challenge logged in — matching how the rest of the app
+      // gates login (mirrors the referrals/settings pages' Bootstrap-modal pattern).
+      openLogin () {
+        this.$nextTick(() => {
+          this.showLoginModal = true
+          if (typeof $ !== 'undefined' && $ && typeof $.fn.modal === 'function') {
+            $('#loginModal').modal('show')
+          }
+        })
+      },
+      // Fired by LoginModal on a successful login (SPA — no reload): isLoggedIn
+      // flips reactively so the CTA becomes the Join button; also pull the balance.
+      onLoggedIn () {
+        this.showLoginModal = false
+        if (this.isLoggedIn) this.loadAfitBalance()
+      },
+      // Chain-first: the client signs + broadcasts the actifit_arena op; the bot's
+      // tailer indexes it. We optimistically flip the UI and note that indexing
+      // takes a few blocks (a later visit reflects the on-chain truth).
+      arenaOp (op) {
+        return {
+          required_auths: [],
+          required_posting_auths: [this.myUsername],
+          id: 'actifit_arena',
+          json: JSON.stringify({ op, v: 1, challenge_id: this.ch.id })
+        }
+      },
+      async broadcastArenaOp (op) {
+        this.acting = true
+        this.actionMsg = ''
+        try {
+          const res = await this.$processTrxFunc('custom_json', this.arenaOp(op), false)
+          if (res && res.success) {
+            this.actionMsg = this.$t('Arena_Join_Pending')
+            return true
+          }
+          this.actionMsg = this.$t('Arena_Action_Failed')
+          return false
+        } catch (e) {
+          this.actionMsg = this.$t('Arena_Action_Failed')
+          return false
+        } finally {
+          this.acting = false
+        }
+      },
+      async joinChallenge () {
+        if (!this.isLoggedIn || this.acting) return
+        if (await this.broadcastArenaOp('join')) this.localJoined = true
+      },
+      async leaveChallenge () {
+        if (!this.isLoggedIn || this.acting) return
+        if (await this.broadcastArenaOp('leave')) this.localJoined = false
+      }
+    }
+  }
+</script>
+
+<style scoped>
+  .arena-back {
+    display: inline-block;
+    margin-bottom: 18px;
+    font-weight: 600;
+    color: #e31337;
+    text-decoration: none;
+  }
+  .arena-back:hover,
+  .arena-back:focus-visible { text-decoration: underline; }
+  .arena-back:focus-visible,
+  .arena-participate__cta:focus-visible {
+    outline: 2px solid #e31337;
+    outline-offset: 2px;
+  }
+
+  /* Hero */
+  .arena-hero {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    min-height: 260px;
+  }
+  .arena-hero__img {
+    width: 100%;
+    height: 100%;
+    max-height: 380px;
+    object-fit: cover;
+    display: block;
+  }
+  .arena-hero__overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 26px 26px 22px;
+    background: linear-gradient(to top, rgba(20, 16, 22, 0.82) 0%, rgba(20, 16, 22, 0.45) 45%, rgba(20, 16, 22, 0) 100%);
+    color: #fff;
+  }
+  .arena-hero__badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .badge-pill {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+  .badge-pill.is-type { background: #e31337; color: #fff; }
+  .badge-pill.is-recur { background: rgba(255, 255, 255, 0.92); color: #333; }
+  .badge-pill.is-state { background: rgba(255, 255, 255, 0.92); color: #444; }
+  .badge-pill.is-state.state-open { color: #1a8f4c; }
+  .arena-hero__title {
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0 0 6px;
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+  .arena-hero__tagline {
+    font-size: 1.05rem;
+    margin: 0;
+    opacity: 0.95;
+    max-width: 640px;
+  }
+
+  /* Key facts */
+  .arena-facts {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 8px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+  }
+  .arena-facts li {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    background: #faf7f8;
+    border: 1px solid #f0e6e9;
+    border-radius: 10px;
+    padding: 11px 13px;
+  }
+  .arena-facts__k {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #8a8a94;
+    font-weight: 700;
+  }
+  .arena-facts__k i { color: #e31337; margin-right: 4px; }
+  .arena-facts__v {
+    font-size: 0.98rem;
+    font-weight: 600;
+    color: #2a2f3a;
+    text-transform: capitalize;
+  }
+
+  /* Content blocks */
+  .arena-block {
+    margin-top: 28px;
+  }
+  .arena-block__h {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #1f2430;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #f3e3e7;
+  }
+  .arena-block p { color: #4a4f5a; line-height: 1.6; }
+  .arena-prizes {
+    background: #fdf1f3;
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .arena-prizes i { color: #e0a100; margin-right: 6px; }
+  .arena-fairplay {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-top: 8px;
+  }
+  .arena-fairplay i { color: #1a8f4c; margin-right: 5px; }
+
+  /* Collectible badges */
+  .arena-badge-offer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .arena-badge-offer__label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #6b7280;
+  }
+  .arena-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #8a6d00;
+    background: linear-gradient(135deg, #fff5d6, #ffe9a8);
+    border: 1px solid #f0d47a;
+    border-radius: 999px;
+    padding: 4px 11px;
+  }
+  .arena-badge i { color: #e0a100; }
+  .arena-badge--sm {
+    font-size: 0.72rem;
+    padding: 2px 8px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  /* Standings */
+  .arena-standings-wrap { overflow-x: auto; }
+  .arena-standings {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+  }
+  .arena-standings th, .arena-standings td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+  }
+  .arena-standings th {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #8a8a94;
+  }
+  .arena-standings .c-rank { width: 64px; }
+  .arena-standings .c-score { text-align: right; font-variant-numeric: tabular-nums; }
+  .arena-standings th.c-score { text-align: right; }
+  .arena-standings tr.is-top td { font-weight: 700; color: #1f2430; }
+  .arena-standings tr.is-top .c-rank { color: #e31337; }
+
+  /* Participate sidebar */
+  .arena-participate {
+    background: #fff;
+    border: 1px solid #f0e6e9;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 6px 20px rgba(227, 19, 55, 0.07);
+    position: sticky;
+    top: 90px;
+  }
+  .arena-participate__h {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #1f2430;
+    margin: 0 0 8px;
+  }
+  .arena-participate__p {
+    font-size: 0.9rem;
+    color: #5c6270;
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+  .arena-participate__cta {
+    display: block;
+    text-align: center;
+    background: #e31337;
+    color: #fff;
+    font-weight: 700;
+    padding: 12px 16px;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: background 0.16s ease;
+  }
+  .arena-participate__cta:hover { background: #c00f2d; color: #fff; text-decoration: none; }
+  .arena-participate__cta i { margin-left: 4px; }
+  /* Join button reuses the CTA look but is a real <button>. */
+  .arena-participate__btn {
+    width: 100%;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+  .arena-participate__btn:disabled { opacity: 0.6; cursor: default; }
+  .arena-participate__btn i { margin: 0 6px 0 0; }
+  .arena-participate__signup {
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #e31337;
+    text-decoration: none;
+  }
+  .arena-participate__signup:hover { text-decoration: underline; }
+  .arena-participate__joined {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    color: #1a8f4c;
+    margin: 0 0 10px;
+  }
+  .arena-participate__leave {
+    display: block;
+    width: 100%;
+    background: transparent;
+    border: 1px solid #d1d5db;
+    color: #6b7280;
+    font-weight: 600;
+    padding: 9px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 0.16s ease, color 0.16s ease;
+  }
+  .arena-participate__leave:hover { border-color: #e31337; color: #e31337; }
+  .arena-participate__leave:disabled { opacity: 0.6; cursor: default; }
+  .arena-participate__msg {
+    font-size: 0.8rem;
+    color: #4b5563;
+    margin: 12px 0 0;
+    line-height: 1.45;
+  }
+  .arena-merits {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid #eef0f3;
+  }
+  .arena-merits__label { font-size: 0.85rem; color: #6b7280; font-weight: 600; }
+  .arena-merits__value { font-size: 1.35rem; font-weight: 800; color: #111827; font-variant-numeric: tabular-nums; }
+  .arena-participate__note {
+    font-size: 0.78rem;
+    color: #6b7280;
+    margin: 14px 0 0;
+    line-height: 1.45;
+  }
+  .arena-participate__note i { color: #1a8f4c; margin-right: 5px; }
+
+  @media (max-width: 991px) {
+    .arena-participate { position: static; margin-top: 24px; }
+    .arena-hero__title { font-size: 1.6rem; }
+  }
+</style>

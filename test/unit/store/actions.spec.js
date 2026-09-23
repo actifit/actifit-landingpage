@@ -105,6 +105,90 @@ describe('store/actions', () => {
       expect(global.fetch).toHaveBeenCalledWith(API + 'moderators')
       expect(commit).toHaveBeenCalledWith('setModerators', [{ name: 'mod1' }])
     })
+
+    it('fetchFeaturedActifitter hits /featuredActifitter and commits the doc', async () => {
+      const doc = { username: 'jane', display_name: 'Jane Doe' }
+      global.fetch.mockReturnValue(jsonResponse(doc))
+      const result = await actions.fetchFeaturedActifitter({ commit })
+      expect(global.fetch).toHaveBeenCalledWith(API + 'featuredActifitter')
+      expect(commit).toHaveBeenCalledWith('setFeaturedActifitter', doc)
+      expect(result).toEqual(doc)
+    })
+
+    it('fetchFeaturedActifitter commits null and resolves (never rejects) when the fetch fails', async () => {
+      global.fetch.mockReturnValue(Promise.reject(new Error('api down')))
+      const result = await actions.fetchFeaturedActifitter({ commit })
+      expect(commit).toHaveBeenCalledWith('setFeaturedActifitter', null)
+      expect(result).toBeNull()
+    })
+
+    it('fetchArenaChallenges hits the arena endpoint with filters and commits setArenaChallenges', async () => {
+      global.fetch.mockReturnValue(jsonResponse([{ id: 'ch1' }]))
+      actions.fetchArenaChallenges({ commit }, { state: 'open' })
+      await flush()
+
+      expect(global.fetch).toHaveBeenCalledWith(API + 'arena/challenges?state=open')
+      expect(commit).toHaveBeenCalledWith('setArenaChallenges', [{ id: 'ch1' }])
+    })
+
+    it('fetchArenaChallenges omits empty/undefined filter params', async () => {
+      global.fetch.mockReturnValue(jsonResponse([]))
+      actions.fetchArenaChallenges({ commit }, { state: '', type: undefined })
+      await flush()
+
+      expect(global.fetch).toHaveBeenCalledWith(API + 'arena/challenges')
+    })
+
+    it('fetchArenaChallenges rejects (no commit) when fetch fails — page falls through to empty state', async () => {
+      global.fetch.mockReturnValue(Promise.reject(new Error('network down')))
+      await expect(actions.fetchArenaChallenges({ commit })).rejects.toThrow('network down')
+      expect(commit).not.toHaveBeenCalled()
+    })
+
+    it('fetchArenaChallenge hits the by-id endpoint and commits setArenaChallenge', async () => {
+      const payload = { challenge: { id: 'ch1' }, participants: [] }
+      global.fetch.mockReturnValue(jsonResponse(payload))
+      const result = await actions.fetchArenaChallenge({ commit }, 'ch1')
+      expect(global.fetch).toHaveBeenCalledWith(API + 'arena/challenges/ch1')
+      expect(commit).toHaveBeenCalledWith('setArenaChallenge', payload)
+      expect(result).toEqual(payload)
+    })
+
+    it('fetchArenaChallenge rejects (no commit) on a 404 so the page shows not-found', async () => {
+      global.fetch.mockReturnValue(jsonResponse({ error: 'not found' }, false, 404))
+      await expect(actions.fetchArenaChallenge({ commit }, 'nope')).rejects.toThrow(/HTTP Error: 404/)
+      expect(commit).not.toHaveBeenCalled()
+    })
+
+    it('fetchArenaStandings hits the standings endpoint with the id and commits setArenaStandings', async () => {
+      const standings = { id: 'ch1', rows: [{ entity: 'alice', rank: 1, score: 9 }] }
+      global.fetch.mockReturnValue(jsonResponse(standings))
+      await actions.fetchArenaStandings({ commit }, 'ch1')
+      await flush()
+      expect(global.fetch).toHaveBeenCalledWith(API + 'arena/standings?id=ch1')
+      expect(commit).toHaveBeenCalledWith('setArenaStandings', standings)
+    })
+
+    it('fetchArenaStandings commits null (empty board) on an empty/invalid body, without rejecting', async () => {
+      global.fetch.mockReturnValue(Promise.resolve({ ok: true, status: 200, json: () => Promise.reject(new Error('Unexpected end of JSON input')) }))
+      await expect(actions.fetchArenaStandings({ commit }, 'ch1')).resolves.toBeNull()
+      expect(commit).toHaveBeenCalledWith('setArenaStandings', null)
+    })
+
+    it('fetchArenaMerits hits the merits endpoint and commits setArenaMerits', async () => {
+      const merits = { user: 'alice', balance: 240, ledger: [] }
+      global.fetch.mockReturnValue(jsonResponse(merits))
+      await actions.fetchArenaMerits({ commit }, 'alice')
+      await flush()
+      expect(global.fetch).toHaveBeenCalledWith(API + 'arena/merits/alice')
+      expect(commit).toHaveBeenCalledWith('setArenaMerits', merits)
+    })
+
+    it('fetchArenaMerits commits null and resolves when no user is given', async () => {
+      await expect(actions.fetchArenaMerits({ commit }, null)).resolves.toBeNull()
+      expect(commit).toHaveBeenCalledWith('setArenaMerits', null)
+      expect(global.fetch).not.toHaveBeenCalled()
+    })
   })
 
   describe('fetchTopDelegators query handling', () => {

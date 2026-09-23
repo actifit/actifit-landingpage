@@ -158,6 +158,8 @@ describe('components/StingChat.vue', () => {
       widget,
       widgetSessionVersion: 0,
       isBeingDestroyed: false,
+      // chat was opened, so restartWidgetSession() rebuilds after teardown
+      widgetRequested: true,
       widgetError: '',
       $refs: { widgetContainer: container },
       $nextTick: (callback) => callback(),
@@ -319,7 +321,7 @@ describe('components/StingChat.vue', () => {
     expect(container.hidden).toBe(true)
   })
 
-  it('validates and attaches a prompted posting key without persisting it', () => {
+  it('validates and attaches a prompted posting key without persisting it', async () => {
     const postingKey = hive.auth.toWif('alice', 'posting-key-test', 'posting')
     const publicKey = hive.auth.wifToPublic(postingKey)
     const container = { hidden: true }
@@ -328,6 +330,7 @@ describe('components/StingChat.vue', () => {
       postingKeyInput: postingKey,
       postingKeyError: '',
       showPostingKeyPrompt: true,
+      widgetRequested: false,
       user: {
         account: {
           posting: { key_auths: [[publicKey, 1]] }
@@ -336,7 +339,9 @@ describe('components/StingChat.vue', () => {
       $store: store,
       $refs: { widgetContainer: container },
       $t: (key) => key,
-      $nextTick: (callback) => callback()
+      $nextTick: (callback) => callback(),
+      // submitPostingKey loads the widget on demand via ensureWidget()
+      ensureWidget: jest.fn(() => Promise.resolve())
     }
     vm.isValidPostingKey = (key) => StingChat.methods.isValidPostingKey.call(vm, key)
     vm.closePostingKeyPrompt = () => StingChat.methods.closePostingKeyPrompt.call(vm)
@@ -347,6 +352,11 @@ describe('components/StingChat.vue', () => {
     expect(localStorage.getItem('chatPostingKey')).toBeNull()
     expect(vm.postingKeyInput).toBe('')
     expect(vm.showPostingKeyPrompt).toBe(false)
+    expect(vm.ensureWidget).toHaveBeenCalledTimes(1)
+
+    // the container is revealed inside ensureWidget().then(...) — flush the microtask
+    await Promise.resolve()
+    await Promise.resolve()
     expect(container.hidden).toBe(false)
   })
 

@@ -35,9 +35,9 @@
             <i :title="$t('copy_link')" class="fas fa-copy cmt-meta-icon" v-on:click="copyContent"></i>
 
             <i v-if="translationLoading" class="fas fa-spinner fa-spin cmt-meta-icon"
-              :title="$t('translating_content', 'Translating...')"></i>
+              :title="$t('translating_content')"></i>
             <i v-else-if="!showTranslated" class="fa-solid fa-language cmt-meta-icon" v-on:click="translateContent"
-              :title="$t('translate_content', 'Translate Content')"></i>
+              :title="$t('translate_content')"></i>
             <button v-if="depth === 1" type="button" class="cmt-icon-btn"
               :title="$t('hide_comment')" @click="commentMinimized = true">
               <i class="fa-solid fa-circle-minus"></i>

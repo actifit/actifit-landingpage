@@ -38,7 +38,9 @@ describe('disable-email-obfuscation middleware', () => {
     const page = fs.readFileSync(pagePath, 'utf8')
 
     expect(page).toContain("middleware: 'disable-email-obfuscation'")
-    expect(page).toContain('href="mailto:hello@actifit.io"')
+    // the page must carry a real, un-obfuscated actifit mail link (address varies
+    // per page — privacy uses info@, terms uses hello@)
+    expect(page).toMatch(/href="mailto:[a-z0-9._%+-]+@actifit\.io"/i)
     expect(page).not.toContain('/cdn-cgi/l/email-protection')
   })
 })

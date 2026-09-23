@@ -24,6 +24,10 @@ const createStore = () => {
       rewardedActivityCount: 0, // total amount of activity posts
       leaderboard: [], // top users
       extLeaderboard: [], //top users extended
+      arenaChallenges: [], //Challenge Engine — active/open challenges (The Arena)
+      arenaChallenge: null, //Challenge Engine — single challenge (+participants) for the detail page
+      arenaStandings: null, //Challenge Engine — materialized standings for the detail page
+      arenaMerits: null, //Challenge Engine — logged-in user's Merit balance + ledger
       reports: [], // all activity reports/posts
       posts: [], // all posts
       videos: [], // all video posts
@@ -64,6 +68,7 @@ const createStore = () => {
       cartEntries: [], //contains current items being bought via market
       purchaseSuccess: false, //references latest purchase transaction using cart
       darkMode: false, //controls whether dark mode is active for this user's display
+      featuredActifitter: null, //Actifitter of the Month spotlight (Trello #110), null = hidden
     },
     getters,
     mutations,

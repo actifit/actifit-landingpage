@@ -32,16 +32,8 @@
                   </h5>
                   <a :href="buildLink" class="p-1"><span class="date-head spec-btns" :title="date">{{ $getTimeDifference(report.created) }}</span> <i class="fas fa-link spec-btns"></i></a>
                   <i :title="$t('copy_link')" class="fas fa-copy spec-btns" v-on:click="copyContent"></i>
-                  <i v-if="translationLoading" class="fas fa-spinner fa-spin spec-btns" :title="$t('translating_content', 'Translating...')"></i>
-                  <i v-else-if="!showTranslated" class="fa-solid fa-language spec-btns" v-on:click="translateContent" :title="$t('translate_content', 'Translate Content')"></i>
-                  <!-- Edit/Delete buttons for post author -->
-                  <div v-if="user && user.account.name === report.author">
-                    <span><a href="#" @click.prevent="$store.commit('setEditPost', report)" data-toggle="modal" data-target="#editPostModal" :title="$t('Edit_note')">
-                          <i class="fas fa-edit text-white"></i></a></span>
-                    <span v-if="postDeletable()"><a href="#" @click.prevent="deletePost" :title="$t('Delete_note')">
-                          <i class="fas fa-trash-alt text-white"></i><i class="fas fa-spin fa-spinner" v-if="deleting"></i></a>
-                    </span>
-                  </div>
+                  <i v-if="translationLoading" class="fas fa-spinner fa-spin spec-btns" :title="$t('translating_content')"></i>
+                  <i v-else-if="!showTranslated" class="fa-solid fa-language spec-btns" v-on:click="translateContent" :title="$t('translate_content')"></i>
                   <div class="header-post-actions">
                     <CardActions
                       :cardData="report"
@@ -49,10 +41,15 @@
                       :voteCount="getVoteCount"
                       :hasVoted="userVotedThisPost()"
                       :showReply="!!user"
+                      :showEdit="!!(user && user.account.name === report.author)"
+                      :showDelete="!!(user && user.account.name === report.author && postDeletable())"
+                      :deleting="deleting"
                       @reply="toggleCommentBox"
                       @vote-prompt="votePrompt($event)"
                       @open-modal="headToComments"
                       @reblog="$reblog(user, report)"
+                      @edit="editThisPost"
+                      @delete="deletePost"
                     />
                   </div>
                   <div class="modal-header">
@@ -254,13 +251,35 @@ export default {
     CardActions
   },
   head() {
+    const title = `${this.pageTitle} - Actifit`;
+    const description = `${this.desc} by ${this.username}`;
+    // Twitter/Facebook require an https image; normalize protocol-relative and
+    // legacy http (Steem-era) URLs, and fall back to the Actifit logo when a report
+    // carries no usable image — so a preview never emits a dropped or
+    // `content="undefined"` image.
+    let image = this.postImg || '';
+    if (image.indexOf('//') === 0) image = 'https:' + image;
+    else if (image.indexOf('http://') === 0) image = 'https://' + image.slice(7);
+    if (!/^https:\/\//i.test(image)) image = 'https://actifit.io/img/actifit_logo_med.png';
+    const url = this.canonicalUrl;
     return {
       title: `${this.pageTitle}`,
       meta: [
-        { hid: 'title', name: 'og:title', 'property': 'og:title', content: `${this.pageTitle} - Actifit` },
+        { hid: 'title', name: 'og:title', 'property': 'og:title', content: title },
         { hid: 'description', name: 'description', content: `${this.desc} by ${this.username} on Actifit — a move-to-earn fitness activity report rewarded with AFIT tokens.` },
-        { hid: 'ogdescription', name: 'og:description', 'property': 'og:description', content: `${this.desc} by ${this.username}` },
-        { hid: 'image', name: 'og:image', 'property': 'og:image', content: `${this.postImg}` }
+        { hid: 'ogdescription', name: 'og:description', 'property': 'og:description', content: description },
+        { hid: 'image', name: 'og:image', 'property': 'og:image', content: image },
+        { hid: 'url', name: 'og:url', 'property': 'og:url', content: url },
+        { hid: 'ogtype', name: 'og:type', 'property': 'og:type', content: 'article' },
+        // Twitter falls back to og:* but an explicit large-image card makes the post
+        // image render prominently instead of a small thumbnail.
+        { hid: 'twitter:card', name: 'twitter:card', content: 'summary_large_image' },
+        { hid: 'twitter:title', name: 'twitter:title', content: title },
+        { hid: 'twitter:description', name: 'twitter:description', content: description },
+        { hid: 'twitter:image', name: 'twitter:image', content: image }
+      ],
+      link: [
+        { hid: 'canonical', rel: 'canonical', href: url }
       ]
     }
   },
@@ -350,7 +369,9 @@ export default {
       return meta_spec;
     } catch (preerr) {
       console.log(preerr);
-      return '';
+      // Return an object (not '') with safe meta defaults so head() never emits
+      // "undefined …" when the post can't be loaded; pageTitle keeps its data() value.
+      return { desc: '', postImg: '' };
     }
   },
   data() {
@@ -359,7 +380,7 @@ export default {
       authorAfitBalance: null, userRank: null, afitReward: 0, fullAFITReward: '',
       tokenRewards: [], commentsLoading: true, commentBoxOpen: false, replyBody: '',
       responsePosted: false, responseBody: '', moderatorSignature: '', loading: false,
-      pageTitle: 'Actifit Report', showTranslated: false, safety_post_content: '',
+      pageTitle: 'Actifit Report', desc: '', postImg: '', showTranslated: false, safety_post_content: '',
 	    translationLoading: false, translatedText: '', reload: 0, resizeObserver: null,
       displayMorePayoutData: false, cur_bchain: 'HIVE',
       socialSharingDesc: process.env.socialSharingDesc,
@@ -391,6 +412,27 @@ export default {
     meta() {
       try { if (this.report && this.report.json_metadata) { return JSON.parse(this.report.json_metadata); } } catch (e) {}
       return {};
+    },
+    // Author handle usable at SSR (head() reads it for the OG/Twitter description).
+    // `report` is client-only, so during the server render fall back to the route
+    // param — which carries the '@author' — otherwise the description said
+    // "… by undefined" for every post.
+    username() {
+      if (this.report && this.report.author) return this.report.author;
+      const p = this.$route && this.$route.params && this.$route.params.username;
+      return p ? p.replace('@', '') : '';
+    },
+    // Canonical post URL usable at SSR. `report` is populated client-side only, so
+    // during the server render (when head() emits og:url/canonical for crawlers) it
+    // is null — fall back to the route params, which ARE present server-side.
+    canonicalUrl() {
+      if (this.report) return `https://actifit.io/@${this.report.author}/${this.report.permlink}`;
+      const p = this.$route && this.$route.params;
+      if (p && p.username && p.permlink) {
+        const author = p.username.charAt(0) === '@' ? p.username : '@' + p.username;
+        return `https://actifit.io/${author}/${p.permlink}`;
+      }
+      return 'https://actifit.io';
     },
     buildLink() { return this.report ? `/@${this.report.author}/${this.report.permlink}` : '#'; },
     buildParentLink() { return this.report && this.report.parent_author ? `/@${this.report.parent_author}/${this.report.parent_permlink}` : '#'; },
@@ -571,6 +613,10 @@ export default {
     },
     cancelTranslation() { this.report.body = this.safety_post_content; this.showTranslated = false; },
     votePrompt() { if (this.report) this.$store.commit('setPostToVote', this.report); },
+    editThisPost() {
+      this.$store.commit('setEditPost', this.report);
+      this.$nextTick(() => { try { window.$('#editPostModal').modal('show'); } catch (e) { /* jQuery/bootstrap not ready */ } });
+    },
     resetOpenComment() { this.commentBoxOpen = false; this.replyBody = ''; },
     postDeletable() {
       if (!this.report) return false;

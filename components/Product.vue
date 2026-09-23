@@ -10,15 +10,17 @@
         :title="this.product.name"
       >
         <div
-          v-if="this.product.image.startsWith('http')"
+          v-if="this.product.image && this.product.image.startsWith('http')"
           class="avatar pro-card-av"
           :style="'background-image: url(' + this.product.image + ');'"
         ></div>
         <div
-          v-else
+          v-else-if="this.product.image"
           class="avatar pro-card-av"
           :style="'background-image: url(img/gadgets/' + this.product.image + ');'"
         ></div>
+        <!-- no image: plain avatar, never url(img/gadgets/null) -->
+        <div v-else class="avatar pro-card-av"></div>
       </div>
       <a v-else :href="'/' + this.product.provider" class="product-header-media">
         <div class="avatar pro-card-av" :style="'background-image: url(' + product_prov_pic + ');'"></div>

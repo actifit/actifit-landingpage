@@ -11,7 +11,8 @@ describe('store/getters', () => {
     cartEntries: [{ _id: 1 }],
     purchaseSuccess: true,
     voteWeight: 80,
-    bchain: 'hive'
+    bchain: 'hive',
+    arenaChallenges: [{ id: 'ch1' }]
   }
 
   it('each getter returns its matching state key', () => {

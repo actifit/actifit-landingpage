@@ -53,6 +53,22 @@ export default {
   setExtendedLeaderboard (state, leaderboard) {
     state.extLeaderboard = leaderboard
   },
+  setFeaturedActifitter (state, featured) {
+    // null / non-object payloads hide the section; a valid spotlight must name a user
+    state.featuredActifitter = (featured && typeof featured === 'object' && featured.username) ? featured : null
+  },
+  setArenaChallenges (state, challenges) {
+    state.arenaChallenges = Array.isArray(challenges) ? challenges : []
+  },
+  setArenaChallenge (state, payload) {
+    state.arenaChallenge = payload || null
+  },
+  setArenaStandings (state, standings) {
+    state.arenaStandings = standings || null
+  },
+  setArenaMerits (state, merits) {
+    state.arenaMerits = merits || null
+  },
   setReports (state, reports) {
     state.reports = reports
   },
