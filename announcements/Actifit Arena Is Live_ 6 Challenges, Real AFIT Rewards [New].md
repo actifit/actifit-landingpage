@@ -8,6 +8,10 @@ POSTING METADATA (HivePulse-optimized — score before posting):
     The Actifit Arena is live: six recurring fitness challenges, AFIT rewards for verified activity, collectible badges, and a wizard to launch your own.
   Focus keyword: actifit
   Tags (3-5 content tags): actifit, hive, fitness, challenges, news
+  Screenshots (upload each, then replace the matching *_URL_HERE placeholder):
+    ARENA_DISCOVERY_URL_HERE -> announcements/arena-shot-discovery.png
+    ARENA_CHALLENGE_URL_HERE -> announcements/arena-shot-challenge.png
+    ARENA_HOME_URL_HERE      -> announcements/arena-shot-home.png
   Banner: announcements/actifit-arena-banner.jpg (1500x1000, 272 KB). Upload it via
     the Actifit editor (upload, never paste), then replace BANNER_URL_HERE below with
     the returned usermedia.actifit.io URL. Keep the descriptive alt text as-is — a
@@ -44,6 +48,8 @@ Three things are true of **every** challenge in the Arena:
 * **✅ Decided by verified activity.** Your score comes from your own verified Actifit activity reports. No voting, no luck, no chance.
 * **🚫 Never pay-to-win.** You cannot buy a better placing, and nobody wagers anything against anybody. This is a skill-and-effort competition, by design.
 
+![The Actifit Arena — six live fitness challenges with leaderboards and AFIT rewards](ARENA_DISCOVERY_URL_HERE)
+
 ---
 
 ## 🎯 The Six Launch Challenges
@@ -58,6 +64,10 @@ The Arena opens with six official contests, and they recur — so if you miss on
 * **🗓️ Monthly Live-Ops Event** — a month-long event with milestones all the way to the finish. *Recurs monthly.*
 
 Official contests are funded by Actifit and therefore reward **AFIT** — the same token you already earn, spend in the market, and can cash out. To keep emissions healthy and fair, official contest rewards are capped at **500 AFIT per person per day**.
+
+Each challenge has its own page showing the rules, the window, the reward and a live leaderboard:
+
+![A live Actifit Arena challenge page — Weekly Step League, showing rules, window, AFIT prize and standings](ARENA_CHALLENGE_URL_HERE)
 
 ---
 
@@ -99,6 +109,11 @@ The entire Arena — the discovery page, the challenge pages, the create wizard,
 ## 🚀 How To Get Started
 
 1. Open **[actifit.io/arena](https://actifit.io/arena)** (or tap **The Arena** 🏆 in the top menu).
+
+You will also find it right on the Actifit home page:
+
+![The Arena promo on the Actifit home page, linking to browse or create a challenge](ARENA_HOME_URL_HERE)
+
 2. Pick a challenge that fits how you already move, and hit **Join** — it's free.
 3. Keep posting your activity reports as usual. Your score updates automatically while the challenge runs.
 4. When the window closes, rewards and badges are settled and credited for you.
