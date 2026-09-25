@@ -1,28 +1,35 @@
-# Actifit Arena Is Live: 6 Challenges, Real AFIT Rewards [New]
+# Actifit Arena Is Live: 6 Challenges, Join or Launch [New]
 
 <!--
-POSTING METADATA (HivePulse-optimized — score before posting):
-  Title (put in the editor's TITLE field, NOT as an H1 in the body):
-    Actifit Arena Is Live: 6 Challenges, Real AFIT Rewards [New]
-  Preview description (paste into the editor's Preview Description field):
-    The Actifit Arena is live: six recurring fitness challenges, AFIT rewards for verified activity, collectible badges, and a wizard to launch your own.
-  Focus keyword: actifit
-  Tags (3-5 content tags): actifit, hive, fitness, challenges, news
-  Screenshots (upload each, then replace the matching *_URL_HERE placeholder):
-    ARENA_DISCOVERY_URL_HERE -> announcements/arena-shot-discovery.png
-    ARENA_CHALLENGE_URL_HERE -> announcements/arena-shot-challenge.png
-    ARENA_HOME_URL_HERE      -> announcements/arena-shot-home.png
-  Banner: announcements/actifit-arena-banner.jpg (1500x1000, 272 KB). Upload it via
-    the Actifit editor (upload, never paste), then replace BANNER_URL_HERE below with
-    the returned usermedia.actifit.io URL. Keep the descriptive alt text as-is — a
-    bare filename as alt scores as MISSING media.
-When posting, paste the body starting at "Hey Actifitters!" — drop BOTH the leading
-"# ..." H1 line (the frontend renders the title as the H1 already) AND this comment
-block. Scored exactly that way: SEO 99 / GEO 100 / combined 100. Leaving this comment
-in the body costs 40 GEO points, because the scorer reads it as the opening paragraph.
-POST THIS ONLY AFTER: actifit-bot + landingpage promoted to master, the arena tailer
-and jobs enabled, and the six def_* contests broadcast on-chain and visible at
-https://actifit.io/arena (otherwise the post links to an empty Arena).
+PUBLISHED 2026-09-24T11:35:21Z — this file is now the ARCHIVE of what actually
+went out, synced from the on-chain body. Earlier revisions were the draft.
+
+  URL       : https://actifit.io/hive-193552/@actifit/actifit-arena-is-live-6-challenges-join-or-launch-new
+  Author    : @actifit
+  Permlink  : actifit-arena-is-live-6-challenges-join-or-launch-new
+  Title     : Actifit Arena Is Live: 6 Challenges, Join or Launch [New]
+  Community : hive-193552 ("Actifit")
+  Tags      : hive-193552, actifit, hive, fitness, challenges, news
+  Description: The Actifit Arena is live: six recurring fitness challenges, AFIT
+               rewards for verified activity, collectible badges, and a wizard to
+               launch your own.
+  Beneficiaries: none
+
+SCORE (HivePulse, measured on the LIVE post by @author/permlink):
+  SEO 99 / GEO 100 / combined 100 — "excellent"
+  keyword 35/35 · title 12/12 · meta 10/10 · structure 11/11 · media 9/9
+  links 7/7 · tags 8/8 · readability 7/8
+  hook 40/40 · self-contained 35/35 · clear subjects 25/25
+  For reference the v1.13.0 announcement scored 99 combined.
+
+The body below is the published text verbatim, including the real
+usermedia.actifit.io image URLs. Source images live beside this file:
+  actifit-arena-banner.jpg · arena-shot-discovery.png
+  arena-shot-challenge.png · arena-shot-home.png
+
+Reusing this as a template: drop the H1 and this comment when pasting — the
+frontend renders the title as the H1, and leaving the comment in costs 40 GEO
+points because the scorer reads it as the opening paragraph.
 -->
 
 
@@ -32,7 +39,7 @@ Hey Actifitters! 💪
 
 This is one of the biggest additions to Actifit in years, because until now your daily activity earned you rewards on your own. The Arena lets you put it up against everyone else's — on a leaderboard, in a duel, or in a challenge you design yourself. 👇
 
-![Actifit Arena launch banner — fitness challenges, leaderboards and AFIT rewards](BANNER_URL_HERE)
+![Actifit Arena launch banner — fitness challenges, leaderboards and AFIT rewards](https://usermedia.actifit.io/MUFFCET52PJIHUSWD0B5OD37T61EEP)
 
 ---
 
@@ -48,7 +55,7 @@ Three things are true of **every** challenge in the Arena:
 * **✅ Decided by verified activity.** Your score comes from your own verified Actifit activity reports. No voting, no luck, no chance.
 * **🚫 Never pay-to-win.** You cannot buy a better placing, and nobody wagers anything against anybody. This is a skill-and-effort competition, by design.
 
-![The Actifit Arena — six live fitness challenges with leaderboards and AFIT rewards](ARENA_DISCOVERY_URL_HERE)
+![The Actifit Arena — six live fitness challenges with leaderboards and AFIT rewards](https://usermedia.actifit.io/MUFFD8WGBI0F934ZDCHODJ5E6MTW)
 
 ---
 
@@ -67,7 +74,7 @@ Official contests are funded by Actifit and therefore reward **AFIT** — the sa
 
 Each challenge has its own page showing the rules, the window, the reward and a live leaderboard:
 
-![A live Actifit Arena challenge page — Weekly Step League, showing rules, window, AFIT prize and standings](ARENA_CHALLENGE_URL_HERE)
+![A live Actifit Arena challenge page — Weekly Step League, showing rules, window, AFIT prize and standings](https://usermedia.actifit.io/MUFFE185MA1MBU8P4WGJVB3CECZCUP)
 
 ---
 
@@ -100,19 +107,13 @@ That means the record of who entered, who competed, and how a challenge settled 
 
 ---
 
-## 🌍 Available In All 14 Languages
-
-The entire Arena — the discovery page, the challenge pages, the create wizard, the badge labels — is translated into all **14 languages** Actifit supports, from day one. No English-only corners. 🌐
-
----
-
 ## 🚀 How To Get Started
 
 1. Open **[actifit.io/arena](https://actifit.io/arena)** (or tap **The Arena** 🏆 in the top menu).
 
 You will also find it right on the Actifit home page:
 
-![The Arena promo on the Actifit home page, linking to browse or create a challenge](ARENA_HOME_URL_HERE)
+![The Arena promo on the Actifit home page, linking to browse or create a challenge](https://usermedia.actifit.io/MUFFKI7BV22P382ZCYHYL4W9J66DVA)
 
 2. Pick a challenge that fits how you already move, and hit **Join** — it's free.
 3. Keep posting your activity reports as usual. Your score updates automatically while the challenge runs.
