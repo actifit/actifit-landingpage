@@ -101,6 +101,11 @@ module.exports = {
     steemApiNode: 'https://api.steemit.com/',
     hiveApiNode: 'https://api.hive.blog',//'https://hiveapi.actifit.io',//'https://anyx.io', 'https://hiveapi.actifit.io', //https://api.hive.blog
     blurtApiNode: 'https://rpc.blurt.blog', //'https://blurtrpc.actifit.io', //'https://blurt-rpc.saboin.com', //'http://164.68.116.86/', //'https://blurt-rpc.saboin.com/', //
+    // Off by default. The post page's SSR asyncData used to fall through to a Blurt
+    // lookup on every Hive miss, which on a crawl of nonexistent permlinks doubled
+    // our upstream RPC calls and got us 429'd by both chains at once (2026-09-28
+    // outage). Set BLURT_META_FALLBACK=true in the environment to restore it.
+    blurtMetaFallback: process.env.BLURT_META_FALLBACK === 'true',
     hiveStateApiNode: 'https://api.deathwing.me',
     hiveTestNode: 'https://testnet.openhive.network', //'https://api.fake.openhive.network',
     altHiveNodes: ["https://api.hive.blog", "https://api.deathwing.me", "https://api.openhive.network", "https://hiveapi.actifit.io", "https://hived.privex.io", "https://api.deathwing.me", "https://rpc.ausbit.dev", "https://hive-api.arcange.eu", "https://hive.roelandp.nl", "https://anyx.io",],

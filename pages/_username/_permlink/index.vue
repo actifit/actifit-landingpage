@@ -287,27 +287,45 @@ export default {
     //let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE')
     //if (cur_bchain == 'HIVE'){
     //set HIVE as default chain, since we cannot use localstorage in here
-    let chainLnk = hive;
-    await chainLnk.api.setOptions({ url: process.env.hiveApiNode });
-    /*}else{
-      await steem.api.setOptions({ url: process.env.steemApiNode });
-    }	  */
-    //console.log('connect node');
-    let user_name = params.username.replace('@', '');
-    let result = await chainLnk.api.getContentAsync(user_name, params.permlink);
+    // This runs on EVERY render of a post URL, including ones that do not exist.
+    // It only builds SEO meta tags - the post itself is fetched client-side in
+    // mounted() - so a miss here costs nothing functional: the page still renders,
+    // it just carries default meta. That is what makes the guards below safe.
+    //
+    // 2026-09-28 incident: this used to fall through to a BLURT lookup on ANY Hive
+    // miss. Actifit is a Hive app, so in practice that fired almost exclusively on
+    // URLs for posts that do not exist - which meant a crawler walking nonexistent
+    // permlinks cost TWO upstream RPC round-trips each instead of one. Under a bot
+    // flood that was enough to get us HTTP 429'd by api.hive.blog AND the Blurt node
+    // simultaneously, and because neither call was inside the try below, every
+    // rejection escaped asyncData unhandled. The SSR heap grew until V8 aborted with
+    // "Reached heap limit - JavaScript heap out of memory", crash-looping the
+    // container and taking actifit.io down repeatedly over several days.
+    //
+    // Both lookups are now individually guarded, and the Blurt fallback is OFF by
+    // default: set BLURT_META_FALLBACK=true to restore it. A missing post now returns
+    // safe default meta immediately instead of querying a second chain.
+    const user_name = params.username.replace('@', '');
+    let result = null;
+    try {
+      await hive.api.setOptions({ url: process.env.hiveApiNode });
+      result = await hive.api.getContentAsync(user_name, params.permlink);
+    } catch (hiveErr) {
+      // An upstream 429/timeout must not reject out of asyncData - that is the
+      // unhandled rejection that filled the heap.
+      console.log('asyncData: hive lookup failed - ' + (hiveErr && hiveErr.message));
+    }
+    if ((!result || !result.author) && process.env.blurtMetaFallback) {
+      try {
+        await blurt.api.setOptions({ url: process.env.blurtApiNode });
+        result = await blurt.api.getContentAsync(user_name, params.permlink);
+      } catch (blurtErr) {
+        console.log('asyncData: blurt lookup failed - ' + (blurtErr && blurtErr.message));
+      }
+    }
     if (!result || !result.author) {
-      //switch to Steem chain
-      /*chainLnk = steem
-      await chainLnk.api.setOptions({ url: process.env.steemApiNode });
-      result = await chainLnk.api.getContentAsync(user_name, params.permlink);
-      is_steem = true;
-
-      if (!result || !result.author){*/
-      //if no result, switch to Blurt
-      chainLnk = blurt;
-      await chainLnk.api.setOptions({ url: process.env.blurtApiNode });
-      result = await chainLnk.api.getContentAsync(user_name, params.permlink);
-      //}
+      // Unknown or non-existent post: default meta, zero further upstream cost.
+      return { desc: '', postImg: '' };
     }
     //console.log('pre-flight');
     //console.log(result);
