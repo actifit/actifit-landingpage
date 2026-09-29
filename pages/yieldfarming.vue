@@ -212,9 +212,12 @@
 		  }).catch(e => reject(e))
 
 		  //grab HIVE price
-		  fetch('https://api.coingecko.com/api/v3/simple/price?ids=hive&vs_currencies=usd').then(
-			res => {res.json().then(json => this.setHivePrice (json.hive.usd)).catch(e => reject(e))
-		  }).catch(e => reject(e))
+		  // See VoteModal.vue: CoinGecko now needs a key and returns HTML, leaving the
+		  // price at its default of 1. Our API reads the chain's median feed instead.
+		  fetch('/actifit-api/hivePrice').then(
+			res => {res.json().then(json => this.setHivePrice (json.hive.usd))
+			  .catch(e => console.warn('hive price parse failed', e))
+		  }).catch(e => console.warn('hive price fetch failed', e))
 
 		//fetch AFIT price
 	    fetch(process.env.actiAppUrl+'exchangeAFITPrice').then(
