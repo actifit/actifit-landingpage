@@ -99,7 +99,13 @@ module.exports = {
     steemImgUrl: 'https://steemitimages.com',
     hiveImgUrl: 'https://images.hive.blog',
     steemApiNode: 'https://api.steemit.com/',
-    hiveApiNode: 'https://api.hive.blog',//'https://hiveapi.actifit.io',//'https://anyx.io', 'https://hiveapi.actifit.io', //https://api.hive.blog
+    // Our own node, deliberately. SSR calls getContent on every post URL, and a bot
+    // crawl of nonexistent permlinks turns that into hundreds of calls a second - which
+    // api.hive.blog answers with HTTP 429, flooding the logs and starving real renders
+    // (2026-09-29 outage: "hive lookup failed - HTTP 429" repeated 62 times in 3s).
+    // hiveapi.actifit.io is ours, so it does not rate-limit us. Public nodes remain in
+    // altHiveNodes as fallback.
+    hiveApiNode: 'https://hiveapi.actifit.io',//'https://api.hive.blog',
     blurtApiNode: 'https://rpc.blurt.blog', //'https://blurtrpc.actifit.io', //'https://blurt-rpc.saboin.com', //'http://164.68.116.86/', //'https://blurt-rpc.saboin.com/', //
     // Off by default. The post page's SSR asyncData used to fall through to a Blurt
     // lookup on every Hive miss, which on a crawl of nonexistent permlinks doubled
