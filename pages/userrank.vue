@@ -94,6 +94,11 @@
 		  meta: [
 			{ hid: 'description', name: 'description', content: `Check your Actifit user rank based on activity, engagement, and fitness achievements. Climb the ranks and earn more AFIT token rewards.` },
 			{ hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Check your Actifit user rank and earn more AFIT token rewards.` },
+			// The whole page body is behind v-if="user", so a logged-out crawler sees an
+			// empty container. Indexing it can only produce a blank result; it is a
+			// signed-in utility page, not a search landing page. Also removed from
+			// static/sitemap.xml so the two signals agree (SEO audit A5/A6).
+			{ name: 'robots', content: 'noindex, nofollow' },
 			{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Actifit User Rank - Actifit.io' }
 		  ]
 		}
