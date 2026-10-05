@@ -66,21 +66,6 @@
     <changefreq>weekly</changefreq>
   </url>
   <url>
-    <loc>https://actifit.io/userrank</loc>
-    <priority>0.4</priority>
-    <changefreq>daily</changefreq>
-  </url>
-  <url>
-    <loc>https://actifit.io/blog/new</loc>
-    <priority>0.5</priority>
-    <changefreq>monthly</changefreq>
-  </url>
-  <url>
-    <loc>https://actifit.io/videos/new</loc>
-    <priority>0.5</priority>
-    <changefreq>monthly</changefreq>
-  </url>
-  <url>
     <loc>https://actifit.io/privacy-policy</loc>
     <priority>0.3</priority>
     <changefreq>yearly</changefreq>

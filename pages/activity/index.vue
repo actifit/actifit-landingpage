@@ -6,6 +6,17 @@
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-5">
       <ListHeadingSection :textualDisplay="$t('Activity_Reports')" />
+      <!-- Server-rendered page intro (SEO issue A2, 2026-09-11 audit). This route
+         populates its list client-side, so without static copy the SERVED html is
+         near-empty for anything that does not execute JavaScript - GPTBot,
+         ClaudeBot, PerplexityBot and most social link scrapers. Googlebot renders
+         JS and was never affected, which is why the audit's 'thin content' flags
+         were false positives for Google and real for AI search. -->
+      <section class="row">
+        <div class="col-12 pb-4">
+          <p class="text-muted">{{ $t('seo_intro_activity') }}</p>
+        </div>
+      </section>
 
 	  <!-- show voting counter -->
 	  <VotingStatus v-if="reports.length" />
