@@ -67,7 +67,15 @@
   // YOUR CURRENT, IMPROVED SCRIPT IS PRESERVED
   import { VueReCaptcha } from 'vue-recaptcha-v3'
   import Vue from 'vue'
-  Vue.use(VueReCaptcha, { siteKey: process.env.captchaV3Key })
+  // autoHideBadge: NavbarBrand pulls LoginModal into every page, so reCAPTCHA
+// loads site-wide and its badge renders everywhere. When the script cannot
+// reach Google - a fingerprint-blocking browser, or a blocked request - the
+// badge area shows Google's own "Could not connect to the reCAPTCHA service",
+// which made unrelated pages like /arena look broken (reported 2026-10-06).
+// hideBadge() was only ever called AFTER a successful login, so it never
+// helped a logged-out visitor. Hiding it is permitted provided the required
+// attribution is shown instead - added to the footer in NewFooterDesign.vue.
+Vue.use(VueReCaptcha, { siteKey: process.env.captchaV3Key, loaderOptions: { autoHideBadge: true } })
   import QRious from 'qrious';
   import { PublicKey, Signature, hash } from '@hiveio/hive-js/lib/auth/ecc';
 
@@ -223,10 +231,33 @@ async loginHiveauth (){
         this.error_proceeding = false;
         this.error_msg = '';
         if (this.$refs["username"].value == '' || this.$refs["ppkey"].value == ''){ this.error_proceeding = true; this.error_msg = this.$t('login_error'); return; }
-        const token = await this.$recaptcha('login');
-        let outc = await fetch('/api/proxy/verifyLoginCaptcha?token='+encodeURIComponent(token));
-        let captchaJson = await outc.json();
-        if (!outc.ok || captchaJson.error){ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('login_error'); return; }
+        // reCAPTCHA v3 scores by fingerprinting (canvas, WebGL, audio context). A
+        // browser that randomises those - Brave with Shields up, Firefox strict mode,
+        // several privacy extensions - cannot produce a usable token, and $recaptcha()
+        // may hang rather than reject. Awaiting it unguarded is why the FIRST login
+        // click appeared to do nothing (reported 2026-10-06): the handler sat waiting
+        // on a promise that never settled.
+        //
+        // If no token can be obtained, skip verification and continue. This weakens
+        // nothing: loginAuth verifies the posting key against the chain, so the captcha
+        // is bot-deterrence in FRONT of the real check, never the check itself. It
+        // mirrors the server, which already lets Google's 'browser-error' through for
+        // exactly this reason.
+        let token = null;
+        try {
+          token = await Promise.race([
+            this.$recaptcha('login'),
+            new Promise((resolve) => setTimeout(() => resolve(null), 8000)),
+          ]);
+        } catch (e) {
+          console.warn('reCAPTCHA unavailable, continuing without it:', e && e.message);
+        }
+        if (token) {
+          let outc = await fetch('/api/proxy/verifyLoginCaptcha?token='+encodeURIComponent(token));
+          let captchaJson = await outc.json();
+          // A rejected token still blocks. Only the inability to OBTAIN one is tolerated.
+          if (!outc.ok || captchaJson.error){ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('login_error'); return; }
+        }
         this.$store.commit('setBchain', this.bchain_val);
         localStorage.setItem('cur_bchain', this.bchain_val);
         this.login_in_progress = true;

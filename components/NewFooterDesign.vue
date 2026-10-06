@@ -73,6 +73,11 @@
         <div class="bottom-row">
             <div class="bottom-bar-item copyright-section">
                 © {{ currentYear }} Copyright Actifit | {{ $config.version }} | <nuxt-link to="/privacy-policy">Privacy Policy</nuxt-link> | <nuxt-link to="/terms-conditions">Terms & Conditions</nuxt-link> | <nuxt-link to="/conduct">Code of Conduct</nuxt-link>
+            <div class="bottom-bar-item recaptcha-attribution">
+                This site is protected by reCAPTCHA and the Google
+                <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a> and
+                <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer">Terms of Service</a> apply.
+            </div>
             </div>
         </div>
       </div>
