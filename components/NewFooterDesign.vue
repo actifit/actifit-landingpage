@@ -75,6 +75,15 @@
                 © {{ currentYear }} Copyright Actifit | {{ $config.version }} | <nuxt-link to="/privacy-policy">Privacy Policy</nuxt-link> | <nuxt-link to="/terms-conditions">Terms & Conditions</nuxt-link> | <nuxt-link to="/conduct">Code of Conduct</nuxt-link>
             </div>
         </div>
+        <!-- Required by Google if the reCAPTCHA badge is hidden, which it is
+             (autoHideBadge). Must stay as long as reCAPTCHA loads on the site. -->
+        <div class="bottom-row">
+            <div class="bottom-bar-item recaptcha-attribution">
+                This site is protected by reCAPTCHA and the Google
+                <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a> and
+                <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer">Terms of Service</a> apply.
+            </div>
+        </div>
       </div>
     </div>
   </footer>
@@ -162,6 +171,14 @@ export default {
 .copyright-section a { color: #666; text-decoration: underline; }
 .bottom-bar-item a:hover { color: #ff112d; }
 
+/* Google's required reCAPTCHA attribution. display:block overrides the flex from
+   .bottom-bar-item on purpose - this item is a SENTENCE with inline links, and under
+   flex each <a> is blockified into its own flex item on a row that cannot wrap, which
+   breaks the sentence apart. Block flow lets it wrap as prose. Kept visually quiet:
+   it is a legal footnote, not navigation, so it should not out-weigh the real links. */
+.recaptcha-attribution { display: block; font-size: 12px; color: #888; max-width: 520px; line-height: 1.5; }
+.recaptcha-attribution a { color: #888; font-weight: 400; text-decoration: underline; }
+
 /* --- DARK MODE STYLES --- */
 .dark-mode .new-footer-container { background-color: #1a1a1a; color: #e0e0e0; }
 .dark-mode .new-footer-container::before {
@@ -178,6 +195,8 @@ export default {
 .dark-mode .footer-bottom-bar { color: #999; }
 .dark-mode .bottom-bar-item a { color: #e0e0e0; }
 .dark-mode .copyright-section a { color: #999; }
+.dark-mode .recaptcha-attribution,
+.dark-mode .recaptcha-attribution a { color: #777; }
 .dark-mode .links-column a:hover,
 .dark-mode .bottom-bar-item a:hover {
   color: #ff112d;

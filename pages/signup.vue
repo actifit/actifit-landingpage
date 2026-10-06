@@ -374,7 +374,19 @@ import { VueReCaptcha } from 'vue-recaptcha-v3'
 import { mapGetters } from 'vuex'
 import Vue from 'vue'
 
-Vue.use(VueReCaptcha, { siteKey: process.env.captchaV3Key })
+// autoHideBadge: NavbarBrand pulls LoginModal into every page, so reCAPTCHA
+// loads site-wide and its badge renders everywhere. When the script cannot
+// reach Google - a fingerprint-blocking browser, or a blocked request - the
+// badge area shows Google's own "Could not connect to the reCAPTCHA service",
+// which made unrelated pages like /arena look broken (reported 2026-10-06).
+// Hiding the badge is permitted provided the required attribution is shown
+// instead - added to the footer in NewFooterDesign.vue. Full rationale is in
+// components/LoginModal.vue, which registers the same plugin.
+//
+// This must be set here AS WELL as in LoginModal: Vue.use dedupes by plugin
+// identity, so whichever module evaluates first wins and the other call is a
+// no-op. Setting only one would make the behaviour load-order dependent.
+Vue.use(VueReCaptcha, { siteKey: process.env.captchaV3Key, loaderOptions: { autoHideBadge: true } })
 
 export default {
   head() {
