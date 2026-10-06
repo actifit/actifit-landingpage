@@ -38,6 +38,11 @@ module.exports = {
   },
 
   serverMiddleware: [
+    // Runs BEFORE the Nuxt renderer, so the Cache-Control it sets survives onto
+    // the rendered HTML response. Order matters: it must precede the proxy entry
+    // only in the sense that both are registered here; it no-ops on /api/proxy
+    // and the other proxy prefixes via its own NEVER list.
+    '~/api/cache-headers.js',
     { path: '/api/proxy', handler: '~/api/proxy.js' }
   ],
 
