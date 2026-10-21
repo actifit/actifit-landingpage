@@ -153,6 +153,7 @@ module.exports = {
   switch_user: 'उपयोगकर्ता बदलें',
   keep_loggedin: 'मुझे लॉग इन रखें',
   forgot_my_posting_key: 'मेरी पोस्टिंग कुंजी भूल गए?',
+  posting_key_login_disabled: 'सुरक्षा एहतियात के तौर पर पोस्टिंग की से लॉगिन अस्थायी रूप से बंद है। कृपया इसके बजाय Hive Keychain या HiveAuth से साइन इन करें।',
   auto_translated_content: 'स्व-अनुवादित सामग्री।',
   click_to_view_original: 'मूल देखने के लिए क्लिक करें',
   profile_image_disclaimer: 'कृपया ध्यान दें कि प्रोफ़ाइल छवि परिवर्तन 24 घंटों के बाद तक प्रतिबिंबित नहीं हो सकता है।',

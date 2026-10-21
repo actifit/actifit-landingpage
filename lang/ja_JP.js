@@ -153,6 +153,7 @@ module.exports = {
   switch_user: 'ユーザー切り替え',
   keep_loggedin: 'ログイン状態を維持',
   forgot_my_posting_key: '投稿キーを忘れましたか？',
+  posting_key_login_disabled: 'セキュリティ上の予防措置として、ポスティングキーによるログインを一時的に無効にしています。Hive Keychain または HiveAuth でログインしてください。',
   auto_translated_content: '自動翻訳されたコンテンツ',
   click_to_view_original: 'オリジナルを表示するにはクリック',
   profile_image_disclaimer: 'プロフィール画像の変更が反映されるまで最大24時間かかる場合がありますので、ご了承ください。',

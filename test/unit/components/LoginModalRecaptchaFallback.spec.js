@@ -19,6 +19,13 @@
 import LoginModal from '@/components/LoginModal.vue'
 
 const makeVm = (overrides = {}) => ({
+  // These tests are about the reCAPTCHA fallback, not the posting-key kill switch, so
+  // the switch is ON here - otherwise proceedLogin short-circuits and the captcha logic
+  // below is never reached, which would silently gut this suite rather than fail it.
+  // Keeping the coverage alive also means it still guards the behaviour if posting-key
+  // login is ever re-enabled. The switch's own behaviour is covered separately at the
+  // bottom of this file.
+  posting_key_login_enabled: true,
   is_logged_in: false,
   error_proceeding: false,
   error_msg: '',
@@ -227,6 +234,42 @@ describe('components/LoginModal.vue reCAPTCHA-unavailable fallback', () => {
 
       expect(fetchMock).not.toHaveBeenCalled()
       expect(vm.error_proceeding).toBe(true)
+    })
+  })
+
+  describe('posting-key login kill switch', () => {
+    // Added 2026-10-21 when posting-key login was disabled as a precaution after a
+    // report of Hive-Engine transfers on accounts that did not authorise them.
+    // proceedLogin is the ONLY place the raw key would be put on the wire, so the
+    // guard belongs in the method, not just in the template.
+    it('refuses to POST anything when the switch is off', async () => {
+      const fetchSpy = jest.fn()
+      global.fetch = fetchSpy
+      const vm = makeVm({ posting_key_login_enabled: false })
+
+      await LoginModal.methods.proceedLogin.call(vm)
+
+      // The assertion that matters: no request at all. Checking only the error message
+      // would pass against an implementation that showed the message AND still sent
+      // the key.
+      expect(fetchSpy).not.toHaveBeenCalled()
+      expect(vm.error_proceeding).toBe(true)
+      expect(vm.login_in_progress).toBe(false)
+      expect(vm.error_msg).toBe('posting_key_login_disabled')
+    })
+
+    it('does not depend on the ppkey ref existing', async () => {
+      // With the switch off the input is not rendered, so $refs.ppkey is undefined.
+      // An unguarded dereference here would throw instead of refusing cleanly.
+      const fetchSpy = jest.fn()
+      global.fetch = fetchSpy
+      const vm = makeVm({
+        posting_key_login_enabled: false,
+        $refs: { username: { value: 'alice' } }
+      })
+
+      await expect(LoginModal.methods.proceedLogin.call(vm)).resolves.toBeUndefined()
+      expect(fetchSpy).not.toHaveBeenCalled()
     })
   })
 })
