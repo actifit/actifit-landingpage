@@ -27,17 +27,23 @@
 					</div>
 				</transition>
 
-				<div class="row col-12">
-					<input type="password" id="ppkey" name="ppkey" ref="ppkey" :placeholder="$t('Ppkey')"  class="form-control form-control-lg m-1 col-md-8 acti-shadow">
-				</div>
+				<!-- Posting-key login gated by posting_key_login_enabled - see data(). -->
+				<template v-if="posting_key_login_enabled">
+					<div class="row col-12">
+						<input type="password" id="ppkey" name="ppkey" ref="ppkey" :placeholder="$t('Ppkey')"  class="form-control form-control-lg m-1 col-md-8 acti-shadow">
+					</div>
 
-				<div class="row col-12">
-					<button v-on:click="proceedLogin" class="btn btn-brand login-stdd-btn m-1"><b>{{ $t('Login') }}</b><i class="fas fa-spin fa-spinner text-white" v-if="login_in_progress"></i></button>
-				</div>
+					<div class="row col-12">
+						<button v-on:click="proceedLogin" class="btn btn-brand login-stdd-btn m-1"><b>{{ $t('Login') }}</b><i class="fas fa-spin fa-spinner text-white" v-if="login_in_progress"></i></button>
+					</div>
 
-				<span class="row form-control-lg ml-0">
-					<a href="/password" class="small">Forgot my posting key?</a>
-				</span>
+					<span class="row form-control-lg ml-0">
+						<a href="/password" class="small">Forgot my posting key?</a>
+					</span>
+				</template>
+				<div v-else class="row col-12 form-control-lg ml-0" role="status">
+					<div class="small">{{ $t('posting_key_login_disabled') }}</div>
+				</div>
 				<span class="row mb-1 form-control-lg " style="display: none">
 				  <div class="bchain-option p-1 m-1 btn" :class="adjustHiveClass">
 					<input type="radio" id="hive_bchain" value="HIVE" v-model="bchain_val">
@@ -124,6 +130,12 @@
     },
 	data () {
       return {
+		// POSTING-KEY LOGIN KILL SWITCH - disabled 2026-10-21. Must stay in step with
+		// the same flag in components/LoginModal.vue; this page is a SECOND entry point
+		// that POSTs the raw key to /api/proxy/loginAuth, so disabling only the modal
+		// would have left this one wide open. Keychain/HiveAuth sign locally and are
+		// unaffected. See LoginModal.vue's data() for the full rationale.
+		posting_key_login_enabled: false,
 		resultReturned: false,
 		username_exists: '',
 		username_invalid: '',
@@ -548,7 +560,16 @@
 			return;
 		}*/
 
-		if (this.$refs["username"].value == '' || this.$refs["ppkey"].value == ''){
+		// Hiding the input is not the control - this is. proceedLogin stays reachable
+		// from a cached bundle or devtools, and would POST a plaintext posting key.
+		if (!this.posting_key_login_enabled){
+			this.error_proceeding = true;
+			this.login_in_progress = false;
+			this.error_msg = this.$t('posting_key_login_disabled');
+			return;
+		}
+
+		if (!this.$refs["username"] || !this.$refs["ppkey"] || this.$refs["username"].value == '' || this.$refs["ppkey"].value == ''){
 			this.error_proceeding = true;
 			this.error_msg = this.$t('login_error');
 			return;
