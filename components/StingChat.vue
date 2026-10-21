@@ -58,6 +58,10 @@ import hive from '@hiveio/hive-js'
 import { PrivateKey, cryptoUtils } from '@hiveio/dhive'
 
 const WIDGET_SCRIPT_URL = 'https://chat.peakd.com/stwidget.js'
+
+// See the kill-switch comment in toggleWidget(). Re-enable only once the key is no
+// longer handed to an unpinned third-party script with a third-party-owned allowlist.
+const POSTING_KEY_CHAT_ENABLED = false
 let widgetScriptPromise = null
 
 export default {
@@ -506,7 +510,27 @@ export default {
     toggleWidget () {
       const username = this.user && this.user.account && this.user.account.name
       const loginMethod = localStorage.getItem('acti_login_method') || 'posting-key'
+      // POSTING-KEY KILL SWITCH (2026-10-21). This prompt is the second place in the UI
+      // that asks for a raw posting key, and it is the more dangerous of the two.
+      //
+      // "It only signs locally" is NOT a mitigation here. configurePostingKeyPassthrough
+      // hands the key to StWidget, loaded unpinned and without SRI from
+      // https://chat.peakd.com/stwidget.js, and then gates broadcasts on
+      // widget.allowedCustomJson / widget.isAllowedOperation - allowlists owned by THAT
+      // script, with the custom_json id and payload both supplied by its iframe. If that
+      // allowlist ever includes ssc-mainnet-hive, it can have the browser sign arbitrary
+      // Hive-Engine token transfers with the user's key: posting-authority custom_json on
+      // an account whose owner did not initiate it, which is exactly the reported symptom.
+      //
+      // Note the default: `|| 'posting-key'` means EVERY session that did not record a
+      // method - all pre-existing posting-key logins (which write '') and HiveSigner
+      // logins via pages/auth.vue - lands here. Chat still works for Keychain/HiveAuth
+      // sessions, which never take this branch.
       if (username && loginMethod === 'posting-key' && !this.chatPostingKey) {
+        if (!POSTING_KEY_CHAT_ENABLED) {
+          this.widgetError = this.$t('posting_key_login_disabled')
+          return
+        }
         this.openPostingKeyPrompt()
         return
       }

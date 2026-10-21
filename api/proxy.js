@@ -1,4 +1,10 @@
-const axios = require('axios');
+const axios = require('axios');
+
+// Server-side half of the posting-key login kill switch (disabled 2026-10-21).
+// Must stay in step with posting_key_login_enabled in components/LoginModal.vue and
+// pages/login.vue. This one is the enforcement point; those two are the UI.
+const POSTING_KEY_LOGIN_ENABLED = false;
+
 const url = require('url');
 
 const VALID_USER_RE = /^[a-z][a-z0-9.-]{2,15}$/;
@@ -254,6 +260,21 @@ module.exports = async function (req, res, next) {
     }
 
     // 6. Login proxies
+    //
+    // POSTING-KEY LOGIN KILL SWITCH, server side. Disabling the UI in LoginModal.vue and
+    // pages/login.vue is NOT the control: this endpoint is reachable by curl, by a phishing
+    // page on any origin, by a browser tab still running the pre-deploy bundle, and by the
+    // Actifit mobile app. Until this returns 410, the raw posting key still crosses our
+    // server exactly as before and the client-side switch is cosmetic.
+    //
+    // /loginKeychain and /loginKeychainVerify stay open: they carry a signature, never a key.
+    if (path === '/loginAuth' && !POSTING_KEY_LOGIN_ENABLED) {
+      res.statusCode = 410;
+      return res.end(JSON.stringify({
+        error: 'Posting key login is temporarily disabled as a security precaution. Please sign in with Hive Keychain or HiveAuth instead.'
+      }));
+    }
+
     const loginPostEndpoints = ['/loginAuth', '/loginKeychain', '/loginKeychainVerify'];
     if (loginPostEndpoints.includes(path)) {
       if (req.method !== 'POST') {

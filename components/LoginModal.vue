@@ -36,6 +36,11 @@
                 </template>
                 <div v-else class="form-control-lg ml-0 mt-2 text-center" role="status">
                   <div class="small">{{ $t('posting_key_login_disabled') }}</div>
+                  <!-- Kept visible on purpose: this notice tells users their key may need
+                       changing, and /password is the only place to change it. It used to
+                       live inside the gated block, which hid it from exactly the people
+                       who now need it most. -->
+                  <a href="/password" class="small">{{ $t('forgot_my_posting_key') }}</a>
                 </div>
                 <span class="mb-1 form-control-lg " style="display: none">
                   <div class="bchain-option p-1 m-1 btn" :class="adjustHiveClass">

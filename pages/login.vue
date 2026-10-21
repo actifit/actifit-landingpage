@@ -43,6 +43,9 @@
 				</template>
 				<div v-else class="row col-12 form-control-lg ml-0" role="status">
 					<div class="small">{{ $t('posting_key_login_disabled') }}</div>
+					<!-- See the matching note in components/LoginModal.vue: the key-rotation
+					     link must stay reachable while posting-key login is disabled. -->
+					<a href="/password" class="small">{{ $t('forgot_my_posting_key') }}</a>
 				</div>
 				<span class="row mb-1 form-control-lg " style="display: none">
 				  <div class="bchain-option p-1 m-1 btn" :class="adjustHiveClass">
