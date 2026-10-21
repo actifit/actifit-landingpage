@@ -1,4 +1,5 @@
-const axios = require('axios');
+const axios = require('axios');
+
 
 // Server-side half of the posting-key login kill switch (disabled 2026-10-21).
 // Must stay in step with posting_key_login_enabled in components/LoginModal.vue and

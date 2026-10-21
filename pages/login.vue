@@ -98,7 +98,11 @@
   //import {keychain, isKeychainInstalled, hasKeychainBeenUsed} from '@hiveio/keychain'
 
   import Vue from 'vue'
-  Vue.use(VueReCaptcha, { siteKey: process.env.captchaV3Key })
+  // autoHideBadge is what now hides the badge, replacing the manual hideBadge() calls
+  // removed from the two success handlers below. It must be set on EVERY registration -
+  // Vue.use dedupes by plugin identity, so whichever module evaluates first wins. The
+  // other two are components/LoginModal.vue and pages/signup.vue; this one was missed.
+  Vue.use(VueReCaptcha, { siteKey: process.env.captchaV3Key, loaderOptions: { autoHideBadge: true } })
 
   //QR display for hive auth
   import QRious from 'qrious';
@@ -240,15 +244,22 @@
 	  setKeychainLoginStatus (json){
 		console.log('keychain login');
 		console.log(json);
-		if (json && json.success && json.token && json.HIVE){
+		// json.userdata, NOT json.HIVE. This handler is fed the /loginKeychainVerify
+		// response, which carries `userdata`; /getAccountData (which returns {HIVE:{...}})
+		// stopped being the source in 009ce64. components/LoginModal.vue was updated then
+		// and this page was not, so Keychain login HERE has failed for every user since.
+		// The posting-key field masked it; removing that field is what exposes it.
+		if (json && json.success && json.token && json.userdata){
 
-			//hide captcha as well
-			const recaptcha = this.$recaptchaInstance
+			// The manual $recaptchaInstance.hideBadge() that used to sit here has been
+			// REMOVED, exactly as LoginModal.vue did. The plugin assigns
+			// $recaptchaInstance only inside the loader's .then(), so when reCAPTCHA is
+			// blocked (Brave Shields, uBlock, corporate DNS) it stays undefined and this
+			// threw - above every localStorage write and the redirect. The user was
+			// authenticated upstream and still got a generic error with no session.
+			// The badge is hidden declaratively via loaderOptions.autoHideBadge instead.
 
-			// Hide reCAPTCHA badge:
-			recaptcha.hideBadge();
-
-			let acct_data = json.HIVE;
+			let acct_data = json.userdata;
 
 			let userSC = new Object();
 			userSC.account = acct_data;
@@ -411,11 +422,10 @@
 				this.hiveauth_expire = expire;
 				this.hiveauth_token = token;
 				if (success){
-					//hide captcha as well
-					const recaptcha = this.$recaptchaInstance
-
-					// Hide reCAPTCHA badge:
-					recaptcha.hideBadge();
+					// hideBadge() removed here too - see setKeychainLoginStatus. The throw
+					// was swallowed by this chain's trailing .catch, so HiveAuth also died
+					// with a generic error on reCAPTCHA-blocked browsers. With posting-key
+					// login disabled, that left this page with NO working login method.
 					this.login_in_progress = false;
 
 					try {

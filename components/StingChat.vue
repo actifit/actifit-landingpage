@@ -256,8 +256,14 @@ export default {
         '--appMessageFontFamily': "'New Heterodox Mono', monospace",
         '--appMessageFontSize': '16px'
       })
-
-      if (username && localPostingKey && postingKeyMatchesUser) {
+
+      // POSTING_KEY_CHAT_ENABLED here is belt-and-braces: this handoff is unreachable
+
+      // today only because no setter remains. Re-enabling setUserLoginStatus's commit,
+
+      // or adding store persistence, would silently reopen it.
+
+      if (POSTING_KEY_CHAT_ENABLED && username && localPostingKey && postingKeyMatchesUser) {
         this.configurePostingKey(username, localPostingKey)
       } else if (username && loginMethod === 'keychain' && hasKeychain) {
         // Keep Sting on its Keychain login path. Direct-message requests contain
@@ -274,7 +280,12 @@ export default {
         this.widget.enableKeychainPassthrough = false
         this.widget.enablePeakVaultPassthrough = false
         if (loginMethod === 'posting-key') {
-          this.widgetError = this.$t('sting_chat_key_required')
+          // While the kill switch is off, "enter your posting key" is the WRONG remedy -
+          // we will not accept one. Point users at the action that actually restores
+          // chat: signing in again with Keychain or HiveAuth.
+          this.widgetError = POSTING_KEY_CHAT_ENABLED
+            ? this.$t('sting_chat_key_required')
+            : this.$t('posting_key_login_disabled')
         }
       }
 
