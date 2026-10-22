@@ -529,6 +529,11 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
         );
         sanitized_html = sanitizeHtml(html_content, {
             allowedTags: sanitizeOptions.ALLOWED_TAGS,
+            // data-external-href feeds SafeRemarkable's window.open(). sanitize-html only
+            // scheme-checks href/src/cite by default, so without this an author-supplied
+            // javascript: value passes through the SSR branch byte-for-byte. DOMPurify
+            // already URI-checks it on the client; this makes the two branches agree.
+            allowedSchemesAppliedToAttributes: ['href', 'src', 'cite', 'data-external-href'],
             allowedAttributes: {
                 '*': sanitizeOptions.ALLOWED_ATTR
             },

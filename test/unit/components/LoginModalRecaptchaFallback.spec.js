@@ -19,6 +19,13 @@
 import LoginModal from '@/components/LoginModal.vue'
 
 const makeVm = (overrides = {}) => ({
+  // These tests are about the reCAPTCHA fallback, not the posting-key kill switch, so
+  // the switch is ON here - otherwise proceedLogin short-circuits and the captcha logic
+  // below is never reached, which would silently gut this suite rather than fail it.
+  // Keeping the coverage alive also means it still guards the behaviour if posting-key
+  // login is ever re-enabled. The switch's own behaviour is covered separately at the
+  // bottom of this file.
+  posting_key_login_enabled: true,
   is_logged_in: false,
   error_proceeding: false,
   error_msg: '',
@@ -227,6 +234,97 @@ describe('components/LoginModal.vue reCAPTCHA-unavailable fallback', () => {
 
       expect(fetchMock).not.toHaveBeenCalled()
       expect(vm.error_proceeding).toBe(true)
+    })
+  })
+
+  describe('the shipped flag value', () => {
+    // Without these, flipping the flag back to true in either file leaves the whole
+    // suite green - i.e. the control could be silently removed. The flag is hand
+    // duplicated across two components and the proxy, so drift is the likely regression.
+    it('posting-key login is DISABLED in the login modal as shipped', () => {
+      expect(LoginModal.data().posting_key_login_enabled).toBe(false)
+    })
+
+    it('posting-key login is DISABLED on the standalone /login page as shipped', () => {
+      // eslint-disable-next-line global-require
+      const LoginPage = require('@/pages/login.vue').default
+      expect(LoginPage.data().posting_key_login_enabled).toBe(false)
+    })
+
+    it('the proxy refuses /loginAuth too - the UI is not the control', () => {
+      // The enforcement point. curl, the mobile app and a stale bundle all bypass the
+      // components entirely and hit this endpoint directly.
+      const src = require('fs').readFileSync(
+        require('path').join(__dirname, '..', '..', '..', 'api', 'proxy.js'), 'utf8')
+      expect(src).toMatch(/const POSTING_KEY_LOGIN_ENABLED = false/)
+      expect(src).toMatch(/path === '\/loginAuth' && !POSTING_KEY_LOGIN_ENABLED/)
+    })
+  })
+
+  describe('resetForm with the ppkey input unrendered', () => {
+    // The guard this covers is the fix's entire answer to "does Keychain still work?",
+    // and it had ZERO coverage: every test stubbed resetForm with jest.fn(), so deleting
+    // the guard left the suite green. In production the throw lands inside
+    // setKeychainLoginStatus AFTER closeModal() and the localStorage writes but BEFORE
+    // refreshUser/fetchModerators/$emit - modal shuts, token stored, navbar never
+    // updates. Exactly the failure mode this file's header was written about.
+    it('does not throw when $refs.ppkey is absent', () => {
+      expect(() => LoginModal.methods.resetForm.call({
+        $refs: { username: { value: 'alice' } }
+      })).not.toThrow()
+    })
+
+    it('a Keychain login runs the REAL resetForm and still completes', () => {
+      const vm = makeVm({
+        posting_key_login_enabled: false,
+        $refs: { username: { value: 'alice' } },
+        resetForm: LoginModal.methods.resetForm
+      })
+
+      LoginModal.methods.setKeychainLoginStatus.call(vm, {
+        success: true, token: 'tok', userdata: { name: 'alice' }
+      })
+
+      // These three run AFTER resetForm, so they are what a throw would swallow.
+      expect(vm.$emit).toHaveBeenCalledWith('login-successful')
+      expect(vm.$store.dispatch).toHaveBeenCalledWith('steemconnect/refreshUser')
+      expect(vm.$store.dispatch).toHaveBeenCalledWith('fetchModerators')
+    })
+  })
+
+  describe('posting-key login kill switch', () => {
+    // Added 2026-10-21 when posting-key login was disabled as a precaution after a
+    // report of Hive-Engine transfers on accounts that did not authorise them.
+    // proceedLogin is the ONLY place the raw key would be put on the wire, so the
+    // guard belongs in the method, not just in the template.
+    it('refuses to POST anything when the switch is off', async () => {
+      const fetchSpy = jest.fn()
+      global.fetch = fetchSpy
+      const vm = makeVm({ posting_key_login_enabled: false })
+
+      await LoginModal.methods.proceedLogin.call(vm)
+
+      // The assertion that matters: no request at all. Checking only the error message
+      // would pass against an implementation that showed the message AND still sent
+      // the key.
+      expect(fetchSpy).not.toHaveBeenCalled()
+      expect(vm.error_proceeding).toBe(true)
+      expect(vm.login_in_progress).toBe(false)
+      expect(vm.error_msg).toBe('posting_key_login_disabled')
+    })
+
+    it('does not depend on the ppkey ref existing', async () => {
+      // With the switch off the input is not rendered, so $refs.ppkey is undefined.
+      // An unguarded dereference here would throw instead of refusing cleanly.
+      const fetchSpy = jest.fn()
+      global.fetch = fetchSpy
+      const vm = makeVm({
+        posting_key_login_enabled: false,
+        $refs: { username: { value: 'alice' } }
+      })
+
+      await expect(LoginModal.methods.proceedLogin.call(vm)).resolves.toBeUndefined()
+      expect(fetchSpy).not.toHaveBeenCalled()
     })
   })
 })

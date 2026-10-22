@@ -25,9 +25,21 @@
                     </a>
                   </div>
                 </transition>
-                <input type="password" id="ppkey" name="ppkey" autocomplete="current-password" ref="ppkey" :placeholder="$t('Ppkey')"  class="form-control form-control-lg m-1 col-md-8 acti-shadow">
-                <button v-on:click="proceedLogin" class="btn btn-brand login-stdd-btn m-1"><b>{{ $t('Login') }}</b><i class="fas fa-spin fa-spinner text-white" v-if="login_in_progress"></i></button>
-                <div class="form-control-lg ml-0 mt-2">
+                <!-- Posting-key login is gated by posting_key_login_enabled. Read the
+                     comment on that flag in data() before re-enabling it. -->
+                <template v-if="posting_key_login_enabled">
+                  <input type="password" id="ppkey" name="ppkey" autocomplete="current-password" ref="ppkey" :placeholder="$t('Ppkey')"  class="form-control form-control-lg m-1 col-md-8 acti-shadow">
+                  <button v-on:click="proceedLogin" class="btn btn-brand login-stdd-btn m-1"><b>{{ $t('Login') }}</b><i class="fas fa-spin fa-spinner text-white" v-if="login_in_progress"></i></button>
+                  <div class="form-control-lg ml-0 mt-2">
+                    <a href="/password" class="small">{{ $t('forgot_my_posting_key') }}</a>
+                  </div>
+                </template>
+                <div v-else class="form-control-lg ml-0 mt-2 text-center" role="status">
+                  <div class="small">{{ $t('posting_key_login_disabled') }}</div>
+                  <!-- Kept visible on purpose: this notice tells users their key may need
+                       changing, and /password is the only place to change it. It used to
+                       live inside the gated block, which hid it from exactly the people
+                       who now need it most. -->
                   <a href="/password" class="small">{{ $t('forgot_my_posting_key') }}</a>
                 </div>
                 <span class="mb-1 form-control-lg " style="display: none">
@@ -100,6 +112,26 @@
     },
     data () {
       return {
+        // ---------------------------------------------------------------------------
+        // POSTING-KEY LOGIN KILL SWITCH - disabled 2026-10-21 as a precaution after a
+        // report of Hive-Engine token transfers (custom_json, which needs only POSTING
+        // authority) appearing on accounts whose owners say they did not initiate them.
+        //
+        // Why this login method is the one worth switching off first: it is the only
+        // path where actifit servers see a user's RAW posting key. proceedLogin POSTs
+        // { username, ppkey, ... } to /api/proxy/loginAuth, which forwards it to
+        // api.actifit.io. Keychain and HiveAuth never transmit the key - they sign
+        // locally and send only a signature - so they stay enabled and are unaffected.
+        //
+        // This is a precaution, NOT a diagnosis: the source of those transfers had not
+        // been established when this was set. It also does not help anyone whose key is
+        // already out - a leaked posting key stays valid until the user CHANGES it.
+        //
+        // To re-enable: set this back to true. Before doing so, confirm where the
+        // transfers actually came from, and note that setUserLoginStatus() also commits
+        // the key into the Vuex store via setChatPostingKey.
+        // ---------------------------------------------------------------------------
+        posting_key_login_enabled: false,
         originalTitle: document.title,
         resultReturned: false,
         username_exists: '',
@@ -152,7 +184,12 @@
     methods: {
       // All your current methods are preserved...
       resetForm() {
-        this.$refs.username.value = ''; this.$refs.ppkey.value = ''; this.login_in_progress = false; this.error_proceeding = false; this.error_msg = ''; this.hiveauth_wait = false;
+        if (this.$refs.username) { this.$refs.username.value = ''; }
+        // Guarded: with posting-key login disabled the ppkey input is not rendered, so
+        // this.$refs.ppkey is undefined. An unguarded dereference throws inside
+        // resetForm, which runs on EVERY successful login - Keychain and HiveAuth
+        // included - and would dead-end the very paths this change exists to preserve.
+        if (this.$refs.ppkey) { this.$refs.ppkey.value = ''; } this.login_in_progress = false; this.error_proceeding = false; this.error_msg = ''; this.hiveauth_wait = false;
       },
       closeModal() {
         $(this.$refs.loginModal).modal('hide'); document.title = this.originalTitle;
@@ -239,7 +276,16 @@ async loginHiveauth (){
         this.captcha_invalid = '';
         this.error_proceeding = false;
         this.error_msg = '';
-        if (this.$refs["username"].value == '' || this.$refs["ppkey"].value == ''){ this.error_proceeding = true; this.error_msg = this.$t('login_error'); return; }
+        // Hiding the input is not the control - this is. A cached bundle, a devtools
+        // call, or anything holding a reference to this component can still invoke
+        // proceedLogin, and it would POST a plaintext posting key to /loginAuth.
+        if (!this.posting_key_login_enabled){
+          this.error_proceeding = true;
+          this.login_in_progress = false;
+          this.error_msg = this.$t('posting_key_login_disabled');
+          return;
+        }
+        if (!this.$refs["username"] || !this.$refs["ppkey"] || this.$refs["username"].value == '' || this.$refs["ppkey"].value == ''){ this.error_proceeding = true; this.error_msg = this.$t('login_error'); return; }
         // reCAPTCHA v3 scores by fingerprinting (canvas, WebGL, audio context). A
         // browser that randomises those - Brave with Shields up, Firefox strict mode,
         // several privacy extensions - cannot produce a usable token, and $recaptcha()

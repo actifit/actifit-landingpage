@@ -153,6 +153,7 @@ module.exports = {
   switch_user: 'Kullanıcı Değiştir',
   keep_loggedin: 'Oturumu açık tut',
   forgot_my_posting_key: 'Gönderi anahtarımı unuttum?',
+  posting_key_login_disabled: 'Güvenlik önlemi olarak gönderi anahtarı ile giriş geçici olarak devre dışı bırakıldı. Lütfen bunun yerine Hive Keychain veya HiveAuth ile giriş yapın.',
   auto_translated_content: 'Otomatik Çevrilmiş İçerik.',
   click_to_view_original: 'Orijinalini görüntülemek için tıklayın',
   profile_image_disclaimer: 'Lütfen profil resmi değişikliğinin 24 saat sonrasına kadar yansımayabileceğini unutmayın.',

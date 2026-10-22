@@ -148,6 +148,7 @@ module.exports = {
   switch_user: 'Changer d\'utilisateur',
   keep_loggedin: 'Rester connecté',
   forgot_my_posting_key: 'J\'ai oublié ma clé de publication ?',
+  posting_key_login_disabled: 'La connexion par clé de publication est temporairement désactivée par précaution de sécurité. Veuillez vous connecter avec Hive Keychain ou HiveAuth.',
   auto_translated_content: 'Contenu traduit automatiquement.',
   click_to_view_original: 'Cliquez pour voir l\'original',
   profile_image_disclaimer: 'Veuillez noter que le changement de l\'image de profil peut ne pas être visible avant 24 heures.',
