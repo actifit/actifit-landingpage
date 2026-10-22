@@ -191,7 +191,7 @@
           </small>
           <i class="fas fa-dove"></i>
           <small>
-            <a :href="this.meta.charity[0]" target="_blank" rel="noopener noreferrer">@{{ this.meta.charity[0] }}</a>
+            <a :href="$safeUrl(this.meta.charity[0])" target="_blank" rel="noopener noreferrer">@{{ this.meta.charity[0] }}</a>
           </small>
         </div>
         <transition name="fade">
@@ -477,7 +477,17 @@ export default {
       this.translationLoading = true;
       try {
         const translationResult = await translateTextWithGemini(this.safety_post_content);
-        this.translatedText = translationResult;
+        // $cleanBody on the MODEL OUTPUT, not just the input. The translated text is
+        // rendered by <SafeRemarkable :options="{html:true}">, which despite its name does
+        // NO sanitising - it is a vue-remarkable wrapper that sets innerHTML. $cleanBody
+        // is applied to what we SEND to the model; what comes BACK was unsanitised.
+        //
+        // An LLM response is attacker-controlled by definition here: the prompt tells the
+        // model to preserve HTML and wraps the post body in """ delimiters the author can
+        // simply close, so a crafted post can make the model emit an an onerror image payload.
+        // One click on "Translate" would then run it on actifit.io, where the session
+        // token lives in localStorage.
+        this.translatedText = this.$cleanBody(translationResult);
         this.displayBody = this.translatedText;
         this.showTranslated = true;
 
