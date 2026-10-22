@@ -30,6 +30,12 @@ jobs:
         env:
           # skip the ~100MB Playwright browser download — jest unit tests don't need it
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+      # .npmrc sets ignore-scripts, which also blocks patch-package's postinstall
+      # hook. Apply the patches/ explicitly so lint and tests run against the same
+      # dependency tree the build does.
+      - name: Apply dependency patches
+        run: npx patch-package
+
       - name: Lint (eslint)
         run: npm run lint
       - name: Unit tests (jest)
