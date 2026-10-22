@@ -432,7 +432,17 @@ export default {
       try {
         const originalContent = this.commentBody();
         const translationResult = await translateTextWithGemini(originalContent);
-        this.translatedText = translationResult;
+        // $cleanBody on the MODEL OUTPUT, not just the input. The translated text is
+        // rendered by <SafeRemarkable :options="{html:true}">, which despite its name does
+        // NO sanitising - it is a vue-remarkable wrapper that sets innerHTML. $cleanBody
+        // is applied to what we SEND to the model; what comes BACK was unsanitised.
+        //
+        // An LLM response is attacker-controlled by definition here: the prompt tells the
+        // model to preserve HTML and wraps the post body in """ delimiters the author can
+        // simply close, so a crafted post can make the model emit an an onerror image payload.
+        // One click on "Translate" would then run it on actifit.io, where the session
+        // token lives in localStorage.
+        this.translatedText = this.$cleanBody(translationResult);
         this.showTranslated = true;
         this.updateCache({
           originalBody: originalContent,
