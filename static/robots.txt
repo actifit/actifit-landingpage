@@ -5,7 +5,6 @@ Disallow: /auth
 Disallow: /settings
 Disallow: /notifications
 Disallow: /transaction-success
-Disallow: /stingtst
 Disallow: /mods-access
 Disallow: /password
 Disallow: /search

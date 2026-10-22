@@ -147,7 +147,7 @@
         <!-- adding section to display charity info if available -->
         <div class="modal-footer text-brand" v-if="this.meta.charity">
           <i class="fas fa-dove"></i><small>{{ $t('Charity_Post') }}</small><i class="fas fa-dove"></i>
-          <small><a :href="$safeUrl(this.meta.charity[0])" target="_blank" rel="noopener noreferrer">@{{ this.meta.charity[0] }}</a></small>
+          <small><a :href="$safeUrl('https://actifit.io/@' + this.meta.charity[0])" target="_blank" rel="noopener noreferrer">@{{ this.meta.charity[0] }}</a></small>
         </div>
         <transition name="fade">
           <div class="report-reply modal-body" v-if="commentBoxOpen">
@@ -416,17 +416,18 @@ export default {
 
       this.translationLoading = true;
       try {
-        const translationResult = await translateTextWithGemini(this.safety_post_content);
-        // $cleanBody on the MODEL OUTPUT, not just the input. The translated text is
-        // rendered by <SafeRemarkable :options="{html:true}">, which despite its name does
-        // NO sanitising - it is a vue-remarkable wrapper that sets innerHTML. $cleanBody
-        // is applied to what we SEND to the model; what comes BACK was unsanitised.
+        const translationResult = await translateTextWithGemini(this.report.body);
+        // Send the RAW body to the model and $cleanBody the RESULT exactly once.
         //
-        // An LLM response is attacker-controlled by definition here: the prompt tells the
-        // model to preserve HTML and wraps the post body in """ delimiters the author can
-        // simply close, so a crafted post can make the model emit an an onerror image payload.
-        // One click on "Translate" would then run it on actifit.io, where the session
-        // token lives in localStorage.
+        // Passing safety_post_content (already $cleanBody output) and then cleaning the
+        // reply ran the pipeline TWICE, and it is not idempotent: escapeHtmlAttr escapes
+        // & unconditionally, so an image URL's &amp; became &amp;amp; and the browser
+        // requested a src containing a literal "amp;" - broken images in the translated
+        // view for every URL with a query string. The second pass also dropped alt text
+        // and emitted a ghost empty anchor before every @mention.
+        //
+        // Raw markdown is also what the model should receive; it was being handed HTML
+        // soup. This matches pages/_username/_permlink/index.vue, which was already right.
         this.translatedText = this.$cleanBody(translationResult);
         this.displayBody = this.translatedText;
         this.showTranslated = true;

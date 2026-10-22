@@ -256,13 +256,11 @@ export default {
         '--appMessageFontFamily': "'New Heterodox Mono', monospace",
         '--appMessageFontSize': '16px'
       })
-
+
+
       // POSTING_KEY_CHAT_ENABLED here is belt-and-braces: this handoff is unreachable
-
       // today only because no setter remains. Re-enabling setUserLoginStatus's commit,
-
       // or adding store persistence, would silently reopen it.
-
       if (POSTING_KEY_CHAT_ENABLED && username && localPostingKey && postingKeyMatchesUser) {
         this.configurePostingKey(username, localPostingKey)
       } else if (username && loginMethod === 'keychain' && hasKeychain) {

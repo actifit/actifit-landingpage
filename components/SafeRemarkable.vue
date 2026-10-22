@@ -85,7 +85,7 @@
           },
           openExternalLink() {
           if (this.externalLinkUrl) {
-          window.open(this.externalLinkUrl, '_blank');
+          window.open(this.$safeUrl(this.externalLinkUrl), '_blank', 'noopener');
           }
           this.closeModal();
           }

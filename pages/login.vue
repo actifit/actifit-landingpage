@@ -287,10 +287,6 @@
 		if (json.success && json.token){
 
 			//hide captcha as well
-			const recaptcha = this.$recaptchaInstance
-
-			// Hide reCAPTCHA badge:
-			recaptcha.hideBadge();
 
 			localStorage.setItem('actiToken', json.token);
 
