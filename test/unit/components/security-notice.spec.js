@@ -139,6 +139,14 @@ describe('SecurityNoticeBanner', () => {
   })
 
   it('offers the key-rotation link, since that is the action being asked for', () => {
-    expect(mountBanner(NOTICE).find('a[href="/password"]').exists()).toBe(true)
+    const link = mountBanner(NOTICE).find('a[href="/password"]')
+    expect(link.exists()).toBe(true)
+    // The destination alone is not enough. The banner asks the user to CHANGE a key,
+    // so the call to action has to say that. It previously reused
+    // 'forgot_my_posting_key' ("Forgot my posting key?"), which reads as key RECOVERY
+    // and sends a user who is being told to rotate looking for something they did not
+    // lose. $t is mocked as identity here, so the key name is what renders.
+    expect(link.text()).toBe('change_my_keys_now')
+    expect(link.text()).not.toBe('forgot_my_posting_key')
   })
 })

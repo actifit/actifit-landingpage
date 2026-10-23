@@ -7,7 +7,12 @@
       <i class="fas fa-exclamation-triangle security-notice-icon" aria-hidden="true"></i>
       <!-- Interpolated, never v-html: this text comes from the API. -->
       <span class="security-notice-text">{{ noticeText }}</span>
-      <a href="/password" class="security-notice-action">{{ $t('forgot_my_posting_key') }}</a>
+      <!-- /password rotates keys entirely in the browser: it derives the new keys with
+           hive-js and broadcasts account_update from the client, so the master password
+           never reaches an Actifit server. That is the whole reason we can safely send a
+           user there during a config-secret incident. Do not repoint this at an endpoint
+           that would POST the password to us. -->
+      <a href="/password" class="security-notice-action">{{ $t('change_my_keys_now') }}</a>
       <button type="button" class="security-notice-close" :aria-label="$t('Close')" @click="dismiss">&times;</button>
     </div>
   </div>
