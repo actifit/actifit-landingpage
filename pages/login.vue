@@ -254,6 +254,25 @@
 			return;
 		}
 	  },
+	  // Surface the server's own message for the login-gate responses, instead of the
+	  // generic "your account and/or posting key is incorrect".
+	  //
+	  // actifit-bot returns 403 {code:'KEY_ROTATION_REQUIRED'} for an account caught in the
+	  // 2026-10-21 incident, and 503 {code:'TRY_AGAIN'} when it cannot read the chain to
+	  // decide. Both carry an accurate `message`. Showing login_error for those tells a user
+	  // whose key is correct that it is wrong, and sends them to RESET a key that actually
+	  // needs ROTATING on chain - the opposite of the required action.
+	  //
+	  // Deliberately an allow-list of codes, not "show json.message whenever present": that
+	  // keeps unexpected server or proxy errors out of the UI. Safe either way - error_msg
+	  // renders through {{ }}, not v-html - but narrow is better.
+	  loginGateMessage (json) {
+	    const GATE_CODES = ['KEY_ROTATION_REQUIRED', 'TRY_AGAIN'];
+	    if (json && GATE_CODES.indexOf(json.code) !== -1 && typeof json.message === 'string' && json.message.trim()) {
+	      return json.message;
+	    }
+	    return null;
+	  },
 	  setUserLoginStatus (json, postingKey) {
 		this.is_logged_in = json.success;
 
@@ -287,7 +306,7 @@
 			//display error message
 			this.error_proceeding = true;
 			this.login_in_progress = false;
-			this.error_msg = this.$t('login_error');
+			this.error_msg = this.loginGateMessage(json) || this.$t('login_error');
 			return;
 		}
 	  },

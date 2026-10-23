@@ -166,8 +166,27 @@
       setKeychainLoginStatus (json){
         if (json && json.success && json.token && json.userdata){ let acct_data = json.userdata; let userSC = new Object(); userSC.account = acct_data; this.is_logged_in = true; this.$store.commit('setStdLoginUser', true); localStorage.setItem('access_token', json.token); localStorage.setItem('std_login', true); localStorage.setItem('std_login_name', userSC.account.name); localStorage.setItem('acti_login_method', 'keychain'); this.$store.commit('steemconnect/login', userSC); this.closeModal(); this.resetForm(); this.$store.dispatch('steemconnect/refreshUser'); this.$store.dispatch('fetchModerators'); this.$emit('login-successful'); }else{ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('login_error'); return; }
       },
+      // Surface the server's own message for the login-gate responses, instead of the
+      // generic "your account and/or posting key is incorrect".
+      //
+      // actifit-bot returns 403 {code:'KEY_ROTATION_REQUIRED'} for an account caught in
+      // the 2026-10-21 incident, and 503 {code:'TRY_AGAIN'} when it cannot read the chain
+      // to decide. Both carry an accurate `message`. Showing login_error for those tells a
+      // user whose key is correct that it is wrong, and sends them to reset a key that
+      // needs ROTATING on chain, not re-entering - the opposite of the required action.
+      //
+      // Deliberately an allow-list of codes, not "show json.message whenever present":
+      // that keeps unexpected server or proxy errors from being echoed into the UI. Safe
+      // either way (error_msg renders through {{ }}, not v-html), but narrow is better.
+      loginGateMessage (json) {
+        const GATE_CODES = ['KEY_ROTATION_REQUIRED', 'TRY_AGAIN'];
+        if (json && GATE_CODES.indexOf(json.code) !== -1 && typeof json.message === 'string' && json.message.trim()) {
+          return json.message;
+        }
+        return null;
+      },
       setUserLoginStatus (json, postingKey) {
-        this.is_logged_in = json.success; if (json.success && json.token){ localStorage.setItem('actiToken', json.token); let userSC = new Object(); userSC.account = json.userdata; this.$store.commit('setStdLoginUser', true); this.$store.commit('setChatPostingKey', postingKey); localStorage.setItem('access_token', json.token); localStorage.setItem('std_login', true); localStorage.setItem('std_login_name', userSC.account.name); localStorage.setItem('acti_login_method', ''); this.$store.commit('steemconnect/login', userSC); this.closeModal(); this.resetForm(); this.$store.dispatch('steemconnect/refreshUser'); this.$store.dispatch('fetchModerators'); this.$emit('login-successful'); }else{ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('login_error'); }
+        this.is_logged_in = json.success; if (json.success && json.token){ localStorage.setItem('actiToken', json.token); let userSC = new Object(); userSC.account = json.userdata; this.$store.commit('setStdLoginUser', true); this.$store.commit('setChatPostingKey', postingKey); localStorage.setItem('access_token', json.token); localStorage.setItem('std_login', true); localStorage.setItem('std_login_name', userSC.account.name); localStorage.setItem('acti_login_method', ''); this.$store.commit('steemconnect/login', userSC); this.closeModal(); this.resetForm(); this.$store.dispatch('steemconnect/refreshUser'); this.$store.dispatch('fetchModerators'); this.$emit('login-successful'); }else{ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.loginGateMessage(json) || this.$t('login_error'); }
       },
       verifyHiveauth (challenge, data){ const sig = Signature.fromHex(data.challenge); const buf = hash.sha256(challenge, null, 0); return sig.verifyHash(buf, PublicKey.fromString(data.pubkey)); },
 async loginHiveauth (){
