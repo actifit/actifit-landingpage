@@ -49,10 +49,22 @@ export default {
 </script>
 
 <style scoped>
+/* Pinned to the BOTTOM, not the top. NavbarBrand is Bootstrap `fixed-top`
+   (position:fixed, z-index:1030), so a banner in normal flow at the top of the
+   layout renders underneath it and its first line is unreadable. Raising the
+   banner's z-index instead would make it cover the nav, and offsetting it by the
+   navbar height is not reliable -- each page sets its own navbar spacing and the
+   bar grows when its contents wrap. The bottom edge is free on every page. */
 .security-notice-banner {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1040; /* above .fixed-top (1030) and Bootstrap modals' backdrop baseline */
   background: #fff3cd;
   color: #664d03;
-  border-bottom: 1px solid #ffe69c;
+  border-top: 1px solid #ffe69c;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.12);
   padding: 0.6rem 1rem;
   font-size: 0.95rem;
 }

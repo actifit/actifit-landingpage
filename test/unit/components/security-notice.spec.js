@@ -19,6 +19,8 @@ import LoginModal from '@/components/LoginModal.vue'
 import LoginPage from '@/pages/login.vue'
 import SecurityNoticeBanner from '@/components/SecurityNoticeBanner.vue'
 import { mount } from '@vue/test-utils'
+import fs from 'fs'
+import path from 'path'
 
 const methodsOf = (C) => (C.options ? C.options.methods : C.methods)
 const NOTICE = 'For your security, please change your Hive posting key.'
@@ -148,5 +150,25 @@ describe('SecurityNoticeBanner', () => {
     // lose. $t is mocked as identity here, so the key name is what renders.
     expect(link.text()).toBe('change_my_keys_now')
     expect(link.text()).not.toBe('forgot_my_posting_key')
+  })
+
+  // NavbarBrand is Bootstrap `fixed-top` (position:fixed, z-index:1030). The banner
+  // first shipped in normal flow at the top of layouts/default.vue, so the navbar
+  // rendered over it and the first line of the notice was unreadable in production.
+  // jsdom does not apply scoped CSS, so this asserts on the component source -- it
+  // guards the positioning contract, not the computed layout.
+  it('is pinned clear of the fixed navbar', () => {
+    const src = fs.readFileSync(
+      path.resolve(__dirname, '../../../components/SecurityNoticeBanner.vue'), 'utf8')
+    // strip CSS comments first: the rationale comment mentions the navbar's own
+    // z-index:1030, and a naive match would read that instead of the declaration.
+    const style = src.slice(src.indexOf('<style')).replace(/\/\*[\s\S]*?\*\//g, '')
+
+    expect(style).toMatch(/position:\s*fixed/)
+    expect(style).toMatch(/bottom:\s*0/)
+    // must out-rank .fixed-top, or it goes back under the navbar
+    const z = style.match(/z-index:\s*(\d+)/)
+    expect(z).not.toBeNull()
+    expect(Number(z[1])).toBeGreaterThan(1030)
   })
 })

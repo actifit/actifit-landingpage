@@ -58,6 +58,29 @@ import hive from '@hiveio/hive-js'
 import { PrivateKey, cryptoUtils } from '@hiveio/dhive'
 
 const WIDGET_SCRIPT_URL = 'https://chat.peakd.com/stwidget.js'
+// Origin of the chat iframe (see `new StWidget('https://chat.peakd.com/t/...')` below).
+// StWidget's own `frameOrigin` defaults to '*', so it does not restrict who may talk to
+// the bridge -- we have to check it ourselves.
+const WIDGET_ORIGIN = 'https://chat.peakd.com'
+
+// The ONLY thing this bridge is asked to sign is Sting's image-upload challenge --
+// see the `Upload.signWithKey` note at the call site, and the upload/<id>/<token> shape
+// exercised in test/unit/components/StingChat.spec.js.
+//
+// WHY THIS GATE EXISTS: the requestSignBuffer branch signs sha256(args[1]) with the
+// user's posting key, with no prompt and no content check, for whoever controls the chat
+// frame. Once actifit-bot's signed-challenge login ships, a compromised chat origin could
+// fetch a login challenge (the "Log in to actifit.io / user / nonce" message), have
+// us sign
+// it here, and exchange the signature for a full Actifit session without ever holding the
+// key. The same oracle would serve any other site's challenge just as well.
+//
+// So: allow the upload namespace, refuse everything else. The pattern is anchored and
+// excludes whitespace, so no multi-line challenge can pass however it is prefixed.
+const STING_UPLOAD_CHALLENGE = /^upload\/[A-Za-z0-9._~/-]{1,256}$/
+export function isStingSignable (text) {
+  return typeof text === 'string' && STING_UPLOAD_CHALLENGE.test(text)
+}
 let widgetScriptPromise = null
 
 export default {
@@ -309,6 +332,14 @@ export default {
       widget.handleWithHivejs = (event, messageId, request, args) => {
         let operation
 
+        // Only the chat frame may drive this bridge. StWidget does not check the sender,
+        // and every branch below acts with the user's posting key.
+        if (event.origin !== WIDGET_ORIGIN) {
+          this.postWalletResponse(widget, event, messageId,
+            { success: false, error: 'Rejected chat wallet request from an unexpected origin.' })
+          return
+        }
+
         try {
           if (request === 'requestBroadcast' && widget.isAllowedOperation(args[1]) && args[2] === 'Posting') {
             operation = new Promise((resolve) => {
@@ -327,15 +358,22 @@ export default {
             if (decoded.startsWith('#')) decoded = decoded.substring(1)
             operation = Promise.resolve({ success: true, error: null, result: decoded })
           } else if (request === 'requestSignBuffer' && args[2] === 'Posting') {
-            operation = Promise.resolve({
-              success: true,
-              error: null,
-              // Match Sting uploader's Upload.signWithKey implementation:
-              // compact-sign the SHA-256 digest of the upload challenge.
-              result: PrivateKey.fromString(postingKey)
-                .sign(cryptoUtils.sha256(args[1]))
-                .toString('hex')
-            })
+            if (!isStingSignable(args[1])) {
+              operation = Promise.resolve({
+                success: false,
+                error: 'Refused to sign: not a Sting upload challenge.'
+              })
+            } else {
+              operation = Promise.resolve({
+                success: true,
+                error: null,
+                // Match Sting uploader's Upload.signWithKey implementation:
+                // compact-sign the SHA-256 digest of the upload challenge.
+                result: PrivateKey.fromString(postingKey)
+                  .sign(cryptoUtils.sha256(args[1]))
+                  .toString('hex')
+              })
+            }
           } else if (request === 'requestEncodeMessage' && args[3] === 'Posting') {
             const recipientPublicKey = args[0] === args[1]
               ? hive.auth.wifToPublic(postingKey)
