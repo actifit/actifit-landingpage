@@ -148,6 +148,7 @@ module.exports = {
   switch_user: 'تبديل المستخدم',
   keep_loggedin: 'إبقائي مسجلاً للدخول',
   forgot_my_posting_key: 'هل نسيت مفتاح النشر الخاص بي؟',
+  keychain_login_unavailable: 'تسجيل الدخول عبر Hive Keychain غير متاح مؤقتاً أثناء إجراء أعمال الصيانة الأمنية. يرجى تسجيل الدخول بمفتاح النشر الخاص بك أو عبر HiveAuth.',
   auto_translated_content: 'محتوى مترجم آليًا.',
   click_to_view_original: 'اضغط لعرض النسخة الأصلية',
   profile_image_disclaimer: 'يرجى ملاحظة أن تغيير صورة الملف الشخصي قد لا يظهر إلا بعد 24 ساعة.',

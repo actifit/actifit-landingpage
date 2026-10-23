@@ -148,6 +148,7 @@ module.exports = {
   switch_user: 'Benutzer wechseln',
   keep_loggedin: 'Angemeldet bleiben',
   forgot_my_posting_key: 'Posting-Schlüssel vergessen?',
+  keychain_login_unavailable: 'Die Anmeldung mit Hive Keychain ist während unserer Sicherheitswartung vorübergehend nicht verfügbar. Bitte melde dich mit deinem Posting-Key oder mit HiveAuth an.',
   auto_translated_content: 'Automatisch übersetzter Inhalt.',
   click_to_view_original: 'Klicken, um das Original anzuzeigen',
   profile_image_disclaimer: 'Bitte beachten Sie, dass die Änderung des Profilbilds möglicherweise erst nach 24 Stunden sichtbar ist.',
