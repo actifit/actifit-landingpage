@@ -114,7 +114,7 @@ module.exports = {
   switch_user: 'Switch User',
   keep_loggedin: 'Keep me logged in',
   forgot_my_posting_key: 'Forgot my posting key?',
-  keychain_login_unavailable: 'Hive Keychain login is temporarily unavailable while we complete security maintenance. Please sign in with HiveAuth.',
+  keychain_login_unavailable: 'Hive Keychain login is temporarily unavailable while we complete security maintenance. Please sign in with your posting key, or with HiveAuth.',
   auto_translated_content: 'Auto-Translated Content.',
   click_to_view_original: 'Click to view original',
   profile_image_disclaimer: 'Please note that the profile image change might not be reflected till after 24 hours.',

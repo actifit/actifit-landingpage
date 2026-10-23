@@ -153,7 +153,7 @@ module.exports = {
   switch_user: "Змінити користувача",
   keep_loggedin: "Залишатися в системі",
   forgot_my_posting_key: "Забули ключ для публікації?",
-  keychain_login_unavailable: 'Вхід через Hive Keychain тимчасово недоступний під час робіт із безпеки. Будь ласка, увійдіть через HiveAuth.',
+  keychain_login_unavailable: 'Вхід через Hive Keychain тимчасово недоступний під час робіт із безпеки. Будь ласка, увійдіть за допомогою posting-ключа або через HiveAuth.',
   auto_translated_content: "Автоматично перекладений вміст.",
   click_to_view_original: "Натисніть, щоб переглянути оригінал",
   profile_image_disclaimer: "Будь ласка, зверніть увагу, що зміна зображення профілю може відобразитися не раніше, ніж через 24 години.",

@@ -153,7 +153,7 @@ module.exports = {
   switch_user: 'Mudar de Usuário',
   keep_loggedin: 'Mantenha-me conectado',
   forgot_my_posting_key: 'Esqueceu minha chave de postagem?',
-  keychain_login_unavailable: 'O início de sessão com o Hive Keychain está temporariamente indisponível durante a manutenção de segurança. Por favor, inicie sessão com o HiveAuth.',
+  keychain_login_unavailable: 'O início de sessão com o Hive Keychain está temporariamente indisponível durante a manutenção de segurança. Por favor, inicie sessão com a sua chave de publicação ou com o HiveAuth.',
   auto_translated_content: 'Conteúdo Traduzido Automaticamente.',
   click_to_view_original: 'Clique para ver o original',
   profile_image_disclaimer: 'Por favor, note que a alteração da imagem de perfil pode não ser refletida até 24 horas depois.',

@@ -153,7 +153,7 @@ module.exports = {
   switch_user: 'उपयोगकर्ता बदलें',
   keep_loggedin: 'मुझे लॉग इन रखें',
   forgot_my_posting_key: 'मेरी पोस्टिंग कुंजी भूल गए?',
-  keychain_login_unavailable: 'सुरक्षा रखरखाव के दौरान Hive Keychain से लॉगिन अस्थायी रूप से अनुपलब्ध है। कृपया HiveAuth से साइन इन करें।',
+  keychain_login_unavailable: 'सुरक्षा रखरखाव के दौरान Hive Keychain से लॉगिन अस्थायी रूप से अनुपलब्ध है। कृपया अपनी पोस्टिंग की या HiveAuth से साइन इन करें।',
   auto_translated_content: 'स्व-अनुवादित सामग्री।',
   click_to_view_original: 'मूल देखने के लिए क्लिक करें',
   profile_image_disclaimer: 'कृपया ध्यान दें कि प्रोफ़ाइल छवि परिवर्तन 24 घंटों के बाद तक प्रतिबिंबित नहीं हो सकता है।',

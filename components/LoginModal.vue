@@ -201,6 +201,13 @@ async loginHiveauth (){
           // Keychain login involves no typed key at all, and the key itself is fine.
           // Telling our largest login cohort their credentials are wrong during an
           // incident drives exactly the wrong behaviour (needless key resets).
+          //
+          // The message names the POSTING KEY first and HiveAuth second, because that
+          // is what is actually available today: posting-key login still works, and
+          // most users have never used HiveAuth - naming only HiveAuth reads as 'you
+          // are locked out'. When #494 lands and disables posting-key login, this
+          // string must be updated in the same PR, or it will recommend a method that
+          // no longer exists.
           if (outc.status === 503) {
             this.error_proceeding = true;
             this.login_in_progress = false;

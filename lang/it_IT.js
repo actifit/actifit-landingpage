@@ -153,7 +153,7 @@ module.exports = {
   switch_user: 'Cambia Utente',
   keep_loggedin: 'Resta connesso',
   forgot_my_posting_key: 'Ho dimenticato la mia chiave di pubblicazione?',
-  keychain_login_unavailable: 'Il login con Hive Keychain è temporaneamente non disponibile durante la manutenzione di sicurezza. Accedi con HiveAuth.',
+  keychain_login_unavailable: 'Il login con Hive Keychain è temporaneamente non disponibile durante la manutenzione di sicurezza. Accedi con la tua chiave di posting o con HiveAuth.',
   auto_translated_content: 'Contenuto Tradotto Automaticamente.',
   click_to_view_original: 'Clicca per visualizzare l\'originale',
   profile_image_disclaimer: 'Nota che la modifica dell\'immagine del profilo potrebbe non essere visibile prima di 24 ore.',

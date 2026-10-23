@@ -148,7 +148,7 @@ module.exports = {
   switch_user: 'Changer d\'utilisateur',
   keep_loggedin: 'Rester connecté',
   forgot_my_posting_key: 'J\'ai oublié ma clé de publication ?',
-  keychain_login_unavailable: 'La connexion avec Hive Keychain est temporairement indisponible pendant notre maintenance de sécurité. Veuillez vous connecter avec HiveAuth.',
+  keychain_login_unavailable: 'La connexion avec Hive Keychain est temporairement indisponible pendant notre maintenance de sécurité. Veuillez vous connecter avec votre clé de publication ou avec HiveAuth.',
   auto_translated_content: 'Contenu traduit automatiquement.',
   click_to_view_original: 'Cliquez pour voir l\'original',
   profile_image_disclaimer: 'Veuillez noter que le changement de l\'image de profil peut ne pas être visible avant 24 heures.',
