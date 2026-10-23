@@ -3282,7 +3282,7 @@ export default {
         let outcome = await res.json();
         console.log(outcome);
         if (outcome.error) {
-          this.error_wallet = this.$t('error_resetting_wallet');
+          this.error_wallet = this.$gateMessage(outcome) || this.$t('error_resetting_wallet');
         } else {
           console.log('success');
           this.$refs['bsc-wallet-address'].value = '';
@@ -3380,7 +3380,7 @@ export default {
           console.log(outcome);
           if (outcome.error) {
             console.log('error');
-            this.error_wallet = this.$t('error_saving_wallet');
+            this.error_wallet = this.$gateMessage(outcome) || this.$t('error_saving_wallet');
             return;
           } else if (outcome.success) {
             console.log('success. Next lets save');
@@ -3400,7 +3400,7 @@ export default {
             let outcome = await res.json();
             console.log(outcome);
             if (outcome.error) {
-              this.error_wallet = this.$t('error_saving_wallet');
+              this.error_wallet = this.$gateMessage(outcome) || this.$t('error_saving_wallet');
             } else {
               console.log('success');
               this.$notify({

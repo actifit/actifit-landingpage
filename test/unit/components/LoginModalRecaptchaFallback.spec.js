@@ -39,6 +39,10 @@ const makeVm = (overrides = {}) => ({
   // The REAL success handler, not a stub. proceedLogin calls it as
   // this.setUserLoginStatus(...), so stubbing it would skip the exact code that
   // carried the original crash and this suite would pass while login stayed broken.
+  // setUserLoginStatus now calls this (it captures the post-login security notice
+  // from /loginAuth). Real method, not a stub, so this suite keeps exercising the
+  // same code path production runs.
+  captureSecurityNotice: LoginModal.methods.captureSecurityNotice,
   setUserLoginStatus: LoginModal.methods.setUserLoginStatus,
   ...overrides
 })

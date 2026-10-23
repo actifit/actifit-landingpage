@@ -166,27 +166,34 @@
       setKeychainLoginStatus (json){
         if (json && json.success && json.token && json.userdata){ let acct_data = json.userdata; let userSC = new Object(); userSC.account = acct_data; this.is_logged_in = true; this.$store.commit('setStdLoginUser', true); localStorage.setItem('access_token', json.token); localStorage.setItem('std_login', true); localStorage.setItem('std_login_name', userSC.account.name); localStorage.setItem('acti_login_method', 'keychain'); this.$store.commit('steemconnect/login', userSC); this.closeModal(); this.resetForm(); this.$store.dispatch('steemconnect/refreshUser'); this.$store.dispatch('fetchModerators'); this.$emit('login-successful'); }else{ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('login_error'); return; }
       },
-      // Surface the server's own message for the login-gate responses, instead of the
-      // generic "your account and/or posting key is incorrect".
+      // Capture the post-login security notice.
       //
-      // actifit-bot returns 403 {code:'KEY_ROTATION_REQUIRED'} for an account caught in
-      // the 2026-10-21 incident, and 503 {code:'TRY_AGAIN'} when it cannot read the chain
-      // to decide. Both carry an accurate `message`. Showing login_error for those tells a
-      // user whose key is correct that it is wrong, and sends them to reset a key that
-      // needs ROTATING on chain, not re-entering - the opposite of the required action.
+      // actifit-bot returns, in the /loginAuth SUCCESS body, for a flagged account whose
+      // posting key has not been rotated since the 2026-10-21 incident:
+      //     security_notice: { code: 'KEY_ROTATION_RECOMMENDED', message: '<guidance>' }
+      // Login is NOT refused - the account works normally; the user is being advised to
+      // rotate the key the attacker may also hold.
       //
-      // Deliberately an allow-list of codes, not "show json.message whenever present":
-      // that keeps unexpected server or proxy errors from being echoed into the UI. Safe
-      // either way (error_msg renders through {{ }}, not v-html), but narrow is better.
-      loginGateMessage (json) {
-        const GATE_CODES = ['KEY_ROTATION_REQUIRED', 'TRY_AGAIN'];
-        if (json && GATE_CODES.indexOf(json.code) !== -1 && typeof json.message === 'string' && json.message.trim()) {
-          return json.message;
-        }
-        return null;
+      // Only this handler captures it: it is the /loginAuth path. Keychain and HiveAuth
+      // logins never hit that endpoint and so never carry the field.
+      //
+      // Stored rather than rendered here on purpose. This component calls closeModal()
+      // on success and pages/login.vue calls postLoginRedirect(), so a banner rendered at
+      // this point would be torn down before anyone read it. The store + localStorage
+      // pair survives the redirect, and layouts/default.vue shows it on every page until
+      // the user dismisses it.
+      //
+      // Allow-listed by code, so an unexpected field cannot put arbitrary server text on
+      // every page of the site.
+      captureSecurityNotice (json) {
+        const notice = json && json.security_notice;
+        if (!notice || notice.code !== 'KEY_ROTATION_RECOMMENDED') return;
+        if (typeof notice.message !== 'string' || !notice.message.trim()) return;
+        this.$store.commit('setSecurityNotice', notice.message);
+        try { localStorage.setItem('acti_security_notice', notice.message); } catch (e) { /* private mode */ }
       },
       setUserLoginStatus (json, postingKey) {
-        this.is_logged_in = json.success; if (json.success && json.token){ localStorage.setItem('actiToken', json.token); let userSC = new Object(); userSC.account = json.userdata; this.$store.commit('setStdLoginUser', true); this.$store.commit('setChatPostingKey', postingKey); localStorage.setItem('access_token', json.token); localStorage.setItem('std_login', true); localStorage.setItem('std_login_name', userSC.account.name); localStorage.setItem('acti_login_method', ''); this.$store.commit('steemconnect/login', userSC); this.closeModal(); this.resetForm(); this.$store.dispatch('steemconnect/refreshUser'); this.$store.dispatch('fetchModerators'); this.$emit('login-successful'); }else{ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.loginGateMessage(json) || this.$t('login_error'); }
+        this.is_logged_in = json.success; if (json.success && json.token){ localStorage.setItem('actiToken', json.token); let userSC = new Object(); userSC.account = json.userdata; this.$store.commit('setStdLoginUser', true); this.$store.commit('setChatPostingKey', postingKey); this.captureSecurityNotice(json); localStorage.setItem('access_token', json.token); localStorage.setItem('std_login', true); localStorage.setItem('std_login_name', userSC.account.name); localStorage.setItem('acti_login_method', ''); this.$store.commit('steemconnect/login', userSC); this.closeModal(); this.resetForm(); this.$store.dispatch('steemconnect/refreshUser'); this.$store.dispatch('fetchModerators'); this.$emit('login-successful'); }else{ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('login_error'); }
       },
       verifyHiveauth (challenge, data){ const sig = Signature.fromHex(data.challenge); const buf = hash.sha256(challenge, null, 0); return sig.verifyHash(buf, PublicKey.fromString(data.pubkey)); },
 async loginHiveauth (){

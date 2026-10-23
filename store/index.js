@@ -8,6 +8,11 @@ import actions from './actions'
 const createStore = () => {
   const store = new Vuex.Store({
     state: {
+      // Post-login security notice from actifit-bot (security_notice in the /loginAuth
+      // success body). Rendered by layouts/default.vue, NOT by the login components:
+      // LoginModal closes itself on success and pages/login redirects, so a banner in
+      // either would be destroyed before anyone read it.
+      securityNotice: null,
       userTokens: 0, // logged-in user's token count
       userReportCount: 0, // logged-in user's report count
       transactions: [], // logged-in user's transactions

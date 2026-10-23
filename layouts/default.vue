@@ -1,11 +1,18 @@
 <template>
-  <nuxt/>
+  <div>
+    <!-- Shown on every page until dismissed. It has to live here rather than in the
+         login components, which tear themselves down on success. -->
+    <SecurityNoticeBanner />
+    <nuxt/>
+  </div>
 </template>
 
 <script>
 import { getCanonicalUrl } from '~/utils/seo'
+import SecurityNoticeBanner from '~/components/SecurityNoticeBanner.vue'
 
 export default {
+  components: { SecurityNoticeBanner },
   head () {
     const canonicalUrl = getCanonicalUrl(this.$route.path)
 

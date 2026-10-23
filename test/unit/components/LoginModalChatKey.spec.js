@@ -8,6 +8,10 @@ describe('components/LoginModal.vue posting-key chat session', () => {
     const vm = {
       is_logged_in: false,
       $recaptchaInstance: { hideBadge: jest.fn() },
+      // setUserLoginStatus now calls this (it captures the post-login security notice
+      // from /loginAuth). Real method, not a stub, so this suite keeps exercising the
+      // same code path production runs.
+      captureSecurityNotice: LoginModal.methods.captureSecurityNotice,
       $store: store,
       closeModal: jest.fn(),
       resetForm: jest.fn(),

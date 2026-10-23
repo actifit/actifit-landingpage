@@ -1,6 +1,9 @@
 import Vue from 'vue'
 
 export default {
+  setSecurityNotice (state, securityNotice) {
+    state.securityNotice = securityNotice
+  },
   setUserTokens (state, userTokens) {
     state.userTokens = userTokens
   },
