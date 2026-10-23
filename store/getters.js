@@ -1,4 +1,7 @@
 export default {
+  securityNotice (state) {
+    return state.securityNotice
+  },
   userTokens (state) {
     return state.userTokens
   },

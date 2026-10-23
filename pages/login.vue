@@ -227,11 +227,6 @@
 		console.log(json);
 		if (json && json.success && json.token && json.HIVE){
 
-			//hide captcha as well
-			const recaptcha = this.$recaptchaInstance
-
-			// Hide reCAPTCHA badge:
-			recaptcha.hideBadge();
 
 			let acct_data = json.HIVE;
 
@@ -254,17 +249,38 @@
 			return;
 		}
 	  },
+	  // Capture the post-login security notice.
+	  //
+	  // actifit-bot returns, in the /loginAuth SUCCESS body, for a flagged account whose
+	  // posting key has not been rotated since the 2026-10-21 incident:
+	  //     security_notice: { code: 'KEY_ROTATION_RECOMMENDED', message: '<guidance>' }
+	  // Login is NOT refused - the account works normally; the user is being advised to
+	  // rotate the key the attacker may also hold.
+	  //
+	  // Only this handler captures it: it is the /loginAuth path. Keychain and HiveAuth
+	  // logins never hit that endpoint and so never carry the field.
+	  //
+	  // Stored rather than rendered here on purpose. This component calls closeModal()
+	  // on success and pages/login.vue calls postLoginRedirect(), so a banner rendered at
+	  // this point would be torn down before anyone read it. The store + localStorage
+	  // pair survives the redirect, and layouts/default.vue shows it on every page until
+	  // the user dismisses it.
+	  //
+	  // Allow-listed by code, so an unexpected field cannot put arbitrary server text on
+	  // every page of the site.
+	  captureSecurityNotice (json) {
+	    const notice = json && json.security_notice;
+	    if (!notice || notice.code !== 'KEY_ROTATION_RECOMMENDED') return;
+	    if (typeof notice.message !== 'string' || !notice.message.trim()) return;
+	    this.$store.commit('setSecurityNotice', notice.message);
+	    try { localStorage.setItem('acti_security_notice', notice.message); } catch (e) { /* private mode */ }
+	  },
 	  setUserLoginStatus (json, postingKey) {
 		this.is_logged_in = json.success;
 
 		//console.log(json);
 		if (json.success && json.token){
 
-			//hide captcha as well
-			const recaptcha = this.$recaptchaInstance
-
-			// Hide reCAPTCHA badge:
-			recaptcha.hideBadge();
 
 			localStorage.setItem('actiToken', json.token);
 
@@ -277,6 +293,7 @@
 			localStorage.setItem('std_login', true)
 			localStorage.setItem('std_login_name', userSC.account.name)
 			localStorage.setItem('acti_login_method', '');
+			this.captureSecurityNotice(json);
 			this.$store.commit('steemconnect/login', userSC);
 			//this.$store.commit('steemconnect/setAccessToken',)
 			//this.$steemconnect.login(this.$store.state, json.userdata);
@@ -396,11 +413,6 @@
 				this.hiveauth_expire = expire;
 				this.hiveauth_token = token;
 				if (success){
-					//hide captcha as well
-					const recaptcha = this.$recaptchaInstance
-
-					// Hide reCAPTCHA badge:
-					recaptcha.hideBadge();
 					this.login_in_progress = false;
 
 					try {

@@ -154,6 +154,7 @@ module.exports = {
   keep_loggedin: 'ログイン状態を維持',
   forgot_my_posting_key: '投稿キーを忘れましたか？',
   keychain_login_unavailable: 'セキュリティメンテナンスのため、Hive Keychain でのログインを一時的にご利用いただけません。ポスティングキー、または HiveAuth でログインしてください。',
+  change_my_keys_now: '今すぐキーを変更する',
   auto_translated_content: '自動翻訳されたコンテンツ',
   click_to_view_original: 'オリジナルを表示するにはクリック',
   profile_image_disclaimer: 'プロフィール画像の変更が反映されるまで最大24時間かかる場合がありますので、ご了承ください。',

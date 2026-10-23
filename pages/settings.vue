@@ -654,7 +654,10 @@
 					}else{
 						this.$notify({
 						  group: 'error',
-						  text: this.$t('error'),
+						  // $gateMessage so a flagged account is told to rotate its posting key rather
+						  // than just 'error'. Sanitised because vue-notification renders `text` via
+						  // innerHTML and this string comes from the API.
+						  text: this.$sanitize(this.$gateMessage(outcome) || this.$t('error')),
 						  position: 'top center'
 						})
 					}
