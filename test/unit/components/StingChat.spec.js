@@ -10,7 +10,15 @@ describe('components/StingChat.vue', () => {
     delete global.StWidget
   })
 
-  it('uses the session posting key before an installed Keychain extension', () => {
+  // Behaviour changed 2026-10-21: the posting-key handoff to StWidget is gated behind
+  // POSTING_KEY_CHAT_ENABLED. This test asserted the OLD behaviour - that a session key
+  // is preferred over the Keychain extension - which is exactly what we no longer want,
+  // because setPostingKey hands the raw key to a script loaded unpinned and without SRI
+  // from chat.peakd.com, whose own allowlists then decide what may be signed.
+  //
+  // Kept and inverted rather than deleted: the setup is the precise condition that used
+  // to trigger the handoff, so it is the right place to prove it no longer does.
+  it('does NOT hand a session posting key to the third-party widget', () => {
     localStorage.setItem('acti_login_method', '')
     window.hive_keychain = { requestHandshake: jest.fn() }
 
@@ -29,6 +37,7 @@ describe('components/StingChat.vue', () => {
       widgetError: '',
       chatPostingKey: '5Kposting',
       user: { account: { name: 'alice' } },
+      $t: (k) => k,
       $refs: { widgetContainer: document.createElement('div') }
     }
     vm.configurePostingKey = (username, postingKey) => {
@@ -44,10 +53,17 @@ describe('components/StingChat.vue', () => {
 
     StingChat.methods.initWidget.call(vm)
 
-    expect(widget.setPostingKey).toHaveBeenCalledWith('5Kposting', expect.anything())
-    expect(widget.setUser).toHaveBeenCalledWith('alice')
+    // The load-bearing assertion: the key never reaches the widget.
+    expect(widget.setPostingKey).not.toHaveBeenCalled()
+    // No user is attached either: with no signing path there is nothing chat could do
+    // on this account's behalf, so it does not present itself as signed in.
+    expect(widget.setUser).not.toHaveBeenCalled()
+    // Passthrough stays off, so an installed Keychain cannot silently take over the
+    // session either.
     expect(widget.enableKeychainPassthrough).toBe(false)
     expect(widget.enablePeakVaultPassthrough).toBe(false)
+    // And the user is told the remedy that actually works, not "enter your posting key".
+    expect(vm.widgetError).toBe('posting_key_login_disabled')
   })
 
   it('routes a fresh Keychain session through the Keychain extension', async () => {
@@ -305,20 +321,58 @@ describe('components/StingChat.vue', () => {
     expect(vm.widgetError).toBe('')
   })
 
-  it('prompts a posting-key user instead of opening chat when the memory key is missing', () => {
+  it('does NOT prompt a posting-key user while the kill switch is off', () => {
+    // Behaviour changed deliberately on 2026-10-21. This prompt used to be the way a
+    // posting-key session started chat; it now refuses, because submitting the key hands
+    // it to StWidget - loaded unpinned and without SRI from chat.peakd.com - which then
+    // decides what may be signed via its own widget.allowedCustomJson /
+    // isAllowedOperation allowlists. "The key never leaves the browser" is not a
+    // mitigation when a third party chooses what the browser signs with it.
+    //
+    // Note `|| 'posting-key'` in toggleWidget: acti_login_method === '' (every legacy
+    // posting-key session) and absent (HiveSigner via pages/auth.vue) BOTH land here.
     localStorage.setItem('acti_login_method', '')
     const container = { hidden: true }
     const vm = {
       user: { account: { name: 'alice' } },
       chatPostingKey: null,
+      widgetError: '',
+      $t: (k) => k,
       $refs: { widgetContainer: container },
       openPostingKeyPrompt: jest.fn()
     }
 
     StingChat.methods.toggleWidget.call(vm)
 
-    expect(vm.openPostingKeyPrompt).toHaveBeenCalledTimes(1)
+    expect(vm.openPostingKeyPrompt).not.toHaveBeenCalled()
+    expect(vm.widgetError).toBe('posting_key_login_disabled')
+    // Chat must not silently open either - no key means no signing path.
     expect(container.hidden).toBe(true)
+  })
+
+  it('still opens chat normally for a Keychain session', () => {
+    // The switch must not break the login methods that never expose a key. Without this,
+    // the test above would also pass against a toggleWidget that refuses everyone.
+    localStorage.setItem('acti_login_method', 'keychain')
+    const container = { hidden: true }
+    const vm = {
+      user: { account: { name: 'alice' } },
+      chatPostingKey: null,
+      widgetError: '',
+      widgetRequested: false,
+      widget: null,
+      $t: (k) => k,
+      $refs: { widgetContainer: container },
+      openPostingKeyPrompt: jest.fn(),
+      ensureWidget: jest.fn(() => Promise.resolve())
+    }
+
+    StingChat.methods.toggleWidget.call(vm)
+
+    expect(vm.openPostingKeyPrompt).not.toHaveBeenCalled()
+    expect(vm.widgetError).toBe('')
+    expect(vm.widgetRequested).toBe(true)
+    expect(vm.ensureWidget).toHaveBeenCalled()
   })
 
   it('validates and attaches a prompted posting key without persisting it', async () => {

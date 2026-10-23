@@ -148,6 +148,7 @@ module.exports = {
   switch_user: 'Benutzer wechseln',
   keep_loggedin: 'Angemeldet bleiben',
   forgot_my_posting_key: 'Posting-Schlüssel vergessen?',
+  posting_key_login_disabled: 'Die Anmeldung mit dem Posting-Key ist vorübergehend aus Sicherheitsgründen deaktiviert. Bitte melde dich stattdessen mit Hive Keychain oder HiveAuth an.',
   auto_translated_content: 'Automatisch übersetzter Inhalt.',
   click_to_view_original: 'Klicken, um das Original anzuzeigen',
   profile_image_disclaimer: 'Bitte beachten Sie, dass die Änderung des Profilbilds möglicherweise erst nach 24 Stunden sichtbar ist.',
