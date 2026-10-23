@@ -154,6 +154,7 @@ module.exports = {
   switch_user: '切换用户',
   keep_loggedin: '保持登录状态',
   forgot_my_posting_key: '忘记了我的发帖密钥？',
+  keychain_login_unavailable: '安全维护期间，暂时无法使用 Hive Keychain 登录。请改用 HiveAuth 登录。',
   auto_translated_content: '自动翻译内容。',
   click_to_view_original: '点击查看原文',
   profile_image_disclaimer: '请注意，个人资料图片的更改可能需要24小时后才能反映出来。',

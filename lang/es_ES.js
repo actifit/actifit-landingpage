@@ -145,6 +145,7 @@ module.exports = {
   switch_user: 'Cambiar de Usuario',
   keep_loggedin: 'Mantenerme conectado',
   forgot_my_posting_key: '¿Olvidé mi clave de publicación?',
+  keychain_login_unavailable: 'El inicio de sesión con Hive Keychain no está disponible temporalmente mientras realizamos tareas de seguridad. Por favor, inicia sesión con HiveAuth.',
   auto_translated_content: 'Contenido Traducido Automáticamente.',
   click_to_view_original: 'Haga clic para ver el original',
   profile_image_disclaimer: 'Ten en cuenta que el cambio de imagen de perfil podría no reflejarse hasta después de 24 horas.',

@@ -194,6 +194,19 @@ async loginHiveauth (){
             signal: controller.signal
           });
           clearTimeout(timeoutId);
+          // 503 means the endpoint is deliberately disabled (actifit-bot's
+          // securityDisabled), not that anything is wrong with the user's credentials.
+          // Without this the empty body falls through to login_error - "Your account
+          // and/or private posting key is incorrect" - which is false twice over:
+          // Keychain login involves no typed key at all, and the key itself is fine.
+          // Telling our largest login cohort their credentials are wrong during an
+          // incident drives exactly the wrong behaviour (needless key resets).
+          if (outc.status === 503) {
+            this.error_proceeding = true;
+            this.login_in_progress = false;
+            this.error_msg = this.$t('keychain_login_unavailable');
+            return;
+          }
           let contt = await outc.json();
           if (contt.message){
             window.hive_keychain.requestVerifyKey(account_name, contt.message, 'Posting', async (response) => {

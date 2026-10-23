@@ -495,6 +495,14 @@
 					signal: controller.signal
 				});
 			clearTimeout(timeoutId);
+						// 503 means the endpoint is deliberately disabled (actifit-bot's securityDisabled),
+			// not that the user's credentials are wrong. See the matching note in LoginModal.vue.
+			if (outc.status === 503) {
+				this.error_proceeding = true;
+				this.login_in_progress = false;
+				this.error_msg = this.$t('keychain_login_unavailable');
+				return;
+			}
 			let contt = await outc.json();
 			//console.log(contt)
 
