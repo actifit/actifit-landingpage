@@ -1,4 +1,36 @@
 const axios = require('axios');
+
+// Every upstream call goes through this instance, and every one has a timeout.
+//
+// None of them had one. When an upstream stalled, the request hung, the Nuxt server
+// held it open, and requests piled up behind it until Cloudflare gave up with a 504 -
+// observed right after the signed-challenge login deployed (2026-10-24): login routes
+// 504ing or taking 13-16s while the API answered directly in under a second.
+//
+// A LOCAL instance, not axios.defaults: require('axios') is a process-wide singleton,
+// so changing its defaults here would silently change the timeout for every other
+// axios caller in the server.
+//
+// Limits are per purpose (see T below). The binding constraint is login: the client
+// aborts at 20s, so the proxy must give up FIRST and return a real error, rather than
+// letting the browser's own abort or Cloudflare's 504 decide what the user sees.
+const http = axios.create({ timeout: 15000 });
+// When an upstream call fails WITHOUT a response - a timeout above, a refused or
+// reset connection - each catch below answers 503, not 500. That is accurate (the
+// service is unavailable; nothing is wrong with the request), and it is the status
+// the login client maps to "try again shortly" rather than "your key is incorrect".
+const T = {
+  login: 15000,     // under the client's 20s abort - see above
+  quick: 10000,     // captcha check, account lookup: small reads
+  reward: 15000,
+  translate: 30000,
+  gemini: 60000,    // an LLM call; legitimately slow
+  upload: 60000,    // file bodies; legitimately slow
+  // Generous on purpose. Timing out here does NOT cancel the upstream - the API may
+  // still confirm the payment - so a premature error would tell the user it failed
+  // when it did not, and invite them to pay twice. Kept under Cloudflare's 100s.
+  payment: 90000
+};
 const url = require('url');
 
 const VALID_USER_RE = /^[a-z][a-z0-9.-]{2,15}$/;
@@ -75,12 +107,13 @@ module.exports = async function (req, res, next) {
       req.on('end', async () => {
         try {
           const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-          const response = await axios.post(geminiUrl, JSON.parse(body), {
-            headers: { 'Content-Type': 'application/json' }
+          const response = await http.post(geminiUrl, JSON.parse(body), {
+            headers: { 'Content-Type': 'application/json' },
+            timeout: T.gemini
           });
           res.end(JSON.stringify(response.data));
         } catch (error) {
-          res.statusCode = error.response ? error.response.status : 500;
+          res.statusCode = error.response ? error.response.status : 503;
           res.end(JSON.stringify(error.response ? error.response.data : { error: error.message }));
         }
       });
@@ -105,7 +138,8 @@ module.exports = async function (req, res, next) {
       req.on('end', async () => {
         try {
           const params = JSON.parse(body);
-          const response = await axios.post('https://api.deepl.com/v2/translate', null, {
+          const response = await http.post('https://api.deepl.com/v2/translate', null, {
+            timeout: T.translate,
             params: {
               ...params,
               auth_key: apiKey
@@ -113,7 +147,7 @@ module.exports = async function (req, res, next) {
           });
           res.end(JSON.stringify(response.data));
         } catch (error) {
-          res.statusCode = error.response ? error.response.status : 500;
+          res.statusCode = error.response ? error.response.status : 503;
           res.end(JSON.stringify(error.response ? error.response.data : { error: error.message }));
         }
       });
@@ -163,13 +197,14 @@ module.exports = async function (req, res, next) {
       const targetUrl = `${baseApiUrl}${endpoint}/${user}`;
 
       try {
-        const response = await axios.get(targetUrl, {
+        const response = await http.get(targetUrl, {
+            timeout: T.reward,
             params: { [param]: key, url: postUrl },
             headers: { 'x-acti-token': userToken },
         });
         return res.end(JSON.stringify(response.data));
       } catch (error) {
-        res.statusCode = error.response ? error.response.status : 500;
+        res.statusCode = error.response ? error.response.status : 503;
         res.end(JSON.stringify(error.response ? error.response.data : { error: error.message }));
         return;
       }
@@ -197,9 +232,10 @@ module.exports = async function (req, res, next) {
       };
 
       try {
-        const response = await axios({
+        const response = await http({
           method: 'post',
           url: targetUrl,
+          timeout: T.upload,
           data: req,
           headers: headers,
           maxBodyLength: Infinity,
@@ -243,10 +279,10 @@ module.exports = async function (req, res, next) {
       req.on('end', async () => {
         try {
           const params = { ...JSON.parse(body), confirm_payment_token: apiKey };
-          const response = await axios.post(targetUrl, params);
+          const response = await http.post(targetUrl, params, { timeout: T.payment });
           res.end(JSON.stringify(response.data));
         } catch (error) {
-          res.statusCode = error.response ? error.response.status : 500;
+          res.statusCode = error.response ? error.response.status : 503;
           res.end(JSON.stringify(error.response ? error.response.data : { error: error.message }));
         }
       });
@@ -276,12 +312,13 @@ module.exports = async function (req, res, next) {
 
       try {
         const body = await readRequestBody(req);
-        const response = await axios.post(targetUrl, body ? JSON.parse(body) : {}, {
-          headers: { 'Content-Type': 'application/json' }
+        const response = await http.post(targetUrl, body ? JSON.parse(body) : {}, {
+          headers: { 'Content-Type': 'application/json' },
+          timeout: T.login
         });
         return res.end(JSON.stringify(response.data));
       } catch (error) {
-        res.statusCode = error.response ? error.response.status : (error.statusCode || 500);
+        res.statusCode = error.response ? error.response.status : (error.statusCode || 503);
         return res.end(JSON.stringify(error.response ? error.response.data : { error: error.message }));
       }
     }
@@ -306,12 +343,13 @@ module.exports = async function (req, res, next) {
 
       const baseApiUrl = (process.env.ACTI_API_URL || 'https://api.actifit.io').replace(/\/?$/, '/');
       try {
-        const response = await axios.get(`${baseApiUrl}verifyLoginCaptcha`, {
-          params: { token }
+        const response = await http.get(`${baseApiUrl}verifyLoginCaptcha`, {
+          params: { token },
+          timeout: T.quick
         });
         return res.end(JSON.stringify(response.data));
       } catch (error) {
-        res.statusCode = error.response ? error.response.status : 500;
+        res.statusCode = error.response ? error.response.status : 503;
         return res.end(JSON.stringify(error.response ? error.response.data : { error: error.message }));
       }
     }
@@ -341,12 +379,13 @@ module.exports = async function (req, res, next) {
 
       const baseApiUrl = (process.env.ACTI_API_URL || 'https://api.actifit.io').replace(/\/?$/, '/');
       try {
-        const response = await axios.get(`${baseApiUrl}getAccountData`, {
-          params: { user, bchain }
+        const response = await http.get(`${baseApiUrl}getAccountData`, {
+          params: { user, bchain },
+          timeout: T.quick
         });
         return res.end(JSON.stringify(response.data));
       } catch (error) {
-        res.statusCode = error.response ? error.response.status : 500;
+        res.statusCode = error.response ? error.response.status : 503;
         return res.end(JSON.stringify(error.response ? error.response.data : { error: error.message }));
       }
     }
