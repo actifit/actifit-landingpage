@@ -6,6 +6,8 @@ import HAS from 'hive-auth-wrapper';
 // endpoints) - module singleton - so broadcasts below go to the configured node.
 import hive from '@hiveio/hive-js';
 import { requestKey } from '~/utils/keyPrompt';
+import { classifyKey, keyRefusal } from '~/utils/keyChecks';
+import escapeHtml from '~/utils/escapeHtml';
 Vue.prototype.$HAS = HAS;
 
 //sanitization
@@ -336,25 +338,6 @@ Vue.prototype.$processTrxFunc = async function (op_name, cstm_params, active) {
 };
 
 /**
- * Sign and broadcast operations IN THE BROWSER with the typed-key user's own key.
- *
- * Shared by $processTrxFunc and by every component that used to call /performTrx
- * directly - one implementation, so they cannot drift (see utils/keyChecks.js for why
- * that matters here).
- *
- * Returns the response shape /performTrx used to return, so callers' existing outcome
- * handling keeps working unchanged:
- *   success: { success: true, trx: { tx: <broadcast result incl. id> } }
- *   failure: { error: true, trx: { tx: { error: <message> } }, cancelled?: true }
- *
- * Does NOT notify: the direct callers already raise their own toast on failure, and
- * doubling it would be noise. $processTrxFunc notifies for its own callers.
- *
- * HIVE ONLY. Typed-key login is Hive-only (the signed-challenge login verifies against
- * the Hive account), so the key held here IS a Hive key; signing a Steem or Blurt
- * operation with it would fail anyway. Saying so plainly beats an opaque chain error.
- */
-/**
  * Decrypt a memo addressed to the user, in the browser.
  *
  * Replaces /memoDecode, which had the SERVER decrypt with a posting key it had stored for
@@ -386,21 +369,45 @@ Vue.prototype.$decodeMemo = async function (memo) {
 	}
 	let wif = this.$store.state.chatPostingKey;
 	if (!wif) {
-	  wif = await requestKey('posting', account);
+	  wif = await requestKey('posting', account, [['memo_decode', {}]]);
 	  if (wif) this.$store.commit('setChatPostingKey', wif);
 	}
 	if (!wif) return { error: this.$t('signing_cancelled') };
 	return { xcstkn: hive.memo.decode(wif, memo) };
   } catch (e) {
-	return { error: (e && e.message) || this.$t('error_performing_operation') };
+	// Escaped: callers show this in a toast, and toasts render HTML.
+	return { error: escapeHtml((e && e.message) || this.$t('error_performing_operation')) };
   }
 };
 
+/**
+ * Sign and broadcast operations IN THE BROWSER with the typed-key user's own key.
+ *
+ * Shared by $processTrxFunc and by every component that used to call /performTrx
+ * directly - one implementation, so they cannot drift (see utils/keyChecks.js for why
+ * that matters here).
+ *
+ * Returns the response shape /performTrx used to return, so callers' existing outcome
+ * handling keeps working unchanged:
+ *   success: { success: true, trx: { tx: <broadcast result incl. id> } }
+ *   failure: { error: true, trx: { tx: { error: <message> } }, cancelled?: true }
+ *
+ * Does NOT notify: the direct callers already raise their own toast on failure, and
+ * doubling it would be noise. $processTrxFunc notifies for its own callers.
+ *
+ * HIVE ONLY. Typed-key login is Hive-only (the signed-challenge login verifies against
+ * the Hive account), so the key held here IS a Hive key; signing a Steem or Blurt
+ * operation with it would fail anyway. Saying so plainly beats an opaque chain error.
+ */
 Vue.prototype.$broadcastWithKey = async function (operations, opts) {
   const options = opts || {};
   const active = !!options.active;
   const bchain = String(options.bchain || 'HIVE').toUpperCase();
-  const fail = (msg, extra) => Object.assign({ error: true, trx: { tx: { error: msg } } }, extra || {});
+  // The message is HTML-ESCAPED here, once, at the source. Every caller either
+  // substring-matches it ('missing' / 'authority') or shows it in a toast, and toasts
+  // render HTML (vue-notification uses v-html) - while the text can come from an RPC
+  // node. Escaping here covers every caller, including ones added later.
+  const fail = (msg, extra) => Object.assign({ error: true, trx: { tx: { error: escapeHtml(msg) } } }, extra || {});
 
   if (bchain !== 'HIVE') {
 	return fail(this.$t('typed_key_hive_only'));
@@ -412,18 +419,24 @@ Vue.prototype.$broadcastWithKey = async function (operations, opts) {
   let wif;
   if (options.wif) {
 	// The caller already collected the key in its own form (the buy-now flows ask for
-	// the active key up front). Use it rather than prompting a second time.
-	wif = options.wif;
+	// the active key up front). Use it rather than prompting a second time - but apply
+	// exactly the checks the prompt applies. This path skips the prompt, and it is the
+	// one that signs PAYMENTS: without this, an owner key typed into a buy form would
+	// sign, and a posting key would fail only after the user had committed.
+	const typed = String(options.wif).trim();
+	const refusal = keyRefusal(await classifyKey(account, typed), keyType);
+	if (refusal) return fail(this.$t(refusal));
+	wif = typed;
   } else if (active) {
 	// Active keys are requested PER ACTION and never kept: one can move funds.
-	wif = await requestKey('active', account);
+	wif = await requestKey('active', account, operations);
   } else {
 	// The posting key lives in memory for the session, put there at login. After a
 	// reload it is gone (memory-only by design), so ask once and keep it for the rest
 	// of the session.
 	wif = this.$store.state.chatPostingKey;
 	if (!wif) {
-	  wif = await requestKey('posting', account);
+	  wif = await requestKey('posting', account, operations);
 	  if (wif) this.$store.commit('setChatPostingKey', wif);
 	}
   }
@@ -450,9 +463,63 @@ Vue.prototype.$broadcastWithKey = async function (operations, opts) {
 	}
 	return fail(err_msg);
   } finally {
-	// Release our reference to an active key as soon as the broadcast settles.
+	// Drop this function's reference to an active key once the broadcast settles. This
+	// does NOT wipe it from memory - JS strings cannot be zeroed - it only stops this
+	// code from holding it. The active key is never written to the store or storage.
 	if (active) wif = null;
   }
+};
+
+/**
+ * Does this session sign its own transactions in the browser - Keychain, HiveAuth or a
+ * typed key? Then every payment/action confirmation must use the actifit-bot route that
+ * verifies the transaction ON CHAIN (the "...Keychain" routes, via findVerifyTrx).
+ *
+ * The other routes (buyGadgetHive, activateMultiGadget, addFriend, ...) only look the
+ * transaction up in verified_tx, which was filled by the server when IT signed. The
+ * server no longer signs, so for a browser-signed transaction those routes can never
+ * succeed. Sending a typed-key user there broadcast a real HIVE payment and then failed
+ * the purchase. Only HiveSigner (no std_login) keeps the old routes.
+ */
+Vue.prototype.$signsInBrowser = function () {
+  return !!localStorage.getItem('std_login');
+};
+
+/**
+ * Did an actifit-bot confirmation route fail? The routes answer {error: ...} for some
+ * failures but {status: 'error'} when on-chain verification fails - and callers that
+ * only checked `outcome.error` treated that second shape as SUCCESS.
+ */
+Vue.prototype.$confirmFailed = function (outcome) {
+  return !outcome || !!outcome.error || outcome.status === 'error';
+};
+
+/**
+ * Text for a failed signing/broadcast, SAFE FOR v-html (errorProceed and toasts are
+ * both HTML sinks). Accepts every failure shape that reaches the purchase flows:
+ *   $broadcastWithKey  { error: true, trx: { tx: { error } } }  - already escaped there
+ *   Keychain/HiveAuth  { success: false, error: <string> }
+ *   hive-js            Error with .cause.message / .message
+ * It used to read res.cause.message unconditionally, which threw on the first two.
+ */
+Vue.prototype.$signingErrorText = function (res) {
+  if (res && res.trx && res.trx.tx && res.trx.tx.error) return res.trx.tx.error;
+  const msg = (res && res.cause && res.cause.message) ||
+	(res && typeof res.error === 'string' && res.error) ||
+	(res && typeof res.message === 'string' && res.message);
+  return escapeHtml(msg || this.$t('error_performing_operation'));
+};
+
+/**
+ * The HIVE payment WAS signed and broadcast, but actifit-bot did not confirm the
+ * purchase. Say exactly that, with the transaction id, so the user does not pay a second
+ * time and support can find the payment. A toast that stays until dismissed: the panel
+ * that shows errorProceed is hidden when the buy flow finishes. Returns the text too.
+ */
+Vue.prototype.$notifyPaymentNotConfirmed = function (trxId) {
+  const msg = this.$t('payment_sent_not_confirmed').replace('_TX_', escapeHtml(trxId || ''));
+  this.$notify({ group: 'error', text: msg, duration: -1, position: 'top center' });
+  return msg;
 };
 
 // Returns actifit-bot's own message for the key-rotation gate, or null.
@@ -527,12 +594,7 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
 	// Escape characters that are significant inside an HTML attribute value so a
 	// crafted URL cannot terminate the src="" attribute and inject new attributes
 	// (e.g. onerror=). Defence against stored XSS via image/media URLs.
-	const escapeHtmlAttr = (str) => String(str)
-		.replace(/&/g, '&amp;')
-		.replace(/"/g, '&quot;')
-		.replace(/'/g, '&#39;')
-		.replace(/</g, '&lt;')
-		.replace(/>/g, '&gt;');
+	const escapeHtmlAttr = escapeHtml;
 
 	// Process Images (unified approach)
 	const createProxiedImageTag = (url) => {

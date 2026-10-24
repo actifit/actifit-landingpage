@@ -28,7 +28,7 @@
 				  <input type="password" id="active-key" name="active-key" ref="active-key" class="form-control-lg col-sm-8 p-2" v-model="userActvKey">
 				</div>
 				<div class="text-center" v-if="buyHiveExpand">
-				  <button v-on:click="proceedBuyNowHive()" v-if="this.userTokens >= this.minAfitBuyTicket" class="btn btn-brand btn-lg border">{{ $t('Proceed') }}</button>
+				  <button v-on:click="proceedBuyNowHive()" v-if="this.userTokens >= this.minAfitBuyTicket" :disabled="paymentInFlight" class="btn btn-brand btn-lg border">{{ $t('Proceed') }}</button>
 				  <button data-toggle="modal" v-else :data-target="'#buyOptionsModalCart'" class="btn btn-brand btn-lg border">{{ $t('Proceed') }}</button>
 				</div>
 			</div>
@@ -112,6 +112,8 @@
 		buyHiveExpand: false,
 		errorProceed: '',
 		buyInProgress: false,
+		// A HIVE payment is being signed or confirmed: blocks a second transfer.
+		paymentInFlight: false,
 		buyAttempt: false,
 		userActvKey: '',
 		minAfitBuyTicket: process.env.minAfitBuyEarnTicket,
@@ -250,7 +252,8 @@
 							//await this.verifyTrx(response.result, operation);
 							resolve({success: response.success, trx:{id: response.result.id}})
 						}else{
-							reject({error: response.error});
+							// `reject` is not in scope here: resolve, or the caller waits forever.
+							resolve({success: false, trx: null, error: response.message || response.error});
 						}
 						
 					}
@@ -407,7 +410,9 @@
 		if (res.success){
 			bcastRes = res.trx;
 		}else{
-			console.log(err);
+			this.buyInProgress = false;
+			this.errorProceed = this.$signingErrorText(res);
+			return;
 		}
 		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 		let url_string = process.env.actiAppUrl + 'activateMultiGadget/'
@@ -422,8 +427,9 @@
 			url_string += '/' + appendFriend;
 		}
 		
-		if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) || 
-			(localStorage.getItem('acti_login_method') == 'hiveauth')){			
+		// Every browser-signed transaction (Keychain, HiveAuth, typed key) is confirmed
+		// by the route that verifies it ON CHAIN.
+		if (this.$signsInBrowser()){
 			
 			let op_json = JSON.stringify(operation)
 			url_string = new URL( process.env.actiAppUrl + 'activateMultiGadgetKeychain/'
@@ -444,8 +450,8 @@
 		try{
 			let res = await fetch(url);
 			let outcome = await res.json();
-			if (outcome.error){
-				this.errorProceed = outcome;
+			if (this.$confirmFailed(outcome)){
+				this.errorProceed = this.$t('error_performing_operation');
 				console.error(outcome);
 			}else{
 				//update product status
@@ -573,7 +579,9 @@
 		if (res.success){
 			bcastRes = res.trx;
 		}else{
-			console.log(err);
+			this.buyInProgress = false;
+			this.errorProceed = this.$signingErrorText(res);
+			return;
 		}
 		
 		let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
@@ -586,8 +594,9 @@
 						+ bcastRes.id + '/'
 						+ cur_bchain);
 						
-		if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) || 
-			(localStorage.getItem('acti_login_method') == 'hiveauth')){			
+		// Every browser-signed transaction (Keychain, HiveAuth, typed key) is confirmed
+		// by the route that verifies it ON CHAIN.
+		if (this.$signsInBrowser()){
 			
 			let op_json = JSON.stringify(operation)
 			url = new URL( process.env.actiAppUrl + 'buyMultiGadgetKeychain/'
@@ -603,8 +612,8 @@
 		try{
 			let res = await fetch(url);
 			let outcome = await res.json();
-			if (outcome.error){
-				this.errorProceed = outcome;
+			if (this.$confirmFailed(outcome)){
+				this.errorProceed = this.$t('error_performing_operation');
 				console.error(outcome);
 			}else{
 				//update user token count
@@ -657,6 +666,7 @@
 		this.buyHiveExpand = !this.buyHiveExpand;
 	  },
 	  async proceedBuyNowHive (){
+		if (this.paymentInFlight) return;
 		try{
 			this.buyAttempt = true;
 			this.buyInProgress = true;
@@ -723,6 +733,9 @@
 			let operation = [ 
 			   ['transfer', cstm_params]
 			];
+			// The exact operation, for actifit-bot to match against the transaction on chain.
+			let op_json = JSON.stringify(operation);
+			this.paymentInFlight = true;
 			
 			
 			if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain)||
@@ -733,11 +746,9 @@
 				console.log(res);
 				if (res.success){
 					bcastRes = res.trx;
-					let op_json = JSON.stringify(operation)
-					this.confirmCompletion('transfer', payAmount, bcastRes, attempt, op_json);
-					
+					await this.confirmCompletion('transfer', payAmount, bcastRes, attempt, op_json);
 				}else{
-					console.log(err);
+					this.errorCompletion(res);
 				}
 			}else{
 				let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
@@ -748,23 +759,25 @@
 				
 				console.log(outcome);
 				if (outcome.success && outcome.trx){
-					let op_json = JSON.stringify(operation);
-					this.confirmCompletion('transfer', payAmount, outcome.trx.tx, attempt);
-					console.log('after call');
-					//this.$router.push('/login');
+					// op_json routes confirmation to the ON-CHAIN verified route. Without it this
+					// went to buyMultiGadgetHive, which cannot verify a browser-signed transaction:
+					// the HIVE was sent, the purchase refused - and the reply was shown as success.
+					await this.confirmCompletion('transfer', payAmount, outcome.trx.tx, attempt, op_json);
 				}else{
-					this.errorCompletion(outcome.error);
-					
+					this.errorCompletion(outcome);
 				}
 			}
 		}catch(excp){
 			console.log(excp);
+			this.buyInProgress = false;
+		}finally{
+			this.paymentInFlight = false;
+			// The typed active key was for this one payment only.
+			this.userActvKey = '';
 		}
 	  },
 	  async errorCompletion(res){
-		//console.log(res);
-		let err_details = res;//JSON.parse();
-		this.errorProceed = err_details.cause.message;
+		this.errorProceed = this.$signingErrorText(res);
 		//this.buyAttempt = false;
 		this.buyInProgress = false;
 	  },
@@ -797,7 +810,8 @@
 							+ res.id + '/'
 							+ cur_bchain);
 							
-			if (this.isKeychainActive || this.isHiveauthActive){
+			// Every browser-signed payment passes op_json and is verified ON CHAIN.
+			if (op_json){
 				url = new URL( tgtNode + 'buyMultiGadgetHiveKeychain/'
 							+ this.user.account.name + '/'
 							+ memo + '/'
@@ -812,14 +826,16 @@
 			try{
 				let reslt = await fetch(url);
 				let outcome = await reslt.json();
-				if (outcome.error){
+				// {status:'error'} is the answer when on-chain verification fails; checking only
+				// outcome.error showed it as a successful purchase.
+				if (this.$confirmFailed(outcome)){
 					if (attempt == 1){
 						//try again with another API node
 						console.log('>>>>try again');
-						this.confirmCompletion(type, amount, res, attempt + 1, op_json);
+						return await this.confirmCompletion(type, amount, res, attempt + 1, op_json);
 					}else{
-						this.errorProceed = outcome;
 						console.error(outcome);
+						this.errorProceed = this.$notifyPaymentNotConfirmed(res.id);
 					}
 				}else{
 										
@@ -850,10 +866,9 @@
 				if (attempt == 1){
 					//try again with another API node
 					console.log('>>>>try again');
-					this.confirmCompletion(type, amount, res, attempt + 1, op_json);
+					return await this.confirmCompletion(type, amount, res, attempt + 1, op_json);
 				}else{
-					this.errorProceed = outcome;
-					console.error(outcome);
+					this.errorProceed = this.$notifyPaymentNotConfirmed(res.id);
 				}
 				//this.checkingFunds = false;
 			}
@@ -878,7 +893,7 @@
 			}*/
 			
 		}else{
-			this.errorProceed = res.error.message;
+			this.errorProceed = this.$signingErrorText(res);
 		}
 		this.buyAttempt = false;
 		this.buyInProgress = false;

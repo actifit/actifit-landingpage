@@ -316,7 +316,7 @@
 			+ targetUser + '/'
 			+ res.ref_block_num + '/'
 			+ res.id + '/' + this.cur_bchain);
-		if (this.isKeychainActive || this.isHiveauthActive){
+		if (this.$signsInBrowser()){
 
 			let op_json = JSON.stringify(operation)
 			url = new URL( process.env.actiAppUrl + 'addFriendHiveKeychain/'
@@ -392,7 +392,7 @@
 			+ targetUser + '/'
 			+ res.ref_block_num + '/'
 			+ res.id + '/' + this.cur_bchain);
-		if (this.isKeychainActive || this.isHiveauthActive){
+		if (this.$signsInBrowser()){
 
 			let op_json = JSON.stringify(operation)
 			url = new URL( process.env.actiAppUrl + 'cancelFriendRequestHiveKeychain/'
@@ -468,7 +468,7 @@
 			+ targetUser + '/'
 			+ res.ref_block_num + '/'
 			+ res.id + '/' + this.cur_bchain);
-		if (this.isKeychainActive || this.isHiveauthActive){
+		if (this.$signsInBrowser()){
 
 			let op_json = JSON.stringify(operation)
 			url = new URL( process.env.actiAppUrl + 'dropFriendshipHiveKeychain/'
@@ -544,7 +544,7 @@
 			+ targetUser + '/'
 			+ res.ref_block_num + '/'
 			+ res.id+ '/' + this.cur_bchain);
-		if (this.isKeychainActive || this.isHiveauthActive){
+		if (this.$signsInBrowser()){
 
 			let op_json = JSON.stringify(operation)
 			url = new URL( process.env.actiAppUrl + 'acceptFriendHiveKeychain/'

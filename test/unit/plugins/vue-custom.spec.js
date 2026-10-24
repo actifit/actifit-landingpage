@@ -7,11 +7,16 @@ jest.mock('hive-auth-wrapper', () => ({ broadcast: jest.fn(), authenticate: jest
 // $broadcastWithKey runs end to end.
 jest.mock('@hiveio/hive-js', () => ({ broadcast: { send: jest.fn() }, memo: { decode: jest.fn() } }))
 jest.mock('@/utils/keyPrompt', () => ({ requestKey: jest.fn() }))
+// classifyKey reads the chain; the refusal RULE (keyRefusal) stays real.
+jest.mock('@/utils/keyChecks', () => Object.assign({}, jest.requireActual('@/utils/keyChecks'), {
+  classifyKey: jest.fn()
+}))
 
 import Vue from 'vue'
 import { getTransactionErrorMessage } from '@/plugins/vue-custom'
 import hive from '@hiveio/hive-js'
 import { requestKey } from '@/utils/keyPrompt'
+import { classifyKey } from '@/utils/keyChecks'
 
 describe('plugins/vue-custom global helpers', () => {
   describe('getTransactionErrorMessage', () => {
@@ -106,7 +111,7 @@ describe('plugins/vue-custom global helpers', () => {
 
       const result = await Vue.prototype.$processTrxFunc.call(makeContext(null), 'vote', {}, false)
 
-      expect(requestKey).toHaveBeenCalledWith('posting', 'alice')
+      expect(requestKey).toHaveBeenCalledWith('posting', 'alice', [['vote', {}]])
       expect(committed).toContainEqual(['setChatPostingKey', WIF])
       expect(result.success).toBe(true)
     })
@@ -117,7 +122,7 @@ describe('plugins/vue-custom global helpers', () => {
 
       await Vue.prototype.$processTrxFunc.call(makeContext('posting-key-in-memory'), 'transfer', {}, true)
 
-      expect(requestKey).toHaveBeenCalledWith('active', 'alice')
+      expect(requestKey).toHaveBeenCalledWith('active', 'alice', [['transfer', {}]])
       expect(hive.broadcast.send.mock.calls[0][1]).toEqual({ active: WIF })
       // an active key can move funds: it must not end up in the store
       expect(committed.filter(([name]) => name === 'setChatPostingKey')).toEqual([])
@@ -213,7 +218,7 @@ describe('plugins/vue-custom global helpers', () => {
 
       await Vue.prototype.$decodeMemo.call(ctx(null), '#encrypted')
 
-      expect(requestKey).toHaveBeenCalledWith('posting', 'alice')
+      expect(requestKey).toHaveBeenCalledWith('posting', 'alice', expect.any(Array))
       expect(hive.memo.decode).toHaveBeenCalledWith('prompted-wif', '#encrypted')
     })
 
@@ -253,6 +258,7 @@ describe('plugins/vue-custom global helpers', () => {
     it('uses a key the caller already collected instead of prompting again', async () => {
       // the buy-now flows ask for the active key in their own form
       hive.broadcast.send.mockImplementation((tx, keys, cb) => cb(null, { id: 'x' }))
+      classifyKey.mockResolvedValue('active')
       await Vue.prototype.$broadcastWithKey.call(ctx(), [['transfer', {}]], { active: true, wif: 'typed-active' })
       expect(requestKey).not.toHaveBeenCalled()
       expect(hive.broadcast.send.mock.calls[0][1]).toEqual({ active: 'typed-active' })
@@ -498,6 +504,118 @@ describe('plugins/vue-custom global helpers', () => {
     it('returns empty string when there is no metadata', () => {
       expect(Vue.prototype.$fetchReportTags({})).toBe('')
       expect(Vue.prototype.$fetchReportTags(null)).toBe('')
+    })
+  })
+
+  // The buy-now forms collect the active key themselves and pass it as options.wif,
+  // skipping the prompt. That path signs PAYMENTS, so it gets the prompt's checks.
+  describe('$broadcastWithKey with a caller-supplied key', () => {
+    const ctx = () => ({
+      user: { account: { name: 'alice' } },
+      $t: (k) => k,
+      $store: { state: { chatPostingKey: null }, commit: jest.fn() }
+    })
+    const pay = (wif) => Vue.prototype.$broadcastWithKey.call(ctx(), [['transfer', { amount: '1.000 HIVE' }]],
+      { active: true, wif })
+    beforeEach(() => {
+      hive.broadcast.send.mockReset()
+      hive.broadcast.send.mockImplementation((tx, keys, cb) => cb(null, { id: 'x' }))
+      classifyKey.mockReset()
+    })
+
+    it.each([
+      ['owner', 'key_prompt_owner_refused'],
+      ['posting', 'key_prompt_not_active'],
+      ['none', 'key_prompt_not_active'],
+      ['invalid', 'key_prompt_invalid'],
+      // a failed lookup is NOT waved through: the key would sign a payment unchecked
+      ['unknown', 'key_prompt_check_failed']
+    ])('refuses a %s key before signing anything', async (kind, reason) => {
+      classifyKey.mockResolvedValue(kind)
+      const out = await pay('5Ksomething')
+      expect(out.error).toBe(true)
+      expect(out.trx.tx.error).toBe(reason)
+      expect(hive.broadcast.send).not.toHaveBeenCalled()
+    })
+
+    it('signs with a verified active key, trimmed', async () => {
+      classifyKey.mockResolvedValue('active')
+      const out = await pay('  5Kactive  ')
+      expect(classifyKey).toHaveBeenCalledWith('alice', '5Kactive')
+      expect(hive.broadcast.send.mock.calls[0][1]).toEqual({ active: '5Kactive' })
+      expect(out.success).toBe(true)
+    })
+  })
+
+  // vue-notification renders toast text with v-html, and the message can come from an
+  // RPC node. Escaped once at the source, so every caller is covered.
+  describe('broadcast error messages are HTML-escaped', () => {
+    const XSS = '<img src=x onerror=alert(1)>'
+    const ctx = () => ({
+      user: { account: { name: 'alice' } },
+      $t: (k) => k,
+      $notify: jest.fn(),
+      $store: { state: { chatPostingKey: 'k' }, commit: jest.fn() }
+    })
+    beforeEach(() => {
+      hive.broadcast.send.mockReset()
+      hive.broadcast.send.mockImplementation((tx, keys, cb) => cb(new Error(XSS)))
+    })
+
+    it('in the $broadcastWithKey result', async () => {
+      const out = await Vue.prototype.$broadcastWithKey.call(ctx(), [['vote', {}]], {})
+      expect(out.trx.tx.error).toBe('&lt;img src=x onerror=alert(1)&gt;')
+    })
+
+    it('in the $processTrxFunc toast', async () => {
+      localStorage.setItem('std_login', 'true')
+      localStorage.setItem('acti_login_method', '')
+      const c = ctx()
+      c.$broadcastWithKey = Vue.prototype.$broadcastWithKey
+      await Vue.prototype.$processTrxFunc.call(c, 'vote', {}, false)
+      const text = c.$notify.mock.calls[0][0].text
+      expect(text).not.toContain('<img')
+      expect(text).toContain('&lt;img')
+      localStorage.clear()
+    })
+  })
+
+  describe('purchase confirmation helpers', () => {
+    it('$confirmFailed treats BOTH failure shapes as failure', () => {
+      const failed = Vue.prototype.$confirmFailed
+      // {status:'error'} is what the on-chain verified routes answer - and what the
+      // purchase flows used to show as success
+      expect(failed({ status: 'error' })).toBe(true)
+      expect(failed({ error: 'Transaction already verified' })).toBe(true)
+      expect(failed(null)).toBe(true)
+      expect(failed({ status: 'Success' })).toBe(false)
+      expect(failed({ status: 'success' })).toBe(false)
+    })
+
+    it('$signsInBrowser: Keychain, HiveAuth and typed key yes; HiveSigner no', () => {
+      localStorage.clear()
+      expect(Vue.prototype.$signsInBrowser()).toBe(false)
+      localStorage.setItem('std_login', 'true')
+      expect(Vue.prototype.$signsInBrowser()).toBe(true)
+      localStorage.clear()
+    })
+
+    it('$signingErrorText reads every failure shape, never throws, escapes', () => {
+      const text = (r) => Vue.prototype.$signingErrorText.call({ $t: (k) => k }, r)
+      expect(text({ error: true, trx: { tx: { error: 'already &lt;escaped&gt;' } } })).toBe('already &lt;escaped&gt;')
+      expect(text({ success: false, error: '<b>keychain</b>' })).toBe('&lt;b&gt;keychain&lt;/b&gt;')
+      expect(text({ cause: { message: 'hive-js' } })).toBe('hive-js')
+      expect(text(new Error('plain'))).toBe('plain')
+      // the old code read res.cause.message unconditionally: these threw
+      expect(text(true)).toBe('error_performing_operation')
+      expect(text(undefined)).toBe('error_performing_operation')
+    })
+
+    it('$notifyPaymentNotConfirmed: persistent toast, escaped tx id', () => {
+      const c = { $t: () => 'sent: _TX_', $notify: jest.fn() }
+      const msg = Vue.prototype.$notifyPaymentNotConfirmed.call(c, '<x>')
+      expect(msg).toBe('sent: &lt;x&gt;')
+      expect(c.$notify).toHaveBeenCalledWith(expect.objectContaining({ group: 'error', text: msg, duration: -1 }))
     })
   })
 })

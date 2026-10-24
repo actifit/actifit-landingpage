@@ -13,6 +13,9 @@ const ctx = (over = {}) => ({
   cur_bchain: 'HIVE',
   isKeychainActive: false,
   isHiveauthActive: false,
+  // plugins/vue-custom.js: true for every std_login session (Keychain, HiveAuth, typed
+  // key) - they all sign in the browser. Only HiveSigner (false) keeps the old route.
+  $signsInBrowser: () => false,
   friendshipLoader: 'bob',
   addFriendError: '',
   $t: (k) => k,
@@ -32,7 +35,7 @@ describe('components/FriendshipModal propagateFriendReq', () => {
     jest.restoreAllMocks()
   })
 
-  it('fetches the standard addFriend endpoint and notifies on success', async () => {
+  it('HiveSigner: fetches the standard addFriend endpoint and notifies on success', async () => {
     const fetchMock = jest.fn().mockResolvedValue({ json: async () => ({ status: 'success' }) })
     global.fetch = fetchMock
     const c = ctx()
@@ -50,7 +53,7 @@ describe('components/FriendshipModal propagateFriendReq', () => {
   it('routes through the Keychain endpoint with the serialized operation', async () => {
     const fetchMock = jest.fn().mockResolvedValue({ json: async () => ({ status: 'success' }) })
     global.fetch = fetchMock
-    const c = ctx({ isKeychainActive: true })
+    const c = ctx({ isKeychainActive: true, $signsInBrowser: () => true })
 
     await Comp.methods.propagateFriendReq.call(c, txStub, 'bob', [['custom_json', { id: 'actifit' }]])
 
@@ -62,11 +65,26 @@ describe('components/FriendshipModal propagateFriendReq', () => {
   it('routes through the Keychain endpoint when Hiveauth is active', async () => {
     const fetchMock = jest.fn().mockResolvedValue({ json: async () => ({ status: 'success' }) })
     global.fetch = fetchMock
-    const c = ctx({ isHiveauthActive: true })
+    const c = ctx({ isHiveauthActive: true, $signsInBrowser: () => true })
 
     await Comp.methods.propagateFriendReq.call(c, txStub, 'bob', [['custom_json', {}]])
 
     expect(fetchMock.mock.calls[0][0].toString()).toContain('addFriendHiveKeychain')
+  })
+
+  // The typed key now signs in the browser too, so the server never saw this
+  // transaction: only the on-chain verified route can confirm it. The old addFriend
+  // route reads verified_tx, which only server-side signing ever filled.
+  it('routes a TYPED-KEY user through the on-chain verified endpoint', async () => {
+    const fetchMock = jest.fn().mockResolvedValue({ json: async () => ({ status: 'success' }) })
+    global.fetch = fetchMock
+    const c = ctx({ $signsInBrowser: () => true })
+
+    await Comp.methods.propagateFriendReq.call(c, txStub, 'bob', [['custom_json', { id: 'actifit' }]])
+
+    const calledUrl = fetchMock.mock.calls[0][0].toString()
+    expect(calledUrl).toContain('addFriendHiveKeychain/alice/bob/123/abc/HIVE')
+    expect(calledUrl).toContain('operation=')
   })
 
   it('clears the loader and surfaces an error when fetch rejects', async () => {
