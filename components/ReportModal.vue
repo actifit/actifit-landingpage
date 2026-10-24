@@ -512,7 +512,7 @@ export default {
         return new Promise((resolve) => {
           const auth = {
             username: this.user.account.name,
-            token: localStorage.getItem('access_token'),
+            token: localStorage.getItem('hiveauth_has_token'),
             expire: localStorage.getItem('expires'),
             key: localStorage.getItem('key')
           }

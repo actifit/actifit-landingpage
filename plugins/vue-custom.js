@@ -269,7 +269,7 @@ Vue.prototype.$processTrxFunc = async function (op_name, cstm_params, active) {
 	return new Promise((resolve) => {
 	  const auth = {
 		username: this.user.account.name,
-		token: localStorage.getItem('access_token'),
+		token: localStorage.getItem('hiveauth_has_token'),
 		expire: localStorage.getItem('expires'),
 		key: localStorage.getItem('key')
 	  };
