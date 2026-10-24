@@ -36,24 +36,38 @@ describe('Sting chat is disabled', () => {
     expect(guard[0]).toContain('stingChatEnabled')
   })
 
-  it('the widget script is LOADED by exactly one component', () => {
-    // If a second entry point appears, disabling UserMenu's mount stops being enough.
+  it('no OTHER file in the app loads the widget script', () => {
+    // If a second entry point exists, disabling UserMenu's mount is not enough.
+    //
+    // This used to check three hardcoded files - and so missed pages/stingtst.vue, a
+    // public dev route that loaded stwidget.js into our origin on mount, with Keychain
+    // passthrough on. A logged-in user sent to /stingtst would have run the third-party
+    // script anyway, which is the exact exposure this change exists to remove. So scan
+    // EVERYTHING under the app directories rather than a list someone has to maintain.
     //
     // Matches an actual load, not a mention: UserMenu's rationale comment names the
-    // script deliberately, and a bare substring search would flag that as a second
-    // loader. Comment lines are stripped before checking.
+    // script deliberately. Comment lines are stripped before checking.
     const stripComments = (src) => src
       .split('\n')
       .filter((l) => !/^\s*(\/\/|\*|<!--|\/\*)/.test(l))
       .join('\n')
 
-    expect(source('components/StingChat.vue'))
-      .toContain('https://chat.peakd.com/stwidget.js')
-
-    const others = ['components/UserMenu.vue', 'layouts/default.vue', 'pages/login.vue']
-    others.forEach((rel) => {
-      expect(stripComments(source(rel))).not.toContain('stwidget.js')
+    const walk = (dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+      const full = path.join(dir, e.name)
+      if (e.isDirectory()) return walk(full)
+      return /\.(vue|js)$/.test(e.name) ? [full] : []
     })
+
+    const root = path.resolve(__dirname, '../../../')
+    const loaders = ['components', 'pages', 'layouts', 'plugins', 'mixins', 'store', 'middleware']
+      .map((d) => path.join(root, d))
+      .filter((d) => fs.existsSync(d))
+      .flatMap(walk)
+      .filter((f) => stripComments(fs.readFileSync(f, 'utf8')).includes('stwidget.js'))
+      .map((f) => path.relative(root, f).replace(/\\/g, '/'))
+
+    // StingChat.vue keeps the URL for when chat returns; nothing else may load it.
+    expect(loaders).toEqual(['components/StingChat.vue'])
   })
 
   it('the signing gate is still present, for when chat returns', () => {

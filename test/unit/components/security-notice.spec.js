@@ -179,4 +179,35 @@ describe('SecurityNoticeBanner', () => {
     expect(Number(z[1])).toBeGreaterThan(1030)
     expect(Number(z[1])).toBeLessThan(9999)
   })
+
+  it('reserves the SUM of both bars, and out-ranks the cookie bar rule', () => {
+    // Footer.vue reserves only the cookie bar:
+    //   body.cookie-consent-visible { padding-bottom: var(--cookie-banner-height) }
+    // A same-specificity rule here loses on source order, because Footer's style tag is
+    // always emitted after this one - with both bars up the padding collapsed to the
+    // cookie bar alone and the notice covered the footer's last row. jsdom applies no
+    // CSS, so this pins the two properties that make the cascade come out right.
+    const src = fs.readFileSync(
+      path.resolve(__dirname, '../../../components/SecurityNoticeBanner.vue'), 'utf8')
+    const footer = fs.readFileSync(
+      path.resolve(__dirname, '../../../components/Footer.vue'), 'utf8')
+
+    const ours = src.match(/([^{}\n]*security-notice-visible[^{}\n]*)\{([^}]*)\}/)
+    expect(ours).not.toBeNull()
+    const theirs = footer.match(/([^{}\n]*cookie-consent-visible[^{}\n]*)\{([^}]*)\}/)
+    expect(theirs).not.toBeNull()
+
+    // 1. it reserves BOTH heights, not one
+    expect(ours[2]).toMatch(/--cookie-banner-height/)
+    expect(ours[2]).toMatch(/--security-notice-height/)
+
+    // 2. it is strictly MORE specific than Footer's rule, so source order cannot decide
+    const specificity = (sel) => {
+      const s = sel.trim()
+      const classes = (s.match(/\.[\w-]+/g) || []).length
+      const elements = s.replace(/\.[\w-]+/g, '').split(/\s+/).filter(Boolean).length
+      return classes * 10 + elements
+    }
+    expect(specificity(ours[1])).toBeGreaterThan(specificity(theirs[1]))
+  })
 })

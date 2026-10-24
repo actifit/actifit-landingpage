@@ -30,7 +30,10 @@ export default {
     }
   },
   watch: {
-    noticeText () { this.syncBodyOffset() }
+    noticeText () {
+      this.syncBodyOffset()
+      this.observeSize()
+    }
   },
   mounted () {
     // Rehydrate after a reload. The notice must outlive the page it was issued on —
@@ -48,10 +51,7 @@ export default {
       // A resize listener alone goes stale: the bar re-wraps on a locale switch, a late
       // webfont or the icon arriving, none of which fire `resize`. Footer.vue watches the
       // cookie bar the same way.
-      if (typeof ResizeObserver !== 'undefined' && this.$el && this.$el.nodeType === 1) {
-        this.sizeObserver = new ResizeObserver(() => this.syncBodyOffset())
-        this.sizeObserver.observe(this.$el)
-      }
+      this.observeSize()
     }
   },
   beforeDestroy () {
@@ -62,6 +62,23 @@ export default {
     this.setBodyOffset(0)
   },
   methods: {
+    // (Re)attach the ResizeObserver to whatever element is CURRENTLY rendered.
+    //
+    // It cannot be set up once in mounted(): at that point the notice is not yet shown,
+    // so $el is the v-if comment placeholder (nodeType 8), not an element, and there is
+    // nothing to observe. And v-if replaces the element every time the notice comes and
+    // goes, so a single observer would be watching a detached node. So disconnect and
+    // re-observe after each render.
+    observeSize () {
+      if (!process.client || typeof ResizeObserver === 'undefined') return
+      this.$nextTick(() => {
+        if (this.sizeObserver) { this.sizeObserver.disconnect(); this.sizeObserver = null }
+        const el = this.$el
+        if (!el || el.nodeType !== 1) return
+        this.sizeObserver = new ResizeObserver(() => this.syncBodyOffset())
+        this.sizeObserver.observe(el)
+      })
+    },
     // The banner is position:fixed, so without this it permanently covers the last
     // ~45px of every page — which is the footer's bottom bar, including the reCAPTCHA
     // attribution we are required to show while the badge is hidden. Reserve exactly
@@ -101,10 +118,18 @@ export default {
 
 <!-- Un-scoped on purpose: this styles <body>, which a scoped block cannot reach.
      It lives here rather than in Footer.vue because Footer is imported per page and is
-     absent from pages/auth.vue, pages/stingtst.vue and pages/transaction-success.vue,
+     absent from pages/auth.vue and pages/transaction-success.vue,
      whereas this banner renders from the layout on every page. -->
 <style>
-body.security-notice-visible {
+/* `html` is deliberate, NOT redundant. Footer.vue's
+   `body.cookie-consent-visible { padding-bottom: var(--cookie-banner-height) }` has the
+   same specificity (0,1,1) as `body.security-notice-visible`, so with both bars up the
+   tie is broken by SOURCE ORDER - and Footer's style tag is always emitted after this
+   one (this banner renders from the layout before <nuxt/>; Footer is deep in the page).
+   Footer won, the padding collapsed to the cookie bar alone, and the notice sat over
+   the footer's last row. Prefixing `html` lifts this to (0,1,2) so it wins regardless
+   of how the style tags happen to be ordered. */
+html body.security-notice-visible {
   /* both bars stack at the bottom; reserve for whichever are present */
   padding-bottom: calc(var(--cookie-banner-height, 0px) + var(--security-notice-height, 0px));
 }
