@@ -96,6 +96,7 @@
 
   //to validates keys for hive
   import { PublicKey, Signature, hash } from '@hiveio/hive-js/lib/auth/ecc';
+  import signedChallengeLogin from '~/mixins/signedChallengeLogin';
 
   /*import HasClient from 'hive-auth-client';
   const client = new HasClient('hive-auth.arcange.eu', '', true);
@@ -104,6 +105,7 @@
 
 
   export default {
+  mixins: [signedChallengeLogin],
 	head () {
 		return {
 		  title: `Login Page - Actifit.io`,
@@ -193,21 +195,30 @@
 	  onExpiredCaptcha () {
 		this.captchaValid = false;
 	  },
+	  // Takes the /loginVerify body, like the other two methods, so HiveAuth finally
+	  // holds a real API session instead of a browser-only logged-in flag.
+	  //
+	  // access_token is the API JWT, since every x-acti-token caller reads that key. The
+	  // HAS token moves to hiveauth_has_token: it is what $HAS.broadcast needs and is NOT
+	  // interchangeable with the JWT. Holding both in access_token is what left HiveAuth
+	  // users unable to reach any authenticated endpoint.
 	  setHiveauthLoginStatus (json){
-
-		let acct_data = json.HIVE;
-
+		if (!(json && json.success && json.token && json.userdata)){
+			this.failLogin(this.$t('login_error'));
+			return;
+		}
 		let userSC = new Object();
-		userSC.account = acct_data;
-		//append proper login data for SC, while making sure this is recognized as a normal login
+		userSC.account = json.userdata;
 		this.is_logged_in = true;
 		this.$store.commit('setStdLoginUser', true);
 		localStorage.setItem('acti_login_method', 'hiveauth');
-		localStorage.setItem('access_token', this.hiveauth_token);
+		localStorage.setItem('access_token', json.token);
+		localStorage.setItem('hiveauth_has_token', this.hiveauth_token);
 		localStorage.setItem('expires', this.hiveauth_expire);
 		localStorage.setItem('key', this.hiveauth_key);
 		localStorage.setItem('std_login', true)
 		localStorage.setItem('std_login_name', userSC.account.name)
+		this.captureSecurityNotice(json);
 		this.$store.commit('steemconnect/login', userSC);
 		this.postLoginRedirect();
 	  },
@@ -223,12 +234,12 @@
 		}
 	  },
 	  setKeychainLoginStatus (json){
-		console.log('keychain login');
-		console.log(json);
-		if (json && json.success && json.token && json.HIVE){
-
-
-			let acct_data = json.HIVE;
+		// json.userdata, not json.HIVE. The login API returns userdata, and this handler
+		// reading HIVE is why Keychain login on /login was broken for every user while the
+		// modal worked. It also used to console.log the whole response - including the
+		// session JWT - which is gone.
+		if (json && json.success && json.token && json.userdata){
+			let acct_data = json.userdata;
 
 			let userSC = new Object();
 			userSC.account = acct_data;
@@ -239,6 +250,7 @@
 			localStorage.setItem('std_login', true)
 			localStorage.setItem('std_login_name', userSC.account.name)
 			localStorage.setItem('acti_login_method', 'keychain');
+			this.captureSecurityNotice(json);
 			this.$store.commit('steemconnect/login', userSC);
 			this.postLoginRedirect();
 		}else{
@@ -251,14 +263,15 @@
 	  },
 	  // Capture the post-login security notice.
 	  //
-	  // actifit-bot returns, in the /loginAuth SUCCESS body, for a flagged account whose
+	  // actifit-bot returns, in the /loginVerify SUCCESS body, for a flagged account whose
 	  // posting key has not been rotated since the 2026-10-21 incident:
 	  //     security_notice: { code: 'KEY_ROTATION_RECOMMENDED', message: '<guidance>' }
 	  // Login is NOT refused - the account works normally; the user is being advised to
 	  // rotate the key the attacker may also hold.
 	  //
-	  // Only this handler captures it: it is the /loginAuth path. Keychain and HiveAuth
-	  // logins never hit that endpoint and so never carry the field.
+	  // All three login methods now go through /loginVerify, so all three can carry
+	  // it - and every success handler must capture it. Keychain users are likely
+	  // the largest flagged group; missing it there would hide the notice from them.
 	  //
 	  // Stored rather than rendered here on purpose. This component calls closeModal()
 	  // on success and pages/login.vue calls postLoginRedirect(), so a banner rendered at
@@ -323,138 +336,68 @@
 			return;
 		}
 		this.login_in_progress = true;
-		let account = this.$refs["username"].value.trim().toLowerCase();
-		const APP_META = {
-			name:"actifit",
-			description:process.env.socialSharingTitle,
-			icon:"https://actifit.io/img/actifit_logo.png"
-		}
-		// Create an authentication object
-		const auth = {
-		  username: account,
-		  expire: undefined,
-		  key: undefined,
-		}
-		// Retrieving connection status
-		const status = this.$HAS.status()
-		console.log(status)
-		let challenge_data = undefined
+		const account = this.$refs["username"].value.trim().toLowerCase();
 
-		challenge_data = {
-			key_type: "posting",
-			challenge: JSON.stringify({
-				login: account,
-				ts: Date.now(),
-			})
-		}
-		let mainRef = this;
+		// The challenge is the SERVER's message now, not a locally invented one. Previously
+		// HiveAuth proved possession to the browser, which then declared itself logged in
+		// while the server was never involved - so the session was decorative and every
+		// authenticated call failed.
+		// requestLoginChallenge reports its own failure, and more precisely.
+		const challenge = await this.requestLoginChallenge(account);
+		if (!challenge) { return; }
+
+		const APP_META = { name:"actifit", description: process.env.socialSharingTitle, icon:"https://actifit.io/img/actifit_logo.png" };
+		const auth = { username: account, expire: undefined, key: undefined };
+		const challenge_data = { key_type: "posting", challenge: challenge.message };
+		const mainRef = this;
+
 		this.$HAS.authenticate(auth, APP_META, challenge_data, (message) => {
-			console.log(message)    // process auth_wait message
-			const {
-				data, uuid, authData,
-			} = message;
-			console.log(data);
 			if (message.cmd && message.cmd === 'auth_wait'){
 				this.hiveauth_wait = true;
 				this.$nextTick(() => {
-					//this.timeLeft = timeLeft;
-					const authPayload = {
-						uuid: message.uuid,
-						account: account,
-						key: message.key,
-						host: 'wss://hive-auth.arcange.eu'
-					};
+					const authPayload = { uuid: message.uuid, account: account, key: message.key, host: 'wss://hive-auth.arcange.eu' };
 					this.hiveauth_key = message.key;
-					//authentication url
 					const authUri = `has://auth_req/${btoa(JSON.stringify(authPayload))}`;
-
 					const qrLinkElement = mainRef.$refs['hiveauth-qr-link'];
 					const qrElement = mainRef.$refs['hiveauth-qr'];
-					if (!qrLinkElement || !qrElement) {
-						console.error('HiveAuth QR elements are unavailable.')
-						mainRef.hiveauth_wait = false
-						mainRef.error_proceeding = true
-						mainRef.error_msg = mainRef.$t('login_error')
-						return
-					}
-					const QR = new QRious({
-							element: qrElement,
-							background: 'white',
-							backgroundAlpha: 0.8,
-							foreground: 'black',
-							size: 200,
-						});
-					QR.value = authUri;
-					qrLinkElement.href = authUri;
+					const QR = new QRious({ element: qrElement, background: 'white', backgroundAlpha: 0.8, foreground: 'black', size: 200 });
+					QR.value = authUri; qrLinkElement.href = authUri;
 				});
-
 			}
 		}).then(async (message) => {
-			//resolve(res)
-			console.log(message);
 			if (message.cmd && message.cmd === 'auth_ack'){
-				//approved, verify pub key
-				const {
-					data, uuid, authData,
-				} = message;
-				//console.log(data);
-				//console.log(uuid);
-				const { expire, token, challenge: challengeResponse } = data;
-				/*const {
-					data, uuid, authData: { token, key, expire },
-				} = message;
-				const { challenge: challengeResponse } = data;*/
-				console.log(data)
-				//console.log(challengeResponse);
-				const success = this.verifyHiveauth(challenge_data.challenge, data.challenge);
-				//const success = this.verifyHiveauth(challenge, challengeResponse);
-				console.log(success);
+				const { data } = message;
+				const { expire, token } = data;
 				this.hiveauth_wait = false;
 				this.hiveauth_expire = expire;
 				this.hiveauth_token = token;
-				if (success){
-					this.login_in_progress = false;
 
-					try {
-						const acctController = new AbortController();
-						const acctTimeoutId = setTimeout(() => acctController.abort(), 20000);
-						const acctRes = await fetch('/api/proxy/getAccountData?user='+encodeURIComponent(account)+'&bchain=HIVE', {
-							signal: acctController.signal
-						});
-						clearTimeout(acctTimeoutId);
-						const acctJson = await acctRes.json();
-						this.setHiveauthLoginStatus(acctJson);
-					} catch (e) {
-						console.error('HiveAuth account data error:', e);
-						this.error_proceeding = true;
-						this.login_in_progress = false;
-						this.error_msg = this.$t('login_error');
-					}
-				}else{
-					//display error message
-					this.error_proceeding = true;
-					this.login_in_progress = false;
-					this.error_msg = this.$t('login_error');
+				// data.challenge is an OBJECT {challenge: <sig hex>, pubkey}. Verify locally to
+				// fail fast on a malformed reply; the verdict that matters is the server's,
+				// which checks the signature against on-chain posting authority.
+				if (!this.verifyHiveauth(challenge_data.challenge, data.challenge)) {
+					this.failLogin(this.$t('login_error'));
 					return;
 				}
 
+				try {
+					const json = await this.submitLoginVerify(account, challenge.nonce, data.challenge.challenge, 'hiveauth');
+					this.login_in_progress = false;
+					if (json) { this.setHiveauthLoginStatus(json); }
+				} catch (e) {
+					console.error('HiveAuth verify error:', e);
+					this.failLogin(this.$t('login_error'));
+				}
 			}else if (message.cmd && message.cmd === 'auth_nack'){
-				//display error message
-				this.error_proceeding = true;
-				this.login_in_progress = false;
-				this.error_msg = this.$t('auth_rejected_by_user');
+				this.failLogin(this.$t('auth_rejected_by_user'));
 				return;
 			}
 		})
 		.catch(err => {
 			console.error(err)
-			this.error_proceeding = true;
-			this.error_msg = this.$t('login_error');
 			this.hiveauth_wait = false;
-			this.login_in_progress = false;
+			this.failLogin(this.$t('login_error'));
 		})
-
-
 	  },
 	  async verifyKeychain () {
 		return new Promise((resolve) => {
@@ -480,83 +423,21 @@
 			this.error_msg = this.$t('login_error');
 			return;
 		}
-
-		//set proper blockchain selected
 		this.$store.commit('setBchain', this.bchain_val);
-
 		localStorage.setItem('cur_bchain', this.bchain_val)
+		const account_name = this.$refs["username"].value.trim().toLowerCase();
+		this.login_in_progress = true;
 
-		let account_name = this.$refs["username"].value.trim().toLowerCase();
-		const message = account_name + Date.now();
-
-		let user_info = {
-						'username': account_name,
-						'bchain': this.bchain_val
-					}
-		console.log('loginkeychain attempt')
-		console.log(process.env.actiAppUrl);
-		try {
-			const controller = new AbortController();
-			const timeoutId = setTimeout(() => controller.abort(), 20000);
-			let outc = await fetch('/api/proxy/loginKeychain',{
-					method: 'POST',
-					headers: {
-					  'Content-Type': 'application/json'
-					},
-					body: JSON.stringify(user_info),
-					signal: controller.signal
+		// requestSignBuffer, not requestVerifyKey: the proof is now a SIGNATURE over the
+		// server's single-use nonce. The key stays inside the extension.
+		const json = await this.signedChallengeLogin(account_name, 'keychain', (message) =>
+			new Promise((resolve) => {
+				window.hive_keychain.requestSignBuffer(account_name, message, 'Posting', (response) => {
+					resolve(response && response.success === true ? response.result : null);
 				});
-			clearTimeout(timeoutId);
-						// 503 means the endpoint is deliberately disabled (actifit-bot's securityDisabled),
-			// not that the user's credentials are wrong. See the matching note in LoginModal.vue.
-			if (outc.status === 503) {
-				this.error_proceeding = true;
-				this.login_in_progress = false;
-				this.error_msg = this.$t('keychain_login_unavailable');
-				return;
-			}
-			let contt = await outc.json();
-			//console.log(contt)
-
-			if (contt.message){
-				window.hive_keychain.requestVerifyKey(account_name, contt.message, 'Posting', async (response) => {
-				  //console.log(response);
-				  if (response.success === true) {
-					//successfully verified user
-					try {
-						//send the keychain-decrypted proof back to mint a real session token (JWT)
-						const verController = new AbortController();
-						const verTimeoutId = setTimeout(() => verController.abort(), 20000);
-						const verRes = await fetch('/api/proxy/loginKeychainVerify', {
-							method: 'POST',
-							headers: { 'Content-Type': 'application/json' },
-							body: JSON.stringify({ username: account_name, decrypted: response.result, bchain: this.bchain_val }),
-							signal: verController.signal
-						});
-						clearTimeout(verTimeoutId);
-						const verJson = await verRes.json();
-						this.setKeychainLoginStatus(verJson);
-					} catch (e) {
-						console.error('Keychain account data error:', e);
-						this.error_proceeding = true;
-						this.login_in_progress = false;
-						this.error_msg = this.$t('login_error');
-					}
-				  }
-				});
-
-			} else {
-				this.error_proceeding = true;
-				this.login_in_progress = false;
-				this.error_msg = this.$t('login_error');
-			}
-		} catch (e) {
-			console.error('Keychain login error:', e);
-			this.error_proceeding = true;
-			this.login_in_progress = false;
-			this.error_msg = this.$t('login_error');
-		}
-
+			})
+		);
+		if (json) { this.setKeychainLoginStatus(json); }
 	  },
 	  async proceedLogin () {
 		this.captcha_invalid = '';
@@ -600,28 +481,18 @@
 		localStorage.setItem('cur_bchain', this.bchain_val)
 
 		this.login_in_progress = true;
-		let account_name = this.$refs["username"].value.trim().toLowerCase();
-		let priv_pkey = this.$refs["ppkey"].value;
-		let user_info = {
-						'username': account_name,
-						'ppkey': priv_pkey,
-						'bchain': this.bchain_val,
-						'keeploggedin': this.keep_loggedin_val
-					}
+		const account_name = this.$refs["username"].value.trim().toLowerCase();
+		const priv_pkey = this.$refs["ppkey"].value;
 		try {
-			const controller = new AbortController();
-			const timeoutId = setTimeout(() => controller.abort(), 20000);
-			const res = await fetch('/api/proxy/loginAuth',{
-				method: 'POST',
-				headers: {
-				  'Content-Type': 'application/json'
-				},
-				body: JSON.stringify(user_info),
-				signal: controller.signal
-			});
-			clearTimeout(timeoutId);
-			const json = await res.json();
-			this.setUserLoginStatus(json, priv_pkey);
+			// The typed key is used HERE and never transmitted. signBufferSha256 coerces
+			// the WIF itself and asserts on an invalid one, so a bad key throws rather than
+			// producing a junk signature the server rejects with an unhelpful message.
+			// Refuse an active/owner key before anything else touches it.
+			if (!await this.assertPostingOnlyKey(account_name, priv_pkey)) { return; }
+			const json = await this.signedChallengeLogin(account_name, 'posting', (message) =>
+				Signature.signBufferSha256(hash.sha256(message), priv_pkey).toHex()
+			);
+			if (json) { this.setUserLoginStatus(json, priv_pkey); }
 		} catch (e) {
 			console.error('Login error:', e);
 			this.error_proceeding = true;

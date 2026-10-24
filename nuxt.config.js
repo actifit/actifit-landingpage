@@ -317,6 +317,8 @@ module.exports = {
     { src: '~plugins/vue-simplemde', ssr: false },
     { src: '~plugins/v-lightbox', mode: 'client' },
     { src: '@/plugins/vue-mavon-editor', ssr: false },
+    // Must run before anything can broadcast via HiveAuth - see the file header.
+    { src: '~/plugins/hiveauth-token-migration.js', mode: 'client' },
     { src: '~plugins/vue-custom.js' },
     { src: '~/plugins/dark-mode.js' },
     { src: '~/plugins/commonCardMixin.js', mode: 'client' }

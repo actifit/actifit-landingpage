@@ -254,7 +254,11 @@ module.exports = async function (req, res, next) {
     }
 
     // 6. Login proxies
-    const loginPostEndpoints = ['/loginAuth', '/loginKeychain', '/loginKeychainVerify'];
+    // /loginChallenge + /loginVerify are the signed-challenge login (actifit-bot #147).
+    // The posting key is signed in the browser and only the SIGNATURE crosses the wire,
+    // so no raw key passes through this proxy on those two routes.
+    const loginPostEndpoints = ['/loginAuth', '/loginKeychain', '/loginKeychainVerify',
+      '/loginChallenge', '/loginVerify'];
     if (loginPostEndpoints.includes(path)) {
       if (req.method !== 'POST') {
         res.statusCode = 405;
