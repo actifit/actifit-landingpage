@@ -485,6 +485,8 @@
 			// The typed key is used HERE and never transmitted. signBufferSha256 coerces
 			// the WIF itself and asserts on an invalid one, so a bad key throws rather than
 			// producing a junk signature the server rejects with an unhelpful message.
+			// Refuse an active/owner key before anything else touches it.
+			if (!await this.assertPostingOnlyKey(account_name, priv_pkey)) { return; }
 			const json = await this.signedChallengeLogin(account_name, 'posting', (message) =>
 				Signature.signBufferSha256(hash.sha256(message), priv_pkey).toHex()
 			);

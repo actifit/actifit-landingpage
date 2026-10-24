@@ -157,6 +157,7 @@ module.exports = {
   change_my_keys_now: 'Змінити мої ключі зараз',
   login_request_expired: 'Термін дії запиту на вхід сплив. Спробуйте ще раз.',
   login_service_unavailable: 'Вхід тимчасово недоступний. Спробуйте ще раз за хвилину.',
+  posting_key_only_login: 'Це ваш active або owner ключ. Увійдіть лише з POSTING ключем - ніколи не вводьте active або owner ключ на сайті.',
   auto_translated_content: "Автоматично перекладений вміст.",
   click_to_view_original: "Натисніть, щоб переглянути оригінал",
   profile_image_disclaimer: "Будь ласка, зверніть увагу, що зміна зображення профілю може відобразитися не раніше, ніж через 24 години.",

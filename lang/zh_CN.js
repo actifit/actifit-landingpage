@@ -158,6 +158,7 @@ module.exports = {
   change_my_keys_now: '立即更改我的密钥',
   login_request_expired: '登录请求已过期。请重试。',
   login_service_unavailable: '登录暂时不可用。请稍后重试。',
+  posting_key_only_login: '这是您的 active 或 owner 密钥。请仅使用 POSTING 密钥登录 - 切勿在网站上输入 active 或 owner 密钥。',
   auto_translated_content: '自动翻译内容。',
   click_to_view_original: '点击查看原文',
   profile_image_disclaimer: '请注意，个人资料图片的更改可能需要24小时后才能反映出来。',

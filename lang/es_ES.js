@@ -149,6 +149,7 @@ module.exports = {
   change_my_keys_now: 'Cambiar mis claves ahora',
   login_request_expired: 'Tu solicitud de inicio de sesión ha caducado. Inténtalo de nuevo.',
   login_service_unavailable: 'El inicio de sesión no está disponible temporalmente. Inténtalo de nuevo en un momento.',
+  posting_key_only_login: 'Esa es tu clave active u owner. Inicia sesión solo con tu clave POSTING: nunca introduzcas tu clave active u owner en un sitio web.',
   auto_translated_content: 'Contenido Traducido Automáticamente.',
   click_to_view_original: 'Haga clic para ver el original',
   profile_image_disclaimer: 'Ten en cuenta que el cambio de imagen de perfil podría no reflejarse hasta después de 24 horas.',

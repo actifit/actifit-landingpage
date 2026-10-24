@@ -157,6 +157,7 @@ module.exports = {
   change_my_keys_now: '今すぐキーを変更する',
   login_request_expired: 'ログインリクエストの有効期限が切れました。もう一度お試しください。',
   login_service_unavailable: '現在ログインをご利用いただけません。しばらくしてからお試しください。',
+  posting_key_only_login: 'それは active または owner キーです。POSTING キーだけでログインしてください。',
   auto_translated_content: '自動翻訳されたコンテンツ',
   click_to_view_original: 'オリジナルを表示するにはクリック',
   profile_image_disclaimer: 'プロフィール画像の変更が反映されるまで最大24時間かかる場合がありますので、ご了承ください。',

@@ -31,10 +31,56 @@
  * The consuming component must provide: error_proceeding, login_in_progress, error_msg,
  * keep_loggedin_val, and $t.
  */
+import hive from '@hiveio/hive-js'
+
 const REQUEST_TIMEOUT_MS = 20000
 
 export default {
   methods: {
+    /**
+     * Refuse a typed key that is actually the ACTIVE or OWNER key.
+     *
+     * Users paste the wrong key more often than you would think, and the consequences
+     * are not symmetric: a posting key can post and vote, an active key can move funds,
+     * an owner key can take the account. Someone typing an owner key into a web form has
+     * made a much larger mistake than a failed login, and they will not find out from us
+     * unless we tell them.
+     *
+     * hive.blog does the same check (condenser UserSaga.js): "This login gives owner or
+     * active permissions and should not be used here."
+     *
+     * FAILS OPEN on any lookup problem. This guard protects the user from their own
+     * slip, not us from an attacker — an attacker holding the owner key does not need to
+     * get past a client-side check. Blocking login because a chain read failed would
+     * trade a real outage for no security.
+     */
+    async assertPostingOnlyKey (username, wif) {
+      let pub
+      try {
+        pub = hive.auth.wifToPublic(wif)
+      } catch (e) {
+        return true // not a valid WIF at all; let the signer report that
+      }
+      let acct
+      try {
+        const res = await fetch('/api/proxy/getAccountData?user=' +
+          encodeURIComponent(username) + '&bchain=HIVE')
+        const json = await res.json()
+        acct = json && (json.HIVE || json)
+      } catch (e) {
+        return true
+      }
+      if (!acct || !acct.owner || !acct.active) return true
+
+      const pubsOf = (auth) =>
+        (auth && Array.isArray(auth.key_auths)) ? auth.key_auths.map((k) => k[0]) : []
+      if (pubsOf(acct.owner).indexOf(pub) !== -1 || pubsOf(acct.active).indexOf(pub) !== -1) {
+        this.failLogin(this.$t('posting_key_only_login'))
+        return false
+      }
+      return true
+    },
+
     async requestLoginChallenge (username) {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)

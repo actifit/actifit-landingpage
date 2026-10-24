@@ -157,6 +157,7 @@ module.exports = {
   change_my_keys_now: 'Anahtarlarımı şimdi değiştir',
   login_request_expired: 'Giriş isteğinizin süresi doldu. Lütfen tekrar deneyin.',
   login_service_unavailable: 'Giriş geçici olarak kullanılamıyor. Lütfen birazdan tekrar deneyin.',
+  posting_key_only_login: 'Bu sizin active veya owner anahtarınız. Lütfen yalnızca POSTING anahtarınızla giriş yapın - active veya owner anahtarınızı hiçbir sitede girmeyin.',
   auto_translated_content: 'Otomatik Çevrilmiş İçerik.',
   click_to_view_original: 'Orijinalini görüntülemek için tıklayın',
   profile_image_disclaimer: 'Lütfen profil resmi değişikliğinin 24 saat sonrasına kadar yansımayabileceğini unutmayın.',

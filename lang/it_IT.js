@@ -157,6 +157,7 @@ module.exports = {
   change_my_keys_now: 'Cambia le mie chiavi ora',
   login_request_expired: 'La richiesta di accesso è scaduta. Riprova.',
   login_service_unavailable: 'Accesso temporaneamente non disponibile. Riprova tra poco.',
+  posting_key_only_login: 'Questa è la tua chiave active o owner. Accedi solo con la chiave POSTING - non inserire mai la chiave active o owner su un sito web.',
   auto_translated_content: 'Contenuto Tradotto Automaticamente.',
   click_to_view_original: 'Clicca per visualizzare l\'originale',
   profile_image_disclaimer: 'Nota che la modifica dell\'immagine del profilo potrebbe non essere visibile prima di 24 ore.',

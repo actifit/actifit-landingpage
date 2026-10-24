@@ -412,6 +412,8 @@
           // priv_pkey still reaches setUserLoginStatus, which puts it in the Vuex store
           // for the chat widget. That is the remaining in-browser exposure and is
           // deliberately out of scope here -- see the StingChat signing gate.
+          // Refuse an active/owner key before anything else touches it.
+          if (!await this.assertPostingOnlyKey(account_name, priv_pkey)) { return; }
           const json = await this.signedChallengeLogin(account_name, 'posting', (message) =>
             Signature.signBufferSha256(hash.sha256(message), priv_pkey).toHex()
           );

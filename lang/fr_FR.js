@@ -152,6 +152,7 @@ module.exports = {
   change_my_keys_now: 'Changer mes clés maintenant',
   login_request_expired: 'Votre demande de connexion a expiré. Veuillez réessayer.',
   login_service_unavailable: 'La connexion est temporairement indisponible. Veuillez réessayer dans un instant.',
+  posting_key_only_login: 'Il s’agit de votre clé active ou owner. Connectez-vous uniquement avec votre clé POSTING - n’entrez jamais votre clé active ou owner sur un site web.',
   auto_translated_content: 'Contenu traduit automatiquement.',
   click_to_view_original: 'Cliquez pour voir l\'original',
   profile_image_disclaimer: 'Veuillez noter que le changement de l\'image de profil peut ne pas être visible avant 24 heures.',
