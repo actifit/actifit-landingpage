@@ -367,9 +367,17 @@
           // exactly the bug this change exists to remove.
           try {
             const outc = await fetch('/api/proxy/verifyLoginCaptcha?token='+encodeURIComponent(token));
-            const captchaJson = await outc.json();
-            // A rejected token still blocks. Only the inability to OBTAIN one is tolerated.
-            if (!outc.ok || captchaJson.error){ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('login_error'); return; }
+            // A verifier that is DOWN - any 5xx, including the proxy's own 503 when the
+            // check times out - is the same as one that is unreachable: not a verdict, so
+            // tolerated exactly like the catch below. Treating it as a rejection told users
+            // whose only problem was a slow Google "your key is incorrect".
+            if (outc.status >= 500) {
+              console.warn('captcha verification unavailable, continuing without it:', outc.status);
+            } else {
+              const captchaJson = await outc.json();
+              // A rejected token still blocks. Only the inability to OBTAIN one is tolerated.
+              if (!outc.ok || captchaJson.error){ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('login_error'); return; }
+            }
           } catch (e) {
             console.warn('captcha verification unreachable, continuing without it:', e && e.message);
           }

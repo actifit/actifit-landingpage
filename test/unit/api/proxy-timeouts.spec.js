@@ -42,6 +42,29 @@ describe('proxy upstream calls', () => {
     expect(timeouts.length).toBe(calls.length)
   })
 
+  it('every limit is a real positive number', () => {
+    // A review proved the other assertions here passed with every limit set to 0 - which
+    // axios treats as NO timeout. This closes that hole for the source checks; the
+    // behavioural spec (proxy-hung-upstream.spec.js) closes it for real.
+    const block = src.match(/const T = \{([\s\S]*?)\};/)
+    expect(block).not.toBeNull()
+    const values = [...block[1].matchAll(/^\s*\w+:\s*(\d+)/gm)].map((m) => Number(m[1]))
+    expect(values.length).toBeGreaterThanOrEqual(7)
+    values.forEach((v) => expect(v).toBeGreaterThan(0))
+    expect(Number(src.match(/axios\.create\(\{\s*timeout:\s*(\d+)/)[1])).toBeGreaterThan(0)
+  })
+
+  it('the deadline uses a manual AbortController, not AbortSignal.timeout', () => {
+    // Production runs Node 16.20.2 (package.json engines); AbortSignal.timeout() only
+    // exists from Node 17.3 and would throw on every upstream call.
+    const pkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../../package.json'), 'utf8'))
+    expect(pkg.engines.node).toMatch(/16\./)
+    const code = src.split('\n').filter((l) => !/^\s*(\/\/|\*)/.test(l)).join('\n')
+    expect(code).not.toMatch(/AbortSignal\.timeout/)
+    expect(code).toMatch(/new AbortController\(\)/)
+    expect(code).toMatch(/interceptors\.request\.use/)
+  })
+
   it('login times out before the client\'s 20s abort', () => {
     // The proxy must give up FIRST and return a real error; otherwise the browser's own
     // abort or Cloudflare's 504 decides what the user sees.

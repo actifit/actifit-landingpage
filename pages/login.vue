@@ -461,15 +461,25 @@
 
 		//verify recaptcha-v3
 
-		let outc = await fetch('/api/proxy/verifyLoginCaptcha?token='+encodeURIComponent(token));
-		console.log(outc);
-		let captchaJson = await outc.json();
-
-		if (!outc.ok || captchaJson.error){
-			this.error_proceeding = true;
-			this.login_in_progress = false;
-			this.error_msg = this.$t('login_error');
-			return;
+		// Same rule as LoginModal: a rejected token blocks, an UNAVAILABLE verifier does
+		// not. A 5xx (including the proxy's 503 on timeout) is not a verdict. And .json() is
+		// guarded: on a Cloudflare HTML error page it throws, which used to leave this
+		// button dead with no message.
+		try {
+			const outc = await fetch('/api/proxy/verifyLoginCaptcha?token='+encodeURIComponent(token));
+			if (outc.status >= 500) {
+				console.warn('captcha verification unavailable, continuing without it:', outc.status);
+			} else {
+				const captchaJson = await outc.json();
+				if (!outc.ok || captchaJson.error){
+					this.error_proceeding = true;
+					this.login_in_progress = false;
+					this.error_msg = this.$t('login_error');
+					return;
+				}
+			}
+		} catch (e) {
+			console.warn('captcha verification unreachable, continuing without it:', e && e.message);
 		}
 		//otherwise, we're good, continue
 
