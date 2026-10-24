@@ -312,16 +312,9 @@
 			let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 			//let cur_bchain = 'STEEM';
 			
-			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+op_json+'&bchain='+cur_bchain);
-			
-			let reqHeads = new Headers({
-			  'Content-Type': 'application/json',
-			  'x-acti-token': 'Bearer ' + accToken,
-			});
-			let res = await fetch(url, {
-				headers: reqHeads
-			});
-			let outcome = await res.json();
+			// Signed IN THE BROWSER with the user's own key - /performTrx is gone.
+			// Same response shape as before, so the handling below is unchanged.
+			let outcome = await this.$broadcastWithKey(operation, { active: !!forceActive, bchain: cur_bchain });
 			//console.log(outcome);
 			if (outcome.error){
 				console.log(outcome.error);
@@ -749,18 +742,9 @@
 			}else{
 				let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 				
-				let url = new URL(process.env.actiAppUrl + 'performTrxPost/?user='+this.user.account.name+'&bchain='+cur_bchain);
-				
-				let reqHeads = new Headers({
-				  'Content-Type': 'application/json',
-				  'x-acti-token': 'Bearer ' + accToken,
-				});
-				let res = await fetch(url, {
-					method: 'POST',
-					headers: reqHeads,
-					body: JSON.stringify({'operation': JSON.stringify(operation), 'active': this.userActvKey})
-				});
-				let outcome = await res.json();
+				// Signed IN THE BROWSER with the user's own key - /performTrx is gone.
+				// Same response shape as before, so the handling below is unchanged.
+				let outcome = await this.$broadcastWithKey(operation, { active: true, bchain: cur_bchain, wif: this.userActvKey });
 				
 				console.log(outcome);
 				if (outcome.success && outcome.trx){
