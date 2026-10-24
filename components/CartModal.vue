@@ -260,7 +260,7 @@
 			return new Promise((resolve) => {
 				const auth = {
 				  username: this.user.account.name,
-				  token: localStorage.getItem('access_token'),//should be changed in V1 (current V0.8)
+				  token: localStorage.getItem('hiveauth_has_token'),//should be changed in V1 (current V0.8)
 				  expire: localStorage.getItem('expires'),
 				  key: localStorage.getItem('key')
 				}

@@ -116,6 +116,8 @@ module.exports = {
   forgot_my_posting_key: 'Forgot my posting key?',
   keychain_login_unavailable: 'Hive Keychain login is temporarily unavailable while we complete security maintenance. Please sign in with your posting key, or with HiveAuth.',
   change_my_keys_now: 'Change my keys now',
+  login_request_expired: 'Your login request timed out. Please try again.',
+  login_service_unavailable: 'Login is temporarily unavailable. Please try again in a moment.',
   auto_translated_content: 'Auto-Translated Content.',
   click_to_view_original: 'Click to view original',
   profile_image_disclaimer: 'Please note that the profile image change might not be reflected till after 24 hours.',

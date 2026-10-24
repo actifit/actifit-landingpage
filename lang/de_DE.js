@@ -150,6 +150,8 @@ module.exports = {
   forgot_my_posting_key: 'Posting-Schlüssel vergessen?',
   keychain_login_unavailable: 'Die Anmeldung mit Hive Keychain ist während unserer Sicherheitswartung vorübergehend nicht verfügbar. Bitte melde dich mit deinem Posting-Key oder mit HiveAuth an.',
   change_my_keys_now: 'Meine Schlüssel jetzt ändern',
+  login_request_expired: 'Ihre Anmeldeanfrage ist abgelaufen. Bitte versuchen Sie es erneut.',
+  login_service_unavailable: 'Die Anmeldung ist vorübergehend nicht verfügbar. Bitte versuchen Sie es gleich erneut.',
   auto_translated_content: 'Automatisch übersetzter Inhalt.',
   click_to_view_original: 'Klicken, um das Original anzuzeigen',
   profile_image_disclaimer: 'Bitte beachten Sie, dass die Änderung des Profilbilds möglicherweise erst nach 24 Stunden sichtbar ist.',

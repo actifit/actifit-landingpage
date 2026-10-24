@@ -155,6 +155,8 @@ module.exports = {
   forgot_my_posting_key: 'Nie pamiętasz klucza do publikacji?',
   keychain_login_unavailable: 'Logowanie przez Hive Keychain jest tymczasowo niedostępne podczas prac serwisowych. Zaloguj się swoim kluczem postingowym lub przez HiveAuth.',
   change_my_keys_now: 'Zmień moje klucze teraz',
+  login_request_expired: 'Twoje żądanie logowania wygasło. Spróbuj ponownie.',
+  login_service_unavailable: 'Logowanie jest chwilowo niedostępne. Spróbuj ponownie za chwilę.',
   auto_translated_content: 'Treść przetłumaczona automatycznie.',
   click_to_view_original: 'Kliknij, aby zobaczyć oryginał',
   profile_image_disclaimer: 'Pamiętaj, że zmiana zdjęcia profilowego może być widoczna dopiero po 24 godzinach.',

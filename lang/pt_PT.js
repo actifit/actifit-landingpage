@@ -155,6 +155,8 @@ module.exports = {
   forgot_my_posting_key: 'Esqueceu minha chave de postagem?',
   keychain_login_unavailable: 'O início de sessão com o Hive Keychain está temporariamente indisponível durante a manutenção de segurança. Por favor, inicie sessão com a sua chave de publicação ou com o HiveAuth.',
   change_my_keys_now: 'Alterar as minhas chaves agora',
+  login_request_expired: 'O seu pedido de login expirou. Tente novamente.',
+  login_service_unavailable: 'O login está temporariamente indisponível. Tente novamente dentro de momentos.',
   auto_translated_content: 'Conteúdo Traduzido Automaticamente.',
   click_to_view_original: 'Clique para ver o original',
   profile_image_disclaimer: 'Por favor, note que a alteração da imagem de perfil pode não ser refletida até 24 horas depois.',
