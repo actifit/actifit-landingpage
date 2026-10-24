@@ -75,8 +75,8 @@
       <!-- END: FIXED LANGUAGE SWITCHER IMPLEMENTATION             -->
       <!-- ======================================================= -->
 
-      <!-- StingChat -->
-      <li class="nav-item mr-2" v-if="user && !hideVisualControls">
+      <!-- StingChat - OFF, see stingChatEnabled below -->
+      <li class="nav-item mr-2" v-if="user && !hideVisualControls && stingChatEnabled">
         <StingChat :user="this.user" />
       </li>
 
@@ -202,6 +202,22 @@
 import LoginModal from '~/components/LoginModal'
 import { mapGetters } from 'vuex'
 import SteemStats from '~/components/SteemStats'
+// Sting chat is TEMPORARILY DISABLED.
+//
+// It loads https://chat.peakd.com/stwidget.js into the actifit.io origin with no SRI and
+// no version pin, and hands that script the user's plaintext posting key via
+// setPostingKey. So a compromise or malicious update of one third-party file reaches
+// every posting-key user's key, and anything else in our origin - including anything
+// that script loads - can read our localStorage.
+//
+// That single fact is what makes storing credentials in this origin materially riskier
+// than it is for other Hive front ends, which do not run third-party code in theirs.
+//
+// Turn this back on only once the script is vendored or pinned with SRI, and preferably
+// once the posting key no longer reaches it at all. The signing gate in StingChat.vue
+// stays in place for that day; it is not a substitute for this.
+const STING_CHAT_ENABLED = false
+
 import StingChat from '~/components/StingChat'
 import AutocompleteUsernameInput from '~/components/AutocompleteUsernameInput';
 
@@ -245,6 +261,8 @@ export default {
     }
   },
   computed: {
+    // see STING_CHAT_ENABLED above
+    stingChatEnabled () { return STING_CHAT_ENABLED },
     ...mapGetters('steemconnect', ['user']),
     ...mapGetters(['userTokens', 'userRank', 'userRankObj', 'referrals', 'bchain']),
     ...mapGetters(['moderators']),
