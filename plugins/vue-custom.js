@@ -2,6 +2,10 @@ import Vue from 'vue'
 
 //Hive auth services
 import HAS from 'hive-auth-wrapper';
+// The SAME hive-js instance store/actions.js configures (node URL, alternative
+// endpoints) - module singleton - so broadcasts below go to the configured node.
+import hive from '@hiveio/hive-js';
+import { requestKey } from '~/utils/keyPrompt';
 Vue.prototype.$HAS = HAS;
 
 //sanitization
@@ -308,46 +312,146 @@ Vue.prototype.$processTrxFunc = async function (op_name, cstm_params, active) {
 		});
 	});
   } else {
-	let operation = [[op_name, cstm_params]];
-	console.log('broadcasting');
-	console.log(operation);
-
-	let accToken = localStorage.getItem('access_token');
-	let op_json = JSON.stringify(operation);
-	let cur_bchain = localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : '';
-	let url = new URL(process.env.actiAppUrl + 'performTrx/?user=' + this.user.account.name + '&operation=' + op_json + '&bchain=' + cur_bchain);
-	let reqHeads = new Headers({
-	  'Content-Type': 'application/json',
-	  'x-acti-token': 'Bearer ' + accToken
-	});
-
-	let res = await fetch(url, {
-	  headers: reqHeads
-	});
-
-	let outcome = await res.json();
-	console.log(outcome);
-
-	if (!outcome || outcome.error || !outcome.trx) {
-	  console.log(outcome && outcome.error);
-
-	  let err_msg = getTransactionErrorMessage(outcome) || this.$t('error_performing_operation');
-	  if (err_msg.includes('missing') && err_msg.includes('authority')) {
-		localStorage.removeItem('access_token');
-		this.error_msg = this.$t('session_expired_login_again');
-		this.$store.dispatch('steemconnect/logout');
-	  }
-
-	  this.$notify({
-		group: 'error',
-		text: err_msg,
-		position: 'top center'
-	  });
-
-	  return { success: false, trx: null, error: err_msg };
-	} else {
-	  return { success: true, trx: outcome.trx };
+	// Typed-key login: sign and broadcast IN THE BROWSER.
+	//
+	// This branch used to send the operation to /performTrx, where the SERVER signed it
+	// with a posting key it had stored. That is what the incident abused - stored keys
+	// signed Hive-Engine drains server-side - and /performTrx is now permanently
+	// disabled. Since the signed-challenge login, the server never holds a key at all,
+	// so typed-key users could log in but not vote, comment, post or transfer.
+	//
+	// Return shape is unchanged - { success, trx: { tx }, error? } - so no caller needs
+	// to change. hive-js returns { id, ref_block_num, ... }: `id` is the real transaction
+	// id, which payment confirmation depends on, and ref_block_num matches what the old
+	// server path returned.
+	const out = await this.$broadcastWithKey([[op_name, cstm_params]], { active: active });
+	if (out.success) return { success: true, trx: out.trx };
+	const err_msg = out.trx.tx.error;
+	// A cancelled prompt is the user's own choice, not an error worth a red toast.
+	if (!out.cancelled) {
+	  this.$notify({ group: 'error', text: err_msg, position: 'top center' });
 	}
+	return { success: false, trx: null, error: err_msg };
+  }
+};
+
+/**
+ * Sign and broadcast operations IN THE BROWSER with the typed-key user's own key.
+ *
+ * Shared by $processTrxFunc and by every component that used to call /performTrx
+ * directly - one implementation, so they cannot drift (see utils/keyChecks.js for why
+ * that matters here).
+ *
+ * Returns the response shape /performTrx used to return, so callers' existing outcome
+ * handling keeps working unchanged:
+ *   success: { success: true, trx: { tx: <broadcast result incl. id> } }
+ *   failure: { error: true, trx: { tx: { error: <message> } }, cancelled?: true }
+ *
+ * Does NOT notify: the direct callers already raise their own toast on failure, and
+ * doubling it would be noise. $processTrxFunc notifies for its own callers.
+ *
+ * HIVE ONLY. Typed-key login is Hive-only (the signed-challenge login verifies against
+ * the Hive account), so the key held here IS a Hive key; signing a Steem or Blurt
+ * operation with it would fail anyway. Saying so plainly beats an opaque chain error.
+ */
+/**
+ * Decrypt a memo addressed to the user, in the browser.
+ *
+ * Replaces /memoDecode, which had the SERVER decrypt with a posting key it had stored for
+ * the user. That route is permanently disabled and the server holds no keys, so the 3Speak
+ * session flow (connectSession3S, which fetches an encrypted access token from 3Speak and
+ * must decrypt it) was dead for EVERY login method - it never branched by method at all.
+ *
+ * Returns the shape /memoDecode returned, so callers' handling is unchanged:
+ *   { xcstkn: <decoded memo> }  or  { error: <message> }
+ *
+ * Keychain decrypts in the extension: requestVerifyKey IS memo decryption. A typed key
+ * decrypts locally with hive-js. HiveAuth has no memo-decrypt operation; it never worked
+ * here either (the server held no key for HiveAuth users), so this is not a regression.
+ */
+Vue.prototype.$decodeMemo = async function (memo) {
+  if (!memo) return { error: this.$t('error_performing_operation') };
+  const account = this.user && this.user.account && this.user.account.name;
+  const method = localStorage.getItem('acti_login_method');
+  try {
+	if (method === 'keychain' && window.hive_keychain) {
+	  const decoded = await new Promise((resolve) => {
+		window.hive_keychain.requestVerifyKey(account, memo, 'Posting',
+		  (r) => resolve(r && r.success ? r.result : null));
+	  });
+	  return decoded ? { xcstkn: decoded } : { error: this.$t('signing_cancelled') };
+	}
+	if (method === 'hiveauth') {
+	  return { error: this.$t('error_performing_operation') };
+	}
+	let wif = this.$store.state.chatPostingKey;
+	if (!wif) {
+	  wif = await requestKey('posting', account);
+	  if (wif) this.$store.commit('setChatPostingKey', wif);
+	}
+	if (!wif) return { error: this.$t('signing_cancelled') };
+	return { xcstkn: hive.memo.decode(wif, memo) };
+  } catch (e) {
+	return { error: (e && e.message) || this.$t('error_performing_operation') };
+  }
+};
+
+Vue.prototype.$broadcastWithKey = async function (operations, opts) {
+  const options = opts || {};
+  const active = !!options.active;
+  const bchain = String(options.bchain || 'HIVE').toUpperCase();
+  const fail = (msg, extra) => Object.assign({ error: true, trx: { tx: { error: msg } } }, extra || {});
+
+  if (bchain !== 'HIVE') {
+	return fail(this.$t('typed_key_hive_only'));
+  }
+
+  const account = this.user && this.user.account && this.user.account.name;
+  const keyType = active ? 'active' : 'posting';
+
+  let wif;
+  if (options.wif) {
+	// The caller already collected the key in its own form (the buy-now flows ask for
+	// the active key up front). Use it rather than prompting a second time.
+	wif = options.wif;
+  } else if (active) {
+	// Active keys are requested PER ACTION and never kept: one can move funds.
+	wif = await requestKey('active', account);
+  } else {
+	// The posting key lives in memory for the session, put there at login. After a
+	// reload it is gone (memory-only by design), so ask once and keep it for the rest
+	// of the session.
+	wif = this.$store.state.chatPostingKey;
+	if (!wif) {
+	  wif = await requestKey('posting', account);
+	  if (wif) this.$store.commit('setChatPostingKey', wif);
+	}
+  }
+
+  if (!wif) {
+	return fail(this.$t('signing_cancelled'), { cancelled: true });
+  }
+
+  try {
+	const result = await new Promise((resolve, reject) => {
+	  // keys MUST be an object keyed by role. hive-js signs with `for (k in keys)`, so
+	  // a bare WIF string would iterate its CHARACTERS and sign with garbage.
+	  hive.broadcast.send({ extensions: [], operations: operations }, { [keyType]: wif },
+		(err, res) => (err ? reject(err) : resolve(res)));
+	});
+	return { success: true, trx: { tx: result } };
+  } catch (err) {
+	const err_msg = getTransactionErrorMessage({ error: err }) ||
+	  (err && err.message) || this.$t('error_performing_operation');
+	// A posting key that no longer has authority (the user rotated it) must not keep
+	// being retried from memory. Drop it so the next action asks for the current one.
+	if (!active && /missing.*authority|missing required posting/i.test(err_msg)) {
+	  this.$store.commit('setChatPostingKey', null);
+	}
+	return fail(err_msg);
+  } finally {
+	// Release our reference to an active key as soon as the broadcast settles.
+	if (active) wif = null;
   }
 };
 
