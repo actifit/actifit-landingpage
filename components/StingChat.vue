@@ -58,6 +58,57 @@ import hive from '@hiveio/hive-js'
 import { PrivateKey, cryptoUtils } from '@hiveio/dhive'
 
 const WIDGET_SCRIPT_URL = 'https://chat.peakd.com/stwidget.js'
+// Origin of the chat iframe (see `new StWidget('https://chat.peakd.com/t/...')` below).
+// StWidget's own `frameOrigin` defaults to '*', so it does not restrict who may talk to
+// the bridge -- we have to check it ourselves.
+const WIDGET_ORIGIN = 'https://chat.peakd.com'
+
+// What the chat frame legitimately asks us to sign. Verified against Sting's live
+// bundles (stuploader.js, stlib.js, the embed's index bundle), NOT assumed -- an earlier
+// version of this gate allowed only `upload/...` and would have broken message sending,
+// DMs, edits, flags and preferences writes, which are the chat's whole purpose.
+//
+//   upload/<byteLength>/<sha256hex>        Upload.toSignableMessage
+//   download/<id>/<timestamp>              Uploader.downloadWithKeychain
+//   {login:"<user>"}                       first-time Sting login proof
+//   "<type>","<mentions>","<conv>",<json>,<ts>   SignableMessage.toSignableTextFormat
+//
+// WHY A GATE AT ALL: the requestSignBuffer branch below signs sha256(args[1]) with the
+// user's posting key, with no prompt, for whoever controls the chat frame. actifit-bot's
+// signed-challenge login turns a signature over its challenge message into a full API
+// session, so an ungated signer is an account-takeover oracle -- and would serve any
+// other site's challenge equally well.
+const STING_UPLOAD_RE = /^upload\/\d{1,12}\/[0-9a-f]{64}$/
+const STING_DOWNLOAD_RE = /^download\/[A-Za-z0-9._~-]{1,128}\/\d{1,20}$/
+// Group-key generation (the chat's "Generate" button, NewUserMessageModal): Sting signs
+// `timestamp + Math.random()` purely to harvest entropy for a new group key. Refusing it
+// killed encrypted group chat SILENTLY -- the caller has no catch, so nothing appeared in
+// the UI and it read as a Sting bug. Signing this is no more revealing than an upload
+// hash: the value is generated locally and used only as a seed.
+const STING_GENKEY_RE = /^generateKey \d{1,20} 0?\.\d+(e-\d+)?$/
+
+export function isStingSignable (text, username) {
+  if (typeof text !== 'string' || !text.length) return false
+  if (STING_UPLOAD_RE.test(text) || STING_DOWNLOAD_RE.test(text) ||
+      STING_GENKEY_RE.test(text)) return true
+  // Bound to the signed-in user: we never prove someone else's login.
+  if (username && text === '{login:"' + username + '"}') return true
+
+  // SignableMessage is five comma-joined JSON values, so wrapping it in brackets must
+  // parse to exactly five. Checking the STRUCTURE rather than the content is deliberate:
+  // the message body is arbitrary user text and cannot be pattern-matched, but a login
+  // challenge is not five JSON values and cannot be made into them. Smuggling one inside
+  // the body does not help either -- the bytes signed are the whole envelope, so the
+  // resulting signature does not verify against the bare challenge.
+  try {
+    const parts = JSON.parse('[' + text + ']')
+    return Array.isArray(parts) && parts.length === 5 &&
+      typeof parts[0] === 'string' && typeof parts[1] === 'string' &&
+      typeof parts[2] === 'string' && typeof parts[4] === 'number'
+  } catch (e) {
+    return false
+  }
+}
 let widgetScriptPromise = null
 
 export default {
@@ -309,6 +360,14 @@ export default {
       widget.handleWithHivejs = (event, messageId, request, args) => {
         let operation
 
+        // Only the chat frame may drive this bridge. StWidget does not check the sender,
+        // and every branch below acts with the user's posting key.
+        if (event.origin !== WIDGET_ORIGIN) {
+          this.postWalletResponse(widget, event, messageId,
+            { success: false, error: 'Rejected chat wallet request from an unexpected origin.' })
+          return
+        }
+
         try {
           if (request === 'requestBroadcast' && widget.isAllowedOperation(args[1]) && args[2] === 'Posting') {
             operation = new Promise((resolve) => {
@@ -327,15 +386,25 @@ export default {
             if (decoded.startsWith('#')) decoded = decoded.substring(1)
             operation = Promise.resolve({ success: true, error: null, result: decoded })
           } else if (request === 'requestSignBuffer' && args[2] === 'Posting') {
-            operation = Promise.resolve({
-              success: true,
-              error: null,
-              // Match Sting uploader's Upload.signWithKey implementation:
-              // compact-sign the SHA-256 digest of the upload challenge.
-              result: PrivateKey.fromString(postingKey)
-                .sign(cryptoUtils.sha256(args[1]))
-                .toString('hex')
-            })
+            // read once: re-reading args[1] after the check would let a same-origin
+            // getter return something different to the signer than to the gate
+            const signText = args[1]
+            if (!isStingSignable(signText, this.postingKeyUsername)) {
+              operation = Promise.resolve({
+                success: false,
+                error: 'Refused to sign: not a recognised Sting request.'
+              })
+            } else {
+              operation = Promise.resolve({
+                success: true,
+                error: null,
+                // Match Sting uploader's Upload.signWithKey implementation:
+                // compact-sign the SHA-256 digest of the upload challenge.
+                result: PrivateKey.fromString(postingKey)
+                  .sign(cryptoUtils.sha256(signText))
+                  .toString('hex')
+              })
+            }
           } else if (request === 'requestEncodeMessage' && args[3] === 'Posting') {
             const recipientPublicKey = args[0] === args[1]
               ? hive.auth.wifToPublic(postingKey)
@@ -376,6 +445,17 @@ export default {
 
       widget.handleWithKeychain = (event, messageId, request, args) => {
         let keychainCall = null
+
+        // Same guard as the hivejs bridge. StWidget accepts a bare 'stlib' message name
+        // from any sender, so without this any frame or opener that can postMessage into
+        // the page can raise a Keychain prompt that appears to come from actifit.io.
+        // Keychain does prompt, so this is social-engineering-grade rather than silent --
+        // but there is no reason for the two bridges to differ.
+        if (event.origin !== WIDGET_ORIGIN) {
+          this.postWalletResponse(widget, event, messageId,
+            { success: false, error: 'Rejected chat wallet request from an unexpected origin.' })
+          return
+        }
 
         if (request === 'requestBroadcast' && widget.isAllowedOperation(args[1]) && args[2] === 'Posting') {
           keychainCall = this.callKeychain(request, [args[0], args[1], 'Posting'])

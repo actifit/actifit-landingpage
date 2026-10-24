@@ -265,7 +265,7 @@ describe('components/StingChat.vue', () => {
       { source: { postMessage }, origin: 'https://chat.peakd.com' },
       'upload-1',
       'requestSignBuffer',
-      ['alice', 'upload/123/abc123', 'Posting']
+      ['alice', 'upload/4096/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'Posting']
     )
     await Promise.resolve()
     await Promise.resolve()
@@ -274,7 +274,7 @@ describe('components/StingChat.vue', () => {
     expect(response.success).toBe(true)
     expect(response.result).toMatch(/^[0-9a-f]{130}$/)
     const recoveredKey = Signature.fromString(response.result)
-      .recover(cryptoUtils.sha256('upload/123/abc123'))
+      .recover(cryptoUtils.sha256('upload/4096/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'))
       .toString()
     expect(recoveredKey).toBe(PrivateKey.fromString(senderKey).createPublic().toString())
   })
