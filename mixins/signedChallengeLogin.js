@@ -113,7 +113,12 @@ export default {
       // Reporting it as a credential failure is the same mistake that, during the
       // incident, told Keychain users their key was incorrect and sent them off
       // rotating keys that were perfectly fine.
-      if (res.status === 503) {
+      // ANY 5xx, not just 503. Cloudflare's own 502/504/52x come straight from the edge
+      // and never reach the proxy code, so the proxy cannot translate them - and they
+      // used to fall through to "your key is incorrect". Observed for real right after
+      // the signed-challenge login deployed: login routes returned edge 504s, which
+      // would have told every user caught in that window their key was wrong.
+      if (res.status >= 500) {
         this.failLogin(this.$t('login_service_unavailable'))
         return null
       }
@@ -202,7 +207,7 @@ export default {
         clearTimeout(timeoutId)
       }
 
-      if (res.status === 503) {
+      if (res.status >= 500) {
         this.failLogin(this.$t('login_service_unavailable'))
         return null
       }
