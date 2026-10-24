@@ -160,15 +160,23 @@ describe('SecurityNoticeBanner', () => {
   it('is pinned clear of the fixed navbar', () => {
     const src = fs.readFileSync(
       path.resolve(__dirname, '../../../components/SecurityNoticeBanner.vue'), 'utf8')
-    // strip CSS comments first: the rationale comment mentions the navbar's own
-    // z-index:1030, and a naive match would read that instead of the declaration.
-    const style = src.slice(src.indexOf('<style')).replace(/\/\*[\s\S]*?\*\//g, '')
+    // Scope to the .security-notice-banner RULE, not the whole <style> block. Matching
+    // the block passes if ANY rule in it happens to carry these declarations -- proved
+    // by putting a decoy rule beside a fully reverted banner and watching it stay green.
+    const rule = src.match(/\.security-notice-banner\s*\{([^}]*)\}/)
+    expect(rule).not.toBeNull()
+    const decls = rule[1]
 
-    expect(style).toMatch(/position:\s*fixed/)
-    expect(style).toMatch(/bottom:\s*0/)
-    // must out-rank .fixed-top, or it goes back under the navbar
-    const z = style.match(/z-index:\s*(\d+)/)
+    expect(decls).toMatch(/position:\s*fixed/)
+    // the regression that started this: a top-of-flow banner renders under the navbar
+    expect(decls).not.toMatch(/border-bottom/)
+    // stacked above the cookie consent bar, which also sits at bottom:0
+    expect(decls).toMatch(/bottom:\s*var\(--cookie-banner-height/)
+    // must out-rank .fixed-top (1030) but stay BELOW the consent bar (9999),
+    // which has to remain clickable
+    const z = decls.match(/z-index:\s*(\d+)/)
     expect(z).not.toBeNull()
     expect(Number(z[1])).toBeGreaterThan(1030)
+    expect(Number(z[1])).toBeLessThan(9999)
   })
 })

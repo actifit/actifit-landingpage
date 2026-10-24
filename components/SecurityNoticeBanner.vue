@@ -22,27 +22,63 @@
 export default {
   name: 'SecurityNoticeBanner',
   data () {
-    return { localNotice: null }
+    return { localNotice: null, onResize: null }
   },
   computed: {
     noticeText () {
       return this.$store.getters.securityNotice || this.localNotice
     }
   },
+  watch: {
+    noticeText () { this.syncBodyOffset() }
+  },
   mounted () {
     // Rehydrate after a reload. The notice must outlive the page it was issued on —
     // the user has to go and rotate a key, which takes them away from the site.
-    if (this.$store.getters.securityNotice) return
-    try {
-      const stored = localStorage.getItem('acti_security_notice')
-      if (stored) this.localNotice = stored
-    } catch (e) { /* private mode / blocked storage — banner just won't persist */ }
+    if (!this.$store.getters.securityNotice) {
+      try {
+        const stored = localStorage.getItem('acti_security_notice')
+        if (stored) this.localNotice = stored
+      } catch (e) { /* private mode / blocked storage — banner just won't persist */ }
+    }
+    this.syncBodyOffset()
+    if (process.client && typeof window !== 'undefined') {
+      this.onResize = () => this.syncBodyOffset()
+      window.addEventListener('resize', this.onResize)
+    }
+  },
+  beforeDestroy () {
+    if (this.onResize && typeof window !== 'undefined') {
+      window.removeEventListener('resize', this.onResize)
+    }
+    this.setBodyOffset(0)
   },
   methods: {
+    // The banner is position:fixed, so without this it permanently covers the last
+    // ~45px of every page — which is the footer's bottom bar, including the reCAPTCHA
+    // attribution we are required to show while the badge is hidden. Reserve exactly
+    // its own height instead of guessing a constant: the bar is taller once the text
+    // wraps onto its own row on narrow viewports.
+    setBodyOffset (px) {
+      if (!process.client || typeof document === 'undefined' || !document.body) return
+      document.body.style.paddingBottom = px ? px + 'px' : ''
+    },
+    syncBodyOffset () {
+      if (!process.client) return
+      this.$nextTick(() => {
+        const el = this.$el
+        if (!this.noticeText || !el || typeof el.getBoundingClientRect !== 'function') {
+          this.setBodyOffset(0)
+          return
+        }
+        this.setBodyOffset(Math.ceil(el.getBoundingClientRect().height || 0))
+      })
+    },
     dismiss () {
       this.localNotice = null
       this.$store.commit('setSecurityNotice', null)
       try { localStorage.removeItem('acti_security_notice') } catch (e) { /* as above */ }
+      this.setBodyOffset(0)
     }
   }
 }
@@ -54,13 +90,20 @@ export default {
    layout renders underneath it and its first line is unreadable. Raising the
    banner's z-index instead would make it cover the nav, and offsetting it by the
    navbar height is not reliable -- each page sets its own navbar spacing and the
-   bar grows when its contents wrap. The bottom edge is free on every page. */
+   bar grows when its contents wrap.
+
+   The bottom edge is NOT free, though: vue-cookie-accept-decline also sits at
+   bottom:0, at z-index 9999, so it hid this banner completely. We stack above it
+   using --cookie-banner-height, which Footer.vue already maintains on <body> with a
+   ResizeObserver (see updateCookieBannerBodyState) and sets to 0px once the cookie
+   bar is dismissed. Staying BELOW 9999 is deliberate -- the consent bar must remain
+   clickable. */
 .security-notice-banner {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 0;
-  z-index: 1040; /* above .fixed-top (1030) and Bootstrap modals' backdrop baseline */
+  bottom: var(--cookie-banner-height, 0px);
+  z-index: 9998;
   background: #fff3cd;
   color: #664d03;
   border-top: 1px solid #ffe69c;

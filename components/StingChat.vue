@@ -63,23 +63,44 @@ const WIDGET_SCRIPT_URL = 'https://chat.peakd.com/stwidget.js'
 // the bridge -- we have to check it ourselves.
 const WIDGET_ORIGIN = 'https://chat.peakd.com'
 
-// The ONLY thing this bridge is asked to sign is Sting's image-upload challenge --
-// see the `Upload.signWithKey` note at the call site, and the upload/<id>/<token> shape
-// exercised in test/unit/components/StingChat.spec.js.
+// What the chat frame legitimately asks us to sign. Verified against Sting's live
+// bundles (stuploader.js, stlib.js, the embed's index bundle), NOT assumed -- an earlier
+// version of this gate allowed only `upload/...` and would have broken message sending,
+// DMs, edits, flags and preferences writes, which are the chat's whole purpose.
 //
-// WHY THIS GATE EXISTS: the requestSignBuffer branch signs sha256(args[1]) with the
-// user's posting key, with no prompt and no content check, for whoever controls the chat
-// frame. Once actifit-bot's signed-challenge login ships, a compromised chat origin could
-// fetch a login challenge (the "Log in to actifit.io / user / nonce" message), have
-// us sign
-// it here, and exchange the signature for a full Actifit session without ever holding the
-// key. The same oracle would serve any other site's challenge just as well.
+//   upload/<byteLength>/<sha256hex>        Upload.toSignableMessage
+//   download/<id>/<timestamp>              Uploader.downloadWithKeychain
+//   {login:"<user>"}                       first-time Sting login proof
+//   "<type>","<mentions>","<conv>",<json>,<ts>   SignableMessage.toSignableTextFormat
 //
-// So: allow the upload namespace, refuse everything else. The pattern is anchored and
-// excludes whitespace, so no multi-line challenge can pass however it is prefixed.
-const STING_UPLOAD_CHALLENGE = /^upload\/[A-Za-z0-9._~/-]{1,256}$/
-export function isStingSignable (text) {
-  return typeof text === 'string' && STING_UPLOAD_CHALLENGE.test(text)
+// WHY A GATE AT ALL: the requestSignBuffer branch below signs sha256(args[1]) with the
+// user's posting key, with no prompt, for whoever controls the chat frame. actifit-bot's
+// signed-challenge login turns a signature over its challenge message into a full API
+// session, so an ungated signer is an account-takeover oracle -- and would serve any
+// other site's challenge equally well.
+const STING_UPLOAD_RE = /^upload\/\d{1,12}\/[0-9a-f]{64}$/
+const STING_DOWNLOAD_RE = /^download\/[A-Za-z0-9._~-]{1,128}\/\d{1,20}$/
+
+export function isStingSignable (text, username) {
+  if (typeof text !== 'string' || !text.length) return false
+  if (STING_UPLOAD_RE.test(text) || STING_DOWNLOAD_RE.test(text)) return true
+  // Bound to the signed-in user: we never prove someone else's login.
+  if (username && text === '{login:"' + username + '"}') return true
+
+  // SignableMessage is five comma-joined JSON values, so wrapping it in brackets must
+  // parse to exactly five. Checking the STRUCTURE rather than the content is deliberate:
+  // the message body is arbitrary user text and cannot be pattern-matched, but a login
+  // challenge is not five JSON values and cannot be made into them. Smuggling one inside
+  // the body does not help either -- the bytes signed are the whole envelope, so the
+  // resulting signature does not verify against the bare challenge.
+  try {
+    const parts = JSON.parse('[' + text + ']')
+    return Array.isArray(parts) && parts.length === 5 &&
+      typeof parts[0] === 'string' && typeof parts[1] === 'string' &&
+      typeof parts[2] === 'string' && typeof parts[4] === 'number'
+  } catch (e) {
+    return false
+  }
 }
 let widgetScriptPromise = null
 
@@ -358,10 +379,13 @@ export default {
             if (decoded.startsWith('#')) decoded = decoded.substring(1)
             operation = Promise.resolve({ success: true, error: null, result: decoded })
           } else if (request === 'requestSignBuffer' && args[2] === 'Posting') {
-            if (!isStingSignable(args[1])) {
+            // read once: re-reading args[1] after the check would let a same-origin
+            // getter return something different to the signer than to the gate
+            const signText = args[1]
+            if (!isStingSignable(signText, this.postingKeyUsername)) {
               operation = Promise.resolve({
                 success: false,
-                error: 'Refused to sign: not a Sting upload challenge.'
+                error: 'Refused to sign: not a recognised Sting request.'
               })
             } else {
               operation = Promise.resolve({
@@ -370,7 +394,7 @@ export default {
                 // Match Sting uploader's Upload.signWithKey implementation:
                 // compact-sign the SHA-256 digest of the upload challenge.
                 result: PrivateKey.fromString(postingKey)
-                  .sign(cryptoUtils.sha256(args[1]))
+                  .sign(cryptoUtils.sha256(signText))
                   .toString('hex')
               })
             }
