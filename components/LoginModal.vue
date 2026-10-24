@@ -192,7 +192,7 @@
         }
       },
       setKeychainLoginStatus (json){
-        if (json && json.success && json.token && json.userdata){ let acct_data = json.userdata; let userSC = new Object(); userSC.account = acct_data; this.is_logged_in = true; this.$store.commit('setStdLoginUser', true); localStorage.setItem('access_token', json.token); localStorage.setItem('std_login', true); localStorage.setItem('std_login_name', userSC.account.name); localStorage.setItem('acti_login_method', 'keychain'); this.$store.commit('steemconnect/login', userSC); this.closeModal(); this.resetForm(); this.$store.dispatch('steemconnect/refreshUser'); this.$store.dispatch('fetchModerators'); this.$emit('login-successful'); }else{ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('login_error'); return; }
+        if (json && json.success && json.token && json.userdata){ let acct_data = json.userdata; let userSC = new Object(); userSC.account = acct_data; this.is_logged_in = true; this.$store.commit('setStdLoginUser', true); localStorage.setItem('access_token', json.token); localStorage.setItem('std_login', true); localStorage.setItem('std_login_name', userSC.account.name); localStorage.setItem('acti_login_method', 'keychain'); this.captureSecurityNotice(json); this.$store.commit('steemconnect/login', userSC); this.closeModal(); this.resetForm(); this.$store.dispatch('steemconnect/refreshUser'); this.$store.dispatch('fetchModerators'); this.$emit('login-successful'); }else{ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('login_error'); return; }
       },
       // Capture the post-login security notice.
       //
@@ -202,8 +202,9 @@
       // Login is NOT refused - the account works normally; the user is being advised to
       // rotate the key the attacker may also hold.
       //
-      // Only this handler captures it: it is the typed-key path. Keychain and HiveAuth
-      // logins never hit that endpoint and so never carry the field.
+      // All three login methods now go through /loginVerify, so all three can carry
+      // it - and every success handler must capture it. Keychain users are likely
+      // the largest flagged group; missing it there would hide the notice from them.
       //
       // Stored rather than rendered here on purpose. This component calls closeModal()
       // on success and pages/login.vue calls postLoginRedirect(), so a banner rendered at
@@ -272,38 +273,12 @@
               this.error_msg = this.$t('login_error'); return;
             }
 
-            try {
-              const controller = new AbortController();
-              const timeoutId = setTimeout(() => controller.abort(), 20000);
-              let res;
-              try {
-                res = await fetch('/api/proxy/loginVerify', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    username: account,
-                    nonce: challenge.nonce,
-                    signature: data.challenge.challenge,
-                    method: 'hiveauth',
-                    keeploggedin: this.keep_loggedin_val
-                  }),
-                  signal: controller.signal
-                });
-              } finally { clearTimeout(timeoutId); }
-              this.login_in_progress = false;
-              if (res.status === 403) {
-                const body = await res.json().catch(() => ({}));
-                this.error_proceeding = true;
-                this.error_msg = (body && body.error === 'Login request expired')
-                  ? this.$t('login_request_expired') : this.$t('login_error');
-                return;
-              }
-              this.setHiveauthLoginStatus(await res.json());
-            } catch (e) {
-              console.error('HiveAuth verify error:', e);
-              this.error_proceeding = true; this.login_in_progress = false;
-              this.error_msg = this.$t('login_error');
-            }
+            // Through the mixin, like pages/login.vue. The hand-rolled version here had no
+            // 503 branch and the same broken expired-nonce match, so it reported a busy
+            // server and an expired prompt alike as "your key is incorrect". The mixin
+            // never throws and reports both precisely.
+            const json = await this.submitLoginVerify(account, challenge.nonce, data.challenge.challenge, 'hiveauth');
+            if (json) { this.setHiveauthLoginStatus(json); }
           } else if (message.cmd && message.cmd === 'auth_nack'){
             this.error_proceeding = true; this.login_in_progress = false;
             this.error_msg = this.$t('auth_rejected_by_user'); return;

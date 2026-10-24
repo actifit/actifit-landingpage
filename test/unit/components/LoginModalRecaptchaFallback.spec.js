@@ -30,10 +30,13 @@ import signedChallengeLogin from '@/mixins/signedChallengeLogin'
 // would make every test here fail inside the signer rather than exercise the flow.
 const POSTING_WIF = hive.auth.toWif('alice', 'posting-key-test', 'posting')
 
+// The client now refuses to sign anything that is not exactly the login message, with
+// a 64-hex nonce - so the fixture has to look like what the server really returns.
+const NONCE = '3f9a'.repeat(16)
 const CHALLENGE = {
   success: true,
-  nonce: 'nonce-1',
-  message: 'Log in to actifit.io\nuser: alice\nnonce: nonce-1',
+  nonce: NONCE,
+  message: 'Log in to actifit.io\nuser: alice\nnonce: ' + NONCE,
   expires_in: 120
 }
 const SESSION = { success: true, token: 'tok', userdata: { name: 'alice' } }
@@ -198,7 +201,7 @@ describe('components/LoginModal.vue reCAPTCHA-unavailable fallback', () => {
       const verifyCall = fetchMock.mock.calls.find((c) => String(c[0]).includes('loginVerify'))
       expect(JSON.parse(verifyCall[1].body)).toEqual({
         username: 'alice',
-        nonce: 'nonce-1',
+        nonce: NONCE,
         signature: expect.stringMatching(/^[0-9a-f]{130}$/),
         method: 'posting',
         keeploggedin: false

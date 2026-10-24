@@ -62,13 +62,20 @@ export default {
         return true // not a valid WIF at all; let the signer report that
       }
       let acct
+      const controller = new AbortController()
+      // Short on purpose: this is a courtesy check that fails open, so it must never be
+      // the reason a login hangs. Neither this fetch nor the proxy's upstream call had
+      // a timeout, so a stalled chain read used to stall typed-key login indefinitely.
+      const timeoutId = setTimeout(() => controller.abort(), 8000)
       try {
         const res = await fetch('/api/proxy/getAccountData?user=' +
-          encodeURIComponent(username) + '&bchain=HIVE')
+          encodeURIComponent(username) + '&bchain=HIVE', { signal: controller.signal })
         const json = await res.json()
         acct = json && (json.HIVE || json)
       } catch (e) {
         return true
+      } finally {
+        clearTimeout(timeoutId)
       }
       if (!acct || !acct.owner || !acct.active) return true
 
@@ -81,6 +88,10 @@ export default {
       return true
     },
 
+    // NEVER THROWS. Every failure is reported via failLogin and returns null. The callers
+    // (Keychain and HiveAuth especially) are not wrapped in try/catch, so a throw here -
+    // a network drop, the 20s abort, a non-JSON body - used to reject unhandled and leave
+    // the spinner turning forever with no message. Fixing it once, here, covers them all.
     async requestLoginChallenge (username) {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
@@ -92,6 +103,9 @@ export default {
           body: JSON.stringify({ username }),
           signal: controller.signal
         })
+      } catch (e) {
+        this.failLogin(this.$t('login_service_unavailable'))
+        return null
       } finally {
         clearTimeout(timeoutId)
       }
@@ -105,6 +119,22 @@ export default {
       }
       const json = await res.json().catch(() => null)
       if (!res.ok || !json || !json.success || !json.nonce || !json.message) {
+        this.failLogin(this.$t('login_error'))
+        return null
+      }
+
+      // Refuse to sign anything that is not exactly our login message.
+      //
+      // Comparing is not the same as rebuilding: we still sign the server's string
+      // verbatim, we just check it first. Without this the client signed WHATEVER the API
+      // returned - silently, with no wallet prompt, on the typed-key path. A compromised
+      // api.actifit.io (precisely this incident's threat model) could then use every
+      // typed-key login as a signing oracle over arbitrary text, e.g. another Hive dApp's
+      // login challenge. It cannot log in as someone else that way - the server binds the
+      // key to the claimed user - but it can harvest signatures usable elsewhere.
+      const expected = 'Log in to actifit.io\nuser: ' + username + '\nnonce: ' + json.nonce
+      if (!/^[0-9a-f]{64}$/.test(json.nonce) || json.message !== expected) {
+        console.error('Login challenge had an unexpected format; refusing to sign it.')
         this.failLogin(this.$t('login_error'))
         return null
       }
@@ -147,6 +177,7 @@ export default {
       return await this.submitLoginVerify(username, challenge.nonce, signature, method)
     },
 
+    // NEVER THROWS - same contract as requestLoginChallenge, same reason.
     async submitLoginVerify (username, nonce, signature, method) {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
@@ -164,27 +195,42 @@ export default {
           }),
           signal: controller.signal
         })
+      } catch (e) {
+        this.failLogin(this.$t('login_service_unavailable'))
+        return null
       } finally {
         clearTimeout(timeoutId)
       }
 
-      // The nonce is single-use with a short TTL, so a slow wallet prompt can outlive it.
-      // Say that plainly rather than claiming the credentials were wrong -- during the
-      // incident, a misleading "your key is incorrect" drove needless key resets.
       if (res.status === 503) {
         this.failLogin(this.$t('login_service_unavailable'))
         return null
       }
 
+      // The nonce is single-use with a short TTL, so a slow wallet prompt can outlive it.
+      // Say that plainly rather than claiming the credentials were wrong -- during the
+      // incident, a misleading "your key is incorrect" drove needless key resets.
+      //
+      // Matched on `message`, by prefix. The server answers
+      //   403 {"success":false,"message":"Login request expired. Please try again."}
+      // An earlier version compared `body.error === 'Login request expired'` - wrong field
+      // AND wrong text - so it never matched, and an expired nonce showed "your key is
+      // incorrect", the exact message this branch exists to stop showing.
       if (res.status === 403) {
         const body = await res.json().catch(() => ({}))
-        this.failLogin(body && body.error === 'Login request expired'
+        const msg = (body && typeof body.message === 'string') ? body.message : ''
+        this.failLogin(/^Login request expired/i.test(msg)
           ? this.$t('login_request_expired')
           : this.$t('login_error'))
         return null
       }
 
-      return await res.json()
+      const json = await res.json().catch(() => null)
+      if (!json) {
+        this.failLogin(this.$t('login_service_unavailable'))
+        return null
+      }
+      return json
     },
 
     failLogin (msg) {

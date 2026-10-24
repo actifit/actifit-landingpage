@@ -234,12 +234,12 @@
 		}
 	  },
 	  setKeychainLoginStatus (json){
-		console.log('keychain login');
-		console.log(json);
-		if (json && json.success && json.token && json.HIVE){
-
-
-			let acct_data = json.HIVE;
+		// json.userdata, not json.HIVE. The login API returns userdata, and this handler
+		// reading HIVE is why Keychain login on /login was broken for every user while the
+		// modal worked. It also used to console.log the whole response - including the
+		// session JWT - which is gone.
+		if (json && json.success && json.token && json.userdata){
+			let acct_data = json.userdata;
 
 			let userSC = new Object();
 			userSC.account = acct_data;
@@ -250,6 +250,7 @@
 			localStorage.setItem('std_login', true)
 			localStorage.setItem('std_login_name', userSC.account.name)
 			localStorage.setItem('acti_login_method', 'keychain');
+			this.captureSecurityNotice(json);
 			this.$store.commit('steemconnect/login', userSC);
 			this.postLoginRedirect();
 		}else{
@@ -268,8 +269,9 @@
 	  // Login is NOT refused - the account works normally; the user is being advised to
 	  // rotate the key the attacker may also hold.
 	  //
-	  // Only this handler captures it: it is the typed-key path. Keychain and HiveAuth
-	  // logins never hit that endpoint and so never carry the field.
+	  // All three login methods now go through /loginVerify, so all three can carry
+	  // it - and every success handler must capture it. Keychain users are likely
+	  // the largest flagged group; missing it there would hide the notice from them.
 	  //
 	  // Stored rather than rendered here on purpose. This component calls closeModal()
 	  // on success and pages/login.vue calls postLoginRedirect(), so a banner rendered at
