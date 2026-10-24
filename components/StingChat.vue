@@ -80,10 +80,17 @@ const WIDGET_ORIGIN = 'https://chat.peakd.com'
 // other site's challenge equally well.
 const STING_UPLOAD_RE = /^upload\/\d{1,12}\/[0-9a-f]{64}$/
 const STING_DOWNLOAD_RE = /^download\/[A-Za-z0-9._~-]{1,128}\/\d{1,20}$/
+// Group-key generation (the chat's "Generate" button, NewUserMessageModal): Sting signs
+// `timestamp + Math.random()` purely to harvest entropy for a new group key. Refusing it
+// killed encrypted group chat SILENTLY -- the caller has no catch, so nothing appeared in
+// the UI and it read as a Sting bug. Signing this is no more revealing than an upload
+// hash: the value is generated locally and used only as a seed.
+const STING_GENKEY_RE = /^generateKey \d{1,20} 0?\.\d+(e-\d+)?$/
 
 export function isStingSignable (text, username) {
   if (typeof text !== 'string' || !text.length) return false
-  if (STING_UPLOAD_RE.test(text) || STING_DOWNLOAD_RE.test(text)) return true
+  if (STING_UPLOAD_RE.test(text) || STING_DOWNLOAD_RE.test(text) ||
+      STING_GENKEY_RE.test(text)) return true
   // Bound to the signed-in user: we never prove someone else's login.
   if (username && text === '{login:"' + username + '"}') return true
 
@@ -438,6 +445,17 @@ export default {
 
       widget.handleWithKeychain = (event, messageId, request, args) => {
         let keychainCall = null
+
+        // Same guard as the hivejs bridge. StWidget accepts a bare 'stlib' message name
+        // from any sender, so without this any frame or opener that can postMessage into
+        // the page can raise a Keychain prompt that appears to come from actifit.io.
+        // Keychain does prompt, so this is social-engineering-grade rather than silent --
+        // but there is no reason for the two bridges to differ.
+        if (event.origin !== WIDGET_ORIGIN) {
+          this.postWalletResponse(widget, event, messageId,
+            { success: false, error: 'Rejected chat wallet request from an unexpected origin.' })
+          return
+        }
 
         if (request === 'requestBroadcast' && widget.isAllowedOperation(args[1]) && args[2] === 'Posting') {
           keychainCall = this.callKeychain(request, [args[0], args[1], 'Posting'])

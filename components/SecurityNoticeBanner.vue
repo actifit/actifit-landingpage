@@ -22,7 +22,7 @@
 export default {
   name: 'SecurityNoticeBanner',
   data () {
-    return { localNotice: null, onResize: null }
+    return { localNotice: null, sizeObserver: null, onResize: null }
   },
   computed: {
     noticeText () {
@@ -45,12 +45,20 @@ export default {
     if (process.client && typeof window !== 'undefined') {
       this.onResize = () => this.syncBodyOffset()
       window.addEventListener('resize', this.onResize)
+      // A resize listener alone goes stale: the bar re-wraps on a locale switch, a late
+      // webfont or the icon arriving, none of which fire `resize`. Footer.vue watches the
+      // cookie bar the same way.
+      if (typeof ResizeObserver !== 'undefined' && this.$el && this.$el.nodeType === 1) {
+        this.sizeObserver = new ResizeObserver(() => this.syncBodyOffset())
+        this.sizeObserver.observe(this.$el)
+      }
     }
   },
   beforeDestroy () {
     if (this.onResize && typeof window !== 'undefined') {
       window.removeEventListener('resize', this.onResize)
     }
+    if (this.sizeObserver) { this.sizeObserver.disconnect(); this.sizeObserver = null }
     this.setBodyOffset(0)
   },
   methods: {
@@ -59,9 +67,16 @@ export default {
     // attribution we are required to show while the badge is hidden. Reserve exactly
     // its own height instead of guessing a constant: the bar is taller once the text
     // wraps onto its own row on narrow viewports.
+    //
+    // Published as a CUSTOM PROPERTY, not as inline padding. An inline declaration beats
+    // Footer.vue's `body.cookie-consent-visible { padding-bottom: var(--cookie-banner-height) }`,
+    // so writing padding directly here reserved the banner's height INSTEAD of the cookie
+    // bar's rather than as well as it — leaving the footer covered again, which is the
+    // very thing this code exists to prevent. The rule below adds the two together.
     setBodyOffset (px) {
       if (!process.client || typeof document === 'undefined' || !document.body) return
-      document.body.style.paddingBottom = px ? px + 'px' : ''
+      document.body.classList.toggle('security-notice-visible', px > 0)
+      document.body.style.setProperty('--security-notice-height', (px || 0) + 'px')
     },
     syncBodyOffset () {
       if (!process.client) return
@@ -83,6 +98,17 @@ export default {
   }
 }
 </script>
+
+<!-- Un-scoped on purpose: this styles <body>, which a scoped block cannot reach.
+     It lives here rather than in Footer.vue because Footer is imported per page and is
+     absent from pages/auth.vue, pages/stingtst.vue and pages/transaction-success.vue,
+     whereas this banner renders from the layout on every page. -->
+<style>
+body.security-notice-visible {
+  /* both bars stack at the bottom; reserve for whichever are present */
+  padding-bottom: calc(var(--cookie-banner-height, 0px) + var(--security-notice-height, 0px));
+}
+</style>
 
 <style scoped>
 /* Pinned to the BOTTOM, not the top. NavbarBrand is Bootstrap `fixed-top`

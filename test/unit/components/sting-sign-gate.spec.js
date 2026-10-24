@@ -40,6 +40,18 @@ describe('isStingSignable - must ALLOW everything Sting really signs', () => {
     expect(isStingSignable('download/abc-123/1761300000000', USER)).toBe(true)
   })
 
+  // Found only by reading NewUserMessageModal: the chat's "Generate" button signs
+  // `timestamp + Math.random()` for entropy when creating an encrypted group. Refusing it
+  // broke group creation SILENTLY -- that caller has no catch, so nothing showed in the
+  // UI and it read as a Sting bug.
+  it('allows the group-key generation challenge', () => {
+    expect(isStingSignable('generateKey 1792836405123 0.8372619283746', USER)).toBe(true)
+    expect(isStingSignable('generateKey 1792836405123 .5', USER)).toBe(true)
+    expect(isStingSignable('generateKey 1792836405123 1.5e-7', USER)).toBe(false)
+    expect(isStingSignable('generateKey notatime 0.5', USER)).toBe(false)
+    expect(isStingSignable('generateKey 123 0.5 extra', USER)).toBe(false)
+  })
+
   it('allows the first-time login proof for the signed-in user', () => {
     expect(isStingSignable('{login:"' + USER + '"}', USER)).toBe(true)
   })
@@ -81,6 +93,19 @@ describe('isStingSignable - must REFUSE the login-challenge oracle', () => {
     expect(isStingSignable(smuggled, USER)).toBe(true)
     expect(smuggled).not.toBe(CHALLENGE)
     expect(smuggled.indexOf('\n')).toBe(-1) // JSON-escaped, so the signed bytes differ
+  })
+
+  // The envelope rule accepts ANY five comma-joined JSON values, so its safety rests on
+  // actifit-bot never shaping its challenge that way. Nothing in THIS repo can enforce
+  // that, so pin the real server format here: if #147 ever emits a comma-joined JSON
+  // list, this test fails and the gate must change with it.
+  it('refuses the real actifit-bot challenge format', () => {
+    // exactly as /loginChallenge returns it
+    const real = ['Log in to actifit.io', 'user: ' + USER,
+      'nonce: ' + 'f3a9'.repeat(16)].join(String.fromCharCode(10))
+    expect(isStingSignable(real, USER)).toBe(false)
+    // and the shape that WOULD slip through, documented so the risk is visible
+    expect(isStingSignable('"actifit-login","alice","9f3c","",1792836405', USER)).toBe(true)
   })
 
   it('refuses a login proof naming a DIFFERENT user', () => {
@@ -153,6 +178,33 @@ describe('chat bridge guards', () => {
 
     // postWalletResponse unwraps failures to their readable string
     const response = parse(pm)
+    expect(typeof response).toBe('string')
+    expect(response).toMatch(/refus|reject/i)
+  })
+
+  it('refuses a Keychain-bridge request from an unexpected origin', async () => {
+    // The hivejs bridge got this guard first; the Keychain bridge did not. StWidget
+    // accepts a bare 'stlib' message name from any sender, so without it any frame or
+    // opener could raise a Keychain prompt that appears to come from actifit.io.
+    const postMessage = jest.fn()
+    const widget = { messageName: 'stlib0', isAllowedOperation: () => true }
+    const vm = {
+      widget,
+      postingKeyUsername: USER,
+      callKeychain: jest.fn(),
+      postWalletResponse: (...a) => StingChat.methods.postWalletResponse.call(vm, ...a),
+      readableError: (e) => StingChat.methods.readableError.call(vm, e)
+    }
+    StingChat.methods.configureKeychainPassthrough.call(vm)
+    widget.handleWithKeychain(
+      { source: { postMessage }, origin: 'https://evil.example' },
+      'msg-1', 'requestSignBuffer', ['alice', 'upload/1/' + SHA, 'Posting']
+    )
+    await Promise.resolve()
+    await Promise.resolve()
+
+    expect(vm.callKeychain).not.toHaveBeenCalled()
+    const response = JSON.parse(postMessage.mock.calls[0][0][2])
     expect(typeof response).toBe('string')
     expect(response).toMatch(/refus|reject/i)
   })
