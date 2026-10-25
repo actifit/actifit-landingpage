@@ -1,3 +1,4 @@
+import { savePostingKey, clearPostingKey } from '~/utils/postingKeyStore'
 import Vue from 'vue'
 import Vuex from 'vuex'
 
@@ -66,8 +67,9 @@ const createStore = () => {
       commentEntries: [], //contains a reference to the current comments on open modal post
       commentCountToday: 0, //contains the count of comments done by a user on a single day
       stdLoginUser: null,
-      // Posting keys are kept in memory only so Sting can sign chat operations.
-      // They are never serialized to localStorage or runtime config.
+      // The typed-key user's posting key, for signing in the browser. Mirrored to
+      // localStorage (utils/postingKeyStore.js) so reloads and new tabs keep it; never
+      // sent to the server, never in runtime config. Active keys never come here.
       chatPostingKey: null,
       bchain: '',//current active blockchain
       cartEntries: [], //contains current items being bought via market
@@ -84,13 +86,25 @@ const createStore = () => {
   })
 
   // fetch user related data after login
-  store.subscribe((mutation) => {
+  store.subscribe((mutation, state) => {
     if (mutation.type === 'login') {
       store.dispatch('fetchUserTokens')
       store.dispatch('fetchUserReportCount')
       store.dispatch('fetchUserRank')
     } else if (mutation.type === 'steemconnect/logout') {
       store.commit('setChatPostingKey', null)
+    }
+    // Keep the browser copy of the typed-key posting key in step with the store
+    // (utils/postingKeyStore.js). Saved once both the key and the account are known:
+    // at login the key is committed BEFORE the account, so both mutations are watched.
+    if (process.client && (mutation.type === 'setChatPostingKey' || mutation.type === 'steemconnect/login')) {
+      const user = state.steemconnect && state.steemconnect.user &&
+        state.steemconnect.user.account && state.steemconnect.user.account.name
+      if (!state.chatPostingKey) {
+        if (mutation.type === 'setChatPostingKey') clearPostingKey()
+      } else if (user && !localStorage.getItem('acti_login_method')) {
+        savePostingKey(user, state.chatPostingKey)
+      }
     }
   })
 

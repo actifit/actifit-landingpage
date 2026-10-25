@@ -320,6 +320,8 @@ module.exports = {
     // Must run before anything can broadcast via HiveAuth - see the file header.
     { src: '~/plugins/hiveauth-token-migration.js', mode: 'client' },
     { src: '~plugins/vue-custom.js' },
+    // restores the typed-key user's stored posting key (utils/postingKeyStore.js)
+    { src: '~/plugins/posting-key-restore.js', mode: 'client' },
     { src: '~/plugins/dark-mode.js' },
     { src: '~/plugins/commonCardMixin.js', mode: 'client' }
   ],

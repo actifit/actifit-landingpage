@@ -160,7 +160,7 @@ module.exports = {
   posting_key_only_login: 'Essa é a sua chave active ou owner. Inicie sessão apenas com a chave POSTING - nunca introduza a chave active ou owner num site.',
   key_prompt_title_posting: 'Introduza a sua chave posting para continuar',
   key_prompt_title_active: 'Esta ação precisa da sua chave active',
-  key_prompt_note_posting: 'A sua chave assina neste navegador e nunca é enviada para a Actifit.',
+  key_prompt_note_posting: 'A sua chave assina neste navegador e nunca é enviada para a Actifit. Fica guardada neste navegador até terminar a sessão.',
   key_prompt_note_active: 'A sua chave active assina apenas esta ação no navegador e é descartada logo a seguir.',
   key_prompt_sign: 'Assinar',
   key_prompt_invalid: 'Essa não é uma chave privada válida.',

@@ -155,7 +155,7 @@ module.exports = {
   posting_key_only_login: 'Il s’agit de votre clé active ou owner. Connectez-vous uniquement avec votre clé POSTING - n’entrez jamais votre clé active ou owner sur un site web.',
   key_prompt_title_posting: 'Saisissez votre clé posting pour continuer',
   key_prompt_title_active: 'Cette action nécessite votre clé active',
-  key_prompt_note_posting: 'Votre clé signe dans ce navigateur et n’est jamais envoyée à Actifit.',
+  key_prompt_note_posting: 'Votre clé signe dans ce navigateur et n’est jamais envoyée à Actifit. Elle reste enregistrée dans ce navigateur jusqu’à votre déconnexion.',
   key_prompt_note_active: 'Votre clé active signe uniquement cette action dans votre navigateur et est effacée aussitôt après.',
   key_prompt_sign: 'Signer',
   key_prompt_invalid: 'Ce n’est pas une clé privée valide.',

@@ -160,7 +160,7 @@ module.exports = {
   posting_key_only_login: 'To jest Twój klucz active lub owner. Zaloguj się wyłącznie kluczem POSTING - nigdy nie wpisuj klucza active ani owner na stronie.',
   key_prompt_title_posting: 'Wpisz klucz posting, aby kontynuować',
   key_prompt_title_active: 'Ta akcja wymaga klucza active',
-  key_prompt_note_posting: 'Twój klucz podpisuje w tej przeglądarce i nigdy nie jest wysyłany do Actifit.',
+  key_prompt_note_posting: 'Twój klucz podpisuje w tej przeglądarce i nigdy nie jest wysyłany do Actifit. Pozostaje zapisany w tej przeglądarce do wylogowania.',
   key_prompt_note_active: 'Klucz active podpisuje tylko tę akcję w przeglądarce i jest od razu usuwany.',
   key_prompt_sign: 'Podpisz',
   key_prompt_invalid: 'To nie jest prawidłowy klucz prywatny.',

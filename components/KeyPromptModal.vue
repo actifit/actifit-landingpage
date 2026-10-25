@@ -109,9 +109,10 @@ export default {
 .key-prompt-backdrop {
   position: fixed;
   inset: 0;
-  /* Above the cookie bar (9999) and the security banner (9998): a signing prompt is
-     the one thing that must not be covered. */
-  z-index: 10050;
+  /* Above EVERYTHING: a signing prompt is the one thing that must not be covered. The
+     vote modal is raised to 99999 globally (Footer.vue: div#voteModal) and the user
+     hover card to 1000000, so 10050 put this prompt behind the vote modal. */
+  z-index: 2000000;
   background: rgba(0, 0, 0, 0.55);
   display: flex;
   align-items: center;

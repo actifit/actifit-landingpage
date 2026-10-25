@@ -160,7 +160,7 @@ module.exports = {
   posting_key_only_login: 'それは active または owner キーです。POSTING キーだけでログインしてください。',
   key_prompt_title_posting: '続行するには posting キーを入力してください',
   key_prompt_title_active: 'この操作には active キーが必要です',
-  key_prompt_note_posting: 'キーはこのブラウザで署名し、Actifit には送信されません。',
+  key_prompt_note_posting: 'キーはこのブラウザ内で署名に使われ、Actifit に送信されることはありません。ログアウトするまでこのブラウザに保存されます。',
   key_prompt_note_active: 'active キーはこの操作のみに使用され、直後に破棄されます。',
   key_prompt_sign: '署名',
   key_prompt_invalid: '有効な秘密鍵ではありません。',

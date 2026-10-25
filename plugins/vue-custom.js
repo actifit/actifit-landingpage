@@ -449,9 +449,9 @@ Vue.prototype.$broadcastWithKey = async function (operations, opts) {
 	// Active keys are requested PER ACTION and never kept: one can move funds.
 	wif = await requestKey('active', account, operations);
   } else {
-	// The posting key lives in memory for the session, put there at login. After a
-	// reload it is gone (memory-only by design), so ask once and keep it for the rest
-	// of the session.
+	// The posting key is put in the store at login and kept in the browser, so it
+	// survives reloads and new tabs (utils/postingKeyStore.js). Ask only if it is
+	// missing - e.g. a session from before keys were kept, or a key just rotated.
 	wif = this.$store.state.chatPostingKey;
 	if (!wif) {
 	  wif = await requestKey('posting', account, operations);

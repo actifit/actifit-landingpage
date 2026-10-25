@@ -160,7 +160,7 @@ module.exports = {
   posting_key_only_login: 'Questa è la tua chiave active o owner. Accedi solo con la chiave POSTING - non inserire mai la chiave active o owner su un sito web.',
   key_prompt_title_posting: 'Inserisci la chiave posting per continuare',
   key_prompt_title_active: 'Questa azione richiede la tua chiave active',
-  key_prompt_note_posting: 'La tua chiave firma in questo browser e non viene mai inviata ad Actifit.',
+  key_prompt_note_posting: 'La tua chiave firma in questo browser e non viene mai inviata ad Actifit. Resta salvata in questo browser finché non esci.',
   key_prompt_note_active: 'La tua chiave active firma solo questa azione nel browser e viene eliminata subito dopo.',
   key_prompt_sign: 'Firma',
   key_prompt_invalid: 'Questa non è una chiave privata valida.',

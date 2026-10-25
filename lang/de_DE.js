@@ -155,7 +155,7 @@ module.exports = {
   posting_key_only_login: 'Das ist Ihr Active- oder Owner-Schlüssel. Bitte melden Sie sich nur mit Ihrem POSTING-Schlüssel an - geben Sie Ihren Active- oder Owner-Schlüssel niemals auf einer Website ein.',
   key_prompt_title_posting: 'Geben Sie Ihren Posting-Schlüssel ein',
   key_prompt_title_active: 'Für diese Aktion wird Ihr Active-Schlüssel benötigt',
-  key_prompt_note_posting: 'Ihr Schlüssel signiert in diesem Browser und wird nie an Actifit gesendet.',
+  key_prompt_note_posting: 'Ihr Schlüssel signiert in diesem Browser und wird nie an Actifit gesendet. Er bleibt in diesem Browser gespeichert, bis Sie sich abmelden.',
   key_prompt_note_active: 'Ihr Active-Schlüssel signiert nur diese Aktion im Browser und wird danach sofort verworfen.',
   key_prompt_sign: 'Signieren',
   key_prompt_invalid: 'Das ist kein gültiger privater Schlüssel.',

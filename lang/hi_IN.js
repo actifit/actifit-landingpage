@@ -160,7 +160,7 @@ module.exports = {
   posting_key_only_login: 'यह आपकी active या owner कुंजी है। कृपया केवल अपनी POSTING कुंजी से लॉगिन करें।',
   key_prompt_title_posting: 'जारी रखने के लिए अपनी posting कुंजी दर्ज करें',
   key_prompt_title_active: 'इस कार्य के लिए आपकी active कुंजी चाहिए',
-  key_prompt_note_posting: 'आपकी कुंजी इस ब्राउज़र में हस्ताक्षर करती है और Actifit को कभी नहीं भेजी जाती।',
+  key_prompt_note_posting: 'आपकी कुंजी इसी ब्राउज़र में हस्ताक्षर करती है और कभी Actifit को नहीं भेजी जाती। लॉग आउट करने तक यह इसी ब्राउज़र में सहेजी रहती है।',
   key_prompt_note_active: 'आपकी active कुंजी केवल इस कार्य पर हस्ताक्षर करती है और तुरंत हटा दी जाती है।',
   key_prompt_sign: 'हस्ताक्षर करें',
   key_prompt_invalid: 'यह मान्य निजी कुंजी नहीं है।',

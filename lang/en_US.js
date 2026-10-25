@@ -121,7 +121,7 @@ module.exports = {
   posting_key_only_login: 'That is your active or owner key. Please sign in with your POSTING key only - never enter your active or owner key on a website.',
   key_prompt_title_posting: 'Enter your posting key to continue',
   key_prompt_title_active: 'This action needs your active key',
-  key_prompt_note_posting: 'Your key signs in this browser and is never sent to Actifit. It is kept only until you close this tab.',
+  key_prompt_note_posting: 'Your key signs in this browser and is never sent to Actifit. It stays saved in this browser until you log out.',
   key_prompt_note_active: 'Your active key signs this one action in your browser, is never sent to Actifit, and is discarded straight after.',
   key_prompt_sign: 'Sign',
   key_prompt_invalid: 'That is not a valid private key.',

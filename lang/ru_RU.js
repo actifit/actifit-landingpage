@@ -160,7 +160,7 @@ module.exports = {
   posting_key_only_login: 'Это ваш active или owner ключ. Входите только с POSTING ключом - никогда не вводите active или owner ключ на сайте.',
   key_prompt_title_posting: 'Введите posting ключ, чтобы продолжить',
   key_prompt_title_active: 'Для этого действия нужен active ключ',
-  key_prompt_note_posting: 'Ваш ключ подписывает в этом браузере и никогда не отправляется в Actifit.',
+  key_prompt_note_posting: 'Ваш ключ подписывает в этом браузере и никогда не отправляется в Actifit. Он хранится в этом браузере, пока вы не выйдете.',
   key_prompt_note_active: 'Ваш active ключ подписывает только это действие и сразу удаляется.',
   key_prompt_sign: 'Подписать',
   key_prompt_invalid: 'Это недействительный приватный ключ.',

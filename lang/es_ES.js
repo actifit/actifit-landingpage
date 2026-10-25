@@ -152,7 +152,7 @@ module.exports = {
   posting_key_only_login: 'Esa es tu clave active u owner. Inicia sesión solo con tu clave POSTING: nunca introduzcas tu clave active u owner en un sitio web.',
   key_prompt_title_posting: 'Introduce tu clave posting para continuar',
   key_prompt_title_active: 'Esta acción necesita tu clave active',
-  key_prompt_note_posting: 'Tu clave firma en este navegador y nunca se envía a Actifit.',
+  key_prompt_note_posting: 'Tu clave firma en este navegador y nunca se envía a Actifit. Se guarda en este navegador hasta que cierres sesión.',
   key_prompt_note_active: 'Tu clave active firma solo esta acción en tu navegador y se descarta justo después.',
   key_prompt_sign: 'Firmar',
   key_prompt_invalid: 'Esa no es una clave privada válida.',

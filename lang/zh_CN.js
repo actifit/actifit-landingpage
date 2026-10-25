@@ -161,7 +161,7 @@ module.exports = {
   posting_key_only_login: '这是您的 active 或 owner 密钥。请仅使用 POSTING 密钥登录 - 切勿在网站上输入 active 或 owner 密钥。',
   key_prompt_title_posting: '请输入 posting 密钥以继续',
   key_prompt_title_active: '此操作需要您的 active 密钥',
-  key_prompt_note_posting: '您的密钥在此浏览器中签名，绝不会发送给 Actifit。',
+  key_prompt_note_posting: '您的密钥在此浏览器中签名，绝不会发送给 Actifit。在您退出登录之前，它会保存在此浏览器中。',
   key_prompt_note_active: '您的 active 密钥仅用于此次操作签名，随后立即丢弃。',
   key_prompt_sign: '签名',
   key_prompt_invalid: '这不是有效的私钥。',

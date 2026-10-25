@@ -160,7 +160,7 @@ module.exports = {
   posting_key_only_login: 'Bu sizin active veya owner anahtarınız. Lütfen yalnızca POSTING anahtarınızla giriş yapın - active veya owner anahtarınızı hiçbir sitede girmeyin.',
   key_prompt_title_posting: 'Devam etmek için posting anahtarınızı girin',
   key_prompt_title_active: 'Bu işlem active anahtarınızı gerektirir',
-  key_prompt_note_posting: 'Anahtarınız bu tarayıcıda imzalar ve asla Actifit’e gönderilmez.',
+  key_prompt_note_posting: 'Anahtarınız bu tarayıcıda imzalar ve asla Actifit’e gönderilmez. Çıkış yapana kadar bu tarayıcıda kayıtlı kalır.',
   key_prompt_note_active: 'Active anahtarınız yalnızca bu işlemi imzalar ve hemen ardından silinir.',
   key_prompt_sign: 'İmzala',
   key_prompt_invalid: 'Bu geçerli bir özel anahtar değil.',
