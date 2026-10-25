@@ -150,6 +150,34 @@ describe.each(flows)('$name with a typed key', (flow) => {
     const ctx = flow.ctx({ paymentInFlight: true })
     await flow.run(ctx)
     expect(ctx.$broadcastWithKey).not.toHaveBeenCalled()
+    // and the in-flight payment still holds the lock (Product.vue used to release it
+    // here, from `finally`, letting a THIRD click send a second transfer)
+    expect(ctx.paymentInFlight).toBe(true)
+    expect(ctx.userActvKey).toBe('typed-active-wif')
+  })
+
+  it('a blocked click during payment 1 cannot unlock payment 2', async () => {
+    let finishFirst
+    respond({ status: 'Success' })
+    const ctx = flow.ctx({
+      $broadcastWithKey: jest.fn(() => new Promise((r) => { finishFirst = r }))
+    })
+    const first = flow.run(ctx)          // payment 1: waiting on the signature
+    await flow.run(ctx)                  // click 2: blocked
+    ctx.userActvKey = 'typed-active-wif' // the user re-types the key (old code cleared it)
+    flow.run(ctx)                        // click 3: must be blocked too
+    await new Promise((r) => setTimeout(r, 0))
+    expect(ctx.$broadcastWithKey).toHaveBeenCalledTimes(1)
+    finishFirst({ success: true, trx: { tx: TX } })
+    await first
+    expect(ctx.paymentInFlight).toBe(false)
+  })
+
+  it('a failed validation keeps the typed key (nothing was attempted)', async () => {
+    const ctx = flow.ctx({ user: null })
+    await flow.run(ctx)
+    expect(ctx.userActvKey).toBe('typed-active-wif')
+    expect(ctx.$broadcastWithKey).not.toHaveBeenCalled()
   })
 
   it('releases the lock and drops the typed active key when done', async () => {

@@ -1,11 +1,10 @@
 /**
  * Classify a private key against an account's on-chain authorities.
  *
- * Shared by the login mixin and by in-browser transaction signing, deliberately. These
- * checks used to be at risk of being copied per call site, and duplicated security logic
- * is how LoginModal.vue and pages/login.vue drifted apart before (one of them read
- * json.HIVE where the API returns json.userdata, and Keychain login there broke for
- * everyone). One implementation, imported where needed.
+ * Used by in-browser transaction signing (the key prompt and the buy-now forms). Login
+ * has its own check (mixins/signedChallengeLogin.js), backed by actifit-bot accepting
+ * only a posting-key signature. Duplicated security logic is how LoginModal.vue and
+ * pages/login.vue drifted apart before, so new signing paths should import this.
  *
  * Returns one of:
  *   'owner' | 'active' | 'posting'  - the key matches that authority
@@ -13,10 +12,8 @@
  *   'invalid'                       - not a parseable private key at all
  *   'unknown'                       - the account lookup failed, so we cannot tell
  *
- * 'unknown' exists so callers can FAIL OPEN on a lookup problem. These checks guard the
- * user against their own slip, not us against an attacker - the chain itself rejects a
- * signature from a key without the right authority - so blocking an action because a
- * chain read failed would trade a real outage for no security.
+ * 'unknown' means the lookup failed. keyRefusal() below REFUSES it: an unchecked key may
+ * be an active or owner key, and a posting key is kept in memory for the session.
  *
  * Owner is checked FIRST: a key that is somehow present in several authorities is
  * reported as the most powerful one, because that is the one that matters.
@@ -36,15 +33,20 @@ export function publicKeyOf (wif) {
   }
 }
 
+// Read the account's authorities from the Hive node itself (the hive-js instance the
+// store configures), NOT through actifit-bot: the key check must not depend on our own
+// backend being honest, and the proxy route is rate-limited per IP.
 export async function fetchAccount (username) {
-  const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), LOOKUP_TIMEOUT_MS)
+  let timeoutId
   try {
-    const res = await fetch('/api/proxy/getAccountData?user=' +
-      encodeURIComponent(username) + '&bchain=HIVE', { signal: controller.signal })
-    const json = await res.json()
-    const acct = json && (json.HIVE || json)
-    return (acct && acct.owner && acct.active && acct.posting) ? acct : null
+    const accounts = await Promise.race([
+      hive.api.getAccountsAsync([username]),
+      new Promise((resolve, reject) => {
+        timeoutId = setTimeout(() => reject(new Error('timeout')), LOOKUP_TIMEOUT_MS)
+      })
+    ])
+    const acct = Array.isArray(accounts) ? accounts[0] : null
+    return (acct && acct.name === username && acct.owner && acct.active && acct.posting) ? acct : null
   } catch (e) {
     return null
   } finally {

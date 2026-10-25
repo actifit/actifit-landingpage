@@ -169,6 +169,7 @@ module.exports = {
   key_prompt_not_posting: 'Це не posting ключ цього акаунта.',
   signing_cancelled: 'Підписання скасовано.',
   typed_key_hive_only: 'Підпис введеним ключем працює лише в Hive. Для Steem або Blurt увійдіть через Keychain.',
+  keychain_not_detected: 'Hive Keychain не виявлено. Увімкніть розширення Keychain і перезавантажте сторінку або увійдіть знову іншим способом.',
   key_prompt_check_failed: 'Наразі не вдалося звірити цей ключ із вашим акаунтом. Спробуйте ще раз за хвилину.',
   key_prompt_operation: 'Ви підписуєте:',
   payment_sent_not_confirmed: 'Ваш платіж у HIVE надіслано, але ми ще не змогли підтвердити покупку. Не платіть повторно. Зверніться до підтримки з цим ID транзакції: _TX_',

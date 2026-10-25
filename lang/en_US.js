@@ -130,6 +130,7 @@ module.exports = {
   key_prompt_not_posting: 'That key is not a posting key for this account.',
   signing_cancelled: 'Signing cancelled.',
   typed_key_hive_only: 'Signing with a typed key works on Hive only. To act on Steem or Blurt, log in with Keychain.',
+  keychain_not_detected: 'Hive Keychain was not detected. Enable the Keychain extension and reload the page, or log in again with another method.',
   key_prompt_check_failed: 'We could not check this key against your account right now. Please try again in a moment.',
   key_prompt_operation: 'You are signing:',
   payment_sent_not_confirmed: 'Your HIVE payment was sent, but we could not confirm your purchase yet. Please do not pay again. Contact support with this transaction ID: _TX_',

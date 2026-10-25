@@ -771,9 +771,12 @@
 			console.log(excp);
 			this.buyInProgress = false;
 		}finally{
-			this.paymentInFlight = false;
-			// The typed active key was for this one payment only.
-			this.userActvKey = '';
+			// Only once a payment was attempted: a failed validation keeps what was typed.
+			if (this.paymentInFlight){
+				this.paymentInFlight = false;
+				// The typed active key was for this one payment only.
+				this.userActvKey = '';
+			}
 		}
 	  },
 	  async errorCompletion(res){

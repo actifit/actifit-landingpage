@@ -134,7 +134,7 @@ describe('plugins/vue-custom global helpers', () => {
 
       const result = await Vue.prototype.$processTrxFunc.call(ctx, 'vote', {}, false)
 
-      expect(result).toEqual({ success: false, trx: null, error: 'signing_cancelled' })
+      expect(result).toEqual({ success: false, trx: null, error: 'signing_cancelled', cancelled: true })
       expect(ctx.$notify).not.toHaveBeenCalled()
       expect(hive.broadcast.send).not.toHaveBeenCalled()
     })
@@ -145,7 +145,7 @@ describe('plugins/vue-custom global helpers', () => {
 
       const result = await Vue.prototype.$processTrxFunc.call(ctx, 'vote', {}, false)
 
-      expect(result).toEqual({ success: false, trx: null, error: 'broadcast failed' })
+      expect(result).toEqual({ success: false, trx: null, error: 'broadcast failed', cancelled: false })
       expect(ctx.$notify).toHaveBeenCalledWith(expect.objectContaining({ text: 'broadcast failed' }))
     })
 
@@ -175,6 +175,8 @@ describe('plugins/vue-custom global helpers', () => {
       hive.memo.decode.mockReset()
       requestKey.mockReset()
       localStorage.clear()
+      // a typed-key session: the only kind that may be asked to type a key
+      localStorage.setItem('std_login', 'true')
     })
     afterEach(() => { delete window.hive_keychain; localStorage.clear() })
 
@@ -232,7 +234,12 @@ describe('plugins/vue-custom global helpers', () => {
   })
 
   describe('$broadcastWithKey', () => {
-    beforeEach(() => { hive.broadcast.send.mockReset(); requestKey.mockReset() })
+    beforeEach(() => {
+      hive.broadcast.send.mockReset(); requestKey.mockReset()
+      localStorage.clear()
+      // a typed-key session: the only kind that may be asked to type a key
+      localStorage.setItem('std_login', 'true')
+    })
 
     const ctx = () => ({
       user: { account: { name: 'alice' } },
@@ -521,6 +528,9 @@ describe('plugins/vue-custom global helpers', () => {
       hive.broadcast.send.mockReset()
       hive.broadcast.send.mockImplementation((tx, keys, cb) => cb(null, { id: 'x' }))
       classifyKey.mockReset()
+      localStorage.clear()
+      // a typed-key session: the only kind that may be asked to type a key
+      localStorage.setItem('std_login', 'true')
     })
 
     it.each([
@@ -560,6 +570,9 @@ describe('plugins/vue-custom global helpers', () => {
     beforeEach(() => {
       hive.broadcast.send.mockReset()
       hive.broadcast.send.mockImplementation((tx, keys, cb) => cb(new Error(XSS)))
+      localStorage.clear()
+      // a typed-key session: the only kind that may be asked to type a key
+      localStorage.setItem('std_login', 'true')
     })
 
     it('in the $broadcastWithKey result', async () => {
@@ -572,11 +585,43 @@ describe('plugins/vue-custom global helpers', () => {
       localStorage.setItem('acti_login_method', '')
       const c = ctx()
       c.$broadcastWithKey = Vue.prototype.$broadcastWithKey
-      await Vue.prototype.$processTrxFunc.call(c, 'vote', {}, false)
+      const result = await Vue.prototype.$processTrxFunc.call(c, 'vote', {}, false)
       const text = c.$notify.mock.calls[0][0].text
       expect(text).not.toContain('<img')
       expect(text).toContain('&lt;img')
+      // the RETURNED error is raw, like the Keychain branch: callers show it as plain
+      // text ({{ }}), where escaping would show "&lt;" literally
+      expect(result.error).toBe(XSS)
       localStorage.clear()
+    })
+  })
+
+  describe('sessions that must never be asked to TYPE a key', () => {
+    const ctx = () => ({
+      user: { account: { name: 'alice' } },
+      $t: (k) => k,
+      $store: { state: { chatPostingKey: null }, commit: jest.fn() }
+    })
+    beforeEach(() => { requestKey.mockReset(); hive.broadcast.send.mockReset(); localStorage.clear() })
+    afterEach(() => localStorage.clear())
+
+    it('a Keychain session whose extension is missing is told so - no key prompt', async () => {
+      localStorage.setItem('std_login', 'true')
+      localStorage.setItem('acti_login_method', 'keychain') // and no window.hive_keychain
+      const out = await Vue.prototype.$broadcastWithKey.call(ctx(), [['vote', {}]], {})
+      expect(out.trx.tx.error).toBe('keychain_not_detected')
+      const memo = await Vue.prototype.$decodeMemo.call(ctx(), '#m')
+      expect(memo).toEqual({ error: 'keychain_not_detected' })
+      expect(requestKey).not.toHaveBeenCalled()
+      expect(hive.broadcast.send).not.toHaveBeenCalled()
+    })
+
+    it('a HiveSigner session (no std_login) is never prompted, e.g. by /videos/new on load', async () => {
+      const memo = await Vue.prototype.$decodeMemo.call(ctx(), '#m')
+      expect(memo.error).toBeTruthy()
+      const out = await Vue.prototype.$broadcastWithKey.call(ctx(), [['vote', {}]], {})
+      expect(out.error).toBe(true)
+      expect(requestKey).not.toHaveBeenCalled()
     })
   })
 

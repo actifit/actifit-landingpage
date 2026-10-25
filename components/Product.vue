@@ -2382,8 +2382,10 @@ export default {
       }
       this.buyHiveExpand = !this.buyHiveExpand;
     }, async proceedBuyNowHive() {
+      // Before the try: an early return inside it would still run `finally`, releasing
+      // the lock the in-flight payment holds.
+      if (this.paymentInFlight) return;
       try { //console.log(this.product.name);
-        if (this.paymentInFlight) return;
         this.buyAttempt = true; this.buyInProgress = true; this.errorProceed = ''; console.log('proceedBuyNowHive');
         //making sure user is logged in
         if (!this.user) {
@@ -2478,9 +2480,12 @@ export default {
         console.log(excp);
         this.buyInProgress = false;
       } finally {
-        this.paymentInFlight = false;
-        // The typed active key was for this one payment only.
-        this.userActvKey = '';
+        // Only once a payment was attempted: a failed validation keeps what was typed.
+        if (this.paymentInFlight) {
+          this.paymentInFlight = false;
+          // The typed active key was for this one payment only.
+          this.userActvKey = '';
+        }
       }
     },
     async errorCompletion(res, type) {
@@ -2784,7 +2789,8 @@ export default {
         'buyer_zip': this.$refs['buyer_zip'].value,
         'afit_amount': this.item_price,
         'hive_amount': this.item_price_extra,
-        'active_key': this.userRlActvKey,
+        // No 'active_key': private keys never leave the browser. (/purchaseRealProduct
+        // is disabled server-side; it used to receive the user's active key here.)
         'order_quantity': this.order_quantity,
         'color_choice': this.color_choice,
       }

@@ -169,6 +169,7 @@ module.exports = {
   key_prompt_not_posting: 'Essa chave não é uma chave posting desta conta.',
   signing_cancelled: 'Assinatura cancelada.',
   typed_key_hive_only: 'Assinar com uma chave digitada só funciona no Hive. Para Steem ou Blurt, inicie sessão com o Keychain.',
+  keychain_not_detected: 'O Hive Keychain não foi detetado. Ative a extensão Keychain e recarregue a página, ou inicie sessão novamente com outro método.',
   key_prompt_check_failed: 'Não foi possível verificar esta chave com a sua conta neste momento. Tente novamente daqui a pouco.',
   key_prompt_operation: 'Está a assinar:',
   payment_sent_not_confirmed: 'O seu pagamento em HIVE foi enviado, mas ainda não conseguimos confirmar a sua compra. Não pague novamente. Contacte o suporte com este ID de transação: _TX_',

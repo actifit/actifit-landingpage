@@ -1063,7 +1063,8 @@ export default {
           this.$processTrxFunc('account_update2', transaction, false),
           timeoutError
         );
-        if (outcome && outcome.error === 'user_cancel') return;
+        // A cancelled prompt (Keychain's user_cancel, or the typed-key prompt) is no error.
+        if (outcome && (outcome.error === 'user_cancel' || outcome.cancelled)) return;
         if (!outcome || !outcome.success) throw new Error((outcome && outcome.error) || this.$t('Save_Error'));
 
         this.userinfo = { ...this.userinfo, posting_json_metadata: transaction.posting_json_metadata };

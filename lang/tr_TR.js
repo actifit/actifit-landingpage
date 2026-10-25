@@ -169,6 +169,7 @@ module.exports = {
   key_prompt_not_posting: 'Bu anahtar bu hesabın posting anahtarı değil.',
   signing_cancelled: 'İmzalama iptal edildi.',
   typed_key_hive_only: 'Yazılan bir anahtarla imzalama yalnızca Hive’da çalışır. Steem veya Blurt için Keychain ile giriş yapın.',
+  keychain_not_detected: 'Hive Keychain algılanmadı. Keychain eklentisini etkinleştirip sayfayı yenileyin veya başka bir yöntemle yeniden giriş yapın.',
   key_prompt_check_failed: 'Bu anahtarı şu anda hesabınızla doğrulayamadık. Lütfen birazdan tekrar deneyin.',
   key_prompt_operation: 'İmzaladığınız işlem:',
   payment_sent_not_confirmed: 'HIVE ödemeniz gönderildi, ancak satın alımınızı henüz onaylayamadık. Lütfen tekrar ödeme yapmayın. Bu işlem kimliğiyle destek ekibine ulaşın: _TX_',

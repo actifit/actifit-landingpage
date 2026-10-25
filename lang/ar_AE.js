@@ -164,6 +164,7 @@ module.exports = {
   key_prompt_not_posting: 'هذا ليس مفتاح نشر لهذا الحساب.',
   signing_cancelled: 'تم إلغاء التوقيع.',
   typed_key_hive_only: 'التوقيع بمفتاح مكتوب يعمل على Hive فقط. للتعامل على Steem أو Blurt، سجّل الدخول بـ Keychain.',
+  keychain_not_detected: 'لم يتم العثور على Hive Keychain. فعّل إضافة Keychain وأعد تحميل الصفحة، أو سجّل الدخول مجددًا بطريقة أخرى.',
   key_prompt_check_failed: 'تعذّر علينا التحقق من هذا المفتاح مقابل حسابك الآن. يُرجى المحاولة مرة أخرى بعد قليل.',
   key_prompt_operation: 'أنت توقّع على:',
   payment_sent_not_confirmed: 'تم إرسال دفعة HIVE الخاصة بك، لكننا لم نتمكن من تأكيد عملية الشراء بعد. يُرجى عدم الدفع مرة أخرى. تواصل مع الدعم مع معرّف المعاملة هذا: _TX_',

@@ -328,12 +328,13 @@ Vue.prototype.$processTrxFunc = async function (op_name, cstm_params, active) {
 	// server path returned.
 	const out = await this.$broadcastWithKey([[op_name, cstm_params]], { active: active });
 	if (out.success) return { success: true, trx: out.trx };
-	const err_msg = out.trx.tx.error;
 	// A cancelled prompt is the user's own choice, not an error worth a red toast.
 	if (!out.cancelled) {
-	  this.$notify({ group: 'error', text: err_msg, position: 'top center' });
+	  // escaped: toasts render HTML
+	  this.$notify({ group: 'error', text: out.trx.tx.error, position: 'top center' });
 	}
-	return { success: false, trx: null, error: err_msg };
+	// Raw text, like the Keychain branch above returns: callers show it as plain text.
+	return { success: false, trx: null, error: out.rawError, cancelled: !!out.cancelled };
   }
 };
 
@@ -352,6 +353,17 @@ Vue.prototype.$processTrxFunc = async function (op_name, cstm_params, active) {
  * decrypts locally with hive-js. HiveAuth has no memo-decrypt operation; it never worked
  * here either (the server held no key for HiveAuth users), so this is not a regression.
  */
+// Only a typed-key session may be asked to type a key. A Keychain session whose extension
+// is missing (disabled, mobile browser) reaches the typed-key branches because every
+// Keychain branch also requires window.hive_keychain - asking that user to paste a
+// private key would teach exactly the wrong habit. HiveSigner sessions never type keys.
+// Returns a translation key to refuse with, or null.
+function typedKeySessionRefusal () {
+  if (!localStorage.getItem('std_login')) return 'error_performing_operation';
+  if (localStorage.getItem('acti_login_method') === 'keychain') return 'keychain_not_detected';
+  return null;
+}
+
 Vue.prototype.$decodeMemo = async function (memo) {
   if (!memo) return { error: this.$t('error_performing_operation') };
   const account = this.user && this.user.account && this.user.account.name;
@@ -367,6 +379,8 @@ Vue.prototype.$decodeMemo = async function (memo) {
 	if (method === 'hiveauth') {
 	  return { error: this.$t('error_performing_operation') };
 	}
+	const refusal = typedKeySessionRefusal();
+	if (refusal) return { error: escapeHtml(this.$t(refusal)) };
 	let wif = this.$store.state.chatPostingKey;
 	if (!wif) {
 	  wif = await requestKey('posting', account, [['memo_decode', {}]]);
@@ -407,11 +421,15 @@ Vue.prototype.$broadcastWithKey = async function (operations, opts) {
   // substring-matches it ('missing' / 'authority') or shows it in a toast, and toasts
   // render HTML (vue-notification uses v-html) - while the text can come from an RPC
   // node. Escaping here covers every caller, including ones added later.
-  const fail = (msg, extra) => Object.assign({ error: true, trx: { tx: { error: escapeHtml(msg) } } }, extra || {});
+  // `rawError` keeps the unescaped text for $processTrxFunc, whose callers show it as
+  // plain text ({{ }}), where an escaped "&quot;" would be shown literally.
+  const fail = (msg, extra) => Object.assign({ error: true, rawError: String(msg), trx: { tx: { error: escapeHtml(msg) } } }, extra || {});
 
   if (bchain !== 'HIVE') {
 	return fail(this.$t('typed_key_hive_only'));
   }
+  const refusal = typedKeySessionRefusal();
+  if (refusal) return fail(this.$t(refusal));
 
   const account = this.user && this.user.account && this.user.account.name;
   const keyType = active ? 'active' : 'posting';

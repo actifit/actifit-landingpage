@@ -164,6 +164,7 @@ module.exports = {
   key_prompt_not_posting: 'Dieser Schlüssel ist kein Posting-Schlüssel dieses Kontos.',
   signing_cancelled: 'Signieren abgebrochen.',
   typed_key_hive_only: 'Signieren mit einem eingegebenen Schlüssel funktioniert nur auf Hive. Für Steem oder Blurt melden Sie sich mit Keychain an.',
+  keychain_not_detected: 'Hive Keychain wurde nicht erkannt. Aktivieren Sie die Keychain-Erweiterung und laden Sie die Seite neu, oder melden Sie sich mit einer anderen Methode an.',
   key_prompt_check_failed: 'Wir konnten diesen Schlüssel gerade nicht mit Ihrem Konto abgleichen. Bitte versuchen Sie es gleich noch einmal.',
   key_prompt_operation: 'Sie signieren:',
   payment_sent_not_confirmed: 'Ihre HIVE-Zahlung wurde gesendet, aber wir konnten Ihren Kauf noch nicht bestätigen. Bitte zahlen Sie nicht erneut. Wenden Sie sich mit dieser Transaktions-ID an den Support: _TX_',

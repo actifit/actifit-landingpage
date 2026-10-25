@@ -170,6 +170,7 @@ module.exports = {
   key_prompt_not_posting: '该密钥不是此帐户的 posting 密钥。',
   signing_cancelled: '已取消签名。',
   typed_key_hive_only: '使用输入的密钥签名仅适用于 Hive。如需在 Steem 或 Blurt 上操作，请使用 Keychain 登录。',
+  keychain_not_detected: '未检测到 Hive Keychain。请启用 Keychain 扩展并重新加载页面，或使用其他方式重新登录。',
   key_prompt_check_failed: '目前无法将此密钥与您的账户进行核对。请稍后再试。',
   key_prompt_operation: '您正在签署：',
   payment_sent_not_confirmed: '您的 HIVE 付款已发送，但我们暂时无法确认您的购买。请勿重复付款。请携带此交易 ID 联系客服：_TX_',

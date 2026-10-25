@@ -85,6 +85,56 @@ describe('KeyPromptModal', () => {
     wrapper.destroy()
   })
 
+  it('hands back the key that was CHECKED, not one pasted during the lookup', async () => {
+    const wrapper = mountIt()
+    const p = requestKey('posting', 'alice', [])
+    await wrapper.vm.$nextTick()
+    let answerLookup
+    classifyKey.mockImplementation(() => new Promise((r) => { answerLookup = r }))
+    wrapper.setData({ wif: '5Kposting' })
+    const submitted = wrapper.vm.submit()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('input').attributes('disabled')).toBeDefined()
+    wrapper.vm.wif = '5Kowner'            // swapped in while the lookup runs
+    answerLookup('posting')
+    await submitted
+    await expect(p).resolves.toBe('5Kposting')
+    wrapper.destroy()
+  })
+
+  it('a lookup started before a cancel cannot approve the NEXT prompt', async () => {
+    const wrapper = mountIt()
+    requestKey('posting', 'alice', [])
+    await wrapper.vm.$nextTick()
+    let answerLookup
+    classifyKey.mockImplementation(() => new Promise((r) => { answerLookup = r }))
+    wrapper.setData({ wif: '5Kposting' })
+    const stale = wrapper.vm.submit()
+    wrapper.vm.cancel()
+    const answer = jest.fn()
+    requestKey('active', 'alice', []).then(answer)   // e.g. a buy, next
+    await wrapper.vm.$nextTick()
+    wrapper.setData({ wif: '5Kowner' })
+    answerLookup('active')                            // the OLD lookup finishes
+    await stale
+    await flush()
+    expect(answer).not.toHaveBeenCalled()
+    expect(wrapper.vm.checking).toBe(false)           // the new prompt is usable
+    wrapper.destroy()
+  })
+
+  it('keeps focus events away from an open Bootstrap modal (which would steal focus)', async () => {
+    const wrapper = shallowMount(KeyPromptModal, { mocks: { $t: (k) => k }, attachTo: document.body })
+    requestKey('posting', 'alice', [])
+    await wrapper.vm.$nextTick()
+    const onDocument = jest.fn()
+    document.addEventListener('focusin', onDocument)
+    wrapper.find('input').element.dispatchEvent(new FocusEvent('focusin', { bubbles: true }))
+    expect(onDocument).not.toHaveBeenCalled()
+    document.removeEventListener('focusin', onDocument)
+    wrapper.destroy()
+  })
+
   it('hands back a verified key', async () => {
     const wrapper = mountIt()
     const p = requestKey('active', 'alice', [])

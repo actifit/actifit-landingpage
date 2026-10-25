@@ -1,7 +1,10 @@
 <template>
   <!-- Rendered once, from layouts/default.vue. Opened via utils/keyPrompt.js. -->
+  <!-- @focusin.stop: an open Bootstrap 4 modal moves any focus outside itself back to
+       itself (a focusin handler on document). This prompt opens OVER those modals, so
+       without this its input could not keep focus. -->
   <div v-if="open" class="key-prompt-backdrop" role="dialog" aria-modal="true"
-       :aria-labelledby="'key-prompt-title'" @keydown.esc="cancel">
+       :aria-labelledby="'key-prompt-title'" @keydown.esc="cancel" @focusin.stop>
     <div class="key-prompt-card">
       <h5 id="key-prompt-title" class="key-prompt-title">
         {{ request.type === 'active' ? $t('key_prompt_title_active') : $t('key_prompt_title_posting') }}
@@ -19,7 +22,7 @@
 
       <!-- type="password" and no autocomplete: this is a private key, not a login
            field a password manager should offer to save. -->
-      <input ref="keyInput" v-model="wif" type="password" class="form-control"
+      <input ref="keyInput" v-model="wif" type="password" class="form-control" :disabled="checking"
              autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
              :placeholder="request.type === 'active' ? $t('Private_active_key') : $t('Private_posting_key')"
              @keydown.enter="submit">
@@ -55,6 +58,7 @@ export default {
       this.request = req
       this.wif = ''
       this.error = ''
+      this.checking = false
       this.open = true
       this.$nextTick(() => { if (this.$refs.keyInput) this.$refs.keyInput.focus() })
     })
@@ -67,9 +71,14 @@ export default {
   methods: {
     async submit () {
       if (!this.wif || this.checking) return
+      const request = this.request
+      const wif = this.wif.trim()
       this.checking = true
       this.error = ''
-      const kind = await classifyKey(this.request.account, this.wif.trim())
+      const kind = await classifyKey(request.account, wif)
+      // Cancelled, or replaced by another prompt, while the lookup ran: this answer is
+      // not for the prompt now showing.
+      if (!this.open || this.request !== request) return
       this.checking = false
 
       // The same rule the buy-now forms apply (utils/keyChecks.js): refuses an owner key,
@@ -80,7 +89,7 @@ export default {
         this.error = this.$t(refusal)
         return
       }
-      this.finish(this.wif.trim())
+      this.finish(wif)
     },
     cancel () {
       this.finish(null)

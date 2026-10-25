@@ -169,6 +169,7 @@ module.exports = {
   key_prompt_not_posting: 'このアカウントの posting キーではありません。',
   signing_cancelled: '署名をキャンセルしました。',
   typed_key_hive_only: '入力したキーでの署名は Hive でのみ機能します。Steem または Blurt では Keychain でログインしてください。',
+  keychain_not_detected: 'Hive Keychain が検出されませんでした。Keychain 拡張機能を有効にしてページを再読み込みするか、別の方法で再ログインしてください。',
   key_prompt_check_failed: '現在、このキーをアカウントと照合できませんでした。しばらくしてからもう一度お試しください。',
   key_prompt_operation: '署名する内容:',
   payment_sent_not_confirmed: 'HIVE の支払いは送信されましたが、購入をまだ確認できていません。再度支払わないでください。次の取引 ID を添えてサポートにお問い合わせください: _TX_',

@@ -169,6 +169,7 @@ module.exports = {
   key_prompt_not_posting: 'यह इस खाते की posting कुंजी नहीं है।',
   signing_cancelled: 'हस्ताक्षर रद्द किया गया।',
   typed_key_hive_only: 'टाइप की गई कुंजी से हस्ताक्षर केवल Hive पर काम करता है। Steem या Blurt के लिए Keychain से लॉग इन करें।',
+  keychain_not_detected: 'Hive Keychain नहीं मिला। Keychain एक्सटेंशन चालू करें और पेज फिर से लोड करें, या किसी अन्य तरीके से फिर से लॉग इन करें।',
   key_prompt_check_failed: 'हम अभी इस कुंजी को आपके खाते से जाँच नहीं सके। कृपया थोड़ी देर में फिर से प्रयास करें।',
   key_prompt_operation: 'आप हस्ताक्षर कर रहे हैं:',
   payment_sent_not_confirmed: 'आपका HIVE भुगतान भेज दिया गया है, लेकिन हम अभी आपकी खरीद की पुष्टि नहीं कर सके। कृपया दोबारा भुगतान न करें। इस लेनदेन आईडी के साथ सहायता से संपर्क करें: _TX_',

@@ -169,6 +169,7 @@ module.exports = {
   key_prompt_not_posting: 'Ten klucz nie jest kluczem posting tego konta.',
   signing_cancelled: 'Podpisywanie anulowane.',
   typed_key_hive_only: 'Podpisywanie wpisanym kluczem działa tylko na Hive. Aby działać na Steem lub Blurt, zaloguj się przez Keychain.',
+  keychain_not_detected: 'Nie wykryto Hive Keychain. Włącz rozszerzenie Keychain i odśwież stronę albo zaloguj się ponownie inną metodą.',
   key_prompt_check_failed: 'Nie udało się teraz sprawdzić tego klucza z Twoim kontem. Spróbuj ponownie za chwilę.',
   key_prompt_operation: 'Podpisujesz:',
   payment_sent_not_confirmed: 'Twoja płatność HIVE została wysłana, ale nie mogliśmy jeszcze potwierdzić zakupu. Nie płać ponownie. Skontaktuj się z pomocą, podając ten identyfikator transakcji: _TX_',
