@@ -2,8 +2,21 @@
 // plugin (which registers global Vue helpers) has no side effects.
 jest.mock('hive-auth-wrapper', () => ({ broadcast: jest.fn(), authenticate: jest.fn() }))
 
+// Typed-key transactions are now signed IN THE BROWSER by hive-js, not by /performTrx.
+// Mock the broadcast (no network) and the key prompt (no UI) so the real signing path in
+// $broadcastWithKey runs end to end.
+jest.mock('@hiveio/hive-js', () => ({ broadcast: { send: jest.fn() }, memo: { decode: jest.fn() } }))
+jest.mock('@/utils/keyPrompt', () => ({ requestKey: jest.fn() }))
+// classifyKey reads the chain; the refusal RULE (keyRefusal) stays real.
+jest.mock('@/utils/keyChecks', () => Object.assign({}, jest.requireActual('@/utils/keyChecks'), {
+  classifyKey: jest.fn()
+}))
+
 import Vue from 'vue'
 import { getTransactionErrorMessage } from '@/plugins/vue-custom'
+import hive from '@hiveio/hive-js'
+import { requestKey } from '@/utils/keyPrompt'
+import { classifyKey } from '@/utils/keyChecks'
 
 describe('plugins/vue-custom global helpers', () => {
   describe('getTransactionErrorMessage', () => {
@@ -28,57 +41,253 @@ describe('plugins/vue-custom global helpers', () => {
     })
   })
 
-  describe('$processTrxFunc standard login errors', () => {
-    const originalActiAppUrl = process.env.actiAppUrl
-    const originalFetch = global.fetch
+  // The typed-key branch used to send operations to /performTrx, where the server signed
+  // with a posting key it had stored. That is what the incident abused, and /performTrx is
+  // permanently disabled - so these tests replace the ones that mocked its responses.
+  describe('$processTrxFunc typed-key login: signs in the browser', () => {
+    const WIF = '5JdeC9P7Pbd1uGdFVEsJ41EkEnADbbHGq6p1BwFxm6txNBsQnsw'
+    let committed
+
+    const makeContext = (storedKey) => {
+      committed = []
+      const ctx = {
+        user: { account: { name: 'alice' } },
+        $notify: jest.fn(),
+        $t: (key) => key,
+        $store: {
+          state: { chatPostingKey: storedKey },
+          commit: (name, val) => committed.push([name, val])
+        }
+      }
+      // $processTrxFunc delegates to this; on a real component Vue provides it.
+      ctx.$broadcastWithKey = Vue.prototype.$broadcastWithKey
+      return ctx
+    }
 
     beforeEach(() => {
       localStorage.clear()
       localStorage.setItem('std_login', 'true')
-      localStorage.setItem('acti_login_method', 'standard')
-      localStorage.setItem('access_token', 'token')
-      process.env.actiAppUrl = 'https://api.example/'
+      localStorage.setItem('acti_login_method', '')
+      hive.broadcast.send.mockReset()
+      requestKey.mockReset()
+    })
+    afterEach(() => localStorage.clear())
+
+    it('never calls /performTrx', async () => {
+      global.fetch = jest.fn()
+      hive.broadcast.send.mockImplementation((tx, keys, cb) => cb(null, { id: 'abc' }))
+
+      await Vue.prototype.$processTrxFunc.call(makeContext(WIF), 'vote', {}, false)
+
+      expect(global.fetch).not.toHaveBeenCalled()
+      delete global.fetch
     })
 
-    afterEach(() => {
-      global.fetch = originalFetch
-      process.env.actiAppUrl = originalActiAppUrl
+    it('signs with the in-memory posting key and returns the transaction id', async () => {
+      hive.broadcast.send.mockImplementation((tx, keys, cb) =>
+        cb(null, { id: 'deadbeef', ref_block_num: 42 }))
+
+      const result = await Vue.prototype.$processTrxFunc.call(makeContext(WIF), 'vote', { weight: 1 }, false)
+
+      expect(result).toEqual({ success: true, trx: { tx: { id: 'deadbeef', ref_block_num: 42 } } })
+      expect(hive.broadcast.send.mock.calls[0][0].operations).toEqual([['vote', { weight: 1 }]])
+      // no prompt: the key was already in memory
+      expect(requestKey).not.toHaveBeenCalled()
+    })
+
+    it('passes keys as an OBJECT keyed by role, never a bare string', async () => {
+      // hive-js signs with `for (k in keys)`. A string would iterate its CHARACTERS and
+      // sign with garbage.
+      hive.broadcast.send.mockImplementation((tx, keys, cb) => cb(null, { id: 'x' }))
+
+      await Vue.prototype.$processTrxFunc.call(makeContext(WIF), 'vote', {}, false)
+
+      expect(hive.broadcast.send.mock.calls[0][1]).toEqual({ posting: WIF })
+    })
+
+    it('asks for the posting key when memory is empty (after a reload), and keeps it', async () => {
+      requestKey.mockResolvedValue(WIF)
+      hive.broadcast.send.mockImplementation((tx, keys, cb) => cb(null, { id: 'x' }))
+
+      const result = await Vue.prototype.$processTrxFunc.call(makeContext(null), 'vote', {}, false)
+
+      expect(requestKey).toHaveBeenCalledWith('posting', 'alice', [['vote', {}]])
+      expect(committed).toContainEqual(['setChatPostingKey', WIF])
+      expect(result.success).toBe(true)
+    })
+
+    it('requests the ACTIVE key per action and never stores it', async () => {
+      requestKey.mockResolvedValue(WIF)
+      hive.broadcast.send.mockImplementation((tx, keys, cb) => cb(null, { id: 'x' }))
+
+      await Vue.prototype.$processTrxFunc.call(makeContext('posting-key-in-memory'), 'transfer', {}, true)
+
+      expect(requestKey).toHaveBeenCalledWith('active', 'alice', [['transfer', {}]])
+      expect(hive.broadcast.send.mock.calls[0][1]).toEqual({ active: WIF })
+      // an active key can move funds: it must not end up in the store
+      expect(committed.filter(([name]) => name === 'setChatPostingKey')).toEqual([])
+    })
+
+    it('a cancelled prompt fails quietly, without a red toast', async () => {
+      requestKey.mockResolvedValue(null)
+      const ctx = makeContext(null)
+
+      const result = await Vue.prototype.$processTrxFunc.call(ctx, 'vote', {}, false)
+
+      expect(result).toEqual({ success: false, trx: null, error: 'signing_cancelled', cancelled: true })
+      expect(ctx.$notify).not.toHaveBeenCalled()
+      expect(hive.broadcast.send).not.toHaveBeenCalled()
+    })
+
+    it('surfaces a broadcast error, with a toast', async () => {
+      hive.broadcast.send.mockImplementation((tx, keys, cb) => cb(new Error('broadcast failed')))
+      const ctx = makeContext(WIF)
+
+      const result = await Vue.prototype.$processTrxFunc.call(ctx, 'vote', {}, false)
+
+      expect(result).toEqual({ success: false, trx: null, error: 'broadcast failed', cancelled: false })
+      expect(ctx.$notify).toHaveBeenCalledWith(expect.objectContaining({ text: 'broadcast failed' }))
+    })
+
+    it('drops a posting key that has lost its authority, so it is not retried', async () => {
+      // e.g. the user rotated their key - exactly what the security notice asks them to do
+      hive.broadcast.send.mockImplementation((tx, keys, cb) =>
+        cb(new Error('missing required posting authority: Missing Posting Authority alice')))
+
+      await Vue.prototype.$processTrxFunc.call(makeContext(WIF), 'vote', {}, false)
+
+      expect(committed).toContainEqual(['setChatPostingKey', null])
+    })
+  })
+
+  // /memoDecode had the SERVER decrypt with a stored key. connectSession3S (3Speak) never
+  // branched by login method, so with that route gone it was dead for everyone.
+  describe('$decodeMemo', () => {
+    const ctx = (storedKey) => {
+      const c = {
+        user: { account: { name: 'alice' } },
+        $t: (k) => k,
+        $store: { state: { chatPostingKey: storedKey }, commit: jest.fn() }
+      }
+      return c
+    }
+    beforeEach(() => {
+      hive.memo.decode.mockReset()
+      requestKey.mockReset()
       localStorage.clear()
+      // a typed-key session: the only kind that may be asked to type a key
+      localStorage.setItem('std_login', 'true')
+    })
+    afterEach(() => { delete window.hive_keychain; localStorage.clear() })
+
+    it('decrypts locally with the typed key, returning the /memoDecode shape', async () => {
+      localStorage.setItem('acti_login_method', '')
+      hive.memo.decode.mockReturnValue('#token123')
+
+      const out = await Vue.prototype.$decodeMemo.call(ctx('wif'), '#encrypted')
+
+      expect(out).toEqual({ xcstkn: '#token123' })
+      expect(hive.memo.decode).toHaveBeenCalledWith('wif', '#encrypted')
     })
 
-    it('surfaces a top-level backend error when trx is null', async () => {
-      global.fetch = jest.fn().mockResolvedValue({
-        json: jest.fn().mockResolvedValue({ error: 'broadcast failed', trx: null })
-      })
-      const context = {
-        user: { account: { name: 'alice' } },
-        $notify: jest.fn(),
-        $t: key => key,
-        $store: { dispatch: jest.fn() }
+    it('decrypts in the Keychain extension for Keychain users - never locally', async () => {
+      localStorage.setItem('acti_login_method', 'keychain')
+      window.hive_keychain = {
+        requestVerifyKey: jest.fn((user, memo, role, cb) => cb({ success: true, result: '#tok' }))
       }
 
-      const result = await Vue.prototype.$processTrxFunc.call(context, 'account_update2', {}, false)
+      const out = await Vue.prototype.$decodeMemo.call(ctx(null), '#encrypted')
 
-      expect(result).toEqual({ success: false, trx: null, error: 'broadcast failed' })
-      expect(context.$notify).toHaveBeenCalledWith(expect.objectContaining({ text: 'broadcast failed' }))
+      expect(out).toEqual({ xcstkn: '#tok' })
+      expect(window.hive_keychain.requestVerifyKey)
+        .toHaveBeenCalledWith('alice', '#encrypted', 'Posting', expect.any(Function))
+      expect(hive.memo.decode).not.toHaveBeenCalled()
     })
 
-    it('rejects a malformed success response with no transaction', async () => {
-      global.fetch = jest.fn().mockResolvedValue({
-        json: jest.fn().mockResolvedValue({ success: true, trx: null })
-      })
-      const context = {
-        user: { account: { name: 'alice' } },
-        $notify: jest.fn(),
-        $t: key => key,
-        $store: { dispatch: jest.fn() }
+    it('reports a refused Keychain prompt as cancelled', async () => {
+      localStorage.setItem('acti_login_method', 'keychain')
+      window.hive_keychain = { requestVerifyKey: jest.fn((u, m, r, cb) => cb({ success: false })) }
+
+      const out = await Vue.prototype.$decodeMemo.call(ctx(null), '#encrypted')
+
+      expect(out).toEqual({ error: 'signing_cancelled' })
+    })
+
+    it('asks for the posting key when memory is empty', async () => {
+      localStorage.setItem('acti_login_method', '')
+      requestKey.mockResolvedValue('prompted-wif')
+      hive.memo.decode.mockReturnValue('#t')
+
+      await Vue.prototype.$decodeMemo.call(ctx(null), '#encrypted')
+
+      expect(requestKey).toHaveBeenCalledWith('posting', 'alice', expect.any(Array))
+      expect(hive.memo.decode).toHaveBeenCalledWith('prompted-wif', '#encrypted')
+    })
+
+    it('returns an error rather than throwing on a bad memo', async () => {
+      localStorage.setItem('acti_login_method', '')
+      hive.memo.decode.mockImplementation(() => { throw new Error('Invalid memo') })
+
+      await expect(Vue.prototype.$decodeMemo.call(ctx('wif'), '#junk'))
+        .resolves.toEqual({ error: 'Invalid memo' })
+    })
+  })
+
+  describe('$broadcastWithKey', () => {
+    beforeEach(() => {
+      hive.broadcast.send.mockReset(); requestKey.mockReset()
+      localStorage.clear()
+      // a typed-key session: the only kind that may be asked to type a key
+      localStorage.setItem('std_login', 'true')
+    })
+
+    const ctx = () => ({
+      user: { account: { name: 'alice' } },
+      $t: (k) => k,
+      $store: { state: { chatPostingKey: 'k' }, commit: jest.fn() }
+    })
+
+    it('returns the shape /performTrx used to, so direct callers need no other change', async () => {
+      hive.broadcast.send.mockImplementation((tx, keys, cb) => cb(new Error('boom')))
+      const out = await Vue.prototype.$broadcastWithKey.call(ctx(), [['vote', {}]], {})
+      // callers read outcome.error and outcome.trx.tx.error
+      expect(out.error).toBe(true)
+      expect(out.trx.tx.error).toBe('boom')
+    })
+
+    it('broadcasts several operations at once (e.g. a vote plus its options)', async () => {
+      hive.broadcast.send.mockImplementation((tx, keys, cb) => cb(null, { id: 'x' }))
+      const ops = [['comment', {}], ['comment_options', {}]]
+      await Vue.prototype.$broadcastWithKey.call(ctx(), ops, {})
+      expect(hive.broadcast.send.mock.calls[0][0].operations).toEqual(ops)
+    })
+
+    it('uses a key the caller already collected instead of prompting again', async () => {
+      // the buy-now flows ask for the active key in their own form
+      hive.broadcast.send.mockImplementation((tx, keys, cb) => cb(null, { id: 'x' }))
+      classifyKey.mockResolvedValue('active')
+      await Vue.prototype.$broadcastWithKey.call(ctx(), [['transfer', {}]], { active: true, wif: 'typed-active' })
+      expect(requestKey).not.toHaveBeenCalled()
+      expect(hive.broadcast.send.mock.calls[0][1]).toEqual({ active: 'typed-active' })
+    })
+
+    it('refuses Steem and Blurt plainly - a typed key here is a Hive key', async () => {
+      for (const bchain of ['STEEM', 'BLURT', 'steem']) {
+        const out = await Vue.prototype.$broadcastWithKey.call(ctx(), [['vote', {}]], { bchain })
+        expect(out.error).toBe(true)
+        expect(out.trx.tx.error).toBe('typed_key_hive_only')
       }
-
-      const result = await Vue.prototype.$processTrxFunc.call(context, 'account_update2', {}, false)
-
-      expect(result).toEqual({ success: false, trx: null, error: 'error_performing_operation' })
+      expect(hive.broadcast.send).not.toHaveBeenCalled()
     })
 
+    it('treats a missing or empty chain as Hive', async () => {
+      hive.broadcast.send.mockImplementation((tx, keys, cb) => cb(null, { id: 'x' }))
+      // wallet.vue defaults cur_bchain to '' rather than 'HIVE'
+      for (const bchain of [undefined, '', null, 'HIVE', 'hive']) {
+        const out = await Vue.prototype.$broadcastWithKey.call(ctx(), [['vote', {}]], { bchain })
+        expect(out.success).toBe(true)
+      }
+    })
   })
 
   describe('$processTrxFunc Keychain cancellation', () => {
@@ -302,6 +511,156 @@ describe('plugins/vue-custom global helpers', () => {
     it('returns empty string when there is no metadata', () => {
       expect(Vue.prototype.$fetchReportTags({})).toBe('')
       expect(Vue.prototype.$fetchReportTags(null)).toBe('')
+    })
+  })
+
+  // The buy-now forms collect the active key themselves and pass it as options.wif,
+  // skipping the prompt. That path signs PAYMENTS, so it gets the prompt's checks.
+  describe('$broadcastWithKey with a caller-supplied key', () => {
+    const ctx = () => ({
+      user: { account: { name: 'alice' } },
+      $t: (k) => k,
+      $store: { state: { chatPostingKey: null }, commit: jest.fn() }
+    })
+    const pay = (wif) => Vue.prototype.$broadcastWithKey.call(ctx(), [['transfer', { amount: '1.000 HIVE' }]],
+      { active: true, wif })
+    beforeEach(() => {
+      hive.broadcast.send.mockReset()
+      hive.broadcast.send.mockImplementation((tx, keys, cb) => cb(null, { id: 'x' }))
+      classifyKey.mockReset()
+      localStorage.clear()
+      // a typed-key session: the only kind that may be asked to type a key
+      localStorage.setItem('std_login', 'true')
+    })
+
+    it.each([
+      ['owner', 'key_prompt_owner_refused'],
+      ['posting', 'key_prompt_not_active'],
+      ['none', 'key_prompt_not_active'],
+      ['invalid', 'key_prompt_invalid'],
+      // a failed lookup is NOT waved through: the key would sign a payment unchecked
+      ['unknown', 'key_prompt_check_failed']
+    ])('refuses a %s key before signing anything', async (kind, reason) => {
+      classifyKey.mockResolvedValue(kind)
+      const out = await pay('5Ksomething')
+      expect(out.error).toBe(true)
+      expect(out.trx.tx.error).toBe(reason)
+      expect(hive.broadcast.send).not.toHaveBeenCalled()
+    })
+
+    it('signs with a verified active key, trimmed', async () => {
+      classifyKey.mockResolvedValue('active')
+      const out = await pay('  5Kactive  ')
+      expect(classifyKey).toHaveBeenCalledWith('alice', '5Kactive')
+      expect(hive.broadcast.send.mock.calls[0][1]).toEqual({ active: '5Kactive' })
+      expect(out.success).toBe(true)
+    })
+  })
+
+  // vue-notification renders toast text with v-html, and the message can come from an
+  // RPC node. Escaped once at the source, so every caller is covered.
+  describe('broadcast error messages are HTML-escaped', () => {
+    const XSS = '<img src=x onerror=alert(1)>'
+    const ctx = () => ({
+      user: { account: { name: 'alice' } },
+      $t: (k) => k,
+      $notify: jest.fn(),
+      $store: { state: { chatPostingKey: 'k' }, commit: jest.fn() }
+    })
+    beforeEach(() => {
+      hive.broadcast.send.mockReset()
+      hive.broadcast.send.mockImplementation((tx, keys, cb) => cb(new Error(XSS)))
+      localStorage.clear()
+      // a typed-key session: the only kind that may be asked to type a key
+      localStorage.setItem('std_login', 'true')
+    })
+
+    it('in the $broadcastWithKey result', async () => {
+      const out = await Vue.prototype.$broadcastWithKey.call(ctx(), [['vote', {}]], {})
+      expect(out.trx.tx.error).toBe('&lt;img src=x onerror=alert(1)&gt;')
+    })
+
+    it('in the $processTrxFunc toast', async () => {
+      localStorage.setItem('std_login', 'true')
+      localStorage.setItem('acti_login_method', '')
+      const c = ctx()
+      c.$broadcastWithKey = Vue.prototype.$broadcastWithKey
+      const result = await Vue.prototype.$processTrxFunc.call(c, 'vote', {}, false)
+      const text = c.$notify.mock.calls[0][0].text
+      expect(text).not.toContain('<img')
+      expect(text).toContain('&lt;img')
+      // the RETURNED error is raw, like the Keychain branch: callers show it as plain
+      // text ({{ }}), where escaping would show "&lt;" literally
+      expect(result.error).toBe(XSS)
+      localStorage.clear()
+    })
+  })
+
+  describe('sessions that must never be asked to TYPE a key', () => {
+    const ctx = () => ({
+      user: { account: { name: 'alice' } },
+      $t: (k) => k,
+      $store: { state: { chatPostingKey: null }, commit: jest.fn() }
+    })
+    beforeEach(() => { requestKey.mockReset(); hive.broadcast.send.mockReset(); localStorage.clear() })
+    afterEach(() => localStorage.clear())
+
+    it('a Keychain session whose extension is missing is told so - no key prompt', async () => {
+      localStorage.setItem('std_login', 'true')
+      localStorage.setItem('acti_login_method', 'keychain') // and no window.hive_keychain
+      const out = await Vue.prototype.$broadcastWithKey.call(ctx(), [['vote', {}]], {})
+      expect(out.trx.tx.error).toBe('keychain_not_detected')
+      const memo = await Vue.prototype.$decodeMemo.call(ctx(), '#m')
+      expect(memo).toEqual({ error: 'keychain_not_detected' })
+      expect(requestKey).not.toHaveBeenCalled()
+      expect(hive.broadcast.send).not.toHaveBeenCalled()
+    })
+
+    it('a HiveSigner session (no std_login) is never prompted, e.g. by /videos/new on load', async () => {
+      const memo = await Vue.prototype.$decodeMemo.call(ctx(), '#m')
+      expect(memo.error).toBeTruthy()
+      const out = await Vue.prototype.$broadcastWithKey.call(ctx(), [['vote', {}]], {})
+      expect(out.error).toBe(true)
+      expect(requestKey).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('purchase confirmation helpers', () => {
+    it('$confirmFailed treats BOTH failure shapes as failure', () => {
+      const failed = Vue.prototype.$confirmFailed
+      // {status:'error'} is what the on-chain verified routes answer - and what the
+      // purchase flows used to show as success
+      expect(failed({ status: 'error' })).toBe(true)
+      expect(failed({ error: 'Transaction already verified' })).toBe(true)
+      expect(failed(null)).toBe(true)
+      expect(failed({ status: 'Success' })).toBe(false)
+      expect(failed({ status: 'success' })).toBe(false)
+    })
+
+    it('$signsInBrowser: Keychain, HiveAuth and typed key yes; HiveSigner no', () => {
+      localStorage.clear()
+      expect(Vue.prototype.$signsInBrowser()).toBe(false)
+      localStorage.setItem('std_login', 'true')
+      expect(Vue.prototype.$signsInBrowser()).toBe(true)
+      localStorage.clear()
+    })
+
+    it('$signingErrorText reads every failure shape, never throws, escapes', () => {
+      const text = (r) => Vue.prototype.$signingErrorText.call({ $t: (k) => k }, r)
+      expect(text({ error: true, trx: { tx: { error: 'already &lt;escaped&gt;' } } })).toBe('already &lt;escaped&gt;')
+      expect(text({ success: false, error: '<b>keychain</b>' })).toBe('&lt;b&gt;keychain&lt;/b&gt;')
+      expect(text({ cause: { message: 'hive-js' } })).toBe('hive-js')
+      expect(text(new Error('plain'))).toBe('plain')
+      // the old code read res.cause.message unconditionally: these threw
+      expect(text(true)).toBe('error_performing_operation')
+      expect(text(undefined)).toBe('error_performing_operation')
+    })
+
+    it('$notifyPaymentNotConfirmed: persistent toast, escaped tx id', () => {
+      const c = { $t: () => 'sent: _TX_', $notify: jest.fn() }
+      const msg = Vue.prototype.$notifyPaymentNotConfirmed.call(c, '<x>')
+      expect(msg).toBe('sent: &lt;x&gt;')
+      expect(c.$notify).toHaveBeenCalledWith(expect.objectContaining({ group: 'error', text: msg, duration: -1 }))
     })
   })
 })

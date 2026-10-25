@@ -546,13 +546,9 @@ export default {
         if (bchain_option) {
           cur_bchain = bchain_option;
         }
-        let url = new URL(process.env.actiAppUrl + 'performTrx/?user=' + this.user.account.name + '&operation=' + encodeURIComponent(op_json) + '&bchain=' + cur_bchain);
-        let reqHeads = new Headers({
-          'Content-Type': 'application/json',
-          'x-acti-token': 'Bearer ' + accToken,
-        });
-        let res = await fetch(url, { headers: reqHeads });
-        let outcome = await res.json();
+        // Signed IN THE BROWSER with the user's own key - /performTrx is gone.
+        // Same response shape as before, so the handling below is unchanged.
+        let outcome = await this.$broadcastWithKey(operation, { active: false, bchain: cur_bchain });
         if (outcome.error) {
           let err_msg = outcome.trx.tx.error;
           if (err_msg.includes('missing') && err_msg.includes('authority') && this.cur_bchain == bchain_option) {

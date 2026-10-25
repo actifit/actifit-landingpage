@@ -1,9 +1,39 @@
+import { savePostingKey, clearPostingKey, loadPostingKey, typedKeySessionActive, isPostingKeyOf } from '~/utils/postingKeyStore'
 import Vue from 'vue'
 import Vuex from 'vuex'
 
 import getters from './getters'
 import mutations from './mutations'
 import actions from './actions'
+
+// Keep the browser copy of the typed-key posting key (utils/postingKeyStore.js) in step
+// with the store. At login the key is committed BEFORE the account, so both mutations
+// are watched; it is saved once the account is known AND the key is one of its posting
+// keys.
+function syncPostingKey (store, state, type) {
+  try {
+    const wif = state.chatPostingKey
+    const account = state.steemconnect && state.steemconnect.user && state.steemconnect.user.account
+    if (type === 'setChatPostingKey' && !wif) {
+      clearPostingKey()
+      return
+    }
+    if (!typedKeySessionActive()) {
+      // Logged in with Keychain / HiveAuth / HiveSigner (e.g. "switch user"): a typed
+      // key from the previous session must not linger in memory or storage.
+      if (type === 'steemconnect/login' && wif) store.commit('setChatPostingKey', null)
+      return
+    }
+    if (!wif || !account) return
+    if (isPostingKeyOf(account, wif)) {
+      savePostingKey(account.name, wif)
+    } else if (type === 'steemconnect/login') {
+      // The key in memory is not this account's - e.g. a stale tab learning that another
+      // user logged in elsewhere. Use what is stored for the current user instead.
+      store.commit('setChatPostingKey', loadPostingKey())
+    }
+  } catch (e) { /* storage unavailable: memory-only */ }
+}
 
 const createStore = () => {
   const store = new Vuex.Store({
@@ -66,8 +96,9 @@ const createStore = () => {
       commentEntries: [], //contains a reference to the current comments on open modal post
       commentCountToday: 0, //contains the count of comments done by a user on a single day
       stdLoginUser: null,
-      // Posting keys are kept in memory only so Sting can sign chat operations.
-      // They are never serialized to localStorage or runtime config.
+      // The typed-key user's posting key, for signing in the browser. Mirrored to
+      // localStorage (utils/postingKeyStore.js) so reloads and new tabs keep it; never
+      // sent to the server, never in runtime config. Active keys never come here.
       chatPostingKey: null,
       bchain: '',//current active blockchain
       cartEntries: [], //contains current items being bought via market
@@ -84,13 +115,16 @@ const createStore = () => {
   })
 
   // fetch user related data after login
-  store.subscribe((mutation) => {
+  store.subscribe((mutation, state) => {
     if (mutation.type === 'login') {
       store.dispatch('fetchUserTokens')
       store.dispatch('fetchUserReportCount')
       store.dispatch('fetchUserRank')
     } else if (mutation.type === 'steemconnect/logout') {
       store.commit('setChatPostingKey', null)
+    }
+    if (process.client && (mutation.type === 'setChatPostingKey' || mutation.type === 'steemconnect/login')) {
+      syncPostingKey(store, state, mutation.type)
     }
   })
 
