@@ -1,0 +1,46 @@
+# Deploy actifit.io to its Hetzner server on every merge to master.
+#
+# The server does the work: /opt/actifit/deploy.sh builds the new release BESIDE the
+# live one, switches over, and restarts the two copies one at a time (no downtime).
+#
+# HETZNER_DEPLOY_KEY can ONLY run that script: the server pins the key to it
+# (authorized_keys: command="/opt/actifit/deploy.sh",restrict) - no shell, no port
+# forwarding - so a leaked key can do nothing but redeploy master.
+#
+# Roll back: SSH in as root and run  su - actifit -c "/opt/actifit/deploy.sh <commit>"
+name: Deploy to Hetzner
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+# never two deploys at once; a newer merge waits for the running one
+concurrency:
+  group: deploy-hetzner
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Deploy
+        env:
+          DEPLOY_KEY: ${{ secrets.HETZNER_DEPLOY_KEY }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/deploy
+          chmod 600 ~/.ssh/deploy
+          # the server's host key, pinned: never trust whatever answers on that IP
+          echo "46.62.222.249 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJwrdbeleVck32knj5fBgDjr6xVdoh4/KW0GmblHQFVW" > ~/.ssh/known_hosts
+          ssh -i ~/.ssh/deploy -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            -o ServerAliveInterval=30 actifit@46.62.222.249 deploy
+
+      - name: Check the live site
+        run: |
+          sleep 10
+          v=$(curl -fsS --max-time 30 https://actifit.io/ | grep -oE '1\.[0-9]+\.[0-9]+' | sort -u | tr '\n' ' ')
+          echo "actifit.io reports version: $v"
