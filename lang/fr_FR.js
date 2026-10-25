@@ -311,7 +311,7 @@ module.exports = {
   sting_chat_unavailable: 'Le chat est temporairement indisponible. Veuillez réessayer.',
   sting_chat_key_required: 'Saisissez votre clé de publication pour ouvrir le chat.',
   sting_chat_posting_key_title: 'Connecter le chat avec la clé de publication',
-  sting_chat_posting_key_help: 'Saisissez votre clé privée de publication. Elle reste uniquement en mémoire jusqu’à ce que vous quittiez ou rechargiez cette page.',
+  sting_chat_posting_key_help: 'Saisissez votre clé de publication privée. Elle reste enregistrée dans ce navigateur jusqu’à votre déconnexion et n’est jamais envoyée à Actifit.',
   sting_chat_connect: 'Connecter',
   sting_chat_invalid_posting_key: 'Cette clé de publication ne correspond pas au compte connecté.',
   toggle_dark_mode: 'Activer/Désactiver le mode sombre',

@@ -316,7 +316,7 @@ module.exports = {
   sting_chat_unavailable: 'La chat non è temporaneamente disponibile. Riprova.',
   sting_chat_key_required: 'Inserisci la chiave di posting per aprire la chat.',
   sting_chat_posting_key_title: 'Connetti la chat con la chiave di posting',
-  sting_chat_posting_key_help: 'Inserisci la tua chiave privata di posting. Rimarrà solo in memoria finché non lasci o ricarichi questa pagina.',
+  sting_chat_posting_key_help: 'Inserisci la tua chiave di pubblicazione privata. Resta salvata in questo browser finché non esci e non viene mai inviata ad Actifit.',
   sting_chat_connect: 'Connetti',
   sting_chat_invalid_posting_key: 'Questa chiave di posting non corrisponde all’account connesso.',
   toggle_dark_mode: 'Attiva/Disattiva Modalità Scura',

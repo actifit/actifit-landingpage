@@ -12,7 +12,28 @@
  * Stored with the username, and restored only for a typed-key session of that same
  * user, so a key can never be restored into another account's session.
  */
+import { publicKeyOf } from '~/utils/keyChecks'
+
 const STORAGE_KEY = 'acti_posting_key'
+
+// A typed-key login is active (not Keychain / HiveAuth / HiveSigner / logged out).
+// The ONE rule for both saving and restoring.
+export function typedKeySessionActive () {
+  try {
+    return !!localStorage.getItem('std_login') && !localStorage.getItem('acti_login_method')
+  } catch (e) {
+    return false
+  }
+}
+
+// Is `wif` one of this account's posting keys? Checked against the account object the
+// site already holds (chain data), so a key can never be saved under the wrong account
+// - e.g. by a stale tab that still holds the previous user's key.
+export function isPostingKeyOf (account, wif) {
+  const pub = publicKeyOf(wif)
+  const auths = account && account.posting && account.posting.key_auths
+  return !!pub && Array.isArray(auths) && auths.some((k) => k[0] === pub)
+}
 
 export function savePostingKey (user, wif) {
   if (!user || !wif) return
@@ -33,9 +54,7 @@ export function loadPostingKey () {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return null
     const stored = JSON.parse(raw)
-    const typedKeySession = !!localStorage.getItem('std_login') &&
-      !localStorage.getItem('acti_login_method')
-    if (typedKeySession && stored && stored.wif &&
+    if (typedKeySessionActive() && stored && stored.wif &&
         stored.user === localStorage.getItem('std_login_name')) {
       return stored.wif
     }

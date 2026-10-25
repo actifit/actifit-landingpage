@@ -311,7 +311,7 @@ module.exports = {
   sting_chat_unavailable: 'Der Chat ist vorübergehend nicht verfügbar. Bitte versuche es erneut.',
   sting_chat_key_required: 'Gib deinen Posting-Schlüssel ein, um den Chat zu öffnen.',
   sting_chat_posting_key_title: 'Posting-Key-Chat verbinden',
-  sting_chat_posting_key_help: 'Gib deinen privaten Posting-Schlüssel ein. Er bleibt nur bis zum Verlassen oder Neuladen dieser Seite im Speicher.',
+  sting_chat_posting_key_help: 'Geben Sie Ihren privaten Posting-Schlüssel ein. Er bleibt in diesem Browser gespeichert, bis Sie sich abmelden, und wird nie an Actifit gesendet.',
   sting_chat_connect: 'Verbinden',
   sting_chat_invalid_posting_key: 'Dieser Posting-Schlüssel gehört nicht zum angemeldeten Konto.',
   toggle_dark_mode: 'Dunkelmodus umschalten',

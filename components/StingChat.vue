@@ -341,7 +341,8 @@ export default {
       this.$refs.widgetContainer.hidden = true
     },
     configurePostingKey (username, postingKey) {
-      // The validated key remains in Vuex/browser memory only. This path must
+      // The validated key is the session's posting key (kept in the browser until
+      // logout, utils/postingKeyStore.js; never sent to the server). This path must
       // take precedence over wallet extensions installed in the same browser.
       this.widget.enableKeychainPassthrough = false
       this.widget.enablePeakVaultPassthrough = false

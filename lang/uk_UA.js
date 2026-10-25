@@ -316,7 +316,7 @@ module.exports = {
   sting_chat_unavailable: 'Чат тимчасово недоступний. Спробуйте ще раз.',
   sting_chat_key_required: 'Введіть posting-ключ, щоб відкрити чат.',
   sting_chat_posting_key_title: 'Підключити чат із posting-ключем',
-  sting_chat_posting_key_help: 'Введіть приватний posting-ключ. Він зберігатиметься лише в пам’яті, доки ви не залишите або не перезавантажите цю сторінку.',
+  sting_chat_posting_key_help: 'Введіть свій приватний ключ публікації. Він зберігається в цьому браузері, доки ви не вийдете, і ніколи не надсилається в Actifit.',
   sting_chat_connect: 'Підключити',
   sting_chat_invalid_posting_key: 'Цей posting-ключ не відповідає поточному обліковому запису.',
   toggle_dark_mode: 'Переключити темний режим',

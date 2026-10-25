@@ -311,7 +311,7 @@ module.exports = {
   sting_chat_unavailable: 'الدردشة غير متاحة مؤقتًا. يرجى المحاولة مرة أخرى.',
   sting_chat_key_required: 'أدخل مفتاح النشر لفتح الدردشة.',
   sting_chat_posting_key_title: 'ربط الدردشة بمفتاح النشر',
-  sting_chat_posting_key_help: 'أدخل مفتاح النشر الخاص. سيُحفظ في الذاكرة فقط حتى تغادر الصفحة أو تعيد تحميلها.',
+  sting_chat_posting_key_help: 'أدخل مفتاح النشر الخاص بك. يبقى محفوظًا في هذا المتصفح حتى تسجّل الخروج، ولا يُرسل أبدًا إلى Actifit.',
   sting_chat_connect: 'اتصال',
   sting_chat_invalid_posting_key: 'مفتاح النشر هذا لا يطابق الحساب المسجّل دخوله.',
   toggle_dark_mode: 'تبديل الوضع الداكن',

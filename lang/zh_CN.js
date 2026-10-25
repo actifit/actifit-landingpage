@@ -317,7 +317,7 @@ module.exports = {
   sting_chat_unavailable: '聊天暂时不可用，请重试。',
   sting_chat_key_required: '请输入发帖密钥以打开聊天。',
   sting_chat_posting_key_title: '使用发帖密钥连接聊天',
-  sting_chat_posting_key_help: '请输入您的私密发帖密钥。它只会保存在内存中，直到您离开或重新加载此页面。',
+  sting_chat_posting_key_help: '请输入您的私有发帖密钥。在您退出登录之前，它会保存在此浏览器中，且绝不会发送给 Actifit。',
   sting_chat_connect: '连接',
   sting_chat_invalid_posting_key: '此发帖密钥与当前登录账户不匹配。',
   toggle_dark_mode: '切换深色模式',

@@ -316,7 +316,7 @@ module.exports = {
   sting_chat_unavailable: 'チャットは一時的に利用できません。もう一度お試しください。',
   sting_chat_key_required: 'チャットを開くには投稿キーを入力してください。',
   sting_chat_posting_key_title: '投稿キーチャットに接続',
-  sting_chat_posting_key_help: '非公開の投稿キーを入力してください。このページを離れるか再読み込みするまで、メモリ内にのみ保持されます。',
+  sting_chat_posting_key_help: '投稿用の秘密鍵を入力してください。ログアウトするまでこのブラウザに保存され、Actifit に送信されることはありません。',
   sting_chat_connect: '接続',
   sting_chat_invalid_posting_key: 'この投稿キーはログイン中のアカウントと一致しません。',
   toggle_dark_mode: 'ダークモード切り替え',

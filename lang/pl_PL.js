@@ -316,7 +316,7 @@ module.exports = {
   sting_chat_unavailable: 'Czat jest tymczasowo niedostępny. Spróbuj ponownie.',
   sting_chat_key_required: 'Wprowadź klucz posting, aby otworzyć czat.',
   sting_chat_posting_key_title: 'Połącz czat kluczem posting',
-  sting_chat_posting_key_help: 'Wprowadź prywatny klucz posting. Będzie przechowywany tylko w pamięci do opuszczenia lub odświeżenia tej strony.',
+  sting_chat_posting_key_help: 'Wpisz swój prywatny klucz do publikowania. Pozostaje zapisany w tej przeglądarce do wylogowania i nigdy nie jest wysyłany do Actifit.',
   sting_chat_connect: 'Połącz',
   sting_chat_invalid_posting_key: 'Ten klucz posting nie pasuje do zalogowanego konta.',
   toggle_dark_mode: 'Przełącz tryb ciemny',

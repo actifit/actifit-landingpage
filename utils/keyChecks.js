@@ -13,7 +13,7 @@
  *   'unknown'                       - the account lookup failed, so we cannot tell
  *
  * 'unknown' means the lookup failed. keyRefusal() below REFUSES it: an unchecked key may
- * be an active or owner key, and a posting key is kept in memory for the session.
+ * be an active or owner key, and a posting key is kept in the browser until logout.
  *
  * Owner is checked FIRST: a key that is somehow present in several authorities is
  * reported as the most powerful one, because that is the one that matters.

@@ -1,10 +1,39 @@
-import { savePostingKey, clearPostingKey } from '~/utils/postingKeyStore'
+import { savePostingKey, clearPostingKey, loadPostingKey, typedKeySessionActive, isPostingKeyOf } from '~/utils/postingKeyStore'
 import Vue from 'vue'
 import Vuex from 'vuex'
 
 import getters from './getters'
 import mutations from './mutations'
 import actions from './actions'
+
+// Keep the browser copy of the typed-key posting key (utils/postingKeyStore.js) in step
+// with the store. At login the key is committed BEFORE the account, so both mutations
+// are watched; it is saved once the account is known AND the key is one of its posting
+// keys.
+function syncPostingKey (store, state, type) {
+  try {
+    const wif = state.chatPostingKey
+    const account = state.steemconnect && state.steemconnect.user && state.steemconnect.user.account
+    if (type === 'setChatPostingKey' && !wif) {
+      clearPostingKey()
+      return
+    }
+    if (!typedKeySessionActive()) {
+      // Logged in with Keychain / HiveAuth / HiveSigner (e.g. "switch user"): a typed
+      // key from the previous session must not linger in memory or storage.
+      if (type === 'steemconnect/login' && wif) store.commit('setChatPostingKey', null)
+      return
+    }
+    if (!wif || !account) return
+    if (isPostingKeyOf(account, wif)) {
+      savePostingKey(account.name, wif)
+    } else if (type === 'steemconnect/login') {
+      // The key in memory is not this account's - e.g. a stale tab learning that another
+      // user logged in elsewhere. Use what is stored for the current user instead.
+      store.commit('setChatPostingKey', loadPostingKey())
+    }
+  } catch (e) { /* storage unavailable: memory-only */ }
+}
 
 const createStore = () => {
   const store = new Vuex.Store({
@@ -94,17 +123,8 @@ const createStore = () => {
     } else if (mutation.type === 'steemconnect/logout') {
       store.commit('setChatPostingKey', null)
     }
-    // Keep the browser copy of the typed-key posting key in step with the store
-    // (utils/postingKeyStore.js). Saved once both the key and the account are known:
-    // at login the key is committed BEFORE the account, so both mutations are watched.
     if (process.client && (mutation.type === 'setChatPostingKey' || mutation.type === 'steemconnect/login')) {
-      const user = state.steemconnect && state.steemconnect.user &&
-        state.steemconnect.user.account && state.steemconnect.user.account.name
-      if (!state.chatPostingKey) {
-        if (mutation.type === 'setChatPostingKey') clearPostingKey()
-      } else if (user && !localStorage.getItem('acti_login_method')) {
-        savePostingKey(user, state.chatPostingKey)
-      }
+      syncPostingKey(store, state, mutation.type)
     }
   })
 

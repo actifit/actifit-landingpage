@@ -316,7 +316,7 @@ module.exports = {
   sting_chat_unavailable: 'Sohbet geçici olarak kullanılamıyor. Lütfen tekrar deneyin.',
   sting_chat_key_required: 'Sohbeti açmak için gönderi anahtarınızı girin.',
   sting_chat_posting_key_title: 'Gönderi anahtarıyla sohbeti bağla',
-  sting_chat_posting_key_help: 'Özel gönderi anahtarınızı girin. Bu sayfadan ayrılana veya sayfayı yenileyene kadar yalnızca bellekte tutulur.',
+  sting_chat_posting_key_help: 'Özel paylaşım anahtarınızı girin. Çıkış yapana kadar bu tarayıcıda kayıtlı kalır ve asla Actifit’e gönderilmez.',
   sting_chat_connect: 'Bağlan',
   sting_chat_invalid_posting_key: 'Bu gönderi anahtarı oturum açılan hesapla eşleşmiyor.',
   toggle_dark_mode: 'Karanlık Modu Değiştir',
