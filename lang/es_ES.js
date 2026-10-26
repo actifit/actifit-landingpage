@@ -250,6 +250,7 @@ module.exports = {
     step3_title: 'Paso 3 / 3: ¡Estás listo para intercambiar AFIT por un Aumento de Recompensa de Voto!',
     step3_desc1: 'Los votos positivos se realizarán en tu próxima publicación/informe de Actifit con prueba de actividad.',
     step3_desc2: 'Elige una opción',
+    exchange_title: 'Cambia AFIT por un impulso de recompensa de voto',
     afit_se_to_power: 'Mover AFIT (Steem-Engine) al Monedero de Actifit',
     afit_he_to_power: 'Mover AFIT (Hive-Engine) al Monedero de Actifit',
     initiate_afit_to_se: 'Mover AFIT a S-E',

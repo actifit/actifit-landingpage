@@ -253,6 +253,7 @@ module.exports = {
     step3_title: 'الخطوة 3 / 3: أنت جاهز لتبديل AFIT مقابل تعزيز مكافأة التصويت!',
     step3_desc1: 'تتم عمليات التصويت الإيجابي على منشورك/تقريرك التالي في أكتيفيت مع إثبات النشاط.',
     step3_desc2: 'اختر خيارًا',
+    exchange_title: 'استبدل AFIT بتعزيز لمكافأة التصويت',
     afit_se_to_power: 'نقل AFIT (Steem-Engine) إلى محفظة أكتيفيت',
     afit_he_to_power: 'نقل AFIT (Hive-Engine) إلى محفظة أكتيفيت',
     initiate_afit_to_se: 'نقل AFIT إلى S-E',

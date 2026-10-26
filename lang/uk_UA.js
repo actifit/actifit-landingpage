@@ -258,6 +258,7 @@ module.exports = {
     step3_title: 'Крок 3 / 3: Ви готові обміняти AFIT на збільшення винагороди за голос!',
     step3_desc1: 'Апвоути відбуваються на вашому наступному дописі/звіті Actifit з підтвердженням активності.',
     step3_desc2: 'Оберіть опцію',
+    exchange_title: 'Обміняйте AFIT на підсилення винагороди за голос',
     afit_se_to_power: 'Перемістити AFIT (Steem-Engine) до гаманця Actifit',
     afit_he_to_power: 'Перемістити AFIT (Hive-Engine) до гаманця Actifit',
     initiate_afit_to_se: 'Перемістити AFIT до S-E',

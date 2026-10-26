@@ -253,6 +253,7 @@ module.exports = {
     step3_title: 'Schritt 3 / 3: Sie sind bereit, AFIT gegen eine Stimmbelohnungs-Steigerung einzutauschen!',
     step3_desc1: 'Upvotes finden bei Ihrem nächsten Actifit-Beitrag/Bericht mit Aktivitätsnachweis statt.',
     step3_desc2: 'Wählen Sie eine Option',
+    exchange_title: 'AFIT gegen einen Vote-Reward-Boost tauschen',
     afit_se_to_power: 'AFIT (Steem-Engine) in Actifit-Wallet verschieben',
     afit_he_to_power: 'AFIT (Hive-Engine) in Actifit-Wallet verschieben',
     initiate_afit_to_se: 'AFIT nach S-E verschieben',

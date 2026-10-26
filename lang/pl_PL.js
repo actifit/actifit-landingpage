@@ -258,6 +258,7 @@ module.exports = {
     step3_title: 'Krok 3/3: Jesteś gotowy do wymiany AFIT na wzmocnienie nagrody za głos!',
     step3_desc1: 'Głosy zostaną oddane na Twój następny post/raport Actifit z dowodem aktywności.',
     step3_desc2: 'Wybierz opcję',
+    exchange_title: 'Wymień AFIT na zwiększenie nagrody za głos',
     afit_se_to_power: 'Przenieś AFIT (Steem-Engine) do portfela Actifit',
     afit_he_to_power: 'Przenieś AFIT (Hive-Engine) do portfela Actifit',
     initiate_afit_to_se: 'Przenieś AFIT do S-E',

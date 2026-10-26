@@ -219,6 +219,7 @@ module.exports = {
 	step3_title: 'Step 3 / 3: You are ready to exchange AFIT for Vote Reward Boost!',
 	step3_desc1: 'Upvotes take place on your next actifit post/report with proof of activity.',
 	step3_desc2: 'Choose an option',
+	exchange_title: 'Exchange AFIT for a Vote Reward Boost',
 	afit_se_to_power: 'Move AFIT (Steem-Engine) To Actifit Wallet',
 	afit_he_to_power: 'Move AFIT (Hive-Engine) To Actifit Wallet',
 	initiate_afit_to_se: 'Move AFIT to S-E',

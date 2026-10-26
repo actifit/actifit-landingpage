@@ -259,6 +259,7 @@ module.exports = {
     step3_title: '第3步/共3步：您已准备好将AFIT兑换为点赞奖励增益！',
     step3_desc1: '点赞将在您下一个带有活动证明的Actifit帖子/报告上进行。',
     step3_desc2: '选择一个选项',
+    exchange_title: '用 AFIT 兑换投票奖励加成',
     afit_se_to_power: '将AFIT（Steem-Engine）移至Actifit钱包',
     afit_he_to_power: '将AFIT（Hive-Engine）移至Actifit钱包',
     initiate_afit_to_se: '将AFIT移至S-E',

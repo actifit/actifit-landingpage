@@ -258,6 +258,7 @@ module.exports = {
     step3_title: 'Adım 3 / 3: AFIT\'i Oy Ödülü Artışı için takas etmeye hazırsınız!',
     step3_desc1: 'Oylamalar, bir sonraki Actifit gönderinizde/aktivite kanıtı olan raporunuzda gerçekleşir.',
     step3_desc2: 'Bir seçenek belirleyin',
+    exchange_title: 'AFIT’i oy ödülü artışıyla değiştirin',
     afit_se_to_power: 'AFIT (Steem-Engine) Tokenlerini Actifit Cüzdanına Taşı',
     afit_he_to_power: 'AFIT (Hive-Engine) Tokenlerini Actifit Cüzdanına Taşı',
     initiate_afit_to_se: 'AFIT\'i S-E\'ye Taşı',

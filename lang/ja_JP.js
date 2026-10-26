@@ -258,6 +258,7 @@ module.exports = {
     step3_title: 'ステップ3/3：AFITを投票報酬ブーストと交換する準備ができました！',
     step3_desc1: 'アップボートは、あなたの次の活動証明付きのActifit投稿/レポートで行われます。',
     step3_desc2: 'オプションを選択してください',
+    exchange_title: 'AFIT を投票報酬ブーストと交換',
     afit_se_to_power: 'AFIT（Steem-Engine）をActifitウォレットに移動',
     afit_he_to_power: 'AFIT（Hive-Engine）をActifitウォレットに移動',
     initiate_afit_to_se: 'AFITをS-Eに移動',
