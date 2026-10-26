@@ -1,0 +1,64 @@
+# Deploy actifit.io to its Hetzner server on every merge to master.
+#
+# The server does the work: /usr/local/sbin/actifit-deploy (root-owned) builds the new
+# release BESIDE the live one, then restarts the two copies one at a time, checking each
+# renders pages; a copy that will not come up is put back on the previous release and
+# the deploy FAILS, so this job goes red instead of leaving the site broken.
+#
+# HETZNER_DEPLOY_KEY can ONLY run that script: the server pins the key to it in a
+# root-owned key file (command="/usr/local/sbin/actifit-deploy",restrict) - no shell,
+# no port forwarding, no choice of commit - so a leaked key can do nothing but redeploy
+# master.
+#
+# Roll back (on the server, as root):  su - actifit -c "actifit-deploy <commit-sha>"
+name: Deploy to Hetzner
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+# never two deploys at once; a newer merge waits for the running one
+concurrency:
+  group: deploy-hetzner
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash -euo pipefail {0}
+    steps:
+      - name: Deploy
+        id: deploy
+        env:
+          DEPLOY_KEY: ${{ secrets.HETZNER_DEPLOY_KEY }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/deploy
+          chmod 600 ~/.ssh/deploy
+          # the server's host key, pinned: never trust whatever answers on that IP
+          echo "46.62.222.249 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJwrdbeleVck32knj5fBgDjr6xVdoh4/KW0GmblHQFVW" > ~/.ssh/known_hosts
+          ssh -i ~/.ssh/deploy -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            -o ServerAliveInterval=30 actifit@46.62.222.249 deploy | tee deploy.log
+          # last line: "deployed <full sha> <version>"
+          sha=$(tail -n 1 deploy.log | awk '$1 == "deployed" {print $2}')
+          [ -n "$sha" ] || { echo "deploy did not report a commit"; exit 1; }
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+
+      - name: Check the live site serves that commit
+        env:
+          SHA: ${{ steps.deploy.outputs.sha }}
+        run: |
+          for _ in 1 2 3 4 5 6; do
+            live=$(curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "https://actifit.io/version.txt?t=$(date +%s)" || true)
+            echo "actifit.io/version.txt: $live"
+            case "$live" in "$SHA "*) exit 0 ;; esac
+            sleep 10
+          done
+          echo "actifit.io is not serving $SHA"
+          exit 1
