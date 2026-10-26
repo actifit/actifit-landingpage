@@ -28,8 +28,10 @@ permissions: {}
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # The deploy key lives in the `production` environment, which only `master` may use:
-    # a workflow pushed to any other branch cannot read it.
+    # The deploy key lives in the `production` environment, whose branch rule allows only
+    # `master`; a job on any other branch that names it fails before it starts. (This only
+    # protects the key once no REPOSITORY secret of the same name exists.)
+    # Manual run: gh workflow run deploy-hetzner.yml --ref master   (default branch is develop)
     environment: production
     timeout-minutes: 30
     defaults:
