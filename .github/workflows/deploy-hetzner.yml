@@ -28,6 +28,9 @@ permissions: {}
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    # The deploy key lives in the `production` environment, which only `master` may use:
+    # a workflow pushed to any other branch cannot read it.
+    environment: production
     timeout-minutes: 30
     defaults:
       run:
