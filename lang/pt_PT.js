@@ -977,6 +977,7 @@ module.exports = {
   Login_actifit: 'Entrar na Actifit',
   login_error: 'Sua conta e/ou chave de postagem privada está incorreta.',
   session_expired_login_again: 'Sua sessão expirou. Por favor, faça login novamente.',
+  too_many_attempts: 'Demasiadas tentativas. Aguarde alguns minutos e tente novamente.',
   confirm_power_down: 'Tem certeza que deseja iniciar um power down?',
   confirm_power_up: 'Tem certeza que deseja fazer power up?',
   confirm_cancel_power_down: 'Tem certeza que deseja cancelar seu power down?',

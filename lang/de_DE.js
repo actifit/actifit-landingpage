@@ -973,6 +973,7 @@ module.exports = {
   Login_actifit: 'Bei Actifit anmelden',
   login_error: 'Ihr Konto und/oder privater Posting-Schlüssel ist falsch.',
   session_expired_login_again: 'Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.',
+  too_many_attempts: 'Zu viele Versuche. Bitte warten Sie einige Minuten und versuchen Sie es erneut.',
   confirm_power_down: 'Sind Sie sicher, dass Sie ein Power Down starten möchten?',
   confirm_power_up: 'Sind Sie sicher, dass Sie ein Power Up durchführen möchten?',
   confirm_cancel_power_down: 'Sind Sie sicher, dass Sie Ihr Power Down abbrechen möchten?',

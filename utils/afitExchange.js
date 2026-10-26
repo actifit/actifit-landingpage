@@ -30,12 +30,22 @@ export async function requestAfitExchange ({ apiUrl, user, tokens, sessionToken 
  *    key gate 401 LOGIN_AGAIN: log in again
  *  - anything else the route says (not enough AFIT, pending, invalid amount, ...)
  */
+// checkHdrs answers HTTP 200 with these when the session is gone - e.g. a validly signed
+// token whose session row was revoked (logged out elsewhere, or ended by the key-rotation
+// gate). After the 2026-10-21 revocations this is the most common "expired" reply.
+const SESSION_GONE = /^(Authentication failed|Invalid token payload|Auth token is not provided)/i
+
 export function exchangeErrorText (status, outcome, t, gateMessage) {
-  const gate = gateMessage(outcome)
+  const o = outcome || {}
+  const gate = gateMessage(o)
   if (gate) return gate
-  if (status === 401 || (outcome && outcome.code === 'LOGIN_AGAIN') ||
-      (outcome && outcome.success === false && !outcome.error)) {
+  // the key-rotation gate's own "log in again with your new key" says more than ours
+  if (o.code === 'LOGIN_AGAIN' && typeof o.message === 'string' && o.message.trim()) return o.message
+  if (status === 401 || o.code === 'LOGIN_AGAIN' ||
+      (o.success === false && !o.error) ||
+      (typeof o.error === 'string' && SESSION_GONE.test(o.error))) {
     return t('session_expired_login_again')
   }
-  return (outcome && outcome.error) || t('error_performing_operation')
+  if (status === 429) return t('too_many_attempts')
+  return o.error || t('error_performing_operation')
 }

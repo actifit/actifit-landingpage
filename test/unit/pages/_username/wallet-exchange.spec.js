@@ -37,7 +37,11 @@ describe('exchangeErrorText - the server reason, in words the user can act on', 
     ['key rotation required', 403, { code: 'KEY_ROTATION_REQUIRED', message: 'Rotate your posting key first' }, 'Rotate your posting key first'],
     ['try again', 503, { code: 'TRY_AGAIN', message: 'Please try again shortly' }, 'Please try again shortly'],
     ['an expired or invalid session (checkHdrs: 200 + success:false)', 200, { success: false, message: 'Token is not valid' }, 'session_expired_login_again'],
-    ['login again (key gate 401)', 401, { code: 'LOGIN_AGAIN', error: 'x' }, 'session_expired_login_again'],
+    ['login again (key gate 401, no message)', 401, { code: 'LOGIN_AGAIN', error: 'x' }, 'session_expired_login_again'],
+    ['login again with the gate\'s own message', 401, { code: 'LOGIN_AGAIN', message: 'Your posting key has changed. Please log in again with your new key.' }, 'Your posting key has changed. Please log in again with your new key.'],
+    ['a revoked session (checkHdrs: signed token, no session row)', 200, { error: 'Authentication failed. Key not found' }, 'session_expired_login_again'],
+    ['a malformed token', 200, { error: 'Invalid token payload' }, 'session_expired_login_again'],
+    ['the rate limit (429, non-JSON body)', 429, {}, 'too_many_attempts'],
     ['another account', 200, { error: 'User mismatch' }, 'User mismatch'],
     ['already being processed', 200, { error: 'An exchange is already being processed' }, 'An exchange is already being processed'],
     ['a non-tier amount', 200, { error: 'Invalid AFIT amount. Choose one of: 50, 100, 150, 200' }, 'Invalid AFIT amount. Choose one of: 50, 100, 150, 200'],
@@ -55,6 +59,11 @@ describe('wallet.vue no longer asks for the funds password to exchange', () => {
     // the exchange wizard's "set / verify a funds password" steps are gone
     expect(src).not.toMatch(/<transition name="fade" v-if="!userHasFundsPass">/)
     expect(src).not.toMatch(/<transition name="fade" v-else-if="!userFundsPassVerified">/)
+    // and nothing offers to create a funds password any more
+    expect(src).not.toMatch(/create_pass_short/)
+  })
+  it('shows the exchange only on your own wallet', () => {
+    expect(src).toMatch(/v-else-if="afitActivityMode == EXCHANGE_AFIT_STEEM && !nonAuthUser"/)
   })
   it('sends the exchange through the session helper', () => {
     expect(src).toMatch(/requestAfitExchange\(/)

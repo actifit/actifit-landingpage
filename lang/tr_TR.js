@@ -978,6 +978,7 @@ module.exports = {
   Login_actifit: 'Actifit\'e Giriş Yap',
   login_error: 'Hesabınız ve/veya özel gönderi anahtarınız yanlış.',
   session_expired_login_again: 'Oturumunuzun süresi doldu. Lütfen tekrar giriş yapın.',
+  too_many_attempts: 'Çok fazla deneme. Lütfen birkaç dakika bekleyip tekrar deneyin.',
   confirm_power_down: 'Güç azaltma başlatmak istediğinizden emin misiniz?',
   confirm_power_up: 'Güçlendirme yapmak istediğinizden emin misiniz?',
   confirm_cancel_power_down: 'Güç azaltmanızı iptal etmek istediğinizden emin misiniz?',

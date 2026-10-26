@@ -970,6 +970,7 @@ module.exports = {
   Login_actifit: 'Iniciar Sesión en Actifit',
   login_error: 'Tu cuenta y/o clave de publicación privada son incorrectas.',
   session_expired_login_again: 'Tu sesión ha expirado. Por favor, inicia sesión de nuevo.',
+  too_many_attempts: 'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.',
   confirm_power_down: '¿Estás seguro de que quieres iniciar un power down?',
   confirm_power_up: '¿Estás seguro de que quieres hacer un power up?',
   confirm_cancel_power_down: '¿Estás seguro de que quieres cancelar tu power down?',

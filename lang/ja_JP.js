@@ -977,6 +977,7 @@ module.exports = {
   Login_actifit: 'Actifitにログイン',
   login_error: 'アカウントおよび/またはプライベート投稿キーが正しくありません。',
   session_expired_login_again: 'セッションが期限切れです。もう一度ログインしてください。',
+  too_many_attempts: '試行回数が多すぎます。数分待ってからもう一度お試しください。',
   confirm_power_down: 'パワーダウンを開始してもよろしいですか？',
   confirm_power_up: 'パワーアップしてもよろしいですか？',
   confirm_cancel_power_down: 'パワーダウンをキャンセルしてもよろしいですか？',

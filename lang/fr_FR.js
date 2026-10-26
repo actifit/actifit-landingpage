@@ -973,6 +973,7 @@ module.exports = {
   Login_actifit: 'Se connecter à Actifit',
   login_error: 'Votre compte et/ou votre clé de publication privée sont incorrects.',
   session_expired_login_again: 'Votre session a expiré. Veuillez vous reconnecter.',
+  too_many_attempts: 'Trop de tentatives. Veuillez patienter quelques minutes puis réessayer.',
   confirm_power_down: 'Êtes-vous sûr de vouloir démarrer un power down ?',
   confirm_power_up: 'Êtes-vous sûr de vouloir effectuer un power up ?',
   confirm_cancel_power_down: 'Êtes-vous sûr de vouloir annuler votre power down ?',

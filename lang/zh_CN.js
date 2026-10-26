@@ -978,6 +978,7 @@ module.exports = {
   Login_actifit: '登录Actifit',
   login_error: '您的账户和/或私有发帖密钥不正确。',
   session_expired_login_again: '您的会话已过期。请重新登录。',
+  too_many_attempts: '尝试次数过多。请稍等几分钟后再试。',
   confirm_power_down: '您确定要开始降低能量吗？',
   confirm_power_up: '您确定要增强能量吗？',
   confirm_cancel_power_down: '您确定要取消降低能量吗？',

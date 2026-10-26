@@ -1439,10 +1439,8 @@
                     <label for="funds-pass" class="w-25 p-2">{{ $t('Funds_Password') }}</label>
                     <input type="password" id="funds-pass" name="funds-pass" ref="funds-pass"
                       class="form-control-lg w-50 p-2">
-                    <button type="button" v-if="!userHasFundsPass" v-on:click="exchangeAFITforSTEEM" class="btn btn-brand border m-1">{{
-                      $t('create_pass_short') }}</button>
-                    <button type="button" v-else v-on:click="resetFundsPass" class="btn btn-brand border m-1">{{
-                      $t('Reset_password') }}</button>
+                    <!-- No create/reset buttons: funds passwords can no longer be set or reset
+                         (treated as compromised since 2026-10-21; those routes are disabled). -->
                   </div>
                   <div class="row">
                     <div class="col-2"></div>
@@ -1485,10 +1483,8 @@
                     <label for="move-funds-pass" class="w-25 p-2 text-right">{{ $t('Funds_Password') }}</label>
                     <input type="password" id="move-funds-pass" name="move-funds-pass" ref="move-funds-pass"
                       class="form-control-lg w-50 p-2">
-                    <button type="button" v-if="!userHasFundsPass" v-on:click="exchangeAFITforSTEEM" class="btn btn-brand border m-1">{{
-                      $t('create_pass_short') }}</button>
-                    <button type="button" v-else v-on:click="resetFundsPass" class="btn btn-brand border m-1">{{
-                      $t('Reset_password') }}</button>
+                    <!-- No create/reset buttons: funds passwords can no longer be set or reset
+                         (treated as compromised since 2026-10-21; those routes are disabled). -->
                   </div>
                   <div class="text-brand text-center" v-if="afit_se_move_error_proceeding"
                     v-html="afit_se_move_err_msg" @click="handleSetFundsPassLink">
@@ -1552,7 +1548,9 @@
               </div>
             </div>
 
-            <div v-else-if="afitActivityMode == EXCHANGE_AFIT_STEEM">
+            <!-- your own wallet only: the server exchanges for the SESSION user, so showing this on
+                 someone else's wallet (e.g. via ?action=set_funds_pass) would mislead -->
+            <div v-else-if="afitActivityMode == EXCHANGE_AFIT_STEEM && !nonAuthUser">
               <!-- No funds password any more: the exchange is authorised by the login session
                    (server: checkHdrs + key-rotation gate). Every funds password is treated as
                    known to the attacker since 2026-10-21, so it protected nothing. -->
@@ -8629,7 +8627,7 @@ export default {
         if (outcome.status == 'Success') {
           //map exchange amount to exchange category
           let exchange_cat = 1;
-          switch (this.afit_val_exchange) {
+          switch (String(this.afit_val_exchange)) {
             case '50': exchange_cat = 1; break;
             case '100': exchange_cat = 2; break;
             case '150': exchange_cat = 3; break;

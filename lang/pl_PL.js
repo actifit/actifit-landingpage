@@ -977,6 +977,7 @@ module.exports = {
   Login_actifit: 'Zaloguj się do Actifit',
   login_error: 'Twoje konto i/lub prywatny klucz do publikacji są nieprawidłowe.',
   session_expired_login_again: 'Twoja sesja wygasła. Zaloguj się ponownie.',
+  too_many_attempts: 'Zbyt wiele prób. Odczekaj kilka minut i spróbuj ponownie.',
   confirm_power_down: 'Czy na pewno chcesz rozpocząć zmniejszanie mocy?',
   confirm_power_up: 'Czy na pewno chcesz zwiększyć moc?',
   confirm_cancel_power_down: 'Czy na pewno chcesz anulować zmniejszanie mocy?',

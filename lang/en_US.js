@@ -961,6 +961,7 @@ module.exports = {
   Login_actifit: 'Login to Actifit',
   login_error: 'Your account and/or private posting key is incorrect.',
   session_expired_login_again: 'Your session has expired. Please login again.',
+  too_many_attempts: 'Too many attempts. Please wait a few minutes and try again.',
   confirm_power_down: 'Are you sure you want to start a power down?',
   confirm_power_up: 'Are you sure you want to power up?',
   confirm_cancel_power_down: 'Are you sure you want to cancel your power down?',
