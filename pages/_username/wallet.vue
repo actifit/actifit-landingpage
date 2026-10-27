@@ -1439,10 +1439,8 @@
                     <label for="funds-pass" class="w-25 p-2">{{ $t('Funds_Password') }}</label>
                     <input type="password" id="funds-pass" name="funds-pass" ref="funds-pass"
                       class="form-control-lg w-50 p-2">
-                    <button type="button" v-if="!userHasFundsPass" v-on:click="exchangeAFITforSTEEM" class="btn btn-brand border m-1">{{
-                      $t('create_pass_short') }}</button>
-                    <button type="button" v-else v-on:click="resetFundsPass" class="btn btn-brand border m-1">{{
-                      $t('Reset_password') }}</button>
+                    <!-- No create/reset buttons: funds passwords can no longer be set or reset
+                         (treated as compromised since 2026-10-21; those routes are disabled). -->
                   </div>
                   <div class="row">
                     <div class="col-2"></div>
@@ -1485,10 +1483,8 @@
                     <label for="move-funds-pass" class="w-25 p-2 text-right">{{ $t('Funds_Password') }}</label>
                     <input type="password" id="move-funds-pass" name="move-funds-pass" ref="move-funds-pass"
                       class="form-control-lg w-50 p-2">
-                    <button type="button" v-if="!userHasFundsPass" v-on:click="exchangeAFITforSTEEM" class="btn btn-brand border m-1">{{
-                      $t('create_pass_short') }}</button>
-                    <button type="button" v-else v-on:click="resetFundsPass" class="btn btn-brand border m-1">{{
-                      $t('Reset_password') }}</button>
+                    <!-- No create/reset buttons: funds passwords can no longer be set or reset
+                         (treated as compromised since 2026-10-21; those routes are disabled). -->
                   </div>
                   <div class="text-brand text-center" v-if="afit_se_move_error_proceeding"
                     v-html="afit_se_move_err_msg" @click="handleSetFundsPassLink">
@@ -1552,102 +1548,13 @@
               </div>
             </div>
 
-            <div v-else-if="afitActivityMode == EXCHANGE_AFIT_STEEM">
-              <transition name="fade" v-if="!userHasFundsPass">
-                <div class="text-center grid p-2">
-                  <h3 class="pro-name">{{ $t('EXCHANGE_AFIT_FOR_STEEM') }}</h3>
-                  <div class="text-brand font-weight-bold">{{ $t('wallet.title_process') }}</div>
-                  <h5>{{ $t('wallet.step1_title') }}</h5>
-                  <div v-html="$t('wallet.step1_desc')">
-                  </div>
-                  <div class="row">
-                    <label for="funds-pass" class="w-25 p-2">{{ $t('Funds_Password') }}</label>
-                    <input :type="showFundsPass ? 'text' : 'password'" id="funds-pass" name="funds-pass" ref="funds-pass"
-                      class="form-control-lg w-50 p-2">
-                    <button type="button" v-on:click="showFundsPass = !showFundsPass" class="btn btn-brand"
-                      :aria-label="showFundsPass ? 'Hide password' : 'Show password'">
-                      <i :class="showFundsPass ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
-                    </button>
-                    <button v-on:click="setPasswordVal" class="btn btn-brand">{{ $t('Generate_Password') }}</button>
-                  </div>
-                  <div class="row">
-                    <div class="w-25"></div>
-                    <div class="w-50 text-brand"><i>{{ $t('avoid_special_chars') }}</i></div>
-                  </div>
-                  <div class="row">
-                    <label for="confirm-funds-pass" class="w-25 p-2">{{ $t('Confirm_Password') }}</label>
-                    <input :type="showFundsPass ? 'text' : 'password'" id="confirm-funds-pass" name="confirm-funds-pass" ref="confirm-funds-pass"
-                      class="form-control-lg w-50 p-2">
-                  </div>
-                  <div class="row">
-                    <div class="w-25"></div>
-                    <button v-on:click="setFundsPass" class="btn btn-brand btn-lg w-50 border">{{ $t('Set_Password')
-                    }}</button>
-                  </div>
-                  <div v-if="settingPass" class="row">
-                    <div class="w-25"></div>
-                    <i class="fas fa-spin fa-spinner"></i>
-                  </div>
-                  <div v-if="errorSettingPass" class="row text-brand">
-                    <div class="w-25"></div>
-                    <span>{{ errorSettingPass }}</span>
-                  </div>
-                </div>
-              </transition>
-              <transition name="fade" v-else-if="!userFundsPassVerified">
-                <div class="text-center grid p-2">
-                  <h5>{{ $t('wallet.step2_title') }}</h5>
-                  <div v-html="$t('wallet.step2_desc')">
-                  </div>
-                  <div class="row">
-                    <label for="pass-transfer-type" class="w-25 p-2">{{ $t('Type') }} *</label>
-                    <select @change="passTransferTypeChange" id="pass-transfer-type" name="pass-transfer-type"
-                      ref="pass-transfer-type" text="Choose Type" class="form-control-lg w-50 p-2">
-                      <option v-if="cur_bchain == 'STEEM'" value="STEEM">{{ $t('STEEM') }}</option>
-                      <option v-if="cur_bchain == 'STEEM'" value="SBD">{{ $t('SBD') }}</option>
-                      <option v-if="cur_bchain == 'HIVE'" value="HIVE">{{ $t('HIVE') }}</option>
-                      <option v-if="cur_bchain == 'HIVE'" value="HBD">{{ $t('HBD') }}</option>
-                      <!--<option v-if="cur_bchain=='BLURT'" value="BLURT">{{ $t('BLURT') }}</option>-->
-                    </select>
-                  </div>
-                  <div class="row">
-                    <label for="pass-transfer-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
-                    <input type="number" id="pass-transfer-amount" name="pass-transfer-amount"
-                      ref="pass-transfer-amount" class="form-control-lg w-50 p-2" v-model="transfer_amount">
-                  </div>
-                  <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
-                    <label for="p-ac-key-funds-ver" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
-                    <input type="password" id="p-ac-key-funds-ver" name="p-ac-key-funds-ver" ref="p-ac-key-funds-ver"
-                      class="form-control-lg w-50 p-2">
-                  </div>
-                  <div class="text-brand text-center" v-if="pass_error_proceeding">
-                    {{ this.pass_error_msg }}
-                  </div>
-                  <div class="row">
-                    <div class="w-25"></div>
-                    <button v-on:click="proceedVerifyPass" class="btn btn-brand btn-lg w-50 border">{{ $t('Send_Verify')
-                    }}</button>
-                  </div>
-                  <div class="row">
-                    <div class="w-25"></div>
-                    <button v-on:click="resetFundsPass" class="btn btn-brand btn-lg w-50 border">{{ $t('Reset_password')
-                    }}</button>
-                  </div>
-                  <div class="row">
-                    <div class="w-25"></div>
-                    <div v-if="checkingFunds" id="checking_funds">
-                      <i class="fas fa-spin fa-spinner"></i>{{ $t('Checking_Steem_Transfer') }}
-                    </div>
-                  </div>
-                  <div class="row" v-if="speed_up_on">
-                    <div class="w-25"></div>
-                    <div>{{ $t('speed_up_text') }} <a href="#a" v-on:click="speedUpVerify">{{ $t('speed_up') }}</a>
-                    </div>
-
-                  </div>
-                </div>
-              </transition>
-              <transition name="fade" v-else-if="pendingTokenSwap == ''">
+            <!-- your own wallet only: the server exchanges for the SESSION user, so showing this on
+                 someone else's wallet (e.g. via ?action=set_funds_pass) would mislead -->
+            <div v-else-if="afitActivityMode == EXCHANGE_AFIT_STEEM && !nonAuthUser">
+              <!-- No funds password any more: the exchange is authorised by the login session
+                   (server: checkHdrs + key-rotation gate). Every funds password is treated as
+                   known to the attacker since 2026-10-21, so it protected nothing. -->
+              <transition name="fade" v-if="pendingTokenSwap == ''">
                 <div class="text-center grid p-2">
                   <div class="p-3 row">
                     <div class="col-md-6 d-inline-block pt-3 text-md-right">
@@ -1661,7 +1568,7 @@
                       </a>
                     </div>
                   </div>
-                  <div>{{ $t('wallet.step3_title') }}</div>
+                  <div>{{ $t('wallet.exchange_title') }}</div>
                   <div>{{ $t('wallet.step3_desc1') }}</div>
                   <div>{{ $t('wallet.step3_desc2') }}</div>
                   <span class="afit-ex-option border border-danger p-2 m-2 btn-brand">
@@ -1685,14 +1592,7 @@
                   <span><i>{{ $t('You_are_exchanging') }} {{ afit_val_exchange }} {{ $t('AFIT_Token') }} {{ $t('Tokens')
                   }} {{ $t('for') }} {{ afit_exch_matching_perc }} % {{ $t('extra_upvote') }}
                       <!--<br/> ({{ $t('net_profit_approx') }} ${{ (afit_val_exchange * 0.036).toFixed(2) }})-->
-                      <br />{{ $t('enter_funds_pass_proceed') }}</i></span>
-                  <div class="row">
-                    <div class="w-25 p-2 text-right">{{ $t('Funds_Password') }}</div>
-                    <input type="password" id="funds-pass-entry" name="funds-pass-entry" ref="funds-pass-entry"
-                      class="form-control-lg w-50 p-2">
-                    <button v-on:click="resetFundsPass" class="btn btn-brand btn-lg border">{{ $t('Reset_password')
-                    }}</button>
-                  </div>
+                      </i></span>
                   <div class="row" v-if="error_swap != ''">
                     <div class="w-25"></div>
                     <span class="text-brand">{{ error_swap }}</span>
@@ -2031,6 +1931,7 @@ import { mapGetters } from 'vuex'
 import Web3 from 'web3';
 
 import badActors from '~/utils/BadActorList';
+import { requestAfitExchange, exchangeErrorText } from '~/utils/afitExchange';
 import AutocompleteUsernameInput from '~/components/AutocompleteUsernameInput';
 
 let web3 = new Web3(process.env.web3Node);
@@ -8707,13 +8608,6 @@ export default {
       this.error_swap = '';
       this.swapResult = '';
       this.buyMore = false;
-      //ensure we have proper values
-      if (this.$refs["funds-pass-entry"].value == '') {
-        this.error_proceeding = true;
-        this.error_swap = this.$t('provide_funds_pass');
-        this.performingSwap = false;
-        return;
-      }
       if (this.userTokensWallet < this.min_tokens_required) {
         this.error_swap = this.$t('need_at_least') + this.numberFormat(this.min_tokens_required, 2) + this.$t('afit_tokens_to_exchange');
         this.performingSwap = false;
@@ -8723,16 +8617,17 @@ export default {
 
       //proceed with storing the swap and decreasing user AFIT tokens count
       try {
-        let res = await fetch(process.env.actiAppUrl + 'performAfitSteemExchange', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user: this.user.account.name, pass: this.$refs['funds-pass-entry'].value, tokens: this.afit_val_exchange })
+        // Authorised by the login session, not a funds password (utils/afitExchange.js).
+        const { status, outcome } = await requestAfitExchange({
+          apiUrl: process.env.actiAppUrl,
+          user: this.user.account.name,
+          tokens: this.afit_val_exchange,
+          sessionToken: localStorage.getItem('access_token')
         });
-        let outcome = await res.json();
         if (outcome.status == 'Success') {
           //map exchange amount to exchange category
           let exchange_cat = 1;
-          switch (this.afit_val_exchange) {
+          switch (String(this.afit_val_exchange)) {
             case '50': exchange_cat = 1; break;
             case '100': exchange_cat = 2; break;
             case '150': exchange_cat = 3; break;
@@ -8760,10 +8655,11 @@ export default {
           //update user data
           this.fetchUserData();
         } else {
-          this.error_swap = outcome.error;
+          this.error_swap = exchangeErrorText(status, outcome, (k) => this.$t(k), (o) => this.$gateMessage(o));
         }
       } catch (err) {
         console.error(err);
+        this.error_swap = this.$t('error_performing_operation');
       }
       this.performingSwap = false;
     },
