@@ -954,6 +954,7 @@ module.exports = {
   afit_move_he_unavailable: '我们正在进行安全维护，将 AFIT 转移到 Hive-Engine 暂时不可用。如果您有待处理的转移，仍可在此取消：此操作使用您的登录会话，无需资金密码。',
   buy_afit_unavailable: '我们正在进行安全维护，此处购买 AFIT 暂时不可用。您仍可在 Hive-Engine 市场购买 AFIT。',
   mod_actions_unavailable: '我们正在进行安全维护，版主操作暂时不可用。统计数据和订单仍可查看。',
+  no_purchase_record_for_product: '在您的账户中未找到此商品的购买记录。',
   too_many_attempts: '尝试次数过多。请稍等几分钟后再试。',
   confirm_power_down: '您确定要开始降低能量吗？',
   confirm_power_up: '您确定要增强能量吗？',

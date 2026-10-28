@@ -1672,8 +1672,7 @@ import hive from '@hiveio/hive-js'
 import BuyOptionsModal from '~/components/BuyOptionsModal'
 import { getProductPurchaseCurrencies } from '~/utils/marketPricing'
 import { getGadgetLevelClass } from '~/utils/marketCatalog'
-import { requestReissueDownloadToken, ebookDownloadHref } from '~/utils/sessionActions'
-import { exchangeErrorText } from '~/utils/afitExchange'
+import { requestReissueDownloadToken, reissueErrorText, ebookDownloadHref } from '~/utils/sessionActions'
 
 
 //import VueLazyLoad from 'vue-lazyload'
@@ -2154,7 +2153,6 @@ export default {
     },
     checkProductBought() {
       //if this is a product, try to grab if sold before
-      //let's check if user already has a funds pass set
       if (this.product && this.user) {
         if (this.product.type == 'ingame') {
           fetch(process.env.actiAppUrl
@@ -2191,7 +2189,7 @@ export default {
           this.downloadHref = ebookDownloadHref(process.env.actiAppUrl, this.user.account.name,
             this.product._id, outcome.access_token);
         } else {
-          this.errorDownloadAgain = exchangeErrorText(status, outcome, (k) => this.$t(k), (o) => this.$gateMessage(o));
+          this.errorDownloadAgain = reissueErrorText(status, outcome, (k) => this.$t(k), (o) => this.$gateMessage(o));
         }
       } catch (err) {
         console.error(err);

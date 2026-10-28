@@ -949,6 +949,7 @@ module.exports = {
   afit_move_he_unavailable: 'Das Verschieben von AFIT zu Hive-Engine ist während unserer Sicherheitswartung vorübergehend nicht verfügbar. Einen ausstehenden Transfer können Sie hier weiterhin abbrechen: Dafür wird Ihre Anmeldesitzung genutzt, kein Guthaben-Passwort.',
   buy_afit_unavailable: 'Der Kauf von AFIT ist hier während unserer Sicherheitswartung vorübergehend nicht verfügbar. Sie können AFIT weiterhin auf dem Hive-Engine-Markt kaufen.',
   mod_actions_unavailable: 'Moderatoraktionen sind während unserer Sicherheitswartung vorübergehend nicht verfügbar. Statistiken und Bestellungen bleiben sichtbar.',
+  no_purchase_record_for_product: 'Für dieses Produkt wurde in Ihrem Konto kein Kaufnachweis gefunden.',
   too_many_attempts: 'Zu viele Versuche. Bitte warten Sie einige Minuten und versuchen Sie es erneut.',
   confirm_power_down: 'Sind Sie sicher, dass Sie ein Power Down starten möchten?',
   confirm_power_up: 'Sind Sie sicher, dass Sie ein Power Up durchführen möchten?',

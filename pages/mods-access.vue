@@ -42,6 +42,8 @@
 			<h3>{{ $t('Hey') }} {{ user.account.name }}!</h3>
 		</div>
 		
+		<!-- moderator actions POST /modAction, which is disabled server side: hide them -->
+		<template v-if="modActionsAvailable">
 		<div class="col-md-12 row-sep m-2">
 			<div class="row text-center action-title">VERIFY NEWBIE</div>
 			<div :action='this.actiapimod' method="get" class="p-2">
@@ -94,6 +96,7 @@
 				<div name="rewardresult" ref="rewardresult" class="text-brand" />
 			</div>
 		</div>
+		</template>
 		
 		<div class="col-md-12 row-sep m-2" v-if="isAdmin">
 			<div class="text-center row action-title">MARKET ORDERS</div>
@@ -388,6 +391,8 @@
 		}
 	  },
 	  async processAction (targetAction){
+		//the forms are hidden while /modAction is disabled; never send it meanwhile
+		if (!this.modActionsAvailable) return;
 		
 		let url = new URL(this.actiapimod);
 		//compile all needed data and send it along the request for processing

@@ -954,6 +954,7 @@ module.exports = {
   afit_move_he_unavailable: 'Güvenlik bakımı tamamlanana kadar AFIT öğesini Hive-Engine üzerine taşımak geçici olarak kullanılamıyor. Bekleyen bir taşımanız varsa burada yine de iptal edebilirsiniz: oturum açma oturumunuz kullanılır, fon şifresi gerekmez.',
   buy_afit_unavailable: 'Güvenlik bakımı tamamlanana kadar burada AFIT satın almak geçici olarak kullanılamıyor. AFIT tokenlerini Hive-Engine piyasasından almaya devam edebilirsiniz.',
   mod_actions_unavailable: 'Güvenlik bakımı tamamlanana kadar moderatör işlemleri geçici olarak kullanılamıyor. İstatistikler ve siparişler görünmeye devam eder.',
+  no_purchase_record_for_product: 'Hesabınızda bu ürüne ait bir satın alma kaydı bulunamadı.',
   too_many_attempts: 'Çok fazla deneme. Lütfen birkaç dakika bekleyip tekrar deneyin.',
   confirm_power_down: 'Güç azaltma başlatmak istediğinizden emin misiniz?',
   confirm_power_up: 'Güçlendirme yapmak istediğinizden emin misiniz?',

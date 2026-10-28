@@ -953,6 +953,7 @@ module.exports = {
   afit_move_he_unavailable: 'セキュリティメンテナンス中のため、AFITのHive-Engineへの移動は一時的にご利用いただけません。保留中の移動がある場合は、ここから引き続きキャンセルできます（ログインセッションを使用し、資金パスワードは不要です）。',
   buy_afit_unavailable: 'セキュリティメンテナンス中のため、ここでのAFIT購入は一時的にご利用いただけません。Hive-EngineマーケットでのAFIT購入は引き続き可能です。',
   mod_actions_unavailable: 'セキュリティメンテナンス中のため、モデレーター操作は一時的にご利用いただけません。統計と注文は引き続き表示されます。',
+  no_purchase_record_for_product: 'お客様のアカウントにこの商品の購入記録が見つかりませんでした。',
   too_many_attempts: '試行回数が多すぎます。数分待ってからもう一度お試しください。',
   confirm_power_down: 'パワーダウンを開始してもよろしいですか？',
   confirm_power_up: 'パワーアップしてもよろしいですか？',

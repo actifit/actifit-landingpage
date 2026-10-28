@@ -1925,7 +1925,7 @@ import Web3 from 'web3';
 
 import badActors from '~/utils/BadActorList';
 import { requestAfitExchange, exchangeErrorText } from '~/utils/afitExchange';
-import { AFIT_TIPS_AVAILABLE, AFIT_MOVE_TO_HE_AVAILABLE, BUY_AFIT_AVAILABLE, cancelAfitMoveRequest } from '~/utils/sessionActions';
+import { AFIT_TIPS_AVAILABLE, AFIT_MOVE_TO_HE_AVAILABLE, BUY_AFIT_AVAILABLE, requestCancelAfitMove } from '~/utils/sessionActions';
 import AutocompleteUsernameInput from '~/components/AutocompleteUsernameInput';
 
 let web3 = new Web3(process.env.web3Node);
@@ -2027,13 +2027,11 @@ export default {
       performingSwap: false,
       error_swap: '',
       swapResult: '',
-      checkingFunds: false,
       movingFunds: false,
       movingAFIT: false,
       movingAFITX: false,
       checkingBought: false,
       transConfirmed: false,
-      target_exchange_account: 'actifit.exchange',
       target_buy_account: 'actifit.buy',
       properties: '', //handles the Steem BC properties
       //disabled server side since the 2026-10-21 incident -> the panels show a note instead
@@ -4150,7 +4148,6 @@ export default {
       }
     },
     fetchUserPendingRewards(tgtUser) {
-      //let's check if user already has a funds pass set
 
       fetch(process.env.actiAppUrl + 'pendingRewards/?user=' + tgtUser).then(
         res => {
@@ -5997,9 +5994,23 @@ export default {
       this.initiateInProgress = true;
 
       //authorised by the login session (the server cancels for the session user), no
-      //funds password; silently refresh + retry once if the keychain token expired
-      const cancelReq = cancelAfitMoveRequest(process.env.actiAppUrl, this.user.account.name);
-      let outcome = await this.withAuthRetry(() => this.postAuthed(cancelReq.url, cancelReq.body));
+      //funds password; silently refresh + retry once if the keychain token expired.
+      //Keeps the HTTP status so a plain-text 429 reads as "too many attempts".
+      const sendCancel = () => requestCancelAfitMove({
+        apiUrl: process.env.actiAppUrl,
+        user: this.user.account.name,
+        sessionToken: localStorage.getItem('access_token')
+      });
+      let status = 0;
+      let outcome = {};
+      try {
+        ({ status, outcome } = await sendCancel());
+        if (this.isAuthFailure(outcome) && await this.ensureKeychainToken()) {
+          ({ status, outcome } = await sendCancel());
+        }
+      } catch (err) {
+        console.error('cancelAFITMoveSE failed:', err);
+      }
       if (outcome.status == 'Success') {
         let afitCancPDTransaction = { action: 'Cancel AFIT To S-E Power Down' };
         //store the transaction to Steem BC
@@ -6027,8 +6038,7 @@ export default {
 
       } else {
         this.afit_se_move_error_proceeding = true;
-        this.afit_se_move_err_msg = this.isAuthFailure(outcome) ? this.$t('session_expired_login_again')
-          : (this.$gateMessage(outcome) || outcome.error || this.$t('error_performing_operation'));
+        this.afit_se_move_err_msg = exchangeErrorText(status, outcome, (k) => this.$t(k), (o) => this.$gateMessage(o));
       }
       this.initiateInProgress = false;
     },
@@ -6549,7 +6559,7 @@ export default {
             console.log(response);
             //notify of success
             if (response.success && response.result.id){
-              //let's check if user already has a funds pass set
+              //register the AFIT transition for this transfer
             fetch(process.env.actiAppUrl+'proceedAfitTransition/?user='+this.user.account.name+'&txid='+response.result.id+'&amount='+amount_to_move+'&bchain='+(direction==1?'STEEM':'HIVE')).then(
               res => {res.json().then(json =>
                 {
@@ -6624,7 +6634,7 @@ export default {
 
         //proceed with moving tokens over to recipient
 
-        //let's check if user already has a funds pass set
+        //register the AFIT transition for this transfer
         fetch(process.env.actiAppUrl + 'proceedAfitTransition/?user=' + this.user.account.name + '&txid=' + tx.id + '&amount=' + amount_to_move + '&bchain=' + (direction == 1 ? 'STEEM' : 'HIVE')).then(
           res => {
             res.json().then(json => {
@@ -6770,7 +6780,7 @@ export default {
 
         //proceed with moving tokens over to recipient
 
-        //let's check if user already has a funds pass set
+        //register the AFITX transition for this transfer
         fetch(process.env.actiAppUrl + 'proceedAfitxTransition/?user=' + this.user.account.name + '&txid=' + tx.id + '&amount=' + amount_to_move + '&bchain=' + (direction == 1 ? 'STEEM' : 'HIVE')).then(
           res => {
             res.json().then(json => {

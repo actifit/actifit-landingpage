@@ -953,6 +953,7 @@ module.exports = {
   afit_move_he_unavailable: 'Przenoszenie AFIT na Hive-Engine jest tymczasowo niedostępne z powodu prac konserwacyjnych związanych z bezpieczeństwem. Oczekujący transfer nadal możesz tutaj anulować: używa on Twojej sesji logowania, bez hasła do środków.',
   buy_afit_unavailable: 'Kupowanie AFIT tutaj jest tymczasowo niedostępne z powodu prac konserwacyjnych związanych z bezpieczeństwem. Nadal możesz kupić AFIT na rynku Hive-Engine.',
   mod_actions_unavailable: 'Działania moderatorów są tymczasowo niedostępne z powodu prac konserwacyjnych związanych z bezpieczeństwem. Statystyki i zamówienia pozostają widoczne.',
+  no_purchase_record_for_product: 'Na Twoim koncie nie znaleziono zapisu zakupu tego produktu.',
   too_many_attempts: 'Zbyt wiele prób. Odczekaj kilka minut i spróbuj ponownie.',
   confirm_power_down: 'Czy na pewno chcesz rozpocząć zmniejszanie mocy?',
   confirm_power_up: 'Czy na pewno chcesz zwiększyć moc?',
