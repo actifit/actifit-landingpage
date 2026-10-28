@@ -430,17 +430,14 @@
                 <div v-if="showAfitTipInfo" class="alert alert-info mt-3 small" v-html="$t('tipping_details')" />
 
                 <div v-if="proceedTip" class="wallet-action-box mt-3">
-                  <div class="tip-details">
+                  <!-- /tipAccount is disabled server side (security maintenance after 2026-10-21) -->
+                  <div v-if="!afitTipsAvailable" class="alert alert-info mb-0">{{ $t('afit_tips_unavailable') }}</div>
+                  <div v-else class="tip-details">
                     <div class="form-group">
                       <label for="tip-amount">{{ $t('Tip_Amount') }}</label>
                       <input type="number" id="tip-amount" name="tip-amount" ref="tip-amount" class="form-control">
                     </div>
-                    <div class="form-group">
-                      <label for="funds-pass">{{ $t('Funds_Password') }}</label>
-                      <input type="password" id="funds-pass" name="funds-pass" ref="funds-pass" class="form-control">
-                      <small><a href="/wallet?action=set_funds_pass" target="_blank" rel="noopener noreferrer">{{ $t('create_pass_short') }}</a></small>
-                    </div>
-                    <div v-if="tipError" v-html="tipError" class="alert alert-danger"></div>
+                    <div v-if="tipError" class="alert alert-danger">{{ tipError }}</div>
                     <div>
                       <button v-on:click="proceedTipActivity" class="btn btn-danger">{{ $t('Proceed') }}</button>
                       <i class="fas fa-spin fa-spinner ml-2" v-if="tipInProgress"></i>
@@ -578,6 +575,7 @@ import MeasureChartModal from '~/components/MeasureChartModal'
 import ActivityChartModal from '~/components/ActivityChartModal'
 import ProfileImageModal from '~/components/ProfileImageModal'
 import badActors from '~/utils/BadActorList';
+import { AFIT_TIPS_AVAILABLE } from '~/utils/sessionActions'
 import { BadgePlugin } from 'bootstrap-vue'
 Vue.use(BadgePlugin)
 import SSC from 'sscjs'
@@ -640,6 +638,7 @@ export default {
       account_banned: false,
       tipError: '',
       tipInProgress: false,
+      afitTipsAvailable: AFIT_TIPS_AVAILABLE, //tips are disabled server side for now
       proceedTip: false,
       addFriendError: '',
       cur_bchain: 'HIVE',
@@ -1668,10 +1667,6 @@ export default {
         this.tipError = this.$t('Cannot_tip_self');
         return false;
       }
-      if (this.$refs["funds-pass"].value == '') {
-        this.tipError = this.$t('error_missing_funds_pass') + ' <u><a href="/wallet?action=set_funds_pass">' + this.$t('create_funds_pass') + '</a></u>';
-        return;
-      }
       if (this.$refs["tip-amount"].value == '') {
         this.tipError = this.$t('amount_positive_int');
         return;
@@ -1681,13 +1676,14 @@ export default {
         return;
       }
       this.tipInProgress = true;
+      //authorised by the login session, no funds password (disabled server side for now)
       const accToken = localStorage.getItem('access_token');
       let res = await fetch(process.env.actiAppUrl + 'tipAccount/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-acti-token': 'Bearer ' + accToken },
-        body: JSON.stringify({ targetUser: this.displayUser, amount: this.$refs["tip-amount"].value, fundsPass: this.$refs["funds-pass"].value })
+        body: JSON.stringify({ targetUser: this.displayUser, amount: this.$refs["tip-amount"].value })
       });
-      let outcome = await res.json();
+      let outcome = await res.json().catch(() => ({}));
       if (outcome.status == 'Success') {
         let tipTransaction = { action: 'Tip', amount: outcome.tipAmount, recipient: this.displayUser };
         let cstm_params = {
@@ -1710,7 +1706,7 @@ export default {
         }
         this.proceedTip = false;
       } else {
-        this.tipError = outcome.error;
+        this.tipError = outcome.error || this.$t('error_performing_operation');
       }
       this.tipInProgress = false;
     },

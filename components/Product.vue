@@ -413,19 +413,11 @@
         </a>
       </div>
       <div v-else>
+        <!-- re-issued for the logged-in session (GET /reissueDownloadToken), no funds password -->
         <div v-if="!this.downloadAgainReady">
-          <a class="btn btn-brand btn-lg w-100 book-button" @click.prevent="requestFundsPass = true">{{
-            $t('Download_again') }}</a>
-        </div>
-        <div v-if="this.requestFundsPass && !this.downloadAgainReady" class="pt-2">
-          <label for="funds-pass" class="w-100 field-label">{{ $t('Funds_Password') }}</label>
-          <input type="text" id="funds-pass" name="funds-pass" ref="funds-pass" class="form-control w-100">
-          <a href="/wallet?action=set_funds_pass" class="funds-pass-link">{{ $t('No_funds_pass_wallet') }}&nbsp;
-            <i class="fas fa-solid fa-wallet"></i></a>
-          <div class="pt-2">
-            <a class="btn btn-brand btn-lg w-100 book-button" @click.prevent="downloadAgain()">{{ $t('Proceed') }}</a>
-          </div>
-          <div v-if="this.errorDownloadAgain" v-html="this.errorDownloadAgain" class="text-brand"></div>
+          <a class="btn btn-brand btn-lg w-100 book-button" @click.prevent="downloadAgain()">{{
+            $t('Download_again') }} <i class="fas fa-spin fa-spinner" v-if="downloadAgainRunning"></i></a>
+          <div v-if="this.errorDownloadAgain" class="text-brand pt-2">{{ errorDownloadAgain }}</div>
         </div>
         <div v-if="this.downloadAgainReady">
           <div class="text-brand">{{ $t('download_ready_again_text') }}</div>
@@ -1408,11 +1400,6 @@
   max-width: 160px;
 }
 
-.funds-pass-link {
-  display: inline-block;
-  margin-top: 6px;
-}
-
 /* ---------- checkout form ---------- */
 .checkout-form {
   text-align: left;
@@ -1511,13 +1498,11 @@ html.dark-mode .purchase-currency-badge {
 }
 
 html.dark-mode .product-card .provider-link,
-html.dark-mode .product-card .provider-link a,
-html.dark-mode .product-card .funds-pass-link {
+html.dark-mode .product-card .provider-link a {
   color: #ffffff;
 }
 
-html.dark-mode .product-card .provider-link a:hover,
-html.dark-mode .product-card .funds-pass-link:hover {
+html.dark-mode .product-card .provider-link a:hover {
   color: #f4f4f4;
 }
 
@@ -1687,6 +1672,8 @@ import hive from '@hiveio/hive-js'
 import BuyOptionsModal from '~/components/BuyOptionsModal'
 import { getProductPurchaseCurrencies } from '~/utils/marketPricing'
 import { getGadgetLevelClass } from '~/utils/marketCatalog'
+import { requestReissueDownloadToken, ebookDownloadHref } from '~/utils/sessionActions'
+import { exchangeErrorText } from '~/utils/afitExchange'
 
 
 //import VueLazyLoad from 'vue-lazyload'
@@ -1859,7 +1846,6 @@ export default {
       // broadcasting a second real transfer.
       paymentInFlight: false,
       productBought: false,
-      requestFundsPass: false,
       downloadAgainRunning: false,
       errorDownloadAgain: '',
       downloadAgainReady: false,
@@ -2075,7 +2061,6 @@ export default {
     },
     resetDownState() {
       this.downloadAgainReady = false
-      this.requestFundsPass = false
     },
     handleFirstDownloadClick() {
       if (this.firstDownloadHref) {
@@ -2191,30 +2176,26 @@ export default {
       }
     },
     async downloadAgain() {
+      if (this.downloadAgainRunning) return;
       this.downloadAgainRunning = true;
       this.errorDownloadAgain = '';
-      if (this.$refs["funds-pass"].value == '') {
-        this.errorDownloadAgain = this.$t('Provide_funds_pass');
-        this.downloadAgainRunning = false;
-        return;
-      }
-      let url = new URL(process.env.actiAppUrl + 'validatePassForDownload/?user=' + this.user.account.name + '&pass='
-        + this.$refs['funds-pass'].value + '&product_id=' + this.product._id);
-      let res = await fetch(url);
-      let outcome = await res.json();
-      this.settingPass = false;
-      //console.log(outcome);
-      if (!outcome.error) {
-        //success
-        this.downloadAgainReady = true;
-        this.downloadHref = process.env.actiAppUrl
-          + 'downEbook/'
-          + '?user=' + this.user.account.name
-          + '&product_id=' + this.product._id
-          + '&access_token=' + outcome.access_token
-      } else {
-        //display error
-        this.errorDownloadAgain = outcome.error;
+      try {
+        //the server re-enables the download for the SESSION user (x-acti-token)
+        const { status, outcome } = await requestReissueDownloadToken({
+          apiUrl: process.env.actiAppUrl,
+          productId: this.product._id,
+          sessionToken: localStorage.getItem('access_token')
+        });
+        if (outcome.access_token && !outcome.error) {
+          this.downloadAgainReady = true;
+          this.downloadHref = ebookDownloadHref(process.env.actiAppUrl, this.user.account.name,
+            this.product._id, outcome.access_token);
+        } else {
+          this.errorDownloadAgain = exchangeErrorText(status, outcome, (k) => this.$t(k), (o) => this.$gateMessage(o));
+        }
+      } catch (err) {
+        console.error(err);
+        this.errorDownloadAgain = this.$t('error_performing_operation');
       }
       this.downloadAgainRunning = false;
     },

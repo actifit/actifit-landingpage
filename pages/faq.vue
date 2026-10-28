@@ -9,8 +9,8 @@
 			<h1 class="pt-5 mb-3 text-capitalize text-center headline"><span class="text-brand">{{ $t('faq.headline') }}</span></h1>
 			
 			
-			<div v-for="quest in 100" class="row lead mb-4 p-3 w-100" :key="quest" v-if="$t('faq.q'+quest) != 'faq.q'+quest">
-				<span class="font-weight-bold">{{quest}}.&nbsp;</span><div v-html="$t('faq.q'+quest)" class="font-weight-bold"></div>
+			<div v-for="(quest, idx) in faqNumbers" class="row lead mb-4 p-3 w-100" :key="quest">
+				<span class="font-weight-bold">{{idx + 1}}.&nbsp;</span><div v-html="$t('faq.q'+quest)" class="font-weight-bold"></div>
 				<div v-html="$t('faq.a'+quest)" class="w-100"></div>
 			</div>
       
@@ -49,7 +49,15 @@
 	  }
 	},
     computed: {
-	
+	  //question numbers present in the locale (gaps are retired questions, e.g. the
+	  //funds-password ones), shown numbered 1..n so the list has no holes
+	  faqNumbers () {
+		const nums = [];
+		for (let i = 1; i <= 100; i++) {
+		  if (this.$t('faq.q' + i) != 'faq.q' + i) nums.push(i);
+		}
+		return nums;
+	  }
     },
     async mounted () {
 	  
