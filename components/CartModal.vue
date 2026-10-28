@@ -94,6 +94,7 @@
   import hive from '@hiveio/hive-js'
   
   import BuyOptionsModal from '~/components/BuyOptionsModal'
+  import { gadgetBuyErrorText } from '~/utils/gadgetErrors'
 
   export default {
      props: ['afitPrice'],
@@ -613,8 +614,14 @@
 			let res = await fetch(url);
 			let outcome = await res.json();
 			if (this.$confirmFailed(outcome)){
-				this.errorProceed = this.$t('error_performing_operation');
+				this.errorProceed = gadgetBuyErrorText(outcome, (k) => this.$t(k), (o) => this.$gateMessage(o));
 				console.error(outcome);
+				if (Array.isArray(outcome && outcome.delivered) && outcome.delivered.length > 0){
+					//some items were delivered (and charged): refresh balance, stock and the cart
+					this.$store.dispatch('fetchUserTokens');
+					this.$store.dispatch('fetchProducts');
+					this.$emit('refresh-tickets-multi');
+				}
 			}else{
 				//update user token count
 				this.$store.dispatch('fetchUserTokens')

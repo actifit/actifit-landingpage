@@ -1678,6 +1678,7 @@ import BuyOptionsModal from '~/components/BuyOptionsModal'
 import { getProductPurchaseCurrencies } from '~/utils/marketPricing'
 import { getGadgetLevelClass } from '~/utils/marketCatalog'
 import { requestReissueDownloadToken, reissueErrorText, ebookDownloadHref, EBOOK_PURCHASE_AVAILABLE, REAL_PRODUCT_PURCHASE_AVAILABLE } from '~/utils/sessionActions'
+import { gadgetBuyErrorText } from '~/utils/gadgetErrors'
 
 
 //import VueLazyLoad from 'vue-lazyload'
@@ -2835,7 +2836,7 @@ export default {
         let res = await fetch(url);
         let outcome = await res.json();
         if (this.$confirmFailed(outcome)) {
-          this.errorProceed = this.$t('error_performing_operation');
+          this.errorProceed = gadgetBuyErrorText(outcome, (k) => this.$t(k), (o) => this.$gateMessage(o));
           console.error(outcome);
         } else { //update user token count
           this.$store.dispatch('fetchUserTokens') //update product status

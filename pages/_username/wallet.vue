@@ -17,7 +17,7 @@
 			  <a href="/walletV1"><i>New Wallet Layout. Click to switch back to old version</i></a>
 		  </div>-->
 
-        <section v-if="userTokensWallet >= 0" class="wallet-hero text-left">
+        <section v-if="tokensLoaded" class="wallet-hero text-left">
           <div class="wallet-hero-main">
             <span class="wallet-eyebrow">{{ $t('account_est_val') }}</span>
             <div class="wallet-total" v-if="!loading && !walletDataRefreshing"><small>$</small>{{ totalAccountValue }}</div>
@@ -83,7 +83,7 @@
                 :style="settings_set ? 'color:green' : 'color:white'"></i><i class="fas fa-spin fa-spinner text-white"
                 v-if="save_progress"></i></span>
 
-            <div class="wallet-sort-bar" v-if="userTokensWallet >= 0">
+            <div class="wallet-sort-bar" v-if="tokensLoaded">
               <label for="wallet-token-sort">{{ $t('Sort_By') }}</label>
               <select id="wallet-token-sort" v-model="tokenSort" v-on:change="sortTokenData(tokenSort, true)">
                 <option value="symbol">Token</option>
@@ -97,7 +97,7 @@
               </button>
             </div>
           </div>
-          <div class="col wallet-toolbar-search" v-if="userTokensWallet >= 0">
+          <div class="col wallet-toolbar-search" v-if="tokensLoaded">
             <i class="fas fa-search wallet-search-icon"></i>
             <input type="text" v-model="tokenSearch" class="wallet-search-input"
               :placeholder="$t('search_tokens_ph')" :aria-label="$t('search_tokens_ph')">
@@ -107,7 +107,7 @@
         </div>
         <a href="#" id="pendingRewardsKicker" name="pendingRewardsKicker" ref="pendingRewardsKicker" class="d-none"
           data-toggle="modal" data-target="#pendingRewardsModal" aria-hidden="true"></a>
-        <div class="wallet-container" v-if="userTokensWallet >= 0">
+        <div class="wallet-container" v-if="tokensLoaded">
           <div class="row font-weight-bold token-entry thick-bottom head-title">
             <div class="col-2 clickable" v-on:click="sortTokenData('symbol')">Token
               <span>
@@ -2166,7 +2166,10 @@ export default {
       walletInitialized: false, // true once initWallet() has run (guards double-init)
       mountedDone: false, // true after mounted() finishes — lets the user watcher tell a post-mount login from the initial load
       profImgUrl: process.env.hiveImgUrl,
-      userTokensWallet: -1,
+      userTokensWallet: 0,
+      // the AFIT balance fetch has finished (success or failure). Not `userTokensWallet >= 0`:
+      // a balance can legitimately be negative and must still show the wallet.
+      tokensLoaded: false,
       badActors: badActors,
       badActorWarning: false,
       hiveTransactions: [],
@@ -2593,7 +2596,7 @@ export default {
         // reset states
         this.tokensOfInterestBal = [];
         this.tokenMetrics = [];
-        this.userTokensWallet = -1;
+        this.tokensLoaded = false;
         this.totalAccountValue = 0;
         this.steemPower = 0;
         this.delegatedSteemPower = 0;
@@ -3932,7 +3935,7 @@ export default {
     async completeUserDataRefresh() {
       this.walletDataRefreshing = true;
       try {
-        this.userTokensWallet = -1;
+        this.tokensLoaded = false;
         this.tokensOfInterestBal = [];
         this.tokenMetrics = [];
         this.totalAccountValue = 0;
@@ -3973,7 +3976,15 @@ export default {
 
         // This redundant assignment is now removed. The `mounted` hook handles setting `displayUserData`.
 
-        this.userTokensWallet = await this.$store.dispatch('fetchUserTokensReturn', this.displayUser, false)
+        try {
+          const tokens = parseFloat(await this.$store.dispatch('fetchUserTokensReturn', this.displayUser, false));
+          this.userTokensWallet = Number.isFinite(tokens) ? tokens : 0;
+        } catch (err) {
+          console.error('Error fetching AFIT balance:', err);
+          this.userTokensWallet = 0;
+        } finally {
+          this.tokensLoaded = true;
+        }
 
         this.$store.dispatch('fetchUserTokens')
         this.$store.dispatch('fetchTransactions', this.displayUser)

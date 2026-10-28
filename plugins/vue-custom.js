@@ -545,7 +545,9 @@ Vue.prototype.$notifyPaymentNotConfirmed = function (trxId) {
 // For an account flagged in the 2026-10-21 incident, sensitive endpoints
 // (/setUserFundsPass, /storeUserWalletAddress, /deleteUserWalletAddress,
 // /deleteAccount) answer 403 {code:'KEY_ROTATION_REQUIRED', error, message} - or 503
-// {code:'TRY_AGAIN'} when the chain cannot be read to decide. Those carry an actionable
+// {code:'TRY_AGAIN'} when the chain cannot be read to decide. Signed-transaction routes
+// (gadget buys, ...) can also answer 403 {code:'KEY_ROTATION_HOLD'} briefly after a key
+// change. Those carry an actionable
 // instruction ("rotate your posting key"), so a generic "error performing operation"
 // hides the one thing the user needs to be told.
 //
@@ -553,7 +555,7 @@ Vue.prototype.$notifyPaymentNotConfirmed = function (trxId) {
 // and internal errors keep their existing generic text. Every call site renders through
 // {{ }}, so this is not an HTML sink - but narrow is still the right default.
 Vue.prototype.$gateMessage = function (outcome) {
-	const GATE_CODES = ['KEY_ROTATION_REQUIRED', 'TRY_AGAIN'];
+	const GATE_CODES = ['KEY_ROTATION_REQUIRED', 'KEY_ROTATION_HOLD', 'TRY_AGAIN'];
 	if (!outcome || GATE_CODES.indexOf(outcome.code) === -1) return null;
 	const msg = outcome.message || outcome.error;
 	return (typeof msg === 'string' && msg.trim()) ? msg : null;
