@@ -106,12 +106,15 @@
             </span>
           </label>
 
-          <label class="arena-choice" :class="{ 'is-picked': form.rewardType === 'afit', 'is-disabled': !canFund || balanceLoading }">
-            <input type="radio" value="afit" v-model="form.rewardType" :disabled="!canFund || balanceLoading" />
+          <!-- AFIT-funded challenges are paused server side (ARENA_FUNDING_PAUSED: the backend drops
+               them), so the option stays visible but disabled with a note - badge-only is unchanged -->
+          <label class="arena-choice" :class="{ 'is-picked': form.rewardType === 'afit', 'is-disabled': !arenaAfitPrizesAvailable || !canFund || balanceLoading }">
+            <input type="radio" value="afit" v-model="form.rewardType" :disabled="!arenaAfitPrizesAvailable || !canFund || balanceLoading" />
             <span class="arena-choice__body">
               <span class="arena-choice__title"><i class="fas fa-coins" aria-hidden="true"></i> {{ $t('Arena_Reward_Afit') }}</span>
               <span class="arena-choice__desc">{{ $t('Arena_Reward_Afit_Desc') }}</span>
-              <span v-if="balanceLoading" class="arena-choice__gate"><i class="fas fa-spinner fa-spin" aria-hidden="true"></i> {{ $t('Arena_Balance_Loading') }}</span>
+              <span v-if="!arenaAfitPrizesAvailable" class="arena-choice__gate"><i class="fas fa-pause-circle" aria-hidden="true"></i> {{ $t('arena_afit_prizes_unavailable') }}</span>
+              <span v-else-if="balanceLoading" class="arena-choice__gate"><i class="fas fa-spinner fa-spin" aria-hidden="true"></i> {{ $t('Arena_Balance_Loading') }}</span>
               <span v-else-if="balanceError" class="arena-choice__gate"><i class="fas fa-exclamation-triangle" aria-hidden="true"></i> {{ $t('Arena_Balance_Error') }}</span>
               <span v-else-if="!canFund" class="arena-choice__gate"><i class="fas fa-lock" aria-hidden="true"></i> {{ fundedGateMsg }}</span>
             </span>
@@ -188,6 +191,7 @@
   import Footer from '~/components/Footer'
   import LoginModal from '~/components/LoginModal'
   import ListHeadingSection from '~/components/ListHeadingSection'
+  import { ARENA_AFIT_PRIZES_AVAILABLE } from '~/utils/sessionActions'
 
   // Mirror of the backend gate/economics (actifit-bot config defaults). These are
   // advisory here — the authoritative checks (holdings tier + funding debit) run
@@ -221,6 +225,7 @@
       return {
         FEE_PCT,
         MIN_POOL,
+        arenaAfitPrizesAvailable: ARENA_AFIT_PRIZES_AVAILABLE,
         step: 0,
         publishing: false,
         published: false,
@@ -343,7 +348,7 @@
         }
         if (this.step === 1) {
           if (this.form.rewardType === 'badge') return !!this.form.badge
-          if (this.form.rewardType === 'afit') return this.canFund && !this.prizeError
+          if (this.form.rewardType === 'afit') return !!(this.arenaAfitPrizesAvailable && this.canFund && !this.prizeError)
           return false
         }
         return true
@@ -444,6 +449,8 @@
       },
       async publish () {
         if (!this.canPublish || this.publishing) return
+        // the backend drops AFIT-funded challenges for now - never report a false success
+        if (this.form.rewardType === 'afit' && !this.arenaAfitPrizesAvailable) return
         this.publishing = true
         this.actionMsg = ''
         try {

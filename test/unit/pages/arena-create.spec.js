@@ -81,10 +81,16 @@ describe('pages/arena/create (wizard)', () => {
       expect(CreatePage.computed.stepValid.call({ step: 1, form: { rewardType: 'badge', badge: 'X' } })).toBe(true)
       // funded but under the holdings gate → invalid
       expect(CreatePage.computed.stepValid.call({ step: 1, form: { rewardType: 'afit' }, canFund: false, prizeError: '' })).toBe(false)
-      // funded, gated ok, no prize error → valid
-      expect(CreatePage.computed.stepValid.call({ step: 1, form: { rewardType: 'afit' }, canFund: true, prizeError: '' })).toBe(true)
+      // funded, gated ok, no prize error → valid (while AFIT prizes are available)
+      expect(CreatePage.computed.stepValid.call({ step: 1, form: { rewardType: 'afit' }, arenaAfitPrizesAvailable: true, canFund: true, prizeError: '' })).toBe(true)
       // funded, gated ok, but a prize error → invalid
-      expect(CreatePage.computed.stepValid.call({ step: 1, form: { rewardType: 'afit' }, canFund: true, prizeError: 'nope' })).toBe(false)
+      expect(CreatePage.computed.stepValid.call({ step: 1, form: { rewardType: 'afit' }, arenaAfitPrizesAvailable: true, canFund: true, prizeError: 'nope' })).toBe(false)
+    })
+
+    it('AFIT prizes paused (ARENA_FUNDING_PAUSED): the afit path is never valid, badge is unchanged', () => {
+      expect(CreatePage.computed.stepValid.call({ step: 1, form: { rewardType: 'afit' }, arenaAfitPrizesAvailable: false, canFund: true, prizeError: '' })).toBe(false)
+      expect(CreatePage.computed.stepValid.call({ step: 1, form: { rewardType: 'badge', badge: 'X' }, arenaAfitPrizesAvailable: false })).toBe(true)
+      expect(CreatePage.data.call({}).arenaAfitPrizesAvailable).toBe(false)
     })
   })
 
@@ -187,6 +193,20 @@ describe('pages/arena/create (wizard)', () => {
       expect(ctx.$processTrxFunc).toHaveBeenCalledWith('custom_json', expect.objectContaining({ id: 'actifit_arena', required_posting_auths: ['alice'] }), false)
       const sent = JSON.parse(ctx.$processTrxFunc.mock.calls[0][1].json)
       expect(sent.op).toBe('challenge_create')
+      expect(ctx.published).toBe(true)
+    })
+
+    it('never broadcasts (or shows success for) an AFIT-funded challenge while AFIT prizes are paused', async () => {
+      const ctx = makeCtx({ arenaAfitPrizesAvailable: false, form: { ...baseForm(), rewardType: 'afit', prize: 400 } })
+      await CreatePage.methods.publish.call(ctx)
+      expect(ctx.$processTrxFunc).not.toHaveBeenCalled()
+      expect(ctx.published).toBe(false)
+    })
+
+    it('badge-only challenges still publish while AFIT prizes are paused', async () => {
+      const ctx = makeCtx({ arenaAfitPrizesAvailable: false })
+      await CreatePage.methods.publish.call(ctx)
+      expect(ctx.$processTrxFunc).toHaveBeenCalled()
       expect(ctx.published).toBe(true)
     })
 

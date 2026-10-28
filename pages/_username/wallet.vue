@@ -425,6 +425,8 @@
 
           <div ref="coreActionAnchor" class="wallet-core-action-anchor" aria-hidden="true"></div>
           <h2 class="wallet-asset-group-heading" v-if="groupMatchesSearch(['AFIT', 'AFITX', 'BNB', 'LP'])">{{ $t('BSC') }}</h2>
+          <!-- the Hive -> BSC bridge (/appendBridgeTransaction + its job) is paused: no move button, say why here -->
+          <p v-if="!bscBridgeAvailable && groupMatchesSearch(['AFIT', 'AFITX', 'BNB', 'LP'])" class="text-brand px-2 mb-2">{{ $t('bsc_bridge_unavailable') }}</p>
           <div class="token-entry row main-token" v-if="matchesTokenSearch('AFIT')">
             <div class="col-2 text-left wallet-token-name"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo" alt="">AFIT</div>
             <div class="col-2 col-lg-1 wallet-token-location">{{ $t('BSC') }}</div>
@@ -572,7 +574,7 @@
                     :title="$t('withdraw_tokens')"></i></span>
                 <span class="btn btn-brand p-1" v-on:click="initiateTransfer(token)"><i class="fas fa-share-square "
                     :title="$t('transfer_tokens')"></i></span>
-                <span v-if="token.symbol == 'AFIT'" class="btn btn-brand p-1" v-on:click="initiateBSCTransfer(token)"><i
+                <span v-if="bscBridgeAvailable && token.symbol == 'AFIT'" class="btn btn-brand p-1" v-on:click="initiateBSCTransfer(token)"><i
                     class="fas fa-truck-loading " :title="$t('move_to_bsc')"></i></span>
                 <span v-if="token.stakable" class="btn btn-brand p-1" v-on:click="initiateDelegation(token)"><i
                     class="fas fa-donate p-1" :title="$t('delegate_tokens')"></i></span>
@@ -1153,7 +1155,10 @@
                   <div class="text-brand text-center" v-if="error_proceeding">
                     {{ this.error_msg }}
                   </div>
-                  <div class="row">
+                  <!-- RC delegations are signed in the browser (Keychain / HiveAuth / typed posting key);
+                       legacy HiveSigner sessions used the retired server-side /delegateRC -->
+                  <div v-if="!isStdLogin" class="text-brand text-center p-2">{{ $t('rc_delegation_login_needed') }}</div>
+                  <div class="row" v-else>
                     <div class="w-25"></div>
                     <button v-on:click="proceedRCDelegation" class="btn btn-brand btn-lg w-50 border">{{
                       $t('Delegate_rc') }}</button>
@@ -1925,7 +1930,7 @@ import Web3 from 'web3';
 
 import badActors from '~/utils/BadActorList';
 import { requestAfitExchange, exchangeErrorText } from '~/utils/afitExchange';
-import { AFIT_TIPS_AVAILABLE, AFIT_MOVE_TO_HE_AVAILABLE, BUY_AFIT_AVAILABLE, requestCancelAfitMove } from '~/utils/sessionActions';
+import { AFIT_TIPS_AVAILABLE, AFIT_MOVE_TO_HE_AVAILABLE, BUY_AFIT_AVAILABLE, BSC_BRIDGE_AVAILABLE, requestCancelAfitMove } from '~/utils/sessionActions';
 import AutocompleteUsernameInput from '~/components/AutocompleteUsernameInput';
 
 let web3 = new Web3(process.env.web3Node);
@@ -2038,6 +2043,7 @@ export default {
       afitTipsAvailable: AFIT_TIPS_AVAILABLE,
       afitMoveToHeAvailable: AFIT_MOVE_TO_HE_AVAILABLE,
       buyAfitAvailable: BUY_AFIT_AVAILABLE,
+      bscBridgeAvailable: BSC_BRIDGE_AVAILABLE,
       screenWidth: 1200,
       afit_val_exchange: 50,
       afit_exch_matching_perc: 10,
@@ -2198,7 +2204,8 @@ export default {
         { id: 'hp', icon: 'fas fa-donate', short: this.$t('wa_hp_deleg'), full: this.$t('FETCH_MY_DELEGATIONS'), run: () => this.fetchDelegations(false) },
         { id: 'rc', icon: 'fas fa-bolt', short: this.$t('wa_rc_deleg'), full: this.$t('FETCH_MY_RC_DELEGATIONS'), run: () => this.fetchRCDelegations(false) },
         { id: 'history', icon: 'fas fa-file-invoice', short: this.$t('wa_history'), full: this.$t('AFIT_Transaction_History'), run: () => this.scrollToTransactionHistory() },
-        { id: 'bsc', img: '/img/binance-logo.png', short: this.$t('wa_bsc'), full: this.$t('bsc_wallet'), run: () => this.showBSCAddress() },
+        // BSC wallet / bridge entry only while the bridge runs (see bsc_bridge_unavailable)
+        ...(this.bscBridgeAvailable ? [{ id: 'bsc', img: '/img/binance-logo.png', short: this.$t('wa_bsc'), full: this.$t('bsc_wallet'), run: () => this.showBSCAddress() }] : []),
       ];
     },
     overflowActions() {
@@ -3585,6 +3592,7 @@ export default {
       this.scrollTokenAction();
     },
     initiateBSCTransfer(token) {
+      if (!this.bscBridgeAvailable) return;
       //only adjust open/close is same button is clicked, otherwise adjust token being unstaked
       if (this.selTokenUp == token && this.curTokenAction == this.TRANSFER_BSC) {
         this.tokenActions = !this.tokenActions;
@@ -5305,6 +5313,12 @@ export default {
     },
 
     async proceedRCDelegation(cancellation) {
+      //legacy HiveSigner sessions (no std_login) relied on the retired server-side /delegateRC
+      if (!localStorage.getItem('std_login')) {
+        this.error_proceeding = true;
+        this.error_msg = this.$t('rc_delegation_login_needed');
+        return;
+      }
       let note = this.$t('confirm_rc_delegation')
       if (cancellation == true) {
         note = this.$t('confirm_rc_delegation_cancel')
@@ -5330,87 +5344,49 @@ export default {
       }
 
 
-      if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) ||
-        (localStorage.getItem('acti_login_method') == 'hiveauth')) {
-        const op_name = 'custom_json';
-        //['delegate_rc', {
-        const json_data = JSON.stringify(['delegate_rc', {
-          from: this.user.account.name,
-          delegatees: [this.$refs["delegate-recipient"].value.trim()],
-          max_rc: this.$refs["delegate-amount"].value.trim()
-        }]);
-        //}]);
-        const transId = 'rc';
-        const cstm_params = {
-          required_auths: [],
-          required_posting_auths: [this.user.account.name],
-          id: transId,
-          json: json_data
-        }
-        /*
-        let operation = [
-         [op_name, cstm_params]
-        ];*/
+      //Keychain, HiveAuth and typed-key sessions all sign in the browser via processTrxFunc
+      //(typed key: $broadcastWithKey with the posting key) - /delegateRC (server-side signing) is gone
+      const op_name = 'custom_json';
+      const json_data = JSON.stringify(['delegate_rc', {
+        from: this.user.account.name,
+        delegatees: [this.$refs["delegate-recipient"].value.trim()],
+        max_rc: this.$refs["delegate-amount"].value.trim()
+      }]);
+      const transId = 'rc';
+      const cstm_params = {
+        required_auths: [],
+        required_posting_auths: [this.user.account.name],
+        id: transId,
+        json: json_data
+      }
 
-        let res = await this.processTrxFunc(op_name, cstm_params);
+      this.delegateProcess = true;
+      let res;
+      try {
+        res = await this.processTrxFunc(op_name, cstm_params);
+      } catch (err) {
+        console.log(err);
+        res = { success: false };
+      }
+      this.delegateProcess = false;
 
-        console.log('trx status:' + res.success);
-        if (res.success) {
-          //success
-          this.$notify({
-            group: 'success',
-            text: this.$t('rc_delegation_success'),
-            position: 'top center'
-          });
-          //update RC delegations
-          this.fetchRCDelegations(true);
-        } else {
-          //error
-          this.$notify({
-            group: 'error',
-            text: this.$t('error_performing_operation'),
-            position: 'top center'
-          })
-        }
-
+      console.log('trx status:' + res.success);
+      if (res.success) {
+        //success
+        this.$notify({
+          group: 'success',
+          text: this.$t('rc_delegation_success'),
+          position: 'top center'
+        });
+        //update RC delegations
+        this.fetchRCDelegations(true);
       } else {
-
-        let accToken = localStorage.getItem('access_token')
-
-        //chain not needed, as only supported by hive
-        //let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
-
-
-        this.delegateProcess = true;
-        let url = new URL(process.env.actiAppUrl + 'delegateRC/?user=' + this.user.account.name + '&delegatees=' + this.$refs["delegate-recipient"].value.trim() + '&max_rc=' + this.$refs["delegate-amount"].value.trim());
-
-        let reqHeads = new Headers({
-          'Content-Type': 'application/json',
-          'x-acti-token': 'Bearer ' + accToken,
-        });
-        let res = await fetch(url, {
-          headers: reqHeads
-        });
-        let outcome = await res.json();
-        console.log(outcome);
-        if (outcome.id && outcome.ref_block_num) {
-          //success
-          this.$notify({
-            group: 'success',
-            text: this.$t('rc_delegation_success'),
-            position: 'top center'
-          });
-          //update RC delegations
-          this.fetchRCDelegations(true);
-        } else {
-          //error
-          this.$notify({
-            group: 'error',
-            text: this.$t('error_performing_operation'),
-            position: 'top center'
-          })
-        }
-        this.delegateProcess = false;
+        //error
+        this.$notify({
+          group: 'error',
+          text: this.$t('error_performing_operation'),
+          position: 'top center'
+        })
       }
     },
 
@@ -7818,6 +7794,8 @@ export default {
     },
     async proceedTransferBSC() {
       //handles locking and moving tokens over to BSC
+      //the bridge is paused: never broadcast the AFIT lock + HBD fee to the bridge account
+      if (!this.bscBridgeAvailable) return;
       this.afit_se_power_error_proceeding = false;
       this.afit_se_power_err_msg = '';
 

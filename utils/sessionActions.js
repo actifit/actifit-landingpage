@@ -23,6 +23,27 @@ export const AFIT_MOVE_TO_HE_AVAILABLE = false
 export const BUY_AFIT_AVAILABLE = false
 export const MOD_ACTIONS_AVAILABLE = false
 
+/*
+ * More flows that are disabled server side (HTTP 503) or whose backend job is paused since
+ * the incident. Each one is hidden BEFORE the user signs or pays anything, and a translated
+ * "*_unavailable" note says why. Flip a flag once the backend side is back.
+ */
+// Signup, paid AND promo-code (both go through /confirmPayment): no payment address/memo.
+export const SIGNUP_AVAILABLE = false
+// Claiming free signup links (/claimFreeSignupAccounts); the links are redeemed via signup.
+export const FREE_SIGNUP_LINKS_AVAILABLE = false
+// AFIT -> BSC bridge (/appendBridgeTransaction + the bridge job): no AFIT lock + HBD fee.
+export const BSC_BRIDGE_AVAILABLE = false
+// Market: ebook / service orders (/processBuyOrder) and real products (/purchaseRealProduct).
+// Gadgets (type 'ingame') are not affected.
+export const EBOOK_PURCHASE_AVAILABLE = false
+export const REAL_PRODUCT_PURCHASE_AVAILABLE = false
+// Weekly gadget-buyer prize draw (the draw job is paused): no countdown to a draw date.
+export const GADGET_PRIZE_DRAW_AVAILABLE = false
+// AFIT-funded arena challenges (the backend drops them: ARENA_FUNDING_PAUSED). Badge-only
+// challenges are unchanged.
+export const ARENA_AFIT_PRIZES_AVAILABLE = false
+
 /**
  * Cancel a pending AFIT -> H-E move: { url, body }. The server cancels for the session
  * user; `user` is sent only so the server can reject a mismatch.

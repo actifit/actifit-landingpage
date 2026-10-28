@@ -53,7 +53,6 @@ function productCtx (overrides) {
     paymentInFlight: false,
     buyAttempt: false,
     buyInProgress: false,
-    buyAfitInProgress: false,
     errorProceed: '',
     isKeychainActive: false,
     isHiveauthActive: false,
