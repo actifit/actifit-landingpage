@@ -1333,6 +1333,7 @@
 
             <transition name="fade">
               <div v-if="afitActivityMode == showBSCDetails">
+                <p v-if="!bscBridgeAvailable" class="text-brand px-2 mb-2">{{ $t('bsc_bridge_unavailable') }}</p>
                 <div class="wallet-action-title">
                   <h3 class="pro-name">{{ $t('bsc_wallet') }}</h3>
                   <button type="button" class="btn btn-brand wallet-action-close" @click="closeAllWalletActions">
@@ -2204,8 +2205,9 @@ export default {
         { id: 'hp', icon: 'fas fa-donate', short: this.$t('wa_hp_deleg'), full: this.$t('FETCH_MY_DELEGATIONS'), run: () => this.fetchDelegations(false) },
         { id: 'rc', icon: 'fas fa-bolt', short: this.$t('wa_rc_deleg'), full: this.$t('FETCH_MY_RC_DELEGATIONS'), run: () => this.fetchRCDelegations(false) },
         { id: 'history', icon: 'fas fa-file-invoice', short: this.$t('wa_history'), full: this.$t('AFIT_Transaction_History'), run: () => this.scrollToTransactionHistory() },
-        // BSC wallet / bridge entry only while the bridge runs (see bsc_bridge_unavailable)
-        ...(this.bscBridgeAvailable ? [{ id: 'bsc', img: '/img/binance-logo.png', short: this.$t('wa_bsc'), full: this.$t('bsc_wallet'), run: () => this.showBSCAddress() }] : []),
+        // stays available while the bridge is paused: this panel is where users save the BSC
+        // address that drives their BSC balance rows; only moving tokens to BSC is gated
+        { id: 'bsc', img: '/img/binance-logo.png', short: this.$t('wa_bsc'), full: this.$t('bsc_wallet'), run: () => this.showBSCAddress() },
       ];
     },
     overflowActions() {
@@ -5380,8 +5382,8 @@ export default {
         });
         //update RC delegations
         this.fetchRCDelegations(true);
-      } else {
-        //error
+      } else if (!res.cancelled) {
+        //error (a cancelled key prompt already showed its own message)
         this.$notify({
           group: 'error',
           text: this.$t('error_performing_operation'),
@@ -5952,7 +5954,7 @@ export default {
             text: err_msg,
             position: 'top center'
           })
-          return { success: false, trx: null };
+          return { success: false, trx: null, cancelled: !!outcome.cancelled };
           //this.$router.push('/login');
         } else {
           return { success: true, trx: outcome.trx };

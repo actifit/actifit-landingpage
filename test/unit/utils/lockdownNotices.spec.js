@@ -105,11 +105,13 @@ describe('referrals: free signup links', () => {
 
 describe('wallet: BSC bridge', () => {
   const src = read('pages/_username/wallet.vue')
-  it('the move-to-BSC button and the BSC menu entry only exist while the bridge runs', () => {
+  it('the move-to-BSC button only exists while the bridge runs; the BSC wallet panel stays', () => {
     expect(src).toContain(`<span v-if="bscBridgeAvailable && token.symbol == 'AFIT'" class="btn btn-brand p-1" v-on:click="initiateBSCTransfer(token)">`)
-    expect(src).toMatch(/\.\.\.\(this\.bscBridgeAvailable \? \[\{ id: 'bsc'/)
+    // the BSC wallet panel (save / reset the BSC address) stays reachable, with the paused note
+    expect(src).toMatch(/\{ id: 'bsc', img: '\/img\/binance-logo\.png'/)
+    expect(src).toMatch(/<div v-if="afitActivityMode == showBSCDetails">\s*<p v-if="!bscBridgeAvailable" class="text-brand px-2 mb-2">\{\{ \$t\('bsc_bridge_unavailable'\) \}\}<\/p>/)
     expect(src.match(/initiateBSCTransfer\(/g)).toHaveLength(2) // the gated button + the method
-    expect(src.match(/showBSCAddress\(\)/g)).toHaveLength(2) // the gated menu entry + the method
+    expect(src.match(/showBSCAddress\(\)/g)).toHaveLength(2) // the menu entry + the method
   })
   it('no AFIT lock + HBD fee is broadcast while the bridge is paused', () => {
     expect(src).toMatch(/async proceedTransferBSC\(\) \{\s*(\/\/[^\n]*\n\s*)+if \(!this\.bscBridgeAvailable\) return;/)
