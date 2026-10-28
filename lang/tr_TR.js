@@ -1056,6 +1056,7 @@ module.exports = {
   gadget_buy_partial_delivery: 'Bazı ürünler teslim edildi, ancak geri kalanı teslim edilemedi. Teslim edilmeyen ürünler için sizden ücret alınmadı.',
   gadget_buy_partial_check_balance: 'Bazı ürünler teslim edildi, bazıları edilmedi. Lütfen AFIT bakiyenizi kontrol edin; almadığınız ürünler için ücret alındıysa destekle iletişime geçin.',
   afit_balance_unavailable: 'AFIT bakiyeniz yüklenemedi, bu nedenle toplamlara dahil edilmedi.',
+  afit_balance_stale: 'AFIT bakiyeniz yenilenemedi ve güncel olmayabilir.',
   afit_balance_retry: 'Tekrar dene',
   error_operation_active_key: 'Eylem gerçekleştirilirken hata! Aktif anahtarınızı kullandığınızdan emin olun',
   move_afitx_se_he: 'AFITX S-E\'den H-E\'ye Taşı',

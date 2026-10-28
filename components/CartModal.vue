@@ -620,9 +620,9 @@
 					//the delivered items are paid for: take them out of the cart, or a retry would
 					//buy (and charge) them again
 					this.$store.commit('setCartEntries', cartAfterPartialDelivery(this.cartEntries, outcome.delivered));
-					this.$store.dispatch('fetchUserTokens');
-					this.$store.dispatch('fetchProducts');
-					this.$store.dispatch('fetchUserGadgetStats');
+					this.$store.dispatch('fetchUserTokens').catch(() => {});
+					this.$store.dispatch('fetchProducts').catch(() => {});
+					this.$store.dispatch('fetchUserGadgetStats').catch(() => {});
 					this.$emit('refresh-tickets-multi');
 				}
 			}else{

@@ -1055,6 +1055,7 @@ module.exports = {
   gadget_buy_partial_delivery: 'Część przedmiotów została dostarczona, ale pozostałych nie udało się dostarczyć. Za niedostarczone przedmioty nie pobrano opłaty.',
   gadget_buy_partial_check_balance: 'Część przedmiotów została dostarczona, a część nie. Sprawdź saldo AFIT; jeśli pobrano opłatę za przedmioty, których nie otrzymałeś, skontaktuj się z pomocą techniczną.',
   afit_balance_unavailable: 'Nie udało się wczytać salda AFIT, więc nie jest ono uwzględnione w sumach.',
+  afit_balance_stale: 'Nie udało się odświeżyć salda AFIT; może być nieaktualne.',
   afit_balance_retry: 'Spróbuj ponownie',
   error_operation_active_key: 'Błąd podczas wykonywania akcji! Upewnij się, że używasz swojego klucza aktywnego.',
   move_afitx_se_he: 'Przenieś AFITX z S-E do H-E',

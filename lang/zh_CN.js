@@ -1056,6 +1056,7 @@ module.exports = {
   gadget_buy_partial_delivery: '部分物品已送达，其余物品未能送达。未送达的物品未向您收费。',
   gadget_buy_partial_check_balance: '部分物品已送达，部分未送达。请检查您的AFIT余额；如果您为未收到的物品被扣费，请联系客服。',
   afit_balance_unavailable: '无法加载您的AFIT余额，因此未计入总额。',
+  afit_balance_stale: '无法刷新您的 AFIT 余额，显示的可能不是最新数据。',
   afit_balance_retry: '重试',
   error_operation_active_key: '执行操作时出错！请确保您正在使用您的活动密钥',
   move_afitx_se_he: '将AFITX S-E移至H-E',

@@ -34,6 +34,10 @@
                 {{ $t('afit_balance_unavailable') }}
                 <a href="#" @click.prevent="fetchUserData()">{{ $t('afit_balance_retry') }}</a>
               </small>
+              <small v-else-if="tokensLoadFailed" class="text-warning" role="status">
+                {{ $t('afit_balance_stale') }}
+                <a href="#" @click.prevent="fetchUserData()">{{ $t('afit_balance_retry') }}</a>
+              </small>
             </div>
             <div class="wallet-stat-card">
               <span>{{ cur_bchain }} {{ $t('POWER') }}</span>

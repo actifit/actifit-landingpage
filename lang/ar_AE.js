@@ -1051,6 +1051,7 @@ module.exports = {
   gadget_buy_partial_delivery: 'تم تسليم بعض العناصر، لكن تعذّر تسليم الباقي. لم يتم خصم ثمن العناصر التي لم تُسلَّم.',
   gadget_buy_partial_check_balance: 'تم تسليم بعض العناصر ولم يتم تسليم البعض الآخر. يرجى التحقق من رصيد AFIT الخاص بك؛ وإذا تم خصم ثمن عناصر لم تستلمها، فتواصل مع الدعم.',
   afit_balance_unavailable: 'تعذّر تحميل رصيد AFIT الخاص بك، لذا لم يتم احتسابه في الإجماليات.',
+  afit_balance_stale: 'تعذر تحديث رصيد AFIT الخاص بك وقد لا يكون محدثًا.',
   afit_balance_retry: 'إعادة المحاولة',
   error_operation_active_key: 'خطأ في تنفيذ الإجراء! تأكد من أنك تستخدم مفتاحك النشط',
   move_afitx_se_he: 'نقل AFITX من S-E إلى H-E',

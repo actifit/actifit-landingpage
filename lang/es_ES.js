@@ -1048,6 +1048,7 @@ module.exports = {
   gadget_buy_partial_delivery: 'Algunos artículos se entregaron, pero el resto no se pudo entregar. No se te ha cobrado por los artículos no entregados.',
   gadget_buy_partial_check_balance: 'Algunos artículos se entregaron y otros no. Revisa tu saldo de AFIT; si se te cobró por artículos que no recibiste, contacta con soporte.',
   afit_balance_unavailable: 'No se pudo cargar tu saldo de AFIT, por lo que no está incluido en los totales.',
+  afit_balance_stale: 'No se pudo actualizar tu saldo de AFIT y puede estar desactualizado.',
   afit_balance_retry: 'Reintentar',
   error_operation_active_key: '¡Error al realizar la acción! Asegúrate de que estás usando tu clave activa',
   move_afitx_se_he: 'Mover AFITX S-E a H-E',

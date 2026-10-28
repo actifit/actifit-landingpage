@@ -1051,6 +1051,7 @@ module.exports = {
   gadget_buy_partial_delivery: 'Certains articles ont été livrés, mais pas les autres. Les articles non livrés ne vous ont pas été facturés.',
   gadget_buy_partial_check_balance: 'Certains articles ont été livrés et d\'autres non. Veuillez vérifier votre solde AFIT ; si des articles non reçus vous ont été facturés, contactez le support.',
   afit_balance_unavailable: 'Votre solde AFIT n\'a pas pu être chargé, il n\'est donc pas inclus dans les totaux.',
+  afit_balance_stale: "Votre solde AFIT n'a pas pu être actualisé et n'est peut-être plus à jour.",
   afit_balance_retry: 'Réessayer',
   error_operation_active_key: 'Erreur lors de l\'exécution de l\'action ! Assurez-vous d\'utiliser votre clé active',
   move_afitx_se_he: 'Déplacer AFITX S-E vers H-E',

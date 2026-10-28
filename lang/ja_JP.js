@@ -1055,6 +1055,7 @@ module.exports = {
   gadget_buy_partial_delivery: '一部のアイテムは配送されましたが、残りは配送できませんでした。配送されなかったアイテムの料金は請求されていません。',
   gadget_buy_partial_check_balance: '一部のアイテムは配送されましたが、配送されなかったアイテムもあります。AFIT残高をご確認ください。受け取っていないアイテムの料金が請求されている場合は、サポートにお問い合わせください。',
   afit_balance_unavailable: 'AFIT残高を読み込めなかったため、合計には含まれていません。',
+  afit_balance_stale: 'AFIT残高を更新できませんでした。最新ではない可能性があります。',
   afit_balance_retry: '再試行',
   error_operation_active_key: 'アクションの実行中にエラーが発生しました！アクティブキーを使用していることを確認してください',
   move_afitx_se_he: 'AFITX S-EをH-Eに移動',

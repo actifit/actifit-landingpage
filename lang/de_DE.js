@@ -1051,6 +1051,7 @@ module.exports = {
   gadget_buy_partial_delivery: 'Einige Artikel wurden geliefert, der Rest konnte nicht geliefert werden. Für die nicht gelieferten Artikel wurde nichts abgebucht.',
   gadget_buy_partial_check_balance: 'Einige Artikel wurden geliefert, andere nicht. Bitte prüfen Sie Ihr AFIT-Guthaben; falls Ihnen Artikel berechnet wurden, die Sie nicht erhalten haben, wenden Sie sich an den Support.',
   afit_balance_unavailable: 'Ihr AFIT-Guthaben konnte nicht geladen werden und ist daher nicht in den Summen enthalten.',
+  afit_balance_stale: 'Dein AFIT-Guthaben konnte nicht aktualisiert werden und ist möglicherweise veraltet.',
   afit_balance_retry: 'Erneut versuchen',
   error_operation_active_key: 'Fehler bei der Ausführung der Aktion! Stellen Sie sicher, dass Sie Ihren aktiven Schlüssel verwenden',
   move_afitx_se_he: 'AFITX S-E nach H-E verschieben',

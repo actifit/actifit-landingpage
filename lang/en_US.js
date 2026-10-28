@@ -1040,6 +1040,7 @@ module.exports = {
   gadget_buy_partial_delivery: 'Some items were delivered, but the rest could not be. You were not charged for the items that were not delivered.',
   gadget_buy_partial_check_balance: 'Some items were delivered and some were not. Please check your AFIT balance; if you were charged for items you didn\'t receive, contact support.',
   afit_balance_unavailable: 'Your AFIT balance could not be loaded, so it is not included in the totals.',
+  afit_balance_stale: 'Your AFIT balance could not be refreshed and may be out of date.',
   afit_balance_retry: 'Retry',
   error_operation_active_key: 'Error performing action! Make sure you are using your active key',
   move_afitx_se_he: 'Move AFITX S-E to H-E',
