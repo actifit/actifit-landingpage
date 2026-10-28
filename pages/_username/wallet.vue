@@ -1424,7 +1424,9 @@
             <div v-else-if="afitActivityMode == INIT_AFIT_TIP" class="action-box">
               <h3 class="pro-name">{{ $t('SEND_AFIT_TO_USER') }}</h3>
               <div class="text-center grid p-2">
-                <div>
+                <!-- /tipAccount is disabled server side (security maintenance after 2026-10-21) -->
+                <div v-if="!afitTipsAvailable" class="text-brand p-3">{{ $t('afit_tips_unavailable') }}</div>
+                <div v-else>
                   <div class="row">
                     <label for="tip-amount" class="w-25 p-2">{{ $t('Recipient') }}</label>
                     <input type="text" id="tip-recipient" name="tip-recipient" ref="tip-recipient"
@@ -1436,18 +1438,11 @@
                       class="form-control-lg w-50 p-2">
                   </div>
                   <div class="row">
-                    <label for="funds-pass" class="w-25 p-2">{{ $t('Funds_Password') }}</label>
-                    <input type="password" id="funds-pass" name="funds-pass" ref="funds-pass"
-                      class="form-control-lg w-50 p-2">
-                    <!-- No create/reset buttons: funds passwords can no longer be set or reset
-                         (treated as compromised since 2026-10-21; those routes are disabled). -->
-                  </div>
-                  <div class="row">
                     <div class="col-2"></div>
                     <div class="col-8">{{ $t('tip_note') }}</div>
                   </div>
                   <div class="row">
-                    <div v-if="tipError" v-html="tipError" class="m-3" @click="handleSetFundsPassLink"></div>
+                    <div v-if="tipError" class="m-3">{{ tipError }}</div>
                   </div>
 
                   <div class="row">
@@ -1473,30 +1468,26 @@
 
                 <div>{{ $t('move_afit_se_notice2') }}</div>
                 <div>{{ $t('move_afit_se_notice3') }}</div>
+                <!-- starting / adjusting a move (/initiateAFITMoveSE) is disabled server side;
+                     cancelling a pending one still works, authorised by the login session -->
+                <div v-if="!afitMoveToHeAvailable" class="text-brand p-3">{{ $t('afit_move_he_unavailable') }}</div>
                 <div>
-                  <div class="row">
+                  <div class="row" v-if="afitMoveToHeAvailable">
                     <div class="w-25 p-2 text-right">{{ $t('Amount_To_Move_Daily') }}</div>
                     <input type="number" id="afit-move-to-se" name="afit-move-to-se" ref="afit-move-to-se"
                       class="form-control-lg w-50 p-2">
                   </div>
-                  <div class="row">
-                    <label for="move-funds-pass" class="w-25 p-2 text-right">{{ $t('Funds_Password') }}</label>
-                    <input type="password" id="move-funds-pass" name="move-funds-pass" ref="move-funds-pass"
-                      class="form-control-lg w-50 p-2">
-                    <!-- No create/reset buttons: funds passwords can no longer be set or reset
-                         (treated as compromised since 2026-10-21; those routes are disabled). -->
-                  </div>
-                  <div class="text-brand text-center" v-if="afit_se_move_error_proceeding"
-                    v-html="afit_se_move_err_msg" @click="handleSetFundsPassLink">
+                  <div class="text-brand text-center" v-if="afit_se_move_error_proceeding">
+                    {{ afit_se_move_err_msg }}
                   </div>
                   <div class="row" v-if="userPDAfit.user">
                     <div class="w-25"></div>
-                    <button v-on:click="proceedMoveToSE" class="btn btn-brand border wallet-action-proceed">{{ $t('adjust_amount')
+                    <button v-if="afitMoveToHeAvailable" v-on:click="proceedMoveToSE" class="btn btn-brand border wallet-action-proceed">{{ $t('adjust_amount')
                     }}</button>
                     <button v-on:click="cancelMoveToSE" class="btn btn-brand border wallet-action-proceed">{{
                       $t('Cancel_Transfer') }}</button>
                   </div>
-                  <div class="row" v-else>
+                  <div class="row" v-else-if="afitMoveToHeAvailable">
                     <div class="w-25"></div>
                     <button v-on:click="proceedMoveToSE" class="btn btn-brand border wallet-action-proceed">{{ $t('Proceed')
                     }}</button>
@@ -1513,7 +1504,9 @@
             </div>
 
             <div v-else-if="afitActivityMode == BUY_AFIT_STEEM">
-              <div class="text-center grid p-2">
+              <!-- /confirmBuyAction is disabled server side (security maintenance after 2026-10-21) -->
+              <div v-if="!buyAfitAvailable" class="text-center text-brand p-3">{{ $t('buy_afit_unavailable') }}</div>
+              <div v-else class="text-center grid p-2">
                 <div class="row">
                   <span class="text-brand text-center w-100" v-html="$t('notice_buy_afit')">
                   </span>
@@ -1932,6 +1925,7 @@ import Web3 from 'web3';
 
 import badActors from '~/utils/BadActorList';
 import { requestAfitExchange, exchangeErrorText } from '~/utils/afitExchange';
+import { AFIT_TIPS_AVAILABLE, AFIT_MOVE_TO_HE_AVAILABLE, BUY_AFIT_AVAILABLE, requestCancelAfitMove } from '~/utils/sessionActions';
 import AutocompleteUsernameInput from '~/components/AutocompleteUsernameInput';
 
 let web3 = new Web3(process.env.web3Node);
@@ -2027,30 +2021,23 @@ export default {
       fundActivityMode: 0,
       afitActivityMode: 0,
       transferType: 'HIVE',
-      transferTypePass: 'HIVE',
       error_proceeding: '',
       error_msg: '',
-      pass_error_proceeding: '',
-      pass_error_msg: '',
       afit_se_move_error_proceeding: '',
       performingSwap: false,
       error_swap: '',
       swapResult: '',
-      checkingFunds: false,
       movingFunds: false,
       movingAFIT: false,
       movingAFITX: false,
       checkingBought: false,
       transConfirmed: false,
-      target_exchange_account: 'actifit.exchange',
       target_buy_account: 'actifit.buy',
       properties: '', //handles the Steem BC properties
-      userHasFundsPass: false, //holds value if user has proper funds pass or not yet
-      userFundsPassVerified: false, //holds value if user has verified funds pass or not yet
-      showFundsPass: false, //toggles plain/masked display of the funds password while setting it
-      settingPass: false,
-      verifyingPass: false,
-      errorSettingPass: '',
+      //disabled server side since the 2026-10-21 incident -> the panels show a note instead
+      afitTipsAvailable: AFIT_TIPS_AVAILABLE,
+      afitMoveToHeAvailable: AFIT_MOVE_TO_HE_AVAILABLE,
+      buyAfitAvailable: BUY_AFIT_AVAILABLE,
       screenWidth: 1200,
       afit_val_exchange: 50,
       afit_exch_matching_perc: 10,
@@ -3991,13 +3978,6 @@ export default {
         } catch (error) {
           console.log(error);
         }
-        //let's check if user already has a funds pass set
-        //cache:'no-store' so a just-completed verification isn't masked by a stale cached response
-        fetch(process.env.actiAppUrl + 'userHasFundsPassSet/' + this.displayUserData.name, { cache: 'no-store' }).then(
-          res => {
-            res.json().then(json => this.setUserPassStatus(json)).catch(e => console.log(e))
-          }).catch(e => console.log(e))
-
         //let's check if user has a pending AFIT tokens exchange
         fetch(process.env.actiAppUrl + 'userHasPendingTokenSwap/' + this.displayUserData.name).then(
           res => {
@@ -4168,7 +4148,6 @@ export default {
       }
     },
     fetchUserPendingRewards(tgtUser) {
-      //let's check if user already has a funds pass set
 
       fetch(process.env.actiAppUrl + 'pendingRewards/?user=' + tgtUser).then(
         res => {
@@ -4208,40 +4187,6 @@ export default {
       const p = parseFloat(_afitxPrice);
       if (!isNaN(p)) this.afitxBSCPrice = p;
       console.log('afitxBSCPrice' + this.afitxBSCPrice);
-    },
-    setUserPassStatus(result) {
-      //handles setting funds password status
-      const verified = !!(result && result.passVerified);
-      const hasPass = !!(result && result.hasFundsPass);
-
-      //set proper value for verified funds pass status
-      this.userFundsPassVerified = verified;
-
-      if (verified) {
-        //fully set up & verified -> move to step 3 and drop the pending marker
-        this.userHasFundsPass = true;
-        this.clearFundsPassPending();
-      } else {
-        //keep the user on step 2 while a set is pending verification, even if a
-        //background refresh (60s interval / user watcher) momentarily reports no
-        //record yet. Only an explicit reset returns them to step 1.
-        this.userHasFundsPass = hasPass || this.isFundsPassPending();
-      }
-    },
-    //pending marker is scoped to the logged-in account so it survives page reloads
-    fundsPassPendingKey() {
-      const name = (this.user && this.user.account && this.user.account.name)
-        || localStorage.getItem('std_login_name') || '';
-      return 'funds_pass_pending_' + name;
-    },
-    isFundsPassPending() {
-      try { return localStorage.getItem(this.fundsPassPendingKey()) === 'true'; } catch (e) { return false; }
-    },
-    markFundsPassPending() {
-      try { localStorage.setItem(this.fundsPassPendingKey(), 'true'); } catch (e) { /* ignore */ }
-    },
-    clearFundsPassPending() {
-      try { localStorage.removeItem(this.fundsPassPendingKey()); } catch (e) { /* ignore */ }
     },
     setUserTokenSwapStatus(result) {
       //handles setting user token swap status
@@ -5583,9 +5528,6 @@ export default {
         if (type == 'transfer') {
           note = 'Transfer completed successfully!';
         }
-        if (type == 'transfer-verify') {
-          note = 'Transfer completed. Verifying transaction.'
-        }
         if (type == 'cancel-savings-withdraw') {
           note = 'Savings withdrawal cancelled.'
         }
@@ -5617,30 +5559,6 @@ export default {
         this.fetchDelegations(true);
       } else if (type == 'transfer') {
         this.transferProcess = false;
-      } else if (type == 'transfer-verify') {
-        //also start verification process
-        let url = new URL(process.env.actiAppUrl + 'confirmPaymentPasswordVerify/' + '?bchain=' + this.cur_bchain);
-        //compile all needed data and send it along the request for processing
-        let params = {
-          from: this.user.account.name,
-        }
-        Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
-        try {
-          let res = await fetch(url);
-          let outcome = await res.json();
-          //if the payment was confirmed, advance to step 3 directly instead of
-          //relying on a follow-up status read that can race or be cache-stale
-          if (outcome && outcome.statusUpdated) {
-            this.userFundsPassVerified = true;
-            this.userHasFundsPass = true;
-            this.clearFundsPassPending();
-          }
-          //update user data according to result
-          this.fetchUserData();
-        } catch (err) {
-          console.error(err);
-        }
-        this.checkingFunds = false;
       } else if (type == 'transfer-bsc') {
         //res is HBD
         //extraAFITTrx is AFIT H-E
@@ -5765,17 +5683,6 @@ export default {
       this.curTokenAction = 0;
       this.scrollAfitAction();
     },
-    handleSetFundsPassLink(event) {
-      //error-hint messages are rendered via v-html, so their links can't use
-      //Vue directives. Delegate clicks here: if the "create password" hint link
-      //was clicked, open the funds-pass wizard in-page instead of navigating.
-      const link = event.target.closest('.set-funds-pass-link');
-      if (!link) {
-        return;
-      }
-      event.preventDefault();
-      this.exchangeAFITforSTEEM();
-    },
     moveAFITXseHE() {
       //set proper AFIT Activity Mode controlling the display
       /*if (this.afitActivityMode == this.MOVE_AFITX_SE_HE ){
@@ -5873,15 +5780,6 @@ export default {
       this.curTokenAction = 0;
       this.scrollAfitAction();
     },
-    passTransferTypeChange(e) {
-      //handles the drop down select option to ensure we have proper value
-      if (e.target.options.selectedIndex > -1) {
-        this.transferTypePass = e.target.options[e.target.options.selectedIndex].value;
-      }
-    },
-    setPasswordVal() {
-      this.$refs["funds-pass"].value = this.generatePassword(2);
-    },
     generatePassword(multip) {
       //generate random 11 characters password
       let passString = '';
@@ -5889,46 +5787,6 @@ export default {
         passString += Math.random().toString(36).substr(2, 13);
       }
       return passString;
-    },
-    async setFundsPass() {
-      //stores the password set by the user
-      this.settingPass = true;
-      this.errorSettingPass = '';
-      //ensure we have proper values
-      if (this.$refs["funds-pass"].value == '') {
-        this.errorSettingPass = this.$t('error_missing_funds_pass');
-        this.settingPass = false;
-        return;
-      }
-      //ensure user confirmed password
-      if (this.$refs["confirm-funds-pass"].value !== this.$refs["funds-pass"].value) {
-        this.errorSettingPass = this.$t('error_passwords_mismatch');
-        this.settingPass = false;
-        return;
-      }
-      let passVal = this.$refs['funds-pass'].value;
-      let setUrl = process.env.actiAppUrl + 'setUserFundsPass?user=' + this.user.account.name;
-      //silently refresh an expired keychain token and retry once if the token is rejected
-      let outcome = await this.withAuthRetry(() => this.postAuthed(setUrl, JSON.stringify({ pass: passVal })));
-      this.settingPass = false;
-      //only advance when the API actually persisted the record (status === 'Success').
-      //any other shape (e.g. {error}, or an auth rejection {success:false, message})
-      //must surface as an error instead of silently moving to step 2 with nothing saved.
-      if (outcome && outcome.status === 'Success') {
-        this.userHasFundsPass = true;
-        //remember the user is awaiting verification so background refreshes /
-        //page reloads keep them on step 2 instead of bouncing back to step 1
-        this.markFundsPassPending();
-      } else if (this.isAuthFailure(outcome)) {
-        //token was rejected and a silent keychain refresh didn't recover it -> ask to re-login
-        this.errorSettingPass = this.$t('session_expired_login_again');
-        console.error('setUserFundsPass failed (auth):', outcome);
-      } else {
-        //display whatever the API reported so the real cause is visible
-        this.errorSettingPass = (outcome && (outcome.error || outcome.message))
-          || this.$t('error_performing_operation');
-        console.error('setUserFundsPass failed:', outcome);
-      }
     },
     //POST a JSON body to an authenticated (checkHdrs) endpoint using the current session token
     async postAuthed(url, body) {
@@ -5941,18 +5799,6 @@ export default {
         return await res.json();
       } catch (e) {
         console.error('authed POST failed:', url, e);
-        return { error: this.$t('error_performing_operation') };
-      }
-    },
-    //GET an authenticated (checkHdrs) endpoint using the current session token
-    async getAuthed(url) {
-      try {
-        let res = await fetch(url, {
-          headers: { 'Content-Type': 'application/json', 'x-acti-token': 'Bearer ' + localStorage.getItem('access_token') },
-        });
-        return await res.json();
-      } catch (e) {
-        console.error('authed GET failed:', url, e);
         return { error: this.$t('error_performing_operation') };
       }
     },
@@ -6145,23 +5991,26 @@ export default {
       }
 
 
-      //make sure password is provided
-      //ensure user provided funds-pass
-      if (this.$refs["move-funds-pass"].value == '') {
-        this.afit_se_move_error_proceeding = true;
-        this.afit_se_move_err_msg = this.$t('error_missing_funds_pass') + ' <u><a href="#" class="set-funds-pass-link">' + this.$t('create_funds_pass') + '</a></u>';
-        return;
-      }
-
       this.initiateInProgress = true;
 
-      //proceed with tipping
-      let res = await fetch(process.env.actiAppUrl + 'cancelAFITMoveSE/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user: this.user.account.name, fundsPass: this.$refs["move-funds-pass"].value })
+      //authorised by the login session (the server cancels for the session user), no
+      //funds password; silently refresh + retry once if the keychain token expired.
+      //Keeps the HTTP status so a plain-text 429 reads as "too many attempts".
+      const sendCancel = () => requestCancelAfitMove({
+        apiUrl: process.env.actiAppUrl,
+        user: this.user.account.name,
+        sessionToken: localStorage.getItem('access_token')
       });
-      let outcome = await res.json();
+      let status = 0;
+      let outcome = {};
+      try {
+        ({ status, outcome } = await sendCancel());
+        if (this.isAuthFailure(outcome) && await this.ensureKeychainToken()) {
+          ({ status, outcome } = await sendCancel());
+        }
+      } catch (err) {
+        console.error('cancelAFITMoveSE failed:', err);
+      }
       if (outcome.status == 'Success') {
         let afitCancPDTransaction = { action: 'Cancel AFIT To S-E Power Down' };
         //store the transaction to Steem BC
@@ -6189,7 +6038,7 @@ export default {
 
       } else {
         this.afit_se_move_error_proceeding = true;
-        this.afit_se_move_err_msg = outcome.error;
+        this.afit_se_move_err_msg = exchangeErrorText(status, outcome, (k) => this.$t(k), (o) => this.$gateMessage(o));
       }
       this.initiateInProgress = false;
     },
@@ -6207,10 +6056,6 @@ export default {
         this.tipError = this.$t('Cannot_tip_self');
         return false;
       }
-      if (this.$refs["funds-pass"].value == '') {
-        this.tipError = this.$t('error_missing_funds_pass') + ' <u><a href="#" class="set-funds-pass-link">' + this.$t('create_funds_pass') + '</a></u>';
-        return;
-      }
       if (this.$refs["tip-amount"].value == '') {
         this.tipError = this.$t('amount_positive_int');
         return;
@@ -6221,8 +6066,9 @@ export default {
         return;
       }
       this.tipInProgress = true;
-      //proceed with tipping (silently refresh + retry if the keychain token expired)
-      let tipBody = JSON.stringify({ targetUser: this.$refs['tip-recipient'].value, amount: this.$refs["tip-amount"].value, fundsPass: this.$refs["funds-pass"].value });
+      //proceed with tipping, authorised by the login session (silently refresh + retry if
+      //the keychain token expired). The server has this disabled for now (afitTipsAvailable).
+      let tipBody = JSON.stringify({ targetUser: this.$refs['tip-recipient'].value, amount: this.$refs["tip-amount"].value });
       let outcome = await this.withAuthRetry(() => this.postAuthed(process.env.actiAppUrl + 'tipAccount/', tipBody));
       if (outcome.status == 'Success') {
         let tipTransaction = { action: 'Tip', amount: outcome.tipAmount, recipient: this.displayUser };
@@ -6270,12 +6116,6 @@ export default {
 
       let amount_to_powerdown = this.$refs["afit-move-to-se"].value.trim();
 
-      //ensure user provided funds-pass
-      if (this.$refs["move-funds-pass"].value == '') {
-        this.afit_se_move_error_proceeding = true;
-        this.afit_se_move_err_msg = this.$t('error_missing_funds_pass') + ' <u><a href="#" class="set-funds-pass-link">' + this.$t('create_funds_pass') + '</a></u>';
-        return;
-      }
       //ensure we have proper values
       if (isNaN(amount_to_powerdown) || parseFloat(amount_to_powerdown) < 0.1) {
         this.afit_se_move_error_proceeding = true;
@@ -6344,8 +6184,9 @@ export default {
       //otherwise we're good, let's register the move
 
 
-      //register the move (silently refresh + retry if the keychain token expired)
-      let moveBody = JSON.stringify({ amount: amount_to_powerdown, fundsPass: this.$refs["move-funds-pass"].value });
+      //register the move, authorised by the login session (silently refresh + retry if the
+      //keychain token expired). The server has this disabled for now (afitMoveToHeAvailable).
+      let moveBody = JSON.stringify({ amount: amount_to_powerdown });
       let outcome = await this.withAuthRetry(() => this.postAuthed(process.env.actiAppUrl + 'initiateAFITMoveSE/', moveBody));
       if (outcome.status == 'Success') {
         let afitPDTransaction = { action: 'AFIT To S-E Power Down', amount: amount_to_powerdown };
@@ -6718,7 +6559,7 @@ export default {
             console.log(response);
             //notify of success
             if (response.success && response.result.id){
-              //let's check if user already has a funds pass set
+              //register the AFIT transition for this transfer
             fetch(process.env.actiAppUrl+'proceedAfitTransition/?user='+this.user.account.name+'&txid='+response.result.id+'&amount='+amount_to_move+'&bchain='+(direction==1?'STEEM':'HIVE')).then(
               res => {res.json().then(json =>
                 {
@@ -6793,7 +6634,7 @@ export default {
 
         //proceed with moving tokens over to recipient
 
-        //let's check if user already has a funds pass set
+        //register the AFIT transition for this transfer
         fetch(process.env.actiAppUrl + 'proceedAfitTransition/?user=' + this.user.account.name + '&txid=' + tx.id + '&amount=' + amount_to_move + '&bchain=' + (direction == 1 ? 'STEEM' : 'HIVE')).then(
           res => {
             res.json().then(json => {
@@ -6939,7 +6780,7 @@ export default {
 
         //proceed with moving tokens over to recipient
 
-        //let's check if user already has a funds pass set
+        //register the AFITX transition for this transfer
         fetch(process.env.actiAppUrl + 'proceedAfitxTransition/?user=' + this.user.account.name + '&txid=' + tx.id + '&amount=' + amount_to_move + '&bchain=' + (direction == 1 ? 'STEEM' : 'HIVE')).then(
           res => {
             res.json().then(json => {
@@ -8381,174 +8222,6 @@ export default {
         this.movingFunds = false;
       }
     },
-    async speedUpVerify() {
-      //show the loader while we wait on the verification request to complete
-      this.checkingFunds = true;
-      let url = new URL(process.env.actiAppUrl + 'confirmPaymentPasswordVerify?from=' + this.user.account.name + '&bchain=' + this.cur_bchain);
-      let res = await fetch(url);
-      let outcome = await res.json();
-      console.log(outcome);
-      if (outcome.statusUpdated == true) {
-        //payment confirmed -> advance to step 3 directly
-        this.userFundsPassVerified = true;
-        this.userHasFundsPass = true;
-        this.clearFundsPassPending();
-      }/*else{
-				  this.$notify({
-					group: 'error',
-					text: this.$t('problem_reset_pass'),
-					position: 'top center'
-				  })
-			  }*/
-      //always refresh authoritative state (covers the already-verified case too)
-      this.fetchUserData();
-      this.checkingFunds = false;
-    },
-    async resetFundsPass() {
-      let confirmPopup = confirm(this.$t('Confirm_password_reset'));
-      if (!confirmPopup) {
-        return;
-      }
-      let url = new URL(process.env.actiAppUrl + 'resetFundsPass/?user=' + this.user.account.name);
-      //silently refresh + retry if the keychain token expired
-      let outcome = await this.withAuthRetry(() => this.getAuthed(url));
-      console.log(outcome);
-      if (outcome.status == 'success') {
-        //explicit reset -> drop the pending marker and return to step 1
-        this.clearFundsPassPending();
-        this.userHasFundsPass = false;
-        this.userFundsPassVerified = false;
-        this.$notify({
-          group: 'success',
-          text: this.$t('pass_reset_successfully'),
-          position: 'top center'
-        })
-        console.log(outcome.error);
-        this.fetchUserData();
-      } else {
-        this.$notify({
-          group: 'error',
-          text: this.isAuthFailure(outcome) ? this.$t('session_expired_login_again') : this.$t('problem_reset_pass'),
-          position: 'top center'
-        })
-      }
-    },
-    async proceedVerifyPass() {
-      //handles checking for proper confirmation of account via STEEM transfer
-      this.checkingFunds = true
-      //function handles the actual processing of the transfer
-      this.pass_error_proceeding = false;
-      this.pass_error_msg = '';
-      //ensure we have proper values
-      if (isNaN(this.$refs["pass-transfer-amount"].value.trim()) || this.$refs["pass-transfer-amount"].value < 1) {
-        this.error_proceeding = true;
-        this.error_msg = this.$t('min_amount_1_HIVE_HBD');
-        this.checkingFunds = false;
-        this.$notify({
-          group: 'error',
-          text: this.$t('min_amount_1_HIVE_HBD'),
-          position: 'top center'
-        })
-        return;
-      }
-
-      if (!localStorage.getItem('std_login')) {
-        //https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
-        var link = this.$steemconnect.sign('transfer', {
-          from: this.user.account.name,
-          to: this.target_exchange_account,
-          amount: this.$refs["pass-transfer-amount"].value + ' ' + this.transferTypePass,
-          memo: '',//no memo needed
-          auto_return: true,
-        });
-
-        //launch the SC window
-        window.open(link);
-
-        //also start verification process
-        let url = new URL(process.env.actiAppUrl + 'confirmPaymentPasswordVerify/' + '?bchain=' + this.cur_bchain);
-        //compile all needed data and send it along the request for processing
-        let params = {
-          from: this.user.account.name,
-        }
-        Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
-        try {
-          let res = await fetch(url);
-          let outcome = await res.json();
-          //update user data according to result
-          this.fetchUserData();
-        } catch (err) {
-          console.error(err);
-        }
-        this.checkingFunds = false;
-
-      } else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) {
-        return new Promise((resolve) => {
-          window.hive_keychain.requestTransfer(this.user.account.name, this.target_exchange_account, parseFloat(this.$refs["pass-transfer-amount"].value).toFixed(3), '', this.transferTypePass, (response) => {
-            console.log(response);
-            this.confirmCompletion('transfer-verify', this.$refs["pass-transfer-amount"].value, response)
-          }, true);
-        });
-
-      } else if (this.isHiveauthLogin) {
-        let opname = 'transfer';
-        let params = {
-          "from": this.user.account.name,
-          "to": this.target_exchange_account,
-          "amount": parseFloat(this.$refs["pass-transfer-amount"].value).toFixed(3) + ' ' + this.transferTypePass,
-          "memo": ""
-        };
-        let res = await this.processTrxFunc(opname, params, true);
-
-        if (res.success) {
-          this.confirmCompletion('transfer-verify', this.$refs["pass-transfer-amount"].value, res)
-        }
-
-      } else {
-
-        if (this.$refs["p-ac-key-funds-ver"].value == '') {
-          this.error_proceeding = true;
-          this.error_msg = this.$t('all_fields_required');
-          this.checkingFunds = false;
-          this.$notify({
-            group: 'error',
-            text: this.$t('all_fields_required'),
-            position: 'top center'
-          })
-          return;
-        }
-
-
-        let confirmPopup = confirm(this.$t('Confirm_verf_transfer').replace('_AMOUNT_', this.$refs["pass-transfer-amount"].value).replace('_CURR_', this.transferTypePass));
-        if (!confirmPopup) {
-          this.checkingFunds = false;
-          return;
-        }
-
-        let chainLnk = this.setProperNode();
-        console.log('perform transfer');
-        //console.log(this.$refs["p-ac-key-funds-ver"].value);
-        //transferToVesting(wif, from, to, amount)
-        let res = await chainLnk.broadcast.transferAsync(this.$refs["p-ac-key-funds-ver"].value, this.user.account.name, this.target_exchange_account, parseFloat(this.$refs["pass-transfer-amount"].value).toFixed(3) + ' ' + this.transferTypePass, '').then(
-          res => this.confirmCompletion('transfer-verify', this.$refs["pass-transfer-amount"].value, res)
-        ).catch(err => {
-          console.log(err);
-          this.$notify({
-            group: 'error',
-            text: this.$t('error_operation_active_key'),
-            position: 'top center'
-          })
-          this.error_proceeding = true;
-          this.error_msg = this.$t('error_operation_active_key');
-          this.checkingFunds = false;
-        });
-
-        /*steem.broadcast.claimRewardBalanceAsync(this.user.account.name,this.claimSTEEM, this.claimSBD, this.claimSP).then(
-          res => ).catch(err=>console.log(err));*/
-      }
-
-
-    },
     async proceedBuyAFIT() {
       //function handles the actual processing of the buy event
       this.checkingBought = true;
@@ -8732,7 +8405,6 @@ export default {
           this.cur_bchain = localStorage.getItem('cur_bchain');
         }
         this.transferType = this.cur_bchain;
-        this.transferTypePass = this.cur_bchain;
 
         steem.api.setOptions({ url: process.env.steemApiNode });
         if (process.env.hiveTestNetOn) {
@@ -8745,11 +8417,6 @@ export default {
 
         const chainLnk = this.setProperNode();
         this.$store.dispatch('steemconnect/login');
-        //restore the step-2 wizard state before the first fetch so a page reload
-        //while awaiting verification doesn't flash/reset back to step 1
-        if (this.isFundsPassPending()) {
-          this.userHasFundsPass = true;
-        }
         await this.fetchUserData(); // This can now be called safely.
 
         try {
@@ -8807,6 +8474,8 @@ export default {
         if (this.$route.query.action === 'buy_afit') {
           this.afitActivityMode = this.BUY_AFIT_STEEM;
         } else if (this.$route.query.action === 'set_funds_pass') {
+          //funds passwords are retired; old links land on the AFIT exchange, which now
+          //uses the login session instead
           this.afitActivityMode = this.EXCHANGE_AFIT_STEEM;
         } else if (this.$route.query.action === 'delegate') {
           this.afitActivityMode = 0;

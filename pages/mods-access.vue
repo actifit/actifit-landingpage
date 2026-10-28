@@ -6,6 +6,9 @@
 		<div class="text-center">
 			<h1 class="h2">Moderator Interface</h1>
 		</div>
+
+		<!-- /modAction is disabled server side (security maintenance after 2026-10-21) -->
+		<div v-if="!modActionsAvailable" class="alert alert-warning text-center m-2">{{ $t('mod_actions_unavailable') }}</div>
 		
 		<div class="col-md-12 row-sep m-2">
 			<h3 v-if="week==1">Moderator Current Week Stats</h3>
@@ -37,9 +40,10 @@
 		
 		<div class="col-md-12 row-sep m-2">
 			<h3>{{ $t('Hey') }} {{ user.account.name }}!</h3>
-			<b>INPUT YOUR FUNDS PASSWORD</b><input type="password" name="fundsPass" ref="fundsPass">
 		</div>
 		
+		<!-- moderator actions POST /modAction, which is disabled server side: hide them -->
+		<template v-if="modActionsAvailable">
 		<div class="col-md-12 row-sep m-2">
 			<div class="row text-center action-title">VERIFY NEWBIE</div>
 			<div :action='this.actiapimod' method="get" class="p-2">
@@ -92,15 +96,7 @@
 				<div name="rewardresult" ref="rewardresult" class="text-brand" />
 			</div>
 		</div>
-		
-		<div class="col-md-12 row-sep m-2">
-			<div class="text-center row action-title">RESET FUNDS PASSWORD</div>
-			<div :action='this.actiapimod' method="get" class="p-2">
-			  User: <input type="text" id="resetuser" name="resetuser" ref="resetuser" value=""><br>
-			  <input type="button" value="RESET PASSWORD" v-on:click="processAction('resetpass')">
-			  <div name="resetpassresult" ref="resetpassresult" class="text-brand" />
-			</div>
-		</div>
+		</template>
 		
 		<div class="col-md-12 row-sep m-2" v-if="isAdmin">
 			<div class="text-center row action-title">MARKET ORDERS</div>
@@ -206,14 +202,6 @@
 			</table>
 		</div>
 		
-		<!--<div class="col-md-12 row-sep m-2">
-			<div class="text-center row action-title">VERIFY FUNDS PASSWORD</div>
-			<div :action='this.actiapimod' method="get" class="p-2">
-			  User: <input type="text" id="from" name="from" ref="from" value=""><br>
-			  <input type="button" value="VERIFY PASSWORD" v-on:click="processAction('verifypass')">
-			  <div name="verifypassresult" ref="verifypassresult" class="text-brand" />
-			</div>
-		</div>-->
     </div>
 	
 	<div :class="smallScreenClasses" class="container mt-5 pb-5 pt-5" v-else>
@@ -246,6 +234,7 @@
   import Footer from '~/components/Footer'
 
   import { mapGetters } from 'vuex'
+  import { MOD_ACTIONS_AVAILABLE } from '~/utils/sessionActions'
 
   export default {
 	head () {
@@ -279,6 +268,7 @@
 		week: 1,
 		purchaseOrders: [],
 		isAdmin: false,
+		modActionsAvailable: MOD_ACTIONS_AVAILABLE,
 	  }
 	},
     computed: {
@@ -401,13 +391,14 @@
 		}
 	  },
 	  async processAction (targetAction){
+		//the forms are hidden while /modAction is disabled; never send it meanwhile
+		if (!this.modActionsAvailable) return;
 		
 		let url = new URL(this.actiapimod);
 		//compile all needed data and send it along the request for processing
 		let params = {
 			moderator: this.user.account.name,
 			targetAction: targetAction,
-			fundsPass: this.$refs['fundsPass'].value.trim(),
 		};
 		switch(targetAction){
 		
@@ -423,13 +414,6 @@
 						params.fullurl = this.$refs['fullurl'].value.trim();
 						params.power = this.$refs['power'].value.trim();
 						break;
-			case 'resetpass':
-						params.resetuser = this.$refs['resetuser'].value.trim();
-						break;
-		
-			case 'verifypass':
-						params.from = this.$refs['from'].value.trim();
-						break;
 			case 'verifynewbie':
 						params.account = this.$refs['newbieaccount'].value.trim();
 						params.verif_link = this.$refs['verif_link'].value.trim();
@@ -442,12 +426,13 @@
 		}
 		
 		try{
+			//sent with the login session, no funds password (the route is disabled for now)
 			let res = await fetch(url, {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
+				headers: { 'Content-Type': 'application/json', 'x-acti-token': 'Bearer ' + localStorage.getItem('access_token') },
 				body: JSON.stringify(params),
 			});
-			let outcome = await res.json();
+			let outcome = await res.json().catch(() => ({ error: this.$t('error_performing_operation') }));
 			console.log(outcome);
 			let display = outcome;
 			if (outcome.error){
