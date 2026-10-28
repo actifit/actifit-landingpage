@@ -94,7 +94,7 @@
   import hive from '@hiveio/hive-js'
   
   import BuyOptionsModal from '~/components/BuyOptionsModal'
-  import { gadgetBuyErrorText } from '~/utils/gadgetErrors'
+  import { gadgetBuyErrorText, cartAfterPartialDelivery } from '~/utils/gadgetErrors'
 
   export default {
      props: ['afitPrice'],
@@ -617,9 +617,12 @@
 				this.errorProceed = gadgetBuyErrorText(outcome, (k) => this.$t(k), (o) => this.$gateMessage(o));
 				console.error(outcome);
 				if (Array.isArray(outcome && outcome.delivered) && outcome.delivered.length > 0){
-					//some items were delivered (and charged): refresh balance, stock and the cart
+					//the delivered items are paid for: take them out of the cart, or a retry would
+					//buy (and charge) them again
+					this.$store.commit('setCartEntries', cartAfterPartialDelivery(this.cartEntries, outcome.delivered));
 					this.$store.dispatch('fetchUserTokens');
 					this.$store.dispatch('fetchProducts');
+					this.$store.dispatch('fetchUserGadgetStats');
 					this.$emit('refresh-tickets-multi');
 				}
 			}else{
@@ -649,6 +652,8 @@
 		
 		}catch(err){
 			console.error(err);
+			//e.g. a reply that is not JSON: say something rather than nothing
+			this.errorProceed = this.$t('error_performing_operation');
 			//this.checkingFunds = false;
 		}
 		this.buyInProgress = false;

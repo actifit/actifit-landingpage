@@ -29,7 +29,11 @@
             <div class="wallet-stat-card">
               <span>{{ $t('AFIT_Token') }}</span>
               <strong>{{ formattedUserAfit }}</strong>
-              <small>${{ afitValueUSD }}</small>
+              <small>{{ afitBalanceKnown ? '$' + afitValueUSD : '—' }}</small>
+              <small v-if="!afitBalanceKnown && tokensLoadFailed" class="text-danger" role="alert">
+                {{ $t('afit_balance_unavailable') }}
+                <a href="#" @click.prevent="fetchUserData()">{{ $t('afit_balance_retry') }}</a>
+              </small>
             </div>
             <div class="wallet-stat-card">
               <span>{{ cur_bchain }} {{ $t('POWER') }}</span>
@@ -141,7 +145,7 @@
             <div class="col-2 text-right wallet-token-balance" :data-label="$t('Available')">{{ formattedUserAfit }}</div>
             <div class="col-2 text-right wallet-token-staked" :data-label="$t('Staked')">-</div>
             <div class="col-lg-1 col-2 text-right wallet-token-savings" :data-label="$t('Savings')">-</div>
-            <div class="col-1 col-lg-2 text-right break-val wallet-token-usd" :data-label="$t('in_usd')">${{ this.afitValueUSD }}</div>
+            <div class="col-1 col-lg-2 text-right break-val wallet-token-usd" :data-label="$t('in_usd')">{{ afitBalanceKnown ? '$' + afitValueUSD : '—' }}</div>
             <div class="col-lg-2 col-1 token_actions wallet-token-actions" v-if="!nonAuthUser">
               <span class="btn btn-brand p-1" v-on:click="refreshBalance()">
                 <i class="fas fa-solid fa-history" :title="$t('Refresh_balance')" />
@@ -2166,10 +2170,13 @@ export default {
       walletInitialized: false, // true once initWallet() has run (guards double-init)
       mountedDone: false, // true after mounted() finishes — lets the user watcher tell a post-mount login from the initial load
       profImgUrl: process.env.hiveImgUrl,
-      userTokensWallet: 0,
-      // the AFIT balance fetch has finished (success or failure). Not `userTokensWallet >= 0`:
-      // a balance can legitimately be negative and must still show the wallet.
+      // null = not known yet (never loaded, or the load failed). A balance can legitimately
+      // be negative, so it is never used as a "loading" marker.
+      userTokensWallet: null,
+      // the AFIT balance fetch has finished (success or failure)
       tokensLoaded: false,
+      // the last AFIT balance fetch failed; a previously loaded balance is kept
+      tokensLoadFailed: false,
       badActors: badActors,
       badActorWarning: false,
       hiveTransactions: [],
@@ -2342,7 +2349,12 @@ export default {
     isStdLogin() {
       return localStorage.getItem('std_login')
     },
+    afitBalanceKnown() {
+      return this.userTokensWallet !== null;
+    },
     afitValueUSD() {
+      // an unknown AFIT balance counts as 0 in the totals (the card says it is not included)
+      if (!this.afitBalanceKnown) return '0';
       return this.numberFormat(parseFloat(this.userTokensWallet) * this.afitPrice, 2);
     },
     afitBSCValueUSD() {
@@ -2375,6 +2387,7 @@ export default {
       return this.numberFormat(this.totalAccountValueSteem, 3) + ' ' + this.cur_bchain;
     },
     formattedUserAfit() {
+      if (!this.afitBalanceKnown) return '— AFIT';
       return this.numberFormat((parseFloat(this.userTokensWallet) + parseFloat(this.userAddedTokens)).toFixed(3), 3) + " AFIT";
     },
     formattedUserAfitSE() {
@@ -3695,7 +3708,7 @@ export default {
         this.totalAccountValue += (this.afitBSCValueUSD / baseCurrency);
         this.totalAccountValue += (this.afitxBSCValueUSD / baseCurrency);
 
-        this.detailCalculation += this.userTokensWallet + ' AFIT x ' + this.numberFormat((this.afitPrice / baseCurrency), 4) + ' AFIT/' + this.cur_bchain + ' = ' + this.numberFormat(afitCoreVal, 4) + ' ' + this.cur_bchain + '<br/>';
+        this.detailCalculation += (this.afitBalanceKnown ? Number(this.userTokensWallet).toFixed(3) : '—') + ' AFIT x ' + this.numberFormat((this.afitPrice / baseCurrency), 4) + ' AFIT/' + this.cur_bchain + ' = ' + this.numberFormat(afitCoreVal, 4) + ' ' + this.cur_bchain + '<br/>';
 
         let par = this;
         const availableMetrics = Array.isArray(this.tokenMetrics) ? this.tokenMetrics : [];
@@ -3976,15 +3989,21 @@ export default {
 
         // This redundant assignment is now removed. The `mounted` hook handles setting `displayUserData`.
 
+        // a failed fetch (network, 5xx, {error} body) never shows 0 and never overwrites a
+        // balance loaded earlier
+        let tokens = NaN;
         try {
-          const tokens = parseFloat(await this.$store.dispatch('fetchUserTokensReturn', this.displayUser, false));
-          this.userTokensWallet = Number.isFinite(tokens) ? tokens : 0;
+          tokens = parseFloat(await this.$store.dispatch('fetchUserTokensReturn', this.displayUser, false));
         } catch (err) {
           console.error('Error fetching AFIT balance:', err);
-          this.userTokensWallet = 0;
-        } finally {
-          this.tokensLoaded = true;
         }
+        if (Number.isFinite(tokens)) {
+          this.userTokensWallet = tokens;
+          this.tokensLoadFailed = false;
+        } else {
+          this.tokensLoadFailed = true;
+        }
+        this.tokensLoaded = true;
 
         this.$store.dispatch('fetchUserTokens')
         this.$store.dispatch('fetchTransactions', this.displayUser)
@@ -6050,7 +6069,7 @@ export default {
         return;
       }
       //check if user has enough funds
-      if (parseFloat(this.$refs["tip-amount"].value) > parseFloat(this.userTokensWallet)) {
+      if (!(parseFloat(this.$refs["tip-amount"].value) <= parseFloat(this.userTokensWallet))) {
         this.tipError = this.$t('amount_above_balance');
         return;
       }
@@ -6116,7 +6135,7 @@ export default {
       //console.log(amount_to_powerdown);
 
       //ensure user is powering down value he has
-      if (amount_to_powerdown > parseFloat(this.userTokensWallet)) {
+      if (!(parseFloat(amount_to_powerdown) <= parseFloat(this.userTokensWallet))) {
         this.afit_se_move_error_proceeding = true;
         this.afit_se_move_err_msg = this.$t('max_amount_AFIT_power_SE');
         //this.movingFunds = false;
@@ -8272,7 +8291,7 @@ export default {
       this.error_swap = '';
       this.swapResult = '';
       this.buyMore = false;
-      if (this.userTokensWallet < this.min_tokens_required) {
+      if (!(this.userTokensWallet >= this.min_tokens_required)) {
         this.error_swap = this.$t('need_at_least') + this.numberFormat(this.min_tokens_required, 2) + this.$t('afit_tokens_to_exchange');
         this.performingSwap = false;
         this.buyMore = true;

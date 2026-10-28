@@ -2861,6 +2861,8 @@ export default {
         } //this.checkingFunds=false; //this.resultReturned=true;
       } catch (err) {
         console.error(err);
+        // e.g. a reply that is not JSON: say something rather than nothing
+        this.errorProceed = this.$t('error_performing_operation');
       }
       //this.checkingFunds=false; }
     },

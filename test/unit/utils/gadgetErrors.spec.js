@@ -1,6 +1,6 @@
 // Gadget / product buy failures: actifit-bot's specific reasons map to our own
 // translated text; unknown text falls back to the generic error (utils/gadgetErrors.js).
-import { gadgetBuyErrorText, AFIT_BUSY_ERROR } from '~/utils/gadgetErrors'
+import { gadgetBuyErrorText, AFIT_BUSY_ERROR, cartAfterPartialDelivery } from '~/utils/gadgetErrors'
 
 const t = (k) => '[' + k + ']'
 const gate = (o) => (o && ['KEY_ROTATION_REQUIRED', 'KEY_ROTATION_HOLD', 'TRY_AGAIN'].includes(o.code) ? o.message : null)
@@ -23,9 +23,13 @@ describe('gadgetBuyErrorText', () => {
     }
   })
 
-  it('reports a partial multi-buy delivery (the undelivered items were refunded)', () => {
-    expect(text({ error: 'Error performing buy action. DB storing issue', delivered: ['a', 'b'] }))
+  it('a partial multi-buy says "not charged" only when the server confirms the refund', () => {
+    expect(text({ error: 'Error performing buy action. DB storing issue', delivered: ['a', 'b'], refunded: true }))
       .toBe('[gadget_buy_partial_delivery]')
+    // today's server sends no `refunded`; a failed give-back is silent, so tell the user to check
+    expect(text({ error: 'Error performing buy action. DB storing issue', delivered: ['a', 'b'] }))
+      .toBe('[gadget_buy_partial_check_balance]')
+    expect(text({ error: 'x', delivered: ['a'], refunded: false })).toBe('[gadget_buy_partial_check_balance]')
   })
 
   it('a delivery failure with nothing delivered is the generic error', () => {
@@ -49,5 +53,24 @@ describe('gadgetBuyErrorText', () => {
 
   it('works without a gate function', () => {
     expect(gadgetBuyErrorText({ code: 'KEY_ROTATION_REQUIRED', message: 'x' }, t)).toBe('[error_performing_operation]')
+  })
+})
+
+describe('cartAfterPartialDelivery', () => {
+  const e = (id, n) => ({ _id: id, n })
+  it('drops the delivered items (the first N, in cart order) and keeps the rest', () => {
+    expect(cartAfterPartialDelivery([e('a'), e('b'), e('c')], ['a', 'b'])).toEqual([e('c')])
+  })
+  it('removes ONE entry per delivered id, so undelivered duplicates stay in the cart', () => {
+    const cart = [e('a', 1), e('a', 2), e('b', 3)]
+    expect(cartAfterPartialDelivery(cart, ['a'])).toEqual([e('a', 2), e('b', 3)])
+    expect(cart).toHaveLength(3) // not mutated
+  })
+  it('matches ids as strings and ignores ids not in the cart', () => {
+    expect(cartAfterPartialDelivery([e(5), e('x')], ['5', 'zz'])).toEqual([e('x')])
+  })
+  it('tolerates missing inputs', () => {
+    expect(cartAfterPartialDelivery(undefined, ['a'])).toEqual([])
+    expect(cartAfterPartialDelivery([e('a')], undefined)).toEqual([e('a')])
   })
 })
