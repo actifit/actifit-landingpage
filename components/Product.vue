@@ -286,7 +286,7 @@
 
     <div class="card-footer product-card-footer">
       <div v-if="product.type == 'real'">
-        <div class="buy-actions-block" v-if="!checkout_product && realProdBuyStatus">
+        <div class="buy-actions-block" v-if="!checkout_product && realProdBuyStatus && realProductPurchaseAvailable">
           <a class="btn btn-success book-button buy-cta" @click.prevent="prepareCheckout()"
             :class="productBuyColor">
             <span class="buy-cta-label">{{ $t('Buy_now') }}</span>
@@ -298,6 +298,8 @@
             </span>
           </a>
         </div>
+        <!-- /purchaseRealProduct is disabled server side for now: no Buy, no checkout form -->
+        <div v-else-if="!checkout_product && realProdBuyStatus" class="text-brand p-2">{{ $t('real_product_purchase_unavailable') }}</div>
         <div v-else-if="!checkout_product" class="pending-order-block">
           <span class="pending-order-text">{{ $t('pending_real_order_notification') }}</span>
           <div v-for="(entry, index) in pendingOrders" :key="index" :entry="entry" class="pending-order-entry">
@@ -405,13 +407,16 @@
         </div>
       </div>
 
-      <div v-else-if="!productBought && !this.errorProceed">
+      <div v-else-if="!productBought && !this.errorProceed && ebookPurchaseAvailable">
         <a class="btn btn-brand book-button buy-cta w-100" @click.prevent="buyNow()">
           <span class="buy-cta-label">{{ $t('Buy_now') }}</span>
           <span class="buy-cta-price">{{ numberFormat(this.item_price, 2) }}
             {{ this.item_currency }}<img class="token-logo-sm" src="/img/actifit_logo.png" alt=""></span>
         </a>
       </div>
+      <!-- ebook / service orders (/processBuyOrder) are disabled server side for now: say so
+           instead of a Buy that would sign a buy_product and then fail -->
+      <div v-else-if="!productBought && !ebookPurchaseAvailable" class="text-brand p-2">{{ $t('ebook_purchase_unavailable') }}</div>
       <div v-else>
         <!-- re-issued for the logged-in session (GET /reissueDownloadToken), no funds password -->
         <div v-if="!this.downloadAgainReady">
@@ -1672,7 +1677,7 @@ import hive from '@hiveio/hive-js'
 import BuyOptionsModal from '~/components/BuyOptionsModal'
 import { getProductPurchaseCurrencies } from '~/utils/marketPricing'
 import { getGadgetLevelClass } from '~/utils/marketCatalog'
-import { requestReissueDownloadToken, reissueErrorText, ebookDownloadHref } from '~/utils/sessionActions'
+import { requestReissueDownloadToken, reissueErrorText, ebookDownloadHref, EBOOK_PURCHASE_AVAILABLE, REAL_PRODUCT_PURCHASE_AVAILABLE } from '~/utils/sessionActions'
 
 
 //import VueLazyLoad from 'vue-lazyload'
@@ -1854,20 +1859,17 @@ export default {
       profImgUrl: process.env.steemImgUrl,
       minAfitBuyTicket: process.env.minAfitBuyEarnTicket,
       userActvKey: '',
-      userActvKeyHv: '',
-      afitBuyAmount: 1,
       userRlActvKey: '',
       prodRef: this,
       checkout_product: false,
+      //disabled server side since the 2026-10-21 incident (gadgets are unaffected)
+      ebookPurchaseAvailable: EBOOK_PURCHASE_AVAILABLE,
+      realProductPurchaseAvailable: REAL_PRODUCT_PURCHASE_AVAILABLE,
       buyer_country: '',
       order_quantity: 1,
       color_choice: (this.product.colorOptions ? this.product.colorOptions[0] : ''),
-      proceedBuyAFIT: false,
-      afit_buy_err_msg: '',
       transConfirmed: false,
       checkingBought: false,
-      buyAfitInProgress: false,
-      buyAfitConfirmed: false,
       galleryIndex: 0,
 
     }
@@ -1905,44 +1907,6 @@ export default {
           $('#loginModal').modal('show');
         }
       });
-    },
-    async buyAFITNow() {
-      this.afit_buy_err_msg = '';
-
-      if (!this.user) {
-        this.afit_buy_err_msg = this.$t('need_login_signup_notice_vote');
-        return;
-      }
-      if (this.afitBuyAmount < 0) { this.afit_buy_err_msg = this.$t('amount_positive_int'); return; } if
-        (this.getMatchingHIVE() < 0) { this.afit_buy_err_msg = this.$t('amount_positive_int'); return; } if
-        (this.userActvKeyHv == '') { this.afit_buy_err_msg = this.$t('all_fields_required'); return; } if
-        (this.user.account.balance.split(" ")[0] < this.getMatchingHIVE()) {
-        this.afit_buy_err_msg = this.$t('Not_enough_hive_balance_to_buy');
-        //console.log(this.errorProceed );
-        return;
-      }
-
-      this.buyAfitInProgress = true;
-      let hiveAmnt = this.getMatchingHIVE();
-      let afitAmnt = this.afitBuyAmount;
-
-      //show user confirm for purchasing product/service
-      let user_prmpt = this.$t('confirm_buy_afit_hive').replace('_AFIT_', afitAmnt).replace('_HIVE_', hiveAmnt);
-
-      let decis = confirm(user_prmpt);
-      if (!decis) {
-        this.buyAfitInProgress = false;
-        return;
-      }
-      //proceed with purchase transaction
-      let attempt = 1;
-      let memo = 'buy-afit:' + afitAmnt;
-      let res = await hive.broadcast.transferAsync(this.userActvKeyHv, this.user.account.name, process.env.actifitVault, hiveAmnt + ' ' + 'HIVE', memo).then(
-        res => this.confirmCompletion('buyAFITHive', hiveAmnt, res, attempt, afitAmnt)).catch(err => this.errorCompletion(err, 'buyAFITHive'));
-
-    },
-    getMatchingHIVE() {
-      return parseFloat(this.afitBuyAmount * this.afitPrice.afitHiveLastPrice).toFixed(3);
     },
     updateProdStat() {
       if (this.user && this.product.type == 'real' && Array.isArray(this.realProducts) && this.realProducts.length > 0) {
@@ -2471,16 +2435,6 @@ export default {
       this.errorProceed = this.$signingErrorText(res);
       //this.buyAttempt = false;
       this.buyInProgress = false;
-
-      if (type == 'buyAFITHive') {
-        this.buyAfitInProgress = false;
-        this.$notify({
-          group: 'error',
-          text: this.$t('error_performing_operation'),
-          position: 'top center'
-        })
-        //this.proceedBuyAFIT = false;
-      }
     },
     async confirmCompletion(type, amount, res, attempt, afitAmnt, op_json) {
       console.log(res)
@@ -2506,17 +2460,6 @@ export default {
           + res.ref_block_num + '/'
           + res.id + '/'
           + cur_bchain);
-
-        if (type == 'buyAFITHive') {
-          url = new URL(process.env.actiAppUrl + 'buyAfitHive/'
-            + this.user.account.name + '/'
-            + amount + '/'
-            + afitAmnt + '/'
-            + res.ref_block_num + '/'
-            + res.id + '/'
-            + 'HIVE');//for now only support HIVE
-          //:user/:amnt/:afitAmnt/:blockNo/:trxID/:bchain
-        }
 
 
         // Every browser-signed payment (Keychain, HiveAuth, typed key) passes op_json and
@@ -2544,49 +2487,36 @@ export default {
               return await this.confirmCompletion(type, amount, res, attempt + 1, afitAmnt, op_json);
             } else {
               console.error(outcome);
-              this.buyAfitInProgress = false;
               this.errorProceed = this.$notifyPaymentNotConfirmed(res.id);
             }
           } else {
             console.log('result IN');
             console.log(outcome);
-            if (type == 'buyAFITHive') {
-              //update user token count
-              this.$store.dispatch('fetchUserTokens')
-              this.$notify({
-                group: 'success',
-                text: this.$t('afit_bought').replace('_AFIT_', outcome.boughtAmnt),
-                position: 'top center'
-              })
-              this.buyAfitInProgress = false;
-              this.proceedBuyAFIT = false;
-            } else {
-              //update product status
-              this.checkProductBought();
+            //update product status
+            this.checkProductBought();
 
-              this.$store.dispatch('fetchProducts')
+            this.$store.dispatch('fetchProducts')
 
-              if (this.product.type == 'service') {
-                //display proper success message
-                this.errorProceed = this.$t('purchase_success_service_part1') + this.product.name + ' '
-                  + this.$t('With') + ' ' + this.product.provider_name + '.\n'
-                  + this.$t('purchase_success_service_part2') + '.\n'
-              } else if (this.product.type == 'ebook') {
-                //display proper success message
-                this.errorProceed = this.$t('purchase_success_ebook_part1') + ' ' + this.product.name + ' '
-                  + this.$t('By') + ' ' + this.product.provider_name + '.<br />';
-                this.firstDownloadHref = process.env.actiAppUrl
-                  + 'downEbook/'
-                  + '?user=' + this.user.account.name
-                  + '&product_id=' + this.product._id
-                  + '&access_token=' + outcome.access_token;
-              } else if (this.product.type == 'ingame') {
-                //display proper success message
-                this.errorProceed = this.$t('purchase_success_ingame_part1') + ' ' + this.product.name + ' '
-                  + this.$t('Level') + ' ' + this.product.level + '. ' + this.$t('purchase_success_ingame_part2') + '.<br />';
+            if (this.product.type == 'service') {
+              //display proper success message
+              this.errorProceed = this.$t('purchase_success_service_part1') + this.product.name + ' '
+                + this.$t('With') + ' ' + this.product.provider_name + '.\n'
+                + this.$t('purchase_success_service_part2') + '.\n'
+            } else if (this.product.type == 'ebook') {
+              //display proper success message
+              this.errorProceed = this.$t('purchase_success_ebook_part1') + ' ' + this.product.name + ' '
+                + this.$t('By') + ' ' + this.product.provider_name + '.<br />';
+              this.firstDownloadHref = process.env.actiAppUrl
+                + 'downEbook/'
+                + '?user=' + this.user.account.name
+                + '&product_id=' + this.product._id
+                + '&access_token=' + outcome.access_token;
+            } else if (this.product.type == 'ingame') {
+              //display proper success message
+              this.errorProceed = this.$t('purchase_success_ingame_part1') + ' ' + this.product.name + ' '
+                + this.$t('Level') + ' ' + this.product.level + '. ' + this.$t('purchase_success_ingame_part2') + '.<br />';
 
-                this.$emit('refresh-tickets');
-              }
+              this.$emit('refresh-tickets');
             }
           }
           //this.checkingFunds = false;
@@ -2599,7 +2529,6 @@ export default {
             console.log('>>>>try again');
             return await this.confirmCompletion(type, amount, res, attempt + 1, afitAmnt, op_json);
           } else {
-            this.buyAfitInProgress = false;
             this.errorProceed = this.$notifyPaymentNotConfirmed(res.id);
           }
           //this.checkingFunds = false;
@@ -2653,6 +2582,7 @@ export default {
       return properNode;
     },
     async prepareCheckout() {
+      if (!this.realProductPurchaseAvailable) return;
       this.buyAttempt = true;
       this.errorProceed = '';
       if (!this.user) {
@@ -2677,6 +2607,8 @@ export default {
       this.checkout_product = true;
     },
     async proceedBuyReal() {
+      //never sign the payment for an order /purchaseRealProduct cannot take
+      if (!this.realProductPurchaseAvailable) return;
       this.buyAttempt = true;
       this.errorProceed = '';
       this.buyInProgress = true;
@@ -2814,6 +2746,9 @@ export default {
       }
     },
     async buyNow() {
+      //ebook / service orders are disabled server side: return before any signing.
+      //Gadgets (ingame) are unaffected.
+      if (this.product.type != 'ingame' && !this.ebookPurchaseAvailable) return;
       this.buyAttempt = true;
       this.buyInProgress = true;
       this.errorProceed = '';

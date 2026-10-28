@@ -12,6 +12,10 @@
           <p class="signup-social-proof"><i class="fas fa-users text-brand mr-1"></i>{{ $t('signup.social_proof') }}</p>
         </div>
 
+        <!-- Signup (paid and promo) goes through /confirmPayment, disabled server side for now:
+             say so up front, before anyone sends a payment (see utils/sessionActions.js) -->
+        <div v-if="!signupAvailable" class="alert alert-warning text-center mb-4" role="alert">{{ $t('signup_unavailable') }}</div>
+
         <!-- Step indicator -->
         <div class="signup-step-indicator mb-5">
           <div class="signup-step" :class="{ active: currentStep === 1, done: currentStep > 1 }">
@@ -142,6 +146,11 @@
                   </div>
                 </div>
 
+                <div v-if="!signupAvailable" class="alert alert-warning mb-0" role="alert">{{ $t('signup_unavailable') }}</div>
+
+                <!-- Payment address / memo / amount and the confirm buttons: only while signup works,
+                     so nobody is told where to send funds that cannot be processed -->
+                <template v-if="signupAvailable">
                 <!-- Promo code toggle -->
                 <div class="form-group mb-3">
                   <div class="custom-control custom-checkbox">
@@ -248,6 +257,7 @@
                     </div>
                   </div>
                 </div>
+                </template>
 
               </div>
             </div>
@@ -373,6 +383,7 @@ import blurt from '@blurtfoundation/blurtjs'
 import { VueReCaptcha } from 'vue-recaptcha-v3'
 import { mapGetters } from 'vuex'
 import Vue from 'vue'
+import { SIGNUP_AVAILABLE } from '~/utils/sessionActions'
 
 // autoHideBadge: NavbarBrand pulls LoginModal into every page, so reCAPTCHA
 // loads site-wide and its badge renders everywhere. When the script cannot
@@ -406,6 +417,7 @@ export default {
   },
   data() {
     return {
+      signupAvailable: SIGNUP_AVAILABLE, //confirmPayment is disabled server side for now
       targetMemo: '',
       checkingFunds: false,
       processStarted: false,
@@ -734,7 +746,9 @@ export default {
       }
     },
     setMemoValue() {
-      this.$refs["actifit-memo"].value = this.generateMemo();
+      const memoEl = this.$refs["actifit-memo"];
+      const memo = this.generateMemo();
+      if (memoEl) memoEl.value = memo; //not rendered while signup is unavailable
     },
     generateMemo() {
       this.targetMemo = "acmm" + this.generatePassword(2);
@@ -753,6 +767,8 @@ export default {
       this.captchaValid = false;
     },
     async checkFunds() {
+      //never ask the server to confirm a payment it cannot process
+      if (!this.signupAvailable) return;
       this.captcha_invalid = '';
       this.error_proceeding = false;
       this.error_msg = '';

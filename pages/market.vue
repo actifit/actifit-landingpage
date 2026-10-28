@@ -39,7 +39,9 @@
 						<div class="prize-draw-card">
 							<i class="far fa-clock prize-draw-icon"></i>
 							<h5 class="prize-draw-card-title">{{ $t('next_draw') }}</h5>
-							<Countdown v-if="countDownReady && nextGadgetBuyRewardDate" :deadline="nextGadgetBuyRewardDate" class="prize-draw-countdown"></Countdown>
+							<!-- the draw job is paused: no countdown, so no implied draw date -->
+							<p class="prize-draw-card-text" v-if="!gadgetPrizeDrawAvailable">{{ $t('gadget_prize_draw_unavailable') }}</p>
+							<Countdown v-else-if="countDownReady && nextGadgetBuyRewardDate" :deadline="nextGadgetBuyRewardDate" class="prize-draw-countdown"></Countdown>
 							<p class="prize-draw-card-text" v-else><i class="fas fa-spin fa-spinner"></i></p>
 						</div>
 
@@ -328,6 +330,7 @@ import Countdown from 'vuejs-countdown'
 import NotifyModal from '~/components/NotifyModal'
 import CartModal from '~/components/CartModal'
 import ListHeadingSection from '~/components/ListHeadingSection.vue'
+import { GADGET_PRIZE_DRAW_AVAILABLE } from '~/utils/sessionActions'
 import Lodash from 'lodash'
 import { getProductAfitPrice, getProductHivePrice, getProductPurchaseCurrencies, getProductUsdValue } from '~/utils/marketPricing'
 import { filterMarketProducts, getGadgetLevelClass, getGadgetOwnership, getProductMarketState } from '~/utils/marketCatalog'
@@ -364,6 +367,7 @@ export default {
 			currentSort: JSON.stringify({ value: 'price', direction: 'asc' }),
 			prodList: [],
 			afitPrice: 0,
+			gadgetPrizeDrawAvailable: GADGET_PRIZE_DRAW_AVAILABLE, //draw job paused since the 2026-10-21 incident
 			ticketCount: 0,
 			prizePool: 0,
 			prizePoolValue: '',
