@@ -662,5 +662,15 @@ describe('plugins/vue-custom global helpers', () => {
       expect(msg).toBe('sent: &lt;x&gt;')
       expect(c.$notify).toHaveBeenCalledWith(expect.objectContaining({ group: 'error', text: msg, duration: -1 }))
     })
+
+    it('$gateMessage returns the key-rotation gate text (incl. the post-rotation hold) and nothing else', () => {
+      const gate = Vue.prototype.$gateMessage
+      expect(gate({ code: 'KEY_ROTATION_REQUIRED', message: 'rotate' })).toBe('rotate')
+      expect(gate({ code: 'KEY_ROTATION_HOLD', error: 'hold on' })).toBe('hold on')
+      expect(gate({ code: 'TRY_AGAIN', message: 'again' })).toBe('again')
+      expect(gate({ code: 'OTHER', message: 'x' })).toBe(null)
+      expect(gate({ error: 'Account does not have enough AFIT funds' })).toBe(null)
+      expect(gate(null)).toBe(null)
+    })
   })
 })
