@@ -16,6 +16,7 @@ jest.mock('@blurtfoundation/blurtjs', () => ({
 }))
 
 import actions from '@/store/actions'
+import { clearSharedFetchCache } from '@/utils/sharedFetch'
 
 const API = 'https://api.actifit.test/'
 
@@ -98,12 +99,25 @@ describe('store/actions', () => {
     })
 
     it('fetchModerators commits the list with no user dependency', async () => {
+      clearSharedFetchCache()
       global.fetch.mockReturnValue(jsonResponse([{ name: 'mod1' }]))
       actions.fetchModerators({ commit })
       await flush()
 
       expect(global.fetch).toHaveBeenCalledWith(API + 'moderators')
       expect(commit).toHaveBeenCalledWith('setModerators', [{ name: 'mod1' }])
+    })
+
+    it('fetchModerators shares one request between many dispatches, each committing', async () => {
+      clearSharedFetchCache()
+      global.fetch.mockReturnValue(jsonResponse([{ name: 'mod1' }]))
+      const commitA = jest.fn()
+      const commitB = jest.fn()
+      await Promise.all([actions.fetchModerators({ commit: commitA }), actions.fetchModerators({ commit: commitB })])
+
+      expect(global.fetch.mock.calls.filter(c => c[0] === API + 'moderators')).toHaveLength(1)
+      expect(commitA).toHaveBeenCalledWith('setModerators', [{ name: 'mod1' }])
+      expect(commitB).toHaveBeenCalledWith('setModerators', [{ name: 'mod1' }])
     })
 
     it('fetchFeaturedActifitter hits /featuredActifitter and commits the doc', async () => {

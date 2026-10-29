@@ -2,6 +2,7 @@ import { mount, createLocalVue } from '@vue/test-utils'
 import Vuex from 'vuex'
 import Post from '@/components/Post.vue'
 import CardActions from '@/components/CardActions.vue'
+import { clearSharedFetchCache } from '@/utils/sharedFetch'
 
 function buildPost(overrides = {}) {
   return {
@@ -107,5 +108,45 @@ describe('components/Post.vue', () => {
     expect(cardActions.props('voteModalTarget')).toBe('#voteModal')
 
     wrapper.destroy()
+  })
+})
+
+describe('card API calls (commonCardMixin)', () => {
+  let observers
+  beforeEach(() => {
+    clearSharedFetchCache()
+    process.env.actiAppUrl = 'https://api.test/'
+    global.fetch = jest.fn(() => Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ token_count: 3 }) }))
+    observers = []
+    global.IntersectionObserver = class {
+      constructor (cb) { this.cb = cb; observers.push(this) }
+      observe () {}
+      disconnect () {}
+    }
+    global.$ = jest.fn(() => ({ on: jest.fn(), modal: jest.fn(), hasClass: jest.fn(() => false) }))
+  })
+  afterEach(() => {
+    delete global.fetch
+    delete global.IntersectionObserver
+    delete global.$
+  })
+
+  const statCalls = () => global.fetch.mock.calls.map(c => c[0]).filter(u => /getRank|getPostReward/.test(u))
+
+  it('waits until a card is near the screen, then shares one rank request per author', async () => {
+    const a = mountPost({ permlink: 'p1', url: '/@bob/p1' })
+    const b = mountPost({ permlink: 'p2', url: '/@bob/p2' })
+    await a.vm.$nextTick()
+    expect(statCalls()).toEqual([])
+
+    observers.forEach(o => o.cb([{ isIntersecting: true }]))
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    const calls = statCalls()
+    expect(calls.filter(u => u === 'https://api.test/getRank/bob')).toHaveLength(1)
+    expect(calls.filter(u => u.includes('getPostReward'))).toHaveLength(2)
+    expect(a.vm.afitReward).toBe(3)
+    a.destroy()
+    b.destroy()
   })
 })

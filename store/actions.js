@@ -4,6 +4,7 @@ import steem from 'steem'
 import hive from '@hiveio/hive-js'
 
 import blurt from '@blurtfoundation/blurtjs'
+import { fetchJsonShared } from '~/utils/sharedFetch'
 
 //hive.config.set('rebranded_api', true)
 //hive.broadcast.updateOperations()
@@ -125,12 +126,11 @@ export default {
       }).catch(e => reject(e))
     })
   },
+  // Dispatched by every post card and comment, so the request is shared (utils/sharedFetch).
+  // Each dispatch still commits into its own store.
   fetchModerators({ commit }) {
-    return new Promise((resolve, reject) => {
-      fetch(process.env.actiAppUrl + 'moderators').then(res => {
-        res.json().then(json => commit('setModerators', json || [])).catch(e => reject(e))
-      }).catch(e => reject(e))
-    })
+    return fetchJsonShared(process.env.actiAppUrl + 'moderators')
+      .then(json => commit('setModerators', json || []))
   },
   fetchAmbassadors({ commit }) {
     return new Promise((resolve, reject) => {

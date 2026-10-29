@@ -348,7 +348,7 @@
 			//res.json().then(json => this.fullAFITReward = json.token_count)}).catch(e => reject(e))
 
 		//grab moderators' list
-		this.$store.dispatch('fetchModerators')
+		this.$store.dispatch('fetchModerators').catch(() => {})
 
 		this.cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
 

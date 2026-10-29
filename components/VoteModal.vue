@@ -203,6 +203,8 @@ export default {
 		this.fetchVotingPower();
 	},
 	methods: {
+		// The card mixin's reward/rank fetch: this modal shows neither.
+		fetchCardStats () {},
 		//handles calculating and displaying proper voting value
 		async calculateVoteValue() {
 

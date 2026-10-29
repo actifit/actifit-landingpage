@@ -227,6 +227,7 @@ import { translateTextWithGemini } from '~/components/gemini-client.js';
 import SafeRemarkable from '~/components/SafeRemarkable.vue';
 import steem from 'steem'
 import hive from '@hiveio/hive-js'
+import { fetchJsonShared } from '~/utils/sharedFetch'
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
 import DOMPurify from 'dompurify'
@@ -381,10 +382,10 @@ export default {
     },
 
     fetchReportData() {
-      fetch(process.env.actiAppUrl + 'getRank/' + this.author).then(res => {
-        res.json().then(json => this.userRank = json)
-      }).catch(e => console.error(e));
-      this.$store.dispatch('fetchModerators')
+      fetchJsonShared(process.env.actiAppUrl + 'getRank/' + this.author)
+        .then(json => { this.userRank = json })
+        .catch(e => console.error(e));
+      this.$store.dispatch('fetchModerators').catch(() => {})
       this.fetchAuthorReputation();
     },
 

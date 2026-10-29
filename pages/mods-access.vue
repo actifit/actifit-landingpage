@@ -296,7 +296,7 @@
 	  this.fetchUserInfo();
 	  
 	  //grab moderators' list
-		this.$store.dispatch('fetchModerators')
+		this.$store.dispatch('fetchModerators').catch(() => {})
 		
 		//grab moderators weekly stats
 		let res = await fetch(process.env.actiAppUrl + 'moderatorWeeklyStats');

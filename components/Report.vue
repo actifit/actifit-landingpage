@@ -194,15 +194,18 @@ export default {
         : this.meta.dataTrackingSource
     }
   },
+  methods: {
+    // Called by the card mixin once the card comes near the screen.
+    fetchCardExtraStats () {
+      fetch(process.env.actiAppUrl + 'getPostFullAFITPayReward?user=' + this.report.author + '&url=' + this.report.url)
+        .then(res => res.json())
+        .then(json => { this.fullAFITReward = json.token_count })
+        .catch(e => console.error('Error fetching full AFIT reward:', e))
+    }
+  },
   async mounted () {
     // This now initializes the mixin logic for this component instance
     this.initializeCard()
-
-    // This fetch is specific to reports, so it stays here
-    fetch(process.env.actiAppUrl + 'getPostFullAFITPayReward?user=' + this.report.author + '&url=' + this.report.url)
-      .then(res => res.json())
-      .then(json => { this.fullAFITReward = json.token_count })
-      .catch(e => console.error('Error fetching full AFIT reward:', e))
   }
 }
 </script>

@@ -211,6 +211,7 @@
 <script>
 import UserHoverCard from './UserHoverCard.vue'
 import { mapGetters } from 'vuex'
+import { fetchJsonShared } from '~/utils/sharedFetch'
 import Comments from '~/components/Comments'
 import CustomTextEditor from '~/components/CustomTextEditor'
 import SafeRemarkable from '~/components/SafeRemarkable.vue'
@@ -370,16 +371,16 @@ export default {
       this.responseBody = this.moderatorSignature;
     },
     fetchReportKeyData() {
-      fetch(process.env.actiAppUrl + 'getPostReward?user=' + this.report.author + '&url=' + this.report.url).then(res => {
-        res.json().then(json => this.afitReward = json.token_count)
-      }).catch(e => console.error(e))
-      fetch(process.env.actiAppUrl + 'getRank/' + this.report.author).then(res => {
-        res.json().then(json => this.userRank = json)
-      }).catch(e => console.error(e))
+      fetchJsonShared(process.env.actiAppUrl + 'getPostReward?user=' + this.report.author + '&url=' + this.report.url)
+        .then(json => { this.afitReward = json.token_count })
+        .catch(e => console.error(e))
+      fetchJsonShared(process.env.actiAppUrl + 'getRank/' + this.report.author)
+        .then(json => { this.userRank = json })
+        .catch(e => console.error(e))
       fetch(process.env.actiAppUrl + 'getPostFullAFITPayReward?user=' + this.report.author + '&url=' + this.report.url).then(res => {
         res.json().then(json => this.fullAFITReward = json.token_count)
       }).catch(e => console.error(e))
-      this.$store.dispatch('fetchModerators')
+      this.$store.dispatch('fetchModerators').catch(() => {})
       this.profImgUrl = process.env.hiveImgUrl;
       if (this.cur_bchain == 'STEEM') {
         this.profImgUrl = process.env.steemImgUrl;
