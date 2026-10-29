@@ -2020,7 +2020,7 @@ export default {
 
       fetch(process.env.actiAppUrl + 'trackedMeasurements/' + this.displayUser).then(res => res.json().then(json => this.setUserMeasurements(json))).catch(e => console.log(e));
       fetch(process.env.actiAppUrl + 'trackedActivity/' + this.displayUser).then(res => res.json().then(json => this.setUserActivity(json))).catch(e => console.log(e));
-      fetch(process.env.actiAppUrl + 'getRank/' + this.displayUser).then(res => res.json().then(json => this.userRank = json)).catch(e => reject(e));
+      fetch(process.env.actiAppUrl + 'getRank/' + this.displayUser).then(res => res.json().then(json => this.userRank = json)).catch(e => console.error(e));
       fetch(process.env.actiAppUrl + 'userRewardedPostCount/' + this.displayUser).then(res => res.json().then(json => this.rewardedPostCount = json.rewarded_post_count)).catch(e => reject(e));
       fetch(process.env.actiAppUrl + 'user/' + this.displayUser).then(res => res.json().then(json => this.userTokenCount = json.tokens)).catch(e => console.log(e));
       fetch(process.env.actiAppUrl + 'userBadges/' + this.displayUser).then(res => res.json().then(json => this.userBadges = json)).catch(e => reject(e));

@@ -540,7 +540,7 @@ export default {
     this.profImgUrl = process.env.hiveImgUrl;
     if (this.cur_bchain === 'STEEM') this.profImgUrl = process.env.steemImgUrl;
 
-    this.$store.dispatch('fetchModerators');
+    this.$store.dispatch('fetchModerators').catch(() => {});
     if (this.user) {
       this.updateUserData();
     }

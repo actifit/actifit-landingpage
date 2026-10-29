@@ -153,6 +153,7 @@
 
 <script>
 import hive from '@hiveio/hive-js'
+import { fetchJsonShared } from '~/utils/sharedFetch'
 
 export default {
   name: 'UserHoverCard',
@@ -253,7 +254,9 @@ export default {
       //:
     //  process.env.hiveImgUrl
 
-      this.fetchUserRank()
+      // Only the 'full' mode shows the rank inline. Other modes (voter lists, community
+      // admins) render many of these at once, so they fetch it on hover instead.
+      if (this.displayMode === 'full') this.fetchUserRank()
   },
 
   beforeDestroy() {
@@ -270,6 +273,10 @@ export default {
       immediate: true,
       handler(newUsername) {
         this.currentUsername = newUsername
+        // Lists reuse this component by index, so a new name must not keep the old rank.
+        this.userRankData = null
+        this.displayCoreUserRank = null
+        this.displayIncreasedUserRank = null
         if (this.displayMode === 'full') {
           this.fetchUserRank()
         }
@@ -350,12 +357,8 @@ export default {
           return
         }
 
-        const response = await fetch(`${process.env.actiAppUrl}getRank/${this.username}`)
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-
-        const rankData = await response.json()
+        // fetchJsonShared rejects on a non-2xx answer, as the response.ok check here did.
+        const rankData = await fetchJsonShared(`${process.env.actiAppUrl}getRank/${this.username}`)
 
         if (this.currentUsername === this.username) {
           this.userRankData = rankData
@@ -408,7 +411,7 @@ export default {
         }*/
 
         // Fetch rank data if needed and not already loaded
-        if (this.displayMode === 'full' && !this.displayCoreUserRank) {
+        if (!this.displayCoreUserRank) {
           await this.fetchUserRank()
         }
 
