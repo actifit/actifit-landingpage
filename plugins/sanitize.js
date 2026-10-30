@@ -76,23 +76,27 @@ export default ({ app }, inject) => {
 
     if (process.client) {
       return filterClasses(DOMPurify.sanitize(dirty, domPurifyOptions));
-    }
-    const sanitizeHtml = require('sanitize-html');
-    return sanitizeHtml(dirty, {
-      allowedTags: ALLOWED_TAGS,
-      allowedAttributes: sanitizeHtmlAllowedAttributes,
-      // sanitize-html filters class values natively; the client equivalent is
-      // filterClasses() above. Keep the two token lists identical.
-      allowedClasses: { '*': ALLOWED_CLASS_TOKENS },
-      // Any target=_blank we emit gets noopener/noreferrer, matching what $cleanBody
-      // already forces in plugins/vue-custom.js.
-      transformTags: {
-        a: (tagName, attribs) => {
-          if (attribs.target === '_blank') attribs.rel = 'noopener noreferrer';
-          return { tagName, attribs };
+    } else {
+      // Keep this require inside the else: webpack 4 drops a branch of a constant
+      // `if (process.client)` from the client bundle, but not code after an early
+      // return, and sanitize-html's htmlparser2 does not parse in webpack 4.
+      const sanitizeHtml = require('sanitize-html');
+      return sanitizeHtml(dirty, {
+        allowedTags: ALLOWED_TAGS,
+        allowedAttributes: sanitizeHtmlAllowedAttributes,
+        // sanitize-html filters class values natively; the client equivalent is
+        // filterClasses() above. Keep the two token lists identical.
+        allowedClasses: { '*': ALLOWED_CLASS_TOKENS },
+        // Any target=_blank we emit gets noopener/noreferrer, matching what $cleanBody
+        // already forces in plugins/vue-custom.js.
+        transformTags: {
+          a: (tagName, attribs) => {
+            if (attribs.target === '_blank') attribs.rel = 'noopener noreferrer';
+            return { tagName, attribs };
+          },
         },
-      },
-    });
+      });
+    }
   });
 
   inject('safeUrl', (url) => {
