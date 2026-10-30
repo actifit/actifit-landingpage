@@ -1,6 +1,7 @@
 <template>
   <div>
-    <vue-remarkable :source="source" :options="options" ref="remarkable"></vue-remarkable>
+    <!-- Same markup vue-remarkable produced, so existing styles still apply. -->
+    <div ref="remarkable"><span v-html="renderedHtml"></span></div>
 
     <!-- External Link Modal -->
     <div class="modal fade" id="externalLinkModal" tabindex="-1" role="dialog" aria-labelledby="externalLinkModalLabel" aria-hidden="true">
@@ -28,13 +29,13 @@
           </template>
 
           <script>
-          import vueRemarkable from 'vue-remarkable';
+          import { Remarkable } from 'remarkable';
 
+          // Callers pass HTML that $cleanBody already sanitized (or a user's own reply),
+          // and Remarkable runs again over it with html:true. That second parse can rebuild
+          // markup the sanitizer removed, so its output is sanitized again before display.
           export default {
           name: 'SafeRemarkable',
-          components: {
-          vueRemarkable
-          },
           props: {
           source: { type: String, required: true },
           options: { type: Object, default: () => ({ html: true, breaks: true, typographer: true }) }
@@ -43,6 +44,13 @@
           return {
           externalLinkUrl: ''
           };
+          },
+          computed: {
+          renderedHtml() {
+          if (!this.source) return '';
+          const md = new Remarkable(this.options);
+          return this.$sanitizePostHtml(md.render(this.source.trim()));
+          }
           },
           mounted() {
           this.addLinkListeners();
