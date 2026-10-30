@@ -12,20 +12,29 @@ const crypto = require('crypto');
 
 const TRUSTED_HIDS = ['gtm-script'];
 
-const INLINE_SCRIPT_RE = /<script\b([^>]*)>([\s\S]*?)<\/script>/gi;
-
+// Finds each `data-hid="<hid>"` marker with indexOf and checks the tag around it,
+// so the scan stays linear in the size of <head> whatever its content.
 function headHashes(html) {
   const headEnd = html.indexOf('</head>');
   if (headEnd === -1) return [];
   const head = html.slice(0, headEnd);
   const hashes = [];
-  let m;
-  while ((m = INLINE_SCRIPT_RE.exec(head)) !== null) {
-    const attrs = m[1];
-    if (/\bsrc\s*=/i.test(attrs)) continue;
-    const hid = /\bdata-hid="([^"]*)"/i.exec(attrs);
-    if (!hid || !TRUSTED_HIDS.includes(hid[1])) continue;
-    hashes.push(`'sha256-${crypto.createHash('sha256').update(m[2]).digest('base64')}'`);
+  for (const hid of TRUSTED_HIDS) {
+    const marker = 'data-hid="' + hid + '"';
+    let at = head.indexOf(marker);
+    // Each trusted script appears once per page; a few tries bound the work.
+    for (let tries = 0; at !== -1 && tries < 4; tries++) {
+      const tagStart = head.lastIndexOf('<', at);
+      const tagEnd = head.indexOf('>', at);
+      if (tagEnd === -1) break;
+      const close = head.indexOf('</script>', tagEnd);
+      const openTag = tagStart === -1 ? '' :head.slice(tagStart, tagEnd);
+      if (close !== -1 && /^<script\s/i.test(openTag) && !/\bsrc\s*=/i.test(openTag)) {
+        const body = head.slice(tagEnd + 1, close);
+        hashes.push(`'sha256-${crypto.createHash('sha256').update(body).digest('base64')}'`);
+      }
+      at = head.indexOf(marker, at + marker.length);
+    }
   }
   return hashes;
 }

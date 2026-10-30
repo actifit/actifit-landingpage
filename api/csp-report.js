@@ -31,7 +31,7 @@ function stripQuery(u) {
 // Reporting API body ([{ type: 'csp-violation', body: {...} }]).
 function normalise(payload) {
   const items = Array.isArray(payload) ? payload.map((r) => r && r.body) : [payload && payload['csp-report']];
-  return items.filter(Boolean).map((r) => ({
+  return items.filter((r) => r && typeof r === 'object').map((r) => ({
     directive: clip(r['effective-directive'] || r.effectiveDirective || r['violated-directive'], 60),
     blocked: stripQuery(r['blocked-uri'] || r.blockedURL),
     page: stripQuery(r['document-uri'] || r.documentURL),
@@ -48,10 +48,10 @@ function record(v, now = Date.now()) {
     entry.count += 1;
     return false;
   }
-  if (!entry && seen.size >= MAX_KEYS) {
-    for (const [k, e] of seen) if (now - e.first >= WINDOW_MS) seen.delete(k);
-    if (seen.size >= MAX_KEYS) return false;
-  }
+  seen.delete(key); // re-insert at the end, so Map order stays oldest-first
+  // When full, evict the oldest key rather than drop new ones: otherwise 2000 junk
+  // reports would silence every real violation for an hour.
+  if (seen.size >= MAX_KEYS) seen.delete(seen.keys().next().value);
   seen.set(key, { first: now, count: 1 });
   return true;
 }
@@ -59,6 +59,10 @@ function record(v, now = Date.now()) {
 function handler(req, res) {
   if (req.method !== 'POST') {
     res.statusCode = 405;
+    return res.end();
+  }
+  if (Number(req.headers && req.headers['content-length']) > MAX_BODY) {
+    res.statusCode = 413;
     return res.end();
   }
   let size = 0;

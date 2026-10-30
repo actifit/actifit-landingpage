@@ -249,11 +249,17 @@ module.exports = {
       policies: {
         'default-src': ["'self'"],
         // 'self' and the inline-script hashes are added by Nuxt.
+        // CDN entries are pinned to the exact libraries we load: these hosts serve every
+        // version of every library, including old ones that can be used to get around a CSP.
         'script-src': [
-          'https://code.jquery.com',             // jQuery (head)
-          'https://cdnjs.cloudflare.com',        // popper, TweenMax (head); highlight.js, KaTeX (mavon-editor)
-          'https://maxcdn.bootstrapcdn.com',     // bootstrap.js (head)
-          'https://www.googletagmanager.com',    // gtag (plugins/ga.js)
+          'https://code.jquery.com/jquery-3.2.1.slim.min.js',                 // head
+          'https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/',          // head
+          'https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/',               // head (TweenMax)
+          'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/',       // mavon-editor
+          'https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.8.3/',               // mavon-editor
+          'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/',               // head
+          'https://www.googletagmanager.com/gtag/',  // gtag (plugins/ga.js) and GA4 destinations
+          'https://www.googletagmanager.com/gtm.js', // @nuxtjs/gtm
           'https://www.google-analytics.com',
           'https://www.google.com/recaptcha/',   // reCAPTCHA
           'https://www.gstatic.com/recaptcha/',

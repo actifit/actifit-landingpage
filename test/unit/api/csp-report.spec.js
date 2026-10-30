@@ -143,3 +143,36 @@ describe('api/csp-head-hashes', () => {
     expect(() => addHeadHashes('/', {})).not.toThrow()
   })
 })
+
+describe('api/csp-report hardening', () => {
+  beforeEach(() => seen.clear())
+
+  test('when full, evicts the oldest key instead of dropping new violations', () => {
+    for (let i = 0; i < 2000; i++) record({ directive: 'junk', blocked: String(i), source: '' }, 0)
+    expect(record({ directive: 'script-src-elem', blocked: 'https://real.example/x.js', source: '' }, 1)).toBe(true)
+    expect(seen.size).toBe(2000)
+  })
+
+  test('ignores report entries that are not objects', () => {
+    expect(normalise([{ body: 'str' }, { body: null }, null])).toEqual([])
+  })
+
+  test('refuses an oversized body by content-length before reading it', async () => {
+    const req = new EventEmitter()
+    req.method = 'POST'
+    req.headers = { 'content-length': String(40 * 1024) }
+    const res = await new Promise((resolve) => {
+      const r = { statusCode: 200, end: () => resolve(r) }
+      handler(req, r)
+    })
+    expect(res.statusCode).toBe(413)
+  })
+
+  test('head hashing stays fast on many unclosed script tags', () => {
+    const { headHashes } = require('../../../api/csp-head-hashes')
+    const html = '<head>' + '<script a'.repeat(20000) + '</head>'
+    const t = Date.now()
+    expect(headHashes(html)).toEqual([])
+    expect(Date.now() - t).toBeLessThan(500)
+  })
+})
