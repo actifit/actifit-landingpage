@@ -433,17 +433,9 @@ export default {
       try {
         const originalContent = this.commentBody();
         const translationResult = await translateTextWithGemini(this.full_data.body);
-        // Send the RAW body to the model and $cleanBody the RESULT exactly once.
-        //
-        // Passing safety_post_content (already $cleanBody output) and then cleaning the
-        // reply ran the pipeline TWICE, and it is not idempotent: escapeHtmlAttr escapes
-        // & unconditionally, so an image URL's &amp; became &amp;amp; and the browser
-        // requested a src containing a literal "amp;" - broken images in the translated
-        // view for every URL with a query string. The second pass also dropped alt text
-        // and emitted a ghost empty anchor before every @mention.
-        //
-        // Raw markdown is also what the model should receive; it was being handed HTML
-        // soup. This matches pages/_username/_permlink/index.vue, which was already right.
+        // The model's reply is untrusted HTML: $cleanBody it before rendering. Send the RAW
+        // body and clean once - $cleanBody is not idempotent (a second pass turns &amp; in
+        // image URLs into &amp;amp;). Same as pages/_username/_permlink/index.vue.
         this.translatedText = this.$cleanBody(translationResult);
         this.showTranslated = true;
         this.updateCache({
