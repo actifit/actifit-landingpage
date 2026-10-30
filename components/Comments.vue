@@ -432,8 +432,11 @@ export default {
       this.translationLoading = true;
       try {
         const originalContent = this.commentBody();
-        const translationResult = await translateTextWithGemini(originalContent);
-        this.translatedText = translationResult;
+        const translationResult = await translateTextWithGemini(this.full_data.body);
+        // The model's reply is untrusted HTML: $cleanBody it before rendering. Send the RAW
+        // body and clean once - $cleanBody is not idempotent (a second pass turns &amp; in
+        // image URLs into &amp;amp;). Same as pages/_username/_permlink/index.vue.
+        this.translatedText = this.$cleanBody(translationResult);
         this.showTranslated = true;
         this.updateCache({
           originalBody: originalContent,

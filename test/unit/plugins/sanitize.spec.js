@@ -54,8 +54,10 @@ describe('plugins/sanitize', () => {
       expect(safeUrl('http://example.com')).toBe('http://example.com')
     })
 
-    it('allows blockchain and contact schemes', () => {
-      expect(safeUrl('hive:alice')).toBe('hive:alice')
+    it('allows contact schemes but not wallet-signing schemes', () => {
+      expect(safeUrl('hive:alice')).toBe('#')
+      expect(safeUrl('hive://sign/op/x')).toBe('#')
+      expect(safeUrl('hivesigner:x')).toBe('#')
       expect(safeUrl('mailto:a@b.com')).toBe('mailto:a@b.com')
       expect(safeUrl('tel:+123')).toBe('tel:+123')
     })
@@ -79,6 +81,66 @@ describe('plugins/sanitize', () => {
       expect(safeUrl(null)).toBe('#')
       expect(safeUrl(undefined)).toBe('#')
       expect(safeUrl(123)).toBe('#')
+    })
+  })
+
+  describe('heading spoofing (client path)', () => {
+    let sanitize
+    beforeAll(() => { process.client = true; sanitize = loadInjected().sanitize })
+    afterAll(() => { delete process.client })
+
+    it('keeps our own logos and the modal trigger', () => {
+      const logo = 'Blog <img src="/img/HIVE.png" class="mr-2 token-logo-md" alt="">'
+      expect(sanitize(logo)).toContain('src="/img/HIVE.png"')
+      const info = '<a href="#" data-toggle="modal" data-target="#notifyModal"><i class="fas fa-info-circle text-white"></i></a>'
+      const out = sanitize(info)
+      expect(out).toContain('href="#"')
+      expect(out).toContain('data-target="#notifyModal"')
+    })
+
+    it('drops off-site images and off-site links', () => {
+      const out = sanitize('<a href="https://evil.example/login"><img src="https://evil.example/fake.png"></a>')
+      expect(out).not.toContain('evil.example')
+      expect(out).not.toContain('<img')
+      for (const href of ['//evil.example', '/\\evil.example', '/ /x']) {
+        expect(sanitize(`<a href="${href}">x</a>`)).not.toContain('href=')
+      }
+      expect(sanitize('<img src="/img/../x.png">')).not.toContain('<img')
+    })
+
+    it('drops data-* attributes other than the modal trigger', () => {
+      const out = sanitize('<a href="#" data-toggle="popover" data-html="true" data-content="<b>x</b>">x</a>')
+      expect(out).not.toContain('data-content')
+      expect(out).not.toContain('data-html')
+    })
+  })
+
+  describe('$safeUrl leaving the site', () => {
+    let safeUrl
+    beforeAll(() => { safeUrl = loadInjected().safeUrl })
+
+    it('treats only a single leading slash as local', () => {
+      expect(safeUrl('/@alice')).toBe('/@alice')
+      expect(safeUrl(' /@alice')).toBe('/@alice')
+      for (const u of ['//evil.example', '/\\evil.example', '/\t/evil.example', ' //evil.example']) {
+        expect(safeUrl(u)).toBe('#')
+      }
+    })
+  })
+
+  describe('$hiveProfileUrl', () => {
+    let profile
+    beforeAll(() => { profile = loadInjected().hiveProfileUrl })
+
+    it('links valid account names relatively', () => {
+      expect(profile('alice')).toBe('/@alice')
+      expect(profile('actifit.rewards')).toBe('/@actifit.rewards')
+    })
+
+    it('gives no link for anything else', () => {
+      for (const n of ['../../x', 'x/../../evil', 'x?y', 'x#y', '\\evil.com', 'ab', 'A1ice', '', null, 'a'.repeat(17)]) {
+        expect(profile(n)).toBe('#')
+      }
     })
   })
 })

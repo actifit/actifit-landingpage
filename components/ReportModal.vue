@@ -147,7 +147,7 @@
         <!-- adding section to display charity info if available -->
         <div class="modal-footer text-brand" v-if="this.meta.charity">
           <i class="fas fa-dove"></i><small>{{ $t('Charity_Post') }}</small><i class="fas fa-dove"></i>
-          <small><a :href="this.meta.charity[0]" target="_blank" rel="noopener noreferrer">@{{ this.meta.charity[0] }}</a></small>
+          <small><a :href="$hiveProfileUrl(this.meta.charity[0])" target="_blank" rel="noopener noreferrer">@{{ this.meta.charity[0] }}</a></small>
         </div>
         <transition name="fade">
           <div class="report-reply modal-body" v-if="commentBoxOpen">
@@ -417,8 +417,11 @@ export default {
 
       this.translationLoading = true;
       try {
-        const translationResult = await translateTextWithGemini(this.safety_post_content);
-        this.translatedText = translationResult;
+        const translationResult = await translateTextWithGemini(this.report.body);
+        // The model's reply is untrusted HTML: $cleanBody it before rendering. Send the RAW
+        // body and clean once - $cleanBody is not idempotent (a second pass turns &amp; in
+        // image URLs into &amp;amp;). Same as pages/_username/_permlink/index.vue.
+        this.translatedText = this.$cleanBody(translationResult);
         this.displayBody = this.translatedText;
         this.showTranslated = true;
         this.$set(this.translationCache, reportId, {

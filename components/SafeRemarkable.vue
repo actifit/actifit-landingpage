@@ -84,8 +84,9 @@
           }
           },
           openExternalLink() {
-          if (this.externalLinkUrl) {
-          window.open(this.externalLinkUrl, '_blank');
+          const url = this.externalLinkUrl ? this.$safeUrl(this.externalLinkUrl) : '#';
+          if (url !== '#') {
+          window.open(url, '_blank', 'noopener');
           }
           this.closeModal();
           }

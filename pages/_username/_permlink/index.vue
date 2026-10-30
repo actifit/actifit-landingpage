@@ -146,7 +146,7 @@
               </div>
               <div class="modal-footer col-md-12 text-brand" v-if="meta.charity">
                 <i class="fas fa-dove"></i><small> {{ $t('Charity_Post') }} </small><i class="fas fa-dove"></i>
-                <small><a :href="meta.charity[0]" target="_blank" rel="noopener noreferrer">@{{ meta.charity[0] }}</a></small>
+                <small><a :href="$hiveProfileUrl(meta.charity[0])" target="_blank" rel="noopener noreferrer">@{{ meta.charity[0] }}</a></small>
               </div>
               <transition name="fade">
                 <div class="report-reply col-md-12" v-if="commentBoxOpen">
