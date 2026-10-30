@@ -853,7 +853,7 @@ export default {
     attachImageErrorHandlers() {
       const vm = this;
       this.$nextTick(() => {
-        const contentEl = vm.$refs.remarkableContent.el;
+        const contentEl = vm.$refs.remarkableContent && vm.$refs.remarkableContent.$el;
         if (!contentEl) {
             console.warn('SafeRemarkable component not found!');
             return;

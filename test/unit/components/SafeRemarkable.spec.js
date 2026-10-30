@@ -3,7 +3,9 @@ jest.mock('hive-auth-wrapper', () => ({ broadcast: jest.fn(), authenticate: jest
 jest.mock('@hiveio/hive-js', () => ({ broadcast: { send: jest.fn() }, memo: { decode: jest.fn() } }))
 jest.mock('@/utils/keyPrompt', () => ({ requestKey: jest.fn() }))
 
+import Vue from 'vue'
 import { shallowMount } from '@vue/test-utils'
+import { Remarkable } from 'remarkable'
 import '@/plugins/vue-custom'
 import SafeRemarkable from '@/components/SafeRemarkable.vue'
 
@@ -63,5 +65,36 @@ describe('SafeRemarkable', () => {
 
   it('renders nothing for an empty source', () => {
     expect(render('').textContent).toBe('')
+  })
+
+  // The main regression risk: post bodies already went through $cleanBody, and the
+  // second sanitize must not change them.
+  it('leaves $cleanBody output unchanged', () => {
+    const md = new Remarkable({ html: true, breaks: true, typographer: true })
+    const body = [
+      '# Title', '**bold** and @alice', '![](https://images.hive.blog/0x0/a.png)',
+      'https://www.youtube.com/watch?v=abcdefghijk', '<details><summary>more</summary>text</details>',
+      '| a | b |\n|---|---|\n| 1 | 2 |', '```js\nconst x = 1\n```',
+      '<div class="pull-left" style="text-align:center">c</div>',
+    ].join('\n\n')
+    const cleaned = Vue.prototype.$cleanBody(body, false, false)
+    // Parse it as the old innerHTML insert did, so both sides get the same DOM fix-ups.
+    const before = document.createElement('span')
+    before.innerHTML = md.render(cleaned.trim())
+    expect(render(cleaned).firstElementChild.innerHTML).toBe(before.innerHTML)
+  })
+
+  it('does not render again when the parent re-renders with equal options', async () => {
+    const spy = jest.spyOn(Vue.prototype, '$sanitizePostHtml')
+    const Parent = {
+      components: { SafeRemarkable },
+      data: () => ({ tick: 0 }),
+      template: '<div>{{ tick }}<SafeRemarkable source="**x**" :options="{ html: true, breaks: true }" /></div>',
+    }
+    const wrapper = shallowMount(Parent, { stubs: { SafeRemarkable }, mocks: { $t: (k) => k } })
+    const calls = spy.mock.calls.length
+    for (let i = 1; i <= 3; i++) { wrapper.vm.tick = i; await wrapper.vm.$nextTick() }
+    expect(spy.mock.calls.length).toBe(calls)
+    spy.mockRestore()
   })
 })

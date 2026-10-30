@@ -42,14 +42,25 @@
           },
           data() {
           return {
-          externalLinkUrl: ''
+          externalLinkUrl: '',
+          renderedHtml: ''
           };
           },
           computed: {
-          renderedHtml() {
-          if (!this.source) return '';
-          const md = new Remarkable(this.options);
-          return this.$sanitizePostHtml(md.render(this.source.trim()));
+          // Callers pass options as an inline object, a new one on every parent re-render.
+          // Watching this string instead renders and sanitizes only when content changes.
+          renderKey() {
+          return JSON.stringify([this.source, this.options]);
+          }
+          },
+          watch: {
+          renderKey: {
+          immediate: true,
+          handler() {
+          this.renderedHtml = this.source
+          ? this.$sanitizePostHtml(new Remarkable(this.options).render(this.source.trim()))
+          : '';
+          }
           }
           },
           mounted() {
