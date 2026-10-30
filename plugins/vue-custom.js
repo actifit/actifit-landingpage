@@ -801,9 +801,10 @@ function sanitizePostHtml (html_content) {
         });
         return doc.body.innerHTML;
     } else {
-        // Server-side link processing using cheerio
-        const cheerio = require('cheerio');
-        const $ = cheerio.load(sanitized_html);
+        // Server-side link processing. cheerio/slim, not cheerio: the full build pulls in
+        // undici 7, which does not load on the server's Node 16 (.nvmrc).
+        const cheerio = require('cheerio/slim');
+        const $ = cheerio.load(sanitized_html, null, false);
         $('a[href]').each((i, el) => {
             const $el = $(el);
             processLinks(
@@ -812,7 +813,7 @@ function sanitizePostHtml (html_content) {
                 (name, val) => $el.attr(name, val)
             );
         });
-        return $('body').html();
+        return $.root().html();
     }
 }
 
