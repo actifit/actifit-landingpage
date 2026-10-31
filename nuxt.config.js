@@ -11,6 +11,9 @@ const mainDescription = `Track your daily activity and earn crypto rewards. Acti
 
 const { I18N } = require('./config')
 
+// true = the CSP below only reports violations; false = it blocks them.
+const CSP_REPORT_ONLY = true
+
 //load env file if present
 import * as dotenv from 'dotenv'
 dotenv.config()
@@ -43,8 +46,14 @@ module.exports = {
     // only in the sense that both are registered here; it no-ops on /api/proxy
     // and the other proxy prefixes via its own NEVER list.
     '~/api/cache-headers.js',
-    { path: '/api/proxy', handler: '~/api/proxy.js' }
+    { path: '/api/proxy', handler: '~/api/proxy.js' },
+    { path: '/api/csp-report', handler: '~/api/csp-report.js' }
   ],
+
+  hooks: {
+    // Adds the CSP hashes of trusted inline <head> scripts (the GTM bootstrap).
+    'render:route': require('./api/csp-head-hashes').addHeadHashes,
+  },
 
 
   router: {
@@ -227,6 +236,49 @@ module.exports = {
   },
 
   render: {
+    // Content-Security-Policy on every server-rendered page. The session lives in
+    // localStorage, so one injected script is a full account takeover; this policy
+    // stops scripts that do not come from us or the hosts below. Nuxt adds the hash
+    // of its own inline state script to script-src on each render.
+    // Runs REPORT-ONLY first: violations are logged by api/csp-report.js ("[csp]"
+    // lines) and nothing is blocked. Set CSP_REPORT_ONLY to false to enforce, once
+    // the logs show only attack noise.
+    csp: {
+      hashAlgorithm: 'sha256',
+      reportOnly: CSP_REPORT_ONLY,
+      policies: {
+        'default-src': ["'self'"],
+        // 'self' and the inline-script hashes are added by Nuxt.
+        // CDN entries are pinned to the exact libraries we load: these hosts serve every
+        // version of every library, including old ones that can be used to get around a CSP.
+        'script-src': [
+          'https://code.jquery.com/jquery-3.2.1.slim.min.js',                 // head
+          'https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/',          // head
+          'https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/',               // head (TweenMax)
+          'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/',       // mavon-editor
+          'https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.8.3/',               // mavon-editor
+          'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/',               // head
+          'https://www.googletagmanager.com/gtag/',  // gtag (plugins/ga.js) and GA4 destinations
+          'https://www.googletagmanager.com/gtm.js', // @nuxtjs/gtm
+          'https://www.google-analytics.com',
+          'https://www.google.com/recaptcha/',   // reCAPTCHA
+          'https://www.gstatic.com/recaptcha/',
+          'https://chat.peakd.com',              // Sting chat widget (components/StingChat.vue)
+        ],
+        // Vue, bootstrap-vue and post bodies use inline styles.
+        'style-src': ["'self'", "'unsafe-inline'", 'https://cdnjs.cloudflare.com', 'https://fonts.googleapis.com', 'https://maxcdn.bootstrapcdn.com'],
+        'font-src': ["'self'", 'data:', 'https://cdnjs.cloudflare.com', 'https://fonts.gstatic.com'],
+        // Post images and embeds come from anywhere on the web; Hive nodes are user-selectable.
+        'img-src': ["'self'", 'data:', 'blob:', 'https:'],
+        'media-src': ["'self'", 'blob:', 'https:'],
+        'connect-src': ["'self'", 'https:', 'wss:'],
+        'frame-src': ["'self'", 'https:'],
+        'worker-src': ["'self'", 'blob:'],
+        'object-src': ["'none'"],
+        'base-uri': ["'self'"],
+        'report-uri': ['/api/csp-report'],
+      },
+    },
     static: {
       setHeaders(res) {
         res.setHeader('X-Frame-Options', 'ALLOWALL')
