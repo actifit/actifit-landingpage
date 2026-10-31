@@ -834,6 +834,8 @@ module.exports = {
   other: 'altro',
   Need_login: 'Effettua il login prima',
   Already_friends: 'Sei già amico di questo utente',
+  Friend_request_already_sent: 'Richiesta di amicizia già inviata',
+  Friend_request_received_accept_instead: 'Questo utente ti ha già inviato una richiesta di amicizia: accettala invece',
   Not_friends: 'Non puoi rimuovere l\'amicizia con qualcuno con cui non sei amico',
   friendship_pending_approval: 'Amicizia in attesa di approvazione',
   cancel_friend_request: 'Annulla la tua richiesta di amicizia',

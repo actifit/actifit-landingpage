@@ -829,6 +829,8 @@ module.exports = {
   other: 'آخر',
   Need_login: 'يرجى تسجيل الدخول أولاً',
   Already_friends: 'أنت بالفعل صديق لهذا المستخدم',
+  Friend_request_already_sent: 'تم إرسال طلب الصداقة بالفعل',
+  Friend_request_received_accept_instead: 'هذا المستخدم أرسل إليك طلب صداقة بالفعل — اقبله بدلاً من ذلك',
   Not_friends: 'لا يمكنك إلغاء صداقة شخص لست صديقًا له',
   friendship_pending_approval: 'الصداقة معلقة في انتظار الموافقة',
   cancel_friend_request: 'إلغاء طلب الصداقة',

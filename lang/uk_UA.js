@@ -834,6 +834,8 @@ module.exports = {
   other: 'інший',
   Need_login: 'Будь ласка, спочатку увійдіть',
   Already_friends: 'Ви вже друзі з цим користувачем',
+  Friend_request_already_sent: 'Запит у друзі вже надіслано',
+  Friend_request_received_accept_instead: 'Цей користувач уже надіслав вам запит у друзі — прийміть його',
   Not_friends: 'Ви не можете видалити з друзів того, з ким ви не дружите',
   friendship_pending_approval: 'Дружба очікує на схвалення',
   cancel_friend_request: 'Скасувати ваш запит на дружбу',

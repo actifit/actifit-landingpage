@@ -833,6 +833,8 @@ module.exports = {
   other: 'その他',
   Need_login: 'まずログインしてください',
   Already_friends: 'あなたはこのユーザーとすでに友達です',
+  Friend_request_already_sent: '友達リクエストは送信済みです',
+  Friend_request_received_accept_instead: 'このユーザーからすでに友達リクエストが届いています。代わりに承認してください',
   Not_friends: '友達でない人を友達から外すことはできません',
   friendship_pending_approval: '友情承認待ち',
   cancel_friend_request: '友達リクエストをキャンセル',

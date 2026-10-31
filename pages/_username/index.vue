@@ -570,6 +570,7 @@ import steem from 'steem'
 import hive from '@hiveio/hive-js'
 import blurt from '@blurtfoundation/blurtjs'
 import { mapGetters } from 'vuex'
+import { friendAddRefusal, friendErrorText } from '~/utils/friendRequests'
 import Vue from 'vue'
 import MeasureChartModal from '~/components/MeasureChartModal'
 import ActivityChartModal from '~/components/ActivityChartModal'
@@ -1192,6 +1193,20 @@ export default {
         this.addFriendError = this.$t('Already_friends');
         return false;
       }
+      // A pending request in either direction means the backend refuses the add:
+      // say so before the user signs anything. friendRequests here are the
+      // PROFILE OWNER's (refreshFriendStatus loads them for displayUser).
+      const refusal = friendAddRefusal({
+        me: this.user.account.name,
+        target: this.displayUser,
+        owner: this.displayUser,
+        friends: this.userFriends,
+        requests: this.friendRequests
+      });
+      if (refusal) {
+        this.addFriendError = this.$t(refusal);
+        return false;
+      }
       let userConf = confirm(this.$t('confirm_add_friend').replace('_USERNAME_', this.displayUser));
       if (!userConf) {
         return;
@@ -1241,7 +1256,7 @@ export default {
           position: 'top center'
         })
       } else {
-        this.addFriendError = this.$t('unknown_error');
+        this.addFriendError = friendErrorText(outcome, this.$t('unknown_error'));
         this.friendshipLoader = false;
         return false;
       }
@@ -1309,7 +1324,7 @@ export default {
           position: 'top center'
         })
       } else {
-        this.addFriendError = this.$t('unknown_error');
+        this.addFriendError = friendErrorText(outcome, this.$t('unknown_error'));
         this.friendshipLoader = false;
         return false;
       }
@@ -1377,7 +1392,7 @@ export default {
           position: 'top center'
         })
       } else {
-        this.addFriendError = this.$t('unknown_error');
+        this.addFriendError = friendErrorText(outcome, this.$t('unknown_error'));
         this.friendshipLoader = false;
         return false;
       }
@@ -1445,7 +1460,7 @@ export default {
           position: 'top center'
         })
       } else {
-        this.addFriendError = this.$t('unknown_error');
+        this.addFriendError = friendErrorText(outcome, this.$t('unknown_error'));
         this.friendshipLoader = false;
         return false;
       }

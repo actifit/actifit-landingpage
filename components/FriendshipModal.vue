@@ -74,6 +74,7 @@
 
 <script>
   import { mapGetters } from 'vuex'
+  import { friendAddRefusal, friendErrorText } from '~/utils/friendRequests'
   
   export default {
 	props: ['showModal'],
@@ -402,6 +403,28 @@
 			this.addFriendError = this.$t('Already_friends');
 			return false;
 		}
+		//a pending request in either direction means the backend refuses the add:
+		//say so before the user signs anything
+		if (!this.friendRequests || !Array.isArray(this.friendRequests.sent_pending)){
+			try{
+				let quer = await fetch(process.env.actiAppUrl+'userFriendRequests/'+this.user.account.name);
+				this.friendRequests = await quer.json();
+			}catch(err){
+				//not fatal: the backend still refuses a duplicate request
+				console.log('could not load friend requests', err);
+			}
+		}
+		let refusal = friendAddRefusal({
+			me: this.user.account.name,
+			target: targetFriend,
+			owner: this.user.account.name,
+			friends: this.userFriends,
+			requests: this.friendRequests
+		});
+		if (refusal){
+			this.addFriendError = this.$t(refusal);
+			return false;
+		}
 		let userConf = confirm(this.$t('confirm_add_friend').replace('_USERNAME_', targetFriend));
 		if (!userConf) {
 		  return;
@@ -469,7 +492,7 @@
 			})
 		}else{
 			console.log('error sending friend request');
-			this.addFriendError = this.$t('unknown_error');
+			this.addFriendError = friendErrorText(outcome, this.$t('unknown_error'));
 			this.friendshipLoader = false;
 			return false;
 		}

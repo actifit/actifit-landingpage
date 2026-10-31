@@ -829,6 +829,8 @@ module.exports = {
   other: 'andere',
   Need_login: 'Bitte melden Sie sich zuerst an',
   Already_friends: 'Sie sind bereits mit diesem Benutzer befreundet',
+  Friend_request_already_sent: 'Freundschaftsanfrage bereits gesendet',
+  Friend_request_received_accept_instead: 'Dieser Benutzer hat dir bereits eine Freundschaftsanfrage gesendet – nimm sie stattdessen an',
   Not_friends: 'Sie können jemanden nicht entfreunden, mit dem Sie nicht befreundet sind',
   friendship_pending_approval: 'Freundschaftsanfrage wartet auf Genehmigung',
   cancel_friend_request: 'Ihre Freundschaftsanfrage abbrechen',

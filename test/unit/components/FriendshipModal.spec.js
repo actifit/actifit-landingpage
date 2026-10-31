@@ -110,4 +110,100 @@ describe('components/FriendshipModal propagateFriendReq', () => {
     expect(c.friendshipLoader).toBe(false)
     expect(c.$notify).not.toHaveBeenCalled()
   })
+  it('shows the backend refusal message instead of the generic error', async () => {
+    global.fetch = jest.fn().mockResolvedValue({ json: async () => ({ status: 'error', message: 'Friend request already sent' }) })
+    const c = ctx()
+
+    const result = await Comp.methods.propagateFriendReq.call(c, txStub, 'bob', [['custom_json', {}]])
+
+    expect(result).toBe(false)
+    expect(c.addFriendError).toBe('Friend request already sent')
+    expect(c.friendshipLoader).toBe(false)
+  })
+
+  it('escapes a backend message before it reaches the v-html error slot', async () => {
+    global.fetch = jest.fn().mockResolvedValue({ json: async () => ({ status: 'error', message: '<b>x</b>' }) })
+    const c = ctx()
+
+    await Comp.methods.propagateFriendReq.call(c, txStub, 'bob', [['custom_json', {}]])
+
+    expect(c.addFriendError).toBe('&lt;b&gt;x&lt;/b&gt;')
+  })
+})
+
+describe('components/FriendshipModal addFriend pre-checks', () => {
+  beforeEach(() => {
+    process.env.actiAppUrl = 'https://api.actifit.io/'
+    global.confirm = jest.fn(() => true)
+  })
+  afterEach(() => {
+    process.env.actiAppUrl = OLD_ENV
+    delete global.confirm
+    delete global.fetch
+    jest.restoreAllMocks()
+  })
+
+  const addCtx = (over = {}) => ctx({
+    friendshipLoader: false,
+    userFriends: [],
+    friendRequests: { sent_pending: [], received_pending: [] },
+    isFriend: () => false,
+    $processTrxFunc: jest.fn().mockResolvedValue({ success: true, trx: { tx: txStub } }),
+    propagateFriendReq: jest.fn(),
+    ...over
+  })
+
+  it('refuses without signing when alice already sent bob a request', async () => {
+    const c = addCtx({ friendRequests: { sent_pending: [{ target: 'bob' }], received_pending: [] } })
+
+    const result = await Comp.methods.addFriend.call(c, 'bob')
+
+    expect(result).toBe(false)
+    expect(c.addFriendError).toBe('Friend_request_already_sent')
+    expect(c.$processTrxFunc).not.toHaveBeenCalled()
+    expect(global.confirm).not.toHaveBeenCalled()
+  })
+
+  it('refuses without signing when bob already sent alice a request', async () => {
+    const c = addCtx({ friendRequests: { sent_pending: [], received_pending: [{ initiator: 'bob' }] } })
+
+    const result = await Comp.methods.addFriend.call(c, 'bob')
+
+    expect(result).toBe(false)
+    expect(c.addFriendError).toBe('Friend_request_received_accept_instead')
+    expect(c.$processTrxFunc).not.toHaveBeenCalled()
+  })
+
+  it('keeps the self and already-friends checks', async () => {
+    const self = addCtx()
+    expect(await Comp.methods.addFriend.call(self, 'alice')).toBe(false)
+    expect(self.addFriendError).toBe('Cannot_friend_self')
+
+    const friends = addCtx({ isFriend: () => true })
+    expect(await Comp.methods.addFriend.call(friends, 'bob')).toBe(false)
+    expect(friends.addFriendError).toBe('Already_friends')
+    expect(friends.$processTrxFunc).not.toHaveBeenCalled()
+  })
+
+  it('fetches the pending requests when they are not loaded yet', async () => {
+    global.fetch = jest.fn().mockResolvedValue({ json: async () => ({ sent_pending: [], received_pending: [{ initiator: 'bob' }] }) })
+    const c = addCtx({ friendRequests: [] })
+
+    const result = await Comp.methods.addFriend.call(c, 'bob')
+
+    expect(global.fetch.mock.calls[0][0]).toBe('https://api.actifit.io/userFriendRequests/alice')
+    expect(result).toBe(false)
+    expect(c.addFriendError).toBe('Friend_request_received_accept_instead')
+    expect(c.$processTrxFunc).not.toHaveBeenCalled()
+  })
+
+  it('still signs and propagates when nothing is pending', async () => {
+    const c = addCtx({ friendRequests: { sent_pending: [{ target: 'carol' }], received_pending: [{ initiator: 'dave' }] } })
+
+    await Comp.methods.addFriend.call(c, 'bob')
+
+    expect(c.addFriendError).toBe('')
+    expect(c.$processTrxFunc).toHaveBeenCalledTimes(1)
+    expect(c.propagateFriendReq).toHaveBeenCalledWith(txStub, 'bob', expect.any(Array))
+  })
 })

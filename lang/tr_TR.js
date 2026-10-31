@@ -834,6 +834,8 @@ module.exports = {
   other: 'diğer',
   Need_login: 'Lütfen önce giriş yapın',
   Already_friends: 'Bu kullanıcıyla zaten arkadaşsınız',
+  Friend_request_already_sent: 'Arkadaşlık isteği zaten gönderildi',
+  Friend_request_received_accept_instead: 'Bu kullanıcı size zaten bir arkadaşlık isteği gönderdi — bunun yerine isteği kabul edin',
   Not_friends: 'Arkadaş olmadığınız birini arkadaşlıktan çıkaramazsınız',
   friendship_pending_approval: 'Arkadaşlık onayı bekliyor',
   cancel_friend_request: 'Arkadaşlık isteğinizi iptal edin',

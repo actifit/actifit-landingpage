@@ -834,6 +834,8 @@ module.exports = {
   other: '其他',
   Need_login: '请先登录',
   Already_friends: '您已经是该用户的好友',
+  Friend_request_already_sent: '好友请求已发送',
+  Friend_request_received_accept_instead: '该用户已向您发送好友请求，请直接接受',
   Not_friends: '您不能取消与非好友的好友关系',
   friendship_pending_approval: '好友请求待批准',
   cancel_friend_request: '取消您的好友请求',
