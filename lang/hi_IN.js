@@ -834,6 +834,8 @@ module.exports = {
   other: 'अन्य',
   Need_login: 'कृपया पहले लॉग इन करें',
   Already_friends: 'आप पहले से ही इस उपयोगकर्ता के साथ दोस्त हैं',
+  Friend_request_already_sent: 'मित्रता अनुरोध पहले ही भेजा जा चुका है',
+  Friend_request_received_accept_instead: 'इस उपयोगकर्ता ने आपको पहले ही मित्रता अनुरोध भेजा है — इसके बजाय उसे स्वीकार करें',
   Not_friends: 'आप किसी ऐसे व्यक्ति को अनफ्रेंड नहीं कर सकते जिसके साथ आप दोस्त नहीं हैं',
   friendship_pending_approval: 'मित्रता अनुमोदन लंबित है',
   cancel_friend_request: 'अपनी मित्र अनुरोध रद्द करें',

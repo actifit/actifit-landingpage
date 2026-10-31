@@ -805,6 +805,8 @@ module.exports = {
   other: 'other',
   Need_login: 'Please login first',
   Already_friends: 'You are already friends with this user',
+  Friend_request_already_sent: 'Friend request already sent',
+  Friend_request_received_accept_instead: 'This user already sent you a friend request — accept it instead',
   Not_friends: 'You cannot unfriend someone you are not friends with',
   friendship_pending_approval: 'Friendship pending approval',
   cancel_friend_request: 'Cancel your friend request',

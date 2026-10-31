@@ -826,6 +826,8 @@ module.exports = {
   other: 'otro',
   Need_login: 'Por favor, inicia sesión primero',
   Already_friends: 'Ya eres amigo de este usuario',
+  Friend_request_already_sent: 'Solicitud de amistad ya enviada',
+  Friend_request_received_accept_instead: 'Este usuario ya te envió una solicitud de amistad: acéptala en su lugar',
   Not_friends: 'No puedes dejar de ser amigo de alguien con quien no lo eres',
   friendship_pending_approval: 'Amistad pendiente de aprobación',
   cancel_friend_request: 'Cancelar tu solicitud de amistad',

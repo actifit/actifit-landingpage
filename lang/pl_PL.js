@@ -833,6 +833,8 @@ module.exports = {
   other: 'inny',
   Need_login: 'Najpierw zaloguj się',
   Already_friends: 'Już jesteś znajomym tego użytkownika',
+  Friend_request_already_sent: 'Zaproszenie do znajomych zostało już wysłane',
+  Friend_request_received_accept_instead: 'Ten użytkownik już wysłał ci zaproszenie do znajomych — zamiast tego je zaakceptuj',
   Not_friends: 'Nie możesz usunąć z listy znajomych kogoś, z kim nie jesteś znajomym',
   friendship_pending_approval: 'Znajomość oczekuje na zatwierdzenie',
   cancel_friend_request: 'Anuluj zaproszenie do znajomych',
