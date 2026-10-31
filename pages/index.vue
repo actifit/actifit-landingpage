@@ -181,7 +181,7 @@
             </div>
           </div>
           <div class="aurora-image-wrapper">
-            <img src="/img/landingimgs/healthier_you.jpeg" :alt="$t('alt_texts.running_couple')" class="img-fluid" />
+            <picture><source srcset="/img/landingimgs/healthier_you.webp" type="image/webp" /><img src="/img/landingimgs/healthier_you.jpeg" :alt="$t('alt_texts.running_couple')" class="img-fluid" loading="lazy" decoding="async" width="800" height="800" /></picture>
           </div>
         </div>
       </div>
@@ -190,7 +190,7 @@
       <div class="showcase-card reveal">
         <div class="card-content-grid">
            <div class="aurora-image-wrapper">
-             <img src="/img/landingimgs/actifit_gym_pay_back.jpeg" :alt="$t('alt_texts.gym_workout')" class="img-fluid" />
+             <picture><source srcset="/img/landingimgs/actifit_gym_pay_back.webp" type="image/webp" /><img src="/img/landingimgs/actifit_gym_pay_back.jpeg" :alt="$t('alt_texts.gym_workout')" class="img-fluid" loading="lazy" decoding="async" width="800" height="800" /></picture>
           </div>
            <div class="aurora-text-content">
               <h2 class="text-capitalize">{{ $t('homepage.section3_title') }}</h2>
@@ -220,7 +220,7 @@
               </div>
           </div>
           <div class="aurora-image-wrapper">
-             <img src="/img/landingimgs/effort_rewarded_crypto.jpeg" :alt="$t('alt_texts.post_workout_pose')" class="img-fluid" />
+             <picture><source srcset="/img/landingimgs/effort_rewarded_crypto.webp" type="image/webp" /><img src="/img/landingimgs/effort_rewarded_crypto.jpeg" :alt="$t('alt_texts.post_workout_pose')" class="img-fluid" loading="lazy" decoding="async" width="800" height="800" /></picture>
           </div>
         </div>
       </div>
