@@ -280,6 +280,7 @@ module.exports = {
   You_have_scheduled: 'Masz zaplanowane',
   afit_steem_exchange_in_progress: 'Wymiana AFIT na głosy w toku.',
   current_no_queue: 'Twój obecny numer w kolejce to',
+  exchange_queue_updating: 'Twoje miejsce w kolejce jest aktualizowane. Sprawdź ponownie za kilka minut.',
   exchange_projected_time: 'Twoja wymiana/głosowanie ma nastąpić w ciągu nadchodzących ROUND_COUNT rund głosowania',
   hrs: 'godz.',
   upvote_notice: 'Głos zostanie oddany na Twoją najnowszą kartę raportu Actifit, która NIE została jeszcze nagrodzona.',

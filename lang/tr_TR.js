@@ -280,6 +280,7 @@ module.exports = {
   You_have_scheduled: 'Zamanlanmış bir',
   afit_steem_exchange_in_progress: 'AFIT\'ten Oylara takas işlemi devam ediyor.',
   current_no_queue: 'Sıradaki mevcut numaranız',
+  exchange_queue_updating: 'Sıradaki yeriniz güncelleniyor. Lütfen birkaç dakika sonra tekrar kontrol edin.',
   exchange_projected_time: 'Takas/oylamanızın önümüzdeki ROUND_COUNT oylama tur(lar)ı içinde gerçekleşmesi bekleniyor',
   hrs: 'saat',
   upvote_notice: 'Oylama, HENÜZ ödüllendirilmemiş en son Actifit Rapor kartınızda gerçekleşecektir.',

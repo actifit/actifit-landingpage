@@ -8,6 +8,7 @@ import hive from '@hiveio/hive-js';
 import { requestKey } from '~/utils/keyPrompt';
 import { classifyKey, keyRefusal } from '~/utils/keyChecks';
 import escapeHtml from '~/utils/escapeHtml';
+import { timeAgo } from '~/utils/timeAgo';
 Vue.prototype.$HAS = HAS;
 
 //sanitization
@@ -84,36 +85,9 @@ import moment from "moment";
 import Lodash from 'lodash';
 
 //global functions
+// time-ago label; see utils/timeAgo.js
 Vue.prototype.$getTimeDifference = function(dateParam) {
-
-  let localDate = new Date();
-
-  dateParam = new Date(Date.parse(dateParam));//Date(dateParam);
-  const currentDate = Date.now();
-  const difference = Math.abs(dateParam.getTime() - currentDate - localDate.getTimezoneOffset() * 60000);
-
-  //let difference = utcTime - dateParam.getTime();//currentDate.getUTCTime() - dateParam.getTime();
-  let mins = Math.floor(difference / (1000 * 60 ));
-  let hours = Math.floor(difference / (1000 * 60 * 60));
-  let days = Math.floor(hours / 24);
-  let weeks = Math.floor(days / 7);
-  let months = Math.floor(weeks / 4);
-  let years = Math.floor(months / 12);
-  let remainingMonths = months % 12;
-
-  if (mins < 60) {
-	return `${mins} min(s) ago`;
-  } else if (hours < 24) {
-	return `${hours} hour(s) ago`;
-  } else if (days < 7) {
-	return `${days} day(s) ago`;
-  } else if (weeks < 4) {
-	return `${weeks} week(s) ago`;
-  } else if (months < 12) {
-	return `${months} month(s) ago`;
-  } else {
-	return `${years} year(s) ago`;//`${years} years and ${remainingMonths} month(s)`;
-  }
+  return timeAgo(dateParam);
 }
 
 Vue.prototype.$fetchReportTags = function(report){

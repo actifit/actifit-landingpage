@@ -280,6 +280,7 @@ module.exports = {
   You_have_scheduled: 'スケジュール済み',
   afit_steem_exchange_in_progress: 'AFITからアップボートへの交換が進行中です。',
   current_no_queue: '現在のキュー番号は',
+  exchange_queue_updating: 'キューでの順番を更新しています。数分後にもう一度ご確認ください。',
   exchange_projected_time: 'あなたの交換/アップボートは、次のROUND_COUNT投票ラウンド以内に行われる予定です',
   hrs: '時間',
   upvote_notice: 'アップボートは、まだ報酬が支払われていないあなたの最新のActifitレポートカードで行われます。',
