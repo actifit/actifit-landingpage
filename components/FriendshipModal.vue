@@ -405,6 +405,7 @@
 		}
 		//a pending request in either direction means the backend refuses the add:
 		//say so before the user signs anything
+		this.friendshipLoader = targetFriend;
 		if (!this.friendRequests || !Array.isArray(this.friendRequests.sent_pending)){
 			try{
 				let quer = await fetch(process.env.actiAppUrl+'userFriendRequests/'+this.user.account.name);
@@ -423,10 +424,12 @@
 		});
 		if (refusal){
 			this.addFriendError = this.$t(refusal);
+			this.friendshipLoader = false;
 			return false;
 		}
 		let userConf = confirm(this.$t('confirm_add_friend').replace('_USERNAME_', targetFriend));
 		if (!userConf) {
+		  this.friendshipLoader = false;
 		  return;
 		}		
 		this.friendshipLoader = targetFriend;

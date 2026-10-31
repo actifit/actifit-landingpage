@@ -1246,8 +1246,14 @@ export default {
           + this.cur_bchain + '?operation=' + op_json);
       }
 
-      let req_res = await fetch(url);
-      let outcome = await req_res.json();
+      // a network or parse failure falls through to the error branch below,
+      // which clears the spinner
+      let outcome = {};
+      try {
+        outcome = await (await fetch(url)).json();
+      } catch (err) {
+        console.log(err);
+      }
       if (outcome.status == 'success') {
         this.friendshipLoader = false;
         this.$notify({
@@ -1314,8 +1320,14 @@ export default {
           + res.id + '/'
           + this.cur_bchain + '?operation=' + op_json);
       }
-      let req_res = await fetch(url);
-      let outcome = await req_res.json();
+      // a network or parse failure falls through to the error branch below,
+      // which clears the spinner
+      let outcome = {};
+      try {
+        outcome = await (await fetch(url)).json();
+      } catch (err) {
+        console.log(err);
+      }
       if (outcome.status == 'success') {
         this.friendshipLoader = false;
         this.$notify({
@@ -1382,8 +1394,14 @@ export default {
           + res.id + '/'
           + this.cur_bchain + '?operation=' + op_json);
       }
-      let req_res = await fetch(url);
-      let outcome = await req_res.json();
+      // a network or parse failure falls through to the error branch below,
+      // which clears the spinner
+      let outcome = {};
+      try {
+        outcome = await (await fetch(url)).json();
+      } catch (err) {
+        console.log(err);
+      }
       if (outcome.status == 'success') {
         this.friendshipLoader = false;
         this.$notify({
@@ -1450,8 +1468,14 @@ export default {
           + res.id + '/'
           + this.cur_bchain + '?operation=' + op_json);
       }
-      let req_res = await fetch(url);
-      let outcome = await req_res.json();
+      // a network or parse failure falls through to the error branch below,
+      // which clears the spinner
+      let outcome = {};
+      try {
+        outcome = await (await fetch(url)).json();
+      } catch (err) {
+        console.log(err);
+      }
       if (outcome.status == 'success') {
         this.friendshipLoader = false;
         this.$notify({
