@@ -20,6 +20,8 @@ describe('image sizes', () => {
       const p = path.join(badgeDir, f)
       const [w, h] = pngSize(p)
       expect(Math.max(w, h)).toBeLessThanOrEqual(256)
+      // colour type 6 = RGBA: the badges must keep their transparency
+      expect(fs.readFileSync(p)[25]).toBe(6)
       expect(fs.statSync(p).size).toBeLessThan(150 * 1024)
     }
   })
