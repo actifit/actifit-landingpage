@@ -280,6 +280,7 @@ module.exports = {
   You_have_scheduled: 'Você tem uma',
   afit_steem_exchange_in_progress: 'Troca de AFIT por Upvotes em andamento.',
   current_no_queue: 'Seu número atual na fila é',
+  exchange_queue_updating: 'A sua posição na fila está a ser atualizada. Volte a verificar dentro de alguns minutos.',
   exchange_projected_time: 'Sua troca/upvote está estimada para ocorrer dentro das próximas ROUND_COUNT rodadas de votação',
   hrs: 'horas',
   upvote_notice: 'O upvote ocorrerá no seu cartão de Relatório Actifit mais recente que AINDA NÃO foi recompensado.',

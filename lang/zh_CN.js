@@ -281,6 +281,7 @@ module.exports = {
   You_have_scheduled: '您已安排',
   afit_steem_exchange_in_progress: 'AFIT兑换点赞正在进行中。',
   current_no_queue: '您当前的排队号是',
+  exchange_queue_updating: '您在队列中的位置正在更新，请几分钟后再查看。',
   exchange_projected_time: '您的兑换/点赞预计将在接下来的ROUND_COUNT个投票轮次内进行',
   hrs: '小时',
   upvote_notice: '点赞将在您最近尚未获得奖励的Actifit报告卡上进行。',

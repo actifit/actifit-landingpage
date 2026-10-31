@@ -275,6 +275,7 @@ module.exports = {
   You_have_scheduled: 'Vous avez programmé',
   afit_steem_exchange_in_progress: 'Échange d\'AFIT contre des votes positifs en cours.',
   current_no_queue: 'Votre numéro actuel dans la file d\'attente est',
+  exchange_queue_updating: "Votre place dans la file d'attente est en cours de mise à jour. Revenez dans quelques minutes.",
   exchange_projected_time: 'Votre échange/vote positif est estimé avoir lieu dans les ROUND_COUNT prochain(s) tour(s) de vote',
   hrs: 'h',
   upvote_notice: 'Le vote positif aura lieu sur votre plus récente carte de rapport Actifit qui n\'est PAS encore récompensée.',

@@ -241,6 +241,7 @@ module.exports = {
   You_have_scheduled: 'You have a scheduled',
   afit_steem_exchange_in_progress: 'AFIT to Upvotes exchange in progress.',
   current_no_queue: 'Your current number in queue is',
+  exchange_queue_updating: 'Your place in the queue is being updated. Please check back in a few minutes.',
   exchange_projected_time: 'Your exchange/upvote is estimated to take place within upcoming ROUND_COUNT voting round(s)',
   hrs: 'hrs',
   upvote_notice: 'The upvote will take place on your most recent Actifit Report card that is NOT yet rewarded.',

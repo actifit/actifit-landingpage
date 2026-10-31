@@ -280,6 +280,7 @@ module.exports = {
   You_have_scheduled: 'आपने एक शेड्यूल किया है',
   afit_steem_exchange_in_progress: 'अपवोट के लिए AFIT का आदान-pradan प्रगति पर है।',
   current_no_queue: 'कतार में आपका वर्तमान नंबर है',
+  exchange_queue_updating: 'कतार में आपका स्थान अपडेट हो रहा है। कृपया कुछ मिनट बाद फिर से देखें।',
   exchange_projected_time: 'आपका विनिमय/अपवोट आगामी ROUND_COUNT वोटिंग राउंड के भीतर होने का अनुमान है',
   hrs: 'घंटे',
   upvote_notice: 'अपवोट आपकी सबसे हालिया एक्टिफिट रिपोर्ट कार्ड पर होगा जिसे अभी तक पुरस्कृत नहीं किया गया है।',

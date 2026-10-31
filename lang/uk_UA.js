@@ -280,6 +280,7 @@ module.exports = {
   You_have_scheduled: 'У вас заплановано',
   afit_steem_exchange_in_progress: 'Обмін AFIT на апвоути в процесі.',
   current_no_queue: 'Ваш поточний номер у черзі',
+  exchange_queue_updating: 'Ваше місце в черзі оновлюється. Будь ласка, перевірте за кілька хвилин.',
   exchange_projected_time: 'Ваш обмін/апвоут орієнтовно відбудеться протягом наступних ROUND_COUNT раундів голосування',
   hrs: 'год',
   upvote_notice: 'Апвоут буде здійснено на вашій останній картці звіту Actifit, яка ще НЕ винагороджена.',

@@ -1658,8 +1658,10 @@
                       {{ $t('afitx_bal_rank') }} {{ userAFITXRank }}. {{ $t('you_need') }} {{ minJoinTopHolders() }} {{
                         $t('min_missing_afitx_prio') }}
                     </div>
-                    <div>{{ $t('current_no_queue') }} {{ userTokenSwapPending.order }}. {{
+                    <div v-if="userTokenSwapPending && userTokenSwapPending.order">{{ $t('current_no_queue') }} {{ userTokenSwapPending.order }}. {{
                       $t('exchange_projected_time').replace('ROUND_COUNT', userTokenSwapPending.reward_round) }}</div>
+                    <!-- not in the queue list just loaded (e.g. that request failed): no blank number -->
+                    <div v-else>{{ $t('exchange_queue_updating') }}</div>
                   </div>
                   <div>{{ $t('upvote_notice') }}</div>
                   <small>{{ $t('afitx_data_update_notice') }}</small>
@@ -4254,6 +4256,7 @@ export default {
         ? this.tokenSwapQueue.pendingTransactions
         : []
       //sets proper full entry for user's token queue exchange details
+      this.userTokenSwapPending = '';
       for (let i = 0, max = entryList.length; i < max; i++) {
         if (entryList[i].user === this.displayUserData.name) {
           //found our user

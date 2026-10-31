@@ -275,6 +275,7 @@ module.exports = {
   You_have_scheduled: 'Sie haben einen geplanten',
   afit_steem_exchange_in_progress: 'AFIT zu Upvotes-Tausch läuft.',
   current_no_queue: 'Ihre aktuelle Nummer in der Warteschlange ist',
+  exchange_queue_updating: 'Dein Platz in der Warteschlange wird aktualisiert. Bitte schau in ein paar Minuten wieder vorbei.',
   exchange_projected_time: 'Ihr Tausch/Upvote wird voraussichtlich in den nächsten ROUND_COUNT Abstimmungsrunden stattfinden',
   hrs: 'Std.',
   upvote_notice: 'Der Upvote findet auf Ihrer letzten Actifit-Berichtskarte statt, die NOCH NICHT belohnt wurde.',
