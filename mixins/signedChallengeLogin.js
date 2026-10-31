@@ -38,6 +38,9 @@ const REQUEST_TIMEOUT_MS = 20000
 // a fresh nonce, so repeating it is harmless, and a brief network blip no longer ends
 // in an error. Not used for /loginVerify, whose nonce is single-use.
 const CHALLENGE_RETRY_DELAY_MS = 1000
+// Only a fast failure is worth repeating. A slow one (the proxy answers 503 after its own
+// 15 s upstream timeout) would just double the wait before the same message.
+const CHALLENGE_RETRY_IF_FASTER_THAN_MS = 5000
 
 // A fetch that never got an answer: a network failure, not a slow or failing server.
 // The 20s abort is excluded - that one means the server is too slow to answer.
@@ -107,6 +110,7 @@ export default {
         if (attempt > 0) await new Promise((resolve) => setTimeout(resolve, CHALLENGE_RETRY_DELAY_MS))
         const controller = new AbortController()
         const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+        const started = Date.now()
         try {
           res = await fetch('/api/proxy/loginChallenge', {
             method: 'POST',
@@ -123,6 +127,7 @@ export default {
           clearTimeout(timeoutId)
         }
         if (res && res.status < 500) break
+        if (Date.now() - started > CHALLENGE_RETRY_IF_FASTER_THAN_MS) break
       }
       if (!res) {
         this.failLogin(this.$t(connectionFailed ? 'login_connection_problem' : 'login_service_unavailable'))

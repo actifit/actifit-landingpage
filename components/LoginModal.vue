@@ -26,7 +26,7 @@
                   </div>
                 </transition>
                 <input type="password" id="ppkey" name="ppkey" autocomplete="current-password" ref="ppkey" :placeholder="$t('Ppkey')"  class="form-control form-control-lg m-1 col-md-8 acti-shadow">
-                <button v-on:click="proceedLogin" class="btn btn-brand login-stdd-btn m-1"><b>{{ $t('Login') }}</b><i class="fas fa-spin fa-spinner text-white" v-if="login_in_progress"></i></button>
+                <button v-on:click="proceedLogin" :disabled="login_in_progress" class="btn btn-brand login-stdd-btn m-1"><b>{{ $t('Login') }}</b><i class="fas fa-spin fa-spinner text-white" v-if="login_in_progress"></i></button>
                 <div class="form-control-lg ml-0 mt-2">
                   <a href="/password" class="small">{{ $t('forgot_my_posting_key') }}</a>
                 </div>
@@ -313,6 +313,7 @@
         if (json) { this.setKeychainLoginStatus(json); }
       },
       async proceedLogin () {
+        if (this.login_in_progress) { return; } // one login at a time
         this.captcha_invalid = '';
         this.error_proceeding = false;
         this.error_msg = '';

@@ -65,6 +65,46 @@ describe('login challenge retry', () => {
     expect(vm.error_msg).toBe('login_error')
   })
 
+  it('a drop then a 5xx says the service is unavailable', async () => {
+    global.fetch = jest.fn().mockImplementationOnce(dropped).mockImplementationOnce(() => Promise.resolve(status(502)))
+    const vm = makeVm()
+    expect(await vm.requestLoginChallenge('alice')).toBeNull()
+    expect(vm.error_msg).toBe('login_service_unavailable')
+  })
+
+  it('a 5xx then a drop says "check your connection"', async () => {
+    global.fetch = jest.fn().mockImplementationOnce(() => Promise.resolve(status(503))).mockImplementationOnce(dropped)
+    const vm = makeVm()
+    expect(await vm.requestLoginChallenge('alice')).toBeNull()
+    expect(vm.error_msg).toBe('login_connection_problem')
+  })
+
+  it('a slow 5xx (the proxy upstream timeout) is not retried', async () => {
+    const realNow = Date.now
+    let t = 1000000
+    Date.now = () => t
+    global.fetch = jest.fn(() => { t += 15000; return Promise.resolve(status(503)) })
+    try {
+      const vm = makeVm()
+      expect(await vm.requestLoginChallenge('alice')).toBeNull()
+      expect(global.fetch).toHaveBeenCalledTimes(1)
+      expect(vm.error_msg).toBe('login_service_unavailable')
+    } finally {
+      Date.now = realNow
+    }
+  })
+
+  it('the connection message exists in every locale', () => {
+    const fs = require('fs')
+    const path = require('path')
+    const dir = path.join(__dirname, '../../../lang')
+    for (const f of fs.readdirSync(dir).filter((x) => x.endsWith('.js'))) {
+      const mod = require(path.join(dir, f))
+      const strings = mod.default || mod
+      expect(typeof strings.login_connection_problem).toBe('string')
+    }
+  })
+
   it('loginVerify is never retried; a dropped connection says "check your connection"', async () => {
     global.fetch = jest.fn(dropped)
     const vm = makeVm()
