@@ -9,10 +9,13 @@
 
 export function parseUtc (value) {
   if (value instanceof Date) return value.getTime()
+  if (typeof value === 'number') return value
   if (typeof value !== 'string' || !value) return NaN
-  const hasZone = /([zZ]|[+-]\d\d:?\d\d)$/.test(value)
-  const isDateTime = value.includes('T')
-  return Date.parse(isDateTime && !hasZone ? value + 'Z' : value)
+  // "2026-10-30 16:39:30" (space) is the same date-time as "2026-10-30T16:39:30"
+  const text = /^\d{4}-\d\d-\d\d \d/.test(value) ? value.replace(' ', 'T') : value
+  const hasZone = /([zZ]|[+-]\d\d(:?\d\d)?)$/.test(text)
+  const isDateTime = /T/i.test(text)
+  return Date.parse(isDateTime && !hasZone ? text + 'Z' : text)
 }
 
 export function timeAgo (value, now = Date.now()) {
