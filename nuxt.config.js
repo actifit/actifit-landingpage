@@ -53,6 +53,8 @@ module.exports = {
   hooks: {
     // Adds the CSP hashes of trusted inline <head> scripts (the GTM bootstrap).
     'render:route': require('./api/csp-head-hashes').addHeadHashes,
+    // Keeps the CSP report-uri on a sample of pages only (api/csp-report-sample.js).
+    'render:beforeResponse': require('./api/csp-report-sample').sampleCspReports,
   },
 
 
