@@ -282,6 +282,9 @@ module.exports = {
       },
     },
     static: {
+      // let Cloudflare and browsers keep static files (images, favicon) for a day
+      // instead of revalidating every request with the server
+      maxAge: '1d',
       setHeaders(res) {
         res.setHeader('X-Frame-Options', 'ALLOWALL')
         res.setHeader('Access-Control-Allow-Origin', '*')
