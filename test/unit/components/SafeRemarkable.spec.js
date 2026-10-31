@@ -98,3 +98,18 @@ describe('SafeRemarkable', () => {
     spy.mockRestore()
   })
 })
+
+// The server runs Node 16 (.nvmrc), like CI. This loads the real sanitize-html and
+// cheerio/slim there, so a dependency that stops loading on Node 16 fails CI, not
+// every server-rendered page.
+describe('SafeRemarkable on the server (sanitize-html path)', () => {
+  beforeAll(() => { process.client = false })
+  afterAll(() => { delete process.client })
+
+  it('sanitizes and marks off-site links', () => {
+    const el = render('hi <img src="https://images.hive.blog/0x0/a.png" onerror="alert(1)"> [x](https://example.com/p)')
+    expect(handlerAttrs(el)).toEqual([])
+    expect(el.querySelector('img')).not.toBeNull()
+    expect(el.querySelector('a').classList.contains('external-link')).toBe(true)
+  })
+})
