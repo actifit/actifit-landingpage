@@ -149,6 +149,7 @@ module.exports = {
   change_my_keys_now: 'Cambiar mis claves ahora',
   login_request_expired: 'Tu solicitud de inicio de sesión ha caducado. Inténtalo de nuevo.',
   login_service_unavailable: 'El inicio de sesión no está disponible temporalmente. Inténtalo de nuevo en un momento.',
+  login_connection_problem: 'No se pudo conectar con Actifit. Comprueba tu conexión e inténtalo de nuevo.',
   posting_key_only_login: 'Esa es tu clave active u owner. Inicia sesión solo con tu clave POSTING: nunca introduzcas tu clave active u owner en un sitio web.',
   key_prompt_title_posting: 'Introduce tu clave posting para continuar',
   key_prompt_title_active: 'Esta acción necesita tu clave active',

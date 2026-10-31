@@ -152,6 +152,7 @@ module.exports = {
   change_my_keys_now: 'Meine Schlüssel jetzt ändern',
   login_request_expired: 'Ihre Anmeldeanfrage ist abgelaufen. Bitte versuchen Sie es erneut.',
   login_service_unavailable: 'Die Anmeldung ist vorübergehend nicht verfügbar. Bitte versuchen Sie es gleich erneut.',
+  login_connection_problem: 'Actifit ist nicht erreichbar. Bitte prüfe deine Verbindung und versuche es erneut.',
   posting_key_only_login: 'Das ist Ihr Active- oder Owner-Schlüssel. Bitte melden Sie sich nur mit Ihrem POSTING-Schlüssel an - geben Sie Ihren Active- oder Owner-Schlüssel niemals auf einer Website ein.',
   key_prompt_title_posting: 'Geben Sie Ihren Posting-Schlüssel ein',
   key_prompt_title_active: 'Für diese Aktion wird Ihr Active-Schlüssel benötigt',

@@ -118,6 +118,7 @@ module.exports = {
   change_my_keys_now: 'Change my keys now',
   login_request_expired: 'Your login request timed out. Please try again.',
   login_service_unavailable: 'Login is temporarily unavailable. Please try again in a moment.',
+  login_connection_problem: "Couldn't reach Actifit. Please check your connection and try again.",
   posting_key_only_login: 'That is your active or owner key. Please sign in with your POSTING key only - never enter your active or owner key on a website.',
   key_prompt_title_posting: 'Enter your posting key to continue',
   key_prompt_title_active: 'This action needs your active key',

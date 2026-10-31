@@ -157,6 +157,7 @@ module.exports = {
   change_my_keys_now: 'Cambia le mie chiavi ora',
   login_request_expired: 'La richiesta di accesso è scaduta. Riprova.',
   login_service_unavailable: 'Accesso temporaneamente non disponibile. Riprova tra poco.',
+  login_connection_problem: 'Impossibile raggiungere Actifit. Controlla la connessione e riprova.',
   posting_key_only_login: 'Questa è la tua chiave active o owner. Accedi solo con la chiave POSTING - non inserire mai la chiave active o owner su un sito web.',
   key_prompt_title_posting: 'Inserisci la chiave posting per continuare',
   key_prompt_title_active: 'Questa azione richiede la tua chiave active',

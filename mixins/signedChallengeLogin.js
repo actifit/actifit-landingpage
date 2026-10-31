@@ -34,6 +34,14 @@
 import hive from '@hiveio/hive-js'
 
 const REQUEST_TIMEOUT_MS = 20000
+// One quiet retry of /loginChallenge after a dropped connection or a 5xx: each try gets
+// a fresh nonce, so repeating it is harmless, and a brief network blip no longer ends
+// in an error. Not used for /loginVerify, whose nonce is single-use.
+const CHALLENGE_RETRY_DELAY_MS = 1000
+
+// A fetch that never got an answer: a network failure, not a slow or failing server.
+// The 20s abort is excluded - that one means the server is too slow to answer.
+const isConnectionFailure = (e) => !(e && e.name === 'AbortError')
 
 export default {
   methods: {
@@ -93,21 +101,32 @@ export default {
     // a network drop, the 20s abort, a non-JSON body - used to reject unhandled and leave
     // the spinner turning forever with no message. Fixing it once, here, covers them all.
     async requestLoginChallenge (username) {
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
-      let res
-      try {
-        res = await fetch('/api/proxy/loginChallenge', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username }),
-          signal: controller.signal
-        })
-      } catch (e) {
-        this.failLogin(this.$t('login_service_unavailable'))
+      let res = null
+      let connectionFailed = false
+      for (let attempt = 0; attempt < 2; attempt++) {
+        if (attempt > 0) await new Promise((resolve) => setTimeout(resolve, CHALLENGE_RETRY_DELAY_MS))
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+        try {
+          res = await fetch('/api/proxy/loginChallenge', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username }),
+            signal: controller.signal
+          })
+          connectionFailed = false
+        } catch (e) {
+          res = null
+          connectionFailed = isConnectionFailure(e)
+          if (!connectionFailed) break // timed out: the server is slow, do not wait again
+        } finally {
+          clearTimeout(timeoutId)
+        }
+        if (res && res.status < 500) break
+      }
+      if (!res) {
+        this.failLogin(this.$t(connectionFailed ? 'login_connection_problem' : 'login_service_unavailable'))
         return null
-      } finally {
-        clearTimeout(timeoutId)
       }
       // 503 is the server saying "busy, try again", not "your credentials are wrong".
       // Reporting it as a credential failure is the same mistake that, during the
@@ -201,7 +220,7 @@ export default {
           signal: controller.signal
         })
       } catch (e) {
-        this.failLogin(this.$t('login_service_unavailable'))
+        this.failLogin(this.$t(isConnectionFailure(e) ? 'login_connection_problem' : 'login_service_unavailable'))
         return null
       } finally {
         clearTimeout(timeoutId)

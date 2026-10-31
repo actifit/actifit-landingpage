@@ -157,6 +157,7 @@ module.exports = {
   change_my_keys_now: 'Alterar as minhas chaves agora',
   login_request_expired: 'O seu pedido de login expirou. Tente novamente.',
   login_service_unavailable: 'O login está temporariamente indisponível. Tente novamente dentro de momentos.',
+  login_connection_problem: 'Não foi possível ligar ao Actifit. Verifique a sua ligação e tente novamente.',
   posting_key_only_login: 'Essa é a sua chave active ou owner. Inicie sessão apenas com a chave POSTING - nunca introduza a chave active ou owner num site.',
   key_prompt_title_posting: 'Introduza a sua chave posting para continuar',
   key_prompt_title_active: 'Esta ação precisa da sua chave active',

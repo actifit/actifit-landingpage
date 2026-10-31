@@ -152,6 +152,7 @@ module.exports = {
   change_my_keys_now: 'Changer mes clés maintenant',
   login_request_expired: 'Votre demande de connexion a expiré. Veuillez réessayer.',
   login_service_unavailable: 'La connexion est temporairement indisponible. Veuillez réessayer dans un instant.',
+  login_connection_problem: 'Impossible de joindre Actifit. Vérifiez votre connexion et réessayez.',
   posting_key_only_login: 'Il s’agit de votre clé active ou owner. Connectez-vous uniquement avec votre clé POSTING - n’entrez jamais votre clé active ou owner sur un site web.',
   key_prompt_title_posting: 'Saisissez votre clé posting pour continuer',
   key_prompt_title_active: 'Cette action nécessite votre clé active',
