@@ -673,6 +673,12 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
 		html_content = html_content.replace(placeholder, placeholders[placeholder]);
 	}
 
+	return sanitizePostHtml(html_content);
+}
+
+// Sanitizes rendered post HTML and marks off-site links. Shared by $cleanBody and
+// SafeRemarkable, which renders markdown again and so must sanitize its own output.
+function sanitizePostHtml (html_content) {
 	let sanitizeOptions = {
 		ALLOWED_TAGS: [ 'img', 'iframe', 'details', 'summary', 'table', 'tr', 'td', 'th', 'thead', 'tbody', 'sub', 'sup', 'div', 'a', 'p', 'br', 'strong', 'em', 'u', 's', 'blockquote', 'code', 'pre', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span' ],
 		ALLOWED_ATTR: [ 'src', 'style', 'class', 'alt', 'title', 'width', 'height', 'frameborder', 'allowfullscreen', 'href', 'target', 'rel', 'colspan', 'rowspan', 'data-external-href' ],
@@ -795,9 +801,10 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
         });
         return doc.body.innerHTML;
     } else {
-        // Server-side link processing using cheerio
-        const cheerio = require('cheerio');
-        const $ = cheerio.load(sanitized_html);
+        // Server-side link processing. cheerio/slim, not cheerio: the full build pulls in
+        // undici 7, which does not load on the server's Node 16 (.nvmrc).
+        const cheerio = require('cheerio/slim');
+        const $ = cheerio.load(sanitized_html, null, false);
         $('a[href]').each((i, el) => {
             const $el = $(el);
             processLinks(
@@ -806,9 +813,11 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
                 (name, val) => $el.attr(name, val)
             );
         });
-        return $('body').html();
+        return $.root().html();
     }
 }
+
+Vue.prototype.$sanitizePostHtml = sanitizePostHtml;
 
 Vue.prototype.$clearDraft = function (username, type){
 	localStorage.removeItem(username+'_draft_'+type);
