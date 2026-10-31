@@ -50,5 +50,11 @@ describe('csp-report-sample', () => {
     expect(sampleRate('1')).toBe(1)
     expect(sampleRate('2')).toBe(0.02)
     expect(sampleRate('abc')).toBe(0.02)
+    expect(sampleRate('  ')).toBe(0.02)
+  })
+
+  it('is registered as the render:beforeResponse hook in nuxt.config.js', () => {
+    const src = require('fs').readFileSync(require('path').join(__dirname, '../../../nuxt.config.js'), 'utf8')
+    expect(src).toMatch(/'render:beforeResponse':\s*require\('\.\/api\/csp-report-sample'\)\.sampleCspReports/)
   })
 })

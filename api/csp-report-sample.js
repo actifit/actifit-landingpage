@@ -13,9 +13,11 @@ const DEFAULT_SAMPLE = 0.02;
 
 function sampleRate(value = process.env.CSP_REPORT_SAMPLE) {
   const rate = Number(value);
-  return value !== undefined && value !== '' && rate >= 0 && rate <= 1 ? rate : DEFAULT_SAMPLE;
+  return value !== undefined && String(value).trim() !== '' && rate >= 0 && rate <= 1 ? rate : DEFAULT_SAMPLE;
 }
 
+// Only report-uri is handled: the policy has no report-to directive and no
+// Reporting-Endpoints header. Add them here if that changes.
 function withoutReportUri(policy) {
   return policy.split(';').filter((d) => !/^\s*report-uri\b/i.test(d)).join(';');
 }
