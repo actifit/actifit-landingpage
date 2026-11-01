@@ -152,6 +152,7 @@ module.exports = {
   change_my_keys_now: 'تغيير مفاتيحي الآن',
   login_request_expired: 'انتهت صلاحية طلب تسجيل الدخول. يرجى المحاولة مرة أخرى.',
   login_service_unavailable: 'تسجيل الدخول غير متاح مؤقتاً. يرجى المحاولة بعد قليل.',
+  login_connection_problem: 'تعذّر الوصول إلى Actifit. يرجى التحقق من اتصالك والمحاولة مرة أخرى.',
   posting_key_only_login: 'هذا هو مفتاحك النشط أو مفتاح المالك. يرجى تسجيل الدخول بمفتاح النشر فقط - لا تدخل مفتاح النشط أو المالك في أي موقع.',
   key_prompt_title_posting: 'أدخل مفتاح النشر للمتابعة',
   key_prompt_title_active: 'يتطلب هذا الإجراء مفتاحك النشط',

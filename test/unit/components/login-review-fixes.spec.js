@@ -122,7 +122,9 @@ describe('3. network failures never leave the spinner turning', () => {
     const vm = makeVm()
 
     await vm.requestLoginChallenge(USER)
-    expect(vm.error_msg).toBe('login_service_unavailable')
+    expect(vm.error_msg).toBe('login_connection_problem')
+    // retried once before giving up
+    expect(global.fetch).toHaveBeenCalledTimes(2)
   })
 })
 

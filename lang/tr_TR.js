@@ -157,6 +157,7 @@ module.exports = {
   change_my_keys_now: 'Anahtarlarımı şimdi değiştir',
   login_request_expired: 'Giriş isteğinizin süresi doldu. Lütfen tekrar deneyin.',
   login_service_unavailable: 'Giriş geçici olarak kullanılamıyor. Lütfen birazdan tekrar deneyin.',
+  login_connection_problem: "Actifit'e ulaşılamadı. Lütfen bağlantınızı kontrol edip tekrar deneyin.",
   posting_key_only_login: 'Bu sizin active veya owner anahtarınız. Lütfen yalnızca POSTING anahtarınızla giriş yapın - active veya owner anahtarınızı hiçbir sitede girmeyin.',
   key_prompt_title_posting: 'Devam etmek için posting anahtarınızı girin',
   key_prompt_title_active: 'Bu işlem active anahtarınızı gerektirir',

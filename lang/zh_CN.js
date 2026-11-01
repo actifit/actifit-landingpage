@@ -158,6 +158,7 @@ module.exports = {
   change_my_keys_now: '立即更改我的密钥',
   login_request_expired: '登录请求已过期。请重试。',
   login_service_unavailable: '登录暂时不可用。请稍后重试。',
+  login_connection_problem: '无法连接到 Actifit。请检查您的网络连接后重试。',
   posting_key_only_login: '这是您的 active 或 owner 密钥。请仅使用 POSTING 密钥登录 - 切勿在网站上输入 active 或 owner 密钥。',
   key_prompt_title_posting: '请输入 posting 密钥以继续',
   key_prompt_title_active: '此操作需要您的 active 密钥',

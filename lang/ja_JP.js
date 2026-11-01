@@ -157,6 +157,7 @@ module.exports = {
   change_my_keys_now: '今すぐキーを変更する',
   login_request_expired: 'ログインリクエストの有効期限が切れました。もう一度お試しください。',
   login_service_unavailable: '現在ログインをご利用いただけません。しばらくしてからお試しください。',
+  login_connection_problem: 'Actifitに接続できませんでした。接続を確認して、もう一度お試しください。',
   posting_key_only_login: 'それは active または owner キーです。POSTING キーだけでログインしてください。',
   key_prompt_title_posting: '続行するには posting キーを入力してください',
   key_prompt_title_active: 'この操作には active キーが必要です',

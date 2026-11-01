@@ -157,6 +157,7 @@ module.exports = {
   change_my_keys_now: 'अभी मेरी कुंजियाँ बदलें',
   login_request_expired: 'आपका लॉगिन अनुरोध समाप्त हो गया। कृपया पुनः प्रयास करें।',
   login_service_unavailable: 'लॉगिन अस्थायी रूप से उपलब्ध नहीं है। कृपया थोड़ी देर बाद प्रयास करें।',
+  login_connection_problem: 'Actifit से कनेक्ट नहीं हो सका। कृपया अपना कनेक्शन जांचें और फिर से प्रयास करें।',
   posting_key_only_login: 'यह आपकी active या owner कुंजी है। कृपया केवल अपनी POSTING कुंजी से लॉगिन करें।',
   key_prompt_title_posting: 'जारी रखने के लिए अपनी posting कुंजी दर्ज करें',
   key_prompt_title_active: 'इस कार्य के लिए आपकी active कुंजी चाहिए',

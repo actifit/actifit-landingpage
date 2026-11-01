@@ -157,6 +157,7 @@ module.exports = {
   change_my_keys_now: 'Zmień moje klucze teraz',
   login_request_expired: 'Twoje żądanie logowania wygasło. Spróbuj ponownie.',
   login_service_unavailable: 'Logowanie jest chwilowo niedostępne. Spróbuj ponownie za chwilę.',
+  login_connection_problem: 'Nie udało się połączyć z Actifit. Sprawdź połączenie i spróbuj ponownie.',
   posting_key_only_login: 'To jest Twój klucz active lub owner. Zaloguj się wyłącznie kluczem POSTING - nigdy nie wpisuj klucza active ani owner na stronie.',
   key_prompt_title_posting: 'Wpisz klucz posting, aby kontynuować',
   key_prompt_title_active: 'Ta akcja wymaga klucza active',

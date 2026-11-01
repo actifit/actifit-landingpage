@@ -157,6 +157,7 @@ module.exports = {
   change_my_keys_now: 'Змінити мої ключі зараз',
   login_request_expired: 'Термін дії запиту на вхід сплив. Спробуйте ще раз.',
   login_service_unavailable: 'Вхід тимчасово недоступний. Спробуйте ще раз за хвилину.',
+  login_connection_problem: "Не вдалося підключитися до Actifit. Перевірте з'єднання та спробуйте ще раз.",
   posting_key_only_login: 'Це ваш active або owner ключ. Увійдіть лише з POSTING ключем - ніколи не вводьте active або owner ключ на сайті.',
   key_prompt_title_posting: 'Введіть posting ключ, щоб продовжити',
   key_prompt_title_active: 'Для цієї дії потрібен active ключ',

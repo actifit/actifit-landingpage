@@ -32,7 +32,7 @@
 				</div>
 
 				<div class="row col-12">
-					<button v-on:click="proceedLogin" class="btn btn-brand login-stdd-btn m-1"><b>{{ $t('Login') }}</b><i class="fas fa-spin fa-spinner text-white" v-if="login_in_progress"></i></button>
+					<button v-on:click="proceedLogin" :disabled="login_in_progress" class="btn btn-brand login-stdd-btn m-1"><b>{{ $t('Login') }}</b><i class="fas fa-spin fa-spinner text-white" v-if="login_in_progress"></i></button>
 				</div>
 
 				<span class="row form-control-lg ml-0">
@@ -440,6 +440,7 @@
 		if (json) { this.setKeychainLoginStatus(json); }
 	  },
 	  async proceedLogin () {
+		if (this.login_in_progress) { return; } // one login at a time
 		this.captcha_invalid = '';
 		this.error_proceeding = false;
 		this.error_msg = '';
