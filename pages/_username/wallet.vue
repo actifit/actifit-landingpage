@@ -8519,7 +8519,12 @@ export default {
     },
   },
   created() {
-    this.runningInterval = setInterval(this.fetchUserData, 60 * 1000);
+    // created() also runs during server rendering, where destroyed() never does: an
+    // interval started there was never cleared and kept the whole rendered app in
+    // memory (~1 MB per wallet render). Refresh only in the browser.
+    if (process.client) {
+      this.runningInterval = setInterval(this.fetchUserData, 60 * 1000);
+    }
 
   },
   destroyed() {
