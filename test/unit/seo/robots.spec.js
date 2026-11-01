@@ -47,6 +47,13 @@ describe('robots.txt', () => {
     }
   })
 
+  it('Applebot may crawl every page listed in the sitemap', () => {
+    const sitemap = fs.readFileSync(path.join(__dirname, '../../../static/sitemap.xml'), 'utf8')
+    const paths = [...sitemap.matchAll(/<loc>\s*https?:\/\/[^/<]+([^<]*)<\/loc>/g)].map(m => m[1].trim() || '/')
+    expect(paths.length > 5).toBe(true)
+    for (const p of paths) expect([p, allowed('Applebot', p)]).toEqual([p, true])
+  })
+
   it('Applebot skips tag and community listing pages', () => {
     for (const p of ['/photography', '/spanish', '/hive-193552', '/bitcoin', '/travel']) {
       expect([p, allowed('Applebot', p)]).toEqual([p, false])

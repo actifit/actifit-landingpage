@@ -12,8 +12,9 @@ Disallow: /search
 # Applebot crawls every tag and community listing page (/photography, /spanish,
 # /hive-193552 ...), an endless set with little search value, at several pages a
 # second, each rendered on the server. It keeps posts and profiles (/@...), the
-# homepage and the main site pages. Applebot reads only this group, not the one
-# above, so the paths above are repeated here.
+# homepage, every page in the sitemap and the main site pages. Applebot reads only
+# this group: the private pages listed above stay blocked by the final Disallow: /.
+# Prefix rules on purpose (Apple documents standard robots.txt, not `$` anchors).
 User-agent: Applebot
 Allow: /$
 Allow: /@
@@ -27,6 +28,14 @@ Allow: /signup
 Allow: /explore
 Allow: /privacy-policy
 Allow: /terms-conditions
+Allow: /yieldfarming
+Allow: /delegators
+Allow: /referrals
+Allow: /consultants
+Allow: /proposals
+Allow: /conduct
+Allow: /ownership
+Allow: /whitepaper/
 Allow: /sitemap.xml
 Allow: /img/
 Allow: /_nuxt/
