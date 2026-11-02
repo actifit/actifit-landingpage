@@ -279,12 +279,18 @@ export default {
           return
         }
         const timer = setTimeout(() => resolve(false), KEYCHAIN_HANDSHAKE_TIMEOUT_MS)
-        keychain.requestHandshake(() => {
+        try {
+          keychain.requestHandshake(() => {
+            clearTimeout(timer)
+            this.keychain = keychain
+            this.keychain_available = true
+            resolve(true)
+          })
+        } catch (e) {
+          // a broken extension can throw here instead of answering
           clearTimeout(timer)
-          this.keychain = keychain
-          this.keychain_available = true
-          resolve(true)
-        })
+          resolve(false)
+        }
       })
     },
 

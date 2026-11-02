@@ -398,6 +398,7 @@
 		})
 	  },
 	  async loginKeychain () {
+		if (this.login_in_progress) { return; } // one login at a time
 		if (!await this.verifyKeychain()) {
 			this.failLogin(this.$t('keychain_not_detected'));
 			return;

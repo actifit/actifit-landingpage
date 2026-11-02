@@ -69,6 +69,11 @@ describe('verifyKeychain', () => {
     expect(vm.keychain_available).toBe(true)
   })
 
+  it('is false when the extension throws instead of answering', async () => {
+    window.hive_keychain = { requestHandshake: () => { throw new Error('broken') } }
+    await expect(makeVm().verifyKeychain()).resolves.toBe(false)
+  })
+
   it('is false after 3s when Keychain never answers', async () => {
     jest.useFakeTimers()
     window.hive_keychain = { requestHandshake: () => {} }
@@ -101,11 +106,31 @@ describe('loginCaptchaToken', () => {
 
 describe.each([['LoginModal', LoginModal], ['pages/login', LoginPage]])('%s', (name, C) => {
   it('the Keychain button says Keychain was not detected instead of doing nothing', async () => {
-    const vm = makeVm({ login_in_progress: true })
+    const vm = makeVm()
     await methodsOf(C).loginKeychain.call(vm)
     expect(vm.error_proceeding).toBe(true)
     expect(vm.error_msg).toBe('keychain_not_detected')
     expect(vm.login_in_progress).toBe(false)
+  })
+
+  it('the Keychain button does nothing while another login is running', async () => {
+    const vm = makeVm({ login_in_progress: true, verifyKeychain: jest.fn() })
+    await methodsOf(C).loginKeychain.call(vm)
+    expect(vm.verifyKeychain).not.toHaveBeenCalled()
+    expect(vm.login_in_progress).toBe(true)
+    expect(vm.error_msg).toBe('')
+  })
+
+  it('a rejected reCAPTCHA token still blocks the login and resets the button', async () => {
+    global.fetch = jest.fn((url) => String(url).includes('verifyLoginCaptcha')
+      ? Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ error: 1 }) })
+      : ok(CHALLENGE))
+    const vm = makeVm({ $recaptchaLoaded: jest.fn().mockResolvedValue(), $recaptcha: jest.fn().mockResolvedValue('t'), closeModal: jest.fn(), resetForm: jest.fn(), $emit: jest.fn() })
+    await methodsOf(C).proceedLogin.call(vm)
+    const called = global.fetch.mock.calls.map((c) => String(c[0]))
+    expect(called.some((u) => u.includes('loginChallenge'))).toBe(false)
+    expect(vm.login_in_progress).toBe(false)
+    expect(vm.error_msg).toBe('login_error')
   })
 
   it('a posting-key login goes ahead without a reCAPTCHA token, and skips the token check', async () => {
