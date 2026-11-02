@@ -13,7 +13,6 @@
     <div><!-- class="modal-dialog" role="document" -->
       <div class="modal-content">
         <div class="modal-header p-1">
-          <!-- Using the dynamic year from the computed property -->
           <h5 class="modal-title">{{ $t('proposal_modal_title_year') }}</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close" @click="closeModal">
             <span aria-hidden="true">×</span>
@@ -21,7 +20,7 @@
         </div>
         <p>{{ $t('proposal_modal_message') }}</p>
         <div class="text-right">
-          <button @click="voteForProposal" class="btn m-1 col-5">
+          <button @click="voteForProposal" :disabled="voting" class="btn m-1 col-5">
             {{ $t('vote_button_text') }}
           </button>
           <button @click="readMore" class="m-1 col-5">{{ $t('read_more_button_text') }}</button>
@@ -34,13 +33,11 @@
 <script>
 import { mapGetters } from 'vuex';
 
+// After "×", stay hidden for this long in this browser.
+const DISMISS_MS = 3 * 24 * 60 * 60 * 1000;
+
 export default {
   props: {
-    // MODIFIED: Removed modalTitle and message props to handle text internally.
-    propUrl:{
-      type: String,
-      default: 'https://peakd.com/proposals/337',
-    },
     bottomOffset: {
       type: Number,
       default: 20,
@@ -49,7 +46,7 @@ export default {
   data() {
     return {
       visible: false,
-      username: null,
+      voting: false,
     };
   },
   watch: {
@@ -59,8 +56,16 @@ export default {
   },
   computed: {
     ...mapGetters('steemconnect', ['user']),
-    ...mapGetters(['proposalVoters']),
 
+    username() {
+      return (this.user && this.user.account && this.user.account.name) || null;
+    },
+    proposalId() {
+      return Number(this.$config.proposalId);
+    },
+    dismissKey() {
+      return 'proposal_popup_dismissed_' + this.proposalId;
+    },
     modalStyle() {
       return {
         bottom: `${this.bottomOffset}px`,
@@ -70,44 +75,58 @@ export default {
   methods: {
     closeModal() {
       this.visible = false;
+      try { localStorage.setItem(this.dismissKey, String(Date.now())); } catch (e) { /* storage blocked */ }
     },
-    voteForProposal() {
-      const username = this.user && this.user.account && this.user.account.name || null;
-      const proposalId = this.$config.proposalId; // Retrieve proposal ID from nuxt.config.js
-      const approve = true; // Set to false if you want to unvote
-      window.hive_keychain?.requestUpdateProposalVote(
-        username,
-        [proposalId],
-        approve,
-        [],
-        (response) => {
-          if (response.success) {
-            this.visible = false; // Close modal after voting
-          }
-        }
-      );
-    },
-    readMore(){
-      window.open(this.propUrl, '_blank'); // Opens the link in a new tab
-    },
-    userVotedProposal(){
-      const username = this.user && this.user.account && this.user.account.name || null;
-      if (!username) return false;
-      if (this.proposalVoters != null && this.proposalVoters.length > 0){
-        if (this.proposalVoters.includes(username)){
-          return true;
-        }
+    recentlyDismissed() {
+      try {
+        const at = Number(localStorage.getItem(this.dismissKey));
+        return at > 0 && Date.now() - at < DISMISS_MS;
+      } catch (e) {
+        return false;
       }
     },
-    adjustVisibility(){
-      // Popup disabled for now — re-enable for Actifit's next DHF proposal by restoring:
-      //   this.visible = !this.userVotedProposal();
-      this.visible = false;
+    async voteForProposal() {
+      if (!this.username || this.voting) return;
+      // Proposal votes need the active key. HiveSigner sessions only hold a posting
+      // token, so HiveSigner users approve the vote on hivesigner.com instead.
+      if (!this.$signsInBrowser()) {
+        window.open('https://hivesigner.com/sign/update-proposal-votes?proposal_ids=' +
+          encodeURIComponent(JSON.stringify([this.proposalId])) + '&approve=true', '_blank');
+        this.closeModal();
+        return;
+      }
+      this.voting = true;
+      try {
+        const res = await this.$processTrxFunc('update_proposal_votes', {
+          voter: this.username,
+          proposal_ids: [this.proposalId],
+          approve: true,
+          extensions: []
+        }, true);
+        if (res && res.success) this.visible = false;
+      } finally {
+        this.voting = false;
+      }
+    },
+    readMore(){
+      window.open(this.$config.proposalPostPath, '_blank');
+    },
+    // Only logged-in users who have not voted yet, and did not just close it.
+    async adjustVisibility(){
+      const username = this.username;
+      if (!username || this.recentlyDismissed()) {
+        this.visible = false;
+        return;
+      }
+      let voted = true; // a failed lookup hides the popup rather than nagging voters
+      try {
+        voted = await this.$store.dispatch('hasVotedProposal', { proposalId: this.proposalId, username });
+      } catch (e) { /* node unavailable */ }
+      // the user may have logged out or switched accounts while we waited
+      if (username === this.username) this.visible = !voted;
     }
   },
-  async mounted() {
-    // Fetch voters and then adjust visibility based on the result.
-    await this.$store.dispatch('fetchProposalVoters', {proposalId: this.$config.proposalId});
+  mounted() {
     this.adjustVisibility();
   },
 };

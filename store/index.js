@@ -48,7 +48,6 @@ const createStore = () => {
       transactions: [], // logged-in user's transactions
       referrals: [], //logged-in user's referrals
       proposals: [], //proposals
-      proposalVoters: [],
       userSettings: {}, //logged-in user's settings
       userRank: 0, // logged-in user's rank
       userRankObj: '', // full details about user's rank
