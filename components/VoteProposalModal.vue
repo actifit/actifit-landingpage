@@ -32,6 +32,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import escapeHtml from '~/utils/escapeHtml';
 
 // After "×", stay hidden for this long in this browser.
 const DISMISS_MS = 3 * 24 * 60 * 60 * 1000;
@@ -47,6 +48,7 @@ export default {
     return {
       visible: false,
       voting: false,
+      lookupId: 0,
     };
   },
   watch: {
@@ -103,7 +105,16 @@ export default {
           approve: true,
           extensions: []
         }, true);
-        if (res && res.success) this.visible = false;
+        if (res && res.success) {
+          // also remembered, so a lookup that runs before the vote is in a block
+          // (or on a lagging node) does not bring the popup back
+          this.closeModal();
+        } else if (res && !('cancelled' in res)) {
+          // Keychain and HiveAuth failures come back without a message shown; the
+          // typed-key path (the one that sets `cancelled`) already shows its own.
+          // Escaped: toasts render HTML.
+          this.$notify({ group: 'error', text: escapeHtml(res.error || this.$t('error_performing_operation')), position: 'top center' });
+        }
       } finally {
         this.voting = false;
       }
@@ -115,15 +126,18 @@ export default {
     async adjustVisibility(){
       const username = this.username;
       if (!username || this.recentlyDismissed()) {
+        this.lookupId++;
         this.visible = false;
         return;
       }
+      const id = ++this.lookupId;
       let voted = true; // a failed lookup hides the popup rather than nagging voters
       try {
         voted = await this.$store.dispatch('hasVotedProposal', { proposalId: this.proposalId, username });
       } catch (e) { /* node unavailable */ }
-      // the user may have logged out or switched accounts while we waited
-      if (username === this.username) this.visible = !voted;
+      // only the latest lookup counts: the user may have logged out or switched
+      // accounts while we waited, and mounted and the user watcher can overlap
+      if (id === this.lookupId && username === this.username) this.visible = !voted;
     }
   },
   mounted() {

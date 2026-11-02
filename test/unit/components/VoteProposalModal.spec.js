@@ -38,6 +38,7 @@ function ctx (over = {}) {
   const c = {
     visible: false,
     voting: false,
+    lookupId: 0,
     username: 'alice',
     proposalId: 391,
     dismissKey: 'proposal_popup_dismissed_391',
@@ -45,6 +46,8 @@ function ctx (over = {}) {
     $store: { dispatch: jest.fn().mockResolvedValue(false) },
     $signsInBrowser: () => true,
     $processTrxFunc: jest.fn().mockResolvedValue({ success: true }),
+    $notify: jest.fn(),
+    $t: (k) => k,
     ...over
   }
   for (const m of Object.keys(Comp.methods)) c[m] = Comp.methods[m].bind(c)
@@ -92,6 +95,50 @@ describe('components/VoteProposalModal', () => {
     expect(c.$processTrxFunc).toHaveBeenCalledWith('update_proposal_votes',
       { voter: 'alice', proposal_ids: [391], approve: true, extensions: [] }, true)
     expect(c.visible).toBe(false)
+  })
+
+  it('ignores a lookup that finishes after the user switched accounts', async () => {
+    let finish
+    const c = ctx({ $store: { dispatch: jest.fn(() => new Promise((resolve) => { finish = resolve })) } })
+    const pending = c.adjustVisibility()
+    c.username = 'bob'
+    finish(false)
+    await pending
+    expect(c.visible).toBe(false)
+  })
+
+  it('only the latest of two overlapping lookups decides', async () => {
+    const answers = []
+    const c = ctx({ $store: { dispatch: jest.fn(() => new Promise((resolve) => answers.push(resolve))) } })
+    const first = c.adjustVisibility()
+    const second = c.adjustVisibility()
+    answers[1](false) // latest: not voted, show
+    await second
+    answers[0](true) // older answer arrives late
+    await first
+    expect(c.visible).toBe(true)
+  })
+
+  it('remembers a successful vote so the popup does not come back', async () => {
+    const c = ctx({ visible: true })
+    await c.voteForProposal()
+    await c.adjustVisibility()
+    expect(c.visible).toBe(false)
+  })
+
+  it('a failed Keychain or HiveAuth vote keeps the popup open and says why', async () => {
+    const c = ctx({ visible: true, $processTrxFunc: jest.fn().mockResolvedValue({ success: false, error: 'Missing <b>active</b> authority' }) })
+    await c.voteForProposal()
+    expect(c.visible).toBe(true)
+    expect(c.voting).toBe(false)
+    expect(c.$notify).toHaveBeenCalledWith(expect.objectContaining({ group: 'error', text: 'Missing &lt;b&gt;active&lt;/b&gt; authority' }))
+  })
+
+  it('does not add a second message for typed-key failures, which show their own', async () => {
+    const c = ctx({ visible: true, $processTrxFunc: jest.fn().mockResolvedValue({ success: false, error: 'x', cancelled: false }) })
+    await c.voteForProposal()
+    expect(c.$notify).not.toHaveBeenCalled()
+    expect(c.visible).toBe(true)
   })
 
   it('sends HiveSigner users to hivesigner.com to approve the vote', async () => {
