@@ -21,7 +21,7 @@
         <p>{{ $t('proposal_modal_message') }}</p>
         <!-- Keychain's proposal vote cannot pick an account itself, so a logged-out
              visitor names theirs here. -->
-        <input v-if="askUsername" ref="voteUsername" v-model.trim="voteUsername" class="form-control mb-1"
+        <input v-if="askUsername && !username" ref="voteUsername" v-model.trim="voteUsername" class="form-control mb-1"
                :placeholder="$t('Your_Username')" autocapitalize="none" @keyup.enter="voteForProposal">
         <div class="text-right">
           <button @click="voteForProposal" :disabled="voting" class="btn m-1 col-5">
@@ -107,23 +107,24 @@ export default {
         return false;
       }
     },
-    async voteForProposal() {
+    voteForProposal() {
       if (this.voting) return;
       // Keychain first, whatever the login method: it keeps the active key out of the
       // page. Logged-in users sign as themselves; logged-out visitors name their account.
-      if (window.hive_keychain) {
-        this.voteWithKeychain();
-        return;
-      }
-      // No Keychain. Proposal votes need the active key: HiveSigner sessions only hold a
-      // posting token, and logged-out visitors have no way to sign here, so both approve
-      // the vote on hivesigner.com instead (where they pick the account).
+      if (window.hive_keychain) return this.voteWithKeychain();
+      return this.voteWithoutKeychain();
+    },
+    async voteWithoutKeychain() {
+      // Proposal votes need the active key: HiveSigner sessions only hold a posting
+      // token, and logged-out visitors have no way to sign here, so both approve the
+      // vote on hivesigner.com instead (where they pick the account).
       if (!this.username || !this.$signsInBrowser()) {
         window.open('https://hivesigner.com/sign/update-proposal-votes?proposal_ids=' +
           encodeURIComponent(JSON.stringify([this.proposalId])) + '&approve=true', '_blank');
-        // Out of the way for this page only: opening HiveSigner is not a vote, so it must
-        // not count as closing it. A logged-in user's next page checks the chain again.
-        this.visible = false;
+        // Opening HiveSigner is not a vote. A logged-in user's next page checks the
+        // chain again; a logged-out visitor (no check possible) gets an hour's rest.
+        if (this.username) this.visible = false;
+        else this.closeModal(VOTED_MS);
         return;
       }
       this.voting = true;
@@ -155,18 +156,34 @@ export default {
         return;
       }
       const account = this.username || this.voteUsername.replace(/^@/, '').toLowerCase();
-      if (!account) return;
+      if (!account) {
+        this.$refs.voteUsername && this.$refs.voteUsername.focus();
+        return;
+      }
+      const loggedIn = !!this.username;
       this.voting = true;
-      window.hive_keychain.requestUpdateProposalVote(account, JSON.stringify([this.proposalId]), true,
-        JSON.stringify([]), (response) => {
-          this.voting = false;
-          if (response && response.success) {
-            this.closeModal(VOTED_MS);
-          } else if (response && response.error !== 'user_cancel') {
-            // Escaped: toasts render HTML.
-            this.$notify({ group: 'error', text: escapeHtml(response.message || this.$t('error_performing_operation')), position: 'top center' });
-          }
-        });
+      try {
+        window.hive_keychain.requestUpdateProposalVote(account, JSON.stringify([this.proposalId]), true,
+          JSON.stringify([]), (response) => {
+            this.voting = false;
+            if (response && response.success) {
+              // logged-out visitors cannot be checked on chain, so treat it like "×"
+              this.closeModal(loggedIn ? VOTED_MS : DISMISS_MS);
+            } else if (response && response.error !== 'user_cancel') {
+              // A logged-in user whose Keychain does not hold this account's keys
+              // falls back to their own login method (unless that is Keychain too).
+              if (loggedIn && this.username === account && !this.keychainLogin()) return this.voteWithoutKeychain();
+              // Escaped: toasts render HTML.
+              this.$notify({ group: 'error', text: escapeHtml(response.message || this.$t('error_performing_operation')), position: 'top center' });
+            }
+          });
+      } catch (e) {
+        this.voting = false;
+        if (loggedIn && !this.keychainLogin()) this.voteWithoutKeychain();
+      }
+    },
+    keychainLogin() {
+      try { return localStorage.getItem('acti_login_method') === 'keychain'; } catch (e) { return false; }
     },
     readMore(){
       window.open(this.$config.proposalPostPath, '_blank');

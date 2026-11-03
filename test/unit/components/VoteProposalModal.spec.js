@@ -126,6 +126,44 @@ describe('components/VoteProposalModal', () => {
       expect(requestUpdateProposalVote).toHaveBeenCalledWith('alice', '[391]', true, '[]', expect.any(Function))
     })
 
+    it('falls back to the login method when Keychain does not hold the logged-in account', async () => {
+      window.hive_keychain = { requestUpdateProposalVote: (u, i, a, e, cb) => cb({ success: false, error: 'x', message: 'no key' }) }
+      const c = ctx({ visible: true })
+      await c.voteForProposal()
+      await new Promise((resolve) => setTimeout(resolve)) // let the fallback vote finish
+      expect(c.$processTrxFunc).toHaveBeenCalledWith('update_proposal_votes',
+        { voter: 'alice', proposal_ids: [391], approve: true, extensions: [] }, true)
+      expect(c.$notify).not.toHaveBeenCalled()
+      expect(c.visible).toBe(false)
+    })
+
+    it('a Keychain login does not fall back to a second Keychain prompt', async () => {
+      localStorage.setItem('acti_login_method', 'keychain')
+      window.hive_keychain = { requestUpdateProposalVote: (u, i, a, e, cb) => cb({ success: false, error: 'x', message: 'Not enough RC' }) }
+      const c = ctx({ visible: true })
+      await c.voteForProposal()
+      expect(c.$processTrxFunc).not.toHaveBeenCalled()
+      expect(c.$notify).toHaveBeenCalledWith(expect.objectContaining({ text: 'Not enough RC' }))
+    })
+
+    it('a cancelled Keychain vote does not fall back', async () => {
+      window.hive_keychain = { requestUpdateProposalVote: (u, i, a, e, cb) => cb({ success: false, error: 'user_cancel' }) }
+      const c = ctx({ visible: true })
+      await c.voteForProposal()
+      expect(c.$processTrxFunc).not.toHaveBeenCalled()
+      expect(c.visible).toBe(true)
+    })
+
+    it('a logged-out Keychain vote hides it like "x" (it cannot be checked on chain)', async () => {
+      const now = jest.spyOn(Date, 'now').mockReturnValue(1e12)
+      window.hive_keychain = { requestUpdateProposalVote: (u, i, a, e, cb) => cb({ success: true }) }
+      const c = ctx({ visible: true, username: null, askUsername: true, voteUsername: 'alice' })
+      await c.voteForProposal()
+      now.mockReturnValue(1e12 + 2 * 24 * 60 * 60 * 1000)
+      expect(c.recentlyDismissed()).toBe(true)
+      now.mockRestore()
+    })
+
     it('does nothing without a username', async () => {
       const requestUpdateProposalVote = jest.fn()
       window.hive_keychain = { requestUpdateProposalVote }
@@ -154,9 +192,11 @@ describe('components/VoteProposalModal', () => {
     await c.voteForProposal()
     expect(open).toHaveBeenCalledWith('https://hivesigner.com/sign/update-proposal-votes?proposal_ids=%5B391%5D&approve=true', '_blank')
     expect(c.$processTrxFunc).not.toHaveBeenCalled()
-    // opening HiveSigner is not a vote: hidden on this page only, back on the next one
+    // opening HiveSigner is not a vote: hidden for an hour only
     expect(c.visible).toBe(false)
-    expect(c.recentlyDismissed()).toBe(false)
+    const until = Number(localStorage.getItem(c.dismissKey))
+    expect(until - Date.now()).toBeGreaterThan(59 * 60 * 1000)
+    expect(until - Date.now()).toBeLessThanOrEqual(60 * 60 * 1000)
     open.mockRestore()
   })
 
@@ -258,5 +298,49 @@ describe('components/VoteProposalModal', () => {
     ctx().readMore()
     expect(open).toHaveBeenCalledWith('/@hdev/hive-dev-proposal-3', '_blank')
     open.mockRestore()
+  })
+})
+
+describe('components/VoteProposalModal template', () => {
+  const { shallowMount } = require('@vue/test-utils')
+  afterEach(() => { localStorage.clear(); delete window.hive_keychain })
+
+  function mountIt (username) {
+    return shallowMount(Comp, {
+      computed: { user: () => (username ? { account: { name: username } } : null) },
+      mocks: {
+        $store: { dispatch: jest.fn().mockResolvedValue(false) },
+        $config: { proposalId: 391, proposalPostPath: '/@hdev/hive-dev-proposal-3' },
+        $route: { path: '/' },
+        $t: (k) => k,
+        $notify: jest.fn(),
+        $signsInBrowser: () => true,
+        $processTrxFunc: jest.fn()
+      }
+    })
+  }
+
+  it('"x" hides it for 3 days (the click event is not taken as a duration)', async () => {
+    const w = mountIt(null)
+    await w.vm.$nextTick()
+    expect(w.find('#voteProposalModal').exists()).toBe(true)
+    await w.find('button.close').trigger('click')
+    const until = Number(localStorage.getItem('proposal_popup_dismissed_391'))
+    expect(until - Date.now()).toBeGreaterThan(2.9 * 24 * 60 * 60 * 1000)
+    expect(w.find('#voteProposalModal').exists()).toBe(false)
+  })
+
+  it('logged out with Keychain: Vote shows the username field, Enter votes', async () => {
+    const requestUpdateProposalVote = jest.fn()
+    window.hive_keychain = { requestUpdateProposalVote }
+    const w = mountIt(null)
+    await w.vm.$nextTick()
+    expect(w.find('input').exists()).toBe(false)
+    await w.findAll('button').at(1).trigger('click')
+    const input = w.find('input')
+    expect(input.exists()).toBe(true)
+    await input.setValue('alice')
+    await input.trigger('keyup.enter')
+    expect(requestUpdateProposalVote).toHaveBeenCalledWith('alice', '[391]', true, '[]', expect.any(Function))
   })
 })
