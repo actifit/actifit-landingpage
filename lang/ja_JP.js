@@ -1388,7 +1388,7 @@ module.exports = {
   hide_reblogs: 'リブログを非表示',
   show_reblogs: 'リブログを表示',
   proposal_modal_title_year: "Hive Dev 提案 #3",
-  proposal_modal_message: "パートナーであるHDevチームのHive開発と成長への取り組みを応援してください。彼らの提案に投票してください❤️",
+  proposal_modal_message: "Hiveのコアとアプリの開発と成長に取り組むHDevチームを応援してください。彼らの提案に投票してください❤️",
   vote_button_text: "投票する",
   read_more_button_text: "続きを読む",
 

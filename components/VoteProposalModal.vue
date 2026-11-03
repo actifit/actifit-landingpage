@@ -14,11 +14,15 @@
       <div class="modal-content">
         <div class="modal-header p-1">
           <h5 class="modal-title">{{ $t('proposal_modal_title_year') }}</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close" @click="closeModal">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" @click="closeModal()">
             <span aria-hidden="true">×</span>
           </button>
         </div>
         <p>{{ $t('proposal_modal_message') }}</p>
+        <!-- Keychain's proposal vote cannot pick an account itself, so a logged-out
+             visitor names theirs here. -->
+        <input v-if="askUsername" ref="voteUsername" v-model.trim="voteUsername" class="form-control mb-1"
+               :placeholder="$t('Your_Username')" autocapitalize="none" @keyup.enter="voteForProposal">
         <div class="text-right">
           <button @click="voteForProposal" :disabled="voting" class="btn m-1 col-5">
             {{ $t('vote_button_text') }}
@@ -36,6 +40,9 @@ import escapeHtml from '~/utils/escapeHtml';
 
 // After "×", stay hidden for this long in this browser.
 const DISMISS_MS = 3 * 24 * 60 * 60 * 1000;
+// After a vote the wallet reported as sent: long enough for the vote to reach a block
+// and the nodes, short enough that a vote that never landed brings the popup back soon.
+const VOTED_MS = 60 * 60 * 1000;
 
 export default {
   props: {
@@ -49,6 +56,8 @@ export default {
       visible: false,
       voting: false,
       lookupId: 0,
+      askUsername: false,
+      voteUsername: '',
     };
   },
   watch: {
@@ -75,26 +84,46 @@ export default {
     },
   },
   methods: {
-    closeModal() {
+    // Hide, and keep it hidden in this browser for `ms` (stored as a "hidden until" time).
+    closeModal(ms = DISMISS_MS) {
       this.visible = false;
-      try { localStorage.setItem(this.dismissKey, String(Date.now())); } catch (e) { /* storage blocked */ }
+      try { localStorage.setItem(this.dismissKey, String(Date.now() + ms)); } catch (e) { /* storage blocked */ }
+    },
+    // A saved session whose account has not loaded yet: wait for it rather than
+    // briefly showing the logged-out popup to someone who may have voted.
+    sessionLoading() {
+      try {
+        return !this.username && !!localStorage.getItem('access_token');
+      } catch (e) {
+        return false;
+      }
     },
     recentlyDismissed() {
       try {
-        const at = Number(localStorage.getItem(this.dismissKey));
-        return at > 0 && Date.now() - at < DISMISS_MS;
+        const until = Number(localStorage.getItem(this.dismissKey));
+        // capped, so a bad or old-format value can never hide it for longer than "×" does
+        return until > Date.now() && until - Date.now() <= DISMISS_MS;
       } catch (e) {
         return false;
       }
     },
     async voteForProposal() {
-      if (!this.username || this.voting) return;
-      // Proposal votes need the active key. HiveSigner sessions only hold a posting
-      // token, so HiveSigner users approve the vote on hivesigner.com instead.
-      if (!this.$signsInBrowser()) {
+      if (this.voting) return;
+      // Keychain first, whatever the login method: it keeps the active key out of the
+      // page. Logged-in users sign as themselves; logged-out visitors name their account.
+      if (window.hive_keychain) {
+        this.voteWithKeychain();
+        return;
+      }
+      // No Keychain. Proposal votes need the active key: HiveSigner sessions only hold a
+      // posting token, and logged-out visitors have no way to sign here, so both approve
+      // the vote on hivesigner.com instead (where they pick the account).
+      if (!this.username || !this.$signsInBrowser()) {
         window.open('https://hivesigner.com/sign/update-proposal-votes?proposal_ids=' +
           encodeURIComponent(JSON.stringify([this.proposalId])) + '&approve=true', '_blank');
-        this.closeModal();
+        // Out of the way for this page only: opening HiveSigner is not a vote, so it must
+        // not count as closing it. A logged-in user's next page checks the chain again.
+        this.visible = false;
         return;
       }
       this.voting = true;
@@ -106,9 +135,9 @@ export default {
           extensions: []
         }, true);
         if (res && res.success) {
-          // also remembered, so a lookup that runs before the vote is in a block
-          // (or on a lagging node) does not bring the popup back
-          this.closeModal();
+          // also remembered briefly, so a lookup that runs before the vote is in a
+          // block (or on a lagging node) does not bring the popup back
+          this.closeModal(VOTED_MS);
         } else if (res && !('cancelled' in res)) {
           // Keychain and HiveAuth failures come back without a message shown; the
           // typed-key path (the one that sets `cancelled`) already shows its own.
@@ -119,15 +148,36 @@ export default {
         this.voting = false;
       }
     },
+    voteWithKeychain() {
+      if (!this.username && !this.askUsername) {
+        this.askUsername = true;
+        this.$nextTick(() => this.$refs.voteUsername && this.$refs.voteUsername.focus());
+        return;
+      }
+      const account = this.username || this.voteUsername.replace(/^@/, '').toLowerCase();
+      if (!account) return;
+      this.voting = true;
+      window.hive_keychain.requestUpdateProposalVote(account, JSON.stringify([this.proposalId]), true,
+        JSON.stringify([]), (response) => {
+          this.voting = false;
+          if (response && response.success) {
+            this.closeModal(VOTED_MS);
+          } else if (response && response.error !== 'user_cancel') {
+            // Escaped: toasts render HTML.
+            this.$notify({ group: 'error', text: escapeHtml(response.message || this.$t('error_performing_operation')), position: 'top center' });
+          }
+        });
+    },
     readMore(){
       window.open(this.$config.proposalPostPath, '_blank');
     },
-    // Only logged-in users who have not voted yet, and did not just close it.
+    // Logged-in users who have not voted yet, and logged-out visitors (whose vote we
+    // cannot check), unless they just closed it.
     async adjustVisibility(){
       const username = this.username;
       if (!username || this.recentlyDismissed()) {
         this.lookupId++;
-        this.visible = false;
+        this.visible = !username && !this.sessionLoading() && !this.recentlyDismissed();
         return;
       }
       const id = ++this.lookupId;
@@ -164,7 +214,7 @@ export default {
   z-index: 1000;
   pointer-events: auto;
   max-width: 330px;
-  max-height: 230px;
+  max-height: 300px;
   height: auto;
 }
 

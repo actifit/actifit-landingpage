@@ -1390,7 +1390,7 @@ module.exports = {
   hide_reblogs: '隐藏转发',
   show_reblogs: '显示转发',
   proposal_modal_title_year: "Hive Dev 提案 #3",
-  proposal_modal_message: "支持我们的合作伙伴HDev团队开发和发展Hive。请为他们的提案投票❤️",
+  proposal_modal_message: "支持HDev团队构建和发展Hive核心及应用。请为他们的提案投票❤️",
   vote_button_text: "投票",
   read_more_button_text: "阅读更多",
 

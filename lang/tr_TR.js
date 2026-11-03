@@ -1389,7 +1389,7 @@ module.exports = {
   hide_reblogs: 'yeniden blogları gizle',
   show_reblogs: 'yeniden blogları göster',
   proposal_modal_title_year: "Hive Dev Önerisi #3",
-  proposal_modal_message: "Ortağımız HDev ekibini Hive'ın geliştirilmesi ve büyümesinde destekleyin. Önerilerine oy verin❤️",
+  proposal_modal_message: "HDev ekibini Hive çekirdeğini ve uygulamalarını geliştirme ve büyütme çalışmalarında destekleyin. Önerilerine oy verin❤️",
   vote_button_text: "Oy Ver",
   read_more_button_text: "Daha Fazlasını Oku",
 

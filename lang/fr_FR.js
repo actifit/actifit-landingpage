@@ -1385,7 +1385,7 @@ module.exports = {
   hide_reblogs: 'cacher les reblogs',
   show_reblogs: 'afficher les reblogs',
   proposal_modal_title_year: "Proposition Hive Dev #3",
-  proposal_modal_message: "Soutenez nos partenaires, l'équipe HDev, dans le développement et la croissance de Hive. Votez pour leur proposition❤️",
+  proposal_modal_message: "Soutenez l'équipe HDev dans la construction et la croissance du cœur de Hive et de ses applications. Votez pour leur proposition❤️",
   vote_button_text: "Voter",
   read_more_button_text: "En savoir plus",
 
