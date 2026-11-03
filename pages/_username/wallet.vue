@@ -5978,9 +5978,11 @@ export default {
       }
     },
     async cancelMoveToSE() {
+      //one request at a time: don't even ask while another one runs
+      if (this.initiateInProgress) return;
       this.afit_se_move_err_msg = '';
       let userConf = confirm(this.$t('Cancel_Transfer_Confirm'));
-      if (!userConf || this.initiateInProgress) {
+      if (!userConf) {
         return;
       }
 
@@ -6077,7 +6079,11 @@ export default {
           text: this.$t('tip_successfully_sent'),
           position: 'top center'
         });
-        //record the tip on chain
+        //refresh the sender's balance and transactions now: the record below may never settle
+        this.refreshBalance();
+        this.$store.dispatch('fetchUserTokens');
+        this.$store.dispatch('fetchTransactions');
+        //record the tip on chain; the tip itself is done, so a failure here is only logged
         const tipTransaction = { action: 'Tip', amount: outcome.tipAmount, recipient: checked.recipient };
         const cstm_params = {
           required_auths: [],
@@ -6085,11 +6091,11 @@ export default {
           id: 'actifit',
           json: JSON.stringify(tipTransaction)
         };
-        await this.$processTrxFunc('custom_json', cstm_params);
-        //refresh the sender's balance and transactions
-        this.refreshBalance();
-        this.$store.dispatch('fetchUserTokens');
-        this.$store.dispatch('fetchTransactions');
+        try {
+          await this.$processTrxFunc('custom_json', cstm_params);
+        } catch (err) {
+          console.error('recording the tip custom_json failed:', err);
+        }
       } catch (err) {
         console.error('tipAccount failed:', err);
         this.tipError = this.$t('error_performing_operation');

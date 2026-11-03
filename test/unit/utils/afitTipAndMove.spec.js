@@ -218,6 +218,20 @@ describe('profile page tip (index.vue proceedTipActivity on a mocked this)', () 
     await fn.call(c)
     expect(global.fetch).not.toHaveBeenCalled()
   })
+
+  it.each([
+    ['rejects', () => Promise.reject(new Error('HiveSigner: no result'))],
+    ['never settles', () => new Promise(() => {})]
+  ])('the on-chain record %s after a sent tip: no error shown, balance refreshed, unlocked', async (_, record) => {
+    global.fetch = jest.fn().mockResolvedValue(reply(200, { status: 'Success', tipAmount: 2 }))
+    const c = ctx({ $processTrxFunc: jest.fn(record) })
+    fn.call(c)
+    await flush()
+    expect(c.$notify).toHaveBeenCalledWith(expect.objectContaining({ text: 'tip_successfully_sent' }))
+    expect(c.tipError).toBe('')
+    expect(c.$store.dispatch).toHaveBeenCalledWith('fetchUserTokens')
+    expect(c.tipInProgress).toBe(false)
+  })
 })
 
 // wallet.vue is too heavy for jest: pull its methods out of the source and run them on a
@@ -324,12 +338,19 @@ describe('wallet send-AFIT (proceedTipActivity)', () => {
     expect(c.tipInProgress).toBe(false)
   })
 
-  it('unlocks as soon as the server confirms, even if the on-chain record never settles', async () => {
+  it.each([
+    ['rejects', () => Promise.reject(new Error('HiveSigner: no result'))],
+    ['never settles', () => new Promise(() => {})]
+  ])('the on-chain record %s after a sent tip: no error shown, balances refreshed, unlocked', async (_, record) => {
     global.fetch = jest.fn().mockResolvedValue(reply(200, { status: 'Success', tipAmount: 2 }))
-    const c = walletCtx({ $processTrxFunc: jest.fn(() => new Promise(() => {})) })
+    const c = walletCtx({ $processTrxFunc: jest.fn(record) })
     fn.call(c)
     await flush()
-    expect(c.$notify).toHaveBeenCalled()
+    expect(c.$notify).toHaveBeenCalledWith(expect.objectContaining({ text: 'tip_successfully_sent' }))
+    expect(c.tipError).toBe('')
+    expect(c.refreshBalance).toHaveBeenCalled()
+    expect(c.$store.dispatch).toHaveBeenCalledWith('fetchUserTokens')
+    expect(c.$store.dispatch).toHaveBeenCalledWith('fetchTransactions')
     expect(c.tipInProgress).toBe(false)
   })
 
@@ -420,7 +441,9 @@ describe('wallet move to H-E (proceedMoveToSE)', () => {
 })
 
 describe('wallet cancel move (cancelMoveToSE)', () => {
-  const fn = walletMethod('cancelMoveToSE', { confirm: () => true, requestCancelAfitMove, exchangeErrorText, ...env })
+  const confirm = jest.fn(() => true)
+  const fn = walletMethod('cancelMoveToSE', { confirm: (...a) => confirm(...a), requestCancelAfitMove, exchangeErrorText, ...env })
+  beforeEach(() => confirm.mockClear())
 
   it('cancels, clears the pending move and unlocks even if the record never settles', async () => {
     global.fetch = jest.fn().mockResolvedValue(reply(200, { status: 'Success' }))
@@ -441,9 +464,10 @@ describe('wallet cancel move (cancelMoveToSE)', () => {
     expect(c.initiateInProgress).toBe(false)
   })
 
-  it('does nothing while another request runs', async () => {
+  it('does nothing while another request runs, and does not even ask to confirm', async () => {
     global.fetch = jest.fn()
     await fn.call(walletCtx({ initiateInProgress: true }))
+    expect(confirm).not.toHaveBeenCalled()
     expect(global.fetch).not.toHaveBeenCalled()
   })
 })
@@ -467,6 +491,28 @@ describe('wallet processTrxFunc always settles', () => {
     const fn = walletMethod('processTrxFunc', { localStorage: ls('hiveauth'), window: {}, console: quietConsole })
     const c = walletCtx({ $HAS: { broadcast: () => Promise.resolve(response) } })
     await expect(fn.call(c, 'custom_json', {})).resolves.toEqual({ success: false })
+  })
+
+  // hive-auth-wrapper 0.8.9 REJECTS on sign_nack / sign_err / expired
+  it('HiveAuth: a rejected broadcast resolves as a failure and clears the "check your app" toast', async () => {
+    const fn = walletMethod('processTrxFunc', { localStorage: ls('hiveauth'), window: {}, console: quietConsole })
+    const c = walletCtx({ $HAS: { broadcast: () => Promise.reject(new Error('expired')) } })
+    await expect(fn.call(c, 'custom_json', {})).resolves.toEqual({ success: false })
+    expect(c.$notify).toHaveBeenCalledWith({ group: 'warn', clean: true })
+  })
+
+  it('HiveAuth rejecting the record after a confirmed move leaves the move form unlocked', async () => {
+    const record = walletMethod('processTrxFunc', { localStorage: ls('hiveauth'), window: {}, console: quietConsole })
+    const move = walletMethod('proceedMoveToSE', {
+      afitAmountError, hsc: { findOne: jest.fn().mockResolvedValue(null) }, requestAfitMoveToHe, sessionActionErrorText, ...env
+    })
+    global.fetch = jest.fn().mockResolvedValue(reply(200, { status: 'Success', trx: {} }))
+    const c = walletCtx({ $HAS: { broadcast: () => Promise.reject(new Error('expired')) } })
+    c.processTrxFunc = record
+    await move.call(c)
+    expect(c.setUserPDAfitStatus).toHaveBeenCalled()
+    expect(c.afit_se_move_err_msg).toBe('')
+    expect(c.initiateInProgress).toBe(false)
   })
 })
 

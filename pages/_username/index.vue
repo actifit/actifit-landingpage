@@ -1737,7 +1737,7 @@ export default {
           this.userTokenCount = outcome.recipientTokenCount;
         }
         this.$store.dispatch('fetchUserTokens')
-        //record the tip on chain
+        //record the tip on chain; the tip itself is done, so a failure here is only logged
         let tipTransaction = { action: 'Tip', amount: outcome.tipAmount, recipient: checked.recipient };
         let cstm_params = {
           required_auths: [],
@@ -1745,7 +1745,11 @@ export default {
           id: 'actifit',
           json: JSON.stringify(tipTransaction)
         };
-        await this.$processTrxFunc('custom_json', cstm_params);
+        try {
+          await this.$processTrxFunc('custom_json', cstm_params);
+        } catch (err) {
+          console.error('recording the tip custom_json failed:', err);
+        }
       } catch (err) {
         console.error('tipAccount failed:', err);
         this.tipError = this.$t('error_performing_operation');
