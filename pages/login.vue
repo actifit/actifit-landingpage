@@ -175,9 +175,7 @@
 		} catch (e) {
 		  console.log(e);
 		}*/
-		console.log('load recaptcha')
-		await this.$recaptchaLoaded()
-		console.log('complete')
+		// not behind reCAPTCHA's loader: that never finishes where Google is blocked
 		this.verifyKeychain();
 	},
 	methods: {
@@ -399,23 +397,10 @@
 			this.failLogin(this.$t('login_error'));
 		})
 	  },
-	  async verifyKeychain () {
-		return new Promise((resolve) => {
-			if (window.hive_keychain) {
-				this.keychain = window.hive_keychain
-				let mainRef = this;
-				this.keychain.requestHandshake(() => {
-					console.log('keychain installed');
-					this.keychain_available = true;
-					resolve();
-				});
-			}
-		})
-	  },
 	  async loginKeychain () {
-		await this.verifyKeychain();
-		if (!this.keychain_available){
-			console.log("You do not have hive keychain installed");
+		if (this.login_in_progress) { return; } // one login at a time
+		if (!await this.verifyKeychain()) {
+			this.failLogin(this.$t('keychain_not_detected'));
 			return;
 		}
 		if (this.$refs["username"].value == ''){
@@ -456,42 +441,37 @@
 			return;
 		}
 
-		//check captcha V3
-		// Execute reCAPTCHA with action "login".
-		const token = await this.$recaptcha('login')
+		// Spinner up before the wait, which can last 8s (see loginCaptchaToken).
+		this.login_in_progress = true;
+		const token = await this.loginCaptchaToken();
 
-		//verify recaptcha-v3
-
-		// Same rule as LoginModal: a rejected token blocks, an UNAVAILABLE verifier does
-		// not. A 5xx (including the proxy's 503 on timeout) is not a verdict. And .json() is
-		// guarded: on a Cloudflare HTML error page it throws, which used to leave this
-		// button dead with no message.
-		try {
-			const outc = await fetch('/api/proxy/verifyLoginCaptcha?token='+encodeURIComponent(token));
-			if (outc.status >= 500) {
-				console.warn('captcha verification unavailable, continuing without it:', outc.status);
-			} else {
-				const captchaJson = await outc.json();
-				if (!outc.ok || captchaJson.error){
-					this.error_proceeding = true;
-					this.login_in_progress = false;
-					this.error_msg = this.$t('login_error');
-					return;
+		// Same rule as LoginModal: no token means skip the check; a rejected token blocks;
+		// an UNAVAILABLE verifier does not. A 5xx (including the proxy's 503 on timeout) is
+		// not a verdict. And .json() is guarded: on a Cloudflare HTML error page it throws,
+		// which used to leave this button dead with no message.
+		if (token) {
+			try {
+				const outc = await fetch('/api/proxy/verifyLoginCaptcha?token='+encodeURIComponent(token));
+				if (outc.status >= 500) {
+					console.warn('captcha verification unavailable, continuing without it:', outc.status);
+				} else {
+					const captchaJson = await outc.json();
+					if (!outc.ok || captchaJson.error){
+						this.error_proceeding = true;
+						this.login_in_progress = false;
+						this.error_msg = this.$t('login_error');
+						return;
+					}
 				}
+			} catch (e) {
+				console.warn('captcha verification unreachable, continuing without it:', e && e.message);
 			}
-		} catch (e) {
-			console.warn('captcha verification unreachable, continuing without it:', e && e.message);
 		}
-		//otherwise, we're good, continue
-
-		console.log(token);
-
 		//set proper blockchain selected
 		this.$store.commit('setBchain', this.bchain_val);
 
 		localStorage.setItem('cur_bchain', this.bchain_val)
 
-		this.login_in_progress = true;
 		const account_name = this.$refs["username"].value.trim().toLowerCase();
 		const priv_pkey = this.$refs["ppkey"].value;
 		try {

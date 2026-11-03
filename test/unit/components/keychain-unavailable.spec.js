@@ -43,13 +43,14 @@ const makeVm = () => {
     $refs: { username: { value: 'alice' } },
     setKeychainLoginStatus: jest.fn(),
     postLoginRedirect: jest.fn(),
-    verifyKeychain: jest.fn(),
   }
   // Vue merges mixin methods onto the instance; these specs build the vm by hand, so
   // do the same explicitly rather than silently calling undefined.
   Object.keys(signedChallengeLogin.methods).forEach((k) => {
     vm[k] = signedChallengeLogin.methods[k].bind(vm)
   })
+  // After the mixin, which now provides the real check: Keychain is present here.
+  vm.verifyKeychain = jest.fn().mockResolvedValue(true)
   return vm
 }
 

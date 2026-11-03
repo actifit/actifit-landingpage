@@ -44,6 +44,12 @@ const CHALLENGE_RETRY_IF_FASTER_THAN_MS = 5000
 
 // A fetch that never got an answer: a network failure, not a slow or failing server.
 // The 20s abort is excluded - that one means the server is too slow to answer.
+// How long to wait for Keychain to answer its handshake. An extension that is locked
+// or broken may never answer, which used to leave the Keychain button silent.
+const KEYCHAIN_HANDSHAKE_TIMEOUT_MS = 3000
+// How long to wait for a reCAPTCHA token before going on without one.
+const CAPTCHA_TIMEOUT_MS = 8000
+
 const isConnectionFailure = (e) => !(e && e.name === 'AbortError')
 
 export default {
@@ -260,6 +266,69 @@ export default {
         return null
       }
       return json
+    },
+
+    // Is Hive Keychain installed and answering? Resolves true or false and never hangs:
+    // with no extension, the old check never settled, so the button did nothing at all.
+    verifyKeychain () {
+      return new Promise((resolve) => {
+        const keychain = typeof window !== 'undefined' && window.hive_keychain
+        if (!keychain) {
+          this.keychain_available = false
+          resolve(false)
+          return
+        }
+        const timer = setTimeout(() => resolve(false), KEYCHAIN_HANDSHAKE_TIMEOUT_MS)
+        try {
+          keychain.requestHandshake(() => {
+            clearTimeout(timer)
+            this.keychain = keychain
+            this.keychain_available = true
+            resolve(true)
+          })
+        } catch (e) {
+          // a broken extension can throw here instead of answering
+          clearTimeout(timer)
+          resolve(false)
+        }
+      })
+    },
+
+    // A reCAPTCHA token for the login, or null when none comes within 8s.
+    //
+    // reCAPTCHA v3 scores by fingerprinting (canvas, WebGL, audio context). A browser
+    // that randomises those - Brave with Shields up, Firefox strict mode, several privacy
+    // extensions - or that blocks Google outright cannot produce a usable token, and
+    // $recaptcha() may hang rather than reject. Awaiting it unguarded left the login
+    // button looking dead (reported 2026-10-06 for the login modal, and again on the
+    // /login page).
+    //
+    // Going on without a token is safe, stated precisely: the token is never sent to the
+    // login endpoints - loginVerify carries only username/nonce/signature/method, and
+    // api/proxy.js passes that body straight through. So the captcha never gated the
+    // login server-side. The brute-force control is the proxy's per-IP rate limit.
+    // NOTE for anyone who later wires the token INTO loginVerify: at that moment this
+    // fallback becomes a real bypass (a client can force null by blocking Google).
+    //
+    // $recaptcha is assigned only once the loader resolves, so wait on $recaptchaLoaded()
+    // first: calling it straight away would skip the captcha for anyone who is merely
+    // quick, not only for browsers that cannot run it.
+    async loginCaptchaToken () {
+      let timer
+      try {
+        return await Promise.race([
+          (async () => {
+            if (typeof this.$recaptchaLoaded === 'function') { await this.$recaptchaLoaded() }
+            return this.$recaptcha('login')
+          })(),
+          new Promise((resolve) => { timer = setTimeout(() => resolve(null), CAPTCHA_TIMEOUT_MS) })
+        ])
+      } catch (e) {
+        console.warn('reCAPTCHA unavailable, continuing without it:', e && e.message)
+        return null
+      } finally {
+        clearTimeout(timer)
+      }
     },
 
     failLogin (msg) {

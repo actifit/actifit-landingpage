@@ -142,7 +142,7 @@
         this.resetForm();
         this.$emit('close');
       });
-      await this.$recaptchaLoaded();
+      // not behind reCAPTCHA's loader: that never finishes where Google is blocked
       this.verifyKeychain();
     },
     beforeDestroy() {
@@ -289,12 +289,9 @@
           this.hiveauth_wait = false; this.login_in_progress = false;
         });
       },
-      async verifyKeychain () {
-        return new Promise((resolve) => { if (window.hive_keychain) { this.keychain = window.hive_keychain; this.keychain.requestHandshake(() => { this.keychain_available = true; resolve(); }); } })
-      },
       async loginKeychain () {
-        await this.verifyKeychain();
-        if (!this.keychain_available){ return; }
+        if (this.login_in_progress) { return; } // one login at a time
+        if (!await this.verifyKeychain()) { this.failLogin(this.$t('keychain_not_detected')); return; }
         if (this.$refs["username"].value == ''){ this.error_proceeding = true; this.error_msg = this.$t('login_error'); return; }
         this.$store.commit('setBchain', this.bchain_val);
         localStorage.setItem('cur_bchain', this.bchain_val);
@@ -318,50 +315,10 @@
         this.error_proceeding = false;
         this.error_msg = '';
         if (this.$refs["username"].value == '' || this.$refs["ppkey"].value == ''){ this.error_proceeding = true; this.error_msg = this.$t('login_error'); return; }
-        // reCAPTCHA v3 scores by fingerprinting (canvas, WebGL, audio context). A
-        // browser that randomises those - Brave with Shields up, Firefox strict mode,
-        // several privacy extensions - cannot produce a usable token, and $recaptcha()
-        // may hang rather than reject. Awaiting it unguarded is why the FIRST login
-        // click appeared to do nothing (reported 2026-10-06): the handler sat waiting
-        // on a promise that never settled.
-        //
-        // If no token can be obtained, skip verification and continue.
-        //
-        // Why that is safe, stated precisely: the captcha token is never sent to
-        // the login endpoints - loginVerify carries only username/nonce/signature/method,
-        // and api/proxy.js passes that body straight through. So the captcha was never
-        // bound to the login request server-side and could never have gated it; anyone
-        // could always POST loginVerify directly without touching verifyLoginCaptcha.
-        // Skipping it therefore grants no capability that was not already available.
-        // The actual brute-force control is the proxy's own per-IP rate limit on
-        // the login routes (10 req/60s), which this change does not touch.
-        //
-        // NOTE for anyone who later wires the token INTO loginVerify: at that moment this
-        // fallback becomes a real bypass, because a client can force token=null just by
-        // blocking www.google.com/recaptcha. Revisit it then.
-        //
-        // Spinner goes up BEFORE the race: the wait below can last 8s, and without it
-        // the button looks dead for that whole time and a second click fires a second
-        // parallel login.
+        // Spinner goes up BEFORE the wait: it can last 8s, and without it the button
+        // looks dead for that whole time and a second click fires a second login.
         this.login_in_progress = true;
-        let token = null;
-        try {
-          token = await Promise.race([
-            // $recaptcha is assigned only once the loader resolves, so it is undefined
-            // for the whole window between page load and script ready. Calling it
-            // straight away would throw and silently skip the captcha for anyone who
-            // clicks early - even though it would have worked a second later. Waiting
-            // on $recaptchaLoaded() first keeps the skip for browsers that genuinely
-            // cannot run it, rather than for anyone who is merely quick.
-            (async () => {
-              if (typeof this.$recaptchaLoaded === 'function') { await this.$recaptchaLoaded(); }
-              return this.$recaptcha('login');
-            })(),
-            new Promise((resolve) => setTimeout(() => resolve(null), 8000)),
-          ]);
-        } catch (e) {
-          console.warn('reCAPTCHA unavailable, continuing without it:', e && e.message);
-        }
+        const token = await this.loginCaptchaToken();
         if (token) {
           // Wrapped because an upstream 502 returns an HTML body, and .json() then
           // throws - which unhandled would leave the button dead with no message, i.e.
