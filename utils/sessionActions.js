@@ -158,7 +158,7 @@ export function afitAmountError (raw, balance) {
 
 /**
  * Check the send-AFIT form. Returns { error } (a translation key) or the cleaned
- * { recipient, amount } to send.
+ * { recipient, amount } to send (amount as a canonical decimal string).
  */
 export function validateAfitTip ({ sender, recipient, amount, balance }) {
   if (!sender) return { error: 'Need_login_tip' }
@@ -167,7 +167,8 @@ export function validateAfitTip ({ sender, recipient, amount, balance }) {
   if (to === normalizeHiveUsername(sender)) return { error: 'Cannot_tip_self' }
   const amountErr = afitAmountError(amount, balance)
   if (amountErr) return { error: amountErr }
-  return { recipient: to, amount: String(amount).trim() }
+  // canonical form for the server's /^\d+(\.\d{1,3})?$/: ".5" -> "0.5", "5." -> "5"
+  return { recipient: to, amount: String(Number(String(amount).trim())) }
 }
 
 async function postSession (url, payload, sessionToken) {

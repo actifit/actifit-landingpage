@@ -5,9 +5,10 @@
 // source level, and index.vue's tip method runs against a mocked `this`.
 import fs from 'fs'
 import path from 'path'
+import { exchangeErrorText } from '~/utils/afitExchange'
 import {
   normalizeHiveUsername, isValidHiveUsername, afitAmountError, validateAfitTip,
-  requestAfitTip, requestAfitMoveToHe, sessionActionErrorText
+  requestAfitTip, requestAfitMoveToHe, sessionActionErrorText, requestCancelAfitMove
 } from '~/utils/sessionActions'
 
 const t = (k) => k
@@ -71,6 +72,12 @@ describe('validateAfitTip', () => {
   it('returns the cleaned recipient and amount', () => {
     expect(validateAfitTip(ok)).toEqual({ recipient: 'bob', amount: '1.5' })
   })
+  it.each([['.5', '0.5'], ['5.', '5'], [' 1.250 ', '1.25'], ['0.001', '0.001'], ['10', '10']])(
+    'sends %p as %p, the form the server accepts (/^\\d+(\\.\\d{1,3})?$/)', (typed, sent) => {
+      const r = validateAfitTip({ ...ok, amount: typed })
+      expect(r.amount).toBe(sent)
+      expect(r.amount).toMatch(/^\d+(\.\d{1,3})?$/)
+    })
   it.each([
     ['not logged in', { sender: '' }, 'Need_login_tip'],
     ['no recipient', { recipient: '' }, 'tip_invalid_recipient'],
@@ -213,33 +220,259 @@ describe('profile page tip (index.vue proceedTipActivity on a mocked this)', () 
   })
 })
 
-describe('the pages use the shared checks and handling', () => {
-  const wallet = read('pages/_username/wallet.vue')
-  const index = read('pages/_username/index.vue')
+// wallet.vue is too heavy for jest: pull its methods out of the source and run them on a
+// mocked `this`, with the page's imports passed in
+const wallet = read('pages/_username/wallet.vue')
+// drop the comment lines of the next method and the trailing comma
+const asObjectMember = (body) => body.replace(/(\n[ \t]*\/\/[^\n]*)+\s*$/, '').replace(/,\s*$/, '')
+const walletMethod = (name, deps) => {
+  const body = asObjectMember(methodBody(wallet, '    async ' + name + '('))
+  // eslint-disable-next-line no-new-func
+  return new Function(...Object.keys(deps), 'return {' + body + '}.' + name)(...Object.values(deps))
+}
+const isAuthFailure = (() => {
+  const body = asObjectMember(methodBody(wallet, '    isAuthFailure(outcome) {'))
+  // eslint-disable-next-line no-new-func
+  return new Function('return {' + body + '}.isAuthFailure')()
+})()
+const flush = () => new Promise((resolve) => setTimeout(resolve, 0))
+const quietConsole = { error: () => {}, log: () => {} }
+const env = {
+  process: { env: { actiAppUrl: 'https://api.test/' } },
+  localStorage: { getItem: () => 'jwt' },
+  console: quietConsole
+}
+const reply = (status, body) => ({ status, json: async () => body })
+const EXPIRED = { success: false, message: 'Token is not valid' }
 
-  it('wallet send-AFIT: validated, one at a time, session retry, 503 note, right recipient on chain', () => {
-    const body = methodBody(wallet, '    async proceedTipActivity() {')
-    expect(body).toMatch(/if \(this\.tipInProgress\) return;/)
-    expect(body).toMatch(/validateAfitTip\(\{/)
-    expect(body).toMatch(/requestAfitTip\(\{/)
-    expect(body).toMatch(/this\.isAuthFailure\(outcome\) && await this\.ensureKeychainToken\(\)/)
-    expect(body).toMatch(/sessionActionErrorText\(status, outcome, [^\n]*'afit_tips_unavailable'\)/)
-    expect(body).toMatch(/recipient: checked\.recipient/)
-    expect(body).not.toMatch(/recipient: this\.displayUser/)
-    expect(body).toMatch(/finally \{\s*this\.tipInProgress = false;/)
-    expect(wallet).toMatch(/v-on:click="proceedTipActivity" :disabled="tipInProgress"/)
+function walletCtx (over = {}) {
+  return {
+    user: { account: { name: 'alice' } },
+    userTokensWallet: 100,
+    tipError: '',
+    tipInProgress: false,
+    initiateInProgress: false,
+    afit_se_move_error_proceeding: false,
+    afit_se_move_err_msg: '',
+    userPDAfit: { user: 'alice' },
+    $refs: {
+      'tip-recipient': { value: '@Bob' },
+      'tip-amount': { value: '2' },
+      'afit-move-to-se': { value: '50' }
+    },
+    $t: (k) => k,
+    $gateMessage: gate,
+    $notify: jest.fn(),
+    $store: { dispatch: jest.fn() },
+    $processTrxFunc: jest.fn().mockResolvedValue({ success: true }),
+    processTrxFunc: jest.fn().mockResolvedValue({ success: true }),
+    refreshBalance: jest.fn(),
+    setUserPDAfitStatus: jest.fn(),
+    isAuthFailure,
+    ensureKeychainToken: jest.fn().mockResolvedValue('new-token'),
+    ...over
+  }
+}
+
+describe('wallet send-AFIT (proceedTipActivity)', () => {
+  const fn = walletMethod('proceedTipActivity', { validateAfitTip, requestAfitTip, sessionActionErrorText, ...env })
+
+  it('sends once, confirms, clears the form and records the real recipient', async () => {
+    global.fetch = jest.fn().mockResolvedValue(reply(200, { status: 'Success', tipAmount: 2 }))
+    const c = walletCtx()
+    await fn.call(c)
+    expect(global.fetch).toHaveBeenCalledTimes(1)
+    expect(c.ensureKeychainToken).not.toHaveBeenCalled()
+    expect(JSON.parse(global.fetch.mock.calls[0][1].body)).toEqual({ targetUser: 'bob', amount: '2' })
+    expect(c.$notify).toHaveBeenCalledWith(expect.objectContaining({ group: 'success', text: 'tip_successfully_sent' }))
+    expect(c.$refs['tip-amount'].value).toBe('')
+    expect(JSON.parse(c.$processTrxFunc.mock.calls[0][1].json)).toEqual({ action: 'Tip', amount: 2, recipient: 'bob' })
+    expect(c.tipInProgress).toBe(false)
   })
 
-  it('wallet move to H-E: one at a time, session retry, 503 note', () => {
-    const body = methodBody(wallet, '    async proceedMoveToSE() {')
-    expect(body).toMatch(/if \(this\.initiateInProgress\) return;/)
-    expect(body).toMatch(/requestAfitMoveToHe\(\{/)
-    expect(body).toMatch(/this\.isAuthFailure\(outcome\) && await this\.ensureKeychainToken\(\)/)
-    expect(body).toMatch(/sessionActionErrorText\(status, outcome, [^\n]*'afit_move_he_unavailable'\)/)
-    expect(wallet.match(/v-on:click="proceedMoveToSE" :disabled="initiateInProgress"/g)).toHaveLength(2)
+  it('an expired session: one keychain refresh, then exactly one retry', async () => {
+    global.fetch = jest.fn()
+      .mockResolvedValueOnce(reply(200, EXPIRED))
+      .mockResolvedValueOnce(reply(200, { status: 'Success', tipAmount: 2 }))
+    const c = walletCtx()
+    await fn.call(c)
+    expect(c.ensureKeychainToken).toHaveBeenCalledTimes(1)
+    expect(global.fetch).toHaveBeenCalledTimes(2)
+    expect(c.tipError).toBe('')
   })
 
-  it('errors are rendered as text, never v-html', () => {
+  it('still expired after the retry: says so, no third attempt', async () => {
+    global.fetch = jest.fn().mockResolvedValue(reply(200, EXPIRED))
+    const c = walletCtx()
+    await fn.call(c)
+    expect(global.fetch).toHaveBeenCalledTimes(2)
+    expect(c.tipError).toBe('session_expired_login_again')
+  })
+
+  it.each([
+    ['a network failure', () => Promise.reject(new TypeError('Failed to fetch')), 'error_performing_operation'],
+    ['a server reason', () => Promise.resolve(reply(400, { error: 'Daily limit reached' })), 'Daily limit reached'],
+    ['a 503 (maintenance)', () => Promise.resolve(reply(503, { error: 'disabled' })), 'afit_tips_unavailable']
+  ])('%s: no retry, shown, nothing recorded', async (_, res, shown) => {
+    global.fetch = jest.fn(res)
+    const c = walletCtx()
+    await fn.call(c)
+    expect(global.fetch).toHaveBeenCalledTimes(1)
+    expect(c.ensureKeychainToken).not.toHaveBeenCalled()
+    expect(c.tipError).toBe(shown)
+    expect(c.$processTrxFunc).not.toHaveBeenCalled()
+    expect(c.tipInProgress).toBe(false)
+  })
+
+  it('unlocks as soon as the server confirms, even if the on-chain record never settles', async () => {
+    global.fetch = jest.fn().mockResolvedValue(reply(200, { status: 'Success', tipAmount: 2 }))
+    const c = walletCtx({ $processTrxFunc: jest.fn(() => new Promise(() => {})) })
+    fn.call(c)
+    await flush()
+    expect(c.$notify).toHaveBeenCalled()
+    expect(c.tipInProgress).toBe(false)
+  })
+
+  it('invalid input or a second click never reaches the server', async () => {
+    global.fetch = jest.fn()
+    const bad = walletCtx({ $refs: { 'tip-recipient': { value: 'x' }, 'tip-amount': { value: '1' } } })
+    await fn.call(bad)
+    expect(bad.tipError).toBe('tip_invalid_recipient')
+    await fn.call(walletCtx({ tipInProgress: true }))
+    expect(global.fetch).not.toHaveBeenCalled()
+  })
+})
+
+describe('wallet move to H-E (proceedMoveToSE)', () => {
+  const hsc = { findOne: jest.fn().mockResolvedValue(null) }
+  const fn = walletMethod('proceedMoveToSE', { afitAmountError, hsc, requestAfitMoveToHe, sessionActionErrorText, ...env })
+
+  it('registers once, shows the move and unlocks', async () => {
+    global.fetch = jest.fn().mockResolvedValue(reply(200, { status: 'Success', trx: { user: 'alice' } }))
+    const c = walletCtx()
+    await fn.call(c)
+    expect(global.fetch).toHaveBeenCalledTimes(1)
+    expect(JSON.parse(global.fetch.mock.calls[0][1].body)).toEqual({ amount: 50 })
+    expect(c.setUserPDAfitStatus).toHaveBeenCalledWith({ user: 'alice' })
+    expect(c.initiateInProgress).toBe(false)
+  })
+
+  it('an expired session: exactly one retry', async () => {
+    global.fetch = jest.fn()
+      .mockResolvedValueOnce(reply(200, EXPIRED))
+      .mockResolvedValueOnce(reply(200, { status: 'Success', trx: {} }))
+    const c = walletCtx()
+    await fn.call(c)
+    expect(c.ensureKeychainToken).toHaveBeenCalledTimes(1)
+    expect(global.fetch).toHaveBeenCalledTimes(2)
+  })
+
+  it.each([
+    ['a network failure', () => Promise.reject(new TypeError('Failed to fetch')), 'error_performing_operation'],
+    ['a server reason', () => Promise.resolve(reply(400, { error: 'pending move' })), 'pending move'],
+    ['a 503 (maintenance)', () => Promise.resolve(reply(503, {})), 'afit_move_he_unavailable']
+  ])('%s: no retry, shown, unlocked', async (_, res, shown) => {
+    global.fetch = jest.fn(res)
+    const c = walletCtx()
+    await fn.call(c)
+    expect(global.fetch).toHaveBeenCalledTimes(1)
+    expect(c.ensureKeychainToken).not.toHaveBeenCalled()
+    expect(c.afit_se_move_err_msg).toBe(shown)
+    expect(c.initiateInProgress).toBe(false)
+  })
+
+  it('unlocks when the on-chain record rejects', async () => {
+    global.fetch = jest.fn().mockResolvedValue(reply(200, { status: 'Success', trx: {} }))
+    const c = walletCtx({ processTrxFunc: jest.fn().mockRejectedValue(new Error('boom')) })
+    await fn.call(c)
+    expect(c.initiateInProgress).toBe(false)
+  })
+
+  it('unlocks when the on-chain record never settles (signing prompt dismissed)', async () => {
+    global.fetch = jest.fn().mockResolvedValue(reply(200, { status: 'Success', trx: {} }))
+    const c = walletCtx({ processTrxFunc: jest.fn(() => new Promise(() => {})) })
+    fn.call(c)
+    await flush()
+    expect(c.setUserPDAfitStatus).toHaveBeenCalled()
+    expect(c.initiateInProgress).toBe(false)
+  })
+
+  it.each([
+    ['', 'min_amount_AFIT_move_he'],
+    ['0.05', 'min_amount_AFIT_move_he'],
+    ['1e3', 'min_amount_AFIT_move_he'],
+    ['1.0001', 'amount_max_3_decimals'],
+    ['101', 'max_amount_AFIT_power_SE']
+  ])('rejects %p before any request (%s)', async (value, key) => {
+    global.fetch = jest.fn()
+    const c = walletCtx({ $refs: { 'afit-move-to-se': { value } } })
+    await fn.call(c)
+    expect(c.afit_se_move_err_msg).toBe(key)
+    expect(global.fetch).not.toHaveBeenCalled()
+    expect(c.initiateInProgress).toBe(false)
+  })
+
+  it('a second click while a request runs does nothing', async () => {
+    global.fetch = jest.fn()
+    await fn.call(walletCtx({ initiateInProgress: true }))
+    expect(global.fetch).not.toHaveBeenCalled()
+  })
+})
+
+describe('wallet cancel move (cancelMoveToSE)', () => {
+  const fn = walletMethod('cancelMoveToSE', { confirm: () => true, requestCancelAfitMove, exchangeErrorText, ...env })
+
+  it('cancels, clears the pending move and unlocks even if the record never settles', async () => {
+    global.fetch = jest.fn().mockResolvedValue(reply(200, { status: 'Success' }))
+    const c = walletCtx({ processTrxFunc: jest.fn(() => new Promise(() => {})) })
+    fn.call(c)
+    await flush()
+    expect(c.userPDAfit).toBe(false)
+    expect(c.$notify).toHaveBeenCalledWith(expect.objectContaining({ text: 'afit_power_down_canceled' }))
+    expect(c.initiateInProgress).toBe(false)
+  })
+
+  it('a failure is shown and unlocks', async () => {
+    global.fetch = jest.fn().mockResolvedValue(reply(429, {}))
+    const c = walletCtx()
+    await fn.call(c)
+    expect(c.afit_se_move_err_msg).toBe('too_many_attempts')
+    expect(c.userPDAfit).toEqual({ user: 'alice' })
+    expect(c.initiateInProgress).toBe(false)
+  })
+
+  it('does nothing while another request runs', async () => {
+    global.fetch = jest.fn()
+    await fn.call(walletCtx({ initiateInProgress: true }))
+    expect(global.fetch).not.toHaveBeenCalled()
+  })
+})
+
+describe('wallet processTrxFunc always settles', () => {
+  const ls = (method) => ({ getItem: (k) => ({ std_login: '1', acti_login_method: method, access_token: 'jwt' })[k] || null })
+
+  it('Keychain: a cancelled request (success:false, result null) resolves as a failure', async () => {
+    const window = { hive_keychain: { requestBroadcast: (u, ops, kind, cb) => cb({ success: false, result: null, message: 'cancelled' }) } }
+    const fn = walletMethod('processTrxFunc', { localStorage: ls('keychain'), window, console: quietConsole })
+    await expect(fn.call(walletCtx(), 'custom_json', {})).resolves.toEqual({ success: false, txID: null })
+  })
+
+  it('Keychain: a success resolves with the transaction id', async () => {
+    const window = { hive_keychain: { requestBroadcast: (u, ops, kind, cb) => cb({ success: true, result: { id: 'tx1' } }) } }
+    const fn = walletMethod('processTrxFunc', { localStorage: ls('keychain'), window, console: quietConsole })
+    await expect(fn.call(walletCtx(), 'custom_json', {})).resolves.toEqual({ success: true, txID: 'tx1' })
+  })
+
+  it.each([[{ cmd: 'sign_err' }], [{ cmd: 'sign_nack' }], [{}]])('HiveAuth: %p resolves as a failure', async (response) => {
+    const fn = walletMethod('processTrxFunc', { localStorage: ls('hiveauth'), window: {}, console: quietConsole })
+    const c = walletCtx({ $HAS: { broadcast: () => Promise.resolve(response) } })
+    await expect(fn.call(c, 'custom_json', {})).resolves.toEqual({ success: false })
+  })
+})
+
+describe('the pages render errors as text', () => {
+  it('never v-html', () => {
+    const index = read('pages/_username/index.vue')
     expect(wallet).toMatch(/<div v-if="tipError" [^>]*>\{\{ tipError \}\}<\/div>/)
     expect(index).toMatch(/<div v-if="tipError" [^>]*>\{\{ tipError \}\}<\/div>/)
     expect(wallet).not.toMatch(/v-html="(tipError|afit_se_move_err_msg)"/)
@@ -253,12 +486,13 @@ describe('translations', () => {
   const en = load('en_US.js')
   it.each(LOCALES)('lang/%s has the new and reworded strings, translated', (file) => {
     const m = load(file)
-    for (const k of ['tip_invalid_recipient', 'amount_max_3_decimals', 'afit_tips_unavailable', 'afit_move_he_unavailable']) {
+    for (const k of ['tip_invalid_recipient', 'amount_max_3_decimals', 'min_amount_AFIT_move_he', 'afit_tips_unavailable', 'afit_move_he_unavailable']) {
       expect(typeof m[k]).toBe('string')
       expect(m[k].length).toBeGreaterThan(10)
       if (file !== 'en_US.js') expect(m[k]).not.toBe(en[k])
     }
-    // the FAQ no longer says tips are unavailable, and still needs no funds password
-    expect(m.faq.a23).toMatch(/10[,.\s]?000/)
+    // the daily limit is server config (max_allowed_tips_per_day): the FAQ names no number
+    expect(m.faq.a23).not.toMatch(/10[,.\s]?000/)
+    expect(m.faq.a23).toMatch(/AFIT/)
   })
 })

@@ -1444,7 +1444,7 @@
                   <div class="row">
                     <label for="tip-recipient" class="w-25 p-2">{{ $t('Recipient') }}</label>
                     <input type="text" id="tip-recipient" name="tip-recipient" ref="tip-recipient"
-                      autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="17"
+                      autocomplete="off" autocapitalize="none" spellcheck="false"
                       class="form-control-lg w-50 p-2">
                   </div>
                   <div class="row">
@@ -1942,7 +1942,7 @@ import Web3 from 'web3';
 
 import badActors from '~/utils/BadActorList';
 import { requestAfitExchange, exchangeErrorText } from '~/utils/afitExchange';
-import { AFIT_TIPS_AVAILABLE, AFIT_MOVE_TO_HE_AVAILABLE, BUY_AFIT_AVAILABLE, BSC_BRIDGE_AVAILABLE, requestCancelAfitMove, validateAfitTip, requestAfitTip, requestAfitMoveToHe, sessionActionErrorText } from '~/utils/sessionActions';
+import { AFIT_TIPS_AVAILABLE, AFIT_MOVE_TO_HE_AVAILABLE, BUY_AFIT_AVAILABLE, BSC_BRIDGE_AVAILABLE, requestCancelAfitMove, validateAfitTip, requestAfitTip, requestAfitMoveToHe, sessionActionErrorText, afitAmountError } from '~/utils/sessionActions';
 import AutocompleteUsernameInput from '~/components/AutocompleteUsernameInput';
 
 let web3 = new Web3(process.env.web3Node);
@@ -5856,7 +5856,7 @@ export default {
         //if (!this.stdLogin){
         let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
         //console.log(res);
-        if (res.result.ref_block_num) {
+        if (res && res.result && res.result.ref_block_num) {
           console.log('success');
           return { success: true, trx: res.result };
         } else {
@@ -5874,8 +5874,12 @@ export default {
             operation,
             active ? 'Active' : 'Posting', (response) => {
               console.log(response);
-              //resolve(response);
-              resolve({ success: response.success, txID: response.result.id })
+              //a cancelled / failed request comes back as success:false with no result:
+              //still settle, or the caller's spinner and disabled buttons never reset
+              resolve({
+                success: !!(response && response.success),
+                txID: response && response.result ? response.result.id : null
+              })
             });
         });
       } else if (localStorage.getItem('acti_login_method') == 'hiveauth') {
@@ -5908,9 +5912,10 @@ export default {
                 group: 'warn',
                 clean: true
               })
-              if (response.cmd && response.cmd === 'sign_ack') {
+              if (response && response.cmd === 'sign_ack') {
                 resolve({ success: true, txID: response.data })
-              } else if (response.cmd && response.cmd === 'sign_nack') {
+              } else {
+                //sign_nack, sign_err, expired...: always settle
                 resolve({ success: false })
               }
             }) // transaction approved and successfully broadcasted
@@ -5975,7 +5980,7 @@ export default {
     async cancelMoveToSE() {
       this.afit_se_move_err_msg = '';
       let userConf = confirm(this.$t('Cancel_Transfer_Confirm'));
-      if (!userConf) {
+      if (!userConf || this.initiateInProgress) {
         return;
       }
 
@@ -6000,36 +6005,34 @@ export default {
       } catch (err) {
         console.error('cancelAFITMoveSE failed:', err);
       }
-      if (outcome.status == 'Success') {
-        let afitCancPDTransaction = { action: 'Cancel AFIT To S-E Power Down' };
-        //store the transaction to Steem BC
-        let cstm_params = {
-          required_auths: [],
-          required_posting_auths: [this.user.account.name],
-          id: 'actifit',
-          json: JSON.stringify(afitCancPDTransaction)
-        };
-
-        let res = await this.processTrxFunc('custom_json', cstm_params);
-
-        if (res.success) {
-          //notify of success
-          this.$notify({
-            group: 'success',
-            text: this.$t('afit_power_down_canceled'),
-            position: 'top center'
-          })
-
-          //unset the value of existing transfer
-          this.userPDAfit = false
-        }
-
-
-      } else {
+      this.initiateInProgress = false;
+      if (outcome.status != 'Success') {
         this.afit_se_move_error_proceeding = true;
         this.afit_se_move_err_msg = exchangeErrorText(status, outcome, (k) => this.$t(k), (o) => this.$gateMessage(o));
+        return;
       }
-      this.initiateInProgress = false;
+      //cancelled server side: show it now, even if recording the custom_json below fails
+      //or the user dismisses the signing prompt
+      this.$notify({
+        group: 'success',
+        text: this.$t('afit_power_down_canceled'),
+        position: 'top center'
+      })
+      this.userPDAfit = false
+
+      let afitCancPDTransaction = { action: 'Cancel AFIT To S-E Power Down' };
+      //record the transaction on chain
+      let cstm_params = {
+        required_auths: [],
+        required_posting_auths: [this.user.account.name],
+        id: 'actifit',
+        json: JSON.stringify(afitCancPDTransaction)
+      };
+      try {
+        await this.processTrxFunc('custom_json', cstm_params);
+      } catch (err) {
+        console.error('recording the AFIT move cancel custom_json failed:', err);
+      }
     },
     async proceedTipActivity() {
       //one send at a time: a double click must not send the AFIT twice
@@ -6068,6 +6071,7 @@ export default {
         //send again if recording the custom_json below fails
         this.$refs['tip-amount'].value = '';
         this.$refs['tip-recipient'].value = '';
+        this.tipInProgress = false;
         this.$notify({
           group: 'success',
           text: this.$t('tip_successfully_sent'),
@@ -6100,25 +6104,18 @@ export default {
       this.afit_se_move_error_proceeding = false;
       this.afit_se_move_err_msg = '';
 
-      let amount_to_powerdown = this.$refs["afit-move-to-se"].value.trim();
-
-      //ensure we have proper values
-      if (isNaN(amount_to_powerdown) || parseFloat(amount_to_powerdown) < 0.1) {
+      //a plain number with at most 3 decimals, at least 0.1, within the AFIT balance
+      const amountRaw = this.$refs["afit-move-to-se"].value;
+      const amountErr = afitAmountError(amountRaw, this.userTokensWallet);
+      if (amountErr || parseFloat(amountRaw) < 0.1) {
         this.afit_se_move_error_proceeding = true;
-        this.afit_se_move_err_msg = this.$t('min_amount_AFIT_power');
-        //this.movingFunds = false;
+        this.afit_se_move_err_msg = this.$t(
+          amountErr === 'amount_above_balance' ? 'max_amount_AFIT_power_SE'
+            : amountErr === 'amount_max_3_decimals' ? amountErr
+              : 'min_amount_AFIT_move_he');
         return;
       }
-      amount_to_powerdown = parseFloat(amount_to_powerdown);
-      //console.log(amount_to_powerdown);
-
-      //ensure user is powering down value he has
-      if (!(parseFloat(amount_to_powerdown) <= parseFloat(this.userTokensWallet))) {
-        this.afit_se_move_error_proceeding = true;
-        this.afit_se_move_err_msg = this.$t('max_amount_AFIT_power_SE');
-        //this.movingFunds = false;
-        return;
-      }
+      let amount_to_powerdown = parseFloat(amountRaw);
       this.initiateInProgress = true;
 
       try {
@@ -6178,10 +6175,17 @@ export default {
         amount: amount_to_powerdown,
         sessionToken: localStorage.getItem('access_token')
       });
-      let { status, outcome } = await sendMove();
-      if (this.isAuthFailure(outcome) && await this.ensureKeychainToken()) {
+      let status = 0;
+      let outcome = {};
+      try {
         ({ status, outcome } = await sendMove());
+        if (this.isAuthFailure(outcome) && await this.ensureKeychainToken()) {
+          ({ status, outcome } = await sendMove());
+        }
+      } catch (err) {
+        console.error('initiateAFITMoveSE failed:', err);
       }
+      this.initiateInProgress = false;
       if (outcome.status == 'Success') {
         //the move is registered server side: show it now (Adjust / Cancel), even if
         //recording the custom_json below fails, so the user does not register it twice
@@ -6214,8 +6218,6 @@ export default {
         this.afit_se_move_error_proceeding = true;
         this.afit_se_move_err_msg = sessionActionErrorText(status, outcome, (k) => this.$t(k), (o) => this.$gateMessage(o), 'afit_move_he_unavailable');
       }
-      this.initiateInProgress = false;
-
     },
     async proceedMoveSEPower() {
       //handles checking for proper confirmation of account via STEEM transfer

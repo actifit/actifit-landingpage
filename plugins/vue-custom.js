@@ -274,7 +274,8 @@ Vue.prototype.$processTrxFunc = async function (op_name, cstm_params, active) {
 		  });
 		  if (response.cmd && response.cmd === 'sign_ack') {
 			resolve({ success: true, txID: response.data, trx: {tx: {id: response.data} }});
-		  } else if (response.cmd && response.cmd === 'sign_nack') {
+		  } else {
+			// sign_nack, sign_err, expired...: always settle, or the caller hangs
 			resolve({ success: false });
 		  }
 		})

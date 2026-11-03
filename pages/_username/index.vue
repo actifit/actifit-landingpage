@@ -1727,6 +1727,7 @@ export default {
         //the AFIT has moved server side: confirm it and close the form, so the user does not
         //send again if recording the custom_json below fails
         this.proceedTip = false;
+        this.tipInProgress = false;
         this.$notify({
           group: 'success',
           text: this.$t('tip_successfully_sent'),
