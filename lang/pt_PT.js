@@ -1388,8 +1388,8 @@ module.exports = {
   Latest_Activity_Date: 'Data da Última Atividade',
   hide_reblogs: 'ocultar reblogs',
   show_reblogs: 'mostrar reblogs',
-  proposal_modal_title_year: "Proposta Actifit 2025",
-  proposal_modal_message: "Apoie o esforço de desenvolvimento e crescimento da Actifit. Vote em nossa proposta❤️",
+  proposal_modal_title_year: "Proposta Hive Dev #3",
+  proposal_modal_message: "Apoie a equipa HDev na construção e crescimento do núcleo e das aplicações da Hive. Vote na proposta deles❤️",
   vote_button_text: "Votar",
   read_more_button_text: "Leia Mais",
 

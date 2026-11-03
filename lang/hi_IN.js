@@ -1389,8 +1389,8 @@ module.exports = {
   Latest_Activity_Date: 'नवीनतम गतिविधि तिथि',
   hide_reblogs: 'रिब्लॉग छिपाएं',
   show_reblogs: 'रिब्लॉग दिखाएं',
-  proposal_modal_title_year: "एक्टिफिट प्रस्ताव 2025",
-  proposal_modal_message: "एक्टिफिट के विकास और वृद्धि के प्रयासों का समर्थन करें। हमारे प्रस्ताव के लिए वोट करें❤️",
+  proposal_modal_title_year: "Hive Dev प्रस्ताव #3",
+  proposal_modal_message: "Hive कोर और ऐप्स के निर्माण और विकास में HDev टीम का समर्थन करें। उनके प्रस्ताव के लिए वोट करें❤️",
   vote_button_text: "वोट करें",
   read_more_button_text: "और पढ़ें",
 

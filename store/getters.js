@@ -14,9 +14,6 @@ export default {
   proposals (state){
 	  return state.proposals;
   },
-  proposalVoters (state){
-    return state.proposalVoters;
-  },
   referrals (state) {
     return state.referrals
   },

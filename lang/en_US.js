@@ -1373,8 +1373,8 @@ module.exports = {
   Latest_Activity_Date:'Latest Activity Date',
   hide_reblogs:'hide reblogs',
   show_reblogs:'show reblogs',
-  proposal_modal_title_year: "Hive Dev Proposal 2026",
-  proposal_modal_message: "Support Our partners HDev team's development & growth effort. Vote for their proposal❤️",
+  proposal_modal_title_year: "Hive Dev Proposal #3",
+  proposal_modal_message: "Support the HDev team in building and growing Hive core and apps. Vote for their proposal❤️",
   vote_button_text: "Vote",
   read_more_button_text: "Read More",
 

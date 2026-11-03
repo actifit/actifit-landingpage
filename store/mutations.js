@@ -16,9 +16,6 @@ export default {
   setProposals (state, proposals){
 	  state.proposals = proposals
   },
-  setProposalVoters (state, proposalVoters){
-    state.proposalVoters = proposalVoters;
-  },
   setReferrals (state, referrals) {
     state.referrals = referrals
   },

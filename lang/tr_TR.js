@@ -1388,8 +1388,8 @@ module.exports = {
   Latest_Activity_Date: 'Son Aktivite Tarihi',
   hide_reblogs: 'yeniden blogları gizle',
   show_reblogs: 'yeniden blogları göster',
-  proposal_modal_title_year: "Actifit Önerisi 2025",
-  proposal_modal_message: "Actifit'in gelişim ve büyüme çabasını destekleyin. Önerimiz için oy verin❤️",
+  proposal_modal_title_year: "Hive Dev Önerisi #3",
+  proposal_modal_message: "HDev ekibini Hive çekirdeğini ve uygulamalarını geliştirme ve büyütme çalışmalarında destekleyin. Önerilerine oy verin❤️",
   vote_button_text: "Oy Ver",
   read_more_button_text: "Daha Fazlasını Oku",
 

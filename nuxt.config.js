@@ -24,7 +24,9 @@ module.exports = {
   // Runtime configuration
   publicRuntimeConfig: {
     version: pkg.version,
-    proposalId: '360',
+    // Hive Dev Proposal #3 and its announcement post (the vote popup in the footer)
+    proposalId: 391,
+    proposalPostPath: '/@hdev/hive-dev-proposal-3',
   },
 
   privateRuntimeConfig: {
