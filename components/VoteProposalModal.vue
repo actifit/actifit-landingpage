@@ -13,15 +13,18 @@
     <div><!-- class="modal-dialog" role="document" -->
       <div class="modal-content">
         <div class="modal-header p-1">
-          <!-- Using the dynamic year from the computed property -->
           <h5 class="modal-title">{{ $t('proposal_modal_title_year') }}</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close" @click="closeModal">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" @click="closeModal()">
             <span aria-hidden="true">×</span>
           </button>
         </div>
         <p>{{ $t('proposal_modal_message') }}</p>
+        <!-- Keychain's proposal vote cannot pick an account itself, so a logged-out
+             visitor names theirs here. -->
+        <input v-if="askUsername && !username" ref="voteUsername" v-model.trim="voteUsername" class="form-control mb-1"
+               :placeholder="$t('Your_Username')" autocapitalize="none" @keyup.enter="voteForProposal">
         <div class="text-right">
-          <button @click="voteForProposal" class="btn m-1 col-5">
+          <button @click="voteForProposal" :disabled="voting" class="btn m-1 col-5">
             {{ $t('vote_button_text') }}
           </button>
           <button @click="readMore" class="m-1 col-5">{{ $t('read_more_button_text') }}</button>
@@ -33,14 +36,16 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import escapeHtml from '~/utils/escapeHtml';
+
+// After "×", stay hidden for this long in this browser.
+const DISMISS_MS = 3 * 24 * 60 * 60 * 1000;
+// After a vote the wallet reported as sent: long enough for the vote to reach a block
+// and the nodes, short enough that a vote that never landed brings the popup back soon.
+const VOTED_MS = 60 * 60 * 1000;
 
 export default {
   props: {
-    // MODIFIED: Removed modalTitle and message props to handle text internally.
-    propUrl:{
-      type: String,
-      default: 'https://peakd.com/proposals/337',
-    },
     bottomOffset: {
       type: Number,
       default: 20,
@@ -49,7 +54,10 @@ export default {
   data() {
     return {
       visible: false,
-      username: null,
+      voting: false,
+      lookupId: 0,
+      askUsername: false,
+      voteUsername: '',
     };
   },
   watch: {
@@ -59,8 +67,16 @@ export default {
   },
   computed: {
     ...mapGetters('steemconnect', ['user']),
-    ...mapGetters(['proposalVoters']),
 
+    username() {
+      return (this.user && this.user.account && this.user.account.name) || null;
+    },
+    proposalId() {
+      return Number(this.$config.proposalId);
+    },
+    dismissKey() {
+      return 'proposal_popup_dismissed_' + this.proposalId;
+    },
     modalStyle() {
       return {
         bottom: `${this.bottomOffset}px`,
@@ -68,46 +84,130 @@ export default {
     },
   },
   methods: {
-    closeModal() {
+    // Hide, and keep it hidden in this browser for `ms` (stored as a "hidden until" time).
+    closeModal(ms = DISMISS_MS) {
       this.visible = false;
+      try { localStorage.setItem(this.dismissKey, String(Date.now() + ms)); } catch (e) { /* storage blocked */ }
     },
-    voteForProposal() {
-      const username = this.user && this.user.account && this.user.account.name || null;
-      const proposalId = this.$config.proposalId; // Retrieve proposal ID from nuxt.config.js
-      const approve = true; // Set to false if you want to unvote
-      window.hive_keychain?.requestUpdateProposalVote(
-        username,
-        [proposalId],
-        approve,
-        [],
-        (response) => {
-          if (response.success) {
-            this.visible = false; // Close modal after voting
-          }
-        }
-      );
-    },
-    readMore(){
-      window.open(this.propUrl, '_blank'); // Opens the link in a new tab
-    },
-    userVotedProposal(){
-      const username = this.user && this.user.account && this.user.account.name || null;
-      if (!username) return false;
-      if (this.proposalVoters != null && this.proposalVoters.length > 0){
-        if (this.proposalVoters.includes(username)){
-          return true;
-        }
+    // A saved session whose account has not loaded yet: wait for it rather than
+    // briefly showing the logged-out popup to someone who may have voted.
+    sessionLoading() {
+      try {
+        return !this.username && !!localStorage.getItem('access_token');
+      } catch (e) {
+        return false;
       }
     },
-    adjustVisibility(){
-      // Popup disabled for now — re-enable for Actifit's next DHF proposal by restoring:
-      //   this.visible = !this.userVotedProposal();
-      this.visible = false;
+    recentlyDismissed() {
+      try {
+        const until = Number(localStorage.getItem(this.dismissKey));
+        // capped, so a bad or old-format value can never hide it for longer than "×" does
+        return until > Date.now() && until - Date.now() <= DISMISS_MS;
+      } catch (e) {
+        return false;
+      }
+    },
+    voteForProposal() {
+      if (this.voting) return;
+      // Keychain first, whatever the login method: it keeps the active key out of the
+      // page. Logged-in users sign as themselves; logged-out visitors name their account.
+      if (window.hive_keychain) return this.voteWithKeychain();
+      return this.voteWithoutKeychain();
+    },
+    async voteWithoutKeychain() {
+      // Proposal votes need the active key: HiveSigner sessions only hold a posting
+      // token, and logged-out visitors have no way to sign here, so both approve the
+      // vote on hivesigner.com instead (where they pick the account).
+      if (!this.username || !this.$signsInBrowser()) {
+        window.open('https://hivesigner.com/sign/update-proposal-votes?proposal_ids=' +
+          encodeURIComponent(JSON.stringify([this.proposalId])) + '&approve=true', '_blank');
+        // Opening HiveSigner is not a vote. A logged-in user's next page checks the
+        // chain again; a logged-out visitor (no check possible) gets an hour's rest.
+        if (this.username) this.visible = false;
+        else this.closeModal(VOTED_MS);
+        return;
+      }
+      this.voting = true;
+      try {
+        const res = await this.$processTrxFunc('update_proposal_votes', {
+          voter: this.username,
+          proposal_ids: [this.proposalId],
+          approve: true,
+          extensions: []
+        }, true);
+        if (res && res.success) {
+          // also remembered briefly, so a lookup that runs before the vote is in a
+          // block (or on a lagging node) does not bring the popup back
+          this.closeModal(VOTED_MS);
+        } else if (res && !('cancelled' in res)) {
+          // Keychain and HiveAuth failures come back without a message shown; the
+          // typed-key path (the one that sets `cancelled`) already shows its own.
+          // Escaped: toasts render HTML.
+          this.$notify({ group: 'error', text: escapeHtml(res.error || this.$t('error_performing_operation')), position: 'top center' });
+        }
+      } finally {
+        this.voting = false;
+      }
+    },
+    voteWithKeychain() {
+      if (!this.username && !this.askUsername) {
+        this.askUsername = true;
+        this.$nextTick(() => this.$refs.voteUsername && this.$refs.voteUsername.focus());
+        return;
+      }
+      const account = this.username || this.voteUsername.replace(/^@/, '').toLowerCase();
+      if (!account) {
+        this.$refs.voteUsername && this.$refs.voteUsername.focus();
+        return;
+      }
+      const loggedIn = !!this.username;
+      this.voting = true;
+      try {
+        window.hive_keychain.requestUpdateProposalVote(account, JSON.stringify([this.proposalId]), true,
+          JSON.stringify([]), (response) => {
+            this.voting = false;
+            if (response && response.success) {
+              // logged-out visitors cannot be checked on chain, so treat it like "×"
+              this.closeModal(loggedIn ? VOTED_MS : DISMISS_MS);
+            } else if (response && response.error !== 'user_cancel') {
+              // A logged-in user whose Keychain does not hold this account's keys
+              // falls back to their own login method (unless that is Keychain too).
+              if (loggedIn && this.username === account && !this.keychainLogin()) return this.voteWithoutKeychain();
+              // Escaped: toasts render HTML.
+              this.$notify({ group: 'error', text: escapeHtml(response.message || this.$t('error_performing_operation')), position: 'top center' });
+            }
+          });
+      } catch (e) {
+        this.voting = false;
+        if (loggedIn && !this.keychainLogin()) this.voteWithoutKeychain();
+      }
+    },
+    keychainLogin() {
+      try { return localStorage.getItem('acti_login_method') === 'keychain'; } catch (e) { return false; }
+    },
+    readMore(){
+      window.open(this.$config.proposalPostPath, '_blank');
+    },
+    // Logged-in users who have not voted yet, and logged-out visitors (whose vote we
+    // cannot check), unless they just closed it.
+    async adjustVisibility(){
+      const username = this.username;
+      if (!username || this.recentlyDismissed()) {
+        this.lookupId++;
+        this.visible = !username && !this.sessionLoading() && !this.recentlyDismissed();
+        return;
+      }
+      const id = ++this.lookupId;
+      let voted = true; // a failed lookup hides the popup rather than nagging voters
+      try {
+        voted = await this.$store.dispatch('hasVotedProposal', { proposalId: this.proposalId, username });
+      } catch (e) { /* node unavailable */ }
+      // only the latest lookup counts: the user may have logged out or switched
+      // accounts while we waited, and mounted and the user watcher can overlap
+      if (id === this.lookupId && username === this.username) this.visible = !voted;
     }
   },
-  async mounted() {
-    // Fetch voters and then adjust visibility based on the result.
-    await this.$store.dispatch('fetchProposalVoters', {proposalId: this.$config.proposalId});
+  mounted() {
     this.adjustVisibility();
   },
 };
@@ -131,7 +231,7 @@ export default {
   z-index: 1000;
   pointer-events: auto;
   max-width: 330px;
-  max-height: 230px;
+  max-height: 300px;
   height: auto;
 }
 

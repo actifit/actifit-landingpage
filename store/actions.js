@@ -706,29 +706,15 @@ export default {
     });
   },
 
-  fetchProposalVoters({ state, commit }, params) {
-    return new Promise(async (resolve, reject) => {
-
-      let proposalId = params && params.proposalId ? params.proposalId : '337';
-      let chainLnk = hive;
-
-      //https://developers.hive.io/apidefinitions/#condenser_api.list_proposals
-
-
-      let outc = await chainLnk.api.callAsync('condenser_api.list_proposal_votes', [[proposalId], 1000, 'by_proposal_voter', 'ascending', 'all']);
-      let proposalVotersArray = outc.filter((obj) => obj.proposal['id'] === proposalId)
-							.map((obj) => obj.voter).sort();
-      //let outc = chainLnk.api.call('bridge.list_pop_communities', callQuery, (err, comms) => {
-      if (outc) {
-        //console.log('fetch proposals Voters');
-        //console.log(outc)
-        commit('setProposalVoters', proposalVotersArray)
-        resolve(outc);
-      } else {
-        reject('error');
-      }
-      //});
-    });
+  // Has `username` voted for proposal `proposalId`? Reads only that user's vote: the
+  // by_proposal_voter index is sorted by (proposal, voter), so the first entry at or
+  // after [proposalId, username] is their vote if they cast one.
+  async hasVotedProposal (_, { proposalId, username }) {
+    const id = Number(proposalId)
+    const votes = await hive.api.callAsync('condenser_api.list_proposal_votes',
+      [[id, username], 1, 'by_proposal_voter', 'ascending', 'all'])
+    const first = votes && votes[0]
+    return !!first && first.voter === username && Number(first.proposal.id) === id
   },
 
   fetchUserVideos({ state, commit, dispatch }, username) {
