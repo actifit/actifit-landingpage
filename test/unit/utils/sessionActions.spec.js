@@ -104,9 +104,11 @@ describe('requestReissueDownloadToken', () => {
 })
 
 describe('server-disabled actions show a note instead of their form', () => {
-  it('flags are off until the backend re-enables them', () => {
-    expect([AFIT_TIPS_AVAILABLE, AFIT_MOVE_TO_HE_AVAILABLE, BUY_AFIT_AVAILABLE, MOD_ACTIONS_AVAILABLE])
-      .toEqual([false, false, false, false])
+  it('buying AFIT and moderator actions stay off until the backend re-enables them', () => {
+    expect([BUY_AFIT_AVAILABLE, MOD_ACTIONS_AVAILABLE]).toEqual([false, false])
+  })
+  it('sending AFIT and starting a move to H-E are back on (the backend re-enabled them)', () => {
+    expect([AFIT_TIPS_AVAILABLE, AFIT_MOVE_TO_HE_AVAILABLE]).toEqual([true, true])
   })
   it.each([
     ['pages/_username/wallet.vue', ['afit_tips_unavailable', 'afit_move_he_unavailable', 'buy_afit_unavailable']],
