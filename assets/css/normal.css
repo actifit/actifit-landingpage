@@ -398,10 +398,9 @@ code {
   background-color: rgba(255, 255, 255, 0.1);
   color: #e06c75;
 }
-/* Google's reCAPTCHA badge. vue-recaptcha-v3's autoHideBadge only hides it after
-   reCAPTCHA loads successfully, so when a browser blocks Google (privacy shields,
-   VPNs) the badge stays visible showing "Could not connect to the reCAPTCHA
-   service" on every page. Hiding it is allowed because the footer carries the
+/* Google's reCAPTCHA badge, hidden from first paint by the site's own CSS rather
+   than only by vue-recaptcha-v3's autoHideBadge (which depends on which page
+   registers the plugin first). Hiding it is allowed because the footer carries the
    required reCAPTCHA attribution (NewFooterDesign.vue). */
 .grecaptcha-badge {
   visibility: hidden !important;

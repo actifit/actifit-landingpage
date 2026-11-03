@@ -1,6 +1,5 @@
-// The reCAPTCHA badge must be hidden by the site's own CSS, not only by
-// vue-recaptcha-v3's autoHideBadge (which runs only after reCAPTCHA loads, so a
-// browser that blocks Google kept the "Could not connect" badge on every page).
+// The reCAPTCHA badge is hidden by the site's own CSS, not only by
+// vue-recaptcha-v3's autoHideBadge (whose effect depends on plugin registration order).
 const fs = require('fs')
 const path = require('path')
 
