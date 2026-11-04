@@ -430,16 +430,16 @@
                 <div v-if="showAfitTipInfo" class="alert alert-info mt-3 small" v-html="$t('tipping_details')" />
 
                 <div v-if="proceedTip" class="wallet-action-box mt-3">
-                  <!-- /tipAccount is disabled server side (security maintenance after 2026-10-21) -->
+                  <!-- note in place of the form if /tipAccount is switched off again (flag in utils/sessionActions.js) -->
                   <div v-if="!afitTipsAvailable" class="alert alert-info mb-0">{{ $t('afit_tips_unavailable') }}</div>
                   <div v-else class="tip-details">
                     <div class="form-group">
                       <label for="tip-amount">{{ $t('Tip_Amount') }}</label>
-                      <input type="number" id="tip-amount" name="tip-amount" ref="tip-amount" class="form-control">
+                      <input type="number" id="tip-amount" name="tip-amount" ref="tip-amount" min="0.001" step="0.001" class="form-control">
                     </div>
-                    <div v-if="tipError" class="alert alert-danger">{{ tipError }}</div>
+                    <div v-if="tipError" class="alert alert-danger" role="alert">{{ tipError }}</div>
                     <div>
-                      <button v-on:click="proceedTipActivity" class="btn btn-danger">{{ $t('Proceed') }}</button>
+                      <button v-on:click="proceedTipActivity" :disabled="tipInProgress" class="btn btn-danger">{{ $t('Proceed') }}</button>
                       <i class="fas fa-spin fa-spinner ml-2" v-if="tipInProgress"></i>
                     </div>
                   </div>
@@ -576,7 +576,7 @@ import MeasureChartModal from '~/components/MeasureChartModal'
 import ActivityChartModal from '~/components/ActivityChartModal'
 import ProfileImageModal from '~/components/ProfileImageModal'
 import badActors from '~/utils/BadActorList';
-import { AFIT_TIPS_AVAILABLE } from '~/utils/sessionActions'
+import { AFIT_TIPS_AVAILABLE, validateAfitTip, requestAfitTip, sessionActionErrorText } from '~/utils/sessionActions'
 import { BadgePlugin } from 'bootstrap-vue'
 Vue.use(BadgePlugin)
 import SSC from 'sscjs'
@@ -639,7 +639,7 @@ export default {
       account_banned: false,
       tipError: '',
       tipInProgress: false,
-      afitTipsAvailable: AFIT_TIPS_AVAILABLE, //tips are disabled server side for now
+      afitTipsAvailable: AFIT_TIPS_AVAILABLE, //false shows a "temporarily unavailable" note instead
       proceedTip: false,
       addFriendError: '',
       cur_bchain: 'HIVE',
@@ -1697,57 +1697,65 @@ export default {
       }
     },
     async proceedTipActivity() {
+      //one send at a time: a double click must not send the AFIT twice
+      if (this.tipInProgress) return;
       this.tipError = '';
-      if (!this.user) {
-        this.tipError = this.$t('Need_login_tip');
-        return false;
-      }
-      if (this.displayUser == this.user.account.name) {
-        this.tipError = this.$t('Cannot_tip_self');
-        return false;
-      }
-      if (this.$refs["tip-amount"].value == '') {
-        this.tipError = this.$t('amount_positive_int');
-        return;
-      }
-      if (parseFloat(this.$refs["tip-amount"].value) > parseFloat(this.userTokens)) {
-        this.tipError = this.$t('amount_above_balance');
+      const checked = validateAfitTip({
+        sender: this.user && this.user.account.name,
+        recipient: this.displayUser,
+        amount: this.$refs["tip-amount"].value,
+        balance: this.userTokens
+      });
+      if (checked.error) {
+        this.tipError = this.$t(checked.error);
         return;
       }
       this.tipInProgress = true;
-      //authorised by the login session, no funds password (disabled server side for now)
-      const accToken = localStorage.getItem('access_token');
-      let res = await fetch(process.env.actiAppUrl + 'tipAccount/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-acti-token': 'Bearer ' + accToken },
-        body: JSON.stringify({ targetUser: this.displayUser, amount: this.$refs["tip-amount"].value })
-      });
-      let outcome = await res.json().catch(() => ({}));
-      if (outcome.status == 'Success') {
-        let tipTransaction = { action: 'Tip', amount: outcome.tipAmount, recipient: this.displayUser };
+      try {
+        //authorised by the login session, no funds password. Keeps the HTTP status so a 503
+        //(switched off for security maintenance) or a plain-text 429 reads as such.
+        const { status, outcome } = await requestAfitTip({
+          apiUrl: process.env.actiAppUrl,
+          targetUser: checked.recipient,
+          amount: checked.amount,
+          sessionToken: localStorage.getItem('access_token')
+        });
+        if (outcome.status != 'Success') {
+          this.tipError = sessionActionErrorText(status, outcome, (k) => this.$t(k), (o) => this.$gateMessage(o), 'afit_tips_unavailable');
+          return;
+        }
+        //the AFIT has moved server side: confirm it and close the form, so the user does not
+        //send again if recording the custom_json below fails
+        this.proceedTip = false;
+        this.tipInProgress = false;
+        this.$notify({
+          group: 'success',
+          text: this.$t('tip_successfully_sent'),
+          position: 'top center'
+        })
+        if (outcome.recipientTokenCount !== undefined) {
+          this.userTokenCount = outcome.recipientTokenCount;
+        }
+        this.$store.dispatch('fetchUserTokens')
+        //record the tip on chain; the tip itself is done, so a failure here is only logged
+        let tipTransaction = { action: 'Tip', amount: outcome.tipAmount, recipient: checked.recipient };
         let cstm_params = {
           required_auths: [],
           required_posting_auths: [this.user.account.name],
           id: 'actifit',
           json: JSON.stringify(tipTransaction)
         };
-        let res = await this.$processTrxFunc('custom_json', cstm_params);
-        if (res.success) {
-          this.$notify({
-            group: 'success',
-            text: this.$t('tip_successfully_sent'),
-            position: 'top center'
-          })
-          this.$store.dispatch('fetchUserTokens')
-          this.userTokenCount = outcome.recipientTokenCount;
-        } else {
-          this.friendshipLoader = false;
+        try {
+          await this.$processTrxFunc('custom_json', cstm_params);
+        } catch (err) {
+          console.error('recording the tip custom_json failed:', err);
         }
-        this.proceedTip = false;
-      } else {
-        this.tipError = outcome.error || this.$t('error_performing_operation');
+      } catch (err) {
+        console.error('tipAccount failed:', err);
+        this.tipError = this.$t('error_performing_operation');
+      } finally {
+        this.tipInProgress = false;
       }
-      this.tipInProgress = false;
     },
     getUserActivityLevel() {
       return this.calcScore(this.rewarded_posts_rules, this.rewardedPostCount)
