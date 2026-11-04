@@ -398,3 +398,10 @@ code {
   background-color: rgba(255, 255, 255, 0.1);
   color: #e06c75;
 }
+/* Google's reCAPTCHA badge, hidden from first paint by the site's own CSS rather
+   than only by vue-recaptcha-v3's autoHideBadge (which depends on which page
+   registers the plugin first). Hiding it is allowed because the footer carries the
+   required reCAPTCHA attribution (NewFooterDesign.vue). */
+.grecaptcha-badge {
+  visibility: hidden !important;
+}
