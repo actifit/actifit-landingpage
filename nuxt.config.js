@@ -1,4 +1,4 @@
-const pkg = require('./package')
+const pkg = require('./package.json')
 
 // --- STEP 1: Import the language file to access its strings ---
 const enTranslations = require('./lang/en_US.js')
@@ -22,8 +22,11 @@ module.exports = {
   mode: 'universal',
 
   // Runtime configuration
+  // Not named `version`: Nuxt lets an environment variable with the same name as a
+  // runtime-config key replace its value, and pm2 sets `version` in the environment to
+  // the version of the script it runs (Nuxt's own bin), so the footer showed 2.18.1.
   publicRuntimeConfig: {
-    version: pkg.version,
+    appVersion: pkg.version,
     // Hive Dev Proposal #3 and its announcement post (the vote popup in the footer)
     proposalId: 391,
     proposalPostPath: '/@hdev/hive-dev-proposal-3',
