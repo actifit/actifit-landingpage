@@ -283,7 +283,7 @@ export default {
       ]
     }
   },
-  async asyncData({ params, app }) {
+  async asyncData({ params, app, error }) {
     //let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE')
     //if (cur_bchain == 'HIVE'){
     //set HIVE as default chain, since we cannot use localstorage in here
@@ -307,9 +307,14 @@ export default {
     // safe default meta immediately instead of querying a second chain.
     const user_name = params.username.replace('@', '');
     let result = null;
+    // true only when the node itself says there is no such post
+    let hiveSaysMissing = false;
     try {
       await hive.api.setOptions({ url: process.env.hiveApiNode });
       result = await hive.api.getContentAsync(user_name, params.permlink);
+      // hivemind answers a missing post with error -32602 ("Post a/b does not exist"),
+      // which hive-js hands back as a JSON *string* instead of throwing
+      hiveSaysMissing = typeof result === 'string' || (!!result && result.author === '');
     } catch (hiveErr) {
       // An upstream 429/timeout must not reject out of asyncData - that is the
       // unhandled rejection that filled the heap.
@@ -324,6 +329,13 @@ export default {
       }
     }
     if (!result || !result.author) {
+      // The node answered and there is no such post: a real 404 on the server render,
+      // so crawlers do not index an empty page. A failed lookup is not an answer and
+      // still renders the page; so does any client-side navigation.
+      if (process.server && hiveSaysMissing && !process.env.blurtMetaFallback && typeof error === 'function') {
+        error({ statusCode: 404, message: 'Post not found' });
+        return;
+      }
       // Unknown or non-existent post: default meta, zero further upstream cost.
       return { desc: '', postImg: '' };
     }

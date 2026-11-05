@@ -568,6 +568,7 @@ import NavbarBrand from '~/components/NavbarBrand'
 import Footer from '~/components/Footer'
 import steem from 'steem'
 import hive from '@hiveio/hive-js'
+import { hiveAccountExists } from '~/utils/hiveAccount'
 import blurt from '@blurtfoundation/blurtjs'
 import { mapGetters } from 'vuex'
 import { friendAddRefusal, friendErrorText } from '~/utils/friendRequests'
@@ -586,6 +587,15 @@ import Lodash from 'lodash';
 import { buildMeasurementsMetadata, convertMeasurementValue, MEASUREMENT_KEYS, MEASUREMENT_UNIT_OPTIONS, mergeMeasurementSources, normalizeMeasurements, normalizeMeasurementUnit, selectLatestMeasurements, waitForMeasurementSave } from '~/utils/measurements'
 
 export default {
+  // A URL that is no Hive account must answer 404, not a 200 "User Not Found" page
+  // that search engines index. Only on the server render (the page itself loads
+  // client-side, so client navigation keeps the in-page message), and only on a
+  // definite "does not exist": a slow or failing node renders the page as before.
+  async validate({ params }) {
+    if (!process.server) return true;
+    const name = String(params.username || '').replace('@', '');
+    return (await hiveAccountExists(name, { node: process.env.hiveApiNode })) !== false;
+  },
   head() {
     return {
       title: `Actifit user profile ${this.username} - Actifit.io`,

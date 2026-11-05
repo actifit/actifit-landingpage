@@ -262,7 +262,7 @@ export default {
   fetchArenaChallenge({ commit }, id) {
     return new Promise((resolve, reject) => {
       fetch(process.env.actiAppUrl + 'arena/challenges/' + encodeURIComponent(id)).then(res => {
-        if (!res.ok) { reject(new Error('HTTP Error: ' + res.status)); return }
+        if (!res.ok) { reject(Object.assign(new Error('HTTP Error: ' + res.status), { status: res.status })); return }
         res.json().then(json => {
           commit('setArenaChallenge', json)
           resolve(json)
