@@ -9,7 +9,7 @@
 // rules live in utils/walletTotal.js and the wiring is checked on the source.
 import fs from 'fs'
 import path from 'path'
-import { heTokenPriceHive, bscValuesUSD, neededPrices, metricsSymbols } from '~/utils/walletTotal'
+import { heTokenPriceHive, bscValuesUSD, neededPrices, metricsSymbols, failPending, metricsAfterFetch } from '~/utils/walletTotal'
 
 const src = fs.readFileSync(path.join(__dirname, '../../../../pages/_username/wallet.vue'), 'utf8')
 
@@ -87,5 +87,37 @@ describe('wallet.vue wiring', () => {
       expect(src).toMatch(new RegExp(`, '${k}'\\);`))
       expect(src).toMatch(new RegExp(`this\\.markPrice\\('${k}', !isNaN\\(p\\)\\);`))
     }
+  })
+})
+
+describe('a wallet load that fails half-way does not spin forever', () => {
+  it('marks what the total still waits for as failed, leaving loaded prices alone', () => {
+    const status = { afit: 'ok', hive: 'loading', hbd: 'loading', steem: 'loading' }
+    const r = failPending(status, ['afit', 'hive'], 'loading')
+    expect(r.priceStatus).toEqual({ afit: 'ok', hive: 'failed', hbd: 'loading', steem: 'loading' })
+    expect(r.tokenMetricsStatus).toBe('failed')
+    expect(failPending({}, [], 'ok').tokenMetricsStatus).toBe('ok')
+  })
+  it('prices are fetched before fetchUserData, which can throw', () => {
+    expect(src).toMatch(/this\.fetchPrices\(\);\s*await this\.fetchUserData\(\); \/\/ This can now be called safely\./)
+    expect(src).not.toContain('const fetchPrice = async (url, setter, key) => {\n          try {')
+  })
+  it('the initWallet catch fails the pending inputs, and a Hive-Engine error is caught', () => {
+    expect(src).toMatch(/console\.error\('Error initializing wallet:', err\);[\s\S]{0,200}this\.failPendingTotalInputs\(\);/)
+    expect(src).toMatch(/console\.error\('Error fetching Hive-Engine balances:', err\);\s*if \(this\.tokenMetricsStatus !== 'ok'\) this\.tokenMetricsStatus = 'failed';/)
+  })
+})
+
+describe('a failed metrics refresh', () => {
+  const good = [{ symbol: 'PAL', lastPrice: '0.5' }]
+  it('keeps the last good prices of the same account', () => {
+    expect(metricsAfterFetch(null, { account: 'alice', metrics: good }, 'alice')).toEqual({ metrics: good, status: 'ok' })
+  })
+  it("does not reuse another account's prices, and fails with none", () => {
+    expect(metricsAfterFetch(null, { account: 'bob', metrics: good }, 'alice')).toEqual({ metrics: [], status: 'failed' })
+    expect(metricsAfterFetch(undefined, null, 'alice')).toEqual({ metrics: [], status: 'failed' })
+  })
+  it('uses fresh prices when they arrive', () => {
+    expect(metricsAfterFetch([], { account: 'alice', metrics: good }, 'alice')).toEqual({ metrics: [], status: 'ok' })
   })
 })

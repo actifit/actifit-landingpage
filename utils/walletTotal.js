@@ -44,3 +44,19 @@ export function metricsSymbols (always, balances) {
   })
   return symbols
 }
+
+// After a wallet load aborted half-way: whatever the total still waits for will
+// never arrive, so mark it failed (the hero then shows a dash, not a spinner).
+// Mutates and returns the statuses; a price that lands later still flips to 'ok'.
+export function failPending (priceStatus, needed, tokenMetricsStatus) {
+  needed.forEach(k => { if (priceStatus[k] === 'loading') priceStatus[k] = 'failed' })
+  return { priceStatus, tokenMetricsStatus: tokenMetricsStatus === 'loading' ? 'failed' : tokenMetricsStatus }
+}
+
+// The metrics to show after a fetch: fresh ones, else (a failed refresh) the last good
+// ones of the same account, else none.
+export function metricsAfterFetch (fresh, lastGood, account) {
+  if (Array.isArray(fresh)) return { metrics: fresh, status: 'ok' }
+  if (lastGood && lastGood.account === account) return { metrics: lastGood.metrics, status: 'ok' }
+  return { metrics: [], status: 'failed' }
+}
