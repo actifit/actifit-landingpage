@@ -85,6 +85,18 @@ describe('arena challenge page (/arena/:id)', () => {
 })
 
 describe('error layout', () => {
+  it('marks an error page uncacheable on the server render', () => {
+    const res = { headersSent: false, setHeader: jest.fn() }
+    const prev = process.server
+    process.server = true
+    try { ErrorLayout.created.call({ $ssrContext: { res }, error: { statusCode: 404 } }) } finally { process.server = prev }
+    expect(res.setHeader).toHaveBeenCalledWith('Cache-Control', 'no-store')
+  })
+  it('does nothing in the browser', () => {
+    const res = { setHeader: jest.fn() }
+    ErrorLayout.created.call({ $ssrContext: { res }, error: { statusCode: 404 } })
+    expect(res.setHeader).not.toHaveBeenCalled()
+  })
   it('says "page not found" for a 404 and something generic otherwise', () => {
     expect(ErrorLayout.computed.notFound.call({ error: { statusCode: 404 } })).toBe(true)
     expect(ErrorLayout.computed.notFound.call({ error: { statusCode: 500 } })).toBe(false)

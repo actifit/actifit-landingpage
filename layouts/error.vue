@@ -20,6 +20,13 @@
       error: { type: Object, default: () => ({}) }
     },
     components: { NavbarBrand, Footer },
+    // A 404 must not be cached at the edge: api/cache-headers.js marks post pages
+    // cacheable before rendering, and hivemind also answers "does not exist" for a post
+    // it has not indexed yet. Any error page is a poor thing to cache, so all get it.
+    created () {
+      const res = process.server && this.$ssrContext && this.$ssrContext.res
+      if (res && !res.headersSent) res.setHeader('Cache-Control', 'no-store')
+    },
     computed: {
       notFound () {
         return this.error && this.error.statusCode === 404

@@ -1,6 +1,6 @@
 // Unknown profile URLs answer 404 only when Hive says the account does not exist.
 // A network problem must never turn a real profile into a 404.
-import { isValidHiveAccountName, hiveAccountExists } from '~/utils/hiveAccount'
+import { isValidHiveAccountName, hiveAccountExists, clearHiveAccountCache } from '~/utils/hiveAccount'
 
 const reply = (body, ok = true) => jest.fn().mockResolvedValue({ ok, json: async () => body })
 
@@ -15,6 +15,7 @@ describe('isValidHiveAccountName', () => {
 
 describe('hiveAccountExists', () => {
   const node = 'https://node.test'
+  beforeEach(() => clearHiveAccountCache())
 
   it('is false for a name that cannot exist, without a lookup', async () => {
     const f = jest.fn()
@@ -37,5 +38,41 @@ describe('hiveAccountExists', () => {
     expect(await hiveAccountExists('actifit', { node, fetchImpl: reply({ error: { message: 'busy' } }) })).toBe(null)
     expect(await hiveAccountExists('actifit', { node, fetchImpl: () => new Promise(() => {}), timeoutMs: 10 })).toBe(null)
     expect(await hiveAccountExists('actifit', { node: '', fetchImpl: reply({ result: [] }) })).toBe(null)
+  })
+})
+
+describe('hiveAccountExists: abort and cache', () => {
+  const node = 'https://node.test'
+  const none = () => jest.fn().mockResolvedValue({ ok: true, json: async () => ({ result: [] }) })
+  beforeEach(() => clearHiveAccountCache())
+
+  it('aborts a lookup that timed out', async () => {
+    let signal
+    const f = jest.fn((url, opts) => { signal = opts.signal; return new Promise(() => {}) })
+    expect(await hiveAccountExists('actifit', { node, fetchImpl: f, timeoutMs: 10 })).toBe(null)
+    expect(signal.aborted).toBe(true)
+  })
+  it('remembers yes and no for 5 minutes, then asks again', async () => {
+    const f = none()
+    const t0 = 1000000
+    expect(await hiveAccountExists('ghost', { node, fetchImpl: f, now: t0 })).toBe(false)
+    expect(await hiveAccountExists('ghost', { node, fetchImpl: f, now: t0 + 60000 })).toBe(false)
+    expect(f).toHaveBeenCalledTimes(1)
+    await hiveAccountExists('ghost', { node, fetchImpl: f, now: t0 + 5 * 60000 + 1 })
+    expect(f).toHaveBeenCalledTimes(2)
+  })
+  it('does not cache an unknown answer', async () => {
+    const f = jest.fn().mockRejectedValue(new Error('down'))
+    await hiveAccountExists('actifit', { node, fetchImpl: f })
+    await hiveAccountExists('actifit', { node, fetchImpl: f })
+    expect(f).toHaveBeenCalledTimes(2)
+  })
+  it('holds at most 500 names', async () => {
+    const f = none()
+    for (let i = 0; i < 501; i++) await hiveAccountExists('user' + i, { node, fetchImpl: f })
+    expect(f).toHaveBeenCalledTimes(501)
+    await hiveAccountExists('user0', { node, fetchImpl: f }) // evicted, asked again
+    await hiveAccountExists('user500', { node, fetchImpl: f }) // still cached
+    expect(f).toHaveBeenCalledTimes(502)
   })
 })
