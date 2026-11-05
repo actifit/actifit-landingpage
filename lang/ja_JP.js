@@ -550,6 +550,7 @@ module.exports = {
   error_page_generic_text: "しばらくしてからもう一度お試しください。",
   error_page_home: "ホームページへ",
   account_value_unavailable: "価格を読み込めなかったため、合計は表示されません。再読み込みしてもう一度お試しください。",
+  hiveauth_timeout: "HiveAuth から応答がありませんでした。もう一度お試しください。",
   invalid_account_name: '有効なアカウント名を入力してください。',
   account_lookup_failed: 'アカウントを確認できませんでした。もう一度お試しください。',
   need_login_signup_notice_vote: 'まずログインまたはサインアップする必要があります',

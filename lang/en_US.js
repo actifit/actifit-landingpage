@@ -518,6 +518,7 @@ module.exports = {
   error_page_generic_text: "Please try again in a moment.",
   error_page_home: "Go to the home page",
   account_value_unavailable: "Prices could not be loaded, so the total is not shown. Please reload to try again.",
+  hiveauth_timeout: "HiveAuth did not respond. Please try again.",
   invalid_account_name: 'Please enter a valid account username.',
   account_lookup_failed: 'Unable to verify the account. Please try again.',
   need_login_signup_notice_vote: 'You need to login or signup first',

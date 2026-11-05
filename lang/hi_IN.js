@@ -550,6 +550,7 @@ module.exports = {
   error_page_generic_text: "कृपया थोड़ी देर में फिर से प्रयास करें।",
   error_page_home: "होम पेज पर जाएं",
   account_value_unavailable: "कीमतें लोड नहीं हो सकीं, इसलिए कुल राशि नहीं दिखाई गई। कृपया फिर से प्रयास करने के लिए पेज रीलोड करें।",
+  hiveauth_timeout: "HiveAuth ने जवाब नहीं दिया। कृपया फिर से प्रयास करें।",
   invalid_account_name: 'कृपया एक मान्य खाता उपयोगकर्ता नाम दर्ज करें।',
   account_lookup_failed: 'खाते की पुष्टि नहीं की जा सकी। कृपया पुनः प्रयास करें।',
   need_login_signup_notice_vote: 'आपको पहले लॉग इन या साइन अप करना होगा',

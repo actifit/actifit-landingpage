@@ -545,6 +545,7 @@ module.exports = {
   error_page_generic_text: "يرجى المحاولة مرة أخرى بعد قليل.",
   error_page_home: "الذهاب إلى الصفحة الرئيسية",
   account_value_unavailable: "تعذّر تحميل الأسعار، لذلك لا يظهر الإجمالي. يرجى إعادة تحميل الصفحة للمحاولة مرة أخرى.",
+  hiveauth_timeout: "لم يستجب HiveAuth. يرجى المحاولة مرة أخرى.",
   invalid_account_name: 'يرجى إدخال اسم مستخدم صالح للحساب.',
   account_lookup_failed: 'تعذر التحقق من الحساب. يرجى المحاولة مرة أخرى.',
   need_login_signup_notice_vote: 'تحتاج إلى تسجيل الدخول أو التسجيل أولاً',

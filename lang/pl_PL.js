@@ -550,6 +550,7 @@ module.exports = {
   error_page_generic_text: "Spróbuj ponownie za chwilę.",
   error_page_home: "Przejdź do strony głównej",
   account_value_unavailable: "Nie udało się wczytać cen, więc suma nie jest wyświetlana. Odśwież stronę, aby spróbować ponownie.",
+  hiveauth_timeout: "HiveAuth nie odpowiedział. Spróbuj ponownie.",
   invalid_account_name: 'Wprowadź prawidłową nazwę użytkownika konta.',
   account_lookup_failed: 'Nie udało się zweryfikować konta. Spróbuj ponownie.',
   need_login_signup_notice_vote: 'Musisz się najpierw zalogować lub zarejestrować',

@@ -545,6 +545,7 @@ module.exports = {
   error_page_generic_text: "Veuillez réessayer dans un instant.",
   error_page_home: "Aller à la page d'accueil",
   account_value_unavailable: "Les prix n'ont pas pu être chargés, le total n'est donc pas affiché. Rechargez la page pour réessayer.",
+  hiveauth_timeout: "HiveAuth n'a pas répondu. Veuillez réessayer.",
   invalid_account_name: 'Veuillez saisir un nom de compte valide.',
   account_lookup_failed: 'Impossible de vérifier le compte. Veuillez réessayer.',
   need_login_signup_notice_vote: 'Vous devez vous connecter ou vous inscrire d\'abord',

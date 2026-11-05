@@ -7,6 +7,7 @@ import path from 'path'
 import MarketPage from '~/pages/market.vue'
 import LoginModal from '~/components/LoginModal.vue'
 import LoginPage from '~/pages/login.vue'
+import signedChallengeLogin, { HIVEAUTH_TIMEOUT_MS } from '~/mixins/signedChallengeLogin'
 
 const root = path.join(__dirname, '../../..')
 const read = (f) => fs.readFileSync(path.join(root, f), 'utf8')
@@ -96,5 +97,34 @@ describe('proposal popup title', () => {
       const t = (mod.default || mod).proposal_modal_title_year
       expect(`${f}: ${t}`).toMatch(/3 \(#391\)/)
     }
+  })
+})
+
+describe.each([['LoginModal', LoginModal], ['pages/login', LoginPage]])('%s: HiveAuth that never answers', (_n, C) => {
+  const methods = C.options ? C.options.methods : C.methods
+  afterEach(() => jest.useRealTimers())
+
+  it('gives up after the timeout, so the button and retries work again', async () => {
+    jest.useFakeTimers()
+    const vm = {
+      login_in_progress: false, error_proceeding: false, error_msg: '', hiveauth_wait: true,
+      $t: (k) => k, $refs: { username: { value: 'alice' } },
+      requestLoginChallenge: jest.fn().mockResolvedValue({ message: 'm', nonce: 'n' }),
+      // hive-auth-wrapper when the HAS websocket cannot connect: never settles
+      $HAS: { authenticate: jest.fn(() => new Promise(() => {})) }
+    }
+    Object.keys(signedChallengeLogin.methods).forEach(k => {
+      if (k !== 'requestLoginChallenge') vm[k] = signedChallengeLogin.methods[k].bind(vm)
+    })
+    const spy = jest.spyOn(console, 'error').mockImplementation(() => {})
+    await methods.loginHiveauth.call(vm)
+    expect(vm.login_in_progress).toBe(true)
+    jest.advanceTimersByTime(HIVEAUTH_TIMEOUT_MS)
+    for (let i = 0; i < 10; i++) await Promise.resolve()
+    spy.mockRestore()
+    expect(vm.login_in_progress).toBe(false)
+    expect(vm.hiveauth_wait).toBe(false)
+    expect(vm.error_proceeding).toBe(true)
+    expect(vm.error_msg).toBe('hiveauth_timeout')
   })
 })

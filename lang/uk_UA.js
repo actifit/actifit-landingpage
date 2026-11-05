@@ -550,6 +550,7 @@ module.exports = {
   error_page_generic_text: "Будь ласка, спробуйте ще раз трохи згодом.",
   error_page_home: "На головну сторінку",
   account_value_unavailable: "Не вдалося завантажити ціни, тому підсумок не показано. Оновіть сторінку, щоб спробувати ще раз.",
+  hiveauth_timeout: "HiveAuth не відповів. Спробуйте ще раз.",
   invalid_account_name: 'Введіть коректне ім\'я користувача.',
   account_lookup_failed: 'Не вдалося перевірити обліковий запис. Спробуйте ще раз.',
   need_login_signup_notice_vote: 'Вам потрібно спочатку увійти або зареєструватися',

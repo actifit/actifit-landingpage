@@ -551,6 +551,7 @@ module.exports = {
   error_page_generic_text: "请稍后再试。",
   error_page_home: "前往首页",
   account_value_unavailable: "无法加载价格，因此不显示总额。请刷新页面重试。",
+  hiveauth_timeout: "HiveAuth 没有响应。请重试。",
   invalid_account_name: '请输入有效的账户用户名。',
   account_lookup_failed: '无法验证账户，请重试。',
   need_login_signup_notice_vote: '您需要先登录或注册',

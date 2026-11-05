@@ -550,6 +550,7 @@ module.exports = {
   error_page_generic_text: "Lütfen birazdan tekrar deneyin.",
   error_page_home: "Ana sayfaya git",
   account_value_unavailable: "Fiyatlar yüklenemedi, bu yüzden toplam gösterilmiyor. Tekrar denemek için sayfayı yenileyin.",
+  hiveauth_timeout: "HiveAuth yanıt vermedi. Lütfen tekrar deneyin.",
   invalid_account_name: 'Lütfen geçerli bir hesap kullanıcı adı girin.',
   account_lookup_failed: 'Hesap doğrulanamadı. Lütfen tekrar deneyin.',
   need_login_signup_notice_vote: 'Önce giriş yapmanız veya kaydolmanız gerekir',

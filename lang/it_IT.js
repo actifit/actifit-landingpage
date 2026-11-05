@@ -550,6 +550,7 @@ module.exports = {
   error_page_generic_text: "Riprova tra un momento.",
   error_page_home: "Vai alla home page",
   account_value_unavailable: "Non è stato possibile caricare i prezzi, quindi il totale non viene mostrato. Ricarica la pagina per riprovare.",
+  hiveauth_timeout: "HiveAuth non ha risposto. Riprova.",
   invalid_account_name: 'Inserisci un nome utente valido.',
   account_lookup_failed: 'Impossibile verificare l\'account. Riprova.',
   need_login_signup_notice_vote: 'Devi prima accedere o iscriverti',

@@ -247,7 +247,7 @@
         const challenge_data = { key_type: "posting", challenge: challenge.message };
         const mainRef = this;
 
-        this.$HAS.authenticate(auth, APP_META, challenge_data, (message) => {
+        this.hiveauthAuthenticate(auth, APP_META, challenge_data, (message) => {
           if (message.cmd && message.cmd === 'auth_wait'){
             this.hiveauth_wait = true;
             this.$nextTick(() => {
@@ -289,7 +289,8 @@
           }
         }).catch(err => {
           console.error(err);
-          this.error_proceeding = true; this.error_msg = this.$t('login_error');
+          this.error_proceeding = true;
+          this.error_msg = this.$t(err && err.message === 'hiveauth_timeout' ? 'hiveauth_timeout' : 'login_error');
           this.hiveauth_wait = false; this.login_in_progress = false;
         });
       },

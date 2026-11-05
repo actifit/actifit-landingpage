@@ -545,6 +545,7 @@ module.exports = {
   error_page_generic_text: "Bitte versuche es gleich noch einmal.",
   error_page_home: "Zur Startseite",
   account_value_unavailable: "Die Preise konnten nicht geladen werden, daher wird keine Summe angezeigt. Bitte lade die Seite neu.",
+  hiveauth_timeout: "HiveAuth hat nicht geantwortet. Bitte versuche es erneut.",
   invalid_account_name: 'Bitte geben Sie einen gültigen Kontonamen ein.',
   account_lookup_failed: 'Das Konto konnte nicht überprüft werden. Bitte versuchen Sie es erneut.',
   need_login_signup_notice_vote: 'Sie müssen sich zuerst anmelden oder registrieren',

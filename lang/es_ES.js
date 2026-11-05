@@ -542,6 +542,7 @@ module.exports = {
   error_page_generic_text: "Inténtalo de nuevo en un momento.",
   error_page_home: "Ir a la página de inicio",
   account_value_unavailable: "No se pudieron cargar los precios, así que no se muestra el total. Recarga la página para intentarlo de nuevo.",
+  hiveauth_timeout: "HiveAuth no respondió. Inténtalo de nuevo.",
   invalid_account_name: 'Introduce un nombre de usuario de cuenta válido.',
   account_lookup_failed: 'No se pudo verificar la cuenta. Inténtalo de nuevo.',
   need_login_signup_notice_vote: 'Necesitas iniciar sesión o registrarte primero',
