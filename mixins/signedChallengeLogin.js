@@ -50,6 +50,13 @@ const KEYCHAIN_HANDSHAKE_TIMEOUT_MS = 3000
 // How long to wait for a reCAPTCHA token before going on without one.
 const CAPTCHA_TIMEOUT_MS = 8000
 
+// hive-auth-wrapper's authenticate() never settles when the HAS websocket cannot
+// connect (an assert inside an async Promise executor), which left the HiveAuth button
+// spinning and, with the one-login-at-a-time guard, blocked every retry. Give up a
+// little after HAS's own 60s request expiry.
+export const HIVEAUTH_TIMEOUT_MS = 70000
+export const HIVEAUTH_TIMEOUT = 'hiveauth_timeout'
+
 const isConnectionFailure = (e) => !(e && e.name === 'AbortError')
 
 export default {
@@ -329,6 +336,14 @@ export default {
       } finally {
         clearTimeout(timer)
       }
+    },
+
+    hiveauthAuthenticate (...args) {
+      let timer
+      const timeout = new Promise((resolve, reject) => {
+        timer = setTimeout(() => reject(new Error(HIVEAUTH_TIMEOUT)), HIVEAUTH_TIMEOUT_MS)
+      })
+      return Promise.race([this.$HAS.authenticate(...args), timeout]).finally(() => clearTimeout(timer))
     },
 
     failLogin (msg) {

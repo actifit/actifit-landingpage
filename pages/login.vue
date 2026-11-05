@@ -22,7 +22,7 @@
 					<div v-if="hiveauth_wait">
 						<div id="hiveauth-instructions">{{ $t('hiveauth_instructions')}}</div>
 						<a href="#" id="hiveauth-qr-link" ref="hiveauth-qr-link" target="_blank" rel="noreferrer noopener">
-							<canvas id="hiveauth-qr" ref="hiveauth-qr" />
+							<canvas id="hiveauth-qr" ref="hiveauth-qr" width="200" height="200" />
 						</a>
 					</div>
 				</transition>
@@ -328,6 +328,9 @@
 		return sig.verifyHash(buf, PublicKey.fromString(data.pubkey));
 	  },
 	  async loginHiveauth (){
+		if (this.login_in_progress) { return; } // one login at a time
+		// a failed Keychain attempt's message must not sit under the new QR code
+		this.error_proceeding = false; this.error_msg = '';
 		if (this.$refs["username"].value == ''){
 			this.error_proceeding = true;
 			this.error_msg = this.$t('login_error');
@@ -349,7 +352,7 @@
 		const challenge_data = { key_type: "posting", challenge: challenge.message };
 		const mainRef = this;
 
-		this.$HAS.authenticate(auth, APP_META, challenge_data, (message) => {
+		this.hiveauthAuthenticate(auth, APP_META, challenge_data, (message) => {
 			if (message.cmd && message.cmd === 'auth_wait'){
 				this.hiveauth_wait = true;
 				this.$nextTick(() => {
@@ -394,11 +397,12 @@
 		.catch(err => {
 			console.error(err)
 			this.hiveauth_wait = false;
-			this.failLogin(this.$t('login_error'));
+			this.failLogin(this.$t(err && err.message === 'hiveauth_timeout' ? 'hiveauth_timeout' : 'login_error'));
 		})
 	  },
 	  async loginKeychain () {
 		if (this.login_in_progress) { return; } // one login at a time
+		this.error_proceeding = false; this.error_msg = '';
 		if (!await this.verifyKeychain()) {
 			this.failLogin(this.$t('keychain_not_detected'));
 			return;

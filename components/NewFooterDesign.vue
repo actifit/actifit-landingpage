@@ -72,7 +72,7 @@
         </div>
         <div class="bottom-row">
             <div class="bottom-bar-item copyright-section">
-                © {{ currentYear }} Copyright Actifit | {{ $config.version }} | <nuxt-link to="/privacy-policy">Privacy Policy</nuxt-link> | <nuxt-link to="/terms-conditions">Terms & Conditions</nuxt-link> | <nuxt-link to="/conduct">Code of Conduct</nuxt-link>
+                © {{ currentYear }} Copyright Actifit | {{ $config.appVersion }} | <nuxt-link to="/privacy-policy">Privacy Policy</nuxt-link> | <nuxt-link to="/terms-conditions">Terms & Conditions</nuxt-link> | <nuxt-link to="/conduct">Code of Conduct</nuxt-link>
             </div>
         </div>
         <!-- Required by Google if the reCAPTCHA badge is hidden, which it is

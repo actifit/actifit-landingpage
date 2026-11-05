@@ -1,7 +1,7 @@
 <template>
   <!-- 1. A unique class is added here to contain all styles and prevent leakage -->
   <div class="modal fade login-modal-final" id="loginModal" ref="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-custom-size modal-dialog-scrollable" role="document">
+    <div class="modal-dialog modal-custom-size modal-dialog-scrollable" role="document">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">{{ $t('Login_actifit') }}</h5>
@@ -21,7 +21,7 @@
                   <div v-if="hiveauth_wait">
                     <div id="hiveauth-instructions">{{ $t('hiveauth_instructions')}}</div>
                     <a href="#" id="hiveauth-qr-link" ref="hiveauth-qr-link" target="_blank" rel="noreferrer noopener">
-                      <canvas id="hiveauth-qr" ref="hiveauth-qr" />
+                      <canvas id="hiveauth-qr" ref="hiveauth-qr" width="200" height="200" />
                     </a>
                   </div>
                 </transition>
@@ -51,8 +51,9 @@
                   <input type="checkbox" id="keeploggedin" v-model="keep_loggedin_val" >
                   <label for="keeploggedin" class="ml-2">{{ $t('keep_loggedin') }}</label>
                 </span>
-                <div class="text-brand text-center" v-if="error_proceeding">
-                  {{ this.error_msg}}
+                <!-- always rendered with a reserved line, so an error appearing does not shift the form -->
+                <div class="text-brand text-center login-error-line" role="alert">
+                  <template v-if="error_proceeding">{{ error_msg }}</template>
                 </div>
               </div>
             </div>
@@ -226,6 +227,9 @@
       },
       verifyHiveauth (challenge, data){ const sig = Signature.fromHex(data.challenge); const buf = hash.sha256(challenge, null, 0); return sig.verifyHash(buf, PublicKey.fromString(data.pubkey)); },
       async loginHiveauth () {
+        if (this.login_in_progress) { return; } // one login at a time
+        // a failed Keychain attempt's message must not sit under the new QR code
+        this.error_proceeding = false; this.error_msg = '';
         if (this.$refs["username"].value == ''){ this.error_proceeding = true; this.error_msg = this.$t('login_error'); return; }
         this.login_in_progress = true;
         const account = this.$refs["username"].value.trim().toLowerCase();
@@ -243,7 +247,7 @@
         const challenge_data = { key_type: "posting", challenge: challenge.message };
         const mainRef = this;
 
-        this.$HAS.authenticate(auth, APP_META, challenge_data, (message) => {
+        this.hiveauthAuthenticate(auth, APP_META, challenge_data, (message) => {
           if (message.cmd && message.cmd === 'auth_wait'){
             this.hiveauth_wait = true;
             this.$nextTick(() => {
@@ -285,12 +289,14 @@
           }
         }).catch(err => {
           console.error(err);
-          this.error_proceeding = true; this.error_msg = this.$t('login_error');
+          this.error_proceeding = true;
+          this.error_msg = this.$t(err && err.message === 'hiveauth_timeout' ? 'hiveauth_timeout' : 'login_error');
           this.hiveauth_wait = false; this.login_in_progress = false;
         });
       },
       async loginKeychain () {
         if (this.login_in_progress) { return; } // one login at a time
+        this.error_proceeding = false; this.error_msg = '';
         if (!await this.verifyKeychain()) { this.failLogin(this.$t('keychain_not_detected')); return; }
         if (this.$refs["username"].value == ''){ this.error_proceeding = true; this.error_msg = this.$t('login_error'); return; }
         this.$store.commit('setBchain', this.bchain_val);
@@ -427,8 +433,16 @@
 .login-modal-final .login-form-centered{
   justify-content: center; align-items: center;
 }
+/* top-aligned, like the dialog: when the QR code or an error appears the form grows
+   downward instead of the whole dialog re-centering and jumping */
 .login-modal-final .login-container {
-  display: flex; justify-content: center; align-items: center; min-height: 50vh;
+  display: flex; justify-content: center; align-items: flex-start; min-height: 50vh;
+}
+.login-modal-final .login-error-line {
+  min-height: 1.5em;
+}
+.login-modal-final #hiveauth-qr {
+  width: 200px; height: 200px;
 }
 .login-modal-final .home-card {
   width: 100%; max-width: 400px;

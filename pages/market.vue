@@ -48,8 +48,12 @@
 						<div class="prize-draw-card">
 							<i class="fas fa-trophy prize-draw-icon"></i>
 							<h5 class="prize-draw-card-title">{{ $t('Recent_draw_winner') }}</h5>
-							<a :href="'/' + lastDrawWinner" class="prize-draw-winner-link">@{{ lastDrawWinner }}</a>
-							<p class="prize-draw-card-text">{{ wonAmount }} {{ $t('HIVE') }} <img src="/img/HIVE.png" class="token-logo-sm" alt=""></p>
+							<template v-if="lastDrawWinner">
+								<a :href="'/' + lastDrawWinner" class="prize-draw-winner-link">@{{ lastDrawWinner }}</a>
+								<p class="prize-draw-card-text">{{ wonAmount }} {{ $t('HIVE') }} <img src="/img/HIVE.png" class="token-logo-sm" alt=""></p>
+							</template>
+							<p class="prize-draw-card-text" v-else-if="lastDrawWinnerFailed">—</p>
+							<p class="prize-draw-card-text" v-else><i class="fas fa-spin fa-spinner"></i></p>
 						</div>
 					</div>
 				</div>
@@ -374,6 +378,7 @@ export default {
 			countDownReady: false,
 			nextGadgetBuyRewardDate: '',//'2020-10-15',//"August 18, 2020 00:00 GMT",
 			lastDrawWinner: '',
+			lastDrawWinnerFailed: false,
 			wonAmount: 0,
 			selectedProductId: null,
 			mobileShowDetail: false,
@@ -653,8 +658,13 @@ export default {
 			this.nextGadgetBuyRewardDate = targetDate.getFullYear() + '-' + mnth + '-' + targetDate.getDate() + ' 00:00 GMT';
 
 			//also set last draw winner display
-			this.lastDrawWinner = json.winner[0].name;
-			this.wonAmount = this.numberFormat(json.winner[0].reward, 3);
+			const winner = Array.isArray(json.winner) && json.winner[0];
+			if (!winner || !winner.name) {
+				this.lastDrawWinnerFailed = true;
+				return;
+			}
+			this.lastDrawWinner = winner.name;
+			this.wonAmount = this.numberFormat(winner.reward, 3);
 		},
 
 		async fetchGadgetPrizeCycle() {
@@ -663,6 +673,7 @@ export default {
 				this.setNextPrizeDate(await res.json())
 			} catch (e) {
 				console.error('fetchGadgetPrizeCycle failed', e)
+				this.lastDrawWinnerFailed = true
 			}
 		},
 
