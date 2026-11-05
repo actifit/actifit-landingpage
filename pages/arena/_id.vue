@@ -20,7 +20,8 @@
             <div class="arena-hero__badges">
               <span class="badge-pill is-type">{{ humanize(ch.type) }}</span>
               <span class="badge-pill is-recur">{{ cat.recurrence }}</span>
-              <span class="badge-pill is-state" :class="'state-' + ch.state">{{ humanize(ch.state) }}</span>
+              <span class="badge-pill is-state" :class="'state-' + arenaState(ch)">{{ arenaStateLabel(ch) }}</span>
+              <span v-if="arenaCountdown(ch)" class="badge-pill is-countdown"><i class="far fa-clock" aria-hidden="true"></i> {{ arenaCountdown(ch) }}</span>
             </div>
             <h1 class="arena-hero__title">{{ ch.title || ch.id }}</h1>
             <p class="arena-hero__tagline">{{ cat.tagline }}</p>
@@ -160,8 +161,10 @@
   import Footer from '~/components/Footer'
   import LoginModal from '~/components/LoginModal'
   import { catalogFor, artUrl, formatDuration, formatDate, scoredByLabel, humanize } from '~/utils/arenaCatalog'
+  import arenaClock from '~/mixins/arenaClock'
 
   export default {
+    mixins: [arenaClock],
     head () {
       const ch = this.ch
       const title = ch ? `${ch.title || ch.id} — The Arena | Actifit.io` : 'The Arena | Actifit.io'
@@ -185,13 +188,19 @@
     // for crawlers and social shares, and so navigating between challenges always
     // refetches (asyncData re-runs on route change; mounted would not). Standings
     // are reset first so a fetch error can never leak the previous challenge's board.
-    async asyncData ({ store, params }) {
+    async asyncData ({ store, params, error }) {
       store.commit('setArenaStandings', null)
       let notFound = false
       try {
         await store.dispatch('fetchArenaChallenge', params.id)
       } catch (e) {
         store.commit('setArenaChallenge', null)
+        // the API said there is no such challenge: answer 404. Any other failure
+        // (network, 5xx) keeps the in-page message.
+        if (e && e.status === 404 && typeof error === 'function') {
+          error({ statusCode: 404, message: 'Challenge not found' })
+          return { notFound: true }
+        }
         notFound = true
       }
       if (!notFound) {
@@ -418,6 +427,10 @@
   .badge-pill.is-recur { background: rgba(255, 255, 255, 0.92); color: #333; }
   .badge-pill.is-state { background: rgba(255, 255, 255, 0.92); color: #444; }
   .badge-pill.is-state.state-open { color: #1a8f4c; }
+  .badge-pill.is-state.state-upcoming { color: #2f6fd1; }
+  .badge-pill.is-state.state-ending_soon { color: #c25e00; }
+  .badge-pill.is-countdown { background: rgba(20, 16, 22, 0.7); color: #fff; text-transform: none; font-variant-numeric: tabular-nums; }
+  .badge-pill.is-countdown i { margin-right: 4px; }
   .arena-hero__title {
     font-size: 2rem;
     font-weight: 800;

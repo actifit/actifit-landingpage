@@ -60,6 +60,32 @@ const BY_ID = {
   }
 }
 
+// Exact prize text for the official contests, from actifit-bot arena_rewards.js
+// SCHEDULES. The API sends rewards: null and a generic prize_summary for these, so
+// without this the page never said what a contest pays. Only finishers with a
+// verified score above 0 are paid. Remove once the API carries the amounts.
+const OFFICIAL_PRIZES = {
+  def_daily_focus: (ch) => {
+    const t = ch && ch.scoring && Number(ch.scoring.threshold)
+    return t > 0
+      ? `50 AFIT to everyone who reaches ${t.toLocaleString('en-US')} steps in the day.`
+      : '50 AFIT to everyone who reaches the daily step goal.'
+  },
+  def_weekly_step_league: () => '1st: 100 AFIT, 2nd: 60 AFIT, 3rd: 40 AFIT. Every other finisher with activity earns 10 AFIT.',
+  def_season_ladder: () => '1st: 250 AFIT, 2nd: 150 AFIT, 3rd: 100 AFIT. Every other finisher with activity earns 20 AFIT.',
+  def_weekly_top_n: () => '1st: 80 AFIT, 2nd: 60 AFIT, 3rd: 45 AFIT, 4th to 10th: 25 AFIT each. Every other finisher with activity earns 10 AFIT.',
+  def_weekend_warrior: () => '1st: 50 AFIT, 2nd: 35 AFIT, 3rd: 25 AFIT. Every other finisher with activity earns 8 AFIT.',
+  def_monthly_liveops: () => '1st: 400 AFIT, 2nd: 250 AFIT, 3rd: 150 AFIT. Every other finisher with activity earns 25 AFIT.'
+}
+
+// Only a challenge the official account created pays the schedule; a user challenge
+// can name a def_* parent_id, so the id alone is not enough.
+function officialPrizes (ch) {
+  if (!ch || ch.origin_tier !== 'official') return ''
+  const fn = OFFICIAL_PRIZES[ch.parent_id] || OFFICIAL_PRIZES[ch.id]
+  return fn ? fn(ch) : ''
+}
+
 // Fallback copy keyed by challenge type (user-created / unknown ids).
 const BY_TYPE = {
   league_fixture: {
@@ -111,7 +137,7 @@ export function catalogFor (ch) {
     recurrence: ch.recurrence || base.recurrence,
     tagline: ch.tagline || ch.description || base.tagline,
     howItWorks: ch.how_it_works || ch.description || base.howItWorks,
-    prizes: (ch.rewards && ch.rewards.summary) || ch.prize_summary || base.prizes
+    prizes: (ch.rewards && ch.rewards.summary) || officialPrizes(ch) || ch.prize_summary || base.prizes
   }
 }
 
@@ -158,4 +184,48 @@ export function humanize (s) {
 export function formatDate (iso) {
   const d = new Date(iso)
   return isNaN(d.getTime()) ? '' : d.toLocaleDateString()
+}
+
+const HOUR = 3600000
+const DAY = 24 * HOUR
+
+function windowMs (ch) {
+  const w = ch && ch.window
+  if (!w) return null
+  const start = new Date(w.start).getTime()
+  const end = new Date(w.end).getTime()
+  return { start: isFinite(start) ? start : null, end: isFinite(end) ? end : null }
+}
+
+// The state to SHOW. The engine stores 'open' for a challenge whose window has not
+// started yet (it can be joined early), so 'open' alone read as "running now".
+// Returns 'upcoming', 'ending_soon' or the stored state.
+export function displayState (ch, now = Date.now()) {
+  if (!ch) return ''
+  const w = windowMs(ch)
+  if (w && w.start !== null && now < w.start) return 'upcoming'
+  if (ch.state === 'open' && w && w.end !== null && w.end > now && w.end - now < DAY) return 'ending_soon'
+  return ch.state
+}
+
+// "2d 4h", "5h 12m", "12m 5s".
+export function formatCountdown (ms) {
+  if (!isFinite(ms) || ms <= 0) return ''
+  const s = Math.floor(ms / 1000)
+  const d = Math.floor(s / 86400)
+  const h = Math.floor((s % 86400) / 3600)
+  const m = Math.floor((s % 3600) / 60)
+  if (d > 0) return `${d}d ${h}h`
+  if (h > 0) return `${h}h ${m}m`
+  return `${m}m ${s % 60}s`
+}
+
+// What the countdown chip says: { kind: 'starts' | 'ends', text }, or null once the
+// window is over or unknown.
+export function countdownFor (ch, now = Date.now()) {
+  const w = windowMs(ch)
+  if (!w) return null
+  if (w.start !== null && now < w.start) return { kind: 'starts', text: formatCountdown(w.start - now) }
+  if (w.end !== null && now < w.end) return { kind: 'ends', text: formatCountdown(w.end - now) }
+  return null
 }
