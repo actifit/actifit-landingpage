@@ -20,7 +20,8 @@
         <section v-if="tokensLoaded" class="wallet-hero text-left">
           <div class="wallet-hero-main">
             <span class="wallet-eyebrow">{{ $t('account_est_val') }}</span>
-            <div class="wallet-total" v-if="!loading && !walletDataRefreshing"><small>$</small>{{ totalAccountValue }}</div>
+            <div class="wallet-total" v-if="!loading && !walletDataRefreshing && totalValueStatus === 'ready'"><small>$</small>{{ totalAccountValue }}</div>
+            <div class="wallet-total" v-else-if="!loading && !walletDataRefreshing && totalValueStatus === 'failed'" :title="$t('account_value_unavailable')">—</div>
             <div class="wallet-total wallet-total-loading" v-else aria-label="Loading account value">
               <i class="fas fa-spin fa-spinner"></i>
             </div>
@@ -1917,6 +1918,7 @@ import blurt from '@blurtfoundation/blurtjs'
 import ExchangeQueue from '~/components/ExchangeQueueModal'
 import ExchangeHistory from '~/components/ExchangeHistoryModal'
 import SSC from 'sscjs'
+import { heTokenPriceHive, bscValuesUSD, neededPrices, metricsSymbols } from '~/utils/walletTotal'
 
 import Countdown from 'vuejs-countdown'
 
@@ -2106,6 +2108,12 @@ export default {
       showAfitxInfo: false,
       totalAccountValue: 0,
       totalAccountValueSteem: 0,
+      // false until formattedTotAccountVal has run on real prices
+      totalAccountValueReady: false,
+      // 'loading' | 'ok' | 'failed' - the price defaults above are placeholders, and
+      // a total computed on them is wrong, so the total waits for these
+      priceStatus: { afit: 'loading', hive: 'loading', hbd: 'loading', steem: 'loading', sbd: 'loading', blurt: 'loading' },
+      tokenMetricsStatus: 'loading',
       detailCalculation: '',
       showDetailedCalc: false,
       userAFITXRank: -1,
@@ -2364,11 +2372,30 @@ export default {
       if (!this.afitBalanceKnown) return '0';
       return this.numberFormat(parseFloat(this.userTokensWallet) * this.afitPrice, 2);
     },
+    // BSC holdings, valued at the Actifit/Hive-Engine prices (see utils/walletTotal.js)
+    bscValues() {
+      return bscValuesUSD({
+        afitBSC: this.afitBalanceBSC, afitxBSC: this.afitxBalanceBSC,
+        afitPriceUSD: this.afitPrice, afitxPriceHive: this.afitxHEPrice, hivePriceUSD: this.hivePrice
+      });
+    },
     afitBSCValueUSD() {
-      return parseFloat(this.afitBalanceBSC) * this.afitBSCPrice;
+      return this.bscValues.afit;
     },
     afitxBSCValueUSD() {
-      return parseFloat(this.afitxBalanceBSC) * this.afitxBSCPrice;
+      return this.bscValues.afitx;
+    },
+    // AFITX Hive-Engine market price, in HIVE; 0 when there is none
+    afitxHEPrice() {
+      return heTokenPriceHive('AFITX', this.tokenMetrics);
+    },
+    neededPrices() {
+      return neededPrices(this.cur_bchain, this.displayUserData, this.claimSBD);
+    },
+    // 'ready' | 'loading' | 'failed': the hero shows the total, a spinner, or a dash
+    totalValueStatus() {
+      if (this.tokenMetricsStatus === 'failed' || this.neededPrices.some(k => this.priceStatus[k] === 'failed')) return 'failed';
+      return this.totalAccountValueReady ? 'ready' : 'loading';
     },
     hbdValueUSD() {
       if (!this.displayUserData) return '0.00';
@@ -2473,6 +2500,13 @@ export default {
       this.$nextTick(this.measureQuickActions);
     },
     tokenMetrics: 'formattedTotAccountVal',
+    tokenMetricsStatus: 'formattedTotAccountVal',
+    priceStatus: { handler: 'formattedTotAccountVal', deep: true },
+    hivePrice: 'formattedTotAccountVal',
+    afitPrice: 'formattedTotAccountVal',
+    hbdPrice: 'formattedTotAccountVal',
+    sbdPrice: 'formattedTotAccountVal',
+    blurtPrice: 'formattedTotAccountVal',
     steemPrice: 'formattedTotAccountVal',
     afitBSCPrice: 'formattedTotAccountVal',
     afitxBSCPrice: 'formattedTotAccountVal',
@@ -2616,8 +2650,10 @@ export default {
         // reset states
         this.tokensOfInterestBal = [];
         this.tokenMetrics = [];
+        this.tokenMetricsStatus = 'loading';
         this.tokensLoaded = false;
         this.totalAccountValue = 0;
+        this.totalAccountValueReady = false;
         this.steemPower = 0;
         this.delegatedSteemPower = 0;
         this.receivedSteemPower = 0;
@@ -2663,10 +2699,10 @@ export default {
             await this.sortTokenData(this.tokenSort, true);
           }
 
-          const metrics = await hsc.find('market', 'metrics', {}, 1000, 0, '', false);
-          this.tokenMetrics = Array.isArray(metrics) ? metrics : [];
+          await this.loadTokenMetrics(this.tokensOfInterestBal);
         } catch (err) {
           console.error('Error fetching token data:', err);
+          this.tokenMetricsStatus = 'failed';
         }
 
         await this.$nextTick();
@@ -3678,8 +3714,11 @@ export default {
     },
     formattedTotAccountVal() {
       this.totalAccountValue = 0;
-      if ((Array.isArray(this.tokenMetrics) && this.tokenMetrics.length > 0) ||
-          (Array.isArray(this.tokensOfInterestBal) && this.tokensOfInterestBal.length > 0)) {
+      this.totalAccountValueReady = false;
+      // Until every price is live the total is not shown: computed on the placeholder
+      // prices, or with token prices missing, it was wrong and changed between reloads.
+      const pricesLive = this.neededPrices.every(k => this.priceStatus[k] === 'ok');
+      if (this.displayUserData && pricesLive && this.tokenMetricsStatus === 'ok') {
 
         this.detailCalculation = '';
         //get AFITX val
@@ -3711,11 +3750,18 @@ export default {
 
         //console.log('this.afitBSCValueUSD:'+this.afitBSCValueUSD)
         //console.log('this.afitxBSCValueUSD:'+this.afitxBSCValueUSD)
-        //add AFIT BSC and AFITX BSC
-        this.totalAccountValue += (this.afitBSCValueUSD / baseCurrency);
-        this.totalAccountValue += (this.afitxBSCValueUSD / baseCurrency);
+        this.detailCalculation += (this.afitBalanceKnown ? Number(this.userTokensWallet).toFixed(3) : '—') + ' AFIT x ' + this.numberFormat((this.afitPrice / baseCurrency), 8) + ' AFIT/' + this.cur_bchain + ' = ' + this.numberFormat(afitCoreVal, 4) + ' ' + this.cur_bchain + '<br/>';
 
-        this.detailCalculation += (this.afitBalanceKnown ? Number(this.userTokensWallet).toFixed(3) : '—') + ' AFIT x ' + this.numberFormat((this.afitPrice / baseCurrency), 4) + ' AFIT/' + this.cur_bchain + ' = ' + this.numberFormat(afitCoreVal, 4) + ' ' + this.cur_bchain + '<br/>';
+        //add AFIT BSC and AFITX BSC, at the same prices as the AFIT and AFITX above
+        const afitBSCVal = this.afitBSCValueUSD / baseCurrency;
+        const afitxBSCVal = this.afitxBSCValueUSD / baseCurrency;
+        this.totalAccountValue += afitBSCVal + afitxBSCVal;
+        if (parseFloat(this.afitBalanceBSC) > 0) {
+          this.detailCalculation += this.numberFormat(this.afitBalanceBSC, 3) + ' AFIT BSC x ' + this.numberFormat((this.afitPrice / baseCurrency), 8) + ' AFIT/' + this.cur_bchain + ' = ' + this.numberFormat(afitBSCVal, 4) + ' ' + this.cur_bchain + '<br/>';
+        }
+        if (parseFloat(this.afitxBalanceBSC) > 0) {
+          this.detailCalculation += this.numberFormat(this.afitxBalanceBSC, 3) + ' AFITX BSC x ' + this.numberFormat((this.afitxHEPrice * this.hivePrice / baseCurrency), 8) + ' AFITX/' + this.cur_bchain + ' = ' + this.numberFormat(afitxBSCVal, 4) + ' ' + this.cur_bchain + '<br/>';
+        }
 
         let par = this;
         const availableMetrics = Array.isArray(this.tokenMetrics) ? this.tokenMetrics : [];
@@ -3723,11 +3769,8 @@ export default {
         this.tokensOfInterestBal.forEach(function (token, index) {
           par.showPowerBreakdown[token.symbol] = false;
 
-          let tokenData = availableMetrics.find(v => v.symbol == token.symbol);
-          if (!tokenData || (typeof tokenData.lastPrice === 'undefined' || tokenData.lastPrice === null)) {
-            tokenData = new Object();
-            tokenData.lastPrice = 1;
-          }
+          // no market price: not counted (SWAP.HIVE is pegged to HIVE)
+          let tokenData = { lastPrice: heTokenPriceHive(token.symbol, availableMetrics) };
           //console.log(token);
           if (typeof token.stake === 'undefined' || token.stake === null || tokensNonStakable.includes(token.symbol)) {
             token.stake = 0;
@@ -3811,7 +3854,7 @@ export default {
         //console.log(baseCurrency);
         //console.log(this.totalAccountValue);
         this.totalAccountValue = this.numberFormat(this.totalAccountValue, 2);
-
+        this.totalAccountValueReady = true;
       }
     },
     renderSteemPower(type) {
@@ -3958,7 +4001,9 @@ export default {
         this.tokensLoaded = false;
         this.tokensOfInterestBal = [];
         this.tokenMetrics = [];
+        this.tokenMetricsStatus = 'loading';
         this.totalAccountValue = 0;
+        this.totalAccountValueReady = false;
 
         await this.fetchUserData();
 
@@ -4118,8 +4163,7 @@ export default {
         }
 
         //extract prices for all user balances
-        this.tokenMetrics = await hsc.find('market', 'metrics', {}, 1000, 0, '', false);
-        this.tokenMetrics = Array.isArray(this.tokenMetrics) ? this.tokenMetrics : [];
+        await this.loadTokenMetrics(tokenData);
 
         //let's grab the user's wallet address
         fetch(process.env.actiAppUrl + 'getUserWalletAddress?user=' + this.displayUserData.name).then(
@@ -4225,6 +4269,27 @@ export default {
     setAFITPrice(_afitPrice) {
       const p = parseFloat(_afitPrice);
       if (!isNaN(p)) this.afitPrice = p;
+      this.markPrice('afit', !isNaN(p));
+    },
+    // a price that loaded stays 'ok' even if a later refresh fails
+    markPrice(key, loaded) {
+      if (loaded) this.priceStatus[key] = 'ok';
+      else if (this.priceStatus[key] !== 'ok') this.priceStatus[key] = 'failed';
+    },
+    // Prices for the tokens this account holds, plus the tokens of interest (claimable
+    // rewards, and AFIT/AFITX, which also value its BSC holdings).
+    async loadTokenMetrics(balances) {
+      const symbols = metricsSymbols(tokensOfInterest, balances);
+      try {
+        const metrics = await hsc.find('market', 'metrics', { symbol: { $in: symbols } }, 1000, 0, [], false);
+        if (!Array.isArray(metrics)) throw new Error('no metrics returned');
+        this.tokenMetrics = metrics;
+        this.tokenMetricsStatus = 'ok';
+      } catch (err) {
+        console.log('Error fetching token metrics:', err);
+        this.tokenMetrics = [];
+        this.tokenMetricsStatus = 'failed';
+      }
     },
     setAFITBSCPrice(_afitPrice) {
       const p = parseFloat(_afitPrice);
@@ -4609,12 +4674,7 @@ export default {
           await this.sortTokenData(this.tokenSort, true);
         }
 
-        try {
-          this.tokenMetrics = await hsc.find('market', 'metrics', {}, 1000, 0, '', false);
-        } catch (err) {
-          console.log('Error fetching token metrics:', err);
-          this.tokenMetrics = [];
-        }
+        await this.loadTokenMetrics(Array.isArray(tokenData) ? tokenData : []);
 
       } catch (err) {
         console.error('Error in fetchTokenBalance:', err);
@@ -8348,22 +8408,27 @@ export default {
     setSteemPrice(_steemPrice) {
       const p = parseFloat(_steemPrice);
       if (!isNaN(p)) this.steemPrice = p;
+      this.markPrice('steem', !isNaN(p));
     },
     setSBDPrice(_sbdPrice) {
       const p = parseFloat(_sbdPrice);
       if (!isNaN(p)) this.sbdPrice = p;
+      this.markPrice('sbd', !isNaN(p));
     },
     setHivePrice(_hivePrice) {
       const p = parseFloat(_hivePrice);
       if (!isNaN(p)) this.hivePrice = p;
+      this.markPrice('hive', !isNaN(p));
     },
     setHBDPrice(_hbdPrice) {
       const p = parseFloat(_hbdPrice);
       if (!isNaN(p)) this.hbdPrice = p;
+      this.markPrice('hbd', !isNaN(p));
     },
     setBlurtPrice(_blurtPrice) {
       const p = parseFloat(_blurtPrice);
       if (!isNaN(p)) this.blurtPrice = p;
+      this.markPrice('blurt', !isNaN(p));
     },
     async loadGlobalProperties() {
       try {
@@ -8433,7 +8498,7 @@ export default {
           console.error('Error getting properties:', err);
         }
 
-        const fetchPrice = async (url, setter) => {
+        const fetchPrice = async (url, setter, key) => {
           try {
             const response = await this.retryOperation(async () => {
               const res = await fetch(url);
@@ -8442,26 +8507,27 @@ export default {
             setter(response);
           } catch (err) {
             console.error('Error fetching price:', err);
+            if (key) this.markPrice(key, false);
           }
         };
 
         //await Promise.all([
           fetchPrice(`${process.env.actiAppUrl}curAFITPrice`,
-            json => this.setAFITPrice(json.unit_price_usd));
+            json => this.setAFITPrice(json.unit_price_usd), 'afit');
           fetchPrice(`${process.env.actiAppUrl}AFITBSCPrice`,
             json => this.setAFITBSCPrice(json.price));
           fetchPrice(`${process.env.actiAppUrl}AFITXBSCPrice`,
             json => this.setAFITXBSCPrice(json.price));
           fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=steem&vs_currencies=usd',
-            json => this.setSteemPrice(json.steem.usd));
+            json => this.setSteemPrice(json.steem.usd), 'steem');
           fetchPrice(`${process.env.actiAppUrl}hivePrice`,
-            json => this.setHivePrice(json.hive.usd));
+            json => this.setHivePrice(json.hive.usd), 'hive');
           fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=blurt&vs_currencies=usd',
-            json => this.setBlurtPrice(json.blurt.usd));
+            json => this.setBlurtPrice(json.blurt.usd), 'blurt');
           fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=steem-dollars&vs_currencies=usd',
-            json => this.setSBDPrice(json['steem-dollars'].usd));
+            json => this.setSBDPrice(json['steem-dollars'].usd), 'sbd');
           fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=hive_dollar&vs_currencies=usd',
-            json => this.setHBDPrice(json['hive_dollar'].usd));
+            json => this.setHBDPrice(json['hive_dollar'].usd), 'hbd');
         //]);
 
         this.screenWidth = screen.width;
