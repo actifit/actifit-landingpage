@@ -75,9 +75,11 @@
                 © {{ currentYear }} Copyright Actifit | {{ $config.appVersion }} | <nuxt-link to="/privacy-policy">Privacy Policy</nuxt-link> | <nuxt-link to="/terms-conditions">Terms & Conditions</nuxt-link> | <nuxt-link to="/conduct">Code of Conduct</nuxt-link>
             </div>
         </div>
-        <!-- Required by Google if the reCAPTCHA badge is hidden, which it is
-             (autoHideBadge). Must stay as long as reCAPTCHA loads on the site. -->
-        <div class="bottom-row">
+        <!-- Required by Google when the reCAPTCHA badge is hidden, which it is
+             (autoHideBadge). reCAPTCHA v3 now loads only on /signup (login no longer
+             uses it), so the notice shows there. /password uses the v2 checkbox, which
+             carries Google's own branding. -->
+        <div class="bottom-row" v-if="showRecaptchaAttribution">
             <div class="bottom-bar-item recaptcha-attribution">
                 This site is protected by reCAPTCHA and the Google
                 <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a> and
@@ -94,6 +96,11 @@ export default {
   computed: {
     currentYear() {
       return (new Date()).getFullYear();
+    },
+    // Signup is the only page that still loads reCAPTCHA v3. Matches locale-prefixed
+    // paths too (/fr/signup).
+    showRecaptchaAttribution() {
+      return /(^|\/)signup\/?$/.test(this.$route.path);
     },
   },
 }

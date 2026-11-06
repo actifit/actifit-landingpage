@@ -66,26 +66,6 @@
 
 <script>
   // YOUR CURRENT, IMPROVED SCRIPT IS PRESERVED
-  import { VueReCaptcha } from 'vue-recaptcha-v3'
-  import Vue from 'vue'
-  // autoHideBadge: NavbarBrand pulls LoginModal into every page, so reCAPTCHA
-  // loads site-wide and its badge renders everywhere. When the script cannot
-  // reach Google - a fingerprint-blocking browser, or a blocked request - the
-  // badge area shows Google's own "Could not connect to the reCAPTCHA service",
-  // which made unrelated pages like /arena look broken (reported 2026-10-06).
-  //
-  // This replaces three manual hideBadge() calls that ran only AFTER a successful
-  // login - useless to the logged-out visitor who actually sees the badge, and a
-  // crash risk besides: they dereferenced $recaptchaInstance, which is undefined
-  // in exactly the blocked-script case, before any login state was persisted.
-  //
-  // Hiding the badge is permitted provided the required attribution is shown
-  // instead - added to the footer in NewFooterDesign.vue.
-  //
-  // Must be set in BOTH this file and pages/signup.vue: Vue.use dedupes by plugin
-  // identity, so whichever module evaluates first wins and the other call is a
-  // no-op. Setting only one would make the behaviour load-order dependent.
-  Vue.use(VueReCaptcha, { siteKey: process.env.captchaV3Key, loaderOptions: { autoHideBadge: true } })
   import QRious from 'qrious';
   import { PublicKey, Signature, hash } from '@hiveio/hive-js/lib/auth/ecc';
   import signedChallengeLogin from '~/mixins/signedChallengeLogin';
@@ -107,15 +87,12 @@
         resultReturned: false,
         username_exists: '',
         username_invalid: '',
-        captchaValid: false,
-        captcha_invalid: '',
         privatePostKey: '',
         error_proceeding: '',
         error_msg: '',
         account_name: '',
         is_logged_in: false,
         user: '',
-        captchaReady: false,
         login_in_progress: false,
         bchain_val: 'HIVE',
         keep_loggedin_val: false,
@@ -143,7 +120,6 @@
         this.resetForm();
         this.$emit('close');
       });
-      // not behind reCAPTCHA's loader: that never finishes where Google is blocked
       this.verifyKeychain();
     },
     beforeDestroy() {
@@ -160,9 +136,7 @@
       closeModal() {
         $(this.$refs.loginModal).modal('hide'); document.title = this.originalTitle;
       },
-      onVerifyCaptcha (response) { this.captchaValid = true; },
       generateToken (multip) { let passString = ''; for (let i=0;i<multip;i++){ passString += Math.random().toString(36).substr(2, 13); } return passString; },
-      onExpiredCaptcha () { this.captchaValid = false; },
       // Takes the /loginVerify body, exactly like the other two methods, so HiveAuth
       // finally holds a real API session instead of a browser-only logged-in flag.
       //
@@ -317,35 +291,10 @@
       },
       async proceedLogin () {
         if (this.login_in_progress) { return; } // one login at a time
-        this.captcha_invalid = '';
         this.error_proceeding = false;
         this.error_msg = '';
         if (this.$refs["username"].value == '' || this.$refs["ppkey"].value == ''){ this.error_proceeding = true; this.error_msg = this.$t('login_error'); return; }
-        // Spinner goes up BEFORE the wait: it can last 8s, and without it the button
-        // looks dead for that whole time and a second click fires a second login.
         this.login_in_progress = true;
-        const token = await this.loginCaptchaToken();
-        if (token) {
-          // Wrapped because an upstream 502 returns an HTML body, and .json() then
-          // throws - which unhandled would leave the button dead with no message, i.e.
-          // exactly the bug this change exists to remove.
-          try {
-            const outc = await fetch('/api/proxy/verifyLoginCaptcha?token='+encodeURIComponent(token));
-            // A verifier that is DOWN - any 5xx, including the proxy's own 503 when the
-            // check times out - is the same as one that is unreachable: not a verdict, so
-            // tolerated exactly like the catch below. Treating it as a rejection told users
-            // whose only problem was a slow Google "your key is incorrect".
-            if (outc.status >= 500) {
-              console.warn('captcha verification unavailable, continuing without it:', outc.status);
-            } else {
-              const captchaJson = await outc.json();
-              // A rejected token still blocks. Only the inability to OBTAIN one is tolerated.
-              if (!outc.ok || captchaJson.error){ this.error_proceeding = true; this.login_in_progress = false; this.error_msg = this.$t('login_error'); return; }
-            }
-          } catch (e) {
-            console.warn('captcha verification unreachable, continuing without it:', e && e.message);
-          }
-        }
         this.$store.commit('setBchain', this.bchain_val);
         localStorage.setItem('cur_bchain', this.bchain_val);
         const account_name = this.$refs["username"].value.trim().toLowerCase();
