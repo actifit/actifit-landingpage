@@ -1,26 +1,16 @@
 /**
- * Regression guard for login when reCAPTCHA is unavailable.
+ * Posting-key login in the login modal: the session is written, and the key never
+ * leaves the browser.
  *
- * Context: reCAPTCHA registers on every page (NavbarBrand pulls in LoginModal), and in
- * a browser that blocks or cannot run it, BOTH `$recaptcha` and `$recaptchaInstance`
- * are undefined - the plugin assigns them only inside the loader's .then(). Login must
- * still complete, because the captcha token is never sent to the login endpoints and so
- * never gated them server-side.
+ * Formerly LoginModalRecaptchaFallback.spec.js. Login no longer uses reCAPTCHA at all
+ * (1.14.32), so the captcha-fallback cases went; login-no-recaptcha.spec.js covers that.
+ * The cases kept here guard the signed-challenge flow: proceedLogin fetches a nonce from
+ * /loginChallenge, signs the server's message locally, and sends only the signature to
+ * /loginVerify.
  *
- * This file exists because the first attempt at that fallback shipped with a full green
- * suite and still did not work: `setUserLoginStatus` dereferenced `$recaptchaInstance`
- * BEFORE writing any login state, so the exact browser the fallback was for got an
- * error instead of a session. The one existing LoginModal test passes
- * `$recaptchaInstance: { hideBadge: jest.fn() }`, which hid it.
- *
- * So the rule these tests encode: a fake vm here must NEVER be given a reCAPTCHA stub.
- * Absence is the case under test.
- *
- * UPDATED for the signed-challenge login: proceedLogin no longer POSTs the key to
- * /loginAuth. It fetches a nonce from /loginChallenge, signs the server's message
- * locally, and sends only the signature to /loginVerify. The captcha premise is
- * unchanged, and there is now a stronger assertion available - that the private key
- * appears in NO request body at all.
+ * History worth keeping: setUserLoginStatus once dereferenced $recaptchaInstance before
+ * writing any login state, so a browser without reCAPTCHA got an error instead of a
+ * session. A fake vm here is never given a reCAPTCHA stub, so that cannot come back.
  */
 import hive from '@hiveio/hive-js'
 import LoginModal from '@/components/LoginModal.vue'
@@ -48,11 +38,8 @@ const ok = (body) => Promise.resolve({
 // URL-aware, because the flow now makes two different calls that need different bodies.
 // A blanket mock would hand /loginChallenge a session object with no nonce, and the
 // login would fail for a reason that has nothing to do with the test.
-const loginFetch = (opts = {}) => jest.fn().mockImplementation((url) => {
+const loginFetch = () => jest.fn().mockImplementation((url) => {
   const u = String(url)
-  if (u.includes('verifyLoginCaptcha')) {
-    return opts.captcha ? opts.captcha() : ok({ success: true })
-  }
   if (u.includes('loginChallenge')) return ok(CHALLENGE)
   if (u.includes('loginVerify')) return ok(SESSION)
   return ok({})
@@ -63,11 +50,9 @@ const makeVm = (overrides = {}) => {
     is_logged_in: false,
     error_proceeding: false,
     error_msg: '',
-    captcha_invalid: '',
     login_in_progress: false,
     bchain_val: 'HIVE',
     keep_loggedin_val: false,
-    // Deliberately no $recaptcha and no $recaptchaInstance.
     $store: { commit: jest.fn(), dispatch: jest.fn() },
     $refs: {
       username: { value: 'alice' },
@@ -92,16 +77,16 @@ const makeVm = (overrides = {}) => {
   return vm
 }
 
-describe('components/LoginModal.vue reCAPTCHA-unavailable fallback', () => {
+describe('components/LoginModal.vue posting-key login', () => {
   afterEach(() => {
     localStorage.clear()
     delete global.fetch
   })
 
-  describe('login state is persisted even with no reCAPTCHA instance', () => {
+  describe('login state is persisted', () => {
     // These are the blocker. A TypeError here aborts the login AFTER the server has
     // already authenticated the user, so they see a generic error and stay logged out.
-    it('setUserLoginStatus completes without $recaptchaInstance', () => {
+    it('setUserLoginStatus writes the session', () => {
       const vm = makeVm()
 
       expect(() => {
@@ -119,7 +104,7 @@ describe('components/LoginModal.vue reCAPTCHA-unavailable fallback', () => {
       expect(vm.$emit).toHaveBeenCalledWith('login-successful')
     })
 
-    it('setKeychainLoginStatus completes without $recaptchaInstance', () => {
+    it('setKeychainLoginStatus writes the session', () => {
       const vm = makeVm()
 
       expect(() => {
@@ -137,30 +122,7 @@ describe('components/LoginModal.vue reCAPTCHA-unavailable fallback', () => {
   })
 
   describe('proceedLogin', () => {
-    it('waits for the loader before giving up on a token', async () => {
-      // A merely-slow script must not cause a silent skip: $recaptcha is undefined
-      // until the loader resolves, so an early click would otherwise bypass the
-      // captcha entirely even though it was about to become available.
-      const recaptcha = jest.fn().mockResolvedValue('late-token')
-      const vm = makeVm({
-        $recaptchaLoaded: jest.fn().mockImplementation(() => {
-          // Only now does the plugin assign $recaptcha, as it does in the real loader.
-          vm.$recaptcha = recaptcha
-          return Promise.resolve()
-        })
-      })
-      global.fetch = loginFetch()
-
-      await LoginModal.methods.proceedLogin.call(vm)
-
-      expect(vm.$recaptchaLoaded).toHaveBeenCalled()
-      expect(recaptcha).toHaveBeenCalledWith('login')
-      const called = global.fetch.mock.calls.map((c) => String(c[0]))
-      expect(called.some((u) => u.includes('verifyLoginCaptcha'))).toBe(true)
-      expect(localStorage.getItem('access_token')).toBe('tok')
-    })
-
-    it('reaches the login endpoints when $recaptcha is undefined', async () => {
+    it('reaches the login endpoints', async () => {
       const fetchMock = loginFetch()
       global.fetch = fetchMock
       const vm = makeVm()
@@ -170,24 +132,17 @@ describe('components/LoginModal.vue reCAPTCHA-unavailable fallback', () => {
       const called = fetchMock.mock.calls.map((c) => String(c[0]))
       expect(called).toContain('/api/proxy/loginChallenge')
       expect(called).toContain('/api/proxy/loginVerify')
-      // Nothing was sent to verification, because no token could be obtained.
       expect(called.some((u) => u.includes('verifyLoginCaptcha'))).toBe(false)
       expect(localStorage.getItem('access_token')).toBe('tok')
     })
 
-    it('never sends the private posting key, or the captcha token, to any endpoint', async () => {
-      // Two premises in one assertion.
-      //
-      // The KEY one is the point of the signed-challenge login: the key is used to sign
-      // in the browser and must never cross the network. If someone later reintroduces
-      // a key-bearing request, this fails.
-      //
-      // The CAPTCHA one is what the whole fallback rests on: a client can force
-      // token=null by blocking Google, so if the token were ever bound to login it
-      // would become bypassable and the fallback would need reconsidering.
+    it('never sends the private posting key to any endpoint', async () => {
+      // The point of the signed-challenge login: the key is used to sign in the browser
+      // and must never cross the network. If someone later reintroduces a key-bearing
+      // request, this fails.
       const fetchMock = loginFetch()
       global.fetch = fetchMock
-      const vm = makeVm({ $recaptcha: jest.fn().mockResolvedValue('good-token') })
+      const vm = makeVm()
 
       await LoginModal.methods.proceedLogin.call(vm)
 
@@ -195,7 +150,6 @@ describe('components/LoginModal.vue reCAPTCHA-unavailable fallback', () => {
         .map((c) => (c[1] && c[1].body) || '')
         .join('\n')
       expect(bodies).not.toContain(POSTING_WIF)
-      expect(bodies).not.toContain('good-token')
       expect(bodies).not.toContain('ppkey')
 
       const verifyCall = fetchMock.mock.calls.find((c) => String(c[0]).includes('loginVerify'))
@@ -234,55 +188,6 @@ describe('components/LoginModal.vue reCAPTCHA-unavailable fallback', () => {
       expect(
         Signature.fromHex(signature).verifyHash(hash.sha256(rebuilt), pub)
       ).toBe(false)
-    })
-
-    it('still blocks a token that IS obtained and then rejected', async () => {
-      // The deliberate asymmetry: only the INABILITY to get a token is tolerated.
-      const fetchMock = loginFetch({ captcha: () => ok({ error: 'invalid captcha' }) })
-      global.fetch = fetchMock
-      const vm = makeVm({ $recaptcha: jest.fn().mockResolvedValue('bad-token') })
-
-      await LoginModal.methods.proceedLogin.call(vm)
-
-      expect(vm.error_proceeding).toBe(true)
-      expect(vm.login_in_progress).toBe(false)
-      const called = fetchMock.mock.calls.map((c) => String(c[0]))
-      expect(called).not.toContain('/api/proxy/loginChallenge')
-      expect(called).not.toContain('/api/proxy/loginVerify')
-    })
-
-    it('survives a non-JSON response from the verify endpoint', async () => {
-      // An upstream 502 returns HTML; .json() throws. Unhandled, that left the button
-      // dead with no message - the same failure this change exists to remove.
-      const fetchMock = loginFetch({
-        captcha: () => Promise.resolve({
-          ok: false,
-          status: 502,
-          json: () => Promise.reject(new SyntaxError('Unexpected token <'))
-        })
-      })
-      global.fetch = fetchMock
-      const vm = makeVm({ $recaptcha: jest.fn().mockResolvedValue('good-token') })
-
-      await expect(LoginModal.methods.proceedLogin.call(vm)).resolves.toBeUndefined()
-      expect(localStorage.getItem('access_token')).toBe('tok')
-    })
-
-    it('shows the spinner before awaiting reCAPTCHA, not after', async () => {
-      // The wait can last up to 8s. If the flag is set after it, the button looks dead
-      // for that whole window and a second click fires a second parallel login.
-      let progressDuringRecaptcha = null
-      const vm = makeVm({
-        $recaptcha: jest.fn().mockImplementation(() => {
-          progressDuringRecaptcha = vm.login_in_progress
-          return Promise.resolve(null)
-        })
-      })
-      global.fetch = loginFetch()
-
-      await LoginModal.methods.proceedLogin.call(vm)
-
-      expect(progressDuringRecaptcha).toBe(true)
     })
 
     it('does not call the login endpoints when the form is empty', async () => {

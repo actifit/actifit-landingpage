@@ -127,7 +127,7 @@
                   <a href="#" @click.prevent="openLogin" class="arena-participate__cta">
                     {{ $t('Arena_Login_To_Join') }} <i class="fas fa-arrow-right" aria-hidden="true"></i>
                   </a>
-                  <nuxt-link :to="`/signup?redirect=/arena/${ch.id}`" class="arena-participate__signup">{{ $t('Arena_Participate') }}</nuxt-link>
+                  <nuxt-link :to="`/signup?redirect=/arena/${ch.id}`" no-prefetch class="arena-participate__signup">{{ $t('Arena_Participate') }}</nuxt-link>
                 </template>
               </template>
               <!-- else: closed & not joined → no CTA -->

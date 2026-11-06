@@ -76,9 +76,6 @@ const upstreamFailed = (res, error, route) => {
 const T = {
   login: 15000,     // under the client's 20s abort - see above
   quick: 10000,     // account lookup: a small read
-  // ABOVE actifit-bot's own 10s timeout on its call to Google, so the bot's specific
-  // reply (e.g. 502 verify-unreachable) arrives before we give up on it.
-  captcha: 13000,
   reward: 15000,
   translate: 30000,
   gemini: 60000,    // an LLM call; legitimately slow
@@ -365,36 +362,6 @@ module.exports = async function (req, res, next) {
         const response = await http.post(targetUrl, body ? JSON.parse(body) : {}, {
           headers: { 'Content-Type': 'application/json' },
           timeout: T.login
-        });
-        return res.end(JSON.stringify(response.data));
-      } catch (error) {
-        return upstreamFailed(res, error, path);
-      }
-    }
-
-    if (path === '/verifyLoginCaptcha') {
-      if (req.method !== 'GET') {
-        res.statusCode = 405;
-        return res.end(JSON.stringify({ error: 'Method Not Allowed' }));
-      }
-
-      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
-      if (isRateLimited(`${ip}:${path}`, 10, 60000)) {
-        res.statusCode = 429;
-        return res.end(JSON.stringify({ error: 'Too many requests' }));
-      }
-
-      const token = parsedUrl.query.token;
-      if (!token || typeof token !== 'string') {
-        res.statusCode = 400;
-        return res.end(JSON.stringify({ error: 'Missing captcha token' }));
-      }
-
-      const baseApiUrl = (process.env.ACTI_API_URL || 'https://api.actifit.io').replace(/\/?$/, '/');
-      try {
-        const response = await http.get(`${baseApiUrl}verifyLoginCaptcha`, {
-          params: { token },
-          timeout: T.captcha
         });
         return res.end(JSON.stringify(response.data));
       } catch (error) {
