@@ -76,10 +76,10 @@
             </div>
         </div>
         <!-- Required by Google when the reCAPTCHA badge is hidden, which it is
-             (autoHideBadge). reCAPTCHA v3 now loads only on /signup (login no longer
-             uses it), so the notice shows there. /password uses the v2 checkbox, which
-             carries Google's own branding. -->
-        <div class="bottom-row" v-if="showRecaptchaAttribution">
+             (autoHideBadge). Only /signup uses v3 now, but shown site-wide on purpose:
+             once signup.vue's module has run (a visit, or a prefetching link) the script
+             stays loaded on every page for the rest of the session. -->
+        <div class="bottom-row">
             <div class="bottom-bar-item recaptcha-attribution">
                 This site is protected by reCAPTCHA and the Google
                 <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a> and
@@ -96,11 +96,6 @@ export default {
   computed: {
     currentYear() {
       return (new Date()).getFullYear();
-    },
-    // Signup is the only page that still loads reCAPTCHA v3. Matches locale-prefixed
-    // paths too (/fr/signup).
-    showRecaptchaAttribution() {
-      return /(^|\/)signup\/?$/.test(this.$route.path);
     },
   },
 }

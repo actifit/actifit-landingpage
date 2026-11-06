@@ -38,7 +38,8 @@ describe('proxy upstream calls', () => {
   it('every upstream call sets an explicit per-purpose timeout', () => {
     const calls = src.match(/await http(\.\w+)?\(/g) || []
     const timeouts = src.match(/timeout:\s*T\.\w+/g) || []
-    expect(calls.length).toBeGreaterThanOrEqual(8)
+    // 7 since the login-only /verifyLoginCaptcha route was removed (1.14.32).
+    expect(calls.length).toBeGreaterThanOrEqual(7)
     expect(timeouts.length).toBe(calls.length)
   })
 

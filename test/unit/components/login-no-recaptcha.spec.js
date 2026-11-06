@@ -119,6 +119,8 @@ describe('reCAPTCHA registration', () => {
       expect(src).not.toMatch(/\$recaptcha/)
       expect(src).not.toMatch(/verifyLoginCaptcha/)
     })
+    // The proxy route served only login; signup calls the bot directly.
+    expect(read('api/proxy.js')).not.toMatch(/verifyLoginCaptcha/)
   })
 
   it('stays on signup, registered at module level (deferring it broke tokens in 1.12.0)', () => {
@@ -129,5 +131,27 @@ describe('reCAPTCHA registration', () => {
     // Before `export default`, i.e. not inside mounted() or a method.
     expect(use).toBeLessThan(script.indexOf('export default'))
     expect(src).toMatch(/\$recaptcha\('signup'\)/)
+  })
+
+  // Nuxt prefetches a visible <nuxt-link>'s page chunk at idle, which evaluates
+  // signup.vue and so its Vue.use - loading reCAPTCHA on every page that shows the link
+  // (UserMenu does, for every logged-out visitor).
+  it('no nuxt-link to /signup prefetches the signup page', () => {
+    const root = path.join(__dirname, '../../..')
+    const vueFiles = (dir) => fs.readdirSync(path.join(root, dir), { withFileTypes: true }).flatMap((d) =>
+      d.isDirectory() ? vueFiles(path.join(dir, d.name)) : (d.name.endsWith('.vue') ? [path.join(dir, d.name)] : []))
+    const links = ['pages', 'components', 'layouts']
+      .filter((d) => fs.existsSync(path.join(root, d)))
+      .flatMap(vueFiles)
+      .flatMap((f) => (read(f).match(/<(nuxt-link|NuxtLink)\b[^>]*>/g) || [])
+        .filter((tag) => /\/signup\b/.test(tag))
+        .map((tag) => ({ f, tag })))
+    expect(links.length).toBeGreaterThanOrEqual(2) // UserMenu, arena/_id
+    links.forEach(({ f, tag }) => expect(`${f}: ${tag}`).toMatch(/\bno-prefetch\b/))
+  })
+
+  it('shows the hidden-badge attribution site-wide, not only on /signup', () => {
+    const footer = read('components/NewFooterDesign.vue')
+    expect(footer).toMatch(/<div class="bottom-row">\s*<div class="bottom-bar-item recaptcha-attribution">/)
   })
 })
