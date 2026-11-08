@@ -221,10 +221,10 @@
                 <div class="alert alert-danger py-2" v-if="error_proceeding">{{ error_msg }}</div>
 
                 <div class="text-center">
-                  <button v-on:click="checkFunds" class="btn btn-brand btn-lg w-100" v-if="!promo_code_chkbx">
+                  <button v-on:click="checkFunds" :disabled="checkingFunds" class="btn btn-brand btn-lg w-100" v-if="!promo_code_chkbx">
                     {{ $t('Steem_sent').replace('_CUR_', this.transferType) }}
                   </button>
-                  <button v-on:click="checkFunds" class="btn btn-brand btn-lg w-100" v-else>
+                  <button v-on:click="checkFunds" :disabled="checkingFunds" class="btn btn-brand btn-lg w-100" v-else>
                     {{ $t('create_account') }}
                   </button>
                 </div>

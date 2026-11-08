@@ -52,6 +52,18 @@ describe('signup passSignupCaptcha', () => {
     expect(vm.error_proceeding).toBe(false)
   })
 
+  test('the 15s timer is cleared once the token arrives', async () => {
+    jest.useFakeTimers()
+    try {
+      global.fetch = answer({ success: true })
+      const vm = makeVm({ $recaptcha: jest.fn().mockResolvedValue('tok') })
+      await methods.passSignupCaptcha.call(vm)
+      expect(jest.getTimerCount()).toBe(0)
+    } finally {
+      jest.useRealTimers()
+    }
+  })
+
   test('server rejects the token: reads the JSON body and shows captcha_invalid', async () => {
     global.fetch = answer({ error: 'error', reason: 'timeout-or-duplicate' })
     const vm = makeVm({ $recaptcha: jest.fn().mockResolvedValue('tok') })
