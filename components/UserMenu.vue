@@ -39,7 +39,7 @@
 
       <!-- Login/Signup Links (FIXED: Using NuxtLink) -->
       <li class="nav-item" v-if="!user">
-        <NuxtLink :to="localePath('/signup')">{{ $t('Signup_Link') }}</NuxtLink> |
+        <NuxtLink :to="localePath('/signup')" no-prefetch>{{ $t('Signup_Link') }}</NuxtLink> |
         <a href="#" data-toggle="modal" data-target="#loginModal" @click.prevent="showModalFunc">{{ $t('Login') }}</a>
       </li>
 

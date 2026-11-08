@@ -75,8 +75,10 @@
                 © {{ currentYear }} Copyright Actifit | {{ $config.appVersion }} | <nuxt-link to="/privacy-policy">Privacy Policy</nuxt-link> | <nuxt-link to="/terms-conditions">Terms & Conditions</nuxt-link> | <nuxt-link to="/conduct">Code of Conduct</nuxt-link>
             </div>
         </div>
-        <!-- Required by Google if the reCAPTCHA badge is hidden, which it is
-             (autoHideBadge). Must stay as long as reCAPTCHA loads on the site. -->
+        <!-- Required by Google when the reCAPTCHA badge is hidden, which it is
+             (autoHideBadge). Only /signup uses v3 now, but shown site-wide on purpose:
+             once signup.vue's module has run (a visit, or a prefetching link) the script
+             stays loaded on every page for the rest of the session. -->
         <div class="bottom-row">
             <div class="bottom-bar-item recaptcha-attribution">
                 This site is protected by reCAPTCHA and the Google

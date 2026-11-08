@@ -73,13 +73,6 @@
   import NavbarBrand from '~/components/NavbarBrand'
   import Footer from '~/components/Footer'
 
-  //import VueRecaptcha from 'vue-recaptcha';
-
-  import { VueReCaptcha } from 'vue-recaptcha-v3'
-
-
-  //import { VueReCaptchaV3 } from 'vue-recaptcha-v3';
-
   import { mapGetters } from 'vuex'
 
   //import hive from '@hiveio/hive-js'
@@ -87,9 +80,6 @@
   //import blurt from '@blurtfoundation/blurtjs'
 
   //import {keychain, isKeychainInstalled, hasKeychainBeenUsed} from '@hiveio/keychain'
-
-  import Vue from 'vue'
-  Vue.use(VueReCaptcha, { siteKey: process.env.captchaV3Key })
 
   //QR display for hive auth
   import QRious from 'qrious';
@@ -120,24 +110,18 @@
     components: {
       NavbarBrand,
       Footer,
-	  //VueReCaptchaV3
-	  //VueRecaptcha,
-	  //VueReCaptcha,
     },
 	data () {
       return {
 		resultReturned: false,
 		username_exists: '',
 		username_invalid: '',
-		captchaValid: false,
-		captcha_invalid: '',
 		privatePostKey: '',
 		error_proceeding: '',
 		error_msg: '',
 		account_name: '',
 		is_logged_in: false,
 		user: '',
-		captchaReady: false,
 		login_in_progress: false,
 		bchain_val: 'HIVE',
 		keep_loggedin_val: false,
@@ -170,18 +154,9 @@
 		}
     },
     async mounted () {
-		/*try {
-		  await this.$recaptcha.init()
-		} catch (e) {
-		  console.log(e);
-		}*/
-		// not behind reCAPTCHA's loader: that never finishes where Google is blocked
 		this.verifyKeychain();
 	},
 	methods: {
-	  onVerifyCaptcha (response) {
-		this.captchaValid = true;
-	  },
 	  generateToken (multip) {
 		//generate random 11 characters password
 		let passString = '';
@@ -189,9 +164,6 @@
 			passString += Math.random().toString(36).substr(2, 13);
 		}
 		return passString;
-	  },
-	  onExpiredCaptcha () {
-		this.captchaValid = false;
 	  },
 	  // Takes the /loginVerify body, like the other two methods, so HiveAuth finally
 	  // holds a real API session instead of a browser-only logged-in flag.
@@ -430,14 +402,8 @@
 	  },
 	  async proceedLogin () {
 		if (this.login_in_progress) { return; } // one login at a time
-		this.captcha_invalid = '';
 		this.error_proceeding = false;
 		this.error_msg = '';
-
-		/*if (!this.captchaValid){
-			this.captcha_invalid = this.$t('solve_captcha');
-			return;
-		}*/
 
 		if (this.$refs["username"].value == '' || this.$refs["ppkey"].value == ''){
 			this.error_proceeding = true;
@@ -445,32 +411,7 @@
 			return;
 		}
 
-		// Spinner up before the wait, which can last 8s (see loginCaptchaToken).
 		this.login_in_progress = true;
-		const token = await this.loginCaptchaToken();
-
-		// Same rule as LoginModal: no token means skip the check; a rejected token blocks;
-		// an UNAVAILABLE verifier does not. A 5xx (including the proxy's 503 on timeout) is
-		// not a verdict. And .json() is guarded: on a Cloudflare HTML error page it throws,
-		// which used to leave this button dead with no message.
-		if (token) {
-			try {
-				const outc = await fetch('/api/proxy/verifyLoginCaptcha?token='+encodeURIComponent(token));
-				if (outc.status >= 500) {
-					console.warn('captcha verification unavailable, continuing without it:', outc.status);
-				} else {
-					const captchaJson = await outc.json();
-					if (!outc.ok || captchaJson.error){
-						this.error_proceeding = true;
-						this.login_in_progress = false;
-						this.error_msg = this.$t('login_error');
-						return;
-					}
-				}
-			} catch (e) {
-				console.warn('captcha verification unreachable, continuing without it:', e && e.message);
-			}
-		}
 		//set proper blockchain selected
 		this.$store.commit('setBchain', this.bchain_val);
 
