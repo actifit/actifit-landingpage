@@ -325,3 +325,76 @@ describe('page source', () => {
     }
   })
 })
+
+describe('review round 1 fixes', () => {
+  const realFetch = global.fetch
+  afterEach(() => { jest.useRealTimers(); global.fetch = realFetch })
+
+  test('promo box ticked with a blank code: stops before anything is sent', async () => {
+    global.fetch = jest.fn()
+    for (const code of ['', '   ']) {
+      const vm = makeVm({ promo_code_chkbx: true, promo_code_val: code })
+      await vm.checkFunds()
+      expect(vm.error_msg).toBe('swk_promo_invalid')
+      expect(vm.checkingFunds).toBe(false)
+    }
+    expect(global.fetch).not.toHaveBeenCalled()
+  })
+
+  test('a quote whose mode does not match the promo box is refused', async () => {
+    // promo box on, but the server quoted a paid signup (amount + account)
+    global.fetch = answers(QUOTED)
+    const vm = makeVm({ promo_code_chkbx: true, promo_code_val: 'X' })
+    vm.signupFields = () => ({ new_account: 'newbie', sent_cur: 'HIVE' })
+    await expect(vm.getQuote()).resolves.toBe(false)
+    expect(vm.quote).toBe(null)
+  })
+
+  test('the backup and the screen hold the private halves of exactly the keys sent', async () => {
+    global.fetch = answers(QUOTED)
+    const vm = makeVm({ privatePostKey: 'stale', privateActiveKey: 'stale', privateOwnerKey: 'stale', privateMemoKey: 'stale' })
+    await vm.getQuote()
+    const sent = sentBody(global.fetch.mock.calls[0]).keys
+    for (const [role, priv] of [['posting', vm.privatePostKey], ['active', vm.privateActiveKey], ['owner', vm.privateOwnerKey], ['memo', vm.privateMemoKey]]) {
+      expect(hive.auth.wifToPublic(priv)).toBe(sent[role])
+    }
+  })
+
+  test('switched off after the user may have paid: never says "don\'t send any payment"', async () => {
+    global.fetch = answers({ accountCreated: false, reason: 'signup_disabled', retryable: true, retry_after: 3600 })
+    const vm = makeVm({ quote: { fields: {}, memo: QUOTED.memo, amount: '1' } })
+    await vm.checkFunds()
+    expect(vm.error_msg).toBe('swk_not_seen_yet')
+  })
+
+  test('once "I\'ve sent payment" is clicked, the details can no longer be changed from the page', async () => {
+    global.fetch = answers({ accountCreated: false, reason: 'payment_insufficient', retryable: false })
+    const vm = makeVm({ quote: { fields: {}, memo: QUOTED.memo, amount: '1' } })
+    await vm.checkFunds()
+    expect(vm.paymentSent).toBe(true)
+    const src = fs.readFileSync(path.join(ROOT, 'pages/signup.vue'), 'utf8')
+    expect(src).toMatch(/v-if="quote && !paymentSent && !checkingFunds && !accountCreated" @click\.prevent="editDetails"/)
+  })
+
+  test('after the account exists, the payment details and the paid button are gone', () => {
+    const src = fs.readFileSync(path.join(ROOT, 'pages/signup.vue'), 'utf8')
+    expect(src).toContain('<div v-if="quote && quote.amount && !accountCreated">')
+    expect(src).toMatch(/v-else-if="!promo_code_chkbx && !accountCreated"/)
+  })
+
+  test('the backup file carries the memo and the payment details', () => {
+    let blob
+    const realBlob = global.Blob
+    global.Blob = function (parts) { blob = parts.join('') }
+    URL.createObjectURL = () => 'blob:x'
+    URL.revokeObjectURL = () => {}
+    try {
+      const vm = makeVm({ quote: { fields: { email: 'me@example.com', referrer: 'mcfarhat' }, memo: QUOTED.memo, amount: '8.334', currency: 'HBD', account: 'actifit.signup' } })
+      vm.generateAndDownloadFile()
+    } finally { global.Blob = realBlob }
+    expect(blob).toContain('Memo:' + QUOTED.memo)
+    expect(blob).toContain('Amount:8.334 HBD')
+    expect(blob).toContain('Send to:actifit.signup')
+    expect(blob).toContain('Referrer:mcfarhat')
+  })
+})

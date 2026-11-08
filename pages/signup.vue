@@ -161,7 +161,7 @@
                   </div>
 
                   <!-- Shown only once the server has quoted these exact details -->
-                  <div v-if="quote && quote.amount">
+                  <div v-if="quote && quote.amount && !accountCreated">
                     <div class="alert alert-warning small">
                       <p class="mb-2">{{ $t('swk_keys_first') }}</p>
                       <button class="btn btn-brand btn-sm" @click="generateAndDownloadFile">
@@ -219,13 +219,13 @@
                   <button v-on:click="getQuote" :disabled="quoting" class="btn btn-brand btn-lg w-100" v-if="!promo_code_chkbx && !quote">
                     {{ $t('swk_continue') }}
                   </button>
-                  <button v-on:click="checkFunds" :disabled="checkingFunds" class="btn btn-brand btn-lg w-100" v-else-if="!promo_code_chkbx">
+                  <button v-on:click="checkFunds" :disabled="checkingFunds" class="btn btn-brand btn-lg w-100" v-else-if="!promo_code_chkbx && !accountCreated">
                     {{ $t('Steem_sent') }}
                   </button>
                   <button v-on:click="checkFunds" :disabled="checkingFunds || quoting" class="btn btn-brand btn-lg w-100" v-else>
                     {{ $t('create_account') }}
                   </button>
-                  <a href="#" class="d-inline-block mt-2 small" v-if="quote && !checkingFunds && !accountCreated" @click.prevent="editDetails">{{ $t('swk_edit_details') }}</a>
+                  <a href="#" class="d-inline-block mt-2 small" v-if="quote && !paymentSent && !checkingFunds && !accountCreated" @click.prevent="editDetails">{{ $t('swk_edit_details') }}</a>
                 </div>
 
                 <!-- Process status -->
@@ -424,6 +424,8 @@ export default {
       quoting: false,
       referrer: '',
       paymentWaitUntil: 0,
+      //set by "I've sent payment": from then on the details must not change (the memo would)
+      paymentSent: false,
       pollTimer: null,
       username_exists: '',
       username_invalid: '',
@@ -506,6 +508,15 @@ export default {
       content += '\nPrivate Memo Key:' + this.privateMemoKey;
       content += '\n# Below is the main password for the account';
       content += '\nMaster Password:' + this.$refs["account-password"].value;
+      //what is needed to finish this signup if the page closes after paying
+      if (this.quote) {
+        content += '\n# Signup payment';
+        if (this.quote.amount) content += '\nAmount:' + this.quote.amount + ' ' + this.quote.currency + '\nSend to:' + this.quote.account;
+        content += '\nMemo:' + this.quote.memo;
+        if (this.quote.fields.email) content += '\nEmail:' + this.quote.fields.email;
+        if (this.quote.fields.referrer) content += '\nReferrer:' + this.quote.fields.referrer;
+        if (this.quote.fields.promo_code) content += '\nPromo code:' + this.quote.fields.promo_code;
+      }
 
       const blob = new Blob([content], { type: "text/plain" });
 
@@ -606,6 +617,11 @@ export default {
     signupFields() {
       const new_account = this.$refs["account-username"].value.trim().toLowerCase();
       const keys = hive.auth.getPrivateKeys(new_account, this.$refs["account-password"].value, KEY_ROLES);
+      //the backup file and the screen must hold the private halves of exactly the keys sent
+      this.privatePostKey = keys.posting;
+      this.privateActiveKey = keys.active;
+      this.privateOwnerKey = keys.owner;
+      this.privateMemoKey = keys.memo;
       const fields = { new_account, sent_cur: this.transferType };
       for (const role of KEY_ROLES) fields['keys[' + role + ']'] = keys[role + 'Pubkey'];
       if (this.referrer && this.referrer !== new_account) fields.referrer = this.referrer;
@@ -653,8 +669,11 @@ export default {
       if (!this.signupAvailable || this.quoting || this.checkingFunds) return false;
       this.clearErrors();
       if (!this.formReady()) return false;
+      //a ticked promo box with no code would otherwise be quoted as a paid signup
+      if (this.promo_code_chkbx && !String(this.promo_code_val || '').trim()) return this.showSignupError('promo_invalid');
       this.quoting = true;
       try {
+        //advisory only: the API routes do not check the token; their own rate limits do the work
         if (!(await this.passSignupCaptcha())) return false;
         let fields = this.signupFields();
         let out = await this.postSignup('signupQuote', fields);
@@ -665,7 +684,8 @@ export default {
           out = await this.postSignup('signupQuote', fields);
         }
         const amount = out.amounts && out.amounts[fields.sent_cur];
-        if (out.reason !== 'quoted' || !out.memo || (!fields.promo_code && !(amount && out.signup_account))) {
+        if (out.reason !== 'quoted' || !out.memo || !!fields.promo_code !== this.promo_code_chkbx
+          || (!fields.promo_code && !(amount && out.signup_account))) {
           if (out.reason === 'quoted') return this.showSignupError('server_error');
           if (out.reason === 'username_taken') this.username_exists = this.$t('choose_proper_username');
           return this.showSignupError(out.reason);
@@ -701,6 +721,7 @@ export default {
       this.checkingFunds = true;
       this.processStarted = true;
       this.resultReturned = false;
+      this.paymentSent = true;
       this.paymentWaitUntil = Date.now() + PAYMENT_WAIT_MS;
       await this.submitSignup();
     },
@@ -712,6 +733,7 @@ export default {
       } catch (err) {
         out = { reason: 'server_error', retryable: true };
       }
+      if (this._isDestroyed) return;
       if (out.accountCreated) {
         this.checkingFunds = false;
         this.accountCreated = true;
@@ -725,10 +747,11 @@ export default {
         return;
       }
       this.checkingFunds = false;
-      this.showSignupError(out.reason);
+      //switched off after the user may have paid: "don't send any payment" would be wrong here
+      this.showSignupError(out.reason === 'signup_disabled' ? 'payment_pending' : out.reason);
       //a final failure after paying needs support (refund): show how to reach them
       //a wrong promo code frees these details on the server: let the user fix the code
-      if (out.reason === 'promo_invalid') this.quote = null;
+      if (out.reason === 'promo_invalid') { this.quote = null; this.paymentSent = false; }
       else if (!out.retryable) this.resultReturned = true;
     },
     //Gets a reCAPTCHA v3 token and has the server check it. Returns true when signup may go on.
