@@ -456,3 +456,16 @@ describe('review round 2 fixes', () => {
     }
   })
 })
+
+describe('review round 3 fix', () => {
+  const realFetch = global.fetch
+  afterEach(() => { global.fetch = realFetch })
+  test('a promo signup that fails for good (name taken meanwhile) unlocks the form', async () => {
+    global.fetch = answers({ enabled: true, reason: 'quoted', memo: 'signup:aaaaaaaaaaaaaaaaaaaaaaaa' }, { accountCreated: false, reason: 'username_taken', retryable: false })
+    const vm = makeVm({ promo_code_chkbx: true, promo_code_val: 'FREE-1' })
+    await vm.checkFunds()
+    expect(vm.error_msg).toBe('choose_proper_username')
+    expect(vm.quote).toBe(null)
+    expect(vm.paymentSent).toBe(false)
+  })
+})

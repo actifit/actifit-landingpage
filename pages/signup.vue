@@ -751,7 +751,8 @@ export default {
       this.showSignupError(out.reason === 'signup_disabled' && !this.promo_code_chkbx ? 'payment_pending' : out.reason);
       //a final failure after paying needs support (refund): show how to reach them
       //a wrong promo code frees these details on the server: let the user fix the code
-      if (out.reason === 'promo_invalid') { this.quote = null; this.paymentSent = false; }
+      //a promo signup that fails for good paid nothing: unlock the form so the user can change it
+      if (out.reason === 'promo_invalid' || (this.promo_code_chkbx && !out.retryable)) { this.quote = null; this.paymentSent = false; }
       else if (!out.retryable) this.resultReturned = true;
     },
     //Gets a reCAPTCHA v3 token and has the server check it. Returns true when signup may go on.
