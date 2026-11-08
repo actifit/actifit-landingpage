@@ -32,8 +32,10 @@ export const MOD_ACTIONS_AVAILABLE = false
  * the incident. Each one is hidden BEFORE the user signs or pays anything, and a translated
  * "*_unavailable" note says why. Flip a flag once the backend side is back.
  */
-// Signup, paid AND promo-code (both go through /confirmPayment): no payment address/memo.
-export const SIGNUP_AVAILABLE = false
+// Signup, paid AND promo-code: back on since the keys are made in the browser and only public
+// keys reach the API (/app/signupWithKeys). The server has its own switch (settings doc
+// signup_with_keys); this one hides the payment details on the page.
+export const SIGNUP_AVAILABLE = true
 // Claiming free signup links (/claimFreeSignupAccounts); the links are redeemed via signup.
 export const FREE_SIGNUP_LINKS_AVAILABLE = false
 // AFIT -> BSC bridge (/appendBridgeTransaction + the bridge job): no AFIT lock + HBD fee.

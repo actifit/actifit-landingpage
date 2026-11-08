@@ -1,5 +1,5 @@
 /**
- * Signup when reCAPTCHA is blocked or rejects the token (#533).
+ * Signup when reCAPTCHA is blocked or rejects the token (#533). The captcha now guards the quote step.
  *
  * Before: with Google blocked, $recaptcha was undefined and calling it threw a TypeError,
  * so the button silently did nothing. The server's answer was read off the fetch Response
@@ -121,7 +121,6 @@ describe('signup warns before payment when reCAPTCHA cannot load', () => {
     $store: { dispatch: jest.fn().mockResolvedValue() },
     $route: { query: {} },
     setPasswordVal: jest.fn(),
-    setMemoValue: jest.fn(),
     $recaptchaLoaded,
   })
 
@@ -161,48 +160,36 @@ describe('signup warns before payment when reCAPTCHA cannot load', () => {
   })
 })
 
-describe('signup checkFunds and the captcha', () => {
-  const realFetch = global.fetch
-  afterEach(() => { global.fetch = realFetch })
-  const field = (value) => ({ value })
+describe('signup getQuote and the captcha', () => {
   const formVm = (passSignupCaptcha) => makeVm({
     signupAvailable: true,
+    quoting: false,
     checkingFunds: false,
-    processStarted: false,
-    promo_code_chkbx: false,
-    hive_account: true,
-    $refs: {
-      'account-username': field('newbie'),
-      'account-password': field('pw'),
-      'account-password-confirm': field('pw'),
-      'account-email': field(''),
-    },
-    $route: { query: {} },
-    isEmailValid: () => '',
-    getMatchingAmount: () => 1,
-    getMatchingAFIT: () => 1,
+    quote: null,
+    formReady: () => true,
+    clearErrors: methods.clearErrors,
+    showSignupError: methods.showSignupError,
+    signupFields: () => ({ new_account: 'newbie', sent_cur: 'HIVE' }),
+    postSignup: jest.fn(() => new Promise(() => {})),
     passSignupCaptcha,
   })
-  const confirmCalls = () => global.fetch.mock.calls.filter(([u]) => String(u).includes('confirmPayment'))
 
-  test('a failed captcha never reaches confirmPayment and frees the button', async () => {
-    global.fetch = jest.fn()
+  test('a failed captcha never asks for a quote and frees the button', async () => {
     const vm = formVm(jest.fn().mockResolvedValue(false))
-    await methods.checkFunds.call(vm)
-    expect(confirmCalls()).toHaveLength(0)
-    expect(vm.checkingFunds).toBe(false)
-    expect(vm.processStarted).toBe(false)
+    await expect(methods.getQuote.call(vm)).resolves.toBe(false)
+    expect(vm.postSignup).not.toHaveBeenCalled()
+    expect(vm.quoting).toBe(false)
+    expect(vm.quote).toBe(null)
   })
 
-  test('a double click sends one confirmation, not two', async () => {
+  test('a double click asks for one quote, not two', async () => {
     let pass
     const vm = formVm(jest.fn(() => new Promise((r) => { pass = r })))
-    global.fetch = jest.fn(() => new Promise(() => {}))
-    methods.checkFunds.call(vm)
-    await methods.checkFunds.call(vm)
+    methods.getQuote.call(vm)
+    await methods.getQuote.call(vm)
     pass(true)
     await new Promise((r) => setTimeout(r, 0))
     expect(vm.passSignupCaptcha).toHaveBeenCalledTimes(1)
-    expect(confirmCalls()).toHaveLength(1)
+    expect(vm.postSignup).toHaveBeenCalledTimes(1)
   })
 })

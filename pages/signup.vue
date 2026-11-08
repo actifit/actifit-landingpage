@@ -12,8 +12,7 @@
           <p class="signup-social-proof"><i class="fas fa-users text-brand mr-1"></i>{{ $t('signup.social_proof') }}</p>
         </div>
 
-        <!-- Signup (paid and promo) goes through /confirmPayment, disabled server side for now:
-             say so up front, before anyone sends a payment (see utils/sessionActions.js) -->
+        <!-- Kill switch (utils/sessionActions.js): say so up front, before anyone sends a payment -->
         <div v-if="!signupAvailable" class="alert alert-warning text-center mb-4" role="alert">{{ $t('signup_unavailable') }}</div>
 
         <!-- Step indicator -->
@@ -57,43 +56,26 @@
 
                 <div class="form-group mb-3">
                   <label for="account-username">{{ $t('Pick_Username') }}</label>
-                  <input class="form-control form-control-lg" ref="account-username" id="account-username"
+                  <input class="form-control form-control-lg" ref="account-username" id="account-username" :readonly="!!quote"
                     @input="handleUsername($event.target.value.toLowerCase())" />
                   <p class="text-brand mt-1 mb-0" v-if="username_invalid"><b>{{ username_invalid }}</b></p>
                   <p class="text-brand mt-1 mb-0" v-if="username_exists"><b>{{ username_exists }}</b></p>
                 </div>
 
                 <div class="form-group mb-3">
-                  <label>{{ $t('target_bchain') }}</label>
-                  <p class="signup-muted mb-1"><i>{{ $t('leave_default_recommend') }}</i></p>
-                  <div class="pl-2 mb-1">
-                    <input type="checkbox" id="hive-account" v-model="hive_account" v-on:change="validateUserName">
-                    <label for="hive-account" class="font-weight-normal ml-1">{{ $t('hive_account_text') }}</label>
-                  </div>
-                  <div class="pl-2 mb-1" style="display:none">
-                    <input type="checkbox" id="steem-account" v-model="steem_account" v-on:change="validateUserName">
-                    <label for="steem-account" class="font-weight-normal ml-1">{{ $t('steem_account_text') }}</label>
-                  </div>
-                  <div class="pl-2 mb-1" v-if="blurt_active">
-                    <input type="checkbox" id="blurt-account" v-model="blurt_account" v-on:change="validateUserName">
-                    <label for="blurt-account" class="font-weight-normal ml-1">{{ $t('blurt_account_text') }}</label>
-                  </div>
-                </div>
-
-                <div class="form-group mb-3">
                   <label for="account-password">{{ $t('Your_Password') }}</label>
-                  <input class="form-control form-control-lg" id="account-password" ref="account-password"
+                  <input class="form-control form-control-lg" id="account-password" ref="account-password" :readonly="!!quote"
                     v-on:change="genPrivKey" />
                   <p class="signup-muted mt-1 mb-1">
                     <i class="fas fa-exclamation-triangle text-warning mr-1"></i>{{ $t('signup.keys_warning') }}
                   </p>
-                  <button v-on:click="setPasswordVal" class="btn btn-brand btn-sm mr-2">{{ $t('Regenerate') }}</button>
+                  <button v-on:click="setPasswordVal" :disabled="!!quote" class="btn btn-brand btn-sm mr-2">{{ $t('Regenerate') }}</button>
                   <button v-on:click="copyContent" data-targetEl="account-password" class="btn btn-brand btn-sm">{{ $t('Copy_Password') }}</button>
                 </div>
 
                 <div class="form-group mb-3">
                   <label for="account-password-confirm">{{ $t('confirm_password_copy') }}</label>
-                  <input class="form-control form-control-lg" id="account-password-confirm" ref="account-password-confirm" />
+                  <input class="form-control form-control-lg" id="account-password-confirm" ref="account-password-confirm" :readonly="!!quote" />
                 </div>
 
                 <div class="form-group mb-3">
@@ -109,7 +91,7 @@
 
                 <div class="form-group mb-0">
                   <label for="account-email">{{ $t('email_optional') }}</label>
-                  <input class="form-control form-control-lg" id="account-email" ref="account-email" v-model="email" />
+                  <input class="form-control form-control-lg" id="account-email" ref="account-email" v-model="email" :readonly="!!quote" />
                 </div>
 
               </div>
@@ -150,12 +132,14 @@
                 <div v-if="!signupAvailable" class="alert alert-warning mb-0" role="alert">{{ $t('signup_unavailable') }}</div>
 
                 <!-- Payment address / memo / amount and the confirm buttons: only while signup works,
-                     so nobody is told where to send funds that cannot be processed -->
+                     so nobody is told where to send funds that cannot be processed. The keys are made
+                     in this browser; only the public keys go to the server, which answers with the
+                     amount and a memo bound to these exact details (actifit-bot signup_with_keys.js). -->
                 <template v-if="signupAvailable">
                 <!-- Promo code toggle -->
                 <div class="form-group mb-3">
                   <div class="custom-control custom-checkbox">
-                    <input type="checkbox" class="custom-control-input" id="promo-code-chkbx" v-model="promo_code_chkbx">
+                    <input type="checkbox" class="custom-control-input" id="promo-code-chkbx" v-model="promo_code_chkbx" :disabled="!!quote">
                     <label class="custom-control-label font-weight-normal" for="promo-code-chkbx">{{ $t('promo_code') }}</label>
                   </div>
                 </div>
@@ -163,78 +147,92 @@
                 <div v-if="promo_code_chkbx" class="form-group mb-3">
                   <label for="promo-code-val">{{ $t('promo_code') }}</label>
                   <input type="text" class="form-control form-control-lg" id="promo-code-val" ref="promo-code-val"
-                    v-model="promo_code_val" />
+                    v-model="promo_code_val" :readonly="!!quote" />
                 </div>
 
                 <div v-else>
                   <div class="form-group mb-3">
-                    <label for="matching-afit">{{ $t('matching_rew_afit') }}</label>
-                    <input type="number" class="form-control form-control-lg" id="matching-afit" ref="matching-afit"
-                      readonly :value="getMatchingAFIT()" />
+                    <label for="invested-crypto">{{ $t('choose_cryto') }}</label>
+                    <select v-model="transferType" id="invested-crypto" name="invested-crypto" :disabled="!!quote"
+                      class="form-control form-control-lg" style="max-width:160px">
+                      <option value="HIVE">{{ $t('HIVE') }}</option>
+                      <option value="HBD">{{ $t('HBD') }}</option>
+                    </select>
                   </div>
 
-                  <div class="form-group mb-3">
-                    <label for="invested-amount">{{ $t('choose_cryto') }}</label>
-                    <div class="input-group">
-                      <input type="number" class="form-control form-control-lg" id="invested-amount" ref="invested-amount"
-                        readonly :value="getMatchingAmount()" />
-                      <select @change="adjustCurrency" id="invested-crypto" name="invested-crypto" ref="invested-crypto"
-                        class="form-control form-control-lg" style="max-width:120px">
-                        <option value="HIVE">{{ $t('HIVE') }}</option>
-                        <option value="HBD">{{ $t('HBD') }}</option>
-                      </select>
-                      <div class="input-group-append">
-                        <button v-on:click="copyContent" data-targetEl="invested-amount" class="btn btn-brand">{{ $t('copy_amount') }}</button>
+                  <!-- Shown only once the server has quoted these exact details -->
+                  <div v-if="quote && quote.amount">
+                    <div class="alert alert-warning small">
+                      <p class="mb-2">{{ $t('swk_keys_first') }}</p>
+                      <button class="btn btn-brand btn-sm" @click="generateAndDownloadFile">
+                        <i class="fas fa-download mr-1"></i>{{ $t('signup.download_keys_backup') }}
+                      </button>
+                    </div>
+
+                    <p class="mb-3">{{ $t('swk_send_exactly').replace('_AMOUNT_', quote.amount).replace('_CUR_', quote.currency) }}</p>
+
+                    <div class="form-group mb-3">
+                      <label for="invested-amount">{{ quote.currency }}</label>
+                      <div class="input-group">
+                        <input class="form-control form-control-lg" id="invested-amount" ref="invested-amount" readonly :value="quote.amount" />
+                        <div class="input-group-append">
+                          <button v-on:click="copyContent" data-targetEl="invested-amount" class="btn btn-brand">{{ $t('copy_amount') }}</button>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <p class="mb-3">{{ $t('notice_send_amount').replace('_CUR_', this.transferType) }}</p>
-
-                  <div class="form-group mb-3">
-                    <label for="actifit-address">{{ $t('Address') }}</label>
-                    <div class="input-group">
-                      <input class="form-control form-control-lg" id="actifit-address" ref="actifit-address" readonly
-                        :value="getTargetAccount()" />
-                      <div class="input-group-append">
-                        <button v-on:click="copyContent" data-targetEl="actifit-address" class="btn btn-brand">{{ $t('Copy_Address') }}</button>
+                    <div class="form-group mb-3">
+                      <label for="actifit-address">{{ $t('Address') }}</label>
+                      <div class="input-group">
+                        <input class="form-control form-control-lg" id="actifit-address" ref="actifit-address" readonly :value="quote.account" />
+                        <div class="input-group-append">
+                          <button v-on:click="copyContent" data-targetEl="actifit-address" class="btn btn-brand">{{ $t('Copy_Address') }}</button>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div class="form-group mb-3">
-                    <label for="actifit-memo">{{ $t('Memo') }}</label>
-                    <div class="input-group">
-                      <input class="form-control form-control-lg" id="actifit-memo" ref="actifit-memo" readonly />
-                      <div class="input-group-append">
-                        <button v-on:click="setMemoValue" class="btn btn-outline-secondary">{{ $t('Regenerate') }}</button>
-                        <button v-on:click="copyContent" data-targetEl="actifit-memo" class="btn btn-brand">{{ $t('Copy_Memo') }}</button>
+                    <div class="form-group mb-3">
+                      <label for="actifit-memo">{{ $t('Memo') }}</label>
+                      <div class="input-group">
+                        <input class="form-control form-control-lg" id="actifit-memo" ref="actifit-memo" readonly :value="quote.memo" />
+                        <div class="input-group-append">
+                          <button v-on:click="copyContent" data-targetEl="actifit-memo" class="btn btn-brand">{{ $t('Copy_Memo') }}</button>
+                        </div>
                       </div>
                     </div>
+
+                    <div class="form-group mb-3" v-if="quote.afit_reward > 0">
+                      <label for="matching-afit">{{ $t('matching_rew_afit') }}</label>
+                      <input class="form-control form-control-lg" id="matching-afit" readonly :value="quote.afit_reward" />
+                    </div>
+
+                    <p class="signup-muted mb-3">{{ $t('send_process_verf') }}</p>
                   </div>
                 </div>
 
-                <p class="signup-muted mb-3" v-if="!promo_code_chkbx">{{ $t('send_process_verf') }}</p>
-                <p class="signup-muted mb-3" v-else>{{ $t('send_process_promo_verf') }}</p>
+                <p class="signup-muted mb-3" v-if="promo_code_chkbx">{{ $t('send_process_promo_verf') }}</p>
 
                 <div class="alert alert-danger py-2" v-if="captcha_invalid">{{ captcha_invalid }}</div>
                 <div class="alert alert-danger py-2" v-if="error_proceeding">{{ error_msg }}</div>
 
                 <div class="text-center">
-                  <button v-on:click="checkFunds" :disabled="checkingFunds" class="btn btn-brand btn-lg w-100" v-if="!promo_code_chkbx">
-                    {{ $t('Steem_sent').replace('_CUR_', this.transferType) }}
+                  <button v-on:click="getQuote" :disabled="quoting" class="btn btn-brand btn-lg w-100" v-if="!promo_code_chkbx && !quote">
+                    {{ $t('swk_continue') }}
                   </button>
-                  <button v-on:click="checkFunds" :disabled="checkingFunds" class="btn btn-brand btn-lg w-100" v-else>
+                  <button v-on:click="checkFunds" :disabled="checkingFunds" class="btn btn-brand btn-lg w-100" v-else-if="!promo_code_chkbx">
+                    {{ $t('Steem_sent') }}
+                  </button>
+                  <button v-on:click="checkFunds" :disabled="checkingFunds || quoting" class="btn btn-brand btn-lg w-100" v-else>
                     {{ $t('create_account') }}
                   </button>
+                  <a href="#" class="d-inline-block mt-2 small" v-if="quote && !checkingFunds && !accountCreated" @click.prevent="editDetails">{{ $t('swk_edit_details') }}</a>
                 </div>
 
                 <!-- Process status -->
                 <div v-if="processStarted" class="text-center text-brand mt-3">
-                  <div id="checking_funds">
-                    <i class="fas fa-spin fa-spinner" v-if="checkingFunds"></i>
-                    <i class="fas fa-check" v-if="!promo_code_chkbx && !checkingFunds"></i>
-                    <span v-if="!promo_code_chkbx"> {{ $t('Check_Steem_Transfer') }}</span>
+                  <div id="checking_funds" v-if="checkingFunds">
+                    <i class="fas fa-spin fa-spinner"></i>
+                    <span v-if="!promo_code_chkbx"> {{ $t('swk_waiting') }}</span>
                   </div>
                   <div id="account_creation" v-if="resultReturned">
                     <div v-if="accountCreated" class="text-left mt-3">
@@ -377,10 +375,7 @@
 <script>
 import NavbarBrand from '~/components/NavbarBrand'
 import Footer from '~/components/Footer'
-import steem from 'steem'
 import hive from '@hiveio/hive-js'
-import blurt from '@blurtfoundation/blurtjs'
-//import VueRecaptcha from 'vue-recaptcha';
 import { VueReCaptcha } from 'vue-recaptcha-v3'
 import { mapGetters } from 'vuex'
 import Vue from 'vue'
@@ -397,6 +392,10 @@ import { SIGNUP_AVAILABLE } from '~/utils/sessionActions'
 // is shown instead - NewFooterDesign.vue shows it on this page.
 Vue.use(VueReCaptcha, { siteKey: process.env.captchaV3Key, loaderOptions: { autoHideBadge: true } })
 
+const KEY_ROLES = ['owner', 'active', 'posting', 'memo']
+//how long the page keeps checking for a payment after "I've sent payment"
+const PAYMENT_WAIT_MS = 20 * 60 * 1000
+
 export default {
   head() {
     return {
@@ -411,33 +410,24 @@ export default {
   components: {
     NavbarBrand,
     Footer,
-    //VueRecaptcha,
   },
   data() {
     return {
-      signupAvailable: SIGNUP_AVAILABLE, //confirmPayment is disabled server side for now
-      targetMemo: '',
+      signupAvailable: SIGNUP_AVAILABLE,
       checkingFunds: false,
       processStarted: false,
       resultReturned: false,
       accountCreated: false,
-      //steemPrice: 0.1,
-      //sbdPrice: 0.1,
-      hivePrice: 0.1,
-      hbdPrice: 1,
       transferType: 'HIVE',//default option
-      minUSD: process.env.minSignupUSDCost,
-      afitPrice: 0.5,
-      maxAfitRewardPerLot: 100,
-      lotSizeUsd: 5,
-      userInputSTEEMAmount: 0,
-      userInputUSDAmount: this.minUSD,
+      //the server's answer for the current details: { fields, memo, amount, currency, account, afit_reward }
+      quote: null,
+      quoting: false,
+      referrer: '',
+      paymentWaitUntil: 0,
+      pollTimer: null,
       username_exists: '',
       username_invalid: '',
-      captchaValid: false,
       captcha_invalid: '',
-      targetAccount: 'actifit.signup',
-      delegatedSteem: 10,
       privatePostKey: '',
       privateActiveKey: '',
       privateOwnerKey: '',
@@ -449,10 +439,6 @@ export default {
       email: '',
       promo_code_chkbx: false,
       promo_code_val: '',
-      hive_account: true,
-      steem_account: false,
-      blurt_account: false,
-      blurt_active: true,
       reg: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/,
       usernameCheckTimer: null
     }
@@ -463,9 +449,12 @@ export default {
     },
     currentStep() {
       if (this.accountCreated) return 3;
-      if (this.processStarted) return 2;
+      if (this.processStarted || this.quote) return 2;
       return 1;
     }
+  },
+  beforeDestroy() {
+    clearTimeout(this.pollTimer);
   },
   async mounted() {
     //warn before the user sends a payment that signup cannot confirm
@@ -481,62 +470,18 @@ export default {
 
     hive.api.setOptions({ url: properNode });
 
-    steem.api.setOptions({ url: process.env.steemApiNode });
-
-    blurt.api.setOptions({ url: process.env.blurtApiNode });
-
-    //check if we need to show blurt signup option
-    if (this.$route.query.chain && this.$route.query.chain == 'hive') {
-      this.blurt_active = false;
-      this.blurt_account = false;
-    }
-
     //if a promo code is available, let's set it accordingly
     if (this.$route.query.promo) {
       this.promo_code_chkbx = true;
       this.promo_code_val = this.$route.query.promo;
     }
 
+    //a referral link with a malformed name is ignored rather than blocking signup
+    const referrer = String(this.$route.query.referrer || '').trim().toLowerCase();
+    if (referrer && hive.utils.validateAccountName(referrer) == null) this.referrer = referrer;
 
-    //grab STEEM price
-    /*fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem&vs_currencies=usd').then(
-    res => {res.json().then(json => this.setSteemPrice (json.steem.usd)).catch(e => reject(e))
-    }).catch(e => reject(e))
-
-    //grab SBD price
-    fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem-dollar&vs_currencies=usd').then(
-    res => {res.json().then(json => this.setSBDPrice (json['steem-dollar'].usd)).catch(e => reject(e))
-    }).catch(e => reject(e))*/
-
-    //grab HIVE price
-    // See VoteModal.vue: CoinGecko's free endpoint now needs a key and returns HTML,
-    // so this silently left the price at its default of 1. Our API reads the chain's
-    // median feed instead; relative path uses the /actifit-api/ proxy.
-    fetch('/actifit-api/hivePrice').then(
-      res => {
-        res.json().then(json => this.setHivePrice(json.hive.usd))
-          .catch(e => console.warn('hive price parse failed', e))
-      }).catch(e => console.warn('hive price fetch failed', e))
-
-    //grab HBD price
-    fetch('https://api.coingecko.com/api/v3/simple/price?ids=hive_dollar&vs_currencies=usd').then(
-      res => {
-        res.json().then(json => this.setHBDPrice(json.hive_dollar.usd)).catch(e => reject(e))
-      }).catch(e => reject(e))
-
-    //grab AFIT price
-
-    fetch(process.env.actiAppUrl + 'curAFITPrice').then(
-      res => {
-        res.json().then(json => this.setAFITPrice(json.unit_price_usd)).catch(e => reject(e))
-      }).catch(e => reject(e))
-
-
-    //setup default STEEM amount
-    this.userInputUSDAmount = this.minUSD;
-
+    //the amount, memo and AFIT reward now come from the server's quote, not from prices read here
     this.setPasswordVal();
-    this.setMemoValue();
 
     // login
     await this.$store.dispatch('steemconnect/login')
@@ -550,7 +495,7 @@ export default {
   methods: {
     generateAndDownloadFile() {
       let content = 'Please keep this file secure and confidential, as it holds information about your private account.';
-      content += '\nUsername:' + this.$refs['account-username'].value;
+      content += '\nUsername:' + this.$refs['account-username'].value.trim().toLowerCase();
       content += '\n# ' + this.$t('Posting_key_desc');
       content += '\nPrivate Posting Key:' + this.privatePostKey;
       content += '\n# ' + this.$t('Active_key_desc');
@@ -582,51 +527,10 @@ export default {
       document.body.removeChild(link);
       URL.revokeObjectURL(blobUrl);
     },
-    adjustCurrency(e) {
-      if (e.target.options.selectedIndex > -1) {
-        this.transferType = e.target.options[e.target.options.selectedIndex].value;
-        //also adjust payment amount
-
-      }
-    },
-    // Restore the functionality of this method to provide content for the modal
-    signupProcessDetails() {
-      return this.$t('signup.desc_part1')
-			+ this.$t('signup.desc_part2') + this.afitTokensToEarn()
-			+ this.$t('signup.desc_part3') + this.delegatedSteem
-			+ this.$t('signup.desc_part3_5') + this.delegatedSteem
-			+ this.$t('signup.desc_part4') + this.minUSD
-			+ this.$t('signup.desc_part5') + this.afitTokensToEarn('100')
-			+ this.$t('signup.desc_part6');
-    },
-    validateUserName() {
-      this.handleUsername(this.$refs['account-username'].value);
-      this.updateMinAmount();
-    },
-    updateMinAmount(){
-      this.userInputUSDAmount = this.blurt_account ? this.minUSD * 2 : this.minUSD;
-    },
-    async checkUserNameAv(testChain, val) {
-      let usernameValid = testChain.utils.validateAccountName(val);
-      //check for error msg
-      if (usernameValid == null) {
-        //ensure no existing account matches same name
-        let result = await testChain.api.getAccountsAsync([val]);
-        console.log(testChain.name);
-        if (result.length > 0) {
-          if (testChain.name == 'Hive') {
-            this.username_exists += 'Username is not available. Please choose a different one.\n';
-          } else {
-            this.username_exists += 'Username is not available on ' + testChain.name + '. Please choose a different one, or deselect ' + testChain.name + ' chain option.';
-          }
-          return false;
-        }
-        return true;
-        //});
-      } else {
-        this.username_invalid = usernameValid;
-        return false;
-      }
+    checkUserNameAv(val) {
+      return hive.api.getAccountsAsync([val]).then((result) => {
+        if (result.length > 0) this.username_exists = 'Username is not available. Please choose a different one.';
+      }).catch(() => {}); //the server checks the name again before quoting
     },
     handleUsername(val) {
       this.username_invalid = '';
@@ -654,105 +558,28 @@ export default {
       clearTimeout(this.usernameCheckTimer);
       if (!val) return;
       this.usernameCheckTimer = setTimeout(async () => {
-        let usAv = true;
-        if (this.hive_account) {
-          hive.name = 'Hive';
-          usAv = await this.checkUserNameAv(hive, val);
-        }
-        if (usAv && this.steem_account) {
-          steem.name = 'Steem';
-          usAv = await this.checkUserNameAv(steem, val);
-        }
-        if (usAv && this.blurt_account) {
-          blurt.name = 'Blurt';
-          usAv = await this.checkUserNameAv(blurt, val);
-        }
+        await this.checkUserNameAv(val);
         this.genPrivKey();
       }, 500);
     },
-    /*setSteemPrice (_steemPrice){
-    this.steemPrice = parseFloat(_steemPrice).toFixed(3);
+    genPrivKey() {
+      const keys = hive.auth.getPrivateKeys(this.$refs["account-username"].value.trim().toLowerCase(), this.$refs["account-password"].value, KEY_ROLES);
+      this.privatePostKey = keys.posting;
+      this.privateActiveKey = keys.active;
+      this.privateOwnerKey = keys.owner;
+      this.privateMemoKey = keys.memo;
     },
-    setSBDPrice (_sbdPrice){
-    this.sbdPrice = parseFloat(_sbdPrice).toFixed(3);
-    },*/
-    setHivePrice(_hivePrice) {
-      this.hivePrice = parseFloat(_hivePrice).toFixed(3);
-    },
-    setHBDPrice(_hbdPrice) {
-      this.hbdPrice = parseFloat(_hbdPrice).toFixed(3);
-    },
-    /*minSteemAmount () {
-    //take into consideration potential charges, and remove 0.1 STEEM for potential transfer loss
-    return parseFloat(this.minUSD / this.steemPrice - 0.1).toFixed(3);
-    },*/
-    setAFITPrice(_afitPrice) {
-      this.afitPrice = parseFloat(_afitPrice).toFixed(6);
-    },
-    afitTokensToEarn(usdInvest) {
-      if (typeof usdInvest == 'undefined' || usdInvest == null || usdInvest == '' || usdInvest == 0) {
-        usdInvest = this.blurt_account ? this.minUSD * 2 : this.minUSD;
-      }
-      console.log("usdInvest"+usdInvest);
-      return parseFloat(usdInvest / this.afitPrice).toFixed(6);
-    },
-    async genPrivKey() {
-      //generate posting key
-      let privateKeys = await hive.auth.getPrivateKeys(this.$refs["account-username"].value.toLowerCase(), this.$refs["account-password"].value);//, ['posting']);
-      this.privatePostKey = privateKeys.posting;
-      this.privateActiveKey = privateKeys.active;
-      this.privateOwnerKey = privateKeys.owner;
-      this.privateMemoKey = privateKeys.memo;
-    },
-    async setPasswordVal() {
+    setPasswordVal() {
       this.$refs["account-password"].value = this.generatePassword(4);
       this.genPrivKey();
-      //this.$refs["posting-key"].value =
     },
     generatePassword(multip) {
-      //generate random 11 characters password
-      let passString = '';
-      for (let i = 0; i < multip; i++) {
-        passString += Math.random().toString(36).substr(2, 13);
-      }
-      return passString;
-    },
-    getTargetAccount() {
-      return this.targetAccount;
-    },
-    getMatchingAFIT() {
-      let matchingAfitAmnt = parseFloat(this.userInputUSDAmount / this.afitPrice);
-      //make sure we only reward max amount per lot
-      let lotCount = Math.floor(this.userInputUSDAmount / this.lotSizeUsd);
-      if (lotCount < 1) {
-        lotCount += 1;
-      }
-      //max amount per lot
-      let maxAfitPerTotLots = this.maxAfitRewardPerLot * lotCount
-      if (matchingAfitAmnt > maxAfitPerTotLots) {
-        matchingAfitAmnt = maxAfitPerTotLots;
-      }
-      return Math.floor(matchingAfitAmnt);
-    },
-    getMatchingAmount() {
-      console.log(this.transferType);
-      /*if (this.transferType == 'STEEM'){
-        return parseFloat(this.userInputUSDAmount / this.steemPrice).toFixed(3);
-      }else*/
-      if (this.transferType == 'HIVE') {
-        return parseFloat(this.userInputUSDAmount / this.hivePrice).toFixed(3);
-      } else if (this.transferType == 'HBD') {
-        return parseFloat(this.userInputUSDAmount / this.hbdPrice).toFixed(3);
-      }
-    },
-    setMemoValue() {
-      const memoEl = this.$refs["actifit-memo"];
-      const memo = this.generateMemo();
-      if (memoEl) memoEl.value = memo; //not rendered while signup is unavailable
-    },
-    generateMemo() {
-      this.targetMemo = "acmm" + this.generatePassword(2);
-      return this.targetMemo;
+      //random characters from the browser's secure generator
+      const alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789';
+      const bytes = new Uint8Array(multip * 13);
+      window.crypto.getRandomValues(bytes);
+      //252 is the largest multiple of 36 below 256: dropping higher bytes keeps every character equally likely
+      return Array.from(bytes).filter((b) => b < 252).map((b) => alphabet[b % 36]).join('');
     },
     copyContent(event) {
       var copyText = this.$refs[event.currentTarget.getAttribute('data-targetEl')];
@@ -760,109 +587,149 @@ export default {
       document.execCommand("copy");
       return;
     },
-    onVerifyCaptcha(response) {
-      this.captchaValid = true;
-    },
-    onExpiredCaptcha() {
-      this.captchaValid = false;
-    },
-    async checkFunds() {
-      //never ask the server to confirm a payment it cannot process
-      if (!this.signupAvailable) return;
-      //one confirmation at a time: a double click must not send two
-      if (this.checkingFunds) return;
-      this.captcha_invalid = '';
-      this.error_proceeding = false;
-      this.error_msg = '';
-
-      let invested_usd = 0;
-      if (!this.promo_code_chkbx) {
-        invested_usd = this.userInputUSDAmount;
+    //Local checks before anything is sent. Returns true when the form is ready.
+    formReady() {
+      const name = this.$refs["account-username"].value;
+      if (this.username_exists || this.username_invalid || name == '') {
+        return this.showSignupError('invalid_username');
       }
-      /*if (!this.captchaValid){
-        this.captcha_invalid = this.$t('solve_captcha');
-        return;
-      }*/
-      if (this.username_exists || this.username_invalid || this.$refs["account-username"].value == '') {
-        this.error_proceeding = true;
-        this.error_msg = this.$t('choose_proper_username');
-        return;
-      }
-      if (this.isEmailValid() != '') {
-        this.error_proceeding = true;
-        this.error_msg = this.$t('invalid_email_format');
-        return;
-      }
+      if (this.isEmailValid() != '') return this.showSignupError('invalid_email');
       //make sure user copied and pasted password
       if (this.$refs["account-password-confirm"].value != this.$refs["account-password"].value) {
         this.error_proceeding = true;
         this.error_msg = this.$t('copy_password_confirm');
-        return;
+        return false;
       }
-
-      if (!this.hive_account && !this.blurt_account) {
-        this.error_proceeding = true;
-        this.error_msg = this.$t('need_hive_account');
-        return;
+      return true;
+    },
+    //What the server binds the memo to. Only the PUBLIC keys leave this page.
+    signupFields() {
+      const new_account = this.$refs["account-username"].value.trim().toLowerCase();
+      const keys = hive.auth.getPrivateKeys(new_account, this.$refs["account-password"].value, KEY_ROLES);
+      const fields = { new_account, sent_cur: this.transferType };
+      for (const role of KEY_ROLES) fields['keys[' + role + ']'] = keys[role + 'Pubkey'];
+      if (this.referrer && this.referrer !== new_account) fields.referrer = this.referrer;
+      const email = String(this.email || '').trim();
+      if (email) fields.email = email;
+      const promo = String(this.promo_code_val || '').trim();
+      if (this.promo_code_chkbx && promo) fields.promo_code = promo;
+      return fields;
+    },
+    //Form-encoded, so the browser sends it straight to the API without a CORS preflight.
+    async postSignup(route, fields) {
+      const res = await fetch(process.env.actiAppUrl + 'app/' + route, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(fields).toString(),
+      });
+      try {
+        return await res.json();
+      } catch (err) {
+        return { reason: 'server_error', retryable: true };
       }
-
-      this.checkingFunds = true;
-      if (!(await this.passSignupCaptcha())) {
-        this.checkingFunds = false;
-        return;
+    },
+    showSignupError(reason) {
+      const msg = {
+        signup_disabled: 'swk_paused',
+        username_taken: 'choose_proper_username',
+        invalid_username: 'choose_proper_username',
+        invalid_email: 'invalid_email_format',
+        promo_invalid: 'swk_promo_invalid',
+        rate_limited: 'swk_rate_limited',
+        payment_insufficient: 'swk_underpaid',
+        payment_pending: 'swk_not_seen_yet',
+      }[reason] || 'swk_try_again';
+      this.error_proceeding = true;
+      this.error_msg = this.$t(msg);
+      return false;
+    },
+    clearErrors() {
+      this.captcha_invalid = '';
+      this.error_proceeding = false;
+      this.error_msg = '';
+    },
+    //Step 1 -> 2: get the amount and the memo for these exact details. Returns true on success.
+    async getQuote() {
+      if (!this.signupAvailable || this.quoting || this.checkingFunds) return false;
+      this.clearErrors();
+      if (!this.formReady()) return false;
+      this.quoting = true;
+      try {
+        if (!(await this.passSignupCaptcha())) return false;
+        let fields = this.signupFields();
+        let out = await this.postSignup('signupQuote', fields);
+        if (out.reason === 'invalid_referrer' && fields.referrer) {
+          //the referral link names an account that does not exist: sign up without it
+          this.referrer = '';
+          fields = this.signupFields();
+          out = await this.postSignup('signupQuote', fields);
+        }
+        const amount = out.amounts && out.amounts[fields.sent_cur];
+        if (out.reason !== 'quoted' || !out.memo || (!fields.promo_code && !(amount && out.signup_account))) {
+          if (out.reason === 'quoted') return this.showSignupError('server_error');
+          if (out.reason === 'username_taken') this.username_exists = this.$t('choose_proper_username');
+          return this.showSignupError(out.reason);
+        }
+        this.quote = {
+          fields, memo: out.memo, amount: amount || '', currency: fields.sent_cur,
+          account: out.signup_account || '', afit_reward: out.afit_reward || 0,
+        };
+        return true;
+      } catch (err) {
+        return this.showSignupError('server_error');
+      } finally {
+        this.quoting = false;
       }
-
-      //to prevent tampering with STEEM and AFIT values
-      const steem_invest = this.getMatchingAmount();
-      const afit_reward = this.getMatchingAFIT();
+    },
+    //Back to step 1: only safe before paying, since the memo belongs to the old details.
+    editDetails() {
+      if (this.checkingFunds) return;
+      this.quote = null;
+      this.processStarted = false;
+      this.resultReturned = false;
+      this.clearErrors();
+    },
+    //"I've sent payment" (paid) or "Create Account" (promo): ask the server to create the account.
+    async checkFunds() {
+      //never ask the server to create an account while signup is switched off
+      if (!this.signupAvailable) return;
+      //one request at a time: a double click must not send two
+      if (this.checkingFunds || this.quoting) return;
+      this.clearErrors();
+      //a promo signup has no payment step: quote and submit in one click
+      if (!this.quote && !(this.promo_code_chkbx && (await this.getQuote()))) return;
       this.checkingFunds = true;
       this.processStarted = true;
-      //compile all needed data and send it along the request for processing
-      let params = {
-        new_account: this.$refs["account-username"].value.toLowerCase(),
-        new_pass: this.$refs["account-password"].value,
-        usd_invest: invested_usd,
-        steem_invest: steem_invest,
-        sent_cur: this.transferType,
-        afit_reward: afit_reward,
-        memo: this.targetMemo,
-        referrer: this.$route.query.referrer,
-        email: this.$refs["account-email"].value,
-        promo_code: this.promo_code_val,
-        //cur_bchain: 'HIVE',
-      }
-      params['cur_bchain'] = '';
-      if (this.hive_account) {
-        params['cur_bchain'] += 'HIVE|';
-      }
-      if (this.steem_account) {
-        params['cur_bchain'] += 'STEEM|';
-      }
-      if (this.blurt_account) {
-        params['cur_bchain'] += 'BLURT';
-      }
-
-      const requestUrl = '/api/proxy/confirmPayment';
+      this.resultReturned = false;
+      this.paymentWaitUntil = Date.now() + PAYMENT_WAIT_MS;
+      await this.submitSignup();
+    },
+    async submitSignup() {
+      if (this._isDestroyed || !this.quote) return;
+      let out;
       try {
-        let res = await fetch(requestUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(params),
-        });
-        let outcome = await res.json();
-        this.checkingFunds = false;
-        this.accountCreated = outcome.accountCreated;
-        this.resultReturned = true;
-
-        let privateKeys = await hive.auth.getPrivateKeys(this.$refs["account-username"].value.toLowerCase(), this.$refs["account-password"].value);//, ['posting']);
-        this.privatePostKey = privateKeys.posting;
-        this.privateActiveKey = privateKeys.active;
-        this.privateOwnerKey = privateKeys.owner;
-        this.privateMemoKey = privateKeys.memo;
+        out = await this.postSignup('signupWithKeys', Object.assign({}, this.quote.fields, { memo: this.quote.memo }));
       } catch (err) {
-        console.error(err);
-        this.checkingFunds = false;
+        out = { reason: 'server_error', retryable: true };
       }
+      if (out.accountCreated) {
+        this.checkingFunds = false;
+        this.accountCreated = true;
+        this.resultReturned = true;
+        return;
+      }
+      //payment not seen yet, or a passing server problem: check again shortly
+      const wait = Number(out.retry_after) > 0 ? Number(out.retry_after) : 10;
+      if (out.retryable && wait <= 60 && Date.now() + wait * 1000 < this.paymentWaitUntil) {
+        this.pollTimer = setTimeout(() => this.submitSignup(), wait * 1000);
+        return;
+      }
+      this.checkingFunds = false;
+      this.showSignupError(out.reason);
+      //a final failure after paying needs support (refund): show how to reach them
+      //a wrong promo code frees these details on the server: let the user fix the code
+      if (out.reason === 'promo_invalid') this.quote = null;
+      else if (!out.retryable) this.resultReturned = true;
     },
     //Gets a reCAPTCHA v3 token and has the server check it. Returns true when signup may go on.
     async passSignupCaptcha() {
@@ -892,13 +759,13 @@ export default {
         const res = await fetch(process.env.actiAppUrl + 'verifyLoginCaptcha?token=' + encodeURIComponent(token));
         outcome = await res.json();
       } catch (err) {
-        //our server did not answer; confirmPayment will report that itself
+        //our server did not answer; the quote request will report that itself
         return true;
       }
       if (outcome && outcome.success) return true;
       //stop only when the token itself was bad (expired, reused or not ours): a new click
       //gets a new token. Other answers (our server cannot reach Google, a broken secret or
-      //site key) are not the user's fault and retrying would not help; confirmPayment decides.
+      //site key) are not the user's fault and retrying would not help.
       const reason = String((outcome && outcome.reason) || '');
       if (!/timeout-or-duplicate|invalid-input-response/.test(reason)) return true;
       this.error_proceeding = true;
