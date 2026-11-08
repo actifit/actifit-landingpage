@@ -309,9 +309,13 @@ describe('page source', () => {
   })
   test('the details are locked once quoted, so the memo always matches what is shown', () => {
     for (const id of ['account-username', 'account-password', 'account-password-confirm', 'account-email']) {
-      expect(src).toMatch(new RegExp('id="' + id + '"[^>]*:readonly="!!quote"'))
+      // also while the quote is in flight: an edit then would send keys the user does not have
+      expect(src).toMatch(new RegExp('id="' + id + '"[^>]*:readonly="!!quote \\|\\| quoting"'))
     }
-    expect(src).toMatch(/id="invested-crypto"[^>]*:disabled="!!quote"/)
+    expect(src).toMatch(/id="invested-crypto"[^>]*:disabled="!!quote \|\| quoting"/)
+    expect(src).toMatch(/id="promo-code-chkbx"[^>]*:disabled="!!quote \|\| quoting"/)
+    expect(src).toMatch(/id="promo-code-val"[^>]*:readonly="!!quote \|\| quoting"/)
+    expect(src).toMatch(/v-on:click="setPasswordVal" :disabled="!!quote \|\| quoting"/)
   })
   test('every locale has every new message', () => {
     const keys = [...new Set(src.match(/swk_[a-z_]+/g))]
@@ -396,5 +400,59 @@ describe('review round 1 fixes', () => {
     expect(blob).toContain('Amount:8.334 HBD')
     expect(blob).toContain('Send to:actifit.signup')
     expect(blob).toContain('Referrer:mcfarhat')
+  })
+})
+
+describe('review round 2 fixes', () => {
+  const realFetch = global.fetch
+  afterEach(() => { global.fetch = realFetch })
+
+  test('promo daily cap: a promo user (who paid nothing) sees "paused", a paid user "not seen yet"', async () => {
+    for (const [promo, msg] of [[true, 'swk_paused'], [false, 'swk_not_seen_yet']]) {
+      global.fetch = answers({ accountCreated: false, reason: 'signup_disabled', retryable: true, retry_after: 3600 })
+      const vm = makeVm({ promo_code_chkbx: promo, promo_code_val: 'X', quote: { fields: {}, memo: QUOTED.memo } })
+      await vm.checkFunds()
+      expect([promo, vm.error_msg]).toEqual([promo, msg])
+    }
+  })
+
+  test('the backup names the quoted account, not whatever the input holds now', () => {
+    let blob
+    const realBlob = global.Blob
+    global.Blob = function (parts) { blob = parts.join('') }
+    URL.createObjectURL = () => 'blob:x'
+    URL.revokeObjectURL = () => {}
+    try {
+      const vm = makeVm({ quote: { fields: { new_account: 'quotedname' }, memo: QUOTED.memo } })
+      vm.$refs['account-username'] = field('typedlater')
+      vm.generateAndDownloadFile()
+    } finally { global.Blob = realBlob }
+    expect(blob).toContain('Username:quotedname')
+  })
+
+  test('no create/sent button is rendered once the account exists, in either mode', () => {
+    const compiler = require('vue-template-compiler')
+    const src = fs.readFileSync(path.join(ROOT, 'pages/signup.vue'), 'utf8')
+    const tpl = src.slice(src.indexOf('<template>') + 10, src.lastIndexOf('</template>', src.indexOf('<script>')))
+    const { render, staticRenderFns } = compiler.compileToFunctions(tpl)
+    const Vue = require('vue').default || require('vue')
+    for (const promo of [false, true]) {
+      const vm = new Vue({
+        render, staticRenderFns,
+        components: { NavbarBrand: { render: (h) => h('div') }, Footer: { render: (h) => h('div') } },
+        data: () => ({
+          signupAvailable: true, accountCreated: true, resultReturned: true, processStarted: true, checkingFunds: false,
+          quoting: false, paymentSent: true, promo_code_chkbx: promo, promo_code_val: 'X', transferType: 'HIVE',
+          quote: { fields: {}, memo: QUOTED.memo, amount: promo ? '' : '8.334', currency: 'HIVE', account: 'actifit.signup', afit_reward: 0 },
+          username_invalid: '', username_exists: '', recaptchaUnavailable: false, captcha_invalid: '', error_proceeding: false, error_msg: '',
+          email: '', privatePostKey: 'k', currentStep: 3,
+        }),
+        methods: Object.fromEntries(Object.keys(methods).map((m) => [m, () => {}]).concat([['$t', (k) => k]])),
+      }).$mount()
+      const html = vm.$el.outerHTML
+      expect([promo, html.includes('Steem_sent'), html.includes('>create_account') || /\s+create_account\s+<\/button>/.test(html), html.includes('actifit-memo')])
+        .toEqual([promo, false, false, false])
+      expect(html).toContain('account_created_success')
+    }
   })
 })

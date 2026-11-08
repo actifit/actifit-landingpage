@@ -56,7 +56,7 @@
 
                 <div class="form-group mb-3">
                   <label for="account-username">{{ $t('Pick_Username') }}</label>
-                  <input class="form-control form-control-lg" ref="account-username" id="account-username" :readonly="!!quote"
+                  <input class="form-control form-control-lg" ref="account-username" id="account-username" :readonly="!!quote || quoting"
                     @input="handleUsername($event.target.value.toLowerCase())" />
                   <p class="text-brand mt-1 mb-0" v-if="username_invalid"><b>{{ username_invalid }}</b></p>
                   <p class="text-brand mt-1 mb-0" v-if="username_exists"><b>{{ username_exists }}</b></p>
@@ -64,18 +64,18 @@
 
                 <div class="form-group mb-3">
                   <label for="account-password">{{ $t('Your_Password') }}</label>
-                  <input class="form-control form-control-lg" id="account-password" ref="account-password" :readonly="!!quote"
+                  <input class="form-control form-control-lg" id="account-password" ref="account-password" :readonly="!!quote || quoting"
                     v-on:change="genPrivKey" />
                   <p class="signup-muted mt-1 mb-1">
                     <i class="fas fa-exclamation-triangle text-warning mr-1"></i>{{ $t('signup.keys_warning') }}
                   </p>
-                  <button v-on:click="setPasswordVal" :disabled="!!quote" class="btn btn-brand btn-sm mr-2">{{ $t('Regenerate') }}</button>
+                  <button v-on:click="setPasswordVal" :disabled="!!quote || quoting" class="btn btn-brand btn-sm mr-2">{{ $t('Regenerate') }}</button>
                   <button v-on:click="copyContent" data-targetEl="account-password" class="btn btn-brand btn-sm">{{ $t('Copy_Password') }}</button>
                 </div>
 
                 <div class="form-group mb-3">
                   <label for="account-password-confirm">{{ $t('confirm_password_copy') }}</label>
-                  <input class="form-control form-control-lg" id="account-password-confirm" ref="account-password-confirm" :readonly="!!quote" />
+                  <input class="form-control form-control-lg" id="account-password-confirm" ref="account-password-confirm" :readonly="!!quote || quoting" />
                 </div>
 
                 <div class="form-group mb-3">
@@ -91,7 +91,7 @@
 
                 <div class="form-group mb-0">
                   <label for="account-email">{{ $t('email_optional') }}</label>
-                  <input class="form-control form-control-lg" id="account-email" ref="account-email" v-model="email" :readonly="!!quote" />
+                  <input class="form-control form-control-lg" id="account-email" ref="account-email" v-model="email" :readonly="!!quote || quoting" />
                 </div>
 
               </div>
@@ -139,7 +139,7 @@
                 <!-- Promo code toggle -->
                 <div class="form-group mb-3">
                   <div class="custom-control custom-checkbox">
-                    <input type="checkbox" class="custom-control-input" id="promo-code-chkbx" v-model="promo_code_chkbx" :disabled="!!quote">
+                    <input type="checkbox" class="custom-control-input" id="promo-code-chkbx" v-model="promo_code_chkbx" :disabled="!!quote || quoting">
                     <label class="custom-control-label font-weight-normal" for="promo-code-chkbx">{{ $t('promo_code') }}</label>
                   </div>
                 </div>
@@ -147,13 +147,13 @@
                 <div v-if="promo_code_chkbx" class="form-group mb-3">
                   <label for="promo-code-val">{{ $t('promo_code') }}</label>
                   <input type="text" class="form-control form-control-lg" id="promo-code-val" ref="promo-code-val"
-                    v-model="promo_code_val" :readonly="!!quote" />
+                    v-model="promo_code_val" :readonly="!!quote || quoting" />
                 </div>
 
                 <div v-else>
                   <div class="form-group mb-3">
                     <label for="invested-crypto">{{ $t('choose_cryto') }}</label>
-                    <select v-model="transferType" id="invested-crypto" name="invested-crypto" :disabled="!!quote"
+                    <select v-model="transferType" id="invested-crypto" name="invested-crypto" :disabled="!!quote || quoting"
                       class="form-control form-control-lg" style="max-width:160px">
                       <option value="HIVE">{{ $t('HIVE') }}</option>
                       <option value="HBD">{{ $t('HBD') }}</option>
@@ -222,7 +222,7 @@
                   <button v-on:click="checkFunds" :disabled="checkingFunds" class="btn btn-brand btn-lg w-100" v-else-if="!promo_code_chkbx && !accountCreated">
                     {{ $t('Steem_sent') }}
                   </button>
-                  <button v-on:click="checkFunds" :disabled="checkingFunds || quoting" class="btn btn-brand btn-lg w-100" v-else>
+                  <button v-on:click="checkFunds" :disabled="checkingFunds || quoting" class="btn btn-brand btn-lg w-100" v-else-if="!accountCreated">
                     {{ $t('create_account') }}
                   </button>
                   <a href="#" class="d-inline-block mt-2 small" v-if="quote && !paymentSent && !checkingFunds && !accountCreated" @click.prevent="editDetails">{{ $t('swk_edit_details') }}</a>
@@ -497,7 +497,7 @@ export default {
   methods: {
     generateAndDownloadFile() {
       let content = 'Please keep this file secure and confidential, as it holds information about your private account.';
-      content += '\nUsername:' + this.$refs['account-username'].value.trim().toLowerCase();
+      content += '\nUsername:' + (this.quote ? this.quote.fields.new_account : this.$refs['account-username'].value.trim().toLowerCase());
       content += '\n# ' + this.$t('Posting_key_desc');
       content += '\nPrivate Posting Key:' + this.privatePostKey;
       content += '\n# ' + this.$t('Active_key_desc');
@@ -747,8 +747,8 @@ export default {
         return;
       }
       this.checkingFunds = false;
-      //switched off after the user may have paid: "don't send any payment" would be wrong here
-      this.showSignupError(out.reason === 'signup_disabled' ? 'payment_pending' : out.reason);
+      //switched off after a paid user may have paid: "don't send any payment" would be wrong there
+      this.showSignupError(out.reason === 'signup_disabled' && !this.promo_code_chkbx ? 'payment_pending' : out.reason);
       //a final failure after paying needs support (refund): show how to reach them
       //a wrong promo code frees these details on the server: let the user fix the code
       if (out.reason === 'promo_invalid') { this.quote = null; this.paymentSent = false; }
