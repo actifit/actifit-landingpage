@@ -1495,6 +1495,7 @@ module.exports = {
   Withdraw_token: "トークンを引き出す",
   afit_transfer_error: "AFITの送金に失敗しました。もう一度お試しください。",
   captcha_invalid: "キャプチャが無効です。もう一度お試しください。",
+  captcha_unavailable: "登録には Google reCAPTCHA が必要ですが、ブラウザがブロックしています。google.com/recaptcha を許可し(例: このページで Brave Shields や広告ブロッカーをオフにする)、支払いを送る前にページを再読み込みしてください。",
   hive_withdraw_progress: "出金処理中",
   invalid_username: "無効なユーザー名です。",
   max_amount_AFIT: "金額が上限を超えています。",

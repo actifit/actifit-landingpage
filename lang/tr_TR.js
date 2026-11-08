@@ -1495,6 +1495,7 @@ module.exports = {
   Withdraw_token: "Token çek",
   afit_transfer_error: "AFIT transferi başarısız oldu. Lütfen tekrar deneyin.",
   captcha_invalid: "Geçersiz captcha. Lütfen tekrar deneyin.",
+  captcha_unavailable: "Kayıt için Google reCAPTCHA gerekiyor ve tarayıcınız onu engelliyor. google.com/recaptcha'ya izin verin (örneğin bu sayfa için Brave Shields'ı veya reklam engelleyiciyi kapatın) ve ödeme göndermeden önce sayfayı yenileyin.",
   hive_withdraw_progress: "Para çekme işlemi sürüyor",
   max_amount_AFIT: "Tutar izin verilen maksimumu aşıyor.",
   min_amount_AFIT: "Tutar izin verilen minimumun altında.",

@@ -1497,6 +1497,7 @@ module.exports = {
   Withdraw_token: "Retirer le token",
   afit_transfer_error: "Échec du transfert AFIT. Veuillez réessayer.",
   captcha_invalid: "Captcha non valide. Veuillez réessayer.",
+  captcha_unavailable: "L'inscription nécessite Google reCAPTCHA, et votre navigateur le bloque. Autorisez google.com/recaptcha (par exemple, désactivez Brave Shields ou votre bloqueur de publicités pour cette page) et rechargez avant d'envoyer un paiement.",
   hive_withdraw_progress: "Retrait en cours",
   invalid_username: "Nom d’utilisateur non valide.",
   max_amount_AFIT: "Le montant dépasse le maximum autorisé.",

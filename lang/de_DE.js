@@ -1495,6 +1495,7 @@ module.exports = {
   Withdraw_token: "Token abheben",
   afit_transfer_error: "AFIT-Übertragung fehlgeschlagen. Bitte versuche es erneut.",
   captcha_invalid: "Ungültiges Captcha. Bitte versuche es erneut.",
+  captcha_unavailable: "Für die Registrierung wird Google reCAPTCHA benötigt, und dein Browser blockiert es. Erlaube google.com/recaptcha (zum Beispiel Brave Shields oder den Werbeblocker für diese Seite ausschalten) und lade die Seite neu, bevor du eine Zahlung sendest.",
   hive_withdraw_progress: "Abhebung läuft",
   max_amount_AFIT: "Betrag überschreitet das erlaubte Maximum.",
   min_amount_AFIT: "Betrag liegt unter dem erlaubten Minimum.",
