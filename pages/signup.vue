@@ -122,7 +122,7 @@
                 <strong>{{ $t('signup.step2') }}</strong>
               </div>
               <div class="card-body">
-                <div class="alert alert-warning py-2" v-if="recaptchaUnavailable">{{ $t('captcha_unavailable') }}</div>
+                <div class="alert alert-warning py-2" role="alert" v-if="recaptchaUnavailable">{{ $t('captcha_unavailable') }}</div>
 
                 <!-- Fee explanation micro-card -->
                 <div class="card signup-fee-card mb-3">
@@ -468,7 +468,8 @@ export default {
     }
   },
   async mounted() {
-
+    //warn before the user sends a payment that signup cannot confirm
+    this.$recaptchaLoaded().catch(() => { this.recaptchaUnavailable = true })
 
     //rely on HIVE node
     let properNode = process.env.hiveApiNode;
@@ -544,12 +545,6 @@ export default {
     this.$store.dispatch('fetchUserRank')
     this.$store.dispatch('fetchReferrals')
 
-    try {
-      await this.$recaptchaLoaded()
-    } catch (err) {
-      //warn before the user sends a payment that signup cannot confirm
-      this.recaptchaUnavailable = true
-    }
 
   },
   methods: {
@@ -774,6 +769,8 @@ export default {
     async checkFunds() {
       //never ask the server to confirm a payment it cannot process
       if (!this.signupAvailable) return;
+      //one confirmation at a time: a double click must not send two
+      if (this.checkingFunds) return;
       this.captcha_invalid = '';
       this.error_proceeding = false;
       this.error_msg = '';
@@ -809,7 +806,11 @@ export default {
         return;
       }
 
-      if (!(await this.passSignupCaptcha())) return;
+      this.checkingFunds = true;
+      if (!(await this.passSignupCaptcha())) {
+        this.checkingFunds = false;
+        return;
+      }
 
       //to prevent tampering with STEEM and AFIT values
       const steem_invest = this.getMatchingAmount();
@@ -874,10 +875,15 @@ export default {
       //the plugin only defines $recaptcha once Google's script has loaded
       if (typeof this.$recaptcha !== 'function') return unavailable();
       let token;
+      let timer;
       try {
-        token = await this.$recaptcha('signup');
+        //a dropped request to Google can leave this pending forever
+        const timeout = new Promise((resolve) => { timer = setTimeout(() => resolve(null), 15000); });
+        token = await Promise.race([this.$recaptcha('signup'), timeout]);
       } catch (err) {
         return unavailable();
+      } finally {
+        clearTimeout(timer);
       }
       if (!token) return unavailable();
 
@@ -890,8 +896,11 @@ export default {
         return true;
       }
       if (outcome && outcome.success) return true;
-      //our server could not reach Google: not the user's fault
-      if (outcome && outcome.reason === 'verify-unreachable') return true;
+      //stop only when the token itself was bad (expired, reused or not ours): a new click
+      //gets a new token. Other answers (our server cannot reach Google, a broken secret or
+      //site key) are not the user's fault and retrying would not help; confirmPayment decides.
+      const reason = String((outcome && outcome.reason) || '');
+      if (!/timeout-or-duplicate|invalid-input-response/.test(reason)) return true;
       this.error_proceeding = true;
       this.error_msg = this.$t('captcha_invalid');
       return false;

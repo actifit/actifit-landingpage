@@ -59,6 +59,38 @@ describe('signup passSignupCaptcha', () => {
     expect(vm.error_msg).toBe('captcha_invalid')
   })
 
+  test('a broken secret or site key on our side does not block paying users', async () => {
+    for (const reason of ['invalid-input-secret', 'hostname-mismatch', 'bad-request', 'unknown']) {
+      global.fetch = answer({ error: 'error', reason })
+      const vm = makeVm({ $recaptcha: jest.fn().mockResolvedValue('tok') })
+      await expect(methods.passSignupCaptcha.call(vm)).resolves.toBe(true)
+    }
+  })
+
+  test('an expired, reused or foreign token stops signup (a new click gets a new token)', async () => {
+    for (const reason of ['timeout-or-duplicate', 'invalid-input-response']) {
+      global.fetch = answer({ error: 'error', reason })
+      const vm = makeVm({ $recaptcha: jest.fn().mockResolvedValue('tok') })
+      await expect(methods.passSignupCaptcha.call(vm)).resolves.toBe(false)
+      expect(vm.error_msg).toBe('captcha_invalid')
+    }
+  })
+
+  test('a token that never arrives times out after 15s as unavailable', async () => {
+    jest.useFakeTimers()
+    try {
+      global.fetch = jest.fn()
+      const vm = makeVm({ $recaptcha: jest.fn(() => new Promise(() => {})) })
+      const result = methods.passSignupCaptcha.call(vm)
+      jest.advanceTimersByTime(15000)
+      await expect(result).resolves.toBe(false)
+      expect(vm.error_msg).toBe('captcha_unavailable')
+      expect(global.fetch).not.toHaveBeenCalled()
+    } finally {
+      jest.useRealTimers()
+    }
+  })
+
   test('our server cannot reach Google, or does not answer: not the user\'s fault, signup goes on', async () => {
     global.fetch = answer({ error: 'error', reason: 'verify-unreachable' })
     let vm = makeVm({ $recaptcha: jest.fn().mockResolvedValue('tok') })
@@ -85,6 +117,16 @@ describe('signup warns before payment when reCAPTCHA cannot load', () => {
     global.fetch = jest.fn(() => new Promise(() => {}))
     const vm = pageVm(jest.fn().mockRejectedValue(new Error('blocked')))
     await expect(mounted.call(vm)).resolves.toBeUndefined()
+    await new Promise((r) => setTimeout(r, 0))
+    expect(vm.recaptchaUnavailable).toBe(true)
+  })
+
+  test('the warning does not wait for login, so it shows even if login fails', async () => {
+    global.fetch = jest.fn(() => new Promise(() => {}))
+    const vm = pageVm(jest.fn().mockRejectedValue(new Error('blocked')))
+    vm.$store.dispatch = jest.fn().mockRejectedValue(new Error('login failed'))
+    await expect(mounted.call(vm)).rejects.toThrow('login failed')
+    await new Promise((r) => setTimeout(r, 0))
     expect(vm.recaptchaUnavailable).toBe(true)
   })
 
@@ -92,6 +134,7 @@ describe('signup warns before payment when reCAPTCHA cannot load', () => {
     global.fetch = jest.fn(() => new Promise(() => {}))
     const vm = pageVm(jest.fn().mockResolvedValue(true))
     await mounted.call(vm)
+    await new Promise((r) => setTimeout(r, 0))
     expect(vm.recaptchaUnavailable).toBe(false)
   })
 
@@ -103,5 +146,51 @@ describe('signup warns before payment when reCAPTCHA cannot load', () => {
     for (const f of fs.readdirSync(langDir).filter((f) => f.endsWith('.js'))) {
       expect([f, /captcha_unavailable: "/.test(fs.readFileSync(path.join(langDir, f), 'utf8'))]).toEqual([f, true])
     }
+  })
+})
+
+describe('signup checkFunds and the captcha', () => {
+  const realFetch = global.fetch
+  afterEach(() => { global.fetch = realFetch })
+  const field = (value) => ({ value })
+  const formVm = (passSignupCaptcha) => makeVm({
+    signupAvailable: true,
+    checkingFunds: false,
+    processStarted: false,
+    promo_code_chkbx: false,
+    hive_account: true,
+    $refs: {
+      'account-username': field('newbie'),
+      'account-password': field('pw'),
+      'account-password-confirm': field('pw'),
+      'account-email': field(''),
+    },
+    $route: { query: {} },
+    isEmailValid: () => '',
+    getMatchingAmount: () => 1,
+    getMatchingAFIT: () => 1,
+    passSignupCaptcha,
+  })
+  const confirmCalls = () => global.fetch.mock.calls.filter(([u]) => String(u).includes('confirmPayment'))
+
+  test('a failed captcha never reaches confirmPayment and frees the button', async () => {
+    global.fetch = jest.fn()
+    const vm = formVm(jest.fn().mockResolvedValue(false))
+    await methods.checkFunds.call(vm)
+    expect(confirmCalls()).toHaveLength(0)
+    expect(vm.checkingFunds).toBe(false)
+    expect(vm.processStarted).toBe(false)
+  })
+
+  test('a double click sends one confirmation, not two', async () => {
+    let pass
+    const vm = formVm(jest.fn(() => new Promise((r) => { pass = r })))
+    global.fetch = jest.fn(() => new Promise(() => {}))
+    methods.checkFunds.call(vm)
+    await methods.checkFunds.call(vm)
+    pass(true)
+    await new Promise((r) => setTimeout(r, 0))
+    expect(vm.passSignupCaptcha).toHaveBeenCalledTimes(1)
+    expect(confirmCalls()).toHaveLength(1)
   })
 })
