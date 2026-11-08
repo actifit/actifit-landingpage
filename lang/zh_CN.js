@@ -1496,6 +1496,7 @@ module.exports = {
   Withdraw_token: "提取代币",
   afit_transfer_error: "AFIT 转账失败，请重试。",
   captcha_invalid: "验证码无效，请重试。",
+  captcha_unavailable: "注册需要 Google reCAPTCHA,但您的浏览器正在阻止它。请允许 google.com/recaptcha(例如为此页面关闭 Brave Shields 或广告拦截器),并在发送任何付款之前重新加载页面。",
   hive_withdraw_progress: "提现处理中",
   max_amount_AFIT: "金额超过允许的最大值。",
   min_amount_AFIT: "金额低于允许的最小值。",

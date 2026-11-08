@@ -122,6 +122,7 @@
                 <strong>{{ $t('signup.step2') }}</strong>
               </div>
               <div class="card-body">
+                <div class="alert alert-warning py-2" v-if="recaptchaUnavailable">{{ $t('captcha_unavailable') }}</div>
 
                 <!-- Fee explanation micro-card -->
                 <div class="card signup-fee-card mb-3">
@@ -443,6 +444,8 @@ export default {
       privateMemoKey: '',
       error_proceeding: '',
       error_msg: '',
+      //reCAPTCHA could not load (blocked by the browser, an extension or the network)
+      recaptchaUnavailable: false,
       email: '',
       promo_code_chkbx: false,
       promo_code_val: '',
@@ -541,7 +544,12 @@ export default {
     this.$store.dispatch('fetchUserRank')
     this.$store.dispatch('fetchReferrals')
 
-    await this.$recaptchaLoaded()
+    try {
+      await this.$recaptchaLoaded()
+    } catch (err) {
+      //warn before the user sends a payment that signup cannot confirm
+      this.recaptchaUnavailable = true
+    }
 
   },
   methods: {
@@ -801,23 +809,7 @@ export default {
         return;
       }
 
-      //verify captcha
-      //check captcha V3
-      // Execute reCAPTCHA with action "login".
-
-      const token = await this.$recaptcha('signup')
-
-      //verify recaptcha-v3
-
-      let outc = await fetch(process.env.actiAppUrl + 'verifyLoginCaptcha?token=' + token);
-      console.log(outc);
-      //let outc = await outc.json();
-
-      if (outc.error) {
-        this.error_proceeding = true;
-        this.error_msg = this.$t('captcha_invalid');
-        return;
-      }
+      if (!(await this.passSignupCaptcha())) return;
 
       //to prevent tampering with STEEM and AFIT values
       const steem_invest = this.getMatchingAmount();
@@ -870,6 +862,39 @@ export default {
         console.error(err);
         this.checkingFunds = false;
       }
+    },
+    //Gets a reCAPTCHA v3 token and has the server check it. Returns true when signup may go on.
+    async passSignupCaptcha() {
+      const unavailable = () => {
+        this.recaptchaUnavailable = true;
+        this.error_proceeding = true;
+        this.error_msg = this.$t('captcha_unavailable');
+        return false;
+      };
+      //the plugin only defines $recaptcha once Google's script has loaded
+      if (typeof this.$recaptcha !== 'function') return unavailable();
+      let token;
+      try {
+        token = await this.$recaptcha('signup');
+      } catch (err) {
+        return unavailable();
+      }
+      if (!token) return unavailable();
+
+      let outcome;
+      try {
+        const res = await fetch(process.env.actiAppUrl + 'verifyLoginCaptcha?token=' + encodeURIComponent(token));
+        outcome = await res.json();
+      } catch (err) {
+        //our server did not answer; confirmPayment will report that itself
+        return true;
+      }
+      if (outcome && outcome.success) return true;
+      //our server could not reach Google: not the user's fault
+      if (outcome && outcome.reason === 'verify-unreachable') return true;
+      this.error_proceeding = true;
+      this.error_msg = this.$t('captcha_invalid');
+      return false;
     },
     isEmailValid: function () {
       return (this.email == "") ? "" : (this.reg.test(this.email)) ? '' : 'has-error';

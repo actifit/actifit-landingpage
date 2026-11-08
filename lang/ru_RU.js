@@ -1495,6 +1495,7 @@ module.exports = {
   Withdraw_token: "Вывести токен",
   afit_transfer_error: "Не удалось перевести AFIT. Попробуйте ещё раз.",
   captcha_invalid: "Неверная капча. Попробуйте ещё раз.",
+  captcha_unavailable: "Для регистрации нужен Google reCAPTCHA, а ваш браузер его блокирует. Разрешите google.com/recaptcha (например, отключите Brave Shields или блокировщик рекламы для этой страницы) и перезагрузите страницу, прежде чем отправлять оплату.",
   hive_withdraw_progress: "Вывод выполняется",
   max_amount_AFIT: "Сумма превышает допустимый максимум.",
   min_amount_AFIT: "Сумма меньше допустимого минимума.",

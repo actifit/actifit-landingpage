@@ -1495,6 +1495,7 @@ module.exports = {
   Withdraw_token: "سحب الرمز",
   afit_transfer_error: "فشل تحويل AFIT. يرجى المحاولة مرة أخرى.",
   captcha_invalid: "رمز التحقق غير صالح. يرجى المحاولة مرة أخرى.",
+  captcha_unavailable: "يتطلب التسجيل خدمة Google reCAPTCHA، ومتصفحك يحظرها. اسمح بـ google.com/recaptcha (مثلاً أوقف Brave Shields أو مانع الإعلانات لهذه الصفحة) ثم أعد تحميل الصفحة قبل إرسال أي دفعة.",
   hive_withdraw_progress: "جارٍ السحب",
   max_amount_AFIT: "المبلغ يتجاوز الحد الأقصى المسموح به.",
   min_amount_AFIT: "المبلغ أقل من الحد الأدنى المسموح به.",

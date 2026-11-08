@@ -1497,6 +1497,7 @@ module.exports = {
   Withdraw_token: "टोकन निकालें",
   afit_transfer_error: "AFIT ट्रांसफर विफल रहा। कृपया पुनः प्रयास करें।",
   captcha_invalid: "अमान्य कैप्चा। कृपया पुनः प्रयास करें।",
+  captcha_unavailable: "साइनअप के लिए Google reCAPTCHA ज़रूरी है, और आपका ब्राउज़र इसे ब्लॉक कर रहा है। google.com/recaptcha को अनुमति दें (जैसे इस पेज के लिए Brave Shields या ऐड ब्लॉकर बंद करें) और कोई भी भुगतान भेजने से पहले पेज रीलोड करें।",
   hive_withdraw_progress: "निकासी जारी है",
   invalid_username: "अमान्य उपयोगकर्ता नाम।",
   max_amount_AFIT: "राशि अधिकतम अनुमत सीमा से अधिक है।",
