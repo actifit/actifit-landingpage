@@ -34,9 +34,12 @@ const NEW_KEYS = ['signup_unavailable', 'free_signup_links_unavailable', 'bsc_br
 
 describe('availability flags', () => {
   it('are all off until the backend side is back', () => {
-    expect([SIGNUP_AVAILABLE, FREE_SIGNUP_LINKS_AVAILABLE, BSC_BRIDGE_AVAILABLE, EBOOK_PURCHASE_AVAILABLE,
+    expect([FREE_SIGNUP_LINKS_AVAILABLE, BSC_BRIDGE_AVAILABLE, EBOOK_PURCHASE_AVAILABLE,
       REAL_PRODUCT_PURCHASE_AVAILABLE, GADGET_PRIZE_DRAW_AVAILABLE, ARENA_AFIT_PRIZES_AVAILABLE])
-      .toEqual([false, false, false, false, false, false, false])
+      .toEqual([false, false, false, false, false, false])
+  })
+  it('signup is back on: it now sends public keys only (/app/signupWithKeys)', () => {
+    expect(SIGNUP_AVAILABLE).toBe(true)
   })
 
   const LOCALES = fs.readdirSync(path.join(ROOT, 'lang')).filter((f) => f.endsWith('.js'))
@@ -69,28 +72,28 @@ describe('availability flags', () => {
   })
 })
 
-describe('signup (paid and promo both go through /confirmPayment)', () => {
+describe('signup kill switch (utils/sessionActions.js SIGNUP_AVAILABLE)', () => {
   const src = read('pages/signup.vue')
   it('the payment address / memo / amount and the confirm buttons only render while signup works', () => {
     const start = src.indexOf('<template v-if="signupAvailable">')
     expect(start).toBeGreaterThan(0)
     const end = src.indexOf('</template>', start)
     const block = src.slice(start, end)
-    for (const el of ['id="actifit-address"', 'id="actifit-memo"', 'id="invested-amount"', 'id="promo-code-val"', 'v-on:click="checkFunds"', "$t('notice_send_amount')"]) {
+    for (const el of ['id="actifit-address"', 'id="actifit-memo"', 'id="invested-amount"', 'id="promo-code-val"', 'v-on:click="checkFunds"', 'v-on:click="getQuote"', "$t('swk_send_exactly')"]) {
       expect(block).toContain(el)
     }
     // ...and nowhere else on the page (no other path - ?promo=, ?referrer= - can show them)
     const tpl = src.slice(0, src.indexOf('<script>'))
     const outside = tpl.slice(0, start) + tpl.slice(end)
-    for (const el of ['actifit-address', 'actifit-memo', 'checkFunds"', 'notice_send_amount']) expect(outside).not.toContain(el)
+    for (const el of ['actifit-address', 'actifit-memo', 'checkFunds"', 'getQuote"', 'swk_send_exactly']) expect(outside).not.toContain(el)
   })
   it('the "don\'t send any payment" note shows while signup is off', () => {
     expect(src.match(/<div v-if="!signupAvailable"[^>]*>\{\{ \$t\('signup_unavailable'\) \}\}<\/div>/g)).toHaveLength(2)
     expect(src).toMatch(/signupAvailable: SIGNUP_AVAILABLE/)
   })
-  it('checkFunds never reaches /confirmPayment while off, and the memo setter survives the hidden field', () => {
+  it('neither the quote nor the account request is sent while off', () => {
     expect(methodBody(src, 'async checkFunds() {')).toMatch(/^async checkFunds\(\) \{\s*\/\/[^\n]*\n\s*if \(!this\.signupAvailable\) return;/)
-    expect(methodBody(src, 'setMemoValue() {')).toMatch(/if \(memoEl\) memoEl\.value = memo/)
+    expect(methodBody(src, 'async getQuote() {')).toMatch(/^async getQuote\(\) \{\s*if \(!this\.signupAvailable/)
   })
 })
 

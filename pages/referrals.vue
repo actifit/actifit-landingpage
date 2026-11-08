@@ -58,8 +58,8 @@
     <div >
         <h4 class="text-left mt-5">{{ $t('Referral_Free_Signup_Links') }}</h4>
         <p>{{ $t('referral_free_signup_links_notice') }}</p>
-        <!-- /claimFreeSignupAccounts and signup itself (/confirmPayment) are disabled server side
-             for now: links can neither be claimed nor redeemed (see utils/sessionActions.js) -->
+        <!-- /claimFreeSignupAccounts is disabled server side
+             for now: links cannot be claimed (see utils/sessionActions.js) -->
         <div v-if="!freeSignupLinksAvailable" class="alert alert-warning" role="alert">{{ $t('free_signup_links_unavailable') }}</div>
         <!-- claim button to claim new signup links-->
         <div v-if="freeSignupLinksAvailable && hasClaimableLinks.status">

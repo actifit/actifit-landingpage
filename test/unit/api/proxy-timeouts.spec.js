@@ -38,8 +38,9 @@ describe('proxy upstream calls', () => {
   it('every upstream call sets an explicit per-purpose timeout', () => {
     const calls = src.match(/await http(\.\w+)?\(/g) || []
     const timeouts = src.match(/timeout:\s*T\.\w+/g) || []
-    // 7 since the login-only /verifyLoginCaptcha route was removed (1.14.32).
-    expect(calls.length).toBeGreaterThanOrEqual(7)
+    // 7 since the login-only /verifyLoginCaptcha route was removed (1.14.32), 6 since
+    // /confirmPayment was (1.14.34: signup calls the API directly with public keys).
+    expect(calls.length).toBeGreaterThanOrEqual(6)
     expect(timeouts.length).toBe(calls.length)
   })
 
@@ -50,7 +51,7 @@ describe('proxy upstream calls', () => {
     const block = src.match(/const T = \{([\s\S]*?)\};/)
     expect(block).not.toBeNull()
     const values = [...block[1].matchAll(/^\s*\w+:\s*(\d+)/gm)].map((m) => Number(m[1]))
-    expect(values.length).toBeGreaterThanOrEqual(7)
+    expect(values.length).toBeGreaterThanOrEqual(6)
     values.forEach((v) => expect(v).toBeGreaterThan(0))
     expect(Number(src.match(/axios\.create\(\{\s*timeout:\s*(\d+)/)[1])).toBeGreaterThan(0)
   })
@@ -72,14 +73,6 @@ describe('proxy upstream calls', () => {
     const m = src.match(/login:\s*(\d+)/)
     expect(m).not.toBeNull()
     expect(Number(m[1])).toBeLessThan(20000)
-  })
-
-  it('payment confirmation is generous but under Cloudflare\'s 100s', () => {
-    // A premature timeout does not cancel the upstream - the payment may still confirm -
-    // so it would tell the user it failed when it did not, and invite a second payment.
-    const m = src.match(/payment:\s*(\d+)/)
-    expect(Number(m[1])).toBeGreaterThanOrEqual(60000)
-    expect(Number(m[1])).toBeLessThan(100000)
   })
 
   it('a failure with no upstream response is answered 503, never 500', () => {

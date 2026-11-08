@@ -82,11 +82,7 @@ const T = {
   // The deadline covers the whole request INCLUDING the browser's upload, which is
   // streamed through (data: req) at the user's connection speed. 60s cut off a ~10MB
   // phone photo on a slow uplink. Kept under Cloudflare's 100s.
-  upload: 90000,
-  // Generous on purpose. Timing out here does NOT cancel the upstream - the API may
-  // still confirm the payment - so a premature error would tell the user it failed
-  // when it did not, and invite them to pay twice. Kept under Cloudflare's 100s.
-  payment: 90000
+  upload: 90000
 };
 const url = require('url');
 
@@ -306,35 +302,9 @@ module.exports = async function (req, res, next) {
       return;
     }
 
-    // 5. Confirm Payment Proxy
-    if (path === '/confirmPayment') {
-      if (req.method !== 'POST') {
-        res.statusCode = 405;
-        return res.end(JSON.stringify({ error: 'Method Not Allowed' }));
-      }
-
-      const apiKey = process.env.CONFIRM_PAYMENT_API_KEY;
-      if (!apiKey) {
-        res.statusCode = 500;
-        return res.end(JSON.stringify({ error: 'Confirm Payment API key not configured on server' }));
-      }
-
-      const baseApiUrl = (process.env.ACTI_API_URL || 'http://localhost:3120').replace(/\/?$/, '/');
-      const targetUrl = `${baseApiUrl}confirmPayment`;
-
-      let body = '';
-      req.on('data', chunk => { body += chunk; });
-      req.on('end', async () => {
-        try {
-          const params = { ...JSON.parse(body), confirm_payment_token: apiKey };
-          const response = await http.post(targetUrl, params, { timeout: T.payment });
-          res.end(JSON.stringify(response.data));
-        } catch (error) {
-          return upstreamFailed(res, error, path);
-        }
-      });
-      return;
-    }
+    // 5. (removed) /confirmPayment: the old signup sent the new account's master password
+    // through here. Signup now makes the keys in the browser and calls the API's
+    // /app/signupQuote + /app/signupWithKeys directly with public keys only.
 
     // 6. Login proxies
     // /loginChallenge + /loginVerify are the signed-challenge login (actifit-bot #147).
