@@ -4,7 +4,6 @@
 jest.mock('dsteem', () => ({ Client: jest.fn() }))
 jest.mock('@hiveio/dhive', () => ({ Client: jest.fn() }))
 
-import '@/plugins/vue-custom'
 import fs from 'fs'
 import path from 'path'
 import { compile } from 'vue-template-compiler'
@@ -19,9 +18,9 @@ const POST = {
   permlink: 'my-walk',
   title: 'My Actifit Report Card',
   json_metadata: '{}',
-  body: 'A long walk today.\n\n[off-site](https://example.com/x) and [peakd](https://peakd.com/@alice)\n\n' +
-    '<script>alert(1)</script><img src="https://images.hive.blog/0x0/a.png" onerror="alert(1)">\n\n' +
-    '[bad](javascript:alert(1))',
+  body: '## Morning\n\nA **long** walk today.\n\n![photo](https://images.hive.blog/a.png)\n\n' +
+    'Read [my plan](https://peakd.com/@alice/plan) and https://example.com/x too.\n\n' +
+    '<script>alert(1)</script><img src="x" onerror="alert(1)">Tom & "Jerry" <3',
 }
 
 const onServer = async (fn) => {
@@ -31,73 +30,55 @@ const onServer = async (fn) => {
   try { return await fn() } finally { process.server = prev.server; process.client = prev.client }
 }
 
-const parse = (html) => {
+describe('renderPostBodyHtml', () => {
+  const html = renderPostBodyHtml(POST.body)
   const el = document.createElement('div')
   el.innerHTML = html
-  return el
-}
 
-describe('renderPostBodyHtml on the server (sanitize-html path)', () => {
-  it('renders the text and strips scripts and event handlers', async () => {
-    const el = parse(await onServer(() => renderPostBodyHtml(POST.body)))
-    expect(el.textContent).toContain('A long walk today.')
-    expect(el.querySelector('script')).toBeNull()
-    expect(el.innerHTML).not.toMatch(/onerror|alert\(1\)/)
-    expect(el.querySelector('img')).not.toBeNull()
+  it('keeps the text as paragraphs, without markdown markup', () => {
+    const paras = [...el.querySelectorAll('p')].map((p) => p.textContent)
+    expect(paras[0]).toBe('Morning')
+    expect(paras[1]).toBe('A long walk today.')
+    expect(paras.join(' ')).toContain('Read my plan and too.')
   })
 
-  it('marks off-site links the way the browser does, without cheerio', async () => {
-    const el = parse(await onServer(() => renderPostBodyHtml(POST.body)))
-    const off = el.querySelector('a[href="https://example.com/x"]')
-    expect(off.classList.contains('external-link')).toBe(true)
-    expect(off.getAttribute('data-external-href')).toBe('https://example.com/x')
-    expect(off.getAttribute('target')).toBe('_blank')
-    const listed = el.querySelector('a[href="https://peakd.com/@alice"]')
-    expect(listed.classList.contains('external-link')).toBe(false)
-    expect(listed.getAttribute('target')).toBe('_blank')
+  it('drops images and URLs', () => {
+    expect(html).not.toMatch(/images\.hive\.blog|example\.com|peakd\.com|photo/)
   })
 
-  it('never keeps a javascript: link, in href or data-external-href', async () => {
-    const html = await onServer(() => renderPostBodyHtml('[bad](javascript:alert(1)) <a href="javascript:alert(2)">x</a>'))
-    expect(html).not.toMatch(/javascript:/i)
+  it('outputs only <p> elements and escaped text', () => {
+    expect([...el.querySelectorAll('*')].every((n) => n.tagName === 'P')).toBe(true)
+    expect(html).not.toMatch(/<(?!\/?p>)/)
+    expect(el.textContent).toContain('Tom & "Jerry"')
   })
 
-  it('keeps embeds on subdomains of trusted hosts and drops others', async () => {
-    const html = await onServer(() => renderPostBodyHtml(
-      '<iframe src="https://www.youtube.com/embed/abcdefghijk"></iframe><iframe src="https://evil.example/x"></iframe>'))
-    const frames = [...parse(html).querySelectorAll('iframe')].map((f) => f.getAttribute('src'))
-    expect(frames).toContain('https://www.youtube.com/embed/abcdefghijk')
-    expect(frames.join(' ')).not.toMatch(/evil/)
-  })
-
-  it('returns nothing for an empty body', () => {
+  it('returns nothing for a body with no text', () => {
     expect(renderPostBodyHtml('')).toBe('')
     expect(renderPostBodyHtml(undefined)).toBe('')
+    expect(renderPostBodyHtml('![x](https://a.b/c.png)\n\nhttps://a.b/c')).toBe('')
   })
-})
 
-describe('code highlighting is registered once', () => {
-  it('a second evaluation of the plugin does not highlight code blocks twice', () => {
-    // marked is one shared object; each extra marked.use() highlighted the previous
-    // highlighter's output (a 24 MB page for one post with code blocks, in dev).
-    const shared = jest.requireActual('marked')
-    jest.isolateModules(() => {
-      jest.doMock('marked', () => shared)
-      require('@/plugins/vue-custom')
-      require('@/plugins/vue-custom')
-    })
-    const html = shared.marked.parse('```js\nconst a = "<b>"\n```')
-    expect(html).toContain('hljs')
-    // a second pass would highlight the first pass's escaped markup
-    expect(html).not.toMatch(/&lt;span class=/)
-    expect(html).not.toMatch(/&amp;lt;/)
+  it('caps the text', () => {
+    expect(renderPostBodyHtml('word '.repeat(20000)).length).toBeLessThan(21000)
+  })
+
+  // The browser's pipeline took 7-15 s on crafted 16 KB bodies (review of PR #536); on
+  // the server's single thread that stops the whole site. These are Hive's maximum size.
+  it.each([
+    ['<img src="'], ['*a_'], ['['], ['<'], ['!['], ['](' ], ['http://'], ['\n \n'], ['# '], ['[x](http://a.b/'],
+  ])('a 64 KB body of %j renders quickly', (unit) => {
+    const body = unit.repeat(Math.ceil(65536 / unit.length)).slice(0, 65536)
+    const t = Date.now()
+    renderPostBodyHtml(body)
+    expect(Date.now() - t).toBeLessThan(500)
   })
 })
 
 describe('post page asyncData', () => {
+  let getContent
   beforeEach(() => {
     jest.spyOn(hive.api, 'setOptions').mockImplementation(() => {})
-    jest.spyOn(hive.api, 'getContentAsync').mockResolvedValue(POST)
+    getContent = jest.spyOn(hive.api, 'getContentAsync').mockResolvedValue(POST)
   })
   afterEach(() => jest.restoreAllMocks())
 
@@ -107,10 +88,18 @@ describe('post page asyncData', () => {
     const ssrContext = {}
     const data = await onServer(() => run(ssrContext))
     expect(data.ssrArticle).toEqual({ title: 'My Actifit Report Card', author: 'alice' })
-    expect(ssrContext.actifitPostHtml).toContain('A long walk today.')
+    expect(ssrContext.actifitPostHtml).toContain('<p>A long walk today.</p>')
     // not sent a second time in the page's data payload (desc is the 140-char meta snippet)
     expect(Object.keys(data).sort()).toEqual(['desc', 'pageTitle', 'ssrArticle'])
-    expect(JSON.stringify(data)).not.toMatch(/<p>|<a /)
+    expect(JSON.stringify(data)).not.toMatch(/<p>/)
+  })
+
+  it('a post with no text gets no article', async () => {
+    getContent.mockResolvedValue(Object.assign({}, POST, { body: '![x](https://images.hive.blog/a.png)' }))
+    const ssrContext = {}
+    const data = await onServer(() => run(ssrContext))
+    expect(data.ssrArticle).toBeUndefined()
+    expect(ssrContext.actifitPostHtml).toBeUndefined()
   })
 
   it('a body that fails to render leaves the page as before (no article, no error)', async () => {
@@ -130,6 +119,50 @@ describe('post page asyncData', () => {
     expect(data.ssrArticle).toBeUndefined()
     expect(ssrContext).toEqual({})
   })
+
+  it('the meta description reads only the start of a long body', async () => {
+    // 64 KB of steemitimages URLs took ~0.6 s in the description regexes
+    getContent.mockResolvedValue(Object.assign({}, POST, { body: 'https://steemitimages.com/a'.repeat(2500) }))
+    const t = Date.now()
+    await onServer(() => run({}))
+    expect(Date.now() - t).toBeLessThan(300)
+  })
+})
+
+describe('after the browser loads the post', () => {
+  afterEach(() => jest.restoreAllMocks())
+
+  it('the server article is dropped, so a later reload shows the spinner, not a stale title', async () => {
+    jest.spyOn(hive.api, 'setOptions').mockImplementation(() => {})
+    jest.spyOn(hive.api, 'getContentAsync').mockResolvedValue(POST)
+    let duringLoad
+    const vm = {
+      ssrArticle: { title: 't', author: 'alice' },
+      $route: { params: { username: '@alice', permlink: 'my-walk' } },
+      resetData () {}, alignSidebar () {}, fetchReportCommentData () {},
+      // still loading: dropping the article here showed the spinner in between (CLS 1.4)
+      fetchSupplementaryData: async () => { duringLoad = vm.ssrArticle },
+    }
+    await PostPage.methods.fetchPageData.call(vm)
+    expect(duringLoad).toEqual({ title: 't', author: 'alice' })
+    expect(vm.report).toBe(POST)
+    expect(vm.ssrArticle).toBeNull()
+  })
+
+  it('a failed first load keeps the server article', async () => {
+    jest.spyOn(hive.api, 'setOptions').mockImplementation(() => {})
+    jest.spyOn(hive.api, 'getContentAsync').mockRejectedValue(new Error('down'))
+    jest.spyOn(console, 'error').mockImplementation(() => {})
+    const article = { title: 't', author: 'alice' }
+    const vm = {
+      ssrArticle: article,
+      $route: { params: { username: '@alice', permlink: 'my-walk' } },
+      resetData () {}, alignSidebar () {},
+    }
+    await PostPage.methods.fetchPageData.call(vm)
+    expect(vm.ssrArticle).toBe(article)
+    expect(vm.errorDisplay).toBeTruthy()
+  })
 })
 
 describe('post page template', () => {
@@ -140,7 +173,7 @@ describe('post page template', () => {
     expect(compile(template).errors).toEqual([])
   })
 
-  it('shows the server article ahead of an error, so a failed browser load keeps the post', () => {
+  it('shows the server article ahead of an error, so a failed first load keeps the post', () => {
     const article = template.indexOf('v-else-if="ssrArticle"')
     const error = template.indexOf('v-else-if="errorDisplay"')
     expect(article).toBeGreaterThan(-1)

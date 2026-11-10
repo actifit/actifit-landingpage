@@ -65,12 +65,6 @@ hljs.registerLanguage('markdown', markdown);
 hljs.registerLanguage('md', markdown);
 hljs.registerLanguage('diff', diff);
 
-// `marked` is one shared object, and marked.use() ADDS an extension every time it runs.
-// Register the highlighter once: if this file is evaluated again (the server bundle on
-// every hot reload in dev), a second highlighter would highlight the first one's output,
-// and each code block grew several-fold per extra copy (a 24 MB post page in testing).
-if (!marked.__actifitHighlight) {
-marked.__actifitHighlight = true;
 marked.use(markedHighlight({
   langPrefix: 'hljs language-',
   highlight(code, lang) {
@@ -85,7 +79,6 @@ marked.use(markedHighlight({
     return '';
   }
 }));
-}
 
 import moment from "moment";
 
@@ -680,30 +673,6 @@ function sanitizePostHtml (html_content) {
         'facebook.com',
     ];
 
-	// =========================================================================
-	// ===== LINK RULES (WHITELIST & EXTERNAL), used by both branches below ==
-	// =========================================================================
-
-    const processLinks = (href, addClass, setAttr) => {
-        if (!href) return;
-
-		// Whitelist check
-		const isWhitelisted = /^(?:\/|#|https?:\/\/(?:[\w-]+\.)*(?:actifit\.io|peakd\.com|ecency\.com|hive\.blog|leofinance\.io|travelfeed\.com|3speak\.tv|steemit\.com|hivesigner\.com|vimm\.tv|d\.tube|bit\.ly|youtube\.com|youtu\.be|facebook\.com|twitter\.com|x\.com|instagram\.com|discord\.gg|discord\.com|telegram\.me|t\.me))/i.test(href);
-
-		if (!isWhitelisted) {
-			addClass('external-link');
-            // We use the data-external-href to keep the modal informed
-            // even if the href is still on the tag for browser rendering.
-            setAttr('data-external-href', href);
-		}
-
-		// Standard link attributes for whitelisted/internal
-		if (!href.startsWith('/') && !href.startsWith('#')) {
-			setAttr('target', '_blank');
-			setAttr('rel', 'noopener ugc');
-		}
-    };
-
     if (process.client) {
         // Custom hook to strip dangerous CSS from style attributes and restrict iframe src
         DOMPurify.addHook('afterSanitizeAttributes', function(node) {
@@ -755,23 +724,6 @@ function sanitizePostHtml (html_content) {
                 '*': sanitizeOptions.ALLOWED_ATTR
             },
             allowedIframeHostnames: TRUSTED_IFRAME_HOSTS,
-            // Hostnames match exactly; this also admits their subdomains (www.youtube.com,
-            // play.3speak.tv), as the client's iframe check above does.
-            allowedIframeDomains: TRUSTED_IFRAME_HOSTS,
-            // Mark links in the same pass, so the server needs no second HTML library. This
-            // runs before the attribute filter, which then scheme-checks href and
-            // data-external-href. (It used cheerio/slim, but Nuxt's server bundle runner
-            // resolves packages without export maps and could not load it.)
-            transformTags: {
-                a: (tagName, attribs) => {
-                    processLinks(
-                        attribs.href,
-                        (cls) => { attribs.class = attribs.class ? attribs.class + ' ' + cls : cls; },
-                        (name, val) => { attribs[name] = val; }
-                    );
-                    return { tagName, attribs };
-                },
-            },
             allowedStyles: {
                 '*': {
                     // Match the dangerousProps logic from DOMPurify hook
@@ -786,6 +738,30 @@ function sanitizePostHtml (html_content) {
         });
     }
 
+	// =========================================================================
+	// ===== STEP 4: POST-PROCESS LINKS (WHITELIST & EXTERNAL) ================
+	// =========================================================================
+
+    const processLinks = (href, addClass, setAttr) => {
+        if (!href) return;
+
+		// Whitelist check
+		const isWhitelisted = /^(?:\/|#|https?:\/\/(?:[\w-]+\.)*(?:actifit\.io|peakd\.com|ecency\.com|hive\.blog|leofinance\.io|travelfeed\.com|3speak\.tv|steemit\.com|hivesigner\.com|vimm\.tv|d\.tube|bit\.ly|youtube\.com|youtu\.be|facebook\.com|twitter\.com|x\.com|instagram\.com|discord\.gg|discord\.com|telegram\.me|t\.me))/i.test(href);
+
+		if (!isWhitelisted) {
+			addClass('external-link');
+            // We use the data-external-href to keep the modal informed
+            // even if the href is still on the tag for browser rendering.
+            setAttr('data-external-href', href);
+		}
+
+		// Standard link attributes for whitelisted/internal
+		if (!href.startsWith('/') && !href.startsWith('#')) {
+			setAttr('target', '_blank');
+			setAttr('rel', 'noopener ugc');
+		}
+    };
+
     if (process.client) {
         const parser = new DOMParser();
         const doc = parser.parseFromString(sanitized_html, 'text/html');
@@ -799,9 +775,21 @@ function sanitizePostHtml (html_content) {
             );
         });
         return doc.body.innerHTML;
+    } else {
+        // Server-side link processing. cheerio/slim, not cheerio: the full build pulls in
+        // undici 7, which does not load on the server's Node 16 (.nvmrc).
+        const cheerio = require('cheerio/slim');
+        const $ = cheerio.load(sanitized_html, null, false);
+        $('a[href]').each((i, el) => {
+            const $el = $(el);
+            processLinks(
+                $el.attr('href'),
+                (cls) => $el.addClass(cls),
+                (name, val) => $el.attr(name, val)
+            );
+        });
+        return $.root().html();
     }
-    // Server: links were marked by the sanitize-html pass above (transformTags).
-    return sanitized_html;
 }
 
 Vue.prototype.$sanitizePostHtml = sanitizePostHtml;

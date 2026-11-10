@@ -394,13 +394,17 @@ export default {
       //console.log(result);
       //console.log(result.body);
 
+      // The description is 140 characters, so only the start of the body is needed. The
+      // image-link regexes below backtrack on long crafted bodies (64 KB of repeated
+      // steemitimages URLs took ~0.6 s of the server's single thread per request).
+      const descSource = String(result.body || '').slice(0, 4000);
       //remove all tags from text
-      let desc = result.body;
+      let desc = descSource;
       if (process.client) {
-        desc = DOMPurify.sanitize(result.body, { ALLOWED_TAGS: [] });
+        desc = DOMPurify.sanitize(descSource, { ALLOWED_TAGS: [] });
       } else {
         // Fallback for server-side execution where DOMPurify lacks a DOM
-        desc = result.body.replace(/<[^>]*>?/gm, '');
+        desc = descSource.replace(/<[^>]*>?/gm, '');
       }
 
       //remove all links/image links
@@ -611,6 +615,11 @@ export default {
         console.error(err);
       } finally {
         this.isLoading = false; this.alignSidebar();
+        // The server's article stands in until the full page shows, which is now. Dropped
+        // only then: dropped earlier, the short spinner showed in between and the page
+        // jumped twice (CLS 1.4). Afterwards a reload (switching chain) shows the spinner,
+        // not a stale title over an empty body. A failed load keeps it.
+        if (this.report) this.ssrArticle = null;
       }
     },
     async fetchSupplementaryData() {

@@ -6,6 +6,8 @@ module.exports = {
     '^@/(.*)$': '<rootDir>/$1',
     '^~/(.*)$': '<rootDir>/$1',
     '^vue$': 'vue/dist/vue.common.js',
+    // jest 27's resolver ignores package "exports"; Node resolves this to the same file.
+    '^cheerio/slim$': '<rootDir>/node_modules/cheerio/dist/commonjs/slim.js',
     // Stub out styles and static assets so component imports don't choke
     '\\.(css|scss|sass|less)$': '<rootDir>/test/mocks/styleMock.js',
     '\\.(jpg|jpeg|png|gif|webp|svg|mp4|webm)$': '<rootDir>/test/mocks/fileMock.js'
