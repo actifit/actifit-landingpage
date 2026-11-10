@@ -45,7 +45,7 @@ function intrinsicSize (file) {
 const staticImages = (file) => {
   const src = fs.readFileSync(path.join(root, file), 'utf8')
   return (src.match(/<img\b[^>]*>/g) || [])
-    .map((tag) => ({ tag, src: (tag.match(/\ssrc="(\/img\/[^"]+)"/) || [])[1] }))
+    .map((tag) => ({ tag, src: (tag.match(/\ssrc=["'](\/img\/[^"']+)["']/) || [])[1] }))
     .filter((i) => i.src)
 }
 
@@ -61,8 +61,8 @@ describe.each(FILES)('%s', (file) => {
   it.each(images.map((i) => [i.src, i.tag]))('%s declares a width and height of its real shape', (src, tag) => {
     const size = intrinsicSize(path.join(root, 'static', src))
     expect(size).not.toBeNull()
-    const w = Number((tag.match(/\swidth="(\d+)"/) || [])[1])
-    const h = Number((tag.match(/\sheight="(\d+)"/) || [])[1])
+    const w = Number((tag.match(/\swidth=["'](\d+)["']/) || [])[1])
+    const h = Number((tag.match(/\sheight=["'](\d+)["']/) || [])[1])
     expect(w).toBeGreaterThan(0)
     expect(h).toBeGreaterThan(0)
     expect(Math.abs(w / h - size[0] / size[1])).toBeLessThan(0.01)
@@ -71,6 +71,8 @@ describe.each(FILES)('%s', (file) => {
 
 describe('the CSS still sets the shown size', () => {
   // A width attribute next to a height-only rule would stretch the image to that width.
+  // These match the rules as written: reformatting them means updating the patterns, and
+  // a later rule elsewhere that sets one side of these images is not caught here.
   it('height-only rules let the width follow the image', () => {
     const footer = fs.readFileSync(path.join(root, 'components/NewFooterDesign.vue'), 'utf8')
     expect(footer).toMatch(/\.footer-logo \{ height: 50px; width: auto;/)
