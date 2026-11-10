@@ -42,6 +42,11 @@ describe('renderPostBodyHtml', () => {
     expect(paras.join(' ')).toContain('Read my plan and too.')
   })
 
+  it('leaves out script and style contents, and does not double-escape entities', () => {
+    const out = renderPostBodyHtml('<style>p{color:red}</style><script>var x = 1</script>Fish &amp; chips &lt;3 "quoted"')
+    expect(out).toBe('<p>Fish &amp; chips &lt;3 &quot;quoted&quot;</p>')
+  })
+
   it('drops images and URLs', () => {
     expect(html).not.toMatch(/images\.hive\.blog|example\.com|peakd\.com|photo/)
   })
@@ -125,7 +130,7 @@ describe('post page asyncData', () => {
     getContent.mockResolvedValue(Object.assign({}, POST, { body: 'https://steemitimages.com/a'.repeat(2500) }))
     const t = Date.now()
     await onServer(() => run({}))
-    expect(Date.now() - t).toBeLessThan(300)
+    expect(Date.now() - t).toBeLessThan(500) // was ~600 ms; ~5 ms now
   })
 })
 

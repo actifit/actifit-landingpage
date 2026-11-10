@@ -20,12 +20,16 @@ export function postBodyText (body) {
   if (typeof body !== 'string') return ''
   return body.slice(0, MAX_INPUT)
     .replace(/\r\n?/g, '\n')
+    .replace(/<(script|style)\b[^<>]{0,200}>[^<]{0,20000}<\/\1\s{0,10}>/gi, ' ') // code, not text
     .replace(/<(?:br|\/p|\/div|\/h[1-6]|\/li)\b[^<>]{0,200}>/gi, '\n\n') // block ends become breaks
     .replace(/<[^<>]{0,500}>/g, ' ') // other HTML tags
     .replace(/!\[[^\[\]\n]{0,300}\]\([^()\s]{0,1000}\)/g, ' ') // markdown images
     .replace(/\[([^\[\]\n]{0,300})\]\([^()\s]{0,1000}\)/g, '$1') // markdown links: keep the text
     .replace(/https?:\/\/[^\s<>()]{1,1000}/g, ' ') // bare URLs
     .replace(/&nbsp;/gi, ' ')
+    // escaped again below: decoding first avoids showing "&amp;amp;"
+    .replace(/&(amp|lt|gt|quot|#39|#x27);/gi, (m, e) =>
+      ({ amp: '&', lt: '<', gt: '>', quot: '"', '#39': "'", '#x27': "'" }[e.toLowerCase()]))
     .replace(/^ {0,3}(?:#{1,6}|>|[-*+]|\d{1,9}[.)])[ \t]/gm, '') // heading, quote and list markers
     .replace(/[*_~`|]+/g, '') // emphasis, code and table markup
     .replace(/[ \t]+/g, ' ')
