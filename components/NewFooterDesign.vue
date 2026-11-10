@@ -6,7 +6,7 @@
         <!-- Column 1: Brand Info & App Stores -->
         <div class="footer-column brand-column">
           <div class="d-flex align-items-center mb-3">
-            <img src="/img/actifit_logo.png" alt="Actifit Logo" class="footer-logo">
+            <img src="/img/actifit_logo.png" alt="Actifit Logo" class="footer-logo" width="128" height="128">
             <span class="footer-brand-name">Actifit</span>
           </div>
           <p class="footer-description">
@@ -14,10 +14,10 @@
           </p>
           <div class="app-store-buttons">
             <a href="https://links.actifit.io/android" target="_blank" rel="noopener noreferrer">
-              <img src="/img/google-play.png" alt="Get it on Google Play">
+              <img src="/img/google-play.png" alt="Get it on Google Play" width="200" height="59">
             </a>
             <a href="https://links.actifit.io/ios" target="_blank" rel="noopener noreferrer">
-              <img src="/img/app-store.png" alt="Download on the App Store">
+              <img src="/img/app-store.png" alt="Download on the App Store" width="200" height="61">
             </a>
           </div>
         </div>
@@ -64,7 +64,7 @@
       <div class="footer-bottom-bar">
         <div class="bottom-row top-row">
             <div class="bottom-bar-item">
-                Powered By HIVE <img src="/img/HIVE.png" class="hive-logo-bottom" alt="">
+                Powered By HIVE <img src="/img/HIVE.png" class="hive-logo-bottom" alt="" width="219" height="190">
             </div>
             <div class="bottom-bar-item">
                 Price Data provided By <a href="https://coingecko.com" target="_blank" rel="noopener noreferrer">CoinGecko</a>
@@ -146,12 +146,12 @@ export default {
 .footer-column { padding: 0 15px; }
 .brand-column { flex: 2; min-width: 300px; }
 .links-column { flex: 1; min-width: 200px; }
-.footer-logo { height: 50px; margin-right: 15px; }
+.footer-logo { height: 50px; width: auto; margin-right: 15px; }
 .footer-brand-name { font-size: 28px; font-weight: bold; }
 .footer-description { font-size: 16px; margin-top: 10px; color: #555; max-width: 300px; }
 
 .app-store-buttons { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
-.app-store-buttons img { height: 50px; transition: transform 0.2s ease; }
+.app-store-buttons img { height: 50px; width: auto; transition: transform 0.2s ease; }
 .app-store-buttons a:hover img { transform: scale(1.05); }
 
 .links-column h4 { font-weight: bold; margin-bottom: 20px; font-size: 18px; }
@@ -168,7 +168,7 @@ export default {
 .bottom-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; }
 .top-row { gap: 15px 40px; }
 .bottom-bar-item { display: flex; align-items: center; }
-.hive-logo-bottom { height: 20px; margin-left: 8px; }
+.hive-logo-bottom { height: 20px; width: auto; margin-left: 8px; }
 .bottom-bar-item a { color: #333; font-weight: 500; text-decoration: none; transition: color 0.2s ease, text-shadow 0.2s ease; }
 .copyright-section a { color: #666; text-decoration: underline; }
 .bottom-bar-item a:hover { color: #ff112d; }
