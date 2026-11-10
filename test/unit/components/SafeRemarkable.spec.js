@@ -99,9 +99,9 @@ describe('SafeRemarkable', () => {
   })
 })
 
-// The server runs Node 16 (.nvmrc), like CI. This loads the real sanitize-html and
-// cheerio/slim there, so a dependency that stops loading on Node 16 fails CI, not
-// every server-rendered page.
+// The server runs Node 16 (.nvmrc), like CI. This loads the real sanitize-html there
+// (which also marks the links), so a dependency that stops loading on Node 16 fails CI,
+// not every server-rendered page.
 describe('SafeRemarkable on the server (sanitize-html path)', () => {
   beforeAll(() => { process.client = false })
   afterAll(() => { delete process.client })
