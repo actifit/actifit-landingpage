@@ -12,15 +12,16 @@ const NOW = Date.parse('2026-11-10T12:00:00Z')
 const hoursAgo = (h) => new Date(NOW - h * 3600 * 1000).toISOString().slice(0, 19)
 const BOTH_NODES = ['https://hiveapi.actifit.io', 'https://api.hive.blog']
 
-// A fake bridge: `posts` newest first, paged the way get_ranked_posts pages
-// (the next page starts with the last post of the previous one).
-function fakeHive (posts, { failNodes = [] } = {}) {
+// A fake bridge: `posts` newest first, paged the way get_ranked_posts pages: the next
+// page starts AFTER the start post (checked live). `overlap` mimics condenser-style
+// paging, which repeats it.
+function fakeHive (posts, { failNodes = [], overlap = false } = {}) {
   const calls = []
   setPost(async (url, body) => {
     calls.push(url)
     if (failNodes.includes(url)) throw new Error('down')
     const { start_author: a, start_permlink: p, limit } = body.params
-    const from = a ? posts.findIndex((x) => x && x.author === a && x.permlink === p) : 0
+    const from = a ? posts.findIndex((x) => x && x.author === a && x.permlink === p) + (overlap ? 0 : 1) : 0
     return { data: { result: posts.slice(from, from + limit) } }
   })
   return calls
@@ -32,7 +33,8 @@ const post = (author, permlink, h, extra) => Object.assign({ author, permlink, c
 const built = async (now = NOW) => { currentXml(now); await whenBuilt(); return currentXml(now) }
 
 beforeEach(() => reset())
-afterEach(() => jest.restoreAllMocks())
+// a build left running would write into the next test's cache
+afterEach(async () => { await whenBuilt(); jest.restoreAllMocks() })
 
 describe('recentPosts', () => {
   it('pages through the bridge and stops at the age limit', async () => {
@@ -44,10 +46,26 @@ describe('recentPosts', () => {
     expect(got.map((p) => p.permlink)).toEqual(posts.filter((p, i) => i * 4 <= 168).map((p) => p.permlink))
   })
 
-  it('skips pinned posts, which the bridge lists first whatever their age', async () => {
+  it('lists every post once across pages, without dropping the page boundaries', async () => {
+    // slicing off a "repeated" first item dropped one real post per page (~35 a build)
+    const posts = []
+    for (let i = 0; i < 95; i++) posts.push(post('user' + (i % 9), 'p' + i, i))
+    fakeHive(posts)
+    expect((await recentPosts(NOW)).map((p) => p.permlink)).toEqual(posts.map((p) => p.permlink))
+    reset()
+    fakeHive(posts, { overlap: true }) // a node that does repeat the start post
+    expect((await recentPosts(NOW)).map((p) => p.permlink)).toEqual(posts.map((p) => p.permlink))
+  })
+
+  it('skips old pinned posts, which the bridge lists first whatever their age, and keeps recent ones', async () => {
     // an old pinned post first used to end the walk at once: an empty sitemap, every hour
-    fakeHive([post('mod', 'rules', 24 * 60, { stats: { is_pinned: true } }), post('alice', 'today', 1)])
-    expect((await recentPosts(NOW)).map((p) => p.permlink)).toEqual(['today'])
+    fakeHive([
+      post('mod', 'rules', 24 * 60, { stats: { is_pinned: true } }),
+      post('mod', 'event', 5, { stats: { is_pinned: true } }),
+      post('alice', 'today', 1),
+      post('mod', 'event', 5), // the pinned post again, in its date position
+    ])
+    expect((await recentPosts(NOW)).map((p) => p.permlink)).toEqual(['event', 'today'])
   })
 
   it('leaves out hidden and greyed-out posts and names that are not Hive names', async () => {
@@ -71,9 +89,12 @@ describe('recentPosts', () => {
     expect(() => buildXml(got)).not.toThrow()
   })
 
-  it('keeps only the fields it needs (the bridge sends whole bodies)', async () => {
-    fakeHive([post('alice', 'ok', 1, { body: 'x'.repeat(1000), json_metadata: '{}' })])
-    expect(Object.keys((await recentPosts(NOW))[0]).sort()).toEqual(['author', 'created', 'permlink', 'updated'])
+  it('keeps only the fields it needs (the bridge sends whole bodies), with the edit time', async () => {
+    fakeHive([post('alice', 'ok', 30, { updated: hoursAgo(2), body: 'x'.repeat(1000), json_metadata: '{}' })])
+    const [p] = await recentPosts(NOW)
+    expect(Object.keys(p).sort()).toEqual(['author', 'created', 'permlink', 'updated'])
+    expect(p.updated).toBe(Date.parse(hoursAgo(2) + 'Z'))
+    expect(p.created).toBe(Date.parse(hoursAgo(30) + 'Z'))
   })
 
   it('stops at the post cap', async () => {

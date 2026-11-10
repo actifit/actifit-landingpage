@@ -20,8 +20,9 @@ const NODES = ['https://hiveapi.actifit.io', 'https://api.hive.blog']
 const DAYS = 7
 const MAX_POSTS = 1000
 const PAGE_SIZE = 20 // the bridge's maximum
-// pages after the first repeat one post, so each adds PAGE_SIZE - 1
-const MAX_PAGES = 1 + Math.ceil((MAX_POSTS - PAGE_SIZE) / (PAGE_SIZE - 1))
+// bridge pages do not repeat the start post (unlike condenser_api's), so no overlap;
+// one spare page covers the pinned posts the first page can carry
+const MAX_PAGES = Math.ceil(MAX_POSTS / PAGE_SIZE) + 1
 const TTL_MS = 60 * 60 * 1000
 const RETRY_MS = 5 * 60 * 1000 // after a failed build, before trying Hive again
 const CALL_MS = 15 * 1000 // one bridge call, start to finish
@@ -62,28 +63,33 @@ async function rankedPage (start) {
 }
 
 // Posts from the last DAYS days, newest first, at most MAX_POSTS, as
-// {author, permlink, created, updated} (times in ms). Pinned posts (listed first,
-// whatever their age), hidden and greyed-out (muted or downvoted) posts, and malformed
-// items are left out.
+// {author, permlink, created, updated} (times in ms). Hidden and greyed-out (muted or
+// downvoted) posts and malformed items are left out.
 async function recentPosts (now = Date.now(), deadline = Date.now() + BUILD_MS) {
   const since = now - DAYS * 24 * 60 * 60 * 1000
   const out = []
+  const seen = new Set() // whichever way a node pages, a post is listed once
   let start = null
   for (let i = 0; i < MAX_PAGES && out.length < MAX_POSTS; i++) {
     if (Date.now() > deadline) throw new Error('build deadline passed')
     const raw = await rankedPage(start)
-    // a page starts with the post the previous one ended on
-    const page = start ? raw.slice(1) : raw
-    if (!page.length) break
-    for (const p of page) {
+    if (!raw.length) break
+    for (const p of raw) {
       if (!p || typeof p !== 'object') continue
       const stats = p.stats || {}
-      if (stats.is_pinned) continue
       const created = time(p.created)
       if (!Number.isFinite(created)) continue
-      if (created < since) return out
+      if (created < since) {
+        // Pinned posts come first on page 1 whatever their age: an old one is skipped,
+        // not taken as the end of the window.
+        if (stats.is_pinned) continue
+        return out
+      }
       if (stats.hide || stats.gray) continue
       if (!SAFE_NAME.test(p.author) || !SAFE_PERMLINK.test(p.permlink)) continue
+      const key = p.author + '/' + p.permlink
+      if (seen.has(key)) continue
+      seen.add(key)
       const updated = time(p.updated)
       out.push({ author: p.author, permlink: p.permlink, created, updated: Number.isFinite(updated) ? updated : created })
       if (out.length >= MAX_POSTS) return out
