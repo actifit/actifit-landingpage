@@ -8,18 +8,23 @@ import path from 'path'
 
 const root = path.resolve(__dirname, '../../..')
 const walk = (dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
-  e.isDirectory() ? walk(path.join(dir, e.name)) : e.name.endsWith('.vue') ? [path.join(dir, e.name)] : [])
-const files = ['pages', 'components', 'layouts'].flatMap((d) => walk(path.join(root, d)))
-  .concat(path.join(root, 'nuxt.config.js'))
+  e.isDirectory() ? walk(path.join(dir, e.name)) : /\.(vue|js)$/.test(e.name) ? [path.join(dir, e.name)] : [])
+const files = ['pages', 'components', 'layouts', 'mixins', 'plugins', 'store', 'middleware']
+  .flatMap((d) => walk(path.join(root, d))).concat(path.join(root, 'nuxt.config.js'))
 
-// every meta entry that mentions an og:/fb: property, as [file, line]
+// every line that mentions an og:/fb: property, as [file, line]
 const entries = files.flatMap((f) => fs.readFileSync(f, 'utf8').split(/\r?\n/)
-  .filter((l) => /['"](og|fb):[a-z_:]+['"]/.test(l) && /content:/.test(l))
+  .filter((l) => /['"](og|fb):[a-z_:]+['"]/.test(l))
   .map((l) => [path.relative(root, f), l.trim()]))
 
 describe('Open Graph meta tags', () => {
   it('finds the tags', () => {
     expect(entries.length).toBeGreaterThan(50)
+  })
+
+  // the checks below read one line at a time, so a tag split over lines would slip past
+  it('each sit on one line', () => {
+    expect(entries.filter(([, l]) => !/content:/.test(l) || !/hid:/.test(l) && !/fb:app_id/.test(l))).toEqual([])
   })
 
   it('use property=, never name=', () => {
