@@ -51,7 +51,9 @@ module.exports = {
     // and the other proxy prefixes via its own NEVER list.
     '~/api/cache-headers.js',
     { path: '/api/proxy', handler: '~/api/proxy.js' },
-    { path: '/api/csp-report', handler: '~/api/csp-report.js' }
+    { path: '/api/csp-report', handler: '~/api/csp-report.js' },
+    // Recent community posts and their authors, for search engines (listed in robots.txt).
+    { path: '/sitemap-posts.xml', handler: '~/api/sitemap-posts.js' }
   ],
 
   hooks: {

@@ -37,8 +37,10 @@ Allow: /conduct
 Allow: /ownership
 Allow: /whitepaper/
 Allow: /sitemap.xml
+Allow: /sitemap-posts.xml
 Allow: /img/
 Allow: /_nuxt/
 Disallow: /
 
 Sitemap: https://actifit.io/sitemap.xml
+Sitemap: https://actifit.io/sitemap-posts.xml
