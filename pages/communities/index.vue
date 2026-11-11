@@ -104,8 +104,8 @@
 		  title: `Hive Communities - Actifit.io`,
 		  meta: [
 			{ hid: 'description', name: 'description', content: `Explore Hive blockchain communities on Actifit — discover fitness groups, crypto enthusiasts, and healthy lifestyle discussions.` },
-			{ hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Explore Hive blockchain communities on Actifit.` },
-			{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Hive Communities - Actifit.io' }
+			{ hid: 'ogdescription', property: 'og:description', content: `Explore Hive blockchain communities on Actifit.` },
+			{ hid: 'ogtitle', property: 'og:title', content: 'Hive Communities - Actifit.io' }
 		  ]
 		}
 	},

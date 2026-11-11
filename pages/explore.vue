@@ -115,8 +115,8 @@
 		  title: `Explore Hive Content - Actifit.io`,
 		  meta: [
 			{ hid: 'description', name: 'description', content: `Discover fitness activity reports, workout stories, and healthy lifestyle content from the Actifit community on Hive blockchain.` },
-			{ hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Discover fitness activity reports and healthy lifestyle content from the Actifit community on Hive blockchain.` },
-			{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Explore Hive Content - Actifit.io' }
+			{ hid: 'ogdescription', property: 'og:description', content: `Discover fitness activity reports and healthy lifestyle content from the Actifit community on Hive blockchain.` },
+			{ hid: 'ogtitle', property: 'og:title', content: 'Explore Hive Content - Actifit.io' }
 		  ]
 		}
 	},

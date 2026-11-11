@@ -72,8 +72,8 @@
 		  title: `Hive Proposals - Actifit.io`,
 		  meta: [
 			{ hid: 'description', name: 'description', content: `Browse and vote on Hive blockchain proposals. Support decentralized funding for projects on the Hive ecosystem.` },
-			{ hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Browse and vote on Hive blockchain proposals on Actifit.` },
-			{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Hive Proposals - Actifit.io' }
+			{ hid: 'ogdescription', property: 'og:description', content: `Browse and vote on Hive blockchain proposals on Actifit.` },
+			{ hid: 'ogtitle', property: 'og:title', content: 'Hive Proposals - Actifit.io' }
 		  ]
 		}
 	},

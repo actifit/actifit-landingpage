@@ -240,8 +240,8 @@ export default {
       title: 'Terms and Conditions - Actifit.io',
       meta: [
         { hid: 'description', name: 'description', content: 'Terms and conditions for using Actifit — the move-to-earn platform that rewards your daily fitness activity with AFIT crypto tokens.' },
-        { hid: 'ogdescription', name: 'og:description', property: 'og:description', content: 'Terms and conditions for using Actifit — the move-to-earn platform that rewards your daily fitness activity with AFIT crypto tokens.' },
-        { hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Terms and Conditions - Actifit.io' }
+        { hid: 'ogdescription', property: 'og:description', content: 'Terms and conditions for using Actifit — the move-to-earn platform that rewards your daily fitness activity with AFIT crypto tokens.' },
+        { hid: 'ogtitle', property: 'og:title', content: 'Terms and Conditions - Actifit.io' }
       ]
     }
   }

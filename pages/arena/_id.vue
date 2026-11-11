@@ -173,9 +173,9 @@
         title,
         meta: [
           { hid: 'description', name: 'description', content: desc },
-          { hid: 'ogtitle', name: 'og:title', property: 'og:title', content: ch ? (ch.title || ch.id) : 'The Arena' },
-          { hid: 'ogdescription', name: 'og:description', content: desc },
-          { hid: 'ogimage', name: 'og:image', property: 'og:image', content: 'https://actifit.io' + artUrl(ch) }
+          { hid: 'ogtitle', property: 'og:title', content: ch ? (ch.title || ch.id) : 'The Arena' },
+          { hid: 'ogdescription', property: 'og:description', content: desc },
+          { hid: 'ogimage', property: 'og:image', content: 'https://actifit.io' + artUrl(ch) }
         ]
       }
     },

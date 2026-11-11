@@ -296,12 +296,12 @@ export default {
     return {
       title: `${this.pageTitle}`,
       meta: [
-        { hid: 'title', name: 'og:title', 'property': 'og:title', content: title },
+        { hid: 'ogtitle', property: 'og:title', content: title },
         { hid: 'description', name: 'description', content: `${this.desc} by ${this.username} on Actifit — a move-to-earn fitness activity report rewarded with AFIT tokens.` },
-        { hid: 'ogdescription', name: 'og:description', 'property': 'og:description', content: description },
-        { hid: 'image', name: 'og:image', 'property': 'og:image', content: image },
-        { hid: 'url', name: 'og:url', 'property': 'og:url', content: url },
-        { hid: 'ogtype', name: 'og:type', 'property': 'og:type', content: 'article' },
+        { hid: 'ogdescription', property: 'og:description', content: description },
+        { hid: 'ogimage', property: 'og:image', content: image },
+        { hid: 'url', property: 'og:url', content: url },
+        { hid: 'ogtype', property: 'og:type', content: 'article' },
         // Twitter falls back to og:* but an explicit large-image card makes the post
         // image render prominently instead of a small thumbnail.
         { hid: 'twitter:card', name: 'twitter:card', content: 'summary_large_image' },

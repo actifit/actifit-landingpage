@@ -32,7 +32,7 @@ export default {
         { hid: 'canonical', rel: 'canonical', href: canonicalUrl }
       ],
       meta: [
-        { hid: 'url', name: 'og:url', property: 'og:url', content: canonicalUrl }
+        { hid: 'url', property: 'og:url', content: canonicalUrl }
       ]
     }
   }
