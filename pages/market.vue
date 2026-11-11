@@ -346,8 +346,8 @@ export default {
 			title: `Actifit Market - Actifit.io`,
 			meta: [
 				{ hid: 'description', name: 'description', content: `Browse the Actifit Market — spend AFIT tokens on fitness consultations, ebooks, supplements, and booster gadgets. Health products powered by blockchain rewards.` },
-				{ hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Browse the Actifit Market — spend AFIT tokens on fitness consultations, ebooks, supplements, and booster gadgets.` },
-				{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Actifit Market - Actifit.io' }
+				{ hid: 'ogdescription', property: 'og:description', content: `Browse the Actifit Market — spend AFIT tokens on fitness consultations, ebooks, supplements, and booster gadgets.` },
+				{ hid: 'ogtitle', property: 'og:title', content: 'Actifit Market - Actifit.io' }
 			]
 		}
 	},

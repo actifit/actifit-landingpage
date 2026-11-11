@@ -115,8 +115,8 @@
 		  title: `Actifit user friends - Actifit.io`,
 		  meta: [
 			{ hid: 'description', name: 'description', content: `View your Actifit friends and connections` },
-			{ hid: 'ogdescription', name: 'og:description', content: `View your Actifit friends and connections` },
-			{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Actifit user friends - Actifit.io' },
+			{ hid: 'ogdescription', property: 'og:description', content: `View your Actifit friends and connections` },
+			{ hid: 'ogtitle', property: 'og:title', content: 'Actifit user friends - Actifit.io' },
 			{ name: 'robots', content: 'noindex, nofollow' }
 		  ]
 		}

@@ -145,8 +145,8 @@ export default {
       title: 'Privacy Policy - Actifit.io',
       meta: [
         { hid: 'description', name: 'description', content: 'Actifit privacy policy — how we collect, use, and protect your data on our move-to-earn fitness platform.' },
-        { hid: 'ogdescription', name: 'og:description', property: 'og:description', content: 'Actifit privacy policy — how we collect, use, and protect your data on our move-to-earn fitness platform.' },
-        { hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Privacy Policy - Actifit.io' }
+        { hid: 'ogdescription', property: 'og:description', content: 'Actifit privacy policy — how we collect, use, and protect your data on our move-to-earn fitness platform.' },
+        { hid: 'ogtitle', property: 'og:title', content: 'Privacy Policy - Actifit.io' }
       ]
     }
   }

@@ -53,8 +53,8 @@
 		  title: 'Fitness Leaderboard - Actifit.io',
 		  meta: [
 			{ hid: 'description', name: 'description', content: 'See the top-performing Actifit users on our daily fitness leaderboard. Track who is earning the most AFIT tokens for staying active and healthy.' },
-			{ hid: 'ogdescription', name: 'og:description', content: 'See the top-performing Actifit users on our daily fitness leaderboard. Track who is earning the most AFIT tokens for staying active and healthy.' },
-			{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Fitness Leaderboard - Actifit.io' }
+			{ hid: 'ogdescription', property: 'og:description', content: 'See the top-performing Actifit users on our daily fitness leaderboard. Track who is earning the most AFIT tokens for staying active and healthy.' },
+			{ hid: 'ogtitle', property: 'og:title', content: 'Fitness Leaderboard - Actifit.io' }
 		  ]
 		}
 	},

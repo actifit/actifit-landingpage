@@ -69,9 +69,9 @@
         title: 'The Arena — Fitness Challenges | Actifit.io',
         meta: [
           { hid: 'description', name: 'description', content: 'Discover and join fitness challenges, leagues and seasons on Actifit — earn rewards for staying active.' },
-          { hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'The Arena — Actifit Fitness Challenges' },
-          { hid: 'ogdescription', name: 'og:description', content: 'Discover and join fitness challenges, leagues and seasons on Actifit.' },
-          { hid: 'ogimage', name: 'og:image', property: 'og:image', content: 'https://actifit.io/img/arena/step-league.webp' }
+          { hid: 'ogtitle', property: 'og:title', content: 'The Arena — Actifit Fitness Challenges' },
+          { hid: 'ogdescription', property: 'og:description', content: 'Discover and join fitness challenges, leagues and seasons on Actifit.' },
+          { hid: 'ogimage', property: 'og:image', content: 'https://actifit.io/img/arena/step-league.webp' }
         ]
       }
     },

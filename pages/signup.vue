@@ -402,8 +402,8 @@ export default {
       title: `Signup Page - Actifit.io`,
       meta: [
         { hid: 'description', name: 'description', content: `Create your Actifit account and start earning crypto for staying active. Sign up in seconds and get a 100 AFIT welcome bonus.` },
-        { hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Create your Actifit account and start earning crypto for staying active. Sign up in seconds and get a 100 AFIT welcome bonus.` },
-        { hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Signup Page - Actifit.io' }
+        { hid: 'ogdescription', property: 'og:description', content: `Create your Actifit account and start earning crypto for staying active. Sign up in seconds and get a 100 AFIT welcome bonus.` },
+        { hid: 'ogtitle', property: 'og:title', content: 'Signup Page - Actifit.io' }
       ]
     }
   },

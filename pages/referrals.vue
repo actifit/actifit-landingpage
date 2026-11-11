@@ -177,8 +177,8 @@
 		  title: `Actifit Referrals - Actifit.io`,
 		  meta: [
 			{ hid: 'description', name: 'description', content: `Invite friends to Actifit and earn AFIT token rewards for every referral. Grow the move-to-earn fitness community and get rewarded.` },
-			{ hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Invite friends to Actifit and earn AFIT token rewards for every referral.` },
-			{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Actifit Referrals - Actifit.io' }
+			{ hid: 'ogdescription', property: 'og:description', content: `Invite friends to Actifit and earn AFIT token rewards for every referral.` },
+			{ hid: 'ogtitle', property: 'og:title', content: 'Actifit Referrals - Actifit.io' }
 		  ]
 		}
 	},

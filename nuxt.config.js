@@ -313,14 +313,14 @@ module.exports = {
       // Now uses the new consistent description
       { hid: 'description', name: 'description', 'property': 'description', content: mainDescription },
       // Now uses the new consistent title
-      { hid: 'title', name: 'og:title', 'property': 'og:title', content: mainTitle },
+      { hid: 'ogtitle', property: 'og:title', content: mainTitle },
       // Now uses the new consistent description
-      { hid: 'ogdescription', name: 'og:description', 'property': 'og:description', content: mainDescription },
-      { hid: 'url', name: 'og:url', 'property': 'og:url', content: 'https://actifit.io' },
-      { hid: 'ogtype', name: 'og:type', 'property': 'og:type', content: 'website' },
-      { hid: 'image', name: 'og:image', 'property': 'og:image', content: 'https://actifit.io/img/actifit_logo_med.png' },
+      { hid: 'ogdescription', property: 'og:description', content: mainDescription },
+      { hid: 'url', property: 'og:url', content: 'https://actifit.io' },
+      { hid: 'ogtype', property: 'og:type', content: 'website' },
+      { hid: 'ogimage', property: 'og:image', content: 'https://actifit.io/img/actifit_logo_med.png' },
       { name: 'google-site-verification', content: 'Dv3mVaav2x5_2FauDB6MRjixVtVVWPfjUekWwKY-Tnc' },
-      { name: 'fb:app_id', 'property': 'fb:app_id', content: '651065985331472' },
+      { property: 'fb:app_id', content: '651065985331472' },
     ],
     // --- END MODIFICATION ---
     link: [

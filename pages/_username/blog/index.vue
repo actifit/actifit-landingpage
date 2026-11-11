@@ -99,8 +99,8 @@ export default {
       title: `Blog Posts by ${this.username} - Actifit.io`,
       meta: [
         { hid: 'description', name: 'description', content: `Blog posts by ${this.username} on Actifit — fitness stories, crypto earnings, and community insights on Hive blockchain.` },
-        { hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Blog posts by ${this.username} on Actifit.` },
-        { hid: 'ogtitle', name: 'og:title', property: 'og:title', content: `Blog Posts by ${this.username} - Actifit.io` }
+        { hid: 'ogdescription', property: 'og:description', content: `Blog posts by ${this.username} on Actifit.` },
+        { hid: 'ogtitle', property: 'og:title', content: `Blog Posts by ${this.username} - Actifit.io` }
       ]
     }
   },

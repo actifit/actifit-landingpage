@@ -77,7 +77,7 @@
         title: `Login Page - Actifit.io`,
         meta: [
           { hid: 'description', name: 'description', content: `Login to your actifit.io account` },
-          { hid: 'ogdescription', name: 'og:description', content: `Login to your actifit.io account` }
+          { hid: 'ogdescription', property: 'og:description', content: `Login to your actifit.io account` }
         ]
       }
     },

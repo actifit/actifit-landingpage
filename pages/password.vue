@@ -211,8 +211,8 @@
 		  title: 'Reset Password - Actifit.io',
 		  meta: [
 			{ hid: 'description', name: 'description', content: 'Reset your Actifit account password' },
-			{ hid: 'ogdescription', name: 'og:description', content: 'Reset your Actifit account password' },
-			{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Reset Password - Actifit.io' },
+			{ hid: 'ogdescription', property: 'og:description', content: 'Reset your Actifit account password' },
+			{ hid: 'ogtitle', property: 'og:title', content: 'Reset Password - Actifit.io' },
 			{ name: 'robots', content: 'noindex, nofollow' }
 		  ]
 		}

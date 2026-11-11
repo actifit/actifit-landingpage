@@ -101,8 +101,8 @@
 		  title: `Login Page - Actifit.io`,
 		  meta: [
 			{ hid: 'description', name: 'description', content: `Login to your Actifit account` },
-			{ hid: 'ogdescription', name: 'og:description', content: `Login to your Actifit account` },
-			{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Login Page - Actifit.io' },
+			{ hid: 'ogdescription', property: 'og:description', content: `Login to your Actifit account` },
+			{ hid: 'ogtitle', property: 'og:title', content: 'Login Page - Actifit.io' },
 			{ name: 'robots', content: 'noindex, nofollow' }
 		  ]
 		}

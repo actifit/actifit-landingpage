@@ -275,8 +275,8 @@ export default {
       title: `New Video Post via Actifit`,
       meta: [
         { hid: 'description', name: 'description', content: `New Video post via Actifit` },
-        { hid: 'ogdescription', name: 'og:description', content: `New Video post via Actifit` },
-        { hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'New Video Post via Actifit' },
+        { hid: 'ogdescription', property: 'og:description', content: `New Video post via Actifit` },
+        { hid: 'ogtitle', property: 'og:title', content: 'New Video Post via Actifit' },
         { name: 'robots', content: 'noindex, nofollow' }
       ]
     }

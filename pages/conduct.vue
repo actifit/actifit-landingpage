@@ -57,8 +57,8 @@ export default {
       title: 'Code of Conduct - Actifit.io',
       meta: [
         { hid: 'description', name: 'description', content: 'Actifit community code of conduct — guidelines for respectful interaction on our move-to-earn fitness platform.' },
-        { hid: 'ogdescription', name: 'og:description', property: 'og:description', content: 'Actifit community code of conduct — guidelines for respectful interaction on our move-to-earn fitness platform.' },
-        { hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Code of Conduct - Actifit.io' }
+        { hid: 'ogdescription', property: 'og:description', content: 'Actifit community code of conduct — guidelines for respectful interaction on our move-to-earn fitness platform.' },
+        { hid: 'ogtitle', property: 'og:title', content: 'Code of Conduct - Actifit.io' }
       ]
     }
   }
