@@ -193,6 +193,36 @@
       </div>
     </div>
 
+    <!-- The server render of a post: its title, author and text, so crawlers and link
+         previews read the post instead of a spinner. The full page above replaces it once
+         the browser has loaded the post. Same layout classes, so little moves when it does.
+         Ahead of errorDisplay: if the browser's own load fails (say the Actifit API is
+         down), the reader keeps the post the server already sent instead of an error. -->
+    <div v-else-if="ssrArticle" class="container-fluid px-md-3 pt-5 mt-5 pb-5">
+      <div class="row">
+        <div class="col-md-8 order-md-2">
+          <div class="main-content-scroll-container">
+            <article class="content-wrapper row">
+              <div class="report-head mb-3 col-md-12">
+                <h1>{{ ssrArticle.title }}</h1>
+                <div class="main-user-info pl-4">
+                  <h5 class="text-brand"><a :href="'/@' + ssrArticle.author">@{{ ssrArticle.author }}</a></h5>
+                </div>
+              </div>
+              <div class="post-body col-md-12">
+                <div><div>
+                  <!-- No v-html in the browser: an empty <span> leaves the server's HTML in
+                       place during hydration, where v-html would replace it. -->
+                  <span v-if="ssrBodyHtml" v-html="ssrBodyHtml"></span>
+                  <span v-else></span>
+                </div></div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div v-else-if="errorDisplay" class="container pt-5 mt-5 pb-5">
       <div class="mb-3 text-center"><h4>{{ errorDisplay }}</h4></div>
     </div>
@@ -239,6 +269,7 @@ import EditPostModal from '~/components/EditPostModal'
 import DOMPurify from 'dompurify'
 import { declinedPayoutMixin } from '~/plugins/commonCardMixin.js'
 import CardActions from '~/components/CardActions.vue'
+import { renderPostBodyHtml } from '~/utils/ssrPostBody'
 
 const scot_steemengine_api = process.env.steemEngineScot;
 const scot_hive_api_param = process.env.hiveEngineScotParam;
@@ -283,7 +314,7 @@ export default {
       ]
     }
   },
-  async asyncData({ params, app, error }) {
+  async asyncData({ params, app, error, ssrContext }) {
     //let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE')
     //if (cur_bchain == 'HIVE'){
     //set HIVE as default chain, since we cannot use localstorage in here
@@ -363,13 +394,17 @@ export default {
       //console.log(result);
       //console.log(result.body);
 
+      // The description is 140 characters, so only the start of the body is needed. The
+      // image-link regexes below backtrack on long crafted bodies (64 KB of repeated
+      // steemitimages URLs took ~0.6 s of the server's single thread per request).
+      const descSource = String(result.body || '').slice(0, 4000);
       //remove all tags from text
-      let desc = result.body;
+      let desc = descSource;
       if (process.client) {
-        desc = DOMPurify.sanitize(result.body, { ALLOWED_TAGS: [] });
+        desc = DOMPurify.sanitize(descSource, { ALLOWED_TAGS: [] });
       } else {
         // Fallback for server-side execution where DOMPurify lacks a DOM
-        desc = result.body.replace(/<[^>]*>?/gm, '');
+        desc = descSource.replace(/<[^>]*>?/gm, '');
       }
 
       //remove all links/image links
@@ -396,6 +431,21 @@ export default {
       //prefer the author's on-chain preview description (json_metadata.description); fall back to the body-derived snippet
       const onchainDesc = (post_meta && typeof post_meta.description === 'string') ? post_meta.description.trim() : '';
       meta_spec.desc = onchainDesc || desc;
+
+      // Server render only: the post's text for crawlers (see the ssrArticle block in the
+      // template). The HTML goes on the request's ssrContext, not into the returned data,
+      // so it is not sent a second time in the page's data payload.
+      if (process.server && ssrContext) {
+        try {
+          const html = renderPostBodyHtml(result.body);
+          if (html) {
+            ssrContext.actifitPostHtml = html;
+            meta_spec.ssrArticle = { title: result.title || '', author: result.author };
+          }
+        } catch (renderErr) {
+          console.log('asyncData: post body render failed - ' + (renderErr && renderErr.message));
+        }
+      }
       return meta_spec;
     } catch (preerr) {
       console.log(preerr);
@@ -418,10 +468,17 @@ export default {
       hashtags: process.env.socialSharingHashtags,
       heightSyncObserver: null,
       deleting: false,
+      ssrArticle: null,
     }
   },
   computed: {
     cardData() { return this.report },
+    // The post HTML asyncData left on this request's ssrContext; nothing in the browser.
+    ssrBodyHtml() {
+      if (!process.server) return '';
+      const ctx = this.$ssrContext;
+      return (ctx && ctx.actifitPostHtml) || '';
+    },
     ...mapGetters('steemconnect', ['user', 'stdLogin']),
     ...mapGetters(['commentEntries', 'newlyVotedPosts', 'bchain', 'moderators', 'commentCountToday']),
 
@@ -558,6 +615,11 @@ export default {
         console.error(err);
       } finally {
         this.isLoading = false; this.alignSidebar();
+        // The server's article stands in until the full page shows, which is now. Dropped
+        // only then: dropped earlier, the short spinner showed in between and the page
+        // jumped twice (CLS 1.4). Afterwards a reload (switching chain) shows the spinner,
+        // not a stale title over an empty body. A failed load keeps it.
+        if (this.report) this.ssrArticle = null;
       }
     },
     async fetchSupplementaryData() {
