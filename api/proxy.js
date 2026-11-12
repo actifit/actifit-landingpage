@@ -78,7 +78,7 @@ const T = {
   quick: 10000,     // account lookup: a small read
   reward: 15000,
   translate: 30000,
-  gemini: 60000,    // an LLM call; legitimately slow
+  gemini: 40000,    // an LLM call; under the client's 45 s per-model abort, so the proxy answers first
   // The deadline covers the whole request INCLUDING the browser's upload, which is
   // streamed through (data: req) at the user's connection speed. 60s cut off a ~10MB
   // phone photo on a slow uplink. Kept under Cloudflare's 100s.
@@ -89,7 +89,46 @@ const url = require('url');
 // The models components/gemini-client.js tries, in order. Google retires models: when one
 // starts answering 404, replace it in both places.
 const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.5-flash'];
+// Per model: thinking off where the model allows it (a translation needs none; measured
+// 2.4 s -> 0.7 s on 2.5-flash). 3.5-flash-lite does not think by default and rejects
+// thinkingBudget with a 400.
+const GEMINI_THINKING = {
+  'gemini-2.5-flash': { thinkingBudget: 0 },
+  'gemini-3.5-flash': { thinkingBudget: 0 },
+};
 const GEMINI_MAX_BODY = 256 * 1024;
+// Hive's own cap on a post body. Counted in characters; a JSON body of that much text
+// stays under GEMINI_MAX_BODY.
+const GEMINI_MAX_TEXT = 64 * 1024;
+
+// The browser sends only the text; the prompt and settings are fixed here, so this route
+// can only ever translate. It used to forward whatever generateContent body it was given:
+// any prompt, tools (paid Search grounding), any output length, on the site's key.
+function geminiTranslateRequest(model, text) {
+  const generationConfig = { temperature: 0.2, maxOutputTokens: 16384 };
+  if (GEMINI_THINKING[model]) generationConfig.thinkingConfig = GEMINI_THINKING[model];
+  const prompt = 'Translate the following text to English. The text may contain Markdown or HTML formatting. ' +
+    'Preserve the original formatting (like links, bolding, lists, etc.) as accurately as possible. ' +
+    'Do not add any extra explanations, introductory phrases, or apologies. Return ONLY the translated text.' +
+    '\n\nText to translate:\n"""\n' + text + '\n"""';
+  return { contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig };
+}
+
+// The answer's text, without any thought parts; '' when Google returned none (a blocked
+// or empty answer).
+function geminiText(data) {
+  const parts = (data && data.candidates && data.candidates[0] && data.candidates[0].content &&
+    data.candidates[0].content.parts) || [];
+  return parts.filter((p) => p && !p.thought && typeof p.text === 'string').map((p) => p.text).join('');
+}
+
+// The visitor's address, for rate limits. Cloudflare sets cf-connecting-ip, and the origin
+// accepts web traffic only through Cloudflare (checked 2026-11-12: 80/443 closed to
+// direct connections). x-forwarded-for keeps whatever the caller sent first, so a made-up
+// value per request got a fresh allowance on every route keyed by it.
+function clientIp(req) {
+  return req.headers['cf-connecting-ip'] || (req.socket && req.socket.remoteAddress) || 'unknown';
+}
 const VALID_USER_RE = /^[a-z][a-z0-9.-]{2,15}$/;
 const ALLOWED_URL_HOSTS = ['actifit.io', 'peakd.com', 'ecency.com', 'hive.blog'];
 
@@ -169,10 +208,7 @@ module.exports = async function (req, res, next) {
         res.statusCode = 400;
         return res.end(JSON.stringify({ error: 'Model not allowed' }));
       }
-      // cf-connecting-ip is set by Cloudflare; x-forwarded-for keeps whatever the caller
-      // sent, so a made-up value per request would get a fresh allowance each time.
-      const ip = req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
-      if (isRateLimited(`${ip}:${path}`, 20, 60000)) {
+      if (isRateLimited(`${clientIp(req)}:${path}`, 20, 60000)) {
         res.statusCode = 429;
         return res.end(JSON.stringify({ error: 'Too many requests' }));
       }
@@ -183,22 +219,32 @@ module.exports = async function (req, res, next) {
         return res.end(JSON.stringify({ error: 'Gemini API key not configured on server' }));
       }
 
-      // A translation request is a post or comment (Hive caps a body at 64 KB) plus the
-      // prompt; anything far larger is not one, and reading it all would fill memory.
-      let payload;
+      // A post or comment (Hive caps a body at 64 KB); anything far larger is not one, and
+      // reading it all would fill memory.
+      let text;
       try {
-        payload = JSON.parse(await readRequestBody(req, GEMINI_MAX_BODY));
+        text = JSON.parse(await readRequestBody(req, GEMINI_MAX_BODY)).text;
       } catch (error) {
         res.statusCode = error.statusCode || 400;
         return res.end(JSON.stringify({ error: error.statusCode ? 'Request body too large' : 'Invalid request body' }));
       }
+      if (typeof text !== 'string' || !text.trim() || text.length > GEMINI_MAX_TEXT) {
+        res.statusCode = 400;
+        return res.end(JSON.stringify({ error: 'Send { text } of at most ' + GEMINI_MAX_TEXT + ' characters' }));
+      }
       try {
         const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-        const response = await http.post(geminiUrl, payload, {
+        const response = await http.post(geminiUrl, geminiTranslateRequest(model, text), {
           headers: { 'Content-Type': 'application/json' },
           timeout: T.gemini
         });
-        return res.end(JSON.stringify(response.data));
+        const translated = geminiText(response.data);
+        if (!translated) {
+          // Blocked or empty: 502, so the client tries the next model.
+          res.statusCode = 502;
+          return res.end(JSON.stringify({ error: 'No translation returned' }));
+        }
+        return res.end(JSON.stringify({ text: translated }));
       } catch (error) {
         return upstreamFailed(res, error, path);
       }
@@ -270,7 +316,7 @@ module.exports = async function (req, res, next) {
         return res.end(JSON.stringify({ error: 'Authentication required' }));
       }
 
-      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+      const ip = clientIp(req);
       if (isRateLimited(`${ip}:${path}`, 10, 60000) || isRateLimited(`${ip}:${user}:${path}`, 5, 60000)) {
         res.statusCode = 429;
         return res.end(JSON.stringify({ error: 'Too many requests' }));
@@ -350,7 +396,7 @@ module.exports = async function (req, res, next) {
         return res.end(JSON.stringify({ error: 'Method Not Allowed' }));
       }
 
-      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+      const ip = clientIp(req);
       if (isRateLimited(`${ip}:${path}`, 10, 60000)) {
         res.statusCode = 429;
         return res.end(JSON.stringify({ error: 'Too many requests' }));
@@ -377,7 +423,7 @@ module.exports = async function (req, res, next) {
         return res.end(JSON.stringify({ error: 'Method Not Allowed' }));
       }
 
-      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+      const ip = clientIp(req);
       if (isRateLimited(`${ip}:${path}`, 10, 60000)) {
         res.statusCode = 429;
         return res.end(JSON.stringify({ error: 'Too many requests' }));
