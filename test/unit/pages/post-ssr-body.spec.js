@@ -137,21 +137,62 @@ describe('post page asyncData', () => {
 describe('after the browser loads the post', () => {
   afterEach(() => jest.restoreAllMocks())
 
-  it('the server article is dropped, so a later reload shows the spinner, not a stale title', async () => {
+  const loadWith = async (fetchSupplementaryData) => {
     jest.spyOn(hive.api, 'setOptions').mockImplementation(() => {})
     jest.spyOn(hive.api, 'getContentAsync').mockResolvedValue(POST)
-    let duringLoad
     const vm = {
       ssrArticle: { title: 't', author: 'alice' },
       $route: { params: { username: '@alice', permlink: 'my-walk' } },
       resetData () {}, alignSidebar () {}, fetchReportCommentData () {},
-      // still loading: dropping the article here showed the spinner in between (CLS 1.4)
-      fetchSupplementaryData: async () => { duringLoad = vm.ssrArticle },
+      fetchSupplementaryData,
     }
     await PostPage.methods.fetchPageData.call(vm)
-    expect(duringLoad).toEqual({ title: 't', author: 'alice' })
+    return vm
+  }
+
+  it('the server article is dropped, so a later reload shows the spinner, not a stale title', async () => {
+    const vm = await loadWith(async () => {})
     expect(vm.report).toBe(POST)
     expect(vm.ssrArticle).toBeNull()
+  })
+
+  // The full page (with the sidebar) used to wait for three author lookups, leaving the
+  // plain-text server version up for seconds.
+  it('the full post shows without waiting for the author details', async () => {
+    const vm = await loadWith(() => new Promise(() => {}))
+    expect(vm.isLoading).toBe(false)
+    expect(vm.report).toBe(POST)
+    expect(vm.ssrArticle).toBeNull()
+  })
+
+  it('the sidebar fills from Hive even when the Actifit API fails', async () => {
+    jest.spyOn(hive.api, 'getAccountsAsync').mockResolvedValue([{ name: 'alice', balance: '1.000 HIVE' }])
+    const errors = jest.spyOn(console, 'error').mockImplementation(() => {})
+    const prevFetch = global.fetch
+    global.fetch = jest.fn(() => Promise.reject(new Error('api down')))
+    try {
+      const vm = { report: POST, cur_bchain: 'HIVE', authorAccountInfo: null, authorAfitBalance: null, userRank: null }
+      await PostPage.methods.fetchSupplementaryData.call(vm) // never rejects
+      expect(vm.authorAccountInfo).toEqual({ name: 'alice', balance: '1.000 HIVE' })
+      expect(vm.authorAfitBalance).toBeNull()
+      expect(vm.userRank).toBeNull()
+      expect(errors).toHaveBeenCalled()
+    } finally { global.fetch = prevFetch }
+  })
+
+  it('answers for an earlier load are dropped', async () => {
+    let answer
+    jest.spyOn(hive.api, 'getAccountsAsync').mockImplementation(() => new Promise((r) => { answer = r }))
+    const prevFetch = global.fetch
+    global.fetch = jest.fn(() => new Promise(() => {}))
+    try {
+      const vm = { report: POST, cur_bchain: 'HIVE', authorAccountInfo: null, loadSeq: 1 }
+      PostPage.methods.fetchSupplementaryData.call(vm)
+      vm.loadSeq = 2 // a reload started
+      answer([{ name: 'old' }])
+      await new Promise((r) => setTimeout(r, 0))
+      expect(vm.authorAccountInfo).toBeNull()
+    } finally { global.fetch = prevFetch }
   })
 
   it('a failed first load keeps the server article', async () => {
@@ -183,6 +224,14 @@ describe('post page template', () => {
     const error = template.indexOf('v-else-if="errorDisplay"')
     expect(article).toBeGreaterThan(-1)
     expect(error).toBeGreaterThan(article)
+  })
+
+  it('the server article keeps the sidebar column, so the text does not jump across', () => {
+    const start = template.indexOf('v-else-if="ssrArticle"')
+    const block = template.slice(start, template.indexOf('v-else-if="errorDisplay"'))
+    expect(block).toMatch(/<UserSidebar :report="\{ author: ssrArticle\.author, permlink: \$route\.params\.permlink \}"/)
+    // its spinner would never stop after a failed load: hidden, column kept
+    expect(block).toMatch(/:class="\{ invisible: !!errorDisplay \}"/)
   })
 
   it('never binds v-html to the body in the browser (hydration would replace the server HTML)', () => {
