@@ -209,7 +209,10 @@
       return {
         title: 'Create a Challenge — The Arena | Actifit.io',
         meta: [
-          { hid: 'description', name: 'description', content: 'Create your own Actifit fitness challenge — reward players with a badge or a self-funded AFIT prize.' }
+          { hid: 'description', name: 'description', content: 'Create your own Actifit fitness challenge — reward players with a badge or a self-funded AFIT prize.' },
+          { hid: 'ogtitle', property: 'og:title', content: 'Create a Challenge — The Arena' },
+          { hid: 'ogdescription', property: 'og:description', content: 'Create your own Actifit fitness challenge — reward players with a badge or a self-funded AFIT prize.' },
+          { hid: 'ogimage', property: 'og:image', content: 'https://actifit.io/img/arena/step-league.webp' }
         ]
       }
     },
