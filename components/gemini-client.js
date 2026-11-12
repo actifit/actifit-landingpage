@@ -6,12 +6,13 @@
  */
 export async function translateTextWithGemini(textToTranslate) {
 
-  // UPDATED LIST based on your 'Available Models' screenshot:
+  // Tried in order; a 404 (retired model), 429 (quota) or 503 (overloaded) moves on to
+  // the next. api/proxy.js accepts only these models, so change both lists together.
+  // The gemini-2.0 models were retired by Google (404 since late 2026).
   const modelsToTry = [
-    'gemini-2.5-flash',       // Priority 1: Newest (Retry this, the 503 error was temporary)
-    'gemini-2.0-flash-lite',  // Priority 2: Lite version (Great for translation, less quota usage)
-    'gemini-2.0-flash',       // Priority 3: Standard 2.0 (Currently hitting quota, but keep as backup)
-    'gemini-2.0-flash-exp'    // Priority 4: Experimental version
+    'gemini-2.5-flash',
+    'gemini-3.5-flash-lite',
+    'gemini-3.5-flash',
   ];
 
   const prompt = `Translate the following text to English. The text may contain Markdown or HTML formatting. Preserve the original formatting (like links, bolding, lists, etc.) as accurately as possible. Do not add any extra explanations, introductory phrases, or apologies. Return ONLY the translated text.\n\nText to translate:\n"""\n${textToTranslate}\n"""`;
@@ -51,7 +52,15 @@ export async function translateTextWithGemini(textToTranslate) {
       // Handle Errors
       const status = response.status;
       const errorData = await response.json();
-      const errorMessage = errorData.error?.message || response.statusText;
+      const errorMessage = errorData.error?.message || errorData.error || response.statusText;
+
+      // The proxy's own limit, not Google's quota: another model would only use up more
+      // of this visitor's allowance.
+      if (status === 429 && errorData.error === 'Too many requests') {
+        const limited = new Error('Too many translations in a short time. Please wait a minute and try again.');
+        limited.stop = true;
+        throw limited;
+      }
 
       // 429 = Quota Exceeded, 503 = Overloaded, 404 = Model Not Found
       if (status === 429 || status === 503 || status === 404) {
@@ -68,7 +77,7 @@ export async function translateTextWithGemini(textToTranslate) {
 
     } catch (error) {
       lastError = error;
-      if (error.message.includes("Configuration") || error.message.includes("Invalid Key")) {
+      if (error.stop || error.message.includes("Configuration") || error.message.includes("Invalid Key")) {
         throw error;
       }
     }
@@ -77,17 +86,3 @@ export async function translateTextWithGemini(textToTranslate) {
   console.error("All Gemini models failed.");
   throw lastError || new Error("Failed to translate text with any Gemini model.");
 }
-
-async function checkAvailableModels() {
-  const apiKey = process.env.geminiApiKey;
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-  const data = await response.json();
-
-  // Filter for models that support 'generateContent'
-  const availableModels = data.models
-    .filter(m => m.supportedGenerationMethods.includes('generateContent'))
-    .map(m => m.name); // e.g. "models/gemini-2.5-flash"
-
-  console.log("Available Models:", availableModels);
-}
-

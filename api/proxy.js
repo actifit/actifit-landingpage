@@ -86,6 +86,10 @@ const T = {
 };
 const url = require('url');
 
+// The models components/gemini-client.js tries, in order. Google retires models: when one
+// starts answering 404, replace it in both places.
+const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.5-flash'];
+const GEMINI_MAX_BODY = 256 * 1024;
 const VALID_USER_RE = /^[a-z][a-z0-9.-]{2,15}$/;
 const ALLOWED_URL_HOSTS = ['actifit.io', 'peakd.com', 'ecency.com', 'hive.blog'];
 
@@ -100,12 +104,23 @@ function isAllowedPostUrl(rawUrl) {
 
 // Simple in-memory sliding-window rate limiter
 const _rateMap = new Map();
+const RATE_MAP_MAX = 10000;
 function isRateLimited(key, maxPerWindow = 10, windowMs = 60000) {
   const now = Date.now();
   const entry = _rateMap.get(key) || { count: 0, resetAt: now + windowMs };
   if (now > entry.resetAt) { entry.count = 0; entry.resetAt = now + windowMs; }
   entry.count++;
   _rateMap.set(key, entry);
+  // Entries were never removed, so every new key (one per visitor and route) stayed for
+  // the life of the process. Drop expired ones, and if a flood of new keys still leaves
+  // too many, the oldest.
+  if (_rateMap.size > RATE_MAP_MAX) {
+    for (const [k, e] of _rateMap) if (now > e.resetAt) _rateMap.delete(k);
+    for (const k of _rateMap.keys()) {
+      if (_rateMap.size <= RATE_MAP_MAX) break;
+      _rateMap.delete(k);
+    }
+  }
   return entry.count > maxPerWindow;
 }
 
@@ -147,7 +162,20 @@ module.exports = async function (req, res, next) {
         return res.end(JSON.stringify({ error: 'Method Not Allowed' }));
       }
 
-      const model = parsedUrl.query.model || 'gemini-2.5-flash';
+      // Only the translation models, at a translation pace: this route spends the site's
+      // own Gemini key, so it must not run any model, any number of times, for anyone.
+      const model = parsedUrl.query.model || GEMINI_MODELS[0];
+      if (!GEMINI_MODELS.includes(model)) {
+        res.statusCode = 400;
+        return res.end(JSON.stringify({ error: 'Model not allowed' }));
+      }
+      // cf-connecting-ip is set by Cloudflare; x-forwarded-for keeps whatever the caller
+      // sent, so a made-up value per request would get a fresh allowance each time.
+      const ip = req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+      if (isRateLimited(`${ip}:${path}`, 20, 60000)) {
+        res.statusCode = 429;
+        return res.end(JSON.stringify({ error: 'Too many requests' }));
+      }
       const apiKey = process.env.GEMINI_API_KEY;
 
       if (!apiKey) {
@@ -155,21 +183,25 @@ module.exports = async function (req, res, next) {
         return res.end(JSON.stringify({ error: 'Gemini API key not configured on server' }));
       }
 
-      let body = '';
-      req.on('data', chunk => { body += chunk; });
-      req.on('end', async () => {
-        try {
-          const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-          const response = await http.post(geminiUrl, JSON.parse(body), {
-            headers: { 'Content-Type': 'application/json' },
-            timeout: T.gemini
-          });
-          res.end(JSON.stringify(response.data));
-        } catch (error) {
-          return upstreamFailed(res, error, path);
-        }
-      });
-      return;
+      // A translation request is a post or comment (Hive caps a body at 64 KB) plus the
+      // prompt; anything far larger is not one, and reading it all would fill memory.
+      let payload;
+      try {
+        payload = JSON.parse(await readRequestBody(req, GEMINI_MAX_BODY));
+      } catch (error) {
+        res.statusCode = error.statusCode || 400;
+        return res.end(JSON.stringify({ error: error.statusCode ? 'Request body too large' : 'Invalid request body' }));
+      }
+      try {
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+        const response = await http.post(geminiUrl, payload, {
+          headers: { 'Content-Type': 'application/json' },
+          timeout: T.gemini
+        });
+        return res.end(JSON.stringify(response.data));
+      } catch (error) {
+        return upstreamFailed(res, error, path);
+      }
     }
 
     // 2. DeepL Proxy
