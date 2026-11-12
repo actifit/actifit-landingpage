@@ -321,6 +321,9 @@ module.exports = {
       { hid: 'ogimage', property: 'og:image', content: 'https://actifit.io/img/actifit_logo_med.png' },
       { name: 'google-site-verification', content: 'Dv3mVaav2x5_2FauDB6MRjixVtVVWPfjUekWwKY-Tnc' },
       { property: 'fb:app_id', content: '651065985331472' },
+      // X/Twitter shows a card with the og:image only when a card type is set; post pages
+      // raise this to summary_large_image under the same hid.
+      { hid: 'twitter:card', name: 'twitter:card', content: 'summary' },
     ],
     // --- END MODIFICATION ---
     link: [

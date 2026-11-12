@@ -66,7 +66,7 @@
 </template>
 
 <script>
-import { profileImageMeta } from '~/utils/seo'
+  import { profileImageMeta } from '~/utils/seo'
   import NavbarBrand from '~/components/NavbarBrand'
   import Post from '~/components/Post'
   import Footer from '~/components/Footer'

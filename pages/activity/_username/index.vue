@@ -58,7 +58,7 @@
 </template>
 
 <script>
-import { profileImageMeta } from '~/utils/seo'
+  import { profileImageMeta } from '~/utils/seo'
   import NavbarBrand from '~/components/NavbarBrand'
   import Report from '~/components/Report'
   import Footer from '~/components/Footer'
