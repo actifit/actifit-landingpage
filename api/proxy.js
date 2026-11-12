@@ -86,6 +86,9 @@ const T = {
 };
 const url = require('url');
 
+// The models components/gemini-client.js tries, in order. Google retires models: when one
+// starts answering 404, replace it in both places.
+const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.5-flash'];
 const VALID_USER_RE = /^[a-z][a-z0-9.-]{2,15}$/;
 const ALLOWED_URL_HOSTS = ['actifit.io', 'peakd.com', 'ecency.com', 'hive.blog'];
 
@@ -147,7 +150,20 @@ module.exports = async function (req, res, next) {
         return res.end(JSON.stringify({ error: 'Method Not Allowed' }));
       }
 
-      const model = parsedUrl.query.model || 'gemini-2.5-flash';
+      // Only the translation models, at a translation pace: this route spends the site's
+      // own Gemini key, so it must not run any model, any number of times, for anyone.
+      const model = parsedUrl.query.model || GEMINI_MODELS[0];
+      if (!GEMINI_MODELS.includes(model)) {
+        res.statusCode = 400;
+        return res.end(JSON.stringify({ error: 'Model not allowed' }));
+      }
+      // cf-connecting-ip is set by Cloudflare; x-forwarded-for keeps whatever the caller
+      // sent, so a made-up value per request would get a fresh allowance each time.
+      const ip = req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+      if (isRateLimited(`${ip}:${path}`, 20, 60000)) {
+        res.statusCode = 429;
+        return res.end(JSON.stringify({ error: 'Too many requests' }));
+      }
       const apiKey = process.env.GEMINI_API_KEY;
 
       if (!apiKey) {
