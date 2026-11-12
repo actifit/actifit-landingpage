@@ -9,6 +9,7 @@ import { requestKey } from '~/utils/keyPrompt';
 import { classifyKey, keyRefusal } from '~/utils/keyChecks';
 import escapeHtml from '~/utils/escapeHtml';
 import { timeAgo } from '~/utils/timeAgo';
+import { isSiteLink, isTrustedLink } from '~/utils/trustedLinks';
 Vue.prototype.$HAS = HAS;
 
 //sanitization
@@ -745,18 +746,14 @@ function sanitizePostHtml (html_content) {
     const processLinks = (href, addClass, setAttr) => {
         if (!href) return;
 
-		// Whitelist check
-		const isWhitelisted = /^(?:\/|#|https?:\/\/(?:[\w-]+\.)*(?:actifit\.io|peakd\.com|ecency\.com|hive\.blog|leofinance\.io|travelfeed\.com|3speak\.tv|steemit\.com|hivesigner\.com|vimm\.tv|d\.tube|bit\.ly|youtube\.com|youtu\.be|facebook\.com|twitter\.com|x\.com|instagram\.com|discord\.gg|discord\.com|telegram\.me|t\.me))/i.test(href);
-
-		if (!isWhitelisted) {
+		if (!isTrustedLink(href)) {
 			addClass('external-link');
             // We use the data-external-href to keep the modal informed
             // even if the href is still on the tag for browser rendering.
             setAttr('data-external-href', href);
 		}
 
-		// Standard link attributes for whitelisted/internal
-		if (!href.startsWith('/') && !href.startsWith('#')) {
+		if (!isSiteLink(href)) {
 			setAttr('target', '_blank');
 			setAttr('rel', 'noopener ugc');
 		}
