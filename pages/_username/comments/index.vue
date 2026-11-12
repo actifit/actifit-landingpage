@@ -73,6 +73,7 @@
 
 
   <script>
+  import { profileImageMeta } from '~/utils/seo'
 
   import NavbarBrand from '~/components/NavbarBrand'
   import Post from '~/components/Post'
@@ -91,7 +92,8 @@
 		  meta: [
 			{ hid: 'description', name: 'description', content: `Comments by ${this.username} on Actifit — community discussions and fitness engagement on Hive blockchain.` },
 			{ hid: 'ogdescription', property: 'og:description', content: `Comments by ${this.username} on Actifit.` },
-			{ hid: 'ogtitle', property: 'og:title', content: `Comments by ${this.username} - Actifit.io` }
+			{ hid: 'ogtitle', property: 'og:title', content: `Comments by ${this.username} - Actifit.io` },
+			...profileImageMeta(this.username)
 		  ]
 		}
 	},

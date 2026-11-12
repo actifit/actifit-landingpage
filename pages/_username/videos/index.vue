@@ -66,6 +66,7 @@
 </template>
 
 <script>
+  import { profileImageMeta } from '~/utils/seo'
   import NavbarBrand from '~/components/NavbarBrand'
   import Post from '~/components/Post'
   import Footer from '~/components/Footer'
@@ -84,7 +85,8 @@
 		  meta: [
 			{ hid: 'description', name: 'description', content: `Videos by ${this.username} on Actifit — fitness content and community videos on Hive blockchain via 3Speak.` },
 			{ hid: 'ogdescription', property: 'og:description', content: `Videos by ${this.username} on Actifit.` },
-			{ hid: 'ogtitle', property: 'og:title', content: `3Speak Videos by ${this.username} - Actifit.io` }
+			{ hid: 'ogtitle', property: 'og:title', content: `3Speak Videos by ${this.username} - Actifit.io` },
+			...profileImageMeta(this.username)
 		  ]
 		}
 	},

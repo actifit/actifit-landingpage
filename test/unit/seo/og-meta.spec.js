@@ -9,7 +9,7 @@ import path from 'path'
 const root = path.resolve(__dirname, '../../..')
 const walk = (dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
   e.isDirectory() ? walk(path.join(dir, e.name)) : /\.(vue|js)$/.test(e.name) ? [path.join(dir, e.name)] : [])
-const files = ['pages', 'components', 'layouts', 'mixins', 'plugins', 'store', 'middleware']
+const files = ['pages', 'components', 'layouts', 'mixins', 'plugins', 'store', 'middleware', 'utils']
   .flatMap((d) => walk(path.join(root, d))).concat(path.join(root, 'nuxt.config.js'))
 
 // every line that mentions an og:/fb: property, as [file, line]

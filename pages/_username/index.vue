@@ -562,6 +562,7 @@
   </div>
 </template>
 <script>
+import { profileImageMeta } from '~/utils/seo'
 import UserHoverCard from '~/components/UserHoverCard'
 import LoginModal from '~/components/LoginModal'
 import NavbarBrand from '~/components/NavbarBrand'
@@ -602,7 +603,8 @@ export default {
       meta: [
         { hid: 'description', name: 'description', content: `View ${this.username}'s activity reports, fitness achievements, and earnings on Actifit — the move-to-earn platform that rewards your healthy lifestyle.` },
         { hid: 'ogdescription', property: 'og:description', content: `View ${this.username}'s activity reports and earnings on Actifit.` },
-        { hid: 'ogtitle', property: 'og:title', content: `${this.username} on Actifit` }
+        { hid: 'ogtitle', property: 'og:title', content: `${this.username} on Actifit` },
+        ...profileImageMeta(this.username)
       ]
     }
   },

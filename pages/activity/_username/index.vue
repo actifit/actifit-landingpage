@@ -58,6 +58,7 @@
 </template>
 
 <script>
+  import { profileImageMeta } from '~/utils/seo'
   import NavbarBrand from '~/components/NavbarBrand'
   import Report from '~/components/Report'
   import Footer from '~/components/Footer'
@@ -77,7 +78,8 @@
 		  meta: [
 			{ hid: 'description', name: 'description', content: `Activity reports by ${this.username} on Actifit — daily fitness tracking and crypto rewards for staying active.` },
 			{ hid: 'ogdescription', property: 'og:description', content: `Activity reports by ${this.username} on Actifit.` },
-			{ hid: 'ogtitle', property: 'og:title', content: `Actifit activity reports by ${this.username} - Actifit.io` }
+			{ hid: 'ogtitle', property: 'og:title', content: `Actifit activity reports by ${this.username} - Actifit.io` },
+			...profileImageMeta(this.username)
 		  ]
 		}
 	},
