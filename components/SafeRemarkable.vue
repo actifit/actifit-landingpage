@@ -103,7 +103,16 @@
           }
           },
           openExternalLink() {
-          const url = this.externalLinkUrl ? this.$safeUrl(this.externalLinkUrl) : '#';
+          let url = this.externalLinkUrl ? this.$safeUrl(this.externalLinkUrl) : '#';
+          // $safeUrl rejects "//site.com" and "/\site.com" (it guards links meant to stay
+          // on the site). The reader has been warned, so open where the browser would go,
+          // if that is an http(s) page.
+          if (url === '#' && this.externalLinkUrl) {
+            try {
+              const resolved = new URL(this.externalLinkUrl, window.location.href);
+              if (resolved.protocol === 'https:' || resolved.protocol === 'http:') url = resolved.href;
+            } catch {}
+          }
           if (url !== '#') {
           window.open(url, '_blank', 'noopener');
           }

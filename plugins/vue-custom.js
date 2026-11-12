@@ -709,11 +709,6 @@ function sanitizePostHtml (html_content) {
     } else {
         // Server-side sanitization using sanitize-html
         const sanitizeHtml = require('sanitize-html');
-        const trustedIframeRe = new RegExp(
-            '^https?:\\/\\/([\\w-]+\\.)*(' +
-            TRUSTED_IFRAME_HOSTS.map(h => h.replace('.', '\\.')).join('|') +
-            ')(\\/|$)', 'i'
-        );
         sanitized_html = sanitizeHtml(html_content, {
             allowedTags: sanitizeOptions.ALLOWED_TAGS,
             // data-external-href feeds SafeRemarkable's window.open(). sanitize-html only

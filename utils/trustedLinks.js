@@ -30,6 +30,6 @@ export function isTrustedLink (href) {
   try { url = new URL(normalize(href)) } catch { return false }
   if (url.protocol !== 'https:' && url.protocol !== 'http:') return false
   if (url.username || url.password) return false
-  const host = url.hostname.toLowerCase()
+  const host = url.hostname.toLowerCase().replace(/\.$/, '') // "peakd.com." is peakd.com
   return TRUSTED_LINK_HOSTS.some((h) => host === h || host.endsWith('.' + h))
 }
