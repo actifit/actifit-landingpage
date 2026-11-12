@@ -15,9 +15,10 @@ name: Lockfile sync
 on:
   pull_request:
     branches: [develop, master]
-  # Daily on master too: a new upstream release can break `npm ci` without any change
-  # here (ws 5.2.8 did, 2026-11-12, failing the 1.14.42 deploy). A scheduled failure
-  # emails the repo owner, so it is caught before the next deploy, not during it.
+  # Daily too: a new upstream release can break `npm ci` without any change here (ws
+  # 5.2.8 did, 2026-11-12, failing the 1.14.42 deploy). GitHub runs schedules only from
+  # the DEFAULT branch's copy of this file, and emails a failure to whoever last edited
+  # the cron line; on a public repo it pauses schedules after 60 days without activity.
   schedule:
     - cron: '17 5 * * *'
   workflow_dispatch:
@@ -28,6 +29,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # the daily run checks what deploys (master), whatever the default branch is
+          ref: ${{ github.event_name == 'schedule' && 'master' || '' }}
       - uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc' # v16.20.2, matching the DigitalOcean build
