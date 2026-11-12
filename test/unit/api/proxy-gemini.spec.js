@@ -101,7 +101,7 @@ describe('api/proxy /gemini builds the request itself', () => {
     const prompt = sent().contents[0].parts[0].text
     expect(prompt).toMatch(/^Translate the following text to English\./)
     expect(prompt).toContain('"""\nHola amigos\n"""')
-    expect(sent().generationConfig).toEqual({ temperature: 0.2, maxOutputTokens: 16384, thinkingConfig: { thinkingBudget: 0 } })
+    expect(sent().generationConfig).toEqual({ temperature: 0.2, maxOutputTokens: 32768, thinkingConfig: { thinkingBudget: 0 } })
   })
 
   it('sends no thinking setting to a model that rejects it', async () => {
@@ -157,6 +157,26 @@ describe('api/proxy /gemini builds the request itself', () => {
   it('answers 502 to an empty or blocked answer, so the next model is tried', async () => {
     post.mockResolvedValue({ data: { promptFeedback: { blockReason: 'OTHER' } } })
     expect((await call(proxy)).status).toBe(502)
+  })
+
+  it('flags an answer cut off at the output cap', async () => {
+    post.mockResolvedValue({ data: { candidates: [{ content: { parts: [{ text: 'half a po' }] }, finishReason: 'MAX_TOKENS' }] } })
+    expect((await call(proxy)).body).toEqual({ text: 'half a po', truncated: true })
+  })
+
+  // A Google error concerns that model only; passed through as-is, the client took a 500 or
+  // a model-specific 400 for the proxy's own and gave up on every model.
+  it.each([[500, 502], [504, 502], [400, 502], [403, 502], [404, 404], [429, 429]])(
+    'Google %i is answered as %i', async (google, ours) => {
+      jest.spyOn(console, 'warn').mockImplementation(() => {})
+      post.mockRejectedValue({ response: { status: google, data: { error: { message: 'x' } } } })
+      expect((await call(proxy)).status).toBe(ours)
+    })
+
+  it('a timeout or dropped connection is 503', async () => {
+    jest.spyOn(console, 'warn').mockImplementation(() => {})
+    post.mockRejectedValue(Object.assign(new Error('canceled'), { code: 'ERR_CANCELED' }))
+    expect((await call(proxy)).status).toBe(503)
   })
 })
 
@@ -217,6 +237,18 @@ describe('the translate button', () => {
       .mockImplementationOnce(() => reply(200, { text: 'hello' }))
     await expect(client.translateTextWithGemini('hola')).resolves.toBe('hello')
     expect(global.fetch.mock.calls[1][0]).toContain('model=gemini-3.5-flash-lite')
+  })
+
+  it('moves to the next model on a Google error (502 from the proxy)', async () => {
+    global.fetch = jest.fn()
+      .mockImplementationOnce(() => reply(502, { error: 'Model error' }))
+      .mockImplementationOnce(() => reply(200, { text: 'hello' }))
+    await expect(client.translateTextWithGemini('hola')).resolves.toBe('hello')
+  })
+
+  it('says so when the translation was cut short', async () => {
+    global.fetch = jest.fn(() => reply(200, { text: 'half', truncated: true }))
+    await expect(client.translateTextWithGemini('hola')).resolves.toBe('half' + client.TRUNCATED_NOTE)
   })
 
   it('gives up on a model that never answers and tries the next', async () => {

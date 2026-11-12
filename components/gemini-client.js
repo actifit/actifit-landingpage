@@ -12,6 +12,7 @@ export const GEMINI_MODELS = [
 export const MODEL_TIMEOUT_MS = 45000;
 
 const RETRY_STATUSES = [404, 429, 502, 503];
+export const TRUNCATED_NOTE = '\n\n*(The translation stops here: the post is too long to translate in full.)*';
 const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 /**
@@ -38,7 +39,7 @@ export async function translateTextWithGemini(textToTranslate) {
 
       if (response.ok) {
         if (!data.text) throw new Error(`Empty translation from ${model}`);
-        return data.text;
+        return data.truncated ? data.text + TRUNCATED_NOTE : data.text;
       }
 
       const errorMessage = (data.error && data.error.message) || data.error || response.statusText;
@@ -58,7 +59,8 @@ export async function translateTextWithGemini(textToTranslate) {
         continue;
       }
 
-      // 400 (bad request), 500 (no key on the server): the next model would fail the same way.
+      // The proxy's own 400 (bad request) or 500 (no key on the server): the next model would
+      // fail the same way. Google's errors arrive as 502 and are retried above.
       const fatal = new Error(`Translation failed: ${errorMessage}`);
       fatal.stop = true;
       throw fatal;

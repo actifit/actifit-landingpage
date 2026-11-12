@@ -105,7 +105,7 @@ const GEMINI_MAX_TEXT = 64 * 1024;
 // can only ever translate. It used to forward whatever generateContent body it was given:
 // any prompt, tools (paid Search grounding), any output length, on the site's key.
 function geminiTranslateRequest(model, text) {
-  const generationConfig = { temperature: 0.2, maxOutputTokens: 16384 };
+  const generationConfig = { temperature: 0.2, maxOutputTokens: 32768 };
   if (GEMINI_THINKING[model]) generationConfig.thinkingConfig = GEMINI_THINKING[model];
   const prompt = 'Translate the following text to English. The text may contain Markdown or HTML formatting. ' +
     'Preserve the original formatting (like links, bolding, lists, etc.) as accurately as possible. ' +
@@ -244,8 +244,21 @@ module.exports = async function (req, res, next) {
           res.statusCode = 502;
           return res.end(JSON.stringify({ error: 'No translation returned' }));
         }
-        return res.end(JSON.stringify({ text: translated }));
+        // Cut off at the output cap (a very long post): say so rather than show half a post
+        // as if it were all of it.
+        const candidate = response.data.candidates[0];
+        const truncated = candidate.finishReason === 'MAX_TOKENS';
+        return res.end(JSON.stringify(truncated ? { text: translated, truncated } : { text: translated }));
       } catch (error) {
+        const status = error && error.response && error.response.status;
+        // Google's own errors (500 INTERNAL, 504, a model-specific 400...) concern that model
+        // only: 502, so the client tries the next one. 404 (retired) and 429 (quota) pass
+        // through as they are. The client stops only on THIS route's own 400/500s.
+        if (status && status !== 404 && status !== 429) {
+          console.warn('[proxy] gemini ' + model + ' answered ' + status);
+          res.statusCode = 502;
+          return res.end(JSON.stringify({ error: 'Model error' }));
+        }
         return upstreamFailed(res, error, path);
       }
     }
