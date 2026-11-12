@@ -220,6 +220,9 @@
             </article>
           </div>
         </div>
+        <!-- The sidebar's column and loading state, so the text sits where the full page
+             puts it instead of jumping across when the page swaps in. -->
+        <UserSidebar :report="{ author: ssrArticle.author }" class="align-to-content" />
       </div>
     </div>
 
@@ -608,7 +611,10 @@ export default {
         if (!reportData || !reportData.author) throw new Error('Post not found');
         this.report = reportData;
         this.pageTitle = this.report.title || 'Comment' + ` by @${this.report.author}`;
-        await this.fetchSupplementaryData();
+        // Not awaited: the post shows as soon as it loads, and the sidebar fills in when
+        // these arrive (it has its own loading state). A failure here only leaves the
+        // sidebar empty; it no longer replaces a loaded post with an error.
+        this.fetchSupplementaryData();
         this.fetchReportCommentData();
       } catch (err) {
         this.errorDisplay = "Could not load post. It may not exist or the network is busy.";
@@ -625,18 +631,25 @@ export default {
     async fetchSupplementaryData() {
         if (!this.report) return;
         const { author, url, permlink } = this.report;
-        const [accounts, afitData, rankData] = await Promise.all([
-            hive.api.getAccountsAsync([author]),
-            fetch(`${process.env.actiAppUrl}user/${author}`).then(res => res.json()),
-            fetch(`${process.env.actiAppUrl}getRank/${author}`).then(res => res.json()),
-        ]);
-        if (accounts && accounts.length > 0) this.authorAccountInfo = accounts[0];
-        if (afitData) this.authorAfitBalance = afitData.tokens;
-        if (rankData) this.userRank = rankData;
-        fetch(`${process.env.actiAppUrl}getPostReward?user=${author}&url=${url}`).then(res => res.json()).then(json => this.afitReward = json.token_count);
-        fetch(`${process.env.actiAppUrl}getPostFullAFITPayReward?user=${author}&url=${url}`).then(res => res.json()).then(json => this.fullAFITReward = json.token_count);
         const scotApiUrl = this.cur_bchain === 'STEEM' ? `${scot_steemengine_api}@${author}/${permlink}` : `${scot_steemengine_api}@${author}/${permlink}${scot_hive_api_param}`;
         fetch(scotApiUrl).then(res => res.json()).then(json => { this.tokenRewards = Array.isArray(json) ? json : [] }).catch(e => { console.error("Scot API fetch failed:", e); this.tokenRewards = []; });
+        const getJson = (path) => fetch(`${process.env.actiAppUrl}${path}`).then(res => res.json());
+        const logFail = (what) => (err) => console.error(`${what} failed:`, err);
+        // Each fills its part of the page as it arrives. The sidebar shows once the Hive
+        // account is in; a slow or failing Actifit API no longer keeps it spinning.
+        await Promise.all([
+            hive.api.getAccountsAsync([author])
+                .then(accounts => { if (accounts && accounts.length > 0) this.authorAccountInfo = accounts[0]; })
+                .catch(logFail('Author account')),
+            getJson(`user/${author}`).then(afitData => { if (afitData) this.authorAfitBalance = afitData.tokens; })
+                .catch(logFail('AFIT balance')),
+            getJson(`getRank/${author}`).then(rankData => { if (rankData) this.userRank = rankData; })
+                .catch(logFail('User rank')),
+            getJson(`getPostReward?user=${author}&url=${url}`).then(json => { this.afitReward = json.token_count; })
+                .catch(logFail('Post reward')),
+            getJson(`getPostFullAFITPayReward?user=${author}&url=${url}`).then(json => { this.fullAFITReward = json.token_count; })
+                .catch(logFail('Full AFIT reward')),
+        ]);
     },
     fetchReportCommentData() {
       if (!this.report) return;
