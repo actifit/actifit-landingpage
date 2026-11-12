@@ -115,7 +115,7 @@
     "patch-package": "^6.2.1"
   },
   "overrides": {
-    "ws": "5.2.7",
+    "ws": "5.2.8",
     "cookie": "^0.7.0",
     "follow-redirects": "^1.15.6",
     "lodash": "^4.17.21",
