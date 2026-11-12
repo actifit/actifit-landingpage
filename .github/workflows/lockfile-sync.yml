@@ -15,6 +15,11 @@ name: Lockfile sync
 on:
   pull_request:
     branches: [develop, master]
+  # Daily on master too: a new upstream release can break `npm ci` without any change
+  # here (ws 5.2.8 did, 2026-11-12, failing the 1.14.42 deploy). A scheduled failure
+  # emails the repo owner, so it is caught before the next deploy, not during it.
+  schedule:
+    - cron: '17 5 * * *'
   workflow_dispatch:
 
 jobs:
