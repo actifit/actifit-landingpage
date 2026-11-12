@@ -52,7 +52,15 @@ export async function translateTextWithGemini(textToTranslate) {
       // Handle Errors
       const status = response.status;
       const errorData = await response.json();
-      const errorMessage = errorData.error?.message || response.statusText;
+      const errorMessage = errorData.error?.message || errorData.error || response.statusText;
+
+      // The proxy's own limit, not Google's quota: another model would only use up more
+      // of this visitor's allowance.
+      if (status === 429 && errorData.error === 'Too many requests') {
+        const limited = new Error('Too many translations in a short time. Please wait a minute and try again.');
+        limited.stop = true;
+        throw limited;
+      }
 
       // 429 = Quota Exceeded, 503 = Overloaded, 404 = Model Not Found
       if (status === 429 || status === 503 || status === 404) {
@@ -69,7 +77,7 @@ export async function translateTextWithGemini(textToTranslate) {
 
     } catch (error) {
       lastError = error;
-      if (error.message.includes("Configuration") || error.message.includes("Invalid Key")) {
+      if (error.stop || error.message.includes("Configuration") || error.message.includes("Invalid Key")) {
         throw error;
       }
     }

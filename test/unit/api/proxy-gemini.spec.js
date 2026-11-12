@@ -11,7 +11,7 @@
 import fs from 'fs'
 import path from 'path'
 
-const call = (proxy, { model, ip = '1.2.3.4' } = {}) => new Promise((resolve) => {
+const call = (proxy, { model, ip = '1.2.3.4', body = '{"contents":[{"parts":[{"text":"hi"}]}]}' } = {}) => new Promise((resolve) => {
   const handlers = {}
   const req = {
     method: 'POST',
@@ -19,6 +19,7 @@ const call = (proxy, { model, ip = '1.2.3.4' } = {}) => new Promise((resolve) =>
     headers: { 'cf-connecting-ip': ip },
     socket: {},
     on: (ev, fn) => { handlers[ev] = fn },
+    destroy () {},
   }
   const res = {
     statusCode: 200,
@@ -26,7 +27,7 @@ const call = (proxy, { model, ip = '1.2.3.4' } = {}) => new Promise((resolve) =>
     end (body) { resolve({ status: this.statusCode, body: body && JSON.parse(body) }) },
   }
   proxy(req, res, () => {})
-  if (handlers.data) handlers.data('{"contents":[{"parts":[{"text":"hi"}]}]}')
+  if (handlers.data) handlers.data(body)
   if (handlers.end) handlers.end()
 })
 
@@ -66,6 +67,61 @@ describe('api/proxy /gemini', () => {
     expect(post).toHaveBeenCalledTimes(20)
     // another visitor is unaffected
     expect((await call(proxy, { ip: '8.8.8.8' })).status).toBe(200)
+  })
+})
+
+describe('api/proxy /gemini request body', () => {
+  let proxy, post
+  beforeEach(() => {
+    process.env.GEMINI_API_KEY = 'test-key'
+    post = jest.fn().mockResolvedValue({ data: {} })
+    jest.isolateModules(() => {
+      jest.doMock('axios', () => ({ create: () => ({ post, interceptors: { request: { use () {} }, response: { use () {} } } }) }))
+      proxy = require('../../../api/proxy.js')
+    })
+  })
+  afterEach(() => { jest.dontMock('axios'); delete process.env.GEMINI_API_KEY })
+
+  it('answers 413 to a body far larger than any post, without calling Google', async () => {
+    const r = await call(proxy, { body: 'x'.repeat(300 * 1024) })
+    expect(r.status).toBe(413)
+    expect(post).not.toHaveBeenCalled()
+  })
+
+  it('takes a 64 KB post with its prompt', async () => {
+    const text = 'word '.repeat(13000)
+    const r = await call(proxy, { body: JSON.stringify({ contents: [{ parts: [{ text }] }] }) })
+    expect(r.status).toBe(200)
+  })
+
+  it('answers 400, not 503, to a body that is not JSON', async () => {
+    const r = await call(proxy, { body: '{not json' })
+    expect(r.status).toBe(400)
+    expect(post).not.toHaveBeenCalled()
+  })
+})
+
+describe('the translate button', () => {
+  let translateTextWithGemini
+  beforeAll(() => { translateTextWithGemini = require('../../../components/gemini-client.js').translateTextWithGemini })
+  afterEach(() => { delete global.fetch; jest.useRealTimers() })
+  const reply = (status, body) => Promise.resolve({ ok: status === 200, status, statusText: 'x', json: () => Promise.resolve(body) })
+
+  it('stops at the proxy limit instead of trying more models', async () => {
+    global.fetch = jest.fn(() => reply(429, { error: 'Too many requests' }))
+    jest.spyOn(console, 'log').mockImplementation(() => {})
+    await expect(translateTextWithGemini('hola')).rejects.toThrow(/wait a minute/)
+    expect(global.fetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('moves to the next model when Google has retired one', async () => {
+    jest.spyOn(console, 'log').mockImplementation(() => {})
+    jest.spyOn(console, 'warn').mockImplementation(() => {})
+    global.fetch = jest.fn()
+      .mockImplementationOnce(() => reply(404, { error: { message: 'no longer available' } }))
+      .mockImplementationOnce(() => reply(200, { candidates: [{ content: { parts: [{ text: 'hello' }] } }] }))
+    await expect(translateTextWithGemini('hola')).resolves.toBe('hello')
+    expect(global.fetch.mock.calls[1][0]).toContain('model=gemini-3.5-flash-lite')
   })
 })
 
