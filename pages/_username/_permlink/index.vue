@@ -222,7 +222,11 @@
         </div>
         <!-- The sidebar's column and loading state, so the text sits where the full page
              puts it instead of jumping across when the page swaps in. -->
-        <UserSidebar :report="{ author: ssrArticle.author }" class="align-to-content" />
+        <!-- permlink too: this instance is reused for the full page, and its recent-posts
+             list leaves out the post being read. Hidden (space kept) if the load failed,
+             since its spinner would never stop. -->
+        <UserSidebar :report="{ author: ssrArticle.author, permlink: $route.params.permlink }"
+          class="align-to-content" :class="{ invisible: !!errorDisplay }" />
       </div>
     </div>
 
@@ -471,6 +475,7 @@ export default {
       hashtags: process.env.socialSharingHashtags,
       heightSyncObserver: null,
       deleting: false,
+      loadSeq: 0,
       ssrArticle: null,
     }
   },
@@ -599,6 +604,7 @@ export default {
     },
     async fetchPageData() {
       this.isLoading = true; this.resetData();
+      this.loadSeq = (this.loadSeq || 0) + 1;
       const author = this.$route.params.username.replace('@', '');
       const permlink = this.$route.params.permlink;
       try {
@@ -631,23 +637,27 @@ export default {
     async fetchSupplementaryData() {
         if (!this.report) return;
         const { author, url, permlink } = this.report;
+        // A reload (chain switch, login in another tab) starts a new load; answers for an
+        // earlier one are dropped so they cannot land on the new page.
+        const seq = this.loadSeq;
+        const set = (fn) => (val) => { if (seq === this.loadSeq) fn(val); };
         const scotApiUrl = this.cur_bchain === 'STEEM' ? `${scot_steemengine_api}@${author}/${permlink}` : `${scot_steemengine_api}@${author}/${permlink}${scot_hive_api_param}`;
-        fetch(scotApiUrl).then(res => res.json()).then(json => { this.tokenRewards = Array.isArray(json) ? json : [] }).catch(e => { console.error("Scot API fetch failed:", e); this.tokenRewards = []; });
+        fetch(scotApiUrl).then(res => res.json()).then(set(json => { this.tokenRewards = Array.isArray(json) ? json : [] })).catch(e => { console.error("Scot API fetch failed:", e); this.tokenRewards = []; });
         const getJson = (path) => fetch(`${process.env.actiAppUrl}${path}`).then(res => res.json());
         const logFail = (what) => (err) => console.error(`${what} failed:`, err);
         // Each fills its part of the page as it arrives. The sidebar shows once the Hive
         // account is in; a slow or failing Actifit API no longer keeps it spinning.
         await Promise.all([
             hive.api.getAccountsAsync([author])
-                .then(accounts => { if (accounts && accounts.length > 0) this.authorAccountInfo = accounts[0]; })
+                .then(set(accounts => { if (accounts && accounts.length > 0) this.authorAccountInfo = accounts[0]; }))
                 .catch(logFail('Author account')),
-            getJson(`user/${author}`).then(afitData => { if (afitData) this.authorAfitBalance = afitData.tokens; })
+            getJson(`user/${author}`).then(set(afitData => { if (afitData) this.authorAfitBalance = afitData.tokens; }))
                 .catch(logFail('AFIT balance')),
-            getJson(`getRank/${author}`).then(rankData => { if (rankData) this.userRank = rankData; })
+            getJson(`getRank/${author}`).then(set(rankData => { if (rankData) this.userRank = rankData; }))
                 .catch(logFail('User rank')),
-            getJson(`getPostReward?user=${author}&url=${url}`).then(json => { this.afitReward = json.token_count; })
+            getJson(`getPostReward?user=${author}&url=${url}`).then(set(json => { this.afitReward = json.token_count; }))
                 .catch(logFail('Post reward')),
-            getJson(`getPostFullAFITPayReward?user=${author}&url=${url}`).then(json => { this.fullAFITReward = json.token_count; })
+            getJson(`getPostFullAFITPayReward?user=${author}&url=${url}`).then(set(json => { this.fullAFITReward = json.token_count; }))
                 .catch(logFail('Full AFIT reward')),
         ]);
     },

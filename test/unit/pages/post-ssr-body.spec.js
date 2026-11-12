@@ -180,6 +180,21 @@ describe('after the browser loads the post', () => {
     } finally { global.fetch = prevFetch }
   })
 
+  it('answers for an earlier load are dropped', async () => {
+    let answer
+    jest.spyOn(hive.api, 'getAccountsAsync').mockImplementation(() => new Promise((r) => { answer = r }))
+    const prevFetch = global.fetch
+    global.fetch = jest.fn(() => new Promise(() => {}))
+    try {
+      const vm = { report: POST, cur_bchain: 'HIVE', authorAccountInfo: null, loadSeq: 1 }
+      PostPage.methods.fetchSupplementaryData.call(vm)
+      vm.loadSeq = 2 // a reload started
+      answer([{ name: 'old' }])
+      await new Promise((r) => setTimeout(r, 0))
+      expect(vm.authorAccountInfo).toBeNull()
+    } finally { global.fetch = prevFetch }
+  })
+
   it('a failed first load keeps the server article', async () => {
     jest.spyOn(hive.api, 'setOptions').mockImplementation(() => {})
     jest.spyOn(hive.api, 'getContentAsync').mockRejectedValue(new Error('down'))
@@ -214,7 +229,9 @@ describe('post page template', () => {
   it('the server article keeps the sidebar column, so the text does not jump across', () => {
     const start = template.indexOf('v-else-if="ssrArticle"')
     const block = template.slice(start, template.indexOf('v-else-if="errorDisplay"'))
-    expect(block).toMatch(/<UserSidebar :report="\{ author: ssrArticle\.author \}"/)
+    expect(block).toMatch(/<UserSidebar :report="\{ author: ssrArticle\.author, permlink: \$route\.params\.permlink \}"/)
+    // its spinner would never stop after a failed load: hidden, column kept
+    expect(block).toMatch(/:class="\{ invisible: !!errorDisplay \}"/)
   })
 
   it('never binds v-html to the body in the browser (hydration would replace the server HTML)', () => {
