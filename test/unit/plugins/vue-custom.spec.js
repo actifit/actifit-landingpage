@@ -509,6 +509,7 @@ describe('plugins/vue-custom global helpers', () => {
       'https://player.vimeo.com/video/76979871',
       'https://www.facebook.com/plugins/video.php?href=x',
       'https://evil.test@youtube.com/embed/x', // the host really is youtube.com
+      'HTTPS://WWW.YOUTUBE.COM/embed/x', // hosts compare lowercased on both sides
     ])('keeps %s', (url) => {
       expect(src(url, false)).toBe(url)
       expect(src(url, true)).toBe(url)
@@ -521,6 +522,7 @@ describe('plugins/vue-custom global helpers', () => {
       'https://evil.test/x',
       // Only the player hosts themselves, not the rest of their domain.
       'https://sub.youtube.com/embed/x',
+      'https://www.youtube.com./embed/x', // trailing dot: not an exact match on either side
       'https://m.facebook.com/plugins/video.php',
       'https://vimeo.com/76979871',
       'https://youtu.be/dQw4w9WgXcQ',
