@@ -15,8 +15,10 @@ import sanitizePlugin from '@/plugins/sanitize'
 //   GHSA-x3q4-9hxx-gx8m  <noscript> added to nonTextTags
 //   GHSA-cv27-6wvh-8x7j  <meta http-equiv="refresh" content="0;url=javascript:...">
 // These run each published proof of concept through both server sanitizers, so allowing
-// any of those tags later fails here instead of shipping the hole. Upgrade sanitize-html
-// once the server is on Node 22, and these can stay as regression tests.
+// svg, textarea, xmp or meta later fails here instead of shipping the hole. The noscript
+// cases are weaker: with noscript in nonTextTags, x3q4 can only let through markup the
+// allow-list already permits, so they check that nothing runs, not the config itself.
+// Upgrade sanitize-html once the server is on Node 22; these stay as regression tests.
 const POCS = {
   'SVG SMIL href list (GHSA-g8qq)':
     '<svg><a><animate attributeName="href" values="#safe;javascript:alert(1)" dur=".01s" fill="freeze"></animate><text y="30">Click me</text></a></svg>',
@@ -30,6 +32,14 @@ const POCS = {
     '<p>Hi</p><![CDATA[ x > <noscript>]]><a href="javascript:alert(1)">Reset</a><img src="/img/a.png" onerror="alert(1)"></noscript>',
   'meta refresh (GHSA-cv27)':
     '<meta http-equiv="refresh" content="0;url=javascript:alert(1)">',
+  // Not an advisory: our own cheerio link pass used to decode iframe text and write it
+  // back unescaped (plugins/vue-custom.js, server branch).
+  'escaped markup inside an iframe':
+    '<iframe>&lt;/iframe&gt;&lt;img src=x onerror=alert(1)&gt;</iframe>',
+  'escaped markup inside a trusted iframe':
+    '<iframe src="https://www.youtube.com/embed/x">&lt;/iframe&gt;&lt;img src=x onerror=alert(1)&gt;</iframe>',
+  'markup in an attribute inside an iframe':
+    '<iframe><span title="</iframe><img src=x onerror=alert(1)>">x</span></iframe>',
 }
 
 // Parse the output the way the browser will, then look for anything that could run.

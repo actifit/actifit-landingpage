@@ -772,6 +772,11 @@ function sanitizePostHtml (html_content) {
         // undici 7, which does not load on the server's Node 16 (.nvmrc).
         const cheerio = require('cheerio/slim');
         const $ = cheerio.load(sanitized_html, null, false);
+        // Empty every iframe (browsers never show its content). cheerio writes iframe text
+        // back UNESCAPED, so sanitize-html's safe "<iframe>&lt;/iframe&gt;&lt;img
+        // onerror=..&gt;</iframe>" came out as a live <img onerror> once the browser
+        // closed the iframe at the first </iframe>.
+        $('iframe').empty();
         $('a[href]').each((i, el) => {
             const $el = $(el);
             processLinks(
