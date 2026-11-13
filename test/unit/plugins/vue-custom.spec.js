@@ -503,7 +503,14 @@ describe('plugins/vue-custom global helpers', () => {
       'https://www.youtube.com/embed/dQw4w9WgXcQ',
       'https://youtube.com/embed/dQw4w9WgXcQ',
       'https://play.3speak.tv/watch?v=a/b',
+      'https://3speak.tv/embed?v=a/b',
+      'https://audio.3speak.tv/play?a=a/b',
+      'https://3speak.online/embed?v=a/b',
+      'https://rumble.com/embed/v1abc/',
+      'https://player.vimeo.com/video/76979871',
+      'https://www.facebook.com/plugins/video.php?href=x',
       'https://evil.test@youtube.com/embed/x', // the host really is youtube.com
+      'HTTPS://WWW.YOUTUBE.COM/embed/x', // hosts compare lowercased on both sides
     ])('keeps %s', (url) => {
       expect(src(url, false)).toBe(url)
       expect(src(url, true)).toBe(url)
@@ -514,6 +521,17 @@ describe('plugins/vue-custom global helpers', () => {
       'https://evilyoutube.com/embed/x',
       'https://youtube.com@evil.test/embed/x',
       'https://evil.test/x',
+      // Only the player hosts themselves, not the rest of their domain.
+      'https://sub.youtube.com/embed/x',
+      'https://www.youtube.com./embed/x', // trailing dot: not an exact match on either side
+      'https://m.facebook.com/plugins/video.php',
+      'https://vimeo.com/76979871',
+      'https://youtu.be/dQw4w9WgXcQ',
+      // Dropped: defunct domains someone could re-register.
+      'https://vimm.tv/embed/x',
+      'https://www.vimm.tv/embed/x',
+      'https://d.tube/#!/v/a/b',
+      'https://emb.d.tube/#!/a/b',
       '//www.youtube.com/embed/x',
       '/relative/path',
       'javascript:alert(1)',

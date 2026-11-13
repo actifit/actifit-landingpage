@@ -7,7 +7,7 @@
 
 const TRUSTED_LINK_HOSTS = [
   'actifit.io', 'peakd.com', 'ecency.com', 'hive.blog', 'leofinance.io', 'travelfeed.com',
-  '3speak.tv', 'steemit.com', 'hivesigner.com', 'vimm.tv', 'd.tube', 'bit.ly',
+  '3speak.tv', 'steemit.com', 'hivesigner.com', 'bit.ly',
   'youtube.com', 'youtu.be', 'facebook.com', 'twitter.com', 'x.com', 'instagram.com',
   'discord.gg', 'discord.com', 'telegram.me', 't.me',
 ]
