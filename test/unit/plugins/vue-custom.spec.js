@@ -504,6 +504,7 @@ describe('plugins/vue-custom global helpers', () => {
       'https://youtube.com/embed/dQw4w9WgXcQ',
       'https://play.3speak.tv/watch?v=a/b',
       'https://3speak.tv/embed?v=a/b',
+      'https://audio.3speak.tv/play?a=a/b',
       'https://3speak.online/embed?v=a/b',
       'https://rumble.com/embed/v1abc/',
       'https://player.vimeo.com/video/76979871',

@@ -671,7 +671,7 @@ function sanitizePostHtml (html_content) {
     // dropped for this) would let whoever re-registers it frame any page in a post.
     const TRUSTED_IFRAME_HOSTS = [
         'www.youtube.com', 'youtube.com',
-        'play.3speak.tv', '3speak.tv', '3speak.online',
+        'play.3speak.tv', 'audio.3speak.tv', '3speak.tv', '3speak.online',
         'rumble.com', 'player.vimeo.com',
         'www.facebook.com',
     ];
