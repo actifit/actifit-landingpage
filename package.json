@@ -1,6 +1,6 @@
 {
   "name": "actifit-landingpage",
-  "version": "1.14.46",
+  "version": "1.14.47",
   "description": "Actifit is an innovative dapp that aims to incentivize fitness and healthy lifestyle via rewarding daily activity.",
   "author": "mktcode",
   "private": true,
@@ -55,12 +55,12 @@
     "hive-auth-client": "^0.1.5",
     "hive-auth-wrapper": "^0.8.9",
     "jquery": "^3.5.0",
-    "lodash": "^4.17.21",
+    "lodash": "4.18.1",
     "marked": "^4.2.5",
     "marked-highlight": "^2.2.4",
     "mavon-editor": "^2.10.4",
     "moment": "^2.24.0",
-    "node-fetch": "^2.7.0",
+    "node-fetch": "2.7.0",
     "node-fetch-cookies": "^2.0.4",
     "nuxt": "^2.17.0",
     "nuxt-helmet": "^1.2.3",
@@ -121,7 +121,7 @@
     },
     "cookie": "0.7.2",
     "follow-redirects": "1.16.2",
-    "lodash": "^4.17.21",
+    "lodash": "4.18.1",
     "lodash.template": "4.18.1",
     "path-to-regexp": "0.1.13",
     "qs": "6.16.1",
@@ -141,7 +141,9 @@
     "undici": "6.29.1",
     "form-data": "4.0.6",
     "uuid": "9.0.1",
-    "node-fetch": "^2.7.0",
+    "node-fetch": "2.7.0",
+    "proxy-addr": "2.0.8",
+    "shell-quote": "1.12.0",
     "sscjs": {
       "axios": "1.21.1"
     }

@@ -489,6 +489,40 @@ describe('plugins/vue-custom global helpers', () => {
     })
   })
 
+  // The server must keep exactly the embeds the client keeps: one it keeps and the client
+  // drops vanishes at hydration, and one it drops shows an empty player until then.
+  describe('$sanitizePostHtml iframe hosts agree on server and client', () => {
+    afterAll(() => { delete process.client })
+    const src = (url, client) => {
+      process.client = client
+      const m = Vue.prototype.$sanitizePostHtml(`<iframe src="${url}"></iframe>`).match(/src="([^"]*)"/)
+      return m ? m[1] : null
+    }
+
+    it.each([
+      'https://www.youtube.com/embed/dQw4w9WgXcQ',
+      'https://youtube.com/embed/dQw4w9WgXcQ',
+      'https://play.3speak.tv/watch?v=a/b',
+      'https://evil.test@youtube.com/embed/x', // the host really is youtube.com
+    ])('keeps %s', (url) => {
+      expect(src(url, false)).toBe(url)
+      expect(src(url, true)).toBe(url)
+    })
+
+    it.each([
+      'https://youtube.com.evil.test/embed/x',
+      'https://evilyoutube.com/embed/x',
+      'https://youtube.com@evil.test/embed/x',
+      'https://evil.test/x',
+      '//www.youtube.com/embed/x',
+      '/relative/path',
+      'javascript:alert(1)',
+    ])('drops %s', (url) => {
+      expect(src(url, false)).toBeNull()
+      expect(src(url, true)).toBeNull()
+    })
+  })
+
   describe('$fetchReportTags', () => {
     beforeAll(() => { process.client = false }) // exercise the SSR regex-strip path
     afterAll(() => { delete process.client })
