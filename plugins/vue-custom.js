@@ -719,7 +719,9 @@ function sanitizePostHtml (html_content) {
             allowedAttributes: {
                 '*': sanitizeOptions.ALLOWED_ATTR
             },
-            allowedIframeHostnames: TRUSTED_IFRAME_HOSTS,
+            // Domains, not hostnames: the client check above also accepts subdomains, and
+            // almost every embed is www.youtube.com, which allowedIframeHostnames rejected.
+            allowedIframeDomains: TRUSTED_IFRAME_HOSTS,
             allowedStyles: {
                 '*': {
                     // Match the dangerousProps logic from DOMPurify hook

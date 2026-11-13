@@ -489,6 +489,35 @@ describe('plugins/vue-custom global helpers', () => {
     })
   })
 
+  // The server must keep the same embeds the client keeps, or the first paint shows
+  // empty players until hydration.
+  describe('$sanitizePostHtml iframe hosts (server sanitize path)', () => {
+    beforeAll(() => { process.client = false })
+    afterAll(() => { delete process.client })
+    const src = (url) => {
+      const m = Vue.prototype.$sanitizePostHtml(`<iframe src="${url}"></iframe>`).match(/src="([^"]*)"/)
+      return m ? m[1] : null
+    }
+
+    it.each([
+      'https://www.youtube.com/embed/dQw4w9WgXcQ',
+      'https://youtube.com/embed/dQw4w9WgXcQ',
+      'https://play.3speak.tv/watch?v=a/b',
+    ])('keeps %s', (url) => {
+      expect(src(url)).toBe(url)
+    })
+
+    it.each([
+      'https://youtube.com.evil.test/embed/x',
+      'https://evilyoutube.com/embed/x',
+      'https://evil.test/x',
+      '/relative/path',
+      'javascript:alert(1)',
+    ])('drops %s', (url) => {
+      expect(src(url)).toBeNull()
+    })
+  })
+
   describe('$fetchReportTags', () => {
     beforeAll(() => { process.client = false }) // exercise the SSR regex-strip path
     afterAll(() => { delete process.client })
