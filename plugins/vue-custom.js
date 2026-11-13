@@ -581,6 +581,20 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
 		return prefix + stashResult(`<div class="video-container"><iframe src="https://play.3speak.tv/watch?v=${v}&mode=iframe&autoplay=false&layout=desktop" scrolling="no" frameborder="0" allowfullscreen></iframe></div>`);
 	});
 
+	// 3Speak audio, podcasts and playlists: their uploads put the bare player link on
+	// its own line. Only the id is carried over, into a src we build ourselves. The
+	// tail takes extra query params (&mode=full) but not punctuation after the link.
+	// Sizes are 3Speak's own embed defaults: compact player for one track, and
+	// room for the track list (480px) for a playlist or podcast.
+	let threespk_audio_reg = /(^|\s)https?:\/\/audio\.3speak\.tv\/play\?(a|list|podcast)=([\w-]+)(?:&[\w%=-]*)*/ig;
+	report_content = report_content.replace(threespk_audio_reg, (match, prefix, kind, id) => {
+		kind = kind.toLowerCase();
+		const src = kind === 'a'
+			? `https://audio.3speak.tv/play?a=${id}&mode=compact&iframe=1`
+			: `https://audio.3speak.tv/play?${kind}=${id}&iframe=1`;
+		return prefix + stashResult(`<div class="audio-container"><iframe src="${src}" width="100%" height="${kind === 'a' ? 120 : 480}" frameborder="0"></iframe></div>`);
+	});
+
 	// Process YouTube
 	let vid_reg = /https?:\/\/(?:[0-9A-Z-]+\.)?(?:youtu\.be\/|youtube\.com\S*[^\w\-\s])([\w\-]{11})(?=[^\w\-]|$)(?![?=&+%\w]*(?:['"][^<>]*>|<\/a>))[?=&+%\w-]*/ig;
 	report_content = report_content.replace(vid_reg, (match, v) => {
@@ -645,9 +659,10 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
 	// behaviour) re-injected raw, attacker-influenced markup that the sanitizer
 	// never saw — a stored-XSS hole. This also makes the iframe host allow-list
 	// and link whitelist actually apply to stashed content.
-	for (const placeholder in placeholders) {
-		html_content = html_content.replace(placeholder, placeholders[placeholder]);
-	}
+	// One pass by exact number: a plain string replace of HTML_PLACEHOLDER_1 also hit
+	// the start of HTML_PLACEHOLDER_10, so posts with 10+ media/mentions came out
+	// scrambled with stray digits and raw placeholder text.
+	html_content = html_content.replace(/HTML_PLACEHOLDER_\d+/g, (ph) => (ph in placeholders ? placeholders[ph] : ph));
 
 	return sanitizePostHtml(html_content);
 }
