@@ -483,6 +483,40 @@ describe('plugins/vue-custom global helpers', () => {
       expect(html).not.toMatch(/<a[^>]*play\.3speak\.tv\/embed/)
     })
 
+    // Real 3Speak audio posts (e.g. @epodcaster) put the bare link on its own line.
+    const audioSrc = (html) => {
+      const root = document.createElement('div')
+      root.innerHTML = html
+      return Array.from(root.querySelectorAll('iframe')).map(f => f.getAttribute('src'))
+    }
+
+    it.each([
+      ['a', 'apf9gpw1'],
+      ['list', 'pl-123'],
+      ['podcast', 'feed_9'],
+    ])('renders a bare audio.3speak.tv ?%s= link as the compact audio player', (kind, id) => {
+      const html = clean(`Intro\n\nhttps://audio.3speak.tv/play?${kind}=${id}\n\nMore text`)
+      expect(audioSrc(html)).toEqual([`https://audio.3speak.tv/play?${kind}=${id}&mode=compact&iframe=1`])
+      expect(html).toContain('Intro')
+      expect(html).toContain('More text')
+    })
+
+    it('carries only the audio id into the player, never the rest of the link', () => {
+      const html = clean('https://audio.3speak.tv/play?a=abc"onload="alert(1)&mode=full')
+      expect(eventHandlerAttrs(html)).toEqual([])
+      expect(audioSrc(html)).toEqual(['https://audio.3speak.tv/play?a=abc&mode=compact&iframe=1'])
+    })
+
+    it('leaves an audio link inside a markdown link as a link', () => {
+      const html = clean('[listen](https://audio.3speak.tv/play?a=abc)')
+      expect(audioSrc(html)).toEqual([])
+      expect(html).toContain('href="https://audio.3speak.tv/play?a=abc"')
+    })
+
+    it('drops the audio player when media is off', () => {
+      expect(Vue.prototype.$cleanBody('https://audio.3speak.tv/play?a=abc', false, true)).not.toContain('<iframe')
+    })
+
     it('still renders @mentions as actifit links', () => {
       const html = clean('hello @cr0w how are you')
       expect(html).toContain('href="https://actifit.io/@cr0w"')

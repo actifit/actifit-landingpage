@@ -581,6 +581,13 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
 		return prefix + stashResult(`<div class="video-container"><iframe src="https://play.3speak.tv/watch?v=${v}&mode=iframe&autoplay=false&layout=desktop" scrolling="no" frameborder="0" allowfullscreen></iframe></div>`);
 	});
 
+	// 3Speak audio, podcasts and playlists: their uploads put the bare player link on
+	// its own line. Only the id is carried over, into a src we build ourselves.
+	let threespk_audio_reg = /(^|\s)https?:\/\/audio\.3speak\.tv\/play\?(a|list|podcast)=([\w-]+)[^\s<]*/ig;
+	report_content = report_content.replace(threespk_audio_reg, (match, prefix, kind, id) => {
+		return prefix + stashResult(`<div class="audio-container"><iframe src="https://audio.3speak.tv/play?${kind.toLowerCase()}=${id}&mode=compact&iframe=1" width="100%" height="120" frameborder="0"></iframe></div>`);
+	});
+
 	// Process YouTube
 	let vid_reg = /https?:\/\/(?:[0-9A-Z-]+\.)?(?:youtu\.be\/|youtube\.com\S*[^\w\-\s])([\w\-]{11})(?=[^\w\-]|$)(?![?=&+%\w]*(?:['"][^<>]*>|<\/a>))[?=&+%\w-]*/ig;
 	report_content = report_content.replace(vid_reg, (match, v) => {
