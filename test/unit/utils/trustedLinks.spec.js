@@ -32,6 +32,9 @@ const LEAVES_SITE = [
   'https://evil.com\\@peakd.com',
   'https://peakd.com%2eevil.com',
   '',
+  // Defunct domains (vimm.tv no longer answers): whoever re-registers one gets no warning.
+  'https://vimm.tv/x',
+  'https://d.tube/#!/v/a/b',
 ]
 
 describe('isTrustedLink', () => {

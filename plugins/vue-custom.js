@@ -666,12 +666,14 @@ function sanitizePostHtml (html_content) {
 
     let sanitized_html = '';
 
+    // Exact player hostnames, not whole domains: a subdomain match would also trust
+    // every other host under a domain, and a lapsed domain (vimm.tv, d.tube were
+    // dropped for this) would let whoever re-registers it frame any page in a post.
     const TRUSTED_IFRAME_HOSTS = [
-        'youtube.com', 'youtu.be',
-        '3speak.tv', '3speak.online',
-        'vimm.tv', 'd.tube',
-        'rumble.com', 'vimeo.com',
-        'facebook.com',
+        'www.youtube.com', 'youtube.com',
+        'play.3speak.tv', '3speak.tv', '3speak.online',
+        'rumble.com', 'player.vimeo.com',
+        'www.facebook.com',
     ];
 
     if (process.client) {
@@ -696,7 +698,7 @@ function sanitizePostHtml (html_content) {
                 let allowed = false;
                 try {
                     const hostname = new URL(src).hostname;
-                    allowed = TRUSTED_IFRAME_HOSTS.some(h => hostname === h || hostname.endsWith('.' + h));
+                    allowed = TRUSTED_IFRAME_HOSTS.includes(hostname);
                 } catch {}
                 if (!allowed) node.removeAttribute('src');
             }
@@ -719,9 +721,7 @@ function sanitizePostHtml (html_content) {
             allowedAttributes: {
                 '*': sanitizeOptions.ALLOWED_ATTR
             },
-            // Domains, not hostnames: the client check above also accepts subdomains, and
-            // almost every embed is www.youtube.com, which allowedIframeHostnames rejected.
-            allowedIframeDomains: TRUSTED_IFRAME_HOSTS,
+            allowedIframeHostnames: TRUSTED_IFRAME_HOSTS,
             // The client only keeps an iframe src that new URL() parses on its own, so a
             // protocol-relative "//www.youtube.com/..." is dropped there. sanitize-html
             // would keep it, and the player would vanish at hydration. Drop it here too.
