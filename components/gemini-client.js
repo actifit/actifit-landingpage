@@ -1,88 +1,79 @@
+// Tried in order; a 404 (retired model), 429 (Google's quota), 502 (empty answer), 503
+// (overloaded or timed out) or this file's own timeout moves on to the next. api/proxy.js
+// accepts only these models, so change both lists together.
+export const GEMINI_MODELS = [
+  'gemini-2.5-flash',
+  'gemini-3.5-flash-lite',
+  'gemini-3.5-flash',
+];
+
+// Per model. The proxy gives up at 40 s and answers 503; this only fires if that answer
+// never arrives, so the spinner cannot run for minutes.
+export const MODEL_TIMEOUT_MS = 45000;
+
+const RETRY_STATUSES = [404, 429, 502, 503];
+export const TRUNCATED_NOTE = '\n\n*(The translation stops here: the post is too long to translate in full.)*';
+const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 /**
- * Connecting to the Gemini API to translate text.
+ * Translates a post or comment to English through the site's Gemini proxy, which builds
+ * the prompt itself (the browser sends only the text).
  * @param {string} textToTranslate The text to be translated.
  * @returns {Promise<string>} The translated text.
  */
 export async function translateTextWithGemini(textToTranslate) {
-
-  // Tried in order; a 404 (retired model), 429 (quota) or 503 (overloaded) moves on to
-  // the next. api/proxy.js accepts only these models, so change both lists together.
-  // The gemini-2.0 models were retired by Google (404 since late 2026).
-  const modelsToTry = [
-    'gemini-2.5-flash',
-    'gemini-3.5-flash-lite',
-    'gemini-3.5-flash',
-  ];
-
-  const prompt = `Translate the following text to English. The text may contain Markdown or HTML formatting. Preserve the original formatting (like links, bolding, lists, etc.) as accurately as possible. Do not add any extra explanations, introductory phrases, or apologies. Return ONLY the translated text.\n\nText to translate:\n"""\n${textToTranslate}\n"""`;
-  const requestBody = { contents: [{ parts: [{ text: prompt }] }] };
-
-  // Helper to pause execution
-  const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
   let lastError = null;
 
-  // Loop through the models
-  for (const model of modelsToTry) {
+  for (const model of GEMINI_MODELS) {
+    // A manual AbortController: AbortSignal.timeout() is missing from older browsers.
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), MODEL_TIMEOUT_MS);
     try {
-      console.log(`Attempting translation with model: ${model} via proxy...`);
-
-      // Call local proxy endpoint instead of direct API
-      const GEMINI_PROXY_URL = `/api/proxy/gemini?model=${model}`;
-
-      const response = await fetch(GEMINI_PROXY_URL, {
+      const response = await fetch(`/api/proxy/gemini?model=${model}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify({ text: textToTranslate }),
+        signal: controller.signal,
       });
+      const data = await response.json().catch(() => ({}));
 
       if (response.ok) {
-        const data = await response.json();
-        const translatedText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-        if (!translatedText) {
-          throw new Error(`Parsed empty result from proxy for ${model}`);
-        }
-
-        console.log(`Success with ${model} via proxy`);
-        return translatedText;
+        if (!data.text) throw new Error(`Empty translation from ${model}`);
+        return data.truncated ? data.text + TRUNCATED_NOTE : data.text;
       }
 
-      // Handle Errors
-      const status = response.status;
-      const errorData = await response.json();
-      const errorMessage = errorData.error?.message || errorData.error || response.statusText;
+      const errorMessage = (data.error && data.error.message) || data.error || response.statusText;
 
       // The proxy's own limit, not Google's quota: another model would only use up more
       // of this visitor's allowance.
-      if (status === 429 && errorData.error === 'Too many requests') {
+      if (response.status === 429 && data.error === 'Too many requests') {
         const limited = new Error('Too many translations in a short time. Please wait a minute and try again.');
         limited.stop = true;
         throw limited;
       }
 
-      // 429 = Quota Exceeded, 503 = Overloaded, 404 = Model Not Found
-      if (status === 429 || status === 503 || status === 404) {
-        console.warn(`Model ${model} failed (${status}): ${errorMessage}`);
-        console.warn(`Switching to next available model...`);
+      if (RETRY_STATUSES.includes(response.status)) {
+        console.warn(`Model ${model} failed (${response.status}): ${errorMessage}; trying the next one`);
         lastError = new Error(`API error: ${errorMessage}`);
-
-        // Wait 1 second before trying the next model
         await wait(1000);
         continue;
       }
 
-      throw new Error(`API Error (${model}): ${errorMessage}`);
-
+      // The proxy's own 400 (bad request) or 500 (no key on the server): the next model would
+      // fail the same way. Google's errors arrive as 502 and are retried above.
+      const fatal = new Error(`Translation failed: ${errorMessage}`);
+      fatal.stop = true;
+      throw fatal;
     } catch (error) {
-      lastError = error;
-      if (error.stop || error.message.includes("Configuration") || error.message.includes("Invalid Key")) {
-        throw error;
-      }
+      if (error.stop) throw error;
+      lastError = error.name === 'AbortError'
+        ? new Error(`Translation timed out on ${model}`)
+        : error;
+    } finally {
+      clearTimeout(timer);
     }
   }
 
-  console.error("All Gemini models failed.");
-  throw lastError || new Error("Failed to translate text with any Gemini model.");
+  console.error('All Gemini models failed.');
+  throw lastError || new Error('Failed to translate text with any Gemini model.');
 }
