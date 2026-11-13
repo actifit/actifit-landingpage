@@ -58,8 +58,11 @@
     <div >
         <h4 class="text-left mt-5">{{ $t('Referral_Free_Signup_Links') }}</h4>
         <p>{{ $t('referral_free_signup_links_notice') }}</p>
+        <!-- /claimFreeSignupAccounts is disabled server side
+             for now: links cannot be claimed (see utils/sessionActions.js) -->
+        <div v-if="!freeSignupLinksAvailable" class="alert alert-warning" role="alert">{{ $t('free_signup_links_unavailable') }}</div>
         <!-- claim button to claim new signup links-->
-        <div v-if="hasClaimableLinks.status">
+        <div v-if="freeSignupLinksAvailable && hasClaimableLinks.status">
           <button  v-on:click="claimSignupLinks" class="btn btn-brand p-3">{{ $t('Claim_free_links') }}</button>
         </div>
         <div v-else>
@@ -162,6 +165,8 @@
 
   import SSC from 'sscjs'
 
+  import { FREE_SIGNUP_LINKS_AVAILABLE } from '~/utils/sessionActions'
+
   const ssc = new SSC(process.env.steemEngineRpc);
 
   const hsc = new SSC(process.env.hiveEngineRpc);
@@ -172,8 +177,8 @@
 		  title: `Actifit Referrals - Actifit.io`,
 		  meta: [
 			{ hid: 'description', name: 'description', content: `Invite friends to Actifit and earn AFIT token rewards for every referral. Grow the move-to-earn fitness community and get rewarded.` },
-			{ hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Invite friends to Actifit and earn AFIT token rewards for every referral.` },
-			{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Actifit Referrals - Actifit.io' }
+			{ hid: 'ogdescription', property: 'og:description', content: `Invite friends to Actifit and earn AFIT token rewards for every referral.` },
+			{ hid: 'ogtitle', property: 'og:title', content: 'Actifit Referrals - Actifit.io' }
 		  ]
 		}
 	},
@@ -188,6 +193,7 @@
 	data (){
 	  return {
 		showModal: false,
+    freeSignupLinksAvailable: FREE_SIGNUP_LINKS_AVAILABLE,
     refUrl: '',
 		screenWidth: 1200,
 		afitx_he_balance: 0,
@@ -297,6 +303,7 @@
 			)
 	  },
     async claimSignupLinks(){
+      if (!this.freeSignupLinksAvailable) return;
       let outcome = await this.$store.dispatch('claimSignupLinks');
       if (outcome.status && outcome.status == 'success'){
         this.$notify({

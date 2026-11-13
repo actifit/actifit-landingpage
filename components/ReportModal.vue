@@ -147,7 +147,7 @@
         <!-- adding section to display charity info if available -->
         <div class="modal-footer text-brand" v-if="this.meta.charity">
           <i class="fas fa-dove"></i><small>{{ $t('Charity_Post') }}</small><i class="fas fa-dove"></i>
-          <small><a :href="this.meta.charity[0]" target="_blank" rel="noopener noreferrer">@{{ this.meta.charity[0] }}</a></small>
+          <small><a :href="$hiveProfileUrl(this.meta.charity[0])" target="_blank" rel="noopener noreferrer">@{{ this.meta.charity[0] }}</a></small>
         </div>
         <transition name="fade">
           <div class="report-reply modal-body" v-if="commentBoxOpen">
@@ -211,6 +211,7 @@
 <script>
 import UserHoverCard from './UserHoverCard.vue'
 import { mapGetters } from 'vuex'
+import { fetchJsonShared } from '~/utils/sharedFetch'
 import Comments from '~/components/Comments'
 import CustomTextEditor from '~/components/CustomTextEditor'
 import SafeRemarkable from '~/components/SafeRemarkable.vue'
@@ -370,16 +371,16 @@ export default {
       this.responseBody = this.moderatorSignature;
     },
     fetchReportKeyData() {
-      fetch(process.env.actiAppUrl + 'getPostReward?user=' + this.report.author + '&url=' + this.report.url).then(res => {
-        res.json().then(json => this.afitReward = json.token_count)
-      }).catch(e => console.error(e))
-      fetch(process.env.actiAppUrl + 'getRank/' + this.report.author).then(res => {
-        res.json().then(json => this.userRank = json)
-      }).catch(e => console.error(e))
+      fetchJsonShared(process.env.actiAppUrl + 'getPostReward?user=' + this.report.author + '&url=' + this.report.url)
+        .then(json => { this.afitReward = json.token_count })
+        .catch(e => console.error(e))
+      fetchJsonShared(process.env.actiAppUrl + 'getRank/' + this.report.author)
+        .then(json => { this.userRank = json })
+        .catch(e => console.error(e))
       fetch(process.env.actiAppUrl + 'getPostFullAFITPayReward?user=' + this.report.author + '&url=' + this.report.url).then(res => {
         res.json().then(json => this.fullAFITReward = json.token_count)
       }).catch(e => console.error(e))
-      this.$store.dispatch('fetchModerators')
+      this.$store.dispatch('fetchModerators').catch(() => {})
       this.profImgUrl = process.env.hiveImgUrl;
       if (this.cur_bchain == 'STEEM') {
         this.profImgUrl = process.env.steemImgUrl;
@@ -416,8 +417,11 @@ export default {
 
       this.translationLoading = true;
       try {
-        const translationResult = await translateTextWithGemini(this.safety_post_content);
-        this.translatedText = translationResult;
+        const translationResult = await translateTextWithGemini(this.report.body);
+        // The model's reply is untrusted HTML: $cleanBody it before rendering. Send the RAW
+        // body and clean once - $cleanBody is not idempotent (a second pass turns &amp; in
+        // image URLs into &amp;amp;). Same as pages/_username/_permlink/index.vue.
+        this.translatedText = this.$cleanBody(translationResult);
         this.displayBody = this.translatedText;
         this.showTranslated = true;
         this.$set(this.translationCache, reportId, {
@@ -512,7 +516,7 @@ export default {
         return new Promise((resolve) => {
           const auth = {
             username: this.user.account.name,
-            token: localStorage.getItem('access_token'),
+            token: localStorage.getItem('hiveauth_has_token'),
             expire: localStorage.getItem('expires'),
             key: localStorage.getItem('key')
           }
@@ -546,13 +550,9 @@ export default {
         if (bchain_option) {
           cur_bchain = bchain_option;
         }
-        let url = new URL(process.env.actiAppUrl + 'performTrx/?user=' + this.user.account.name + '&operation=' + encodeURIComponent(op_json) + '&bchain=' + cur_bchain);
-        let reqHeads = new Headers({
-          'Content-Type': 'application/json',
-          'x-acti-token': 'Bearer ' + accToken,
-        });
-        let res = await fetch(url, { headers: reqHeads });
-        let outcome = await res.json();
+        // Signed IN THE BROWSER with the user's own key - /performTrx is gone.
+        // Same response shape as before, so the handling below is unchanged.
+        let outcome = await this.$broadcastWithKey(operation, { active: false, bchain: cur_bchain });
         if (outcome.error) {
           let err_msg = outcome.trx.tx.error;
           if (err_msg.includes('missing') && err_msg.includes('authority') && this.cur_bchain == bchain_option) {

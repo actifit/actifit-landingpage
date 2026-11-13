@@ -187,8 +187,8 @@
 		  title: 'Settings - Actifit.io',
 		  meta: [
 			{ hid: 'description', name: 'description', content: 'Actifit user settings' },
-			{ hid: 'ogdescription', name: 'og:description', content: 'Actifit user settings' },
-			{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Settings - Actifit.io' },
+			{ hid: 'ogdescription', property: 'og:description', content: 'Actifit user settings' },
+			{ hid: 'ogtitle', property: 'og:title', content: 'Settings - Actifit.io' },
 			{ name: 'robots', content: 'noindex, nofollow' }
 		  ]
 		}
@@ -522,7 +522,7 @@
 			return new Promise((resolve) => {
 				const auth = {
 				  username: this.user.account.name,
-				  token: localStorage.getItem('access_token'),//should be changed in V1 (current V0.8)
+				  token: localStorage.getItem('hiveauth_has_token'),//should be changed in V1 (current V0.8)
 				  expire: localStorage.getItem('expires'),
 				  key: localStorage.getItem('key')
 				}
@@ -578,17 +578,9 @@
 				bchain = bchain_option;
 			}
 			
-			let url = new URL(process.env.actiAppUrl + 'performTrx/?user='+this.user.account.name+'&operation='+op_json+'&bchain='+bchain);
-
-			
-			let reqHeads = new Headers({
-			  'Content-Type': 'application/json',
-			  'x-acti-token': 'Bearer ' + accToken,
-			});
-			let res = await fetch(url, {
-				headers: reqHeads
-			});
-			let outcome = await res.json();
+			// Signed IN THE BROWSER with the user's own key - /performTrx is gone.
+			// Same response shape as before, so the handling below is unchanged.
+			let outcome = await this.$broadcastWithKey(operation, { active: false, bchain: bchain });
 			console.log(outcome);
 			if (outcome.error){
 				console.log(outcome.error);
@@ -654,7 +646,10 @@
 					}else{
 						this.$notify({
 						  group: 'error',
-						  text: this.$t('error'),
+						  // $gateMessage so a flagged account is told to rotate its posting key rather
+						  // than just 'error'. Sanitised because vue-notification renders `text` via
+						  // innerHTML and this string comes from the API.
+						  text: this.$sanitize(this.$gateMessage(outcome) || this.$t('error')),
 						  position: 'top center'
 						})
 					}

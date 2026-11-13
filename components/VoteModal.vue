@@ -203,6 +203,8 @@ export default {
 		this.fetchVotingPower();
 	},
 	methods: {
+		// The card mixin's reward/rank fetch: this modal shows neither.
+		fetchCardStats () {},
 		//handles calculating and displaying proper voting value
 		async calculateVoteValue() {
 
@@ -421,7 +423,7 @@ export default {
 				return new Promise((resolve) => {
 					const auth = {
 						username: this.user.account.name,
-						token: localStorage.getItem('access_token'),//should be changed in V1 (current V0.8)
+						token: localStorage.getItem('hiveauth_has_token'),//should be changed in V1 (current V0.8)
 						expire: localStorage.getItem('expires'),
 						key: localStorage.getItem('key')
 					}
@@ -476,17 +478,9 @@ export default {
 					bchain = bchain_option;
 				}
 
-				let url = new URL(process.env.actiAppUrl + 'performTrx/?user=' + this.user.account.name + '&operation=' + op_json + '&bchain=' + bchain);
-
-
-				let reqHeads = new Headers({
-					'Content-Type': 'application/json',
-					'x-acti-token': 'Bearer ' + accToken,
-				});
-				let res = await fetch(url, {
-					headers: reqHeads
-				});
-				let outcome = await res.json();
+				// Signed IN THE BROWSER with the user's own key - /performTrx is gone.
+				// Same response shape as before, so the handling below is unchanged.
+				let outcome = await this.$broadcastWithKey(operation, { active: false, bchain: bchain });
 				console.log(outcome);
 				if (outcome.error) {
 					console.log(outcome.error);
@@ -895,26 +889,34 @@ export default {
 		//grab STEEM price, needed for vote value calculation
 		fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem&vs_currencies=usd').then(
 			res => {
-				res.json().then(json => this.setSteemPrice(json.steem.usd)).catch(e => reject(e))
-			}).catch(e => reject(e))
+				res.json().then(json => this.setSteemPrice(json.steem.usd)).catch(e => console.warn('steem price parse failed', e))
+			}).catch(e => console.warn('price fetch failed', e))
 
 		//grab SBD price, needed for vote value calculation
 		fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem-dollars&vs_currencies=usd').then(
 			res => {
-				res.json().then(json => this.setSBDPrice(json['steem-dollars'].usd)).catch(e => reject(e))
-			}).catch(e => reject(e))
+				res.json().then(json => this.setSBDPrice(json['steem-dollars'].usd)).catch(e => console.warn('sbd price parse failed', e))
+			}).catch(e => console.warn('price fetch failed', e))
 
 		//grab HIVE price, needed for vote value calculation
-		fetch('https://api.coingecko.com/api/v3/simple/price?ids=hive&vs_currencies=usd').then(
+		//// HIVE price comes from our own API, which reads the blockchain's median price
+    // feed (with a Binance fallback). It used to call CoinGecko directly from the
+    // browser; CoinGecko's free endpoint now requires a key and answers with an HTML
+    // error page, so res.json() threw and setHivePrice() was never reached. Every
+    // price here defaults to 1, so the failure was silent and simply relabelled HIVE
+    // amounts as USD - vote values read ~17x high. The path is relative so it goes
+    // through the /actifit-api/ proxy: no CORS, no key in the browser.
+		fetch('/actifit-api/hivePrice').then(
 			res => {
-				res.json().then(json => this.setHivePrice(json.hive.usd)).catch(e => reject(e))
-			}).catch(e => reject(e))
+				res.json().then(json => this.setHivePrice(json.hive.usd))
+					.catch(e => console.warn('hive price parse failed', e))
+			}).catch(e => console.warn('hive price fetch failed', e))
 
 		//grab HBD price, needed for vote value calculation
 		fetch('https://api.coingecko.com/api/v3/simple/price?ids=hive_dollar&vs_currencies=usd').then(
 			res => {
-				res.json().then(json => this.setHBDPrice(json['hive_dollar'].usd)).catch(e => reject(e))
-			}).catch(e => reject(e))
+				res.json().then(json => this.setHBDPrice(json['hive_dollar'].usd)).catch(e => console.warn('hbd price parse failed', e))
+			}).catch(e => console.warn('price fetch failed', e))
 
 		//in addition to the default updating of VP upon each render, we need to take into consideration leaving window open. 
 		//for this purpose, let's update every 30 seconds

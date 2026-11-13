@@ -730,7 +730,13 @@ export default {
         });
 
         const imageUrl = 'https://usermedia.actifit.io/' + key;
-        this.$refs.editor.$img2Url(pos, imageUrl);
+        // mavon-editor's own $img2Url builds this regex with eval(), which the
+        // Content-Security-Policy blocks. Same replacement, without eval.
+        const editor = this.$refs.editor;
+        const placeholder = new RegExp('(!\\[[^\\[]*?\\](?=\\())\\(\\s*(' + Number(pos) + ')\\s*\\)', 'g');
+        editor.d_value = editor.d_value.replace(placeholder, '$1(' + imageUrl + ')');
+        editor.$refs.toolbar_left.$changeUrl(pos, imageUrl);
+        editor.iRender();
         return imageUrl;
 
       } catch (error) {

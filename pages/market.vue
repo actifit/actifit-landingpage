@@ -39,15 +39,21 @@
 						<div class="prize-draw-card">
 							<i class="far fa-clock prize-draw-icon"></i>
 							<h5 class="prize-draw-card-title">{{ $t('next_draw') }}</h5>
-							<Countdown v-if="countDownReady && nextGadgetBuyRewardDate" :deadline="nextGadgetBuyRewardDate" class="prize-draw-countdown"></Countdown>
+							<!-- the draw job is paused: no countdown, so no implied draw date -->
+							<p class="prize-draw-card-text" v-if="!gadgetPrizeDrawAvailable">{{ $t('gadget_prize_draw_unavailable') }}</p>
+							<Countdown v-else-if="countDownReady && nextGadgetBuyRewardDate" :deadline="nextGadgetBuyRewardDate" class="prize-draw-countdown"></Countdown>
 							<p class="prize-draw-card-text" v-else><i class="fas fa-spin fa-spinner"></i></p>
 						</div>
 
 						<div class="prize-draw-card">
 							<i class="fas fa-trophy prize-draw-icon"></i>
 							<h5 class="prize-draw-card-title">{{ $t('Recent_draw_winner') }}</h5>
-							<a :href="'/' + lastDrawWinner" class="prize-draw-winner-link">@{{ lastDrawWinner }}</a>
-							<p class="prize-draw-card-text">{{ wonAmount }} {{ $t('HIVE') }} <img src="/img/HIVE.png" class="token-logo-sm" alt=""></p>
+							<template v-if="lastDrawWinner">
+								<a :href="'/' + lastDrawWinner" class="prize-draw-winner-link">@{{ lastDrawWinner }}</a>
+								<p class="prize-draw-card-text">{{ wonAmount }} {{ $t('HIVE') }} <img src="/img/HIVE.png" class="token-logo-sm" alt=""></p>
+							</template>
+							<p class="prize-draw-card-text" v-else-if="lastDrawWinnerFailed">—</p>
+							<p class="prize-draw-card-text" v-else><i class="fas fa-spin fa-spinner"></i></p>
 						</div>
 					</div>
 				</div>
@@ -328,6 +334,7 @@ import Countdown from 'vuejs-countdown'
 import NotifyModal from '~/components/NotifyModal'
 import CartModal from '~/components/CartModal'
 import ListHeadingSection from '~/components/ListHeadingSection.vue'
+import { GADGET_PRIZE_DRAW_AVAILABLE } from '~/utils/sessionActions'
 import Lodash from 'lodash'
 import { getProductAfitPrice, getProductHivePrice, getProductPurchaseCurrencies, getProductUsdValue } from '~/utils/marketPricing'
 import { filterMarketProducts, getGadgetLevelClass, getGadgetOwnership, getProductMarketState } from '~/utils/marketCatalog'
@@ -339,8 +346,8 @@ export default {
 			title: `Actifit Market - Actifit.io`,
 			meta: [
 				{ hid: 'description', name: 'description', content: `Browse the Actifit Market — spend AFIT tokens on fitness consultations, ebooks, supplements, and booster gadgets. Health products powered by blockchain rewards.` },
-				{ hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Browse the Actifit Market — spend AFIT tokens on fitness consultations, ebooks, supplements, and booster gadgets.` },
-				{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Actifit Market - Actifit.io' }
+				{ hid: 'ogdescription', property: 'og:description', content: `Browse the Actifit Market — spend AFIT tokens on fitness consultations, ebooks, supplements, and booster gadgets.` },
+				{ hid: 'ogtitle', property: 'og:title', content: 'Actifit Market - Actifit.io' }
 			]
 		}
 	},
@@ -364,12 +371,14 @@ export default {
 			currentSort: JSON.stringify({ value: 'price', direction: 'asc' }),
 			prodList: [],
 			afitPrice: 0,
+			gadgetPrizeDrawAvailable: GADGET_PRIZE_DRAW_AVAILABLE, //draw job paused since the 2026-10-21 incident
 			ticketCount: 0,
 			prizePool: 0,
 			prizePoolValue: '',
 			countDownReady: false,
 			nextGadgetBuyRewardDate: '',//'2020-10-15',//"August 18, 2020 00:00 GMT",
 			lastDrawWinner: '',
+			lastDrawWinnerFailed: false,
 			wonAmount: 0,
 			selectedProductId: null,
 			mobileShowDetail: false,
@@ -649,8 +658,13 @@ export default {
 			this.nextGadgetBuyRewardDate = targetDate.getFullYear() + '-' + mnth + '-' + targetDate.getDate() + ' 00:00 GMT';
 
 			//also set last draw winner display
-			this.lastDrawWinner = json.winner[0].name;
-			this.wonAmount = this.numberFormat(json.winner[0].reward, 3);
+			const winner = Array.isArray(json.winner) && json.winner[0];
+			if (!winner || !winner.name) {
+				this.lastDrawWinnerFailed = true;
+				return;
+			}
+			this.lastDrawWinner = winner.name;
+			this.wonAmount = this.numberFormat(winner.reward, 3);
 		},
 
 		async fetchGadgetPrizeCycle() {
@@ -659,6 +673,7 @@ export default {
 				this.setNextPrizeDate(await res.json())
 			} catch (e) {
 				console.error('fetchGadgetPrizeCycle failed', e)
+				this.lastDrawWinnerFailed = true
 			}
 		},
 

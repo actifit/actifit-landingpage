@@ -1,4 +1,4 @@
-const pkg = require('./package')
+const pkg = require('./package.json')
 
 // --- STEP 1: Import the language file to access its strings ---
 const enTranslations = require('./lang/en_US.js')
@@ -11,6 +11,9 @@ const mainDescription = `Track your daily activity and earn crypto rewards. Acti
 
 const { I18N } = require('./config')
 
+// true = the CSP below only reports violations; false = it blocks them.
+const CSP_REPORT_ONLY = true
+
 //load env file if present
 import * as dotenv from 'dotenv'
 dotenv.config()
@@ -19,9 +22,14 @@ module.exports = {
   mode: 'universal',
 
   // Runtime configuration
+  // Not named `version`: Nuxt lets an environment variable with the same name as a
+  // runtime-config key replace its value, and pm2 sets `version` in the environment to
+  // the version of the script it runs (Nuxt's own bin), so the footer showed 2.18.1.
   publicRuntimeConfig: {
-    version: pkg.version,
-    proposalId: '360',
+    appVersion: pkg.version,
+    // Hive Dev Proposal #3 and its announcement post (the vote popup in the footer)
+    proposalId: 391,
+    proposalPostPath: '/@hdev/hive-dev-proposal-3',
   },
 
   privateRuntimeConfig: {
@@ -31,15 +39,29 @@ module.exports = {
     CREATE_ACCOUNT_API_KEY: process.env.CREATE_ACCOUNT_API_KEY,
     REWARD_REFERRAL_API_KEY: process.env.REWARD_REFERRAL_API_KEY,
     DELEGATE_ACCOUNT_API_KEY: process.env.DELEGATE_ACCOUNT_API_KEY,
-    CONFIRM_PAYMENT_API_KEY: process.env.CONFIRM_PAYMENT_API_KEY,
     WEB_EDIT_REWARD_KEY: process.env.WEB_EDIT_REWARD_KEY,
     WEB_VOTE_REWARD_KEY: process.env.WEB_VOTE_REWARD_KEY,
     WEB_COMMENT_REWARD_KEY: process.env.WEB_COMMENT_REWARD_KEY,
   },
 
   serverMiddleware: [
-    { path: '/api/proxy', handler: '~/api/proxy.js' }
+    // Runs BEFORE the Nuxt renderer, so the Cache-Control it sets survives onto
+    // the rendered HTML response. Order matters: it must precede the proxy entry
+    // only in the sense that both are registered here; it no-ops on /api/proxy
+    // and the other proxy prefixes via its own NEVER list.
+    '~/api/cache-headers.js',
+    { path: '/api/proxy', handler: '~/api/proxy.js' },
+    { path: '/api/csp-report', handler: '~/api/csp-report.js' },
+    // Recent community posts and their authors, for search engines (listed in robots.txt).
+    { path: '/sitemap-posts.xml', handler: '~/api/sitemap-posts.js' }
   ],
+
+  hooks: {
+    // Adds the CSP hashes of trusted inline <head> scripts (the GTM bootstrap).
+    'render:route': require('./api/csp-head-hashes').addHeadHashes,
+    // Keeps the CSP report-uri on a sample of pages only (api/csp-report-sample.js).
+    'render:beforeResponse': require('./api/csp-report-sample').sampleCspReports,
+  },
 
 
   router: {
@@ -99,8 +121,19 @@ module.exports = {
     steemImgUrl: 'https://steemitimages.com',
     hiveImgUrl: 'https://images.hive.blog',
     steemApiNode: 'https://api.steemit.com/',
-    hiveApiNode: 'https://api.hive.blog',//'https://hiveapi.actifit.io',//'https://anyx.io', 'https://hiveapi.actifit.io', //https://api.hive.blog
+    // Our own node, deliberately. SSR calls getContent on every post URL, and a bot
+    // crawl of nonexistent permlinks turns that into hundreds of calls a second - which
+    // api.hive.blog answers with HTTP 429, flooding the logs and starving real renders
+    // (2026-09-29 outage: "hive lookup failed - HTTP 429" repeated 62 times in 3s).
+    // hiveapi.actifit.io is ours, so it does not rate-limit us. Public nodes remain in
+    // altHiveNodes as fallback.
+    hiveApiNode: 'https://hiveapi.actifit.io',//'https://api.hive.blog',
     blurtApiNode: 'https://rpc.blurt.blog', //'https://blurtrpc.actifit.io', //'https://blurt-rpc.saboin.com', //'http://164.68.116.86/', //'https://blurt-rpc.saboin.com/', //
+    // Off by default. The post page's SSR asyncData used to fall through to a Blurt
+    // lookup on every Hive miss, which on a crawl of nonexistent permlinks doubled
+    // our upstream RPC calls and got us 429'd by both chains at once (2026-09-28
+    // outage). Set BLURT_META_FALLBACK=true in the environment to restore it.
+    blurtMetaFallback: process.env.BLURT_META_FALLBACK === 'true',
     hiveStateApiNode: 'https://api.deathwing.me',
     hiveTestNode: 'https://testnet.openhive.network', //'https://api.fake.openhive.network',
     altHiveNodes: ["https://api.hive.blog", "https://api.deathwing.me", "https://api.openhive.network", "https://hiveapi.actifit.io", "https://hived.privex.io", "https://api.deathwing.me", "https://rpc.ausbit.dev", "https://hive-api.arcange.eu", "https://hive.roelandp.nl", "https://anyx.io",],
@@ -211,7 +244,53 @@ module.exports = {
   },
 
   render: {
+    // Content-Security-Policy on every server-rendered page. The session lives in
+    // localStorage, so one injected script is a full account takeover; this policy
+    // stops scripts that do not come from us or the hosts below. Nuxt adds the hash
+    // of its own inline state script to script-src on each render.
+    // Runs REPORT-ONLY first: violations are logged by api/csp-report.js ("[csp]"
+    // lines) and nothing is blocked. Set CSP_REPORT_ONLY to false to enforce, once
+    // the logs show only attack noise.
+    csp: {
+      hashAlgorithm: 'sha256',
+      reportOnly: CSP_REPORT_ONLY,
+      policies: {
+        'default-src': ["'self'"],
+        // 'self' and the inline-script hashes are added by Nuxt.
+        // CDN entries are pinned to the exact libraries we load: these hosts serve every
+        // version of every library, including old ones that can be used to get around a CSP.
+        'script-src': [
+          'https://code.jquery.com/jquery-3.2.1.slim.min.js',                 // head
+          'https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/',          // head
+          'https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/',               // head (TweenMax)
+          'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/',       // mavon-editor
+          'https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.8.3/',               // mavon-editor
+          'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/',               // head
+          'https://www.googletagmanager.com/gtag/',  // gtag (plugins/ga.js) and GA4 destinations
+          'https://www.googletagmanager.com/gtm.js', // @nuxtjs/gtm
+          'https://www.google-analytics.com',
+          'https://www.google.com/recaptcha/',   // reCAPTCHA
+          'https://www.gstatic.com/recaptcha/',
+          'https://chat.peakd.com',              // Sting chat widget (components/StingChat.vue)
+        ],
+        // Vue, bootstrap-vue and post bodies use inline styles.
+        'style-src': ["'self'", "'unsafe-inline'", 'https://cdnjs.cloudflare.com', 'https://fonts.googleapis.com', 'https://maxcdn.bootstrapcdn.com'],
+        'font-src': ["'self'", 'data:', 'https://cdnjs.cloudflare.com', 'https://fonts.gstatic.com'],
+        // Post images and embeds come from anywhere on the web; Hive nodes are user-selectable.
+        'img-src': ["'self'", 'data:', 'blob:', 'https:'],
+        'media-src': ["'self'", 'blob:', 'https:'],
+        'connect-src': ["'self'", 'https:', 'wss:'],
+        'frame-src': ["'self'", 'https:'],
+        'worker-src': ["'self'", 'blob:'],
+        'object-src': ["'none'"],
+        'base-uri': ["'self'"],
+        'report-uri': ['/api/csp-report'],
+      },
+    },
     static: {
+      // let Cloudflare and browsers keep static files (images, favicon) for a day
+      // instead of revalidating every request with the server
+      maxAge: '1d',
       setHeaders(res) {
         res.setHeader('X-Frame-Options', 'ALLOWALL')
         res.setHeader('Access-Control-Allow-Origin', '*')
@@ -234,14 +313,17 @@ module.exports = {
       // Now uses the new consistent description
       { hid: 'description', name: 'description', 'property': 'description', content: mainDescription },
       // Now uses the new consistent title
-      { hid: 'title', name: 'og:title', 'property': 'og:title', content: mainTitle },
+      { hid: 'ogtitle', property: 'og:title', content: mainTitle },
       // Now uses the new consistent description
-      { hid: 'ogdescription', name: 'og:description', 'property': 'og:description', content: mainDescription },
-      { hid: 'url', name: 'og:url', 'property': 'og:url', content: 'https://actifit.io' },
-      { hid: 'ogtype', name: 'og:type', 'property': 'og:type', content: 'website' },
-      { hid: 'image', name: 'og:image', 'property': 'og:image', content: 'https://actifit.io/img/actifit_logo_med.png' },
+      { hid: 'ogdescription', property: 'og:description', content: mainDescription },
+      { hid: 'url', property: 'og:url', content: 'https://actifit.io' },
+      { hid: 'ogtype', property: 'og:type', content: 'website' },
+      { hid: 'ogimage', property: 'og:image', content: 'https://actifit.io/img/actifit_logo_med.png' },
       { name: 'google-site-verification', content: 'Dv3mVaav2x5_2FauDB6MRjixVtVVWPfjUekWwKY-Tnc' },
-      { name: 'fb:app_id', 'property': 'fb:app_id', content: '651065985331472' },
+      { property: 'fb:app_id', content: '651065985331472' },
+      // X/Twitter shows a card with the og:image only when a card type is set; post pages
+      // raise this to summary_large_image under the same hid.
+      { hid: 'twitter:card', name: 'twitter:card', content: 'summary' },
     ],
     // --- END MODIFICATION ---
     link: [
@@ -301,7 +383,11 @@ module.exports = {
     { src: '~plugins/vue-simplemde', ssr: false },
     { src: '~plugins/v-lightbox', mode: 'client' },
     { src: '@/plugins/vue-mavon-editor', ssr: false },
+    // Must run before anything can broadcast via HiveAuth - see the file header.
+    { src: '~/plugins/hiveauth-token-migration.js', mode: 'client' },
     { src: '~plugins/vue-custom.js' },
+    // restores the typed-key user's stored posting key (utils/postingKeyStore.js)
+    { src: '~/plugins/posting-key-restore.js', mode: 'client' },
     { src: '~/plugins/dark-mode.js' },
     { src: '~/plugins/commonCardMixin.js', mode: 'client' }
   ],

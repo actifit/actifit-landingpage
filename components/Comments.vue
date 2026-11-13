@@ -227,6 +227,7 @@ import { translateTextWithGemini } from '~/components/gemini-client.js';
 import SafeRemarkable from '~/components/SafeRemarkable.vue';
 import steem from 'steem'
 import hive from '@hiveio/hive-js'
+import { fetchJsonShared } from '~/utils/sharedFetch'
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
 import DOMPurify from 'dompurify'
@@ -381,10 +382,10 @@ export default {
     },
 
     fetchReportData() {
-      fetch(process.env.actiAppUrl + 'getRank/' + this.author).then(res => {
-        res.json().then(json => this.userRank = json)
-      }).catch(e => console.error(e));
-      this.$store.dispatch('fetchModerators')
+      fetchJsonShared(process.env.actiAppUrl + 'getRank/' + this.author)
+        .then(json => { this.userRank = json })
+        .catch(e => console.error(e));
+      this.$store.dispatch('fetchModerators').catch(() => {})
       this.fetchAuthorReputation();
     },
 
@@ -431,8 +432,11 @@ export default {
       this.translationLoading = true;
       try {
         const originalContent = this.commentBody();
-        const translationResult = await translateTextWithGemini(originalContent);
-        this.translatedText = translationResult;
+        const translationResult = await translateTextWithGemini(this.full_data.body);
+        // The model's reply is untrusted HTML: $cleanBody it before rendering. Send the RAW
+        // body and clean once - $cleanBody is not idempotent (a second pass turns &amp; in
+        // image URLs into &amp;amp;). Same as pages/_username/_permlink/index.vue.
+        this.translatedText = this.$cleanBody(translationResult);
         this.showTranslated = true;
         this.updateCache({
           originalBody: originalContent,
@@ -545,7 +549,7 @@ export default {
         return new Promise((resolve) => {
           const auth = {
             username: this.user.account.name,
-            token: localStorage.getItem('access_token'),//should be changed in V1 (current V0.8)
+            token: localStorage.getItem('hiveauth_has_token'),//should be changed in V1 (current V0.8)
             expire: localStorage.getItem('expires'),
             key: localStorage.getItem('key')
           }
@@ -594,15 +598,9 @@ export default {
         if (bchain_option) {
           cur_bchain = bchain_option;
         }
-        let url = new URL(process.env.actiAppUrl + 'performTrx/?user=' + this.user.account.name + '&operation=' + encodeURIComponent(op_json) + '&bchain=' + cur_bchain);
-        let reqHeads = new Headers({
-          'Content-Type': 'application/json',
-          'x-acti-token': 'Bearer ' + accToken,
-        });
-        let res = await fetch(url, {
-          headers: reqHeads
-        });
-        let outcome = await res.json();
+        // Signed IN THE BROWSER with the user's own key - /performTrx is gone.
+        // Same response shape as before, so the handling below is unchanged.
+        let outcome = await this.$broadcastWithKey(operation, { active: false, bchain: cur_bchain });
         if (outcome.error) {
           console.log(outcome.error);
           let err_msg = outcome.trx.tx.error;

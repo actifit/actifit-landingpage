@@ -1,5 +1,6 @@
 import steem from 'steem'
 import hive from '@hiveio/hive-js'
+import { fetchJsonShared } from '~/utils/sharedFetch'
 
 export const declinedPayoutMixin = {
   computed: {
@@ -122,6 +123,7 @@ export const commonCardMixin = {
             if (entries[0].isIntersecting) {
               this.intersectionObserver.disconnect();
               this.loadImagesForVisibleCard();
+              this.fetchCardStats();
             }
           }, { rootMargin: '200px' }
         );
@@ -221,14 +223,22 @@ export const commonCardMixin = {
     fetchApiData() {
       steem.api.setOptions({ url: process.env.steemApiNode })
       hive.api.setOptions({ url: process.env.hiveApiNode })
-      if (this.cardData && this.cardData.author) {
-        fetch(`${process.env.actiAppUrl}getPostReward?user=${this.cardData.author}&url=${this.cardData.url}`).then(res => res.json()).then(json => { this.afitReward = json.token_count }).catch(e => {})
-        fetch(`${process.env.actiAppUrl}getRank/${this.cardData.author}`).then(res => res.json()).then(json => { this.userRank = json }).catch(e => {})
-      }
-      this.$store.dispatch('fetchModerators')
+      this.$store.dispatch('fetchModerators').catch(() => {})
       this.cur_bchain = localStorage.getItem('cur_bchain') || 'HIVE'
       this.profImgUrl = this.cur_bchain === 'STEEM' ? process.env.steemImgUrl : process.env.hiveImgUrl
     },
+    // Reward and rank are fetched only once the card comes near the screen, not for every
+    // card in the feed on mount: those per-card calls are what overloaded the API on
+    // 2026-10-29. Shared per URL, since a feed shows the same author on many cards.
+    fetchCardStats() {
+      if (this.cardData && this.cardData.author) {
+        fetchJsonShared(`${process.env.actiAppUrl}getPostReward?user=${this.cardData.author}&url=${this.cardData.url}`).then(json => { this.afitReward = json.token_count }).catch(e => {})
+        fetchJsonShared(`${process.env.actiAppUrl}getRank/${this.cardData.author}`).then(json => { this.userRank = json }).catch(e => {})
+      }
+      this.fetchCardExtraStats()
+    },
+    // Overridden by cards that show more (Report.vue).
+    fetchCardExtraStats() {},
     postPaid () {
       if (!this.cardData) return false
       if (this.cardData.is_paidout) return true

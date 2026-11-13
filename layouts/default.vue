@@ -1,11 +1,22 @@
 <template>
-  <nuxt/>
+  <div>
+    <!-- Shown on every page until dismissed. It has to live here rather than in the
+         login components, which tear themselves down on success. -->
+    <SecurityNoticeBanner />
+    <!-- Collects a private key for ONE signing operation; see utils/keyPrompt.js. Lives
+         in the layout so any page or modal can request a key. -->
+    <KeyPromptModal />
+    <nuxt/>
+  </div>
 </template>
 
 <script>
 import { getCanonicalUrl } from '~/utils/seo'
+import SecurityNoticeBanner from '~/components/SecurityNoticeBanner.vue'
+import KeyPromptModal from '~/components/KeyPromptModal.vue'
 
 export default {
+  components: { SecurityNoticeBanner, KeyPromptModal },
   head () {
     const canonicalUrl = getCanonicalUrl(this.$route.path)
 
@@ -21,7 +32,7 @@ export default {
         { hid: 'canonical', rel: 'canonical', href: canonicalUrl }
       ],
       meta: [
-        { hid: 'url', name: 'og:url', property: 'og:url', content: canonicalUrl }
+        { hid: 'url', property: 'og:url', content: canonicalUrl }
       ]
     }
   }

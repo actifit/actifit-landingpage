@@ -6,6 +6,17 @@
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-2">
       <ListHeadingSection :textualDisplay="textualTitle"/>
+      <!-- Server-rendered page intro (SEO issue A2, 2026-09-11 audit). This route
+         populates its list client-side, so without static copy the SERVED html is
+         near-empty for anything that does not execute JavaScript - GPTBot,
+         ClaudeBot, PerplexityBot and most social link scrapers. Googlebot renders
+         JS and was never affected, which is why the audit's 'thin content' flags
+         were false positives for Google and real for AI search. -->
+      <section class="row">
+        <div class="col-12 pb-4">
+          <p class="text-muted">{{ $t('seo_intro_explore') }}</p>
+        </div>
+      </section>
 
 	  <div class="text-right col-12 row pb-2">
 			<div class="col-lg-9 col-sm-8"/>
@@ -104,8 +115,8 @@
 		  title: `Explore Hive Content - Actifit.io`,
 		  meta: [
 			{ hid: 'description', name: 'description', content: `Discover fitness activity reports, workout stories, and healthy lifestyle content from the Actifit community on Hive blockchain.` },
-			{ hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Discover fitness activity reports and healthy lifestyle content from the Actifit community on Hive blockchain.` },
-			{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Explore Hive Content - Actifit.io' }
+			{ hid: 'ogdescription', property: 'og:description', content: `Discover fitness activity reports and healthy lifestyle content from the Actifit community on Hive blockchain.` },
+			{ hid: 'ogtitle', property: 'og:title', content: 'Explore Hive Content - Actifit.io' }
 		  ]
 		}
 	},

@@ -2,6 +2,14 @@ import Vue from 'vue'
 
 //Hive auth services
 import HAS from 'hive-auth-wrapper';
+// The SAME hive-js instance store/actions.js configures (node URL, alternative
+// endpoints) - module singleton - so broadcasts below go to the configured node.
+import hive from '@hiveio/hive-js';
+import { requestKey } from '~/utils/keyPrompt';
+import { classifyKey, keyRefusal } from '~/utils/keyChecks';
+import escapeHtml from '~/utils/escapeHtml';
+import { timeAgo } from '~/utils/timeAgo';
+import { isSiteLink, isTrustedLink } from '~/utils/trustedLinks';
 Vue.prototype.$HAS = HAS;
 
 //sanitization
@@ -78,36 +86,9 @@ import moment from "moment";
 import Lodash from 'lodash';
 
 //global functions
+// time-ago label; see utils/timeAgo.js
 Vue.prototype.$getTimeDifference = function(dateParam) {
-
-  let localDate = new Date();
-
-  dateParam = new Date(Date.parse(dateParam));//Date(dateParam);
-  const currentDate = Date.now();
-  const difference = Math.abs(dateParam.getTime() - currentDate - localDate.getTimezoneOffset() * 60000);
-
-  //let difference = utcTime - dateParam.getTime();//currentDate.getUTCTime() - dateParam.getTime();
-  let mins = Math.floor(difference / (1000 * 60 ));
-  let hours = Math.floor(difference / (1000 * 60 * 60));
-  let days = Math.floor(hours / 24);
-  let weeks = Math.floor(days / 7);
-  let months = Math.floor(weeks / 4);
-  let years = Math.floor(months / 12);
-  let remainingMonths = months % 12;
-
-  if (mins < 60) {
-	return `${mins} min(s) ago`;
-  } else if (hours < 24) {
-	return `${hours} hour(s) ago`;
-  } else if (days < 7) {
-	return `${days} day(s) ago`;
-  } else if (weeks < 4) {
-	return `${weeks} week(s) ago`;
-  } else if (months < 12) {
-	return `${months} month(s) ago`;
-  } else {
-	return `${years} year(s) ago`;//`${years} years and ${remainingMonths} month(s)`;
-  }
+  return timeAgo(dateParam);
 }
 
 Vue.prototype.$fetchReportTags = function(report){
@@ -269,7 +250,7 @@ Vue.prototype.$processTrxFunc = async function (op_name, cstm_params, active) {
 	return new Promise((resolve) => {
 	  const auth = {
 		username: this.user.account.name,
-		token: localStorage.getItem('access_token'),
+		token: localStorage.getItem('hiveauth_has_token'),
 		expire: localStorage.getItem('expires'),
 		key: localStorage.getItem('key')
 	  };
@@ -294,7 +275,8 @@ Vue.prototype.$processTrxFunc = async function (op_name, cstm_params, active) {
 		  });
 		  if (response.cmd && response.cmd === 'sign_ack') {
 			resolve({ success: true, txID: response.data, trx: {tx: {id: response.data} }});
-		  } else if (response.cmd && response.cmd === 'sign_nack') {
+		  } else {
+			// sign_nack, sign_err, expired...: always settle, or the caller hangs
 			resolve({ success: false });
 		  }
 		})
@@ -308,47 +290,251 @@ Vue.prototype.$processTrxFunc = async function (op_name, cstm_params, active) {
 		});
 	});
   } else {
-	let operation = [[op_name, cstm_params]];
-	console.log('broadcasting');
-	console.log(operation);
+	// Typed-key login: sign and broadcast IN THE BROWSER.
+	//
+	// This branch used to send the operation to /performTrx, where the SERVER signed it
+	// with a posting key it had stored. That is what the incident abused - stored keys
+	// signed Hive-Engine drains server-side - and /performTrx is now permanently
+	// disabled. Since the signed-challenge login, the server never holds a key at all,
+	// so typed-key users could log in but not vote, comment, post or transfer.
+	//
+	// Return shape is unchanged - { success, trx: { tx }, error? } - so no caller needs
+	// to change. hive-js returns { id, ref_block_num, ... }: `id` is the real transaction
+	// id, which payment confirmation depends on, and ref_block_num matches what the old
+	// server path returned.
+	const out = await this.$broadcastWithKey([[op_name, cstm_params]], { active: active });
+	if (out.success) return { success: true, trx: out.trx };
+	// A cancelled prompt is the user's own choice, not an error worth a red toast.
+	if (!out.cancelled) {
+	  // escaped: toasts render HTML
+	  this.$notify({ group: 'error', text: out.trx.tx.error, position: 'top center' });
+	}
+	// Raw text, like the Keychain branch above returns: callers show it as plain text.
+	return { success: false, trx: null, error: out.rawError, cancelled: !!out.cancelled };
+  }
+};
 
-	let accToken = localStorage.getItem('access_token');
-	let op_json = JSON.stringify(operation);
-	let cur_bchain = localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : '';
-	let url = new URL(process.env.actiAppUrl + 'performTrx/?user=' + this.user.account.name + '&operation=' + op_json + '&bchain=' + cur_bchain);
-	let reqHeads = new Headers({
-	  'Content-Type': 'application/json',
-	  'x-acti-token': 'Bearer ' + accToken
-	});
+/**
+ * Decrypt a memo addressed to the user, in the browser.
+ *
+ * Replaces /memoDecode, which had the SERVER decrypt with a posting key it had stored for
+ * the user. That route is permanently disabled and the server holds no keys, so the 3Speak
+ * session flow (connectSession3S, which fetches an encrypted access token from 3Speak and
+ * must decrypt it) was dead for EVERY login method - it never branched by method at all.
+ *
+ * Returns the shape /memoDecode returned, so callers' handling is unchanged:
+ *   { xcstkn: <decoded memo> }  or  { error: <message> }
+ *
+ * Keychain decrypts in the extension: requestVerifyKey IS memo decryption. A typed key
+ * decrypts locally with hive-js. HiveAuth has no memo-decrypt operation; it never worked
+ * here either (the server held no key for HiveAuth users), so this is not a regression.
+ */
+// Only a typed-key session may be asked to type a key. A Keychain session whose extension
+// is missing (disabled, mobile browser) reaches the typed-key branches because every
+// Keychain branch also requires window.hive_keychain - asking that user to paste a
+// private key would teach exactly the wrong habit. HiveSigner sessions never type keys.
+// Returns a translation key to refuse with, or null.
+function typedKeySessionRefusal () {
+  if (!localStorage.getItem('std_login')) return 'error_performing_operation';
+  if (localStorage.getItem('acti_login_method') === 'keychain') return 'keychain_not_detected';
+  return null;
+}
 
-	let res = await fetch(url, {
-	  headers: reqHeads
-	});
-
-	let outcome = await res.json();
-	console.log(outcome);
-
-	if (!outcome || outcome.error || !outcome.trx) {
-	  console.log(outcome && outcome.error);
-
-	  let err_msg = getTransactionErrorMessage(outcome) || this.$t('error_performing_operation');
-	  if (err_msg.includes('missing') && err_msg.includes('authority')) {
-		localStorage.removeItem('access_token');
-		this.error_msg = this.$t('session_expired_login_again');
-		this.$store.dispatch('steemconnect/logout');
-	  }
-
-	  this.$notify({
-		group: 'error',
-		text: err_msg,
-		position: 'top center'
+Vue.prototype.$decodeMemo = async function (memo) {
+  if (!memo) return { error: this.$t('error_performing_operation') };
+  const account = this.user && this.user.account && this.user.account.name;
+  const method = localStorage.getItem('acti_login_method');
+  try {
+	if (method === 'keychain' && window.hive_keychain) {
+	  const decoded = await new Promise((resolve) => {
+		window.hive_keychain.requestVerifyKey(account, memo, 'Posting',
+		  (r) => resolve(r && r.success ? r.result : null));
 	  });
+	  return decoded ? { xcstkn: decoded } : { error: this.$t('signing_cancelled') };
+	}
+	if (method === 'hiveauth') {
+	  return { error: this.$t('error_performing_operation') };
+	}
+	const refusal = typedKeySessionRefusal();
+	if (refusal) return { error: escapeHtml(this.$t(refusal)) };
+	let wif = this.$store.state.chatPostingKey;
+	if (!wif) {
+	  wif = await requestKey('posting', account, [['memo_decode', {}]]);
+	  if (wif) this.$store.commit('setChatPostingKey', wif);
+	}
+	if (!wif) return { error: this.$t('signing_cancelled') };
+	return { xcstkn: hive.memo.decode(wif, memo) };
+  } catch (e) {
+	// Escaped: callers show this in a toast, and toasts render HTML.
+	return { error: escapeHtml((e && e.message) || this.$t('error_performing_operation')) };
+  }
+};
 
-	  return { success: false, trx: null, error: err_msg };
-	} else {
-	  return { success: true, trx: outcome.trx };
+/**
+ * Sign and broadcast operations IN THE BROWSER with the typed-key user's own key.
+ *
+ * Shared by $processTrxFunc and by every component that used to call /performTrx
+ * directly - one implementation, so they cannot drift (see utils/keyChecks.js for why
+ * that matters here).
+ *
+ * Returns the response shape /performTrx used to return, so callers' existing outcome
+ * handling keeps working unchanged:
+ *   success: { success: true, trx: { tx: <broadcast result incl. id> } }
+ *   failure: { error: true, trx: { tx: { error: <message> } }, cancelled?: true }
+ *
+ * Does NOT notify: the direct callers already raise their own toast on failure, and
+ * doubling it would be noise. $processTrxFunc notifies for its own callers.
+ *
+ * HIVE ONLY. Typed-key login is Hive-only (the signed-challenge login verifies against
+ * the Hive account), so the key held here IS a Hive key; signing a Steem or Blurt
+ * operation with it would fail anyway. Saying so plainly beats an opaque chain error.
+ */
+Vue.prototype.$broadcastWithKey = async function (operations, opts) {
+  const options = opts || {};
+  const active = !!options.active;
+  const bchain = String(options.bchain || 'HIVE').toUpperCase();
+  // The message is HTML-ESCAPED here, once, at the source. Every caller either
+  // substring-matches it ('missing' / 'authority') or shows it in a toast, and toasts
+  // render HTML (vue-notification uses v-html) - while the text can come from an RPC
+  // node. Escaping here covers every caller, including ones added later.
+  // `rawError` keeps the unescaped text for $processTrxFunc, whose callers show it as
+  // plain text ({{ }}), where an escaped "&quot;" would be shown literally.
+  const fail = (msg, extra) => Object.assign({ error: true, rawError: String(msg), trx: { tx: { error: escapeHtml(msg) } } }, extra || {});
+
+  if (bchain !== 'HIVE') {
+	return fail(this.$t('typed_key_hive_only'));
+  }
+  const refusal = typedKeySessionRefusal();
+  if (refusal) return fail(this.$t(refusal));
+
+  const account = this.user && this.user.account && this.user.account.name;
+  const keyType = active ? 'active' : 'posting';
+
+  let wif;
+  if (options.wif) {
+	// The caller already collected the key in its own form (the buy-now flows ask for
+	// the active key up front). Use it rather than prompting a second time - but apply
+	// exactly the checks the prompt applies. This path skips the prompt, and it is the
+	// one that signs PAYMENTS: without this, an owner key typed into a buy form would
+	// sign, and a posting key would fail only after the user had committed.
+	const typed = String(options.wif).trim();
+	const refusal = keyRefusal(await classifyKey(account, typed), keyType);
+	if (refusal) return fail(this.$t(refusal));
+	wif = typed;
+  } else if (active) {
+	// Active keys are requested PER ACTION and never kept: one can move funds.
+	wif = await requestKey('active', account, operations);
+  } else {
+	// The posting key is put in the store at login and kept in the browser, so it
+	// survives reloads and new tabs (utils/postingKeyStore.js). Ask only if it is
+	// missing - e.g. a session from before keys were kept, or a key just rotated.
+	wif = this.$store.state.chatPostingKey;
+	if (!wif) {
+	  wif = await requestKey('posting', account, operations);
+	  if (wif) this.$store.commit('setChatPostingKey', wif);
 	}
   }
+
+  if (!wif) {
+	return fail(this.$t('signing_cancelled'), { cancelled: true });
+  }
+
+  try {
+	const result = await new Promise((resolve, reject) => {
+	  // keys MUST be an object keyed by role. hive-js signs with `for (k in keys)`, so
+	  // a bare WIF string would iterate its CHARACTERS and sign with garbage.
+	  hive.broadcast.send({ extensions: [], operations: operations }, { [keyType]: wif },
+		(err, res) => (err ? reject(err) : resolve(res)));
+	});
+	return { success: true, trx: { tx: result } };
+  } catch (err) {
+	const err_msg = getTransactionErrorMessage({ error: err }) ||
+	  (err && err.message) || this.$t('error_performing_operation');
+	// A posting key that no longer has authority (the user rotated it) must not keep
+	// being retried from memory. Drop it so the next action asks for the current one.
+	if (!active && /missing.*authority|missing required posting/i.test(err_msg)) {
+	  this.$store.commit('setChatPostingKey', null);
+	}
+	return fail(err_msg);
+  } finally {
+	// Drop this function's reference to an active key once the broadcast settles. This
+	// does NOT wipe it from memory - JS strings cannot be zeroed - it only stops this
+	// code from holding it. The active key is never written to the store or storage.
+	if (active) wif = null;
+  }
+};
+
+/**
+ * Does this session sign its own transactions in the browser - Keychain, HiveAuth or a
+ * typed key? Then every payment/action confirmation must use the actifit-bot route that
+ * verifies the transaction ON CHAIN (the "...Keychain" routes, via findVerifyTrx).
+ *
+ * The other routes (buyGadgetHive, activateMultiGadget, addFriend, ...) only look the
+ * transaction up in verified_tx, which was filled by the server when IT signed. The
+ * server no longer signs, so for a browser-signed transaction those routes can never
+ * succeed. Sending a typed-key user there broadcast a real HIVE payment and then failed
+ * the purchase. Only HiveSigner (no std_login) keeps the old routes.
+ */
+Vue.prototype.$signsInBrowser = function () {
+  return !!localStorage.getItem('std_login');
+};
+
+/**
+ * Did an actifit-bot confirmation route fail? The routes answer {error: ...} for some
+ * failures but {status: 'error'} when on-chain verification fails - and callers that
+ * only checked `outcome.error` treated that second shape as SUCCESS.
+ */
+Vue.prototype.$confirmFailed = function (outcome) {
+  return !outcome || !!outcome.error || outcome.status === 'error';
+};
+
+/**
+ * Text for a failed signing/broadcast, SAFE FOR v-html (errorProceed and toasts are
+ * both HTML sinks). Accepts every failure shape that reaches the purchase flows:
+ *   $broadcastWithKey  { error: true, trx: { tx: { error } } }  - already escaped there
+ *   Keychain/HiveAuth  { success: false, error: <string> }
+ *   hive-js            Error with .cause.message / .message
+ * It used to read res.cause.message unconditionally, which threw on the first two.
+ */
+Vue.prototype.$signingErrorText = function (res) {
+  if (res && res.trx && res.trx.tx && res.trx.tx.error) return res.trx.tx.error;
+  const msg = (res && res.cause && res.cause.message) ||
+	(res && typeof res.error === 'string' && res.error) ||
+	(res && typeof res.message === 'string' && res.message);
+  return escapeHtml(msg || this.$t('error_performing_operation'));
+};
+
+/**
+ * The HIVE payment WAS signed and broadcast, but actifit-bot did not confirm the
+ * purchase. Say exactly that, with the transaction id, so the user does not pay a second
+ * time and support can find the payment. A toast that stays until dismissed: the panel
+ * that shows errorProceed is hidden when the buy flow finishes. Returns the text too.
+ */
+Vue.prototype.$notifyPaymentNotConfirmed = function (trxId) {
+  const msg = this.$t('payment_sent_not_confirmed').replace('_TX_', escapeHtml(trxId || ''));
+  this.$notify({ group: 'error', text: msg, duration: -1, position: 'top center' });
+  return msg;
+};
+
+// Returns actifit-bot's own message for the key-rotation gate, or null.
+//
+// For an account flagged in the 2026-10-21 incident, sensitive endpoints
+// (/setUserFundsPass, /storeUserWalletAddress, /deleteUserWalletAddress,
+// /deleteAccount) answer 403 {code:'KEY_ROTATION_REQUIRED', error, message} - or 503
+// {code:'TRY_AGAIN'} when the chain cannot be read to decide. Signed-transaction routes
+// (gadget buys, ...) can also answer 403 {code:'KEY_ROTATION_HOLD'} briefly after a key
+// change. Those carry an actionable
+// instruction ("rotate your posting key"), so a generic "error performing operation"
+// hides the one thing the user needs to be told.
+//
+// Allow-listed by code rather than "show whatever the server said", so ordinary failures
+// and internal errors keep their existing generic text. Every call site renders through
+// {{ }}, so this is not an HTML sink - but narrow is still the right default.
+Vue.prototype.$gateMessage = function (outcome) {
+	const GATE_CODES = ['KEY_ROTATION_REQUIRED', 'KEY_ROTATION_HOLD', 'TRY_AGAIN'];
+	if (!outcome || GATE_CODES.indexOf(outcome.code) === -1) return null;
+	const msg = outcome.message || outcome.error;
+	return (typeof msg === 'string' && msg.trim()) ? msg : null;
 };
 
 Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
@@ -404,12 +590,7 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
 	// Escape characters that are significant inside an HTML attribute value so a
 	// crafted URL cannot terminate the src="" attribute and inject new attributes
 	// (e.g. onerror=). Defence against stored XSS via image/media URLs.
-	const escapeHtmlAttr = (str) => String(str)
-		.replace(/&/g, '&amp;')
-		.replace(/"/g, '&quot;')
-		.replace(/'/g, '&#39;')
-		.replace(/</g, '&lt;')
-		.replace(/>/g, '&gt;');
+	const escapeHtmlAttr = escapeHtml;
 
 	// Process Images (unified approach)
 	const createProxiedImageTag = (url) => {
@@ -468,6 +649,12 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
 		html_content = html_content.replace(placeholder, placeholders[placeholder]);
 	}
 
+	return sanitizePostHtml(html_content);
+}
+
+// Sanitizes rendered post HTML and marks off-site links. Shared by $cleanBody and
+// SafeRemarkable, which renders markdown again and so must sanitize its own output.
+function sanitizePostHtml (html_content) {
 	let sanitizeOptions = {
 		ALLOWED_TAGS: [ 'img', 'iframe', 'details', 'summary', 'table', 'tr', 'td', 'th', 'thead', 'tbody', 'sub', 'sup', 'div', 'a', 'p', 'br', 'strong', 'em', 'u', 's', 'blockquote', 'code', 'pre', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span' ],
 		ALLOWED_ATTR: [ 'src', 'style', 'class', 'alt', 'title', 'width', 'height', 'frameborder', 'allowfullscreen', 'href', 'target', 'rel', 'colspan', 'rowspan', 'data-external-href' ],
@@ -522,13 +709,13 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
     } else {
         // Server-side sanitization using sanitize-html
         const sanitizeHtml = require('sanitize-html');
-        const trustedIframeRe = new RegExp(
-            '^https?:\\/\\/([\\w-]+\\.)*(' +
-            TRUSTED_IFRAME_HOSTS.map(h => h.replace('.', '\\.')).join('|') +
-            ')(\\/|$)', 'i'
-        );
         sanitized_html = sanitizeHtml(html_content, {
             allowedTags: sanitizeOptions.ALLOWED_TAGS,
+            // data-external-href feeds SafeRemarkable's window.open(). sanitize-html only
+            // scheme-checks href/src/cite by default, so without this an author-supplied
+            // javascript: value passes through the SSR branch byte-for-byte. DOMPurify
+            // already URI-checks it on the client; this makes the two branches agree.
+            allowedSchemesAppliedToAttributes: ['href', 'src', 'cite', 'data-external-href'],
             allowedAttributes: {
                 '*': sanitizeOptions.ALLOWED_ATTR
             },
@@ -554,18 +741,14 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
     const processLinks = (href, addClass, setAttr) => {
         if (!href) return;
 
-		// Whitelist check
-		const isWhitelisted = /^(?:\/|#|https?:\/\/(?:[\w-]+\.)*(?:actifit\.io|peakd\.com|ecency\.com|hive\.blog|leofinance\.io|travelfeed\.com|3speak\.tv|steemit\.com|hivesigner\.com|vimm\.tv|d\.tube|bit\.ly|youtube\.com|youtu\.be|facebook\.com|twitter\.com|x\.com|instagram\.com|discord\.gg|discord\.com|telegram\.me|t\.me))/i.test(href);
-
-		if (!isWhitelisted) {
+		if (!isTrustedLink(href)) {
 			addClass('external-link');
             // We use the data-external-href to keep the modal informed
             // even if the href is still on the tag for browser rendering.
             setAttr('data-external-href', href);
 		}
 
-		// Standard link attributes for whitelisted/internal
-		if (!href.startsWith('/') && !href.startsWith('#')) {
+		if (!isSiteLink(href)) {
 			setAttr('target', '_blank');
 			setAttr('rel', 'noopener ugc');
 		}
@@ -585,9 +768,15 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
         });
         return doc.body.innerHTML;
     } else {
-        // Server-side link processing using cheerio
-        const cheerio = require('cheerio');
-        const $ = cheerio.load(sanitized_html);
+        // Server-side link processing. cheerio/slim, not cheerio: the full build pulls in
+        // undici 7, which does not load on the server's Node 16 (.nvmrc).
+        const cheerio = require('cheerio/slim');
+        const $ = cheerio.load(sanitized_html, null, false);
+        // Empty every iframe (browsers never show its content). cheerio writes iframe text
+        // back UNESCAPED, so sanitize-html's safe "<iframe>&lt;/iframe&gt;&lt;img
+        // onerror=..&gt;</iframe>" came out as a live <img onerror> once the browser
+        // closed the iframe at the first </iframe>.
+        $('iframe').empty();
         $('a[href]').each((i, el) => {
             const $el = $(el);
             processLinks(
@@ -596,9 +785,11 @@ Vue.prototype.$cleanBody = function (report_content, full_cleanup, no_media){
                 (name, val) => $el.attr(name, val)
             );
         });
-        return $('body').html();
+        return $.root().html();
     }
 }
+
+Vue.prototype.$sanitizePostHtml = sanitizePostHtml;
 
 Vue.prototype.$clearDraft = function (username, type){
 	localStorage.removeItem(username+'_draft_'+type);

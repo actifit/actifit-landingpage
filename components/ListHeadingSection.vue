@@ -4,7 +4,17 @@
       <img v-if="username" class="list-heading-avatar" :src="avatarSrc" alt="" width="30" height="30"
         aria-hidden="true" @error="useFallbackAvatar">
 
-      <h1 class="font-weight-semibold text-white text-left h4 mb-0" v-html="textualDisplay"></h1>
+      <!-- $sanitize is LOAD-BEARING, not decoration. textualDisplay is built from
+           route input by six callers - pages/search.vue passes $route.query.q, and
+           five more pass $route.params.username - so an unescaped v-html here is a
+           REFLECTED XSS that needs nothing but a crafted link: no login, no chain
+           write, and it fires on the SSR response as well as the client.
+           It stays v-html rather than {{ }} because four callers legitimately pass
+           chain-logo image and info-link markup; $sanitize keeps those (a/b/i/strong/em/br/img/span,
+           allow-listed classes, /img/ images, local links only) and drops everything else,
+           on both the DOMPurify and sanitize-html paths.
+           The cleaner end state is a named slot for that markup plus {{ }} here. -->
+      <h1 class="font-weight-semibold text-white text-left h4 mb-0" v-html="$sanitize(textualDisplay)"></h1>
     </div>
   </div>
 </template>

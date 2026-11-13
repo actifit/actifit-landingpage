@@ -1,6 +1,134 @@
 const axios = require('axios');
+
+// Every upstream call goes through this instance, and every one has a timeout.
+//
+// None of them had one. When an upstream stalled, the request hung, the Nuxt server
+// held it open, and requests piled up behind it until Cloudflare gave up with a 504 -
+// observed right after the signed-challenge login deployed (2026-10-24): login routes
+// 504ing or taking 13-16s while the API answered directly in under a second.
+//
+// A LOCAL instance, not axios.defaults: require('axios') is a process-wide singleton,
+// so changing its defaults here would silently change the timeout for every other
+// axios caller in the server.
+//
+// Limits are per purpose (see T below). The binding constraint is login: the client
+// aborts at 20s, so the proxy must give up FIRST and return a real error, rather than
+// letting the browser's own abort or Cloudflare's 504 decide what the user sees.
+const http = axios.create({
+  timeout: 15000,
+  // Cap upstream response bodies. Every upstream here is first-party, Google or DeepL, so
+  // the risk is low - but the default is unlimited, and one oversized body can exhaust
+  // the process for every user. /upload overrides this for itself.
+  maxContentLength: 10 * 1024 * 1024
+});
+
+// axios `timeout` is NOT a total deadline. Under Node it bounds only the wait for the
+// response HEADERS; after that just a socket-idle timer remains, so an upstream that
+// drips its body slowly is never cut off (measured: a 40s drip succeeded through a 15s
+// limit) - which is exactly the request pile-up these timeouts exist to stop. So every
+// request also gets an AbortController fired at the same deadline.
+//
+// A manual AbortController, NOT AbortSignal.timeout(): production runs Node 16.20.2
+// (package.json engines), and AbortSignal.timeout() only exists from Node 17.3. It would
+// have thrown on every single upstream call.
+http.interceptors.request.use((config) => {
+  if (config.timeout && !config.signal) {
+    const controller = new AbortController();
+    config.signal = controller.signal;
+    config.deadlineTimer = setTimeout(() => controller.abort(), config.timeout);
+  }
+  return config;
+});
+const clearDeadline = (config) => {
+  if (config && config.deadlineTimer) clearTimeout(config.deadlineTimer);
+};
+http.interceptors.response.use(
+  (response) => { clearDeadline(response.config); return response; },
+  (error) => { clearDeadline(error.config); return Promise.reject(error); }
+);
+
+// The one failure path for every upstream call.
+//
+// Pass an upstream status through ONLY if it is a real error (>= 400). An upstream that
+// stalls after sending its headers fails with error.response.status === 200, and passing
+// that through answered the browser with a 200 and an empty body - which the login client
+// then reported as "your key is incorrect". Anything without a real error status means
+// the service is unavailable: 503, the status the client maps to "try again shortly".
+//
+// The body is generic on that path. It used to be error.message, which leaked internals
+// to the browser (e.g. "connect ECONNREFUSED 127.0.0.1:3120").
+const upstreamFailed = (res, error, route) => {
+  const status = error && error.response && error.response.status;
+  if (status && status >= 400) {
+    res.statusCode = status;
+    return res.end(JSON.stringify(error.response.data));
+  }
+  // Logged, so a timeout is diagnosable from pm2 instead of being a silent 503.
+  console.warn('[proxy] upstream unavailable on ' + route + ':',
+    (error && (error.code || error.name)) || '', (error && error.message) || '');
+  res.statusCode = 503;
+  return res.end(JSON.stringify({ error: 'Service temporarily unavailable' }));
+};
+// When an upstream call fails WITHOUT a response - a timeout above, a refused or
+// reset connection - each catch below answers 503, not 500. That is accurate (the
+// service is unavailable; nothing is wrong with the request), and it is the status
+// the login client maps to "try again shortly" rather than "your key is incorrect".
+const T = {
+  login: 15000,     // under the client's 20s abort - see above
+  quick: 10000,     // account lookup: a small read
+  reward: 15000,
+  translate: 30000,
+  gemini: 40000,    // an LLM call; under the client's 45 s per-model abort, so the proxy answers first
+  // The deadline covers the whole request INCLUDING the browser's upload, which is
+  // streamed through (data: req) at the user's connection speed. 60s cut off a ~10MB
+  // phone photo on a slow uplink. Kept under Cloudflare's 100s.
+  upload: 90000
+};
 const url = require('url');
 
+// The models components/gemini-client.js tries, in order. Google retires models: when one
+// starts answering 404, replace it in both places.
+const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.5-flash'];
+// Per model: thinking off where the model allows it (a translation needs none; measured
+// 2.4 s -> 0.7 s on 2.5-flash). 3.5-flash-lite does not think by default and rejects
+// thinkingBudget with a 400.
+const GEMINI_THINKING = {
+  'gemini-2.5-flash': { thinkingBudget: 0 },
+  'gemini-3.5-flash': { thinkingBudget: 0 },
+};
+const GEMINI_MAX_BODY = 256 * 1024;
+// Hive's own cap on a post body. Counted in characters; a JSON body of that much text
+// stays under GEMINI_MAX_BODY.
+const GEMINI_MAX_TEXT = 64 * 1024;
+
+// The browser sends only the text; the prompt and settings are fixed here, so this route
+// can only ever translate. It used to forward whatever generateContent body it was given:
+// any prompt, tools (paid Search grounding), any output length, on the site's key.
+function geminiTranslateRequest(model, text) {
+  const generationConfig = { temperature: 0.2, maxOutputTokens: 32768 };
+  if (GEMINI_THINKING[model]) generationConfig.thinkingConfig = GEMINI_THINKING[model];
+  const prompt = 'Translate the following text to English. The text may contain Markdown or HTML formatting. ' +
+    'Preserve the original formatting (like links, bolding, lists, etc.) as accurately as possible. ' +
+    'Do not add any extra explanations, introductory phrases, or apologies. Return ONLY the translated text.' +
+    '\n\nText to translate:\n"""\n' + text + '\n"""';
+  return { contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig };
+}
+
+// The answer's text, without any thought parts; '' when Google returned none (a blocked
+// or empty answer).
+function geminiText(data) {
+  const parts = (data && data.candidates && data.candidates[0] && data.candidates[0].content &&
+    data.candidates[0].content.parts) || [];
+  return parts.filter((p) => p && !p.thought && typeof p.text === 'string').map((p) => p.text).join('');
+}
+
+// The visitor's address, for rate limits. Cloudflare sets cf-connecting-ip, and the origin
+// accepts web traffic only through Cloudflare (checked 2026-11-12: 80/443 closed to
+// direct connections). x-forwarded-for keeps whatever the caller sent first, so a made-up
+// value per request got a fresh allowance on every route keyed by it.
+function clientIp(req) {
+  return req.headers['cf-connecting-ip'] || (req.socket && req.socket.remoteAddress) || 'unknown';
+}
 const VALID_USER_RE = /^[a-z][a-z0-9.-]{2,15}$/;
 const ALLOWED_URL_HOSTS = ['actifit.io', 'peakd.com', 'ecency.com', 'hive.blog'];
 
@@ -15,12 +143,23 @@ function isAllowedPostUrl(rawUrl) {
 
 // Simple in-memory sliding-window rate limiter
 const _rateMap = new Map();
+const RATE_MAP_MAX = 10000;
 function isRateLimited(key, maxPerWindow = 10, windowMs = 60000) {
   const now = Date.now();
   const entry = _rateMap.get(key) || { count: 0, resetAt: now + windowMs };
   if (now > entry.resetAt) { entry.count = 0; entry.resetAt = now + windowMs; }
   entry.count++;
   _rateMap.set(key, entry);
+  // Entries were never removed, so every new key (one per visitor and route) stayed for
+  // the life of the process. Drop expired ones, and if a flood of new keys still leaves
+  // too many, the oldest.
+  if (_rateMap.size > RATE_MAP_MAX) {
+    for (const [k, e] of _rateMap) if (now > e.resetAt) _rateMap.delete(k);
+    for (const k of _rateMap.keys()) {
+      if (_rateMap.size <= RATE_MAP_MAX) break;
+      _rateMap.delete(k);
+    }
+  }
   return entry.count > maxPerWindow;
 }
 
@@ -62,7 +201,17 @@ module.exports = async function (req, res, next) {
         return res.end(JSON.stringify({ error: 'Method Not Allowed' }));
       }
 
-      const model = parsedUrl.query.model || 'gemini-2.5-flash';
+      // Only the translation models, at a translation pace: this route spends the site's
+      // own Gemini key, so it must not run any model, any number of times, for anyone.
+      const model = parsedUrl.query.model || GEMINI_MODELS[0];
+      if (!GEMINI_MODELS.includes(model)) {
+        res.statusCode = 400;
+        return res.end(JSON.stringify({ error: 'Model not allowed' }));
+      }
+      if (isRateLimited(`${clientIp(req)}:${path}`, 20, 60000)) {
+        res.statusCode = 429;
+        return res.end(JSON.stringify({ error: 'Too many requests' }));
+      }
       const apiKey = process.env.GEMINI_API_KEY;
 
       if (!apiKey) {
@@ -70,21 +219,48 @@ module.exports = async function (req, res, next) {
         return res.end(JSON.stringify({ error: 'Gemini API key not configured on server' }));
       }
 
-      let body = '';
-      req.on('data', chunk => { body += chunk; });
-      req.on('end', async () => {
-        try {
-          const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-          const response = await axios.post(geminiUrl, JSON.parse(body), {
-            headers: { 'Content-Type': 'application/json' }
-          });
-          res.end(JSON.stringify(response.data));
-        } catch (error) {
-          res.statusCode = error.response ? error.response.status : 500;
-          res.end(JSON.stringify(error.response ? error.response.data : { error: error.message }));
+      // A post or comment (Hive caps a body at 64 KB); anything far larger is not one, and
+      // reading it all would fill memory.
+      let text;
+      try {
+        text = JSON.parse(await readRequestBody(req, GEMINI_MAX_BODY)).text;
+      } catch (error) {
+        res.statusCode = error.statusCode || 400;
+        return res.end(JSON.stringify({ error: error.statusCode ? 'Request body too large' : 'Invalid request body' }));
+      }
+      if (typeof text !== 'string' || !text.trim() || text.length > GEMINI_MAX_TEXT) {
+        res.statusCode = 400;
+        return res.end(JSON.stringify({ error: 'Send { text } of at most ' + GEMINI_MAX_TEXT + ' characters' }));
+      }
+      try {
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+        const response = await http.post(geminiUrl, geminiTranslateRequest(model, text), {
+          headers: { 'Content-Type': 'application/json' },
+          timeout: T.gemini
+        });
+        const translated = geminiText(response.data);
+        if (!translated) {
+          // Blocked or empty: 502, so the client tries the next model.
+          res.statusCode = 502;
+          return res.end(JSON.stringify({ error: 'No translation returned' }));
         }
-      });
-      return;
+        // Cut off at the output cap (a very long post): say so rather than show half a post
+        // as if it were all of it.
+        const candidate = response.data.candidates[0];
+        const truncated = candidate.finishReason === 'MAX_TOKENS';
+        return res.end(JSON.stringify(truncated ? { text: translated, truncated } : { text: translated }));
+      } catch (error) {
+        const status = error && error.response && error.response.status;
+        // Google's own errors (500 INTERNAL, 504, a model-specific 400...) concern that model
+        // only: 502, so the client tries the next one. 404 (retired) and 429 (quota) pass
+        // through as they are. The client stops only on THIS route's own 400/500s.
+        if (status && status !== 404 && status !== 429) {
+          console.warn('[proxy] gemini ' + model + ' answered ' + status);
+          res.statusCode = 502;
+          return res.end(JSON.stringify({ error: 'Model error' }));
+        }
+        return upstreamFailed(res, error, path);
+      }
     }
 
     // 2. DeepL Proxy
@@ -105,7 +281,8 @@ module.exports = async function (req, res, next) {
       req.on('end', async () => {
         try {
           const params = JSON.parse(body);
-          const response = await axios.post('https://api.deepl.com/v2/translate', null, {
+          const response = await http.post('https://api.deepl.com/v2/translate', null, {
+            timeout: T.translate,
             params: {
               ...params,
               auth_key: apiKey
@@ -113,8 +290,7 @@ module.exports = async function (req, res, next) {
           });
           res.end(JSON.stringify(response.data));
         } catch (error) {
-          res.statusCode = error.response ? error.response.status : 500;
-          res.end(JSON.stringify(error.response ? error.response.data : { error: error.message }));
+          return upstreamFailed(res, error, path);
         }
       });
       return;
@@ -153,7 +329,7 @@ module.exports = async function (req, res, next) {
         return res.end(JSON.stringify({ error: 'Authentication required' }));
       }
 
-      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+      const ip = clientIp(req);
       if (isRateLimited(`${ip}:${path}`, 10, 60000) || isRateLimited(`${ip}:${user}:${path}`, 5, 60000)) {
         res.statusCode = 429;
         return res.end(JSON.stringify({ error: 'Too many requests' }));
@@ -163,14 +339,14 @@ module.exports = async function (req, res, next) {
       const targetUrl = `${baseApiUrl}${endpoint}/${user}`;
 
       try {
-        const response = await axios.get(targetUrl, {
+        const response = await http.get(targetUrl, {
+            timeout: T.reward,
             params: { [param]: key, url: postUrl },
             headers: { 'x-acti-token': userToken },
         });
         return res.end(JSON.stringify(response.data));
       } catch (error) {
-        res.statusCode = error.response ? error.response.status : 500;
-        res.end(JSON.stringify(error.response ? error.response.data : { error: error.message }));
+        return upstreamFailed(res, error, path);
         return;
       }
     }
@@ -197,9 +373,10 @@ module.exports = async function (req, res, next) {
       };
 
       try {
-        const response = await axios({
+        const response = await http({
           method: 'post',
           url: targetUrl,
+          timeout: T.upload,
           data: req,
           headers: headers,
           maxBodyLength: Infinity,
@@ -211,57 +388,28 @@ module.exports = async function (req, res, next) {
 
       } catch (error) {
          console.error("Proxy upload error:", error.message);
-         if (error.response) {
-            res.statusCode = error.response.status;
-            res.end(JSON.stringify(error.response.data));
-         } else {
-            res.statusCode = 500;
-            res.end(JSON.stringify({ error: 'Upload failed', details: error.message }));
-         }
+         upstreamFailed(res, error, path);
       }
       return;
     }
 
-    // 5. Confirm Payment Proxy
-    if (path === '/confirmPayment') {
-      if (req.method !== 'POST') {
-        res.statusCode = 405;
-        return res.end(JSON.stringify({ error: 'Method Not Allowed' }));
-      }
-
-      const apiKey = process.env.CONFIRM_PAYMENT_API_KEY;
-      if (!apiKey) {
-        res.statusCode = 500;
-        return res.end(JSON.stringify({ error: 'Confirm Payment API key not configured on server' }));
-      }
-
-      const baseApiUrl = (process.env.ACTI_API_URL || 'http://localhost:3120').replace(/\/?$/, '/');
-      const targetUrl = `${baseApiUrl}confirmPayment`;
-
-      let body = '';
-      req.on('data', chunk => { body += chunk; });
-      req.on('end', async () => {
-        try {
-          const params = { ...JSON.parse(body), confirm_payment_token: apiKey };
-          const response = await axios.post(targetUrl, params);
-          res.end(JSON.stringify(response.data));
-        } catch (error) {
-          res.statusCode = error.response ? error.response.status : 500;
-          res.end(JSON.stringify(error.response ? error.response.data : { error: error.message }));
-        }
-      });
-      return;
-    }
+    // 5. (removed) /confirmPayment: the old signup sent the new account's master password
+    // through here. Signup now makes the keys in the browser and calls the API's
+    // /app/signupQuote + /app/signupWithKeys directly with public keys only.
 
     // 6. Login proxies
-    const loginPostEndpoints = ['/loginAuth', '/loginKeychain', '/loginKeychainVerify'];
+    // /loginChallenge + /loginVerify are the signed-challenge login (actifit-bot #147).
+    // The posting key is signed in the browser and only the SIGNATURE crosses the wire,
+    // so no raw key passes through this proxy on those two routes.
+    const loginPostEndpoints = ['/loginAuth', '/loginKeychain', '/loginKeychainVerify',
+      '/loginChallenge', '/loginVerify'];
     if (loginPostEndpoints.includes(path)) {
       if (req.method !== 'POST') {
         res.statusCode = 405;
         return res.end(JSON.stringify({ error: 'Method Not Allowed' }));
       }
 
-      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+      const ip = clientIp(req);
       if (isRateLimited(`${ip}:${path}`, 10, 60000)) {
         res.statusCode = 429;
         return res.end(JSON.stringify({ error: 'Too many requests' }));
@@ -272,43 +420,13 @@ module.exports = async function (req, res, next) {
 
       try {
         const body = await readRequestBody(req);
-        const response = await axios.post(targetUrl, body ? JSON.parse(body) : {}, {
-          headers: { 'Content-Type': 'application/json' }
+        const response = await http.post(targetUrl, body ? JSON.parse(body) : {}, {
+          headers: { 'Content-Type': 'application/json' },
+          timeout: T.login
         });
         return res.end(JSON.stringify(response.data));
       } catch (error) {
-        res.statusCode = error.response ? error.response.status : (error.statusCode || 500);
-        return res.end(JSON.stringify(error.response ? error.response.data : { error: error.message }));
-      }
-    }
-
-    if (path === '/verifyLoginCaptcha') {
-      if (req.method !== 'GET') {
-        res.statusCode = 405;
-        return res.end(JSON.stringify({ error: 'Method Not Allowed' }));
-      }
-
-      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
-      if (isRateLimited(`${ip}:${path}`, 10, 60000)) {
-        res.statusCode = 429;
-        return res.end(JSON.stringify({ error: 'Too many requests' }));
-      }
-
-      const token = parsedUrl.query.token;
-      if (!token || typeof token !== 'string') {
-        res.statusCode = 400;
-        return res.end(JSON.stringify({ error: 'Missing captcha token' }));
-      }
-
-      const baseApiUrl = (process.env.ACTI_API_URL || 'https://api.actifit.io').replace(/\/?$/, '/');
-      try {
-        const response = await axios.get(`${baseApiUrl}verifyLoginCaptcha`, {
-          params: { token }
-        });
-        return res.end(JSON.stringify(response.data));
-      } catch (error) {
-        res.statusCode = error.response ? error.response.status : 500;
-        return res.end(JSON.stringify(error.response ? error.response.data : { error: error.message }));
+        return upstreamFailed(res, error, path);
       }
     }
 
@@ -318,7 +436,7 @@ module.exports = async function (req, res, next) {
         return res.end(JSON.stringify({ error: 'Method Not Allowed' }));
       }
 
-      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+      const ip = clientIp(req);
       if (isRateLimited(`${ip}:${path}`, 10, 60000)) {
         res.statusCode = 429;
         return res.end(JSON.stringify({ error: 'Too many requests' }));
@@ -337,13 +455,13 @@ module.exports = async function (req, res, next) {
 
       const baseApiUrl = (process.env.ACTI_API_URL || 'https://api.actifit.io').replace(/\/?$/, '/');
       try {
-        const response = await axios.get(`${baseApiUrl}getAccountData`, {
-          params: { user, bchain }
+        const response = await http.get(`${baseApiUrl}getAccountData`, {
+          params: { user, bchain },
+          timeout: T.quick
         });
         return res.end(JSON.stringify(response.data));
       } catch (error) {
-        res.statusCode = error.response ? error.response.status : 500;
-        return res.end(JSON.stringify(error.response ? error.response.data : { error: error.message }));
+        return upstreamFailed(res, error, path);
       }
     }
 

@@ -1,6 +1,9 @@
 import Vue from 'vue'
 
 export default {
+  setSecurityNotice (state, securityNotice) {
+    state.securityNotice = securityNotice
+  },
   setUserTokens (state, userTokens) {
     state.userTokens = userTokens
   },
@@ -12,9 +15,6 @@ export default {
   },
   setProposals (state, proposals){
 	  state.proposals = proposals
-  },
-  setProposalVoters (state, proposalVoters){
-    state.proposalVoters = proposalVoters;
   },
   setReferrals (state, referrals) {
     state.referrals = referrals

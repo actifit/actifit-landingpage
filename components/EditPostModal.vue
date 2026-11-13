@@ -381,18 +381,9 @@ export default {
 
       let cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
 
-      let url = new URL(process.env.actiAppUrl + 'memoDecode/?user=' + this.user.account.name + '&bchain=' + cur_bchain);
-
-      let reqHeads = new Headers({
-        'Content-Type': 'application/json',
-        'x-acti-token': 'Bearer ' + accToken,
-      });
-      res = await fetch(url, {
-        method: 'POST',
-        headers: reqHeads,
-        body: JSON.stringify({ 'memo': memo })
-      });
-      outcome = await res.json();
+      // Decrypted IN THE BROWSER - /memoDecode is gone, and the server holds no
+      // keys. Same { xcstkn } / { error } shape, so the handling below is unchanged.
+      outcome = await this.$decodeMemo(memo);
       console.log(outcome);
       let xcstkn = '';
       if (outcome.error) {
@@ -432,7 +423,7 @@ export default {
         return new Promise((resolve) => {
           const auth = {
             username: this.user.account.name,
-            token: localStorage.getItem('access_token'),//should be changed in V1 (current V0.8)
+            token: localStorage.getItem('hiveauth_has_token'),//should be changed in V1 (current V0.8)
             expire: localStorage.getItem('expires'),
             key: localStorage.getItem('key')
           }
@@ -498,18 +489,9 @@ export default {
           cur_bchain = bchain_option;
         }
 
-        let url = new URL(process.env.actiAppUrl + 'performTrxPost/?user=' + this.user.account.name + '&bchain=' + cur_bchain);
-
-        let reqHeads = new Headers({
-          'Content-Type': 'application/json',
-          'x-acti-token': 'Bearer ' + accToken,
-        });
-        let res = await fetch(url, {
-          method: 'POST',
-          headers: reqHeads,
-          body: JSON.stringify({ 'operation': JSON.stringify(operation) })
-        });
-        let outcome = await res.json();
+        // Signed IN THE BROWSER with the user's own key - /performTrx is gone.
+        // Same response shape as before, so the handling below is unchanged.
+        let outcome = await this.$broadcastWithKey(operation, { active: false, bchain: cur_bchain });
         console.log(outcome);
         if (outcome.error) {
           console.log(outcome.error);

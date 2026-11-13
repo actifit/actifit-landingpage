@@ -121,8 +121,8 @@
 		  title: `Actifit Daily Yield Farming - Actifit.io`,
 		  meta: [
 			{ hid: 'description', name: 'description', content: `Earn daily AFIT token rewards by delegating Hive Power to Actifit. Yield farm crypto while supporting the move-to-earn fitness community.` },
-			{ hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Earn daily AFIT token rewards by delegating Hive Power to Actifit yield farming.` },
-			{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Actifit Daily Yield Farming - Actifit.io' }
+			{ hid: 'ogdescription', property: 'og:description', content: `Earn daily AFIT token rewards by delegating Hive Power to Actifit yield farming.` },
+			{ hid: 'ogtitle', property: 'og:title', content: 'Actifit Daily Yield Farming - Actifit.io' }
 		  ]
 		}
 	},
@@ -212,9 +212,12 @@
 		  }).catch(e => reject(e))
 
 		  //grab HIVE price
-		  fetch('https://api.coingecko.com/api/v3/simple/price?ids=hive&vs_currencies=usd').then(
-			res => {res.json().then(json => this.setHivePrice (json.hive.usd)).catch(e => reject(e))
-		  }).catch(e => reject(e))
+		  // See VoteModal.vue: CoinGecko now needs a key and returns HTML, leaving the
+		  // price at its default of 1. Our API reads the chain's median feed instead.
+		  fetch('/actifit-api/hivePrice').then(
+			res => {res.json().then(json => this.setHivePrice (json.hive.usd))
+			  .catch(e => console.warn('hive price parse failed', e))
+		  }).catch(e => console.warn('hive price fetch failed', e))
 
 		//fetch AFIT price
 	    fetch(process.env.actiAppUrl+'exchangeAFITPrice').then(

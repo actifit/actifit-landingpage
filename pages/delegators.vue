@@ -6,6 +6,17 @@
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-5">
       <h1 class="text-center mb-5 h2">{{ $t('Actifit_Delegators') }}</h1>
+      <!-- Server-rendered page intro (SEO issue A2, 2026-09-11 audit). This route
+         populates its list client-side, so without static copy the SERVED html is
+         near-empty for anything that does not execute JavaScript - GPTBot,
+         ClaudeBot, PerplexityBot and most social link scrapers. Googlebot renders
+         JS and was never affected, which is why the audit's 'thin content' flags
+         were false positives for Google and real for AI search. -->
+      <section class="row">
+        <div class="col-12 pb-4">
+          <p class="text-muted">{{ $t('seo_intro_delegators') }}</p>
+        </div>
+      </section>
 
 
       <!-- show listing when loaded -->
@@ -37,8 +48,8 @@
 		  title: `Actifit Delegators - Actifit.io`,
 		  meta: [
 			{ hid: 'description', name: 'description', content: `Meet Actifit's top Hive delegators powering the move-to-earn ecosystem. Delegate Hive Power and earn AFIT tokens daily.` },
-			{ hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Delegate Hive Power to Actifit and earn daily AFIT token rewards.` },
-			{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Actifit Delegators - Actifit.io' }
+			{ hid: 'ogdescription', property: 'og:description', content: `Delegate Hive Power to Actifit and earn daily AFIT token rewards.` },
+			{ hid: 'ogtitle', property: 'og:title', content: 'Actifit Delegators - Actifit.io' }
 		  ]
 		}
 	},

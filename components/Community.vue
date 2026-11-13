@@ -289,7 +289,7 @@ import UserHoverCard from '~/components/UserHoverCard.vue';
 			//res.json().then(json => this.fullAFITReward = json.token_count)}).catch(e => reject(e))
 
 		//grab moderators' list
-		this.$store.dispatch('fetchModerators')
+		this.$store.dispatch('fetchModerators').catch(() => {})
 		this.$nextTick(this.measureDescriptionOverflow)
 		window.addEventListener('resize', this.measureDescriptionOverflow)
 

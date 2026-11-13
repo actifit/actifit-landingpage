@@ -17,6 +17,17 @@
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-5">
       <h1 class="text-center mb-5 h2">{{ $t('professionals_title') }}</h1>
+      <!-- Server-rendered page intro (SEO issue A2, 2026-09-11 audit). This route
+         populates its list client-side, so without static copy the SERVED html is
+         near-empty for anything that does not execute JavaScript - GPTBot,
+         ClaudeBot, PerplexityBot and most social link scrapers. Googlebot renders
+         JS and was never affected, which is why the audit's 'thin content' flags
+         were false positives for Google and real for AI search. -->
+      <section class="row">
+        <div class="col-12 pb-4">
+          <p class="text-muted">{{ $t('seo_intro_consultants') }}</p>
+        </div>
+      </section>
 
       <!-- show listing of professionals -->
       <div class="row" v-if="professionals.length">
@@ -50,8 +61,8 @@
 		  title: `Actifit Consultants - Actifit.io`,
 		  meta: [
 			{ hid: 'description', name: 'description', content: `Book fitness and nutrition consultations with verified professionals on Actifit Market. Pay with AFIT tokens for expert health and wellness advice.` },
-			{ hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `Book fitness and nutrition consultations with verified professionals on Actifit Market.` },
-			{ hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Actifit Consultants - Actifit.io' }
+			{ hid: 'ogdescription', property: 'og:description', content: `Book fitness and nutrition consultations with verified professionals on Actifit Market.` },
+			{ hid: 'ogtitle', property: 'og:title', content: 'Actifit Consultants - Actifit.io' }
 		  ]
 		}
 	},

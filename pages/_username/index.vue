@@ -430,19 +430,16 @@
                 <div v-if="showAfitTipInfo" class="alert alert-info mt-3 small" v-html="$t('tipping_details')" />
 
                 <div v-if="proceedTip" class="wallet-action-box mt-3">
-                  <div class="tip-details">
+                  <!-- note in place of the form if /tipAccount is switched off again (flag in utils/sessionActions.js) -->
+                  <div v-if="!afitTipsAvailable" class="alert alert-info mb-0">{{ $t('afit_tips_unavailable') }}</div>
+                  <div v-else class="tip-details">
                     <div class="form-group">
                       <label for="tip-amount">{{ $t('Tip_Amount') }}</label>
-                      <input type="number" id="tip-amount" name="tip-amount" ref="tip-amount" class="form-control">
+                      <input type="number" id="tip-amount" name="tip-amount" ref="tip-amount" min="0.001" step="0.001" class="form-control">
                     </div>
-                    <div class="form-group">
-                      <label for="funds-pass">{{ $t('Funds_Password') }}</label>
-                      <input type="password" id="funds-pass" name="funds-pass" ref="funds-pass" class="form-control">
-                      <small><a href="/wallet?action=set_funds_pass" target="_blank" rel="noopener noreferrer">{{ $t('create_pass_short') }}</a></small>
-                    </div>
-                    <div v-if="tipError" v-html="tipError" class="alert alert-danger"></div>
+                    <div v-if="tipError" class="alert alert-danger" role="alert">{{ tipError }}</div>
                     <div>
-                      <button v-on:click="proceedTipActivity" class="btn btn-danger">{{ $t('Proceed') }}</button>
+                      <button v-on:click="proceedTipActivity" :disabled="tipInProgress" class="btn btn-danger">{{ $t('Proceed') }}</button>
                       <i class="fas fa-spin fa-spinner ml-2" v-if="tipInProgress"></i>
                     </div>
                   </div>
@@ -565,19 +562,23 @@
   </div>
 </template>
 <script>
+import { profileImageMeta } from '~/utils/seo'
 import UserHoverCard from '~/components/UserHoverCard'
 import LoginModal from '~/components/LoginModal'
 import NavbarBrand from '~/components/NavbarBrand'
 import Footer from '~/components/Footer'
 import steem from 'steem'
 import hive from '@hiveio/hive-js'
+import { hiveAccountExists } from '~/utils/hiveAccount'
 import blurt from '@blurtfoundation/blurtjs'
 import { mapGetters } from 'vuex'
+import { friendAddRefusal, friendErrorText } from '~/utils/friendRequests'
 import Vue from 'vue'
 import MeasureChartModal from '~/components/MeasureChartModal'
 import ActivityChartModal from '~/components/ActivityChartModal'
 import ProfileImageModal from '~/components/ProfileImageModal'
 import badActors from '~/utils/BadActorList';
+import { AFIT_TIPS_AVAILABLE, validateAfitTip, requestAfitTip, sessionActionErrorText } from '~/utils/sessionActions'
 import { BadgePlugin } from 'bootstrap-vue'
 Vue.use(BadgePlugin)
 import SSC from 'sscjs'
@@ -587,13 +588,23 @@ import Lodash from 'lodash';
 import { buildMeasurementsMetadata, convertMeasurementValue, MEASUREMENT_KEYS, MEASUREMENT_UNIT_OPTIONS, mergeMeasurementSources, normalizeMeasurements, normalizeMeasurementUnit, selectLatestMeasurements, waitForMeasurementSave } from '~/utils/measurements'
 
 export default {
+  // A URL that is no Hive account must answer 404, not a 200 "User Not Found" page
+  // that search engines index. Only on the server render (the page itself loads
+  // client-side, so client navigation keeps the in-page message), and only on a
+  // definite "does not exist": a slow or failing node renders the page as before.
+  async validate({ params }) {
+    if (!process.server) return true;
+    const name = String(params.username || '').replace('@', '');
+    return (await hiveAccountExists(name, { node: process.env.hiveApiNode })) !== false;
+  },
   head() {
     return {
       title: `Actifit user profile ${this.username} - Actifit.io`,
       meta: [
         { hid: 'description', name: 'description', content: `View ${this.username}'s activity reports, fitness achievements, and earnings on Actifit — the move-to-earn platform that rewards your healthy lifestyle.` },
-        { hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `View ${this.username}'s activity reports and earnings on Actifit.` },
-        { hid: 'ogtitle', name: 'og:title', property: 'og:title', content: `${this.username} on Actifit` }
+        { hid: 'ogdescription', property: 'og:description', content: `View ${this.username}'s activity reports and earnings on Actifit.` },
+        { hid: 'ogtitle', property: 'og:title', content: `${this.username} on Actifit` },
+        ...profileImageMeta(this.username)
       ]
     }
   },
@@ -640,6 +651,7 @@ export default {
       account_banned: false,
       tipError: '',
       tipInProgress: false,
+      afitTipsAvailable: AFIT_TIPS_AVAILABLE, //false shows a "temporarily unavailable" note instead
       proceedTip: false,
       addFriendError: '',
       cur_bchain: 'HIVE',
@@ -1063,7 +1075,8 @@ export default {
           this.$processTrxFunc('account_update2', transaction, false),
           timeoutError
         );
-        if (outcome && outcome.error === 'user_cancel') return;
+        // A cancelled prompt (Keychain's user_cancel, or the typed-key prompt) is no error.
+        if (outcome && (outcome.error === 'user_cancel' || outcome.cancelled)) return;
         if (!outcome || !outcome.success) throw new Error((outcome && outcome.error) || this.$t('Save_Error'));
 
         this.userinfo = { ...this.userinfo, posting_json_metadata: transaction.posting_json_metadata };
@@ -1192,6 +1205,20 @@ export default {
         this.addFriendError = this.$t('Already_friends');
         return false;
       }
+      // A pending request in either direction means the backend refuses the add:
+      // say so before the user signs anything. friendRequests here are the
+      // PROFILE OWNER's (refreshFriendStatus loads them for displayUser).
+      const refusal = friendAddRefusal({
+        me: this.user.account.name,
+        target: this.displayUser,
+        owner: this.displayUser,
+        friends: this.userFriends,
+        requests: this.friendRequests
+      });
+      if (refusal) {
+        this.addFriendError = this.$t(refusal);
+        return false;
+      }
       let userConf = confirm(this.$t('confirm_add_friend').replace('_USERNAME_', this.displayUser));
       if (!userConf) {
         return;
@@ -1221,7 +1248,7 @@ export default {
         + res.ref_block_num + '/'
         + res.id + '/' + this.cur_bchain);
 
-      if (this.isKeychainActive || this.isHiveauthActive) {
+      if (this.$signsInBrowser()) {
         let op_json = JSON.stringify(operation)
         url = new URL(process.env.actiAppUrl + 'addFriendHiveKeychain/'
           + this.user.account.name + '/'
@@ -1231,8 +1258,14 @@ export default {
           + this.cur_bchain + '?operation=' + op_json);
       }
 
-      let req_res = await fetch(url);
-      let outcome = await req_res.json();
+      // a network or parse failure falls through to the error branch below,
+      // which clears the spinner
+      let outcome = {};
+      try {
+        outcome = await (await fetch(url)).json();
+      } catch (err) {
+        console.log(err);
+      }
       if (outcome.status == 'success') {
         this.friendshipLoader = false;
         this.$notify({
@@ -1241,7 +1274,7 @@ export default {
           position: 'top center'
         })
       } else {
-        this.addFriendError = this.$t('unknown_error');
+        this.addFriendError = friendErrorText(outcome, this.$t('unknown_error'));
         this.friendshipLoader = false;
         return false;
       }
@@ -1290,7 +1323,7 @@ export default {
         + res.ref_block_num + '/'
         + res.id + '/' + this.cur_bchain);
 
-      if (this.isKeychainActive || this.isHiveauthActive) {
+      if (this.$signsInBrowser()) {
         let op_json = JSON.stringify(operation)
         url = new URL(process.env.actiAppUrl + 'cancelFriendRequestHiveKeychain/'
           + this.user.account.name + '/'
@@ -1299,8 +1332,14 @@ export default {
           + res.id + '/'
           + this.cur_bchain + '?operation=' + op_json);
       }
-      let req_res = await fetch(url);
-      let outcome = await req_res.json();
+      // a network or parse failure falls through to the error branch below,
+      // which clears the spinner
+      let outcome = {};
+      try {
+        outcome = await (await fetch(url)).json();
+      } catch (err) {
+        console.log(err);
+      }
       if (outcome.status == 'success') {
         this.friendshipLoader = false;
         this.$notify({
@@ -1309,7 +1348,7 @@ export default {
           position: 'top center'
         })
       } else {
-        this.addFriendError = this.$t('unknown_error');
+        this.addFriendError = friendErrorText(outcome, this.$t('unknown_error'));
         this.friendshipLoader = false;
         return false;
       }
@@ -1358,7 +1397,7 @@ export default {
         + res.ref_block_num + '/'
         + res.id + '/' + this.cur_bchain);
 
-      if (this.isKeychainActive || this.isHiveauthActive) {
+      if (this.$signsInBrowser()) {
         let op_json = JSON.stringify(operation)
         url = new URL(process.env.actiAppUrl + 'dropFriendshipHiveKeychain/'
           + this.user.account.name + '/'
@@ -1367,8 +1406,14 @@ export default {
           + res.id + '/'
           + this.cur_bchain + '?operation=' + op_json);
       }
-      let req_res = await fetch(url);
-      let outcome = await req_res.json();
+      // a network or parse failure falls through to the error branch below,
+      // which clears the spinner
+      let outcome = {};
+      try {
+        outcome = await (await fetch(url)).json();
+      } catch (err) {
+        console.log(err);
+      }
       if (outcome.status == 'success') {
         this.friendshipLoader = false;
         this.$notify({
@@ -1377,7 +1422,7 @@ export default {
           position: 'top center'
         })
       } else {
-        this.addFriendError = this.$t('unknown_error');
+        this.addFriendError = friendErrorText(outcome, this.$t('unknown_error'));
         this.friendshipLoader = false;
         return false;
       }
@@ -1426,7 +1471,7 @@ export default {
         + res.ref_block_num + '/'
         + res.id + '/' + this.cur_bchain);
 
-      if (this.isKeychainActive || this.isHiveauthActive) {
+      if (this.$signsInBrowser()) {
         let op_json = JSON.stringify(operation)
         url = new URL(process.env.actiAppUrl + 'acceptFriendHiveKeychain/'
           + this.user.account.name + '/'
@@ -1435,8 +1480,14 @@ export default {
           + res.id + '/'
           + this.cur_bchain + '?operation=' + op_json);
       }
-      let req_res = await fetch(url);
-      let outcome = await req_res.json();
+      // a network or parse failure falls through to the error branch below,
+      // which clears the spinner
+      let outcome = {};
+      try {
+        outcome = await (await fetch(url)).json();
+      } catch (err) {
+        console.log(err);
+      }
       if (outcome.status == 'success') {
         this.friendshipLoader = false;
         this.$notify({
@@ -1445,7 +1496,7 @@ export default {
           position: 'top center'
         })
       } else {
-        this.addFriendError = this.$t('unknown_error');
+        this.addFriendError = friendErrorText(outcome, this.$t('unknown_error'));
         this.friendshipLoader = false;
         return false;
       }
@@ -1522,7 +1573,7 @@ export default {
         } else if (this.isHiveauthLogin()) {
           const auth = {
             username: this.user.account.name,
-            token: localStorage.getItem('access_token'),
+            token: localStorage.getItem('hiveauth_has_token'),
             expire: localStorage.getItem('expires'),
             key: localStorage.getItem('key')
           }
@@ -1607,7 +1658,7 @@ export default {
         } else if (this.isHiveauthLogin()) {
           const auth = {
             username: this.user.account.name,
-            token: localStorage.getItem('access_token'),
+            token: localStorage.getItem('hiveauth_has_token'),
             expire: localStorage.getItem('expires'),
             key: localStorage.getItem('key')
           }
@@ -1658,60 +1709,65 @@ export default {
       }
     },
     async proceedTipActivity() {
+      //one send at a time: a double click must not send the AFIT twice
+      if (this.tipInProgress) return;
       this.tipError = '';
-      if (!this.user) {
-        this.tipError = this.$t('Need_login_tip');
-        return false;
-      }
-      if (this.displayUser == this.user.account.name) {
-        this.tipError = this.$t('Cannot_tip_self');
-        return false;
-      }
-      if (this.$refs["funds-pass"].value == '') {
-        this.tipError = this.$t('error_missing_funds_pass') + ' <u><a href="/wallet?action=set_funds_pass">' + this.$t('create_funds_pass') + '</a></u>';
-        return;
-      }
-      if (this.$refs["tip-amount"].value == '') {
-        this.tipError = this.$t('amount_positive_int');
-        return;
-      }
-      if (parseFloat(this.$refs["tip-amount"].value) > parseFloat(this.userTokens)) {
-        this.tipError = this.$t('amount_above_balance');
+      const checked = validateAfitTip({
+        sender: this.user && this.user.account.name,
+        recipient: this.displayUser,
+        amount: this.$refs["tip-amount"].value,
+        balance: this.userTokens
+      });
+      if (checked.error) {
+        this.tipError = this.$t(checked.error);
         return;
       }
       this.tipInProgress = true;
-      const accToken = localStorage.getItem('access_token');
-      let res = await fetch(process.env.actiAppUrl + 'tipAccount/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-acti-token': 'Bearer ' + accToken },
-        body: JSON.stringify({ targetUser: this.displayUser, amount: this.$refs["tip-amount"].value, fundsPass: this.$refs["funds-pass"].value })
-      });
-      let outcome = await res.json();
-      if (outcome.status == 'Success') {
-        let tipTransaction = { action: 'Tip', amount: outcome.tipAmount, recipient: this.displayUser };
+      try {
+        //authorised by the login session, no funds password. Keeps the HTTP status so a 503
+        //(switched off for security maintenance) or a plain-text 429 reads as such.
+        const { status, outcome } = await requestAfitTip({
+          apiUrl: process.env.actiAppUrl,
+          targetUser: checked.recipient,
+          amount: checked.amount,
+          sessionToken: localStorage.getItem('access_token')
+        });
+        if (outcome.status != 'Success') {
+          this.tipError = sessionActionErrorText(status, outcome, (k) => this.$t(k), (o) => this.$gateMessage(o), 'afit_tips_unavailable');
+          return;
+        }
+        //the AFIT has moved server side: confirm it and close the form, so the user does not
+        //send again if recording the custom_json below fails
+        this.proceedTip = false;
+        this.tipInProgress = false;
+        this.$notify({
+          group: 'success',
+          text: this.$t('tip_successfully_sent'),
+          position: 'top center'
+        })
+        if (outcome.recipientTokenCount !== undefined) {
+          this.userTokenCount = outcome.recipientTokenCount;
+        }
+        this.$store.dispatch('fetchUserTokens')
+        //record the tip on chain; the tip itself is done, so a failure here is only logged
+        let tipTransaction = { action: 'Tip', amount: outcome.tipAmount, recipient: checked.recipient };
         let cstm_params = {
           required_auths: [],
           required_posting_auths: [this.user.account.name],
           id: 'actifit',
           json: JSON.stringify(tipTransaction)
         };
-        let res = await this.$processTrxFunc('custom_json', cstm_params);
-        if (res.success) {
-          this.$notify({
-            group: 'success',
-            text: this.$t('tip_successfully_sent'),
-            position: 'top center'
-          })
-          this.$store.dispatch('fetchUserTokens')
-          this.userTokenCount = outcome.recipientTokenCount;
-        } else {
-          this.friendshipLoader = false;
+        try {
+          await this.$processTrxFunc('custom_json', cstm_params);
+        } catch (err) {
+          console.error('recording the tip custom_json failed:', err);
         }
-        this.proceedTip = false;
-      } else {
-        this.tipError = outcome.error;
+      } catch (err) {
+        console.error('tipAccount failed:', err);
+        this.tipError = this.$t('error_performing_operation');
+      } finally {
+        this.tipInProgress = false;
       }
-      this.tipInProgress = false;
     },
     getUserActivityLevel() {
       return this.calcScore(this.rewarded_posts_rules, this.rewardedPostCount)
@@ -2023,7 +2079,7 @@ export default {
 
       fetch(process.env.actiAppUrl + 'trackedMeasurements/' + this.displayUser).then(res => res.json().then(json => this.setUserMeasurements(json))).catch(e => console.log(e));
       fetch(process.env.actiAppUrl + 'trackedActivity/' + this.displayUser).then(res => res.json().then(json => this.setUserActivity(json))).catch(e => console.log(e));
-      fetch(process.env.actiAppUrl + 'getRank/' + this.displayUser).then(res => res.json().then(json => this.userRank = json)).catch(e => reject(e));
+      fetch(process.env.actiAppUrl + 'getRank/' + this.displayUser).then(res => res.json().then(json => this.userRank = json)).catch(e => console.error(e));
       fetch(process.env.actiAppUrl + 'userRewardedPostCount/' + this.displayUser).then(res => res.json().then(json => this.rewardedPostCount = json.rewarded_post_count)).catch(e => reject(e));
       fetch(process.env.actiAppUrl + 'user/' + this.displayUser).then(res => res.json().then(json => this.userTokenCount = json.tokens)).catch(e => console.log(e));
       fetch(process.env.actiAppUrl + 'userBadges/' + this.displayUser).then(res => res.json().then(json => this.userBadges = json)).catch(e => reject(e));

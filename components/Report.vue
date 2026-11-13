@@ -110,7 +110,7 @@
           <div class="col-6">
             <i class="fas fa-dove"></i><small> {{ $t('Charity_Post') }} </small><i class="fas fa-dove"></i>
           </div>
-          <div class="col-6 text-right"><small><a :href="this.meta.charity[0]" target="_blank" rel="noopener noreferrer">@{{ this.meta.charity[0] }}</a></small></div>
+          <div class="col-6 text-right"><small><a :href="$hiveProfileUrl(this.meta.charity[0])" target="_blank" rel="noopener noreferrer">@{{ this.meta.charity[0] }}</a></small></div>
         </div>
         <div class="row details mt-2 text-brand full-afit-txt" v-if="isUserModerator">
           <div class="col-6 text-brand">
@@ -194,15 +194,18 @@ export default {
         : this.meta.dataTrackingSource
     }
   },
+  methods: {
+    // Called by the card mixin once the card comes near the screen.
+    fetchCardExtraStats () {
+      fetch(process.env.actiAppUrl + 'getPostFullAFITPayReward?user=' + this.report.author + '&url=' + this.report.url)
+        .then(res => res.json())
+        .then(json => { this.fullAFITReward = json.token_count })
+        .catch(e => console.error('Error fetching full AFIT reward:', e))
+    }
+  },
   async mounted () {
     // This now initializes the mixin logic for this component instance
     this.initializeCard()
-
-    // This fetch is specific to reports, so it stays here
-    fetch(process.env.actiAppUrl + 'getPostFullAFITPayReward?user=' + this.report.author + '&url=' + this.report.url)
-      .then(res => res.json())
-      .then(json => { this.fullAFITReward = json.token_count })
-      .catch(e => console.error('Error fetching full AFIT reward:', e))
   }
 }
 </script>

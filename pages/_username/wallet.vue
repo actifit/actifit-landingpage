@@ -17,10 +17,11 @@
 			  <a href="/walletV1"><i>New Wallet Layout. Click to switch back to old version</i></a>
 		  </div>-->
 
-        <section v-if="userTokensWallet >= 0" class="wallet-hero text-left">
+        <section v-if="tokensLoaded" class="wallet-hero text-left">
           <div class="wallet-hero-main">
             <span class="wallet-eyebrow">{{ $t('account_est_val') }}</span>
-            <div class="wallet-total" v-if="!loading && !walletDataRefreshing"><small>$</small>{{ totalAccountValue }}</div>
+            <div class="wallet-total" v-if="!loading && !walletDataRefreshing && totalValueStatus === 'ready'"><small>$</small>{{ totalAccountValue }}</div>
+            <div class="wallet-total" v-else-if="!loading && !walletDataRefreshing && totalValueStatus === 'failed'" :title="$t('account_value_unavailable')">—</div>
             <div class="wallet-total wallet-total-loading" v-else aria-label="Loading account value">
               <i class="fas fa-spin fa-spinner"></i>
             </div>
@@ -29,7 +30,15 @@
             <div class="wallet-stat-card">
               <span>{{ $t('AFIT_Token') }}</span>
               <strong>{{ formattedUserAfit }}</strong>
-              <small>${{ afitValueUSD }}</small>
+              <small>{{ afitBalanceKnown ? '$' + afitValueUSD : '—' }}</small>
+              <small v-if="!afitBalanceKnown && tokensLoadFailed" class="text-danger" role="alert">
+                {{ $t('afit_balance_unavailable') }}
+                <a href="#" @click.prevent="fetchUserData()">{{ $t('afit_balance_retry') }}</a>
+              </small>
+              <small v-else-if="tokensLoadFailed" class="text-warning" role="status">
+                {{ $t('afit_balance_stale') }}
+                <a href="#" @click.prevent="fetchUserData()">{{ $t('afit_balance_retry') }}</a>
+              </small>
             </div>
             <div class="wallet-stat-card">
               <span>{{ cur_bchain }} {{ $t('POWER') }}</span>
@@ -83,7 +92,7 @@
                 :style="settings_set ? 'color:green' : 'color:white'"></i><i class="fas fa-spin fa-spinner text-white"
                 v-if="save_progress"></i></span>
 
-            <div class="wallet-sort-bar" v-if="userTokensWallet >= 0">
+            <div class="wallet-sort-bar" v-if="tokensLoaded">
               <label for="wallet-token-sort">{{ $t('Sort_By') }}</label>
               <select id="wallet-token-sort" v-model="tokenSort" v-on:change="sortTokenData(tokenSort, true)">
                 <option value="symbol">Token</option>
@@ -97,7 +106,7 @@
               </button>
             </div>
           </div>
-          <div class="col wallet-toolbar-search" v-if="userTokensWallet >= 0">
+          <div class="col wallet-toolbar-search" v-if="tokensLoaded">
             <i class="fas fa-search wallet-search-icon"></i>
             <input type="text" v-model="tokenSearch" class="wallet-search-input"
               :placeholder="$t('search_tokens_ph')" :aria-label="$t('search_tokens_ph')">
@@ -107,7 +116,7 @@
         </div>
         <a href="#" id="pendingRewardsKicker" name="pendingRewardsKicker" ref="pendingRewardsKicker" class="d-none"
           data-toggle="modal" data-target="#pendingRewardsModal" aria-hidden="true"></a>
-        <div class="wallet-container" v-if="userTokensWallet >= 0">
+        <div class="wallet-container" v-if="tokensLoaded">
           <div class="row font-weight-bold token-entry thick-bottom head-title">
             <div class="col-2 clickable" v-on:click="sortTokenData('symbol')">Token
               <span>
@@ -141,7 +150,7 @@
             <div class="col-2 text-right wallet-token-balance" :data-label="$t('Available')">{{ formattedUserAfit }}</div>
             <div class="col-2 text-right wallet-token-staked" :data-label="$t('Staked')">-</div>
             <div class="col-lg-1 col-2 text-right wallet-token-savings" :data-label="$t('Savings')">-</div>
-            <div class="col-1 col-lg-2 text-right break-val wallet-token-usd" :data-label="$t('in_usd')">${{ this.afitValueUSD }}</div>
+            <div class="col-1 col-lg-2 text-right break-val wallet-token-usd" :data-label="$t('in_usd')">{{ afitBalanceKnown ? '$' + afitValueUSD : '—' }}</div>
             <div class="col-lg-2 col-1 token_actions wallet-token-actions" v-if="!nonAuthUser">
               <span class="btn btn-brand p-1" v-on:click="refreshBalance()">
                 <i class="fas fa-solid fa-history" :title="$t('Refresh_balance')" />
@@ -425,6 +434,8 @@
 
           <div ref="coreActionAnchor" class="wallet-core-action-anchor" aria-hidden="true"></div>
           <h2 class="wallet-asset-group-heading" v-if="groupMatchesSearch(['AFIT', 'AFITX', 'BNB', 'LP'])">{{ $t('BSC') }}</h2>
+          <!-- the Hive -> BSC bridge (/appendBridgeTransaction + its job) is paused: no move button, say why here -->
+          <p v-if="!bscBridgeAvailable && groupMatchesSearch(['AFIT', 'AFITX', 'BNB', 'LP'])" class="text-brand px-2 mb-2">{{ $t('bsc_bridge_unavailable') }}</p>
           <div class="token-entry row main-token" v-if="matchesTokenSearch('AFIT')">
             <div class="col-2 text-left wallet-token-name"><img src="/img/actifit_logo.png" class="mr-1 mini-token-logo" alt="">AFIT</div>
             <div class="col-2 col-lg-1 wallet-token-location">{{ $t('BSC') }}</div>
@@ -572,7 +583,7 @@
                     :title="$t('withdraw_tokens')"></i></span>
                 <span class="btn btn-brand p-1" v-on:click="initiateTransfer(token)"><i class="fas fa-share-square "
                     :title="$t('transfer_tokens')"></i></span>
-                <span v-if="token.symbol == 'AFIT'" class="btn btn-brand p-1" v-on:click="initiateBSCTransfer(token)"><i
+                <span v-if="bscBridgeAvailable && token.symbol == 'AFIT'" class="btn btn-brand p-1" v-on:click="initiateBSCTransfer(token)"><i
                     class="fas fa-truck-loading " :title="$t('move_to_bsc')"></i></span>
                 <span v-if="token.stakable" class="btn btn-brand p-1" v-on:click="initiateDelegation(token)"><i
                     class="fas fa-donate p-1" :title="$t('delegate_tokens')"></i></span>
@@ -1153,7 +1164,10 @@
                   <div class="text-brand text-center" v-if="error_proceeding">
                     {{ this.error_msg }}
                   </div>
-                  <div class="row">
+                  <!-- RC delegations are signed in the browser (Keychain / HiveAuth / typed posting key);
+                       legacy HiveSigner sessions used the retired server-side /delegateRC -->
+                  <div v-if="!isStdLogin" class="text-brand text-center p-2">{{ $t('rc_delegation_login_needed') }}</div>
+                  <div class="row" v-else>
                     <div class="w-25"></div>
                     <button v-on:click="proceedRCDelegation" class="btn btn-brand btn-lg w-50 border">{{
                       $t('Delegate_rc') }}</button>
@@ -1328,6 +1342,7 @@
 
             <transition name="fade">
               <div v-if="afitActivityMode == showBSCDetails">
+                <p v-if="!bscBridgeAvailable" class="text-brand px-2 mb-2">{{ $t('bsc_bridge_unavailable') }}</p>
                 <div class="wallet-action-title">
                   <h3 class="pro-name">{{ $t('bsc_wallet') }}</h3>
                   <button type="button" class="btn btn-brand wallet-action-close" @click="closeAllWalletActions">
@@ -1424,37 +1439,31 @@
             <div v-else-if="afitActivityMode == INIT_AFIT_TIP" class="action-box">
               <h3 class="pro-name">{{ $t('SEND_AFIT_TO_USER') }}</h3>
               <div class="text-center grid p-2">
-                <div>
+                <!-- note in place of the form if /tipAccount is switched off again (flag in utils/sessionActions.js) -->
+                <div v-if="!afitTipsAvailable" class="text-brand p-3">{{ $t('afit_tips_unavailable') }}</div>
+                <div v-else>
                   <div class="row">
-                    <label for="tip-amount" class="w-25 p-2">{{ $t('Recipient') }}</label>
+                    <label for="tip-recipient" class="w-25 p-2">{{ $t('Recipient') }}</label>
                     <input type="text" id="tip-recipient" name="tip-recipient" ref="tip-recipient"
+                      autocomplete="off" autocapitalize="none" spellcheck="false"
                       class="form-control-lg w-50 p-2">
                   </div>
                   <div class="row">
                     <label for="tip-amount" class="w-25 p-2">{{ $t('Tip_Amount') }}</label>
                     <input type="number" id="tip-amount" name="tip-amount" ref="tip-amount"
-                      class="form-control-lg w-50 p-2">
-                  </div>
-                  <div class="row">
-                    <label for="funds-pass" class="w-25 p-2">{{ $t('Funds_Password') }}</label>
-                    <input type="password" id="funds-pass" name="funds-pass" ref="funds-pass"
-                      class="form-control-lg w-50 p-2">
-                    <button type="button" v-if="!userHasFundsPass" v-on:click="exchangeAFITforSTEEM" class="btn btn-brand border m-1">{{
-                      $t('create_pass_short') }}</button>
-                    <button type="button" v-else v-on:click="resetFundsPass" class="btn btn-brand border m-1">{{
-                      $t('Reset_password') }}</button>
+                      min="0.001" step="0.001" class="form-control-lg w-50 p-2">
                   </div>
                   <div class="row">
                     <div class="col-2"></div>
                     <div class="col-8">{{ $t('tip_note') }}</div>
                   </div>
                   <div class="row">
-                    <div v-if="tipError" v-html="tipError" class="m-3" @click="handleSetFundsPassLink"></div>
+                    <div v-if="tipError" class="m-3 text-brand" role="alert">{{ tipError }}</div>
                   </div>
 
                   <div class="row">
                     <div class="col-2"></div>
-                    <div class="col-8"><button v-on:click="proceedTipActivity" class="btn btn-brand w-50 border m-3">{{
+                    <div class="col-8"><button v-on:click="proceedTipActivity" :disabled="tipInProgress" class="btn btn-brand w-50 border m-3">{{
                       $t('Proceed') }}</button>
                       <i class="fas fa-spin fa-spinner" v-if="tipInProgress"></i>
                     </div>
@@ -1475,34 +1484,28 @@
 
                 <div>{{ $t('move_afit_se_notice2') }}</div>
                 <div>{{ $t('move_afit_se_notice3') }}</div>
+                <!-- note in place of start / adjust if /initiateAFITMoveSE is switched off again (flag in
+                     utils/sessionActions.js); cancelling a pending move always stays available -->
+                <div v-if="!afitMoveToHeAvailable" class="text-brand p-3">{{ $t('afit_move_he_unavailable') }}</div>
                 <div>
-                  <div class="row">
+                  <div class="row" v-if="afitMoveToHeAvailable">
                     <div class="w-25 p-2 text-right">{{ $t('Amount_To_Move_Daily') }}</div>
                     <input type="number" id="afit-move-to-se" name="afit-move-to-se" ref="afit-move-to-se"
-                      class="form-control-lg w-50 p-2">
+                      min="0.1" step="0.001" class="form-control-lg w-50 p-2">
                   </div>
-                  <div class="row">
-                    <label for="move-funds-pass" class="w-25 p-2 text-right">{{ $t('Funds_Password') }}</label>
-                    <input type="password" id="move-funds-pass" name="move-funds-pass" ref="move-funds-pass"
-                      class="form-control-lg w-50 p-2">
-                    <button type="button" v-if="!userHasFundsPass" v-on:click="exchangeAFITforSTEEM" class="btn btn-brand border m-1">{{
-                      $t('create_pass_short') }}</button>
-                    <button type="button" v-else v-on:click="resetFundsPass" class="btn btn-brand border m-1">{{
-                      $t('Reset_password') }}</button>
-                  </div>
-                  <div class="text-brand text-center" v-if="afit_se_move_error_proceeding"
-                    v-html="afit_se_move_err_msg" @click="handleSetFundsPassLink">
+                  <div class="text-brand text-center" v-if="afit_se_move_error_proceeding">
+                    {{ afit_se_move_err_msg }}
                   </div>
                   <div class="row" v-if="userPDAfit.user">
                     <div class="w-25"></div>
-                    <button v-on:click="proceedMoveToSE" class="btn btn-brand border wallet-action-proceed">{{ $t('adjust_amount')
+                    <button v-if="afitMoveToHeAvailable" v-on:click="proceedMoveToSE" :disabled="initiateInProgress" class="btn btn-brand border wallet-action-proceed">{{ $t('adjust_amount')
                     }}</button>
-                    <button v-on:click="cancelMoveToSE" class="btn btn-brand border wallet-action-proceed">{{
+                    <button v-on:click="cancelMoveToSE" :disabled="initiateInProgress" class="btn btn-brand border wallet-action-proceed">{{
                       $t('Cancel_Transfer') }}</button>
                   </div>
-                  <div class="row" v-else>
+                  <div class="row" v-else-if="afitMoveToHeAvailable">
                     <div class="w-25"></div>
-                    <button v-on:click="proceedMoveToSE" class="btn btn-brand border wallet-action-proceed">{{ $t('Proceed')
+                    <button v-on:click="proceedMoveToSE" :disabled="initiateInProgress" class="btn btn-brand border wallet-action-proceed">{{ $t('Proceed')
                     }}</button>
                   </div>
                   <div class="row">
@@ -1517,7 +1520,9 @@
             </div>
 
             <div v-else-if="afitActivityMode == BUY_AFIT_STEEM">
-              <div class="text-center grid p-2">
+              <!-- /confirmBuyAction is disabled server side (security maintenance after 2026-10-21) -->
+              <div v-if="!buyAfitAvailable" class="text-center text-brand p-3">{{ $t('buy_afit_unavailable') }}</div>
+              <div v-else class="text-center grid p-2">
                 <div class="row">
                   <span class="text-brand text-center w-100" v-html="$t('notice_buy_afit')">
                   </span>
@@ -1552,102 +1557,13 @@
               </div>
             </div>
 
-            <div v-else-if="afitActivityMode == EXCHANGE_AFIT_STEEM">
-              <transition name="fade" v-if="!userHasFundsPass">
-                <div class="text-center grid p-2">
-                  <h3 class="pro-name">{{ $t('EXCHANGE_AFIT_FOR_STEEM') }}</h3>
-                  <div class="text-brand font-weight-bold">{{ $t('wallet.title_process') }}</div>
-                  <h5>{{ $t('wallet.step1_title') }}</h5>
-                  <div v-html="$t('wallet.step1_desc')">
-                  </div>
-                  <div class="row">
-                    <label for="funds-pass" class="w-25 p-2">{{ $t('Funds_Password') }}</label>
-                    <input :type="showFundsPass ? 'text' : 'password'" id="funds-pass" name="funds-pass" ref="funds-pass"
-                      class="form-control-lg w-50 p-2">
-                    <button type="button" v-on:click="showFundsPass = !showFundsPass" class="btn btn-brand"
-                      :aria-label="showFundsPass ? 'Hide password' : 'Show password'">
-                      <i :class="showFundsPass ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
-                    </button>
-                    <button v-on:click="setPasswordVal" class="btn btn-brand">{{ $t('Generate_Password') }}</button>
-                  </div>
-                  <div class="row">
-                    <div class="w-25"></div>
-                    <div class="w-50 text-brand"><i>{{ $t('avoid_special_chars') }}</i></div>
-                  </div>
-                  <div class="row">
-                    <label for="confirm-funds-pass" class="w-25 p-2">{{ $t('Confirm_Password') }}</label>
-                    <input :type="showFundsPass ? 'text' : 'password'" id="confirm-funds-pass" name="confirm-funds-pass" ref="confirm-funds-pass"
-                      class="form-control-lg w-50 p-2">
-                  </div>
-                  <div class="row">
-                    <div class="w-25"></div>
-                    <button v-on:click="setFundsPass" class="btn btn-brand btn-lg w-50 border">{{ $t('Set_Password')
-                    }}</button>
-                  </div>
-                  <div v-if="settingPass" class="row">
-                    <div class="w-25"></div>
-                    <i class="fas fa-spin fa-spinner"></i>
-                  </div>
-                  <div v-if="errorSettingPass" class="row text-brand">
-                    <div class="w-25"></div>
-                    <span>{{ errorSettingPass }}</span>
-                  </div>
-                </div>
-              </transition>
-              <transition name="fade" v-else-if="!userFundsPassVerified">
-                <div class="text-center grid p-2">
-                  <h5>{{ $t('wallet.step2_title') }}</h5>
-                  <div v-html="$t('wallet.step2_desc')">
-                  </div>
-                  <div class="row">
-                    <label for="pass-transfer-type" class="w-25 p-2">{{ $t('Type') }} *</label>
-                    <select @change="passTransferTypeChange" id="pass-transfer-type" name="pass-transfer-type"
-                      ref="pass-transfer-type" text="Choose Type" class="form-control-lg w-50 p-2">
-                      <option v-if="cur_bchain == 'STEEM'" value="STEEM">{{ $t('STEEM') }}</option>
-                      <option v-if="cur_bchain == 'STEEM'" value="SBD">{{ $t('SBD') }}</option>
-                      <option v-if="cur_bchain == 'HIVE'" value="HIVE">{{ $t('HIVE') }}</option>
-                      <option v-if="cur_bchain == 'HIVE'" value="HBD">{{ $t('HBD') }}</option>
-                      <!--<option v-if="cur_bchain=='BLURT'" value="BLURT">{{ $t('BLURT') }}</option>-->
-                    </select>
-                  </div>
-                  <div class="row">
-                    <label for="pass-transfer-amount" class="w-25 p-2">{{ $t('Amount') }} *</label>
-                    <input type="number" id="pass-transfer-amount" name="pass-transfer-amount"
-                      ref="pass-transfer-amount" class="form-control-lg w-50 p-2" v-model="transfer_amount">
-                  </div>
-                  <div class="row" v-if="!isKeychainLogin && !isHiveauthLogin && isStdLogin">
-                    <label for="p-ac-key-funds-ver" class="w-25 p-2">{{ $t('Active_Key') }} *</label>
-                    <input type="password" id="p-ac-key-funds-ver" name="p-ac-key-funds-ver" ref="p-ac-key-funds-ver"
-                      class="form-control-lg w-50 p-2">
-                  </div>
-                  <div class="text-brand text-center" v-if="pass_error_proceeding">
-                    {{ this.pass_error_msg }}
-                  </div>
-                  <div class="row">
-                    <div class="w-25"></div>
-                    <button v-on:click="proceedVerifyPass" class="btn btn-brand btn-lg w-50 border">{{ $t('Send_Verify')
-                    }}</button>
-                  </div>
-                  <div class="row">
-                    <div class="w-25"></div>
-                    <button v-on:click="resetFundsPass" class="btn btn-brand btn-lg w-50 border">{{ $t('Reset_password')
-                    }}</button>
-                  </div>
-                  <div class="row">
-                    <div class="w-25"></div>
-                    <div v-if="checkingFunds" id="checking_funds">
-                      <i class="fas fa-spin fa-spinner"></i>{{ $t('Checking_Steem_Transfer') }}
-                    </div>
-                  </div>
-                  <div class="row" v-if="speed_up_on">
-                    <div class="w-25"></div>
-                    <div>{{ $t('speed_up_text') }} <a href="#a" v-on:click="speedUpVerify">{{ $t('speed_up') }}</a>
-                    </div>
-
-                  </div>
-                </div>
-              </transition>
-              <transition name="fade" v-else-if="pendingTokenSwap == ''">
+            <!-- your own wallet only: the server exchanges for the SESSION user, so showing this on
+                 someone else's wallet (e.g. via ?action=set_funds_pass) would mislead -->
+            <div v-else-if="afitActivityMode == EXCHANGE_AFIT_STEEM && !nonAuthUser">
+              <!-- No funds password any more: the exchange is authorised by the login session
+                   (server: checkHdrs + key-rotation gate). Every funds password is treated as
+                   known to the attacker since 2026-10-21, so it protected nothing. -->
+              <transition name="fade" v-if="pendingTokenSwap == ''">
                 <div class="text-center grid p-2">
                   <div class="p-3 row">
                     <div class="col-md-6 d-inline-block pt-3 text-md-right">
@@ -1661,7 +1577,7 @@
                       </a>
                     </div>
                   </div>
-                  <div>{{ $t('wallet.step3_title') }}</div>
+                  <div>{{ $t('wallet.exchange_title') }}</div>
                   <div>{{ $t('wallet.step3_desc1') }}</div>
                   <div>{{ $t('wallet.step3_desc2') }}</div>
                   <span class="afit-ex-option border border-danger p-2 m-2 btn-brand">
@@ -1685,14 +1601,7 @@
                   <span><i>{{ $t('You_are_exchanging') }} {{ afit_val_exchange }} {{ $t('AFIT_Token') }} {{ $t('Tokens')
                   }} {{ $t('for') }} {{ afit_exch_matching_perc }} % {{ $t('extra_upvote') }}
                       <!--<br/> ({{ $t('net_profit_approx') }} ${{ (afit_val_exchange * 0.036).toFixed(2) }})-->
-                      <br />{{ $t('enter_funds_pass_proceed') }}</i></span>
-                  <div class="row">
-                    <div class="w-25 p-2 text-right">{{ $t('Funds_Password') }}</div>
-                    <input type="password" id="funds-pass-entry" name="funds-pass-entry" ref="funds-pass-entry"
-                      class="form-control-lg w-50 p-2">
-                    <button v-on:click="resetFundsPass" class="btn btn-brand btn-lg border">{{ $t('Reset_password')
-                    }}</button>
-                  </div>
+                      </i></span>
                   <div class="row" v-if="error_swap != ''">
                     <div class="w-25"></div>
                     <span class="text-brand">{{ error_swap }}</span>
@@ -1751,8 +1660,10 @@
                       {{ $t('afitx_bal_rank') }} {{ userAFITXRank }}. {{ $t('you_need') }} {{ minJoinTopHolders() }} {{
                         $t('min_missing_afitx_prio') }}
                     </div>
-                    <div>{{ $t('current_no_queue') }} {{ userTokenSwapPending.order }}. {{
+                    <div v-if="userTokenSwapPending && userTokenSwapPending.order">{{ $t('current_no_queue') }} {{ userTokenSwapPending.order }}. {{
                       $t('exchange_projected_time').replace('ROUND_COUNT', userTokenSwapPending.reward_round) }}</div>
+                    <!-- not in the queue list just loaded (e.g. that request failed): no blank number -->
+                    <div v-else>{{ $t('exchange_queue_updating') }}</div>
                   </div>
                   <div>{{ $t('upvote_notice') }}</div>
                   <small>{{ $t('afitx_data_update_notice') }}</small>
@@ -2007,6 +1918,7 @@ import blurt from '@blurtfoundation/blurtjs'
 import ExchangeQueue from '~/components/ExchangeQueueModal'
 import ExchangeHistory from '~/components/ExchangeHistoryModal'
 import SSC from 'sscjs'
+import { heTokenPriceHive, bscValuesUSD, neededPrices, metricsSymbols, failPending, metricsAfterFetch } from '~/utils/walletTotal'
 
 import Countdown from 'vuejs-countdown'
 
@@ -2031,6 +1943,8 @@ import { mapGetters } from 'vuex'
 import Web3 from 'web3';
 
 import badActors from '~/utils/BadActorList';
+import { requestAfitExchange, exchangeErrorText } from '~/utils/afitExchange';
+import { AFIT_TIPS_AVAILABLE, AFIT_MOVE_TO_HE_AVAILABLE, BUY_AFIT_AVAILABLE, BSC_BRIDGE_AVAILABLE, requestCancelAfitMove, validateAfitTip, requestAfitTip, requestAfitMoveToHe, sessionActionErrorText, afitAmountError } from '~/utils/sessionActions';
 import AutocompleteUsernameInput from '~/components/AutocompleteUsernameInput';
 
 let web3 = new Web3(process.env.web3Node);
@@ -2063,8 +1977,8 @@ export default {
       title: `Actifit user wallet - Actifit.io`,
       meta: [
         { hid: 'description', name: 'description', content: `View AFIT token balance, transactions, and earnings on Actifit — manage your move-to-earn crypto rewards.` },
-        { hid: 'ogdescription', name: 'og:description', property: 'og:description', content: `View AFIT token balance and transactions on Actifit.` },
-        { hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'Actifit User Wallet - Actifit.io' },
+        { hid: 'ogdescription', property: 'og:description', content: `View AFIT token balance and transactions on Actifit.` },
+        { hid: 'ogtitle', property: 'og:title', content: 'Actifit User Wallet - Actifit.io' },
         { name: 'robots', content: 'noindex, nofollow' }
       ]
     }
@@ -2126,30 +2040,24 @@ export default {
       fundActivityMode: 0,
       afitActivityMode: 0,
       transferType: 'HIVE',
-      transferTypePass: 'HIVE',
       error_proceeding: '',
       error_msg: '',
-      pass_error_proceeding: '',
-      pass_error_msg: '',
       afit_se_move_error_proceeding: '',
       performingSwap: false,
       error_swap: '',
       swapResult: '',
-      checkingFunds: false,
       movingFunds: false,
       movingAFIT: false,
       movingAFITX: false,
       checkingBought: false,
       transConfirmed: false,
-      target_exchange_account: 'actifit.exchange',
       target_buy_account: 'actifit.buy',
       properties: '', //handles the Steem BC properties
-      userHasFundsPass: false, //holds value if user has proper funds pass or not yet
-      userFundsPassVerified: false, //holds value if user has verified funds pass or not yet
-      showFundsPass: false, //toggles plain/masked display of the funds password while setting it
-      settingPass: false,
-      verifyingPass: false,
-      errorSettingPass: '',
+      //disabled server side since the 2026-10-21 incident -> the panels show a note instead
+      afitTipsAvailable: AFIT_TIPS_AVAILABLE,
+      afitMoveToHeAvailable: AFIT_MOVE_TO_HE_AVAILABLE,
+      buyAfitAvailable: BUY_AFIT_AVAILABLE,
+      bscBridgeAvailable: BSC_BRIDGE_AVAILABLE,
       screenWidth: 1200,
       afit_val_exchange: 50,
       afit_exch_matching_perc: 10,
@@ -2200,6 +2108,13 @@ export default {
       showAfitxInfo: false,
       totalAccountValue: 0,
       totalAccountValueSteem: 0,
+      // false until formattedTotAccountVal has run on real prices
+      totalAccountValueReady: false,
+      // 'loading' | 'ok' | 'failed' - the price defaults above are placeholders, and
+      // a total computed on them is wrong, so the total waits for these
+      priceStatus: { afit: 'loading', hive: 'loading', hbd: 'loading', steem: 'loading', sbd: 'loading', blurt: 'loading' },
+      tokenMetricsStatus: 'loading',
+      lastGoodMetrics: null, // { account, metrics } from the last successful load
       detailCalculation: '',
       showDetailedCalc: false,
       userAFITXRank: -1,
@@ -2271,7 +2186,13 @@ export default {
       walletInitialized: false, // true once initWallet() has run (guards double-init)
       mountedDone: false, // true after mounted() finishes — lets the user watcher tell a post-mount login from the initial load
       profImgUrl: process.env.hiveImgUrl,
-      userTokensWallet: -1,
+      // null = not known yet (never loaded, or the load failed). A balance can legitimately
+      // be negative, so it is never used as a "loading" marker.
+      userTokensWallet: null,
+      // the AFIT balance fetch has finished (success or failure)
+      tokensLoaded: false,
+      // the last AFIT balance fetch failed; a previously loaded balance is kept
+      tokensLoadFailed: false,
       badActors: badActors,
       badActorWarning: false,
       hiveTransactions: [],
@@ -2310,6 +2231,8 @@ export default {
         { id: 'hp', icon: 'fas fa-donate', short: this.$t('wa_hp_deleg'), full: this.$t('FETCH_MY_DELEGATIONS'), run: () => this.fetchDelegations(false) },
         { id: 'rc', icon: 'fas fa-bolt', short: this.$t('wa_rc_deleg'), full: this.$t('FETCH_MY_RC_DELEGATIONS'), run: () => this.fetchRCDelegations(false) },
         { id: 'history', icon: 'fas fa-file-invoice', short: this.$t('wa_history'), full: this.$t('AFIT_Transaction_History'), run: () => this.scrollToTransactionHistory() },
+        // stays available while the bridge is paused: this panel is where users save the BSC
+        // address that drives their BSC balance rows; only moving tokens to BSC is gated
         { id: 'bsc', img: '/img/binance-logo.png', short: this.$t('wa_bsc'), full: this.$t('bsc_wallet'), run: () => this.showBSCAddress() },
       ];
     },
@@ -2442,14 +2365,38 @@ export default {
     isStdLogin() {
       return localStorage.getItem('std_login')
     },
+    afitBalanceKnown() {
+      return this.userTokensWallet !== null;
+    },
     afitValueUSD() {
+      // an unknown AFIT balance counts as 0 in the totals (the card says it is not included)
+      if (!this.afitBalanceKnown) return '0';
       return this.numberFormat(parseFloat(this.userTokensWallet) * this.afitPrice, 2);
     },
+    // BSC holdings, valued at the Actifit/Hive-Engine prices (see utils/walletTotal.js)
+    bscValues() {
+      return bscValuesUSD({
+        afitBSC: this.afitBalanceBSC, afitxBSC: this.afitxBalanceBSC,
+        afitPriceUSD: this.afitPrice, afitxPriceHive: this.afitxHEPrice, hivePriceUSD: this.hivePrice
+      });
+    },
     afitBSCValueUSD() {
-      return parseFloat(this.afitBalanceBSC) * this.afitBSCPrice;
+      return this.bscValues.afit;
     },
     afitxBSCValueUSD() {
-      return parseFloat(this.afitxBalanceBSC) * this.afitxBSCPrice;
+      return this.bscValues.afitx;
+    },
+    // AFITX Hive-Engine market price, in HIVE; 0 when there is none
+    afitxHEPrice() {
+      return heTokenPriceHive('AFITX', this.tokenMetrics);
+    },
+    neededPrices() {
+      return neededPrices(this.cur_bchain, this.displayUserData, this.claimSBD);
+    },
+    // 'ready' | 'loading' | 'failed': the hero shows the total, a spinner, or a dash
+    totalValueStatus() {
+      if (this.tokenMetricsStatus === 'failed' || this.neededPrices.some(k => this.priceStatus[k] === 'failed')) return 'failed';
+      return this.totalAccountValueReady ? 'ready' : 'loading';
     },
     hbdValueUSD() {
       if (!this.displayUserData) return '0.00';
@@ -2475,6 +2422,7 @@ export default {
       return this.numberFormat(this.totalAccountValueSteem, 3) + ' ' + this.cur_bchain;
     },
     formattedUserAfit() {
+      if (!this.afitBalanceKnown) return '— AFIT';
       return this.numberFormat((parseFloat(this.userTokensWallet) + parseFloat(this.userAddedTokens)).toFixed(3), 3) + " AFIT";
     },
     formattedUserAfitSE() {
@@ -2553,6 +2501,13 @@ export default {
       this.$nextTick(this.measureQuickActions);
     },
     tokenMetrics: 'formattedTotAccountVal',
+    tokenMetricsStatus: 'formattedTotAccountVal',
+    priceStatus: { handler: 'formattedTotAccountVal', deep: true },
+    hivePrice: 'formattedTotAccountVal',
+    afitPrice: 'formattedTotAccountVal',
+    hbdPrice: 'formattedTotAccountVal',
+    sbdPrice: 'formattedTotAccountVal',
+    blurtPrice: 'formattedTotAccountVal',
     steemPrice: 'formattedTotAccountVal',
     afitBSCPrice: 'formattedTotAccountVal',
     afitxBSCPrice: 'formattedTotAccountVal',
@@ -2696,8 +2651,10 @@ export default {
         // reset states
         this.tokensOfInterestBal = [];
         this.tokenMetrics = [];
-        this.userTokensWallet = -1;
+        this.tokenMetricsStatus = 'loading';
+        this.tokensLoaded = false;
         this.totalAccountValue = 0;
+        this.totalAccountValueReady = false;
         this.steemPower = 0;
         this.delegatedSteemPower = 0;
         this.receivedSteemPower = 0;
@@ -2743,10 +2700,10 @@ export default {
             await this.sortTokenData(this.tokenSort, true);
           }
 
-          const metrics = await hsc.find('market', 'metrics', {}, 1000, 0, '', false);
-          this.tokenMetrics = Array.isArray(metrics) ? metrics : [];
+          await this.loadTokenMetrics(this.tokensOfInterestBal);
         } catch (err) {
           console.error('Error fetching token data:', err);
+          this.tokenMetricsStatus = 'failed';
         }
 
         await this.$nextTick();
@@ -3282,7 +3239,7 @@ export default {
         let outcome = await res.json();
         console.log(outcome);
         if (outcome.error) {
-          this.error_wallet = this.$t('error_resetting_wallet');
+          this.error_wallet = this.$gateMessage(outcome) || this.$t('error_resetting_wallet');
         } else {
           console.log('success');
           this.$refs['bsc-wallet-address'].value = '';
@@ -3380,7 +3337,7 @@ export default {
           console.log(outcome);
           if (outcome.error) {
             console.log('error');
-            this.error_wallet = this.$t('error_saving_wallet');
+            this.error_wallet = this.$gateMessage(outcome) || this.$t('error_saving_wallet');
             return;
           } else if (outcome.success) {
             console.log('success. Next lets save');
@@ -3400,7 +3357,7 @@ export default {
             let outcome = await res.json();
             console.log(outcome);
             if (outcome.error) {
-              this.error_wallet = this.$t('error_saving_wallet');
+              this.error_wallet = this.$gateMessage(outcome) || this.$t('error_saving_wallet');
             } else {
               console.log('success');
               this.$notify({
@@ -3697,6 +3654,7 @@ export default {
       this.scrollTokenAction();
     },
     initiateBSCTransfer(token) {
+      if (!this.bscBridgeAvailable) return;
       //only adjust open/close is same button is clicked, otherwise adjust token being unstaked
       if (this.selTokenUp == token && this.curTokenAction == this.TRANSFER_BSC) {
         this.tokenActions = !this.tokenActions;
@@ -3757,8 +3715,11 @@ export default {
     },
     formattedTotAccountVal() {
       this.totalAccountValue = 0;
-      if ((Array.isArray(this.tokenMetrics) && this.tokenMetrics.length > 0) ||
-          (Array.isArray(this.tokensOfInterestBal) && this.tokensOfInterestBal.length > 0)) {
+      this.totalAccountValueReady = false;
+      // Until every price is live the total is not shown: computed on the placeholder
+      // prices, or with token prices missing, it was wrong and changed between reloads.
+      const pricesLive = this.neededPrices.every(k => this.priceStatus[k] === 'ok');
+      if (this.displayUserData && pricesLive && this.tokenMetricsStatus === 'ok') {
 
         this.detailCalculation = '';
         //get AFITX val
@@ -3790,11 +3751,18 @@ export default {
 
         //console.log('this.afitBSCValueUSD:'+this.afitBSCValueUSD)
         //console.log('this.afitxBSCValueUSD:'+this.afitxBSCValueUSD)
-        //add AFIT BSC and AFITX BSC
-        this.totalAccountValue += (this.afitBSCValueUSD / baseCurrency);
-        this.totalAccountValue += (this.afitxBSCValueUSD / baseCurrency);
+        this.detailCalculation += (this.afitBalanceKnown ? Number(this.userTokensWallet).toFixed(3) : '—') + ' AFIT x ' + this.numberFormat((this.afitPrice / baseCurrency), 8) + ' AFIT/' + this.cur_bchain + ' = ' + this.numberFormat(afitCoreVal, 4) + ' ' + this.cur_bchain + '<br/>';
 
-        this.detailCalculation += this.userTokensWallet + ' AFIT x ' + this.numberFormat((this.afitPrice / baseCurrency), 4) + ' AFIT/' + this.cur_bchain + ' = ' + this.numberFormat(afitCoreVal, 4) + ' ' + this.cur_bchain + '<br/>';
+        //add AFIT BSC and AFITX BSC, at the same prices as the AFIT and AFITX above
+        const afitBSCVal = this.afitBSCValueUSD / baseCurrency;
+        const afitxBSCVal = this.afitxBSCValueUSD / baseCurrency;
+        this.totalAccountValue += afitBSCVal + afitxBSCVal;
+        if (parseFloat(this.afitBalanceBSC) > 0) {
+          this.detailCalculation += this.numberFormat(this.afitBalanceBSC, 3) + ' AFIT BSC x ' + this.numberFormat((this.afitPrice / baseCurrency), 8) + ' AFIT/' + this.cur_bchain + ' = ' + this.numberFormat(afitBSCVal, 4) + ' ' + this.cur_bchain + '<br/>';
+        }
+        if (parseFloat(this.afitxBalanceBSC) > 0) {
+          this.detailCalculation += this.numberFormat(this.afitxBalanceBSC, 3) + ' AFITX BSC x ' + this.numberFormat((this.afitxHEPrice * this.hivePrice / baseCurrency), 8) + ' AFITX/' + this.cur_bchain + ' = ' + this.numberFormat(afitxBSCVal, 4) + ' ' + this.cur_bchain + '<br/>';
+        }
 
         let par = this;
         const availableMetrics = Array.isArray(this.tokenMetrics) ? this.tokenMetrics : [];
@@ -3802,11 +3770,8 @@ export default {
         this.tokensOfInterestBal.forEach(function (token, index) {
           par.showPowerBreakdown[token.symbol] = false;
 
-          let tokenData = availableMetrics.find(v => v.symbol == token.symbol);
-          if (!tokenData || (typeof tokenData.lastPrice === 'undefined' || tokenData.lastPrice === null)) {
-            tokenData = new Object();
-            tokenData.lastPrice = 1;
-          }
+          // no market price: not counted (SWAP.HIVE is pegged to HIVE)
+          let tokenData = { lastPrice: heTokenPriceHive(token.symbol, availableMetrics) };
           //console.log(token);
           if (typeof token.stake === 'undefined' || token.stake === null || tokensNonStakable.includes(token.symbol)) {
             token.stake = 0;
@@ -3890,7 +3855,7 @@ export default {
         //console.log(baseCurrency);
         //console.log(this.totalAccountValue);
         this.totalAccountValue = this.numberFormat(this.totalAccountValue, 2);
-
+        this.totalAccountValueReady = true;
       }
     },
     renderSteemPower(type) {
@@ -4034,10 +3999,12 @@ export default {
     async completeUserDataRefresh() {
       this.walletDataRefreshing = true;
       try {
-        this.userTokensWallet = -1;
+        this.tokensLoaded = false;
         this.tokensOfInterestBal = [];
         this.tokenMetrics = [];
+        this.tokenMetricsStatus = 'loading';
         this.totalAccountValue = 0;
+        this.totalAccountValueReady = false;
 
         await this.fetchUserData();
 
@@ -4075,7 +4042,21 @@ export default {
 
         // This redundant assignment is now removed. The `mounted` hook handles setting `displayUserData`.
 
-        this.userTokensWallet = await this.$store.dispatch('fetchUserTokensReturn', this.displayUser, false)
+        // a failed fetch (network, 5xx, {error} body) never shows 0 and never overwrites a
+        // balance loaded earlier
+        let tokens = NaN;
+        try {
+          tokens = parseFloat(await this.$store.dispatch('fetchUserTokensReturn', this.displayUser, false));
+        } catch (err) {
+          console.error('Error fetching AFIT balance:', err);
+        }
+        if (Number.isFinite(tokens)) {
+          this.userTokensWallet = tokens;
+          this.tokensLoadFailed = false;
+        } else {
+          this.tokensLoadFailed = true;
+        }
+        this.tokensLoaded = true;
 
         this.$store.dispatch('fetchUserTokens')
         this.$store.dispatch('fetchTransactions', this.displayUser)
@@ -4090,13 +4071,6 @@ export default {
         } catch (error) {
           console.log(error);
         }
-        //let's check if user already has a funds pass set
-        //cache:'no-store' so a just-completed verification isn't masked by a stale cached response
-        fetch(process.env.actiAppUrl + 'userHasFundsPassSet/' + this.displayUserData.name, { cache: 'no-store' }).then(
-          res => {
-            res.json().then(json => this.setUserPassStatus(json)).catch(e => console.log(e))
-          }).catch(e => console.log(e))
-
         //let's check if user has a pending AFIT tokens exchange
         fetch(process.env.actiAppUrl + 'userHasPendingTokenSwap/' + this.displayUserData.name).then(
           res => {
@@ -4155,43 +4129,49 @@ export default {
           }).catch(e => console.log(e))
 
 
-        //fetch user's tokensOfInterest S-E balance
-        let tokenData, tokenExtraDetails
+        // A Hive-Engine node error used to escape here and abort the rest of the wallet
+        // load, leaving the total waiting for token prices forever.
+        try {
+          //fetch user's tokensOfInterest S-E balance
+          let tokenData, tokenExtraDetails
 
-        //new full token balance listing
-        tokenData = await hsc.find('tokens', 'balances', { account: this.displayUserData.name });
-        tokenData = Array.isArray(tokenData) ? tokenData : [];
+          //new full token balance listing
+          tokenData = await hsc.find('tokens', 'balances', { account: this.displayUserData.name });
+          tokenData = Array.isArray(tokenData) ? tokenData : [];
 
-        this.heTokenDelegations = await hsc.find('tokens', 'delegations', { from: this.displayUserData.name }, 200, 0, []);
-        this.heTokenDelegations = Array.isArray(this.heTokenDelegations) ? this.heTokenDelegations : [];
+          this.heTokenDelegations = await hsc.find('tokens', 'delegations', { from: this.displayUserData.name }, 200, 0, []);
+          this.heTokenDelegations = Array.isArray(this.heTokenDelegations) ? this.heTokenDelegations : [];
 
-        this.heTokenUnstakes = await hsc.find('tokens', 'pendingUnstakes', { account: this.displayUserData.name }, 200, 0, []);
-        this.heTokenUnstakes = Array.isArray(this.heTokenUnstakes) ? this.heTokenUnstakes : [];
+          this.heTokenUnstakes = await hsc.find('tokens', 'pendingUnstakes', { account: this.displayUserData.name }, 200, 0, []);
+          this.heTokenUnstakes = Array.isArray(this.heTokenUnstakes) ? this.heTokenUnstakes : [];
 
-        //grab full token data
-        tokenExtraDetails = await hsc.find('tokens', 'tokens', {});
-        tokenExtraDetails = Array.isArray(tokenExtraDetails) ? tokenExtraDetails : [];
+          //grab full token data
+          tokenExtraDetails = await hsc.find('tokens', 'tokens', {});
+          tokenExtraDetails = Array.isArray(tokenExtraDetails) ? tokenExtraDetails : [];
 
-        //loop through tokenData and set proper icon
-        for (let x = 0; x < tokenData.length; x++) {
-          try {
-            let matchEntry = tokenExtraDetails.find(v => v.symbol == tokenData[x].symbol);
-            if (matchEntry && matchEntry.metadata) {
-              tokenData[x].icon = JSON.parse(matchEntry.metadata).icon
+          //loop through tokenData and set proper icon
+          for (let x = 0; x < tokenData.length; x++) {
+            try {
+              let matchEntry = tokenExtraDetails.find(v => v.symbol == tokenData[x].symbol);
+              if (matchEntry && matchEntry.metadata) {
+                tokenData[x].icon = JSON.parse(matchEntry.metadata).icon
+              }
+            } catch (parseErr) {
+              console.log(parseErr);
             }
-          } catch (parseErr) {
-            console.log(parseErr);
           }
-        }
 
-        if (tokenData) {
-          this.tokensOfInterestBal = tokenData;
-          await this.sortTokenData(this.tokenSort, true);
-        }
+          if (tokenData) {
+            this.tokensOfInterestBal = tokenData;
+            await this.sortTokenData(this.tokenSort, true);
+          }
 
-        //extract prices for all user balances
-        this.tokenMetrics = await hsc.find('market', 'metrics', {}, 1000, 0, '', false);
-        this.tokenMetrics = Array.isArray(this.tokenMetrics) ? this.tokenMetrics : [];
+          //extract prices for all user balances
+          await this.loadTokenMetrics(tokenData);
+        } catch (err) {
+          console.error('Error fetching Hive-Engine balances:', err);
+          if (this.tokenMetricsStatus !== 'ok') this.tokenMetricsStatus = 'failed';
+        }
 
         //let's grab the user's wallet address
         fetch(process.env.actiAppUrl + 'getUserWalletAddress?user=' + this.displayUserData.name).then(
@@ -4267,7 +4247,6 @@ export default {
       }
     },
     fetchUserPendingRewards(tgtUser) {
-      //let's check if user already has a funds pass set
 
       fetch(process.env.actiAppUrl + 'pendingRewards/?user=' + tgtUser).then(
         res => {
@@ -4298,6 +4277,66 @@ export default {
     setAFITPrice(_afitPrice) {
       const p = parseFloat(_afitPrice);
       if (!isNaN(p)) this.afitPrice = p;
+      this.markPrice('afit', !isNaN(p));
+    },
+    // a price that loaded stays 'ok' even if a later refresh fails
+    markPrice(key, loaded) {
+      if (loaded) this.priceStatus[key] = 'ok';
+      else if (this.priceStatus[key] !== 'ok') this.priceStatus[key] = 'failed';
+    },
+    // Prices for the tokens this account holds, plus the tokens of interest (claimable
+    // rewards, and AFIT/AFITX, which also value its BSC holdings).
+    async loadTokenMetrics(balances) {
+      const symbols = metricsSymbols(tokensOfInterest, balances);
+      const account = this.displayUserData && this.displayUserData.name;
+      let fresh = null;
+      try {
+        fresh = await hsc.find('market', 'metrics', { symbol: { $in: symbols } }, 1000, 0, [], false);
+      } catch (err) {
+        console.log('Error fetching token metrics:', err);
+      }
+      // a failed periodic refresh keeps this account's last good prices
+      const { metrics, status } = metricsAfterFetch(fresh, this.lastGoodMetrics, account);
+      this.tokenMetrics = metrics;
+      this.tokenMetricsStatus = status;
+      if (Array.isArray(fresh)) this.lastGoodMetrics = { account, metrics: fresh };
+    },
+    // A wallet load that aborted half-way: anything the total still waits for will
+    // never arrive, so show the dash instead of a spinner. A price that lands later
+    // still flips back to 'ok'.
+    failPendingTotalInputs() {
+      this.tokenMetricsStatus = failPending(this.priceStatus, this.neededPrices, this.tokenMetricsStatus).tokenMetricsStatus;
+    },
+    // Fired without waiting: the total needs these whatever happens to the rest of the load.
+    fetchPrices() {
+      const fetchPrice = async (url, setter, key) => {
+        try {
+          const response = await this.retryOperation(async () => {
+            const res = await fetch(url);
+            return res.json();
+          });
+          setter(response);
+        } catch (err) {
+          console.error('Error fetching price:', err);
+          if (key) this.markPrice(key, false);
+        }
+      };
+      fetchPrice(`${process.env.actiAppUrl}curAFITPrice`,
+        json => this.setAFITPrice(json.unit_price_usd), 'afit');
+      fetchPrice(`${process.env.actiAppUrl}AFITBSCPrice`,
+        json => this.setAFITBSCPrice(json.price));
+      fetchPrice(`${process.env.actiAppUrl}AFITXBSCPrice`,
+        json => this.setAFITXBSCPrice(json.price));
+      fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=steem&vs_currencies=usd',
+        json => this.setSteemPrice(json.steem.usd), 'steem');
+      fetchPrice(`${process.env.actiAppUrl}hivePrice`,
+        json => this.setHivePrice(json.hive.usd), 'hive');
+      fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=blurt&vs_currencies=usd',
+        json => this.setBlurtPrice(json.blurt.usd), 'blurt');
+      fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=steem-dollars&vs_currencies=usd',
+        json => this.setSBDPrice(json['steem-dollars'].usd), 'sbd');
+      fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=hive_dollar&vs_currencies=usd',
+        json => this.setHBDPrice(json['hive_dollar'].usd), 'hbd');
     },
     setAFITBSCPrice(_afitPrice) {
       const p = parseFloat(_afitPrice);
@@ -4307,40 +4346,6 @@ export default {
       const p = parseFloat(_afitxPrice);
       if (!isNaN(p)) this.afitxBSCPrice = p;
       console.log('afitxBSCPrice' + this.afitxBSCPrice);
-    },
-    setUserPassStatus(result) {
-      //handles setting funds password status
-      const verified = !!(result && result.passVerified);
-      const hasPass = !!(result && result.hasFundsPass);
-
-      //set proper value for verified funds pass status
-      this.userFundsPassVerified = verified;
-
-      if (verified) {
-        //fully set up & verified -> move to step 3 and drop the pending marker
-        this.userHasFundsPass = true;
-        this.clearFundsPassPending();
-      } else {
-        //keep the user on step 2 while a set is pending verification, even if a
-        //background refresh (60s interval / user watcher) momentarily reports no
-        //record yet. Only an explicit reset returns them to step 1.
-        this.userHasFundsPass = hasPass || this.isFundsPassPending();
-      }
-    },
-    //pending marker is scoped to the logged-in account so it survives page reloads
-    fundsPassPendingKey() {
-      const name = (this.user && this.user.account && this.user.account.name)
-        || localStorage.getItem('std_login_name') || '';
-      return 'funds_pass_pending_' + name;
-    },
-    isFundsPassPending() {
-      try { return localStorage.getItem(this.fundsPassPendingKey()) === 'true'; } catch (e) { return false; }
-    },
-    markFundsPassPending() {
-      try { localStorage.setItem(this.fundsPassPendingKey(), 'true'); } catch (e) { /* ignore */ }
-    },
-    clearFundsPassPending() {
-      try { localStorage.removeItem(this.fundsPassPendingKey()); } catch (e) { /* ignore */ }
     },
     setUserTokenSwapStatus(result) {
       //handles setting user token swap status
@@ -4364,6 +4369,7 @@ export default {
         ? this.tokenSwapQueue.pendingTransactions
         : []
       //sets proper full entry for user's token queue exchange details
+      this.userTokenSwapPending = '';
       for (let i = 0, max = entryList.length; i < max; i++) {
         if (entryList[i].user === this.displayUserData.name) {
           //found our user
@@ -4715,12 +4721,7 @@ export default {
           await this.sortTokenData(this.tokenSort, true);
         }
 
-        try {
-          this.tokenMetrics = await hsc.find('market', 'metrics', {}, 1000, 0, '', false);
-        } catch (err) {
-          console.log('Error fetching token metrics:', err);
-          this.tokenMetrics = [];
-        }
+        await this.loadTokenMetrics(Array.isArray(tokenData) ? tokenData : []);
 
       } catch (err) {
         console.error('Error in fetchTokenBalance:', err);
@@ -5459,6 +5460,12 @@ export default {
     },
 
     async proceedRCDelegation(cancellation) {
+      //legacy HiveSigner sessions (no std_login) relied on the retired server-side /delegateRC
+      if (!localStorage.getItem('std_login')) {
+        this.error_proceeding = true;
+        this.error_msg = this.$t('rc_delegation_login_needed');
+        return;
+      }
       let note = this.$t('confirm_rc_delegation')
       if (cancellation == true) {
         note = this.$t('confirm_rc_delegation_cancel')
@@ -5484,87 +5491,49 @@ export default {
       }
 
 
-      if ((localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) ||
-        (localStorage.getItem('acti_login_method') == 'hiveauth')) {
-        const op_name = 'custom_json';
-        //['delegate_rc', {
-        const json_data = JSON.stringify(['delegate_rc', {
-          from: this.user.account.name,
-          delegatees: [this.$refs["delegate-recipient"].value.trim()],
-          max_rc: this.$refs["delegate-amount"].value.trim()
-        }]);
-        //}]);
-        const transId = 'rc';
-        const cstm_params = {
-          required_auths: [],
-          required_posting_auths: [this.user.account.name],
-          id: transId,
-          json: json_data
-        }
-        /*
-        let operation = [
-         [op_name, cstm_params]
-        ];*/
+      //Keychain, HiveAuth and typed-key sessions all sign in the browser via processTrxFunc
+      //(typed key: $broadcastWithKey with the posting key) - /delegateRC (server-side signing) is gone
+      const op_name = 'custom_json';
+      const json_data = JSON.stringify(['delegate_rc', {
+        from: this.user.account.name,
+        delegatees: [this.$refs["delegate-recipient"].value.trim()],
+        max_rc: this.$refs["delegate-amount"].value.trim()
+      }]);
+      const transId = 'rc';
+      const cstm_params = {
+        required_auths: [],
+        required_posting_auths: [this.user.account.name],
+        id: transId,
+        json: json_data
+      }
 
-        let res = await this.processTrxFunc(op_name, cstm_params);
+      this.delegateProcess = true;
+      let res;
+      try {
+        res = await this.processTrxFunc(op_name, cstm_params);
+      } catch (err) {
+        console.log(err);
+        res = { success: false };
+      }
+      this.delegateProcess = false;
 
-        console.log('trx status:' + res.success);
-        if (res.success) {
-          //success
-          this.$notify({
-            group: 'success',
-            text: this.$t('rc_delegation_success'),
-            position: 'top center'
-          });
-          //update RC delegations
-          this.fetchRCDelegations(true);
-        } else {
-          //error
-          this.$notify({
-            group: 'error',
-            text: this.$t('error_performing_operation'),
-            position: 'top center'
-          })
-        }
-
-      } else {
-
-        let accToken = localStorage.getItem('access_token')
-
-        //chain not needed, as only supported by hive
-        //let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'');
-
-
-        this.delegateProcess = true;
-        let url = new URL(process.env.actiAppUrl + 'delegateRC/?user=' + this.user.account.name + '&delegatees=' + this.$refs["delegate-recipient"].value.trim() + '&max_rc=' + this.$refs["delegate-amount"].value.trim());
-
-        let reqHeads = new Headers({
-          'Content-Type': 'application/json',
-          'x-acti-token': 'Bearer ' + accToken,
+      console.log('trx status:' + res.success);
+      if (res.success) {
+        //success
+        this.$notify({
+          group: 'success',
+          text: this.$t('rc_delegation_success'),
+          position: 'top center'
         });
-        let res = await fetch(url, {
-          headers: reqHeads
-        });
-        let outcome = await res.json();
-        console.log(outcome);
-        if (outcome.id && outcome.ref_block_num) {
-          //success
-          this.$notify({
-            group: 'success',
-            text: this.$t('rc_delegation_success'),
-            position: 'top center'
-          });
-          //update RC delegations
-          this.fetchRCDelegations(true);
-        } else {
-          //error
-          this.$notify({
-            group: 'error',
-            text: this.$t('error_performing_operation'),
-            position: 'top center'
-          })
-        }
-        this.delegateProcess = false;
+        //update RC delegations
+        this.fetchRCDelegations(true);
+      } else if (!res.cancelled) {
+        //error (a cancelled key prompt already showed its own message)
+        this.$notify({
+          group: 'error',
+          text: this.$t('error_performing_operation'),
+          position: 'top center'
+        })
       }
     },
 
@@ -5682,9 +5651,6 @@ export default {
         if (type == 'transfer') {
           note = 'Transfer completed successfully!';
         }
-        if (type == 'transfer-verify') {
-          note = 'Transfer completed. Verifying transaction.'
-        }
         if (type == 'cancel-savings-withdraw') {
           note = 'Savings withdrawal cancelled.'
         }
@@ -5716,30 +5682,6 @@ export default {
         this.fetchDelegations(true);
       } else if (type == 'transfer') {
         this.transferProcess = false;
-      } else if (type == 'transfer-verify') {
-        //also start verification process
-        let url = new URL(process.env.actiAppUrl + 'confirmPaymentPasswordVerify/' + '?bchain=' + this.cur_bchain);
-        //compile all needed data and send it along the request for processing
-        let params = {
-          from: this.user.account.name,
-        }
-        Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
-        try {
-          let res = await fetch(url);
-          let outcome = await res.json();
-          //if the payment was confirmed, advance to step 3 directly instead of
-          //relying on a follow-up status read that can race or be cache-stale
-          if (outcome && outcome.statusUpdated) {
-            this.userFundsPassVerified = true;
-            this.userHasFundsPass = true;
-            this.clearFundsPassPending();
-          }
-          //update user data according to result
-          this.fetchUserData();
-        } catch (err) {
-          console.error(err);
-        }
-        this.checkingFunds = false;
       } else if (type == 'transfer-bsc') {
         //res is HBD
         //extraAFITTrx is AFIT H-E
@@ -5864,17 +5806,6 @@ export default {
       this.curTokenAction = 0;
       this.scrollAfitAction();
     },
-    handleSetFundsPassLink(event) {
-      //error-hint messages are rendered via v-html, so their links can't use
-      //Vue directives. Delegate clicks here: if the "create password" hint link
-      //was clicked, open the funds-pass wizard in-page instead of navigating.
-      const link = event.target.closest('.set-funds-pass-link');
-      if (!link) {
-        return;
-      }
-      event.preventDefault();
-      this.exchangeAFITforSTEEM();
-    },
     moveAFITXseHE() {
       //set proper AFIT Activity Mode controlling the display
       /*if (this.afitActivityMode == this.MOVE_AFITX_SE_HE ){
@@ -5972,15 +5903,6 @@ export default {
       this.curTokenAction = 0;
       this.scrollAfitAction();
     },
-    passTransferTypeChange(e) {
-      //handles the drop down select option to ensure we have proper value
-      if (e.target.options.selectedIndex > -1) {
-        this.transferTypePass = e.target.options[e.target.options.selectedIndex].value;
-      }
-    },
-    setPasswordVal() {
-      this.$refs["funds-pass"].value = this.generatePassword(2);
-    },
     generatePassword(multip) {
       //generate random 11 characters password
       let passString = '';
@@ -5988,85 +5910,6 @@ export default {
         passString += Math.random().toString(36).substr(2, 13);
       }
       return passString;
-    },
-    async setFundsPass() {
-      //stores the password set by the user
-      this.settingPass = true;
-      this.errorSettingPass = '';
-      //ensure we have proper values
-      if (this.$refs["funds-pass"].value == '') {
-        this.errorSettingPass = this.$t('error_missing_funds_pass');
-        this.settingPass = false;
-        return;
-      }
-      //ensure user confirmed password
-      if (this.$refs["confirm-funds-pass"].value !== this.$refs["funds-pass"].value) {
-        this.errorSettingPass = this.$t('error_passwords_mismatch');
-        this.settingPass = false;
-        return;
-      }
-      let passVal = this.$refs['funds-pass'].value;
-      let setUrl = process.env.actiAppUrl + 'setUserFundsPass?user=' + this.user.account.name;
-      //silently refresh an expired keychain token and retry once if the token is rejected
-      let outcome = await this.withAuthRetry(() => this.postAuthed(setUrl, JSON.stringify({ pass: passVal })));
-      this.settingPass = false;
-      //only advance when the API actually persisted the record (status === 'Success').
-      //any other shape (e.g. {error}, or an auth rejection {success:false, message})
-      //must surface as an error instead of silently moving to step 2 with nothing saved.
-      if (outcome && outcome.status === 'Success') {
-        this.userHasFundsPass = true;
-        //remember the user is awaiting verification so background refreshes /
-        //page reloads keep them on step 2 instead of bouncing back to step 1
-        this.markFundsPassPending();
-      } else if (this.isAuthFailure(outcome)) {
-        //token was rejected and a silent keychain refresh didn't recover it -> ask to re-login
-        this.errorSettingPass = this.$t('session_expired_login_again');
-        console.error('setUserFundsPass failed (auth):', outcome);
-      } else {
-        //display whatever the API reported so the real cause is visible
-        this.errorSettingPass = (outcome && (outcome.error || outcome.message))
-          || this.$t('error_performing_operation');
-        console.error('setUserFundsPass failed:', outcome);
-      }
-    },
-    //POST a JSON body to an authenticated (checkHdrs) endpoint using the current session token
-    async postAuthed(url, body) {
-      try {
-        let res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'x-acti-token': 'Bearer ' + localStorage.getItem('access_token') },
-          body: body,
-        });
-        return await res.json();
-      } catch (e) {
-        console.error('authed POST failed:', url, e);
-        return { error: this.$t('error_performing_operation') };
-      }
-    },
-    //GET an authenticated (checkHdrs) endpoint using the current session token
-    async getAuthed(url) {
-      try {
-        let res = await fetch(url, {
-          headers: { 'Content-Type': 'application/json', 'x-acti-token': 'Bearer ' + localStorage.getItem('access_token') },
-        });
-        return await res.json();
-      } catch (e) {
-        console.error('authed GET failed:', url, e);
-        return { error: this.$t('error_performing_operation') };
-      }
-    },
-    //runs an authenticated request (fn must return the parsed API response); if the token
-    //was rejected, silently refresh it via keychain once and retry, so keychain users
-    //aren't bounced to a re-login mid-action
-    async withAuthRetry(fn) {
-      let outcome = await fn();
-      if (this.isAuthFailure(outcome)) {
-        let refreshed = await this.ensureKeychainToken();
-        if (refreshed) {
-          outcome = await fn();
-        }
-      }
-      return outcome;
     },
     //true when the API response indicates the session token was missing/expired/invalid
     isAuthFailure(outcome) {
@@ -6120,7 +5963,7 @@ export default {
         //if (!this.stdLogin){
         let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
         //console.log(res);
-        if (res.result.ref_block_num) {
+        if (res && res.result && res.result.ref_block_num) {
           console.log('success');
           return { success: true, trx: res.result };
         } else {
@@ -6138,15 +5981,19 @@ export default {
             operation,
             active ? 'Active' : 'Posting', (response) => {
               console.log(response);
-              //resolve(response);
-              resolve({ success: response.success, txID: response.result.id })
+              //a cancelled / failed request comes back as success:false with no result:
+              //still settle, or the caller's spinner and disabled buttons never reset
+              resolve({
+                success: !!(response && response.success),
+                txID: response && response.result ? response.result.id : null
+              })
             });
         });
       } else if (localStorage.getItem('acti_login_method') == 'hiveauth') {
         return new Promise((resolve) => {
           const auth = {
             username: this.user.account.name,
-            token: localStorage.getItem('access_token'),//should be changed in V1 (current V0.8)
+            token: localStorage.getItem('hiveauth_has_token'),//should be changed in V1 (current V0.8)
             expire: localStorage.getItem('expires'),
             key: localStorage.getItem('key')
           }
@@ -6172,9 +6019,10 @@ export default {
                 group: 'warn',
                 clean: true
               })
-              if (response.cmd && response.cmd === 'sign_ack') {
+              if (response && response.cmd === 'sign_ack') {
                 resolve({ success: true, txID: response.data })
-              } else if (response.cmd && response.cmd === 'sign_nack') {
+              } else {
+                //sign_nack, sign_err, expired...: always settle
                 resolve({ success: false })
               }
             }) // transaction approved and successfully broadcasted
@@ -6206,16 +6054,9 @@ export default {
 
         let cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : '');
 
-        let url = new URL(process.env.actiAppUrl + 'performTrx/?user=' + this.user.account.name + '&operation=' + op_json + '&bchain=' + cur_bchain);
-
-        let reqHeads = new Headers({
-          'Content-Type': 'application/json',
-          'x-acti-token': 'Bearer ' + accToken,
-        });
-        let res = await fetch(url, {
-          headers: reqHeads
-        });
-        let outcome = await res.json();
+        // Signed IN THE BROWSER with the user's own key - /performTrx is gone.
+        // Same response shape as before, so the handling below is unchanged.
+        let outcome = await this.$broadcastWithKey(operation, { active: !!active, bchain: cur_bchain });
         console.log(outcome);
         if (outcome.error) {
           console.log(outcome.error);
@@ -6236,7 +6077,7 @@ export default {
             text: err_msg,
             position: 'top center'
           })
-          return { success: false, trx: null };
+          return { success: false, trx: null, cancelled: !!outcome.cancelled };
           //this.$router.push('/login');
         } else {
           return { success: true, trx: outcome.trx };
@@ -6244,6 +6085,8 @@ export default {
       }
     },
     async cancelMoveToSE() {
+      //one request at a time: don't even ask while another one runs
+      if (this.initiateInProgress) return;
       this.afit_se_move_err_msg = '';
       let userConf = confirm(this.$t('Cancel_Transfer_Confirm'));
       if (!userConf) {
@@ -6251,154 +6094,141 @@ export default {
       }
 
 
-      //make sure password is provided
-      //ensure user provided funds-pass
-      if (this.$refs["move-funds-pass"].value == '') {
-        this.afit_se_move_error_proceeding = true;
-        this.afit_se_move_err_msg = this.$t('error_missing_funds_pass') + ' <u><a href="#" class="set-funds-pass-link">' + this.$t('create_funds_pass') + '</a></u>';
-        return;
-      }
-
       this.initiateInProgress = true;
 
-      //proceed with tipping
-      let res = await fetch(process.env.actiAppUrl + 'cancelAFITMoveSE/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user: this.user.account.name, fundsPass: this.$refs["move-funds-pass"].value })
+      //authorised by the login session (the server cancels for the session user), no
+      //funds password; silently refresh + retry once if the keychain token expired.
+      //Keeps the HTTP status so a plain-text 429 reads as "too many attempts".
+      const sendCancel = () => requestCancelAfitMove({
+        apiUrl: process.env.actiAppUrl,
+        user: this.user.account.name,
+        sessionToken: localStorage.getItem('access_token')
       });
-      let outcome = await res.json();
-      if (outcome.status == 'Success') {
-        let afitCancPDTransaction = { action: 'Cancel AFIT To S-E Power Down' };
-        //store the transaction to Steem BC
-        let cstm_params = {
-          required_auths: [],
-          required_posting_auths: [this.user.account.name],
-          id: 'actifit',
-          json: JSON.stringify(afitCancPDTransaction)
-        };
-
-        let res = await this.processTrxFunc('custom_json', cstm_params);
-
-        if (res.success) {
-          //notify of success
-          this.$notify({
-            group: 'success',
-            text: this.$t('afit_power_down_canceled'),
-            position: 'top center'
-          })
-
-          //unset the value of existing transfer
-          this.userPDAfit = false
+      let status = 0;
+      let outcome = {};
+      try {
+        ({ status, outcome } = await sendCancel());
+        if (this.isAuthFailure(outcome) && await this.ensureKeychainToken()) {
+          ({ status, outcome } = await sendCancel());
         }
-
-
-      } else {
-        this.afit_se_move_error_proceeding = true;
-        this.afit_se_move_err_msg = outcome.error;
+      } catch (err) {
+        console.error('cancelAFITMoveSE failed:', err);
       }
       this.initiateInProgress = false;
+      if (outcome.status != 'Success') {
+        this.afit_se_move_error_proceeding = true;
+        this.afit_se_move_err_msg = exchangeErrorText(status, outcome, (k) => this.$t(k), (o) => this.$gateMessage(o));
+        return;
+      }
+      //cancelled server side: show it now, even if recording the custom_json below fails
+      //or the user dismisses the signing prompt
+      this.$notify({
+        group: 'success',
+        text: this.$t('afit_power_down_canceled'),
+        position: 'top center'
+      })
+      this.userPDAfit = false
+
+      let afitCancPDTransaction = { action: 'Cancel AFIT To S-E Power Down' };
+      //record the transaction on chain
+      let cstm_params = {
+        required_auths: [],
+        required_posting_auths: [this.user.account.name],
+        id: 'actifit',
+        json: JSON.stringify(afitCancPDTransaction)
+      };
+      try {
+        await this.processTrxFunc('custom_json', cstm_params);
+      } catch (err) {
+        console.error('recording the AFIT move cancel custom_json failed:', err);
+      }
     },
     async proceedTipActivity() {
+      //one send at a time: a double click must not send the AFIT twice
+      if (this.tipInProgress) return;
       this.tipError = '';
-      if (!this.user) {
-        this.tipError = this.$t('Need_login_tip');
-        return false;
-      }
-      if (this.$refs['tip-recipient'].value == '') {
-        this.tipError = this.$t('Cannot_tip_self');
-        return false;
-      }
-      if (this.$refs['tip-recipient'].value == this.user.account.name) {
-        this.tipError = this.$t('Cannot_tip_self');
-        return false;
-      }
-      if (this.$refs["funds-pass"].value == '') {
-        this.tipError = this.$t('error_missing_funds_pass') + ' <u><a href="#" class="set-funds-pass-link">' + this.$t('create_funds_pass') + '</a></u>';
-        return;
-      }
-      if (this.$refs["tip-amount"].value == '') {
-        this.tipError = this.$t('amount_positive_int');
-        return;
-      }
-      //check if user has enough funds
-      if (parseFloat(this.$refs["tip-amount"].value) > parseFloat(this.userTokensWallet)) {
-        this.tipError = this.$t('amount_above_balance');
+      const checked = validateAfitTip({
+        sender: this.user && this.user.account.name,
+        recipient: this.$refs['tip-recipient'].value,
+        amount: this.$refs['tip-amount'].value,
+        balance: this.userTokensWallet
+      });
+      if (checked.error) {
+        this.tipError = this.$t(checked.error);
         return;
       }
       this.tipInProgress = true;
-      //proceed with tipping (silently refresh + retry if the keychain token expired)
-      let tipBody = JSON.stringify({ targetUser: this.$refs['tip-recipient'].value, amount: this.$refs["tip-amount"].value, fundsPass: this.$refs["funds-pass"].value });
-      let outcome = await this.withAuthRetry(() => this.postAuthed(process.env.actiAppUrl + 'tipAccount/', tipBody));
-      if (outcome.status == 'Success') {
-        let tipTransaction = { action: 'Tip', amount: outcome.tipAmount, recipient: this.displayUser };
-        //store the transaction to Steem BC
-        let cstm_params = {
+      try {
+        //authorised by the login session, no funds password; silently refresh + retry once
+        //if the keychain token expired. Keeps the HTTP status so a 503 (switched off for
+        //security maintenance) or a plain-text 429 reads as such.
+        const sendTip = () => requestAfitTip({
+          apiUrl: process.env.actiAppUrl,
+          targetUser: checked.recipient,
+          amount: checked.amount,
+          sessionToken: localStorage.getItem('access_token')
+        });
+        let { status, outcome } = await sendTip();
+        if (this.isAuthFailure(outcome) && await this.ensureKeychainToken()) {
+          ({ status, outcome } = await sendTip());
+        }
+        if (outcome.status != 'Success') {
+          this.tipError = sessionActionErrorText(status, outcome, (k) => this.$t(k), (o) => this.$gateMessage(o), 'afit_tips_unavailable');
+          return;
+        }
+        //the AFIT has moved server side: confirm it and clear the form, so the user does not
+        //send again if recording the custom_json below fails
+        this.$refs['tip-amount'].value = '';
+        this.$refs['tip-recipient'].value = '';
+        this.tipInProgress = false;
+        this.$notify({
+          group: 'success',
+          text: this.$t('tip_successfully_sent'),
+          position: 'top center'
+        });
+        //refresh the sender's balance and transactions now: the record below may never settle
+        this.refreshBalance();
+        this.$store.dispatch('fetchUserTokens');
+        this.$store.dispatch('fetchTransactions');
+        //record the tip on chain; the tip itself is done, so a failure here is only logged
+        const tipTransaction = { action: 'Tip', amount: outcome.tipAmount, recipient: checked.recipient };
+        const cstm_params = {
           required_auths: [],
           required_posting_auths: [this.user.account.name],
           id: 'actifit',
           json: JSON.stringify(tipTransaction)
         };
-        let res = await this.$processTrxFunc('custom_json', cstm_params);
-        //console.log(res);
-        if (res.success) {
-          //notify of success
-          this.$notify({
-            group: 'success',
-            text: this.$t('tip_successfully_sent'),
-            position: 'top center'
-          })
-
-          //refresh user balance
-          this.refreshBalance();
-          //update sender token count
-          //ensure we fetch proper logged in user data
-          this.$store.dispatch('fetchUserTokens')
-
-          //update transactions
-          this.$store.dispatch('fetchTransactions')
-          //update recipient token count
-          //this.userTokenCount = outcome.recipientTokenCount;
+        try {
+          await this.$processTrxFunc('custom_json', cstm_params);
+        } catch (err) {
+          console.error('recording the tip custom_json failed:', err);
         }
-
-        this.proceedTip = false;
-      } else if (this.isAuthFailure(outcome)) {
-        this.tipError = this.$t('session_expired_login_again');
-      } else {
-        this.tipError = outcome.error;
+      } catch (err) {
+        console.error('tipAccount failed:', err);
+        this.tipError = this.$t('error_performing_operation');
+      } finally {
+        this.tipInProgress = false;
       }
-      this.tipInProgress = false;
     },
     async proceedMoveToSE() {
+      //one request at a time (double click, or Adjust while a cancel is running)
+      if (this.initiateInProgress) return;
 
       this.afit_se_move_error_proceeding = false;
       this.afit_se_move_err_msg = '';
 
-      let amount_to_powerdown = this.$refs["afit-move-to-se"].value.trim();
-
-      //ensure user provided funds-pass
-      if (this.$refs["move-funds-pass"].value == '') {
+      //a plain number with at most 3 decimals, at least 0.1, within the AFIT balance
+      const amountRaw = this.$refs["afit-move-to-se"].value;
+      const amountErr = afitAmountError(amountRaw, this.userTokensWallet);
+      if (amountErr || parseFloat(amountRaw) < 0.1) {
         this.afit_se_move_error_proceeding = true;
-        this.afit_se_move_err_msg = this.$t('error_missing_funds_pass') + ' <u><a href="#" class="set-funds-pass-link">' + this.$t('create_funds_pass') + '</a></u>';
+        this.afit_se_move_err_msg = this.$t(
+          amountErr === 'amount_above_balance' ? 'max_amount_AFIT_power_SE'
+            : amountErr === 'amount_max_3_decimals' ? amountErr
+              : 'min_amount_AFIT_move_he');
         return;
       }
-      //ensure we have proper values
-      if (isNaN(amount_to_powerdown) || parseFloat(amount_to_powerdown) < 0.1) {
-        this.afit_se_move_error_proceeding = true;
-        this.afit_se_move_err_msg = this.$t('min_amount_AFIT_power');
-        //this.movingFunds = false;
-        return;
-      }
-      amount_to_powerdown = parseFloat(amount_to_powerdown);
-      //console.log(amount_to_powerdown);
-
-      //ensure user is powering down value he has
-      if (amount_to_powerdown > parseFloat(this.userTokensWallet)) {
-        this.afit_se_move_error_proceeding = true;
-        this.afit_se_move_err_msg = this.$t('max_amount_AFIT_power_SE');
-        //this.movingFunds = false;
-        return;
-      }
+      let amount_to_powerdown = parseFloat(amountRaw);
       this.initiateInProgress = true;
 
       try {
@@ -6450,29 +6280,47 @@ export default {
       //otherwise we're good, let's register the move
 
 
-      //register the move (silently refresh + retry if the keychain token expired)
-      let moveBody = JSON.stringify({ amount: amount_to_powerdown, fundsPass: this.$refs["move-funds-pass"].value });
-      let outcome = await this.withAuthRetry(() => this.postAuthed(process.env.actiAppUrl + 'initiateAFITMoveSE/', moveBody));
+      //register the move, authorised by the login session (silently refresh + retry once if
+      //the keychain token expired). Keeps the HTTP status so a 503 (switched off for security
+      //maintenance) or a plain-text 429 reads as such.
+      const sendMove = () => requestAfitMoveToHe({
+        apiUrl: process.env.actiAppUrl,
+        amount: amount_to_powerdown,
+        sessionToken: localStorage.getItem('access_token')
+      });
+      let status = 0;
+      let outcome = {};
+      try {
+        ({ status, outcome } = await sendMove());
+        if (this.isAuthFailure(outcome) && await this.ensureKeychainToken()) {
+          ({ status, outcome } = await sendMove());
+        }
+      } catch (err) {
+        console.error('initiateAFITMoveSE failed:', err);
+      }
+      this.initiateInProgress = false;
       if (outcome.status == 'Success') {
+        //the move is registered server side: show it now (Adjust / Cancel), even if
+        //recording the custom_json below fails, so the user does not register it twice
+        this.$notify({
+          group: 'success',
+          text: this.$t('power_down_successfully_initiated'),
+          position: 'top center'
+        })
+        this.setUserPDAfitStatus(outcome.trx);
+
         let afitPDTransaction = { action: 'AFIT To S-E Power Down', amount: amount_to_powerdown };
-        //store the transaction to Steem BC
+        //record the transaction on chain
         let cstm_params = {
           required_auths: [],
           required_posting_auths: [this.user.account.name],
           id: 'actifit',
           json: JSON.stringify(afitPDTransaction)
         };
-        let res = await this.processTrxFunc('custom_json', cstm_params);
-
-        if (res.success) {
-          //notify of success
-          this.$notify({
-            group: 'success',
-            text: this.$t('power_down_successfully_initiated'),
-            position: 'top center'
-          })
-
-          this.setUserPDAfitStatus(outcome.trx);
+        try {
+          await this.processTrxFunc('custom_json', cstm_params);
+        } catch (err) {
+          console.error('recording the AFIT move custom_json failed:', err);
         }
         //check if user is powering down AFIT to SE
         /*fetch(process.env.actiAppUrl+'isPoweringDown/'+this.user.account.name).then(
@@ -6481,10 +6329,8 @@ export default {
 
       } else {
         this.afit_se_move_error_proceeding = true;
-        this.afit_se_move_err_msg = this.isAuthFailure(outcome) ? this.$t('session_expired_login_again') : outcome.error;
+        this.afit_se_move_err_msg = sessionActionErrorText(status, outcome, (k) => this.$t(k), (o) => this.$gateMessage(o), 'afit_move_he_unavailable');
       }
-      this.initiateInProgress = false;
-
     },
     async proceedMoveSEPower() {
       //handles checking for proper confirmation of account via STEEM transfer
@@ -6824,7 +6670,7 @@ export default {
             console.log(response);
             //notify of success
             if (response.success && response.result.id){
-              //let's check if user already has a funds pass set
+              //register the AFIT transition for this transfer
             fetch(process.env.actiAppUrl+'proceedAfitTransition/?user='+this.user.account.name+'&txid='+response.result.id+'&amount='+amount_to_move+'&bchain='+(direction==1?'STEEM':'HIVE')).then(
               res => {res.json().then(json =>
                 {
@@ -6899,7 +6745,7 @@ export default {
 
         //proceed with moving tokens over to recipient
 
-        //let's check if user already has a funds pass set
+        //register the AFIT transition for this transfer
         fetch(process.env.actiAppUrl + 'proceedAfitTransition/?user=' + this.user.account.name + '&txid=' + tx.id + '&amount=' + amount_to_move + '&bchain=' + (direction == 1 ? 'STEEM' : 'HIVE')).then(
           res => {
             res.json().then(json => {
@@ -7045,7 +6891,7 @@ export default {
 
         //proceed with moving tokens over to recipient
 
-        //let's check if user already has a funds pass set
+        //register the AFITX transition for this transfer
         fetch(process.env.actiAppUrl + 'proceedAfitxTransition/?user=' + this.user.account.name + '&txid=' + tx.id + '&amount=' + amount_to_move + '&bchain=' + (direction == 1 ? 'STEEM' : 'HIVE')).then(
           res => {
             res.json().then(json => {
@@ -8083,6 +7929,8 @@ export default {
     },
     async proceedTransferBSC() {
       //handles locking and moving tokens over to BSC
+      //the bridge is paused: never broadcast the AFIT lock + HBD fee to the bridge account
+      if (!this.bscBridgeAvailable) return;
       this.afit_se_power_error_proceeding = false;
       this.afit_se_power_err_msg = '';
 
@@ -8487,174 +8335,6 @@ export default {
         this.movingFunds = false;
       }
     },
-    async speedUpVerify() {
-      //show the loader while we wait on the verification request to complete
-      this.checkingFunds = true;
-      let url = new URL(process.env.actiAppUrl + 'confirmPaymentPasswordVerify?from=' + this.user.account.name + '&bchain=' + this.cur_bchain);
-      let res = await fetch(url);
-      let outcome = await res.json();
-      console.log(outcome);
-      if (outcome.statusUpdated == true) {
-        //payment confirmed -> advance to step 3 directly
-        this.userFundsPassVerified = true;
-        this.userHasFundsPass = true;
-        this.clearFundsPassPending();
-      }/*else{
-				  this.$notify({
-					group: 'error',
-					text: this.$t('problem_reset_pass'),
-					position: 'top center'
-				  })
-			  }*/
-      //always refresh authoritative state (covers the already-verified case too)
-      this.fetchUserData();
-      this.checkingFunds = false;
-    },
-    async resetFundsPass() {
-      let confirmPopup = confirm(this.$t('Confirm_password_reset'));
-      if (!confirmPopup) {
-        return;
-      }
-      let url = new URL(process.env.actiAppUrl + 'resetFundsPass/?user=' + this.user.account.name);
-      //silently refresh + retry if the keychain token expired
-      let outcome = await this.withAuthRetry(() => this.getAuthed(url));
-      console.log(outcome);
-      if (outcome.status == 'success') {
-        //explicit reset -> drop the pending marker and return to step 1
-        this.clearFundsPassPending();
-        this.userHasFundsPass = false;
-        this.userFundsPassVerified = false;
-        this.$notify({
-          group: 'success',
-          text: this.$t('pass_reset_successfully'),
-          position: 'top center'
-        })
-        console.log(outcome.error);
-        this.fetchUserData();
-      } else {
-        this.$notify({
-          group: 'error',
-          text: this.isAuthFailure(outcome) ? this.$t('session_expired_login_again') : this.$t('problem_reset_pass'),
-          position: 'top center'
-        })
-      }
-    },
-    async proceedVerifyPass() {
-      //handles checking for proper confirmation of account via STEEM transfer
-      this.checkingFunds = true
-      //function handles the actual processing of the transfer
-      this.pass_error_proceeding = false;
-      this.pass_error_msg = '';
-      //ensure we have proper values
-      if (isNaN(this.$refs["pass-transfer-amount"].value.trim()) || this.$refs["pass-transfer-amount"].value < 1) {
-        this.error_proceeding = true;
-        this.error_msg = this.$t('min_amount_1_HIVE_HBD');
-        this.checkingFunds = false;
-        this.$notify({
-          group: 'error',
-          text: this.$t('min_amount_1_HIVE_HBD'),
-          position: 'top center'
-        })
-        return;
-      }
-
-      if (!localStorage.getItem('std_login')) {
-        //https://steemconnect.com/sign/transfer?from=mcfarhat&to=mcfarhat&amount=20.000%20STEEM&memo=test
-        var link = this.$steemconnect.sign('transfer', {
-          from: this.user.account.name,
-          to: this.target_exchange_account,
-          amount: this.$refs["pass-transfer-amount"].value + ' ' + this.transferTypePass,
-          memo: '',//no memo needed
-          auto_return: true,
-        });
-
-        //launch the SC window
-        window.open(link);
-
-        //also start verification process
-        let url = new URL(process.env.actiAppUrl + 'confirmPaymentPasswordVerify/' + '?bchain=' + this.cur_bchain);
-        //compile all needed data and send it along the request for processing
-        let params = {
-          from: this.user.account.name,
-        }
-        Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
-        try {
-          let res = await fetch(url);
-          let outcome = await res.json();
-          //update user data according to result
-          this.fetchUserData();
-        } catch (err) {
-          console.error(err);
-        }
-        this.checkingFunds = false;
-
-      } else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) {
-        return new Promise((resolve) => {
-          window.hive_keychain.requestTransfer(this.user.account.name, this.target_exchange_account, parseFloat(this.$refs["pass-transfer-amount"].value).toFixed(3), '', this.transferTypePass, (response) => {
-            console.log(response);
-            this.confirmCompletion('transfer-verify', this.$refs["pass-transfer-amount"].value, response)
-          }, true);
-        });
-
-      } else if (this.isHiveauthLogin) {
-        let opname = 'transfer';
-        let params = {
-          "from": this.user.account.name,
-          "to": this.target_exchange_account,
-          "amount": parseFloat(this.$refs["pass-transfer-amount"].value).toFixed(3) + ' ' + this.transferTypePass,
-          "memo": ""
-        };
-        let res = await this.processTrxFunc(opname, params, true);
-
-        if (res.success) {
-          this.confirmCompletion('transfer-verify', this.$refs["pass-transfer-amount"].value, res)
-        }
-
-      } else {
-
-        if (this.$refs["p-ac-key-funds-ver"].value == '') {
-          this.error_proceeding = true;
-          this.error_msg = this.$t('all_fields_required');
-          this.checkingFunds = false;
-          this.$notify({
-            group: 'error',
-            text: this.$t('all_fields_required'),
-            position: 'top center'
-          })
-          return;
-        }
-
-
-        let confirmPopup = confirm(this.$t('Confirm_verf_transfer').replace('_AMOUNT_', this.$refs["pass-transfer-amount"].value).replace('_CURR_', this.transferTypePass));
-        if (!confirmPopup) {
-          this.checkingFunds = false;
-          return;
-        }
-
-        let chainLnk = this.setProperNode();
-        console.log('perform transfer');
-        //console.log(this.$refs["p-ac-key-funds-ver"].value);
-        //transferToVesting(wif, from, to, amount)
-        let res = await chainLnk.broadcast.transferAsync(this.$refs["p-ac-key-funds-ver"].value, this.user.account.name, this.target_exchange_account, parseFloat(this.$refs["pass-transfer-amount"].value).toFixed(3) + ' ' + this.transferTypePass, '').then(
-          res => this.confirmCompletion('transfer-verify', this.$refs["pass-transfer-amount"].value, res)
-        ).catch(err => {
-          console.log(err);
-          this.$notify({
-            group: 'error',
-            text: this.$t('error_operation_active_key'),
-            position: 'top center'
-          })
-          this.error_proceeding = true;
-          this.error_msg = this.$t('error_operation_active_key');
-          this.checkingFunds = false;
-        });
-
-        /*steem.broadcast.claimRewardBalanceAsync(this.user.account.name,this.claimSTEEM, this.claimSBD, this.claimSP).then(
-          res => ).catch(err=>console.log(err));*/
-      }
-
-
-    },
     async proceedBuyAFIT() {
       //function handles the actual processing of the buy event
       this.checkingBought = true;
@@ -8714,14 +8394,7 @@ export default {
       this.error_swap = '';
       this.swapResult = '';
       this.buyMore = false;
-      //ensure we have proper values
-      if (this.$refs["funds-pass-entry"].value == '') {
-        this.error_proceeding = true;
-        this.error_swap = this.$t('provide_funds_pass');
-        this.performingSwap = false;
-        return;
-      }
-      if (this.userTokensWallet < this.min_tokens_required) {
+      if (!(this.userTokensWallet >= this.min_tokens_required)) {
         this.error_swap = this.$t('need_at_least') + this.numberFormat(this.min_tokens_required, 2) + this.$t('afit_tokens_to_exchange');
         this.performingSwap = false;
         this.buyMore = true;
@@ -8730,16 +8403,17 @@ export default {
 
       //proceed with storing the swap and decreasing user AFIT tokens count
       try {
-        let res = await fetch(process.env.actiAppUrl + 'performAfitSteemExchange', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user: this.user.account.name, pass: this.$refs['funds-pass-entry'].value, tokens: this.afit_val_exchange })
+        // Authorised by the login session, not a funds password (utils/afitExchange.js).
+        const { status, outcome } = await requestAfitExchange({
+          apiUrl: process.env.actiAppUrl,
+          user: this.user.account.name,
+          tokens: this.afit_val_exchange,
+          sessionToken: localStorage.getItem('access_token')
         });
-        let outcome = await res.json();
         if (outcome.status == 'Success') {
           //map exchange amount to exchange category
           let exchange_cat = 1;
-          switch (this.afit_val_exchange) {
+          switch (String(this.afit_val_exchange)) {
             case '50': exchange_cat = 1; break;
             case '100': exchange_cat = 2; break;
             case '150': exchange_cat = 3; break;
@@ -8767,10 +8441,11 @@ export default {
           //update user data
           this.fetchUserData();
         } else {
-          this.error_swap = outcome.error;
+          this.error_swap = exchangeErrorText(status, outcome, (k) => this.$t(k), (o) => this.$gateMessage(o));
         }
       } catch (err) {
         console.error(err);
+        this.error_swap = this.$t('error_performing_operation');
       }
       this.performingSwap = false;
     },
@@ -8780,22 +8455,27 @@ export default {
     setSteemPrice(_steemPrice) {
       const p = parseFloat(_steemPrice);
       if (!isNaN(p)) this.steemPrice = p;
+      this.markPrice('steem', !isNaN(p));
     },
     setSBDPrice(_sbdPrice) {
       const p = parseFloat(_sbdPrice);
       if (!isNaN(p)) this.sbdPrice = p;
+      this.markPrice('sbd', !isNaN(p));
     },
     setHivePrice(_hivePrice) {
       const p = parseFloat(_hivePrice);
       if (!isNaN(p)) this.hivePrice = p;
+      this.markPrice('hive', !isNaN(p));
     },
     setHBDPrice(_hbdPrice) {
       const p = parseFloat(_hbdPrice);
       if (!isNaN(p)) this.hbdPrice = p;
+      this.markPrice('hbd', !isNaN(p));
     },
     setBlurtPrice(_blurtPrice) {
       const p = parseFloat(_blurtPrice);
       if (!isNaN(p)) this.blurtPrice = p;
+      this.markPrice('blurt', !isNaN(p));
     },
     async loadGlobalProperties() {
       try {
@@ -8843,7 +8523,6 @@ export default {
           this.cur_bchain = localStorage.getItem('cur_bchain');
         }
         this.transferType = this.cur_bchain;
-        this.transferTypePass = this.cur_bchain;
 
         steem.api.setOptions({ url: process.env.steemApiNode });
         if (process.env.hiveTestNetOn) {
@@ -8856,11 +8535,8 @@ export default {
 
         const chainLnk = this.setProperNode();
         this.$store.dispatch('steemconnect/login');
-        //restore the step-2 wizard state before the first fetch so a page reload
-        //while awaiting verification doesn't flash/reset back to step 1
-        if (this.isFundsPassPending()) {
-          this.userHasFundsPass = true;
-        }
+        // before fetchUserData, which can throw: the total must not wait on it
+        this.fetchPrices();
         await this.fetchUserData(); // This can now be called safely.
 
         try {
@@ -8871,36 +8547,6 @@ export default {
           console.error('Error getting properties:', err);
         }
 
-        const fetchPrice = async (url, setter) => {
-          try {
-            const response = await this.retryOperation(async () => {
-              const res = await fetch(url);
-              return res.json();
-            });
-            setter(response);
-          } catch (err) {
-            console.error('Error fetching price:', err);
-          }
-        };
-
-        //await Promise.all([
-          fetchPrice(`${process.env.actiAppUrl}curAFITPrice`,
-            json => this.setAFITPrice(json.unit_price_usd));
-          fetchPrice(`${process.env.actiAppUrl}AFITBSCPrice`,
-            json => this.setAFITBSCPrice(json.price));
-          fetchPrice(`${process.env.actiAppUrl}AFITXBSCPrice`,
-            json => this.setAFITXBSCPrice(json.price));
-          fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=steem&vs_currencies=usd',
-            json => this.setSteemPrice(json.steem.usd));
-          fetchPrice(`${process.env.actiAppUrl}hivePrice`,
-            json => this.setHivePrice(json.hive.usd));
-          fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=blurt&vs_currencies=usd',
-            json => this.setBlurtPrice(json.blurt.usd));
-          fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=steem-dollars&vs_currencies=usd',
-            json => this.setSBDPrice(json['steem-dollars'].usd));
-          fetchPrice('https://api.coingecko.com/api/v3/simple/price?ids=hive_dollar&vs_currencies=usd',
-            json => this.setHBDPrice(json['hive_dollar'].usd));
-        //]);
 
         this.screenWidth = screen.width;
 
@@ -8918,6 +8564,8 @@ export default {
         if (this.$route.query.action === 'buy_afit') {
           this.afitActivityMode = this.BUY_AFIT_STEEM;
         } else if (this.$route.query.action === 'set_funds_pass') {
+          //funds passwords are retired; old links land on the AFIT exchange, which now
+          //uses the login session instead
           this.afitActivityMode = this.EXCHANGE_AFIT_STEEM;
         } else if (this.$route.query.action === 'delegate') {
           this.afitActivityMode = 0;
@@ -8940,11 +8588,17 @@ export default {
         console.error('Error initializing wallet:', err);
         this.walletInitialized = false; // allow a retry (e.g. on next user/chain change)
         this.loading = false;
+        this.failPendingTotalInputs();
       }
     },
   },
   created() {
-    this.runningInterval = setInterval(this.fetchUserData, 60 * 1000);
+    // created() also runs during server rendering, where destroyed() never does: an
+    // interval started there was never cleared and kept the whole rendered app in
+    // memory (~1 MB per wallet render). Refresh only in the browser.
+    if (process.client) {
+      this.runningInterval = setInterval(this.fetchUserData, 60 * 1000);
+    }
 
   },
   destroyed() {

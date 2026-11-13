@@ -1,0 +1,10 @@
+# Normalise line endings so a CRLF rewrite never buries a real change in a
+# whole-file diff. This repo stores sources as LF; several security PRs have
+# produced 700-1200 line diffs for a handful of changed lines without it.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary

@@ -146,7 +146,7 @@
               </div>
               <div class="modal-footer col-md-12 text-brand" v-if="meta.charity">
                 <i class="fas fa-dove"></i><small> {{ $t('Charity_Post') }} </small><i class="fas fa-dove"></i>
-                <small><a :href="meta.charity[0]" target="_blank" rel="noopener noreferrer">@{{ meta.charity[0] }}</a></small>
+                <small><a :href="$hiveProfileUrl(meta.charity[0])" target="_blank" rel="noopener noreferrer">@{{ meta.charity[0] }}</a></small>
               </div>
               <transition name="fade">
                 <div class="report-reply col-md-12" v-if="commentBoxOpen">
@@ -190,6 +190,43 @@
           :user-rank="userRank"
           class="align-to-content"
         />
+      </div>
+    </div>
+
+    <!-- The server render of a post: its title, author and text, so crawlers and link
+         previews read the post instead of a spinner. The full page above replaces it once
+         the browser has loaded the post. Same layout classes, so little moves when it does.
+         Ahead of errorDisplay: if the browser's own load fails (say the Actifit API is
+         down), the reader keeps the post the server already sent instead of an error. -->
+    <div v-else-if="ssrArticle" class="container-fluid px-md-3 pt-5 mt-5 pb-5">
+      <div class="row">
+        <div class="col-md-8 order-md-2">
+          <div class="main-content-scroll-container">
+            <article class="content-wrapper row">
+              <div class="report-head mb-3 col-md-12">
+                <h1>{{ ssrArticle.title }}</h1>
+                <div class="main-user-info pl-4">
+                  <h5 class="text-brand"><a :href="'/@' + ssrArticle.author">@{{ ssrArticle.author }}</a></h5>
+                </div>
+              </div>
+              <div class="post-body col-md-12">
+                <div><div>
+                  <!-- No v-html in the browser: an empty <span> leaves the server's HTML in
+                       place during hydration, where v-html would replace it. -->
+                  <span v-if="ssrBodyHtml" v-html="ssrBodyHtml"></span>
+                  <span v-else></span>
+                </div></div>
+              </div>
+            </article>
+          </div>
+        </div>
+        <!-- The sidebar's column and loading state, so the text sits where the full page
+             puts it instead of jumping across when the page swaps in. -->
+        <!-- permlink too: this instance is reused for the full page, and its recent-posts
+             list leaves out the post being read. Hidden (space kept) if the load failed,
+             since its spinner would never stop. -->
+        <UserSidebar :report="{ author: ssrArticle.author, permlink: $route.params.permlink }"
+          class="align-to-content" :class="{ invisible: !!errorDisplay }" />
       </div>
     </div>
 
@@ -239,6 +276,7 @@ import EditPostModal from '~/components/EditPostModal'
 import DOMPurify from 'dompurify'
 import { declinedPayoutMixin } from '~/plugins/commonCardMixin.js'
 import CardActions from '~/components/CardActions.vue'
+import { renderPostBodyHtml } from '~/utils/ssrPostBody'
 
 const scot_steemengine_api = process.env.steemEngineScot;
 const scot_hive_api_param = process.env.hiveEngineScotParam;
@@ -265,12 +303,12 @@ export default {
     return {
       title: `${this.pageTitle}`,
       meta: [
-        { hid: 'title', name: 'og:title', 'property': 'og:title', content: title },
+        { hid: 'ogtitle', property: 'og:title', content: title },
         { hid: 'description', name: 'description', content: `${this.desc} by ${this.username} on Actifit — a move-to-earn fitness activity report rewarded with AFIT tokens.` },
-        { hid: 'ogdescription', name: 'og:description', 'property': 'og:description', content: description },
-        { hid: 'image', name: 'og:image', 'property': 'og:image', content: image },
-        { hid: 'url', name: 'og:url', 'property': 'og:url', content: url },
-        { hid: 'ogtype', name: 'og:type', 'property': 'og:type', content: 'article' },
+        { hid: 'ogdescription', property: 'og:description', content: description },
+        { hid: 'ogimage', property: 'og:image', content: image },
+        { hid: 'url', property: 'og:url', content: url },
+        { hid: 'ogtype', property: 'og:type', content: 'article' },
         // Twitter falls back to og:* but an explicit large-image card makes the post
         // image render prominently instead of a small thumbnail.
         { hid: 'twitter:card', name: 'twitter:card', content: 'summary_large_image' },
@@ -283,31 +321,61 @@ export default {
       ]
     }
   },
-  async asyncData({ params, app }) {
+  async asyncData({ params, app, error, ssrContext }) {
     //let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE')
     //if (cur_bchain == 'HIVE'){
     //set HIVE as default chain, since we cannot use localstorage in here
-    let chainLnk = hive;
-    await chainLnk.api.setOptions({ url: process.env.hiveApiNode });
-    /*}else{
-      await steem.api.setOptions({ url: process.env.steemApiNode });
-    }	  */
-    //console.log('connect node');
-    let user_name = params.username.replace('@', '');
-    let result = await chainLnk.api.getContentAsync(user_name, params.permlink);
+    // This runs on EVERY render of a post URL, including ones that do not exist.
+    // It only builds SEO meta tags - the post itself is fetched client-side in
+    // mounted() - so a miss here costs nothing functional: the page still renders,
+    // it just carries default meta. That is what makes the guards below safe.
+    //
+    // 2026-09-28 incident: this used to fall through to a BLURT lookup on ANY Hive
+    // miss. Actifit is a Hive app, so in practice that fired almost exclusively on
+    // URLs for posts that do not exist - which meant a crawler walking nonexistent
+    // permlinks cost TWO upstream RPC round-trips each instead of one. Under a bot
+    // flood that was enough to get us HTTP 429'd by api.hive.blog AND the Blurt node
+    // simultaneously, and because neither call was inside the try below, every
+    // rejection escaped asyncData unhandled. The SSR heap grew until V8 aborted with
+    // "Reached heap limit - JavaScript heap out of memory", crash-looping the
+    // container and taking actifit.io down repeatedly over several days.
+    //
+    // Both lookups are now individually guarded, and the Blurt fallback is OFF by
+    // default: set BLURT_META_FALLBACK=true to restore it. A missing post now returns
+    // safe default meta immediately instead of querying a second chain.
+    const user_name = params.username.replace('@', '');
+    let result = null;
+    // true only when the node itself says there is no such post
+    let hiveSaysMissing = false;
+    try {
+      await hive.api.setOptions({ url: process.env.hiveApiNode });
+      result = await hive.api.getContentAsync(user_name, params.permlink);
+      // hivemind answers a missing post with error -32602 ("Post a/b does not exist"),
+      // which hive-js hands back as a JSON *string* instead of throwing
+      hiveSaysMissing = typeof result === 'string' || (!!result && result.author === '');
+    } catch (hiveErr) {
+      // An upstream 429/timeout must not reject out of asyncData - that is the
+      // unhandled rejection that filled the heap.
+      console.log('asyncData: hive lookup failed - ' + (hiveErr && hiveErr.message));
+    }
+    if ((!result || !result.author) && process.env.blurtMetaFallback) {
+      try {
+        await blurt.api.setOptions({ url: process.env.blurtApiNode });
+        result = await blurt.api.getContentAsync(user_name, params.permlink);
+      } catch (blurtErr) {
+        console.log('asyncData: blurt lookup failed - ' + (blurtErr && blurtErr.message));
+      }
+    }
     if (!result || !result.author) {
-      //switch to Steem chain
-      /*chainLnk = steem
-      await chainLnk.api.setOptions({ url: process.env.steemApiNode });
-      result = await chainLnk.api.getContentAsync(user_name, params.permlink);
-      is_steem = true;
-
-      if (!result || !result.author){*/
-      //if no result, switch to Blurt
-      chainLnk = blurt;
-      await chainLnk.api.setOptions({ url: process.env.blurtApiNode });
-      result = await chainLnk.api.getContentAsync(user_name, params.permlink);
-      //}
+      // The node answered and there is no such post: a real 404 on the server render,
+      // so crawlers do not index an empty page. A failed lookup is not an answer and
+      // still renders the page; so does any client-side navigation.
+      if (process.server && hiveSaysMissing && !process.env.blurtMetaFallback && typeof error === 'function') {
+        error({ statusCode: 404, message: 'Post not found' });
+        return;
+      }
+      // Unknown or non-existent post: default meta, zero further upstream cost.
+      return { desc: '', postImg: '' };
     }
     //console.log('pre-flight');
     //console.log(result);
@@ -333,13 +401,17 @@ export default {
       //console.log(result);
       //console.log(result.body);
 
+      // The description is 140 characters, so only the start of the body is needed. The
+      // image-link regexes below backtrack on long crafted bodies (64 KB of repeated
+      // steemitimages URLs took ~0.6 s of the server's single thread per request).
+      const descSource = String(result.body || '').slice(0, 4000);
       //remove all tags from text
-      let desc = result.body;
+      let desc = descSource;
       if (process.client) {
-        desc = DOMPurify.sanitize(result.body, { ALLOWED_TAGS: [] });
+        desc = DOMPurify.sanitize(descSource, { ALLOWED_TAGS: [] });
       } else {
         // Fallback for server-side execution where DOMPurify lacks a DOM
-        desc = result.body.replace(/<[^>]*>?/gm, '');
+        desc = descSource.replace(/<[^>]*>?/gm, '');
       }
 
       //remove all links/image links
@@ -366,6 +438,21 @@ export default {
       //prefer the author's on-chain preview description (json_metadata.description); fall back to the body-derived snippet
       const onchainDesc = (post_meta && typeof post_meta.description === 'string') ? post_meta.description.trim() : '';
       meta_spec.desc = onchainDesc || desc;
+
+      // Server render only: the post's text for crawlers (see the ssrArticle block in the
+      // template). The HTML goes on the request's ssrContext, not into the returned data,
+      // so it is not sent a second time in the page's data payload.
+      if (process.server && ssrContext) {
+        try {
+          const html = renderPostBodyHtml(result.body);
+          if (html) {
+            ssrContext.actifitPostHtml = html;
+            meta_spec.ssrArticle = { title: result.title || '', author: result.author };
+          }
+        } catch (renderErr) {
+          console.log('asyncData: post body render failed - ' + (renderErr && renderErr.message));
+        }
+      }
       return meta_spec;
     } catch (preerr) {
       console.log(preerr);
@@ -388,10 +475,18 @@ export default {
       hashtags: process.env.socialSharingHashtags,
       heightSyncObserver: null,
       deleting: false,
+      loadSeq: 0,
+      ssrArticle: null,
     }
   },
   computed: {
     cardData() { return this.report },
+    // The post HTML asyncData left on this request's ssrContext; nothing in the browser.
+    ssrBodyHtml() {
+      if (!process.server) return '';
+      const ctx = this.$ssrContext;
+      return (ctx && ctx.actifitPostHtml) || '';
+    },
     ...mapGetters('steemconnect', ['user', 'stdLogin']),
     ...mapGetters(['commentEntries', 'newlyVotedPosts', 'bchain', 'moderators', 'commentCountToday']),
 
@@ -509,6 +604,7 @@ export default {
     },
     async fetchPageData() {
       this.isLoading = true; this.resetData();
+      this.loadSeq = (this.loadSeq || 0) + 1;
       const author = this.$route.params.username.replace('@', '');
       const permlink = this.$route.params.permlink;
       try {
@@ -521,30 +617,49 @@ export default {
         if (!reportData || !reportData.author) throw new Error('Post not found');
         this.report = reportData;
         this.pageTitle = this.report.title || 'Comment' + ` by @${this.report.author}`;
-        await this.fetchSupplementaryData();
+        // Not awaited: the post shows as soon as it loads, and the sidebar fills in when
+        // these arrive (it has its own loading state). A failure here only leaves the
+        // sidebar empty; it no longer replaces a loaded post with an error.
+        this.fetchSupplementaryData();
         this.fetchReportCommentData();
       } catch (err) {
         this.errorDisplay = "Could not load post. It may not exist or the network is busy.";
         console.error(err);
       } finally {
         this.isLoading = false; this.alignSidebar();
+        // The server's article stands in until the full page shows, which is now. Dropped
+        // only then: dropped earlier, the short spinner showed in between and the page
+        // jumped twice (CLS 1.4). Afterwards a reload (switching chain) shows the spinner,
+        // not a stale title over an empty body. A failed load keeps it.
+        if (this.report) this.ssrArticle = null;
       }
     },
     async fetchSupplementaryData() {
         if (!this.report) return;
         const { author, url, permlink } = this.report;
-        const [accounts, afitData, rankData] = await Promise.all([
-            hive.api.getAccountsAsync([author]),
-            fetch(`${process.env.actiAppUrl}user/${author}`).then(res => res.json()),
-            fetch(`${process.env.actiAppUrl}getRank/${author}`).then(res => res.json()),
-        ]);
-        if (accounts && accounts.length > 0) this.authorAccountInfo = accounts[0];
-        if (afitData) this.authorAfitBalance = afitData.tokens;
-        if (rankData) this.userRank = rankData;
-        fetch(`${process.env.actiAppUrl}getPostReward?user=${author}&url=${url}`).then(res => res.json()).then(json => this.afitReward = json.token_count);
-        fetch(`${process.env.actiAppUrl}getPostFullAFITPayReward?user=${author}&url=${url}`).then(res => res.json()).then(json => this.fullAFITReward = json.token_count);
+        // A reload (chain switch, login in another tab) starts a new load; answers for an
+        // earlier one are dropped so they cannot land on the new page.
+        const seq = this.loadSeq;
+        const set = (fn) => (val) => { if (seq === this.loadSeq) fn(val); };
         const scotApiUrl = this.cur_bchain === 'STEEM' ? `${scot_steemengine_api}@${author}/${permlink}` : `${scot_steemengine_api}@${author}/${permlink}${scot_hive_api_param}`;
-        fetch(scotApiUrl).then(res => res.json()).then(json => { this.tokenRewards = Array.isArray(json) ? json : [] }).catch(e => { console.error("Scot API fetch failed:", e); this.tokenRewards = []; });
+        fetch(scotApiUrl).then(res => res.json()).then(set(json => { this.tokenRewards = Array.isArray(json) ? json : [] })).catch(e => { console.error("Scot API fetch failed:", e); this.tokenRewards = []; });
+        const getJson = (path) => fetch(`${process.env.actiAppUrl}${path}`).then(res => res.json());
+        const logFail = (what) => (err) => console.error(`${what} failed:`, err);
+        // Each fills its part of the page as it arrives. The sidebar shows once the Hive
+        // account is in; a slow or failing Actifit API no longer keeps it spinning.
+        await Promise.all([
+            hive.api.getAccountsAsync([author])
+                .then(set(accounts => { if (accounts && accounts.length > 0) this.authorAccountInfo = accounts[0]; }))
+                .catch(logFail('Author account')),
+            getJson(`user/${author}`).then(set(afitData => { if (afitData) this.authorAfitBalance = afitData.tokens; }))
+                .catch(logFail('AFIT balance')),
+            getJson(`getRank/${author}`).then(set(rankData => { if (rankData) this.userRank = rankData; }))
+                .catch(logFail('User rank')),
+            getJson(`getPostReward?user=${author}&url=${url}`).then(set(json => { this.afitReward = json.token_count; }))
+                .catch(logFail('Post reward')),
+            getJson(`getPostFullAFITPayReward?user=${author}&url=${url}`).then(set(json => { this.fullAFITReward = json.token_count; }))
+                .catch(logFail('Full AFIT reward')),
+        ]);
     },
     fetchReportCommentData() {
       if (!this.report) return;
@@ -777,7 +892,7 @@ export default {
         return new Promise((resolve) => {
           const auth = {
             username: this.user.account.name,
-            token: localStorage.getItem('access_token'),//should be changed in V1 (current V0.8)
+            token: localStorage.getItem('hiveauth_has_token'),//should be changed in V1 (current V0.8)
             expire: localStorage.getItem('expires'),
             key: localStorage.getItem('key')
           }
@@ -806,10 +921,9 @@ export default {
       } else {
         let accToken = localStorage.getItem('access_token')
         let op_json = JSON.stringify([[op_name, cstm_params]])
-        let url = new URL(process.env.actiAppUrl + 'performTrx/?user=' + this.user.account.name + '&operation=' + encodeURIComponent(op_json) + '&bchain=' + this.cur_bchain);
-        let reqHeads = new Headers({ 'Content-Type': 'application/json', 'x-acti-token': 'Bearer ' + accToken, });
-        let res = await fetch(url, { headers: reqHeads });
-        let outcome = await res.json();
+        // Signed IN THE BROWSER with the user's own key - /performTrx is gone.
+        // Same response shape as before, so the handling below is unchanged.
+        let outcome = await this.$broadcastWithKey([[op_name, cstm_params]], { active: false, bchain: this.cur_bchain });
         if (outcome.error) {
           let err_msg = outcome.trx.tx.error;
           if (err_msg.includes('missing') && err_msg.includes('authority')) {

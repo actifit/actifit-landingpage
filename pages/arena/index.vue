@@ -26,7 +26,7 @@
             <div class="arena-card__media">
               <img :src="artUrl(ch)" :alt="ch.title || humanize(ch.type)" loading="lazy" />
               <span class="arena-card__type">{{ humanize(ch.type) }}</span>
-              <span class="arena-card__state" :class="'is-' + ch.state">{{ humanize(ch.state) }}</span>
+              <span class="arena-card__state" :class="'is-' + arenaState(ch)">{{ arenaStateLabel(ch) }}</span>
             </div>
 
             <div class="arena-card__body">
@@ -36,8 +36,10 @@
               <ul class="arena-card__meta">
                 <li><i class="fas fa-sync-alt" aria-hidden="true"></i> {{ cat(ch).recurrence }}</li>
                 <li v-if="duration(ch)"><i class="fas fa-hourglass-half" aria-hidden="true"></i> {{ duration(ch) }}</li>
+                <li v-if="arenaState(ch) === 'upcoming' && starts(ch)"><i class="fas fa-play" aria-hidden="true"></i> {{ $t('Arena_Starts') }} {{ starts(ch) }}</li>
                 <li v-if="ends(ch)"><i class="fas fa-flag-checkered" aria-hidden="true"></i> {{ $t('Arena_Ends') }} {{ ends(ch) }}</li>
               </ul>
+              <p v-if="arenaCountdown(ch)" class="arena-countdown"><i class="far fa-clock" aria-hidden="true"></i> {{ arenaCountdown(ch) }}</p>
 
               <p class="arena-card__prizes"><i class="fas fa-trophy" aria-hidden="true"></i> {{ cat(ch).prizes }}</p>
 
@@ -58,16 +60,18 @@
   import Footer from '~/components/Footer'
   import ListHeadingSection from '~/components/ListHeadingSection'
   import { catalogFor, artUrl, formatDuration, formatDate, humanize } from '~/utils/arenaCatalog'
+  import arenaClock from '~/mixins/arenaClock'
 
   export default {
+    mixins: [arenaClock],
     head () {
       return {
         title: 'The Arena — Fitness Challenges | Actifit.io',
         meta: [
           { hid: 'description', name: 'description', content: 'Discover and join fitness challenges, leagues and seasons on Actifit — earn rewards for staying active.' },
-          { hid: 'ogtitle', name: 'og:title', property: 'og:title', content: 'The Arena — Actifit Fitness Challenges' },
-          { hid: 'ogdescription', name: 'og:description', content: 'Discover and join fitness challenges, leagues and seasons on Actifit.' },
-          { hid: 'ogimage', name: 'og:image', property: 'og:image', content: 'https://actifit.io/img/arena/step-league.webp' }
+          { hid: 'ogtitle', property: 'og:title', content: 'The Arena — Actifit Fitness Challenges' },
+          { hid: 'ogdescription', property: 'og:description', content: 'Discover and join fitness challenges, leagues and seasons on Actifit.' },
+          { hid: 'ogimage', property: 'og:image', content: 'https://actifit.io/img/arena/step-league.webp' }
         ]
       }
     },
@@ -101,6 +105,9 @@
       },
       duration (ch) {
         return formatDuration(ch && ch.window)
+      },
+      starts (ch) {
+        return formatDate(ch && ch.window && ch.window.start)
       },
       ends (ch) {
         return formatDate(ch && ch.window && ch.window.end)
@@ -195,6 +202,8 @@
     color: #444;
   }
   .arena-card__state.is-open { color: #1a8f4c; }
+  .arena-card__state.is-upcoming { color: #2f6fd1; }
+  .arena-card__state.is-ending_soon { color: #c25e00; }
   .arena-card__state.is-resolved,
   .arena-card__state.is-closed { color: #8a8a8a; }
 
@@ -232,6 +241,20 @@
     color: #e31337;
     margin-right: 4px;
   }
+
+  .arena-countdown {
+    display: inline-block;
+    align-self: flex-start;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #3a3f4b;
+    background: #f1f3f7;
+    border-radius: 20px;
+    padding: 3px 10px;
+    margin: 0 0 12px;
+    font-variant-numeric: tabular-nums;
+  }
+  .arena-countdown i { margin-right: 4px; color: #e31337; }
 
   .arena-card__prizes {
     font-size: 0.85rem;

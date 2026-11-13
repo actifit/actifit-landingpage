@@ -4,6 +4,10 @@ import ListHeadingSection from '~/components/ListHeadingSection.vue'
 describe('ListHeadingSection', () => {
   it('renders the page title as the only h1', () => {
     const wrapper = shallowMount(ListHeadingSection, {
+      // The template calls $sanitize (see the component comment: textualDisplay
+      // carries route input). Identity stub - these tests are about layout, and
+      // sanitiser behaviour is pinned in heading-xss.spec.js.
+      mocks: { $sanitize: (s) => s },
       propsData: {
         textualDisplay: 'Activity Reports'
       }
@@ -16,6 +20,10 @@ describe('ListHeadingSection', () => {
 
   it('renders a fixed-size avatar without Bootstrap column classes', async () => {
     const wrapper = shallowMount(ListHeadingSection, {
+      // The template calls $sanitize (see the component comment: textualDisplay
+      // carries route input). Identity stub - these tests are about layout, and
+      // sanitiser behaviour is pinned in heading-xss.spec.js.
+      mocks: { $sanitize: (s) => s },
       propsData: {
         username: 'pjansen',
         textualDisplay: 'Activity Reports by pjansen'
