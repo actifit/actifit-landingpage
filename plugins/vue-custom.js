@@ -722,6 +722,15 @@ function sanitizePostHtml (html_content) {
             // Domains, not hostnames: the client check above also accepts subdomains, and
             // almost every embed is www.youtube.com, which allowedIframeHostnames rejected.
             allowedIframeDomains: TRUSTED_IFRAME_HOSTS,
+            // The client only keeps an iframe src that new URL() parses on its own, so a
+            // protocol-relative "//www.youtube.com/..." is dropped there. sanitize-html
+            // would keep it, and the player would vanish at hydration. Drop it here too.
+            transformTags: {
+                iframe: (tagName, attribs) => {
+                    try { new URL(attribs.src); } catch { delete attribs.src; }
+                    return { tagName, attribs };
+                },
+            },
             allowedStyles: {
                 '*': {
                     // Match the dangerousProps logic from DOMPurify hook
