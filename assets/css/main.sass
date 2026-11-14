@@ -100,6 +100,44 @@ a,
     width: 100%
     height: 100%
 
+// Spinner shown until the player's iframe loads (plugins/embed-loaded.js adds .is-loaded).
+// It sits behind the iframe, so a player that paints before the class arrives covers it.
+.audio-container
+  position: relative
+  iframe
+    position: relative
+    display: block
+
+.video-container,
+.audio-container
+  iframe
+    z-index: 1
+  // Only where a player iframe sits directly inside: authors can write these classes
+  // around their own text, and only a direct-child iframe's load clears the spinner.
+  &:has(> iframe)::before
+    content: ''
+    position: absolute
+    top: 50%
+    left: 50%
+    width: 2rem
+    height: 2rem
+    margin: -1rem 0 0 -1rem
+    border: 3px solid rgba(128, 128, 128, .3)
+    border-top-color: $brand-color
+    border-radius: 50%
+    animation: embed-spin .8s linear infinite
+  &.is-loaded::before
+    display: none
+
+@media (prefers-reduced-motion: reduce)
+  .video-container::before,
+  .audio-container::before
+    animation: none
+
+@keyframes embed-spin
+  to
+    transform: rotate(360deg)
+
 .modal-content
   border-radius: 0
   border: none
