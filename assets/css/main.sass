@@ -112,7 +112,9 @@ a,
 .audio-container
   iframe
     z-index: 1
-  &::before
+  // Only where a player iframe sits directly inside: authors can write these classes
+  // around their own text, and only a direct-child iframe's load clears the spinner.
+  &:has(> iframe)::before
     content: ''
     position: absolute
     top: 50%
@@ -130,7 +132,7 @@ a,
 @media (prefers-reduced-motion: reduce)
   .video-container::before,
   .audio-container::before
-    animation-duration: 2.4s
+    animation: none
 
 @keyframes embed-spin
   to
