@@ -483,6 +483,71 @@ describe('plugins/vue-custom global helpers', () => {
       expect(html).not.toMatch(/<a[^>]*play\.3speak\.tv\/embed/)
     })
 
+    // Real 3Speak audio posts (e.g. @epodcaster) put the bare link on its own line.
+    const audioSrc = (html) => {
+      const root = document.createElement('div')
+      root.innerHTML = html
+      return Array.from(root.querySelectorAll('iframe')).map(f => f.getAttribute('src'))
+    }
+
+    it.each([
+      ['a', 'apf9gpw1', 'https://audio.3speak.tv/play?a=apf9gpw1&mode=compact&iframe=1', '120'],
+      ['list', 'pl-123', 'https://audio.3speak.tv/play?list=pl-123&iframe=1', '480'],
+      ['podcast', 'feed_9', 'https://audio.3speak.tv/play?podcast=feed_9&iframe=1', '480'],
+    ])('renders a bare audio.3speak.tv ?%s= link as the audio player', (kind, id, expected, height) => {
+      const html = clean(`Intro\n\nhttps://audio.3speak.tv/play?${kind}=${id}\n\nMore text`)
+      expect(audioSrc(html)).toEqual([expected])
+      expect(html).toContain(`height="${height}"`)
+      expect(html).toContain('Intro')
+      expect(html).toContain('More text')
+    })
+
+    it('keeps punctuation and text right after the audio link', () => {
+      const html = clean('Listen: https://audio.3speak.tv/play?a=abc&mode=full, then comment.')
+      expect(audioSrc(html)).toEqual(['https://audio.3speak.tv/play?a=abc&mode=compact&iframe=1'])
+      expect(html).toContain(', then comment.')
+    })
+
+    it('leaves an author-pasted audio iframe as it is (no second player)', () => {
+      const html = clean('<iframe src="https://audio.3speak.tv/play?a=abc&mode=full" width="100%" height="180"></iframe>')
+      expect(audioSrc(html)).toEqual(['https://audio.3speak.tv/play?a=abc&mode=full'])
+    })
+
+    it('renders the audio player on the server too', () => {
+      process.client = false
+      try {
+        const html = clean('https://audio.3speak.tv/play?a=abc')
+        expect(audioSrc(html)).toEqual(['https://audio.3speak.tv/play?a=abc&mode=compact&iframe=1'])
+      } finally { process.client = true }
+    })
+
+    it('restores 10+ media placeholders without mixing up HTML_PLACEHOLDER_1 and _10', () => {
+      const imgs = Array.from({ length: 11 }, (_, i) => `https://example.com/p${i}.png`).join('\n\n')
+      const html = clean(`hi @alice\n\n${imgs}`)
+      expect(html).not.toContain('HTML_PLACEHOLDER')
+      expect(html).toContain('href="https://actifit.io/@alice"')
+      const root = document.createElement('div')
+      root.innerHTML = html
+      const srcs = Array.from(root.querySelectorAll('img')).map(i => i.getAttribute('src'))
+      expect(srcs).toEqual(Array.from({ length: 11 }, (_, i) => `https://images.hive.blog/0x0/https://example.com/p${i}.png`))
+    })
+
+    it('carries only the audio id into the player, never the rest of the link', () => {
+      const html = clean('https://audio.3speak.tv/play?a=abc"onload="alert(1)&mode=full')
+      expect(eventHandlerAttrs(html)).toEqual([])
+      expect(audioSrc(html)).toEqual(['https://audio.3speak.tv/play?a=abc&mode=compact&iframe=1'])
+    })
+
+    it('leaves an audio link inside a markdown link as a link', () => {
+      const html = clean('[listen](https://audio.3speak.tv/play?a=abc)')
+      expect(audioSrc(html)).toEqual([])
+      expect(html).toContain('href="https://audio.3speak.tv/play?a=abc"')
+    })
+
+    it('drops the audio player when media is off', () => {
+      expect(Vue.prototype.$cleanBody('https://audio.3speak.tv/play?a=abc', false, true)).not.toContain('<iframe')
+    })
+
     it('still renders @mentions as actifit links', () => {
       const html = clean('hello @cr0w how are you')
       expect(html).toContain('href="https://actifit.io/@cr0w"')
