@@ -176,6 +176,7 @@ module.exports = {
   typed_key_hive_only: 'Це працює лише в Hive. Перейдіть на Hive і спробуйте ще раз.',
   post_not_on_chain: 'Цього допису немає в _CHAIN_. Можливо, він у Hive.',
   switch_to_hive: 'Перейти на Hive',
+  wallet_no_account_on_chain: 'У @_USER_ немає облікового запису в _CHAIN_.',
   blurt_key_rejected: 'Blurt не прийняв ваш ключ. Спробуйте ще раз і введіть поточний ключ Blurt.',
   keychain_not_detected: 'Hive Keychain не виявлено. Увімкніть розширення Keychain і перезавантажте сторінку або увійдіть знову іншим способом.',
   key_prompt_check_failed: 'Наразі не вдалося звірити цей ключ із вашим акаунтом. Спробуйте ще раз за хвилину.',

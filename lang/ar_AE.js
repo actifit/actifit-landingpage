@@ -171,6 +171,7 @@ module.exports = {
   typed_key_hive_only: 'هذا يعمل على Hive فقط. انتقل إلى Hive وحاول مرة أخرى.',
   post_not_on_chain: 'هذا المنشور غير موجود على _CHAIN_. قد يكون على Hive.',
   switch_to_hive: 'التبديل إلى Hive',
+  wallet_no_account_on_chain: 'لا يملك @_USER_ حسابًا على _CHAIN_.',
   blurt_key_rejected: 'لم تقبل Blurt مفتاحك. حاول مرة أخرى وأدخل مفتاح Blurt الحالي.',
   keychain_not_detected: 'لم يتم العثور على Hive Keychain. فعّل إضافة Keychain وأعد تحميل الصفحة، أو سجّل الدخول مجددًا بطريقة أخرى.',
   key_prompt_check_failed: 'تعذّر علينا التحقق من هذا المفتاح مقابل حسابك الآن. يُرجى المحاولة مرة أخرى بعد قليل.',

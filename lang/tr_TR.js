@@ -176,6 +176,7 @@ module.exports = {
   typed_key_hive_only: 'Bu yalnızca Hive’da çalışır. Hive’a geçip tekrar deneyin.',
   post_not_on_chain: 'Bu gönderi _CHAIN_ üzerinde değil. Hive üzerinde olabilir.',
   switch_to_hive: 'Hive’a geç',
+  wallet_no_account_on_chain: '@_USER_ adlı kullanıcının _CHAIN_ üzerinde hesabı yok.',
   blurt_key_rejected: 'Blurt anahtarınızı kabul etmedi. Tekrar deneyin ve güncel Blurt anahtarınızı girin.',
   keychain_not_detected: 'Hive Keychain algılanmadı. Keychain eklentisini etkinleştirip sayfayı yenileyin veya başka bir yöntemle yeniden giriş yapın.',
   key_prompt_check_failed: 'Bu anahtarı şu anda hesabınızla doğrulayamadık. Lütfen birazdan tekrar deneyin.',

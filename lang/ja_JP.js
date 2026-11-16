@@ -176,6 +176,7 @@ module.exports = {
   typed_key_hive_only: 'これは Hive でのみ機能します。Hive に切り替えてもう一度お試しください。',
   post_not_on_chain: 'この投稿は _CHAIN_ にはありません。Hive にある可能性があります。',
   switch_to_hive: 'Hive に切り替える',
+  wallet_no_account_on_chain: '@_USER_ は _CHAIN_ にアカウントを持っていません。',
   blurt_key_rejected: 'Blurt がキーを受け付けませんでした。もう一度、現在の Blurt キーを入力してください。',
   keychain_not_detected: 'Hive Keychain が検出されませんでした。Keychain 拡張機能を有効にしてページを再読み込みするか、別の方法で再ログインしてください。',
   key_prompt_check_failed: '現在、このキーをアカウントと照合できませんでした。しばらくしてからもう一度お試しください。',

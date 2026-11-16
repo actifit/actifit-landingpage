@@ -171,6 +171,7 @@ module.exports = {
   typed_key_hive_only: 'Das funktioniert nur auf Hive. Wechseln Sie zu Hive und versuchen Sie es erneut.',
   post_not_on_chain: 'Dieser Beitrag ist nicht auf _CHAIN_. Er ist möglicherweise auf Hive.',
   switch_to_hive: 'Zu Hive wechseln',
+  wallet_no_account_on_chain: '@_USER_ hat kein Konto auf _CHAIN_.',
   blurt_key_rejected: 'Blurt hat Ihren Schlüssel nicht akzeptiert. Versuchen Sie es erneut und geben Sie Ihren aktuellen Blurt-Schlüssel ein.',
   keychain_not_detected: 'Hive Keychain wurde nicht erkannt. Aktivieren Sie die Keychain-Erweiterung und laden Sie die Seite neu, oder melden Sie sich mit einer anderen Methode an.',
   key_prompt_check_failed: 'Wir konnten diesen Schlüssel gerade nicht mit Ihrem Konto abgleichen. Bitte versuchen Sie es gleich noch einmal.',
