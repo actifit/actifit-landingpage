@@ -70,6 +70,11 @@ describe('renderPostBodyHtml', () => {
     expect(out).toBe('<p>Overview</p><p>Text - here</p><p>Next</p><p>a b</p>')
   })
 
+  it('drops table separator rows and keeps lines that only start with dashes', () => {
+    expect(renderPostBodyHtml('| a | b |\n|---|:---:|\n| 1 | 2 |')).toBe('<p>a b</p><p>1 2</p>')
+    expect(renderPostBodyHtml('--- note')).toBe('<p>--- note</p>')
+  })
+
   it('caps the text', () => {
     expect(renderPostBodyHtml('word '.repeat(20000)).length).toBeLessThan(21000)
   })
@@ -234,6 +239,25 @@ describe('after the browser loads the post', () => {
       await PostPage.methods.fetchPageData.call(vm)
       expect(vm.notOnChain).toBeFalsy()
       expect(vm.errorDisplay).toMatch(/Could not load post/)
+    })
+
+    it('a late Blurt failure does not land on the Hive load that replaced it', async () => {
+      jest.spyOn(blurt.api, 'setOptions').mockImplementation(() => {})
+      let fail
+      jest.spyOn(blurt.api, 'getContentAsync').mockImplementation(() => new Promise((resolve, reject) => { fail = reject }))
+      jest.spyOn(console, 'error').mockImplementation(() => {})
+      const vm = vmFor()
+      vm.alignSidebar = jest.fn()
+      const first = PostPage.methods.fetchPageData.call(vm)
+      await new Promise((r) => setTimeout(r, 0))
+      vm.loadSeq += 1 // "Switch to Hive" started a new load, still in flight
+      vm.isLoading = true
+      fail(new Error('Post not found'))
+      await first
+      expect(vm.notOnChain).toBeFalsy()
+      expect(vm.errorDisplay).toBeFalsy()
+      expect(vm.isLoading).toBe(true)
+      expect(vm.alignSidebar).not.toHaveBeenCalled()
     })
 
     it('"Switch to Hive" saves the choice and reloads, even when the store already says HIVE', () => {

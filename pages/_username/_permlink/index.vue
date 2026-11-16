@@ -614,6 +614,9 @@ export default {
     async fetchPageData() {
       this.isLoading = true; this.resetData();
       this.loadSeq = (this.loadSeq || 0) + 1;
+      // A later load (chain switch, route change) supersedes this one: its late answer,
+      // success or failure, must not land on the newer page.
+      const seq = this.loadSeq;
       const author = this.$route.params.username.replace('@', '');
       const permlink = this.$route.params.permlink;
       try {
@@ -623,6 +626,7 @@ export default {
         else if (this.cur_bchain === 'BLURT') { chainLnk = blurt; nodeUrl = process.env.blurtApiNode; }
         await chainLnk.api.setOptions({ url: nodeUrl });
         const reportData = await chainLnk.api.getContentAsync(author, permlink);
+        if (seq !== this.loadSeq) return;
         if (!reportData || !reportData.author) throw new Error('Post not found');
         this.report = reportData;
         this.pageTitle = this.report.title || 'Comment' + ` by @${this.report.author}`;
@@ -632,6 +636,7 @@ export default {
         this.fetchSupplementaryData();
         this.fetchReportCommentData();
       } catch (err) {
+        if (seq !== this.loadSeq) return;
         // Links to posts are mostly Hive posts. With another chain selected the lookup finds
         // nothing, and without this the reader was left on the server's plain-text copy
         // with no idea why.
@@ -643,12 +648,14 @@ export default {
         }
         console.error(err);
       } finally {
-        this.isLoading = false; this.alignSidebar();
-        // The server's article stands in until the full page shows, which is now. Dropped
-        // only then: dropped earlier, the short spinner showed in between and the page
-        // jumped twice (CLS 1.4). Afterwards a reload (switching chain) shows the spinner,
-        // not a stale title over an empty body. A failed load keeps it.
-        if (this.report) this.ssrArticle = null;
+        if (seq === this.loadSeq) {
+          this.isLoading = false; this.alignSidebar();
+          // The server's article stands in until the full page shows, which is now. Dropped
+          // only then: dropped earlier, the short spinner showed in between and the page
+          // jumped twice (CLS 1.4). Afterwards a reload (switching chain) shows the spinner,
+          // not a stale title over an empty body. A failed load keeps it.
+          if (this.report) this.ssrArticle = null;
+        }
       }
     },
     async fetchSupplementaryData() {
