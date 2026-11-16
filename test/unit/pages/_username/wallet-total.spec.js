@@ -108,6 +108,17 @@ describe('a wallet load that fails half-way does not spin forever', () => {
   })
 })
 
+describe('the native coin card on Blurt', () => {
+  it('shows the selected chain power unit, not always HP', () => {
+    expect(src).toContain('<strong>{{ renderSteemPower(2) }} {{ powerUnit }}</strong>')
+    expect(src).toMatch(/powerUnit\(\) \{\s*return this\.cur_bchain === 'STEEM' \? 'SP' : \(this\.cur_bchain === 'BLURT' \? 'BP' : 'HP'\);/)
+  })
+  it('values the coin at its own price (Blurt Power was priced at the HIVE price)', () => {
+    expect(src).toMatch(/hiveValueUSD\(\) \{[\s\S]{0,250}\* this\.nativePrice, 2\);/)
+    expect(src).toMatch(/nativePrice\(\) \{\s*return this\.cur_bchain === 'STEEM' \? this\.steemPrice : \(this\.cur_bchain === 'BLURT' \? this\.blurtPrice : this\.hivePrice\);/)
+  })
+})
+
 describe('a failed metrics refresh', () => {
   const good = [{ symbol: 'PAL', lastPrice: '0.5' }]
   it('keeps the last good prices of the same account', () => {

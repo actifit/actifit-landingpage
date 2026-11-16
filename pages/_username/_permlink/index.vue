@@ -209,6 +209,10 @@
                   <h5 class="text-brand"><a :href="'/@' + ssrArticle.author">@{{ ssrArticle.author }}</a></h5>
                 </div>
               </div>
+              <div v-if="notOnChain" class="col-md-12 alert alert-warning not-on-chain" role="status">
+                <span>{{ errorDisplay }}</span>
+                <button type="button" class="btn btn-brand btn-sm" v-on:click="switchToHive">{{ $t('switch_to_hive') }}</button>
+              </div>
               <div class="post-body col-md-12">
                 <div><div>
                   <!-- No v-html in the browser: an empty <span> leaves the server's HTML in
@@ -232,6 +236,9 @@
 
     <div v-else-if="errorDisplay" class="container pt-5 mt-5 pb-5">
       <div class="mb-3 text-center"><h4>{{ errorDisplay }}</h4></div>
+      <div v-if="notOnChain" class="text-center">
+        <button type="button" class="btn btn-brand" v-on:click="switchToHive">{{ $t('switch_to_hive') }}</button>
+      </div>
     </div>
 
     <div v-else class="container pt-5 mt-5 pb-5">
@@ -477,6 +484,8 @@ export default {
       deleting: false,
       loadSeq: 0,
       ssrArticle: null,
+      // the chain the post was looked up on and not found (a Hive post opened with Blurt selected)
+      notOnChain: '',
     }
   },
   computed: {
@@ -623,7 +632,15 @@ export default {
         this.fetchSupplementaryData();
         this.fetchReportCommentData();
       } catch (err) {
-        this.errorDisplay = "Could not load post. It may not exist or the network is busy.";
+        // Links to posts are mostly Hive posts. With another chain selected the lookup finds
+        // nothing, and without this the reader was left on the server's plain-text copy
+        // with no idea why.
+        if (err && err.message === 'Post not found' && this.cur_bchain !== 'HIVE') {
+          this.notOnChain = this.cur_bchain;
+          this.errorDisplay = this.$t('post_not_on_chain').replace('_CHAIN_', this.cur_bchain === 'BLURT' ? 'Blurt' : 'Steem');
+        } else {
+          this.errorDisplay = "Could not load post. It may not exist or the network is busy.";
+        }
         console.error(err);
       } finally {
         this.isLoading = false; this.alignSidebar();
@@ -675,8 +692,17 @@ export default {
           this.responseBody = '';
         });
     },
+    // Same as picking Hive in the header's chain list; the bchain watcher reloads the post.
+    // The store can already say HIVE while the saved choice says otherwise (the page reads
+    // the saved one), and then the watcher does not fire, so reload directly.
+    switchToHive() {
+      const storeChanges = this.bchain !== 'HIVE';
+      localStorage.setItem('cur_bchain', 'HIVE');
+      this.$store.commit('setBchain', 'HIVE');
+      if (!storeChanges) this.fetchPageData();
+    },
     resetData() {
-      this.isLoading = true; this.report = null; this.errorDisplay = ''; this.authorAccountInfo = null; this.authorAfitBalance = null;
+      this.isLoading = true; this.report = null; this.errorDisplay = ''; this.notOnChain = ''; this.authorAccountInfo = null; this.authorAfitBalance = null;
       this.userRank = null; this.afitReward = 0; this.tokenRewards = []; this.pageTitle = 'Loading...'; this.fullAFITReward = '';
       if (this.user) { this.moderatorSignature = ''; }
       if (this.$store) this.$store.commit('setCommentEntries', null);
@@ -1009,6 +1035,7 @@ export default {
 }
 </script>
 <style scoped>
+.not-on-chain { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
 .text-muted { color: #adb5bd !important; }
 .mid-avatar { width: 30px !important; height: 30px !important; }
 .report-head { border-bottom: 1px solid red; }
