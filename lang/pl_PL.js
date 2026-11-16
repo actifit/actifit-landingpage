@@ -174,6 +174,7 @@ module.exports = {
   key_prompt_not_posting: 'Ten klucz nie jest kluczem posting tego konta.',
   signing_cancelled: 'Podpisywanie anulowane.',
   typed_key_hive_only: 'To działa tylko na Hive. Przełącz się na Hive i spróbuj ponownie.',
+  blurt_key_rejected: 'Blurt nie zaakceptował Twojego klucza. Spróbuj ponownie i wpisz swój aktualny klucz Blurt.',
   keychain_not_detected: 'Nie wykryto Hive Keychain. Włącz rozszerzenie Keychain i odśwież stronę albo zaloguj się ponownie inną metodą.',
   key_prompt_check_failed: 'Nie udało się teraz sprawdzić tego klucza z Twoim kontem. Spróbuj ponownie za chwilę.',
   key_prompt_operation: 'Podpisujesz:',

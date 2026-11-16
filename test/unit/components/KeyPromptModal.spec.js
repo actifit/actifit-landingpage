@@ -57,6 +57,60 @@ describe('KeyPromptModal', () => {
     wrapper.destroy()
   })
 
+  it('checks a Blurt key against the Blurt account and says it is for Blurt', async () => {
+    const wrapper = mountIt()
+    const answer = jest.fn()
+    requestKey('posting', 'alice', [], 'BLURT').then(answer)
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.key-prompt-account').text()).toContain('Blurt')
+    classifyKey.mockResolvedValue('posting')
+    wrapper.setData({ wif: '5Kblurt' })
+    await wrapper.vm.submit()
+    await flush()
+    expect(classifyKey).toHaveBeenCalledWith('alice', '5Kblurt', 'BLURT')
+    expect(answer).toHaveBeenCalledWith('5Kblurt')
+    wrapper.destroy()
+  })
+
+  it.each(['active', 'owner', 'unknown'])('refuses a Blurt posting key that is (or may be) the user\'s Hive %s key (it would be kept)', async (hiveKind) => {
+    const wrapper = mountIt()
+    const answer = jest.fn()
+    requestKey('posting', 'alice', [], 'BLURT').then(answer)
+    await wrapper.vm.$nextTick()
+    classifyKey.mockImplementation((acct, wif, chain) => Promise.resolve(chain === 'HIVE' ? hiveKind : 'posting'))
+    wrapper.setData({ wif: '5Kreused' })
+    await wrapper.vm.submit()
+    await flush()
+    expect(wrapper.vm.error).toBeTruthy()
+    expect(answer).not.toHaveBeenCalled()
+    classifyKey.mockReset()
+    wrapper.destroy()
+  })
+
+  it('accepts a Blurt posting key that is also the Hive posting key, or not a Hive key at all', async () => {
+    for (const hiveKind of ['posting', 'none']) {
+      const wrapper = mountIt()
+      const answer = jest.fn()
+      requestKey('posting', 'alice', [], 'BLURT').then(answer)
+      await wrapper.vm.$nextTick()
+      classifyKey.mockImplementation((acct, wif, chain) => Promise.resolve(chain === 'HIVE' ? hiveKind : 'posting'))
+      wrapper.setData({ wif: '5Kblurt' })
+      await wrapper.vm.submit()
+      await flush()
+      expect([hiveKind, answer.mock.calls]).toEqual([hiveKind, [['5Kblurt']]])
+      wrapper.destroy()
+    }
+    classifyKey.mockReset()
+  })
+
+  it('does not label a Hive prompt as Blurt', async () => {
+    const wrapper = mountIt()
+    requestKey('posting', 'alice', [])
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.key-prompt-account').text()).not.toContain('Blurt')
+    wrapper.destroy()
+  })
+
   it('refuses a posting key at the active prompt and does not resolve', async () => {
     const wrapper = mountIt()
     const answer = jest.fn()

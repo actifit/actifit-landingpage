@@ -174,6 +174,7 @@ module.exports = {
   key_prompt_not_posting: 'このアカウントの posting キーではありません。',
   signing_cancelled: '署名をキャンセルしました。',
   typed_key_hive_only: 'これは Hive でのみ機能します。Hive に切り替えてもう一度お試しください。',
+  blurt_key_rejected: 'Blurt がキーを受け付けませんでした。もう一度、現在の Blurt キーを入力してください。',
   keychain_not_detected: 'Hive Keychain が検出されませんでした。Keychain 拡張機能を有効にしてページを再読み込みするか、別の方法で再ログインしてください。',
   key_prompt_check_failed: '現在、このキーをアカウントと照合できませんでした。しばらくしてからもう一度お試しください。',
   key_prompt_operation: '署名する内容:',

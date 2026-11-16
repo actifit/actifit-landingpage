@@ -35,6 +35,38 @@ function syncPostingKey (store, state, type) {
   } catch (e) { /* storage unavailable: memory-only */ }
 }
 
+// The Blurt posting key, kept under the Hive key's rules. It is checked against the Blurt
+// account when it is entered ($broadcastWithKey), so here it only needs the user it
+// belongs to: saved under the logged-in name, dropped for any other kind of session, and
+// replaced by the stored one when the account changes.
+function syncBlurtPostingKey (store, state, type) {
+  try {
+    const wif = state.blurtPostingKey
+    const account = state.steemconnect && state.steemconnect.user && state.steemconnect.user.account
+    if (type === 'setBlurtPostingKey' && !wif) {
+      // A stale tab (still showing a previous user) only forgets its own copy: what is
+      // stored belongs to the user logged in now.
+      if (!account || account.name === localStorage.getItem('std_login_name')) clearPostingKey('BLURT')
+      return
+    }
+    if (!typedKeySessionActive()) {
+      if (type === 'steemconnect/login' && wif) store.commit('setBlurtPostingKey', null)
+      return
+    }
+    if (type === 'steemconnect/login') {
+      // Another user may have logged in (a stale tab): use only what is stored for them.
+      const stored = loadPostingKey('BLURT')
+      if (stored !== wif) store.commit('setBlurtPostingKey', stored)
+      return
+    }
+    // Only for the user this browser is logged in as: a stale tab still showing a previous
+    // user must not save the current user's key under the old name.
+    if (wif && account && account.name && account.name === localStorage.getItem('std_login_name')) {
+      savePostingKey(account.name, wif, 'BLURT')
+    }
+  } catch (e) { /* storage unavailable: memory-only */ }
+}
+
 const createStore = () => {
   const store = new Vuex.Store({
     state: {
@@ -99,6 +131,7 @@ const createStore = () => {
       // localStorage (utils/postingKeyStore.js) so reloads and new tabs keep it; never
       // sent to the server, never in runtime config. Active keys never come here.
       chatPostingKey: null,
+      blurtPostingKey: null,
       bchain: '',//current active blockchain
       cartEntries: [], //contains current items being bought via market
       purchaseSuccess: false, //references latest purchase transaction using cart
@@ -121,9 +154,13 @@ const createStore = () => {
       store.dispatch('fetchUserRank')
     } else if (mutation.type === 'steemconnect/logout') {
       store.commit('setChatPostingKey', null)
+      store.commit('setBlurtPostingKey', null)
     }
     if (process.client && (mutation.type === 'setChatPostingKey' || mutation.type === 'steemconnect/login')) {
       syncPostingKey(store, state, mutation.type)
+    }
+    if (process.client && (mutation.type === 'setBlurtPostingKey' || mutation.type === 'steemconnect/login')) {
+      syncBlurtPostingKey(store, state, mutation.type)
     }
   })
 
