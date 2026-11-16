@@ -105,7 +105,7 @@ We are not liable for any harm or damages of any sort made in connection with an
 
 <h4>SECTION 9 - AFIT AND OR AFITX TOKENS. PARTICIPATING IN ACTIFIT ICO, IEO, ISO, OR ANY OTHER TOKEN SALE FORM</h4>
 
-Your participation in purchasing AFIT/AFITX tokens via any means, including a token sale, an ICO (Initial Coin Offering), IEO (Initial Exchange Offering), ISO (Initial Steem Offering), our website, to name a few, or any other means of purchasing and/or exchanging them from/to other forms of FIAT and/or crypto is done at your sole responsibility. 
+Your participation in purchasing AFIT/AFITX tokens via any means, including a token sale, an ICO (Initial Coin Offering), IEO (Initial Exchange Offering), our website, to name a few, or any other means of purchasing and/or exchanging them from/to other forms of FIAT and/or crypto is done at your sole responsibility. 
 Actifit does not hold any responsibility for any potential loss of value, funds or investment via purchasing, exchanging, and/or holding AFIT/AFITX tokens under any form.
 Token purchase transactions are non-reversible and non-refundable.
 
@@ -117,7 +117,7 @@ Actifit business model may change or need to be modified due to any regulatory a
 
 Actifit warns its buyers that token purchase represents a very high risk, and such activity should only be conducted after careful consideration do not invest what you cannot afford to lose.
 
-Actifit relies in its operation on third party technologies, including but not limited to Steem blockchain, Ethereum blockchain, and other tools and software. Actifit aims to undertake reasonable security measures to hold its tokens and users safe from any security concern, yet does not present any guarantees under this aspect.
+Actifit relies in its operation on third party technologies, including but not limited to Hive blockchain, Ethereum blockchain, and other tools and software. Actifit aims to undertake reasonable security measures to hold its tokens and users safe from any security concern, yet does not present any guarantees under this aspect.
 
 Lack of funding, token & other crypto valuation could have large impact on the growth, progress, and continuity of Actifit project among other reasons, hence Actifit does not provide any guarantee to the continuity of the project.
 
@@ -161,11 +161,11 @@ We do not warrant that the results that may be obtained from the use of the serv
 
 You agree that from time to time we may remove the service for indefinite periods of time or cancel the service at any time, without notice to you.
 
-You accept and acknowledge that there are risks associated with utilizing an Internet-based Steem blockchain account service including, but not limited to, the risk of failure of hardware, software and Internet connections, the risk of malicious software introduction, and the risk that third-parties may obtain unauthorized access to information stored within or associated with your Account, including, but not limited to your private key(s) ("Private Key"). You accept and acknowledge that we will not be responsible for any communication failures, disruptions, errors, distortions, or delays you may experience when using the Services, however caused.
+You accept and acknowledge that there are risks associated with utilizing an Internet-based Hive blockchain account service including, but not limited to, the risk of failure of hardware, software and Internet connections, the risk of malicious software introduction, and the risk that third-parties may obtain unauthorized access to information stored within or associated with your Account, including, but not limited to your private key(s) ("Private Key"). You accept and acknowledge that we will not be responsible for any communication failures, disruptions, errors, distortions, or delays you may experience when using the Services, however caused.
 
 We make no representation or warranty of any kind, express or implied, statutory, or otherwise, regarding the contents of the Service, information and functions made accessible through the Service, any hyperlinks to third-party websites, nor for any breach of security associated with the transmission of information through the Service or any website linked to by the Service.
 
-We will not be responsible or liable to you for any loss and take no responsibility for and will not be liable to you for any use of our Services, including but not limited to any losses, damages or claims arising from: (a) User error such as forgotten passwords, incorrectly constructed transactions, or mistyped Steem blockchain addresses; (b) Server failure or data loss; (c) Corrupted Account files; (d) Unauthorized access to applications; (e) Any unauthorized third-party activities, including without limitation the use of viruses, phishing, brute forcing or other means of attack against the Service or Services.
+We will not be responsible or liable to you for any loss and take no responsibility for and will not be liable to you for any use of our Services, including but not limited to any losses, damages or claims arising from: (a) User error such as forgotten passwords, incorrectly constructed transactions, or mistyped Hive blockchain addresses; (b) Server failure or data loss; (c) Corrupted Account files; (d) Unauthorized access to applications; (e) Any unauthorized third-party activities, including without limitation the use of viruses, phishing, brute forcing or other means of attack against the Service or Services.
 
 We make no warranty that the Service or the server that makes it available, are free of viruses or errors, that its content is accurate, that it will be uninterrupted, or that defects will be corrected. We will not be responsible or liable to you for any loss of any kind, from action taken, or taken in reliance on material, or information, contained on the Service.
 

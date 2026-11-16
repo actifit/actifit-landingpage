@@ -13,9 +13,6 @@
 			<div class="row col-12">
 				<div class="col-sm-12 col-md-6">
 					<div class="row">
-					<a href="https://steem-engine.com/?p=market&t=AFIT" class="btn btn-brand btn-lg border" target="_blank" rel="noopener noreferrer">{{ $t('buy_afit_se') }}</a>
-					</div>
-					<div class="row">
 					<a href="https://hive-engine.com/?p=market&t=AFIT" class="btn btn-brand btn-lg border" target="_blank" rel="noopener noreferrer">{{ $t('buy_afit_he') }}</a>
 					</div>
 					<div class="row">

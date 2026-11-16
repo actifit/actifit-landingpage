@@ -763,7 +763,7 @@ module.exports = {
   Afit_Move_SE_Desc: 'تتيح لك هذه العملية نقل عملات AFIT الخاصة بك من محفظة أكتيفيت إلى Hive-Engine AFIT. العملية يومية وتستمر لمدة أسبوع واحد (7 أيام)، وبعدها سيتم إلغاؤها تلقائيًا. يعتمد الحد الأقصى للمبلغ الذي يمكن نقله يوميًا على عدد عملات AFITX التي تملكها. ',
   no_proper_afitx_funds: 'ليس لديك الحد الأدنى المطلوب وهو 1 AFITX لإجراء النقل.',
   cannot_move_amount_afitx_needed: 'ليس لديك ما يكفي من AFITX لنقل AFIT_AMNT AFIT يوميًا. لكل 100 AFIT إضافية تريد نقلها يوميًا، تحتاج إلى امتلاك 1 AFITX إضافي.',
-  power_down_successfully_initiated: 'تم بدء السحب التدريجي والنقل إلى S-E. يتم السحب التدريجي التالي في الساعة 10:00 صباحًا بتوقيت جرينتش ',
+  power_down_successfully_initiated: 'تم بدء السحب التدريجي والنقل إلى H-E. يتم السحب التدريجي التالي في الساعة 10:00 صباحًا بتوقيت جرينتش ',
   afit_power_down_canceled: 'تم إلغاء السحب التدريجي لـ AFIT بنجاح ',
   next_afit_powerdown: 'النقل التالي لـ AFIT_AMOUNT في',
   Cancel_Transfer: 'إلغاء النقل',

@@ -768,7 +768,7 @@ module.exports = {
   Afit_Move_SE_Desc: 'Bu işlem, AFIT tokenlerinizi Actifit cüzdanından Hive-Engine AFIT\'e taşımanızı sağlar. İşlem günlüktür ve bir hafta (7 gün) sürer, ardından otomatik olarak iptal edilir. Günlük taşınabilecek maksimum miktar, sahip olduğunuz AFITX token sayısına bağlıdır. ',
   no_proper_afitx_funds: 'Taşıma işlemini gerçekleştirmek için gerekli minimum 1 AFITX miktarına sahip değilsiniz.',
   cannot_move_amount_afitx_needed: 'Günlük AFIT_AMNT AFIT taşımak için yeterli AFITX\'iniz yok. Günlük taşımak istediğiniz her ek 100 AFIT için 1 ek AFITX\'e sahip olmanız gerekir.',
-  power_down_successfully_initiated: 'Güç Azaltma ve S-E\'ye Transfer Başlatıldı. Bir Sonraki Güç Azaltma 10:00 AM UTC\'de Gerçekleşecek ',
+  power_down_successfully_initiated: 'Güç Azaltma ve H-E\'ye Transfer Başlatıldı. Bir Sonraki Güç Azaltma 10:00 AM UTC\'de Gerçekleşecek ',
   afit_power_down_canceled: 'AFIT güç azaltma başarıyla iptal edildi ',
   next_afit_powerdown: 'Bir Sonraki AFIT_AMOUNT Transferi',
   Cancel_Transfer: 'Transferi İptal Et',
