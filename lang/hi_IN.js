@@ -173,7 +173,7 @@ module.exports = {
   key_prompt_not_active: 'यह इस खाते की active कुंजी नहीं है।',
   key_prompt_not_posting: 'यह इस खाते की posting कुंजी नहीं है।',
   signing_cancelled: 'हस्ताक्षर रद्द किया गया।',
-  typed_key_hive_only: 'टाइप की गई कुंजी से हस्ताक्षर केवल Hive पर काम करता है। Steem या Blurt के लिए Keychain से लॉग इन करें।',
+  typed_key_hive_only: 'यह केवल Hive पर काम करता है। Hive पर स्विच करें और फिर से प्रयास करें।',
   keychain_not_detected: 'Hive Keychain नहीं मिला। Keychain एक्सटेंशन चालू करें और पेज फिर से लोड करें, या किसी अन्य तरीके से फिर से लॉग इन करें।',
   key_prompt_check_failed: 'हम अभी इस कुंजी को आपके खाते से जाँच नहीं सके। कृपया थोड़ी देर में फिर से प्रयास करें।',
   key_prompt_operation: 'आप हस्ताक्षर कर रहे हैं:',

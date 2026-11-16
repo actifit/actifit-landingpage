@@ -173,7 +173,7 @@ module.exports = {
   key_prompt_not_active: 'Essa chave não é uma chave active desta conta.',
   key_prompt_not_posting: 'Essa chave não é uma chave posting desta conta.',
   signing_cancelled: 'Assinatura cancelada.',
-  typed_key_hive_only: 'Assinar com uma chave digitada só funciona no Hive. Para Steem ou Blurt, inicie sessão com o Keychain.',
+  typed_key_hive_only: 'Isto só funciona no Hive. Mude para o Hive e tente novamente.',
   keychain_not_detected: 'O Hive Keychain não foi detetado. Ative a extensão Keychain e recarregue a página, ou inicie sessão novamente com outro método.',
   key_prompt_check_failed: 'Não foi possível verificar esta chave com a sua conta neste momento. Tente novamente daqui a pouco.',
   key_prompt_operation: 'Está a assinar:',
