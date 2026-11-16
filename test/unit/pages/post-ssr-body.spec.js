@@ -8,6 +8,7 @@ import fs from 'fs'
 import path from 'path'
 import { compile } from 'vue-template-compiler'
 import hive from '@hiveio/hive-js'
+import blurt from '@blurtfoundation/blurtjs'
 import PostPage from '~/pages/_username/_permlink/index.vue'
 import * as ssrPostBody from '~/utils/ssrPostBody'
 
@@ -61,6 +62,17 @@ describe('renderPostBodyHtml', () => {
     expect(renderPostBodyHtml('')).toBe('')
     expect(renderPostBodyHtml(undefined)).toBe('')
     expect(renderPostBodyHtml('![x](https://a.b/c.png)\n\nhttps://a.b/c')).toBe('')
+  })
+
+  // Ecency's proposal post showed "Overview --------": the underline of a heading was kept as text.
+  it('drops heading underlines and dividers, but keeps list items and dashes in text', () => {
+    const out = renderPostBodyHtml('Overview\n--------\n\nText - here\n\n* * *\n\nNext\n====\n\n- a\n- b')
+    expect(out).toBe('<p>Overview</p><p>Text - here</p><p>Next</p><p>a b</p>')
+  })
+
+  it('drops table separator rows and keeps lines that only start with dashes', () => {
+    expect(renderPostBodyHtml('| a | b |\n|---|:---:|\n| 1 | 2 |')).toBe('<p>a b</p><p>1 2</p>')
+    expect(renderPostBodyHtml('--- note')).toBe('<p>--- note</p>')
   })
 
   it('caps the text', () => {
@@ -195,6 +207,73 @@ describe('after the browser loads the post', () => {
     } finally { global.fetch = prevFetch }
   })
 
+  describe('a Hive post opened with Blurt selected', () => {
+    // the page reads the selected chain only in the browser
+    let prevClient
+    beforeEach(() => { prevClient = process.client; process.client = true; localStorage.setItem('cur_bchain', 'BLURT') })
+    afterEach(() => { process.client = prevClient; localStorage.removeItem('cur_bchain') })
+
+    const vmFor = () => ({
+      ssrArticle: { title: 't', author: 'alice' },
+      $route: { params: { username: '@alice', permlink: 'my-walk' } },
+      $t: (k) => ({ post_not_on_chain: 'This post is not on _CHAIN_. It may be on Hive.' }[k]),
+      resetData () {}, alignSidebar () {},
+    })
+
+    it('says the post is not on Blurt, keeps the server text and offers Hive', async () => {
+      jest.spyOn(blurt.api, 'setOptions').mockImplementation(() => {})
+      jest.spyOn(blurt.api, 'getContentAsync').mockResolvedValue({ author: '', permlink: '' })
+      jest.spyOn(console, 'error').mockImplementation(() => {})
+      const vm = vmFor()
+      await PostPage.methods.fetchPageData.call(vm)
+      expect(vm.notOnChain).toBe('BLURT')
+      expect(vm.errorDisplay).toBe('This post is not on Blurt. It may be on Hive.')
+      expect(vm.ssrArticle).toEqual({ title: 't', author: 'alice' })
+    })
+
+    it('a network failure on Blurt keeps the general message', async () => {
+      jest.spyOn(blurt.api, 'setOptions').mockImplementation(() => {})
+      jest.spyOn(blurt.api, 'getContentAsync').mockRejectedValue(new Error('down'))
+      jest.spyOn(console, 'error').mockImplementation(() => {})
+      const vm = vmFor()
+      await PostPage.methods.fetchPageData.call(vm)
+      expect(vm.notOnChain).toBeFalsy()
+      expect(vm.errorDisplay).toMatch(/Could not load post/)
+    })
+
+    it('a late Blurt failure does not land on the Hive load that replaced it', async () => {
+      jest.spyOn(blurt.api, 'setOptions').mockImplementation(() => {})
+      let fail
+      jest.spyOn(blurt.api, 'getContentAsync').mockImplementation(() => new Promise((resolve, reject) => { fail = reject }))
+      jest.spyOn(console, 'error').mockImplementation(() => {})
+      const vm = vmFor()
+      vm.alignSidebar = jest.fn()
+      const first = PostPage.methods.fetchPageData.call(vm)
+      await new Promise((r) => setTimeout(r, 0))
+      vm.loadSeq += 1 // "Switch to Hive" started a new load, still in flight
+      vm.isLoading = true
+      fail(new Error('Post not found'))
+      await first
+      expect(vm.notOnChain).toBeFalsy()
+      expect(vm.errorDisplay).toBeFalsy()
+      expect(vm.isLoading).toBe(true)
+      expect(vm.alignSidebar).not.toHaveBeenCalled()
+    })
+
+    it('"Switch to Hive" saves the choice and reloads, even when the store already says HIVE', () => {
+      for (const [bchain, reloads] of [['BLURT', 0], ['HIVE', 1]]) {
+        const commits = []
+        const vm = { bchain, $store: { commit: (...a) => commits.push(a) }, fetchPageData: jest.fn() }
+        localStorage.setItem('cur_bchain', 'BLURT')
+        PostPage.methods.switchToHive.call(vm)
+        expect(localStorage.getItem('cur_bchain')).toBe('HIVE')
+        expect(commits).toEqual([['setBchain', 'HIVE']])
+        // a store change is picked up by the bchain watcher instead
+        expect(vm.fetchPageData).toHaveBeenCalledTimes(reloads)
+      }
+    })
+  })
+
   it('a failed first load keeps the server article', async () => {
     jest.spyOn(hive.api, 'setOptions').mockImplementation(() => {})
     jest.spyOn(hive.api, 'getContentAsync').mockRejectedValue(new Error('down'))
@@ -224,6 +303,11 @@ describe('post page template', () => {
     const error = template.indexOf('v-else-if="errorDisplay"')
     expect(article).toBeGreaterThan(-1)
     expect(error).toBeGreaterThan(article)
+  })
+
+  it('the "not on this chain" notice and its button show on the server article and on the error screen', () => {
+    expect(src).toMatch(/v-if="notOnChain" class="col-md-12 alert alert-warning not-on-chain"[\s\S]{0,250}switchToHive/)
+    expect(src).toMatch(/<h4>\{\{ errorDisplay \}\}<\/h4><\/div>\s*<div v-if="notOnChain"[\s\S]{0,150}switchToHive/)
   })
 
   it('the server article keeps the sidebar column, so the text does not jump across', () => {

@@ -30,6 +30,7 @@ export function postBodyText (body) {
     // escaped again below: decoding first avoids showing "&amp;amp;"
     .replace(/&(amp|lt|gt|quot|#39|#x27);/gi, (m, e) =>
       ({ amp: '&', lt: '<', gt: '>', quot: '"', '#39': "'", '#x27': "'" }[e.toLowerCase()]))
+    .replace(/^[ \t]{0,3}[-=*_|:][-=*_|: \t]{2,300}$/gm, '') // heading underlines, dividers (---, ===, * * *) and table separator rows (|---|:-:|)
     .replace(/^ {0,3}(?:#{1,6}|>|[-*+]|\d{1,9}[.)])[ \t]/gm, '') // heading, quote and list markers
     .replace(/[*_~`|]+/g, '') // emphasis, code and table markup
     .replace(/[ \t]+/g, ' ')

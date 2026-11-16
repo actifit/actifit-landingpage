@@ -135,6 +135,8 @@ module.exports = {
   key_prompt_not_posting: 'That key is not a posting key for this account.',
   signing_cancelled: 'Signing cancelled.',
   typed_key_hive_only: 'This works on Hive only. Switch to Hive and try again.',
+  post_not_on_chain: 'This post is not on _CHAIN_. It may be on Hive.',
+  switch_to_hive: 'Switch to Hive',
   blurt_key_rejected: 'Blurt did not accept your key. Try again and enter your current Blurt key.',
   keychain_not_detected: 'Hive Keychain was not detected. Enable the Keychain extension and reload the page, or log in again with another method.',
   key_prompt_check_failed: 'We could not check this key against your account right now. Please try again in a moment.',
