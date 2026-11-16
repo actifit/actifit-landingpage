@@ -258,6 +258,17 @@ describe('the Blurt posting key', () => {
     expect(storedBlurt()).toEqual({ user: 'bob', wif: '5Kblurtbob' })
   })
 
+  it('a stale tab dropping a rejected key does not delete the current user\'s stored key', () => {
+    typedSession('alice')
+    store.commit('steemconnect/login', account('alice', '5Kalice'))
+    typedSession('bob')
+    savePostingKey('bob', '5Kblurtbob', 'BLURT')
+    store.commit('setBlurtPostingKey', '5Kblurtbob') // picked up from the storage event
+    store.commit('setBlurtPostingKey', null) // Blurt rejected it for alice's operation
+    expect(store.state.blurtPostingKey).toBeNull()
+    expect(storedBlurt()).toEqual({ user: 'bob', wif: '5Kblurtbob' })
+  })
+
   it('"switch user" to Keychain drops it from memory and storage', () => {
     typedSession('alice')
     store.commit('steemconnect/login', account('alice', '5Kalice'))

@@ -72,7 +72,7 @@ describe('KeyPromptModal', () => {
     wrapper.destroy()
   })
 
-  it.each(['active', 'owner'])('refuses a Blurt posting key that is the user\'s Hive %s key (it would be kept)', async (hiveKind) => {
+  it.each(['active', 'owner', 'unknown'])('refuses a Blurt posting key that is (or may be) the user\'s Hive %s key (it would be kept)', async (hiveKind) => {
     const wrapper = mountIt()
     const answer = jest.fn()
     requestKey('posting', 'alice', [], 'BLURT').then(answer)
@@ -87,8 +87,8 @@ describe('KeyPromptModal', () => {
     wrapper.destroy()
   })
 
-  it('accepts a Blurt posting key that is also the Hive posting key, or unknown on Hive', async () => {
-    for (const hiveKind of ['posting', 'none', 'unknown']) {
+  it('accepts a Blurt posting key that is also the Hive posting key, or not a Hive key at all', async () => {
+    for (const hiveKind of ['posting', 'none']) {
       const wrapper = mountIt()
       const answer = jest.fn()
       requestKey('posting', 'alice', [], 'BLURT').then(answer)

@@ -90,7 +90,8 @@ export default {
       if (!refusal && request.chain === 'BLURT' && request.type === 'posting') {
         const onHive = await classifyKey(request.account, wif, 'HIVE')
         if (!this.open || this.request !== request) return
-        if (onHive === 'owner' || onHive === 'active') refusal = keyRefusal(onHive, 'posting')
+        // 'unknown' (Hive lookup failed) is refused too: an unchecked key could be one.
+        if (onHive === 'owner' || onHive === 'active' || onHive === 'unknown') refusal = keyRefusal(onHive, 'posting')
       }
       this.checking = false
       if (refusal) {

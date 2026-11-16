@@ -44,7 +44,9 @@ function syncBlurtPostingKey (store, state, type) {
     const wif = state.blurtPostingKey
     const account = state.steemconnect && state.steemconnect.user && state.steemconnect.user.account
     if (type === 'setBlurtPostingKey' && !wif) {
-      clearPostingKey('BLURT')
+      // A stale tab (still showing a previous user) only forgets its own copy: what is
+      // stored belongs to the user logged in now.
+      if (!account || account.name === localStorage.getItem('std_login_name')) clearPostingKey('BLURT')
       return
     }
     if (!typedKeySessionActive()) {
