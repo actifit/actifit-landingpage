@@ -2193,6 +2193,7 @@ export default {
       displayUserData: null,
       walletInitialized: false, // true once initWallet() has run (guards double-init)
       noAccountOnChain: '', // the non-Hive chain selected where this account does not exist
+      accountStale: false, // a chain switch could not read the account: the one held is the previous chain's
       mountedDone: false, // true after mounted() finishes — lets the user watcher tell a post-mount login from the initial load
       profImgUrl: process.env.hiveImgUrl,
       // null = not known yet (never loaded, or the load failed). A balance can legitimately
@@ -2607,8 +2608,13 @@ export default {
           console.error('Error fetching account data on chain switch:', err);
         }
         // Node error: the account held is the previous chain's, and converting it at this
-        // chain's rate is the mix this avoids. Keep what is shown; the next refresh retries.
-        if (!Array.isArray(accounts)) return;
+        // chain's rate is the mix this avoids. Keep what is shown; fetchUserData re-reads the
+        // account on the next refresh before converting anything.
+        if (!Array.isArray(accounts)) {
+          this.accountStale = true;
+          return;
+        }
+        this.accountStale = false;
         if (accounts.length === 0 && newBchain !== 'HIVE') {
           // Not on this chain. Keeping the previous chain's account would convert its
           // vests at this chain's rate, so show the notice and stop here.
@@ -4060,6 +4066,7 @@ export default {
     async fetchUserData() {
       // The account held is another chain's while the "no account on this chain" notice shows.
       if (this.noAccountOnChain) return;
+      if (this.accountStale && !(await this.rereadStaleAccount())) return;
       // Guard Clause: Ensure this function doesn't run if the primary user data isn't loaded yet.
       if (!this.displayUserData) {
         console.warn('fetchUserData called before displayUserData was ready. Aborting.');
@@ -8537,6 +8544,25 @@ export default {
       }
     },
     // Same as picking Hive in the header's chain list; the bchain watcher reloads the wallet.
+    // After a chain switch that could not read the account: read it on the selected chain.
+    // True once the account held is this chain's again.
+    async rereadStaleAccount() {
+      const name = this.displayUser || (this.user && this.user.account && this.user.account.name);
+      let accounts = null;
+      try {
+        accounts = await this.setProperNode().api.getAccountsAsync([name]);
+      } catch (err) {
+        console.error('Re-reading the account failed:', err);
+      }
+      if (!Array.isArray(accounts)) return false;
+      this.accountStale = false;
+      if (accounts.length === 0) {
+        if (this.cur_bchain !== 'HIVE') this.noAccountOnChain = this.cur_bchain;
+        return false;
+      }
+      this.displayUserData = accounts[0];
+      return true;
+    },
     // The store can already say HIVE while the saved choice said otherwise (another tab);
     // then the watcher does not fire, so do its part here.
     async switchWalletToHive() {

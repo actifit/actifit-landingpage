@@ -91,7 +91,48 @@ describe('no account on the selected chain', () => {
       await watcher.call(v, 'STEEM')
       expect(v.noAccountOnChain).toBe(notice)
       expect(v.fetchUserData).not.toHaveBeenCalled()
+      // marked, so the next refresh re-reads the account before converting anything
+      expect(v.accountStale).toBe(true)
     }
+  })
+
+  describe('the refresh after a failed switch', () => {
+    const mStart = src.indexOf('    async rereadStaleAccount() {')
+    const mBody = src.slice(src.indexOf('{', mStart) + 1, src.indexOf('\n    },', mStart))
+    // eslint-disable-next-line no-new-func
+    const reread = new Function(`return (async () => {${mBody}})()`)
+    const stale = (result, extra) => ({
+      accountStale: true, noAccountOnChain: '', cur_bchain: 'BLURT', displayUser: 'alice', user: null,
+      displayUserData: { name: 'alice', from: 'hive' },
+      setProperNode: () => ({ api: { getAccountsAsync: async () => { if (result instanceof Error) throw result; return result } } }),
+      ...extra,
+    })
+
+    it('fetchUserData re-reads a stale account before converting anything', () => {
+      expect(src).toMatch(/if \(this\.noAccountOnChain\) return;\s*if \(this\.accountStale && !\(await this\.rereadStaleAccount\(\)\)\) return;/)
+    })
+
+    it('uses the account read on the selected chain', async () => {
+      const v = stale([{ name: 'alice', from: 'blurt' }])
+      expect(await reread.call(v)).toBe(true)
+      expect(v.displayUserData).toEqual({ name: 'alice', from: 'blurt' })
+      expect(v.accountStale).toBe(false)
+    })
+
+    it('still failing: converts nothing and tries again next time', async () => {
+      jest.spyOn(console, 'error').mockImplementation(() => {})
+      const v = stale(new Error('down'))
+      expect(await reread.call(v)).toBe(false)
+      expect(v.accountStale).toBe(true)
+      expect(v.displayUserData).toEqual({ name: 'alice', from: 'hive' })
+    })
+
+    it('not on this chain: shows the notice', async () => {
+      const v = stale([])
+      expect(await reread.call(v)).toBe(false)
+      expect(v.noAccountOnChain).toBe('BLURT')
+      expect(v.displayUserData).toEqual({ name: 'alice', from: 'hive' })
+    })
   })
 
   it('a found account clears a notice left by another user (Switch User, log in again)', () => {
@@ -107,13 +148,20 @@ describe('no account on the selected chain', () => {
     const mBody = src.slice(src.indexOf('{', mStart) + 1, src.indexOf('\n    },', mStart))
     // eslint-disable-next-line no-new-func
     const switchWalletToHive = new Function(`return (async () => {${mBody}})()`)
-    const btn = (extra) => ({
-      bchain: 'BLURT', cur_bchain: 'BLURT', noAccountOnChain: 'BLURT', walletInitialized: false,
-      displayUser: 'alice', user: null,
-      $store: { commit: jest.fn() }, initWallet: jest.fn(), refreshAllWalletData: jest.fn(),
-      setupQuickActionsOverflow: jest.fn(), $nextTick: jest.fn((fn) => fn()),
-      ...extra,
-    })
+    const btn = (extra) => {
+      const v = {
+        bchain: 'BLURT', cur_bchain: 'BLURT', noAccountOnChain: 'BLURT', walletInitialized: false,
+        displayUser: 'alice', user: null,
+        setupQuickActionsOverflow: jest.fn(), $nextTick: jest.fn((fn) => fn()),
+        ...extra,
+      }
+      // like Vuex: the getter follows the commit at once
+      v.$store = { commit: jest.fn((type, chain) => { v.bchain = chain }) }
+      // the notice must be gone before loading: fetchUserData does nothing while it shows
+      v.initWallet = jest.fn(function () { expect(v.noAccountOnChain).toBe('') })
+      v.refreshAllWalletData = jest.fn(function () { expect(v.noAccountOnChain).toBe('') })
+      return v
+    }
     afterEach(() => localStorage.removeItem('cur_bchain'))
 
     it('saves Hive and lets the chain watcher reload when the store changes', async () => {
