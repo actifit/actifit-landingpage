@@ -767,7 +767,7 @@ module.exports = {
   Afit_Move_SE_Desc: 'Este processo permite que você mova seus tokens AFIT da carteira Actifit para a Hive-Engine AFIT. O processo é diário e dura uma semana (7 dias), após o qual será cancelado automaticamente. O valor máximo que pode ser movido diariamente depende de quantos tokens AFITX você possui.',
   no_proper_afitx_funds: 'Você não tem a quantidade mínima de 1 AFITX necessária para realizar a movimentação.',
   cannot_move_amount_afitx_needed: 'Você não tem AFITX suficiente para mover diariamente AFIT_AMNT AFIT. Para cada 100 AFIT extras que você deseja mover diariamente, você precisa ter 1 AFITX adicional.',
-  power_down_successfully_initiated: 'Power Down e Transferência para S-E Iniciados. O próximo Power Down ocorre às 10:00 AM UTC.',
+  power_down_successfully_initiated: 'Power Down e Transferência para H-E Iniciados. O próximo Power Down ocorre às 10:00 AM UTC.',
   afit_power_down_canceled: 'Power down de AFIT cancelado com sucesso',
   next_afit_powerdown: 'Próxima Transferência de AFIT_AMOUNT em',
   Cancel_Transfer: 'Cancelar Transferência',

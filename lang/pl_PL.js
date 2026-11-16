@@ -767,7 +767,7 @@ module.exports = {
   Afit_Move_SE_Desc: 'Ten proces umożliwia przeniesienie tokenów AFIT z portfela Actifit do Hive-Engine AFIT. Proces jest codzienny i trwa przez tydzień (7 dni), po czym zostanie automatycznie anulowany. Maksymalna kwota, którą można przenieść dziennie, zależy od tego, ile tokenów AFITX posiadasz.',
   no_proper_afitx_funds: 'Nie masz minimalnej kwoty 1 AFITX wymaganej do wykonania przeniesienia.',
   cannot_move_amount_afitx_needed: 'Nie masz wystarczającej ilości AFITX, aby przenieść codziennie AFIT_AMNT AFIT. Za każde dodatkowe 100 AFIT, które chcesz przenieść dziennie, musisz posiadać 1 dodatkowy AFITX.',
-  power_down_successfully_initiated: 'Zmniejszenie mocy i przelew do S-E zainicjowane. Następne zmniejszenie mocy nastąpi o 10:00 UTC.',
+  power_down_successfully_initiated: 'Zmniejszenie mocy i przelew do H-E zainicjowane. Następne zmniejszenie mocy nastąpi o 10:00 UTC.',
   afit_power_down_canceled: 'Zmniejszenie mocy AFIT pomyślnie anulowane.',
   next_afit_powerdown: 'Następny przelew AFIT_AMOUNT za',
   Cancel_Transfer: 'Anuluj przelew',

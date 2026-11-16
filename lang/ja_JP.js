@@ -767,7 +767,7 @@ module.exports = {
   Afit_Move_SE_Desc: 'このプロセスにより、ActifitウォレットからHive-Engine AFITにAFITトークンを移動できます。このプロセスは毎日行われ、1週間（7日間）続いた後、自動的にキャンセルされます。毎日移動できる最大額は、保有するAFITXトークンの数によって異なります。',
   no_proper_afitx_funds: '移動を実行するために必要な最低1 AFITXがありません。',
   cannot_move_amount_afitx_needed: '毎日AFIT_AMNT AFITを移動するのに十分なAFITXがありません。毎日追加で100 AFITを移動するには、追加で1 AFITXを保有する必要があります。',
-  power_down_successfully_initiated: 'S-Eへのパワーダウン＆転送が開始されました。次のパワーダウンは午前10時（UTC）に行われます',
+  power_down_successfully_initiated: 'H-Eへのパワーダウン＆転送が開始されました。次のパワーダウンは午前10時（UTC）に行われます',
   afit_power_down_canceled: 'AFITパワーダウンが正常にキャンセルされました',
   next_afit_powerdown: '次のAFIT_AMOUNTの転送まで',
   Cancel_Transfer: '転送をキャンセル',

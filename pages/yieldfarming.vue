@@ -29,7 +29,7 @@
 
 					<h5>{{$t('total_delegations')}}: {{numberFormat(topDelegators.hive.length,0)}}</h5>
 					<h5>{{$t('total_amount_locked')}}: {{numberFormat(delegatedHiveAmount,0)}} {{$t('HIVE')}} ( $ {{numberFormat(delegatedHiveAmount * hivePrice,2)}} )</h5>
-					<h5 v-if="afitPrice && hivePrice">{{$t('yearly_apy')}}: {{calculateYearlyAPY('hive')}}</h5>
+					<h5 v-if="afitPrice && hivePrice">{{$t('yearly_apy')}}: {{calculateYearlyAPY()}}</h5>
 					<div style="text-align:center; padding-top: 10px">
 						<a href="/wallet?action=power_up" class="btn btn-brand w-25">{{ $t('stake') }}</a>
 						<a href="/wallet?action=delegate" class="btn btn-brand w-25">{{ $t('DELEGATE_ACTION_TEXT') }}</a>
@@ -39,26 +39,6 @@
 					<i class="fas fa-spin fa-spinner text-brand"></i>
 				</span>
 			</div>
-			<!--<div class="col-md-6 row-sep-in small-pad-row p-2 text-left">
-				<span v-if="topDelegators.steem">
-					<h4 class="text-center">{{ $t('Daily_pool') }} - {{$t('Steem_delegators')}} <img src="/img/STEEM.png" style="max-height: 20px;" alt=""> </h4>
-
-					<h5>
-						{{ $t('daily_amount') }}: {{ dailySteemPool }} {{ $t('AFIT_Token') }}
-						<img class="token-logo-sm " src="/img/actifit_logo.png" alt="">
-					</h5>
-					<h5>{{$t('total_delegations')}}: {{numberFormat(topDelegators.steem.length,0)}}</h5>
-					<h5>{{$t('total_amount_locked')}}: {{numberFormat(delegatedSteemAmount,0)}} {{$t('STEEM')}} ( $ {{numberFormat(delegatedSteemAmount * steemPrice,2)}} )</h5>
-					<h5 v-if="afitPrice && steemPrice">{{$t('yearly_apy')}}: {{calculateYearlyAPY('steem')}}</h5>
-					<div style="text-align:center; padding-top: 10px">
-						<a href="/wallet?action=power_up" class="btn btn-brand w-25">{{ $t('stake') }}</a>
-						<a href="/wallet?action=delegate" class="btn btn-brand w-25">{{ $t('DELEGATE_ACTION_TEXT') }}</a>
-					</div>
-				</span>
-				<span v-else>
-					<i class="fas fa-spin fa-spinner text-brand"></i>
-				</span>
-			</div>-->
 		  </div>
 
 	  </div>
@@ -88,9 +68,6 @@
 				<img :src="'/img/'+trx.chain+'.png'" style="max-height: 20px;" alt="">
 				<span v-if="trx.chain == 'HIVE' && topDelegators.hive && topDelegators.hive.length" class="p-1">{{ getDelegatedAmount(trx, 'hive', true) }} {{ $t('Hive_Power') }}
 					<span v-if="randomAfitTrxHive == ''">{{setHiveTrx(trx, getDelegatedAmount(trx, 'hive', false))}}</span>
-				</span>
-				<span v-else-if="trx.chain == 'STEEM' && topDelegators.steem && topDelegators.steem.length" class="p-1">{{ getDelegatedAmount(trx, 'steem', true) }} {{ $t('Steem_Power') }}
-					<span v-if="randomAfitTrxSteem == ''">{{setSteemTrx(trx, getDelegatedAmount(trx, 'steem', false))}}</span>
 				</span>
 			</span>
 			<span class="col-3 p-1"><img class="token-logo-sm " src="/img/actifit_logo.png" alt=""> {{ getRewardedAmount(trx) }} {{ $t('AFIT_Token') }}  {{ $t('per_day') }}</span>
@@ -139,14 +116,10 @@
 		profImgUrl: process.env.hiveImgUrl,
 		delegationTransactions: [],
 		dailyHivePool: '',
-		dailySteemPool: '',
 		afitPrice: '',
-		steemPrice: '',
 		hivePrice: '',
 		randomAfitTrxHive: '',
-		randomAfitTrxSteem: '',
 		delegatedHiveAmount: 0,
-		delegatedSteemAmount: 0,
       }
     },
     computed: {
@@ -160,10 +133,6 @@
 			this.delegatedHiveAmount = 0;
 			for (let i=0;i<this.topDelegators.hive.length;i++){
 				this.delegatedHiveAmount += parseInt(this.topDelegators.hive[i].steem_power);
-			}
-			this.delegatedSteemAmount = 0;
-			for (let i=0;i<this.topDelegators.steem.length;i++){
-				this.delegatedSteemAmount += parseInt(this.topDelegators.steem[i].steem_power);
 			}
 		}
 	},
@@ -196,7 +165,6 @@
 	  },
 	  setPools(json){
 		this.dailyHivePool = this.numberFormat(json.hive_pool, 0);
-		this.dailySteemPool = this.numberFormat(json.steem_pool, 0);
 	  },
 	  getRewardedAmount(trx){
 		return this.numberFormat(trx.token_count, 3);
@@ -206,11 +174,6 @@
 		console.log(this.afitPrice);
 	  },
 	  async fetchPriceData () {
-		  //grab STEEM price
-		  fetch('https://api.coingecko.com/api/v3/simple/price?ids=steem&vs_currencies=usd').then(
-			res => {res.json().then(json => this.setSteemPrice (json.steem.usd)).catch(e => reject(e))
-		  }).catch(e => reject(e))
-
 		  //grab HIVE price
 		  // See VoteModal.vue: CoinGecko now needs a key and returns HTML, leaving the
 		  // price at its default of 1. Our API reads the chain's median feed instead.
@@ -224,9 +187,6 @@
 		  res => {res.json().then(json => this.setAFITPrice (json)).catch(e => reject(e))
 	    }).catch(e => reject(e))
 	  },
-	  setSteemPrice (_steemPrice){
-		this.steemPrice = parseFloat(_steemPrice).toFixed(3);
-	  },
 	  setHivePrice (_hivePrice){
 		this.hivePrice = parseFloat(_hivePrice).toFixed(3);
 	  },
@@ -236,38 +196,14 @@
 		this.randomAfitTrxHive = trx;
 		this.randomAfitTrxHive.delegated_amount = parseInt(delegated_amount);
 	  },
-	  setSteemTrx (trx, delegated_amount){
-		this.randomAfitTrxSteem = trx;
-		this.randomAfitTrxSteem.delegated_amount = parseInt(delegated_amount);
-	  },
-	  calculateYearlyAPY (chain){
-		if (this.randomAfitTrxHive && this.randomAfitTrxSteem){
-			if (chain == 'hive'){
-				let hiveValue = this.randomAfitTrxHive.delegated_amount * this.hivePrice;
-				let afitValue = this.randomAfitTrxHive.token_count * this.afitPrice.afitHiveLastUsdPrice;
-				let dailyAPY = afitValue / hiveValue;//daily percentage return (Daily APY)
-				/*console.log('calculateYearlyAPY');
-				console.log(this.randomAfitTrxHive);
-				console.log(this.randomAfitTrxHive.delegated_amount)
-				console.log(hiveValue);
-				console.log(this.randomAfitTrxHive.token_count);
-				console.log(afitValue);
-				console.log(dailyAPY);
-				console.log(365 * dailyAPY);*/
-				return this.numberFormat(365 * dailyAPY * 100, 3) + ' %';
-			}else{
-				let steemValue = this.randomAfitTrxSteem.delegated_amount * this.steemPrice;
-				let afitValue = this.randomAfitTrxSteem.token_count * this.afitPrice.afitHiveLastUsdPrice;
-				let dailyAPY = afitValue / steemValue;//daily percentage return (Daily APY)
-				/*console.log(this.randomAfitTrxSteem.delegated_amount)
-				console.log(steemValue);
-				console.log(this.randomAfitTrxHive.token_count);
-				console.log(afitValue);
-				console.log(dailyAPY);*/
-				return this.numberFormat(365 * dailyAPY * 100, 3) + ' %';
-			}
-		}
-		return '- %';
+	  calculateYearlyAPY (){
+		if (!this.randomAfitTrxHive) return '- %';
+		const hiveValue = this.randomAfitTrxHive.delegated_amount * this.hivePrice;
+		const afitValue = this.randomAfitTrxHive.token_count * this.afitPrice.afitHiveLastUsdPrice;
+		const dailyAPY = afitValue / hiveValue; // daily return
+		// the sample may have undelegated since the reward run (no amount): no figure beats "NaN %"
+		if (!hiveValue || !isFinite(dailyAPY)) return '- %';
+		return this.numberFormat(365 * dailyAPY * 100, 3) + ' %';
 	  }
     },
     async mounted () {
