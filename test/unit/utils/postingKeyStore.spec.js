@@ -201,3 +201,89 @@ describe('vue-steemconnect login action on a rejected session', () => {
     expect(commit).not.toHaveBeenCalledWith('logout')
   })
 })
+
+// A Blurt posting key that differs from the Hive one is kept under the same rules.
+describe('the Blurt posting key', () => {
+  let store
+  const storedBlurt = () => JSON.parse(localStorage.getItem('acti_blurt_posting_key') || 'null')
+  beforeEach(() => {
+    localStorage.clear()
+    process.client = true
+    store = createStore()
+  })
+  afterEach(() => { delete process.client })
+
+  it('is stored apart from the Hive key, for the logged-in user', () => {
+    typedSession('alice')
+    store.commit('steemconnect/login', account('alice', '5Kalice'))
+    store.commit('setChatPostingKey', '5Kalice')
+    store.commit('setBlurtPostingKey', '5Kblurt')
+    expect(storedBlurt()).toEqual({ user: 'alice', wif: '5Kblurt' })
+    expect(stored()).toEqual({ user: 'alice', wif: '5Kalice' })
+  })
+
+  it('is cleared on logout and when dropped, without touching the Hive key when dropped', () => {
+    typedSession('alice')
+    store.commit('steemconnect/login', account('alice', '5Kalice'))
+    store.commit('setChatPostingKey', '5Kalice')
+    store.commit('setBlurtPostingKey', '5Kblurt')
+    store.commit('setBlurtPostingKey', null)
+    expect(storedBlurt()).toBeNull()
+    expect(stored()).toEqual({ user: 'alice', wif: '5Kalice' })
+    store.commit('setBlurtPostingKey', '5Kblurt')
+    store.commit('steemconnect/logout')
+    expect(storedBlurt()).toBeNull()
+    expect(store.state.blurtPostingKey).toBeNull()
+  })
+
+  it('is not restored for another user, and a stale tab switches to the new one', () => {
+    typedSession('alice')
+    store.commit('steemconnect/login', account('alice', '5Kalice'))
+    store.commit('setBlurtPostingKey', '5Kblurtalice')
+    typedSession('bob')
+    expect(loadPostingKey('BLURT')).toBeNull() // alice's is not bob's
+    savePostingKey('bob', '5Kblurtbob', 'BLURT')
+    store.commit('steemconnect/login', account('bob', '5Kbob'))
+    expect(store.state.blurtPostingKey).toBe('5Kblurtbob')
+  })
+
+  it('a stale tab still showing alice never saves bob\'s key under alice\'s name', () => {
+    typedSession('alice')
+    store.commit('steemconnect/login', account('alice', '5Kalice'))
+    // another tab: alice logged out, bob logged in and entered his Blurt key
+    typedSession('bob')
+    savePostingKey('bob', '5Kblurtbob', 'BLURT')
+    // this tab picks it up from the storage event before learning bob logged in
+    store.commit('setBlurtPostingKey', '5Kblurtbob')
+    expect(storedBlurt()).toEqual({ user: 'bob', wif: '5Kblurtbob' })
+  })
+
+  it('a stale tab dropping a rejected key does not delete the current user\'s stored key', () => {
+    typedSession('alice')
+    store.commit('steemconnect/login', account('alice', '5Kalice'))
+    typedSession('bob')
+    savePostingKey('bob', '5Kblurtbob', 'BLURT')
+    store.commit('setBlurtPostingKey', '5Kblurtbob') // picked up from the storage event
+    store.commit('setBlurtPostingKey', null) // Blurt rejected it for alice's operation
+    expect(store.state.blurtPostingKey).toBeNull()
+    expect(storedBlurt()).toEqual({ user: 'bob', wif: '5Kblurtbob' })
+  })
+
+  it('"switch user" to Keychain drops it from memory and storage', () => {
+    typedSession('alice')
+    store.commit('steemconnect/login', account('alice', '5Kalice'))
+    store.commit('setBlurtPostingKey', '5Kblurt')
+    localStorage.setItem('acti_login_method', 'keychain')
+    store.commit('steemconnect/login', account('alice', '5Kalice'))
+    expect(store.state.blurtPostingKey).toBeNull()
+    expect(storedBlurt()).toBeNull()
+  })
+
+  it('is restored on page load for the same typed-key session', () => {
+    typedSession('alice')
+    savePostingKey('alice', '5Kblurt', 'BLURT')
+    const fresh = createStore()
+    restorePlugin({ store: fresh })
+    expect(fresh.state.blurtPostingKey).toBe('5Kblurt')
+  })
+})

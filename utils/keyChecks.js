@@ -19,11 +19,16 @@
  * reported as the most powerful one, because that is the one that matters.
  */
 import hive from '@hiveio/hive-js'
+import { chainClient } from '~/utils/chainClient'
 
 const LOOKUP_TIMEOUT_MS = 8000
 
+// A public key without its chain prefix (STM on Hive, BLT on Blurt). The same private key
+// gives the same key body on both chains, so bodies are what get compared.
+const keyBody = (pub) => String(pub).slice(3)
+
 const pubsOf = (auth) =>
-  (auth && Array.isArray(auth.key_auths)) ? auth.key_auths.map((k) => k[0]) : []
+  (auth && Array.isArray(auth.key_auths)) ? auth.key_auths.map((k) => keyBody(k[0])) : []
 
 export function publicKeyOf (wif) {
   try {
@@ -33,14 +38,14 @@ export function publicKeyOf (wif) {
   }
 }
 
-// Read the account's authorities from the Hive node itself (the hive-js instance the
-// store configures), NOT through actifit-bot: the key check must not depend on our own
-// backend being honest, and the proxy route is rate-limited per IP.
-export async function fetchAccount (username) {
+// Read the account's authorities from the chain's node itself, NOT through actifit-bot:
+// the key check must not depend on our own backend being honest, and the proxy route is
+// rate-limited per IP. `chain` is 'HIVE' (default) or 'BLURT'.
+export async function fetchAccount (username, chain) {
   let timeoutId
   try {
     const accounts = await Promise.race([
-      hive.api.getAccountsAsync([username]),
+      chainClient(chain).api.getAccountsAsync([username]),
       new Promise((resolve, reject) => {
         timeoutId = setTimeout(() => reject(new Error('timeout')), LOOKUP_TIMEOUT_MS)
       })
@@ -54,10 +59,13 @@ export async function fetchAccount (username) {
   }
 }
 
-export async function classifyKey (username, wif) {
-  const pub = publicKeyOf(wif)
-  if (!pub) return 'invalid'
-  const acct = await fetchAccount(username)
+// Against the account on `chain` ('HIVE' by default, or 'BLURT'): a Hive key is often
+// also the Blurt key (both chains copied Steem's keys), but not once either was changed.
+export async function classifyKey (username, wif, chain) {
+  const found = publicKeyOf(wif)
+  if (!found) return 'invalid'
+  const pub = keyBody(found)
+  const acct = await fetchAccount(username, chain)
   if (!acct) return 'unknown'
   if (pubsOf(acct.owner).indexOf(pub) !== -1) return 'owner'
   if (pubsOf(acct.active).indexOf(pub) !== -1) return 'active'

@@ -9,7 +9,8 @@
       <h5 id="key-prompt-title" class="key-prompt-title">
         {{ request.type === 'active' ? $t('key_prompt_title_active') : $t('key_prompt_title_posting') }}
       </h5>
-      <p class="key-prompt-account">@{{ request.account }}</p>
+      <!-- Which chain the key is for: a Blurt key is often not the Hive one. -->
+      <p class="key-prompt-account">@{{ request.account }}<span v-if="request.chain === 'BLURT'"> &middot; Blurt</span></p>
 
       <!-- What this key is about to sign. Text interpolation only: these lines carry
            user-controlled values (memos, permlinks). -->
@@ -51,7 +52,7 @@ import { classifyKey, keyRefusal } from '~/utils/keyChecks'
 export default {
   name: 'KeyPromptModal',
   data () {
-    return { open: false, request: { type: 'posting', account: '', summary: [] }, wif: '', error: '', checking: false }
+    return { open: false, request: { type: 'posting', account: '', chain: 'HIVE', summary: [] }, wif: '', error: '', checking: false }
   },
   mounted () {
     registerKeyPrompt((req) => {
@@ -75,16 +76,24 @@ export default {
       const wif = this.wif.trim()
       this.checking = true
       this.error = ''
-      const kind = await classifyKey(request.account, wif)
+      const kind = await classifyKey(request.account, wif, request.chain)
       // Cancelled, or replaced by another prompt, while the lookup ran: this answer is
       // not for the prompt now showing.
       if (!this.open || this.request !== request) return
-      this.checking = false
 
       // The same rule the buy-now forms apply (utils/keyChecks.js): refuses an owner key,
       // the wrong role, a key of another account, and - when the account lookup fails -
       // a key we could not check at all.
-      const refusal = keyRefusal(kind, this.request.type)
+      let refusal = keyRefusal(kind, this.request.type)
+      // A Blurt posting key is kept in the browser. If it is also the user's Hive ACTIVE or
+      // OWNER key, keeping it would keep a key that can move Hive funds - refuse that.
+      if (!refusal && request.chain === 'BLURT' && request.type === 'posting') {
+        const onHive = await classifyKey(request.account, wif, 'HIVE')
+        if (!this.open || this.request !== request) return
+        // 'unknown' (Hive lookup failed) is refused too: an unchecked key could be one.
+        if (onHive === 'owner' || onHive === 'active' || onHive === 'unknown') refusal = keyRefusal(onHive, 'posting')
+      }
+      this.checking = false
       if (refusal) {
         this.error = this.$t(refusal)
         return

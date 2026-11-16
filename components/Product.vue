@@ -2402,11 +2402,11 @@ export default {
 
         } else {
 
-          let cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
 
           // Signed IN THE BROWSER with the user's own key - /performTrx is gone.
           // Same response shape as before, so the handling below is unchanged.
-          let outcome = await this.$broadcastWithKey(operation, { active: true, bchain: cur_bchain, wif: this.userActvKey });
+          // The payment is in HIVE, so it is signed on Hive whatever chain is selected.
+          let outcome = await this.$broadcastWithKey(operation, { active: true, bchain: 'HIVE', wif: this.userActvKey });
 
           console.log(outcome);
           if (outcome.success && outcome.trx) {

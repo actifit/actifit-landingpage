@@ -46,7 +46,8 @@ export function describeOperations (operations) {
   })
 }
 
-export function requestKey (type, account, operations) {
+// `chain` is 'HIVE' or 'BLURT': the prompt checks the key against that chain's account.
+export function requestKey (type, account, operations, chain) {
   if (pending) {
     const prev = pending
     pending = null
@@ -57,7 +58,7 @@ export function requestKey (type, account, operations) {
     // null immediately rather than leaving the caller waiting forever.
     if (!showPrompt) return resolve(null)
     pending = resolve
-    showPrompt({ type, account, summary: describeOperations(operations) })
+    showPrompt({ type, account, chain: chain || 'HIVE', summary: describeOperations(operations) })
   })
 }
 

@@ -14,7 +14,10 @@
  */
 import { publicKeyOf } from '~/utils/keyChecks'
 
-const STORAGE_KEY = 'acti_posting_key'
+// One entry per chain. A user whose Blurt key differs from their Hive key enters it once,
+// and it is kept under the same rules as the Hive one.
+const STORAGE_KEYS = { HIVE: 'acti_posting_key', BLURT: 'acti_blurt_posting_key' }
+const storageKey = (chain) => STORAGE_KEYS[chain] || STORAGE_KEYS.HIVE
 
 // A typed-key login is active (not Keychain / HiveAuth / HiveSigner / logged out).
 // The ONE rule for both saving and restoring.
@@ -35,23 +38,23 @@ export function isPostingKeyOf (account, wif) {
   return !!pub && Array.isArray(auths) && auths.some((k) => k[0] === pub)
 }
 
-export function savePostingKey (user, wif) {
+export function savePostingKey (user, wif, chain) {
   if (!user || !wif) return
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ user, wif }))
+    localStorage.setItem(storageKey(chain), JSON.stringify({ user, wif }))
   } catch (e) { /* storage blocked (private mode): memory-only for this session */ }
 }
 
-export function clearPostingKey () {
-  try { localStorage.removeItem(STORAGE_KEY) } catch (e) { /* nothing stored */ }
+export function clearPostingKey (chain) {
+  try { localStorage.removeItem(storageKey(chain)) } catch (e) { /* nothing stored */ }
 }
 
 // The stored key, if it belongs to the current typed-key session; else null. A key
 // stored for any other situation (another user, a Keychain/HiveAuth login, logged out)
 // is removed rather than left behind.
-export function loadPostingKey () {
+export function loadPostingKey (chain) {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const raw = localStorage.getItem(storageKey(chain))
     if (!raw) return null
     const stored = JSON.parse(raw)
     if (typedKeySessionActive() && stored && stored.wif &&
@@ -59,6 +62,6 @@ export function loadPostingKey () {
       return stored.wif
     }
   } catch (e) { /* unreadable: treat as absent */ }
-  clearPostingKey()
+  clearPostingKey(chain)
   return null
 }
