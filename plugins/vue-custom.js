@@ -7,6 +7,7 @@ import HAS from 'hive-auth-wrapper';
 import hive from '@hiveio/hive-js';
 import { requestKey } from '~/utils/keyPrompt';
 import { classifyKey, keyRefusal } from '~/utils/keyChecks';
+import { SIGNING_CHAINS, chainClient, normalizeChain } from '~/utils/chainClient';
 import escapeHtml from '~/utils/escapeHtml';
 import { timeAgo } from '~/utils/timeAgo';
 import { isSiteLink, isTrustedLink } from '~/utils/trustedLinks';
@@ -385,14 +386,17 @@ Vue.prototype.$decodeMemo = async function (memo) {
  * Does NOT notify: the direct callers already raise their own toast on failure, and
  * doubling it would be noise. $processTrxFunc notifies for its own callers.
  *
- * HIVE ONLY. Typed-key login is Hive-only (the signed-challenge login verifies against
- * the Hive account), so the key held here IS a Hive key; signing a Steem or Blurt
- * operation with it would fail anyway. Saying so plainly beats an opaque chain error.
+ * Hive or Blurt (options.bchain). The login key is a Hive key, and it is often also the
+ * Blurt key (both chains copied Steem's keys) - the old server path signed Blurt with it
+ * for that reason. So on Blurt the login key is tried first, checked against the Blurt
+ * account, and only if it is not a Blurt posting key is the user asked for theirs - once,
+ * kept like the Hive one. Active keys are asked for per action on both chains.
+ * Steem is not supported.
  */
 Vue.prototype.$broadcastWithKey = async function (operations, opts) {
   const options = opts || {};
   const active = !!options.active;
-  const bchain = String(options.bchain || 'HIVE').toUpperCase();
+  const bchain = normalizeChain(options.bchain);
   // The message is HTML-ESCAPED here, once, at the source. Every caller either
   // substring-matches it ('missing' / 'authority') or shows it in a toast, and toasts
   // render HTML (vue-notification uses v-html) - while the text can come from an RPC
@@ -401,9 +405,11 @@ Vue.prototype.$broadcastWithKey = async function (operations, opts) {
   // plain text ({{ }}), where an escaped "&quot;" would be shown literally.
   const fail = (msg, extra) => Object.assign({ error: true, rawError: String(msg), trx: { tx: { error: escapeHtml(msg) } } }, extra || {});
 
-  if (bchain !== 'HIVE') {
+  if (SIGNING_CHAINS.indexOf(bchain) === -1) {
 	return fail(this.$t('typed_key_hive_only'));
   }
+  const blurt = bchain === 'BLURT';
+  const postingKeyMutation = blurt ? 'setBlurtPostingKey' : 'setChatPostingKey';
   const refusal = typedKeySessionRefusal();
   if (refusal) return fail(this.$t(refusal));
 
@@ -418,19 +424,28 @@ Vue.prototype.$broadcastWithKey = async function (operations, opts) {
 	// one that signs PAYMENTS: without this, an owner key typed into a buy form would
 	// sign, and a posting key would fail only after the user had committed.
 	const typed = String(options.wif).trim();
-	const refusal = keyRefusal(await classifyKey(account, typed), keyType);
+	const refusal = keyRefusal(await classifyKey(account, typed, bchain), keyType);
 	if (refusal) return fail(this.$t(refusal));
 	wif = typed;
   } else if (active) {
 	// Active keys are requested PER ACTION and never kept: one can move funds.
-	wif = await requestKey('active', account, operations);
+	wif = await requestKey('active', account, operations, bchain);
+  } else if (blurt) {
+	wif = this.$store.state.blurtPostingKey;
+	if (!wif) {
+	  // The login (Hive) key, if it is also this account's Blurt posting key.
+	  const hiveKey = this.$store.state.chatPostingKey;
+	  if (hiveKey && await classifyKey(account, hiveKey, 'BLURT') === 'posting') wif = hiveKey;
+	  if (!wif) wif = await requestKey('posting', account, operations, 'BLURT');
+	  if (wif) this.$store.commit('setBlurtPostingKey', wif);
+	}
   } else {
 	// The posting key is put in the store at login and kept in the browser, so it
 	// survives reloads and new tabs (utils/postingKeyStore.js). Ask only if it is
 	// missing - e.g. a session from before keys were kept, or a key just rotated.
 	wif = this.$store.state.chatPostingKey;
 	if (!wif) {
-	  wif = await requestKey('posting', account, operations);
+	  wif = await requestKey('posting', account, operations, 'HIVE');
 	  if (wif) this.$store.commit('setChatPostingKey', wif);
 	}
   }
@@ -443,7 +458,7 @@ Vue.prototype.$broadcastWithKey = async function (operations, opts) {
 	const result = await new Promise((resolve, reject) => {
 	  // keys MUST be an object keyed by role. hive-js signs with `for (k in keys)`, so
 	  // a bare WIF string would iterate its CHARACTERS and sign with garbage.
-	  hive.broadcast.send({ extensions: [], operations: operations }, { [keyType]: wif },
+	  chainClient(bchain).broadcast.send({ extensions: [], operations: operations }, { [keyType]: wif },
 		(err, res) => (err ? reject(err) : resolve(res)));
 	});
 	return { success: true, trx: { tx: result } };
@@ -453,7 +468,7 @@ Vue.prototype.$broadcastWithKey = async function (operations, opts) {
 	// A posting key that no longer has authority (the user rotated it) must not keep
 	// being retried from memory. Drop it so the next action asks for the current one.
 	if (!active && /missing.*authority|missing required posting/i.test(err_msg)) {
-	  this.$store.commit('setChatPostingKey', null);
+	  this.$store.commit(postingKeyMutation, null);
 	}
 	return fail(err_msg);
   } finally {

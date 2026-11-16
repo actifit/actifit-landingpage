@@ -174,6 +174,10 @@ export default {
   setChatPostingKey (state, postingKey) {
 	state.chatPostingKey = postingKey;
   },
+  // A typed-key user's Blurt posting key, when it is not their Hive one (utils/postingKeyStore.js).
+  setBlurtPostingKey (state, postingKey) {
+	state.blurtPostingKey = postingKey;
+  },
   setBchain (state, bchain) {
 	state.bchain = bchain;
   },

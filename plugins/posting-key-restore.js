@@ -3,11 +3,13 @@
 import { loadPostingKey } from '~/utils/postingKeyStore'
 
 // Keys whose change in ANOTHER tab means this tab's posting key may be wrong.
-const WATCHED = ['acti_posting_key', 'std_login', 'std_login_name', 'acti_login_method']
+const WATCHED = ['acti_posting_key', 'acti_blurt_posting_key', 'std_login', 'std_login_name', 'acti_login_method']
 
 export default ({ store }) => {
   const wif = loadPostingKey()
   if (wif && !store.state.chatPostingKey) store.commit('setChatPostingKey', wif)
+  const blurtWif = loadPostingKey('BLURT')
+  if (blurtWif && !store.state.blurtPostingKey) store.commit('setBlurtPostingKey', blurtWif)
 
   // Logout (or a login as someone else) in another tab: this tab must not keep signing
   // with the old key from memory. Re-read the one stored for the current session.
@@ -15,5 +17,7 @@ export default ({ store }) => {
     if (e.key !== null && WATCHED.indexOf(e.key) === -1) return
     const current = loadPostingKey()
     if (store.state.chatPostingKey !== current) store.commit('setChatPostingKey', current)
+    const currentBlurt = loadPostingKey('BLURT')
+    if (store.state.blurtPostingKey !== currentBlurt) store.commit('setBlurtPostingKey', currentBlurt)
   })
 }

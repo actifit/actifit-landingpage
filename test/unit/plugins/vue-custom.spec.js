@@ -6,6 +6,7 @@ jest.mock('hive-auth-wrapper', () => ({ broadcast: jest.fn(), authenticate: jest
 // Mock the broadcast (no network) and the key prompt (no UI) so the real signing path in
 // $broadcastWithKey runs end to end.
 jest.mock('@hiveio/hive-js', () => ({ broadcast: { send: jest.fn() }, memo: { decode: jest.fn() } }))
+jest.mock('@blurtfoundation/blurtjs', () => ({ broadcast: { send: jest.fn() }, api: { setOptions: jest.fn() } }))
 jest.mock('@/utils/keyPrompt', () => ({ requestKey: jest.fn() }))
 // classifyKey reads the chain; the refusal RULE (keyRefusal) stays real.
 jest.mock('@/utils/keyChecks', () => Object.assign({}, jest.requireActual('@/utils/keyChecks'), {
@@ -15,6 +16,7 @@ jest.mock('@/utils/keyChecks', () => Object.assign({}, jest.requireActual('@/uti
 import Vue from 'vue'
 import { getTransactionErrorMessage } from '@/plugins/vue-custom'
 import hive from '@hiveio/hive-js'
+import blurt from '@blurtfoundation/blurtjs'
 import { requestKey } from '@/utils/keyPrompt'
 import { classifyKey } from '@/utils/keyChecks'
 
@@ -111,7 +113,7 @@ describe('plugins/vue-custom global helpers', () => {
 
       const result = await Vue.prototype.$processTrxFunc.call(makeContext(null), 'vote', {}, false)
 
-      expect(requestKey).toHaveBeenCalledWith('posting', 'alice', [['vote', {}]])
+      expect(requestKey).toHaveBeenCalledWith('posting', 'alice', [['vote', {}]], 'HIVE')
       expect(committed).toContainEqual(['setChatPostingKey', WIF])
       expect(result.success).toBe(true)
     })
@@ -122,7 +124,7 @@ describe('plugins/vue-custom global helpers', () => {
 
       await Vue.prototype.$processTrxFunc.call(makeContext('posting-key-in-memory'), 'transfer', {}, true)
 
-      expect(requestKey).toHaveBeenCalledWith('active', 'alice', [['transfer', {}]])
+      expect(requestKey).toHaveBeenCalledWith('active', 'alice', [['transfer', {}]], 'HIVE')
       expect(hive.broadcast.send.mock.calls[0][1]).toEqual({ active: WIF })
       // an active key can move funds: it must not end up in the store
       expect(committed.filter(([name]) => name === 'setChatPostingKey')).toEqual([])
@@ -271,13 +273,14 @@ describe('plugins/vue-custom global helpers', () => {
       expect(hive.broadcast.send.mock.calls[0][1]).toEqual({ active: 'typed-active' })
     })
 
-    it('refuses Steem and Blurt plainly - a typed key here is a Hive key', async () => {
-      for (const bchain of ['STEEM', 'BLURT', 'steem']) {
+    it('refuses Steem plainly - Actifit does not support it', async () => {
+      for (const bchain of ['STEEM', 'steem']) {
         const out = await Vue.prototype.$broadcastWithKey.call(ctx(), [['vote', {}]], { bchain })
         expect(out.error).toBe(true)
         expect(out.trx.tx.error).toBe('typed_key_hive_only')
       }
       expect(hive.broadcast.send).not.toHaveBeenCalled()
+      expect(blurt.broadcast.send).not.toHaveBeenCalled()
     })
 
     it('treats a missing or empty chain as Hive', async () => {
@@ -287,6 +290,95 @@ describe('plugins/vue-custom global helpers', () => {
         const out = await Vue.prototype.$broadcastWithKey.call(ctx(), [['vote', {}]], { bchain })
         expect(out.success).toBe(true)
       }
+    })
+  })
+
+  // Blurt: the login (Hive) key is often also the Blurt key, as both chains copied Steem's
+  // keys. It is tried first; otherwise the user's own Blurt key is asked for once and kept.
+  describe('$broadcastWithKey on Blurt', () => {
+    let committed
+    const ctx = (state) => ({
+      user: { account: { name: 'alice' } },
+      $t: (k) => k,
+      $store: {
+        state: Object.assign({ chatPostingKey: 'hive-wif', blurtPostingKey: null }, state),
+        commit: (name, val) => committed.push([name, val])
+      }
+    })
+    const run = (state, opts) => Vue.prototype.$broadcastWithKey.call(ctx(state), [['vote', {}]],
+      Object.assign({ bchain: 'BLURT' }, opts))
+    beforeEach(() => {
+      committed = []
+      hive.broadcast.send.mockReset(); blurt.broadcast.send.mockReset()
+      blurt.broadcast.send.mockImplementation((tx, keys, cb) => cb(null, { id: 'b' }))
+      requestKey.mockReset(); classifyKey.mockReset()
+      localStorage.clear()
+      localStorage.setItem('std_login', 'true')
+    })
+
+    it('signs on Blurt, never on Hive, with the kept Blurt key', async () => {
+      const out = await run({ blurtPostingKey: 'blurt-wif' })
+      expect(out.success).toBe(true)
+      expect(blurt.broadcast.send.mock.calls[0][1]).toEqual({ posting: 'blurt-wif' })
+      expect(hive.broadcast.send).not.toHaveBeenCalled()
+      expect(requestKey).not.toHaveBeenCalled()
+    })
+
+    it('uses the login key without asking when it is also the Blurt posting key', async () => {
+      classifyKey.mockResolvedValue('posting')
+      await run()
+      expect(classifyKey).toHaveBeenCalledWith('alice', 'hive-wif', 'BLURT')
+      expect(requestKey).not.toHaveBeenCalled()
+      expect(blurt.broadcast.send.mock.calls[0][1]).toEqual({ posting: 'hive-wif' })
+      expect(committed).toContainEqual(['setBlurtPostingKey', 'hive-wif'])
+    })
+
+    it.each(['none', 'active', 'unknown'])('asks for the Blurt key once when the login key is %s on Blurt', async (kind) => {
+      classifyKey.mockResolvedValue(kind)
+      requestKey.mockResolvedValue('blurt-wif')
+      await run()
+      expect(requestKey).toHaveBeenCalledWith('posting', 'alice', [['vote', {}]], 'BLURT')
+      expect(blurt.broadcast.send.mock.calls[0][1]).toEqual({ posting: 'blurt-wif' })
+      expect(committed).toContainEqual(['setBlurtPostingKey', 'blurt-wif'])
+      // the Hive key is left alone
+      expect(committed.filter(([n]) => n === 'setChatPostingKey')).toEqual([])
+    })
+
+    it('reports a cancelled Blurt prompt as cancelled and signs nothing', async () => {
+      classifyKey.mockResolvedValue('none')
+      requestKey.mockResolvedValue(null)
+      const out = await run()
+      expect(out.cancelled).toBe(true)
+      expect(blurt.broadcast.send).not.toHaveBeenCalled()
+    })
+
+    it('asks for the ACTIVE key per action, checked on Blurt, and never keeps it', async () => {
+      requestKey.mockResolvedValue('blurt-active')
+      await run({ blurtPostingKey: 'blurt-wif' }, { active: true })
+      expect(requestKey).toHaveBeenCalledWith('active', 'alice', [['vote', {}]], 'BLURT')
+      expect(blurt.broadcast.send.mock.calls[0][1]).toEqual({ active: 'blurt-active' })
+      expect(committed).toEqual([])
+    })
+
+    it('checks a caller-supplied active key against the Blurt account', async () => {
+      classifyKey.mockResolvedValue('active')
+      await run({}, { active: true, wif: '5Kblurtactive' })
+      expect(classifyKey).toHaveBeenCalledWith('alice', '5Kblurtactive', 'BLURT')
+      expect(requestKey).not.toHaveBeenCalled()
+    })
+
+    it('drops only the Blurt key when Blurt says it lost its authority', async () => {
+      blurt.broadcast.send.mockImplementation((tx, keys, cb) => cb(new Error('missing required posting authority')))
+      const out = await run({ blurtPostingKey: 'old-blurt-wif' })
+      expect(out.error).toBe(true)
+      expect(committed).toEqual([['setBlurtPostingKey', null]])
+    })
+
+    it('still never asks a Keychain session to type a key', async () => {
+      localStorage.setItem('acti_login_method', 'keychain')
+      const out = await run()
+      expect(out.trx.tx.error).toBe('keychain_not_detected')
+      expect(requestKey).not.toHaveBeenCalled()
     })
   })
 
@@ -668,7 +760,7 @@ describe('plugins/vue-custom global helpers', () => {
     it('signs with a verified active key, trimmed', async () => {
       classifyKey.mockResolvedValue('active')
       const out = await pay('  5Kactive  ')
-      expect(classifyKey).toHaveBeenCalledWith('alice', '5Kactive')
+      expect(classifyKey).toHaveBeenCalledWith('alice', '5Kactive', 'HIVE')
       expect(hive.broadcast.send.mock.calls[0][1]).toEqual({ active: '5Kactive' })
       expect(out.success).toBe(true)
     })
