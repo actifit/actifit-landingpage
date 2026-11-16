@@ -168,7 +168,7 @@ module.exports = {
   key_prompt_not_active: 'Dieser Schlüssel ist kein Active-Schlüssel dieses Kontos.',
   key_prompt_not_posting: 'Dieser Schlüssel ist kein Posting-Schlüssel dieses Kontos.',
   signing_cancelled: 'Signieren abgebrochen.',
-  typed_key_hive_only: 'Signieren mit einem eingegebenen Schlüssel funktioniert nur auf Hive. Für Steem oder Blurt melden Sie sich mit Keychain an.',
+  typed_key_hive_only: 'Das funktioniert nur auf Hive. Wechseln Sie zu Hive und versuchen Sie es erneut.',
   keychain_not_detected: 'Hive Keychain wurde nicht erkannt. Aktivieren Sie die Keychain-Erweiterung und laden Sie die Seite neu, oder melden Sie sich mit einer anderen Methode an.',
   key_prompt_check_failed: 'Wir konnten diesen Schlüssel gerade nicht mit Ihrem Konto abgleichen. Bitte versuchen Sie es gleich noch einmal.',
   key_prompt_operation: 'Sie signieren:',
