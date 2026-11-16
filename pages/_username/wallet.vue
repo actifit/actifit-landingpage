@@ -2682,7 +2682,11 @@ export default {
             this.displayUserData = account_res[0];
           }
         } else if (this.user && this.user.account) {
-          this.displayUserData = this.user.account;
+          // the store's account is the Hive one (from the Actifit server); read it on the selected chain
+          let account_res = await this.setProperNode().api.getAccountsAsync([this.user.account.name]);
+          if (account_res && account_res.length > 0) {
+            this.displayUserData = account_res[0];
+          }
         }
 
         await this.fetchUserData();
@@ -4457,12 +4461,16 @@ export default {
         }
       });
     },
+    // Each chain names its vesting fund after its coin (total_vesting_fund_hive / _blurt /
+    // _steem), so properties loaded for another chain (or not yet) lack this chain's field.
+    propertiesMatchChain() {
+      return !!(this.properties && this.properties['total_vesting_fund_' + String(this.cur_bchain || 'HIVE').toLowerCase()]);
+    },
     async vestsToSteemPower(vests) {
       //function handles converting Vests to SP
       try {
         let chainLnk = this.setProperNode();
-        if (this.properties == '') {
-          //not loaded yet
+        if (!this.propertiesMatchChain()) {
           this.properties = await chainLnk.api.getDynamicGlobalPropertiesAsync();
         }
         if (this.cur_bchain == 'STEEM') {
@@ -4489,8 +4497,7 @@ export default {
     async steemPowerToVests(steemPower) {
       //function handles conversting SP to Vests
       let chainLnk = this.setProperNode();
-      if (this.properties == '') {
-        //not loaded yet
+      if (!this.propertiesMatchChain()) {
         this.properties = await chainLnk.api.getDynamicGlobalPropertiesAsync();
       }
       if (this.cur_bchain == 'STEEM') {
@@ -4537,9 +4544,9 @@ export default {
     },
 
     async calculateSavingsRewardsParams() {
+      if (this.cur_bchain !== 'HIVE') return; // HBD savings interest exists only on Hive
       //current interest rate set by witnesses
-      if (this.properties == '') {
-        //not loaded yet
+      if (!this.propertiesMatchChain()) {
         let chainLnk = this.setProperNode();
         this.properties = await chainLnk.api.getDynamicGlobalPropertiesAsync();
       }
@@ -5642,7 +5649,14 @@ export default {
 
           await this.$store.dispatch('steemconnect/refreshUser');
 
-          this.fixUserData(this.user.account);
+          // Not this.user.account: the store keeps the Hive account, and on Blurt its vests
+          // would be converted at Blurt's rate (6.6M BP for 4,135).
+          try {
+            const res = await this.setProperNode().api.getAccountsAsync([this.user.account.name]);
+            if (res && res.length) this.fixUserData(res[0]);
+          } catch (e) {
+            console.error('Reloading the account after the claim failed:', e);
+          }
 
           //console.log(this.user);
 
@@ -8505,10 +8519,16 @@ export default {
       try {
 
         this.displayUser = userToFetch;
+        // before the read: the conversions use cur_bchain, the read uses the saved chain
+        if (localStorage.getItem('cur_bchain')) this.cur_bchain = localStorage.getItem('cur_bchain');
 
         // Step 3: Fetch the core account data and WAIT for it before doing anything else. This is the critical fix.
+        // From the selected chain: the powers are converted with that chain's vests rate, and
+        // Hive vests at Blurt's rate showed 6.6M BP for an account holding 4,135.
+        const accountChain = this.setProperNode();
+        if (accountChain === blurt) blurt.api.setOptions({ url: process.env.blurtApiNode });
         const account_res = await this.retryOperation(async () => {
-          return await hive.api.getAccountsAsync([this.displayUser]);
+          return await accountChain.api.getAccountsAsync([this.displayUser]);
         });
 
         // Step 4: Handle the case where the user account does not exist.
