@@ -96,7 +96,7 @@ export function guardKeychain (keychain, storage, refuse) {
 export function guardHiveAuth (HAS, storage, refuse) {
   if (!HAS || HAS[WRAPPED] || typeof HAS.broadcast !== 'function') return false
   const original = HAS.broadcast
-  HAS.broadcast = function (auth, keyType, ops, ...rest) {
+  const guarded = function (auth, keyType, ops, ...rest) {
     const chain = selectedChain(storage)
     if (chain !== 'HIVE' && opsBlocked(ops)) {
       const message = refuse(chain)
@@ -104,6 +104,12 @@ export function guardHiveAuth (HAS, storage, refuse) {
     }
     return original.call(this, auth, keyType, ops, ...rest)
   }
-  HAS[WRAPPED] = true
+  try {
+    HAS.broadcast = guarded
+    HAS[WRAPPED] = true
+  } catch (e) {
+    console.warn('HiveAuth guard: cannot wrap broadcast', e)
+    return false
+  }
   return true
 }

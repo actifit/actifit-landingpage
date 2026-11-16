@@ -18,6 +18,8 @@ describe('hive-signer-guard plugin', () => {
   it.each(['components/Comments.vue', 'pages/_username/_permlink/index.vue'])('%s: a Keychain delete succeeds only if Keychain says so', (file) => {
     const src = fs.readFileSync(path.resolve(__dirname, '../../..', file), 'utf8')
     expect(src).toContain('this.deleteSuccess(response && response.success ? null : true);')
+    // HiveAuth: a refused or declined delete stops the spinner too
+    expect(src).toMatch(/response\.cmd === 'sign_nack'\) \{\s*resolve\(\{ success: false \}\)\s*\/\/[^\n]*\n\s*if \(op_name == 'delete_comment'\) this\.deleteSuccess\(true\);/)
   })
 
   it('refuses with the translated message naming the chain, as an error toast', async () => {

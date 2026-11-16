@@ -578,6 +578,8 @@ export default {
                 }
               } else if (response.cmd && response.cmd === 'sign_nack') {
                 resolve({ success: false })
+                // refused (e.g. Blurt selected) or declined: stop the delete spinner
+                if (op_name == 'delete_comment') this.deleteSuccess(true);
               }
             })
             .catch(err => {

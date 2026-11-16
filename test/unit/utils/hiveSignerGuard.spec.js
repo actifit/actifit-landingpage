@@ -133,6 +133,11 @@ describe('HiveAuth', () => {
     expect(res).toEqual({ cmd: 'sign_nack', error: 'chain_not_supported', message: 'msg' })
   })
 
+  it('a frozen HiveAuth object does not throw', () => {
+    jest.spyOn(console, 'warn').mockImplementation(() => {})
+    expect(() => guardHiveAuth(Object.freeze({ broadcast: jest.fn() }), storage('BLURT'), jest.fn())).not.toThrow()
+  })
+
   it('Hive-only operations, and anything on Hive, still go to the app', async () => {
     const original = jest.fn(() => Promise.resolve({ cmd: 'sign_ack', data: 'tx' }))
     const HAS = { broadcast: original }
