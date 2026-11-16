@@ -372,6 +372,43 @@ describe('plugins/vue-custom global helpers', () => {
       const out = await run({ blurtPostingKey: 'old-blurt-wif' })
       expect(out.error).toBe(true)
       expect(committed).toEqual([['setBlurtPostingKey', null]])
+      expect(committed.filter(([n]) => n === 'setChatPostingKey')).toEqual([])
+    })
+
+    it('publishes a post on Blurt with its payout cap in BLURT, not HBD (Blurt cannot parse HBD)', async () => {
+      const ops = [['comment', { permlink: 'p' }], ['comment_options', {
+        author: 'alice', permlink: 'p', max_accepted_payout: '1000000.000 HBD', percent_hbd: 10000,
+        allow_votes: true, allow_curation_rewards: true, extensions: []
+      }]]
+      await Vue.prototype.$broadcastWithKey.call(ctx({ blurtPostingKey: 'blurt-wif' }), ops, { bchain: 'BLURT' })
+      const sent = blurt.broadcast.send.mock.calls[0][0].operations
+      expect(sent[0]).toEqual(ops[0])
+      expect(sent[1][1]).toEqual({
+        author: 'alice', permlink: 'p', max_accepted_payout: '1000000.000 BLURT',
+        allow_votes: true, allow_curation_rewards: true, extensions: []
+      })
+      // the caller's operations are not modified
+      expect(ops[1][1].max_accepted_payout).toBe('1000000.000 HBD')
+    })
+
+    it('leaves Hive posts exactly as built (HBD cap and percent_hbd)', async () => {
+      hive.broadcast.send.mockImplementation((tx, keys, cb) => cb(null, { id: 'x' }))
+      const ops = [['comment_options', { max_accepted_payout: '0.000 HBD', percent_hbd: 10000 }]]
+      await Vue.prototype.$broadcastWithKey.call(ctx(), ops, { bchain: 'HIVE' })
+      expect(hive.broadcast.send.mock.calls[0][0].operations).toEqual(ops)
+    })
+
+    it('a rejected Blurt key is reported in words that do not log the user out', async () => {
+      // callers treat "missing ... authority" as an expired session and log out, which would
+      // also wipe the valid Hive key
+      blurt.broadcast.send.mockImplementation((tx, keys, cb) => cb(new Error('missing required posting authority:Missing Posting Authority alice')))
+      const out = await run({ blurtPostingKey: 'old-blurt-wif' })
+      expect(out.trx.tx.error).toBe('blurt_key_rejected')
+      expect(out.trx.tx.error).not.toMatch(/missing|authority/i)
+      // and an active Blurt key the same way
+      requestKey.mockResolvedValue('blurt-active')
+      const outActive = await run({}, { active: true })
+      expect(outActive.trx.tx.error).toBe('blurt_key_rejected')
     })
 
     it('still never asks a Keychain session to type a key', async () => {
@@ -821,6 +858,15 @@ describe('plugins/vue-custom global helpers', () => {
       expect(out.trx.tx.error).toBe('keychain_not_detected')
       const memo = await Vue.prototype.$decodeMemo.call(ctx(), '#m')
       expect(memo).toEqual({ error: 'keychain_not_detected' })
+      expect(requestKey).not.toHaveBeenCalled()
+      expect(hive.broadcast.send).not.toHaveBeenCalled()
+    })
+
+    it.each(['HIVE', 'BLURT'])('a HiveAuth session is never prompted on %s', async (bchain) => {
+      localStorage.setItem('std_login', 'true')
+      localStorage.setItem('acti_login_method', 'hiveauth')
+      const out = await Vue.prototype.$broadcastWithKey.call(ctx(), [['vote', {}]], { bchain })
+      expect(out.error).toBe(true)
       expect(requestKey).not.toHaveBeenCalled()
       expect(hive.broadcast.send).not.toHaveBeenCalled()
     })

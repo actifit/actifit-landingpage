@@ -72,6 +72,37 @@ describe('KeyPromptModal', () => {
     wrapper.destroy()
   })
 
+  it.each(['active', 'owner'])('refuses a Blurt posting key that is the user\'s Hive %s key (it would be kept)', async (hiveKind) => {
+    const wrapper = mountIt()
+    const answer = jest.fn()
+    requestKey('posting', 'alice', [], 'BLURT').then(answer)
+    await wrapper.vm.$nextTick()
+    classifyKey.mockImplementation((acct, wif, chain) => Promise.resolve(chain === 'HIVE' ? hiveKind : 'posting'))
+    wrapper.setData({ wif: '5Kreused' })
+    await wrapper.vm.submit()
+    await flush()
+    expect(wrapper.vm.error).toBeTruthy()
+    expect(answer).not.toHaveBeenCalled()
+    classifyKey.mockReset()
+    wrapper.destroy()
+  })
+
+  it('accepts a Blurt posting key that is also the Hive posting key, or unknown on Hive', async () => {
+    for (const hiveKind of ['posting', 'none', 'unknown']) {
+      const wrapper = mountIt()
+      const answer = jest.fn()
+      requestKey('posting', 'alice', [], 'BLURT').then(answer)
+      await wrapper.vm.$nextTick()
+      classifyKey.mockImplementation((acct, wif, chain) => Promise.resolve(chain === 'HIVE' ? hiveKind : 'posting'))
+      wrapper.setData({ wif: '5Kblurt' })
+      await wrapper.vm.submit()
+      await flush()
+      expect([hiveKind, answer.mock.calls]).toEqual([hiveKind, [['5Kblurt']]])
+      wrapper.destroy()
+    }
+    classifyKey.mockReset()
+  })
+
   it('does not label a Hive prompt as Blurt', async () => {
     const wrapper = mountIt()
     requestKey('posting', 'alice', [])

@@ -57,7 +57,11 @@ function syncBlurtPostingKey (store, state, type) {
       if (stored !== wif) store.commit('setBlurtPostingKey', stored)
       return
     }
-    if (wif && account && account.name) savePostingKey(account.name, wif, 'BLURT')
+    // Only for the user this browser is logged in as: a stale tab still showing a previous
+    // user must not save the current user's key under the old name.
+    if (wif && account && account.name && account.name === localStorage.getItem('std_login_name')) {
+      savePostingKey(account.name, wif, 'BLURT')
+    }
   } catch (e) { /* storage unavailable: memory-only */ }
 }
 

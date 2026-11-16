@@ -247,6 +247,17 @@ describe('the Blurt posting key', () => {
     expect(store.state.blurtPostingKey).toBe('5Kblurtbob')
   })
 
+  it('a stale tab still showing alice never saves bob\'s key under alice\'s name', () => {
+    typedSession('alice')
+    store.commit('steemconnect/login', account('alice', '5Kalice'))
+    // another tab: alice logged out, bob logged in and entered his Blurt key
+    typedSession('bob')
+    savePostingKey('bob', '5Kblurtbob', 'BLURT')
+    // this tab picks it up from the storage event before learning bob logged in
+    store.commit('setBlurtPostingKey', '5Kblurtbob')
+    expect(storedBlurt()).toEqual({ user: 'bob', wif: '5Kblurtbob' })
+  })
+
   it('"switch user" to Keychain drops it from memory and storage', () => {
     typedSession('alice')
     store.commit('steemconnect/login', account('alice', '5Kalice'))

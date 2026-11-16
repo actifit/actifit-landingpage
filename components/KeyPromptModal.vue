@@ -80,12 +80,19 @@ export default {
       // Cancelled, or replaced by another prompt, while the lookup ran: this answer is
       // not for the prompt now showing.
       if (!this.open || this.request !== request) return
-      this.checking = false
 
       // The same rule the buy-now forms apply (utils/keyChecks.js): refuses an owner key,
       // the wrong role, a key of another account, and - when the account lookup fails -
       // a key we could not check at all.
-      const refusal = keyRefusal(kind, this.request.type)
+      let refusal = keyRefusal(kind, this.request.type)
+      // A Blurt posting key is kept in the browser. If it is also the user's Hive ACTIVE or
+      // OWNER key, keeping it would keep a key that can move Hive funds - refuse that.
+      if (!refusal && request.chain === 'BLURT' && request.type === 'posting') {
+        const onHive = await classifyKey(request.account, wif, 'HIVE')
+        if (!this.open || this.request !== request) return
+        if (onHive === 'owner' || onHive === 'active') refusal = keyRefusal(onHive, 'posting')
+      }
+      this.checking = false
       if (refusal) {
         this.error = this.$t(refusal)
         return

@@ -337,8 +337,26 @@ Vue.prototype.$processTrxFunc = async function (op_name, cstm_params, active) {
 // Returns a translation key to refuse with, or null.
 function typedKeySessionRefusal () {
   if (!localStorage.getItem('std_login')) return 'error_performing_operation';
-  if (localStorage.getItem('acti_login_method') === 'keychain') return 'keychain_not_detected';
+  const method = localStorage.getItem('acti_login_method');
+  if (method === 'keychain') return 'keychain_not_detected';
+  // Callers check HiveAuth first today; this keeps a future caller from prompting anyway.
+  if (method === 'hiveauth') return 'error_performing_operation';
   return null;
+}
+
+// Actifit's post forms build comment_options for Hive: a payout cap in HBD, which Blurt
+// cannot parse ("Cannot parse asset symbol"). Blurt has no second currency, so the cap is
+// in BLURT and percent_hbd has no meaning there.
+function forBlurt (operations) {
+  return operations.map((op) => {
+	if (!Array.isArray(op) || op[0] !== 'comment_options' || !op[1]) return op;
+	const params = Object.assign({}, op[1]);
+	delete params.percent_hbd;
+	if (typeof params.max_accepted_payout === 'string') {
+	  params.max_accepted_payout = params.max_accepted_payout.replace(/ HBD$/, ' BLURT');
+	}
+	return [op[0], params];
+  });
 }
 
 Vue.prototype.$decodeMemo = async function (memo) {
@@ -458,7 +476,7 @@ Vue.prototype.$broadcastWithKey = async function (operations, opts) {
 	const result = await new Promise((resolve, reject) => {
 	  // keys MUST be an object keyed by role. hive-js signs with `for (k in keys)`, so
 	  // a bare WIF string would iterate its CHARACTERS and sign with garbage.
-	  chainClient(bchain).broadcast.send({ extensions: [], operations: operations }, { [keyType]: wif },
+	  chainClient(bchain).broadcast.send({ extensions: [], operations: blurt ? forBlurt(operations) : operations }, { [keyType]: wif },
 		(err, res) => (err ? reject(err) : resolve(res)));
 	});
 	return { success: true, trx: { tx: result } };
@@ -467,9 +485,15 @@ Vue.prototype.$broadcastWithKey = async function (operations, opts) {
 	  (err && err.message) || this.$t('error_performing_operation');
 	// A posting key that no longer has authority (the user rotated it) must not keep
 	// being retried from memory. Drop it so the next action asks for the current one.
-	if (!active && /missing.*authority|missing required posting/i.test(err_msg)) {
+	const keyRejected = /missing.*authority|missing required posting/i.test(err_msg);
+	if (!active && keyRejected) {
 	  this.$store.commit(postingKeyMutation, null);
 	}
+	// Callers treat "missing ... authority" as an expired session and log the user out.
+	// That is right for the Hive login key, but a rejected Blurt key says nothing about the
+	// session - so say what happened instead, in words that do not trigger the logout.
+	// The next Blurt action asks for the current key.
+	if (blurt && keyRejected) return fail(this.$t('blurt_key_rejected'));
 	return fail(err_msg);
   } finally {
 	// Drop this function's reference to an active key once the broadcast settles. This
