@@ -173,7 +173,7 @@ module.exports = {
   key_prompt_not_active: 'Это не active ключ этого аккаунта.',
   key_prompt_not_posting: 'Это не posting ключ этого аккаунта.',
   signing_cancelled: 'Подпись отменена.',
-  typed_key_hive_only: 'Подпись введённым ключом работает только в Hive. Для Steem или Blurt войдите через Keychain.',
+  typed_key_hive_only: 'Это работает только в Hive. Переключитесь на Hive и попробуйте снова.',
   keychain_not_detected: 'Hive Keychain не обнаружен. Включите расширение Keychain и перезагрузите страницу или войдите снова другим способом.',
   key_prompt_check_failed: 'Сейчас не удалось сверить этот ключ с вашим аккаунтом. Попробуйте ещё раз через минуту.',
   key_prompt_operation: 'Вы подписываете:',

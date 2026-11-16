@@ -173,7 +173,7 @@ module.exports = {
   key_prompt_not_active: 'Questa chiave non è una chiave active di questo account.',
   key_prompt_not_posting: 'Questa chiave non è una chiave posting di questo account.',
   signing_cancelled: 'Firma annullata.',
-  typed_key_hive_only: 'La firma con una chiave digitata funziona solo su Hive. Per Steem o Blurt, accedi con Keychain.',
+  typed_key_hive_only: 'Funziona solo su Hive. Passa a Hive e riprova.',
   keychain_not_detected: 'Hive Keychain non è stato rilevato. Attiva l’estensione Keychain e ricarica la pagina, oppure accedi di nuovo con un altro metodo.',
   key_prompt_check_failed: 'Al momento non è stato possibile verificare questa chiave con il tuo account. Riprova tra poco.',
   key_prompt_operation: 'Stai firmando:',
