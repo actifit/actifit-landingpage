@@ -36,6 +36,7 @@ describe('no account on the selected chain', () => {
     } }),
     fetchUserData: jest.fn(), fetchTokenBalance: jest.fn(), fetchAFITHE: jest.fn(),
     formattedTotAccountVal: jest.fn(), $forceUpdate: jest.fn(), initWallet: jest.fn(),
+    setupQuickActionsOverflow: jest.fn(), $nextTick: jest.fn((fn) => fn()),
     ...extra,
   })
 
@@ -53,6 +54,22 @@ describe('no account on the selected chain', () => {
     await watcher.call(v, 'HIVE')
     expect(v.noAccountOnChain).toBe('')
     expect(v.initWallet).toHaveBeenCalledWith('alice')
+    // the action bar mounted() could not set up while the notice showed
+    expect(v.setupQuickActionsOverflow).toHaveBeenCalled()
+    // initWallet loads the data itself
+    expect(v.fetchUserData).not.toHaveBeenCalled()
+  })
+
+  it('a missing account on Hive itself is not "no account on this chain"', async () => {
+    const v = vm([])
+    await watcher.call(v, 'HIVE')
+    expect(v.noAccountOnChain).toBe('')
+  })
+
+  it('a wallet still loading (not stopped at the notice) is not set up from the watcher', async () => {
+    const v = vm([{ name: 'alice' }], { walletInitialized: false })
+    await watcher.call(v, 'BLURT')
+    expect(v.initWallet).not.toHaveBeenCalled()
   })
 
   it('a normal chain switch neither shows the notice nor re-runs the setup', async () => {
@@ -63,14 +80,63 @@ describe('no account on the selected chain', () => {
     expect(v.fetchUserData).toHaveBeenCalled()
   })
 
-  it('a node failure on switch is not reported as a missing account', async () => {
-    const v = vm(null)
-    v.setProperNode = () => ({ api: {
-      getDynamicGlobalPropertiesAsync: async () => ({}),
-      getAccountsAsync: async () => { throw new Error('down') },
-    } })
-    jest.spyOn(console, 'error').mockImplementation(() => {})
-    await watcher.call(v, 'BLURT')
-    expect(v.noAccountOnChain).toBe('')
+  it('a node failure on switch is not reported as a missing account, and does not convert the old account', async () => {
+    for (const notice of ['', 'BLURT']) {
+      const v = vm(null, { noAccountOnChain: notice })
+      v.setProperNode = () => ({ api: {
+        getDynamicGlobalPropertiesAsync: async () => ({}),
+        getAccountsAsync: async () => { throw new Error('down') },
+      } })
+      jest.spyOn(console, 'error').mockImplementation(() => {})
+      await watcher.call(v, 'STEEM')
+      expect(v.noAccountOnChain).toBe(notice)
+      expect(v.fetchUserData).not.toHaveBeenCalled()
+    }
+  })
+
+  it('a found account clears a notice left by another user (Switch User, log in again)', () => {
+    expect(src).toMatch(/this\.displayUserData = account_res\[0\];\s*\/\/[^\n]*\n\s*this\.noAccountOnChain = '';\s*\/\/ Step 5:/)
+  })
+
+  it('refreshes do nothing while the notice shows (the account held is another chain\'s)', () => {
+    expect(src).toMatch(/async fetchUserData\(\) \{\s*\/\/[^\n]*\n\s*if \(this\.noAccountOnChain\) return;/)
+  })
+
+  describe('"Switch to Hive"', () => {
+    const mStart = src.indexOf('    async switchWalletToHive() {')
+    const mBody = src.slice(src.indexOf('{', mStart) + 1, src.indexOf('\n    },', mStart))
+    // eslint-disable-next-line no-new-func
+    const switchWalletToHive = new Function(`return (async () => {${mBody}})()`)
+    const btn = (extra) => ({
+      bchain: 'BLURT', cur_bchain: 'BLURT', noAccountOnChain: 'BLURT', walletInitialized: false,
+      displayUser: 'alice', user: null,
+      $store: { commit: jest.fn() }, initWallet: jest.fn(), refreshAllWalletData: jest.fn(),
+      setupQuickActionsOverflow: jest.fn(), $nextTick: jest.fn((fn) => fn()),
+      ...extra,
+    })
+    afterEach(() => localStorage.removeItem('cur_bchain'))
+
+    it('saves Hive and lets the chain watcher reload when the store changes', async () => {
+      const v = btn()
+      await switchWalletToHive.call(v)
+      expect(localStorage.getItem('cur_bchain')).toBe('HIVE')
+      expect(v.$store.commit).toHaveBeenCalledWith('setBchain', 'HIVE')
+      expect(v.initWallet).not.toHaveBeenCalled()
+      expect(v.refreshAllWalletData).not.toHaveBeenCalled()
+    })
+
+    it('when the store already says HIVE (the watcher will not fire), it loads the wallet itself', async () => {
+      const first = btn({ bchain: 'HIVE' })
+      await switchWalletToHive.call(first)
+      expect(first.noAccountOnChain).toBe('')
+      expect(first.cur_bchain).toBe('HIVE')
+      expect(first.initWallet).toHaveBeenCalledWith('alice')
+      expect(first.setupQuickActionsOverflow).toHaveBeenCalled()
+
+      const later = btn({ bchain: 'HIVE', walletInitialized: true })
+      await switchWalletToHive.call(later)
+      expect(later.refreshAllWalletData).toHaveBeenCalled()
+      expect(later.initWallet).not.toHaveBeenCalled()
+    })
   })
 })

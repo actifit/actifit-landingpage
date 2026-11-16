@@ -6,7 +6,7 @@
          2020 have no Blurt account): say so instead of an empty or stale wallet. -->
     <div class="container wallet-page wallet-shell pt-5 mt-5 pb-5" v-if="noAccountOnChain">
       <div class="alert alert-warning wallet-no-account" role="status">
-        <span>{{ $t('wallet_no_account_on_chain').replace('_USER_', displayUser || (user && user.account.name) || '').replace('_CHAIN_', noAccountOnChain === 'BLURT' ? 'Blurt' : 'Steem') }}</span>
+        <span>{{ $t('wallet_no_account_on_chain').replace('_USER_', displayUser || (user && user.account && user.account.name) || '').replace('_CHAIN_', noAccountOnChain === 'BLURT' ? 'Blurt' : 'Steem') }}</span>
         <button type="button" class="btn btn-brand btn-sm" v-on:click="switchWalletToHive">{{ $t('switch_to_hive') }}</button>
       </div>
     </div>
@@ -2606,7 +2606,10 @@ export default {
         } catch (err) {
           console.error('Error fetching account data on chain switch:', err);
         }
-        if (Array.isArray(accounts) && accounts.length === 0 && newBchain !== 'HIVE') {
+        // Node error: the account held is the previous chain's, and converting it at this
+        // chain's rate is the mix this avoids. Keep what is shown; the next refresh retries.
+        if (!Array.isArray(accounts)) return;
+        if (accounts.length === 0 && newBchain !== 'HIVE') {
           // Not on this chain. Keeping the previous chain's account would convert its
           // vests at this chain's rate, so show the notice and stop here.
           this.noAccountOnChain = newBchain;
@@ -2621,6 +2624,8 @@ export default {
         // is the wallet's own user): finish setting up now.
         if (recovering && !this.walletInitialized) {
           await this.initWallet(name);
+          // mounted() tried while the notice showed, so the action bar was not there yet
+          this.$nextTick(this.setupQuickActionsOverflow);
           return;
         }
       }
@@ -4053,6 +4058,8 @@ export default {
       this.displayUserData = newUserData;
     },
     async fetchUserData() {
+      // The account held is another chain's while the "no account on this chain" notice shows.
+      if (this.noAccountOnChain) return;
       // Guard Clause: Ensure this function doesn't run if the primary user data isn't loaded yet.
       if (!this.displayUserData) {
         console.warn('fetchUserData called before displayUserData was ready. Aborting.');
@@ -8530,9 +8537,21 @@ export default {
       }
     },
     // Same as picking Hive in the header's chain list; the bchain watcher reloads the wallet.
-    switchWalletToHive() {
+    // The store can already say HIVE while the saved choice said otherwise (another tab);
+    // then the watcher does not fire, so do its part here.
+    async switchWalletToHive() {
+      const storeChanges = this.bchain !== 'HIVE';
       localStorage.setItem('cur_bchain', 'HIVE');
       this.$store.commit('setBchain', 'HIVE');
+      if (storeChanges) return;
+      this.cur_bchain = 'HIVE';
+      this.noAccountOnChain = '';
+      if (this.walletInitialized) {
+        await this.refreshAllWalletData();
+      } else {
+        await this.initWallet(this.displayUser || (this.user && this.user.account && this.user.account.name));
+        this.$nextTick(this.setupQuickActionsOverflow);
+      }
     },
     async initWallet(userToFetch) {
       if (this.walletInitialized) return; // already set up (guards double-init)
@@ -8562,6 +8581,8 @@ export default {
         }
 
         this.displayUserData = account_res[0];
+        // e.g. the previous user (Switch User, or log in again) had no account on this chain
+        this.noAccountOnChain = '';
 
         // Step 5: Now that displayUserData is safely populated, proceed with all other initializations.
         this.afitTokenAddress = afitTokenAddress;
