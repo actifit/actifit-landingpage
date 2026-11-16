@@ -918,7 +918,8 @@ export default {
           'Posting', (response) => {
             console.log(response);
             if (op_name == 'delete_comment') {
-              this.deleteSuccess();
+              // a refused or cancelled delete is not a success (the post page would also navigate away)
+              this.deleteSuccess(response && response.success ? null : true);
             }
           });
       } else if (localStorage.getItem('acti_login_method') == 'hiveauth') {

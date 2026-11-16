@@ -9,6 +9,10 @@ describe('which operations would land on Hive by mistake', () => {
     ['claim_reward_balance', {}], ['account_witness_vote', {}], ['account_witness_proxy', {}],
     ['transfer', { amount: '1.000 BLURT' }], ['transfer_to_vesting', { amount: '5.000 BLURT' }],
     ['transfer_to_savings', { amount: '1.000 STEEM' }],
+    // the profile page reads the Blurt profile on Blurt: signing it on Hive would replace the Hive profile
+    ['account_update2', { account: 'alice', posting_json_metadata: '{}' }], ['account_update', {}],
+    ['cancel_transfer_from_savings', {}],
+    ['account_witness_vote', { witness: 'someoneelse', approve: true }],
   ])('%s %j is refused', (name, params) => {
     expect(opBlocked([name, params])).toBe(true)
   })
@@ -19,6 +23,9 @@ describe('which operations would land on Hive by mistake', () => {
     ['custom_json', { id: 'actifit', json: '{}' }],
     ['transfer', { amount: '10.000 HIVE' }], ['transfer', { amount: '2.500 HBD' }],
     ['update_proposal_votes', {}],
+    // the Actifit witness card is a Hive action for every login method (typed keys sign it on Hive)
+    ['account_witness_vote', { account: 'alice', witness: 'actifit', approve: true }],
+    ['account_witness_proxy', { account: 'alice', proxy: 'actifit' }],
   ])('%s %j goes through', (name, params) => {
     expect(opBlocked([name, params])).toBe(false)
   })
@@ -34,6 +41,15 @@ describe('which operations would land on Hive by mistake', () => {
     expect(keychainCallBlocked('requestSignBuffer', [])).toBe(false)
     expect(keychainCallBlocked('requestCustomJson', [])).toBe(false)
     expect(keychainCallBlocked('requestUpdateProposalVote', [])).toBe(false)
+    expect(keychainCallBlocked('requestWitnessVote', ['alice', 'actifit', true])).toBe(false)
+    expect(keychainCallBlocked('requestProxy', ['alice', 'actifit'])).toBe(false)
+    expect(keychainCallBlocked('requestWitnessVote', ['alice', 'other', true])).toBe(true)
+  })
+
+  it('operations passed as a JSON string are checked too', () => {
+    expect(keychainCallBlocked('requestBroadcast', ['a', JSON.stringify([['vote', {}]]), 'Posting'])).toBe(true)
+    expect(keychainCallBlocked('requestBroadcast', ['a', JSON.stringify([['custom_json', {}]]), 'Posting'])).toBe(false)
+    expect(keychainCallBlocked('requestBroadcast', ['a', 'not json', 'Posting'])).toBe(true)
   })
 })
 
@@ -91,6 +107,12 @@ describe('Keychain', () => {
     chain = 'BLURT'
     kc.requestPost('alice', 't', 'b', 'p', '', '{}', 'perm', '', () => {})
     expect(requestPost).toHaveBeenCalledTimes(1)
+  })
+
+  it('a frozen Keychain object does not throw (the site must still start)', () => {
+    const kc = Object.freeze({ requestBroadcast: jest.fn() })
+    jest.spyOn(console, 'warn').mockImplementation(() => {})
+    expect(() => guardKeychain(kc, storage('BLURT'), jest.fn())).not.toThrow()
   })
 
   it('wraps only once, and leaves a missing Keychain alone', () => {
