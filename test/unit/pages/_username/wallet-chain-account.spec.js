@@ -22,6 +22,17 @@ describe('the wallet reads the account on the selected chain', () => {
     expect(init).toMatch(/if \(accountChain === blurt\) blurt\.api\.setOptions\(\{ url: process\.env\.blurtApiNode \}\);/)
   })
 
+  it('the chain is synced before the first read, so conversions use the same chain', () => {
+    const init = method('initWallet')
+    expect(init.indexOf("this.cur_bchain = localStorage.getItem('cur_bchain')")).toBeGreaterThan(-1)
+    expect(init.indexOf("this.cur_bchain = localStorage.getItem('cur_bchain')")).toBeLessThan(init.indexOf('accountChain.api.getAccountsAsync'))
+  })
+
+  it('after a claim the account is re-read on the selected chain, not copied from the store', () => {
+    expect(src).not.toContain('this.fixUserData(this.user.account)')
+    expect(src).toMatch(/const res = await this\.setProperNode\(\)\.api\.getAccountsAsync\(\[this\.user\.account\.name\]\);\s*if \(res && res\.length\) this\.fixUserData\(res\[0\]\);/)
+  })
+
   it('refreshing one\'s own wallet does not reuse the store account (the Hive one)', () => {
     const refresh = method('refreshAllWalletData')
     expect(refresh).not.toContain('this.displayUserData = this.user.account')
@@ -52,5 +63,10 @@ describe('the vests rate belongs to the selected chain', () => {
     expect(src).not.toContain("if (this.properties == '') {")
     expect(method('vestsToSteemPower')).toContain('if (!this.propertiesMatchChain()) {')
     expect(method('steemPowerToVests')).toContain('if (!this.propertiesMatchChain()) {')
+    expect(method('calculateSavingsRewardsParams')).toContain('if (!this.propertiesMatchChain()) {')
+  })
+
+  it('the HBD interest estimate runs only on Hive (Blurt has no HBD savings)', () => {
+    expect(method('calculateSavingsRewardsParams')).toMatch(/^\s*async calculateSavingsRewardsParams\(\) \{\s*if \(this\.cur_bchain !== 'HIVE'\) return;/)
   })
 })

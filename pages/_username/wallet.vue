@@ -4544,6 +4544,7 @@ export default {
     },
 
     async calculateSavingsRewardsParams() {
+      if (this.cur_bchain !== 'HIVE') return; // HBD savings interest exists only on Hive
       //current interest rate set by witnesses
       if (!this.propertiesMatchChain()) {
         let chainLnk = this.setProperNode();
@@ -5648,7 +5649,14 @@ export default {
 
           await this.$store.dispatch('steemconnect/refreshUser');
 
-          this.fixUserData(this.user.account);
+          // Not this.user.account: the store keeps the Hive account, and on Blurt its vests
+          // would be converted at Blurt's rate (6.6M BP for 4,135).
+          try {
+            const res = await this.setProperNode().api.getAccountsAsync([this.user.account.name]);
+            if (res && res.length) this.fixUserData(res[0]);
+          } catch (e) {
+            console.error('Reloading the account after the claim failed:', e);
+          }
 
           //console.log(this.user);
 
@@ -8511,6 +8519,8 @@ export default {
       try {
 
         this.displayUser = userToFetch;
+        // before the read: the conversions use cur_bchain, the read uses the saved chain
+        if (localStorage.getItem('cur_bchain')) this.cur_bchain = localStorage.getItem('cur_bchain');
 
         // Step 3: Fetch the core account data and WAIT for it before doing anything else. This is the critical fix.
         // From the selected chain: the powers are converted with that chain's vests rate, and
