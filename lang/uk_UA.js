@@ -174,6 +174,7 @@ module.exports = {
   key_prompt_not_posting: 'Це не posting ключ цього акаунта.',
   signing_cancelled: 'Підписання скасовано.',
   typed_key_hive_only: 'Це працює лише в Hive. Перейдіть на Hive і спробуйте ще раз.',
+  signer_hive_only: 'Hive Keychain і HiveAuth можуть підписувати лише в Hive. Щоб зробити це в _CHAIN_, увійдіть за допомогою ключів або перейдіть на Hive.',
   post_not_on_chain: 'Цього допису немає в _CHAIN_. Можливо, він у Hive.',
   switch_to_hive: 'Перейти на Hive',
   blurt_key_rejected: 'Blurt не прийняв ваш ключ. Спробуйте ще раз і введіть поточний ключ Blurt.',
