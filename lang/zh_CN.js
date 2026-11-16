@@ -769,7 +769,7 @@ module.exports = {
   Afit_Move_SE_Desc: '此过程使您能够将您的AFIT代币从Actifit钱包移动到Hive-Engine AFIT。该过程是每日进行的，持续一周（7天），之后将自动取消。每日可移动的最大金额取决于您持有的AFITX代币数量。',
   no_proper_afitx_funds: '您没有执行移动所需的最少1个AFITX。',
   cannot_move_amount_afitx_needed: '您没有足够的AFITX来每日移动AFIT_AMNT AFIT。每额外移动100 AFIT，您需要额外拥有1个AFITX。',
-  power_down_successfully_initiated: '能量降低和转至S-E已启动。下一次能量降低将在世界标准时间上午10:00进行',
+  power_down_successfully_initiated: '能量降低和转至H-E已启动。下一次能量降低将在世界标准时间上午10:00进行',
   afit_power_down_canceled: 'AFIT能量降低已成功取消',
   next_afit_powerdown: '下一次AFIT_AMOUNT的转移在',
   Cancel_Transfer: '取消转移',

@@ -763,7 +763,7 @@ module.exports = {
   Afit_Move_SE_Desc: 'Ce processus vous permet de déplacer vos jetons AFIT du portefeuille Actifit vers AFIT sur Hive-Engine. Le processus est quotidien et dure une semaine (7 jours), après quoi il s\'annulera automatiquement. Le montant maximal pouvant être déplacé quotidiennement dépend du nombre de jetons AFITX que vous détenez. ',
   no_proper_afitx_funds: 'Vous n\'avez pas le montant minimum de 1 AFITX requis pour effectuer le déplacement.',
   cannot_move_amount_afitx_needed: 'Vous n\'avez pas assez d\'AFITX pour déplacer quotidiennement AFIT_AMNT AFIT. Pour chaque 100 AFIT supplémentaires que vous souhaitez déplacer quotidiennement, vous devez avoir 1 AFITX supplémentaire.',
-  power_down_successfully_initiated: 'Power Down & Transfert vers S-E initié. Le prochain Power Down aura lieu à 10:00 AM UTC ',
+  power_down_successfully_initiated: 'Power Down & Transfert vers H-E initié. Le prochain Power Down aura lieu à 10:00 AM UTC ',
   afit_power_down_canceled: 'Power down d\'AFIT annulé avec succès ',
   next_afit_powerdown: 'Prochain transfert de AFIT_AMOUNT dans',
   Cancel_Transfer: 'Annuler le transfert',

@@ -39,6 +39,19 @@ describe('yield farming APY', () => {
     expect(out).toMatch(/^18\.25 ?%$/)
   })
 
+  it('shows "- %" when the sample no longer delegates (instead of "NaN %")', () => {
+    const base = { hivePrice: 0.2, afitPrice: { afitHiveLastUsdPrice: 0.01 } }
+    expect(apy({ ...base, randomAfitTrxHive: { delegated_amount: NaN, token_count: 10 } })).toBe('- %')
+    expect(apy({ ...base, randomAfitTrxHive: { delegated_amount: 0, token_count: 10 } })).toBe('- %')
+  })
+
+  it('the AFIT move toast names Hive-Engine, not Steem-Engine', () => {
+    for (const f of fs.readdirSync(path.resolve(__dirname, '../../../lang')).filter((n) => n.endsWith('.js'))) {
+      const line = fs.readFileSync(path.resolve(__dirname, '../../../lang', f), 'utf8').split('\n').find((l) => l.includes('power_down_successfully_initiated:'))
+      expect([f, /S-E|एस-ई/.test(line)]).toEqual([f, false])
+    }
+  })
+
   it('shows "- %" until a Hive sample delegation is known', () => {
     expect(apy({ randomAfitTrxHive: '', hivePrice: 0.2, afitPrice: {} })).toBe('- %')
   })

@@ -201,6 +201,8 @@
 		const hiveValue = this.randomAfitTrxHive.delegated_amount * this.hivePrice;
 		const afitValue = this.randomAfitTrxHive.token_count * this.afitPrice.afitHiveLastUsdPrice;
 		const dailyAPY = afitValue / hiveValue; // daily return
+		// the sample may have undelegated since the reward run (no amount): no figure beats "NaN %"
+		if (!hiveValue || !isFinite(dailyAPY)) return '- %';
 		return this.numberFormat(365 * dailyAPY * 100, 3) + ' %';
 	  }
     },
