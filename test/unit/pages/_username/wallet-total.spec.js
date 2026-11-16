@@ -108,6 +108,26 @@ describe('a wallet load that fails half-way does not spin forever', () => {
   })
 })
 
+describe('the native coin card on Blurt', () => {
+  it('shows the selected chain power unit, not always HP', () => {
+    expect(src).toContain('<strong>{{ renderSteemPower(2) }} {{ powerUnit }}</strong>')
+    expect(src).toMatch(/powerUnit\(\) \{\s*return this\.cur_bchain === 'STEEM' \? 'SP' : \(this\.cur_bchain === 'BLURT' \? 'BP' : 'HP'\);/)
+  })
+  it('shows "—" for the USD value until the coin price has loaded (Blurt starts at a 0.01 placeholder)', () => {
+    expect(src).toContain("<small>{{ nativePriceKnown ? '$' + hiveValueUSD : '—' }}</small>")
+    expect(src).toContain(`:data-label="$t('in_usd')">{{ nativePriceKnown ? '$' + hiveValueUSD : '—' }}</div>`)
+    expect(src).toMatch(/nativePriceKnown\(\) \{\s*return this\.priceStatus\[this\.nativeSymbol\.toLowerCase\(\)\] === 'ok';/)
+  })
+  it('the search matches the main row by the chain power unit (BP on Blurt)', () => {
+    expect(src).not.toMatch(/groupMatchesSearch\(\[(this\.)?nativeSymbol, 'HP'/)
+    expect(src.match(/groupMatchesSearch\(\[(this\.)?nativeSymbol, (this\.)?powerUnit/g)).toHaveLength(3)
+  })
+  it('values the coin at its own price (Blurt Power was priced at the HIVE price)', () => {
+    expect(src).toMatch(/hiveValueUSD\(\) \{[\s\S]{0,250}\* this\.nativePrice, 2\);/)
+    expect(src).toMatch(/nativePrice\(\) \{\s*return this\.cur_bchain === 'STEEM' \? this\.steemPrice : \(this\.cur_bchain === 'BLURT' \? this\.blurtPrice : this\.hivePrice\);/)
+  })
+})
+
 describe('a failed metrics refresh', () => {
   const good = [{ symbol: 'PAL', lastPrice: '0.5' }]
   it('keeps the last good prices of the same account', () => {

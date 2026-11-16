@@ -174,6 +174,8 @@ module.exports = {
   key_prompt_not_posting: 'Это не posting ключ этого аккаунта.',
   signing_cancelled: 'Подпись отменена.',
   typed_key_hive_only: 'Это работает только в Hive. Переключитесь на Hive и попробуйте снова.',
+  post_not_on_chain: 'Этого поста нет в _CHAIN_. Возможно, он в Hive.',
+  switch_to_hive: 'Перейти на Hive',
   blurt_key_rejected: 'Blurt не принял ваш ключ. Попробуйте снова и введите текущий ключ Blurt.',
   keychain_not_detected: 'Hive Keychain не обнаружен. Включите расширение Keychain и перезагрузите страницу или войдите снова другим способом.',
   key_prompt_check_failed: 'Сейчас не удалось сверить этот ключ с вашим аккаунтом. Попробуйте ещё раз через минуту.',

@@ -42,8 +42,8 @@
             </div>
             <div class="wallet-stat-card">
               <span>{{ cur_bchain }} {{ $t('POWER') }}</span>
-              <strong>{{ renderSteemPower(2) }} HP</strong>
-              <small>${{ hiveValueUSD }}</small>
+              <strong>{{ renderSteemPower(2) }} {{ powerUnit }}</strong>
+              <small>{{ nativePriceKnown ? '$' + hiveValueUSD : '—' }}</small>
             </div>
           </div>
         </section>
@@ -181,8 +181,8 @@
             </div>
           </div>
           <div ref="afitActionAnchor" class="wallet-core-action-anchor" aria-hidden="true"></div>
-          <h2 class="wallet-asset-group-heading" v-if="groupMatchesSearch([nativeSymbol, 'HP', nativeStable])">{{ $t('main_chain') }}</h2>
-          <div class="token-entry row main-token" v-if="groupMatchesSearch([nativeSymbol, 'HP'])">
+          <h2 class="wallet-asset-group-heading" v-if="groupMatchesSearch([nativeSymbol, powerUnit, nativeStable])">{{ $t('main_chain') }}</h2>
+          <div class="token-entry row main-token" v-if="groupMatchesSearch([nativeSymbol, powerUnit])">
             <div class="col-2 text-left wallet-token-name">
               <span v-if="cur_bchain == 'HIVE'"><img src="/img/HIVE.png" class="mr-1 mini-token-logo" alt="">HIVE</span>
               <span v-else-if="cur_bchain == 'STEEM'"><img src="/img/STEEM.png"
@@ -227,7 +227,7 @@
 
 
             </div>
-            <div class="col-1 col-lg-2 text-right break-val wallet-token-usd" :data-label="$t('in_usd')">${{ this.hiveValueUSD }}</div>
+            <div class="col-1 col-lg-2 text-right break-val wallet-token-usd" :data-label="$t('in_usd')">{{ nativePriceKnown ? '$' + hiveValueUSD : '—' }}</div>
             <transition name="fade">
               <div v-if="showPowerBreakdown['HIVE']" class="wallet-power-breakdown">
                 <strong>{{ $t('POWER_BREAKDOWN') }}</strong>
@@ -2239,6 +2239,18 @@ export default {
     overflowActions() {
       return this.walletQuickActions.slice(this.visibleActionCount);
     },
+    // USD price of the selected chain's coin: liquid + staked balances are valued with it
+    nativePrice() {
+      return this.cur_bchain === 'STEEM' ? this.steemPrice : (this.cur_bchain === 'BLURT' ? this.blurtPrice : this.hivePrice);
+    },
+    // Until it loads, nativePrice is a placeholder (BLURT 0.01), and a failed fetch leaves
+    // it there, so the USD value is shown only once the real price is in.
+    nativePriceKnown() {
+      return this.priceStatus[this.nativeSymbol.toLowerCase()] === 'ok';
+    },
+    powerUnit() {
+      return this.cur_bchain === 'STEEM' ? 'SP' : (this.cur_bchain === 'BLURT' ? 'BP' : 'HP');
+    },
     // native chain symbols, used so the search box can match the core main-chain rows
     nativeSymbol() {
       return this.cur_bchain === 'STEEM' ? 'STEEM' : (this.cur_bchain === 'BLURT' ? 'BLURT' : 'HIVE');
@@ -2251,7 +2263,7 @@ export default {
     noSearchMatches() {
       if (!(this.tokenSearch || '').trim()) return false;
       return !this.matchesTokenSearch('AFIT')
-        && !this.groupMatchesSearch([this.nativeSymbol, 'HP', this.nativeStable])
+        && !this.groupMatchesSearch([this.nativeSymbol, this.powerUnit, this.nativeStable])
         && !this.groupMatchesSearch(['AFIT', 'AFITX', 'BNB', 'LP'])
         && !this.engineHasSearchMatch();
     },
@@ -2404,7 +2416,7 @@ export default {
     },
     hiveValueUSD() {
       if (!this.displayUserData) return '0.00';
-      return this.numberFormat((parseFloat(this.displayUserData.balance) + parseFloat(this.steemPower)) * this.hivePrice, 2);
+      return this.numberFormat((parseFloat(this.displayUserData.balance) + parseFloat(this.steemPower)) * this.nativePrice, 2);
     },
     totalBalanceUSD() {
       //calculate full balance HE tokens
