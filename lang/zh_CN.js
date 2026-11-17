@@ -1297,6 +1297,7 @@ module.exports = {
   manage_beneficiaries: '管理受益人',
   no_posts: '未找到帖子',
   error_no_posts: '用户似乎还没有帖子...',
+  posts_load_failed: '无法加载帖子。请重试。',
   error_no_Videos: '用户似乎还没有视频...',
   show_core_tokens: '显示核心代币',
   show_all_tokens: '显示完整列表',
