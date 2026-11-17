@@ -68,7 +68,7 @@
       </div>
 
       <!-- show load more button if there are more posts available -->
-      <div class="text-center" v-if="moreUserPostsAvailable">
+      <div class="text-center" v-if="moreUserPostsAvailable && !noAccountOnChain && !loadFailed">
         <a href="#" class="btn btn-brand" @click.prevent="loadMore()">
           {{ $t('load_more') }}
           <i class="fas fa-spinner fa-spin" v-if="loadingMore"></i>
@@ -149,6 +149,7 @@ export default {
     },
     user: 'fetchUserData',
     bchain: async function (newBchain) {
+      // a change during a load is picked up when that load ends (see loadPosts)
       if (this.cur_bchain != newBchain && !this.loading) {
         //only update if changed
         this.cur_bchain = newBchain;
@@ -208,6 +209,8 @@ export default {
     // Loads the first page from scratch. The spinner always stops: a node error used to
     // leave it running for good.
     async loadPosts() {
+      const chain = this.bchain;
+      this.cur_bchain = chain;
       this.loading = true;
       this.noAccountOnChain = '';
       this.loadFailed = false;
@@ -216,17 +219,22 @@ export default {
       try {
         await this.fetchPostsRecursively();
       } catch (err) {
-        this.showLoadError(err);
+        this.showLoadError(err, chain);
       } finally {
         this.loading = false;
       }
+      // the chain changed during the load (the watcher skips changes while loading):
+      // load again for the chain now selected, or the page shows the previous chain's result
+      if (this.bchain !== chain) await this.loadPosts();
     },
 
-    showLoadError(err) {
+    // `chain`: the one the failed load was for, which may no longer be the selected one
+    showLoadError(err, chain) {
       console.error('Loading the posts failed:', err);
       if (isMissingAccountError(err)) {
-        // on Hive: the existing "no posts" line covers it
-        if (['BLURT', 'STEEM'].includes(this.bchain)) this.noAccountOnChain = this.bchain;
+        // Blurt answers a missing account with an error; on Hive, hive-js turns it into an
+        // empty list (see blogPostsList), so this is Blurt's (or Steem's) case
+        if (['BLURT', 'STEEM'].includes(chain)) this.noAccountOnChain = chain;
       } else {
         this.loadFailed = true;
       }

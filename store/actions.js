@@ -5,6 +5,7 @@ import hive from '@hiveio/hive-js'
 
 import blurt from '@blurtfoundation/blurtjs'
 import { fetchJsonShared } from '~/utils/sharedFetch'
+import { blogPostsList } from '~/utils/chainErrors'
 
 //hive.config.set('rebranded_api', true)
 //hive.broadcast.updateOperations()
@@ -595,14 +596,21 @@ export default {
       }
       //console.log('get blog posts');
       // get (next) 20 posts from the user
+      const chain = state.bchain
       chainLnk.api.getDiscussionsByBlog({ tag: username, limit: process.env.maxPostCount, start_author: start_author, start_permlink: start_permlink }, (err, posts) => {
         //console.log(err,posts);
         if (err) reject(err)
+        // the chain changed meanwhile: these posts belong to the previous one
+        else if (state.bchain !== chain) resolve()
         else {
+          posts = blogPostsList(posts)
           if (start_author && start_permlink) posts.shift() // remove the first posts because its the last post from before
           //posts = posts.filter(userPostsFilter(username)) // get only actual activity posts
           commit('setUserPosts', [...state.userPosts, ...posts])
-          dispatch('checkIfMoreUserPostsAvailable', username)
+          dispatch('checkIfMoreUserPostsAvailable', username).catch((e) => {
+            console.error('Checking for more posts failed:', e)
+            commit('setMoreUserPostsAvailable', false)
+          })
           resolve()
         }
       })
@@ -1080,9 +1088,12 @@ export default {
         chainLnk = blurt;
       }
 
+      const chain = state.bchain
       chainLnk.api.getDiscussionsByBlog({ tag: username, limit: process.env.maxPostCount, start_author: start_author, start_permlink: start_permlink }, (err, posts) => {
         if (err) reject(err)
+        else if (state.bchain !== chain) resolve() // a previous chain's answer
         else {
+          posts = blogPostsList(posts)
           posts.shift() // remove the first posts because its the last post from before
           //posts = posts.filter(userPostsFilter(username)) // get only actual activity posts
           commit('setMoreUserPostsAvailable', !!posts.length) // if posts were found, show load more button

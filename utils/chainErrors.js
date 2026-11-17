@@ -6,3 +6,16 @@ export function isMissingAccountError (err) {
   try { text += ' ' + JSON.stringify(err) } catch (e) { /* circular: the message is enough */ }
   return /account\b[^"]{0,40}?\b(not found|does not exist)/i.test(text)
 }
+
+// hive-js answers a missing account (-32602) not with an error but with the JSON *string*
+// '{"id":0, "result":[], ...}'; spread as posts, it became one "post" per character.
+export function blogPostsList (posts) {
+  if (Array.isArray(posts)) return posts
+  if (typeof posts === 'string') {
+    try {
+      const parsed = JSON.parse(posts)
+      if (parsed && Array.isArray(parsed.result)) return parsed.result
+    } catch (e) { /* not JSON: nothing usable */ }
+  }
+  return []
+}
