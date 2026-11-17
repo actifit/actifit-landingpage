@@ -14,20 +14,26 @@ const template = src.slice(src.indexOf('<template>') + '<template>'.length, src.
 describe('no account on the selected chain', () => {
   it('the template compiles, and the notice replaces the wallet', () => {
     expect(compile(template).errors).toEqual([])
-    expect(template).toMatch(/v-if="noAccountOnChain">[\s\S]{0,400}wallet_no_account_on_chain[\s\S]{0,400}switchWalletToHive[\s\S]{0,200}<div class="container wallet-page wallet-shell pt-5 mt-5 pb-5" v-else-if="user \|\| displayUser">/)
+    expect(template).toMatch(/v-if="noAccountOnChain">[\s\S]{0,400}wallet_no_account_on_chain[\s\S]{0,400}switchWalletToHive[\s\S]{0,600}v-else-if="accountStale">[\s\S]{0,400}wallet_account_stale[\s\S]{0,300}fetchUserData\(\)[\s\S]{0,200}<div class="container wallet-page wallet-shell pt-5 mt-5 pb-5" v-else-if="user \|\| displayUser">/)
   })
 
   it('first load: a missing account on a non-Hive chain sets the notice', () => {
-    expect(src).toMatch(/console\.error\(`Account \$\{this\.displayUser\} not found\.`\);\s*if \(this\.cur_bchain !== 'HIVE'\) this\.noAccountOnChain = this\.cur_bchain;/)
+    expect(src).toMatch(/console\.error\(`Account \$\{this\.displayUser\} not found\.`\);\s*if \(NOTICE_CHAINS\.includes\(this\.cur_bchain\)\) this\.noAccountOnChain = this\.cur_bchain;/)
   })
 
   // the bchain watcher, extracted and run with stubs
   const start = src.indexOf('    bchain: async function (newBchain) {')
   const body = src.slice(src.indexOf('{', start) + 1, src.indexOf('\n    },', start))
+  const NOTICE_CHAINS = ['BLURT', 'STEEM']
   // eslint-disable-next-line no-new-func
-  const watcher = new Function('newBchain', `return (async () => {${body}})()`)
+  const watcherFn = new Function('NOTICE_CHAINS', 'newBchain', `return (async () => {${body}})()`)
+  const watcher = { call: (v, chain) => watcherFn.call(v, NOTICE_CHAINS, chain) }
+
+  it('NOTICE_CHAINS matches the page', () => {
+    expect(src).toContain("const NOTICE_CHAINS = ['BLURT', 'STEEM'];")
+  })
   const vm = (accounts, extra = {}) => ({
-    displayUser: 'alice', user: null, walletInitialized: true, noAccountOnChain: '',
+    displayUser: 'alice', walletUserName: 'alice', user: null, walletInitialized: true, noAccountOnChain: '',
     displayUserData: { name: 'alice', vesting_shares: '6255584.165781 VESTS' },
     $store: { dispatch: jest.fn() },
     setProperNode: () => ({ api: {
@@ -100,11 +106,16 @@ describe('no account on the selected chain', () => {
     const mStart = src.indexOf('    async rereadStaleAccount() {')
     const mBody = src.slice(src.indexOf('{', mStart) + 1, src.indexOf('\n    },', mStart))
     // eslint-disable-next-line no-new-func
-    const reread = new Function(`return (async () => {${mBody}})()`)
+    const rereadFn = new Function('NOTICE_CHAINS', `return (async () => {${mBody}})()`)
+    const reread = { call: (v) => rereadFn.call(v, NOTICE_CHAINS) }
     const stale = (result, extra) => ({
-      accountStale: true, noAccountOnChain: '', cur_bchain: 'BLURT', displayUser: 'alice', user: null,
-      displayUserData: { name: 'alice', from: 'hive' },
-      setProperNode: () => ({ api: { getAccountsAsync: async () => { if (result instanceof Error) throw result; return result } } }),
+      accountStale: true, noAccountOnChain: '', cur_bchain: 'BLURT', walletUserName: 'alice',
+      displayUserData: { name: 'alice', from: 'hive' }, properties: { from: 'hive' },
+      setProperNode: jest.fn(() => ({ api: {
+        getDynamicGlobalPropertiesAsync: async () => ({ from: 'blurt' }),
+        getAccountsAsync: async () => { if (result instanceof Error) throw result; return result },
+      } })),
+      setupQuickActionsOverflow: jest.fn(), $nextTick: jest.fn((fn) => fn()),
       ...extra,
     })
 
@@ -116,7 +127,28 @@ describe('no account on the selected chain', () => {
       const v = stale([{ name: 'alice', from: 'blurt' }])
       expect(await reread.call(v)).toBe(true)
       expect(v.displayUserData).toEqual({ name: 'alice', from: 'blurt' })
+      expect(v.properties).toEqual({ from: 'blurt' })
       expect(v.accountStale).toBe(false)
+      // read on the chain the labels show, not whatever localStorage says
+      expect(v.setProperNode).toHaveBeenCalledWith('BLURT')
+      // the wallet replaces the banner: its action bar is set up again
+      expect(v.setupQuickActionsOverflow).toHaveBeenCalled()
+    })
+
+    it('a chain switch while re-reading: the result is dropped', async () => {
+      const v = stale([{ name: 'alice', from: 'blurt' }])
+      v.setProperNode = () => ({ api: {
+        getDynamicGlobalPropertiesAsync: async () => { v.cur_bchain = 'HIVE'; return {} },
+        getAccountsAsync: async () => [{ name: 'alice', from: 'blurt' }],
+      } })
+      expect(await reread.call(v)).toBe(false)
+      expect(v.displayUserData).toEqual({ name: 'alice', from: 'hive' })
+    })
+
+    it('an unknown chain value never names a chain in the notice', async () => {
+      const v = stale([], { cur_bchain: 'hive' })
+      expect(await reread.call(v)).toBe(false)
+      expect(v.noAccountOnChain).toBe('')
     })
 
     it('still failing: converts nothing and tries again next time', async () => {
@@ -135,6 +167,56 @@ describe('no account on the selected chain', () => {
     })
   })
 
+  it('out of order: a slower, older switch does not overwrite the newer one', async () => {
+    let releaseBlurt
+    const blurtGate = new Promise((resolve) => { releaseBlurt = resolve })
+    const v = vm(null)
+    v.setProperNode = (chain) => ({ api: {
+      getDynamicGlobalPropertiesAsync: async () => { if (chain === 'BLURT') await blurtGate; return { chain } },
+      getAccountsAsync: async () => (chain === 'BLURT' ? [] : [{ name: 'alice', chain }]),
+    } })
+    const blurtRun = watcher.call(v, 'BLURT')
+    await watcher.call(v, 'HIVE')
+    releaseBlurt()
+    await blurtRun
+    expect(v.noAccountOnChain).toBe('')
+    expect(v.properties).toEqual({ chain: 'HIVE' })
+    expect(v.displayUserData).toEqual({ name: 'alice', chain: 'HIVE' })
+    expect(v.fetchUserData).toHaveBeenCalledTimes(1)
+  })
+
+  it('a node failure reading the chain properties marks the account stale too', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {})
+    const v = vm([{ name: 'alice' }], { properties: { chain: 'HIVE' } })
+    v.setProperNode = () => ({ api: {
+      getDynamicGlobalPropertiesAsync: async () => { throw new Error('down') },
+      getAccountsAsync: async () => [{ name: 'alice' }],
+    } })
+    await watcher.call(v, 'BLURT')
+    expect(v.accountStale).toBe(true)
+    expect(v.properties).toEqual({ chain: 'HIVE' })
+    expect(v.fetchUserData).not.toHaveBeenCalled()
+  })
+
+  it('an unknown chain value in localStorage reads Hive and shows no notice', async () => {
+    const v = vm([])
+    await watcher.call(v, 'hive')
+    expect(v.noAccountOnChain).toBe('')
+  })
+
+  it('the URL user name is inserted literally ($ patterns are not expanded)', () => {
+    expect(template.match(/\.replace\('_USER_', /g)).toHaveLength(2)
+    expect(template.match(/\.replace\('_USER_', \(\) => walletUserName\)/g)).toHaveLength(2)
+    expect(template.match(/\.replace\('_CHAIN_', \(\) => chainLabel\(/g)).toHaveLength(2)
+    expect('@_USER_ has'.replace('_USER_', () => "$'x")).toBe("@$'x has")
+  })
+
+  it('the stale banner hides the wallet and its forms', () => {
+    const staleAt = template.indexOf('v-else-if="accountStale"')
+    expect(staleAt).toBeGreaterThan(template.indexOf('v-if="noAccountOnChain"'))
+    expect(template.indexOf('v-else-if="user || displayUser"')).toBeGreaterThan(staleAt)
+  })
+
   it('a found account clears a notice left by another user (Switch User, log in again)', () => {
     expect(src).toMatch(/this\.displayUserData = account_res\[0\];\s*\/\/[^\n]*\n\s*this\.noAccountOnChain = '';\s*\/\/ Step 5:/)
   })
@@ -151,7 +233,7 @@ describe('no account on the selected chain', () => {
     const btn = (extra) => {
       const v = {
         bchain: 'BLURT', cur_bchain: 'BLURT', noAccountOnChain: 'BLURT', walletInitialized: false,
-        displayUser: 'alice', user: null,
+        accountStale: true, displayUser: 'alice', walletUserName: 'alice', user: null,
         setupQuickActionsOverflow: jest.fn(), $nextTick: jest.fn((fn) => fn()),
         ...extra,
       }
@@ -178,6 +260,7 @@ describe('no account on the selected chain', () => {
       await switchWalletToHive.call(first)
       expect(first.noAccountOnChain).toBe('')
       expect(first.cur_bchain).toBe('HIVE')
+      expect(first.accountStale).toBe(false)
       expect(first.initWallet).toHaveBeenCalledWith('alice')
       expect(first.setupQuickActionsOverflow).toHaveBeenCalled()
 

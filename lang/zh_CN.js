@@ -178,6 +178,7 @@ module.exports = {
   post_not_on_chain: '此帖子不在 _CHAIN_ 上，可能在 Hive 上。',
   switch_to_hive: '切换到 Hive',
   wallet_no_account_on_chain: '@_USER_ 在 _CHAIN_ 上没有账户。',
+  wallet_account_stale: '无法加载 @_USER_ 在 _CHAIN_ 上的账户。正在重试…',
   blurt_key_rejected: 'Blurt 未接受您的密钥。请重试并输入您当前的 Blurt 密钥。',
   keychain_not_detected: '未检测到 Hive Keychain。请启用 Keychain 扩展并重新加载页面，或使用其他方式重新登录。',
   key_prompt_check_failed: '目前无法将此密钥与您的账户进行核对。请稍后再试。',

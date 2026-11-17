@@ -177,6 +177,7 @@ module.exports = {
   post_not_on_chain: 'Questo post non è su _CHAIN_. Potrebbe essere su Hive.',
   switch_to_hive: 'Passa a Hive',
   wallet_no_account_on_chain: '@_USER_ non ha un account su _CHAIN_.',
+  wallet_account_stale: 'Impossibile caricare l\'account di @_USER_ su _CHAIN_. Nuovo tentativo…',
   blurt_key_rejected: 'Blurt non ha accettato la tua chiave. Riprova e inserisci la tua chiave Blurt attuale.',
   keychain_not_detected: 'Hive Keychain non è stato rilevato. Attiva l’estensione Keychain e ricarica la pagina, oppure accedi di nuovo con un altro metodo.',
   key_prompt_check_failed: 'Al momento non è stato possibile verificare questa chiave con il tuo account. Riprova tra poco.',
