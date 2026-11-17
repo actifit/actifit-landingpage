@@ -2,7 +2,23 @@
   <div>
     <NavbarBrand @user-switched="refreshAllWalletData" />
 
-    <div class="container wallet-page wallet-shell pt-5 mt-5 pb-5" v-if="user || displayUser">
+    <!-- The account does not exist on the selected chain (most Hive accounts made since
+         2020 have no Blurt account): say so instead of an empty or stale wallet. -->
+    <div class="container wallet-page wallet-shell pt-5 mt-5 pb-5" v-if="noAccountOnChain">
+      <div class="alert alert-warning wallet-no-account" role="status">
+        <span>{{ $t('wallet_no_account_on_chain').replace('_USER_', () => walletUserName).replace('_CHAIN_', () => chainLabel(noAccountOnChain)) }}</span>
+        <button type="button" class="btn btn-brand btn-sm" v-on:click="switchWalletToHive">{{ $t('switch_to_hive') }}</button>
+      </div>
+    </div>
+    <!-- A chain switch could not read the account: the one held is the previous chain's, so
+         its balances and the forms' max amounts would be wrong. Hide them until it is re-read. -->
+    <div class="container wallet-page wallet-shell pt-5 mt-5 pb-5" v-else-if="accountStale">
+      <div class="alert alert-warning wallet-no-account" role="status">
+        <span>{{ $t('wallet_account_stale').replace('_USER_', () => walletUserName).replace('_CHAIN_', () => chainLabel(cur_bchain)) }}</span>
+        <button type="button" class="btn btn-brand btn-sm" v-on:click="fetchUserData()">{{ $t('afit_balance_retry') }}</button>
+      </div>
+    </div>
+    <div class="container wallet-page wallet-shell pt-5 mt-5 pb-5" v-else-if="user || displayUser">
 
       <!-- account balance -->
       <div class="text-center">
@@ -1937,6 +1953,8 @@ const hsc = new SSC(process.env.hiveEngineRpc);
 
 const tokensNonStakable = ['AFITX', 'AFIT', 'SWAP.HIVE', 'SWAP.BLURT'];
 const tokensOfInterest = ['SPORTS', 'PAL', 'APX', 'BEE', 'POSH', 'LEO'].concat(tokensNonStakable);
+// chains that get "no account on this chain"; anything else in localStorage reads Hive
+const NOTICE_CHAINS = ['BLURT', 'STEEM'];
 
 import { mapGetters } from 'vuex'
 
@@ -2184,6 +2202,8 @@ export default {
       displayUser: '',
       displayUserData: null,
       walletInitialized: false, // true once initWallet() has run (guards double-init)
+      noAccountOnChain: '', // the non-Hive chain selected where this account does not exist
+      accountStale: false, // a chain switch could not read the account: the one held is the previous chain's
       mountedDone: false, // true after mounted() finishes — lets the user watcher tell a post-mount login from the initial load
       profImgUrl: process.env.hiveImgUrl,
       // null = not known yet (never loaded, or the load failed). A balance can legitimately
@@ -2220,6 +2240,10 @@ export default {
   },
   computed: {
     ...mapGetters('steemconnect', ['user']),
+    // the wallet's own user: the one in the URL, else the logged-in one
+    walletUserName() {
+      return this.displayUser || (this.user && this.user.account && this.user.account.name) || '';
+    },
     ...mapGetters('steemconnect', ['stdLogin']),
     ...mapGetters(['userTokens', 'transactions', 'userRank', 'bchain']),
     // Secondary wallet actions (Transfer is the always-visible primary, rendered separately).
@@ -2579,6 +2603,8 @@ export default {
 
     bchain: async function (newBchain) {
       console.log('change in chain');
+      // A quick Blurt -> Hive switch can finish the Blurt reads last: only the latest run applies.
+      const seq = this.bchainSeq = (this.bchainSeq || 0) + 1;
       this.cur_bchain = newBchain;
       this.transferType = newBchain;
       this.$store.dispatch('steemconnect/refreshUser');
@@ -2586,26 +2612,55 @@ export default {
       // Pass newBchain to setProperNode to ensure we use the new chain
       // (localStorage may not be updated yet when this watcher fires)
       let chainLnk = this.setProperNode(newBchain);
-      this.properties = await chainLnk.api.getDynamicGlobalPropertiesAsync();
+      let properties = null;
+      try {
+        properties = await chainLnk.api.getDynamicGlobalPropertiesAsync();
+      } catch (err) {
+        console.error('Error fetching chain properties on chain switch:', err);
+      }
+      if (seq !== this.bchainSeq) return;
+      if (!properties) {
+        this.accountStale = true;
+        return;
+      }
+      this.properties = properties;
 
       // Fetch fresh account data from the new chain
-      if (this.displayUser) {
+      const name = this.walletUserName;
+      if (name) {
+        let accounts = null;
         try {
-          let accounts = await chainLnk.api.getAccountsAsync([this.displayUser]);
-          if (accounts && accounts.length > 0) {
-            this.displayUserData = accounts[0];
-          }
+          accounts = await chainLnk.api.getAccountsAsync([name]);
         } catch (err) {
           console.error('Error fetching account data on chain switch:', err);
         }
-      } else if (this.user && this.user.account) {
-        try {
-          let accounts = await chainLnk.api.getAccountsAsync([this.user.account.name]);
-          if (accounts && accounts.length > 0) {
-            this.displayUserData = accounts[0];
-          }
-        } catch (err) {
-          console.error('Error fetching account data on chain switch:', err);
+        if (seq !== this.bchainSeq) return;
+        // Node error: the account held is the previous chain's, and converting it at this
+        // chain's rate is the mix this avoids. Keep what is shown; fetchUserData re-reads the
+        // account on the next refresh before converting anything.
+        if (!Array.isArray(accounts)) {
+          this.accountStale = true;
+          return;
+        }
+        this.accountStale = false;
+        if (accounts.length === 0 && NOTICE_CHAINS.includes(newBchain)) {
+          // Not on this chain. Keeping the previous chain's account would convert its
+          // vests at this chain's rate, so show the notice and stop here.
+          this.noAccountOnChain = newBchain;
+          return;
+        }
+        const recovering = !!this.noAccountOnChain;
+        this.noAccountOnChain = '';
+        if (accounts && accounts.length > 0) {
+          this.displayUserData = accounts[0];
+        }
+        // The first load stopped at the notice (initWallet had set displayUser, so `name`
+        // is the wallet's own user): finish setting up now.
+        if (recovering && !this.walletInitialized) {
+          await this.initWallet(name);
+          // mounted() tried while the notice showed, so the action bar was not there yet
+          this.$nextTick(this.setupQuickActionsOverflow);
+          return;
         }
       }
 
@@ -4037,6 +4092,9 @@ export default {
       this.displayUserData = newUserData;
     },
     async fetchUserData() {
+      // The account held is another chain's while the "no account on this chain" notice shows.
+      if (this.noAccountOnChain) return;
+      if (this.accountStale && !(await this.rereadStaleAccount())) return;
       // Guard Clause: Ensure this function doesn't run if the primary user data isn't loaded yet.
       if (!this.displayUserData) {
         console.warn('fetchUserData called before displayUserData was ready. Aborting.');
@@ -8513,6 +8571,54 @@ export default {
         // Handle error, e.g., set a default or show a message
       }
     },
+    // After a chain switch that could not read the account: read it on the selected chain.
+    // True once the account held is this chain's again.
+    async rereadStaleAccount() {
+      const chain = this.cur_bchain;
+      const chainLnk = this.setProperNode(chain);
+      let properties = null;
+      let accounts = null;
+      try {
+        properties = await chainLnk.api.getDynamicGlobalPropertiesAsync();
+        accounts = await chainLnk.api.getAccountsAsync([this.walletUserName]);
+      } catch (err) {
+        console.error('Re-reading the account failed:', err);
+      }
+      // a newer chain switch took over meanwhile
+      if (chain !== this.cur_bchain) return false;
+      if (!properties || !Array.isArray(accounts)) return false;
+      this.accountStale = false;
+      if (accounts.length === 0) {
+        if (NOTICE_CHAINS.includes(chain)) this.noAccountOnChain = chain;
+        return false;
+      }
+      this.properties = properties;
+      this.displayUserData = accounts[0];
+      // the wallet comes back in place of the banner: set its action bar up again
+      this.$nextTick(this.setupQuickActionsOverflow);
+      return true;
+    },
+    chainLabel(chain) {
+      return { HIVE: 'Hive', BLURT: 'Blurt', STEEM: 'Steem' }[chain] || chain;
+    },
+    // Same as picking Hive in the header's chain list; the bchain watcher reloads the wallet.
+    // The store can already say HIVE while the saved choice said otherwise (another tab);
+    // then the watcher does not fire, so do its part here.
+    async switchWalletToHive() {
+      const storeChanges = this.bchain !== 'HIVE';
+      localStorage.setItem('cur_bchain', 'HIVE');
+      this.$store.commit('setBchain', 'HIVE');
+      if (storeChanges) return;
+      this.cur_bchain = 'HIVE';
+      this.noAccountOnChain = '';
+      this.accountStale = false;
+      if (this.walletInitialized) {
+        await this.refreshAllWalletData();
+      } else {
+        await this.initWallet(this.walletUserName);
+        this.$nextTick(this.setupQuickActionsOverflow);
+      }
+    },
     async initWallet(userToFetch) {
       if (this.walletInitialized) return; // already set up (guards double-init)
       this.walletInitialized = true;
@@ -8534,12 +8640,15 @@ export default {
         // Step 4: Handle the case where the user account does not exist.
         if (!account_res || account_res.length === 0) {
           console.error(`Account ${this.displayUser} not found.`);
+          if (NOTICE_CHAINS.includes(this.cur_bchain)) this.noAccountOnChain = this.cur_bchain;
           this.walletInitialized = false; // let a later user change retry (e.g. transient node miss)
           this.loading = false;
           return; // Stop execution
         }
 
         this.displayUserData = account_res[0];
+        // e.g. the previous user (Switch User, or log in again) had no account on this chain
+        this.noAccountOnChain = '';
 
         // Step 5: Now that displayUserData is safely populated, proceed with all other initializations.
         this.afitTokenAddress = afitTokenAddress;
@@ -8699,6 +8808,7 @@ export default {
 	  max-width: 500px
   </style>
 <style>
+.wallet-no-account { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
 @media screen and (max-width: 600px) {
   .modal-content {
     padding: .3rem;

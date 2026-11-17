@@ -542,7 +542,8 @@ export default {
           'Posting', (response) => {
             console.log(response);
             if (op_name == 'delete_comment') {
-              this.deleteSuccess();
+              // a refused or cancelled delete is not a success (the post page would also navigate away)
+              this.deleteSuccess(response && response.success ? null : true);
             }
           });
       } else if (localStorage.getItem('acti_login_method') == 'hiveauth') {
@@ -553,7 +554,6 @@ export default {
             expire: localStorage.getItem('expires'),
             key: localStorage.getItem('key')
           }
-          console.log(auth);
           this.$HAS.broadcast(auth, 'active', [[op_name, cstm_params]], (evt) => {
             console.log(evt)    // process sign_wait message
             let msg = this.$t('verify_hiveauth_app');
@@ -577,6 +577,8 @@ export default {
                 }
               } else if (response.cmd && response.cmd === 'sign_nack') {
                 resolve({ success: false })
+                // refused (e.g. Blurt selected) or declined: stop the delete spinner
+                if (op_name == 'delete_comment') this.deleteSuccess(true);
               }
             })
             .catch(err => {

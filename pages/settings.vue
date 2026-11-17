@@ -526,7 +526,6 @@
 				  expire: localStorage.getItem('expires'),
 				  key: localStorage.getItem('key')
 				}
-				console.log(auth);
 				this.$HAS.broadcast(auth, "posting", [[op_name, cstm_params]], (evt)=> {
 					console.log(evt)    // process sign_wait message
 					let msg = this.$t('verify_hiveauth_app');
