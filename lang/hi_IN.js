@@ -177,6 +177,8 @@ module.exports = {
   signer_hive_only: 'Hive Keychain और HiveAuth केवल Hive पर हस्ताक्षर कर सकते हैं। _CHAIN_ पर यह करने के लिए अपनी कुंजियों से लॉग इन करें, या Hive पर स्विच करें।',
   post_not_on_chain: 'यह पोस्ट _CHAIN_ पर नहीं है। यह Hive पर हो सकती है।',
   switch_to_hive: 'Hive पर स्विच करें',
+  wallet_no_account_on_chain: '@_USER_ का _CHAIN_ पर कोई खाता नहीं है।',
+  wallet_account_stale: '_CHAIN_ पर @_USER_ का खाता लोड नहीं हो सका। फिर से प्रयास किया जा रहा है…',
   blurt_key_rejected: 'Blurt ने आपकी कुंजी स्वीकार नहीं की। फिर से प्रयास करें और अपनी वर्तमान Blurt कुंजी दर्ज करें।',
   keychain_not_detected: 'Hive Keychain नहीं मिला। Keychain एक्सटेंशन चालू करें और पेज फिर से लोड करें, या किसी अन्य तरीके से फिर से लॉग इन करें।',
   key_prompt_check_failed: 'हम अभी इस कुंजी को आपके खाते से जाँच नहीं सके। कृपया थोड़ी देर में फिर से प्रयास करें।',

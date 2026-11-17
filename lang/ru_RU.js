@@ -177,6 +177,8 @@ module.exports = {
   signer_hive_only: 'Hive Keychain и HiveAuth могут подписывать только в Hive. Чтобы сделать это в _CHAIN_, войдите с помощью ключей или переключитесь на Hive.',
   post_not_on_chain: 'Этого поста нет в _CHAIN_. Возможно, он в Hive.',
   switch_to_hive: 'Перейти на Hive',
+  wallet_no_account_on_chain: 'У @_USER_ нет аккаунта в _CHAIN_.',
+  wallet_account_stale: 'Не удалось загрузить аккаунт @_USER_ в _CHAIN_. Повторяем…',
   blurt_key_rejected: 'Blurt не принял ваш ключ. Попробуйте снова и введите текущий ключ Blurt.',
   keychain_not_detected: 'Hive Keychain не обнаружен. Включите расширение Keychain и перезагрузите страницу или войдите снова другим способом.',
   key_prompt_check_failed: 'Сейчас не удалось сверить этот ключ с вашим аккаунтом. Попробуйте ещё раз через минуту.',
