@@ -1280,6 +1280,7 @@ module.exports = {
   manage_beneficiaries: 'Manage Beneficiaries',
   no_posts: 'No Posts Found',
   error_no_posts: 'User appears to have no posts .. yet',
+  posts_load_failed: 'Could not load the posts. Please try again.',
   error_no_Videos: 'User appears to have no videos .. yet',
   show_core_tokens: 'Show Core Tokens',
   show_all_tokens: 'Show Full List',

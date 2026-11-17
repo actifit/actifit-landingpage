@@ -15,6 +15,17 @@
         <i class="fas fa-spinner fa-spin  fa-3x text-brand"></i>
       </div>
 
+      <!-- most Hive accounts made since 2020 have no Blurt account: the node answers
+           "Account not found", which used to leave the spinner running for good -->
+      <div class="alert alert-warning blog-load-notice" role="status" v-else-if="noAccountOnChain">
+        <span>{{ $t('wallet_no_account_on_chain').replace('_USER_', () => username).replace('_CHAIN_', () => chainLabel(noAccountOnChain)) }}</span>
+        <button type="button" class="btn btn-brand btn-sm" v-on:click="switchToHive">{{ $t('switch_to_hive') }}</button>
+      </div>
+      <div class="alert alert-warning blog-load-notice" role="status" v-else-if="loadFailed">
+        <span>{{ $t('posts_load_failed') }}</span>
+        <button type="button" class="btn btn-brand btn-sm" v-on:click="loadPosts">{{ $t('afit_balance_retry') }}</button>
+      </div>
+
       <div class="text-center p-3" v-else-if="user && user.account.name == username">
         <a href="#" @click="initiateNewPost" data-toggle="modal" data-target="#editPostModal" :title="$t('Create_post')"
           class="btn btn-brand border">
@@ -52,7 +63,7 @@
       </div>
 
       <!-- or no content message when no posts found -->
-      <div class="text-center text-muted" v-if="!filteredUserPosts.length && !loading">
+      <div class="text-center text-muted" v-if="!filteredUserPosts.length && !loading && !noAccountOnChain && !loadFailed">
         {{ username }} {{ $t('error_no_posts') }}
       </div>
 
@@ -91,6 +102,7 @@ import VoteModal from '~/components/VoteModal'
 import ListHeadingSection from '~/components/ListHeadingSection.vue'
 
 import { mapGetters } from 'vuex'
+import { isMissingAccountError } from '~/utils/chainErrors'
 
 //import ChainSelection from '~/components/ChainSelection'
 
@@ -124,7 +136,9 @@ export default {
       splitFactor: 9,
       inlineAds: 2,
       hideReblogs: false,
-      minPostThreshold: 20, 
+      minPostThreshold: 20,
+      noAccountOnChain: '', // the non-Hive chain selected where this account does not exist
+      loadFailed: false,
     }
   },
   watch: {
@@ -139,15 +153,12 @@ export default {
         //only update if changed
         this.cur_bchain = newBchain;
         this.loading = true; // Set loading state
-        await this.$store.dispatch('steemconnect/refreshUser');
-
-        this.$store.commit('setUserPosts', [])
-
-        this.$store.commit('setMoreUserPostsAvailable', false)
-
-        await this.fetchPostsRecursively(); 
-        
-        this.loading = false
+        try {
+          await this.$store.dispatch('steemconnect/refreshUser');
+        } catch (err) {
+          console.error('Refreshing the user on chain switch failed:', err);
+        }
+        await this.loadPosts();
       }
     }
   },
@@ -186,13 +197,52 @@ export default {
       }
 
       this.loadingMore = true;
+      try {
+        await this.$store.dispatch('fetchUserPosts', this.username);
+        await this.ensureMinimumPosts();
+      } finally {
+        this.loadingMore = false;
+      }
+    },
 
-      await this.$store.dispatch('fetchUserPosts', this.username);
+    // Loads the first page from scratch. The spinner always stops: a node error used to
+    // leave it running for good.
+    async loadPosts() {
+      this.loading = true;
+      this.noAccountOnChain = '';
+      this.loadFailed = false;
+      this.$store.commit('setUserPosts', []);
+      this.$store.commit('setMoreUserPostsAvailable', false);
+      try {
+        await this.fetchPostsRecursively();
+      } catch (err) {
+        this.showLoadError(err);
+      } finally {
+        this.loading = false;
+      }
+    },
 
-      
-      await this.ensureMinimumPosts();
+    showLoadError(err) {
+      console.error('Loading the posts failed:', err);
+      if (isMissingAccountError(err)) {
+        // on Hive: the existing "no posts" line covers it
+        if (['BLURT', 'STEEM'].includes(this.bchain)) this.noAccountOnChain = this.bchain;
+      } else {
+        this.loadFailed = true;
+      }
+    },
 
-      this.loadingMore = false;
+    chainLabel(chain) {
+      return { HIVE: 'Hive', BLURT: 'Blurt', STEEM: 'Steem' }[chain] || chain;
+    },
+
+    // Same as picking Hive in the user menu; the bchain watcher reloads the posts. The store
+    // can already say HIVE while the saved choice said otherwise; then load here.
+    async switchToHive() {
+      const storeChanges = this.bchain !== 'HIVE';
+      localStorage.setItem('cur_bchain', 'HIVE');
+      this.$store.commit('setBchain', 'HIVE');
+      if (!storeChanges) await this.loadPosts();
     },
 
 
@@ -230,7 +280,12 @@ export default {
       this.$store.commit('setEditPost', newPost);
     },
     async loadMore() {
-      await this.fetchPostsRecursively();
+      try {
+        await this.fetchPostsRecursively();
+      } catch (err) {
+        console.error('Loading more posts failed:', err);
+        this.$notify({ group: 'error', text: this.$t('posts_load_failed'), position: 'top center' });
+      }
     },
     async fetchUserData() {
       if (typeof this.user != 'undefined' && this.user != null) {
@@ -251,13 +306,12 @@ export default {
     let cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
     this.$store.commit('setBchain', cur_bchain);
 
-    this.$store.commit('setUserPosts', [])
-    this.$store.commit('setMoreUserPostsAvailable', false)
-
     // Initial fetch
-    await this.fetchPostsRecursively();
-
-    this.loading = false
+    await this.loadPosts();
   }
 }
 </script>
+
+<style scoped>
+.blog-load-notice { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+</style>

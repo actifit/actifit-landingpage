@@ -1295,6 +1295,7 @@ module.exports = {
   manage_beneficiaries: 'Yararlanıcıları Yönet',
   no_posts: 'Gönderi Bulunamadı',
   error_no_posts: 'Kullanıcının henüz gönderisi yok gibi görünüyor..',
+  posts_load_failed: 'Gönderiler yüklenemedi. Lütfen tekrar deneyin.',
   error_no_Videos: 'Kullanıcının henüz videosu yok gibi görünüyor..',
   show_core_tokens: 'Çekirdek Tokenleri Göster',
   show_all_tokens: 'Tam Listeyi Göster',

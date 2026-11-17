@@ -1291,6 +1291,7 @@ module.exports = {
   manage_beneficiaries: 'Gérer les bénéficiaires',
   no_posts: 'Aucune publication trouvée',
   error_no_posts: 'L\'utilisateur semble n\'avoir aucune publication... pour l\'instant',
+  posts_load_failed: 'Impossible de charger les publications. Veuillez réessayer.',
   error_no_Videos: 'L\'utilisateur semble n\'avoir aucune vidéo... pour l\'instant',
   show_core_tokens: 'Afficher les jetons principaux',
   show_all_tokens: 'Afficher la liste complète',
