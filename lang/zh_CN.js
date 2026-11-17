@@ -175,6 +175,7 @@ module.exports = {
   key_prompt_not_posting: '该密钥不是此帐户的 posting 密钥。',
   signing_cancelled: '已取消签名。',
   typed_key_hive_only: '此功能仅适用于 Hive。请切换到 Hive 后重试。',
+  signer_hive_only: 'Hive Keychain 和 HiveAuth 只能在 Hive 上签名。要在 _CHAIN_ 上执行此操作，请使用您的密钥登录，或切换到 Hive。',
   post_not_on_chain: '此帖子不在 _CHAIN_ 上，可能在 Hive 上。',
   switch_to_hive: '切换到 Hive',
   blurt_key_rejected: 'Blurt 未接受您的密钥。请重试并输入您当前的 Blurt 密钥。',

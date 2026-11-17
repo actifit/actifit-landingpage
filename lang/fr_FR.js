@@ -169,6 +169,7 @@ module.exports = {
   key_prompt_not_posting: 'Cette clé n’est pas une clé posting de ce compte.',
   signing_cancelled: 'Signature annulée.',
   typed_key_hive_only: 'Cela ne fonctionne que sur Hive. Passez à Hive et réessayez.',
+  signer_hive_only: 'Hive Keychain et HiveAuth ne peuvent signer que sur Hive. Pour faire cela sur _CHAIN_, connectez-vous avec vos clés ou passez à Hive.',
   post_not_on_chain: 'Cette publication n’est pas sur _CHAIN_. Elle est peut-être sur Hive.',
   switch_to_hive: 'Passer à Hive',
   blurt_key_rejected: 'Blurt n’a pas accepté votre clé. Réessayez et saisissez votre clé Blurt actuelle.',

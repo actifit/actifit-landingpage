@@ -174,6 +174,7 @@ module.exports = {
   key_prompt_not_posting: 'यह इस खाते की posting कुंजी नहीं है।',
   signing_cancelled: 'हस्ताक्षर रद्द किया गया।',
   typed_key_hive_only: 'यह केवल Hive पर काम करता है। Hive पर स्विच करें और फिर से प्रयास करें।',
+  signer_hive_only: 'Hive Keychain और HiveAuth केवल Hive पर हस्ताक्षर कर सकते हैं। _CHAIN_ पर यह करने के लिए अपनी कुंजियों से लॉग इन करें, या Hive पर स्विच करें।',
   post_not_on_chain: 'यह पोस्ट _CHAIN_ पर नहीं है। यह Hive पर हो सकती है।',
   switch_to_hive: 'Hive पर स्विच करें',
   blurt_key_rejected: 'Blurt ने आपकी कुंजी स्वीकार नहीं की। फिर से प्रयास करें और अपनी वर्तमान Blurt कुंजी दर्ज करें।',

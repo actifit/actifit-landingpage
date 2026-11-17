@@ -174,6 +174,7 @@ module.exports = {
   key_prompt_not_posting: 'Bu anahtar bu hesabın posting anahtarı değil.',
   signing_cancelled: 'İmzalama iptal edildi.',
   typed_key_hive_only: 'Bu yalnızca Hive’da çalışır. Hive’a geçip tekrar deneyin.',
+  signer_hive_only: 'Hive Keychain ve HiveAuth yalnızca Hive üzerinde imzalayabilir. Bunu _CHAIN_ üzerinde yapmak için anahtarlarınızla giriş yapın veya Hive’a geçin.',
   post_not_on_chain: 'Bu gönderi _CHAIN_ üzerinde değil. Hive üzerinde olabilir.',
   switch_to_hive: 'Hive’a geç',
   blurt_key_rejected: 'Blurt anahtarınızı kabul etmedi. Tekrar deneyin ve güncel Blurt anahtarınızı girin.',

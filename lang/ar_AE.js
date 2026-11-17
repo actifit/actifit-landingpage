@@ -169,6 +169,7 @@ module.exports = {
   key_prompt_not_posting: 'هذا ليس مفتاح نشر لهذا الحساب.',
   signing_cancelled: 'تم إلغاء التوقيع.',
   typed_key_hive_only: 'هذا يعمل على Hive فقط. انتقل إلى Hive وحاول مرة أخرى.',
+  signer_hive_only: 'لا يمكن لـ Hive Keychain وHiveAuth التوقيع إلا على Hive. للقيام بذلك على _CHAIN_، سجّل الدخول بمفاتيحك، أو انتقل إلى Hive.',
   post_not_on_chain: 'هذا المنشور غير موجود على _CHAIN_. قد يكون على Hive.',
   switch_to_hive: 'التبديل إلى Hive',
   blurt_key_rejected: 'لم تقبل Blurt مفتاحك. حاول مرة أخرى وأدخل مفتاح Blurt الحالي.',

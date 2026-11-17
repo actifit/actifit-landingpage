@@ -166,6 +166,7 @@ module.exports = {
   key_prompt_not_posting: 'Esa clave no es una clave posting de esta cuenta.',
   signing_cancelled: 'Firma cancelada.',
   typed_key_hive_only: 'Esto solo funciona en Hive. Cambia a Hive e inténtalo de nuevo.',
+  signer_hive_only: 'Hive Keychain y HiveAuth solo pueden firmar en Hive. Para hacer esto en _CHAIN_, inicia sesión con tus claves o cambia a Hive.',
   post_not_on_chain: 'Esta publicación no está en _CHAIN_. Puede que esté en Hive.',
   switch_to_hive: 'Cambiar a Hive',
   blurt_key_rejected: 'Blurt no aceptó tu clave. Inténtalo de nuevo e introduce tu clave actual de Blurt.',

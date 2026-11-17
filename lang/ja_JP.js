@@ -174,6 +174,7 @@ module.exports = {
   key_prompt_not_posting: 'このアカウントの posting キーではありません。',
   signing_cancelled: '署名をキャンセルしました。',
   typed_key_hive_only: 'これは Hive でのみ機能します。Hive に切り替えてもう一度お試しください。',
+  signer_hive_only: 'Hive Keychain と HiveAuth は Hive でのみ署名できます。_CHAIN_ で行うには、キーでログインするか、Hive に切り替えてください。',
   post_not_on_chain: 'この投稿は _CHAIN_ にはありません。Hive にある可能性があります。',
   switch_to_hive: 'Hive に切り替える',
   blurt_key_rejected: 'Blurt がキーを受け付けませんでした。もう一度、現在の Blurt キーを入力してください。',
