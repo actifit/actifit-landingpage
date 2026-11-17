@@ -1290,6 +1290,7 @@ module.exports = {
   manage_beneficiaries: 'Begünstigte verwalten',
   no_posts: 'Keine Beiträge gefunden',
   error_no_posts: 'Benutzer scheint noch keine Beiträge zu haben...',
+  posts_load_failed: 'Die Beiträge konnten nicht geladen werden. Bitte versuche es erneut.',
   error_no_Videos: 'Benutzer scheint noch keine Videos zu haben...',
   show_core_tokens: 'Kerntoken anzeigen',
   show_all_tokens: 'Vollständige Liste anzeigen',

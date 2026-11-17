@@ -1296,6 +1296,7 @@ module.exports = {
   manage_beneficiaries: 'लाभार्थियों का प्रबंधन करें',
   no_posts: 'कोई पोस्ट नहीं मिली',
   error_no_posts: 'उपयोगकर्ता के पास कोई पोस्ट नहीं है .. अभी तक',
+  posts_load_failed: 'पोस्ट लोड नहीं हो सकीं। कृपया फिर से प्रयास करें।',
   error_no_Videos: 'उपयोगकर्ता के पास कोई वीडियो नहीं है .. अभी तक',
   show_core_tokens: 'कोर टोकन दिखाएं',
   show_all_tokens: 'पूरी सूची दिखाएं',

@@ -1295,6 +1295,7 @@ module.exports = {
   manage_beneficiaries: 'Zarządzaj beneficjentami',
   no_posts: 'Nie znaleziono postów',
   error_no_posts: 'Użytkownik wydaje się nie mieć jeszcze żadnych postów...',
+  posts_load_failed: 'Nie udało się wczytać postów. Spróbuj ponownie.',
   error_no_Videos: 'Użytkownik wydaje się nie mieć jeszcze żadnych filmów...',
   show_core_tokens: 'Pokaż podstawowe tokeny',
   show_all_tokens: 'Pokaż pełną listę',

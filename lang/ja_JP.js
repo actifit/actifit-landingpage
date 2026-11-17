@@ -1294,6 +1294,7 @@ module.exports = {
   manage_beneficiaries: '受益者を管理',
   no_posts: '投稿が見つかりません',
   error_no_posts: 'ユーザーはまだ投稿を持っていないようです。',
+  posts_load_failed: '投稿を読み込めませんでした。もう一度お試しください。',
   error_no_Videos: 'ユーザーはまだビデオを持っていないようです。',
   show_core_tokens: 'コアトークンを表示',
   show_all_tokens: '全リストを表示',

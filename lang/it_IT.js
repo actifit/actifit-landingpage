@@ -1295,6 +1295,7 @@ module.exports = {
   manage_beneficiaries: 'Gestisci Beneficiari',
   no_posts: 'Nessun Post Trovato',
   error_no_posts: 'L\'utente sembra non avere ancora nessun post...',
+  posts_load_failed: 'Impossibile caricare i post. Riprova.',
   error_no_Videos: 'L\'utente sembra non avere ancora nessun video...',
   show_core_tokens: 'Mostra Token Principali',
   show_all_tokens: 'Mostra Elenco Completo',
