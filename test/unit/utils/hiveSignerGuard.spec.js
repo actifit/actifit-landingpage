@@ -46,6 +46,35 @@ describe('which operations would land on Hive by mistake', () => {
     expect(keychainCallBlocked('requestWitnessVote', ['alice', 'other', true])).toBe(true)
   })
 
+  // a reblog of a Blurt post signed on Hive reblogs the same author/permlink on Hive
+  it.each(['reblog', 'follow', 'community', ' Reblog '])('custom_json %j (acts on chain content) is refused', (id) => {
+    expect(opBlocked(['custom_json', { id, json: '[]' }])).toBe(true)
+    expect(keychainCallBlocked('requestCustomJson', ['alice', id, 'Posting', '[]', 'x', () => {}])).toBe(true)
+  })
+
+  it('anything it cannot read as [name, params] is refused (fails closed)', () => {
+    expect(opBlocked(['Vote', { author: 'bob' }])).toBe(true)
+    expect(opBlocked([42, {}])).toBe(true)
+    expect(opBlocked(['custom_json'])).toBe(true)
+    expect(opBlocked('vote')).toBe(true)
+    // a single operation passed unwrapped is checked as one
+    expect(keychainCallBlocked('requestBroadcast', ['a', ['vote', {}], 'Posting'])).toBe(true)
+    expect(keychainCallBlocked('requestBroadcast', ['a', ['custom_json', { id: 'actifit' }], 'Posting'])).toBe(false)
+    expect(keychainCallBlocked('requestBroadcast', ['a', [['custom_json', { id: 'actifit' }], 'vote'], 'Posting'])).toBe(true)
+    expect(keychainCallBlocked('requestBroadcast', ['a', { 0: ['vote', {}] }, 'Posting'])).toBe(true)
+    expect(keychainCallBlocked('requestBroadcast', ['a', JSON.stringify({ op: 'vote' }), 'Posting'])).toBe(true)
+  })
+
+  it('Keychain requests it does not know are refused; signing-only ones pass', () => {
+    for (const m of ['requestSignTx', 'requestSignedCall', 'requestAddAccountAuthority', 'requestRemoveKeyAuthority',
+      'requestConversion', 'requestRecurrentTransfer', 'requestSendToken', 'requestSomethingNew']) {
+      expect(keychainCallBlocked(m, ['alice'])).toBe(true)
+    }
+    for (const m of ['requestHandshake', 'requestSignBuffer', 'requestVerifyKey', 'requestEncodeMessage']) {
+      expect(keychainCallBlocked(m, ['alice'])).toBe(false)
+    }
+  })
+
   it('operations passed as a JSON string are checked too', () => {
     expect(keychainCallBlocked('requestBroadcast', ['a', JSON.stringify([['vote', {}]]), 'Posting'])).toBe(true)
     expect(keychainCallBlocked('requestBroadcast', ['a', JSON.stringify([['custom_json', {}]]), 'Posting'])).toBe(false)
@@ -115,6 +144,37 @@ describe('Keychain', () => {
     expect(() => guardKeychain(kc, storage('BLURT'), jest.fn())).not.toThrow()
   })
 
+  it('every request method is wrapped, including unknown ones and those on a prototype', async () => {
+    const proto = { requestSignTx: jest.fn() }
+    const kc = Object.assign(Object.create(proto), { requestAddAccountAuthority: jest.fn(), helper: jest.fn() })
+    const { requestAddAccountAuthority, helper } = kc
+    guardKeychain(kc, storage('BLURT'), () => 'msg')
+    const cb = jest.fn()
+    kc.requestSignTx('alice', {}, 'Active', cb)
+    kc.requestAddAccountAuthority('alice', 'evil', 'Active', 1, cb)
+    await new Promise((r) => setTimeout(r, 0))
+    expect(proto.requestSignTx).not.toHaveBeenCalled()
+    expect(requestAddAccountAuthority).not.toHaveBeenCalled()
+    expect(cb).toHaveBeenCalledTimes(2)
+    // not a request: left alone
+    expect(kc.helper).toBe(helper)
+  })
+
+  it('a partly read-only object is not marked guarded, so a later try finishes the job', () => {
+    jest.spyOn(console, 'warn').mockImplementation(() => {})
+    const kc = { requestBroadcast: jest.fn() }
+    let locked = jest.fn()
+    Object.defineProperty(kc, 'requestPost', { get: () => locked, set: () => {}, configurable: true, enumerable: true })
+    expect(guardKeychain(kc, storage('BLURT'), jest.fn())).toBe(false)
+    const wrappedBroadcast = kc.requestBroadcast
+    expect(wrappedBroadcast).not.toBe(undefined)
+    // writable now: the retry wraps what is left, without wrapping twice
+    Object.defineProperty(kc, 'requestPost', { value: locked, writable: true, configurable: true, enumerable: true })
+    expect(guardKeychain(kc, storage('BLURT'), jest.fn())).toBe(true)
+    expect(kc.requestPost).not.toBe(locked)
+    expect(kc.requestBroadcast).toBe(wrappedBroadcast)
+  })
+
   it('wraps only once, and leaves a missing Keychain alone', () => {
     const kc = keychain()
     expect(guardKeychain(kc, storage('BLURT'), jest.fn())).toBe(true)
@@ -131,6 +191,15 @@ describe('HiveAuth', () => {
     const res = await HAS.broadcast({}, 'posting', [['comment', {}], ['comment_options', {}]], () => {})
     expect(original).not.toHaveBeenCalled()
     expect(res).toEqual({ cmd: 'sign_nack', error: 'chain_not_supported', message: 'msg' })
+  })
+
+  it('with Blurt selected, a reblog is refused', async () => {
+    const original = jest.fn(() => Promise.resolve({ cmd: 'sign_ack' }))
+    const HAS = { broadcast: original }
+    guardHiveAuth(HAS, storage('BLURT'), () => 'msg')
+    const res = await HAS.broadcast({}, 'posting', [['custom_json', { id: 'reblog', json: '["bob","post"]' }]], () => {})
+    expect(original).not.toHaveBeenCalled()
+    expect(res.cmd).toBe('sign_nack')
   })
 
   it('a frozen HiveAuth object does not throw', () => {

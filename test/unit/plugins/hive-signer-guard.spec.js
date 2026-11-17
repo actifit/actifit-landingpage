@@ -47,4 +47,49 @@ describe('hive-signer-guard plugin', () => {
       localStorage.removeItem('cur_bchain')
     }
   })
+
+  it('a Keychain object assigned later, or replacing the first, is wrapped too', async () => {
+    const prevNotify = Vue.notify
+    Vue.notify = jest.fn()
+    localStorage.setItem('cur_bchain', 'BLURT')
+    try {
+      plugin({ app: { i18n: { t: () => 'Only Hive. Not on _CHAIN_.' } } })
+      for (const late of [{ requestVote: jest.fn() }, { requestVote: jest.fn() }]) {
+        const original = late.requestVote
+        window.hive_keychain = late
+        const cb = jest.fn()
+        window.hive_keychain.requestVote('alice', 'p', 'bob', 10000, cb)
+        await new Promise((r) => setTimeout(r, 0))
+        expect(window.hive_keychain).toBe(late)
+        expect(original).not.toHaveBeenCalled()
+        expect(cb).toHaveBeenCalledWith(expect.objectContaining({ error: 'chain_not_supported' }))
+      }
+    } finally {
+      Vue.notify = prevNotify
+      localStorage.removeItem('cur_bchain')
+    }
+  })
+
+  it('an odd chain value is escaped in the toast (it renders HTML)', async () => {
+    const prev = { HAS: Vue.prototype.$HAS, notify: Vue.notify }
+    Vue.prototype.$HAS = { broadcast: jest.fn() }
+    Vue.notify = jest.fn()
+    localStorage.setItem('cur_bchain', '<img src=x onerror=alert(1)>')
+    try {
+      plugin({ app: { i18n: { t: () => 'Not on _CHAIN_.' } } })
+      const res = await Vue.prototype.$HAS.broadcast({}, 'posting', [['vote', {}]], () => {})
+      expect(res.message).not.toContain('<')
+      expect(res.message).toContain('&lt;IMG SRC=X ONERROR=ALERT(1)&gt;')
+    } finally {
+      Vue.prototype.$HAS = prev.HAS
+      Vue.notify = prev.notify
+      localStorage.removeItem('cur_bchain')
+    }
+  })
+
+  it('HiveAuth session keys are not written to the console', () => {
+    for (const file of ['components/CartModal.vue', 'components/Comments.vue', 'pages/settings.vue']) {
+      expect(fs.readFileSync(path.resolve(__dirname, '../../..', file), 'utf8')).not.toMatch(/console\.log\(auth\)/)
+    }
+  })
 })
