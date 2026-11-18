@@ -95,6 +95,7 @@
 import { mapGetters } from 'vuex'
 import steem from 'steem'
 import hive from '@hiveio/hive-js'
+import blurt from '@blurtfoundation/blurtjs'
 //import dsteem from 'dsteem'
 import SteemStats from '~/components/SteemStats'
 import VotersListModal from '~/components/VotersListModal'
@@ -390,19 +391,36 @@ export default {
 			this.calculateVoteValue();
 		},
 		/* function checks if logged in user has upvoted current report */
-		userVotedThisPost() {
+		userVotedThisPost(votes) {
 			let curUser = this.user.account.name;
 			//check if the post contains in its original voters current user
-			return this.postToVote.active_votes.filter(voter => (voter.voter === curUser)).length > 0;
+			return (votes || this.postToVote.active_votes || []).filter(voter => (voter.voter === curUser)).length > 0;
 		},
-		// The user's existing vote if it has the weight being cast. Some listings carry no
-		// `percent` per vote; then nothing is known and the chain decides.
-		sameWeightVote() {
+		// The user's existing vote if it has the weight being cast. A vote without `percent`
+		// (hivemind listings carry only voter and rshares) is unknown: the chain decides.
+		sameWeightVote(votes) {
 			const curUser = this.user.account.name;
-			const votes = (this.postToVote && this.postToVote.active_votes) || [];
-			const mine = votes.find(v => v.voter === curUser);
+			const mine = (votes || (this.postToVote && this.postToVote.active_votes) || []).find(v => v.voter === curUser);
 			if (!mine || mine.percent === undefined || mine.percent === null) return null;
 			return Number(mine.percent) === this.voteWeight * 100 ? mine : null;
+		},
+		// The post's votes as the chain has them now. The listing's copy can lack `percent`
+		// (hivemind) or be stale (a vote changed in another app since the page loaded).
+		// null if they cannot be read in time: the listing's copy is used instead.
+		async currentVotes() {
+			const chainLnk = this.cur_bchain === 'BLURT' ? blurt : (this.cur_bchain === 'STEEM' ? steem : hive);
+			const { author, permlink } = this.postToVote || {};
+			if (!author || !permlink) return null;
+			try {
+				const votes = await Promise.race([
+					chainLnk.api.getActiveVotesAsync(author, permlink),
+					new Promise((resolve) => setTimeout(() => resolve(null), 5000)),
+				]);
+				return Array.isArray(votes) ? votes : null;
+			} catch (err) {
+				console.error('Reading the current votes failed:', err);
+				return null;
+			}
 		},
 		async processTrxFunc(op_name, cstm_params, bchain_option, extra_ops) {
 			extra_ops = extra_ops || [];
@@ -604,6 +622,22 @@ export default {
 				return;
 			}
 
+			// The chain rejects a vote identical to the one already cast ("Your current vote on
+			// this comment is identical to this vote"), which showed only as "error voting".
+			// Checked first: no point confirming a paid-out vote that cannot go through.
+			this.loading = true;
+			const votes = await this.currentVotes();
+			this.loading = false;
+			const sameVote = this.sameWeightVote(votes);
+			if (sameVote) {
+				this.$notify({
+					group: 'error', // the group every page with this modal renders (vote errors use it)
+					text: this.$t('vote_identical').replace('_WEIGHT_', () => Math.abs(sameVote.percent / 100)),
+					position: 'top center'
+				});
+				return;
+			}
+
 			// Check if the post has already been paid out.
 			if (this.postPaid()) {
 				// If it is paid out, show a confirmation dialog using the i18n translation.
@@ -618,21 +652,9 @@ export default {
 			}
 
 
-			// The chain rejects a vote identical to the one already cast ("Your current vote on
-			// this comment is identical to this vote"), which showed only as "error voting".
-			const sameVote = this.sameWeightVote();
-			if (sameVote) {
-				this.$notify({
-					group: 'error', // the group every page with this modal renders (vote errors use it)
-					text: this.$t('vote_identical').replace('_WEIGHT_', () => sameVote.percent / 100),
-					position: 'top center'
-				});
-				return;
-			}
-
 			//if the user already voted, confirm vote change
 			//if this post is already voted by the user, we need to show a confirmation
-			if (this.userVotedThisPost()) {
+			if (this.userVotedThisPost(votes)) {
 				var confirmPopup = confirm(this.$t('confirm_vote_change'));
 				if (!confirmPopup) {
 					return;
