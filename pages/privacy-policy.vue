@@ -35,7 +35,7 @@
 		<p>On Android, if you choose to connect Health Connect, the Actifit app asks for permission to read the following data types. It never writes to Health Connect.</p>
 		<ul>
 			<li><strong>Steps</strong>: your step counts, used to show your activity and progress and to calculate your rewards.</li>
-			<li><strong>Distance</strong> and <strong>Active calories burned</strong>: shown on your dashboard only. They are not included in your reports.</li>
+			<li><strong>Distance</strong> and <strong>Active calories burned</strong>: shown in the app only (dashboard, profile and home-screen widget). They are not included in your reports.</li>
 			<li><strong>Exercise sessions</strong> (only if you turn on "Show my workouts" in Settings): the type of each workout, its duration, its distance and whether it was entered manually, shown on your dashboard and included in your activity report when you submit one.</li>
 		</ul>
 		<p>Only steps recorded automatically by your phone or wearable count toward rewards. Steps that were entered manually in another app, and workouts of any kind, are shown for your information only and never count toward rewards.</p>
@@ -43,8 +43,10 @@
 		<ul>
 			<li><strong>Estimated reward</strong>: while you use the app, today's step count is sent to Actifit's servers to show the AFIT reward you are on track to earn.</li>
 			<li><strong>Dashboard insight</strong>: today's step count, your current streak and your 7-day step average are sent to Google's Gemini API to generate the short personal fitness tip shown on your dashboard.</li>
-			<li><strong>Activity reports</strong>: when you submit a report, it is sent to Actifit's servers (hosted on Heroku), which validate it, calculate your rewards and publish it to the Hive blockchain. A report contains your daily step count, your steps per 15-minute period of the day, and your workouts as described above. Once published, it is public and permanent.</li>
-			<li><strong>Waves and comments</strong>: when you post a wave or comment from the app, today's step count is attached to it and published to the Hive blockchain.</li>
+			<li><strong>Activity reports</strong>: when you submit a report, it is sent to Actifit's servers, which validate it, store a copy with your account to calculate your rewards, and publish it to the Hive blockchain and, if you have an account there, the Blurt blockchain. A report contains your daily step count, your steps per 15-minute period of the day, your workouts as described above and, if you recorded a GPS route that day, the steps counted during that route. Once published, it is public and permanent.</li>
+			<li><strong>Waves</strong>: when you post a wave from the app, today's step count is attached to it and published to the Hive blockchain.</li>
+			<li><strong>Sharing and exports you start</strong>: if you tap Share progress, an image showing your daily and weekly steps is shared with the app you choose; if you export a backup from Settings, it includes your recent activity data and is saved where you choose.</li>
+			<li><strong>Device backup</strong>: if Android backup is turned on, the app's local data, including Health Connect data, may be included in your device's encrypted backup to your own Google account.</li>
 		</ul>
 		<p>We do not sell Health Connect data, we do not use it for advertising or to target the ads shown in the app, and we do not transfer it to anyone except as described above. You can revoke Actifit's access at any time from the Health Connect settings on your device.</p>
 		<p>Actifit's use of information received from Health Connect adheres to the Health Connect Permissions policy, including its Limited Use requirements.</p>
