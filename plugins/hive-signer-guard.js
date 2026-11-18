@@ -16,25 +16,19 @@ export default ({ app }) => {
 
   guardHiveAuth(Vue.prototype.$HAS, localStorage, refuse)
 
-  const guard = (keychain) => guardKeychain(keychain, localStorage, refuse)
-  guard(window.hive_keychain)
-  // The extension adds window.hive_keychain itself, usually before the site's scripts run but
-  // not always (a slow extension, Keychain installed mid-session, a mobile in-app browser), and
-  // a provider can replace it. Wrap whatever is assigned, whenever it is assigned.
-  try {
-    let current = window.hive_keychain
-    Object.defineProperty(window, 'hive_keychain', {
-      configurable: true,
-      enumerable: true,
-      get: () => current,
-      set: (value) => { current = value; guard(value) },
-    })
-  } catch (e) {
-    console.warn('Keychain guard: cannot watch window.hive_keychain', e)
-  }
-  // in case it was defined in a way the trap cannot see
-  const retry = () => guard(window.hive_keychain)
+  // The extension adds window.hive_keychain itself, often after the site's scripts run (it
+  // injects `var hive_keychain = {...}` once the page is idle), and a provider can replace it.
+  // Do NOT put a getter/setter on window.hive_keychain to catch that: in Chrome, Keychain's
+  // `var` assignment never reached the setter, window.hive_keychain stayed undefined, and
+  // every Keychain action on the site fell back to "error voting" with no popup (1.14.55-57).
+  // Instead wrap whatever is there at load, a little later, and right before every user action
+  // (capture phase, ahead of the site's handlers). Wrapping is idempotent and cheap.
+  const retry = () => { guardKeychain(window.hive_keychain, localStorage, refuse) }
+  retry()
   window.addEventListener('load', retry)
   setTimeout(retry, 1500)
   setTimeout(retry, 5000)
+  for (const type of ['pointerdown', 'mousedown', 'touchstart', 'keydown']) {
+    document.addEventListener(type, retry, { capture: true, passive: true })
+  }
 }

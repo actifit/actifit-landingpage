@@ -48,15 +48,39 @@ describe('hive-signer-guard plugin', () => {
     }
   })
 
-  it('a Keychain object assigned later, or replacing the first, is wrapped too', async () => {
+  // 1.14.55-57 put a getter/setter on window.hive_keychain. In Chrome, Keychain's injected
+  // `var hive_keychain = {...}` never reached the setter, so the site never saw Keychain:
+  // every Keychain vote showed "error voting" with no popup.
+  it('leaves window.hive_keychain a plain property, so Keychain\'s own `var` defines it', () => {
+    const prevNotify = Vue.notify
+    Vue.notify = jest.fn()
+    delete window.hive_keychain
+    try {
+      plugin({ app: { i18n: { t: (k) => k } } })
+      const desc = Object.getOwnPropertyDescriptor(window, 'hive_keychain')
+      expect(desc && (desc.get || desc.set)).toBeFalsy()
+      expect(fs.readFileSync(path.resolve(__dirname, '../../../plugins/hive-signer-guard.js'), 'utf8')).not.toMatch(/defineProperty\(window/)
+      // the way Keychain defines it (public/hive_keychain.js), run as a global script
+      // eslint-disable-next-line no-eval
+      ;(0, eval)('var hive_keychain = { requestBroadcast: function () {} }')
+      expect(window.hive_keychain && typeof window.hive_keychain.requestBroadcast).toBe('function')
+    } finally {
+      Vue.notify = prevNotify
+      delete window.hive_keychain
+    }
+  })
+
+  it('a Keychain object that appears later, or replaces the first, is wrapped before the next user action', async () => {
     const prevNotify = Vue.notify
     Vue.notify = jest.fn()
     localStorage.setItem('cur_bchain', 'BLURT')
     try {
       plugin({ app: { i18n: { t: () => 'Only Hive. Not on _CHAIN_.' } } })
-      for (const late of [{ requestVote: jest.fn() }, { requestVote: jest.fn() }]) {
+      for (const [late, event] of [[{ requestVote: jest.fn() }, 'pointerdown'], [{ requestVote: jest.fn() }, 'keydown'], [{ requestVote: jest.fn() }, 'touchstart']]) {
         const original = late.requestVote
         window.hive_keychain = late
+        // the click / key press that starts the action
+        document.body.dispatchEvent(new Event(event, { bubbles: true }))
         const cb = jest.fn()
         window.hive_keychain.requestVote('alice', 'p', 'bob', 10000, cb)
         await new Promise((r) => setTimeout(r, 0))
