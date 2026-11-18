@@ -6,7 +6,7 @@
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-5">
       <h1 class="text-center mb-5 h2">Privacy Policy</h1>
-		<p>Effective date: November 26, 2018</p>
+		<p>Effective date: November 18, 2026</p>
 
 
 		<p>Actifit.io ("us", "we", or "our") operates the https://actifit.io website and the Actifit Fitness Tracker mobile application (the "Service").</p>
@@ -31,6 +31,16 @@
 		</ul>
 		<p>While using Actifit mobile apps, we collect your phone's sensor readings in terms of your movements, as Actifit aims to reward users' activity, as well as other information such as your Hive account username, password/keys, activity types, measurements and other relevant information. Though this information is not stored except on your own device, until you decide to submit this information and post it, whereby it will be posted on the Hive blockchain. Passwords/keys will not be stored anywhere aside from your own device, and will be used to authenticate your user account.</p> 
 		<p>Similarly, if you decide to use one of the integrations Actifit provides to sync data from wearable devices (such as Fitbit), then this data (including but not limited to step count, weight/height) will also be stored on your device, and only submitted to the Hive blockchain once you decide to, and will be integrated as part of your post.</p>
+		<h4>Health Connect (Android)</h4>
+		<p>On Android, if you choose to connect Health Connect, the Actifit app asks for permission to read the following data types, and never writes to Health Connect:</p>
+		<ul>
+			<li><strong>Steps</strong>: your daily step count, used to show your activity and to calculate your rewards.</li>
+			<li><strong>Distance</strong> and <strong>Active calories burned</strong>: shown on your dashboard and optionally included in your activity report.</li>
+			<li><strong>Exercise sessions</strong> (only if you turn on "Show workouts" in Settings): the type of each workout, its duration and its distance, shown on your dashboard and optionally included in your activity report.</li>
+		</ul>
+		<p>Only steps recorded automatically by your phone or wearable count toward rewards. Steps that were entered manually in another app, and workouts of any kind, are shown for your information only and never count toward rewards.</p>
+		<p>This data is read and processed on your device. It leaves your device only when you choose to submit an activity report, and then only as the summary included in that report (for example, your step count and the type and duration of your workouts), which is published to the Hive blockchain. We do not sell Health Connect data, we do not use it for advertising, and we do not share it with third parties other than by publishing the reports you choose to submit. You can revoke Actifit's access at any time from the Health Connect settings on your device.</p>
+		<p>Actifit's use of information received from Health Connect adheres to the Health Connect Permissions policy, including its Limited Use requirements.</p>
 		<p>Due to the immutable nature of the blockchain, the data and posts/reports submitted can no longer be deleted.</p>
 		<p>Uploading pictures/attachments via Actifit.io website or app, you give Actifit team the permission to reuse this content under any means deemed useful, including but not limited to social media promotions and other marketing purposes</p>
 
