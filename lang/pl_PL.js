@@ -548,6 +548,7 @@ module.exports = {
   Activity_Reports: 'Raporty aktywności',
   Activity_Reports_Rewarded: 'Nagrodzone raporty aktywności',
   confirm_vote_change: 'Już wcześniej głosowałeś na ten post. Czy na pewno chcesz zmienić swój głos?',
+  vote_identical: 'Już zagłosowałeś na ten post z wagą _WEIGHT_%. Wybierz inną wagę, aby zmienić głos.',
   confirm_delete_comment: 'Czy na pewno chcesz usunąć swój komentarz?',
   user_not_found_error: 'Błąd: Nie znaleziono użytkownika',
   error_page_not_found: "Nie znaleziono strony",

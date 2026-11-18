@@ -548,6 +548,7 @@ module.exports = {
   Activity_Reports: 'Relatórios de Atividade',
   Activity_Reports_Rewarded: 'Relatórios de Atividade Recompensados',
   confirm_vote_change: 'Você já votou nesta postagem antes. Tem certeza que deseja alterar seu voto?',
+  vote_identical: 'Já votou _WEIGHT_% nesta publicação. Escolha um peso diferente para alterar o seu voto.',
   confirm_delete_comment: 'Tem certeza que deseja excluir seu comentário?',
   user_not_found_error: 'Erro: Usuário não Encontrado',
   error_page_not_found: "Página não encontrada",

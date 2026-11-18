@@ -543,6 +543,7 @@ module.exports = {
   Activity_Reports: 'Rapports d\'activité',
   Activity_Reports_Rewarded: 'Rapports d\'activité récompensés',
   confirm_vote_change: 'Vous aviez déjà voté sur cette publication. Êtes-vous sûr de vouloir changer votre vote ?',
+  vote_identical: 'Vous avez déjà voté à _WEIGHT_% sur cette publication. Choisissez un autre poids pour modifier votre vote.',
   confirm_delete_comment: 'Êtes-vous sûr de vouloir supprimer votre commentaire ?',
   user_not_found_error: 'Erreur : Utilisateur non trouvé',
   error_page_not_found: "Page introuvable",
