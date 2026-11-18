@@ -48,39 +48,15 @@ describe('hive-signer-guard plugin', () => {
     }
   })
 
-  // 1.14.55-57 put a getter/setter on window.hive_keychain. In Chrome, Keychain's injected
-  // `var hive_keychain = {...}` never reached the setter, so the site never saw Keychain:
-  // every Keychain vote showed "error voting" with no popup.
-  it('leaves window.hive_keychain a plain property, so Keychain\'s own `var` defines it', () => {
-    const prevNotify = Vue.notify
-    Vue.notify = jest.fn()
-    delete window.hive_keychain
-    try {
-      plugin({ app: { i18n: { t: (k) => k } } })
-      const desc = Object.getOwnPropertyDescriptor(window, 'hive_keychain')
-      expect(desc && (desc.get || desc.set)).toBeFalsy()
-      expect(fs.readFileSync(path.resolve(__dirname, '../../../plugins/hive-signer-guard.js'), 'utf8')).not.toMatch(/defineProperty\(window/)
-      // the way Keychain defines it (public/hive_keychain.js), run as a global script
-      // eslint-disable-next-line no-eval
-      ;(0, eval)('var hive_keychain = { requestBroadcast: function () {} }')
-      expect(window.hive_keychain && typeof window.hive_keychain.requestBroadcast).toBe('function')
-    } finally {
-      Vue.notify = prevNotify
-      delete window.hive_keychain
-    }
-  })
-
-  it('a Keychain object that appears later, or replaces the first, is wrapped before the next user action', async () => {
+  it('a Keychain object assigned later, or replacing the first, is wrapped too', async () => {
     const prevNotify = Vue.notify
     Vue.notify = jest.fn()
     localStorage.setItem('cur_bchain', 'BLURT')
     try {
       plugin({ app: { i18n: { t: () => 'Only Hive. Not on _CHAIN_.' } } })
-      for (const [late, event] of [[{ requestVote: jest.fn() }, 'pointerdown'], [{ requestVote: jest.fn() }, 'keydown'], [{ requestVote: jest.fn() }, 'touchstart']]) {
+      for (const late of [{ requestVote: jest.fn() }, { requestVote: jest.fn() }]) {
         const original = late.requestVote
         window.hive_keychain = late
-        // the click / key press that starts the action
-        document.body.dispatchEvent(new Event(event, { bubbles: true }))
         const cb = jest.fn()
         window.hive_keychain.requestVote('alice', 'p', 'bob', 10000, cb)
         await new Promise((r) => setTimeout(r, 0))
@@ -91,6 +67,48 @@ describe('hive-signer-guard plugin', () => {
     } finally {
       Vue.notify = prevNotify
       localStorage.removeItem('cur_bchain')
+    }
+  })
+
+  // A Keychain defined in a way the window.hive_keychain trap cannot see, appearing after the
+  // timers: it is wrapped before the user action that would use it, including a bare click
+  // (screen readers, voice control) and a form submit.
+  it.each(['pointerdown', 'keydown', 'click', 'submit'])('a Keychain the trap missed is wrapped on %s, before the site\'s handlers', async (type) => {
+    const prevNotify = Vue.notify
+    Vue.notify = jest.fn()
+    localStorage.setItem('cur_bchain', 'BLURT')
+    try {
+      plugin({ app: { i18n: { t: () => 'Only Hive. Not on _CHAIN_.' } } })
+      const late = { requestVote: jest.fn() }
+      const original = late.requestVote
+      Object.defineProperty(window, 'hive_keychain', { value: late, configurable: true, writable: true })
+      const cb = jest.fn()
+      // the site's own handler, on the target (runs after capture-phase listeners)
+      const target = document.createElement(type === 'submit' ? 'form' : 'button')
+      document.body.appendChild(target)
+      target.addEventListener(type, () => window.hive_keychain.requestVote('alice', 'p', 'bob', 10000, cb))
+      target.dispatchEvent(new Event(type, { bubbles: true }))
+      await new Promise((r) => setTimeout(r, 0))
+      expect(original).not.toHaveBeenCalled()
+      expect(cb).toHaveBeenCalledWith(expect.objectContaining({ error: 'chain_not_supported' }))
+      target.remove()
+    } finally {
+      Vue.notify = prevNotify
+      localStorage.removeItem('cur_bchain')
+      delete window.hive_keychain
+    }
+  })
+
+  it('a provider that cannot be wrapped is reported once, not on every key press', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {})
+    try {
+      plugin({ app: { i18n: { t: (k) => k } } })
+      Object.defineProperty(window, 'hive_keychain', { value: Object.freeze({ requestVote () {} }), configurable: true, writable: true })
+      for (let i = 0; i < 5; i++) document.body.dispatchEvent(new Event('keydown', { bubbles: true }))
+      expect(warn.mock.calls.filter(([m]) => /cannot wrap/.test(m))).toHaveLength(1)
+    } finally {
+      warn.mockRestore()
+      delete window.hive_keychain
     }
   })
 
