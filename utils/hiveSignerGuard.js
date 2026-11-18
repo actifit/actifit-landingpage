@@ -87,6 +87,7 @@ const isRequest = (keychain, key) => /^request[A-Z]/.test(key) && typeof keychai
 // answers it too (as a failure, with an empty `result` because some callers read
 // response.result.id), so no caller is left waiting.
 // True once every request method is wrapped; false otherwise, so the caller tries again.
+const warnedKeychains = new WeakSet()
 export function guardKeychain (keychain, storage, refuse) {
   if (!keychain || keychain[WRAPPED]) return false
   let complete = true
@@ -107,12 +108,16 @@ export function guardKeychain (keychain, storage, refuse) {
     guarded[WRAPPED] = true
     // A provider with a frozen object must not break the site: guard what can be guarded.
     try { keychain[method] = guarded } catch (e) { /* checked below */ }
-    if (keychain[method] !== guarded) {
-      complete = false
-      console.warn('Keychain guard: cannot wrap ' + method)
-    }
+    if (keychain[method] !== guarded) complete = false
   }
-  if (!complete) return false
+  if (!complete) {
+    // the plugin retries on every user action: say it once per object, not per key press
+    if (!warnedKeychains.has(keychain)) {
+      warnedKeychains.add(keychain)
+      console.warn('Keychain guard: cannot wrap every Keychain request method')
+    }
+    return false
+  }
   try { Object.defineProperty(keychain, WRAPPED, { value: true }) } catch (e) { /* frozen: wrapped methods stay marked */ }
   return true
 }
