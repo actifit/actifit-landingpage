@@ -543,6 +543,7 @@ module.exports = {
   Activity_Reports: 'Aktivitätsberichte',
   Activity_Reports_Rewarded: 'Belohnte Aktivitätsberichte',
   confirm_vote_change: 'Sie haben bereits für diesen Beitrag gestimmt. Sind Sie sicher, dass Sie Ihre Stimme ändern möchten?',
+  vote_identical: 'Du hast diesen Beitrag bereits mit _WEIGHT_% bewertet. Wähle ein anderes Gewicht, um deine Stimme zu ändern.',
   confirm_delete_comment: 'Sind Sie sicher, dass Sie Ihren Kommentar löschen möchten?',
   user_not_found_error: 'Fehler: Benutzer nicht gefunden',
   error_page_not_found: "Seite nicht gefunden",

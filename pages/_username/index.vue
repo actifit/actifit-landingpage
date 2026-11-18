@@ -2039,7 +2039,7 @@ export default {
     async setSplinterCards(json) {
       this.splinterCards = json;
       fetch(process.env.splinter_api_url_user_collections.replace('_USERNAME_', this.displayUser)).then(
-        res => { res.json().then(json => this.setUserSplinterCards(json)) }).catch(e => reject(e))
+        res => { res.json().then(json => this.setUserSplinterCards(json)) }).catch(e => console.error(e))
     },
     async setUserSplinterCards(json) {
       if (json && json.player == this.displayUser && json.cards.length > 0) {
@@ -2080,21 +2080,21 @@ export default {
       fetch(process.env.actiAppUrl + 'trackedMeasurements/' + this.displayUser).then(res => res.json().then(json => this.setUserMeasurements(json))).catch(e => console.log(e));
       fetch(process.env.actiAppUrl + 'trackedActivity/' + this.displayUser).then(res => res.json().then(json => this.setUserActivity(json))).catch(e => console.log(e));
       fetch(process.env.actiAppUrl + 'getRank/' + this.displayUser).then(res => res.json().then(json => this.userRank = json)).catch(e => console.error(e));
-      fetch(process.env.actiAppUrl + 'userRewardedPostCount/' + this.displayUser).then(res => res.json().then(json => this.rewardedPostCount = json.rewarded_post_count)).catch(e => reject(e));
+      fetch(process.env.actiAppUrl + 'userRewardedPostCount/' + this.displayUser).then(res => res.json().then(json => this.rewardedPostCount = json.rewarded_post_count)).catch(e => console.error(e));
       fetch(process.env.actiAppUrl + 'user/' + this.displayUser).then(res => res.json().then(json => this.userTokenCount = json.tokens)).catch(e => console.log(e));
-      fetch(process.env.actiAppUrl + 'userBadges/' + this.displayUser).then(res => res.json().then(json => this.userBadges = json)).catch(e => reject(e));
-      fetch(process.env.actiAppUrl + 'isoParticipant/' + this.displayUser).then(res => res.json().then(json => this.isoParticipant = json)).catch(e => reject(e));
+      fetch(process.env.actiAppUrl + 'userBadges/' + this.displayUser).then(res => res.json().then(json => this.userBadges = json)).catch(e => console.error(e));
+      fetch(process.env.actiAppUrl + 'isoParticipant/' + this.displayUser).then(res => res.json().then(json => this.isoParticipant = json)).catch(e => console.error(e));
 
-      fetch(process.env.actiAppUrl + 'delegation/' + this.displayUser).then(res => res.json().then(json => this.actifitDelegator = json)).catch(e => reject(e));
+      fetch(process.env.actiAppUrl + 'delegation/' + this.displayUser).then(res => res.json().then(json => this.actifitDelegator = json)).catch(e => console.error(e));
 
-      fetch(process.env.actiAppUrl + 'luckyWinner/' + this.displayUser).then(res => res.json().then(json => this.doubledupWinner = json)).catch(e => reject(e));
-      fetch(process.env.actiAppUrl + 'charityDonor/' + this.displayUser).then(res => res.json().then(json => this.charityDonor = json)).catch(e => reject(e));
-      fetch(process.env.actiAppUrl + 'is_banned/' + this.displayUser).then(res => res.json().then(json => this.account_banned = json)).catch(e => reject(e));
+      fetch(process.env.actiAppUrl + 'luckyWinner/' + this.displayUser).then(res => res.json().then(json => this.doubledupWinner = json)).catch(e => console.error(e));
+      fetch(process.env.actiAppUrl + 'charityDonor/' + this.displayUser).then(res => res.json().then(json => this.charityDonor = json)).catch(e => console.error(e));
+      fetch(process.env.actiAppUrl + 'is_banned/' + this.displayUser).then(res => res.json().then(json => this.account_banned = json)).catch(e => console.error(e));
       fetch(process.env.actiAppUrl + 'arena/badges/' + this.displayUser).then(res => res.json().then(json => { this.arenaBadges = (json && Array.isArray(json.badges)) ? json.badges : []; })).catch(e => console.log(e));
-      fetch(process.env.actiAppUrl + 'availableTipBalance?user=' + this.displayUser).then(res => res.json().then(json => this.setTipBalance(json))).catch(e => reject(e));
-      fetch(process.env.poshVerificationUrl + this.displayUser).then(res => res.json().then(json => this.setPoshVerifStatus(json))).catch(e => reject(e));
-      fetch(process.env.threeSpeakApiVidCount.replace('_USERNAME_', this.displayUser)).then(res => res.json().then(json => this.set3SVideoCount(json))).catch(e => reject(e));
-      fetch(process.env.splinter_api_all_cards).then(res => res.json().then(json => this.setSplinterCards(json))).catch(e => reject(e));
+      fetch(process.env.actiAppUrl + 'availableTipBalance?user=' + this.displayUser).then(res => res.json().then(json => this.setTipBalance(json))).catch(e => console.error(e));
+      fetch(process.env.poshVerificationUrl + this.displayUser).then(res => res.json().then(json => this.setPoshVerifStatus(json))).catch(e => console.error(e));
+      fetch(process.env.threeSpeakApiVidCount.replace('_USERNAME_', this.displayUser)).then(res => res.json().then(json => this.set3SVideoCount(json))).catch(e => console.error(e));
+      fetch(process.env.splinter_api_all_cards).then(res => res.json().then(json => this.setSplinterCards(json))).catch(e => console.error(e));
 
       if (badActors.includes(this.displayUser)){
         this.badActorWarning = true;

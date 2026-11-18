@@ -77,8 +77,8 @@
 	  loadVotingStatus() {
 		//fetch voting status
 		  fetch(process.env.actiAppUrl+'votingStatus/').then(
-			res => {res.json().then(json => this.setVotingStatus (json) ).catch(e => reject(e))
-		  }).catch(e => reject(e))
+			res => {res.json().then(json => this.setVotingStatus (json) ).catch(e => console.error(e))
+		  }).catch(e => console.error(e))
 	  }
 	},
 	async mounted () {

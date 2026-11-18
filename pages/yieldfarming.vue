@@ -184,8 +184,8 @@
 
 		//fetch AFIT price
 	    fetch(process.env.actiAppUrl+'exchangeAFITPrice').then(
-		  res => {res.json().then(json => this.setAFITPrice (json)).catch(e => reject(e))
-	    }).catch(e => reject(e))
+		  res => {res.json().then(json => this.setAFITPrice (json)).catch(e => console.error(e))
+	    }).catch(e => console.error(e))
 	  },
 	  setHivePrice (_hivePrice){
 		this.hivePrice = parseFloat(_hivePrice).toFixed(3);
@@ -214,12 +214,12 @@
       this.$store.dispatch('fetchTopDelegators')
 
 	  fetch(process.env.actiAppUrl+'transactionsByType?type=Delegation&sortByToken=-1').then(//
-		  res => {res.json().then(json => this.setDelegationTransactions (json)).catch(e => reject(e))
-		}).catch(e => reject(e))
+		  res => {res.json().then(json => this.setDelegationTransactions (json)).catch(e => console.error(e))
+		}).catch(e => console.error(e))
 
 	  fetch(process.env.actiAppUrl+'getDailyDelegationPool').then(
-		  res => {res.json().then(json => this.setPools (json)).catch(e => reject(e))
-		}).catch(e => reject(e))
+		  res => {res.json().then(json => this.setPools (json)).catch(e => console.error(e))
+		}).catch(e => console.error(e))
 
 
 	  this.fetchPriceData();

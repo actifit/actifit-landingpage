@@ -543,6 +543,7 @@ module.exports = {
   Activity_Reports: 'تقارير النشاط',
   Activity_Reports_Rewarded: 'تقارير النشاط المكافأة',
   confirm_vote_change: 'لقد قمت بالتصويت بالفعل على هذا المنشور. هل أنت متأكد أنك تريد تغيير تصويتك؟',
+  vote_identical: 'لقد صوّتّ بالفعل بنسبة _WEIGHT_% على هذا المنشور. اختر نسبة مختلفة لتغيير تصويتك.',
   confirm_delete_comment: 'هل أنت متأكد أنك تريد حذف تعليقك؟',
   user_not_found_error: 'خطأ: لم يتم العثور على المستخدم',
   error_page_not_found: "الصفحة غير موجودة",

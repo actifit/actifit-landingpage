@@ -548,6 +548,7 @@ module.exports = {
   Activity_Reports: 'Звіти про активність',
   Activity_Reports_Rewarded: 'Винагороджені звіти про активність',
   confirm_vote_change: 'Ви вже голосували за цей допис. Ви впевнені, що хочете змінити свій голос?',
+  vote_identical: 'Ви вже проголосували за цей допис на _WEIGHT_%. Виберіть іншу вагу, щоб змінити голос.',
   confirm_delete_comment: 'Ви впевнені, що хочете видалити свій коментар?',
   user_not_found_error: 'Помилка: користувача не знайдено',
   error_page_not_found: "Сторінку не знайдено",

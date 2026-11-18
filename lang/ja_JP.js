@@ -548,6 +548,7 @@ module.exports = {
   Activity_Reports: 'アクティビティレポート',
   Activity_Reports_Rewarded: '報酬対象のアクティビティレポート',
   confirm_vote_change: 'この投稿にはすでに投票しています。投票を変更してもよろしいですか？',
+  vote_identical: 'この投稿にはすでに _WEIGHT_% で投票済みです。投票を変更するには別の割合を選んでください。',
   confirm_delete_comment: 'コメントを削除してもよろしいですか？',
   user_not_found_error: 'エラー：ユーザーが見つかりません',
   error_page_not_found: "ページが見つかりません",

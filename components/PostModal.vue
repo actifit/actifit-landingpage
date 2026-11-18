@@ -799,13 +799,13 @@ export default {
         this.profImgUrl = process.env.steemImgUrl;
         fetch(scot_steemengine_api + '@' + this.post.author + '/' + this.post.permlink).then(
           res => {
-            res.json().then(json => this.setPostTokenRewards(json)).catch(e => reject(e))
-          }).catch(e => reject(e))
+            res.json().then(json => this.setPostTokenRewards(json)).catch(e => console.error(e))
+          }).catch(e => console.error(e))
       } else {
         fetch(scot_steemengine_api + '@' + this.post.author + '/' + this.post.permlink + scot_hive_api_param).then(
           res => {
-            res.json().then(json => this.setPostTokenRewards(json)).catch(e => reject(e))
-          }).catch(e => reject(e))
+            res.json().then(json => this.setPostTokenRewards(json)).catch(e => console.error(e))
+          }).catch(e => console.error(e))
       }
       this.attachImageErrorHandlers();
     },
