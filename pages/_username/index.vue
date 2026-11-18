@@ -1525,6 +1525,8 @@ export default {
       return localStorage.getItem('std_login')
     },
     proceedWitnessVote(isProxy) {
+      // Keychain session with no Keychain: say so, rather than ask for a typed active key
+      if (this.$keychainMissing && this.$keychainMissing()) return;
       this.error_proceeding = false;
       if (!this.isKeychainLogin() && !this.isHiveauthLogin() && this.isStdLogin()) {
         if (!this.$refs["p-ac-key"] || this.$refs["p-ac-key"].value == '') {

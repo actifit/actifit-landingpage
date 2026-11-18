@@ -4,9 +4,11 @@
 // Keychain sessions. Each flow then added its own generic toast ("error voting", "error
 // performing operation"...) on top of, or instead of, the one that said what was wrong.
 //
-// One notice for all of them: the Keychain message is shown once, and the generic error
-// toasts the failed action adds right after it are dropped.
+// One notice for all of them, in its own toast group (rendered once, in the layout, so it
+// shows on every page and never stacks): after a refused action, the generic error toasts
+// that action adds right after it are dropped.
 
+export const NOTICE_GROUP = 'keychain-missing'
 // long enough for the failing action's own error toast to follow; short enough not to hide
 // the next, unrelated error
 export const MUTE_MS = 4000
@@ -20,20 +22,21 @@ export function keychainExpectedButMissing (storage, win) {
   }
 }
 
-// notify: the unfiltered toast function. message(): the (HTML-safe) text to show.
+// notify: the toast function. message(): the (HTML-safe) text to show.
 export function createKeychainMissingNotice ({ notify, message, now = Date.now }) {
   let mutedUntil = 0
   return {
-    report () {
-      const t = now()
-      if (t >= mutedUntil) notify({ group: 'error', text: message(), position: 'top center', duration: 10000 })
-      mutedUntil = t + MUTE_MS
+    // mute: false for the page-load notice, which follows no failed action
+    report ({ mute = true } = {}) {
+      // replace a notice still showing (or dismissed): one at a time, and always visible feedback
+      notify({ group: NOTICE_GROUP, clean: true })
+      notify({ group: NOTICE_GROUP, text: message(), duration: 10000 })
+      if (mute) mutedUntil = now() + MUTE_MS
     },
-    // false: drop this toast (a generic error that follows the Keychain notice)
+    // false: drop this toast (a generic error that follows a refused action)
     allows (params) {
       if (now() >= mutedUntil) return true
-      if (typeof params === 'string') return false
-      return !(params && params.group === 'error' && !params.clean)
+      return !(params && typeof params === 'object' && params.group === 'error' && !params.clean)
     },
   }
 }

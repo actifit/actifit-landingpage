@@ -4655,6 +4655,8 @@ export default {
 
 
     async claimSavingsRewards() {
+      // Keychain session with no Keychain: say so, rather than ask for a typed active key
+      if (this.$keychainMissing && this.$keychainMissing()) return;
 
       //check if we need active key
       if (!this.isKeychainLogin && !this.isHiveauthLogin && this.isStdLogin) {
@@ -5003,6 +5005,8 @@ export default {
       this.scrollAction();
     },
     async cancelSavingsWithdrawal(request_id) {
+      // Keychain session with no Keychain: say so, rather than ask for a typed active key
+      if (this.$keychainMissing && this.$keychainMissing()) return;
       if (!this.isKeychainLogin && !this.isHiveauthLogin && this.isStdLogin) {
         //check for active key
         if (this.$refs["cancel-withdraw-act-key"].value == '') {
@@ -5067,6 +5071,8 @@ export default {
       }
     },
     async proceedRemoveSavings() {
+      // Keychain session with no Keychain: say so, rather than ask for a typed active key
+      if (this.$keychainMissing && this.$keychainMissing()) return;
       //console.log(this.user.account);
       //function handles sending to savings
       if (!this.isKeychainLogin && !this.isHiveauthLogin && this.isStdLogin) {
@@ -5153,6 +5159,8 @@ export default {
       }
     },
     async proceedTransferSavings() {
+      // Keychain session with no Keychain: say so, rather than ask for a typed active key
+      if (this.$keychainMissing && this.$keychainMissing()) return;
       //function handles sending to savings
       if (!this.isKeychainLogin && !this.isHiveauthLogin && this.isStdLogin) {
         let confirmPopup = confirm(this.$t('confirm_transfer'));
@@ -5242,6 +5250,8 @@ export default {
     },
 
     async proceedTransfer() {
+      // Keychain session with no Keychain: say so, rather than ask for a typed active key
+      if (this.$keychainMissing && this.$keychainMissing()) return;
       //function handles the actual processing of the transfer
 
       if (!this.isKeychainLogin && !this.isHiveauthLogin && this.isStdLogin) {
@@ -5387,6 +5397,8 @@ export default {
 
     },
     async proceedPowerUp() {
+      // Keychain session with no Keychain: say so, rather than ask for a typed active key
+      if (this.$keychainMissing && this.$keychainMissing()) return;
       //function handles the actual processing of the power up
       if (!this.isKeychainLogin && !this.isHiveauthLogin) {
         let confirmPopup = confirm(this.$t('confirm_power_up'));
@@ -5457,6 +5469,8 @@ export default {
     },
 
     async proceedDelegation(cancellation) {
+      // Keychain session with no Keychain: say so, rather than ask for a typed active key
+      if (this.$keychainMissing && this.$keychainMissing()) return;
       //function handles the actual processing of delegation
       let note = this.$t('confirm_delegation')
       if (cancellation == true) {
@@ -5615,6 +5629,8 @@ export default {
     },
 
     async proceedPowerDown() {
+      // Keychain session with no Keychain: say so, rather than ask for a typed active key
+      if (this.$keychainMissing && this.$keychainMissing()) return;
       //function handles the actual processing of the power down
       if (!this.isKeychainLogin && !this.isHiveauthLogin) {
         let confirmPopup = confirm(this.$t('confirm_power_down'));
@@ -5814,6 +5830,8 @@ export default {
       //setTimeout(this.fetchTokenBalance , 5);
     },
     async cancelPowerDown() {
+      // Keychain session with no Keychain: say so, rather than ask for a typed active key
+      if (this.$keychainMissing && this.$keychainMissing()) return;
       //function handles cancelling the power down
 
       let confirmPopup = confirm(this.$t('confirm_cancel_power_down'));
@@ -6417,6 +6435,8 @@ export default {
       }
     },
     async proceedMoveSEPower() {
+      // Keychain session with no Keychain: say so, rather than ask for a typed active key
+      if (this.$keychainMissing && this.$keychainMissing()) return;
       //handles checking for proper confirmation of account via STEEM transfer
       //this.movingFunds = true
       //function handles the actual processing of the transfer
@@ -6671,6 +6691,8 @@ export default {
       setTimeout(function () { pntr.refreshinBal = false; }, 10000);
     },
     async proceedMoveAFIT(direction) {
+      // Keychain session with no Keychain: say so, rather than ask for a typed active key
+      if (this.$keychainMissing && this.$keychainMissing()) return;
       //TODO: if we are to reinstate this functionality after SE goes back online, we need to setup code for keychain support
 
       //direction = 1: SE to HE
@@ -6886,6 +6908,8 @@ export default {
       //}
     },
     async proceedMoveAFITX(direction) {
+      // Keychain session with no Keychain: say so, rather than ask for a typed active key
+      if (this.$keychainMissing && this.$keychainMissing()) return;
       //TODO: if we are to reinstate this functionality after SE goes back online, we need to setup code for keychain support
       //direction = 1: SE to HE
       //direction = 2: HE to SE
@@ -7029,6 +7053,8 @@ export default {
       }
     },
     async proceedPowerUpToken() {
+      // Keychain session with no Keychain: say so, rather than ask for a typed active key
+      if (this.$keychainMissing && this.$keychainMissing()) return;
       //handles performing a token power up/staking
       this.afit_se_power_error_proceeding = false;
       this.afit_se_power_err_msg = '';
@@ -7215,6 +7241,8 @@ export default {
     },
 
     async proceedDelegateToken() {
+      // Keychain session with no Keychain: say so, rather than ask for a typed active key
+      if (this.$keychainMissing && this.$keychainMissing()) return;
 
       this.afit_se_power_error_proceeding = false;
       this.afit_se_power_err_msg = '';
@@ -7407,6 +7435,8 @@ export default {
     },
 
     async proceedUnDelegateToken(delegation) {
+      // Keychain session with no Keychain: say so, rather than ask for a typed active key
+      if (this.$keychainMissing && this.$keychainMissing()) return;
 
       this.afit_se_power_error_proceeding = false;
       this.afit_se_power_err_msg = '';
@@ -7602,6 +7632,8 @@ export default {
 
 
     async proceedPowerDownToken() {
+      // Keychain session with no Keychain: say so, rather than ask for a typed active key
+      if (this.$keychainMissing && this.$keychainMissing()) return;
       //handles performing a token power down/unstaking
       this.afit_se_power_error_proceeding = false;
       this.afit_se_power_err_msg = '';
@@ -7784,6 +7816,8 @@ export default {
       }
     },
     async proceedTransferToken() {
+      // Keychain session with no Keychain: say so, rather than ask for a typed active key
+      if (this.$keychainMissing && this.$keychainMissing()) return;
       //handles performing a token power down/unstaking
       this.afit_se_power_error_proceeding = false;
       this.afit_se_power_err_msg = '';
@@ -8015,6 +8049,8 @@ export default {
       //handles locking and moving tokens over to BSC
       //the bridge is paused: never broadcast the AFIT lock + HBD fee to the bridge account
       if (!this.bscBridgeAvailable) return;
+      // Keychain session with no Keychain: say so, rather than ask for a typed active key
+      if (this.$keychainMissing && this.$keychainMissing()) return;
       this.afit_se_power_error_proceeding = false;
       this.afit_se_power_err_msg = '';
 
@@ -8207,6 +8243,8 @@ export default {
 
     },
     async proceedWithdrawToken() {
+      // Keychain session with no Keychain: say so, rather than ask for a typed active key
+      if (this.$keychainMissing && this.$keychainMissing()) return;
       //handles performing a token power down/unstaking
       this.afit_se_power_error_proceeding = false;
       this.afit_se_power_err_msg = '';

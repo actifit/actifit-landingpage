@@ -14,14 +14,17 @@ import '@/plugins/vue-custom'
 import plugin from '@/plugins/keychain-missing'
 import hive from '@hiveio/hive-js'
 import { requestKey } from '@/utils/keyPrompt'
-import { MUTE_MS, createKeychainMissingNotice, keychainExpectedButMissing } from '@/utils/keychainMissing'
+import { MUTE_MS, NOTICE_GROUP, createKeychainMissingNotice, keychainExpectedButMissing } from '@/utils/keychainMissing'
 
+const read = (file) => fs.readFileSync(path.resolve(__dirname, '../../..', file), 'utf8')
 const MSG = 'Hive Keychain was not detected.'
 const keychainSession = () => {
   localStorage.setItem('std_login', 'true')
   localStorage.setItem('acti_login_method', 'keychain')
   delete window.hive_keychain
 }
+// the toasts actually shown (not the clearing calls)
+const texts = (fn) => fn.mock.calls.map(([p]) => p).filter((p) => !p.clean).map((p) => p.text)
 
 afterEach(() => {
   localStorage.clear()
@@ -44,25 +47,38 @@ describe('keychainExpectedButMissing', () => {
 })
 
 describe('the notice', () => {
-  it('is shown once, then the generic errors that follow it are dropped, for MUTE_MS only', () => {
-    let t = 1000
+  it('replaces the one showing (never stacks, always visible), in its own group', () => {
     const notify = jest.fn()
-    const n = createKeychainMissingNotice({ notify, message: () => MSG, now: () => t })
+    const n = createKeychainMissingNotice({ notify, message: () => MSG, now: () => 1 })
+    n.report()
+    n.report() // a second click, after the first notice was dismissed or is still up
+    expect(notify.mock.calls.map(([p]) => p)).toEqual([
+      { group: NOTICE_GROUP, clean: true },
+      expect.objectContaining({ group: NOTICE_GROUP, text: MSG }),
+      { group: NOTICE_GROUP, clean: true },
+      expect.objectContaining({ group: NOTICE_GROUP, text: MSG }),
+    ])
+  })
+
+  it('after a refused action, drops the generic errors that follow, for MUTE_MS only', () => {
+    let t = 1000
+    const n = createKeychainMissingNotice({ notify: jest.fn(), message: () => MSG, now: () => t })
     expect(n.allows({ group: 'error', text: 'x' })).toBe(true)
     n.report()
-    n.report() // a second refusal in the same action (both-chains vote, retry)
-    expect(notify).toHaveBeenCalledTimes(1)
-    expect(notify).toHaveBeenCalledWith(expect.objectContaining({ group: 'error', text: MSG }))
     expect(n.allows({ group: 'error', text: 'error voting' })).toBe(false)
-    expect(n.allows('error voting')).toBe(false)
-    // not errors, or clearing toasts: untouched
+    // not errors, clearing calls, plain strings (default group): untouched
     expect(n.allows({ group: 'success', text: 'ok' })).toBe(true)
     expect(n.allows({ group: 'warn', text: 'w' })).toBe(true)
     expect(n.allows({ group: 'error', clean: true })).toBe(true)
+    expect(n.allows('plain')).toBe(true)
     t += MUTE_MS
     expect(n.allows({ group: 'error', text: 'later, unrelated' })).toBe(true)
-    n.report()
-    expect(notify).toHaveBeenCalledTimes(2)
+  })
+
+  it('the page-load notice mutes nothing (it follows no failed action)', () => {
+    const n = createKeychainMissingNotice({ notify: jest.fn(), message: () => MSG, now: () => 1 })
+    n.report({ mute: false })
+    expect(n.allows({ group: 'error', text: 'a page fetch failed' })).toBe(true)
   })
 })
 
@@ -70,16 +86,27 @@ describe('plugin', () => {
   let shown
   const install = () => {
     shown = jest.fn()
+    shown.close = jest.fn()
     Vue.notify = shown
     Vue.prototype.$notify = shown
     plugin({ app: { i18n: { t: (k) => (k === 'keychain_not_detected' ? MSG + " <l'extension>" : k) } } })
   }
 
   it('is registered client-side, after vue-notification and vue-custom.js', () => {
-    const cfg = fs.readFileSync(path.resolve(__dirname, '../../../nuxt.config.js'), 'utf8')
+    const cfg = read('nuxt.config.js')
     const at = (s) => cfg.indexOf(s)
     expect(at("{ src: '~/plugins/keychain-missing.js', mode: 'client' }")).toBeGreaterThan(at("{ src: '~plugins/vue-custom.js' }"))
     expect(at("{ src: '~plugins/vue-custom.js' }")).toBeGreaterThan(at("{ src: '~plugins/vue-notification', ssr: false }"))
+  })
+
+  it('the notice group is rendered in the layout, so it shows on every page', () => {
+    expect(read('layouts/default.vue')).toMatch(new RegExp(`<notifications group="${NOTICE_GROUP}"`))
+  })
+
+  it('keeps vue-notification\'s close()', () => {
+    install()
+    expect(Vue.notify.close).toBe(shown.close)
+    expect(Vue.prototype.$notify.close).toBe(shown.close)
   })
 
   it('$keychainMissing: false (nothing shown) when Keychain is there, or for other logins', () => {
@@ -101,26 +128,40 @@ describe('plugin', () => {
     new Vue().$notify({ group: 'error', text: 'error voting' })
     Vue.notify({ group: 'error', text: 'error performing operation' })
     new Vue().$notify({ group: 'success', text: 'saved' })
-    expect(shown.mock.calls.map(([p]) => p.text)).toEqual([MSG + ' &lt;l&#39;extension&gt;', 'saved'])
+    expect(texts(shown)).toEqual([MSG + ' &lt;l&#39;extension&gt;', 'saved'])
   })
+
+  const vmWithUser = () => {
+    const vm = new Vue()
+    vm.user = { account: { name: 'alice' } }
+    vm.$t = (k) => k
+    vm.$store = { state: {}, commit: jest.fn() }
+    return vm
+  }
 
   // the path every flow's typed-key fallback takes
   it('every flow: a Keychain session failing through $processTrxFunc shows only the Keychain notice', async () => {
     install()
     keychainSession()
-    const vm = new Vue()
-    vm.user = { account: { name: 'alice' } }
-    vm.$t = (k) => k
-    vm.$store = { state: {}, commit: jest.fn() }
+    const vm = vmWithUser()
     const res = await vm.$processTrxFunc('vote', { voter: 'alice' }, false)
     // what a caller then does on failure
     if (!res.success) vm.$notify({ group: 'error', text: 'error voting' })
     expect(res.success).toBe(false)
-    expect(shown).toHaveBeenCalledTimes(1)
-    expect(shown.mock.calls[0][0].text).toContain(MSG)
+    expect(texts(shown)).toHaveLength(1)
+    expect(texts(shown)[0]).toContain(MSG)
     // nothing was asked for or signed
     expect(requestKey).not.toHaveBeenCalled()
     expect(hive.broadcast.send).not.toHaveBeenCalled()
+  })
+
+  it('memo decoding (3Speak sessions) shows the notice too', async () => {
+    install()
+    keychainSession()
+    const res = await vmWithUser().$decodeMemo('#encrypted')
+    expect(res.error).toBeTruthy()
+    expect(texts(shown)).toHaveLength(1)
+    expect(hive.memo.decode).not.toHaveBeenCalled()
   })
 
   it('once per tab, a few seconds after load, when Keychain never showed up', () => {
@@ -128,16 +169,22 @@ describe('plugin', () => {
     keychainSession()
     install()
     jest.advanceTimersByTime(5000)
-    expect(shown).toHaveBeenCalledTimes(1)
+    expect(texts(shown)).toHaveLength(1)
     // another page load in the same tab
     install()
     jest.advanceTimersByTime(5000)
     expect(shown).not.toHaveBeenCalled()
   })
 
-  it('no load notice when Keychain arrived in time, or for other logins', () => {
+  it('no load notice if one was already shown for an action, if Keychain arrived in time, or for other logins', () => {
     jest.useFakeTimers()
     keychainSession()
+    install()
+    Vue.prototype.$keychainMissing() // e.g. videos/new connects to 3Speak on mount
+    shown.mockClear()
+    jest.advanceTimersByTime(5000)
+    expect(shown).not.toHaveBeenCalled()
+    sessionStorage.clear()
     install()
     window.hive_keychain = {}
     jest.advanceTimersByTime(5000)
@@ -146,5 +193,41 @@ describe('plugin', () => {
     install()
     jest.advanceTimersByTime(5000)
     expect(shown).not.toHaveBeenCalled()
+  })
+})
+
+// These ask a Keychain user (whose extension is missing) for a typed ACTIVE key, and several
+// sign with it directly through hive-js, never reaching the refusal: they must stop first.
+describe('actions that would ask for a typed active key stop first', () => {
+  const ACTIONS = {
+    'pages/_username/wallet.vue': ['claimSavingsRewards', 'cancelSavingsWithdrawal', 'proceedRemoveSavings', 'proceedTransferSavings', 'proceedTransfer', 'proceedPowerUp', 'proceedDelegation', 'proceedPowerDown', 'cancelPowerDown', 'proceedMoveSEPower', 'proceedMoveAFIT', 'proceedMoveAFITX', 'proceedPowerUpToken', 'proceedDelegateToken', 'proceedUnDelegateToken', 'proceedPowerDownToken', 'proceedTransferToken', 'proceedTransferBSC', 'proceedWithdrawToken'],
+    'pages/_username/index.vue': ['proceedWitnessVote'],
+    'components/CartModal.vue': ['buyNowHive', 'proceedBuyNowHive'],
+    'components/Product.vue': ['buyNowHive', 'proceedBuyNowHive', 'proceedBuyReal'],
+    'pages/arena/_id.vue': ['broadcastArenaOp'],
+  }
+  for (const [file, names] of Object.entries(ACTIONS)) {
+    it.each(names)(`${file}: %s`, (name) => {
+      const src = read(file)
+      const m = src.match(new RegExp(`(?:^|\\}, )[ \\t]*(?:async )?${name} ?\\([^)]*\\) ?\\{\\r?\\n(?:[ \\t]*//[^\\n]*\\n)*(?:[ \\t]*if \\(!this\\.bscBridgeAvailable\\) return;\\n(?:[ \\t]*//[^\\n]*\\n)*)?[ \\t]*(.*)`, 'm'))
+      expect(m).toBeTruthy()
+      // the first statement
+      expect(m[1]).toMatch(/^if \(this\.\$keychainMissing && this\.\$keychainMissing\(\)\) return( false)?;?\r?$/)
+    })
+  }
+
+  // every function that opens an active-key branch is in the list above
+  it.each(['pages/_username/wallet.vue', 'pages/_username/index.vue'])('%s: no unguarded typed-active-key action', (file) => {
+    const src = read(file)
+    const guarded = ACTIONS[file]
+    const fnRx = /^\s{4,6}(?:async\s+)?([A-Za-z_]\w*)\s*\([^)]*\)\s*\{\s*$/
+    let cur = null
+    const unguarded = new Set()
+    for (const line of src.split('\n')) {
+      const m = line.match(fnRx)
+      if (m && !['if', 'for', 'while', 'switch', 'catch', 'function'].includes(m[1])) cur = m[1]
+      if (/!this\.isKeychainLogin(\(\))? && !this\.isHiveauthLogin(\(\))?/.test(line) && cur && !guarded.includes(cur)) unguarded.add(cur)
+    }
+    expect([...unguarded]).toEqual([])
   })
 })

@@ -2311,6 +2311,8 @@ export default {
       }
     },
     async buyNowHive() {
+      // Keychain session with no Keychain: say so, rather than ask for a typed active key
+      if (this.$keychainMissing && this.$keychainMissing()) return;
       //check if this is a game gadget and if reqts have been met
       this.buyAttempt = true;
       //this.buyInProgress = true;
@@ -2326,6 +2328,8 @@ export default {
       }
       this.buyHiveExpand = !this.buyHiveExpand;
     }, async proceedBuyNowHive() {
+      // Keychain session with no Keychain: say so, rather than ask for a typed active key
+      if (this.$keychainMissing && this.$keychainMissing()) return;
       // Before the try: an early return inside it would still run `finally`, releasing
       // the lock the in-flight payment holds.
       if (this.paymentInFlight) return;
@@ -2608,6 +2612,8 @@ export default {
       this.checkout_product = true;
     },
     async proceedBuyReal() {
+      // Keychain session with no Keychain: say so, rather than ask for a typed active key
+      if (this.$keychainMissing && this.$keychainMissing()) return;
       //never sign the payment for an order /purchaseRealProduct cannot take
       if (!this.realProductPurchaseAvailable) return;
       this.buyAttempt = true;
