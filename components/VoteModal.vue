@@ -622,6 +622,15 @@ export default {
 				return;
 			}
 
+			// A Keychain session with no Keychain on the page (extension crashed, disabled or not
+			// allowed on this site) fell through to the typed-key path, which refuses Keychain
+			// sessions: the user saw "error voting" and no popup. Say what is wrong instead.
+			// std_login: acti_login_method is not cleared on logout, so a later HiveSigner session still has it
+			if (localStorage.getItem('std_login') && localStorage.getItem('acti_login_method') === 'keychain' && !window.hive_keychain) {
+				this.$notify({ group: 'error', text: this.$t('keychain_not_detected'), position: 'top center' });
+				return;
+			}
+
 			// The chain rejects a vote identical to the one already cast ("Your current vote on
 			// this comment is identical to this vote"), which showed only as "error voting".
 			// Checked first: no point confirming a paid-out vote that cannot go through.

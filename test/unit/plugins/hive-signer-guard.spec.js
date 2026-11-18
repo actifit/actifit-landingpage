@@ -70,6 +70,48 @@ describe('hive-signer-guard plugin', () => {
     }
   })
 
+  // A Keychain defined in a way the window.hive_keychain trap cannot see, appearing after the
+  // timers: it is wrapped before the user action that would use it, including a bare click
+  // (screen readers, voice control) and a form submit.
+  it.each(['pointerdown', 'keydown', 'click', 'submit'])('a Keychain the trap missed is wrapped on %s, before the site\'s handlers', async (type) => {
+    const prevNotify = Vue.notify
+    Vue.notify = jest.fn()
+    localStorage.setItem('cur_bchain', 'BLURT')
+    try {
+      plugin({ app: { i18n: { t: () => 'Only Hive. Not on _CHAIN_.' } } })
+      const late = { requestVote: jest.fn() }
+      const original = late.requestVote
+      Object.defineProperty(window, 'hive_keychain', { value: late, configurable: true, writable: true })
+      const cb = jest.fn()
+      // the site's own handler, on the target (runs after capture-phase listeners)
+      const target = document.createElement(type === 'submit' ? 'form' : 'button')
+      document.body.appendChild(target)
+      target.addEventListener(type, () => window.hive_keychain.requestVote('alice', 'p', 'bob', 10000, cb))
+      target.dispatchEvent(new Event(type, { bubbles: true }))
+      await new Promise((r) => setTimeout(r, 0))
+      expect(original).not.toHaveBeenCalled()
+      expect(cb).toHaveBeenCalledWith(expect.objectContaining({ error: 'chain_not_supported' }))
+      target.remove()
+    } finally {
+      Vue.notify = prevNotify
+      localStorage.removeItem('cur_bchain')
+      delete window.hive_keychain
+    }
+  })
+
+  it('a provider that cannot be wrapped is reported once, not on every key press', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {})
+    try {
+      plugin({ app: { i18n: { t: (k) => k } } })
+      Object.defineProperty(window, 'hive_keychain', { value: Object.freeze({ requestVote () {} }), configurable: true, writable: true })
+      for (let i = 0; i < 5; i++) document.body.dispatchEvent(new Event('keydown', { bubbles: true }))
+      expect(warn.mock.calls.filter(([m]) => /cannot wrap/.test(m))).toHaveLength(1)
+    } finally {
+      warn.mockRestore()
+      delete window.hive_keychain
+    }
+  })
+
   it('an odd chain value is escaped in the toast (it renders HTML)', async () => {
     const prev = { HAS: Vue.prototype.$HAS, notify: Vue.notify }
     Vue.prototype.$HAS = { broadcast: jest.fn() }

@@ -37,4 +37,9 @@ export default ({ app }) => {
   window.addEventListener('load', retry)
   setTimeout(retry, 1500)
   setTimeout(retry, 5000)
+  // and right before any user action, ahead of the site's handlers (capture phase): `click`
+  // and `submit` too, since screen readers and voice control send a bare click.
+  for (const type of ['pointerdown', 'keydown', 'click', 'submit']) {
+    document.addEventListener(type, retry, { capture: true, passive: true })
+  }
 }

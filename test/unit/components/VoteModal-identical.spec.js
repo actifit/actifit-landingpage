@@ -158,6 +158,39 @@ describe('voting again at the same weight', () => {
   })
 })
 
+// Keychain crashed or disabled: the vote fell through to the typed-key path, which refuses
+// Keychain sessions, and the user saw only "error voting" with no popup.
+describe('logged in with Keychain, but Keychain is not on the page', () => {
+  it('says Keychain was not detected, reads nothing and broadcasts nothing', async () => {
+    localStorage.setItem('acti_login_method', 'keychain')
+    const { v } = modal({ chainVotes: [] })
+    await call('vote', v, libs(), {})
+    expect(v.$notify).toHaveBeenCalledWith(expect.objectContaining({ group: 'error', text: 'keychain_not_detected' }))
+    expect(v.$notify).toHaveBeenCalledTimes(1)
+    expect(v.currentVotes).not.toHaveBeenCalled()
+    expect(broadcasts(v)).toBe(0)
+    expect(v.loading).toBe(false)
+  })
+
+  it('a HiveSigner session with a leftover Keychain login method still votes through HiveSigner', async () => {
+    localStorage.setItem('acti_login_method', 'keychain')
+    localStorage.removeItem('std_login')
+    const { v } = modal({ chainVotes: [] })
+    await call('vote', v, libs(), {})
+    expect(v.$steemconnect.broadcast).toHaveBeenCalledTimes(1)
+    expect(v.$notify).not.toHaveBeenCalledWith(expect.objectContaining({ text: 'keychain_not_detected' }))
+  })
+
+  it('with Keychain present, the vote goes to Keychain as before', async () => {
+    localStorage.setItem('acti_login_method', 'keychain')
+    window.hive_keychain = { requestBroadcast: jest.fn() }
+    const { v } = modal({ chainVotes: [] })
+    await call('vote', v, libs(), {})
+    expect(window.hive_keychain.requestBroadcast).toHaveBeenCalledTimes(1)
+    expect(v.$notify).not.toHaveBeenCalled()
+  })
+})
+
 describe('reading the current votes', () => {
   it('from the selected chain', async () => {
     for (const chain of ['HIVE', 'BLURT', 'STEEM']) {
