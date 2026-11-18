@@ -176,9 +176,22 @@ describe('plugin', () => {
     expect(shown).not.toHaveBeenCalled()
   })
 
+  it('a notice raised before the layout rendered its container does not use up the load notice', () => {
+    jest.useFakeTimers()
+    keychainSession()
+    install()
+    Vue.prototype.$keychainMissing() // no .vue-notification-group in the document yet
+    shown.mockClear()
+    jest.advanceTimersByTime(5000)
+    expect(texts(shown)).toHaveLength(1)
+  })
+
   it('no load notice if one was already shown for an action, if Keychain arrived in time, or for other logins', () => {
     jest.useFakeTimers()
     keychainSession()
+    const container = document.createElement('div')
+    container.className = 'vue-notification-group'
+    document.body.appendChild(container)
     install()
     Vue.prototype.$keychainMissing() // e.g. videos/new connects to 3Speak on mount
     shown.mockClear()
@@ -193,6 +206,7 @@ describe('plugin', () => {
     install()
     jest.advanceTimersByTime(5000)
     expect(shown).not.toHaveBeenCalled()
+    container.remove()
   })
 })
 
@@ -209,7 +223,7 @@ describe('actions that would ask for a typed active key stop first', () => {
   for (const [file, names] of Object.entries(ACTIONS)) {
     it.each(names)(`${file}: %s`, (name) => {
       const src = read(file)
-      const m = src.match(new RegExp(`(?:^|\\}, )[ \\t]*(?:async )?${name} ?\\([^)]*\\) ?\\{\\r?\\n(?:[ \\t]*//[^\\n]*\\n)*(?:[ \\t]*if \\(!this\\.bscBridgeAvailable\\) return;\\n(?:[ \\t]*//[^\\n]*\\n)*)?[ \\t]*(.*)`, 'm'))
+      const m = src.match(new RegExp(`(?:^|\\}, )[ \\t]*(?:async )?${name} ?\\([^)]*\\) ?\\{\\r?\\n(?:[ \\t]*//[^\\n]*\\n)*(?:[ \\t]*if \\(!this\\.(?:bscBridgeAvailable|realProductPurchaseAvailable)\\) return;\\n(?:[ \\t]*//[^\\n]*\\n)*)?[ \\t]*(.*)`, 'm'))
       expect(m).toBeTruthy()
       // the first statement
       expect(m[1]).toMatch(/^if \(this\.\$keychainMissing && this\.\$keychainMissing\(\)\) return( false)?;?\r?$/)

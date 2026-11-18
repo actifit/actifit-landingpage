@@ -31,7 +31,9 @@ export default ({ app }) => {
   Vue.prototype.$keychainMissing = function () {
     if (!keychainExpectedButMissing(localStorage, window)) return false
     notice.report()
-    markShown()
+    // The layout renders the notice's container a tick after the page mounts: a notice raised
+    // before that is lost, so it must not use up the once-per-tab load notice.
+    if (document.querySelector('.vue-notification-group')) markShown()
     return true
   }
 

@@ -2612,10 +2612,10 @@ export default {
       this.checkout_product = true;
     },
     async proceedBuyReal() {
-      // Keychain session with no Keychain: say so, rather than ask for a typed active key
-      if (this.$keychainMissing && this.$keychainMissing()) return;
       //never sign the payment for an order /purchaseRealProduct cannot take
       if (!this.realProductPurchaseAvailable) return;
+      // Keychain session with no Keychain: say so, rather than ask for a typed active key
+      if (this.$keychainMissing && this.$keychainMissing()) return;
       this.buyAttempt = true;
       this.errorProceed = '';
       this.buyInProgress = true;
