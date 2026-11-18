@@ -549,6 +549,7 @@ module.exports = {
   Activity_Reports: '活动报告',
   Activity_Reports_Rewarded: '已奖励的活动报告',
   confirm_vote_change: '您之前已经对这篇帖子投过票了。您确定要更改您的投票吗？',
+  vote_identical: '您已经以 _WEIGHT_% 为此帖子投票。请选择不同的权重来更改投票。',
   confirm_delete_comment: '您确定要删除您的评论吗？',
   user_not_found_error: '错误：用户未找到',
   error_page_not_found: "页面未找到",

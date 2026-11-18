@@ -548,6 +548,7 @@ module.exports = {
   Activity_Reports: 'Aktivite Raporları',
   Activity_Reports_Rewarded: 'Ödüllendirilen Aktivite Raporları',
   confirm_vote_change: 'Bu gönderiye daha önce oy vermiştiniz. Oyunuzu değiştirmek istediğinizden emin misiniz?',
+  vote_identical: 'Bu gönderiye zaten %_WEIGHT_ oy verdiniz. Oyunuzu değiştirmek için farklı bir ağırlık seçin.',
   confirm_delete_comment: 'Yorumunuzu silmek istediğinizden emin misiniz?',
   user_not_found_error: 'Hata: Kullanıcı Bulunamadı',
   error_page_not_found: "Sayfa bulunamadı",

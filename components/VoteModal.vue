@@ -395,6 +395,15 @@ export default {
 			//check if the post contains in its original voters current user
 			return this.postToVote.active_votes.filter(voter => (voter.voter === curUser)).length > 0;
 		},
+		// The user's existing vote if it has the weight being cast. Some listings carry no
+		// `percent` per vote; then nothing is known and the chain decides.
+		sameWeightVote() {
+			const curUser = this.user.account.name;
+			const votes = (this.postToVote && this.postToVote.active_votes) || [];
+			const mine = votes.find(v => v.voter === curUser);
+			if (!mine || mine.percent === undefined || mine.percent === null) return null;
+			return Number(mine.percent) === this.voteWeight * 100 ? mine : null;
+		},
 		async processTrxFunc(op_name, cstm_params, bchain_option, extra_ops) {
 			extra_ops = extra_ops || [];
 			if (!localStorage.getItem('std_login')) {
@@ -608,6 +617,18 @@ export default {
 				}
 			}
 
+
+			// The chain rejects a vote identical to the one already cast ("Your current vote on
+			// this comment is identical to this vote"), which showed only as "error voting".
+			const sameVote = this.sameWeightVote();
+			if (sameVote) {
+				this.$notify({
+					group: 'error', // the group every page with this modal renders (vote errors use it)
+					text: this.$t('vote_identical').replace('_WEIGHT_', () => sameVote.percent / 100),
+					position: 'top center'
+				});
+				return;
+			}
 
 			//if the user already voted, confirm vote change
 			//if this post is already voted by the user, we need to show a confirmation

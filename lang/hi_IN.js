@@ -548,6 +548,7 @@ module.exports = {
   Activity_Reports: 'गतिविधि रिपोर्ट',
   Activity_Reports_Rewarded: 'पुरस्कृत गतिविधि रिपोर्ट',
   confirm_vote_change: 'आपने इस पोस्ट पर पहले ही वोट कर दिया था। क्या आप वाकई अपना वोट बदलना चाहते हैं?',
+  vote_identical: 'आप इस पोस्ट पर पहले ही _WEIGHT_% वोट कर चुके हैं। अपना वोट बदलने के लिए अलग वेट चुनें।',
   confirm_delete_comment: 'क्या आप वाकई अपनी टिप्पणी हटाना चाहते हैं?',
   user_not_found_error: 'त्रुटि: उपयोगकर्ता नहीं मिला',
   error_page_not_found: "पेज नहीं मिला",

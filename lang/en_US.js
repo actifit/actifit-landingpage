@@ -516,6 +516,7 @@ module.exports = {
   Activity_Reports: 'Activity Reports',
   Activity_Reports_Rewarded: 'Rewarded Activity Reports',
   confirm_vote_change: 'You already had voted before on this post. Are you sure you want to change your vote?',
+  vote_identical: 'You already voted _WEIGHT_% on this post. Pick a different weight to change your vote.',
   confirm_delete_comment: 'Are you sure you want to delete your comment?',
   user_not_found_error: 'Error: User Not Found',
   error_page_not_found: "Page not found",
