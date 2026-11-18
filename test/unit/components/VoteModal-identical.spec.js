@@ -172,6 +172,15 @@ describe('logged in with Keychain, but Keychain is not on the page', () => {
     expect(v.loading).toBe(false)
   })
 
+  it('a HiveSigner session with a leftover Keychain login method still votes through HiveSigner', async () => {
+    localStorage.setItem('acti_login_method', 'keychain')
+    localStorage.removeItem('std_login')
+    const { v } = modal({ chainVotes: [] })
+    await call('vote', v, libs(), {})
+    expect(v.$steemconnect.broadcast).toHaveBeenCalledTimes(1)
+    expect(v.$notify).not.toHaveBeenCalledWith(expect.objectContaining({ text: 'keychain_not_detected' }))
+  })
+
   it('with Keychain present, the vote goes to Keychain as before', async () => {
     localStorage.setItem('acti_login_method', 'keychain')
     window.hive_keychain = { requestBroadcast: jest.fn() }
