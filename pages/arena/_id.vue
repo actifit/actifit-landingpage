@@ -341,6 +341,8 @@
         }
       },
       async broadcastArenaOp (op) {
+        // Keychain session with no Keychain: say so, rather than ask for a typed active key
+        if (this.$keychainMissing && this.$keychainMissing()) return false
         this.acting = true
         this.actionMsg = ''
         try {

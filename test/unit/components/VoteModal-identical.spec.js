@@ -4,6 +4,7 @@
 // called an undefined `reject` when they failed ("ReferenceError: reject is not defined").
 import fs from 'fs'
 import path from 'path'
+import { keychainExpectedButMissing } from '~/utils/keychainMissing'
 
 const read = (file) => fs.readFileSync(path.resolve(__dirname, '../../..', file), 'utf8')
 const src = read('components/VoteModal.vue')
@@ -39,6 +40,12 @@ const modal = ({ listing = [], chainVotes = null, voteWeight = 100, paid = false
     processTrxFunc: jest.fn(async () => ({ success: true })),
     voteSuccess: jest.fn(),
     postPaid: () => paid,
+    // plugins/keychain-missing.js, with the real condition
+    $keychainMissing: jest.fn(function () {
+      const missing = keychainExpectedButMissing(localStorage, window)
+      if (missing) this.$notify({ group: 'error', text: 'keychain_not_detected' })
+      return missing
+    }),
   }
   v.currentVotes = jest.fn(() => call('currentVotes', v, l))
   v.sameWeightVote = (votes) => sync.sameWeightVote.call(v, votes)
