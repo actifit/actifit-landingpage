@@ -6,7 +6,7 @@
     <!-- listing -->
     <div class="container pt-5 mt-5 pb-5">
       <h1 class="text-center mb-5 h2">Privacy Policy</h1>
-		<p>Effective date: November 26, 2018</p>
+		<p>Effective date: November 18, 2026</p>
 
 
 		<p>Actifit.io ("us", "we", or "our") operates the https://actifit.io website and the Actifit Fitness Tracker mobile application (the "Service").</p>
@@ -29,8 +29,26 @@
 		<ul>
 		<li>Cookies and Usage Data</li>
 		</ul>
-		<p>While using Actifit mobile apps, we collect your phone's sensor readings in terms of your movements, as Actifit aims to reward users' activity, as well as other information such as your Hive account username, password/keys, activity types, measurements and other relevant information. Though this information is not stored except on your own device, until you decide to submit this information and post it, whereby it will be posted on the Hive blockchain. Passwords/keys will not be stored anywhere aside from your own device, and will be used to authenticate your user account.</p> 
+		<p>While using Actifit mobile apps, we collect your phone's sensor readings in terms of your movements, as Actifit aims to reward users' activity, as well as other information such as your Hive account username, password/keys, activity types, measurements and other relevant information. This information is stored on your own device, except where described in the "Health Connect (Android)" section below and when you decide to submit a report, in which case it is sent to our servers and posted on the Hive blockchain. Passwords/keys will not be stored anywhere aside from your own device, and will be used to authenticate your user account.</p> 
 		<p>Similarly, if you decide to use one of the integrations Actifit provides to sync data from wearable devices (such as Fitbit), then this data (including but not limited to step count, weight/height) will also be stored on your device, and only submitted to the Hive blockchain once you decide to, and will be integrated as part of your post.</p>
+		<h4>Health Connect (Android)</h4>
+		<p>On Android, if you choose to connect Health Connect, the Actifit app asks for permission to read the following data types. It never writes to Health Connect.</p>
+		<ul>
+			<li><strong>Steps</strong>: your step counts, used to show your activity and progress and to calculate your rewards.</li>
+			<li><strong>Distance</strong> and <strong>Active calories burned</strong>: shown in the app only (dashboard, profile and home-screen widget). They are not included in your reports.</li>
+			<li><strong>Exercise sessions</strong> (only if you turn on "Show my workouts" in Settings): the type of each workout, its duration, its distance and whether it was entered manually, shown on your dashboard and included in your activity report when you submit one.</li>
+		</ul>
+		<p>Only steps recorded automatically by your phone or wearable count toward rewards. Steps that were entered manually in another app, and workouts of any kind, are shown for your information only and never count toward rewards.</p>
+		<p>Health Connect data is read and processed on your device. Some of it leaves your device in the following cases only, each to provide a feature of the app:</p>
+		<ul>
+			<li><strong>Estimated reward</strong>: while you use the app, today's step count is sent to Actifit's servers to show the AFIT reward you are on track to earn.</li>
+			<li><strong>Activity reports</strong>: when you submit a report, it is sent to Actifit's servers, which validate it, store a copy with your account to calculate your rewards, and publish it to the Hive blockchain and, if you have an account there, the Blurt blockchain. A report contains your daily step count, your steps per 15-minute period of the day, your workouts as described above and, if you recorded a GPS route that day, the steps counted during that route. Once published, it is public and permanent.</li>
+			<li><strong>Waves</strong>: when you post a wave from the app, today's step count is attached to it and published to the Hive blockchain.</li>
+			<li><strong>Sharing and exports you start</strong>: if you tap Share progress, an image showing your daily and weekly steps is shared with the app you choose; if you export a backup from Settings, it includes your recent activity data and is saved where you choose.</li>
+			<li><strong>Device backup</strong>: if Android backup is turned on, the app's local data, including Health Connect data, may be included in your device's encrypted backup to your own Google account.</li>
+		</ul>
+		<p>We do not sell Health Connect data, we do not use it for advertising or to target the ads shown in the app, and we do not transfer it to anyone except as described above. You can revoke Actifit's access at any time from the Health Connect settings on your device.</p>
+		<p>Actifit's use of information received from Health Connect adheres to the Health Connect Permissions policy, including its Limited Use requirements.</p>
 		<p>Due to the immutable nature of the blockchain, the data and posts/reports submitted can no longer be deleted.</p>
 		<p>Uploading pictures/attachments via Actifit.io website or app, you give Actifit team the permission to reuse this content under any means deemed useful, including but not limited to social media promotions and other marketing purposes</p>
 
@@ -86,7 +104,7 @@
 		<p>The security of your data is important to us, but remember that no method of transmission over the Internet, or method of electronic storage is 100% secure. While we strive to use commercially acceptable means to protect your Personal Data, we cannot guarantee its absolute security.</p>
 
 		<h2>Data Retention</h2>
-		<p>We retain your Personal Data only for as long as is necessary for the purposes set out in this Privacy Policy. We keep your account information and associated activity data for as long as your Actifit account remains active, so that we can provide the Service and calculate your rewards. Activity and health data (such as steps, distance and active calories) read from your device or from connected services such as Health Connect and Fitbit are processed on your device and are not retained on our servers except to the extent necessary to deliver the Service and your rewards. We will also retain and use your Personal Data to the extent necessary to comply with our legal obligations, resolve disputes, and enforce our agreements. As noted above, any reports or posts you choose to submit to the Hive blockchain are public and permanent due to the immutable nature of the blockchain, and cannot be deleted.</p>
+		<p>We retain your Personal Data only for as long as is necessary for the purposes set out in this Privacy Policy. We keep your account information and associated activity data for as long as your Actifit account remains active, so that we can provide the Service and calculate your rewards. Activity and health data (such as steps, distance and active calories) read from your device or from connected services such as Health Connect and Fitbit are processed on your device and are not retained on our servers except to the extent necessary to deliver the Service and your rewards, as described in the "Health Connect (Android)" section above. We will also retain and use your Personal Data to the extent necessary to comply with our legal obligations, resolve disputes, and enforce our agreements. As noted above, any reports or posts you choose to submit to the Hive blockchain are public and permanent due to the immutable nature of the blockchain, and cannot be deleted.</p>
 
 		<h2>Data Deletion</h2>
 		<p>You have the right to request deletion of the Personal Data we hold about you. You can submit a data deletion request at any time by emailing us at <a href="mailto:info@actifit.io">info@actifit.io</a> with the subject "Data Deletion Request", or by using the contact options in the "Contact Us" section below. After we verify your request, we will delete or anonymise the personal data under our control — such as your account details, email address, and any activity data stored off-chain — within 30 days, except where we are required to retain certain information to comply with a legal obligation. Please note that data you have already published to the public Hive blockchain cannot be removed by Actifit due to the immutable nature of blockchain records.</p>
