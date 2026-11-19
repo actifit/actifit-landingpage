@@ -389,6 +389,7 @@ module.exports = {
     { src: '~/plugins/embed-loaded.js', mode: 'client' },
     // after vue-custom.js, which sets $HAS: Keychain/HiveAuth must not sign Blurt actions on Hive
     { src: '~/plugins/hive-signer-guard.js', mode: 'client' },
+    { src: '~/plugins/keychain-missing.js', mode: 'client' },
     // restores the typed-key user's stored posting key (utils/postingKeyStore.js)
     { src: '~/plugins/posting-key-restore.js', mode: 'client' },
     { src: '~/plugins/dark-mode.js' },

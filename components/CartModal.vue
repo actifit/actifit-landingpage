@@ -658,6 +658,8 @@
 		this.buyInProgress = false;
 	  },
 	  async buyNowHive () {
+		// Keychain session with no Keychain: say so, rather than ask for a typed active key
+		if (this.$keychainMissing && this.$keychainMissing()) return;
 		//check if this is a game gadget and if reqts have been met
 		this.buyAttempt = true;
 		//this.buyInProgress = true;
@@ -677,6 +679,8 @@
 		this.buyHiveExpand = !this.buyHiveExpand;
 	  },
 	  async proceedBuyNowHive (){
+		// Keychain session with no Keychain: say so, rather than ask for a typed active key
+		if (this.$keychainMissing && this.$keychainMissing()) return;
 		if (this.paymentInFlight) return;
 		try{
 			this.buyAttempt = true;

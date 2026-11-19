@@ -375,6 +375,7 @@ Vue.prototype.$decodeMemo = async function (memo) {
 	  return { error: this.$t('error_performing_operation') };
 	}
 	const refusal = typedKeySessionRefusal();
+	if (refusal === 'keychain_not_detected' && this.$keychainMissing) this.$keychainMissing();
 	if (refusal) return { error: escapeHtml(this.$t(refusal)) };
 	let wif = this.$store.state.chatPostingKey;
 	if (!wif) {
@@ -429,6 +430,8 @@ Vue.prototype.$broadcastWithKey = async function (operations, opts) {
   const blurt = bchain === 'BLURT';
   const postingKeyMutation = blurt ? 'setBlurtPostingKey' : 'setChatPostingKey';
   const refusal = typedKeySessionRefusal();
+  // Keychain session, no Keychain: one clear notice, and the caller's generic error toast is dropped
+  if (refusal === 'keychain_not_detected' && this.$keychainMissing) this.$keychainMissing();
   if (refusal) return fail(this.$t(refusal));
 
   const account = this.user && this.user.account && this.user.account.name;

@@ -6,6 +6,11 @@
     <!-- Collects a private key for ONE signing operation; see utils/keyPrompt.js. Lives
          in the layout so any page or modal can request a key. -->
     <KeyPromptModal />
+    <!-- "Hive Keychain was not detected" (plugins/keychain-missing.js): here so it shows on
+         every page, including ones that render no error toasts of their own. -->
+    <client-only>
+      <notifications group="keychain-missing" position="top center" classes="vue-notification error" />
+    </client-only>
     <nuxt/>
   </div>
 </template>
