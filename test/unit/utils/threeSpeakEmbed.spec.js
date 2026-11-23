@@ -5,7 +5,7 @@ import fs from 'fs'
 import path from 'path'
 import {
   VIDEO_BENEFICIARIES, canAttach, embedUrl, fetchVideoStatus, fromStatus, listUploads, reportSnippet,
-  requestUploadToken, statusUrl, videoMetadata, watchUrl, withVideoAtTop, withVideoBeneficiaries,
+  requestUploadToken, statusUrl, stripVideoLinks, videoMetadata, watchUrl, withVideoAtTop, withVideoBeneficiaries,
 } from '@/utils/threeSpeakEmbed'
 
 const read = (file) => fs.readFileSync(path.resolve(__dirname, '../../..', file), 'utf8')
@@ -36,6 +36,30 @@ describe('post body', () => {
   })
   it('works on an empty post', () => {
     expect(withVideoAtTop('', 'alice', 'abc123', EMBED, null).startsWith(EMBED)).toBe(true)
+  })
+})
+
+describe('changing the selected video', () => {
+  const A = embedUrl('alice', 'aaa')
+  const B = embedUrl('alice', 'bbb')
+  const swap = (text, from, to) => withVideoAtTop(
+    stripVideoLinks(text, 'alice', from, embedUrl('alice', from)), 'alice', to, embedUrl('alice', to), 'https://f/' + to)
+
+  it('A, B, back to A leaves only A, first, with the text kept', () => {
+    let text = withVideoAtTop('my workout', 'alice', 'aaa', A, 'https://f/aaa')
+    text = swap(text, 'aaa', 'bbb')
+    expect(text).not.toContain(A)
+    expect(text.startsWith(B)).toBe(true)
+    text = swap(text, 'bbb', 'aaa')
+    expect(text).not.toContain(B)
+    expect(text).not.toContain('https://f/bbb')
+    expect(text.startsWith(A)).toBe(true)
+    expect(text.endsWith('my workout')).toBe(true)
+  })
+  it('a permlink that starts with another is a different video', () => {
+    const longer = embedUrl('alice', 'aaa111')
+    expect(stripVideoLinks(longer + '\nmine', 'alice', 'aaa', A)).toContain(longer)
+    expect(withVideoAtTop(longer, 'alice', 'aaa', A, null).startsWith(A)).toBe(true)
   })
 })
 
@@ -70,7 +94,8 @@ describe('withVideoBeneficiaries', () => {
     expect(out.map((b) => b.account)).toEqual(['bob', 'encoder.pay', 'threespeakfund', 'zed'])
     expect(out.find((b) => b.account === 'zed').weight).toBe(500)
   })
-  it('refuses too many, over 100%, and empty weights', () => {
+  it('refuses too many, over 100%, empty weights and duplicates', () => {
+    expect(withVideoBeneficiaries([{ account: 'a', weight: 100 }, { account: 'a', weight: 100 }])).toBeNull()
     expect(withVideoBeneficiaries([{ account: 'a', weight: 1 }, { account: 'b', weight: 1 }, { account: 'c', weight: 1 }])).toBeNull()
     expect(withVideoBeneficiaries([{ account: 'a', weight: 9000 }])).toBeNull()
     expect(withVideoBeneficiaries([{ account: 'a', weight: 0 }])).toBeNull()
@@ -121,6 +146,11 @@ describe('api calls', () => {
   })
   it('a status check that fails is unknown, not an error', async () => {
     expect(await fetchVideoStatus('p', async () => { throw new Error('down') })).toBeNull()
+    expect(await fetchVideoStatus('p', async () => json({ error: 'busy' }, false, 503))).toBeNull()
+  })
+  it('only a 404 means 3Speak has no such video', async () => {
+    const status = await fetchVideoStatus('p', async () => json({ error: 'Video not found' }, false, 404))
+    expect(fromStatus('alice', { permlink: 'p' }, status).status).toBe('missing')
   })
 })
 
@@ -141,12 +171,21 @@ describe('the site', () => {
     expect(page).toMatch(/endpoint: ticket\.upload_url/)
     expect(page).toMatch(/Authorization: 'Bearer ' \+ ticket\.token/)
   })
+  it('sessions the bot cannot serve, and other chains, stop before a token or a post', () => {
+    expect(page).toMatch(/if \(this\.processing \|\| !this\.video \|\| !this\.videoPostingAvailable\(\)\) return;/)
+    expect(page).toMatch(/async save\(vid\) \{\s+if \(this\.loading\) return;/)
+    expect(page).toMatch(/if \(!this\.videoPostingAvailable\(\)\) return;\s+if \(!vid\) vid = this\.selVid;/)
+  })
+  it('a late token or finished upload cannot touch a newly chosen file', () => {
+    expect(page).toMatch(/if \(run !== this\.uploadRun\) return; \/\/ another file/)
+    expect(page).toMatch(/this\.uploadRun \+= 1;/)
+  })
   it('never changes the video\'s permlink for the post', () => {
     expect(page).toMatch(/this\.editPost\.permlink = vid\.permlink;/)
     expect(page).not.toMatch(/editPost\.permlink \+=/)
   })
   it('every login method broadcasts the beneficiaries', () => {
-    expect(page).toMatch(/const benef = withVideoBeneficiaries\(this\.benef_list\)/)
+    expect(page).toMatch(/const benef = withVideoBeneficiaries\(this\.\$refs\['beneficiaryList'\]\.formattedEntries\)/)
     expect(page).toMatch(/extensions: \[\[0, \{ 'beneficiaries': benef \}\]\]/)
     expect(page).not.toMatch(/\$steemconnect\.comment\(/)
     expect(page).toMatch(/ops\.push\(\[op2, params2\]\)/)

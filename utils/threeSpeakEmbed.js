@@ -31,11 +31,25 @@ export function reportSnippet (owner, permlink, embed, thumbnailUrl) {
   return embed + '\n\n' + link
 }
 
+// whole URL only: permlink "abc" must not match a line holding "abc123"
+const hasUrl = (text, url) =>
+  new RegExp(url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?![\\w.-])').test(text)
+
 export function withVideoAtTop (content, owner, permlink, embed, thumbnailUrl) {
   const text = content || ''
-  if (embed && text.includes(embed)) return text
+  if (embed && hasUrl(text, embed)) return text
   const snippet = reportSnippet(owner, permlink, embed, thumbnailUrl)
   return text.trim() ? snippet + '\n\n' + text : snippet
+}
+
+// The text without this video's player and watch lines, for when another video replaces it.
+export function stripVideoLinks (content, owner, permlink, embed) {
+  const watch = watchUrl(owner, permlink)
+  return (content || '').split('\n')
+    .filter((line) => !(embed && hasUrl(line, embed)) && !hasUrl(line, watch))
+    .join('\n')
+    .replace(/^\s+/, '')
+    .replace(/\n{3,}/g, '\n\n')
 }
 
 // json_metadata.video. PeakD and Ecency build the player from info.author and info.permlink.
@@ -58,7 +72,8 @@ export function withVideoBeneficiaries (entries) {
   const list = [...own, ...VIDEO_BENEFICIARIES.map((b) => ({ ...b }))]
     .sort((a, b) => (a.account < b.account ? -1 : (a.account > b.account ? 1 : 0)))
   const total = list.reduce((sum, b) => sum + b.weight, 0)
-  if (list.length > MAX_BENEFICIARIES || total > FULL_WEIGHT || list.some((b) => !(b.weight > 0))) return null
+  const duplicated = new Set(list.map((b) => b.account)).size !== list.length
+  if (duplicated || list.length > MAX_BENEFICIARIES || total > FULL_WEIGHT || list.some((b) => !(b.weight > 0))) return null
   return list
 }
 
@@ -125,6 +140,8 @@ export async function listUploads (apiUrl, sessionToken, fetchImpl = fetch) {
 export async function fetchVideoStatus (permlink, fetchImpl = fetch) {
   try {
     const res = await fetchImpl(statusUrl(permlink))
+    if (res.status === 404) return { error: 'Video not found' }
+    if (!res.ok) return null
     return await res.json()
   } catch (e) {
     return null
