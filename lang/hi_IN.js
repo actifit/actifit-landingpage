@@ -1363,6 +1363,7 @@ module.exports = {
   video_needs_site_login: 'वीडियो अपलोड करने के लिए कृपया Keychain, HiveAuth या अपनी कुंजी से फिर से लॉग इन करें।',
   video_hive_only: 'वीडियो पोस्ट केवल Hive पर उपलब्ध हैं। Hive पर जाएँ और फिर से प्रयास करें।',
   video_file_required: 'कृपया एक वीडियो फ़ाइल चुनें।',
+  video_upload_refused: 'यह फ़ाइल अपलोड नहीं हो सकी। कृपया कोई दूसरा वीडियो आज़माएँ।',
   vid_status_uploading: 'अपलोड हो रहा है',
   vid_status_processing: 'प्रोसेसिंग _PCT_%',
   vid_status_ready: 'तैयार',

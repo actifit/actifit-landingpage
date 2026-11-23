@@ -1362,6 +1362,7 @@ module.exports = {
   video_needs_site_login: 'Чтобы загружать видео, войдите снова через Keychain, HiveAuth или свой ключ.',
   video_hive_only: 'Видеопосты доступны только в Hive. Переключитесь на Hive и повторите попытку.',
   video_file_required: 'Выберите видеофайл.',
+  video_upload_refused: 'Не удалось загрузить этот файл. Попробуйте другое видео.',
   vid_status_uploading: 'Загрузка',
   vid_status_processing: 'Обработка _PCT_%',
   vid_status_ready: 'Готово',

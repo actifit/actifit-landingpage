@@ -54,7 +54,7 @@
               <i class="fas fa-spin fa-spinner text-brand" v-if="processing"></i>
             </div>
             <button class="btn btn-white border text-red acti-shadow mt-2" @click="startVideoUpload"
-              v-if="video && !processing && !newVidSubmitted">{{ $t('upload_video') }}</button>
+              v-if="video && !processing && !newVidSubmitted && !recording">{{ $t('upload_video') }}</button>
             <button class="btn btn-white border text-red acti-shadow mt-2" @click="selectVid(newVid)"
               v-if="newVidSubmitted">Add to Post</button>
           </div>
@@ -320,6 +320,9 @@ export default {
       uploadedHere: [], // permlinks this browser finished sending (3Speak's status can lag)
       benef_list: VIDEO_BENEFICIARIES.map(b => ({ ...b })),
       requiredBenefAccounts: VIDEO_BENEFICIARIES.map(b => b.account),
+      videoAccount: '', // whose uploads this page holds
+      listRun: 0, // only the latest list request may update the page
+      finalizing: false, // a stopped recording is still being prepared
       uploadRun: 0, // bumped when the selected file changes, so a late reply can't touch the new one
       //comment_options: {},
     }
@@ -365,6 +368,9 @@ export default {
     },
     user(newUser) {
       if (!newUser) return;
+      const name = newUser.account.name;
+      if (this.videoAccount && this.videoAccount !== name) this.clearVideoState();
+      this.videoAccount = name;
       this.fetchCommunities();
       this.getAllVideoStatuses();
     },
@@ -450,6 +456,7 @@ export default {
       });
     },
     async startRecording() {
+      if (this.finalizing) return;
       try {
         console.log(this.recordedVideoUrl);
         if (this.recordedVideoUrl != null) {
@@ -459,6 +466,10 @@ export default {
           }
         }
         this.stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        // the previous clip was chosen but not sent: it must not go up in place of this one
+        if (this.video && this.video === this.recordedVid && !this.activeUpload && !this.processing) {
+          this.resetNewVidData();
+        }
         this.recordedVid = null; // until the new recording is finished
         this.$refs.recvideo.srcObject = this.stream;
         this.mediaRecorder = new MediaRecorder(this.stream);
@@ -471,7 +482,11 @@ export default {
           console.log('event listener stop')
           let blob = new Blob(this.chunks, { type: 'video/mp4' });
           let duration = Date.now() - this.startTime;
-          blob = await fixWebmDuration(blob, duration, { logger: false });
+          try {
+            blob = await fixWebmDuration(blob, duration, { logger: false });
+          } catch (err) {
+            console.log(err); // keep the recording, without the corrected length
+          }
           //const blob = await fixWebmDuration(new Blob(this.chunks, { type: 'video/mp4' }), duration);
           this.recordedVid = new File([blob], 'recorded-video.mp4', { type: blob.type });
           this.recordedVideoUrl = URL.createObjectURL(blob);
@@ -482,6 +497,7 @@ export default {
           this.$refs.recvideo.srcObject = null;
           //set proper src for video
           this.$refs.recvideo.src = this.recordedVideoUrl;
+          this.finalizing = false;
         });
         this.startTime = Date.now();
         this.mediaRecorder.start();
@@ -504,10 +520,11 @@ export default {
       }
     },
     stopRecording() {
-      console.log('stoprecording func');
-      this.mediaRecorder.stop();
       clearInterval(this.timer);
       this.recording = false;
+      if (!this.mediaRecorder || this.mediaRecorder.state === 'inactive') return;
+      this.finalizing = true;
+      this.mediaRecorder.stop();
 
       //set video ready for playback
       this.playBack();
@@ -546,6 +563,19 @@ export default {
     },
     selVidReadyForPublish() {
       return !!(this.selVid && this.selVid.permlink) && this.canAttachVideo(this.selVid);
+    },
+    // Another account logged in: nothing of the previous one's may be published under this one.
+    clearVideoState() {
+      const selected = this.selVid;
+      if (selected && selected.permlink && this.$refs.editor) {
+        this.$refs.editor.content = stripVideoLinks(this.$refs.editor.content, selected.owner, selected.permlink, selected.embed_url);
+      }
+      this.selVid = {};
+      this.newVid = {};
+      this.userVidList = [];
+      this.uploadedHere = [];
+      this.listRun += 1;
+      this.resetNewVidData();
     },
     selectVid(video) {
       const previous = this.selVid;
@@ -591,23 +621,7 @@ export default {
       }
     },
     async processTrxFunc(op_name, cstm_params, bchain_option, op2, params2) {
-      if (!localStorage.getItem('std_login')) {
-        //if (!this.stdLogin){
-        // both operations: a video post without its comment_options would lose 3Speak's
-        // mandatory beneficiaries
-        const ops = [[op_name, cstm_params]];
-        if (op2 && params2) ops.push([op2, params2]);
-        try {
-          let res = await this.$steemconnect.broadcast(ops);
-          if (res.result.ref_block_num) {
-            return { success: true, trx: res.result };
-          }
-        } catch (err) {
-          console.log(err);
-        }
-        this.$notify({ group: 'error', text: this.$t('Save_Error'), position: 'top center' });
-        return { success: false, trx: null };
-      } else if (localStorage.getItem('acti_login_method') == 'hiveauth') {
+      if (localStorage.getItem('acti_login_method') == 'hiveauth') {
         return new Promise((resolve) => {
           const auth = {
             username: this.user.account.name,
@@ -623,8 +637,25 @@ export default {
             operation.push([op2, params2])
           }
 
+          let settled = false;
+          let watchdog = null;
+          const finish = (result) => {
+            if (settled) return;
+            settled = true;
+            clearTimeout(watchdog);
+            this.$notify({ group: 'warn', clean: true });
+            if (!result.success) {
+              this.$notify({ group: 'error', text: this.$t('Save_Error'), position: 'top center' });
+            }
+            resolve(result);
+          };
+          // the wrapper never settles when its socket can't connect; once the request reaches
+          // the app (sign_wait), its own expiry takes over
+          watchdog = setTimeout(() => finish({ success: false }), 15000);
+
           this.$HAS.broadcast(auth, 'posting', operation, (evt) => {
             console.log(evt)    // process sign_wait message
+            clearTimeout(watchdog);
             let msg = this.$t('verify_hiveauth_app');
             this.$notify({
               group: 'warn',
@@ -635,23 +666,15 @@ export default {
           })
             .then(response => {
               console.log(response);
-              this.$notify({
-                group: 'warn',
-                clean: true
-              })
-              if (response.cmd && response.cmd === 'sign_ack') {
-                resolve({ success: true, trx: response.data });
-              } else if (response.cmd && response.cmd === 'sign_nack') {
-                resolve({ success: false })
+              if (response.cmd === 'sign_ack') {
+                finish({ success: true, trx: response.data });
+              } else {
+                finish({ success: false });
               }
             }) // transaction approved and successfully broadcasted
             .catch(err => {
-              this.$notify({
-                group: 'warn',
-                clean: true
-              })
               console.log(err);
-              resolve({ success: false })
+              finish({ success: false });
             })
         })
       } else {
@@ -707,39 +730,6 @@ export default {
         }
       }
     },
-    commentSuccess(err, finalize, bchain, newPost) {
-      let mainRef = this;
-      let successMsg = mainRef.$t('Save_Success_Chain').replace('_CHAIN_', bchain);
-      if (newPost) {
-        successMsg = mainRef.$t('Post_created_successfully');
-      }
-      this.$notify({
-        group: err ? 'error' : 'success',
-        text: err ? mainRef.$t('Save_Error') : successMsg,
-        position: 'top center'
-      })
-
-      //let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
-      //this.$store.commit('setBchain', cur_bchain);
-
-      //reward the user for a new edit
-      if (finalize) {
-        // stop loading animation and show notification
-        this.loading = false
-        if (newPost) {
-          $(this.$refs.editPostModal).modal('hide')
-        }
-        const _rewardUser = this.editPost.author;
-        const _rewardUrl = `https://actifit.io/@${this.editPost.author}/${this.editPost.permlink}`;
-        setTimeout(() => this.RewardUserEdit(_rewardUser, _rewardUrl), 10000);
-        // update post in store
-        this.$store.dispatch('updatePost', {
-          author: this.editPost.author,
-          permlink: this.editPost.permlink
-        })
-
-      }
-    },
     async save(vid) {
       if (this.loading) return;
       if (!this.user || !this.user.account || !this.user.account.name) {
@@ -750,7 +740,7 @@ export default {
       if (this.$keychainMissing && this.$keychainMissing()) return;
       if (!this.videoPostingAvailable()) return;
       if (!vid) vid = this.selVid;
-      if (!vid || !vid.permlink || !canAttach(vid.status, this.uploadedHere.includes(vid.permlink))) {
+      if (!vid || !vid.permlink || vid.owner !== this.user.account.name || !this.canAttachVideo(vid)) {
         this.$notify({ group: 'error', text: this.$t('sel_suitable_vid'), position: 'top center' });
         return;
       }
@@ -988,15 +978,7 @@ export default {
 
       // save changes
       let postSuccess = false;
-      if (!localStorage.getItem('std_login')) {
-        const res = await this.processTrxFunc('comment', cstm_params, this.cur_bchain, 'comment_options', comment_options);
-        if (res.success) {
-          this.commentSuccess(null, true, this.cur_bchain, true);
-        } else {
-          this.loading = false;
-        }
-        return;
-      } else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) {
+      if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) {
         //console.log(comment_options);
         //this.$nuxt.refresh()
         let outc = await this.postKeychain(cstm_params, comment_options);
@@ -1007,7 +989,7 @@ export default {
           this.loading = false;
           this.$notify({
             group: 'error',
-            text: 'there was an error creating the video post',
+            text: this.$t('Save_Error'),
             position: 'top center'
           })
         }
@@ -1072,9 +1054,6 @@ export default {
       if (this.activeUpload) this.activeUpload.abort();
       this.activeUpload = null;
 
-      if (this.$refs.recVideo) {
-        this.$refs.recVideo.src = '';
-      }
       this.timeLeft = this.maxDuration;
     },
 
@@ -1085,20 +1064,28 @@ export default {
       if (!session || !localStorage.getItem('std_login')) return;
       this.isRotating = true;
       const owner = this.user.account.name;
+      const run = ++this.listRun;
       try {
         const rows = await listUploads(process.env.actiAppUrl, session);
-        this.userVidList = await Promise.all(rows.map(async (row) => {
+        const videos = await Promise.all(rows.map(async (row) => {
           const video = fromStatus(owner, row, await fetchVideoStatus(row.permlink));
+          if (!video.status) { // 3Speak unreachable: keep what we last knew
+            const known = this.userVidList.find(v => v.permlink === row.permlink);
+            if (known) video.status = known.status;
+          }
           video.thumbnail_url = video.thumbnail_url || this.savedFrame(row.permlink);
           if (this.canAttachVideo(video) && await this.alreadyPosted(owner, row.permlink)) {
             video.status = STATUS_POSTED;
           }
           return video;
         }));
+        if (run !== this.listRun) return;
+        this.userVidList = videos;
         const current = this.selVid && this.userVidList.find(v => v.permlink === this.selVid.permlink);
         if (current) this.selVid = current;
       } catch (err) {
         console.log(err);
+        if (run !== this.listRun) return;
         this.$notify({ group: 'error', text: escapeHtml(err.message), position: 'top center' });
       }
       this.isRotating = false;
@@ -1174,11 +1161,17 @@ export default {
           const status = error.originalResponse && error.originalResponse.getStatus();
           if (run !== this.uploadRun) return;
           // refused for good (token expired or used, file rejected): the next try starts over
-          if (status >= 400 && status < 500 && status !== 409 && status !== 423) this.activeUpload = null;
+          const refused = status >= 400 && status < 500 && status !== 409 && status !== 423;
+          if (refused) this.activeUpload = null;
           this.processing = false;
-          this.$notify({ group: 'error', text: this.$t('video_upload_failed'), position: 'top center' });
+          this.$notify({ group: 'error', text: this.$t(refused ? 'video_upload_refused' : 'video_upload_failed'), position: 'top center' });
         },
         onProgress: (bytesUploaded, bytesTotal) => {
+          // an abort right after start() doesn't hold: tus clears it as it begins sending
+          if (run !== this.uploadRun) {
+            upload.abort();
+            return;
+          }
           this.vidprogress = 'Video Upload ' + (bytesUploaded / bytesTotal * 100).toFixed(2) + '%';
         },
         onSuccess: () => this.finishUpload(ticket, file, run, owner),
@@ -1190,7 +1183,7 @@ export default {
     async finishUpload(ticket, file, run, owner) {
       this.uploadedHere.push(ticket.permlink);
       if (run === this.uploadRun) this.activeUpload = null;
-      const frame = await this.uploadFrame(ticket.permlink);
+      const frame = run === this.uploadRun ? await this.uploadFrame(ticket.permlink) : null;
       if (run === this.uploadRun) {
         this.newVid = fromStatus(owner, {
           permlink: ticket.permlink,
@@ -1278,40 +1271,19 @@ export default {
       })
     },
 
-    async RewardUserEdit(user, postUrl) {
-      let url = new URL('/api/proxy/reward-edit', window.location.origin);
-      if (!postUrl || !postUrl.startsWith('http')) {
-        const raw = this.editPost && this.editPost.url;
-        postUrl = (raw && raw.startsWith('http')) ? raw : `https://actifit.io/@${this.editPost.author}/${this.editPost.permlink}`;
-      }
-      if (!user) user = this.editPost.author;
-      let params = {
-        user,
-        url: postUrl,
-      }
-      Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
-      try {
-        let res = await fetch(url, { headers: { 'x-acti-token': localStorage.getItem('access_token') || '' } });
-        let outcome = await res.json();
-        if (outcome.rewarded) {
-          // notify the user that he received an additional reward
-          this.$notify({
-            group: 'success',
-            text: this.$t('youve_been_rewarded') + outcome.amount + this.$t('reward_for_edit'),
-            position: 'top center'
-          })
-        }
-        console.log(outcome);
-      } catch (err) {
-        console.error(err);
-      }
-    },
+  },
+  beforeDestroy() {
+    this.uploadRun += 1;
+    if (this.activeUpload) this.activeUpload.abort();
+    clearInterval(this.timer);
+    if (this.stream) this.stream.getTracks().forEach(track => track.stop());
   },
   async mounted() {
     console.log('edit screen mounted');
     this.cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
     this.$store.commit('setBchain', this.cur_bchain);
     await this.$store.dispatch('steemconnect/login')
+    if (this.user) this.videoAccount = this.user.account.name;
     await this.getAllVideoStatuses();
     this.fetchCommunities();
 

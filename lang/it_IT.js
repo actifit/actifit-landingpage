@@ -1362,6 +1362,7 @@ module.exports = {
   video_needs_site_login: 'Per caricare video, accedi di nuovo con Keychain, HiveAuth o la tua chiave.',
   video_hive_only: 'I post video sono disponibili solo su Hive. Passa a Hive e riprova.',
   video_file_required: 'Scegli un file video.',
+  video_upload_refused: 'Impossibile caricare questo file. Prova con un altro video.',
   vid_status_uploading: 'Caricamento',
   vid_status_processing: 'Elaborazione _PCT_%',
   vid_status_ready: 'Pronto',

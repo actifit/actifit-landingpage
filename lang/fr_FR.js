@@ -1358,6 +1358,7 @@ module.exports = {
   video_needs_site_login: 'Pour envoyer des vidéos, reconnectez-vous avec Keychain, HiveAuth ou votre clé.',
   video_hive_only: 'Les publications vidéo sont disponibles uniquement sur Hive. Passez à Hive et réessayez.',
   video_file_required: 'Veuillez choisir un fichier vidéo.',
+  video_upload_refused: 'Ce fichier n\'a pas pu être envoyé. Veuillez essayer une autre vidéo.',
   vid_status_uploading: 'Envoi en cours',
   vid_status_processing: 'Traitement _PCT_ %',
   vid_status_ready: 'Prête',

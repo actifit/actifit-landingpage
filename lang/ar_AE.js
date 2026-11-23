@@ -1357,6 +1357,7 @@ module.exports = {
   video_needs_site_login: 'لرفع الفيديوهات، يرجى تسجيل الدخول مرة أخرى باستخدام Keychain أو HiveAuth أو مفتاحك.',
   video_hive_only: 'منشورات الفيديو متاحة على Hive فقط. انتقل إلى Hive وحاول مرة أخرى.',
   video_file_required: 'يرجى اختيار ملف فيديو.',
+  video_upload_refused: 'تعذر رفع هذا الملف. يرجى تجربة فيديو آخر.',
   vid_status_uploading: 'جارٍ الرفع',
   vid_status_processing: 'جارٍ المعالجة _PCT_%',
   vid_status_ready: 'جاهز',

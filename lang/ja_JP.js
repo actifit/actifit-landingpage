@@ -1361,6 +1361,7 @@ module.exports = {
   video_needs_site_login: '動画をアップロードするには、Keychain、HiveAuth、またはキーで再度ログインしてください。',
   video_hive_only: '動画投稿は Hive でのみ利用できます。Hive に切り替えてもう一度お試しください。',
   video_file_required: '動画ファイルを選択してください。',
+  video_upload_refused: 'このファイルはアップロードできませんでした。別の動画をお試しください。',
   vid_status_uploading: 'アップロード中',
   vid_status_processing: '処理中 _PCT_%',
   vid_status_ready: '準備完了',

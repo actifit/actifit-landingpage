@@ -1362,6 +1362,7 @@ module.exports = {
   video_needs_site_login: 'Aby przesyłać wideo, zaloguj się ponownie przez Keychain, HiveAuth lub swój klucz.',
   video_hive_only: 'Posty wideo są dostępne tylko na Hive. Przełącz się na Hive i spróbuj ponownie.',
   video_file_required: 'Wybierz plik wideo.',
+  video_upload_refused: 'Nie udało się przesłać tego pliku. Spróbuj z innym wideo.',
   vid_status_uploading: 'Przesyłanie',
   vid_status_processing: 'Przetwarzanie _PCT_%',
   vid_status_ready: 'Gotowe',

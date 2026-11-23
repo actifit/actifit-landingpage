@@ -1362,6 +1362,7 @@ module.exports = {
   video_needs_site_login: 'Video yüklemek için lütfen Keychain, HiveAuth veya anahtarınızla yeniden giriş yapın.',
   video_hive_only: 'Video gönderileri yalnızca Hive üzerinde kullanılabilir. Hive\'a geçip yeniden deneyin.',
   video_file_required: 'Lütfen bir video dosyası seçin.',
+  video_upload_refused: 'Bu dosya yüklenemedi. Lütfen başka bir video deneyin.',
   vid_status_uploading: 'Yükleniyor',
   vid_status_processing: 'İşleniyor %_PCT_',
   vid_status_ready: 'Hazır',

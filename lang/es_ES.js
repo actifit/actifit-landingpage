@@ -1354,6 +1354,7 @@ module.exports = {
   video_needs_site_login: 'Para subir vídeos, vuelve a iniciar sesión con Keychain, HiveAuth o tu clave.',
   video_hive_only: 'Las publicaciones de vídeo solo están disponibles en Hive. Cambia a Hive e inténtalo de nuevo.',
   video_file_required: 'Elige un archivo de vídeo.',
+  video_upload_refused: 'No se pudo subir este archivo. Prueba con otro vídeo.',
   vid_status_uploading: 'Subiendo',
   vid_status_processing: 'Procesando _PCT_%',
   vid_status_ready: 'Listo',

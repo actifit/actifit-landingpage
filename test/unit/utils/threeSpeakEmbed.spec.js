@@ -180,6 +180,13 @@ describe('the site', () => {
     expect(page).toMatch(/if \(run !== this\.uploadRun\) return; \/\/ another file/)
     expect(page).toMatch(/this\.uploadRun \+= 1;/)
   })
+  it('a HiveAuth request that never reaches the app cannot hang the page', () => {
+    expect(page).toMatch(/watchdog = setTimeout\(\(\) => finish\(\{ success: false \}\), 15000\)/)
+  })
+  it('one account cannot publish another\'s video', () => {
+    expect(page).toMatch(/vid\.owner !== this\.user\.account\.name/)
+    expect(page).toMatch(/this\.videoAccount !== name\) this\.clearVideoState\(\)/)
+  })
   it('never changes the video\'s permlink for the post', () => {
     expect(page).toMatch(/this\.editPost\.permlink = vid\.permlink;/)
     expect(page).not.toMatch(/editPost\.permlink \+=/)
@@ -188,6 +195,7 @@ describe('the site', () => {
     expect(page).toMatch(/const benef = withVideoBeneficiaries\(this\.\$refs\['beneficiaryList'\]\.formattedEntries\)/)
     expect(page).toMatch(/extensions: \[\[0, \{ 'beneficiaries': benef \}\]\]/)
     expect(page).not.toMatch(/\$steemconnect\.comment\(/)
-    expect(page).toMatch(/ops\.push\(\[op2, params2\]\)/)
+    expect(page).toMatch(/processTrxFunc\('comment', cstm_params, this\.cur_bchain, 'comment_options', comment_options\)/)
+    expect(page).toMatch(/postKeychain\(cstm_params, comment_options\)/)
   })
 })

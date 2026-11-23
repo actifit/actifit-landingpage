@@ -1364,6 +1364,7 @@ module.exports = {
   video_needs_site_login: '要上传视频，请使用 Keychain、HiveAuth 或您的密钥重新登录。',
   video_hive_only: '视频帖子仅在 Hive 上可用。请切换到 Hive 后重试。',
   video_file_required: '请选择视频文件。',
+  video_upload_refused: '无法上传此文件。请尝试其他视频。',
   vid_status_uploading: '上传中',
   vid_status_processing: '处理中 _PCT_%',
   vid_status_ready: '已就绪',
