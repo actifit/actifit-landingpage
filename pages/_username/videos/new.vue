@@ -2,19 +2,17 @@
   <div>
     <NavbarBrand />
     <div class="container pt-5 mt-5 pb-5">
-      <a href="#a" data-toggle="modal" id="modenabler" name="modenabler" ref="modenabler"
-        data-target="#notifyModal"></a>
       <div class="text-center font-weight">
         <ListHeadingSection :username="user ? user.account.name : ''" :textualDisplay="textualContent()"/>
       </div>
 
-      <div class="vid-container" v-if="xcstkn != ''">
+      <div class="vid-container" v-if="user">
         <div class="card post p-4 m-4 float-left" :class="smallScreenCheck" ref="mainCard">
           <div class="text-center font-weight-bold">{{ $t('new_video_placeholder') }}</div>
 
           <div>
             <!-- video upload section -->
-            <input type="file" ref="fileInput" @change="uploadVideo" @click="setUploadEnvt()" :max-size="maxFileSize" />
+            <input type="file" accept="video/*" ref="fileInput" @change="uploadVideo" @click="setUploadEnvt()" :max-size="maxFileSize" />
 
             <!--<div v-if="selVid == newVid">Selected</div>-->
           </div>
@@ -33,7 +31,7 @@
                   <button @click="stopRecording" v-else class="btn btn-white border text-red acti-shadow mt-2">Stop
                     Recording</button>
                   <!--<button @click="playBack" v-if="!recording" class="btn btn-white border text-red acti-shadow mt-2">Play Back</button>-->
-                  <button @click="uploadRecVideo" v-if="!recording"
+                  <button @click="uploadRecVideo" v-if="!recording && recordedVid"
                     class="btn btn-white border text-red acti-shadow mt-2">Upload Recording</button>
                   <!--<a v-if="recordedVideoUrl" :href="recordedVideoUrl" download="recorded-video.mp4" class="btn btn-white border text-red acti-shadow mt-2">Download Recording</a>-->
                 </div>
@@ -41,52 +39,41 @@
             </transition>
           </div>
           <div>
-            <div v-if="thumbprogress">{{ thumbprogress }}</div>
             <div v-if="vidprogress">{{ vidprogress }}</div>
 
             <div>
               <span v-if="videoLength">{{ videoLength.toFixed(2) }} sec | </span>
               <span v-if="videoSize">{{ (videoSize / 1024 / 1024).toFixed(2) }} MB</span>
             </div>
-            <div v-if="videoLength">Now</div>
-            <div v-if="videoLength">New Vid <i class="fas fa-solid fa-refresh text-brand" @click="getAllVideoStatuses()"
-                :class="{ 'fa-spin': isRotating }"></i></div>
 
             <video ref="video" id="video" style="display:none">
             </video>
             <canvas ref="canvas" id="canvas" style="display: none" />
-            <img id="thumb" :src="thumbnail" class="max-img" alt="Generated video thumbnail" />
+            <img v-if="thumbnail" id="thumb" :src="thumbnail" class="max-img" alt="Generated video thumbnail" />
             <div>
               <i class="fas fa-spin fa-spinner text-brand" v-if="processing"></i>
             </div>
-            <button class="btn btn-white border text-red acti-shadow mt-2" @click="updateVideoInfo"
-              v-if="videoReady && !newVidSubmitted">Submit Video</button>
+            <button class="btn btn-white border text-red acti-shadow mt-2" @click="startVideoUpload"
+              v-if="video && !processing && !newVidSubmitted && !recording">{{ $t('upload_video') }}</button>
             <button class="btn btn-white border text-red acti-shadow mt-2" @click="selectVid(newVid)"
               v-if="newVidSubmitted">Add to Post</button>
           </div>
         </div>
-        <div class="card post p-4 m-4" :class="smallScreenCheck" v-if="userVidList.length > 0"
-          v-for="(video, index) in userVidList" :key="index" :video="video">
-          <img :src="video.thumbUrl" class="max-img" :alt="video.title || 'Video thumbnail'">
+        <div class="card post p-4 m-4" :class="smallScreenCheck" v-for="video in userVidList" :key="video.permlink">
+          <img v-if="video.thumbnail_url" :src="video.thumbnail_url" class="max-img" :alt="video.title || 'Video thumbnail'">
           <div class="vid-title">{{ video.title }}</div>
-          <div>{{ video.duration.toFixed(2) }} sec | {{ (video.size / 1024 / 1024).toFixed(2) }} MB</div>
-          <!--<div>{{video.permlink}}</div>-->
+          <div v-if="video.duration">{{ video.duration.toFixed(2) }} sec</div>
           <div :title="video.created">{{ $getTimeDifference(video.created) }}</div>
           <div>{{ dispStatusWording(video) }} <i class="fas fa-solid fa-refresh text-brand" @click="getAllVideoStatuses()"
               :class="{ 'fa-spin': isRotating }"></i></div>
-          <!--<div>{{video.encodingProgress}}</div>-->
-          <button class="btn btn-white border text-red acti-shadow"
-            v-if="!isVideoPublished(video) && !isVideoFailed(video)" @click="selectVid(video)">Add to Post</button>
-          <button v-if="!isVideoPublished(video) && !isVideoFailed(video)"
-            class="btn btn-white border text-red acti-shadow" @click="video = markVideoPublished(video)">Mark published
-            <i v-if="marking == video._id" class="fas fa-spin fa-spinner text-brand"></i></button>
-          <a v-else class="btn btn-white border text-red acti-shadow float-right"
-            :href="'/' + video.owner + '/' + video.permlink" target="_blank" rel="noopener noreferrer">View Post</a>
-          <!--<div v-if="selVid == video">Selected</div>-->
+          <button class="btn btn-white border text-red acti-shadow" v-if="canAttachVideo(video)"
+            @click="selectVid(video)">Add to Post</button>
+          <a v-if="video.status == 'posted'" class="btn btn-white border text-red acti-shadow float-right"
+            :href="'/@' + video.owner + '/' + video.permlink" target="_blank" rel="noopener noreferrer">View Post</a>
         </div>
       </div>
       <div class="vid-container" v-else>
-        <button class="btn btn-white border text-red acti-shadow" @click="connectSession3S">Load Videos</button>
+        <button class="btn btn-white border text-red acti-shadow" @click="requestLogin">{{ $t('Login') }}</button>
       </div>
 
 
@@ -137,8 +124,8 @@
 
         <div class="form-group acti-shadow extra-container">
           <Beneficiary ref="beneficiaryList" :initialEntries="benef_list" :viewOnly="!editPost.isNewPost"
-            class="float-left" :requiredEntries="benef_list.map(obj => obj.account)" :extraNote="$t('benefic_3s')"
-            :restrictedPercent="parseInt(1)" />
+            class="float-left" :requiredEntries="requiredBenefAccounts" :extraNote="$t('benefic_3s')"
+            />
 
           <!-- also select community to post to -->
           <div class="form-group d-flex align-items-center p-1">
@@ -182,7 +169,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-white border text-red acti-shadow" :disabled="!selVidReadyForPublish()"
+        <button type="button" class="btn btn-white border text-red acti-shadow" :disabled="loading || !selVidReadyForPublish()"
           @click.prevent="save()">
           <i class="fas fa-spin fa-spinner" v-if="loading"></i>
           <i class="fas fa-paper-plane" v-else></i>
@@ -203,8 +190,6 @@
         <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" />
         <notifications :group="'warn'" :position="'top center'" :classes="'vue-notification warn'" />
         <notifications :group="'error'" :position="'top center'" :classes="'vue-notification error'" />
-        <NotifyModal id="notifyModal" ref="notifyModal" :modalTitle="$t('Actifit_Info')"
-          :modalText="$t('success_submit_wait_encoding')" />
       </div>
     </client-only>
   </div>
@@ -219,8 +204,6 @@ import CustomTextEditor from '~/components/CustomTextEditor';
 import TagInput from '~/components/TagInput';
 import Beneficiary from '~/components/Beneficiary';
 
-import NotifyModal from '~/components/NotifyModal';
-
 import hive from '@hiveio/hive-js'
 
 import NavbarBrand from '~/components/NavbarBrand';
@@ -232,12 +215,13 @@ import LoginModal from '~/components/LoginModal';
 import fixWebmDuration from 'fix-webm-duration';
 
 import axios from 'axios';
+import escapeHtml from '~/utils/escapeHtml';
 import * as tus from "tus-js-client";
-import { wrapper } from "axios-cookiejar-support";
-import { CookieJar } from "tough-cookie";
+import {
+  STATUS_POSTED, VIDEO_BENEFICIARIES, canAttach, fetchVideoStatus, fromStatus, listUploads,
+  requestUploadToken, stripVideoLinks, videoMetadata, withVideoAtTop, withVideoBeneficiaries,
+} from '~/utils/threeSpeakEmbed';
 
-const jar = new CookieJar();
-const client = wrapper(axios.create({ jar }));
 /* tus installation:
 https://github.com/tus/tus-js-client/blob/2b86d4b01464e742483417270b1927a88c0bbfa6/docs/installation.md
 */
@@ -287,7 +271,6 @@ export default {
     CustomTextEditor,
     TagInput,
     Beneficiary,
-    NotifyModal,
     ListHeadingSection,
     LoginModal
   },
@@ -305,15 +288,13 @@ export default {
       recordedVideoUrl: null, // URL of the recorded video
       timeLeft: this.maxDuration,
       /* end */
-      maxFileSize: 750 * 1000 * 1000, // max 250M
+      maxFileSize: 750 * 1000 * 1000, // max 750 MB
       isRotating: false,
-      runnerProc: -1, //interval to mark vid as published
       title: '', // post title
       body: '', // post body
       tags: [], // post tags
       description: '', // post preview description -> json_metadata.description
       loading: false, // loading animation in submit button
-      loadingxcstkn: false,
       cur_bchain: 'HIVE', //bchain used to edit/save
       target_bchain: 'HIVE', //bchain to which edits will go
       //benef_list: [],
@@ -329,32 +310,20 @@ export default {
       videoLength: null,
       videoReady: false,
       processing: false,
-      marking: -1,
-      filename: '',
-      origFilename: '',
       vidprogress: null,
-      thumbprogress: null,
       thumbnail: null,
-      thumbnailName: '',
-      thumbnailUrl: '',
-      xcstkn: '',
       userVidList: [],
       selVid: {},
       newVid: {},
       newVidSubmitted: false,
       userSelection: 'upload',
-      statusList: [['uploaded', 0, 'Uploaded'],
-      ['encoding_queued', 1, 'Queued for Encoding'],
-      ['encoding_ipfs', 2, 'Processing Encoding'],
-      ['encoding_failed', 3, 'Encoding Failed'],
-      ['deleted', 4, 'Deleted'],
-      ['publish_manual', 5, 'Ready to publish'],
-      ['published', 6, 'Published✓']],
-      benef_list: [
-        { account: 'spk.beneficiary', weight: 1000 },
-        //{account: 'threespeakleader', weight: 100},
-      ],
-      vidPostContent: '',
+      uploadedHere: [], // permlinks this browser finished sending (3Speak's status can lag)
+      benef_list: VIDEO_BENEFICIARIES.map(b => ({ ...b })),
+      requiredBenefAccounts: VIDEO_BENEFICIARIES.map(b => b.account),
+      videoAccount: '', // whose uploads this page holds
+      listRun: 0, // only the latest list request may update the page
+      finalizing: false, // a stopped recording is still being prepared
+      uploadRun: 0, // bumped when the selected file changes, so a late reply can't touch the new one
       //comment_options: {},
     }
   },
@@ -399,8 +368,11 @@ export default {
     },
     user(newUser) {
       if (!newUser) return;
+      const name = newUser.account.name;
+      if (this.videoAccount && this.videoAccount !== name) this.clearVideoState();
+      this.videoAccount = name;
       this.fetchCommunities();
-      this.connectSession3S();
+      this.getAllVideoStatuses();
     },
     editPost() {
       //enforce new post till and if we implement full screen edit
@@ -422,7 +394,6 @@ export default {
         this.percent_hbd = this.editPost.percent_hbd;
       }
       //console.log('session 3S');
-      //this.connectSession3S();
       //console.log(this.tags);
       //set paste handling script for images
       //this.$el.querySelector('textarea').addEventListener('paste', this.handlePaste);
@@ -457,12 +428,16 @@ export default {
       :this.$t('Editing') + '<a :href="'/'' + this.editPost.author + '/' + this.editPost.permlink + '">' + this.title + '</a>';
     },
     dispStatusWording(video) {
-      //console.log(video.status);
-      let match = this.statusList.find(row => row[0] === video.status);
-      if (Array.isArray(match)) {
-        return match[2]
+      switch (video.status) {
+        case 'uploading': return this.$t('vid_status_uploading');
+        case 'processing': return this.$t('vid_status_processing').replace('_PCT_', Math.round(video.encodingProgress));
+        case 'published': return this.$t('vid_status_ready');
+        case 'failed': return this.$t('vid_status_failed');
+        case 'deleted': return this.$t('vid_status_deleted');
+        case 'missing': return this.$t('vid_status_missing');
+        case STATUS_POSTED: return this.$t('vid_status_posted');
+        default: return '';
       }
-      return '';
     },
     setUploadEnvt() {
       this.$nextTick(() => {
@@ -481,6 +456,7 @@ export default {
       });
     },
     async startRecording() {
+      if (this.finalizing) return;
       try {
         console.log(this.recordedVideoUrl);
         if (this.recordedVideoUrl != null) {
@@ -490,6 +466,11 @@ export default {
           }
         }
         this.stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        // the previous clip was chosen but not sent: it must not go up in place of this one
+        if (this.video && this.video === this.recordedVid && !this.activeUpload && !this.processing) {
+          this.resetNewVidData();
+        }
+        this.recordedVid = null; // until the new recording is finished
         this.$refs.recvideo.srcObject = this.stream;
         this.mediaRecorder = new MediaRecorder(this.stream);
         this.mediaRecorder.addEventListener('dataavailable', (event) => {
@@ -501,16 +482,22 @@ export default {
           console.log('event listener stop')
           let blob = new Blob(this.chunks, { type: 'video/mp4' });
           let duration = Date.now() - this.startTime;
-          blob = await fixWebmDuration(blob, duration, { logger: false });
+          try {
+            blob = await fixWebmDuration(blob, duration, { logger: false });
+          } catch (err) {
+            console.log(err); // keep the recording, without the corrected length
+          }
           //const blob = await fixWebmDuration(new Blob(this.chunks, { type: 'video/mp4' }), duration);
           this.recordedVid = new File([blob], 'recorded-video.mp4', { type: blob.type });
           this.recordedVideoUrl = URL.createObjectURL(blob);
           this.chunks = [];
           this.mediaRecorder = null;
+          if (this.stream) this.stream.getTracks().forEach(track => track.stop());
           this.stream = null;
           this.$refs.recvideo.srcObject = null;
           //set proper src for video
           this.$refs.recvideo.src = this.recordedVideoUrl;
+          this.finalizing = false;
         });
         this.startTime = Date.now();
         this.mediaRecorder.start();
@@ -533,10 +520,11 @@ export default {
       }
     },
     stopRecording() {
-      console.log('stoprecording func');
-      this.mediaRecorder.stop();
       clearInterval(this.timer);
       this.recording = false;
+      if (!this.mediaRecorder || this.mediaRecorder.state === 'inactive') return;
+      this.finalizing = true;
+      this.mediaRecorder.stop();
 
       //set video ready for playback
       this.playBack();
@@ -551,38 +539,65 @@ export default {
         this.$refs.recvideo.src = this.recordedVideoUrl;
       }
     },
-    async uploadRecVideo(vid) {
+    async uploadRecVideo() {
+      if (!this.recordedVid) return;
+      this.resetNewVidData();
       this.video = this.recordedVid;
-      let file = this.video;
-      this.origFilename = file.name;
-      console.log(file.name)
-      //await upload.start()
-      this.generateThumbnail(this.recordedVideoUrl)//upload.file)
-
+      this.videoSize = this.video.size;
+      this.generateThumbnail(this.recordedVideoUrl)
+    },
+    // Uploads need a site session (the bot refuses HiveSigner tokens), and the bot links
+    // videos to Hive posts only.
+    videoPostingAvailable() {
+      let text = '';
+      if (!localStorage.getItem('std_login') || !localStorage.getItem('access_token')) {
+        text = this.$t('video_needs_site_login');
+      } else if (this.cur_bchain !== 'HIVE') {
+        text = this.$t('video_hive_only');
+      }
+      if (text) this.$notify({ group: 'error', text, position: 'top center' });
+      return !text;
+    },
+    canAttachVideo(video) {
+      return canAttach(video.status, this.uploadedHere.includes(video.permlink));
     },
     selVidReadyForPublish() {
-      return (this.selVid && this.selVid.status && this.selVid.status == 'publish_manual');
+      return !!(this.selVid && this.selVid.permlink) && this.canAttachVideo(this.selVid);
     },
-    isVideoPublished(video) {
-      return video.status == 'published';//this.statusList.find(row => row[0] === )[2]}
-    },
-    isVideoFailed(video) {
-      return video.status == 'encoding_failed';//this.statusList.find(row => row[0] === )[2]}
+    // Another account logged in: nothing of the previous one's may be published under this one.
+    clearVideoState() {
+      const selected = this.selVid;
+      if (selected && selected.permlink && this.$refs.editor) {
+        this.$refs.editor.content = stripVideoLinks(this.$refs.editor.content, selected.owner, selected.permlink, selected.embed_url);
+      }
+      this.selVid = {};
+      this.newVid = {};
+      this.userVidList = [];
+      this.uploadedHere = [];
+      this.listRun += 1;
+      this.resetNewVidData();
     },
     selectVid(video) {
+      const previous = this.selVid;
+      let content = this.$refs['editor'].content;
+      // a post carries one video: the one its permlink and metadata point to
+      if (previous && previous.permlink && previous.permlink !== video.permlink) {
+        content = stripVideoLinks(content, previous.owner, previous.permlink, previous.embed_url);
+      }
       this.selVid = video;
-      //set content of the post body first as video url:
-      let thumbUrl = 'https://ipfs-3speak.b-cdn.net/ipfs/' + video.thumbnail.replace('ipfs://', '');
-
-      this.$refs['editor'].content =
-        '[![](' + thumbUrl + ')](https://3speak.tv/watch?v=' + video.owner + '/' + video.permlink + ')';
+      this.$refs['editor'].content = withVideoAtTop(content, video.owner, video.permlink,
+        video.embed_url, video.thumbnail_url);
     },
     async uploadVideo(event) {
 
-
-
-      this.video = event.target.files[0];
-      let file = this.video;
+      // checked first: a rejected choice must not cancel an upload already running
+      const file = event.target.files[0];
+      if (!file) return;
+      if (file.type && !file.type.startsWith('video/')) {
+        this.$notify({ group: 'error', text: this.$t('video_file_required'), position: 'top center' });
+        event.target.value = null;
+        return;
+      }
       if (file.size > this.maxFileSize) {
         this.$notify({
           group: 'error',
@@ -592,25 +607,12 @@ export default {
         event.target.value = null;
         return;
       }
-      this.origFilename = file.name;
-      //await upload.start()
-      this.generateThumbnail()//upload.file)
+      this.resetNewVidData();
+      this.video = file;
+      this.videoSize = file.size;
+      this.generateThumbnail()
 
     },
-
-    async grabVideoUrl(vid) {
-      let targetField = vid.video_v2//vid.filename;//
-      if (targetField) {
-        if (targetField.startsWith('http')) {
-          //we're good, no changes needed
-          return targetField;//vid.video_v2;
-        }
-        return process.env.threeSpeakCDN + '/' + targetField.replaceAll('ipfs://', '');
-        //vid.video_v2.replaceAll('ipfs://','');
-      }
-      return '';
-    },
-
 
     async fetchCommunities() {
       if (this.user) {
@@ -618,51 +620,8 @@ export default {
         console.log(this.communitySubs);
       }
     },
-    async uploadImage(files) {
-      const upload = new tus.Upload(files[0], {
-        endpoint: 'https://uploads.3speak.tv/files', //'https://tusd.tusdemo.net/files/',
-        retryDelays: [0, 1000, 3000, 5000],
-        /*metadata   : {
-        filename: `photo.${extension}`,
-        filetype: this.getMimeType(extension),
-        },*/
-        onError: (error) => {
-          console.log(error)
-          /*this.setState({
-            status: `upload failed ${error}`,
-          })*/
-        },
-        onProgress: (uploadedBytes, totalBytes) => {
-          //console.log(uploadedBytes, totalBytes)
-          const percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2)
-          console.log(bytesUploaded, bytesTotal, `${percentage}%`)
-          /*this.setState({
-            totalBytes,
-            uploadedBytes,
-          })*/
-        },
-        onSuccess: () => {
-          /*this.setState({
-            status   : 'upload finished',
-            uploadUrl: upload.url,
-          })*/
-          console.log('Success! Upload URL:', upload.url)
-        },
-      })
-    },
     async processTrxFunc(op_name, cstm_params, bchain_option, op2, params2) {
-      if (!localStorage.getItem('std_login')) {
-        //if (!this.stdLogin){
-        let res = await this.$steemconnect.broadcast([[op_name, cstm_params]]);
-        //console.log(res);
-        if (res.result.ref_block_num) {
-          console.log('success');
-          return { success: true, trx: res.result };
-        } else {
-          //console.log(err);
-          return { success: false, trx: null };
-        }
-      } else if (localStorage.getItem('acti_login_method') == 'hiveauth') {
+      if (localStorage.getItem('acti_login_method') == 'hiveauth') {
         return new Promise((resolve) => {
           const auth = {
             username: this.user.account.name,
@@ -678,8 +637,25 @@ export default {
             operation.push([op2, params2])
           }
 
+          let settled = false;
+          let watchdog = null;
+          const finish = (result) => {
+            if (settled) return;
+            settled = true;
+            clearTimeout(watchdog);
+            this.$notify({ group: 'warn', clean: true });
+            if (!result.success) {
+              this.$notify({ group: 'error', text: this.$t('Save_Error'), position: 'top center' });
+            }
+            resolve(result);
+          };
+          // the wrapper never settles when its socket can't connect; once the request reaches
+          // the app (sign_wait), its own expiry takes over
+          watchdog = setTimeout(() => finish({ success: false }), 15000);
+
           this.$HAS.broadcast(auth, 'posting', operation, (evt) => {
             console.log(evt)    // process sign_wait message
+            clearTimeout(watchdog);
             let msg = this.$t('verify_hiveauth_app');
             this.$notify({
               group: 'warn',
@@ -690,23 +666,15 @@ export default {
           })
             .then(response => {
               console.log(response);
-              this.$notify({
-                group: 'warn',
-                clean: true
-              })
-              if (response.cmd && response.cmd === 'sign_ack') {
-                resolve({ success: true, trx: response.data });
-              } else if (response.cmd && response.cmd === 'sign_nack') {
-                resolve({ success: false })
+              if (response.cmd === 'sign_ack') {
+                finish({ success: true, trx: response.data });
+              } else {
+                finish({ success: false });
               }
             }) // transaction approved and successfully broadcasted
             .catch(err => {
-              this.$notify({
-                group: 'warn',
-                clean: true
-              })
               console.log(err);
-              resolve({ success: false })
+              finish({ success: false });
             })
         })
       } else {
@@ -762,49 +730,26 @@ export default {
         }
       }
     },
-    commentSuccess(err, finalize, bchain, newPost) {
-      let mainRef = this;
-      let successMsg = mainRef.$t('Save_Success_Chain').replace('_CHAIN_', bchain);
-      if (newPost) {
-        successMsg = mainRef.$t('Post_created_successfully');
-      }
-      this.$notify({
-        group: err ? 'error' : 'success',
-        text: err ? mainRef.$t('Save_Error') : successMsg,
-        position: 'top center'
-      })
-
-      //let cur_bchain = (localStorage.getItem('cur_bchain')?localStorage.getItem('cur_bchain'):'HIVE');
-      //this.$store.commit('setBchain', cur_bchain);
-
-      //reward the user for a new edit
-      if (finalize) {
-        // stop loading animation and show notification
-        this.loading = false
-        if (newPost) {
-          $(this.$refs.editPostModal).modal('hide')
-        }
-        const _rewardUser = this.editPost.author;
-        const _rewardUrl = `https://actifit.io/@${this.editPost.author}/${this.editPost.permlink}`;
-        setTimeout(() => this.RewardUserEdit(_rewardUser, _rewardUrl), 10000);
-        // update post in store
-        this.$store.dispatch('updatePost', {
-          author: this.editPost.author,
-          permlink: this.editPost.permlink
-        })
-
-      }
-    },
     async save(vid) {
+      if (this.loading) return;
       if (!this.user || !this.user.account || !this.user.account.name) {
         this.requestLogin();
+        return;
+      }
+      // Keychain session with no Keychain: say so, rather than ask for a typed key
+      if (this.$keychainMissing && this.$keychainMissing()) return;
+      if (!this.videoPostingAvailable()) return;
+      if (!vid) vid = this.selVid;
+      if (!vid || !vid.permlink || vid.owner !== this.user.account.name || !this.canAttachVideo(vid)) {
+        this.$notify({ group: 'error', text: this.$t('sel_suitable_vid'), position: 'top center' });
         return;
       }
       this.loading = true // start loading animation
       //only convert to array if not already array
       this.tags = this.$refs.tagItem.items;
 
-      this.body = this.$refs.editor.content;
+      // the player stays in the post even if it was deleted from the text
+      this.body = withVideoAtTop(this.$refs.editor.content, vid.owner, vid.permlink, vid.embed_url, vid.thumbnail_url);
 
 
       console.log(this.title);
@@ -915,10 +860,6 @@ export default {
       if (desc) meta.description = desc
       else delete meta.description // don't publish an empty description key
 
-      if (!vid) {
-        vid = this.selVid;
-      }
-
       //append post specific data for new posts
       if (this.editPost.isNewPost) {
         //let permlnk = this.title.replaceAll('.','-').replaceAll('  ',' ').replaceAll(' ','-').toLowerCase();
@@ -932,24 +873,25 @@ export default {
         this.editPost.parent_author = '';
         this.editPost.parent_permlink = meta.tags[0];
         this.editPost.author = this.user.account.name;
-        //use video permlink for post permlink
-        this.editPost.permlink = vid.permlink;//permlnk;
+        // the post MUST use the video's permlink: that is how actifit-bot links it on 3Speak
+        this.editPost.permlink = vid.permlink;
 
-        //check also if a similar post exists, to adjust permlink
-        let chainLnk = hive;
-        await chainLnk.api.setOptions({ url: process.env.hiveApiNode });
-        let result = await chainLnk.api.getContentAsync(this.user.account.name, this.editPost.permlink);
+        await hive.api.setOptions({ url: process.env.hiveApiNode });
+        let result;
+        try {
+          result = await hive.api.getContentAsync(this.user.account.name, this.editPost.permlink);
+        } catch (err) {
+          console.log(err);
+          this.$notify({ group: 'error', text: this.$t('Save_Error'), position: 'top center' });
+          this.loading = false;
+          return;
+        }
         if (result && result.author) {
-          //found a match
-          this.editPost.permlink += "-" + new Date().toISOString().replace(/-|:|\./g, '').toLowerCase();
+          this.$notify({ group: 'error', text: this.$t('video_already_posted'), position: 'top center' });
+          this.loading = false;
+          return;
         }
 
-        //fetch beneficiaries from user selection
-        this.benef_list = this.$refs['beneficiaryList'].formattedEntries;
-        //[{ 'account':'actifit.pay', 'weight':500 }];//, { 'account':'actifit', 'weight':500 }
-        //loop through benefic list, ensure values are integer
-
-        console.log(this.benef_list);
 
 
         //let remaining_pct -= 500;
@@ -989,25 +931,8 @@ export default {
       //video specific requirements
 
 
-      let benef = this.benef_list.concat(this.$parseJsonMetadata(vid.beneficiaries));
-
-      //if list does not include required account, append it
-      /*let sagarRecord = benef.find(record => record.account === 'sagarkothari88');
-
-      if (sagarRecord === undefined) {
-        // If the record is not found, insert a new entry
-        benef.push({account: "sagarkothari88", weight: 100});
-      }*/
-
-      //console.log(this.benef_list)
-      //sort as this is required for posting properly
-      benef = benef.sort((a, b) => a.account.localeCompare(b.account));
-      console.log('beneficiaries')
-      console.log(benef)
-
-      if (benef.length > 4) {
-        //adding condition to prevent overassigning beneficiaries due to issue with video encoding on 3speak end with more than 5 beneficiaries
-        //post requires a title
+      const benef = withVideoBeneficiaries(this.$refs['beneficiaryList'].formattedEntries);
+      if (!benef) {
         this.$notify({
           group: 'error',
           text: this.$t('benefic_count_exceeded'),
@@ -1015,55 +940,21 @@ export default {
         })
         this.loading = false
         return;
-
       }
 
       //return;
-      //setup proper video metadata for 3speak
-      let vidJsonMeta = {
-        video: {
-          info: {
-            platform: '3speak',
-            title: vid.title,
-            author: vid.owner,
-            permlink: vid.permlink,
-            duration: vid.duration,
-            filesize: vid.size,
-            file: vid.filename,
-            lang: 'en',
-            firstUpload: false,
-            video_v2: vid.video_v2,
-            sourceMap: [
-              {
-                type: "thumbnail",
-                url: vid.thumbnail,
-              },
-              {
-                type: "video",
-                url: vid.video_v2,
-                format: "m3u8",
-              }
-            ],
-          },
-          content: {
-            description: '',
-            tags: ['actifit', '3speak'],
-          },
-        },
-      }
+      meta.video = videoMetadata({
+        owner: vid.owner,
+        permlink: vid.permlink,
+        embed: vid.embed_url,
+        title: this.title,
+        duration: vid.duration,
+        thumbnailUrl: vid.thumbnail_url,
+      });
 
-      meta.video = vidJsonMeta.video;
-
-      //set content of the post body first as video url:
-      let thumbUrl = 'https://ipfs-3speak.b-cdn.net/ipfs/' + vid.thumbnail.replace('ipfs://', '');
-
-      this.vidPostContent =
-        '[![](' + thumbUrl + ')](https://3speak.tv/watch?v=' + vid.owner + '/' + vid.permlink + ')'
-
-      //return;
       let comment_options = {
-        author: vid.owner,
-        permlink: this.editPost.permlink,//vid.permlink,
+        author: this.editPost.author,
+        permlink: this.editPost.permlink,
         max_accepted_payout: payout_amnt,
         percent_hbd: percent_hbd,
         allow_votes: true,
@@ -1078,7 +969,7 @@ export default {
       let cstm_params = {
         "author": this.editPost.author,
         "title": this.title,
-        "body": this.$refs.editor.content,
+        "body": this.body,
         "parent_author": this.editPost.parent_author,
         "parent_permlink": this.editPost.parent_permlink,
         "permlink": this.editPost.permlink,
@@ -1087,22 +978,7 @@ export default {
 
       // save changes
       let postSuccess = false;
-      if (!localStorage.getItem('std_login')) {
-        //if (!this.stdLogin){
-
-        this.$steemconnect.comment(
-          this.editPost.parent_author,
-          this.editPost.parent_permlink,
-          this.editPost.author,
-          this.editPost.permlink,
-          this.title,
-          this.$refs.editor.content,
-          meta,
-          (err) => {
-            this.commentSuccess(err, true, 'STEEM');
-          }
-        )
-      } else if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) {
+      if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) {
         //console.log(comment_options);
         //this.$nuxt.refresh()
         let outc = await this.postKeychain(cstm_params, comment_options);
@@ -1113,7 +989,7 @@ export default {
           this.loading = false;
           this.$notify({
             group: 'error',
-            text: 'there was an error creating the video post',
+            text: this.$t('Save_Error'),
             position: 'top center'
           })
         }
@@ -1153,40 +1029,14 @@ export default {
           }
         }*/
       }
-      console.log(postSuccess);
-      let attempts = 0;
-      let maxAttempts = 10;
-      let markVidPublished = true;//false;
-      if (postSuccess && markVidPublished) {
-        //wait a second or two to validate on blockchain
-        this.runnerProc = setInterval(async () => {
-          //this.$refs.editor.simplemde.codemirror.refresh()
-          //console.log(this.$refs.editor.textarea.value);
-          console.log('mark video published');
-          attempts += 1;
-          let vidUpdate = await this.markVideoPublished(vid, true);
-          if (vidUpdate.status == 'published') {
-            clearInterval(this.runnerProc)
-            this.$notify({
-              group: 'success',
-              text: this.$t('video_post_created'),
-              position: 'top center'
-            })
-            this.loading = false;
-            //this.$router.push('/'+this.user.account.name+'/videos');
-            this.$refs['my-videos'].click();
-          }
-          else if (attempts > maxAttempts) {
-            clearInterval(this.runnerProc);
-            this.$notify({
-              group: 'error',
-              text: this.$t('video_post_created') + ' ' + this.$t('issue_marking_published'),
-              position: 'top center'
-            })
-            this.loading = false;
-          }
-        }, 3000)
-
+      if (postSuccess) {
+        this.$notify({
+          group: 'success',
+          text: this.$t('video_post_created'),
+          position: 'top center'
+        })
+        this.loading = false;
+        this.$refs['my-videos'].click();
       }
     },
 
@@ -1197,193 +1047,178 @@ export default {
       this.videoLength = null;
       this.videoReady = false;
       this.processing = false;
-      this.filename = '';
-      this.origFilename = '';
       this.vidprogress = null;
-      this.thumbprogress = null;
       this.thumbnail = null;
-      this.thumbnailName = '';
-      this.thumbnailUrl = '';
       this.newVidSubmitted = false;
+      this.uploadRun += 1;
+      if (this.activeUpload) this.activeUpload.abort();
+      this.activeUpload = null;
 
-      if (this.$refs.recVideo) {
-        this.$refs.recVideo.src = '';
-      }
       this.timeLeft = this.maxDuration;
     },
 
+    // The user's uploads (our server's list) with 3Speak's public status for each.
     async getAllVideoStatuses() {
+      if (!this.user) return;
+      const session = localStorage.getItem('access_token');
+      if (!session || !localStorage.getItem('std_login')) return;
       this.isRotating = true;
-      console.log('get all videos')
-      console.log(process.env.threeSpeakUserVideoList);
-      //console.log(access_token);
+      const owner = this.user.account.name;
+      const run = ++this.listRun;
       try {
-        let response = await client.get(process.env.threeSpeakUserVideoList,
-          {
-            withCredentials: false,
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${this.xcstkn}`
-            },
+        const rows = await listUploads(process.env.actiAppUrl, session);
+        const videos = await Promise.all(rows.map(async (row) => {
+          const video = fromStatus(owner, row, await fetchVideoStatus(row.permlink));
+          if (!video.status) { // 3Speak unreachable: keep what we last knew
+            const known = this.userVidList.find(v => v.permlink === row.permlink);
+            if (known) video.status = known.status;
           }
-        );
-        console.log(response);
-        if (response.data) {
-          //set user videos array
-          this.userVidList = response.data;//JSON.stringify(myAllVideosWithStatusInfo)
-          console.log(this.userVidList);
-          //console.log(`All Videos Info response: userVidList${}`);
-        }
-        this.resetNewVidData();
-        this.isRotating = false;
-        return response.data;
+          video.thumbnail_url = video.thumbnail_url || this.savedFrame(row.permlink);
+          if (this.canAttachVideo(video) && await this.alreadyPosted(owner, row.permlink)) {
+            video.status = STATUS_POSTED;
+          }
+          return video;
+        }));
+        if (run !== this.listRun) return;
+        this.userVidList = videos;
+        const current = this.selVid && this.userVidList.find(v => v.permlink === this.selVid.permlink);
+        if (current) this.selVid = current;
       } catch (err) {
         console.log(err);
-        //reset session data
-        localStorage.removeItem('3s_access_token');
-        this.isRotating = false;
-        throw err;
+        if (run !== this.listRun) return;
+        this.$notify({ group: 'error', text: escapeHtml(err.message), position: 'top center' });
       }
-
+      this.isRotating = false;
     },
 
-    async generateThumbnail(vidUrl) {
-      //
-      let upRef = this;
-      let URL = URL || window.URL
-      let videoURL
-      if (vidUrl) {
-        videoURL = vidUrl;
-      } else {
-        videoURL = URL.createObjectURL(this.video)
+    async alreadyPosted(owner, permlink) {
+      try {
+        await hive.api.setOptions({ url: process.env.hiveApiNode });
+        const post = await hive.api.getContentAsync(owner, permlink);
+        return !!(post && post.author);
+      } catch (err) {
+        return false; // the publish step checks again
       }
-      console.log(videoURL);
-      let canvas = this.$refs['canvas']//document.createElement('canvas')
-      let context = canvas.getContext('2d')
-      let video = this.$refs['video'];
-
-
-      video.src = videoURL;
-      //video.addEventListener('loadeddata', async () => {
-      video.addEventListener('loadedmetadata', async () => {
-
-        //set current video time. Go to 25%
-        video.currentTime = video.duration * 0.25;//5
-        //console.log(video)
-
-        canvas.width = video.videoWidth
-        canvas.height = video.videoHeight
-        //console.log(canvas.width)
-        //console.log(canvas.height)
-
-        upRef.videoLength = video.duration;// + ' seconds'
-        //console.log(upRef.thumbnail);
-        //console.log(upRef.videoLength)
-        //return;
-
-      })
-      //capture the seeking event, and set proper image accordingly
-      video.addEventListener('seeked', async () => {
-        upRef.processing = true;
-        context.drawImage(video, 0, 0, canvas.width, canvas.height)
-        upRef.thumbnail = canvas.toDataURL()
-
-        await upRef.startThumbnailUpload()
-        await upRef.startVideoUpload()
-
-      })
-
     },
 
+    savedFrame(permlink) {
+      try { return localStorage.getItem('3s_frame_' + permlink); } catch (e) { return null; }
+    },
 
+    generateThumbnail(vidUrl) {
+      const video = this.$refs['video'];
+      const canvas = this.$refs['canvas'];
+      video.addEventListener('loadedmetadata', () => {
+        // a recording can report an unknown (infinite) length
+        const known = Number.isFinite(video.duration);
+        video.currentTime = known ? video.duration * 0.25 : 0;
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        this.videoLength = known ? video.duration : null;
+      }, { once: true });
+      video.addEventListener('seeked', () => {
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+        this.thumbnail = canvas.toDataURL('image/jpeg', 0.85);
+      }, { once: true });
+      video.src = vidUrl || window.URL.createObjectURL(this.video);
+    },
+
+    // One-time token from our server (the 3Speak key never reaches the browser), then the
+    // file goes straight to 3Speak by TUS. After a failure, the same upload resumes.
     async startVideoUpload() {
-      console.log('start video upload');
-      let file = this.video
-      console.log(this.video);
-
-      //this.$cookies.set("connect.sid","s%3AV4_SdjzaTTAKQ6cPUsztSmwOYOaJErtc.oLdKsvBfueMkUsPDamPQls1EAeiwthMfM2UK4%2FhAvqU");
-
-      //let cook = this.$cookies.get("connect.sid") // vuejs
-      //console.log(cook);
-
-      let upRef = this;
-      let upload = new tus.Upload(file, {
-        endpoint: 'https://uploads.3speak.tv/files',
-        chunkSize: 100 * 1024,
+      if (this.processing || !this.video || !this.videoPostingAvailable()) return;
+      if (this.activeUpload) {
+        this.processing = true;
+        this.activeUpload.start();
+        return;
+      }
+      const session = localStorage.getItem('access_token');
+      const owner = this.user.account.name;
+      const run = this.uploadRun;
+      this.processing = true;
+      let ticket;
+      try {
+        ticket = await requestUploadToken(process.env.actiAppUrl, session);
+      } catch (err) {
+        if (run !== this.uploadRun) return;
+        this.processing = false;
+        this.$notify({ group: 'error', text: escapeHtml(err.message), position: 'top center' });
+        return;
+      }
+      if (run !== this.uploadRun) return; // another file was chosen meanwhile
+      const file = this.video;
+      const metadata = { filename: file.name || 'video.mp4', filetype: file.type || 'video/mp4' };
+      if (this.videoLength > 0) metadata.duration = String(Math.round(this.videoLength));
+      const upload = new tus.Upload(file, {
+        endpoint: ticket.upload_url,
+        headers: { Authorization: 'Bearer ' + ticket.token },
+        chunkSize: 1024 * 1024,
         retryDelays: [0, 1000, 3000, 5000],
-        metadata: {
-          filename: file.name,
-          filetype: file.type
+        storeFingerprintForResuming: false,
+        metadata,
+        onError: (error) => {
+          console.log('Video upload failed: ' + error);
+          const status = error.originalResponse && error.originalResponse.getStatus();
+          if (run !== this.uploadRun) return;
+          // refused for good (token expired or used, file rejected): the next try starts over
+          const refused = status >= 400 && status < 500 && status !== 409 && status !== 423;
+          if (refused) this.activeUpload = null;
+          this.processing = false;
+          this.$notify({ group: 'error', text: this.$t(refused ? 'video_upload_refused' : 'video_upload_failed'), position: 'top center' });
         },
-        onError(error) {
-          console.log('Failed because: ' + error)
+        onProgress: (bytesUploaded, bytesTotal) => {
+          // an abort right after start() doesn't hold: tus clears it as it begins sending
+          if (run !== this.uploadRun) {
+            upload.abort();
+            return;
+          }
+          this.vidprogress = 'Video Upload ' + (bytesUploaded / bytesTotal * 100).toFixed(2) + '%';
         },
-        onProgress(bytesUploaded, bytesTotal) {
-          let percentage = (bytesUploaded / bytesTotal * 100).toFixed(2)
-          upRef.vidprogress = 'Video Upload ' + percentage + '%';
-          //console.log(bytesUploaded, bytesTotal, percentage + '%')
-        },
-        onSuccess() {
-          console.log('Upload completed!')
-          console.log("Download %s from %s", upload.file.name, upload.url)
-          upRef.filename = upload.file.name;
-
-          upRef.filename = upload.url.replace('https://uploads.3speak.tv/files/', '');
-          //upRef.videoSize = `${(file.size / 1024 / 1024).toFixed(2)} MB`
-          upRef.videoSize = file.size
-          upRef.videoReady = true;
-          upRef.processing = false;
-          console.log(upRef.filename)
-          //send over data to 3speak creating video post
-          //upRef.updateVideoInfo()
-        }
-      })
-
-      await upload.start()
-
+        onSuccess: () => this.finishUpload(ticket, file, run, owner),
+      });
+      this.activeUpload = upload;
+      upload.start();
     },
 
-    async startThumbnailUpload() {
-      console.log('startthumbnailupload');
-      let upRef = this;
-      /*
-      let data = this.thumbnail.split(',')[1]
-      let binary = atob(data)
-      let array = []
-
-      for (let i = 0; i < binary.length; i++) {
-      array.push(binary.charCodeAt(i))
+    async finishUpload(ticket, file, run, owner) {
+      this.uploadedHere.push(ticket.permlink);
+      if (run === this.uploadRun) this.activeUpload = null;
+      const frame = run === this.uploadRun ? await this.uploadFrame(ticket.permlink) : null;
+      if (run === this.uploadRun) {
+        this.newVid = fromStatus(owner, {
+          permlink: ticket.permlink,
+          embed_url: ticket.embed_url,
+          created: new Date().toISOString(),
+        }, {
+          status: 'uploading',
+          duration: this.videoLength,
+          originalFilename: file.name,
+          thumbnail_url: frame,
+        });
+        this.newVidSubmitted = true;
+        this.processing = false;
+        this.$notify({ group: 'success', text: this.$t('video_uploaded_add_to_post'), position: 'top center' });
       }
-      let thumbnailBlob = new Blob([new Uint8Array(array)], {type: 'image/jpeg'})
-      */
-      let thumbnailBlob = this.dataURItoBlob(this.thumbnail);
+      await this.getAllVideoStatuses();
+    },
 
-      let thumbnailUpload = new tus.Upload(thumbnailBlob, {
-        endpoint: 'https://uploads.3speak.tv/files',
-        chunkSize: 100 * 1024,
-        metadata: {
-          filename: 'thumbnail.png'
-        },
-        onError: function (error) {
-          console.log("Failed because: " + error)
-        },
-        onProgress: function (bytesUploaded, bytesTotal) {
-          let percentage = (bytesUploaded / bytesTotal * 100).toFixed(2)
-          //console.log(`Thumbnail: ${bytesUploaded}/${bytesTotal} (${percentage}%)`)
-          upRef.thumbprogress = 'Thumbnail Upload ' + percentage + '%';
-        },
-        onSuccess: function () {
-          console.log('Thumbnail Upload completed!')
-          //console.log(thumbnailUpload);
-          upRef.thumbnailName = thumbnailUpload.url.replace('https://uploads.3speak.tv/files/', '')
-          upRef.thumbnailUrl = thumbnailUpload.url;
-          //thumbnailUpload.file.name;
-          console.log("Download %s from %s", upRef.thumbnailName, thumbnailUpload.url)
-
-          console.log(`Thumbnail uploaded: ${thumbnailUpload.url}`)
-        }
-      })
-      await thumbnailUpload.start()
+    // The frame becomes the post's cover. Best effort: the post works without one.
+    async uploadFrame(permlink) {
+      if (!this.thumbnail) return null;
+      try {
+        const key = (Date.now().toString(36) + Math.random().toString(36).slice(2, 13)
+          + Math.random().toString(36).slice(2, 13)).toUpperCase();
+        const blob = this.dataURItoBlob(this.thumbnail);
+        const form = new FormData();
+        form.append('image', new File([blob], key, { type: blob.type }));
+        await axios.post('/api/proxy/upload', form, { timeout: 30000, headers: { 'Content-Type': 'multipart/form-data' } });
+        const url = 'https://usermedia.actifit.io/' + key;
+        try { localStorage.setItem('3s_frame_' + permlink, url); } catch (e) { /* storage blocked */ }
+        return url;
+      } catch (err) {
+        console.log(err);
+        return null;
+      }
     },
 
     dataURItoBlob(dataURI) {
@@ -1395,111 +1230,6 @@ export default {
         ia[i] = byteString.charCodeAt(i)
       }
       return new Blob([ab], { type: mimeString })
-    },
-
-    async updateVideoInfo() {
-      this.processing = true;
-      let videoInfo = {
-        'filename': this.filename,
-        'oFilename': this.origFilename,
-        'size': this.videoSize,
-        'duration': this.videoLength,
-        'thumbnail': this.thumbnailName,
-        'owner': this.user.account.name,
-        'isReel': false
-      }
-
-      console.log(videoInfo);
-
-      try {
-        let res = await client.post(process.env.threeSpeakUploadInfo + '?app=actifit',
-          JSON.stringify(videoInfo),
-          {
-            withCredentials: false,
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${this.xcstkn}`
-            },
-          }
-        );
-        console.log(res);
-
-        if (res.status == 200) {
-          this.selVid = res.data;
-          this.newVid = this.selVid;
-          this.newVidSubmitted = true;
-          let vidPermLink = this.selVid.permlink;
-          //register this video for monitoring to update user about its status
-          let url = new URL(process.env.actiAppUrl + "userAddedVid/" +
-            this.user.account.name + "/" + vidPermLink + "/new");
-          let subres = await fetch(url);
-          //show success message and wait for video ready
-          //refresh vid list
-          this.getAllVideoStatuses();
-
-          console.log(this.$refs['modenabler']);
-          this.$refs['modenabler'].click();
-
-          /*
-          //embed video link to post including image thumb and video
-          let thumbUrl = 'https://ipfs-3speak.b-cdn.net/ipfs/'+this.selVid.thumbnail.replace('ipfs://','');
-
-          this.$refs['editor'].content += '[![]('+thumbUrl+')](https://3speak.tv/watch?v='+this.selVid.owner+'/'+this.selVid.permlink+')';
-          */
-        }
-
-      } catch (err) {
-        console.log(err);
-      }
-      this.processing = false;
-
-    },
-
-    async markVideoPublished(vid, keepactivefail) {
-      this.processing = true;
-      this.marking = vid._id;
-      let videoInfo = {
-        'videoId': '' + vid._id,//vid.videoid,
-        'title': vid.title,
-        'description': vid.description,
-        'tags': vid.tags,
-        'thumbnail': vid.thumbnail
-      }
-
-      console.log(videoInfo);
-      try {
-        let res = await client.post(process.env.threeSpeakUserVideoList + "/iPublished",
-          JSON.stringify(videoInfo),
-          {
-            withCredentials: false,
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${this.xcstkn}`
-            },
-          }
-        );
-        console.log(res);
-        if (res && res.data && res.data.success) {
-          vid.status = 'published'
-          this.processing = false;
-          this.loading = false;
-          this.marking = -1;
-        } else {
-          if (!keepactivefail) {
-            this.processing = false;
-            this.loading = false;
-            this.marking = -1;
-          }
-        }
-      } catch (err) {
-        console.log(err);
-        if (!keepactivefail) {
-          this.processing = false;
-          this.loading = false;
-          this.marking = -1;
-        }
-      }
-      return vid;
     },
 
     async postKeychain(cstm_params, comment_options) {
@@ -1541,219 +1271,20 @@ export default {
       })
     },
 
-    async keychainDecode(memo) {
-      return new Promise((resolve, reject) => {
-        const keychain = window.hive_keychain;
-        keychain.requestVerifyKey(this.user.account.name, memo, 'Posting', (response) => {
-          console.log(response);
-          if (response.success === true) {
-            const decodedMessage = response.result;
-            resolve({ 'xcstkn': decodedMessage });
-          } else {
-            reject({ 'error': 'error' });
-          }
-        });
-      })
-
-    },
-
-    async connectSession3S() {
-      if (!this.user || !this.user.account || !this.user.account.name) {
-        this.requestLogin();
-        return;
-      }
-      try {
-        if (this.loadingxcstkn) {
-          //do nothing, already loading
-          return;
-        }
-        this.loadingxcstkn = true;
-        console.log('keychain>>>')
-        console.log(window.hive_keychain)
-        console.log('3S session');
-        //check if token already exists, if so skip below
-        const ts_tkn = localStorage.getItem('3s_access_token');
-        if (ts_tkn) {
-          this.xcstkn = ts_tkn;
-        } else {
-
-          //fetch 3speak memo
-
-          //let res = await fetch(process.env.threeSpeakApiSession.replace('_USERNAME_', this.user.account.name));
-          let res = await client.get(process.env.threeSpeakApiSession.replace('_USERNAME_', this.user.account.name),
-            {
-              withCredentials: false,
-              headers: {
-                "Content-Type": "application/json",
-              },
-            }
-          );
-
-          console.log(res);
-          //let outcome = await res.json();
-          //console.log(outcome);
-          let memo = '';
-          if (res && res.data && res.data.memo) {
-            memo = res.data.memo;
-          }
-          console.log(memo);
-
-          //decode memo
-
-          //grab actifit token
-          let outcome = {};
-
-          if (localStorage.getItem('acti_login_method') == 'keychain' && window.hive_keychain) {
-
-
-            console.log('utils decodememo')
-            outcome = await this.keychainDecode(memo);
-            console.log(outcome);
-          } else if (localStorage.getItem('acti_login_method') == 'hiveauth') {
-            this.$notify({
-              group: 'error',
-              text: this.$t('operation_ns_hiveauth'),
-              position: 'top center'
-            })
-            /*const auth = {
-              username: this.user.account.name,
-              token: localStorage.getItem('hiveauth_has_token'),//should be changed in V1 (current V0.8)
-              expire: localStorage.getItem('expires'),
-              key: localStorage.getItem('key')
-            }
-            const challenge_data = {
-              key_type: "posting",
-              challenge: JSON.stringify({
-                login: auth.username,
-                ts: this.user.account.name
-              })
-            }*/
-
-            /*const ecc = new ec('secp256k1');
-            const res = await this.$HAS.challenge(auth, challenge_data)
-            console.log(res);
-            const sig = Signature.fromHex(res.data.challenge) //ecc.
-            const buf = hash.sha256(challenge, null, 0) //ecc.
-            const verified = sig.verifyHash(buf, ecc.PublicKey.fromString(res.data.pubkey));
-            console.log(buf);
-            console.log(verified);
-            if(verified) {
-              console.log("challenge succeeded")
-            } else {
-              console.error("challenge failed")
-            }*/
-
-            /*let op_name = 'decode';
-            let cstm_params = {
-              key: ,
-              message: memo
-            }
-            let operation = [
-               [op_name, cstm_params]
-            ];*/
-            //TODO: implement hiveauth approach to decode memo. Currently hiveauth does not support such calls
-            /*let operation = [
-               ['decode', {}]
-            ];*/
-          } else {
-            let accToken = localStorage.getItem('access_token')
-
-            let cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
-
-            // Decrypted IN THE BROWSER - /memoDecode is gone, and the server holds no
-            // keys. Same { xcstkn } / { error } shape, so the handling below is unchanged.
-            outcome = await this.$decodeMemo(memo);
-            console.log(outcome);
-
-          }
-          this.xcstkn = '';
-          if (outcome.error) {
-            console.log(outcome.error);
-            this.loadingxcstkn = false;
-            return;
-          } else {
-            this.xcstkn = outcome.xcstkn;
-            this.loadingxcstkn = false;
-          }
-
-          //store token under localstorage
-          localStorage.setItem('3s_access_token', this.xcstkn);
-
-        }
-
-
-        //request cookie
-        if (this.xcstkn) {
-          if (this.xcstkn.startsWith('#')) {
-            this.xcstkn = this.xcstkn.substring(1);//remove first character from token #
-          }
-          /*res = await fetch(process.env.threeSpeakApiSession.replace('_USERNAME_', this.user.account.name)+'&access_token=' + xcstkn, {
-            credentials: 'include',
-          });*/
-          let res = await client.get(process.env.threeSpeakApiSession.replace('_USERNAME_', this.user.account.name) + '&access_token=' + this.xcstkn, {
-            withCredentials: false,
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-          )
-          console.log(res);
-
-          //also grab user's videos
-          let myAllVideosWithStatusInfo = await this.getAllVideoStatuses();
-          //console.log(`All Videos Info response: ${JSON.stringify(myAllVideosWithStatusInfo)}`);
-
-          //const videoID = myAllVideosWithStatusInfo[0]._id;
-          //console.log(videoID);
-          //
-          //console.log( res.headers.get('set-cookie'))
-          //console.log(res.headers["set-cookie"]);
-          //outcome = await res.json();
-          //console.log(outcome);
-        }
-      } catch (exc) {
-        console.log(exc);
-        this.loadingxcstkn = false;
-        //localStorage.removeItem('3s_access_token');
-      }
-    },
-
-
-    async RewardUserEdit(user, postUrl) {
-      let url = new URL('/api/proxy/reward-edit', window.location.origin);
-      if (!postUrl || !postUrl.startsWith('http')) {
-        const raw = this.editPost && this.editPost.url;
-        postUrl = (raw && raw.startsWith('http')) ? raw : `https://actifit.io/@${this.editPost.author}/${this.editPost.permlink}`;
-      }
-      if (!user) user = this.editPost.author;
-      let params = {
-        user,
-        url: postUrl,
-      }
-      Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
-      try {
-        let res = await fetch(url, { headers: { 'x-acti-token': localStorage.getItem('access_token') || '' } });
-        let outcome = await res.json();
-        if (outcome.rewarded) {
-          // notify the user that he received an additional reward
-          this.$notify({
-            group: 'success',
-            text: this.$t('youve_been_rewarded') + outcome.amount + this.$t('reward_for_edit'),
-            position: 'top center'
-          })
-        }
-        console.log(outcome);
-      } catch (err) {
-        console.error(err);
-      }
-    },
+  },
+  beforeDestroy() {
+    this.uploadRun += 1;
+    if (this.activeUpload) this.activeUpload.abort();
+    clearInterval(this.timer);
+    if (this.stream) this.stream.getTracks().forEach(track => track.stop());
   },
   async mounted() {
     console.log('edit screen mounted');
     this.cur_bchain = (localStorage.getItem('cur_bchain') ? localStorage.getItem('cur_bchain') : 'HIVE');
     this.$store.commit('setBchain', this.cur_bchain);
     await this.$store.dispatch('steemconnect/login')
-    await this.connectSession3S();
+    if (this.user) this.videoAccount = this.user.account.name;
+    await this.getAllVideoStatuses();
     this.fetchCommunities();
 
     //this.$refs['modenabler'].click();
