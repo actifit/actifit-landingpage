@@ -187,6 +187,9 @@ describe('the site', () => {
     expect(page).toMatch(/vid\.owner !== this\.user\.account\.name/)
     expect(page).toMatch(/this\.videoAccount !== name\) this\.clearVideoState\(\)/)
   })
+  it('after an upload the new video shows once: the upload card clears when the list has it', () => {
+    expect(page).toMatch(/this\.userVidList\.some\(v => v\.permlink === ticket\.permlink\)\) \{\s+this\.resetNewVidData\(\);/)
+  })
   it('never changes the video\'s permlink for the post', () => {
     expect(page).toMatch(/this\.editPost\.permlink = vid\.permlink;/)
     expect(page).not.toMatch(/editPost\.permlink \+=/)

@@ -1200,6 +1200,12 @@ export default {
         this.$notify({ group: 'success', text: this.$t('video_uploaded_add_to_post'), position: 'top center' });
       }
       await this.getAllVideoStatuses();
+      // once the list shows the new video, the upload card would only repeat it: clear it
+      // for the next upload (it stays if the list couldn't be loaded)
+      if (run === this.uploadRun && this.userVidList.some(v => v.permlink === ticket.permlink)) {
+        this.resetNewVidData();
+        if (this.$refs.fileInput) this.$refs.fileInput.value = '';
+      }
     },
 
     // The frame becomes the post's cover. Best effort: the post works without one.
