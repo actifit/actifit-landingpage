@@ -1081,6 +1081,13 @@ export default {
         }));
         if (run !== this.listRun) return;
         this.userVidList = videos;
+        // once the list can offer the new upload, the upload card would only repeat it: clear it
+        // for the next one (it stays while the list can't, e.g. 3Speak's status lags)
+        const listed = this.newVidSubmitted && videos.find(v => v.permlink === this.newVid.permlink);
+        if (listed && this.canAttachVideo(listed)) {
+          this.resetNewVidData();
+          if (this.$refs.fileInput) this.$refs.fileInput.value = '';
+        }
         const current = this.selVid && this.userVidList.find(v => v.permlink === this.selVid.permlink);
         if (current) this.selVid = current;
       } catch (err) {
@@ -1200,12 +1207,6 @@ export default {
         this.$notify({ group: 'success', text: this.$t('video_uploaded_add_to_post'), position: 'top center' });
       }
       await this.getAllVideoStatuses();
-      // once the list shows the new video, the upload card would only repeat it: clear it
-      // for the next upload (it stays if the list couldn't be loaded)
-      if (run === this.uploadRun && this.userVidList.some(v => v.permlink === ticket.permlink)) {
-        this.resetNewVidData();
-        if (this.$refs.fileInput) this.$refs.fileInput.value = '';
-      }
     },
 
     // The frame becomes the post's cover. Best effort: the post works without one.
